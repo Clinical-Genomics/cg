@@ -6,7 +6,7 @@ from setuptools import setup
 
 here = os.path.abspath(os.path.dirname(__file__))
 about = {}
-with open(os.path.join(here, 'cg', '__version__.py')) as in_handle:
+with open(os.path.join(here, 'cg', 'version.py')) as in_handle:
     exec(in_handle.read(), about)
 
 if sys.argv[-1] == "publish":
