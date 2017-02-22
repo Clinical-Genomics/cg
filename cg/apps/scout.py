@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 from pymongo import MongoClient
 
+from scout.adapter import MongoAdapter
+from scout.export.panel import export_panels
+
 APP_KEY = 'scout'
 
 
@@ -10,6 +13,19 @@ def connect(config, app_key=APP_KEY):
     db = client[config[app_key]['database']]
     db.authenticate(config[app_key]['username'], config[app_key]['password'])
     return db
+
+
+def connect_adapter(config):
+    """Connect the Scout Mongo adapter."""
+    mongo_adapter = MongoAdapter()
+    mongo_adapter.connect_to_database(
+        database=config['scout']['database'],
+        host=config['scout']['host'],
+        port=config['scout']['port'],
+        username=config['scout']['username'],
+        password=config['scout']['password']
+    )
+    return mongo_adapter
 
 
 def get_case(db, case_id):

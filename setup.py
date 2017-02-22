@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import os
 import sys
-from setuptools import setup
+from setuptools import setup, find_packages
 
 here = os.path.abspath(os.path.dirname(__file__))
 about = {}
@@ -21,7 +21,7 @@ setup(
     author='Robin Andeer',
     author_email='robin.andeer@scilifelab.se',
     url='https://github.com/Clinical-Genomics/cg',
-    packages=['cg'],
+    packages=find_packages(exclude=('tests*', 'docs', 'examples')),
     entry_points={
         'console_scripts': ['cg=cg:cli'],
     },
