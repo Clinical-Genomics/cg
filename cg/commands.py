@@ -47,9 +47,9 @@ def mip_config(context, case_id):
 @click.pass_context
 def reruns(context, source='prod'):
     """Return reruns marked in Scout (old)."""
-    scout_db = apps.scout.connect(context.obj)
+    scout_db = apps.scoutprod.connect(context.obj)
     if source == 'prod':
-        for scout_case in apps.scout.get_reruns(scout_db):
+        for scout_case in apps.scoutprod.get_reruns(scout_db):
             click.echo(scout_case['_id'])
 
     elif source == 'archive':
@@ -57,7 +57,7 @@ def reruns(context, source='prod'):
         for scout_case in apps.scoutold.get_reruns(scoutold_db):
             case_id = scout_case['_id'].replace('_', '-', 1)
             # lookup requested case in current Scout
-            if apps.scout.get_case(scout_db, case_id):
+            if apps.scoutprod.get_case(scout_db, case_id):
                 pass
             else:
                 click.echo(case_id)
@@ -84,6 +84,6 @@ def mip_panel(context, case_id):
     family_dir = check_root(context, case_info)
     panel_path = family_dir.joinpath('aggregated_master.bed')
 
-    adapter = apps.scout.connect_adapter(context.obj)
-    apps.scout.export_panels(adapter, all_panels)
+    adapter = apps.scoutprod.connect_adapter(context.obj)
+    apps.scoutprod.export_panels(adapter, all_panels)
     log.info("wrote aggregated gene panel: %s", panel_path)
