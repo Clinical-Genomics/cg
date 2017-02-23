@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from datetime import datetime
 import logging
 
 import click
@@ -87,3 +88,31 @@ def mip_panel(context, case_id):
     adapter = apps.scoutprod.connect_adapter(context.obj)
     apps.scoutprod.export_panels(adapter, all_panels)
     log.info("wrote aggregated gene panel: %s", panel_path)
+
+
+@click.command()
+@click.option('-a', '--answered-out', is_flag=True, help='fill in answered out status')
+@click.argument('case_id')
+@click.pass_context
+def update(context, answered_out, case_id):
+    """Fill in information in Housekeeper."""
+    if answered_out:
+        hk_db = apps.hk.connect(context.obj)
+        lims_api = apps.lims.connect(context.obj)
+        log.debug("get case from housekeeper")
+        hk_case = apps.hk.api.case(case_id)
+        log.debug("loop over related samples from most recent run")
+        delivery_dates = set()
+        hk_run = hk_case.current
+        for hk_sample in hk_run.samples:
+            log.debug("lookup if sample has been delivered in LIMS")
+            delivery_date = lims_api.is_delivered(hk_sample.lims_id)
+            if delivery_date is None:
+                log.warn("sample not delivered: %s", hk_sample.lims_id)
+                context.abort()
+            delivery_dates.append(delivery_dates)
+        latest_date = sorted(delivery_dates)[-1]
+        log.debug("fillin answered out date in HK")
+        hk_run.answeredout_at = datetime.combine(latest_date, datetime.min.time())
+        hk_db.commit()
+        log.info("run 'answered out' date updated: %s", case_id)
