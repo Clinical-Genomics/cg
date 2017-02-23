@@ -21,7 +21,7 @@ click_completion.init()
 @click.option('--log-file', type=click.Path())
 @click.argument('config', type=click.File('r'))
 @click.pass_context
-def cli(context, help=False, log_level='INFO', log_file=None, config):
+def cli(context, help, log_level, log_file, config):
     """Central place for interacting with CG apps."""
     init_log(logging.getLogger(), loglevel=log_level, filename=log_file)
 
