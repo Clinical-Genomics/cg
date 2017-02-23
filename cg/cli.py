@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
+import logging
+
 import click
 import click_completion
 import crayons
 import ruamel.yaml
 
+from .log import init_log
 from .version import __version__
 from . import commands
 
@@ -14,10 +17,14 @@ click_completion.init()
 @click.group(invoke_without_command=True)
 @click.version_option(prog_name=crayons.yellow('cg'), version=__version__)
 @click.option('-h', '--help', is_flag=True, help="Show this message then exit.")
+@click.option('-l', '--log-level', default='INFO')
+@click.option('--log-file', type=click.Path())
 @click.argument('config', type=click.File('r'))
 @click.pass_context
-def cli(context, config, help=False):
+def cli(context, help=False, log_level='INFO', log_file=None, config):
     """Central place for interacting with CG apps."""
+    init_log(logging.getLogger(), loglevel=log_level, filename=log_file)
+
     if help:
         click.echo(context.get_help())
     context.obj = ruamel.yaml.safe_load(config)
