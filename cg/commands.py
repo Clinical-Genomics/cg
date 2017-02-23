@@ -110,7 +110,7 @@ def update(context, answered_out, case_id):
             if delivery_date is None:
                 log.warn("sample not delivered: %s", hk_sample.lims_id)
                 context.abort()
-            delivery_dates.append(delivery_dates)
+            delivery_dates.append(delivery_date)
         latest_date = sorted(delivery_dates)[-1]
         log.debug("fillin answered out date in HK")
         hk_run.answeredout_at = datetime.combine(latest_date, datetime.min.time())
