@@ -25,3 +25,4 @@ def cli(context, config, help=False):
 
 cli.add_command(commands.mip_config)
 cli.add_command(commands.reruns)
+cli.add_command(commands.update)
