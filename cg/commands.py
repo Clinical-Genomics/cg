@@ -102,7 +102,7 @@ def update(context, answered_out, case_id):
         log.debug("get case from housekeeper")
         hk_case = apps.hk.api.case(case_id)
         log.debug("loop over related samples from most recent run")
-        delivery_dates = set()
+        delivery_dates = []
         hk_run = hk_case.current
         for hk_sample in hk_run.samples:
             log.debug("lookup if sample has been delivered in LIMS")
