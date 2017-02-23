@@ -19,7 +19,7 @@ click_completion.init()
 @click.option('-h', '--help', is_flag=True, help="Show this message then exit.")
 @click.option('-l', '--log-level', default='INFO')
 @click.option('--log-file', type=click.Path())
-@click.argument('config', type=click.File('r'))
+@click.option('-c', '--config', type=click.File('r'), required=True)
 @click.pass_context
 def cli(context, help, log_level, log_file, config):
     """Central place for interacting with CG apps."""
