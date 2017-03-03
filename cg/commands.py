@@ -18,6 +18,7 @@ def check_root(context, case_info):
     if not family_dir.exists():
         log.error("family directory not found: %s", family_dir)
         context.abort()
+    return family_dir
 
 
 @click.command('mip-config')
