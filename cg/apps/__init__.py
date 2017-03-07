@@ -1,2 +1,2 @@
 # -*- coding: utf-8 -*-
-from . import hk, lims, scoutold, scoutprod
+from . import hk, lims, scoutold, scoutprod, admin
