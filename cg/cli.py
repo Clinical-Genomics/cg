@@ -19,7 +19,7 @@ click_completion.init()
 @click.option('-l', '--log-level', default='INFO')
 @click.option('-c', '--config', type=click.File('r'), required=True)
 @click.pass_context
-def cli(context, help, log_level, log_file, config):
+def cli(context, help, log_level, config):
     """Central place for interacting with CG apps."""
     coloredlogs.install(level=log_level)
     if help:
