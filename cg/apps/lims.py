@@ -5,7 +5,7 @@ from cglims import api
 from cglims.config import basic_config
 from cglims.panels import convert_panels
 from cglims.check import check_sample, process_samples
-from genologics.enteties import Process
+from genologics.entities import Process
 
 log = logging.getLogger(__name__)
 config = basic_config
