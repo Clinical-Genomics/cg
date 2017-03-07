@@ -30,3 +30,4 @@ def cli(context, help, log_level, config):
 cli.add_command(commands.mip_config)
 cli.add_command(commands.reruns)
 cli.add_command(commands.update)
+cli.add_command(commands.check)
