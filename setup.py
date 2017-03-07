@@ -31,6 +31,7 @@ setup(
         'crayons',
         'ruamel.yaml',
         'pymongo',
+        'coloredlogs',
     ],
     classifiers=[
         'Programming Language :: Python',

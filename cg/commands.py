@@ -40,7 +40,8 @@ def mip_config(context, case_id):
         apps.lims.extend_case(data, case_info['extra'])
 
     with config_path.open('w') as out_handle:
-        click.echo(ruamel.yaml.round_trip_dump(data), file=out_handle)
+        raw_output = ruamel.yaml.round_trip_dump(data)
+        click.echo(raw_output.decode(), file=out_handle)
     log.info("wrote config to: %s", config_path)
 
 
@@ -117,3 +118,16 @@ def update(context, answered_out, case_id):
         hk_run.answeredout_at = datetime.combine(latest_date, datetime.min.time())
         hk_db.commit()
         log.info("run 'answered out' date updated: %s", case_id)
+
+
+@click.command()
+@click.argument('process_id')
+@click.pass_context
+def check(context, process_id):
+    """Check samples in LIMS and optionally update them."""
+    admin_db = apps.admin.connect(context.obj)
+    lims_api = apps.lims.connect(context.obj)
+    samples = list(apps.lims.process_to_samples(lims_api, process_id))
+    uniq_tags = set(sample['sample']['Sequencing Analysis'] for sample in samples)
+    apptag_map = apps.admin.map_apptags(admin_db, uniq_tags)
+    apps.lims.check_samples(lims_api, samples, apptag_map)
