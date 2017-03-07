@@ -39,7 +39,7 @@ def check_samples(lims_api, samples, apptag_map):
         lims_sample = sample_dict['sample']
         log.info("checking sample: %s", lims_sample.id)
         apptag_version = apptag_map[lims_sample.udf['Sequencing Analysis']]
-        check_sample(lims_sample, lims_artifact=sample_dict.get('artifact'),
+        check_sample(lims_api, lims_sample, lims_artifact=sample_dict.get('artifact'),
                      update=True, version=apptag_version)
 
 

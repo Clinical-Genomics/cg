@@ -128,6 +128,6 @@ def check(context, process_id):
     admin_db = apps.admin.connect(context.obj)
     lims_api = apps.lims.connect(context.obj)
     samples = list(apps.lims.process_to_samples(lims_api, process_id))
-    uniq_tags = set(sample['sample']['Sequencing Analysis'] for sample in samples)
+    uniq_tags = set(sample['sample'].udf['Sequencing Analysis'] for sample in samples)
     apptag_map = apps.admin.map_apptags(admin_db, uniq_tags)
     apps.lims.check_samples(lims_api, samples, apptag_map)
