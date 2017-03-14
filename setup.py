@@ -32,6 +32,7 @@ setup(
         'ruamel.yaml',
         'pymongo',
         'coloredlogs',
+        'trailblazer',
     ],
     classifiers=[
         'Programming Language :: Python',

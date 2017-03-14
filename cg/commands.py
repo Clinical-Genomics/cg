@@ -22,27 +22,31 @@ def check_root(context, case_info):
 
 
 @click.command('mip-config')
+@click.option('-p', '--print', 'print_output', is_flag=True, help='print to console')
 @click.argument('case_id')
 @click.pass_context
-def mip_config(context, case_id):
+def mip_config(context, print_output, case_id):
     """Generate a MIP config from LIMS data."""
     case_info = parse_caseid(case_id)
-    family_dir = check_root(context, case_info)
-    config_file = "{}_pedigree.yaml".format(case_info['family_id'])
-    config_path = family_dir.joinpath(config_file)
 
     log.debug("get config data: %s", case_info['case_id'])
     lims_api = apps.lims.connect(context.obj)
     data = apps.lims.config(lims_api, case_info['customer_id'], case_info['family_id'])
 
     if case_info['extra']:
-        log.info("update config with suffic: %s", case_info['extra'])
+        log.info("update config with suffix: %s", case_info['extra'])
         apps.lims.extend_case(data, case_info['extra'])
 
-    with config_path.open('w') as out_handle:
-        raw_output = ruamel.yaml.round_trip_dump(data)
-        click.echo(raw_output.decode(), file=out_handle)
-    log.info("wrote config to: %s", config_path)
+    raw_output = ruamel.yaml.round_trip_dump(data)
+    if print_output:
+        click.echo(raw_output.decode())
+    else:
+        family_dir = check_root(context, case_info)
+        config_file = "{}_pedigree.yaml".format(case_info['family_id'])
+        config_path = family_dir.joinpath(config_file)
+        with config_path.open('w') as out_handle:
+            click.echo(raw_output.decode(), file=out_handle)
+        log.info("wrote config to: %s", config_path)
 
 
 @click.command()
@@ -131,3 +135,23 @@ def check(context, process_id):
     uniq_tags = set(sample['sample'].udf['Sequencing Analysis'] for sample in samples)
     apptag_map = apps.admin.map_apptags(admin_db, uniq_tags)
     apps.lims.check_samples(lims_api, samples, apptag_map)
+
+
+@click.command()
+@click.option('-s', '--setup/--no-setup', default=True,
+              help='perform setup before starting analysis')
+@click.option('-f', '--force', is_flag=True, help='skip pre-analysis checks')
+@click.option('--hg38', is_flag=True, help='run with hg38 settings')
+@click.argument('case_id')
+@click.pass_context
+def start(context, setup, force, hg38, case_id):
+    """Start a MIP analysis."""
+    case_info = parse_caseid(case_id)
+    if setup:
+        log.info('generate aggregated gene panel')
+        context.invoke(mip_panel, case_id=case_id)
+        log.info('generate analysis pedigree')
+        context.invoke(mip_config, case_id=case_id)
+
+    log.info("start analysis for: %s", case_id)
+    apps.tb.start_analysis(context.obj, case_info, hg38=hg38, force=force)

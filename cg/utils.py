@@ -9,6 +9,10 @@ def parse_caseid(raw_caseid):
     family_id = family_parts[0]
     extra = family_parts[1] if len(family_parts) > 1 else None
     return {
+        'raw': {
+            'case_id': raw_caseid,
+            'family_id': raw_familyid,
+        },
         'customer_id': customer_id,
         'family_id': family_id,
         'case_id': case_id,
