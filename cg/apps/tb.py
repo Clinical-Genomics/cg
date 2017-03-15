@@ -44,18 +44,21 @@ def start_analysis(config, case_info, hg38=False, execute=True, force=False):
     process = start_mip(config=global_config, family_id=family_id, ccp=cc_path,
                         executable=executable, email=email, max_gaussian=max_gaussian,
                         execute=execute)
-    process.wait()
-    if process.returncode != 0:
-        raise ValueError("check output, error starting analysis: {}".format(case_id))
 
-    # add pending entry to database
-    new_entry = build_pending(case_id, cc_path)
-    if email:
-        user = api.user(email)
-        new_entry.user = user
+    if execute:
+        process.wait()
+        if process.returncode != 0:
+            raise ValueError("check output, error starting analysis: {}"
+                             .format(case_id))
 
-    commit_analysis(tb_db, new_entry)
-    tb_db.commit()
+        # add pending entry to database
+        new_entry = build_pending(case_id, cc_path)
+        if email:
+            user = api.user(email)
+            new_entry.user = user
+
+        commit_analysis(tb_db, new_entry)
+        tb_db.commit()
 
 
 def check_setup(tb_db, case_id):
