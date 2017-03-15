@@ -71,9 +71,10 @@ def reruns(context, source='prod'):
 
 
 @click.command('mip-panel')
+@click.option('-p', '--print', 'print_output', is_flag=True, help='print to console')
 @click.argument('case_id')
 @click.pass_context
-def mip_panel(context, case_id):
+def mip_panel(context, print_output, case_id):
     """Generate an aggregated panel for MIP."""
     case_info = parse_caseid(case_id)
     lims_api = apps.lims.connect(context.obj)
@@ -88,12 +89,18 @@ def mip_panel(context, case_id):
     all_panels = apps.lims.convert_panels(case_info['customer_id'], default_panels)
     log.debug("determined panels to use: %s", ', '.join(all_panels))
 
-    family_dir = check_root(context, case_info)
-    panel_path = family_dir.joinpath('aggregated_master.bed')
-
     adapter = apps.scoutprod.connect_adapter(context.obj)
-    apps.scoutprod.export_panels(adapter, all_panels)
-    log.info("wrote aggregated gene panel: %s", panel_path)
+    bed_lines = apps.scoutprod.export_panels(adapter, all_panels)
+
+    if print_output:
+        for bed_line in bed_lines:
+            click.echo(bed_line)
+    else:
+        family_dir = check_root(context, case_info)
+        panel_path = family_dir.joinpath('aggregated_master.bed')
+        with panel_path.open('w') as out_handle:
+            click.echo('\n'.join(bed_lines), file=out_handle)
+        log.info("wrote aggregated gene panel: %s", panel_path)
 
 
 @click.command()
