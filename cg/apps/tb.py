@@ -17,7 +17,7 @@ def connect(config):
     return tb_db
 
 
-def start_analysis(config, case_info, hg38=False, force=False):
+def start_analysis(config, case_info, hg38=False, execute=True, force=False):
     """Start analysis run."""
     tb_db = connect(config)
     customer_id = case_info['customer_id']
@@ -42,7 +42,8 @@ def start_analysis(config, case_info, hg38=False, force=False):
     email = environ_email()
 
     process = start_mip(config=global_config, family_id=family_id, ccp=cc_path,
-                        executable=executable, email=email, max_gaussian=max_gaussian)
+                        executable=executable, email=email, max_gaussian=max_gaussian,
+                        execute=execute)
     process.wait()
     if process.returncode != 0:
         raise ValueError("check output, error starting analysis: {}".format(case_id))

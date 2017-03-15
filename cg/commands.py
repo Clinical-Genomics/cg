@@ -147,11 +147,12 @@ def check(context, process_id):
 @click.command()
 @click.option('-s', '--setup/--no-setup', default=True,
               help='perform setup before starting analysis')
+@click.option('--execute/--no-execute', default=True, help='skip running MIP')
 @click.option('-f', '--force', is_flag=True, help='skip pre-analysis checks')
 @click.option('--hg38', is_flag=True, help='run with hg38 settings')
 @click.argument('case_id')
 @click.pass_context
-def start(context, setup, force, hg38, case_id):
+def start(context, setup, execute, force, hg38, case_id):
     """Start a MIP analysis."""
     case_info = parse_caseid(case_id)
     if setup:
@@ -161,4 +162,5 @@ def start(context, setup, force, hg38, case_id):
         context.invoke(mip_config, case_id=case_id)
 
     log.info("start analysis for: %s", case_id)
-    apps.tb.start_analysis(context.obj, case_info, hg38=hg38, force=force)
+    apps.tb.start_analysis(context.obj, case_info, hg38=hg38, force=force,
+                           execute=execute)
