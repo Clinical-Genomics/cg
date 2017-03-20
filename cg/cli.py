@@ -8,6 +8,7 @@ import ruamel.yaml
 
 from .version import __version__
 from . import commands
+from cg.queue import cli as queue_cli
 
 # enable shell completion
 click_completion.init()
@@ -34,3 +35,4 @@ cli.add_command(commands.check)
 cli.add_command(commands.mip_config)
 cli.add_command(commands.mip_panel)
 cli.add_command(commands.start)
+cli.add_command(queue_cli.queue)

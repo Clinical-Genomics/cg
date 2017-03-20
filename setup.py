@@ -33,6 +33,8 @@ setup(
         'pymongo',
         'coloredlogs',
         'trailblazer',
+        'scout',
+        'pymysql',
     ],
     classifiers=[
         'Programming Language :: Python',
