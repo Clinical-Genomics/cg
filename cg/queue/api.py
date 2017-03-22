@@ -22,6 +22,10 @@ class QueueApi(object):
         """Fetch a case from the database."""
         return self.db.Case.get(case_id)
 
+    def case_by_name(self, case_name):
+        """Fetch a case by name."""
+        return self.db.Case.filter_by(case_id=case_name).first()
+
     def save_case(self, case_data):
         """Save a new case to the database."""
         return self.db.Case.save(case_data)
