@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 
 def check_root(context, case_info):
     root_dir = Path(context.obj['analysis_root'])
-    family_dir = root_dir.joinpath(case_info['customer_id'], case_info['family_id'])
+    family_dir = root_dir.joinpath(case_info['customer_id'], case_info['raw']['family_id'])
     if not family_dir.exists():
         log.error("family directory not found: %s", family_dir)
         context.abort()
@@ -42,7 +42,7 @@ def mip_config(context, print_output, case_id):
         click.echo(raw_output.decode())
     else:
         family_dir = check_root(context, case_info)
-        config_file = "{}_pedigree.yaml".format(case_info['family_id'])
+        config_file = "{}_pedigree.yaml".format(case_info['raw']['family_id'])
         config_path = family_dir.joinpath(config_file)
         with config_path.open('w') as out_handle:
             click.echo(raw_output.decode(), file=out_handle)
