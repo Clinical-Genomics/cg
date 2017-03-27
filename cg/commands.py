@@ -37,7 +37,7 @@ def mip_config(context, print_output, case_id):
         log.info("update config with suffix: %s", case_info['extra'])
         apps.lims.extend_case(data, case_info['extra'])
 
-    raw_output = ruamel.yaml.round_trip_dump(data)
+    raw_output = ruamel.yaml.round_trip_dump(data, indent=4, block_seq_indent=2)
     if print_output:
         click.echo(raw_output.decode())
     else:
