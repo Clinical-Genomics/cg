@@ -33,7 +33,7 @@ setup(
         'pymongo',
         'coloredlogs',
         'trailblazer',
-        'scout',
+        'scout-browser',
         'pymysql',
     ],
     classifiers=[
