@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
+import logging
+
 import click
 from dateutil.parser import parse as parse_date
 
 from .api import QueueApi
+
+log = logging.getLogger(__name__)
 
 
 @click.group()
@@ -31,11 +35,14 @@ def init(context):
 def add(context, case_id, last_analyzed=None, prioritize=None):
     """Add a new case to be analyzed."""
     old_case = context.obj['api'].case(case_id)
-    last_analyzed_at = parse_date(last_analyzed) if last_analyzed else None
-    new_case = dict(case_id=case_id, last_analyzed_at=last_analyzed_at,
-                    is_prioritized=prioritize)
-    case_obj = context.obj['api'].save_case(new_case)
-    click.echo(f"new case created: {case_obj.case_id} ({case_obj.id})")
+    if old_case:
+        click.echo("case already exists: {}".format(old_case['case_id']))
+    else:
+        last_analyzed_at = parse_date(last_analyzed) if last_analyzed else None
+        new_case = dict(case_id=case_id, last_analyzed_at=last_analyzed_at,
+                        is_prioritized=prioritize)
+        case_obj = context.obj['api'].save_case(new_case)
+        click.echo("new case created: {case.case_id} ({case.id})".format(case=case_obj))
 
 
 @queue.command()

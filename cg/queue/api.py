@@ -30,16 +30,17 @@ class QueueApi(object):
         """Save a new case to the database."""
         return self.db.Case.save(case_data)
 
-    def cases(self):
+    def cases(self, lims_ok=None):
         """Return cases in order of highest priority."""
-        return self.db.Case.order_by(Case.is_prioritized.desc(),
-                                     Case.last_analyzed_at.desc())
+        query = self.db.Case.order_by(Case.is_prioritized.desc(),
+                                      Case.last_analyzed_at.desc())
+        if lims_ok is not None:
+            query = query.filter_by(lims_ok=lims_ok)
+        return query
 
     def flowcell(self, flowcell_id, sample_id):
         """Return result for a flowcell and sample."""
-        return (self.db.Flowcell
-                       .filter_by(flowcell_id=flowcell_id, sample_id=sample_id)
-                       .first())
+        return self.db.Flowcell.filter_by(flowcell_id=flowcell_id, sample_id=sample_id).first()
 
     def save_flowcell(self, flowcell_data):
         """Save a new flowcell (+ sample) entry to the database."""

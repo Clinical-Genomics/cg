@@ -20,7 +20,9 @@ class Case(Model):
 
     def is_ready(self):
         """Check if the case is ready for analysis."""
-        return all(flowcell_obj.has_fastqs for flowcell_obj in self.flowcells)
+        linked_fcs = len(self.flowcells) > 0
+        flowcells_ok = all(flowcell_obj.has_fastqs for flowcell_obj in self.flowcells)
+        return self.lims_ok and linked_fcs and flowcells_ok
 
 
 class Flowcell(Model):
