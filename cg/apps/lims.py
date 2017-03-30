@@ -17,6 +17,15 @@ def connect(config):
     return api.connect(config['cglims']['genologics'])
 
 
+def case_sexes(lims_api, customer_id, family_name):
+    """Fetch sample sex information from LIMS."""
+    sample_sex = {}
+    for lims_sample in lims_api.case(customer_id, family_name):
+        sample_data = api.ClinicalSample(lims_sample).to_dict()
+        sample_sex[sample_data['sample_id']] = sample_data['sex']
+    return sample_sex
+
+
 def extend_case(config_data, suffix):
     """Modify ids for downstream extensions."""
     config_data['family'] = "{}--{}".format(config_data['family'], suffix)

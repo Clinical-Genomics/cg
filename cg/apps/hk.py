@@ -46,4 +46,5 @@ def genotypes(hk_db, analysis_obj):
         log.error("BCF file missing")
         raise MissingFileError("gBCF/BCF not found")
 
-    return bcf_obj.path
+    qc_obj = api.assets(run_id=analysis_obj.id, category='qc').first()
+    return dict(bcf_path=bcf_obj.path, qc_path=qc_obj.path)

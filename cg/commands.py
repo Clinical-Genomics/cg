@@ -212,14 +212,19 @@ def genotypes(context, force, case_id):
     """Upload coverage for an analysis (latest)."""
     genotype_db = apps.gt.connect(context.obj)
     hk_db = apps.hk.connect(context.obj)
+    lims_api = apps.lims.connect(context.obj)
     case_info = parse_caseid(case_id)
     latest_run = check_latest_run(hk_db, context, case_info)
 
     if not force and latest_run.extra.genotype_date:
         click.echo("Genotypes already added for run: %s", latest_run.extra.genotype_date.date())
     else:
-        raw_bcf_path = apps.hk.genotypes(hk_db, latest_run)
-        apps.gt.add(genotype_db, raw_bcf_path, force=force)
+        assets = apps.hk.genotypes(hk_db, latest_run)
+        apps.gt.add(genotype_db, assets['bcf_path'], force=force)
+        samples_sex = apps.lims.case_sexes(lims_api, case_info['customer_id'],
+                                           case_info['family_id'])
+        with open(assets['qc_path']) as qcmetrics_stream:
+            apps.gt.add_sex(genotype_db, samples_sex, qcmetrics_stream)
 
     log.info("marking genotypes added for case: %s", case_info['raw']['case_id'])
     latest_run.extra.genotype_date = latest_run.analyzed_at
