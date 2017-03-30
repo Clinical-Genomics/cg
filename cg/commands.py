@@ -179,7 +179,8 @@ def coverage(context, force, case_id):
     latest_run = check_latest_run(hk_db, context, case_info)
 
     if not force and latest_run.extra.coverage_date:
-        click.echo("Coverage already added for run: %s", latest_run.extra.coverage_date.date())
+        click.echo("Coverage already added for run: {}"
+                   .format(latest_run.extra.coverage_date.date()))
     else:
         for sample_data in apps.hk.coverage(hk_db, latest_run):
             chanjo_sample = apps.coverage.sample(sample_data['sample_id'])
@@ -217,7 +218,8 @@ def genotypes(context, force, case_id):
     latest_run = check_latest_run(hk_db, context, case_info)
 
     if not force and latest_run.extra.genotype_date:
-        click.echo("Genotypes already added for run: %s", latest_run.extra.genotype_date.date())
+        click.echo("Genotypes already added for run: {}"
+                   .format(latest_run.extra.genotype_date.date()))
     else:
         assets = apps.hk.genotypes(hk_db, latest_run)
         apps.gt.add(genotype_db, assets['bcf_path'], force=force)
