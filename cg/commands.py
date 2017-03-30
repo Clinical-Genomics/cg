@@ -186,6 +186,11 @@ def coverage(context, force, case_id):
         click.echo("Coverage already uploaded for run: %s", latest_run.extra.coverage_date.date())
     else:
         for sample_data in apps.hk.coverage(hk_db, latest_run):
+            chanjo_sample = apps.coverage.sample(sample_data['sample_id'])
+            if chanjo_sample:
+                log.warn("removing existing sample: %s", chanjo_sample.id)
+                apps.coverage.delete(chanjo_db, chanjo_sample)
+
             lims_sample = lims_api.sample(sample_data['sample_id'])
             log.info("adding coverage for sample: %s", sample_data['sample_id'])
             with open(sample_data['bed_path']) as bed_stream:

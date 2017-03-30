@@ -4,6 +4,7 @@ import logging
 import click
 from sqlalchemy.exc import IntegrityError
 from chanjo.store import api
+from chanjo.store.models import Sample
 from chanjo.load.sambamba import load_transcripts
 
 log = logging.getLogger(__name__)
@@ -33,20 +34,12 @@ def add(chanjo_db, case_id, family_name, sample_id, sample_name, bed_stream, sou
         raise error
 
 
+def sample(sample_id):
+    """Get sample from database."""
+    return Sample.query.get(sample_id)
 
-    # local case_id=${1?'missing input - case id'};
-    # local sample_id;
-    # for sample_id in $(cglims get ${case_id} sample_id);
-    # do
-    #     ( echo "working on sample: ${sample_id}" 1>&2 );
-    #     local coverage_bed;
-    #     if coverage_bed=$(housekeeper get --sample "${sample_id}" --category coverage); then
-    #         local case_id=$(cglims get ${sample_id} case_id);
-    #         local family_id=$(cglims get ${sample_id} familyID);
-    #         local sample_name=$(cglims get ${sample_id} name);
-    #         chanjo load --group "${case_id}" --group-name "${family_id}" --name "${sample_name}" "${coverage_bed}";
-    #     else
-    #         ( echo "missing coverage output for: ${sample_id}" 1>&2 );
-    #     fi;
-    # done;
-    # return 0
+
+def delete(chanjo_db, sample_obj):
+    """Delete sample from database."""
+    chanjo_db.session.delete(sample_obj)
+    chanjo_db.save()
