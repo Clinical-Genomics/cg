@@ -164,3 +164,32 @@ def start(context, setup, execute, force, hg38, case_id):
     log.info("start analysis for: %s", case_id)
     apps.tb.start_analysis(context.obj, case_info, hg38=hg38, force=force,
                            execute=execute)
+
+
+@click.command()
+@click.argument('case_id')
+@click.pass_context
+def coverage(context, case_id):
+    """Upload coverage for an analysis (latest)."""
+    chanjo_db = apps.coverage.connect(context.obj)
+    hk_db = apps.hk.connect(context.obj)
+    lims_api = apps.lims.connect(context.obj)
+    case_info = parse_caseid(case_id)
+    # get latest analysis for the case
+    latest_run = apps.hk.latest_run(case_info['raw']['case_id'])
+    if latest_run is None:
+        click.echo("No run found for the case!")
+        context.abort()
+    for sample_data in apps.hk.coverage(hk_db, latest_run):
+        lims_sample = lims_api.sample(id=sample_data['sample_id'])
+        log.info("adding coverage for sample: %s", sample_data['sample_id'])
+        with open(sample_data['bed_path']) as bed_stream:
+            apps.coverage.add(
+                chanjo_db,
+                case_id=case_info['raw']['case_id'],
+                family_name=case_info['raw']['family_id'],
+                sample_id=sample_data['sample_id'],
+                sample_name=lims_sample.name,
+                bed_stream=bed_stream,
+                source=sample_data['bed_path']
+            )
