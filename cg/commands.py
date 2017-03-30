@@ -250,7 +250,7 @@ def qc(context, force, case_id):
     else:
         assets = apps.hk.qc(hk_db, latest_run)
         with open(assets['qc_path']) as qc_stream, open(assets['sampleinfo_path']) as si_stream:
-            apps.qc.add(cgstats_db, qc_stream, si_stream, force=force)
+            apps.qc.add(cgstats_db, case_info['raw']['case_id'], qc_stream, si_stream, force=force)
 
         log.info("marking qc added for case: %s", case_info['raw']['case_id'])
         latest_run.extra.qc_date = latest_run.analyzed_at
