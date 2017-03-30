@@ -4,6 +4,7 @@ import logging
 from cglims import api
 from cglims.config import basic_config
 from cglims.exc import MissingLimsDataException
+from cglims.export import export_case
 from cglims.panels import convert_panels
 from cglims.check import check_sample, process_samples
 from genologics.entities import Process
@@ -77,3 +78,9 @@ def check_config(lims_api, customer_id, family_id):
             return {'success': False, 'message': error.args[0]}
     else:
         return {'success': True, 'data': config_data}
+
+
+def export(lims_api, customer_id, family_id):
+    lims_samples = lims_api.case(customer_id, family_id)
+    case_data = export_case(lims, lims_samples)
+    return case_data

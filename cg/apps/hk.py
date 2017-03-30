@@ -2,6 +2,7 @@
 import logging
 
 from housekeeper.store import api
+from housekeeper.store.utils import get_rundir
 from housekeeper.pipelines.mip4.scout import prepare_scout
 
 from cg.exc import MissingFileError
@@ -78,3 +79,19 @@ def visualize(hk_db, analysis_obj, madeline_exe, root_path):
 
     scout_config = api.assets(run_id=analysis_obj.id, category='scout-config').first()
     return scout_config.path
+
+
+def rundir(config, analysis_obj):
+    """Get root directory for a run."""
+    root_path = get_rundir(config['housekeeper']['root'], analysis_obj.case.name, analysis_obj)
+    return root_path
+
+
+def add_asset(hk_db, analysis_obj, asset_path, category, archive_type=None, sample=None):
+    """Add a new asset to an existing analysis run."""
+    new_asset = api.add_asset(analysis_obj, asset_path, category, archive_type, sample=sample)
+    new_asset.path = asset_path
+    analysis_obj.assets.append(new_asset)
+    log.info("add asset: %s", new_asset.path)
+    hk_db.commit()
+    return new_asset

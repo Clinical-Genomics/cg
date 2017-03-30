@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os.path
 from datetime import datetime
 import logging
 
@@ -279,3 +280,60 @@ def visualize(context, force, case_id):
                                         context.obj['housekeeper']['madeline_exe'],
                                         context.obj['housekeeper']['root'])
         apps.scoutprod.add(config_path)
+
+        log.info("marking visualize added for case: %s", case_info['raw']['case_id'])
+        latest_run.extra.visualizer_date = latest_run.analyzed_at
+        hk_db.commit()
+
+
+@click.command('delivery-report')
+@click.argument('case_id')
+@click.pass_context
+def delivery_report(context, case_id):
+    """Generate delivery report for the latest analysis."""
+    hk_db = apps.hk.connect(context.obj)
+    lims_api = apps.lims.connect(context.obj)
+    cgstats_db = apps.qc.connect(context.obj)
+    admin_db = apps.admin.connect(context.obj)
+    scout_db = apps.scoutprod.connect(context.obj)
+    case_info = parse_caseid(case_id)
+    latest_run = check_latest_run(hk_db, context, case_info)
+
+    case_data = apps.lims.export(lims_api, case_info['customer_id'], case_info['family_id'])
+    case_data = apps.qc.export(cgstats_db, case_data)
+    template_out = apps.admin.export_report(admin_db, case_data)
+
+    run_root = apps.hk.rundir(context.obj, latest_run)
+    report_file = os.path.join(run_root, 'delivery-report.html')
+    with open(report_file, 'w') as out_handle:
+        out_handle.write(template_out)
+
+    apps.hk.add_asset(hk_db, latest_run, report_file, 'export', archive_type='result')
+    apps.scoutprod.report(scout_db, case_info['customer_id'], case_info['family_id'], report_file)
+
+
+@click.command()
+@click.option('-f', '--force', is_flag=True, help='skip pre-upload checks')
+@click.argument('case_id')
+@click.pass_context
+def add(context, force, case_id):
+    """Uplaod analysis results (latest) to various databases."""
+    hk_db = apps.hk.connect(context.obj)
+    admin_db = apps.admin.connect(context.obj)
+    case_info = parse_caseid(case_id)
+    latest_run = check_latest_run(hk_db, context, case_info)
+
+    if not force and latest_run.delivered_at:
+        click.echo("Run already delivered: {}".format(latest_run.delivered_at.date()))
+    else:
+        log.info("Add coverage")
+        context.invoke(coverage, force=force, case_id=case_id)
+        log.info("Add genotypes and sex information")
+        context.invoke(genotypes, force=force, case_id=case_id)
+        log.info("Add QC metrics")
+        context.invoke(qc, force=force, case_id=case_id)
+        if apps.admin.customer(admin_db, case_info['customer_id']).scout_access:
+            log.info("Add case and variants to Scout")
+            context.invoke(visualize, force=force, case_id=case_id)
+            log.info("Add delivery report to Scout upload")
+            context.invoke(delivery_report, case_id=case_id)

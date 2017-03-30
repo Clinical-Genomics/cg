@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
+import logging
+
+import pymongo
 from pymongo import MongoClient
 
 from scout.adapter import MongoAdapter
 from scout.export.panel import export_panels
 
 APP_KEY = 'scout'
+log = logging.getLogger(__name__)
 
 
 def connect(config, app_key=APP_KEY):
@@ -41,3 +45,21 @@ def get_reruns(db):
 def add(config_path):
     """Upload variants for an analysis to the database."""
     pass
+
+
+def report(scout_db, customer_id, family_id, report_path):
+    """Link a delivery report with an existing Scout case."""
+    case_obj = scout_db.case(customer_id, family_id)
+    if case_obj is None:
+        log.error("case not found in database")
+        return None
+
+    case_obj[''] = report_path
+    updated_case = scout_db.case_collection.find_one_and_update({
+        '_id': case_obj['_id']
+    }, {
+        '$set': {
+            'delivery_report': report_path
+        }
+    }, return_document=pymongo.ReturnDocument.AFTER)
+    return updated_case
