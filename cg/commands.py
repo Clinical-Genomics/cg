@@ -167,9 +167,10 @@ def start(context, setup, execute, force, hg38, case_id):
 
 
 @click.command()
+@click.option('-f', '--force', is_flag=True, help='skip pre-upload checks')
 @click.argument('case_id')
 @click.pass_context
-def coverage(context, case_id):
+def coverage(context, force, case_id):
     """Upload coverage for an analysis (latest)."""
     chanjo_db = apps.coverage.connect(context.obj)
     hk_db = apps.hk.connect(context.obj)
@@ -180,16 +181,22 @@ def coverage(context, case_id):
     if latest_run is None:
         click.echo("No run found for the case!")
         context.abort()
-    for sample_data in apps.hk.coverage(hk_db, latest_run):
-        lims_sample = lims_api.sample(id=sample_data['sample_id'])
-        log.info("adding coverage for sample: %s", sample_data['sample_id'])
-        with open(sample_data['bed_path']) as bed_stream:
-            apps.coverage.add(
-                chanjo_db,
-                case_id=case_info['raw']['case_id'],
-                family_name=case_info['raw']['family_id'],
-                sample_id=sample_data['sample_id'],
-                sample_name=lims_sample.name,
-                bed_stream=bed_stream,
-                source=sample_data['bed_path']
-            )
+
+    if not force and latest_run.extra.coverage_date:
+        click.echo("Coverage already uploaded for run: %s", latest_run.extra.coverage_date.date())
+    else:
+        for sample_data in apps.hk.coverage(hk_db, latest_run):
+            lims_sample = lims_api.sample(sample_data['sample_id'])
+            log.info("adding coverage for sample: %s", sample_data['sample_id'])
+            with open(sample_data['bed_path']) as bed_stream:
+                apps.coverage.add(
+                    chanjo_db,
+                    case_id=case_info['raw']['case_id'],
+                    family_name=case_info['raw']['family_id'],
+                    sample_id=sample_data['sample_id'],
+                    sample_name=lims_sample.name,
+                    bed_stream=bed_stream,
+                    source=sample_data['bed_path']
+                )
+        latest_run.extra.coverage_date = datetime.now()
+        hk_db.commit()
