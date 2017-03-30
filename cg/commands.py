@@ -7,7 +7,7 @@ from path import Path
 import ruamel.yaml
 
 from . import apps
-from .utils import parse_caseid
+from .utils import parse_caseid, check_latest_run
 
 log = logging.getLogger(__name__)
 
@@ -176,14 +176,10 @@ def coverage(context, force, case_id):
     hk_db = apps.hk.connect(context.obj)
     lims_api = apps.lims.connect(context.obj)
     case_info = parse_caseid(case_id)
-    # get latest analysis for the case
-    latest_run = apps.hk.latest_run(case_info['raw']['case_id'])
-    if latest_run is None:
-        click.echo("No run found for the case!")
-        context.abort()
+    latest_run = check_latest_run(hk_db, context, case_info)
 
     if not force and latest_run.extra.coverage_date:
-        click.echo("Coverage already uploaded for run: %s", latest_run.extra.coverage_date.date())
+        click.echo("Coverage already added for run: %s", latest_run.extra.coverage_date.date())
     else:
         for sample_data in apps.hk.coverage(hk_db, latest_run):
             chanjo_sample = apps.coverage.sample(sample_data['sample_id'])
@@ -203,5 +199,28 @@ def coverage(context, force, case_id):
                     bed_stream=bed_stream,
                     source=sample_data['bed_path']
                 )
-        latest_run.extra.coverage_date = datetime.now()
+        log.info("marking coverage added for case: %s", case_info['raw']['case_id'])
+        latest_run.extra.coverage_date = latest_run.analyzed_at
         hk_db.commit()
+
+
+@click.command()
+@click.option('-f', '--force', is_flag=True, help='skip pre-upload checks')
+@click.argument('case_id')
+@click.pass_context
+def genotypes(context, force, case_id):
+    """Upload coverage for an analysis (latest)."""
+    genotype_db = apps.gt.connect(context.obj)
+    hk_db = apps.hk.connect(context.obj)
+    case_info = parse_caseid(case_id)
+    latest_run = check_latest_run(hk_db, context, case_info)
+
+    if not force and latest_run.extra.genotype_date:
+        click.echo("Genotypes already added for run: %s", latest_run.extra.genotype_date.date())
+    else:
+        raw_bcf_path = apps.hk.genotypes(hk_db, latest_run)
+        apps.gt.add(genotype_db, raw_bcf_path, force=force)
+
+    log.info("marking genotypes added for case: %s", case_info['raw']['case_id'])
+    latest_run.extra.genotype_date = latest_run.analyzed_at
+    hk_db.commit()

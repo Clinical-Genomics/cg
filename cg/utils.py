@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+import click
+
+from cg import apps
 
 
 def parse_caseid(raw_caseid):
@@ -18,3 +21,12 @@ def parse_caseid(raw_caseid):
         'case_id': case_id,
         'extra': extra,
     }
+
+
+def check_latest_run(hk_db, context, case_info):
+    # get latest analysis for the case
+    latest_run = apps.hk.latest_run(hk_db, case_info['raw']['case_id'])
+    if latest_run is None:
+        click.echo("No run found for the case!")
+        context.abort()
+    return latest_run

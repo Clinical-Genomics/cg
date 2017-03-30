@@ -3,6 +3,8 @@ import logging
 
 from housekeeper.store import api
 
+from cg.exc import MissingFileError
+
 log = logging.getLogger(__name__)
 
 
@@ -12,7 +14,7 @@ def connect(config):
     return hk_db
 
 
-def latest_run(case_id):
+def latest_run(hk_db, case_id):
     """Get the latest analysis for a case."""
     case_obj = api.case(case_id)
     if case_obj is None:
@@ -30,3 +32,18 @@ def coverage(hk_db, analysis_obj):
             continue
 
         yield dict(sample_id=sample_obj.lims_id, bed_path=coverage_bed.path)
+
+
+def genotypes(hk_db, analysis_obj):
+    """Parse analysis record for uploading genotypes."""
+    # first try to find a "gBCF"
+    bcf_obj = api.assets(run_id=analysis_obj.id, category='gbcf').first()
+    if bcf_obj is None:
+        log.warn("can't find gBCF, looking up raw BCF file")
+        bcf_obj = api.assets(run_id=analysis_obj.id, category='bcf-raw').first()
+
+    if bcf_obj is None:
+        log.error("BCF file missing")
+        raise MissingFileError("gBCF/BCF not found")
+
+    return bcf_obj.path
