@@ -255,3 +255,27 @@ def qc(context, force, case_id):
         log.info("marking qc added for case: %s", case_info['raw']['case_id'])
         latest_run.extra.qc_date = latest_run.analyzed_at
         hk_db.commit()
+
+
+@click.command()
+@click.option('-f', '--force', is_flag=True, help='skip pre-upload checks')
+@click.argument('case_id')
+@click.pass_context
+def visualize(context, force, case_id):
+    """Add data to Scout for an analysis run (latest)."""
+    hk_db = apps.hk.connect(context.obj)
+    case_info = parse_caseid(case_id)
+    latest_run = check_latest_run(hk_db, context, case_info)
+
+    if not latest_run.pipeline_version.startswith('v4'):
+        log.error("unsupported pipeline version: %s", latest_run.pipeline_version)
+        context.abort()
+
+    if not force and latest_run.extra.visualizer_date:
+        click.echo("Run already added to scout: {}"
+                   .format(latest_run.extra.visualizer_date.date()))
+    else:
+        config_path = apps.hk.visualize(hk_db, latest_run,
+                                        context.obj['housekeeper']['madeline_exe'],
+                                        context.obj['housekeeper']['root'])
+        apps.scoutprod.add(config_path)

@@ -2,6 +2,7 @@
 import logging
 
 from housekeeper.store import api
+from housekeeper.pipelines.mip4.scout import prepare_scout
 
 from cg.exc import MissingFileError
 
@@ -55,3 +56,25 @@ def qc(hk_db, analysis_obj):
     qc_obj = api.assets(run_id=analysis_obj.id, category='qc').first()
     sampleinfo_obj = api.assets(run_id=analysis_obj.id, category='sampleinfo').first()
     return dict(qc_path=qc_obj.path, sampleinfo_path=sampleinfo_obj.path)
+
+
+def visualize(hk_db, analysis_obj, madeline_exe, root_path):
+    """Parse analysis record for uploading to Scout."""
+    log.info("create/replace Scout load config")
+    analysis_obj.analysis_id
+
+    existing_conf = api.assets(run_id=analysis_obj.id, category='scout-config').first()
+    if existing_conf:
+        log.info("delete existing scout config: %s", existing_conf.path)
+        api.delete_asset(existing_conf)
+    existing_mad = api.assets(run_id=analysis_obj.id, category='madeline').first()
+    if existing_mad:
+        log.info("delete existing madeline: %s", existing_mad.path)
+        api.delete_asset(existing_mad)
+    hk_db.commit()
+
+    prepare_scout(analysis_obj, root_path, madeline_exe)
+    hk_db.commit()
+
+    scout_config = api.assets(run_id=analysis_obj.id, category='scout-config').first()
+    return scout_config.path

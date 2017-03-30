@@ -36,3 +36,8 @@ def get_case(db, case_id):
 def get_reruns(db):
     """Get cases marked to be rerun."""
     return db.case.find({'rerun_requested': True})
+
+
+def add(config_path):
+    """Upload variants for an analysis to the database."""
+    pass
