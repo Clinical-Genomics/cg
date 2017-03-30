@@ -48,3 +48,10 @@ def genotypes(hk_db, analysis_obj):
 
     qc_obj = api.assets(run_id=analysis_obj.id, category='qc').first()
     return dict(bcf_path=bcf_obj.path, qc_path=qc_obj.path)
+
+
+def qc(hk_db, analysis_obj):
+    """Parse analysis record for adding QC output."""
+    qc_obj = api.assets(run_id=analysis_obj.id, category='qc').first()
+    sampleinfo_obj = api.assets(run_id=analysis_obj.id, category='sampleinfo').first()
+    return dict(qc_path=qc_obj.path, sampleinfo_path=sampleinfo_obj.path)

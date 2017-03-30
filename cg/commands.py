@@ -200,6 +200,7 @@ def coverage(context, force, case_id):
                     bed_stream=bed_stream,
                     source=sample_data['bed_path']
                 )
+
         log.info("marking coverage added for case: %s", case_info['raw']['case_id'])
         latest_run.extra.coverage_date = latest_run.analyzed_at
         hk_db.commit()
@@ -210,7 +211,7 @@ def coverage(context, force, case_id):
 @click.argument('case_id')
 @click.pass_context
 def genotypes(context, force, case_id):
-    """Upload coverage for an analysis (latest)."""
+    """Add VCF genotypes for an analysis run (latest)."""
     genotype_db = apps.gt.connect(context.obj)
     hk_db = apps.hk.connect(context.obj)
     lims_api = apps.lims.connect(context.obj)
@@ -228,6 +229,29 @@ def genotypes(context, force, case_id):
         with open(assets['qc_path']) as qcmetrics_stream:
             apps.gt.add_sex(genotype_db, samples_sex, qcmetrics_stream)
 
-    log.info("marking genotypes added for case: %s", case_info['raw']['case_id'])
-    latest_run.extra.genotype_date = latest_run.analyzed_at
-    hk_db.commit()
+        log.info("marking genotypes added for case: %s", case_info['raw']['case_id'])
+        latest_run.extra.genotype_date = latest_run.analyzed_at
+        hk_db.commit()
+
+
+@click.command()
+@click.option('-f', '--force', is_flag=True, help='skip pre-upload checks')
+@click.argument('case_id')
+@click.pass_context
+def qc(context, force, case_id):
+    """Add QC metrics for an anlyais run (latest)."""
+    hk_db = apps.hk.connect(context.obj)
+    cgstats_db = apps.qc.connect(context.obj)
+    case_info = parse_caseid(case_id)
+    latest_run = check_latest_run(hk_db, context, case_info)
+
+    if not force and latest_run.extra.qc_date:
+        click.echo("QC already added for run: {}".format(latest_run.extra.qc_date.date()))
+    else:
+        assets = apps.hk.qc(hk_db, latest_run)
+        with open(assets['qc_path']) as qc_stream, open(assets['sampleinfo_path']) as si_stream:
+            apps.qc.add(cgstats_db, qc_stream, si_stream, force=force)
+
+        log.info("marking qc added for case: %s", case_info['raw']['case_id'])
+        latest_run.extra.qc_date = latest_run.analyzed_at
+        hk_db.commit()
