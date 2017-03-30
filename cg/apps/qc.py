@@ -27,6 +27,7 @@ def add(cgstats_db, case_id, qc_stream, sampleinfo_stream, force=False):
         if old_analysis:
             log.warn("removing old analysis")
             old_analysis.delete()
+            cgstats_db.commit()
 
         metrics = ruamel.yaml.safe_load(qc_stream)
         log.debug("parsing analysis output")
