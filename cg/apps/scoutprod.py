@@ -6,6 +6,7 @@ from pymongo import MongoClient
 
 from scout.adapter import MongoAdapter
 from scout.export.panel import export_panels
+from scout.load.all import load_scout
 
 APP_KEY = 'scout'
 log = logging.getLogger(__name__)
@@ -42,9 +43,20 @@ def get_reruns(db):
     return db.case.find({'rerun_requested': True})
 
 
-def add(config_path):
+def add(scout_db, config_data):
     """Upload variants for an analysis to the database."""
-    pass
+    existing_case = scout_db.case(institute_id=config_data['owner'],
+                                  display_name=config_data['family'])
+    if existing_case:
+        if config_data.get['analysis_date'] > existing_case['analysis_date']:
+            log.info("Updating existing Scout case")
+            load_scout(scout_db, config_data, update=True)
+        else:
+            existing_date = existing_case['analysis_date'].date()
+            log.warning("Analysis of case already added: %s", existing_date)
+    else:
+        log.info("Adding new case to Scout")
+        load_scout(scout_db, config_data)
 
 
 def report(scout_db, customer_id, family_id, report_path):
@@ -54,12 +66,9 @@ def report(scout_db, customer_id, family_id, report_path):
         log.error("case not found in database")
         return None
 
-    case_obj[''] = report_path
-    updated_case = scout_db.case_collection.find_one_and_update({
-        '_id': case_obj['_id']
-    }, {
-        '$set': {
-            'delivery_report': report_path
-        }
-    }, return_document=pymongo.ReturnDocument.AFTER)
+    updated_case = scout_db.case_collection.find_one_and_update(
+        {'_id': case_obj['_id']},
+        {'$set': {'delivery_report': report_path}},
+        return_document=pymongo.ReturnDocument.AFTER
+    )
     return updated_case

@@ -270,11 +270,13 @@ def qc(context, force, case_id):
 
 @click.command()
 @click.option('-f', '--force', is_flag=True, help='skip pre-upload checks')
+@click.option('-t', '--threshold', default=5, help='rank score threshold')
 @click.argument('case_id')
 @click.pass_context
-def visualize(context, force, case_id):
+def visualize(context, force, threshold, case_id):
     """Add data to Scout for an analysis run (latest)."""
     hk_db = apps.hk.connect(context.obj)
+    scout_db = apps.scoutprod.connect(context.obj)
     case_info = parse_caseid(case_id)
     latest_run = check_latest_run(hk_db, context, case_info)
 
@@ -289,7 +291,11 @@ def visualize(context, force, case_id):
         config_path = apps.hk.visualize(hk_db, latest_run,
                                         context.obj['housekeeper']['madeline_exe'],
                                         context.obj['housekeeper']['root'])
-        apps.scoutprod.add(config_path)
+        with open(config_path) as config_stream:
+            config_data = ruamel.yaml.safe_load(config_stream)
+
+        config_data['rank_score_threshold'] = threshold
+        apps.scoutprod.add(scout_db, config_data)
 
         log.info("marking visualize added for case: %s", case_info['raw']['case_id'])
         latest_run.extra.visualizer_date = latest_run.analyzed_at
