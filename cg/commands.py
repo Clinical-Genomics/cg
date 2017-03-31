@@ -111,7 +111,7 @@ def mip_panel(context, print_output, case_id):
         family_dir = check_root(context, case_info)
         panel_path = family_dir.joinpath('aggregated_master.bed')
         with panel_path.open('w') as out_handle:
-            click.echo('\n'.join(bed_lines), file=out_handle)
+            click.echo('\n'.join(bed_lines).decode(), file=out_handle)
         log.info("wrote aggregated gene panel: %s", panel_path)
 
 
