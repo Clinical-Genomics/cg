@@ -14,6 +14,17 @@ log = logging.getLogger(__name__)
 
 
 def check_root(context, case_info):
+    """Compose and check if root analysis directory for a case exists.
+
+    Aborts the Click CLI context if the family directory doesn't exist.
+
+    Args:
+        context (Object): Click context object
+        case_info (dict): Parsed case id information
+
+    Returns:
+        path: root analysis directory for the family/case
+    """
     root_dir = Path(context.obj['analysis_root'])
     family_dir = root_dir.joinpath(case_info['customer_id'], case_info['raw']['family_id'])
     if not family_dir.exists():
@@ -137,11 +148,11 @@ def update(context, answered_out, case_id):
 @click.pass_context
 def check(context, process_id):
     """Check samples in LIMS and optionally update them."""
-    admin_db = apps.admin.connect(context.obj)
+    admin_db = apps.admin.Application(context.obj)
     lims_api = apps.lims.connect(context.obj)
     samples = list(apps.lims.process_to_samples(lims_api, process_id))
     uniq_tags = set(sample['sample'].udf['Sequencing Analysis'] for sample in samples)
-    apptag_map = apps.admin.map_apptags(admin_db, uniq_tags)
+    apptag_map = admin_db.map_apptags(uniq_tags)
     apps.lims.check_samples(lims_api, samples, apptag_map)
 
 
@@ -163,8 +174,7 @@ def start(context, setup, execute, force, hg38, case_id):
         context.invoke(mip_config, case_id=case_id)
 
     log.info("start analysis for: %s", case_id)
-    apps.tb.start_analysis(context.obj, case_info, hg38=hg38, force=force,
-                           execute=execute)
+    apps.tb.start_analysis(context.obj, case_info, hg38=hg38, force=force, execute=execute)
 
 
 @click.command()
@@ -179,9 +189,9 @@ def coverage(context, force, case_id):
     case_info = parse_caseid(case_id)
     latest_run = check_latest_run(hk_db, context, case_info)
 
-    if not force and latest_run.extra.coverage_date:
-        click.echo("Coverage already added for run: {}"
-                   .format(latest_run.extra.coverage_date.date()))
+    coverage_date = latest_run.extra.coverage_date
+    if not force and coverage_date:
+        click.echo("Coverage already added for run: {}".format(coverage_date.date()))
     else:
         for sample_data in apps.hk.coverage(hk_db, latest_run):
             chanjo_sample = apps.coverage.sample(sample_data['sample_id'])
@@ -294,14 +304,14 @@ def delivery_report(context, case_id):
     hk_db = apps.hk.connect(context.obj)
     lims_api = apps.lims.connect(context.obj)
     cgstats_db = apps.qc.connect(context.obj)
-    admin_db = apps.admin.connect(context.obj)
+    admin_db = apps.admin.Application(context.obj)
     scout_db = apps.scoutprod.connect(context.obj)
     case_info = parse_caseid(case_id)
     latest_run = check_latest_run(hk_db, context, case_info)
 
     case_data = apps.lims.export(lims_api, case_info['customer_id'], case_info['family_id'])
     case_data = apps.qc.export(cgstats_db, case_data)
-    template_out = apps.admin.export_report(admin_db, case_data)
+    template_out = admin_db.export_report(case_data)
 
     run_root = apps.hk.rundir(context.obj, latest_run)
     report_file = os.path.join(run_root, 'delivery-report.html')
@@ -319,7 +329,7 @@ def delivery_report(context, case_id):
 def add(context, force, case_id):
     """Uplaod analysis results (latest) to various databases."""
     hk_db = apps.hk.connect(context.obj)
-    admin_db = apps.admin.connect(context.obj)
+    admin_db = apps.admin.Application(context.obj)
     case_info = parse_caseid(case_id)
     latest_run = check_latest_run(hk_db, context, case_info)
 
@@ -332,7 +342,7 @@ def add(context, force, case_id):
         context.invoke(genotypes, force=force, case_id=case_id)
         log.info("Add QC metrics")
         context.invoke(qc, force=force, case_id=case_id)
-        if apps.admin.customer(admin_db, case_info['customer_id']).scout_access:
+        if admin_db.customer(case_info['customer_id']).scout_access:
             log.info("Add case and variants to Scout")
             context.invoke(visualize, force=force, case_id=case_id)
             log.info("Add delivery report to Scout upload")
