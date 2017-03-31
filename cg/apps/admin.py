@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-from cgadmin.store import api, AdminDatabase
+from cgadmin.store import api
 from cgadmin.report.core import export_report as export_report_api
 
 
-class Application(AdminDatabase):
+class Application(api.AdminDatabase):
 
     """Admin database API.
 
