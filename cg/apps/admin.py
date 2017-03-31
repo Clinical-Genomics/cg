@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-from cgadmin.store import api
+from cgadmin.store import api, AdminDatabase
 from cgadmin.report.core import export_report as export_report_api
 
 
-class Application(object):
+class Application(AdminDatabase):
 
     """Admin database API.
 
@@ -12,8 +12,7 @@ class Application(object):
     """
 
     def __init__(self, config):
-        super(Application, self).__init__()
-        self.db = api.connect(config['cgadmin']['database'])
+        super(Application, self).__init__(api.connect(config['cgadmin']['database']))
 
     def map_apptags(self, apptags):
         """Map application tags with latest versions.
@@ -23,14 +22,14 @@ class Application(object):
         """
         apptag_map = {}
         for apptag_id in apptags:
-            latest_version = api.latest_version(self.db, apptag_id)
+            latest_version = self.latest_version(apptag_id)
             apptag_map[apptag_id] = latest_version.version
         return apptag_map
 
     def customer(self, customer_id):
         """Get a customer record from the database."""
-        return self.db.Customer.filter_by(customer_id=customer_id).first()
+        return self.Customer.filter_by(customer_id=customer_id).first()
 
     def export_report(self, case_data):
         """Pass-through to the original API function."""
-        return export_report_api(self.db, case_data)
+        return export_report_api(self, case_data)
