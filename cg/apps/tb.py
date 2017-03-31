@@ -25,7 +25,7 @@ def start_analysis(config, case_info, hg38=False, execute=True, force=False):
     case_id = case_info['raw']['case_id']
     cc_path = Path(config['trailblazer']['analysis_root']).joinpath(customer_id)
     if not force:
-        check_setup(tb_db, cc_path, case_id, family_id)
+        check_setup(tb_db, case_id)
 
     pedigree_path = cc_path.joinpath("{0}/{0}_pedigree.yaml".format(family_id))
     if not pedigree_path.exists():
