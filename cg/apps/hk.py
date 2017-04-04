@@ -62,8 +62,6 @@ def qc(hk_db, analysis_obj):
 def visualize(hk_db, analysis_obj, madeline_exe, root_path):
     """Parse analysis record for uploading to Scout."""
     log.info("create/replace Scout load config")
-    analysis_obj.analysis_id
-
     existing_conf = api.assets(run_id=analysis_obj.id, category='scout-config').first()
     if existing_conf:
         log.info("delete existing scout config: %s", existing_conf.path)
