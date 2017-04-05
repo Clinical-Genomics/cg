@@ -312,7 +312,7 @@ def delivery_report(context, case_id):
     lims_api = apps.lims.connect(context.obj)
     cgstats_db = apps.qc.connect(context.obj)
     admin_db = apps.admin.Application(context.obj)
-    scout_db = apps.scoutprod.connect(context.obj)
+    scout_db = apps.scoutprod.connect_adapter(context.obj)
     case_info = parse_caseid(case_id)
     latest_run = check_latest_run(hk_db, context, case_info)
 
