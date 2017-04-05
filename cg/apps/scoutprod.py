@@ -61,7 +61,7 @@ def add(scout_db, config_data):
 
 def report(scout_db, customer_id, family_id, report_path):
     """Link a delivery report with an existing Scout case."""
-    case_obj = scout_db.case(customer_id, family_id)
+    case_obj = scout_db.case_collection(customer_id, family_id)
     if case_obj is None:
         log.error("case not found in database")
         return None
