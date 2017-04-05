@@ -315,15 +315,20 @@ def delivery_report(context, case_id):
     case_info = parse_caseid(case_id)
     latest_run = check_latest_run(hk_db, context, case_info)
 
+    log.info('fetching data from LIMS')
     case_data = apps.lims.export(lims_api, case_info['customer_id'], case_info['family_id'])
+    log.info('fetching data from cgstats')
     case_data = apps.qc.export_run(cgstats_db, case_data)
+    log.info('generating report in cgadmin')
     template_out = admin_db.export_report(case_data)
 
     run_root = apps.hk.rundir(context.obj, latest_run)
     report_file = os.path.join(run_root, 'delivery-report.html')
+    log.info("saving report to: %s", report_file)
     with open(report_file, 'w') as out_handle:
         out_handle.write(template_out)
 
+    log.info("adding report to housekeeper")
     apps.hk.add_asset(hk_db, latest_run, report_file, 'export', archive_type='result')
     apps.scoutprod.report(scout_db, case_info['customer_id'], case_info['family_id'], report_file)
 
