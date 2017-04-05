@@ -316,7 +316,7 @@ def delivery_report(context, case_id):
     latest_run = check_latest_run(hk_db, context, case_info)
 
     case_data = apps.lims.export(lims_api, case_info['customer_id'], case_info['family_id'])
-    case_data = apps.qc.export(cgstats_db, case_data)
+    case_data = apps.qc.export_run(cgstats_db, case_data)
     template_out = admin_db.export_report(case_data)
 
     run_root = apps.hk.rundir(context.obj, latest_run)

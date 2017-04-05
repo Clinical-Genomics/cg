@@ -35,9 +35,3 @@ def add(cgstats_db, case_id, qc_stream, sampleinfo_stream, force=False):
         new_analysis = process_all(case_id, sampleinfo, metrics)
         log.info("adding analysis: %s", new_analysis.analysis_id)
         cgstats_db.add_commit(new_analysis)
-
-
-def export(cgstats_db, existing_data):
-    """Export delivery information from the QC database."""
-    new_data = export_run(existing_data)
-    return new_data
