@@ -12,7 +12,7 @@ class Application(api.AdminDatabase):
     """
 
     def __init__(self, config):
-        super(Application, self).__init__(api.connect(config['cgadmin']['database']))
+        super(Application, self).__init__(config['cgadmin']['database'])
 
     def map_apptags(self, apptags):
         """Map application tags with latest versions.
