@@ -326,7 +326,8 @@ def delivery_report(context, case_id):
     run_root = apps.hk.rundir(context.obj, latest_run)
     report_file = os.path.join(run_root, 'delivery-report.html')
     log.info("saving report to: %s", report_file)
-    with open(report_file, 'w') as out_handle:
+    click.echo(template_out, file=report_file)
+    with click.open_file(report_file, mode='w', encoding='utf-8') as out_handle:
         out_handle.write(template_out)
 
     log.info("adding report to housekeeper")
