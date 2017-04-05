@@ -66,7 +66,7 @@ def report(scout_db, customer_id, family_id, report_path):
         log.error("case not found in database")
         return None
 
-    updated_case = scout_db.case_collection.find_one_and_update(
+    updated_case = scout_db.db.case.find_one_and_update(
         {'_id': case_obj['_id']},
         {'$set': {'delivery_report': report_path}},
         return_document=pymongo.ReturnDocument.AFTER
