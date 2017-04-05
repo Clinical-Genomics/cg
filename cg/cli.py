@@ -8,6 +8,7 @@ import ruamel.yaml
 
 from .version import __version__
 from . import commands
+from cg.invoice.cli import invoice as invoice_cli
 from cg.queue import cli as queue_cli
 
 # enable shell completion
@@ -41,3 +42,4 @@ cli.add_command(commands.genotypes)
 cli.add_command(commands.qc)
 cli.add_command(commands.visualize)
 cli.add_command(commands.delivery_report)
+cli.add_command(invoice_cli)

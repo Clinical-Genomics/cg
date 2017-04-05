@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
-from cgadmin.store import api
+import logging
+
+from cgadmin.store import api, models
 from cgadmin.report.core import export_report as export_report_api
+
+log = logging.getLogger(__name__)
 
 
 class Application(api.AdminDatabase):
@@ -33,3 +37,30 @@ class Application(api.AdminDatabase):
     def export_report(self, case_data):
         """Pass-through to the original API function."""
         return export_report_api(self, case_data)
+
+    def price(self, app_tag, app_tag_version, priority):
+        """Get the price for a sample from the database."""
+        version_obj = (self.ApplicationTagVersion.join(models.ApplicationTagVersion.apptag)
+                           .filter(models.ApplicationTagVersion.version == app_tag_version,
+                                   models.ApplicationTag.name == app_tag)).first()
+        if version_obj:
+            log.info("getting price from: %s (%s)", version_obj.apptag.name, version_obj.version)
+            return getattr(version_obj, "price_{}".format(priority))
+        else:
+            return None
+
+    def invoice(self, customer_id, costcenter='kth'):
+        """Get invoice information about a customer."""
+        customer_obj = self.customer(customer_id)
+        data = dict(
+            name=customer_obj.name,
+            contact=dict(
+                name=customer_obj.invoice_contact.name,
+                email=customer_obj.invoice_contact.email,
+            ),
+            reference=customer_obj.invoice_reference,
+            project=getattr(customer_obj, "project_account_{}".format(costcenter)),
+            agreement=customer_obj.agreement_registration,
+            address=customer_obj.invoice_address,
+        )
+        return data

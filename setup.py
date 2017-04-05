@@ -21,6 +21,8 @@ setup(
     author='Robin Andeer',
     author_email='robin.andeer@scilifelab.se',
     url='https://github.com/Clinical-Genomics/cg',
+    include_package_data=True,
+    zip_safe=False,
     packages=find_packages(exclude=('tests*', 'docs', 'examples')),
     entry_points={
         'console_scripts': ['cg=cg:cli'],

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 
+from dateutil.parser import parse as parse_date
 from cglims import api
 from cglims.config import basic_config
 from cglims.exc import MissingLimsDataException
@@ -84,3 +85,22 @@ def export(lims_api, customer_id, family_id):
     lims_samples = lims_api.case(customer_id, family_id)
     case_data = export_case(lims_api, lims_samples)
     return case_data
+
+
+def invoice(lims_api, sample_ids):
+    """Fetch information about invoicing."""
+    samples = []
+    for sample_id in sample_ids:
+        lims_sample = lims_api.sample(sample_id)
+        sample_date = parse_date(lims_sample.date_received)
+        data = dict(
+            lims_id=lims_sample.id,
+            date=sample_date,
+            application_tag=lims_sample.udf['Sequencing Analysis'],
+            application_tag_version=int(lims_sample.udf['Application Tag Version']),
+            priority=lims_sample.udf['priority'],
+            project=lims_sample.project.name,
+            name=lims_sample.name,
+        )
+        samples.append(data)
+    return samples
