@@ -307,6 +307,7 @@ def visualize(context, force, threshold, case_id):
 @click.pass_context
 def delivery_report(context, case_id):
     """Generate delivery report for the latest analysis."""
+    log.info('connecting to databases')
     hk_db = apps.hk.connect(context.obj)
     lims_api = apps.lims.connect(context.obj)
     cgstats_db = apps.qc.connect(context.obj)

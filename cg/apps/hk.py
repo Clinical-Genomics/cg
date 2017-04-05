@@ -87,6 +87,12 @@ def rundir(config, analysis_obj):
 
 def add_asset(hk_db, analysis_obj, asset_path, category, archive_type=None, sample=None):
     """Add a new asset to an existing analysis run."""
+    # check existing asset
+    existing_asset = api.assets(run_id=analysis_obj.id, category=category).first()
+    if existing_asset:
+        log.warn("existing asset exists!")
+        return existing_asset
+
     new_asset = api.add_asset(analysis_obj, asset_path, category, archive_type, sample=sample)
     new_asset.path = asset_path
     analysis_obj.assets.append(new_asset)
