@@ -82,5 +82,5 @@ def check_config(lims_api, customer_id, family_id):
 
 def export(lims_api, customer_id, family_id):
     lims_samples = lims_api.case(customer_id, family_id)
-    case_data = export_case(lims, lims_samples)
+    case_data = export_case(lims_api, lims_samples)
     return case_data
