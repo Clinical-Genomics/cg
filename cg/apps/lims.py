@@ -96,7 +96,7 @@ def invoice(lims_samples):
             data = dict(
                 lims_id=lims_sample.id,
                 customer=lims_sample.udf['customer'],
-                date=sample_date,
+                date=sample_date.date(),
                 application_tag=lims_sample.udf['Sequencing Analysis'],
                 application_tag_version=int(lims_sample.udf['Application Tag Version']),
                 priority=lims_sample.udf['priority'],

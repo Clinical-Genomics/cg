@@ -44,14 +44,19 @@ class MismatchingCustomersError(Exception):
 @click.pass_context
 def invoice(context, customer_id, process_id):
     """Generate invoices from a LIMS process."""
+    log.debug("connecting to databases")
     lims_api = apps.lims.connect(context.obj)
     admin_db = apps.admin.Application(context.obj)
+
+    log.info("getting invoice data from process")
     lims_data = apps.lims.invoice_process(lims_api, process_id)
 
     customer_id = customer_id or lims_data['customer_id']
     if customer_id is None:
         log.error('You need to provide a customer for the invoice')
         context.abort()
+
+    log.info("generate invoice data from LIMS and cgadmin")
     lims_samples = lims_data['lims_samples']
     new_invoices = []
     for costcenter in ['kth', 'ki']:
@@ -66,7 +71,8 @@ def invoice(context, customer_id, process_id):
 
     for invoice_data in new_invoices:
         new_invoice = admin_db.add_invoice(invoice_data)
-        log.info("created new %s invoice: %s", new_invoice.invoice_id)
+        log.info("created new %s invoice: %s", new_invoice.costcenter.upper(),
+                 new_invoice.invoice_id)
 
 
 def generate_invoice(lims_api, admin_db, customer_id, lims_samples, costcenter, discount=None):
