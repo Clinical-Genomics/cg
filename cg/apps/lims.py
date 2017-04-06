@@ -87,20 +87,37 @@ def export(lims_api, customer_id, family_id):
     return case_data
 
 
-def invoice(lims_api, sample_ids):
+def invoice(lims_samples):
     """Fetch information about invoicing."""
     samples = []
-    for sample_id in sample_ids:
-        lims_sample = lims_api.sample(sample_id)
+    for lims_sample in lims_samples:
         sample_date = parse_date(lims_sample.date_received)
-        data = dict(
-            lims_id=lims_sample.id,
-            date=sample_date,
-            application_tag=lims_sample.udf['Sequencing Analysis'],
-            application_tag_version=int(lims_sample.udf['Application Tag Version']),
-            priority=lims_sample.udf['priority'],
-            project=lims_sample.project.name,
-            name=lims_sample.name,
-        )
+        try:
+            data = dict(
+                lims_id=lims_sample.id,
+                customer=lims_sample.udf['customer'],
+                date=sample_date,
+                application_tag=lims_sample.udf['Sequencing Analysis'],
+                application_tag_version=int(lims_sample.udf['Application Tag Version']),
+                priority=lims_sample.udf['priority'],
+                project=lims_sample.project.name,
+                name=lims_sample.name,
+            )
+        except KeyError as error:
+            message = "Missing UDF value: {} - {}".format(lims_sample.id, error.message)
+            raise MissingLimsDataException(message)
         samples.append(data)
     return samples
+
+
+def invoice_process(lims_api, process_id):
+    """Get information from an invoice process."""
+    lims_process = Process(lims_api, id=process_id)
+    lims_data = process_samples(lims_process)
+
+    data = dict(
+        lims_samples=[data['sample'] for data in lims_data],
+        customer_id=lims_process.udf.get('customer'),
+        discount=float(lims_process.udf['Discount (%)']),
+    )
+    return data

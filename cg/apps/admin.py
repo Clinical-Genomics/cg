@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from __future__ import division
+import datetime
 import logging
 
 from cgadmin.store import api, models
@@ -38,14 +40,20 @@ class Application(api.AdminDatabase):
         """Pass-through to the original API function."""
         return export_report_api(self, case_data)
 
-    def price(self, app_tag, app_tag_version, priority):
+    def price(self, app_tag, app_tag_version, priority, costcenter=None):
         """Get the price for a sample from the database."""
         version_obj = (self.ApplicationTagVersion.join(models.ApplicationTagVersion.apptag)
                            .filter(models.ApplicationTagVersion.version == app_tag_version,
                                    models.ApplicationTag.name == app_tag)).first()
         if version_obj:
             log.info("getting price from: %s (%s)", version_obj.apptag.name, version_obj.version)
-            return getattr(version_obj, "price_{}".format(priority))
+            full_price = getattr(version_obj, "price_{}".format(priority))
+            if costcenter == 'kth':
+                return full_price * (version_obj.percent_kth / 100)
+            elif costcenter == 'ki':
+                return full_price * ((1 - version_obj.percent_kth) / 100)
+            else:
+                return full_price
         else:
             return None
 
@@ -64,3 +72,16 @@ class Application(api.AdminDatabase):
             address=customer_obj.invoice_address,
         )
         return data
+
+    def add_invoice(self, invoice_data):
+        """Create a record for an invoice."""
+        customer_obj = self.customer(invoice_data['customer_id'])
+        new_invoice = models.Invoice(
+            customer=customer_obj,
+            invoice_id=invoice_data['invoice_id'],
+            invoiced_at=datetime.date.today(),
+            costcenter=invoice_data['costcenter'],
+        )
+        new_invoice.data = invoice_data
+        invoice_obj = self.Invoice.save(new_invoice)
+        return invoice_obj

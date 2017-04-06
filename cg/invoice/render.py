@@ -6,13 +6,14 @@ from openpyxl import load_workbook
 from openpyxl.styles import Border, Font, PatternFill, Side
 
 
-def render_xlsx(data, costcenter):
+def render_xlsx(data):
     """Render an Excel invoice."""
     pkg_dir = __name__.rpartition('.')[0]
     template_path = resource_filename(pkg_dir, 'templates/invoice.xlsx')
     wb = load_workbook(template_path)
     ws = wb.active
-    ws['C1'] = costcenter.upper()
+    ws['C1'] = data['costcenter'].upper()
+    ws['F1'] = data['invoice_id']
     ws['F2'] = datetime.datetime.today().date()
     ws['C7'] = data['project']
     ws['C13'] = data['contact']['name']
