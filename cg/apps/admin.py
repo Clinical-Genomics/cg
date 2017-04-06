@@ -40,7 +40,7 @@ class Application(api.AdminDatabase):
         """Pass-through to the original API function."""
         return export_report_api(self, case_data)
 
-    def price(self, app_tag, app_tag_version, priority, costcenter=None):
+    def price(self, app_tag, app_tag_version, priority, discount=None):
         """Get the price for a sample from the database."""
         version_obj = (self.ApplicationTagVersion.join(models.ApplicationTagVersion.apptag)
                            .filter(models.ApplicationTagVersion.version == app_tag_version,
@@ -48,16 +48,18 @@ class Application(api.AdminDatabase):
         if version_obj:
             log.info("getting price from: %s (%s)", version_obj.apptag.name, version_obj.version)
             full_price = getattr(version_obj, "price_{}".format(priority))
-            if costcenter == 'kth':
-                return full_price * (version_obj.percent_kth / 100)
-            elif costcenter == 'ki':
-                return full_price * ((1 - version_obj.percent_kth) / 100)
-            else:
-                return full_price
+            discount_factor = ((100 - discount) / 100) if discount else 1
+            prices = dict(
+                kth=full_price * (version_obj.percent_kth / 100) * discount_factor,
+                ki=full_price * ((1 - version_obj.percent_kth) / 100) * discount_factor,
+                full=full_price * discount_factor,
+                discount_factor=discount_factor,
+            )
+            return prices
         else:
             return None
 
-    def invoice(self, customer_id, costcenter='kth'):
+    def invoice(self, customer_id):
         """Get invoice information about a customer."""
         customer_obj = self.customer(customer_id)
         data = dict(
@@ -67,7 +69,6 @@ class Application(api.AdminDatabase):
                 email=customer_obj.invoice_contact.email,
             ),
             reference=customer_obj.invoice_reference,
-            project=getattr(customer_obj, "project_account_{}".format(costcenter)),
             agreement=customer_obj.agreement_registration,
             address=customer_obj.invoice_address,
         )
@@ -80,7 +81,6 @@ class Application(api.AdminDatabase):
             customer=customer_obj,
             invoice_id=invoice_data['invoice_id'],
             invoiced_at=datetime.date.today(),
-            costcenter=invoice_data['costcenter'],
         )
         new_invoice.data = invoice_data
         invoice_obj = self.Invoice.save(new_invoice)
