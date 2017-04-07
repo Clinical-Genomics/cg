@@ -4,9 +4,10 @@ import hashlib
 import logging
 
 import click
-from cglims.exc import MissingLimsDataException, MultipleCustomersError
+from cglims.exc import MissingLimsDataException
 
 from cg import apps
+from cg.exc import MultipleCustomersError
 
 log = logging.getLogger(__name__)
 COSTCENTERS = ['kth', 'ki']
@@ -41,7 +42,7 @@ def generate_invoice(lims_api, admin_db, lims_samples, discount=None):
     """Generate an invoice from a list of samples."""
     lims_data = apps.lims.invoice(lims_samples)
     invoice_data = admin_db.invoice(lims_data['customer_id'])
-    invoice_data['samples'] = lims_data['samples']
+    invoice_data.update(lims_data)
 
     hash_factory = hashlib.sha256()
     sample_list = [sample_data['lims_id'] for sample_data in invoice_data['samples']]

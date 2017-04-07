@@ -4,11 +4,13 @@ import logging
 from dateutil.parser import parse as parse_date
 from cglims import api
 from cglims.config import basic_config
-from cglims.exc import MissingLimsDataException, MultipleCustomersError
+from cglims.exc import MissingLimsDataException
 from cglims.export import export_case
 from cglims.panels import convert_panels
 from cglims.check import check_sample, process_samples
 from genologics.entities import Process
+
+from cg.exc import MultipleCustomersError
 
 log = logging.getLogger(__name__)
 config = basic_config
