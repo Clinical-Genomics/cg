@@ -124,5 +124,6 @@ def invoice_process(lims_api, process_id):
     data = dict(
         lims_samples=[data['sample'] for data in lims_data],
         discount=float(lims_process.udf['Discount (%)']),
+        lims_process=lims_process,
     )
     return data

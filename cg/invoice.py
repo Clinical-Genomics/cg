@@ -36,6 +36,8 @@ def invoice(context, process_id):
 
     new_invoice = admin_db.add_invoice(invoice_data)
     log.info("prepared new invoice: %s", new_invoice.invoice_id)
+    lims_data['lims_process'].udf['Invoice reference'] = new_invoice.invoice_id
+    lims_data['lims_process'].put()
 
 
 def generate_invoice(lims_api, admin_db, lims_samples, discount=None):
