@@ -7,7 +7,6 @@ import click
 from cglims.exc import MissingLimsDataException
 
 from cg import apps
-from .render import render_xlsx
 
 log = logging.getLogger(__name__)
 COSTCENTERS = ['kth', 'ki']
@@ -15,27 +14,6 @@ COSTCENTERS = ['kth', 'ki']
 
 class MismatchingCustomersError(Exception):
     pass
-
-
-# @click.command()
-# @click.option('-c', '--costcenter', type=click.Choice(COSTCENTERS), default='kth')
-# @click.option('-o', '--out', 'xlsx_path', type=click.Path(), required=True)
-# @click.option('-d', '--discount', type=float, help='Discount price for each sample')
-# @click.argument('customer_id')
-# @click.argument('sample_ids', nargs=-1)
-# @click.pass_context
-# def invoice(context, costcenter, xlsx_path, discount, customer_id, sample_ids):
-#     """Generate invoice for a set of samples for a customer."""
-#     lims_api = apps.lims.connect(context.obj)
-#     admin_db = apps.admin.Application(context.obj)
-
-#     lims_samples = [lims_api.sample(sample_id) for sample_id in sample_ids]
-#     try:
-#         generate_invoice(lims_api, admin_db, customer_id, lims_samples, costcenter, xlsx_path,
-#                          discount=discount)
-#     except MismatchingCustomersError as error:
-#         log.error(error.message)
-#         context.abort()
 
 
 @click.command()
@@ -89,9 +67,3 @@ def generate_invoice(lims_api, admin_db, customer_id, lims_samples, discount=Non
         data['prices'] = admin_db.price(data['application_tag'], data['application_tag_version'],
                                         data['priority'], discount=discount)
     return invoice_data
-
-
-def make_invoice(invoice_data, out_path):
-    """Generate Excel invoice file."""
-    workbook = render_xlsx(invoice_data)
-    workbook.save(out_path)
