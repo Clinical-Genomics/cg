@@ -4,7 +4,7 @@ import hashlib
 import logging
 
 import click
-from cglims.exc import MissingLimsDataException
+from cglims.exc import MissingLimsDataException, MultipleCustomersError
 
 from cg import apps
 
@@ -12,15 +12,10 @@ log = logging.getLogger(__name__)
 COSTCENTERS = ['kth', 'ki']
 
 
-class MismatchingCustomersError(Exception):
-    pass
-
-
 @click.command()
-@click.option('-c', '--customer', 'customer_id')
 @click.argument('process_id')
 @click.pass_context
-def invoice(context, customer_id, process_id):
+def invoice(context, process_id):
     """Generate invoices from a LIMS process."""
     log.debug("connecting to databases")
     lims_api = apps.lims.connect(context.obj)
@@ -29,17 +24,12 @@ def invoice(context, customer_id, process_id):
     log.info("getting invoice data from process")
     lims_data = apps.lims.invoice_process(lims_api, process_id)
 
-    customer_id = customer_id or lims_data['customer_id']
-    if customer_id is None:
-        log.error('You need to provide a customer for the invoice')
-        context.abort()
-
     log.info("generate invoice data from LIMS and cgadmin")
     lims_samples = lims_data['lims_samples']
     try:
-        invoice_data = generate_invoice(lims_api, admin_db, customer_id, lims_samples, discount=lims_data['discount'])
-        invoice_data['customer_id'] = customer_id
-    except (MismatchingCustomersError, MissingLimsDataException) as error:
+        invoice_data = generate_invoice(lims_api, admin_db, lims_samples,
+                                        discount=lims_data['discount'])
+    except (MultipleCustomersError, MissingLimsDataException) as error:
         log.error(error.message)
         context.abort()
 
@@ -47,10 +37,11 @@ def invoice(context, customer_id, process_id):
     log.info("prepared new invoice: %s", new_invoice.invoice_id)
 
 
-def generate_invoice(lims_api, admin_db, customer_id, lims_samples, discount=None):
+def generate_invoice(lims_api, admin_db, lims_samples, discount=None):
     """Generate an invoice from a list of samples."""
-    invoice_data = admin_db.invoice(customer_id)
-    invoice_data['samples'] = apps.lims.invoice(lims_samples)
+    lims_data = apps.lims.invoice(lims_samples)
+    invoice_data = admin_db.invoice(lims_data['customer_id'])
+    invoice_data['samples'] = lims_data['samples']
 
     hash_factory = hashlib.sha256()
     sample_list = [sample_data['lims_id'] for sample_data in invoice_data['samples']]
@@ -60,10 +51,6 @@ def generate_invoice(lims_api, admin_db, customer_id, lims_samples, discount=Non
 
     for data in invoice_data['samples']:
         log.debug("including sample: %s", data['lims_id'])
-        if data['customer'] != customer_id:
-            message = "mismatching customer: %s - %s", data['lims_id'], data['customer']
-            raise MismatchingCustomersError(message)
-        log.info("working on sample: %s", data['lims_id'])
         data['prices'] = admin_db.price(data['application_tag'], data['application_tag_version'],
                                         data['priority'], discount=discount)
     return invoice_data

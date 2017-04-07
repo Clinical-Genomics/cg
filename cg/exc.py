@@ -3,3 +3,7 @@
 
 class MissingFileError(Exception):
     pass
+
+
+class MultipleCustomersError(Exception):
+    pass

@@ -4,7 +4,7 @@ import logging
 from dateutil.parser import parse as parse_date
 from cglims import api
 from cglims.config import basic_config
-from cglims.exc import MissingLimsDataException
+from cglims.exc import MissingLimsDataException, MultipleCustomersError
 from cglims.export import export_case
 from cglims.panels import convert_panels
 from cglims.check import check_sample, process_samples
@@ -89,13 +89,14 @@ def export(lims_api, customer_id, family_id):
 
 def invoice(lims_samples):
     """Fetch information about invoicing."""
+    customers = set()
     samples = []
     for lims_sample in lims_samples:
         sample_date = parse_date(lims_sample.date_received)
         try:
+            customers.add(lims_sample.udf['customer'])
             data = dict(
                 lims_id=lims_sample.id,
-                customer=lims_sample.udf['customer'],
                 date=sample_date.date(),
                 application_tag=lims_sample.udf['Sequencing Analysis'],
                 application_tag_version=int(lims_sample.udf['Application Tag Version']),
@@ -107,7 +108,10 @@ def invoice(lims_samples):
             message = "Missing UDF value: {} - {}".format(lims_sample.id, error.message)
             raise MissingLimsDataException(message)
         samples.append(data)
-    return samples
+
+    if len(customers) > 1:
+        raise MultipleCustomersError(customers)
+    return dict(samples=samples, customer_id=customers.pop())
 
 
 def invoice_process(lims_api, process_id):
@@ -117,7 +121,6 @@ def invoice_process(lims_api, process_id):
 
     data = dict(
         lims_samples=[data['sample'] for data in lims_data],
-        customer_id=lims_process.udf.get('customer'),
         discount=float(lims_process.udf['Discount (%)']),
     )
     return data
