@@ -51,7 +51,7 @@ class Application(api.AdminDatabase):
             discount_factor = ((100 - discount) / 100) if discount else 1
             prices = dict(
                 kth=full_price * (version_obj.percent_kth / 100) * discount_factor,
-                ki=full_price * ((1 - version_obj.percent_kth) / 100) * discount_factor,
+                ki=full_price * ((100 - version_obj.percent_kth) / 100) * discount_factor,
                 full=full_price * discount_factor,
                 discount_factor=discount_factor,
             )
