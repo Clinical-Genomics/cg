@@ -17,7 +17,8 @@ def connect(config):
     return tb_db
 
 
-def start_analysis(config, case_info, hg38=False, execute=True, force=False):
+def start_analysis(config, case_info, hg38=False, execute=True, force=False,
+                   skip_validation=False):
     """Start analysis run."""
     tb_db = connect(config)
     customer_id = case_info['customer_id']
@@ -41,9 +42,10 @@ def start_analysis(config, case_info, hg38=False, execute=True, force=False):
     executable = config['trailblazer']['mip_exe']
     email = environ_email()
 
+    flags = [('--qccollect_skip_evaluation', 1)] if skip_validation else None
     process = start_mip(config=global_config, family_id=family_id, ccp=cc_path,
                         executable=executable, email=email, max_gaussian=max_gaussian,
-                        execute=execute)
+                        execute=execute, flags=flags)
 
     if execute:
         process.wait()

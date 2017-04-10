@@ -174,8 +174,13 @@ def start(context, setup, execute, force, hg38, case_id):
         log.info('generate analysis pedigree')
         context.invoke(mip_config, case_id=case_id)
 
+    lims_api = apps.lims.connect(context.obj)
+    is_external = apps.lims.case_is_external(lims_api, case_info['customer_id'],
+                                             case_info['raw']['family_id'])
+
     log.info("start analysis for: %s", case_id)
-    apps.tb.start_analysis(context.obj, case_info, hg38=hg38, force=force, execute=execute)
+    apps.tb.start_analysis(context.obj, case_info, hg38=hg38, force=force, execute=execute,
+                           skip_validation=is_external)
 
 
 @click.command()

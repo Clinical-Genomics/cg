@@ -141,3 +141,18 @@ def validate(lims_api, customer_id, family_name):
             is_low_input=sample.apptag.startswith('WGSLIN'),
         )
     return data
+
+
+def case_is_external(lims_api, customer_id, family_name):
+    """Check if all samples are external for case."""
+    sample_statuses = set()
+    for lims_sample in lims_api.case(customer_id, family_name):
+        sample = api.ClinicalSample(lims_sample)
+        is_external = sample.apptag.is_external
+        log.debug("%s is %s external", sample.sample_id, '' if is_external else 'not')
+        sample_statuses.add(is_external)
+    if len(sample_statuses) == 0:
+        return sample_statuses.pop()
+    else:
+        # mix of internal and external samples
+        return False
