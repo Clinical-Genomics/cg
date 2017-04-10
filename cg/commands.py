@@ -370,3 +370,11 @@ def add(context, force, case_id):
     log.info("marking analysis run as delivered: %s", case_info['raw']['case_id'])
     latest_run.delivered_at = datetime.now()
     hk_db.commit()
+
+
+@click.command()
+@click.pass_context
+def validate(context, case_id):
+    """Validate samples in a case."""
+    chanjo_db = apps.coverage.Coverage(context.obj)
+    chanjo_db.validate(case_id)
