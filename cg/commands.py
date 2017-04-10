@@ -415,10 +415,10 @@ def validate(context, case_id):
             log.debug('WGS sample')
             if lims_data[sample_id]['is_low_input'] and data.mean_coverage < 22.5:
                 log.debug('low input sample')
-                log.error("mean coverage too low: %s < 22.5")
+                log.error("mean coverage too low: %s < 22.5", data.mean_coverage)
                 results.update(['FAIL'])
             elif data.mean_coverage < 26:
-                log.error("mean coverage too low: %s < 26")
+                log.error("mean coverage too low: %s < 26", data.mean_coverage)
                 results.update(['FAIL'])
             else:
                 log.info('coverage OK!')
