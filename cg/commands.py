@@ -347,7 +347,7 @@ def add(context, force, case_id):
     latest_run = check_latest_run(hk_db, context, case_info)
 
     if not force and latest_run.delivered_at:
-        click.echo("Run already delivered: {}".format(latest_run.delivered_at.date()))
+        log.warn("Run already delivered: %s", latest_run.delivered_at.date())
     else:
         log.info("Add coverage")
         context.invoke(coverage, force=force, case_id=case_id)
@@ -371,9 +371,9 @@ def add(context, force, case_id):
             ticket_id = lims_samples[0].project.name
             email.deliver(ticket_id, case_info['raw']['family_id'])
 
-    log.info("marking analysis run as delivered: %s", case_info['raw']['case_id'])
-    latest_run.delivered_at = datetime.now()
-    hk_db.commit()
+        log.info("marking analysis run as delivered: %s", case_info['raw']['case_id'])
+        latest_run.delivered_at = datetime.now()
+        hk_db.commit()
 
 
 @click.command()
