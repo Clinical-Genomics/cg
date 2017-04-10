@@ -19,7 +19,7 @@ def connect(config):
 def latest_run(hk_db, case_id):
     """Get the latest analysis for a case."""
     case_obj = api.case(case_id)
-    if case_obj is None:
+    if case_obj is None or len(case_obj.runs) == 0:
         return None
     return case_obj.runs[0]
 
