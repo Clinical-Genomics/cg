@@ -359,3 +359,14 @@ def add(context, force, case_id):
             context.invoke(visualize, force=force, case_id=case_id)
             log.info("Add delivery report to Scout upload")
             context.invoke(delivery_report, case_id=case_id)
+
+            log.info("sending email about successful delivery")
+            email = apps.email.EMail(context.obj)
+            lims_api = apps.lims.connect(context.obj)
+            lims_samples = lims_api.case(case_info['case_id'])
+            ticket_id = lims_samples[0].project.name
+            email.deliver(ticket_id, case_info['raw']['family_id'])
+
+    log.info("marking analysis run as delivered: %s", case_info['raw']['case_id'])
+    latest_run.delivered_at = datetime.now()
+    hk_db.commit()
