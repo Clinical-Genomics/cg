@@ -127,3 +127,17 @@ def invoice_process(lims_api, process_id):
         lims_process=lims_process,
     )
     return data
+
+
+def validate(lims_api, customer_id, family_name):
+    """Get information used to validate a sample."""
+    data = {}
+    for lims_sample in lims_api.case(customer_id, family_name):
+        sample = api.ClinicalSample(lims_sample)
+        data[sample.sample_id] = dict(
+            is_external=sample.apptag.is_external,
+            is_panel=sample.apptag.is_panel,
+            reads=sample.apptag.reads,
+            is_low_input=sample.apptag.startswith('WGSLIN'),
+        )
+    return data

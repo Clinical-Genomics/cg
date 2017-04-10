@@ -12,18 +12,18 @@ from .omim import OMIM_GENE_IDS
 log = logging.getLogger(__name__)
 
 
-class Coverage(api.chanjo_db):
+class Coverage(api.ChanjoDB):
 
     def __init__(self, config):
         """Connect to the chanjo coverage database."""
         super(Coverage, self).__init__(uri=config['chanjo']['database'])
 
-    def validate(case_id):
+    def validate(self, case_id):
         """Validate samples uploaded in the database."""
-        query = api.query(
+        query = self.query(
             models.Sample,
             func.avg(models.TranscriptStat.mean_coverage).label('mean_coverage'),
-            func.avg(models.TranscriptStat.completeness_15).label('completeness_15'),
+            func.avg(models.TranscriptStat.completeness_10).label('completeness_10'),
         ).join(
             models.TranscriptStat.sample,
             models.TranscriptStat.transcript
@@ -31,12 +31,7 @@ class Coverage(api.chanjo_db):
             models.Sample.group_id == case_id,
             models.Transcript.gene_id.in_(OMIM_GENE_IDS)
         ).group_by(models.TranscriptStat.sample_id)
-
-        for data in query:
-            if data.mean_coverage > 26:
-                log.info("coverage for %s is OK", data.Sample.id)
-            else:
-                log.error("coverage for %s too low: %s", data.Sample.id, data.mean_coverage)
+        return query
 
 
 def connect(config):

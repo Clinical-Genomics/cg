@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from collections import Counter
 import os.path
 from datetime import datetime
 import logging
@@ -355,12 +356,15 @@ def add(context, force, case_id):
         log.info("Add QC metrics")
         context.invoke(qc, force=force, case_id=case_id)
         if admin_db.customer(case_info['customer_id']).scout_access:
+            log.info("Validate quality criteria")
+            context.invoke(validate, case_id=case_id)
+
             log.info("Add case and variants to Scout")
             context.invoke(visualize, force=force, case_id=case_id)
             log.info("Add delivery report to Scout upload")
             context.invoke(delivery_report, case_id=case_id)
 
-            log.info("sending email about successful delivery")
+            log.info("Send email about successful delivery")
             email = apps.email.EMail(context.obj)
             lims_api = apps.lims.connect(context.obj)
             lims_samples = lims_api.case(case_info['case_id'])
@@ -373,8 +377,61 @@ def add(context, force, case_id):
 
 
 @click.command()
+@click.argument('case_id')
 @click.pass_context
 def validate(context, case_id):
     """Validate samples in a case."""
+    case_info = parse_caseid(case_id)
+    lims_api = apps.lims.connect(context.obj)
+    lims_data = apps.lims.validate(lims_api, case_info['customer_id'],
+                                   case_info['raw']['family_id'])
+
     chanjo_db = apps.coverage.Coverage(context.obj)
-    chanjo_db.validate(case_id)
+    coverage_query = chanjo_db.validate(case_id)
+
+    results = Counter()
+    for data in coverage_query:
+        sample_id = data.Sample.id
+        log.info("validating sample: %s", sample_id)
+        if lims_data[sample_id]['is_external']:
+            log.info("external sample, skipping quality checks")
+            results.update(['SKIP'])
+            continue
+        elif lims_data[sample_id]['is_panel']:
+            log.debug("TGA sample")
+            if lims_data[sample_id]['reads'] >= 75e6 and data.completeness_10 < 0.96:
+                log.error("completeness too low: %s < 0.96", data.completeness_10)
+                results.update(['FAIL'])
+            elif lims_data[sample_id]['reads'] >= 30e6 and data.completeness_10 < 0.95:
+                log.error("completeness too low: %s < 0.95", data.completeness_10)
+                results.update(['FAIL'])
+            elif data.completeness_10 < 0.8:
+                log.error("completeness too low: %s < 0.8", data.completeness_10)
+                results.update(['FAIL'])
+            else:
+                log.info('coverage OK!')
+                results.update(['PASS'])
+        else:
+            log.debug('WGS sample')
+            if lims_data[sample_id]['is_low_input'] and data.mean_coverage < 22.5:
+                log.debug('low input sample')
+                log.error("mean coverage too low: %s < 22.5")
+                results.update(['FAIL'])
+            elif data.mean_coverage < 26:
+                log.error("mean coverage too low: %s < 26")
+                results.update(['FAIL'])
+            else:
+                log.info('coverage OK!')
+                results.update(['PASS'])
+
+    samples_no = len(lims_data)
+    skipped_no = results['SKIP'] or 0
+    if skipped_no > 0:
+        log.warn("skipped %s/%s samples", results['SKIP'] or 0, samples_no)
+
+    log.info("passed %s/%s samples", results['PASS'] or 0, samples_no)
+
+    failed_no = results['FAIL'] or 0
+    if failed_no > 0:
+        log.error("failed %s/%s samples", results['FAIL'] or 0, samples_no)
+        context.abort()
