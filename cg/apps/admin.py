@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import division
 import datetime
+import hashlib
 import logging
 
 from cgadmin.store import api, models
@@ -76,6 +77,12 @@ class Application(api.AdminDatabase):
 
     def add_invoice(self, invoice_data):
         """Create a record for an invoice."""
+        hash_factory = hashlib.sha256()
+        sample_list = [sample_data['lims_id'] for sample_data in invoice_data['samples']]
+        samples_str = ''.join(sample_list)
+        hash_factory.update(samples_str.encode())
+        invoice_data['invoice_id'] = hash_factory.hexdigest()[:10]
+
         customer_obj = self.customer(invoice_data['customer_id'])
         new_invoice = models.Invoice(
             customer=customer_obj,
@@ -85,3 +92,20 @@ class Application(api.AdminDatabase):
         new_invoice.data = invoice_data
         invoice_obj = self.Invoice.save(new_invoice)
         return invoice_obj
+
+
+def split_invoice(samples_data, limit=300000):
+    """Split invoice based on a cost limit."""
+    current_slice = []
+    price_sum = 0
+    for sample_data in samples_data:
+        kth_price = sample_data['price']['kth']
+
+        if kth_price + price_sum > limit:
+            yield current_slice
+            current_slice = []
+
+        current_slice.append(sample_data)
+        price_sum += kth_price
+
+    yield current_slice

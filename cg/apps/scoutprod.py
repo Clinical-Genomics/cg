@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
 
-import pymongo
 from pymongo import MongoClient
 
 from scout.adapter import MongoAdapter
