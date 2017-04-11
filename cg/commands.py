@@ -77,7 +77,7 @@ def reruns(context, source='prod'):
         for scout_case in apps.scoutold.get_reruns(scoutold_db):
             case_id = scout_case['_id'].replace('_', '-', 1)
             # lookup requested case in current Scout
-            if apps.scoutprod.get_case(scout_db, case_id):
+            if scout_db.case(case_id=scout_case['_id']):
                 pass
             else:
                 click.echo(case_id)
@@ -102,7 +102,7 @@ def mip_panel(context, print_output, case_id):
     all_panels = apps.lims.convert_panels(case_info['customer_id'], default_panels)
     log.debug("determined panels to use: %s", ', '.join(all_panels))
 
-    adapter = apps.scoutprod.connect_adapter(context.obj)
+    adapter = apps.scoutprod.connect(context.obj)
     bed_lines = apps.scoutprod.export_panels(adapter, all_panels)
 
     if print_output:
@@ -318,7 +318,7 @@ def delivery_report(context, case_id):
     lims_api = apps.lims.connect(context.obj)
     cgstats_db = apps.qc.connect(context.obj)
     admin_db = apps.admin.Application(context.obj)
-    scout_db = apps.scoutprod.connect_adapter(context.obj)
+    scout_db = apps.scoutprod.connect(context.obj)
     case_info = parse_caseid(case_id)
     latest_run = check_latest_run(hk_db, context, case_info)
 
