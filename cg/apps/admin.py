@@ -104,6 +104,7 @@ def split_invoice(samples_data, limit=300000):
         if price_sum + sample_price > limit:
             yield current_slice
             current_slice = []
+            price_sum = 0
 
         current_slice.append(sample_data)
         price_sum += sample_price
