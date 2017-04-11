@@ -99,13 +99,13 @@ def split_invoice(samples_data, limit=300000):
     current_slice = []
     price_sum = 0
     for sample_data in samples_data:
-        kth_price = sample_data['price']['kth']
+        sample_price = sample_data['prices']['kth'] + sample_data['prices']['ki']
 
-        if kth_price + price_sum > limit:
+        if price_sum + sample_price > limit:
             yield current_slice
             current_slice = []
 
         current_slice.append(sample_data)
-        price_sum += kth_price
+        price_sum += sample_price
 
     yield current_slice
