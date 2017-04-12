@@ -302,7 +302,7 @@ def visualize(context, force, threshold, case_id):
             config_data = ruamel.yaml.safe_load(config_stream)
 
         config_data['rank_score_threshold'] = threshold
-        apps.scoutprod.add(scout_db, config_data)
+        apps.scoutprod.add(scout_db, config_data, force=force)
 
         log.info("marking visualize added for case: %s", case_info['raw']['case_id'])
         latest_run.extra.visualizer_date = latest_run.analyzed_at

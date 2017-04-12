@@ -30,13 +30,13 @@ def get_reruns(adapter):
     return adapter.case_collection.find({'rerun_requested': True})
 
 
-def add(scout_db, config_data, threshold=5):
+def add(scout_db, config_data, threshold=5, force=False):
     """Upload variants for an analysis to the database."""
     config_data['rank_score_threshold'] = threshold
     existing_case = scout_db.case(institute_id=config_data['owner'],
                                   display_name=config_data['family'])
     if existing_case:
-        if config_data['analysis_date'] > existing_case['analysis_date']:
+        if force or config_data['analysis_date'] > existing_case['analysis_date']:
             log.info("Updating existing Scout case")
             load_scout(scout_db, config_data, update=True)
         else:
