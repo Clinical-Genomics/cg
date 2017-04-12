@@ -70,12 +70,14 @@ class Application(api.AdminDatabase):
                 ki=dict(
                     name=customer_obj.invoice_contact.name,
                     email=customer_obj.invoice_contact.email,
+                    customer_name=customer_obj.name,
                     reference=customer_obj.invoice_reference,
                     address=customer_obj.invoice_address,
                 ),
                 kth=dict(
                     name=kth_customer.invoice_contact.name,
                     email=kth_customer.invoice_contact.email,
+                    customer_name=kth_customer.name,
                     reference=kth_customer.invoice_reference,
                     address=kth_customer.invoice_address,
                 ),
