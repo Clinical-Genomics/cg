@@ -35,7 +35,7 @@ def add(scout_db, config_data):
     existing_case = scout_db.case(institute_id=config_data['owner'],
                                   display_name=config_data['family'])
     if existing_case:
-        if config_data.get['analysis_date'] > existing_case['analysis_date']:
+        if config_data['analysis_date'] > existing_case['analysis_date']:
             log.info("Updating existing Scout case")
             load_scout(scout_db, config_data, update=True)
         else:
