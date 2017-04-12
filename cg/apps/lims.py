@@ -121,8 +121,24 @@ def invoice_process(lims_api, process_id):
     lims_process = Process(lims_api, id=process_id)
     lims_data = process_samples(lims_process)
 
+    lims_samples = {}
+    for sample_data in lims_data:
+        if sample_data['artifact'].name.startswith('Pool'):
+            lims_artifact = sample_data['artifact']
+            if lims_artifact.id not in lims_samples:
+                lims_sample = sample_data['sample']
+                lims_artifact.date_received = lims_sample.date_received
+                lims_artifact.project = lims_sample.project
+                udf_keys = ['customer', 'Sequencing Analysis', 'Application Tag Version',
+                            'priority']
+                for udf_key in udf_keys:
+                    lims_artifact.udf[udf_key] = lims_sample.udf[udf_key]
+                lims_samples[lims_artifact.id] = lims_artifact
+        else:
+            lims_samples[sample_data['sample'].id] = sample_data['sample']
+
     data = dict(
-        lims_samples=[data['sample'] for data in lims_data],
+        lims_samples=lims_samples.values(),
         discount=float(lims_process.udf['Discount (%)']),
         lims_process=lims_process,
     )
