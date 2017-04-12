@@ -383,13 +383,13 @@ def add(context, force, case_id):
             log.info("Validate quality criteria")
             context.invoke(validate, case_id=case_id)
 
-            log.info("Add observations to local database, loqusdb")
-            context.invoke(observations, case_id=case_id)
-
             log.info("Add case and variants to Scout")
             context.invoke(visualize, force=force, case_id=case_id)
             log.info("Add delivery report to Scout upload")
             context.invoke(delivery_report, case_id=case_id)
+
+            log.info("Add observations to local database, loqusdb")
+            context.invoke(observations, case_id=case_id)
 
             log.info("Send email about successful delivery")
             email = apps.email.EMail(context.obj)
