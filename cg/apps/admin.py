@@ -63,15 +63,24 @@ class Application(api.AdminDatabase):
     def invoice(self, customer_id):
         """Get invoice information about a customer."""
         customer_obj = self.customer(customer_id)
+        kth_customer = self.customer('cust999')
         data = dict(
-            name=customer_obj.name,
+            customer_name=customer_obj.name,
             contact=dict(
-                name=customer_obj.invoice_contact.name,
-                email=customer_obj.invoice_contact.email,
+                ki=dict(
+                    name=customer_obj.invoice_contact.name,
+                    email=customer_obj.invoice_contact.email,
+                    reference=customer_obj.invoice_reference,
+                    address=customer_obj.invoice_address,
+                ),
+                kth=dict(
+                    name=kth_customer.invoice_contact.name,
+                    email=kth_customer.invoice_contact.email,
+                    reference=kth_customer.invoice_reference,
+                    address=kth_customer.invoice_address,
+                ),
             ),
-            reference=customer_obj.invoice_reference,
             agreement=customer_obj.agreement_registration,
-            address=customer_obj.invoice_address,
         )
         return data
 

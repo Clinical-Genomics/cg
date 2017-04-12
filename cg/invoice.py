@@ -40,10 +40,10 @@ def invoice(context, process_id):
         log.info("prepared new invoice: %s", new_invoice.invoice_id)
         invoice_ids.append(new_invoice.invoice_id)
 
-        for sample_data in invoice_data['samples']:
-            lims_sample = lims_api.sample(sample_data['lims_id'])
-            lims_sample.udf['Invoice reference'] = new_invoice.invoice_id
-            lims_sample.put()
+        # for sample_data in invoice_data['samples']:
+        #     lims_sample = lims_api.sample(sample_data['lims_id'])
+        #     lims_sample.udf['Invoice reference'] = new_invoice.invoice_id
+        #     lims_sample.put()
 
     lims_data['lims_process'].udf['Invoice reference'] = ', '.join(invoice_ids)
     lims_data['lims_process'].udf['Invoicing date'] = date.today()
