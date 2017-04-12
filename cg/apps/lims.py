@@ -154,7 +154,7 @@ def start(lims_api, customer_id, family_name):
         log.debug("%s is %s external", sample.sample_id, '' if is_external else 'not')
         is_externals.add(is_external)
 
-        sample_status = sample.udf('Status')
+        sample_status = sample.udf('priority')
         log.debug("%s has status %s", sample.sample_id, sample_status)
         statuses.add(sample_status)
 
