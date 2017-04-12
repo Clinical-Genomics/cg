@@ -7,7 +7,7 @@ from loqusdb.vcf_tools.vcf import (get_file_handle, check_vcf)
 def connect(config):
     """Connect to LoqusDB mongo database."""
     adapter = MongoAdapter()
-    adapter.connect(uri=config['loqusdb']['port'])
+    adapter.connect(uri=config['loqusdb']['uri'])
     return adapter
 
 
