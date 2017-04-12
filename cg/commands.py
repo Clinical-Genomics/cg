@@ -91,7 +91,7 @@ def mip_panel(context, print_output, case_id):
     """Generate an aggregated panel for MIP."""
     case_info = parse_caseid(case_id)
     lims_api = apps.lims.connect(context.obj)
-    samples = lims_api.case(case_info['customer_id'], case_info['family_id'])
+    samples = lims_api.case(case_info['customer_id'], case_info['raw']['family_id'])
 
     # fetch default panels
     default_panels = set()
@@ -372,7 +372,7 @@ def add(context, force, case_id):
             log.info("Send email about successful delivery")
             email = apps.email.EMail(context.obj)
             lims_api = apps.lims.connect(context.obj)
-            lims_samples = lims_api.case(case_info['case_id'])
+            lims_samples = lims_api.case(case_info['customer_id'], case_info['raw']['family_id'])
             ticket_id = lims_samples[0].project.name
             email.deliver(ticket_id, case_info['raw']['family_id'])
 
