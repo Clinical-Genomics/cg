@@ -143,16 +143,26 @@ def validate(lims_api, customer_id, family_name):
     return data
 
 
-def case_is_external(lims_api, customer_id, family_name):
-    """Check if all samples are external for case."""
-    sample_statuses = set()
+def start(lims_api, customer_id, family_name):
+    """Fetch data relevant to starting an analysis."""
+    statuses = set()
+    is_externals = set()
     for lims_sample in lims_api.case(customer_id, family_name):
         sample = api.ClinicalSample(lims_sample)
+
         is_external = sample.apptag.is_external
         log.debug("%s is %s external", sample.sample_id, '' if is_external else 'not')
-        sample_statuses.add(is_external)
-    if len(sample_statuses) == 0:
-        return sample_statuses.pop()
+        is_externals.add(is_external)
+
+        sample_status = sample.udf('Status')
+        log.debug("%s has status %s", sample.sample_id, sample_status)
+        statuses.add(sample_status)
+
+    if len(is_externals) == 0:
+        data = dict(is_external=is_externals.pop())
     else:
         # mix of internal and external samples
-        return False
+        data = dict(is_external=False)
+
+    data['is_prio'] = True if ('express' in statuses) or ('priority' in statuses) else False
+    return data
