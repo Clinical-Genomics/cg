@@ -5,6 +5,7 @@ from datetime import datetime
 import logging
 
 import click
+from loqusdb.exceptions import CaseError, VcfError
 from path import Path
 import ruamel.yaml
 
@@ -341,6 +342,24 @@ def delivery_report(context, case_id):
 
 
 @click.command()
+@click.argument('case_id')
+@click.pass_context
+def observations(context, case_id):
+    """Add observations for a case."""
+    case_info = parse_caseid(case_id)
+    hk_db = apps.hk.connect(context.obj)
+    latest_run = check_latest_run(hk_db, context, case_info)
+    paths = apps.hk.observations(hk_db, latest_run)
+    loqus_db = apps.loqus.connect(context.obj)
+
+    try:
+        apps.loqus.add(loqus_db, paths['ped'], paths['vcf'])
+    except (CaseError, VcfError) as error:
+        log.error(error)
+        context.abort()
+
+
+@click.command()
 @click.option('-f', '--force', is_flag=True, help='skip pre-upload checks')
 @click.argument('case_id')
 @click.pass_context
@@ -363,6 +382,9 @@ def add(context, force, case_id):
         if admin_db.customer(case_info['customer_id']).scout_access:
             log.info("Validate quality criteria")
             context.invoke(validate, case_id=case_id)
+
+            log.info("Add observations to local database, loqusdb")
+            context.invoke(observations, case_id=case_id)
 
             log.info("Add case and variants to Scout")
             context.invoke(visualize, force=force, case_id=case_id)

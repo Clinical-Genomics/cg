@@ -79,6 +79,13 @@ def visualize(hk_db, analysis_obj, madeline_exe, root_path):
     return scout_config.path
 
 
+def observations(hk_db, analysis_obj):
+    """Parse analysis record for uploading to LoqusDB."""
+    existing_ped = api.assets(run_id=analysis_obj.id, category='pedigree').first()
+    existing_vcf = api.assets(run_id=analysis_obj.id, category='vcf-research-bin').first()
+    return dict(ped=existing_ped.path, vcf=existing_vcf.path)
+
+
 def rundir(config, analysis_obj):
     """Get root directory for a run."""
     root_path = get_rundir(config['housekeeper']['root'], analysis_obj.case.name, analysis_obj)
