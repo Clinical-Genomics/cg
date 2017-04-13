@@ -391,12 +391,12 @@ def add(context, force, case_id):
             log.info("Add observations to local database, loqusdb")
             context.invoke(observations, case_id=case_id)
 
-            log.info("Send email about successful delivery")
-            email = apps.email.EMail(context.obj)
-            lims_api = apps.lims.connect(context.obj)
-            lims_samples = lims_api.case(case_info['customer_id'], case_info['raw']['family_id'])
-            ticket_id = lims_samples[0].project.name
-            email.deliver(ticket_id, case_info['raw']['family_id'])
+            # log.info("Send email about successful delivery")
+            # email = apps.email.EMail(context.obj)
+            # lims_api = apps.lims.connect(context.obj)
+            # lims_samples = lims_api.case(case_info['customer_id'], case_info['raw']['family_id'])
+            # ticket_id = lims_samples[0].project.name
+            # email.deliver(ticket_id, case_info['raw']['family_id'])
 
         log.info("marking analysis run as delivered: %s", case_info['raw']['case_id'])
         latest_run.delivered_at = datetime.now()
