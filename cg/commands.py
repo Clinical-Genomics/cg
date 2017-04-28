@@ -184,6 +184,24 @@ def start(context, setup, execute, force, hg38, case_id):
                            prioritize=lims_data['is_prio'])
 
 
+@click.command('auto-start')
+@click.option('--dry-run', is_flag=True, help='skip launching new runs')
+@click.pass_context
+def auto_start(context, dry_run):
+    """Automatically start analysis for sequenced cases."""
+    hk_db = apps.hk.connect(context.obj)
+    tb_db = apps.tb.connect(context.obj)
+    cases = apps.hk.to_analyze(hk_db)
+    for case_obj in cases:
+        log.debug("working on case: %s", case_obj.name)
+        if apps.tb.api.is_running(case_obj.name):
+            log.debug("already running, skipping: %s", case_obj.name)
+        else:
+            log.info("starting case: %s", case_obj.name)
+            if not dry_run:
+                context.invoke(start, case_id=case_obj.name)
+
+
 @click.command()
 @click.option('-f', '--force', is_flag=True, help='skip pre-upload checks')
 @click.argument('case_id')

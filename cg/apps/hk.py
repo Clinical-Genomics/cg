@@ -106,3 +106,9 @@ def add_asset(hk_db, analysis_obj, asset_path, category, archive_type=None, samp
     log.info("add asset: %s", new_asset.path)
     hk_db.commit()
     return new_asset
+
+
+def to_analyze(hk_db):
+    """Fetch cases to be analyzed."""
+    cases_q = api.cases(missing='analyzed')
+    return cases_q
