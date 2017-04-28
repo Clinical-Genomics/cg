@@ -192,10 +192,16 @@ def auto_start(context, dry_run):
     hk_db = apps.hk.connect(context.obj)
     tb_db = apps.tb.connect(context.obj)
     cases = apps.hk.to_analyze(hk_db)
+
     log.info("%s cases can be started", cases.count())
     for case_obj in cases:
         log.debug("working on case: %s", case_obj.name)
-        if apps.tb.api.is_running(case_obj.name):
+
+        if not all(sample_obj.sequenced_at for sample_obj in case_obj.samples):
+            log.warn("all samples not sequenced: %s", case_obj.name)
+        elif len(case_obj.runs) != 0:
+            log.warn("case already analyzed: %s", case_obj.name)
+        elif apps.tb.api.is_running(case_obj.name):
             log.debug("already running, skipping: %s", case_obj.name)
         else:
             log.info("starting case: %s", case_obj.name)
