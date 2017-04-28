@@ -221,21 +221,18 @@ def keep(context):
     analyses = apps.tb.recently_completed(tb_db)
     for analysis_obj in analyses:
         log.debug("working on case: %s", analysis_obj.case_id)
-        hk_analysis = apps.hk.api.runs(case_name=analysis_obj.case_id,
-                                       run_date=analysis_obj.started_at)
-        if hk_analysis.first():
+        try:
+            root_path = context.obj['housekeeper']['root']
+            with open(analysis_obj.config_path, 'r') as in_handle:
+                mip_config_data = ruamel.yaml.safe_load(in_handle)
+            apps.hk.add(hk_db, root_path, mip_config_data)
+            log.info("added case to housekeeper: %s", analysis_obj.case_id)
+        except hk_exc.AnalysisConflictError as error:
             log.debug('analysis already added to housekeeper')
-        else:
-            log.info("add case to housekeeper: %s", analysis_obj.case_id)
-            try:
-                root_path = context.obj['housekeeper']['root']
-                with open(analysis_obj.config_path, 'r') as in_handle:
-                    mip_config_data = ruamel.yaml.safe_load(in_handle)
-                apps.hk.add(hk_db, root_path, mip_config_data)
-            except hk_exc.MalformattedPedigreeError as error:
-                log.error("bad PED formatting: %s", error.message)
-            except hk_exc.AnalysisNotFinishedError as error:
-                log.error("analysis not finished: %s", error.message)
+        except hk_exc.MalformattedPedigreeError as error:
+            log.error("bad PED formatting: %s", error.message)
+        except hk_exc.AnalysisNotFinishedError as error:
+            log.error("analysis not finished: %s", error.message)
 
 
 @click.command()
