@@ -431,8 +431,11 @@ def add(context, force, case_id):
         log.info("Add QC metrics")
         context.invoke(qc, force=force, case_id=case_id)
         if admin_db.customer(case_info['customer_id']).scout_access:
-            log.info("Validate quality criteria")
-            context.invoke(validate, case_id=case_id)
+            if not force:
+                log.info("Validate quality criteria")
+                context.invoke(validate, case_id=case_id)
+            else:
+                log.warn("Skipping quality validation!")
 
             log.info("Add case and variants to Scout")
             context.invoke(visualize, force=force, case_id=case_id)
