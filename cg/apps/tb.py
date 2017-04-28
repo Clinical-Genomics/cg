@@ -18,7 +18,7 @@ def connect(config):
 
 
 def start_analysis(config, case_info, hg38=False, execute=True, force=False,
-                   skip_validation=False, prioritize=False):
+                   skip_validation=False, prioritize=False, email=None):
     """Start analysis run."""
     tb_db = connect(config)
     customer_id = case_info['customer_id']
@@ -40,7 +40,7 @@ def start_analysis(config, case_info, hg38=False, execute=True, force=False,
     global_config = (config['trailblazer']['mip_config_hg38'] if hg38 else
                      config['trailblazer']['mip_config'])
     executable = config['trailblazer']['mip_exe']
-    email = environ_email()
+    email = email or environ_email()
 
     flags = [('--qccollect_skip_evaluation', 1)] if skip_validation else None
     priority = 'high' if prioritize else 'normal'

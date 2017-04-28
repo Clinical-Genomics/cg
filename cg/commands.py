@@ -164,9 +164,10 @@ def check(context, process_id):
 @click.option('--execute/--no-execute', default=True, help='skip running MIP')
 @click.option('-f', '--force', is_flag=True, help='skip pre-analysis checks')
 @click.option('--hg38', is_flag=True, help='run with hg38 settings')
+@click.option('-e', '--email', help='email to send errors to')
 @click.argument('case_id')
 @click.pass_context
-def start(context, setup, execute, force, hg38, case_id):
+def start(context, setup, execute, force, hg38, email, case_id):
     """Start a MIP analysis."""
     case_info = parse_caseid(case_id)
     if setup:
@@ -181,13 +182,14 @@ def start(context, setup, execute, force, hg38, case_id):
     log.info("start analysis for: %s", case_id)
     apps.tb.start_analysis(context.obj, case_info, hg38=hg38, force=force, execute=execute,
                            skip_validation=lims_data['is_external'],
-                           prioritize=lims_data['is_prio'])
+                           prioritize=lims_data['is_prio'], email=email)
 
 
 @click.command('auto-start')
 @click.option('--dry-run', is_flag=True, help='skip launching new runs')
+@click.option('-e', '--email', help='email to send errors to')
 @click.pass_context
-def auto_start(context, dry_run):
+def auto_start(context, dry_run, email):
     """Automatically start analysis for sequenced cases."""
     hk_db = apps.hk.connect(context.obj)
     tb_db = apps.tb.connect(context.obj)
@@ -206,7 +208,7 @@ def auto_start(context, dry_run):
         else:
             log.info("starting case: %s", case_obj.name)
             if not dry_run:
-                context.invoke(start, case_id=case_obj.name)
+                context.invoke(start, case_id=case_obj.name, email=email)
 
 
 @click.command()
