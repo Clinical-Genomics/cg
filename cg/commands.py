@@ -192,6 +192,7 @@ def auto_start(context, dry_run):
     hk_db = apps.hk.connect(context.obj)
     tb_db = apps.tb.connect(context.obj)
     cases = apps.hk.to_analyze(hk_db)
+    log.info("%s cases can be started", cases.count())
     for case_obj in cases:
         log.debug("working on case: %s", case_obj.name)
         if apps.tb.api.is_running(case_obj.name):

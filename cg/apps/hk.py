@@ -110,5 +110,5 @@ def add_asset(hk_db, analysis_obj, asset_path, category, archive_type=None, samp
 
 def to_analyze(hk_db):
     """Fetch cases to be analyzed."""
-    cases_q = api.cases(missing='analyzed')
+    cases_q = api.cases(missing='analyzed', onhold=False)
     return cases_q
