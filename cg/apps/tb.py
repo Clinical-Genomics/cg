@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import datetime
 import logging
 
 from trailblazer.store import api
@@ -79,3 +80,11 @@ def case_analysis_type(ped_data):
         return 'wgs'
     else:
         raise ValueError("unknown analysis type: {}".format(analysis_types))
+
+
+def recently_completed(tb_db):
+    """Return recently completed analyses."""
+    today = datetime.date.today()
+    week_ago = today - datetime.timedelta(days=7)
+    analysis_q = api.analyses(since=week_ago, is_ready=True)
+    return analysis_q

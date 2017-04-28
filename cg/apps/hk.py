@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 import logging
+import pkg_resources
 
 from housekeeper.store import api
 from housekeeper.store.utils import get_rundir
 from housekeeper.pipelines.mip4.scout import prepare_scout
+from housekeeper.pipelines.cli import LOADERS, link_records
+from housekeeper.pipelines.general import commit_analysis
+import ruamel.yaml
 
 from cg.exc import MissingFileError
 
@@ -112,3 +116,18 @@ def to_analyze(hk_db):
     """Fetch cases to be analyzed."""
     cases_q = api.cases(missing='analyzed', onhold=False)
     return cases_q
+
+
+def add(hk_db, root_path, analysis_config, pipeline='mip4', force=False):
+    """Add analyses from different pipelines."""
+    default_ref = "pipelines/references/{}.yaml".format(pipeline)
+    references = pkg_resources.resource_string('housekeeper', default_ref)
+    reference_data = ruamel.yaml.safe_load(references)
+    loader = LOADERS[pipeline]
+    data = loader(analysis_config, reference_data, force=force)
+    records = link_records(data)
+    case_name = records['case'].name
+    commit_analysis(hk_db, root_path, records['case'], records['run'])
+    log.info("added new analysis: %s", case_name)
+    sample_ids = ', '.join(sample.lims_id for sample in records['run'].samples)
+    log.info("including samples: %s", sample_ids)

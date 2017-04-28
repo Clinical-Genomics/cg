@@ -6,6 +6,7 @@ import logging
 
 import click
 from loqusdb.exceptions import CaseError, VcfError
+from housekeeper import exc as hk_exc
 from path import Path
 import ruamel.yaml
 
@@ -209,6 +210,32 @@ def auto_start(context, dry_run, email):
             log.info("starting case: %s", case_obj.name)
             if not dry_run:
                 context.invoke(start, case_id=case_obj.name, email=email)
+
+
+@click.command()
+@click.pass_context
+def keep(context):
+    """Add recently completed analyses to Housekeeper."""
+    tb_db = apps.tb.connect(context.obj)
+    hk_db = apps.hk.connect(context.obj)
+    analyses = apps.tb.recently_completed(tb_db)
+    for analysis_obj in analyses:
+        log.debug("working on case: %s", analysis_obj.case_id)
+        hk_analysis = apps.hk.api.runs(case_name=analysis_obj.case_id,
+                                       run_date=analysis_obj.started_at)
+        if hk_analysis.first():
+            log.debug('analysis already added to housekeeper')
+        else:
+            log.info("add case to housekeeper: %s", analysis_obj.case_id)
+            try:
+                root_path = context.obj['housekeeper']['root']
+                with open(analysis_obj.config_path, 'r') as in_handle:
+                    mip_config_data = ruamel.yaml.safe_load(in_handle)
+                apps.hk.add(hk_db, root_path, mip_config_data)
+            except hk_exc.MalformattedPedigreeError as error:
+                log.error("bad PED formatting: %s", error.message)
+            except hk_exc.AnalysisNotFinishedError as error:
+                log.error("analysis not finished: %s", error.message)
 
 
 @click.command()
