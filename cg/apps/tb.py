@@ -85,6 +85,6 @@ def case_analysis_type(ped_data):
 def recently_completed(tb_db):
     """Return recently completed analyses."""
     today = datetime.date.today()
-    week_ago = today - datetime.timedelta(days=7)
+    week_ago = today - datetime.timedelta(days=3)
     analysis_q = api.analyses(since=week_ago, is_ready=True)
     return analysis_q
