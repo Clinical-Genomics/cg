@@ -200,7 +200,7 @@ def auto_start(context, dry_run, email, force, running):
 
     log.info("%s cases can be started", cases.count())
     for case_obj in cases:
-        analyses_running = apps.tb.analyses_running
+        analyses_running = apps.tb.analyses_running()
         if not force and analyses_running >= running:
             log.warn("already %s analyses running, pausing", analyses_running)
             break
