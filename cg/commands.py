@@ -189,8 +189,9 @@ def start(context, setup, execute, force, hg38, email, case_id):
 @click.command('auto-start')
 @click.option('--dry-run', is_flag=True, help='skip launching new runs')
 @click.option('-e', '--email', help='email to send errors to')
+@click.option('-f', '--force', is_flag=True, help='start more than 20 runs')
 @click.pass_context
-def auto_start(context, dry_run, email):
+def auto_start(context, dry_run, email, force):
     """Automatically start analysis for sequenced cases."""
     hk_db = apps.hk.connect(context.obj)
     tb_db = apps.tb.connect(context.obj)
@@ -198,6 +199,11 @@ def auto_start(context, dry_run, email):
 
     log.info("%s cases can be started", cases.count())
     for case_obj in cases:
+        analyses_running = apps.tb.analyses_running
+        if not force and analyses_running >= 20:
+            log.warn("already %s analyses running, pausing", analyses_running)
+            break
+
         log.debug("working on case: %s", case_obj.name)
 
         if not all(sample_obj.sequenced_at for sample_obj in case_obj.samples):

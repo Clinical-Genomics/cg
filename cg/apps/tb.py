@@ -88,3 +88,8 @@ def recently_completed(tb_db):
     week_ago = today - datetime.timedelta(days=3)
     analysis_q = api.analyses(since=week_ago, is_ready=True)
     return analysis_q
+
+
+def analyses_running(tb_db):
+    running_q = api.analyses(status=['pending', 'running'])
+    return running_q.count()
