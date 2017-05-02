@@ -209,7 +209,10 @@ def auto_start(context, dry_run, email):
         else:
             log.info("starting case: %s", case_obj.name)
             if not dry_run:
-                context.invoke(start, case_id=case_obj.name, email=email)
+                try:
+                    context.invoke(start, case_id=case_obj.name, email=email)
+                except ValueError as error:
+                    log.error(error.args[0])
 
 
 @click.command()
