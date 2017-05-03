@@ -213,6 +213,8 @@ def auto_start(context, dry_run, email, force, running):
             log.warn("case already analyzed: %s", case_obj.name)
         elif apps.tb.api.is_running(case_obj.name):
             log.debug("already running, skipping: %s", case_obj.name)
+        elif apps.tb.is_failed(tb_db, case_obj.name):
+            log.debug("latest run has failed, skipping: %s", case_obj.name)
         else:
             log.info("starting case: %s", case_obj.name)
             if not dry_run:
