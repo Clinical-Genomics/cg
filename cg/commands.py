@@ -432,6 +432,7 @@ def add(context, force, case_id):
     """Uplaod analysis results (latest) to various databases."""
     hk_db = apps.hk.connect(context.obj)
     admin_db = apps.admin.Application(context.obj)
+    tb_db = apps.tb.connect(context.obj)
     case_info = parse_caseid(case_id)
     latest_run = check_latest_run(hk_db, context, case_info)
 
@@ -469,6 +470,18 @@ def add(context, force, case_id):
         log.info("marking analysis run as delivered: %s", case_info['raw']['case_id'])
         latest_run.delivered_at = datetime.now()
         hk_db.commit()
+
+        log.info("commenting on run log in trailblazer")
+        analysis_log = (apps.tb.api.Analysis.query
+                            .filter_by(case_id=case_info['raw']['case_id'],
+                                       started_at=latest_run.analyzed_at)
+                            .first())
+        if analysis_log:
+            message = 'analysis delivered! /cg'
+            if analysis_log.comment:
+                analysis_log.comment = "{}\n\n{}".format(message, analysis_log.comment)
+            else:
+                analysis_log.comment = message
 
 
 @click.command()
