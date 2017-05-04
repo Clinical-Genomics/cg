@@ -222,6 +222,8 @@ def auto_start(context, dry_run, email, force, running):
                     context.invoke(start, case_id=case_obj.name, email=email)
                 except ValueError as error:
                     log.error(error.args[0])
+                except KeyError as error:
+                    log.error("error creating config, sample: {}".format(error.args[0]))
 
 
 @click.command()
