@@ -482,6 +482,7 @@ def add(context, force, case_id):
                 analysis_log.comment = "{}\n\n{}".format(message, analysis_log.comment)
             else:
                 analysis_log.comment = message
+            tb_db.commit()
 
 
 @click.command()
