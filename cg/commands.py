@@ -418,7 +418,7 @@ def observations(context, case_id):
     loqus_db = apps.loqus.connect(context.obj)
 
     try:
-        apps.loqus.add(loqus_db, paths['ped'], paths['vcf'])
+        apps.loqus.add(loqus_db, paths['ped'], paths['vcf'], case_id=case_id)
     except (CaseError, VcfError) as error:
         log.error(error)
         context.abort()

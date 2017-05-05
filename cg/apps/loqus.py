@@ -11,7 +11,7 @@ def connect(config):
     return adapter
 
 
-def add(adapter, ped_path, vcf_path):
+def add(adapter, ped_path, vcf_path, case_id):
     """Add observations from a VCF."""
     variant_handle = get_file_handle(vcf_path)
     nr_variants = check_vcf(variant_handle)
@@ -22,6 +22,7 @@ def add(adapter, ped_path, vcf_path):
         family_type='ped',
         gq_treshold=20,
         nr_variants=nr_variants,
+        case_id=case_id,
     )
 
     return dict(variants=nr_variants, inserted=nr_inserted)
