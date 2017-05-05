@@ -206,15 +206,16 @@ def auto_start(context, dry_run, email, force, running):
             break
 
         log.debug("working on case: %s", case_obj.name)
-
         if not all(sample_obj.sequenced_at for sample_obj in case_obj.samples):
             log.warn("all samples not sequenced: %s", case_obj.name)
         elif len(case_obj.runs) != 0:
             log.warn("case already analyzed: %s", case_obj.name)
         elif apps.tb.api.is_running(case_obj.name):
             log.debug("already running, skipping: %s", case_obj.name)
-        elif apps.tb.is_failed(tb_db, case_obj.name):
+        elif apps.tb.latest_status(tb_db, case_obj.name, 'failed'):
             log.debug("latest run has failed, skipping: %s", case_obj.name)
+        elif apps.tb.latest_status(tb_db, case_obj.name, 'completed'):
+            log.debug("latest run completed, skipping: %s", case_obj.name)
         else:
             log.info("starting case: %s", case_obj.name)
             if not dry_run:

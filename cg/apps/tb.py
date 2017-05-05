@@ -95,12 +95,12 @@ def analyses_running(tb_db):
     return running_q.count()
 
 
-def is_failed(tb_db, case_name):
+def latest_status(tb_db, case_name, status):
     """Check if the latest run of a case has failed."""
     latest_case_run = api.analyses(analysis_id=case_name).first()
     if latest_case_run is None:
         return False
-    elif latest_case_run.status == 'failed':
+    elif latest_case_run.status == status:
         return True
     else:
         return False
