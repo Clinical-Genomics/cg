@@ -47,7 +47,7 @@ setup(
         'requests',
         'genotype>=2.1.0',
         'genologics',
-        'scout>=3.0.7',
+        'scout-browser>=3.0.7',
     ],
     classifiers=[
         'Programming Language :: Python',
