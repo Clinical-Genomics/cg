@@ -55,7 +55,7 @@ def report(scout_db, customer_id, family_id, report_path):
         return None
 
     updated_case = scout_db.case_collection.find_one_and_update(
-        {'_id': case_obj['case_id']},
+        {'_id': case_obj['_id']},
         {'$set': {'delivery_report': report_path}},
         return_document=pymongo.ReturnDocument.AFTER
     )
