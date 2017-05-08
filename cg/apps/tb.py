@@ -43,7 +43,7 @@ def start_analysis(config, case_info, hg38=False, execute=True, force=False,
     executable = config['trailblazer']['mip_exe']
     email = email or environ_email()
 
-    flags = [('--qccollect_skip_evaluation', 1)] if skip_validation else None
+    flags = [('--qccollect_skip_evaluation', '1')] if skip_validation else None
     priority = 'high' if prioritize else 'normal'
     process = start_mip(config=global_config, family_id=family_id, ccp=cc_path,
                         executable=executable, email=email, max_gaussian=max_gaussian,
