@@ -174,7 +174,7 @@ def start(lims_api, customer_id, family_name):
         log.debug("%s has status %s", sample.sample_id, sample_status)
         statuses.add(sample_status)
 
-    if len(is_externals) == 0:
+    if len(is_externals) == 1:
         data = dict(is_external=is_externals.pop())
     else:
         # mix of internal and external samples
