@@ -423,11 +423,15 @@ def observations(context, case_id):
     paths = apps.hk.observations(hk_db, latest_run)
     loqus_db = apps.loqus.connect(context.obj)
 
-    try:
-        apps.loqus.add(loqus_db, paths['ped'], paths['vcf'], case_id=case_id)
-    except (CaseError, VcfError) as error:
-        log.error(error)
-        context.abort()
+    existing_case = loqus_db.case(dict(case_id=case_id))
+    if existing_case:
+        log.warn("found existing case - skipping: %s", case_id)
+    else:
+        try:
+            apps.loqus.add(loqus_db, paths['ped'], paths['vcf'], case_id=case_id)
+        except (CaseError, VcfError) as error:
+            log.error(error)
+            context.abort()
 
 
 @click.command()
