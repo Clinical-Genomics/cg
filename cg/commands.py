@@ -425,7 +425,7 @@ def observations(context, case_id):
 
     existing_case = loqus_db.case(dict(case_id=case_id))
     if existing_case:
-        log.warn("found existing case - skipping: %s", case_id)
+        log.warn("found observations for existing case - skipping: %s", case_id)
     else:
         try:
             apps.loqus.add(loqus_db, paths['ped'], paths['vcf'], case_id=case_id)
