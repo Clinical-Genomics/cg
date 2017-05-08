@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from collections import Counter
+from collections import Counter, namedtuple
 import os.path
 from datetime import datetime
 import logging
@@ -14,6 +14,7 @@ from . import apps
 from .utils import parse_caseid, check_latest_run
 
 log = logging.getLogger(__name__)
+FakeAnalysis = namedtuple('FakeAnalysis', ['case_id', 'config_path'])
 
 
 def check_root(context, case_info):
@@ -228,12 +229,16 @@ def auto_start(context, dry_run, email, force, running):
 
 
 @click.command()
+@click.argument('mip_config_path', type=click.Path(exists=True), required=False)
 @click.pass_context
-def keep(context):
+def keep(context, mip_config_path):
     """Add recently completed analyses to Housekeeper."""
     tb_db = apps.tb.connect(context.obj)
     hk_db = apps.hk.connect(context.obj)
-    analyses = apps.tb.recently_completed(tb_db)
+    if mip_config_path:
+        analyses = [FakeAnalysis(os.path.basename(mip_config_path), mip_config_path)]
+    else:
+        analyses = apps.tb.recently_completed(tb_db)
     for analysis_obj in analyses:
         log.debug("working on case: %s", analysis_obj.case_id)
         try:
