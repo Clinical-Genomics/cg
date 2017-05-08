@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import coloredlogs
-
 import click
 import click_completion
 import crayons
