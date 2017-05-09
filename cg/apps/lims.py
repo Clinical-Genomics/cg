@@ -182,3 +182,12 @@ def start(lims_api, customer_id, family_name):
 
     data['is_prio'] = True if ('express' in statuses) or ('priority' in statuses) else False
     return data
+
+
+def keep_visualisation(lims_api, customer_id, family_name):
+    """Check if one of the samples indicate old upload should be saved."""
+    for lims_sample in lims_api.case(customer_id, family_name):
+        if lims_sample.udf.get('keep vis') == 'yes':
+            return True
+
+    return False

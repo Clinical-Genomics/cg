@@ -355,6 +355,7 @@ def visualize(context, force, threshold, case_id):
     """Add data to Scout for an analysis run (latest)."""
     hk_db = apps.hk.connect(context.obj)
     scout_db = apps.scoutprod.connect(context.obj)
+    lims_api = apps.lims.connect(context.obj)
     case_info = parse_caseid(case_id)
     latest_run = check_latest_run(hk_db, context, case_info)
 
@@ -373,7 +374,9 @@ def visualize(context, force, threshold, case_id):
             config_data = ruamel.yaml.safe_load(config_stream)
 
         config_data['rank_score_threshold'] = threshold
-        apps.scoutprod.add(scout_db, config_data, force=force)
+        keep_old = apps.lims.keep_visualisation(lims_api, case_info['customer_id'],
+                                                case_info['family_id'])
+        apps.scoutprod.add(scout_db, config_data, force=force, keep_old=keep_old)
 
         log.info("marking visualize added for case: %s", case_info['raw']['case_id'])
         latest_run.extra.visualizer_date = latest_run.analyzed_at

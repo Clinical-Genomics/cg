@@ -30,13 +30,28 @@ def get_reruns(adapter):
     return adapter.case_collection.find({'rerun_requested': True})
 
 
-def add(scout_db, config_data, threshold=5, force=False):
+def add(scout_db, config_data, threshold=5, force=False, keep_old=False):
     """Upload variants for an analysis to the database."""
     config_data['rank_score_threshold'] = threshold
-    existing_case = scout_db.case(institute_id=config_data['owner'],
-                                  display_name=config_data['family'])
+    if keep_old:
+        # find the latest version
+        for index in range(2, 10):
+            new_family_name = "{}-{}".format(config_data['family'], index)
+            some_case = scout_db.case(institute_id=config_data['owner'],
+                                      display_name=new_family_name)
+            if some_case is None:
+                break
+            else:
+                existing_case = some_case
+    else:
+        existing_case = scout_db.case(institute_id=config_data['owner'],
+                                      display_name=config_data['family'])
     if existing_case:
-        if force or config_data['analysis_date'] > existing_case['analysis_date']:
+        if keep_old and config_data['analysis_date'] > existing_case['analysis_date']:
+            config_data['family'] = new_family_name
+            log.info("Addding a new analysis to existing case: %s", new_family_name)
+            load_scout(scout_db, config_data)
+        elif force or config_data['analysis_date'] > existing_case['analysis_date']:
             log.info("Updating existing Scout case")
             load_scout(scout_db, config_data, update=True)
         else:
