@@ -36,7 +36,7 @@ def add(scout_db, config_data, threshold=5, force=False, keep_old=False):
     if keep_old:
         # find the latest version
         for index in range(2, 10):
-            new_family_name = "{}-{}".format(config_data['family'], index)
+            new_family_name = "{}--{}".format(config_data['family'], index)
             some_case = scout_db.case(institute_id=config_data['owner'],
                                       display_name=new_family_name)
             if some_case is None:
