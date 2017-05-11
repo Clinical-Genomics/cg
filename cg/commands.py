@@ -467,6 +467,9 @@ def add(context, force, case_id):
 
             log.info("Add case and variants to Scout")
             context.invoke(visualize, force=force, case_id=case_id)
+            log.info("commenting on run log in trailblazer")
+            apps.tb.log_upload(tb_db, case_info['raw']['case_id'], latest_run.analyzed_at)
+
             log.info("Add delivery report to Scout upload")
             context.invoke(delivery_report, case_id=case_id)
 
@@ -483,19 +486,6 @@ def add(context, force, case_id):
         log.info("marking analysis run as delivered: %s", case_info['raw']['case_id'])
         latest_run.delivered_at = datetime.now()
         hk_db.commit()
-
-        log.info("commenting on run log in trailblazer")
-        analysis_log = (apps.tb.api.Analysis.query
-                            .filter_by(case_id=case_info['raw']['case_id'],
-                                       started_at=latest_run.analyzed_at)
-                            .first())
-        if analysis_log:
-            message = 'analysis delivered! /cg'
-            if analysis_log.comment:
-                analysis_log.comment = "{}\n\n{}".format(message, analysis_log.comment)
-            else:
-                analysis_log.comment = message
-            tb_db.commit()
 
 
 @click.command()

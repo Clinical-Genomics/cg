@@ -104,3 +104,16 @@ def latest_status(tb_db, case_name, status):
         return True
     else:
         return False
+
+
+def log_upload(tb_db, case_id, analyzed_at):
+    """Log message about upload to delivery server."""
+    analysis_q = api.Analysis.query.filter_by(case_id=case_id, started_at=analyzed_at)
+    analysis_log = analysis_q.first()
+    if analysis_log:
+        message = 'analysis delivered! /cg'
+        if analysis_log.comment:
+            analysis_log.comment = "{}\n\n{}".format(message, analysis_log.comment)
+        else:
+            analysis_log.comment = message
+        tb_db.commit()
