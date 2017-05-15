@@ -428,24 +428,23 @@ def observations(context, force, case_id):
     paths = apps.hk.observations(hk_db, latest_run)
     loqus_db = apps.loqus.connect(context.obj)
 
-    external_case = apps.lims.is_external_case(lims_api, case_info['customer_id'],
-                                               case_info['family_id'])
-    if not force and external_case:
+    if not latest_run.pipeline_version.startswith('v4'):
+        log.warning("unsupported MIP version - skipping: %s", latest_run.pipeline_version)
+    elif loqus_db.case(dict(case_id=case_id)):
+        log.warn("found observations for existing case - skipping: %s", case_id)
+    elif not force and apps.lims.is_external_case(lims_api, case_info['customer_id'],
+                                                  case_info['family_id']):
         log.warning("case contains external samples - skipping unless '--force'")
     else:
-        existing_case = loqus_db.case(dict(case_id=case_id))
-        if existing_case:
-            log.warn("found observations for existing case - skipping: %s", case_id)
-        else:
-            try:
-                apps.loqus.add(loqus_db, paths['ped'], paths['vcf'], case_id=case_id)
-            except (CaseError, VcfError) as error:
-                log.error(error)
-                context.abort()
+        try:
+            apps.loqus.add(loqus_db, paths['ped'], paths['vcf'], case_id=case_id)
+        except (CaseError, VcfError) as error:
+            log.error(error)
+            context.abort()
 
-            log.info("marking frequency added for case: %s", case_info['raw']['case_id'])
-            latest_run.extra.frequency_date = latest_run.analyzed_at
-            hk_db.commit()
+        log.info("marking frequency added for case: %s", case_info['raw']['case_id'])
+        latest_run.extra.frequency_date = latest_run.analyzed_at
+        hk_db.commit()
 
 
 @click.command()
