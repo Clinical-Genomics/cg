@@ -416,25 +416,36 @@ def delivery_report(context, case_id):
 
 
 @click.command()
+@click.option('-f', '--force', is_flag=True, help='skip check if samples are external')
 @click.argument('case_id')
 @click.pass_context
-def observations(context, case_id):
+def observations(context, force, case_id):
     """Add observations for a case."""
     case_info = parse_caseid(case_id)
     hk_db = apps.hk.connect(context.obj)
+    lims_api = apps.lims.connect(context.obj)
     latest_run = check_latest_run(hk_db, context, case_info)
     paths = apps.hk.observations(hk_db, latest_run)
     loqus_db = apps.loqus.connect(context.obj)
 
-    existing_case = loqus_db.case(dict(case_id=case_id))
-    if existing_case:
-        log.warn("found observations for existing case - skipping: %s", case_id)
+    external_case = apps.lims.is_external_case(lims_api, case_info['customer_id'],
+                                               case_info['family_id'])
+    if not force and external_case:
+        log.warning("case contains external samples - skipping unless '--force'")
     else:
-        try:
-            apps.loqus.add(loqus_db, paths['ped'], paths['vcf'], case_id=case_id)
-        except (CaseError, VcfError) as error:
-            log.error(error)
-            context.abort()
+        existing_case = loqus_db.case(dict(case_id=case_id))
+        if existing_case:
+            log.warn("found observations for existing case - skipping: %s", case_id)
+        else:
+            try:
+                apps.loqus.add(loqus_db, paths['ped'], paths['vcf'], case_id=case_id)
+            except (CaseError, VcfError) as error:
+                log.error(error)
+                context.abort()
+
+            log.info("marking frequency added for case: %s", case_info['raw']['case_id'])
+            latest_run.extra.frequency_date = latest_run.analyzed_at
+            hk_db.commit()
 
 
 @click.command()

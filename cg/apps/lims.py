@@ -191,3 +191,19 @@ def keep_visualisation(lims_api, customer_id, family_name):
             return True
 
     return False
+
+
+def is_external_case(lims_api, customer_id, family_name):
+    """Check if some sample in a case is external."""
+    is_externals = set()
+    for lims_sample in lims_api.case(customer_id, family_name):
+        sample = api.ClinicalSample(lims_sample)
+        is_external = sample.apptag.is_external
+        log.debug("%s is %s external", sample.sample_id, '' if is_external else 'not')
+        is_externals.add(is_external)
+
+    if len(is_externals) == 1:
+        return is_externals.pop()
+    else:
+        # mix of internal and external samples
+        return False
