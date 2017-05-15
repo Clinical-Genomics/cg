@@ -131,3 +131,13 @@ def add(hk_db, root_path, analysis_config, pipeline='mip4', force=False):
     log.info("added new analysis: %s", case_name)
     sample_ids = ', '.join(sample.lims_id for sample in records['run'].samples)
     log.info("including samples: %s", sample_ids)
+
+
+def mark_started(hk_db, case_name):
+    """Mark case as started in database."""
+    case_obj = api.case(case_name)
+    if case_obj:
+        case_obj.is_started = True
+        hk_db.commit()
+    else:
+        log.warning("case not found in housekeeper: %s", case_name)

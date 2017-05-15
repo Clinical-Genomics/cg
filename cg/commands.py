@@ -178,6 +178,7 @@ def start(context, setup, execute, force, hg38, email, case_id):
         log.info('generate analysis pedigree')
         context.invoke(mip_config, case_id=case_id)
 
+    hk_db = apps.hk.connect(context.obj)
     lims_api = apps.lims.connect(context.obj)
     lims_data = apps.lims.start(lims_api, case_info['customer_id'], case_info['raw']['family_id'])
 
@@ -185,6 +186,9 @@ def start(context, setup, execute, force, hg38, email, case_id):
     apps.tb.start_analysis(context.obj, case_info, hg38=hg38, force=force, execute=execute,
                            skip_validation=lims_data['is_external'],
                            prioritize=lims_data['is_prio'], email=email)
+
+    log.info("mark case as running in housekeeper: %s", case_id)
+    apps.hk.mark_started(hk_db, case_id)
 
 
 @click.command('auto-start')
