@@ -41,6 +41,10 @@ def add(cgstats_db, case_id, qc_stream, sampleinfo_stream, force=False):
 def sequencing_status(cgstats_db, samples_data):
     """Update sample data from cgstats."""
     for sample_id, sample_data in samples_data.items():
+        if samples_data.get('sequenced_at'):
+            log.debug("sequence date already filled in")
+            continue
+
         log.info("calculating if sample is sequenced: %s", sample_id)
         query = api.get_sample(sample_id)
         try:

@@ -215,13 +215,21 @@ def case_status(lims_api, customer_id, family_name):
     lims_samples = lims_api.case(customer_id, family_name)
     active_samples = relevant_samples(lims_samples)
     for lims_sample in active_samples:
-        log.info("fetch LIMS data for sample: %s", lims_sample.id)
-        received_date = lims_api.get_received_date(lims_sample.id)
         sample_obj = api.ClinicalSample(lims_sample)
+        if sample_obj.apptag.is_external:
+            log.debug("external sample, use project open date")
+            received_date = (parse_date(lims_sample.date_received)
+                             if lims_sample.date_received else None)
+        else:
+            log.info("fetch LIMS data for sample: %s", lims_sample.id)
+            received_date = lims_api.get_received_date(lims_sample.id)
+
         samples_data[sample_obj.sample_id] = {
             'received_at': received_date,
+            'sequenced_at': received_date if sample_obj.apptag.is_external else None,
             'priority': sample_obj.udf('priority') in ('express', 'priority'),
             'category': sample_obj.apptag.category,
             'expected_reads': sample_obj.expected_reads,
+            'external': sample_obj.apptag.is_external,
         }
     return samples_data
