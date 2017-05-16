@@ -3,7 +3,7 @@ import logging
 
 from dateutil.parser import parse as parse_date
 from cglims import api
-from cglims.config import basic_config
+from cglims.config import basic_config, relevant_samples
 from cglims.exc import MissingLimsDataException
 from cglims.export import export_case
 from cglims.panels import convert_panels
@@ -212,7 +212,9 @@ def is_external_case(lims_api, customer_id, family_name):
 def case_status(lims_api, customer_id, family_name):
     """Fetch status data about samples in a case."""
     samples_data = {}
-    for lims_sample in lims_api.case(customer_id, family_name):
+    lims_samples = lims_api.case(customer_id, family_name)
+    active_samples = relevant_samples(lims_samples)
+    for lims_sample in active_samples:
         log.info("fetch LIMS data for sample: %s", lims_sample.id)
         received_date = lims_api.get_received_date(lims_sample.id)
         sample_obj = api.ClinicalSample(lims_sample)

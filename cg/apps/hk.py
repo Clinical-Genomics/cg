@@ -2,7 +2,7 @@
 import logging
 import pkg_resources
 
-from housekeeper.store import api
+from housekeeper.store import api, Case, Sample
 from housekeeper.store.utils import get_rundir
 from housekeeper.pipelines.mip4.scout import prepare_scout
 from housekeeper.pipelines.cli import LOADERS, link_records
@@ -143,11 +143,21 @@ def mark_started(hk_db, case_name):
         log.warning("case not found in housekeeper: %s", case_name)
 
 
-def update_case(hk_db, samples_data):
+def update_case(hk_db, case_id, customer_id, family_name, samples_data):
     """Update status of samples in a case."""
+    case_obj = api.case(case_id)
+    if case_obj is None:
+        case_obj = Case(name=case_id, customer=customer_id, family_id=family_name)
+        hk_db.add(case_obj)
+        log.info("added new case: %s", case_id)
+
     for sample_id, sample_data in samples_data.items():
         log.info("updating info for: %s", sample_id)
         sample_obj = api.sample(sample_id)
+        if sample_obj is None:
+            sample_obj = Sample(lims_id=sample_id)
+            case_obj.samples.append(sample_obj)
+
         if sample_obj.priority != sample_data['priority']:
             log.info("updating priority: %s -> %s", sample_obj.priority, sample_data['priority'])
             sample_obj.priority = sample_data['priority']
