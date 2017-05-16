@@ -218,7 +218,7 @@ def case_status(lims_api, customer_id, family_name):
         samples_data[sample_obj.sample_id] = {
             'received_at': received_date,
             'priority': sample_obj.udf('priority') in ('express', 'priority'),
-            'category': sample_obj.category,
+            'category': sample_obj.apptag.category,
             'expected_reads': sample_obj.expected_reads,
         }
     return samples_data
