@@ -141,3 +141,17 @@ def mark_started(hk_db, case_name):
         hk_db.commit()
     else:
         log.warning("case not found in housekeeper: %s", case_name)
+
+
+def update_case(hk_db, samples_data):
+    """Update status of samples in a case."""
+    for sample_id, sample_data in samples_data.items():
+        log.info("updating info for: %s", sample_id)
+        sample_obj = api.sample(sample_id)
+        sample_obj.priority = sample_data['priority']
+        sample_obj.category = sample_data['category']
+        sample_obj.received_at = sample_data['received_at']
+        if sample_obj.sequenced_at is None:
+            sample_obj.sequenced_at = sample_data['sequenced_at']
+
+    hk_db.commit()

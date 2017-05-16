@@ -124,10 +124,23 @@ def mip_panel(context, print_output, case_id):
 @click.argument('case_id')
 @click.pass_context
 def update(context, answered_out, case_id):
-    """Fill in information in Housekeeper."""
+    """Fill in information in Housekeeper.
+
+    SAMPLE:
+    - cglims: lims_id, received at, priority, category
+    - cgstats: sequenced at
+    - genotype: confirmed at
+    """
+    case_info = parse_caseid(case_id)
+    hk_db = apps.hk.connect(context.obj)
+    lims_api = apps.lims.connect(context.obj)
+    cgstats_db = apps.qc.connect(context.obj)
+    samples_data = apps.lims.case_status(lims_api, case_info['customer_id'],
+                                         case_info['family_id'])
+    apps.qc.sequencing_status(cgstats_db, samples_data)
+    apps.hk.update_case(hk_db, samples_data)
+
     if answered_out:
-        hk_db = apps.hk.connect(context.obj)
-        lims_api = apps.lims.connect(context.obj)
         log.debug("get case from housekeeper")
         hk_case = apps.hk.api.case(case_id)
         log.debug("loop over related samples from most recent run")

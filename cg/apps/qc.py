@@ -35,3 +35,19 @@ def add(cgstats_db, case_id, qc_stream, sampleinfo_stream, force=False):
         new_analysis = process_all(case_id, sampleinfo, metrics)
         log.info("adding analysis: %s", new_analysis.analysis_id)
         cgstats_db.add_commit(new_analysis)
+
+
+def sequencing_status(cgstats_db, samples_data):
+    """Update sample data from cgstats."""
+    for sample_id, sample_data in samples_data.items():
+        query = api.get_sample(sample_id)
+        sample_obj = query.one()
+
+        # fetch number of reads
+        reads = sum(unaligned.readcounts for unaligned in sample_obj.unaligned)
+        if reads < sample_data['expected_reads']:
+            sample_data['sequenced_at'] = None
+        else:
+            sorted_dates = sorted(unaligned.demux.datasource.rundate for unaligned
+                                  in sample_obj.unaligned)
+            sample_data['sequenced_at'] = sorted_dates[-1]

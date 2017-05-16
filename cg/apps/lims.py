@@ -207,3 +207,18 @@ def is_external_case(lims_api, customer_id, family_name):
     else:
         # mix of internal and external samples
         return False
+
+
+def case_status(lims_api, customer_id, family_name):
+    """Fetch status data about samples in a case."""
+    samples_data = {}
+    for lims_sample in lims_api.case(customer_id, family_name):
+        received_date = lims_api.get_received_date(lims_sample.id)
+        sample_obj = api.ClinicalSample(lims_sample)
+        samples_data[sample_obj.sample_id] = {
+            'received_at': received_date,
+            'priority': sample_obj.udf('priority') in ('express', 'priority'),
+            'category': sample_obj.category,
+            'expected_reads': sample_obj.expected_reads,
+        }
+    return samples_data
