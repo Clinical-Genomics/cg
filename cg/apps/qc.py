@@ -7,6 +7,7 @@ from clinstatsdb.analysis.export import export_run
 from clinstatsdb.analysis.mip import process_all
 from clinstatsdb.analysis.models import Analysis
 import ruamel.yaml
+from sqlalchemy.orm.exc import NoResultFound
 
 log = logging.getLogger(__name__)
 
@@ -42,7 +43,12 @@ def sequencing_status(cgstats_db, samples_data):
     for sample_id, sample_data in samples_data.items():
         log.info("calculating if sample is sequenced: %s", sample_id)
         query = api.get_sample(sample_id)
-        sample_obj = query.one()
+        try:
+            sample_obj = query.one()
+        except NoResultFound as error:
+            log.warning("sample not found in cgstats: %s", sample_id)
+            sample_data['sequenced_at'] = None
+            continue
 
         # fetch number of reads
         reads = sum(unaligned.readcounts for unaligned in sample_obj.unaligned)
