@@ -156,7 +156,8 @@ def update_case(hk_db, samples_data):
             log.info("updating category: %s -> %s", sample_obj.priority, sample_data['priority'])
             sample_obj.category = sample_data['category']
 
-        if sample_obj.received_at.date() != sample_data['received_at']:
+        new_date = sample_obj.received_at is None and sample_data['received_at']
+        if new_date or (sample_obj.received_at.date() != sample_data['received_at']):
             log.info("updating received: %s -> %s", sample_obj.received_at,
                      sample_data['received_at'])
             sample_obj.received_at = sample_data['received_at']
