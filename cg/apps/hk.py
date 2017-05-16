@@ -174,7 +174,7 @@ def update_case(hk_db, case_id, customer_id, family_name, samples_data):
                      sample_data['received_at'])
             sample_obj.received_at = sample_data['received_at']
 
-        if sample_obj.sequenced_at is None:
+        if sample_obj.sequenced_at is None and sample_data['sequenced_at']:
             log.info("sample sequenced at %s!", sample_data['sequenced_at'])
             sample_obj.sequenced_at = sample_data['sequenced_at']
 
