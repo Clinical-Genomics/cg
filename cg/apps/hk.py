@@ -148,10 +148,21 @@ def update_case(hk_db, samples_data):
     for sample_id, sample_data in samples_data.items():
         log.info("updating info for: %s", sample_id)
         sample_obj = api.sample(sample_id)
-        sample_obj.priority = sample_data['priority']
-        sample_obj.category = sample_data['category']
-        sample_obj.received_at = sample_data['received_at']
+        if sample_obj.priority != sample_data['priority']:
+            log.info("updating priority: %s -> %s", sample_obj.priority, sample_data['priority'])
+            sample_obj.priority = sample_data['priority']
+
+        if sample_obj.category != sample_data['category']:
+            log.info("updating category: %s -> %s", sample_obj.priority, sample_data['priority'])
+            sample_obj.category = sample_data['category']
+
+        if sample_obj.received_at != sample_data['received_at']:
+            log.info("updating received: %s -> %s", sample_obj.received_at,
+                     sample_data['received_at'])
+            sample_obj.received_at = sample_data['received_at']
+
         if sample_obj.sequenced_at is None:
+            log.info("sample sequenced at %s!", sample_data['sequenced_at'])
             sample_obj.sequenced_at = sample_data['sequenced_at']
 
     hk_db.commit()

@@ -213,6 +213,7 @@ def case_status(lims_api, customer_id, family_name):
     """Fetch status data about samples in a case."""
     samples_data = {}
     for lims_sample in lims_api.case(customer_id, family_name):
+        log.info("fetch LIMS data for sample: %s", lims_sample.id)
         received_date = lims_api.get_received_date(lims_sample.id)
         sample_obj = api.ClinicalSample(lims_sample)
         samples_data[sample_obj.sample_id] = {

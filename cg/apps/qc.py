@@ -40,6 +40,7 @@ def add(cgstats_db, case_id, qc_stream, sampleinfo_stream, force=False):
 def sequencing_status(cgstats_db, samples_data):
     """Update sample data from cgstats."""
     for sample_id, sample_data in samples_data.items():
+        log.info("calculating if sample is sequenced: %s", sample_id)
         query = api.get_sample(sample_id)
         sample_obj = query.one()
 
