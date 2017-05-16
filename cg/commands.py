@@ -138,7 +138,8 @@ def update(context, answered_out, case_id):
     samples_data = apps.lims.case_status(lims_api, case_info['customer_id'],
                                          case_info['family_id'])
     apps.qc.sequencing_status(cgstats_db, samples_data)
-    apps.hk.update_case(hk_db, case_info['customer_id'], case_info['family_id'], samples_data)
+    apps.hk.update_case(hk_db, case_id, case_info['customer_id'], case_info['family_id'],
+                        samples_data)
 
     if answered_out:
         log.debug("get case from housekeeper")

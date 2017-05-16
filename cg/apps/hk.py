@@ -157,6 +157,7 @@ def update_case(hk_db, case_id, customer_id, family_name, samples_data):
         if sample_obj is None:
             sample_obj = Sample(lims_id=sample_id)
             case_obj.samples.append(sample_obj)
+            log.info("added new sample: %s", sample_id)
 
         if sample_obj.priority != sample_data['priority']:
             log.info("updating priority: %s -> %s", sample_obj.priority, sample_data['priority'])
