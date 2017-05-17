@@ -467,9 +467,10 @@ def observations(context, force, case_id):
 
 @click.command()
 @click.option('-f', '--force', is_flag=True, help='skip pre-upload checks')
+@click.option('--no-validation', is_flag=True, help='skip validation step')
 @click.argument('case_id')
 @click.pass_context
-def add(context, force, case_id):
+def add(context, force, no_validation, case_id):
     """Uplaod analysis results (latest) to various databases."""
     hk_db = apps.hk.connect(context.obj)
     admin_db = apps.admin.Application(context.obj)
@@ -487,11 +488,11 @@ def add(context, force, case_id):
         log.info("Add QC metrics")
         context.invoke(qc, force=force, case_id=case_id)
         if admin_db.customer(case_info['customer_id']).scout_access:
-            if not force:
+            if force or no_validation:
+                log.warn("Skipping quality validation!")
+            else:
                 log.info("Validate quality criteria")
                 context.invoke(validate, case_id=case_id)
-            else:
-                log.warn("Skipping quality validation!")
 
             log.info("Add case and variants to Scout")
             context.invoke(visualize, force=force, case_id=case_id)
