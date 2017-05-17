@@ -112,8 +112,9 @@ def log_upload(tb_db, case_id, analyzed_at):
     analysis_log = analysis_q.first()
     if analysis_log:
         message = 'analysis delivered! /cg'
-        if analysis_log.comment:
-            analysis_log.comment = "{}\n\n{}".format(message, analysis_log.comment)
-        else:
+        if not analysis_log.comment:
             analysis_log.comment = message
+        elif message not in analysis_log.comment:
+            analysis_log.comment = "{}\n\n{}".format(message, analysis_log.comment)
+
         tb_db.commit()
