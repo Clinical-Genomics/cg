@@ -295,7 +295,8 @@ def coverage(context, force, case_id):
                 log.warn("removing existing sample: %s", chanjo_sample.id)
                 apps.coverage.delete(chanjo_db, chanjo_sample)
 
-            lims_sample = lims_api.sample(sample_data['sample_id'])
+            sample_id = sample_data['sample_id']
+            lims_sample = lims_api.sample(sample_id, is_cgid=sample_id[0].isdigit())
             log.info("adding coverage for sample: %s", sample_data['sample_id'])
             with open(sample_data['bed_path']) as bed_stream:
                 apps.coverage.add(
