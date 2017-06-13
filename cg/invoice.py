@@ -4,10 +4,10 @@ from datetime import date
 import logging
 
 import click
-from cglims.exc import MissingLimsDataException
 
 from cg import apps
 from cg.exc import MultipleCustomersError
+from cg.apps.lims import MissingLimsDataException
 
 log = logging.getLogger(__name__)
 COSTCENTERS = ['kth', 'ki']

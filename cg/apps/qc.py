@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 import logging
 
-from clinstatsdb.db import api
-from clinstatsdb.analysis.cli import test_analysis
-from clinstatsdb.analysis.export import export_run
-from clinstatsdb.analysis.mip import process_all
-from clinstatsdb.analysis.models import Analysis
+from cgstats.db import api
+from cgstats.analysis.cli import test_analysis
+from cgstats.analysis.export import export_run
+from cgstats.analysis.mip import process_all
+from cgstats.analysis.models import Analysis
 import ruamel.yaml
 from sqlalchemy.orm.exc import NoResultFound
 
