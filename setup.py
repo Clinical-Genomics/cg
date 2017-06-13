@@ -48,6 +48,10 @@ setup(
         'genotype>=2.1.0',
         'genologics',
         'scout-browser>=3.0.7',
+        'Flask-Restful',
+        'Flask-SQLService',
+        'webargs',
+        'Flask-CORS',
     ],
     classifiers=[
         'Programming Language :: Python',
