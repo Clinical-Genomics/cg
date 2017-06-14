@@ -49,6 +49,13 @@ sample_filter_args = {**pagination_args, **dict(
 )}
 
 
+@app.route('/')
+def index():
+    """Public index page."""
+    return """<h1>Welcome to Clinical Genomics!</h1>
+              Go to <a href="/info">/info</a> for more information!"""
+
+
 @app.route('/info')
 def api_info():
     """Display general API info."""
