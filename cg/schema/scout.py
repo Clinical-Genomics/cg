@@ -3,7 +3,7 @@ from copy import deepcopy
 
 from . import base, constants
 
-schema_sample = deepcopy(base.schema_base_sample)
+schema_sample = deepcopy(base.schema_sample)
 sample_properties = {
     "sex": {
         "enum": constants.SEXES
