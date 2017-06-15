@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 import os
 
-from flask import abort, Flask
+from flask import abort, Flask, jsonify
 from flask_restful import Resource, Api
 from flask_sqlservice import FlaskSQLService
 from flask_cors import CORS
 from webargs import fields
 from webargs.flaskparser import use_args
 
+from cg.schema import PROJECT_SCHEMAS
 from cg.store import models
 from cg.store.actions import ActionsHandler
 from cg.store.mutations import MutationsHandler
@@ -46,6 +47,35 @@ user_filter_args = dict(
 sample_filter_args = {**pagination_args, **dict(
     sequence=fields.Bool()
 )}
+
+
+@app.route('/')
+def index():
+    """Public index page."""
+    return """<h1>Welcome to Clinical Genomics!</h1>
+              Go to <a href="/info">/info</a> for more information!"""
+
+
+@app.route('/info')
+def api_info():
+    """Display general API info."""
+    return jsonify(**dict(
+        name='Clinical Genomics API',
+        version='1',
+        api_spec=dict(
+            help='View API spec for submitting projects using: /info/<project_type>',
+            project_types=list(PROJECT_SCHEMAS),
+        )
+    ))
+
+
+@app.route('/info/<project_type>')
+def api_spec(project_type):
+    """Display API spec for project types."""
+    project_schema = PROJECT_SCHEMAS.get(project_type)
+    if project_schema is None:
+        return abort(404, message="Project type '{}' not found".format(project_type))
+    return jsonify(**project_schema)
 
 
 class User(Resource):
