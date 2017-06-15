@@ -66,7 +66,7 @@ schema_sample = {
             "pattern": "^[A-Z]:[1-9]{1,2}$"
         },
         "quantity": {
-            "type": "number"
+            "type": "string"
         },
         "comment": {
             "type": "string"
