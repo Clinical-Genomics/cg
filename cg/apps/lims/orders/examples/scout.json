@@ -1,0 +1,43 @@
+{
+    "name": "Klinisk WGS 3",
+    "customer": "cust003",
+    "families": [{
+        "name": "17081",
+        "panels": ["EP"],
+        "priority": "standard",
+        "require_qcok": true,
+        "samples": [{
+            "name": "17081-II-1U",
+            "application_tag": "WGTPCFC030",
+            "container": "96 well plate",
+            "container_name": "CMMS",
+            "well_position": "A:1",
+            "quantity": "2200",
+            "sex": "male",
+            "source": "blood",
+            "status": "unaffected",
+        }, {
+            "name": "17081-II-2U",
+            "application_tag": "WGTPCFC030",
+            "container": "96 well plate",
+            "container_name": "CMMS",
+            "well_position": "B:1",
+            "quantity": "2200",
+            "sex": "female",
+            "source": "blood",
+            "status": "unaffected",
+        }, {
+            "name": "17081-I-2A",
+            "application_tag": "WGTPCFC030",
+            "container": "96 well plate",
+            "container_name": "CMMS",
+            "well_position": "E:1",
+            "father": "17081-II-1U",
+            "mother": "17081-II-2U",
+            "quantity": "2200",
+            "sex": "female",
+            "source": "blood",
+            "status": "affected",
+        }]
+    }]
+}
