@@ -52,6 +52,7 @@ setup(
         'Flask-SQLService',
         'webargs',
         'Flask-CORS',
+        'cgstats',
     ],
     classifiers=[
         'Programming Language :: Python',

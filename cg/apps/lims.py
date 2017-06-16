@@ -3,17 +3,15 @@ import logging
 
 from dateutil.parser import parse as parse_date
 from cglims import api
-from cglims.config import basic_config, relevant_samples
+from cglims.config import AnalysisConfig
 from cglims.exc import MissingLimsDataException
-from cglims.export import export_case
-from cglims.panels import convert_panels
+from cglims.export import ExportSamples
 from cglims.check import check_sample, process_samples
 from genologics.entities import Process
 
 from cg.exc import MultipleCustomersError
 
 log = logging.getLogger(__name__)
-config = basic_config
 
 
 def connect(config):
@@ -25,8 +23,8 @@ def case_sexes(lims_api, customer_id, family_name):
     """Fetch sample sex information from LIMS."""
     sample_sex = {}
     for lims_sample in lims_api.case(customer_id, family_name):
-        sample_data = api.ClinicalSample(lims_sample).to_dict()
-        sample_sex[sample_data['sample_id']] = sample_data['sex']
+        sample_data = api.Sample(lims_sample)
+        sample_sex[sample_data.get('old_id', sample_data['id'])] = sample_data['sex']
     return sample_sex
 
 
@@ -65,7 +63,7 @@ def process_to_samples(lims_api, process_id):
 def check_config(lims_api, customer_id, family_id):
     """Check generation of pedigree config."""
     try:
-        config_data = config(lims_api, customer_id, family_id)
+        config_data = AnalysisConfig(lims_api)(customer_id, family_id)
     except MissingLimsDataException as error:
         log.error(error.args[0])
         return {'success': False, 'message': error.args[0]}
@@ -84,8 +82,8 @@ def check_config(lims_api, customer_id, family_id):
 
 
 def export(lims_api, customer_id, family_id):
-    lims_samples = lims_api.case(customer_id, family_id)
-    case_data = export_case(lims_api, lims_samples)
+    export_case = ExportSamples(lims_api)
+    case_data = export_case(customer_id, family_id)
     return case_data
 
 
@@ -197,9 +195,10 @@ def is_external_case(lims_api, customer_id, family_name):
     """Check if some sample in a case is external."""
     is_externals = set()
     for lims_sample in lims_api.case(customer_id, family_name):
-        sample = api.ClinicalSample(lims_sample)
-        is_external = sample.apptag.is_external
-        log.debug("%s is %s external", sample.sample_id, '' if is_external else 'not')
+        sample_obj = api.Sample(lims_sample)
+        is_external = sample_obj.apptag.is_external
+        sample_id = sample_obj.get('old_id', sample_obj['id'])
+        log.debug("%s is %s external", sample_id, '' if is_external else 'not')
         is_externals.add(is_external)
 
     if len(is_externals) == 1:
@@ -213,9 +212,11 @@ def case_status(lims_api, customer_id, family_name):
     """Fetch status data about samples in a case."""
     samples_data = {}
     lims_samples = lims_api.case(customer_id, family_name)
-    active_samples = relevant_samples(lims_samples)
-    for lims_sample in active_samples:
-        sample_obj = api.ClinicalSample(lims_sample)
+    for lims_sample in lims_samples:
+        sample_obj = api.Sample(lims_sample)
+        if not sample_obj.to_analysis:
+            log.debug("skipping inactive sample: %s", sample_obj['id'])
+            continue
         if sample_obj.apptag.is_external:
             log.debug("external sample, use project open date")
             received_date = (parse_date(lims_sample.date_received)

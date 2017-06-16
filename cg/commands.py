@@ -47,7 +47,7 @@ def mip_config(context, print_output, case_id):
 
     log.debug("get config data: %s", case_info['case_id'])
     lims_api = apps.lims.connect(context.obj)
-    data = apps.lims.config(lims_api, case_info['customer_id'], case_info['family_id'])
+    data = apps.lims.AnalysisConfig(lims_api)(case_info['customer_id'], case_info['family_id'])
 
     if case_info['extra']:
         log.info("update config with suffix: %s", case_info['extra'])
