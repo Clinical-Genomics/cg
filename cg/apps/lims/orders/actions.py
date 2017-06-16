@@ -11,13 +11,33 @@ log = logging.getLogger(__name__)
 CONTAINER_TYPE_MAP = {'Tube': 2, '96 well plate': 1}
 
 
-class LimsProject():
+class LimsProject(object):
+
+    """Submit a new LIMS project.
+
+    Args:
+        lims_api (ClinicalLims): LIMS connection
+    """
 
     def __init__(self, lims_api):
         self.lims = lims_api
 
     def __call__(self, project_data, researcher_id='3'):
-        """Submit an order."""
+        """Submit a new order.
+
+        You can submit using any of the supported project types:
+
+            - fastq
+            - external
+            - scout
+
+        Args:
+            project_data (dict): project order data dict
+            researcher_id (Optional[str]): id of research to link to the order
+
+        Returns:
+            genologics.entities.Project: new LIMS project instance
+        """
         lims_data = self.prepare(project_data, researcher_id)
         lims_project = self.submit(lims_data)
         return lims_project
@@ -49,17 +69,6 @@ class LimsProject():
                 lims_sample = self._save_sample(raw_sample, lims_container, position)
                 log.info("created new LIMS sample: %s -> %s", lims_sample.name, lims_sample.id)
         return lims_project
-
-    def _save_sample(self, instance, container, position):
-        """Create an instance of Sample from attributes then post it to the LIMS"""
-        location = ElementTree.SubElement(instance.root, 'location')
-        ElementTree.SubElement(location, 'container', dict(uri=container.uri))
-        position_element = ElementTree.SubElement(location, 'value')
-        position_element.text = position
-        data = self.lims.tostring(ElementTree.ElementTree(instance.root))
-        instance.root = self.lims.post(uri=self.lims.get_uri(Sample._URI), data=data)
-        instance._uri = instance.root.attrib['uri']
-        return instance
 
     @classmethod
     def prepare(cls, project_data, researcher_id):
@@ -119,13 +128,6 @@ class LimsProject():
             new_data['samples'].append(sample_data)
         return new_data
 
-    @classmethod
-    def prepare_scout(cls, project_data):
-        """Prepare input for a Scout project order."""
-        new_data = cls.populate_family(project_data)
-        lims_data = cls.prepare(new_data)
-        return lims_data
-
     @staticmethod
     def group_containers(samples):
         """Group samples by containers."""
@@ -144,3 +146,14 @@ class LimsProject():
             else:
                 raise ValueError(f"unknown container type: {sample_data['container']}")
         return tubes, plates
+
+    def _save_sample(self, instance, container, position):
+        """Create an instance of Sample from attributes then post it to the LIMS"""
+        location = ElementTree.SubElement(instance.root, 'location')
+        ElementTree.SubElement(location, 'container', dict(uri=container.uri))
+        position_element = ElementTree.SubElement(location, 'value')
+        position_element.text = position
+        data = self.lims.tostring(ElementTree.ElementTree(instance.root))
+        instance.root = self.lims.post(uri=self.lims.get_uri(Sample._URI), data=data)
+        instance._uri = instance.root.attrib['uri']
+        return instance
