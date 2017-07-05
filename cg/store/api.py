@@ -1,12 +1,20 @@
 # -*- coding: utf-8 -*-
-from sqlservice import SQLClient
+import alchy
 
-from .actions import ActionsHandler
-from .models import Model
-from .mutations import MutationsHandler
+from . import models
 
 
-class Store(SQLClient, MutationsHandler, ActionsHandler):
+class BaseHandler:
 
-    def __init__(self, db_uri):
-        super(Store, self).__init__({'SQL_DATABASE_URI': db_uri}, model_class=Model)
+    User = models.User
+    Customer = models.Customer
+    Family = models.Family
+    Sample = models.Sample
+    Flowcell = models.Flowcell
+    Analysis = models.Analysis
+
+
+class Store(alchy.Manager, BaseHandler):
+
+    def __init__(self, uri):
+        super(Store, self).__init__(config=dict(SQLALCHEMY_DATABASE_URI=uri), Model=models.Model)
