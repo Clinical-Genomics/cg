@@ -22,5 +22,5 @@ def base(context, config, database, log_level):
         context.obj['database'] = database
 
 
-@base.add_command(analyze)
-@base.add_command(store)
+base.add_command(analyze)
+base.add_command(store)
