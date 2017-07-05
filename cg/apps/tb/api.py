@@ -11,7 +11,7 @@ class TrailblazerAPI(Store, AddHandler):
 
     def __init__(self, config):
         super(TrailblazerAPI, self).__init__(config['trailblazer']['database'])
-        self.mip = MipCli(config['trailblazer']['script'])
+        self.mip_cli = MipCli(config['trailblazer']['script'])
         self.mip_config = config['trailblazer']['mip_config']
 
     def start(self, family_id: str, priority: str='normal', email: str=None):
