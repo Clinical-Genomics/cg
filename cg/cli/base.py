@@ -4,6 +4,9 @@ import ruamel.yaml
 
 import cg
 
+from .analyze import analyze
+from .store import store
+
 
 @click.group()
 @click.option('-c', '--config', type=click.File())
@@ -17,3 +20,7 @@ def base(context, config, database, log_level):
     context.obj = ruamel.yaml.safe_load(config) if config else {}
     if database:
         context.obj['database'] = database
+
+
+@base.add_command(analyze)
+@base.add_command(store)
