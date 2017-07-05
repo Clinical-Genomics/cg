@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
 
-class MissingFileError(Exception):
-    pass
+class CgError(Exception):
+
+    def __init__(self, message):
+        self.message = message
 
 
-class MultipleCustomersError(Exception):
+class AnalysisNotFinishedError(CgError):
     pass
