@@ -23,6 +23,7 @@ def customer(context, internal_id, name):
         click.echo(click.style(f"customer already added: {existing.name}", fg='yellow'))
         context.abort()
     record = context.obj['db'].add_customer(internal_id=internal_id, name=name)
+    context.obj['db'].add_commit(record)
     click.echo(click.style(f"customer added: {record.internal_id} ({record.id})", fg='green'))
 
 
@@ -44,8 +45,11 @@ def family(context, customer, family_name):
         click.echo(click.style(f"family already added: {existing.internal_id}", fg='yellow'))
         context.abort()
     family_obj = db.add_family(customer_obj, family_name, priority=family_data['priority'])
+    db.add(family_obj)
     click.echo(click.style(f"family added: {family_obj.internal_id}", fg='green'))
     for sample_data in family_data['samples']:
         sample_obj = db.add_sample(customer_obj, family_obj, id=sample_data['id'],
                                    name=sample_data['name'], received=sample_data['received'])
+        db.add(sample_obj)
         click.echo(click.style(f"sample added: {sample_obj.internal_id}", fg='green'))
+    db.commit()

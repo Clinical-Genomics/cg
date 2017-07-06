@@ -24,15 +24,15 @@ class BaseHandler:
 
     def customer(self, internal_id: str) -> models.Customer:
         """Fetch a customer by internal id from the store."""
-        return self.Customer.filter_by(internal_id=internal_id).first()
+        return self.Customer.query.filter_by(internal_id=internal_id).first()
 
     def family(self, internal_id: str) -> models.Family:
         """Fetch a family by internal id from the database."""
-        return self.Family.filter_by(internal_id=internal_id).first()
+        return self.Family.query.filter_by(internal_id=internal_id).first()
 
     def find_family(self, customer: models.Customer, name: str) -> models.Family:
         """Find a family by family name within a customer."""
-        return self.Family.filter_by(customer=customer, name=name).first()
+        return self.Family.query.filter_by(customer=customer, name=name).first()
 
     def add_customer(self, internal_id: str, name: str) -> models.Customer:
         """Add a new customer to the database."""
