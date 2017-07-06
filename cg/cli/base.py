@@ -7,6 +7,8 @@ from cg.store import Store
 
 from .analyze import analyze
 from .store import store
+from .add import add
+from .upload import upload
 
 
 @click.group()
@@ -40,10 +42,12 @@ def init(context, reset, force):
         click.echo(click.style("Database already exists, use '--reset'", fg='red'))
         context.abort()
 
-    db.setup()
+    db.create_all()
     message = f"Success! New tables: {', '.join(db.engine.table_names())}"
     click.echo(click.style(message, fg='green'))
 
 
 base.add_command(analyze)
 base.add_command(store)
+base.add_command(add)
+base.add_command(upload)

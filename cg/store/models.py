@@ -7,28 +7,25 @@ from sqlalchemy import Column, ForeignKey, orm, types, UniqueConstraint, Table
 Model = alchy.make_declarative_base(Base=alchy.ModelBase)
 
 
-class ModelBase(Model):
+class User(Model):
+
     id = Column(types.Integer, primary_key=True)
-
-
-class User(ModelBase):
-
-    __tablename__ = 'user'
-
     name = Column(types.String(128), nullable=False)
     email = Column(types.String(128), unique=True, nullable=False)
     is_admin = Column(types.Boolean, default=False)
 
+    customer_id = Column(ForeignKey('customer.id', ondelete='CASCADE'), nullable=False)
 
-class Customer(ModelBase):
 
-    __tablename__ = 'customer'
+class Customer(Model):
 
+    id = Column(types.Integer, primary_key=True)
     internal_id = Column(types.String(32), unique=True, nullable=False)
     name = Column(types.String(128), nullable=False)
 
-    families = orm.relationship('Family', cascade='all,delete', backref='customer')
-    samples = orm.relationship('Sample', cascade='all,delete', backref='customer')
+    families = orm.relationship('Family', backref='customer')
+    samples = orm.relationship('Sample', backref='customer')
+    users = orm.relationship('User', backref='customer')
 
 
 family_sample = Table(
@@ -40,61 +37,69 @@ family_sample = Table(
 )
 
 
-class Family(ModelBase):
+class Family(Model):
 
-    __tablename__ = 'family'
+    __table_args__ = (
+        UniqueConstraint('customer_id', 'name', name='_customer_name_uc'),
+    )
 
+    id = Column(types.Integer, primary_key=True)
     internal_id = Column(types.String(32), unique=True, nullable=False)
     name = Column(types.String(128), nullable=False)
+    priority = Column(types.Integer, default=1, nullable=False)
+    _panels = Column(types.Text, nullable=False)
 
-    customer_id = Column(ForeignKey('customer.id'), nullable=False)
+    customer_id = Column(ForeignKey('customer.id', ondelete='CASCADE'), nullable=False)
 
     samples = orm.relationship('Sample', secondary=family_sample, backref='families')
-    analyses = orm.relationship('Analysis', cascade='all,delete', backref='family')
+    analyses = orm.relationship('Analysis', backref='family', order_by='-Analysis.analyzed_at')
+
+    @property
+    def panels(self):
+        """Return a list of panels."""
+        panel_list = self._panels.split(',') if self._panels else []
+        return panel_list
+
+    @panels.setter
+    def panels(self, panel_list):
+        self._panels = ','.join(panel_list) if panel_list else None
 
 
-class Sample(ModelBase):
+class Sample(Model):
 
-    __tablename__ = 'sample'
-
-    internal_id = Column(types.String(32), unique=True, nullable=False)
+    id = Column(types.Integer, primary_key=True)
+    lims_id = Column(types.String(32), unique=True)
     name = Column(types.String(128), nullable=False)
     received_at = Column(types.DateTime)
-    priority = Column(types.Integer, default=0, nullable=False)
     is_external = Column(types.Boolean, default=False)
     sequenced_at = Column(types.DateTime)
 
-    customer_id = Column(ForeignKey('customer.id'), nullable=False)
+    customer_id = Column(ForeignKey('customer.id', ondelete='CASCADE'), nullable=False)
 
 
-class FlowcellSample(ModelBase):
-
-    __tablename__ = 'flowcell_sample'
-    __table_args__ = (
-        UniqueConstraint('flowcell_id', 'sample_id', name='_flowcell_sample_uc'),
-    )
-
-    reads = Column(types.Integer, nullable=False)
-    flowcell_id = Column(ForeignKey('flowcell.id'), nullable=False)
-    sample_id = Column(ForeignKey('sample.id'), nullable=False)
+flowcell_sample = Table(
+    'flowcell_sample',
+    Model.metadata,
+    Column('flowcell_id', types.Integer, ForeignKey('flowcell.id'), nullable=False),
+    Column('sample_id', types.Integer, ForeignKey('sample.id'), nullable=False),
+    UniqueConstraint('flowcell_id', 'sample_id', name='_flowcell_sample_uc'),
+)
 
 
-class Flowcell(ModelBase):
+class Flowcell(Model):
 
-    __tablename__ = 'flowcell'
-
+    id = Column(types.Integer, primary_key=True)
     name = Column(types.String(32), unique=True, nullable=False)
     sequencer_type = Column(types.Enum('hiseqga', 'hiseqx'))
     sequencer_name = Column(types.String(32))
     sequenced_at = Column(types.DateTime)
 
-    samples = orm.relationship('Sample', secondary=FlowcellSample, backref='flowcells')
+    samples = orm.relationship('Sample', secondary=flowcell_sample, backref='flowcells')
 
 
-class Analysis(ModelBase):
+class Analysis(Model):
 
-    __tablename__ = 'analysis'
-
+    id = Column(types.Integer, primary_key=True)
     pipeline = Column(types.String(32), nullable=False)
     pipeline_version = Column(types.String(32))
     created_at = Column(types.DateTime, default=dt.datetime.now, nullable=False)
@@ -102,4 +107,4 @@ class Analysis(ModelBase):
     # primary analysis is the one originally delivered to the customer
     is_primary = Column(types.Boolean, default=False)
 
-    family_id = Column(ForeignKey('family.id'), nullable=False)
+    family_id = Column(ForeignKey('family.id', ondelete='CASCADE'), nullable=False)

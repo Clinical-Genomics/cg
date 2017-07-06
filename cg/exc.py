@@ -9,3 +9,11 @@ class CgError(Exception):
 
 class AnalysisNotFinishedError(CgError):
     pass
+
+
+class LimsDataError(CgError):
+    pass
+
+
+class MissingCustomerError(CgError):
+    pass

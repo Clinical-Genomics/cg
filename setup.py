@@ -4,11 +4,6 @@ import os
 import sys
 from setuptools import setup, find_packages
 
-here = os.path.abspath(os.path.dirname(__file__))
-about = {}
-with open(os.path.join(here, 'cg', 'version.py')) as in_handle:
-    exec(in_handle.read(), about)
-
 if sys.argv[-1] == "publish":
     os.system("python setup.py sdist bdist_wheel upload")
     sys.exit()
@@ -16,7 +11,7 @@ if sys.argv[-1] == "publish":
 
 setup(
     name='cg',
-    version=about['__version__'],
+    version='1.0.0-beta1',
     description='Glue CLI for Clinical Genomics apps.',
     author='Robin Andeer',
     author_email='robin.andeer@scilifelab.se',
@@ -33,6 +28,7 @@ setup(
         'trailblazer',
         'housekeeper',
         'coloredlogs',
+        'petname',
     ],
     classifiers=[
         'Programming Language :: Python',

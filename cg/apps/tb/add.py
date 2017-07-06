@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
+import logging
 from pathlib import Path
 
 import ruamel.yaml
 from trailblazer.mip import files as mip_files
 
 from cg.exc import AnalysisNotFinishedError
+
+log = logging.getLogger(__name__)
 
 
 class AddHandler:
@@ -67,6 +70,9 @@ class AddHandler:
         for variant_type in ['snv', 'sv']:
             for output_type in ['clinical', 'research']:
                 vcf_path = sampleinfo_data[variant_type][f"{output_type}_vcf"]
+                if vcf_path is None:
+                    log.warn(f"missing file: {output_type} {variant_type} VCF")
+                    continue
                 vcf_tag = f"vcf-{variant_type}-{output_type}"
                 data.append({
                     'path': vcf_path,
@@ -92,7 +98,9 @@ class AddHandler:
                 'archive': False,
             })
             data.append({
-                'path': f"{bam_path}".bai,
+                'path': f"{bam_path}.bai",
                 'tags': ['bam-index', sample_data['id']],
                 'archive': False,
             })
+
+        return data
