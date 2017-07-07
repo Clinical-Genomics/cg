@@ -33,7 +33,8 @@ def store(context, config_stream):
         analyzed=new_version.created_at,
         primary=(len(family_obj.analyses) == 0),
     )
-    click.echo(f"new bundle added: {new_bundle.name}, version {new_version.id}")
+    version_date = new_version.created_at.date()
+    click.echo(f"new bundle added: {new_bundle.name}, version {version_date}")
 
     # include the files in the housekeeper system
     try:

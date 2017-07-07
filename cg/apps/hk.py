@@ -12,7 +12,8 @@ log = logging.getLogger(__name__)
 class HousekeeperAPI(Store):
 
     def __init__(self, config):
-        super(HousekeeperAPI, self).__init__(config['housekeeper']['database'])
+        super(HousekeeperAPI, self).__init__(config['housekeeper']['database'],
+                                             config['housekeeper']['root'])
         self.root_dir = config['housekeeper']['root']
 
     def include(self, version_obj):
