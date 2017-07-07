@@ -6,11 +6,11 @@ from typing import List
 import alchy
 import petname
 
+from cg.constants import PRIORITY_MAP
 from cg.exc import MissingCustomerError
 from . import models
 
 log = logging.getLogger(__name__)
-PRIORITY_MAP = {'research': 0, 'standard': 1, 'priority': 2, 'express': 3}
 
 
 class BaseHandler:
@@ -45,8 +45,15 @@ class BaseHandler:
         new_user = self.User(customer=customer, name=name, email=email, is_admin=admin)
         return new_user
 
+    def add_sample(self, customer: models.Customer, name: str, lims_id: str=None,
+                   received: dt.datetime=None, external: bool=False) -> models.Sample:
+        """Add a new sample to the database."""
+        new_sample = self.Sample(customer=customer, name=name, lims_id=lims_id,
+                                 received_at=received, is_external=external)
+        return new_sample
+
     def add_family(self, customer: models.Customer, name: str, panels: List[str],
-                   priority: str='standard') -> models.Family:
+                   samples: List[models.Sample], priority: str='standard') -> models.Family:
         """Add a new family to the database."""
         # generate a unique family id
         while True:
@@ -57,16 +64,8 @@ class BaseHandler:
                 log.debug(f"{internal_id} already used - trying another family id")
 
         new_family = self.Family(customer=customer, internal_id=internal_id, name=name,
-                                 priority=PRIORITY_MAP[priority], panels=panels)
+                                 priority=PRIORITY_MAP[priority], samples=samples, panels=panels)
         return new_family
-
-    def add_sample(self, customer: models.Customer, family: models.Family, name: str,
-                   lims_id: str=None, received: dt.datetime=None,
-                   external: bool=False) -> models.Sample:
-        """Add a new sample to the database."""
-        new_sample = self.Sample(customer=customer, family=family, lims_id=lims_id,
-                                 name=name, received_at=received, is_external=external)
-        return new_sample
 
     def add_flowcell(self, name: str, sequencer: str, sequenced: dt.datetime,
                      samples: List[models.Sample]) -> models.Flowcell:

@@ -18,7 +18,7 @@ class ChanjoAPI(ChanjoDB):
 
     def upload(self, sample_id: str, sample_name: str, group_id: str, group_name: str,
                bed_stream: io.TextIOWrapper):
-        source = Path(bed_stream.name).abspath()
+        source = str(Path(bed_stream.name).absolute())
         result = load_transcripts(bed_stream, sample_id=sample_id, group_id=group_id,
                                   source=source, threshold=10)
 

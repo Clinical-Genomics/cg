@@ -31,7 +31,7 @@ class UploadCoverageApi(object):
             data['samples'].append({
                 'sample': sample_obj.lims_id,
                 'sample_name': sample_obj.name,
-                'coverage': hk_coverage.path,
+                'coverage': hk_coverage.full_path,
             })
         return data
 
