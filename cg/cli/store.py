@@ -22,7 +22,6 @@ def store(context, config_stream):
         click.echo(click.style(error.message, fg='red'))
         context.abort()
     new_bundle = hk_api.add_bundle(bundle_data)
-    hk_api.add_commit(new_bundle)
     new_version = new_bundle.versions[0]
 
     # add new analysis to the status API
@@ -34,7 +33,6 @@ def store(context, config_stream):
         analyzed=new_version.created_at,
         primary=(len(family_obj.analyses) == 0),
     )
-    status_api.commit(new_analysis)
     click.echo(f"new bundle added: {new_bundle.name}, version {new_version.id}")
 
     # include the files in the housekeeper system
@@ -43,5 +41,7 @@ def store(context, config_stream):
     except hk.VersionIncludedError as error:
         click.echo(click.style(error.message, fg='red'))
         context.abort()
-    hk_api.commit(new_version)
+
+    hk_api.add_commit(new_bundle)
+    status_api.add_commit(new_analysis)
     click.echo(click.style('included files in Housekeeper', fg='green'))
