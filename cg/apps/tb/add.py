@@ -30,6 +30,7 @@ class AddHandler:
         data = {
             'name': config_data['family'],
             'created': sampleinfo_data['date'],
+            'pipeline_version': sampleinfo_data['version'],
             'files': cls._get_files(config_data, sampleinfo_data),
         }
         return data
