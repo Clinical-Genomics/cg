@@ -2,6 +2,7 @@
 from trailblazer.mip.start import MipCli
 from trailblazer.store import Store
 from trailblazer.cli.utils import environ_email
+from trailblazer.mip import files
 
 from .add import AddHandler
 
@@ -20,3 +21,8 @@ class TrailblazerAPI(Store, AddHandler):
         kwargs = dict(config=self.mip_config, family=family_id, priority=priority, email=email)
         self.mip_cli(**kwargs)
         self.add_pending(family_id, email=email)
+
+    @staticmethod
+    def parse_qcmetrics(data: dict) -> dict:
+        """Call internal Trailblazer MIP API."""
+        return files.parse_qcmetrics(data)

@@ -31,6 +31,7 @@ setup(
         'petname',
         'genologics',
         'chanjo',
+        'genotype',
     ],
     classifiers=[
         'Programming Language :: Python',

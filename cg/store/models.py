@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime as dt
+import json
+from typing import List
 
 import alchy
 from sqlalchemy import Column, ForeignKey, orm, types, UniqueConstraint, Table
@@ -48,6 +50,7 @@ class Family(Model):
     name = Column(types.String(128), nullable=False)
     priority = Column(types.Integer, default=1, nullable=False)
     _panels = Column(types.Text, nullable=False)
+    _relationships = Column(types.Text, default='[]')
 
     customer_id = Column(ForeignKey('customer.id', ondelete='CASCADE'), nullable=False)
 
@@ -64,15 +67,26 @@ class Family(Model):
     def panels(self, panel_list):
         self._panels = ','.join(panel_list) if panel_list else None
 
+    @property
+    def relationships(self):
+        """Return the relationships, stored as JSON."""
+        relationship_list = json.loads(self._relationships)
+        return relationship_list
+
+    @relationships.setter
+    def relationships(self, relationship_list: List[dict]):
+        self._relationships = json.dumps(relationship_list or [])
+
 
 class Sample(Model):
 
     id = Column(types.Integer, primary_key=True)
-    lims_id = Column(types.String(32), unique=True)
+    internal_id = Column(types.String(32), nullable=False, unique=True)
     name = Column(types.String(128), nullable=False)
     received_at = Column(types.DateTime)
     is_external = Column(types.Boolean, default=False)
     sequenced_at = Column(types.DateTime)
+    sex = Column(types.Enum('male', 'female', 'unknown'), nullable=False)
 
     customer_id = Column(ForeignKey('customer.id', ondelete='CASCADE'), nullable=False)
 

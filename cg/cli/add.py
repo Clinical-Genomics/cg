@@ -31,10 +31,12 @@ def customer(context, internal_id, name):
 @add.command()
 @click.option('-l', '--lims', 'lims_id', help='LIMS id for the sample')
 @click.option('-e', '--external', is_flag=True, help='Is sample externally sequenced?')
+@click.option('-s', '--sex', type=click.Choice(['male', 'female', 'unknown']),
+              help='Sample pedigree sex', required=True)
 @click.argument('customer')
 @click.argument('name')
 @click.pass_context
-def sample(context, lims_id, external, customer, name):
+def sample(context, lims_id, external, sex, customer, name):
     """Add a sample to the store."""
     db = context.obj['db']
     customer_obj = db.customer(customer)
@@ -44,17 +46,18 @@ def sample(context, lims_id, external, customer, name):
     new_record = db.add_sample(
         customer=customer_obj,
         name=name,
-        lims_id=lims_id,
+        sex=sex,
+        internal_id=lims_id,
         external=external,
     )
     db.add_commit(new_record)
-    click.echo(click.style(f"added new family: {new_record.name}"), fg='green')
+    click.echo(click.style(f"added new sample: {new_record.name}", fg='green'))
 
 
 @add.command()
 @click.option('--priority', type=click.Choice(PRIORITY_OPTIONS), default='standard')
-@click.option('-p', '--panels', nargs=-1, required=True, help='Default gene panels')
-@click.option('-s', '--samples', nargs=-1, required=True, help='Samples in the family')
+@click.option('-p', '--panel', 'panels', multiple=True, required=True, help='Default gene panels')
+@click.option('-s', '--sample', 'samples', multiple=True, required=True)
 @click.argument('customer')
 @click.argument('name')
 @click.pass_context
@@ -74,7 +77,7 @@ def family(context, priority, panels, samples, customer, name):
         priority=priority,
     )
     db.add_commit(new_family)
-    click.echo(click.style(f"added new family: {new_family.internal_id}"), fg='green')
+    click.echo(click.style(f"added new family: {new_family.internal_id}", fg='green'))
 
 
 def add_family_auto(db, config, customer, family_name):

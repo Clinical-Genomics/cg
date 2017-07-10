@@ -16,7 +16,7 @@ class UploadCoverageApi(object):
         self.hk = hk_api
         self.chanjo = chanjo_api
 
-    def data(self, analysis_obj: models.Analysis):
+    def data(self, analysis_obj: models.Analysis) -> dict:
         """Get data for uploading coverage."""
         family_id = analysis_obj.family.internal_id
         data = {
@@ -27,9 +27,9 @@ class UploadCoverageApi(object):
         for sample_obj in analysis_obj.family.samples:
             hk_version = self.hk.version(family_id, analysis_obj.analyzed_at)
             hk_coverage = self.hk.files(version=hk_version.id,
-                                        tags=[sample_obj.lims_id, 'coverage']).first()
+                                        tags=[sample_obj.internal_id, 'coverage']).first()
             data['samples'].append({
-                'sample': sample_obj.lims_id,
+                'sample': sample_obj.internal_id,
                 'sample_name': sample_obj.name,
                 'coverage': hk_coverage.full_path,
             })

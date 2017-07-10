@@ -30,6 +30,10 @@ class BaseHandler:
         """Fetch a family by internal id from the database."""
         return self.Family.query.filter_by(internal_id=internal_id).first()
 
+    def sample(self, internal_id: str) -> models.Sample:
+        """Fetch a sample by lims id."""
+        return self.Sample.query.filter_by(internal_id=internal_id).first()
+
     def find_family(self, customer: models.Customer, name: str) -> models.Family:
         """Find a family by family name within a customer."""
         return self.Family.query.filter_by(customer=customer, name=name).first()
@@ -45,15 +49,24 @@ class BaseHandler:
         new_user = self.User(customer=customer, name=name, email=email, is_admin=admin)
         return new_user
 
-    def add_sample(self, customer: models.Customer, name: str, lims_id: str=None,
+    def add_sample(self, customer: models.Customer, name: str, sex: str, internal_id: str=None,
                    received: dt.datetime=None, external: bool=False) -> models.Sample:
         """Add a new sample to the database."""
-        new_sample = self.Sample(customer=customer, name=name, lims_id=lims_id,
-                                 received_at=received, is_external=external)
+        if internal_id is None:
+            # generate a unique sample id
+            while True:
+                internal_id = petname.Generate(3, separator='')
+                if self.sample(internal_id) is None:
+                    break
+                else:
+                    log.debug(f"{internal_id} already used - trying another id")
+        new_sample = self.Sample(customer=customer, name=name, internal_id=internal_id,
+                                 received_at=received, is_external=external, sex=sex)
         return new_sample
 
     def add_family(self, customer: models.Customer, name: str, panels: List[str],
-                   samples: List[models.Sample], priority: str='standard') -> models.Family:
+                   samples: List[models.Sample], priority: str='standard',
+                   relationships: List[dict]=None) -> models.Family:
         """Add a new family to the database."""
         # generate a unique family id
         while True:
@@ -61,10 +74,12 @@ class BaseHandler:
             if self.family(internal_id) is None:
                 break
             else:
-                log.debug(f"{internal_id} already used - trying another family id")
+                log.debug(f"{internal_id} already used - trying another id")
 
         new_family = self.Family(customer=customer, internal_id=internal_id, name=name,
-                                 priority=PRIORITY_MAP[priority], samples=samples, panels=panels)
+                                 priority=PRIORITY_MAP[priority], samples=samples)
+        new_family.panels = panels
+        new_family.relationships = relationships
         return new_family
 
     def add_flowcell(self, name: str, sequencer: str, sequenced: dt.datetime,
