@@ -17,8 +17,9 @@ class BaseHandler:
 
     User = models.User
     Customer = models.Customer
-    Family = models.Family
     Sample = models.Sample
+    Family = models.Family
+    FamilySample = models.FamilySample
     Flowcell = models.Flowcell
     Analysis = models.Analysis
 
@@ -65,8 +66,7 @@ class BaseHandler:
         return new_sample
 
     def add_family(self, customer: models.Customer, name: str, panels: List[str],
-                   samples: List[models.Sample], priority: str='standard',
-                   relationships: List[dict]=None) -> models.Family:
+                   priority: str='standard') -> models.Family:
         """Add a new family to the database."""
         # generate a unique family id
         while True:
@@ -77,10 +77,17 @@ class BaseHandler:
                 log.debug(f"{internal_id} already used - trying another id")
 
         new_family = self.Family(customer=customer, internal_id=internal_id, name=name,
-                                 priority=PRIORITY_MAP[priority], samples=samples)
+                                 priority=PRIORITY_MAP[priority])
         new_family.panels = panels
-        new_family.relationships = relationships
         return new_family
+
+    def relate_sample(self, family: models.Family, sample: models.Sample,
+                      status: str, mother: models.Sample=None,
+                      father: models.Sample=None) -> models.FamilySample:
+        """Relate a sample to a family."""
+        new_record = self.FamilySample(family=family, sample=sample, status=status,
+                                       mother=mother, father=father)
+        return new_record
 
     def add_flowcell(self, name: str, sequencer: str, sequenced: dt.datetime,
                      samples: List[models.Sample]) -> models.Flowcell:

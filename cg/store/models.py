@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 import datetime as dt
-import json
-from typing import List
 
 import alchy
 from sqlalchemy import Column, ForeignKey, orm, types, UniqueConstraint, Table
@@ -30,13 +28,22 @@ class Customer(Model):
     users = orm.relationship('User', backref='customer')
 
 
-family_sample = Table(
-    'family_sample',
-    Model.metadata,
-    Column('family_id', types.Integer, ForeignKey('family.id'), nullable=False),
-    Column('sample_id', types.Integer, ForeignKey('sample.id'), nullable=False),
-    UniqueConstraint('family_id', 'sample_id', name='_family_sample_uc'),
-)
+class FamilySample(Model):
+
+    __table_args__ = (
+        UniqueConstraint('family_id', 'sample_id', name='_family_sample_uc'),
+    )
+
+    id = Column(types.Integer, primary_key=True)
+    family_id = Column(ForeignKey('family.id', ondelete='CASCADE'), nullable=False)
+    sample_id = Column(ForeignKey('sample.id', ondelete='CASCADE'), nullable=False)
+    status = Column(types.Enum('affected', 'unaffected', 'unknown'), nullable=False)
+    mother_id = Column(ForeignKey('sample_id'))
+    father_id = Column(ForeignKey('sample_id'))
+
+    mother = orm.relationship('Sample', foreign_keys=[mother_id])
+    father = orm.relationship('Sample', foreign_keys=[father_id])
+    family = orm.relationship('Sample', foreign_keys=[sample_id], backref='samples')
 
 
 class Family(Model):
@@ -50,11 +57,9 @@ class Family(Model):
     name = Column(types.String(128), nullable=False)
     priority = Column(types.Integer, default=1, nullable=False)
     _panels = Column(types.Text, nullable=False)
-    _relationships = Column(types.Text, default='[]')
 
     customer_id = Column(ForeignKey('customer.id', ondelete='CASCADE'), nullable=False)
 
-    samples = orm.relationship('Sample', secondary=family_sample, backref='families')
     analyses = orm.relationship('Analysis', backref='family', order_by='-Analysis.analyzed_at')
 
     @property
@@ -66,16 +71,6 @@ class Family(Model):
     @panels.setter
     def panels(self, panel_list):
         self._panels = ','.join(panel_list) if panel_list else None
-
-    @property
-    def relationships(self):
-        """Return the relationships, stored as JSON."""
-        relationship_list = json.loads(self._relationships)
-        return relationship_list
-
-    @relationships.setter
-    def relationships(self, relationship_list: List[dict]):
-        self._relationships = json.dumps(relationship_list or [])
 
 
 class Sample(Model):

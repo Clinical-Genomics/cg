@@ -57,11 +57,10 @@ def sample(context, lims_id, external, sex, customer, name):
 @add.command()
 @click.option('--priority', type=click.Choice(PRIORITY_OPTIONS), default='standard')
 @click.option('-p', '--panel', 'panels', multiple=True, required=True, help='Default gene panels')
-@click.option('-s', '--sample', 'samples', multiple=True, required=True)
 @click.argument('customer')
 @click.argument('name')
 @click.pass_context
-def family(context, priority, panels, samples, customer, name):
+def family(context, priority, panels, customer, name):
     """Add a family of samples."""
     db = context.obj['db']
     customer_obj = db.customer(customer)
@@ -69,15 +68,30 @@ def family(context, priority, panels, samples, customer, name):
         click.echo(click.style('customer not found', fg='red'))
         context.abort()
 
-    new_family = db.add_family(
-        customer=customer_obj,
-        name=name,
-        panels=panels,
-        samples=[db.sample(sample) for sample in samples],
-        priority=priority,
-    )
+    new_family = db.add_family(customer=customer_obj, name=name, panels=panels, priority=priority)
     db.add_commit(new_family)
     click.echo(click.style(f"added new family: {new_family.internal_id}", fg='green'))
+
+
+@add.command()
+@click.option('-m', '--mother', help='sample if for mother of sample')
+@click.option('-f', '--father', help='sample if for father of sample')
+@click.option('-s', '--status', type=click.Choice('affected', 'unaffected', 'unknown'),
+              required=True)
+@click.argument('family')
+@click.argument('sample')
+@click.pass_context
+def relationship(context, mother, father, status, family, sample):
+    """Relate a sample to a family."""
+    db = context.obj['db']
+    family_obj = db.family(family)
+    sample_obj = db.sample(sample)
+    mother_obj = db.sample(mother) if mother else None
+    father_obj = db.sample(father) if father else None
+    new_record = db.relate_sample(family_obj, sample_obj, status, mother=mother_obj,
+                                  father=father_obj)
+    db.add_commit(new_record)
+    click.echo(f"related sample to family")
 
 
 def add_family_auto(db, config, customer, family_name):
