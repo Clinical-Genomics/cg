@@ -3,8 +3,8 @@ import click
 
 from cg.store import Store
 from cg.apps import coverage as coverage_app, gt, hk, tb
-from cg.apps.upload.coverage import UploadCoverageApi
-from cg.apps.upload.gt import UploadGenotypesAPI
+from cg.meta.upload.coverage import UploadCoverageApi
+from cg.meta.upload.gt import UploadGenotypesAPI
 
 
 @click.group()
