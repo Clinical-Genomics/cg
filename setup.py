@@ -32,6 +32,8 @@ setup(
         'genologics',
         'chanjo',
         'genotype',
+        'loqusdb',
+        'scout-browser',
     ],
     classifiers=[
         'Programming Language :: Python',

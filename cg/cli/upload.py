@@ -2,9 +2,11 @@
 import click
 
 from cg.store import Store
-from cg.apps import coverage as coverage_app, gt, hk, tb
+from cg.apps import coverage as coverage_app, gt, hk, loqus, tb, scoutapi
 from cg.meta.upload.coverage import UploadCoverageApi
 from cg.meta.upload.gt import UploadGenotypesAPI
+from cg.meta.upload.observations import UploadObservationsAPI
+from cg.meta.upload.scoutapi import UploadScoutAPI
 
 
 @click.group()
@@ -40,3 +42,31 @@ def genotypes(context, family_id):
     api = UploadGenotypesAPI(status_api, hk_api, tb_api, gt_api)
     results = api.data(family_obj.analyses[0])
     api.upload(results)
+
+
+@upload.command()
+@click.argument('family_id')
+@click.pass_context
+def observations(context, family_id):
+    """Upload observations from an analysis to LoqusDB."""
+    status_api = Store(context.obj['database'])
+    hk_api = hk.HousekeeperAPI(context.obj)
+    loqus_api = loqus.LoqusdbAPI(context.obj)
+    family_obj = status_api.family(family_id)
+    api = UploadObservationsAPI(status_api, hk_api, loqus_api)
+    results = api.data(family_obj.analyses[0])
+    api.upload(results)
+
+
+@upload.command()
+@click.argument('family_id')
+@click.pass_context
+def scout(context, family_id):
+    """Upload variants from analysis to Scout."""
+    status_api = Store(context.obj['database'])
+    hk_api = hk.HousekeeperAPI(context.obj)
+    scout_api = scoutapi.ScoutAPI(context.obj)
+    family_obj = status_api.family(family_id)
+    api = UploadScoutAPI(status_api, hk_api, scout_api)
+    results = api.data(family_obj.analyses[0])
+    scout_api.upload(results)

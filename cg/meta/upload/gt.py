@@ -29,6 +29,7 @@ class UploadGenotypesAPI(object):
                 'pedigree': sample_obj.sex,
                 'analysis': analysis_sexes[sample_obj.internal_id],
             }
+        return data
 
     def _analysis_sex(self, hk_version: hk.models.Version) -> dict:
         """Fetch analysis sex for each sample of an analysis."""
