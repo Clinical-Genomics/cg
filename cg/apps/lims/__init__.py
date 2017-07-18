@@ -1,2 +1,3 @@
 # -*- coding: utf-8 -*-
-from .api import ClinicalLims
+from .api import LimsAPI
+from .orderform import parse_orderform

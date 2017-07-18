@@ -34,6 +34,9 @@ setup(
         'genotype',
         'loqusdb',
         'scout-browser',
+        'flask',
+        'flask_cors',
+        'flask_alchy',
     ],
     classifiers=[
         'Programming Language :: Python',

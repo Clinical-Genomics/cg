@@ -17,3 +17,7 @@ class LimsDataError(CgError):
 
 class MissingCustomerError(CgError):
     pass
+
+
+class DuplicateRecordError(CgError):
+    pass

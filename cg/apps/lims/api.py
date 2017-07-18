@@ -8,11 +8,11 @@ from .order import OrderHandler
 SEX_MAP = {'F': 'female', 'M': 'male', 'Unknown': 'unknown', 'unknown': 'unknown'}
 
 
-class ClinicalLims(Lims, OrderHandler):
+class LimsAPI(Lims, OrderHandler):
 
     def __init__(self, config):
         lconf = config['lims']
-        super(ClinicalLims, self).__init__(lconf['host'], lconf['username'], lconf['password'])
+        super(LimsAPI, self).__init__(lconf['host'], lconf['username'], lconf['password'])
 
     def sample(self, lims_id):
         """Fetch a sample from the LIMS database."""
@@ -40,6 +40,9 @@ class ClinicalLims(Lims, OrderHandler):
             'panels': udfs.get('Gene List').split(';') if udfs.get('Gene List') else None,
             'priority': udfs.get('priority'),
             'received': self._received_date(lims_sample.id),
+            'application': udfs.get('Sequencing Analysis'),
+            'application_version': (int(udfs['Application Tag Version']) if
+                                    udfs.get('Application Tag Version') else None),
         }
         return data
 

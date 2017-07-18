@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
+from flask_admin import Admin
+from flask_alchy import Alchy
 from flask_cors import CORS
-from flask_sqlservice import FlaskSQLService
 
-from cg.store import models
-from cg.store.actions import ActionsHandler
-from cg.store.mutations import MutationsHandler
+from cg.store import models, api
 
 
-class CgFlaskSqlservice(FlaskSQLService, ActionsHandler, MutationsHandler):
+class CgAlchy(Alchy, api.CoreHandler):
     pass
 
 
-db = CgFlaskSqlservice(model_class=models.Model)
-cors = CORS(resources={r"/api/*": {"origins": "*"}})
+cors = CORS(resources={r"/api/*": {'origins': '*'}}, supports_credentials=True)
+db = CgAlchy(Model=models.Model)
+admin = Admin(name='Clinical Genomics')

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from cg.apps.lims import ClinicalLims
+from cg.apps.lims import LimsAPI
 from cg.store import Store
 from .schema import ExternalProject, FastqProject, RerunProject, ScoutProject
 
@@ -7,13 +7,13 @@ from .schema import ExternalProject, FastqProject, RerunProject, ScoutProject
 class OrdersAPI(object):
 
     projects = {
-        'external': ExternalProject,
-        'fastq': FastqProject,
-        'rerun': RerunProject,
-        'scout': ScoutProject,
+        'external': ExternalProject(),
+        'fastq': FastqProject(),
+        'rerun': RerunProject(),
+        'scout': ScoutProject(),
     }
 
-    def __init__(self, lims: ClinicalLims, status: Store):
+    def __init__(self, lims: LimsAPI, status: Store):
         self.lims = lims
         self.status = status
 
@@ -22,15 +22,17 @@ class OrdersAPI(object):
         errors = self.validate(project_type, data)
         if errors:
             return errors
-        lims_data = self.to_lims(data)
-        lims_project = self.lims.add_project(lims_data)
-        lims_samples = self.lims.get_samples(projectlimsid=lims_project.id)
-        lims_map = {lims_sample.name: lims_sample.id for lims_sample in lims_samples}
-        status_data = self.to_status(data, lims_map)
+        #lims_data = self.to_lims(data)
+        #lims_project = self.lims.add_project(lims_data)
+        #lims_samples = self.lims.get_samples(projectlimsid=lims_project.id)
+        #lims_map = {lims_sample.name: lims_sample.id for lims_sample in lims_samples}
+
+        #status_data = self.to_status(data, lims_map)
+        status_data = self.to_status(data)
         new_families = self.status.add_order(status_data)
-        self.status.add_commit(new_families)
+        self.status.commit()
         return {
-            'lims_project': lims_project,
+        #    'lims_project': lims_project,
             'families': new_families,
         }
 
@@ -66,16 +68,17 @@ class OrdersAPI(object):
         return lims_data
 
     @staticmethod
-    def to_status(data: dict, lims_map: dict) -> dict:
+    def to_status(data: dict, lims_map: dict=None) -> dict:
         """Convert order input to status interface input."""
         status_data = {
             'customer': data['customer'],
+            'name': data['name'],
             'families': [{
                 'name': family['name'],
                 'priority': family['priority'],
                 'panels': family['panels'],
                 'samples': [{
-                    'lims_id': lims_map[sample['name']],
+                    'internal_id': lims_map[sample['name']] if lims_map else None,
                     'name': sample['name'],
                     'sex': sample['sex'],
                     'status': sample['status'],

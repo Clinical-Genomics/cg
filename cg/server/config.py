@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 import os
 
-SECRET_KEY = "not secure!!"
+SECRET_KEY = 'unsafe!!!'
 TEMPLATES_AUTO_RELOAD = True
-SQL_DATABASE_URI = os.environ['CG_SQL_DATABASE_URI']
-if 'mysql' in SQL_DATABASE_URI:  # pragma: no cover
-    SQL_POOL_RECYCLE = 7200
+SQLALCHEMY_DATABASE_URI = os.environ['SQLALCHEMY_DATABASE_URI']
+SQLALCHEMY_POOL_RECYCLE = 7200
 SQLALCHEMY_TRACK_MODIFICATIONS = 'FLASK_DEBUG' in os.environ
+CG_ENABLE_ADMIN = 'FLASK_DEBUG' in os.environ or os.environ.get('CG_ENABLE_ADMIN')
