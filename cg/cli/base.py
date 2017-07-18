@@ -9,8 +9,8 @@ from .analyze import analyze
 from .demo import demo
 from .store import store
 from .add import add
-#from .upload import upload
-from .transfer import transfer
+from .upload import upload
+from .status import status
 
 
 @click.group()
@@ -52,6 +52,6 @@ def init(context, reset, force):
 base.add_command(analyze)
 base.add_command(store)
 base.add_command(add)
-#base.add_command(upload)
+base.add_command(upload)
 base.add_command(demo)
-base.add_command(transfer)
+base.add_command(status)

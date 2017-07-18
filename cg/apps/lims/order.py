@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import logging
+from xml.etree import ElementTree
 
 from genologics.entities import Project, Researcher, Sample, Container, Containertype
-from xml.etree import ElementTree
 
 log = logging.getLogger(__name__)
 CONTAINER_TYPE_MAP = {'Tube': 2, '96 well plate': 1}

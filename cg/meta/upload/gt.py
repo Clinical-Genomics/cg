@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 from pathlib import Path
 
+import ruamel.yaml
+
 from cg.apps import hk, gt, tb
 from cg.store import models, Store
-import ruamel.yaml
 
 
 class UploadGenotypesAPI(object):

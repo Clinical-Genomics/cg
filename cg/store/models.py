@@ -89,6 +89,7 @@ class Family(Model):
     name = Column(types.String(128), nullable=False)
     priority = Column(types.Integer, default=1, nullable=False)
     _panels = Column(types.Text, nullable=False)
+    analyze = Column(types.Boolean, default=False)
 
     customer_id = Column(ForeignKey('customer.id', ondelete='CASCADE'), nullable=False)
 
@@ -128,6 +129,7 @@ class Sample(Model):
     name = Column(types.String(128), nullable=False)
     received_at = Column(types.DateTime)
     sequenced_at = Column(types.DateTime)
+    delivered_at = Column(types.DateTime)
     sex = Column(types.Enum('male', 'female', 'unknown'), nullable=False)
 
     customer_id = Column(ForeignKey('customer.id', ondelete='CASCADE'), nullable=False)
@@ -164,6 +166,9 @@ class Analysis(Model):
     pipeline_version = Column(types.String(32))
     created_at = Column(types.DateTime, default=dt.datetime.now, nullable=False)
     analyzed_at = Column(types.DateTime)
+    housekeeper_id = Column(types.Integer)
+    uploaded_at = Column(types.DateTime)
+    delivered_at = Column(types.DateTime)
     # primary analysis is the one originally delivered to the customer
     is_primary = Column(types.Boolean, default=False)
 
