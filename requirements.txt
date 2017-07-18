@@ -29,3 +29,4 @@ genotype
 loqusdb
 scout-browser
 pymongo
+cgstats

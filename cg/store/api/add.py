@@ -77,10 +77,8 @@ class AddHandler:
         new_record.father = father
         return new_record
 
-    def add_flowcell(self, name: str, sequencer: str, sequenced: dt.datetime,
-                     samples: List[models.Sample]) -> models.Flowcell:
-        new_record = self.Flowcell(name=name, sequencer_type=sequencer, sequenced_at=sequenced,
-                                   samples=samples)
+    def add_flowcell(self, name: str, sequencer: str, sequenced: dt.datetime) -> models.Flowcell:
+        new_record = self.Flowcell(name=name, sequencer_type=sequencer, sequenced_at=sequenced)
         return new_record
 
     def add_analysis(self, pipeline: str, version: str, analyzed: dt.datetime,

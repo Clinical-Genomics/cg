@@ -131,6 +131,7 @@ class Sample(Model):
     sequenced_at = Column(types.DateTime)
     delivered_at = Column(types.DateTime)
     sex = Column(types.Enum('male', 'female', 'unknown'), nullable=False)
+    reads = Column(types.Integer, default=0)
 
     customer_id = Column(ForeignKey('customer.id', ondelete='CASCADE'), nullable=False)
     application_version_id = Column(ForeignKey('application_version.id'))

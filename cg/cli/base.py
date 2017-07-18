@@ -11,6 +11,7 @@ from .store import store
 from .add import add
 from .upload import upload
 from .status import status
+from .transfer import transfer
 
 
 @click.group()
@@ -55,3 +56,4 @@ base.add_command(add)
 base.add_command(upload)
 base.add_command(demo)
 base.add_command(status)
+base.add_command(transfer)

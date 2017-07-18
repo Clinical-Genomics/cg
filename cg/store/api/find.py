@@ -61,3 +61,7 @@ class FindHandler:
     def analysis(self, family: models.Family, analyzed: dt.datetime) -> models.Analysis:
         """Fetch an analysis."""
         return self.Analysis.query.filter_by(family=family, analyzed_at=analyzed).first()
+
+    def flowcell(self, name: str) -> models.Flowcell:
+        """Fetch a flowcell."""
+        return self.Flowcell.query.filter_by(name=name).first()

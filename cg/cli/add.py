@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import click
 
-from cg.apps import lims
 from cg.constants import PRIORITY_OPTIONS
 from cg.store import Store
 
@@ -112,26 +111,3 @@ def relationship(context, mother, father, status, family, sample):
                                   father=father_obj)
     db.add_commit(new_record)
     click.echo(f"related sample to family")
-
-
-def add_family_auto(db, config, customer, family_name):
-    """Auto-add family based on information in LIMS."""
-    lims_api = lims.LimsAPI(config)
-    customer_obj = db.customer(customer)
-    if customer_obj is None:
-        click.echo(click.style('customer not found', fg='red'))
-        return
-    family_data = lims_api.family(customer, family_name)
-    existing = db.find_family(customer_obj, family_name)
-    if existing:
-        click.echo(click.style(f"family already added: {existing.internal_id}", fg='yellow'))
-        return
-    family_obj = db.add_family(customer_obj, family_name, priority=family_data['priority'])
-    db.add(family_obj)
-    click.echo(click.style(f"family added: {family_obj.internal_id}", fg='green'))
-    for sample_data in family_data['samples']:
-        sample_obj = db.add_sample(customer_obj, family_obj, id=sample_data['id'],
-                                   name=sample_data['name'], received=sample_data['received'])
-        db.add(sample_obj)
-        click.echo(click.style(f"sample added: {sample_obj.internal_id}", fg='green'))
-    db.commit()
