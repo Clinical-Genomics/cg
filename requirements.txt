@@ -1,0 +1,31 @@
+# database
+alchy
+sqlalchemy
+
+# cli
+Click>=6.7
+
+# server
+Flask
+Flask-Admin
+Flask-Alchy
+Flask-CORS
+google-auth
+werkzeug
+
+# utils
+ruamel.yaml
+coloredlogs
+petname
+marshmallow
+xlrd
+
+# apps
+trailblazer
+housekeeper
+genologics
+chanjo
+genotype
+loqusdb
+scout-browser
+pymongo
