@@ -59,11 +59,10 @@ def expand_family(family_id, parsed_family):
             'container': raw_sample['container'],
             'container_name': raw_sample['container_name'],
             'sex': raw_sample['sex'],
-            'application_tag': raw_sample['application_tag'],
+            'application': raw_sample['application'],
             'source': raw_sample['source'],
         }
-        for key in ('container', 'container_name', 'well_position', 'quantity',
-                    'status'):
+        for key in ('container', 'container_name', 'well_position', 'quantity', 'status'):
             if raw_sample[key]:
                 new_sample[key] = raw_sample[key]
 
@@ -108,7 +107,7 @@ def parse_sample(raw_sample):
                    raw_sample.get('UDF/Gene List') else None),
         'require_qcok': True if raw_sample['UDF/Process only if QC OK'] else False,
         'quantity': raw_sample['UDF/Quantity'] if raw_sample.get('UDF/Quantity') else None,
-        'application_tag': raw_sample['UDF/Sequencing Analysis'],
+        'application': raw_sample['UDF/Sequencing Analysis'],
         'source': raw_sample['UDF/Source'].lower(),
         'status': raw_sample['UDF/Status'].lower(),
         'customer': raw_sample['UDF/customer'],

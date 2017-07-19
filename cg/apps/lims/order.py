@@ -8,7 +8,7 @@ log = logging.getLogger(__name__)
 CONTAINER_TYPE_MAP = {'Tube': 2, '96 well plate': 1}
 PROP2UDF = {
     "require_qcok": "Process only if QC OK",
-    "application_tag": "Sequencing Analysis",
+    "application": "Sequencing Analysis",
     "priority": "priority",
     "source": "Source",
     "comment": "Comment",
@@ -34,7 +34,7 @@ class OrderHandler:
                     "container_name": "CMMS",
                     'udfs': {
                         'priority': 'standard',
-                        'application_tag': 'WGTPCFC030',
+                        'application': 'WGTPCFC030',
                         'require_qcok': True,
                         'well_position': 'A:1',
                         'quantity': "2200",

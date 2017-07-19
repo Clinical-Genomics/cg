@@ -76,6 +76,9 @@ class FamilySample(Model):
             data['father'] = self.father.to_dict() if self.father else None
         return data
 
+    def __str__(self):
+        return f"{self.family.internal_id} | {self.sample.internal_id}"
+
 
 class Family(Model):
 

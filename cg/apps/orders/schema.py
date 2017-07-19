@@ -4,7 +4,7 @@ from marshmallow import Schema, fields
 
 class BaseSample(Schema):
     name = fields.Str(required=True)
-    application_tag = fields.Str(required=True)
+    application = fields.Str(required=True)
 
 
 class BaseFamily(Schema):

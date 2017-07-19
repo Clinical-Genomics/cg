@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from pathlib import Path
-from typing import Generator, Iterator
+from typing import Iterator
 
 import alchy
 import sqlalchemy as sqa
@@ -67,7 +67,7 @@ class StatsAPI(alchy.Manager):
         """Fetch a sample for the database by name."""
         return api.get_sample(sample_name).first()
 
-    def fastqs(self, sample_obj: models.Sample) -> Generator[dict]:
+    def fastqs(self, sample_obj: models.Sample) -> Iterator[dict]:
         """Fetch FASTQ files for a sample."""
         base_pattern = "*{}/Unaligned*/Project_*/Sample_{}/*.fastq.gz"
         for flowcell_obj in self.sample_flowcells(sample_obj):

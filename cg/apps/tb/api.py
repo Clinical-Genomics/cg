@@ -18,7 +18,7 @@ class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
         super(TrailblazerAPI, self).__init__(config['trailblazer']['database'])
         self.mip_cli = MipCli(config['trailblazer']['script'])
         self.mip_config = config['trailblazer']['mip_config']
-        self.families_root = Path(config['trailblazer']['root'])
+        self.families_dir = Path(config['trailblazer']['root'])
 
     def start(self, family_id: str, priority: str='normal', email: str=None):
         """Start MIP."""

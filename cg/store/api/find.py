@@ -65,3 +65,15 @@ class FindHandler:
     def flowcell(self, name: str) -> models.Flowcell:
         """Fetch a flowcell."""
         return self.Flowcell.query.filter_by(name=name).first()
+
+    def link(self, family_id: str, sample_id: str) -> models.FamilySample:
+        """Find a link between a family and a sample."""
+        return (
+            self.FamilySample.query
+            .join(models.FamilySample.family, models.FamilySample.sample)
+            .filter(
+                models.Family.internal_id == family_id,
+                models.Sample.internal_id == sample_id
+            )
+            .first()
+        )

@@ -127,6 +127,8 @@ class AddHandler:
                     internal_id=sample['internal_id'],
                     order=data['name'],
                 )
+                application_obj = self.application(sample['application'])
+                sample_obj.application_version = application_obj.versions[-1]
                 sample_obj.customer = customer_obj
                 family_samples[sample_obj.name] = sample_obj
                 self.add(sample_obj)
