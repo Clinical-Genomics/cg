@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import xlrd
-from cgadmin.lims import SEX_MAP
 
+SEX_MAP = {'male': 'M', 'female': 'F', 'unknown': 'unknown'}
 REV_SEX_MAP = {value: key for key, value in SEX_MAP.items()}
 
 
