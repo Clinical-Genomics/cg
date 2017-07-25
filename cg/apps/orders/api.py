@@ -78,8 +78,10 @@ class OrdersAPI(object):
                 'priority': family['priority'],
                 'panels': family['panels'],
                 'samples': [{
-                    'internal_id': lims_map[sample['name']] if lims_map else None,
+                    'internal_id': (sample.get('internal') or
+                                    (lims_map[sample['name']] if lims_map else None)),
                     'name': sample['name'],
+                    'application': sample['application'],
                     'sex': sample['sex'],
                     'status': sample['status'],
                     'mother': sample.get('mother'),

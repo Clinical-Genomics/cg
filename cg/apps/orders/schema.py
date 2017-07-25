@@ -4,6 +4,7 @@ from marshmallow import Schema, fields
 
 class BaseSample(Schema):
     name = fields.Str(required=True)
+    internal = fields.Str()
     application = fields.Str(required=True)
 
 

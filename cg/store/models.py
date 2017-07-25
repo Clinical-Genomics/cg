@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime as dt
+from typing import List
 
 import alchy
 from sqlalchemy import Column, ForeignKey, orm, types, UniqueConstraint, Table
@@ -15,9 +16,10 @@ class User(Model):
     is_admin = Column(types.Boolean, default=False)
 
     customer_id = Column(ForeignKey('customer.id', ondelete='CASCADE'), nullable=False)
+    customer = orm.relationship('Customer', backref='users')
 
-    def __str__(self):
-        return f"{self.name}"
+    def __str__(self) -> str:
+        return self.name
 
 
 class Customer(Model):
@@ -43,10 +45,9 @@ class Customer(Model):
 
     families = orm.relationship('Family', backref='customer', order_by='-Family.id')
     samples = orm.relationship('Sample', backref='customer', order_by='-Sample.id')
-    users = orm.relationship('User', backref='customer')
 
-    def __str__(self):
-        return f"{self.internal_id}"
+    def __str__(self) -> str:
+        return f"{self.internal_id} ({self.name})"
 
 
 class FamilySample(Model):
@@ -67,7 +68,7 @@ class FamilySample(Model):
     mother = orm.relationship('Sample', foreign_keys=[mother_id])
     father = orm.relationship('Sample', foreign_keys=[father_id])
 
-    def to_dict(self, samples=False):
+    def to_dict(self, samples: bool=False) -> dict:
         """Override dicify method."""
         data = super(FamilySample, self).to_dict()
         if samples:
@@ -76,7 +77,7 @@ class FamilySample(Model):
             data['father'] = self.father.to_dict() if self.father else None
         return data
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.family.internal_id} | {self.sample.internal_id}"
 
 
@@ -98,10 +99,10 @@ class Family(Model):
 
     analyses = orm.relationship('Analysis', backref='family', order_by='-Analysis.analyzed_at')
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
 
-    def to_dict(self, links=False):
+    def to_dict(self, links: bool=False) -> dict:
         """Override dicify method."""
         data = super(Family, self).to_dict()
         if links:
@@ -109,13 +110,13 @@ class Family(Model):
         return data
 
     @property
-    def panels(self):
+    def panels(self) -> List[str]:
         """Return a list of panels."""
         panel_list = self._panels.split(',') if self._panels else []
         return panel_list
 
     @panels.setter
-    def panels(self, panel_list):
+    def panels(self, panel_list: List[str]):
         self._panels = ','.join(panel_list) if panel_list else None
 
 
@@ -127,9 +128,9 @@ class Sample(Model):
 
     id = Column(types.Integer, primary_key=True)
     created_at = Column(types.DateTime, default=dt.datetime.now)
-    order = Column(types.String(64))
     internal_id = Column(types.String(32), nullable=False, unique=True)
     name = Column(types.String(128), nullable=False)
+    order = Column(types.String(64))
     received_at = Column(types.DateTime)
     sequenced_at = Column(types.DateTime)
     delivered_at = Column(types.DateTime)
@@ -139,7 +140,7 @@ class Sample(Model):
     customer_id = Column(ForeignKey('customer.id', ondelete='CASCADE'), nullable=False)
     application_version_id = Column(ForeignKey('application_version.id'))
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
 
 
@@ -162,6 +163,9 @@ class Flowcell(Model):
 
     samples = orm.relationship('Sample', secondary=flowcell_sample, backref='flowcells')
 
+    def __str__(self):
+        return self.name
+
 
 class Analysis(Model):
 
@@ -178,6 +182,9 @@ class Analysis(Model):
 
     family_id = Column(ForeignKey('family.id', ondelete='CASCADE'), nullable=False)
 
+    def __str__(self):
+        return f"{self.family.internal_id} | {self.analyzed_at.date()}"
+
 
 class Application(Model):
 
@@ -190,14 +197,13 @@ class Application(Model):
     turnaround_time = Column(types.Integer)
     minimum_order = Column(types.Integer, default=1)
     sequencing_depth = Column(types.Integer)
+    target_reads = Column(types.BigInteger, default=0)
     sample_amount = Column(types.Integer)
     sample_volume = Column(types.Text)
     sample_concentration = Column(types.Text)
     priority_processing = Column(types.Boolean, default=False)
-
     details = Column(types.Text)
     limitations = Column(types.Text)
-
     percent_kth = Column(types.Integer)
 
     created_at = Column(types.DateTime, default=dt.datetime.now)
@@ -207,8 +213,12 @@ class Application(Model):
     versions = orm.relationship('ApplicationVersion', order_by='ApplicationVersion.version',
                                 backref='application')
 
-    def __str__(self):
-        return f"{self.tag}"
+    def __str__(self) -> str:
+        return self.tag
+
+    @property
+    def expected_reads(self):
+        return self.target_reads * 0.75
 
 
 class ApplicationVersion(Model):
@@ -231,7 +241,7 @@ class ApplicationVersion(Model):
 
     samples = orm.relationship('Sample', backref='application_version')
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.application.tag} ({self.version})"
 
 
@@ -246,3 +256,6 @@ class Panel(Model):
     gene_count = Column(types.Integer)
 
     customer = orm.relationship(Customer, backref='panels')
+
+    def __str__(self):
+        return f"{self.abbrev} ({self.current_version})"

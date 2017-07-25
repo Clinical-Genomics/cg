@@ -17,7 +17,7 @@ import logging
 
 from cgadmin.store.api import AdminDatabase
 import click
-from housekeeper.store import api as hk_api
+#from housekeeper.store import api as hk_api
 import pymongo
 import ruamel.yaml
 
@@ -82,6 +82,19 @@ class ApplicationImporter():
 
     @staticmethod
     def convert(record):
+        target_reads = 0
+        if 'WIP' not in record.name:
+            type_id = record.name[-4]
+            number = int(record.name[-3:])
+            if type_id == 'R':
+                target_reads = number * 1000000
+            elif type_id == 'K':
+                target_reads = number * 1000
+            elif type_id == 'C':
+                # expect WGS, how many reads needed to cover genome 1x
+                READS_PER_1X = 650000000 / 0.75 / 30
+                target_reads = number * READS_PER_1X
+
         return {
             'tag': record.name,
             'category': {
@@ -93,6 +106,7 @@ class ApplicationImporter():
             'created_at': record.created_at,
             'minimum_order': record.minimum_order,
             'sequencing_depth': record.sequencing_depth,
+            'target_reads': target_reads,
             'sample_amount': record.sample_amount,
             'sample_volume': record.sample_volume,
             'sample_concentration': record.sample_concentration,
@@ -426,15 +440,15 @@ def transfer(config_file):
     panel_importer = PanelImporter(status_api, scout_api)
     panel_importer.records()
 
-    lims_api = lims_app.LimsAPI(config)
-    log.info('loading samples, families, and links')
-    sample_importer = SampleImporter(status_api, lims_api)
-    sample_importer.records()
+    # lims_api = lims_app.LimsAPI(config)
+    # log.info('loading samples, families, and links')
+    # sample_importer = SampleImporter(status_api, lims_api)
+    # sample_importer.records()
 
-    hk_manager = hk_api.manager(config['housekeeper']['old']['database'])
-    log.info('loading analyses')
-    analysis_importer = AnalysisImporter(status_api, hk_manager)
-    analysis_importer.records()
+    # hk_manager = hk_api.manager(config['housekeeper']['old']['database'])
+    # log.info('loading analyses')
+    # analysis_importer = AnalysisImporter(status_api, hk_manager)
+    # analysis_importer.records()
 
 
 if __name__ == '__main__':

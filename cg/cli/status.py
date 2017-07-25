@@ -21,7 +21,30 @@ def analysis(context):
 
 
 @status.command()
-@click.option('-s', '--skip', default=0, help='skip initial families')
+@click.option('-s', '--skip', default=0, help='skip initial records')
+@click.pass_context
+def samples(context, skip):
+    """View status of samples."""
+    records = context.obj['db'].samples().offset(skip).limit(30)
+    for record in records:
+        message = f"{record.internal_id} ({record.customer.internal_id})"
+        if record.sequenced_at:
+            color = 'green'
+            message += f" [SEQUENCED: {record.sequenced_at.date()}]"
+        elif record.received_at and record.reads:
+            color = 'orange'
+            message += f" [READS: {record.reads}]"
+        elif record.received_at:
+            color = 'blue'
+            message += f" [RECEIVED: {record.received_at.date()}]"
+        else:
+            color = 'grey'
+            message += ' [NOT RECEIVED]'
+        click.echo(click.style(message, fg=color))
+
+
+@status.command()
+@click.option('-s', '--skip', default=0, help='skip initial records')
 @click.pass_context
 def families(context, skip):
     """View status of families."""

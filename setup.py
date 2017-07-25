@@ -4,8 +4,8 @@ import os
 import sys
 from setuptools import setup, find_packages
 
-if sys.argv[-1] == "publish":
-    os.system("python setup.py sdist bdist_wheel upload")
+if sys.argv[-1] == 'publish':
+    os.system('python setup.py sdist bdist_wheel upload')
     sys.exit()
 
 
@@ -30,7 +30,7 @@ def parse_reqs(req_path='./requirements.txt'):
 setup(
     name='cg',
     version='1.0.0-beta1',
-    description='Glue CLI for Clinical Genomics apps.',
+    description='Clinical Genomics command center.',
     author='Robin Andeer',
     author_email='robin.andeer@scilifelab.se',
     url='https://github.com/Clinical-Genomics/cg',

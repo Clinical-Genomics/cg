@@ -4,7 +4,7 @@ from flask import Flask
 from flask_admin.contrib.sqla import ModelView
 
 from cg.store import models
-from . import api, ext
+from . import api, ext, admin
 
 
 def create_app():
@@ -37,13 +37,13 @@ def register_blueprints(app):
 
 
 def register_admin_views():
-    ext.admin.add_view(ModelView(models.Customer, ext.db.session))
-    ext.admin.add_view(ModelView(models.User, ext.db.session))
-    ext.admin.add_view(ModelView(models.FamilySample, ext.db.session))
-    ext.admin.add_view(ModelView(models.Family, ext.db.session))
-    ext.admin.add_view(ModelView(models.Sample, ext.db.session))
+    ext.admin.add_view(admin.CustomerView(models.Customer, ext.db.session))
+    ext.admin.add_view(admin.UserView(models.User, ext.db.session))
+    ext.admin.add_view(admin.FamilyView(models.Family, ext.db.session))
+    ext.admin.add_view(admin.SampleView(models.Sample, ext.db.session))
+    ext.admin.add_view(admin.FamilySampleView(models.FamilySample, ext.db.session))
     ext.admin.add_view(ModelView(models.Flowcell, ext.db.session))
     ext.admin.add_view(ModelView(models.Analysis, ext.db.session))
-    ext.admin.add_view(ModelView(models.Application, ext.db.session))
-    ext.admin.add_view(ModelView(models.ApplicationVersion, ext.db.session))
-    ext.admin.add_view(ModelView(models.Panel, ext.db.session))
+    ext.admin.add_view(admin.ApplicationView(models.Application, ext.db.session))
+    ext.admin.add_view(admin.ApplicationVersionView(models.ApplicationVersion, ext.db.session))
+    ext.admin.add_view(admin.PanelView(models.Panel, ext.db.session))

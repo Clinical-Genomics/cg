@@ -1,6 +1,6 @@
 # database
-alchy
-sqlalchemy
+Alchy
+SQLAlchemy
 
 # cli
 Click>=6.7

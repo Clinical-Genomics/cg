@@ -19,5 +19,6 @@ def transfer(context):
 def flowcell(context, flowcell):
     """Populate results from a flowcell."""
     stats_api = StatsAPI(context.obj)
-    record = transfer_app.flowcell(context.obj['db'], stats_api, flowcell)
-    click.echo(record)
+    new_record = transfer_app.flowcell(context.obj['db'], stats_api, flowcell)
+    context.obj['db'].add_commit(new_record)
+    click.echo(click.style(f"flowcell added: {new_record}", fg='green'))
