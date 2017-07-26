@@ -2,7 +2,7 @@
 import click
 
 from cg.apps import hk, tb
-from cg.meta import analysis
+from cg.meta.analysis import AnalysisAPI
 from cg.store import Store
 
 priority_option = click.option('-p', '--priority', type=click.Choice(['low', 'normal', 'high']))
@@ -14,12 +14,12 @@ email_option = click.option('-e', '--email', help='email to send errors to')
 @email_option
 @click.option('-f', '--family', 'family_id', help='link samples within a family')
 @click.pass_context
-def analyze(context, priority, email, family_id):
+def analysis(context, priority, email, family_id):
     """Start an analysis (MIP) for a family."""
     context.obj['db'] = Store(context.obj['database'])
     hk_api = hk.HousekeeperAPI(context.obj)
     context.obj['tb'] = tb.TrailblazerAPI(context.obj)
-    context.obj['api'] = analysis.AnalysisAPI(context.obj['db'], hk_api, context.obj['tb'])
+    context.obj['api'] = AnalysisAPI(context.obj['db'], hk_api, context.obj['tb'])
 
     if context.invoked_subcommand is None:
         if family_id is None:
@@ -32,7 +32,7 @@ def analyze(context, priority, email, family_id):
         context.invoke(start, family_id=family_id, priority=priority, email=email)
 
 
-@analyze.command()
+@analysis.command()
 @click.option('-d', '--dry', is_flag=True, help='print config to console')
 @click.argument('family_id')
 @click.pass_context
@@ -47,7 +47,7 @@ def config(context, dry, family_id):
         click.echo(click.style(f"saved config to: {out_path}", fg='green'))
 
 
-@analyze.command()
+@analysis.command()
 @click.option('-f', '--family', 'family_id', help='link samples within a family')
 @click.argument('sample_id', required=False)
 @click.pass_context
@@ -72,7 +72,7 @@ def link(context, family_id, sample_id):
         context.obj['api'].link_sample(link_obj)
 
 
-@analyze.command()
+@analysis.command()
 @priority_option
 @email_option
 @click.argument('family_id')

@@ -5,7 +5,7 @@ import ruamel.yaml
 import cg
 from cg.store import Store
 
-from .analyze import analyze
+from .analysis import analysis
 from .demo import demo
 from .store import store
 from .add import add
@@ -50,7 +50,7 @@ def init(context, reset, force):
     click.echo(click.style(message, fg='green'))
 
 
-base.add_command(analyze)
+base.add_command(analysis)
 base.add_command(store)
 base.add_command(add)
 base.add_command(upload)
