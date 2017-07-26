@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import click
 
-from cg.apps import stats, tb
+from cg.apps import hk, tb
 from cg.meta import analysis
 from cg.store import Store
 
@@ -17,9 +17,9 @@ email_option = click.option('-e', '--email', help='email to send errors to')
 def analyze(context, priority, email, family_id):
     """Start an analysis (MIP) for a family."""
     context.obj['db'] = Store(context.obj['database'])
-    stats_api = stats.StatsAPI(context.obj)
+    hk_api = hk.HousekeeperAPI(context.obj)
     context.obj['tb'] = tb.TrailblazerAPI(context.obj)
-    context.obj['api'] = analysis.AnalysisAPI(context.obj['db'], stats_api, context.obj['tb'])
+    context.obj['api'] = analysis.AnalysisAPI(context.obj['db'], hk_api, context.obj['tb'])
 
     if context.invoked_subcommand is None:
         if family_id is None:
@@ -33,7 +33,7 @@ def analyze(context, priority, email, family_id):
 
 
 @analyze.command()
-@click.option('-d', '--dry', is_flag=True)
+@click.option('-d', '--dry', is_flag=True, help='print config to console')
 @click.argument('family_id')
 @click.pass_context
 def config(context, dry, family_id):
@@ -48,11 +48,10 @@ def config(context, dry, family_id):
 
 
 @analyze.command()
-@click.option('-d', '--dry', is_flag=True)
 @click.option('-f', '--family', 'family_id', help='link samples within a family')
 @click.argument('sample_id', required=False)
 @click.pass_context
-def link(context, dry, family_id, sample_id):
+def link(context, family_id, sample_id):
     """Link FASTQ files for a sample."""
     if family_id and (sample_id is None):
         # link all samples in a family
@@ -70,7 +69,7 @@ def link(context, dry, family_id, sample_id):
         context.abort()
 
     for link_obj in link_objs:
-        context.obj['api'].link_sample(link_obj, dry=dry)
+        context.obj['api'].link_sample(link_obj)
 
 
 @analyze.command()

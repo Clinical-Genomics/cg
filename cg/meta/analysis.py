@@ -2,7 +2,7 @@
 import logging
 
 from cg.apps.tb import TrailblazerAPI
-from cg.apps.stats import StatsAPI
+from cg.apps.hk import HousekeeperAPI
 from cg.store import models, Store
 
 log = logging.getLogger(__name__)
@@ -10,10 +10,10 @@ log = logging.getLogger(__name__)
 
 class AnalysisAPI():
 
-    def __init__(self, db: Store, stats_api: StatsAPI, tb_api: TrailblazerAPI):
+    def __init__(self, db: Store, hk_api: HousekeeperAPI, tb_api: TrailblazerAPI):
         self.db = db
         self.tb = tb_api
-        self.stats = stats_api
+        self.hk = hk_api
 
     def start(self, *args, **kwargs):
         """Start the analysis."""
@@ -47,14 +47,13 @@ class AnalysisAPI():
             data['samples'].append(sample_data)
         return data
 
-    def link_sample(self, link_obj: models.FamilySample, dry: bool=False):
+    def link_sample(self, link_obj: models.FamilySample):
         """Link FASTQ files for a sample."""
-        stats_sample = self.stats.sample(link_obj.sample.internal_id)
-        files = self.stats.fastqs(stats_sample)
+        file_objs = self.hk.files(bundle=link_obj.sample.internal_id, tags=['fastq'])
+        files = [file_obj.path for file_obj in file_objs]
         self.tb.link(
             family=link_obj.family.internal_id,
             sample=link_obj.sample.internal_id,
             analysis_type=link_obj.sample.application_version.application.category,
             files=files,
-            dry=dry,
         )

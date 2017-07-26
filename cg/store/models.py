@@ -38,7 +38,6 @@ class Customer(Model):
     invoice_address = Column(types.Text)
     invoice_reference = Column(types.String(32))
     uppmax_account = Column(types.String(32))
-
     primary_contact = Column(types.String(128))
     delivery_contact = Column(types.String(128))
     invoice_contact = Column(types.String(128))
@@ -88,15 +87,14 @@ class Family(Model):
     )
 
     id = Column(types.Integer, primary_key=True)
-    created_at = Column(types.DateTime, default=dt.datetime.now)
     internal_id = Column(types.String(32), unique=True, nullable=False)
     name = Column(types.String(128), nullable=False)
     priority = Column(types.Integer, default=1, nullable=False)
     _panels = Column(types.Text, nullable=False)
     analyze = Column(types.Boolean, default=False)
 
+    created_at = Column(types.DateTime, default=dt.datetime.now)
     customer_id = Column(ForeignKey('customer.id', ondelete='CASCADE'), nullable=False)
-
     analyses = orm.relationship('Analysis', backref='family', order_by='-Analysis.analyzed_at')
 
     def __str__(self) -> str:
@@ -127,16 +125,16 @@ class Sample(Model):
     )
 
     id = Column(types.Integer, primary_key=True)
-    created_at = Column(types.DateTime, default=dt.datetime.now)
     internal_id = Column(types.String(32), nullable=False, unique=True)
     name = Column(types.String(128), nullable=False)
     order = Column(types.String(64))
+    sex = Column(types.Enum('male', 'female', 'unknown'), nullable=False)
+    reads = Column(types.Integer, default=0)
     received_at = Column(types.DateTime)
     sequenced_at = Column(types.DateTime)
     delivered_at = Column(types.DateTime)
-    sex = Column(types.Enum('male', 'female', 'unknown'), nullable=False)
-    reads = Column(types.Integer, default=0)
 
+    created_at = Column(types.DateTime, default=dt.datetime.now)
     customer_id = Column(ForeignKey('customer.id', ondelete='CASCADE'), nullable=False)
     application_version_id = Column(ForeignKey('application_version.id'))
 
@@ -172,14 +170,14 @@ class Analysis(Model):
     id = Column(types.Integer, primary_key=True)
     pipeline = Column(types.String(32), nullable=False)
     pipeline_version = Column(types.String(32))
-    created_at = Column(types.DateTime, default=dt.datetime.now, nullable=False)
     analyzed_at = Column(types.DateTime)
-    housekeeper_id = Column(types.Integer)
     uploaded_at = Column(types.DateTime)
     delivered_at = Column(types.DateTime)
     # primary analysis is the one originally delivered to the customer
     is_primary = Column(types.Boolean, default=False)
+    housekeeper_id = Column(types.Integer)
 
+    created_at = Column(types.DateTime, default=dt.datetime.now, nullable=False)
     family_id = Column(ForeignKey('family.id', ondelete='CASCADE'), nullable=False)
 
     def __str__(self):
@@ -192,8 +190,8 @@ class Application(Model):
     tag = Column(types.String(32), unique=True, nullable=False)
     category = Column(types.Enum('wgs', 'wes', 'tga', 'rna', 'mic'), nullable=False)
     description = Column(types.String(256), nullable=False)
-
     is_accredited = Column(types.Boolean, nullable=False)
+
     turnaround_time = Column(types.Integer)
     minimum_order = Column(types.Integer, default=1)
     sequencing_depth = Column(types.Integer)
@@ -205,11 +203,10 @@ class Application(Model):
     details = Column(types.Text)
     limitations = Column(types.Text)
     percent_kth = Column(types.Integer)
+    comment = Column(types.Text)
 
     created_at = Column(types.DateTime, default=dt.datetime.now)
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
-    comment = Column(types.Text)
-
     versions = orm.relationship('ApplicationVersion', order_by='ApplicationVersion.version',
                                 backref='application')
 
@@ -228,17 +225,16 @@ class ApplicationVersion(Model):
     id = Column(types.Integer, primary_key=True)
     version = Column(types.Integer, nullable=False)
 
-    application_id = Column(ForeignKey(Application.id), nullable=False)
     valid_from = Column(types.DateTime, default=dt.datetime.now, nullable=False)
     price_standard = Column(types.Integer)
     price_priority = Column(types.Integer)
     price_express = Column(types.Integer)
     price_research = Column(types.Integer)
+    comment = Column(types.Text)
 
     created_at = Column(types.DateTime, default=dt.datetime.now)
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
-    comment = Column(types.Text)
-
+    application_id = Column(ForeignKey(Application.id), nullable=False)
     samples = orm.relationship('Sample', backref='application_version')
 
     def __str__(self) -> str:
@@ -250,11 +246,11 @@ class Panel(Model):
     id = Column(types.Integer, primary_key=True)
     name = Column(types.String(64), unique=True)
     abbrev = Column(types.String(32), unique=True)
-    customer_id = Column(ForeignKey('customer.id', ondelete='CASCADE'), nullable=False)
     current_version = Column(types.Float, nullable=False)
     date = Column(types.DateTime, nullable=False)
     gene_count = Column(types.Integer)
 
+    customer_id = Column(ForeignKey('customer.id', ondelete='CASCADE'), nullable=False)
     customer = orm.relationship(Customer, backref='panels')
 
     def __str__(self):
