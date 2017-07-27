@@ -28,8 +28,8 @@ class ChanjoAPI(ChanjoDB):
         try:
             self.add(result.sample)
             with click.progressbar(result.models, length=result.count,
-                                   label='loading transcripts') as bar:
-                for tx_model in bar:
+                                   label='loading transcripts') as progress_bar:
+                for tx_model in progress_bar:
                     self.add(tx_model)
             self.save()
         except IntegrityError as error:

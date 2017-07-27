@@ -25,17 +25,17 @@ class UploadGenotypesAPI(object):
             'samples_sex': {},
         }
         analysis_sexes = self._analysis_sex(hk_version)
-        for sample_obj in analysis_obj.family.samples:
-            data['samples_sex'][sample_obj.internal_id] = {
-                'pedigree': sample_obj.sex,
-                'analysis': analysis_sexes[sample_obj.internal_id],
+        for link_obj in analysis_obj.family.links:
+            data['samples_sex'][link_obj.sample.internal_id] = {
+                'pedigree': link_obj.sample.sex,
+                'analysis': analysis_sexes[link_obj.sample.internal_id],
             }
         return data
 
     def _analysis_sex(self, hk_version: hk.models.Version) -> dict:
         """Fetch analysis sex for each sample of an analysis."""
         hk_qcmetrics = self.hk.files(version=hk_version.id, tags=['qcmetrics']).first()
-        with Path(hk_qcmetrics.full_path) as in_stream:
+        with Path(hk_qcmetrics.full_path).open() as in_stream:
             qcmetrics_raw = ruamel.yaml.safe_load(in_stream)
         qcmetrics_data = self.tb.parse_qcmetrics(qcmetrics_raw)
         data = {}
@@ -45,4 +45,4 @@ class UploadGenotypesAPI(object):
 
     def upload(self, data: dict):
         """Upload data about genotypes for a family of samples."""
-        self.gt.upload(data['bcf'], data['samples_sex'])
+        self.gt.upload(str(data['bcf']), data['samples_sex'])

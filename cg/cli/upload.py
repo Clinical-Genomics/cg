@@ -9,10 +9,16 @@ from cg.meta.upload.observations import UploadObservationsAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
 
 
-@click.group()
-def upload():
+@click.group(invoke_without_command=True)
+@click.option('-f', '--family', 'family_id', help='Upload to all apps')
+@click.pass_context
+def upload(context, family_id):
     """Upload results from analyses."""
-    pass
+    if family_id:
+        context.invoke(coverage, family_id=family_id)
+        context.invoke(genotypes, family_id=family_id)
+        context.invoke(observations, family_id=family_id)
+        context.invoke(scout, family_id=family_id)
 
 
 @upload.command()
