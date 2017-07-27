@@ -2,7 +2,7 @@
 import click
 
 from cg.apps.stats import StatsAPI
-from cg.apps.housekeeper import HousekeeperAPI
+from cg.apps.hk import HousekeeperAPI
 from cg.meta import transfer as transfer_app
 from cg.store import Store
 

@@ -34,7 +34,8 @@ class TransferFlowcell():
                 continue
 
             # store FASTQ files
-            fastq_files = self.stats.fastqs(sample_obj)
+            stats_sample = self.stats.sample(sample_data['name'])
+            fastq_files = self.stats.fastqs(stats_sample)
             self.store_fastqs(sample_obj.internal_id, fastq_files)
 
             sample_obj.reads = sample_data['reads']
@@ -59,6 +60,7 @@ class TransferFlowcell():
             new_version = self.hk.new_version(created_at=new_bundle.created_at)
             new_version.bundle = new_bundle
             self.hk.add_commit(new_version)
+            log.info(f"added new Housekeeper bundle: {new_bundle.name}")
 
         for fastq_file in fastq_files:
             if self.hk.files(path=fastq_file).first() is None:

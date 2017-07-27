@@ -1,2 +1,2 @@
 # -*- coding: utf-8 -*-
-from .flowcell import flowcell
+from .flowcell import TransferFlowcell

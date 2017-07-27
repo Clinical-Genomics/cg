@@ -48,13 +48,13 @@ def user(context, admin, customer, email, name):
 @add.command()
 @click.option('-l', '--lims', 'lims_id', help='LIMS id for the sample')
 @click.option('-e', '--external', is_flag=True, help='Is sample externally sequenced?')
-@click.option('-p', '--project')
+@click.option('-o', '--order')
 @click.option('-s', '--sex', type=click.Choice(['male', 'female', 'unknown']),
               help='Sample pedigree sex', required=True)
 @click.argument('customer')
 @click.argument('name')
 @click.pass_context
-def sample(context, lims_id, external, sex, project, customer, name):
+def sample(context, lims_id, external, sex, order, customer, name):
     """Add a sample to the store."""
     db = context.obj['db']
     customer_obj = db.customer(customer)
@@ -62,13 +62,12 @@ def sample(context, lims_id, external, sex, project, customer, name):
         click.echo(click.style('customer not found', fg='red'))
         context.abort()
     new_record = db.add_sample(
-        customer=customer_obj,
         name=name,
         sex=sex,
         internal_id=lims_id,
-        external=external,
-        project=project,
+        order=order,
     )
+    new_record.customer = customer_obj
     db.add_commit(new_record)
     click.echo(click.style(f"added new sample: {new_record.name}", fg='green'))
 
