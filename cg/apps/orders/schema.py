@@ -4,7 +4,7 @@ from marshmallow import Schema, fields
 
 class BaseSample(Schema):
     name = fields.Str(required=True)
-    internal = fields.Str()
+    internal_id = fields.Str()
     application = fields.Str(required=True)
 
 
@@ -56,7 +56,7 @@ class ExternalFamily(BaseFamily):
 
 
 class ExternalProject(BaseProject):
-    families = fields.List(fields.Nested(ExternalSample), required=True)
+    families = fields.List(fields.Nested(ExternalFamily), required=True)
 
 
 class FastqProject(BaseProject):

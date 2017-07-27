@@ -44,11 +44,11 @@ class AddHandler:
         return new_record
 
     def add_sample(self, name: str, sex: str, internal_id: str=None, received: dt.datetime=None,
-                   order: str=None) -> models.Sample:
+                   order: str=None, external: bool=False, tumour: bool=False) -> models.Sample:
         """Add a new sample to the database."""
         internal_id = internal_id or utils.get_unique_id(self.sample)
         new_sample = self.Sample(name=name, internal_id=internal_id, received_at=received,
-                                 sex=sex, order=order)
+                                 sex=sex, order=order, is_external=external, is_tumour=tumour)
         return new_sample
 
     def add_family(self, name: str, panels: List[str], priority: str='standard') -> models.Family:

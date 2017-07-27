@@ -129,6 +129,8 @@ class Sample(Model):
     name = Column(types.String(128), nullable=False)
     order = Column(types.String(64))
     sex = Column(types.Enum('male', 'female', 'unknown'), nullable=False)
+    is_external = Column(types.Boolean, default=False)
+    is_tumour = Column(types.Boolean, default=False)
     reads = Column(types.Integer, default=0)
     received_at = Column(types.DateTime)
     sequenced_at = Column(types.DateTime)
@@ -136,7 +138,7 @@ class Sample(Model):
 
     created_at = Column(types.DateTime, default=dt.datetime.now)
     customer_id = Column(ForeignKey('customer.id', ondelete='CASCADE'), nullable=False)
-    application_version_id = Column(ForeignKey('application_version.id'))
+    application_version_id = Column(ForeignKey('application_version.id'), nullable=False)
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"

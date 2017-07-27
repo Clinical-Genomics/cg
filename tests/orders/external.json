@@ -1,0 +1,27 @@
+{
+    "type": "external",
+    "data": {
+        "name": "Scout analysis",
+        "customer": "cust002",
+        "families": [{
+            "name": "F0009703",
+            "panels": ["OMIM-AUTO"],
+            "samples": [{
+                "name": "2016-20203",
+                "sex": "male",
+                "application": "WGXCUSC000",
+                "status": "affected"
+            }]
+        }, {
+            "name": "F0009704",
+            "panels": ["SKD"],
+            "samples": [{
+                "name": "2016-20204",
+                "sex": "female",
+                "status": "affected",
+                "application": "EXXCUSR000",
+                "capture_kit": "Agilent Sureselect V5"
+            }]
+        }]
+    }
+}

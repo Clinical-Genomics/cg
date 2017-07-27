@@ -4,7 +4,7 @@ from cg.store import Store
 from .schema import ExternalProject, FastqProject, RerunProject, ScoutProject
 
 
-class OrdersAPI(object):
+class OrdersAPI():
 
     projects = {
         'external': ExternalProject(),
@@ -22,12 +22,16 @@ class OrdersAPI(object):
         errors = self.validate(project_type, data)
         if errors:
             return errors
-        #lims_data = self.to_lims(data)
-        #lims_project = self.lims.add_project(lims_data)
-        #lims_samples = self.lims.get_samples(projectlimsid=lims_project.id)
-        #lims_map = {lims_sample.name: lims_sample.id for lims_sample in lims_samples}
 
-        #status_data = self.to_status(data, lims_map)
+        if project_type != 'external':
+            #lims_data = self.to_lims(data)
+            #lims_project = self.lims.add_project(lims_data)
+            #lims_samples = self.lims.get_samples(projectlimsid=lims_project.id)
+            #lims_map = {lims_sample.name: lims_sample.id for lims_sample in lims_samples}
+            #status_data = self.to_status(data, lims_map)
+            pass
+        else:
+            pass
         status_data = self.to_status(data)
         new_families = self.status.add_order(status_data)
         self.status.commit()
@@ -37,7 +41,7 @@ class OrdersAPI(object):
         }
 
     @classmethod
-    def validate(cls, project_type: str, data: dict):
+    def validate(cls, project_type: str, data: dict) -> dict:
         """Validate input against a particular schema."""
         errors = cls.projects[project_type].validate(data)
         return errors
@@ -76,10 +80,10 @@ class OrdersAPI(object):
             'name': data['name'],
             'families': [{
                 'name': family['name'],
-                'priority': family['priority'],
+                'priority': family.get('priority', 'standard'),
                 'panels': family['panels'],
                 'samples': [{
-                    'internal_id': (sample.get('internal') or
+                    'internal_id': (sample.get('internal_id') or
                                     (lims_map[sample['name']] if lims_map else None)),
                     'name': sample['name'],
                     'application': sample['application'],

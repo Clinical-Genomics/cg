@@ -51,15 +51,20 @@ def user(context, admin, customer, email, name):
 @click.option('-o', '--order')
 @click.option('-s', '--sex', type=click.Choice(['male', 'female', 'unknown']),
               help='Sample pedigree sex', required=True)
+@click.option('-a', '--application', help='Application tag', required=True)
 @click.argument('customer')
 @click.argument('name')
 @click.pass_context
-def sample(context, lims_id, external, sex, order, customer, name):
+def sample(context, lims_id, external, sex, order, application, customer, name):
     """Add a sample to the store."""
     db = context.obj['db']
     customer_obj = db.customer(customer)
     if customer_obj is None:
         click.echo(click.style('customer not found', fg='red'))
+        context.abort()
+    application_obj = db.application(application)
+    if application_obj is None:
+        click.echo(click.style('application not found', fg='red'))
         context.abort()
     new_record = db.add_sample(
         name=name,
@@ -67,6 +72,7 @@ def sample(context, lims_id, external, sex, order, customer, name):
         internal_id=lims_id,
         order=order,
     )
+    new_record.application_version = application.versions[-1]
     new_record.customer = customer_obj
     db.add_commit(new_record)
     click.echo(click.style(f"added new sample: {new_record.name}", fg='green'))

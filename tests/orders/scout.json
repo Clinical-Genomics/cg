@@ -1,0 +1,40 @@
+{
+    "type": "scout",
+    "data": {
+        "name": "Clincal WGS",
+        "customer": "cust003",
+        "families": [{
+            "name": "17093",
+            "panels": ["IEM", "EP"],
+            "require_qcok": false,
+            "priority": "standard",
+            "samples": [{
+                "name": "17093-I-2A",
+                "father": "17093-II-1U",
+                "mother": "17093-II-2U",
+                "sex": "female",
+                "quantity": "2200",
+                "application": "WGTPCFC030",
+                "source": "blood",
+                "status": "affected",
+                "container": "Tube"
+            }, {
+                "name": "17093-II-1U",
+                "sex": "male",
+                "quantity": "2200",
+                "application": "WGTPCFC030",
+                "source": "blood",
+                "status": "unaffected",
+                "container": "Tube"
+            }, {
+                "name": "17093-II-2U",
+                "sex": "female",
+                "quantity": "2200",
+                "application": "WGTPCFC030",
+                "source": "blood",
+                "status": "unaffected",
+                "container": "Tube"
+            }]
+        }]
+    }
+}

@@ -11,6 +11,10 @@ class FindHandler:
         """Fetch a customer by internal id from the store."""
         return self.Customer.query.filter_by(internal_id=internal_id).first()
 
+    def customers(self) -> List[models.Customer]:
+        """Fetch all customers."""
+        return self.Customer.query
+
     def user(self, email: str) -> models.User:
         """Fetch a user from the store."""
         return self.User.query.filter_by(email=email).first()
@@ -47,6 +51,13 @@ class FindHandler:
     def application(self, tag: str) -> models.Application:
         """Fetch an application from the store."""
         return self.Application.query.filter_by(tag=tag).first()
+
+    def applications(self, *, category=None):
+        """Fetch all applications."""
+        records = self.Application.query
+        if category:
+            records = records.filter_by(category=category)
+        return records
 
     def application_version(self, application: models.Application,
                             version: int) -> models.ApplicationVersion:

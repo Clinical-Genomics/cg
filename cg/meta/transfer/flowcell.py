@@ -36,7 +36,7 @@ class TransferFlowcell():
             # store FASTQ files
             stats_sample = self.stats.sample(sample_data['name'])
             fastq_files = self.stats.fastqs(stats_sample)
-            self.store_fastqs(sample_obj.internal_id, fastq_files)
+            self.store_fastqs(sample_obj.internal_id, map(str, fastq_files))
 
             sample_obj.reads = sample_data['reads']
             enough_reads = (sample_obj.reads >
