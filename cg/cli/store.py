@@ -40,12 +40,12 @@ def analysis(context, config_stream):
     # add new analysis to the status API
     family_obj = db.family(new_bundle.name)
     new_analysis = db.add_analysis(
-        family=family_obj,
         pipeline='mip',
         version=bundle_data['pipeline_version'],
         analyzed=new_version.created_at,
         primary=(len(family_obj.analyses) == 0),
     )
+    new_analysis.family = family_obj
     version_date = new_version.created_at.date()
     click.echo(f"new bundle added: {new_bundle.name}, version {version_date}")
 
@@ -67,9 +67,9 @@ def completed(context):
     """Store all completed analyses."""
     hk_api = context.obj['hk_api']
     for analysis_obj in context.obj['tb_api'].analyses(status='completed'):
-        existing_record = hk_api.version(analysis_obj.family, analysis_obj.analyzed_at)
+        existing_record = hk_api.version(analysis_obj.family, analysis_obj.started_at)
         if existing_record:
-            log.debug(f"analysis stored: {analysis_obj.family} - {analysis_obj.analyzed_at}")
+            log.debug(f"analysis stored: {analysis_obj.family} - {analysis_obj.started_at}")
             continue
         click.echo(click.style(f"storing family: {analysis_obj.family}", fg='blue'))
         with Path(analysis_obj.config_path).open() as config_stream:

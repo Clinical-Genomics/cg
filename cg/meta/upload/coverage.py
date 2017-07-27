@@ -24,13 +24,13 @@ class UploadCoverageApi(object):
             'family_name': analysis_obj.family.name,
             'samples': [],
         }
-        for sample_obj in analysis_obj.family.samples:
+        for link_obj in analysis_obj.family.links:
             hk_version = self.hk.version(family_id, analysis_obj.analyzed_at)
             hk_coverage = self.hk.files(version=hk_version.id,
-                                        tags=[sample_obj.internal_id, 'coverage']).first()
+                                        tags=[link_obj.sample.internal_id, 'coverage']).first()
             data['samples'].append({
-                'sample': sample_obj.internal_id,
-                'sample_name': sample_obj.name,
+                'sample': link_obj.sample.internal_id,
+                'sample_name': link_obj.sample.name,
                 'coverage': hk_coverage.full_path,
             })
         return data

@@ -72,7 +72,6 @@ class FamilyView(BaseView):
 
 
 class SampleView(BaseView):
-    column_exclude_list = ['created_at']
     column_searchable_list = ['internal_id', 'name', 'order', 'customer.internal_id']
     column_filters = ['customer.internal_id', 'sex', 'application_version.application']
     column_editable_list = ['sex']

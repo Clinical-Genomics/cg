@@ -56,6 +56,7 @@ class OrdersAPI(object):
                     'container': sample['container'],
                     'container_name': sample['container_name'],
                     'udfs': {
+                        'family_name': family['name'],
                         'priority': family['priority'],
                         'application': sample['application'],
                         'require_qcok': family['require_qcok'],
