@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from genologics.entities import Sample
 from genologics.lims import Lims
+from dateutil.parser import parse as parse_date
 
 from cg.exc import LimsDataError
 from .order import OrderHandler
@@ -29,6 +30,8 @@ class LimsAPI(Lims, OrderHandler):
             'project': {
                 'id': lims_sample.project.id,
                 'name': lims_sample.project.name,
+                'date': (parse_date(lims_sample.project.open_date) if
+                         lims_sample.project.open_date else None),
             },
             'family': udfs.get('familyID'),
             'customer': udfs.get('customer'),

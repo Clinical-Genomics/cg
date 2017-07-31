@@ -6,6 +6,24 @@ from cg.store import models
 
 class StatusHandler:
 
+    def samples_to_recieve(self):
+        """Fetch incoming samples."""
+        records = (
+            self.Sample.query
+            .filter(models.Sample.received_at == None)
+            .order_by(models.Sample.ordered_at.desc())
+        )
+        return records
+
+    def samples_to_sequence(self):
+        """Fetch samples in sequencing."""
+        records = (
+            self.Sample.query
+            .filter(models.Sample.received_at != None, models.Sample.sequenced_at == None)
+            .order_by(models.Sample.priority.desc(), models.Sample.ordered_at.desc())
+        )
+        return records
+
     def families_to_analyze(self):
         """Fetch families without analyses where all samples are sequenced."""
         records = (
@@ -22,20 +40,22 @@ class StatusHandler:
         )
         return records
 
-    def families_to_upload(self):
+    def analyses_to_upload(self):
         """Fetch analyses that haven't been uploaded."""
-        records = self.Analysis.filter(models.Analysis.analyzed_at != None,
-                                       models.Analysis.uploaded_at == None)
+        records = self.Analysis.query.filter(models.Analysis.analyzed_at != None,
+                                             models.Analysis.uploaded_at == None)
         return records
 
-    def families_to_deliver(self):
+    def analyses_to_deliver(self):
         """Fetch analyses that have been uploaded but not delivered."""
-        records = self.Analysis.filter(models.Analysis.uploaded_at != None,
-                                       models.Analysis.delivered_at == None)
+        records = (
+            self.Analysis.query
+            .filter(models.Analysis.uploaded_at != None, models.Analysis.delivered_at == None)
+        )
         return records
 
     def samples_to_deliver(self):
         """Fetch samples that have been sequenced but not delivered."""
-        records = self.Sample.filter(models.Sample.sequenced_at != None,
-                                     models.Sample.delivered_at == None)
+        records = self.Sample.query.filter(models.Sample.sequenced_at != None,
+                                           models.Sample.delivered_at == None)
         return records

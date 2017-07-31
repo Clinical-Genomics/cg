@@ -43,12 +43,15 @@ class AddHandler:
             setattr(new_record, f"price_{price_key}", prices[price_key])
         return new_record
 
-    def add_sample(self, name: str, sex: str, internal_id: str=None, received: dt.datetime=None,
-                   order: str=None, external: bool=False, tumour: bool=False) -> models.Sample:
+    def add_sample(self, name: str, sex: str, internal_id: str=None, ordered: dt.datetime=None,
+                   received: dt.datetime=None, order: str=None, external: bool=False,
+                   tumour: bool=False, priority: str='standard') -> models.Sample:
         """Add a new sample to the database."""
         internal_id = internal_id or utils.get_unique_id(self.sample)
+        db_priority = PRIORITY_MAP[priority]
         new_sample = self.Sample(name=name, internal_id=internal_id, received_at=received,
-                                 sex=sex, order=order, is_external=external, is_tumour=tumour)
+                                 sex=sex, order=order, is_external=external, is_tumour=tumour,
+                                 ordered_at=ordered or dt.datetime.now(), priority=db_priority)
         return new_sample
 
     def add_family(self, name: str, panels: List[str], priority: str='standard') -> models.Family:
@@ -77,8 +80,10 @@ class AddHandler:
         new_record.father = father
         return new_record
 
-    def add_flowcell(self, name: str, sequencer: str, sequenced: dt.datetime) -> models.Flowcell:
-        new_record = self.Flowcell(name=name, sequencer_type=sequencer, sequenced_at=sequenced)
+    def add_flowcell(self, name: str, sequencer: str, sequencer_type: str,
+                     date: dt.datetime) -> models.Flowcell:
+        new_record = self.Flowcell(name=name, sequencer_name=sequencer,
+                                   sequencer_type=sequencer_type, sequenced_at=date)
         return new_record
 
     def add_analysis(self, pipeline: str, version: str, analyzed: dt.datetime,
@@ -117,10 +122,6 @@ class AddHandler:
 
             family_samples = {}
             for sample in family['samples']:
-                existing_record = self.find_sample(customer_obj, sample['name'])
-                if existing_record:
-                    raise DuplicateRecordError(f"existing sample found: {existing_record.name} "
-                                               f"({existing_record.internal_id})")
                 sample_obj = self.add_sample(
                     name=sample['name'],
                     sex=sample['sex'],

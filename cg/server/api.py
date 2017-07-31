@@ -76,8 +76,11 @@ def panels():
 @blueprint.route('/families')
 def families():
     """Fetch families."""
-    query = db.Family.query
-    data = [family_obj.to_dict() for family_obj in query]
+    if request.args.get('status') == 'analysis':
+        families_q = db.families_to_analyze()
+    else:
+        families_q = db.Family.query
+    data = [family_obj.to_dict(links=True) for family_obj in families_q]
     return jsonify(families=data)
 
 
@@ -92,9 +95,27 @@ def family(family_id):
 @blueprint.route('/samples')
 def samples():
     """Fetch samples."""
-    samples_q = db.samples(query=request.args.get('query'))
+    if request.args.get('status') == 'incoming':
+        samples_q = db.samples_to_recieve()
+    elif request.args.get('status') == 'sequencing':
+        samples_q = db.samples_to_sequence()
+    else:
+        samples_q = db.samples(query=request.args.get('query'))
     data = [sample_obj.to_dict() for sample_obj in samples_q.limit(30)]
     return jsonify(samples=data)
+
+
+@blueprint.route('/analyses')
+def analyses():
+    """Fetch analyses."""
+    if request.args.get('status') == 'delivery':
+        analyses_q = db.analyses_to_deliver()
+    elif request.args.get('status') == 'upload':
+        analyses_q = db.analyses_to_upload()
+    else:
+        analyses_q = db.Analysis.query
+    data = [analysis_obj.to_dict() for analysis_obj in analyses_q]
+    return jsonify(analyses=data)
 
 
 @blueprint.route('/options')

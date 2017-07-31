@@ -28,7 +28,8 @@ class StatsAPI(alchy.Manager):
         record = self.Flowcell.query.filter_by(flowcellname=flowcell_name).first()
         data = {
             'name': record.flowcellname,
-            'sequencer': record.hiseqtype,
+            'sequencer': record.demux.datasource.machine,
+            'sequencer_type': record.hiseqtype,
             'date': record.time,
             'samples': []
         }

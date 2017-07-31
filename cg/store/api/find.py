@@ -44,9 +44,9 @@ class FindHandler:
         records = records.filter(models.Sample.name.like(f"%{query}%")) if query else records
         return records.order_by(models.Sample.created_at.desc())
 
-    def find_sample(self, customer: models.Customer, name: str) -> models.Sample:
-        """Find a sample within a customer."""
-        return self.Sample.query.filter_by(customer=customer, name=name).first()
+    def find_sample(self, customer: models.Customer, name: str) -> List[models.Sample]:
+        """Find samples within a customer."""
+        return self.Sample.query.filter_by(customer=customer, name=name)
 
     def application(self, tag: str) -> models.Application:
         """Fetch an application from the store."""

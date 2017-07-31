@@ -3,7 +3,7 @@ import logging
 from typing import List
 
 from cg.store import models, Store
-from cg.apps.stats import StatsAPI, models as stats_models
+from cg.apps.stats import StatsAPI
 from cg.apps.hk import HousekeeperAPI
 
 log = logging.getLogger(__name__)
@@ -24,7 +24,8 @@ class TransferFlowcell():
             record = self.db.add_flowcell(
                 name=flowcell_name,
                 sequencer=stats_data['sequencer'],
-                sequenced=stats_data['date'],
+                sequencer_type=stats_data['sequencer_type'],
+                date=stats_data['date'],
             )
         for sample_data in stats_data['samples']:
             log.debug(f"adding reads to sample: {sample_data['name']}")
@@ -55,17 +56,18 @@ class TransferFlowcell():
         """Store FASTQ files for a sample in housekeeper."""
         hk_bundle = self.hk.bundle(sample_id)
         if hk_bundle is None:
-            new_bundle = self.hk.new_bundle(sample_id)
-            self.hk.add_commit(new_bundle)
-            new_version = self.hk.new_version(created_at=new_bundle.created_at)
-            new_version.bundle = new_bundle
-            self.hk.add_commit(new_version)
-            log.info(f"added new Housekeeper bundle: {new_bundle.name}")
+            hk_bundle = self.hk.new_bundle(sample_id)
+            self.hk.add_commit(hk_bundle)
+            new_version = self.hk.new_version(created_at=hk_bundle.created_at)
+            hk_bundle.versions.append(new_version)
+            self.hk.commit()
+            log.info(f"added new Housekeeper bundle: {hk_bundle.name}")
 
-        for fastq_file in fastq_files:
-            if self.hk.files(path=fastq_file).first() is None:
-                log.info(f"found FASTQ file: {fastq_file}")
-                new_file = self.hk.new_file(path=fastq_file, tags=[self.hk.tag('fastq')])
-                new_file.version = hk_bundle.versions[0]
-                self.hk.add(new_file)
-        self.hk.commit()
+        with self.hk.session.no_autoflush:
+            hk_version = hk_bundle.versions[0]
+            for fastq_file in fastq_files:
+                if self.hk.files(path=fastq_file).first() is None:
+                    log.info(f"found FASTQ file: {fastq_file}")
+                    new_file = self.hk.new_file(path=fastq_file, tags=[self.hk.tag('fastq')])
+                    hk_version.files.append(new_file)
+            self.hk.commit()

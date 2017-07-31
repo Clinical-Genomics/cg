@@ -103,6 +103,7 @@ class Family(Model):
     def to_dict(self, links: bool=False) -> dict:
         """Override dicify method."""
         data = super(Family, self).to_dict()
+        data['panels'] = self.panels
         if links:
             data['links'] = [link_obj.to_dict(samples=True) for link_obj in self.links]
         return data
@@ -120,18 +121,16 @@ class Family(Model):
 
 class Sample(Model):
 
-    __table_args__ = (
-        UniqueConstraint('customer_id', 'name', name='_customer_name_uc'),
-    )
-
     id = Column(types.Integer, primary_key=True)
     internal_id = Column(types.String(32), nullable=False, unique=True)
+    priority = Column(types.Integer, default=1, nullable=False)
     name = Column(types.String(128), nullable=False)
     order = Column(types.String(64))
     sex = Column(types.Enum('male', 'female', 'unknown'), nullable=False)
     is_external = Column(types.Boolean, default=False)
     is_tumour = Column(types.Boolean, default=False)
     reads = Column(types.Integer, default=0)
+    ordered_at = Column(types.DateTime, nullable=False)
     received_at = Column(types.DateTime)
     sequenced_at = Column(types.DateTime)
     delivered_at = Column(types.DateTime)
@@ -142,6 +141,14 @@ class Sample(Model):
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
+
+    def to_dict(self) -> dict:
+        """Override dicify method."""
+        data = super(Sample, self).to_dict()
+        data['customer'] = self.customer.to_dict()
+        data['application_version'] = self.application_version.to_dict()
+        data['application'] = self.application_version.application.to_dict()
+        return data
 
 
 flowcell_sample = Table(
@@ -185,6 +192,12 @@ class Analysis(Model):
     def __str__(self):
         return f"{self.family.internal_id} | {self.analyzed_at.date()}"
 
+    def to_dict(self):
+        """Override dicify method."""
+        data = super(Analysis, self).to_dict()
+        data['family'] = self.family.to_dict()
+        return data
+
 
 class Application(Model):
 
@@ -206,6 +219,7 @@ class Application(Model):
     limitations = Column(types.Text)
     percent_kth = Column(types.Integer)
     comment = Column(types.Text)
+    is_archived = Column(types.Boolean, default=False)
 
     created_at = Column(types.DateTime, default=dt.datetime.now)
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
