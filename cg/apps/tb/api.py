@@ -2,6 +2,7 @@
 import logging
 from pathlib import Path
 
+import click
 from trailblazer.mip.start import MipCli
 from trailblazer.store import Store
 from trailblazer.cli.utils import environ_email
@@ -37,5 +38,6 @@ class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
         out_dir = self.families_dir / family_id
         out_dir.mkdir(parents=True, exist_ok=True)
         out_path = out_dir / 'aggregated_master.bed'
-        with out_path.open() as out_handle:
-            out_handle.write(content)
+        with out_path.open('w') as out_handle:
+            for line in content:
+                click.echo(line, file=out_handle)
