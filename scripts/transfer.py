@@ -307,7 +307,7 @@ def validate_sample(db, lims, lims_sample, family=False):
     if sample['application'] is None:
         log.debug(f"missing application udf: {sample}")
         return None
-    elif sample['application'].startswith(('MWG', 'RML', 'MET')):
+    elif sample['application'].startswith(('MW', 'RML', 'MET')):
         return None
     elif sample['customer'] is None:
         log.debug(f"missing customer udf: {sample}")
@@ -557,36 +557,36 @@ def transfer(config_file):
     config = ruamel.yaml.safe_load(config_file)
     status_api = Store(config['database'])
 
-    # admin_api = AdminDatabase(config['cgadmin']['database'])
-    # log.info('loading customers')
-    # customer_importer = CustomerImporter(status_api, admin_api)
-    # customer_importer.records()
+    admin_api = AdminDatabase(config['cgadmin']['database'])
+    log.info('loading customers')
+    customer_importer = CustomerImporter(status_api, admin_api)
+    customer_importer.records()
 
-    # log.info('loading users')
-    # user_importer = UserImporter(status_api, admin_api)
-    # user_importer.records()
+    log.info('loading users')
+    user_importer = UserImporter(status_api, admin_api)
+    user_importer.records()
 
-    # log.info('loading applications')
-    # application_importer = ApplicationImporter(status_api, admin_api)
-    # application_importer.records()
+    log.info('loading applications')
+    application_importer = ApplicationImporter(status_api, admin_api)
+    application_importer.records()
 
-    # log.info('loading application versions')
-    # version_importer = VersionImporter(status_api, admin_api)
-    # version_importer.records()
+    log.info('loading application versions')
+    version_importer = VersionImporter(status_api, admin_api)
+    version_importer.records()
 
-    # scout_api = scoutapi.ScoutAPI(config)
-    # log.info('loading panels')
-    # panel_importer = PanelImporter(status_api, scout_api)
-    # panel_importer.records()
+    scout_api = scoutapi.ScoutAPI(config)
+    log.info('loading panels')
+    panel_importer = PanelImporter(status_api, scout_api)
+    panel_importer.records()
 
-    # lims_api = lims_app.LimsAPI(config)
-    # log.info('loading samples')
-    # sample_importer = SampleImporter(status_api, lims_api)
-    # sample_importer.records()
+    lims_api = lims_app.LimsAPI(config)
+    log.info('loading samples')
+    sample_importer = SampleImporter(status_api, lims_api)
+    sample_importer.records()
 
-    # log.info('loading families and links')
-    # family_importer = FamilyImporter(status_api, lims_api)
-    # family_importer.records()
+    log.info('loading families and links')
+    family_importer = FamilyImporter(status_api, lims_api)
+    family_importer.records()
 
     stats_api = stats.StatsAPI(config)
     log.info('loading flowcells')

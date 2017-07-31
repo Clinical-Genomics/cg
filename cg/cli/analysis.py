@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import click
 
-from cg.apps import hk, tb
+from cg.apps import hk, tb, scoutapi
 from cg.meta.analysis import AnalysisAPI
 from cg.store import Store
 
@@ -18,8 +18,9 @@ def analysis(context, priority, email, family_id):
     """Start an analysis (MIP) for a family."""
     context.obj['db'] = Store(context.obj['database'])
     hk_api = hk.HousekeeperAPI(context.obj)
+    scout_api = scoutapi.ScoutAPI(context.obj)
     context.obj['tb'] = tb.TrailblazerAPI(context.obj)
-    context.obj['api'] = AnalysisAPI(context.obj['db'], hk_api, context.obj['tb'])
+    context.obj['api'] = AnalysisAPI(context.obj['db'], hk_api, scout_api, context.obj['tb'])
 
     if context.invoked_subcommand is None:
         if family_id is None:
@@ -29,6 +30,7 @@ def analysis(context, priority, email, family_id):
         # execute the analysis!
         context.invoke(config, family_id=family_id)
         context.invoke(link, family_id=family_id)
+        context.invoke(panel, family_id=family_id)
         context.invoke(start, family_id=family_id, priority=priority, email=email)
 
 
@@ -70,6 +72,21 @@ def link(context, family_id, sample_id):
 
     for link_obj in link_objs:
         context.obj['api'].link_sample(link_obj)
+
+
+@analysis.command()
+@click.option('-p', '--print', 'print_output', is_flag=True, help='print to console')
+@click.argument('family_id')
+@click.pass_context
+def panel(context, print_output, family_id):
+    """Write aggregated gene panel file."""
+    family_obj = context.obj['db'].family(family_id)
+    bed_lines = context.obj['api'].panel(family_obj)
+    if print_output:
+        for bed_line in bed_lines:
+            click.echo(bed_line)
+    else:
+        context.obj['tb'].write_panel(family_id, bed_lines)
 
 
 @analysis.command()

@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 import logging
+from typing import List
 
 from pymongo import MongoClient
 from scout.adapter.mongo import MongoAdapter
+from scout.export.panel import export_panels as scout_export_panels
 from scout.load import load_scout
 
 log = logging.getLogger(__name__)
@@ -28,3 +30,6 @@ class ScoutAPI(MongoAdapter):
         else:
             log.debug("loading new Scout case")
             load_scout(self, data)
+
+    def export_panels(self, panels: List[str]):
+        return scout_export_panels(self, panels)

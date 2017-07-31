@@ -1,19 +1,32 @@
 # -*- coding: utf-8 -*-
 import logging
+from typing import List
 
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.hk import HousekeeperAPI
+from cg.apps.scoutapi import ScoutAPI
 from cg.store import models, Store
 
 log = logging.getLogger(__name__)
 
+COLLABORATORS = ('cust000', 'cust002', 'cust003', 'cust004', 'cust042')
+MASTER_LIST = ('ENDO', 'EP', 'IEM', 'IBMFS', 'mtDNA', 'MIT', 'PEDHEP', 'OMIM-AUTO',
+               'PIDCAD', 'PID', 'SKD', 'NMD', 'ATX', 'CTD', 'ID', 'SPG', 'Ataxi', 'AD-HSP')
+COMBOS = {
+    'DSD': ('DSD', 'HYP', 'SEXDIF', 'SEXDET'),
+    'CM': ('CNM', 'CM'),
+    'Horsel': ('Horsel', '141217', '141201'),
+}
+
 
 class AnalysisAPI():
 
-    def __init__(self, db: Store, hk_api: HousekeeperAPI, tb_api: TrailblazerAPI):
+    def __init__(self, db: Store, hk_api: HousekeeperAPI, scout_api: ScoutAPI,
+                 tb_api: TrailblazerAPI):
         self.db = db
         self.tb = tb_api
         self.hk = hk_api
+        self.scout = scout_api
 
     def start(self, *args, **kwargs):
         """Start the analysis."""
@@ -57,3 +70,31 @@ class AnalysisAPI():
             analysis_type=link_obj.sample.application_version.application.category,
             files=files,
         )
+
+    def panel(self, family_obj: models.Family) -> List[str]:
+        """Create the aggregated panel file."""
+        all_panels = self.convert_panels(family_obj.customer.internal_id, family_obj.panels)
+        bed_lines = self.scout.export_panels(all_panels)
+        return bed_lines
+
+    @staticmethod
+    def convert_panels(customer, default_panels):
+        """Convert between default panels and all panels included in gene list."""
+        if customer in COLLABORATORS:
+            # check if all default panels are part of master list
+            if all(panel in MASTER_LIST for panel in default_panels):
+                return MASTER_LIST
+
+        # the rest are handled the same way
+        all_panels = set(default_panels)
+
+        # fill in extra panels if selection is part of a combo
+        for panel in default_panels:
+            if panel in COMBOS:
+                for extra_panel in COMBOS[panel]:
+                    all_panels.add(extra_panel)
+
+        # add OMIM to every panel choice
+        all_panels.add('OMIM-AUTO')
+
+        return list(all_panels)

@@ -31,3 +31,9 @@ class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
     def parse_qcmetrics(data: dict) -> dict:
         """Call internal Trailblazer MIP API."""
         return files.parse_qcmetrics(data)
+
+    def write_panel(self, family_id, content):
+        """Write the gene panel to the defined location."""
+        out_path = self.families_dir / family_id / 'aggregated_master.bed'
+        with out_path.open() as out_handle:
+            out_handle.write(content)
