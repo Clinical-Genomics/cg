@@ -80,7 +80,7 @@ def families():
         families_q = db.families_to_analyze()
     else:
         families_q = db.Family.query
-    data = [family_obj.to_dict(links=True) for family_obj in families_q]
+    data = [family_obj.to_dict(links=True) for family_obj in families_q.limit(30)]
     return jsonify(families=data)
 
 

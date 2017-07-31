@@ -2,7 +2,7 @@
 import os
 
 # flask
-SECRET_KEY = 'unsafe!!!'
+SECRET_KEY = 'thisIsNotASafeKey'
 TEMPLATES_AUTO_RELOAD = True
 
 # sqlalchemy

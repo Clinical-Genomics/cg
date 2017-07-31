@@ -5,6 +5,8 @@ from typing import List
 import alchy
 from sqlalchemy import Column, ForeignKey, orm, types, UniqueConstraint, Table
 
+from cg.constants import REV_PRIORITY_MAP
+
 Model = alchy.make_declarative_base(Base=alchy.ModelBase)
 
 
@@ -97,6 +99,11 @@ class Family(Model):
     customer_id = Column(ForeignKey('customer.id', ondelete='CASCADE'), nullable=False)
     analyses = orm.relationship('Analysis', backref='family', order_by='-Analysis.analyzed_at')
 
+    @property
+    def priority_human(self):
+        """Humanized priority for sample."""
+        return REV_PRIORITY_MAP[self.priority]
+
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
 
@@ -104,6 +111,7 @@ class Family(Model):
         """Override dicify method."""
         data = super(Family, self).to_dict()
         data['panels'] = self.panels
+        data['priority'] = self.priority_human
         if links:
             data['links'] = [link_obj.to_dict(samples=True) for link_obj in self.links]
         return data
@@ -129,7 +137,7 @@ class Sample(Model):
     sex = Column(types.Enum('male', 'female', 'unknown'), nullable=False)
     is_external = Column(types.Boolean, default=False)
     is_tumour = Column(types.Boolean, default=False)
-    reads = Column(types.Integer, default=0)
+    reads = Column(types.BigInteger, default=0)
     ordered_at = Column(types.DateTime, nullable=False)
     received_at = Column(types.DateTime)
     sequenced_at = Column(types.DateTime)
@@ -139,12 +147,18 @@ class Sample(Model):
     customer_id = Column(ForeignKey('customer.id', ondelete='CASCADE'), nullable=False)
     application_version_id = Column(ForeignKey('application_version.id'), nullable=False)
 
+    @property
+    def priority_human(self):
+        """Humanized priority for sample."""
+        return REV_PRIORITY_MAP[self.priority]
+
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
 
     def to_dict(self) -> dict:
         """Override dicify method."""
         data = super(Sample, self).to_dict()
+        data['priority'] = self.priority_human
         data['customer'] = self.customer.to_dict()
         data['application_version'] = self.application_version.to_dict()
         data['application'] = self.application_version.application.to_dict()

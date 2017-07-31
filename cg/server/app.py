@@ -2,6 +2,7 @@
 import coloredlogs
 from flask import Flask
 from flask_admin.contrib.sqla import ModelView
+from flask_admin.base import AdminIndexView
 
 from cg.store import models
 from . import api, ext, admin
@@ -29,7 +30,8 @@ def configure_extensions(app):
 
     ext.cors.init_app(app)
     ext.db.init_app(app)
-    ext.admin.init_app(app)
+    ext.admin.init_app(app, index_view=AdminIndexView(endpoint='admin',
+                                                      url=f"/{app.config['SECRET_KEY']}"))
 
 
 def register_blueprints(app):

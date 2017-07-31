@@ -28,9 +28,16 @@ class AnalysisAPI():
         self.hk = hk_api
         self.scout = scout_api
 
-    def start(self, *args, **kwargs):
+    def start(self, family_obj: models.Family, **kwargs):
         """Start the analysis."""
-        self.tb.start(*args, **kwargs)
+        if kwargs.get('priority') is None:
+            if family_obj.priority == 0:
+                priority = 'low'
+            elif family_obj.priority > 1:
+                priority = 'high'
+            else:
+                priority = 'normal'
+        self.tb.start(family_obj.internal_id, priority=priority, **kwargs)
 
     def config(self, family_obj: models.Family) -> dict:
         """Make the MIP config."""

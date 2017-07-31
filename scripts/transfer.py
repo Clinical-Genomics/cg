@@ -377,10 +377,14 @@ class FamilyImporter():
             panels=data['panels'],
         )
         family_obj.customer = customer_obj
-        new_records = [family_obj]
+        self.db.add(family_obj)
 
+        used_names = set()
         for link_data in data['links']:
-            for sample_obj in self.db.find_sample(customer_obj, data['name']):
+            if link_data['sample'] in used_names:
+                continue
+            used_names.add(link_data['sample'])
+            for sample_obj in self.db.find_sample(customer_obj, link_data['sample']):
                 link_obj = self.db.relate_sample(
                     family=family_obj,
                     sample=sample_obj,
@@ -390,8 +394,8 @@ class FamilyImporter():
                     mother=(self.db.find_sample(customer_obj, link_data['mother']).first() if
                             link_data['mother'] else None),
                 )
-                new_records.append(link_obj)
-        return new_records
+                self.db.add(link_obj)
+        self.db.commit()
 
     def records(self):
         # figure out which samples might be linked together
@@ -407,12 +411,11 @@ class FamilyImporter():
                 family_id = f"{samples[0]['customer']}-{samples[0]['family']}"
                 if family_id in covered_families:
                     continue
+                covered_families.add(family_id)
                 data = self.convert(samples)
                 if data is None:
                     continue
-                new_records = self.status(data)
-                self.db.add_commit(new_records)
-                covered_families.add(family_id)
+                self.status(data)
 
 
 class UserImporter():
@@ -537,7 +540,7 @@ class FlowcellImporter():
                 sample_obj.flowcells.append(flowcell_obj)
 
     def records(self):
-        query = self.stats.Sample.query
+        query = self.stats.Sample.query.order_by('-sample_id')
         count = query.count()
         with click.progressbar(query, length=count, label='flowcells') as progressbar:
             for stats_sample in progressbar:
@@ -545,9 +548,8 @@ class FlowcellImporter():
                 if sample_obj is None:
                     continue
                 data = self.convert(stats_sample)
-                sample_obj = self.status(sample_obj, data)
-                if sample_obj is not None:
-                    self.db.commit()
+                self.status(sample_obj, data)
+                self.db.commit()
 
 
 @click.command()
@@ -557,32 +559,32 @@ def transfer(config_file):
     config = ruamel.yaml.safe_load(config_file)
     status_api = Store(config['database'])
 
-    admin_api = AdminDatabase(config['cgadmin']['database'])
-    log.info('loading customers')
-    customer_importer = CustomerImporter(status_api, admin_api)
-    customer_importer.records()
+    # admin_api = AdminDatabase(config['cgadmin']['database'])
+    # log.info('loading customers')
+    # customer_importer = CustomerImporter(status_api, admin_api)
+    # customer_importer.records()
 
-    log.info('loading users')
-    user_importer = UserImporter(status_api, admin_api)
-    user_importer.records()
+    # log.info('loading users')
+    # user_importer = UserImporter(status_api, admin_api)
+    # user_importer.records()
 
-    log.info('loading applications')
-    application_importer = ApplicationImporter(status_api, admin_api)
-    application_importer.records()
+    # log.info('loading applications')
+    # application_importer = ApplicationImporter(status_api, admin_api)
+    # application_importer.records()
 
-    log.info('loading application versions')
-    version_importer = VersionImporter(status_api, admin_api)
-    version_importer.records()
+    # log.info('loading application versions')
+    # version_importer = VersionImporter(status_api, admin_api)
+    # version_importer.records()
 
-    scout_api = scoutapi.ScoutAPI(config)
-    log.info('loading panels')
-    panel_importer = PanelImporter(status_api, scout_api)
-    panel_importer.records()
+    # scout_api = scoutapi.ScoutAPI(config)
+    # log.info('loading panels')
+    # panel_importer = PanelImporter(status_api, scout_api)
+    # panel_importer.records()
 
     lims_api = lims_app.LimsAPI(config)
-    log.info('loading samples')
-    sample_importer = SampleImporter(status_api, lims_api)
-    sample_importer.records()
+    # log.info('loading samples')
+    # sample_importer = SampleImporter(status_api, lims_api)
+    # sample_importer.records()
 
     log.info('loading families and links')
     family_importer = FamilyImporter(status_api, lims_api)
