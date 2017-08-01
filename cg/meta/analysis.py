@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+import re
 from typing import List
 
 from cg.apps.tb import TrailblazerAPI
@@ -32,12 +33,12 @@ class AnalysisAPI():
         """Start the analysis."""
         if kwargs.get('priority') is None:
             if family_obj.priority == 0:
-                priority = 'low'
+                kwargs['priority'] = 'low'
             elif family_obj.priority > 1:
-                priority = 'high'
+                kwargs['priority'] = 'high'
             else:
-                priority = 'normal'
-        self.tb.start(family_obj.internal_id, priority=priority, **kwargs)
+                kwargs['priority'] = 'normal'
+        self.tb.start(family_obj.internal_id, **kwargs)
 
     def config(self, family_obj: models.Family) -> dict:
         """Make the MIP config."""
@@ -70,7 +71,13 @@ class AnalysisAPI():
     def link_sample(self, link_obj: models.FamilySample):
         """Link FASTQ files for a sample."""
         file_objs = self.hk.files(bundle=link_obj.sample.internal_id, tags=['fastq'])
-        files = [file_obj.path for file_obj in file_objs]
+        files = [{
+            'path': file_obj.path,
+            'lane': int(re.findall(r'_L([0-9]{3})_', file_obj.path)[0]),
+            'flowcell': re.search(r'[0-9A-Z]{7}[XY]{2}', file_obj.path)[0],
+            'read': int(re.findall(r'_R([0-9])_', file_obj.path)[0]),
+            'undetermined': ('_Undetermined_' in file_obj.path),
+        } for file_obj in file_objs]
         self.tb.link(
             family=link_obj.family.internal_id,
             sample=link_obj.sample.internal_id,

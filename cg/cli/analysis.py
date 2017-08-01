@@ -96,7 +96,8 @@ def panel(context, print_output, family_id):
 @click.pass_context
 def start(context, priority, email, family_id):
     """Start the analysis pipeline for a family."""
+    family_obj = context.obj['db'].family(family_id)
     try:
-        context.obj['api'].start(family_id, priority=priority, email=email)
+        context.obj['api'].start(family_obj, priority=priority, email=email)
     except tb.MipStartError as error:
         click.echo(click.style(error.message, fg='red'))
