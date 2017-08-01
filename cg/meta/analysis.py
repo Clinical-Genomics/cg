@@ -71,13 +71,20 @@ class AnalysisAPI():
     def link_sample(self, link_obj: models.FamilySample):
         """Link FASTQ files for a sample."""
         file_objs = self.hk.files(bundle=link_obj.sample.internal_id, tags=['fastq'])
-        files = [{
-            'path': file_obj.path,
-            'lane': int(re.findall(r'_L([0-9]{3})_', file_obj.path)[0]),
-            'flowcell': re.search(r'[0-9A-Z]{7}[XY]{2}', file_obj.path)[0],
-            'read': int(re.findall(r'_R([0-9])_', file_obj.path)[0]),
-            'undetermined': ('_Undetermined_' in file_obj.path),
-        } for file_obj in file_objs]
+        files = []
+        for file_obj in file_objs:
+            data = {
+                'path': file_obj.path,
+                'lane': int(re.findall(r'_L([0-9]{3})_', file_obj.path)[0]),
+                'flowcell': re.search(r'[0-9A-Z]{7}[XY]{2}', file_obj.path)[0],
+                'read': int(re.findall(r'_R([0-9])_', file_obj.path)[0]),
+                'undetermined': ('_Undetermined_' in file_obj.path),
+            }
+            # look for tile identifier (HiSeq X runs)
+            matches = re.findall(r'-l[1-9]t([1-9]{2})_', file_obj.path)
+            if len(matches) > 0:
+                data['flowcell'] = f"{data['flowcell']}-{matches[0]}"
+
         self.tb.link(
             family=link_obj.family.internal_id,
             sample=link_obj.sample.internal_id,
