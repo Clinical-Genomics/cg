@@ -15,12 +15,12 @@ In this context, `cg` provides the interface between these tools to facilitate a
 
 ## Team members
 
-- @ingkebil: bioinformatics manager | 🇧🇪
-- @robinandeer: lead developer, designer | 🇸🇪
-- @Dilea: bioinformatician, LIMS developer | 🇸🇪
-- @b4ckm4n: bioinformatician | 🇸🇪
-- @moonso: bioinformatician, Scout developer | 🇸🇪
-- @henrikstranneheim: bioinformatician, MIP developer | 🇸🇪
+- [@ingkebil][ingkebil]: bioinformatics manager | 🇧🇪
+- [@robinandeer][robinandeer]: lead developer, designer | 🇸🇪
+- [@Dilea][Dilea]: bioinformatician, LIMS developer | 🇸🇪
+- [@b4ckm4n][b4ckm4n]: bioinformatician | 🇸🇪
+- [@moonso][moonso]: bioinformatician, Scout developer | 🇸🇪
+- [@henrikstranneheim][henrikstranneheim]: bioinformatician, MIP developer | 🇸🇪
 
 ## Work flow
 
@@ -64,7 +64,7 @@ This is a schematic overview of how data flows between different tools. Generall
 
     - **Family/Analysis**: some collaborators have opted into the Scout platform for delivery of annotated and ranked variants. These families are analyzed and uploaded which essentially corresponds to the "delivery" for such orders. We do, however, perform various quality checks before we finally answer out the results.
 
-8. **Archive**: @ingkebil
+8. **Archive**: [@ingkebil][ingkebil]
 
 ## Responsibilities
 
@@ -74,19 +74,19 @@ We therefore need to share responsibilities and monitoring between members of ou
 
 ### Processes
 
-- **Order**: @robinandeer
-- **Demux**: @ingkebil
-- **Analysis**: @Dilea
-- **Upload**: @robinandeer
-- **Delivery**: @b4ckm4n
-- **Archive**: @ingkebil
+- **Order**: [@robinandeer][robinandeer]
+- **Demux**: [@ingkebil][ingkebil]
+- **Analysis**: [@Dilea][Dilea]
+- **Upload**: [@robinandeer][robinandeer]
+- **Delivery**: [@b4ckm4n][b4ckm4n]
+- **Archive**: [@ingkebil][ingkebil]
 
 ### Tools
 
-- **LIMS**: @Dilea
-- **LoqusDB**: @moonso
-- **Scout**: @robinandeer + @moonso
-- **MIP**: @henrikstranneheim
+- **LIMS**: [@Dilea][Dilea]
+- **LoqusDB**: [@moonso][moonso]
+- **Scout**: [@robinandeer][robinandeer] + [@moonso][moonso]
+- **MIP**: [@henrikstranneheim][henrikstranneheim]
 
 ## Server
 
@@ -107,3 +107,9 @@ The `/order` endpoint accepts orders for new samples. If you supply a JSON docum
 [scout]: https://github.com/Clinical-Genomics/scout
 [scilife]: https://www.scilifelab.se/
 [flask]: http://flask.pocoo.org/
+[ingkebil]: https://github.com/ingkebil
+[robinandeer]: https://github.com/robinandeer
+[Dilea]: https://github.com/Dilea
+[b4ckm4n]: https://github.com/b4ckm4n
+[moonso]: https://github.com/moonso
+[henrikstranneheim]: https://github.com/henrikstranneheim
