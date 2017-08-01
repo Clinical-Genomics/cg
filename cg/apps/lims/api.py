@@ -49,7 +49,7 @@ class LimsAPI(Lims, OrderHandler):
         }
         return data
 
-    def _received_date(self, lims_id):
+    def _received_date(self, lims_id: str) -> str:
         lims_artifacts = self.get_artifacts(process_type='CG002 - Reception Control',
                                             samplelimsid=lims_id)
         for artifact in lims_artifacts:
@@ -57,7 +57,27 @@ class LimsAPI(Lims, OrderHandler):
             if artifact.parent_process and artifact.parent_process.udf.get(udf_key):
                 return artifact.parent_process.udf.get(udf_key)
 
-    def family(self, customer, family):
+    def capture_kit(self, lims_id: str) -> str:
+        """Get capture kit for a LIMS sample."""
+        lims_sample = Sample(self, id=lims_id)
+        capture_kit = lims_sample.udf.get('Capture Library version')
+        if capture_kit:
+            return capture_kit
+        else:
+            artifacts = self.get_artifacts(
+                samplelimsid=lims_id,
+                process_type='CG002 - Hybridize Library  (SS XT)',
+                type='Analyte'
+            )
+            udf_key = 'SureSelect capture library/libraries used'
+            capture_kits = set(artifact.parent_process.udf.get(udf_key) for artifact in artifacts)
+            if len(capture_kits) == 1:
+                return capture_kits.pop()
+            else:
+                message = f"Capture kit error: {lims_sample.id} | {capture_kits}"
+                raise LimsDataError(message)
+
+    def family(self, customer: str, family: str):
         """Fetch information about a family of samples."""
         filters = {'customer': customer, 'familyID': family}
         lims_samples = self.get_samples(udf=filters)

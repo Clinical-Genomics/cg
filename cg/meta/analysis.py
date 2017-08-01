@@ -3,9 +3,7 @@ import logging
 import re
 from typing import List
 
-from cg.apps.tb import TrailblazerAPI
-from cg.apps.hk import HousekeeperAPI
-from cg.apps.scoutapi import ScoutAPI
+from cg.apps import tb, hk, scoutapi, lims
 from cg.store import models, Store
 
 log = logging.getLogger(__name__)
@@ -18,16 +16,22 @@ COMBOS = {
     'CM': ('CNM', 'CM'),
     'Horsel': ('Horsel', '141217', '141201'),
 }
+CAPTUREKIT_MAP = {'Agilent Sureselect CRE': 'Agilent_SureSelectCRE.V1',
+                  'SureSelect CRE': 'Agilent_SureSelectCRE.V1',
+                  'Agilent Sureselect V5': 'Agilent_SureSelect.V5',
+                  'SureSelect Focused Exome': 'Agilent_SureSelectFocusedExome.V1',
+                  'other': 'Agilent_SureSelectCRE.V1'}
 
 
 class AnalysisAPI():
 
-    def __init__(self, db: Store, hk_api: HousekeeperAPI, scout_api: ScoutAPI,
-                 tb_api: TrailblazerAPI):
+    def __init__(self, db: Store, hk_api: hk.HousekeeperAPI, scout_api: scoutapi.ScoutAPI,
+                 tb_api: tb.TrailblazerAPI, lims_api: lims.LimsAPI):
         self.db = db
         self.tb = tb_api
         self.hk = hk_api
         self.scout = scout_api
+        self.lims = lims_api
 
     def start(self, family_obj: models.Family, **kwargs):
         """Start the analysis."""
@@ -61,6 +65,9 @@ class AnalysisAPI():
                 'phenotype': link.status,
                 'expected_coverage': link.sample.application_version.application.sequencing_depth,
             }
+            if sample_data['analysis_type'] in ('tgs', 'wes'):
+                capture_kit = self.lims.capture_kit(link.sample.internal_id)
+                sample_data['capture_kit'] = CAPTUREKIT_MAP[capture_kit]
             if link.mother:
                 sample_data['mother'] = link.mother.internal_id
             if link.father:
