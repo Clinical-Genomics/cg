@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import click
 
-from cg.apps import hk, tb, scoutapi
+from cg.apps import hk, tb, scoutapi, lims
 from cg.meta.analysis import AnalysisAPI
 from cg.store import Store
 
@@ -19,8 +19,15 @@ def analysis(context, priority, email, family_id):
     context.obj['db'] = Store(context.obj['database'])
     hk_api = hk.HousekeeperAPI(context.obj)
     scout_api = scoutapi.ScoutAPI(context.obj)
+    lims_api = lims.LimsAPI(context.obj)
     context.obj['tb'] = tb.TrailblazerAPI(context.obj)
-    context.obj['api'] = AnalysisAPI(context.obj['db'], hk_api, scout_api, context.obj['tb'])
+    context.obj['api'] = AnalysisAPI(
+        db=context.obj['db'],
+        hk_api=hk_api,
+        tb_api=context.obj['tb'],
+        scout_api=scout_api,
+        lims_api=lims_api
+    )
 
     if context.invoked_subcommand is None:
         if family_id is None:
