@@ -81,7 +81,7 @@ def families():
     else:
         families_q = db.Family.query
     data = [family_obj.to_dict(links=True) for family_obj in families_q.limit(30)]
-    return jsonify(families=data)
+    return jsonify(families=data, total=families_q.count())
 
 
 @blueprint.route('/families/<int:family_id>')
@@ -102,7 +102,7 @@ def samples():
     else:
         samples_q = db.samples(query=request.args.get('query'))
     data = [sample_obj.to_dict() for sample_obj in samples_q.limit(30)]
-    return jsonify(samples=data)
+    return jsonify(samples=data, total=samples_q.count())
 
 
 @blueprint.route('/analyses')
@@ -114,8 +114,8 @@ def analyses():
         analyses_q = db.analyses_to_upload()
     else:
         analyses_q = db.Analysis.query
-    data = [analysis_obj.to_dict() for analysis_obj in analyses_q]
-    return jsonify(analyses=data)
+    data = [analysis_obj.to_dict() for analysis_obj in analyses_q.limit(30)]
+    return jsonify(analyses=data, total=analyses_q.count())
 
 
 @blueprint.route('/options')
