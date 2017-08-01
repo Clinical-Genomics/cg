@@ -84,6 +84,7 @@ class AnalysisAPI():
             matches = re.findall(r'-l[1-9]t([1-9]{2})_', file_obj.path)
             if len(matches) > 0:
                 data['flowcell'] = f"{data['flowcell']}-{matches[0]}"
+            files.append(data)
 
         self.tb.link(
             family=link_obj.family.internal_id,
