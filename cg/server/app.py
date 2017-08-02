@@ -30,6 +30,7 @@ def configure_extensions(app):
 
     ext.cors.init_app(app)
     ext.db.init_app(app)
+    ext.lims.init_app(app)
     ext.admin.init_app(app, index_view=AdminIndexView(endpoint='admin',
                                                       url=f"/{app.config['SECRET_KEY']}"))
 

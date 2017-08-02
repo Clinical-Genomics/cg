@@ -24,19 +24,18 @@ class OrdersAPI():
             return errors
 
         if project_type != 'external':
-            #lims_data = self.to_lims(data)
-            #lims_project = self.lims.add_project(lims_data)
-            #lims_samples = self.lims.get_samples(projectlimsid=lims_project.id)
-            #lims_map = {lims_sample.name: lims_sample.id for lims_sample in lims_samples}
-            #status_data = self.to_status(data, lims_map)
-            pass
+            lims_data = self.to_lims(data)
+            lims_project = self.lims.add_project(lims_data)
+            lims_samples = self.lims.get_samples(projectlimsid=lims_project.id)
+            lims_map = {lims_sample.name: lims_sample.id for lims_sample in lims_samples}
         else:
-            pass
-        status_data = self.to_status(data)
+            lims_project = lims_map = None
+
+        status_data = self.to_status(data, lims_map=lims_map)
         new_families = self.status.add_order(status_data)
         self.status.commit()
         return {
-        #    'lims_project': lims_project,
+            'lims_project': lims_project,
             'families': new_families,
         }
 
@@ -59,12 +58,12 @@ class OrdersAPI():
                     'name': sample['name'],
                     'container': sample['container'],
                     'container_name': sample['container_name'],
+                    'well_position': sample['well_position'],
                     'udfs': {
                         'family_name': family['name'],
                         'priority': family['priority'],
                         'application': sample['application'],
                         'require_qcok': family['require_qcok'],
-                        'well_position': sample['well_position'],
                         'quantity': sample['quantity'],
                         'source': sample['source'],
                         'customer': data['customer'],

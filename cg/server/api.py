@@ -10,7 +10,7 @@ from werkzeug.utils import secure_filename
 from cg.apps.orders import OrdersAPI
 from cg.apps.lims import parse_orderform
 from cg.exc import DuplicateRecordError
-from .ext import db
+from .ext import db, lims
 
 blueprint = Blueprint('api', __name__, url_prefix='/api/v1')
 
@@ -48,7 +48,7 @@ def before_request():
 @blueprint.route('/order', methods=['POST'])
 def order():
     """Submit an order for samples."""
-    api = OrdersAPI(lims=None, status=db)
+    api = OrdersAPI(lims=lims, status=db)
     post_data = request.get_json()
     try:
         result = api.accept(post_data['type'], post_data['data'])

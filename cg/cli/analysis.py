@@ -26,7 +26,7 @@ def analysis(context, priority, email, family_id):
         hk_api=hk_api,
         tb_api=context.obj['tb'],
         scout_api=scout_api,
-        lims_api=lims_api
+        lims_api=lims_api,
     )
 
     if context.invoked_subcommand is None:

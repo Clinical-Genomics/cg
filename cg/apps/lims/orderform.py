@@ -112,13 +112,17 @@ def parse_sample(raw_sample):
         'status': raw_sample['UDF/Status'].lower(),
         'customer': raw_sample['UDF/customer'],
         'family': raw_sample['UDF/familyID'],
-        'mother': raw_sample['UDF/motherID'] if raw_sample['UDF/motherID'] else None,
-        'father': raw_sample['UDF/fatherID'] if raw_sample['UDF/fatherID'] else None,
         'priority': raw_sample['UDF/priority'].lower(),
         'capture_kit': (raw_sample['UDF/Capture Library version'] if
                         raw_sample['UDF/Capture Library version'] else None),
         'comment': raw_sample['UDF/Comment'] if raw_sample['UDF/Comment'] else None,
     }
+
+    for parent in ['mother', 'father']:
+        sample[parent] = (raw_sample['UDF/motherID']
+                          if raw_sample['UDF/motherID'] and (raw_sample['UDF/motherID'] != '0.0')
+                          else None)
+
     return sample
 
 
