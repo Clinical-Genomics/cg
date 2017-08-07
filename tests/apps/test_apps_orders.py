@@ -44,15 +44,15 @@ def test_order_external(example):
     order_data = orders_api.accept('external', data)
 
     # THEN it should update the status database with information
-    assert len(order_data['families']) == len(data['families'])
+    assert len(order_data['families']) == 1
     assert example['store'].families().count() == 1
     new_family = example['store'].families().first()
-    assert new_family.name == data['families'][0]['name']
+    assert new_family.name == data['samples'][0]['family_name']
     assert isinstance(new_family.internal_id, str)
 
     assert example['store'].samples().count() == 1
     new_sample = example['store'].samples().first()
-    assert new_sample.name == data['families'][0]['samples'][0]['name']
+    assert new_sample.name == data['samples'][0]['name']
     assert isinstance(new_sample.internal_id, str)
     assert new_sample.application_version.application.tag == example['application_tag']
 

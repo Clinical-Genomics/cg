@@ -30,7 +30,7 @@ class OrdersAPI():
         else:
             status_data = self.samples_to_status(data)
 
-        if project_type != 'external':
+        if self.lims and project_type != 'external':
             lims_data = self.to_lims(data)
             lims_project = self.lims.add_project(lims_data)
             lims_samples = self.lims.get_samples(projectlimsid=lims_project.id)
@@ -113,17 +113,15 @@ class OrdersAPI():
         }
         families = cls.group_families(data['samples'])
         for family_name, family_samples in families.items():
-            family_options = {}
-            for field in ['priority', 'panels']:
-                values = set(sample[field] for sample in family_samples)
-                if len(values) > 1:
-                    raise ValueError(f"different '{field}' values: {family_name} - {values}")
-                family_options[field] = values.pop()
-
+            values = set(sample.get('priority', 'standard') for sample in family_samples)
+            if len(values) > 1:
+                raise ValueError(f"different '{field}' values: {family_name} - {values}")
+            priority = values.pop()
+            panels = set(panel for sample in family_samples for panel in sample['panels'])
             family = {
                 'name': family_name,
-                'priority': family_options['priority'],
-                'panels': family_options['panels'],
+                'priority': priority,
+                'panels': list(panels),
                 'samples': [{
                     'internal_id': sample.get('internal_id'),
                     'name': sample['name'],
