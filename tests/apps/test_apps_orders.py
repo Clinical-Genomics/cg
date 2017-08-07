@@ -28,16 +28,14 @@ def test_order_external(example):
     data = {
         'name': 'My order',
         'customer': 'cust003',
-        'families': [{
-            'name': 'My family',
-            'panels': ['OMIM-AUTO'],
-            'samples': [{
-                'name': 'sample1',
-                'application': example['application_tag'],
-                'sex': 'male',
-                'status': 'affected',
-                'capture_kit': 'Agilent SureSelect V5',
-            }]
+        'samples': [{
+            'name': 'sample1',
+            'application': example['application_tag'],
+            'sex': 'male',
+            'status': 'affected',
+            'capture_kit': 'Agilent SureSelect V5',
+            'family_name': 'My family',
+            'panels': ['OMIM-AUTO']
         }]
     }
 
@@ -68,27 +66,28 @@ def test_order_scout(example):
     data = dict(
         name='My order 2',
         customer=store.customers().first().internal_id,
-        families=[dict(
-            name='child',
+        samples=[dict(
+            name='sample45',
+            application=store.applications(category='wgs').first().tag,
+            sex='female',
+            status='affected',
+            source='blood',
+            container='Tube',
+            father='father',
+            family_name='child',
             panels=['IEM', 'EP'],
             priority='priority',
-            samples=[dict(
-                name='sample45',
-                application=store.applications(category='wgs').first().tag,
-                sex='female',
-                status='affected',
-                source='blood',
-                container='Tube',
-                father='father',
-            ), dict(
-                name='father',
-                application=store.applications(category='wgs').first().tag,
-                sex='male',
-                status='unaffected',
-                source='blood',
-                container='Tube',
-            )]
-        )],
+        ), dict(
+            name='father',
+            application=store.applications(category='wgs').first().tag,
+            sex='male',
+            status='unaffected',
+            source='blood',
+            container='Tube',
+            family_name='child',
+            panels=['IEM', 'EP'],
+            priority='priority',
+        )]
     )
 
     # WHEN submitting it to the orders API

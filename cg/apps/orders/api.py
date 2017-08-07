@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
+from typing import List
+
 from cg.apps.lims import LimsAPI
 from cg.store import Store
-from .schema import ExternalProject, FastqProject, RerunProject, ScoutProject
+from .schema import ExternalProject, FastqProject, RmlProject, ScoutProject
 
 
 class OrdersAPI():
@@ -9,7 +11,7 @@ class OrdersAPI():
     projects = {
         'external': ExternalProject(),
         'fastq': FastqProject(),
-        'rerun': RerunProject(),
+        'rml': RmlProject(),
         'scout': ScoutProject(),
     }
 
@@ -23,15 +25,24 @@ class OrdersAPI():
         if errors:
             return errors
 
+        if project_type in ('external', 'scout'):
+            status_data = self.families_to_status(data)
+        else:
+            status_data = self.samples_to_status(data)
+
         if project_type != 'external':
             lims_data = self.to_lims(data)
             lims_project = self.lims.add_project(lims_data)
             lims_samples = self.lims.get_samples(projectlimsid=lims_project.id)
             lims_map = {lims_sample.name: lims_sample.id for lims_sample in lims_samples}
         else:
-            lims_project = lims_map = None
+            lims_project = None
+            lims_map = {}
 
-        status_data = self.to_status(data, lims_map=lims_map)
+        for family in status_data['families']:
+            for sample in family['samples']:
+                sample['internal_id'] = lims_map.get(sample['name']) or sample['internal_id']
+
         new_families = self.status.add_order(status_data)
         self.status.commit()
         return {
@@ -52,45 +63,89 @@ class OrdersAPI():
             'name': data['name'],
             'samples': [],
         }
-        for family in data['families']:
-            for sample in family['samples']:
-                lims_data['samples'].append({
-                    'name': sample['name'],
-                    'container': sample['container'],
-                    'container_name': sample['container_name'],
-                    'well_position': sample['well_position'],
-                    'udfs': {
-                        'family_name': family['name'],
-                        'priority': family['priority'],
-                        'application': sample['application'],
-                        'require_qcok': family['require_qcok'],
-                        'quantity': sample['quantity'],
-                        'source': sample['source'],
-                        'customer': data['customer'],
-                    }
-                })
+        for sample in data['samples']:
+            lims_data['samples'].append({
+                'name': sample['name'],
+                'container': sample['container'],
+                'container_name': sample.get('container_name'),
+                'well_position': sample.get('well_position'),
+                'udfs': {
+                    'family_name': sample.get('family_name'),
+                    'priority': sample['priority'],
+                    'application': sample['application'],
+                    'require_qcok': sample.get('require_qcok') or False,
+                    'quantity': sample.get('quantity'),
+                    'volume': data.get('volume'),
+                    'concentration': data.get('concentration'),
+                    'source': sample['source'],
+                    'customer': data['customer'],
+                    'comment': data.get('comment'),
+                    'tumour': data.get('tumour'),
+                    'pool': data.get('pool'),
+                    'index': data.get('index'),
+                    'index_number': data.get('index_number'),
+                }
+            })
         return lims_data
 
     @staticmethod
-    def to_status(data: dict, lims_map: dict=None) -> dict:
+    def samples_to_status(self, data: dict) -> dict:
+        """Convert order input to status for fastq-only orders."""
+        status_data = {
+            'customer': data['customer'],
+            'name': data['name'],
+            'samples': [{
+                'internal_id': sample.get('internal_id'),
+                'name': sample['name'],
+                'application': sample['application'],
+                'tumour': sample.get('tumour') or False,
+            } for sample in data['samples']],
+        }
+        return status_data
+
+    @classmethod
+    def families_to_status(cls, data: dict) -> dict:
         """Convert order input to status interface input."""
         status_data = {
             'customer': data['customer'],
             'name': data['name'],
-            'families': [{
-                'name': family['name'],
-                'priority': family.get('priority', 'standard'),
-                'panels': family['panels'],
+            'families': [],
+        }
+        families = cls.group_families(data['samples'])
+        for family_name, family_samples in families.items():
+            family_options = {}
+            for field in ['priority', 'panels']:
+                values = set(sample[field] for sample in family_samples)
+                if len(values) > 1:
+                    raise ValueError(f"different '{field}' values: {family_name} - {values}")
+                family_options[field] = values.pop()
+
+            family = {
+                'name': family_name,
+                'priority': family_options['priority'],
+                'panels': family_options['panels'],
                 'samples': [{
-                    'internal_id': (sample.get('internal_id') or
-                                    (lims_map[sample['name']] if lims_map else None)),
+                    'internal_id': sample.get('internal_id'),
                     'name': sample['name'],
                     'application': sample['application'],
                     'sex': sample['sex'],
                     'status': sample['status'],
                     'mother': sample.get('mother'),
                     'father': sample.get('father'),
-                } for sample in family['samples']]
-            } for family in data['families']]
-        }
+                    'tumour': sample.get('tumour') or False,
+                    'capture_kit': sample.get('capture_kit'),
+                } for sample in family_samples],
+            }
+
+            status_data['families'].append(family)
         return status_data
+
+    @staticmethod
+    def group_families(samples: List[dict]) -> dict:
+        """Group samples in families."""
+        families = {}
+        for sample in samples:
+            if sample['family_name'] not in families:
+                families[sample['family_name']] = []
+            families[sample['family_name']].append(sample)
+        return families

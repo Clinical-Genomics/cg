@@ -10,7 +10,7 @@ class StatusHandler:
         """Fetch incoming samples."""
         records = (
             self.Sample.query
-            .filter(models.Sample.received_at == None)
+            .filter(models.Sample.received_at == None, models.Sample.sequenced_at == None)
             .order_by(models.Sample.ordered_at.desc())
         )
         return records
@@ -50,7 +50,7 @@ class StatusHandler:
         """Fetch analyses that have been uploaded but not delivered."""
         records = (
             self.Analysis.query
-            .filter(models.Analysis.uploaded_at != None, models.Analysis.delivered_at == None)
+            .filter(models.Analysis.delivered_at == None)
         )
         return records
 

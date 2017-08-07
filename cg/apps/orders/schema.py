@@ -6,66 +6,66 @@ class BaseSample(Schema):
     name = fields.Str(required=True)
     internal_id = fields.Str()
     application = fields.Str(required=True)
+    comment = fields.Str()
 
 
-class BaseFamily(Schema):
-    name = fields.Str(required=True)
+class PrepMixin:
+    container = fields.Str(default='Tube', required=True)
+    container_name = fields.Str()
+    well_position = fields.Str()
+    tumour = fields.Bool()
+    quantity = fields.Str()
+    volume = fields.Str()
+    concentration = fields.Str()
+    source = fields.Str(required=True)
+    priority = fields.Str(default='standard', required=True)
+    require_qcok = fields.Bool(default=False)
+
+
+class AnalysisMixin:
+    sex = fields.Str(required=True)
+    status = fields.Str(required=True)
+    family_name = fields.Str(required=True)
     panels = fields.List(fields.Str(), required=True)
+    father = fields.Str()
+    mother = fields.Str()
 
 
 class BaseProject(Schema):
     name = fields.Str(required=True)
     customer = fields.Str(required=True)
+    comment = fields.Str()
 
 
-class AnalysisSample(Schema):
-    sex = fields.Str()
-    status = fields.Str()
-
-
-class PrepSample(BaseSample):
-    container = fields.Str(default='Tube')
-    container_name = fields.Str()
-    well_position = fields.Str()
-    tumour = fields.Bool()
-    quantity = fields.Str()
-    source = fields.Str()
-
-
-class ScoutSample(PrepSample, AnalysisSample):
-    father = fields.Str()
-    mother = fields.Str()
-
-
-class ScoutFamily(BaseFamily):
-    priority = fields.Str(required=True, default='standard')
-    require_qcok = fields.Bool()
-    samples = fields.List(fields.Nested(ScoutSample), required=True)
+class ScoutSample(BaseSample, PrepMixin, AnalysisMixin):
+    pass
 
 
 class ScoutProject(BaseProject):
-    families = fields.List(fields.Nested(ScoutFamily), required=True)
+    samples = fields.List(fields.Nested(ScoutSample), required=True)
 
 
-class ExternalSample(BaseSample, AnalysisSample):
+class ExternalSample(BaseSample, AnalysisMixin):
     capture_kit = fields.Str()
 
 
-class ExternalFamily(BaseFamily):
+class ExternalProject(BaseProject):
     samples = fields.List(fields.Nested(ExternalSample), required=True)
 
 
-class ExternalProject(BaseProject):
-    families = fields.List(fields.Nested(ExternalFamily), required=True)
+class FastqSample(BaseSample, PrepMixin):
+    pass
 
 
 class FastqProject(BaseProject):
-    samples = fields.List(fields.Nested(PrepSample), required=True)
+    samples = fields.List(fields.Nested(FastqSample), required=True)
 
 
-class RerunFamily(BaseFamily):
-    samples = fields.List(fields.Nested(AnalysisSample), required=True)
+class RmlSample(BaseSample, PrepMixin):
+    pool = fields.Str(required=True)
+    index = fields.Str()
+    index_number = fields.Int()
 
 
-class RerunProject(BaseProject):
-    families = fields.List(fields.Nested(RerunFamily), required=True)
+class RmlProject(BaseProject):
+    samples = fields.List(fields.Nested(RmlSample), required=True)

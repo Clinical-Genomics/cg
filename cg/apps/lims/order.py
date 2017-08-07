@@ -16,6 +16,11 @@ PROP2UDF = {
     "family_name": "familyID",
     "quantity": "Quantity",
     "tumour": "tumor",
+    'pool': 'pool name',
+    'index': 'Index type',
+    'index_number': 'Index number',
+    'concentration': 'Concentration (nM)',
+    'volume': 'Volume (uL)',
 }
 
 

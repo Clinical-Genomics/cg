@@ -95,6 +95,7 @@ class Family(Model):
     _panels = Column(types.Text, nullable=False)
     analyze = Column(types.Boolean, default=False)
 
+    ordered_at = Column(types.DateTime, default=dt.datetime.now)
     created_at = Column(types.DateTime, default=dt.datetime.now)
     customer_id = Column(ForeignKey('customer.id', ondelete='CASCADE'), nullable=False)
     analyses = orm.relationship('Analysis', backref='family', order_by='-Analysis.analyzed_at')
@@ -112,6 +113,7 @@ class Family(Model):
         data = super(Family, self).to_dict()
         data['panels'] = self.panels
         data['priority'] = self.priority_human
+        data['customer'] = self.customer.to_dict()
         if links:
             data['links'] = [link_obj.to_dict(samples=True) for link_obj in self.links]
         return data
@@ -134,14 +136,17 @@ class Sample(Model):
     priority = Column(types.Integer, default=1, nullable=False)
     name = Column(types.String(128), nullable=False)
     order = Column(types.String(64))
+    ticket_number = Column(types.Integer)
     sex = Column(types.Enum('male', 'female', 'unknown'), nullable=False)
     is_external = Column(types.Boolean, default=False)
     is_tumour = Column(types.Boolean, default=False)
+    capture_kit = Column(types.String(64))
     reads = Column(types.BigInteger, default=0)
     ordered_at = Column(types.DateTime, nullable=False)
     received_at = Column(types.DateTime)
     sequenced_at = Column(types.DateTime)
     delivered_at = Column(types.DateTime)
+    comment = Column(types.Text)
 
     created_at = Column(types.DateTime, default=dt.datetime.now)
     customer_id = Column(ForeignKey('customer.id', ondelete='CASCADE'), nullable=False)

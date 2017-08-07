@@ -45,13 +45,13 @@ def before_request():
         g.current_user = user_obj
 
 
-@blueprint.route('/order', methods=['POST'])
-def order():
+@blueprint.route('/order/<project_type>', methods=['POST'])
+def order(project_type):
     """Submit an order for samples."""
     api = OrdersAPI(lims=lims, status=db)
     post_data = request.get_json()
     try:
-        result = api.accept(post_data['type'], post_data['data'])
+        result = api.accept(project_type, post_data)
     except DuplicateRecordError as error:
         return abort(make_response(jsonify(message=error.message), 500))
     return jsonify(families=[family.to_dict() for family in result['families']])
