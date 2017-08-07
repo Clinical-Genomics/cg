@@ -6,7 +6,6 @@ import cg
 from cg.store import Store
 
 from .analysis import analysis
-from .demo import demo
 from .store import store
 from .add import add
 from .upload import upload
@@ -54,6 +53,5 @@ base.add_command(analysis)
 base.add_command(store)
 base.add_command(add)
 base.add_command(upload)
-base.add_command(demo)
 base.add_command(status)
 base.add_command(transfer)

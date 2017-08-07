@@ -146,6 +146,7 @@ class Sample(Model):
     received_at = Column(types.DateTime)
     sequenced_at = Column(types.DateTime)
     delivered_at = Column(types.DateTime)
+    invoiced_at = Column(types.DateTime)
     comment = Column(types.Text)
 
     created_at = Column(types.DateTime, default=dt.datetime.now)

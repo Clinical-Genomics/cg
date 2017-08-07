@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import datetime as dt
+
 from genologics.entities import Sample
 from genologics.lims import Lims
 from dateutil.parser import parse as parse_date
@@ -56,6 +58,17 @@ class LimsAPI(Lims, OrderHandler):
             udf_key = 'date arrived at clinical genomics'
             if artifact.parent_process and artifact.parent_process.udf.get(udf_key):
                 return artifact.parent_process.udf.get(udf_key)
+
+    def get_delivery(self, lims_id: str) -> dt.date:
+        """Get delivery date for a sample."""
+        artifacts = self.get_artifacts(samplelimsid=lims_id, process_type='CG002 - Delivery',
+                                       type='Analyte')
+        if len(artifacts) == 1:
+            return artifacts[0].parent_process.udf['Date delivered']
+        elif len(artifacts) == 0:
+            return None
+        else:
+            raise LimsDataError(f"multiple delivery artifacts found for: {lims_id}")
 
     def capture_kit(self, lims_id: str) -> str:
         """Get capture kit for a LIMS sample."""
