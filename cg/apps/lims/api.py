@@ -48,6 +48,7 @@ class LimsAPI(Lims, OrderHandler):
             'application': udfs.get('Sequencing Analysis'),
             'application_version': (int(udfs['Application Tag Version']) if
                                     udfs.get('Application Tag Version') else None),
+            'comment': udfs.get('comment'),
         }
         return data
 
