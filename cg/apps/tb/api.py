@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 from pathlib import Path
+from typing import List
 
 import click
 from trailblazer.mip.start import MipCli
@@ -15,7 +16,7 @@ log = logging.getLogger(__name__)
 
 class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
 
-    def __init__(self, config):
+    def __init__(self, config: dict):
         super(TrailblazerAPI, self).__init__(config['trailblazer']['database'])
         self.mip_cli = MipCli(config['trailblazer']['script'])
         self.mip_config = config['trailblazer']['mip_config']
@@ -33,7 +34,7 @@ class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
         """Call internal Trailblazer MIP API."""
         return files.parse_qcmetrics(data)
 
-    def write_panel(self, family_id, content):
+    def write_panel(self, family_id: str, content: List[str]):
         """Write the gene panel to the defined location."""
         out_dir = self.families_dir / family_id
         out_dir.mkdir(parents=True, exist_ok=True)

@@ -25,7 +25,7 @@ class AddHandler:
         return new_bundle
 
     @classmethod
-    def _build_bundle(cls, config_data, sampleinfo_data):
+    def _build_bundle(cls, config_data: dict, sampleinfo_data: dict) -> dict:
         """Create a new bundle."""
         data = {
             'name': config_data['family'],
@@ -36,7 +36,7 @@ class AddHandler:
         return data
 
     @staticmethod
-    def _get_files(config_data, sampleinfo_data):
+    def _get_files(config_data: dict, sampleinfo_data: dict) -> dict:
         """Get all the files from the MIP files."""
         data = [{
             'path': config_data['config_path'],

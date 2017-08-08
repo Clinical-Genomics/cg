@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime as dt
 
-from genologics.entities import Sample
+from genologics.entities import Sample, Process
 from genologics.lims import Lims
 from dateutil.parser import parse as parse_date
 
@@ -50,6 +50,13 @@ class LimsAPI(Lims, OrderHandler):
                                     udfs.get('Application Tag Version') else None),
         }
         return data
+
+    def _export_artifact(self, lims_artifact):
+        """Get data from a LIMS artifact."""
+        return {
+            'id': lims_artifact.id,
+            'name': lims_artifact.name,
+        }
 
     def _received_date(self, lims_id: str) -> str:
         lims_artifacts = self.get_artifacts(process_type='CG002 - Reception Control',
@@ -118,3 +125,13 @@ class LimsAPI(Lims, OrderHandler):
 
         family_data['panels'] = list(panels)
         return family_data
+
+    def process(self, process_id: str) -> Process:
+        """Get LIMS process."""
+        return Process(self, id=process_id)
+
+    def process_samples(self, lims_process: Process):
+        """Retrieve LIMS input samples from a process."""
+        for lims_artifact in lims_process.all_inputs():
+            for lims_sample in lims_artifact.samples:
+                yield lims_sample.id

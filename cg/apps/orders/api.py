@@ -115,7 +115,7 @@ class OrdersAPI():
         for family_name, family_samples in families.items():
             values = set(sample.get('priority', 'standard') for sample in family_samples)
             if len(values) > 1:
-                raise ValueError(f"different '{field}' values: {family_name} - {values}")
+                raise ValueError(f"different 'priority' values: {family_name} - {values}")
             priority = values.pop()
             panels = set(panel for sample in family_samples for panel in sample['panels'])
             family = {

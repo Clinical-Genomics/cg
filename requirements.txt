@@ -19,6 +19,7 @@ coloredlogs
 petname
 marshmallow
 xlrd
+openpyxl
 
 # apps
 trailblazer
