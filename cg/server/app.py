@@ -3,6 +3,7 @@ import coloredlogs
 from flask import Flask
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.base import AdminIndexView
+import requests
 
 from cg.store import models
 from . import api, ext, admin
@@ -27,6 +28,9 @@ def create_app():
 def configure_extensions(app):
     # initialize logging
     coloredlogs.install(level='DEBUG' if app.debug else 'INFO')
+
+    certs_resp = requests.get('https://www.googleapis.com/oauth2/v1/certs')
+    app.config['GOOGLE_OAUTH_CERTS'] = certs_resp.json()
 
     ext.cors.init_app(app)
     ext.db.init_app(app)

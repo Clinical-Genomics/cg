@@ -36,7 +36,7 @@ def before_request():
             jwt_token = auth_header.split('Bearer ')[-1]
         else:
             return abort(403, 'no JWT token found on request')
-        user_data = jwt.decode(jwt_token, verify=False)
+        user_data = jwt.decode(jwt_token, certs=current_app.config['GOOGLE_OAUTH_CERTS'])
         user_obj = db.user(user_data['email'])
         if user_obj is None:
             message = f"{user_data['email']} doesn't have access"
