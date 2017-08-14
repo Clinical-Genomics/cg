@@ -44,7 +44,7 @@ class LimsAPI(Lims, OrderHandler):
             'status': udfs.get('Status'),
             'panels': udfs.get('Gene List').split(';') if udfs.get('Gene List') else None,
             'priority': udfs.get('priority'),
-            'received': self._received_date(lims_sample.id),
+            'received': self.get_received_date(lims_sample.id),
             'application': udfs.get('Sequencing Analysis'),
             'application_version': (int(udfs['Application Tag Version']) if
                                     udfs.get('Application Tag Version') else None),
@@ -59,7 +59,7 @@ class LimsAPI(Lims, OrderHandler):
             'name': lims_artifact.name,
         }
 
-    def _received_date(self, lims_id: str) -> str:
+    def get_received_date(self, lims_id: str) -> str:
         lims_artifacts = self.get_artifacts(process_type='CG002 - Reception Control',
                                             samplelimsid=lims_id)
         for artifact in lims_artifacts:
@@ -67,7 +67,7 @@ class LimsAPI(Lims, OrderHandler):
             if artifact.parent_process and artifact.parent_process.udf.get(udf_key):
                 return artifact.parent_process.udf.get(udf_key)
 
-    def get_delivery(self, lims_id: str) -> dt.date:
+    def get_delivery_date(self, lims_id: str) -> dt.date:
         """Get delivery date for a sample."""
         artifacts = self.get_artifacts(samplelimsid=lims_id, process_type='CG002 - Delivery',
                                        type='Analyte')

@@ -31,24 +31,10 @@ def flowcell(context, flowcell):
 
 
 @transfer.command()
-@click.argument('lims_id', required=False)
+@click.option('-s', '--status', type=click.Choice(['received', 'delivered']), default='received')
 @click.pass_context
-def delivered(context, lims_id):
-    """Check if samples ready to deliver have been delivered in LIMS."""
+def lims(context, status):
+    """Check if samples have been updated in LIMS."""
     lims_api = lims.LimsAPI(context)
-    if lims_id:
-        sample_obj = context.obj['db'].sample(lims_id)
-        if sample_obj is None:
-            click.echo(click.style(f"sample not found", fg='red'))
-            context.abort()
-        samples = [sample_obj]
-    else:
-        samples = context.obj['db'].samples_to_deliver()
-
-    for sample_obj in samples:
-        log.debug(f"looking up delivery date for: {sample_obj.internal_id}")
-        delivered_date = lims_api.get_delivery(sample_obj.internal_id)
-        if delivered_date:
-            sample_obj.delivered_at = delivered_date
-            context.obj['db'].commit()
-            click.echo(click.style(f"sample delivered: {sample_obj.internal_id}", fg='green'))
+    transfer_api = transfer_app.TransferLims(context.obj['db'], lims_api)
+    transfer_api.transfer_samples(status)
