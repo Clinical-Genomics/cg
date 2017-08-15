@@ -25,19 +25,19 @@ def test_order_external(example):
     # GIVEN an order for external samples
     assert example['store'].families().first() is None
     assert example['store'].samples().first() is None
-    data = {
-        'name': 'My order',
-        'customer': 'cust003',
-        'samples': [{
-            'name': 'sample1',
-            'application': example['application_tag'],
-            'sex': 'male',
-            'status': 'affected',
-            'capture_kit': 'Agilent SureSelect V5',
-            'family_name': 'My family',
-            'panels': ['OMIM-AUTO']
-        }]
-    }
+    data = dict(
+        name='My order',
+        customer='cust003',
+        samples=[dict(
+            name='sample1',
+            application=example['application_tag'],
+            sex='male',
+            status='affected',
+            capture_kit='Agilent SureSelect V5',
+            family_name='My family',
+            panels=['OMIM-AUTO']
+        )]
+    )
 
     # WHEN submitting it to the orders api
     orders_api = orders.OrdersAPI(lims=None, status=example['store'])

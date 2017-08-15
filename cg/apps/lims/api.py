@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime as dt
+import logging
 
 from genologics.entities import Sample, Process
 from genologics.lims import Lims
@@ -9,6 +10,7 @@ from cg.exc import LimsDataError
 from .order import OrderHandler
 
 SEX_MAP = {'F': 'female', 'M': 'male', 'Unknown': 'unknown', 'unknown': 'unknown'}
+log = logging.getLogger(__name__)
 
 
 class LimsAPI(Lims, OrderHandler):
@@ -76,7 +78,8 @@ class LimsAPI(Lims, OrderHandler):
         elif len(artifacts) == 0:
             return None
         else:
-            raise LimsDataError(f"multiple delivery artifacts found for: {lims_id}")
+            log.warning(f"multiple delivery artifacts found for: {lims_id}")
+            return min(artifact.parent_process.udf['Date delivered'] for artifact in artifacts)
 
     def capture_kit(self, lims_id: str) -> str:
         """Get capture kit for a LIMS sample."""

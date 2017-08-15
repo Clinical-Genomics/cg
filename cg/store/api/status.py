@@ -10,7 +10,11 @@ class StatusHandler:
         """Fetch incoming samples."""
         records = (
             self.Sample.query
-            .filter(models.Sample.received_at == None, models.Sample.sequenced_at == None)
+            .filter(
+                models.Sample.received_at == None,
+                models.Sample.sequenced_at == None,
+                models.Sample.is_external == False
+            )
             .order_by(models.Sample.ordered_at.desc())
         )
         return records

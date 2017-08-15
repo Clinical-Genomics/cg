@@ -20,6 +20,12 @@ class User(Model):
     customer_id = Column(ForeignKey('customer.id', ondelete='CASCADE'), nullable=False)
     customer = orm.relationship('Customer', backref='users')
 
+    def to_dict(self) -> dict:
+        """Override dicify method."""
+        data = super(User, self).to_dict()
+        data['customer'] = self.customer.to_dict()
+        return data
+
     def __str__(self) -> str:
         return self.name
 

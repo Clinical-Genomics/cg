@@ -82,7 +82,10 @@ def families():
     if request.args.get('status') == 'analysis':
         families_q = db.families_to_analyze()
     else:
-        families_q = db.Family.query
+        families_q = db.families(
+            customer=(db.customer(request.args.get('customer')) if
+                      request.args.get('customer') else None)
+        )
     data = [family_obj.to_dict(links=True) for family_obj in families_q.limit(30)]
     return jsonify(families=data, total=families_q.count())
 
@@ -103,7 +106,11 @@ def samples():
     elif request.args.get('status') == 'sequencing':
         samples_q = db.samples_to_sequence()
     else:
-        samples_q = db.samples(query=request.args.get('query'))
+        samples_q = db.samples(
+            query=request.args.get('query'),
+            customer=(db.customer(request.args.get('customer')) if
+                      request.args.get('customer') else None),
+        )
     data = [sample_obj.to_dict() for sample_obj in samples_q.limit(30)]
     return jsonify(samples=data, total=samples_q.count())
 
@@ -138,15 +145,7 @@ def options():
 @blueprint.route('/me')
 def me():
     """Fetch information about current user."""
-    customer = None if g.current_user.is_admin else g.current_user.customer
-    families = db.families(customer=customer)
-    samples = db.samples(customer=customer)
-    return jsonify(
-        user=g.current_user.to_dict(),
-        customer=g.current_user.customer.to_dict(),
-        samples=[sample_obj.to_dict() for sample_obj in samples.limit(50)],
-        families=[family_obj.to_dict() for family_obj in families.limit(50)]
-    )
+    return jsonify(user=g.current_user.to_dict())
 
 
 @blueprint.route('/applications')
