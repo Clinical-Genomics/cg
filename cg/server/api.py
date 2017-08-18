@@ -7,7 +7,7 @@ from flask import abort, current_app, Blueprint, jsonify, g, make_response, requ
 from google.auth import jwt
 from werkzeug.utils import secure_filename
 
-from cg.exc import DuplicateRecordError
+from cg.exc import DuplicateRecordError, OrderFormError
 from cg.apps.lims import parse_orderform
 from cg.meta.orders import OrdersAPI
 from .ext import db, lims
@@ -175,6 +175,9 @@ def orderform():
     temp_dir = Path(tempfile.gettempdir())
     saved_path = str(temp_dir / filename)
     excel_file.save(saved_path)
-    project_data = parse_orderform(saved_path)
+    try:
+        project_data = parse_orderform(saved_path)
+    except OrderFormError as error:
+        return abort(make_response(jsonify(message=error.message), 400))
     project_data['name'] = filename
     return jsonify(**project_data)

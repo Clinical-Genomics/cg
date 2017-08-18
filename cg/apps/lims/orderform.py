@@ -1,31 +1,52 @@
 # -*- coding: utf-8 -*-
 import xlrd
 
-SEX_MAP = {'male': 'M', 'female': 'F', 'unknown': 'unknown'}
+from cg.exc import OrderFormError
+
+SEX_MAP = {'male': 'M', 'female': 'F', 'unknown': 'unknown', 'unknown': 'Unknown'}
 REV_SEX_MAP = {value: key for key, value in SEX_MAP.items()}
 
 
 def parse_orderform(excel_path):
     """Parse out information from an order form."""
     workbook = xlrd.open_workbook(excel_path)
-    orderform_sheet = workbook.sheet_by_name('orderform')
+
+    sheet_name = None
+    sheet_names = workbook.sheet_names()
+    for name in ['orderform', 'order form']:
+        if name in sheet_names:
+            sheet_name = name
+            break
+    if sheet_name is None:
+        raise OrderFormError("'orderform' sheet not found in Excel file")
+    orderform_sheet = workbook.sheet_by_name(sheet_name)
+
+    if '1604' in orderform_sheet.row(0)[1].value:
+        project_type = 'rml'
+    else:
+        project_type = 'scout'
+
     raw_samples = relevant_rows(orderform_sheet)
     parsed_samples = [parse_sample(raw_sample) for raw_sample in raw_samples]
-    parsed_families = group_families(parsed_samples)
-
-    families = []
-    customer_ids = set()
-    for family_id, parsed_family in parsed_families.items():
-        customer_id, family_data = expand_family(family_id, parsed_family)
-        customer_ids.add(customer_id)
-        families.append(family_data)
+    if project_type == 'scout':
+        parsed_families = group_families(parsed_samples)
+        items = []
+        customer_ids = set()
+        for family_id, parsed_family in parsed_families.items():
+            customer_id, family_data = expand_family(family_id, parsed_family)
+            customer_ids.add(customer_id)
+            items.append(family_data)
+    else:
+        customer_ids = set(sample['customer'] for sample in parsed_samples)
+        items = parsed_samples
 
     if len(customer_ids) != 1:
         raise ValueError("invalid customer information: {}".format(customer_ids))
 
     new_project = {
         'customer': customer_ids.pop(),
-        'families': families,
+        'items': items,
+        'project_type': project_type,
     }
     return new_project
 
@@ -91,7 +112,7 @@ def group_families(parsed_samples):
 
 def parse_sample(raw_sample):
     """Parse a raw sample row from order form sheet."""
-    if ':' in raw_sample['UDF/Gene List']:
+    if ':' in raw_sample.get('UDF/Gene List', ''):
         raw_sample['UDF/Gene List'] = raw_sample['UDF/Gene List'].replace(':', ';')
 
     if raw_sample['UDF/priority'].lower() == 'förtur':
@@ -100,27 +121,38 @@ def parse_sample(raw_sample):
     sample = {
         'name': raw_sample['Sample/Name'],
         'container': raw_sample.get('Container/Type'),
-        'container_name': raw_sample.get('Container/Name'),
-        'well_position': raw_sample.get('Sample/Well Location'),
-        'sex': REV_SEX_MAP[raw_sample['UDF/Gender'].strip()],
+        'container_name': raw_sample.get('Container/Name', raw_sample.get('UDF/RML plate name')),
+        'well_position': raw_sample.get('Sample/Well Location',
+                                        raw_sample.get('UDF/RML well position')),
+        'sex': REV_SEX_MAP.get(raw_sample['UDF/Gender'].strip()),
         'panels': (raw_sample['UDF/Gene List'].split(';') if
                    raw_sample.get('UDF/Gene List') else None),
         'require_qcok': True if raw_sample['UDF/Process only if QC OK'] else False,
         'quantity': raw_sample['UDF/Quantity'] if raw_sample.get('UDF/Quantity') else None,
         'application': raw_sample['UDF/Sequencing Analysis'],
         'source': raw_sample['UDF/Source'].lower(),
-        'status': raw_sample['UDF/Status'].lower(),
+        'status': raw_sample['UDF/Status'].lower() if raw_sample.get('UDF/Status') else None,
         'customer': raw_sample['UDF/customer'],
         'family': raw_sample['UDF/familyID'],
-        'priority': raw_sample['UDF/priority'].lower(),
+        'priority': raw_sample['UDF/priority'].lower() if raw_sample.get('UDF/priority') else None,
         'capture_kit': (raw_sample['UDF/Capture Library version'] if
                         raw_sample['UDF/Capture Library version'] else None),
         'comment': raw_sample['UDF/Comment'] if raw_sample['UDF/Comment'] else None,
+        'index': raw_sample['UDF/Index type'] if raw_sample.get('UDF/Index type') else None,
+        'reagent_label': (raw_sample['Sample/Reagent Label'] if
+                          raw_sample.get('Sample/Reagent Label') else None),
     }
 
+    for key, field_key in [('pool', 'pool name'), ('index_number', 'Index number'),
+                           ('volume', 'Volume (uL)'), ('concentration', 'UDF/Concentration (nM)')]:
+        excel_key = f"UDF/{field_key}"
+        str_value = raw_sample[excel_key] if raw_sample.get(excel_key, '').isdigit() else None
+        sample[key] = int(float(str_value)) if str_value else None
+
     for parent in ['mother', 'father']:
-        sample[parent] = (raw_sample['UDF/motherID']
-                          if raw_sample['UDF/motherID'] and (raw_sample['UDF/motherID'] != '0.0')
+        parent_key = f"UDF/{parent}ID"
+        sample[parent] = (raw_sample[parent_key] if
+                          raw_sample.get(parent_key) and (raw_sample[parent_key] != '0.0')
                           else None)
 
     return sample

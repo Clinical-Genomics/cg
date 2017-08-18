@@ -21,3 +21,7 @@ class MissingCustomerError(CgError):
 
 class DuplicateRecordError(CgError):
     pass
+
+
+class OrderFormError(CgError):
+    pass
