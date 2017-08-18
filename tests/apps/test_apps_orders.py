@@ -2,7 +2,7 @@
 import pytest
 import datetime as dt
 
-from cg.apps import orders
+from cg.meta import orders
 
 
 @pytest.yield_fixture

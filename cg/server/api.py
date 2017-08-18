@@ -7,9 +7,9 @@ from flask import abort, current_app, Blueprint, jsonify, g, make_response, requ
 from google.auth import jwt
 from werkzeug.utils import secure_filename
 
-from cg.apps.orders import OrdersAPI
-from cg.apps.lims import parse_orderform
 from cg.exc import DuplicateRecordError
+from cg.apps.lims import parse_orderform
+from cg.meta.orders import OrdersAPI
 from .ext import db, lims
 
 blueprint = Blueprint('api', __name__, url_prefix='/api/v1')
