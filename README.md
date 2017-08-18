@@ -68,7 +68,7 @@ This is a schematic overview of how data flows between different tools. Generall
 
 ## Responsibilities
 
-Genomics platsforms produce vasts amount of data and we deal with 1000s of samples every year. This leads to a rather complex interaction of tools and databases to handle this throughput. We also strive to automate as much of the processes as possible.
+Genomics platforms produce vasts amount of data and we deal with 1000s of samples every year. This leads to a rather complex interaction of tools and databases to handle this throughput. We also strive to automate as much of the processes as possible.
 
 We therefore need to share responsibilities and monitoring between members of our team.
 
