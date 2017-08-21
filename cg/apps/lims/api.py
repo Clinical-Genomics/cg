@@ -25,18 +25,20 @@ class LimsAPI(Lims, OrderHandler):
         data = self._export_sample(lims_sample)
         return data
 
+    def _export_project(self, lims_project):
+        return {
+            'id': lims_project.id,
+            'name': lims_project.name,
+            'date': parse_date(lims_project.open_date) if lims_project.open_date else None,
+        }
+
     def _export_sample(self, lims_sample):
         """Get data from a LIMS sample."""
         udfs = lims_sample.udf
         data = {
             'id': lims_sample.id,
             'name': lims_sample.name,
-            'project': {
-                'id': lims_sample.project.id,
-                'name': lims_sample.project.name,
-                'date': (parse_date(lims_sample.project.open_date) if
-                         lims_sample.project.open_date else None),
-            },
+            'project': self._export_project(lims_sample.project),
             'family': udfs.get('familyID'),
             'customer': udfs.get('customer'),
             'sex': SEX_MAP.get(udfs.get('Gender'), None),
@@ -100,6 +102,15 @@ class LimsAPI(Lims, OrderHandler):
             else:
                 message = f"Capture kit error: {lims_sample.id} | {capture_kits}"
                 raise LimsDataError(message)
+
+    def get_samples(self, *args, map_ids=False, **kwargs):
+        """Bypass to original method."""
+        lims_samples = super(LimsAPI).get_samples(*args, **kwargs)
+        if map_ids:
+            lims_map = {lims_sample.name: lims_sample.id for lims_sample in lims_samples}
+            return lims_map
+        else:
+            return lims_samples
 
     def family(self, customer: str, family: str):
         """Fetch information about a family of samples."""

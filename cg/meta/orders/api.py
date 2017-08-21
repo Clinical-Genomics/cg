@@ -30,14 +30,9 @@ class OrdersAPI():
         else:
             status_data = self.samples_to_status(data)
 
-        if self.lims and project_type != 'external':
-            lims_data = self.to_lims(data)
-            lims_project = self.lims.add_project(lims_data)
-            lims_samples = self.lims.get_samples(projectlimsid=lims_project.id)
-            lims_map = {lims_sample.name: lims_sample.id for lims_sample in lims_samples}
-        else:
-            lims_project = None
-            lims_map = {}
+        lims_data = self.to_lims(data)
+        project_data = self.lims.add_project(lims_data)
+        lims_map = self.lims.get_samples(projectlimsid=project_data['id'], map_ids=True)
 
         for family in status_data['families']:
             for sample in family['samples']:
@@ -45,10 +40,7 @@ class OrdersAPI():
 
         new_families = self.status.add_order(status_data)
         self.status.commit()
-        return {
-            'lims_project': lims_project,
-            'families': new_families,
-        }
+        return {'project': project_data, 'families': new_families}
 
     @classmethod
     def validate(cls, project_type: str, data: dict) -> dict:

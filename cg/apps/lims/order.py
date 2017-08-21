@@ -57,9 +57,9 @@ class OrderHandler:
             genologics.entities.Project: new LIMS project instance
         """
         lims_data = self.prepare(project_data, researcher_id)
-        import ipdb; ipdb.set_trace()
         lims_project = self.submit(lims_data)
-        return lims_project
+        project_data = self._export_project(lims_project)
+        return project_data
 
     def submit(self, data):
         """Submit a new project with samples to LIMS."""
