@@ -115,6 +115,15 @@ def samples():
     return jsonify(samples=data, total=samples_q.count())
 
 
+@blueprint.route('/samples/<sample_id>')
+def sample(sample_id):
+    """Fetch a single sample."""
+    sample_obj = db.sample(sample_id)
+    if sample_obj is None:
+        return abort(404)
+    return jsonify(**sample_obj.to_dict())
+
+
 @blueprint.route('/analyses')
 def analyses():
     """Fetch analyses."""
@@ -179,5 +188,4 @@ def orderform():
         project_data = parse_orderform(saved_path)
     except OrderFormError as error:
         return abort(make_response(jsonify(message=error.message), 400))
-    project_data['name'] = filename
-    return jsonify(**project_data)
+    return jsonify(name=filename.rsplit('.')[0], **project_data)
