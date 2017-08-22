@@ -7,10 +7,10 @@ from flask import abort, current_app, Blueprint, jsonify, g, make_response, requ
 from google.auth import jwt
 from werkzeug.utils import secure_filename
 
-from cg.exc import DuplicateRecordError, OrderFormError
+from cg.exc import DuplicateRecordError, OrderFormError, OrderError
 from cg.apps.lims import parse_orderform
-from cg.meta.orders import OrdersAPI
-from .ext import db, lims
+from cg.meta.orders import OrdersAPI, OrderType
+from .ext import db, lims, osticket
 
 blueprint = Blueprint('api', __name__, url_prefix='/api/v1')
 
@@ -48,16 +48,18 @@ def before_request():
         g.current_user = user_obj
 
 
-@blueprint.route('/order/<project_type>', methods=['POST'])
-def order(project_type):
+@blueprint.route('/order/<order_type>', methods=['POST'])
+def order(order_type):
     """Submit an order for samples."""
-    api = OrdersAPI(lims=lims, status=db)
+    api = OrdersAPI(lims=lims, status=db, osticket=osticket)
     post_data = request.get_json()
     try:
-        result = api.accept(project_type, post_data)
-    except DuplicateRecordError as error:
-        return abort(make_response(jsonify(message=error.message), 500))
-    return jsonify(families=[family.to_dict() for family in result['families']])
+        name, email = g.current_user.name, g.current_user.email
+        result = api.submit(OrderType[order_type.upper()], name, email, post_data)
+    except (DuplicateRecordError, OrderError) as error:
+        return abort(make_response(jsonify(message=error.message), 401))
+    return jsonify(project=result['project'],
+                   records=[record.to_dict() for record in result['records']])
 
 
 @blueprint.route('/customers')

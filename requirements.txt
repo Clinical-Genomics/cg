@@ -12,6 +12,7 @@ Flask-Alchy
 Flask-CORS
 google-auth
 werkzeug
+requests
 
 # utils
 ruamel.yaml

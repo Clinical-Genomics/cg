@@ -23,6 +23,8 @@ class BaseHandler:
     Application = models.Application
     ApplicationVersion = models.ApplicationVersion
     Panel = models.Panel
+    Pool = models.Pool
+    Delivery = models.Delivery
 
 
 class CoreHandler(BaseHandler, AddHandler, FindHandler, StatusHandler):

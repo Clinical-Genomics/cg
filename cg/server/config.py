@@ -17,3 +17,6 @@ CG_ENABLE_ADMIN = ('FLASK_DEBUG' in os.environ) or (os.environ.get('CG_ENABLE_AD
 LIMS_HOST = os.environ['LIMS_HOST']
 LIMS_USERNAME = os.environ['LIMS_USERNAME']
 LIMS_PASSWORD = os.environ['LIMS_PASSWORD']
+
+OSTICKET_API_KEY = os.environ['OSTICKET_API_KEY']
+OSTICKET_DOMAIN = os.environ['OSTICKET_DOMAIN']

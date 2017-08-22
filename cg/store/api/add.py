@@ -6,7 +6,6 @@ from typing import List
 import petname
 
 from cg.constants import PRIORITY_MAP
-from cg.exc import MissingCustomerError, DuplicateRecordError
 from cg.store import models, utils
 
 log = logging.getLogger(__name__)
@@ -102,49 +101,22 @@ class AddHandler:
                                 gene_count=genes)
         return new_record
 
-    def add_order(self, data: dict) -> List[models.Family]:
-        """Add a new order of samples to the database."""
-        customer_obj = self.customer(data['customer'])
-        if customer_obj is None:
-            raise MissingCustomerError(f"can't find customer: {data['customer']}")
-        records = []
-        for family in data['families']:
-            existing_record = self.find_family(customer_obj, family['name'])
-            if existing_record:
-                raise DuplicateRecordError(f"existing family found: {existing_record.name} "
-                                           f"({existing_record.internal_id})")
+    def add_pool(self, customer: models.Customer, name: str, order: str, ordered: dt.datetime,
+                 application_version: models.ApplicationVersion, ticket: int=None,
+                 comment: str=None, received: dt.datetime=None) -> models.Pool:
+        """Build a new Pool record."""
+        new_record = self.Pool(name=name, ordered_at=ordered, order=order,
+                               ticket_number=ticket, received_at=received, comment=comment)
+        new_record.customer = customer
+        new_record.application_version = application_version
+        return new_record
 
-            family_obj = self.add_family(
-                name=family['name'],
-                panels=family['panels'],
-                priority=family['priority'],
-            )
-            family_obj.customer = customer_obj
-            self.add(family_obj)
-
-            family_samples = {}
-            for sample in family['samples']:
-                sample_obj = self.add_sample(
-                    name=sample['name'],
-                    sex=sample['sex'],
-                    internal_id=sample['internal_id'],
-                    order=data['name'],
-                )
-                application_obj = self.application(sample['application'])
-                sample_obj.application_version = application_obj.versions[-1]
-                sample_obj.customer = customer_obj
-                family_samples[sample_obj.name] = sample_obj
-                self.add(sample_obj)
-
-            for sample in family['samples']:
-                relationship_obj = self.relate_sample(
-                    family=family_obj,
-                    sample=family_samples[sample['name']],
-                    status=sample['status'],
-                    mother=family_samples[sample['mother']] if sample.get('mother') else None,
-                    father=family_samples[sample['father']] if sample.get('father') else None,
-                )
-                self.add(relationship_obj)
-
-            records.append(family_obj)
-        return records
+    def add_delivery(self, destination: str, sample: models.Sample=None, pool: models.Pool=None,
+                     comment: str=None) -> models.Delivery:
+        """Build a new Delivery record."""
+        if not any([sample, pool]):
+            raise ValueError('you have to provide a sample or a pool')
+        new_record = self.Delivery(destination=destination, comment=comment)
+        new_record.sample = sample
+        new_record.pool = pool
+        return new_record

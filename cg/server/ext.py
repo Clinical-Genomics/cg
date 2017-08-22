@@ -4,6 +4,7 @@ from flask_alchy import Alchy
 from flask_cors import CORS
 
 from cg.apps.lims import LimsAPI
+from cg.apps.osticket import OsTicket
 from cg.store import models, api
 
 
@@ -32,3 +33,4 @@ cors = CORS(resources={r"/api/*": {'origins': '*'}}, supports_credentials=True)
 db = CgAlchy(Model=models.Model)
 admin = Admin(name='Clinical Genomics')
 lims = FlaskLims()
+osticket = OsTicket()

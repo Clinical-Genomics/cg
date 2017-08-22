@@ -7,15 +7,15 @@ from genologics.entities import Project, Researcher, Sample, Container, Containe
 log = logging.getLogger(__name__)
 CONTAINER_TYPE_MAP = {'Tube': 2, '96 well plate': 1}
 PROP2UDF = {
-    "require_qcok": "Process only if QC OK",
-    "application": "Sequencing Analysis",
-    "priority": "priority",
-    "source": "Source",
-    "comment": "Comment",
-    "customer": "customer",
-    "family_name": "familyID",
-    "quantity": "Quantity",
-    "tumour": "tumor",
+    'require_qcok': 'Process only if QC OK',
+    'application': 'Sequencing Analysis',
+    'priority': 'priority',
+    'source': 'Source',
+    'comment': 'Comment',
+    'customer': 'customer',
+    'family_name': 'familyID',
+    'quantity': 'Quantity',
+    'tumour': 'tumor',
     'pool': 'pool name',
     'index': 'Index type',
     'index_number': 'Index number',
@@ -82,7 +82,8 @@ class OrderHandler:
 
                 log.debug('adding sample UDFs')
                 for udf_key, udf_value in sample_data['udfs'].items():
-                    raw_sample.udf[udf_key] = udf_value
+                    if udf_value:
+                        raw_sample.udf[udf_key] = udf_value
 
                 location_label = sample_data['location']
                 lims_sample = self._save_sample(raw_sample, lims_container, location_label)
@@ -121,6 +122,8 @@ class OrderHandler:
                             if isinstance(value, bool):
                                 value = 'yes' if value else 'no'
                             new_sample['udfs'][PROP2UDF[key]] = value
+                        else:
+                            log.debug(f"UDF not found: {key} - {value}")
 
                     new_container['samples'].append(new_sample)
                 lims_data['containers'].append(new_container)

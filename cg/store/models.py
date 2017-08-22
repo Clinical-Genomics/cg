@@ -135,6 +135,40 @@ class Family(Model):
         self._panels = ','.join(panel_list) if panel_list else None
 
 
+class Delivery(Model):
+
+    id = Column(types.Integer, primary_key=True)
+    delivered_at = Column(types.DateTime)
+    removed_at = Column(types.DateTime)
+    destination = Column(types.Enum('caesar', 'pdc', 'uppmax', 'mh', 'custom'), default='caesar')
+    sample_id = Column(ForeignKey('sample.id', ondelete='CASCADE'))
+    pool_id = Column(ForeignKey('pool.id', ondelete='CASCADE'))
+    comment = Column(types.Text)
+
+
+class Pool(Model):
+
+    __table_args__ = (UniqueConstraint('order', 'name', name='_order_name_uc'),)
+
+    id = Column(types.Integer, primary_key=True)
+    name = Column(types.String(32), nullable=False)
+    order = Column(types.String(64), nullable=False)
+    ticket_number = Column(types.Integer)
+    reads = Column(types.BigInteger, default=0)
+    ordered_at = Column(types.DateTime, nullable=False)
+    received_at = Column(types.DateTime)
+    sequenced_at = Column(types.DateTime)
+    delivered_at = Column(types.DateTime)
+    invoiced_at = Column(types.DateTime)
+    comment = Column(types.Text)
+
+    created_at = Column(types.DateTime, default=dt.datetime.now)
+    customer_id = Column(ForeignKey('customer.id', ondelete='CASCADE'), nullable=False)
+    application_version_id = Column(ForeignKey('application_version.id'), nullable=False)
+
+    deliveries = orm.relationship('Delivery', backref='pool')
+
+
 class Sample(Model):
 
     id = Column(types.Integer, primary_key=True)
@@ -158,6 +192,8 @@ class Sample(Model):
     created_at = Column(types.DateTime, default=dt.datetime.now)
     customer_id = Column(ForeignKey('customer.id', ondelete='CASCADE'), nullable=False)
     application_version_id = Column(ForeignKey('application_version.id'), nullable=False)
+
+    deliveries = orm.relationship('Delivery', backref='sample')
 
     @property
     def priority_human(self):
@@ -193,6 +229,7 @@ class Flowcell(Model):
     sequencer_type = Column(types.Enum('hiseqga', 'hiseqx'))
     sequencer_name = Column(types.String(32))
     sequenced_at = Column(types.DateTime)
+    archived_at = Column(types.DateTime)
 
     samples = orm.relationship('Sample', secondary=flowcell_sample, backref='flowcells')
 

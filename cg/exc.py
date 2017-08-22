@@ -25,3 +25,11 @@ class DuplicateRecordError(CgError):
 
 class OrderFormError(CgError):
     pass
+
+
+class OrderError(CgError):
+    pass
+
+
+class TicketCreationError(CgError):
+    pass

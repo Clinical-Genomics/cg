@@ -40,8 +40,10 @@ def parse_orderform(excel_path):
         customer_ids = set(sample['customer'] for sample in parsed_samples)
         items = parsed_samples
 
-    if len(customer_ids) != 1:
-        raise ValueError("invalid customer information: {}".format(customer_ids))
+    if len(customer_ids) == 0:
+        raise OrderFormError('customer information missing')
+    elif len(customer_ids) != 1:
+        raise OrderFormError(f"invalid customer information: {customer_ids}")
 
     new_project = {
         'customer': customer_ids.pop(),

@@ -105,7 +105,7 @@ class LimsAPI(Lims, OrderHandler):
 
     def get_samples(self, *args, map_ids=False, **kwargs):
         """Bypass to original method."""
-        lims_samples = super(LimsAPI).get_samples(*args, **kwargs)
+        lims_samples = super(LimsAPI, self).get_samples(*args, **kwargs)
         if map_ids:
             lims_map = {lims_sample.name: lims_sample.id for lims_sample in lims_samples}
             return lims_map
