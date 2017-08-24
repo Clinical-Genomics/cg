@@ -37,8 +37,9 @@ class OrdersAPI():
         if errors:
             return errors
         message = f"New incoming samples, {name}"
-        ticket_id = self.osticket.open_ticket(name, email, subject=data['name'], message=message)
-        data['ticket'] = ticket_id
+        data['ticket'] = (self.osticket.open_ticket(name, email, subject=data['name'],
+                                                    message=message)
+                          if self.osticket else None)
         result = getattr(self, f"submit_{type.value}")(data)
         self.status.commit()
         return result

@@ -16,6 +16,8 @@ log = logging.getLogger(__name__)
 
 class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
 
+    """Interface to Trailblazer for `cg`."""
+
     def __init__(self, config: dict):
         super(TrailblazerAPI, self).__init__(config['trailblazer']['database'])
         self.mip_cli = MipCli(config['trailblazer']['script'])

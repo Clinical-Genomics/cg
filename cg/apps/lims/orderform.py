@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from typing import List
+
 import xlrd
 
 from cg.exc import OrderFormError
@@ -7,7 +9,7 @@ SEX_MAP = {'male': 'M', 'female': 'F', 'unknown': 'unknown', 'unknown': 'Unknown
 REV_SEX_MAP = {value: key for key, value in SEX_MAP.items()}
 
 
-def parse_orderform(excel_path):
+def parse_orderform(excel_path: str) -> dict:
     """Parse out information from an order form."""
     workbook = xlrd.open_workbook(excel_path)
 
@@ -21,14 +23,13 @@ def parse_orderform(excel_path):
         raise OrderFormError("'orderform' sheet not found in Excel file")
     orderform_sheet = workbook.sheet_by_name(sheet_name)
 
-    if '1604' in orderform_sheet.row(0)[1].value:
-        project_type = 'rml'
-    else:
-        project_type = 'scout'
-
     raw_samples = relevant_rows(orderform_sheet)
     parsed_samples = [parse_sample(raw_sample) for raw_sample in raw_samples]
-    if project_type == 'scout':
+
+    document_title = orderform_sheet.row(0)[1].value
+    project_type = get_project_type(document_title, parsed_samples)
+
+    if project_type in ('scout', 'external'):
         parsed_families = group_families(parsed_samples)
         items = []
         customer_ids = set()
@@ -40,17 +41,30 @@ def parse_orderform(excel_path):
         customer_ids = set(sample['customer'] for sample in parsed_samples)
         items = parsed_samples
 
-    if len(customer_ids) == 0:
+    customer_options = len(customer_ids)
+    if customer_options == 0:
         raise OrderFormError('customer information missing')
-    elif len(customer_ids) != 1:
+    elif customer_options != 1:
         raise OrderFormError(f"invalid customer information: {customer_ids}")
 
-    new_project = {
+    data = {
         'customer': customer_ids.pop(),
         'items': items,
         'project_type': project_type,
     }
-    return new_project
+    return data
+
+
+def get_project_type(document_title: str, parsed_samples: List) -> str:
+    """Determine the project type."""
+    if '1604' in document_title:
+        return 'rml'
+    elif '1541' in document_title:
+        return 'external'
+
+    analyses = set(sample['analysis'] for sample in parsed_samples)
+    project_type = analyses.pop() if len(analyses) == 1 else 'scout'    
+    return project_type
 
 
 def expand_family(family_id, parsed_family):
@@ -85,7 +99,8 @@ def expand_family(family_id, parsed_family):
             'application': raw_sample['application'],
             'source': raw_sample['source'],
         }
-        for key in ('container', 'container_name', 'well_position', 'quantity', 'status'):
+        for key in ('container', 'container_name', 'well_position', 'quantity', 'status',
+                    'comment', 'capture_kit'):
             if raw_sample[key]:
                 new_sample[key] = raw_sample[key]
 
@@ -130,7 +145,6 @@ def parse_sample(raw_sample):
         'panels': (raw_sample['UDF/Gene List'].split(';') if
                    raw_sample.get('UDF/Gene List') else None),
         'require_qcok': True if raw_sample['UDF/Process only if QC OK'] else False,
-        'quantity': raw_sample['UDF/Quantity'] if raw_sample.get('UDF/Quantity') else None,
         'application': raw_sample['UDF/Sequencing Analysis'],
         'source': raw_sample['UDF/Source'].lower(),
         'status': raw_sample['UDF/Status'].lower() if raw_sample.get('UDF/Status') else None,
@@ -143,12 +157,19 @@ def parse_sample(raw_sample):
         'index': raw_sample['UDF/Index type'] if raw_sample.get('UDF/Index type') else None,
         'reagent_label': (raw_sample['Sample/Reagent Label'] if
                           raw_sample.get('Sample/Reagent Label') else None),
+        'tumour': True if raw_sample.get('UDF/tumor') == 'yes' else False,
     }
 
+    data_analysis = raw_sample.get('UDF/Data Analysis') or 'fastq'
+    raw_analysis = 'scout' if 'scout' in data_analysis else data_analysis.split('+', 1)[0]
+    sample['analysis'] = 'fastq' if raw_analysis == 'custom' else raw_analysis
+
     for key, field_key in [('pool', 'pool name'), ('index_number', 'Index number'),
-                           ('volume', 'Volume (uL)'), ('concentration', 'UDF/Concentration (nM)')]:
+                           ('volume', 'Volume (uL)'), ('concentration', 'Concentration (nM)'),
+                           ('quantity', 'Quantity')]:
         excel_key = f"UDF/{field_key}"
-        str_value = raw_sample[excel_key] if raw_sample.get(excel_key, '').isdigit() else None
+        str_value = (raw_sample[excel_key] if raw_sample.get(excel_key, '').rstrip('.0').isdigit()
+                     else None)
         sample[key] = int(float(str_value)) if str_value else None
 
     for parent in ['mother', 'father']:

@@ -9,6 +9,8 @@ from cg.exc import TicketCreationError
 
 class OsTicket(object):
 
+    """Interface to ticket system."""
+
     def __init__(self):
         self.headers = None
         self.url = None

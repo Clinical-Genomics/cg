@@ -16,6 +16,7 @@ class HousekeeperAPI(Store):
                                              config['housekeeper']['root'])
         self.root_dir = config['housekeeper']['root']
 
-    def include(self, version_obj):
+    def include(self, version_obj: models.Version):
+        """Call the include version function to import related assets."""
         include_version(self.root_dir, version_obj)
         version_obj.included_at = dt.datetime.now()
