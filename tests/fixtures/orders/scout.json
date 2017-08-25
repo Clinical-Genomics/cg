@@ -1,23 +1,23 @@
 {
-    "name": "Clincal WGS",                              // required
-    "customer": "cust003",                              // required
+    "name": "Clincal WGS",
+    "customer": "cust003",
     "comment": "Vi kommer in med proverna på tisdag",
     "samples": [{
-        "name": "17093-I-2A",                           // required
-        "father": "17093-II-1U",                        // must exist in order
-        "mother": "17093-II-2U",                        // do
-        "sex": "female",                                // required
+        "name": "17093-I-2A",
+        "father": "17093-II-1U",
+        "mother": "17093-II-2U",
+        "sex": "female",
         "quantity": "2200",
-        "application": "WGTPCFC030",                    // required
-        "source": "blood",                              // required
-        "status": "affected",                           // required
-        "container": "96 well plate",                   // required [Tube, 96 well plate]
-        "container_name": "CMMS",                       // (sample name is assumed for "Tube")
-        "well_position": "A:1",                         // required if "96 well plate"
-        "family_name": "17093",                         // required
-        "panels": ["IEM", "EP"],                        // required
-        "require_qcok": false,                          // default = false
-        "priority": "standard"                          // default = standard
+        "application": "WGTPCFC030",
+        "source": "blood",
+        "status": "affected",
+        "container": "96 well plate",
+        "container_name": "CMMS",
+        "well_position": "A:1",
+        "family_name": "17093",
+        "panels": ["IEM", "EP"],
+        "require_qcok": false,
+        "priority": "standard"
     }, {
         "name": "17093-II-1U",
         "sex": "male",
