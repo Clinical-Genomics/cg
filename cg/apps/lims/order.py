@@ -26,7 +26,7 @@ PROP2UDF = {
 
 class OrderHandler:
 
-    def add_project(self, project_data, researcher_id='3'):
+    def add_project(self, data, researcher_id='3'):
         """Submit a new order.
 
         Example:
@@ -50,16 +50,16 @@ class OrderHandler:
             }
 
         Args:
-            project_data (dict): project order data dict
+            data (dict): project order data dict
             researcher_id (Optional[str]): id of research to link to the order
 
         Returns:
             genologics.entities.Project: new LIMS project instance
         """
-        lims_data = self.prepare(project_data, researcher_id)
+        lims_data = self.prepare(data, researcher_id)
         lims_project = self.submit(lims_data)
-        project_data = self._export_project(lims_project)
-        return project_data
+        lims_project_data = self._export_project(lims_project)
+        return lims_project_data
 
     def submit(self, data):
         """Submit a new project with samples to LIMS."""

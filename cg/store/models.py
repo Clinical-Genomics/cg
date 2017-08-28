@@ -52,6 +52,7 @@ class Customer(Model):
 
     families = orm.relationship('Family', backref='customer', order_by='-Family.id')
     samples = orm.relationship('Sample', backref='customer', order_by='-Sample.id')
+    pools = orm.relationship('Pool', backref='customer', order_by='-Pool.id')
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
@@ -266,7 +267,7 @@ class Application(Model):
 
     id = Column(types.Integer, primary_key=True)
     tag = Column(types.String(32), unique=True, nullable=False)
-    category = Column(types.Enum('wgs', 'wes', 'tga', 'rna', 'mic'), nullable=False)
+    category = Column(types.Enum('wgs', 'wes', 'tga', 'rna', 'mic', 'rml'), nullable=False)
     description = Column(types.String(256), nullable=False)
     is_accredited = Column(types.Boolean, nullable=False)
 
@@ -315,6 +316,7 @@ class ApplicationVersion(Model):
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
     application_id = Column(ForeignKey(Application.id), nullable=False)
     samples = orm.relationship('Sample', backref='application_version')
+    pools = orm.relationship('Pool', backref='application_version')
 
     def __str__(self) -> str:
         return f"{self.application.tag} ({self.version})"

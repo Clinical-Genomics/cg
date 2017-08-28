@@ -93,3 +93,13 @@ class FindHandler:
             )
             .first()
         )
+
+    def pools(self):
+        """Fetch all the pools."""
+        query = self.Pool.query
+        return query
+    
+    def deliveries(self):
+        """Fetch all deliveries."""
+        query = self.Delivery.query
+        return query

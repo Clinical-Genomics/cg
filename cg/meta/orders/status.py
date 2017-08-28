@@ -155,25 +155,27 @@ class StatusHandler:
             raise OrderError(f"unknown customer: {customer}")
         new_samples = []
         for sample in samples:
-            new_sample = self.status.add_sample(
-                name=sample['name'],
-                internal_id=sample['internal_id'],
-                sex=sample['sex'] or 'unknown',
-                order=order,
-                ordered=ordered,
-                ticket=ticket,
-                priority=sample['priority'],
-                comment=sample['comment'],
-                tumour=sample['tumour'],
-            )
+            with self.status.session.no_autoflush:
+                new_sample = self.status.add_sample(
+                    name=sample['name'],
+                    internal_id=sample['internal_id'],
+                    sex=sample['sex'] or 'unknown',
+                    order=order,
+                    ordered=ordered,
+                    ticket=ticket,
+                    priority=sample['priority'],
+                    comment=sample['comment'],
+                    tumour=sample['tumour'],
+                )
             new_sample.customer = customer_obj
             with self.status.session.no_autoflush:
                 new_sample.application_version = self.status.latest_version(sample['application'])
             new_samples.append(new_sample)
 
             if not new_sample.is_tumour:
-                new_family = self.status.add_family(name=sample['name'], panels=['OMIM-AUTO'],
-                                                    priority='research')
+                with self.status.session.no_autoflush:
+                    new_family = self.status.add_family(name=sample['name'], panels=['OMIM-AUTO'],
+                                                        priority='research')
                 new_family.customer = production_customer
                 self.status.add(new_family)
 
@@ -200,6 +202,8 @@ class StatusHandler:
         for pool in pools:
             with self.status.session.no_autoflush:
                 application_version = self.status.latest_version(pool['application'])
+                if application_version is None:
+                    raise OrderError(f"unknown application: {pool['application']}")
             new_pool = self.status.add_pool(
                 customer=customer_obj,
                 name=pool['name'],

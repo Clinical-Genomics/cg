@@ -44,7 +44,6 @@ class OrdersAPI(LimsHandler, StatusHandler):
                                                     message=message)
                           if self.osticket else None)
         result = getattr(self, f"submit_{project.value}")(data)
-        self.status.commit()
         return result
 
     def submit_rml(self, data: dict) -> dict:

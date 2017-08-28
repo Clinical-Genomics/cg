@@ -1,3 +1,5 @@
+import datetime as dt
+
 from cg.meta.orders.status import StatusHandler
 
 
@@ -52,3 +54,87 @@ def test_families_to_status(scout_order):
 
     # ... second sample has a comment
     assert isinstance(family['samples'][1]['comment'], str)
+
+
+def test_store_pools(orders_api, base_store, rml_status_data):
+    # GIVEN a basic store with no samples and a rml order
+    assert base_store.pools().count() == 0
+    # WHEN storing the order
+    new_pools = orders_api.store_pools(
+        customer=rml_status_data['customer'],
+        order=rml_status_data['order'],
+        ordered=dt.datetime.now(),
+        ticket=1234348,
+        pools=rml_status_data['pools'],
+    )
+    # THEN it should update the database with new pools
+    assert len(new_pools) == 1
+    assert base_store.pools().count() == 1
+    new_pool = base_store.pools().first()
+    assert new_pool == new_pools[0]
+    assert new_pool.name == '1'
+    assert new_pool.application_version.application.tag == 'RMLS05R150'
+    # ... and add a delivery
+    assert len(new_pool.deliveries) == 1
+    assert new_pool.deliveries[0].destination == 'caesar'
+
+
+def test_store_samples(orders_api, base_store, fastq_status_data):
+    # GIVEN a basic store with no samples and a fastq order
+    assert base_store.samples().count() == 0
+    assert base_store.families().count() == 0
+    # WHEN stoting the order
+    new_samples = orders_api.store_samples(
+        customer=fastq_status_data['customer'],
+        order=fastq_status_data['order'],
+        ordered=dt.datetime.now(),
+        ticket=1234348,
+        samples=fastq_status_data['samples'],
+    )
+    # THEN it should store the samples and create a "fake" family for
+    # the non-tumour sample
+    assert len(new_samples) == 2
+    assert base_store.samples().count() == 2
+    assert base_store.families().count() == 1
+    first_sample = new_samples[0]
+    assert len(first_sample.links) == 1
+    family_link = first_sample.links[0]
+    assert family_link.family == base_store.families().first()
+    for sample in new_samples:
+        assert len(sample.deliveries) == 1
+
+
+def test_store_families(orders_api, base_store, scout_status_data):
+    # GIVEN a basic store with no samples or nothing in it + scout order
+    assert base_store.samples().first() is None
+    assert base_store.families().first() is None
+    # WHEN storing the order
+    new_families = orders_api.store_families(
+        customer=scout_status_data['customer'],
+        order=scout_status_data['order'],
+        ordered=dt.datetime.now(),
+        ticket=1234567,
+        families=scout_status_data['families'],
+    )
+    # THEN it should create and link samples and the family
+    family_obj = base_store.families().first()
+    assert len(new_families) == 1
+    new_family = new_families[0]
+    assert new_family == family_obj
+    assert new_family.name == '17093'
+    assert set(new_family.panels) == set(['IEM', 'EP'])
+    assert new_family.priority_human == 'standard'
+
+    assert len(new_family.links) == 3
+    new_link = new_family.links[0]
+    assert new_link.status == 'affected'
+    assert new_link.mother.name == '17093-II-2U'
+    assert new_link.father.name == '17093-II-1U'
+    assert new_link.sample.name == '17093-I-2A'
+    assert new_link.sample.sex == 'female'
+    assert new_link.sample.application_version.application.tag == 'WGTPCFC030'
+    assert isinstance(new_family.links[1].sample.comment, str)
+
+    assert base_store.deliveries().count() == base_store.samples().count()
+    for link in new_family.links:
+        assert len(link.sample.deliveries) == 1

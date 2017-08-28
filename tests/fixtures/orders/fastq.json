@@ -1,6 +1,6 @@
 {
     "name": "I want my reads",
-    "customer": "cust022",
+    "customer": "cust002",
     "samples": [{
         "name": "sample-normal",
         "application": "WGSPCFC060",

@@ -61,7 +61,7 @@ class FastqProject(BaseProject):
     samples = fields.List(fields.Nested(FastqSample), required=True)
 
 
-class RmlSample(BaseSample, PrepMixin):
+class RmlSample(BaseSample):
     pool = fields.Str(required=True)
     index = fields.Str()
     index_number = fields.Int()
