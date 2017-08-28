@@ -44,7 +44,6 @@ def before_request():
         if user_obj is None:
             message = f"{user_data['email']} doesn't have access"
             return abort(make_response(jsonify(message=message), 403))
-            make_response
         g.current_user = user_obj
 
 

@@ -1,14 +1,17 @@
 # -*- coding: utf-8 -*-
+import logging
 from enum import Enum
 from typing import List
 
 from cg.apps.lims import LimsAPI
 from cg.apps.osticket import OsTicket
-from cg.exc import OrderError
+from cg.exc import OrderError, TicketCreationError
 from cg.store import Store
 from .schema import ExternalProject, FastqProject, RmlProject, ScoutProject
 from .lims import LimsHandler
 from .status import StatusHandler
+
+LOG = logging.getLogger(__name__)
 
 
 class OrderType(Enum):
@@ -40,9 +43,13 @@ class OrdersAPI(LimsHandler, StatusHandler):
         if errors:
             return errors
         message = f"New incoming samples, {name}"
-        data['ticket'] = (self.osticket.open_ticket(name, email, subject=data['name'],
-                                                    message=message)
-                          if self.osticket else None)
+        try:
+            data['ticket'] = (self.osticket.open_ticket(name, email, subject=data['name'],
+                                                        message=message)
+                              if self.osticket else None)
+        except TicketCreationError as error:
+            LOG.warning(error.message)
+            data['ticket'] = None
         result = getattr(self, f"submit_{project.value}")(data)
         return result
 
