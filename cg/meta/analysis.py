@@ -16,11 +16,11 @@ COMBOS = {
     'CM': ('CNM', 'CM'),
     'Horsel': ('Horsel', '141217', '141201'),
 }
-CAPTUREKIT_MAP = {'Agilent Sureselect CRE': 'Agilent_SureSelectCRE.V1',
-                  'SureSelect CRE': 'Agilent_SureSelectCRE.V1',
-                  'Agilent Sureselect V5': 'Agilent_SureSelect.V5',
-                  'SureSelect Focused Exome': 'Agilent_SureSelectFocusedExome.V1',
-                  'other': 'Agilent_SureSelectCRE.V1'}
+CAPTUREKIT_MAP = {'Agilent Sureselect CRE': 'agilent_sureselect_cre.v1',
+                  'SureSelect CRE': 'agilent_sureselect_cre.v1',
+                  'Agilent Sureselect V5': 'agilent_sureselect.v5',
+                  'SureSelect Focused Exome': 'agilent_sureselect_focusedexome.v1',
+                  'other': 'agilent_sureselect_cre.v1'}
 
 
 class AnalysisAPI():
