@@ -1,17 +1,20 @@
 # -*- coding: utf-8 -*-
+import logging
+
 import click
 
 from cg.apps import hk, tb, scoutapi, lims
 from cg.meta.analysis import AnalysisAPI
 from cg.store import Store
 
-priority_option = click.option('-p', '--priority', type=click.Choice(['low', 'normal', 'high']))
-email_option = click.option('-e', '--email', help='email to send errors to')
+LOG = logging.getLogger(__name__)
+PRIORITY_OPTION = click.option('-p', '--priority', type=click.Choice(['low', 'normal', 'high']))
+EMAIL_OPTION = click.option('-e', '--email', help='email to send errors to')
 
 
 @click.group(invoke_without_command=True)
-@priority_option
-@email_option
+@PRIORITY_OPTION
+@EMAIL_OPTION
 @click.option('-f', '--family', 'family_id', help='link samples within a family')
 @click.pass_context
 def analysis(context, priority, email, family_id):
@@ -97,8 +100,8 @@ def panel(context, print_output, family_id):
 
 
 @analysis.command()
-@priority_option
-@email_option
+@PRIORITY_OPTION
+@EMAIL_OPTION
 @click.argument('family_id')
 @click.pass_context
 def start(context, priority, email, family_id):
@@ -108,3 +111,14 @@ def start(context, priority, email, family_id):
         context.obj['api'].start(family_obj, priority=priority, email=email)
     except tb.MipStartError as error:
         click.echo(click.style(error.message, fg='red'))
+
+
+@analysis.command()
+@click.pass_context
+def auto(context):
+    """Start all analyses that are ready for analysis."""
+    for family_obj in context.obj['db'].families_to_analyze():
+        LOG.info(f"starting family: {family_obj.internal_id}")
+        priority = ('high' if family_obj.high_priority else
+                    ('low' if family_obj.low_priority else 'standard'))
+        context.invoke(analysis, priority=priority, family_id=family_obj.internal_id)

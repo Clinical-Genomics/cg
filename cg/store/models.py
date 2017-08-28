@@ -10,6 +10,24 @@ from cg.constants import REV_PRIORITY_MAP
 Model = alchy.make_declarative_base(Base=alchy.ModelBase)
 
 
+class PriorityMixin:
+
+    @property
+    def priority_human(self):
+        """Humanized priority for sample."""
+        return REV_PRIORITY_MAP[self.priority]
+
+    @property
+    def high_priority(self):
+        """Has high priority?"""
+        return self.priority > 1
+
+    @property
+    def low_priority(self):
+        """Has low priority?"""
+        return self.priority < 1
+
+
 class User(Model):
 
     id = Column(types.Integer, primary_key=True)
@@ -89,7 +107,7 @@ class FamilySample(Model):
         return f"{self.family.internal_id} | {self.sample.internal_id}"
 
 
-class Family(Model):
+class Family(Model, PriorityMixin):
 
     __table_args__ = (
         UniqueConstraint('customer_id', 'name', name='_customer_name_uc'),
@@ -106,11 +124,6 @@ class Family(Model):
     created_at = Column(types.DateTime, default=dt.datetime.now)
     customer_id = Column(ForeignKey('customer.id', ondelete='CASCADE'), nullable=False)
     analyses = orm.relationship('Analysis', backref='family', order_by='-Analysis.analyzed_at')
-
-    @property
-    def priority_human(self):
-        """Humanized priority for sample."""
-        return REV_PRIORITY_MAP[self.priority]
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
@@ -170,7 +183,7 @@ class Pool(Model):
     deliveries = orm.relationship('Delivery', backref='pool')
 
 
-class Sample(Model):
+class Sample(Model, PriorityMixin):
 
     id = Column(types.Integer, primary_key=True)
     internal_id = Column(types.String(32), nullable=False, unique=True)
@@ -195,11 +208,6 @@ class Sample(Model):
     application_version_id = Column(ForeignKey('application_version.id'), nullable=False)
 
     deliveries = orm.relationship('Delivery', backref='sample')
-
-    @property
-    def priority_human(self):
-        """Humanized priority for sample."""
-        return REV_PRIORITY_MAP[self.priority]
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
