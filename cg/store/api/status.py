@@ -6,14 +6,14 @@ from cg.store import models
 
 class StatusHandler:
 
-    def samples_to_recieve(self):
+    def samples_to_recieve(self, external=False):
         """Fetch incoming samples."""
         records = (
             self.Sample.query
             .filter(
                 models.Sample.received_at == None,
                 models.Sample.sequenced_at == None,
-                models.Sample.is_external == False
+                models.Sample.is_external == external
             )
             .order_by(models.Sample.ordered_at.desc())
         )
@@ -23,7 +23,11 @@ class StatusHandler:
         """Fetch samples in sequencing."""
         records = (
             self.Sample.query
-            .filter(models.Sample.received_at != None, models.Sample.sequenced_at == None)
+            .filter(
+                models.Sample.received_at != None,
+                models.Sample.sequenced_at == None,
+                models.Sample.is_external == False
+            )
             .order_by(models.Sample.priority.desc(), models.Sample.ordered_at.desc())
         )
         return records

@@ -46,14 +46,14 @@ class AddHandler:
     def add_sample(self, name: str, sex: str, internal_id: str=None, ordered: dt.datetime=None,
                    received: dt.datetime=None, order: str=None, external: bool=False,
                    tumour: bool=False, priority: str='standard', ticket: int=None,
-                   comment: str=None) -> models.Sample:
+                   comment: str=None, **kwargs) -> models.Sample:
         """Add a new sample to the database."""
         internal_id = internal_id or utils.get_unique_id(self.sample)
         db_priority = PRIORITY_MAP[priority]
         new_sample = self.Sample(name=name, internal_id=internal_id, received_at=received,
                                  sex=sex, order=order, is_external=external, is_tumour=tumour,
                                  ordered_at=ordered or dt.datetime.now(), priority=db_priority,
-                                 ticket_number=ticket, comment=comment)
+                                 ticket_number=ticket, comment=comment, **kwargs)
         return new_sample
 
     def add_family(self, name: str, panels: List[str], priority: str='standard') -> models.Family:

@@ -35,9 +35,9 @@ class OrderHandler:
                 'name': 'project name',
                 'samples': [{
                     'name': '17081-II-1U',
-                    "container": "96 well plate",
-                    "container_name": "CMMS",
-                    "well_position": "A:1",
+                    'container': '96 well plate',
+                    'container_name': 'CMMS',
+                    'well_position': 'A:1',
                     'udfs': {
                         'priority': 'standard',
                         'application': 'WGTPCFC030',
