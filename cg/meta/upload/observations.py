@@ -16,7 +16,7 @@ class UploadObservationsAPI(object):
 
     def data(self, analysis_obj: models.Analysis) -> dict:
         """Fetch data about an analysis to load observations."""
-        hk_version = self.hk.version(analysis_obj.family.internal_id, analysis_obj.analyzed_at)
+        hk_version = self.hk.version(analysis_obj.family.internal_id, analysis_obj.completed_at)
         hk_vcf = self.hk.files(version=hk_version.id, tags=['vcf-snv-research']).first()
         hk_pedigree = self.hk.files(version=hk_version.id, tags=['pedigree']).first()
         data = {

@@ -16,7 +16,7 @@ class UploadScoutAPI(object):
 
     def data(self, analysis_obj: models.Analysis) -> dict:
         """Fetch data about an analysis to load Scout."""
-        hk_version = self.hk.version(analysis_obj.family.internal_id, analysis_obj.analyzed_at)
+        hk_version = self.hk.version(analysis_obj.family.internal_id, analysis_obj.completed_at)
 
         data = {
             'owner': analysis_obj.family.customer.internal_id,
@@ -31,7 +31,7 @@ class UploadScoutAPI(object):
                 'phenotype': sample_obj.status,
                 'sex': sample_obj.sample.sex,
             } for sample_obj in analysis_obj.samples],
-            'analysis_date': analysis_obj.analyzed_at,
+            'analysis_date': analysis_obj.completed_at,
             'default_gene_panels': analysis_obj.family.panels,
         }
 

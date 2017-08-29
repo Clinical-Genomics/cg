@@ -42,7 +42,7 @@ class StatusHandler:
                 models.Family.analyze == True,
                 and_(
                     models.Sample.sequenced_at != None,
-                    models.Analysis.analyzed_at == None
+                    models.Analysis.completed_at == None
                 )
             ))
         )
@@ -50,7 +50,7 @@ class StatusHandler:
 
     def analyses_to_upload(self):
         """Fetch analyses that haven't been uploaded."""
-        records = self.Analysis.query.filter(models.Analysis.analyzed_at != None,
+        records = self.Analysis.query.filter(models.Analysis.completed_at != None,
                                              models.Analysis.uploaded_at == None)
         return records
 

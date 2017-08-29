@@ -53,7 +53,7 @@ def families(context, skip):
         color = 'red' if family_obj.priority > 1 else 'blue'
         message = f"{family_obj.internal_id} ({family_obj.priority})"
         if family_obj.analyses:
-            message += f" {family_obj.analyses[0].analyzed_at.date()}"
+            message += f" {family_obj.analyses[0].completed_at.date()}"
             color = 'green'
         if family_obj.analyze:
             message += ' [ANALYZE]'

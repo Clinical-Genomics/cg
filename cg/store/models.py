@@ -123,7 +123,7 @@ class Family(Model, PriorityMixin):
     ordered_at = Column(types.DateTime, default=dt.datetime.now)
     created_at = Column(types.DateTime, default=dt.datetime.now)
     customer_id = Column(ForeignKey('customer.id', ondelete='CASCADE'), nullable=False)
-    analyses = orm.relationship('Analysis', backref='family', order_by='-Analysis.analyzed_at')
+    analyses = orm.relationship('Analysis', backref='family', order_by='-Analysis.completed_at')
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
@@ -264,7 +264,7 @@ class Analysis(Model):
     family_id = Column(ForeignKey('family.id', ondelete='CASCADE'), nullable=False)
 
     def __str__(self):
-        return f"{self.family.internal_id} | {self.analyzed_at.date()}"
+        return f"{self.family.internal_id} | {self.completed_at.date()}"
 
     def to_dict(self):
         """Override dicify method."""

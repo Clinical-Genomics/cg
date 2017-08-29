@@ -89,11 +89,11 @@ class AddHandler:
                                    sequencer_type=sequencer_type, sequenced_at=date)
         return new_record
 
-    def add_analysis(self, pipeline: str, version: str, analyzed: dt.datetime,
+    def add_analysis(self, pipeline: str, version: str, completed_at: dt.datetime,
                      primary: bool=False, uploaded: dt.datetime=None) -> models.Analysis:
         """Add a new analysis to the database."""
         new_record = self.Analysis(pipeline=pipeline, pipeline_version=version,
-                                   analyzed_at=analyzed, is_primary=primary, uploaded_at=uploaded)
+                                   completed_at=completed_at, is_primary=primary, uploaded_at=uploaded)
         return new_record
 
     def add_panel(self, name: str, abbrev: str, version: float, date: dt.datetime=None,
