@@ -54,8 +54,8 @@ class Customer(Model):
     internal_id = Column(types.String(32), unique=True, nullable=False)
     name = Column(types.String(128), nullable=False)
     priority = Column(types.Enum('diagnostic', 'research'))
+    scout_access = Column(types.Boolean, nullable=False, default=False)
 
-    scout_access = Column(types.Boolean, default=False)
     agreement_date = Column(types.DateTime)
     agreement_registration = Column(types.String(32))
     project_account_ki = Column(types.String(32))

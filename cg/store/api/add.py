@@ -13,14 +13,18 @@ log = logging.getLogger(__name__)
 
 class AddHandler:
 
-    def add_customer(self, internal_id: str, name: str, scout: bool=False) -> models.Customer:
+    def add_customer(self, internal_id: str, name: str, scout_access: bool=False,
+                     **kwargs) -> models.Customer:
         """Add a new customer to the database."""
-        new_customer = self.Customer(internal_id=internal_id, name=name, scout_access=scout)
+        new_customer = self.Customer(internal_id=internal_id, name=name, scout_access=scout_access,
+                                     **kwargs)
         return new_customer
 
-    def add_user(self, email: str, name: str, admin: bool=False) -> models.User:
+    def add_user(self, customer: models.Customer, email: str, name: str,
+                 is_admin: bool=False) -> models.User:
         """Add a new user to the database."""
-        new_user = self.User(name=name, email=email, is_admin=admin)
+        new_user = self.User(name=name, email=email, is_admin=is_admin)
+        new_user.customer = customer
         return new_user
 
     def add_application(self, tag: str, category: str, description: str,
@@ -96,11 +100,12 @@ class AddHandler:
                                    completed_at=completed_at, is_primary=primary, uploaded_at=uploaded)
         return new_record
 
-    def add_panel(self, name: str, abbrev: str, version: float, date: dt.datetime=None,
-                  genes: int=None) -> models.Panel:
+    def add_panel(self, customer: models.Customer, name: str, abbrev: str, version: float,
+                  date: dt.datetime=None, genes: int=None) -> models.Panel:
         """Build a new panel."""
         new_record = self.Panel(name=name, abbrev=abbrev, current_version=version, date=date,
                                 gene_count=genes)
+        new_record.customer = customer
         return new_record
 
     def add_pool(self, customer: models.Customer, name: str, order: str, ordered: dt.datetime,
