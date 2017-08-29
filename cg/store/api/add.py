@@ -24,20 +24,21 @@ class AddHandler:
         return new_user
 
     def add_application(self, tag: str, category: str, description: str,
-                        accredited: bool=False) -> models.Application:
+                        is_accredited: bool=False, **kwargs) -> models.Application:
         """Add a new application to the store."""
         new_record = self.Application(
             tag=tag,
             category=category,
             description=description,
-            is_accredited=accredited
+            is_accredited=is_accredited,
+            **kwargs,
         )
         return new_record
 
-    def add_version(self, application: models.Application, version: int, valid: dt.datetime,
-                    prices: dict, comment: str=None) -> models.ApplicationVersion:
+    def add_version(self, application: models.Application, version: int, valid_from: dt.datetime,
+                    prices: dict, **kwargs) -> models.ApplicationVersion:
         """Add application version."""
-        new_record = self.ApplicationVersion(version=version, valid_from=valid, comment=comment)
+        new_record = self.ApplicationVersion(version=version, valid_from=valid_from, **kwargs)
         for price_key in ['standard', 'priority', 'express', 'research']:
             setattr(new_record, f"price_{price_key}", prices[price_key])
         new_record.application = application

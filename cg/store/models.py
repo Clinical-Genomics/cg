@@ -198,6 +198,7 @@ class Sample(Model, PriorityMixin):
     reads = Column(types.BigInteger, default=0)
     ordered_at = Column(types.DateTime, nullable=False)
     received_at = Column(types.DateTime)
+    sequence_start = Column(types.DateTime)
     sequenced_at = Column(types.DateTime)
     delivered_at = Column(types.DateTime)
     invoiced_at = Column(types.DateTime)
@@ -251,7 +252,8 @@ class Analysis(Model):
     id = Column(types.Integer, primary_key=True)
     pipeline = Column(types.String(32), nullable=False)
     pipeline_version = Column(types.String(32))
-    analyzed_at = Column(types.DateTime)
+    started_at = Column(types.DateTime)
+    completed_at = Column(types.DateTime)
     uploaded_at = Column(types.DateTime)
     delivered_at = Column(types.DateTime)
     # primary analysis is the one originally delivered to the customer
