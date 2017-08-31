@@ -34,8 +34,10 @@ class StatsAPI(alchy.Manager):
             'samples': []
         }
         for sample in self.sample_reads(record):
+            raw_samplename = sample.name.split('_', 1)[0]
+            curated_samplename = raw_samplename.rstrip('AB')
             data['samples'].append({
-                'name': sample.name.split('_', 1)[0],
+                'name': curated_samplename,
                 'reads': sample.reads,
             })
         return data

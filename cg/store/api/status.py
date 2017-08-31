@@ -15,7 +15,7 @@ class StatusHandler:
                 models.Sample.sequenced_at == None,
                 models.Sample.is_external == external
             )
-            .order_by(models.Sample.ordered_at.desc())
+            .order_by(models.Sample.ordered_at)
         )
         return records
 
@@ -28,7 +28,7 @@ class StatusHandler:
                 models.Sample.sequenced_at == None,
                 models.Sample.is_external == False
             )
-            .order_by(models.Sample.priority.desc(), models.Sample.ordered_at.desc())
+            .order_by(models.Sample.priority.desc(), models.Sample.ordered_at)
         )
         return records
 
