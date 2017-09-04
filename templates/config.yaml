@@ -1,0 +1,27 @@
+---
+database: "mysql+pymysql://PASSWORD:USERNAME@HOST:PORT/DATABASE"
+
+housekeeper:
+  database: "mysql+pymysql://PASSWORD:USERNAME@HOST:PORT/DATABASE"
+  root: "./DEVELOP/bundles"
+  old:
+    database: "mysql+pymysql://PASSWORD:USERNAME@HOST:PORT/DATABASE"
+
+trailblazer:
+  database: "mysql+pymysql://PASSWORD:USERNAME@HOST:PORT/DATABASE"
+  script: /mnt/hds/proj/bioinfo/SERVER/miniconda/bin/mip.pl
+  mip_config: "/mnt/hds/proj/cust000/STAGE/config/mip.v4.yaml"
+  root: /mnt/hds/proj/bioinfo/MIP_ANALYSIS/families
+
+lims:
+  host: url
+  username: username
+  password: password
+
+scout:
+  database: "mongodb://USERNAME:PASSWORD@HOST:PORT/DATABASE"
+  database_name: database
+
+cgstats:
+  root: /mnt/hds/proj/bioinfo/DEMUX
+  database: "mysql+pymysql://PASSWORD:USERNAME@HOST:PORT/DATABASE"
