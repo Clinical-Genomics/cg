@@ -91,10 +91,10 @@ def families():
     return jsonify(families=data, total=families_q.count())
 
 
-@blueprint.route('/families/<int:family_id>')
+@blueprint.route('/families/<family_id>')
 def family(family_id):
     """Fetch a family with links."""
-    family_obj = db.Family.get(family_id)
+    family_obj = db.family(family_id)
     data = family_obj.to_dict(links=True)
     return jsonify(**data)
 
