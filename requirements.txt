@@ -27,7 +27,7 @@ genologics
 pymongo
 loqusdb
 trailblazer>=2.0.0b1
-housekeeper>=2.0.0b1
+housekeeper>=2.0.0b2
 chanjo>=4.2.0
 genotype>=2.2.0
 scout-browser>=3.3.0
