@@ -5,6 +5,7 @@ import tempfile
 
 from flask import abort, current_app, Blueprint, jsonify, g, make_response, request
 from google.auth import jwt
+from requests.exceptions import HTTPError
 from werkzeug.utils import secure_filename
 
 from cg.exc import DuplicateRecordError, OrderFormError, OrderError
@@ -57,6 +58,11 @@ def order(order_type):
         result = api.submit(OrderType[order_type.upper()], name, email, post_data)
     except (DuplicateRecordError, OrderError) as error:
         return abort(make_response(jsonify(message=error.message), 401))
+    except HTTPError as error:
+        return abort(make_response(jsonify(message=error.args[0]), 401))
+    if 'project' not in result:
+        # validation failed
+        return abort(make_response(jsonify(message='validation failed', errors=result), 401))
     return jsonify(project=result['project'],
                    records=[record.to_dict() for record in result['records']])
 

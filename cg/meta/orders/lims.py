@@ -36,7 +36,7 @@ class LimsHandler:
                 }
             })
         return lims_data
-    
+
     def process_lims(self, data: dict):
         """Process samples to add them to LIMS."""
         lims_data = self.to_lims(data)

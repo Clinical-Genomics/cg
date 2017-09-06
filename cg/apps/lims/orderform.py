@@ -168,9 +168,9 @@ def parse_sample(raw_sample):
                            ('volume', 'Volume (uL)'), ('concentration', 'Concentration (nM)'),
                            ('quantity', 'Quantity')]:
         excel_key = f"UDF/{field_key}"
-        str_value = (raw_sample[excel_key] if raw_sample.get(excel_key, '').rstrip('.0').isdigit()
-                     else None)
-        sample[key] = int(float(str_value)) if str_value else None
+        str_value = raw_sample.get(excel_key, '').rsplit('.0')[0]
+        if str_value.isdigit():
+            sample[key] = str_value
 
     for parent in ['mother', 'father']:
         parent_key = f"UDF/{parent}ID"

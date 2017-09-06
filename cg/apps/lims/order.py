@@ -4,6 +4,8 @@ from xml.etree import ElementTree
 
 from genologics.entities import Project, Researcher, Sample, Container, Containertype
 
+from cg.exc import OrderError
+
 log = logging.getLogger(__name__)
 CONTAINER_TYPE_MAP = {'Tube': 2, '96 well plate': 1}
 PROP2UDF = {
@@ -101,14 +103,23 @@ class OrderHandler:
         tubes, plates = cls.group_containers(project_data['samples'])
         # "96 well plate" = container type "1"; Tube = container type "2"
         for container_type, containers in [('1', plates), ('2', tubes)]:
-            for container_name, samples in containers.items():
+            for container_name, samples in containers.items():                        
                 new_container = {
                     'name': container_name,
                     'type': container_type,
                     'samples': [],
                 }
+                # check that positions in plate are unique
+                well_positions = {}
                 for sample_data in samples:
                     location = sample_data['well_position'] or None
+                    if location:
+                        if location in well_positions:
+                            first_sample = well_positions[location]
+                            message = (f"duplicate well position: {location} | {first_sample}"
+                                       f" - {sample_data['name']}")
+                            raise OrderError(message)
+                        well_positions[location] = sample_data['name']
                     if sample_data['container'] == '96 well plate' and location is None:
                         message = f"missing 'well_position' for sample: {sample_data['name']}"
                         raise ValueError(message)
