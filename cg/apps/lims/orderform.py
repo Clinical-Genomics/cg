@@ -7,6 +7,7 @@ from cg.exc import OrderFormError
 
 SEX_MAP = {'male': 'M', 'female': 'F', 'unknown': 'unknown', 'unknown': 'Unknown'}
 REV_SEX_MAP = {value: key for key, value in SEX_MAP.items()}
+CONTAINER_TYPES = ['Tube', '96 well plate']
 
 
 def parse_orderform(excel_path: str) -> dict:
@@ -93,14 +94,14 @@ def expand_family(family_id, parsed_family):
             gene_panels.update(raw_sample['panels'])
         new_sample = {
             'name': raw_sample['name'],
-            'container': raw_sample['container'],
-            'container_name': raw_sample['container_name'],
             'sex': raw_sample['sex'],
             'application': raw_sample['application'],
             'source': raw_sample['source'],
         }
-        for key in ('container', 'container_name', 'well_position', 'quantity', 'status',
-                    'comment', 'capture_kit'):
+        if raw_sample.get('container') in CONTAINER_TYPES:
+            new_sample['container'] = raw_sample['container']
+        for key in ('container_name', 'well_position', 'quantity', 'status', 'comment',
+                    'capture_kit'):
             if raw_sample[key]:
                 new_sample[key] = raw_sample[key]
 
