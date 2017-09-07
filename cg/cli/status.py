@@ -38,7 +38,7 @@ def samples(context, skip):
             color = 'blue'
             message += f" [RECEIVED: {record.received_at.date()}]"
         else:
-            color = 'grey'
+            color = 'white'
             message += ' [NOT RECEIVED]'
         click.echo(click.style(message, fg=color))
 
