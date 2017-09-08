@@ -73,7 +73,9 @@ class StatsAPI(alchy.Manager):
     def fastqs(self, sample_obj: models.Sample) -> Iterator[Path]:
         """Fetch FASTQ files for a sample."""
         base_pattern = "*{}/Unaligned*/Project_*/Sample_{}/*.fastq.gz"
+        alt_pattern = "*{}/Unaligned*/Project_*/Sample_{}_*/*.fastq.gz"
         for flowcell_obj in self.sample_flowcells(sample_obj):
-            pattern = base_pattern.format(flowcell_obj.flowcellname, sample_obj.samplename)
-            files = self.root_dir.glob(pattern)
-            yield from files
+            for fastq_pattern in (base_pattern, alt_pattern):
+                pattern = fastq_pattern.format(flowcell_obj.flowcellname, sample_obj.samplename)
+                files = self.root_dir.glob(pattern)
+                yield from files
