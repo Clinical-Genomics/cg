@@ -87,14 +87,17 @@ def panels():
 def families():
     """Fetch families."""
     if request.args.get('status') == 'analysis':
-        families_q = db.families_to_analyze()
+        records = db.families_to_analyze()
+        count = len(families_q)
     else:
         families_q = db.families(
             customer=(db.customer(request.args.get('customer')) if
                       request.args.get('customer') else None)
         )
-    data = [family_obj.to_dict(links=True) for family_obj in families_q.limit(30)]
-    return jsonify(families=data, total=families_q.count())
+        count = families_q.count()
+        records = families.limit(30)
+    data = [family_obj.to_dict(links=True) for family_obj in records]
+    return jsonify(families=data, total=count)
 
 
 @blueprint.route('/families/<family_id>')
