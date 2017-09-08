@@ -47,6 +47,7 @@ class StatusHandler:
                     models.Analysis.completed_at == None
                 )
             ))
+            .order_by(models.Family.priority.desc(), models.Family.ordered_at)
         )
         return [record for record in records if self._samples_sequenced(record.links)]
     
