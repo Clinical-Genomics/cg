@@ -95,7 +95,7 @@ def families():
                       request.args.get('customer') else None)
         )
         count = families_q.count()
-        records = families.limit(30)
+        records = families_q.limit(30)
     data = [family_obj.to_dict(links=True) for family_obj in records]
     return jsonify(families=data, total=count)
 
