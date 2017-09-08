@@ -88,7 +88,7 @@ def families():
     """Fetch families."""
     if request.args.get('status') == 'analysis':
         records = db.families_to_analyze()
-        count = len(families_q)
+        count = len(records)
     else:
         families_q = db.families(
             customer=(db.customer(request.args.get('customer')) if
