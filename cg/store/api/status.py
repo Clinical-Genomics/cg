@@ -53,7 +53,7 @@ class StatusHandler:
     @staticmethod
     def _samples_sequenced(links: List[models.FamilySample]) -> bool:
         """Return True if all samples are sequenced."""
-        return all(link.sequenced_at for link in links)
+        return all(link.sample.sequenced_at for link in links)
 
     def analyses_to_upload(self):
         """Fetch analyses that haven't been uploaded."""
