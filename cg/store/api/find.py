@@ -78,6 +78,10 @@ class FindHandler:
         """Fetch an analysis."""
         return self.Analysis.query.filter_by(family=family, completed_at=completed_at).first()
 
+    def flowcells(self) -> List[models.Flowcell]:
+        """Fetch all flowcells."""
+        return self.Flowcell.query
+
     def flowcell(self, name: str) -> models.Flowcell:
         """Fetch a flowcell."""
         return self.Flowcell.query.filter_by(name=name).first()

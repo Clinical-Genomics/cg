@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+
+from typing import List
 from sqlalchemy import and_, or_
 
 from cg.store import models
@@ -46,7 +48,12 @@ class StatusHandler:
                 )
             ))
         )
-        return records
+        return [record for record in records if self._samples_sequenced(record.links)]
+    
+    @staticmethod
+    def _samples_sequenced(links: List[models.FamilySample]) -> bool:
+        """Return True if all samples are sequenced."""
+        return all(link.sequenced_at for link in links)
 
     def analyses_to_upload(self):
         """Fetch analyses that haven't been uploaded."""

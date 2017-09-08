@@ -35,7 +35,7 @@ class TransferFlowcell():
             if sample_obj is None:
                 LOG.warning(f"unable to find sample: {sample_data['name']}")
                 continue
-            
+
             if store:
                 # store FASTQ files
                 stats_sample = self.stats.sample(sample_data['name'])

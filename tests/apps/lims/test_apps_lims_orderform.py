@@ -14,9 +14,9 @@ def test_parsing_rml_orderform(rml_orderform):
     # ... and collect relevant sample data
     sample_data = data['items'][0]
     assert sample_data['well_position'] == 'A:1'
-    assert sample_data['pool'] == 1
-    assert sample_data['volume'] == 30
-    assert sample_data['concentration'] == 5
+    assert sample_data['pool'] == '1'
+    assert sample_data['volume'] == '30'
+    assert sample_data['concentration'] == '5'
     assert isinstance(sample_data['container_name'], str)
 
 
@@ -66,7 +66,7 @@ def test_parsing_scout_orderform(scout_orderform):
     assert proband_sample['father'] == 'sample3'
     mother_sample = trio_family['samples'][1]
     assert mother_sample.get('mother') is None
-    assert mother_sample['quantity'] == 220
+    assert mother_sample['quantity'] == '220'
     assert isinstance(mother_sample['comment'], str)
 
 

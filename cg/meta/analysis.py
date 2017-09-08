@@ -107,7 +107,7 @@ class AnalysisAPI():
         return bed_lines
 
     @staticmethod
-    def convert_panels(customer, default_panels):
+    def convert_panels(customer: str, default_panels: List[str]) -> List[str]:
         """Convert between default panels and all panels included in gene list."""
         if customer in COLLABORATORS:
             # check if all default panels are part of master list

@@ -102,7 +102,7 @@ def expand_family(family_id, parsed_family):
             new_sample['container'] = raw_sample['container']
         for key in ('container_name', 'well_position', 'quantity', 'status', 'comment',
                     'capture_kit'):
-            if raw_sample[key]:
+            if raw_sample.get(key):
                 new_sample[key] = raw_sample[key]
 
         for parent_id in ('mother', 'father'):
