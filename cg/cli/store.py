@@ -24,7 +24,7 @@ def store(context):
 @click.pass_context
 def analysis(context, config_stream):
     """Store a finished analysis in Housekeeper."""
-    db = context.obj['db']
+    status = context.obj['db']
     tb_api = context.obj['tb_api']
     hk_api = context.obj['hk_api']
 
@@ -38,11 +38,11 @@ def analysis(context, config_stream):
     new_version = new_bundle.versions[0]
 
     # add new analysis to the status API
-    family_obj = db.family(new_bundle.name)
-    new_analysis = db.add_analysis(
+    family_obj = status.family(new_bundle.name)
+    new_analysis = status.add_analysis(
         pipeline='mip',
         version=bundle_data['pipeline_version'],
-        analyzed=new_version.created_at,
+        completed_at=new_version.created_at,
         primary=(len(family_obj.analyses) == 0),
     )
     new_analysis.family = family_obj
