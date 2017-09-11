@@ -32,4 +32,4 @@ class UploadObservationsAPI(object):
     def upload(self, data: dict):
         """Upload data about genotypes for a family of samples."""
         results = self.loqusdb.load(data['family'], data['pedigree'], data['vcf'])
-        LOG.info(f"inserted {results['inserted']} / {results['variants']} variants")
+        LOG.info(f"parsed {results['variants']} variants")

@@ -17,7 +17,7 @@ class LoqusdbAPI(MongoAdapter):
         """Add observations from a VCF."""
         variant_handle = get_file_handle(vcf_path)
         nr_variants = check_vcf(variant_handle)
-        nr_inserted = load_database(
+        load_database(
             adapter=self,
             variant_file=vcf_path,
             family_file=ped_path,
@@ -26,4 +26,4 @@ class LoqusdbAPI(MongoAdapter):
             nr_variants=nr_variants,
             case_id=family_id,
         )
-        return dict(variants=nr_variants, inserted=nr_inserted)
+        return dict(variants=nr_variants)
