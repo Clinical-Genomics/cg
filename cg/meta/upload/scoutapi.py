@@ -43,6 +43,6 @@ class UploadScoutAPI(object):
                  ('vcf_sv', 'vcf-sv-clinical'), ('vcf_sv_research', 'vcf-sv-research')}
         for scout_key, hk_tag in files:
             hk_vcf = self.housekeeper.files(version=hk_version.id, tags=[hk_tag]).first()
-            data[scout_key] = hk_vcf.full_path
+            data[scout_key] = str(hk_vcf.full_path)
 
         return data

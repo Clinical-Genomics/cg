@@ -9,7 +9,7 @@ class LimsHandler:
     def to_lims(data: dict) -> dict:
         """Convert order input to lims interface input."""
         lims_data = {
-            'name': data['name'],
+            'name': data['ticket'] or data['name'],
             'samples': [],
         }
         for sample in data['samples']:
