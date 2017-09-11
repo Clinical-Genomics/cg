@@ -38,12 +38,15 @@ class UploadCoverageApi(object):
     def upload(self, data: dict):
         """Upload coverage to Chanjo from an analysis."""
         for sample_data in data['samples']:
-            log.debug(f"uploading coverage for sample: {sample_data['sample']}")
-            with Path(sample_data['coverage']).open() as bed_stream:
-                self.chanjo.upload(
-                    sample_id=sample_data['sample'],
-                    sample_name=sample_data['sample_name'],
-                    group_id=data['family'],
-                    group_name=data['family_name'],
-                    bed_stream=bed_stream,
-                )
+            if self.chanjo.sample(sample_data['sample']) is None:
+                log.debug(f"uploading coverage for sample: {sample_data['sample']}")
+                with Path(sample_data['coverage']).open() as bed_stream:
+                    self.chanjo.upload(
+                        sample_id=sample_data['sample'],
+                        sample_name=sample_data['sample_name'],
+                        group_id=data['family'],
+                        group_name=data['family_name'],
+                        bed_stream=bed_stream,
+                    )
+            else:
+                log.debug(f"sample already loaded, skipping: {sample_data['sample']}")

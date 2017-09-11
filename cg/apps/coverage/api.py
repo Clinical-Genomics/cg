@@ -4,6 +4,7 @@ import io
 from pathlib import Path
 
 from chanjo.store.api import ChanjoDB
+from chanjo.store.models import Sample
 from chanjo.load.sambamba import load_transcripts
 import click
 from sqlalchemy.exc import IntegrityError
@@ -35,3 +36,8 @@ class ChanjoAPI(ChanjoDB):
         except IntegrityError as error:
             self.session.rollback()
             raise error
+    
+    def sample(self, sample_id: str) -> Sample:
+        """Fetch sample from the database."""
+        query = Sample.query.filter_by(sample_id=sample_id)
+        return query.first()

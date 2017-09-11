@@ -21,7 +21,7 @@ class ScoutAPI(MongoAdapter):
     def upload(self, data: dict, threshold: int=5, force: bool=False):
         """Load analysis of a new family into Scout."""
         data['rank_score_threshold'] = threshold
-        existing_case = self.case(institute_id=data['owner'], display_name=data['family'])
+        existing_case = self.case(institute_id=data['owner'], display_name=data['family_name'])
         if existing_case:
             if force or data['analysis_date'] > existing_case['analysis_date']:
                 LOG.info(f"updating existing Scout case")
