@@ -3,6 +3,7 @@ import logging
 
 from cg.apps import hk, scoutapi
 from cg.store import models, Store
+from cg.meta.analysis import AnalysisAPI
 
 LOG = logging.getLogger(__name__)
 
@@ -33,6 +34,8 @@ class UploadScoutAPI(object):
                 'sex': link_obj.sample.sex,
             } for link_obj in analysis_obj.family.links],
             'analysis_date': analysis_obj.completed_at,
+            'gene_panels': AnalysisAPI.convert_panels(analysis_obj.family.customer.internal_id,
+                                                      analysis_obj.family.panels),
             'default_gene_panels': analysis_obj.family.panels,
         }
 
