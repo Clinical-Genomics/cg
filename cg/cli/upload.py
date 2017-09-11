@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import datetime as dt
 import click
 
 from cg.store import Store
@@ -15,10 +16,21 @@ from cg.meta.upload.scoutapi import UploadScoutAPI
 def upload(context, family_id):
     """Upload results from analyses."""
     if family_id:
+        status_api = Store(context.obj['database'])
+        family_obj = status_api.family(family_id)
+        analysis_obj = family_obj.analyses[0]
+        if analysis_obj.uploaded_at is not None:
+            message = f"analysis already uploaded: {analysis_obj.uploaded_at.date()}"
+            click.echo(click.style(message, fg='blue'))
+            context.abort()
+
         context.invoke(coverage, family_id=family_id)
         context.invoke(genotypes, family_id=family_id)
         context.invoke(observations, family_id=family_id)
         context.invoke(scout, family_id=family_id)
+
+        analysis_obj.uploaded_at = dt.datetime.now()
+        status_api.commit()
 
 
 @upload.command()

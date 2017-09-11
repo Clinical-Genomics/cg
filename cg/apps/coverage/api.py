@@ -9,10 +9,12 @@ from chanjo.load.sambamba import load_transcripts
 import click
 from sqlalchemy.exc import IntegrityError
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 class ChanjoAPI(ChanjoDB):
+
+    """Interface to Chanjo, the coverage analysis tool."""
 
     def __init__(self, config: dict):
         super(ChanjoAPI, self).__init__(uri=config['chanjo']['database'])
