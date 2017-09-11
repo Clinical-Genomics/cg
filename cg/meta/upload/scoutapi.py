@@ -22,7 +22,8 @@ class UploadScoutAPI(object):
 
         data = {
             'owner': analysis_obj.family.customer.internal_id,
-            'family': analysis_obj.family.internal_id,
+            'family_id': analysis_obj.family.internal_id,
+            'family_name': analysis_obj.family.name,
             'samples': [{
                 'analysis_type': None,
                 'sample_id': link_obj.sample.internal_id,

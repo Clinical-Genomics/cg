@@ -18,14 +18,14 @@ def transfer(context):
 
 
 @transfer.command()
-@click.argument('flowcell')
+@click.argument('flowcell_name')
 @click.pass_context
-def flowcell(context, flowcell):
+def flowcell(context, flowcell_name):
     """Populate results from a flowcell."""
     stats_api = stats.StatsAPI(context.obj)
     hk_api = hk.HousekeeperAPI(context.obj)
     transfer_api = transfer_app.TransferFlowcell(context.obj['db'], stats_api, hk_api)
-    new_record = transfer_api.transfer(flowcell)
+    new_record = transfer_api.transfer(flowcell_name)
     context.obj['db'].add_commit(new_record)
     click.echo(click.style(f"flowcell added: {new_record}", fg='green'))
 
