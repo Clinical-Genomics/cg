@@ -8,7 +8,10 @@ class LoqusdbAPI(MongoAdapter):
 
     def __init__(self, config: dict):
         super(LoqusdbAPI, self).__init__()
-        self.connect(uri=config['loqusdb']['database'])
+        self.connect(
+            uri=config['loqusdb']['database'],
+            database=config['loqusdb']['database_name']
+        )
 
     def load(self, family_id: str, ped_path: str, vcf_path: str) -> dict:
         """Add observations from a VCF."""
