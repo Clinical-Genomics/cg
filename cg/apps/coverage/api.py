@@ -39,5 +39,4 @@ class ChanjoAPI(ChanjoDB):
     
     def sample(self, sample_id: str) -> Sample:
         """Fetch sample from the database."""
-        query = Sample.query.filter_by(sample_id=sample_id)
-        return query.first()
+        return Sample.get(sample_id)
