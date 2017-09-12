@@ -2,7 +2,7 @@
 
 `cg` stands for _Clinical Genomics_; a clinical sequencing platform under [SciLifeLab][scilife].
 
-This is our main package for interacting with data and samples that flow through our pipeline. We rely on a set of specialized "apps" to deal with a lot of the complexity like:
+This is our main package for interacting with data and samples that flow through our pipeline. We rely on a set of specialized "apps" to deal with a lot of complexity like:
 
 - [Trailblazer][trailblazer]: Python wrapper around MIP, a rare disease genomics pipeline
 - [Housekeeper][housekeeper]: storage, retrieval, and archive of files
@@ -10,15 +10,18 @@ This is our main package for interacting with data and samples that flow through
 
 In this context, `cg` provides the interface between these tools to facilitate automation and other necessary cross-talk. It also exposes some APIs:
 
-- HTTP REST for powering the web portal: [clinicalgenomics.now.sh][portal]
+- HTTP REST for powering the web portal: [clinicalgenomics.se][portal]
 - CLI for interactions on the command line
 
-## Team members
+## Team
 
 - [@ingkebil][ingkebil]: bioinformatics manager | 🇧🇪
 - [@robinandeer][robinandeer]: lead developer, designer | 🇸🇪
 - [@Dilea][Dilea]: bioinformatician, LIMS developer | 🇸🇪
 - [@b4ckm4n][b4ckm4n]: bioinformatician | 🇸🇪
+- [@emmser][emmser]: bioinformatician | 🇸🇪 👶
+- [@northwestwitch][northwestwitch]: bioinformatician, variant sharing expert 🇮🇹
+- [@mayabrandi][mayabrandi]: bioinformatician, lead LIMS developer | 🇸🇪 👶
 - [@moonso][moonso]: bioinformatician, Scout developer | 🇸🇪
 - [@henrikstranneheim][henrikstranneheim]: bioinformatician, MIP developer | 🇸🇪
 
@@ -30,41 +33,47 @@ This is a schematic overview of how data flows between different tools. Generall
 
 1. **Order** | New samples are submitted by logging into the [portal][portal] and either uploading an "orderform" or supplying the information directly.
 
-    Information is parsed and uploaded both to LIMS and to the central status database. These samples now end up in the [incoming queue](https://clinicalgenomics.now.sh/status/incoming).
+    Information is parsed and uploaded both to LIMS and to the status database. These samples now end up in the **incoming queue**.
 
-2. **Lab** | Samples are worked on and monitored through in LIMS. This is true for all lab related activities up until sequencing. Samples are stuck in the [sequencing queue](https://clinicalgenomics.now.sh/status/sequencing) until they have reached sufficient reads according to the application tag.
+    Samples are marked with a date of reception in LIMS. A crontab syncronizes this information over to the status database and moves the samples along.
 
-    Samples are marked as having arrived in LIMS and this is also reflected by copying the date to the status database.
+1. **Lab** | Samples are prepped on and monitored in LIMS. This is true for all lab related activities  until sequencing. Until fully sequenced (as defined by the application tag), samples stay in the **sequencing queue**.
 
-3. **Demux** | Samples are  picked up by the bioinformatics pipeline after sequencing. A demultiplexed flowcell will get added to `status` and FASTQ files for each samples will be sent to `housekeeper`. This updates the reads count for each associated sample and subsequently moves them along the chain.
+1. **Demux** | Samples are  picked up by the bioinformatics pipeline after sequencing. A demultiplexed flowcell will get added to `status` and FASTQ files for each sample will be sent to `housekeeper`. Meanwhile, reads count are updated which moves the samples to the next step.
 
-4. **Analysis** | Families where all related samples have been sequenced show up in the [analysis queue](https://clinicalgenomics.now.sh/status/analysis). The runs are automatically started. Starting a run will do four things:
+1. **Analysis** | Samples are always analyzed as "families". If a family of samples all have been sequenced, they show up in the **analysis queue**. Analyses are automatically started by a crontab script.
+
+    Families with elevated priority (priority/express) will be started first with the rest following in reverse chronological order.
+
+    Starting a run will do four things:
 
     1. Generate a pedigree config for the analysis pipeline
-    2. Link FASTQ files for each related sample and rename to follow the pipeline conventions
-    3. Generate a gene panel file according to the order
-    4. Start the pipeline and setting the priority flag to high if required
+    1. Link FASTQ files for each related sample and rename to follow the pipeline conventions
+    1. Generate a gene panel file according to the order
+    1. Start the pipeline and set the priority flag to high if required
 
-    Samples with elevated priority ("priority" and "express") will be started first with the rest following in reverse chronological order.
+    A crontab is monitoring the progress of started runs. You can follow the status in [Trailblazer][trailblazer-ui].
 
-5. **Store** | Completed analyses can be accessed through `trailblazer` and are automatically "stored". This process updated `status` and links files to the family in `housekeeper`.
+1. **Store** | Completed analyses can be accessed through `trailblazer` and are automatically "stored". This process updates `status` and links files to the family in `housekeeper`.
 
-    Some files are marked as essential and will be subsequently backed up. Other files will be automatically remove after 3 months.
+    Some files are marked as essential and will be subsequently backed up. The rest of the files are removed after 3 months.
 
-6. **Upload** | Results from completed analyses gets uploaded to a range of different tools:
+1. **Upload** | Results from completed analyses are uploaded to a range of different tools:
 
     - [Chanjo][chanjo]: coverage metrics
     - [Genotype][genotype]: genotypes for detecting sample mix-ups
     - LoqusDB: local observation counts for variants
     - [Scout][scout]: variant interpretation platform
 
-7. **Delivery** | Delivery happens on two levels:
+    We also gather statistics from analysis (post-alignment) which we use to generate a delivery report, however, this is still under development.
+
+1. **Delivery** | Delivery happens on two levels:
 
     - **Sample**: FASTQ-files are always delivered for every order. The default is delivery to the delivery server. We also support upload to UPPMAX and other generic servers for some collaborators. After delivery, `status` is updated with a final sample progress date.
 
     - **Family/Analysis**: some collaborators have opted into the Scout platform for delivery of annotated and ranked variants. These families are analyzed and uploaded which essentially corresponds to the "delivery" for such orders. We do, however, perform various quality checks before we finally answer out the results.
 
-8. **Archive**: [@ingkebil][ingkebil]
+1. **Archive**: [@ingkebil][ingkebil]
 
 ## Responsibilities
 
@@ -88,6 +97,26 @@ We therefore need to share responsibilities and monitoring between members of ou
 - **Scout**: [@robinandeer][robinandeer] + [@moonso][moonso]
 - **MIP**: [@henrikstranneheim][henrikstranneheim]
 
+### Databases
+
+- **MySQL**, host: clinical-db.scilifelab.se, [@ingkebil][ingkebil]
+
+  - `/cg` - status
+  - `/chanjo4` - Chanjo, coverage
+
+- **MySQL**, host: clinical-genomics.cyxfn5r4quzp.eu-central-1.rds.amazonaws.com, [@robinandeer][robinandeer]
+
+  - `/csdb` - CGStats, demux
+  - `/housekeeper2` - Housekeeper, file management
+  - `/mwgs` - Microbial pipeline, statistics
+  - `/taboo` - Genotype
+  - `/trailblazer` - Trailblazer, MIP analysis monitoring
+
+- **MongoDB**, host: clinical-db.scilifelab.se, [@robinandeer][robinandeer]
+
+  - `/scout` - Scout, variant visualizer
+  - `/loqusdb` - LoqusDB, variant observation counts
+
 ## Server
 
 The REST API server handles a number of actions. It's written in [Flask][flask] and exposes an admin interface for quickly editing information in the backend MySQL database.
@@ -96,11 +125,11 @@ The API is protected by JSON Web Tokens generated by Google OAuth. It authorizes
 
 ### Order endpoint
 
-The `/order` endpoint accepts orders for new samples. If you supply a JSON document on the expected format, a new order is open in `status` and LIMS.
+The `/order/<type>` endpoint accepts orders for new samples. If you supply a JSON document on the expected format, a new order is open in `status` and LIMS.
 
-
-[portal]: https://clinicalgenomics.now.sh/
+[portal]: https://clinical-db.scilifelab.se:7071/
 [trailblazer]: https://github.com/Clinical-Genomics/trailblazer
+[trailblazer-ui]: https://apps.clinicalgenomics.se/trailblazer-ui
 [housekeeper]: https://github.com/Clinical-Genomics/housekeeper
 [genotype]: https://github.com/Clinical-Genomics/genotype
 [chanjo]: https://github.com/robinandeer/chanjo
@@ -113,3 +142,6 @@ The `/order` endpoint accepts orders for new samples. If you supply a JSON docum
 [b4ckm4n]: https://github.com/b4ckm4n
 [moonso]: https://github.com/moonso
 [henrikstranneheim]: https://github.com/henrikstranneheim
+[emmser]: https://github.com/emmser
+[northwestwitch]: https://github.com/northwestwitch
+[mayabrandi]: https://github.com/mayabrandi
