@@ -112,7 +112,7 @@ class AddHandler:
                  application_version: models.ApplicationVersion, ticket: int=None,
                  comment: str=None, received: dt.datetime=None) -> models.Pool:
         """Build a new Pool record."""
-        new_record = self.Pool(name=name, ordered_at=ordered, order=order,
+        new_record = self.Pool(name=name, ordered_at=ordered or dt.datetime.now(), order=order,
                                ticket_number=ticket, received_at=received, comment=comment)
         new_record.customer = customer
         new_record.application_version = application_version
