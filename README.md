@@ -4,7 +4,7 @@
 
 This is our main package for interacting with data and samples that flow through our pipeline. We rely on a set of specialized "apps" to deal with a lot of complexity like:
 
-- [Trailblazer][trailblazer]: Python wrapper around MIP, a rare disease genomics pipeline
+- [Trailblazer][trailblazer]: Python wrapper around [MIP][mip], a rare disease genomics pipeline
 - [Housekeeper][housekeeper]: storage, retrieval, and archive of files
 - [Genotype][genotype]: managing genotypes for detecting sample mix-ups
 
@@ -39,7 +39,7 @@ This is a schematic overview of how data flows between different tools. Generall
 
 1. **Lab** | Samples are prepped on and monitored in LIMS. This is true for all lab related activities  until sequencing. Until fully sequenced (as defined by the application tag), samples stay in the **sequencing queue**.
 
-1. **Demux** | Samples are  picked up by the bioinformatics pipeline after sequencing. A demultiplexed flowcell will get added to `status` and FASTQ files for each sample will be sent to `housekeeper`. Meanwhile, reads count are updated which moves the samples to the next step.
+1. **Demux** | Samples are  picked up by the bioinformatics pipeline after sequencing. A demultiplexed flowcell will get added to `status` and FASTQ files for each sample will be sent to `housekeeper`. Meanwhile, read count are updated which moves the samples to the next step.
 
 1. **Analysis** | Samples are always analyzed as "families". If a family of samples all have been sequenced, they show up in the **analysis queue**. Analyses are automatically started by a crontab script.
 
@@ -73,7 +73,7 @@ This is a schematic overview of how data flows between different tools. Generall
 
     - **Family/Analysis**: some collaborators have opted into the Scout platform for delivery of annotated and ranked variants. These families are analyzed and uploaded which essentially corresponds to the "delivery" for such orders. We do, however, perform various quality checks before we finally answer out the results.
 
-1. **Archive**: [@ingkebil][ingkebil]
+1. **Archive**| Essential result files and raw data coming from the sequencers will sent off-site for slow storage.
 
 ## Responsibilities
 
@@ -134,6 +134,7 @@ The `/order/<type>` endpoint accepts orders for new samples. If you supply a JSO
 [genotype]: https://github.com/Clinical-Genomics/genotype
 [chanjo]: https://github.com/robinandeer/chanjo
 [scout]: https://github.com/Clinical-Genomics/scout
+[mip]: https://github.com/Clinical-Genomics/mip
 [scilife]: https://www.scilifelab.se/
 [flask]: http://flask.pocoo.org/
 [ingkebil]: https://github.com/ingkebil
