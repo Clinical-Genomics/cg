@@ -573,21 +573,22 @@ class AnalysisImporter(Store):
 
 
 @click.command()
+@click.option('--admin', required=True, help='CG admin connection string')
 @click.argument('config_file', type=click.File())
-def transfer(config_file):
+def transfer(admin, config_file):
     """Transfer stuff from external interfaces."""
     config = ruamel.yaml.safe_load(config_file)
-    # admin_api = AdminDatabase(config['cgadmin']['database'])
+    admin_api = AdminDatabase(admin)
 
-    # ApplicationImporter(config['database'], admin_api).process()
-    # CustomerImporter(config['database'], admin_api).process()
-    # UserImporter(config['database'], admin_api).process()
+    ApplicationImporter(config['database'], admin_api).process()
+    CustomerImporter(config['database'], admin_api).process()
+    UserImporter(config['database'], admin_api).process()
 
-    # PanelImporter(config['database'], scoutapi.ScoutAPI(config)).process()
+    PanelImporter(config['database'], scoutapi.ScoutAPI(config)).process()
 
-    # lims_api = lims_app.LimsAPI(config)
-    # SampleImporter(config['database'], lims_api).process()
-    # FamilyImporter(config['database'], lims_api).process()
+    lims_api = lims_app.LimsAPI(config)
+    SampleImporter(config['database'], lims_api).process()
+    FamilyImporter(config['database'], lims_api).process()
     FlowcellImporter(Store(config['database']), stats.StatsAPI(config)).process()
 
 
