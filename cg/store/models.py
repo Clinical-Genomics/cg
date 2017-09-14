@@ -5,7 +5,7 @@ from typing import List
 import alchy
 from sqlalchemy import Column, ForeignKey, orm, types, UniqueConstraint, Table
 
-from cg.constants import REV_PRIORITY_MAP
+from cg.constants import PRIORITY_MAP, REV_PRIORITY_MAP
 
 Model = alchy.make_declarative_base(Base=alchy.ModelBase)
 
@@ -16,6 +16,10 @@ class PriorityMixin:
     def priority_human(self):
         """Humanized priority for sample."""
         return REV_PRIORITY_MAP[self.priority]
+    
+    @priority_human.setter
+    def panels(self, priority_str: str):
+        self.priority = PRIORITY_MAP.get(priority_str)
 
     @property
     def high_priority(self):
@@ -105,6 +109,7 @@ class FamilySample(Model):
 
     def __str__(self) -> str:
         return f"{self.family.internal_id} | {self.sample.internal_id}"
+
 
 
 class Family(Model, PriorityMixin):

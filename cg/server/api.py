@@ -91,6 +91,7 @@ def families():
         count = len(records)
     else:
         families_q = db.families(
+            query=request.args.get('query'),
             customer=(db.customer(request.args.get('customer')) if
                       request.args.get('customer') else None)
         )
@@ -150,14 +151,14 @@ def analyses():
 @blueprint.route('/options')
 def options():
     """Fetch various options."""
-    customers = db.Customer.query if g.current_user.is_admin else [g.current_user.customer]
+    customer_objs = db.Customer.query.all() if g.current_user.is_admin else [g.current_user.customer]
     return jsonify(
         customers=[{
             'text': f"{customer.name} ({customer.internal_id})",
             'value': customer.internal_id,
-        } for customer in customers],
+        } for customer in customer_objs],
         applications=[application.tag for application in db.Application.query],
-        panels=[panel.abbrev for panel in db.Panel.query],
+        panels=[panel.abbrev for panel in db.Panel.query if panel.customer in customer_objs],
     )
 
 

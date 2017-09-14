@@ -102,48 +102,68 @@ class StatusHandler:
             raise OrderError(f"unknown customer: {customer}")
         new_families = []
         for family in families:
-            new_family = self.status.add_family(
-                name=family['name'],
-                panels=family['panels'],
-                priority=family['priority'],
-            )
-            new_family.customer = customer_obj
-            new_families.append(new_family)
+            family_obj = self.status.find_family(customer_obj, family['name'])
+            if family_obj:
+                family_obj.panels = family['panels']
+            else:
+                family_obj = self.status.add_family(
+                    name=family['name'],
+                    panels=family['panels'],
+                    priority=family['priority'],
+                )
+                family_obj.customer = customer_obj
+                new_families.append(family_obj)
 
             family_samples = {}
             for sample in family['samples']:
-                new_sample = self.status.add_sample(
-                    name=sample['name'],
-                    internal_id=sample['internal_id'],
-                    sex=sample['sex'],
-                    order=order,
-                    ordered=ordered,
-                    ticket=ticket,
-                    priority=family['priority'],
-                    comment=sample['comment'],
-                )
-                new_sample.customer = customer_obj
-                with self.status.session.no_autoflush:
-                    application_tag = sample['application']
-                    new_sample.application_version = self.status.latest_version(application_tag)
-                if new_sample.application_version is None:
-                    raise OrderError(f"unknown application tag: {sample['application']}")
-                family_samples[new_sample.name] = new_sample
-                self.status.add(new_sample)
+                sample_obj = self.status.sample(sample['internal_id'])
+                if sample_obj:
+                    sample_obj.name = sample['name']
+                    sample_obj.sex = sample['sex']
+                    sample_obj.comment = sample['comment']
+                    family_samples[sample_obj.name] = sample_obj
+                else:
+                    new_sample = self.status.add_sample(
+                        name=sample['name'],
+                        internal_id=sample['internal_id'],
+                        sex=sample['sex'],
+                        order=order,
+                        ordered=ordered,
+                        ticket=ticket,
+                        priority=family['priority'],
+                        comment=sample['comment'],
+                    )
+                    new_sample.customer = customer_obj
+                    with self.status.session.no_autoflush:
+                        application_tag = sample['application']
+                        new_sample.application_version = self.status.latest_version(application_tag)
+                    if new_sample.application_version is None:
+                        raise OrderError(f"unknown application tag: {sample['application']}")
+                    family_samples[new_sample.name] = new_sample
+                    self.status.add(new_sample)
 
-                new_delivery = self.status.add_delivery(destination='caesar', sample=new_sample)
-                self.status.add(new_delivery)
+                    new_delivery = self.status.add_delivery(destination='caesar', sample=new_sample)
+                    self.status.add(new_delivery)
 
             for sample in family['samples']:
-                new_relationship = self.status.relate_sample(
-                    family=new_family,
-                    sample=family_samples[sample['name']],
-                    status=sample['status'],
-                    mother=family_samples[sample['mother']] if sample.get('mother') else None,
-                    father=family_samples[sample['father']] if sample.get('father') else None,
-                )
-                self.status.add(new_relationship)
-        self.status.add_commit(new_families)
+                mother_obj = family_samples[sample['mother']] if sample.get('mother') else None
+                father_obj = family_samples[sample['father']] if sample.get('father') else None
+                with self.status.session.no_autoflush:
+                    link_obj = self.status.link(family_obj.internal_id, sample['internal_id'])
+                if link_obj:
+                    link_obj.status = sample['status'] or link_obj.status
+                    link_obj.mother = mother_obj or link_obj.mother
+                    link_obj.father = father_obj or link_obj.father
+                else:
+                    new_link = self.status.relate_sample(
+                        family=family_obj,
+                        sample=family_samples[sample['name']],
+                        status=sample['status'],
+                        mother=mother_obj,
+                        father=father_obj,
+                    )
+                    self.status.add(new_link)
+            self.status.add_commit(new_families)
         return new_families
 
     def store_samples(self, customer: str, order: str, ordered: dt.datetime, ticket: int,

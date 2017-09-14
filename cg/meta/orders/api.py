@@ -56,7 +56,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
     def submit_rml(self, data: dict) -> dict:
         """Submit a batch of ready made libraries."""
         status_data = self.pools_to_status(data)
-        project_data, _ = self.process_lims(data)
+        project_data, _ = self.process_lims(data, data['samples'])
         new_records = self.store_pools(
             customer=status_data['customer'],
             order=status_data['order'],
@@ -69,7 +69,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
     def submit_fastq(self, data: dict) -> dict:
         """Submit a batch of samples for FASTQ delivery."""
         status_data = self.samples_to_status(data)
-        project_data, lims_map = self.process_lims(data)
+        project_data, lims_map = self.process_lims(data, data['samples'])
         self.fillin_sample_ids(status_data['samples'], lims_map)
         new_records = self.store_samples(
             customer=status_data['customer'],
@@ -92,14 +92,10 @@ class OrdersAPI(LimsHandler, StatusHandler):
 
     def process_analysis_samples(self, data: dict) -> dict:
         """Process samples to be analyzed."""
+        # fileter out only new samples
         status_data = self.families_to_status(data)
-        customer_obj = self.status.customer(status_data['customer'])
-        for family in status_data['families']:
-            family_obj = self.status.find_family(customer_obj, family['name'])
-            if family_obj:
-                raise OrderError(f"family name already used: {family_obj.name}")
-
-        project_data, lims_map = self.process_lims(data)
+        new_samples = [sample for sample in data['samples'] if sample.get('internal_id') is None]
+        project_data, lims_map = self.process_lims(data, new_samples)
         samples = [sample
                    for family in status_data['families']
                    for sample in family['samples']]

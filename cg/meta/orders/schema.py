@@ -4,7 +4,7 @@ from marshmallow import Schema, fields
 
 class BaseSample(Schema):
     name = fields.Str(required=True)
-    internal_id = fields.Str()
+    internal_id = fields.Str(allow_none=True)
     application = fields.Str(required=True)
     comment = fields.Str()
 

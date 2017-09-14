@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from typing import List
 import logging
 from xml.etree import ElementTree
 
@@ -28,28 +29,25 @@ PROP2UDF = {
 
 class OrderHandler:
 
-    def add_project(self, data, researcher_id='3'):
+    def add_project(self, project_name: str, samples: List[dict], researcher_id: str='3'):
         """Submit a new order.
 
         Example:
 
-            {
-                'name': 'project name',
-                'samples': [{
-                    'name': '17081-II-1U',
-                    'container': '96 well plate',
-                    'container_name': 'CMMS',
-                    'well_position': 'A:1',
-                    'udfs': {
-                        'priority': 'standard',
-                        'application': 'WGTPCFC030',
-                        'require_qcok': True,
-                        'quantity': "2200",
-                        'source': 'blood',
-                        'customer': 'cust003',
-                    },
-                }]
-            }
+            [{
+                'name': '17081-II-1U',
+                'container': '96 well plate',
+                'container_name': 'CMMS',
+                'well_position': 'A:1',
+                'udfs': {
+                    'priority': 'standard',
+                    'application': 'WGTPCFC030',
+                    'require_qcok': True,
+                    'quantity': "2200",
+                    'source': 'blood',
+                    'customer': 'cust003',
+                },
+            }]
 
         Args:
             data (dict): project order data dict
@@ -58,19 +56,19 @@ class OrderHandler:
         Returns:
             genologics.entities.Project: new LIMS project instance
         """
-        lims_data = self.prepare(data, researcher_id)
-        lims_project = self.submit(lims_data)
+        containers = self.prepare(samples)
+        lims_project = self.submit(project_name, researcher_id, containers)
         lims_project_data = self._export_project(lims_project)
         return lims_project_data
 
-    def submit(self, data):
+    def submit(self, project_name: str, researcher_id: str, containers: List[dict]):
         """Submit a new project with samples to LIMS."""
         log.debug('creating LIMS project')
-        lims_researcher = Researcher(self, id=data['researcher_id'])
-        lims_project = Project.create(self, researcher=lims_researcher, name=data['name'])
+        lims_researcher = Researcher(self, id=researcher_id)
+        lims_project = Project.create(self, researcher=lims_researcher, name=project_name)
         log.info("created new LIMS project: %s", lims_project.id)
 
-        for container_data in data['containers']:
+        for container_data in containers:
             log.debug('creating LIMS container')
             container_type = Containertype(lims=self, id=container_data['type'])
             lims_container = Container.create(lims=self, name=container_data['name'],
@@ -93,14 +91,10 @@ class OrderHandler:
         return lims_project
 
     @classmethod
-    def prepare(cls, project_data, researcher_id):
+    def prepare(cls, samples):
         """Convert API input to LIMS input data."""
-        lims_data = {
-            'name': project_data['name'],
-            'researcher_id': researcher_id,
-            'containers': [],
-        }
-        tubes, plates = cls.group_containers(project_data['samples'])
+        lims_containers = []
+        tubes, plates = cls.group_containers(samples)
         # "96 well plate" = container type "1"; Tube = container type "2"
         for container_type, containers in [('1', plates), ('2', tubes)]:
             for container_name, samples in containers.items():                        
@@ -137,8 +131,8 @@ class OrderHandler:
                             log.debug(f"UDF not found: {key} - {value}")
 
                     new_container['samples'].append(new_sample)
-                lims_data['containers'].append(new_container)
-        return lims_data
+                lims_containers.append(new_container)
+        return lims_containers
 
     @staticmethod
     def group_containers(samples):

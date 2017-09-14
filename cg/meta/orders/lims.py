@@ -6,14 +6,11 @@ from cg.exc import OrderError
 class LimsHandler:
 
     @staticmethod
-    def to_lims(data: dict) -> dict:
+    def to_lims(customer: str, samples: List[dict]) -> List[dict]:
         """Convert order input to lims interface input."""
-        lims_data = {
-            'name': data['ticket'] or data['name'],
-            'samples': [],
-        }
-        for sample in data['samples']:
-            lims_data['samples'].append({
+        samples_lims = []
+        for sample in samples:
+            samples_lims.append({
                 'name': sample['name'],
                 'container': sample.get('container') or 'Tube',
                 'container_name': sample.get('container_name'),
@@ -27,7 +24,7 @@ class LimsHandler:
                     'volume': sample.get('volume'),
                     'concentration': sample.get('concentration'),
                     'source': sample.get('source') or 'NA',
-                    'customer': data['customer'],
+                    'customer': customer,
                     'comment': sample.get('comment'),
                     'tumour': sample.get('tumour') or False,
                     'pool': sample.get('pool'),
@@ -35,11 +32,11 @@ class LimsHandler:
                     'index_number': sample.get('index_number'),
                 }
             })
-        return lims_data
+        return samples_lims
 
-    def process_lims(self, data: dict):
+    def process_lims(self, data: dict, samples: List[dict]):
         """Process samples to add them to LIMS."""
-        lims_data = self.to_lims(data)
-        project_data = self.lims.add_project(lims_data)
+        samples_lims = self.to_lims(data['customer'], samples)
+        project_data = self.lims.add_project(data['ticket'] or data['name'], samples_lims)
         lims_map = self.lims.get_samples(projectlimsid=project_data['id'], map_ids=True)
         return project_data, lims_map
