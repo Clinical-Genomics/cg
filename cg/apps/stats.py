@@ -7,6 +7,8 @@ import sqlalchemy as sqa
 
 from cgstats.db import api, models
 
+LOG = logging.getLogger(__name__)
+
 
 class StatsAPI(alchy.Manager):
 
@@ -33,14 +35,35 @@ class StatsAPI(alchy.Manager):
             'date': record.time,
             'samples': []
         }
-        for sample in self.sample_reads(record):
+        for sample in self.flowcell_samples(record):
             raw_samplename = sample.name.split('_', 1)[0]
             curated_samplename = raw_samplename.rstrip('AB')
-            data['samples'].append({
+            sample_data = { 
                 'name': curated_samplename,
-                'reads': sample.reads,
-            })
+                'reads': 0,
+                'fastqs': [],
+            }
+            for flowcell in self.sample_reads(sample):
+                if flowcell.type == 'hiseqga' and flowcell.q30 >= 80:
+                    sample_data['reads'] += flowcell.reads
+                elif flowcell.type == 'hiseqx' and flowcell.q30 >= 75:
+                    sample_data['reads'] += flowcell.reads
+                else:
+                    LOG.warning(f"q30 too low for {curated_samplename} on {flowcell.name}:"
+                                f"{flowcell.q30} < {80 if flowcell.type == 'hiseqga' else 75}%")
+                    continue
+                for fastq_path in self.fastqs(flowcell_obj, sample_obj):
+                    sample_data['fastqs'].append(fastq_path)
+
         return data
+
+    def flowcell_samples(self, flowcell_obj: models.Flowcells) -> Iterator[models.Sample]:
+        """Fetch all the samples from a flowcell."""
+        return (
+            self.Sample.query
+            .join(models.Sample.unaligned, models.Unaligned.demuxes)
+            .filter(models.Demux.flowcell == flowcell_obj)
+        )
 
     def sample_flowcells(self, sample_obj: models.Sample) -> Iterator[models.Flowcell]:
         """Fetch all flowcells for a sample."""
@@ -50,19 +73,21 @@ class StatsAPI(alchy.Manager):
             .filter(models.Unaligned.sample == sample_obj)
         )
 
-    def sample_reads(self, flowcell_obj: models.Flowcell) -> Iterator:
+    def sample_reads(self, sample_obj: models.Sample) -> Iterator:
         """Calculate reads for a sample."""
         query = (
             self.session.query(
-                models.Sample.samplename.label('name'),
+                models.Flowcell.flowcellname.label('name'),
+                models.Flowcell.hiseqtype.label('type'),
                 sqa.func.sum(models.Unaligned.readcounts).label('reads'),
+                sqa.func.min(models.Unaligned.q30).label('q30'),
             )
             .join(
-                models.Sample.unaligned,
-                models.Sample.demuxes
+                models.Flowcell.demuxes,
+                models.Demux.unaligned
             )
-            .filter(models.Demux.flowcell == flowcell_obj)
-            .group_by(models.Sample.samplename)
+            .filter(models.Unaligned.sample == sample_obj)
+            .group_by(models.Flowcell.flowcellname)
         )
         return query
 
@@ -70,12 +95,11 @@ class StatsAPI(alchy.Manager):
         """Fetch a sample for the database by name."""
         return api.get_sample(sample_name).first()
 
-    def fastqs(self, sample_obj: models.Sample) -> Iterator[Path]:
+    def fastqs(self, flowcell_obj: models.Flowcell, sample_obj: models.Sample) -> Iterator[Path]:
         """Fetch FASTQ files for a sample."""
         base_pattern = "*{}/Unaligned*/Project_*/Sample_{}/*.fastq.gz"
         alt_pattern = "*{}/Unaligned*/Project_*/Sample_{}_*/*.fastq.gz"
-        for flowcell_obj in self.sample_flowcells(sample_obj):
-            for fastq_pattern in (base_pattern, alt_pattern):
-                pattern = fastq_pattern.format(flowcell_obj.flowcellname, sample_obj.samplename)
-                files = self.root_dir.glob(pattern)
-                yield from files
+        for fastq_pattern in (base_pattern, alt_pattern):
+            pattern = fastq_pattern.format(flowcell_obj.flowcellname, sample_obj.samplename)
+            files = self.root_dir.glob(pattern)
+            yield from files
