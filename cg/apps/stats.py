@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import logging
 from pathlib import Path
 from typing import Iterator
 
@@ -35,29 +36,29 @@ class StatsAPI(alchy.Manager):
             'date': record.time,
             'samples': []
         }
-        for sample in self.flowcell_samples(record):
-            raw_samplename = sample.name.split('_', 1)[0]
+        for sample_obj in self.flowcell_samples(record):
+            raw_samplename = sample_obj.name.split('_', 1)[0]
             curated_samplename = raw_samplename.rstrip('AB')
             sample_data = { 
                 'name': curated_samplename,
                 'reads': 0,
                 'fastqs': [],
             }
-            for flowcell in self.sample_reads(sample):
-                if flowcell.type == 'hiseqga' and flowcell.q30 >= 80:
-                    sample_data['reads'] += flowcell.reads
-                elif flowcell.type == 'hiseqx' and flowcell.q30 >= 75:
-                    sample_data['reads'] += flowcell.reads
+            for flowcell_obj in self.sample_reads(sample_obj):
+                if flowcell_obj.type == 'hiseqga' and flowcell_obj.q30 >= 80:
+                    sample_data['reads'] += flowcell_obj.reads
+                elif flowcell_obj.type == 'hiseqx' and flowcell_obj.q30 >= 75:
+                    sample_data['reads'] += flowcell_obj.reads
                 else:
-                    LOG.warning(f"q30 too low for {curated_samplename} on {flowcell.name}:"
-                                f"{flowcell.q30} < {80 if flowcell.type == 'hiseqga' else 75}%")
+                    LOG.warning(f"q30 too low for {curated_samplename} on {flowcell_obj.name}:"
+                                f"{flowcell_obj.q30} < {80 if flowcell_obj.type == 'hiseqga' else 75}%")
                     continue
                 for fastq_path in self.fastqs(flowcell_obj, sample_obj):
-                    sample_data['fastqs'].append(fastq_path)
+                    sample_data['fastqs'].append(str(fastq_path))
 
         return data
 
-    def flowcell_samples(self, flowcell_obj: models.Flowcells) -> Iterator[models.Sample]:
+    def flowcell_samples(self, flowcell_obj: models.Flowcell) -> Iterator[models.Sample]:
         """Fetch all the samples from a flowcell."""
         return (
             self.Sample.query
