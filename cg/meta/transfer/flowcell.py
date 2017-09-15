@@ -30,17 +30,14 @@ class TransferFlowcell():
                 date=stats_data['date'],
             )
         for sample_data in stats_data['samples']:
-            LOG.debug(f"adding reads to sample: {sample_data['name']}")
+            LOG.debug(f"adding reads/fastqs to sample: {sample_data['name']}")
             sample_obj = self.db.sample(sample_data['name'])
             if sample_obj is None:
                 LOG.warning(f"unable to find sample: {sample_data['name']}")
                 continue
 
             if store:
-                # store FASTQ files
-                stats_sample = self.stats.sample(sample_data['name'])
-                fastq_files = self.stats.fastqs(stats_sample)
-                self.store_fastqs(sample_obj.internal_id, map(str, fastq_files))
+                self.store_fastqs(sample_obj.internal_id, sample_data['fastqs'])
 
             sample_obj.reads = sample_data['reads']
             enough_reads = (sample_obj.reads >

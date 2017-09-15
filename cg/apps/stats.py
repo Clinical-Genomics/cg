@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import logging
 from pathlib import Path
 from typing import Iterator
 
@@ -6,6 +7,8 @@ import alchy
 import sqlalchemy as sqa
 
 from cgstats.db import api, models
+
+LOG = logging.getLogger(__name__)
 
 
 class StatsAPI(alchy.Manager):
@@ -33,36 +36,52 @@ class StatsAPI(alchy.Manager):
             'date': record.time,
             'samples': []
         }
-        for sample in self.sample_reads(record):
-            raw_samplename = sample.name.split('_', 1)[0]
+        for sample_obj in self.flowcell_samples(record):
+            raw_samplename = sample_obj.name.split('_', 1)[0]
             curated_samplename = raw_samplename.rstrip('AB')
-            data['samples'].append({
+            sample_data = {
                 'name': curated_samplename,
-                'reads': sample.reads,
-            })
+                'reads': 0,
+                'fastqs': [],
+            }
+            for fc_data in self.sample_reads(sample_obj):
+                if fc_data.type == 'hiseqga' and fc_data.q30 >= 80:
+                    sample_data['reads'] += fc_data.reads
+                elif fc_data.type == 'hiseqx' and fc_data.q30 >= 75:
+                    sample_data['reads'] += fc_data.reads
+                else:
+                    LOG.warning(f"q30 too low for {curated_samplename} on {fc_data.name}:"
+                                f"{fc_data.q30} < {80 if fc_data.type == 'hiseqga' else 75}%")
+                    continue
+                for fastq_path in self.fastqs(fc_data, sample_obj):
+                    sample_data['fastqs'].append(str(fastq_path))
+            data['samples'].append(sample_data)
+
         return data
 
-    def sample_flowcells(self, sample_obj: models.Sample) -> Iterator[models.Flowcell]:
-        """Fetch all flowcells for a sample."""
+    def flowcell_samples(self, flowcell_obj: models.Flowcell) -> Iterator[models.Sample]:
+        """Fetch all the samples from a flowcell."""
         return (
-            self.Flowcell.query
-            .join(models.Flowcell.demux, models.Demux.unaligned)
-            .filter(models.Unaligned.sample == sample_obj)
+            self.Sample.query
+            .join(models.Sample.unaligned, models.Unaligned.demuxes)
+            .filter(models.Demux.flowcell == flowcell_obj)
         )
 
-    def sample_reads(self, flowcell_obj: models.Flowcell) -> Iterator:
+    def sample_reads(self, sample_obj: models.Sample) -> Iterator:
         """Calculate reads for a sample."""
         query = (
             self.session.query(
-                models.Sample.samplename.label('name'),
+                models.Flowcell.flowcellname.label('name'),
+                models.Flowcell.hiseqtype.label('type'),
                 sqa.func.sum(models.Unaligned.readcounts).label('reads'),
+                sqa.func.min(models.Unaligned.q30).label('q30'),
             )
             .join(
-                models.Sample.unaligned,
-                models.Sample.demuxes
+                models.Flowcell.demuxes,
+                models.Demux.unaligned
             )
-            .filter(models.Demux.flowcell == flowcell_obj)
-            .group_by(models.Sample.samplename)
+            .filter(models.Unaligned.sample == sample_obj)
+            .group_by(models.Flowcell.flowcellname)
         )
         return query
 
@@ -70,12 +89,11 @@ class StatsAPI(alchy.Manager):
         """Fetch a sample for the database by name."""
         return api.get_sample(sample_name).first()
 
-    def fastqs(self, sample_obj: models.Sample) -> Iterator[Path]:
+    def fastqs(self, flowcell_obj: models.Flowcell, sample_obj: models.Sample) -> Iterator[Path]:
         """Fetch FASTQ files for a sample."""
         base_pattern = "*{}/Unaligned*/Project_*/Sample_{}/*.fastq.gz"
         alt_pattern = "*{}/Unaligned*/Project_*/Sample_{}_*/*.fastq.gz"
-        for flowcell_obj in self.sample_flowcells(sample_obj):
-            for fastq_pattern in (base_pattern, alt_pattern):
-                pattern = fastq_pattern.format(flowcell_obj.flowcellname, sample_obj.samplename)
-                files = self.root_dir.glob(pattern)
-                yield from files
+        for fastq_pattern in (base_pattern, alt_pattern):
+            pattern = fastq_pattern.format(flowcell_obj.flowcellname, sample_obj.samplename)
+            files = self.root_dir.glob(pattern)
+            yield from files
