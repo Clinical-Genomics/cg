@@ -39,22 +39,23 @@ class StatsAPI(alchy.Manager):
         for sample_obj in self.flowcell_samples(record):
             raw_samplename = sample_obj.name.split('_', 1)[0]
             curated_samplename = raw_samplename.rstrip('AB')
-            sample_data = { 
+            sample_data = {
                 'name': curated_samplename,
                 'reads': 0,
                 'fastqs': [],
             }
-            for flowcell_obj in self.sample_reads(sample_obj):
-                if flowcell_obj.type == 'hiseqga' and flowcell_obj.q30 >= 80:
-                    sample_data['reads'] += flowcell_obj.reads
-                elif flowcell_obj.type == 'hiseqx' and flowcell_obj.q30 >= 75:
-                    sample_data['reads'] += flowcell_obj.reads
+            for fc_data in self.sample_reads(sample_obj):
+                if fc_data.type == 'hiseqga' and fc_data.q30 >= 80:
+                    sample_data['reads'] += fc_data.reads
+                elif fc_data.type == 'hiseqx' and fc_data.q30 >= 75:
+                    sample_data['reads'] += fc_data.reads
                 else:
-                    LOG.warning(f"q30 too low for {curated_samplename} on {flowcell_obj.name}:"
-                                f"{flowcell_obj.q30} < {80 if flowcell_obj.type == 'hiseqga' else 75}%")
+                    LOG.warning(f"q30 too low for {curated_samplename} on {fc_data.name}:"
+                                f"{fc_data.q30} < {80 if fc_data.type == 'hiseqga' else 75}%")
                     continue
-                for fastq_path in self.fastqs(flowcell_obj, sample_obj):
+                for fastq_path in self.fastqs(fc_data, sample_obj):
                     sample_data['fastqs'].append(str(fastq_path))
+            data['samples'].append(sample_data)
 
         return data
 
