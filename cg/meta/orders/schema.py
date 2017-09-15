@@ -14,10 +14,10 @@ class PrepMixin:
     container_name = fields.Str()
     well_position = fields.Str()
     tumour = fields.Bool()
-    quantity = fields.Str()
-    volume = fields.Str()
-    concentration = fields.Str()
-    source = fields.Str(required=True)
+    quantity = fields.Str(allow_none=True)
+    volume = fields.Str(allow_none=True)
+    concentration = fields.Str(allow_none=True)
+    source = fields.Str()
     priority = fields.Str(default='standard', required=True)
     require_qcok = fields.Bool(default=False)
 
@@ -63,6 +63,8 @@ class FastqProject(BaseProject):
 
 class RmlSample(BaseSample):
     pool = fields.Str(required=True)
+    well_position_rml = fields.Str()
+    rml_plate_name = fields.Str()
     index = fields.Str()
     index_number = fields.Int()
 

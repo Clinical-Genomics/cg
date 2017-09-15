@@ -37,7 +37,7 @@ class StatsAPI(alchy.Manager):
             'samples': []
         }
         for sample_obj in self.flowcell_samples(record):
-            raw_samplename = sample_obj.name.split('_', 1)[0]
+            raw_samplename = sample_obj.samplename.split('_', 1)[0]
             curated_samplename = raw_samplename.rstrip('AB')
             sample_data = {
                 'name': curated_samplename,
@@ -53,7 +53,7 @@ class StatsAPI(alchy.Manager):
                     LOG.warning(f"q30 too low for {curated_samplename} on {fc_data.name}:"
                                 f"{fc_data.q30} < {80 if fc_data.type == 'hiseqga' else 75}%")
                     continue
-                for fastq_path in self.fastqs(fc_data, sample_obj):
+                for fastq_path in self.fastqs(fc_data.name, sample_obj):
                     sample_data['fastqs'].append(str(fastq_path))
             data['samples'].append(sample_data)
 
@@ -63,7 +63,7 @@ class StatsAPI(alchy.Manager):
         """Fetch all the samples from a flowcell."""
         return (
             self.Sample.query
-            .join(models.Sample.unaligned, models.Unaligned.demuxes)
+            .join(models.Sample.unaligned, models.Unaligned.demux)
             .filter(models.Demux.flowcell == flowcell_obj)
         )
 
@@ -74,10 +74,10 @@ class StatsAPI(alchy.Manager):
                 models.Flowcell.flowcellname.label('name'),
                 models.Flowcell.hiseqtype.label('type'),
                 sqa.func.sum(models.Unaligned.readcounts).label('reads'),
-                sqa.func.min(models.Unaligned.q30).label('q30'),
+                sqa.func.min(models.Unaligned.q30_bases_pct).label('q30'),
             )
             .join(
-                models.Flowcell.demuxes,
+                models.Flowcell.demux,
                 models.Demux.unaligned
             )
             .filter(models.Unaligned.sample == sample_obj)
@@ -89,11 +89,11 @@ class StatsAPI(alchy.Manager):
         """Fetch a sample for the database by name."""
         return api.get_sample(sample_name).first()
 
-    def fastqs(self, flowcell_obj: models.Flowcell, sample_obj: models.Sample) -> Iterator[Path]:
+    def fastqs(self, flowcell: str, sample_obj: models.Sample) -> Iterator[Path]:
         """Fetch FASTQ files for a sample."""
         base_pattern = "*{}/Unaligned*/Project_*/Sample_{}/*.fastq.gz"
         alt_pattern = "*{}/Unaligned*/Project_*/Sample_{}_*/*.fastq.gz"
         for fastq_pattern in (base_pattern, alt_pattern):
-            pattern = fastq_pattern.format(flowcell_obj.flowcellname, sample_obj.samplename)
+            pattern = fastq_pattern.format(flowcell, sample_obj.samplename)
             files = self.root_dir.glob(pattern)
             yield from files

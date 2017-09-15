@@ -43,13 +43,14 @@ class OrdersAPI(LimsHandler, StatusHandler):
         if errors:
             return errors
         message = f"New incoming samples, {name}"
-        try:
-            data['ticket'] = (self.osticket.open_ticket(name, email, subject=data['name'],
-                                                        message=message)
-                              if self.osticket else None)
-        except TicketCreationError as error:
-            LOG.warning(error.message)
-            data['ticket'] = None
+        # try:
+        #     data['ticket'] = (self.osticket.open_ticket(name, email, subject=data['name'],
+        #                                                 message=message)
+        #                       if self.osticket else None)
+        # except TicketCreationError as error:
+        #     LOG.warning(error.message)
+        #     data['ticket'] = None
+        data['ticket'] = None
         result = getattr(self, f"submit_{project.value}")(data)
         return result
 

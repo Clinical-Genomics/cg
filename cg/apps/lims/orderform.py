@@ -5,9 +5,19 @@ import xlrd
 
 from cg.exc import OrderFormError
 
-SEX_MAP = {'male': 'M', 'female': 'F', 'unknown': 'unknown', 'unknown': 'Unknown'}
+SEX_MAP = {'male': 'M', 'female': 'F', 'unknown': 'unknown'}
 REV_SEX_MAP = {value: key for key, value in SEX_MAP.items()}
 CONTAINER_TYPES = ['Tube', '96 well plate']
+SOURCE_TYPES = [
+    'blood',
+    'saliva',
+    'tissue (fresh frozen)',
+    'tissue (FFPE)',
+    'cell line',
+    'nail',
+    'muscle',
+    'other',
+]
 
 
 def parse_orderform(excel_path: str) -> dict:
@@ -136,18 +146,20 @@ def parse_sample(raw_sample):
     if raw_sample['UDF/priority'].lower() == 'förtur':
         raw_sample['UDF/priority'] = 'priority'
 
+    source = raw_sample['UDF/Source'].lower()
     sample = {
         'name': raw_sample['Sample/Name'],
         'container': raw_sample.get('Container/Type'),
-        'container_name': raw_sample.get('Container/Name', raw_sample.get('UDF/RML plate name')),
-        'well_position': raw_sample.get('Sample/Well Location',
-                                        raw_sample.get('UDF/RML well position')),
+        'container_name': raw_sample.get('Container/Name'),
+        'rml_plate_name': raw_sample.get('UDF/RML plate name'),
+        'well_position': raw_sample.get('Sample/Well Location'),
+        'well_position_rml': raw_sample.get('UDF/RML well position'),
         'sex': REV_SEX_MAP.get(raw_sample['UDF/Gender'].strip()),
         'panels': (raw_sample['UDF/Gene List'].split(';') if
                    raw_sample.get('UDF/Gene List') else None),
         'require_qcok': True if raw_sample['UDF/Process only if QC OK'] else False,
         'application': raw_sample['UDF/Sequencing Analysis'],
-        'source': raw_sample['UDF/Source'].lower(),
+        'source': source if source in SOURCE_TYPES else None,
         'status': raw_sample['UDF/Status'].lower() if raw_sample.get('UDF/Status') else None,
         'customer': raw_sample['UDF/customer'],
         'family': raw_sample['UDF/familyID'],

@@ -24,6 +24,8 @@ PROP2UDF = {
     'index_number': 'Index number',
     'concentration': 'Concentration (nM)',
     'volume': 'Volume (uL)',
+    'well_position_rml': 'RML well position',
+    'rml_plate_name': 'RML plate name',
 }
 
 
