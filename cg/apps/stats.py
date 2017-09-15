@@ -66,14 +66,6 @@ class StatsAPI(alchy.Manager):
             .filter(models.Demux.flowcell == flowcell_obj)
         )
 
-    def sample_flowcells(self, sample_obj: models.Sample) -> Iterator[models.Flowcell]:
-        """Fetch all flowcells for a sample."""
-        return (
-            self.Flowcell.query
-            .join(models.Flowcell.demux, models.Demux.unaligned)
-            .filter(models.Unaligned.sample == sample_obj)
-        )
-
     def sample_reads(self, sample_obj: models.Sample) -> Iterator:
         """Calculate reads for a sample."""
         query = (
