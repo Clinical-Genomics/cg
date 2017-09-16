@@ -124,5 +124,5 @@ def auto(context):
         else:
             LOG.info(f"starting family: {family_obj.internal_id}")
             priority = ('high' if family_obj.high_priority else
-                        ('low' if family_obj.low_priority else 'standard'))
+                        ('low' if family_obj.low_priority else 'normal'))
             context.invoke(analysis, priority=priority, family_id=family_obj.internal_id)
