@@ -8,10 +8,12 @@ import petname
 from cg.constants import PRIORITY_MAP
 from cg.store import models, utils
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 class AddHandler:
+
+    """Methods related to adding new data to the store."""
 
     def add_customer(self, internal_id: str, name: str, scout_access: bool=False,
                      **kwargs) -> models.Customer:
@@ -69,7 +71,7 @@ class AddHandler:
             if self.family(internal_id) is None:
                 break
             else:
-                log.debug(f"{internal_id} already used - trying another id")
+                LOG.debug(f"{internal_id} already used - trying another id")
 
         db_priority = PRIORITY_MAP[priority]
         new_family = self.Family(internal_id=internal_id, name=name, priority=db_priority)
@@ -89,13 +91,14 @@ class AddHandler:
 
     def add_flowcell(self, name: str, sequencer: str, sequencer_type: str,
                      date: dt.datetime) -> models.Flowcell:
+        """Build a new Flowcell record."""
         new_record = self.Flowcell(name=name, sequencer_name=sequencer,
                                    sequencer_type=sequencer_type, sequenced_at=date)
         return new_record
 
     def add_analysis(self, pipeline: str, version: str, completed_at: dt.datetime,
                      primary: bool=False, uploaded: dt.datetime=None) -> models.Analysis:
-        """Add a new analysis to the database."""
+        """Build a new Analysis record."""
         new_record = self.Analysis(pipeline=pipeline, pipeline_version=version,
                                    completed_at=completed_at, is_primary=primary, uploaded_at=uploaded)
         return new_record

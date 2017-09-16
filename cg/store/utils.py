@@ -4,7 +4,7 @@ from typing import Callable
 
 import petname
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 def get_unique_id(availability_func: Callable) -> str:
@@ -18,4 +18,4 @@ def get_unique_id(availability_func: Callable) -> str:
         if availability_func(random_id) is None:
             return random_id
         else:
-            log.debug(f"{random_id} already used - trying another id")
+            LOG.debug(f"{random_id} already used - trying another id")

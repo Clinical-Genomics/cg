@@ -8,7 +8,7 @@ from .add import AddHandler
 from .find import FindHandler
 from .status import StatusHandler
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 class BaseHandler:

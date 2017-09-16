@@ -3,7 +3,10 @@
 
 class CgError(Exception):
 
+    """Base exception for the package."""
+
     def __init__(self, message):
+        super(CgError, self).__init__()
         self.message = message
 
 
@@ -12,6 +15,7 @@ class AnalysisNotFinishedError(CgError):
 
 
 class LimsDataError(CgError):
+    """Error related to missing/incomplete data in LIMS."""
     pass
 
 
