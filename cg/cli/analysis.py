@@ -118,7 +118,11 @@ def start(context, priority, email, family_id):
 def auto(context):
     """Start all analyses that are ready for analysis."""
     for family_obj in context.obj['db'].families_to_analyze():
-        LOG.info(f"starting family: {family_obj.internal_id}")
-        priority = ('high' if family_obj.high_priority else
-                    ('low' if family_obj.low_priority else 'standard'))
-        context.invoke(analysis, priority=priority, family_id=family_obj.internal_id)
+        pending = context.obj['tb'].analyses(family=family_obj.internal_id, temp=True)
+        if pending.first():
+            LOG.info("analysis already running, skipping")
+        else:
+            LOG.info(f"starting family: {family_obj.internal_id}")
+            priority = ('high' if family_obj.high_priority else
+                        ('low' if family_obj.low_priority else 'standard'))
+            context.invoke(analysis, priority=priority, family_id=family_obj.internal_id)
