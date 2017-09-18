@@ -123,7 +123,7 @@ class Family(Model, PriorityMixin):
     name = Column(types.String(128), nullable=False)
     priority = Column(types.Integer, default=1, nullable=False)
     _panels = Column(types.Text, nullable=False)
-    analyze = Column(types.Boolean, default=False)
+    action = Column(types.Enum('analyze', 'running', 'hold'))
 
     ordered_at = Column(types.DateTime, default=dt.datetime.now)
     created_at = Column(types.DateTime, default=dt.datetime.now)

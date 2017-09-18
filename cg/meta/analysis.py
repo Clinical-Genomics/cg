@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import datetime as dt
 import logging
 import re
 from typing import List
@@ -43,6 +44,9 @@ class AnalysisAPI():
             else:
                 kwargs['priority'] = 'normal'
         self.tb.start(family_obj.internal_id, **kwargs)
+        # mark the family as running
+        family_obj.action = 'running'
+        self.db.commit()
 
     def config(self, family_obj: models.Family) -> dict:
         """Make the MIP config."""

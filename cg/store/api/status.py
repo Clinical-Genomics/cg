@@ -40,12 +40,15 @@ class StatusHandler:
             self.Family.query
             .outerjoin(models.Family.analyses)
             .join(models.Family.links, models.FamilySample.sample)
-            .filter(or_(
-                models.Family.analyze == True,
-                and_(
-                    models.Sample.sequenced_at != None,
-                    models.Analysis.completed_at == None
-                )
+            .filter(
+                or_(
+                    models.Family.action == 'analyze',
+                    and_(
+                        models.Sample.sequenced_at != None,
+                        models.Analysis.completed_at == None,
+                        models.Analysis.action != 'hold',
+                        models.Family.action != 'running',
+                    )
             ))
             .order_by(models.Family.priority.desc(), models.Family.ordered_at)
         )

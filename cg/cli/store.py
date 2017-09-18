@@ -39,6 +39,9 @@ def analysis(context, config_stream):
 
     # add new analysis to the status API
     family_obj = status.family(new_bundle.name)
+    # reset the action on the family (from 'running')
+    family_obj.action = None
+    # add new complete analysis record
     new_analysis = status.add_analysis(
         pipeline='mip',
         version=bundle_data['pipeline_version'],
@@ -57,7 +60,7 @@ def analysis(context, config_stream):
         context.abort()
 
     hk_api.add_commit(new_bundle)
-    db.add_commit(new_analysis)
+    status.add_commit(new_analysis)
     click.echo(click.style('included files in Housekeeper', fg='green'))
 
 

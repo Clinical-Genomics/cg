@@ -67,8 +67,8 @@ class PanelView(BaseView):
 class FamilyView(BaseView):
     column_exclude_list = ['created_at']
     column_searchable_list = ['internal_id', 'name', 'customer.internal_id']
-    column_filters = ['customer.internal_id', 'priority', 'analyze']
-    column_editable_list = ['analyze']
+    column_filters = ['customer.internal_id', 'priority', 'action']
+    column_editable_list = ['action']
 
 
 class SampleView(BaseView):

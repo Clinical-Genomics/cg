@@ -55,7 +55,7 @@ def families(context, skip):
         if family_obj.analyses:
             message += f" {family_obj.analyses[0].completed_at.date()}"
             color = 'green'
-        if family_obj.analyze:
-            message += ' [ANALYZE]'
+        if family_obj.action:
+            message += f" [{family_obj.action.upper()}]"
             color = 'orange'
         click.echo(click.style(message, fg=color))

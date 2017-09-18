@@ -96,11 +96,13 @@ class AddHandler:
                                    sequencer_type=sequencer_type, sequenced_at=date)
         return new_record
 
-    def add_analysis(self, pipeline: str, version: str, completed_at: dt.datetime,
-                     primary: bool=False, uploaded: dt.datetime=None) -> models.Analysis:
+    def add_analysis(self, pipeline: str, version: str=None, completed_at: dt.datetime=None,
+                     primary: bool=False, uploaded: dt.datetime=None,
+                     started_at: dt.datetime=None, **kwargs) -> models.Analysis:
         """Build a new Analysis record."""
         new_record = self.Analysis(pipeline=pipeline, pipeline_version=version,
-                                   completed_at=completed_at, is_primary=primary, uploaded_at=uploaded)
+                                   completed_at=completed_at, is_primary=primary,
+                                   uploaded_at=uploaded, started_at=started_at, **kwargs)
         return new_record
 
     def add_panel(self, customer: models.Customer, name: str, abbrev: str, version: float,
