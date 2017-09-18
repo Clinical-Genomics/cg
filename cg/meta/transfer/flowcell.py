@@ -18,7 +18,7 @@ class TransferFlowcell():
 
     def transfer(self, flowcell_name: str, store: bool=True) -> models.Flowcell:
         """Populate the database with the information."""
-        if self.hk.tag('fastq') is None:
+        if store and self.hk.tag('fastq') is None:
             self.hk.add_commit(self.hk.new_tag('fastq'))
         stats_data = self.stats.flowcell(flowcell_name)
         record = self.db.flowcell(flowcell_name)

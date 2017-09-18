@@ -34,7 +34,7 @@ class StatusHandler:
         )
         return records
 
-    def families_to_analyze(self):
+    def families_to_analyze(self, limit: int=50):
         """Fetch families without analyses where all samples are sequenced."""
         records = (
             self.Family.query
@@ -46,13 +46,12 @@ class StatusHandler:
                     and_(
                         models.Sample.sequenced_at != None,
                         models.Analysis.completed_at == None,
-                        models.Analysis.action != 'hold',
-                        models.Family.action != 'running',
+                        models.Family.action == None,
                     )
             ))
             .order_by(models.Family.priority.desc(), models.Family.ordered_at)
         )
-        return [record for record in records if self._samples_sequenced(record.links)]
+        return [record for record in records.limit(limit) if self._samples_sequenced(record.links)]
     
     @staticmethod
     def _samples_sequenced(links: List[models.FamilySample]) -> bool:
