@@ -41,22 +41,43 @@ This is a schematic overview of how data flows between different tools. Generall
 
 1. **Demux** | Samples are  picked up by the bioinformatics pipeline after sequencing. A demultiplexed flowcell will get added to `status` and FASTQ files for each sample will be sent to `housekeeper`. Meanwhile, read count are updated which moves the samples to the next step.
 
-1. **Analysis** | Samples are always analyzed as "families". If a family of samples all have been sequenced, they show up in the **analysis queue**. Analyses are automatically started by a crontab script.
+    You can (re-)perform the transfer at any time, you just need the flowcell id:
+
+    ```bash
+    cg transfer flowcell [flowcell]
+    ```
+
+    > TODO: reads are only counted for samples that pass the **Q30 threshold**. You can override this check by using the `--force` flag.
+
+1. **Analysis** | Samples are always analyzed as "families". If all samples in a family have been sequenced, it show up in the **analysis queue**. Analyses are automatically started by a crontab script.
 
     Families with elevated priority (priority/express) will be started first with the rest following in reverse chronological order.
 
     Starting a run will do four things:
 
-    1. Generate a pedigree config for the analysis pipeline
-    1. Link FASTQ files for each related sample and rename to follow the pipeline conventions
-    1. Generate a gene panel file according to the order
-    1. Start the pipeline and set the priority flag to high if required
+    1. Generate a pedigree config for the analysis pipeline (`cg analysis config FAMILY`)
+    1. Link FASTQ files for each related sample and rename to follow the pipeline conventions (`cg analysis link FAMILY`)
+    1. Generate a gene panel file according to the order (`cg analysis panel FAMILY`)
+    1. Start the pipeline and set the priority flag to high if required (`cg analysis start FAMILY`)
 
     A crontab is monitoring the progress of started runs. You can follow the status in [Trailblazer][trailblazer-ui].
+
+    You can start an anlysis in a couple different ways:
+
+    1. set the action property of the family to "analyze"
+    1. run the command: `cg analysis -f [family]`
 
 1. **Store** | Completed analyses can be accessed through `trailblazer` and are automatically "stored". This process updates `status` and links files to the family in `housekeeper`.
 
     Some files are marked as essential and will be subsequently backed up. The rest of the files are removed after 3 months.
+
+    If you are in a hurry, you can store a completed analysis manually by running:
+
+    ```bash
+    cg store analysis FAMILY
+    # or store all the recently completed runs
+    cg store completed
+    ```
 
 1. **Upload** | Results from completed analyses are uploaded to a range of different tools:
 

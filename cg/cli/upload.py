@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime as dt
 import click
+import logging
 
 from cg.store import Store
 from cg.apps import coverage as coverage_app, gt, hk, loqus, tb, scoutapi
@@ -8,6 +9,8 @@ from cg.meta.upload.coverage import UploadCoverageApi
 from cg.meta.upload.gt import UploadGenotypesAPI
 from cg.meta.upload.observations import UploadObservationsAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
+
+LOG = logging.getLogger(__name__)
 
 
 @click.group(invoke_without_command=True)
@@ -89,3 +92,12 @@ def scout(context, family_id):
     api = UploadScoutAPI(status_api, hk_api, scout_api)
     results = api.data(family_obj.analyses[0])
     scout_api.upload(results)
+
+
+@upload.command()
+@click.pass_context
+def auto(context):
+    """Upload all completed analyses."""
+    for analysis_obj in context.obj['db'].analyses_to_upload():
+        LOG.info(f"uploading family: {analysis_obj.family.internal_id}")
+        context.invoke(upload, family_id=analysis_obj.family.internal_id)
