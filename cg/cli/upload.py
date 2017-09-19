@@ -92,6 +92,6 @@ def scout(context, family_id):
 @click.pass_context
 def auto(context):
     """Upload all completed analyses."""
-    for analysis_obj in context.obj['db'].analyses_to_upload():
+    for analysis_obj in context.obj['status'].analyses_to_upload():
         LOG.info(f"uploading family: {analysis_obj.family.internal_id}")
         context.invoke(upload, family_id=analysis_obj.family.internal_id)
