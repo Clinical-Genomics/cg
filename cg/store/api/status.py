@@ -15,7 +15,7 @@ class StatusHandler:
             .filter(
                 models.Sample.received_at == None,
                 models.Sample.sequenced_at == None,
-                models.Sample.is_external == external
+                models.Sample.is_external == external,
             )
             .order_by(models.Sample.ordered_at)
         )
@@ -28,7 +28,7 @@ class StatusHandler:
             .filter(
                 models.Sample.received_at != None,
                 models.Sample.sequenced_at == None,
-                models.Sample.is_external == False
+                models.Sample.is_external == False,
             )
             .order_by(models.Sample.priority.desc(), models.Sample.ordered_at)
         )

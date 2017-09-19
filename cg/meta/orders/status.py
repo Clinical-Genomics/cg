@@ -137,6 +137,7 @@ class StatusHandler:
                     with self.status.session.no_autoflush:
                         application_tag = sample['application']
                         new_sample.application_version = self.status.latest_version(application_tag)
+                        new_sample.is_external = True if application_tag[2] == 'X' else False
                     if new_sample.application_version is None:
                         raise OrderError(f"unknown application tag: {sample['application']}")
                     family_samples[new_sample.name] = new_sample

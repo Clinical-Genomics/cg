@@ -32,6 +32,7 @@ class LimsHandler:
                     'index_number': sample.get('index_number'),
                     'rml_plate_name': sample.get('rml_plate_name'),
                     'well_position_rml': sample.get('well_position_rml'),
+                    'index_sequence': sample.get('index_sequence'),
                 }
             })
         return samples_lims
