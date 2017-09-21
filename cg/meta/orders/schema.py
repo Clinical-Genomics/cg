@@ -67,6 +67,7 @@ class RmlSample(BaseSample):
     rml_plate_name = fields.Str()
     index = fields.Str()
     index_number = fields.Int()
+    index_sequence = fields.Str()
 
 
 class RmlProject(BaseProject):

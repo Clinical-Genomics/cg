@@ -98,10 +98,11 @@ class FindHandler:
             .first()
         )
 
-    def pools(self):
+    def pools(self, *, customer: models.Customer):
         """Fetch all the pools."""
-        query = self.Pool.query
-        return query
+        records = self.Pool.query
+        records = records.filter_by(customer=customer) if customer else records
+        return records
     
     def deliveries(self):
         """Fetch all deliveries."""

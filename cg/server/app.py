@@ -41,7 +41,7 @@ def configure_extensions(app):
 
 
 def register_blueprints(app):
-    app.register_blueprint(api.blueprint)
+    app.register_blueprint(api.BLUEPRINT)
 
 
 def register_admin_views():

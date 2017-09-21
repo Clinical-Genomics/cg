@@ -13,7 +13,7 @@ from cg.apps.lims import parse_orderform
 from cg.meta.orders import OrdersAPI, OrderType
 from .ext import db, lims, osticket
 
-blueprint = Blueprint('api', __name__, url_prefix='/api/v1')
+BLUEPRINT = Blueprint('api', __name__, url_prefix='/api/v1')
 
 
 def public(route_function):
@@ -24,7 +24,7 @@ def public(route_function):
     return public_endpoint
 
 
-@blueprint.before_request
+@BLUEPRINT.before_request
 def before_request():
     """Authorize API routes with JSON Web Tokens."""
     if request.method == 'OPTIONS':
@@ -48,7 +48,7 @@ def before_request():
         g.current_user = user_obj
 
 
-@blueprint.route('/order/<order_type>', methods=['POST'])
+@BLUEPRINT.route('/order/<order_type>', methods=['POST'])
 def order(order_type):
     """Submit an order for samples."""
     api = OrdersAPI(lims=lims, status=db, osticket=osticket)
@@ -67,7 +67,7 @@ def order(order_type):
                    records=[record.to_dict() for record in result['records']])
 
 
-@blueprint.route('/customers')
+@BLUEPRINT.route('/customers')
 def customers():
     """Fetch customers."""
     query = db.Customer.query
@@ -75,7 +75,7 @@ def customers():
     return jsonify(customers=data)
 
 
-@blueprint.route('/panels')
+@BLUEPRINT.route('/panels')
 def panels():
     """Fetch panels."""
     query = db.Panel.query
@@ -83,7 +83,7 @@ def panels():
     return jsonify(panels=data)
 
 
-@blueprint.route('/families')
+@BLUEPRINT.route('/families')
 def families():
     """Fetch families."""
     if request.args.get('status') == 'analysis':
@@ -101,7 +101,7 @@ def families():
     return jsonify(families=data, total=count)
 
 
-@blueprint.route('/families/<family_id>')
+@BLUEPRINT.route('/families/<family_id>')
 def family(family_id):
     """Fetch a family with links."""
     family_obj = db.family(family_id)
@@ -109,7 +109,7 @@ def family(family_id):
     return jsonify(**data)
 
 
-@blueprint.route('/samples')
+@BLUEPRINT.route('/samples')
 def samples():
     """Fetch samples."""
     if request.args.get('status') == 'incoming':
@@ -119,14 +119,13 @@ def samples():
     else:
         samples_q = db.samples(
             query=request.args.get('query'),
-            customer=(db.customer(request.args.get('customer')) if
-                      request.args.get('customer') else None),
+            customer=db.customer(request.args.get('customer')),
         )
     data = [sample_obj.to_dict() for sample_obj in samples_q.limit(30)]
     return jsonify(samples=data, total=samples_q.count())
 
 
-@blueprint.route('/samples/<sample_id>')
+@BLUEPRINT.route('/samples/<sample_id>')
 def sample(sample_id):
     """Fetch a single sample."""
     sample_obj = db.sample(sample_id)
@@ -135,7 +134,24 @@ def sample(sample_id):
     return jsonify(**sample_obj.to_dict())
 
 
-@blueprint.route('/analyses')
+@BLUEPRINT.route('/pools')
+def pools():
+    """Fetch pools."""
+    pools_q = db.pools(customer=db.customer(request.args.get('customer')))
+    data = [pool_obj.to_dict() for pool_obj in pools_q.limit(30)]
+    return jsonify(pools=data, total=pools_q.count())
+
+
+@BLUEPRINT.route('/pools/<pool_id>')
+def pool(pool_id):
+    """Fetch a single pool."""
+    pool_obj = db.pool(pool_id)
+    if pool_obj is None:
+        return abort(404)
+    return jsonify(**pool_obj.to_dict())
+
+
+@BLUEPRINT.route('/analyses')
 def analyses():
     """Fetch analyses."""
     if request.args.get('status') == 'delivery':
@@ -148,7 +164,7 @@ def analyses():
     return jsonify(analyses=data, total=analyses_q.count())
 
 
-@blueprint.route('/options')
+@BLUEPRINT.route('/options')
 def options():
     """Fetch various options."""
     customer_objs = db.Customer.query.all() if g.current_user.is_admin else [g.current_user.customer]
@@ -162,13 +178,13 @@ def options():
     )
 
 
-@blueprint.route('/me')
+@BLUEPRINT.route('/me')
 def me():
     """Fetch information about current user."""
     return jsonify(user=g.current_user.to_dict())
 
 
-@blueprint.route('/applications')
+@BLUEPRINT.route('/applications')
 @public
 def applications():
     """Fetch application tags."""
@@ -177,7 +193,7 @@ def applications():
     return jsonify(applications=data)
 
 
-@blueprint.route('/applications/<tag>')
+@BLUEPRINT.route('/applications/<tag>')
 @public
 def application(tag):
     """Fetch an application tag."""
@@ -187,7 +203,7 @@ def application(tag):
     return jsonify(**record.to_dict())
 
 
-@blueprint.route('/orderform', methods=['POST'])
+@BLUEPRINT.route('/orderform', methods=['POST'])
 def orderform():
     """Parse an orderform."""
     excel_file = request.files['file']

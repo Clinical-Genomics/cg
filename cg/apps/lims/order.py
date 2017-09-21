@@ -3,11 +3,11 @@ from typing import List
 import logging
 from xml.etree import ElementTree
 
-from genologics.entities import Project, Researcher, Sample, Container, Containertype
+from genologics.entities import Project, Researcher, Sample, Container, Containertype, Artifact
 
 from cg.exc import OrderError
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 CONTAINER_TYPE_MAP = {'Tube': 2, '96 well plate': 1}
 PROP2UDF = {
     'require_qcok': 'Process only if QC OK',
@@ -65,31 +65,35 @@ class OrderHandler:
 
     def submit(self, project_name: str, researcher_id: str, containers: List[dict]):
         """Submit a new project with samples to LIMS."""
-        log.debug('creating LIMS project')
+        LOG.debug('creating LIMS project')
         lims_researcher = Researcher(self, id=researcher_id)
         lims_project = Project.create(self, researcher=lims_researcher, name=project_name)
-        log.info("created new LIMS project: %s", lims_project.id)
+        LOG.info("created new LIMS project: %s", lims_project.id)
 
         for container_data in containers:
-            log.debug('creating LIMS container')
+            LOG.debug('creating LIMS container')
             container_type = Containertype(lims=self, id=container_data['type'])
             lims_container = Container.create(lims=self, name=container_data['name'],
                                               type=container_type)
-            log.info("created new LIMS container: %s", lims_container.id)
+            LOG.info("created new LIMS container: %s", lims_container.id)
 
             for sample_data in container_data['samples']:
-                log.debug("creating LIMS sample: %s", sample_data['name'])
+                LOG.debug("creating LIMS sample: %s", sample_data['name'])
                 raw_sample = Sample._create(self, creation_tag='samplecreation',
                                             name=sample_data['name'], project=lims_project)
 
-                log.debug('adding sample UDFs')
+                LOG.debug('adding sample UDFs')
                 for udf_key, udf_value in sample_data['udfs'].items():
                     if udf_value:
                         raw_sample.udf[udf_key] = udf_value
 
                 location_label = sample_data['location']
                 lims_sample = self._save_sample(raw_sample, lims_container, location_label)
-                log.info("created new LIMS sample: %s -> %s", lims_sample.name, lims_sample.id)
+                LOG.info("created new LIMS sample: %s -> %s", lims_sample.name, lims_sample.id)
+
+                if sample_data['index_sequence']:
+                    LOG.info("adding index seq./reagent label %s", sample_data['index_sequence'])
+                    self._save_reagentlabel(lims_sample.artifact, sample_data['index_sequence'])
         return lims_project
 
     @classmethod
@@ -130,7 +134,7 @@ class OrderHandler:
                                 value = 'yes' if value else 'no'
                             new_sample['udfs'][PROP2UDF[key]] = value
                         else:
-                            log.debug(f"UDF not found: {key} - {value}")
+                            LOG.debug(f"UDF not found: {key} - {value}")
 
                     new_container['samples'].append(new_sample)
                 lims_containers.append(new_container)
@@ -165,3 +169,11 @@ class OrderHandler:
         instance.root = self.post(uri=self.get_uri(Sample._URI), data=data)
         instance._uri = instance.root.attrib['uri']
         return instance
+
+    def _save_reagentlabel(self, artifact: Artifact, reagent_label: str):
+        """Update artifact with reagent label."""
+        xml_data = f"""<?xml version="1.0" encoding="UTF-8"?>
+        <art:artifact xmlns:art="http://genologics.com/ri/artifact">
+        <reagent-label name="{reagent_label}"></reagent-label>
+        </art:artifact>"""
+        self.put(artifact.uri.split('?')[0], xml_data)
