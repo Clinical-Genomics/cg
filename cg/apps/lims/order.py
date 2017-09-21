@@ -93,7 +93,11 @@ class OrderHandler:
 
                 if sample_data['index_sequence']:
                     LOG.info("adding index seq./reagent label %s", sample_data['index_sequence'])
-                    self._save_reagentlabel(lims_sample.artifact, sample_data['index_sequence'])
+                    self._save_reagentlabel(
+                        artifact=lims_sample.artifact,
+                        reagent_label=sample_data['index_sequence'],
+                        sample_name=lims_sample.name,
+                    )
         return lims_project
 
     @classmethod
@@ -103,7 +107,7 @@ class OrderHandler:
         tubes, plates = cls.group_containers(samples)
         # "96 well plate" = container type "1"; Tube = container type "2"
         for container_type, containers in [('1', plates), ('2', tubes)]:
-            for container_name, samples in containers.items():                        
+            for container_name, samples in containers.items():
                 new_container = {
                     'name': container_name,
                     'type': container_type,
@@ -126,6 +130,7 @@ class OrderHandler:
                     new_sample = {
                         'name': sample_data['name'],
                         'location': location or '1:1',
+                        'index_sequence': sample_data['index_sequence'],
                         'udfs': {}
                     }
                     for key, value in sample_data['udfs'].items():
@@ -170,10 +175,11 @@ class OrderHandler:
         instance._uri = instance.root.attrib['uri']
         return instance
 
-    def _save_reagentlabel(self, artifact: Artifact, reagent_label: str):
+    def _save_reagentlabel(self, artifact: Artifact, reagent_label: str, sample_name: str=None):
         """Update artifact with reagent label."""
         xml_data = f"""<?xml version="1.0" encoding="UTF-8"?>
         <art:artifact xmlns:art="http://genologics.com/ri/artifact">
+        <name>{sample_name or artifact.id}</name>
         <reagent-label name="{reagent_label}"></reagent-label>
         </art:artifact>"""
         self.put(artifact.uri.split('?')[0], xml_data)

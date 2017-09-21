@@ -15,6 +15,7 @@ class LimsHandler:
                 'container': sample.get('container') or 'Tube',
                 'container_name': sample.get('container_name'),
                 'well_position': sample.get('well_position'),
+                'index_sequence': sample.get('index_sequence'),
                 'udfs': {
                     'family_name': sample.get('family_name') or 'NA',
                     'priority': sample.get('priority') or 'standard',
@@ -32,7 +33,6 @@ class LimsHandler:
                     'index_number': sample.get('index_number'),
                     'rml_plate_name': sample.get('rml_plate_name'),
                     'well_position_rml': sample.get('well_position_rml'),
-                    'index_sequence': sample.get('index_sequence'),
                 }
             })
         return samples_lims
