@@ -251,6 +251,13 @@ class Flowcell(Model):
     def __str__(self):
         return self.name
 
+    def to_dict(self, samples=False):
+        """Override dictify method."""
+        data = super(Flowcell, self).to_dict()
+        if samples:
+            data['samples'] = [sample.to_dict() for sample in self.samples]
+        return data
+
 
 class Analysis(Model):
 

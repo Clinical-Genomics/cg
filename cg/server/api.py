@@ -145,10 +145,27 @@ def pools():
 @BLUEPRINT.route('/pools/<pool_id>')
 def pool(pool_id):
     """Fetch a single pool."""
-    pool_obj = db.pool(pool_id)
-    if pool_obj is None:
+    record = db.pool(pool_id)
+    if record is None:
         return abort(404)
-    return jsonify(**pool_obj.to_dict())
+    return jsonify(**record.to_dict())
+
+
+@BLUEPRINT.route('/flowcells')
+def flowcells():
+    """Fetch flowcells."""
+    query = db.flowcells()
+    data = [record.to_dict() for record in query.limit(30)]
+    return jsonify(flowcells=data, total=query.count())
+
+
+@BLUEPRINT.route('/flowcells/<flowcell_id>')
+def flowcell(flowcell_id):
+    """Fetch a single flowcell."""
+    record = db.flowcell(flowcell_id)
+    if record is None:
+        return abort(404)
+    return jsonify(**record.to_dict(samples=True))
 
 
 @BLUEPRINT.route('/analyses')
