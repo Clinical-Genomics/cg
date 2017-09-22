@@ -282,7 +282,7 @@ class Application(Model):
 
     id = Column(types.Integer, primary_key=True)
     tag = Column(types.String(32), unique=True, nullable=False)
-    category = Column(types.Enum('wgs', 'wes', 'tga', 'rna', 'mic', 'rml'), nullable=False)
+    category = Column(types.Enum('wgs', 'wes', 'tga', 'rna', 'mic', 'rml', 'ext'), nullable=False)
     description = Column(types.String(256), nullable=False)
     is_accredited = Column(types.Boolean, nullable=False)
 

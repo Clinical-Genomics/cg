@@ -168,12 +168,18 @@ def analyses():
 def options():
     """Fetch various options."""
     customer_objs = db.Customer.query.all() if g.current_user.is_admin else [g.current_user.customer]
+    apptag_groups = {}
+    for application in db.Application.query:
+        if application.category not in apptag_groups:
+            apptag_groups[application.category] = []
+        apptag_groups[application.category].append(application.tag)
+
     return jsonify(
         customers=[{
             'text': f"{customer.name} ({customer.internal_id})",
             'value': customer.internal_id,
         } for customer in customer_objs],
-        applications=[application.tag for application in db.Application.query],
+        applications=apptag_groups,
         panels=[panel.abbrev for panel in db.Panel.query if panel.customer in customer_objs],
     )
 

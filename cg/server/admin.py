@@ -42,7 +42,7 @@ class ApplicationView(BaseView):
     ]
     column_searchable_list = ['tag']
     column_filters = ['category', 'is_accredited']
-    column_editable_list = ['description', 'is_accredited', 'target_reads', 'comment']
+    column_editable_list = ['description', 'is_accredited', 'target_reads', 'comment', 'category']
 
 
 class ApplicationVersionView(BaseView):

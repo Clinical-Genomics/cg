@@ -103,6 +103,10 @@ class FindHandler:
         records = self.Pool.query
         records = records.filter_by(customer=customer) if customer else records
         return records
+
+    def pool(self, pool_id: int):
+        """Fetch a pool."""
+        return self.Pool.get(pool_id)
     
     def deliveries(self):
         """Fetch all deliveries."""
