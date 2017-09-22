@@ -14,7 +14,7 @@ class AddHandler:
 
     @classmethod
     def add_analysis(cls, config_stream):
-        """Add a MIP analysis to Housekeeper."""
+        """Gather information from MIP analysis to store."""
         config_raw = ruamel.yaml.safe_load(config_stream)
         config_data = mip_files.parse_config(config_raw)
         sampleinfo_raw = ruamel.yaml.safe_load(Path(config_data['sampleinfo_path']).open())
