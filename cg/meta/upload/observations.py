@@ -49,5 +49,5 @@ class UploadObservationsAPI(object):
         self.upload(results)
         case_obj = self.loqusdb.case(analysis_obj.family.internal_id)
         for link in analysis_obj.family.links:
-            link.sample.loqusdb_id = case_obj['_id']
+            link.sample.loqusdb_id = str(case_obj['_id'])
         self.status.commit()
