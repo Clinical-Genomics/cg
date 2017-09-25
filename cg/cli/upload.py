@@ -6,6 +6,7 @@ import click
 
 from cg.store import Store
 from cg.apps import coverage as coverage_app, gt, hk, loqus, tb, scoutapi
+from cg.exc import DuplicateRecordError
 from cg.meta.upload.coverage import UploadCoverageApi
 from cg.meta.upload.gt import UploadGenotypesAPI
 from cg.meta.upload.observations import UploadObservationsAPI
@@ -72,8 +73,10 @@ def observations(context, family_id):
     loqus_api = loqus.LoqusdbAPI(context.obj)
     family_obj = context.obj['status'].family(family_id)
     api = UploadObservationsAPI(context.obj['status'], context.obj['housekeeper_api'], loqus_api)
-    results = api.data(family_obj.analyses[0])
-    api.upload(results)
+    try:
+        api.process(family_obj.analyses[0])
+    except DuplicateRecordError as errors:
+        LOG.info(f"skipping observations upload: {error.message}")
 
 
 @upload.command()

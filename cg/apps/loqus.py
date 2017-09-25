@@ -22,8 +22,9 @@ class LoqusdbAPI(MongoAdapter):
             variant_file=vcf_path,
             family_file=ped_path,
             family_type='ped',
+            case_id=family_id,
             gq_treshold=20,
             nr_variants=nr_variants,
-            case_id=family_id,
         )
+        self.check_indexes()
         return dict(variants=nr_variants)

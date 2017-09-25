@@ -160,7 +160,7 @@ We also try to group all app-related imports and functionality in these interfac
 
 #### coverage
 
-Interface to Chanjo. It's used to load coverage information from Sambamba output.
+Interface to [Chanjo][chanjo]. It's used to load coverage information from Sambamba output.
 
 #### invoice
 

@@ -25,7 +25,7 @@ openpyxl
 # apps
 genologics
 pymongo
-loqusdb
+loqusdb>=1.0.0
 trailblazer>=2.0.0b1
 housekeeper>=2.0.0b2
 chanjo>=4.2.0

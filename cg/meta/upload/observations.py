@@ -2,6 +2,7 @@
 import logging
 
 from cg.apps import hk, loqus
+from cg.exc import DuplicateRecordError
 from cg.store import models, Store
 
 LOG = logging.getLogger(__name__)
@@ -37,3 +38,16 @@ class UploadObservationsAPI(object):
             LOG.info(f"parsed {results['variants']} variants")
         else:
             LOG.debug("found existing family, skipping observations")
+
+    def process(self, analysis_obj: models.Analysis):
+        """Process an upload observation counts for a case."""
+        # check if some sample has already been uploaded
+        for link in analysis_obj.family.links:
+            if link.sample.loqusdb_id:
+                raise DuplicateRecordError(f"{link.sample.internal_id} already in LoqusDB")
+        results = self.data(analysis_obj)
+        self.upload(results)
+        case_obj = self.loqusdb.case(analysis_obj.family.internal_id)
+        for link in analysis_obj.family.links:
+            link.sample.loqusdb_id = case_obj['_id']
+        self.status.commit()

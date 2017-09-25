@@ -199,6 +199,7 @@ class Sample(Model, PriorityMixin):
     sex = Column(types.Enum('male', 'female', 'unknown'), nullable=False)
     is_external = Column(types.Boolean, default=False)
     is_tumour = Column(types.Boolean, default=False)
+    loqusdb_id = Column(types.Boolean, default=False)
     capture_kit = Column(types.String(64))
     reads = Column(types.BigInteger, default=0)
     ordered_at = Column(types.DateTime, nullable=False)
