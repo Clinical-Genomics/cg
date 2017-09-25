@@ -75,7 +75,8 @@ def observations(context, family_id):
     api = UploadObservationsAPI(context.obj['status'], context.obj['housekeeper_api'], loqus_api)
     try:
         api.process(family_obj.analyses[0])
-    except DuplicateRecordError as errors:
+        click.echo(click.style(f"{family_id}: observations uploaded!", fg='green'))
+    except DuplicateRecordError as error:
         LOG.info(f"skipping observations upload: {error.message}")
 
 
