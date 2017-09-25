@@ -94,7 +94,7 @@ This is a schematic overview of how data flows between different tools. Generall
 
     - **Family/Analysis**: some collaborators have opted into the Scout platform for delivery of annotated and ranked variants. These families are analyzed and uploaded which essentially corresponds to the "delivery" for such orders. We do, however, perform various quality checks before we finally answer out the results.
 
-1. **Archive**| Essential result files and raw data coming from the sequencers will sent off-site for slow storage.
+1. **Archive** | Essential result files and raw data coming from the sequencers will sent off-site for slow storage.
 
 ## Responsibilities
 

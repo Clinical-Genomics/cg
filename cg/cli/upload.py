@@ -20,7 +20,7 @@ LOG = logging.getLogger(__name__)
 def upload(context, family_id):
     """Upload results from analyses."""
     context.obj['status'] = Store(context.obj['database'])
-    context.obj['housekeeper'] = hk.HousekeeperAPI(context.obj)
+    context.obj['housekeeper_api'] = hk.HousekeeperAPI(context.obj)
     if family_id:
         family_obj = context.obj['status'].family(family_id)
         analysis_obj = family_obj.analyses[0]
@@ -46,7 +46,7 @@ def coverage(context, family_id):
     """Upload coverage from an analysis to Chanjo."""
     chanjo_api = coverage_app.ChanjoAPI(context.obj)
     family_obj = context.obj['status'].family(family_id)
-    api = UploadCoverageApi(context.obj['status'], context.obj['housekeeper'], chanjo_api)
+    api = UploadCoverageApi(context.obj['status'], context.obj['housekeeper_api'], chanjo_api)
     coverage_data = api.data(family_obj.analyses[0])
     api.upload(coverage_data)
 
@@ -59,7 +59,7 @@ def genotypes(context, family_id):
     tb_api = tb.TrailblazerAPI(context.obj)
     gt_api = gt.GenotypeAPI(context.obj)
     family_obj = context.obj['status'].family(family_id)
-    api = UploadGenotypesAPI(context.obj['status'], context.obj['housekeeper'], tb_api, gt_api)
+    api = UploadGenotypesAPI(context.obj['status'], context.obj['housekeeper_api'], tb_api, gt_api)
     results = api.data(family_obj.analyses[0])
     api.upload(results)
 
@@ -71,7 +71,7 @@ def observations(context, family_id):
     """Upload observations from an analysis to LoqusDB."""
     loqus_api = loqus.LoqusdbAPI(context.obj)
     family_obj = context.obj['status'].family(family_id)
-    api = UploadObservationsAPI(context.obj['status'], context.obj['housekeeper'], loqus_api)
+    api = UploadObservationsAPI(context.obj['status'], context.obj['housekeeper_api'], loqus_api)
     results = api.data(family_obj.analyses[0])
     api.upload(results)
 
@@ -83,7 +83,7 @@ def scout(context, family_id):
     """Upload variants from analysis to Scout."""
     scout_api = scoutapi.ScoutAPI(context.obj)
     family_obj = context.obj['status'].family(family_id)
-    api = UploadScoutAPI(context.obj['status'], context.obj['housekeeper'], scout_api)
+    api = UploadScoutAPI(context.obj['status'], context.obj['housekeeper_api'], scout_api)
     results = api.data(family_obj.analyses[0])
     scout_api.upload(results)
 
