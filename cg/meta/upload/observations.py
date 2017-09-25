@@ -47,7 +47,7 @@ class UploadObservationsAPI(object):
                 raise DuplicateRecordError(f"{link.sample.internal_id} already in LoqusDB")
         results = self.data(analysis_obj)
         self.upload(results)
-        case_obj = self.loqusdb.case(analysis_obj.family.internal_id)
+        case_obj = self.loqusdb.get_case(analysis_obj.family.internal_id)
         for link in analysis_obj.family.links:
             link.sample.loqusdb_id = str(case_obj['_id'])
         self.status.commit()

@@ -28,3 +28,7 @@ class LoqusdbAPI(MongoAdapter):
         )
         self.check_indexes()
         return dict(variants=nr_variants)
+
+    def get_case(self, case_id: str) -> dict:
+        """Find a case in the database by case id."""
+        return self.db.case.find_one({'case_id': case_id})
