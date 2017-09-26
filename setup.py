@@ -29,7 +29,7 @@ def parse_reqs(req_path='./requirements.txt'):
 
 setup(
     name='cg',
-    version='1.0.0-beta2',
+    version='1.0.0',
     description='Clinical Genomics command center.',
     author='Robin Andeer',
     author_email='robin.andeer@scilifelab.se',
