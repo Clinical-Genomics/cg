@@ -38,11 +38,11 @@ class ApplicationView(BaseView):
         'percent_kth',
         'created_at',
         'updated_at',
-        'sequencing_depth',
     ]
     column_searchable_list = ['tag']
     column_filters = ['category', 'is_accredited']
-    column_editable_list = ['description', 'is_accredited', 'target_reads', 'comment', 'category']
+    column_editable_list = ['description', 'is_accredited', 'target_reads', 'comment',
+                            'category', 'sequencing_depth']
 
 
 class ApplicationVersionView(BaseView):

@@ -210,6 +210,111 @@ Interface to CGStats. Used to handle things related to flowcells:
 
 The command line code is written in the [Click][click] framework.
 
+#### add
+
+This set of commands let's you quite easily _add things to the status database_. For example when a new customer is signed you could run:
+
+```bash
+cg add customer cust101 "Massachusetts Institute of Technology"
+```
+
+You can also accomplish simliar tasks through the admin interface of the REST server.
+
+#### analysis
+
+The MIP pipeline is accessed through Trailblazer but `cg` provides additional conventions and hooks into the status database that makes managing analyses simpler.
+
+You can start the analysis of a single family "raredragon" by just running:
+
+```bash
+cg analysis --family raredragon
+```
+
+This command will create the MIP config in the correct location, link and rename FASTQ files from Housekeeper, and write an aggregated gene panel file. Then it will start the pipeline. All these 4 actions can be issued individually as well:
+
+```bash
+cg analysis [config|link|panel|start] raredragon
+```
+
+The final command is intended to run in a crontab and will continously check for families where all samples have been sequenced and start them automatically.
+
+```bash
+cg analysis auto
+```
+
+#### status
+
+The main interface for getting an overview of data in the system is provided through the [web interface][cgweb], however, it's possible to use the same database APIs to get an idea of the status of things from the command line.
+
+To get a list of families that are waiting in the analysis queue e.g. you can run:
+
+```bash
+cg status analysis
+```
+
+To get a general overview of samples or a sample in particular:
+
+```bash
+cg status samples ADM4565A1
+ADM4565A1 (17101-1-1A) [SEQUENCED: 2017-09-02]
+```
+
+#### store
+
+This group of commands facilitate the Housekeeper integration. For example, when an analysis finishes and you want to store important files and update the status database accordingly, you run:
+
+```bash
+cg store analysis /path/to/families/raredragon/analysis/raredragon_config.yaml
+```
+
+... or just wait for the crontab process to pick up the analysis automatically:
+
+```bash
+cg store completed
+```
+
+#### transfer
+
+Some information will always exist across multiple database and requires some continous syncing to keep up-to-date. This is the case for information primarily entered through LIMS. To automatically fill-in the date of sample reception for all samples that are waiting in the queue:
+
+```bash
+cg transfer lims --status received
+```
+
+And similarly for filling in the delivery date:
+
+```bash
+cg transfer lims --status delivered
+```
+
+Another common task is to transfer data and FASTQ files from the demux/cgstats interface when a demultiplexing task completes. This is as easy as determining the flowcell of interest and running:
+
+```bash
+cg transfer flowcell HGF2KBCXX
+```
+
+The command will update the _total_ read counts of each sample and check against the application for the sample if it has been fully sequenced. It will also make sure to link the related FASTQ files to Housekeeper. You can run the command over and over - only additional information will be updated.
+
+#### upload
+
+Much like the group of analysis subcommands you can perform an upload of analysis results (stored in Housekeeper) all at once by running:
+
+```bash
+cg upload --family raredragon
+```
+
+All analyses that are marked as completed will be uploaded this way automatically:
+
+```bash
+cg upload auto
+```
+
+You can of course specify which upload you want to do yourself as well:
+
+```bash
+cg upload [coverage|genotypes|observations|scout] raredragon
+```
+
 ### `meta`
 
 This is the interfaces that bridge various apps. An example would be the "orders" module. When placing orders we need to coordinate information/actions between the apps: `lims`, `status`, and `osticket`. It also provides some additional functionality such as setting up the basis for the orders API and which fields are required for different order types.
@@ -340,3 +445,4 @@ Another module `/exc.py` contains the custom Exception classes that are used acr
 [northwestwitch]: https://github.com/northwestwitch
 [mayabrandi]: https://github.com/mayabrandi
 [click]: http://click.pocoo.org/5/
+[cgweb]: https://github.com/Clinical-Genomics/cgweb
