@@ -4,20 +4,33 @@ import os
 import sys
 from setuptools import setup, find_packages
 
-here = os.path.abspath(os.path.dirname(__file__))
-about = {}
-with open(os.path.join(here, 'cg', 'version.py')) as in_handle:
-    exec(in_handle.read(), about)
-
-if sys.argv[-1] == "publish":
-    os.system("python setup.py sdist bdist_wheel upload")
+if sys.argv[-1] == 'publish':
+    os.system('python setup.py sdist bdist_wheel upload')
     sys.exit()
+
+
+def parse_reqs(req_path='./requirements.txt'):
+    """Recursively parse requirements from nested pip files."""
+    install_requires = []
+    with open(req_path, 'r') as handle:
+        # remove comments and empty lines
+        lines = (line.strip() for line in handle
+                 if line.strip() and not line.startswith('#'))
+        for line in lines:
+            # check for nested requirements files
+            if line.startswith('-r'):
+                # recursively call this function
+                install_requires += parse_reqs(req_path=line[3:])
+            else:
+                # add the line as a new requirement
+                install_requires.append(line)
+    return install_requires
 
 
 setup(
     name='cg',
-    version=about['__version__'],
-    description='Glue CLI for Clinical Genomics apps.',
+    version='1.0.0',
+    description='Clinical Genomics command center.',
     author='Robin Andeer',
     author_email='robin.andeer@scilifelab.se',
     url='https://github.com/Clinical-Genomics/cg',
@@ -25,42 +38,12 @@ setup(
     zip_safe=False,
     packages=find_packages(exclude=('tests*', 'docs', 'examples')),
     entry_points={
-        'console_scripts': ['cg=cg:cli'],
+        'console_scripts': ['cg=cg.cli:base'],
     },
-    install_requires=[
-        'click>=6.7',
-        'click_completion',
-        'crayons',
-        'ruamel.yaml',
-        'pymongo',
-        'coloredlogs',
-        'trailblazer>=1.4.0',
-        'scout-browser',
-        'pymysql',
-        'loqusdb>=0.5',
-        'housekeeper>=1.2.0',
-        'path.py',
-        'cglims>=1.2.0',
-        'sqlservice',
-        'cgadmin>=1.0.0',
-        'chanjo>=4.1.1',
-        'requests',
-        'genotype>=2.1.0',
-        'genologics',
-        'scout-browser>=3.0.7',
-        'Flask-Restful',
-        'Flask-SQLService',
-        'webargs',
-        'Flask-CORS',
-        'cgstats',
-    ],
+    # install requirements loaded from "./requirements.txt"
+    install_requires=parse_reqs(),
     classifiers=[
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: Implementation :: CPython',
     ],

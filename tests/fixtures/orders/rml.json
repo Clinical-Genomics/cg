@@ -1,0 +1,38 @@
+{
+    "name": "ctDNA sequencing - order 9",
+    "customer": "cust001",
+    "samples": [{
+        "name": "LB-P-AZSJ001-CFDNA-2015112-TP20170331-WGS",
+        "application": "RMLS05R150",
+        "pool": "1",
+        "volume": 35,
+        "concentration": 5,
+        "index": "TruSeq DNA HT Dual-index (D7-D5)",
+        "index_number": 65,
+        "container": "96 well plate",
+        "well_position": "A:1",
+        "container_name": "20170502 - ctDNA 9 (#814813, J.Lindberg)"
+    }, {
+        "name": "LB-P-UZG009-CFDNA-2015862-TP20170331-WGS",
+        "application": "RMLS05R150",
+        "pool": "1",
+        "volume": 35,
+        "concentration": 5,
+        "index": "TruSeq DNA HT Dual-index (D7-D5)",
+        "index_number": 73,
+        "container": "96 well plate",
+        "well_position": "A:1",
+        "container_name": "20170502 - ctDNA 9 (#814813, J.Lindberg)"
+    }, {
+        "name": "LB-P-GZA3949-CFDNA-20160293-TP20170331-WGS",
+        "application": "RMLS05R150",
+        "pool": "1",
+        "volume": 35,
+        "concentration": 5,
+        "index": "TruSeq DNA HT Dual-index (D7-D5)",
+        "index_number": 81,
+        "container": "96 well plate",
+        "well_position": "B:1",
+        "container_name": "20170502 - ctDNA 9 (#814813, J.Lindberg)"
+    }]
+}

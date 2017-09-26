@@ -1,0 +1,23 @@
+{
+    "name": "I want my reads",
+    "customer": "cust002",
+    "samples": [{
+        "name": "sample-normal",
+        "application": "WGSPCFC060",
+        "priority": "priority",
+        "tumour": false,
+        "source": "blood",
+        "container": "96 well plate",
+        "well_position": "A:1",
+        "container_name": "cancer test"
+    }, {
+        "name": "sample-tumour",
+        "application": "WGSPCFC060",
+        "priority": "priority",
+        "tumour": true,
+        "source": "tissue (FFPE)",
+        "container": "96 well plate",
+        "well_position": "A:2",
+        "container_name": "cancer test"
+    }]
+}

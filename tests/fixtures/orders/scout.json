@@ -1,0 +1,47 @@
+{
+    "name": "Clincal WGS",
+    "customer": "cust003",
+    "comment": "Vi kommer in med proverna på tisdag",
+    "samples": [{
+        "name": "17093-I-2A",
+        "father": "17093-II-1U",
+        "mother": "17093-II-2U",
+        "sex": "female",
+        "quantity": "2200",
+        "application": "WGTPCFC030",
+        "source": "blood",
+        "status": "affected",
+        "container": "96 well plate",
+        "container_name": "CMMS",
+        "well_position": "A:1",
+        "family_name": "17093",
+        "panels": ["IEM", "EP"],
+        "require_qcok": false,
+        "priority": "standard"
+    }, {
+        "name": "17093-II-1U",
+        "sex": "male",
+        "quantity": "2200",
+        "application": "WGTPCFC030",
+        "source": "blood",
+        "status": "unaffected",
+        "container": "Tube",
+        "family_name": "17093",
+        "panels": ["IEM", "EP"],
+        "require_qcok": false,
+        "priority": "standard",
+        "comment": "Osäkra på könet för det här provet"
+    }, {
+        "name": "17093-II-2U",
+        "sex": "female",
+        "quantity": "2200",
+        "application": "WGTPCFC030",
+        "source": "blood",
+        "status": "unaffected",
+        "container": "Tube",
+        "family_name": "17093",
+        "panels": ["IEM", "EP"],
+        "require_qcok": false,
+        "priority": "standard"
+    }]
+}

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from .cli import cli
+import pkg_resources
 
-if __name__ == '__main__':
-    cli()
+__title__ = 'cg'
+__version__ = pkg_resources.get_distribution(__title__).version
