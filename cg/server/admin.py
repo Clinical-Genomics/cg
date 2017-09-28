@@ -78,8 +78,19 @@ class SampleView(BaseView):
 
 
 class FamilySampleView(BaseView):
-    column_searchable_list = ['family.internal_id', 'sample.internal_id']
+    column_searchable_list = ['family.internal_id', 'family.name', 'sample.internal_id']
     column_filters = ['status']
     column_editable_list = ['status']
     create_modal = True
     edit_modal = True
+
+
+class FlowcellView(BaseView):
+    column_searchable_list = ['name']
+    column_filters = ['sequencer_type', 'sequencer_name']
+
+
+class AnalysisView(BaseView):
+    column_searchable_list = ['family.internal_id', 'family.name']
+    column_filters = ['pipeline', 'pipeline_version', 'is_primary']
+    column_editable_list = ['is_primary']
