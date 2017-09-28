@@ -12,7 +12,7 @@ Delivery <- ???
 Pool <- lims
 Genotype <- genotype
 
-Manual: clinicalgenomics.se, 
+Manual: clinicalgenomics.se
 """
 import datetime as dt
 import logging
@@ -20,13 +20,14 @@ import re
 
 import click
 from cgadmin.store.api import AdminDatabase
+from housekeeper.store import api as housekeeeper_api
 import pymongo
 import ruamel.yaml
 
 from cg.constants import PRIORITY_MAP
 from cg.apps import lims as lims_app, scoutapi, stats
-from cg.store import Store
-from cg.meta.transfer.flowcell import TransferFlowcell
+from cg.store import Store, models
+# from cg.meta.transfer.flowcell import TransferFlowcell
 
 LOG = logging.getLogger(__name__)
 
@@ -511,18 +512,18 @@ class FamilyImporter(Store):
                 import ipdb; ipdb.set_trace()
 
 
-class FlowcellImporter(TransferFlowcell):
+# class FlowcellImporter(TransferFlowcell):
 
-    """Import info from cgstats."""
+#     """Import info from cgstats."""
 
-    def process(self):
-        """Transfer cgstats info to store."""
-        query = self.stats.Flowcell.query
-        with click.progressbar(query, length=query.count(), label='flowcells') as progressbar:
-            for stats_record in progressbar:
-                new_record = self.transfer(stats_record.flowcellname, store=False)
-                self.db.add(new_record)
-        self.db.commit()
+#     def process(self):
+#         """Transfer cgstats info to store."""
+#         query = self.stats.Flowcell.query
+#         with click.progressbar(query, length=query.count(), label='flowcells') as progressbar:
+#             for stats_record in progressbar:
+#                 new_record = self.transfer(stats_record.flowcellname, store=False)
+#                 self.db.add(new_record)
+#         self.db.commit()
 
 
 class AnalysisImporter(Store):
@@ -538,13 +539,13 @@ class AnalysisImporter(Store):
             for hk_record in progressbar:
                 data = self.extract(hk_record)
 
-                customer_obj = self.db.customer(data['customer'])
-                family_obj = self.db.find_family(customer_obj, data['family'])
+                customer_obj = self.customer(data['customer'])
+                family_obj = self.find_family(customer_obj, data['family'])
                 if family_obj is None:
                     LOG.error(f"family not found: {data['customer']} | {data['family']}")
                     continue
 
-                if not self.db.analysis(family_obj, data['analyzed']):
+                if not self.analysis(family_obj, data['analyzed']):
                     new_record = self.build(family_obj, data)
                     self.add(new_record)
         self.commit()
@@ -561,11 +562,11 @@ class AnalysisImporter(Store):
         }
     
     def build(self, family_obj, data):
-        new_record = self.db.add_analysis(
+        new_record = self.add_analysis(
             pipeline=data['pipeline'],
             version=data['version'],
-            analyzed=data['analyzed'],
-            uploaded=data['uploaded'],
+            completed_at=data['analyzed'],
+            uploaded=data['uploaded'] or dt.datetime(1970, 1, 1),
             primary=data['primary'],
         )
         new_record.family = family_obj
@@ -574,22 +575,44 @@ class AnalysisImporter(Store):
 
 @click.command()
 @click.option('--admin', required=True, help='CG admin connection string')
+@click.option('--housekeeper', required=True, help='Old housekeeper connection string')
 @click.argument('config_file', type=click.File())
-def transfer(admin, config_file):
+def transfer(admin, housekeeper, config_file):
     """Transfer stuff from external interfaces."""
     config = ruamel.yaml.safe_load(config_file)
     admin_api = AdminDatabase(admin)
 
-    ApplicationImporter(config['database'], admin_api).process()
-    CustomerImporter(config['database'], admin_api).process()
-    UserImporter(config['database'], admin_api).process()
+    # ApplicationImporter(config['database'], admin_api).process()
+    # CustomerImporter(config['database'], admin_api).process()
+    # UserImporter(config['database'], admin_api).process()
 
-    PanelImporter(config['database'], scoutapi.ScoutAPI(config)).process()
+    # PanelImporter(config['database'], scoutapi.ScoutAPI(config)).process()
 
-    lims_api = lims_app.LimsAPI(config)
-    SampleImporter(config['database'], lims_api).process()
-    FamilyImporter(config['database'], lims_api).process()
-    FlowcellImporter(Store(config['database']), stats.StatsAPI(config)).process()
+    # lims_api = lims_app.LimsAPI(config)
+    # SampleImporter(config['database'], lims_api).process()
+    # FamilyImporter(config['database'], lims_api).process()
+    # FlowcellImporter(Store(config['database']), stats.StatsAPI(config)).process()
+
+    housekeeeper_api.manager(housekeeper)
+    AnalysisImporter(config['database'], housekeeeper_api).process()
+
+    # set all samples from 2016 as received + sequenced
+    status = Store(config['database'])
+    old_date = dt.datetime(2017, 1, 1)
+    (models.Sample.query.filter(
+        models.Sample.received_at == None,
+        models.Sample.sequenced_at == None,
+        models.Sample.is_external == False
+    ).filter(models.Sample.ordered_at < old_date)
+     .update({models.Sample.received_at: dt.datetime(1970, 1, 1),
+              models.Sample.sequenced_at: dt.datetime(1970, 1, 1)}))
+    status.commit()
+
+    # set all families to analyze "on hold"
+    for family_obj in status.families_to_analyze(limit=1000):
+        LOG.info(f"setting family on hold: {family_obj.name}")
+        family_obj.action = 'hold'
+    status.commit()
 
 
 if __name__ == '__main__':
