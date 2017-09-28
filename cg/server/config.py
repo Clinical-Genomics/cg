@@ -2,7 +2,7 @@
 import os
 
 # flask
-SECRET_KEY = 'thisIsNotASafeKey'
+SECRET_KEY = os.environ.get('CG_SECRET_KEY') or 'thisIsNotASafeKey'
 TEMPLATES_AUTO_RELOAD = True
 
 # sqlalchemy
