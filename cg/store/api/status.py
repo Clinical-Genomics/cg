@@ -68,7 +68,10 @@ class StatusHandler:
         """Fetch analyses that have been uploaded but not delivered."""
         records = (
             self.Analysis.query
-            .filter(models.Analysis.delivered_at == None)
+            .filter(
+                models.Analysis.uploaded_at != None,
+                models.Analysis.delivered_at == None
+            )
         )
         return records
 
