@@ -8,7 +8,7 @@ from typing import List
 from cg.apps import tb, hk, scoutapi, lims
 from cg.store import models, Store
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 COLLABORATORS = ('cust000', 'cust002', 'cust003', 'cust004', 'cust042')
 MASTER_LIST = ('ENDO', 'EP', 'IEM', 'IBMFS', 'mtDNA', 'MIT', 'PEDHEP', 'OMIM-AUTO',
@@ -18,11 +18,11 @@ COMBOS = {
     'CM': ('CNM', 'CM'),
     'Horsel': ('Horsel', '141217', '141201'),
 }
-CAPTUREKIT_MAP = {'Agilent Sureselect CRE': 'Agilent_SureSelectCRE.V1',
-                  'SureSelect CRE': 'Agilent_SureSelectCRE.V1',
-                  'Agilent Sureselect V5': 'Agilent_SureSelect.V5',
-                  'SureSelect Focused Exome': 'Agilent_SureSelect_FocusedExome.V1',
-                  'other': 'Agilent_SureSelectCRE.V1'}
+CAPTUREKIT_MAP = {'Agilent Sureselect CRE': 'agilent_sureselect_cre.v1',
+                  'SureSelect CRE': 'agilent_sureselect_cre.v1',
+                  'Agilent Sureselect V5': 'agilent_sureselect.v5',
+                  'SureSelect Focused Exome': 'agilent_sureselect_focusedexome.v1',
+                  'other': 'agilent_sureselect_cre.v1'}
 
 
 class AnalysisAPI():
