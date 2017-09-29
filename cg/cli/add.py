@@ -112,12 +112,12 @@ def family(context, priority, panels, customer, name):
 @click.pass_context
 def relationship(context, mother, father, status, family, sample):
     """Relate a sample to a family."""
-    status = context.obj['db']
-    family_obj = status.family(family)
-    sample_obj = status.sample(sample)
-    mother_obj = status.sample(mother) if mother else None
-    father_obj = status.sample(father) if father else None
-    new_record = status.relate_sample(family_obj, sample_obj, status, mother=mother_obj,
-                                      father=father_obj)
-    status.add_commit(new_record)
+    status_db = context.obj['db']
+    family_obj = status_db.family(family)
+    sample_obj = status_db.sample(sample)
+    mother_obj = status_db.sample(mother) if mother else None
+    father_obj = status_db.sample(father) if father else None
+    new_record = status_db.relate_sample(family_obj, sample_obj, status, mother=mother_obj,
+                                         father=father_obj)
+    status_db.add_commit(new_record)
     click.echo(f"related sample to family")
