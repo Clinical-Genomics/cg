@@ -80,3 +80,11 @@ class StatusHandler:
         records = self.Sample.query.filter(models.Sample.sequenced_at != None,
                                            models.Sample.delivered_at == None)
         return records
+
+    def flowcells_completed(self):
+        """Find flowcells ordered by run date."""
+        records = (
+            self.Flowcell.query
+            .order_by(models.Flowcell.sequenced_at.desc())
+        )
+        return records

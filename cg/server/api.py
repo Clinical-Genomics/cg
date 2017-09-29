@@ -154,7 +154,7 @@ def pool(pool_id):
 @BLUEPRINT.route('/flowcells')
 def flowcells():
     """Fetch flowcells."""
-    query = db.flowcells()
+    query = db.flowcells_completed()
     data = [record.to_dict() for record in query.limit(30)]
     return jsonify(flowcells=data, total=query.count())
 

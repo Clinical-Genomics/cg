@@ -57,25 +57,25 @@ def user(context, admin, customer, email, name):
 @click.pass_context
 def sample(context, lims_id, external, sex, order, application, customer, name):
     """Add a sample to the store."""
-    db = context.obj['db']
-    customer_obj = db.customer(customer)
+    status = context.obj['db']
+    customer_obj = status.customer(customer)
     if customer_obj is None:
         click.echo(click.style('customer not found', fg='red'))
         context.abort()
-    application_obj = db.application(application)
+    application_obj = status.application(application)
     if application_obj is None:
         click.echo(click.style('application not found', fg='red'))
         context.abort()
-    new_record = db.add_sample(
+    new_record = status.add_sample(
         name=name,
         sex=sex,
         internal_id=lims_id,
         order=order,
     )
-    new_record.application_version = application.versions[-1]
+    new_record.application_version = application_obj.versions[-1]
     new_record.customer = customer_obj
-    db.add_commit(new_record)
-    click.echo(click.style(f"added new sample: {new_record.name}", fg='green'))
+    status.add_commit(new_record)
+    click.echo(click.style(f"added new sample: {new_record.internal_id}", fg='green'))
 
 
 @add.command()
@@ -86,14 +86,19 @@ def sample(context, lims_id, external, sex, order, application, customer, name):
 @click.pass_context
 def family(context, priority, panels, customer, name):
     """Add a family of samples."""
-    db = context.obj['db']
-    customer_obj = db.customer(customer)
+    status = context.obj['db']
+    customer_obj = status.customer(customer)
     if customer_obj is None:
         click.echo(click.style('customer not found', fg='red'))
         context.abort()
 
-    new_family = db.add_family(customer=customer_obj, name=name, panels=panels, priority=priority)
-    db.add_commit(new_family)
+    new_family = status.add_family(
+        name=name,
+        panels=panels,
+        priority=priority
+    )
+    new_family.customer = customer_obj
+    status.add_commit(new_family)
     click.echo(click.style(f"added new family: {new_family.internal_id}", fg='green'))
 
 
@@ -107,12 +112,12 @@ def family(context, priority, panels, customer, name):
 @click.pass_context
 def relationship(context, mother, father, status, family, sample):
     """Relate a sample to a family."""
-    db = context.obj['db']
-    family_obj = db.family(family)
-    sample_obj = db.sample(sample)
-    mother_obj = db.sample(mother) if mother else None
-    father_obj = db.sample(father) if father else None
-    new_record = db.relate_sample(family_obj, sample_obj, status, mother=mother_obj,
-                                  father=father_obj)
-    db.add_commit(new_record)
+    status = context.obj['db']
+    family_obj = status.family(family)
+    sample_obj = status.sample(sample)
+    mother_obj = status.sample(mother) if mother else None
+    father_obj = status.sample(father) if father else None
+    new_record = status.relate_sample(family_obj, sample_obj, status, mother=mother_obj,
+                                      father=father_obj)
+    status.add_commit(new_record)
     click.echo(f"related sample to family")
