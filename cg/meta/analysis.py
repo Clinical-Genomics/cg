@@ -85,7 +85,7 @@ class AnalysisAPI():
         files = []
         for file_obj in file_objs:
             data = {
-                'path': file_obj.path,
+                'path': file_obj.full_path,
                 'lane': int(re.findall(r'_L([0-9]{3})_', file_obj.path)[0]),
                 'flowcell': re.search(r'[0-9A-Z]{7}[XY]{2}', file_obj.path)[0],
                 'read': int(re.findall(r'_R([0-9])_', file_obj.path)[0]),

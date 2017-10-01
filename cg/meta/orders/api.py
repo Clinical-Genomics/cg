@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 from enum import Enum
+import re
 from typing import List
 
 from cg.apps.lims import LimsAPI
@@ -42,15 +43,24 @@ class OrdersAPI(LimsHandler, StatusHandler):
         errors = self.types[project].validate(data)
         if errors:
             return errors
-        message = f"New incoming samples, {name}"
-        try:
-            data['ticket'] = (self.osticket.open_ticket(name, email, subject=data['name'],
-                                                        message=message)
-                              if self.osticket else None)
-        except TicketCreationError as error:
-            LOG.warning(error.message)
-            data['ticket'] = None
-        result = getattr(self, f"submit_{project.value}")(data)
+
+        # detect manual ticket assignment
+        ticket_match = re.search(r'([0-9]{6})', name)
+        ticket_number = int(ticket_match.group()) if ticket_match else None
+        if ticket_number:
+            data['ticket'] = ticket_number
+        else:
+            # open and assign ticket to order
+            try:
+                message = f"New incoming samples, {name}"
+                data['ticket'] = (self.osticket.open_ticket(name, email, subject=data['name'],
+                                                            message=message)
+                                  if self.osticket else None)
+            except TicketCreationError as error:
+                LOG.warning(error.message)
+                data['ticket'] = None
+        order_func = getattr(self, f"submit_{project.value}")
+        result = order_func(data)
         return result
 
     def submit_rml(self, data: dict) -> dict:
