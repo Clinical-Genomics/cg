@@ -72,6 +72,16 @@ class LimsAPI(Lims, OrderHandler):
             if artifact.parent_process and artifact.parent_process.udf.get(udf_key):
                 return artifact.parent_process.udf.get(udf_key)
 
+    def get_prepared_date(self, lims_id: str) -> dt.datetime:
+        """Get the date when a sample was prepared in the lab."""
+        lims_sample = Sample(self, id=lims_id)
+        if lims_sample.udf.get('Passed Library QC') is not True:
+            return None
+        process_type = 'CG002 - Aggregate QC (Library Validation)'
+        artifacts = self.get_artifacts(process_type=process_type, samplelimsid=lims_id)
+        if artifacts:
+            return parse_date(artifacts[0].parent_process.date_run)
+
     def get_delivery_date(self, lims_id: str) -> dt.date:
         """Get delivery date for a sample."""
         artifacts = self.get_artifacts(samplelimsid=lims_id, process_type='CG002 - Delivery',
