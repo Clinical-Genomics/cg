@@ -35,7 +35,7 @@ def analysis(context, config_stream):
         click.echo(click.style(error.message, fg='red'))
         context.abort()
     new_bundle = hk_api.add_bundle(bundle_data)
-    new_version = new_bundle.versions[0]
+    new_version = new_bundle.versions[-1]
 
     # add new analysis to the status API
     family_obj = status.family(new_bundle.name)
