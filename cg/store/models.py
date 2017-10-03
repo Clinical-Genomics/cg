@@ -219,6 +219,20 @@ class Sample(Model, PriorityMixin):
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
 
+    @property
+    def state(self) -> str:
+        """Get the current sample state."""
+        if self.delivered_at:
+            return f"Delivered {self.delivered_at.date()}"
+        elif self.sequenced_at:
+            return f"Sequenced {self.sequenced_at.date()}"
+        elif self.sequence_start:
+            return f"Sequencing {self.sequence_start.date()}"
+        elif self.received_at:
+            return f"Received {self.received_at.date()}"
+        else:
+            return f"Ordered {self.ordered_at.date()}"
+
     def to_dict(self) -> dict:
         """Override dicify method."""
         data = super(Sample, self).to_dict()
