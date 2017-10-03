@@ -21,6 +21,7 @@ petname
 marshmallow
 xlrd
 openpyxl
+tabulate
 
 # apps
 genologics
