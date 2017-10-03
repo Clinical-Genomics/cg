@@ -24,14 +24,13 @@ class ChanjoAPI(ChanjoDB):
         source = str(Path(bed_stream.name).absolute())
         result = load_transcripts(bed_stream, sample_id=sample_id, group_id=group_id,
                                   source=source, threshold=10)
-
         result.sample.name = sample_name
         result.sample.group_name = group_name
 
         try:
             self.add(result.sample)
             with click.progressbar(result.models, length=result.count,
-                                   label='loading transcripts') as progress_bar:
+                                   label=f"loading {sample_id}") as progress_bar:
                 for tx_model in progress_bar:
                     self.add(tx_model)
             self.save()
