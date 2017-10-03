@@ -62,7 +62,8 @@ def genotypes(context, family_id):
     family_obj = context.obj['status'].family(family_id)
     api = UploadGenotypesAPI(context.obj['status'], context.obj['housekeeper_api'], tb_api, gt_api)
     results = api.data(family_obj.analyses[0])
-    api.upload(results)
+    if results:
+        api.upload(results)
 
 
 @upload.command()

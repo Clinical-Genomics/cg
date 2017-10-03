@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
+import logging
 from pathlib import Path
 
 import ruamel.yaml
 
 from cg.apps import hk, gt, tb
 from cg.store import models, Store
+
+LOG = logging.getLogger(__name__)
 
 
 class UploadGenotypesAPI(object):
@@ -20,6 +23,9 @@ class UploadGenotypesAPI(object):
         """Fetch data about an analysis to load genotypes."""
         hk_version = self.hk.version(analysis_obj.family.internal_id, analysis_obj.completed_at)
         hk_bcf = self.hk.files(version=hk_version.id, tags=['snv-gbcf']).first()
+        if hk_bcf is None:
+            LOG.warning("unable to find GBCF for genotype upload")
+            return None
         data = {
             'bcf': hk_bcf.full_path,
             'samples_sex': {},
