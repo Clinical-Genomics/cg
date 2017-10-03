@@ -25,7 +25,7 @@ class UploadScoutAPI(object):
             'family': analysis_obj.family.internal_id,
             'family_name': analysis_obj.family.name,
             'samples': [{
-                'analysis_type': None,
+                'analysis_type': link_obj.sample.application_version.application.category,
                 'sample_id': link_obj.sample.internal_id,
                 'capture_kit': None,
                 'father': link_obj.father.internal_id if link_obj.father else None,
