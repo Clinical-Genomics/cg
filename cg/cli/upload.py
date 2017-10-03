@@ -82,15 +82,16 @@ def observations(context, family_id):
 
 
 @upload.command()
+@click.option('-r', '--re-upload', is_flag=True, help='re-upload existing analysis')
 @click.argument('family_id')
 @click.pass_context
-def scout(context, family_id):
+def scout(context, re_upload, family_id):
     """Upload variants from analysis to Scout."""
     scout_api = scoutapi.ScoutAPI(context.obj)
     family_obj = context.obj['status'].family(family_id)
     api = UploadScoutAPI(context.obj['status'], context.obj['housekeeper_api'], scout_api)
     results = api.data(family_obj.analyses[0])
-    scout_api.upload(results)
+    scout_api.upload(results, force=re_upload)
 
 
 @upload.command()
