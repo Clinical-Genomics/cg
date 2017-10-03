@@ -8,6 +8,7 @@ from cg.store import Store
 from .analysis import analysis
 from .store import store
 from .add import add
+from .get import get
 from .upload import upload
 from .status import status
 from .transfer import transfer
@@ -55,3 +56,4 @@ base.add_command(add)
 base.add_command(upload)
 base.add_command(status)
 base.add_command(transfer)
+base.add_command(get)
