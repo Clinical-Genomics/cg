@@ -16,12 +16,12 @@ FLOWCELL_HEADERS = ['Flowcell', 'Type', 'Sequencer', 'Date', 'Archived?']
 def get(context, identifier):
     """Get information about records in the database."""
     context.obj['status'] = Store(context.obj['database'])
-    if identifier and re.match(r'[A-Z]{3}[0-9]{4,5}[A-Z]{1}[1-9]{1,3}', identifier):
+    if identifier and re.match(r'^[A-Z]{3}[0-9]{4,5}[A-Z]{1}[1-9]{1,3}$', identifier):
         context.invoke(sample, sample_ids=[identifier])
     elif identifier and re.match(r'^[a-z]*$', identifier):
         # try family information
         context.invoke(family, family_id=identifier)
-    elif identifier and re.match(r'[HC][A-Z0-9]{8}', identifier):
+    elif identifier and re.match(r'^[HC][A-Z0-9]{8}$', identifier):
         # try flowcell information
         context.invoke(flowcell, flowcell_id=identifier)
     else:
