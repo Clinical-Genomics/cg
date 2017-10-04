@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 
-from cg.apps import hk, scoutapi
+from cg.apps import hk, scoutapi, madeline
 from cg.store import models, Store
 from cg.meta.analysis import AnalysisAPI
 
@@ -10,10 +10,12 @@ LOG = logging.getLogger(__name__)
 
 class UploadScoutAPI(object):
 
-    def __init__(self, status_api: Store, hk_api: hk.HousekeeperAPI, scout_api: scoutapi.ScoutAPI):
+    def __init__(self, status_api: Store, hk_api: hk.HousekeeperAPI,
+                 scout_api: scoutapi.ScoutAPI, madeline_exe: str):
         self.status = status_api
         self.housekeeper = hk_api
         self.scout = scout_api
+        self.madeline_exe = madeline_exe
 
     def data(self, analysis_obj: models.Analysis) -> dict:
         """Fetch data about an analysis to load Scout."""
@@ -54,4 +56,21 @@ class UploadScoutAPI(object):
             hk_vcf = self.housekeeper.files(version=hk_version.id, tags=[hk_tag]).first()
             data[scout_key] = str(hk_vcf.full_path)
 
+        if len(data['samples']) > 1:
+            svg_path = self.run_madeline(analysis_obj.family)
+            data['madeline'] = svg_path
+
         return data
+
+    def run_madeline(self, family_obj: models.Family):
+        """Generate a madeline file for an analysis."""
+        samples = [{
+            'sample': link_obj.sample.name,
+            'sex': link_obj.sample.sex,
+            'father': link_obj.father.name if link_obj.father else None,
+            'mother': link_obj.mother.name if link_obj.mother else None,
+            'affected': link_obj.status == 'affected',
+        } for link_obj in family_obj.links]
+        ped_stream = madeline.make_ped(family_obj.name, samples=samples)
+        svg_path = madeline.run(self.madeline_exe, ped_stream)
+        return svg_path

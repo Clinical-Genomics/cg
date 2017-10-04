@@ -90,7 +90,12 @@ def scout(context, re_upload, family_id):
     """Upload variants from analysis to Scout."""
     scout_api = scoutapi.ScoutAPI(context.obj)
     family_obj = context.obj['status'].family(family_id)
-    api = UploadScoutAPI(context.obj['status'], context.obj['housekeeper_api'], scout_api)
+    api = UploadScoutAPI(
+        status_api=context.obj['status'],
+        hk_api=context.obj['housekeeper_api'],
+        scout_api=scout_api,
+        madeline_exe=context.obj['madeline_exe'],
+    )
     results = api.data(family_obj.analyses[0])
     scout_api.upload(results, force=re_upload)
 
