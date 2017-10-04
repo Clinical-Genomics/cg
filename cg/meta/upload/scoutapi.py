@@ -69,7 +69,7 @@ class UploadScoutAPI(object):
             'sex': link_obj.sample.sex,
             'father': link_obj.father.name if link_obj.father else None,
             'mother': link_obj.mother.name if link_obj.mother else None,
-            'affected': link_obj.status == 'affected',
+            'affected': link_obj.status,
         } for link_obj in family_obj.links]
         ped_stream = madeline.make_ped(family_obj.name, samples=samples)
         svg_path = madeline.run(self.madeline_exe, ped_stream)

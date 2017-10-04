@@ -1,38 +1,38 @@
 # -*- coding: utf-8 -*-
-import codecs
 import os.path
 import subprocess
 from tempfile import NamedTemporaryFile, mkdtemp
 from typing import List
 
 SEX_GENDER = {'male': 'M', 'female': 'F'}
+STATUS_AFFECTED = {'affected': 'Y', 'unaffected': 'N'}
 COLUMNS = {
     'family': 'FamilyId',
     'sample': 'IndividualId',
     'sex': 'Gender',
-    'father': 'father',
-    'mother': 'mother',
+    'father': 'Father',
+    'mother': 'Mother',
     'deceased': 'Deceased',
     'proband': 'Proband',
-    'affected': 'Affected',
+    'status': 'Affected',
 }
 
 
 def make_ped(family_id: str, samples: List[dict]):
     """Make Madeline pedigree file."""
-    yield from COLUMNS.values()
+    yield '\t'.join(COLUMNS.values())
     for sample in samples:
         row = [
             family_id,
             sample['sample'],
             SEX_GENDER.get(sample['sex'], '.'),
-            sample.get('father', '.'),
-            sample.get('mother', '.'),
+            sample.get('father') or '.',
+            sample.get('mother') or '.',
             'Y' if sample.get('deceased') else '.',
             'Y' if sample.get('proband') else '.',
-            'Y' if sample.get('affected') else '.',
+            STATUS_AFFECTED.get(sample.get('status'), '.'),
         ]
-        yield ' '.join(row)
+        yield '\t'.join(row)
 
 
 def run(executable: str, ped_stream: List[str]):
@@ -43,14 +43,14 @@ def run(executable: str, ped_stream: List[str]):
     out_path = f"{output_prefix}.xml"
 
     # write the input to a temp file
-    with NamedTemporaryFile('r+w') as in_file:
+    with NamedTemporaryFile('w') as in_file:
         madeline_content = '\n'.join(ped_stream)
         in_file.write(madeline_content)
         in_file.flush()
         subprocess.call([madeline_exe, '--color', '--outputprefix',
                          output_prefix, in_file.name])
 
-    with codecs.open(out_path, 'r') as output:
+    with open(out_path, 'r') as output:
         svg_content = output.read()
 
     # strip away the script tag
