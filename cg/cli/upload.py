@@ -31,6 +31,7 @@ def upload(context, family_id):
             context.abort()
 
         context.invoke(coverage, family_id=family_id)
+        context.invoke(validate, family_id=family_id)
         context.invoke(genotypes, family_id=family_id)
         context.invoke(observations, family_id=family_id)
         context.invoke(scout, family_id=family_id)
@@ -101,3 +102,27 @@ def auto(context):
     for analysis_obj in context.obj['status'].analyses_to_upload():
         LOG.info(f"uploading family: {analysis_obj.family.internal_id}")
         context.invoke(upload, family_id=analysis_obj.family.internal_id)
+
+
+@upload.command()
+@click.argument('family_id')
+@click.pass_context
+def validate(context, family_id):
+    """Validate a family of samples."""
+    family_obj = context.obj['status'].family(family_id)
+    chanjo_api = coverage_app.ChanjoAPI(context.obj)
+    chanjo_samples = []
+    for link_obj in family_obj.links:
+        sample_id = link_obj.sample.internal_id
+        chanjo_sample = chanjo_api.sample(sample_id)
+        if chanjo_sample is None:
+            click.echo(click.style(f"upload coverage for {sample_id}", fg='yellow'))
+            continue
+        chanjo_samples.append(chanjo_sample)
+    if chanjo_samples:
+        coverage_results = chanjo_api.omim_coverage(chanjo_samples)
+        for link_obj in family_obj.links:
+            sample_id = link_obj.sample.internal_id
+            completeness = coverage_results[sample_id]['mean_completeness']
+            mean_coverage = coverage_results[sample_id]['mean_coverage']
+            click.echo(click.style(f"{sample_id}: {mean_coverage:.2f}X - {completeness:.2f}%"))

@@ -5,7 +5,7 @@ from typing import List
 import alchy
 from sqlalchemy import Column, ForeignKey, orm, types, UniqueConstraint, Table
 
-from cg.constants import PRIORITY_MAP, REV_PRIORITY_MAP
+from cg.constants import PRIORITY_MAP, REV_PRIORITY_MAP, FAMILY_ACTIONS
 
 Model = alchy.make_declarative_base(Base=alchy.ModelBase)
 
@@ -123,7 +123,7 @@ class Family(Model, PriorityMixin):
     name = Column(types.String(128), nullable=False)
     priority = Column(types.Integer, default=1, nullable=False)
     _panels = Column(types.Text, nullable=False)
-    action = Column(types.Enum('analyze', 'running', 'hold'))
+    action = Column(types.Enum(*FAMILY_ACTIONS))
 
     ordered_at = Column(types.DateTime, default=dt.datetime.now)
     created_at = Column(types.DateTime, default=dt.datetime.now)
