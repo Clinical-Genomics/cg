@@ -18,7 +18,7 @@ class PriorityMixin:
         return REV_PRIORITY_MAP[self.priority]
     
     @priority_human.setter
-    def panels(self, priority_str: str):
+    def priority_human(self, priority_str: str):
         self.priority = PRIORITY_MAP.get(priority_str)
 
     @property

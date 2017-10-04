@@ -24,21 +24,29 @@ class UploadScoutAPI(object):
             'owner': analysis_obj.family.customer.internal_id,
             'family': analysis_obj.family.internal_id,
             'family_name': analysis_obj.family.name,
-            'samples': [{
+            'samples': [],
+            'analysis_date': analysis_obj.completed_at,
+            'gene_panels': AnalysisAPI.convert_panels(analysis_obj.family.customer.internal_id,
+                                                      analysis_obj.family.panels),
+            'default_gene_panels': analysis_obj.family.panels,
+        }
+
+        for link_obj in analysis_obj.family.links:
+            sample_id = link_obj.sample.internal_id
+            tags = ['bam', sample_id]
+            bam_file = self.housekeeper.files(version=hk_version.id, tags=tags).first()
+            bam_path = bam_file.full_path if bam_file else None
+            data['samples'].append({
                 'analysis_type': link_obj.sample.application_version.application.category,
-                'sample_id': link_obj.sample.internal_id,
+                'sample_id': sample_id,
                 'capture_kit': None,
                 'father': link_obj.father.internal_id if link_obj.father else None,
                 'mother': link_obj.mother.internal_id if link_obj.mother else None,
                 'sample_name': link_obj.sample.name,
                 'phenotype': link_obj.status,
                 'sex': link_obj.sample.sex,
-            } for link_obj in analysis_obj.family.links],
-            'analysis_date': analysis_obj.completed_at,
-            'gene_panels': AnalysisAPI.convert_panels(analysis_obj.family.customer.internal_id,
-                                                      analysis_obj.family.panels),
-            'default_gene_panels': analysis_obj.family.panels,
-        }
+                'bam_path': bam_path,
+            })
 
         files = {('vcf_snv', 'vcf-snv-clinical'), ('vcf_snv_research', 'vcf-snv-research'),
                  ('vcf_sv', 'vcf-sv-clinical'), ('vcf_sv_research', 'vcf-sv-research')}
