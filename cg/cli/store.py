@@ -34,7 +34,11 @@ def analysis(context, config_stream):
     except AnalysisNotFinishedError as error:
         click.echo(click.style(error.message, fg='red'))
         context.abort()
-    new_bundle = hk_api.add_bundle(bundle_data)
+    try:
+        new_bundle = hk_api.add_bundle(bundle_data)
+    except FileNotFoundError as error:
+        click.echo(click.style(f"missing file: {error.args[0]}", fg='red'))
+        context.abort()
     new_version = new_bundle.versions[-1]
 
     # add new analysis to the status API
