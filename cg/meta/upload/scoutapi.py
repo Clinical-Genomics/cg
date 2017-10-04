@@ -57,8 +57,13 @@ class UploadScoutAPI(object):
             data[scout_key] = str(hk_vcf.full_path)
 
         if len(data['samples']) > 1:
-            svg_path = self.run_madeline(analysis_obj.family)
-            data['madeline'] = svg_path
+            if any(sample['father'] or sample['mother'] for sample in data['samples']):
+                svg_path = self.run_madeline(analysis_obj.family)
+                data['madeline'] = svg_path
+            else:
+                LOG.info('family of unconnected samples - skip pedigree graph')
+        else:
+            LOG.info('family of 1 sample - skip pedigree graph')
 
         return data
 
