@@ -98,8 +98,11 @@ class AddHandler:
                 'tags': ['bam', sample_data['id']],
                 'archive': False,
             })
+            bai_path = f"{bam_path}.bai"
+            if not Path(bai_path).exists():
+                bai_path = bam_path.replace('.bam', '.bai')
             data.append({
-                'path': f"{bam_path}.bai",
+                'path': bai_path,
                 'tags': ['bam-index', sample_data['id']],
                 'archive': False,
             })
