@@ -128,6 +128,9 @@ def validate(context, family_id):
         coverage_results = chanjo_api.omim_coverage(chanjo_samples)
         for link_obj in family_obj.links:
             sample_id = link_obj.sample.internal_id
-            completeness = coverage_results[sample_id]['mean_completeness']
-            mean_coverage = coverage_results[sample_id]['mean_coverage']
-            click.echo(click.style(f"{sample_id}: {mean_coverage:.2f}X - {completeness:.2f}%"))
+            if sample_id in coverage_results:
+                completeness = coverage_results[sample_id]['mean_completeness']
+                mean_coverage = coverage_results[sample_id]['mean_coverage']
+                click.echo(f"{sample_id}: {mean_coverage:.2f}X - {completeness:.2f}%")
+            else:
+                print(f"{sample_id}: sample not found in chanjo")
