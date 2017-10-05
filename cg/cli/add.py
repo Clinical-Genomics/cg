@@ -52,13 +52,13 @@ def user(context, admin, customer, email, name):
 @click.option('-s', '--sex', type=click.Choice(['male', 'female', 'unknown']),
               help='Sample pedigree sex', required=True)
 @click.option('-a', '--application', help='Application tag', required=True)
-@click.argument('customer')
+@click.argument('customer_id')
 @click.argument('name')
 @click.pass_context
-def sample(context, lims_id, external, sex, order, application, customer, name):
+def sample(context, lims_id, external, sex, order, application, customer_id, name):
     """Add a sample to the store."""
     status = context.obj['db']
-    customer_obj = status.customer(customer)
+    customer_obj = status.customer(customer_id)
     if customer_obj is None:
         click.echo(click.style('customer not found', fg='red'))
         context.abort()
@@ -71,6 +71,7 @@ def sample(context, lims_id, external, sex, order, application, customer, name):
         sex=sex,
         internal_id=lims_id,
         order=order,
+        external=external,
     )
     new_record.application_version = application_obj.versions[-1]
     new_record.customer = customer_obj
@@ -81,16 +82,22 @@ def sample(context, lims_id, external, sex, order, application, customer, name):
 @add.command()
 @click.option('--priority', type=click.Choice(PRIORITY_OPTIONS), default='standard')
 @click.option('-p', '--panel', 'panels', multiple=True, required=True, help='Default gene panels')
-@click.argument('customer')
+@click.argument('customer_id')
 @click.argument('name')
 @click.pass_context
-def family(context, priority, panels, customer, name):
+def family(context, priority, panels, customer_id, name):
     """Add a family of samples."""
     status = context.obj['db']
-    customer_obj = status.customer(customer)
+    customer_obj = status.customer(customer_id)
     if customer_obj is None:
         click.echo(click.style('customer not found', fg='red'))
         context.abort()
+
+    for panel_id in panels:
+        panel_obj = status.panel(panel_id)
+        if panel_obj is None:
+            print(click.style(f"{panel_id}: panel not found", fg='red'))
+            context.abort()
 
     new_family = status.add_family(
         name=name,
@@ -107,14 +114,14 @@ def family(context, priority, panels, customer, name):
 @click.option('-f', '--father', help='sample if for father of sample')
 @click.option('-s', '--status', type=click.Choice(['affected', 'unaffected', 'unknown']),
               required=True)
-@click.argument('family')
-@click.argument('sample')
+@click.argument('family_id')
+@click.argument('sample_id')
 @click.pass_context
-def relationship(context, mother, father, status, family, sample):
+def relationship(context, mother, father, status, family_id, sample_id):
     """Relate a sample to a family."""
     status_db = context.obj['db']
-    family_obj = status_db.family(family)
-    sample_obj = status_db.sample(sample)
+    family_obj = status_db.family(family_id)
+    sample_obj = status_db.sample(sample_id)
     mother_obj = status_db.sample(mother) if mother else None
     father_obj = status_db.sample(father) if father else None
     new_record = status_db.relate_sample(family_obj, sample_obj, status, mother=mother_obj,

@@ -72,6 +72,7 @@ class StatusHandler:
                 models.Analysis.uploaded_at != None,
                 models.Analysis.delivered_at == None
             )
+            .order_by(models.Analysis.uploaded_at.desc())
         )
         return records
 

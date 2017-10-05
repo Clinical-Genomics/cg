@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime as dt
+import gzip
 import logging
 import re
 from typing import List
@@ -84,10 +85,15 @@ class AnalysisAPI():
         file_objs = self.hk.files(bundle=link_obj.sample.internal_id, tags=['fastq'])
         files = []
         for file_obj in file_objs:
+            # figure out flowcell name from header
+            with gzip.open(file_obj.full_path) as handle:
+                header_line = handle.readline()
+                flowcell = re.search(r'[0-9A-Z]{7}[XY]{2}', header_line)[0]
+
             data = {
                 'path': file_obj.full_path,
                 'lane': int(re.findall(r'_L([0-9]{3})_', file_obj.path)[0]),
-                'flowcell': re.search(r'[0-9A-Z]{7}[XY]{2}', file_obj.path)[0],
+                'flowcell': flowcell,
                 'read': int(re.findall(r'_R([0-9])_', file_obj.path)[0]),
                 'undetermined': ('_Undetermined_' in file_obj.path),
             }
