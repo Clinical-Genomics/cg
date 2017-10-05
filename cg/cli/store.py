@@ -54,7 +54,7 @@ def analysis(context, config_stream):
     )
     new_analysis.family = family_obj
     version_date = version_obj.created_at.date()
-    click.echo(f"new bundle added: {new_bundle.name}, version {version_date}")
+    click.echo(f"new bundle added: {bundle_obj.name}, version {version_date}")
 
     # include the files in the housekeeper system
     try:
