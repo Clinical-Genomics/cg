@@ -59,7 +59,7 @@ class ChanjoAPI(ChanjoDB):
         ).filter(
             models.TranscriptStat.sample_id.in_(sample_ids),
             models.Transcript.gene_id.in_(OMIM_GENE_IDS),
-        )
+        ).group_by(models.TranscriptStat.sample_id)
         data = {result.sample_id: {
             'mean_coverage': result.mean_coverage,
             'mean_completeness': result.mean_completeness,
