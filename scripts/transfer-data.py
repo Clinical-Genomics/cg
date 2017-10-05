@@ -320,14 +320,16 @@ class SampleImporter(Store):
     
     def process(self):
         """Transfer lims info to store."""
-        for customer_obj in self.customers():
-            if self.samples(customer=customer_obj).first():
-                continue
+        for customer_obj in [self.customer('cust002')]:
+            # if self.samples(customer=customer_obj).first():
+            #     continue
             samples = self.lims.get_samples(udf=dict(customer=customer_obj.internal_id))
             count = len(samples)
             label = f"samples | {customer_obj.internal_id}"
             with click.progressbar(samples, length=count, label=label) as progressbar:
                 for lims_sample in progressbar:
+                    if self.sample(lims_sample.id) is not None:
+                        continue
                     if self.sample(lims_sample.id):
                         continue
                     data = self.extract(lims_sample)
@@ -415,9 +417,9 @@ class FamilyImporter(Store):
 
     def process(self):
         """Process data."""
-        for customer_obj in self.customers():
-            if self.families(customer=customer_obj).first():
-                continue
+        for customer_obj in [self.customer('cust002')]:
+            # if self.families(customer=customer_obj).first():
+            #     continue
             query = self.samples(customer=customer_obj)
             label = f"families | {customer_obj.internal_id}"
             with click.progressbar(query, length=query.count(), label=label) as progressbar:
@@ -588,31 +590,31 @@ def transfer(admin, housekeeper, config_file):
 
     # PanelImporter(config['database'], scoutapi.ScoutAPI(config)).process()
 
-    # lims_api = lims_app.LimsAPI(config)
-    # SampleImporter(config['database'], lims_api).process()
-    # FamilyImporter(config['database'], lims_api).process()
+    lims_api = lims_app.LimsAPI(config)
+    SampleImporter(config['database'], lims_api).process()
+    FamilyImporter(config['database'], lims_api).process()
     # FlowcellImporter(Store(config['database']), stats.StatsAPI(config)).process()
 
-    housekeeeper_api.manager(housekeeper)
-    AnalysisImporter(config['database'], housekeeeper_api).process()
+    # housekeeeper_api.manager(housekeeper)
+    # AnalysisImporter(config['database'], housekeeeper_api).process()
 
-    # set all samples from 2016 as received + sequenced
-    status = Store(config['database'])
-    old_date = dt.datetime(2017, 1, 1)
-    (models.Sample.query.filter(
-        models.Sample.received_at == None,
-        models.Sample.sequenced_at == None,
-        models.Sample.is_external == False
-    ).filter(models.Sample.ordered_at < old_date)
-     .update({models.Sample.received_at: dt.datetime(1970, 1, 1),
-              models.Sample.sequenced_at: dt.datetime(1970, 1, 1)}))
-    status.commit()
+    # # set all samples from 2016 as received + sequenced
+    # status = Store(config['database'])
+    # old_date = dt.datetime(2017, 1, 1)
+    # (models.Sample.query.filter(
+    #     models.Sample.received_at == None,
+    #     models.Sample.sequenced_at == None,
+    #     models.Sample.is_external == False
+    # ).filter(models.Sample.ordered_at < old_date)
+    #  .update({models.Sample.received_at: dt.datetime(1970, 1, 1),
+    #           models.Sample.sequenced_at: dt.datetime(1970, 1, 1)}))
+    # status.commit()
 
-    # set all families to analyze "on hold"
-    for family_obj in status.families_to_analyze(limit=1000):
-        LOG.info(f"setting family on hold: {family_obj.name}")
-        family_obj.action = 'hold'
-    status.commit()
+    # # set all families to analyze "on hold"
+    # for family_obj in status.families_to_analyze(limit=1000):
+    #     LOG.info(f"setting family on hold: {family_obj.name}")
+    #     family_obj.action = 'hold'
+    # status.commit()
 
 
 if __name__ == '__main__':
