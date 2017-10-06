@@ -52,7 +52,7 @@ class StatusHandler:
             .order_by(models.Family.priority.desc(), models.Family.ordered_at)
         )
         return [record for record in records.limit(limit) if self._samples_sequenced(record.links)]
-    
+
     @staticmethod
     def _samples_sequenced(links: List[models.FamilySample]) -> bool:
         """Return True if all samples are sequenced."""
