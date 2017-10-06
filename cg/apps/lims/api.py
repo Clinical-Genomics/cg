@@ -10,6 +10,7 @@ from cg.exc import LimsDataError
 from .order import OrderHandler
 
 SEX_MAP = {'F': 'female', 'M': 'male', 'Unknown': 'unknown', 'unknown': 'unknown'}
+REV_SEX_MAP = {value: key for key, value in SEX_MAP.items()}
 log = logging.getLogger(__name__)
 
 
@@ -150,3 +151,12 @@ class LimsAPI(Lims, OrderHandler):
         for lims_artifact in lims_process.all_inputs():
             for lims_sample in lims_artifact.samples:
                 yield lims_sample.id
+
+    def update_sample(self, lims_id: str, sex=None):
+        """Update information about a sample."""
+        lims_sample = Sample(self, lims_id)
+        if sex:
+            lims_gender = REV_SEX_MAP.get(sex)
+            if lims_gender:
+                lims_sample.udf['Gender'] = lims_gender
+        lims_sample.put()
