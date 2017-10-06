@@ -26,6 +26,7 @@ PROP2UDF = {
     'volume': 'Volume (uL)',
     'well_position_rml': 'RML well position',
     'rml_plate_name': 'RML plate name',
+    'sex': 'Gender',
 }
 
 

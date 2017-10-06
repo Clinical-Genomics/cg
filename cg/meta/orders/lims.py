@@ -2,6 +2,8 @@ from typing import List
 
 from cg.exc import OrderError
 
+SEX_MAP = {'male': 'M', 'female': 'F'}
+
 
 class LimsHandler:
 
@@ -33,6 +35,7 @@ class LimsHandler:
                     'index_number': sample.get('index_number'),
                     'rml_plate_name': sample.get('rml_plate_name'),
                     'well_position_rml': sample.get('well_position_rml'),
+                    'sex': SEX_MAP.get(sample.get('sex'), 'unknown'),
                 }
             })
         return samples_lims
