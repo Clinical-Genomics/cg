@@ -154,7 +154,7 @@ class LimsAPI(Lims, OrderHandler):
 
     def update_sample(self, lims_id: str, sex=None):
         """Update information about a sample."""
-        lims_sample = Sample(self, lims_id)
+        lims_sample = Sample(self, id=lims_id)
         if sex:
             lims_gender = REV_SEX_MAP.get(sex)
             if lims_gender:

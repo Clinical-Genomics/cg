@@ -19,10 +19,12 @@ class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
     """Interface to Trailblazer for `cg`."""
 
     def __init__(self, config: dict):
-        super(TrailblazerAPI, self).__init__(config['trailblazer']['database'])
+        super(TrailblazerAPI, self).__init__(
+            config['trailblazer']['database'],
+            families_dir=config['trailblazer']['root'],
+        )
         self.mip_cli = MipCli(config['trailblazer']['script'])
         self.mip_config = config['trailblazer']['mip_config']
-        self.families_dir = Path(config['trailblazer']['root'])
 
     def start(self, family_id: str, priority: str='normal', email: str=None):
         """Start MIP."""
@@ -38,7 +40,7 @@ class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
 
     def write_panel(self, family_id: str, content: List[str]):
         """Write the gene panel to the defined location."""
-        out_dir = self.families_dir / family_id
+        out_dir = Path(self.families_dir) / family_id
         out_dir.mkdir(parents=True, exist_ok=True)
         out_path = out_dir / 'aggregated_master.bed'
         with out_path.open('w') as out_handle:
