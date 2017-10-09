@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import datetime as dt
 import logging
 from enum import Enum
 import re
@@ -105,15 +106,19 @@ class OrdersAPI(LimsHandler, StatusHandler):
         # fileter out only new samples
         status_data = self.families_to_status(data)
         new_samples = [sample for sample in data['samples'] if sample.get('internal_id') is None]
-        project_data, lims_map = self.process_lims(data, new_samples)
+        if new_samples:
+            project_data, lims_map = self.process_lims(data, new_samples)
+        else:
+            project_data = lims_map = None
         samples = [sample
                    for family in status_data['families']
                    for sample in family['samples']]
-        self.fillin_sample_ids(samples, lims_map)
+        if lims_map:
+            self.fillin_sample_ids(samples, lims_map)
         new_families = self.store_families(
             customer=status_data['customer'],
             order=status_data['order'],
-            ordered=project_data['date'],
+            ordered=project_data['date'] if project_data else dt.datetime.now(),
             ticket=data['ticket'],
             families=status_data['families'],
         )
