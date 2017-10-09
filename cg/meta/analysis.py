@@ -44,6 +44,8 @@ class AnalysisAPI():
                 kwargs['priority'] = 'high'
             else:
                 kwargs['priority'] = 'normal'
+        if family_obj.application_version.application.category == 'ext':
+            kwargs['skip_evaluation'] = True
         self.tb.start(family_obj.internal_id, **kwargs)
         # mark the family as running
         family_obj.action = 'running'

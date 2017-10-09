@@ -26,10 +26,13 @@ class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
         self.mip_cli = MipCli(config['trailblazer']['script'])
         self.mip_config = config['trailblazer']['mip_config']
 
-    def start(self, family_id: str, priority: str='normal', email: str=None):
+    def start(self, family_id: str, priority: str='normal', email: str=None,
+              skip_evalution: bool=False):
         """Start MIP."""
         email = email or environ_email()
         kwargs = dict(config=self.mip_config, family=family_id, priority=priority, email=email)
+        if skip_evalution:
+            kwargs['skip_evalution'] = True
         self.mip_cli(**kwargs)
         self.add_pending(family_id, email=email)
 
