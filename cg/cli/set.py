@@ -15,22 +15,32 @@ def set_cmd(context):
 @set_cmd.command()
 @click.option('-a', '--action', type=click.Choice(FAMILY_ACTIONS), help='update family action')
 @click.option('-p', '--priority', type=click.Choice(PRIORITY_OPTIONS), help='update priority')
+@click.option('-g', '--panel', 'panels', multiple=True, help='update gene panels')
 @click.argument('family_id')
 @click.pass_context
-def family(context, action, priority, family_id):
+def family(context, action, priority, panels, family_id):
     """Update information about a family."""
     family_obj = context.obj['status'].family(family_id)
     if family_obj is None:
         print(click.style("can't find family", fg='red'))
         context.abort()
     if action:
-        message = f"updating action: {family_obj.action or 'NA'} -> {action}"
+        message = f"update action: {family_obj.action or 'NA'} -> {action}"
         print(click.style(message, fg='blue'))
         family_obj.action = action
     if priority:
-        message = f"updating priority: {family_obj.priority_human} -> {priority}"
+        message = f"update priority: {family_obj.priority_human} -> {priority}"
         print(click.style(message, fg='blue'))
         family_obj.priority_human = priority
+    if panels:
+        for panel_id in panels:
+            panel_obj = context.obj['status'].panel(panel_id)
+            if panel_obj is None:
+                print(click.style(f"unknown gene panel: {panel_id}", fg='red'))
+                context.abort()
+        message = f"update panels: {', '.join(family_obj.panels)} -> {', '.join(panels)}"
+        print(click.style(message, fg='blue'))
+        family_obj.panels = panels
     context.obj['status'].commit()
 
 
