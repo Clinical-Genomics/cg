@@ -133,7 +133,7 @@ class Family(Model, PriorityMixin):
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
 
-    def to_dict(self, links: bool=False) -> dict:
+    def to_dict(self, links: bool=False, analyses: bool=False) -> dict:
         """Override dicify method."""
         data = super(Family, self).to_dict()
         data['panels'] = self.panels
@@ -141,6 +141,9 @@ class Family(Model, PriorityMixin):
         data['customer'] = self.customer.to_dict()
         if links:
             data['links'] = [link_obj.to_dict(samples=True) for link_obj in self.links]
+        if analyses:
+            data['analyses'] = [analysis_obj.to_dict(family=False) for analysis_obj in
+                                self.analyses]
         return data
 
     @property
@@ -293,10 +296,11 @@ class Analysis(Model):
     def __str__(self):
         return f"{self.family.internal_id} | {self.completed_at.date()}"
 
-    def to_dict(self):
+    def to_dict(self, family: bool=True):
         """Override dicify method."""
         data = super(Analysis, self).to_dict()
-        data['family'] = self.family.to_dict()
+        if family:
+            data['family'] = self.family.to_dict()
         return data
 
 

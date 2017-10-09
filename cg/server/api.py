@@ -105,7 +105,7 @@ def families():
 def family(family_id):
     """Fetch a family with links."""
     family_obj = db.family(family_id)
-    data = family_obj.to_dict(links=True)
+    data = family_obj.to_dict(links=True, analyses=True)
     return jsonify(**data)
 
 
