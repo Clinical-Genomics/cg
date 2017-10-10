@@ -6,12 +6,12 @@ from tabulate import tabulate
 from cg.store import Store
 
 SAMPLE_HEADERS = ['Sample', 'Name', 'Customer', 'Application', 'State', 'Priority', 'External?']
-FAMILY_HEADERS = ['Family', 'Name', 'Customer', 'Priority', 'Action']
+FAMILY_HEADERS = ['Family', 'Name', 'Customer', 'Priority', 'Panels', 'Action']
 FLOWCELL_HEADERS = ['Flowcell', 'Type', 'Sequencer', 'Date', 'Archived?']
 
 
 @click.group(invoke_without_command=True)
-@click.argument('identifier', required=False)
+@click.option('-i', 'identifier', help='made a guess what type you are looking for')
 @click.pass_context
 def get(context, identifier):
     """Get information about records in the database."""
@@ -24,7 +24,7 @@ def get(context, identifier):
     elif identifier and re.match(r'^[HC][A-Z0-9]{8}$', identifier):
         # try flowcell information
         context.invoke(flowcell, flowcell_id=identifier)
-    else:
+    elif identifier:
         click.echo(click.style("can't predict identifier", fg='yellow'))
 
 
@@ -52,24 +52,36 @@ def sample(context, sample_ids):
 
 
 @get.command()
+@click.option('-c', '--customer', help='internal id for customer to filter by')
+@click.option('-n', '--name', is_flag=True, help='search family by name')
 @click.argument('family_id')
 @click.pass_context
-def family(context, family_id):
+def family(context, customer, name, family_id):
     """Get information about a family."""
-    family_obj = context.obj['status'].family(family_id)
-    if family_obj is None:
-        click.echo(click.style(f"family doesn't exist: {family_id}", fg='red'))
-        context.abort()
-    row = [
-        family_obj.internal_id,
-        family_obj.name,
-        family_obj.customer.internal_id,
-        family_obj.priority_human,
-        family_obj.action or 'NA',
-    ]
-    click.echo(tabulate([row], headers=FAMILY_HEADERS, tablefmt='psql'))
-    sample_ids = [link_obj.sample.internal_id for link_obj in family_obj.links]
-    context.invoke(sample, sample_ids=sample_ids)
+    if name:
+        customer_obj = context.obj['status'].customer(customer)
+        if customer_obj is None:
+            print(click.style(f"{customer}: customer not found", fg='yellow'))
+        families = context.obj['status'].families(customer=customer_obj, query=family_id)
+    else:
+        family_obj = context.obj['status'].family(family_id)
+        if family_obj is None:
+            click.echo(click.style(f"family doesn't exist: {family_id}", fg='red'))
+            context.abort()
+        families = [family_obj]
+
+    for family_obj in families:
+        row = [
+            family_obj.internal_id,
+            family_obj.name,
+            family_obj.customer.internal_id,
+            family_obj.priority_human,
+            ', '.join(family_obj.panels),
+            family_obj.action or 'NA',
+        ]
+        click.echo(tabulate([row], headers=FAMILY_HEADERS, tablefmt='psql'))
+        sample_ids = [link_obj.sample.internal_id for link_obj in family_obj.links]
+        context.invoke(sample, sample_ids=sample_ids)
 
 
 @get.command()

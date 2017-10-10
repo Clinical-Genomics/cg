@@ -47,6 +47,10 @@ class ChanjoAPI(ChanjoDB):
         """Fetch sample from the database."""
         return models.Sample.get(sample_id)
 
+    def delete_sample(self, sample_obj: models.Sample):
+        """Delete sample from database."""
+        self.delete_commit(sample_obj)
+
     def omim_coverage(self, samples: List[models.Sample]) -> dict:
         """Calculate coverage for OMIM panel."""
         sample_ids = [sample.id for sample in samples]

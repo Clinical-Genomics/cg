@@ -121,7 +121,8 @@ def samples():
             query=request.args.get('query'),
             customer=db.customer(request.args.get('customer')),
         )
-    data = [sample_obj.to_dict() for sample_obj in samples_q.limit(30)]
+    limit = int(request.args.get('limit', 30))
+    data = [sample_obj.to_dict() for sample_obj in samples_q.limit(limit)]
     return jsonify(samples=data, total=samples_q.count())
 
 

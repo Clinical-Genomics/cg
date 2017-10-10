@@ -42,15 +42,16 @@ def upload(context, family_id):
 
 
 @upload.command()
+@click.option('-r', '--re-upload', is_flag=True, help='re-upload existing analysis')
 @click.argument('family_id')
 @click.pass_context
-def coverage(context, family_id):
+def coverage(context, re_upload, family_id):
     """Upload coverage from an analysis to Chanjo."""
     chanjo_api = coverage_app.ChanjoAPI(context.obj)
     family_obj = context.obj['status'].family(family_id)
     api = UploadCoverageApi(context.obj['status'], context.obj['housekeeper_api'], chanjo_api)
     coverage_data = api.data(family_obj.analyses[0])
-    api.upload(coverage_data)
+    api.upload(coverage_data, replace=re_upload)
 
 
 @upload.command()
