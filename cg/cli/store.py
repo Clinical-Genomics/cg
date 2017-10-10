@@ -36,7 +36,11 @@ def analysis(context, config_stream):
         click.echo(click.style(error.message, fg='red'))
         context.abort()
     try:
-        bundle_obj, version_obj = hk_api.add_bundle(bundle_data)
+        results = hk_api.add_bundle(bundle_data)
+        if results is None:
+            print(click.style('analysis version already added', fg='yellow'))
+            context.abort()
+        bundle_obj, version_obj = results
         version_obj.bundle = bundle_obj
     except FileNotFoundError as error:
         click.echo(click.style(f"missing file: {error.args[0]}", fg='red'))
