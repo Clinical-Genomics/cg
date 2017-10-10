@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import datetime as dt
 import logging
 from pathlib import Path
 
@@ -49,7 +50,8 @@ def analysis(context, config_stream):
     new_analysis = status.add_analysis(
         pipeline='mip',
         version=bundle_data['pipeline_version'],
-        completed_at=version_obj.created_at,
+        started_at=version_obj.created_at,
+        completed_at=dt.datetime.now(),
         primary=(len(family_obj.analyses) == 0),
     )
     new_analysis.family = family_obj
