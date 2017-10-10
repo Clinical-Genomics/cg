@@ -25,7 +25,8 @@ class UploadCoverageApi(object):
             'samples': [],
         }
         for link_obj in analysis_obj.family.links:
-            hk_version = self.hk.version(family_id, analysis_obj.completed_at)
+            analysis_date = analysis_obj.started_at or analysis_obj.completed_at
+            hk_version = self.hk.version(family_id, analysis_date)
             hk_coverage = self.hk.files(version=hk_version.id,
                                         tags=[link_obj.sample.internal_id, 'coverage']).first()
             data['samples'].append({

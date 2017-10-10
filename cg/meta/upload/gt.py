@@ -21,7 +21,8 @@ class UploadGenotypesAPI(object):
 
     def data(self, analysis_obj: models.Analysis) -> dict:
         """Fetch data about an analysis to load genotypes."""
-        hk_version = self.hk.version(analysis_obj.family.internal_id, analysis_obj.completed_at)
+        analysis_date = analysis_obj.started_at or analysis_obj.completed_at
+        hk_version = self.hk.version(analysis_obj.family.internal_id, analysis_date)
         hk_bcf = self.hk.files(version=hk_version.id, tags=['snv-gbcf']).first()
         if hk_bcf is None:
             LOG.warning("unable to find GBCF for genotype upload")

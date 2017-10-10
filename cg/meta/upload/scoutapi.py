@@ -19,8 +19,8 @@ class UploadScoutAPI(object):
 
     def data(self, analysis_obj: models.Analysis) -> dict:
         """Fetch data about an analysis to load Scout."""
-        hk_version = self.housekeeper.version(analysis_obj.family.internal_id,
-                                              analysis_obj.completed_at)
+        analysis_date = analysis_obj.started_at or analysis_obj.completed_at
+        hk_version = self.housekeeper.version(analysis_obj.family.internal_id, analysis_date)
 
         data = {
             'owner': analysis_obj.family.customer.internal_id,
