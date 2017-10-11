@@ -38,11 +38,13 @@ class ApplicationView(BaseView):
         'percent_kth',
         'created_at',
         'updated_at',
+        'category',
     ]
     column_searchable_list = ['tag', 'prep_category']
     column_filters = ['prep_category', 'is_accredited']
     column_editable_list = ['description', 'is_accredited', 'target_reads', 'comment',
                             'prep_category', 'sequencing_depth', 'is_external']
+    form_excluded_columns = ['category']
 
 
 class ApplicationVersionView(BaseView):
