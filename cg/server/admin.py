@@ -39,10 +39,10 @@ class ApplicationView(BaseView):
         'created_at',
         'updated_at',
     ]
-    column_searchable_list = ['tag']
-    column_filters = ['category', 'is_accredited']
+    column_searchable_list = ['tag', 'prep_category']
+    column_filters = ['prep_category', 'is_accredited']
     column_editable_list = ['description', 'is_accredited', 'target_reads', 'comment',
-                            'category', 'sequencing_depth']
+                            'prep_category', 'sequencing_depth', 'is_external']
 
 
 class ApplicationVersionView(BaseView):

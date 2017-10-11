@@ -186,11 +186,14 @@ def analyses():
 def options():
     """Fetch various options."""
     customer_objs = db.Customer.query.all() if g.current_user.is_admin else [g.current_user.customer]
-    apptag_groups = {}
-    for application in db.Application.query:
-        if application.category not in apptag_groups:
-            apptag_groups[application.category] = []
-        apptag_groups[application.category].append(application.tag)
+    apptag_groups = {'ext': []}
+    for application_obj in db.Application.query:
+        if application_obj.is_external:
+            apptag_groups['ext'].append(application_obj.tag)
+        else:
+            if application_obj.prep_category not in apptag_groups:
+                apptag_groups[application_obj.prep_category] = []
+            apptag_groups[application_obj.prep_category].append(application_obj.tag)
 
     return jsonify(
         customers=[{

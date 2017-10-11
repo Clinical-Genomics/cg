@@ -5,7 +5,7 @@ from typing import List
 import alchy
 from sqlalchemy import Column, ForeignKey, orm, types, UniqueConstraint, Table
 
-from cg.constants import PRIORITY_MAP, REV_PRIORITY_MAP, FAMILY_ACTIONS
+from cg.constants import PRIORITY_MAP, REV_PRIORITY_MAP, FAMILY_ACTIONS, PREP_CATEGORIES
 
 Model = alchy.make_declarative_base(Base=alchy.ModelBase)
 
@@ -308,7 +308,10 @@ class Application(Model):
 
     id = Column(types.Integer, primary_key=True)
     tag = Column(types.String(32), unique=True, nullable=False)
-    category = Column(types.Enum('wgs', 'wes', 'tga', 'rna', 'mic', 'rml', 'ext'), nullable=False)
+    # DEPRECATED
+    category = Column(types.Enum('wgs', 'wes', 'tga', 'rna', 'mic', 'rml'), nullable=False)
+    prep_category = Column(types.Enum(*PREP_CATEGORIES), nullable=False)
+    is_external = Column(types.Boolean, nullable=False, default=False)
     description = Column(types.String(256), nullable=False)
     is_accredited = Column(types.Boolean, nullable=False)
 
