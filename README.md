@@ -5,12 +5,12 @@
 This is our main package for interacting with data and samples that flow through our pipeline. We rely on a set of specialized "apps" to deal with a lot of complexity like:
 
 - [Trailblazer][trailblazer]: Python wrapper around [MIP][mip], a rare disease genomics pipeline
-- [Housekeeper][housekeeper]: storage, retrieval, and archive of files
+- [Housekeeper][housekeeper]: storage, retrieval, and archival of files
 - [Genotype][genotype]: managing genotypes for detecting sample mix-ups
 
 In this context, `cg` provides the interface between these tools to facilitate automation and other necessary cross-talk. It also exposes some APIs:
 
-- HTTP REST for powering the web portal: [clinicalgenomics.se][portal]
+- HTTP REST for powering the web portal: [clinical.scilifelab.se][portal]
 - CLI for interactions on the command line
 
 ## Team
@@ -21,8 +21,12 @@ In this context, `cg` provides the interface between these tools to facilitate a
 - [@b4ckm4n][b4ckm4n]: bioinformatician | 🇸🇪
 - [@emmser][emmser]: bioinformatician | 🇸🇪 👶
 - [@northwestwitch][northwestwitch]: bioinformatician, variant sharing expert 🇮🇹
-- [@mayabrandi][mayabrandi]: bioinformatician, lead LIMS developer | 🇸🇪 👶
+- [@mayabrandi][mayabrandi]: bioinformatician, lead LIMS developer | 🇸🇪
+- [@sylvinite][sylvinite]: bioinformatician, Microbial developer | 🇸🇪 🆕
 - [@moonso][moonso]: bioinformatician, Scout developer | 🇸🇪
+
+### Collaborators
+
 - [@henrikstranneheim][henrikstranneheim]: bioinformatician, MIP developer | 🇸🇪
 
 ## Work flow
@@ -33,18 +37,20 @@ This is a schematic overview of how data flows between different tools. Generall
 
 1. **Order** | New samples are submitted by logging into the [portal][portal] and either uploading an "orderform" or supplying the information directly.
 
-    Information is parsed and uploaded both to LIMS and to the status database. These samples now end up in the **incoming queue**.
+    Information is parsed and uploaded both to LIMS and to the `status` database (controlled by this package). These samples now end up in the **incoming queue**.
 
     Samples are marked with a date of reception in LIMS. A crontab syncronizes this information over to the status database and moves the samples along.
 
-1. **Lab** | Samples are prepped on and monitored in LIMS. This is true for all lab related activities  until sequencing. Until fully sequenced (as defined by the application tag), samples stay in the **sequencing queue**.
+1. **Lab** | Samples are prepped and monitored in LIMS. This is true for all lab related activities. Until fully sequenced (as defined by the application tag), samples stay in the **sequencing queue**.
 
-1. **Demux** | Samples are  picked up by the bioinformatics pipeline after sequencing. A demultiplexed flowcell will get added to `status` and FASTQ files for each sample will be sent to `housekeeper`. Meanwhile, read count are updated which moves the samples to the next step.
+    > We are planning to add a new category of "samples to be prepared" which will differentiate between samples in the "lab prep" vs "sequencing" queues. The completion date will similarly be picked up by a crontab checking information in LIMS.
+
+1. **Demux** | Samples are picked up by the bioinformatics pipeline after sequencing. A demultiplexed flowcell will get added to `status` and FASTQ files for each sample will be sent to `housekeeper`. Meanwhile, read count are updated which moves the samples to the next step.
 
     You can (re-)perform the transfer at any time, you just need the flowcell id:
 
     ```bash
-    cg transfer flowcell [flowcell]
+    cg transfer flowcell {FLOWCELL}
     ```
 
     > TODO: reads are only counted for samples that pass the **Q30 threshold**. You can override this check by using the `--force` flag.
@@ -55,27 +61,51 @@ This is a schematic overview of how data flows between different tools. Generall
 
     Starting a run will do four things:
 
-    1. Generate a pedigree config for the analysis pipeline (`cg analysis config FAMILY`)
-    1. Link FASTQ files for each related sample and rename to follow the pipeline conventions (`cg analysis link FAMILY`)
-    1. Generate a gene panel file according to the order (`cg analysis panel FAMILY`)
-    1. Start the pipeline and set the priority flag to high if required (`cg analysis start FAMILY`)
+    1. Generate a pedigree config for the analysis pipeline
+
+        ```bash
+        cg analysis config {FAMILY}
+        ```
+
+    1. Link FASTQ files for each related sample and rename to follow the pipeline conventions
+
+        ```bash
+        cg analysis link --family {FAMILY}
+        ```
+
+    1. Generate a gene panel file according to the ordered "default panels"
+
+        ```bash
+        cg analysis panel {FAMILY}
+        ```
+
+    1. Start the pipeline and set the priority flag to high if required
+
+        ```bash
+        cg analysis start {FAMILY}
+        ```
 
     A crontab is monitoring the progress of started runs. You can follow the status in [Trailblazer][trailblazer-ui].
 
     You can start an anlysis in a couple different ways:
 
-    1. set the action property of the family to "analyze"
-    1. run the command: `cg analysis -f [family]`
+    1. set the `action` property of the family to "analyze", the analysis will be started by the crontab.
 
-1. **Store** | Completed analyses can be accessed through `trailblazer` and are automatically "stored". This process updates `status` and links files to the family in `housekeeper`.
+        ```bash
+        cg set family --action analyze {FAMILY}
+        ```
+
+    1. manually run the command: `cg analysis -f {FAMILY}`
+
+1. **Store** | Completed analyses can be accessed through `trailblazer` and are automatically "stored" using the `cg` CLI. This process updates `status` and links files to the family in `housekeeper`.
 
     Some files are marked as essential and will be subsequently backed up. The rest of the files are removed after 3 months.
 
     If you are in a hurry, you can store a completed analysis manually by running:
 
     ```bash
-    cg store analysis FAMILY
-    # or store all the recently completed runs
+    cg store analysis {FAMILY}
+    # or store all the recently completed runs (= crontab)
     cg store completed
     ```
 
@@ -86,7 +116,7 @@ This is a schematic overview of how data flows between different tools. Generall
     - LoqusDB: local observation counts for variants
     - [Scout][scout]: variant interpretation platform
 
-    We also gather statistics from analysis (post-alignment) which we use to generate a delivery report, however, this is still under development.
+    > We are also working on gathering post-alignment statistics which we use to generate a delivery report, however, this is still under development.
 
 1. **Delivery** | Delivery happens on two levels:
 
@@ -106,7 +136,7 @@ We therefore need to share responsibilities and monitoring between members of ou
 
 - **Order**: [@robinandeer][robinandeer]
 - **Demux**: [@ingkebil][ingkebil]
-- **Analysis**: [@Dilea][Dilea]
+- **Analysis**: [@b4ckm4n][b4ckm4n]
 - **Upload**: [@robinandeer][robinandeer]
 - **Delivery**: [@b4ckm4n][b4ckm4n]
 - **Archive**: [@ingkebil][ingkebil]
@@ -120,33 +150,9 @@ We therefore need to share responsibilities and monitoring between members of ou
 
 ### Databases
 
-- **MySQL**, host: clinical-db.scilifelab.se, [@ingkebil][ingkebil]
+We are mainly using MySQL and MongoDB for storing data. You can read more about this in the [servers][servers] 🔒 repository.
 
-  - `/cg` - status
-  - `/chanjo4` - Chanjo, coverage
-
-- **MySQL**, host: clinical-genomics.cyxfn5r4quzp.eu-central-1.rds.amazonaws.com, [@robinandeer][robinandeer]
-
-  - `/csdb` - CGStats, demux
-  - `/housekeeper2` - Housekeeper, file management
-  - `/mwgs` - Microbial pipeline, statistics
-  - `/taboo` - Genotype
-  - `/trailblazer` - Trailblazer, MIP analysis monitoring
-
-- **MongoDB**, host: clinical-db.scilifelab.se, [@robinandeer][robinandeer]
-
-  - `/scout` - Scout, variant visualizer
-  - `/loqusdb` - LoqusDB, variant observation counts
-
-## Server
-
-The REST API server handles a number of actions. It's written in [Flask][flask] and exposes an admin interface for quickly editing information in the backend MySQL database.
-
-The API is protected by JSON Web Tokens generated by Google OAuth. It authorizes access using the user table in the internal database. The admin interface is served under a hidden route but the plan is to move it to Google OAuth as well.
-
-### Order endpoint
-
-The `/order/<type>` endpoint accepts orders for new samples. If you supply a JSON document on the expected format, a new order is open in `status` and LIMS.
+Main responsible: [@ingkebil][ingkebil]
 
 ## This package
 
@@ -412,7 +418,13 @@ The invoice itself will be stored in an intermediate state in `status` while lin
 
 ### `server`
 
-The REST interface and database admin interface are implemented in [Flask][flask]. Authentication for the REST interface is handled using Google OAuth backed JWT tokens. The admin interface is authenticated using a secret key which corresponds to the route you need to access to get to it.
+The REST API server handles a number of actions. It's written in [Flask][flask] and exposes an admin interface for quickly editing information in the backend MySQL database. The admin interface is served under a hidden route but the plan is to move it to Google OAuth.
+
+The API is protected by JSON Web Tokens generated by Google OAuth. It authorizes access using the user table in the database.
+
+#### Order endpoint
+
+The `/order/<type>` endpoint accepts orders for new samples. If you supply a JSON document on the expected format, a new order is opened in `status` and LIMS.
 
 ### `store`
 
@@ -424,10 +436,9 @@ There's one file for storing all constants like how priority levels are translat
 
 Another module `/exc.py` contains the custom Exception classes that are used across the package.
 
-
-[portal]: https://clinical-db.scilifelab.se:7071/
+[portal]: https://clinical.scilifelab.se/
 [trailblazer]: https://github.com/Clinical-Genomics/trailblazer
-[trailblazer-ui]: https://apps.clinicalgenomics.se/trailblazer-ui
+[trailblazer-ui]: https://trailblazer.scilifelab.se/
 [housekeeper]: https://github.com/Clinical-Genomics/housekeeper
 [genotype]: https://github.com/Clinical-Genomics/genotype
 [chanjo]: https://github.com/robinandeer/chanjo
@@ -444,5 +455,7 @@ Another module `/exc.py` contains the custom Exception classes that are used acr
 [emmser]: https://github.com/emmser
 [northwestwitch]: https://github.com/northwestwitch
 [mayabrandi]: https://github.com/mayabrandi
+[sylvinite]: https://github.com/sylvinite
 [click]: http://click.pocoo.org/5/
 [cgweb]: https://github.com/Clinical-Genomics/cgweb
+[servers]: https://github.com/Clinical-Genomics/servers
