@@ -56,6 +56,14 @@ class UploadScoutAPI(object):
             hk_vcf = self.housekeeper.files(version=hk_version.id, tags=[hk_tag]).first()
             data[scout_key] = str(hk_vcf.full_path)
 
+        files = [('peddy_ped', 'ped'), ('peddy_sex', 'sex-check'), ('peddy_check', 'ped-check')]
+        for scout_key, hk_tag in files:
+            hk_file = self.housekeeper.files(version=hk_version.id, tags=['peddy', hk_tag]).first()
+            if hk_file is None:
+                LOG.debug(f"skipping missing file: {scout_key}")
+            else:
+                data[scout_key] = str(hk_file.full_path)
+
         if len(data['samples']) > 1:
             if any(sample['father'] or sample['mother'] for sample in data['samples']):
                 svg_path = self.run_madeline(analysis_obj.family)

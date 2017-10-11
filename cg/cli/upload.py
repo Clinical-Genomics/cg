@@ -85,9 +85,10 @@ def observations(context, family_id):
 
 @upload.command()
 @click.option('-r', '--re-upload', is_flag=True, help='re-upload existing analysis')
+@click.option('-p', '--print', 'print_console', is_flag=True, help='print config values')
 @click.argument('family_id')
 @click.pass_context
-def scout(context, re_upload, family_id):
+def scout(context, re_upload, print_console, family_id):
     """Upload variants from analysis to Scout."""
     scout_api = scoutapi.ScoutAPI(context.obj)
     family_obj = context.obj['status'].family(family_id)
@@ -98,7 +99,10 @@ def scout(context, re_upload, family_id):
         madeline_exe=context.obj['madeline_exe'],
     )
     results = api.data(family_obj.analyses[0])
-    scout_api.upload(results, force=re_upload)
+    if print_console:
+        print(results)
+    else:
+        scout_api.upload(results, force=re_upload)
 
 
 @upload.command()

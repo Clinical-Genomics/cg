@@ -8,7 +8,7 @@ from cg.store import Store
 @click.group()
 @click.pass_context
 def add(context):
-    """Add things to the store."""
+    """Add stuff to the database."""
     context.obj['db'] = Store(context.obj['database'])
 
 
@@ -16,47 +16,51 @@ def add(context):
 @click.argument('internal_id')
 @click.argument('name')
 @click.pass_context
-def customer(context, internal_id, name):
-    """Add a new customer to the store."""
+def customer(context, internal_id: str, name: str):
+    """Add a new customer with the unique INTERNAL_ID and NAME."""
     existing = context.obj['db'].customer(internal_id)
     if existing:
         click.echo(click.style(f"customer already added: {existing.name}", fg='yellow'))
         context.abort()
-    record = context.obj['db'].add_customer(internal_id=internal_id, name=name)
-    context.obj['db'].add_commit(record)
-    click.echo(click.style(f"customer added: {record.internal_id} ({record.id})", fg='green'))
+    new_customer = context.obj['db'].add_customer(internal_id=internal_id, name=name)
+    context.obj['db'].add_commit(new_customer)
+    message = f"customer added: {new_customer.internal_id} ({new_customer.id})"
+    click.echo(click.style(message, fg='green'))
 
 
 @add.command()
-@click.option('-a', '--admin', is_flag=True)
-@click.option('-c', '--customer', required=True)
+@click.option('-a', '--admin', is_flag=True, help='make the user an admin')
+@click.option('-c', '--customer', 'customer_id', required=True,
+              help='internal ID for the customer of the user')
 @click.argument('email')
 @click.argument('name')
 @click.pass_context
-def user(context, admin, customer, email, name):
-    """Add a new user."""
-    customer_obj = context.obj['db'].customer(customer)
+def user(context, admin, customer_id, email, name):
+    """Add a new user with the login EMAIL and full NAME."""
+    customer_obj = context.obj['db'].customer(customer_id)
     existing = context.obj['db'].user(email)
     if existing:
         click.echo(click.style(f"user already added: {existing.name}", fg='yellow'))
         context.abort()
-    record = context.obj['db'].add_user(customer_obj, email, name, admin=admin)
-    context.obj['db'].add_commit(record)
-    click.echo(click.style(f"user added: {record.email} ({record.id})", fg='green'))
+    new_user = context.obj['db'].add_user(customer_obj, email, name, admin=admin)
+    context.obj['db'].add_commit(new_user)
+    click.echo(click.style(f"user added: {new_user.email} ({new_user.id})", fg='green'))
 
 
 @add.command()
 @click.option('-l', '--lims', 'lims_id', help='LIMS id for the sample')
-@click.option('-e', '--external', is_flag=True, help='Is sample externally sequenced?')
-@click.option('-o', '--order')
-@click.option('-s', '--sex', type=click.Choice(['male', 'female', 'unknown']),
-              help='Sample pedigree sex', required=True)
-@click.option('-a', '--application', help='Application tag', required=True)
+@click.option('-e', '--external', is_flag=True, help='is the sample externally sequenced?')
+@click.option('-o', '--order', help='name of the order the sample belongs to')
+@click.option('-s', '--sex', type=click.Choice(['male', 'female', 'unknown']), required=True,
+              help='sample pedigree sex')
+@click.option('-a', '--application', required=True, help='application tag name')
+@click.option('-p', '--priority', type=click.Choice(PRIORITY_OPTIONS), default='standard',
+              help='set the priority for the samples')
 @click.argument('customer_id')
 @click.argument('name')
 @click.pass_context
-def sample(context, lims_id, external, sex, order, application, customer_id, name):
-    """Add a sample to the store."""
+def sample(context, lims_id, external, sex, order, application, priority, customer_id, name):
+    """Add a sample for the CUSTOMER_ID with the NAME."""
     status = context.obj['db']
     customer_obj = status.customer(customer_id)
     if customer_obj is None:
@@ -72,6 +76,7 @@ def sample(context, lims_id, external, sex, order, application, customer_id, nam
         internal_id=lims_id,
         order=order,
         external=external,
+        priority=priority,
     )
     new_record.application_version = application_obj.versions[-1]
     new_record.customer = customer_obj
@@ -80,13 +85,14 @@ def sample(context, lims_id, external, sex, order, application, customer_id, nam
 
 
 @add.command()
-@click.option('--priority', type=click.Choice(PRIORITY_OPTIONS), default='standard')
-@click.option('-p', '--panel', 'panels', multiple=True, required=True, help='Default gene panels')
+@click.option('--priority', type=click.Choice(PRIORITY_OPTIONS), default='standard',
+              help='analysis priority')
+@click.option('-p', '--panel', 'panels', multiple=True, required=True, help='default gene panels')
 @click.argument('customer_id')
 @click.argument('name')
 @click.pass_context
 def family(context, priority, panels, customer_id, name):
-    """Add a family of samples."""
+    """Add a family to link samples to for CUSTOMER_ID with NAME."""
     status = context.obj['db']
     customer_obj = status.customer(customer_id)
     if customer_obj is None:
@@ -102,7 +108,7 @@ def family(context, priority, panels, customer_id, name):
     new_family = status.add_family(
         name=name,
         panels=panels,
-        priority=priority
+        priority=priority,
     )
     new_family.customer = customer_obj
     status.add_commit(new_family)
@@ -110,15 +116,15 @@ def family(context, priority, panels, customer_id, name):
 
 
 @add.command()
-@click.option('-m', '--mother', help='sample if for mother of sample')
-@click.option('-f', '--father', help='sample if for father of sample')
+@click.option('-m', '--mother', help='sample ID for mother of sample')
+@click.option('-f', '--father', help='sample ID for father of sample')
 @click.option('-s', '--status', type=click.Choice(['affected', 'unaffected', 'unknown']),
               required=True)
 @click.argument('family_id')
 @click.argument('sample_id')
 @click.pass_context
 def relationship(context, mother, father, status, family_id, sample_id):
-    """Relate a sample to a family."""
+    """Create a link between a FAMILY_ID and a SAMPLE_ID."""
     status_db = context.obj['db']
     family_obj = status_db.family(family_id)
     sample_obj = status_db.sample(sample_id)

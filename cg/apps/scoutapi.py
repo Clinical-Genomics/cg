@@ -6,6 +6,7 @@ from pymongo import MongoClient
 from scout.adapter.mongo import MongoAdapter
 from scout.export.panel import export_panels as scout_export_panels
 from scout.load import load_scout
+from scout.parse.case import parse_case_data
 
 LOG = logging.getLogger(__name__)
 
@@ -21,17 +22,19 @@ class ScoutAPI(MongoAdapter):
     def upload(self, data: dict, threshold: int=5, force: bool=False):
         """Load analysis of a new family into Scout."""
         data['rank_score_threshold'] = threshold
-        existing_case = self.case(institute_id=data['owner'], display_name=data['family_name'])
+        config_data = parse_case_data(config=data)
+        existing_case = self.case(institute_id=config_data['owner'],
+                                  display_name=config_data['family_name'])
         if existing_case:
-            if force or data['analysis_date'] > existing_case['analysis_date']:
-                LOG.info(f"updating existing Scout case")
-                load_scout(self, data, update=True)
+            if force or config_data['analysis_date'] > existing_case['analysis_date']:
+                LOG.info(f"update existing Scout case")
+                load_scout(self, config_data, update=True)
             else:
                 existing_date = existing_case['analysis_date'].date()
                 LOG.warning(f"analysis of case already loaded: {existing_date}")
         else:
-            LOG.debug("loading new Scout case")
-            load_scout(self, data)
+            LOG.debug("load new Scout case")
+            load_scout(self, config_data)
 
     def export_panels(self, panels: List[str]):
         """Pass through to export of a list of gene panels."""

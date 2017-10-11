@@ -15,10 +15,10 @@ EMAIL_OPTION = click.option('-e', '--email', help='email to send errors to')
 @click.group(invoke_without_command=True)
 @PRIORITY_OPTION
 @EMAIL_OPTION
-@click.option('-f', '--family', 'family_id', help='link samples within a family')
+@click.option('-f', '--family', 'family_id', help='family to prepare and start an analysis for')
 @click.pass_context
 def analysis(context, priority, email, family_id):
-    """Start an analysis (MIP) for a family."""
+    """Start an analysis (MIP) for a FAMILY_ID."""
     context.obj['db'] = Store(context.obj['database'])
     hk_api = hk.HousekeeperAPI(context.obj)
     scout_api = scoutapi.ScoutAPI(context.obj)
@@ -49,7 +49,7 @@ def analysis(context, priority, email, family_id):
 @click.argument('family_id')
 @click.pass_context
 def config(context, dry, family_id):
-    """Generate a config for the family."""
+    """Generate a config for the FAMILY_ID."""
     family_obj = context.obj['db'].family(family_id)
     config_data = context.obj['api'].config(family_obj)
     if dry:
@@ -60,11 +60,11 @@ def config(context, dry, family_id):
 
 
 @analysis.command()
-@click.option('-f', '--family', 'family_id', help='link samples within a family')
+@click.option('-f', '--family', 'family_id', help='link all samples for a family')
 @click.argument('sample_id', required=False)
 @click.pass_context
 def link(context, family_id, sample_id):
-    """Link FASTQ files for a sample."""
+    """Link FASTQ files for a SAMPLE_ID."""
     if family_id and (sample_id is None):
         # link all samples in a family
         family_obj = context.obj['db'].family(family_id)

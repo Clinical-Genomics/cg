@@ -7,7 +7,7 @@ from trailblazer.mip import files as mip_files
 
 from cg.exc import AnalysisNotFinishedError
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 class AddHandler:
@@ -66,13 +66,25 @@ class AddHandler:
             'path': f"{sampleinfo_data['snv']['gbcf']}.csi",
             'tags': ['snv-gbcf-index'],
             'archive': True,
+        }, {
+            'path': sampleinfo_data['peddy']['ped_check'],
+            'tags': ['peddy', 'ped-check'],
+            'archive': False,
+        }, {
+            'path': sampleinfo_data['peddy']['ped'],
+            'tags': ['peddy', 'ped'],
+            'archive': False,
+        }, {
+            'path': sampleinfo_data['peddy']['sex_check'],
+            'tags': ['peddy', 'sex-check'],
+            'archive': False,
         }]
 
         for variant_type in ['snv', 'sv']:
             for output_type in ['clinical', 'research']:
                 vcf_path = sampleinfo_data[variant_type][f"{output_type}_vcf"]
                 if vcf_path is None:
-                    log.warn(f"missing file: {output_type} {variant_type} VCF")
+                    LOG.warning(f"missing file: {output_type} {variant_type} VCF")
                     continue
                 vcf_tag = f"vcf-{variant_type}-{output_type}"
                 data.append({

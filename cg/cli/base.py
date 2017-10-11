@@ -14,15 +14,18 @@ from .set import set_cmd
 from .status import status
 from .transfer import transfer
 
+LEVELS = ['DEBUG', 'INFO', 'WARNING', 'ERROR']
+
 
 @click.group()
-@click.option('-c', '--config', type=click.File())
+@click.option('-c', '--config', type=click.File(), help='path to config file')
 @click.option('-d', '--database', help='path/URI of the SQL database')
-@click.option('-l', '--log-level', default='INFO')
+@click.option('-l', '--log-level', type=click.Choice(LEVELS), default='INFO',
+              help='lowest level to log at')
 @click.version_option(cg.__version__, prog_name=cg.__title__)
 @click.pass_context
 def base(context, config, database, log_level):
-    """Housekeeper - Access your files!"""
+    """cg - interface between tools at Clinical Genomics."""
     coloredlogs.install(level=log_level)
     context.obj = ruamel.yaml.safe_load(config) if config else {}
     if database:
@@ -35,19 +38,19 @@ def base(context, config, database, log_level):
 @click.pass_context
 def init(context, reset, force):
     """Setup the database."""
-    db = Store(context.obj['database'])
-    existing_tables = db.engine.table_names()
+    status_db = Store(context.obj['database'])
+    existing_tables = status_db.engine.table_names()
     if force or reset:
         if existing_tables and not force:
             message = f"Delete existing tables? [{', '.join(existing_tables)}]"
             click.confirm(click.style(message, fg='yellow'), abort=True)
-        db.drop_all()
+        status_db.drop_all()
     elif existing_tables:
         click.echo(click.style("Database already exists, use '--reset'", fg='red'))
         context.abort()
 
-    db.create_all()
-    message = f"Success! New tables: {', '.join(db.engine.table_names())}"
+    status_db.create_all()
+    message = f"Success! New tables: {', '.join(status_db.engine.table_names())}"
     click.echo(click.style(message, fg='green'))
 
 
