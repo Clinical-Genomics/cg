@@ -44,6 +44,8 @@ class AnalysisAPI():
                 kwargs['priority'] = 'high'
             else:
                 kwargs['priority'] = 'normal'
+        if family_obj.application_version.application.is_external:
+            kwargs['skip_evaluation'] = True
         self.tb.start(family_obj.internal_id, **kwargs)
         # mark the family as running
         family_obj.action = 'running'
@@ -65,7 +67,7 @@ class AnalysisAPI():
         for link in family_obj.links:
             sample_data = {
                 'sample_id': link.sample.internal_id,
-                'analysis_type': link.sample.application_version.application.category,
+                'analysis_type': link.sample.application_version.application.prep_category,
                 'sex': link.sample.sex,
                 'phenotype': link.status,
                 'expected_coverage': link.sample.application_version.application.sequencing_depth,
@@ -109,7 +111,7 @@ class AnalysisAPI():
         self.tb.link(
             family=link_obj.family.internal_id,
             sample=link_obj.sample.internal_id,
-            analysis_type=link_obj.sample.application_version.application.category,
+            analysis_type=link_obj.sample.application_version.application.prep_category,
             files=files,
         )
 

@@ -34,7 +34,7 @@ class AddHandler:
         """Add a new application to the store."""
         new_record = self.Application(
             tag=tag,
-            category=category,
+            prep_category=category,
             description=description,
             is_accredited=is_accredited,
             **kwargs,

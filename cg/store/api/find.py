@@ -52,11 +52,11 @@ class FindHandler:
         """Fetch an application from the store."""
         return self.Application.query.filter_by(tag=tag).first()
 
-    def applications(self, *, category=None):
         """Fetch all applications."""
+    def applications(self, *, category=None):
         records = self.Application.query
         if category:
-            records = records.filter_by(category=category)
+            records = records.filter_by(prep_category=category)
         return records
 
     def application_version(self, application: models.Application,
