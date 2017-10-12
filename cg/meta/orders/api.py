@@ -8,7 +8,7 @@ from typing import List
 from cg.apps.lims import LimsAPI
 from cg.apps.osticket import OsTicket
 from cg.exc import OrderError, TicketCreationError
-from cg.store import Store
+from cg.store import Store, models
 from .schema import ExternalProject, FastqProject, RmlProject, ScoutProject
 from .lims import LimsHandler
 from .status import StatusHandler
@@ -82,14 +82,15 @@ class OrdersAPI(LimsHandler, StatusHandler):
         status_data = self.samples_to_status(data)
         project_data, lims_map = self.process_lims(data, data['samples'])
         self.fillin_sample_ids(status_data['samples'], lims_map)
-        new_records = self.store_samples(
+        new_samples = self.store_samples(
             customer=status_data['customer'],
             order=status_data['order'],
             ordered=project_data['date'],
             ticket=data['ticket'],
             samples=status_data['samples'],
         )
-        return {'project': project_data, 'records': new_records}
+        self.add_missing_reads(new_samples)
+        return {'project': project_data, 'records': new_samples}
 
     def submit_external(self, data: dict) -> dict:
         """Submit a batch of externally sequenced samples for analysis."""
@@ -99,6 +100,11 @@ class OrdersAPI(LimsHandler, StatusHandler):
     def submit_scout(self, data: dict) -> dict:
         """Submit a batch of samples for sequencing and analysis."""
         result = self.process_analysis_samples(data)
+        for family_obj in result['records']:
+            status_samples = [link_obj.sample for link_obj in family_obj.links if
+                              link_obj.sample.ticket_number == data['ticket']]
+            self.add_missing_reads(status_samples)
+        self.update_application(data['ticket'], result['records'])
         return result
 
     def process_analysis_samples(self, data: dict) -> dict:
@@ -123,6 +129,35 @@ class OrdersAPI(LimsHandler, StatusHandler):
             families=status_data['families'],
         )
         return {'project': project_data, 'records': new_families}
+
+    def update_application(self, ticket_number: int, families: List[models.Family]):
+        """Update application for trios if relevant."""
+        reduced_map  = {'EXOSXTR100': 'EXTSXTR100', 'WGSPCFC030': 'WGTPCFC030',
+                        'WGSPCFC060': 'WGTPCFC060'}
+        for family_obj in families:
+            order_samples = [link_obj.sample for link_obj in family_obj.links if
+                             link_obj.sample.ticket_number == ticket_number]
+            if len(order_samples) >= 3:
+                applications = [sample_obj.application_version.application for sample_obj in
+                                order_samples]
+                prep_categories = set(application.prep_category for application in applications)
+                if len(prep_categories) == 1:
+                    for sample_obj in order_samples:
+                        if not sample_obj.application_version.application.reduced_price:
+                            application_tag = sample_obj.application_version.application.tag
+                            if application_tag in reduced_map:
+                                reduced_tag = reduced_map[application_tag]
+                                LOG.info(f"{sample_obj.internal_id}: update application tag - "
+                                         f"{reduced_tag}")
+                                reduced_version = self.status.latest_version(reduced_tag)
+                                sample_obj.application_version = reduced_version
+
+    def add_missing_reads(self, samples: List[models.Sample]):
+        """Add expected reads/reads missing."""
+        for sample_obj in samples:
+            LOG.info(f"{sample_obj.internal_id}: add missing reads in LIMS")
+            target_reads = sample_obj.application_version.application.total_reads / 1000000
+            self.lims.update_sample(sample_obj.internal_id, target_reads=target_reads)
 
     def fillin_sample_ids(self, samples: List[dict], lims_map: dict):
         """Fill in LIMS sample ids."""
