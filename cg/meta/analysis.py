@@ -43,8 +43,16 @@ class AnalysisAPI():
                 kwargs['priority'] = 'high'
             else:
                 kwargs['priority'] = 'normal'
-        if family_obj.application_version.application.is_external:
-            kwargs['skip_evaluation'] = True
+
+        # skip MIP evaluation of QC criteria if any sample is downsampled/external
+        for link_obj in family_obj.links:
+            downsampled = isinstance(link_obj.sample.downsampled_to, int)
+            external = link_obj.sample.application_version.application.is_external
+            if downsampled or external:
+                LOG.info(f"{link_obj.sample.internal_id}: downsampled/external - skip evaluation")
+                kwargs['skip_evaluation'] = True
+                break
+
         self.tb.start(family_obj.internal_id, **kwargs)
         # mark the family as running
         family_obj.action = 'running'

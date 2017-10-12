@@ -52,8 +52,8 @@ class FindHandler:
         """Fetch an application from the store."""
         return self.Application.query.filter_by(tag=tag).first()
 
-        """Fetch all applications."""
     def applications(self, *, category=None):
+        """Fetch all applications."""
         records = self.Application.query
         if category:
             records = records.filter_by(prep_category=category)

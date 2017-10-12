@@ -200,7 +200,8 @@ class Sample(Model, PriorityMixin):
     order = Column(types.String(64))
     ticket_number = Column(types.Integer)
     sex = Column(types.Enum('male', 'female', 'unknown'), nullable=False)
-    is_external = Column(types.Boolean, default=False)
+    is_external = Column(types.Boolean, default=False)  # DEPRECATED
+    downsampled_to = Column(types.BigInteger)
     is_tumour = Column(types.Boolean, default=False)
     loqusdb_id = Column(types.String(64))
     capture_kit = Column(types.String(64))

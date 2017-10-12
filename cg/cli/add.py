@@ -49,7 +49,7 @@ def user(context, admin, customer_id, email, name):
 
 @add.command()
 @click.option('-l', '--lims', 'lims_id', help='LIMS id for the sample')
-@click.option('-e', '--external', is_flag=True, help='is the sample externally sequenced?')
+@click.option('-d', '--downsampled', type=int, help='how many reads is the sample downsampled to?')
 @click.option('-o', '--order', help='name of the order the sample belongs to')
 @click.option('-s', '--sex', type=click.Choice(['male', 'female', 'unknown']), required=True,
               help='sample pedigree sex')
@@ -59,7 +59,7 @@ def user(context, admin, customer_id, email, name):
 @click.argument('customer_id')
 @click.argument('name')
 @click.pass_context
-def sample(context, lims_id, external, sex, order, application, priority, customer_id, name):
+def sample(context, lims_id, downsampled, sex, order, application, priority, customer_id, name):
     """Add a sample for the CUSTOMER_ID with the NAME."""
     status = context.obj['db']
     customer_obj = status.customer(customer_id)
@@ -75,7 +75,7 @@ def sample(context, lims_id, external, sex, order, application, priority, custom
         sex=sex,
         internal_id=lims_id,
         order=order,
-        external=external,
+        downsampled_to=downsampled,
         priority=priority,
     )
     new_record.application_version = application_obj.versions[-1]
