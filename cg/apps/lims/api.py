@@ -7,6 +7,7 @@ from genologics.lims import Lims
 from dateutil.parser import parse as parse_date
 
 from cg.exc import LimsDataError
+from .constants import PROP2UDF
 from .order import OrderHandler
 
 SEX_MAP = {'F': 'female', 'M': 'male', 'Unknown': 'unknown', 'unknown': 'unknown'}
@@ -20,7 +21,7 @@ class LimsAPI(Lims, OrderHandler):
         lconf = config['lims']
         super(LimsAPI, self).__init__(lconf['host'], lconf['username'], lconf['password'])
 
-    def sample(self, lims_id):
+    def sample(self, lims_id: str):
         """Fetch a sample from the LIMS database."""
         lims_sample = Sample(self, id=lims_id)
         data = self._export_sample(lims_sample)
@@ -160,11 +161,16 @@ class LimsAPI(Lims, OrderHandler):
             for lims_sample in lims_artifact.samples:
                 yield lims_sample.id
 
-    def update_sample(self, lims_id: str, sex=None):
+    def update_sample(self, lims_id: str, sex=None, application: str=None,
+                      target_reads: int=None):
         """Update information about a sample."""
         lims_sample = Sample(self, id=lims_id)
         if sex:
             lims_gender = REV_SEX_MAP.get(sex)
             if lims_gender:
-                lims_sample.udf['Gender'] = lims_gender
+                lims_sample.udf[PROP2UDF['sex']] = lims_gender
+        if application:
+            lims_sample.udf[PROP2UDF['application']] = application
+        if isinstance(target_reads, int):
+            lims_sample.udf[PROP2UDF['target_reads']] = target_reads
         lims_sample.put()

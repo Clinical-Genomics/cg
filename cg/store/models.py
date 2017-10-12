@@ -340,6 +340,10 @@ class Application(Model):
         return self.tag
 
     @property
+    def reduced_price(self):
+        return self.tag.startswith('WGT') or self.tag.startswith('EXT')
+
+    @property
     def expected_reads(self):
         return self.target_reads * 0.75
 

@@ -6,28 +6,10 @@ from xml.etree import ElementTree
 from genologics.entities import Project, Researcher, Sample, Container, Containertype, Artifact
 
 from cg.exc import OrderError
+from .constants import PROP2UDF
 
 LOG = logging.getLogger(__name__)
 CONTAINER_TYPE_MAP = {'Tube': 2, '96 well plate': 1}
-PROP2UDF = {
-    'require_qcok': 'Process only if QC OK',
-    'application': 'Sequencing Analysis',
-    'priority': 'priority',
-    'source': 'Source',
-    'comment': 'Comment',
-    'customer': 'customer',
-    'family_name': 'familyID',
-    'quantity': 'Quantity',
-    'tumour': 'tumor',
-    'pool': 'pool name',
-    'index': 'Index type',
-    'index_number': 'Index number',
-    'concentration': 'Concentration (nM)',
-    'volume': 'Volume (uL)',
-    'well_position_rml': 'RML well position',
-    'rml_plate_name': 'RML plate name',
-    'sex': 'Gender',
-}
 
 
 class OrderHandler:
