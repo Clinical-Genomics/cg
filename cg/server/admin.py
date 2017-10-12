@@ -39,13 +39,12 @@ class ApplicationView(BaseView):
         'created_at',
         'updated_at',
         'category',
-        'is_external',
     ]
     column_searchable_list = ['tag', 'prep_category']
     column_filters = ['prep_category', 'is_accredited']
     column_editable_list = ['description', 'is_accredited', 'target_reads', 'comment',
-                            'prep_category', 'sequencing_depth', 'downsampled_to']
-    form_excluded_columns = ['category', 'is_external']
+                            'prep_category', 'sequencing_depth', 'is_external']
+    form_excluded_columns = ['category']
 
 
 class ApplicationVersionView(BaseView):
@@ -75,9 +74,11 @@ class FamilyView(BaseView):
 
 
 class SampleView(BaseView):
+    column_exclude_list = ['is_external']
     column_searchable_list = ['internal_id', 'name', 'ticket_number', 'customer.internal_id']
     column_filters = ['customer.internal_id', 'sex', 'application_version.application']
-    column_editable_list = ['sex']
+    column_editable_list = ['sex', 'downsampled_to']
+    form_excluded_columns = ['is_external']
 
 
 class FamilySampleView(BaseView):
