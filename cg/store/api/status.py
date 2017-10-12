@@ -21,16 +21,29 @@ class StatusHandler:
         )
         return records
 
+    def samples_to_prepare(self):
+        """Fetch samples in lab prep queue."""
+        records = (
+            self.Sample.query
+            .filter(
+                models.Sample.received_at != None,
+                models.Sample.prepared_at == None,
+                models.Sample.is_external == False,
+            )
+            .order_by(models.Sample.priority.desc(), models.Sample.received_at)
+        )
+        return records
+
     def samples_to_sequence(self):
         """Fetch samples in sequencing."""
         records = (
             self.Sample.query
             .filter(
-                models.Sample.received_at != None,
+                models.Sample.prepared_at != None,
                 models.Sample.sequenced_at == None,
                 models.Sample.is_external == False,
             )
-            .order_by(models.Sample.priority.desc(), models.Sample.ordered_at)
+            .order_by(models.Sample.priority.desc(), models.Sample.received_at)
         )
         return records
 

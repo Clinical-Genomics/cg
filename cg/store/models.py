@@ -207,6 +207,7 @@ class Sample(Model, PriorityMixin):
     reads = Column(types.BigInteger, default=0)
     ordered_at = Column(types.DateTime, nullable=False)
     received_at = Column(types.DateTime)
+    prepared_at = Column(types.DateTime)
     sequence_start = Column(types.DateTime)
     sequenced_at = Column(types.DateTime)
     delivered_at = Column(types.DateTime)
