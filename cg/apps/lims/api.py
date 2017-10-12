@@ -65,6 +65,7 @@ class LimsAPI(Lims, OrderHandler):
         }
 
     def get_received_date(self, lims_id: str) -> str:
+        """Get the date when a sample was received."""
         lims_artifacts = self.get_artifacts(process_type='CG002 - Reception Control',
                                             samplelimsid=lims_id)
         for artifact in lims_artifacts:
@@ -74,9 +75,6 @@ class LimsAPI(Lims, OrderHandler):
 
     def get_prepared_date(self, lims_id: str) -> dt.datetime:
         """Get the date when a sample was prepared in the lab."""
-        lims_sample = Sample(self, id=lims_id)
-        if lims_sample.udf.get('Passed Library QC') is not True:
-            return None
         process_type = 'CG002 - Aggregate QC (Library Validation)'
         artifacts = self.get_artifacts(process_type=process_type, samplelimsid=lims_id)
         if artifacts:

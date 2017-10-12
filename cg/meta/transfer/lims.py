@@ -37,8 +37,8 @@ class TransferLims(object):
         for sample_obj in samples:
             status_date = self._date_functions[status_type](sample_obj.internal_id)
             if status_date is None:
-                LOG.debug(f"no {status_type} date found for {sample_obj.internal_id}")
+                LOG.debug(f"no {status_type.value} date found for {sample_obj.internal_id}")
             else:
-                LOG.info(f"found {status_type} date for {sample_obj.internal_id}: {status_date}")
-                setattr(sample_obj, f"{status_type}_at", status_date)
+                LOG.info(f"found {status_type.value} date for {sample_obj.internal_id}: {status_date}")
+                setattr(sample_obj, f"{status_type.value}_at", status_date)
                 self.status.commit()

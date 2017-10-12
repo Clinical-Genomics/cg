@@ -114,6 +114,8 @@ def samples():
     """Fetch samples."""
     if request.args.get('status') == 'incoming':
         samples_q = db.samples_to_recieve()
+    elif request.args.get('status') == 'labprep':
+        samples_q = db.samples_to_prepare()
     elif request.args.get('status') == 'sequencing':
         samples_q = db.samples_to_sequence()
     else:
@@ -121,7 +123,7 @@ def samples():
             query=request.args.get('query'),
             customer=db.customer(request.args.get('customer')),
         )
-    limit = int(request.args.get('limit', 30))
+    limit = int(request.args.get('limit', 50))
     data = [sample_obj.to_dict() for sample_obj in samples_q.limit(limit)]
     return jsonify(samples=data, total=samples_q.count())
 
