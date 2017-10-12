@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import datetime as dt
 import gzip
 import logging
 import re
