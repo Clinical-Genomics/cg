@@ -7,13 +7,16 @@ def test_samples_to_recieve(sample_store):
 
     # WHEN finding which samples are in queue to receive
     assert sample_store.samples_to_recieve().count() == 1
-    assert sample_store.samples_to_recieve().first().is_external is False
-    assert sample_store.samples_to_recieve().first().received_at is None
+    first_sample = sample_store.samples_to_recieve().first()
+    assert first_sample.application_version.application.is_external is False
+    assert first_sample.received_at is None
 
     # WHEN finding external samples to receive
-    assert sample_store.samples_to_recieve(external=True).count() == 1
-    assert sample_store.samples_to_recieve(external=True).first().is_external is True
-    assert sample_store.samples_to_recieve(external=True).first().received_at is None
+    external_query = sample_store.samples_to_recieve(external=True)
+    assert external_query.count() == 1
+    first_sample = external_query.first()
+    assert first_sample.application_version.application.is_external is True
+    assert first_sample.received_at is None
 
 
 def test_samples_to_sequence(sample_store):

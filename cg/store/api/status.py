@@ -12,10 +12,15 @@ class StatusHandler:
         """Fetch incoming samples."""
         records = (
             self.Sample.query
+            .join(
+                models.Sample.application_version,
+                models.ApplicationVersion.application,
+            )
             .filter(
                 models.Sample.received_at == None,
                 models.Sample.sequenced_at == None,
-                models.Sample.is_external == external,
+                models.Sample.downsampled_to == None,
+                models.Application.is_external == external,
             )
             .order_by(models.Sample.ordered_at)
         )
@@ -25,10 +30,15 @@ class StatusHandler:
         """Fetch samples in lab prep queue."""
         records = (
             self.Sample.query
+            .join(
+                models.Sample.application_version,
+                models.ApplicationVersion.application,
+            )
             .filter(
                 models.Sample.received_at != None,
                 models.Sample.prepared_at == None,
-                models.Sample.is_external == False,
+                models.Sample.downsampled_to == None,
+                models.Application.is_external == False,
             )
             .order_by(models.Sample.priority.desc(), models.Sample.received_at)
         )
@@ -38,10 +48,15 @@ class StatusHandler:
         """Fetch samples in sequencing."""
         records = (
             self.Sample.query
+            .join(
+                models.Sample.application_version,
+                models.ApplicationVersion.application,
+            )
             .filter(
                 models.Sample.prepared_at != None,
                 models.Sample.sequenced_at == None,
-                models.Sample.is_external == False,
+                models.Sample.downsampled_to == None,
+                models.Application.is_external == False,
             )
             .order_by(models.Sample.priority.desc(), models.Sample.received_at)
         )
@@ -92,7 +107,8 @@ class StatusHandler:
     def samples_to_deliver(self):
         """Fetch samples that have been sequenced but not delivered."""
         records = self.Sample.query.filter(models.Sample.sequenced_at != None,
-                                           models.Sample.delivered_at == None)
+                                           models.Sample.delivered_at == None,
+                                           models.Sample.downsampled_to == None)
         return records
 
     def flowcells_completed(self):

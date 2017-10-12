@@ -51,16 +51,18 @@ class AddHandler:
         return new_record
 
     def add_sample(self, name: str, sex: str, internal_id: str=None, ordered: dt.datetime=None,
-                   received: dt.datetime=None, order: str=None, external: bool=False,
-                   tumour: bool=False, priority: str='standard', ticket: int=None,
-                   comment: str=None, **kwargs) -> models.Sample:
+                   received: dt.datetime=None, order: str=None, tumour: bool=False,
+                   priority: str=None, ticket: int=None, comment: str=None,
+                   downsampled_to: int=None, **kwargs) -> models.Sample:
         """Add a new sample to the database."""
         internal_id = internal_id or utils.get_unique_id(self.sample)
-        db_priority = PRIORITY_MAP[priority]
+        priority_human = priority or ('research' if downsampled_to else 'standard')
+        db_priority = PRIORITY_MAP[priority_human]
         new_sample = self.Sample(name=name, internal_id=internal_id, received_at=received,
-                                 sex=sex, order=order, is_external=external, is_tumour=tumour,
-                                 ordered_at=ordered or dt.datetime.now(), priority=db_priority,
-                                 ticket_number=ticket, comment=comment, **kwargs)
+                                 sex=sex, order=order, downsampled_to=downsampled_to,
+                                 is_tumour=tumour, ordered_at=ordered or dt.datetime.now(),
+                                 priority=db_priority, ticket_number=ticket, comment=comment,
+                                 **kwargs)
         return new_sample
 
     def add_family(self, name: str, panels: List[str], priority: str='standard') -> models.Family:

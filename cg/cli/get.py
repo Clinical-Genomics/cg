@@ -46,7 +46,7 @@ def sample(context, sample_ids):
             sample_obj.application_version.application.tag,
             sample_obj.state,
             sample_obj.priority_human,
-            'Yes' if sample_obj.is_external else 'No',
+            'Yes' if sample_obj.application_version.application.is_external else 'No',
         ])
     click.echo(tabulate(table, headers=SAMPLE_HEADERS, tablefmt='psql'))
 
