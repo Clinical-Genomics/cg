@@ -80,8 +80,11 @@ class AnalysisAPI():
                 'expected_coverage': link.sample.application_version.application.sequencing_depth,
             }
             if sample_data['analysis_type'] in ('tgs', 'wes'):
-                capture_kit = self.lims.capture_kit(link.sample.internal_id)
-                sample_data['capture_kit'] = CAPTUREKIT_MAP[capture_kit]
+                if link.sample.capture_kit:
+                    sample_data['capture_kit'] = CAPTUREKIT_MAP[link.sample.capture_kit]
+                else:
+                    capture_kit = self.lims.capture_kit(link.sample.internal_id)
+                    sample_data['capture_kit'] = CAPTUREKIT_MAP[capture_kit]
             if link.mother:
                 sample_data['mother'] = link.mother.internal_id
             if link.father:
