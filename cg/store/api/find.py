@@ -23,11 +23,13 @@ class FindHandler:
         """Fetch a family by internal id from the database."""
         return self.Family.query.filter_by(internal_id=internal_id).first()
 
-    def families(self, *, customer: models.Customer=None, query: str=None) -> List[models.Family]:
+    def families(self, *, customer: models.Customer=None, query: str=None,
+                 action: str=None) -> List[models.Family]:
         """Fetch all families."""
         records = self.Family.query
         records = records.filter_by(customer=customer) if customer else records
         records = records.filter(models.Family.name.like(f"%{query}%")) if query else records
+        records = records.filter_by(action=action) if action else records
         return records.order_by(models.Family.created_at.desc())
 
     def find_family(self, customer: models.Customer, name: str) -> models.Family:
