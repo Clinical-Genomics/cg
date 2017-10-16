@@ -93,7 +93,8 @@ def families():
         families_q = db.families(
             query=request.args.get('query'),
             customer=(db.customer(request.args.get('customer')) if
-                      request.args.get('customer') else None)
+                      request.args.get('customer') else None),
+            action=request.args.get('action'),
         )
         count = families_q.count()
         records = families_q.limit(30)
