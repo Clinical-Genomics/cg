@@ -246,3 +246,14 @@ def orderform():
     except OrderFormError as error:
         return abort(make_response(jsonify(message=error.message), 400))
     return jsonify(name=filename.rsplit('.')[0], **project_data)
+
+
+@BLUEPRINT.route('/trends/samples')
+def trends_samples():
+    """Samples per month."""
+    return jsonify(
+        received=list(db.samples_per_month()),
+        prepp_times=list(db.received_to_prepped()),
+        sequence_times=list(db.prepped_to_sequenced()),
+        deliver_times=list(db.sequenced_to_delivered()),
+    )
