@@ -7,6 +7,7 @@ from cg.store import models
 from .add import AddHandler
 from .find import FindHandler
 from .status import StatusHandler
+from .trends import TrendsHandler
 
 LOG = logging.getLogger(__name__)
 
@@ -27,7 +28,7 @@ class BaseHandler:
     Delivery = models.Delivery
 
 
-class CoreHandler(BaseHandler, AddHandler, FindHandler, StatusHandler):
+class CoreHandler(BaseHandler, AddHandler, FindHandler, StatusHandler, TrendsHandler):
     pass
 
 
