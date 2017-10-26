@@ -34,13 +34,45 @@ class TrendsHandler:
             }
             yield data
 
+    def received_to_delivered(self):
+        """Calculate averages from received to delivered."""
+        query = (
+            self.session.query(
+                models.Application.category.label('category'),
+                func.month(models.Sample.received_at).label('month_no'),
+                (func.avg(func.datediff(models.Sample.delivered_at, models.Sample.received_at))
+                     .label('average')),
+            )
+            .join(
+                models.Sample.customer,
+                models.Sample.application_version,
+                models.ApplicationVersion.application,
+            )
+            .filter(
+                models.Customer.priority == 'diagnostic',
+                models.Sample.received_at > dt.datetime(2016, 12, 31),
+                models.Sample.delivered_at != None,
+            )
+            .group_by(func.month(models.Sample.received_at))
+        )
+        for category, results in groupby(query, key=lambda result: result.category):
+            averages = {MONTHS[result.month_no]: float(result.average) for result in results}
+            yield {
+                'category': category,
+                'results': [{
+                    'month': month,
+                    'average': averages.get(month) or None,
+                } for month in MONTHS.values()]
+            }
+
     def received_to_prepped(self):
         """Calculate averages to prepp samples."""
         query = (
             self.session.query(
                 models.Application.category.label('category'),
                 func.month(models.Sample.received_at).label('month_no'),
-                func.avg(func.datediff(models.Sample.prepared_at, models.Sample.received_at)).label('average'),
+                (func.avg(func.datediff(models.Sample.prepared_at, models.Sample.received_at))
+                     .label('average')),
             )
             .join(
                 models.Sample.customer,

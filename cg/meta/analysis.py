@@ -4,6 +4,8 @@ import logging
 import re
 from typing import List
 
+from requests.exceptions import HTTPError
+
 from cg.apps import tb, hk, scoutapi, lims
 from cg.store import models, Store
 
@@ -83,8 +85,14 @@ class AnalysisAPI():
                 if link.sample.capture_kit:
                     sample_data['capture_kit'] = CAPTUREKIT_MAP[link.sample.capture_kit]
                 else:
-                    capture_kit = self.lims.capture_kit(link.sample.internal_id)
-                    sample_data['capture_kit'] = CAPTUREKIT_MAP[capture_kit]
+                    if link.sample.downsampled_to:
+                        LOG.debug(f"{link.sample.name}: downsampled sample, skipping")
+                    else:
+                        try:
+                            capture_kit = self.lims.capture_kit(link.sample.internal_id)
+                            sample_data['capture_kit'] = CAPTUREKIT_MAP[capture_kit]
+                        except HTTPError:
+                            LOG.warning(f"{link.sample.internal_id}: not found (LIMS)")
             if link.mother:
                 sample_data['mother'] = link.mother.internal_id
             if link.father:
