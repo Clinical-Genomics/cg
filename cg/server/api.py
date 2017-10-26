@@ -135,7 +135,8 @@ def sample(sample_id):
     sample_obj = db.sample(sample_id)
     if sample_obj is None:
         return abort(404)
-    return jsonify(**sample_obj.to_dict())
+    data = sample_obj.to_dict(links=True)
+    return jsonify(**data)
 
 
 @BLUEPRINT.route('/pools')
@@ -253,6 +254,7 @@ def trends_samples():
     """Samples per month."""
     return jsonify(
         received=list(db.samples_per_month()),
+        turnaround_times=list(db.received_to_delivered()),
         prepp_times=list(db.received_to_prepped()),
         sequence_times=list(db.prepped_to_sequenced()),
         deliver_times=list(db.sequenced_to_delivered()),

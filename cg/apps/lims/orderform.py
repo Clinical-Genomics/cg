@@ -157,7 +157,7 @@ def parse_sample(raw_sample):
         'sex': REV_SEX_MAP.get(raw_sample['UDF/Gender'].strip()),
         'panels': (raw_sample['UDF/Gene List'].split(';') if
                    raw_sample.get('UDF/Gene List') else None),
-        'require_qcok': True if raw_sample['UDF/Process only if QC OK'] else False,
+        'require_qcok': raw_sample['UDF/Process only if QC OK'] == 'yes',
         'application': raw_sample['UDF/Sequencing Analysis'],
         'source': source if source in SOURCE_TYPES else None,
         'status': raw_sample['UDF/Status'].lower() if raw_sample.get('UDF/Status') else None,

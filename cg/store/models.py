@@ -98,11 +98,14 @@ class FamilySample(Model):
     mother = orm.relationship('Sample', foreign_keys=[mother_id])
     father = orm.relationship('Sample', foreign_keys=[father_id])
 
-    def to_dict(self, samples: bool=False) -> dict:
+    def to_dict(self, parents: bool=False, samples: bool=False) -> dict:
         """Override dicify method."""
         data = super(FamilySample, self).to_dict()
         if samples:
             data['sample'] = self.sample.to_dict()
+            data['mother'] = self.mother.to_dict() if self.mother else None
+            data['father'] = self.father.to_dict() if self.father else None
+        elif parents:
             data['mother'] = self.mother.to_dict() if self.mother else None
             data['father'] = self.father.to_dict() if self.father else None
         return data
@@ -238,13 +241,15 @@ class Sample(Model, PriorityMixin):
         else:
             return f"Ordered {self.ordered_at.date()}"
 
-    def to_dict(self) -> dict:
+    def to_dict(self, links: bool=False) -> dict:
         """Override dicify method."""
         data = super(Sample, self).to_dict()
         data['priority'] = self.priority_human
         data['customer'] = self.customer.to_dict()
         data['application_version'] = self.application_version.to_dict()
         data['application'] = self.application_version.application.to_dict()
+        if links:
+            data['links'] = [link_obj.to_dict(parents=True) for link_obj in self.links]
         return data
 
 
