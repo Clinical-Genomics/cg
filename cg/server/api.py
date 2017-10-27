@@ -191,7 +191,7 @@ def options():
     """Fetch various options."""
     customer_objs = db.Customer.query.all() if g.current_user.is_admin else [g.current_user.customer]
     apptag_groups = {'ext': []}
-    for application_obj in db.Application.query:
+    for application_obj in db.applications(archived=False):
         if application_obj.is_external:
             apptag_groups['ext'].append(application_obj.tag)
         else:
@@ -219,7 +219,7 @@ def me():
 @public
 def applications():
     """Fetch application tags."""
-    query = db.Application.query
+    query = db.applications(archived=False)
     data = [record.to_dict() for record in query]
     return jsonify(applications=data)
 

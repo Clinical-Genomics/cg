@@ -54,11 +54,13 @@ class FindHandler:
         """Fetch an application from the store."""
         return self.Application.query.filter_by(tag=tag).first()
 
-    def applications(self, *, category=None):
+    def applications(self, *, category=None, archived=None):
         """Fetch all applications."""
         records = self.Application.query
         if category:
             records = records.filter_by(prep_category=category)
+        if archived is not None:
+            records = records.filter_by(is_archived=archived)
         return records
 
     def application_version(self, application: models.Application,
