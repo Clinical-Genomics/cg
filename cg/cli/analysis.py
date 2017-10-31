@@ -18,7 +18,7 @@ EMAIL_OPTION = click.option('-e', '--email', help='email to send errors to')
 @click.option('-f', '--family', 'family_id', help='family to prepare and start an analysis for')
 @click.pass_context
 def analysis(context, priority, email, family_id):
-    """Start an analysis (MIP) for a FAMILY_ID."""
+    """Prepare and start a MIP analysis for a FAMILY_ID."""
     context.obj['db'] = Store(context.obj['database'])
     hk_api = hk.HousekeeperAPI(context.obj)
     scout_api = scoutapi.ScoutAPI(context.obj)

@@ -14,7 +14,7 @@ def status(context):
 @status.command()
 @click.pass_context
 def analysis(context):
-    """Which families are gonna be analyzed?"""
+    """Which families will be analyzed?"""
     records = context.obj['db'].families_to_analyze()
     for family_obj in records:
         click.echo(family_obj)
