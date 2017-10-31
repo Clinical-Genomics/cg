@@ -90,7 +90,10 @@ class AnalysisAPI():
                     else:
                         try:
                             capture_kit = self.lims.capture_kit(link.sample.internal_id)
-                            sample_data['capture_kit'] = CAPTUREKIT_MAP[capture_kit]
+                            if capture_kit is None or capture_kit == 'NA':
+                                LOG.warning(f"{link.sample.internal_id}: capture kit not found")
+                            else:
+                                sample_data['capture_kit'] = CAPTUREKIT_MAP[capture_kit]
                         except HTTPError:
                             LOG.warning(f"{link.sample.internal_id}: not found (LIMS)")
             if link.mother:
