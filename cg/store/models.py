@@ -5,7 +5,7 @@ from typing import List
 import alchy
 from sqlalchemy import Column, ForeignKey, orm, types, UniqueConstraint, Table
 
-from cg.constants import PRIORITY_MAP, REV_PRIORITY_MAP, FAMILY_ACTIONS, PREP_CATEGORIES
+from cg import constants
 
 Model = alchy.make_declarative_base(Base=alchy.ModelBase)
 
@@ -15,11 +15,11 @@ class PriorityMixin:
     @property
     def priority_human(self):
         """Humanized priority for sample."""
-        return REV_PRIORITY_MAP[self.priority]
-    
+        return constants.REV_PRIORITY_MAP[self.priority]
+
     @priority_human.setter
     def priority_human(self, priority_str: str):
-        self.priority = PRIORITY_MAP.get(priority_str)
+        self.priority = constants.PRIORITY_MAP.get(priority_str)
 
     @property
     def high_priority(self):
@@ -128,7 +128,7 @@ class Family(Model, PriorityMixin):
     name = Column(types.String(128), nullable=False)
     priority = Column(types.Integer, default=1, nullable=False)
     _panels = Column(types.Text, nullable=False)
-    action = Column(types.Enum(*FAMILY_ACTIONS))
+    action = Column(types.Enum(*constants.FAMILY_ACTIONS))
 
     ordered_at = Column(types.DateTime, default=dt.datetime.now)
     created_at = Column(types.DateTime, default=dt.datetime.now)
@@ -273,6 +273,7 @@ class Flowcell(Model):
     sequencer_name = Column(types.String(32))
     sequenced_at = Column(types.DateTime)
     archived_at = Column(types.DateTime)
+    status = Column(types.Enum(*constants.FLOWCELL_STATUS))
 
     samples = orm.relationship('Sample', secondary=flowcell_sample, backref='flowcells')
 
@@ -320,7 +321,7 @@ class Application(Model):
     tag = Column(types.String(32), unique=True, nullable=False)
     # DEPRECATED
     category = Column(types.Enum('wgs', 'wes', 'tga', 'rna', 'mic', 'rml'), nullable=False)
-    prep_category = Column(types.Enum(*PREP_CATEGORIES), nullable=False)
+    prep_category = Column(types.Enum(*constants.PREP_CATEGORIES), nullable=False)
     is_external = Column(types.Boolean, nullable=False, default=False)
     description = Column(types.String(256), nullable=False)
     is_accredited = Column(types.Boolean, nullable=False)

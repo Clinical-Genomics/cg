@@ -105,6 +105,7 @@ class FamilySampleView(BaseView):
 class FlowcellView(BaseView):
     column_searchable_list = ['name']
     column_filters = ['sequencer_type', 'sequencer_name']
+    column_editable_list = ['status']
 
 
 class AnalysisView(BaseView):
