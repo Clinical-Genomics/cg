@@ -11,3 +11,4 @@ CAPTUREKIT_OPTIONS = ('Agilent Sureselect CRE',
                       'Agilent Sureselect V5',
                       'SureSelect Focused Exome',
                       'other')
+FLOWCELL_STATUS = ('ondisk', 'removed', 'requested')
