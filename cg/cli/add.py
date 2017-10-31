@@ -8,7 +8,7 @@ from cg.store import Store
 @click.group()
 @click.pass_context
 def add(context):
-    """Add stuff to the database."""
+    """Add new things to the database."""
     context.obj['db'] = Store(context.obj['database'])
 
 
@@ -17,7 +17,7 @@ def add(context):
 @click.argument('name')
 @click.pass_context
 def customer(context, internal_id: str, name: str):
-    """Add a new customer with the unique INTERNAL_ID and NAME."""
+    """Add a new customer with a unique INTERNAL_ID and NAME."""
     existing = context.obj['db'].customer(internal_id)
     if existing:
         click.echo(click.style(f"customer already added: {existing.name}", fg='yellow'))
@@ -36,7 +36,7 @@ def customer(context, internal_id: str, name: str):
 @click.argument('name')
 @click.pass_context
 def user(context, admin, customer_id, email, name):
-    """Add a new user with the login EMAIL and full NAME."""
+    """Add a new user with an EMAIL (login) and a NAME (full)."""
     customer_obj = context.obj['db'].customer(customer_id)
     existing = context.obj['db'].user(email)
     if existing:
@@ -60,7 +60,7 @@ def user(context, admin, customer_id, email, name):
 @click.argument('name')
 @click.pass_context
 def sample(context, lims_id, downsampled, sex, order, application, priority, customer_id, name):
-    """Add a sample for the CUSTOMER_ID with the NAME."""
+    """Add a sample for CUSTOMER_ID with a NAME (display)."""
     status = context.obj['db']
     customer_obj = status.customer(customer_id)
     if customer_obj is None:
@@ -92,7 +92,7 @@ def sample(context, lims_id, downsampled, sex, order, application, priority, cus
 @click.argument('name')
 @click.pass_context
 def family(context, priority, panels, customer_id, name):
-    """Add a family to link samples to for CUSTOMER_ID with NAME."""
+    """Add a family to CUSTOMER_ID with a NAME."""
     status = context.obj['db']
     customer_obj = status.customer(customer_id)
     if customer_obj is None:
