@@ -60,11 +60,25 @@ class AddHandler:
             'archive': True,
         }, {
             'path': sampleinfo_data['snv']['gbcf'],
-            'tags': ['snv-gbcf'],
-            'archive': True,
+            'tags': ['snv-gbcf']
         }, {
             'path': f"{sampleinfo_data['snv']['gbcf']}.csi",
-            'tags': ['snv-gbcf-index'],
+            'tags': ['snv-gbcf-index']
+        }, {
+            'path': sampleinfo_data['snv']['bcf'],
+            'tags': ['snv-bcf'],
+            'archive': True,
+        }, {
+            'path': f"{sampleinfo_data['snv']['bcf']}.csi",
+            'tags': ['snv-bcf-index'],
+            'archive': True,
+        }, {
+            'path': sampleinfo_data['sv']['bcf'],
+            'tags': ['sv-bcf'],
+            'archive': True,
+        }, {
+            'path': f"{sampleinfo_data['sv']['bcf']}.csi",
+            'tags': ['sv-bcf-index'],
             'archive': True,
         }, {
             'path': sampleinfo_data['peddy']['ped_check'],
