@@ -60,10 +60,12 @@ class AddHandler:
             'archive': True,
         }, {
             'path': sampleinfo_data['snv']['gbcf'],
-            'tags': ['snv-gbcf']
+            'tags': ['snv-gbcf'],
+            'archive': False,
         }, {
             'path': f"{sampleinfo_data['snv']['gbcf']}.csi",
-            'tags': ['snv-gbcf-index']
+            'tags': ['snv-gbcf-index'],
+            'archive': False,
         }, {
             'path': sampleinfo_data['snv']['bcf'],
             'tags': ['snv-bcf'],
