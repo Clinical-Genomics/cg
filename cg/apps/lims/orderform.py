@@ -171,6 +171,7 @@ def parse_sample(raw_sample):
         'reagent_label': (raw_sample['Sample/Reagent Label'] if
                           raw_sample.get('Sample/Reagent Label') else None),
         'tumour': True if raw_sample.get('UDF/tumor') == 'yes' else False,
+        'custom_index': raw_sample.get('UDF/Custom index'),
     }
 
     data_analysis = raw_sample.get('UDF/Data Analysis') or 'fastq'
