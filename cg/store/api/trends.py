@@ -56,7 +56,8 @@ class TrendsHandler:
             .group_by(func.month(models.Sample.received_at))
         )
         for category, results in groupby(query, key=lambda result: result.category):
-            averages = {MONTHS[result.month_no]: float(result.average) for result in results}
+            averages = {MONTHS[result.month_no]: float(result.average) if result.average else None
+                        for result in results}
             yield {
                 'category': category,
                 'results': [{
@@ -86,7 +87,8 @@ class TrendsHandler:
             .group_by(func.month(models.Sample.received_at))
         )
         for category, results in groupby(query, key=lambda result: result.category):
-            averages = {MONTHS[result.month_no]: float(result.average) for result in results}
+            averages = {MONTHS[result.month_no]: float(result.average) if result.average else None
+                        for result in results}
             yield {
                 'category': category,
                 'results': [{
@@ -115,7 +117,8 @@ class TrendsHandler:
             .group_by(func.month(models.Sample.received_at))
         )
         for category, results in groupby(query, key=lambda result: result.category):
-            averages = {MONTHS[result.month_no]: float(result.average) for result in results}
+            averages = {MONTHS[result.month_no]: float(result.average) if result.average else None
+                        for result in results}
             yield {
                 'category': category,
                 'results': [{
@@ -145,7 +148,8 @@ class TrendsHandler:
             .group_by(func.month(models.Sample.received_at))
         )
         for category, results in groupby(query, key=lambda result: result.category):
-            averages = {MONTHS[result.month_no]: float(result.average) for result in results}
+            averages = {MONTHS[result.month_no]: float(result.average) if result.average else None
+                        for result in results}
             yield {
                 'category': category,
                 'results': [{
