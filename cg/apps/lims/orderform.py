@@ -72,9 +72,11 @@ def get_project_type(document_title: str, parsed_samples: List) -> str:
         return 'rml'
     elif '1541' in document_title:
         return 'external'
+    elif '1603' in document_title:
+        return 'microbial'
 
     analyses = set(sample['analysis'] for sample in parsed_samples)
-    project_type = analyses.pop() if len(analyses) == 1 else 'scout'    
+    project_type = analyses.pop() if len(analyses) == 1 else 'scout'
     return project_type
 
 
@@ -154,7 +156,7 @@ def parse_sample(raw_sample):
         'rml_plate_name': raw_sample.get('UDF/RML plate name'),
         'well_position': raw_sample.get('Sample/Well Location'),
         'well_position_rml': raw_sample.get('UDF/RML well position'),
-        'sex': REV_SEX_MAP.get(raw_sample['UDF/Gender'].strip()),
+        'sex': REV_SEX_MAP.get(raw_sample.get('UDF/Gender', '').strip()),
         'panels': (raw_sample['UDF/Gene List'].split(';') if
                    raw_sample.get('UDF/Gene List') else None),
         'require_qcok': raw_sample['UDF/Process only if QC OK'] == 'yes',
@@ -162,11 +164,11 @@ def parse_sample(raw_sample):
         'source': source if source in SOURCE_TYPES else None,
         'status': raw_sample['UDF/Status'].lower() if raw_sample.get('UDF/Status') else None,
         'customer': raw_sample['UDF/customer'],
-        'family': raw_sample['UDF/familyID'],
+        'family': raw_sample.get('UDF/familyID'),
         'priority': raw_sample['UDF/priority'].lower() if raw_sample.get('UDF/priority') else None,
         'capture_kit': (raw_sample['UDF/Capture Library version'] if
-                        raw_sample['UDF/Capture Library version'] else None),
-        'comment': raw_sample['UDF/Comment'] if raw_sample['UDF/Comment'] else None,
+                        raw_sample.get('UDF/Capture Library version') else None),
+        'comment': raw_sample['UDF/Comment'] if raw_sample.get('UDF/Comment') else None,
         'index': raw_sample['UDF/Index type'] if raw_sample.get('UDF/Index type') else None,
         'reagent_label': (raw_sample['Sample/Reagent Label'] if
                           raw_sample.get('Sample/Reagent Label') else None),
@@ -183,9 +185,8 @@ def parse_sample(raw_sample):
                            ('quantity', 'Quantity')]:
         excel_key = f"UDF/{field_key}"
         str_value = raw_sample.get(excel_key, '').rsplit('.0')[0]
-        if str_value.isdigit():
+        if str_value.replace('.', '').isnumeric():
             sample[key] = str_value
-
     for parent in ['mother', 'father']:
         parent_key = f"UDF/{parent}ID"
         sample[parent] = (raw_sample[parent_key] if

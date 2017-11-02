@@ -10,7 +10,7 @@ class BaseSample(Schema):
 
 
 class PrepMixin:
-    container = fields.Str(default='Tube', required=True)
+    container = fields.Str(default='Tube')
     container_name = fields.Str()
     well_position = fields.Str()
     tumour = fields.Bool()
@@ -27,8 +27,8 @@ class AnalysisMixin:
     status = fields.Str(required=True)
     family_name = fields.Str(required=True)
     panels = fields.List(fields.Str(), required=True)
-    father = fields.Str()
-    mother = fields.Str()
+    father = fields.Str(allow_none=True)
+    mother = fields.Str(allow_none=True)
 
 
 class BaseProject(Schema):
