@@ -98,7 +98,7 @@ class FamilySample(Model):
     mother = orm.relationship('Sample', foreign_keys=[mother_id])
     father = orm.relationship('Sample', foreign_keys=[father_id])
 
-    def to_dict(self, parents: bool=False, samples: bool=False) -> dict:
+    def to_dict(self, parents: bool=False, samples: bool=False, family: bool=False) -> dict:
         """Override dicify method."""
         data = super(FamilySample, self).to_dict()
         if samples:
@@ -108,6 +108,8 @@ class FamilySample(Model):
         elif parents:
             data['mother'] = self.mother.to_dict() if self.mother else None
             data['father'] = self.father.to_dict() if self.father else None
+        if family:
+            data['family'] = self.family.to_dict()
         return data
 
     def __str__(self) -> str:
@@ -249,7 +251,8 @@ class Sample(Model, PriorityMixin):
         data['application_version'] = self.application_version.to_dict()
         data['application'] = self.application_version.application.to_dict()
         if links:
-            data['links'] = [link_obj.to_dict(parents=True) for link_obj in self.links]
+            data['links'] = [link_obj.to_dict(family=True, parents=True) for link_obj in
+                             self.links]
         return data
 
 
