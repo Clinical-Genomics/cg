@@ -34,7 +34,7 @@ class AnalysisMixin:
 class BaseProject(Schema):
     name = fields.Str(required=True)
     customer = fields.Str(required=True)
-    comment = fields.Str()
+    comment = fields.Str(allow_none=True)
 
 
 class ScoutSample(BaseSample, PrepMixin, AnalysisMixin):

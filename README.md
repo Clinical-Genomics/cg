@@ -15,8 +15,9 @@ In this context, `cg` provides the interface between these tools to facilitate a
 
 ## Team
 
+- [@vwirta][vwirta]: facility manager | 🇫🇮
 - [@ingkebil][ingkebil]: bioinformatics manager | 🇧🇪
-- [@robinandeer][robinandeer]: lead developer, designer | 🇸🇪
+- [@robinandeer][robinandeer]: lead developer, designer | 🇸🇪 🛫
 - [@Dilea][Dilea]: bioinformatician, LIMS developer | 🇸🇪
 - [@b4ckm4n][b4ckm4n]: bioinformatician | 🇸🇪
 - [@emmser][emmser]: bioinformatician | 🇸🇪 👶
@@ -24,10 +25,22 @@ In this context, `cg` provides the interface between these tools to facilitate a
 - [@mayabrandi][mayabrandi]: bioinformatician, lead LIMS developer | 🇸🇪
 - [@sylvinite][sylvinite]: bioinformatician, Microbial developer | 🇸🇪 🆕
 - [@moonso][moonso]: bioinformatician, Scout developer | 🇸🇪
+- [@hassan][hassanfa]: bioinformatician, cancer developer | 🇮🇷 🆕
+- [@jlanillos][jlanillos]: Master's thesis student, cancer | 🇪🇸 🛬
 
 ### Collaborators
 
 - [@henrikstranneheim][henrikstranneheim]: bioinformatician, MIP developer | 🇸🇪
+- [@J35P312][J35P312]: PhD student, Clinical Genetics | 🇸🇪
+- [@dnil][dnil]: researcher, Clinical Genetics | 🇸🇪
+- [@jemten][jemten]: Post doc, CMMS | 🇸🇪
+
+### Thesarus
+
+- 🆕 = new member
+- 🛫 = leaving member
+- 🛬 = incoming member
+- 👶 = maternaty/paternaty leave
 
 ## Work flow
 
@@ -337,6 +350,7 @@ The interface supports:
 - samples for sequencing only (**fastq**)
 - sequencing of ready-made libraries (**rml**)
 - analysis of externally sequenced samples (**external**)
+- sequencing and analysis of microbial whole genomes (**microbial**)
 
 It opens a ticket using the `osticket` API for each order which it links with the ticket number. It stores information in both LIMS and `status` for samples and pools linked by LIMS id. It stores only a minimum of information about each sample in LIMS. Most of the critial information is stored in `status` and this is also the primary place to go if we need to update e.g. application tag for a sample.
 
@@ -456,6 +470,12 @@ Another module `/exc.py` contains the custom Exception classes that are used acr
 [northwestwitch]: https://github.com/northwestwitch
 [mayabrandi]: https://github.com/mayabrandi
 [sylvinite]: https://github.com/sylvinite
+[dnil]: https://github.com/dnil
+[J35P312]: https://github.com/J35P312
+[jemten]: https://github.com/jemten
+[vwirta]: https://github.com/vwirta
+[jlanillos]: https://github.com/jlanillos
+[hassanfa]: https://github.com/hassanfa
 [click]: http://click.pocoo.org/5/
 [cgweb]: https://github.com/Clinical-Genomics/cgweb
 [servers]: https://github.com/Clinical-Genomics/servers
