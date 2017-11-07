@@ -2,6 +2,8 @@
 import datetime as dt
 from typing import List
 
+from sqlalchemy import or_
+
 from cg.store import models
 
 
@@ -43,7 +45,10 @@ class FindHandler:
     def samples(self, *, customer: models.Customer=None, query: str=None) -> List[models.Sample]:
         records = self.Sample.query
         records = records.filter_by(customer=customer) if customer else records
-        records = records.filter(models.Sample.name.like(f"%{query}%")) if query else records
+        records = records.filter(or_(
+            models.Sample.name.like(f"%{query}%"),
+            models.Sample.internal_id.like(f"%{query}%"),
+        )) if query else records
         return records.order_by(models.Sample.created_at.desc())
 
     def find_sample(self, customer: models.Customer, name: str) -> List[models.Sample]:

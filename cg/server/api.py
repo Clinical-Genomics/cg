@@ -90,10 +90,10 @@ def families():
         records = db.families_to_analyze()
         count = len(records)
     else:
+        customer_obj = None if g.current_user.is_admin else g.current_user.customer
         families_q = db.families(
             query=request.args.get('query'),
-            customer=(db.customer(request.args.get('customer')) if
-                      request.args.get('customer') else None),
+            customer=customer_obj,
             action=request.args.get('action'),
         )
         count = families_q.count()
@@ -106,6 +106,10 @@ def families():
 def family(family_id):
     """Fetch a family with links."""
     family_obj = db.family(family_id)
+    if family_obj is None:
+        return abort(404)
+    elif not g.current_user.is_admin and (g.current_user.customer != family_obj.customer):
+        return abort(401)
     data = family_obj.to_dict(links=True, analyses=True)
     return jsonify(**data)
 
@@ -113,6 +117,8 @@ def family(family_id):
 @BLUEPRINT.route('/samples')
 def samples():
     """Fetch samples."""
+    if request.args.get('status') and not g.current_user.is_admin:
+        return abort(401)
     if request.args.get('status') == 'incoming':
         samples_q = db.samples_to_recieve()
     elif request.args.get('status') == 'labprep':
@@ -120,9 +126,10 @@ def samples():
     elif request.args.get('status') == 'sequencing':
         samples_q = db.samples_to_sequence()
     else:
+        customer_obj = None if g.current_user.is_admin else g.current_user.customer
         samples_q = db.samples(
             query=request.args.get('query'),
-            customer=db.customer(request.args.get('customer')),
+            customer=customer_obj,
         )
     limit = int(request.args.get('limit', 50))
     data = [sample_obj.to_dict() for sample_obj in samples_q.limit(limit)]
@@ -135,6 +142,8 @@ def sample(sample_id):
     sample_obj = db.sample(sample_id)
     if sample_obj is None:
         return abort(404)
+    elif not g.current_user.is_admin and (g.current_user.customer != sample_obj.customer):
+        return abort(401)
     data = sample_obj.to_dict(links=True)
     return jsonify(**data)
 
