@@ -15,25 +15,25 @@ In this context, `cg` provides the interface between these tools to facilitate a
 
 ## Team
 
-- [@vwirta][vwirta]: facility manager | 🇫🇮
-- [@ingkebil][ingkebil]: bioinformatics manager | 🇧🇪
-- [@robinandeer][robinandeer]: lead developer, designer | 🇸🇪 🛫
-- [@Dilea][Dilea]: bioinformatician, LIMS developer | 🇸🇪
-- [@b4ckm4n][b4ckm4n]: bioinformatician | 🇸🇪
-- [@emmser][emmser]: bioinformatician | 🇸🇪 👶
-- [@northwestwitch][northwestwitch]: bioinformatician, variant sharing expert 🇮🇹
-- [@mayabrandi][mayabrandi]: bioinformatician, lead LIMS developer | 🇸🇪
-- [@sylvinite][sylvinite]: bioinformatician, Microbial developer | 🇸🇪 🆕
-- [@moonso][moonso]: bioinformatician, Scout developer | 🇸🇪
-- [@hassan][hassanfa]: bioinformatician, cancer developer | 🇮🇷 🆕
-- [@jlanillos][jlanillos]: Master's thesis student, cancer | 🇪🇸 🛬
+- [Valtteri Wirta][vwirta]: Facility manager | 🇫🇮
+- [Emma Sernstad][emmser]: Bioinformatician | 🇸🇪 👶
+- [Robin Andeer][robinandeer]: Lead developer, self-appointed designer | 🇸🇪 🛫
+- [Kenny Biliau][ingkebil]: Bioinformatics manager, data-flow master | 🇧🇪
+- [Måns Magnusson][moonso]: Bioinformatician, Scout developer | 🇸🇪
+- [Daniel Backman][b4ckm4n]: Bioinformatician, MIP/pipeline responsible | 🇸🇪
+- [Emilia Ottosson Laakso][Dilea]: Bioinformatician, LIMS developer | 🇸🇪
+- [Maya Brandi][mayabrandi]: Bioinformatician, lead LIMS developer | 🇸🇪
+- [Chiara Rasi][northwestwitch]: Bioinformatician, variant sharing expert 🇮🇹
+- [Isak Sylvin][sylvinite]: Bioinformatician, microbial developer | 🇸🇪 🆕
+- [Hassan Foroughi][hassanfa]: Bioinformatician, cancer developer | 🇮🇷 🆕
+- [Javier Lanillos][jlanillos]: Master's thesis student, cancer | 🇪🇸 🛬
 
 ### Collaborators
 
-- [@henrikstranneheim][henrikstranneheim]: bioinformatician, MIP developer | 🇸🇪
-- [@J35P312][J35P312]: PhD student, Clinical Genetics | 🇸🇪
-- [@dnil][dnil]: researcher, Clinical Genetics | 🇸🇪
-- [@jemten][jemten]: Post doc, CMMS | 🇸🇪
+- [Henrik Stranneheim][henrikstranneheim]: bioinformatician, lead MIP developer, @CMMS | 🇸🇪
+- [Daniel Nilsson][dnil]: researcher, SV expert, @ClinicalGenetics | 🇸🇪
+- [Jesper Eisfeldt][J35P312]: PhD student, SV deputy, @ClinicalGenetics | 🇸🇪
+- [Anders Jemten][jemten]: Post doc, MIP developer, @CMMS | 🇸🇪
 
 ### Thesarus
 
