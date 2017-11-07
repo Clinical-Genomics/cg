@@ -148,7 +148,7 @@ def parse_sample(raw_sample):
     if raw_sample['UDF/priority'].lower() == 'förtur':
         raw_sample['UDF/priority'] = 'priority'
 
-    source = raw_sample['UDF/Source'].lower()
+    source = raw_sample['UDF/Source']
     sample = {
         'name': raw_sample['Sample/Name'],
         'container': raw_sample.get('Container/Type'),
