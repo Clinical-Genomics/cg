@@ -10,6 +10,7 @@ Flask
 Flask-Admin
 Flask-Alchy
 Flask-CORS
+Flask-Dance
 google-auth
 werkzeug
 requests[security]
