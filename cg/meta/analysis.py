@@ -83,7 +83,9 @@ class AnalysisAPI():
             }
             if sample_data['analysis_type'] in ('tgs', 'wes'):
                 if link.sample.capture_kit:
-                    sample_data['capture_kit'] = CAPTUREKIT_MAP[link.sample.capture_kit]
+                    # set the capture kit from status: key or custom file name
+                    mip_capturekit = CAPTUREKIT_MAP.get(link.sample.capture_kit)
+                    sample_data['capture_kit'] = mip_capturekit or link.sample.capture_kit
                 else:
                     if link.sample.downsampled_to:
                         LOG.debug(f"{link.sample.name}: downsampled sample, skipping")
