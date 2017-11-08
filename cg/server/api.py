@@ -54,15 +54,12 @@ def order(order_type):
     api = OrdersAPI(lims=lims, status=db, osticket=osticket)
     post_data = request.get_json()
     try:
-        name, email = g.current_user.name, g.current_user.email
-        result = api.submit(OrderType[order_type.upper()], name, email, post_data)
+        ticket = {'name': g.current_user.name, 'email': g.current_user.email}
+        result = api.submit(OrderType[order_type.upper()], post_data, ticket=ticket)
     except (DuplicateRecordError, OrderError) as error:
         return abort(make_response(jsonify(message=error.message), 401))
     except HTTPError as error:
         return abort(make_response(jsonify(message=error.args[0]), 401))
-    if 'project' not in result:
-        # validation failed
-        return abort(make_response(jsonify(message='validation failed', errors=result), 401))
     return jsonify(project=result['project'],
                    records=[record.to_dict() for record in result['records']])
 

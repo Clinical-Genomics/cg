@@ -1,74 +1,132 @@
-# -*- coding: utf-8 -*-
-from marshmallow import Schema, fields
+from collections import Iterable
+from enum import Enum
+
+from pyschemes import Scheme, validators
+
+from cg.constants import PRIORITY_OPTIONS, SEX_OPTIONS, STATUS_OPTIONS, CAPTUREKIT_OPTIONS
 
 
-class BaseSample(Schema):
-    name = fields.Str(required=True)
-    internal_id = fields.Str(allow_none=True)
-    application = fields.Str(required=True)
-    comment = fields.Str()
+class OrderType(Enum):
+    EXTERNAL = 'external'
+    FASTQ = 'fastq'
+    RML = 'rml'
+    SCOUT = 'scout'
+    MICROBIAL = 'microbial'
 
 
-class PrepMixin:
-    container = fields.Str(default='Tube')
-    container_name = fields.Str()
-    well_position = fields.Str()
-    tumour = fields.Bool()
-    quantity = fields.Str(allow_none=True)
-    volume = fields.Str(allow_none=True)
-    concentration = fields.Str(allow_none=True)
-    source = fields.Str()
-    priority = fields.Str(default='standard', required=True)
-    require_qcok = fields.Bool(default=False)
+class ListValidator(validators.Validator):
 
+    """Validate a list of items against a schema."""
 
-class AnalysisMixin:
-    sex = fields.Str(required=True)
-    status = fields.Str(required=True)
-    family_name = fields.Str(required=True)
-    panels = fields.List(fields.Str(), required=True)
-    father = fields.Str(allow_none=True)
-    mother = fields.Str(allow_none=True)
+    def __init__(self, scheme: validators.Validator, min_items: int=0):
+        super(ListValidator, self).__init__(scheme)
+        self.__scheme = validators.Validator.create_validator(scheme)
+        self.min_items = min_items
 
+    def validate(self, value: Iterable):
+        """Validate the list of values."""
+        values = value
+        validators.TypeValidator(Iterable).validate(values)
+        values_copy = []
+        for one_value in values:
+            self.__scheme.validate(one_value)
+            values_copy.append(one_value)
+        if len(values_copy) < self.min_items:
+            raise ValueError(f"value did not contain at least {self.min_items} items")
+        return values_copy
 
-class BaseProject(Schema):
-    name = fields.Str(required=True)
-    customer = fields.Str(required=True)
-    comment = fields.Str(allow_none=True)
+NAME_PATTERN = r'^[A-Za-z0-9-]*$'
 
+BASE_PROJECT = {
+    'name': str,
+    'customer': str,
+    'comment': validators.Optional(str, None),
+}
 
-class ScoutSample(BaseSample, PrepMixin, AnalysisMixin):
-    pass
+BASE_SAMPLE = {
+    'name': validators.RegexValidator(NAME_PATTERN),
+    'internal_id': validators.Optional(str, None),
+    'application': str,
+    'comment': validators.Optional(str, None),
+}
 
+PREP_MIXIN = {
+    'well_position': validators.Optional(str, None),
+    'tumour': validators.Optional(bool, False),
+    'source': str,
+    'priority': validators.Optional(validators.Any(PRIORITY_OPTIONS), 'standard'),
+    'require_qcok': validators.Optional(bool, False),
+    'sex': validators.Any(SEX_OPTIONS),
+}
 
-class ScoutProject(BaseProject):
-    samples = fields.List(fields.Nested(ScoutSample), required=True)
+LAB_MIXIN = {
+    'container': validators.Optional(str, 'Tube'),
+    'container_name':  validators.Optional(str, None),
+    'quantity': validators.Optional(str, None),
+    'volume': validators.Optional(str, None),
+    'concentration': validators.Optional(str, None),
+}
 
+ANALYSIS_MIXIN = {
+    'status': validators.Any(STATUS_OPTIONS),
+    'family_name': validators.RegexValidator(NAME_PATTERN),
+    'panels': ListValidator(str, min_items=1),
+    'father': validators.Optional(str, None),
+    'mother': validators.Optional(str, None),
+    'sex': validators.Any(SEX_OPTIONS),
+}
 
-class ExternalSample(BaseSample, AnalysisMixin):
-    capture_kit = fields.Str()
+SCOUT_SAMPLE = {**BASE_SAMPLE, **LAB_MIXIN, **PREP_MIXIN, **ANALYSIS_MIXIN}
 
+EXTERNAL_SAMPLE = {
+    **BASE_SAMPLE,
+    **ANALYSIS_MIXIN,
+    'capture_kit': validators.Optional(validators.Any(CAPTUREKIT_OPTIONS), None),
+}
 
-class ExternalProject(BaseProject):
-    samples = fields.List(fields.Nested(ExternalSample), required=True)
+FASTQ_SAMPLE = {**BASE_SAMPLE, **LAB_MIXIN, **PREP_MIXIN}
 
+RML_SAMPLE = {
+    **BASE_SAMPLE,
+    **LAB_MIXIN,
+    'pool': str,
+    'well_position_rml': validators.Optional(str, None),
+    'rml_plate_name': validators.Optional(str, None),
+    'index': validators.Optional(str, None),
+    'index_number': validators.Optional(str, None),
+    'index_sequence': validators.Optional(str, None),
+}
 
-class FastqSample(BaseSample, PrepMixin):
-    pass
+MICROBIAL_SAMPLE = {
+    **BASE_SAMPLE,
+    **LAB_MIXIN,
+    **PREP_MIXIN,
+    'source': validators.Optional(str, None),
+    'strain': str,
+    'reference_genome': str,
+    'eluation_buffer': str,
+    'extraction_method': validators.Optional(str, None),
+}
 
-
-class FastqProject(BaseProject):
-    samples = fields.List(fields.Nested(FastqSample), required=True)
-
-
-class RmlSample(BaseSample):
-    pool = fields.Str(required=True)
-    well_position_rml = fields.Str()
-    rml_plate_name = fields.Str()
-    index = fields.Str()
-    index_number = fields.Int()
-    index_sequence = fields.Str()
-
-
-class RmlProject(BaseProject):
-    samples = fields.List(fields.Nested(RmlSample), required=True)
+ORDER_SCHEMES = {
+    OrderType.EXTERNAL: Scheme({
+        **BASE_PROJECT,
+        'samples': ListValidator(EXTERNAL_SAMPLE, min_items=1)
+    }),
+    OrderType.SCOUT: Scheme({
+        **BASE_PROJECT,
+        'samples': ListValidator(SCOUT_SAMPLE, min_items=1)
+    }),
+    OrderType.FASTQ: Scheme({
+        **BASE_PROJECT,
+        'samples': ListValidator(FASTQ_SAMPLE, min_items=1),
+    }),
+    OrderType.RML: Scheme({
+        **BASE_PROJECT,
+        'samples': ListValidator(RML_SAMPLE, min_items=1),
+    }),
+    OrderType.MICROBIAL: Scheme({
+        **BASE_PROJECT,
+        'samples': ListValidator(MICROBIAL_SAMPLE, min_items=1),
+    }),
+}

@@ -35,7 +35,8 @@ def configure_extensions(app):
     ext.cors.init_app(app)
     ext.db.init_app(app)
     ext.lims.init_app(app)
-    ext.osticket.init_app(app)
+    if app.config['OSTICKET_API_KEY']:
+        ext.osticket.init_app(app)
     ext.admin.init_app(app, index_view=AdminIndexView(endpoint='admin',
                                                       url=f"/{app.config['SECRET_KEY']}"))
 

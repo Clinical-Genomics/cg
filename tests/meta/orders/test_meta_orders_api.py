@@ -3,7 +3,7 @@ import datetime as dt
 import pytest
 
 from cg.store import models
-from cg.meta.orders.api import OrdersAPI, OrderType
+from cg.meta.orders import OrdersAPI, OrderType
 
 
 @pytest.mark.parametrize('order_type', [

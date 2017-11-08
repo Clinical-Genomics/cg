@@ -1,7 +1,5 @@
 from typing import List
 
-from cg.exc import OrderError
-
 SEX_MAP = {'male': 'M', 'female': 'F'}
 
 
@@ -43,6 +41,7 @@ class LimsHandler:
     def process_lims(self, data: dict, samples: List[dict]):
         """Process samples to add them to LIMS."""
         samples_lims = self.to_lims(data['customer'], samples)
-        project_data = self.lims.add_project(data['ticket'] or data['name'], samples_lims)
+        project_name = data['ticket'] or data['name']
+        project_data = self.lims.submit_project(project_name, samples_lims)
         lims_map = self.lims.get_samples(projectlimsid=project_data['id'], map_ids=True)
         return project_data, lims_map

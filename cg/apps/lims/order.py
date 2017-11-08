@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 from typing import List
 import logging
-from xml.etree import ElementTree
 
 from genologics.entities import Project, Researcher, Sample, Container, Containertype, Artifact
+from lxml import etree
+from lxml.objectify import ObjectifiedElement
 
 from cg.exc import OrderError
 from .constants import PROP2UDF
+from . import batch
 
 LOG = logging.getLogger(__name__)
 CONTAINER_TYPE_MAP = {'Tube': 2, '96 well plate': 1}
@@ -14,74 +16,92 @@ CONTAINER_TYPE_MAP = {'Tube': 2, '96 well plate': 1}
 
 class OrderHandler:
 
-    def add_project(self, project_name: str, samples: List[dict], researcher_id: str='3'):
-        """Submit a new order.
+    def save_xml(self, uri: str, document: ObjectifiedElement):
+        """Post the data to the server."""
+        data = etree.tostring(document, xml_declaration=True)
+        LOG.debug(data)
+        result = self.post(uri, data)
+        return result
 
-        Example:
+    def save_containers(self, container_details: ObjectifiedElement):
+        """Save a batch of containers."""
+        container_uri = f"{self.get_uri()}/containers/batch/create"
+        results = self.save_xml(container_uri, container_details)
+        container_map = {}
+        for link in results.findall('link'):
+            lims_container = Container(self, uri=link.attrib['uri'])
+            container_map[lims_container.name] = lims_container
+        return container_map
 
-            [{
-                'name': '17081-II-1U',
-                'container': '96 well plate',
-                'container_name': 'CMMS',
-                'well_position': 'A:1',
-                'udfs': {
-                    'priority': 'standard',
-                    'application': 'WGTPCFC030',
-                    'require_qcok': True,
-                    'quantity': "2200",
-                    'source': 'blood',
-                    'customer': 'cust003',
-                },
-            }]
+    def save_samples(self, sample_details: ObjectifiedElement, map_samples=False):
+        """Save a batch of samples."""
+        sample_uri = f"{self.get_uri()}/samples/batch/create"
+        results = self.save_xml(sample_uri, sample_details)
+        if map_samples:
+            sample_map = {}
+            for link in results.findall('link'):
+                lims_sample = Sample(self, uri=link.attrib['uri'])
+                sample_map[lims_sample.name] = lims_sample
+            return sample_map
+        return results
 
-        Args:
-            data (dict): project order data dict
-            researcher_id (Optional[str]): id of research to link to the order
+    def update_artifacts(self, artifact_details: ObjectifiedElement):
+        """Update/put a batch of artifacts."""
+        artifact_uri = f"{self.get_uri()}/artifacts/batch/update"
+        results = self.save_xml(artifact_uri, artifact_details)
+        return results
 
-        Returns:
-            genologics.entities.Project: new LIMS project instance
-        """
+    def submit_project(self, project_name: str, samples: List[dict], researcher_id: str='3'):
+        """Parse Scout project."""
         containers = self.prepare(samples)
-        lims_project = self.submit(project_name, researcher_id, containers)
+
+        lims_project = Project.create(
+            self,
+            researcher=Researcher(self, id=researcher_id),
+            name=project_name,
+        )
+        LOG.info("%s: created new LIMS project", lims_project.id)
+
+        containers_data = [batch.build_container(
+            name=container['name'],
+            con_type=Containertype(lims=self, id=container['type']),
+        ) for container in containers]
+        container_details = batch.build_container_batch(containers_data)
+        LOG.debug("%s: saving containers", lims_project.name)
+        container_map = self.save_containers(container_details)
+
+        reagentlabel_samples = [sample
+                                for container in containers
+                                for sample in container['samples']
+                                if sample['index_sequence']]
+
+        samples_data = []
+        for container in containers:
+            for sample in container['samples']:
+                LOG.debug("%s: adding sample to container: %s", sample['name'], container['name'])
+                lims_container = container_map[container['name']]
+                sample_data = batch.build_sample(
+                    name=sample['name'],
+                    project=lims_project,
+                    container=lims_container,
+                    location=sample['location'],
+                    udfs=sample['udfs'],
+                )
+                samples_data.append(sample_data)
+        sample_details = batch.build_sample_batch(samples_data)
+        process_reagentlabels = len(reagentlabel_samples) > 0
+        sample_map = self.save_samples(sample_details, map_samples=process_reagentlabels)
+
+        if process_reagentlabels:
+            artifacts_data = [batch.build_artifact(
+                artifact=sample_map[sample['name']].artifact,
+                reagent_label=sample['index_sequence'],
+            ) for sample in reagentlabel_samples]
+            artifact_details = batch.build_artifact_batch(artifacts_data)
+            self.update_artifacts(artifact_details)
+
         lims_project_data = self._export_project(lims_project)
         return lims_project_data
-
-    def submit(self, project_name: str, researcher_id: str, containers: List[dict]):
-        """Submit a new project with samples to LIMS."""
-        LOG.debug('creating LIMS project')
-        lims_researcher = Researcher(self, id=researcher_id)
-        lims_project = Project.create(self, researcher=lims_researcher, name=project_name)
-        LOG.info("created new LIMS project: %s", lims_project.id)
-
-        for container_data in containers:
-            LOG.debug('creating LIMS container')
-            container_type = Containertype(lims=self, id=container_data['type'])
-            lims_container = Container.create(lims=self, name=container_data['name'],
-                                              type=container_type)
-            LOG.info("created new LIMS container: %s", lims_container.id)
-
-            for sample_data in container_data['samples']:
-                LOG.debug("creating LIMS sample: %s", sample_data['name'])
-                raw_sample = Sample._create(self, creation_tag='samplecreation',
-                                            name=sample_data['name'], project=lims_project)
-
-                LOG.debug('adding sample UDFs')
-                for udf_key, udf_value in sample_data['udfs'].items():
-                    if udf_value:
-                        raw_sample.udf[udf_key] = udf_value
-
-                location_label = sample_data['location']
-                lims_sample = self._save_sample(raw_sample, lims_container, location_label)
-                LOG.info("created new LIMS sample: %s -> %s", lims_sample.name, lims_sample.id)
-
-                if sample_data['index_sequence']:
-                    LOG.info("adding index seq./reagent label %s", sample_data['index_sequence'])
-                    self._save_reagentlabel(
-                        artifact=lims_sample.artifact,
-                        reagent_label=sample_data['index_sequence'],
-                        sample_name=lims_sample.name,
-                    )
-        return lims_project
 
     @classmethod
     def prepare(cls, samples):
@@ -117,6 +137,9 @@ class OrderHandler:
                         'udfs': {}
                     }
                     for key, value in sample_data['udfs'].items():
+                        if value is None:
+                            LOG.debug(f"{key}: skipping null value UDF")
+                            continue
                         if key in PROP2UDF:
                             if isinstance(value, bool):
                                 value = 'yes' if value else 'no'
@@ -137,6 +160,8 @@ class OrderHandler:
             if sample_data['container'] == 'Tube':
                 # detected tube: name after sample unless specified
                 container_name = sample_data.get('container_name') or sample_data['name']
+                if container_name in tubes:
+                    raise OrderError(f"{container_name}: conflicting sample/tube name")
                 tubes[container_name] = [sample_data]
             elif sample_data['container'] == '96 well plate':
                 # detected plate: require container name
@@ -146,23 +171,3 @@ class OrderHandler:
             else:
                 raise ValueError(f"unknown container type: {sample_data['container']}")
         return tubes, plates
-
-    def _save_sample(self, instance, container, location_label):
-        """Create an instance of Sample from attributes then post it to the LIMS"""
-        location = ElementTree.SubElement(instance.root, 'location')
-        ElementTree.SubElement(location, 'container', dict(uri=container.uri))
-        location_element = ElementTree.SubElement(location, 'value')
-        location_element.text = location_label
-        data = self.tostring(ElementTree.ElementTree(instance.root))
-        instance.root = self.post(uri=self.get_uri(Sample._URI), data=data)
-        instance._uri = instance.root.attrib['uri']
-        return instance
-
-    def _save_reagentlabel(self, artifact: Artifact, reagent_label: str, sample_name: str=None):
-        """Update artifact with reagent label."""
-        xml_data = f"""<?xml version="1.0" encoding="UTF-8"?>
-        <art:artifact xmlns:art="http://genologics.com/ri/artifact">
-        <name>{sample_name or artifact.id}</name>
-        <reagent-label name="{reagent_label}"></reagent-label>
-        </art:artifact>"""
-        self.put(artifact.uri.split('?')[0], xml_data)

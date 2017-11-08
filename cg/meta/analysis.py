@@ -74,9 +74,10 @@ class AnalysisAPI():
             'samples': [],
         }
         for link in family_obj.links:
+            prep_category = link.sample.application_version.application.prep_category
             sample_data = {
                 'sample_id': link.sample.internal_id,
-                'analysis_type': link.sample.application_version.application.prep_category,
+                'analysis_type': 'wgs' if prep_category == 'wgs' else 'wes',
                 'sex': link.sample.sex,
                 'phenotype': link.status,
                 'expected_coverage': link.sample.application_version.application.sequencing_depth,
