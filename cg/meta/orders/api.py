@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime as dt
 import logging
-from enum import Enum
 import re
 from typing import List
 
@@ -9,54 +8,47 @@ from cg.apps.lims import LimsAPI
 from cg.apps.osticket import OsTicket
 from cg.exc import OrderError, TicketCreationError
 from cg.store import Store, models
-from .schema import ExternalProject, FastqProject, RmlProject, ScoutProject
+from .schema import OrderType, ORDER_SCHEMES
 from .lims import LimsHandler
 from .status import StatusHandler
 
 LOG = logging.getLogger(__name__)
 
 
-class OrderType(Enum):
-    EXTERNAL = 'external'
-    FASTQ = 'fastq'
-    RML = 'rml'
-    SCOUT = 'scout'
-
-
 class OrdersAPI(LimsHandler, StatusHandler):
 
     """Orders API for accepting new samples into the system."""
 
-    types = {
-        OrderType.EXTERNAL: ExternalProject(),
-        OrderType.FASTQ: FastqProject(),
-        OrderType.RML: RmlProject(),
-        OrderType.SCOUT: ScoutProject()
-    }
-
-    def __init__(self, lims: LimsAPI, status: Store, osticket: OsTicket):
+    def __init__(self, lims: LimsAPI, status: Store, osticket: OsTicket=None):
         self.lims = lims
         self.status = status
         self.osticket = osticket
 
-    def submit(self, project: OrderType, name: str, email: str, data: dict) -> dict:
+    def submit(self, project: OrderType, data: dict, ticket: dict) -> dict:
         """Submit a batch of samples."""
-        errors = self.types[project].validate(data)
-        if errors:
-            return errors
+        try:
+            ORDER_SCHEMES[project].validate(data)
+        except (ValueError, TypeError) as error:
+            raise OrderError(error.args[0])
 
         # detect manual ticket assignment
-        ticket_match = re.search(r'([0-9]{6})', name)
+        ticket_match = re.search(r'([0-9]{6})', data['name'])
         ticket_number = int(ticket_match.group()) if ticket_match else None
         if ticket_number:
             data['ticket'] = ticket_number
         else:
             # open and assign ticket to order
             try:
-                message = f"New incoming samples, {name}"
-                data['ticket'] = (self.osticket.open_ticket(name, email, subject=data['name'],
-                                                            message=message)
-                                  if self.osticket else None)
+                if self.osticket:
+                    message = f"New incoming samples, {ticket['name']}"
+                    data['ticket'] = self.osticket.open_ticket(
+                        name=ticket['name'],
+                        email=ticket['email'],
+                        subject=data['name'],
+                        message=message,
+                    )
+                else:
+                    data['ticket'] = None
             except TicketCreationError as error:
                 LOG.warning(error.message)
                 data['ticket'] = None

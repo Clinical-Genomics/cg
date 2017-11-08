@@ -19,6 +19,7 @@ ruamel.yaml
 coloredlogs
 petname
 marshmallow
+pyschemes
 xlrd
 openpyxl
 tabulate

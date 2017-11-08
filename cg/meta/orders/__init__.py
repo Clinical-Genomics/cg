@@ -1,2 +1,3 @@
 # -*- coding: utf-8 -*-
-from .api import OrdersAPI, OrderType
+from .api import OrdersAPI
+from .schema import OrderType
