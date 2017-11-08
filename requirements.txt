@@ -23,6 +23,7 @@ pyschemes
 xlrd
 openpyxl
 tabulate
+lxml
 
 # apps
 genologics
