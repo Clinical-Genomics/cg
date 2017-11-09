@@ -36,6 +36,20 @@ class AnalysisAPI():
         self.scout = scout_api
         self.lims = lims_api
 
+    def check(self, family_obj: models.Family):
+        """Check stuff before starting the analysis."""
+        flowcells = self.db.flowcells(family=family_obj)
+        statuses = []
+        for flowcell_obj in flowcells:
+            LOG.debug(f"{flowcell_obj.name}: checking flowcell")
+            statuses.append(flowcell_obj.status)
+            if flowcell_obj.status == 'removed':
+                LOG.info(f"{flowcell_obj.name}: requesting removed flowcell")
+                flowcell_obj.status = 'requested'
+            elif flowcell_obj.status != 'ondisk':
+                LOG.warning(f"{flowcell_obj.name}: {flowcell_obj.status}")
+        return all(status == 'ondisk' for status in statuses)
+
     def start(self, family_obj: models.Family, **kwargs):
         """Start the analysis."""
         if kwargs.get('priority') is None:

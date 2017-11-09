@@ -129,6 +129,7 @@ class Family(Model, PriorityMixin):
     priority = Column(types.Integer, default=1, nullable=False)
     _panels = Column(types.Text, nullable=False)
     action = Column(types.Enum(*constants.FAMILY_ACTIONS))
+    comment = Column(types.Text)
 
     ordered_at = Column(types.DateTime, default=dt.datetime.now)
     created_at = Column(types.DateTime, default=dt.datetime.now)
@@ -243,7 +244,7 @@ class Sample(Model, PriorityMixin):
         else:
             return f"Ordered {self.ordered_at.date()}"
 
-    def to_dict(self, links: bool=False) -> dict:
+    def to_dict(self, links: bool=False, flowcells: bool=False) -> dict:
         """Override dicify method."""
         data = super(Sample, self).to_dict()
         data['priority'] = self.priority_human
@@ -253,6 +254,8 @@ class Sample(Model, PriorityMixin):
         if links:
             data['links'] = [link_obj.to_dict(family=True, parents=True) for link_obj in
                              self.links]
+        if flowcells:
+            data['flowcells'] = [flowcell_obj.to_dict() for flowcell_obj in self.flowcells]
         return data
 
 
@@ -273,14 +276,14 @@ class Flowcell(Model):
     sequencer_name = Column(types.String(32))
     sequenced_at = Column(types.DateTime)
     archived_at = Column(types.DateTime)
-    status = Column(types.Enum(*constants.FLOWCELL_STATUS))
+    status = Column(types.Enum(*constants.FLOWCELL_STATUS), default='ondisk')
 
     samples = orm.relationship('Sample', secondary=flowcell_sample, backref='flowcells')
 
     def __str__(self):
         return self.name
 
-    def to_dict(self, samples=False):
+    def to_dict(self, samples: bool=False):
         """Override dictify method."""
         data = super(Flowcell, self).to_dict()
         if samples:
