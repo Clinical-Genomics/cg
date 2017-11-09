@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+import shutil
 from pathlib import Path
 from typing import List
 
@@ -17,6 +18,8 @@ log = logging.getLogger(__name__)
 class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
 
     """Interface to Trailblazer for `cg`."""
+
+    parse_sampleinfo = staticmethod(files.parse_sampleinfo)
 
     def __init__(self, config: dict):
         super(TrailblazerAPI, self).__init__(
@@ -49,3 +52,12 @@ class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
         with out_path.open('w') as out_handle:
             for line in content:
                 click.echo(line, file=out_handle)
+
+    def delete_analysis(self, family, date, yes=False):
+        """Delete the analysis output."""
+
+        analysis_obj = self.find_analysis(family, date, 'completed')
+        analysis_path = Path(analysis_obj.out_dir).parent
+
+        if yes or click.confirm(f"Do you want to remove {analysis_path}?"):
+            shutil.rmtree(analysis_path, ignore_errors=True)
