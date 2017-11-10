@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
+import datetime as dt
 import logging
 import shutil
 from pathlib import Path
 from typing import List
 
 import click
+import ruamel.yaml
 from trailblazer.mip.start import MipCli
-from trailblazer.store import Store
+from trailblazer.store import Store, models
 from trailblazer.cli.utils import environ_email
 from trailblazer.mip import files, fastq
 
@@ -37,7 +39,15 @@ class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
         if skip_evaluation:
             kwargs['skip_evaluation'] = True
         self.mip_cli(**kwargs)
+        for old_analysis in self.analyses(family=family_id):
+            old_analysis.is_deleted = True
+        self.commit()
         self.add_pending(family_id, email=email)
+
+    def get_sampleinfo(self, analysis: models.Analysis) -> str:
+        """Get the sample info path for an analysis."""
+        data = ruamel.yaml.safe_load(Path(analysis.config_path).open())
+        return data['sampleinfo_path']
 
     @staticmethod
     def parse_qcmetrics(data: dict) -> dict:
@@ -53,11 +63,16 @@ class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
             for line in content:
                 click.echo(line, file=out_handle)
 
-    def delete_analysis(self, family, date, yes=False):
+    def delete_analysis(self, family: str, date: dt.datetime, yes: bool=False):
         """Delete the analysis output."""
-
+        if self.analyses(family=family, temp=True).count() > 0:
+            raise ValueError("analysis for family already running")
         analysis_obj = self.find_analysis(family, date, 'completed')
+        assert analysis_obj.is_deleted is False
         analysis_path = Path(analysis_obj.out_dir).parent
 
         if yes or click.confirm(f"Do you want to remove {analysis_path}?"):
             shutil.rmtree(analysis_path, ignore_errors=True)
+
+            analysis_obj.is_deleted = True
+            self.commit()
