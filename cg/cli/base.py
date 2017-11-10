@@ -13,6 +13,7 @@ from .upload import upload
 from .set import set_cmd
 from .status import status
 from .transfer import transfer
+from .clean import clean
 
 LEVELS = ['DEBUG', 'INFO', 'WARNING', 'ERROR']
 
@@ -62,3 +63,4 @@ base.add_command(status)
 base.add_command(transfer)
 base.add_command(get)
 base.add_command(set_cmd)
+base.add_command(clean)
