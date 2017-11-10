@@ -51,7 +51,7 @@ def mip(context, dry, yes, sample_info):
 
 @clean.command()
 @click.option('-y', '--yes', is_flag=True, help='skip confirmation')
-@click.argument('before_str', help='clean analyses before this date')
+@click.argument('before_str')
 @click.pass_context
 def auto(context: click.Context, before_str: str, yes: bool=False):
     """Automatically clean up "old" analyses."""
