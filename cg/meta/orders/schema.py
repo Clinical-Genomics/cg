@@ -35,19 +35,34 @@ class ListValidator(validators.Validator):
             raise ValueError(f"value did not contain at least {self.min_items} items")
         return values_copy
 
+
+class TypeValidator(validators.Validator):
+
+    def __init__(self, _type, allow_none=False):
+        self._type = _type
+        self.allow_none = allow_none
+
+    def validate(self, value):
+        if isinstance(value, self._type) or (self.allow_none and value is None):
+            return value
+        else:
+            message = f"expected type: '{self._type.__name__}', got '{type(value).__name__}'"
+            raise TypeError(message)
+
+
 NAME_PATTERN = r'^[A-Za-z0-9-]*$'
 
 BASE_PROJECT = {
     'name': str,
     'customer': str,
-    'comment': validators.Optional(str, None),
+    'comment': validators.Optional(TypeValidator(str, allow_none=True), None),
 }
 
 BASE_SAMPLE = {
     'name': validators.RegexValidator(NAME_PATTERN),
-    'internal_id': validators.Optional(str, None),
+    'internal_id': validators.Optional(TypeValidator(str, allow_none=True), None),
     'application': str,
-    'comment': validators.Optional(str, None),
+    'comment': validators.Optional(TypeValidator(str, allow_none=True), None),
 }
 
 PREP_MIXIN = {
@@ -71,8 +86,8 @@ ANALYSIS_MIXIN = {
     'status': validators.Any(STATUS_OPTIONS),
     'family_name': validators.RegexValidator(NAME_PATTERN),
     'panels': ListValidator(str, min_items=1),
-    'father': validators.Optional(str, None),
-    'mother': validators.Optional(str, None),
+    'father': validators.Optional(TypeValidator(str, allow_none=True), None),
+    'mother': validators.Optional(TypeValidator(str, allow_none=True), None),
     'sex': validators.Any(SEX_OPTIONS),
 }
 
