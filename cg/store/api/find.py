@@ -93,9 +93,9 @@ class FindHandler:
             records = records.filter(models.Analysis.started_at < before)
         return records
 
-    def analysis(self, family: models.Family, completed_at: dt.datetime) -> models.Analysis:
+    def analysis(self, family: models.Family, started_at: dt.datetime) -> models.Analysis:
         """Fetch an analysis."""
-        return self.Analysis.query.filter_by(family=family, completed_at=completed_at).first()
+        return self.Analysis.query.filter_by(family=family, started_at=started_at).first()
 
     def flowcells(self) -> List[models.Flowcell]:
         """Fetch all flowcells."""
