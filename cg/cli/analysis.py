@@ -37,11 +37,22 @@ def analysis(context, priority, email, family_id):
             click.echo(click.style('you need to provide a family', fg='red'))
             context.abort()
 
-        # execute the analysis!
-        context.invoke(config, family_id=family_id)
-        context.invoke(link, family_id=family_id)
-        context.invoke(panel, family_id=family_id)
-        context.invoke(start, family_id=family_id, priority=priority, email=email)
+        # check everything is okey
+        family_obj = context.obj['db'].family(family_id)
+        if family_obj is None:
+            print(click.style('family not found', fg='red'))
+            context.abort()
+        is_ok = context.obj['api'].check(family_obj)
+        if not is_ok:
+            print(click.style('family not ready to start', fg='yellow'))
+            # commit the updates to request flowcells
+            context.obj['db'].commit()
+        else:
+            # execute the analysis!
+            context.invoke(config, family_id=family_id)
+            context.invoke(link, family_id=family_id)
+            context.invoke(panel, family_id=family_id)
+            context.invoke(start, family_id=family_id, priority=priority, email=email)
 
 
 @analysis.command()
