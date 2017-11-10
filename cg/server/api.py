@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import logging
 from functools import wraps
 from pathlib import Path
 import tempfile
@@ -13,6 +14,7 @@ from cg.apps.lims import parse_orderform
 from cg.meta.orders import OrdersAPI, OrderType
 from .ext import db, lims, osticket
 
+LOG = logging.getLogger(__name__)
 BLUEPRINT = Blueprint('api', __name__, url_prefix='/api/v1')
 
 
@@ -53,6 +55,7 @@ def order(order_type):
     """Submit an order for samples."""
     api = OrdersAPI(lims=lims, status=db, osticket=osticket)
     post_data = request.get_json()
+    LOG.info("processing order: %s", post_data)
     try:
         ticket = {'name': g.current_user.name, 'email': g.current_user.email}
         result = api.submit(OrderType[order_type.upper()], post_data, ticket=ticket)
