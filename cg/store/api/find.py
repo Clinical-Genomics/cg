@@ -3,6 +3,7 @@ import datetime as dt
 from typing import List
 
 from sqlalchemy import or_
+from sqlalchemy.orm import Query
 
 from cg.store import models
 
@@ -82,6 +83,15 @@ class FindHandler:
     def panel(self, abbrev):
         """Find a panel by abbreviation."""
         return self.Panel.query.filter_by(abbrev=abbrev).first()
+
+    def analyses(self, family: models.Family=None, before: dt.datetime=None) -> Query:
+        """Fetch multiple analyses."""
+        records = self.Analysis.query
+        if family:
+            records = records.filter(models.Analysis.family == family)
+        if before:
+            records = records.filter(models.Analysis.started_at < before)
+        return records
 
     def analysis(self, family: models.Family, completed_at: dt.datetime) -> models.Analysis:
         """Fetch an analysis."""
