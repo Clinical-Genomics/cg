@@ -97,9 +97,21 @@ class FindHandler:
         """Fetch an analysis."""
         return self.Analysis.query.filter_by(family=family, started_at=started_at).first()
 
-    def flowcells(self) -> List[models.Flowcell]:
+    def flowcells(self, *, status: str=None, family: models.Family=None,
+                  query: str=None) -> List[models.Flowcell]:
         """Fetch all flowcells."""
-        return self.Flowcell.query
+        records = self.Flowcell.query
+        if family:
+            records = (
+                records
+                .join(models.Flowcell.samples, models.Sample.links)
+                .filter(models.FamilySample.family == family)
+            )
+        if status:
+            records = records.filter_by(status=status)
+        if query:
+            records = records.filter(models.Flowcell.name.like(f"%{query}%"))
+        return records.order_by(models.Flowcell.sequenced_at.desc())
 
     def flowcell(self, name: str) -> models.Flowcell:
         """Fetch a flowcell."""

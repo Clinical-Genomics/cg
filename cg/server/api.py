@@ -144,7 +144,7 @@ def sample(sample_id):
         return abort(404)
     elif not g.current_user.is_admin and (g.current_user.customer != sample_obj.customer):
         return abort(401)
-    data = sample_obj.to_dict(links=True)
+    data = sample_obj.to_dict(links=True, flowcells=True)
     return jsonify(**data)
 
 
@@ -168,8 +168,11 @@ def pool(pool_id):
 @BLUEPRINT.route('/flowcells')
 def flowcells():
     """Fetch flowcells."""
-    query = db.flowcells_completed()
-    data = [record.to_dict() for record in query.limit(30)]
+    query = db.flowcells(
+        status=request.args.get('status'),
+        query=request.args.get('query'),
+    )
+    data = [record.to_dict() for record in query.limit(50)]
     return jsonify(flowcells=data, total=query.count())
 
 

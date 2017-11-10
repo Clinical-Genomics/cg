@@ -20,15 +20,18 @@ class TransferFlowcell():
         """Populate the database with the information."""
         if store and self.hk.tag('fastq') is None:
             self.hk.add_commit(self.hk.new_tag('fastq'))
+        if store and self.hk.tag(flowcell_name) is None:
+            self.hk.add_commit(self.hk.new_tag(flowcell_name))
         stats_data = self.stats.flowcell(flowcell_name)
-        record = self.db.flowcell(flowcell_name)
-        if record is None:
-            record = self.db.add_flowcell(
+        flowcell_obj = self.db.flowcell(flowcell_name)
+        if flowcell_obj is None:
+            flowcell_obj = self.db.add_flowcell(
                 name=flowcell_name,
                 sequencer=stats_data['sequencer'],
                 sequencer_type=stats_data['sequencer_type'],
                 date=stats_data['date'],
             )
+        flowcell_obj.status = 'ondisk'
         for sample_data in stats_data['samples']:
             LOG.debug(f"adding reads/fastqs to sample: {sample_data['name']}")
             sample_obj = self.db.sample(sample_data['name'])
@@ -37,26 +40,30 @@ class TransferFlowcell():
                 continue
 
             if store:
-                self.store_fastqs(sample_obj.internal_id, sample_data['fastqs'])
+                self.store_fastqs(
+                    sample=sample_obj.internal_id,
+                    flowcell=flowcell_name,
+                    fastq_files=sample_data['fastqs']
+                )
 
             sample_obj.reads = sample_data['reads']
             enough_reads = (sample_obj.reads >
                             sample_obj.application_version.application.expected_reads)
             newest_date = ((sample_obj.sequenced_at is None) or
-                           (record.sequenced_at > sample_obj.sequenced_at))
+                           (flowcell_obj.sequenced_at > sample_obj.sequenced_at))
             if enough_reads and newest_date:
-                sample_obj.sequenced_at = record.sequenced_at
-            record.samples.append(sample_obj)
+                sample_obj.sequenced_at = flowcell_obj.sequenced_at
+            flowcell_obj.samples.append(sample_obj)
             LOG.info(f"added reads to sample: {sample_data['name']} - {sample_data['reads']} "
                      f"[{'DONE' if enough_reads else 'NOT DONE'}]")
 
-        return record
+        return flowcell_obj
 
-    def store_fastqs(self, sample_id: str, fastq_files: List[str]):
+    def store_fastqs(self, sample: str, flowcell: str, fastq_files: List[str]):
         """Store FASTQ files for a sample in housekeeper."""
-        hk_bundle = self.hk.bundle(sample_id)
+        hk_bundle = self.hk.bundle(sample)
         if hk_bundle is None:
-            hk_bundle = self.hk.new_bundle(sample_id)
+            hk_bundle = self.hk.new_bundle(sample)
             self.hk.add_commit(hk_bundle)
             new_version = self.hk.new_version(created_at=hk_bundle.created_at)
             hk_bundle.versions.append(new_version)
@@ -68,6 +75,7 @@ class TransferFlowcell():
             for fastq_file in fastq_files:
                 if self.hk.files(path=fastq_file).first() is None:
                     LOG.info(f"found FASTQ file: {fastq_file}")
-                    new_file = self.hk.new_file(path=fastq_file, tags=[self.hk.tag('fastq')])
+                    tags = [self.hk.tag('fastq'), self.hk.tag(flowcell)]
+                    new_file = self.hk.new_file(path=fastq_file, tags=tags)
                     hk_version.files.append(new_file)
             self.hk.commit()
