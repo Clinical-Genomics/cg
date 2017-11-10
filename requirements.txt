@@ -24,7 +24,7 @@ xlrd
 openpyxl
 tabulate
 lxml
-dateutil
+python-dateutil
 
 # apps
 genologics
