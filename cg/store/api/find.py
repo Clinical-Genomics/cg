@@ -31,7 +31,10 @@ class FindHandler:
         """Fetch all families."""
         records = self.Family.query
         records = records.filter_by(customer=customer) if customer else records
-        records = records.filter(models.Family.name.like(f"%{query}%")) if query else records
+        records = records.filter(or_(
+            models.Family.name.like(f"%{query}%"),
+            models.Family.internal_id.like(f"%{query}%"),
+        )) if query else records
         records = records.filter_by(action=action) if action else records
         return records.order_by(models.Family.created_at.desc())
 
