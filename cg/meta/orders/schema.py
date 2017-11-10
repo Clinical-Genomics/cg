@@ -68,7 +68,7 @@ BASE_SAMPLE = {
 PREP_MIXIN = {
     'well_position': validators.Optional(str, None),
     'tumour': validators.Optional(bool, False),
-    'source': str,
+    'source': validators.Optional(TypeValidator(str, allow_none=True), None),
     'priority': validators.Optional(validators.Any(PRIORITY_OPTIONS), 'standard'),
     'require_qcok': validators.Optional(bool, False),
     'sex': validators.Any(SEX_OPTIONS),
