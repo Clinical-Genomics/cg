@@ -1,0 +1,10 @@
+{% extends 'admin/master.html' %}
+
+{% block body %}
+  {% if session.user_email %}
+    <p>Welcome {{ session.user_name }}!</p>
+    <a href="{{ url_for('logout') }}">Logout</a>
+  {% else %}
+    <a href="{{ url_for('google.login') }}">Login</a>
+  {% endif %}
+{% endblock %}
