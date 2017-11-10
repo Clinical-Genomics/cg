@@ -355,6 +355,10 @@ class Application(Model):
     def expected_reads(self):
         return self.target_reads * 0.75
 
+    @property
+    def analysis_type(self):
+        return 'wgs' if self.prep_category == 'wgs' else 'wes'
+
 
 class ApplicationVersion(Model):
 
