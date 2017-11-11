@@ -90,7 +90,7 @@ class SampleView(BaseView):
     column_exclude_list = ['is_external']
     column_searchable_list = ['internal_id', 'name', 'ticket_number', 'customer.internal_id']
     column_filters = ['customer.internal_id', 'sex', 'application_version.application']
-    column_editable_list = ['sex', 'downsampled_to']
+    column_editable_list = ['sex', 'downsampled_to', 'sequenced_at']
     form_excluded_columns = ['is_external']
 
 

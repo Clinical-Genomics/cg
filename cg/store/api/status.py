@@ -39,6 +39,7 @@ class StatusHandler:
                 models.Sample.prepared_at == None,
                 models.Sample.downsampled_to == None,
                 models.Application.is_external == False,
+                models.Sample.sequenced_at == None,
             )
             .order_by(models.Sample.priority.desc(), models.Sample.received_at)
         )
