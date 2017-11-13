@@ -38,9 +38,6 @@ def mip(context, dry, yes, sample_info):
     if analysis_obj is None:
         print(f"{family}: {data['date']} not found")
         context.abort()
-    elif analysis_obj.is_deleted:
-        print(click.style(f"{family}: analysis already deleted", fg='red'))
-        context.abort()
 
     try:
         context.obj['tb'].delete_analysis(family, data['date'], yes=yes)
@@ -59,7 +56,8 @@ def auto(context: click.Context, before_str: str, yes: bool=False):
     old_analyses = context.obj['db'].analyses(before=before)
     for status_analysis in old_analyses:
         family_id = status_analysis.family.internal_id
-        tb_analysis = context.obj['tb'].find_analysis(family_id, status_analysis.started_at)
+        tb_analysis = context.obj['tb'].find_analysis(
+            family=family_id, started_at=status_analysis.started_at, status='completed')
 
         if tb_analysis is None:
             print(click.style(f"{family_id}: analysis not found in Trailblazer", fg='yellow'))
@@ -73,4 +71,4 @@ def auto(context: click.Context, before_str: str, yes: bool=False):
 
         print(click.style(f"{family_id}: cleaning MIP output", fg='blue'))
         sampleinfo_path = context.obj['tb'].get_sampleinfo(tb_analysis)
-        context.invoke(mip, yes=yes, sample_info=sampleinfo_path)
+        context.invoke(mip, yes=yes, sample_info=open(sampleinfo_path, 'r'))
