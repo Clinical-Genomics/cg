@@ -46,7 +46,8 @@ class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
 
     def get_sampleinfo(self, analysis: models.Analysis) -> str:
         """Get the sample info path for an analysis."""
-        data = ruamel.yaml.safe_load(Path(analysis.config_path).open())
+        raw_data = ruamel.yaml.safe_load(Path(analysis.config_path).open())
+        data = files.parse_config(raw_data)
         return data['sampleinfo_path']
 
     @staticmethod

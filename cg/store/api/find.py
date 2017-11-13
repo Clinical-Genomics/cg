@@ -2,7 +2,7 @@
 import datetime as dt
 from typing import List
 
-from sqlalchemy import or_
+from sqlalchemy import or_, and_, func
 from sqlalchemy.orm import Query
 
 from cg.store import models
@@ -93,7 +93,14 @@ class FindHandler:
         if family:
             records = records.filter(models.Analysis.family == family)
         if before:
-            records = records.filter(models.Analysis.started_at < before)
+            subq = self.Analysis.query.\
+                join(models.Analysis.family).\
+                group_by(models.Family.id).\
+                with_entities(models.Analysis.id, func.max(models.Analysis.started_at).label('started_at')).subquery()
+            records = records.join(
+                subq,
+                and_(self.Analysis.id == subq.c.id, self.Analysis.started_at == subq.c.started_at)
+            ).filter(models.Analysis.started_at < before)
         return records
 
     def analysis(self, family: models.Family, started_at: dt.datetime) -> models.Analysis:
