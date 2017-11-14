@@ -22,7 +22,7 @@ def get(context: click.Context, identifier: str):
         context.invoke(sample, sample_ids=[identifier])
     elif identifier and re.match(r'^[a-z]*$', identifier):
         # try family information
-        context.invoke(family, family_id=identifier)
+        context.invoke(family, family_ids=[identifier])
     elif identifier and re.match(r'^[HC][A-Z0-9]{8}$', identifier):
         # try flowcell information
         context.invoke(flowcell, flowcell_id=identifier)
