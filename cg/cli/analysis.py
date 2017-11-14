@@ -34,17 +34,17 @@ def analysis(context, priority, email, family_id):
 
     if context.invoked_subcommand is None:
         if family_id is None:
-            click.echo(click.style('you need to provide a family', fg='red'))
+            LOG.error('provide a family')
             context.abort()
 
         # check everything is okey
         family_obj = context.obj['db'].family(family_id)
         if family_obj is None:
-            print(click.style(f"{family_id} not found", fg='red'))
+            LOG.error(f"{family_id} not found")
             context.abort()
         is_ok = context.obj['api'].check(family_obj)
         if not is_ok:
-            print(click.style(f"{family_obj.internal_id} not ready to start", fg='yellow'))
+            LOG.warning(f"{family_obj.internal_id}: not ready to start")
             # commit the updates to request flowcells
             context.obj['db'].commit()
         else:
@@ -64,10 +64,10 @@ def config(context, dry, family_id):
     family_obj = context.obj['db'].family(family_id)
     config_data = context.obj['api'].config(family_obj)
     if dry:
-        click.echo(config_data)
+        print(config_data)
     else:
         out_path = context.obj['tb'].save_config(config_data)
-        click.echo(click.style(f"saved config to: {out_path}", fg='green'))
+        LOG.info(f"saved config to: {out_path}")
 
 
 @analysis.command()
@@ -88,10 +88,11 @@ def link(context, family_id, sample_id):
         # link only one sample in a family
         link_objs = [context.obj['db'].link(family_id, sample_id)]
     else:
-        click.echo(click.style('you need to provide family and/or sample', fg='red'))
+        LOG.error('provide family and/or sample')
         context.abort()
 
     for link_obj in link_objs:
+        LOG.info(f"{link_obj.sample.internal_id}: link FASTQ files")
         context.obj['api'].link_sample(link_obj)
 
 
@@ -105,7 +106,7 @@ def panel(context, print_output, family_id):
     bed_lines = context.obj['api'].panel(family_obj)
     if print_output:
         for bed_line in bed_lines:
-            click.echo(bed_line)
+            print(bed_line)
     else:
         context.obj['tb'].write_panel(family_id, bed_lines)
 
@@ -115,25 +116,27 @@ def panel(context, print_output, family_id):
 @EMAIL_OPTION
 @click.argument('family_id')
 @click.pass_context
-def start(context, priority, email, family_id):
+def start(context: click.Context, family_id: str, priority: str=None, email: str=None):
     """Start the analysis pipeline for a family."""
     family_obj = context.obj['db'].family(family_id)
-    try:
+    if family_obj is None:
+        LOG.error(f"{family_id}: family not found")
+        context.abort()
+    if context.obj['tb'].analyses(family=family_obj.internal_id, temp=True).first():
+        LOG.warning(f"{family_obj.internal_id}: analysis already running")
+    else:
         context.obj['api'].start(family_obj, priority=priority, email=email)
-    except tb.MipStartError as error:
-        click.echo(click.style(error.message, fg='red'))
 
 
 @analysis.command()
 @click.pass_context
-def auto(context):
+def auto(context: click.Context):
     """Start all analyses that are ready for analysis."""
     for family_obj in context.obj['db'].families_to_analyze():
-        pending = context.obj['tb'].analyses(family=family_obj.internal_id, temp=True)
-        if pending.first():
-            LOG.info(f"{family_obj.internal_id}: analysis already running, skipping")
-        else:
-            LOG.info(f"starting family: {family_obj.internal_id}")
-            priority = ('high' if family_obj.high_priority else
-                        ('low' if family_obj.low_priority else 'normal'))
+        LOG.info(f"{family_obj.internal_id}: start analysis")
+        priority = ('high' if family_obj.high_priority else
+                    ('low' if family_obj.low_priority else 'normal'))
+        try:
             context.invoke(analysis, priority=priority, family_id=family_obj.internal_id)
+        except tb.MipStartError as error:
+            LOG.exception(error.message)
