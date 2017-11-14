@@ -40,11 +40,11 @@ def analysis(context, priority, email, family_id):
         # check everything is okey
         family_obj = context.obj['db'].family(family_id)
         if family_obj is None:
-            print(click.style('family not found', fg='red'))
+            print(click.style(f"{family_id} not found", fg='red'))
             context.abort()
         is_ok = context.obj['api'].check(family_obj)
         if not is_ok:
-            print(click.style('family not ready to start', fg='yellow'))
+            print(click.style(f"{family_obj.internal_id} not ready to start", fg='yellow'))
             # commit the updates to request flowcells
             context.obj['db'].commit()
         else:

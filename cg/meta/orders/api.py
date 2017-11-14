@@ -148,7 +148,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
         """Add expected reads/reads missing."""
         for sample_obj in samples:
             LOG.info(f"{sample_obj.internal_id}: add missing reads in LIMS")
-            target_reads = sample_obj.application_version.application.total_reads / 1000000
+            target_reads = sample_obj.application_version.application.target_reads / 1000000
             self.lims.update_sample(sample_obj.internal_id, target_reads=target_reads)
 
     def fillin_sample_ids(self, samples: List[dict], lims_map: dict):
