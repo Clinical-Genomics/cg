@@ -9,6 +9,7 @@ Click>=6.7
 Flask
 Flask-Admin
 Flask-Alchy
+Flask-SQLAlchemy==2.1
 Flask-CORS
 Flask-Dance
 google-auth

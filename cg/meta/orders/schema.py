@@ -105,11 +105,11 @@ RML_SAMPLE = {
     **BASE_SAMPLE,
     **LAB_MIXIN,
     'pool': str,
-    'well_position_rml': validators.Optional(str, None),
-    'rml_plate_name': validators.Optional(str, None),
-    'index': validators.Optional(str, None),
-    'index_number': validators.Optional(str, None),
-    'index_sequence': validators.Optional(str, None),
+    'well_position_rml': validators.Optional(TypeValidator(str, allow_none=True), None),
+    'rml_plate_name': validators.Optional(TypeValidator(str, allow_none=True), None),
+    'index': validators.Optional(TypeValidator(str, allow_none=True), None),
+    'index_number': validators.Optional(TypeValidator(str, allow_none=True), None),
+    'index_sequence': validators.Optional(TypeValidator(str, allow_none=True), None),
 }
 
 MICROBIAL_SAMPLE = {
