@@ -97,7 +97,7 @@ class LimsAPI(Lims, OrderHandler):
         """Get capture kit for a LIMS sample."""
         lims_sample = Sample(self, id=lims_id)
         capture_kit = lims_sample.udf.get('Capture Library version')
-        if capture_kit:
+        if capture_kit and capture_kit != 'NA':
             return capture_kit
         else:
             artifacts = self.get_artifacts(
