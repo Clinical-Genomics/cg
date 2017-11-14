@@ -1,3 +1,5 @@
+import sys
+
 import click
 import coloredlogs
 import ruamel.yaml
@@ -27,7 +29,8 @@ LEVELS = ['DEBUG', 'INFO', 'WARNING', 'ERROR']
 @click.pass_context
 def base(context, config, database, log_level):
     """cg - interface between tools at Clinical Genomics."""
-    coloredlogs.install(level=log_level)
+    log_format = "%(message)s" if sys.stdout.isatty() else None
+    coloredlogs.install(level=log_level, fmt=log_format)
     context.obj = ruamel.yaml.safe_load(config) if config else {}
     if database:
         context.obj['database'] = database
