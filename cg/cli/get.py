@@ -1,3 +1,4 @@
+import logging
 import re
 from typing import List
 
@@ -6,6 +7,7 @@ from tabulate import tabulate
 
 from cg.store import Store
 
+LOG = logging.getLogger(__name__)
 SAMPLE_HEADERS = ['Sample', 'Name', 'Customer', 'Application', 'State', 'Priority',
                   'External?']
 FAMILY_HEADERS = ['Family', 'Name', 'Customer', 'Priority', 'Panels', 'Action']
@@ -27,7 +29,8 @@ def get(context: click.Context, identifier: str):
         # try flowcell information
         context.invoke(flowcell, flowcell_id=identifier)
     elif identifier:
-        click.echo(click.style("can't predict identifier", fg='yellow'))
+        LOG.error(f"{identifier}: can't predict identifier")
+        context.abort()
 
 
 @get.command()
@@ -38,9 +41,10 @@ def get(context: click.Context, identifier: str):
 def sample(context: click.Context, families: bool, flowcells: bool, sample_ids: List[str]):
     """Get information about a sample."""
     for sample_id in sample_ids:
+        LOG.debug("{sample_id}: get info about sample")
         sample_obj = context.obj['status'].sample(sample_id)
         if sample_obj is None:
-            click.echo(click.style(f"sample doesn't exist: {sample_id}", fg='red'))
+            LOG.warning(f"{sample_id}: sample doesn't exist")
             continue
         row = [
             sample_obj.internal_id,
@@ -57,6 +61,7 @@ def sample(context: click.Context, families: bool, flowcells: bool, sample_ids: 
             context.invoke(family, family_ids=family_ids, samples=False)
         if flowcells:
             for flowcell_obj in sample_obj.flowcells:
+                LOG.debug(f"{flowcell_obj.name}: get info about flowcell")
                 context.invoke(flowcell, flowcell_id=flowcell_obj.name, samples=False)
 
 
@@ -72,18 +77,20 @@ def family(context: click.Context, customer: str, name: bool, samples: bool,
     if name:
         customer_obj = context.obj['status'].customer(customer)
         if customer_obj is None:
-            print(click.style(f"{customer}: customer not found", fg='yellow'))
+            LOG.error(f"{customer}: customer not found")
+            context.abort()
         families = context.obj['status'].families(customer=customer_obj, query=family_ids[-1])
     else:
         families = []
         for family_id in family_ids:
             family_obj = context.obj['status'].family(family_id)
             if family_obj is None:
-                click.echo(click.style(f"family doesn't exist: {family_id}", fg='red'))
+                LOG.error(f"{family_id}: family doesn't exist")
                 context.abort()
             families.append(family_obj)
 
     for family_obj in families:
+        LOG.debug(f"{family_id.internal_id}: get info about family")
         row = [
             family_obj.internal_id,
             family_obj.name,
@@ -106,7 +113,7 @@ def flowcell(context: click.Context, samples: bool, flowcell_id: str):
     """Get information about a flowcell and the samples on it."""
     flowcell_obj = context.obj['status'].flowcell(flowcell_id)
     if flowcell_obj is None:
-        click.echo(click.style(f"flowcell doesn't exist: {flowcell_id}", fg='red'))
+        LOG.error(f"{flowcell_id}: flowcell not found")
         context.abort()
     row = [
         flowcell_obj.name,
@@ -121,4 +128,4 @@ def flowcell(context: click.Context, samples: bool, flowcell_id: str):
         if sample_ids:
             context.invoke(sample, sample_ids=sample_ids, families=False)
         else:
-            click.echo(click.style('no samples found on flowcell', fg='yellow'))
+            LOG.warning('no samples found on flowcell')

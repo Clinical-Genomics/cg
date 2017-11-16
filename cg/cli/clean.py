@@ -10,6 +10,7 @@ from cg.store import Store
 
 LOG = logging.getLogger(__name__)
 
+
 @click.group()
 @click.pass_context
 def clean(context):
@@ -31,18 +32,18 @@ def mip(context, dry, yes, sample_info):
     family = data['family']
     family_obj = context.obj['db'].family(family)
     if family_obj is None:
-        print(f"Family '{family}' not found.")
+        LOG.error(f"{family}: family not found")
         context.abort()
 
     analysis_obj = context.obj['db'].analysis(family_obj, data['date'])
     if analysis_obj is None:
-        print(f"{family}: {data['date']} not found")
+        LOG.error(f"{family} - {data['date']}: analysis not found")
         context.abort()
 
     try:
         context.obj['tb'].delete_analysis(family, data['date'], yes=yes)
     except ValueError as error:
-        print(click.style(f"{family}: {error.args[0]}"))
+        LOG.error(f"{family}: {error.args[0]}")
         context.abort()
 
 
@@ -56,19 +57,23 @@ def auto(context: click.Context, before_str: str, yes: bool=False):
     old_analyses = context.obj['db'].analyses(before=before)
     for status_analysis in old_analyses:
         family_id = status_analysis.family.internal_id
+        LOG.info(f"{family_id}: clean up analysis output")
         tb_analysis = context.obj['tb'].find_analysis(
-            family=family_id, started_at=status_analysis.started_at, status='completed')
+            family=family_id,
+            started_at=status_analysis.started_at,
+            status='completed'
+        )
 
         if tb_analysis is None:
-            print(click.style(f"{family_id}: analysis not found in Trailblazer", fg='yellow'))
+            LOG.warning(f"{family_id}: analysis not found in Trailblazer")
             continue
         elif tb_analysis.is_deleted:
-            print(click.style(f"{family_id}: analysis already deleted", fg='yellow'))
+            LOG.warning(f"{family_id}: analysis already deleted")
             continue
         elif context.obj['tb'].analyses(family=family_id, temp=True).count() > 0:
-            print(click.style(f"{family_id}: family already re-started", fg='yellow'))
+            LOG.warning(f"{family_id}: family already re-started")
             continue
 
-        print(click.style(f"{family_id}: cleaning MIP output", fg='blue'))
+        LOG.info(f"{family_id}: cleaning MIP output")
         sampleinfo_path = context.obj['tb'].get_sampleinfo(tb_analysis)
         context.invoke(mip, yes=yes, sample_info=open(sampleinfo_path, 'r'))

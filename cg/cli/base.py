@@ -1,3 +1,4 @@
+import logging
 import sys
 
 import click
@@ -17,6 +18,7 @@ from .status import status
 from .transfer import transfer
 from .clean import clean
 
+LOG = logging.getLogger(__name__)
 LEVELS = ['DEBUG', 'INFO', 'WARNING', 'ERROR']
 
 
@@ -50,12 +52,11 @@ def init(context, reset, force):
             click.confirm(click.style(message, fg='yellow'), abort=True)
         status_db.drop_all()
     elif existing_tables:
-        click.echo(click.style("Database already exists, use '--reset'", fg='red'))
+        LOG.error("Database already exists, use '--reset'")
         context.abort()
 
     status_db.create_all()
-    message = f"Success! New tables: {', '.join(status_db.engine.table_names())}"
-    click.echo(click.style(message, fg='green'))
+    LOG.info(f"Success! New tables: {', '.join(status_db.engine.table_names())}")
 
 
 base.add_command(analysis)

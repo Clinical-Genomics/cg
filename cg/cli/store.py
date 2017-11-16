@@ -9,7 +9,7 @@ from cg.apps import hk, tb
 from cg.exc import AnalysisNotFinishedError
 from cg.store import Store
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 @click.group()
@@ -80,10 +80,10 @@ def analysis(context, config_stream):
 def completed(context):
     """Store all completed analyses."""
     hk_api = context.obj['hk_api']
-    for analysis_obj in context.obj['tb_api'].analyses(status='completed'):
+    for analysis_obj in context.obj['tb_api'].analyses(status='completed', deleted=False):
         existing_record = hk_api.version(analysis_obj.family, analysis_obj.started_at)
         if existing_record:
-            log.debug(f"analysis stored: {analysis_obj.family} - {analysis_obj.started_at}")
+            LOG.debug(f"analysis stored: {analysis_obj.family} - {analysis_obj.started_at}")
             continue
         click.echo(click.style(f"storing family: {analysis_obj.family}", fg='blue'))
         with Path(analysis_obj.config_path).open() as config_stream:

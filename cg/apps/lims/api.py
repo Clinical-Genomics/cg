@@ -86,7 +86,7 @@ class LimsAPI(Lims, OrderHandler):
         artifacts = self.get_artifacts(samplelimsid=lims_id, process_type='CG002 - Delivery',
                                        type='Analyte')
         if len(artifacts) == 1:
-            return artifacts[0].parent_process.udf['Date delivered']
+            return artifacts[0].parent_process.udf.get('Date delivered')
         elif len(artifacts) == 0:
             return None
         else:

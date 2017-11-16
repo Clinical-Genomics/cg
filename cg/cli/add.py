@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
+import logging
 import click
 
 from cg.constants import PRIORITY_OPTIONS
 from cg.store import Store
+
+LOG = logging.getLogger(__name__)
 
 
 @click.group()
@@ -20,12 +23,12 @@ def customer(context, internal_id: str, name: str):
     """Add a new customer with a unique INTERNAL_ID and NAME."""
     existing = context.obj['db'].customer(internal_id)
     if existing:
-        click.echo(click.style(f"customer already added: {existing.name}", fg='yellow'))
+        LOG.error(f"{existing.name}: customer already added")
         context.abort()
     new_customer = context.obj['db'].add_customer(internal_id=internal_id, name=name)
     context.obj['db'].add_commit(new_customer)
     message = f"customer added: {new_customer.internal_id} ({new_customer.id})"
-    click.echo(click.style(message, fg='green'))
+    LOG.info(message)
 
 
 @add.command()
@@ -40,11 +43,11 @@ def user(context, admin, customer_id, email, name):
     customer_obj = context.obj['db'].customer(customer_id)
     existing = context.obj['db'].user(email)
     if existing:
-        click.echo(click.style(f"user already added: {existing.name}", fg='yellow'))
+        LOG.error(f"{existing.name}: user already added")
         context.abort()
     new_user = context.obj['db'].add_user(customer_obj, email, name, admin=admin)
     context.obj['db'].add_commit(new_user)
-    click.echo(click.style(f"user added: {new_user.email} ({new_user.id})", fg='green'))
+    LOG.info(f"user added: {new_user.email} ({new_user.id})")
 
 
 @add.command()
@@ -64,11 +67,11 @@ def sample(context, lims_id, downsampled, sex, order, application, priority, cus
     status = context.obj['db']
     customer_obj = status.customer(customer_id)
     if customer_obj is None:
-        click.echo(click.style('customer not found', fg='red'))
+        LOG.error('customer not found')
         context.abort()
     application_obj = status.application(application)
     if application_obj is None:
-        click.echo(click.style('application not found', fg='red'))
+        LOG.error('application not found')
         context.abort()
     new_record = status.add_sample(
         name=name,
@@ -81,7 +84,7 @@ def sample(context, lims_id, downsampled, sex, order, application, priority, cus
     new_record.application_version = application_obj.versions[-1]
     new_record.customer = customer_obj
     status.add_commit(new_record)
-    click.echo(click.style(f"added new sample: {new_record.internal_id}", fg='green'))
+    LOG.info(f"{new_record.internal_id}: new sample added")
 
 
 @add.command()
@@ -96,13 +99,13 @@ def family(context, priority, panels, customer_id, name):
     status = context.obj['db']
     customer_obj = status.customer(customer_id)
     if customer_obj is None:
-        click.echo(click.style('customer not found', fg='red'))
+        LOG.error(f"{customer_id}: customer not found")
         context.abort()
 
     for panel_id in panels:
         panel_obj = status.panel(panel_id)
         if panel_obj is None:
-            print(click.style(f"{panel_id}: panel not found", fg='red'))
+            LOG.error(f"{panel_id}: panel not found")
             context.abort()
 
     new_family = status.add_family(
@@ -112,7 +115,7 @@ def family(context, priority, panels, customer_id, name):
     )
     new_family.customer = customer_obj
     status.add_commit(new_family)
-    click.echo(click.style(f"added new family: {new_family.internal_id}", fg='green'))
+    LOG.info(f"{new_family.internal_id}: new family added")
 
 
 @add.command()
@@ -133,4 +136,4 @@ def relationship(context, mother, father, status, family_id, sample_id):
     new_record = status_db.relate_sample(family_obj, sample_obj, status, mother=mother_obj,
                                          father=father_obj)
     status_db.add_commit(new_record)
-    click.echo(f"related sample to family")
+    LOG.info(f"related {family_obj.internal_id} to {sample_obj.internal_id}")
