@@ -1,9 +1,12 @@
+import logging
+
 import click
 
 from cg.constants import FAMILY_ACTIONS, PRIORITY_OPTIONS
 from cg.store import Store
 from cg.apps.lims import LimsAPI
 
+LOG = logging.getLogger(__name__)
 
 @click.group('set')
 @click.pass_context
@@ -22,11 +25,10 @@ def family(context, action, priority, panels, family_id):
     """Update information about a family."""
     family_obj = context.obj['status'].family(family_id)
     if family_obj is None:
-        print(click.style("can't find family", fg='red'))
+        LOG.error(f"{family_id}: family not found")
         context.abort()
     if action:
-        message = f"update action: {family_obj.action or 'NA'} -> {action}"
-        print(click.style(message, fg='blue'))
+        LOG.info(f"update action: {family_obj.action or 'NA'} -> {action}")
         family_obj.action = action
     if priority:
         message = f"update priority: {family_obj.priority_human} -> {priority}"
