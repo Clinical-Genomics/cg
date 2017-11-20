@@ -425,3 +425,13 @@ class Invoice(Model):
     samples = orm.relationship(Sample, backref='invoice')
     pools = orm.relationship(Pool, backref='invoice')
     customer = orm.relationship(Customer, backref='invoices')
+
+
+class SampleStats(Model):
+
+    id = Column(types.Integer, primary_key=True)
+    created_at = Column(types.DateTime, default=dt.datetime.now)
+    updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
+    sample_id = Column(ForeignKey(Sample.id), nullable=False)
+
+    sample = orm.relationship(Sample, backref='stats', uselist=False)
