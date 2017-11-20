@@ -129,6 +129,7 @@ class StatusHandler:
                 models.Sample.invoice_id == None,
                 models.Sample.no_invoice != True,
                 models.Sample.delivered_at != True,
+                models.Sample.downsampled_to == None
             )
         )
         records = records.filter(models.Sample.customer == customer) if customer else records
