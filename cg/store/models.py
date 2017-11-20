@@ -433,5 +433,44 @@ class SampleStats(Model):
     created_at = Column(types.DateTime, default=dt.datetime.now)
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
     sample_id = Column(ForeignKey(Sample.id), nullable=False)
+    analysis_id = Column(ForeignKey(Analysis.id), nullable=False)
+
+    # pre-sequencing lab stuff
+    capture_kit = Column(types.String(32))
+    library_kit_lot_1 = Column(types.String(32))
+    library_kit_lot_2 = Column(types.String(32))
+    # can sometimes be a mix of two kits
+    baits_lot = Column(types.String(64))
+    beads_t1_lot = Column(types.String(32))
+    fragment_size = Column(types.Integer)
+    dna_concentration = Column(types.Float)
+    input_material = Column(types.Float)
+    index_sequence = Column(types.String(32))
+
+    # mapping/alignment
+    reads_total = Column(types.Integer)
+    mapped_percent = Column(types.Float)
+    duplicates_percent = Column(types.Float)
+    strand_balance = Column(types.Float)
+
+    # coverage
+    coverage_target = Column(types.Float)
+    completeness_target_10 = Column(types.Float)
+    completeness_target_20 = Column(types.Float)
+    completeness_target_50 = Column(types.Float)
+    completeness_target_100 = Column(types.Float)
+
+    # OMIM stats
+    # 10-100X completeness
+
+    # variant calling
+    variants = Column(types.Integer)  # WHERE?
+    indels = Column(types.Integer)
+    snps = Column(types.Integer)
+    novel_sites = Column(types.Integer)  # WHERE?
+    concordant_rate = Column(types.Float)
+    hethom_ratio = Column(types.Float)
+    titv_ratio = Column(types.Float)
 
     sample = orm.relationship(Sample, backref='stats', uselist=False)
+    analysis = orm.relationship(Analysis, backref='stats')
