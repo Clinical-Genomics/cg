@@ -1,0 +1,21 @@
+{% extends 'invoices/layout.html' %}
+
+{% block body %}
+<div class="container mt-5 mb-5">
+  <h1>Invoices</h1>
+
+  <ul class="list-group">
+    {% for invoice in invoices %}
+      <li class="list-group-item">
+        <a href="{{ url_for('invoices.invoice', invoice_id=invoice.id) }}">
+          {{ invoice.id }}
+        </a>
+      </li>
+    {% else %}
+      <li class="list-group-item">No invoices yet.</li>
+    {% endfor %}
+  </ul>
+
+  <a href="{{ url_for('invoices.new') }}">New invoice</a>
+</div>
+{% endblock %}

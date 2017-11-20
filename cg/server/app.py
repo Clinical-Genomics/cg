@@ -7,7 +7,7 @@ from flask_dance.consumer import oauth_authorized
 import requests
 
 from cg.store import models
-from . import api, ext, admin
+from . import api, ext, admin, invoices
 
 
 def create_app():
@@ -58,6 +58,7 @@ def register_blueprints(app: Flask):
     app.register_blueprint(oauth_bp, url_prefix='/login')
 
     app.register_blueprint(api.BLUEPRINT)
+    app.register_blueprint(invoices.BLUEPRINT, url_prefix='/invoices')
 
     @app.route('/')
     def index():

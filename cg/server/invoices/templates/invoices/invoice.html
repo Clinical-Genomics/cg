@@ -1,0 +1,15 @@
+{% extends 'invoices/layout.html' %}
+
+{% block body %}
+<div class="container">
+  <h1>{{ invoice.id }}</h1>
+
+  <ul class="list-group">
+    {% for sample in invoice.samples %}
+    <li class="list-group-item">
+      {{ sample.internal_id }}
+    </li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}
