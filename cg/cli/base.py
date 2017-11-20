@@ -17,6 +17,7 @@ from .set import set_cmd
 from .status import status
 from .transfer import transfer
 from .clean import clean
+from .deliver import deliver
 
 LOG = logging.getLogger(__name__)
 LEVELS = ['DEBUG', 'INFO', 'WARNING', 'ERROR']
@@ -68,3 +69,4 @@ base.add_command(transfer)
 base.add_command(get)
 base.add_command(set_cmd)
 base.add_command(clean)
+base.add_command(deliver)
