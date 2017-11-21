@@ -1,5 +1,7 @@
+import logging
 from typing import List
 
+LOG = logging.getLogger(__name__)
 SEX_MAP = {'male': 'M', 'female': 'F'}
 
 
@@ -10,6 +12,7 @@ class LimsHandler:
         """Convert order input to lims interface input."""
         samples_lims = []
         for sample in samples:
+            LOG.debug(f"{sample['name']}: prepare LIMS input")
             samples_lims.append({
                 'name': sample['name'],
                 'container': sample.get('container') or 'Tube',
