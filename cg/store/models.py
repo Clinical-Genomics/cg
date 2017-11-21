@@ -295,6 +295,22 @@ class Flowcell(Model):
         return data
 
 
+class Lane(Model):
+
+    __table_args__ = (UniqueConstraint('flowcell_id', 'number', name='_flowcell_number_uc'),)
+
+    id = Column(types.Integer, primary_key=True)
+    flowcell_id = Column(ForeignKey(Flowcell.id), nullable=False)
+    number = Column(types.Integer, nullable=False)
+    read_count = Column(types.Integer, nullable=False)
+    q30 = Column(types.Float, nullable=False)
+    q30_read1 = Column(types.Float)
+    q30_read2 = Column(types.Float)
+    error_rate = Column(types.Float)
+
+    flowcell = orm.relationship('Flowcell', backref='lanes')
+
+
 class Analysis(Model):
 
     id = Column(types.Integer, primary_key=True)
