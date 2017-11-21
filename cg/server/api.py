@@ -56,7 +56,7 @@ def order(order_type):
     """Submit an order for samples."""
     api = OrdersAPI(lims=lims, status=db, osticket=osticket)
     post_data = request.get_json()
-    LOG.info("processing order: %s", post_data)
+    LOG.info("processing '%s' order: %s", order_type, post_data)
     try:
         ticket = {'name': g.current_user.name, 'email': g.current_user.email}
         result = api.submit(OrderType[order_type.upper()], post_data, ticket=ticket)
@@ -64,6 +64,7 @@ def order(order_type):
         return abort(make_response(jsonify(message=error.message), 401))
     except HTTPError as error:
         return abort(make_response(jsonify(message=error.args[0]), 401))
+    LOG.info(f"{result['ticket'] or 'NA'}: successfully submitted samples")
     return jsonify(project=result['project'],
                    records=[record.to_dict() for record in result['records']])
 
