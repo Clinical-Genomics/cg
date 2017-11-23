@@ -90,7 +90,7 @@ def family(context: click.Context, customer: str, name: bool, samples: bool,
             families.append(family_obj)
 
     for family_obj in families:
-        LOG.debug(f"{family_id.internal_id}: get info about family")
+        LOG.debug(f"{family_obj.internal_id}: get info about family")
         row = [
             family_obj.internal_id,
             family_obj.name,
