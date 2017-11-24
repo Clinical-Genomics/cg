@@ -20,3 +20,10 @@ class HousekeeperAPI(Store):
         """Call the include version function to import related assets."""
         include_version(self.root_dir, version_obj)
         version_obj.included_at = dt.datetime.now()
+
+    def last_version(self, bundle: str) -> models.Version:
+        return (self.Version.query
+                            .join(models.Version.bundle)
+                            .filter(models.Bundle.name == bundle)
+                            .order_by(models.Version.created_at.desc())
+                            .first())
