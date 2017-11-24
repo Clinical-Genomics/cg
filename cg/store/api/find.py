@@ -139,6 +139,17 @@ class FindHandler:
             .first()
         )
 
+    def family_samples(self, family_id: str) -> models.FamilySample:
+        """Find the samples of a family."""
+        return (
+            self.FamilySample.query
+            .join(models.FamilySample.family, models.FamilySample.sample)
+            .filter(
+                models.Family.internal_id == family_id,
+            )
+            .all()
+        )
+
     def pools(self, *, customer: models.Customer):
         """Fetch all the pools."""
         records = self.Pool.query
