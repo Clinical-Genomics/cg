@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*- import logging
 
+import os
+
 import click
 import logging
 from pathlib import Path
 
-from cg.apps import tb, hk, lims
 from cg.store import Store
+from cg.meta.deliver.api import DeliverAPI
 
 LOG = logging.getLogger(__name__)
 
@@ -25,27 +27,37 @@ def deliver(context):
 @click.pass_context
 def inbox(context, dry, family, version, tag, inbox):
     """Link files from HK to cust inbox."""
-    status_api = Store(context.obj['database'])
-    hk_api = hk.HousekeeperAPI(context.obj)
-    lims_api = lims.LimsAPI(context.obj)
 
-    family_obj = status_api.family(family)
-    if family_obj is None:
-        print(f"Family '{family}' not found.")
-        context.abort()
+    deliver_api = DeliverAPI(context.obj)
+    db = Store(context.obj['database'])
 
-    if not version:
-        last_version = hk_api.last_version(bundle=family)
-    else:
-        last_version = hk_api.version(bundle=family, date=version)
-    files = hk_api.files(bundle=family, version=last_version.id, tags=tag).all()
+    family_files = deliver_api.get_post_analysis_family_files(family=family, version=version, tag=tag)
+    link_obj = db.family_samples(family)
 
-    for file_obj in files:
+    family_obj = db.family(family)
+    for file_obj in family_files:
         out_path = Path(inbox.format(family=family_obj.name, customer=family_obj.customer.internal_id))
-        file_name = Path('_'.join([ tag.name for tag in file_obj.tags ]))
-        file_ext = ''.join(Path(file_obj.path).suffixes)
-        new_path = f"{out_path / file_name}{file_ext}"
 
-        os.link(file.full_path, new_path)
+        #file_name = Path('_'.join([ tag.name for tag in file_obj.tags ]))
+        #file_ext = ''.join(Path(file_obj.path).suffixes)
+        file_name = Path(file_obj.path).name.replace(family, family_obj.name)
+        new_path = f"{out_path / file_name}"
+
+        os.link(file_obj.full_path, new_path)
         LOG.info(f"linked file: {file_obj.full_path} -> {new_path}")
+
+    sample_files = {}
+    for family_sample in link_obj:
+        sample_obj = family_sample.sample
+        sample_files = deliver_api.get_post_analysis_sample_files(family=family, sample=sample_obj.internal_id, version=version, tag=tag)
+
+        for file_obj in sample_files:
+            out_path = Path(inbox.format(family=family_obj.name, customer=family_obj.customer.internal_id))
+            out_path = out_path.joinpath(sample_obj.name)
+
+            file_name = Path(file_obj.path).name.replace(sample_obj.internal_id, sample_obj.name)
+            new_path = f"{out_path / file_name}"
+
+            os.link(file_obj.full_path, new_path)
+            LOG.info(f"linked file: {file_obj.full_path} -> {new_path}")
 
