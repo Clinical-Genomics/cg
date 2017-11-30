@@ -64,7 +64,7 @@ def order(order_type):
         return abort(make_response(jsonify(message=error.message), 401))
     except HTTPError as error:
         return abort(make_response(jsonify(message=error.args[0]), 401))
-    LOG.info(f"{result['ticket'] or 'NA'}: successfully submitted samples")
+    #LOG.info(f"{result['ticket'] or 'NA'}: successfully submitted samples")
     return jsonify(project=result['project'],
                    records=[record.to_dict() for record in result['records']])
 
