@@ -8,24 +8,31 @@ from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
 
-FAMILY_TAGS = ['vcf-clinical-sv-bin', 'vcf-clinical-sv-bin-index', 'vcf-research-sv-bin', 'vcf-research-sv-bin-index', 'gbcf', 'gbcf-index', 'snv-gbcf', 'snv-gbcf-index', 'snv-bcf', 'snv-bcf-index', 'sv-bcf', 'sv-bcf-index', 'vcf-snv-clinical', 'vcf-snv-clinical-index', 'vcf-snv-research', 'vcf-snv-research-index', 'vcf-sv-clinical', 'vcf-sv-clinical-index', 'vcf-sv-research', 'vcf-sv-research-index']
+FAMILY_TAGS = [
+        'vcf-clinical-sv-bin', 'vcf-clinical-sv-bin-index',
+        'vcf-research-sv-bin', 'vcf-research-sv-bin-index',
+        'gbcf', 'gbcf-index',
+        'snv-gbcf', 'snv-gbcf-index',
+        'snv-bcf', 'snv-bcf-index',
+        'sv-bcf', 'sv-bcf-index',
+        'vcf-snv-clinical', 'vcf-snv-clinical-index',
+        'vcf-snv-research', 'vcf-snv-research-index',
+        'vcf-sv-clinical', 'vcf-sv-clinical-index',
+        'vcf-sv-research', 'vcf-sv-research-index']
 
 SAMPLE_TAGS = ['bam', 'bam-index']
 
 
 class DeliverAPI():
 
-    def __init__(self, config):
-        self.db = Store(config['database'])
-        self.hk = hk.HousekeeperAPI(config)
-        self.lims = lims.LimsAPI(config)
+    def __init__(self, db: Store, hk_api: hk.HousekeeperAPI, lims_api: lims.LimsAPI):
+        self.db = db
+        self.hk = hk_api
+        self.lims = lims_api
 
     def get_post_analysis_files(self, family: str, version, tag):
 
         family_obj = self.db.family_samples(family)
-        if family_obj is None:
-            print(f"Family '{family}' not found.")
-            context.abort()
     
         if not version:
             last_version = self.hk.last_version(bundle=family)
