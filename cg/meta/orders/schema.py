@@ -119,7 +119,11 @@ RML_SAMPLE = {
 MICROBIAL_SAMPLE = {
     **BASE_SAMPLE,
     **LAB_MIXIN,
-    **PREP_MIXIN,
+    'well_position': validators.Optional(TypeValidator(str, allow_none=True), None),
+    'tumour': validators.Optional(bool, False),
+    'source': validators.Optional(TypeValidator(str, allow_none=True), None),
+    'priority': validators.Optional(validators.Any(PRIORITY_OPTIONS), 'standard'),
+    'require_qcok': validators.Optional(bool, False),
     'source': validators.Optional(str, None),
     'strain': str,
     'reference_genome': str,

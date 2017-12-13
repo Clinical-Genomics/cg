@@ -1,4 +1,12 @@
 # -*- coding: utf-8 -*-
+"""Unified interface to handle sample submissions.
+
+This interface will update information in Status and/or LIMS as required.
+
+The normal entry for information is through the REST API which will pass a JSON
+document with all information about samples in the submission. The input will
+be validated and if passing all checks be accepted as new samples.
+"""
 import datetime as dt
 import logging
 import re
@@ -25,7 +33,10 @@ class OrdersAPI(LimsHandler, StatusHandler):
         self.osticket = osticket
 
     def submit(self, project: OrderType, data: dict, ticket: dict) -> dict:
-        """Submit a batch of samples."""
+        """Submit a batch of samples.
+
+        Main entry point for the class towards interfaces that implements it.
+        """
         try:
             ORDER_SCHEMES[project].validate(data)
         except (ValueError, TypeError) as error:
