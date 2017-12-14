@@ -190,6 +190,7 @@ class Pool(Model):
     invoice_id = Column(ForeignKey('invoice.id'))
     invoiced_at = Column(types.DateTime)  # DEPRECATED
     comment = Column(types.Text)
+    lims_project = Column(types.Text)
 
     created_at = Column(types.DateTime, default=dt.datetime.now)
     customer_id = Column(ForeignKey('customer.id', ondelete='CASCADE'), nullable=False)
