@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import json
 import logging
 from functools import wraps
 from pathlib import Path
@@ -10,7 +11,7 @@ from requests.exceptions import HTTPError
 from werkzeug.utils import secure_filename
 
 from cg.exc import DuplicateRecordError, OrderFormError, OrderError
-from cg.apps.lims import parse_orderform
+from cg.apps.lims import parse_orderform, parse_json
 from cg.meta.orders import OrdersAPI, OrderType
 from .ext import db, lims, osticket
 
@@ -55,7 +56,7 @@ def order(order_type):
     """Submit an order for samples."""
     api = OrdersAPI(lims=lims, status=db, osticket=osticket)
     post_data = request.get_json()
-    LOG.info("processing order: %s", post_data)
+    LOG.info("processing '%s' order: %s", order_type, post_data)
     try:
         ticket = {'name': g.current_user.name, 'email': g.current_user.email}
         result = api.submit(OrderType[order_type.upper()], post_data, ticket=ticket)
@@ -63,6 +64,7 @@ def order(order_type):
         return abort(make_response(jsonify(message=error.message), 401))
     except HTTPError as error:
         return abort(make_response(jsonify(message=error.args[0]), 401))
+    #LOG.info(f"{result['ticket'] or 'NA'}: successfully submitted samples")
     return jsonify(project=result['project'],
                    records=[record.to_dict() for record in result['records']])
 
@@ -248,17 +250,23 @@ def application(tag):
 
 @BLUEPRINT.route('/orderform', methods=['POST'])
 def orderform():
-    """Parse an orderform."""
-    excel_file = request.files['file']
-    filename = secure_filename(excel_file.filename)
-    temp_dir = Path(tempfile.gettempdir())
-    saved_path = str(temp_dir / filename)
-    excel_file.save(saved_path)
+    """Parse an orderform/JSON export."""
+    input_file = request.files.get('file')
+    filename = secure_filename(input_file.filename)
+
     try:
-        project_data = parse_orderform(saved_path)
+        if filename.endswith('.xlsx'):
+            temp_dir = Path(tempfile.gettempdir())
+            saved_path = str(temp_dir / filename)
+            input_file.save(saved_path)
+            project_data = parse_orderform(saved_path)
+        else:
+            json_data = json.load(input_file.stream)
+            project_data = parse_json(json_data)
     except OrderFormError as error:
         return abort(make_response(jsonify(message=error.message), 400))
-    return jsonify(name=filename.rsplit('.')[0], **project_data)
+
+    return jsonify(**project_data)
 
 
 @BLUEPRINT.route('/trends/samples')

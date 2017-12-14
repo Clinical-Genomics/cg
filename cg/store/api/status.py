@@ -124,8 +124,8 @@ class StatusHandler:
         have been marked to skip invoicing.
         """
         records = (
-            self.Sample.query
-            .filter(
+            self.Sample.query.filter(
+                models.Sample.received_at != None,
                 models.Sample.invoice_id == None,
                 models.Sample.no_invoice != True,
                 models.Sample.delivered_at != True,
@@ -133,4 +133,23 @@ class StatusHandler:
             )
         )
         records = records.filter(models.Sample.customer == customer) if customer else records
+        return records
+
+    def pools_to_invoice(self, customer: models.Customer=None):
+        """Fetch pools that should be invoiced.
+        
+        Return pools have been delivered but not invoiced, excluding those that
+        have been marked to skip invoicing.
+        """
+        records = ( self.Pool.query.filter(
+                models.Pool.invoice_id == None,
+           # #    models.Pool.no_invoice != True,
+                models.Pool.delivered_at != None,
+                models.Pool.received_at != None
+           # #    models.Pool.downsampled_to == None
+            )
+        )
+        print('ljgjgkjhgkjhgjkhghj')
+        print(customer.id)
+        records = records.filter(models.Pool.customer_id == customer.id) if customer else records
         return records

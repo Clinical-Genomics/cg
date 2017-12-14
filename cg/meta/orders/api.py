@@ -32,9 +32,10 @@ class OrdersAPI(LimsHandler, StatusHandler):
             raise OrderError(error.args[0])
 
         # detect manual ticket assignment
-        ticket_match = re.search(r'([0-9]{6})', data['name'])
+        ticket_match = re.search(r'^#?([0-9]{6})$', data['name'])
         ticket_number = int(ticket_match.group()) if ticket_match else None
         if ticket_number:
+            LOG.info(f"{ticket_number}: detected ticket in order name")
             data['ticket'] = ticket_number
         else:
             # open and assign ticket to order
@@ -47,6 +48,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
                         subject=data['name'],
                         message=message,
                     )
+                    LOG.info(f"{data['ticket']}: opened new ticket")
                 else:
                     data['ticket'] = None
             except TicketCreationError as error:
@@ -93,6 +95,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
         """Submit a batch of samples for sequencing and analysis."""
         result = self.process_analysis_samples(data)
         for family_obj in result['records']:
+            LOG.info(f"{family_obj.name}: submit family samples")
             status_samples = [link_obj.sample for link_obj in family_obj.links if
                               link_obj.sample.ticket_number == data['ticket']]
             self.add_missing_reads(status_samples)
@@ -127,6 +130,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
         reduced_map  = {'EXOSXTR100': 'EXTSXTR100', 'WGSPCFC030': 'WGTPCFC030',
                         'WGSPCFC060': 'WGTPCFC060'}
         for family_obj in families:
+            LOG.debug(f"{family_obj.name}: update application for trios")
             order_samples = [link_obj.sample for link_obj in family_obj.links if
                              link_obj.sample.ticket_number == ticket_number]
             if len(order_samples) >= 3:
@@ -154,4 +158,8 @@ class OrdersAPI(LimsHandler, StatusHandler):
     def fillin_sample_ids(self, samples: List[dict], lims_map: dict):
         """Fill in LIMS sample ids."""
         for sample in samples:
-            sample['internal_id'] = lims_map.get(sample['name']) or sample['internal_id']
+            LOG.debug(f"{sample['name']}: link sample to LIMS")
+            if not sample['internal_id']:
+                internal_id = lims_map[sample['name']]
+                LOG.info(f"{sample['name']} -> {internal_id}: connect sample to LIMS")
+                sample['internal_id'] = internal_id

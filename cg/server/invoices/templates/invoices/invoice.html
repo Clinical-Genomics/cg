@@ -1,15 +1,163 @@
 {% extends 'invoices/layout.html' %}
 
-{% block body %}
-<div class="container">
-  <h1>{{ invoice.id }}</h1>
 
-  <ul class="list-group">
-    {% for sample in invoice.samples %}
-    <li class="list-group-item">
-      {{ sample.internal_id }}
-    </li>
-    {% endfor %}
-  </ul>
-</div>
-{% endblock %}
+
+{% block body %}
+<div id="wrapper">
+  <div class="container">
+    <br>
+    <h1>Invoice template</h1>
+    <br>
+    <div class="card">
+      <div class="card-header">
+        <br>
+        <form action="{{ url_for('invoices.invoice', invoice_id=invoice.id) }}" method="POST" enctype="multipart/form-data">
+          <div class="form-group">
+            <input type="hidden" name="invoice_id" value={{invoice.id}}>
+            <div class="row">
+              <div class="col">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="row"><h5>Comments</h5></div>
+                    <br>
+                    <div class="row"> 
+                      <textarea name="comment" rows="5" class="form-control">
+                        {{ invoice.comment if invoice.comment }}
+                      </textarea>
+                    </div></div>
+                  </div>
+                </div>
+                <div class="col">
+                  <div class="card">
+                    <div class="card-body">
+                      <div class="row"><h5>Modified Invoice</h5></div>
+                      <br>
+                      <div class="row">
+                        
+                        <div class="col">
+                          <label class="custom-file">
+                            <input name="KTH_excel" type="file" class="custom-file-input"> 
+                            <span class="custom-file-control">Choose KTH invoice...</span>
+                          </label>
+                          
+                          {%if invoice.excel_kth%}
+                          <a href="{{ url_for('invoices.modified_invoice', invoice_id=invoice.id, cost_center='KTH') }}"  aria-pressed="true">invoice_KTH.xlsx</a>
+                          {% else %}
+                          No KTH invoice
+                          {%endif%}
+                        </div>
+                      </div>
+                      <br>
+                      <div class="row">
+                        <div class="col">
+                          <label class="custom-file">
+                            <input name="KI_excel" type="file" class="custom-file-input">
+                            <span class="custom-file-control">Choose KI invoice...</span>
+                          </label>
+                          
+                          {%if invoice.excel_ki%}
+                          <a href="{{ url_for('invoices.modified_invoice', invoice_id=invoice.id, cost_center='KI') }}" aria-pressed="true">invoice_KI.xlsx</a>
+                          {% else %}
+                          No KI invoice
+                          {%endif%}
+                        </div>
+                      </div>
+                    </div></div>
+                  </div>  
+                </div>
+                <br>
+                <div class="row">
+                  {%if invoice.invoiced_at %}
+                  <div class="col form-check">
+                    <label class="form-check-label">
+                      <input name="invoice_sent" type="checkbox" class="form-check-input" checked>                      
+                      Invoice Sent to cust.  Date Sent: {{invoice.invoiced_at.date()}}
+                    </label>
+                  </div>
+                  {% else %}
+                  <div class="col form-check">
+                    <label class="form-check-label">
+                      <input name="invoice_sent" type="checkbox" class="form-check-input" >
+                      Invoice Sent to cust.
+                    </label>
+                  </div>
+                  {%endif%}
+                  <div class="float-right col">
+                    <button class="btn btn-primary" type="submit">Save Changes</button>  
+                  </div>
+                </div>
+              </div>
+            </form>  
+          </div>    
+        </div>
+      </div>
+      <div class="container">
+        <br><br>
+        <ul class="nav nav-tabs">
+          <li class="nav-item"><a href="#" data-target="#KTH" data-toggle="tab" class="nav-link active">KTH</a></li>
+          <li class="nav-item"><a href="#" data-target="#KI" data-toggle="tab" class="nav-link">KI</a></li>
+        </ul>   
+        <div id="tabsJustifiedContent" class="tab-content">
+          <div id="KTH" class="tab-pane fade active show">
+            {{invoice_table(invoice_dict.KTH, invoice ,'KTH')}}
+          </div>
+          <div id="KI" class="tab-pane fade show">
+            {{invoice_table(invoice_dict.KI, invoice ,'KI')}}
+          </div>
+          
+        </div>
+      </div>
+    </div>
+    {% endblock %}
+    
+    {% macro invoice_table(invoice_dict, invoice ,costcenter) %}
+    
+    <div class="card">
+      <div class="card-header">
+        <div class="float-right row">
+          <a href="{{ url_for('invoices.invoice_template', invoice_id=invoice.id, cost_center=costcenter) }}" class="btn btn-primary " role="button" aria-pressed="true">Get Invoice Template</a>
+        </div>
+        <br><br><br>
+        <div class="card">
+          <div class="card-body">
+            <div class="row">
+              <div class="col">
+                <h3>Fakturaunderlag {{costcenter}}</h3>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col">
+                <h5>Clinical Genomics</h5>
+              </div>
+              
+              <div class="col">
+                <h5 align="right">Fakturanummer: {{ invoice.id }}</h5>
+              </div>
+            </div>
+            <br>
+            <table class="table border">
+              <tr>
+                <th>Prov</th>
+                <th>Clinical Genomics ID</th>
+                <th>Analys</th>
+                <th> Project (ticket id??)</th>
+                <th>Ankomstdatum</th>
+                <th>Pris</th>
+              </tr>
+              {% for record in invoice_dict.records %}
+              <tr>
+                <td>{{ record.name }}</td>
+                <td>{{record.lims_id}}</td>
+                <td>{{record.application_tag}}</td>
+                <td>{{record.project}}</td>
+                <td>{{record.date.date()}}</td>
+                <td>{{record.price}}</td>
+              </tr>
+              {% endfor %}
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    {% endmacro %}

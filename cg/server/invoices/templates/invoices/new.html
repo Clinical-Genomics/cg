@@ -2,12 +2,14 @@
 
 {% block body %}
 <div class="container mt-5 mb-5">
-  <h1>Create new invoice</h1>
-
-  <form action="{{ url_for('invoices.new') }}">
+  <h1>Make new invoice ({{record_type}})</h1>
+  <br>
+  <form action="{{ url_for('invoices.new', record_type=record_type) }}">
+    <input type="hidden" name="record_type" value="{{ record_type }}">
     <div class="row">
       <div class="col">
-        <select name="customer" class="form-control">
+        <select name="customer" class="form-control" required>
+          <option>Select customer...</option>
           {% for customer in customers %}
           <option value="{{ customer.internal_id }}" {{ 'selected' if args.customer == customer.internal_id }}>
             {{ customer.name }}
@@ -16,44 +18,68 @@
         </select>
       </div>
       <div class="col">
-        <button class="button form-control">Update samples</button>
+        <button class="btn btn-primary">Load {{record_type}}s</button>
       </div>
     </div>
   </form>
-
-  <form action="{{ url_for('invoices.index') }}" method="POST" class="mt-3">
+  <form action="{{ url_for('invoices.index')}}" method="POST" class="mt-3">
     <input type="hidden" name="customer" value="{{ args.customer }}">
-    <div class="form-group">
-      <label>Discount (%)</label>
-      <input type="number" class="form-control" name="discount" value="0">
-    </div>
+    <input type="hidden" name="record_type" value="{{record_type}}">
+    <label>Discount (%)</label>
+    <input type="number" class="form-control" name="discount" value="0">
+    
     <div class="form-group">
       <label>Comment</label>
       <textarea class="form-control" name="comment" rows="3"></textarea>
     </div>
-    <ul class="list-group">
-      {% for sample in samples %}
-      <li class="list-group-item">
-        <div class="form-check mb-0">
-          <div class="row">
-            <div class="col">
-              <label class="form-check-label">
-                <input class="form-check-input" type="checkbox" name="samples" value="{{ sample.internal_id }}"> {{ sample.internal_id }}
-              </label>
-            </div>
-            <div class="col">
-              {{ sample.received_at.date() }}
-            </div>
-            <div class="col">
-              {{ sample.application_version.application.tag }}
-            </div>
-          </div>
-        </div>
-      </li>
+    <tr><input type="checkbox" onClick="toggle()" /> Select All</tr>
+    <button class="btn btn-primary float-right" type="submit">Generate invoice</button>    
+    <br><br><br>
+    <table class="table">
+      <tr>
+        <th>Pool</th>
+        <th>Customer</th>
+        <th>Order</th>
+        <th>Ticket</th>
+        <th>Application</th>
+        <th>Created at</th>
+        <th>Delivered at</th>
+        <th>Received at</th>
+      </tr>
+      {% for record in records %}
+      <tr>
+        <td>
+          <label class="form-check-label">
+            {%if record_type=='Pool'%}
+            <input class="form-check-input" type="checkbox" name="records" value="{{ record.id }}"> {{ record.id }}
+            {% else %}
+            <input class="form-check-input" type="checkbox" name="records" value="{{ record.internal_id }}"> {{ record.internal_id }}            
+            {%endif%}            
+          </label>
+        </td>
+        <td>{{ record.customer.name }}</td>
+        <td>{{ record.order}}</td>
+        <td>{{ record.ticket_number}}</td>
+        <td>{{ record.application_version.application.tag }}</td> 
+        <td>{{record.created_at.date()}}</td>
+        <td>{{record.delivered_at.date()}}</td>
+        <td>{{record.received_at.date()}}</td>   
+      </tr>
       {% endfor %}
-    </ul>
-    <button class="btn btn-primary form-control mt-3" type="submit">Generate invoice</button>
+    </table>
   </form>
 </div>
+{% endblock %}
+
+
+{% block scripts %}
+<script language="JavaScript">
+  function toggle() {
+    checkboxes = document.getElementsByName('records');
+    for(var checkbox in checkboxes) {
+      checkboxes[checkbox].checked = !checkboxes[checkbox].checked;
+    }
+  }
+</script>
 {% endblock %}
 
