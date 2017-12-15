@@ -10,7 +10,7 @@ class UploadBeaconApi():
     
     def __init__(self, status: Store, hk_api: HousekeeperAPI, scout_api: ScoutAPI):
         self.status = status
-        self.hk = hk_api
+        self.housekeeper = hk_api
         self.scout = scout_api
         self.beacon = None
 
@@ -20,8 +20,8 @@ class UploadBeaconApi():
         # get the VCF file
         analysis_obj = family_obj.analyses[0]
         analysis_date = analysis_obj.started_at or analysis_obj.completed_at
-        hk_version = self.hk.version(family_id, analysis_date)
-        hk_vcf = self.hk.files(version=hk_version.id, tags=['vcf-snv-clinical']).first()
+        hk_version = self.housekeeper.version(family_id, analysis_date)
+        hk_vcf = self.housekeeper.files(version=hk_version.id, tags=['vcf-snv-clinical']).first()
         # list affected samples
         affected_samples = [link_obj.sample for link_obj in family_obj.links if
                             link_obj.status == 'affected']
