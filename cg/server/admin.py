@@ -115,3 +115,15 @@ class AnalysisView(BaseView):
 class InvoiceView(BaseView):
     column_searchable_list = ['customer_id', 'id']
     column_list = ('id', 'customer_id', 'created_at', 'updated_at','invoiced_at','comment','discount','price')
+
+
+class OrderView(BaseView):
+    column_searchable_list = ['lims_ref', 'name', 'ticket_number']
+    column_editable_list = ['ticket_number', 'comment']
+    column_filters = ['customer.internal_id']
+
+
+class MicrobialSampleView(BaseView):
+    column_searchable_list = ['internal_ref', 'name']
+    column_editable_list = ['reads', 'comment', 'reference_genome']
+    column_filters = ['priority', 'order.lims_ref']

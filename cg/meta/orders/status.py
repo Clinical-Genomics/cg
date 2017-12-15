@@ -58,6 +58,23 @@ class StatusHandler:
         }
         return status_data
 
+    @staticmethod
+    def microbial_samples_to_status(data: dict) -> dict:
+        """Convert order input for microbial samples."""
+        status_data = {
+            'customer': data['customer'],
+            'order_name': data['name'],
+            'comment': data.get('comment'),
+            'samples': [{
+                'priority': sample_data['priority'],
+                'name': sample_data['name'],
+                'comment': sample_data.get('comment'),
+                'reference_genome': sample_data['reference_genome'],
+                'application': sample_data['application'],
+            } for sample_data in data['samples']]
+        }
+        return status_data
+
     @classmethod
     def families_to_status(cls, data: dict) -> dict:
         """Convert order input to status interface input."""
@@ -237,3 +254,35 @@ class StatusHandler:
             new_pools.append(new_pool)
         self.status.add_commit(new_pools)
         return new_pools
+
+    def store_microbial(self, customer: str, order: str, ordered: dt.datetime, ticket: int,
+                        lims_project: str, samples: List[dict],
+                        comment: str=None) -> List[models.MicrobialSample]:
+        """Store microbial samples in the status database."""
+        customer_obj = self.status.customer(customer)
+        if customer_obj is None:
+            raise OrderError(f"unknown customer: {customer}")
+        new_order = self.status.add_order(
+            customer=customer_obj,
+            name=order,
+            ordered=ordered,
+            lims_ref=lims_project,
+            ticket_number=ticket,
+            comment=comment,
+        )
+        for sample_data in samples:
+            with self.status.session.no_autoflush:
+                application_tag = sample_data['application']
+                application_version = self.status.latest_version(application_tag)
+                if application_version is None:
+                    raise OrderError(f"unknown application tag: {sample['application']}")
+            new_sample = self.status.add_microbial_sample(
+                name=sample_data['name'],
+                internal_ref=sample_data['internal_ref'],
+                reference_genome=sample_data['reference_genome'],
+                comment=sample_data['comment'],
+                application_version=application_version,
+            )
+            new_order.microbial_samples.append(new_sample)
+        self.status.add_commit(new_order)
+        return new_order

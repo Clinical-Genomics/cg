@@ -37,6 +37,10 @@ class LimsHandler:
                     'rml_plate_name': sample.get('rml_plate_name'),
                     'well_position_rml': sample.get('well_position_rml'),
                     'sex': SEX_MAP.get(sample.get('sex'), 'unknown'),
+                    'strain': sample.get('strain'),
+                    'eluation_buffer': sample.get('eluation_buffer'),
+                    'reference_genome': sample.get('reference_genome'),
+                    'extraction_method': sample.get('extraction_method'),
                 }
             })
         return samples_lims

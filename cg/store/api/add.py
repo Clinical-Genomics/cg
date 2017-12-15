@@ -146,3 +146,27 @@ class AddHandler:
         for pool in pools or []:
             new_invoice.pools.append(pool)
         return new_invoice
+
+    def add_order(self, customer: models.Customer, name: str, ordered: dt.datetime,
+                  lims_ref: str=None, ticket_number: int=None, comment: str=None) -> models.Order:
+        """Build a new Order record."""
+        new_order = self.Order(name=name, ordered_at=ordered, lims_ref=lims_ref,
+                               ticket_number=ticket_number, comment=comment)
+        new_order.customer = customer
+        return new_order
+
+    def add_microbial_sample(self, name: str, internal_ref: str, reference_genome: str,
+                             application_version: models.ApplicationVersion,
+                             comment: str=None) -> models.MicrobialSample:
+        """Build a new MicrobialSample record.
+        
+        To commit you also need to assign the sample to an Order.
+        """
+        new_sample = self.MicrobialSample(
+            name=name,
+            internal_ref=internal_ref,
+            reference_genome=reference_genome,
+            comment=comment,
+        )
+        new_sample.application_version = application_version
+        return new_sample

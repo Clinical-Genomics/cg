@@ -17,4 +17,8 @@ PROP2UDF = {
     'rml_plate_name': 'RML plate name',
     'sex': 'Gender',
     'target_reads': 'Reads missing (M)',
+    'eluation_buffer': 'Sample Buffer',
+    'strain': 'Strain',
+    'reference_genome': 'Reference Genome Microbial',
+    'extraction_method': 'Extraction method',
 }
