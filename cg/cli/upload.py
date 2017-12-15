@@ -11,6 +11,7 @@ from cg.meta.upload.coverage import UploadCoverageApi
 from cg.meta.upload.gt import UploadGenotypesAPI
 from cg.meta.upload.observations import UploadObservationsAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
+from cg.meta.upload.beacon import UploadBeaconApi
 
 LOG = logging.getLogger(__name__)
 
@@ -103,6 +104,22 @@ def scout(context, re_upload, print_console, family_id):
         print(results)
     else:
         scout_api.upload(results, force=re_upload)
+
+
+@upload.command()
+@click.argument('family_id')
+@click.option('-p', '--panel', help='Gene panel to filter VCF by')
+@click.pass_context
+def beacon(context: click.Context, family_id: str, panel: str=None):
+    """Upload variants for affected samples in a family to cgbeacon."""
+    api = UploadBeaconApi(
+        status=context.obj['status'],
+        hk_api=context.obj['housekeeper_api'],
+        scout_api=scoutapi.ScoutAPI(context.obj),
+        beacon_api=,
+    )
+    result = api.upload(family_id, panel=panel)
+    LOG.info(f"{result['uploaded']}/{result['total']} variants uploaded")
 
 
 @upload.command()

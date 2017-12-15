@@ -219,6 +219,7 @@ class Sample(Model, PriorityMixin):
     sequenced_at = Column(types.DateTime)
     delivered_at = Column(types.DateTime)
     invoiced_at = Column(types.DateTime)
+    beaconized_at = Column(types.DateTime)
     comment = Column(types.Text)
 
     created_at = Column(types.DateTime, default=dt.datetime.now)
