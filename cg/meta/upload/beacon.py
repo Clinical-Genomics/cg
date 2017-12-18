@@ -24,6 +24,7 @@ class UploadBeaconApi():
 >>>>>>> added interface to cgbeacon
         """Upload variants to Beacon for a family."""
         family_obj = self.status.family(family_id)
+        print("family:",family_obj.name)
         # get the VCF file
         analysis_obj = family_obj.analyses[0]
         analysis_date = analysis_obj.started_at or analysis_obj.completed_at
