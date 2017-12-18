@@ -5,7 +5,7 @@ import logging
 import click
 
 from cg.store import Store
-from cg.apps import coverage as coverage_app, gt, hk, loqus, tb, scoutapi, beacon
+from cg.apps import coverage as coverage_app, gt, hk, loqus, tb, scoutapi, beacon as beacon_app
 from cg.exc import DuplicateRecordError
 from cg.meta.upload.coverage import UploadCoverageApi
 from cg.meta.upload.gt import UploadGenotypesAPI
@@ -108,19 +108,19 @@ def scout(context, re_upload, print_console, family_id):
 
 @upload.command()
 @click.argument('family_id')
-@click.option('-p', '--panel', help='Gene panel to filter VCF by')
-@click.option('-out', '--outfile', help='Path to PDF report outfile')
-@click.option('-cust', '--customer', help='Name of customer')
+@click.option('-p', '--panel', help='Gene panel to filter VCF by', required=True)
+@click.option('-out', '--outfile', help='Path to PDF report outfile', default="cgbeacon.pdf")
+@click.option('-cust', '--customer', help='Name of customer', default="")
 @click.option('-qual', '--quality', help='Variant quality threhold', default=20)
-@click.option('--ref', '--genome_reference', help='Chromosome build (default=grch37)')
+@click.option('--ref', '--genome_reference', help='Chromosome build (default=grch37)', default="grch37")
 @click.pass_context
-def beacon(context: click.Context, family_id: str, panel: str=None):
+def beacon(context: click.Context, family_id: str, panel: str ):
     """Upload variants for affected samples in a family to cgbeacon."""
     api = UploadBeaconApi(
         status=context.obj['status'],
         hk_api=context.obj['housekeeper_api'],
         scout_api=scoutapi.ScoutAPI(context.obj),
-        beacon_api=beacon.BeaconApi(context.obj),
+        beacon_api=beacon_app.BeaconApi(context.obj),
     )
     result = api.upload(
         family_id=family_id,

@@ -5,15 +5,17 @@ import tempfile
 from cg.store import Store
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.scoutapi import ScoutAPI
+from cg.apps.beacon import BeaconApi
 
 
 class UploadBeaconApi():
 
-    def __init__(self, status: Store, hk_api: HousekeeperAPI, scout_api: ScoutAPI):
+    def __init__(self, status: Store, hk_api: HousekeeperAPI, scout_api: ScoutAPI,
+                 beacon_api: BeaconApi):
         self.status = status
         self.housekeeper = hk_api
         self.scout = scout_api
-        self.beacon = None
+        self.beacon = beacon_api
 
 <<<<<<< HEAD
     def upload(self, family_id: str, panel: str=None, dataset: str='clinicalgenomics'):
