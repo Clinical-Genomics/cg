@@ -29,3 +29,6 @@ cgstats:
 loqusdb:
   database: "mongodb://USERNAME:PASSWORD@HOST:PORT/DATABASE"
   database_name: database
+
+cgbeacon:
+  database: "mysql+pymysql://USERNAME:PASSWORD@HOST:PORT/DATABASE"
