@@ -42,7 +42,7 @@ class UploadBeaconApi():
         temp_panel.write('\n'.join(bed_lines))
 
         result = self.beacon.upload(
-            vcf_path = hk_vcf.full_path,
+            vcf_path = hk_vcf.vcf_path,
             panel_path = temp_panel.name,
             dataset = dataset,
             outfile = outfile_name,
