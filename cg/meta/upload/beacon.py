@@ -20,6 +20,7 @@ class UploadBeaconApi():
     def upload(self, family_id: str, panel: str=None, dataset: str='clinicalgenomics', outfile: str=None, customer: str=None, qual: int=20, reference: str="grch37"):
         """Upload variants to Beacon for a family."""
         family_obj = self.status.family(family_id)
+        print("family:",family_obj.name)
         # get the VCF file
         analysis_obj = family_obj.analyses[0]
         analysis_date = analysis_obj.started_at or analysis_obj.completed_at
