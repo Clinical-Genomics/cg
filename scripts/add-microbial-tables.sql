@@ -1,0 +1,42 @@
+CREATE TABLE `order` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `lims_ref` varchar(32) DEFAULT NULL,
+  `name` varchar(128) NOT NULL,
+  `ticket_number` int(11) DEFAULT NULL,
+  `comment` text,
+  `ordered_at` datetime NOT NULL,
+  `received_at` datetime DEFAULT NULL,
+  `prepared_at` datetime DEFAULT NULL,
+  `sequence_start` datetime DEFAULT NULL,
+  `sequenced_at` datetime DEFAULT NULL,
+  `delivered_at` datetime DEFAULT NULL,
+  `invoiced_at` datetime DEFAULT NULL,
+  `customer_id` int(11) NOT NULL,
+  `application_version_id` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `lims_ref` (`lims_ref`),
+  KEY `customer_id` (`customer_id`),
+  KEY `application_version_id` (`application_version_id`),
+  CONSTRAINT `order_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `order_ibfk_2` FOREIGN KEY (`application_version_id`) REFERENCES `application_version` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+
+CREATE TABLE `microbial_sample` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `internal_ref` varchar(32) NOT NULL,
+  `priority` int(11) NOT NULL,
+  `name` varchar(128) NOT NULL,
+  `reads` bigint(20) DEFAULT NULL,
+  `comment` text,
+  `created_at` datetime DEFAULT NULL,
+  `reference_genome` varchar(32) DEFAULT NULL,
+  `order_id` int(11) NOT NULL,
+  `application_version_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `internal_ref` (`internal_ref`),
+  KEY `order_id` (`order_id`),
+  KEY `application_version_id` (`application_version_id`),
+  CONSTRAINT `microbial_sample_ibfk_2` FOREIGN KEY (`application_version_id`) REFERENCES `application_version` (`id`),
+  CONSTRAINT `microbial_sample_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `order` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=92 DEFAULT CHARSET=latin1;
