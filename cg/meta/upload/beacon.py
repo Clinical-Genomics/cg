@@ -23,8 +23,11 @@ class UploadBeaconApi():
         # get the VCF file
         analysis_obj = family_obj.analyses[0]
         analysis_date = analysis_obj.started_at or analysis_obj.completed_at
+        print("analysis_date",analysis_date)
         hk_version = self.housekeeper.version(family_id, analysis_date)
+        print("version",hk_version)
         hk_vcf = self.housekeeper.files(version=hk_version.id, tags=['vcf-snv-clinical']).first()
+        print("hk_vcf",hk_vcf)
         # list affected samples
         affected_samples = [link_obj.sample for link_obj in family_obj.links if
                             link_obj.status == 'affected']
@@ -34,7 +37,7 @@ class UploadBeaconApi():
 
         outfile_name = 'cgbeacon_',time.strftime("%Y%m%d-%H%M%S")
 
-        temp_panel = NamedTemporaryFile('w+t')
+        temp_panel = NamedTemporaryFile('w+t',suffix='.'+panel)
         temp_panel.write('\n'.join(bed_lines))
 
         result = self.beacon.upload(
@@ -47,8 +50,7 @@ class UploadBeaconApi():
             quality = qual,
             genome_reference = reference,
         )
-
-        f.close()
+        temp_panel.close()
 
         # mark samples as uploaded to beacon
         for sample_obj in affected_samples:
