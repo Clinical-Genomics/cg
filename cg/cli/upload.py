@@ -109,14 +109,14 @@ def scout(context, re_upload, print_console, family_id):
 @upload.command()
 @click.argument('family_id')
 @click.option('-p', '--panel', help='Gene panel to filter VCF by', required=True)
-@click.option('-out', '--outfile', help='Path to PDF report outfile', default="")
+@click.option('-out', '--outfile', help='Path to PDF report outfile', default="cgbeacon")
 @click.option('-cust', '--customer', help='Name of customer', default="")
 @click.option('-qual', '--quality', help='Variant quality threhold', default=20)
-@click.option('--ref', '--genome_reference', help='Chromosome build (default=grch37)', default="grch37")
+@click.option('-ref', '--genome_reference', help='Chromosome build (default=grch37)', default="grch37")
 @click.pass_context
-def beacon(context: click.Context, family_id: str, panel: str, out: str, cust: str, qual: int, ref: str):
+def beacon(context: click.Context, family_id: str, panel: str, outfile: str, customer: str, quality: int, genome_reference: str):
     """Upload variants for affected samples in a family to cgbeacon."""
-    out +=  dt.datetime.now().strftime("%Y-%m-%d_%H:%M:%S.pdf")
+    outfile +=  dt.datetime.now().strftime("%Y-%m-%d_%H:%M:%S.pdf")
     api = UploadBeaconApi(
         status=context.obj['status'],
         hk_api=context.obj['housekeeper_api'],
@@ -126,10 +126,10 @@ def beacon(context: click.Context, family_id: str, panel: str, out: str, cust: s
     result = api.upload(
         family_id=family_id,
         panel=panel,
-        outfile=out,
-        customer=cust,
-        qual=qual,
-        reference=ref,
+        outfile=outfile,
+        customer=customer,
+        qual=quality,
+        reference=genome_reference,
     )
     LOG.info(f"{result['uploaded']}/{result['total']} variants uploaded")
 
