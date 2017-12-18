@@ -1,6 +1,6 @@
 import datetime as dt
 import time
-import tempfile
+from tempfile import NamedTemporaryFile
 
 from cg.store import Store
 from cg.apps.hk import HousekeeperAPI
@@ -34,19 +34,21 @@ class UploadBeaconApi():
 
         outfile_name = 'cgbeacon_',time.strftime("%Y%m%d-%H%M%S")
 
-        with tempfile.NamedTemporaryFile(suffix='.'+panel) as temp_panel:
-            temp_panel.write(b'\n'.join(bed_lines).decode())
+        temp_panel = NamedTemporaryFile('w+t')
+        temp_panel.write('\n'.join(bed_lines))
 
-            result = self.beacon.upload(
-                vcf_path = hk_vcf.full_path,
-                panel_path = temp_panel,
-                dataset = dataset,
-                outfile = outfile_name,
-                customer = customer,
-                samples = sample_ids,
-                quality = qual,
-                genome_reference = reference,
-            )
+        result = self.beacon.upload(
+            vcf_path = hk_vcf.full_path,
+            panel_path = temp_panel.name,
+            dataset = dataset,
+            outfile = outfile_name,
+            customer = customer,
+            samples = sample_ids,
+            quality = qual,
+            genome_reference = reference,
+        )
+
+        f.close()
 
         # mark samples as uploaded to beacon
         for sample_obj in affected_samples:
