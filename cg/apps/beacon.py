@@ -1,6 +1,28 @@
+# -*- coding: utf-8 -*-
+from typing import List
+import datetime as dt
+import logging
+from cgbeacon.utils import Utility
+from cgbeacon.utils.mysql_handler import use_mysqlalchemy
 
+LOG = logging.getLogger(__name__)
 
 class BeaconApi():
+    """
+        Interface with Beacon importer (github.com/Clinical-Genomics/cgbeacon)
+        Inserts variants from a VCF file inside a Beacon server.
+    """
 
     def __init__(self, config: dict):
-        pass
+        super(BeaconApi, self).__init__()
+        self.connection = use_mysqlalchemy(config['cgbeacon']['database'])
+
+
+    def upload(self, vcf_path: str, panel_path: str, dataset: str, outfile: str, customer: str, samples: List[str], quality: int, genome_reference: str):
+        """ Uploads variants from a VCF file to a MySQL Beacon database
+            Returns: number of new variants in the Beacon
+        """
+
+        LOG.info("Uploading variants to beacon db.")
+        upload_result = beacon_upload(self.connection, vcf_path, panel_path, dataset, outfile, customer, samples, quality, genome_reference)
+        LOG.info("Upload complete!")

@@ -1,4 +1,5 @@
 import datetime as dt
+import time
 import tempfile
 
 from cg.store import Store
@@ -7,14 +8,14 @@ from cg.apps.scoutapi import ScoutAPI
 
 
 class UploadBeaconApi():
-    
+
     def __init__(self, status: Store, hk_api: HousekeeperAPI, scout_api: ScoutAPI):
         self.status = status
         self.housekeeper = hk_api
         self.scout = scout_api
         self.beacon = None
-    
-    def upload(self, family_id: str, panel: str=None, dataset: str='clinicalgenomics'):
+
+    def upload(self, family_id: str, panel: str=None, dataset: str='clinicalgenomics', outfile: str=None, customer: str=None, qual: int=20, reference: str="grch37"):
         """Upload variants to Beacon for a family."""
         family_obj = self.status.family(family_id)
         # get the VCF file
@@ -28,14 +29,23 @@ class UploadBeaconApi():
         sample_ids = [sample_obj.internal_id for sample_obj in affected_samples]
         # generate BED file
         bed_lines = self.scout.export_panels([panel] if panel else family_obj.panels)
+
+        outfile_name = 'cgbeacon_',time.strftime("%Y%m%d-%H%M%S")
+
         with tempfile.NamedTemporaryFile() as temp_panel:
             temp_panel.write('\n'.join(bed_lines))
 
+            temp_panel.name = panel
+
             result = self.beacon.upload(
-                vcf_path=hk_vcf.full_path,
-                samples=sample_ids,
-                panel_path=temp_panel.name,
-                dataset=dataset,
+                vcf_path = hk_vcf.full_path,
+                panel_path = temp_panel,  ## WOULD THIS WORK???
+                dataset = dataset,
+                outfile = outfile_name,
+                customer = customer,
+                samples = sample_ids,
+                quality = qual,
+                genome_reference = reference,
             )
 
         # mark samples as uploaded to beacon
