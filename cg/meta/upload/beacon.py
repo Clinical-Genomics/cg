@@ -34,14 +34,12 @@ class UploadBeaconApi():
 
         outfile_name = 'cgbeacon_',time.strftime("%Y%m%d-%H%M%S")
 
-        with tempfile.NamedTemporaryFile() as temp_panel:
-            temp_panel.write('\n'.join(bed_lines))
-
-            temp_panel.name = panel
+        with tempfile.NamedTemporaryFile(suffix='.'+panel) as temp_panel:
+            temp_panel.write(b'\n'.join(bed_lines))
 
             result = self.beacon.upload(
                 vcf_path = hk_vcf.full_path,
-                panel_path = temp_panel,  ## WOULD THIS WORK???
+                panel_path = temp_panel,
                 dataset = dataset,
                 outfile = outfile_name,
                 customer = customer,
