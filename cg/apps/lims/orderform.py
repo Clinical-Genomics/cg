@@ -35,6 +35,8 @@ def parse_orderform(excel_path: str) -> dict:
     orderform_sheet = workbook.sheet_by_name(sheet_name)
 
     raw_samples = relevant_rows(orderform_sheet)
+    if len(raw_samples) == 0:
+        raise OrderFormError("orderform doesn't contain any samples")
     parsed_samples = [parse_sample(raw_sample) for raw_sample in raw_samples]
 
     document_title = get_document_title(workbook, orderform_sheet)
@@ -190,9 +192,13 @@ def parse_sample(raw_sample):
         'custom_index': raw_sample.get('UDF/Custom index'),
     }
 
-    data_analysis = raw_sample.get('UDF/Data Analysis') or 'fastq'
-    raw_analysis = 'scout' if 'scout' in data_analysis else data_analysis.split('+', 1)[0]
-    sample['analysis'] = 'fastq' if raw_analysis == 'custom' else raw_analysis
+    data_analysis = raw_sample.get('UDF/Data Analysis') or None
+    if data_analysis and 'scout' in data_analysis:
+        sample['analysis'] = 'scout'
+    elif data_analysis and ('fastq' in data_analysis or data_analysis == 'custom'):
+        sample['analysis'] = 'fastq'
+    else:
+        raise OrderFormError("unknown 'Data Analysis' for order")
 
     for key, field_key in [('pool', 'pool name'), ('index_number', 'Index number'),
                            ('volume', 'Volume (uL)'), ('concentration', 'Concentration (nM)'),
