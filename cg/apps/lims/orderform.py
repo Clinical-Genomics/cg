@@ -37,7 +37,7 @@ def parse_orderform(excel_path: str) -> dict:
     raw_samples = relevant_rows(orderform_sheet)
     parsed_samples = [parse_sample(raw_sample) for raw_sample in raw_samples]
 
-    document_title = orderform_sheet.row(0)[1].value
+    document_title = get_document_title(workbook, orderform_sheet)
     project_type = get_project_type(document_title, parsed_samples)
 
     if project_type in ('scout', 'external'):
@@ -66,6 +66,17 @@ def parse_orderform(excel_path: str) -> dict:
     return data
 
 
+def get_document_title(workbook: xlrd.book.Book, orderform_sheet: xlrd.sheet.Sheet) -> str:
+    """Get the document title for the order form."""
+    if 'information' in workbook.sheet_names():
+        information_sheet = workbook.sheet_by_name('information')
+        document_title = information_sheet.row(0)[2].value
+        return document_title
+
+    document_title = orderform_sheet.row(0)[1].value
+    return document_title
+
+
 def get_project_type(document_title: str, parsed_samples: List) -> str:
     """Determine the project type."""
     if '1604' in document_title:
@@ -76,7 +87,7 @@ def get_project_type(document_title: str, parsed_samples: List) -> str:
         return 'microbial'
 
     analyses = set(sample['analysis'] for sample in parsed_samples)
-    project_type = analyses.pop() if len(analyses) == 1 else 'scout'
+    project_type = analyses.pop().lower() if len(analyses) == 1 else 'scout'
     return project_type
 
 
