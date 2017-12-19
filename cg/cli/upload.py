@@ -131,7 +131,6 @@ def beacon(context: click.Context, family_id: str, panel: str, outfile: str, cus
         qual=quality,
         reference=genome_reference,
     )
-    LOG.info(f"{result['uploaded']}/{result['total']} variants uploaded")
 
 
 @upload.command()
