@@ -1,3 +1,4 @@
+import logging
 import datetime as dt
 import time
 from tempfile import NamedTemporaryFile
@@ -7,6 +8,7 @@ from cg.apps.hk import HousekeeperAPI
 from cg.apps.scoutapi import ScoutAPI
 from cg.apps.beacon import BeaconApi
 
+LOG = logging.getLogger(__name__)
 
 class UploadBeaconApi():
 
@@ -20,15 +22,17 @@ class UploadBeaconApi():
     def upload(self, family_id: str, panel: str=None, dataset: str='clinicalgenomics', outfile: str=None, customer: str=None, qual: int=20, reference: str="grch37"):
         """Upload variants to Beacon for a family."""
         family_obj = self.status.family(family_id)
-        print("family:",family_obj.name)
         # get the VCF file
         analysis_obj = family_obj.analyses[0]
         analysis_date = analysis_obj.started_at or analysis_obj.completed_at
-        print("analysis_date",analysis_date)
         hk_version = self.housekeeper.version(family_id, analysis_date)
-        print("version",hk_version)
         hk_vcf = self.housekeeper.files(version=hk_version.id, tags=['vcf-snv-clinical']).first()
-        print("hk_vcf",hk_vcf)
+        if hk_vcf is None:
+            LOG.info("regular clinical VCF not found, trying old tag")
+            hk_vcf = self.housekeeper.files(version=hk_version.id, tags=['vcf-clinical-bin']).first()
+            if hk_vcf is None:
+                LOG.error("Couldn't find old tag!")
+
         # list affected samples
         affected_samples = [link_obj.sample for link_obj in family_obj.links if
                             link_obj.status == 'affected']
@@ -42,7 +46,7 @@ class UploadBeaconApi():
         temp_panel.write('\n'.join(bed_lines))
 
         result = self.beacon.upload(
-            vcf_path = hk_vcf.vcf_path,
+            vcf_path = hk_vcf.full_path,
             panel_path = temp_panel.name,
             dataset = dataset,
             outfile = outfile_name,
