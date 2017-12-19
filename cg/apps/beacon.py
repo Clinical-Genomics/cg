@@ -24,5 +24,5 @@ class BeaconApi():
         """
 
         LOG.info("Uploading variants to beacon db.")
-        upload_result = beacon_upload(self.connection, vcf_path, panel_path, dataset, outfile, customer, samples, quality, genome_reference)
+        upload_result = Utility.beacon_upload(self.connection, vcf_path, panel_path, dataset, outfile, customer, samples, quality, genome_reference)
         LOG.info("Upload complete!")
