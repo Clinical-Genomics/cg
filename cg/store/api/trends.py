@@ -53,7 +53,10 @@ class TrendsHandler:
                 models.Sample.received_at > dt.datetime(2016, 12, 31),
                 models.Sample.delivered_at != None,
             )
-            .group_by(func.month(models.Sample.received_at))
+            .group_by(
+                models.Application.category,
+                func.month(models.Sample.received_at),
+            )
         )
         for category, results in groupby(query, key=lambda result: result.category):
             averages = {MONTHS[result.month_no]: float(result.average) if result.average else None
@@ -84,7 +87,10 @@ class TrendsHandler:
                 models.Customer.priority == 'diagnostic',
                 models.Sample.received_at > dt.datetime(2016, 12, 31)
             )
-            .group_by(func.month(models.Sample.received_at))
+            .group_by(
+                models.Application.category,
+                func.month(models.Sample.received_at),
+            )
         )
         for category, results in groupby(query, key=lambda result: result.category):
             averages = {MONTHS[result.month_no]: float(result.average) if result.average else None
@@ -114,7 +120,10 @@ class TrendsHandler:
                 models.Customer.priority == 'diagnostic',
                 models.Sample.received_at > dt.datetime(2016, 12, 31)
             )
-            .group_by(func.month(models.Sample.received_at))
+            .group_by(
+                models.Application.category,
+                func.month(models.Sample.received_at),
+            )
         )
         for category, results in groupby(query, key=lambda result: result.category):
             averages = {MONTHS[result.month_no]: float(result.average) if result.average else None
@@ -145,7 +154,10 @@ class TrendsHandler:
                 models.Sample.received_at > dt.datetime(2016, 12, 31),
                 models.Sample.delivered_at != None,
             )
-            .group_by(func.month(models.Sample.received_at))
+            .group_by(
+                models.Application.category,
+                func.month(models.Sample.received_at),
+            )
         )
         for category, results in groupby(query, key=lambda result: result.category):
             averages = {MONTHS[result.month_no]: float(result.average) if result.average else None
