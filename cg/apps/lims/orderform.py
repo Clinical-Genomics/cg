@@ -86,8 +86,11 @@ def get_project_type(document_title: str, parsed_samples: List) -> str:
     elif '1603' in document_title:
         return 'microbial'
 
-    analyses = set(sample['analysis'] for sample in parsed_samples)
-    project_type = analyses.pop().lower() if len(analyses) == 1 else 'scout'
+    analyses = set(sample['analysis'].lower() for sample in parsed_samples)
+    if len(analyses) > 1:
+        raise OrderFormError(f"mixed 'Data Analysis' types: {', '.join(analyses)}")
+    else:
+        project_type = analyses.pop()
     return project_type
 
 
