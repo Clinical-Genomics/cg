@@ -1,5 +1,11 @@
+import logging
+import subprocess
+import time
+
 from cg.apps.pdc import PdcApi
 from cg.store import Store, models
+
+LOG = logging.getLogger(__name__)
 
 
 class BackupApi():
@@ -8,21 +14,47 @@ class BackupApi():
         self.status = status
         self.pdc = pdc_api
 
-    def check_processing(self, max: int=3) -> bool:
+    def check_processing(self, max_flowcells: int=3) -> bool:
         """Check if the processing queue for flowcells is not full."""
-        pass
+        processing_flowcells = self.status.flowcells(status='processing').count()
+        LOG.debug(f"processing flowcells: {processing_flowcells}")
+        return processing_flowcells >= max_flowcells
 
     def pop_flowcell(self) -> models.Flowcell:
         """
         Get the top flowcell from the requested queue and update status to
         "processing".
         """
-        pass
-    
-    def fetch_flowcell(self):
+        flowcell_obj = self.status.flowcells(status='requested').first()
+        if flowcell_obj is not None:
+            flowcell_obj.status = 'processing'
+            self.status.commit()
+        return flowcell_obj
+
+    def fetch_flowcell(self, flowcell_obj: models.Flowcell=None):
         """Start fetching a flowcell from backup if possible.
-        
+
         1. The processing queue is not full
         2. The requested queue is not emtpy
         """
-        pass
+        if self.check_processing() is False:
+            LOG.info('processing queue is full')
+            return None
+
+        if flowcell_obj is not None:
+            flowcell_obj = self.pop_flowcell()
+            if flowcell_obj is None:
+                LOG.info('no flowcells requested')
+                return None
+
+        LOG.info(f"{flowcell_obj.name}: retreiving from PDC")
+        tic = time.time()
+        try:
+            self.pdc.retrieve_flowcell(flowcell_obj.name)
+        except subprocess.CalledProcessError as error:
+            LOG.error(f"{flowcell_obj.name}: retrieval failed")
+            flowcell_obj.status = 'requested'
+            self.status.commit()
+            raise error
+        toc = time.time()
+        return toc - tic
