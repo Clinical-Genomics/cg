@@ -14,6 +14,12 @@ class BackupApi():
         self.status = status
         self.pdc = pdc_api
 
+    def maximum_flowcells_ondisk(self, max_flowcells: int=700) -> bool:
+        """Check if there's too many flowcells already "ondisk"."""
+        ondisk_flowcells = self.status.flowcells(status='ondisk').count()
+        LOG.debug(f"ondisk flowcells: {ondisk_flowcells}")
+        return ondisk_flowcells < max_flowcells
+
     def check_processing(self, max_flowcells: int=3) -> bool:
         """Check if the processing queue for flowcells is not full."""
         processing_flowcells = self.status.flowcells(status='processing').count()
@@ -39,6 +45,10 @@ class BackupApi():
         """
         if self.check_processing() is False:
             LOG.info('processing queue is full')
+            return None
+
+        if self.maximum_flowcells_ondisk() is True:
+            LOG.info('maximum flowcells ondisk reached')
             return None
 
         if flowcell_obj is None:
