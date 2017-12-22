@@ -108,7 +108,7 @@ class FindHandler:
         return self.Analysis.query.filter_by(family=family, started_at=started_at).first()
 
     def flowcells(self, *, status: str=None, family: models.Family=None,
-                  query: str=None) -> List[models.Flowcell]:
+                  query: str=None) -> Query:
         """Fetch all flowcells."""
         records = self.Flowcell.query
         if family:
