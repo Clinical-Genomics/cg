@@ -18,7 +18,7 @@ class PdcApi():
         if dest_server is None:
             raise ValueError(f"{sequencer_type}: invalid sequencer type")
 
-        bash_command = f"\"bash SCRIPTS /retrieve_run_nas.bash {flowcell_id} {dest_server}\""
+        bash_command = f"bash SCRIPTS/retrieve_run_nas.bash {flowcell_id} {dest_server}"
         command = ['ssh', 'nas-9', bash_command]
         LOG.info(' '.join(command))
         subprocess.check_call(command)

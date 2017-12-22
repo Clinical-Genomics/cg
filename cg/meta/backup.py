@@ -18,7 +18,7 @@ class BackupApi():
         """Check if the processing queue for flowcells is not full."""
         processing_flowcells = self.status.flowcells(status='processing').count()
         LOG.debug(f"processing flowcells: {processing_flowcells}")
-        return processing_flowcells >= max_flowcells
+        return processing_flowcells < max_flowcells
 
     def pop_flowcell(self) -> models.Flowcell:
         """
@@ -41,7 +41,7 @@ class BackupApi():
             LOG.info('processing queue is full')
             return None
 
-        if flowcell_obj is not None:
+        if flowcell_obj is None:
             flowcell_obj = self.pop_flowcell()
             if flowcell_obj is None:
                 LOG.info('no flowcells requested')
@@ -50,7 +50,7 @@ class BackupApi():
         LOG.info(f"{flowcell_obj.name}: retreiving from PDC")
         tic = time.time()
         try:
-            self.pdc.retrieve_flowcell(flowcell_obj.name)
+            self.pdc.retrieve_flowcell(flowcell_obj.name, flowcell_obj.sequencer_type)
         except subprocess.CalledProcessError as error:
             LOG.error(f"{flowcell_obj.name}: retrieval failed")
             flowcell_obj.status = 'requested'
