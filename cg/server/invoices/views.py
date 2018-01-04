@@ -47,6 +47,8 @@ def index():
 def new(record_type):
     """Generate a new invoice."""
     customers = db.customers()
+    count = request.args.get('total', 0)
+    print(count)
     customer_id = request.args.get('customer', 'cust002')
     customer_obj = db.customer(customer_id)
     
@@ -58,6 +60,7 @@ def new(record_type):
 
     return render_template(
         'invoices/new.html',
+        count=count,
         customers=customers,
         records=records,
         record_type = record_type,
@@ -71,11 +74,23 @@ def invoice(invoice_id):
     """Save comments and uploaded modified invoices."""
     cost_center = request.args.get('cost_center','KTH')
     invoice_obj = db.invoice(invoice_id)
+    api = InvoiceAPI(db, lims)
+    total_price = api.total_price(invoice_obj)
+    if not invoice_obj.price:
+        final_price = total_price
+    else:
+        final_price = invoice_obj.price
+
     if request.method == 'POST':
         invoice_obj.comment = request.form.get('comment')
-        if request.form.get('invoice_sent'):
+        
+        if request.form.get('final_price') != invoice_obj.price:
+            invoice_obj.price = request.form.get('final_price')
+            final_price = request.form.get('final_price')
+
+        if request.form.get('invoice_sent') and not invoice_obj.invoiced_at:
             invoice_obj.invoiced_at = date.today()
-        else:
+        elif not request.form.get('invoice_sent'):
             invoice_obj.invoiced_at = None
 
         kth_excel_file = request.files.get('KTH_excel')
@@ -85,14 +100,13 @@ def invoice(invoice_id):
         if ki_excel_file:
             invoice_obj.excel_ki = ki_excel_file.stream.read()
         db.commit()
-    api = InvoiceAPI(db, lims)
     invoice_dict = {'KTH' : api.prepare('KTH', invoice_obj), 
                     'KI' : api.prepare('KI', invoice_obj)}
-    print(invoice_dict)
-    print('h2h2hh2hh2')
     return render_template('invoices/invoice.html', 
-                            invoice=invoice_obj, 
-                            invoice_dict=invoice_dict)
+                            invoice = invoice_obj, 
+                            invoice_dict = invoice_dict,
+                            total_price = total_price,
+                            final_price = final_price)
 
 @BLUEPRINT.route('/<int:invoice_id>/excel')
 def invoice_template(invoice_id):

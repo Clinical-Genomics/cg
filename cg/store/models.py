@@ -419,6 +419,7 @@ class Invoice(Model):
     discount = Column(types.Integer, default=0)
     excel_kth = Column(types.BLOB)
     excel_ki = Column(types.BLOB)
+    price = Column(types.Integer)
 
     samples = orm.relationship(Sample, backref='invoice')
     pools = orm.relationship(Pool, backref='invoice')

@@ -21,11 +21,24 @@
                     <div class="row"><h5>Comments</h5></div>
                     <br>
                     <div class="row"> 
-                      <textarea name="comment" rows="5" class="form-control">
+                      <textarea name="comment" rows="2" class="form-control">
                         {{ invoice.comment if invoice.comment }}
                       </textarea>
                     </div></div>
                   </div>
+                  <br>
+                        <div class="row">
+                          <div  class="col-sm-6">
+                            <label>Default Price: {{total_price}}</label>
+                          </div>
+                          <div  class="col-sm-3">
+                              <label>Final Price:</label>
+                            </div>
+                          <div class="col-sm-3">
+                            <input type="number" class="form-control" name="final_price" value={{final_price}}>
+                          </div>
+                        </div>  
+                       
                 </div>
                 <div class="col">
                   <div class="card">
@@ -48,6 +61,7 @@
                         </div>
                       </div>
                       <br>
+                      <br>
                       <div class="row">
                         <div class="col">
                           <label class="custom-file">
@@ -62,7 +76,9 @@
                           {%endif%}
                         </div>
                       </div>
-                    </div></div>
+                      </div>
+                    </div>
+                        
                   </div>  
                 </div>
                 <br>
@@ -137,10 +153,10 @@
             <br>
             <table class="table border">
               <tr>
-                <th>Prov</th>
+                <th>{{invoice_dict.record_type}}</th>
                 <th>Clinical Genomics ID</th>
                 <th>Analys</th>
-                <th> Project (ticket id??)</th>
+                <th> Project (ticket id)</th>
                 <th>Ankomstdatum</th>
                 <th>Pris</th>
               </tr>
