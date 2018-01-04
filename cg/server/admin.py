@@ -112,3 +112,7 @@ class AnalysisView(BaseView):
     column_searchable_list = ['family.internal_id', 'family.name']
     column_filters = ['pipeline', 'pipeline_version', 'is_primary']
     column_editable_list = ['is_primary']
+
+class InvoiceView(BaseView):
+    column_searchable_list = ['customer_id', 'id']
+    column_list = ('id', 'customer_id', 'created_at', 'updated_at','invoiced_at','comment','discount','price')

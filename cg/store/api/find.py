@@ -175,6 +175,13 @@ class FindHandler:
                 query = query.filter(models.Invoice.invoiced_at == None)
         return query
 
+    def new_invoice_id(self) -> Query:
+        """Fetch invoices."""
+        query = self.Invoice.query.all()
+        ids = [inv.id for inv in query]
+        new_id = max(ids)+1
+        return new_id
+
     def invoice(self, invoice_id: int) -> models.Invoice:
         """Fetch an invoice."""
         return self.Invoice.get(invoice_id)

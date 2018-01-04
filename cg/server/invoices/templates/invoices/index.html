@@ -11,10 +11,10 @@
   </ul>
   <div id="tabsJustifiedContent" class="tab-content">
       <div id="Pending" class="tab-pane fade active show">
-          {{ invoice_table(invoices['pending_invoices'] ,'No pending invoices.') }}
+          {{ invoice_table(invoices['pending_invoices'] ,'No pending invoices.', 'pending') }}
       </div>
       <div id="Sent" class="tab-pane show">
-          {{ invoice_table(invoices['sent_invoices'] ,'No delivered invoices.') }}
+          {{ invoice_table(invoices['sent_invoices'] ,'No delivered invoices.', 'sent') }}
       </div>
   </div>
 
@@ -22,7 +22,7 @@
 {% endblock %}
 
 
-{% macro invoice_table(invoices ,no_invoice) %}
+{% macro invoice_table(invoices ,no_invoice, status) %}
 <div class="card">
   {% if invoices.all() %}
   <table class="table ">
@@ -32,6 +32,9 @@
       <th>Created at</th>
       <th>Invoiced at</th>
       <th>Nr samples</th>
+      {% if status=='sent' %}
+      <th>Price</th>
+      {% endif %}
     </tr>
     {% for invoice in invoices %}
     <tr>
@@ -44,6 +47,9 @@
       <td>{{ invoice.created_at.strftime('%Y-%m-%d') }}</td>
       <td>{% if invoice.invoiced_at %} {{ invoice.invoiced_at.strftime('%Y-%m-%d')  }} {% endif %}</td>
       <td>{{ invoice.samples|count }}</td>
+      {% if status=='sent' %}
+      <td>{{ invoice.price }}</td>
+      {% endif %}
     </tr>
     {% endfor %}
   </table>
