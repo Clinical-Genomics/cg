@@ -35,9 +35,11 @@ def parse_orderform(excel_path: str) -> dict:
     orderform_sheet = workbook.sheet_by_name(sheet_name)
 
     raw_samples = relevant_rows(orderform_sheet)
+    if len(raw_samples) == 0:
+        raise OrderFormError("orderform doesn't contain any samples")
     parsed_samples = [parse_sample(raw_sample) for raw_sample in raw_samples]
 
-    document_title = orderform_sheet.row(0)[1].value
+    document_title = get_document_title(workbook, orderform_sheet)
     project_type = get_project_type(document_title, parsed_samples)
 
     if project_type in ('scout', 'external'):
@@ -66,6 +68,17 @@ def parse_orderform(excel_path: str) -> dict:
     return data
 
 
+def get_document_title(workbook: xlrd.book.Book, orderform_sheet: xlrd.sheet.Sheet) -> str:
+    """Get the document title for the order form."""
+    if 'information' in workbook.sheet_names():
+        information_sheet = workbook.sheet_by_name('information')
+        document_title = information_sheet.row(0)[2].value
+        return document_title
+
+    document_title = orderform_sheet.row(0)[1].value
+    return document_title
+
+
 def get_project_type(document_title: str, parsed_samples: List) -> str:
     """Determine the project type."""
     if '1604' in document_title:
@@ -75,8 +88,11 @@ def get_project_type(document_title: str, parsed_samples: List) -> str:
     elif '1603' in document_title:
         return 'microbial'
 
-    analyses = set(sample['analysis'] for sample in parsed_samples)
-    project_type = analyses.pop() if len(analyses) == 1 else 'scout'
+    analyses = set(sample['analysis'].lower() for sample in parsed_samples)
+    if len(analyses) > 1:
+        raise OrderFormError(f"mixed 'Data Analysis' types: {', '.join(analyses)}")
+    else:
+        project_type = analyses.pop()
     return project_type
 
 
@@ -176,9 +192,13 @@ def parse_sample(raw_sample):
         'custom_index': raw_sample.get('UDF/Custom index'),
     }
 
-    data_analysis = raw_sample.get('UDF/Data Analysis') or 'fastq'
-    raw_analysis = 'scout' if 'scout' in data_analysis else data_analysis.split('+', 1)[0]
-    sample['analysis'] = 'fastq' if raw_analysis == 'custom' else raw_analysis
+    data_analysis = raw_sample.get('UDF/Data Analysis') or None
+    if data_analysis and 'scout' in data_analysis:
+        sample['analysis'] = 'scout'
+    elif data_analysis and ('fastq' in data_analysis or data_analysis == 'custom'):
+        sample['analysis'] = 'fastq'
+    else:
+        raise OrderFormError("unknown 'Data Analysis' for order")
 
     for key, field_key in [('pool', 'pool name'), ('index_number', 'Index number'),
                            ('volume', 'Volume (uL)'), ('concentration', 'Concentration (nM)'),
