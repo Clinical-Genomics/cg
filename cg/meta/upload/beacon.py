@@ -43,7 +43,7 @@ class UploadBeaconApi():
 
         outfile_name = 'cgbeacon_'+time.strftime("%Y%m%d-%H%M%S")+'.pdf'
 
-        temp_panel = NamedTemporaryFile('w+t',suffix='.'+panel)
+        temp_panel = NamedTemporaryFile('w+t',suffix='.'+','.join(panel))
         temp_panel.write('\n'.join(bed_lines))
 
         result = self.beacon.upload(
