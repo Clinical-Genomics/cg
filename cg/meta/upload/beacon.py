@@ -40,7 +40,7 @@ class UploadBeaconApi():
         # generate BED file
         bed_lines = self.scout.export_panels([panel] if panel else family_obj.panels)
 
-        outfile_name = 'cgbeacon_',time.strftime("%Y%m%d-%H%M%S")
+        outfile_name = 'cgbeacon_'+time.strftime("%Y%m%d-%H%M%S")
 
         temp_panel = NamedTemporaryFile('w+t',suffix='.'+panel)
         temp_panel.write('\n'.join(bed_lines))
