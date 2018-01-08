@@ -42,7 +42,7 @@ class UploadBeaconApi():
         bed_lines = self.scout.export_panels( panel if panel else family_obj.panels)
 
         if outfile:
-            outfile_name = 'cgbeacon_'+time.strftime("%Y%m%d-%H%M%S")+'.pdf'
+            outfile_name = outfile+'_'+time.strftime("%Y%m%d-%H%M%S")+'.pdf'
         else:
             outfile_name = ""
 
