@@ -19,11 +19,8 @@ class UploadBeaconApi():
         self.scout = scout_api
         self.beacon = beacon_api
 
-<<<<<<< HEAD
-    def upload(self, family_id: str, panel: str=None, dataset: str='clinicalgenomics'):
-=======
-    def upload(self, family_id: str, panel: str=None, dataset: str='clinicalgenomics', outfile: str=None, customer: str=None, qual: int=20, reference: str="grch37"):
->>>>>>> added interface to cgbeacon
+
+    def upload(self, family_id: str, panel: list=None, dataset: str='clinicalgenomics', outfile: str=None, customer: str=None, qual: int=20, reference: str="grch37"):
         """Upload variants to Beacon for a family."""
         family_obj = self.status.family(family_id)
         # get the VCF file
@@ -42,9 +39,10 @@ class UploadBeaconApi():
                             link_obj.status == 'affected']
         sample_ids = [sample_obj.internal_id for sample_obj in affected_samples]
         # generate BED file
+        print('Generating variants filter based on ',len(panel), ' gene panels')
         bed_lines = self.scout.export_panels([panel] if panel else family_obj.panels)
 
-        outfile_name = 'cgbeacon_'+time.strftime("%Y%m%d-%H%M%S")
+        outfile_name = 'cgbeacon_'+time.strftime("%Y%m%d-%H%M%S")+'.pdf'
 
         temp_panel = NamedTemporaryFile('w+t',suffix='.'+panel)
         temp_panel.write('\n'.join(bed_lines))

@@ -108,7 +108,7 @@ def scout(context, re_upload, print_console, family_id):
 
 @upload.command()
 @click.argument('family_id')
-@click.option('-p', '--panel', help='Gene panel to filter VCF by', required=True)
+@click.option('-p', '--panel', help='Gene panel to filter VCF by', required=True, multiple=True)
 @click.option('-out', '--outfile', help='Path to PDF report outfile', default="cgbeacon")
 @click.option('-cust', '--customer', help='Name of customer', default="")
 @click.option('-qual', '--quality', help='Variant quality threhold', default=20)
