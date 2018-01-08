@@ -41,7 +41,10 @@ class UploadBeaconApi():
         print('Generating variants filter based on ',len(panel), ' gene panels')
         bed_lines = self.scout.export_panels( panel if panel else family_obj.panels)
 
-        outfile_name = 'cgbeacon_'+time.strftime("%Y%m%d-%H%M%S")+'.pdf'
+        if outfile:
+            outfile_name = 'cgbeacon_'+time.strftime("%Y%m%d-%H%M%S")+'.pdf'
+        else:
+            outfile_name = ""
 
         temp_panel = NamedTemporaryFile('w+t',suffix='.'+','.join(panel))
         temp_panel.write('\n'.join(bed_lines))
