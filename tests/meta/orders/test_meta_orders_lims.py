@@ -55,7 +55,7 @@ def test_to_lims_rml(rml_order):
     # ... and pick out relevant UDFs
     first_sample = samples[0]
     assert first_sample['udfs']['pool'] == '1'
-    assert first_sample['udfs']['volume'] == 35
-    assert first_sample['udfs']['concentration'] == 5
+    assert first_sample['udfs']['volume'] == '35'
+    assert first_sample['udfs']['concentration'] == '5'
     assert first_sample['udfs']['index'] == 'TruSeq DNA HT Dual-index (D7-D5)'
-    assert first_sample['udfs']['index_number'] == 65
+    assert first_sample['udfs']['index_number'] == '65'
