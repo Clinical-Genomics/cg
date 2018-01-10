@@ -7,6 +7,13 @@ from cg.meta.orders import OrdersAPI, OrderType
 from cg.meta.orders.status import StatusHandler
 
 
+class MockLims:
+
+    def update_sample(self, lims_id: str, sex=None, application: str=None,
+                      target_reads: int=None):
+        pass
+
+
 @pytest.fixture
 def scout_order():
     """Load an example scout order."""
@@ -73,5 +80,6 @@ def scout_status_data(scout_order):
 @pytest.fixture(scope='function')
 def orders_api(base_store):
     osticket_api = OsTicket()
-    _orders_api = OrdersAPI(lims=None, status=base_store, osticket=osticket_api)
+    lims = MockLims()
+    _orders_api = OrdersAPI(lims=lims, status=base_store, osticket=osticket_api)
     return _orders_api
