@@ -3,6 +3,7 @@
     "customer": "cust002",
     "samples": [{
         "name": "sample-normal",
+        "sex": "female",
         "application": "WGSPCFC060",
         "priority": "priority",
         "tumour": false,
@@ -12,6 +13,7 @@
         "container_name": "cancer test"
     }, {
         "name": "sample-tumour",
+        "sex": "female",
         "application": "WGSPCFC060",
         "priority": "priority",
         "tumour": true,
