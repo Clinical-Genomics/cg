@@ -8,6 +8,8 @@
         "mother": "17093-II-2U",
         "sex": "female",
         "quantity": "2200",
+        "volume": "35",
+        "concentration": "5",
         "application": "WGTPCFC030",
         "source": "blood",
         "status": "affected",
@@ -17,7 +19,8 @@
         "family_name": "17093",
         "panels": ["IEM", "EP"],
         "require_qcok": false,
-        "priority": "standard"
+        "priority": "standard",
+        "comment": "Testcomment"
     }, {
         "name": "17093-II-1U",
         "sex": "male",
@@ -42,6 +45,7 @@
         "family_name": "17093",
         "panels": ["IEM", "EP"],
         "require_qcok": false,
-        "priority": "standard"
+        "priority": "standard",
+        "comment": ""
     }]
 }
