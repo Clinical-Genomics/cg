@@ -1,16 +1,21 @@
 {
-    "name": "I want my reads",
+    "name": "Fastq order",
     "customer": "cust002",
+    "comment": "Order comment",
     "samples": [{
         "name": "sample-normal",
         "sex": "female",
         "application": "WGSPCFC060",
         "priority": "priority",
-        "tumour": false,
         "source": "blood",
+        "tumour": false,
         "container": "96 well plate",
+        "container_name": "cancer test",
         "well_position": "A:1",
-        "container_name": "cancer test"
+        "quantity": "2200",
+        "volume": "35",
+        "concentration": "5",
+        "comment": "Normal sample comment"
     }, {
         "name": "sample-tumour",
         "sex": "female",
