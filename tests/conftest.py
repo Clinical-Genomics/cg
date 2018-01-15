@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime as dt
 
+from click.testing import CliRunner
 import pytest
 
 from cg.store import Store
