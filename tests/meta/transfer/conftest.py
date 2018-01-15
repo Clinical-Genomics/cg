@@ -35,7 +35,7 @@ def base_store_stats(store_stats, data):
         project = store_stats.Project(projectname='test', time=dt.datetime.now())
         sample = store_stats.Sample(samplename=sample_data['name'], barcode=sample_data['index'])
         sample.project = project
-        unaligned = store_stats.Unaligned(readcounts=300000000)
+        unaligned = store_stats.Unaligned(readcounts=300000000, q30_bases_pct=85)
         unaligned.sample = sample
 
         if sample_data['flowcell'] in demuxes:

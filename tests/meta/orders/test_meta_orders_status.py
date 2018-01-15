@@ -58,7 +58,7 @@ def test_families_to_status(scout_order):
 
 def test_store_pools(orders_api, base_store, rml_status_data):
     # GIVEN a basic store with no samples and a rml order
-    assert base_store.pools().count() == 0
+    assert base_store.pools(customer=None).count() == 0
     # WHEN storing the order
     new_pools = orders_api.store_pools(
         customer=rml_status_data['customer'],
@@ -69,8 +69,8 @@ def test_store_pools(orders_api, base_store, rml_status_data):
     )
     # THEN it should update the database with new pools
     assert len(new_pools) == 1
-    assert base_store.pools().count() == 1
-    new_pool = base_store.pools().first()
+    assert base_store.pools(customer=None).count() == 1
+    new_pool = base_store.pools(customer=None).first()
     assert new_pool == new_pools[0]
     assert new_pool.name == '1'
     assert new_pool.application_version.application.tag == 'RMLS05R150'
