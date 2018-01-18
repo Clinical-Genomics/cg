@@ -223,6 +223,13 @@ Some info if primarily stored in LIMS and needs to be syncronized over to `statu
 
 #### upload
 
+##### beacon
+
+Includes: `beacon`, `hk`, `scout`, `status`
+
+This command is used to upload variants from affected subject/s of a family to a beacon of genetic variants.
+The API will first use `status` to fetch the id of any affected subject from a given family. It will then use `hk` to retrieve a VCF file from the analyses. A temporary VCF file is then created by filtering for variants present in desired gene panel(s) (retrieved using `scout`). The `beacon` app will finally handle the upload to beacon.
+
 ##### coverage
 
 Includes: `status`, `hk`, `coverage`
