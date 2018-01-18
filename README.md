@@ -13,160 +13,6 @@ In this context, `cg` provides the interface between these tools to facilitate a
 - HTTP REST for powering the web portal: [clinical.scilifelab.se][portal]
 - CLI for interactions on the command line
 
-## Team
-
-- [Valtteri Wirta][vwirta]: Facility manager | 🇫🇮
-- [Emma Sernstad][emmser]: Bioinformatician | 🇸🇪 👶
-- [Robin Andeer][robinandeer]: Lead developer, self-appointed designer | 🇸🇪 🛫
-- [Kenny Biliau][ingkebil]: Bioinformatics manager, data-flow master | 🇧🇪
-- [Måns Magnusson][moonso]: Bioinformatician, Scout developer | 🇸🇪
-- [Daniel Backman][b4ckm4n]: Bioinformatician, MIP/pipeline responsible | 🇸🇪
-- [Emilia Ottosson Laakso][Dilea]: Bioinformatician, LIMS developer | 🇸🇪
-- [Maya Brandi][mayabrandi]: Bioinformatician, lead LIMS developer | 🇸🇪
-- [Chiara Rasi][northwestwitch]: Bioinformatician, variant sharing expert 🇮🇹
-- [Isak Sylvin][sylvinite]: Bioinformatician, microbial developer | 🇸🇪 🆕
-- [Hassan Foroughi][hassanfa]: Bioinformatician, cancer developer | 🇮🇷 🆕
-- [Javier Lanillos][jlanillos]: Master's thesis student, cancer | 🇪🇸 🛬
-
-### Collaborators
-
-- [Henrik Stranneheim][henrikstranneheim]: bioinformatician, lead MIP developer, @CMMS | 🇸🇪
-- [Daniel Nilsson][dnil]: researcher, SV expert, @ClinicalGenetics | 🇸🇪
-- [Jesper Eisfeldt][J35P312]: PhD student, SV deputy, @ClinicalGenetics | 🇸🇪
-- [Anders Jemten][jemten]: Post doc, MIP developer, @CMMS | 🇸🇪
-
-### Thesarus
-
-- 🆕 = new member
-- 🛫 = leaving member
-- 🛬 = incoming member
-- 👶 = maternaty/paternaty leave
-
-## Work flow
-
-![Work flow overview](artwork/overview.png)
-
-This is a schematic overview of how data flows between different tools. Generally things start in the top left corner:
-
-1. **Order** | New samples are submitted by logging into the [portal][portal] and either uploading an "orderform" or supplying the information directly.
-
-    Information is parsed and uploaded both to LIMS and to the `status` database (controlled by this package). These samples now end up in the **incoming queue**.
-
-    Samples are marked with a date of reception in LIMS. A crontab syncronizes this information over to the status database and moves the samples along.
-
-1. **Lab** | Samples are prepped and monitored in LIMS. This is true for all lab related activities. Until fully sequenced (as defined by the application tag), samples stay in the **sequencing queue**.
-
-    > We are planning to add a new category of "samples to be prepared" which will differentiate between samples in the "lab prep" vs "sequencing" queues. The completion date will similarly be picked up by a crontab checking information in LIMS.
-
-1. **Demux** | Samples are picked up by the bioinformatics pipeline after sequencing. A demultiplexed flowcell will get added to `status` and FASTQ files for each sample will be sent to `housekeeper`. Meanwhile, read count are updated which moves the samples to the next step.
-
-    You can (re-)perform the transfer at any time, you just need the flowcell id:
-
-    ```bash
-    cg transfer flowcell {FLOWCELL}
-    ```
-
-    > TODO: reads are only counted for samples that pass the **Q30 threshold**. You can override this check by using the `--force` flag.
-
-1. **Analysis** | Samples are always analyzed as "families". If all samples in a family have been sequenced, it show up in the **analysis queue**. Analyses are automatically started by a crontab script.
-
-    Families with elevated priority (priority/express) will be started first with the rest following in reverse chronological order.
-
-    Starting a run will do four things:
-
-    1. Generate a pedigree config for the analysis pipeline
-
-        ```bash
-        cg analysis config {FAMILY}
-        ```
-
-    1. Link FASTQ files for each related sample and rename to follow the pipeline conventions
-
-        ```bash
-        cg analysis link --family {FAMILY}
-        ```
-
-    1. Generate a gene panel file according to the ordered "default panels"
-
-        ```bash
-        cg analysis panel {FAMILY}
-        ```
-
-    1. Start the pipeline and set the priority flag to high if required
-
-        ```bash
-        cg analysis start {FAMILY}
-        ```
-
-    A crontab is monitoring the progress of started runs. You can follow the status in [Trailblazer][trailblazer-ui].
-
-    You can start an anlysis in a couple different ways:
-
-    1. set the `action` property of the family to "analyze", the analysis will be started by the crontab.
-
-        ```bash
-        cg set family --action analyze {FAMILY}
-        ```
-
-    1. manually run the command: `cg analysis -f {FAMILY}`
-
-1. **Store** | Completed analyses can be accessed through `trailblazer` and are automatically "stored" using the `cg` CLI. This process updates `status` and links files to the family in `housekeeper`.
-
-    Some files are marked as essential and will be subsequently backed up. The rest of the files are removed after 3 months.
-
-    If you are in a hurry, you can store a completed analysis manually by running:
-
-    ```bash
-    cg store analysis {FAMILY}
-    # or store all the recently completed runs (= crontab)
-    cg store completed
-    ```
-
-1. **Upload** | Results from completed analyses are uploaded to a range of different tools:
-
-    - [Chanjo][chanjo]: coverage metrics
-    - [Genotype][genotype]: genotypes for detecting sample mix-ups
-    - LoqusDB: local observation counts for variants
-    - [Scout][scout]: variant interpretation platform
-
-    > We are also working on gathering post-alignment statistics which we use to generate a delivery report, however, this is still under development.
-
-1. **Delivery** | Delivery happens on two levels:
-
-    - **Sample**: FASTQ-files are always delivered for every order. The default is delivery to the delivery server. We also support upload to UPPMAX and other generic servers for some collaborators. After delivery, `status` is updated with a final sample progress date.
-
-    - **Family/Analysis**: some collaborators have opted into the Scout platform for delivery of annotated and ranked variants. These families are analyzed and uploaded which essentially corresponds to the "delivery" for such orders. We do, however, perform various quality checks before we finally answer out the results.
-
-1. **Archive** | Essential result files and raw data coming from the sequencers will sent off-site for slow storage.
-
-## Responsibilities
-
-Genomics platforms produce vasts amount of data and we deal with 1000s of samples every year. This leads to a rather complex interaction of tools and databases to handle this throughput. We also strive to automate as much of the processes as possible.
-
-We therefore need to share responsibilities and monitoring between members of our team.
-
-### Processes
-
-- **Order**: [@robinandeer][robinandeer]
-- **Demux**: [@ingkebil][ingkebil]
-- **Analysis**: [@b4ckm4n][b4ckm4n]
-- **Upload**: [@robinandeer][robinandeer]
-- **Delivery**: [@b4ckm4n][b4ckm4n]
-- **Archive**: [@ingkebil][ingkebil]
-
-### Tools
-
-- **LIMS**: [@Dilea][Dilea]
-- **LoqusDB**: [@moonso][moonso]
-- **Scout**: [@robinandeer][robinandeer] + [@moonso][moonso]
-- **MIP**: [@henrikstranneheim][henrikstranneheim]
-
-### Databases
-
-We are mainly using MySQL and MongoDB for storing data. You can read more about this in the [servers][servers] 🔒 repository.
-
-Main responsible: [@ingkebil][ingkebil]
-
 ## This package
 
 This package is a little special. Essentially it should include all the "Clinical"-specific code that has to be integrated across multiple tools such as LIMS, Trailblazer, Scout etc. However, we still aim to structure it in such a way as to make maintainance as smooth as possible!
@@ -331,7 +177,7 @@ cg upload auto
 You can of course specify which upload you want to do yourself as well:
 
 ```bash
-cg upload [coverage|genotypes|observations|scout] raredragon
+cg upload [coverage|genotypes|observations|scout|beacon] raredragon
 ```
 
 ### `meta`
@@ -367,7 +213,7 @@ The API accepts the name of a flowcell which will be looked up in `stats`. For a
 1. check if the quality (Q30) is good enough to include the sequencing results.
 1. update the number of reads that the sample has been sequenced _overall_ and match this with the requirement given by the application.
 1. accordingly, the interface will look up FASTQ files and store them using `hk`.
-1. if a sample has sufficent number of reads, the `sequenced_at` date will be filled in (`status`) according to the sequencing date of the most recent flowcell.
+1. if a sample has sufficient number of reads, the `sequenced_at` date will be filled in (`status`) according to the sequencing date of the most recent flowcell.
 
 ##### lims
 
@@ -376,6 +222,13 @@ Includes: `status`, `lims`
 Some info if primarily stored in LIMS and needs to be syncronized over to `status`. This is the case for both the date when a samples was received and when it was finally delivered. This interface is intended to run continously as part of a crontab job.
 
 #### upload
+
+##### beacon
+
+Includes: `beacon`, `hk`, `scout`, `status`
+
+This command is used to upload variants from affected subject/s of a family to a beacon of genetic variants.
+The API will first use `status` to fetch the id of any affected subject from a given family. It will then use `hk` to retrieve a VCF file from the analyses. A temporary VCF file is then created by filtering for variants present in the gene panel(s) used for the analysis (checked by `scout`). The `beacon` app will finally handle the upload to beacon.
 
 ##### coverage
 
@@ -460,22 +313,6 @@ Another module `/exc.py` contains the custom Exception classes that are used acr
 [mip]: https://github.com/Clinical-Genomics/mip
 [scilife]: https://www.scilifelab.se/
 [flask]: http://flask.pocoo.org/
-[ingkebil]: https://github.com/ingkebil
-[robinandeer]: https://github.com/robinandeer
-[Dilea]: https://github.com/Dilea
-[b4ckm4n]: https://github.com/b4ckm4n
-[moonso]: https://github.com/moonso
-[henrikstranneheim]: https://github.com/henrikstranneheim
-[emmser]: https://github.com/emmser
-[northwestwitch]: https://github.com/northwestwitch
-[mayabrandi]: https://github.com/mayabrandi
-[sylvinite]: https://github.com/sylvinite
-[dnil]: https://github.com/dnil
-[J35P312]: https://github.com/J35P312
-[jemten]: https://github.com/jemten
-[vwirta]: https://github.com/vwirta
-[jlanillos]: https://github.com/jlanillos
-[hassanfa]: https://github.com/hassanfa
 [click]: http://click.pocoo.org/5/
 [cgweb]: https://github.com/Clinical-Genomics/cgweb
 [servers]: https://github.com/Clinical-Genomics/servers

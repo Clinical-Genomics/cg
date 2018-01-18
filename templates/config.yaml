@@ -1,14 +1,13 @@
 ---
-database: "mysql+pymysql://PASSWORD:USERNAME@HOST:PORT/DATABASE"
+database: "mysql+pymysql://USERNAME:PASSWORD@HOST:PORT/DATABASE"
+madeline_exe: "/mnt/hds/proj/bioinfo/resources/madeline2"
 
 housekeeper:
-  database: "mysql+pymysql://PASSWORD:USERNAME@HOST:PORT/DATABASE"
+  database: "mysql+pymysql://USERNAME:PASSWORD@HOST:PORT/DATABASE"
   root: "./DEVELOP/bundles"
-  old:
-    database: "mysql+pymysql://PASSWORD:USERNAME@HOST:PORT/DATABASE"
 
 trailblazer:
-  database: "mysql+pymysql://PASSWORD:USERNAME@HOST:PORT/DATABASE"
+  database: "mysql+pymysql://USERNAME:PASSWORD@HOST:PORT/DATABASE"
   script: /mnt/hds/proj/bioinfo/SERVER/miniconda/bin/mip.pl
   mip_config: "/mnt/hds/proj/cust000/STAGE/config/mip.v4.yaml"
   root: /mnt/hds/proj/bioinfo/MIP_ANALYSIS/families
@@ -23,12 +22,18 @@ scout:
   database_name: database
 
 cgstats:
+  database: "mysql+pymysql://USERNAME:PASSWORD@HOST:PORT/DATABASE"
   root: /mnt/hds/proj/bioinfo/DEMUX
-  database: "mysql+pymysql://PASSWORD:USERNAME@HOST:PORT/DATABASE"
 
 loqusdb:
   database: "mongodb://USERNAME:PASSWORD@HOST:PORT/DATABASE"
   database_name: database
+
+chanjo:
+  database: "mysql+pymysql://USERNAME:PASSWORD@HOST:PORT/DATABASE"
+
+genotype:
+  database: "mysql+pymysql://USERNAME:PASSWORD@HOST:PORT/DATABASE"
 
 cgbeacon:
   database: "mysql+pymysql://USERNAME:PASSWORD@HOST:PORT/DATABASE"
