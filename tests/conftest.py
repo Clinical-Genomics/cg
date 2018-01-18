@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime as dt
+from pathlib import Path
 
-from click.testing import CliRunner
 import pytest
 
 from cg.store import Store
@@ -14,7 +14,6 @@ def store() -> Store:
     yield _store
     _store.drop_all()
 
-
 @pytest.yield_fixture(scope='function')
 def base_store(store):
     """Setup and example store."""
@@ -23,7 +22,6 @@ def base_store(store):
                  store.add_customer('cust002', 'Karolinska', scout=True),
                  store.add_customer('cust003', 'CMMS', scout=True)]
     store.add_commit(customers)
-
     applications = [store.add_application('WGXCUSC000', 'wgs', 'External WGS', sequencing_depth=0, is_external=True),
                     store.add_application('EXXCUSR000', 'wes', 'External WES', sequencing_depth=0, is_external=True),
                     store.add_application('WGSPCFC060', 'wgs', 'WGS, double', sequencing_depth=30,
@@ -39,3 +37,22 @@ def base_store(store):
     store.add_commit(versions)
 
     yield store
+
+
+@pytest.yield_fixture(scope='function')
+def disk_store(cli_runner, invoke_cli) -> Store:
+    database = './test_db.sqlite3'
+    database_path = Path(database)
+    database_uri = f"sqlite:///{database}"
+    with cli_runner.isolated_filesystem():
+        assert database_path.exists() is False
+
+        # WHEN calling "init"
+        result = invoke_cli(['--database', database_uri, 'init'])
+
+        # THEN it should setup the database with some tables
+        assert result.exit_code == 0
+        assert database_path.exists()
+        assert len(Store(database_uri).engine.table_names()) > 0
+
+        yield Store(database_uri)
