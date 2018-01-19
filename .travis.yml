@@ -1,15 +1,16 @@
 language: python
-
+sudo: false
 python:
-    - "3.6"
-
-services:
-
-script:
-    - py.test -rxs tests/
+    - '3.6'
 
 install:
+    - pip install cython
     - pip install -r requirements.txt -e .
 
+script:
+    - coverage run --source cg setup.py test
+
+after_success: coveralls
+
 notifications:
-    email: false
+    email: never
