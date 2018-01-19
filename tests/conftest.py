@@ -23,8 +23,8 @@ def base_store(store):
                  store.add_customer('cust003', 'CMMS', scout=True)]
     store.add_commit(customers)
 
-    applications = [store.add_application('WGXCUSC000', 'wgs', 'External WGS', sequencing_depth=0),
-                    store.add_application('EXXCUSR000', 'wes', 'External WES', sequencing_depth=0),
+    applications = [store.add_application('WGXCUSC000', 'wgs', 'External WGS', sequencing_depth=0, is_external=True),
+                    store.add_application('EXXCUSR000', 'wes', 'External WES', sequencing_depth=0, is_external=True),
                     store.add_application('WGSPCFC060', 'wgs', 'WGS, double', sequencing_depth=30,
                                           accredited=True),
                     store.add_application('RMLS05R150', 'rml', 'Ready-made', sequencing_depth=0),

@@ -9,12 +9,16 @@ def sample_store(base_store):
     new_samples = [
         base_store.add_sample('ordered', sex='male'),
         base_store.add_sample('received', sex='unknown', received=dt.datetime.now()),
+        base_store.add_sample('received-prepared', sex='unknown', received=dt.datetime.now(),
+                              prepared_at = dt.datetime.now()),
         base_store.add_sample('external', sex='female', external=True),
         base_store.add_sample('external-received', sex='female', external=True,
                               received=dt.datetime.now()),
         base_store.add_sample('sequenced', sex='male', received=dt.datetime.now(),
+                              prepared_at=dt.datetime.now(),
                               sequenced_at=dt.datetime.now(), reads=(310 * 1000000)),
         base_store.add_sample('sequenced-partly', sex='male', received=dt.datetime.now(),
+                              prepared_at=dt.datetime.now(),
                               reads=(250 * 1000000)),
     ]
     customer = base_store.customers().first()
