@@ -6,7 +6,6 @@ def test_parsing_rml_pool_samlple_rml_orderform(rml_orderform):
     # GIVEN a path to a RML orderform with 2 sample in a pool
     # WHEN parsing the file
     data = orderform.parse_orderform(rml_orderform)
-    print(data)
     # THEN it should determine the type of project and customer
     assert data['project_type'] == 'rml'
     assert data['customer'] == 'cust001'
