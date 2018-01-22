@@ -108,7 +108,6 @@ FASTQ_SAMPLE = {
 RML_SAMPLE = {
     **BASE_SAMPLE,
     **LAB_MIXIN,
-    'sex': validators.Any(SEX_OPTIONS),
     'pool': str,
     'well_position_rml': validators.Optional(TypeValidator(str, allow_none=True), None),
     'rml_plate_name': validators.Optional(TypeValidator(str, allow_none=True), None),
