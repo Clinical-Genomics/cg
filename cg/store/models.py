@@ -322,8 +322,8 @@ class Application(Model):
 
     id = Column(types.Integer, primary_key=True)
     tag = Column(types.String(32), unique=True, nullable=False)
-    # DEPRECATED
-    category = Column(types.Enum('wgs', 'wes', 'tga', 'rna', 'mic', 'rml'), nullable=False)
+    # DEPRECATED, use prep_category instead
+    category = Column(types.Enum('wgs', 'wes', 'tga', 'rna', 'mic', 'rml'))
     prep_category = Column(types.Enum(*constants.PREP_CATEGORIES), nullable=False)
     is_external = Column(types.Boolean, nullable=False, default=False)
     description = Column(types.String(256), nullable=False)
