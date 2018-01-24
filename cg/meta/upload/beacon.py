@@ -56,6 +56,7 @@ class UploadBeaconApi():
                 temp_panel.write('\n'.join(bed_lines))
                 path_to_panel = temp_panel.name
             else:
+                LOG.info("Panel was set to 'None', so all variants are going to be uploaded.")
                 path_to_panel = None
 
             result = self.beacon.upload(
