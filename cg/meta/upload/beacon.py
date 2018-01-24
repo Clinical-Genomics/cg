@@ -49,7 +49,7 @@ class UploadBeaconApi():
             temp_panel = None
 
             # If one or more valid panels are supplied generate gene panel BED file
-            if not panel == 'None':
+            if not panel[0] == 'None':
                 print('Generating variants filter based on ',len(panel), ' gene panels')
                 bed_lines = self.scout.export_panels( panel if panel else family_obj.panels)
                 temp_panel = NamedTemporaryFile('w+t',suffix='.'+','.join(panel))
