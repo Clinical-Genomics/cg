@@ -40,10 +40,10 @@ class UploadBeaconApi():
                                 link_obj.status == 'affected']
             sample_ids = [sample_obj.internal_id for sample_obj in affected_samples]
 
-            if outfile:
-                outfile_name = outfile
+            if outfile == "":
+                outfile_name = None
             else:
-                outfile_name = ""
+                outfile_name = outfile
 
             path_to_panel = ''
             temp_panel = None
