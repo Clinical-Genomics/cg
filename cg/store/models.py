@@ -187,8 +187,10 @@ class Pool(Model):
     received_at = Column(types.DateTime)
     sequenced_at = Column(types.DateTime)
     delivered_at = Column(types.DateTime)
-    invoiced_at = Column(types.DateTime)
+    invoice_id = Column(ForeignKey('invoice.id'))
+    invoiced_at = Column(types.DateTime)  # DEPRECATED
     comment = Column(types.Text)
+    lims_project = Column(types.Text)
 
     created_at = Column(types.DateTime, default=dt.datetime.now)
     customer_id = Column(ForeignKey('customer.id', ondelete='CASCADE'), nullable=False)
@@ -218,7 +220,9 @@ class Sample(Model, PriorityMixin):
     sequence_start = Column(types.DateTime)
     sequenced_at = Column(types.DateTime)
     delivered_at = Column(types.DateTime)
-    invoiced_at = Column(types.DateTime)
+    invoiced_at = Column(types.DateTime)  # DEPRECATED
+    invoice_id = Column(ForeignKey('invoice.id'))
+    no_invoice = Column(types.Boolean, default=False)
     comment = Column(types.Text)
 
     created_at = Column(types.DateTime, default=dt.datetime.now)
@@ -402,3 +406,21 @@ class Panel(Model):
 
     def __str__(self):
         return f"{self.abbrev} ({self.current_version})"
+
+
+class Invoice(Model):
+
+    id = Column(types.Integer, primary_key=True)
+    customer_id = Column(ForeignKey('customer.id'), nullable=False)
+    created_at = Column(types.DateTime, default=dt.datetime.now)
+    updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
+    invoiced_at = Column(types.DateTime)
+    comment = Column(types.Text)
+    discount = Column(types.Integer, default=0)
+    excel_kth = Column(types.BLOB)
+    excel_ki = Column(types.BLOB)
+    price = Column(types.Integer)
+
+    samples = orm.relationship(Sample, backref='invoice')
+    pools = orm.relationship(Pool, backref='invoice')
+    customer = orm.relationship(Customer, backref='invoices')
