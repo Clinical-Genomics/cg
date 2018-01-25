@@ -24,8 +24,11 @@ def test_submit(base_store, orders_api, all_orders, monkeypatch, order_type):
 
     # GIVEN an order and an empty store
     assert base_store.samples().first() is None
+
     # WHEN submitting the order
-    result = orders_api.submit(order_type, 'Paul Anderson', 'paul@magnolia.com', order_data)
+    order_ticket = {'name': 'Paul Anderson', 'email': 'paul@magnolia.com'}
+    result = orders_api.submit(order_type, data=order_data, ticket=order_ticket)
+
     # THEN it should work...
     for record in result['records']:
         if isinstance(record, models.Pool) or isinstance(record, models.Sample):
