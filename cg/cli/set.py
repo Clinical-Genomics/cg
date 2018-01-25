@@ -66,3 +66,20 @@ def sample(context, sex, sample_id):
 
         print(click.style('update LIMS/Gender', fg='blue'))
         lims_api.update_sample(sample_id, sex=sex)
+
+@set_cmd.command()
+@click.option('-s', '--status', type=click.Choice(['ondisk', 'removed', 'requested', 'processing']))
+@click.argument('flowcell_name')
+@click.pass_context
+def flowcell(context, flowcell_name, status):
+    """Update information about a flowcell"""
+    flowcell_obj = context.obj['status'].flowcell(flowcell_name)
+
+    if flowcell_obj is None:
+        print(click.style(f"flowcell not found: {flowcell_name}", fg='yellow'))
+        context.abort()
+    prev_status = flowcell_obj.status
+    flowcell_obj.status = status
+
+    context.obj['status'].commit()
+    print(click.style(f"{flowcell_name} set: {prev_status} -> {status}", fg='green'))
