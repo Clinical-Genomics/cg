@@ -1,0 +1,60 @@
+{% extends 'invoices/layout.html' %}
+
+{% block body %}
+<div class="container mt-5 mb-5">
+  <h1>Invoices</h1>
+  <br><br>
+
+  <ul class="nav nav-tabs">
+      <li class="nav-item"><a href="" data-target="#Pending" data-toggle="tab" class="nav-link active">Pending</a></li>
+      <li class="nav-item"><a href="" data-target="#Sent" data-toggle="tab" class="nav-link">Sent</a></li>
+  </ul>
+  <div id="tabsJustifiedContent" class="tab-content">
+      <div id="Pending" class="tab-pane fade active show">
+          {{ invoice_table(invoices['pending_invoices'] ,'No pending invoices.', 'pending') }}
+      </div>
+      <div id="Sent" class="tab-pane show">
+          {{ invoice_table(invoices['sent_invoices'] ,'No delivered invoices.', 'sent') }}
+      </div>
+  </div>
+
+</div>
+{% endblock %}
+
+
+{% macro invoice_table(invoices ,no_invoice, status) %}
+<div class="card">
+  {% if invoices.all() %}
+  <table class="table ">
+    <tr>
+      <th>Invoice ID</th>
+      <th>Customer</th>
+      <th>Created at</th>
+      <th>Invoiced at</th>
+      <th>Nr samples</th>
+      {% if status=='sent' %}
+      <th>Price</th>
+      {% endif %}
+    </tr>
+    {% for invoice in invoices %}
+    <tr>
+      <td>
+      <a href="{{ url_for('invoices.invoice', invoice_id=invoice.id) }}">
+        {{ invoice.id }}
+      </a>
+      </td>
+      <td>{{ invoice.customer.name }}</td>
+      <td>{{ invoice.created_at.strftime('%Y-%m-%d') }}</td>
+      <td>{% if invoice.invoiced_at %} {{ invoice.invoiced_at.strftime('%Y-%m-%d')  }} {% endif %}</td>
+      <td>{{ invoice.samples|count }}</td>
+      {% if status=='sent' %}
+      <td>{{ invoice.price }}</td>
+      {% endif %}
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <li class="list-group-item">{{no_invoice}}</li>
+  {% endif %}
+</div>
+{% endmacro %}
