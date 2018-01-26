@@ -57,18 +57,19 @@ class UploadBeaconApi():
                 temp_panel.write('\n'.join(bed_lines))
                 path_to_panel = temp_panel.name
                 print("does this panel exist?",os.path.exists(path_to_panel))
-                print("abs path:",os.path.abspath(temp_panel.name))
-
                 # Save specifics for gene panels in order to record panels used in status db at the end of the upload operation.
                 n_panels = len(panel)
                 with open(temp_panel.name, "r") as ins:
-                    while n_panels-1:
+                    while n_panels:
                         for line in ins:
                             if line.startswith("##gene_panel="):
-                                print(line.strip())
+                                print(line.strip().lstrip(12))
+
                                 n_panels -= 1
                 temp_panel.close()
                 print("does this panel exist?",os.path.exists(path_to_panel))
+
+
 
 
             else:
