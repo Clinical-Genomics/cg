@@ -64,6 +64,9 @@ class UploadBeaconApi():
                     for line in ins:
                         print(line)
 
+                temp_panel.close()
+                print("does this panel exist?",os.path.exists(path_to_panel))
+
 
             else:
                 #LOG.info("Panel was set to 'None', so all variants are going to be uploaded.")
