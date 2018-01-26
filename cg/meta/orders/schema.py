@@ -77,8 +77,8 @@ LAB_MIXIN = {
     'container': validators.Optional(str, 'Tube'),
     'container_name':  validators.Optional(str, None),
     'quantity': validators.Optional(str, None),
-    'volume': validators.Optional(str, None),
-    'concentration': validators.Optional(str, None),
+    'volume': validators.Optional(TypeValidator(str, allow_none=True), None),
+    'concentration': validators.Optional(TypeValidator(str, allow_none=True), None),
 }
 
 ANALYSIS_MIXIN = {
