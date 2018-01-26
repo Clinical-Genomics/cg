@@ -60,9 +60,9 @@ class UploadBeaconApi():
                 print("abs path:",os.path.abspath(temp_panel.name))
 
                 with open("temp_panel.name", "r") as ins:
-                array = []
-                for line in ins:
-                    print(line)
+
+                    for line in ins:
+                        print(line)
 
 
             else:
