@@ -64,7 +64,7 @@ class UploadBeaconApi():
                     while n_panels:
                         for line in ins:
                             if line.startswith("##gene_panel="):
-                                templine = (line.lstrip('##gene_panel=').strip()).split(',')
+                                templine = (line.strip()).split(',')
                                 temp_panel_tuple = []
                                 print("\n")
                                 for tuple_n in templine:
