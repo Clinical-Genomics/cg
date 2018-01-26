@@ -63,7 +63,7 @@ class UploadBeaconApi():
                 n_panels = len(panel)
                 with open(temp_panel.name, "r") as panel_lines:
                     while n_panels:
-                        for line in panel_file:
+                        for line in panel_lines:
                             if line.startswith("##gene_panel="): #header with specifics of 1 panel
                                 templine = (line.strip()).split(',')
                                 temp_panel_tuple = []
