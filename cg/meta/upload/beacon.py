@@ -67,7 +67,7 @@ class UploadBeaconApi():
                                 templine = (line.lstrip('##gene_panel=').strip()).split(',')
                                 temp_panel_tuple = ()
                                 print("\n")
-                                foreach tuple_n in templine
+                                foreach tuple_n in templine:
                                     #create a tuple with these fields from the panel: name, version, date:
                                     print("tuple_n:",tuple_n)
 
