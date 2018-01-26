@@ -36,8 +36,8 @@ class UploadBeaconApi():
                     LOG.error("Couldn't find any vcf file tag!")
 
             #status_msg = str(hk_vcf).split(',')[1]
-            print('hk_vcf is:',hk_vcf.path)
-            status_msg = hk_vcf.path
+            #print('hk_vcf is:',hk_vcf.path)
+            status_msg = hk_vcf.path.strip()
 
             # list affected samples
             affected_samples = [link_obj.sample for link_obj in family_obj.links if
@@ -81,7 +81,7 @@ class UploadBeaconApi():
                 temp_panel.close()
                 status_msg += "," + str(used_panels)
 
-                print("STATUS MSG", status_msg)
+                print("STATUS MSG:", status_msg)
             else:
                 LOG.info("Panel was set to 'None', so all variants are going to be uploaded.")
                 path_to_panel = None
