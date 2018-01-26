@@ -79,7 +79,6 @@ class UploadBeaconApi():
                                     used_panels.append(tuple(temp_panel_tuple))
                                 n_panels -= 1
 
-                temp_panel.close()
                 status_msg += "," + str(used_panels)
 
                 print("STATUS MSG:", status_msg)
@@ -89,34 +88,33 @@ class UploadBeaconApi():
                 status_msg += path_to_panel
 
 
-            #result = self.beacon.upload(
-            #    vcf_path = hk_vcf.full_path,
-            #    panel_path = path_to_panel,
-            #    dataset = dataset,
-            #    outfile = outfile_name,
-            #    customer = customer,
-            #    samples = sample_ids,
-            #    quality = qual,
-            #    genome_reference = reference,
-            #)
+            result = self.beacon.upload(
+                vcf_path = hk_vcf.full_path,
+                panel_path = path_to_panel,
+                dataset = dataset,
+                outfile = outfile_name,
+                customer = customer,
+                samples = sample_ids,
+                quality = qual,
+                genome_reference = reference,
+            )
 
-            #if temp_panel:
-            #    temp_panel.close()
+            if temp_panel:
+                temp_panel.close()
 
 
+            print('\n' * 50)
+            print(str(result))
 
             # mark samples as uploaded to beacon
-            #for sample_obj in affected_samples:
-            #    sample_obj.beaconized_at = dt.datetime.now()
-            #self.status.commit()
-
             for sample_obj in affected_samples:
+                sample_obj.beaconized_at = dt.datetime.now()
                 print("\n",str(sample_obj),"----->", sample_obj.beaconized_at)
+            self.status.commit()
+            print('\n' * 50)
 
+            return result
 
-            #return result
-
-            return None
 
         except Exception as e:
             LOG.critical("cg/meta/upload/beacon.py. The following error occurred:%s", e)
