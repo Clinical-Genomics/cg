@@ -63,7 +63,7 @@ class UploadBeaconApi():
                     while n_panels:
                         for line in ins:
                             if line.startswith("##gene_panel="):
-                                print((line.strip()).lstrip('##gene_panel='))
+                                print((line.lstrip('##gene_panel=').strip())
 
                                 n_panels -= 1
                 temp_panel.close()
