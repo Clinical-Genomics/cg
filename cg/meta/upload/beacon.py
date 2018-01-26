@@ -72,9 +72,12 @@ class UploadBeaconApi():
                                     print("tuple_n:",tuple_n)
                                     temp_panel_tuple.append(tuple_n.split('=')[1])
 
-                                print(tuple(temp_panel_tuple))
+                                #print(tuple(temp_panel_tuple))
+                                used_panels.append(tuple(temp_panel_tuple))
                                 n_panels -= 1
                 temp_panel.close()
+
+                print(str(used_panels))
                 print("does this panel exist?",os.path.exists(path_to_panel))
 
 
