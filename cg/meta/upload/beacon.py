@@ -75,7 +75,8 @@ class UploadBeaconApi():
                                     temp_panel_tuple.append(tuple_n.split('=')[1])
 
                                 #print(tuple(temp_panel_tuple))
-                                used_panels.append(tuple(temp_panel_tuple))
+                                if not tuple(temp_panel_tuple) in used_panels
+                                    used_panels.append(tuple(temp_panel_tuple))
                                 n_panels -= 1
 
                 temp_panel.close()
