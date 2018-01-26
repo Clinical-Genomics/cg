@@ -78,7 +78,7 @@ class UploadBeaconApi():
                                 n_panels -= 1
 
                 temp_panel.close()
-                status_msg += "," + str(used_panels))
+                status_msg += "," + str(used_panels)
 
                 print("STATUS MSG", status_msg)
             else:
