@@ -36,7 +36,10 @@ class UploadBeaconApi():
                     LOG.error("Couldn't find any vcf file tag!")
 
             status_msg = str(dt.datetime.now())
+
+            print("here1")
             status_msg += ",",hk_vcf.path.strip()
+            print("here2")
 
             # list affected samples
             affected_samples = [link_obj.sample for link_obj in family_obj.links if
@@ -79,6 +82,7 @@ class UploadBeaconApi():
 
                 temp_panel.close()
                 status_msg += "," + str(used_panels)
+                print("here3")
 
                 print("STATUS MSG:", status_msg)
             else:
