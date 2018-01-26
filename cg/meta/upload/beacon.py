@@ -59,10 +59,15 @@ class UploadBeaconApi():
                 print("does this panel exist?",os.path.exists(path_to_panel))
                 print("abs path:",os.path.abspath(temp_panel.name))
 
+                n_panels = len(panel)
                 with open(temp_panel.name, "r") as ins:
 
-                    for line in ins:
-                        print(line)
+                    while n_panels:
+                        for line in ins:
+                            if line.startswith("##gene_panel="):
+                                print(line)
+                                n_panels -= 1
+
 
                 temp_panel.close()
                 print("does this panel exist?",os.path.exists(path_to_panel))
