@@ -55,7 +55,7 @@ class UploadBeaconApi():
                 temp_panel = NamedTemporaryFile('w+t',suffix='.'+','.join(panel))
                 temp_panel.write('\n'.join(bed_lines))
                 path_to_panel = temp_panel.name
-                print("path to panel:",path_to_panel)
+                print("path to panel:",'\n'.join(bed_lines))
             else:
                 #LOG.info("Panel was set to 'None', so all variants are going to be uploaded.")
                 path_to_panel = None
@@ -84,4 +84,4 @@ class UploadBeaconApi():
             return None
 
         except Exception as e:
-            LOG.critical("The following error occurred:%s", e)
+            LOG.critical("cg/meta/upload/beacon.py. The following error occurred:%s", e)
