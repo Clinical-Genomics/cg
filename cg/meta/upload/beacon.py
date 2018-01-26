@@ -107,7 +107,7 @@ class UploadBeaconApi():
             #self.status.commit()
 
             for sample_obj in affected_samples:
-                print("\n----->", sample_obj.beaconized_at)
+                print("\nsample_obj----->", sample_obj.beaconized_at)
 
 
             #return result
