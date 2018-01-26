@@ -150,7 +150,7 @@ class FindHandler:
             .all()
         )
 
-    def pools(self, *, customer: models.Customer):
+    def pools(self, *, customer: models.Customer) -> Query:
         """Fetch all the pools."""
         records = self.Pool.query
         records = records.filter_by(customer=customer) if customer else records
@@ -160,7 +160,28 @@ class FindHandler:
         """Fetch a pool."""
         return self.Pool.get(pool_id)
     
-    def deliveries(self):
+    def deliveries(self) -> Query:
         """Fetch all deliveries."""
         query = self.Delivery.query
         return query
+
+    def invoices(self, invoiced: bool=None) -> Query:
+        """Fetch invoices."""
+        query = self.Invoice.query
+        if invoiced is not None:
+            if invoiced is True:
+                query = query.filter(models.Invoice.invoiced_at != None)
+            else:
+                query = query.filter(models.Invoice.invoiced_at == None)
+        return query
+
+    def new_invoice_id(self) -> Query:
+        """Fetch invoices."""
+        query = self.Invoice.query.all()
+        ids = [inv.id for inv in query]
+        new_id = max(ids)+1
+        return new_id
+
+    def invoice(self, invoice_id: int) -> models.Invoice:
+        """Fetch an invoice."""
+        return self.Invoice.get(invoice_id)
