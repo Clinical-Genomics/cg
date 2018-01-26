@@ -88,7 +88,7 @@ class UploadBeaconApi():
                 status_msg += path_to_panel
 
 
-            result = self.beacon.upload(
+            #result = self.beacon.upload(
             #    vcf_path = hk_vcf.full_path,
             #    panel_path = path_to_panel,
             #    dataset = dataset,
