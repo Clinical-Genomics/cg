@@ -35,7 +35,7 @@ class UploadBeaconApi():
                 if hk_vcf is None:
                     LOG.error("Couldn't find any vcf file tag!")
 
-            status_msg = hk_vcf.split(',')[1]
+            status_msg = str(hk_vcf).split(',')[1]
             print('hk_vcf is:',hk_vcf)
 
             # list affected samples
