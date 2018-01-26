@@ -59,7 +59,7 @@ class UploadBeaconApi():
                 print("does this panel exist?",os.path.exists(path_to_panel))
                 print("abs path:",os.path.abspath(temp_panel.name))
 
-                with open("temp_panel.name", "r") as ins:
+                with open(temp_panel.name, "r") as ins:
 
                     for line in ins:
                         print(line)
