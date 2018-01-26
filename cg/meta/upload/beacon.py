@@ -50,35 +50,38 @@ class UploadBeaconApi():
 
             # If one or more valid panels are supplied generate gene panel BED file
             if not panel[0] == 'None':
-                print('Generating variants filter based on ',len(panel), ' gene panels')
-                bed_lines = self.scout.export_panels( panel if panel else family_obj.panels)
+                print('Generating variants filter based on ', len(panel), ' gene panels')
+                bed_lines = self.scout.export_panels(panel)
                 temp_panel = NamedTemporaryFile('w+t',suffix='.'+','.join(panel))
                 temp_panel.write('\n'.join(bed_lines))
                 path_to_panel = temp_panel.name
+                print("path to panel:",path_to_panel)
             else:
-                LOG.info("Panel was set to 'None', so all variants are going to be uploaded.")
+                #LOG.info("Panel was set to 'None', so all variants are going to be uploaded.")
                 path_to_panel = None
 
-            result = self.beacon.upload(
-                vcf_path = hk_vcf.full_path,
-                panel_path = path_to_panel,
-                dataset = dataset,
-                outfile = outfile_name,
-                customer = customer,
-                samples = sample_ids,
-                quality = qual,
-                genome_reference = reference,
-            )
+            #result = self.beacon.upload(
+            #    vcf_path = hk_vcf.full_path,
+            #    panel_path = path_to_panel,
+            #    dataset = dataset,
+            #    outfile = outfile_name,
+            #    customer = customer,
+            #    samples = sample_ids,
+            #    quality = qual,
+            #    genome_reference = reference,
+            #)
 
-            if temp_panel:
-                temp_panel.close()
+            #if temp_panel:
+            #    temp_panel.close()
 
             # mark samples as uploaded to beacon
-            for sample_obj in affected_samples:
-                sample_obj.beaconized_at = dt.datetime.now()
-            self.status.commit()
+            #for sample_obj in affected_samples:
+            #    sample_obj.beaconized_at = dt.datetime.now()
+            #self.status.commit()
 
-            return result
+            #return result
+
+            return None
 
         except Exception as e:
             LOG.critical("The following error occurred:%s", e)
