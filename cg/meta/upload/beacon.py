@@ -70,7 +70,7 @@ class UploadBeaconApi():
                                 for tuple_n in templine:
                                     #create a tuple with these fields from the panel: name, version, date:
                                     print("tuple_n:",tuple_n)
-                                    temp_panel_tuple.append(tuple_n[tuple_n.index('=')+1])
+                                    temp_panel_tuple.append(tuple_n.split('=')[1])
 
                                 print(tuple(temp_panel_tuple))
                                 n_panels -= 1
