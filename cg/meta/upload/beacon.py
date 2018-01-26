@@ -106,7 +106,7 @@ class UploadBeaconApi():
             #    sample_obj.beaconized_at = dt.datetime.now()
             #self.status.commit()
 
-            for  in affected_samples:
+            for sample_ob in affected_samples:
                 print("\n",sample_ob,"----->", sample_obj.beaconized_at)
 
 
