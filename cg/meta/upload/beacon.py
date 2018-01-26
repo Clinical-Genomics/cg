@@ -1,7 +1,6 @@
 import logging
 import datetime as dt
 import time
-import os
 from tempfile import NamedTemporaryFile
 
 from cg.store import Store
@@ -35,7 +34,6 @@ class UploadBeaconApi():
                 hk_vcf = self.housekeeper.files(version=hk_version.id, tags=['vcf-clinical-bin']).first()
                 if hk_vcf is None:
                     LOG.error("Couldn't find any vcf file tag!")
-                    exit 1
 
             print('hk_vcf is:',hk_vcf)
 
