@@ -1,6 +1,7 @@
 import logging
 import datetime as dt
 import time
+import os
 from tempfile import NamedTemporaryFile
 
 from cg.store import Store
@@ -55,7 +56,7 @@ class UploadBeaconApi():
                 temp_panel = NamedTemporaryFile('w+t',suffix='_chiara.'+','.join(panel))
                 temp_panel.write('\n'.join(bed_lines))
                 path_to_panel = temp_panel.name
-                print("path to panel:",path_to_panel)
+                print("does this panel exist?",path_to_panel)
             else:
                 #LOG.info("Panel was set to 'None', so all variants are going to be uploaded.")
                 path_to_panel = None
