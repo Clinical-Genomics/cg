@@ -65,13 +65,14 @@ class UploadBeaconApi():
                         for line in ins:
                             if line.startswith("##gene_panel="):
                                 templine = (line.lstrip('##gene_panel=').strip()).split(',')
-                                temp_panel_tuple = ()
+                                temp_panel_tuple = []
                                 print("\n")
                                 for tuple_n in templine:
                                     #create a tuple with these fields from the panel: name, version, date:
                                     print("tuple_n:",tuple_n)
+                                    temp_panel_tuple.append(tuple_n[tuple_n.index('=')+1])
 
-
+                                print tuple(temp_panel_tuple)
                                 n_panels -= 1
                 temp_panel.close()
                 print("does this panel exist?",os.path.exists(path_to_panel))
