@@ -34,7 +34,10 @@ class UploadBeaconApi():
                 LOG.info("regular clinical VCF not found, trying old tag")
                 hk_vcf = self.housekeeper.files(version=hk_version.id, tags=['vcf-clinical-bin']).first()
                 if hk_vcf is None:
-                    LOG.error("Couldn't find old tag!")
+                    LOG.error("Couldn't find any vcf file tag!")
+                    exit 1
+
+            print('hk_vcf is:',hk_vcf)
 
             # list affected samples
             affected_samples = [link_obj.sample for link_obj in family_obj.links if
@@ -50,39 +53,33 @@ class UploadBeaconApi():
             temp_panel = None
 
             # If one or more valid panels are supplied generate gene panel BED file
+            used_panels = []
             if not panel[0] == 'None':
                 print('Generating variants filter based on ', len(panel), ' gene panels')
                 bed_lines = self.scout.export_panels(panel)
                 temp_panel = NamedTemporaryFile('w+t',suffix='_chiara.'+','.join(panel))
                 temp_panel.write('\n'.join(bed_lines))
                 path_to_panel = temp_panel.name
-                print("does this panel exist?",os.path.exists(path_to_panel))
-                # Save specifics for gene panels in order to record panels used in status db at the end of the upload operation.
+
+                ## capture specifics for gene panels in order to record panels used in status db at the end of the upload operation.
                 n_panels = len(panel)
-                used_panels = []
-                with open(temp_panel.name, "r") as ins:
+                with open(temp_panel.name, "r") as panel_lines:
                     while n_panels:
-                        for line in ins:
-                            if line.startswith("##gene_panel="):
+                        for line in panel_file:
+                            if line.startswith("##gene_panel="): #header with specifics of 1 panel
                                 templine = (line.strip()).split(',')
                                 temp_panel_tuple = []
-                                print("\n")
                                 for tuple_n in templine:
+
                                     #create a tuple with these fields from the panel: name, version, date:
-                                    print("tuple_n:",tuple_n)
                                     temp_panel_tuple.append(tuple_n.split('=')[1])
 
                                 #print(tuple(temp_panel_tuple))
                                 used_panels.append(tuple(temp_panel_tuple))
                                 n_panels -= 1
+
                 temp_panel.close()
-
                 print(str(used_panels))
-                print("does this panel exist?",os.path.exists(path_to_panel))
-
-
-
-
             else:
                 #LOG.info("Panel was set to 'None', so all variants are going to be uploaded.")
                 path_to_panel = None
