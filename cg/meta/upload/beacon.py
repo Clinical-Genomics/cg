@@ -34,6 +34,7 @@ class UploadBeaconApi():
                 hk_vcf = self.housekeeper.files(version=hk_version.id, tags=['vcf-clinical-bin']).first()
                 if hk_vcf is None:
                     LOG.error("Couldn't find any vcf file tag!")
+                    exit(1)
 
             status_msg = str(dt.datetime.now())
             status_msg += "," + str(hk_vcf.path.strip())
@@ -84,8 +85,10 @@ class UploadBeaconApi():
             else:
                 LOG.info("Panel was set to 'None', so all variants are going to be uploaded.")
                 path_to_panel = None
+                status_msg += path_to_panel
 
-            #result = self.beacon.upload(
+
+            result = self.beacon.upload(
             #    vcf_path = hk_vcf.full_path,
             #    panel_path = path_to_panel,
             #    dataset = dataset,
