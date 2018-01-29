@@ -4,7 +4,6 @@
   "comment": "Vi kommer in med proverna på tisdag",
   "samples": [{
     "name": "LB-P-AZSJ001-CFDNA-2015112-TP20170331-WGS",
-    "sex": "female",
     "application": "RMLS05R150",
     "container": "96 well plate",
     "rml_plate_name": "20170502 - ctDNA 9 (#814813, J.Lindberg)",
@@ -19,7 +18,6 @@
     "comment":"2017-00004-05 testkommentar_HB"
   }, {
     "name": "LB-P-UZG009-CFDNA-2015862-TP20170331-WGS",
-    "sex": "female",
     "application": "RMLS05R150",
     "container": "96 well plate",
     "rml_plate_name": "20170502 - ctDNA 9 (#814813, J.Lindberg)",
@@ -34,7 +32,6 @@
     "comment":"2017-00004-05 testkommentar_HB"
   }, {
     "name": "LB-P-GZA3949-CFDNA-20160293-TP20170331-WGS",
-    "sex": "female",
     "application": "RMLS05R150",
     "container": "96 well plate",
     "rml_plate_name": "20170502 - ctDNA 9 (#814813, J.Lindberg)",
