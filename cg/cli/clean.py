@@ -18,16 +18,16 @@ def clean(context):
     """Remove stuff."""
     context.obj['db'] = Store(context.obj['database'])
     context.obj['tb'] = tb.TrailblazerAPI(context.obj)
+    context.obj['status'] = Store(context.obj['database'])
 
 
 @clean.command()
 @click.option('-fitem', '--family_item', type=click.Choice(['family','sample']), required=True, help='family/sample to remove from beacon')
 @click.argument('id')
 @click.pass_context
-def beacon(context, family_item, id):
+def beacon(context: click.Context, family_item, id):
     """Remove beacon for a sample or one or more affected samples from a family."""
     LOG.info("Removing beacon vars for %s %s", family_item, id)
-
     api = UploadBeaconApi(
         status=context.obj['status'],
         hk_api=context.obj['housekeeper_api'],
