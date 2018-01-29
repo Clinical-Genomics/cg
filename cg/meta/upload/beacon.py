@@ -135,7 +135,7 @@ class UploadBeaconApi():
 
                 # list affected samples
                 affected_samples = [link_obj.sample for link_obj in family_obj.links if
-                                    link_obj.status == 'affected
+                                    link_obj.status == 'affected']
 
                 print(str(affected_samples))
 
