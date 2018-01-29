@@ -126,4 +126,27 @@ class UploadBeaconApi():
         """Remove beacon for a sample or one or more affected samples from a family."""
 
         LOG.info("I'm about to remove item: %s (%s)", item_id, item_type)
-        return 2
+
+        try:
+
+            # remove vars for all affected samples in a family:
+            if item_type == 'family':
+                family_obj = self.status.family(item_type)
+
+                # list affected samples
+                affected_samples = [link_obj.sample for link_obj in family_obj.links if
+                                    link_obj.status == 'affected
+
+                print(str(affected_samples))
+
+
+
+
+
+            else: # remove vars for a single sample:
+                print("remove vars for a single sample:",item_id)
+
+            return 2
+
+        except Exception as e:
+            LOG.critical("cg/meta/upload/beacon.py. The following error occurred:%s", e)
