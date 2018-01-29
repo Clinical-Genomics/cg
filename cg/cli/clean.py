@@ -6,6 +6,7 @@ import click
 from dateutil.parser import parse as parse_date
 
 from cg.apps import tb, hk, beacon as beacon_app
+from cg.meta.upload.beacon import UploadBeaconApi
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
