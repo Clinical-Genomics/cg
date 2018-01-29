@@ -37,9 +37,8 @@ class UploadBeaconApi():
                 if hk_vcf is None:
                     LOG.error("Couldn't find any vcf file tag!")
 
-            status_msg = None str(dt.datetime.now())
-            status_msg += "," + str(hk_vcf.path.strip())
-
+            status_msg = None
+            
             #retrieve samples contained in VCF file:
             vcf_samples = vcfparser.get_samples(hk_vcf.full_path.strip())
 
