@@ -44,7 +44,7 @@ class UploadBeaconApi():
 
             #retrieve samples contained in VCF file:
             print("#"+str(hk_vcf.full_path.strip())+"#")
-            vcf_samples = vcfparser.get_samples(hk_vcf.full_path.path.strip())
+            vcf_samples = vcfparser.get_samples(hk_vcf.full_path.strip())
 
             print ("samples found in VCF file:",str(vcf_samples))
 
