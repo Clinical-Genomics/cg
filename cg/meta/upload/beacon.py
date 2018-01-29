@@ -128,16 +128,16 @@ class UploadBeaconApi():
         LOG.info("I'm about to remove item: %s (%s)", item_id, item_type)
 
         try:
-
             # remove vars for all affected samples in a family:
             if item_type == 'family':
-                family_obj = self.status.family(item_type)
+                family_obj = self.status.family(item_id)
 
                 # list affected samples
                 affected_samples = [link_obj.sample for link_obj in family_obj.links if
                                     link_obj.status == 'affected']
+                sample_ids = [sample_obj.internal_id for sample_obj in affected_samples]
 
-                print(str(affected_samples))
+                print(str(sample_ids))
 
 
 
