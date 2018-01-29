@@ -38,7 +38,7 @@ class UploadBeaconApi():
                     LOG.error("Couldn't find any vcf file tag!")
 
             status_msg = None
-            
+
             #retrieve samples contained in VCF file:
             vcf_samples = vcfparser.get_samples(hk_vcf.full_path.strip())
 
@@ -95,7 +95,6 @@ class UploadBeaconApi():
 
                     status_msg += "," + str(used_panels)
 
-                    print("STATUS MSG:", status_msg)
                 else:
                     LOG.info("Panel was set to 'None', so all variants are going to be uploaded.")
                     path_to_panel = None
@@ -116,19 +115,14 @@ class UploadBeaconApi():
                 if temp_panel:
                     temp_panel.close()
 
+                #mark samples as uploaded to beacon
+                for sample_obj in affected_samples:
+                    sample_obj.beaconized_at = status_msg
+                    print("\n",str(sample_obj),"----->", sample_obj.beaconized_at)
+                self.status.commit()
 
-                #print('\n' * 50)
-                #print(str(result))
-                #print('\n' * 50)
+                return result
 
-                # mark samples as uploaded to beacon
-                #for sample_obj in affected_samples:
-                #    sample_obj.beaconized_at = dt.datetime.now()
-                #    print("\n",str(sample_obj),"----->", sample_obj.beaconized_at)
-                #self.status.commit()
-
-                return None
-                #return result
             else:
                 return None
 
