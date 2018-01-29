@@ -8,6 +8,8 @@ from cg.store import models
 MONTHS = {1: 'January', 2: 'February', 3: 'March', 4: 'April', 5: 'May', 6: 'June',
           7: 'July', 8: 'August', 9: 'September', 10: 'October', 11: 'November', 12: 'December'}
 
+SAMPLES_FROM_DATE = dt.datetime(2017, 12, 31)
+
 
 class TrendsHandler:
 
@@ -20,7 +22,7 @@ class TrendsHandler:
                 func.count(models.Sample.id).label('count'),
             )
             .join(models.Sample.customer)
-            .filter(models.Sample.received_at > dt.datetime(2016, 12, 31))
+            .filter(models.Sample.received_at > SAMPLES_FROM_DATE)
             .group_by(models.Customer.priority, func.month(models.Sample.received_at))
         )
         for cust_priority, results in groupby(query, key=lambda result: result.priority):
@@ -50,7 +52,7 @@ class TrendsHandler:
             )
             .filter(
                 models.Customer.priority == 'diagnostic',
-                models.Sample.received_at > dt.datetime(2016, 12, 31),
+                models.Sample.received_at > SAMPLES_FROM_DATE,
                 models.Sample.delivered_at != None,
             )
             .group_by(
@@ -85,7 +87,7 @@ class TrendsHandler:
             )
             .filter(
                 models.Customer.priority == 'diagnostic',
-                models.Sample.received_at > dt.datetime(2016, 12, 31)
+                models.Sample.received_at > SAMPLES_FROM_DATE
             )
             .group_by(
                 models.Application.category,
@@ -118,7 +120,7 @@ class TrendsHandler:
             )
             .filter(
                 models.Customer.priority == 'diagnostic',
-                models.Sample.received_at > dt.datetime(2016, 12, 31)
+                models.Sample.received_at > SAMPLES_FROM_DATE
             )
             .group_by(
                 models.Application.category,
@@ -151,7 +153,7 @@ class TrendsHandler:
             )
             .filter(
                 models.Customer.priority == 'diagnostic',
-                models.Sample.received_at > dt.datetime(2016, 12, 31),
+                models.Sample.received_at > SAMPLES_FROM_DATE,
                 models.Sample.delivered_at != None,
             )
             .group_by(
