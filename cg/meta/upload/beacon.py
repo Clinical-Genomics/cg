@@ -126,5 +126,5 @@ class UploadBeaconApi():
     def remove_vars(self):
         """Remove beacon for a sample or one or more affected samples from a family."""
 
-        LOG.info("I'm about to remove item: %s (%s)", item_id, item_type)
+        #LOG.info("I'm about to remove item: %s (%s)", item_id, item_type)
         return 2
