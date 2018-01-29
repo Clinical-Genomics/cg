@@ -135,7 +135,13 @@ class UploadBeaconApi():
                 # list affected samples
                 affected_samples = [link_obj.sample for link_obj in family_obj.links if
                                     link_obj.status == 'affected']
-                sample_ids = [sample_obj.internal_id for sample_obj in affected_samples]
+                sample_ids = [sample_obj.internal_id for sample_obj in affected_samples if sample_obj.beaconized_at]
+
+                print("sample ids:",sample_ids)
+
+                #check if any of the above samples is in beacon:
+
+
 
                 print(str(sample_ids))
 
