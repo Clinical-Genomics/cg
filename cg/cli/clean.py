@@ -21,9 +21,9 @@ def clean(context):
 
 @clean.command()
 @click.option('-fitem', '--family_item', type=click.Choice(['family','sample']), required=True, help='family/sample to remove from beacon')
-@click.argument('-id', '--identifier')
+@click.argument('id')
 @click.pass_context
-def beacon(context: click.Context, family_item: str, identifier: str):
+def beacon(context, family_item, id):
     """Remove beacon for a sample or one or more affected samples from a family."""
     LOG.info("Removing beacon vars for %s %s", family_item, identifier)
 
