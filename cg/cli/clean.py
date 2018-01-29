@@ -24,11 +24,11 @@ def clean(context):
 
 @clean.command()
 @click.option('-fitem', '--family_item', type=click.Choice(['family','sample']), required=True, help='family/sample to remove from beacon')
-@click.argument('id')
+@click.argument('item_id')
 @click.pass_context
-def beacon(context: click.Context, family_item, id):
+def beacon(context: click.Context, family_item, item_id):
     """Remove beacon for a sample or one or more affected samples from a family."""
-    LOG.info("Removing beacon vars for %s %s", family_item, id)
+    LOG.info("Removing beacon vars for %s %s", family_item, item_id)
     api = UploadBeaconApi(
         status=context.obj['status'],
         hk_api=context.obj['housekeeper_api'],
