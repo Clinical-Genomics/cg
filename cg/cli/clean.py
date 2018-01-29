@@ -34,10 +34,10 @@ def beacon(context: click.Context, family_item: str, identifier: str):
         beacon_api=beacon_app.BeaconApi(context.obj),
     )
 
-    #result = api.remove_vars(
-    #    item_type = family_item
-    #    item_id = identifier
-    #)
+    result = api.remove_vars(
+        item_type = family_item
+        item_id = identifier
+    )
 
 
 
