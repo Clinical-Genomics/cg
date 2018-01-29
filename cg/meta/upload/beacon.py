@@ -47,10 +47,6 @@ class UploadBeaconApi():
                                 link_obj.status == 'affected']
             sample_ids = [sample_obj.internal_id for sample_obj in affected_samples]
 
-            for sample_obj in affected_samples:
-                sample_obj.beaconized_at = ''
-                print("\n",str(sample_obj),"----->", sample_obj.beaconized_at)
-
             # Process only samples contained in VCF file:
             sample_ids = [ element for element in sample_ids if element in vcf_samples]
 
@@ -98,7 +94,7 @@ class UploadBeaconApi():
                 else:
                     LOG.info("Panel was set to 'None', so all variants are going to be uploaded.")
                     path_to_panel = None
-                    status_msg += path_to_panel
+                    status_msg += str(path_to_panel)
 
 
                 result = self.beacon.upload(
