@@ -21,9 +21,9 @@ def clean(context):
 
 @clean.command()
 @click.option('-fitem', '--family_item', type=click.Choice(['family','sample']), required=True, help='family/sample to remove from beacon')
-@click.argument('-id', '--identifier', help="id of sample or family")
+@click.argument('-id', '--identifier', help='id of sample or family')
 @click.pass_context
-def beacon(context, family_item, identifier):
+def beacon(context: click.Context, family_item: str, identifier: str):
     """Remove beacon for a sample or one or more affected samples from a family."""
     LOG.info("cleaning object: %s (%s)", identifier, family_item)
 
@@ -34,10 +34,10 @@ def beacon(context, family_item, identifier):
         beacon_api=beacon_app.BeaconApi(context.obj),
     )
 
-    #result = api.remove_vars(
-    #    item_type = family_item
-    #    item_id = identifier
-    #)
+    result = api.remove_vars(
+        item_type = family_item
+        item_id = identifier
+    )
 
 
 
