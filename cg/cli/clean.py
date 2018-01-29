@@ -33,10 +33,8 @@ def beacon(context: click.Context, family_item: str, identifier: str):
         scout_api=scoutapi.ScoutAPI(context.obj),
         beacon_api=beacon_app.BeaconApi(context.obj),
     )
-    result = api.remove_vars(
-        item_type = family_item
-        item_id = identifier
-    )
+    result = api.remove_vars()
+    print("result is:",result)
 
 @clean.command()
 @click.option('-d', '--dry', is_flag=True, help='print config to console')
