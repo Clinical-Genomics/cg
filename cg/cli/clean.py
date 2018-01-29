@@ -19,6 +19,7 @@ def clean(context):
     context.obj['db'] = Store(context.obj['database'])
     context.obj['tb'] = tb.TrailblazerAPI(context.obj)
     context.obj['status'] = Store(context.obj['database'])
+    context.obj['housekeeper_api'] = hk.HousekeeperAPI(context.obj)
 
 
 @clean.command()
