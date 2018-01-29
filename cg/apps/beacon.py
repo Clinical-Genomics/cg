@@ -27,5 +27,5 @@ class BeaconApi():
         upload_result = Utility.beacon_upload(self.connection, vcf_path, panel_path, dataset, outfile, customer, samples, quality, genome_reference)
         LOG.info("Upload complete!")
 
-    def remove_vars(self)
+    def remove_vars(self):
         return 1
