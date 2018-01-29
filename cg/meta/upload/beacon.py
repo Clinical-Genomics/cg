@@ -48,16 +48,15 @@ class UploadBeaconApi():
             sample_ids = [sample_obj.internal_id for sample_obj in affected_samples]
 
             # Process only samples contained in VCF file:
-            sample_ids = [ element for element in sample_ids if element in vcf_samples]
+            sample_ids = [element for element in sample_ids if element in vcf_samples]
+
+            for sample_obj in affected_samples:
+                sample_obj.beaconized_at = ''
+                print("\n",str(sample_obj),"----->", sample_obj.beaconized_at)
 
             if sample_ids:
                 status_msg = str(dt.datetime.now())
                 status_msg += "," + str(hk_vcf.full_path.strip())
-
-                if outfile == "":
-                    outfile_name = None
-                else:
-                    outfile_name = outfile
 
                 path_to_panel = ''
                 temp_panel = None
@@ -96,12 +95,11 @@ class UploadBeaconApi():
                     path_to_panel = None
                     status_msg += str(path_to_panel)
 
-
                 result = self.beacon.upload(
                     vcf_path = hk_vcf.full_path,
                     panel_path = path_to_panel,
                     dataset = dataset,
-                    outfile = outfile_name,
+                    outfile = outfile,
                     customer = customer,
                     samples = sample_ids,
                     quality = qual,
@@ -113,6 +111,7 @@ class UploadBeaconApi():
 
                 #mark samples as uploaded to beacon
                 for sample_obj in affected_samples:
+                    if sample_obj.internal_id in sample_ids:
                     sample_obj.beaconized_at = status_msg
                     print("\n",str(sample_obj),"----->", sample_obj.beaconized_at)
                 self.status.commit()
