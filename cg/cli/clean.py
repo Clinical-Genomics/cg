@@ -25,7 +25,7 @@ def clean(context):
 @click.pass_context
 def beacon(context: click.Context, family_item: str, identifier: str):
     """Remove beacon for a sample or one or more affected samples from a family."""
-    LOG.info("cleaning object: %s (%s)", identifier, family_item)
+    LOG.info("Removing beacon vars for %s %s", family_item, identifier)
 
     api = UploadBeaconApi(
         status=context.obj['status'],
@@ -33,20 +33,10 @@ def beacon(context: click.Context, family_item: str, identifier: str):
         scout_api=scoutapi.ScoutAPI(context.obj),
         beacon_api=beacon_app.BeaconApi(context.obj),
     )
-
     result = api.remove_vars(
         item_type = family_item
         item_id = identifier
     )
-
-
-
-
-
-
-
-
-
 
 @clean.command()
 @click.option('-d', '--dry', is_flag=True, help='print config to console')
