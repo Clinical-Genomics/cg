@@ -25,7 +25,7 @@ def clean(context):
 @click.pass_context
 def beacon(context, family_item, id):
     """Remove beacon for a sample or one or more affected samples from a family."""
-    LOG.info("Removing beacon vars for %s %s", family_item, identifier)
+    LOG.info("Removing beacon vars for %s %s", family_item, id)
 
     api = UploadBeaconApi(
         status=context.obj['status'],
