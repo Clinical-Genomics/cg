@@ -50,10 +50,6 @@ class UploadBeaconApi():
             # Process only samples contained in VCF file:
             sample_ids = [element for element in sample_ids if element in vcf_samples]
 
-            for sample_obj in affected_samples:
-                sample_obj.beaconized_at = ''
-                print("\n",str(sample_obj),"----->", sample_obj.beaconized_at)
-
             if sample_ids:
                 status_msg = str(dt.datetime.now())
                 status_msg += "," + str(hk_vcf.full_path.strip())
