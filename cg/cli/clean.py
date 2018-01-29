@@ -23,19 +23,22 @@ def clean(context):
 
 
 @clean.command()
-@click.option('-fitem', '--family_item', type=click.Choice(['family','sample']), required=True, help='family/sample to remove from beacon')
+@click.option('-type', '--item_type', type=click.Choice(['family','sample']), required=True, help='family/sample to remove from beacon')
 @click.argument('item_id',  type=click.STRING)
 @click.pass_context
-def beacon(context: click.Context, family_item, item_id):
+def beacon(context: click.Context, item_type, item_id):
     """Remove beacon for a sample or one or more affected samples from a family."""
-    LOG.info("Removing beacon vars for %s %s", family_item, item_id)
+    LOG.info("Removing beacon vars for %s %s", item_type, item_id)
     api = UploadBeaconApi(
         status=context.obj['status'],
         hk_api=context.obj['housekeeper_api'],
         scout_api=scoutapi.ScoutAPI(context.obj),
         beacon_api=beacon_app.BeaconApi(context.obj),
     )
-    result = api.remove_vars()
+    result = api.remove_vars(
+        item_type = item_type
+        item_id = item_id
+    )
     print("result is:",result)
 
 @clean.command()
