@@ -5,7 +5,7 @@ import ruamel.yaml
 import click
 from dateutil.parser import parse as parse_date
 
-from cg.apps import tb, hk
+from cg.apps import tb, hk, beacon as beacon_app
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -17,6 +17,34 @@ def clean(context):
     """Remove stuff."""
     context.obj['db'] = Store(context.obj['database'])
     context.obj['tb'] = tb.TrailblazerAPI(context.obj)
+
+
+@clean.command()
+@click.option('-fitem', '--family_item', type=click.Choice(['family','sample']), required=True, help='family/sample to remove from beacon')
+@click.argument('-id', '--identifier', type=click.File('r'))
+def beacon(context, family_item, identifier):
+    """Remove variants from a sample or one or more affected samples from a family."""
+    LOG.info("cleaning object:"+family_item)
+
+    api = UploadBeaconApi(
+        status=context.obj['status'],
+        hk_api=context.obj['housekeeper_api'],
+        scout_api=scoutapi.ScoutAPI(context.obj),
+        beacon_api=beacon_app.BeaconApi(context.obj),
+    )
+
+    result = api.remove_vars(
+        item_type = family_item
+        item_id = identifier
+    )
+
+
+
+
+
+
+
+
 
 
 @clean.command()

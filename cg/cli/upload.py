@@ -116,7 +116,8 @@ def scout(context, re_upload, print_console, family_id):
 @click.pass_context
 def beacon(context: click.Context, family_id: str, panel: str, outfile: str, customer: str, quality: int, genome_reference: str):
     """Upload variants for affected samples in a family to cgbeacon."""
-    outfile +=  dt.datetime.now().strftime("%Y-%m-%d_%H:%M:%S.pdf")
+    if outfile:
+        outfile +=  dt.datetime.now().strftime("%Y-%m-%d_%H:%M:%S.pdf")
     api = UploadBeaconApi(
         status=context.obj['status'],
         hk_api=context.obj['housekeeper_api'],

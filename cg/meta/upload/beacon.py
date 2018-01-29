@@ -52,7 +52,7 @@ class UploadBeaconApi():
 
             if sample_ids:
                 status_msg = str(dt.datetime.now())
-                status_msg += "," + str(hk_vcf.full_path.strip())
+                status_msg += "," + str(hk_vcf.full_path.strip()) + "," +qual
 
                 path_to_panel = ''
                 temp_panel = None
@@ -118,6 +118,13 @@ class UploadBeaconApi():
             else:
                 return None
 
-
         except Exception as e:
             LOG.critical("cg/meta/upload/beacon.py. The following error occurred:%s", e)
+
+
+
+    def remove_vars(self, item_type, item_id):
+        """Remove beacon for a sample or one or more affected samples from a family."""
+
+        LOG.info("I'm about to remove item: %s (%s)", item_id, item_type)
+        return "IM DELETING A CERTAIN NUMBER OF VARS!"
