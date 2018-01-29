@@ -105,9 +105,12 @@ class UploadBeaconApi():
                 if temp_panel:
                     temp_panel.close()
 
+                print(status.)
+
                 #mark samples as uploaded to beacon
                 for sample_obj in affected_samples:
                     if sample_obj.internal_id in sample_ids:
+
                         sample_obj.beaconized_at = status_msg
                         print("\n",str(sample_obj),"----->", sample_obj.beaconized_at)
                 self.status.commit()
