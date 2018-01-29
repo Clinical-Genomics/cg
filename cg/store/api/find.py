@@ -108,7 +108,7 @@ class FindHandler:
         return self.Analysis.query.filter_by(family=family, started_at=started_at).first()
 
     def flowcells(self, *, status: str=None, family: models.Family=None,
-                  query: str=None) -> Query:
+                  query: str=None) -> List[models.Flowcell]:
         """Fetch all flowcells."""
         records = self.Flowcell.query
         if family:
@@ -150,7 +150,7 @@ class FindHandler:
             .all()
         )
 
-    def pools(self, *, customer: models.Customer) -> Query:
+    def pools(self, *, customer: models.Customer):
         """Fetch all the pools."""
         records = self.Pool.query
         records = records.filter_by(customer=customer) if customer else records
@@ -159,7 +159,7 @@ class FindHandler:
     def pool(self, pool_id: int):
         """Fetch a pool."""
         return self.Pool.get(pool_id)
-    
+
     def deliveries(self) -> Query:
         """Fetch all deliveries."""
         query = self.Delivery.query
@@ -174,13 +174,6 @@ class FindHandler:
             else:
                 query = query.filter(models.Invoice.invoiced_at == None)
         return query
-
-    def new_invoice_id(self) -> Query:
-        """Fetch invoices."""
-        query = self.Invoice.query.all()
-        ids = [inv.id for inv in query]
-        new_id = max(ids)+1
-        return new_id
 
     def invoice(self, invoice_id: int) -> models.Invoice:
         """Fetch an invoice."""

@@ -12,7 +12,7 @@ class BeaconApi():
         Interface with Beacon importer (github.com/Clinical-Genomics/cgbeacon)
         Inserts variants from a VCF file inside a Beacon server.
     """
-
+    
     def __init__(self, config: dict):
         super(BeaconApi, self).__init__()
         self.connection = use_mysqlalchemy(config['cgbeacon']['database'])
