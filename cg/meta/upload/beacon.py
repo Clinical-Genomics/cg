@@ -3,6 +3,7 @@ import datetime as dt
 import time
 from tempfile import NamedTemporaryFile
 
+from cgbeacon.utils import vcfparser
 from cg.store import Store
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.scoutapi import ScoutAPI
@@ -29,6 +30,8 @@ class UploadBeaconApi():
             analysis_date = analysis_obj.started_at or analysis_obj.completed_at
             hk_version = self.housekeeper.version(family_id, analysis_date)
             hk_vcf = self.housekeeper.files(version=hk_version.id, tags=['vcf-snv-clinical']).first()
+
+
             if hk_vcf is None:
                 LOG.info("regular clinical VCF not found, trying old tag")
                 hk_vcf = self.housekeeper.files(version=hk_version.id, tags=['vcf-clinical-bin']).first()
@@ -39,10 +42,17 @@ class UploadBeaconApi():
             status_msg = str(dt.datetime.now())
             status_msg += "," + str(hk_vcf.path.strip())
 
+            #retrieve samples contained in VCF file:
+            vcf_samples = vcfparser.get_samples(hk_vcf.path.strip())
+
+            print ()"samples found in VCF file:",vcf_samples)
+
             # list affected samples
             affected_samples = [link_obj.sample for link_obj in family_obj.links if
                                 link_obj.status == 'affected']
             sample_ids = [sample_obj.internal_id for sample_obj in affected_samples]
+
+
 
             if outfile == "":
                 outfile_name = None
@@ -88,32 +98,34 @@ class UploadBeaconApi():
                 status_msg += path_to_panel
 
 
-            result = self.beacon.upload(
-                vcf_path = hk_vcf.full_path,
-                panel_path = path_to_panel,
-                dataset = dataset,
-                outfile = outfile_name,
-                customer = customer,
-                samples = sample_ids,
-                quality = qual,
-                genome_reference = reference,
-            )
+            #result = self.beacon.upload(
+            #    vcf_path = hk_vcf.full_path,
+            #    panel_path = path_to_panel,
+            #    dataset = dataset,
+            #    outfile = outfile_name,
+            #    customer = customer,
+            #    samples = sample_ids,
+            #    quality = qual,
+            #    genome_reference = reference,
+            #)
 
             if temp_panel:
                 temp_panel.close()
 
 
-            print('\n' * 50)
-            print(str(result))
+            #print('\n' * 50)
+            #print(str(result))
+            #print('\n' * 50)
 
             # mark samples as uploaded to beacon
-            for sample_obj in affected_samples:
-                sample_obj.beaconized_at = dt.datetime.now()
-                print("\n",str(sample_obj),"----->", sample_obj.beaconized_at)
-            self.status.commit()
-            print('\n' * 50)
+            #for sample_obj in affected_samples:
+            #    sample_obj.beaconized_at = dt.datetime.now()
+            #    print("\n",str(sample_obj),"----->", sample_obj.beaconized_at)
+            #self.status.commit()
 
-            return result
+
+            return None
+            #return result
 
 
         except Exception as e:
