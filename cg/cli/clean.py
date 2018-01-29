@@ -36,7 +36,7 @@ def beacon(context: click.Context, item_type, item_id):
         beacon_api=beacon_app.BeaconApi(context.obj),
     )
     result = api.remove_vars(
-        item_type = item_type
+        item_type = item_type,
         item_id = item_id
     )
     print("result is:",result)
