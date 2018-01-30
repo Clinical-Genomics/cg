@@ -141,7 +141,7 @@ class UploadBeaconApi():
                     # get the beacon upload info from the field "beaconized_at":
                     for sample in samples_to_remove:
                         beacon_info = sample.beaconized_at.split(',')
-                        print("sample:",sample_id,"\t--->",str(beacon_info))
+                        print("sample:",sample.internal_id,"\t--->",str(beacon_info))
 
                         # Chech that path to VCF file with vars that went into beacon exists and get samples contained in that VCF file:
                         vcf_samples = vcfparser.get_samples(beacon_info[1])
