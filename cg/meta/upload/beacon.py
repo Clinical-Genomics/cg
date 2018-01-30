@@ -1,7 +1,6 @@
 import logging
 import datetime as dt
 import os
-import sys
 import time
 from tempfile import NamedTemporaryFile
 
@@ -122,7 +121,6 @@ class UploadBeaconApi():
                 return None
 
         except Exception as e:
-            tb
             LOG.critical("cg/meta/upload/beacon.py. The following error occurred:%s", e)
 
 
