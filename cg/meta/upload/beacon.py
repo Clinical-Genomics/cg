@@ -1,8 +1,8 @@
+import ast
 import logging
 import datetime as dt
 import os
 import time
-from ast import literal_eval
 from tempfile import NamedTemporaryFile
 
 from cgbeacon.utils import vcfparser
