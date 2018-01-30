@@ -166,11 +166,10 @@ class UploadBeaconApi():
                             if not beacon_info[3] == 'None':
                                 #If gene panels were used, retrieve them into a bed file:
                                 panel_list = list(ast.literal_eval(beacon_info[3]))
-
-                                print("panel list:",panel_list)
+                                print("var_list_type:",type(panel_list))
 
                                 # Create bed file with chr. intervals from panels:
-                                temp_panel = self.create_bed_panels(panel_list)
+                                temp_panel = create_bed_panels(panel_list)
 
 
 
