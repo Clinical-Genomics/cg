@@ -124,7 +124,21 @@ class UploadBeaconApi():
         #except Exception as e:
         #    LOG.critical("cg/meta/upload/beacon.py. The following error occurred:%s", e)
 
+    def create_bed_panels( list_of_panels: list ):
+        """Creates a bed file with chr. coordinates from a list of tuples with gene panel info ('panel_id', 'version', date, 'Name')."""
 
+        panels = [i[0] for i in list_of_panels]
+        bed_lines = self.scout.export_panels(panels)
+        temp_panel = NamedTemporaryFile('w+t',suffix='beacon_panels.bed')
+        temp_panel.write('\n'.join(bed_lines))
+
+        with open(temp_panel.name, "r") as panel_lines:
+            for line in panel_lines:
+                if line.startswith("##gene_panel="):
+                    print("#########--->",line)
+
+        return temp_panel
+        
     def remove_vars(self, item_type, item_id):
         """Remove beacon for a sample or one or more affected samples from a family."""
 
@@ -178,18 +192,3 @@ class UploadBeaconApi():
 
         except Exception as e:
             LOG.critical("cg/meta/upload/beacon.py. The following error occurred:%s", e)
-
-    def create_bed_panels( list_of_panels: list ):
-        """Creates a bed file with chr. coordinates from a list of tuples with gene panel info ('panel_id', 'version', date, 'Name')."""
-
-        panels = [i[0] for i in list_of_panels]
-        bed_lines = self.scout.export_panels(panels)
-        temp_panel = NamedTemporaryFile('w+t',suffix='beacon_panels.bed')
-        temp_panel.write('\n'.join(bed_lines))
-
-        with open(temp_panel.name, "r") as panel_lines:
-            for line in panel_lines:
-                if line.startswith("##gene_panel="):
-                    print("#########--->",line)
-
-        return temp_panel
