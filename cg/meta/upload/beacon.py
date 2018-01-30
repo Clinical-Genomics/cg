@@ -191,7 +191,7 @@ class UploadBeaconApi():
                                 if temp_panel:
                                     LOG.info("passing ID, VCF file and gene panels file to beacon handler")
 
-                                    results = self.beacon.clean(sample.internal_id, beacon_info[1], temp_panel.name, int(beacon_info[2]))
+                                    results = self.beacon.remove_vars(sample.internal_id, beacon_info[1], temp_panel.name, int(beacon_info[2]))
 
                                     temp_panel.close()
                                     # Remove beacon info da status db!!!
@@ -229,7 +229,7 @@ class UploadBeaconApi():
                             if temp_panel:
 
                                 LOG.info("passing ID, VCF file and gene panels file to beacon handler")
-                                results = self.beacon.clean(sample_obj.internal_id, beacon_info[1], temp_panel.name, int(beacon_info[2]))
+                                results = self.beacon.remove_vars(sample_obj.internal_id, beacon_info[1], temp_panel.name, int(beacon_info[2]))
 
                                 print("Results so far: ", results)
                                 temp_panel.close()

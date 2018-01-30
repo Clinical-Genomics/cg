@@ -27,5 +27,9 @@ class BeaconApi():
         upload_result = Utility.beacon_upload(self.connection, vcf_path, panel_path, dataset, outfile, customer, samples, quality, genome_reference)
         LOG.info("Upload complete!")
 
-    def remove_vars(self):
-        return 1
+    def remove_vars(self, sample, vcf_path, panel_path=None, qual=20):
+        """ Calls Utility app in beacon package to remove vars from beacon
+            Returns: number of new variants removed from the beacon
+        """
+        removed = Utility.beacon_clean(self.connection, sample, vcf_path, panel_path, qual)
+        return removed
