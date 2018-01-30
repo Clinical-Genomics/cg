@@ -1,6 +1,7 @@
 import logging
 import datetime as dt
 import os
+import sys
 import time
 from tempfile import NamedTemporaryFile
 
@@ -77,7 +78,7 @@ class UploadBeaconApi():
                                     temp_panel_tuple = []
                                     for tuple_n in templine:
 
-                                        print("tuplen",str(tuple_n))
+                                        #print("tuplen",str(tuple_n))
                                         #create a tuple with these fields from the panel: name, version, date:
                                         temp_panel_tuple.append(tuple_n.split('=')[1])
 
@@ -121,6 +122,7 @@ class UploadBeaconApi():
                 return None
 
         except Exception as e:
+            tb
             LOG.critical("cg/meta/upload/beacon.py. The following error occurred:%s", e)
 
 
