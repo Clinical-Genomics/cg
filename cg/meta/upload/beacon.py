@@ -182,7 +182,7 @@ class UploadBeaconApi():
     def create_bed_panels( list_of_panels: list ):
         """Creates a bed file with chr. coordinates from a list of tuples with gene panel info ('panel_id', 'version', date, 'Name')."""
 
-        panels = [i[0] for i in list_of_panels
+        panels = [i[0] for i in list_of_panels]
         bed_lines = self.scout.export_panels(panels)
         temp_panel = NamedTemporaryFile('w+t',suffix='beacon_panels.bed')
         temp_panel.write('\n'.join(bed_lines))
