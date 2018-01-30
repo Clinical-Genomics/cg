@@ -125,33 +125,43 @@ class UploadBeaconApi():
     def remove_vars(self, item_type, item_id):
         """Remove beacon for a sample or one or more affected samples from a family."""
 
-        LOG.info("I'm about to remove item: %s (%s)", item_id, item_type)
+        LOG.info("I'm about to beacon variants for item: %s (%s)", item_id, item_type)
 
         try:
             # remove vars for all affected samples in a family:
             if item_type == 'family':
                 family_obj = self.status.family(item_id)
 
+                print("here")
+
                 # list affected samples
-                affected_samples = [link_obj.sample for link_obj in family_obj.links if
-                                    link_obj.status == 'affected']
+                samples_to_remove = [link_obj.sample for link_obj in family_obj.links if
+                                    link_obj.status == 'affected' if link_obj.sample.beaconized_at ]
+
+                #beacon_sample = [sample_obj.internal_id for sample_obj in affected_samples if ]
+                #beacon_info = [sample_obj.internal_id for sample_obj in affected_samples]
+
+                # list affected samples
+                #affected_beacon_samples = [link_obj for link_obj in family_obj.links if
+                #                    link_obj.status == 'affected' and link_obj.beaconized_at]
 
                 # check if any of the above samples is in beacon:
-                beacon_samples = [sample_obj.sample for sample_obj in affected_samples if sample_obj.beaconized_at]
+                #beacon_samples = [sample_obj for sample_obj in affected_samples if sample_obj.beaconized_at]
 
-                if sample_ids:
+
+                if samples_to_remove:
+                    print("here2")
                     # get the beacon upload info from the field "beaconized_at":
-                    for sample in beacon_samples:
-                        beacon_info = sample.beaconized_at
+                    for sample in samples_to_remove:
+                        print("here3")
+                        beacon_info = sample.split(',')
                         sample_id = sample.internal_id
+                        print("here3")
 
-                        print("sample:",sample_id,"\t--->",beacon_info)
-
-
-
+                        print("sample:",sample_id,"\t--->",str(beacon_info))
 
                 else:
-                    LOG.warn("Could't find any sample im beacon for family %s!",item_id)
+                    LOG.warn("Could")
 
 
 
