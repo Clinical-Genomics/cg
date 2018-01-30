@@ -154,7 +154,7 @@ class UploadBeaconApi():
                                 panel_list = list(ast.literal_eval(beacon_info[3]))
 
                                 # Create bed file with chr. intervals from panels:
-                                temp_panel = collect_beaconized_panels(panel_list)
+                                temp_panel = create_bed_panels(panel_list)
 
 
 
