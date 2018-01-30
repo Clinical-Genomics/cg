@@ -192,7 +192,7 @@ class UploadBeaconApi():
                                     print("passing ID, VCF file and gene panel bed file to beacon handler")
 
 
-
+                                    # Remove beacon info da status db!!!
                                     temp_panel.close()
                                 else:
                                     LOG.critical("Current scout panels don't match with those used for the variant upload! Authomatic variant removal is impossible.")
@@ -204,6 +204,10 @@ class UploadBeaconApi():
             else: # remove vars for a single sample:
                 LOG.info("I'm about to beacon variants for sample: %s", item_id)
                 sample_obj = self.status.sample(item_id)
+
+                beacon_info = sample_obj.beaconized_at
+                print("info:", beacon_info)
+                # Remove beacon info da status db!!!
 
             return 2
 
