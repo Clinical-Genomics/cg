@@ -148,25 +148,21 @@ class UploadBeaconApi():
                         scout_panels.append(tuple(temp_panel_tuple))
                         print("---->",tuple(temp_panel_tuple), sep="")
 
+        # Do check that the panels in scout are still the same as when the variants were uploaded in beacon:
         if scout_panels.sort() == list_of_panels.sort():
-            print(str(scout_panels), "====", str(list_of_panels))
+            LOG.info("Panels retrieved in scout corespond to those used for beacon upload.")
             return temp_panel
         else:
-            print(str(scout_panels), "!!==", str(list_of_panels))
-            return "MEH with the panels"
-
-
-
-
+            return None
 
     def remove_vars(self, item_type, item_id):
         """Remove beacon for a sample or one or more affected samples from a family."""
 
-        LOG.info("I'm about to beacon variants for item: %s (%s)", item_id, item_type)
         temp_panel = None
         try:
             # remove vars for all affected samples in a family:
             if item_type == 'family':
+                LOG.info("I'm about to beacon variants for family: %s", item_id)
                 family_obj = self.status.family(item_id)
 
                 # list affected samples
@@ -191,23 +187,23 @@ class UploadBeaconApi():
                                 # Create bed file with chr. intervals from panels:
                                 temp_panel = self.create_bed_panels(panel_list)
 
+                                if temp_panel:
+                                    # Pass VCF file and gene panel to beacon handler:
+                                    print("passing ID, VCF file and gene panel bed file to beacon handler")
 
 
 
-
-
+                                    temp_panel.close()
+                                else:
+                                    LOG.critical("Current scout panels don't match with those used for the variant upload! Authomatic variant removal is impossible.")
                         else:
                             LOG.warn("sample %s is not contained in the vcf file, skipping it!",sample.internal_id)
-
-
-
-
-
                 else:
                     LOG.warn("Could't find any affected sample in beacon for family %s!",item_id)
 
             else: # remove vars for a single sample:
-                print("remove vars for a single sample:",item_id)
+                LOG.info("I'm about to beacon variants for sample: %s", item_id)
+                sample_obj = self.status.sample(item_id)
 
             return 2
 
