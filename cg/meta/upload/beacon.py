@@ -147,6 +147,7 @@ class UploadBeaconApi():
 
                         # Chech that path to VCF file with vars that went into beacon exists:
                         if os.path.exists(beacon_info[1]):
+                            print("exists")
 
 
                 else:
