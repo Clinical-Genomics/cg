@@ -191,7 +191,7 @@ class UploadBeaconApi():
                                 if temp_panel:
                                     LOG.info("passing ID, VCF file and gene panels file to beacon handler")
 
-
+                                    results = self.beacon.clean(sample.internal_id, beacon_info[1], temp_panel.name, int(beacon_info[2]))
 
                                     temp_panel.close()
                                     # Remove beacon info da status db!!!
@@ -199,6 +199,8 @@ class UploadBeaconApi():
                                     LOG.critical("Current scout panels don't match with those used for the variant upload! Automatic variant removal is not possible.")
                             else:
                                 LOG.warn("No panel was associated to this beacon upload. Removing all variants for this sample.")
+
+
 
                         else:
                             LOG.warn("sample %s is not contained in the annotated vcf file, skipping it!",sample.internal_id)
@@ -227,7 +229,9 @@ class UploadBeaconApi():
                             if temp_panel:
 
                                 LOG.info("passing ID, VCF file and gene panels file to beacon handler")
+                                results = self.beacon.clean(sample_obj.internal_id, beacon_info[1], temp_panel.name, int(beacon_info[2]))
 
+                                print("Results so far: ", results)
                                 temp_panel.close()
                                 # Remove beacon info da status db!!!
 
