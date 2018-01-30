@@ -2,6 +2,7 @@ import ast
 import logging
 import datetime as dt
 import os
+import scout
 import time
 from tempfile import NamedTemporaryFile
 
@@ -91,7 +92,7 @@ class UploadBeaconApi():
             else:
                 LOG.info("Panel was set to 'None', so all variants are going to be uploaded.")
                 path_to_panel = None
-                status_msg += str(path_to_panel)
+                status_msg += "|" + str(path_to_panel)
 
             result = self.beacon.upload(
                 vcf_path = hk_vcf.full_path,
@@ -128,7 +129,7 @@ class UploadBeaconApi():
         """Remove beacon for a sample or one or more affected samples from a family."""
 
         LOG.info("I'm about to beacon variants for item: %s (%s)", item_id, item_type)
-
+        temp_panel = None
         try:
             # remove vars for all affected samples in a family:
             if item_type == 'family':
@@ -147,14 +148,15 @@ class UploadBeaconApi():
                         # Chech that path to VCF file with vars that went into beacon exists and get samples contained in that VCF file:
                         vcf_samples = vcfparser.get_samples(beacon_info[1])
                         if sample.internal_id in vcf_samples:
-                            print("here:#",beacon_info[3][1:-1],"#", sep="")
 
-                            panel_list = list(ast.literal_eval(beacon_info[3]))
-                            print("here2")
+                            if not beacon_info[3] == 'None':
+                                #If gene panels were used, retrieve them into a bed file:
+                                panel_list = list(ast.literal_eval(beacon_info[3]))
 
-                            for panel in panel_list:
-                                print("here3")
-                                print("panel:",str(panel))
+                                # Create bed file with chr. intervals from panels:
+                                temp_panel = collect_beaconized_panels(panel_list)
+
+
 
 
 
@@ -177,6 +179,17 @@ class UploadBeaconApi():
         except Exception as e:
             LOG.critical("cg/meta/upload/beacon.py. The following error occurred:%s", e)
 
-    def collect_beaconized_panels( list_of_panels: list ):
+    def create_bed_panels( list_of_panels: list ):
         """Creates a bed file with chr. coordinates from a list of tuples with gene panel info ('panel_id', 'version', date, 'Name')."""
-        print("doing nothing for now")
+
+        panels = [i[0] for i in list_of_panels
+        bed_lines = self.scout.export_panels(panels)
+        temp_panel = NamedTemporaryFile('w+t',suffix='beacon_panels.bed')
+        temp_panel.write('\n'.join(bed_lines))
+
+        with open(temp_panel.name, "r") as panel_lines:
+            for line in panel_lines:
+                if line.startswith("##gene_panel="):
+                    print("#########--->",line)
+
+        return temp_panel
