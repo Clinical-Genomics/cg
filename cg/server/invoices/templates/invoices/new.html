@@ -1,0 +1,131 @@
+{% extends 'invoices/layout.html' %}
+
+{% block body %}
+<div class="container mt-5 mb-5">
+  <h1>Make new invoice ({{record_type}})</h1>
+  <br>
+  <form action="{{ url_for('invoices.new', record_type=record_type) }}">
+    <input type="hidden" name="record_type" value="{{ record_type }}">
+    <div class="row">
+      <div class="col">
+        <select name="customer" class="form-control" required>
+          <option>Select customer...</option>
+          {% for customer in customers %}
+          <option value="{{ customer.internal_id }}" {{ 'selected' if args.customer == customer.internal_id }}>
+            {{ customer.internal_id}} - {{customer.name }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col">
+        <button class="btn btn-primary">Load {{record_type}}s</button>
+      </div>
+    </div>
+  </form>
+  <form name="listForm" action="{{ url_for('invoices.index')}}" method="POST" class="mt-3">
+    <input type="hidden" name="customer" value="{{ args.customer }}">
+    <input type="hidden" name="record_type" value="{{record_type}}">
+    <label>Discount (%)</label>
+    <input type="number" class="form-control" name="discount" value="0">
+    <div class="form-group">
+      <label>Comment</label>
+      <textarea class="form-control" name="comment" rows="3"></textarea>
+    </div>
+
+    Total Price Standard: <input type="text" size="7" name="total" value="0"/>
+    <button class="btn btn-primary float-right" type="submit">Generate invoice</button>    
+    <tr><input type="checkbox" onClick="toggle()" /> Select All</tr>
+    <tr><input type="checkbox" onClick="check_subset()" /> Select Subset</tr>
+    <br><br><br>
+    <table class="table">
+      <tr>
+        <th>{{record_type}}</th>
+        <th>Customer</th>
+        <th>Order</th>
+        <th>Ticket</th>
+        <th>Application</th>
+        <th>Created at</th>
+        <th>Delivered at</th>
+        <th>Received at</th>
+      </tr>
+      {% for record in records %}
+      <tr>
+        <td>
+          <label class="form-check-label">
+            {%if record_type=='Pool'%}
+            <input class="form-check-input" onchange="checkTotal()" type="checkbox" name="records" id="{{ record.application_version.price_standard }}"  value="{{ record.id }}"> {{ record.id }}
+            {% else %}
+            <input class="form-check-input" onchange="checkTotal()" type="checkbox" name="records" id="{{ record.application_version.price_standard }}" value="{{ record.internal_id }}"> {{ record.internal_id }}            
+            {%endif%}            
+          </label>
+        </td>
+        <td>{{ record.customer.name }}</td>
+        <td>{{ record.order}}</td>
+        <td>{{ record.ticket_number}}</td>
+        <td>{{ record.application_version.application.tag }}</td> 
+        <td>{{record.created_at.date()}}</td>
+        <td>{{record.delivered_at.date()}}</td>
+        <td>{{record.received_at.date()}}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </form>
+</div>
+{% endblock %}
+
+
+{% block scripts %}
+<script language="JavaScript">
+  function toggle() {
+    checkboxes = document.getElementsByName('records');
+    for(var checkbox in checkboxes) {
+      checkboxes[checkbox].checked = !checkboxes[checkbox].checked;
+    }
+  checkTotal()
+  }
+</script>
+
+<script language="JavaScript">
+  function check_subset() {
+    checkboxes = document.getElementsByName('records');
+    total_price = 0;
+   
+    for(var checkbox in checkboxes) {
+      total_price += parseInt(checkboxes[checkbox].id)
+      if (total_price <= 500000) {
+      checkboxes[checkbox].checked = !checkboxes[checkbox].checked;
+    }
+    }
+    checkTotal()
+  }
+</script>
+
+<script language="JavaScript">
+  function checkTotal() {
+    checkboxes = document.getElementsByName('records');
+    total_price = 0;
+   
+    for(var checkbox in checkboxes) {
+      if (checkboxes[checkbox].checked){
+        total_price += parseInt(checkboxes[checkbox].id);
+    }
+    }
+    document.listForm.total.value = total_price;
+  }
+
+</script>
+
+<script type="text/javascript">
+  function checkTotallll() {
+    document.listForm.total.value = '';
+    var sum = 0;
+    for (i=0;i<document.listForm.records.length;i++) {
+      if (document.listForm.records[i].checked) {
+        sum = sum + parseInt(document.listForm.records[i].id);
+      }
+    }
+    document.listForm.total.value = sum;
+  }
+</script>
+{% endblock %}
+

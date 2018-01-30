@@ -90,7 +90,7 @@ class SampleView(BaseView):
     column_exclude_list = ['is_external']
     column_searchable_list = ['internal_id', 'name', 'ticket_number', 'customer.internal_id']
     column_filters = ['customer.internal_id', 'sex', 'application_version.application']
-    column_editable_list = ['sex', 'downsampled_to', 'sequenced_at']
+    column_editable_list = ['sex', 'downsampled_to', 'sequenced_at', 'ticket_number']
     form_excluded_columns = ['is_external']
 
 
@@ -112,3 +112,7 @@ class AnalysisView(BaseView):
     column_searchable_list = ['family.internal_id', 'family.name']
     column_filters = ['pipeline', 'pipeline_version', 'is_primary']
     column_editable_list = ['is_primary']
+
+class InvoiceView(BaseView):
+    column_searchable_list = ['customer_id', 'id']
+    column_list = ('id', 'customer_id', 'created_at', 'updated_at','invoiced_at','comment','discount','price')

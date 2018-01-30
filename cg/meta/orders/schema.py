@@ -71,15 +71,14 @@ PREP_MIXIN = {
     'source': validators.Optional(TypeValidator(str, allow_none=True), None),
     'priority': validators.Optional(validators.Any(PRIORITY_OPTIONS), 'standard'),
     'require_qcok': validators.Optional(bool, False),
-    'sex': validators.Any(SEX_OPTIONS),
 }
 
 LAB_MIXIN = {
     'container': validators.Optional(str, 'Tube'),
     'container_name':  validators.Optional(str, None),
     'quantity': validators.Optional(str, None),
-    'volume': validators.Optional(str, None),
-    'concentration': validators.Optional(str, None),
+    'volume': validators.Optional(TypeValidator(str, allow_none=True), None),
+    'concentration': validators.Optional(TypeValidator(str, allow_none=True), None),
 }
 
 ANALYSIS_MIXIN = {
@@ -99,7 +98,12 @@ EXTERNAL_SAMPLE = {
     'capture_kit': validators.Optional(validators.Any(CAPTUREKIT_OPTIONS), None),
 }
 
-FASTQ_SAMPLE = {**BASE_SAMPLE, **LAB_MIXIN, **PREP_MIXIN}
+FASTQ_SAMPLE = {
+    **BASE_SAMPLE,
+    **LAB_MIXIN,
+    **PREP_MIXIN,
+    'sex': validators.Any(SEX_OPTIONS),
+}
 
 RML_SAMPLE = {
     **BASE_SAMPLE,

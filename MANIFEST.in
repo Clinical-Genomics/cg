@@ -2,6 +2,7 @@ include README.md
 include requirements.txt
 
 recursive-include cg/server/templates *
+recursive-include cg/server/invoices/templates/invoices *
 
 recursive-include tests *
 recursive-exclude * __pycache__
