@@ -53,7 +53,7 @@ class UploadBeaconApi():
 
         if sample_ids:
             status_msg = str(dt.datetime.now())
-            status_msg += "," + str(hk_vcf.full_path.strip()) + "," +qual
+            status_msg += "," + str(hk_vcf.full_path.strip()) + "," + str(qual)
 
             path_to_panel = ''
             temp_panel = None
@@ -77,7 +77,7 @@ class UploadBeaconApi():
                                 temp_panel_tuple = []
                                 for tuple_n in templine:
 
-                                    #print("tuplen",str(tuple_n))
+                                    print("tuplen",str(tuple_n))
                                     #create a tuple with these fields from the panel: name, version, date:
                                     temp_panel_tuple.append(tuple_n.split('=')[1])
 
