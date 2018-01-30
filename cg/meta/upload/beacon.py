@@ -146,12 +146,10 @@ class UploadBeaconApi():
                         # Chech that path to VCF file with vars that went into beacon exists and get samples contained in that VCF file:
                         vcf_samples = vcfparser.get_samples(beacon_info[1])
                         if sample.internal_id in vcf_samples:
+                            panel_list = eval(beacon_info[1])
 
-                            #temp_panel = collect_beaconized_panels(beacon_info[2].split())
-                            tuplez = beacon_info[2].split('", "')
-
-                            for panel in tuplez:
-                                print(panel)
+                            for panel in panel_list:
+                                print("panel:",panel)
 
 
 
