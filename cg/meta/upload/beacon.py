@@ -148,7 +148,7 @@ class UploadBeaconApi():
                         if sample.internal_id in vcf_samples:
 
                             #temp_panel = collect_beaconized_panels(beacon_info[2].split())
-                            tuplez = beacon_info[2].split(',')
+                            tuplez = beacon_info[2].split('", "')
 
                             for panel in tuplez:
                                 print(panel)
