@@ -141,15 +141,25 @@ class UploadBeaconApi():
                     # get the beacon upload info from the field "beaconized_at":
                     for sample in samples_to_remove:
                         beacon_info = sample.beaconized_at.split(',')
-                        sample_id = sample.internal_id
-
                         print("sample:",sample_id,"\t--->",str(beacon_info))
 
-                        # Chech that path to VCF file with vars that went into beacon exists:
-                        if os.path.exists(beacon_info[1]):
-                            print("exists")
+                        # Chech that path to VCF file with vars that went into beacon exists and get samples contained in that VCF file:
+                        vcf_samples = vcfparser.get_samples(beacon_info[1])
+                        if sample.internal_id in vcf_samples:
+
+                            #temp_panel = collect_beaconized_panels(beacon_info[2].split())
+                            tuplez = beacon_info[2].split(',')
+
+                            for panel in tuplez:
+                                print(panel)
+
+
+
                         else:
-                            print("NOE!")
+                            LOG.warn("sample %s is not contained in the vcf file, skipping it!",sample.internal_id)
+
+
+
 
 
                 else:
@@ -162,3 +172,7 @@ class UploadBeaconApi():
 
         except Exception as e:
             LOG.critical("cg/meta/upload/beacon.py. The following error occurred:%s", e)
+
+    def collect_beaconized_panels( list_of_panels: list ):
+    """Creates a bed file with chr. coordinates from a list of tuples with gene panel info ('panel_id', 'version', date, 'Name')."""
+    print("doing nothing for now")
