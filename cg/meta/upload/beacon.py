@@ -79,6 +79,7 @@ class UploadBeaconApi():
 
                                         #create a tuple with these fields from the panel: name, version, date:
                                         temp_panel_tuple.append(tuple_n.split('=')[1])
+                                        print("Im appending:#",tuple_n.split('=')[1],"#")
 
                                     #print(tuple(temp_panel_tuple))
                                     if not tuple(temp_panel_tuple) in used_panels:
