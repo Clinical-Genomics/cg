@@ -132,46 +132,24 @@ class UploadBeaconApi():
             if item_type == 'family':
                 family_obj = self.status.family(item_id)
 
-                print("here")
-
                 # list affected samples
                 samples_to_remove = [link_obj.sample for link_obj in family_obj.links if
                                     link_obj.status == 'affected' if link_obj.sample.beaconized_at ]
 
-                #beacon_sample = [sample_obj.internal_id for sample_obj in affected_samples if ]
-                #beacon_info = [sample_obj.internal_id for sample_obj in affected_samples]
-
-                # list affected samples
-                #affected_beacon_samples = [link_obj for link_obj in family_obj.links if
-                #                    link_obj.status == 'affected' and link_obj.beaconized_at]
-
-                # check if any of the above samples is in beacon:
-                #beacon_samples = [sample_obj for sample_obj in affected_samples if sample_obj.beaconized_at]
-
-
                 if samples_to_remove:
-                    print("here2")
                     # get the beacon upload info from the field "beaconized_at":
                     for sample in samples_to_remove:
-                        print("here3")
-                        beacon_info = sample.beaconized_at.split(',')
+                        beacon_info = sample.beaconized_atsplit(',')
                         sample_id = sample.internal_id
-                        print("here3")
 
                         print("sample:",sample_id,"\t--->",str(beacon_info))
 
+                        # Chech that path to VCF file with vars that went into beacon exists:
+                        vcf_file_path = beacon_info[1].resolve()
+
+
                 else:
-                    LOG.warn("Could")
-
-
-
-
-
-                print(str(sample_ids))
-
-
-
-
+                    LOG.warn("Could't find any affected sample in beacon for family %s!",item_id)
 
             else: # remove vars for a single sample:
                 print("remove vars for a single sample:",item_id)
