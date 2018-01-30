@@ -174,5 +174,5 @@ class UploadBeaconApi():
             LOG.critical("cg/meta/upload/beacon.py. The following error occurred:%s", e)
 
     def collect_beaconized_panels( list_of_panels: list ):
-    """Creates a bed file with chr. coordinates from a list of tuples with gene panel info ('panel_id', 'version', date, 'Name')."""
+        """Creates a bed file with chr. coordinates from a list of tuples with gene panel info ('panel_id', 'version', date, 'Name')."""
         print("doing nothing for now")
