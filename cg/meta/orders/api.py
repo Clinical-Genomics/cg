@@ -43,6 +43,9 @@ class OrdersAPI(LimsHandler, StatusHandler):
                 if self.osticket:
                     message = f"New incoming samples, {ticket['name']}. {data['comment']}"
 
+                    for sample in data['samples']:
+                        message += '<br />' + sample.get('name')
+
                     data['ticket'] = self.osticket.open_ticket(
                         name=ticket['name'],
                         email=ticket['email'],
