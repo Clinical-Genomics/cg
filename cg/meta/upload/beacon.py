@@ -152,9 +152,9 @@ class UploadBeaconApi():
                             #panel_list = list(ast.literal_eval(beacon_info[1][1:-1]))
                             print("here2")
 
-                            for panel in panel_list:
-                                print("here3")
-                                print("panel:",str(panel))
+                            #for panel in panel_list:
+                            #    print("here3")
+                            #    print("panel:",str(panel))
 
 
 
