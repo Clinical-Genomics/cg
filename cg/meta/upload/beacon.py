@@ -149,9 +149,10 @@ class UploadBeaconApi():
                         print("---->",tuple(temp_panel_tuple), sep="")
 
         if scout_panels.sort == list_of_panels.sort():
+            print(str(scout_panels.sort), "====", list_of_panels)
             return temp_panel
         else:
-            return "MEH with the panels!"
+            return "MEH with the panels"
 
 
 
