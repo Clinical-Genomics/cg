@@ -147,7 +147,7 @@ class UploadBeaconApi():
                         vcf_samples = vcfparser.get_samples(beacon_info[1])
                         if sample.internal_id in vcf_samples:
                             print("here")
-                            panel_list = eval(beacon_info[1])
+                            panel_list = eval(str(beacon_info[1]))
                             print("here2")
 
                             for panel in panel_list:
