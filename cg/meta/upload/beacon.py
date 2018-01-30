@@ -135,11 +135,25 @@ class UploadBeaconApi():
                 # list affected samples
                 affected_samples = [link_obj.sample for link_obj in family_obj.links if
                                     link_obj.status == 'affected']
-                sample_ids = [sample_obj.internal_id for sample_obj in affected_samples if sample_obj.beaconized_at]
 
-                print("sample ids:",sample_ids)
+                # check if any of the above samples is in beacon:
+                beacon_samples = [sample_obj.sample for sample_obj in affected_samples if sample_obj.beaconized_at]
 
-                #check if any of the above samples is in beacon:
+                if sample_ids:
+                    # get the beacon upload info from the field "beaconized_at":
+                    for sample in beacon_samples:
+                        beacon_info = sample.beaconized_at
+                        sample_id = sample.internal_id
+
+                        print("sample:",sample_id,"\t--->",beacon_info)
+
+
+
+
+                else:
+                    LOG.warn("Could't find any sample im beacon for family %s!",item_id)
+
+
 
 
 
