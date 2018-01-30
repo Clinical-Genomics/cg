@@ -124,7 +124,7 @@ class UploadBeaconApi():
         #except Exception as e:
         #    LOG.critical("cg/meta/upload/beacon.py. The following error occurred:%s", e)
 
-    def create_bed_panels( list_of_panels):
+    def create_bed_panels( list_of_panels: list ):
         """Creates a bed file with chr. coordinates from a list of tuples with gene panel info ('panel_id', 'version', date, 'Name')."""
 
         panels = [i[0] for i in list_of_panels]
@@ -166,6 +166,8 @@ class UploadBeaconApi():
                             if not beacon_info[3] == 'None':
                                 #If gene panels were used, retrieve them into a bed file:
                                 panel_list = list(ast.literal_eval(beacon_info[3]))
+
+                                print("panel list:",panel_list)
 
                                 # Create bed file with chr. intervals from panels:
                                 temp_panel = self.create_bed_panels(panel_list)
