@@ -53,7 +53,7 @@ class UploadBeaconApi():
 
         if sample_ids:
             status_msg = str(dt.datetime.now())
-            status_msg += "," + str(hk_vcf.full_path.strip()) + "," + str(qual)
+            status_msg += "|" + str(hk_vcf.full_path.strip()) + "|" + str(qual)
 
             path_to_panel = ''
             temp_panel = None
@@ -85,7 +85,7 @@ class UploadBeaconApi():
                                     print("---->",tuple(temp_panel_tuple), sep="")
                                 n_panels -= 1
 
-                status_msg += "," + str(used_panels)
+                status_msg += "|" + str(used_panels)
 
             else:
                 LOG.info("Panel was set to 'None', so all variants are going to be uploaded.")
@@ -140,7 +140,7 @@ class UploadBeaconApi():
                 if samples_to_remove:
                     # get the beacon upload info from the field "beaconized_at":
                     for sample in samples_to_remove:
-                        beacon_info = sample.beaconized_at.split(',')
+                        beacon_info = sample.beaconized_at.split('|')
                         print("sample:",sample.internal_id,"\t--->",str(beacon_info))
 
                         # Chech that path to VCF file with vars that went into beacon exists and get samples contained in that VCF file:
