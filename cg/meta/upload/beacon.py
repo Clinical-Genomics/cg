@@ -175,4 +175,4 @@ class UploadBeaconApi():
 
     def collect_beaconized_panels( list_of_panels: list ):
     """Creates a bed file with chr. coordinates from a list of tuples with gene panel info ('panel_id', 'version', date, 'Name')."""
-    print("doing nothing for now")
+        print("doing nothing for now")
