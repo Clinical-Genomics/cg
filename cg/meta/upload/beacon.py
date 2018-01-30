@@ -138,7 +138,7 @@ class UploadBeaconApi():
                     print("#########--->",line)
 
         return temp_panel
-        
+
     def remove_vars(self, item_type, item_id):
         """Remove beacon for a sample or one or more affected samples from a family."""
 
@@ -168,7 +168,7 @@ class UploadBeaconApi():
                                 panel_list = list(ast.literal_eval(beacon_info[3]))
 
                                 # Create bed file with chr. intervals from panels:
-                                temp_panel = create_bed_panels(panel_list)
+                                temp_panel = self.create_bed_panels(panel_list)
 
 
 
