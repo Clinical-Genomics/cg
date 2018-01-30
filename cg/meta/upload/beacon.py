@@ -1,5 +1,6 @@
 import logging
 import datetime as dt
+import os
 import time
 from tempfile import NamedTemporaryFile
 
@@ -145,7 +146,7 @@ class UploadBeaconApi():
                         print("sample:",sample_id,"\t--->",str(beacon_info))
 
                         # Chech that path to VCF file with vars that went into beacon exists:
-                        vcf_file_path = beacon_info[1].resolve()
+                        if os.path.exists(beacon_info[1]):
 
 
                 else:
