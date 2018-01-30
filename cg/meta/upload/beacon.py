@@ -182,7 +182,6 @@ class UploadBeaconApi():
                             if not beacon_info[3] == 'None':
                                 #If gene panels were used, retrieve them into a bed file:
                                 panel_list = list(ast.literal_eval(beacon_info[3]))
-                                print("var_list_type:",type(panel_list))
 
                                 # Create bed file with chr. intervals from panels:
                                 temp_panel = self.create_bed_panels(panel_list)
@@ -197,7 +196,10 @@ class UploadBeaconApi():
                                 else:
                                     LOG.critical("Current scout panels don't match with those used for the variant upload! Authomatic variant removal is impossible.")
                         else:
-                            LOG.warn("sample %s is not contained in the vcf file, skipping it!",sample.internal_id)
+                            LOG.warn("No panel was associated to this beacon upload. Removing all variants for this sample.")
+
+                        else:
+                            LOG.warn("sample %s is not contained in the annotated vcf file, skipping it!",sample.internal_id)
                 else:
                     LOG.warn("Could't find any affected sample in beacon for family %s!",item_id)
 
@@ -205,9 +207,27 @@ class UploadBeaconApi():
                 LOG.info("I'm about to beacon variants for sample: %s", item_id)
                 sample_obj = self.status.sample(item_id)
 
-                beacon_info = sample_obj.beaconized_at
-                print("info:", beacon_info)
-                # Remove beacon info da status db!!!
+                if sample_obj:
+                    beacon_info = sample.beaconized_at.split('|')
+                    print("info:", beacon_info)
+
+                    # Chech that path to VCF file with vars that went into beacon exists and get samples contained in that VCF file:
+                    vcf_samples = vcfparser.get_samples(beacon_info[1])
+                    if sample_obj.internal_id in vcf_samples:
+
+                        if not beacon_info[3] == 'None':
+                            panel_list = list(ast.literal_eval(beacon_info[3]))
+                            print("plist:",panel_list)
+
+
+                            # Remove beacon info da status db!!!
+
+                        else:
+                            LOG.warn("No panel was associated to this beacon upload. Removing all variants for this sample.")
+                    else:
+                        LOG.warn("sample %s is not contained in the annotated vcf file!",sample_obj.internal_id)
+                else:
+                    LOG.critical("Couldn't find a sample named '%s' in cg database!")
 
             return 2
 
