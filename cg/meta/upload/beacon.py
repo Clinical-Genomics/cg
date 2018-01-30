@@ -132,12 +132,30 @@ class UploadBeaconApi():
         temp_panel = NamedTemporaryFile('w+t',suffix='beacon_panels.bed')
         temp_panel.write('\n'.join(bed_lines))
 
+        scout_panels = []
+
         with open(temp_panel.name, "r") as panel_lines:
             for line in panel_lines:
                 if line.startswith("##gene_panel="):
-                    print("#########--->",line)
+                    templine = (line.strip()).split(',')
+                    temp_panel_tuple = []
+                    for tuple_n in templine:
+                        #create a tuple with these fields from the panel: name, version, date:
+                        temp_panel_tuple.append(tuple_n.split('=')[1])
 
-        return temp_panel
+                    #print(tuple(temp_panel_tuple))
+                    if not tuple(temp_panel_tuple) in scout_panels:
+                        scout_panels.append(tuple(temp_panel_tuple))
+                        print("---->",tuple(temp_panel_tuple), sep="")
+
+        if scout_panels.sort == list_of_panels.sort():
+            return temp_panel
+        else:
+            return "MEH with the panels!"
+
+
+
+
 
     def remove_vars(self, item_type, item_id):
         """Remove beacon for a sample or one or more affected samples from a family."""
