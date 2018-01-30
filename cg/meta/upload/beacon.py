@@ -162,7 +162,7 @@ class UploadBeaconApi():
         try:
             # remove vars for all affected samples in a family:
             if item_type == 'family':
-                LOG.info("I'm about to beacon variants for family: %s", item_id)
+                LOG.info("Removing from beacon variants for family: %s", item_id)
                 family_obj = self.status.family(item_id)
 
                 # list affected samples
@@ -204,11 +204,11 @@ class UploadBeaconApi():
                     LOG.warn("Could't find any affected sample in beacon for family %s!",item_id)
 
             else: # remove vars for a single sample:
-                LOG.info("I'm about to beacon variants for sample: %s", item_id)
+                LOG.info("Removing from beacon variants for sample: %s", item_id)
                 sample_obj = self.status.sample(item_id)
 
                 if sample_obj:
-                    beacon_info = sample.beaconized_at.split('|')
+                    beacon_info = sample_obj.beaconized_at.split('|')
                     print("info:", beacon_info)
 
                     # Chech that path to VCF file with vars that went into beacon exists and get samples contained in that VCF file:
