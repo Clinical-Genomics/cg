@@ -139,7 +139,7 @@ class UploadBeaconApi():
                 if samples_to_remove:
                     # get the beacon upload info from the field "beaconized_at":
                     for sample in samples_to_remove:
-                        beacon_info = sample.beaconized_atsplit(',')
+                        beacon_info = sample.beaconized_at.split(',')
                         sample_id = sample.internal_id
 
                         print("sample:",sample_id,"\t--->",str(beacon_info))
