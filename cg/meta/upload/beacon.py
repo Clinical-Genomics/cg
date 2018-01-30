@@ -194,7 +194,7 @@ class UploadBeaconApi():
                                     # Remove beacon info da status db!!!
                                     temp_panel.close()
                                 else:
-                                    LOG.critical("Current scout panels don't match with those used for the variant upload! Authomatic variant removal is impossible.")
+                                    LOG.critical("Current scout panels don't match with those used for the variant upload! Automatic variant removal is not possible.")
                             else:
                                 LOG.warn("No panel was associated to this beacon upload. Removing all variants for this sample.")
 
@@ -217,7 +217,20 @@ class UploadBeaconApi():
 
                         if not beacon_info[3] == 'None':
                             panel_list = list(ast.literal_eval(beacon_info[3]))
-                            print("plist:",panel_list)
+
+                            # Create bed file with chr. intervals from panels:
+                            temp_panel = self.create_bed_panels(panel_list)
+
+                            if temp_panel:
+
+
+                                temp_panel.close()
+
+                            else:
+                                LOG.critical("Current scout panels don't match with those used for the variant upload! Automatic variant removal is not possible.")
+
+
+
 
 
                             # Remove beacon info da status db!!!
