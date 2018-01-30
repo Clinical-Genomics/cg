@@ -195,8 +195,8 @@ class UploadBeaconApi():
                                     temp_panel.close()
                                 else:
                                     LOG.critical("Current scout panels don't match with those used for the variant upload! Authomatic variant removal is impossible.")
-                        else:
-                            LOG.warn("No panel was associated to this beacon upload. Removing all variants for this sample.")
+                            else:
+                                LOG.warn("No panel was associated to this beacon upload. Removing all variants for this sample.")
 
                         else:
                             LOG.warn("sample %s is not contained in the annotated vcf file, skipping it!",sample.internal_id)
