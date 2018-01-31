@@ -127,33 +127,39 @@ class UploadBeaconApi():
     def create_bed_panels( self, list_of_panels: list ):
         """Creates a bed file with chr. coordinates from a list of tuples with gene panel info ('panel_id', 'version', date, 'Name')."""
 
-        panels = [i[0] for i in list_of_panels]
-        bed_lines = self.scout.export_panels(panels)
-        temp_panel = NamedTemporaryFile('w+t',suffix='beacon_panels.bed')
-        temp_panel.write('\n'.join(bed_lines))
+        for panel in list_of_panels:
+            print("",panel)
 
-        scout_panels = []
 
-        with open(temp_panel.name, "r") as panel_lines:
-            for line in panel_lines:
-                if line.startswith("##gene_panel="):
-                    templine = (line.strip()).split(',')
-                    temp_panel_tuple = []
-                    for tuple_n in templine:
-                        #create a tuple with these fields from the panel: name, version, date:
-                        temp_panel_tuple.append(tuple_n.split('=')[1])
+
+
+        #panels = [i[0] for i in list_of_panels]
+        #bed_lines = self.scout.export_panels(panels)
+        #temp_panel = NamedTemporaryFile('w+t',suffix='beacon_panels.bed')
+        #temp_panel.write('\n'.join(bed_lines))
+
+        #scout_panels = []
+
+        #with open(temp_panel.name, "r") as panel_lines:
+        #    for line in panel_lines:
+        #        if line.startswith("##gene_panel="):
+        #            templine = (line.strip()).split(',')
+        #            temp_panel_tuple = []
+        #            for tuple_n in templine:
+        #                #create a tuple with these fields from the panel: name, version, date:
+        #                temp_panel_tuple.append(tuple_n.split('=')[1])
 
                     #print(tuple(temp_panel_tuple))
-                    if not tuple(temp_panel_tuple) in scout_panels:
-                        scout_panels.append(tuple(temp_panel_tuple))
-                        print("---->",tuple(temp_panel_tuple), sep="")
+        #            if not tuple(temp_panel_tuple) in scout_panels:
+        #                scout_panels.append(tuple(temp_panel_tuple))
+        #                print("---->",tuple(temp_panel_tuple), sep="")
 
         # Do check that the panels in scout are still the same as when the variants were uploaded in beacon:
-        if scout_panels.sort() == list_of_panels.sort():
-            LOG.info("Panels retrieved in scout corespond to those used for beacon upload.")
-            return temp_panel
-        else:
-            return None
+        #if scout_panels.sort() == list_of_panels.sort():
+        #    LOG.info("Panels retrieved in scout corespond to those used for beacon upload.")
+        #    return temp_panel
+        #else:
+        #    return None
 
     def remove_vars(self, item_type, item_id):
         """Remove beacon for a sample or one or more affected samples from a family."""
@@ -203,7 +209,13 @@ class UploadBeaconApi():
                             else:
                                 LOG.warn("No panel was associated to this beacon upload. Removing all variants for this sample.")
 
+                                results = self.beacon.remove_vars(sample.internal_id, beacon_info[1], None, int(beacon_info[2]))
 
+                                LOG.info("Variants removed for sample %s: %s", sample.internal_id, results)
+
+                                if results:
+                                    sample.beaconized_at = ''
+                                    self.status.commit()
 
                         else:
                             LOG.warn("sample %s is not contained in the annotated vcf file, skipping it!",sample.internal_id)
@@ -245,12 +257,20 @@ class UploadBeaconApi():
                                 LOG.critical("Current scout panels don't match with those used for the variant upload! Automatic variant removal is not possible.")
                         else:
                             LOG.warn("No panel was associated to this beacon upload. Removing all variants for this sample.")
+
+                            results = self.beacon.remove_vars(sample_obj.internal_id, beacon_info[1], None, int(beacon_info[2]))
+
+                            LOG.info("Variants removed for sample %s: %s", sample_obj.internal_id, results)
+
+                            if results:
+                                sample_obj.beaconized_at = ''
+                                self.status.commit()
+
                     else:
                         LOG.warn("sample %s is not contained in the annotated vcf file!",sample_obj.internal_id)
                 else:
                     LOG.critical("Couldn't find a sample named '%s' in cg database!")
 
-            return 2
 
         except Exception as e:
             LOG.critical("cg/meta/upload/beacon.py. The following error occurred:%s", e)
