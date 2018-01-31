@@ -139,7 +139,7 @@ class UploadBeaconApi():
         panel_versions =  [float(i[1]) for i in list_of_panels]
 
         bed_lines = self.scout.export_panels(panel_names, panel_versions)
-        print(bed lines)
+        print(bed_lines)
         temp_panel = NamedTemporaryFile('w+t',suffix='_chiara.'+','.join(panel))
         temp_panel.write('\n'.join(bed_lines))
 
