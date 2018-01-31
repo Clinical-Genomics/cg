@@ -164,7 +164,8 @@ class UploadBeaconApi():
         headers.append("#chromosome\tgene_start\tgene_stop\thgnc_id\thgnc_symbol")
 
         for header in headers:
-            yield header
+            print(header)
+            #yield header
 
         for hgnc_gene in hgnc_geneobjs:
             gene_line = bed_string.format(hgnc_gene['chromosome'], hgnc_gene['start'],
