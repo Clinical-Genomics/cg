@@ -26,7 +26,7 @@ class UploadBeaconApi():
     def upload(self, family_id: str, panel: list, dataset: str='clinicalgenomics', outfile: str=None, customer: str=None, qual: int=20, reference: str="grch37"):
         """Upload variants to Beacon for a family."""
 
-        #try:
+
         family_obj = self.status.family(family_id)
         # get the VCF file
         analysis_obj = family_obj.analyses[0]
@@ -40,93 +40,103 @@ class UploadBeaconApi():
             if hk_vcf is None:
                 LOG.error("Couldn't find any vcf file tag!")
 
-        status_msg = None
+        if hk_vcf:
+            status_msg = None
 
-        #retrieve samples contained in VCF file:
-        vcf_samples = vcfparser.get_samples(hk_vcf.full_path.strip())
+            #retrieve samples contained in VCF file:
+            vcf_samples = vcfparser.get_samples(hk_vcf.full_path.strip())
 
-        # list affected samples
-        affected_samples = [link_obj.sample for link_obj in family_obj.links if
-                            link_obj.status == 'affected']
-        sample_ids = [sample_obj.internal_id for sample_obj in affected_samples]
+            # list affected samples
+            affected_samples = [link_obj.sample for link_obj in family_obj.links if
+                                link_obj.status == 'affected']
+            sample_ids = [sample_obj.internal_id for sample_obj in affected_samples]
 
-        # Process only samples contained in VCF file:
-        sample_ids = [element for element in sample_ids if element in vcf_samples]
+            # Process only samples contained in VCF file:
+            sample_ids = [element for element in sample_ids if element in vcf_samples]
 
-        if sample_ids:
-            status_msg = str(dt.datetime.now())
-            status_msg += "|" + str(hk_vcf.full_path.strip()) + "|" + str(qual)
+            if sample_ids:
 
-            path_to_panel = ''
-            temp_panel = None
+                # Check if any of these samples are already in beacon. If they are raise error
+                for sample in sample_ids:
 
-            # If one or more valid panels are supplied generate gene panel BED file
-            used_panels = []
-            if not panel[0] == 'None':
-                print('Generating variants filter based on ', len(panel), ' gene panels')
-                bed_lines = self.scout.export_panels(panel)
-                temp_panel = NamedTemporaryFile('w+t',suffix='_chiara.'+','.join(panel))
-                temp_panel.write('\n'.join(bed_lines))
-                path_to_panel = temp_panel.name
+                    if self.status.sample(sample).beaconized_at is False:
+                        raise Exception("It looks like sample %s is already in Beacon!",sample)
 
-                ## capture specifics for gene panels in order to record panels used in status db at the end of the upload operation.
-                n_panels = len(panel)
-                with open(temp_panel.name, "r") as panel_lines:
-                    while n_panels:
-                        for line in panel_lines:
-                            if line.startswith("##gene_panel="): #header with specifics of 1 panel
-                                templine = (line.strip()).split(',')
-                                temp_panel_tuple = []
-                                for tuple_n in templine:
-                                    #create a tuple with these fields from the panel: name, version, date:
-                                    temp_panel_tuple.append(tuple_n.split('=')[1])
+                status_msg = str(dt.datetime.now())
+                status_msg += "|" + str(hk_vcf.full_path.strip()) + "|" + str(qual)
 
-                                #print(tuple(temp_panel_tuple))
-                                if not tuple(temp_panel_tuple) in used_panels:
-                                    used_panels.append(tuple(temp_panel_tuple))
-                                    print("---->",tuple(temp_panel_tuple), sep="")
-                                n_panels -= 1
+                path_to_panel = ''
+                temp_panel = None
 
-                status_msg += "|" + str(used_panels)
+                # If one or more valid panels are supplied generate gene panel BED file
+                used_panels = []
+                if not panel[0] == 'None':
+                    print('Generating variants filter based on ', len(panel), ' gene panels')
+                    bed_lines = self.scout.export_panels(panel)
+                    temp_panel = NamedTemporaryFile('w+t',suffix='_chiara.'+','.join(panel))
+                    temp_panel.write('\n'.join(bed_lines))
+                    path_to_panel = temp_panel.name
+
+                    ## capture specifics for gene panels in order to record panels used in status db at the end of the upload operation.
+                    n_panels = len(panel)
+                    with open(temp_panel.name, "r") as panel_lines:
+                        while n_panels:
+                            for line in panel_lines:
+                                if line.startswith("##gene_panel="): #header with specifics of 1 panel
+                                    templine = (line.strip()).split(',')
+                                    temp_panel_tuple = []
+                                    for tuple_n in templine:
+                                        #create a tuple with these fields from the panel: name, version, date:
+                                        temp_panel_tuple.append(tuple_n.split('=')[1])
+
+                                    #print(tuple(temp_panel_tuple))
+                                    if not tuple(temp_panel_tuple) in used_panels:
+                                        used_panels.append(tuple(temp_panel_tuple))
+                                        print("---->",tuple(temp_panel_tuple), sep="")
+                                    n_panels -= 1
+
+                    status_msg += "|" + str(used_panels)
+
+                else:
+                    LOG.info("Panel was set to 'None', so all variants are going to be uploaded.")
+                    path_to_panel = None
+                    status_msg += "|" + str(path_to_panel)
+
+                result = self.beacon.upload(
+                    vcf_path = hk_vcf.full_path,
+                    panel_path = path_to_panel,
+                    dataset = dataset,
+                    outfile = outfile,
+                    customer = customer,
+                    samples = sample_ids,
+                    quality = qual,
+                    genome_reference = reference,
+                )
+
+                if temp_panel:
+                    temp_panel.close()
+
+                #mark samples as uploaded to beacon
+                for sample_obj in affected_samples:
+                    if sample_obj.internal_id in sample_ids:
+
+                        sample_obj.beaconized_at = status_msg
+                        print("\n",str(sample_obj),"----->", sample_obj.beaconized_at)
+                self.status.commit()
+
+                return result
 
             else:
-                LOG.info("Panel was set to 'None', so all variants are going to be uploaded.")
-                path_to_panel = None
-                status_msg += "|" + str(path_to_panel)
-
-            result = self.beacon.upload(
-                vcf_path = hk_vcf.full_path,
-                panel_path = path_to_panel,
-                dataset = dataset,
-                outfile = outfile,
-                customer = customer,
-                samples = sample_ids,
-                quality = qual,
-                genome_reference = reference,
-            )
-
-            if temp_panel:
-                temp_panel.close()
-
-            #mark samples as uploaded to beacon
-            for sample_obj in affected_samples:
-                if sample_obj.internal_id in sample_ids:
-
-                    sample_obj.beaconized_at = status_msg
-                    print("\n",str(sample_obj),"----->", sample_obj.beaconized_at)
-            self.status.commit()
-
-            return result
+                return None
 
         else:
-            return None
+            LOG.warning("couldn't find VCF file in Houskeeper for family %s",family_id)
 
-        #except Exception as e:
-        #    LOG.critical("cg/meta/upload/beacon.py. The following error occurred:%s", e)
 
     def create_bed_panels( self, list_of_panels: list ):
         """Creates a bed file with chr. coordinates from a list of tuples with gene panel info ('panel_id', 'version', date, 'Name')."""
 
+        # Remove after måns has merged
         CHROMOSOMES = ('1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12',
                '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'X',
                'Y', 'MT')
@@ -143,7 +153,6 @@ class UploadBeaconApi():
         bed_lines = []
 
         for panel in list_of_panels:
-            print("",panel)
 
             #Create a panel object from panel name and version
             panel_obj = self.scout.get_gene_panels(panel[0], float(panel[1]))
@@ -179,22 +188,23 @@ class UploadBeaconApi():
                                           hgnc_gene['end'], hgnc_gene['hgnc_id'],
                                           hgnc_gene['hgnc_symbol'])
 
-            print(gene_line)
+        #    print(gene_line)
             bed_lines.append(gene_line)
+        ########################################################################################
 
 
-        temp_panel = NamedTemporaryFile('w+t',suffix='beacon_panels.bed')
-        temp_panel.write('\n'.join(bed_lines))
+        ##########################  Un-comment after Måns has finished ##########################
+        #panel_names = [i[0] for i in list_of_panels]
+        #panel_versions =  [i[1] for i in list_of_panels]
 
-        #return temp_panel
+        #bed_lines = self.scout.export_panels(panel_names, panel_versions)
+        #temp_panel = NamedTemporaryFile('w+t',suffix='_chiara.'+','.join(panel))
+        #temp_panel.write('\n'.join(bed_lines))
 
-        #panels = [i[0] for i in list_of_panels]
-        #bed_lines = self.scout.export_panels(panels)
-        #temp_panel = NamedTemporaryFile('w+t',suffix='beacon_panels.bed')
-        #
+        ########################################################################################
 
-        #scout_panels = []
-
+        ############# Additional check to verify that beacon upload and beacon clean use the same panels #############
+        # Do additional check that the panels used for the upload are the same as those to be used to remove vars:
         with open(temp_panel.name, "r") as panel_lines:
             for line in panel_lines:
                 if line.startswith("##gene_panel="):
@@ -215,6 +225,8 @@ class UploadBeaconApi():
             return temp_panel
         else:
             return None
+
+        ##############################################################################################################
 
     def remove_vars(self, item_type, item_id):
         """Remove beacon for a sample or one or more affected samples from a family."""
