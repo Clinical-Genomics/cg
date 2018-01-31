@@ -130,6 +130,9 @@ class UploadBeaconApi():
         for panel in list_of_panels:
             print("",panel)
 
+            panel_obj = self.scout.get_gene_panels(panel[0], float(panel[1]))
+            print(panel_obj)
+
 
 
 
