@@ -27,7 +27,6 @@ class UploadBeaconApi():
     def upload(self, family_id: str, panel: list, dataset: str='clinicalgenomics', outfile: str=None, customer: str=None, qual: int=20, reference: str="grch37"):
         """Upload variants to Beacon for a family."""
 
-
         family_obj = self.status.family(family_id)
         # get the VCF file
         analysis_obj = family_obj.analyses[0]
@@ -38,7 +37,7 @@ class UploadBeaconApi():
         if hk_vcf is None:
             LOG.info("regular clinical VCF not found, trying old tag")
             hk_vcf = self.housekeeper.files(version=hk_version.id, tags=['vcf-clinical-bin']).first()
-            print("hk_vcf--->",hk_vcf)
+
             if hk_vcf is None:
                 LOG.error("Couldn't find any vcf file tag!")
 
@@ -54,6 +53,10 @@ class UploadBeaconApi():
 
         # Process only samples contained in VCF file:
         sample_ids = [element for element in sample_ids if element in vcf_samples]
+
+        if len(sample_ids) == 0:
+            LOG.critical("None of the samples for this family %a could be found among the samples in VCF file %s", sample_ids, vcf_samples)
+            sys.exit(1)
 
         if sample_ids:
             # Check if any of these samples are already in beacon. If they are raise error
@@ -126,9 +129,6 @@ class UploadBeaconApi():
             self.status.commit()
 
             return result
-
-        else:
-            return None
 
 
     def create_bed_panels( self, list_of_panels: list ):
