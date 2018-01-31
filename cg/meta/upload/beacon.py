@@ -63,7 +63,7 @@ class UploadBeaconApi():
             for sample in sample_ids:
 
                 if len(self.status.sample(sample).beaconized_at) > 0:
-                    LOG.critical("It looks like sample %s is already in Beacon! If you want to re-import it, you have to remove its variant first.",sample)
+                    LOG.critical("It looks like sample %s is already in Beacon! If you want to re-import it you have to remove its variant first --> (cg clean beacon %s -type sample).",sample)
                     sys.exit(1)
 
             status_msg = str(dt.datetime.now())
@@ -335,7 +335,3 @@ class UploadBeaconApi():
                     LOG.warn("sample %s is not contained in the annotated vcf file!",sample_obj.internal_id)
             else:
                 LOG.critical("Couldn't find a sample named '%s' in cg database!")
-
-
-        #except Exception as e:
-        #    LOG.critical("cg/meta/upload/beacon.py. The following error occurred:%s", e)
