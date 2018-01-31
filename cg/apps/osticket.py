@@ -27,7 +27,7 @@ class OsTicket(object):
     def open_ticket(self, name: str, email: str, subject: str, message: str) -> str:
         """Open a new ticket through the REST API."""
         data = dict(name=name, email=email, subject=subject, message=message)
-        res = requests.post(self.url, json=data, headers=self.headers)
+        res = requests.post(self.url, json=data, headers=self.headers, timeout=300)
         if res.ok:
             return res.text
         else:
