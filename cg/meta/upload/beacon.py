@@ -150,12 +150,12 @@ class UploadBeaconApi():
                 panel_geneids.add(gene_obj['hgnc_id'])
 
         for hgnc_id in panel_geneids:
-        hgnc_geneobj = adapter.hgnc_gene(hgnc_id)
-        if hgnc_geneobj is None:
-            log.warn("missing HGNC gene: %s", hgnc_id)
-            continue
-        hgnc_geneobjs.append(hgnc_geneobj)
-        chromosomes_found.add(hgnc_geneobj['chromosome'])
+            hgnc_geneobj = adapter.hgnc_gene(hgnc_id)
+            if hgnc_geneobj is None:
+                log.warn("missing HGNC gene: %s", hgnc_id)
+                continue
+            hgnc_geneobjs.append(hgnc_geneobj)
+            chromosomes_found.add(hgnc_geneobj['chromosome'])
 
         for chrom in CHROMOSOMES:
             if chrom in chromosomes_found:
