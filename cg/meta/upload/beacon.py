@@ -139,9 +139,10 @@ class UploadBeaconApi():
         panel_versions =  [float(i[1]) for i in list_of_panels]
 
         bed_lines = self.scout.export_panels( panel_names, panel_versions)
-        print(bed_lines)
         temp_panel = NamedTemporaryFile('w+t',suffix='_gene_panel.bed')
         temp_panel.write('\n'.join(bed_lines))
+
+
 
         ############# Additional check to verify that beacon upload and beacon clean use the same panels #############
         with open(temp_panel.name, "r") as panel_lines:
