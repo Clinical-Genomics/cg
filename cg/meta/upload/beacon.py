@@ -49,13 +49,13 @@ class UploadBeaconApi():
         # list affected samples
         affected_samples = [link_obj.sample for link_obj in family_obj.links if
                             link_obj.status == 'affected']
-        sample_ids = [sample_obj.internal_id for sample_obj in affected_samples]
+        affected_ids = [sample_obj.internal_id for sample_obj in affected_samples]
 
         # Process only samples contained in VCF file:
-        sample_ids = [element for element in sample_ids if element in vcf_samples]
+        sample_ids = [element for element in affected_ids if element in vcf_samples]
 
         if len(sample_ids) == 0:
-            LOG.critical("None of the samples for this family %a could be found among the samples in VCF file %s", affected_samples.internal_id, vcf_samples)
+            LOG.critical("None of the samples for this family %a could be found among the samples in VCF file %s", affected_ids, vcf_samples)
             sys.exit(1)
 
         if sample_ids:
