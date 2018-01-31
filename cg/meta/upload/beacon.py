@@ -143,8 +143,8 @@ class UploadBeaconApi():
         temp_panel.write('\n'.join(bed_lines))
 
 
-
         ############# Additional check to verify that beacon upload and beacon clean use the same panels #############
+        scout_panels=[]
         with open(temp_panel.name, "r") as panel_lines:
             for line in panel_lines:
                 if line.startswith("##gene_panel="):
