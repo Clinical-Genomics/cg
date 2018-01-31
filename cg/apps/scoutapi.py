@@ -4,6 +4,7 @@ from typing import List
 
 from pymongo import MongoClient
 from scout.adapter.mongo import MongoAdapter
+from scout.adapter.mongo import PanelHandler
 from scout.export.panel import export_panels as scout_export_panels
 from scout.load import load_scout
 from scout.parse.case import parse_case_data
@@ -42,4 +43,4 @@ class ScoutAPI(MongoAdapter):
 
     def get_gene_panels(self, panel_name, version):
         """ retrieve scout panel objects """
-        return gene_panel(self, panel_name, version )
+        return PanelHandler.gene_panel(self, panel_name, version )
