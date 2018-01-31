@@ -55,7 +55,7 @@ class UploadBeaconApi():
         sample_ids = [element for element in affected_ids if element in vcf_samples]
 
         if len(sample_ids) == 0:
-            LOG.critical("None of the samples for this family %a could be found among the samples in VCF file %s", affected_ids, vcf_samples)
+            LOG.critical("None of the affected samples for this family %a could be found among the samples in VCF file %s", affected_ids, vcf_samples)
             sys.exit(1)
 
         if sample_ids:
