@@ -147,7 +147,7 @@ class UploadBeaconApi():
                 panel_obj['display_name'],
             ))
             for gene_obj in panel_obj['genes']:
-            panel_geneids.add(gene_obj['hgnc_id'])
+                panel_geneids.add(gene_obj['hgnc_id'])
 
         for hgnc_id in panel_geneids:
         hgnc_geneobj = adapter.hgnc_gene(hgnc_id)
