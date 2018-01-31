@@ -59,7 +59,7 @@ class UploadBeaconApi():
                 # Check if any of these samples are already in beacon. If they are raise error
                 for sample in sample_ids:
 
-                    if self.status.sample(sample).beaconized_at is False:
+                    if len(self.status.sample(sample).beaconized_at) > 0:
                         raise Exception("It looks like sample %s is already in Beacon!",sample)
 
                 status_msg = str(dt.datetime.now())
