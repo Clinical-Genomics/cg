@@ -61,7 +61,8 @@ class UploadBeaconApi():
                 for sample in sample_ids:
 
                     if len(self.status.sample(sample).beaconized_at) > 0:
-                        sys.exit("It looks like sample %s is already in Beacon!",sample)
+                        LOG.critical("It looks like sample %s is already in Beacon!",sample)
+                        sys.exit(1)
 
                 status_msg = str(dt.datetime.now())
                 status_msg += "|" + str(hk_vcf.full_path.strip()) + "|" + str(qual)
