@@ -140,9 +140,12 @@ class UploadBeaconApi():
         chromosomes_found = set()
         hgnc_geneobjs = []
 
+        bed_lines = []
+
         for panel in list_of_panels:
             print("",panel)
 
+            #Create a panel object from panel name and version
             panel_obj = self.scout.get_gene_panels(panel[0], float(panel[1]))
             headers.append(header_string.format(
                 panel_obj['panel_name'],
@@ -169,7 +172,7 @@ class UploadBeaconApi():
 
         for header in headers:
             print(header)
-            #yield header
+            bed_lines.append(header)
 
         for hgnc_gene in hgnc_geneobjs:
             gene_line = bed_string.format(hgnc_gene['chromosome'], hgnc_gene['start'],
@@ -177,48 +180,41 @@ class UploadBeaconApi():
                                           hgnc_gene['hgnc_symbol'])
 
             print(gene_line)
+            bed_lines.append(gene_line)
 
 
+        temp_panel = NamedTemporaryFile('w+t',suffix='beacon_panels.bed')
+        temp_panel.write('\n'.join(bed_lines))
 
-        return None
-
-
-
-
-
-
-
-
-
-
+        #return temp_panel
 
         #panels = [i[0] for i in list_of_panels]
         #bed_lines = self.scout.export_panels(panels)
         #temp_panel = NamedTemporaryFile('w+t',suffix='beacon_panels.bed')
-        #temp_panel.write('\n'.join(bed_lines))
+        #
 
         #scout_panels = []
 
-        #with open(temp_panel.name, "r") as panel_lines:
-        #    for line in panel_lines:
-        #        if line.startswith("##gene_panel="):
-        #            templine = (line.strip()).split(',')
-        #            temp_panel_tuple = []
-        #            for tuple_n in templine:
-        #                #create a tuple with these fields from the panel: name, version, date:
-        #                temp_panel_tuple.append(tuple_n.split('=')[1])
+        with open(temp_panel.name, "r") as panel_lines:
+            for line in panel_lines:
+                if line.startswith("##gene_panel="):
+                    templine = (line.strip()).split(',')
+                    temp_panel_tuple = []
+                    for tuple_n in templine:
+                        #create a tuple with these fields from the panel: name, version, date:
+                        temp_panel_tuple.append(tuple_n.split('=')[1])
 
                     #print(tuple(temp_panel_tuple))
-        #            if not tuple(temp_panel_tuple) in scout_panels:
-        #                scout_panels.append(tuple(temp_panel_tuple))
-        #                print("---->",tuple(temp_panel_tuple), sep="")
+                    if not tuple(temp_panel_tuple) in scout_panels:
+                        scout_panels.append(tuple(temp_panel_tuple))
+                        print("---->",tuple(temp_panel_tuple), sep="")
 
         # Do check that the panels in scout are still the same as when the variants were uploaded in beacon:
-        #if scout_panels.sort() == list_of_panels.sort():
-        #    LOG.info("Panels retrieved in scout corespond to those used for beacon upload.")
-        #    return temp_panel
-        #else:
-        #    return None
+        if scout_panels.sort() == list_of_panels.sort():
+            LOG.info("Panels retrieved in scout corespond to those used for beacon upload.")
+            return temp_panel
+        else:
+            return None
 
     def remove_vars(self, item_type, item_id):
         """Remove beacon for a sample or one or more affected samples from a family."""
