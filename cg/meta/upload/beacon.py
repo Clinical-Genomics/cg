@@ -150,7 +150,7 @@ class UploadBeaconApi():
                 panel_geneids.add(gene_obj['hgnc_id'])
 
         for hgnc_id in panel_geneids:
-            hgnc_geneobj = self.hgnc_gene(hgnc_id)
+            hgnc_geneobj = self.scout.hgnc_gene(hgnc_id)
             if hgnc_geneobj is None:
                 log.warn("missing HGNC gene: %s", hgnc_id)
                 continue
