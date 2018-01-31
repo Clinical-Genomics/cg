@@ -39,7 +39,6 @@ def beacon(context: click.Context, item_type, item_id):
         item_type = item_type,
         item_id = item_id
     )
-    print("result is:",result)
 
 @clean.command()
 @click.option('-d', '--dry', is_flag=True, help='print config to console')
