@@ -127,11 +127,59 @@ class UploadBeaconApi():
     def create_bed_panels( self, list_of_panels: list ):
         """Creates a bed file with chr. coordinates from a list of tuples with gene panel info ('panel_id', 'version', date, 'Name')."""
 
+        headers = []
+        header_string = ("##gene_panel={0},version={1},updated_at={2},display_name={3}")
+        contig_string = ("##contig={0}")
+        bed_string = ("{0}\t{1}\t{2}\t{3}\t{4}")
+
+        panel_geneids = set()
+        chromosomes_found = set()
+        hgnc_geneobjs = []
+
         for panel in list_of_panels:
             print("",panel)
 
             panel_obj = self.scout.get_gene_panels(panel[0], float(panel[1]))
-            print(panel_obj)
+            headers.append(header_string.format(
+                panel_obj['panel_name'],
+                panel_obj['version'],
+                panel_obj['date'].date(),
+                panel_obj['display_name'],
+            ))
+            for gene_obj in panel_obj['genes']:
+            panel_geneids.add(gene_obj['hgnc_id'])
+
+        for hgnc_id in panel_geneids:
+        hgnc_geneobj = adapter.hgnc_gene(hgnc_id)
+        if hgnc_geneobj is None:
+            log.warn("missing HGNC gene: %s", hgnc_id)
+            continue
+        hgnc_geneobjs.append(hgnc_geneobj)
+        chromosomes_found.add(hgnc_geneobj['chromosome'])
+
+        for chrom in CHROMOSOMES:
+            if chrom in chromosomes_found:
+                headers.append(contig_string.format(chrom))
+
+        headers.append("#chromosome\tgene_start\tgene_stop\thgnc_id\thgnc_symbol")
+
+        for header in headers:
+            yield header
+
+        for hgnc_gene in hgnc_geneobjs:
+            gene_line = bed_string.format(hgnc_gene['chromosome'], hgnc_gene['start'],
+                                          hgnc_gene['end'], hgnc_gene['hgnc_id'],
+                                          hgnc_gene['hgnc_symbol'])
+        yield gene_line
+
+        print(gene_line)
+
+
+
+
+
+
+
 
 
 
