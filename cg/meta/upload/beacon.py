@@ -134,18 +134,16 @@ class UploadBeaconApi():
     def create_bed_panels( self, list_of_panels: list ):
         """Creates a bed file with chr. coordinates from a list of tuples with gene panel info ('panel_id', 'version', date, 'Name')."""
 
-        ##########################  Un-comment after Måns has finished ##########################
+
         panel_names = [i[0] for i in list_of_panels]
         panel_versions =  [float(i[1]) for i in list_of_panels]
 
         bed_lines = self.scout.export_panels(panel_names, panel_versions)
+        print(bed lines)
         temp_panel = NamedTemporaryFile('w+t',suffix='_chiara.'+','.join(panel))
         temp_panel.write('\n'.join(bed_lines))
 
-        ########################################################################################
-
         ############# Additional check to verify that beacon upload and beacon clean use the same panels #############
-        # Do additional check that the panels used for the upload are the same as those to be used to remove vars:
         with open(temp_panel.name, "r") as panel_lines:
             for line in panel_lines:
                 if line.startswith("##gene_panel="):
@@ -166,7 +164,6 @@ class UploadBeaconApi():
             return temp_panel
         else:
             return None
-
         ##############################################################################################################
 
     def remove_vars(self, item_type, item_id):
