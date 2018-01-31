@@ -41,10 +41,12 @@ class OrdersAPI(LimsHandler, StatusHandler):
             # open and assign ticket to order
             try:
                 if self.osticket:
-                    message = f"data:text/html;New incoming samples, {ticket['name']}. {data['comment']}"
+                    message = f"data:text/html;New incoming samples: "
 
                     for sample in data['samples']:
                         message += '<br />' + sample.get('name')
+
+                    message += f"<br /><br />{data['comment']}.<br />{ticket['name']}"
 
                     data['ticket'] = self.osticket.open_ticket(
                         name=ticket['name'],
