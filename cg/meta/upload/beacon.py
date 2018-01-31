@@ -127,6 +127,10 @@ class UploadBeaconApi():
     def create_bed_panels( self, list_of_panels: list ):
         """Creates a bed file with chr. coordinates from a list of tuples with gene panel info ('panel_id', 'version', date, 'Name')."""
 
+        CHROMOSOMES = ('1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12',
+               '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'X',
+               'Y', 'MT')
+
         headers = []
         header_string = ("##gene_panel={0},version={1},updated_at={2},display_name={3}")
         contig_string = ("##contig={0}")
