@@ -4,7 +4,7 @@ from typing import List
 
 from pymongo import MongoClient
 from scout.adapter.mongo import MongoAdapter
-from scout.adapter.mongo import PanelHandler
+from scout.adapter.mongo.panel import PanelHandler
 from scout.export.panel import export_panels as scout_export_panels
 from scout.load import load_scout
 from scout.parse.case import parse_case_data
