@@ -41,7 +41,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
             # open and assign ticket to order
             try:
                 if self.osticket:
-                    message = f"data:text/html;New incoming samples, "
+                    message = f"data:text/html;charset=utf-8,New incoming samples: "
 
                     for sample in data.get('samples'):
                         message += '<br />' + sample.get('name')
