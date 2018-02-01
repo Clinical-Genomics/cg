@@ -77,10 +77,7 @@ class UploadBeaconApi():
             if not panel[0] == 'None':
                 print('Generating variants filter based on ', len(panel), ' gene panels')
 
-                #create an empty list of versions, one element for each panel:
-                empty_versions = [None] * len(panel)
-                
-                bed_lines = self.scout.export_panels(panel, empty_versions)
+                bed_lines = self.scout.export_panels(panel, None)
                 temp_panel = NamedTemporaryFile('w+t',suffix='_chiara.'+','.join(panel))
                 temp_panel.write('\n'.join(bed_lines))
                 path_to_panel = temp_panel.name
