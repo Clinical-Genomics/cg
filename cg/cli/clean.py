@@ -5,7 +5,8 @@ import ruamel.yaml
 import click
 from dateutil.parser import parse as parse_date
 
-from cg.apps import tb, hk
+from cg.apps import tb, hk, scoutapi, beacon as beacon_app
+from cg.meta.upload.beacon import UploadBeaconApi
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -17,7 +18,28 @@ def clean(context):
     """Remove stuff."""
     context.obj['db'] = Store(context.obj['database'])
     context.obj['tb'] = tb.TrailblazerAPI(context.obj)
+    context.obj['status'] = Store(context.obj['database'])
+    context.obj['housekeeper_api'] = hk.HousekeeperAPI(context.obj)
 
+
+@clean.command()
+@click.option('-type', '--item_type', type=click.Choice(['family','sample']), required=True, help='family/sample to remove from beacon')
+@click.argument('item_id',  type=click.STRING)
+@click.pass_context
+def beacon(context: click.Context, item_type, item_id):
+    """Remove beacon for a sample or one or more affected samples from a family."""
+    LOG.info("Removing beacon vars for %s %s", item_type, item_id)
+    api = UploadBeaconApi(
+        status=context.obj['status'],
+        hk_api=context.obj['housekeeper_api'],
+        scout_api=scoutapi.ScoutAPI(context.obj),
+        beacon_api=beacon_app.BeaconApi(context.obj),
+    )
+    result = api.remove_vars(
+        item_type = item_type,
+        item_id = item_id
+    )
+    print("result is:",result)
 
 @clean.command()
 @click.option('-d', '--dry', is_flag=True, help='print config to console')

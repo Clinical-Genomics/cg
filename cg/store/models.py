@@ -220,7 +220,8 @@ class Sample(Model, PriorityMixin):
     sequence_start = Column(types.DateTime)
     sequenced_at = Column(types.DateTime)
     delivered_at = Column(types.DateTime)
-    invoiced_at = Column(types.DateTime)  # DEPRECATED
+    invoiced_at = Column(types.DateTime) # DEPRECATED
+    beaconized_at = Column(types.Text)
     invoice_id = Column(ForeignKey('invoice.id'))
     no_invoice = Column(types.Boolean, default=False)
     comment = Column(types.Text)
