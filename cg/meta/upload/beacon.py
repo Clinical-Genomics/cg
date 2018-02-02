@@ -184,6 +184,11 @@ class UploadBeaconApi():
             if samples_to_remove:
                 # get the beacon upload info from the field "beaconized_at":
                 for sample in samples_to_remove:
+
+                    # check first if the subject is on beacon:
+                    if sample.beaconized_at == '':
+                        LOG.critical("Affected sample %s from family %s is affected but was not found in beacon!", sample.internal_id, item_id)
+                        break
                     beacon_info = sample.beaconized_at.split('|')
                     print("sample:",sample.internal_id,"\t--->",str(beacon_info))
 
