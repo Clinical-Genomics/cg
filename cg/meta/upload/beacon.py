@@ -143,7 +143,6 @@ class UploadBeaconApi():
         temp_panel = NamedTemporaryFile('w+t',suffix='_gene_panel.bed')
         temp_panel.write('\n'.join(bed_lines))
 
-
         ############# Additional check to verify that beacon upload and beacon clean use the same panels #############
         scout_panels=[]
         with open(temp_panel.name, "r") as panel_lines:
@@ -276,4 +275,4 @@ class UploadBeaconApi():
                 else:
                     LOG.warn("sample %s is not contained in the annotated vcf file!",sample_obj.internal_id)
             else:
-                LOG.critical("Couldn't find a sample named '%s' in cg database!")
+                LOG.critical("Couldn't find a sample named '%s' in cg database!",item_id)
