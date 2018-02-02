@@ -56,8 +56,6 @@ class OrdersAPI(LimsHandler, StatusHandler):
                     if ticket.get('name'):
                         message += f"<br />{ticket.get('name')}"
 
-                    LOG.info(f"built new ticket message: {message}")
-
                     data['ticket'] = self.osticket.open_ticket(
                         name=ticket['name'],
                         email=ticket['email'],
