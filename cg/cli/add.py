@@ -45,7 +45,7 @@ def user(context, admin, customer_id, email, name):
     if existing:
         LOG.error(f"{existing.name}: user already added")
         context.abort()
-    new_user = context.obj['db'].add_user(customer_obj, email, name, admin=admin)
+    new_user = context.obj['db'].add_user(customer_obj, email, name, is_admin=admin)
     context.obj['db'].add_commit(new_user)
     LOG.info(f"user added: {new_user.email} ({new_user.id})")
 

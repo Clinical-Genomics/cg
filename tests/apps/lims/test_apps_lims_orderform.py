@@ -13,11 +13,11 @@ def test_parsing_rml_orderform(rml_orderform):
     assert len(data['items']) == 2
     # ... and collect relevant sample data
     sample_data = data['items'][0]
-    assert sample_data['well_position'] == 'A:1'
+    assert sample_data['well_position'] is None
+    assert sample_data['well_position_rml'] == 'A:1'
     assert sample_data['pool'] == '1'
     assert sample_data['volume'] == '30'
     assert sample_data['concentration'] == '5'
-    assert isinstance(sample_data['container_name'], str)
 
 
 def test_parsing_fastq_orderform(fastq_orderform):

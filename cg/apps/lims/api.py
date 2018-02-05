@@ -26,6 +26,9 @@ class LimsAPI(Lims, OrderHandler):
         lims_sample = Sample(self, id=lims_id)
         data = self._export_sample(lims_sample)
         return data
+    
+    def samples_in_pools(self, pool_name, projectlimsid):
+        return self.get_samples(udf={"pool name" : str(pool_name)}, projectlimsid = projectlimsid)
 
     def _export_project(self, lims_project):
         return {
