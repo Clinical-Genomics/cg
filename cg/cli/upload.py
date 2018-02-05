@@ -111,7 +111,12 @@ def auto(context):
     """Upload all completed analyses."""
     for analysis_obj in context.obj['status'].analyses_to_upload():
         LOG.info(f"uploading family: {analysis_obj.family.internal_id}")
-        context.invoke(upload, family_id=analysis_obj.family.internal_id)
+        try:
+            context.invoke(upload, family_id=analysis_obj.family.internal_id)
+        except Exception as e:
+            import traceback
+            LOG.error(f"uploading family failed: {analysis_obj.family.internal_id}")
+            LOG.error(traceback.format_exc())
 
 
 @upload.command()
