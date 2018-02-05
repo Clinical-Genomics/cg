@@ -61,7 +61,6 @@ class UploadBeaconApi():
         if sample_ids:
             # Check if any of these samples are already in beacon. If they are raise error
             for sample in sample_ids:
-
                 if len(self.status.sample(sample).beaconized_at) > 0:
                     LOG.critical("It looks like sample %s is already in Beacon! If you want to re-import it you have to remove its variants first! --> (cg clean beacon %s -type sample).",sample, sample)
                     sys.exit(1)
@@ -74,9 +73,13 @@ class UploadBeaconApi():
 
             # If one or more valid panels are supplied generate gene panel BED file
             used_panels = []
-            if not panel[0] == 'None':
-                print('Generating variants filter based on ', len(panel), ' gene panels')
 
+            if panel[0] == 'None':
+                LOG.info("Panel was set to 'None', so all variants are going to be uploaded.")
+                path_to_panel = None
+                status_msg += "|" + str(path_to_panel)
+            else:
+                print('Generating variants filter based on ', len(panel), ' gene panels')
                 bed_lines = self.scout.export_panels(panel, None)
                 temp_panel = NamedTemporaryFile('w+t',suffix='_chiara.'+','.join(panel))
                 temp_panel.write('\n'.join(bed_lines))
@@ -102,11 +105,6 @@ class UploadBeaconApi():
 
                 status_msg += "|" + str(used_panels)
 
-            else:
-                LOG.info("Panel was set to 'None', so all variants are going to be uploaded.")
-                path_to_panel = None
-                status_msg += "|" + str(path_to_panel)
-
             result = self.beacon.upload(
                 vcf_path = hk_vcf.full_path,
                 panel_path = path_to_panel,
@@ -121,7 +119,7 @@ class UploadBeaconApi():
             if temp_panel:
                 temp_panel.close()
 
-            #mark samples as uploaded to beacon
+            # mark samples as uploaded to beacon
             for sample_obj in affected_samples:
                 if sample_obj.internal_id in sample_ids:
 
@@ -134,7 +132,6 @@ class UploadBeaconApi():
 
     def create_bed_panels( self, list_of_panels: list ):
         """Creates a bed file with chr. coordinates from a list of tuples with gene panel info ('panel_id', 'version', date, 'Name')."""
-
 
         panel_names = [i[0] for i in list_of_panels]
         panel_versions =  [float(i[1]) for i in list_of_panels]
@@ -171,9 +168,8 @@ class UploadBeaconApi():
         """Remove beacon for a sample or one or more affected samples from a family."""
 
         temp_panel = None
-        #try
-            # remove vars for all affected samples in a family:
-        if item_type == 'family':
+
+        if item_type == 'family': # remove vars for all affected samples in a family:
             LOG.info("Removing from beacon variants for family: %s", item_id)
             family_obj = self.status.family(item_id)
 
@@ -189,6 +185,7 @@ class UploadBeaconApi():
                     if sample.beaconized_at == '':
                         LOG.critical("Affected sample %s from family %s is affected but was not found in beacon!", sample.internal_id, item_id)
                         break
+
                     beacon_info = sample.beaconized_at.split('|')
                     print("sample:",sample.internal_id,"\t--->",str(beacon_info))
 
@@ -198,7 +195,17 @@ class UploadBeaconApi():
                     vcf_samples = vcfparser.get_samples(beacon_info[1])
                     if sample.internal_id in vcf_samples:
 
-                        if not beacon_info[3] == 'None':
+                        if beacon_info[3] == 'None':
+                            LOG.warn("No panel was associated to this beacon upload. Removing all variants for this sample.")
+
+                            results = self.beacon.remove_vars(sample.internal_id, beacon_info[1], None, int(beacon_info[2]))
+
+                            LOG.info("Variants removed for sample %s: %s", sample.internal_id, results)
+
+                            if results:
+                                sample.beaconized_at = ''
+                                self.status.commit()
+                        else:
                             #If gene panels were used, retrieve them into a bed file:
                             panel_list = list(ast.literal_eval(beacon_info[3]))
 
@@ -217,16 +224,6 @@ class UploadBeaconApi():
                                     self.status.commit()
                             else:
                                 LOG.critical("Current scout panels don't match with those used for the variant upload! Automatic variant removal is not possible.")
-                        else:
-                            LOG.warn("No panel was associated to this beacon upload. Removing all variants for this sample.")
-
-                            results = self.beacon.remove_vars(sample.internal_id, beacon_info[1], None, int(beacon_info[2]))
-
-                            LOG.info("Variants removed for sample %s: %s", sample.internal_id, results)
-
-                            if results:
-                                sample.beaconized_at = ''
-                                self.status.commit()
 
                     else:
                         LOG.warn("sample %s is not contained in the annotated vcf file, skipping it!",sample.internal_id)
