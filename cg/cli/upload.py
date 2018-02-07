@@ -111,7 +111,7 @@ def scout(context, re_upload, print_console, family_id):
 @click.option('-p', '--panel', help='Gene panel to filter VCF by', required=True, multiple=True)
 @click.option('-out', '--outfile', help='Name of pdf outfile', default=None)
 @click.option('-cust', '--customer', help='Name of customer', default="")
-@click.option('-qual', '--quality', help='Variant quality threhold', default=20)
+@click.option('-qual', '--quality', help='Variant quality threshold', default=20)
 @click.option('-ref', '--genome_reference', help='Chromosome build (default=grch37)', default="grch37")
 @click.pass_context
 def beacon(context: click.Context, family_id: str, panel: str, outfile: str, customer: str, quality: int, genome_reference: str):
