@@ -38,4 +38,3 @@ chanjo>=4.2.0
 genotype>=2.2.0
 scout-browser>=3.3.0
 cgstats>=1.1.2
-git+https://github.com/Clinical-Genomics/cgbeacon
