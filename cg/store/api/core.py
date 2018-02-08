@@ -26,6 +26,7 @@ class BaseHandler:
     Panel = models.Panel
     Pool = models.Pool
     Delivery = models.Delivery
+    Invoice = models.Invoice
 
 
 class CoreHandler(BaseHandler, AddHandler, FindHandler, StatusHandler, TrendsHandler):
@@ -35,4 +36,5 @@ class CoreHandler(BaseHandler, AddHandler, FindHandler, StatusHandler, TrendsHan
 class Store(alchy.Manager, CoreHandler):
 
     def __init__(self, uri):
+        self.uri = uri
         super(Store, self).__init__(config=dict(SQLALCHEMY_DATABASE_URI=uri), Model=models.Model)

@@ -18,7 +18,7 @@ class BackupApi():
         """Check if there's too many flowcells already "ondisk"."""
         ondisk_flowcells = self.status.flowcells(status='ondisk').count()
         LOG.debug(f"ondisk flowcells: {ondisk_flowcells}")
-        return ondisk_flowcells < max_flowcells
+        return ondisk_flowcells > max_flowcells
 
     def check_processing(self, max_flowcells: int=3) -> bool:
         """Check if the processing queue for flowcells is not full."""
