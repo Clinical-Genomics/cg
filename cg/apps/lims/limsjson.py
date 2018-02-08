@@ -1,4 +1,4 @@
-OPTIONAL_KEYS = ('container_name', 'quantity', 'status',
+OPTIONAL_KEYS = ('container_name', 'quantity', 'volume', 'concentration', 'status',
                  'comment', 'capture_kit', 'mother', 'father')
 
 def parse_json(indata: dict) -> dict:
@@ -42,9 +42,6 @@ def parse_json(indata: dict) -> dict:
                 'application': sample['application'],
                 'source': sample['source'],
                 'container': sample['container'],
-                'comment': sample['comment'],
-                'volume': sample.get('volume'),
-                'concentration': sample.get('concentration'),
             }
             well_position_raw = sample.get('well_position')
             if well_position_raw:
