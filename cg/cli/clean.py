@@ -69,6 +69,13 @@ def mip(context, dry, yes, sample_info):
 
 
 @clean.command()
+@click.argument('family_id')
+@click.pass_context
+def scout(context, family_id):
+    pass
+
+
+@clean.command()
 @click.option('-y', '--yes', is_flag=True, help='skip confirmation')
 @click.argument('before_str')
 @click.pass_context
