@@ -45,6 +45,10 @@ class OrdersAPI(LimsHandler, StatusHandler):
 
                     for sample in data.get('samples'):
                         message += '<br />' + sample.get('name')
+
+                        if sample.get('internal_id'):
+                            message += ' (already existing sample)'
+
                         if sample.get('comment'):
                             message += ' ' + sample.get('comment')
 
@@ -55,7 +59,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
 
                     if ticket.get('name'):
                         message += f"<br />{ticket.get('name')}"
-
+                        
                     data['ticket'] = self.osticket.open_ticket(
                         name=ticket['name'],
                         email=ticket['email'],
