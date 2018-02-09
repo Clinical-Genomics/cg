@@ -177,7 +177,7 @@ cg upload auto
 You can of course specify which upload you want to do yourself as well:
 
 ```bash
-cg upload [coverage|genotypes|observations|scout] raredragon
+cg upload [coverage|genotypes|observations|scout|beacon] raredragon
 ```
 
 ### `meta`
@@ -213,7 +213,7 @@ The API accepts the name of a flowcell which will be looked up in `stats`. For a
 1. check if the quality (Q30) is good enough to include the sequencing results.
 1. update the number of reads that the sample has been sequenced _overall_ and match this with the requirement given by the application.
 1. accordingly, the interface will look up FASTQ files and store them using `hk`.
-1. if a sample has sufficent number of reads, the `sequenced_at` date will be filled in (`status`) according to the sequencing date of the most recent flowcell.
+1. if a sample has sufficient number of reads, the `sequenced_at` date will be filled in (`status`) according to the sequencing date of the most recent flowcell.
 
 ##### lims
 
