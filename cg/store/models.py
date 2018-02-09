@@ -223,7 +223,9 @@ class Sample(Model, PriorityMixin):
     invoiced_at = Column(types.DateTime)  # DEPRECATED
     invoice_id = Column(ForeignKey('invoice.id'))
     no_invoice = Column(types.Boolean, default=False)
+    beaconized_at = Column(types.Text)
     comment = Column(types.Text)
+    beaconized_at = Column(types.Text)
 
     created_at = Column(types.DateTime, default=dt.datetime.now)
     customer_id = Column(ForeignKey('customer.id', ondelete='CASCADE'), nullable=False)
