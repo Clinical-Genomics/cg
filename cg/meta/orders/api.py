@@ -32,9 +32,10 @@ class OrdersAPI(LimsHandler, StatusHandler):
             raise OrderError(error.args[0])
 
         # detect manual ticket assignment
-        ticket_match = re.search(r'^#?([0-9]{6})$', data['name'])
-        ticket_number = int(ticket_match.group()) if ticket_match else None
-        if ticket_number:
+        ticket_match = re.fullmatch(r'#([0-9]{6})', data['name'])
+
+        if ticket_match:
+            ticket_number = int(ticket_match.group(1))
             LOG.info(f"{ticket_number}: detected ticket in order name")
             data['ticket'] = ticket_number
         else:
