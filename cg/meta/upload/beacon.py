@@ -34,7 +34,7 @@ class UploadBeaconApi():
         hk_version = self.housekeeper.version(family_id, analysis_date)
         hk_vcf = self.housekeeper.files(version=hk_version.id, tags=['vcf-snv-clinical']).first()
 
-        hk_bundle = self.housekeeper.bundle('ADM1136A1')
+        hk_bundle = self.housekeeper.bundle('ACC3677A2')
 
         print(hk_bundle.versions)
 
