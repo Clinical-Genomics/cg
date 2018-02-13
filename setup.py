@@ -29,10 +29,10 @@ def parse_reqs(req_path='./requirements.txt'):
 
 setup(
     name='cg',
-    version='1.4.2',
+    version='1.4.3',
     description='Clinical Genomics command center.',
-    author='Robin Andeer',
-    author_email='robin.andeer@scilifelab.se',
+    author='Patrik Grenfeldt',
+    author_email='patrik.grenfeldt@scilifelab.se',
     url='https://github.com/Clinical-Genomics/cg',
     include_package_data=True,
     zip_safe=False,
