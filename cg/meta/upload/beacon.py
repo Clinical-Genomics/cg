@@ -35,6 +35,7 @@ class UploadBeaconApi():
         hk_vcf = self.housekeeper.files(version=hk_version.id, tags=['vcf-snv-clinical']).first()
 
         hk_bundle = self.housekeeper.bundle('ACC3677A2')
+        print("len of files for this bundle:",len(hk_bundle.versions[0].files))
 
         print(hk_bundle.versions)
 
