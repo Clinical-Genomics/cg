@@ -4,7 +4,7 @@ import datetime as dt
 def test_transfer_flowcell(flowcell_store, store_housekeeper, transfer_flowcell_api):
 
     # GIVEN a store with a received but not sequenced sample
-    flowcell_id = 'H7HKKBCX2'
+    flowcell_id = 'HHGT3CCXY'
     assert flowcell_store.samples().count() == 1
     assert flowcell_store.flowcells().count() == 0
     assert store_housekeeper.bundles().count() == 0
