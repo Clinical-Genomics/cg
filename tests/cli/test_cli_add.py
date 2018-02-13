@@ -25,10 +25,6 @@ def test_add_user(invoke_cli, disk_store: Store):
     db_uri = disk_store.uri
     result = invoke_cli(['--database', db_uri, 'add', 'user', '-c', customer_id, email, name])
 
-    print(result.exception)
-    print(result.output)
-    print(result.runner)
-
     # THEN it should be stored in the database
     assert result.exit_code == 0
     assert disk_store.User.query.count() == 1

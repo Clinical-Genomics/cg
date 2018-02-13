@@ -1,0 +1,30 @@
+{
+    "name": "Scout analysis",
+    "customer": "cust002",
+    "samples": [{
+        "name": "2016-20203",
+        "sex": "male",
+        "app_tag": "WGXCUSC000",
+        "app_tag_version": "1",
+        "status": "affected",
+        "family_name": "F0009703",
+        "panels": ["OMIM-AUTO"],
+        "read_pairs":2,
+        "library_prep_method": "1:2",
+        "sequencing_method": "3:4",
+        "delivery_method": "5:6"
+    }, {
+        "name": "2016-20204",
+        "sex": "female",
+        "status": "affected",
+        "app_tag": "WGXCUSC000",
+        "app_tag_version": "1",
+        "capture_kit": "Agilent Sureselect V5",
+        "family_name": "F0009704",
+        "panels": ["SKD"],
+        "read_pairs":4,
+        "library_prep_method": "1:2",
+        "sequencing_method": "3:4",
+        "delivery_method": "5:6"
+    }]
+}
