@@ -34,6 +34,12 @@ class UploadBeaconApi():
         hk_version = self.housekeeper.version(family_id, analysis_date)
         hk_vcf = self.housekeeper.files(version=hk_version.id, tags=['vcf-snv-clinical']).first()
 
+        hk_bundle = self.hk.bundle('ADM1136A1')
+
+        print(hk_bundle.versions)
+
+        sys.exit(1)
+
         if hk_vcf is None:
             LOG.info("regular clinical VCF not found, trying old tag")
             hk_vcf = self.housekeeper.files(version=hk_version.id, tags=['vcf-clinical-bin']).first()
