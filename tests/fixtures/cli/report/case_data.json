@@ -12,7 +12,11 @@
         "read_pairs":2,
         "library_prep_method": "1:2",
         "sequencing_method": "3:4",
-        "delivery_method": "5:6"
+        "delivery_method": "5:6",
+        "project": "testprojeject qwerty",
+        "internal_id": 1,
+        "received_at": "1980-11-20",
+        "delivery_date": "2018-02-14"
     }, {
         "name": "2016-20204",
         "sex": "female",
@@ -25,6 +29,10 @@
         "read_pairs":4,
         "library_prep_method": "1:2",
         "sequencing_method": "3:4",
-        "delivery_method": "5:6"
+        "delivery_method": "5:6",
+        "project": "testprojeject asdf",
+        "internal_id": 2,
+        "received_at": "2017-12-01",
+        "delivery_date": "2018-02-14"
     }]
 }
