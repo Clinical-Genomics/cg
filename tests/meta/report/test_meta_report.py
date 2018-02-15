@@ -46,9 +46,9 @@ def test_generate_qc_data(case_data, report_api):
     assert qc_data['accredited'] is False
 
 
-def test_render_qc_report(case_data):
+def test_render_qc_report(report_data):
     # GIVEN proper qc data from an analysis exist
     # WHEN rendering a report from that data
     # THEN a html report with certain data should have been rendered
-    rendered_report = ReportAPI.render_qc_report(case_data)
+    rendered_report = ReportAPI.render_qc_report(report_data)
     assert len(rendered_report) > 0

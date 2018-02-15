@@ -1,0 +1,93 @@
+{
+  "name": "Scout analysis",
+  "customer": <Customer(id=3,
+  internal_id=
+  "cust002",
+  name=
+  "Karolinska",
+  priority=None,
+  scout_access=False,
+  agreement_date=None,
+  agreement_registration=None,
+  project_account_ki=None,
+  project_account_kth=None,
+  organisation_number=None,
+  invoice_address=None,
+  invoice_reference=None,
+  uppmax_account=None,
+  primary_contact=None,
+  delivery_contact=None,
+  invoice_contact=None)>,
+  "samples": [
+    {
+      "name": "2016-20203",
+      "sex": "male",
+      "app_tag": "WGXCUSC000",
+      "app_tag_version": "1",
+      "status": "affected",
+      "family_name": "F0009703",
+      "panels": [
+        "OMIM-AUTO"
+      ],
+      "read_pairs": 2,
+      "library_prep_method": "1:2",
+      "sequencing_method": "3:4",
+      "delivery_method": "5:6",
+      "project": "testprojeject",
+      "internal_id": 1,
+      "received_at": "1980-11-20",
+      "delivery_date": "2018-02-14",
+      "processing_time": -1
+    },
+    {
+      "name": "2016-20204",
+      "sex": "female",
+      "status": "affected",
+      "app_tag": "WGXCUSC000",
+      "app_tag_version": "1",
+      "capture_kit": "Agilent Sureselect V5",
+      "family_name": "F0009704",
+      "panels": [
+        "SKD"
+      ],
+      "read_pairs": 4,
+      "library_prep_method": "1:2",
+      "sequencing_method": "3:4",
+      "delivery_method": "5:6",
+      "project": "testprojeject",
+      "internal_id": 2,
+      "received_at": "2017-12-01",
+      "delivery_date": "2018-02-14",
+      "processing_time": -1
+    }
+  ],
+  "today": datetime.date(2018,
+  2,
+  15),
+  "apptags": [
+    <ApplicationVersion(id=1,
+    version=1,
+    valid_from=datetime.datetime(2018,
+    2,
+    15,
+    14,
+    5,
+    10,
+    358220),
+    price_standard=10,
+    price_priority=20,
+    price_express=30,
+    price_research=5,
+    comment=None,
+    created_at=datetime.datetime(2018,
+    2,
+    15,
+    14,
+    5,
+    10,
+    365258),
+    updated_at=None,
+    application_id=1)>
+  ],
+  "accredited": False
+}
