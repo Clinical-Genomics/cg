@@ -72,6 +72,7 @@ class ReportAPI:
         )
         print("2.9")
         template = env.get_template('report.html')
-        template_out = template.render(**qc_data)
         print("2.10")
+        template_out = template.render(**qc_data)
+        print("2.11")
         return template_out

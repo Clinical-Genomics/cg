@@ -60,12 +60,3 @@ def disk_store(cli_runner, invoke_cli) -> Store:
         yield Store(database_uri)
 
 
-@pytest.fixture
-def case_data_path():
-    _in_data_path = 'tests/fixtures/cli/report/case_data.json'
-    return _in_data_path
-
-
-@pytest.fixture
-def case_data(case_data_path):
-    return json.load(open(case_data_path))
