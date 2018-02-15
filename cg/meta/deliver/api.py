@@ -23,7 +23,7 @@ FAMILY_TAGS = [
 SAMPLE_TAGS = ['bam', 'bam-index']
 
 
-class DeliverAPI():
+class DeliverAPI:
 
     def __init__(self, db: Store, hk_api: hk.HousekeeperAPI, lims_api: lims.LimsAPI):
         self.db = db
@@ -32,8 +32,6 @@ class DeliverAPI():
 
     def get_post_analysis_files(self, family: str, version, tag):
 
-        family_obj = self.db.family_samples(family)
-    
         if not version:
             last_version = self.hk.last_version(bundle=family)
         else:

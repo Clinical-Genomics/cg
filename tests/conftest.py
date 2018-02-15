@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime as dt
+import json
 from pathlib import Path
 
 import pytest
@@ -13,6 +14,7 @@ def store() -> Store:
     _store.create_all()
     yield _store
     _store.drop_all()
+
 
 @pytest.yield_fixture(scope='function')
 def base_store(store):
@@ -56,3 +58,14 @@ def disk_store(cli_runner, invoke_cli) -> Store:
         assert len(Store(database_uri).engine.table_names()) > 0
 
         yield Store(database_uri)
+
+
+@pytest.fixture
+def case_data_path():
+    _in_data_path = 'tests/fixtures/cli/report/case_data.json'
+    return _in_data_path
+
+
+@pytest.fixture
+def case_data(case_data_path):
+    return json.load(open(case_data_path))
