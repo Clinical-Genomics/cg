@@ -19,9 +19,10 @@ def store() -> Store:
 @pytest.yield_fixture(scope='function')
 def base_store(store):
     """Setup and example store."""
-    customers = [store.add_customer('cust000', 'Production', scout=False),
-                 store.add_customer('cust001', 'Customer', scout=False),
-                 store.add_customer('cust002', 'Karolinska', scout=True),
+    customers = [store.add_customer('cust000', 'Production', scout_access=False),
+                 store.add_customer('cust001', 'Customer', scout_access=False),
+                 store.add_customer('cust002', 'Karolinska', scout_access=True, invoice_address='Test '
+                                                                                          'street'),
                  store.add_customer('cust003', 'CMMS', scout=True)]
     store.add_commit(customers)
     applications = [store.add_application('WGXCUSC000', 'wgs', 'External WGS', sequencing_depth=0, is_external=True),
@@ -30,7 +31,9 @@ def base_store(store):
                                           accredited=True),
                     store.add_application('RMLS05R150', 'rml', 'Ready-made', sequencing_depth=0),
                     store.add_application('WGTPCFC030', 'wgs', 'WGS trio', accredited=True,
-                                          sequencing_depth=30, target_reads=300000000)]
+                                          sequencing_depth=30, target_reads=300000000,
+                                          limitations='some'),
+                    ]
     store.add_commit(applications)
 
     prices = {'standard': 10, 'priority': 20, 'express': 30, 'research': 5}

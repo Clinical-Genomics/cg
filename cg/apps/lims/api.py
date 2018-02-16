@@ -189,7 +189,7 @@ class LimsAPI(Lims, OrderHandler):
             lims_sample.udf[PROP2UDF['target_reads']] = target_reads
         lims_sample.put()
 
-    def get_prepmethod(self, lims_id: str) -> str:
+    def get_prep_method(self, lims_id: str) -> str:
         """Get the library preparation method."""
         process_names = [
             'CG002 - End repair Size selection A-tailing and Adapter ligation (TruSeq PCR-free '
@@ -214,7 +214,7 @@ class LimsAPI(Lims, OrderHandler):
         method_name = AM_METHODS.get(method_number)
         return f"{method_number}:{method_version} - {method_name}"
 
-    def get_sequencingmethod(self, lims_id: str) -> str:
+    def get_sequencing_method(self, lims_id: str) -> str:
         """Get the sequencing method."""
         process_names = [
             'CG002 - Cluster Generation (HiSeq X)',
@@ -241,7 +241,7 @@ class LimsAPI(Lims, OrderHandler):
         method_name = AM_METHODS.get(method_number)
         return f"{method_number}:{method_version} - {method_name}"
 
-    def get_deliverymethod(self, lims_id: str) -> str:
+    def get_delivery_method(self, lims_id: str) -> str:
         """Get the delivery method."""
         process_name = 'CG002 - Delivery'
         arts = self.get_artifacts(process_type=process_name, samplelimsid=lims_id)
