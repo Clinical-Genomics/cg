@@ -69,7 +69,7 @@
               {% for sample in samples %}
                 <tr>
                   <td>{{ sample.name }} ({{ sample.id }})</td>
-                  <td>{{ family_id }}</td>
+                  <td>{{ family }}</td>
                   <td>
                     {{ sample.sex }}
                     ( analys:
@@ -80,7 +80,7 @@
                       {% endif %})
                   </td>
                   <td>{{ sample.status }}</td>
-                  <td>{{ gene_panels|join(', ') }}</td>
+                  <td>{{ panels|join(', ') }}</td>
                   <td>{{ sample.source }}</td>
                   <td>{{ sample.project }}</td>
                   <td>{{ sample.app_tag }}</td>
@@ -106,8 +106,8 @@
               {% for sample in samples %}
                 <tr>
                   <td>{{ sample.name }}</td>
-                  <td>{{ sample.received_at }}</td>
-                  <td>{{ sample.library_prep_method or "N/A" }}</td>
+                  <td>{{ sample.received }}</td>
+                  <td>{{ sample.prep_method or "N/A" }}</td>
                   <td>{{ sample.sequencing_method or "N/A" }}</td>
                   <td>{{ sample.delivery_method or "N/A" }}</td>
                   <td>
@@ -132,9 +132,9 @@
             </thead>
             <tbody>
               <tr>
-                <td>{{ family_id }}</td>
+                <td>{{ family }}</td>
                 <td>{{ pipeline_version }}</td>
-                <td>{{ gene_panels|join(', ') }}</td>
+                <td>{{ panels|join(', ') }}</td>
                 <td>{{ reference_genome }}</td>
               </tr>
             </tbody>
@@ -171,18 +171,18 @@
           {% if customer.scout_access %}
             <p>
               Varianter finns uppladdade i Scout:
-              <a href="https://clinical-db.scilifelab.se:8083/{{ customer.customer_id }}/{{ family_id }}">https://clinical-db.scilifelab.se:8083/{{ customer.customer_id }}/{{ family_id }}</a>
+              <a href="https://clinical-db.scilifelab.se:8083/{{ customer.customer_id }}/{{ family }}">https://clinical-db.scilifelab.se:8083/{{ customer.customer_id }}/{{ family }}</a>
             </p>
           {% endif %}
         </div>
 
-        {% for apptagv in apptags %}
+        {% for application in applications %}
           <div class="card-block">
             <h4 class="card-title">
-              Teknisk beskrivning av analysen: {{ apptagv.apptag.name }}
+              Teknisk beskrivning av analysen: {{ application.tag }}
             </h4>
-            <p class="card-text">{{ apptagv.description }}</p>
-            <p class="card-text">{{ apptagv.limitations if apptagv.limitations }}</p>
+            <p class="card-text">{{ application.description }}</p>
+            <p class="card-text">{{ application.limitations if application.limitations }}</p>
           </div>
         {% endfor %}
 

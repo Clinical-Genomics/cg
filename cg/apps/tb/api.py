@@ -77,3 +77,31 @@ class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
 
             analysis_obj.is_deleted = True
             self.commit()
+
+    def get_trending(self, family: str) -> str:
+        """Get the sample info path for an analysis."""
+        latest_analysis = self.analyses(family=family).first()
+
+        # mip_config_raw(dict): raw YAML
+        input
+        from MIP analysis
+        config
+        file
+        qcmetrics_raw(dict): raw
+        YAML
+        input
+        from MIP analysis
+        qc
+        metric
+        file
+        sampleinfo_raw(dict): raw
+        YAML
+        input
+        from MIP analysis
+        qc
+        sample
+        info
+        file
+
+        raw_data = ruamel.yaml.safe_load(Path(latest_analysis.config_path).open())
+        data = files.parse_config(raw_data)
