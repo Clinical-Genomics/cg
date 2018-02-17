@@ -18,8 +18,7 @@ def clean(context):
     """Remove stuff."""
     context.obj['db'] = Store(context.obj['database'])
     context.obj['tb'] = tb.TrailblazerAPI(context.obj)
-    context.obj['status'] = Store(context.obj['database'])
-    context.obj['housekeeper_api'] = hk.HousekeeperAPI(context.obj)
+    context.obj['hk'] = hk.HousekeeperAPI(context.obj)
 
 
 @clean.command()
@@ -30,8 +29,8 @@ def beacon(context: click.Context, item_type, item_id):
     """Remove beacon for a sample or one or more affected samples from a family."""
     LOG.info("Removing beacon vars for %s %s", item_type, item_id)
     api = UploadBeaconApi(
-        status=context.obj['status'],
-        hk_api=context.obj['housekeeper_api'],
+        status=context.obj['db'],
+        hk_api=context.obj['hk'],
         scout_api=scoutapi.ScoutAPI(context.obj),
         beacon_api=beacon_app.BeaconApi(context.obj),
     )
@@ -69,10 +68,10 @@ def mip(context, dry, yes, sample_info):
 
 
 @clean.command()
-@click.argument('family_id')
+@click.argument('bundle')
 @click.pass_context
-def scout(context, family_id):
-    pass
+def scout(context, bundle):
+    files = context.obj['hk'].files(bundle=bundle, tags=['bam'])
 
 
 @clean.command()
