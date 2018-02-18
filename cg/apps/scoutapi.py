@@ -40,3 +40,21 @@ class ScoutAPI(MongoAdapter):
     def export_panels(self, panels: List[str], versions: None):
         """Pass through to export of a list of gene panels."""
         return scout_export_panels(self, panels, versions)
+
+    def get_cases(self, case_id=None, institute=None, reruns=None, finished=None, causatives=None, research_requested=None,
+          is_research=None, status=None):
+        """Interact with cases existing in the database."""
+
+        models = []
+        if case_id:
+            case_obj = self.case(case_id=case_id)
+            if case_obj:
+                models.append(case_obj)
+
+        else:
+            models = self.cases(collaborator=institute, reruns=reruns,
+                               finished=finished, has_causatives=causatives,
+                               research_requested=research_requested,
+                               is_research=is_research, status=status)
+
+        return models

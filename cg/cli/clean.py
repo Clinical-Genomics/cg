@@ -19,6 +19,7 @@ def clean(context):
     context.obj['db'] = Store(context.obj['database'])
     context.obj['tb'] = tb.TrailblazerAPI(context.obj)
     context.obj['hk'] = hk.HousekeeperAPI(context.obj)
+    context.obj['scout'] = scoutapi.ScoutAPI(context.obj)
 
 
 @clean.command()
@@ -68,10 +69,36 @@ def mip(context, dry, yes, sample_info):
 
 
 @clean.command()
-@click.argument('bundle')
+@click.argument('bundle', required=False)
+@click.option('-y', '--yes', is_flag=True, help='skip checks')
 @click.pass_context
-def scout(context, bundle):
-    files = context.obj['hk'].files(bundle=bundle, tags=['bam'])
+def scout(context, bundle, yes):
+    bundles = []
+    if bundle:
+        bundles = [bundle]
+    else:
+        for status in 'archived', 'solved':
+            cases = context.obj['scout'].get_cases(status='archived')
+            bundles.extend([ case.get('_id') for case in cases ])
+
+    for bundle in bundles:
+        files = []
+        for tag in ['bam', 'bai', 'bam-index']:
+            files.extend(context.obj['hk'].files(bundle=bundle, tags=[tag]))
+        for file_obj in files:
+            if file_obj.is_included:
+                question = f"{bundle}: remove file from file system and database: {file_obj.full_path}"
+            else:
+                question = f"{bundle}: remove file from database: {file_obj.full_path}"
+
+            if yes or click.confirm(question):
+                file_name = file_obj.full_path
+                if file_obj.is_included and file_obj.full_path.exists():
+                    file_obj.full_path.unlink()
+
+                file_obj.delete()
+                context.obj['store'].commit()
+                click.echo('{file_name} deleted')
 
 
 @clean.command()
