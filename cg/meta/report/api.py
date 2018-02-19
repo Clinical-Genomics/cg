@@ -2,10 +2,12 @@
 import logging
 
 from datetime import datetime
+import ruamel.yaml
+from jinja2 import Environment, PackageLoader, select_autoescape
+from click import Path
 
 from cg.apps.tb import TrailblazerAPI
-from jinja2 import Environment, PackageLoader, select_autoescape
-
+from cg.meta.deliver.api import DeliverAPI
 from cg.apps.lims import LimsAPI
 from cg.store import Store
 
@@ -14,18 +16,22 @@ LOG = logging.getLogger(__name__)
 
 class ReportAPI:
 
-    def __init__(self, db: Store, lims_api: LimsAPI, tb_api: TrailblazerAPI):
+    def __init__(self, db: Store, lims_api: LimsAPI, tb_api: TrailblazerAPI, deliver_api:
+    DeliverAPI):
         self.db = db
         self.lims = lims_api
         self.tb = tb_api
+        self.deliver = deliver_api
 
-    def collect_delivery_data(self, customer: str, family:str):
+    def collect_delivery_data(self, customer: str, family: str):
 
         delivery_data = self.lims.family(customer, family)
         delivery_data = self.generate_qc_data(delivery_data)
-        # call trailblazer to get qc data
-        #tb_data = self.tb.get_sampleinfo()
 
+        # call trailblazer to get trending data
+        trending_data = self.get_trending(family=family)
+
+        delivery_data += trending_data
 
         return delivery_data
 
@@ -69,7 +75,7 @@ class ReportAPI:
             application = self.db.Application.filter_by(tag=apptag_id).first()
             application_id = application.id
             is_accredited = application.is_accredited
-            version = self.db.ApplicationVersion\
+            version = self.db.ApplicationVersion \
                 .filter_by(application_id=application_id, version=apptag_version).first()
 
             if version:
@@ -94,3 +100,31 @@ class ReportAPI:
         template_out = template.render(**qc_data)
         print("2.11")
         return template_out
+
+    def _get_latest_raw_file(self, family: str, tag: str) -> str:
+        analysis_file_path = self.deliver.get_post_analysis_files(family=family,
+                                                                  version=False, tag=tag).first()
+        analysis_file_raw = self._open_file(analysis_file_path)
+        return analysis_file_raw
+
+    @staticmethod
+    def _open_file(file_path):
+        return ruamel.yaml.safe_load(Path(file_path).open())
+
+    def get_trending(self, family: str) -> dict:
+        """Get the sample info path for an analysis."""
+
+        # mip_config_raw (dict): raw YAML input from MIP analysis config file
+        mip_config_raw = self._get_latest_raw_file(family=family, tag='mip-config')
+
+        # qcmetrics_raw (dict): raw YAML input from MIP analysis qc metric file
+        qcmetrics_raw = self._get_latest_raw_file(family=family, tag='qcmetrics')
+
+        # sampleinfo_raw (dict): raw YAML input from MIP analysis qc sample info file
+        sampleinfo_raw = self._get_latest_raw_file(family=family, tag='sampleinfo')
+
+        trending = self.tb.get_trending(mip_config_raw=mip_config_raw,
+                                        qcmetrics_raw=qcmetrics_raw,
+                                        sampleinfo_raw=sampleinfo_raw)
+
+        return trending
