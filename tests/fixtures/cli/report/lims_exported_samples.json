@@ -1,6 +1,6 @@
 [{
             "id": "LIMSID1",
-            "name": "2016-20203",
+            "name": "2018-20203",
             "customer": "cust002",
             "sex": "male",
             "father": "",
@@ -8,7 +8,7 @@
             "status": "affected",
             "application": "WGTPCFC030",
             "application_version": "1",
-            "family": "F0009703",
+            "family": "F0009604",
             "panels": ["OMIM-AUTO"],
             "comment": "Express sample",
             "project": "testprojeject qwerty",
@@ -17,7 +17,7 @@
             "priority": "express"
     }, {
             "id": "LIMSID2",
-            "name": "2016-20204",
+            "name": "2018-20204",
             "customer": "cust002",
             "sex": "female",
             "father": "",
@@ -25,7 +25,7 @@
             "status": "unaffected",
             "application": "WGTPCFC030",
             "application_version": "1",
-            "family": "F0009704",
+            "family": "F0009604",
             "panels": ["SKD"],
             "comment": "",
             "project": "testprojeject asdf",

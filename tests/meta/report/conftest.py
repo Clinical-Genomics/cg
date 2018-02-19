@@ -13,6 +13,7 @@ class MockLims():
 
     def get_prep_method(self, lims_id: str) -> str:
         return 'CG002 - End repair Size selection A-tailing and Adapter ligation (TruSeq PCR-free ' \
+               '' \
                'DNA)'
 
     def get_sequencing_method(self, lims_id: str) -> str:
@@ -55,10 +56,44 @@ class MockLims():
         return family_data
 
 
+class MockTB():
+
+    def get_trending(self, mip_config_raw: dict, qcmetrics_raw: dict, sampleinfo_raw: dict) -> dict:
+        # Returns: dict: parsed data
+        ### Define output dict
+        outdata = {
+            'analysis_sex': {'female'},
+            'family': 'yellowhog',
+            'duplicates': {'13.525'},
+            'genome_build': 'hg19',
+            'mapped_reads': {'98.8'},
+            'mip_version': 'v4.0.20',
+            'sample_ids': ['2018-20203', '2018-20204'],
+        }
+
+        return outdata
+
+class MockDeliver():
+
+    def get_post_analysis_files(self, family: str, version, tag):
+
+        if tag == 'mip-config':
+            return ['/mnt/hds/proj/bioinfo/bundles/' + family + '/2018-01-30/' + family + \
+                '_config.yaml']
+        elif tag == 'sampleinfo':
+            return ['/mnt/hds/proj/bioinfo/bundles/' + family + '/2018-01-30/' + family + \
+                '_qc_sample_info.yaml']
+        if tag == 'qcmetrics':
+            return ['/mnt/hds/proj/bioinfo/bundles/' + family + '/2018-01-30/' + family + \
+                '_qc_metrics.yaml']
+
+
 @pytest.fixture(scope='function')
 def report_api(base_store):
     lims = MockLims()
-    _report_api = ReportAPI(lims_api=lims, db=base_store)
+    tb = MockTB()
+    deliver = MockDeliver()
+    _report_api = ReportAPI(lims_api=lims, db=base_store, tb_api=tb, deliver_api=deliver)
     return _report_api
 
 
