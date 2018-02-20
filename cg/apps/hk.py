@@ -27,3 +27,6 @@ class HousekeeperAPI(Store):
                             .filter(models.Bundle.name == bundle)
                             .order_by(models.Version.created_at.desc())
                             .first())
+
+    def get_files(self, bundle: str, tags: list):
+        return self.files(bundle=bundle, tags=tags)
