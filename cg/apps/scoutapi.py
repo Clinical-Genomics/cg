@@ -4,6 +4,7 @@ from typing import List
 
 from pymongo import MongoClient
 from scout.adapter.mongo import MongoAdapter
+from scout.adapter.mongo.panel import PanelHandler
 from scout.export.panel import export_panels as scout_export_panels
 from scout.load import load_scout
 from scout.parse.case import parse_case_data
@@ -36,6 +37,6 @@ class ScoutAPI(MongoAdapter):
             LOG.debug("load new Scout case")
             load_scout(self, config_data)
 
-    def export_panels(self, panels: List[str]):
+    def export_panels(self, panels: List[str], versions: None):
         """Pass through to export of a list of gene panels."""
-        return scout_export_panels(self, panels)
+        return scout_export_panels(self, panels, versions)
