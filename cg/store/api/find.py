@@ -99,7 +99,7 @@ class FindHandler:
                 with_entities(models.Analysis.id, func.max(models.Analysis.started_at).label('started_at')).subquery()
             records = records.join(
                 subq,
-                and_(self.Analysis.id == subq.c.id, self.Analysis.started_at == subq.c.started_at)
+                self.Analysis.id == subq.c.id
             ).filter(models.Analysis.started_at < before)
         return records
 
