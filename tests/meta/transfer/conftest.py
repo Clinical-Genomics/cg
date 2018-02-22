@@ -32,8 +32,9 @@ def base_store_stats(store_stats, data):
     """Setup CGStats store with sample data."""
     demuxes = {}
     for sample_data in data['samples']:
-        project = store_stats.Project(projectname='test', time=dt.datetime.now())
-        sample = store_stats.Sample(samplename=sample_data['name'], barcode=sample_data['index'])
+        project = store_stats.Project(projectname=‘test’, time=dt.datetime.now())
+        sample = store_stats.Sample(samplename=sample_data[‘name’], barcode=sample_data[‘index’],
+                                   limsid=sample_data[‘name’])
         sample.project = project
         unaligned = store_stats.Unaligned(readcounts=300000000, q30_bases_pct=85)
         unaligned.sample = sample
