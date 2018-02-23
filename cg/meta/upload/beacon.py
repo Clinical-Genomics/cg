@@ -61,7 +61,7 @@ class UploadBeaconApi():
         if sample_ids:
             # Check if any of these samples are already in beacon. If they are raise error
             for sample in sample_ids:
-                if len(self.status.sample(sample).beaconized_at) > 0:
+                if self.status.sample(sample).beaconized_at and len(self.status.sample(sample).beaconized_at) > 0:
                     LOG.critical("It looks like sample %s is already in Beacon! If you want to re-import it you have to remove its variants first! --> (cg clean beacon %s -type sample).",sample, sample)
                     sys.exit(1)
 
