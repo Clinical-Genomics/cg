@@ -37,7 +37,7 @@ class ScoutAPI(MongoAdapter):
             LOG.debug("load new Scout case")
             load_scout(self, config_data)
 
-    def export_panels(self, panels: List[str], versions: None):
+    def export_panels(self, panels: List[str], versions=None):
         """Pass through to export of a list of gene panels."""
         return scout_export_panels(self, panels, versions)
 
