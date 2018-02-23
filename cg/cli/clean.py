@@ -35,7 +35,7 @@ def beacon(context: click.Context, item_type, item_id):
     api = UploadBeaconApi(
         status=context.obj['db'],
         hk_api=context.obj['hk'],
-        scout_api=scoutapi.ScoutAPI(context.obj),
+        scout_api=context.obj['scout'],
         beacon_api=beacon_app.BeaconApi(context.obj),
     )
     result = api.remove_vars(
