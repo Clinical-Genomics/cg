@@ -145,6 +145,7 @@ class LimsAPI(Lims, OrderHandler):
         family_data = {'family': family, 'customer': customer, 'samples': []}
         priorities = set()
         panels = set()
+
         for sample_data in samples_data:
             priorities.add(sample_data['priority'])
             if sample_data['panels']:
@@ -256,7 +257,7 @@ class LimsAPI(Lims, OrderHandler):
         return f"{method_number}:{method_version} - {method_name}"
 
     def get_processing_time(self, lims_id):
-        received_at = self.lims.get_received_date(lims_id)
-        delivery_date = self.lims.get_delivery_date(lims_id)
+        received_at = self.get_received_date(lims_id)
+        delivery_date = self.get_delivery_date(lims_id)
         if received_at and delivery_date:
             return delivery_date - received_at

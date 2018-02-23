@@ -69,3 +69,24 @@ class ChanjoAPI(ChanjoDB):
             'mean_completeness': result.mean_completeness,
         } for result in query}
         return data
+
+    def sample_coverage(self, sample_id: str) -> dict:
+        """Calculate coverage for samples."""
+        query = self.query(
+            models.TranscriptStat.sample_id.label('sample_id'),
+            func.avg(models.TranscriptStat.mean_coverage).label('mean_coverage'),
+            func.avg(models.TranscriptStat.completeness_10).label('mean_completeness'),
+        ).join(
+            models.TranscriptStat.transcript,
+        ).filter(
+            models.TranscriptStat.sample_id == sample_id,
+        ).group_by(models.TranscriptStat.sample_id)
+
+        result = query.first()
+
+        data = {
+            'mean_coverage': result.mean_coverage,
+            'mean_completeness': result.mean_completeness,
+        }
+
+        return data

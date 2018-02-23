@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <title>Clinical Genomics Report - {{ family_id }}</title>
+    <title>Clinical Genomics Report - {{ family }}</title>
 
     {{ css() }}
     {{ custom_css() }}
@@ -20,7 +20,7 @@
 
         <ul class="list-group list-group-flush">
           <li class="list-group-item">
-            Leveransrapport för {{ customer.name }}, familj {{ family_id }}<br>
+            Leveransrapport för {{ customer_obj.name }}, familj {{ family }}<br>
             Datum: {{ today.date() }}
           </li>
         </ul>
@@ -40,7 +40,7 @@
             <div class="col">
               <h4>Kundinformation</h4>
               <address>
-                {{ customer.invoice_address|replace('\n', '<br>')|safe }}
+                {{ customer_obj.invoice_address|replace('\n', '<br>')|safe }}
               </address>
             </div>
             {% if accredited %}
@@ -59,7 +59,6 @@
                 <th>Familj</th>
                 <th>Kön</th>
                 <th>Status</th>
-                <th>Genpanel(er)</th>
                 <th>Vävnad</th>
                 <th>Ticket</th>
                 <th>Analys</th>
@@ -73,17 +72,16 @@
                   <td>
                     {{ sample.sex }}
                     ( analys:
-                      {% if sample.sex != sample.sex_predicted %}
-                        <span class="text-danger">{{ sample.sex_predicted }}</span>
+                      {% if sample.sex != sample.analysis_sex %}
+                        <span class="text-danger">{{ sample.analysis_sex }}</span>
                       {% else %}
-                        <span class="text-success">{{ sample.sex_predicted }}</span>
+                        <span class="text-success">{{ sample.analysis_sex }}</span>
                       {% endif %})
                   </td>
                   <td>{{ sample.status }}</td>
-                  <td>{{ panels|join(', ') }}</td>
                   <td>{{ sample.source }}</td>
-                  <td>{{ sample.project }}</td>
-                  <td>{{ sample.app_tag }}</td>
+                  <td>{{ sample.ticket }}</td>
+                  <td>{{ sample.application }}</td>
                 </tr>
               {% endfor %}
             </tbody>
@@ -107,11 +105,11 @@
                 <tr>
                   <td>{{ sample.name }}</td>
                   <td>{{ sample.received }}</td>
-                  <td>{{ sample.prep_method or "N/A" }}</td>
-                  <td>{{ sample.sequencing_method or "N/A" }}</td>
-                  <td>{{ sample.delivery_method or "N/A" }}</td>
+                  <td>{{ sample.prep_method }}</td>
+                  <td>{{ sample.sequencing_method }}</td>
+                  <td>{{ sample.delivery_method }}</td>
                   <td>
-                    {{ sample.delivery_date.date() if sample.delivery_date }}
+                    {{ sample.delivery_date }}
                     {% if sample.processing_time %}
                       ({{ sample.processing_time }} dagar)
                     {% endif %}
@@ -133,9 +131,9 @@
             <tbody>
               <tr>
                 <td>{{ family }}</td>
-                <td>{{ pipeline_version }}</td>
-                <td>{{ panels|join(', ') }}</td>
-                <td>{{ reference_genome }}</td>
+                <td>{{ mip_version }}</td>
+                <td>{{ panels }}</td>
+                <td>{{ genome_build }}</td>
               </tr>
             </tbody>
           </table>
@@ -158,31 +156,36 @@
               {% for sample in samples %}
                 <tr>
                   <td>{{ sample.name }}</td>
-                  <td>{{ (sample.read_pairs / 1000000)|round(1) }}</td>
-                  <td>{{ sample.mapped|round(3) * 100 }}</td>
-                  <td>{{ sample.target_coverage|round(3) }}</td>
-                  <td>{{ sample.target_completeness|round(3) * 100 }}</td>
-                  <td>{{ (sample.duplicates * 100)|round(3) }}</td>
+                  <td>{{ (sample.million_read_pairs) }}</td>
+                  <td>{{ sample.mapped_reads }}</td>
+                  <td>{{ sample.target_coverage }}</td>
+                  <td>{{ sample.target_completeness }}</td>
+                  <td>{{ (sample.duplicates) }}</td>
                 </tr>
               {% endfor %}
             </tbody>
           </table>
 
-          {% if customer.scout_access %}
+          {% if customer_obj.scout_access %}
             <p>
               Varianter finns uppladdade i Scout:
-              <a href="https://clinical-db.scilifelab.se:8083/{{ customer.customer_id }}/{{ family }}">https://clinical-db.scilifelab.se:8083/{{ customer.customer_id }}/{{ family }}</a>
+              <a href="https://scout.scilifelab.se/{{ customer_obj.internal_id }}/{{ family }}">https://scout.scilifelab.se/{{ customer_obj.internal_id }}/{{ family }}</a>
             </p>
           {% endif %}
         </div>
 
-        {% for application in applications %}
+        {% for application in application_objs %}
           <div class="card-block">
             <h4 class="card-title">
               Teknisk beskrivning av analysen: {{ application.tag }}
             </h4>
             <p class="card-text">{{ application.description }}</p>
-            <p class="card-text">{{ application.limitations if application.limitations }}</p>
+            {% if application.limitations %}
+            <h4 class="card-title">
+              Begränsningar av analysen: {{ application.tag }}
+            </h4>
+            <p class="card-text">{{ application.limitations }}</p>
+            {% endif %}
           </div>
         {% endfor %}
 

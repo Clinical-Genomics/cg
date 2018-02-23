@@ -10,7 +10,7 @@ import ruamel.yaml
 from trailblazer.mip.start import MipCli
 from trailblazer.store import Store, models
 from trailblazer.cli.utils import environ_email
-from trailblazer.mip import files, fastq #, trending
+from trailblazer.mip import files, fastq, trending
 
 from .add import AddHandler
 
@@ -77,21 +77,7 @@ class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
             analysis_obj.is_deleted = True
             self.commit()
 
-    def get_trending(self, mip_config_raw: dict, qcmetrics_raw: dict, sampleinfo_raw: dict) -> dict:
-        # Returns: dict: parsed data
-        ### Define output dict
-        #    outdata = {
-        #        'analysis_sex': {},
-        #        'family': None,
-        #        'duplicates': {},
-        #        'genome_build': None,
-        #        'mapped_reads': {},
-        #       'mip_version': None,
-        #        'sample_ids': [],
-        #    }
-
-        raise('Should call trending here')
-
-        #return trending.get_trending(mip_config_raw=mip_config_raw,
-        #                             qcmetrics_raw=qcmetrics_raw,
-        #                             sampleinfo_raw=sampleinfo_raw)
+    def get_trending(self, mip_config_raw: str, qcmetrics_raw: str, sampleinfo_raw: dict) -> dict:
+        return trending.parse_mip_analysis(mip_config_raw= mip_config_raw,
+                                           qcmetrics_raw=qcmetrics_raw,
+                                           sampleinfo_raw=sampleinfo_raw)
