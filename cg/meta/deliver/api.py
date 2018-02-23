@@ -30,14 +30,14 @@ class DeliverAPI:
         self.hk = hk_api
         self.lims = lims_api
 
-    def get_post_analysis_files(self, family: str, version, tag):
+    def get_post_analysis_files(self, family: str, version, tags: list):
 
         if not version:
             last_version = self.hk.last_version(bundle=family)
         else:
             last_version = self.hk.version(bundle=family, date=version)
 
-        return self.hk.files(bundle=family, version=last_version.id, tags=tag).all()
+        return self.hk.files(bundle=family, version=last_version.id, tags=tags).all()
 
     def get_post_analysis_family_files(self, family: str, version, tag):
         """Link files from HK to cust inbox."""
@@ -70,3 +70,6 @@ class DeliverAPI:
                 sample_files.append(file_obj)
 
         return sample_files
+
+    def get_post_analysis_files_root_dir(self):
+        return self.hk.get_root_dir()

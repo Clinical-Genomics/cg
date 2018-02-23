@@ -4,24 +4,17 @@ import sys
 import json
 import click
 
-from cg.apps import tb, hk, lims
+from cg.apps.coverage import ChanjoAPI
+from cg.apps.hk import HousekeeperAPI
+from cg.apps.lims import LimsAPI
+from cg.apps.scoutapi import ScoutAPI
+from cg.apps.tb import TrailblazerAPI
+from cg.meta.analysis import AnalysisAPI
+from cg.meta.deliver.api import DeliverAPI
 from cg.store import Store
 from cg.meta.report.api import ReportAPI
 
 LOG = logging.getLogger(__name__)
-
-
-def validate_stdin(context, param, value):
-    """Validate piped input contains some data.
-
-    Raises:
-        click.BadParameter: if STDIN is empty
-    """
-    # check if input is a file or stdin
-    if value.name == '<stdin>' and sys.stdin.isatty():  # pragma: no cover
-        # raise error if stdin is empty
-        raise click.BadParameter('you need to pipe something to stdin')
-    return value
 
 
 @click.group()
@@ -29,25 +22,41 @@ def validate_stdin(context, param, value):
 def report(context):
     """Create Reports"""
     context.obj['db'] = Store(context.obj['database'])
+    context.obj['lims'] = LimsAPI(context.obj)
+    context.obj['tb'] = TrailblazerAPI(context.obj)
+    context.obj['hk'] = HousekeeperAPI(context.obj)
+    context.obj['deliver'] = DeliverAPI(context.obj, hk_api=context.obj['hk'], lims_api=context.obj['lims'])
+    context.obj['chanjo'] = ChanjoAPI(context.obj)
+    context.obj['scout'] = ScoutAPI(context.obj)
+    context.obj['analysis'] = AnalysisAPI(context.obj, hk_api=context.obj['hk'],
+                                          scout_api=context.obj['scout'], tb_api=context.obj['tb'],
+                                          lims_api=context.obj['lims'])
 
 
 @report.command()
-@click.argument('in_data', callback=validate_stdin,
-                type=click.File(encoding='utf-8', mode='r'), default='-', required=False)
+@click.argument('customer_id')
+@click.argument('family_id')
 @click.pass_context
-def qc(context, in_data):
-    """Generate a QC report for a case."""
+def delivery(context, customer_id, family_id):
+    """Generate a delivery report for a case."""
 
-    case_data = json.load(in_data)
     db = context.obj['db']
+    lims = context.obj['lims']
+    tb = context.obj['tb']
+    deliver = context.obj['deliver']
+    chanjo = context.obj['chanjo']
+    analysis = context.obj['analysis']
+
     report_api = ReportAPI(
         db=db,
-        hk_api=hk.HousekeeperAPI(context.obj),
-        lims_api=lims.LimsAPI(context.obj)
+        lims_api=lims,
+        tb_api=tb,
+        deliver_api=deliver,
+        chanjo_api=chanjo,
+        analysis_api=analysis
     )
 
-    qc_data = report_api.generate_qc_data(db, case_data)
-    template_out = report_api.render_qc_report(qc_data)
+    template_out = report_api.create_delivery_report(customer_id, family_id)
     click.echo(template_out)
 
 
