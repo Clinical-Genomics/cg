@@ -23,6 +23,7 @@ def clean(context):
     context.obj['tb'] = tb.TrailblazerAPI(context.obj)
     context.obj['hk'] = hk.HousekeeperAPI(context.obj)
     context.obj['scout'] = scoutapi.ScoutAPI(context.obj)
+    context.obj['beacon'] = beacon_app.BeaconApi(context.obj)
 
 
 @clean.command()
@@ -35,8 +36,8 @@ def beacon(context: click.Context, item_type, item_id):
     api = UploadBeaconApi(
         status=context.obj['db'],
         hk_api=context.obj['hk'],
-        scout_api=scoutapi.ScoutAPI(context.obj),
-        beacon_api=beacon_app.BeaconApi(context.obj),
+        scout_api=context.obj['scout'],
+        beacon_api=context.obj['beacon'],
     )
     result = api.remove_vars(
         item_type = item_type,
