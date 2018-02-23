@@ -127,7 +127,10 @@ class AnalysisAPI():
             # figure out flowcell name from header
             with gzip.open(file_obj.full_path) as handle:
                 header_line = handle.readline().decode()
-                part1, part2 = header_line.split(' ', 1)
+                try:
+                    part1, part2 = header_line.split(' ', 1)
+                except ValueError:
+                    part1 = header_line
                 lane = part1.split(':')[3]
                 flowcell = part1.split(':')[2]
                 readnumber = part2.split(':')[0]
