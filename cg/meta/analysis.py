@@ -153,6 +153,9 @@ class AnalysisAPI():
             Y   Y if the read is filtered, N otherwise
             18  0 when none of the control bits are on, otherwise it is an even number
             ATCACG  index sequence
+
+
+        TODO: add unit test
         """
 
         rs = {
