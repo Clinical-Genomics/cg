@@ -95,11 +95,14 @@ class FindHandler:
         if before:
             subq = self.Analysis.query.\
                 join(models.Analysis.family).\
+                filter(models.Analysis.started_at < before).\
                 group_by(models.Family.id).\
-                with_entities(models.Analysis.id, func.max(models.Analysis.started_at).label('started_at')).subquery()
+                with_entities(models.Analysis.family_id, func.max(models.Analysis.started_at).label('started_at')).subquery()
             records = records.join(
                 subq,
-                and_(self.Analysis.id == subq.c.id, self.Analysis.started_at == subq.c.started_at)
+                and_(
+                    self.Analysis.family_id == subq.c.family_id,
+                    self.Analysis.started_at == subq.c.started_at)
             ).filter(models.Analysis.started_at < before)
         return records
 
