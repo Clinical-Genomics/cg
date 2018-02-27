@@ -45,11 +45,10 @@ def beacon(context: click.Context, item_type, item_id):
     )
 
 @clean.command()
-@click.option('-d', '--dry', is_flag=True, help='print config to console')
 @click.option('-y', '--yes', is_flag=True, help='skip confirmation')
 @click.argument('sample_info', type=click.File('r'))
 @click.pass_context
-def mip(context, dry, yes, sample_info):
+def mip(context, yes, sample_info):
     """Remove analysis output."""
     raw_data = ruamel.yaml.safe_load(sample_info)
     data = context.obj['tb'].parse_sampleinfo(raw_data)
@@ -126,7 +125,7 @@ def mipauto(context: click.Context, before_str: str, yes: bool=False):
     old_analyses = context.obj['db'].analyses(before=before)
     for status_analysis in old_analyses:
         family_id = status_analysis.family.internal_id
-        LOG.info(f"{family_id}: clean up analysis output")
+        LOG.debug(f"{family_id}: clean up analysis output")
         tb_analysis = context.obj['tb'].find_analysis(
             family=family_id,
             started_at=status_analysis.started_at,
