@@ -60,12 +60,25 @@ def analysis(context, priority, email, family_id):
 @click.argument('family_id')
 @click.pass_context
 def config(context, dry, family_id):
-    """Generate a config for the FAMILY_ID."""
+    """Generate a config for the FAMILY_ID.
+    
+    Args:
+        dry (Bool): Print config to console
+        family_id (Str):
+        
+    Returns:
+    """
+    # Get family meta data 
     family_obj = context.obj['db'].family(family_id)
+    
+    # MIP formated pedigree.yaml config
     config_data = context.obj['api'].config(family_obj)
+
+    # Print to console
     if dry:
         print(config_data)
     else:
+        # Write to trailblazer root dir / family_id
         out_path = context.obj['tb'].save_config(config_data)
         LOG.info(f"saved config to: {out_path}")
 
