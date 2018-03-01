@@ -6,3 +6,4 @@
     * [Analysis](documentation/commands/analysis.md)
 * [Workflows](documentation/workflow/README.md)
     * [Analyses](documentation/workflow/analyses.md)
+    * [Uploads](documentation/workflow/uploads.md)
