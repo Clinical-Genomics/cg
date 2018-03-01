@@ -8,7 +8,7 @@ Analyses are automatically started according to the "Families to analyze" queue.
 
 This process involves a set of steps that setup the environment to prepare for analysis start:
 
-- [config](https://github.com/Clinical-Genomics/cf/blob/master/documentation/workflow/analyses.html): a pedigree config is created in a "family" directory in the analysis root folder. Information is mainly fetched from _status_ with some exceptions like picking up capture kit version which is stored in LIMS.
+- [config](https://github.com/Clinical-Genomics/cg/blob/master/documentation/commands/analysis.md): a pedigree config is created in a "family" directory in the analysis root folder. Information is mainly fetched from _status_ with some exceptions like picking up capture kit version which is stored in LIMS.
 
       cg analysis config FAMILY-ID
 
