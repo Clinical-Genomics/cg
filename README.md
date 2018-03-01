@@ -13,6 +13,22 @@ In this context, `cg` provides the interface between these tools to facilitate a
 - HTTP REST for powering the web portal: [clinical.scilifelab.se][portal]
 - CLI for interactions on the command line
 
+## Installation
+
+Cg written in Python 3.6+ and is available on the [Python Package Index][pypi] (PyPI).
+
+```bash
+pip install cg
+```
+
+If you would like to install the latest development version:
+
+```bash
+git clone https://github.com/Clinical-Genomics/cg
+cd cg
+pip install --editable .
+```
+
 ## This package
 
 This package is a little special. Essentially it should include all the "Clinical"-specific code that has to be integrated across multiple tools such as LIMS, Trailblazer, Scout etc. However, we still aim to structure it in such a way as to make maintainance as smooth as possible!
