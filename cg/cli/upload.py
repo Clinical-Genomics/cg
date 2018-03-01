@@ -29,17 +29,16 @@ def upload(context, family_id):
         if analysis_obj.uploaded_at is not None:
             message = f"analysis already uploaded: {analysis_obj.uploaded_at.date()}"
             click.echo(click.style(message, fg='yellow'))
-            context.abort()
+        else:
+            context.invoke(coverage, family_id=family_id)
+            context.invoke(validate, family_id=family_id)
+            context.invoke(genotypes, family_id=family_id)
+            context.invoke(observations, family_id=family_id)
+            context.invoke(scout, family_id=family_id)
 
-        context.invoke(coverage, family_id=family_id)
-        context.invoke(validate, family_id=family_id)
-        context.invoke(genotypes, family_id=family_id)
-        context.invoke(observations, family_id=family_id)
-        context.invoke(scout, family_id=family_id)
-
-        analysis_obj.uploaded_at = dt.datetime.now()
-        context.obj['status'].commit()
-        click.echo(click.style(f"{family_id}: analysis uploaded!", fg='green'))
+            analysis_obj.uploaded_at = dt.datetime.now()
+            context.obj['status'].commit()
+            click.echo(click.style(f"{family_id}: analysis uploaded!", fg='green'))
 
 
 @upload.command()
