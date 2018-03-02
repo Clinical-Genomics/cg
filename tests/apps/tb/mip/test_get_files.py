@@ -110,20 +110,22 @@ def test_get_files(files_data) -> dict:
         bai_path = f"{bam_path}.bai"
         if not Path(bai_path).exists():
             bai_path = bam_path.replace('.bam', '.bai')
-
-        ## Downsamples MT bam
-        mt_bam_path = sample_data['subsample_mt']
-        mt_bai_path = f"{mt_bam_path}.bai"
-        if not Path(mt_bai_path).exists():
-            mt_bai_path = mt_bam_path.replace('.bam', '.bai')
         mip_file_test_sample_data[sample_data['id']] = {
             'bam': bam_path,
             'bam-index': bai_path,
-            'bam-mt': mt_bam_path,
-            'bam-mt-index': mt_bai_path,
             'coverage': sample_data['sambamba'],
             'vcf2cytosure': sample_data['vcf2cytosure'],
         }
+
+        ## Only wgs data
+        ## Downsamples MT bam
+        if sample_data['subsample_mt']:
+            mt_bam_path = sample_data['subsample_mt']
+            mt_bai_path = f"{mt_bam_path}.bai"
+            if not Path(mt_bai_path).exists():
+                mt_bai_path = mt_bam_path.replace('.bam', '.bai')
+            mip_file_test_sample_data[sample_data['id']]['bam-mt'] = mt_bam_path
+            mip_file_test_sample_data[sample_data['id']]['bam-mt-index'] = mt_bai_path 
 
     ## Check returns from def
     ## Sample data
