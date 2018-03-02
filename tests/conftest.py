@@ -6,6 +6,36 @@ import pytest
 
 from cg.store import Store
 
+## Trailblazer
+from trailblazer.mip import files as mip_files_api
+import ruamel.yaml
+
+## Trailblazer api for mip files
+@pytest.fixture(scope='session')
+def files():
+    return {
+        'config': 'tests/fixtures/apps/tb/family/family_config.yaml',
+        'sampleinfo': 'tests/fixtures/apps/tb/family/family_qc_sample_info.yaml',
+        'qcmetrics': 'tests/fixtures/apps/tb/family/family_qc_metrics.yaml',
+    }
+
+
+@pytest.fixture(scope='session')
+def files_raw(files):
+    return {
+        'config': ruamel.yaml.safe_load(open(files['config'])),
+        'sampleinfo': ruamel.yaml.safe_load(open(files['sampleinfo'])),
+        'qcmetrics': ruamel.yaml.safe_load(open(files['qcmetrics'])),
+    }
+
+
+@pytest.fixture(scope='session')
+def files_data(files_raw):
+    return {
+        'config': mip_files_api.parse_config(files_raw['config']),
+        'sampleinfo': mip_files_api.parse_sampleinfo(files_raw['sampleinfo']),
+        'qcmetrics': mip_files_api.parse_qcmetrics(files_raw['qcmetrics']),
+}
 
 @pytest.yield_fixture(scope='function')
 def store() -> Store:
