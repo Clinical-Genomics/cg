@@ -75,9 +75,21 @@ class AnalysisAPI():
         self.db.commit()
 
     def config(self, family_obj: models.Family) -> dict:
-        """Make the MIP config."""
+        """Make the MIP config. Meta data for the family is taken from the family object
+        and converted to MIP format via trailblazer. 
+        
+        Args:
+            family_obj (models.Family):
+        
+        Returns:
+            dict: config_data (MIP format)
+        """
+        # Fetch data for creating a MIP config file
         data = self.build_config(family_obj)
+        
+        # Validate and reformat to MIP config format
         config_data = self.tb.make_config(data)
+        
         return config_data
 
     def build_config(self, family_obj: models.Family) -> dict:
@@ -119,6 +131,63 @@ class AnalysisAPI():
             data['samples'].append(sample_data)
         return data
 
+    @staticmethod
+    def _fastq_header(line):
+        """handle illumina's two different header formats
+        @see https://en.wikipedia.org/wiki/FASTQ_format
+
+        @HWUSI-EAS100R:6:73:941:1973#0/1
+
+            HWUSI-EAS100R   the unique instrument name
+            6   flowcell lane
+            73  tile number within the flowcell lane
+            941     'x'-coordinate of the cluster within the tile
+            1973    'y'-coordinate of the cluster within the tile
+            #0  index number for a multiplexed sample (0 for no indexing)
+            /1  the member of a pair, /1 or /2 (paired-end or mate-pair reads only)
+
+        Versions of the Illumina pipeline since 1.4 appear to use #NNNNNN
+        instead of #0 for the multiplex ID, where NNNNNN is the sequence of the
+        multiplex tag.
+
+        With Casava 1.8 the format of the '@' line has changed:
+
+        @EAS139:136:FC706VJ:2:2104:15343:197393 1:Y:18:ATCACG
+
+            EAS139  the unique instrument name
+            136     the run id
+            FC706VJ     the flowcell id
+            2   flowcell lane
+            2104    tile number within the flowcell lane
+            15343   'x'-coordinate of the cluster within the tile
+            197393  'y'-coordinate of the cluster within the tile
+            1   the member of a pair, 1 or 2 (paired-end or mate-pair reads only)
+            Y   Y if the read is filtered, N otherwise
+            18  0 when none of the control bits are on, otherwise it is an even number
+            ATCACG  index sequence
+
+
+        TODO: add unit test
+        """
+
+        rs = {
+            'lane': None,
+            'flowcell': None,
+            'readnumber': None
+        }
+
+        parts = line.split(':')
+        if len(parts) == 5: # @HWUSI-EAS100R:6:73:941:1973#0/1
+            rs['lane'] = parts[1]
+            rs['flowcell'] = 'XXXXXX'
+            rs['readnumber'] = parts[-1].split('/')[-1]
+        if len(parts) == 10: # @EAS139:136:FC706VJ:2:2104:15343:197393 1:Y:18:ATCACG
+            rs['lane'] = parts[3]
+            rs['flowcell'] = parts[2]
+            rs['readnumber'] = parts[6].split(' ')[-1]
+
+        return rs
+
     def link_sample(self, link_obj: models.FamilySample):
         """Link FASTQ files for a sample."""
         file_objs = self.hk.files(bundle=link_obj.sample.internal_id, tags=['fastq'])
@@ -127,10 +196,10 @@ class AnalysisAPI():
             # figure out flowcell name from header
             with gzip.open(file_obj.full_path) as handle:
                 header_line = handle.readline().decode()
-                part1, part2 = header_line.split(' ', 1)
-                lane = part1.split(':')[3]
-                flowcell = part1.split(':')[2]
-                readnumber = part2.split(':')[0]
+                header_info = self._fastq_header(header_line)
+                lane = header_info['lane']
+                flowcell = header_info['flowcell']
+                readnumber = header_info['readnumber']
 
             data = {
                 'path': file_obj.full_path,

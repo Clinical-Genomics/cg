@@ -4,8 +4,12 @@ import logging
 import ruamel.yaml
 import click
 from dateutil.parser import parse as parse_date
+from datetime import datetime
 
-from cg.apps import tb, hk
+from path import Path
+
+from cg.apps import tb, hk, scoutapi, beacon as beacon_app
+from cg.meta.upload.beacon import UploadBeaconApi
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -17,14 +21,34 @@ def clean(context):
     """Remove stuff."""
     context.obj['db'] = Store(context.obj['database'])
     context.obj['tb'] = tb.TrailblazerAPI(context.obj)
+    context.obj['hk'] = hk.HousekeeperAPI(context.obj)
+    context.obj['scout'] = scoutapi.ScoutAPI(context.obj)
+    context.obj['beacon'] = beacon_app.BeaconApi(context.obj)
 
 
 @clean.command()
-@click.option('-d', '--dry', is_flag=True, help='print config to console')
+@click.option('-type', '--item_type', type=click.Choice(['family','sample']), required=True, help='family/sample to remove from beacon')
+@click.argument('item_id',  type=click.STRING)
+@click.pass_context
+def beacon(context: click.Context, item_type, item_id):
+    """Remove beacon for a sample or one or more affected samples from a family."""
+    LOG.info("Removing beacon vars for %s %s", item_type, item_id)
+    api = UploadBeaconApi(
+        status=context.obj['db'],
+        hk_api=context.obj['hk'],
+        scout_api=context.obj['scout'],
+        beacon_api=context.obj['beacon'],
+    )
+    result = api.remove_vars(
+        item_type = item_type,
+        item_id = item_id
+    )
+
+@clean.command()
 @click.option('-y', '--yes', is_flag=True, help='skip confirmation')
 @click.argument('sample_info', type=click.File('r'))
 @click.pass_context
-def mip(context, dry, yes, sample_info):
+def mip(context, yes, sample_info):
     """Remove analysis output."""
     raw_data = ruamel.yaml.safe_load(sample_info)
     data = context.obj['tb'].parse_sampleinfo(raw_data)
@@ -48,16 +72,60 @@ def mip(context, dry, yes, sample_info):
 
 
 @clean.command()
+@click.argument('bundle')
+@click.option('-y', '--yes', is_flag=True, help='skip checks')
+@click.pass_context
+def scout(context, bundle, yes):
+    files = []
+    for tag in ['bam', 'bai', 'bam-index']:
+        files.extend(context.obj['hk'].get_files(bundle=bundle, tags=[tag]))
+    for file_obj in files:
+        if file_obj.is_included:
+            question = f"{bundle}: remove file from file system and database: {file_obj.full_path}"
+        else:
+            question = f"{bundle}: remove file from database: {file_obj.full_path}"
+
+        if yes or click.confirm(question):
+            file_name = file_obj.full_path
+            if file_obj.is_included and Path(file_name).exists():
+                Path(file_name).unlink()
+
+            file_obj.delete()
+            context.obj['hk'].commit()
+            click.echo(f'{file_name} deleted')
+
+
+@clean.command()
+@click.option('-y', '--yes', is_flag=True, help='skip checks')
+@click.pass_context
+def scoutauto(context, yes):
+    """Automatically clean up solved and archived scout cases"""
+    bundles = []
+    for status in 'archived', 'solved':
+        cases = context.obj['scout'].get_cases(status=status, reruns=False)
+        cases_added = 0
+        for case in cases:
+            x_days_ago = datetime.now() - case.get('analysis_date')
+            if x_days_ago.days > 30:
+                bundles.append(case.get('_id'))
+                cases_added += 1
+        LOG.info(f'{cases_added} cases marked for bam removal :)')
+
+    for bundle in bundles:
+        context.invoke(scout, bundle=bundle, yes=yes)
+
+
+@clean.command()
 @click.option('-y', '--yes', is_flag=True, help='skip confirmation')
 @click.argument('before_str')
 @click.pass_context
-def auto(context: click.Context, before_str: str, yes: bool=False):
+def mipauto(context: click.Context, before_str: str, yes: bool=False):
     """Automatically clean up "old" analyses."""
     before = parse_date(before_str)
     old_analyses = context.obj['db'].analyses(before=before)
     for status_analysis in old_analyses:
         family_id = status_analysis.family.internal_id
-        LOG.info(f"{family_id}: clean up analysis output")
+        LOG.debug(f"{family_id}: clean up analysis output")
         tb_analysis = context.obj['tb'].find_analysis(
             family=family_id,
             started_at=status_analysis.started_at,

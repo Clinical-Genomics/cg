@@ -32,9 +32,10 @@ class OrdersAPI(LimsHandler, StatusHandler):
             raise OrderError(error.args[0])
 
         # detect manual ticket assignment
-        ticket_match = re.search(r'^#?([0-9]{6})$', data['name'])
-        ticket_number = int(ticket_match.group()) if ticket_match else None
-        if ticket_number:
+        ticket_match = re.fullmatch(r'#([0-9]{6})', data['name'])
+
+        if ticket_match:
+            ticket_number = int(ticket_match.group(1))
             LOG.info(f"{ticket_number}: detected ticket in order name")
             data['ticket'] = ticket_number
         else:
@@ -45,6 +46,10 @@ class OrdersAPI(LimsHandler, StatusHandler):
 
                     for sample in data.get('samples'):
                         message += '<br />' + sample.get('name')
+
+                        if sample.get('internal_id'):
+                            message += ' (already existing sample)'
+
                         if sample.get('comment'):
                             message += ' ' + sample.get('comment')
 
@@ -55,7 +60,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
 
                     if ticket.get('name'):
                         message += f"<br />{ticket.get('name')}"
-
+                        
                     data['ticket'] = self.osticket.open_ticket(
                         name=ticket['name'],
                         email=ticket['email'],

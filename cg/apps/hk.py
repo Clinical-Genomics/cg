@@ -30,3 +30,6 @@ class HousekeeperAPI(Store):
 
     def get_root_dir(self):
         return self.root_dir
+
+    def get_files(self, bundle: str, tags: list):
+        return self.files(bundle=bundle, tags=tags)
