@@ -1,14 +1,25 @@
 language: python
-sudo: false
+
 python:
     - '3.6'
 
 install:
-    - pip install cython
     - pip install -r requirements.txt -r requirements-dev.txt -e .
 
 script:
-     - py.test -rxs tests/
+    - coverage run --source "$(basename "$PWD")" setup.py test
+
+after_success: coveralls
 
 notifications:
     email: never
+
+deploy:
+- provider: pypi
+  user: robinandeer
+  password:
+    secure: SXvkMHpg5sXUDIqje6mwoZ2j5I6m1NtXMcRRhPu+u0UfnELt3YePsjkFK05VlMyI+6OHU6OzGQTmSprRbB5OUcWhj+6HMh/svlVUePxOfLJW3VBm/eQF/zUwre5TlwdvzGAcjU43lP/KzGzM7ZL9xaLC1SW3zS+UMtUqBNuHypMlr8IOodxca7QdBiHn8JCcX01MkiufsH3seKql6ljA2sK0tD8+4ZmVSYYi7Ce2DkqI0Ar9ggFWJmcUYFqeiyL+UNZDpZQdytPzJykG1oE0ys+EzlkAlZHLLY3TQVdEyQo6BWwNg5jwKHHFKaowfDXp1TGxLHqTC4PNKh8mrfqLKyUGFxyqFP+YyhDfch0fsovZDFd4r9VuLCanRl9fufqHFJFFWCkabJA8q45sVRm9NBWSxUvOs8pmezxel90p8FGU1nzVjlo+N5uoScWCI1qN1jnCKByCV6fhjsHXbdoVQg05VrVt/zFq75LRn3WKQiQy/qfQ9hMhoQsBdxfvpegjzgd/sueEW1MHeds6jL+6+RuFnlvmc6M2ZpO1JGFEHarAXFMpZQWOaO6Ha4R4U1oDJHOFMwiFLXh4NjtpOPSZdXqu4Hbxyi18pfrPVM/GDJJ6fWBZaXkCX5lZPVecW0ISKd0YA/5qui4OytkXlYK89WCs9R3xUi/6QtbdhM1hFnI=
+  on:
+    tags: true
+    distributions: sdist bdist_wheel
+    repo: Clinical-Genomics/cg
