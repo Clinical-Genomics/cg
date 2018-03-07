@@ -61,7 +61,12 @@ setup(
         'console_scripts': ['cg=cg.cli:base'],
     },
     # install requirements loaded from "./requirements.txt"
+    # Install requirements loaded from ``requirements.txt``
     install_requires=parse_reqs(),
+    tests_require=[
+        'pytest',
+    ],
+    cmdclass=dict(test=PyTest),
     classifiers=[
         'Programming Language :: Python',
         'Programming Language :: Python :: 3.6',
