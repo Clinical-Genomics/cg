@@ -6,6 +6,7 @@ from pathlib import Path
 import click
 
 from cg.apps import hk, tb
+from cg.meta import report
 from cg.exc import AnalysisNotFinishedError
 from cg.store import Store
 
@@ -19,6 +20,7 @@ def store(context):
     context.obj['db'] = Store(context.obj['database'])
     context.obj['tb_api'] = tb.TrailblazerAPI(context.obj)
     context.obj['hk_api'] = hk.HousekeeperAPI(context.obj)
+    context.obj['report_api'] = report.ReportAPI(context.obj)
 
 
 @store.command()
@@ -29,8 +31,17 @@ def analysis(context, config_stream):
     status = context.obj['db']
     tb_api = context.obj['tb_api']
     hk_api = context.obj['hk_api']
+    report_api = context.obj['report_api']
 
-    # gather files and bundle in Housekeeper
+    new_analysis = _gather_files_and_bundle_in_housekeeper(config_stream, context, hk_api,
+                                                           report_api, status, tb_api)
+
+    status.add_commit(new_analysis)
+    click.echo(click.style('included files in Housekeeper', fg='green'))
+
+
+def _gather_files_and_bundle_in_housekeeper(config_stream, context, hk_api, report_api, status,
+                                            tb_api):
     try:
         bundle_data = tb_api.add_analysis(config_stream)
     except AnalysisNotFinishedError as error:
@@ -46,12 +57,39 @@ def analysis(context, config_stream):
     except FileNotFoundError as error:
         click.echo(click.style(f"missing file: {error.args[0]}", fg='red'))
         context.abort()
+    family_obj = _add_new_analysis_to_the_status_API(bundle_obj, status)
+    _reset_the_action_on_the_family_from_running(family_obj)
+    new_analysis = _add_new_complete_analysis_record(bundle_data, family_obj, status, version_obj)
+    delivery_report_file = report_api.create_temporary_delivery_report_file(
+        customer_id=family_obj.customer_id, family_id=family_obj.name)
+    _add_report_to_hk(delivery_report_file, hk_api, status, version_obj)
+    version_date = version_obj.created_at.date()
+    click.echo(f"new bundle added: {bundle_obj.name}, version {version_date}")
+    _include_the_files_in_the_housekeeper_system(bundle_obj, context, hk_api, version_obj)
+    return new_analysis
 
-    # add new analysis to the status API
-    family_obj = status.family(bundle_obj.name)
-    # reset the action on the family (from 'running')
-    family_obj.action = None
-    # add new complete analysis record
+
+def _add_report_to_hk(delivery_report_file, hk_api, version_obj):
+    tag_name = 'DELIVERY-REPORT'    # CHANGE!
+    new_file = hk_api.new_file(
+        path=str(Path(delivery_report_file).absolute()),
+        to_archive=False,
+        tags=[hk_api.tag(tag_name)]
+    )
+    new_file.version = version_obj
+    hk_api.add_commit(new_file)
+
+
+def _include_the_files_in_the_housekeeper_system(bundle_obj, context, hk_api, version_obj):
+    try:
+        hk_api.include(version_obj)
+    except hk.VersionIncludedError as error:
+        click.echo(click.style(error.message, fg='red'))
+        context.abort()
+    hk_api.add_commit(bundle_obj, version_obj)
+
+
+def _add_new_complete_analysis_record(bundle_data, family_obj, status, version_obj):
     new_analysis = status.add_analysis(
         pipeline='mip',
         version=bundle_data['pipeline_version'],
@@ -60,19 +98,16 @@ def analysis(context, config_stream):
         primary=(len(family_obj.analyses) == 0),
     )
     new_analysis.family = family_obj
-    version_date = version_obj.created_at.date()
-    click.echo(f"new bundle added: {bundle_obj.name}, version {version_date}")
+    return new_analysis
 
-    # include the files in the housekeeper system
-    try:
-        hk_api.include(version_obj)
-    except hk.VersionIncludedError as error:
-        click.echo(click.style(error.message, fg='red'))
-        context.abort()
 
-    hk_api.add_commit(bundle_obj, version_obj)
-    status.add_commit(new_analysis)
-    click.echo(click.style('included files in Housekeeper', fg='green'))
+def _reset_the_action_on_the_family_from_running(family_obj):
+    family_obj.action = None
+
+
+def _add_new_analysis_to_the_status_API(bundle_obj, status):
+    family_obj = status.family(bundle_obj.name)
+    return family_obj
 
 
 @store.command()
