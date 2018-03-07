@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import logging
 from datetime import datetime
+import os
+import tempfile
 
 import ruamel.yaml
 from jinja2 import Environment, PackageLoader, select_autoescape
@@ -30,9 +32,21 @@ class ReportAPI:
 
     def create_delivery_report(self, customer_id: str, family_id: str) -> str:
         """Generate the html contents of a delivery report."""
-        qc_data = self._get_delivery_data(customer_id, family_id)
-        template_out = self._render_delivery_report(qc_data)
-        return template_out
+        delivery_data = self._get_delivery_data(customer_id, family_id)
+        rendered_report = self._render_delivery_report(delivery_data)
+        return rendered_report
+
+    def create_temporary_delivery_report_file(self, customer_id: str, family_id: str):
+        """Generate a temporary file containing a delivery report."""
+
+        delivery_report = self.create_delivery_report(customer_id=customer_id,
+                                                      family_id=family_id)
+
+        delivery_report_file, delivery_report_filename = tempfile.NamedTemporaryFile(delete=False)
+        os.write(delivery_report_file, delivery_report)
+        os.close(delivery_report_file)
+
+        return delivery_report_file
 
     def _get_delivery_data(self, customer_id: str, family_id: str) -> dict:
         """Fetch all data needed to render a delivery report."""
@@ -136,13 +150,14 @@ class ReportAPI:
         if analysis_files:
             analysis_file_raw = self._open_bundle_file(analysis_files[0].path)
         else:
-            raise LOG.warning(f'No post analysis files received from DeliverAPI for \'{family_id}\'')
+            raise LOG.warning(
+                f'No post analysis files received from DeliverAPI for \'{family_id}\'')
 
         return analysis_file_raw
 
     def _open_bundle_file(self, relative_file_path: str) -> Any:
         """Open a bundle file and return it as an Python object."""
-        
+
         full_file_path = Path(self.deliver.get_post_analysis_files_root_dir()).joinpath(
             relative_file_path)
         open_file = ruamel.yaml.safe_load(Path(full_file_path).open())
