@@ -41,6 +41,14 @@ def delivery(context, customer_id, family_id):
     """Generate a delivery report for a case."""
 
     db = context.obj['db']
+    if db.customer(customer_id) is None:
+        LOG.error(f"{customer_id}: customer not found")
+        context.abort()
+
+    if db.family(family_id) is None:
+        LOG.error(f"{family_id}: family not found")
+        context.abort()
+
     lims = context.obj['lims']
     tb = context.obj['tb']
     deliver = context.obj['deliver']
