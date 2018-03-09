@@ -89,3 +89,4 @@ ENV/
 .ropeproject
 
 DEVELOP/
+tests/fixtures/cli/.DS_Store
