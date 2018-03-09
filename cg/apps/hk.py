@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime as dt
 import logging
+from pathlib import Path
 
 from housekeeper.exc import VersionIncludedError
 from housekeeper.include import include_version
@@ -33,3 +34,13 @@ class HousekeeperAPI(Store):
 
     def get_files(self, bundle: str, tags: list):
         return self.files(bundle=bundle, tags=tags)
+
+    def add_file(self, file, version_obj: models.Version, tag_name, to_archive=False):
+        """Add a file to housekeeper."""
+        new_file = self.new_file(
+            path=str(Path(file).absolute()),
+            to_archive=to_archive,
+            tags=[self.tag(tag_name)]
+        )
+        new_file.version = version_obj
+        self.add_commit(new_file)
