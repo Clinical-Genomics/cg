@@ -1,5 +1,10 @@
-
+import os
 from cg.meta.report.api import ReportAPI
+
+
+def test_init():
+    ReportAPI(lims_api='lims', db='analysis_store', tb_api='tb', deliver_api='deliver',
+              chanjo_api='chanjo', analysis_api='analysis')
 
 
 def test_collect_delivery_data(report_api):
@@ -53,7 +58,6 @@ def test_collect_delivery_data(report_api):
 
 
 def test_incorporate_delivery_date_from_lims(lims_samples, report_api):
-
     # GIVEN data from an analysed case and an initialised report_api
 
     # WHEN fetch_and_add_delivery_date_from_lims
@@ -68,7 +72,6 @@ def test_incorporate_delivery_date_from_lims(lims_samples, report_api):
 
 
 def test_incorporate_processing_time_from_lims(lims_samples, report_api):
-
     # GIVEN data from an analysed case and an initialised report_api
 
     # WHEN fetch_and_add_delivery_date_from_lims
@@ -80,21 +83,6 @@ def test_incorporate_processing_time_from_lims(lims_samples, report_api):
     #   delivery_date
     for sample in samples:
         assert sample['processing_time']
-
-
-def test_get_application_data_from_status_db(lims_samples, report_api):
-    # GIVEN data from an analysed case and an initialised report_api
-
-    # WHEN fetch_application_data_from_status_db
-    samples = lims_samples
-    application_data = report_api._get_application_data_from_status_db(samples)
-
-    # THEN
-    # the generated data has a property apptags with a value
-    assert application_data['application_objs']
-
-    # the generated data has a property accredited with a value
-    assert application_data['accredited'] is True
 
 
 def test_incorporate_lims_methods(lims_samples, report_api):
@@ -151,3 +139,165 @@ def test_create_delivery_report(report_api):
 
     # THEN a html report with certain data should have been rendered
     assert len(created_report) > 0
+
+
+def test_create_temporary_delivery_report_file(report_api: ReportAPI):
+    # GIVEN initialized ReportAPI
+
+    # WHEN rendering a report from that data
+    created_report_file = report_api.create_temporary_delivery_report_file(customer_id='cust002',
+                                                                           family_id='yellowhog')
+
+    # THEN a html report with certain data should have been created on disk
+    assert os.path.isfile(created_report_file.name)
+
+
+def test_get_latest_raw_file(report_api):
+    # GIVEN an initialised report_api and the deliver_api does not have what we want
+    report_api.deliver._get_post_analysis_files_returns_none = True
+
+    # WHEN failing to get raw files for a family
+    latest_raw_file = report_api._get_latest_raw_file(family_id='yellowbear', tag='anytag')
+
+    # THEN there should be a log entry about this
+    assert 'yellowbear' in report_api.LOG.get_last_warning()
+    assert latest_raw_file is None
+
+
+def test_open_bundle_file(report_api):
+    # GIVEN an initialised report_api
+
+    # WHEN failing to get raw files for a family because of strange tag
+    opened_file = report_api._open_bundle_file('/')
+
+    # THEN there should be a log entry about this
+    assert opened_file
+
+
+def test_get_latest_trending_data(report_api):
+    # GIVEN an initialised report_api and the deliver_api does not have what we want
+    report_api.tb._get_trending_raises_keyerror = True
+
+    # WHEN failing to get latest trending data for a family
+    latest_trending_data = report_api._get_latest_trending_data(family_id='bluebull')
+
+    # THEN there should be a log entry about this
+    assert 'bluebull' in report_api.LOG.get_last_warning()
+    assert not latest_trending_data
+
+
+def test_present_float_string():
+    # GIVEN
+
+    # WHEN formatting None
+    presentable_string = ReportAPI._present_float_string(None, 0)
+
+    # THEN we should get 'N/A' back
+    assert 'N/A' in presentable_string
+
+
+def test_present_date():
+    # GIVEN
+
+    # WHEN formatting None
+    presentable_string = ReportAPI._present_date(None)
+
+    # THEN we should get 'N/A' back
+    assert 'N/A' in presentable_string
+
+
+def test_present_string():
+    # GIVEN
+
+    # WHEN formatting None
+    presentable_string = ReportAPI._present_string(None)
+
+    # THEN we should get 'N/A' back
+    assert 'N/A' in presentable_string
+
+
+def test_present_int():
+    # GIVEN
+
+    # WHEN formatting None
+    presentable_string = ReportAPI._present_int(None)
+
+    # THEN we should get 'N/A' back
+    assert 'N/A' in presentable_string
+
+
+def test_present_set():
+    # GIVEN
+
+    # WHEN formatting None
+    presentable_string = ReportAPI._present_set(None)
+
+    # THEN we should get 'N/A' back
+    assert 'N/A' in presentable_string
+
+
+def test_incorporate_coverage_data(report_api, lims_samples):
+    # GIVEN an initialised report_api and the chanjo_api does not return what we want
+    report_api.chanjo._sample_coverage_returns_none = True
+    samples = lims_samples
+
+    # WHEN failing to get latest trending data for a family
+    report_api._incorporate_coverage_data(samples=samples)
+
+    # THEN there should be a log entry about this
+    for sample in samples:
+        lims_id = sample['id']
+        assert not sample.get('target_coverage')
+        assert not sample.get('target_completeness')
+        lims_id_found_in_warnings = False
+        for warning in report_api.LOG.get_warnings():
+            lims_id_found_in_warnings = lims_id in warning or lims_id_found_in_warnings
+        assert lims_id_found_in_warnings
+
+
+def test_fetch_samples_from_status_db(report_api):
+    # GIVEN an initialised report_api and the db returns samples without reads
+    report_api.db._family_samples_returns_no_reads = True
+
+    # WHEN fetching status data
+    samples = report_api._fetch_samples_from_status_db(family_id='yellowhog')
+
+    # THEN the report data should have N/A where it report sample reads
+    for sample in samples:
+        assert 'N/A' == sample.get('million_read_pairs')
+
+
+def test_get_application_data_from_status_db(lims_samples, report_api):
+    # GIVEN data from an analysed case and an initialised report_api
+
+    # WHEN fetch_application_data_from_status_db
+    samples = lims_samples
+    application_data = report_api._get_application_data_from_status_db(samples)
+
+    # THEN
+    # the generated data has a property apptags with a value
+    assert application_data['application_objs']
+
+
+def test_get_application_data_from_status_db_all_accredited(lims_samples, report_api):
+    # GIVEN data from an analysed case and an initialised report_api
+    report_api.db._application_accreditation = True
+
+    # WHEN fetch_application_data_from_status_db
+    samples = lims_samples
+    application_data = report_api._get_application_data_from_status_db(samples)
+
+    # THEN the generated data has a property accredited with a value
+    assert application_data['accredited'] is True
+
+
+def test_get_application_data_from_status_db_none_accredited(lims_samples, report_api):
+    # GIVEN data from an analysed case and an initialised report_api
+    report_api.db._application_accreditation = False
+
+    # WHEN fetch_application_data_from_status_db
+    samples = lims_samples
+    application_data = report_api._get_application_data_from_status_db(samples)
+
+    # THEN the generated data has a property accredited with a value
+    assert application_data['accredited'] is False
