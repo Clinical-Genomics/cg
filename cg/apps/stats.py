@@ -94,6 +94,6 @@ class StatsAPI(alchy.Manager):
         base_pattern = "*{}/Unaligned*/Project_*/Sample_{}/*.fastq.gz"
         alt_pattern = "*{}/Unaligned*/Project_*/Sample_{}_*/*.fastq.gz"
         for fastq_pattern in (base_pattern, alt_pattern):
-            pattern = fastq_pattern.format(flowcell, sample_obj.limsid)
+            pattern = fastq_pattern.format(flowcell, sample_obj.sampleid)
             files = self.root_dir.glob(pattern)
             yield from files
