@@ -4,10 +4,11 @@ import logging
 from pathlib import Path
 
 import click
+import os
 
 from cg.apps import hk, tb
-from cg.meta import report
 from cg.exc import AnalysisNotFinishedError
+from cg.meta.report.api import ReportAPI
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -20,7 +21,7 @@ def store(context):
     context.obj['db'] = Store(context.obj['database'])
     context.obj['tb_api'] = tb.TrailblazerAPI(context.obj)
     context.obj['hk_api'] = hk.HousekeeperAPI(context.obj)
-    context.obj['report_api'] = report.ReportAPI(context.obj)
+    context.obj['report_api'] = ReportAPI(context.obj)
 
 
 @store.command()
@@ -64,7 +65,7 @@ def _gather_files_and_bundle_in_housekeeper(config_stream, context, hk_api, repo
     delivery_report_file = report_api.create_temporary_delivery_report_file(
         customer_id=family_obj.customer_id, family_id=family_obj.name)
     _add_delivery_report_to_hk(delivery_report_file, hk_api, version_obj)
-
+    os.unlink(delivery_report_file)
     version_date = version_obj.created_at.date()
     click.echo(f"new bundle added: {bundle_obj.name}, version {version_date}")
     _include_the_files_in_the_housekeeper_system(bundle_obj, context, hk_api, version_obj)
@@ -73,13 +74,7 @@ def _gather_files_and_bundle_in_housekeeper(config_stream, context, hk_api, repo
 
 def _add_delivery_report_to_hk(delivery_report_file, hk_api, version_obj):
     tag_name = 'export'
-    new_file = hk_api.new_file(
-        path=str(Path(delivery_report_file).absolute()),
-        to_archive=False,
-        tags=[hk_api.tag(tag_name)]
-    )
-    new_file.version = version_obj
-    hk_api.add_commit(new_file)
+    hk_api.add_file(delivery_report_file, version_obj, tag_name)
 
 
 def _include_the_files_in_the_housekeeper_system(bundle_obj, context, hk_api, version_obj):
