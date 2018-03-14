@@ -32,7 +32,7 @@ python-dateutil
 genologics
 pymongo
 loqusdb>=1.0.0
-trailblazer>=2.1.1
+trailblazer>=2.0.0b1 #actually needs 2.1.1 or above for delivery report functionality
 housekeeper>=2.0.0b2
 chanjo>=4.2.0
 genotype>=2.2.0
