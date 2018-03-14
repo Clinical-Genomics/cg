@@ -89,4 +89,6 @@ ENV/
 .ropeproject
 
 DEVELOP/
-tests/fixtures/cli/.DS_Store
+
+# Apple-OS specific files
+.DS_Store
