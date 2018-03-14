@@ -1,6 +1,6 @@
-# cg
+# cg [![Build Status][travis-image]][travis-url] [![Coverage Status][coveralls-image]][coveralls-url]
 
-`cg` stands for _Clinical Genomics_; a clinical sequencing platform under [SciLifeLab][scilife].
+`cg` stands for _Clinical Genomics_; a clinical sequencing platform under [SciLifeLab][scilife] 
 
 This is our main package for interacting with data and samples that flow through our pipeline. We rely on a set of specialized "apps" to deal with a lot of complexity like:
 
@@ -335,3 +335,9 @@ Another module `/exc.py` contains the custom Exception classes that are used acr
 [click]: http://click.pocoo.org/5/
 [cgweb]: https://github.com/Clinical-Genomics/cgweb
 [servers]: https://github.com/Clinical-Genomics/servers
+
+[travis-url]: https://travis-ci.org/Clinical-Genomics/cg
+[travis-image]: https://img.shields.io/travis/Clinical-Genomics/cg.svg?style=flat-square
+
+[coveralls-url]: https://coveralls.io/github/Clinical-Genomics/cg
+[coveralls-image]: https://img.shields.io/coveralls/Clinical-Genomics/cg/badge.svg?style=flat-square
