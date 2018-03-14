@@ -1,6 +1,6 @@
-# cg
+# cg [![Build Status][travis-image]][travis-url] [![Coverage Status][coveralls-image]][coveralls-url]
 
-`cg` stands for _Clinical Genomics_; a clinical sequencing platform under [SciLifeLab][scilife] [![Build Status][travis-image]][travis-url] [![Coverage Status][coveralls-image]][coveralls-url]
+`cg` stands for _Clinical Genomics_; a clinical sequencing platform under [SciLifeLab][scilife] 
 
 This is our main package for interacting with data and samples that flow through our pipeline. We rely on a set of specialized "apps" to deal with a lot of complexity like:
 
