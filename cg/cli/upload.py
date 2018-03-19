@@ -28,19 +28,17 @@ def upload(context, family_id):
         analysis_obj = family_obj.analyses[0]
         if analysis_obj.uploaded_at is not None:
             message = f"analysis already uploaded: {analysis_obj.uploaded_at.date()}"
-            print("Im in upload")
-            context.invoke(coverage, re_upload='-r', family_id=family_id)
             click.echo(click.style(message, fg='yellow'))
         else:
-            #context.invoke(coverage, family_id=family_id)
-            #context.invoke(validate, family_id=family_id)
-            #context.invoke(genotypes, family_id=family_id)
-            #context.invoke(observations, family_id=family_id)
-            #context.invoke(scout, family_id=family_id)
+            context.invoke(coverage, re_upload=True, family_id=family_id)
+            context.invoke(validate, family_id=family_id)
+            context.invoke(genotypes, family_id=family_id)
+            context.invoke(observations, family_id=family_id)
+            context.invoke(scout, family_id=family_id)
 
-            #analysis_obj.uploaded_at = dt.datetime.now()
-            #context.obj['status'].commit()
-            #click.echo(click.style(f"{family_id}: analysis uploaded!", fg='green'))
+            analysis_obj.uploaded_at = dt.datetime.now()
+            context.obj['status'].commit()
+            click.echo(click.style(f"{family_id}: analysis uploaded!", fg='green'))
 
 
 @upload.command()
@@ -49,12 +47,11 @@ def upload(context, family_id):
 @click.pass_context
 def coverage(context, re_upload, family_id):
     """Upload coverage from an analysis to Chanjo."""
-    print("In coverage, re_upload=",re_upload)
-    #chanjo_api = coverage_app.ChanjoAPI(context.obj)
-    #family_obj = context.obj['status'].family(family_id)
-    #api = UploadCoverageApi(context.obj['status'], context.obj['housekeeper_api'], chanjo_api)
-    #coverage_data = api.data(family_obj.analyses[0])
-    #api.upload(coverage_data, replace=re_upload)
+    chanjo_api = coverage_app.ChanjoAPI(context.obj)
+    family_obj = context.obj['status'].family(family_id)
+    api = UploadCoverageApi(context.obj['status'], context.obj['housekeeper_api'], chanjo_api)
+    coverage_data = api.data(family_obj.analyses[0])
+    api.upload(coverage_data, replace=re_upload)
 
 
 @upload.command()
