@@ -30,7 +30,7 @@ def upload(context, family_id):
             message = f"analysis already uploaded: {analysis_obj.uploaded_at.date()}"
             click.echo(click.style(message, fg='yellow'))
         else:
-            context.invoke(coverage, family_id=family_id)
+            context.invoke(coverage, re_upload=True, family_id=family_id)
             context.invoke(validate, family_id=family_id)
             context.invoke(genotypes, family_id=family_id)
             context.invoke(observations, family_id=family_id)
