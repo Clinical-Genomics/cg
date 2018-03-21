@@ -20,9 +20,6 @@ def create_app():
     configure_extensions(app)
     register_blueprints(app)
 
-    # if app.config['CG_ENABLE_ADMIN']:
-    #     register_admin_views()
-
     return app
 
 
@@ -55,10 +52,14 @@ def register_blueprints(app: Flask):
         user_data = resp.json()
         session['user_email'] = user_data['email']
         session['user_name'] = user_data['name']
+
     app.register_blueprint(oauth_bp, url_prefix='/login')
 
     app.register_blueprint(api.BLUEPRINT)
     app.register_blueprint(invoices.BLUEPRINT, url_prefix='/invoices')
+
+    if app.config['CG_ENABLE_ADMIN']:
+        register_admin_views()
 
     @app.route('/')
     def index():
