@@ -20,8 +20,8 @@ def create_app():
     configure_extensions(app)
     register_blueprints(app)
 
-    if app.config['CG_ENABLE_ADMIN']:
-        register_admin_views()
+    # if app.config['CG_ENABLE_ADMIN']:
+    #     register_admin_views()
 
     return app
 
