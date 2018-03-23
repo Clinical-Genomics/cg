@@ -11,6 +11,8 @@ BLUEPRINT = Blueprint('invoices', __name__, template_folder='templates')
 
 @BLUEPRINT.route('/', methods=['GET', 'POST'])
 def index():
+    return redirect(url_for('admin.index'))
+
     """Show invoices."""
     if request.method == 'POST':
         customer_id = request.form.get('customer')
@@ -45,6 +47,8 @@ def index():
 
 @BLUEPRINT.route('/new/<record_type>')
 def new(record_type):
+    return redirect(url_for('admin.index'))
+
     """Generate a new invoice."""
     customers = db.customers()
     count = request.args.get('total', 0)
@@ -71,6 +75,7 @@ def new(record_type):
 
 @BLUEPRINT.route('/<int:invoice_id>', methods=['GET', 'POST'])
 def invoice(invoice_id):
+    return redirect(url_for('admin.index'))
     """Save comments and uploaded modified invoices."""
     cost_center = request.args.get('cost_center','KTH')
     invoice_obj = db.invoice(invoice_id)
@@ -110,6 +115,7 @@ def invoice(invoice_id):
 
 @BLUEPRINT.route('/<int:invoice_id>/excel')
 def invoice_template(invoice_id):
+    return redirect(url_for('admin.index'))
     """Generate invoice template"""
     cost_center = request.args.get('cost_center','KTH')
     invoice_obj = db.invoice(invoice_id)
@@ -127,6 +133,7 @@ def invoice_template(invoice_id):
 
 @BLUEPRINT.route('/<int:invoice_id>/invoice_file/<cost_center>')
 def modified_invoice(invoice_id, cost_center):
+    return redirect(url_for('admin.index'))
     """Enables download of modified invoices saved in the database."""
     invoice_obj = db.invoice(invoice_id)
     file_name = 'invoice_'+cost_center+str(invoice_id)+'.xlsx'
