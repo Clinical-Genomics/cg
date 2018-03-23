@@ -18,10 +18,8 @@ def create_app():
     app.config.from_object(__name__.replace('app', 'config'))
 
     configure_extensions(app)
-    register_blueprints(app)
 
-    # if app.config['CG_ENABLE_ADMIN']:
-    #     register_admin_views()
+    register_blueprints(app)
 
     return app
 
@@ -42,23 +40,30 @@ def configure_extensions(app: Flask):
 
 
 def register_blueprints(app: Flask):
+
+    if not app.config['CG_ENABLE_ADMIN']:
+        return
+
     oauth_bp = make_google_blueprint(
         client_id=app.config['GOOGLE_OAUTH_CLIENT_ID'],
         client_secret=app.config['GOOGLE_OAUTH_CLIENT_SECRET'],
         scope=['email', 'profile'],
     )
+
     @oauth_authorized.connect_via(oauth_bp)
     def logged_in(blueprint, token):
         """Called when the user logs in via Google OAuth."""
         resp = google.get('/oauth2/v1/userinfo?alt=json')
-        assert resp.ok
+        assert resp.ok, resp.text
         user_data = resp.json()
         session['user_email'] = user_data['email']
         session['user_name'] = user_data['name']
-    app.register_blueprint(oauth_bp, url_prefix='/login')
 
     app.register_blueprint(api.BLUEPRINT)
+    register_admin_views()
     app.register_blueprint(invoices.BLUEPRINT, url_prefix='/invoices')
+
+    app.register_blueprint(oauth_bp, url_prefix='/login')
 
     @app.route('/')
     def index():
