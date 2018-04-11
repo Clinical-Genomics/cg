@@ -1,17 +1,25 @@
-from flask import Blueprint, render_template, request, redirect, url_for, send_from_directory
+from flask import Blueprint, render_template, request, redirect, url_for, send_from_directory, session
 from cg.meta.invoice import InvoiceAPI
+from cg.server import admin
 import tempfile
 import os
 from cg.server.ext import db, lims
 from cg.apps.invoice.render import render_xlsx
 from datetime import date
+from flask_dance.contrib.google import google
 
 
 BLUEPRINT = Blueprint('invoices', __name__, template_folder='templates')
 
+def is_loged_in():
+    user_obj = db.user(session.get('user_email'))
+    return (google.authorized and user_obj and user_obj.is_admin)
+
 @BLUEPRINT.route('/', methods=['GET', 'POST'])
 def index():
     """Show invoices."""
+    if not is_loged_in():
+        return redirect(url_for('admin.index'))
     if request.method == 'POST':
         customer_id = request.form.get('customer')
         customer_obj = db.customer(customer_id)
@@ -46,9 +54,10 @@ def index():
 @BLUEPRINT.route('/new/<record_type>')
 def new(record_type):
     """Generate a new invoice."""
+    if not is_loged_in():
+        return redirect(url_for('admin.index'))
     customers = db.customers()
     count = request.args.get('total', 0)
-    print(count)
     customer_id = request.args.get('customer', 'cust002')
     customer_obj = db.customer(customer_id)
     
@@ -72,6 +81,8 @@ def new(record_type):
 @BLUEPRINT.route('/<int:invoice_id>', methods=['GET', 'POST'])
 def invoice(invoice_id):
     """Save comments and uploaded modified invoices."""
+    if not is_loged_in():
+        return redirect(url_for('admin.index'))
     cost_center = request.args.get('cost_center','KTH')
     invoice_obj = db.invoice(invoice_id)
     api = InvoiceAPI(db, lims)
@@ -111,6 +122,8 @@ def invoice(invoice_id):
 @BLUEPRINT.route('/<int:invoice_id>/excel')
 def invoice_template(invoice_id):
     """Generate invoice template"""
+    if not is_loged_in():
+        return redirect(url_for('admin.index'))
     cost_center = request.args.get('cost_center','KTH')
     invoice_obj = db.invoice(invoice_id)
     api = InvoiceAPI(db,lims)
@@ -128,6 +141,8 @@ def invoice_template(invoice_id):
 @BLUEPRINT.route('/<int:invoice_id>/invoice_file/<cost_center>')
 def modified_invoice(invoice_id, cost_center):
     """Enables download of modified invoices saved in the database."""
+    if not is_loged_in():
+        return redirect(url_for('admin.index'))
     invoice_obj = db.invoice(invoice_id)
     file_name = 'invoice_'+cost_center+str(invoice_id)+'.xlsx'
     temp_dir = tempfile.mkdtemp()
