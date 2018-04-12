@@ -1,5 +1,5 @@
 language: python
-sudo: false
+
 python:
     - '3.6'
 
@@ -8,7 +8,9 @@ install:
     - pip install -r requirements.txt -r requirements-dev.txt -e .
 
 script:
-     - py.test -rxs tests/
+    - coverage run --source "$(basename "$PWD")" setup.py test
+
+after_success: coveralls
 
 notifications:
     email: never
