@@ -9,10 +9,8 @@ from cg.server.ext import db
 class BaseView(ModelView):
 
     def is_accessible(self):
-        if not google.authorized:
-            return redirect(url_for('google.login'))
         user_obj = db.user(session.get('user_email'))
-        return True if (user_obj and user_obj.is_admin) else False
+        return True if (google.authorized and user_obj and user_obj.is_admin) else False
 
     def inaccessible_callback(self, name, **kwargs):
         # redirect to login page if user doesn't have access
@@ -112,6 +110,7 @@ class AnalysisView(BaseView):
     column_searchable_list = ['family.internal_id', 'family.name']
     column_filters = ['pipeline', 'pipeline_version', 'is_primary']
     column_editable_list = ['is_primary']
+
 
 class InvoiceView(BaseView):
     column_searchable_list = ['customer_id', 'id']

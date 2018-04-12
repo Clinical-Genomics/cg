@@ -4,6 +4,7 @@ import logging
 import click
 
 from cg.apps import hk, tb, scoutapi, lims
+from cg.exc import LimsDataError
 from cg.meta.analysis import AnalysisAPI
 from cg.store import Store
 
@@ -152,4 +153,6 @@ def auto(context: click.Context):
         try:
             context.invoke(analysis, priority=priority, family_id=family_obj.internal_id)
         except tb.MipStartError as error:
+            LOG.exception(error.message)
+        except LimsDataError as error:
             LOG.exception(error.message)

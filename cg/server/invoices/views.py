@@ -17,6 +17,8 @@ def is_loged_in():
 
 @BLUEPRINT.route('/', methods=['GET', 'POST'])
 def index():
+    return redirect(url_for('admin.index'))
+
     """Show invoices."""
     if not is_loged_in():
         return redirect(url_for('admin.index'))
@@ -53,6 +55,8 @@ def index():
 
 @BLUEPRINT.route('/new/<record_type>')
 def new(record_type):
+    return redirect(url_for('admin.index'))
+
     """Generate a new invoice."""
     if not is_loged_in():
         return redirect(url_for('admin.index'))
@@ -80,6 +84,7 @@ def new(record_type):
 
 @BLUEPRINT.route('/<int:invoice_id>', methods=['GET', 'POST'])
 def invoice(invoice_id):
+    return redirect(url_for('admin.index'))
     """Save comments and uploaded modified invoices."""
     if not is_loged_in():
         return redirect(url_for('admin.index'))
@@ -121,6 +126,7 @@ def invoice(invoice_id):
 
 @BLUEPRINT.route('/<int:invoice_id>/excel')
 def invoice_template(invoice_id):
+    return redirect(url_for('admin.index'))
     """Generate invoice template"""
     if not is_loged_in():
         return redirect(url_for('admin.index'))
@@ -140,6 +146,7 @@ def invoice_template(invoice_id):
 
 @BLUEPRINT.route('/<int:invoice_id>/invoice_file/<cost_center>')
 def modified_invoice(invoice_id, cost_center):
+    return redirect(url_for('admin.index'))
     """Enables download of modified invoices saved in the database."""
     if not is_loged_in():
         return redirect(url_for('admin.index'))
