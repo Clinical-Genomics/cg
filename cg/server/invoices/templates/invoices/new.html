@@ -37,7 +37,11 @@
     <tr><input type="checkbox" onClick="toggle()" /> Select All</tr>
     <tr><input type="checkbox" onClick="check_subset()" /> Select Subset</tr>
     <br><br><br>
+    <div class="container">
+      <input class="form-control" id="myInput" type="text" placeholder="Search..">
+      <br>
     <table class="table">
+      <thead>
       <tr>
         <th>{{record_type}}</th>
         <th>Customer</th>
@@ -48,6 +52,8 @@
         <th>Delivered at</th>
         <th>Received at</th>
       </tr>
+      </thead>
+      <tbody id="myTable">
       {% for record in records %}
       <tr>
         <td>
@@ -68,7 +74,9 @@
         <td>{{record.received_at.date()}}</td>
       </tr>
       {% endfor %}
+    </tbody>
     </table>
+  </div>
   </form>
 </div>
 {% endblock %}
@@ -127,5 +135,16 @@
     document.listForm.total.value = sum;
   }
 </script>
+
+<script>
+  $(document).ready(function(){
+    $("#myInput").on("keyup", function() {
+      var value = $(this).val().toLowerCase();
+      $("#myTable tr").filter(function() {
+        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+      });
+    });
+  });
+  </script>
 {% endblock %}
 
