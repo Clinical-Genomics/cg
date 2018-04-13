@@ -42,7 +42,6 @@ def analysis(context, config_stream):
             print(click.style('analysis version already added', fg='yellow'))
             context.abort()
         bundle_obj, version_obj = results
-        version_obj.bundle = bundle_obj
     except FileNotFoundError as error:
         click.echo(click.style(f"missing file: {error.args[0]}", fg='red'))
         context.abort()
