@@ -168,6 +168,7 @@ def parse_sample(raw_sample):
     sample = {
         'name': raw_sample['Sample/Name'],
         'container': raw_sample.get('Container/Type'),
+        'container_name': raw_sample.get('Container/Name'),
         'rml_plate_name': raw_sample.get('UDF/RML plate name'),
         'well_position': raw_sample.get('Sample/Well Location'),
         'well_position_rml': raw_sample.get('UDF/RML well position'),
@@ -205,8 +206,7 @@ def parse_sample(raw_sample):
 
     numeric_values = [('pool', 'UDF/pool name'), ('index_number', 'UDF/Index number'),
                       ('volume', 'UDF/Volume (uL)'), ('quantity', 'UDF/Quantity'),
-                      ('concentration', 'UDF/Concentration (nM)'),
-                      ('container_name', 'Container/Name')]
+                      ('concentration', 'UDF/Concentration (nM)')]
     for json_key, excel_key in numeric_values:
         str_value = raw_sample.get(excel_key, '').rsplit('.0')[0]
         if str_value.replace('.', '').isnumeric():
