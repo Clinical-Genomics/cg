@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+import sys
 
 import click
 
@@ -146,6 +147,7 @@ def start(context: click.Context, family_id: str, priority: str=None, email: str
 @click.pass_context
 def auto(context: click.Context):
     """Start all analyses that are ready for analysis."""
+    exit_code = 0
     for family_obj in context.obj['db'].families_to_analyze():
         LOG.info(f"{family_obj.internal_id}: start analysis")
         priority = ('high' if family_obj.high_priority else
@@ -154,5 +156,9 @@ def auto(context: click.Context):
             context.invoke(analysis, priority=priority, family_id=family_obj.internal_id)
         except tb.MipStartError as error:
             LOG.exception(error.message)
+            exit_code = 1
         except LimsDataError as error:
             LOG.exception(error.message)
+            exit_code = 1
+
+    sys.exit(exit_code)
