@@ -161,6 +161,14 @@ To change the quality of servive for an analysis use
 
 where `PRIORITY` could be `low`, `normal`, or `high`. The default is set in statusDB.
 
+## cg backup
+Backup utilities.
+
+### cg backup fetch-flowcell
+Fetch the first flowcell in the requested queue from backup.
+
+```$ cg backup fetch-flowcell --flowcell FLOWCELL_ID```
+
 ## cg clean (i don't understand any of this)
 Remove stuff. *Use caution.*
 
@@ -322,6 +330,32 @@ To update the gender of a sample, use
 
 where `SEX`can be `male`, `female`, or `unknown`.
 
+## cg status
+View status of things.
+
+### cg status analysis
+Shows which families will be analyzed.
+
+```$ cg status analysis```
+
+### cg status families
+View status of families.
+
+```$ cg status families```
+
+There is an option to skip initial records:
+
+```$ cg status families --skip INTEGER```
+
+where `INTEGER` is **yeah, what is it?**.
+
+### cg status samples
+View status of samples.
+
+```$ cg status samples --skip INTEGER```
+
+where `INTEGER` is **yeah, what is it?**.
+
 ## cg store
 Store results from MIP in housekeeper.
 
@@ -351,6 +385,82 @@ Check if samples have been updated in LIMS.
 ```$ cg transfer lims --status STATUS```
 
 where `STATUS` can be `received`, `prepared`, or `delivered`.
+
+## cg upload
+Upload results from analyses.
+
+To upload analysis results to all the apps, use the flag `--family`. Example:
+
+```$ cg upload --family FAMILY_ID```
+
+where `FAMILY_ID` is our internal familyID, e.g. `cuddlygull`.
+
+### cg upload auto
+Upload all completed analyses to all the apps.
+
+```$ cg upload auto```
+
+### cg upload beacon
+Upload variants for affected samples in a family to cgbeacon.
+
+```$ cg upload beacon --panel TEXT FAMILY_ID```
+
+where `TEXT` is the gene panel to filter VCF by.
+
+Name the output pdf file by using the `--outfile` option. Example:
+
+```$ cg upload beacon --outfile PDF_NAME FAMILY_ID```
+
+Provide customer by using the `--customer` option. Example:
+
+```$ cg upload beacon --customer CUSTOMER_ID FAMILY_ID```
+
+To set the variant quality threshold, use:
+
+```$ cg upload beacon --quality INTEGER FAMILY_ID```
+
+To set the reference genome, use the `--genome_reference` option (it is by default set to grch37). Example:
+
+```$ cg upload beacon --genome_reference GENOME FAMILY_ID```
+
+### cg upload coverage
+Upload coverage from an analysis to Chanjo.
+
+```$ cg upload coverage FAMILY_ID```
+
+To re-upload an already existing analysis, use:
+
+```$ cg upload coverage --re-upload FAMILY_ID```
+
+### cg upload genotypes
+Upload genotypes from an analysis to Genotype.
+
+```$ cg upload genotypes FAMILY_ID```
+
+### cg upload observations
+Upload observations from an analysis to LoqusDB.
+
+```$ cg upload observations FAMILY_ID```
+
+### cg upload scout
+Upload variants from analysis to Scout.
+
+```$ cg upload scout FAMILY_ID```
+
+To re-upload already existing analysis to scout, use:
+
+```$ cg upload scout --re-upload FAMILY_ID```
+
+It is possible to get the config values printed to the console:
+
+```$ cg upload scout --print FAMILY_ID```
+
+### cg upload validate
+Validate a family of samples.
+
+```$ cg upload validate FAMILY_ID```
+
+
 
 
 
