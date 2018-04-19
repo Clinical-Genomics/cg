@@ -169,7 +169,7 @@ Fetch the first flowcell in the requested queue from backup.
 
 ```$ cg backup fetch-flowcell --flowcell FLOWCELL_ID```
 
-## cg clean (i don't understand any of this)
+## cg clean
 Remove stuff. *Use caution.*
 
 ### cg clean beacon
@@ -177,29 +177,35 @@ Remove beacon for a sample or one or more affected samples from a family. It is 
 
 ```$ cg clean beacon --item_type TYPE ITEM_ID```
 
-Where `TYPE` can be `family` or `sample`.
+Where `TYPE` can be `family` or `sample`. cleans the beacon database of the inserted variants
 
-### cg clean mip (what is SAMPLE_INFO?)
-Remove analysis output.
+### cg clean mip
+Remove analysis output. Removes the family directory (as defined in the cg config).
 
 ```$ cg clean mip SAMPLE_INFO```
 
-There is an option to skip confirmation: `--yes`
+where `SAMPLE_INFO` is the path to the familyID_qc_sample_info.yaml file
 
-### cg clean mipauto (what is BEFORE_STR?)
-Automatically clean up "old" analyses.
+There is an option to skip confirmation: `--yes` 
+
+### cg clean mipauto
+Automatically clean up "old" analyses. Removes all the family directories before the date defined by the user.
 
 ```$ cg clean mipauto BEFORE_STR```
 
-There is an option to skip confirmation: `--yes`
+where `BEFORE_STR` is a date in string format, e.g. `2018-04-19`
+
+There is an option to skip confirmation: `--yes` 
 
 ### cg clean scout
+Cleans the bam and bai files of selected bundle in housekeeper.
+
 ```$ cg clean scout BUNDLE```
 
-There is an option to skip confirmation: `--yes`
+There is an option to skip confirmation: `--yes` 
 
 ### cg clean scoutauto
-Automatically clean up solved and archived scout cases.
+Automatically clean up solved and archived scout cases. Cleans the bam and bai files in housekeeper.
 
 ```cg clean scoutauto```
 
@@ -213,9 +219,11 @@ Link files from HK to customer inbox.
 
 where `FAMILY_ID` is the case name, e.g. `cuddlygull`.
 
-**don't know if --dry does anything.. what does "print config to console" mean in this context anyway?**
+`--dry` flag has not been implemented yet.
 
-**how does version of bundle in --version work**
+To just deliver a specific analysis version, use the `--version` flag, example:
+
+```$ cg deliver inbox --version 2018-04-19 FAMILY_ID```
 
 To only link specific types of files from HK, tags can be employed:
 
