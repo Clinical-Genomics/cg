@@ -42,8 +42,9 @@ class ReportAPI:
         report_data['family'] = ReportAPI._present_string(family_obj.name)
         report_data['customer'] = customer_id
         report_data['customer_obj'] = self._get_customer_from_status_db(customer_id)
-        report_samples = self._fetch_status_data(family_id)
+        report_samples = self._fetch_family_samples_from_status_db(family_id)
         report_data['samples'] = report_samples
+        report_data['panels'] = self._fetch_panels_from_status_db(family_id)
         self._incorporate_lims_data(report_data)
         self._incorporate_lims_methods(report_samples)
         self._incorporate_delivery_date_from_lims(report_samples)
@@ -263,7 +264,7 @@ class ReportAPI:
             else:
                 LOG.warning(f'No coverage could be calculated for: {lims_id}')
 
-    def _fetch_status_data(self, family_id: str) -> list:
+    def _fetch_family_samples_from_status_db(self, family_id: str) -> list:
         """Incorporate data from the status database for each sample ."""
         delivery_data_samples = list()
         family_samples = self.db.family_samples(family_id)
@@ -283,10 +284,17 @@ class ReportAPI:
 
         return delivery_data_samples
 
+    def _fetch_panels_from_status_db(self, family_id: str) -> list:
+        """fetch data from the status database for each panels ."""
+        family = self.db.family(family_id)
+
+        panels = family.panels
+        panels = ReportAPI._present_set(panels)
+
+        return panels
+
     def _incorporate_lims_data(self, report_data: dict):
         """Incorporate data from LIMS for each sample ."""
-        used_panels = set()
-
         for sample in report_data.get('samples'):
             lims_id = sample['id']
 
@@ -300,9 +308,3 @@ class ReportAPI:
             sample['application_version'] = lims_sample.get('application_version')
             sample['received'] = ReportAPI._present_date(lims_sample.get('received'))
 
-            panels = lims_sample.get('panels')
-
-            if panels:
-                used_panels.update(panels)
-
-        report_data['panels'] = ReportAPI._present_set(used_panels)
