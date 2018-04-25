@@ -4,9 +4,9 @@
   {% if session.user_email %}
     <p>Welcome {{ session.user_name }}!</p>
     <a href="{{ url_for('logout') }}">Logout</a>
-    <!--div>
+    <div>
       <a href="{{ url_for('invoices.index') }}">Invoices</a>
-    </div-->
+    </div>
   {% else %}
     <a href="{{ url_for('google.login') }}">Login</a>
   {% endif %}
