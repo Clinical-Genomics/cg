@@ -120,7 +120,6 @@ MICROBIAL_SAMPLE = {
     **BASE_SAMPLE,
     **LAB_MIXIN,
     **PREP_MIXIN,
-    'source': validators.Optional(str, None),
     'strain': str,
     'strain_other': str,
     'reference_genome': str,
