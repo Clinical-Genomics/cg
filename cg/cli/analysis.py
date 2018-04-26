@@ -12,7 +12,7 @@ from cg.store import Store
 LOG = logging.getLogger(__name__)
 PRIORITY_OPTION = click.option('-p', '--priority', type=click.Choice(['low', 'normal', 'high']))
 EMAIL_OPTION = click.option('-e', '--email', help='email to send errors to')
-START_WITH_PROGRAM = click.option('-sw', '--startwith', help='start mip-pipeline with this program and run downstream processes')
+START_WITH_PROGRAM = click.option('-sw', '--start-with', help='start mip-pipeline with this program and run downstream processes')
 
 
 @click.group(invoke_without_command=True)
@@ -21,7 +21,7 @@ START_WITH_PROGRAM = click.option('-sw', '--startwith', help='start mip-pipeline
 @START_WITH_PROGRAM
 @click.option('-f', '--family', 'family_id', help='family to prepare and start an analysis for')
 @click.pass_context
-def analysis(context, priority, email, family_id, startwith):
+def analysis(context, priority, email, family_id, start_with):
     """Prepare and start a MIP analysis for a FAMILY_ID."""
     context.obj['db'] = Store(context.obj['database'])
     hk_api = hk.HousekeeperAPI(context.obj)
@@ -56,7 +56,7 @@ def analysis(context, priority, email, family_id, startwith):
             context.invoke(config, family_id=family_id)
             context.invoke(link, family_id=family_id)
             context.invoke(panel, family_id=family_id)
-            context.invoke(start, family_id=family_id, priority=priority, email=email, startwith=startwith)
+            context.invoke(start, family_id=family_id, priority=priority, email=email, start_with=start_with)
 
 
 @analysis.command()
@@ -134,7 +134,7 @@ def panel(context, print_output, family_id):
 @START_WITH_PROGRAM
 @click.argument('family_id')
 @click.pass_context
-def start(context: click.Context, family_id: str, priority: str=None, email: str=None, startwith: str=None ):
+def start(context: click.Context, family_id: str, priority: str=None, email: str=None, start_with: str=None ):
     """Start the analysis pipeline for a family."""
     family_obj = context.obj['db'].family(family_id)
     if family_obj is None:
@@ -143,7 +143,7 @@ def start(context: click.Context, family_id: str, priority: str=None, email: str
     if context.obj['tb'].analyses(family=family_obj.internal_id, temp=True).first():
         LOG.warning(f"{family_obj.internal_id}: analysis already running")
     else:
-        context.obj['api'].start(family_obj, priority=priority, email=email, startwith=startwith)
+        context.obj['api'].start(family_obj, priority=priority, email=email, start_with=start_with)
 
 
 @analysis.command()
