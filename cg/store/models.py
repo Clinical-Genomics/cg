@@ -116,7 +116,6 @@ class FamilySample(Model):
         return f"{self.family.internal_id} | {self.sample.internal_id}"
 
 
-
 class Family(Model, PriorityMixin):
 
     __table_args__ = (

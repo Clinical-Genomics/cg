@@ -10,7 +10,7 @@ import ruamel.yaml
 from trailblazer.mip.start import MipCli
 from trailblazer.store import Store, models
 from trailblazer.cli.utils import environ_email
-from trailblazer.mip import files, fastq
+from trailblazer.mip import files, fastq, trending
 
 from .add import AddHandler
 
@@ -18,7 +18,6 @@ log = logging.getLogger(__name__)
 
 
 class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
-
     """Interface to Trailblazer for `cg`."""
 
     parse_sampleinfo = staticmethod(files.parse_sampleinfo)
@@ -31,8 +30,8 @@ class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
         self.mip_cli = MipCli(config['trailblazer']['script'])
         self.mip_config = config['trailblazer']['mip_config']
 
-    def start(self, family_id: str, priority: str='normal', email: str=None,
-              skip_evaluation: bool=False):
+    def start(self, family_id: str, priority: str = 'normal', email: str = None,
+              skip_evaluation: bool = False):
         """Start MIP."""
         email = email or environ_email()
         kwargs = dict(config=self.mip_config, family=family_id, priority=priority, email=email)
@@ -64,7 +63,7 @@ class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
             for line in content:
                 click.echo(line, file=out_handle)
 
-    def delete_analysis(self, family: str, date: dt.datetime, yes: bool=False):
+    def delete_analysis(self, family: str, date: dt.datetime, yes: bool = False):
         """Delete the analysis output."""
         if self.analyses(family=family, temp=True).count() > 0:
             raise ValueError("analysis for family already running")
@@ -77,3 +76,8 @@ class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
 
             analysis_obj.is_deleted = True
             self.commit()
+
+    def get_trending(self, mip_config_raw: str, qcmetrics_raw: str, sampleinfo_raw: dict) -> dict:
+        return trending.parse_mip_analysis(mip_config_raw= mip_config_raw,
+                                           qcmetrics_raw=qcmetrics_raw,
+                                           sampleinfo_raw=sampleinfo_raw)
