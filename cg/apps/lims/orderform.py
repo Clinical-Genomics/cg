@@ -164,7 +164,7 @@ def parse_sample(raw_sample):
     if raw_sample['UDF/priority'].lower() == 'förtur':
         raw_sample['UDF/priority'] = 'priority'
 
-    source = raw_sample['UDF/Source']
+    source = raw_sample.get('UDF/Source')
     sample = {
         'name': raw_sample['Sample/Name'],
         'container': raw_sample.get('Container/Type'),
@@ -192,6 +192,7 @@ def parse_sample(raw_sample):
         'custom_index': raw_sample.get('UDF/Custom index'),
         'eluation_buffer': raw_sample.get('UDF/Sample Buffer'),
         'strain': raw_sample.get('UDF/Strain'),
+        'strain_other': raw_sample.get('UDF/Other species'),
         'reference_genome': raw_sample.get('UDF/Reference Genome Microbial'),
         'extraction_method': raw_sample.get('UDF/Extraction method'),
     }
