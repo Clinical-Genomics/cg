@@ -1,0 +1,72 @@
+{
+  "family": "yellowhog",
+  "customer": "cust002",
+  "samples": [
+    {
+      "id": "ADM1",
+      "name": "2018-20203",
+      "customer": "cust002",
+      "sex": "male",
+      "father": "",
+      "mother": "",
+      "status": "affected",
+      "application": "WGTPCFC030",
+      "application_version": "1",
+      "family": "F0009604",
+      "panels": [
+        "OMIM-AUTO"
+      ],
+      "comment": "Express sample",
+      "project": "testproject qwerty",
+      "received": "2016-11-20",
+      "source": "blood",
+      "priority": "express"
+    },
+    {
+      "id": "ADM2",
+      "name": "2018-20204",
+      "customer": "cust002",
+      "sex": "female",
+      "father": "",
+      "mother": "",
+      "status": "unaffected",
+      "application": "WGTPCFC030",
+      "application_version": "1",
+      "family": "F0009604",
+      "panels": [
+        "SKD"
+      ],
+      "comment": "",
+      "project": "testproject asdf",
+      "received": "2017-12-01",
+      "source": "blood",
+      "priority": "standard"
+    }
+    ,
+    {
+      "id": "ADM3",
+      "name": "2018-20209",
+      "customer": "cust002",
+      "sex": "female",
+      "father": "",
+      "mother": "",
+      "status": "unaffected",
+      "application": "WGTPCFC030",
+      "application_version": "1",
+      "family": "F0009604",
+      "panels": [
+        "SKD"
+      ],
+      "comment": "",
+      "project": "testproject dvorak",
+      "received": "2017-12-01",
+      "source": "blood",
+      "priority": "standard"
+    }
+  ],
+  "priority": "express",
+  "panels": [
+    "SKD",
+    "OMIM-AUTO"
+  ]
+}

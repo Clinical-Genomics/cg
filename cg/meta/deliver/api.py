@@ -23,28 +23,26 @@ FAMILY_TAGS = [
 SAMPLE_TAGS = ['bam', 'bam-index']
 
 
-class DeliverAPI():
+class DeliverAPI:
 
     def __init__(self, db: Store, hk_api: hk.HousekeeperAPI, lims_api: lims.LimsAPI):
         self.db = db
         self.hk = hk_api
         self.lims = lims_api
 
-    def get_post_analysis_files(self, family: str, version, tag):
+    def get_post_analysis_files(self, family: str, version, tags: list):
 
-        family_obj = self.db.family_samples(family)
-    
         if not version:
             last_version = self.hk.last_version(bundle=family)
         else:
             last_version = self.hk.version(bundle=family, date=version)
 
-        return self.hk.files(bundle=family, version=last_version.id, tags=tag).all()
+        return self.hk.files(bundle=family, version=last_version.id, tags=tags).all()
 
-    def get_post_analysis_family_files(self, family: str, version, tag):
+    def get_post_analysis_family_files(self, family: str, version, tags):
         """Link files from HK to cust inbox."""
     
-        all_files = self.get_post_analysis_files(family, version, tag)
+        all_files = self.get_post_analysis_files(family, version, tags)
         family_obj = self.db.family_samples(family)
         sample_ids = [family_sample.sample.internal_id for family_sample in family_obj]
 
@@ -72,3 +70,6 @@ class DeliverAPI():
                 sample_files.append(file_obj)
 
         return sample_files
+
+    def get_post_analysis_files_root_dir(self):
+        return self.hk.get_root_dir()
