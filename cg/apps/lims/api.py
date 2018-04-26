@@ -12,6 +12,17 @@ from .order import OrderHandler
 
 SEX_MAP = {'F': 'female', 'M': 'male', 'Unknown': 'unknown', 'unknown': 'unknown'}
 REV_SEX_MAP = {value: key for key, value in SEX_MAP.items()}
+AM_METHODS = {
+    '1464': 'Automated TruSeq DNA PCR-free library preparation method',
+    '1317': 'HiSeq X Sequencing method at Clinical Genomics',
+    '1383': 'MIP analysis for Whole genome and Exome',
+    '1717': 'NxSeq® AmpFREE Low DNA Library Kit (Lucigen)',
+    '1060': 'Raw data delivery',
+    '1036': 'HiSeq 2500 Rapid Run sequencing',
+    '1314': 'Automated SureSelect XT Target Enrichment for Illumina sequencing',
+    '1518': '200 ng input Manual SureSelect XT Target Enrichment',
+    '1079': 'Manuel SureSelect XT Target Enrichment for Illumina sequencing',
+}
 log = logging.getLogger(__name__)
 
 
@@ -134,6 +145,7 @@ class LimsAPI(Lims, OrderHandler):
         family_data = {'family': family, 'customer': customer, 'samples': []}
         priorities = set()
         panels = set()
+
         for sample_data in samples_data:
             priorities.add(sample_data['priority'])
             if sample_data['panels']:
@@ -177,3 +189,75 @@ class LimsAPI(Lims, OrderHandler):
         if isinstance(target_reads, int):
             lims_sample.udf[PROP2UDF['target_reads']] = target_reads
         lims_sample.put()
+
+    def get_prep_method(self, lims_id: str) -> str:
+        """Get the library preparation method."""
+        process_names = [
+            'CG002 - End repair Size selection A-tailing and Adapter ligation (TruSeq PCR-free '
+            'DNA)',
+            'CG002 - Hybridize Library  (SS XT)',
+        ]
+        method_name = method_number = None
+        for process_name in process_names:
+            arts = self.get_artifacts(process_type=process_name, samplelimsid=lims_id)
+            if arts:
+                prep_artifact = arts[0]
+                method_number = prep_artifact.parent_process.udf.get('Method document')
+                method_version = (
+                        prep_artifact.parent_process.udf.get('Method document version') or
+                        prep_artifact.parent_process.udf.get('Method document versio')
+                )
+                break
+
+        if method_number is None:
+            return None
+
+        method_name = AM_METHODS.get(method_number)
+        return f"{method_number}:{method_version} - {method_name}"
+
+    def get_sequencing_method(self, lims_id: str) -> str:
+        """Get the sequencing method."""
+        process_names = [
+            'CG002 - Cluster Generation (HiSeq X)',
+            'CG002 - Cluster Generation (Illumina SBS)',
+        ]
+        method_number = method_version = None
+        for process_name in process_names:
+            arts = self.get_artifacts(process_type=process_name, samplelimsid=lims_id)
+            if arts:
+                prep_artifact = arts[0]
+                method_number = (
+                        prep_artifact.parent_process.udf.get('Method') or
+                        prep_artifact.parent_process.udf.get('Method Document 1')
+                )
+                method_version = (
+                        prep_artifact.parent_process.udf.get('Version') or
+                        prep_artifact.parent_process.udf.get('Document 1 Version')
+                )
+                break
+
+        if method_number is None:
+            return None
+
+        method_name = AM_METHODS.get(method_number)
+        return f"{method_number}:{method_version} - {method_name}"
+
+    def get_delivery_method(self, lims_id: str) -> str:
+        """Get the delivery method."""
+        process_name = 'CG002 - Delivery'
+        arts = self.get_artifacts(process_type=process_name, samplelimsid=lims_id)
+        if arts:
+            prep_artifact = arts[0]
+            method_number = prep_artifact.parent_process.udf.get('Method Document')
+            method_version = prep_artifact.parent_process.udf.get('Method Version')
+        else:
+            return None
+
+        method_name = AM_METHODS.get(method_number)
+        return f"{method_number}:{method_version} - {method_name}"
+
+    def get_processing_time(self, lims_id):
+        received_at = self.get_received_date(lims_id)
+        delivery_date = self.get_delivery_date(lims_id)
+        if received_at and delivery_date:
+            return delivery_date - received_at
