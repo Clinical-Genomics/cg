@@ -274,6 +274,7 @@ class ReportAPI:
             delivery_data_sample = dict()
             delivery_data_sample['id'] = sample.internal_id
             delivery_data_sample['ticket'] = ReportAPI._present_int(sample.ticket_number)
+            delivery_data_sample['status'] = ReportAPI._present_string(family_sample.status)
 
             if sample.reads:
                 delivery_data_sample['million_read_pairs'] = round(sample.reads / 2000000, 1)
@@ -302,7 +303,6 @@ class ReportAPI:
 
             sample['name'] = ReportAPI._present_string(lims_sample.get('name'))
             sample['sex'] = ReportAPI._present_string(lims_sample.get('sex'))
-            sample['status'] = ReportAPI._present_string(lims_sample.get('status'))
             sample['source'] = ReportAPI._present_string(lims_sample.get('source'))
             sample['application'] = ReportAPI._present_string(lims_sample.get('application'))
             sample['application_version'] = lims_sample.get('application_version')
