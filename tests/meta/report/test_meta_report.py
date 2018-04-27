@@ -97,6 +97,19 @@ def test_get_application_data_from_status_db(lims_samples, report_api):
     assert application_data['accredited'] is True
 
 
+def test_get_status_from_status_db(report_api):
+    # GIVEN data from an analysed case and an initialised report_api
+
+    # WHEN fetch_application_data_from_status_db
+    samples = report_api._fetch_family_samples_from_status_db('yellowhog')
+
+    # THEN
+    # the samples contain a status
+    for sample in samples:
+        assert sample['status']
+        assert sample['status'] != 'N/A'
+
+
 def test_incorporate_lims_methods(lims_samples, report_api):
     # GIVEN data from an analysed case and an initialised report_api
 
