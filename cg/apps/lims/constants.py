@@ -19,6 +19,7 @@ PROP2UDF = {
     'target_reads': 'Reads missing (M)',
     'eluation_buffer': 'Sample Buffer',
     'strain': 'Strain',
+    'strain_other': 'Other species',
     'reference_genome': 'Reference Genome Microbial',
     'extraction_method': 'Extraction method',
 }
