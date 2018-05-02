@@ -46,6 +46,7 @@ def delivery(context, customer_id, family_id):
     deliver = context.obj['deliver']
     chanjo = context.obj['chanjo']
     analysis = context.obj['analysis']
+    scout = context.obj['scout']
 
     report_api = ReportAPI(
         db=db,
@@ -53,7 +54,8 @@ def delivery(context, customer_id, family_id):
         tb_api=tb,
         deliver_api=deliver,
         chanjo_api=chanjo,
-        analysis_api=analysis
+        analysis_api=analysis,
+        scout_api=scout,
     )
 
     template_out = report_api.create_delivery_report(customer_id, family_id)

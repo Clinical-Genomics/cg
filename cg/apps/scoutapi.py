@@ -41,6 +41,19 @@ class ScoutAPI(MongoAdapter):
         """Pass through to export of a list of gene panels."""
         return scout_export_panels(self, panels, versions)
 
+    def get_genes(self, panel_id: str, version: str) -> list:
+        """Fetch panel genes.
+
+        Args:
+            panel_id (str): unique id for the panel
+            version (str): version of the panel. If 'None' latest version will be returned
+
+        Returns:
+            panel genes: panel genes list
+        """
+        gene_panel = self.gene_panel(panel_id=panel_id,version=version)
+        return gene_panel.get('genes')
+
     def get_cases(self, case_id=None, institute=None, reruns=None, finished=None, causatives=None, research_requested=None,
           is_research=None, status=None):
         """Interact with cases existing in the database."""

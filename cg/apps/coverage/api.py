@@ -70,7 +70,7 @@ class ChanjoAPI(ChanjoDB):
         } for result in query}
         return data
 
-    def sample_coverage(self, sample_id: str) -> dict:
+    def sample_coverage(self, sample_id: str, panel_genes: list) -> dict:
         """Calculate coverage for samples."""
         query = self.query(
             models.TranscriptStat.sample_id.label('sample_id'),
@@ -79,6 +79,7 @@ class ChanjoAPI(ChanjoDB):
         ).join(
             models.TranscriptStat.transcript,
         ).filter(
+            models.Transcript.gene_id.in_(panel_genes),
             models.TranscriptStat.sample_id == sample_id,
         ).group_by(models.TranscriptStat.sample_id)
 
