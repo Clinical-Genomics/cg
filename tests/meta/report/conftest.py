@@ -43,7 +43,6 @@ class MockTB:
 
     def get_trending(self, mip_config_raw: dict, qcmetrics_raw: dict, sampleinfo_raw: dict) -> dict:
         # Returns: dict: parsed data
-        ### Define output dict
         outdata = {
             'analysis_sex': {'ADM1': 'female', 'ADM2': 'female', 'ADM3': 'female'},
             'family': 'yellowhog',
@@ -82,7 +81,7 @@ class MockDeliver:
 
 class MockChanjo:
 
-    def sample_coverage(self, sample_id) -> dict:
+    def sample_coverage(self, sample_id, genes) -> dict:
         """Calculate coverage for OMIM panel."""
 
         if sample_id == 'ADM1':
@@ -113,16 +112,22 @@ class MockAnalysis:
         return ['']
 
 
+class MockScout:
+    def get_genes(self, panel_id: str, version: str) -> list:
+        return []
+
+
 class MockReport(ReportAPI):
     _fileToOpen = ''
 
-    def __init__(self, db, lims_api, tb_api, deliver_api, chanjo_api, analysis_api):
+    def __init__(self, db, lims_api, tb_api, deliver_api, chanjo_api, analysis_api, scout_api):
         self.db = db
         self.lims = lims_api
         self.tb = tb_api
         self.deliver = deliver_api
         self.chanjo = chanjo_api
         self.analysis = analysis_api
+        self.scout = scout_api
 
     def _open_bundle_file(self, file_path):
         self._fileToOpen = file_path
@@ -135,8 +140,10 @@ def report_api(analysis_store):
     deliver = MockDeliver()
     chanjo = MockChanjo()
     analysis = MockAnalysis()
+    scout = MockScout()
     _report_api = MockReport(lims_api=lims, db=analysis_store, tb_api=tb, deliver_api=deliver,
-                             chanjo_api=chanjo, analysis_api=analysis)
+                             chanjo_api=chanjo, analysis_api=analysis, scout_api=scout)
+
     return _report_api
 
 
