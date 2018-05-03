@@ -85,3 +85,35 @@ def test_parsing_external_orderform(external_orderform):
     wgs_sample = family['samples'][1]
     assert wes_sample['capture_kit'] == 'Agilent Sureselect V5'
     assert wgs_sample.get('capture_kit') is None
+
+
+def test_parsing_microbial_orderform(microbial_orderform):
+    # GIVEN a path to a microbial orderform with 3 samples
+
+    # WHEN parsing the file
+    data = orderform.parse_orderform(microbial_orderform)
+
+    # THEN it should determine the type of project and customer
+    assert data['project_type'] == 'microbial'
+    assert data['customer'] == 'cust015'
+
+    # ... and find all samples
+    assert len(data['items']) == 3
+
+    # ... and collect relevant sample data
+    for sample_data in data['items']:
+        assert sample_data['name'] in ('jag', 'testar', 'lite')
+        assert sample_data['strain'] in ('C. Jejuni', 'Other', 'C. difficile')
+        assert sample_data['reference_genome'] in ('NC_111', 'NC_222', 'NC_333')
+        assert sample_data['data_analysis'] == 'fastq'
+        assert sample_data['application'] == 'MWRNXTR003'
+        assert sample_data['require_qcok'] is True
+        assert sample_data['buffer'] == 'Nuclease-free water'
+        assert sample_data['buffer'] == 'Nuclease-free water'
+
+fortsätt här
+        assert sample_data['well_position'] in ('A:1', 'A:1', 'A:1')
+        assert sample_data['well_position_rml'] is None
+        assert sample_data['pool'] == '1'
+        assert sample_data['volume'] == '30'
+        assert sample_data['concentration'] == '5'
