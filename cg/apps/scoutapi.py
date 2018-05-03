@@ -51,7 +51,7 @@ class ScoutAPI(MongoAdapter):
         Returns:
             panel genes: panel genes list
         """
-        gene_panel = self.gene_panel(panel_id=panel_id,version=version)
+        gene_panel = self.gene_panel(panel_id=panel_id, version=version)
         return gene_panel.get('genes')
 
     def get_cases(self, case_id=None, institute=None, reruns=None, finished=None, causatives=None, research_requested=None,
