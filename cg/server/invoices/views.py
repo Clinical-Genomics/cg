@@ -62,9 +62,9 @@ def new(record_type):
     customer_obj = db.customer(customer_id)
     
     if record_type=='Sample':
-        records = db.samples_to_invoice(customer=customer_obj).limit(50)
+        records = db.samples_to_invoice(customer=customer_obj)
     elif record_type=='Pool':
-        records = db.pools_to_invoice(customer=customer_obj).limit(50)
+        records = db.pools_to_invoice(customer=customer_obj)
 
 
     return render_template(
