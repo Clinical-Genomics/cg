@@ -43,7 +43,7 @@ class User(Model):
     customer = orm.relationship('Customer', backref='users')
 
     def to_dict(self) -> dict:
-        """Override dicify method."""
+        """Override dictify method."""
         data = super(User, self).to_dict()
         data['customer'] = self.customer.to_dict()
         return data
@@ -100,7 +100,7 @@ class FamilySample(Model):
     father = orm.relationship('Sample', foreign_keys=[father_id])
 
     def to_dict(self, parents: bool=False, samples: bool=False, family: bool=False) -> dict:
-        """Override dicify method."""
+        """Override dictify method."""
         data = super(FamilySample, self).to_dict()
         if samples:
             data['sample'] = self.sample.to_dict()
@@ -140,7 +140,7 @@ class Family(Model, PriorityMixin):
         return f"{self.internal_id} ({self.name})"
 
     def to_dict(self, links: bool=False, analyses: bool=False) -> dict:
-        """Override dicify method."""
+        """Override dictify method."""
         data = super(Family, self).to_dict()
         data['panels'] = self.panels
         data['priority'] = self.priority_human
@@ -250,7 +250,7 @@ class Sample(Model, PriorityMixin):
             return f"Ordered {self.ordered_at.date()}"
 
     def to_dict(self, links: bool=False, flowcells: bool=False) -> dict:
-        """Override dicify method."""
+        """Override dictify method."""
         data = super(Sample, self).to_dict()
         data['priority'] = self.priority_human
         data['customer'] = self.customer.to_dict()
@@ -316,7 +316,7 @@ class Analysis(Model):
         return f"{self.family.internal_id} | {self.completed_at.date()}"
 
     def to_dict(self, family: bool=True):
-        """Override dicify method."""
+        """Override dictify method."""
         data = super(Analysis, self).to_dict()
         if family:
             data['family'] = self.family.to_dict()
