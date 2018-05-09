@@ -89,3 +89,4 @@ ENV/
 .ropeproject
 
 DEVELOP/
+.DS_Store
