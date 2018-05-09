@@ -283,12 +283,12 @@ def test_incorporate_coverage_data(report_api, lims_samples):
         assert lims_id_found_in_warnings
 
 
-def test_fetch_samples_from_status_db(report_api):
+def test_fetch_family_samples_from_status_db(report_api):
     # GIVEN an initialised report_api and the db returns samples without reads
     report_api.db._family_samples_returns_no_reads = True
 
     # WHEN fetching status data
-    samples = report_api._fetch_samples_from_status_db(family_id='yellowhog')
+    samples = report_api._fetch_family_samples_from_status_db(family_id='yellowhog')
 
     # THEN the report data should have N/A where it report sample reads
     for sample in samples:

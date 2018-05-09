@@ -261,7 +261,6 @@ class ReportAPI:
             else:
                 self.LOG.warning(f'No coverage could be calculated for: {lims_id}')
 
-
     def _fetch_family_samples_from_status_db(self, family_id: str) -> list:
         """Incorporate data from the status database for each sample ."""
         
@@ -283,7 +282,6 @@ class ReportAPI:
             delivery_data_samples.append(delivery_data_sample)
 
         return delivery_data_samples
-
 
     def _get_application_data_from_status_db(self, samples: list) -> dict:
         """Fetch application data including accreditation status for all samples."""
