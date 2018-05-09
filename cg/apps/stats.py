@@ -54,6 +54,9 @@ class StatsAPI(alchy.Manager):
                                 f"{fc_data.q30} < {80 if fc_data.type == 'hiseqga' else 75}%")
                     continue
                 for fastq_path in self.fastqs(fc_data.name, sample_obj):
+                    if self.is_lane_pooled(flowcell_obj=record, lane=fc_data.lane):
+                        if 'Undetermined' in str(fastq_path):
+                            continue
                     sample_data['fastqs'].append(str(fastq_path))
             data['samples'].append(sample_data)
 
@@ -67,12 +70,27 @@ class StatsAPI(alchy.Manager):
             .filter(models.Demux.flowcell == flowcell_obj)
         )
 
+    def is_lane_pooled(self, flowcell_obj: models.Flowcell, lane: str) -> bool:
+        """Check whether a lane is pooled or not."""
+        query = (
+            self.session.query(
+               sqa.func.count(models.Unaligned.sample_id).label('sample_count')
+            )
+            .join(
+               models.Unaligned.demux,
+            )
+            .filter(models.Demux.flowcell == flowcell_obj)
+            .filter(models.Unaligned.lane == lane)
+        )
+        return query.first().sample_count > 1
+
     def sample_reads(self, sample_obj: models.Sample) -> Iterator:
         """Calculate reads for a sample."""
         query = (
             self.session.query(
                 models.Flowcell.flowcellname.label('name'),
                 models.Flowcell.hiseqtype.label('type'),
+                models.Unaligned.lane,
                 sqa.func.sum(models.Unaligned.readcounts).label('reads'),
                 sqa.func.min(models.Unaligned.q30_bases_pct).label('q30'),
             )
@@ -94,6 +112,6 @@ class StatsAPI(alchy.Manager):
         base_pattern = "*{}/Unaligned*/Project_*/Sample_{}/*.fastq.gz"
         alt_pattern = "*{}/Unaligned*/Project_*/Sample_{}_*/*.fastq.gz"
         for fastq_pattern in (base_pattern, alt_pattern):
-            pattern = fastq_pattern.format(flowcell, sample_obj.limsid)
+            pattern = fastq_pattern.format(flowcell, sample_obj.samplename)
             files = self.root_dir.glob(pattern)
             yield from files

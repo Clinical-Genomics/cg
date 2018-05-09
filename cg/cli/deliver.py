@@ -41,7 +41,8 @@ def inbox(context, dry, family, version, tag, inbox):
         LOG.error(f"Family '{family}' not found.")
         context.abort()
 
-    family_files = deliver_api.get_post_analysis_family_files(family=family, version=version, tag=tag)
+    family_files = deliver_api.get_post_analysis_family_files(family=family, version=version,
+                                                              tags=tag)
     if not family_files:
         LOG.warning(f"No family files found.")
 

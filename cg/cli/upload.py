@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime as dt
 import logging
+import sys
 
 import click
 
@@ -30,7 +31,7 @@ def upload(context, family_id):
             message = f"analysis already uploaded: {analysis_obj.uploaded_at.date()}"
             click.echo(click.style(message, fg='yellow'))
         else:
-            context.invoke(coverage, family_id=family_id)
+            context.invoke(coverage, re_upload=True, family_id=family_id)
             context.invoke(validate, family_id=family_id)
             context.invoke(genotypes, family_id=family_id)
             context.invoke(observations, family_id=family_id)
@@ -137,6 +138,8 @@ def beacon(context: click.Context, family_id: str, panel: str, outfile: str, cus
 @click.pass_context
 def auto(context):
     """Upload all completed analyses."""
+
+    exit_code = 0
     for analysis_obj in context.obj['status'].analyses_to_upload():
         LOG.info(f"uploading family: {analysis_obj.family.internal_id}")
         try:
@@ -145,6 +148,9 @@ def auto(context):
             import traceback
             LOG.error(f"uploading family failed: {analysis_obj.family.internal_id}")
             LOG.error(traceback.format_exc())
+            exit_code = 1
+
+    sys.exit(exit_code)
 
 
 @upload.command()

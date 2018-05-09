@@ -85,6 +85,34 @@ def test_incorporate_processing_time_from_lims(lims_samples, report_api):
         assert sample['processing_time']
 
 
+def test_get_application_data_from_status_db(lims_samples, report_api):
+    # GIVEN data from an analysed case and an initialised report_api
+
+    # WHEN fetch_application_data_from_status_db
+    samples = lims_samples
+    application_data = report_api._get_application_data_from_status_db(samples)
+
+    # THEN
+    # the generated data has a property apptags with a value
+    assert application_data['application_objs']
+
+    # the generated data has a property accredited with a value
+    assert application_data['accredited'] is True
+
+
+def test_get_status_from_status_db(report_api):
+    # GIVEN data from an analysed case and an initialised report_api
+
+    # WHEN fetch_application_data_from_status_db
+    samples = report_api._fetch_family_samples_from_status_db('yellowhog')
+
+    # THEN
+    # the samples contain a status
+    for sample in samples:
+        assert sample['status']
+        assert sample['status'] != 'N/A'
+
+
 def test_incorporate_lims_methods(lims_samples, report_api):
     # GIVEN data from an analysed case and an initialised report_api
 

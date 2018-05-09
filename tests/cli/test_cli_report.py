@@ -23,4 +23,3 @@ def test_cli_report_delivery_no_parameters(invoke_cli, disk_store: Store):
 
     # THEN fail
     assert result.exit_code != 0
-

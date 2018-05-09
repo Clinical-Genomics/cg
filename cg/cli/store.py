@@ -54,7 +54,6 @@ def _gather_files_and_bundle_in_housekeeper(config_stream, context, hk_api, repo
             print(click.style('analysis version already added', fg='yellow'))
             context.abort()
         bundle_obj, version_obj = results
-        version_obj.bundle = bundle_obj
     except FileNotFoundError as error:
         click.echo(click.style(f"missing file: {error.args[0]}", fg='red'))
         context.abort()
