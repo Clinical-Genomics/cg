@@ -98,22 +98,28 @@ def test_parsing_microbial_orderform(microbial_orderform):
     assert data['customer'] == 'cust015'
 
     # ... and find all samples
-    assert len(data['items']) == 3
+    assert len(data['items']) == 5
 
     # ... and collect relevant sample data
-    for sample_data in data['items']:
-        assert sample_data['name'] in ('jag', 'testar', 'lite')
-        assert sample_data['strain'] in ('C. Jejuni', 'Other', 'C. difficile')
-        assert sample_data['reference_genome'] in ('NC_111', 'NC_222', 'NC_333')
-        assert sample_data['data_analysis'] == 'fastq'
-        assert sample_data['application'] == 'MWRNXTR003'
-        assert sample_data['require_qcok'] is True
-        assert sample_data['buffer'] == 'Nuclease-free water'
-        assert sample_data['buffer'] == 'Nuclease-free water'
+    sample_data = data['items'][0]
 
-fortsätt här
-        assert sample_data['well_position'] in ('A:1', 'A:1', 'A:1')
-        assert sample_data['well_position_rml'] is None
-        assert sample_data['pool'] == '1'
-        assert sample_data['volume'] == '30'
-        assert sample_data['concentration'] == '5'
+    assert sample_data['name'] == 'all-fields'
+    assert sample_data.get('internal_id') is None
+    assert sample_data['strain'] == 'Other'
+    assert sample_data['reference_genome'] == 'NC_111'
+    assert sample_data['application'] == 'MWRNXTR003'
+    assert sample_data['require_qcok'] is True
+    assert sample_data['eluation_buffer'] == 'Nuclease-free water'
+    assert sample_data['container'] == '96 well plate'
+    assert sample_data['container_name'] == 'name of plate'
+    assert sample_data.get('volume') is None
+    assert sample_data.get('concentration') is None
+    assert sample_data['well_position'] == 'A:1'
+    assert sample_data.get('tumour') is False
+    assert sample_data.get('source') is None
+    assert sample_data.get('priority') in 'standard'
+    assert sample_data['strain_other'] == 'M.upium'
+    assert sample_data['extraction_method'] == 'MagNaPure 96 (contact Clinical Genomics before submission)'
+    assert sample_data['comment'] == 'plate comment'
+    assert sample_data['concentration_weight'] == '101'
+    assert sample_data['quantity'] == '102'

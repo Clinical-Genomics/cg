@@ -47,12 +47,21 @@ def rml_order():
 
 
 @pytest.fixture
-def all_orders(rml_order, fastq_order, scout_order, external_order):
+def microbial_order():
+    """Load an example microbial order."""
+    json_path = 'tests/fixtures/orders/microbial.json'
+    json_data = json.load(open(json_path))
+    return json_data
+
+
+@pytest.fixture
+def all_orders(rml_order, fastq_order, scout_order, external_order, microbial_order):
     return {
         OrderType.RML: rml_order,
         OrderType.FASTQ: fastq_order,
         OrderType.SCOUT: scout_order,
         OrderType.EXTERNAL: external_order,
+        OrderType.MICROBIAL: microbial_order,
     }
 
 
@@ -74,6 +83,13 @@ def fastq_status_data(fastq_order):
 def scout_status_data(scout_order):
     """Parse scout order example."""
     data = StatusHandler.families_to_status(scout_order)
+    return data
+
+
+@pytest.fixture
+def microbial_status_data(microbial_order):
+    """Parse microbial order example."""
+    data = StatusHandler.microbial_samples_to_status(microbial_order)
     return data
 
 
