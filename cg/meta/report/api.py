@@ -139,7 +139,6 @@ class ReportAPI:
     def _open_bundle_file(self, relative_file_path: str) -> Any:
         """Open a bundle file and return it as an Python object."""
 
-        print(self.path_tool)
         full_file_path = self.path_tool(self.deliver.get_post_analysis_files_root_dir()).joinpath(
             relative_file_path)
         open_file = full_file_path.open()
