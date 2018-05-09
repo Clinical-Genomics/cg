@@ -7,7 +7,12 @@ import click
 import os
 
 from cg.apps import hk, tb
+from cg.apps.coverage import ChanjoAPI
+from cg.apps.lims import LimsAPI
+from cg.apps.scoutapi import ScoutAPI
 from cg.exc import AnalysisNotFinishedError
+from cg.meta.analysis import AnalysisAPI
+from cg.meta.deliver.api import DeliverAPI
 from cg.meta.report.api import ReportAPI
 from cg.store import Store
 
@@ -21,7 +26,27 @@ def store(context):
     context.obj['db'] = Store(context.obj['database'])
     context.obj['tb_api'] = tb.TrailblazerAPI(context.obj)
     context.obj['hk_api'] = hk.HousekeeperAPI(context.obj)
-    context.obj['report_api'] = ReportAPI(context.obj)
+    context.obj['lims'] = LimsAPI(context.obj)
+    context.obj['chanjo'] = ChanjoAPI(context.obj)
+    context.obj['scout'] = ScoutAPI(context.obj)
+    context.obj['deliver'] = DeliverAPI(
+        context.obj, hk_api=context.obj['hk_api'],
+        lims_api=context.obj['lims']
+    )
+    context.obj['analysis'] = AnalysisAPI(
+        context.obj, hk_api=context.obj['hk'],
+        scout_api=context.obj['scout'],
+        tb_api=context.obj['tb_api'],
+        lims_api=context.obj['lims']
+    )
+    context.obj['report_api'] = ReportAPI(
+        db=context.obj['db'],
+        lims_api=context.obj['lims'],
+        tb_api=context.obj['tb_api'],
+        deliver_api=context.obj['deliver'],
+        chanjo_api=context.obj['chanjo'],
+        analysis_api=context.obj['analysis']
+    )
 
 
 @store.command()
