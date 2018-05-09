@@ -27,6 +27,7 @@ class LimsHandler:
                     'quantity': sample.get('quantity'),
                     'volume': sample.get('volume'),
                     'concentration': sample.get('concentration'),
+                    'concentration_weight': sample.get('concentration_weight'),
                     'source': sample.get('source') or 'NA',
                     'customer': customer,
                     'comment': sample.get('comment'),

@@ -125,6 +125,7 @@ MICROBIAL_SAMPLE = {
     'reference_genome': str,
     'eluation_buffer': str,
     'extraction_method': validators.Optional(str, None),
+    'concentration_weight': validators.Optional(TypeValidator(str, allow_none=True), None),
 }
 
 ORDER_SCHEMES = {

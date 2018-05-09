@@ -207,7 +207,8 @@ def parse_sample(raw_sample):
 
     numeric_values = [('pool', 'UDF/pool name'), ('index_number', 'UDF/Index number'),
                       ('volume', 'UDF/Volume (uL)'), ('quantity', 'UDF/Quantity'),
-                      ('concentration', 'UDF/Concentration (nM)')]
+                      ('concentration', 'UDF/Concentration (nM)'),
+                      ('concentration_weight', 'UDF/Sample Conc.')]
     for json_key, excel_key in numeric_values:
         str_value = raw_sample.get(excel_key, '').rsplit('.0')[0]
         if str_value.replace('.', '').isnumeric():
