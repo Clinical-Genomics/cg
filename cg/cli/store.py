@@ -34,7 +34,7 @@ def store(context):
         lims_api=context.obj['lims']
     )
     context.obj['analysis'] = AnalysisAPI(
-        context.obj, hk_api=context.obj['hk'],
+        context.obj, hk_api=context.obj['hk_api'],
         scout_api=context.obj['scout'],
         tb_api=context.obj['tb_api'],
         lims_api=context.obj['lims']
