@@ -38,20 +38,24 @@ class ReportAPI:
         rendered_report = self._render_delivery_report(delivery_data)
         return rendered_report
 
-    def create_temporary_delivery_report_file(self, customer_id: str, family_id: str):
+    def create_temporary_delivery_report_file(self, customer_id: str, family_id: str, file_path:
+    Path):
         """Generate a temporary file containing a delivery report."""
 
         delivery_report = self.create_delivery_report(customer_id=customer_id,
                                                       family_id=family_id)
 
-        delivery_report_file = tempfile.NamedTemporaryFile(delete=False)
-        delivery_report_file.write(delivery_report.encode())
+        delivery_report_file = open(file_path / 'delivery-report.html', 'w')
+        delivery_report_file.write(delivery_report)
         delivery_report_file.close()
 
         return delivery_report_file
 
     def _get_delivery_data(self, customer_id: str, family_id: str) -> dict:
         """Fetch all data needed to render a delivery report."""
+
+        print(f'customer_id: {customer_id}')
+        print(f'family_id: {family_id}')
 
         report_data = dict()
         family_obj = self._get_family_from_status(family_id)
@@ -262,7 +266,7 @@ class ReportAPI:
 
     def _fetch_family_samples_from_status_db(self, family_id: str) -> list:
         """Incorporate data from the status database for each sample ."""
-        
+
         delivery_data_samples = list()
         family_samples = self.db.family_samples(family_id)
 
@@ -308,7 +312,6 @@ class ReportAPI:
         application_data['accredited'] = all(accreditations)
         return application_data
 
-      
     def _fetch_panels_from_status_db(self, family_id: str) -> list:
         """fetch data from the status database for each panels ."""
         family = self.db.family(family_id)
@@ -317,7 +320,6 @@ class ReportAPI:
         panels = ReportAPI._present_set(panels)
 
         return panels
-
 
     def _incorporate_lims_data(self, report_data: dict):
         """Incorporate data from LIMS for each sample ."""
@@ -336,4 +338,3 @@ class ReportAPI:
             sample['application'] = ReportAPI._present_string(lims_sample.get('application'))
             sample['application_version'] = lims_sample.get('application_version')
             sample['received'] = ReportAPI._present_date(lims_sample.get('received'))
-

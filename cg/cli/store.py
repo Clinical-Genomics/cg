@@ -87,23 +87,26 @@ def _gather_files_and_bundle_in_housekeeper(config_stream, context, hk_api, repo
     family_obj = _add_new_analysis_to_the_status_API(bundle_obj, status)
     _reset_the_action_on_the_family_from_running(family_obj)
     new_analysis = _add_new_complete_analysis_record(bundle_data, family_obj, status, version_obj)
-    _create_delivery_report(family_obj, hk_api, report_api, version_obj)
+    report_file = _create_delivery_report(family_obj, hk_api, report_api, version_obj, tb_api)
+
     version_date = version_obj.created_at.date()
     click.echo(f"new bundle added: {bundle_obj.name}, version {version_date}")
     _include_the_files_in_the_housekeeper_system(bundle_obj, context, hk_api, version_obj)
+    os.unlink(report_file.name)
     return new_analysis
 
 
-def _create_delivery_report(family_obj, hk_api, report_api, version_obj):
+def _create_delivery_report(family_obj, hk_api, report_api, version_obj, tb_api):
     delivery_report_file = report_api.create_temporary_delivery_report_file(
-        customer_id=family_obj.customer_id, family_id=family_obj.name)
+        customer_id=family_obj.customer.internal_id, family_id=family_obj.internal_id,
+        file_path=tb_api.get_family_root_dir(family_obj.internal_id))
     _add_delivery_report_to_hk(delivery_report_file, hk_api, version_obj)
-    os.unlink(delivery_report_file)
+    return delivery_report_file
 
 
 def _add_delivery_report_to_hk(delivery_report_file, hk_api, version_obj):
     tag_name = 'export'
-    hk_api.add_file(delivery_report_file, version_obj, tag_name)
+    hk_api.add_file(delivery_report_file.name, version_obj, tag_name)
 
 
 def _include_the_files_in_the_housekeeper_system(bundle_obj, context, hk_api, version_obj):
