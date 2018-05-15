@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
 from datetime import datetime, date
-import tempfile
 
 import requests
 import ruamel.yaml
@@ -53,9 +52,6 @@ class ReportAPI:
 
     def _get_delivery_data(self, customer_id: str, family_id: str) -> dict:
         """Fetch all data needed to render a delivery report."""
-
-        print(f'customer_id: {customer_id}')
-        print(f'family_id: {family_id}')
 
         report_data = dict()
         family_obj = self._get_family_from_status(family_id)
