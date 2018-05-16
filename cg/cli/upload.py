@@ -33,7 +33,6 @@ def upload(context, family_id):
     context.obj['tb'] = tb.TrailblazerAPI(context.obj)
     context.obj['deliver'] = DeliverAPI(context.obj, hk_api=context.obj['housekeeper_api'],
                                          lims_api=context.obj['lims'])
-    context.obj['chanjo'] = coverage_app.ChanjoAPI(context.obj)
     context.obj['scout'] = scoutapi.ScoutAPI(context.obj)
     context.obj['analysis'] = AnalysisAPI(context.obj, hk_api=context.obj[
         'housekeeper_api'],
@@ -80,7 +79,7 @@ def delivery_report(context, customer_id, family_id):
     lims_api = lims.LimsAPI(context.obj)
     tb = context.obj['tb']
     deliver = context.obj['deliver']
-    chanjo = context.obj['chanjo']
+    chanjo_api = coverage_app.ChanjoAPI(context.obj)
     analysis = context.obj['analysis']
     hk = context.obj['housekeeper_api']
 
@@ -89,7 +88,7 @@ def delivery_report(context, customer_id, family_id):
         lims_api=lims_api,
         tb_api=tb,
         deliver_api=deliver,
-        chanjo_api=chanjo,
+        chanjo_api=chanjo_api,
         analysis_api=analysis
     )
 
