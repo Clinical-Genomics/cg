@@ -6,17 +6,14 @@ import sys
 import click
 
 from cg.store import Store
-from cg.apps import coverage as coverage_app, gt, hk, loqus, tb, scoutapi, beacon as beacon_app
+from cg.apps import coverage as coverage_app, gt, hk, loqus, tb, scoutapi, beacon as beacon_app, \
+    lims
 from cg.exc import DuplicateRecordError
 from cg.meta.upload.coverage import UploadCoverageApi
 from cg.meta.upload.gt import UploadGenotypesAPI
 from cg.meta.upload.observations import UploadObservationsAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
 from cg.meta.upload.beacon import UploadBeaconApi
-from cg.apps.coverage import ChanjoAPI
-from cg.apps.lims import LimsAPI
-from cg.apps.scoutapi import ScoutAPI
-from cg.apps.tb import TrailblazerAPI
 from cg.meta.analysis import AnalysisAPI
 from cg.meta.deliver.api import DeliverAPI
 from cg.meta.report.api import ReportAPI
@@ -32,12 +29,14 @@ def upload(context, family_id):
     context.obj['status'] = Store(context.obj['database'])
     context.obj['housekeeper_api'] = hk.HousekeeperAPI(context.obj)
 
-    context.obj['lims'] = LimsAPI(context.obj)
-    context.obj['tb'] = TrailblazerAPI(context.obj)
-    context.obj['deliver'] = DeliverAPI(context.obj, hk_api=context.obj['housekeeper_api'], lims_api=context.obj['lims'])
-    context.obj['chanjo'] = ChanjoAPI(context.obj)
-    context.obj['scout'] = ScoutAPI(context.obj)
-    context.obj['analysis'] = AnalysisAPI(context.obj, hk_api=context.obj['housekeeper_api'],
+    context.obj['lims'] = lims.LimsAPI(context.obj)
+    context.obj['tb'] = tb.TrailblazerAPI(context.obj)
+    context.obj['deliver'] = DeliverAPI(context.obj, hk_api=context.obj['housekeeper_api'],
+                                         lims_api=context.obj['lims'])
+    context.obj['chanjo'] = coverage_app.ChanjoAPI(context.obj)
+    context.obj['scout'] = scoutapi.ScoutAPI(context.obj)
+    context.obj['analysis'] = AnalysisAPI(context.obj, hk_api=context.obj[
+        'housekeeper_api'],
                                           scout_api=context.obj['scout'], tb_api=context.obj['tb'],
                                           lims_api=context.obj['lims'])
 
