@@ -31,6 +31,7 @@ def upload(context, family_id):
 
     context.obj['lims_api'] = lims.LimsAPI(context.obj)
     context.obj['tb_api'] = tb.TrailblazerAPI(context.obj)
+    context.obj['chanjo_api'] = coverage_app.ChanjoAPI(context.obj)
     context.obj['deliver_api'] = DeliverAPI(context.obj, hk_api=context.obj['housekeeper_api'],
                                          lims_api=context.obj['lims_api'])
     context.obj['scout_api'] = scoutapi.ScoutAPI(context.obj)
