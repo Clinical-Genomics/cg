@@ -82,6 +82,7 @@ def register_admin_views():
     ext.admin.add_view(admin.FamilyView(models.Family, ext.db.session))
     ext.admin.add_view(admin.FamilySampleView(models.FamilySample, ext.db.session))
     ext.admin.add_view(admin.SampleView(models.Sample, ext.db.session))
+    ext.admin.add_view(admin.MicrobialSampleView(models.MicrobialSample, ext.db.session))
     ext.admin.add_view(admin.BaseView(models.Pool, ext.db.session))
     ext.admin.add_view(admin.FlowcellView(models.Flowcell, ext.db.session))
     ext.admin.add_view(admin.AnalysisView(models.Analysis, ext.db.session))
@@ -92,3 +93,4 @@ def register_admin_views():
     ext.admin.add_view(admin.InvoiceView(models.Invoice, ext.db.session))
     ext.admin.add_view(admin.OrderView(models.Order, ext.db.session))
     ext.admin.add_view(admin.MicrobialSampleView(models.MicrobialSample, ext.db.session))
+    ext.admin.add_view(admin.InvoiceView(models.Invoice, ext.db.session))

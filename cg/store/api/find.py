@@ -55,6 +55,16 @@ class FindHandler:
         )) if query else records
         return records.order_by(models.Sample.created_at.desc())
 
+    def microbial_samples(self, *, customer: models.Customer=None, query: str=None) -> List[
+        models.MicrobialSample]:
+        records = self.MicrobialSample.query
+        records = records.filter_by(customer=customer) if customer else records
+        records = records.filter(or_(
+            models.MicrobialSample.name.like(f"%{query}%"),
+            models.MicrobialSample.internal_id.like(f"%{query}%"),
+        )) if query else records
+        return records.order_by(models.MicrobialSample.created_at.desc())
+
     def find_sample(self, customer: models.Customer, name: str) -> List[models.Sample]:
         """Find samples within a customer."""
         return self.Sample.query.filter_by(customer=customer, name=name)
@@ -188,3 +198,7 @@ class FindHandler:
     def invoice(self, invoice_id: int) -> models.Invoice:
         """Fetch an invoice."""
         return self.Invoice.get(invoice_id)
+
+    def orders(self) -> List[models.Order]:
+        """Fetch all orders."""
+        return self.Order.query

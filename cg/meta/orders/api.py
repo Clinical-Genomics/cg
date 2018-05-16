@@ -139,10 +139,10 @@ class OrdersAPI(LimsHandler, StatusHandler):
         # submit samples to LIMS
         project_data, lims_map = self.process_lims(data, data['samples'])
         # submit samples to Status
-        self.fillin_sample_ids(status_data['samples'], lims_map, id_key='internal_ref')
-        order_obj = self.store_microbial(
+        self.fillin_sample_ids(status_data['samples'], lims_map, id_key='internal_id')
+        order_obj = self.store_microbial_order(
             customer=status_data['customer'],
-            order=status_data['order_name'],
+            order=status_data['order'],
             ordered=dt.datetime.now(),
             ticket=data['ticket'],
             lims_project=project_data['id'],

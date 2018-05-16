@@ -124,6 +124,13 @@ class OrderView(BaseView):
 
 
 class MicrobialSampleView(BaseView):
-    column_searchable_list = ['internal_ref', 'name']
+    column_exclude_list = ['priority']
+    column_searchable_list = ['internal_id', 'name']
     column_editable_list = ['reads', 'comment', 'reference_genome']
-    column_filters = ['priority', 'order.lims_ref']
+    column_filters = ['order.lims_ref']
+
+
+class InvoiceView(BaseView):
+    column_searchable_list = ['customer_id', 'id']
+    column_list = (
+    'id', 'customer_id', 'created_at', 'updated_at', 'invoiced_at', 'comment', 'discount', 'price')
