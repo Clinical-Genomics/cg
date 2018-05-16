@@ -94,7 +94,8 @@ def delivery_report(context, customer_id, family_id):
         analysis_api=analysis
     )
 
-    delivery_report_file = report_api.create_delivery_report_file(customer_id, family_id)
+    delivery_report_file = report_api.create_delivery_report_file(customer_id, family_id,
+                                                                  file_path=tb.get_family_root_dir(family_id))
     _add_delivery_report_to_hk(delivery_report_file, hk, family_id)
 
 
@@ -103,7 +104,7 @@ def _add_delivery_report_to_hk(delivery_report_file, hk_api: hk.HousekeeperAPI, 
     version_obj = hk_api.latest_version(family_id)
     uploaded_delivery_report_files = hk_api.get_files( bundle=family_id, tags=[tag_name])
 
-    if (len(uploaded_delivery_report_files) == 0):
+    if len(uploaded_delivery_report_files) == 0:
         hk_api.add_file(delivery_report_file.name, version_obj, tag_name)
 
 
