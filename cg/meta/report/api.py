@@ -37,7 +37,7 @@ class ReportAPI:
         rendered_report = self._render_delivery_report(delivery_data)
         return rendered_report
 
-    def create_temporary_delivery_report_file(self, customer_id: str, family_id: str, file_path:
+    def create_delivery_report_file(self, customer_id: str, family_id: str, file_path:
     Path):
         """Generate a temporary file containing a delivery report."""
 

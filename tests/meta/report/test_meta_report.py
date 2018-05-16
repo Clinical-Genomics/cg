@@ -171,11 +171,11 @@ def test_create_delivery_report(report_api):
     assert len(created_report) > 0
 
 
-def test_create_temporary_delivery_report_file(report_api: ReportAPI):
+def test_create_delivery_report_file(report_api: ReportAPI):
     # GIVEN initialized ReportAPI
 
     # WHEN rendering a report from that data
-    created_report_file = report_api.create_temporary_delivery_report_file(customer_id='cust002',
+    created_report_file = report_api.create_delivery_report_file(customer_id='cust002',
                                                                            family_id='yellowhog',
                                                                            file_path=Path(''))
 
