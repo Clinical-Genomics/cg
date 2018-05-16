@@ -29,7 +29,7 @@ def upload(context, family_id):
     context.obj['status'] = Store(context.obj['database'])
     context.obj['housekeeper_api'] = hk.HousekeeperAPI(context.obj)
 
-    context.obj['lims'] = lims.LimsAPI(context.obj)
+    #context.obj['lims'] = lims.LimsAPI(context.obj)
     context.obj['tb'] = tb.TrailblazerAPI(context.obj)
     context.obj['deliver'] = DeliverAPI(context.obj, hk_api=context.obj['housekeeper_api'],
                                          lims_api=context.obj['lims'])
@@ -77,7 +77,7 @@ def delivery_report(context, customer_id, family_id):
         LOG.error(f"{family_id}: family not found")
         context.abort()
 
-    lims = context.obj['lims']
+    lims_api = lims.LimsAPI(context.obj)
     tb = context.obj['tb']
     deliver = context.obj['deliver']
     chanjo = context.obj['chanjo']
@@ -86,7 +86,7 @@ def delivery_report(context, customer_id, family_id):
 
     report_api = ReportAPI(
         db=db,
-        lims_api=lims,
+        lims_api=lims_api,
         tb_api=tb,
         deliver_api=deliver,
         chanjo_api=chanjo,
