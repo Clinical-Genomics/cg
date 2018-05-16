@@ -49,16 +49,16 @@ def upload(context, family_id):
             message = f"analysis already uploaded: {analysis_obj.uploaded_at.date()}"
             click.echo(click.style(message, fg='yellow'))
         else:
-            context.invoke(coverage, re_upload=True, family_id=family_id)
-            context.invoke(validate, family_id=family_id)
-            context.invoke(genotypes, family_id=family_id)
-            context.invoke(observations, family_id=family_id)
+            #context.invoke(coverage, re_upload=True, family_id=family_id)
+            #context.invoke(validate, family_id=family_id)
+            #context.invoke(genotypes, family_id=family_id)
+            #context.invoke(observations, family_id=family_id)
             context.invoke(delivery_report, family_id=family_id,
                            customer_id=family_obj.customer.internal_id)
-            context.invoke(scout, family_id=family_id)
+            #context.invoke(scout, family_id=family_id)
 
-            analysis_obj.uploaded_at = dt.datetime.now()
-            context.obj['status'].commit()
+            #analysis_obj.uploaded_at = dt.datetime.now()
+            #context.obj['status'].commit()
             click.echo(click.style(f"{family_id}: analysis uploaded!", fg='green'))
 
 
