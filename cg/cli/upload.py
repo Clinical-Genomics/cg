@@ -102,9 +102,9 @@ def delivery_report(context, customer_id, family_id):
 def _add_delivery_report_to_hk(delivery_report_file, hk_api: hk.HousekeeperAPI, family_id):
     tag_name = 'export'
     version_obj = hk_api.last_version(family_id)
-    uploaded_delivery_report_files = hk_api.get_files( bundle=family_id, tags=[tag_name])
+    uploaded_delivery_report_files = hk_api.get_files(bundle=family_id, tags=[tag_name])
 
-    if len(uploaded_delivery_report_files) == 0:
+    if len(uploaded_delivery_report_files.all()) == 0:
         hk_api.add_file(delivery_report_file.name, version_obj, tag_name)
 
 
