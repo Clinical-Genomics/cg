@@ -29,15 +29,16 @@ def upload(context, family_id):
     context.obj['status'] = Store(context.obj['database'])
     context.obj['housekeeper_api'] = hk.HousekeeperAPI(context.obj)
 
-    #context.obj['lims'] = lims.LimsAPI(context.obj)
-    context.obj['tb'] = tb.TrailblazerAPI(context.obj)
-    context.obj['deliver'] = DeliverAPI(context.obj, hk_api=context.obj['housekeeper_api'],
-                                         lims_api=context.obj['lims'])
-    context.obj['scout'] = scoutapi.ScoutAPI(context.obj)
-    context.obj['analysis'] = AnalysisAPI(context.obj, hk_api=context.obj[
+    context.obj['lims_api'] = lims.LimsAPI(context.obj)
+    context.obj['tb_api'] = tb.TrailblazerAPI(context.obj)
+    context.obj['deliver_api'] = DeliverAPI(context.obj, hk_api=context.obj['housekeeper_api'],
+                                         lims_api=context.obj['lims_api'])
+    context.obj['scout_api'] = scoutapi.ScoutAPI(context.obj)
+    context.obj['analysis_api'] = AnalysisAPI(context.obj, hk_api=context.obj[
         'housekeeper_api'],
-                                          scout_api=context.obj['scout'], tb_api=context.obj['tb'],
-                                          lims_api=context.obj['lims'])
+                                          scout_api=context.obj['scout_api'], tb_api=context.obj[
+            'tb_api'],
+                                          lims_api=context.obj['lims_api'])
 
 
     if family_id:
@@ -76,11 +77,11 @@ def delivery_report(context, customer_id, family_id):
         LOG.error(f"{family_id}: family not found")
         context.abort()
 
-    lims_api = lims.LimsAPI(context.obj)
-    tb = context.obj['tb']
-    deliver = context.obj['deliver']
-    chanjo_api = coverage_app.ChanjoAPI(context.obj)
-    analysis = context.obj['analysis']
+    lims_api = context.obj['lims_api']
+    tb = context.obj['tb_api']
+    deliver = context.obj['deliver_api']
+    chanjo_api = context.obj['chanjo_api']
+    analysis = context.obj['analysis_api']
     hk = context.obj['housekeeper_api']
 
     report_api = ReportAPI(
