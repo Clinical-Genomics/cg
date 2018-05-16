@@ -13,6 +13,13 @@ from cg.meta.upload.gt import UploadGenotypesAPI
 from cg.meta.upload.observations import UploadObservationsAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
 from cg.meta.upload.beacon import UploadBeaconApi
+from cg.apps.coverage import ChanjoAPI
+from cg.apps.lims import LimsAPI
+from cg.apps.scoutapi import ScoutAPI
+from cg.apps.tb import TrailblazerAPI
+from cg.meta.analysis import AnalysisAPI
+from cg.meta.deliver.api import DeliverAPI
+from cg.meta.report.api import ReportAPI
 
 LOG = logging.getLogger(__name__)
 
@@ -24,6 +31,17 @@ def upload(context, family_id):
     """Upload results from analyses."""
     context.obj['status'] = Store(context.obj['database'])
     context.obj['housekeeper_api'] = hk.HousekeeperAPI(context.obj)
+
+    context.obj['lims'] = LimsAPI(context.obj)
+    context.obj['tb'] = TrailblazerAPI(context.obj)
+    context.obj['deliver'] = DeliverAPI(context.obj, hk_api=context.obj['housekeeper_api'], lims_api=context.obj['lims'])
+    context.obj['chanjo'] = ChanjoAPI(context.obj)
+    context.obj['scout'] = ScoutAPI(context.obj)
+    context.obj['analysis'] = AnalysisAPI(context.obj, hk_api=context.obj['housekeeper_api'],
+                                          scout_api=context.obj['scout'], tb_api=context.obj['tb'],
+                                          lims_api=context.obj['lims'])
+
+
     if family_id:
         family_obj = context.obj['status'].family(family_id)
         analysis_obj = family_obj.analyses[0]
@@ -35,11 +53,58 @@ def upload(context, family_id):
             context.invoke(validate, family_id=family_id)
             context.invoke(genotypes, family_id=family_id)
             context.invoke(observations, family_id=family_id)
+            context.invoke(delivery_report, family_id=family_id,
+                           customer_id=family_obj.customer.internal_id)
             context.invoke(scout, family_id=family_id)
 
             analysis_obj.uploaded_at = dt.datetime.now()
             context.obj['status'].commit()
             click.echo(click.style(f"{family_id}: analysis uploaded!", fg='green'))
+
+
+@upload.command()
+@click.argument('customer_id')
+@click.argument('family_id')
+@click.pass_context
+def delivery_report(context, customer_id, family_id):
+    """Generate a delivery report for a case."""
+
+    db = context.obj['status']
+    if db.customer(customer_id) is None:
+        LOG.error(f"{customer_id}: customer not found")
+        context.abort()
+
+    if db.family(family_id) is None:
+        LOG.error(f"{family_id}: family not found")
+        context.abort()
+
+    lims = context.obj['lims']
+    tb = context.obj['tb']
+    deliver = context.obj['deliver']
+    chanjo = context.obj['chanjo']
+    analysis = context.obj['analysis']
+    hk = context.obj['housekeeper_api']
+
+    report_api = ReportAPI(
+        db=db,
+        lims_api=lims,
+        tb_api=tb,
+        deliver_api=deliver,
+        chanjo_api=chanjo,
+        analysis_api=analysis
+    )
+
+    delivery_report_file = report_api.create_delivery_report_file(customer_id, family_id)
+    _add_delivery_report_to_hk(delivery_report_file, hk, family_id)
+
+
+def _add_delivery_report_to_hk(delivery_report_file, hk_api: hk.HousekeeperAPI, family_id):
+    tag_name = 'export'
+    version_obj = hk_api.latest_version(family_id)
+    uploaded_delivery_report_files = hk_api.get_files( bundle=family_id, tags=[tag_name])
+
+    if (len(uploaded_delivery_report_files) == 0):
+        hk_api.add_file(delivery_report_file.name, version_obj, tag_name)
 
 
 @upload.command()
@@ -178,3 +243,6 @@ def validate(context, family_id):
                 click.echo(f"{sample_id}: {mean_coverage:.2f}X - {completeness:.2f}%")
             else:
                 print(f"{sample_id}: sample not found in chanjo")
+
+
+

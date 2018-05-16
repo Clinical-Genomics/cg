@@ -4,16 +4,9 @@ import logging
 from pathlib import Path
 
 import click
-import os
 
 from cg.apps import hk, tb
-from cg.apps.coverage import ChanjoAPI
-from cg.apps.lims import LimsAPI
-from cg.apps.scoutapi import ScoutAPI
 from cg.exc import AnalysisNotFinishedError
-from cg.meta.analysis import AnalysisAPI
-from cg.meta.deliver.api import DeliverAPI
-from cg.meta.report.api import ReportAPI
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -26,27 +19,6 @@ def store(context):
     context.obj['db'] = Store(context.obj['database'])
     context.obj['tb_api'] = tb.TrailblazerAPI(context.obj)
     context.obj['hk_api'] = hk.HousekeeperAPI(context.obj)
-    context.obj['lims'] = LimsAPI(context.obj)
-    context.obj['chanjo'] = ChanjoAPI(context.obj)
-    context.obj['scout'] = ScoutAPI(context.obj)
-    context.obj['deliver'] = DeliverAPI(
-        context.obj, hk_api=context.obj['hk_api'],
-        lims_api=context.obj['lims']
-    )
-    context.obj['analysis'] = AnalysisAPI(
-        context.obj, hk_api=context.obj['hk_api'],
-        scout_api=context.obj['scout'],
-        tb_api=context.obj['tb_api'],
-        lims_api=context.obj['lims']
-    )
-    context.obj['report_api'] = ReportAPI(
-        db=context.obj['db'],
-        lims_api=context.obj['lims'],
-        tb_api=context.obj['tb_api'],
-        deliver_api=context.obj['deliver'],
-        chanjo_api=context.obj['chanjo'],
-        analysis_api=context.obj['analysis']
-    )
 
 
 @store.command()
@@ -57,16 +29,15 @@ def analysis(context, config_stream):
     status = context.obj['db']
     tb_api = context.obj['tb_api']
     hk_api = context.obj['hk_api']
-    report_api = context.obj['report_api']
 
     new_analysis = _gather_files_and_bundle_in_housekeeper(config_stream, context, hk_api,
-                                                           report_api, status, tb_api)
+                                                           status, tb_api)
 
     status.add_commit(new_analysis)
     click.echo(click.style('included files in Housekeeper', fg='green'))
 
 
-def _gather_files_and_bundle_in_housekeeper(config_stream, context, hk_api, report_api, status,
+def _gather_files_and_bundle_in_housekeeper(config_stream, context, hk_api, status,
                                             tb_api):
     try:
         bundle_data = tb_api.add_analysis(config_stream)
@@ -87,26 +58,11 @@ def _gather_files_and_bundle_in_housekeeper(config_stream, context, hk_api, repo
     family_obj = _add_new_analysis_to_the_status_api(bundle_obj, status)
     _reset_action_from_running_on_family(family_obj)
     new_analysis = _add_new_complete_analysis_record(bundle_data, family_obj, status, version_obj)
-    report_file = _create_delivery_report(family_obj, hk_api, report_api, version_obj, tb_api)
-
     version_date = version_obj.created_at.date()
     click.echo(f"new bundle added: {bundle_obj.name}, version {version_date}")
     _include_files_in_housekeeper(bundle_obj, context, hk_api, version_obj)
-    os.unlink(report_file.name)
+
     return new_analysis
-
-
-def _create_delivery_report(family_obj, hk_api, report_api, version_obj, tb_api):
-    delivery_report_file = report_api.create_temporary_delivery_report_file(
-        customer_id=family_obj.customer.internal_id, family_id=family_obj.internal_id,
-        file_path=tb_api.get_family_root_dir(family_obj.internal_id))
-    _add_delivery_report_to_hk(delivery_report_file, hk_api, version_obj)
-    return delivery_report_file
-
-
-def _add_delivery_report_to_hk(delivery_report_file, hk_api, version_obj):
-    tag_name = 'export'
-    hk_api.add_file(delivery_report_file.name, version_obj, tag_name)
 
 
 def _include_files_in_housekeeper(bundle_obj, context, hk_api, version_obj):
