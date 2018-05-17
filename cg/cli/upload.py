@@ -33,14 +33,22 @@ def upload(context, family_id):
     context.obj['tb_api'] = tb.TrailblazerAPI(context.obj)
     context.obj['chanjo_api'] = coverage_app.ChanjoAPI(context.obj)
     context.obj['deliver_api'] = DeliverAPI(context.obj, hk_api=context.obj['housekeeper_api'],
-                                         lims_api=context.obj['lims_api'])
+                                            lims_api=context.obj['lims_api'])
     context.obj['scout_api'] = scoutapi.ScoutAPI(context.obj)
-    context.obj['analysis_api'] = AnalysisAPI(context.obj, hk_api=context.obj[
-        'housekeeper_api'],
-                                          scout_api=context.obj['scout_api'], tb_api=context.obj[
+    context.obj['analysis_api'] = AnalysisAPI(context.obj, hk_api=context.obj['housekeeper_api'],
+                                              scout_api=context.obj['scout_api'],
+                                              tb_api=context.obj[
+                                                  'tb_api'],
+                                              lims_api=context.obj['lims_api'])
+    context.obj['report_api'] = ReportAPI(
+        db=context.obj['status'],
+        lims_api=context.obj['lims_api'],
+        tb_api=context.obj[
             'tb_api'],
-                                          lims_api=context.obj['lims_api'])
-
+        deliver_api=context.obj['deliver_api'],
+        chanjo_api=context.obj['chanjo_api'],
+        analysis_api=context.obj['analysis_api']
+    )
 
     if family_id:
         family_obj = context.obj['status'].family(family_id)
@@ -49,16 +57,16 @@ def upload(context, family_id):
             message = f"analysis already uploaded: {analysis_obj.uploaded_at.date()}"
             click.echo(click.style(message, fg='yellow'))
         else:
-            #context.invoke(coverage, re_upload=True, family_id=family_id)
-            #context.invoke(validate, family_id=family_id)
-            #context.invoke(genotypes, family_id=family_id)
-            #context.invoke(observations, family_id=family_id)
+            # context.invoke(coverage, re_upload=True, family_id=family_id)
+            # context.invoke(validate, family_id=family_id)
+            # context.invoke(genotypes, family_id=family_id)
+            # context.invoke(observations, family_id=family_id)
             context.invoke(delivery_report, family_id=family_id,
                            customer_id=family_obj.customer.internal_id)
-            #context.invoke(scout, family_id=family_id)
+            # context.invoke(scout, family_id=family_id)
 
-            #analysis_obj.uploaded_at = dt.datetime.now()
-            #context.obj['status'].commit()
+            # analysis_obj.uploaded_at = dt.datetime.now()
+            # context.obj['status'].commit()
             click.echo(click.style(f"{family_id}: analysis uploaded!", fg='green'))
 
 
@@ -71,41 +79,34 @@ def delivery_report(context, customer_id, family_id):
 
     db = context.obj['status']
     if db.customer(customer_id) is None:
-        LOG.error(f"{customer_id}: customer not found")
-        context.abort()
+        LOG.error(f"{customer_id}: customer not found in database")
+        return
 
     if db.family(family_id) is None:
-        LOG.error(f"{family_id}: family not found")
+        LOG.error(f"{family_id}: family not found in database")
         context.abort()
+        return
 
-    lims_api = context.obj['lims_api']
     tb = context.obj['tb_api']
-    deliver = context.obj['deliver_api']
-    chanjo_api = context.obj['chanjo_api']
-    analysis = context.obj['analysis_api']
     hk = context.obj['housekeeper_api']
-
-    report_api = ReportAPI(
-        db=db,
-        lims_api=lims_api,
-        tb_api=tb,
-        deliver_api=deliver,
-        chanjo_api=chanjo_api,
-        analysis_api=analysis
-    )
+    report_api = context.obj['report_api']
 
     delivery_report_file = report_api.create_delivery_report_file(customer_id, family_id,
-                                                                  file_path=tb.get_family_root_dir(family_id))
+                                                                  file_path=tb.get_family_root_dir(
+                                                                      family_id))
     _add_delivery_report_to_hk(delivery_report_file, hk, family_id)
 
 
 def _add_delivery_report_to_hk(delivery_report_file, hk_api: hk.HousekeeperAPI, family_id):
-    tag_name = 'export'
+    delivery_report_tag_name = 'export'
     version_obj = hk_api.last_version(family_id)
-    uploaded_delivery_report_files = hk_api.get_files(bundle=family_id, tags=[tag_name])
+    uploaded_delivery_report_files = hk_api.get_files(bundle=family_id,
+                                                      tags=[delivery_report_tag_name])
+    number_of_delivery_reports = len(uploaded_delivery_report_files.all())
+    is_bundle_missing_delivery_report = number_of_delivery_reports == 0
 
-    if len(uploaded_delivery_report_files.all()) == 0:
-        hk_api.add_file(delivery_report_file.name, version_obj, tag_name)
+    if is_bundle_missing_delivery_report:
+        hk_api.add_file(delivery_report_file.name, version_obj, delivery_report_tag_name)
 
 
 @upload.command()
@@ -178,12 +179,14 @@ def scout(context, re_upload, print_console, family_id):
 @click.option('-out', '--outfile', help='Name of pdf outfile', default=None)
 @click.option('-cust', '--customer', help='Name of customer', default="")
 @click.option('-qual', '--quality', help='Variant quality threshold', default=20)
-@click.option('-ref', '--genome_reference', help='Chromosome build (default=grch37)', default="grch37")
+@click.option('-ref', '--genome_reference', help='Chromosome build (default=grch37)',
+              default="grch37")
 @click.pass_context
-def beacon(context: click.Context, family_id: str, panel: str, outfile: str, customer: str, quality: int, genome_reference: str):
+def beacon(context: click.Context, family_id: str, panel: str, outfile: str, customer: str,
+           quality: int, genome_reference: str):
     """Upload variants for affected samples in a family to cgbeacon."""
     if outfile:
-        outfile +=  dt.datetime.now().strftime("%Y-%m-%d_%H:%M:%S.pdf")
+        outfile += dt.datetime.now().strftime("%Y-%m-%d_%H:%M:%S.pdf")
     api = UploadBeaconApi(
         status=context.obj['status'],
         hk_api=context.obj['housekeeper_api'],
@@ -244,6 +247,3 @@ def validate(context, family_id):
                 click.echo(f"{sample_id}: {mean_coverage:.2f}X - {completeness:.2f}%")
             else:
                 print(f"{sample_id}: sample not found in chanjo")
-
-
-
