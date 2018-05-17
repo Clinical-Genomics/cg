@@ -107,6 +107,7 @@ def _add_delivery_report_to_hk(delivery_report_file, hk_api: hk.HousekeeperAPI, 
 
     if is_bundle_missing_delivery_report:
         hk_api.add_file(delivery_report_file.name, version_obj, delivery_report_tag_name)
+        hk_api.inlude(version_obj)
 
 
 @upload.command()
