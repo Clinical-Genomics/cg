@@ -23,7 +23,7 @@ class HousekeeperAPI(Store):
         include_version(self.get_root_dir(), version_obj)
         version_obj.included_at = dt.datetime.now()
 
-    def include_file_into_version(self, file_obj: models.File, version_obj: models.Version):
+    def include_file(self, file_obj: models.File, version_obj: models.Version):
         """Call the include version function to import related assets."""
         global_root_dir = Path(self.get_root_dir())
 
