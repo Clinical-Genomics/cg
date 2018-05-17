@@ -132,8 +132,10 @@ class StatusHandler:
                 models.Sample.downsampled_to == None
             )
         )
+        customers_to_invoice = [record.customer for record in records.all() if not record.customer.internal_id=='cust000']
+        customers_to_invoice=list(set(customers_to_invoice))
         records = records.filter(models.Sample.customer == customer) if customer else records
-        return records
+        return records, customers_to_invoice
 
     def pools_to_invoice(self, customer: models.Customer=None):
         """Fetch pools that should be invoiced.
@@ -144,12 +146,12 @@ class StatusHandler:
         records = ( self.Pool.query.filter(
                 models.Pool.invoice_id == None,
            # #    models.Pool.no_invoice != True,
-                models.Pool.delivered_at != None,
-                models.Pool.received_at != None
+                models.Pool.delivered_at != None
+           ##     models.Pool.received_at != None
            # #    models.Pool.downsampled_to == None
             )
         )
-        print('ljgjgkjhgkjhgjkhghj')
-        print(customer.id)
+        customers_to_invoice = [record.customer for record in records.all() if not record.customer.internal_id=='cust000']
+        customers_to_invoice=list(set(customers_to_invoice))
         records = records.filter(models.Pool.customer_id == customer.id) if customer else records
-        return records
+        return records, customers_to_invoice

@@ -56,21 +56,20 @@ def new(record_type):
     """Generate a new invoice."""
     if not is_loged_in():
         return redirect(url_for('admin.index'))
-    customers = db.customers()
     count = request.args.get('total', 0)
     customer_id = request.args.get('customer', 'cust002')
     customer_obj = db.customer(customer_id)
     
     if record_type=='Sample':
-        records = db.samples_to_invoice(customer=customer_obj)
+        records, customers_to_invoice = db.samples_to_invoice(customer=customer_obj)
     elif record_type=='Pool':
-        records = db.pools_to_invoice(customer=customer_obj)
+        records, customers_to_invoice = db.pools_to_invoice(customer=customer_obj)
 
 
     return render_template(
         'invoices/new.html',
+        customers_to_invoice=customers_to_invoice,
         count=count,
-        customers=customers,
         records=records,
         record_type = record_type,
         args={
