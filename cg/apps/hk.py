@@ -28,7 +28,7 @@ class HousekeeperAPI(Store):
         global_root_dir = Path(self.get_root_dir())
 
         # generate root directory
-        version_root_dir = global_root_dir / version_obj.root_dir
+        version_root_dir = global_root_dir / version_obj.relative_root_dir
         version_root_dir.mkdir(parents=True, exist_ok=True)
         log.info(f"created new bundle version dir: {version_root_dir}")
 
