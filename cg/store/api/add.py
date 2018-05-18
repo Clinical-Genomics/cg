@@ -136,10 +136,11 @@ class AddHandler:
         return new_record
 
     def add_invoice(self, customer: models.Customer, samples: List[models.Sample]=None,
-                    pools: List[models.Pool]=None, comment: str=None, discount: int=0):
+                    pools: List[models.Pool]=None, comment: str=None, discount: int=0, 
+                    record_type: str=None):
         """Build a new Invoice record."""
         new_id = self.new_invoice_id()
-        new_invoice = self.Invoice(comment=comment, discount=discount, id=new_id)
+        new_invoice = self.Invoice(comment=comment, discount=discount, id=new_id, record_type=record_type)
         new_invoice.customer = customer
         for sample in samples or []:
             new_invoice.samples.append(sample)
