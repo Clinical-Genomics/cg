@@ -81,9 +81,11 @@ class InvoiceAPI():
         else:
             split_factor = (100 - record.application_version.application.percent_kth) / 100
         price = discounted_price * split_factor
+
         return {
             'name': record.name,
             'lims_id': lims_id,
+            'id':record.id,
             'application_tag': record.application_version.application.tag,
             'project': f"{record.order or 'NA'} ({record.ticket_number or 'NA'})",
             'date': record.received_at.date(),
