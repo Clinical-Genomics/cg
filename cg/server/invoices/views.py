@@ -81,8 +81,6 @@ def new(record_type):
         records, customers_to_invoice = db.samples_to_invoice(customer=customer_obj)
     elif record_type=='Pool':
         records, customers_to_invoice = db.pools_to_invoice(customer=customer_obj)
-    print(record_type)
-    print('hajjjjjjooooji')
     return render_template(
         'invoices/new.html',
         customers_to_invoice=customers_to_invoice,
@@ -100,11 +98,8 @@ def invoice(invoice_id):
     if not is_loged_in():
         return redirect(url_for('admin.index'))
     cost_center = request.args.get('cost_center','KTH')
-    print('jooo')
     invoice_obj = db.invoice(invoice_id)
     record_type = invoice_obj.record_type
-    print(invoice_obj.record_type)
-    print(invoice_obj.discount)
     api = InvoiceAPI(db, lims)
     total_price = api.total_price(invoice_obj)
     if not invoice_obj.price:
