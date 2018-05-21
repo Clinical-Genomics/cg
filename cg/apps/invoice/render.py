@@ -56,7 +56,7 @@ def render_xlsx(data: dict) -> Workbook:
             worksheet[f"D{row}"] = str(lims_sample.udf['pool name'])
 
 
-        for column in ['A', 'B', 'C', 'D', 'E', 'F']:
+        for column in ['A', 'B', 'C', 'D', 'E', 'F', 'G']:
             cell = worksheet[f"{column}{6}"]
             cell.font = Font(bold=True)
             cell.border = Border(top=Side(border_style='thin', color='000000'),
@@ -87,16 +87,17 @@ def render_xlsx(data: dict) -> Workbook:
         worksheet[f"A{row}"] = record_data['name']
         worksheet[f"B{row}"] = record_data['lims_id']
         worksheet[f"C{row}"] = record_data['application_tag']
-        worksheet[f"D{row}"] = record_data['project']
-        worksheet[f"E{row}"] = record_data['date']
-        worksheet[f"F{row}"] = record_data['price']
+        worksheet[f"D{row}"] = record_data['priority']
+        worksheet[f"E{row}"] = record_data['project']
+        worksheet[f"F{row}"] = record_data['date']
+        worksheet[f"G{row}"] = record_data['price']
 
-    worksheet[f"E{row + 2}"] = 'Total'
-    worksheet[f"F{row + 2}"] = f"=SUM(F{samples_start}: F{row})"
+    worksheet[f"F{row + 2}"] = 'Total:'
+    worksheet[f"G{row + 2}"] = f"=SUM(G{samples_start}: G{row})"
 
     header_rows = [5, 12, 19, 23, row + 2]
     for header_row in header_rows:
-        for column in ['A', 'B', 'C', 'D', 'E', 'F']:
+        for column in ['A', 'B', 'C', 'D', 'E', 'F', 'G']:
             cell = worksheet[f"{column}{header_row}"]
             cell.font = Font(bold=True)
             cell.border = Border(top=Side(border_style='thin', color='000000'),
