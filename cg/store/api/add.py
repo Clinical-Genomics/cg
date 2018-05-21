@@ -117,10 +117,12 @@ class AddHandler:
 
     def add_pool(self, customer: models.Customer, name: str, order: str, ordered: dt.datetime,
                  application_version: models.ApplicationVersion, ticket: int=None,
-                 comment: str=None, received: dt.datetime=None) -> models.Pool:
+                 comment: str=None, received: dt.datetime=None, capture_kit: str=None) -> \
+            models.Pool:
         """Build a new Pool record."""
         new_record = self.Pool(name=name, ordered_at=ordered or dt.datetime.now(), order=order,
-                               ticket_number=ticket, received_at=received, comment=comment)
+                               ticket_number=ticket, received_at=received, comment=comment,
+                               capture_kit= capture_kit)
         new_record.customer = customer
         new_record.application_version = application_version
         return new_record
