@@ -37,3 +37,7 @@ class OrderError(CgError):
 
 class TicketCreationError(CgError):
     pass
+
+
+class MissingAnalysisFileError(CgError):
+    pass

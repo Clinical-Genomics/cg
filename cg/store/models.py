@@ -432,7 +432,7 @@ class SampleStats(Model):
     id = Column(types.Integer, primary_key=True)
     created_at = Column(types.DateTime, default=dt.datetime.now)
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
-    sample_id = Column(ForeignKey(Sample.id), nullable=False)
+    sample_id = Column(ForeignKey(Sample.id), nullable=False, unique=True)
     analysis_id = Column(ForeignKey(Analysis.id), nullable=False)
 
     # pre-sequencing lab stuff
@@ -454,7 +454,7 @@ class SampleStats(Model):
     strand_balance = Column(types.Float)
 
     # coverage
-    coverage_target = Column(types.Float)
+    target_coverage = Column(types.Float)
     completeness_target_10 = Column(types.Float)
     completeness_target_20 = Column(types.Float)
     completeness_target_50 = Column(types.Float)

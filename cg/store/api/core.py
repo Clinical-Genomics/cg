@@ -27,6 +27,7 @@ class BaseHandler:
     Pool = models.Pool
     Delivery = models.Delivery
     Invoice = models.Invoice
+    SampleStats = models.SampleStats
 
 
 class CoreHandler(BaseHandler, AddHandler, FindHandler, StatusHandler, TrendsHandler):

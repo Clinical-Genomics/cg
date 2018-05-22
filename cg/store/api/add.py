@@ -147,3 +147,24 @@ class AddHandler:
         for pool in pools or []:
             new_invoice.pools.append(pool)
         return new_invoice
+
+    def add_samplestats(self, *, analysis=models.Analysis, sample: models.Sample,
+                        duplicates_percent=float, mapped_percent: float, reads_total: int,
+                        strand_balance: float, target_coverage: float,
+                        completeness_target_10: float, completeness_target_20: float,
+                        completeness_target_50: float, completeness_target_100: float):
+        """Build a new SampleStats record."""
+        new_stats = self.SampleStats(
+            duplicates_percent=duplicates_percent,
+            mapped_percent=mapped_percent,
+            reads_total=reads_total,
+            strand_balance=strand_balance,
+            target_coverage=target_coverage,
+            completeness_target_10=completeness_target_10,
+            completeness_target_20=completeness_target_20,
+            completeness_target_50=completeness_target_50,
+            completeness_target_100=completeness_target_100,
+        )
+        new_stats.sample = sample
+        new_stats.analysis = analysis
+        return new_stats

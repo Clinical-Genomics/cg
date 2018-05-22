@@ -188,3 +188,7 @@ class FindHandler:
     def invoice(self, invoice_id: int) -> models.Invoice:
         """Fetch an invoice."""
         return self.Invoice.get(invoice_id)
+
+    def samplestat(self, sample: models.Sample):
+        """Fetch stats for a sample."""
+        return self.SampleStats.filter(models.SampleStats.sample == sample).first()
