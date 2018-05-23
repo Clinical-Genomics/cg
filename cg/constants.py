@@ -10,5 +10,6 @@ STATUS_OPTIONS = ('affected', 'unaffected', 'unknown')
 CAPTUREKIT_OPTIONS = ('Agilent Sureselect CRE',
                       'Agilent Sureselect V5',
                       'SureSelect Focused Exome',
+                      'Twist_Target_hg19',
                       'other')
 FLOWCELL_STATUS = ('ondisk', 'removed', 'requested', 'processing')
