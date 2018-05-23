@@ -28,9 +28,11 @@ def test_to_lims_scout(scout_order):
 def test_to_lims_external(external_order):
     # GIVEN an external order for two samples
     # WHEN parsing the order to format for LIMS
-    samples = LimsHandler.to_lims(customer='dummyCust',samples=external_order['samples'])
+    samples = LimsHandler.to_lims(customer='dummyCust', samples=external_order['samples'])
+
     # THEN should "work"
     assert len(samples) == 2
+
     # ... and make up a container for each sample
     assert samples[0]['container'] == 'Tube'
 

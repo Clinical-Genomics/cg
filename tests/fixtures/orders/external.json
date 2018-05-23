@@ -13,8 +13,9 @@
         "sex": "female",
         "status": "affected",
         "application": "EXXCUSR000",
-        "capture_kit": "Agilent Sureselect V5",
+        "capture_kit": "Twist_Target_hg19",
         "family_name": "F0009704",
-        "panels": ["SKD"]
+        "panels": ["SKD"],
+        "comment": "externaly sequenced sample comment"
     }]
 }

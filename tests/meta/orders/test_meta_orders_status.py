@@ -14,6 +14,7 @@ def test_pools_to_status(rml_order):
     assert len(data['pools']) == 1
     assert data['pools'][0]['name'] == '1'
     assert data['pools'][0]['application'] == 'RMLS05R150'
+    assert data['pools'][0]['capture_kit'] == 'Agilent Sureselect CRE'
 
 
 def test_samples_to_status(fastq_order):
@@ -56,9 +57,11 @@ def test_families_to_status(scout_order):
     assert isinstance(family['samples'][1]['comment'], str)
 
 
-def test_store_pools(orders_api, base_store, rml_status_data):
+def test_store_rml(orders_api, base_store, rml_status_data):
+
     # GIVEN a basic store with no samples and a rml order
     assert base_store.pools(customer=None).count() == 0
+
     # WHEN storing the order
     new_pools = orders_api.store_pools(
         customer=rml_status_data['customer'],
@@ -67,6 +70,7 @@ def test_store_pools(orders_api, base_store, rml_status_data):
         ticket=1234348,
         pools=rml_status_data['pools'],
     )
+
     # THEN it should update the database with new pools
     assert len(new_pools) == 1
     assert base_store.pools(customer=None).count() == 1
@@ -74,6 +78,7 @@ def test_store_pools(orders_api, base_store, rml_status_data):
     assert new_pool == new_pools[0]
     assert new_pool.name == '1'
     assert new_pool.application_version.application.tag == 'RMLS05R150'
+    assert new_pool.capture_kit == 'Agilent Sureselect CRE'
     # ... and add a delivery
     assert len(new_pool.deliveries) == 1
     assert new_pool.deliveries[0].destination == 'caesar'
@@ -108,6 +113,7 @@ def test_store_families(orders_api, base_store, scout_status_data):
     # GIVEN a basic store with no samples or nothing in it + scout order
     assert base_store.samples().first() is None
     assert base_store.families().first() is None
+
     # WHEN storing the order
     new_families = orders_api.store_families(
         customer=scout_status_data['customer'],
@@ -116,6 +122,7 @@ def test_store_families(orders_api, base_store, scout_status_data):
         ticket=1234567,
         families=scout_status_data['families'],
     )
+
     # THEN it should create and link samples and the family
     family_obj = base_store.families().first()
     assert len(new_families) == 1
@@ -134,6 +141,44 @@ def test_store_families(orders_api, base_store, scout_status_data):
     assert new_link.sample.sex == 'female'
     assert new_link.sample.application_version.application.tag == 'WGTPCFC030'
     assert isinstance(new_family.links[1].sample.comment, str)
+
+    assert base_store.deliveries().count() == base_store.samples().count()
+    for link in new_family.links:
+        assert len(link.sample.deliveries) == 1
+
+
+def test_store_external(orders_api, base_store, external_status_data):
+
+    # GIVEN a basic store with no samples or nothing in it + external order
+    assert base_store.samples().first() is None
+    assert base_store.families().first() is None
+
+    # WHEN storing the order
+    new_families = orders_api.store_families(
+        customer=external_status_data['customer'],
+        order=external_status_data['order'],
+        ordered=dt.datetime.now(),
+        ticket=1234567,
+        families=external_status_data['families'],
+    )
+
+    # THEN it should create and link samples and the family
+    family_obj = base_store.families().first()
+    assert len(new_families) == 2
+    new_family = new_families[1]
+    assert new_family == family_obj
+    assert new_family.name == 'F0009704'
+    assert set(new_family.panels) == set(['SKD'])
+    assert new_family.priority_human == 'standard'
+
+    assert len(new_family.links) == 1
+    new_link = new_family.links[0]
+    assert new_link.status == 'affected'
+    assert new_link.sample.name == '2016-20204'
+    assert new_link.sample.sex == 'female'
+    assert new_link.sample.capture_kit == 'Twist_Target_hg19'
+    assert new_link.sample.application_version.application.tag == 'EXXCUSR000'
+    assert isinstance(new_family.links[0].sample.comment, str)
 
     assert base_store.deliveries().count() == base_store.samples().count()
     for link in new_family.links:
