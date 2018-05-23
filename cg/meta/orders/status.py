@@ -46,11 +46,8 @@ class StatusHandler:
             if capture_kit:
                 pools[name]['capture_kits'].add(capture_kit)
 
-        print('pools: ', pools)
-
         # each pool must only have one application type
         for pool in pools.values():
-            print('pool: ', pool)
 
             applications = pool['applications']
             pool_name = pool['name']
@@ -81,9 +78,7 @@ class StatusHandler:
                 'name': pool_name,
                 'application': application,
                 'capture_kit': capture_kit,
-            })
-
-        print('status_data: ', status_data)
+            })'
 
         return status_data
 
