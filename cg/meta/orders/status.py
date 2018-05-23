@@ -132,6 +132,7 @@ class StatusHandler:
                         ticket=ticket,
                         priority=family['priority'],
                         comment=sample['comment'],
+                        capture_kit=sample['capture_kit']
                     )
                     new_sample.customer = customer_obj
                     with self.status.session.no_autoflush:
@@ -231,6 +232,7 @@ class StatusHandler:
                 ordered=ordered,
                 ticket=ticket,
                 application_version=application_version,
+                capture_kit=pool['capture_kit'],
             )
             new_delivery = self.status.add_delivery(destination='caesar', pool=new_pool)
             self.status.add(new_delivery)
