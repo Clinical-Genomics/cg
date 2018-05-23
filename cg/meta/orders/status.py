@@ -132,6 +132,7 @@ class StatusHandler:
                         ticket=ticket,
                         priority=family['priority'],
                         comment=sample['comment'],
+                        capture_kit=sample['capture_kit']
                     )
                     new_sample.customer = customer_obj
                     with self.status.session.no_autoflush:
