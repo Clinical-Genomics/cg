@@ -172,7 +172,7 @@ def test_store_external(orders_api, base_store, external_status_data):
     assert new_link.status == 'affected'
     assert new_link.sample.name == '2016-20204'
     assert new_link.sample.sex == 'female'
-    assert new_link.sample.capture_kit == 'Twist_Target_hg19'
+    assert new_link.sample.capture_kit == 'Twist_Target_hg19.bed'
     assert new_link.sample.application_version.application.tag == 'EXXCUSR000'
     assert isinstance(new_family.links[0].sample.comment, str)
 
