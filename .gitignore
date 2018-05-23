@@ -90,3 +90,7 @@ ENV/
 
 DEVELOP/
 .idea
+
+# Apple-OS specific files
+.DS_Store
+

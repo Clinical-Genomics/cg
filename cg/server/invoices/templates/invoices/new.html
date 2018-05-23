@@ -10,7 +10,7 @@
       <div class="col">
         <select name="customer" class="form-control" required>
           <option>Select customer...</option>
-          {% for customer in customers %}
+          {% for customer in customers_to_invoice %}
           <option value="{{ customer.internal_id }}" {{ 'selected' if args.customer == customer.internal_id }}>
             {{ customer.internal_id}} - {{customer.name }}
           </option>

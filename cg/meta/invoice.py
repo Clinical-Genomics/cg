@@ -70,8 +70,11 @@ class InvoiceAPI():
         """Get information to invoice for a sample."""
         if type(record)==models.Pool:
             lims_id = None
+            priority = 'research'
         elif type(record)==models.Sample:
             lims_id = record.internal_id
+            priority = record.priority_human
+
         discounted_price = self.get_price(discount, record)
         if costcenter == 'kth':
             split_factor = record.application_version.application.percent_kth / 100
@@ -82,10 +85,12 @@ class InvoiceAPI():
         return {
             'name': record.name,
             'lims_id': lims_id,
+            'id':record.id,
             'application_tag': record.application_version.application.tag,
             'project': f"{record.order or 'NA'} ({record.ticket_number or 'NA'})",
-            'date': record.received_at,
+            'date': record.received_at.date(),
             'price': round(price, 1),
+            'priority':priority
         }
 
 
