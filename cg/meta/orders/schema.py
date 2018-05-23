@@ -114,6 +114,7 @@ RML_SAMPLE = {
     'index': validators.Optional(TypeValidator(str, allow_none=True), None),
     'index_number': validators.Optional(TypeValidator(str, allow_none=True), None),
     'index_sequence': validators.Optional(TypeValidator(str, allow_none=True), None),
+    'capture_kit': validators.Optional(TypeValidator(str, allow_none=True), None),
 }
 
 MICROBIAL_SAMPLE = {

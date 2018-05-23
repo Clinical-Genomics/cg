@@ -15,7 +15,8 @@
     "quantity":"2200",
     "volume": "35",
     "concentration": "5",
-    "comment":"2017-00004-05 testkommentar_HB"
+    "comment":"2017-00004-05 testkommentar_HB",
+    "capture_kit": "Agilent Sureselect CRE"
   }, {
     "name": "LB-P-UZG009-CFDNA-2015862-TP20170331-WGS",
     "application": "RMLS05R150",
