@@ -61,8 +61,8 @@
       </a>
       </td>
       <td>{{ invoice.customer.internal_id}} - {{ invoice.customer.name }}</td>
-      <td>{{ invoice.created_at.strftime('%Y-%m-%d') }}</td>
-      <td>{% if invoice.invoiced_at %} {{ invoice.invoiced_at.strftime('%Y-%m-%d')  }} {% endif %}</td>
+      <td>{% if invoice.created_at!=None %}{{ invoice.created_at.strftime('%Y-%m-%d') }}{% endif %}</td>
+      <td>{% if invoice.invoiced_at!=None %} {{ invoice.invoiced_at.strftime('%Y-%m-%d')  }} {% endif %}</td>
       <td>{{ invoice.samples|count }}</td>
       {% if status=='sent' %}
       <td>{{ invoice.price }}</td>
