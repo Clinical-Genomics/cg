@@ -411,25 +411,6 @@ class Panel(Model):
         return f"{self.abbrev} ({self.current_version})"
 
 
-class Invoice(Model):
-
-    id = Column(types.Integer, primary_key=True)
-    customer_id = Column(ForeignKey('customer.id'), nullable=False)
-    created_at = Column(types.DateTime, default=dt.datetime.now)
-    updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
-    invoiced_at = Column(types.DateTime)
-    comment = Column(types.Text)
-    discount = Column(types.Integer, default=0)
-    excel_kth = Column(types.BLOB)
-    excel_ki = Column(types.BLOB)
-    price = Column(types.Integer)
-    record_type = Column(types.Text)
-
-    samples = orm.relationship(Sample, backref='invoice')
-    pools = orm.relationship(Pool, backref='invoice')
-    customer = orm.relationship(Customer, backref='invoices')
-
-
 class MicrobialSample(Model):
 
     id = Column(types.Integer, primary_key=True)
@@ -514,6 +495,7 @@ class Invoice(Model):
     excel_kth = Column(types.BLOB)
     excel_ki = Column(types.BLOB)
     price = Column(types.Integer)
+    record_type = Column(types.Text)
 
     samples = orm.relationship(Sample, backref='invoice')
     microbial_samples = orm.relationship(MicrobialSample, backref='invoice')
