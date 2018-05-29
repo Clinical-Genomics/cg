@@ -50,6 +50,13 @@ def upload(context, family_id):
         analysis_api=context.obj['analysis_api']
     )
 
+    context.obj['scout_upload_api'] = UploadScoutAPI(
+        status_api=context.obj['status'],
+        hk_api=context.obj['housekeeper_api'],
+        scout_api=context.obj['scout_api'],
+        madeline_exe=context.obj['madeline_exe'],
+    )
+
     if family_id:
         family_obj = context.obj['status'].family(family_id)
         analysis_obj = family_obj.analyses[0]
@@ -61,10 +68,9 @@ def upload(context, family_id):
             # context.invoke(validate, family_id=family_id)
             # context.invoke(genotypes, family_id=family_id)
             # context.invoke(observations, family_id=family_id)
+            # context.invoke(scout, family_id=family_id)
             context.invoke(delivery_report, family_id=family_id,
                            customer_id=family_obj.customer.internal_id)
-            # context.invoke(scout, family_id=family_id)
-
             # analysis_obj.uploaded_at = dt.datetime.now()
             # context.obj['status'].commit()
             click.echo(click.style(f"{family_id}: analysis uploaded!", fg='green'))
@@ -90,11 +96,15 @@ def delivery_report(context, customer_id, family_id):
     tb = context.obj['tb_api']
     hk = context.obj['housekeeper_api']
     report_api = context.obj['report_api']
+    scout_upload_api = context.obj['scout_upload_api']
 
     delivery_report_file = report_api.create_delivery_report_file(customer_id, family_id,
                                                                   file_path=tb.get_family_root_dir(
                                                                       family_id))
     _add_delivery_report_to_hk(delivery_report_file, hk, family_id)
+
+    scout_upload_api.add_delivery_report(institute_id=customer_id, display_name=family_id,
+                            report_path=delivery_report_file)
 
 
 def _add_delivery_report_to_hk(delivery_report_file, hk_api: hk.HousekeeperAPI, family_id):
@@ -161,13 +171,8 @@ def scout(context, re_upload, print_console, family_id):
     """Upload variants from analysis to Scout."""
     scout_api = scoutapi.ScoutAPI(context.obj)
     family_obj = context.obj['status'].family(family_id)
-    api = UploadScoutAPI(
-        status_api=context.obj['status'],
-        hk_api=context.obj['housekeeper_api'],
-        scout_api=scout_api,
-        madeline_exe=context.obj['madeline_exe'],
-    )
-    results = api.data(family_obj.analyses[0])
+    scout_upload_api = context.obj['scout_upload_api']
+    results = scout_upload_api.data(family_obj.analyses[0])
     if print_console:
         print(results)
     else:

@@ -87,3 +87,14 @@ class UploadScoutAPI(object):
         ped_stream = madeline.make_ped(family_obj.name, samples=samples)
         svg_path = madeline.run(self.madeline_exe, ped_stream)
         return svg_path
+
+    def add_delivery_report(self, institute_id, display_name, report_path):
+        """Add delivery report to an existing case."""
+        adapter = self.scout
+        existing_case = adapter.case(institute_id=institute_id, display_name=display_name)
+        if existing_case is None:
+            LOG.warning("no case found")
+            return
+        existing_case.delivery_report = report_path
+        existing_case.save()
+        LOG.info("saved report to case!")
