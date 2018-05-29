@@ -190,6 +190,7 @@ class Pool(Model):
     invoiced_at = Column(types.DateTime)  # DEPRECATED
     comment = Column(types.Text)
     lims_project = Column(types.Text)
+    capture_kit = Column(types.String(64))
 
     created_at = Column(types.DateTime, default=dt.datetime.now)
     customer_id = Column(ForeignKey('customer.id', ondelete='CASCADE'), nullable=False)
@@ -420,6 +421,7 @@ class Invoice(Model):
     excel_kth = Column(types.BLOB)
     excel_ki = Column(types.BLOB)
     price = Column(types.Integer)
+    record_type = Column(types.Text)
 
     samples = orm.relationship(Sample, backref='invoice')
     pools = orm.relationship(Pool, backref='invoice')

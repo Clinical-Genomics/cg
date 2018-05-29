@@ -20,7 +20,22 @@ def index():
     """Show invoices."""
     if not is_loged_in():
         return redirect(url_for('admin.index'))
-    if request.method == 'POST':
+    if request.form.get('undo'):
+        invoice_id = request.form.get('invoice_id')
+        recors = request.form.get('samples')
+        record_type = request.form.get('record_type')
+        invoice_obj = db.invoice(invoice_id)
+        db.session.delete(invoice_obj)
+        for record in recors:
+            if record_type=='Pool':
+                pool=db.pool(record.id)
+                pool.delete('invoice_id')
+            elif record_type=='Sample':
+                sample=db.sample(record.id)
+                sample.delete('invoice_id')    
+        db.session.commit()
+        return redirect(url_for('.new', record_type=record_type))
+    elif request.method == 'POST':        
         customer_id = request.form.get('customer')
         customer_obj = db.customer(customer_id)
         record_ids = request.form.getlist('records')
@@ -34,16 +49,18 @@ def index():
                 customer=customer_obj,
                 pools=pools,
                 comment=request.form.get('comment'),
-                discount=int(request.form.get('discount', '0')))      
+                discount=int(request.form.get('discount', '0')),
+                record_type='Pool')      
         elif record_type=='Sample':
             samples = [db.sample(sample_id) for sample_id in record_ids]
             new_invoice = db.add_invoice(
                 customer=customer_obj,
                 samples=samples,
                 comment=request.form.get('comment'),
-                discount=int(request.form.get('discount', '0')))
+                discount=int(request.form.get('discount', '0')),
+                record_type='Sample')
         db.add_commit(new_invoice)
-        return redirect(url_for('.invoice', invoice_id=new_invoice.id))
+        return redirect(url_for('.invoice', invoice_id=new_invoice.id, record_type=record_type))
 
     invoices = {'sent_invoices' : db.invoices(invoiced=True),
                 'pending_invoices' : db.invoices(invoiced=False)}
@@ -56,21 +73,18 @@ def new(record_type):
     """Generate a new invoice."""
     if not is_loged_in():
         return redirect(url_for('admin.index'))
-    customers = db.customers()
     count = request.args.get('total', 0)
     customer_id = request.args.get('customer', 'cust002')
     customer_obj = db.customer(customer_id)
     
     if record_type=='Sample':
-        records = db.samples_to_invoice(customer=customer_obj)
+        records, customers_to_invoice = db.samples_to_invoice(customer=customer_obj)
     elif record_type=='Pool':
-        records = db.pools_to_invoice(customer=customer_obj)
-
-
+        records, customers_to_invoice = db.pools_to_invoice(customer=customer_obj)
     return render_template(
         'invoices/new.html',
+        customers_to_invoice=customers_to_invoice,
         count=count,
-        customers=customers,
         records=records,
         record_type = record_type,
         args={
@@ -85,6 +99,7 @@ def invoice(invoice_id):
         return redirect(url_for('admin.index'))
     cost_center = request.args.get('cost_center','KTH')
     invoice_obj = db.invoice(invoice_id)
+    record_type = invoice_obj.record_type
     api = InvoiceAPI(db, lims)
     total_price = api.total_price(invoice_obj)
     if not invoice_obj.price:
@@ -117,7 +132,8 @@ def invoice(invoice_id):
                             invoice = invoice_obj, 
                             invoice_dict = invoice_dict,
                             total_price = total_price,
-                            final_price = final_price)
+                            final_price = final_price,
+                            record_type=record_type)
 
 @BLUEPRINT.route('/<int:invoice_id>/excel')
 def invoice_template(invoice_id):
