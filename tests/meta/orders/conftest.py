@@ -76,6 +76,11 @@ def scout_status_data(scout_order):
     data = StatusHandler.families_to_status(scout_order)
     return data
 
+@pytest.fixture
+def external_status_data(external_order):
+    """Parse external order example."""
+    data = StatusHandler.families_to_status(external_order)
+    return data
 
 @pytest.fixture(scope='function')
 def orders_api(base_store):

@@ -89,3 +89,6 @@ ENV/
 .ropeproject
 
 DEVELOP/
+
+# Apple-OS specific files
+.DS_Store

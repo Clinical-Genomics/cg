@@ -185,6 +185,10 @@ class AnalysisAPI():
             rs['lane'] = parts[3]
             rs['flowcell'] = parts[2]
             rs['readnumber'] = parts[6].split(' ')[-1]
+        if len(parts) == 7: # @ST-E00201:173:HCLCGALXX:1:2106:22516:34834/1
+            rs['lane'] = parts[3]
+            rs['flowcell'] = parts[2]
+            rs['readnumber'] = parts[-1].split('/')[-1]
 
         return rs
 

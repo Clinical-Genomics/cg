@@ -10,10 +10,6 @@ class MockLims:
 
     def get_prep_method(self, lims_id: str) -> str:
         return 'CG002 - End repair Size selection A-tailing and Adapter ligation (TruSeq PCR-free ' \
-               '' \
-               '' \
-               '' \
-               '' \
                'DNA)'
 
     def get_sequencing_method(self, lims_id: str) -> str:
