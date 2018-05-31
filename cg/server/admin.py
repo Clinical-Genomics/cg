@@ -85,6 +85,10 @@ class FamilyView(BaseView):
 
 
 class SampleView(BaseView):
+    column_list = ["internal_id","priority","name","order","ticket_number","sex","downsampled_to",
+                "is_tumour","loqusdb_id","capture_kit","reads","ordered_at","received_at","prepared_at",
+                "sequence_start","sequenced_at","delivered_at","invoiced_at","no_invoice","comment",
+                "beaconized_at","created_at","customer","application_version","invoice.id"]
     column_exclude_list = ['is_external']
     column_searchable_list = ['internal_id', 'name', 'ticket_number', 'customer.internal_id']
     column_filters = ['customer.internal_id', 'sex', 'application_version.application']
