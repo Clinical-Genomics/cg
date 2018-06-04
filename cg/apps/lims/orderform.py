@@ -65,6 +65,7 @@ def parse_orderform(excel_path: str) -> dict:
         'items': items,
         'project_type': project_type,
     }
+
     return data
 
 

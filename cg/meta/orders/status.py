@@ -287,7 +287,7 @@ class StatusHandler:
                 customer=customer_obj,
                 name=order,
                 ordered=ordered,
-                lims_ref=lims_project,
+                internal_id=lims_project,
                 ticket_number=ticket,
                 comment=comment,
             )

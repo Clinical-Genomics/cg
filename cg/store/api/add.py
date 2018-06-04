@@ -151,9 +151,9 @@ class AddHandler:
         return new_invoice
 
     def add_order(self, customer: models.Customer, name: str, ordered: dt.datetime,
-                  lims_ref: str=None, ticket_number: int=None, comment: str=None) -> models.Order:
+                  internal_id: str=None, ticket_number: int=None, comment: str=None) -> models.Order:
         """Build a new Order record."""
-        new_order = self.Order(name=name, ordered_at=ordered, lims_ref=lims_ref,
+        new_order = self.Order(name=name, ordered_at=ordered, internal_id=internal_id,
                                ticket_number=ticket_number, comment=comment)
         new_order.customer = customer
         return new_order

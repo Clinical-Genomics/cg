@@ -1,6 +1,6 @@
 CREATE TABLE `order` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `lims_ref` varchar(32) DEFAULT NULL,
+  `internal_id` varchar(32) DEFAULT NULL,
   `name` varchar(128) NOT NULL,
   `ticket_number` int(11) DEFAULT NULL,
   `comment` text,
@@ -10,7 +10,7 @@ CREATE TABLE `order` (
   `customer_id` int(11) NOT NULL,
   `application_version_id` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `lims_ref` (`lims_ref`),
+  UNIQUE KEY `internal_id` (`internal_id`),
   KEY `customer_id` (`customer_id`),
   KEY `application_version_id` (`application_version_id`),
   CONSTRAINT `order_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`) ON DELETE CASCADE,
