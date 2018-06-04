@@ -51,8 +51,8 @@ def before_request():
         g.current_user = user_obj
 
 
-@BLUEPRINT.route('/order/<order_type>', methods=['POST'])
-def order(order_type):
+@BLUEPRINT.route('/submit_order/<order_type>', methods=['POST'])
+def submit_order(order_type):
     """Submit an order for samples."""
     api = OrdersAPI(lims=lims, status=db, osticket=osticket)
     post_data = request.get_json()
