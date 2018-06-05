@@ -137,7 +137,7 @@ def test_store_microbial_samples(orders_api, base_store,  microbial_status_data)
 
     # GIVEN a basic store with no samples and a microbial order
     assert base_store.microbial_samples().count() == 0
-    assert base_store.orders().count() == 0
+    assert base_store.microbial_orders().count() == 0
 
     # WHEN storing the order
     new_order = orders_api.store_microbial_order(
@@ -152,7 +152,7 @@ def test_store_microbial_samples(orders_api, base_store,  microbial_status_data)
     # THEN it should store the samples
     assert len(new_order.microbial_samples) == 5
     assert base_store.microbial_samples().count() == 5
-    assert base_store.orders().count() == 1
+    assert base_store.microbial_orders().count() == 1
 
 
 def test_store_families(orders_api, base_store, scout_status_data):

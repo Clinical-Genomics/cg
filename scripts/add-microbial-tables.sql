@@ -1,4 +1,4 @@
-CREATE TABLE `order` (
+CREATE TABLE `microbial_order` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `internal_id` varchar(32) DEFAULT NULL,
   `name` varchar(128) NOT NULL,
@@ -23,7 +23,7 @@ CREATE TABLE `microbial_sample` (
   `internal_id` varchar(32) NOT NULL,
   `name` varchar(128) NOT NULL,
   `application_version_id` int(11) DEFAULT NULL,
-  `order_id` int(11) NOT NULL,
+  `microbial_order_id` int(11) NOT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   `received_at` datetime DEFAULT NULL,
@@ -38,9 +38,9 @@ CREATE TABLE `microbial_sample` (
   `invoice_id` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `internal_id` (`internal_id`),
-  KEY `order_id` (`order_id`),
+  KEY `microbial_order_id` (`microbial_order_id`),
   KEY `application_version_id` (`application_version_id`),
-  CONSTRAINT `microbial_sample_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `order` (`id`),
+  CONSTRAINT `microbial_sample_ibfk_1` FOREIGN KEY (`microbial_order_id`) REFERENCES `microbial_order` (`id`),
   CONSTRAINT `microbial_sample_ibfk_2` FOREIGN KEY (`application_version_id`) REFERENCES `application_version` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=113 DEFAULT CHARSET=latin1;
 

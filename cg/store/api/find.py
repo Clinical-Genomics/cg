@@ -199,18 +199,18 @@ class FindHandler:
         """Fetch an invoice."""
         return self.Invoice.get(invoice_id)
 
-    def orders(self, *, customer: models.Customer=None, query: str=None,
-                 action: str=None) -> List[models.Order]:
-        """Fetch all orders."""
-        records = self.Order.query
+    def microbial_orders(self, *, customer: models.Customer=None, query: str=None,
+                 action: str=None) -> List[models.MicrobialOrder]:
+        """Fetch all microbial_orders."""
+        records = self.MicrobialOrder.query
         records = records.filter_by(customer=customer) if customer else records
         records = records.filter(or_(
-            models.Order.name.like(f"%{query}%"),
-            models.Order.internal_id.like(f"%{query}%"),
+            models.MicrobialOrder.name.like(f"%{query}%"),
+            models.MicrobialOrder.internal_id.like(f"%{query}%"),
         )) if query else records
         records = records.filter_by(action=action) if action else records
-        return records.order_by(models.Order.created_at.desc())
+        return records.order_by(models.MicrobialOrder.created_at.desc())
 
-    def order(self, internal_id: str) -> models.Order:
+    def microbial_order(self, internal_id: str) -> models.MicrobialOrder:
         """Fetch an order by internal id from the database."""
-        return self.Order.query.filter_by(internal_id=internal_id).first()
+        return self.MicrobialOrder.query.filter_by(internal_id=internal_id).first()

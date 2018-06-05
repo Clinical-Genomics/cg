@@ -117,7 +117,7 @@ class InvoiceView(BaseView):
     column_list = ('id', 'customer_id', 'created_at', 'updated_at','invoiced_at','comment','discount','price')
 
 
-class OrderView(BaseView):
+class MicrobialOrderView(BaseView):
     column_searchable_list = ['internal_id', 'name', 'ticket_number']
     column_editable_list = ['ticket_number', 'comment']
     column_filters = ['customer.internal_id']
@@ -127,7 +127,7 @@ class MicrobialSampleView(BaseView):
     column_exclude_list = ['priority']
     column_searchable_list = ['internal_id', 'name']
     column_editable_list = ['reads', 'comment', 'reference_genome']
-    column_filters = ['order.internal_id']
+    column_filters = ['microbial_order.internal_id']
 
 
 class InvoiceView(BaseView):

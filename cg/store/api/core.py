@@ -28,7 +28,7 @@ class BaseHandler:
     Delivery = models.Delivery
     Invoice = models.Invoice
     MicrobialSample = models.MicrobialSample
-    Order = models.Order
+    MicrobialOrder = models.MicrobialOrder
 
 
 class CoreHandler(BaseHandler, AddHandler, FindHandler, StatusHandler, TrendsHandler):

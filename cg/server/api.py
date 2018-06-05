@@ -150,11 +150,11 @@ def sample(sample_id):
     return jsonify(**data)
 
 
-@BLUEPRINT.route('/orders')
-def orders():
-    """Fetch orders."""
+@BLUEPRINT.route('/microbial_orders')
+def microbial_orders():
+    """Fetch microbial orders."""
     customer_obj = None if g.current_user.is_admin else g.current_user.customer
-    orders_q = db.orders(
+    orders_q = db.microbial_orders(
         query=request.args.get('query'),
         customer=customer_obj,
         action=request.args.get('action'),
@@ -163,13 +163,13 @@ def orders():
     records = orders_q.limit(30)
     data = [order_obj.to_dict(samples=True) for order_obj in records]
 
-    return jsonify(orders=data, total=count)
+    return jsonify(microbial_orders=data, total=count)
 
 
-@BLUEPRINT.route('/orders/<order_id>')
-def order(order_id):
+@BLUEPRINT.route('/microbial_orders/<order_id>')
+def microbial_order(order_id):
     """Fetch a order with samples."""
-    order_obj = db.order(order_id)
+    order_obj = db.microbial_order(order_id)
     if order_obj is None:
         return abort(404)
     elif not g.current_user.is_admin and (g.current_user.customer != order_obj.customer):

@@ -75,7 +75,7 @@ class Customer(Model):
     families = orm.relationship('Family', backref='customer', order_by='-Family.id')
     samples = orm.relationship('Sample', backref='customer', order_by='-Sample.id')
     pools = orm.relationship('Pool', backref='customer', order_by='-Pool.id')
-    orders = orm.relationship('Order', backref='customer', order_by='-Order.id')
+    orders = orm.relationship('MicrobialOrder', backref='customer', order_by='-MicrobialOrder.id')
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
@@ -163,7 +163,7 @@ class Family(Model, PriorityMixin):
         self._panels = ','.join(panel_list) if panel_list else None
 
 
-class Order(Model):
+class MicrobialOrder(Model):
 
     id = Column(types.Integer, primary_key=True)
     internal_id = Column(types.String(32), unique=True)
@@ -176,7 +176,7 @@ class Order(Model):
     ordered_at = Column(types.DateTime, nullable=False)
 
     customer_id = Column(ForeignKey('customer.id', ondelete='CASCADE'), nullable=False)
-    microbial_samples = orm.relationship('MicrobialSample', backref='order',
+    microbial_samples = orm.relationship('MicrobialSample', backref='microbial_order',
                                          order_by='-MicrobialSample.delivered_at')
 
     def __str__(self):
@@ -184,7 +184,7 @@ class Order(Model):
 
     def to_dict(self, samples: bool=False) -> dict:
         """Override dictify method."""
-        data = super(Order, self).to_dict()
+        data = super(MicrobialOrder, self).to_dict()
         data['customer'] = self.customer.to_dict()
         if samples:
             data['microbial_samples'] = [microbial_samples_obj.to_dict() for microbial_samples_obj in self.microbial_samples]
@@ -197,7 +197,7 @@ class MicrobialSample(Model, PriorityMixin):
     internal_id = Column(types.String(32), nullable=False, unique=True)
     name = Column(types.String(128), nullable=False)
     application_version_id = Column(ForeignKey('application_version.id'), nullable=False)
-    order_id = Column(ForeignKey('order.id'), nullable=False)
+    microbial_order_id = Column(ForeignKey('microbial_order.id'), nullable=False)
     created_at = Column(types.DateTime, default=dt.datetime.now)
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
     received_at = Column(types.DateTime)
@@ -235,7 +235,7 @@ class MicrobialSample(Model, PriorityMixin):
         data['application'] = self.application_version.application.to_dict()
         data['priority'] = self.priority_human
         if order:
-            data['order'] = self.order.to_dict()
+            data['microbial_order'] = self.microbial_order.to_dict()
         if self.invoice_id:
             data['invoice'] = self.invoice.to_dict()
         return data

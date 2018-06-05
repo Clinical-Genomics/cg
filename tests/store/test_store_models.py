@@ -11,13 +11,13 @@ def test_microbial_sample_to_dict(microbial_store):
     assert a_dict['internal_id']
     assert a_dict['name']
     assert a_dict['application_version_id']
-    assert a_dict['order_id']
+    assert a_dict['microbial_order_id']
     assert a_dict['created_at']
     assert a_dict['reference_genome']
     assert a_dict['priority']
     assert a_dict['reads']
     assert a_dict['comment']
-    assert a_dict['order']
+    assert a_dict['microbial_order']
     assert a_dict['application']
     assert a_dict['application_version']
 
@@ -25,10 +25,10 @@ def test_microbial_sample_to_dict(microbial_store):
 def test_order_sample_to_dict(microbial_store):
 
     # GIVEN a store with a Microbial sample
-    assert microbial_store.orders().count() > 0
+    assert microbial_store.microbial_orders().count() > 0
 
     # WHEN running to dict on that sample
-    a_dict = microbial_store.orders().first().to_dict(samples=True)
+    a_dict = microbial_store.microbial_orders().first().to_dict(samples=True)
 
     # THEN you should get a dictionary with
     assert a_dict['id']

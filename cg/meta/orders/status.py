@@ -283,7 +283,7 @@ class StatusHandler:
         if customer_obj is None:
             raise OrderError(f"unknown customer: {customer}")
         with self.status.session.no_autoflush:
-            new_order = self.status.add_order(
+            new_order = self.status.add_microbial_order(
                 customer=customer_obj,
                 name=order,
                 ordered=ordered,
