@@ -75,7 +75,7 @@ class Customer(Model):
     families = orm.relationship('Family', backref='customer', order_by='-Family.id')
     samples = orm.relationship('Sample', backref='customer', order_by='-Sample.id')
     pools = orm.relationship('Pool', backref='customer', order_by='-Pool.id')
-    orders = orm.relationship('Order', backref='customer')
+    orders = orm.relationship('Order', backref='customer', order_by='-Order.id')
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
@@ -161,6 +161,84 @@ class Family(Model, PriorityMixin):
     @panels.setter
     def panels(self, panel_list: List[str]):
         self._panels = ','.join(panel_list) if panel_list else None
+
+
+class Order(Model):
+
+    id = Column(types.Integer, primary_key=True)
+    internal_id = Column(types.String(32), unique=True)
+    name = Column(types.String(128), nullable=False)
+    ticket_number = Column(types.Integer)
+    comment = Column(types.Text)
+
+    created_at = Column(types.DateTime, default=dt.datetime.now)
+    updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
+    ordered_at = Column(types.DateTime, nullable=False)
+
+    customer_id = Column(ForeignKey('customer.id', ondelete='CASCADE'), nullable=False)
+    microbial_samples = orm.relationship('MicrobialSample', backref='order',
+                                         order_by='-MicrobialSample.delivered_at')
+
+    def __str__(self):
+        return f"{self.internal_id} ({self.name})"
+
+    def to_dict(self, samples: bool=False) -> dict:
+        """Override dictify method."""
+        data = super(Order, self).to_dict()
+        data['customer'] = self.customer.to_dict()
+        if samples:
+            data['microbial_samples'] = [microbial_samples_obj.to_dict() for microbial_samples_obj in self.microbial_samples]
+        return data
+
+
+class MicrobialSample(Model, PriorityMixin):
+
+    id = Column(types.Integer, primary_key=True)
+    internal_id = Column(types.String(32), nullable=False, unique=True)
+    name = Column(types.String(128), nullable=False)
+    application_version_id = Column(ForeignKey('application_version.id'), nullable=False)
+    order_id = Column(ForeignKey('order.id'), nullable=False)
+    created_at = Column(types.DateTime, default=dt.datetime.now)
+    updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
+    received_at = Column(types.DateTime)
+    prepared_at = Column(types.DateTime)
+    sequence_start = Column(types.DateTime)
+    sequenced_at = Column(types.DateTime)
+    delivered_at = Column(types.DateTime)
+    reference_genome = Column(types.String(32))
+    priority = Column(types.Integer, default=1, nullable=False)
+    reads = Column(types.BigInteger, default=0)
+    comment = Column(types.Text)
+    invoice_id = Column(ForeignKey('invoice.id'))
+
+    def __str__(self) -> str:
+        return f"{self.internal_id} ({self.name})"
+
+    @property
+    def state(self) -> str:
+        """Get the current microbial sample state."""
+        if self.delivered_at:
+            return f"Delivered {self.delivered_at.date()}"
+        elif self.sequenced_at:
+            return f"Sequenced {self.sequenced_at.date()}"
+        elif self.sequence_start:
+            return f"Sequencing {self.sequence_start.date()}"
+        elif self.received_at:
+            return f"Received {self.received_at.date()}"
+        else:
+            return f"Ordered {self.ordered_at.date()}"
+
+    def to_dict(self, order=False) -> dict:
+        """Override dictify method."""
+        data = super(MicrobialSample, self).to_dict()
+        data['application_version'] = self.application_version.to_dict()
+        data['application'] = self.application_version.application.to_dict()
+        data['priority'] = self.priority_human
+        if order:
+            data['order'] = self.order.to_dict()
+        if self.invoice_id:
+            data['invoice'] = self.invoice.to_dict()
+        return data
 
 
 class Delivery(Model):
@@ -409,78 +487,6 @@ class Panel(Model):
 
     def __str__(self):
         return f"{self.abbrev} ({self.current_version})"
-
-
-class MicrobialSample(Model):
-
-    id = Column(types.Integer, primary_key=True)
-    internal_id = Column(types.String(32), nullable=False, unique=True)
-    name = Column(types.String(128), nullable=False)
-    application_version_id = Column(ForeignKey('application_version.id'), nullable=False)
-    order_id = Column(ForeignKey('order.id'), nullable=False)
-    created_at = Column(types.DateTime, default=dt.datetime.now)
-    updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
-    received_at = Column(types.DateTime)
-    prepared_at = Column(types.DateTime)
-    sequence_start = Column(types.DateTime)
-    sequenced_at = Column(types.DateTime)
-    delivered_at = Column(types.DateTime)
-    reference_genome = Column(types.String(32))
-    priority = Column(types.Integer, default=1, nullable=False)
-    reads = Column(types.BigInteger, default=0)
-    comment = Column(types.Text)
-    invoice_id = Column(ForeignKey('invoice.id'))
-
-    def __str__(self) -> str:
-        return f"{self.internal_id} ({self.name})"
-
-    @property
-    def state(self) -> str:
-        """Get the current microbial sample state."""
-        if self.delivered_at:
-            return f"Delivered {self.delivered_at.date()}"
-        elif self.sequenced_at:
-            return f"Sequenced {self.sequenced_at.date()}"
-        elif self.sequence_start:
-            return f"Sequencing {self.sequence_start.date()}"
-        elif self.received_at:
-            return f"Received {self.received_at.date()}"
-        else:
-            return f"Ordered {self.ordered_at.date()}"
-
-    def to_dict(self) -> dict:
-        """Override dictify method."""
-        data = super(MicrobialSample, self).to_dict()
-        data['application_version'] = self.application_version.to_dict()
-        data['application'] = self.application_version.application.to_dict()
-        data['order'] = self.order.to_dict()
-        if self.invoice_id:
-            data['invoice'] = self.invoice.to_dict()
-        return data
-
-
-class Order(Model):
-
-    id = Column(types.Integer, primary_key=True)
-    lims_ref = Column(types.String(32), unique=True)
-    name = Column(types.String(128), nullable=False)
-    ticket_number = Column(types.Integer)
-    comment = Column(types.Text)
-
-    created_at = Column(types.DateTime, default=dt.datetime.now)
-    updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
-    ordered_at = Column(types.DateTime, nullable=False)
-
-    customer_id = Column(ForeignKey('customer.id', ondelete='CASCADE'), nullable=False)
-    microbial_samples = orm.relationship('MicrobialSample', backref='order')
-
-    def __str__(self):
-        return f"{self.lims_ref} ({self.name})"
-
-    def to_dict(self) -> dict:
-        """Override dictify method."""
-        data = super(Order, self).to_dict()
-        return data
 
 
 class Invoice(Model):
