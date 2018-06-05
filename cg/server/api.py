@@ -175,7 +175,6 @@ def order(order_id):
     elif not g.current_user.is_admin and (g.current_user.customer != order_obj.customer):
         return abort(401)
     data = order_obj.to_dict(samples=True)
-    print(data)
     return jsonify(**data)
 
 
