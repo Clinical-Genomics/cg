@@ -64,7 +64,7 @@ def submit_order(order_type):
         return abort(make_response(jsonify(message=error.message), 401))
     except HTTPError as error:
         return abort(make_response(jsonify(message=error.args[0]), 401))
-    #LOG.info(f"{result['ticket'] or 'NA'}: successfully submitted samples")
+
     return jsonify(project=result['project'],
                    records=[record.to_dict() for record in result['records']])
 
@@ -147,6 +147,35 @@ def sample(sample_id):
     elif not g.current_user.is_admin and (g.current_user.customer != sample_obj.customer):
         return abort(401)
     data = sample_obj.to_dict(links=True, flowcells=True)
+    return jsonify(**data)
+
+
+@BLUEPRINT.route('/orders')
+def orders():
+    """Fetch orders."""
+    customer_obj = None if g.current_user.is_admin else g.current_user.customer
+    orders_q = db.orders(
+        query=request.args.get('query'),
+        customer=customer_obj,
+        action=request.args.get('action'),
+    )
+    count = orders_q.count()
+    records = orders_q.limit(30)
+    data = [order_obj.to_dict(samples=True) for order_obj in records]
+
+    return jsonify(orders=data, total=count)
+
+
+@BLUEPRINT.route('/orders/<order_id>')
+def order(order_id):
+    """Fetch a order with samples."""
+    order_obj = db.order(order_id)
+    if order_obj is None:
+        return abort(404)
+    elif not g.current_user.is_admin and (g.current_user.customer != order_obj.customer):
+        return abort(401)
+    data = order_obj.to_dict(samples=True)
+    print(data)
     return jsonify(**data)
 
 
