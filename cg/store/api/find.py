@@ -65,6 +65,10 @@ class FindHandler:
         )) if query else records
         return records.order_by(models.MicrobialSample.created_at.desc())
 
+    def microbial_sample(self, internal_id: str) -> models.MicrobialSample:
+        """Fetch a microbial sample by lims id."""
+        return self.MicrobialSample.query.filter_by(internal_id=internal_id).first()
+
     def find_sample(self, customer: models.Customer, name: str) -> List[models.Sample]:
         """Find samples within a customer."""
         return self.Sample.query.filter_by(customer=customer, name=name)
