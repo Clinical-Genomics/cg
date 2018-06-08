@@ -178,6 +178,34 @@ def microbial_order(order_id):
     return jsonify(**data)
 
 
+@BLUEPRINT.route('/microbial_samples')
+def microbial_samples():
+    """Fetch microbial samples."""
+    if request.args.get('status') and not g.current_user.is_admin:
+        return abort(401)
+    customer_obj = None if g.current_user.is_admin else g.current_user.customer
+    samples_q = db.microbial_samples(
+        query=request.args.get('query'),
+        customer=customer_obj,
+    )
+    limit = int(request.args.get('limit', 50))
+    data = [sample_obj.to_dict(order=True) for sample_obj in samples_q.limit(limit)]
+    return jsonify(samples=data, total=samples_q.count())
+
+
+@BLUEPRINT.route('/microbial_samples/<sample_id>')
+def microbial_sample(sample_id):
+    """Fetch a single sample."""
+    sample_obj = db.microbial_sample(sample_id)
+    print(sample_id)
+    if sample_obj is None:
+        return abort(404)
+    elif not g.current_user.is_admin and (g.current_user.customer != sample_obj.customer):
+        return abort(401)
+    data = sample_obj.to_dict()
+    return jsonify(**data)
+
+
 @BLUEPRINT.route('/pools')
 def pools():
     """Fetch pools."""
