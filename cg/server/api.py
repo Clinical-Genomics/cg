@@ -181,8 +181,6 @@ def microbial_order(order_id):
 @BLUEPRINT.route('/microbial_samples')
 def microbial_samples():
     """Fetch microbial samples."""
-    if request.args.get('status') and not g.current_user.is_admin:
-        return abort(401)
     customer_obj = None if g.current_user.is_admin else g.current_user.customer
     samples_q = db.microbial_samples(
         query=request.args.get('query'),
