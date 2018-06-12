@@ -1,0 +1,283 @@
+---
+analysis_constant_path: analysis
+analysis_type:
+  sample: wgs
+bwa_build_reference: Homo_sapiens.GRCh37.d5.fasta
+bwa_mem_bamstats: '1'
+bwa_mem_cram: '0'
+bwa_mem_hla: '1'
+bwa_sambamba_sort_memory_limit: 32G
+cluster_constant_path: /mnt/hds/proj/bioinfo/MIP_ANALYSIS/customers/cust003
+config_file: /mnt/hds/proj/bioinfo/MIP_ANALYSIS/config/MIP_config.v1.6.yaml
+config_file_analysis: tests/fixtures/family/family_config.yaml
+core_processor_number: '16'
+email: emilia.ottosson@scilifelab.se
+email_type: F
+exome_target_bed:
+  Agilent_SureSelectCRE.V1.GRCh37_targets.bed: sample
+expected_coverage:
+  sample: '26.1'
+family_id: 'family'
+gatk_baserecalibration_covariates:
+  - ReadGroupCovariate
+  - ContextCovariate
+  - CycleCovariate
+  - QualityScoreCovariate
+gatk_baserecalibration_disable_indel_qual: '1'
+gatk_baserecalibration_known_sites:
+  - dbsnp_138.b37.vcf
+  - 1000G_phase1.indels.b37.vcf
+  - Mills_and_1000G_gold_standard.indels.b37.vcf
+gatk_baserecalibration_over_clipped_read: '1'
+gatk_baserecalibration_static_quantized_quals:
+  - '10'
+  - '20'
+  - '30'
+  - '40'
+gatk_bundle_download_version: '2.8'
+gatk_calculategenotypeposteriors_support_set: 1000G_phase3_v4_20130502.sites.vcf
+gatk_combinevariantcallsets_bcf_file: '1'
+gatk_combinevariants_prioritize_caller: 'gatk,samtools,freebayes'
+gatk_concatenate_genotypegvcfs_bcf_file: '1'
+gatk_disable_auto_index_and_file_lock: '0'
+gatk_downsample_to_coverage: '1000'
+gatk_genotypegvcfs_all_sites: '0'
+gatk_genotypegvcfs_ref_gvcf: Merged_reference_infiles.gvcf
+gatk_haplotypecaller_annotation:
+  - BaseQualityRankSumTest
+  - ChromosomeCounts
+  - Coverage
+  - DepthPerAlleleBySample
+  - FisherStrand
+  - MappingQualityRankSumTest
+  - QualByDepth
+  - RMSMappingQuality
+  - ReadPosRankSumTest
+  - StrandOddsRatio
+gatk_haplotypecaller_pcr_indel_model: None
+gatk_haplotypecaller_snp_known_set: dbsnp_138.b37.vcf
+gatk_haplotypecaller_soft_clipped_bases: '1'
+gatk_path: /mnt/hds/proj/bioinfo/MIP_ANALYSIS/modules/GenomeAnalysisTK-3.6
+gatk_realigner_indel_known_sites:
+  - 1000G_phase1.indels.b37.vcf
+  - Mills_and_1000G_gold_standard.indels.b37.vcf
+gatk_varianteval_dbsnp: dbsnp_138.b37.excluding_sites_after_129.vcf
+gatk_varianteval_gold: Mills_and_1000G_gold_standard.indels.b37.vcf
+gatk_variantrecalibration_bcf_file: '0'
+gatk_variantrecalibration_dp_annotation: '1'
+gatk_variantrecalibration_exclude_nonvariants_file: '0'
+gatk_variantrecalibration_indel_max_gaussians: '1'
+gatk_variantrecalibration_indel_tsfilter_level: '99.9'
+gatk_variantrecalibration_snv_max_gaussians: 1
+gatk_variantrecalibration_snv_tsfilter_level: '99.9'
+gatk_variantrecalibration_training_set_1000g_omni: 1000G_omni2.5.b37.sites.vcf
+gatk_variantrecalibration_training_set_1000gsnp: 1000G_phase1.snps.high_confidence.b37.vcf
+gatk_variantrecalibration_training_set_dbsnp: dbsnp_138.b37.vcf
+gatk_variantrecalibration_training_set_hapmap: hapmap_3.3.b37.sites.vcf
+gatk_variantrecalibration_training_set_mills: Mills_and_1000G_gold_standard.indels.b37.vcf
+genmod_annotate_cadd_files:
+  - whole_genome_SNVs.v1.3_ge10.tsv.gz
+  - 1000G_phase3.v1.3.tsv.gz
+  - ExAC_r0.3.v1.3.tsv.gz
+genmod_annotate_regions: '1'
+genmod_annotate_spidex_file: spidex_public_noncommercial_v1_0.tab.gz
+genmod_models_family_type: ped
+genmod_models_reduced_penetrance_file: cust003-CMMS-red-pen.txt.csv
+genmod_models_whole_gene: '1'
+genomic_set: nouser_info
+human_genome_reference: Homo_sapiens.GRCh37.d5.fasta
+infile_dirs:
+  /mnt/hds/proj/bioinfo/MIP_ANALYSIS/customers/cust003/family/wgs/sample/fastq: sample
+java_use_large_pages: '1'
+log_file: tests/fixtures/family/mip.pl_2017-06-17T12:11:42.log
+mip: 1
+node_ram_memory: '128'
+outaligner_dir: bwa
+outdata_dir: /mnt/hds/proj/bioinfo/MIP_ANALYSIS/customers/cust003/family/analysis
+outscript_dir: /mnt/hds/proj/bioinfo/MIP_ANALYSIS/customers/cust003/family/analysis/scripts
+panalysisrunstatus: '1'
+pannovar: 0
+pbamcalibrationblock: '0'
+pbwa_aln: 0
+pbwa_mem: 1
+pbwa_sampe: 0
+pchanjo_sexcheck: '1'
+pcnvnator: 0
+pdelly: 0
+pedigree_file: /mnt/hds/proj/bioinfo/MIP_ANALYSIS/customers/cust003/family/family_pedigree.yaml
+pendvariantannotationblock: 1
+pevaluation: 0
+pfastqc: 1
+pfindtranslocations: 0
+pfreebayes: 1
+pgatk_baserecalibration: 1
+pgatk_combinevariantcallsets: 1
+pgatk_genotypegvcfs: 1
+pgatk_haplotypecaller: 1
+pgatk_phasebytransmission: '0'
+pgatk_readbackedphasing: 0
+pgatk_realigner: 0
+pgatk_variantevalall: 1
+pgatk_variantevalexome: 1
+pgatk_variantrecalibration: 1
+pgenomecoveragebed: 0
+pgzip_fastq: 1
+picardtools_path: /mnt/hds/proj/bioinfo/SERVER/miniconda/bin
+platform: ILLUMINA
+pmadeline: 0
+pmanta: 1
+pmosaik_aligner: 0
+pmosaik_build: 0
+pmultiqc: '1'
+ppicardtools_calculatehsmetrics: 1
+ppicardtools_collectmultiplemetrics: '1'
+ppicardtools_markduplicates: 1
+ppicardtools_mergerapidreads: '0'
+ppicardtools_mergesamfiles: 1
+pprepareforvariantannotationblock: '1'
+pqccollect: 1
+prankvariant: 1
+prcovplots: '0'
+premoveredundantfiles: '1'
+print_program_mode: '2'
+project_id: prod001
+psacct: '1'
+psambamba_depth: 1
+psambamba_markduplicates: 0
+psamplecheck: 1
+psamtools_mpileup: 1
+psnpeff: 1
+psplit_fastq_file: 0
+psv_combinevariantcallsets: 1
+psv_rankvariant: 1
+psv_reformat: 1
+psv_varianteffectpredictor: 1
+psv_vcfparser: 1
+pvariantannotationblock: '0'
+pvarianteffectpredictor: 1
+pvcfparser: 1
+pvt: 1
+qccollect_regexp_file: qc_regexp_v1.13.yaml
+qccollect_sampleinfo_file: tests/fixtures/family/family_qc_sample_info.yaml
+qccollect_skip_evaluation: '0'
+rank_model_file: rank_model_cmms_v1.18.ini
+rankvariant_binary_file: '1'
+reduce_io: '1'
+reference_dir: /mnt/hds/proj/bioinfo/MIP_ANALYSIS/references_4.0
+replace_iupac: '0'
+sambamba_depth_base_quality: '10'
+sambamba_depth_bed: scout.exons.bed
+sambamba_depth_cutoffs:
+  - '10'
+  - '15'
+  - '20'
+  - '50'
+  - '100'
+sambamba_depth_mapping_quality: '10'
+sambamba_depth_noduplicates: '1'
+sambamba_depth_quality_control: '1'
+sample_ids:
+  - sample
+sample_info_file: /mnt/hds/proj/bioinfo/MIP_ANALYSIS/customers/cust003/family/analysis/family_qc_sample_info.yaml
+script_dir: /mnt/hds/proj/bioinfo/SERVER/miniconda/bin
+slurm_quality_of_service: normal
+snpeff_ann: '1'
+snpeff_genome_build_version: GRCh37.75
+snpeff_path: /mnt/hds/proj/bioinfo/SERVER/miniconda/bin
+snpsift_annotation_files:
+  GRCh37_clinvar_-2017-01-04-.vcf.gz: 'CLNSIG,CLNACC,CLNREVSTAT'
+  GRCh37_exac_reheader_-r0.3.1-.vcf.gz: 'AF,AF_Adj'
+  anon-SweGen_STR_NSPHS_1000samples_indel_freq_hg19.vcf.gz: 'AF,AC_Hom,AC_Het,AC_Hemi'
+  anon-SweGen_STR_NSPHS_1000samples_snp_freq_hg19.vcf.gz: 'AF,AC_Hom,AC_Het,AC_Hemi'
+  genbank_haplogroup_2015_August.vcf.gz: MTAF
+  loqusdb.2016-09-26.vcf.gz: 'Obs,Hom'
+snpsift_annotation_outinfo_key:
+  GRCh37_exac_reheader_-r0.3.1-.vcf.gz: EXAC
+snpsift_dbnsfp_annotations:
+  - GERP++_RS
+  - GERP++_NR
+  - phyloP46way_primate
+  - phyloP100way_vertebrate
+  - phastCons46way_primate
+  - phastCons100way_vertebrate
+snpsift_dbnsfp_file: dbNSFP2.9.txt.gz
+source_environment_commands:
+  - echo
+  - hello
+sv_bcftools_view_filter: '1'
+sv_combinevariantcallsets_bcf_file: '1'
+sv_genmod_annotate_regions: '1'
+sv_genmod_filter: '1'
+sv_genmod_filter_1000g: ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz
+sv_genmod_filter_threshold: '0.10'
+sv_genmod_models_family_type: cmms
+sv_genmod_models_reduced_penetrance_file: cust003-CMMS-red-pen.txt.csv
+sv_genmod_models_whole_gene: '0'
+sv_rank_model_file: svrank_model_cmms_v1.0.ini
+sv_rankvariant_binary_file: '1'
+sv_vcfanno: '1'
+sv_vcfanno_config: vcfanno_config.v1.0.toml
+sv_vcfanno_lua: vcfanno_custom.v1.0.lua
+sv_vcfannotation_header_lines_file: vcfanno_headerLines.v1.0.txt
+sv_vcfparser_per_gene: '1'
+sv_vcfparser_select_file: /mnt/hds/proj/bioinfo/MIP_ANALYSIS/customers/cust003/family/aggregated_master.bed
+sv_vcfparser_select_file_matching_column: '3'
+sv_vcfparser_vep_transcripts: '1'
+sv_vep_features:
+  - hgvs
+  - symbol
+  - numbers
+  - sift
+  - polyphen
+  - humdiv
+  - domains
+  - protein
+  - ccds
+  - uniprot
+  - biotype
+  - regulatory
+  - tsl
+  - canonical
+  - per_gene
+  - appris
+sv_vep_plugins:
+  - UpDownDistance
+  - LoFtool
+  - LoF
+sv_vt_decompose: '1'
+temp_directory: /scratch/$SLURM_JOB_ID
+vcfparser_outfile_count: 2
+vcfparser_select_file: /mnt/hds/proj/bioinfo/MIP_ANALYSIS/customers/cust003/family/aggregated_master.bed
+vcfparser_select_file_matching_column: '3'
+vcfparser_vep_transcripts: '1'
+vep_directory_cache: /mnt/hds/proj/bioinfo/SERVER/apps/mip/resources/ensembl-tools-release-87/cache
+vep_directory_path: /mnt/hds/proj/bioinfo/SERVER/miniconda/ensembl-tools-release-87/scripts/variant_effect_predictor
+vep_features:
+  - hgvs
+  - symbol
+  - numbers
+  - sift
+  - polyphen
+  - humdiv
+  - domains
+  - protein
+  - ccds
+  - uniprot
+  - biotype
+  - regulatory
+  - tsl
+  - canonical
+  - appris
+vep_plugins:
+  - UpDownDistance
+  - LoFtool
+  - LoF
+vep_reference: '0'
+vt_decompose: '1'
+vt_genmod_filter: '1'
+vt_genmod_filter_1000g: ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz
+vt_genmod_filter_max_af: '1'
+vt_genmod_filter_threshold: '0.10'
+vt_missing_alt_allele: '1'
+vt_normalize: '1'
+
