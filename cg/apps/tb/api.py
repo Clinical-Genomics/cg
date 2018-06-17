@@ -31,7 +31,7 @@ class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
         self.mip_config = config['trailblazer']['mip_config']
 
     def start(self, family_id: str, priority: str = 'normal', email: str = None,
-              skip_evaluation: bool = False):
+              skip_evaluation: bool = False, start_with = None):
         """Start MIP."""
         email = email or environ_email()
         kwargs = dict(config=self.mip_config, family=family_id, priority=priority, email=email, start_with=start_with)
