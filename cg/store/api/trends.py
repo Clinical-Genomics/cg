@@ -201,8 +201,33 @@ class TrendsHandler:
                 } for month in MONTHS.values()]
             }
 
+    def delivered_to_invoiced(self, year):
+        """Calculate average time to invoice samples."""
+        query = (
+            self.session.query(
+                models.Application.category.label('category'),
+                func.month(models.Sample.received_at).label('month_no'),
+                func.avg(
+                    func.datediff(models.Invoice.invoiced_at,
+                                  models.Sample.delivered_at)).label(
+                    'average'),
             )
-            .group_by(
+                .join(
+                models.Sample.customer,
+                models.Sample.application_version,
+                models.ApplicationVersion.application,
+                models.Sample.invoice,
+            )
+                .filter(
+                models.Customer.priority == 'diagnostic',
+                self.get_from_date(year) < models.Sample.received_at,
+                models.Sample.received_at < self.get_tom_date(year),
+                models.Sample.delivered_at is not None,
+                models.Sample.invoice is not None,
+                models.Sample.invoice_id is not None,
+                models.Invoice.invoiced_at is not None,
+            )
+                .group_by(
                 models.Application.category,
                 func.month(models.Sample.received_at),
             )
