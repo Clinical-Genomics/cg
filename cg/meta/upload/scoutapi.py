@@ -95,6 +95,8 @@ class UploadScoutAPI(object):
         if existing_case is None:
             LOG.warning("no case found")
             return
-        existing_case.delivery_report = report_path
+
+        existing_case['delivery_report'] = report_path
+                                     
         existing_case.save()
         LOG.info("saved report to case!")
