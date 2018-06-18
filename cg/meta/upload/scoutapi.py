@@ -40,7 +40,7 @@ class UploadScoutAPI(object):
             bam_path = bam_file.full_path if bam_file else None
             mt_bam_tags = ['bam-mt', sample_id]
             mt_bam_file = self.housekeeper.files(version=hk_version.id, tags=mt_bam_tags).first()
-            mt_bam_path = m_bam_file.full_path if mt_bam_file else None
+            mt_bam_path = mt_bam_file.full_path if mt_bam_file else None
             data['samples'].append({
                 'analysis_type': link_obj.sample.application_version.application.analysis_type,
                 'sample_id': sample_id,
