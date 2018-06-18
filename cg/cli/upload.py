@@ -102,8 +102,8 @@ def delivery_report(context, customer_id, family_id):
                                                                   file_path=tb.get_family_root_dir(
                                                                       family_id))
     _add_delivery_report_to_hk(delivery_report_file, hk, family_id)
-
-    scout_upload_api.add_delivery_report(institute_id=customer_id, display_name=family_id,
+    family_name = db.family(internal_id=family_id).name
+    scout_upload_api.add_delivery_report(institute_id=customer_id, display_name=family_name,
                             report_path=delivery_report_file)
 
 
