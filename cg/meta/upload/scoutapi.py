@@ -98,5 +98,5 @@ class UploadScoutAPI(object):
 
         existing_case['analyses'][-1]['delivery_report'] = report_path
 
-        adapter.update_case(existing_case)
+        adapter.update_caseid(existing_case, family_id=display_name)
         LOG.info("saved report to case!")
