@@ -81,3 +81,6 @@ class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
         return trending.parse_mip_analysis(mip_config_raw= mip_config_raw,
                                            qcmetrics_raw=qcmetrics_raw,
                                            sampleinfo_raw=sampleinfo_raw)
+
+    def get_family_root_dir(self, family_id: str):
+        return Path(self.families_dir) / family_id
