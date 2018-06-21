@@ -35,9 +35,12 @@ class UploadScoutAPI(object):
 
         for link_obj in analysis_obj.family.links:
             sample_id = link_obj.sample.internal_id
-            tags = ['bam', sample_id]
-            bam_file = self.housekeeper.files(version=hk_version.id, tags=tags).first()
+            bam_tags = ['bam', sample_id]
+            bam_file = self.housekeeper.files(version=hk_version.id, tags=bam_tags).first()
             bam_path = bam_file.full_path if bam_file else None
+            mt_bam_tags = ['bam-mt', sample_id]
+            mt_bam_file = self.housekeeper.files(version=hk_version.id, tags=mt_bam_tags).first()
+            mt_bam_path = mt_bam_file.full_path if mt_bam_file else None
             data['samples'].append({
                 'analysis_type': link_obj.sample.application_version.application.analysis_type,
                 'sample_id': sample_id,
@@ -48,6 +51,7 @@ class UploadScoutAPI(object):
                 'phenotype': link_obj.status,
                 'sex': link_obj.sample.sex,
                 'bam_path': bam_path,
+                'mt_bam': mt_bam_path,
             })
 
         files = {('vcf_snv', 'vcf-snv-clinical'), ('vcf_snv_research', 'vcf-snv-research'),
