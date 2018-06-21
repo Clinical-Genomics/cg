@@ -64,51 +64,44 @@ def upload(context, family_id):
             message = f"analysis already uploaded: {analysis_obj.uploaded_at.date()}"
             click.echo(click.style(message, fg='yellow'))
         else:
-            # context.invoke(coverage, re_upload=True, family_id=family_id)
-            # context.invoke(validate, family_id=family_id)
-            # context.invoke(genotypes, family_id=family_id)
-            # context.invoke(observations, family_id=family_id)
-            # context.invoke(scout, family_id=family_id)
+            context.invoke(coverage, re_upload=True, family_id=family_id)
+            context.invoke(validate, family_id=family_id)
+            context.invoke(genotypes, family_id=family_id)
+            context.invoke(observations, family_id=family_id)
             context.invoke(delivery_report, family_id=family_id,
                            customer_id=family_obj.customer.internal_id)
-            # analysis_obj.uploaded_at = dt.datetime.now()
-            # context.obj['status'].commit()
+            context.invoke(scout, family_id=family_id)
+            analysis_obj.uploaded_at = dt.datetime.now()
+            context.obj['status'].commit()
             click.echo(click.style(f"{family_id}: analysis uploaded!", fg='green'))
 
 
 @upload.command()
 @click.argument('customer_id')
 @click.argument('family_id')
+@click.option('-p', '--print', 'print_console', is_flag=True, help='print report to console')
 @click.pass_context
-def delivery_report(context, customer_id, family_id):
+def delivery_report(context, customer_id, family_id, print_console):
     """Generate a delivery report for a case."""
 
-    db = context.obj['status']
-    if db.customer(customer_id) is None:
-        LOG.error(f"{customer_id}: customer not found in database")
-        return
-
-    if db.family(family_id) is None:
-        LOG.error(f"{family_id}: family not found in database")
-        context.abort()
-        return
-
-    tb = context.obj['tb_api']
-    hk = context.obj['housekeeper_api']
     report_api = context.obj['report_api']
-    scout_upload_api = context.obj['scout_upload_api']
 
-    delivery_report_file = report_api.create_delivery_report_file(customer_id, family_id,
-                                                                  file_path=tb.get_family_root_dir(
-                                                                      family_id))
-    _add_delivery_report_to_hk(delivery_report_file, hk, family_id)
-    family_name = db.family(internal_id=family_id).name
-    scout_upload_api.add_delivery_report_to_current_analysis(institute_id=customer_id, display_name=family_name,
-                            report_path=delivery_report_file)
+    if print_console:
+        delivery_report_html = report_api.create_delivery_report(customer_id, family_id)
+
+        print(delivery_report_html)
+    else:
+        tb_api = context.obj['tb_api']
+        delivery_report_file = report_api.create_delivery_report_file(customer_id, family_id,
+                                                                      file_path=
+                                                                      tb_api.get_family_root_dir(
+                                                                        family_id))
+        hk_api = context.obj['housekeeper_api']
+        _add_delivery_report_to_hk(delivery_report_file, hk_api, family_id)
 
 
 def _add_delivery_report_to_hk(delivery_report_file, hk_api: hk.HousekeeperAPI, family_id):
-    delivery_report_tag_name = 'export'
+    delivery_report_tag_name = 'delivery-report'
     version_obj = hk_api.last_version(family_id)
     uploaded_delivery_report_files = hk_api.get_files(bundle=family_id,
                                                       tags=[delivery_report_tag_name])

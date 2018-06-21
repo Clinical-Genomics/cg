@@ -64,6 +64,14 @@ class UploadScoutAPI(object):
             else:
                 data[scout_key] = str(hk_file.full_path)
 
+        files = [('delivery_report', 'delivery-report')]
+        for scout_key, hk_tag in files:
+            hk_file = self.housekeeper.files(version=hk_version.id, tags=[hk_tag]).first()
+            if hk_file is None:
+                LOG.debug(f"skipping missing file: {scout_key}")
+            else:
+                data[scout_key] = str(hk_file.full_path)
+
         if len(data['samples']) > 1:
             if any(sample['father'] or sample['mother'] for sample in data['samples']):
                 svg_path = self.run_madeline(analysis_obj.family)
@@ -87,16 +95,3 @@ class UploadScoutAPI(object):
         ped_stream = madeline.make_ped(family_obj.name, samples=samples)
         svg_path = madeline.run(self.madeline_exe, ped_stream)
         return svg_path
-
-    def add_delivery_report_to_current_analysis(self, institute_id, display_name, report_path):
-        """Add delivery report to an existing case."""
-        adapter = self.scout
-        existing_case = adapter.case(institute_id=institute_id, display_name=display_name)
-        if existing_case is None:
-            LOG.warning("no case found")
-            return
-
-        existing_case['analyses'][-1]['delivery_report'] = report_path
-
-        adapter.update_caseid(existing_case, family_id=display_name)
-        LOG.info("saved report to case!")
