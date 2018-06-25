@@ -76,7 +76,7 @@ def upload(context, family_id):
             click.echo(click.style(f"{family_id}: analysis uploaded!", fg='green'))
 
 
-@upload.command()
+@upload.command('delivery-report')
 @click.argument('customer_id')
 @click.argument('family_id')
 @click.option('-p', '--print', 'print_console', is_flag=True, help='print report to console')
