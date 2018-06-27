@@ -68,6 +68,14 @@ class UploadScoutAPI(object):
             else:
                 data[scout_key] = str(hk_file.full_path)
 
+        files = [('delivery_report', 'delivery-report')]
+        for scout_key, hk_tag in files:
+            hk_file = self.housekeeper.files(version=hk_version.id, tags=[hk_tag]).first()
+            if hk_file is None:
+                LOG.debug(f"skipping missing file: {scout_key}")
+            else:
+                data[scout_key] = str(hk_file.full_path)
+
         if len(data['samples']) > 1:
             if any(sample['father'] or sample['mother'] for sample in data['samples']):
                 svg_path = self.run_madeline(analysis_obj.family)
