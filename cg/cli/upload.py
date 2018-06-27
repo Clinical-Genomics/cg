@@ -89,7 +89,7 @@ def delivery_report(context, customer_id, family_id, print_console):
     if print_console:
         delivery_report_html = report_api.create_delivery_report(customer_id, family_id)
 
-        print(delivery_report_html)
+        click.echo(delivery_report_html)
     else:
         tb_api = context.obj['tb_api']
         delivery_report_file = report_api.create_delivery_report_file(customer_id, family_id,
@@ -168,7 +168,7 @@ def scout(context, re_upload, print_console, family_id):
     scout_upload_api = context.obj['scout_upload_api']
     results = scout_upload_api.data(family_obj.analyses[0])
     if print_console:
-        print(results)
+        click.echo(results)
     else:
         scout_api.upload(results, force=re_upload)
 
@@ -246,4 +246,4 @@ def validate(context, family_id):
                 mean_coverage = coverage_results[sample_id]['mean_coverage']
                 click.echo(f"{sample_id}: {mean_coverage:.2f}X - {completeness:.2f}%")
             else:
-                print(f"{sample_id}: sample not found in chanjo")
+                click.echo(f"{sample_id}: sample not found in chanjo", color='yellow')
