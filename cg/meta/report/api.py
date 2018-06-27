@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
-from datetime import datetime, date
+from datetime import datetime
 
 import requests
 import ruamel.yaml
@@ -215,7 +215,7 @@ class ReportAPI:
         return presentable_value
 
     @staticmethod
-    def _present_date(a_date: date) -> str:
+    def _present_date(a_date: datetime.date) -> str:
         """Make an date value presentable for the delivery report."""
         if a_date:
             presentable_value = str(a_date)
