@@ -78,6 +78,7 @@ def register_blueprints(app: Flask):
 
 def register_admin_views():
     ext.admin.add_view(admin.CustomerView(models.Customer, ext.db.session))
+    ext.admin.add_view(admin.CustomerGroupView(models.CustomerGroup, ext.db.session))
     ext.admin.add_view(admin.UserView(models.User, ext.db.session))
     ext.admin.add_view(admin.FamilyView(models.Family, ext.db.session))
     ext.admin.add_view(admin.FamilySampleView(models.FamilySample, ext.db.session))
