@@ -18,6 +18,10 @@ class FindHandler:
         """Fetch all customers."""
         return self.Customer.query
 
+    def customer_group(self, internal_id: str) -> models.CustomerGroup:
+        """Fetch a customer group by internal id from the store."""
+        return self.CustomerGroup.query.filter_by(internal_id=internal_id).first()
+
     def user(self, email: str) -> models.User:
         """Fetch a user from the store."""
         return self.User.query.filter_by(email=email).first()
