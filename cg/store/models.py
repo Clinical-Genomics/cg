@@ -71,10 +71,23 @@ class Customer(Model):
     primary_contact = Column(types.String(128))
     delivery_contact = Column(types.String(128))
     invoice_contact = Column(types.String(128))
+    customer_group_id = Column(ForeignKey('customer_group.id', ondelete='CASCADE'), nullable=False)
 
     families = orm.relationship('Family', backref='customer', order_by='-Family.id')
     samples = orm.relationship('Sample', backref='customer', order_by='-Sample.id')
     pools = orm.relationship('Pool', backref='customer', order_by='-Pool.id')
+
+    def __str__(self) -> str:
+        return f"{self.internal_id} ({self.name})"
+
+
+class CustomerGroup(Model):
+
+    id = Column(types.Integer, primary_key=True)
+    internal_id = Column(types.String(32), unique=True, nullable=False)
+    name = Column(types.String(128), nullable=False)
+
+    customers = orm.relationship('Customer', backref='customer_group', order_by='-Customer.id')
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
