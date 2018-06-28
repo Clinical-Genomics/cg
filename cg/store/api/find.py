@@ -30,8 +30,8 @@ class FindHandler:
         """Fetch a family by internal id from the database."""
         return self.Family.query.filter_by(internal_id=internal_id).first()
 
-    def families(self, *, customer: models.Customer=None, query: str=None,
-                 action: str=None) -> List[models.Family]:
+    def families(self, *, customer: models.Customer = None, query: str = None,
+                 action: str = None) -> List[models.Family]:
         """Fetch all families."""
         records = self.Family.query
         records = records.filter_by(customer=customer) if customer else records
@@ -39,7 +39,9 @@ class FindHandler:
             models.Family.name.like(f"%{query}%"),
             models.Family.internal_id.like(f"%{query}%"),
         )) if query else records
+
         records = records.filter_by(action=action) if action else records
+
         return records.order_by(models.Family.created_at.desc())
 
     def find_family(self, customer: models.Customer, name: str) -> models.Family:
@@ -57,6 +59,7 @@ class FindHandler:
             models.Sample.name.like(f"%{query}%"),
             models.Sample.internal_id.like(f"%{query}%"),
         )) if query else records
+
         return records.order_by(models.Sample.created_at.desc())
 
     def find_sample(self, customer: models.Customer, name: str) -> List[models.Sample]:
@@ -91,17 +94,18 @@ class FindHandler:
         """Find a panel by abbreviation."""
         return self.Panel.query.filter_by(abbrev=abbrev).first()
 
-    def analyses(self, *, family: models.Family=None, before: dt.datetime=None) -> Query:
+    def analyses(self, *, family: models.Family = None, before: dt.datetime = None) -> Query:
         """Fetch multiple analyses."""
         records = self.Analysis.query
         if family:
             records = records.filter(models.Analysis.family == family)
         if before:
-            subq = self.Analysis.query.\
-                join(models.Analysis.family).\
-                filter(models.Analysis.started_at < before).\
-                group_by(models.Family.id).\
-                with_entities(models.Analysis.family_id, func.max(models.Analysis.started_at).label('started_at')).subquery()
+            subq = self.Analysis.query. \
+                join(models.Analysis.family). \
+                filter(models.Analysis.started_at < before). \
+                group_by(models.Family.id). \
+                with_entities(models.Analysis.family_id,
+                              func.max(models.Analysis.started_at).label('started_at')).subquery()
             records = records.join(
                 subq,
                 and_(
@@ -114,15 +118,15 @@ class FindHandler:
         """Fetch an analysis."""
         return self.Analysis.query.filter_by(family=family, started_at=started_at).first()
 
-    def flowcells(self, *, status: str=None, family: models.Family=None,
-                  query: str=None) -> Query:
+    def flowcells(self, *, status: str = None, family: models.Family = None,
+                  query: str = None) -> Query:
         """Fetch all flowcells."""
         records = self.Flowcell.query
         if family:
             records = (
                 records
-                .join(models.Flowcell.samples, models.Sample.links)
-                .filter(models.FamilySample.family == family)
+                    .join(models.Flowcell.samples, models.Sample.links)
+                    .filter(models.FamilySample.family == family)
             )
         if status:
             records = records.filter_by(status=status)
@@ -138,23 +142,23 @@ class FindHandler:
         """Find a link between a family and a sample."""
         return (
             self.FamilySample.query
-            .join(models.FamilySample.family, models.FamilySample.sample)
-            .filter(
+                .join(models.FamilySample.family, models.FamilySample.sample)
+                .filter(
                 models.Family.internal_id == family_id,
                 models.Sample.internal_id == sample_id
             )
-            .first()
+                .first()
         )
 
     def family_samples(self, family_id: str) -> models.FamilySample:
         """Find the samples of a family."""
         return (
             self.FamilySample.query
-            .join(models.FamilySample.family, models.FamilySample.sample)
-            .filter(
+                .join(models.FamilySample.family, models.FamilySample.sample)
+                .filter(
                 models.Family.internal_id == family_id,
             )
-            .all()
+                .all()
         )
 
     def pools(self, *, customer: models.Customer) -> Query:
@@ -166,27 +170,27 @@ class FindHandler:
     def pool(self, pool_id: int):
         """Fetch a pool."""
         return self.Pool.get(pool_id)
-    
+
     def deliveries(self) -> Query:
         """Fetch all deliveries."""
         query = self.Delivery.query
         return query
 
-    def invoices(self, invoiced: bool=None) -> Query:
+    def invoices(self, invoiced: bool = None) -> Query:
         """Fetch invoices."""
         query = self.Invoice.query
         if invoiced is not None:
             if invoiced is True:
-                query = query.filter(models.Invoice.invoiced_at != None)
+                query = query.filter(models.Invoice.invoiced_at is not None)
             else:
-                query = query.filter(models.Invoice.invoiced_at == None)
+                query = query.filter(models.Invoice.invoiced_at is None)
         return query
 
     def new_invoice_id(self) -> Query:
         """Fetch invoices."""
         query = self.Invoice.query.all()
         ids = [inv.id for inv in query]
-        new_id = max(ids)+1
+        new_id = max(ids) + 1
         return new_id
 
     def invoice(self, invoice_id: int) -> models.Invoice:
