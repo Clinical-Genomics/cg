@@ -48,7 +48,14 @@ class OrdersAPI(LimsHandler, StatusHandler):
                         message += '<br />' + sample.get('name')
 
                         if sample.get('internal_id'):
-                            message += ' (already existing sample)'
+
+                            message += ' (already existing sample'
+
+                            existing_sample = self.status.sample(sample.get('internal_id'))
+                            if existing_sample.customer_id != data['customer']:
+                                message += ' from ' + existing_sample.customer.internal_id
+
+                            message += ')'
 
                         if sample.get('comment'):
                             message += ' ' + sample.get('comment')
@@ -67,6 +74,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
                         subject=data['name'],
                         message=message,
                     )
+
                     LOG.info(f"{data['ticket']}: opened new ticket")
                 else:
                     data['ticket'] = None
@@ -123,7 +131,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
 
     def process_analysis_samples(self, data: dict) -> dict:
         """Process samples to be analyzed."""
-        # fileter out only new samples
+        # filter out only new samples
         status_data = self.families_to_status(data)
         new_samples = [sample for sample in data['samples'] if sample.get('internal_id') is None]
         if new_samples:
