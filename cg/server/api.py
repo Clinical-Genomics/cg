@@ -64,7 +64,7 @@ def order(order_type):
         return abort(make_response(jsonify(message=error.message), 401))
     except HTTPError as error:
         return abort(make_response(jsonify(message=error.args[0]), 401))
-    #LOG.info(f"{result['ticket'] or 'NA'}: successfully submitted samples")
+
     return jsonify(project=result['project'],
                    records=[record.to_dict() for record in result['records']])
 
@@ -104,6 +104,25 @@ def families():
     return jsonify(families=data, total=count)
 
 
+@BLUEPRINT.route('/families_in_customer_group')
+def families_in_customer_group():
+    """Fetch families."""
+    if request.args.get('status') == 'analysis':
+        records = db.families_to_analyze()
+        count = len(records)
+    else:
+        customer_obj = None if g.current_user.is_admin else g.current_user.customer
+        families_q = db.families_in_customer_group(
+            query=request.args.get('query'),
+            customer=customer_obj,
+            action=request.args.get('action'),
+        )
+        count = families_q.count()
+        records = families_q.limit(30)
+    data = [family_obj.to_dict(links=True) for family_obj in records]
+    return jsonify(families=data, total=count)
+
+
 @BLUEPRINT.route('/families/<family_id>')
 def family(family_id):
     """Fetch a family with links."""
@@ -112,6 +131,21 @@ def family(family_id):
         return abort(404)
     elif not g.current_user.is_admin and (g.current_user.customer != family_obj.customer):
         return abort(401)
+
+    data = family_obj.to_dict(links=True, analyses=True)
+    return jsonify(**data)
+
+
+@BLUEPRINT.route('/families_in_customer_group/<family_id>')
+def family_in_customer_group(family_id):
+    """Fetch a family with links."""
+    family_obj = db.family(family_id)
+    if family_obj is None:
+        return abort(404)
+    elif not g.current_user.is_admin and (g.current_user.customer.customer_group !=
+                                          family_obj.customer.customer_group):
+        return abort(401)
+
     data = family_obj.to_dict(links=True, analyses=True)
     return jsonify(**data)
 
@@ -138,6 +172,28 @@ def samples():
     return jsonify(samples=data, total=samples_q.count())
 
 
+@BLUEPRINT.route('/samples_in_customer_group')
+def samples_in_customer_group():
+    """Fetch samples."""
+    if request.args.get('status') and not g.current_user.is_admin:
+        return abort(401)
+    if request.args.get('status') == 'incoming':
+        samples_q = db.samples_to_recieve()
+    elif request.args.get('status') == 'labprep':
+        samples_q = db.samples_to_prepare()
+    elif request.args.get('status') == 'sequencing':
+        samples_q = db.samples_to_sequence()
+    else:
+        customer_obj = None if g.current_user.is_admin else g.current_user.customer
+        samples_q = db.samples_in_customer_group(
+            query=request.args.get('query'),
+            customer=customer_obj,
+        )
+    limit = int(request.args.get('limit', 50))
+    data = [sample_obj.to_dict() for sample_obj in samples_q.limit(limit)]
+    return jsonify(samples=data, total=samples_q.count())
+
+
 @BLUEPRINT.route('/samples/<sample_id>')
 def sample(sample_id):
     """Fetch a single sample."""
@@ -145,6 +201,19 @@ def sample(sample_id):
     if sample_obj is None:
         return abort(404)
     elif not g.current_user.is_admin and (g.current_user.customer != sample_obj.customer):
+        return abort(401)
+    data = sample_obj.to_dict(links=True, flowcells=True)
+    return jsonify(**data)
+
+
+@BLUEPRINT.route('/samples_in_customer_group/<sample_id>')
+def sample_in_customer_group(sample_id):
+    """Fetch a single sample."""
+    sample_obj = db.sample(sample_id)
+    if sample_obj is None:
+        return abort(404)
+    elif not g.current_user.is_admin and (g.current_user.customer.customer_group !=
+                                          sample_obj.customer.customer_group):
         return abort(401)
     data = sample_obj.to_dict(links=True, flowcells=True)
     return jsonify(**data)

@@ -32,9 +32,32 @@ class FindHandler:
 
     def families(self, *, customer: models.Customer = None, query: str = None,
                  action: str = None) -> List[models.Family]:
-        """Fetch all families."""
+        """Fetch all families excluding from collaborating customers."""
         records = self.Family.query
         records = records.filter_by(customer=customer) if customer else records
+
+        records = records.filter(or_(
+            models.Family.name.like(f"%{query}%"),
+            models.Family.internal_id.like(f"%{query}%"),
+        )) if query else records
+
+        records = records.filter_by(action=action) if action else records
+
+        return records.order_by(models.Family.created_at.desc())
+
+    def families_in_customer_group(self, *, customer: models.Customer = None, query: str = None,
+                                  action: str = None) -> List[models.Family]:
+        """Fetch all families including those from collaborating customers."""
+        records = self.Family.query \
+            .join(
+            models.Family.customer,
+            models.Customer.customer_group,
+        )
+
+        if customer:
+            records = records.filter(
+                models.CustomerGroup.id == customer.customer_group_id)
+
         records = records.filter(or_(
             models.Family.name.like(f"%{query}%"),
             models.Family.internal_id.like(f"%{query}%"),
@@ -52,9 +75,32 @@ class FindHandler:
         """Fetch a sample by lims id."""
         return self.Sample.query.filter_by(internal_id=internal_id).first()
 
-    def samples(self, *, customer: models.Customer=None, query: str=None) -> List[models.Sample]:
+    def samples(self, *, customer: models.Customer = None, query: str = None) -> List[
+        models.Sample]:
+        """Fetch all samples excluding those from collaborating customers."""
         records = self.Sample.query
         records = records.filter_by(customer=customer) if customer else records
+        records = records.filter(or_(
+            models.Sample.name.like(f"%{query}%"),
+            models.Sample.internal_id.like(f"%{query}%"),
+        )) if query else records
+
+        return records.order_by(models.Sample.created_at.desc())
+
+    def samples_in_customer_group(self, *, customer: models.Customer = None, query: str = None) -> \
+            List[models.Sample]:
+        """Fetch all samples including those from collaborating customers."""
+
+        records = self.Sample.query \
+            .join(
+            models.Sample.customer,
+            models.Customer.customer_group,
+        )
+
+        if customer:
+            records = records.filter(
+                models.CustomerGroup.id == customer.customer_group_id)
+
         records = records.filter(or_(
             models.Sample.name.like(f"%{query}%"),
             models.Sample.internal_id.like(f"%{query}%"),
@@ -65,6 +111,12 @@ class FindHandler:
     def find_sample(self, customer: models.Customer, name: str) -> List[models.Sample]:
         """Find samples within a customer."""
         return self.Sample.query.filter_by(customer=customer, name=name)
+
+    def find_sample_in_customer_group(self, customer: models.Customer, name: str) -> List[
+        models.Sample]:
+        """Find samples within the customer group."""
+        return self.Sample.query.filter(
+            models.Sample.customer.customer_group == customer.customer_group, name == name)
 
     def application(self, tag: str) -> models.Application:
         """Fetch an application from the store."""
@@ -162,7 +214,7 @@ class FindHandler:
         )
 
     def pools(self, *, customer: models.Customer) -> Query:
-        """Fetch all the pools."""
+        """Fetch all the pools for a customer."""
         records = self.Pool.query
         records = records.filter_by(customer=customer) if customer else records
         return records
