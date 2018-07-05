@@ -33,7 +33,7 @@ def upload(context, family_id):
         else:
             context.invoke(coverage, re_upload=True, family_id=family_id)
             context.invoke(validate, family_id=family_id)
-            context.invoke(genotypes, family_id=family_id)
+            context.invoke(genotypes, re_upload=False, family_id=family_id)
             context.invoke(observations, family_id=family_id)
             context.invoke(scout, family_id=family_id)
 
@@ -56,9 +56,10 @@ def coverage(context, re_upload, family_id):
 
 
 @upload.command()
+@click.option('-r', '--re-upload', is_flag=True, help='re-upload existing analysis')
 @click.argument('family_id')
 @click.pass_context
-def genotypes(context, family_id):
+def genotypes(context, re_upload, family_id):
     """Upload genotypes from an analysis to Genotype."""
     tb_api = tb.TrailblazerAPI(context.obj)
     gt_api = gt.GenotypeAPI(context.obj)
@@ -66,7 +67,7 @@ def genotypes(context, family_id):
     api = UploadGenotypesAPI(context.obj['status'], context.obj['housekeeper_api'], tb_api, gt_api)
     results = api.data(family_obj.analyses[0])
     if results:
-        api.upload(results)
+        api.upload(results, replace=re_upload)
 
 
 @upload.command()
