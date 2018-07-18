@@ -47,7 +47,7 @@ def lims(context, status):
 @click.pass_context
 def pools(context, status):
     """
-    Update pools with received_at or delivered_at dates from LIMS. Defaults to delivered is no
+    Update pools with received_at or delivered_at dates from LIMS. Defaults to delivered if no
     option is provided.
     """
     lims_api = lims_app.LimsAPI(context.obj)
