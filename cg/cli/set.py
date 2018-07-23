@@ -48,9 +48,10 @@ def family(context, action, priority, panels, family_id):
 
 @set_cmd.command()
 @click.option('-s', '--sex', type=click.Choice(['male', 'female', 'unknown']))
+@click.option('-c', '--customer', help='update customer, input format custXXX')
 @click.argument('sample_id')
 @click.pass_context
-def sample(context, sex, sample_id):
+def sample(context, sex, customer, sample_id):
     """Update information about a sample."""
     lims_api = LimsAPI(context.obj)
     sample_obj = context.obj['status'].sample(sample_id)
@@ -66,6 +67,25 @@ def sample(context, sex, sample_id):
 
         print(click.style('update LIMS/Gender', fg='blue'))
         lims_api.update_sample(sample_id, sex=sex)
+
+    # import ipdb; ipdb.set_trace()
+    if customer:
+        customer_obj = context.obj['status'].customer(customer)
+        if customer_obj is None:
+            print(click.style(f"Can't find customer {customer}", fg='red'))
+            context.abort()
+
+        previous_customer_obj = context.obj['status'].customer_by_id(sample_obj.customer_id)
+        previous_customer = f"{previous_customer_obj.internal_id} ({previous_customer_obj.name})"
+        new_customer = f"{customer_obj.internal_id} ({customer_obj.name})"
+
+        if customer_obj.id == sample_obj.customer_id:
+            click.echo(click.style(f"Sample {sample_obj.internal_id} already belongs to customer {previous_customer}", fg='yellow'))
+            context.abort()
+
+        click.echo(click.style(f"Update sample customer: {previous_customer} -> {new_customer})", fg='green'))
+        sample_obj.customer_id = customer_obj.id
+        context.obj['status'].commit()
 
 @set_cmd.command()
 @click.option('-s', '--status', type=click.Choice(['ondisk', 'removed', 'requested', 'processing']))
