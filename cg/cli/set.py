@@ -1,6 +1,6 @@
 import logging
 
-import click
+import click, datetime
 
 from cg.constants import FAMILY_ACTIONS, PRIORITY_OPTIONS
 from cg.store import Store
@@ -49,9 +49,11 @@ def family(context, action, priority, panels, family_id):
 @set_cmd.command()
 @click.option('-s', '--sex', type=click.Choice(['male', 'female', 'unknown']))
 @click.option('-c', '--customer', help='update customer, input format custXXX')
+@click.option('-n', '--note', 'comment', type=str, help='adds a note/comment to a sample, put text \
+              between quotation marks! This will not overwrite the current comment.')
 @click.argument('sample_id')
 @click.pass_context
-def sample(context, sex, customer, sample_id):
+def sample(context, sex, customer, comment, sample_id):
     """Update information about a sample."""
     lims_api = LimsAPI(context.obj)
     sample_obj = context.obj['status'].sample(sample_id)
@@ -68,7 +70,6 @@ def sample(context, sex, customer, sample_id):
         print(click.style('update LIMS/Gender', fg='blue'))
         lims_api.update_sample(sample_id, sex=sex)
 
-    # import ipdb; ipdb.set_trace()
     if customer:
         customer_obj = context.obj['status'].customer(customer)
         if customer_obj is None:
@@ -85,6 +86,16 @@ def sample(context, sex, customer, sample_id):
 
         click.echo(click.style(f"Update sample customer: {previous_customer} -> {new_customer})", fg='green'))
         sample_obj.customer_id = customer_obj.id
+        context.obj['status'].commit()
+
+    if comment:
+        timestamp = str(datetime.datetime.now())[:-10]
+
+        if sample_obj.comment == None:
+            sample_obj.comment = f"{timestamp}: {comment}"
+        else:   
+            sample_obj.comment += '\n' + f"{timestamp}: {comment}"
+        click.echo(click.style(f"Comment added to sample {sample_obj.internal_id}", fg='green'))
         context.obj['status'].commit()
 
 @set_cmd.command()
