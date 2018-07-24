@@ -51,9 +51,11 @@ def family(context, action, priority, panels, family_id):
 @click.option('-c', '--customer', help='update customer, input format custXXX')
 @click.option('-n', '--note', 'comment', type=str, help='adds a note/comment to a sample, put text \
               between quotation marks! This will not overwrite the current comment.')
+@click.option('-d', '--downsampled-to', type=int, help='set number of downsampled \
+              total reads')
 @click.argument('sample_id')
 @click.pass_context
-def sample(context, sex, customer, comment, sample_id):
+def sample(context, sex, customer, comment, downsampled_to, sample_id):
     """Update information about a sample."""
     lims_api = LimsAPI(context.obj)
     sample_obj = context.obj['status'].sample(sample_id)
@@ -97,6 +99,12 @@ def sample(context, sex, customer, comment, sample_id):
             sample_obj.comment += '\n' + f"{timestamp}: {comment}"
         click.echo(click.style(f"Comment added to sample {sample_obj.internal_id}", fg='green'))
         context.obj['status'].commit()
+
+    if downsampled_to:
+        sample_obj.downsampled_to = downsampled_to
+        click.echo(click.style(f"Downsampled_to set to {downsampled_to} for sample {sample_obj.internal_id}.", fg='green'))
+        context.obj['status'].commit()
+
 
 @set_cmd.command()
 @click.option('-s', '--status', type=click.Choice(['ondisk', 'removed', 'requested', 'processing']))
