@@ -53,9 +53,10 @@ def family(context, action, priority, panels, family_id):
               between quotation marks! This will not overwrite the current comment.')
 @click.option('-d', '--downsampled-to', type=int, help='set number of downsampled \
               total reads')
+@click.option('-a', '--application-tag', 'apptag', help='sets application tag.')
 @click.argument('sample_id')
 @click.pass_context
-def sample(context, sex, customer, comment, downsampled_to, sample_id):
+def sample(context, sex, customer, comment, downsampled_to, apptag, sample_id):
     """Update information about a sample."""
     lims_api = LimsAPI(context.obj)
     sample_obj = context.obj['status'].sample(sample_id)
@@ -105,6 +106,24 @@ def sample(context, sex, customer, comment, downsampled_to, sample_id):
         click.echo(click.style(f"Downsampled_to set to {downsampled_to} for sample {sample_obj.internal_id}.", fg='green'))
         context.obj['status'].commit()
 
+    if apptag:
+        apptags = [app.tag for app in context.obj['status'].applications()]
+        if apptag not in apptags:
+            click.echo(click.style(f"Application tag {apptag} does not exist.", fg='red'))
+            context.abort()
+
+        application_version = context.obj['status'].latest_version(apptag)
+        application_version_id = context.obj['status'].latest_version(apptag).id
+
+        if sample_obj.application_version_id ==  application_version_id:
+            click.echo(click.style(f"Sample {sample_obj.internal_id} already has the application "
+                                   f"tag {str(application_version)}.", fg = 'yellow'))
+            context.abort()
+
+        sample_obj.application_version_id = application_version_id
+        click.echo(click.style(f"Application tag for sample {sample_obj.internal_id} set to "
+                               f"{str(application_version)}.", fg='green'))
+        context.obj['status'].commit()
 
 @set_cmd.command()
 @click.option('-s', '--status', type=click.Choice(['ondisk', 'removed', 'requested', 'processing']))
