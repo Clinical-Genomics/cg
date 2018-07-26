@@ -54,9 +54,10 @@ def family(context, action, priority, panels, family_id):
 @click.option('-d', '--downsampled-to', type=int, help='set number of downsampled \
               total reads')
 @click.option('-a', '--application-tag', 'apptag', help='sets application tag.')
+@click.option('-k', '--capture-kit', help='sets capture kit.')
 @click.argument('sample_id')
 @click.pass_context
-def sample(context, sex, customer, comment, downsampled_to, apptag, sample_id):
+def sample(context, sex, customer, comment, downsampled_to, apptag, capture_kit, sample_id):
     """Update information about a sample."""
     lims_api = LimsAPI(context.obj)
     sample_obj = context.obj['status'].sample(sample_id)
@@ -123,6 +124,12 @@ def sample(context, sex, customer, comment, downsampled_to, apptag, sample_id):
         sample_obj.application_version_id = application_version_id
         click.echo(click.style(f"Application tag for sample {sample_obj.internal_id} set to "
                                f"{str(application_version)}.", fg='green'))
+        context.obj['status'].commit()
+
+    if capture_kit:
+        sample_obj.capture_kit = capture_kit
+        click.echo(click.style(f"Capture kit {capture_kit} added to sample "
+                               f"{sample_obj.internal_id}", fg='green'))
         context.obj['status'].commit()
 
 @set_cmd.command()
