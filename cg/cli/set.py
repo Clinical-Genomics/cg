@@ -1,12 +1,14 @@
 import logging
 
-import click, datetime
+import click
+import datetime
 
 from cg.constants import FAMILY_ACTIONS, PRIORITY_OPTIONS
 from cg.store import Store
 from cg.apps.lims import LimsAPI
 
 LOG = logging.getLogger(__name__)
+
 
 @click.group('set')
 @click.pass_context
@@ -85,26 +87,29 @@ def sample(context, sex, customer, comment, downsampled_to, apptag, capture_kit,
         new_customer = f"{customer_obj.internal_id} ({customer_obj.name})"
 
         if customer_obj.id == sample_obj.customer_id:
-            click.echo(click.style(f"Sample {sample_obj.internal_id} already belongs to customer {previous_customer}", fg='yellow'))
+            click.echo(click.style(f"Sample {sample_obj.internal_id} already belongs to customer "
+                                   f"{previous_customer}", fg='yellow'))
             context.abort()
 
-        click.echo(click.style(f"Update sample customer: {previous_customer} -> {new_customer})", fg='green'))
+        click.echo(click.style(f"Update sample customer: {previous_customer} -> {new_customer})",
+                               fg='green'))
         sample_obj.customer_id = customer_obj.id
         context.obj['status'].commit()
 
     if comment:
         timestamp = str(datetime.datetime.now())[:-10]
 
-        if sample_obj.comment == None:
+        if sample_obj.comment is None:
             sample_obj.comment = f"{timestamp}: {comment}"
-        else:   
+        else:
             sample_obj.comment += '\n' + f"{timestamp}: {comment}"
         click.echo(click.style(f"Comment added to sample {sample_obj.internal_id}", fg='green'))
         context.obj['status'].commit()
 
     if downsampled_to:
         sample_obj.downsampled_to = downsampled_to
-        click.echo(click.style(f"Downsampled_to set to {downsampled_to} for sample {sample_obj.internal_id}.", fg='green'))
+        click.echo(click.style(f"Downsampled_to set to {downsampled_to} for sample "
+                               f"{sample_obj.internal_id}.", fg='green'))
         context.obj['status'].commit()
 
     if apptag:
@@ -116,9 +121,9 @@ def sample(context, sex, customer, comment, downsampled_to, apptag, capture_kit,
         application_version = context.obj['status'].latest_version(apptag)
         application_version_id = context.obj['status'].latest_version(apptag).id
 
-        if sample_obj.application_version_id ==  application_version_id:
+        if sample_obj.application_version_id == application_version_id:
             click.echo(click.style(f"Sample {sample_obj.internal_id} already has the application "
-                                   f"tag {str(application_version)}.", fg = 'yellow'))
+                                   f"tag {str(application_version)}.", fg='yellow'))
             context.abort()
 
         sample_obj.application_version_id = application_version_id
@@ -131,6 +136,7 @@ def sample(context, sex, customer, comment, downsampled_to, apptag, capture_kit,
         click.echo(click.style(f"Capture kit {capture_kit} added to sample "
                                f"{sample_obj.internal_id}", fg='green'))
         context.obj['status'].commit()
+
 
 @set_cmd.command()
 @click.option('-s', '--status', type=click.Choice(['ondisk', 'removed', 'requested', 'processing']))
