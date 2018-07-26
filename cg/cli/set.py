@@ -50,11 +50,11 @@ def family(context, action, priority, panels, family_id):
 
 @set_cmd.command()
 @click.option('-s', '--sex', type=click.Choice(['male', 'female', 'unknown']))
-@click.option('-c', '--customer', help='update customer, input format custXXX')
+@click.option('-c', '--customer', help='updates customer, input format custXXX.')
 @click.option('-n', '--note', 'comment', type=str, help='adds a note/comment to a sample, put text \
               between quotation marks! This will not overwrite the current comment.')
-@click.option('-d', '--downsampled-to', type=int, help='set number of downsampled \
-              total reads')
+@click.option('-d', '--downsampled-to', type=int, help='sets number of downsampled \
+              total reads.')
 @click.option('-a', '--application-tag', 'apptag', help='sets application tag.')
 @click.option('-k', '--capture-kit', help='sets capture kit.')
 @click.argument('sample_id')
@@ -108,8 +108,8 @@ def sample(context, sex, customer, comment, downsampled_to, apptag, capture_kit,
 
     if downsampled_to:
         sample_obj.downsampled_to = downsampled_to
-        click.echo(click.style(f"Downsampled_to set to {downsampled_to} for sample "
-                               f"{sample_obj.internal_id}.", fg='green'))
+        click.echo(click.style(f"Number of downsampled total reads set to {downsampled_to} for "
+                               f"sample {sample_obj.internal_id}.", fg='green'))
         context.obj['status'].commit()
 
     if apptag:
