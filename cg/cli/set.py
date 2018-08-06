@@ -54,7 +54,7 @@ def family(context, action, priority, panels, family_id):
 @click.option('-n', '--note', 'comment', type=str, help='adds a note/comment to a sample, put text \
               between quotation marks! This will not overwrite the current comment.')
 @click.option('-d', '--downsampled-to', type=int, help='sets number of downsampled \
-              total reads.')
+              total reads. Enter 0 to reset.')
 @click.option('-a', '--application-tag', 'apptag', help='sets application tag.')
 @click.option('-k', '--capture-kit', help='sets capture kit.')
 @click.argument('sample_id')
@@ -106,10 +106,15 @@ def sample(context, sex, customer, comment, downsampled_to, apptag, capture_kit,
         click.echo(click.style(f"Comment added to sample {sample_obj.internal_id}", fg='green'))
         context.obj['status'].commit()
 
-    if downsampled_to:
-        sample_obj.downsampled_to = downsampled_to
-        click.echo(click.style(f"Number of downsampled total reads set to {downsampled_to} for "
-                               f"sample {sample_obj.internal_id}.", fg='green'))
+    if downsampled_to or downsampled_to == 0:
+        if downsampled_to == 0:
+            sample_obj.downsampled_to = None
+            message = f"Resetting downsampled total reads for sample {sample_obj.internal_id}."
+        else:
+            sample_obj.downsampled_to = downsampled_to
+            message = f"Number of downsampled total reads set to {downsampled_to} for sample " \
+                      f"{sample_obj.internal_id}."
+        click.echo(click.style(message, fg='green'))
         context.obj['status'].commit()
 
     if apptag:
