@@ -3,7 +3,7 @@ from cg.apps.lims.api import LimsAPI
 
 @pytest.fixture
 def rml_orderform():
-    return 'tests/fixtures/orderforms/1604.5.rml.xlsx'
+    return 'tests/fixtures/orderforms/1604.8.rml.xlsx'
 
 
 @pytest.fixture
