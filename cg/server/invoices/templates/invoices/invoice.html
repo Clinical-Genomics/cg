@@ -98,12 +98,24 @@
                     </label>
                   </div>
                   {%endif%}
-                  <div class="float-right col">
-                    <button class="btn btn-primary" type="submit">Save Changes</button>  
+                  <div class="col-sm-8">
+                    <button class="btn btn-primary" type="submit">Save Changes</button>
+                  </div>
+                  </form>
+                  <form action="{{ url_for('invoices.index') }}" method="POST" enctype="multipart/form-data">
+                    <div class="col-sm-9">
+                    <button class="btn btn-primary" type="submit">Undo Invoice</button> 
+                    <input type="hidden" name="samples" value={{ invoice_dict.records }}>
+                    <input type="hidden" name="invoice_id" value={{ invoice.id }}>
+                    <input type="hidden" name="record_type" value={{ record_type }}>
+                    <input type="hidden" name="undo" value=1>
+                  </div>
+                  </div>
+                  </form> 
                   </div>
                 </div>
               </div>
-            </form>  
+             
           </div>    
         </div>
       </div>
@@ -166,7 +178,7 @@
                 <td>{{record.lims_id}}</td>
                 <td>{{record.application_tag}}</td>
                 <td>{{record.project}}</td>
-                <td>{{record.date.date()}}</td>
+                <td>{{record.date}}</td>
                 <td>{{record.price}}</td>
               </tr>
               {% endfor %}

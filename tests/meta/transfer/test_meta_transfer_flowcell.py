@@ -21,6 +21,8 @@ def test_transfer_flowcell(flowcell_store, store_housekeeper, transfer_flowcell_
 
     # ... and it should store the fastq files for the sample in housekeeper
     hk_bundle = store_housekeeper.bundle(status_sample.internal_id)
+
     assert len(hk_bundle.versions[0].files) > 0
+
     for hk_file in hk_bundle.versions[0].files:
         assert hk_file.path.endswith('fastq.gz')
