@@ -105,6 +105,21 @@ class OrdersAPI(LimsHandler, StatusHandler):
         self.add_missing_reads(new_samples)
         return {'project': project_data, 'records': new_samples}
 
+    def submit_metagenome(self, data: dict) -> dict:
+        """Submit a batch of metagenome samples."""
+        status_data = self.samples_to_status(data)
+        project_data, lims_map = self.process_lims(data, data['samples'])
+        self.fillin_sample_ids(status_data['samples'], lims_map)
+        new_samples = self.store_samples(
+            customer=status_data['customer'],
+            order=status_data['order'],
+            ordered=project_data['date'],
+            ticket=data['ticket'],
+            samples=status_data['samples'],
+        )
+        self.add_missing_reads(new_samples)
+        return {'project': project_data, 'records': new_samples}
+
     def submit_external(self, data: dict) -> dict:
         """Submit a batch of externally sequenced samples for analysis."""
         result = self.process_analysis_samples(data)

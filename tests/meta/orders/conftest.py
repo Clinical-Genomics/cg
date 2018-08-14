@@ -47,12 +47,21 @@ def rml_order():
 
 
 @pytest.fixture
-def all_orders(rml_order, fastq_order, scout_order, external_order):
+def metagenome_order():
+    """Load an example metagenome order."""
+    json_path = 'tests/fixtures/orders/metagenome.json'
+    json_data = json.load(open(json_path))
+    return json_data
+
+
+@pytest.fixture
+def all_orders(rml_order, fastq_order, scout_order, external_order, metagenome_order):
     return {
         OrderType.RML: rml_order,
         OrderType.FASTQ: fastq_order,
         OrderType.SCOUT: scout_order,
         OrderType.EXTERNAL: external_order,
+        OrderType.METAGENOME: metagenome_order,
     }
 
 

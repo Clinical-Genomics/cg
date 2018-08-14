@@ -35,6 +35,8 @@ def base_store(store) -> Store:
                     store.add_application('WGTPCFC030', 'wgs', 'WGS trio', is_accredited=True,
                                           sequencing_depth=30, target_reads=300000000,
                                           limitations='some'),
+                    store.add_application('METLIFR020', 'wgs', 'Whole genome metagenomics',
+                                          sequencing_depth=0, target_reads=40000000),
                     ]
     store.add_commit(applications)
 

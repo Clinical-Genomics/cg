@@ -17,6 +17,14 @@ SOURCE_TYPES = [
     'nail',
     'muscle',
     'other',
+    # metagenome sources
+    'skin',
+    'respiratory',
+    'urine',
+    'CSF',
+    'faeces',
+    'environmental',
+    'unknown'
 ]
 
 
@@ -87,6 +95,8 @@ def get_project_type(document_title: str, parsed_samples: List) -> str:
         return 'external'
     elif '1603' in document_title:
         return 'microbial'
+    elif '1605' in document_title:
+        return 'metagenome'
 
     analyses = set(sample['analysis'].lower() for sample in parsed_samples)
     if len(analyses) > 1:
@@ -190,6 +200,8 @@ def parse_sample(raw_sample):
                           raw_sample.get('Sample/Reagent Label') else None),
         'tumour': True if raw_sample.get('UDF/tumor') == 'yes' else False,
         'custom_index': raw_sample.get('UDF/Custom index'),
+        'elution_buffer': raw_sample.get('UDF/Sample Buffer'),
+        'extraction_method': raw_sample.get('UDF/Extraction method'),
     }
 
     data_analysis = raw_sample.get('UDF/Data Analysis') or None
@@ -200,13 +212,15 @@ def parse_sample(raw_sample):
     else:
         raise OrderFormError("unknown 'Data Analysis' for order")
 
-    for key, field_key in [('pool', 'pool name'), ('index_number', 'Index number'),
-                           ('volume', 'Volume (uL)'), ('concentration', 'Concentration (nM)'),
-                           ('quantity', 'Quantity')]:
-        excel_key = f"UDF/{field_key}"
+    numeric_values = [('pool', 'UDF/pool name'), ('index_number', 'UDF/Index number'),
+                      ('volume', 'UDF/Volume (uL)'), ('quantity', 'UDF/Quantity'),
+                      ('concentration', 'UDF/Concentration (nM)'),
+                      ('concentration_weight', 'UDF/Sample Conc.')]
+    for json_key, excel_key in numeric_values:
         str_value = raw_sample.get(excel_key, '').rsplit('.0')[0]
         if str_value.replace('.', '').isnumeric():
-            sample[key] = str_value
+            sample[json_key] = str_value
+
     for parent in ['mother', 'father']:
         parent_key = f"UDF/{parent}ID"
         sample[parent] = (raw_sample[parent_key] if

@@ -12,6 +12,7 @@ class OrderType(Enum):
     RML = 'rml'
     SCOUT = 'scout'
     MICROBIAL = 'microbial'
+    METAGENOME = 'metagenome'
 
 
 class ListValidator(validators.Validator):
@@ -124,7 +125,16 @@ MICROBIAL_SAMPLE = {
     'source': validators.Optional(str, None),
     'strain': str,
     'reference_genome': str,
-    'eluation_buffer': str,
+    'elution_buffer': str,
+    'extraction_method': validators.Optional(str, None),
+}
+
+METAGENOME_SAMPLE = {
+    **BASE_SAMPLE,
+    **LAB_MIXIN,
+    **PREP_MIXIN,
+    'source': validators.Optional(str, None),
+    'elution_buffer': str,
     'extraction_method': validators.Optional(str, None),
 }
 
@@ -148,5 +158,9 @@ ORDER_SCHEMES = {
     OrderType.MICROBIAL: Scheme({
         **BASE_PROJECT,
         'samples': ListValidator(MICROBIAL_SAMPLE, min_items=1),
+    }),
+    OrderType.METAGENOME: Scheme({
+        **BASE_PROJECT,
+        'samples': ListValidator(METAGENOME_SAMPLE, min_items=1),
     }),
 }
