@@ -2,10 +2,7 @@
 import logging
 from datetime import datetime
 
-import ruamel.yaml
 from jinja2 import Environment, PackageLoader, select_autoescape
-from pathlib import Path
-from typing import Any
 
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.coverage import ChanjoAPI
@@ -129,55 +126,13 @@ class ReportAPI:
         template_out = template.render(**report_data)
         return template_out
 
-    def _get_latest_raw_file(self, family_id: str, tag: str) -> Any:
-        """Get a python object file for a tag and a family ."""
-
-        analysis_files = self.deliver.get_post_analysis_files(family=family_id,
-                                                              version=False, tags=[tag])
-        if analysis_files:
-            analysis_file_raw = self._open_bundle_file(analysis_files[0].path)
-        else:
-            raise LOG.warning(f'No post analysis files received from DeliverAPI for \'{family_id}\'')
-
-        return analysis_file_raw
-
-    def _open_bundle_file(self, relative_file_path: str) -> Any:
-        """Open a bundle file and return it as an Python object."""
-        
-        full_file_path = Path(self.deliver.get_post_analysis_files_root_dir()).joinpath(
-            relative_file_path)
-        open_file = ruamel.yaml.safe_load(Path(full_file_path).open())
-        return open_file
-
-    def _get_latest_trending_data(self, family_id: str) -> dict:
-        """Get the latest trending data for a family."""
-
-        mip_config_raw = self._get_latest_raw_file(family_id=family_id, tag='mip-config')
-
-        qcmetrics_raw = self._get_latest_raw_file(family_id=family_id, tag='qcmetrics')
-
-        sampleinfo_raw = self._get_latest_raw_file(family_id=family_id, tag='sampleinfo')
-
-        trending = dict()
-
-        if mip_config_raw and qcmetrics_raw and sampleinfo_raw:
-            try:
-                trending = self.tb.get_trending(mip_config_raw=mip_config_raw,
-                                                qcmetrics_raw=qcmetrics_raw,
-                                                sampleinfo_raw=sampleinfo_raw)
-            except KeyError:
-                LOG.warning(f'_get_trending_data failed for \'{family_id}\'')
-                trending = dict()
-
-        return trending
-
     def _get_sample_coverage_from_chanjo(self, lims_id: str) -> dict:
         """Get coverage data from Chanjo for a sample."""
         return self.chanjo.sample_coverage(lims_id)
 
     def _incorporate_trending_data(self, report_data: dict, family_id: str):
         """Incorporate trending data into a set of samples."""
-        trending_data = self._get_latest_trending_data(family_id=family_id)
+        trending_data = self.analysis.get_latest_data(family_id=family_id)
 
         mapped_reads_all_samples = trending_data.get('mapped_reads', {})
         duplicates_all_samples = trending_data.get('duplicates', {})

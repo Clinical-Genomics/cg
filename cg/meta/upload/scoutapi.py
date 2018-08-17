@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 import logging
+from pathlib import Path
 
+import ruamel.yaml
 from cg.apps import hk, scoutapi, madeline
 from cg.store import models, Store
 from cg.meta.analysis import AnalysisAPI
+from cg.apps.tb import api as tb_api
 
 LOG = logging.getLogger(__name__)
 
@@ -11,16 +14,28 @@ LOG = logging.getLogger(__name__)
 class UploadScoutAPI(object):
 
     def __init__(self, status_api: Store, hk_api: hk.HousekeeperAPI,
-                 scout_api: scoutapi.ScoutAPI, madeline_exe: str):
+                 scout_api: scoutapi.ScoutAPI, trailblazer_api: tb_api.TrailblazerAPI,
+                 madeline_exe: str, madeline=madeline, ruamel=ruamel, Path=Path
+                 ):
         self.status = status_api
         self.housekeeper = hk_api
         self.scout = scout_api
         self.madeline_exe = madeline_exe
+        self.madeline = madeline
+        self.trailblazer = trailblazer_api
+        self.ruamel = ruamel
+        self.Path = Path
 
-    def data(self, analysis_obj: models.Analysis) -> dict:
+    def generate_config(self, analysis_obj: models.Analysis) -> dict:
         """Fetch data about an analysis to load Scout."""
         analysis_date = analysis_obj.started_at or analysis_obj.completed_at
         hk_version = self.housekeeper.version(analysis_obj.family.internal_id, analysis_date)
+
+        # todo: get trending dictionary instead, extend it with rank_model_version
+
+        sampleinfo_path = self.trailblazer.get_sampleinfo(analysis_obj)
+        sampleinfo_raw = self.ruamel.yaml.safe_load(
+            self.Path(sampleinfo_path).open())  # dictionary with all MIP analysis params
 
         data = {
             'owner': analysis_obj.family.customer.internal_id,
@@ -31,6 +46,8 @@ class UploadScoutAPI(object):
             'gene_panels': AnalysisAPI.convert_panels(analysis_obj.family.customer.internal_id,
                                                       analysis_obj.family.panels),
             'default_gene_panels': analysis_obj.family.panels,
+            'human_genome_build': sampleinfo_raw['human_genome_build']['version'],
+            'rank_model_version': sampleinfo_raw['program']['rankvariant']['rank_model']['version'],
         }
 
         for link_obj in analysis_obj.family.links:
@@ -84,6 +101,6 @@ class UploadScoutAPI(object):
             'mother': link_obj.mother.name if link_obj.mother else None,
             'status': link_obj.status,
         } for link_obj in family_obj.links]
-        ped_stream = madeline.make_ped(family_obj.name, samples=samples)
-        svg_path = madeline.run(self.madeline_exe, ped_stream)
+        ped_stream = self.madeline.make_ped(family_obj.name, samples=samples)
+        svg_path = self.madeline.run(self.madeline_exe, ped_stream)
         return svg_path

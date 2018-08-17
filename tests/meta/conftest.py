@@ -100,14 +100,87 @@ def analysis_store(base_store, analysis_family):
     yield base_store
 
 
+class MockFile:
+
+    def __init__(self, path):
+        self.path = path
+
+    def first(self):
+        return MockFile()
+
+    def full_path(self):
+        return ''
+
+
+class MockDeliver:
+
+    def get_post_analysis_files(self, family: str, version, tags):
+
+        if tags[0] == 'mip-config':
+            path = '/mnt/hds/proj/bioinfo/bundles/' + family + '/2018-01-30/' + family + \
+                    '_config.yaml'
+        elif tags[0] == 'sampleinfo':
+            path = '/mnt/hds/proj/bioinfo/bundles/' + family + '/2018-01-30/' + family + \
+                    '_qc_sample_info.yaml'
+        if tags[0] == 'qcmetrics':
+            path = '/mnt/hds/proj/bioinfo/bundles/' + family + '/2018-01-30/' + family + \
+                    '_qc_metrics.yaml'
+
+        return [MockFile(path=path)]
+
+    def get_post_analysis_files_root_dir(self):
+        return ''
+
+
+class MockPath:
+
+    def __init__(self, path):
+        self.yaml = MockYaml()
+
+    def __call__(self, *args, **kwargs):
+        return self
+
+    def open(self):
+        return dict()
+
+    def joinpath(self, path):
+        return ''
+
+
+class MockRuamel:
+    def __init__(self):
+        self.yaml = MockYaml()
+
+    def yaml(self):
+        return MockYaml()
+
+
+class MockYaml:
+    def safe_load(self, path):
+        return {'human_genome_build': {'version': ''}, 'program': {'rankvariant': {'rank_model': {
+            'version': 1.18}}}}
+
+
+class MockTB:
+    def get_sampleinfo(self, analysis_obj):
+        return ''
+
+
 @pytest.yield_fixture(scope='function')
 def analysis_api(analysis_store, store_housekeeper, scout_store, trailblazer_api):
     """Setup an analysis API."""
+    ruamel_mock = MockRuamel()
+    Path_mock = MockPath('')
+    tb_mock = MockTB()
+
     _analysis_api = AnalysisAPI(
         db=analysis_store,
         hk_api=store_housekeeper,
         scout_api=scout_store,
-        tb_api=trailblazer_api,
+        tb_api=tb_mock,
         lims_api=None,
+        deliver_api=MockDeliver(),
+        ruamel=ruamel_mock,
+        Path=Path_mock
     )
     yield _analysis_api

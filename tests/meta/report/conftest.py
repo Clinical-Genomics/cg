@@ -108,6 +108,21 @@ class MockAnalysis:
         """Create the aggregated panel file."""
         return ['']
 
+    def get_latest_trending_data(self, family_id):
+        # Returns: dict: parsed data
+        ### Define output dict
+        outdata = {
+            'analysis_sex': {'ADM1': 'female', 'ADM2': 'female', 'ADM3': 'female'},
+            'family': 'yellowhog',
+            'duplicates': {'ADM1': 13.525, 'ADM2': 12.525, 'ADM3': 14.525},
+            'genome_build': 'hg19',
+            'mapped_reads': {'ADM1': 98.8, 'ADM2': 99.8, 'ADM3': 97.8},
+            'mip_version': 'v4.0.20',
+            'sample_ids': ['2018-20203', '2018-20204'],
+        }
+
+        return outdata
+
 
 class MockReport(ReportAPI):
     _fileToOpen = ''

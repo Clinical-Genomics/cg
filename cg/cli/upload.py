@@ -93,13 +93,15 @@ def scout(context, re_upload, print_console, family_id):
     """Upload variants from analysis to Scout."""
     scout_api = scoutapi.ScoutAPI(context.obj)
     family_obj = context.obj['status'].family(family_id)
+
     api = UploadScoutAPI(
         status_api=context.obj['status'],
         hk_api=context.obj['housekeeper_api'],
         scout_api=scout_api,
         madeline_exe=context.obj['madeline_exe'],
+        trailblazer_api=tb.TrailblazerAPI(context.obj)
     )
-    results = api.data(family_obj.analyses[0])
+    results = api.generate_config(family_obj.analyses[0])
     if print_console:
         print(results)
     else:
