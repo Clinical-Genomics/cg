@@ -13,6 +13,9 @@ from cg.meta.upload.gt import UploadGenotypesAPI
 from cg.meta.upload.observations import UploadObservationsAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
 from cg.meta.upload.beacon import UploadBeaconApi
+from cg.meta.analysis import AnalysisAPI
+from cg.meta.deliver.api import DeliverAPI
+from cg.apps.lims.api import LimsAPI
 
 LOG = logging.getLogger(__name__)
 
@@ -24,6 +27,7 @@ def upload(context, family_id):
     """Upload results from analyses."""
     context.obj['status'] = Store(context.obj['database'])
     context.obj['housekeeper_api'] = hk.HousekeeperAPI(context.obj)
+
     if family_id:
         family_obj = context.obj['status'].family(family_id)
         analysis_obj = family_obj.analyses[0]
@@ -93,13 +97,25 @@ def scout(context, re_upload, print_console, family_id):
     """Upload variants from analysis to Scout."""
     scout_api = scoutapi.ScoutAPI(context.obj)
     family_obj = context.obj['status'].family(family_id)
+    lims_api = LimsAPI(context.obj)
+    deliver_api = DeliverAPI(db=context.obj['status'], hk_api=context.obj['housekeeper_api'],
+                             lims_api=lims_api)
+
+    analysis_api = context.obj['analysis_api'] = AnalysisAPI(
+        db=context.obj['status'],
+        hk_api=context.obj['housekeeper_api'],
+        scout_api=scout_api,
+        tb_api=tb.TrailblazerAPI(context.obj),
+        lims_api=lims_api,
+        deliver_api=deliver_api
+    )
 
     api = UploadScoutAPI(
         status_api=context.obj['status'],
         hk_api=context.obj['housekeeper_api'],
         scout_api=scout_api,
         madeline_exe=context.obj['madeline_exe'],
-        trailblazer_api=tb.TrailblazerAPI(context.obj)
+        analysis_api=analysis_api
     )
     results = api.generate_config(family_obj.analyses[0])
     if print_console:

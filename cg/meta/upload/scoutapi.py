@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
 import logging
-from pathlib import Path
 
-import ruamel.yaml
 from cg.apps import hk, scoutapi, madeline
 from cg.store import models, Store
 from cg.meta.analysis import AnalysisAPI
-from cg.apps.tb import api as tb_api
 
 LOG = logging.getLogger(__name__)
 
@@ -14,28 +11,21 @@ LOG = logging.getLogger(__name__)
 class UploadScoutAPI(object):
 
     def __init__(self, status_api: Store, hk_api: hk.HousekeeperAPI,
-                 scout_api: scoutapi.ScoutAPI, trailblazer_api: tb_api.TrailblazerAPI,
-                 madeline_exe: str, madeline=madeline, ruamel=ruamel, Path=Path
+                 scout_api: scoutapi.ScoutAPI,
+                 analysis_api: AnalysisAPI, madeline_exe: str, madeline=madeline,
                  ):
         self.status = status_api
         self.housekeeper = hk_api
         self.scout = scout_api
         self.madeline_exe = madeline_exe
         self.madeline = madeline
-        self.trailblazer = trailblazer_api
-        self.ruamel = ruamel
-        self.Path = Path
+        self.analysis = analysis_api
 
     def generate_config(self, analysis_obj: models.Analysis) -> dict:
         """Fetch data about an analysis to load Scout."""
         analysis_date = analysis_obj.started_at or analysis_obj.completed_at
         hk_version = self.housekeeper.version(analysis_obj.family.internal_id, analysis_date)
-
-        # todo: get trending dictionary instead, extend it with rank_model_version
-
-        sampleinfo_path = self.trailblazer.get_sampleinfo(analysis_obj)
-        sampleinfo_raw = self.ruamel.yaml.safe_load(
-            self.Path(sampleinfo_path).open())  # dictionary with all MIP analysis params
+        analysis_data = self.analysis.get_latest_data(analysis_obj.family.internal_id)
 
         data = {
             'owner': analysis_obj.family.customer.internal_id,
@@ -43,11 +33,11 @@ class UploadScoutAPI(object):
             'family_name': analysis_obj.family.name,
             'samples': [],
             'analysis_date': analysis_obj.completed_at,
-            'gene_panels': AnalysisAPI.convert_panels(analysis_obj.family.customer.internal_id,
+            'gene_panels': self.analysis.convert_panels(analysis_obj.family.customer.internal_id,
                                                       analysis_obj.family.panels),
             'default_gene_panels': analysis_obj.family.panels,
-            'human_genome_build': sampleinfo_raw['human_genome_build']['version'],
-            'rank_model_version': sampleinfo_raw['program']['rankvariant']['rank_model']['version'],
+            'human_genome_build': analysis_data.get('genome_build'),
+            'rank_model_version': analysis_data.get('rank_model_version'),
         }
 
         for link_obj in analysis_obj.family.links:

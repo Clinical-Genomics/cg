@@ -165,6 +165,27 @@ class MockTB:
     def get_sampleinfo(self, analysis_obj):
         return ''
 
+    def make_config(self, data):
+        return data
+
+    def get_trending(self, mip_config_raw, qcmetrics_raw, sampleinfo_raw):
+        outdata = {
+            'analysis_sex': {},
+            'at_dropout': {},
+            'family': None,
+            'duplicates': {},
+            'gc_dropout': {},
+            'genome_build': '37',
+            'rank_model_version': '1.18',
+            'insert_size_standard_deviation': {},
+            'mapped_reads': {},
+            'median_insert_size': {},
+            'mip_version': None,
+            'sample_ids': [],
+        }
+
+        return outdata
+
 
 @pytest.yield_fixture(scope='function')
 def analysis_api(analysis_store, store_housekeeper, scout_store, trailblazer_api):

@@ -8,6 +8,18 @@ class MockVersion:
         return ''
 
 
+class MockFile:
+
+    def __init__(self, path=''):
+        self.path = path
+
+    def first(self):
+        return MockFile()
+
+    def full_path(self):
+        return ''
+
+
 class MockHouseKeeper:
 
     def files(self, version, tags):
@@ -28,14 +40,34 @@ class MockMadeline:
         return MockVersion()
 
 
+class MockAnalysis:
+
+    def get_latest_data(self, family_id):
+        # Returns: dict: parsed data
+        ### Define output dict
+        outdata = {
+            'analysis_sex': {'ADM1': 'female', 'ADM2': 'female', 'ADM3': 'female'},
+            'family': 'yellowhog',
+            'duplicates': {'ADM1': 13.525, 'ADM2': 12.525, 'ADM3': 14.525},
+            'genome_build': 'hg19',
+            'rank_model_version': '1.18',
+            'mapped_reads': {'ADM1': 98.8, 'ADM2': 99.8, 'ADM3': 97.8},
+            'mip_version': 'v4.0.20',
+            'sample_ids': ['2018-20203', '2018-20204'],
+        }
+
+        return outdata
+
+    def convert_panels(self, customer_id, panels):
+        return ''
+
+
 @pytest.yield_fixture(scope='function')
-def upload_scout_api(analysis_store, store_housekeeper, scout_store, trailblazer_api):
+def upload_scout_api(analysis_store, scout_store):
 
     madeline_mock = MockMadeline()
     hk_mock = MockHouseKeeper()
-    tb_mock = MockTB()
-    ruamel_mock = MockRuamel()
-    Path_mock = MockPath('')
+    analysis_mock = MockAnalysis()
 
     _api = UploadScoutAPI(
         status_api=analysis_store,
@@ -43,9 +75,7 @@ def upload_scout_api(analysis_store, store_housekeeper, scout_store, trailblazer
         scout_api=scout_store,
         madeline_exe='',
         madeline=madeline_mock,
-        trailblazer_api=tb_mock,
-        ruamel=ruamel_mock,
-        Path=Path_mock
+        analysis_api=analysis_mock
     )
 
     yield _api

@@ -108,7 +108,7 @@ class MockAnalysis:
         """Create the aggregated panel file."""
         return ['']
 
-    def get_latest_trending_data(self, family_id):
+    def get_latest_data(self, family_id):
         # Returns: dict: parsed data
         ### Define output dict
         outdata = {

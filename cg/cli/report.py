@@ -30,7 +30,8 @@ def report(context):
     context.obj['scout'] = ScoutAPI(context.obj)
     context.obj['analysis'] = AnalysisAPI(context.obj, hk_api=context.obj['hk'],
                                           scout_api=context.obj['scout'], tb_api=context.obj['tb'],
-                                          lims_api=context.obj['lims'])
+                                          lims_api=context.obj['lims'], deliver_api=context.obj[
+            'deliver'])
 
 
 @report.command()
