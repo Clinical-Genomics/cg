@@ -1,6 +1,13 @@
 # cg commands
 This is documentation for cg commands.
 
+Recurring nomenclature:
+- sample_id = internal sampleID, provided by LIMS: `ADM..`
+- ext_sample_id = external sampleID, provided by customer: `customer's sample_id`
+- customer_id = `custxxx`
+- ticket_id = `898988`
+- family_id = `cuddlygull`
+
 ## cg add
 Add new things to statusDB.
 
@@ -9,20 +16,20 @@ Add a new customer with a unique INTERNAL_ID and NAME.
 
 ```$ cg add customer CUSTOMER_ID CUSTOMER_NAME```
 
-where `CUSTOMER_ID` our internal customer ID, e.g. cust000, and `CUSTOMER_NAME` is the customer name.
+where `CUSTOMER_ID` our internal customer ID, e.g. cust000, and `CUSTOMER_NAME` is the customer name, e.g. institute or P.I.
 
 ### cg add family
 Add a family to CUSTOMER_ID with a NAME.
 
 ```$ cg add family CUSTOMER_ID FAMILY_NAME```
 
-where `FAMILY_NAME` is the customer's ID for the case.
+where `FAMILY_NAME` is the customer's familyID.
 
 It is required to supply a panel.
 
 ```$ cg add family --panel PANEL CUSTOMER_ID FAMILY_NAME```
 
-where `PANEL` are the gene panels.
+where `PANEL` are the gene panels. To add multiple panels simply provide `--panel PANEL` again with another gene panel.
 
 When adding a family, set the priority by using
 
@@ -31,12 +38,6 @@ When adding a family, set the priority by using
 where `PRIORITY` could be `low`, `normal`, or `high`.
 
 ### cg add relationship
-Create a link between a FAMILY_ID and a SAMPLE_ID.
-
-```$ cg add relationship FAMILY_ID SAMPLE_ID```
-
-where `FAMILY_ID` is our internal family ID, e.g. `cuddlygull`.
-
 Create a link between a FAMILY_ID and a SAMPLE_ID.
 
 ```$ cg add relationship FAMILY_ID SAMPLE_ID```
@@ -60,7 +61,7 @@ Add a sample for CUSTOMER_ID with a SAMPLE_NAME.
 
 ```$ cg add sample CUSTOMER_ID SAMPLE_NAME```
 
-where `SAMPLE_NAME` is the customer's ID for the sample.
+where `SAMPLE_NAME` is the customer's sampleID.
 
 It is required to set the gender of the sample.
 
@@ -110,7 +111,7 @@ Using this option will overwrite any configuration files, so if changes has been
 
 To change the quality of service for an analysis use
 
-```$ cg analysis --family FAMILY_ID --priority PRORITY```
+```$ cg analysis --family FAMILY_ID --priority PRIORITY```
 
 where `PRIORITY` could be `low`, `normal`, or `high`. The default is set in statusDB.
 
@@ -173,11 +174,11 @@ Fetch the first flowcell in the requested queue from backup.
 Remove stuff. *Use caution.*
 
 ### cg clean beacon
-Remove beacon for a sample or one or more affected samples from a family. It is required to specify what item type that should be removed. Example:
+Remove beacon for a sample or one or more affected samples from a family, cleans the beacon database of the inserted variants. It is required to specify what item type that should be removed. Example:
 
 ```$ cg clean beacon --item_type TYPE ITEM_ID```
 
-Where `TYPE` can be `family` or `sample`. cleans the beacon database of the inserted variants
+Where `TYPE` can be `family` or `sample`.
 
 ### cg clean mip
 Remove analysis output. Removes the family directory (as defined in the cg config).
@@ -231,9 +232,9 @@ To only link specific types of files from HK, tags can be employed:
 
 If you want to deliver to another customer inbox than stated in statusDB, use
 
-```$ cg deliver inbox --inbox INBOX FAMILY_ID```
+```$ cg deliver inbox --inbox CUSTOMER_ID FAMILY_ID```
 
-where `INBOX` is the customerID.
+where `CUSTOMER_ID` is the customerID.
 
 ## cg get
 Get information about records in the database.
@@ -325,7 +326,7 @@ To update the gene panel for an analysis, use
 
 ```$ cg set family --panel PANEL FAMILY_ID```
 
-where `PANEL` are the gene panels.
+where `PANEL` are the gene panels. To add multiple panels simply provide `--panel PANEL` again with another gene panel.
 
 ### cg set sample
 Update information about a sample.
@@ -355,14 +356,14 @@ There is an option to skip initial records:
 
 ```$ cg status families --skip INTEGER```
 
-where `INTEGER` is **yeah, what is it?**.
+where `INTEGER` is the number of lines that should be skipped (shows by default the 30 first entries).
 
 ### cg status samples
 View status of samples.
 
 ```$ cg status samples --skip INTEGER```
 
-where `INTEGER` is **yeah, what is it?**.
+where `INTEGER` is the number of lines that should be skipped (shows by default the 30 first entries).
 
 ## cg store
 Store results from MIP in housekeeper.
@@ -413,7 +414,7 @@ Upload variants for affected samples in a family to cgbeacon.
 
 ```$ cg upload beacon --panel TEXT FAMILY_ID```
 
-where `TEXT` is the gene panel to filter VCF by.
+where `TEXT` is the gene panel to filter VCF by. To add multiple panels simply provide `--panel TEXT` again with another gene panel.
 
 Name the output pdf file by using the `--outfile` option. Example:
 
