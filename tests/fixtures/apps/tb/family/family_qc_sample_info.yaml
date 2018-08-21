@@ -1,0 +1,565 @@
+---
+analysis_date: 2017-06-17T12:11:42
+analysis_type:
+  sample: wgs
+analysisrunstatus: finished
+most_complete_bcf:
+  path: /path_to/family_sorted_md_brecal_gvcf_vrecal_comb_BOTH.bcf
+config_file_analysis: /path_to/family_config.yaml
+default_gene_panels:
+  - IEM
+expected_coverage:
+  sample: '26.1'
+family: 'family'
+gbcf_file:
+  path: /path_to/gatk/family_sorted_md_brecal_gvcf_BOTH.bcf
+gene_panels:
+  - ENDO
+  - EP
+  - IEM
+  - IBMFS
+  - mtDNA
+  - MIT
+  - PEDHEP
+  - OMIM-AUTO
+  - PIDCAD
+  - PID
+  - SKD
+  - NMD
+  - ATX
+  - CTD
+  - ID
+  - SPG
+  - Ataxi
+  - AD-HSP
+human_genome_build:
+  path: /mnt/hds/proj/bioinfo/MIP_ANALYSIS/references_4.0/Homo_sapiens.GRCh37.d5.fasta
+  source: GRCh
+  version: '37'
+last_log_file_path: /path_to/mip_log/2017-06-17/mip.pl_2017-06-17T12:11:42.log
+log_file_dir: /path_to/mip_log
+mip_version: v6.0.0
+owner: cust003
+pedigree_file:
+  path: /path_to/family/family_pedigree.yaml
+pedigree_file_analysis:
+  path: /path_to/family/qc_pedigree.yaml
+pedigree_minimal: /path_to/family/family.fam
+program:
+  bcftools:
+    outdirectory: /path_to/freebayes
+    outfile: family_sorted_md_brecal_freebayes_BOTH.vcf
+  endvariantannotationblock:
+    clinical:
+      path: /path_to/family_sorted_md_brecal_gvcf_vrecal_comb_vt_vep_parsed_snpeff_ranked_BOTH.selected.vcf
+    research:
+      path: /path_to/family_sorted_md_brecal_gvcf_vrecal_comb_vt_vep_parsed_snpeff_ranked_BOTH.vcf
+  freebayes:
+    outdirectory: /path_to/freebayes
+    outfile: family_sorted_md_brecal_freebayes_BOTH.vcf
+  gatk:
+    version: '3.6'
+  genmod:
+    outdirectory: /path_to/family/bwa
+    outfile: family_sorted_md_brecal_gvcf_vrecal_comb_vt_vep_parsed_snpeff_ranked_BOTH_1.selected.vcf
+  manta:
+    outdirectory: /path_to/manta
+    outfile: family_sorted_md_brecal_manta_SV.vcf
+  peddy:
+    ped_check:
+      path: /path_to/118.ped_check.csv
+    peddy:
+      path: /path_to/118.peddy.ped
+    sex_check:
+      path: /path_to/118.sex_check.csv
+    stderr:
+      path: /path_to/peddy_118_BOTH.1.stderr.txt
+  pedigree_check:
+    outdirectory: /path_to/gatk
+    outfile: family_sorted_md_brecal_gvcf_vrecal_BOTH.vcf
+  picardtools:
+    version: 2.5.0(2c370988aefe41f579920c8a6a678a201c5261c1_1466708365)
+  plink_sexcheck:
+    outdirectory: /path_to/samplecheck
+    outfile: family.sexcheck
+  qccollect:
+      path: /path_to/family/family_qc_metrics.yaml
+  rankvariant:
+    rank_model:
+      file: rank_model_cmms_v1.18.ini
+      path: /mnt/hds/proj/bioinfo/MIP_ANALYSIS/references_4.0/rank_model_cmms_v1.18.ini
+      version: '1.18'
+  sambamba:
+    version: 0.6.5
+  samtools:
+    outdirectory: /path_to/samtools
+    outfile: family_sorted_md_brecal_mpileup_BOTH.vcf
+  samtools_mpileup:
+    outdirectory: /path_to/samtools
+    outfile: family_sorted_md_brecal_mpileup_BOTH.vcf
+  snpeff:
+    outdirectory: /path_to/family/bwa
+    outfile: family_sorted_md_brecal_gvcf_vrecal_comb_vt_vep_parsed_snpeff_BOTH_1.selected.vcf
+  sv_combinevariantcallsets:
+    outdirectory: /path_to/info/
+    outfile: sv_combinevariantcallsets_family_SV.0.stderr.txt
+  svdb:
+    path: path/to/118_sorted_md_brecal_comb_SV.vcf
+  sv_genmod:
+    outdirectory: /path_to/family/bwa
+    outfile: family_sorted_md_brecal_comb_vep_parsed_ranked_SV.selected.vcf
+  sv_rankvariant:
+    clinical:
+      path: /path_to/family_sorted_md_brecal_comb_vep_parsed_ranked_SV.selected.vcf
+    rank_model:
+      file: svrank_model_cmms_v1.0.ini
+      path: /mnt/hds/proj/bioinfo/MIP_ANALYSIS/references_4.0/svrank_model_cmms_v1.0.ini
+      version: '1.0'
+    research:
+      path: /path_to/family_sorted_md_brecal_comb_vep_parsed_ranked_SV.vcf
+  sv_reformat:
+    clinical:
+      path: /path_to/family_sorted_md_brecal_comb_vep_parsed_ranked_SV.selected.vcf
+    research:
+      path: /path_to/family_sorted_md_brecal_comb_vep_parsed_ranked_SV.vcf
+  sv_varianteffectpredictor:
+    outdirectory: /path_to/family/bwa
+    outfile: family_sorted_md_brecal_comb_vep_SV_1.vcf
+  sv_varianteffectpredictorsummary:
+    outdirectory: /path_to/family/bwa
+    outfile: family_sorted_md_brecal_comb_vep_SV_1.vcf_summary.html
+  sv_vcfparser:
+    outdirectory: /path_to/family/bwa
+    outfile: family_sorted_md_brecal_comb_vep_parsed_SV_1.vcf
+  variantannotationblock:
+    outdirectory: /path_to/info/
+    outfile: variantannotationblock_family.0.stderr.txt
+  varianteffectpredictor:
+    outdirectory: /path_to/family/bwa
+    outfile: family_sorted_md_brecal_gvcf_vrecal_comb_vt_vep_BOTH_1.vcf
+  varianteffectpredictorsummary:
+    outdirectory: /path_to/family/bwa
+    outfile: family_sorted_md_brecal_gvcf_vrecal_comb_vt_vep_BOTH_1.vcf_summary.html
+  vcfparser:
+    outdirectory: /path_to/family/bwa
+    outfile: family_sorted_md_brecal_gvcf_vrecal_comb_vt_vep_parsed_BOTH_1.vcf
+  vcftools:
+    outdirectory: /path_to/samplecheck/info/
+    outfile: samplecheck_family_BOTH.0.stderr.txt
+  vt:
+    outdirectory: /path_to/info/
+    outfile: variantannotationblock_family.0.1.1.stderr.txt
+sample:
+  sample:
+    analysis_type: wgs
+    capture_kit: Agilent_SureSelectCRE.V1
+    expected_coverage: '26.1'
+    father: '0'
+    file:
+      sample.170613_HJG7MALXX-11-Undetermined_TAATGCGC.lane7:
+        interleaved: ~
+        read_direction_file:
+          sample.170613_HJG7MALXX-11-Undetermined_TAATGCGC.lane7_1:
+            date: 2017-06-13
+            flowcell: HJG7MALXX-11-Undetermined
+            lane: '7'
+            original_file_name: 7_170613_HJG7MALXX-11-Undetermined_sample_TAATGCGC_1.fastq.gz
+            original_file_name_noending: 7_170613_HJG7MALXX-11-Undetermined_sample_TAATGCGC_1
+            read_direction: 1
+            run_barcode: 170613_HJG7MALXX-11-Undetermined_7_TAATGCGC
+            sample_barcode: TAATGCGC
+          sample.170613_HJG7MALXX-11-Undetermined_TAATGCGC.lane7_2:
+            date: 2017-06-13
+            flowcell: HJG7MALXX-11-Undetermined
+            lane: '7'
+            original_file_name: 7_170613_HJG7MALXX-11-Undetermined_sample_TAATGCGC_2.fastq.gz
+            original_file_name_noending: 7_170613_HJG7MALXX-11-Undetermined_sample_TAATGCGC_2
+            read_direction: 2
+            run_barcode: 170613_HJG7MALXX-11-Undetermined_7_TAATGCGC
+            sample_barcode: TAATGCGC
+        sequence_length: '151'
+        sequence_run_type: paired_end
+      sample.170613_HJG7MALXX-11_TAATGCGC.lane7:
+        interleaved: ~
+        read_direction_file:
+          sample.170613_HJG7MALXX-11_TAATGCGC.lane7_1:
+            date: 2017-06-13
+            flowcell: HJG7MALXX-11
+            lane: '7'
+            original_file_name: 7_170613_HJG7MALXX-11_sample_TAATGCGC_1.fastq.gz
+            original_file_name_noending: 7_170613_HJG7MALXX-11_sample_TAATGCGC_1
+            read_direction: 1
+            run_barcode: 170613_HJG7MALXX-11_7_TAATGCGC
+            sample_barcode: TAATGCGC
+          sample.170613_HJG7MALXX-11_TAATGCGC.lane7_2:
+            date: 2017-06-13
+            flowcell: HJG7MALXX-11
+            lane: '7'
+            original_file_name: 7_170613_HJG7MALXX-11_sample_TAATGCGC_2.fastq.gz
+            original_file_name_noending: 7_170613_HJG7MALXX-11_sample_TAATGCGC_2
+            read_direction: 2
+            run_barcode: 170613_HJG7MALXX-11_7_TAATGCGC
+            sample_barcode: TAATGCGC
+        sequence_length: '151'
+        sequence_run_type: paired_end
+      sample.170613_HJG7MALXX-21-Undetermined_TAATGCGC.lane7:
+        interleaved: ~
+        read_direction_file:
+          sample.170613_HJG7MALXX-21-Undetermined_TAATGCGC.lane7_1:
+            date: 2017-06-13
+            flowcell: HJG7MALXX-21-Undetermined
+            lane: '7'
+            original_file_name: 7_170613_HJG7MALXX-21-Undetermined_sample_TAATGCGC_1.fastq.gz
+            original_file_name_noending: 7_170613_HJG7MALXX-21-Undetermined_sample_TAATGCGC_1
+            read_direction: 1
+            run_barcode: 170613_HJG7MALXX-21-Undetermined_7_TAATGCGC
+            sample_barcode: TAATGCGC
+          sample.170613_HJG7MALXX-21-Undetermined_TAATGCGC.lane7_2:
+            date: 2017-06-13
+            flowcell: HJG7MALXX-21-Undetermined
+            lane: '7'
+            original_file_name: 7_170613_HJG7MALXX-21-Undetermined_sample_TAATGCGC_2.fastq.gz
+            original_file_name_noending: 7_170613_HJG7MALXX-21-Undetermined_sample_TAATGCGC_2
+            read_direction: 2
+            run_barcode: 170613_HJG7MALXX-21-Undetermined_7_TAATGCGC
+            sample_barcode: TAATGCGC
+        sequence_length: '151'
+        sequence_run_type: paired_end
+      sample.170613_HJG7MALXX-21_TAATGCGC.lane7:
+        interleaved: ~
+        read_direction_file:
+          sample.170613_HJG7MALXX-21_TAATGCGC.lane7_1:
+            date: 2017-06-13
+            flowcell: HJG7MALXX-21
+            lane: '7'
+            original_file_name: 7_170613_HJG7MALXX-21_sample_TAATGCGC_1.fastq.gz
+            original_file_name_noending: 7_170613_HJG7MALXX-21_sample_TAATGCGC_1
+            read_direction: 1
+            run_barcode: 170613_HJG7MALXX-21_7_TAATGCGC
+            sample_barcode: TAATGCGC
+          sample.170613_HJG7MALXX-21_TAATGCGC.lane7_2:
+            date: 2017-06-13
+            flowcell: HJG7MALXX-21
+            lane: '7'
+            original_file_name: 7_170613_HJG7MALXX-21_sample_TAATGCGC_2.fastq.gz
+            original_file_name_noending: 7_170613_HJG7MALXX-21_sample_TAATGCGC_2
+            read_direction: 2
+            run_barcode: 170613_HJG7MALXX-21_7_TAATGCGC
+            sample_barcode: TAATGCGC
+        sequence_length: '151'
+        sequence_run_type: paired_end
+    most_complete_bam:
+      path: /path_to/sample/bwa/sample_lanes_7777_sorted_md_brecal.bam
+    mother: '0'
+    phenotype: affected
+    program:
+      bamstats:
+        sample.170613_HJG7MALXX-11-Undetermined_TAATGCGC.lane7:
+          outdirectory: /path_to/sample/bwa
+          outfile: sample.170613_HJG7MALXX-11-Undetermined_TAATGCGC.lane7_sorted.stats
+        sample.170613_HJG7MALXX-11_TAATGCGC.lane7:
+          outdirectory: /path_to/sample/bwa
+          outfile: sample.170613_HJG7MALXX-11_TAATGCGC.lane7_sorted.stats
+        sample.170613_HJG7MALXX-21-Undetermined_TAATGCGC.lane7:
+          outdirectory: /path_to/sample/bwa
+          outfile: sample.170613_HJG7MALXX-21-Undetermined_TAATGCGC.lane7_sorted.stats
+        sample.170613_HJG7MALXX-21_TAATGCGC.lane7:
+          outdirectory: /path_to/sample/bwa
+          outfile: sample.170613_HJG7MALXX-21_TAATGCGC.lane7_sorted.stats
+      bwa:
+        sample.170613_HJG7MALXX-11-Undetermined_TAATGCGC.lane7:
+          outdirectory: /path_to/sample/bwa/info/
+          outfile: bwa_mem_sample.0.stderr.txt
+        sample.170613_HJG7MALXX-11_TAATGCGC.lane7:
+          outdirectory: /path_to/sample/bwa/info/
+          outfile: bwa_mem_sample.1.stderr.txt
+        sample.170613_HJG7MALXX-21-Undetermined_TAATGCGC.lane7:
+          outdirectory: /path_to/sample/bwa/info/
+          outfile: bwa_mem_sample.2.stderr.txt
+        sample.170613_HJG7MALXX-21_TAATGCGC.lane7:
+          outdirectory: /path_to/sample/bwa/info/
+          outfile: bwa_mem_sample.3.stderr.txt
+      calculatehsmetrics:
+        sample_lanes_7777:
+          outdirectory: /path_to/sample/bwa/coveragereport
+          outfile: sample_lanes_7777_sorted_md_brecal_CalculateHsMetrics
+      chanjo:
+        sample_lanes_7777:
+          outdirectory: /path_to/sample/bwa/coveragereport
+          outfile: sample_lanes_7777_sorted_md_brecal_chanjo_sexcheck.log
+      chanjo_sexcheck:
+        sample_lanes_7777:
+          path: /path_to/sample/bwa/coveragereport/sample_lanes_7777_sorted_md_brecal.sexcheck
+      collectmultiplemetrics:
+        sample_lanes_7777:
+          outdirectory: /path_to/sample/bwa/coveragereport
+          outfile: sample_lanes_7777_sorted_md_brecal.alignment_summary_metrics
+      collectmultiplemetricsinsertsize:
+        sample_lanes_7777:
+          outdirectory: /path_to/sample/bwa/coveragereport
+          outfile: sample_lanes_7777_sorted_md_brecal.insert_size_metrics
+      fastqc:
+        7_170613_HJG7MALXX-11-Undetermined_sample_TAATGCGC_1.fastq.gz:
+          outdirectory: /path_to/sample/fastqc/7_170613_HJG7MALXX-11-Undetermined_sample_TAATGCGC_1_fastqc
+          outfile: fastqc_data.txt
+        7_170613_HJG7MALXX-11-Undetermined_sample_TAATGCGC_2.fastq.gz:
+          outdirectory: /path_to/sample/fastqc/7_170613_HJG7MALXX-11-Undetermined_sample_TAATGCGC_2_fastqc
+          outfile: fastqc_data.txt
+        7_170613_HJG7MALXX-11_sample_TAATGCGC_1.fastq.gz:
+          outdirectory: /path_to/sample/fastqc/7_170613_HJG7MALXX-11_sample_TAATGCGC_1_fastqc
+          outfile: fastqc_data.txt
+        7_170613_HJG7MALXX-11_sample_TAATGCGC_2.fastq.gz:
+          outdirectory: /path_to/sample/fastqc/7_170613_HJG7MALXX-11_sample_TAATGCGC_2_fastqc
+          outfile: fastqc_data.txt
+        7_170613_HJG7MALXX-21-Undetermined_sample_TAATGCGC_1.fastq.gz:
+          outdirectory: /path_to/sample/fastqc/7_170613_HJG7MALXX-21-Undetermined_sample_TAATGCGC_1_fastqc
+          outfile: fastqc_data.txt
+        7_170613_HJG7MALXX-21-Undetermined_sample_TAATGCGC_2.fastq.gz:
+          outdirectory: /path_to/sample/fastqc/7_170613_HJG7MALXX-21-Undetermined_sample_TAATGCGC_2_fastqc
+          outfile: fastqc_data.txt
+        7_170613_HJG7MALXX-21_sample_TAATGCGC_1.fastq.gz:
+          outdirectory: /path_to/sample/fastqc/7_170613_HJG7MALXX-21_sample_TAATGCGC_1_fastqc
+          outfile: fastqc_data.txt
+        7_170613_HJG7MALXX-21_sample_TAATGCGC_2.fastq.gz:
+          outdirectory: /path_to/sample/fastqc/7_170613_HJG7MALXX-21_sample_TAATGCGC_2_fastqc
+          outfile: fastqc_data.txt
+      markduplicates:
+        sample_lanes_7777:
+          outdirectory: /path_to/sample/bwa
+          outfile: sample_lanes_7777_sorted_md_metric
+          processed_by: picardtools_markduplicates
+      sambamba_depth:
+        sample_lanes_7777:
+            path: /path_to/sample/bwa/coveragereport/sample_lanes_7777_sorted_md_brecal_coverage.bed
+      samtools_subsample_mt:
+        ADM1059A4_lanes_8:
+            path: /path_to/sample/bwa/ADM1059A4_lanes_8_sorted_md_brecal_subsample_MT.bam
+      vcf2cytosure:
+        ADM1059A4_lanes_8:
+          path: /path_to/sample/bwa/vcf2cytosure/ADM1059A4_sorted_md_brecal_comb_SV.cgh
+      variantevalall:
+        sample_lanes_7777:
+          outdirectory: /path_to/sample/bwa/gatk_variantevalall
+          outfile: sample_lanes_7777_sorted_md_brecal_gvcf_vrecal_comb_BOTH.vcf.varianteval
+      variantevalexome:
+        sample_lanes_7777:
+          outdirectory: /path_to/sample/bwa/gatk_variantevalexome
+          outfile: sample_lanes_7777_sorted_md_brecal_gvcf_vrecal_comb_BOTH_exome.vcf.varianteval
+    sample_id: sample
+    sample_name: family-I-2A
+    sex: female
+sv_bcf_file:
+  path: /path_to/family_sorted_md_brecal_comb_SV.bcf
+sv_vcf_binary_file:
+  clinical:
+    path: /path_to/family_sorted_md_brecal_comb_vep_parsed_ranked_SV.selected.vcf.gz
+  research:
+    path: /path_to/family_sorted_md_brecal_comb_vep_parsed_ranked_SV.vcf.gz
+sv_vcf_file:
+  clinical:
+    path: /path_to/family_sorted_md_brecal_comb_vep_parsed_ranked_SV.selected.vcf
+  ready_vcf:
+    path: /path_to/family_sorted_md_brecal_comb_SV.vcf
+  research:
+    path: /path_to/family_sorted_md_brecal_comb_vep_parsed_ranked_SV.vcf
+sv_vcfparser:
+  select_file:
+    gene_panel:
+      AD-HSP:
+        display_name: AD-HSP
+        gene_panel: AD-HSP
+        updated_at: 2016-04-22
+        version: '54.0'
+      ATX:
+        display_name: Neutropenia Spastic Paraplegia Ataxia
+        gene_panel: ATX
+        updated_at: 2016-04-22
+        version: '54.0'
+      Ataxi:
+        display_name: Ataxi
+        gene_panel: Ataxi
+        updated_at: 2016-04-22
+        version: '54.0'
+      CTD:
+        display_name: Connective Tissue Diseases
+        gene_panel: CTD
+        updated_at: 2016-04-22
+        version: '54.0'
+      ENDO:
+        display_name: Endocrinology
+        gene_panel: ENDO
+        updated_at: 2017-01-18
+        version: '10.0'
+      EP:
+        display_name: Epilepsy
+        gene_panel: EP
+        updated_at: 2017-01-18
+        version: '10.0'
+      IBMFS:
+        display_name: Inherited Bone Marrow Failure Syndromes
+        gene_panel: IBMFS
+        updated_at: 2016-09-19
+        version: '12.0'
+      ID:
+        display_name: ID
+        gene_panel: ID
+        updated_at: 2016-11-14
+        version: '3.0'
+      IEM:
+        display_name: Inborn Errors of Metabolism
+        gene_panel: IEM
+        updated_at: 2017-01-18
+        version: '10.0'
+      MIT:
+        display_name: Mitochondrial nuclear
+        gene_panel: MIT
+        updated_at: 2017-01-18
+        version: '10.0'
+      NMD:
+        display_name: Neuromuscular diseases
+        gene_panel: NMD
+        updated_at: 2017-02-03
+        version: '62.0'
+      OMIM-AUTO:
+        display_name: OMIM (auto)
+        gene_panel: OMIM-AUTO
+        updated_at: 2017-03-21
+        version: '1.0'
+      PEDHEP:
+        display_name: Pediatric Hepatology
+        gene_panel: PEDHEP
+        updated_at: 2017-05-03
+        version: '10.1'
+      PID:
+        display_name: Primary Immune Deficiency
+        gene_panel: PID
+        updated_at: 2017-02-22
+        version: '13.0'
+      PIDCAD:
+        display_name: PID Candidates
+        gene_panel: PIDCAD
+        updated_at: 2016-09-28
+        version: '11.1'
+      SKD:
+        display_name: Skeletal dysplasia
+        gene_panel: SKD
+        updated_at: 2016-04-22
+        version: '55.0'
+      SPG:
+        display_name: SPG
+        gene_panel: SPG
+        updated_at: 2016-04-22
+        version: '54.0'
+      mtDNA:
+        display_name: Mitochondrial DNA
+        gene_panel: mtDNA
+        updated_at: 2015-11-30
+        version: '8.0'
+    path: /path_to/family/aggregated_master.bed
+vcf_binary_file:
+  clinical:
+    path: /path_to/family_sorted_md_brecal_gvcf_vrecal_comb_vt_vep_parsed_snpeff_ranked_BOTH.selected.vcf.gz
+  research:
+    path: /path_to/family_sorted_md_brecal_gvcf_vrecal_comb_vt_vep_parsed_snpeff_ranked_BOTH.vcf.gz
+vcf_file:
+  clinical:
+    path: /path_to/family_sorted_md_brecal_gvcf_vrecal_comb_vt_vep_parsed_snpeff_ranked_BOTH.selected.vcf
+  ready_vcf:
+    path: /path_to/family_sorted_md_brecal_gvcf_vrecal_comb_BOTH.vcf
+  research:
+    path: /path_to/family_sorted_md_brecal_gvcf_vrecal_comb_vt_vep_parsed_snpeff_ranked_BOTH.vcf
+vcfparser:
+  select_file:
+    gene_panel:
+      AD-HSP:
+        display_name: AD-HSP
+        gene_panel: AD-HSP
+        updated_at: 2016-04-22
+        version: '54.0'
+      ATX:
+        display_name: Neutropenia Spastic Paraplegia Ataxia
+        gene_panel: ATX
+        updated_at: 2016-04-22
+        version: '54.0'
+      Ataxi:
+        display_name: Ataxi
+        gene_panel: Ataxi
+        updated_at: 2016-04-22
+        version: '54.0'
+      CTD:
+        display_name: Connective Tissue Diseases
+        gene_panel: CTD
+        updated_at: 2016-04-22
+        version: '54.0'
+      ENDO:
+        display_name: Endocrinology
+        gene_panel: ENDO
+        updated_at: 2017-01-18
+        version: '10.0'
+      EP:
+        display_name: Epilepsy
+        gene_panel: EP
+        updated_at: 2017-01-18
+        version: '10.0'
+      IBMFS:
+        display_name: Inherited Bone Marrow Failure Syndromes
+        gene_panel: IBMFS
+        updated_at: 2016-09-19
+        version: '12.0'
+      ID:
+        display_name: ID
+        gene_panel: ID
+        updated_at: 2016-11-14
+        version: '3.0'
+      IEM:
+        display_name: Inborn Errors of Metabolism
+        gene_panel: IEM
+        updated_at: 2017-01-18
+        version: '10.0'
+      MIT:
+        display_name: Mitochondrial nuclear
+        gene_panel: MIT
+        updated_at: 2017-01-18
+        version: '10.0'
+      NMD:
+        display_name: Neuromuscular diseases
+        gene_panel: NMD
+        updated_at: 2017-02-03
+        version: '62.0'
+      OMIM-AUTO:
+        display_name: OMIM (auto)
+        gene_panel: OMIM-AUTO
+        updated_at: 2017-03-21
+        version: '1.0'
+      PEDHEP:
+        display_name: Pediatric Hepatology
+        gene_panel: PEDHEP
+        updated_at: 2017-05-03
+        version: '10.1'
+      PID:
+        display_name: Primary Immune Deficiency
+        gene_panel: PID
+        updated_at: 2017-02-22
+        version: '13.0'
+      PIDCAD:
+        display_name: PID Candidates
+        gene_panel: PIDCAD
+        updated_at: 2016-09-28
+        version: '11.1'
+      SKD:
+        display_name: Skeletal dysplasia
+        gene_panel: SKD
+        updated_at: 2016-04-22
+        version: '55.0'
+      SPG:
+        display_name: SPG
+        gene_panel: SPG
+        updated_at: 2016-04-22
+        version: '54.0'
+      mtDNA:
+        display_name: Mitochondrial DNA
+        gene_panel: mtDNA
+        updated_at: 2015-11-30
+        version: '8.0'
+    path: /path_to/family/aggregated_master.bed
+

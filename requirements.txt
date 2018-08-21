@@ -33,7 +33,7 @@ pymongo
 # apps
 genologics
 loqusdb>=1.0.0
-trailblazer>=2.2.0
+trailblazer>=2.2.1-beta
 housekeeper>=2.0.0b2
 chanjo>=4.2.0
 genotype>=2.2.0
