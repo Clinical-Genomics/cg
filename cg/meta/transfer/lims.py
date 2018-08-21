@@ -37,12 +37,9 @@ class TransferLims(object):
 
     def transfer_samples(self, status_type: SampleState):
         """Transfer information about samples."""
-
         samples = self._get_all_samples_not_yet_delivered()
 
         for sample_obj in samples:
-            print(sample_obj)
-            print(sample_obj.received_at)
             status_date = self._date_functions[status_type](sample_obj.internal_id)
 
             if status_date is None:
