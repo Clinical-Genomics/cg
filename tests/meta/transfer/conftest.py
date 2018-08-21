@@ -1,8 +1,10 @@
 import datetime as dt
 
 import pytest
+from cg.apps.lims import LimsAPI
 
 from cg.apps.stats import StatsAPI
+from cg.meta.transfer import TransferLims
 from cg.meta.transfer.flowcell import TransferFlowcell
 
 
@@ -78,3 +80,33 @@ def transfer_flowcell_api(flowcell_store, store_housekeeper, base_store_stats):
     """Setup flowcell transfer API."""
     transfer_api = TransferFlowcell(flowcell_store, base_store_stats, store_housekeeper)
     yield transfer_api
+
+
+@pytest.yield_fixture(scope='function')
+def transfer_lims_api(sample_store):
+    """Setup flowcell transfer API."""
+    transfer_api = TransferLims(sample_store, MockLims(config=''))
+    yield transfer_api
+
+
+class MockLims(LimsAPI):
+    def __init__(self, config):
+        pass
+
+    _received_at = None
+    _delivered_at = None
+    _prepared_date = None
+    _sample = None
+
+    def get_received_date(self, lims_id: str):
+        return self._sample.received_at
+
+    def mock_set_samples(self, samples):
+        self._sample = samples
+
+
+@pytest.fixture(scope='function')
+def lims_api():
+
+    _lims_api = MockLims(config='')
+    return _lims_api

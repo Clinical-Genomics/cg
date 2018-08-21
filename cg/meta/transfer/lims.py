@@ -25,20 +25,30 @@ class TransferLims(object):
             SampleState.PREPARED: self.status.samples_to_prepare,
             SampleState.DELIVERED: self.status.samples_to_deliver,
         }
+
         self._date_functions = {
             SampleState.RECEIVED: self.lims.get_received_date,
             SampleState.PREPARED: self.lims.get_prepared_date,
             SampleState.DELIVERED: self.lims.get_delivery_date,
         }
 
+    def _get_all_samples_not_yet_delivered(self):
+        return self.status.samples_to_deliver()
+
     def transfer_samples(self, status_type: SampleState):
         """Transfer information about samples."""
-        samples = self._sample_functions[status_type]()
+
+        samples = self._get_all_samples_not_yet_delivered()
+
         for sample_obj in samples:
+            print(sample_obj)
+            print(sample_obj.received_at)
             status_date = self._date_functions[status_type](sample_obj.internal_id)
+
             if status_date is None:
                 LOG.debug(f"no {status_type.value} date found for {sample_obj.internal_id}")
             else:
-                LOG.info(f"found {status_type.value} date for {sample_obj.internal_id}: {status_date}")
+                LOG.info(
+                    f"found {status_type.value} date for {sample_obj.internal_id}: {status_date}")
                 setattr(sample_obj, f"{status_type.value}_at", status_date)
                 self.status.commit()
