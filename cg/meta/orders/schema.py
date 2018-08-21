@@ -136,6 +136,7 @@ METAGENOME_SAMPLE = {
     'source': validators.Optional(str, None),
     'elution_buffer': str,
     'extraction_method': validators.Optional(str, None),
+    'concentration_weight': validators.Optional(TypeValidator(str, allow_none=True), None),
 }
 
 ORDER_SCHEMES = {
