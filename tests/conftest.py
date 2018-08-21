@@ -37,6 +37,8 @@ def base_store(store) -> Store:
                                           limitations='some'),
                     store.add_application('METLIFR020', 'wgs', 'Whole genome metagenomics',
                                           sequencing_depth=0, target_reads=40000000),
+                    store.add_application('METNXTR020', 'wgs', 'Metagenomics',
+                                          sequencing_depth=0, target_reads=20000000),
                     ]
     store.add_commit(applications)
 

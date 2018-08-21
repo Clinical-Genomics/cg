@@ -19,7 +19,7 @@
     }, {
         "name": "GKS2",
         "quantity": "2200",
-        "application": "METLIFR020",
+        "application": "METNXTR020",
         "source": "environmental",
         "container": "Tube",
         "require_qcok": true,

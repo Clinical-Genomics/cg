@@ -94,7 +94,7 @@ def test_parsing_metagenome_orderform(metagenome_orderform):
     # THEN it should detect the project type
     assert data['project_type'] == 'metagenome'
     # ... and find all samples
-    assert len(data['items']) == 1
+    assert len(data['items']) == 2
     # ... and collect relevant sample info
     sample = data['items'][0]
 
