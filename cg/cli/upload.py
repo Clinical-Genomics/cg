@@ -6,7 +6,8 @@ import sys
 import click
 
 from cg.store import Store
-from cg.apps import coverage as coverage_app, gt, hk, loqus, tb, scoutapi, beacon as beacon_app
+from cg.apps import coverage as coverage_app, gt, hk, loqus, tb, scoutapi, beacon as beacon_app, \
+    lims
 from cg.exc import DuplicateRecordError
 from cg.meta.upload.coverage import UploadCoverageApi
 from cg.meta.upload.gt import UploadGenotypesAPI
@@ -15,7 +16,7 @@ from cg.meta.upload.scoutapi import UploadScoutAPI
 from cg.meta.upload.beacon import UploadBeaconApi
 from cg.meta.analysis import AnalysisAPI
 from cg.meta.deliver.api import DeliverAPI
-from cg.apps.lims.api import LimsAPI
+from cg.meta.report.api import ReportAPI
 
 LOG = logging.getLogger(__name__)
 
@@ -28,6 +29,34 @@ def upload(context, family_id):
     context.obj['status'] = Store(context.obj['database'])
     context.obj['housekeeper_api'] = hk.HousekeeperAPI(context.obj)
 
+    context.obj['lims_api'] = lims.LimsAPI(context.obj)
+    context.obj['tb_api'] = tb.TrailblazerAPI(context.obj)
+    context.obj['chanjo_api'] = coverage_app.ChanjoAPI(context.obj)
+    context.obj['deliver_api'] = DeliverAPI(context.obj, hk_api=context.obj['housekeeper_api'],
+                                            lims_api=context.obj['lims_api'])
+    context.obj['scout_api'] = scoutapi.ScoutAPI(context.obj)
+    context.obj['analysis_api'] = AnalysisAPI(context.obj, hk_api=context.obj['housekeeper_api'],
+                                              scout_api=context.obj['scout_api'],
+                                              tb_api=context.obj[
+                                                  'tb_api'],
+                                              lims_api=context.obj['lims_api'],
+                                              deliver_api=context.obj['deliver_api'])
+    context.obj['report_api'] = ReportAPI(
+        db=context.obj['status'],
+        lims_api=context.obj['lims_api'],
+        tb_api=context.obj['tb_api'],
+        deliver_api=context.obj['deliver_api'],
+        chanjo_api=context.obj['chanjo_api'],
+        analysis_api=context.obj['analysis_api']
+    )
+
+    context.obj['scout_upload_api'] = UploadScoutAPI(
+        status_api=context.obj['status'],
+        hk_api=context.obj['housekeeper_api'],
+        scout_api=context.obj['scout_api'],
+        madeline_exe=context.obj['madeline_exe'],
+    )
+
     if family_id:
         family_obj = context.obj['status'].family(family_id)
         analysis_obj = family_obj.analyses[0]
@@ -39,11 +68,51 @@ def upload(context, family_id):
             context.invoke(validate, family_id=family_id)
             context.invoke(genotypes, family_id=family_id)
             context.invoke(observations, family_id=family_id)
+            context.invoke(delivery_report, family_id=family_id,
+                           customer_id=family_obj.customer.internal_id)
             context.invoke(scout, family_id=family_id)
 
             analysis_obj.uploaded_at = dt.datetime.now()
             context.obj['status'].commit()
             click.echo(click.style(f"{family_id}: analysis uploaded!", fg='green'))
+
+
+@upload.command('delivery-report')
+@click.argument('customer_id')
+@click.argument('family_id')
+@click.option('-p', '--print', 'print_console', is_flag=True, help='print report to console')
+@click.pass_context
+def delivery_report(context, customer_id, family_id, print_console):
+    """Generate a delivery report for a case."""
+
+    report_api = context.obj['report_api']
+
+    if print_console:
+        delivery_report_html = report_api.create_delivery_report(customer_id, family_id)
+
+        click.echo(delivery_report_html)
+    else:
+        tb_api = context.obj['tb_api']
+        delivery_report_file = report_api.create_delivery_report_file(customer_id, family_id,
+                                                                      file_path=
+                                                                      tb_api.get_family_root_dir(
+                                                                        family_id))
+        hk_api = context.obj['housekeeper_api']
+        _add_delivery_report_to_hk(delivery_report_file, hk_api, family_id)
+
+
+def _add_delivery_report_to_hk(delivery_report_file, hk_api: hk.HousekeeperAPI, family_id):
+    delivery_report_tag_name = 'delivery-report'
+    version_obj = hk_api.last_version(family_id)
+    uploaded_delivery_report_files = hk_api.get_files(bundle=family_id,
+                                                      tags=[delivery_report_tag_name])
+    number_of_delivery_reports = len(uploaded_delivery_report_files.all())
+    is_bundle_missing_delivery_report = number_of_delivery_reports == 0
+
+    if is_bundle_missing_delivery_report:
+        file_obj = hk_api.add_file(delivery_report_file.name, version_obj, delivery_report_tag_name)
+        hk_api.include_file(file_obj, version_obj)
+        hk_api.add_commit(file_obj)
 
 
 @upload.command()
@@ -97,31 +166,12 @@ def scout(context, re_upload, print_console, family_id):
     """Upload variants from analysis to Scout."""
     scout_api = scoutapi.ScoutAPI(context.obj)
     family_obj = context.obj['status'].family(family_id)
-    lims_api = LimsAPI(context.obj)
-    deliver_api = DeliverAPI(db=context.obj['status'], hk_api=context.obj['housekeeper_api'],
-                             lims_api=lims_api)
-
-    analysis_api = context.obj['analysis_api'] = AnalysisAPI(
-        db=context.obj['status'],
-        hk_api=context.obj['housekeeper_api'],
-        scout_api=scout_api,
-        tb_api=tb.TrailblazerAPI(context.obj),
-        lims_api=lims_api,
-        deliver_api=deliver_api
-    )
-
-    api = UploadScoutAPI(
-        status_api=context.obj['status'],
-        hk_api=context.obj['housekeeper_api'],
-        scout_api=scout_api,
-        madeline_exe=context.obj['madeline_exe'],
-        analysis_api=analysis_api
-    )
-    results = api.generate_config(family_obj.analyses[0])
+    scout_upload_api = context.obj['scout_upload_api']
+    scout_config = scout_upload_api.generate_config(family_obj.analyses[0])
     if print_console:
-        print(results)
+        click.echo(scout_config)
     else:
-        scout_api.upload(results, force=re_upload)
+        scout_api.upload(scout_config, force=re_upload)
 
 
 @upload.command()
@@ -142,7 +192,7 @@ def beacon(context: click.Context, family_id: str, panel: str, outfile: str, cus
         scout_api=scoutapi.ScoutAPI(context.obj),
         beacon_api=beacon_app.BeaconApi(context.obj),
     )
-    result = api.upload(
+    api.upload(
         family_id=family_id,
         panel=panel,
         outfile=outfile,
@@ -195,4 +245,4 @@ def validate(context, family_id):
                 mean_coverage = coverage_results[sample_id]['mean_coverage']
                 click.echo(f"{sample_id}: {mean_coverage:.2f}X - {completeness:.2f}%")
             else:
-                print(f"{sample_id}: sample not found in chanjo")
+                click.echo(f"{sample_id}: sample not found in chanjo", color='yellow')

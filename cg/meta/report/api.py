@@ -2,7 +2,10 @@
 import logging
 from datetime import datetime
 
+import requests
+import ruamel.yaml
 from jinja2 import Environment, PackageLoader, select_autoescape
+from pathlib import Path
 
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.coverage import ChanjoAPI
@@ -11,25 +14,40 @@ from cg.apps.lims import LimsAPI
 from cg.store import Store, models
 from cg.meta.analysis import AnalysisAPI
 
-LOG = logging.getLogger(__name__)
-
 
 class ReportAPI:
 
     def __init__(self, db: Store, lims_api: LimsAPI, tb_api: TrailblazerAPI, deliver_api:
-    DeliverAPI, chanjo_api: ChanjoAPI, analysis_api: AnalysisAPI):
+    DeliverAPI, chanjo_api: ChanjoAPI, analysis_api: AnalysisAPI, logger=logging.getLogger(
+        __name__), yaml_loader=ruamel.yaml, path_tool=Path):
         self.db = db
         self.lims = lims_api
         self.tb = tb_api
         self.deliver = deliver_api
         self.chanjo = chanjo_api
         self.analysis = analysis_api
+        self.LOG = logger
+        self.yaml_loader = yaml_loader
+        self.path_tool = path_tool
 
     def create_delivery_report(self, customer_id: str, family_id: str) -> str:
         """Generate the html contents of a delivery report."""
-        qc_data = self._get_delivery_data(customer_id, family_id)
-        template_out = self._render_delivery_report(qc_data)
-        return template_out
+        delivery_data = self._get_delivery_data(customer_id, family_id)
+        rendered_report = self._render_delivery_report(delivery_data)
+        return rendered_report
+
+    def create_delivery_report_file(self, customer_id: str, family_id: str, file_path:
+    Path):
+        """Generate a temporary file containing a delivery report."""
+
+        delivery_report = self.create_delivery_report(customer_id=customer_id,
+                                                      family_id=family_id)
+
+        delivery_report_file = open(file_path / 'delivery-report.html', 'w')
+        delivery_report_file.write(delivery_report)
+        delivery_report_file.close()
+
+        return delivery_report_file
 
     def _get_delivery_data(self, customer_id: str, family_id: str) -> dict:
         """Fetch all data needed to render a delivery report."""
@@ -89,30 +107,6 @@ class ReportAPI:
     def _get_customer_from_status_db(self, internal_customer_id: str) -> models.Customer:
         """Fetch the customer object from the status database that has the given internal_id."""
         return self.db.Customer.filter_by(internal_id=internal_customer_id).first()
-
-    def _get_application_data_from_status_db(self, samples: list) -> dict:
-        """Fetch application data including accreditation status for all samples."""
-        application_data = dict()
-        used_applications = set()
-
-        for sample in samples:
-            used_applications.add((sample['application'], sample['application_version']))
-
-        applications = []
-        all_applications_are_accredited = True
-
-        for apptag_id, apptag_version in used_applications:
-
-            application = self.db.Application.filter_by(tag=apptag_id).first()
-            all_applications_are_accredited = all_applications_are_accredited and \
-                                              application.is_accredited
-
-            if application:
-                applications.append(application)
-
-        application_data['application_objs'] = applications
-        application_data['accredited'] = all_applications_are_accredited
-        return application_data
 
     @staticmethod
     def _render_delivery_report(report_data: dict) -> str:
@@ -174,7 +168,7 @@ class ReportAPI:
         return presentable_value
 
     @staticmethod
-    def _present_date(a_date: datetime) -> str:
+    def _present_date(a_date: datetime.date) -> str:
         """Make an date value presentable for the delivery report."""
         if a_date:
             presentable_value = str(a_date)
@@ -217,7 +211,7 @@ class ReportAPI:
                 sample['target_completeness'] = ReportAPI._present_float_string(
                     target_completeness, 2)
             else:
-                LOG.warning(f'No coverage could be calculated for: {lims_id}')
+                self.LOG.warning(f'No coverage could be calculated for: {lims_id}')
 
     def _fetch_family_samples_from_status_db(self, family_id: str) -> list:
         """Incorporate data from the status database for each sample ."""
@@ -240,6 +234,32 @@ class ReportAPI:
 
         return delivery_data_samples
 
+    def _get_application_data_from_status_db(self, samples: list) -> dict:
+        """Fetch application data including accreditation status for all samples."""
+        application_data = dict()
+        used_applications = set()
+
+        for sample in samples:
+            used_applications.add((sample['application'], sample['application_version']))
+
+        applications = []
+        accreditations = []
+        for apptag_id, apptag_version in used_applications:
+
+            application_is_accredited = False
+
+            application = self.db.application(tag=apptag_id)
+
+            if application:
+                application_is_accredited = application.is_accredited
+                applications.append(application)
+
+            accreditations.append(application_is_accredited)
+
+        application_data['application_objs'] = applications
+        application_data['accredited'] = all(accreditations)
+        return application_data
+
     def _fetch_panels_from_status_db(self, family_id: str) -> list:
         """fetch data from the status database for each panels ."""
         family = self.db.family(family_id)
@@ -254,7 +274,11 @@ class ReportAPI:
         for sample in report_data.get('samples'):
             lims_id = sample['id']
 
-            lims_sample = self.lims.sample(lims_id)
+            try:
+                lims_sample = self.lims.sample(lims_id)
+            except requests.exceptions.HTTPError as e:
+                lims_sample = dict()
+                self.LOG.info(f"could not fetch sample {lims_id} from LIMS: {e}")
 
             sample['name'] = ReportAPI._present_string(lims_sample.get('name'))
             sample['sex'] = ReportAPI._present_string(lims_sample.get('sex'))
