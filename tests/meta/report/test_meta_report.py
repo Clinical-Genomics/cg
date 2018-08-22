@@ -5,8 +5,7 @@ from cg.meta.report.api import ReportAPI
 
 
 def test_init():
-    ReportAPI(lims_api='lims', db='analysis_store', deliver_api='deliver',
-              chanjo_api='chanjo', analysis_api='analysis')
+    ReportAPI(lims_api='lims', db='analysis_store', chanjo_api='chanjo', analysis_api='analysis')
 
 
 def test_collect_delivery_data(report_api):

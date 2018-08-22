@@ -44,7 +44,6 @@ def upload(context, family_id):
     context.obj['report_api'] = ReportAPI(
         db=context.obj['status'],
         lims_api=context.obj['lims_api'],
-        deliver_api=context.obj['deliver_api'],
         chanjo_api=context.obj['chanjo_api'],
         analysis_api=context.obj['analysis_api']
     )
