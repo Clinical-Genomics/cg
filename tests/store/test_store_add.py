@@ -18,6 +18,19 @@ def test_add_customer(store: Store):
     assert store.Customer.query.first() == new_customer
 
 
+def test_add_customer_group(store: Store):
+    # GIVEN an empty database
+    assert store.CustomerGroup.query.first() is None
+    internal_id, name = 'cust_group', 'Test customer group'
+
+    # WHEN adding a new customer group
+    new_customer_group = store.add_customer_group(internal_id=internal_id, name=name)
+    store.add_commit(new_customer_group)
+
+    # THEN it should be stored in the database
+    assert store.CustomerGroup.query.first() == new_customer_group
+
+
 def test_add_user(store: Store):
     # GIVEN a database with a customer in it that we can connect the user to
     customer_group = store.add_customer_group('dummy_group', 'dummy group')
