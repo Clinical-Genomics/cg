@@ -37,28 +37,6 @@ class MockLims:
         return None
 
 
-class MockTB:
-    _get_trending_raises_keyerror = False
-
-    def get_trending(self, mip_config_raw: dict, qcmetrics_raw: dict, sampleinfo_raw: dict) -> dict:
-        if self._get_trending_raises_keyerror:
-            raise KeyError
-
-        # Returns: dict: parsed data
-        ### Define output dict
-        outdata = {
-            'analysis_sex': {'ADM1': 'female', 'ADM2': 'female', 'ADM3': 'female'},
-            'family': 'yellowhog',
-            'duplicates': {'ADM1': 13.525, 'ADM2': 12.525, 'ADM3': 14.525},
-            'genome_build': 'hg19',
-            'mapped_reads': {'ADM1': 98.8, 'ADM2': 99.8, 'ADM3': 97.8},
-            'mip_version': 'v4.0.20',
-            'sample_ids': ['2018-20203', '2018-20204'],
-        }
-
-        return outdata
-
-
 class MockFile:
 
     def __init__(self, path):
@@ -222,12 +200,11 @@ class MockDB(Store):
 class MockReport(ReportAPI):
     _fileToOpen = ''
 
-    def __init__(self, db, lims_api, tb_api, deliver_api, chanjo_api, analysis_api, logger,
+    def __init__(self, db, lims_api, deliver_api, chanjo_api, analysis_api, logger,
                  yaml_loader,
                  path_tool):
         self.db = db
         self.lims = lims_api
-        self.tb = tb_api
         self.deliver = deliver_api
         self.chanjo = chanjo_api
         self.analysis = analysis_api
@@ -240,14 +217,13 @@ class MockReport(ReportAPI):
 def report_api(analysis_store):
     db = MockDB(analysis_store)
     lims = MockLims()
-    tb = MockTB()
     deliver = MockDeliver()
     chanjo = MockChanjo()
     analysis = MockAnalysis()
     logger = MockLogger()
     yaml_loader = MockYamlLoader()
     path_tool = MockPath()
-    _report_api = MockReport(lims_api=lims, db=db, tb_api=tb, deliver_api=deliver,
+    _report_api = MockReport(lims_api=lims, db=db, deliver_api=deliver,
                              chanjo_api=chanjo, analysis_api=analysis, logger=logger,
                              yaml_loader=yaml_loader,
                              path_tool=path_tool)

@@ -12,8 +12,6 @@ from cg.apps import tb, hk, scoutapi, lims
 from cg.store import models, Store
 from cg.meta.deliver.api import DeliverAPI
 
-LOG = logging.getLogger(__name__)
-
 COLLABORATORS = ('cust000', 'cust002', 'cust003', 'cust004', 'cust042')
 MASTER_LIST = ('ENDO', 'EP', 'IEM', 'IBMFS', 'mtDNA', 'MIT', 'PEDHEP', 'OMIM-AUTO',
                'PIDCAD', 'PID', 'SKD', 'NMD', 'ATX', 'CTD', 'ID', 'SPG', 'Ataxi', 'AD-HSP')
@@ -33,7 +31,8 @@ class AnalysisAPI():
 
     def __init__(self, db: Store, hk_api: hk.HousekeeperAPI, scout_api: scoutapi.ScoutAPI,
                  tb_api: tb.TrailblazerAPI, lims_api: lims.LimsAPI, deliver_api:
-            DeliverAPI, ruamel=ruamel, Path=Path):
+            DeliverAPI, ruamel=ruamel, Path=Path, logger=logging.getLogger(
+        __name__)):
         self.db = db
         self.tb = tb_api
         self.hk = hk_api
@@ -42,19 +41,20 @@ class AnalysisAPI():
         self.deliver = deliver_api
         self.ruamel = ruamel
         self.Path = Path
+        self.LOG = logger
 
     def check(self, family_obj: models.Family):
         """Check stuff before starting the analysis."""
         flowcells = self.db.flowcells(family=family_obj)
         statuses = []
         for flowcell_obj in flowcells:
-            LOG.debug(f"{flowcell_obj.name}: checking flowcell")
+            self.LOG.debug(f"{flowcell_obj.name}: checking flowcell")
             statuses.append(flowcell_obj.status)
             if flowcell_obj.status == 'removed':
-                LOG.info(f"{flowcell_obj.name}: requesting removed flowcell")
+                self.LOG.info(f"{flowcell_obj.name}: requesting removed flowcell")
                 flowcell_obj.status = 'requested'
             elif flowcell_obj.status != 'ondisk':
-                LOG.warning(f"{flowcell_obj.name}: {flowcell_obj.status}")
+                self.LOG.warning(f"{flowcell_obj.name}: {flowcell_obj.status}")
         return all(status == 'ondisk' for status in statuses)
 
     def start(self, family_obj: models.Family, **kwargs):
@@ -72,7 +72,7 @@ class AnalysisAPI():
             downsampled = isinstance(link_obj.sample.downsampled_to, int)
             external = link_obj.sample.application_version.application.is_external
             if downsampled or external:
-                LOG.info(f"{link_obj.sample.internal_id}: downsampled/external - skip evaluation")
+                self.LOG.info(f"{link_obj.sample.internal_id}: downsampled/external - skip evaluation")
                 kwargs['skip_evaluation'] = True
                 break
 
@@ -121,16 +121,16 @@ class AnalysisAPI():
                     sample_data['capture_kit'] = mip_capturekit or link.sample.capture_kit
                 else:
                     if link.sample.downsampled_to:
-                        LOG.debug(f"{link.sample.name}: downsampled sample, skipping")
+                        self.LOG.debug(f"{link.sample.name}: downsampled sample, skipping")
                     else:
                         try:
                             capture_kit = self.lims.capture_kit(link.sample.internal_id)
                             if capture_kit is None or capture_kit == 'NA':
-                                LOG.warning(f"{link.sample.internal_id}: capture kit not found")
+                                self.LOG.warning(f"{link.sample.internal_id}: capture kit not found")
                             else:
                                 sample_data['capture_kit'] = CAPTUREKIT_MAP[capture_kit]
                         except HTTPError:
-                            LOG.warning(f"{link.sample.internal_id}: not found (LIMS)")
+                            self.LOG.warning(f"{link.sample.internal_id}: not found (LIMS)")
             if link.mother:
                 sample_data['mother'] = link.mother.internal_id
             if link.father:
@@ -268,7 +268,7 @@ class AnalysisAPI():
         if analysis_files:
             analysis_file_raw = self._open_bundle_file(analysis_files[0].path)
         else:
-            raise LOG.warning(
+            raise self.LOG.warning(
                 f'No post analysis files received from DeliverAPI for \'{family_id}\'')
 
         return analysis_file_raw
@@ -298,7 +298,7 @@ class AnalysisAPI():
                                                 qcmetrics_raw=qcmetrics_raw,
                                                 sampleinfo_raw=sampleinfo_raw)
             except KeyError:
-                LOG.warning(f'_get_trending_data failed for \'{family_id}\'')
+                self.LOG.warning(f'_get_trending_data failed for \'{family_id}\'')
                 trending = dict()
 
         return trending

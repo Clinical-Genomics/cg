@@ -7,7 +7,6 @@ import ruamel.yaml
 from jinja2 import Environment, PackageLoader, select_autoescape
 from pathlib import Path
 
-from cg.apps.tb import TrailblazerAPI
 from cg.apps.coverage import ChanjoAPI
 from cg.meta.deliver.api import DeliverAPI
 from cg.apps.lims import LimsAPI
@@ -17,12 +16,11 @@ from cg.meta.analysis import AnalysisAPI
 
 class ReportAPI:
 
-    def __init__(self, db: Store, lims_api: LimsAPI, tb_api: TrailblazerAPI, deliver_api:
+    def __init__(self, db: Store, lims_api: LimsAPI, deliver_api:
     DeliverAPI, chanjo_api: ChanjoAPI, analysis_api: AnalysisAPI, logger=logging.getLogger(
         __name__), yaml_loader=ruamel.yaml, path_tool=Path):
         self.db = db
         self.lims = lims_api
-        self.tb = tb_api
         self.deliver = deliver_api
         self.chanjo = chanjo_api
         self.analysis = analysis_api

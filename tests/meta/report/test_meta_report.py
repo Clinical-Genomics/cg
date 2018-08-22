@@ -5,7 +5,7 @@ from cg.meta.report.api import ReportAPI
 
 
 def test_init():
-    ReportAPI(lims_api='lims', db='analysis_store', tb_api='tb', deliver_api='deliver',
+    ReportAPI(lims_api='lims', db='analysis_store', deliver_api='deliver',
               chanjo_api='chanjo', analysis_api='analysis')
 
 
@@ -182,40 +182,6 @@ def test_create_delivery_report_file(report_api: ReportAPI):
     # THEN a html report with certain data should have been created on disk
     assert os.path.isfile(created_report_file.name)
     os.unlink(created_report_file.name)
-
-
-def test_get_latest_raw_file(report_api):
-    # GIVEN an initialised report_api and the deliver_api does not have what we want
-    report_api.deliver._get_post_analysis_files_returns_none = True
-
-    # WHEN failing to get raw files for a family
-    latest_raw_file = report_api._get_latest_raw_file(family_id='yellowbear', tag='anytag')
-
-    # THEN there should be a log entry about this
-    assert 'yellowbear' in report_api.LOG.get_last_warning()
-    assert latest_raw_file is None
-
-
-def test_open_bundle_file(report_api):
-    # GIVEN an initialised report_api
-
-    # WHEN failing to get raw files for a family because of strange tag
-    opened_file = report_api._open_bundle_file('/')
-
-    # THEN there should be a log entry about this
-    assert opened_file
-
-
-def test_get_latest_trending_data(report_api):
-    # GIVEN an initialised report_api and the deliver_api does not have what we want
-    report_api.tb._get_trending_raises_keyerror = True
-
-    # WHEN failing to get latest trending data for a family
-    latest_trending_data = report_api._get_latest_trending_data(family_id='bluebull')
-
-    # THEN there should be a log entry about this
-    assert 'bluebull' in report_api.LOG.get_last_warning()
-    assert not latest_trending_data
 
 
 def test_present_float_string():

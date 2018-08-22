@@ -26,3 +26,15 @@ def test_get_latest_data(analysis_api: AnalysisAPI):
     # THEN
     assert trending_data['genome_build']
     assert trending_data['rank_model_version']
+
+
+def test_get_latest_trending_data(analysis_api: AnalysisAPI):
+    # GIVEN an initialised report_api and the deliver_api does not have what we want
+    analysis_api.tb._get_trending_raises_keyerror = True
+
+    # WHEN failing to get latest trending data for a family
+    latest_data = analysis_api.get_latest_data(family_id='bluebull')
+
+    # THEN there should be a log entry about this
+    assert 'bluebull' in analysis_api.LOG.get_last_warning()
+    assert not latest_data

@@ -161,34 +161,53 @@ class MockYaml:
             'version': 1.18}}}}
 
 
+class MockLogger:
+    last_warning = None
+    warnings = []
+
+    def warning(self, text: str):
+        self.last_warning = text
+        self.warnings.append(text)
+
+    def get_last_warning(self) -> str:
+        return self.last_warning
+
+    def get_warnings(self) -> list:
+        return self.warnings
+
+
 class MockTB:
+    _get_trending_raises_keyerror = False
+
+    def get_trending(self, mip_config_raw: dict, qcmetrics_raw: dict, sampleinfo_raw: dict) -> dict:
+        if self._get_trending_raises_keyerror:
+            raise KeyError
+
+        # Returns: dict: parsed data
+        ### Define output dict
+        outdata = {
+            'analysis_sex': {'ADM1': 'female', 'ADM2': 'female', 'ADM3': 'female'},
+            'family': 'yellowhog',
+            'duplicates': {'ADM1': 13.525, 'ADM2': 12.525, 'ADM3': 14.525},
+            'genome_build': 'hg19',
+            'mapped_reads': {'ADM1': 98.8, 'ADM2': 99.8, 'ADM3': 97.8},
+            'mip_version': 'v4.0.20',
+            'sample_ids': ['2018-20203', '2018-20204'],
+            'genome_build': '37',
+            'rank_model_version': '1.18',
+        }
+
+        return outdata
+
     def get_sampleinfo(self, analysis_obj):
         return ''
 
     def make_config(self, data):
         return data
 
-    def get_trending(self, mip_config_raw, qcmetrics_raw, sampleinfo_raw):
-        outdata = {
-            'analysis_sex': {},
-            'at_dropout': {},
-            'family': None,
-            'duplicates': {},
-            'gc_dropout': {},
-            'genome_build': '37',
-            'rank_model_version': '1.18',
-            'insert_size_standard_deviation': {},
-            'mapped_reads': {},
-            'median_insert_size': {},
-            'mip_version': None,
-            'sample_ids': [],
-        }
-
-        return outdata
-
 
 @pytest.yield_fixture(scope='function')
-def analysis_api(analysis_store, store_housekeeper, scout_store, trailblazer_api):
+def analysis_api(analysis_store, store_housekeeper, scout_store):
     """Setup an analysis API."""
     ruamel_mock = MockRuamel()
     Path_mock = MockPath('')
@@ -202,6 +221,7 @@ def analysis_api(analysis_store, store_housekeeper, scout_store, trailblazer_api
         lims_api=None,
         deliver_api=MockDeliver(),
         ruamel=ruamel_mock,
-        Path=Path_mock
+        Path=Path_mock,
+        logger=MockLogger()
     )
     yield _analysis_api
