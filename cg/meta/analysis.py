@@ -281,7 +281,7 @@ class AnalysisAPI():
         open_file = self.ruamel.yaml.safe_load(self.Path(full_file_path).open())
         return open_file
 
-    def get_latest_data(self, family_id: str) -> dict:
+    def get_latest_metadata(self, family_id: str) -> dict:
         """Get the latest trending data for a family."""
 
         mip_config_raw = self._get_latest_raw_file(family_id=family_id, tag='mip-config')

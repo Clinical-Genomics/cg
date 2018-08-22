@@ -8,7 +8,6 @@ from jinja2 import Environment, PackageLoader, select_autoescape
 from pathlib import Path
 
 from cg.apps.coverage import ChanjoAPI
-from cg.meta.deliver.api import DeliverAPI
 from cg.apps.lims import LimsAPI
 from cg.store import Store, models
 from cg.meta.analysis import AnalysisAPI
@@ -16,12 +15,10 @@ from cg.meta.analysis import AnalysisAPI
 
 class ReportAPI:
 
-    def __init__(self, db: Store, lims_api: LimsAPI, deliver_api:
-    DeliverAPI, chanjo_api: ChanjoAPI, analysis_api: AnalysisAPI, logger=logging.getLogger(
-        __name__), yaml_loader=ruamel.yaml, path_tool=Path):
+    def __init__(self, db: Store, lims_api: LimsAPI, chanjo_api: ChanjoAPI,  analysis_api:
+    AnalysisAPI, logger=logging.getLogger(__name__), yaml_loader=ruamel.yaml, path_tool=Path):
         self.db = db
         self.lims = lims_api
-        self.deliver = deliver_api
         self.chanjo = chanjo_api
         self.analysis = analysis_api
         self.LOG = logger
@@ -124,7 +121,7 @@ class ReportAPI:
 
     def _incorporate_trending_data(self, report_data: dict, family_id: str):
         """Incorporate trending data into a set of samples."""
-        trending_data = self.analysis.get_latest_data(family_id=family_id)
+        trending_data = self.analysis.get_latest_metadata(family_id=family_id)
 
         mapped_reads_all_samples = trending_data.get('mapped_reads', {})
         duplicates_all_samples = trending_data.get('duplicates', {})
