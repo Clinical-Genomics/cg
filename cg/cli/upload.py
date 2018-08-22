@@ -71,7 +71,6 @@ def upload(context, family_id):
             context.invoke(delivery_report, family_id=family_id,
                            customer_id=family_obj.customer.internal_id)
             context.invoke(scout, family_id=family_id)
-
             analysis_obj.uploaded_at = dt.datetime.now()
             context.obj['status'].commit()
             click.echo(click.style(f"{family_id}: analysis uploaded!", fg='green'))
@@ -180,12 +179,14 @@ def scout(context, re_upload, print_console, family_id):
 @click.option('-out', '--outfile', help='Name of pdf outfile', default=None)
 @click.option('-cust', '--customer', help='Name of customer', default="")
 @click.option('-qual', '--quality', help='Variant quality threshold', default=20)
-@click.option('-ref', '--genome_reference', help='Chromosome build (default=grch37)', default="grch37")
+@click.option('-ref', '--genome_reference', help='Chromosome build (default=grch37)',
+              default="grch37")
 @click.pass_context
-def beacon(context: click.Context, family_id: str, panel: str, outfile: str, customer: str, quality: int, genome_reference: str):
+def beacon(context: click.Context, family_id: str, panel: str, outfile: str, customer: str,
+           quality: int, genome_reference: str):
     """Upload variants for affected samples in a family to cgbeacon."""
     if outfile:
-        outfile +=  dt.datetime.now().strftime("%Y-%m-%d_%H:%M:%S.pdf")
+        outfile += dt.datetime.now().strftime("%Y-%m-%d_%H:%M:%S.pdf")
     api = UploadBeaconApi(
         status=context.obj['status'],
         hk_api=context.obj['housekeeper_api'],

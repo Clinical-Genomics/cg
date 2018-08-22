@@ -215,6 +215,7 @@ class ReportAPI:
 
     def _fetch_family_samples_from_status_db(self, family_id: str) -> list:
         """Incorporate data from the status database for each sample ."""
+
         delivery_data_samples = list()
         family_samples = self.db.family_samples(family_id)
 
@@ -286,4 +287,3 @@ class ReportAPI:
             sample['application'] = ReportAPI._present_string(lims_sample.get('application'))
             sample['application_version'] = lims_sample.get('application_version')
             sample['received'] = ReportAPI._present_date(lims_sample.get('received'))
-
