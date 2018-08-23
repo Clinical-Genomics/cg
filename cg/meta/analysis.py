@@ -297,8 +297,11 @@ class AnalysisAPI():
                 trending = self.tb.get_trending(mip_config_raw=mip_config_raw,
                                                 qcmetrics_raw=qcmetrics_raw,
                                                 sampleinfo_raw=sampleinfo_raw)
-            except KeyError:
-                self.LOG.warning(f'_get_trending_data failed for \'{family_id}\'')
+            except KeyError as error:
+                self.LOG.warning(f'get_latest_metadata failed for \'{family_id}\''
+                                 f', missing key: {error.args[0]} ')
+                import traceback
+                self.LOG.warning(traceback.format_exc())
                 trending = dict()
 
         return trending
