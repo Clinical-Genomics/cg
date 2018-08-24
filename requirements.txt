@@ -27,7 +27,7 @@ openpyxl
 tabulate
 lxml
 python-dateutil
-cyvcf2==0.9.0
+cyvcf2<0.10.0
 pymongo
 
 # apps
