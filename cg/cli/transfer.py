@@ -39,3 +39,17 @@ def lims(context, status):
     lims_api = lims_app.LimsAPI(context.obj)
     transfer_api = transfer_app.TransferLims(context.obj['db'], lims_api)
     transfer_api.transfer_samples(transfer_app.SampleState[status.upper()])
+
+
+@transfer.command()
+@click.option('-s', '--status', type=click.Choice(['received', 'delivered']),
+              default='delivered')
+@click.pass_context
+def pools(context, status):
+    """
+    Update pools with received_at or delivered_at dates from LIMS. Defaults to delivered if no
+    option is provided.
+    """
+    lims_api = lims_app.LimsAPI(context.obj)
+    transfer_api = transfer_app.TransferLims(context.obj['db'], lims_api)
+    transfer_api.transfer_pools(transfer_app.PoolState[status.upper()])
