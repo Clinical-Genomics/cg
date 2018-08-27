@@ -3,17 +3,17 @@ from cg.apps.lims.api import LimsAPI
 
 @pytest.fixture
 def rml_orderform():
-    return 'tests/fixtures/orderforms/1604.8.rml.xlsx'
+    return 'tests/fixtures/orderforms/1604.7.rml.xlsx'
 
 
 @pytest.fixture
 def fastq_orderform():
-    return 'tests/fixtures/orderforms/1508.12.fastq.xlsx'
+    return 'tests/fixtures/orderforms/1508.13.fastq.xlsx'
 
 
 @pytest.fixture
 def scout_orderform():
-    return 'tests/fixtures/orderforms/1508.12.scout.xlsx'
+    return 'tests/fixtures/orderforms/1508.13.scout.xlsx'
 
 
 @pytest.fixture
