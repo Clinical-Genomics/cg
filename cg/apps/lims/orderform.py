@@ -18,6 +18,23 @@ SOURCE_TYPES = [
     'muscle',
     'other',
 ]
+VALID_ORDERFORMS=[
+    '1508:13',      # Orderform
+    '1541:6',       # Orderform Externally sequenced samples
+    # '1603:6',       # Microbial WGS
+    '1604:7',       # Orderform Ready made libraries (RML)
+    # '1605:4',       # Microbial metagenomes
+]
+
+
+def check_orderform_version(document_title):
+    """Raise an error if the orderform is to new or to old for the order portal."""
+
+    for valid_orderform in VALID_ORDERFORMS:
+        if valid_orderform in document_title:
+            return
+
+    raise OrderFormError(f"Unsupported orderform: {document_title}")
 
 
 def parse_orderform(excel_path: str) -> dict:
@@ -26,22 +43,24 @@ def parse_orderform(excel_path: str) -> dict:
 
     sheet_name = None
     sheet_names = workbook.sheet_names()
+
     for name in ['orderform', 'order form']:
         if name in sheet_names:
             sheet_name = name
             break
     if sheet_name is None:
         raise OrderFormError("'orderform' sheet not found in Excel file")
+
     orderform_sheet = workbook.sheet_by_name(sheet_name)
+    document_title = get_document_title(workbook, orderform_sheet)
+    check_orderform_version(document_title)
 
     raw_samples = relevant_rows(orderform_sheet)
     if len(raw_samples) == 0:
         raise OrderFormError("orderform doesn't contain any samples")
     parsed_samples = [parse_sample(raw_sample) for raw_sample in raw_samples]
 
-    document_title = get_document_title(workbook, orderform_sheet)
     project_type = get_project_type(document_title, parsed_samples)
-
     if project_type in ('scout', 'external'):
         parsed_families = group_families(parsed_samples)
         items = []
