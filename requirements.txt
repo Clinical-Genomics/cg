@@ -28,7 +28,7 @@ tabulate
 lxml
 python-dateutil
 cyvcf2<0.10.0
-pymongo
+pymongo==3.6.0
 
 # apps
 genologics
