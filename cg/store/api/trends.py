@@ -18,7 +18,7 @@ class TrendsHandler:
 
         return self.get_last_day_of_previous_year(int(year))
 
-    def get_tom_date(self, year):
+    def get_until_date(year):
         year = int(year)
         today = dt.date.today()
         month = today.month if today.year == year else 12
