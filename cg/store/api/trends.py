@@ -25,7 +25,7 @@ class TrendsHandler:
 
     @staticmethod
     def get_until_date(year):
-        return TrendsHandler.get_last_day_of_year(year)
+        return TrendsHandler.get_last_day_of_year(int(year))
 
     def samples_per_month(self, year):
         """Fetch samples per month."""
