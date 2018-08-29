@@ -41,8 +41,8 @@ class TrendsHandler:
                 func.count(models.Sample.id).label('count'),
             )
                 .join(models.Sample.customer)
-                .filter(self.get_from_date(year) < models.Sample.received_at,
-                        models.Sample.received_at < self.get_tom_date(year))
+                .filter(models.Sample.received_at > self.get_from_date(year),
+                        models.Sample.received_at < self.get_until_date(year))
                 .group_by(models.Customer.priority, func.month(models.Sample.received_at))
         )
 
@@ -73,8 +73,8 @@ class TrendsHandler:
             )
                 .filter(
                 models.Customer.priority == 'diagnostic',
-                self.get_from_date(year) < models.Sample.received_at,
-                models.Sample.received_at < self.get_tom_date(year),
+                models.Sample.received_at > self.get_from_date(year),
+                models.Sample.received_at < self.get_until_date(year),
                 models.Sample.delivered_at is not None,
             )
                 .group_by(
@@ -109,8 +109,8 @@ class TrendsHandler:
             )
                 .filter(
                 models.Customer.priority == 'diagnostic',
-                self.get_from_date(year) < models.Sample.received_at,
-                models.Sample.received_at < self.get_tom_date(year),
+                models.Sample.received_at > self.get_from_date(year),
+                models.Sample.received_at < self.get_until_date(year),
             )
                 .group_by(
                 models.Application.category,
@@ -145,8 +145,8 @@ class TrendsHandler:
             )
                 .filter(
                 models.Customer.priority == 'diagnostic',
-                self.get_from_date(year) < models.Sample.received_at,
-                models.Sample.received_at < self.get_tom_date(year),
+                models.Sample.received_at > self.get_from_date(year),
+                models.Sample.received_at < self.get_until_date(year),
             )
                 .group_by(
                 models.Application.category,
@@ -181,8 +181,8 @@ class TrendsHandler:
             )
                 .filter(
                 models.Customer.priority == 'diagnostic',
-                self.get_from_date(year) < models.Sample.received_at,
-                models.Sample.received_at < self.get_tom_date(year),
+                models.Sample.received_at > self.get_from_date(year),
+                models.Sample.received_at < self.get_until_date(year),
                 models.Sample.delivered_at is not None,
             )
                 .group_by(
@@ -220,8 +220,8 @@ class TrendsHandler:
             )
                 .filter(
                 models.Customer.priority == 'diagnostic',
-                self.get_from_date(year) < models.Sample.received_at,
-                models.Sample.received_at < self.get_tom_date(year),
+                models.Sample.received_at > self.get_from_date(year),
+                models.Sample.received_at < self.get_until_date(year),
                 models.Sample.delivered_at is not None,
                 models.Sample.invoice is not None,
                 models.Sample.invoice_id is not None,
