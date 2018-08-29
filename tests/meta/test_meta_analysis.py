@@ -46,5 +46,10 @@ def test_get_latest_metadata_logging(analysis_api: AnalysisAPI):
     latest_data = analysis_api.get_latest_metadata(family_id='bluebull')
 
     # THEN there should be a log entry about this
-    assert 'bluebull' in analysis_api.LOG.get_last_warning()
+    found = False
+    for warn in analysis_api.LOG.get_warnings():
+        if 'bluebull' in warn:
+            found = True
+
+    assert found
     assert not latest_data

@@ -162,15 +162,10 @@ class MockYaml:
 
 
 class MockLogger:
-    last_warning = None
     warnings = []
 
     def warning(self, text: str):
-        self.last_warning = text
         self.warnings.append(text)
-
-    def get_last_warning(self) -> str:
-        return self.last_warning
 
     def get_warnings(self) -> list:
         return self.warnings
@@ -181,7 +176,7 @@ class MockTB:
 
     def get_trending(self, mip_config_raw: dict, qcmetrics_raw: dict, sampleinfo_raw: dict) -> dict:
         if self._get_trending_raises_keyerror:
-            raise KeyError
+            raise KeyError('mockmessage')
 
         # Returns: dict: parsed data
         ### Define output dict
