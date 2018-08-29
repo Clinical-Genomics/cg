@@ -11,22 +11,21 @@ MONTHS = {1: 'January', 2: 'February', 3: 'March', 4: 'April', 5: 'May', 6: 'Jun
 
 class TrendsHandler:
 
-    def get_last_day_of_previous_year(self, year: int):
-        return dt.date(year, 1, 1) - relativedelta(days=1)
+    @staticmethod
+    def get_last_day_of_previous_year(year: int):
+        return TrendsHandler.get_last_day_of_year(year-1)
 
-    def get_from_date(self, year):
+    @staticmethod
+    def get_last_day_of_year(year):
+        return dt.date(year, 12, 31)
 
-        return self.get_last_day_of_previous_year(int(year))
+    @staticmethod
+    def get_from_date(year):
+        return TrendsHandler.get_last_day_of_previous_year(int(year))
 
+    @staticmethod
     def get_until_date(year):
-        year = int(year)
-        today = dt.date.today()
-        month = today.month if today.year == year else 12
-
-        if today.year == year:
-            return dt.date(year, month, 1) - relativedelta(days=1)
-        else:
-            return dt.date(year, 12, 31) + relativedelta(days=1)
+        return TrendsHandler.get_last_day_of_year(year)
 
     def samples_per_month(self, year):
         """Fetch samples per month."""
