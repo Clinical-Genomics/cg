@@ -15,7 +15,6 @@ class TrendsHandler:
         return dt.date(year, 1, 1) - relativedelta(days=1)
 
     def get_from_date(self, year):
-        print(self.get_last_day_of_previous_year(int(year)))
 
         return self.get_last_day_of_previous_year(int(year))
 
@@ -31,8 +30,6 @@ class TrendsHandler:
 
     def samples_per_month(self, year):
         """Fetch samples per month."""
-
-        print( self.get_tom_date(year))
 
         query = (
             self.session.query(
