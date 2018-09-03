@@ -1,27 +1,30 @@
 ---
 name: user story
-about: How to write a user story
+about: user story template
 
 ---
 
-Definition of Ready:
-- Problem description
-> As a < type of user >, I want < some goal > so that < some reason >.
+As a busy person, I want to drink coffee so that I wake up.
 
-- Steps to reproduce (do exactly this to get to where the missing feature can be seen)
-1.
-2.
+Problem: 
+The coffee machine is leaking! Most likely the tube is not attached to the back very well.
 
-- Expected outcome / suggested solution 
+Steps to reproduce
+  1. Go to the coffee machine on G4, small kitchen
+  2. Put a cup in the dispenser
+  3. Press to get any coffee
+  4. Water should now be dripping from the right side of the machine. Move the microwave for better view.
+
+Expected outcome / suggested solution:
+A coffee in my cup.
+
+Questions: 
+Q: Does the same problem occur for tea?
+A: Yes.
+
+What needs to be done on the planning meeting:
+- Estimate storypoints
+- **Remember to add label *PBL Teamname***
 
 
-- Questions: 
-Q1:
-A1:
-
-- Estimation: (storypoints)
-
-**!NB** Remember to add label *PBL Teamname* 
-
-
-See [issue reports](https://github.com/Clinical-Genomics/development/blob/master/git/issue-reports.md) for an explaination
+See https://github.com/Clinical-Genomics/development/blob/master/git/issue-reports.md for more!
