@@ -340,4 +340,4 @@ Another module `/exc.py` contains the custom Exception classes that are used acr
 [travis-image]: https://img.shields.io/travis/Clinical-Genomics/cg.svg?style=flat-square
 
 [coveralls-url]: https://coveralls.io/github/Clinical-Genomics/cg
-[coveralls-image]: https://img.shields.io/coveralls/Clinical-Genomics/cg/badge.svg?style=flat-square
+[coveralls-image]: https://coveralls.io/repos/github/Clinical-Genomics/cg/badge.svg?branch=master
