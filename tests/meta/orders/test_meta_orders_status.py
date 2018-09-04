@@ -155,6 +155,28 @@ def test_store_microbial_samples(orders_api, base_store,  microbial_status_data)
     assert base_store.microbial_orders().count() == 1
 
 
+def test_store_microbial_sample_priority(orders_api, base_store, microbial_status_data):
+
+    # GIVEN a basic store with no samples
+    assert base_store.microbial_samples().count() == 0
+
+    # WHEN storing the order
+    orders_api.store_microbial_order(
+        customer=microbial_status_data['customer'],
+        order=microbial_status_data['order'],
+        ordered=dt.datetime.now(),
+        ticket=1234348,
+        lims_project='dummy_lims_project',
+        samples=microbial_status_data['samples'],
+    )
+
+    # THEN it should store the sample priority
+    microbial_sample = base_store.microbial_samples().first()
+
+    assert microbial_sample.priority == 'research'
+
+
+
 def test_store_families(orders_api, base_store, scout_status_data):
     # GIVEN a basic store with no samples or nothing in it + scout order
     assert base_store.samples().first() is None

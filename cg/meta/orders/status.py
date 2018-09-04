@@ -305,6 +305,7 @@ class StatusHandler:
                     strain=sample_data['strain'],
                     strain_other=sample_data['strain_other'],
                     application_version=application_version,
+                    priority=sample_data['priority'],
                 )
                 new_order.microbial_samples.append(new_sample)
 
