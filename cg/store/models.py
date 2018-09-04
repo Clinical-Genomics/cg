@@ -3,9 +3,8 @@ import datetime as dt
 from typing import List
 
 import alchy
+from cg.constants import REV_PRIORITY_MAP, PRIORITY_MAP, FAMILY_ACTIONS, FLOWCELL_STATUS, PREP_CATEGORIES
 from sqlalchemy import Column, ForeignKey, orm, types, UniqueConstraint, Table
-
-from cg import constants
 
 Model = alchy.make_declarative_base(Base=alchy.ModelBase)
 
@@ -15,11 +14,11 @@ class PriorityMixin:
     @property
     def priority_human(self):
         """Humanized priority for sample."""
-        return constants.REV_PRIORITY_MAP[self.priority]
+        return REV_PRIORITY_MAP[self.priority]
 
     @priority_human.setter
     def priority_human(self, priority_str: str):
-        self.priority = constants.PRIORITY_MAP.get(priority_str)
+        self.priority = PRIORITY_MAP.get(priority_str)
 
     @property
     def high_priority(self):
@@ -128,7 +127,7 @@ class Family(Model, PriorityMixin):
     name = Column(types.String(128), nullable=False)
     priority = Column(types.Integer, default=1, nullable=False)
     _panels = Column(types.Text, nullable=False)
-    action = Column(types.Enum(*constants.FAMILY_ACTIONS))
+    action = Column(types.Enum(*FAMILY_ACTIONS))
     comment = Column(types.Text)
 
     ordered_at = Column(types.DateTime, default=dt.datetime.now)
@@ -362,7 +361,7 @@ class Flowcell(Model):
     sequencer_name = Column(types.String(32))
     sequenced_at = Column(types.DateTime)
     archived_at = Column(types.DateTime)
-    status = Column(types.Enum(*constants.FLOWCELL_STATUS), default='ondisk')
+    status = Column(types.Enum(*FLOWCELL_STATUS), default='ondisk')
 
     samples = orm.relationship('Sample', secondary=flowcell_sample, backref='flowcells')
 
@@ -410,7 +409,7 @@ class Application(Model):
     tag = Column(types.String(32), unique=True, nullable=False)
     # DEPRECATED, use prep_category instead
     category = Column(types.Enum('wgs', 'wes', 'tga', 'rna', 'mic', 'rml'))
-    prep_category = Column(types.Enum(*constants.PREP_CATEGORIES), nullable=False)
+    prep_category = Column(types.Enum(*PREP_CATEGORIES), nullable=False)
     is_external = Column(types.Boolean, nullable=False, default=False)
     description = Column(types.String(256), nullable=False)
     is_accredited = Column(types.Boolean, nullable=False)
