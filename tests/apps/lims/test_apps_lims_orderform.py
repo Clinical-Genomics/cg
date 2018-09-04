@@ -117,7 +117,7 @@ def test_parsing_microbial_orderform(microbial_orderform):
     assert sample_data['well_position'] == 'A:1'
     assert sample_data.get('tumour') is False
     assert sample_data.get('source') is None
-    assert sample_data.get('priority') in 'standard'
+    assert sample_data.get('priority') in 'research'
     assert sample_data['strain_other'] == 'M.upium'
     assert sample_data['extraction_method'] == 'MagNaPure 96 (contact Clinical Genomics before submission)'
     assert sample_data['comment'] == 'plate comment'

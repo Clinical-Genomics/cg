@@ -84,6 +84,7 @@ def microbial_store(base_store, microbial_order):
                                                  reads=sample_data['reads'],
                                                  comment=sample_data['comment'],
                                                  strain=sample_data['strain'],
+                                                 strain_other=sample_data['strain_other'],
                                                  reference_genome=sample_data['reference_genome'],
                                                  application_version=application_version
                                                  )

@@ -47,7 +47,7 @@ def test_microbial_samples_to_status(microbial_order):
 
     # THEN first sample should contain all the relevant data from the microbial order
     sample_data = data['samples'][0]
-    assert sample_data.get('priority') in 'standard'
+    assert sample_data.get('priority') in 'research'
     assert sample_data['name'] == 'all-fields'
     assert sample_data.get('internal_id') is None
     assert sample_data['strain'] == 'Other'

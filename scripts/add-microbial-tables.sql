@@ -31,6 +31,8 @@ CREATE TABLE `microbial_sample` (
   `sequence_start` datetime DEFAULT NULL,
   `sequenced_at` datetime DEFAULT NULL,
   `delivered_at` datetime DEFAULT NULL,
+  `strain` varchar(32) DEFAULT NULL,
+  `strain_other` varchar(32) DEFAULT NULL,
   `reference_genome` varchar(32) DEFAULT NULL,
   `priority` int(11) NOT NULL,
   `reads` bigint(20) DEFAULT NULL,

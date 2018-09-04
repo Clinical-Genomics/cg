@@ -205,6 +205,8 @@ class MicrobialSample(Model, PriorityMixin):
     sequence_start = Column(types.DateTime)
     sequenced_at = Column(types.DateTime)
     delivered_at = Column(types.DateTime)
+    strain = Column(types.String(32))
+    strain_other = Column(types.String(32))
     reference_genome = Column(types.String(32))
     priority = Column(types.Integer, default=1, nullable=False)
     reads = Column(types.BigInteger, default=0)

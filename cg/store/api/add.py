@@ -159,7 +159,8 @@ class AddHandler:
         new_order.customer = customer
         return new_order
 
-    def add_microbial_sample(self, name: str, strain: str, internal_id: str, reference_genome: str,
+    def add_microbial_sample(self, name: str, strain: str, strain_other: str, internal_id: str,
+                             reference_genome: str,
                              application_version: models.ApplicationVersion,
                              comment: str = None, **kwargs) -> models.MicrobialSample:
         """Build a new MicrobialSample record.
@@ -167,10 +168,10 @@ class AddHandler:
         To commit you also need to assign the sample to an Order.
         """
         internal_id = internal_id or utils.get_unique_id(self.sample)
-        print(internal_id)
         new_sample = self.MicrobialSample(
             name=name,
             strain=strain,
+            strain_other=strain_other,
             internal_id=internal_id,
             reference_genome=reference_genome,
             comment=comment,
