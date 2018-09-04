@@ -40,7 +40,7 @@ class LimsHandler:
                     'sex': SEX_MAP.get(sample.get('sex'), 'unknown'),
                     'strain': sample.get('strain'),
                     'strain_other': sample.get('strain_other'),
-                    'eluation_buffer': sample.get('eluation_buffer'),
+                    'elution_buffer': sample.get('elution_buffer'),
                     'reference_genome': sample.get('reference_genome'),
                     'extraction_method': sample.get('extraction_method'),
                 }

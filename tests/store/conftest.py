@@ -22,7 +22,7 @@ def microbial_order():
                       family=None,
                       priority='standard', capture_kit=None, comment=None, index=None,
                       reagent_label=None,
-                      tumour=False, custom_index=None, eluation_buffer='Nuclease-free water',
+                      tumour=False, custom_index=None, elution_buffer='Nuclease-free water',
                       strain='C. Jejuni', strain_other='', reference_genome='NC_111',
                       extraction_method='MagNaPure 96 (contact Clinical Genomics before '
                                         'submission)',
@@ -36,7 +36,7 @@ def microbial_order():
                       family=None,
                       priority='standard', capture_kit=None, comment=None, index=None,
                       reagent_label=None,
-                      tumour=False, custom_index=None, eluation_buffer='Nuclease-free water',
+                      tumour=False, custom_index=None, elution_buffer='Nuclease-free water',
                       strain='Other',
                       strain_other='M.upium', reference_genome='NC_222',
                       extraction_method='MagNaPure 96 (contact Clinical Genomics before '
@@ -51,7 +51,7 @@ def microbial_order():
                       family=None,
                       priority='standard', capture_kit=None, comment='3', index=None,
                       reagent_label=None,
-                      tumour=False, custom_index=None, eluation_buffer='Nuclease-free water',
+                      tumour=False, custom_index=None, elution_buffer='Nuclease-free water',
                       strain='C. difficile', strain_other='', reference_genome='NC_333',
                       extraction_method='MagNaPure 96 (contact Clinical Genomics before '
                                         'submission)',

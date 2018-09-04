@@ -109,7 +109,7 @@ def test_parsing_microbial_orderform(microbial_orderform):
     assert sample_data['reference_genome'] == 'NC_111'
     assert sample_data['application'] == 'MWRNXTR003'
     assert sample_data['require_qcok'] is True
-    assert sample_data['eluation_buffer'] == 'Nuclease-free water'
+    assert sample_data['elution_buffer'] == 'Nuclease-free water'
     assert sample_data['container'] == '96 well plate'
     assert sample_data['container_name'] == 'name of plate'
     assert sample_data.get('volume') is None

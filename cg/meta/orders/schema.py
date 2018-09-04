@@ -124,7 +124,7 @@ MICROBIAL_SAMPLE = {
     'strain': str,
     'strain_other': validators.Optional(str, None),
     'reference_genome': str,
-    'eluation_buffer': str,
+    'elution_buffer': str,
     'extraction_method': str,
     'concentration_weight': validators.Optional(TypeValidator(str, allow_none=True), None),
 }
