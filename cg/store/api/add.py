@@ -162,18 +162,22 @@ class AddHandler:
     def add_microbial_sample(self, name: str, strain: str, strain_other: str, internal_id: str,
                              reference_genome: str,
                              application_version: models.ApplicationVersion,
+                             priority: str = None,
                              comment: str = None, **kwargs) -> models.MicrobialSample:
         """Build a new MicrobialSample record.
         
         To commit you also need to assign the sample to an Order.
         """
         internal_id = internal_id or utils.get_unique_id(self.sample)
+        priority_human = priority or 'standard'
+        db_priority = PRIORITY_MAP[priority_human]
         new_sample = self.MicrobialSample(
             name=name,
             strain=strain,
             strain_other=strain_other,
             internal_id=internal_id,
             reference_genome=reference_genome,
+            priority=db_priority,
             comment=comment,
             **kwargs
         )

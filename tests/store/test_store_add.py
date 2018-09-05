@@ -57,6 +57,6 @@ def test_add_microbial_sample(base_store: Store):
     assert stored_microbial_sample.internal_id == internal_id
     assert stored_microbial_sample.reference_genome == reference_genome
     assert stored_microbial_sample.application_version == application_version
-    assert stored_microbial_sample.priority == priority
+    assert stored_microbial_sample.priority_human == priority
     assert stored_microbial_sample.strain == strain
     assert stored_microbial_sample.strain_other == strain_other

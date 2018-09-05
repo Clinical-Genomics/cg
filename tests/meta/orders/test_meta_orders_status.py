@@ -173,8 +173,7 @@ def test_store_microbial_sample_priority(orders_api, base_store, microbial_statu
     # THEN it should store the sample priority
     microbial_sample = base_store.microbial_samples().first()
 
-    assert microbial_sample.priority == 'research'
-
+    assert microbial_sample.priority_human == 'research'
 
 
 def test_store_families(orders_api, base_store, scout_status_data):
