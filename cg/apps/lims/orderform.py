@@ -56,9 +56,9 @@ def parse_orderform(excel_path: str) -> dict:
 
     customer_options = len(customer_ids)
     if customer_options == 0:
-        raise OrderFormError('customer information missing')
+        raise OrderFormError('Customer information is missing')
     elif customer_options != 1:
-        raise OrderFormError(f"invalid customer information: {customer_ids}")
+        raise OrderFormError(f"Samples have different customers: {customer_ids}")
 
     data = {
         'customer': customer_ids.pop(),
@@ -228,6 +228,7 @@ def relevant_rows(orderform_sheet):
     """Get the relevant rows from an order form sheet."""
     raw_samples = []
     current_row = None
+    empty_row_found = False
     for row in orderform_sheet.get_rows():
         if row[0].value == '</SAMPLE ENTRIES>':
             break
@@ -237,10 +238,17 @@ def relevant_rows(orderform_sheet):
             current_row = None
         elif current_row == 'samples':
             values = [str(cell.value) for cell in row]
+
+            # skip empty rows
             if values[0]:
-                # skip empty rows
+                if empty_row_found:
+                    raise OrderFormError(f"Found data after empty lines. Please delete any "
+                                         f"non-sample data rows in between the samples")
+
                 sample_dict = dict(zip(header_row, values))
                 raw_samples.append(sample_dict)
+            else:
+                empty_row_found = True
 
         if row[0].value == '<TABLE HEADER>':
             current_row = 'header'
