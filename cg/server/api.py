@@ -323,13 +323,15 @@ def orderform():
     return jsonify(**project_data)
 
 
-@BLUEPRINT.route('/trends/samples')
-def trends_samples():
+@BLUEPRINT.route('/trends/samples/<year>')
+def trends_samples(year):
     """Samples per month."""
+
     return jsonify(
-        received=list(db.samples_per_month()),
-        turnaround_times=list(db.received_to_delivered()),
-        prepp_times=list(db.received_to_prepped()),
-        sequence_times=list(db.prepped_to_sequenced()),
-        deliver_times=list(db.sequenced_to_delivered()),
+        received=list(db.samples_per_month(year)),
+        turnaround_times=list(db.received_to_delivered(year)),
+        prepp_times=list(db.received_to_prepped(year)),
+        sequence_times=list(db.prepped_to_sequenced(year)),
+        deliver_times=list(db.sequenced_to_delivered(year)),
+        invoice_times=list(db.delivered_to_invoiced(year)),
     )
