@@ -125,10 +125,9 @@ class StatusHandler:
         """
         records = (
             self.Sample.query.filter(
-                models.Sample.received_at != None,
                 models.Sample.invoice_id == None,
                 models.Sample.no_invoice != True,
-                models.Sample.delivered_at != True,
+                models.Sample.delivered_at != True
                 models.Sample.downsampled_to == None
             )
         )
@@ -145,10 +144,9 @@ class StatusHandler:
         """
         records = ( self.Pool.query.filter(
                 models.Pool.invoice_id == None,
-           # #    models.Pool.no_invoice != True,
-                models.Pool.delivered_at != None
-           ##     models.Pool.received_at != None
-           # #    models.Pool.downsampled_to == None
+                models.Pool.no_invoice != True,
+                models.Pool.delivered_at != None,
+                models.Pool.downsampled_to == None
             )
         )
         customers_to_invoice = [record.customer for record in records.all() if not record.customer.internal_id=='cust000']
