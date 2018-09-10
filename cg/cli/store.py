@@ -30,12 +30,21 @@ def analysis(context, config_stream):
     tb_api = context.obj['tb_api']
     hk_api = context.obj['hk_api']
 
-    # gather files and bundle in Housekeeper
+    new_analysis = _gather_files_and_bundle_in_housekeeper(config_stream, context, hk_api,
+                                                           status, tb_api)
+
+    status.add_commit(new_analysis)
+    click.echo(click.style('included files in Housekeeper', fg='green'))
+
+
+def _gather_files_and_bundle_in_housekeeper(config_stream, context, hk_api, status,
+                                            tb_api):
     try:
         bundle_data = tb_api.add_analysis(config_stream)
     except AnalysisNotFinishedError as error:
         click.echo(click.style(error.message, fg='red'))
         context.abort()
+
     try:
         results = hk_api.add_bundle(bundle_data)
         if results is None:
@@ -46,11 +55,26 @@ def analysis(context, config_stream):
         click.echo(click.style(f"missing file: {error.args[0]}", fg='red'))
         context.abort()
 
-    # add new analysis to the status API
-    family_obj = status.family(bundle_obj.name)
-    # reset the action on the family (from 'running')
-    family_obj.action = None
-    # add new complete analysis record
+    family_obj = _add_new_analysis_to_the_status_api(bundle_obj, status)
+    _reset_action_from_running_on_family(family_obj)
+    new_analysis = _add_new_complete_analysis_record(bundle_data, family_obj, status, version_obj)
+    version_date = version_obj.created_at.date()
+    click.echo(f"new bundle added: {bundle_obj.name}, version {version_date}")
+    _include_files_in_housekeeper(bundle_obj, context, hk_api, version_obj)
+
+    return new_analysis
+
+
+def _include_files_in_housekeeper(bundle_obj, context, hk_api, version_obj):
+    try:
+        hk_api.include(version_obj)
+    except hk.VersionIncludedError as error:
+        click.echo(click.style(error.message, fg='red'))
+        context.abort()
+    hk_api.add_commit(bundle_obj, version_obj)
+
+
+def _add_new_complete_analysis_record(bundle_data, family_obj, status, version_obj):
     new_analysis = status.add_analysis(
         pipeline='mip',
         version=bundle_data['pipeline_version'],
@@ -59,19 +83,16 @@ def analysis(context, config_stream):
         primary=(len(family_obj.analyses) == 0),
     )
     new_analysis.family = family_obj
-    version_date = version_obj.created_at.date()
-    click.echo(f"new bundle added: {bundle_obj.name}, version {version_date}")
+    return new_analysis
 
-    # include the files in the housekeeper system
-    try:
-        hk_api.include(version_obj)
-    except hk.VersionIncludedError as error:
-        click.echo(click.style(error.message, fg='red'))
-        context.abort()
 
-    hk_api.add_commit(bundle_obj, version_obj)
-    status.add_commit(new_analysis)
-    click.echo(click.style('included files in Housekeeper', fg='green'))
+def _reset_action_from_running_on_family(family_obj):
+    family_obj.action = None
+
+
+def _add_new_analysis_to_the_status_api(bundle_obj, status):
+    family_obj = status.family(bundle_obj.name)
+    return family_obj
 
 
 @store.command()
