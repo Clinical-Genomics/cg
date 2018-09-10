@@ -94,7 +94,7 @@ def families():
     else:
         customer_obj = None if g.current_user.is_admin else g.current_user.customer
         families_q = db.families(
-            query=request.args.get('query'),
+            enquiry=request.args.get('enquiry'),
             customer=customer_obj,
             action=request.args.get('action'),
         )
@@ -130,7 +130,7 @@ def samples():
     else:
         customer_obj = None if g.current_user.is_admin else g.current_user.customer
         samples_q = db.samples(
-            query=request.args.get('query'),
+            enquiry=request.args.get('enquiry'),
             customer=customer_obj,
         )
     limit = int(request.args.get('limit', 50))
@@ -155,7 +155,7 @@ def microbial_orders():
     """Fetch microbial orders."""
     customer_obj = None if g.current_user.is_admin else g.current_user.customer
     orders_q = db.microbial_orders(
-        query=request.args.get('query'),
+        enquiry=request.args.get('enquiry'),
         customer=customer_obj
     )
     count = orders_q.count()
@@ -182,7 +182,7 @@ def microbial_samples():
     """Fetch microbial samples."""
     customer_obj = None if g.current_user.is_admin else g.current_user.customer
     samples_q = db.microbial_samples(
-        query=request.args.get('query'),
+        enquiry=request.args.get('enquiry'),
         customer=customer_obj,
     )
     limit = int(request.args.get('limit', 50))
@@ -224,7 +224,7 @@ def flowcells():
     """Fetch flowcells."""
     query = db.flowcells(
         status=request.args.get('status'),
-        query=request.args.get('query'),
+        enquiry=request.args.get('enquiry'),
     )
     data = [record.to_dict() for record in query.limit(50)]
     return jsonify(flowcells=data, total=query.count())
