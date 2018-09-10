@@ -194,7 +194,6 @@ def microbial_samples():
 def microbial_sample(sample_id):
     """Fetch a single sample."""
     sample_obj = db.microbial_sample(sample_id)
-    print(sample_id)
     if sample_obj is None:
         return abort(404)
     elif not g.current_user.is_admin and (g.current_user.customer != sample_obj.customer):
