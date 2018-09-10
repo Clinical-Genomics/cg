@@ -112,11 +112,6 @@ class AnalysisView(BaseView):
     column_editable_list = ['is_primary']
 
 
-class InvoiceView(BaseView):
-    column_searchable_list = ['customer_id', 'id']
-    column_list = ('id', 'customer_id', 'created_at', 'updated_at','invoiced_at','comment','discount','price')
-
-
 class MicrobialOrderView(BaseView):
     column_searchable_list = ['internal_id', 'name', 'ticket_number']
     column_editable_list = ['ticket_number', 'comment']
