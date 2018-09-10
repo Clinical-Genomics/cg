@@ -44,5 +44,5 @@ CREATE TABLE `microbial_sample` (
   KEY `application_version_id` (`application_version_id`),
   CONSTRAINT `microbial_sample_ibfk_1` FOREIGN KEY (`microbial_order_id`) REFERENCES `microbial_order` (`id`),
   CONSTRAINT `microbial_sample_ibfk_2` FOREIGN KEY (`application_version_id`) REFERENCES `application_version` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=113 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
