@@ -218,7 +218,6 @@ class FindHandler:
             models.MicrobialOrder.name.like(f"%{query}%"),
             models.MicrobialOrder.internal_id.like(f"%{query}%"),
         )) if query else records
-        records = records.filter_by(action=action) if action else records
         return records.order_by(models.MicrobialOrder.created_at.desc())
 
     def microbial_order(self, internal_id: str) -> models.MicrobialOrder:

@@ -156,8 +156,7 @@ def microbial_orders():
     customer_obj = None if g.current_user.is_admin else g.current_user.customer
     orders_q = db.microbial_orders(
         query=request.args.get('query'),
-        customer=customer_obj,
-        action=request.args.get('action'),
+        customer=customer_obj
     )
     count = orders_q.count()
     records = orders_q.limit(30)
