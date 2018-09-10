@@ -112,6 +112,20 @@ class AnalysisView(BaseView):
     column_editable_list = ['is_primary']
 
 
+class MicrobialOrderView(BaseView):
+    column_searchable_list = ['internal_id', 'name', 'ticket_number']
+    column_editable_list = ['ticket_number', 'comment']
+    column_filters = ['customer.internal_id']
+
+
+class MicrobialSampleView(BaseView):
+    column_searchable_list = ['internal_id', 'name', 'microbial_order.ticket_number']
+    column_editable_list = ['reads', 'comment', 'reference_genome']
+    column_filters = ['microbial_order', 'microbial_order.customer']
+    column_default_sort = ('created_at', True)
+
+
 class InvoiceView(BaseView):
     column_searchable_list = ['customer_id', 'id']
-    column_list = ('id', 'customer_id', 'created_at', 'updated_at','invoiced_at','comment','discount','price')
+    column_list = (
+    'id', 'customer_id', 'created_at', 'updated_at', 'invoiced_at', 'comment', 'discount', 'price')

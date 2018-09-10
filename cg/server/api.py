@@ -51,8 +51,8 @@ def before_request():
         g.current_user = user_obj
 
 
-@BLUEPRINT.route('/order/<order_type>', methods=['POST'])
-def order(order_type):
+@BLUEPRINT.route('/submit_order/<order_type>', methods=['POST'])
+def submit_order(order_type):
     """Submit an order for samples."""
     api = OrdersAPI(lims=lims, status=db, osticket=osticket)
     post_data = request.get_json()
@@ -64,7 +64,7 @@ def order(order_type):
         return abort(make_response(jsonify(message=error.message), 401))
     except HTTPError as error:
         return abort(make_response(jsonify(message=error.args[0]), 401))
-    #LOG.info(f"{result['ticket'] or 'NA'}: successfully submitted samples")
+
     return jsonify(project=result['project'],
                    records=[record.to_dict() for record in result['records']])
 
@@ -94,7 +94,7 @@ def families():
     else:
         customer_obj = None if g.current_user.is_admin else g.current_user.customer
         families_q = db.families(
-            query=request.args.get('query'),
+            enquiry=request.args.get('enquiry'),
             customer=customer_obj,
             action=request.args.get('action'),
         )
@@ -130,7 +130,7 @@ def samples():
     else:
         customer_obj = None if g.current_user.is_admin else g.current_user.customer
         samples_q = db.samples(
-            query=request.args.get('query'),
+            enquiry=request.args.get('enquiry'),
             customer=customer_obj,
         )
     limit = int(request.args.get('limit', 50))
@@ -147,6 +147,58 @@ def sample(sample_id):
     elif not g.current_user.is_admin and (g.current_user.customer != sample_obj.customer):
         return abort(401)
     data = sample_obj.to_dict(links=True, flowcells=True)
+    return jsonify(**data)
+
+
+@BLUEPRINT.route('/microbial_orders')
+def microbial_orders():
+    """Fetch microbial orders."""
+    customer_obj = None if g.current_user.is_admin else g.current_user.customer
+    orders_q = db.microbial_orders(
+        enquiry=request.args.get('enquiry'),
+        customer=customer_obj
+    )
+    count = orders_q.count()
+    records = orders_q.limit(30)
+    data = [order_obj.to_dict(samples=True) for order_obj in records]
+
+    return jsonify(microbial_orders=data, total=count)
+
+
+@BLUEPRINT.route('/microbial_orders/<order_id>')
+def microbial_order(order_id):
+    """Fetch a order with samples."""
+    order_obj = db.microbial_order(order_id)
+    if order_obj is None:
+        return abort(404)
+    elif not g.current_user.is_admin and (g.current_user.customer != order_obj.customer):
+        return abort(401)
+    data = order_obj.to_dict(samples=True)
+    return jsonify(**data)
+
+
+@BLUEPRINT.route('/microbial_samples')
+def microbial_samples():
+    """Fetch microbial samples."""
+    customer_obj = None if g.current_user.is_admin else g.current_user.customer
+    samples_q = db.microbial_samples(
+        enquiry=request.args.get('enquiry'),
+        customer=customer_obj,
+    )
+    limit = int(request.args.get('limit', 50))
+    data = [sample_obj.to_dict(order=True) for sample_obj in samples_q.limit(limit)]
+    return jsonify(samples=data, total=samples_q.count())
+
+
+@BLUEPRINT.route('/microbial_samples/<sample_id>')
+def microbial_sample(sample_id):
+    """Fetch a single sample."""
+    sample_obj = db.microbial_sample(sample_id)
+    if sample_obj is None:
+        return abort(404)
+    elif not g.current_user.is_admin and (g.current_user.customer != sample_obj.customer):
+        return abort(401)
+    data = sample_obj.to_dict()
     return jsonify(**data)
 
 
@@ -172,7 +224,7 @@ def flowcells():
     """Fetch flowcells."""
     query = db.flowcells(
         status=request.args.get('status'),
-        query=request.args.get('query'),
+        enquiry=request.args.get('enquiry'),
     )
     data = [record.to_dict() for record in query.limit(50)]
     return jsonify(flowcells=data, total=query.count())
