@@ -33,6 +33,30 @@ def test_samples_to_status(fastq_order):
     assert data['samples'][1]['tumour'] is True
 
 
+def test_microbial_samples_to_status(microbial_order):
+    # GIVEN microbial order with three samples
+
+    # WHEN parsing for status
+    data = StatusHandler.microbial_samples_to_status(microbial_order)
+
+    # THEN it should pick out samples and relevant information
+    assert len(data['samples']) == 5
+    assert data['customer'] == 'cust002'
+    assert data['order'] == 'Microbial samples'
+    assert data['comment'] == 'Order comment'
+
+    # THEN first sample should contain all the relevant data from the microbial order
+    sample_data = data['samples'][0]
+    assert sample_data.get('priority') in 'research'
+    assert sample_data['name'] == 'all-fields'
+    assert sample_data.get('internal_id') is None
+    assert sample_data['strain'] == 'Other'
+    assert sample_data['strain_other'] == 'M.upium'
+    assert sample_data['reference_genome'] == 'NC_111'
+    assert sample_data['application'] == 'MWRNXTR003'
+    assert sample_data['comment'] == 'plate comment'
+
+
 def test_families_to_status(scout_order):
     # GIVEN a scout order with a trio family
     # WHEN parsing for status
@@ -42,7 +66,7 @@ def test_families_to_status(scout_order):
     family = data['families'][0]
     assert family['name'] == '17093'
     assert family['priority'] == 'standard'
-    assert set(family['panels']) == set(['IEM', 'EP'])
+    assert set(family['panels']) == {'IEM', 'EP'}
     assert len(family['samples']) == 3
 
     first_sample = family['samples'][0]
@@ -86,7 +110,8 @@ def test_store_samples(orders_api, base_store, fastq_status_data):
     # GIVEN a basic store with no samples and a fastq order
     assert base_store.samples().count() == 0
     assert base_store.families().count() == 0
-    # WHEN stoting the order
+
+    # WHEN storing the order
     new_samples = orders_api.store_samples(
         customer=fastq_status_data['customer'],
         order=fastq_status_data['order'],
@@ -94,6 +119,7 @@ def test_store_samples(orders_api, base_store, fastq_status_data):
         ticket=1234348,
         samples=fastq_status_data['samples'],
     )
+
     # THEN it should store the samples and create a "fake" family for
     # the non-tumour sample
     assert len(new_samples) == 2
@@ -105,6 +131,49 @@ def test_store_samples(orders_api, base_store, fastq_status_data):
     assert family_link.family == base_store.families().first()
     for sample in new_samples:
         assert len(sample.deliveries) == 1
+
+
+def test_store_microbial_samples(orders_api, base_store,  microbial_status_data):
+
+    # GIVEN a basic store with no samples and a microbial order
+    assert base_store.microbial_samples().count() == 0
+    assert base_store.microbial_orders().count() == 0
+
+    # WHEN storing the order
+    new_order = orders_api.store_microbial_order(
+        customer=microbial_status_data['customer'],
+        order=microbial_status_data['order'],
+        ordered=dt.datetime.now(),
+        ticket=1234348,
+        lims_project='dummy_lims_project',
+        samples=microbial_status_data['samples'],
+    )
+
+    # THEN it should store the samples
+    assert len(new_order.microbial_samples) == 5
+    assert base_store.microbial_samples().count() == 5
+    assert base_store.microbial_orders().count() == 1
+
+
+def test_store_microbial_sample_priority(orders_api, base_store, microbial_status_data):
+
+    # GIVEN a basic store with no samples
+    assert base_store.microbial_samples().count() == 0
+
+    # WHEN storing the order
+    orders_api.store_microbial_order(
+        customer=microbial_status_data['customer'],
+        order=microbial_status_data['order'],
+        ordered=dt.datetime.now(),
+        ticket=1234348,
+        lims_project='dummy_lims_project',
+        samples=microbial_status_data['samples'],
+    )
+
+    # THEN it should store the sample priority
+    microbial_sample = base_store.microbial_samples().first()
+
+    assert microbial_sample.priority_human == 'research'
 
 
 def test_store_families(orders_api, base_store, scout_status_data):
@@ -125,7 +194,7 @@ def test_store_families(orders_api, base_store, scout_status_data):
     new_family = new_families[0]
     assert new_family == family_obj
     assert new_family.name == '17093'
-    assert set(new_family.panels) == set(['IEM', 'EP'])
+    assert set(new_family.panels) == {'IEM', 'EP'}
     assert new_family.priority_human == 'standard'
 
     assert len(new_family.links) == 3
