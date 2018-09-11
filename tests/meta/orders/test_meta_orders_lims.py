@@ -59,3 +59,19 @@ def test_to_lims_rml(rml_order):
     assert first_sample['udfs']['concentration'] == '5'
     assert first_sample['udfs']['index'] == 'TruSeq DNA HT Dual-index (D7-D5)'
     assert first_sample['udfs']['index_number'] == '65'
+
+
+def test_to_lims_microbial(microbial_order):
+    # GIVEN a microbial order for three samples
+    # WHEN parsing for LIMS
+    samples = LimsHandler.to_lims(customer='cust000', samples=microbial_order['samples'])
+    # THEN it should "work"
+    assert len(samples) == 5
+    # ... and pick out relevant UDFs
+    first_sample = samples[0]
+    assert first_sample['udfs']['priority'] == 'research'
+    assert first_sample['udfs']['strain'] == 'Other'
+    assert first_sample['udfs']['strain_other'] == 'M.upium'
+    assert first_sample['udfs']['reference_genome'] == 'NC_111'
+    assert first_sample['udfs']['extraction_method'] == 'MagNaPure 96 (contact Clinical Genomics ' \
+                                                        'before submission)'
