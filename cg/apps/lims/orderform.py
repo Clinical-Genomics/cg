@@ -114,7 +114,7 @@ def expand_family(family_id, parsed_family):
 
     customers = set(raw_sample['customer'] for raw_sample in samples)
     if len(customers) != 1:
-        raise ValueError("invalid customer information: {}".format(customers))
+        raise OrderFormError("invalid customer information: {}".format(customers))
     customer = customers.pop()
 
     gene_panels = set()
