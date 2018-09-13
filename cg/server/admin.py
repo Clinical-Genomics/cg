@@ -92,6 +92,12 @@ class SampleView(BaseView):
     form_excluded_columns = ['is_external']
 
 
+class PoolView(BaseView):
+    column_searchable_list = ['name', 'order', 'ticket_number', 'customer.internal_id']
+    column_filters = ['customer.internal_id', 'application_version.application']
+    column_editable_list = ['sequenced_at', 'ticket_number']
+
+
 class FamilySampleView(BaseView):
     column_searchable_list = ['family.internal_id', 'family.name', 'sample.internal_id']
     column_filters = ['status']
