@@ -1,6 +1,7 @@
 import json
 
 import pytest
+from cg.apps.lims import LimsAPI
 
 from cg.meta.report.api import ReportAPI
 import datetime
@@ -8,7 +9,20 @@ import datetime
 from cg.store import Store
 
 
-class MockLims:
+@pytest.fixture
+def lims_family():
+    return json.load(open('tests/fixtures/report/lims_family.json'))
+
+
+@pytest.fixture
+def lims_samples(lims_family):
+    return lims_family['samples']
+
+
+class MockLims(LimsAPI):
+
+    def __init__(self, samples):
+        self._samples = samples
 
     def get_prep_method(self, lims_id: str) -> str:
         return 'CG002 - End repair Size selection A-tailing and Adapter ligation (TruSeq PCR-free ' \
@@ -28,35 +42,12 @@ class MockLims:
 
     def sample(self, lims_id: str):
         """Fetch information about a sample."""
-        samples = lims_family().get('samples')
 
-        for sample in samples:
+        for sample in self._samples:
             if sample.get('id') == lims_id:
                 return sample
 
         return None
-
-
-class MockTB:
-    _get_trending_raises_keyerror = False
-
-    def get_trending(self, mip_config_raw: dict, qcmetrics_raw: dict, sampleinfo_raw: dict) -> dict:
-        if self._get_trending_raises_keyerror:
-            raise KeyError
-
-        # Returns: dict: parsed data
-        ### Define output dict
-        outdata = {
-            'analysis_sex': {'ADM1': 'female', 'ADM2': 'female', 'ADM3': 'female'},
-            'family': 'yellowhog',
-            'duplicates': {'ADM1': 13.525, 'ADM2': 12.525, 'ADM3': 14.525},
-            'genome_build': 'hg19',
-            'mapped_reads': {'ADM1': 98.8, 'ADM2': 99.8, 'ADM3': 97.8},
-            'mip_version': 'v4.0.20',
-            'sample_ids': ['2018-20203', '2018-20204'],
-        }
-
-        return outdata
 
 
 class MockFile:
@@ -139,6 +130,21 @@ class MockAnalysis:
         """Create the aggregated panel file."""
         return ['']
 
+    def get_latest_metadata(self, family_id):
+        # Returns: dict: parsed data
+        ### Define output dict
+        outdata = {
+            'analysis_sex': {'ADM1': 'female', 'ADM2': 'female', 'ADM3': 'female'},
+            'family': 'yellowhog',
+            'duplicates': {'ADM1': 13.525, 'ADM2': 12.525, 'ADM3': 14.525},
+            'genome_build': 'hg19',
+            'mapped_reads': {'ADM1': 98.8, 'ADM2': 99.8, 'ADM3': 97.8},
+            'mip_version': 'v4.0.20',
+            'sample_ids': ['2018-20203', '2018-20204'],
+        }
+
+        return outdata
+
 
 class MockLogger:
     last_warning = None
@@ -165,16 +171,6 @@ class MockYamlLoader:
 
     def get_open_file(self):
         return self.open_file
-
-
-@pytest.fixture
-def lims_family():
-    return json.load(open('tests/fixtures/report/lims_family.json'))
-
-
-@pytest.fixture
-def lims_samples():
-    return lims_family()['samples']
 
 
 class MockDB(Store):
@@ -207,12 +203,11 @@ class MockDB(Store):
 class MockReport(ReportAPI):
     _fileToOpen = ''
 
-    def __init__(self, db, lims_api, tb_api, deliver_api, chanjo_api, analysis_api, logger,
+    def __init__(self, db, lims_api, deliver_api, chanjo_api, analysis_api, logger,
                  yaml_loader,
                  path_tool):
         self.db = db
         self.lims = lims_api
-        self.tb = tb_api
         self.deliver = deliver_api
         self.chanjo = chanjo_api
         self.analysis = analysis_api
@@ -222,17 +217,16 @@ class MockReport(ReportAPI):
 
 
 @pytest.fixture(scope='function')
-def report_api(analysis_store):
+def report_api(analysis_store, lims_samples):
     db = MockDB(analysis_store)
-    lims = MockLims()
-    tb = MockTB()
+    lims = MockLims(lims_samples)
     deliver = MockDeliver()
     chanjo = MockChanjo()
     analysis = MockAnalysis()
     logger = MockLogger()
     yaml_loader = MockYamlLoader()
     path_tool = MockPath()
-    _report_api = MockReport(lims_api=lims, db=db, tb_api=tb, deliver_api=deliver,
+    _report_api = MockReport(lims_api=lims, db=db, deliver_api=deliver,
                              chanjo_api=chanjo, analysis_api=analysis, logger=logger,
                              yaml_loader=yaml_loader,
                              path_tool=path_tool)
