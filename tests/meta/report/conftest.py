@@ -1,6 +1,7 @@
 import json
 
 import pytest
+from cg.apps.lims import LimsAPI
 
 from cg.meta.report.api import ReportAPI
 import datetime
@@ -8,7 +9,20 @@ import datetime
 from cg.store import Store
 
 
-class MockLims:
+@pytest.fixture
+def lims_family():
+    return json.load(open('tests/fixtures/report/lims_family.json'))
+
+
+@pytest.fixture
+def lims_samples(lims_family):
+    return lims_family['samples']
+
+
+class MockLims(LimsAPI):
+
+    def __init__(self, samples):
+        self._samples = samples
 
     def get_prep_method(self, lims_id: str) -> str:
         return 'CG002 - End repair Size selection A-tailing and Adapter ligation (TruSeq PCR-free ' \
@@ -28,9 +42,8 @@ class MockLims:
 
     def sample(self, lims_id: str):
         """Fetch information about a sample."""
-        samples = lims_family().get('samples')
 
-        for sample in samples:
+        for sample in self._samples:
             if sample.get('id') == lims_id:
                 return sample
 
@@ -160,16 +173,6 @@ class MockYamlLoader:
         return self.open_file
 
 
-@pytest.fixture
-def lims_family():
-    return json.load(open('tests/fixtures/report/lims_family.json'))
-
-
-@pytest.fixture
-def lims_samples():
-    return lims_family()['samples']
-
-
 class MockDB(Store):
     _family_samples_returns_no_reads = False
     _application_accreditation = None
@@ -214,9 +217,9 @@ class MockReport(ReportAPI):
 
 
 @pytest.fixture(scope='function')
-def report_api(analysis_store):
+def report_api(analysis_store, lims_samples):
     db = MockDB(analysis_store)
-    lims = MockLims()
+    lims = MockLims(lims_samples)
     deliver = MockDeliver()
     chanjo = MockChanjo()
     analysis = MockAnalysis()
