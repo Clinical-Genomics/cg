@@ -11,6 +11,7 @@ from cg.meta.orders import OrdersAPI, OrderType
     OrderType.FASTQ,
     OrderType.SCOUT,
     OrderType.EXTERNAL,
+    OrderType.MICROBIAL,
 ])
 def test_submit(base_store, orders_api, all_orders, monkeypatch, order_type):
     ticket_number = 1234567
@@ -33,7 +34,6 @@ def test_submit(base_store, orders_api, all_orders, monkeypatch, order_type):
     for record in result['records']:
         if isinstance(record, models.Pool) or isinstance(record, models.Sample):
             assert record.ticket_number == ticket_number
-        else:
-            assert isinstance(record, models.Family)
+        elif isinstance(record, models.Family):
             for link_obj in record.links:
                 assert link_obj.sample.ticket_number == ticket_number

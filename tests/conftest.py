@@ -65,7 +65,9 @@ def base_store(store) -> Store:
                     store.add_application('WGTPCFC030', 'wgs', 'WGS trio', is_accredited=True,
                                           sequencing_depth=30, target_reads=300000000,
                                           limitations='some'),
-                    ]
+                    store.add_application('MWRNXTR003', 'mic', 'Microbial whole genome ',
+                                          sequencing_depth=0)]
+
     store.add_commit(applications)
 
     prices = {'standard': 10, 'priority': 20, 'express': 30, 'research': 5}

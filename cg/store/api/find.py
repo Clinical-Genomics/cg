@@ -18,6 +18,10 @@ class FindHandler:
         """Fetch all customers."""
         return self.Customer.query
 
+    def customer_by_id(self, id_: int) -> models.Customer:
+        """Fetch a customer by id number from the store."""
+        return self.Customer.query.filter_by(id=id_).first()
+
     def user(self, email: str) -> models.User:
         """Fetch a user from the store."""
         return self.User.query.filter_by(email=email).first()
@@ -26,15 +30,15 @@ class FindHandler:
         """Fetch a family by internal id from the database."""
         return self.Family.query.filter_by(internal_id=internal_id).first()
 
-    def families(self, *, customer: models.Customer=None, query: str=None,
-                 action: str=None) -> List[models.Family]:
+    def families(self, *, customer: models.Customer = None, enquiry: str = None,
+                 action: str = None) -> List[models.Family]:
         """Fetch all families."""
         records = self.Family.query
         records = records.filter_by(customer=customer) if customer else records
         records = records.filter(or_(
-            models.Family.name.like(f"%{query}%"),
-            models.Family.internal_id.like(f"%{query}%"),
-        )) if query else records
+            models.Family.name.like(f"%{enquiry}%"),
+            models.Family.internal_id.like(f"%{enquiry}%"),
+        )) if enquiry else records
         records = records.filter_by(action=action) if action else records
         return records.order_by(models.Family.created_at.desc())
 
@@ -46,14 +50,29 @@ class FindHandler:
         """Fetch a sample by lims id."""
         return self.Sample.query.filter_by(internal_id=internal_id).first()
 
-    def samples(self, *, customer: models.Customer=None, query: str=None) -> List[models.Sample]:
+    def samples(self, *, customer: models.Customer = None, enquiry: str = None) -> List[
+        models.Sample]:
         records = self.Sample.query
         records = records.filter_by(customer=customer) if customer else records
         records = records.filter(or_(
-            models.Sample.name.like(f"%{query}%"),
-            models.Sample.internal_id.like(f"%{query}%"),
-        )) if query else records
+            models.Sample.name.like(f"%{enquiry}%"),
+            models.Sample.internal_id.like(f"%{enquiry}%"),
+        )) if enquiry else records
         return records.order_by(models.Sample.created_at.desc())
+
+    def microbial_samples(self, *, customer: models.Customer = None, enquiry: str = None) -> List[
+        models.MicrobialSample]:
+        records = self.MicrobialSample.query
+        records = records.filter_by(customer=customer) if customer else records
+        records = records.filter(or_(
+            models.MicrobialSample.name.like(f"%{enquiry}%"),
+            models.MicrobialSample.internal_id.like(f"%{enquiry}%"),
+        )) if enquiry else records
+        return records.order_by(models.MicrobialSample.created_at.desc())
+
+    def microbial_sample(self, internal_id: str) -> models.MicrobialSample:
+        """Fetch a microbial sample by lims id."""
+        return self.MicrobialSample.query.filter_by(internal_id=internal_id).first()
 
     def find_sample(self, customer: models.Customer, name: str) -> List[models.Sample]:
         """Find samples within a customer."""
@@ -87,17 +106,18 @@ class FindHandler:
         """Find a panel by abbreviation."""
         return self.Panel.query.filter_by(abbrev=abbrev).first()
 
-    def analyses(self, *, family: models.Family=None, before: dt.datetime=None) -> Query:
+    def analyses(self, *, family: models.Family = None, before: dt.datetime = None) -> Query:
         """Fetch multiple analyses."""
         records = self.Analysis.query
         if family:
             records = records.filter(models.Analysis.family == family)
         if before:
-            subq = self.Analysis.query.\
-                join(models.Analysis.family).\
-                filter(models.Analysis.started_at < before).\
-                group_by(models.Family.id).\
-                with_entities(models.Analysis.family_id, func.max(models.Analysis.started_at).label('started_at')).subquery()
+            subq = self.Analysis.query. \
+                join(models.Analysis.family). \
+                filter(models.Analysis.started_at < before). \
+                group_by(models.Family.id). \
+                with_entities(models.Analysis.family_id,
+                              func.max(models.Analysis.started_at).label('started_at')).subquery()
             records = records.join(
                 subq,
                 and_(
@@ -110,20 +130,20 @@ class FindHandler:
         """Fetch an analysis."""
         return self.Analysis.query.filter_by(family=family, started_at=started_at).first()
 
-    def flowcells(self, *, status: str=None, family: models.Family=None,
-                  query: str=None) -> Query:
+    def flowcells(self, *, status: str = None, family: models.Family = None,
+                  enquiry: str = None) -> Query:
         """Fetch all flowcells."""
         records = self.Flowcell.query
         if family:
             records = (
                 records
-                .join(models.Flowcell.samples, models.Sample.links)
-                .filter(models.FamilySample.family == family)
+                    .join(models.Flowcell.samples, models.Sample.links)
+                    .filter(models.FamilySample.family == family)
             )
         if status:
             records = records.filter_by(status=status)
-        if query:
-            records = records.filter(models.Flowcell.name.like(f"%{query}%"))
+        if enquiry:
+            records = records.filter(models.Flowcell.name.like(f"%{enquiry}%"))
         return records.order_by(models.Flowcell.sequenced_at.desc())
 
     def flowcell(self, name: str) -> models.Flowcell:
@@ -134,23 +154,23 @@ class FindHandler:
         """Find a link between a family and a sample."""
         return (
             self.FamilySample.query
-            .join(models.FamilySample.family, models.FamilySample.sample)
-            .filter(
+                .join(models.FamilySample.family, models.FamilySample.sample)
+                .filter(
                 models.Family.internal_id == family_id,
                 models.Sample.internal_id == sample_id
             )
-            .first()
+                .first()
         )
 
     def family_samples(self, family_id: str) -> models.FamilySample:
         """Find the samples of a family."""
         return (
             self.FamilySample.query
-            .join(models.FamilySample.family, models.FamilySample.sample)
-            .filter(
+                .join(models.FamilySample.family, models.FamilySample.sample)
+                .filter(
                 models.Family.internal_id == family_id,
             )
-            .all()
+                .all()
         )
 
     def pools(self, *, customer: models.Customer) -> Query:
@@ -162,13 +182,13 @@ class FindHandler:
     def pool(self, pool_id: int):
         """Fetch a pool."""
         return self.Pool.get(pool_id)
-    
+
     def deliveries(self) -> Query:
         """Fetch all deliveries."""
         query = self.Delivery.query
         return query
 
-    def invoices(self, invoiced: bool=None) -> Query:
+    def invoices(self, invoiced: bool = None) -> Query:
         """Fetch invoices."""
         query = self.Invoice.query
         if invoiced is not None:
@@ -182,9 +202,24 @@ class FindHandler:
         """Fetch invoices."""
         query = self.Invoice.query.all()
         ids = [inv.id for inv in query]
-        new_id = max(ids)+1
+        new_id = max(ids) + 1
         return new_id
 
     def invoice(self, invoice_id: int) -> models.Invoice:
         """Fetch an invoice."""
         return self.Invoice.get(invoice_id)
+
+    def microbial_orders(self, *, customer: models.Customer = None, enquiry: str = None) -> List[
+        models.MicrobialOrder]:
+        """Fetch all microbial_orders."""
+        records = self.MicrobialOrder.query
+        records = records.filter_by(customer=customer) if customer else records
+        records = records.filter(or_(
+            models.MicrobialOrder.name.like(f"%{enquiry}%"),
+            models.MicrobialOrder.internal_id.like(f"%{enquiry}%"),
+        )) if enquiry else records
+        return records.order_by(models.MicrobialOrder.created_at.desc())
+
+    def microbial_order(self, internal_id: str) -> models.MicrobialOrder:
+        """Fetch an order by internal id from the database."""
+        return self.MicrobialOrder.query.filter_by(internal_id=internal_id).first()
