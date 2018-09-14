@@ -190,6 +190,7 @@ class Pool(Model):
     invoiced_at = Column(types.DateTime)  # DEPRECATED
     comment = Column(types.Text)
     lims_project = Column(types.Text)
+    no_invoice = Column(types.Boolean, default=False)
     capture_kit = Column(types.String(64))
 
     created_at = Column(types.DateTime, default=dt.datetime.now)

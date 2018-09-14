@@ -144,9 +144,12 @@ class StatusHandler:
         records = (
             self.Pool.query.filter(
                 models.Pool.invoice_id == None,
+                models.Pool.no_invoice == None,
+                models.Pool.received_at != None,
                 models.Pool.delivered_at != None
             )
         )
+        
         customers_to_invoice = [record.customer for record in records.all() if not record.customer.internal_id=='cust000']
         customers_to_invoice = list(set(customers_to_invoice))
         records = records.filter(models.Pool.customer_id == customer.id) if customer else records
