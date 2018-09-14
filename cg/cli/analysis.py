@@ -7,31 +7,37 @@ import click
 from cg.apps import hk, tb, scoutapi, lims
 from cg.exc import LimsDataError
 from cg.meta.analysis import AnalysisAPI
+from cg.meta.deliver.api import DeliverAPI
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
 PRIORITY_OPTION = click.option('-p', '--priority', type=click.Choice(['low', 'normal', 'high']))
 EMAIL_OPTION = click.option('-e', '--email', help='email to send errors to')
+START_WITH_PROGRAM = click.option('-sw', '--start-with', help='start mip-pipeline with this program and run downstream processes')
 
 
 @click.group(invoke_without_command=True)
 @PRIORITY_OPTION
 @EMAIL_OPTION
+@START_WITH_PROGRAM
 @click.option('-f', '--family', 'family_id', help='family to prepare and start an analysis for')
 @click.pass_context
-def analysis(context, priority, email, family_id):
+def analysis(context, priority, email, family_id, start_with):
     """Prepare and start a MIP analysis for a FAMILY_ID."""
     context.obj['db'] = Store(context.obj['database'])
     hk_api = hk.HousekeeperAPI(context.obj)
     scout_api = scoutapi.ScoutAPI(context.obj)
     lims_api = lims.LimsAPI(context.obj)
     context.obj['tb'] = tb.TrailblazerAPI(context.obj)
+    deliver = DeliverAPI(context.obj, hk_api=hk_api,
+                                        lims_api=lims_api)
     context.obj['api'] = AnalysisAPI(
         db=context.obj['db'],
         hk_api=hk_api,
         tb_api=context.obj['tb'],
         scout_api=scout_api,
         lims_api=lims_api,
+        deliver_api=deliver
     )
 
     if context.invoked_subcommand is None:
@@ -54,7 +60,7 @@ def analysis(context, priority, email, family_id):
             context.invoke(config, family_id=family_id)
             context.invoke(link, family_id=family_id)
             context.invoke(panel, family_id=family_id)
-            context.invoke(start, family_id=family_id, priority=priority, email=email)
+            context.invoke(start, family_id=family_id, priority=priority, email=email, start_with=start_with)
 
 
 @analysis.command()
@@ -129,9 +135,10 @@ def panel(context, print_output, family_id):
 @analysis.command()
 @PRIORITY_OPTION
 @EMAIL_OPTION
+@START_WITH_PROGRAM
 @click.argument('family_id')
 @click.pass_context
-def start(context: click.Context, family_id: str, priority: str=None, email: str=None):
+def start(context: click.Context, family_id: str, priority: str=None, email: str=None, start_with: str=None ):
     """Start the analysis pipeline for a family."""
     family_obj = context.obj['db'].family(family_id)
     if family_obj is None:
@@ -140,7 +147,7 @@ def start(context: click.Context, family_id: str, priority: str=None, email: str
     if context.obj['tb'].analyses(family=family_obj.internal_id, temp=True).first():
         LOG.warning(f"{family_obj.internal_id}: analysis already running")
     else:
-        context.obj['api'].start(family_obj, priority=priority, email=email)
+        context.obj['api'].start(family_obj, priority=priority, email=email, start_with=start_with)
 
 
 @analysis.command()
