@@ -44,6 +44,7 @@ nosetests.xml
 coverage.xml
 *,cover
 .hypothesis/
+.pytest_cache
 
 # Translations
 *.mo
@@ -89,6 +90,7 @@ ENV/
 .ropeproject
 
 DEVELOP/
+.idea
 
 # Apple-OS specific files
 .DS_Store

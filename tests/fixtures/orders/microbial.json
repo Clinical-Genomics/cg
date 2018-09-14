@@ -1,0 +1,74 @@
+{
+  "name": "Microbial samples",
+  "customer": "cust002",
+  "comment": "Order comment",
+  "samples": [
+    {
+      "name": "all-fields",
+      "container": "96 well plate",
+      "container_name": "name of plate",
+      "well_position": "A:1",
+      "require_qcok": true,
+      "application": "MWRNXTR003",
+      "priority": "research",
+      "comment": "plate comment",
+      "elution_buffer": "Nuclease-free water",
+      "strain": "Other",
+      "strain_other": "M.upium",
+      "reference_genome": "NC_111",
+      "extraction_method": "MagNaPure 96 (contact Clinical Genomics before submission)",
+      "concentration_weight": "101",
+      "quantity": "102"
+    },
+    {
+      "name": "required-fields",
+      "container": "tube",
+      "require_qcok": true,
+      "application": "MWRNXTR003",
+      "priority": "research",
+      "elution_buffer": "Nuclease-free water",
+      "strain": "C. Jejuni",
+      "reference_genome": "NC_222",
+      "extraction_method": "MagNaPure 96 (contact Clinical Genomics before submission)"
+    },
+    {
+      "name": "plate-fields",
+      "container": "96 well plate",
+      "container_name": "name of plate",
+      "well_position": "A:2",
+      "require_qcok": true,
+      "application": "MWRNXTR003",
+      "priority": "research",
+      "elution_buffer": "Nuclease-free water",
+      "strain": "C. Jejuni",
+      "reference_genome": "NC_333",
+      "extraction_method": "MagNaPure 96 (contact Clinical Genomics before submission)"
+    },
+    {
+      "name": "other-species-fields",
+      "container": "tube",
+      "require_qcok": true,
+      "application": "MWRNXTR003",
+      "priority": "research",
+      "elution_buffer": "Nuclease-free water",
+      "strain": "Other",
+      "strain_other": "M.upium",
+      "reference_genome": "NC_444",
+      "extraction_method": "MagNaPure 96 (contact Clinical Genomics before submission)"
+    },
+        {
+      "name": "optional-fields",
+      "container": "tube",
+      "require_qcok": true,
+      "application": "MWRNXTR003",
+      "priority": "research",
+      "elution_buffer": "Nuclease-free water",
+      "strain": "C. Jejuni",
+      "reference_genome": "NC_555",
+      "extraction_method": "MagNaPure 96 (contact Clinical Genomics before submission)",
+      "comment": "optional comment",
+      "concentration_weight": "201",
+      "quantity": "202"
+    }
+  ]
+}

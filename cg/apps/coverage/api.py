@@ -83,11 +83,14 @@ class ChanjoAPI(ChanjoDB):
             models.TranscriptStat.sample_id == sample_id,
         ).group_by(models.TranscriptStat.sample_id)
 
+        data = None
+
         result = query.first()
 
-        data = {
-            'mean_coverage': result.mean_coverage,
-            'mean_completeness': result.mean_completeness,
-        }
+        if result:
+            data = {
+                'mean_coverage': result.mean_coverage,
+                'mean_completeness': result.mean_completeness,
+            }
 
         return data

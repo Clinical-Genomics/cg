@@ -60,7 +60,6 @@ def test_collect_delivery_data(report_api):
 
 
 def test_incorporate_delivery_date_from_lims(lims_samples, report_api):
-
     # GIVEN data from an analysed case and an initialised report_api
 
     # WHEN fetch_and_add_delivery_date_from_lims
@@ -75,7 +74,6 @@ def test_incorporate_delivery_date_from_lims(lims_samples, report_api):
 
 
 def test_incorporate_processing_time_from_lims(lims_samples, report_api):
-
     # GIVEN data from an analysed case and an initialised report_api
 
     # WHEN fetch_and_add_delivery_date_from_lims
@@ -242,7 +240,7 @@ def test_incorporate_coverage_data(report_api, lims_samples):
     samples = lims_samples
 
     # WHEN failing to get latest trending data for a family
-    report_api._incorporate_coverage_data(samples=samples)
+    report_api._incorporate_coverage_data(samples=samples, panels='dummyPanel')
 
     # THEN there should be a log entry about this
     for sample in samples:

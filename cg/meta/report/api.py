@@ -19,6 +19,7 @@ class ReportAPI:
     def __init__(self, db: Store, lims_api: LimsAPI, chanjo_api: ChanjoAPI,  analysis_api:
         AnalysisAPI, scout_api: ScoutAPI, logger=logging.getLogger(__name__),
             yaml_loader=ruamel.yaml, path_tool=Path):
+
         self.db = db
         self.lims = lims_api
         self.chanjo = chanjo_api
@@ -27,6 +28,7 @@ class ReportAPI:
         self.yaml_loader = yaml_loader
         self.path_tool = path_tool
         self.scout = scout_api
+
 
     def create_delivery_report(self, customer_id: str, family_id: str) -> str:
         """Generate the html contents of a delivery report."""
@@ -120,6 +122,7 @@ class ReportAPI:
         return template_out
 
     def _get_sample_coverage_from_chanjo(self, lims_id: str, genes: list) -> dict:
+
         """Get coverage data from Chanjo for a sample."""
         return self.chanjo.sample_coverage(lims_id, genes)
 
@@ -217,6 +220,7 @@ class ReportAPI:
 
     def _fetch_family_samples_from_status_db(self, family_id: str) -> list:
         """Incorporate data from the status database for each sample ."""
+
         delivery_data_samples = list()
         family_samples = self.db.family_samples(family_id)
 
@@ -298,4 +302,3 @@ class ReportAPI:
         panel_gene_ids = [gene.get('hgnc_id') for gene in panel_genes]
 
         return panel_gene_ids
-

@@ -66,13 +66,13 @@ class MockDeliver:
 
         if tags[0] == 'mip-config':
             path = '/mnt/hds/proj/bioinfo/bundles/' + family + '/2018-01-30/' + family + \
-                    '_config.yaml'
+                   '_config.yaml'
         elif tags[0] == 'sampleinfo':
             path = '/mnt/hds/proj/bioinfo/bundles/' + family + '/2018-01-30/' + family + \
                     '_qc_sample_info.yaml'
         elif tags[0] == 'qcmetrics':
             path = '/mnt/hds/proj/bioinfo/bundles/' + family + '/2018-01-30/' + family + \
-                    '_qc_metrics.yaml'
+                   '_qc_metrics.yaml'
 
         return [MockFile(path=path)]
 
@@ -83,7 +83,7 @@ class MockDeliver:
 class MockChanjo:
     _sample_coverage_returns_none = False
 
-    def sample_coverage(self, sample_id) -> dict:
+    def sample_coverage(self, sample_id, genes) -> dict:
         """Calculate coverage for OMIM panel."""
 
         if self._sample_coverage_returns_none:
@@ -200,21 +200,31 @@ class MockDB(Store):
         return application
 
 
+class MockScout:
+    def get_genes(self, panel_id: str, version: str) -> list:
+        return []
+
+
 class MockReport(ReportAPI):
     _fileToOpen = ''
 
-    def __init__(self, db, lims_api, deliver_api, chanjo_api, analysis_api, logger,
+    def __init__(self, db, lims_api, deliver_api, chanjo_api, analysis_api, scout_api, logger,
                  yaml_loader,
                  path_tool):
+
         self.db = db
         self.lims = lims_api
         self.deliver = deliver_api
         self.chanjo = chanjo_api
         self.analysis = analysis_api
+        self.scout = scout_api
         self.LOG = logger
         self.yaml_loader = yaml_loader
         self.path_tool = path_tool
 
+    def _open_bundle_file(self, file_path):
+        self._fileToOpen = file_path
+        
 
 @pytest.fixture(scope='function')
 def report_api(analysis_store, lims_samples):
@@ -223,11 +233,12 @@ def report_api(analysis_store, lims_samples):
     deliver = MockDeliver()
     chanjo = MockChanjo()
     analysis = MockAnalysis()
+    scout = MockScout()
     logger = MockLogger()
     yaml_loader = MockYamlLoader()
     path_tool = MockPath()
     _report_api = MockReport(lims_api=lims, db=db, deliver_api=deliver,
-                             chanjo_api=chanjo, analysis_api=analysis, logger=logger,
+                             chanjo_api=chanjo, analysis_api=analysis, scout_api=scout, logger=logger,
                              yaml_loader=yaml_loader,
                              path_tool=path_tool)
     return _report_api

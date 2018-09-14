@@ -27,6 +27,8 @@ class BaseHandler:
     Pool = models.Pool
     Delivery = models.Delivery
     Invoice = models.Invoice
+    MicrobialSample = models.MicrobialSample
+    MicrobialOrder = models.MicrobialOrder
 
 
 class CoreHandler(BaseHandler, AddHandler, FindHandler, StatusHandler, TrendsHandler):
