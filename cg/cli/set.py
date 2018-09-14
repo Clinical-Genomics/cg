@@ -51,7 +51,7 @@ def family(context, action, priority, panels, family_id):
 @set_cmd.command()
 @click.option('-s', '--sex', type=click.Choice(['male', 'female', 'unknown']))
 @click.option('-c', '--customer', help='updates customer, input format custXXX.')
-@click.option('-n', '--add-comment', 'comment', type=str, help='adds a note/comment to a sample, '
+@click.option('-C', '--add-comment', 'comment', type=str, help='adds a note/comment to a sample, '
                                                          'put text \
               between quotation marks! This will not overwrite the current comment.')
 @click.option('-d', '--downsampled-to', type=int, help='sets number of downsampled \
