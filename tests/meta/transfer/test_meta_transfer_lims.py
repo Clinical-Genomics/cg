@@ -24,7 +24,7 @@ def test_transfer_samples_received_at_overwriteable(transfer_lims_api):
     assert not has_same_received_at(lims_api, sample)
 
     # WHEN transfer_samples has been called
-    transfer_lims_api.transfer_samples(SampleState.RECEIVED, IncludeOptions.UNDELIVERED)
+    transfer_lims_api.transfer_samples(SampleState.RECEIVED, IncludeOptions.UNDELIVERED.value)
 
     # THEN the samples should have the same received_at as in lims
     assert has_same_received_at(lims_api, sample)
@@ -47,7 +47,7 @@ def test_transfer_samples_all(transfer_lims_api):
     assert not has_same_received_at(lims_api, sample)
 
     # WHEN transfer_samples has been called
-    transfer_lims_api.transfer_samples(SampleState.RECEIVED, IncludeOptions.ALL)
+    transfer_lims_api.transfer_samples(SampleState.RECEIVED, IncludeOptions.ALL.value)
 
     # THEN the samples should have the same received_at as in lims
     assert has_same_received_at(lims_api, sample)
@@ -91,7 +91,7 @@ def test_transfer_samples_include_unset_received_at(transfer_lims_api):
     lims_api.mock_set_samples(lims_samples)
 
     # WHEN calling transfer lims with include unset received_at
-    transfer_lims_api.transfer_samples(SampleState.RECEIVED, IncludeOptions.UNSET)
+    transfer_lims_api.transfer_samples(SampleState.RECEIVED, IncludeOptions.UNSET.value)
 
     # THEN the sample that was not set has been set and the other sample was not touched
     assert has_same_received_at(lims_api, untransfered_sample)
