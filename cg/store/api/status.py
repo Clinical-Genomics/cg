@@ -145,7 +145,6 @@ class StatusHandler:
             self.Pool.query.filter(
                 models.Pool.invoice_id == None,
                 models.Pool.no_invoice == None,
-                models.Pool.received_at != None,
                 models.Pool.delivered_at != None
             )
         )
