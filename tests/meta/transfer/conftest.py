@@ -96,13 +96,18 @@ class MockLims(LimsAPI):
     _received_at = None
     _delivered_at = None
     _prepared_date = None
-    _sample = None
+    _samples = []
 
     def get_received_date(self, lims_id: str):
-        return self._sample.received_at
+
+        received_date = None
+        for sample in self._samples:
+            if sample.internal_id == lims_id:
+                received_date = sample.received_at
+        return received_date
 
     def mock_set_samples(self, samples):
-        self._sample = samples
+        self._samples = samples
 
 
 @pytest.fixture(scope='function')

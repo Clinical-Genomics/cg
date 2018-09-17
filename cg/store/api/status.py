@@ -74,7 +74,7 @@ class StatusHandler:
                     models.Family.action == 'analyze',
                     and_(
                         models.Sample.sequenced_at != None,
-                        models.Analysis.completed_at == None,
+                        models.Analysis.completed_at is None,
                         models.Family.action == None,
                     )
             ))
@@ -119,21 +119,20 @@ class StatusHandler:
 
     def samples_to_invoice(self, customer: models.Customer=None):
         """Fetch samples that should be invoiced.
-        
+
         Return samples have been delivered but invoiced, excluding those that
         have been marked to skip invoicing.
         """
         records = (
             self.Sample.query.filter(
-                models.Sample.received_at != None,
+                models.Sample.delivered_at != None,
                 models.Sample.invoice_id == None,
-                models.Sample.no_invoice != True,
-                models.Sample.delivered_at != True,
+                models.Sample.no_invoice == False,
                 models.Sample.downsampled_to == None
             )
         )
-        customers_to_invoice = [record.customer for record in records.all() if not record.customer.internal_id=='cust000']
-        customers_to_invoice=list(set(customers_to_invoice))
+        customers_to_invoice = [record.customer for record in records.all() if not record.customer.internal_id == 'cust000']
+        customers_to_invoice = list(set(customers_to_invoice))
         records = records.filter(models.Sample.customer == customer) if customer else records
         return records, customers_to_invoice
 
@@ -167,6 +166,7 @@ class StatusHandler:
         records = (
             self.Pool.query
             .filter(
+                models.Pool.received_at != None,
                 models.Pool.delivered_at == None
             )
         )
