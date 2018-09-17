@@ -73,7 +73,7 @@ class StatusHandler:
                     models.Family.action == 'analyze',
                     and_(
                         models.Sample.sequenced_at != None,
-                        models.Analysis.completed_at is None,
+                        models.Analysis.completed_at == None,
                         models.Family.action == None,
                     )
             ))
@@ -110,6 +110,17 @@ class StatusHandler:
             self.Sample.query
             .filter(
                 models.Sample.sequenced_at != None,
+                models.Sample.delivered_at == None,
+                models.Sample.downsampled_to == None
+            )
+        )
+        return records
+
+    def samples_not_delivered(self):
+        """Fetch samples not delivered."""
+        records = (
+            self.Sample.query
+            .filter(
                 models.Sample.delivered_at == None,
                 models.Sample.downsampled_to == None
             )
