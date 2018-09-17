@@ -18,7 +18,6 @@ class StatusHandler:
             )
             .filter(
                 models.Sample.received_at == None,
-                models.Sample.sequenced_at == None,
                 models.Sample.downsampled_to == None,
                 models.Application.is_external == external,
             )
