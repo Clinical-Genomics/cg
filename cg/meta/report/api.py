@@ -269,10 +269,7 @@ class ReportAPI:
     def _fetch_panels_from_status_db(self, family_id: str) -> list:
         """fetch data from the status database for each panels ."""
         family = self.db.family(family_id)
-
         panels = family.panels
-        panels = ReportAPI._present_set(panels)
-
         return panels
 
     def _incorporate_lims_data(self, report_data: dict):
