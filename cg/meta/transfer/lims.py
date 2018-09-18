@@ -69,12 +69,11 @@ class TransferLims(object):
             statusdb_date = getattr(sample_obj, f'{status_type.value}_at')
             if lims_date:
 
-                if not statusdb_date:
-                    LOG.info(
-                        f"Found new {status_type.value} date for {sample_obj.internal_id}: {lims_date}, old value: {statusdb_date} ")
-                elif statusdb_date.date() != lims_date:
-                    LOG.warning(
-                        f"Updating {status_type.value} date for {sample_obj.internal_id}: {lims_date}, old value: {statusdb_date} ")
+                if statusdb_date and statusdb_date.date() == lims_date:
+                    continue
+
+                LOG.info(f"Found new {status_type.value} date for {sample_obj.internal_id}: " \
+                              f"{lims_date}, old value: {statusdb_date} ")
 
                 setattr(sample_obj, f"{status_type.value}_at", lims_date)
                 self.status.commit()
