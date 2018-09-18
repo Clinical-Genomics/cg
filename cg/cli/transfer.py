@@ -33,7 +33,7 @@ def flowcell(context, flowcell_name):
 @transfer.command()
 @click.option('-s', '--status', type=click.Choice(['received', 'prepared', 'delivered']),
               default='received')
-@click.option('-i', '--include', type=click.Choice(['unset', 'undelivered', 'all']),
+@click.option('-i', '--include', type=click.Choice(['unset', 'not-invoiced', 'all']),
               default='unset')
 @click.pass_context
 def lims(context, status, include):

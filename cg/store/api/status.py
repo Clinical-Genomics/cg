@@ -127,6 +127,27 @@ class StatusHandler:
         )
         return records
 
+    def samples_not_invoiced(self):
+        """Fetch all samples that are not invoiced."""
+        records = (
+            self.Sample.query
+            .filter(
+                models.Sample.downsampled_to == None,
+                models.Sample.invoice_id == None,
+            )
+        )
+        return records
+
+    def samples_not_downsampled(self):
+        """Fetch all samples that are not down sampled."""
+        records = (
+            self.Sample.query
+            .filter(
+                models.Sample.downsampled_to == None
+            )
+        )
+        return records
+
     def samples_to_invoice(self, customer: models.Customer=None):
         """Fetch samples that should be invoiced.
 

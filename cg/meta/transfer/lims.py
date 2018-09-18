@@ -21,7 +21,7 @@ class PoolState(Enum):
 
 class IncludeOptions(Enum):
     UNSET = 'unset'
-    UNDELIVERED = 'undelivered'
+    NOTINVOICED = 'not-invoiced'
     ALL = 'all'
 
 
@@ -65,12 +65,18 @@ class TransferLims(object):
             LOG.info(f"{samples.count()} samples to process")
 
         for sample_obj in samples:
-            status_date = self._date_functions[status_type](sample_obj.internal_id)
+            lims_date = self._date_functions[status_type](sample_obj.internal_id)
+            statusdb_date = getattr(sample_obj, f'{status_type.value}_at')
+            if lims_date:
 
-            if status_date:
-                LOG.info(
-                    f"found {status_type.value} date for {sample_obj.internal_id}: {status_date}")
-                setattr(sample_obj, f"{status_type.value}_at", status_date)
+                if not statusdb_date:
+                    LOG.info(
+                        f"Found new {status_type.value} date for {sample_obj.internal_id}: {lims_date}, old value: {statusdb_date} ")
+                elif statusdb_date.date() != lims_date:
+                    LOG.warning(
+                        f"Updating {status_type.value} date for {sample_obj.internal_id}: {lims_date}, old value: {statusdb_date} ")
+
+                setattr(sample_obj, f"{status_type.value}_at", lims_date)
                 self.status.commit()
             else:
                 LOG.debug(f"no {status_type.value} date found for {sample_obj.internal_id}")
@@ -79,10 +85,10 @@ class TransferLims(object):
         samples = None
         if include == IncludeOptions.UNSET.value:
             samples = self._get_samples_in_step(status_type)
-        elif include == IncludeOptions.UNDELIVERED.value:
-            samples = self._get_all_samples_not_yet_delivered()
+        elif include == IncludeOptions.NOTINVOICED.value:
+            samples = self.status.samples_not_invoiced()
         elif include == IncludeOptions.ALL.value:
-            samples = self._get_all_samples()
+            samples = self._get_all_relevant_samples()
         return samples
 
     def transfer_pools(self, status_type: PoolState):
@@ -109,8 +115,8 @@ class TransferLims(object):
                     else:
                         continue
 
-    def _get_all_samples(self):
-        return self.status.samples()
-
     def _get_samples_in_step(self, status_type):
         return self._sample_functions[status_type]()
+
+    def _get_all_relevant_samples(self):
+        return self.status.samples_not_downsampled()
