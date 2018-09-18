@@ -271,8 +271,6 @@ class ReportAPI:
         family = self.db.family(family_id)
 
         panels = family.panels
-        panels = ReportAPI._present_set(panels)
-
         return panels
 
     def _incorporate_lims_data(self, report_data: dict):
