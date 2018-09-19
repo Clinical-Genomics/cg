@@ -191,11 +191,10 @@ class FindHandler:
     def invoices(self, invoiced: bool = None) -> Query:
         """Fetch invoices."""
         query = self.Invoice.query
-        if invoiced is not None:
-            if invoiced is True:
-                query = query.filter(models.Invoice.invoiced_at != None)
-            else:
-                query = query.filter(models.Invoice.invoiced_at == None)
+        if invoiced is True:
+            query = query.filter(models.Invoice.invoiced_at != None)
+        elif invoiced is False:
+            query = query.filter(models.Invoice.invoiced_at == None)
         return query
 
     def new_invoice_id(self) -> Query:
