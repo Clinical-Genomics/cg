@@ -11,16 +11,21 @@ LOG = logging.getLogger(__name__)
 class UploadScoutAPI(object):
 
     def __init__(self, status_api: Store, hk_api: hk.HousekeeperAPI,
-                 scout_api: scoutapi.ScoutAPI, madeline_exe: str):
+                 scout_api: scoutapi.ScoutAPI,
+                 analysis_api: AnalysisAPI, madeline_exe: str, madeline=madeline,
+                 ):
         self.status = status_api
         self.housekeeper = hk_api
         self.scout = scout_api
         self.madeline_exe = madeline_exe
+        self.madeline = madeline
+        self.analysis = analysis_api
 
-    def data(self, analysis_obj: models.Analysis) -> dict:
+    def generate_config(self, analysis_obj: models.Analysis) -> dict:
         """Fetch data about an analysis to load Scout."""
         analysis_date = analysis_obj.started_at or analysis_obj.completed_at
         hk_version = self.housekeeper.version(analysis_obj.family.internal_id, analysis_date)
+        analysis_data = self.analysis.get_latest_metadata(analysis_obj.family.internal_id)
 
         data = {
             'owner': analysis_obj.family.customer.internal_id,
@@ -28,9 +33,11 @@ class UploadScoutAPI(object):
             'family_name': analysis_obj.family.name,
             'samples': [],
             'analysis_date': analysis_obj.completed_at,
-            'gene_panels': AnalysisAPI.convert_panels(analysis_obj.family.customer.internal_id,
+            'gene_panels': self.analysis.convert_panels(analysis_obj.family.customer.internal_id,
                                                       analysis_obj.family.panels),
             'default_gene_panels': analysis_obj.family.panels,
+            'human_genome_build': analysis_data.get('genome_build'),
+            'rank_model_version': analysis_data.get('rank_model_version'),
         }
 
         for link_obj in analysis_obj.family.links:
@@ -96,6 +103,6 @@ class UploadScoutAPI(object):
             'mother': link_obj.mother.name if link_obj.mother else None,
             'status': link_obj.status,
         } for link_obj in family_obj.links]
-        ped_stream = madeline.make_ped(family_obj.name, samples=samples)
-        svg_path = madeline.run(self.madeline_exe, ped_stream)
+        ped_stream = self.madeline.make_ped(family_obj.name, samples=samples)
+        svg_path = self.madeline.run(self.madeline_exe, ped_stream)
         return svg_path

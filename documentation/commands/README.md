@@ -339,6 +339,22 @@ To update the gender of a sample, use
 
 where `SEX`can be `male`, `female`, or `unknown`.
 
+Update the customer, input format `custXXX` with XXX the customer number.
+```-c, --customer CUSTOMER_ID```
+
+To append a note/comment to a sample, put text between quotation marks! This will not overwrite the current comment.
+```-n, --note TEXT```
+
+Set number of downsampled total reads. Enter 0 to reset.
+```-d, --downsampled-to INTEGER```
+
+Set the application tag. Validation of the tag will be performed.
+```-a, --application-tag APPLICATION_TAG```
+
+Set the capture kit. NO validation of the kit will be performed.
+```-k, --capture-kit CAPTURE_KIT```
+
+
 ## cg status
 View status of things.
 

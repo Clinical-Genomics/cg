@@ -59,3 +59,8 @@ def lims_api():
 
     _lims_api = MockLims()
     return _lims_api
+
+
+@pytest.fixture
+def microbial_orderform():
+    return 'tests/fixtures/orderforms/1603.6.microbial.xlsx'
