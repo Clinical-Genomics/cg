@@ -177,7 +177,7 @@ class FindHandler:
         """Fetch all the pools."""
         records = self.Pool.query
         records = records.filter_by(customer=customer) if customer else records
-        return records
+        return records.order_by(models.Pool.created_at.desc())
 
     def pool(self, pool_id: int):
         """Fetch a pool."""
