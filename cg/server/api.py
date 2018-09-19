@@ -205,7 +205,8 @@ def microbial_sample(sample_id):
 @BLUEPRINT.route('/pools')
 def pools():
     """Fetch pools."""
-    pools_q = db.pools(customer=db.customer(request.args.get('customer')))
+    customer_obj = None if g.current_user.is_admin else g.current_user.customer
+    pools_q = db.pools(customer=customer_obj)
     data = [pool_obj.to_dict() for pool_obj in pools_q.limit(30)]
     return jsonify(pools=data, total=pools_q.count())
 
@@ -216,6 +217,8 @@ def pool(pool_id):
     record = db.pool(pool_id)
     if record is None:
         return abort(404)
+    elif not g.current_user.is_admin and (g.current_user.customer != record.customer):
+        return abort(401)
     return jsonify(**record.to_dict())
 
 
