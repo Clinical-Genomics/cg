@@ -20,6 +20,7 @@ I have new code I want to add, what do I need to do?
 - If it passes, merge the PR into master
 - Delete the branch
 - Bumpversion on master
+- Add change to change log
 - Test the installation of the new master on stage
   - Delete current stage
   - Clone prod to stage
