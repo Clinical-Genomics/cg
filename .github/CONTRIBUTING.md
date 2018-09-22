@@ -10,10 +10,12 @@ I have new code I want to add, what do I need to do?
 
 - Create a PR
 - Get the PR reviewed and approved ... but don't merge yet
+  - Get someone to review your code
   - Is the code the python way?
   - Where is the unit test?
   - Did any signatures of existing functions or methods change?
 - Test the PR on stage by deploying your branch
+  - Do this with your reviewer
   - Delete current stage
   - Clone prod to stage
   - Install branch into stage with the tool's update script
