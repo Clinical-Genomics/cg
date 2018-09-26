@@ -122,11 +122,12 @@ MICROBIAL_SAMPLE = {
     **BASE_SAMPLE,
     **LAB_MIXIN,
     **PREP_MIXIN,
-    'source': validators.Optional(str, None),
     'strain': str,
+    'strain_other': validators.Optional(str, None),
     'reference_genome': str,
     'elution_buffer': str,
-    'extraction_method': validators.Optional(str, None),
+    'extraction_method': str,
+    'concentration_weight': validators.Optional(TypeValidator(str, allow_none=True), None),
 }
 
 METAGENOME_SAMPLE = {

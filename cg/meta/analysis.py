@@ -2,14 +2,15 @@
 import gzip
 import logging
 import re
-from typing import List
+from typing import List, Any
+import ruamel.yaml
+from pathlib import Path
 
 from requests.exceptions import HTTPError
 
 from cg.apps import tb, hk, scoutapi, lims
 from cg.store import models, Store
-
-LOG = logging.getLogger(__name__)
+from cg.meta.deliver.api import DeliverAPI
 
 COLLABORATORS = ('cust000', 'cust002', 'cust003', 'cust004', 'cust042')
 MASTER_LIST = ('ENDO', 'EP', 'IEM', 'IBMFS', 'mtDNA', 'MIT', 'PEDHEP', 'OMIM-AUTO',
@@ -29,25 +30,31 @@ CAPTUREKIT_MAP = {'Agilent Sureselect CRE': 'agilent_sureselect_cre.v1',
 class AnalysisAPI():
 
     def __init__(self, db: Store, hk_api: hk.HousekeeperAPI, scout_api: scoutapi.ScoutAPI,
-                 tb_api: tb.TrailblazerAPI, lims_api: lims.LimsAPI):
+                 tb_api: tb.TrailblazerAPI, lims_api: lims.LimsAPI, deliver_api:
+            DeliverAPI, ruamel=ruamel, Path=Path, logger=logging.getLogger(
+        __name__)):
         self.db = db
         self.tb = tb_api
         self.hk = hk_api
         self.scout = scout_api
         self.lims = lims_api
+        self.deliver = deliver_api
+        self.ruamel = ruamel
+        self.Path = Path
+        self.LOG = logger
 
     def check(self, family_obj: models.Family):
         """Check stuff before starting the analysis."""
         flowcells = self.db.flowcells(family=family_obj)
         statuses = []
         for flowcell_obj in flowcells:
-            LOG.debug(f"{flowcell_obj.name}: checking flowcell")
+            self.LOG.debug(f"{flowcell_obj.name}: checking flowcell")
             statuses.append(flowcell_obj.status)
             if flowcell_obj.status == 'removed':
-                LOG.info(f"{flowcell_obj.name}: requesting removed flowcell")
+                self.LOG.info(f"{flowcell_obj.name}: requesting removed flowcell")
                 flowcell_obj.status = 'requested'
             elif flowcell_obj.status != 'ondisk':
-                LOG.warning(f"{flowcell_obj.name}: {flowcell_obj.status}")
+                self.LOG.warning(f"{flowcell_obj.name}: {flowcell_obj.status}")
         return all(status == 'ondisk' for status in statuses)
 
     def start(self, family_obj: models.Family, **kwargs):
@@ -65,7 +72,7 @@ class AnalysisAPI():
             downsampled = isinstance(link_obj.sample.downsampled_to, int)
             external = link_obj.sample.application_version.application.is_external
             if downsampled or external:
-                LOG.info(f"{link_obj.sample.internal_id}: downsampled/external - skip evaluation")
+                self.LOG.info(f"{link_obj.sample.internal_id}: downsampled/external - skip evaluation")
                 kwargs['skip_evaluation'] = True
                 break
 
@@ -86,10 +93,10 @@ class AnalysisAPI():
         """
         # Fetch data for creating a MIP config file
         data = self.build_config(family_obj)
-        
+
         # Validate and reformat to MIP config format
         config_data = self.tb.make_config(data)
-        
+
         return config_data
 
     def build_config(self, family_obj: models.Family) -> dict:
@@ -114,16 +121,16 @@ class AnalysisAPI():
                     sample_data['capture_kit'] = mip_capturekit or link.sample.capture_kit
                 else:
                     if link.sample.downsampled_to:
-                        LOG.debug(f"{link.sample.name}: downsampled sample, skipping")
+                        self.LOG.debug(f"{link.sample.name}: downsampled sample, skipping")
                     else:
                         try:
                             capture_kit = self.lims.capture_kit(link.sample.internal_id)
                             if capture_kit is None or capture_kit == 'NA':
-                                LOG.warning(f"{link.sample.internal_id}: capture kit not found")
+                                self.LOG.warning(f"{link.sample.internal_id}: capture kit not found")
                             else:
                                 sample_data['capture_kit'] = CAPTUREKIT_MAP[capture_kit]
                         except HTTPError:
-                            LOG.warning(f"{link.sample.internal_id}: not found (LIMS)")
+                            self.LOG.warning(f"{link.sample.internal_id}: not found (LIMS)")
             if link.mother:
                 sample_data['mother'] = link.mother.internal_id
             if link.father:
@@ -177,15 +184,15 @@ class AnalysisAPI():
         }
 
         parts = line.split(':')
-        if len(parts) == 5: # @HWUSI-EAS100R:6:73:941:1973#0/1
+        if len(parts) == 5:  # @HWUSI-EAS100R:6:73:941:1973#0/1
             rs['lane'] = parts[1]
             rs['flowcell'] = 'XXXXXX'
             rs['readnumber'] = parts[-1].split('/')[-1]
-        if len(parts) == 10: # @EAS139:136:FC706VJ:2:2104:15343:197393 1:Y:18:ATCACG
+        if len(parts) == 10:  # @EAS139:136:FC706VJ:2:2104:15343:197393 1:Y:18:ATCACG
             rs['lane'] = parts[3]
             rs['flowcell'] = parts[2]
             rs['readnumber'] = parts[6].split(' ')[-1]
-        if len(parts) == 7: # @ST-E00201:173:HCLCGALXX:1:2106:22516:34834/1
+        if len(parts) == 7:  # @ST-E00201:173:HCLCGALXX:1:2106:22516:34834/1
             rs['lane'] = parts[3]
             rs['flowcell'] = parts[2]
             rs['readnumber'] = parts[-1].split('/')[-1]
@@ -252,3 +259,49 @@ class AnalysisAPI():
         all_panels.add('OMIM-AUTO')
 
         return list(all_panels)
+
+    def _get_latest_raw_file(self, family_id: str, tag: str) -> Any:
+        """Get a python object file for a tag and a family ."""
+
+        analysis_files = self.deliver.get_post_analysis_files(family=family_id,
+                                                              version=False, tags=[tag])
+        if analysis_files:
+            analysis_file_raw = self._open_bundle_file(analysis_files[0].path)
+        else:
+            raise self.LOG.warning(
+                f'No post analysis files received from DeliverAPI for \'{family_id}\'')
+
+        return analysis_file_raw
+
+    def _open_bundle_file(self, relative_file_path: str) -> Any:
+        """Open a bundle file and return it as an Python object."""
+
+        full_file_path = self.Path(self.deliver.get_post_analysis_files_root_dir()).joinpath(
+            relative_file_path)
+        open_file = self.ruamel.yaml.safe_load(self.Path(full_file_path).open())
+        return open_file
+
+    def get_latest_metadata(self, family_id: str) -> dict:
+        """Get the latest trending data for a family."""
+
+        mip_config_raw = self._get_latest_raw_file(family_id=family_id, tag='mip-config')
+
+        qcmetrics_raw = self._get_latest_raw_file(family_id=family_id, tag='qcmetrics')
+
+        sampleinfo_raw = self._get_latest_raw_file(family_id=family_id, tag='sampleinfo')
+
+        trending = dict()
+
+        if mip_config_raw and qcmetrics_raw and sampleinfo_raw:
+            try:
+                trending = self.tb.get_trending(mip_config_raw=mip_config_raw,
+                                                qcmetrics_raw=qcmetrics_raw,
+                                                sampleinfo_raw=sampleinfo_raw)
+            except KeyError as error:
+                self.LOG.warning(f'get_latest_metadata failed for \'{family_id}\''
+                                 f', missing key: {error.args[0]} ')
+                import traceback
+                self.LOG.warning(traceback.format_exc())
+                trending = dict()
+
+        return trending
