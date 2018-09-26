@@ -18,7 +18,6 @@ class StatusHandler:
             )
             .filter(
                 models.Sample.received_at == None,
-                models.Sample.sequenced_at == None,
                 models.Sample.downsampled_to == None,
                 models.Application.is_external == external,
             )
@@ -117,41 +116,92 @@ class StatusHandler:
         )
         return records
 
+    def samples_not_delivered(self):
+        """Fetch samples not delivered."""
+        records = (
+            self.Sample.query
+            .filter(
+                models.Sample.delivered_at == None,
+                models.Sample.downsampled_to == None
+            )
+        )
+        return records
+
+    def samples_not_invoiced(self):
+        """Fetch all samples that are not invoiced."""
+        records = (
+            self.Sample.query
+            .filter(
+                models.Sample.downsampled_to == None,
+                models.Sample.invoice_id == None,
+            )
+        )
+        return records
+
+    def samples_not_downsampled(self):
+        """Fetch all samples that are not down sampled."""
+        records = (
+            self.Sample.query
+            .filter(
+                models.Sample.downsampled_to == None
+            )
+        )
+        return records
+
     def samples_to_invoice(self, customer: models.Customer=None):
         """Fetch samples that should be invoiced.
-        
+
         Return samples have been delivered but invoiced, excluding those that
         have been marked to skip invoicing.
         """
         records = (
             self.Sample.query.filter(
-                models.Sample.received_at != None,
+                models.Sample.delivered_at != None,
                 models.Sample.invoice_id == None,
-                models.Sample.no_invoice != True,
-                models.Sample.delivered_at != True,
+                models.Sample.no_invoice == False,
                 models.Sample.downsampled_to == None
             )
         )
-        customers_to_invoice = [record.customer for record in records.all() if not record.customer.internal_id=='cust000']
-        customers_to_invoice=list(set(customers_to_invoice))
+        customers_to_invoice = [record.customer for record in records.all() if not record.customer.internal_id == 'cust000']
+        customers_to_invoice = list(set(customers_to_invoice))
         records = records.filter(models.Sample.customer == customer) if customer else records
         return records, customers_to_invoice
 
     def pools_to_invoice(self, customer: models.Customer=None):
-        """Fetch pools that should be invoiced.
-        
-        Return pools have been delivered but not invoiced, excluding those that
-        have been marked to skip invoicing.
         """
-        records = ( self.Pool.query.filter(
+        Fetch pools that should be invoiced.
+        """
+        records = (
+            self.Pool.query.filter(
                 models.Pool.invoice_id == None,
-           # #    models.Pool.no_invoice != True,
+                models.Pool.no_invoice == None,
                 models.Pool.delivered_at != None
-           ##     models.Pool.received_at != None
-           # #    models.Pool.downsampled_to == None
             )
         )
+        
         customers_to_invoice = [record.customer for record in records.all() if not record.customer.internal_id=='cust000']
-        customers_to_invoice=list(set(customers_to_invoice))
+        customers_to_invoice = list(set(customers_to_invoice))
         records = records.filter(models.Pool.customer_id == customer.id) if customer else records
         return records, customers_to_invoice
+
+    def pools_to_receive(self):
+        """Fetch pools that have been not yet been received."""
+        records = (
+            self.Pool.query
+            .filter(
+                models.Pool.received_at == None
+            )
+        )
+        return records
+
+    def pools_to_deliver(self):
+        """Fetch pools that have been not yet been delivered."""
+        records = (
+            self.Pool.query
+            .filter(
+                models.Pool.received_at != None,
+                models.Pool.delivered_at == None
+            )
+        )
+        return records
+

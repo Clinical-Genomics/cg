@@ -1,4 +1,12 @@
 # -*- coding: utf-8 -*-
+"""Unified interface to handle sample submissions.
+
+This interface will update information in Status and/or LIMS as required.
+
+The normal entry for information is through the REST API which will pass a JSON
+document with all information about samples in the submission. The input will
+be validated and if passing all checks be accepted as new samples.
+"""
 import datetime as dt
 import logging
 import re
@@ -25,7 +33,10 @@ class OrdersAPI(LimsHandler, StatusHandler):
         self.osticket = osticket
 
     def submit(self, project: OrderType, data: dict, ticket: dict) -> dict:
-        """Submit a batch of samples."""
+        """Submit a batch of samples.
+
+        Main entry point for the class towards interfaces that implements it.
+        """
         try:
             ORDER_SCHEMES[project].validate(data)
         except (ValueError, TypeError) as error:
@@ -129,6 +140,25 @@ class OrdersAPI(LimsHandler, StatusHandler):
         self.update_application(data['ticket'], result['records'])
         return result
 
+    def submit_microbial(self, data: dict) -> dict:
+        """Submit a batch of microbial samples."""
+        # prepare data for status database
+        status_data = self.microbial_samples_to_status(data)
+        # submit samples to LIMS
+        project_data, lims_map = self.process_lims(data, data['samples'])
+        # submit samples to Status
+        self.fillin_sample_ids(status_data['samples'], lims_map, id_key='internal_id')
+        order_obj = self.store_microbial_order(
+            customer=status_data['customer'],
+            order=status_data['order'],
+            ordered=dt.datetime.now(),
+            ticket=data['ticket'],
+            lims_project=project_data['id'],
+            samples=status_data['samples'],
+            comment=status_data['comment'],
+        )
+        return {'project': project_data, 'records': order_obj.microbial_samples}
+
     def process_analysis_samples(self, data: dict) -> dict:
         """Process samples to be analyzed."""
         # filter out only new samples
@@ -182,11 +212,11 @@ class OrdersAPI(LimsHandler, StatusHandler):
             target_reads = sample_obj.application_version.application.target_reads / 1000000
             self.lims.update_sample(sample_obj.internal_id, target_reads=target_reads)
 
-    def fillin_sample_ids(self, samples: List[dict], lims_map: dict):
+    def fillin_sample_ids(self, samples: List[dict], lims_map: dict, id_key: str='internal_id'):
         """Fill in LIMS sample ids."""
         for sample in samples:
             LOG.debug(f"{sample['name']}: link sample to LIMS")
-            if not sample['internal_id']:
+            if not sample.get(id_key):
                 internal_id = lims_map[sample['name']]
                 LOG.info(f"{sample['name']} -> {internal_id}: connect sample to LIMS")
-                sample['internal_id'] = internal_id
+                sample[id_key] = internal_id

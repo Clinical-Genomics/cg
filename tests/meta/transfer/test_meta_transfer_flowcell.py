@@ -1,4 +1,6 @@
 import datetime as dt
+import warnings
+from sqlalchemy import exc as sa_exc
 
 
 def test_transfer_flowcell(flowcell_store, store_housekeeper, transfer_flowcell_api):
@@ -10,7 +12,9 @@ def test_transfer_flowcell(flowcell_store, store_housekeeper, transfer_flowcell_
     assert store_housekeeper.bundles().count() == 0
 
     # WHEN transferring the flowcell containing the sample
-    flowcell_obj = transfer_flowcell_api.transfer(flowcell_id)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=sa_exc.SAWarning)
+        flowcell_obj = transfer_flowcell_api.transfer(flowcell_id)
 
     # THEN it should create a new flowcell record
     assert flowcell_store.flowcells().count() == 1

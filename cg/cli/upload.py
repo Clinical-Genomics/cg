@@ -26,6 +26,9 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def upload(context, family_id):
     """Upload results from analyses."""
+
+    click.echo(click.style('----------------- UPLOAD ----------------------'))
+        
     context.obj['status'] = Store(context.obj['database'])
     context.obj['housekeeper_api'] = hk.HousekeeperAPI(context.obj)
 
@@ -39,12 +42,11 @@ def upload(context, family_id):
                                               scout_api=context.obj['scout_api'],
                                               tb_api=context.obj[
                                                   'tb_api'],
-                                              lims_api=context.obj['lims_api'])
+                                              lims_api=context.obj['lims_api'],
+                                              deliver_api=context.obj['deliver_api'])
     context.obj['report_api'] = ReportAPI(
         db=context.obj['status'],
         lims_api=context.obj['lims_api'],
-        tb_api=context.obj['tb_api'],
-        deliver_api=context.obj['deliver_api'],
         chanjo_api=context.obj['chanjo_api'],
         analysis_api=context.obj['analysis_api']
     )
@@ -54,6 +56,7 @@ def upload(context, family_id):
         hk_api=context.obj['housekeeper_api'],
         scout_api=context.obj['scout_api'],
         madeline_exe=context.obj['madeline_exe'],
+        analysis_api=context.obj['analysis_api']
     )
 
     if family_id:
@@ -65,7 +68,7 @@ def upload(context, family_id):
         else:
             context.invoke(coverage, re_upload=True, family_id=family_id)
             context.invoke(validate, family_id=family_id)
-            context.invoke(genotypes, family_id=family_id)
+            context.invoke(genotypes, re_upload=False, family_id=family_id)
             context.invoke(observations, family_id=family_id)
             context.invoke(delivery_report, family_id=family_id,
                            customer_id=family_obj.customer.internal_id)
@@ -82,6 +85,8 @@ def upload(context, family_id):
 @click.pass_context
 def delivery_report(context, customer_id, family_id, print_console):
     """Generate a delivery report for a case."""
+
+    click.echo(click.style('----------------- DELIVERY_REPORT -------------'))
 
     report_api = context.obj['report_api']
 
@@ -119,6 +124,9 @@ def _add_delivery_report_to_hk(delivery_report_file, hk_api: hk.HousekeeperAPI, 
 @click.pass_context
 def coverage(context, re_upload, family_id):
     """Upload coverage from an analysis to Chanjo."""
+
+    click.echo(click.style('----------------- COVERAGE --------------------'))
+
     chanjo_api = coverage_app.ChanjoAPI(context.obj)
     family_obj = context.obj['status'].family(family_id)
     api = UploadCoverageApi(context.obj['status'], context.obj['housekeeper_api'], chanjo_api)
@@ -127,17 +135,21 @@ def coverage(context, re_upload, family_id):
 
 
 @upload.command()
+@click.option('-r', '--re-upload', is_flag=True, help='re-upload existing analysis')
 @click.argument('family_id')
 @click.pass_context
-def genotypes(context, family_id):
+def genotypes(context, re_upload, family_id):
     """Upload genotypes from an analysis to Genotype."""
+
+    click.echo(click.style('----------------- GENOTYPES -------------------'))
+
     tb_api = tb.TrailblazerAPI(context.obj)
     gt_api = gt.GenotypeAPI(context.obj)
     family_obj = context.obj['status'].family(family_id)
     api = UploadGenotypesAPI(context.obj['status'], context.obj['housekeeper_api'], tb_api, gt_api)
     results = api.data(family_obj.analyses[0])
     if results:
-        api.upload(results)
+        api.upload(results, replace=re_upload)
 
 
 @upload.command()
@@ -145,6 +157,9 @@ def genotypes(context, family_id):
 @click.pass_context
 def observations(context, family_id):
     """Upload observations from an analysis to LoqusDB."""
+
+    click.echo(click.style('----------------- OBSERVATIONS ----------------'))
+
     loqus_api = loqus.LoqusdbAPI(context.obj)
     family_obj = context.obj['status'].family(family_id)
     api = UploadObservationsAPI(context.obj['status'], context.obj['housekeeper_api'], loqus_api)
@@ -162,14 +177,17 @@ def observations(context, family_id):
 @click.pass_context
 def scout(context, re_upload, print_console, family_id):
     """Upload variants from analysis to Scout."""
+
+    click.echo(click.style('----------------- SCOUT -----------------------'))
+
     scout_api = scoutapi.ScoutAPI(context.obj)
     family_obj = context.obj['status'].family(family_id)
     scout_upload_api = context.obj['scout_upload_api']
-    results = scout_upload_api.data(family_obj.analyses[0])
+    scout_config = scout_upload_api.generate_config(family_obj.analyses[0])
     if print_console:
-        click.echo(results)
+        click.echo(scout_config)
     else:
-        scout_api.upload(results, force=re_upload)
+        scout_api.upload(scout_config, force=re_upload)
 
 
 @upload.command()
@@ -184,6 +202,9 @@ def scout(context, re_upload, print_console, family_id):
 def beacon(context: click.Context, family_id: str, panel: str, outfile: str, customer: str,
            quality: int, genome_reference: str):
     """Upload variants for affected samples in a family to cgbeacon."""
+
+    click.echo(click.style('----------------- BEACON ----------------------'))
+
     if outfile:
         outfile += dt.datetime.now().strftime("%Y-%m-%d_%H:%M:%S.pdf")
     api = UploadBeaconApi(
@@ -192,7 +213,7 @@ def beacon(context: click.Context, family_id: str, panel: str, outfile: str, cus
         scout_api=scoutapi.ScoutAPI(context.obj),
         beacon_api=beacon_app.BeaconApi(context.obj),
     )
-    result = api.upload(
+    api.upload(
         family_id=family_id,
         panel=panel,
         outfile=outfile,
@@ -206,6 +227,8 @@ def beacon(context: click.Context, family_id: str, panel: str, outfile: str, cus
 @click.pass_context
 def auto(context):
     """Upload all completed analyses."""
+
+    click.echo(click.style('----------------- AUTO ------------------------'))
 
     exit_code = 0
     for analysis_obj in context.obj['status'].analyses_to_upload():
@@ -226,6 +249,9 @@ def auto(context):
 @click.pass_context
 def validate(context, family_id):
     """Validate a family of samples."""
+
+    click.echo(click.style('----------------- VALIDATE --------------------'))
+
     family_obj = context.obj['status'].family(family_id)
     chanjo_api = coverage_app.ChanjoAPI(context.obj)
     chanjo_samples = []

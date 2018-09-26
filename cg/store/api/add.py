@@ -61,11 +61,11 @@ class AddHandler:
         """Add a new sample to the database."""
         internal_id = internal_id or utils.get_unique_id(self.sample)
         priority_human = priority or ('research' if downsampled_to else 'standard')
-        db_priority = PRIORITY_MAP[priority_human]
+        priority_db = PRIORITY_MAP[priority_human]
         new_sample = self.Sample(name=name, internal_id=internal_id, received_at=received,
                                  sex=sex, order=order, downsampled_to=downsampled_to,
                                  is_tumour=tumour, ordered_at=ordered or dt.datetime.now(),
-                                 priority=db_priority, ticket_number=ticket, comment=comment,
+                                 priority=priority_db, ticket_number=ticket, comment=comment,
                                  **kwargs)
         return new_sample
 
@@ -79,8 +79,8 @@ class AddHandler:
             else:
                 LOG.debug(f"{internal_id} already used - trying another id")
 
-        db_priority = PRIORITY_MAP[priority]
-        new_family = self.Family(internal_id=internal_id, name=name, priority=db_priority)
+        priority_db = PRIORITY_MAP[priority]
+        new_family = self.Family(internal_id=internal_id, name=name, priority=priority_db)
         new_family.panels = panels
         return new_family
 
@@ -154,3 +154,37 @@ class AddHandler:
         for pool in pools or []:
             new_invoice.pools.append(pool)
         return new_invoice
+
+    def add_microbial_order(self, customer: models.Customer, name: str, ordered: dt.datetime,
+                            internal_id: str = None, ticket_number: int = None,
+                            comment: str = None) -> models.MicrobialOrder:
+        """Build a new Order record."""
+        new_order = self.MicrobialOrder(name=name, ordered_at=ordered, internal_id=internal_id,
+                                        ticket_number=ticket_number, comment=comment)
+        new_order.customer = customer
+        return new_order
+
+    def add_microbial_sample(self, name: str, strain: str, strain_other: str, internal_id: str,
+                             reference_genome: str,
+                             application_version: models.ApplicationVersion,
+                             priority: str = None,
+                             comment: str = None, **kwargs) -> models.MicrobialSample:
+        """Build a new MicrobialSample record.
+        
+        To commit you also need to assign the sample to an Order.
+        """
+        internal_id = internal_id or utils.get_unique_id(self.sample)
+        priority_human = priority or 'standard'
+        priority_db = PRIORITY_MAP[priority_human]
+        new_sample = self.MicrobialSample(
+            name=name,
+            strain=strain,
+            strain_other=strain_other,
+            internal_id=internal_id,
+            reference_genome=reference_genome,
+            priority=priority_db,
+            comment=comment,
+            **kwargs
+        )
+        new_sample.application_version = application_version
+        return new_sample
