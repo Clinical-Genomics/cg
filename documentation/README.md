@@ -180,6 +180,12 @@ You can of course specify which upload you want to do yourself as well:
 cg upload [coverage|genotypes|observations|scout|beacon] raredragon
 ```
 
+You can force a reupload of sequencing genotypes:
+
+```bash
+cg upload genotypes --re-upload raredragon
+```
+
 ### `meta`
 
 This is the interfaces that bridge various apps. An example would be the "orders" module. When placing orders we need to coordinate information/actions between the apps: `lims`, `status`, and `osticket`. It also provides some additional functionality such as setting up the basis for the orders API and which fields are required for different order types.
