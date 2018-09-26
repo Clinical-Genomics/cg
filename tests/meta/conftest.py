@@ -100,14 +100,123 @@ def analysis_store(base_store, analysis_family):
     yield base_store
 
 
+class MockFile:
+
+    def __init__(self, path):
+        self.path = path
+
+    def first(self):
+        return MockFile()
+
+    def full_path(self):
+        return ''
+
+
+class MockDeliver:
+
+    def get_post_analysis_files(self, family: str, version, tags):
+
+        if tags[0] == 'mip-config':
+            path = '/mnt/hds/proj/bioinfo/bundles/' + family + '/2018-01-30/' + family + \
+                    '_config.yaml'
+        elif tags[0] == 'sampleinfo':
+            path = '/mnt/hds/proj/bioinfo/bundles/' + family + '/2018-01-30/' + family + \
+                    '_qc_sample_info.yaml'
+        if tags[0] == 'qcmetrics':
+            path = '/mnt/hds/proj/bioinfo/bundles/' + family + '/2018-01-30/' + family + \
+                    '_qc_metrics.yaml'
+
+        return [MockFile(path=path)]
+
+    def get_post_analysis_files_root_dir(self):
+        return ''
+
+
+class MockPath:
+
+    def __init__(self, path):
+        self.yaml = MockYaml()
+
+    def __call__(self, *args, **kwargs):
+        return self
+
+    def open(self):
+        return dict()
+
+    def joinpath(self, path):
+        return ''
+
+
+class MockRuamel:
+    def __init__(self):
+        self.yaml = MockYaml()
+
+    def yaml(self):
+        return MockYaml()
+
+
+class MockYaml:
+    def safe_load(self, path):
+        return {'human_genome_build': {'version': ''}, 'program': {'rankvariant': {'rank_model': {
+            'version': 1.18}}}}
+
+
+class MockLogger:
+    warnings = []
+
+    def warning(self, text: str):
+        self.warnings.append(text)
+
+    def get_warnings(self) -> list:
+        return self.warnings
+
+
+class MockTB:
+    _get_trending_raises_keyerror = False
+
+    def get_trending(self, mip_config_raw: dict, qcmetrics_raw: dict, sampleinfo_raw: dict) -> dict:
+        if self._get_trending_raises_keyerror:
+            raise KeyError('mockmessage')
+
+        # Returns: dict: parsed data
+        ### Define output dict
+        outdata = {
+            'analysis_sex': {'ADM1': 'female', 'ADM2': 'female', 'ADM3': 'female'},
+            'family': 'yellowhog',
+            'duplicates': {'ADM1': 13.525, 'ADM2': 12.525, 'ADM3': 14.525},
+            'genome_build': 'hg19',
+            'mapped_reads': {'ADM1': 98.8, 'ADM2': 99.8, 'ADM3': 97.8},
+            'mip_version': 'v4.0.20',
+            'sample_ids': ['2018-20203', '2018-20204'],
+            'genome_build': '37',
+            'rank_model_version': '1.18',
+        }
+
+        return outdata
+
+    def get_sampleinfo(self, analysis_obj):
+        return ''
+
+    def make_config(self, data):
+        return data
+
+
 @pytest.yield_fixture(scope='function')
-def analysis_api(analysis_store, store_housekeeper, scout_store, trailblazer_api):
+def analysis_api(analysis_store, store_housekeeper, scout_store):
     """Setup an analysis API."""
+    ruamel_mock = MockRuamel()
+    Path_mock = MockPath('')
+    tb_mock = MockTB()
+
     _analysis_api = AnalysisAPI(
         db=analysis_store,
         hk_api=store_housekeeper,
         scout_api=scout_store,
-        tb_api=trailblazer_api,
+        tb_api=tb_mock,
         lims_api=None,
+        deliver_api=MockDeliver(),
+        ruamel=ruamel_mock,
+        Path=Path_mock,
+        logger=MockLogger()
     )
     yield _analysis_api

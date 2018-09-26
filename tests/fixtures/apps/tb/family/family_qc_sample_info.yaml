@@ -60,8 +60,11 @@ program:
   gatk:
     version: '3.6'
   genmod:
-    outdirectory: /path_to/family/bwa
-    outfile: family_sorted_md_brecal_gvcf_vrecal_comb_vt_vep_parsed_snpeff_ranked_BOTH_1.selected.vcf
+    path: /path_to/family_sorted_md_brecal_haptc_vrecal_comb_rhocall_vt_frqf_vep_parsed_snpeff_ranked_BOTH_1.selected.vcf
+    rank_model:
+      file: rank_model_cmms_-v1.20-.ini
+      path: /path_to/MIP_ANALYSIS/references_6.0/rank_model_cmms_-v1.20-.ini
+      version: '1.20'
   manta:
     outdirectory: /path_to/manta
     outfile: family_sorted_md_brecal_manta_SV.vcf
@@ -84,11 +87,6 @@ program:
     outfile: family.sexcheck
   qccollect:
       path: /path_to/family/family_qc_metrics.yaml
-  rankvariant:
-    rank_model:
-      file: rank_model_cmms_v1.18.ini
-      path: /mnt/hds/proj/bioinfo/MIP_ANALYSIS/references_4.0/rank_model_cmms_v1.18.ini
-      version: '1.18'
   sambamba:
     version: 0.6.5
   samtools:
@@ -106,8 +104,11 @@ program:
   svdb:
     path: path/to/118_sorted_md_brecal_comb_SV.vcf
   sv_genmod:
-    outdirectory: /path_to/family/bwa
-    outfile: family_sorted_md_brecal_comb_vep_parsed_ranked_SV.selected.vcf
+    path: /path_to/family_sorted_md_brecal_comb_vep_parsed_ranked_SV.selected.vcf
+    sv_rank_model:
+      file: svrank_model_cmms_-v1.2-.ini
+      path: /path_to/MIP_ANALYSIS/references_6.0/svrank_model_cmms_-v1.2-.ini
+      version: '1.2'
   sv_rankvariant:
     clinical:
       path: /path_to/family_sorted_md_brecal_comb_vep_parsed_ranked_SV.selected.vcf

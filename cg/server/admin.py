@@ -20,7 +20,6 @@ class BaseView(ModelView):
 class CustomerView(BaseView):
     column_exclude_list = [
         'agreement_date',
-        'agreement_registration',
         'organisation_number',
         'invoice_address',
         'delivery_contact',
@@ -90,6 +89,12 @@ class SampleView(BaseView):
     column_filters = ['customer.internal_id', 'sex', 'application_version.application']
     column_editable_list = ['sex', 'downsampled_to', 'sequenced_at', 'ticket_number']
     form_excluded_columns = ['is_external']
+
+
+class PoolView(BaseView):
+    column_searchable_list = ['name', 'order', 'ticket_number', 'customer.internal_id']
+    column_filters = ['customer.internal_id', 'application_version.application']
+    column_editable_list = ['sequenced_at', 'ticket_number']
 
 
 class FamilySampleView(BaseView):

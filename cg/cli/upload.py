@@ -42,12 +42,11 @@ def upload(context, family_id):
                                               scout_api=context.obj['scout_api'],
                                               tb_api=context.obj[
                                                   'tb_api'],
-                                              lims_api=context.obj['lims_api'])
+                                              lims_api=context.obj['lims_api'],
+                                              deliver_api=context.obj['deliver_api'])
     context.obj['report_api'] = ReportAPI(
         db=context.obj['status'],
         lims_api=context.obj['lims_api'],
-        tb_api=context.obj['tb_api'],
-        deliver_api=context.obj['deliver_api'],
         chanjo_api=context.obj['chanjo_api'],
         analysis_api=context.obj['analysis_api']
     )
@@ -57,6 +56,7 @@ def upload(context, family_id):
         hk_api=context.obj['housekeeper_api'],
         scout_api=context.obj['scout_api'],
         madeline_exe=context.obj['madeline_exe'],
+        analysis_api=context.obj['analysis_api']
     )
 
     if family_id:
@@ -68,7 +68,7 @@ def upload(context, family_id):
         else:
             context.invoke(coverage, re_upload=True, family_id=family_id)
             context.invoke(validate, family_id=family_id)
-            context.invoke(genotypes, family_id=family_id)
+            context.invoke(genotypes, re_upload=False, family_id=family_id)
             context.invoke(observations, family_id=family_id)
             context.invoke(delivery_report, family_id=family_id,
                            customer_id=family_obj.customer.internal_id)
@@ -135,9 +135,10 @@ def coverage(context, re_upload, family_id):
 
 
 @upload.command()
+@click.option('-r', '--re-upload', is_flag=True, help='re-upload existing analysis')
 @click.argument('family_id')
 @click.pass_context
-def genotypes(context, family_id):
+def genotypes(context, re_upload, family_id):
     """Upload genotypes from an analysis to Genotype."""
 
     click.echo(click.style('----------------- GENOTYPES -------------------'))
@@ -148,7 +149,7 @@ def genotypes(context, family_id):
     api = UploadGenotypesAPI(context.obj['status'], context.obj['housekeeper_api'], tb_api, gt_api)
     results = api.data(family_obj.analyses[0])
     if results:
-        api.upload(results)
+        api.upload(results, replace=re_upload)
 
 
 @upload.command()
@@ -182,11 +183,11 @@ def scout(context, re_upload, print_console, family_id):
     scout_api = scoutapi.ScoutAPI(context.obj)
     family_obj = context.obj['status'].family(family_id)
     scout_upload_api = context.obj['scout_upload_api']
-    results = scout_upload_api.data(family_obj.analyses[0])
+    scout_config = scout_upload_api.generate_config(family_obj.analyses[0])
     if print_console:
-        click.echo(results)
+        click.echo(scout_config)
     else:
-        scout_api.upload(results, force=re_upload)
+        scout_api.upload(scout_config, force=re_upload)
 
 
 @upload.command()
@@ -212,7 +213,7 @@ def beacon(context: click.Context, family_id: str, panel: str, outfile: str, cus
         scout_api=scoutapi.ScoutAPI(context.obj),
         beacon_api=beacon_app.BeaconApi(context.obj),
     )
-    result = api.upload(
+    api.upload(
         family_id=family_id,
         panel=panel,
         outfile=outfile,

@@ -5,6 +5,7 @@ from pathlib import Path
 
 from cg.apps.tb.add import AddHandler
 
+
 def test_get_files(files_data) -> dict:
     """
     Args:
