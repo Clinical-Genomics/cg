@@ -21,7 +21,7 @@ SOURCE_TYPES = [
 VALID_ORDERFORMS=[
     '1508:13',      # Orderform
     '1541:6',       # Orderform Externally sequenced samples
-    # '1603:6',       # Microbial WGS
+    '1603:6',       # Microbial WGS
     '1604:7',       # Orderform Ready made libraries (RML)
     # '1605:4',       # Microbial metagenomes
 ]
