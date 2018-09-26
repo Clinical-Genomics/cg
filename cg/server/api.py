@@ -310,7 +310,7 @@ def orderform():
     filename = secure_filename(input_file.filename)
 
     try:
-        if filename.endswith('.xlsx'):
+        if filename.lower().endswith('.xlsx'):
             temp_dir = Path(tempfile.gettempdir())
             saved_path = str(temp_dir / filename)
             input_file.save(saved_path)
