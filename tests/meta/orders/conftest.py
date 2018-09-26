@@ -50,12 +50,13 @@ def rml_order():
 def metagenome_order():
     """Load an example metagenome order."""
     json_path = 'tests/fixtures/orders/metagenome.json'
+    json_data = json.load(open(json_path))
+    return json_data
 
 @pytest.fixture    
 def microbial_order():
     """Load an example microbial order."""
     json_path = 'tests/fixtures/orders/microbial.json'
-
     json_data = json.load(open(json_path))
     return json_data
 

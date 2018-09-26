@@ -69,7 +69,6 @@ def base_store(store) -> Store:
                                           sequencing_depth=0, target_reads=40000000),
                     store.add_application('METNXTR020', 'wgs', 'Metagenomics',
                                           sequencing_depth=0, target_reads=20000000),
-                    ]
                     store.add_application('MWRNXTR003', 'mic', 'Microbial whole genome ',
                                           sequencing_depth=0)]
 
