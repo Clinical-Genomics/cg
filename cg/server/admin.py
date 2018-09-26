@@ -20,7 +20,6 @@ class BaseView(ModelView):
 class CustomerView(BaseView):
     column_exclude_list = [
         'agreement_date',
-        'agreement_registration',
         'organisation_number',
         'invoice_address',
         'delivery_contact',

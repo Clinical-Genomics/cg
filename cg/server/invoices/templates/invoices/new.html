@@ -71,7 +71,7 @@
         <td>{{ record.application_version.application.tag }}</td> 
         <td>{{record.created_at.date()}}</td>
         <td>{{record.delivered_at.date()}}</td>
-        <td>{{record.received_at.date()}}</td>
+        <td>{% if record.received_at %}{{record.received_at.date()}}{% else %}{% endif %}</td>
       </tr>
       {% endfor %}
     </tbody>
