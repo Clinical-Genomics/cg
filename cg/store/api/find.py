@@ -100,7 +100,8 @@ class FindHandler:
     def latest_version(self, tag: str) -> models.ApplicationVersion:
         """Fetch the latest application version for an application tag."""
         application_obj = self.Application.query.filter_by(tag=tag).first()
-        return application_obj.versions[-1] if application_obj else None
+        return application_obj.versions[-1] if application_obj and application_obj.versions else \
+            None
 
     def panel(self, abbrev):
         """Find a panel by abbreviation."""
