@@ -192,6 +192,7 @@ def parse_sample(raw_sample):
         'tumour': True if raw_sample.get('UDF/tumor') == 'yes' else False,
         'custom_index': raw_sample.get('UDF/Custom index'),
         'elution_buffer': raw_sample.get('UDF/Sample Buffer'),
+        'elution_buffer_other': raw_sample.get('UDF/Other Elution Buffer'),
         'strain': raw_sample.get('UDF/Strain'),
         'strain_other': raw_sample.get('UDF/Other species'),
         'reference_genome': raw_sample.get('UDF/Reference Genome Microbial'),
