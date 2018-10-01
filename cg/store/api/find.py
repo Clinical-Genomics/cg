@@ -106,8 +106,7 @@ class FindHandler:
         """Fetch the current application version for an application tag."""
         application_obj = self.Application.query.filter_by(tag=tag).first()
         application_id = application_obj.id
-        records = self.ApplicationVersion.query
-        records = records.filter_by(application_id=application_id)
+        records = self.ApplicationVersion.query.filter_by(application_id=application_id)
         records = records.filter(self.ApplicationVersion.valid_from < dt.datetime.now())
         records = records.order_by(desc(self.ApplicationVersion.valid_from))
 
