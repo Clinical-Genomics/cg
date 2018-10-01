@@ -113,7 +113,7 @@ def families_in_customer_group():
     else:
         customer_obj = None if g.current_user.is_admin else g.current_user.customer
         families_q = db.families_in_customer_group(
-            query=request.args.get('query'),
+            query=request.args.get('enquiry'),
             customer=customer_obj,
             action=request.args.get('action'),
         )
@@ -186,7 +186,7 @@ def samples_in_customer_group():
     else:
         customer_obj = None if g.current_user.is_admin else g.current_user.customer
         samples_q = db.samples_in_customer_group(
-            query=request.args.get('query'),
+            query=request.args.get('enquiry'),
             customer=customer_obj,
         )
     limit = int(request.args.get('limit', 50))
