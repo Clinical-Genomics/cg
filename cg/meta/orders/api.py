@@ -60,13 +60,12 @@ class OrdersAPI(LimsHandler, StatusHandler):
 
                         if sample.get('internal_id'):
 
-                            message += ' (already existing sample'
-
                             existing_sample = self.status.sample(sample.get('internal_id'))
+                            sample_customer = ''
                             if existing_sample.customer_id != data['customer']:
-                                message += ' from ' + existing_sample.customer.internal_id
-
-                            message += ')'
+                                sample_customer = ' from ' + existing_sample.customer.internal_id
+                            
+                            message += f" (already existing sample{sample_customer})"
 
                         if sample.get('comment'):
                             message += ' ' + sample.get('comment')
