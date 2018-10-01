@@ -81,7 +81,7 @@ def sample(context, lims_id, downsampled, sex, order, application, priority, cus
         downsampled_to=downsampled,
         priority=priority,
     )
-    new_record.application_version = application_obj.versions[-1]
+    new_record.application_version = status.current_version(application)
     new_record.customer = customer_obj
     status.add_commit(new_record)
     LOG.info(f"{new_record.internal_id}: new sample added")
