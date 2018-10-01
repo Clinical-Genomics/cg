@@ -199,7 +199,7 @@ class StatusHandler:
                     new_sample.customer = customer_obj
                     with self.status.session.no_autoflush:
                         application_tag = sample['application']
-                        new_sample.application_version = self.status.latest_version(application_tag)
+                        new_sample.application_version = self.status.current_version(application_tag)
                     if new_sample.application_version is None:
                         raise OrderError(f"unknown application tag: {sample['application']}")
                     family_samples[new_sample.name] = new_sample
@@ -252,7 +252,7 @@ class StatusHandler:
                 )
             new_sample.customer = customer_obj
             with self.status.session.no_autoflush:
-                new_sample.application_version = self.status.latest_version(sample['application'])
+                new_sample.application_version = self.status.current_version(sample['application'])
             new_samples.append(new_sample)
 
             if not new_sample.is_tumour:
@@ -293,7 +293,7 @@ class StatusHandler:
             )
             for sample_data in samples:
                 application_tag = sample_data['application']
-                application_version = self.status.latest_version(application_tag)
+                application_version = self.status.current_version(application_tag)
                 if application_version is None:
                     raise OrderError(f"unknown application tag: {sample_data['application']}")
 
@@ -321,7 +321,7 @@ class StatusHandler:
         new_pools = []
         for pool in pools:
             with self.status.session.no_autoflush:
-                application_version = self.status.latest_version(pool['application'])
+                application_version = self.status.current_version(pool['application'])
                 if application_version is None:
                     raise OrderError(f"unknown application: {pool['application']}")
             new_pool = self.status.add_pool(
