@@ -100,7 +100,8 @@ class FindHandler:
     def latest_version(self, tag: str) -> models.ApplicationVersion:
         """Fetch the latest application version for an application tag."""
         application_obj = self.Application.query.filter_by(tag=tag).first()
-        return application_obj.versions[-1] if application_obj else None
+        return application_obj.versions[-1] if application_obj and application_obj.versions else \
+            None
 
     def current_version(self, tag: str) -> models.ApplicationVersion:
         """Fetch the current application version for an application tag."""
@@ -187,7 +188,7 @@ class FindHandler:
         """Fetch all the pools."""
         records = self.Pool.query
         records = records.filter_by(customer=customer) if customer else records
-        return records
+        return records.order_by(models.Pool.created_at.desc())
 
     def pool(self, pool_id: int):
         """Fetch a pool."""
@@ -201,11 +202,10 @@ class FindHandler:
     def invoices(self, invoiced: bool = None) -> Query:
         """Fetch invoices."""
         query = self.Invoice.query
-        if invoiced is not None:
-            if invoiced is True:
-                query = query.filter(models.Invoice.invoiced_at != None)
-            else:
-                query = query.filter(models.Invoice.invoiced_at == None)
+        if invoiced is True:
+            query = query.filter(models.Invoice.invoiced_at != None)
+        elif invoiced is False:
+            query = query.filter(models.Invoice.invoiced_at == None)
         return query
 
     def new_invoice_id(self) -> Query:

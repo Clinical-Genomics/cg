@@ -201,7 +201,7 @@ class StatusHandler:
                         application_tag = sample['application']
                         new_sample.application_version = self.status.current_version(application_tag)
                     if new_sample.application_version is None:
-                        raise OrderError(f"unknown application tag: {sample['application']}")
+                        raise OrderError(f"Invalid application: {sample['application']}")
                     family_samples[new_sample.name] = new_sample
                     self.status.add(new_sample)
 
@@ -251,8 +251,13 @@ class StatusHandler:
                     tumour=sample['tumour'],
                 )
             new_sample.customer = customer_obj
+
             with self.status.session.no_autoflush:
-                new_sample.application_version = self.status.current_version(sample['application'])
+                application_tag = sample['application']
+                application_version = self.status.current_version(application_tag)
+                if application_version is None:
+                    raise OrderError(f"Invalid application: {sample['application']}")
+                new_sample.application_version = application_version
             new_samples.append(new_sample)
 
             if not new_sample.is_tumour:
@@ -295,7 +300,7 @@ class StatusHandler:
                 application_tag = sample_data['application']
                 application_version = self.status.current_version(application_tag)
                 if application_version is None:
-                    raise OrderError(f"unknown application tag: {sample_data['application']}")
+                    raise OrderError(f"Invalid application: {sample_data['application']}")
 
                 new_sample = self.status.add_microbial_sample(
                     name=sample_data['name'],
@@ -323,7 +328,7 @@ class StatusHandler:
             with self.status.session.no_autoflush:
                 application_version = self.status.current_version(pool['application'])
                 if application_version is None:
-                    raise OrderError(f"unknown application: {pool['application']}")
+                    raise OrderError(f"Invalid application: {pool['application']}")
             new_pool = self.status.add_pool(
                 customer=customer_obj,
                 name=pool['name'],
