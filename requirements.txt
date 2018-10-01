@@ -32,7 +32,7 @@ pymongo==3.7.1
 
 # apps
 genologics
-loqusdb>=1.0.0
+loqusdb<2.0.0
 trailblazer>=3.1.1
 housekeeper>=2.0.0b2
 chanjo>=4.2.0
