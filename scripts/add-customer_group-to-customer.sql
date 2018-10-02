@@ -7,7 +7,7 @@ CREATE TABLE customer_group (
 
   PRIMARY KEY (id),
   UNIQUE KEY internal_id (internal_id)
-) ENGINE=InnoDB AUTO_INCREMENT=57 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT;
 
 INSERT INTO customer_group ( SELECT id, internal_id, name FROM customer );
 
