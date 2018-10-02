@@ -57,7 +57,6 @@ def register_blueprints(app: Flask):
         assert resp.ok, resp.text
         user_data = resp.json()
         session['user_email'] = user_data['email']
-        #session['user_name'] = user_data['name']
 
     app.register_blueprint(api.BLUEPRINT)
     register_admin_views()
