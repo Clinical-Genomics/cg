@@ -106,19 +106,14 @@ def families():
 
 @BLUEPRINT.route('/families_in_customer_group')
 def families_in_customer_group():
-    """Fetch families."""
-    if request.args.get('status') == 'analysis':
-        records = db.families_to_analyze()
-        count = len(records)
-    else:
-        customer_obj = None if g.current_user.is_admin else g.current_user.customer
-        families_q = db.families_in_customer_group(
-            query=request.args.get('enquiry'),
-            customer=customer_obj,
-            action=request.args.get('action'),
-        )
-        count = families_q.count()
-        records = families_q.limit(30)
+    """Fetch families in customer_group."""
+    customer_obj = None if g.current_user.is_admin else g.current_user.customer
+    families_q = db.families_in_customer_group(
+        query=request.args.get('enquiry'),
+        customer=customer_obj,
+    )
+    count = families_q.count()
+    records = families_q.limit(30)
     data = [family_obj.to_dict(links=True) for family_obj in records]
     return jsonify(families=data, total=count)
 
@@ -160,21 +155,12 @@ def samples():
 
 @BLUEPRINT.route('/samples_in_customer_group')
 def samples_in_customer_group():
-    """Fetch samples."""
-    if request.args.get('status') and not g.current_user.is_admin:
-        return abort(401)
-    if request.args.get('status') == 'incoming':
-        samples_q = db.samples_to_recieve()
-    elif request.args.get('status') == 'labprep':
-        samples_q = db.samples_to_prepare()
-    elif request.args.get('status') == 'sequencing':
-        samples_q = db.samples_to_sequence()
-    else:
-        customer_obj = None if g.current_user.is_admin else g.current_user.customer
-        samples_q = db.samples_in_customer_group(
-            query=request.args.get('enquiry'),
-            customer=customer_obj,
-        )
+    """Fetch samples in a customer group."""
+    customer_obj = None if g.current_user.is_admin else g.current_user.customer
+    samples_q = db.samples_in_customer_group(
+        query=request.args.get('enquiry'),
+        customer=customer_obj,
+    )
     limit = int(request.args.get('limit', 50))
     data = [sample_obj.to_dict() for sample_obj in samples_q.limit(limit)]
     return jsonify(samples=data, total=samples_q.count())
