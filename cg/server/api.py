@@ -136,20 +136,6 @@ def family(family_id):
     return jsonify(**data)
 
 
-@BLUEPRINT.route('/families_in_customer_group/<family_id>')
-def family_in_customer_group(family_id):
-    """Fetch a family with links."""
-    family_obj = db.family(family_id)
-    if family_obj is None:
-        return abort(404)
-    elif not g.current_user.is_admin and (g.current_user.customer.customer_group !=
-                                          family_obj.customer.customer_group):
-        return abort(401)
-
-    data = family_obj.to_dict(links=True, analyses=True)
-    return jsonify(**data)
-
-
 @BLUEPRINT.route('/samples')
 def samples():
     """Fetch samples."""
@@ -205,19 +191,7 @@ def sample(sample_id):
     data = sample_obj.to_dict(links=True, flowcells=True)
     return jsonify(**data)
 
-  
-@BLUEPRINT.route('/samples_in_customer_group/<sample_id>')
-def sample_in_customer_group(sample_id):
-    """Fetch a single sample."""
-    sample_obj = db.sample(sample_id)
-    if sample_obj is None:
-        return abort(404)
-    elif not g.current_user.is_admin and (g.current_user.customer.customer_group !=
-                                          sample_obj.customer.customer_group):
-        return abort(401)
-    data = sample_obj.to_dict(links=True, flowcells=True)
 
-    
 @BLUEPRINT.route('/microbial_orders')
 def microbial_orders():
     """Fetch microbial orders."""
