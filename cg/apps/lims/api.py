@@ -10,6 +10,7 @@ from cg.exc import LimsDataError
 from .constants import PROP2UDF
 from .order import OrderHandler
 
+# fixes https://github.com/Clinical-Genomics/servers/issues/30
 import requests_cache
 requests_cache.install_cache(backend='memory')
 
