@@ -106,6 +106,8 @@ class FindHandler:
     def current_version(self, tag: str) -> models.ApplicationVersion:
         """Fetch the current application version for an application tag."""
         application_obj = self.Application.query.filter_by(tag=tag).first()
+        if not application_obj:
+            return None
         application_id = application_obj.id
         records = self.ApplicationVersion.query.filter_by(application_id=application_id)
         records = records.filter(self.ApplicationVersion.valid_from < dt.datetime.now())
