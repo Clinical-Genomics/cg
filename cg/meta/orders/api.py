@@ -71,7 +71,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
 
                     if ticket.get('name'):
                         message += f"<br />{ticket.get('name')}"
-                        
+
                     data['ticket'] = self.osticket.open_ticket(
                         name=ticket['name'],
                         email=ticket['email'],
@@ -176,8 +176,8 @@ class OrdersAPI(LimsHandler, StatusHandler):
 
     def update_application(self, ticket_number: int, families: List[models.Family]):
         """Update application for trios if relevant."""
-        reduced_map  = {'EXOSXTR100': 'EXTSXTR100', 'WGSPCFC030': 'WGTPCFC030',
-                        'WGSPCFC060': 'WGTPCFC060'}
+        reduced_map = {'EXOSXTR100': 'EXTSXTR100', 'WGSPCFC030': 'WGTPCFC030',
+                       'WGSPCFC060': 'WGTPCFC060'}
         for family_obj in families:
             LOG.debug(f"{family_obj.name}: update application for trios")
             order_samples = [link_obj.sample for link_obj in family_obj.links if
@@ -194,7 +194,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
                                 reduced_tag = reduced_map[application_tag]
                                 LOG.info(f"{sample_obj.internal_id}: update application tag - "
                                          f"{reduced_tag}")
-                                reduced_version = self.status.latest_version(reduced_tag)
+                                reduced_version = self.status.current_version(reduced_tag)
                                 sample_obj.application_version = reduced_version
 
     def add_missing_reads(self, samples: List[models.Sample]):

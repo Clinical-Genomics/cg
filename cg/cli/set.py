@@ -52,8 +52,7 @@ def family(context, action, priority, panels, family_id):
 @click.option('-s', '--sex', type=click.Choice(['male', 'female', 'unknown']))
 @click.option('-c', '--customer', help='updates customer, input format custXXX.')
 @click.option('-C', '--add-comment', 'comment', type=str, help='adds a note/comment to a sample, '
-                                                         'put text \
-              between quotation marks! This will not overwrite the current comment.')
+              'put text between quotation marks! This will not overwrite the current comment.')
 @click.option('-d', '--downsampled-to', type=int, help='sets number of downsampled \
               total reads. Enter 0 to reset.')
 @click.option('-a', '--application-tag', 'apptag', help='sets application tag.')
@@ -124,8 +123,12 @@ def sample(context, sex, customer, comment, downsampled_to, apptag, capture_kit,
             click.echo(click.style(f"Application tag {apptag} does not exist.", fg='red'))
             context.abort()
 
-        application_version = context.obj['status'].latest_version(apptag)
-        application_version_id = context.obj['status'].latest_version(apptag).id
+        application_version = context.obj['status'].current_version(apptag)
+        if application_version is None:
+            click.echo(click.style(f"No valid current application version found!", fg='red'))
+            context.abort()
+
+        application_version_id = application_version.id
 
         if sample_obj.application_version_id == application_version_id:
             click.echo(click.style(f"Sample {sample_obj.internal_id} already has the application "
