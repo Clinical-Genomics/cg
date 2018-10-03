@@ -109,7 +109,7 @@ def families_in_customer_group():
     """Fetch families in customer_group."""
     customer_obj = None if g.current_user.is_admin else g.current_user.customer
     families_q = db.families_in_customer_group(
-        query=request.args.get('enquiry'),
+        enquiry=request.args.get('enquiry'),
         customer=customer_obj,
     )
     count = families_q.count()
@@ -158,7 +158,7 @@ def samples_in_customer_group():
     """Fetch samples in a customer group."""
     customer_obj = None if g.current_user.is_admin else g.current_user.customer
     samples_q = db.samples_in_customer_group(
-        query=request.args.get('enquiry'),
+        enquiry=request.args.get('enquiry'),
         customer=customer_obj,
     )
     limit = int(request.args.get('limit', 50))
