@@ -24,10 +24,9 @@ LOG = logging.getLogger(__name__)
 
 
 class OrdersAPI(LimsHandler, StatusHandler):
-
     """Orders API for accepting new samples into the system."""
 
-    def __init__(self, lims: LimsAPI, status: Store, osticket: OsTicket=None):
+    def __init__(self, lims: LimsAPI, status: Store, osticket: OsTicket = None):
         self.lims = lims
         self.status = status
         self.osticket = osticket
@@ -64,7 +63,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
                             sample_customer = ''
                             if existing_sample.customer_id != data['customer']:
                                 sample_customer = ' from ' + existing_sample.customer.internal_id
-                            
+
                             message += f" (already existing sample{sample_customer})"
 
                         if sample.get('comment'):
@@ -77,7 +76,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
 
                     if ticket.get('name'):
                         message += f"<br />{ticket.get('name')}"
-                        
+
                     data['ticket'] = self.osticket.open_ticket(
                         name=ticket['name'],
                         email=ticket['email'],
@@ -183,8 +182,8 @@ class OrdersAPI(LimsHandler, StatusHandler):
 
     def update_application(self, ticket_number: int, families: List[models.Family]):
         """Update application for trios if relevant."""
-        reduced_map  = {'EXOSXTR100': 'EXTSXTR100', 'WGSPCFC030': 'WGTPCFC030',
-                        'WGSPCFC060': 'WGTPCFC060'}
+        reduced_map = {'EXOSXTR100': 'EXTSXTR100', 'WGSPCFC030': 'WGTPCFC030',
+                       'WGSPCFC060': 'WGTPCFC060'}
         for family_obj in families:
             LOG.debug(f"{family_obj.name}: update application for trios")
             order_samples = [link_obj.sample for link_obj in family_obj.links if
@@ -211,7 +210,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
             target_reads = sample_obj.application_version.application.target_reads / 1000000
             self.lims.update_sample(sample_obj.internal_id, target_reads=target_reads)
 
-    def fillin_sample_ids(self, samples: List[dict], lims_map: dict, id_key: str='internal_id'):
+    def fillin_sample_ids(self, samples: List[dict], lims_map: dict, id_key: str = 'internal_id'):
         """Fill in LIMS sample ids."""
         for sample in samples:
             LOG.debug(f"{sample['name']}: link sample to LIMS")
