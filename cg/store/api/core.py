@@ -16,6 +16,7 @@ class BaseHandler:
 
     User = models.User
     Customer = models.Customer
+    CustomerGroup = models.CustomerGroup
     Sample = models.Sample
     Family = models.Family
     FamilySample = models.FamilySample
