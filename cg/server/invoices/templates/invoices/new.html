@@ -34,11 +34,11 @@
 
     Total Price Standard: <input type="text" size="7" name="total" value="0"/>
     <button class="btn btn-primary float-right" type="submit">Generate invoice</button>    
-    <tr><input type="checkbox" onClick="toggle()" /> Select All</tr>
+    <tr><input type="checkbox" onClick="check_all()" /> Select all</tr>
     <tr><input type="checkbox" onClick="check_subset()" /> Select Subset</tr>
     <br><br><br>
     <div class="container">
-      <input class="form-control" id="myInput" type="text" placeholder="Search..">
+      <input class="form-control" id="Search" type="text" placeholder="Search..">
       <br>
     <table class="table">
       <thead>
@@ -50,7 +50,7 @@
         <th>Application</th>
         <th>Created at</th>
         <th>Delivered at</th>
-        <th>Received at</th>
+        <th>Price: Stan/Prio/Res/Expr</th>
       </tr>
       </thead>
       <tbody id="myTable">
@@ -71,7 +71,11 @@
         <td>{{ record.application_version.application.tag }}</td> 
         <td>{{record.created_at.date()}}</td>
         <td>{{record.delivered_at.date()}}</td>
-        <td>{% if record.received_at %}{{record.received_at.date()}}{% else %}{% endif %}</td>
+        <td>{% if record.application_version.price_standard %}{{record.application_version.price_standard}}{% else %}{% endif %}/
+            {% if record.application_version.price_priority %}{{record.application_version.price_priority}}{% else %}{% endif %}/
+            {% if record.application_version.price_research %}{{record.application_version.price_research}}{% else %}{% endif %}/
+            {% if record.application_version.price_express %}{{record.application_version.price_express}}{% else %}{% endif %}
+        </td>
       </tr>
       {% endfor %}
     </tbody>
@@ -83,15 +87,19 @@
 
 
 {% block scripts %}
-<script language="JavaScript">
-  function toggle() {
-    checkboxes = document.getElementsByName('records');
-    for(var checkbox in checkboxes) {
-      checkboxes[checkbox].checked = !checkboxes[checkbox].checked;
+
+<script language="JavaScript"> 
+    function check_all() {
+      checkboxes = document.getElementsByName('records');
+     
+      for(var checkbox in checkboxes) {
+
+        checkboxes[checkbox].checked = !checkboxes[checkbox].checked;
+      }
+      
+      checkTotal()
     }
-  checkTotal()
-  }
-</script>
+  </script>
 
 <script language="JavaScript">
   function check_subset() {
@@ -123,22 +131,10 @@
 
 </script>
 
-<script type="text/javascript">
-  function checkTotallll() {
-    document.listForm.total.value = '';
-    var sum = 0;
-    for (i=0;i<document.listForm.records.length;i++) {
-      if (document.listForm.records[i].checked) {
-        sum = sum + parseInt(document.listForm.records[i].id);
-      }
-    }
-    document.listForm.total.value = sum;
-  }
-</script>
 
 <script>
   $(document).ready(function(){
-    $("#myInput").on("keyup", function() {
+    $("#Search").on("keyup", function() {
       var value = $(this).val().toLowerCase();
       $("#myTable tr").filter(function() {
         $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
