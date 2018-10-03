@@ -2,7 +2,7 @@
 import datetime as dt
 from typing import List
 
-from sqlalchemy import or_, and_, func
+from sqlalchemy import or_, and_, func, desc
 from sqlalchemy.orm import Query
 
 from cg.store import models
@@ -155,6 +155,18 @@ class FindHandler:
         application_obj = self.Application.query.filter_by(tag=tag).first()
         return application_obj.versions[-1] if application_obj and application_obj.versions else \
             None
+
+    def current_version(self, tag: str) -> models.ApplicationVersion:
+        """Fetch the current application version for an application tag."""
+        application_obj = self.Application.query.filter_by(tag=tag).first()
+        if not application_obj:
+            return None
+        application_id = application_obj.id
+        records = self.ApplicationVersion.query.filter_by(application_id=application_id)
+        records = records.filter(self.ApplicationVersion.valid_from < dt.datetime.now())
+        records = records.order_by(desc(self.ApplicationVersion.valid_from))
+
+        return records.first()
 
     def panel(self, abbrev):
         """Find a panel by abbreviation."""

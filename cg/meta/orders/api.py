@@ -202,7 +202,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
                                 reduced_tag = reduced_map[application_tag]
                                 LOG.info(f"{sample_obj.internal_id}: update application tag - "
                                          f"{reduced_tag}")
-                                reduced_version = self.status.latest_version(reduced_tag)
+                                reduced_version = self.status.current_version(reduced_tag)
                                 sample_obj.application_version = reduced_version
 
     def add_missing_reads(self, samples: List[models.Sample]):
