@@ -3,7 +3,7 @@ Alchy
 SQLAlchemy
 
 # cli
-Click>=6.7
+Click<7.0
 
 # server
 Flask
