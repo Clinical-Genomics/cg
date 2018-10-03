@@ -11,5 +11,5 @@ CREATE TABLE customer_group (
 
 INSERT INTO customer_group ( SELECT id, internal_id, name FROM customer );
 
-Update customer SET customer_group_id = ( SELECT id FROM customer_group Where internal_id = customer.internal_id ) Where customer_group_id = 0
+Update customer SET customer_group_id = ( SELECT id FROM customer_group Where internal_id = customer.internal_id ) Where customer_group_id = 0;
 ALTER TABLE customer ADD CONSTRAINT `customer_group_ibfk_1` FOREIGN KEY (`customer_group_id`) REFERENCES `customer_group` (`id`);
