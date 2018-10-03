@@ -41,6 +41,8 @@ class OrdersAPI(LimsHandler, StatusHandler):
         except (ValueError, TypeError) as error:
             raise OrderError(error.args[0])
 
+        self._validate_customers(project, data)
+
         # detect manual ticket assignment
         ticket_match = re.fullmatch(r'#([0-9]{6})', data['name'])
 
@@ -218,3 +220,18 @@ class OrdersAPI(LimsHandler, StatusHandler):
                 internal_id = lims_map[sample['name']]
                 LOG.info(f"{sample['name']} -> {internal_id}: connect sample to LIMS")
                 sample[id_key] = internal_id
+
+    def _validate_customers(self, project, data):
+        for sample in data.get('samples'):
+
+            if sample.get('internal_id'):
+
+                if project not in (OrderType.SCOUT, OrderType.EXTERNAL):
+                    raise OrderError(f"Only scout and external orders can have imported samples: "
+                                     f"{sample.get('name')}")
+
+                existing_sample = self.status.sample(sample.get('internal_id'))
+                data_customer = self.status.customer(data['customer'])
+
+                if existing_sample.customer.customer_group_id != data_customer.customer_group_id:
+                    raise OrderError(f"Sample not available: {sample.get('name')}")
