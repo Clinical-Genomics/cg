@@ -145,7 +145,8 @@ def mipauto(context: click.Context, before_str: str, yes: bool=False):
         try:
             sampleinfo_path = context.obj['tb'].get_sampleinfo(tb_analysis)
             LOG.info(f"{family_id}: cleaning MIP output")
-            context.invoke(mip, yes=yes, sample_info=open(sampleinfo_path, 'r'))
+            with open(sampleinfo_path, 'r') as sampleinfo_file:
+                context.invoke(mip, yes=yes, sample_info=sampleinfo_file)
         except FileNotFoundError as err:
             LOG.error(f"{family_id}: sample_info file not found, please mark the analysis as deleted in the analysis table in trailblazer.")
             
