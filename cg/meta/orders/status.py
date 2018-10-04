@@ -199,7 +199,7 @@ class StatusHandler:
                     new_sample.customer = customer_obj
                     with self.status.session.no_autoflush:
                         application_tag = sample['application']
-                        new_sample.application_version = self.status.latest_version(application_tag)
+                        new_sample.application_version = self.status.current_version(application_tag)
                     if new_sample.application_version is None:
                         raise OrderError(f"Invalid application: {sample['application']}")
                     family_samples[new_sample.name] = new_sample
@@ -254,7 +254,7 @@ class StatusHandler:
 
             with self.status.session.no_autoflush:
                 application_tag = sample['application']
-                application_version = self.status.latest_version(application_tag)
+                application_version = self.status.current_version(application_tag)
                 if application_version is None:
                     raise OrderError(f"Invalid application: {sample['application']}")
                 new_sample.application_version = application_version
@@ -298,7 +298,7 @@ class StatusHandler:
             )
             for sample_data in samples:
                 application_tag = sample_data['application']
-                application_version = self.status.latest_version(application_tag)
+                application_version = self.status.current_version(application_tag)
                 if application_version is None:
                     raise OrderError(f"Invalid application: {sample_data['application']}")
 
@@ -326,7 +326,7 @@ class StatusHandler:
         new_pools = []
         for pool in pools:
             with self.status.session.no_autoflush:
-                application_version = self.status.latest_version(pool['application'])
+                application_version = self.status.current_version(pool['application'])
                 if application_version is None:
                     raise OrderError(f"Invalid application: {pool['application']}")
             new_pool = self.status.add_pool(

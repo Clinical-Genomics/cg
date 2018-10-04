@@ -2,7 +2,7 @@
 import datetime as dt
 from typing import List
 
-from sqlalchemy import or_, and_, func
+from sqlalchemy import or_, and_, func, desc
 from sqlalchemy.orm import Query
 
 from cg.store import models
@@ -18,6 +18,10 @@ class FindHandler:
         """Fetch all customers."""
         return self.Customer.query
 
+    def customer_group(self, internal_id: str) -> models.CustomerGroup:
+        """Fetch a customer group by internal id from the store."""
+        return self.CustomerGroup.query.filter_by(internal_id=internal_id).first()
+
     def customer_by_id(self, id_: int) -> models.Customer:
         """Fetch a customer by id number from the store."""
         return self.Customer.query.filter_by(id=id_).first()
@@ -32,14 +36,37 @@ class FindHandler:
 
     def families(self, *, customer: models.Customer = None, enquiry: str = None,
                  action: str = None) -> List[models.Family]:
-        """Fetch all families."""
+        """Fetch families."""
         records = self.Family.query
         records = records.filter_by(customer=customer) if customer else records
+
         records = records.filter(or_(
             models.Family.name.like(f"%{enquiry}%"),
             models.Family.internal_id.like(f"%{enquiry}%"),
         )) if enquiry else records
+
         records = records.filter_by(action=action) if action else records
+
+        return records.order_by(models.Family.created_at.desc())
+
+    def families_in_customer_group(self, *, customer: models.Customer = None, enquiry: str =
+    None) -> List[models.Family]:
+        """Fetch all families including those from collaborating customers."""
+        records = self.Family.query \
+            .join(
+            models.Family.customer,
+            models.Customer.customer_group,
+        )
+
+        if customer:
+            records = records.filter(
+                models.CustomerGroup.id == customer.customer_group_id)
+
+        records = records.filter(or_(
+            models.Family.name.like(f"%{enquiry}%"),
+            models.Family.internal_id.like(f"%{enquiry}%"),
+        )) if enquiry else records
+
         return records.order_by(models.Family.created_at.desc())
 
     def find_family(self, customer: models.Customer, name: str) -> models.Family:
@@ -54,6 +81,26 @@ class FindHandler:
         models.Sample]:
         records = self.Sample.query
         records = records.filter_by(customer=customer) if customer else records
+        records = records.filter(or_(
+            models.Sample.name.like(f"%{enquiry}%"),
+            models.Sample.internal_id.like(f"%{enquiry}%"),
+        )) if enquiry else records
+        return records.order_by(models.Sample.created_at.desc())
+
+    def samples_in_customer_group(self, *, customer: models.Customer = None, enquiry: str = None) -> \
+            List[models.Sample]:
+        """Fetch all samples including those from collaborating customers."""
+
+        records = self.Sample.query \
+            .join(
+            models.Sample.customer,
+            models.Customer.customer_group,
+        )
+
+        if customer:
+            records = records.filter(
+                models.CustomerGroup.id == customer.customer_group_id)
+
         records = records.filter(or_(
             models.Sample.name.like(f"%{enquiry}%"),
             models.Sample.internal_id.like(f"%{enquiry}%"),
@@ -77,6 +124,12 @@ class FindHandler:
     def find_sample(self, customer: models.Customer, name: str) -> List[models.Sample]:
         """Find samples within a customer."""
         return self.Sample.query.filter_by(customer=customer, name=name)
+
+    def find_sample_in_customer_group(self, customer: models.Customer, name: str) -> List[
+        models.Sample]:
+        """Find samples within the customer group."""
+        return self.Sample.query.filter(
+            models.Sample.customer.customer_group == customer.customer_group, name == name)
 
     def application(self, tag: str) -> models.Application:
         """Fetch an application from the store."""
@@ -102,6 +155,18 @@ class FindHandler:
         application_obj = self.Application.query.filter_by(tag=tag).first()
         return application_obj.versions[-1] if application_obj and application_obj.versions else \
             None
+
+    def current_version(self, tag: str) -> models.ApplicationVersion:
+        """Fetch the current application version for an application tag."""
+        application_obj = self.Application.query.filter_by(tag=tag).first()
+        if not application_obj:
+            return None
+        application_id = application_obj.id
+        records = self.ApplicationVersion.query.filter_by(application_id=application_id)
+        records = records.filter(self.ApplicationVersion.valid_from < dt.datetime.now())
+        records = records.order_by(desc(self.ApplicationVersion.valid_from))
+
+        return records.first()
 
     def panel(self, abbrev):
         """Find a panel by abbreviation."""
@@ -132,7 +197,7 @@ class FindHandler:
         return self.Analysis.query.filter_by(family=family, started_at=started_at).first()
 
     def flowcells(self, *, status: str = None, family: models.Family = None,
-                  enquiry: str = None) -> Query:
+             enquiry: str = None) -> Query:
         """Fetch all flowcells."""
         records = self.Flowcell.query
         if family:
@@ -175,7 +240,7 @@ class FindHandler:
         )
 
     def pools(self, *, customer: models.Customer) -> Query:
-        """Fetch all the pools."""
+        """Fetch all the pools for a customer."""
         records = self.Pool.query
         records = records.filter_by(customer=customer) if customer else records
         return records.order_by(models.Pool.created_at.desc())

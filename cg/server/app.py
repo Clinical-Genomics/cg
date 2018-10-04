@@ -57,7 +57,6 @@ def register_blueprints(app: Flask):
         assert resp.ok, resp.text
         user_data = resp.json()
         session['user_email'] = user_data['email']
-        #session['user_name'] = user_data['name']
 
     app.register_blueprint(api.BLUEPRINT)
     register_admin_views()
@@ -78,6 +77,7 @@ def register_blueprints(app: Flask):
 
 def register_admin_views():
     ext.admin.add_view(admin.CustomerView(models.Customer, ext.db.session))
+    ext.admin.add_view(admin.CustomerGroupView(models.CustomerGroup, ext.db.session))
     ext.admin.add_view(admin.UserView(models.User, ext.db.session))
     ext.admin.add_view(admin.FamilyView(models.Family, ext.db.session))
     ext.admin.add_view(admin.FamilySampleView(models.FamilySample, ext.db.session))
