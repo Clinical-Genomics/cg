@@ -22,7 +22,7 @@ class InvoiceAPI():
         else:
             contact_customer = self.customer_obj
         contact_user = self.db.user(contact_customer.invoice_contact)
-        
+
         if not (contact_customer and contact_user):
             self.log.append(msg)
             return None
@@ -33,7 +33,6 @@ class InvoiceAPI():
                 'reference': contact_customer.invoice_reference,
                 'address': contact_customer.invoice_address,
             }
-        print(contact)
         if None in contact.values():
             self.log.append(msg)
             return None
@@ -141,8 +140,6 @@ class InvoiceAPI():
             priority = record.priority_human
 
         full_price = getattr(record.application_version, f"price_{priority}")
-        print(priority)
-        print(full_price)
         if not discount:
             discount=0
         discount_factor = float(100 - discount) / 100
