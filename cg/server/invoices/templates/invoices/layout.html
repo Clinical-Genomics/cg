@@ -48,7 +48,7 @@
 
   {% with messages = get_flashed_messages() %}
     {% if messages %}
-        <ul class=flashes>
+        <div class=flashes>
         {% for message in messages %}
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             {{ message }}
@@ -57,7 +57,7 @@
             </button>
           </div>
         {% endfor %}
-        </ul>
+        </div>
       {% endif %}
     {% endwith %}  
   {% block body %}{% endblock %}

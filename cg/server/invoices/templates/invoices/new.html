@@ -89,50 +89,33 @@
 {% block scripts %}
 
 <script language="JavaScript"> 
-    function check_all() {
-      checkboxes = document.getElementsByName('records');
-     
-      for(var checkbox in checkboxes) {
 
-        checkboxes[checkbox].checked = !checkboxes[checkbox].checked;
-      }
-      
-      checkTotal()
-    }
-  </script>
-
-<script language="JavaScript">
-  function check_subset() {
-    checkboxes = document.getElementsByName('records');
-    total_price = 0;
-   
-    for(var checkbox in checkboxes) {
-      total_price += parseInt(checkboxes[checkbox].id)
-      if (total_price <= 500000) {
-      checkboxes[checkbox].checked = !checkboxes[checkbox].checked;
-    }
-    }
+  function check_all() {
+    $("input[name='records']").each(function() {
+      this.checked = !this.checked
+    })
     checkTotal()
   }
-</script>
 
-<script language="JavaScript">
-  function checkTotal() {
-    checkboxes = document.getElementsByName('records');
+  function check_subset() {
     total_price = 0;
-   
-    for(var checkbox in checkboxes) {
-      if (checkboxes[checkbox].checked){
-        total_price += parseInt(checkboxes[checkbox].id);
-    }
-    }
-    document.listForm.total.value = total_price;
+    $("input[name='records']").each(function() {
+      if (total_price <= 500000) {
+        this.checked = !this.checked
+        total_price += parseInt(this.id)
+      }
+    })
+    checkTotal()
   }
 
-</script>
+  function checkTotal() {
+    value = 0
+    $("input[name='records']:checked").each(function() {
+      value += parseInt(this.id)
+    })
+    $("input[name='total']").val(value)
+  }
 
-
-<script>
   $(document).ready(function(){
     $("#Search").on("keyup", function() {
       var value = $(this).val().toLowerCase();
