@@ -49,11 +49,13 @@ def store() -> Store:
 @pytest.yield_fixture(scope='function')
 def base_store(store) -> Store:
     """Setup and example store."""
+    customer_group = store.add_customer_group('dummy_group', 'dummy group')
+    store.add_commit(customer_group)
     customers = [store.add_customer('cust000', 'Production', scout_access=True,
-                                    invoice_address='Test street'),
-                 store.add_customer('cust001', 'Customer', scout_access=False),
-                 store.add_customer('cust002', 'Karolinska', scout_access=True),
-                 store.add_customer('cust003', 'CMMS', scout_access=True)]
+                                    invoice_address='Test street', customer_group=customer_group),
+                 store.add_customer('cust001', 'Customer', scout_access=False, customer_group=customer_group),
+                 store.add_customer('cust002', 'Karolinska', scout_access=True, customer_group=customer_group),
+                 store.add_customer('cust003', 'CMMS', scout_access=True, customer_group=customer_group)]
     store.add_commit(customers)
     applications = [store.add_application('WGXCUSC000', 'wgs', 'External WGS',
                                           sequencing_depth=0, is_external=True),
