@@ -29,6 +29,10 @@ class FindHandler:
     def user(self, email: str) -> models.User:
         """Fetch a user from the store."""
         return self.User.query.filter_by(email=email).first()
+        
+    def user_by_cust(self, customer_id: int) -> models.User:
+        """Fetch a user from the store."""
+        return self.User.query.filter_by(customer_id=customer_id).first()
 
     def family(self, internal_id: str) -> models.Family:
         """Fetch a family by internal id from the database."""
