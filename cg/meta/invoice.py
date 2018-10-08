@@ -16,7 +16,7 @@ class InvoiceAPI():
         self.customer_obj  = invoice_obj.customer
 
     def prepare_contact_info(self, costcenter):
-        msg = f'Could not open/generate invoice. Contact information missing in database for customer {self.customer_obj.id}. See log files.'
+        msg = f'Could not open/generate invoice. Contact information missing in database for customer {self.customer_obj.internal_id}. See log files.'
         if costcenter.lower() == 'kth':
             contact_customer = self.db.customer('cust999')
         else:
