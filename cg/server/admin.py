@@ -20,7 +20,6 @@ class BaseView(ModelView):
 class CustomerView(BaseView):
     column_exclude_list = [
         'agreement_date',
-        'agreement_registration',
         'organisation_number',
         'invoice_address',
         'delivery_contact',
@@ -28,7 +27,16 @@ class CustomerView(BaseView):
     ]
     column_searchable_list = ['internal_id', 'name', 'primary_contact']
     column_filters = ['priority', 'scout_access']
-    column_editable_list = ['name', 'scout_access', 'primary_contact', 'priority']
+    column_editable_list = ['name', 'scout_access', 'primary_contact', 'priority', 'customer_group']
+
+
+class CustomerGroupView(BaseView):
+    column_exclude_list = [
+
+    ]
+    column_searchable_list = ['internal_id', 'name']
+    column_filters = []
+    column_editable_list = ['name']
 
 
 class UserView(BaseView):

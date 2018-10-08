@@ -14,12 +14,17 @@ LOG = logging.getLogger(__name__)
 class AddHandler:
     """Methods related to adding new data to the store."""
 
-    def add_customer(self, internal_id: str, name: str, scout_access: bool = False,
-                     **kwargs) -> models.Customer:
+    def add_customer(self, internal_id: str, name: str, customer_group:
+    models.CustomerGroup, scout_access: bool = False, **kwargs) -> models.Customer:
         """Add a new customer to the database."""
         new_customer = self.Customer(internal_id=internal_id, name=name, scout_access=scout_access,
-                                     **kwargs)
+                                     customer_group=customer_group, **kwargs)
         return new_customer
+
+    def add_customer_group(self, internal_id: str, name: str, **kwargs) -> models.CustomerGroup:
+        """Add a new customer group to the database."""
+        new_customer_group = self.CustomerGroup(internal_id=internal_id, name=name, **kwargs)
+        return new_customer_group
 
     def add_user(self, customer: models.Customer, email: str, name: str,
                  is_admin: bool = False) -> models.User:
