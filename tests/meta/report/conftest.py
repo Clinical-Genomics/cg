@@ -206,7 +206,6 @@ class MockScout:
 
 
 class MockReport(ReportAPI):
-    _fileToOpen = ''
 
     def __init__(self, db, lims_api, deliver_api, chanjo_api, analysis_api, scout_api, logger,
                  yaml_loader,
@@ -221,9 +220,6 @@ class MockReport(ReportAPI):
         self.LOG = logger
         self.yaml_loader = yaml_loader
         self.path_tool = path_tool
-
-    def _open_bundle_file(self, file_path):
-        self._fileToOpen = file_path
         
 
 @pytest.fixture(scope='function')
