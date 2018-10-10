@@ -26,6 +26,7 @@ class MockLims(LimsAPI):
 
     def get_prep_method(self, lims_id: str) -> str:
         return 'CG002 - End repair Size selection A-tailing and Adapter ligation (TruSeq PCR-free ' \
+               '' \
                'DNA)'
 
     def get_sequencing_method(self, lims_id: str) -> str:
@@ -69,7 +70,7 @@ class MockDeliver:
                    '_config.yaml'
         elif tags[0] == 'sampleinfo':
             path = '/mnt/hds/proj/bioinfo/bundles/' + family + '/2018-01-30/' + family + \
-                    '_qc_sample_info.yaml'
+                   '_qc_sample_info.yaml'
         elif tags[0] == 'qcmetrics':
             path = '/mnt/hds/proj/bioinfo/bundles/' + family + '/2018-01-30/' + family + \
                    '_qc_metrics.yaml'
@@ -210,7 +211,6 @@ class MockReport(ReportAPI):
     def __init__(self, db, lims_api, deliver_api, chanjo_api, analysis_api, scout_api, logger,
                  yaml_loader,
                  path_tool):
-
         self.db = db
         self.lims = lims_api
         self.deliver = deliver_api
@@ -220,7 +220,7 @@ class MockReport(ReportAPI):
         self.LOG = logger
         self.yaml_loader = yaml_loader
         self.path_tool = path_tool
-        
+
 
 @pytest.fixture(scope='function')
 def report_api(analysis_store, lims_samples):
@@ -234,7 +234,8 @@ def report_api(analysis_store, lims_samples):
     yaml_loader = MockYamlLoader()
     path_tool = MockPath()
     _report_api = MockReport(lims_api=lims, db=db, deliver_api=deliver,
-                             chanjo_api=chanjo, analysis_api=analysis, scout_api=scout, logger=logger,
+                             chanjo_api=chanjo, analysis_api=analysis, scout_api=scout,
+                             logger=logger,
                              yaml_loader=yaml_loader,
                              path_tool=path_tool)
     return _report_api
