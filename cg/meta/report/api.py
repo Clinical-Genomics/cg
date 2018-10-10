@@ -290,7 +290,7 @@ class ReportAPI:
             sample['application_version'] = lims_sample.get('application_version')
             sample['received'] = ReportAPI._present_date(lims_sample.get('received'))
 
-    def _get_genes_from_scout(self, panels) -> list:
+    def _get_genes_from_scout(self, panels: list) -> list:
         panel_genes = list()
 
         for panel in panels:
