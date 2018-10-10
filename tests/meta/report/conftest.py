@@ -83,7 +83,7 @@ class MockDeliver:
 class MockChanjo:
     _sample_coverage_returns_none = False
 
-    def sample_coverage(self, sample_id, genes) -> dict:
+    def sample_coverage(self, sample_id: str, panel_genes: list) -> dict:
         """Calculate coverage for OMIM panel."""
 
         if self._sample_coverage_returns_none:
