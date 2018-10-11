@@ -274,6 +274,12 @@ class FindHandler:
         """Fetch an invoice."""
         return self.Invoice.get(invoice_id)
 
+    def invoice_samples(self, *, invoice_id: int = None) -> List[models.Sample]:
+        pools = self.Pool.query.filter_by(invoice_id=invoice_id).all()
+        samples = self.Sample.query.filter_by(invoice_id=invoice_id).all()
+        return pools + samples
+
+
     def microbial_orders(self, *, customer: models.Customer = None, enquiry: str = None) -> List[
         models.MicrobialOrder]:
         """Fetch all microbial_orders."""
