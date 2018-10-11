@@ -230,8 +230,42 @@ class StatusHandler:
         return new_families
 
     def store_samples(self, customer: str, order: str, ordered: dt.datetime, ticket: int,
-                      samples: List[dict]) -> List[models.Sample]:
+                            samples: List[dict]) -> List[models.Sample]:
         """Store samples in the status database."""
+        production_customer = self.status.customer('cust000')
+        customer_obj = self.status.customer(customer)
+        if customer_obj is None:
+            raise OrderError(f"unknown customer: {customer}")
+        new_samples = []
+        for sample in samples:
+            with self.status.session.no_autoflush:
+                new_sample = self.status.add_sample(
+                    name=sample['name'],
+                    internal_id=sample['internal_id'],
+                    sex=sample['sex'] or 'unknown',
+                    order=order,
+                    ordered=ordered,
+                    ticket=ticket,
+                    priority=sample['priority'],
+                    comment=sample['comment'],
+                    tumour=sample['tumour'],
+                )
+            new_sample.customer = customer_obj
+
+            with self.status.session.no_autoflush:
+                application_tag = sample['application']
+                application_version = self.status.current_version(application_tag)
+                if application_version is None:
+                    raise OrderError(f"Invalid application: {sample['application']}")
+                new_sample.application_version = application_version
+            new_samples.append(new_sample)
+
+        self.status.add_commit(new_samples)
+        return new_samples
+
+    def store_fastq_samples(self, customer: str, order: str, ordered: dt.datetime, ticket: int,
+                            samples: List[dict]) -> List[models.Sample]:
+        """Store fast samples in the status database including family connection and delivery."""
         production_customer = self.status.customer('cust000')
         customer_obj = self.status.customer(customer)
         if customer_obj is None:
