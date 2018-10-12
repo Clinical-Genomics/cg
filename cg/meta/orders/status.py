@@ -293,9 +293,8 @@ class StatusHandler:
                 new_samples.append(new_sample)
 
                 if not new_sample.is_tumour:
-                    with self.status.session.no_autoflush:
-                        new_family = self.status.add_family(name=sample['name'], panels=['OMIM-AUTO'],
-                                                            priority='research')
+                    new_family = self.status.add_family(name=sample['name'], panels=['OMIM-AUTO'],
+                                                        priority='research')
                     new_family.customer = production_customer
                     self.status.add(new_family)
 
