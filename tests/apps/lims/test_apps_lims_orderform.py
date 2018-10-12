@@ -87,6 +87,32 @@ def test_parsing_external_orderform(external_orderform):
     assert wgs_sample.get('capture_kit') is None
 
 
+def test_parsing_metagenome_orderform(metagenome_orderform):
+    # GIVEN an orderform for one metagenome sample
+    # WHEN parsing the file
+    data = orderform.parse_orderform(metagenome_orderform)
+    # THEN it should detect the project type
+    assert data['project_type'] == 'metagenome'
+    # ... and find all samples
+    assert len(data['items']) == 2
+    # ... and collect relevant sample info
+    sample = data['items'][0]
+
+    assert sample['name'] == 'Bristol'
+    assert sample['container'] == '96 well plate'
+    assert sample['application'] == 'METPCFR020'
+    assert sample['customer'] == 'cust000'
+    assert sample['source'] == 'faeces'
+    assert sample['priority'] == 'standard'
+    assert sample['elution_buffer'] == 'EB-buffer'
+    assert sample['container_name'] == 'Platen'
+    assert sample['well_position'] == 'A:1'
+    assert sample['concentration_weight'] == '2'
+    assert sample['quantity'] == '10'
+    assert sample['extraction_method'] == 'best'
+    assert sample['comment'] == '5 on the chart'
+
+    
 def test_parsing_microbial_orderform(microbial_orderform):
     # GIVEN a path to a microbial orderform with 3 samples
 
@@ -123,3 +149,4 @@ def test_parsing_microbial_orderform(microbial_orderform):
     assert sample_data['comment'] == 'plate comment'
     assert sample_data['concentration_weight'] == '101'
     assert sample_data['quantity'] == '102'
+    

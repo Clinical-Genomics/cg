@@ -17,6 +17,14 @@ SOURCE_TYPES = [
     'nail',
     'muscle',
     'other',
+    # metagenome sources
+    'skin',
+    'respiratory',
+    'urine',
+    'CSF',
+    'faeces',
+    'environmental',
+    'unknown'
 ]
 
 
@@ -88,6 +96,8 @@ def get_project_type(document_title: str, parsed_samples: List) -> str:
         return 'external'
     elif '1603' in document_title:
         return 'microbial'
+    elif '1605' in document_title:
+        return 'metagenome'
 
     analyses = set(sample['analysis'].lower() for sample in parsed_samples)
     if len(analyses) > 1:

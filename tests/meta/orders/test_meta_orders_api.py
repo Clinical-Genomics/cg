@@ -13,8 +13,9 @@ from cg.meta.orders import OrdersAPI, OrderType
     OrderType.SCOUT,
     OrderType.EXTERNAL,
     OrderType.MICROBIAL,
+    OrderType.METAGENOME,
 ])
-def test_submit(base_store, orders_api, all_orders, monkeypatch, order_type):
+def test_submit(base_store, orders_api: OrdersAPI, all_orders, monkeypatch, order_type):
     ticket_number = 1234567
     monkeypatch.setattr(orders_api.osticket, 'open_ticket', lambda *args, **kwargs: ticket_number)
 
