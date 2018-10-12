@@ -48,7 +48,8 @@ def upload(context, family_id):
         db=context.obj['status'],
         lims_api=context.obj['lims_api'],
         chanjo_api=context.obj['chanjo_api'],
-        analysis_api=context.obj['analysis_api']
+        analysis_api=context.obj['analysis_api'],
+        scout_api=context.obj['scout_api']
     )
 
     context.obj['scout_upload_api'] = UploadScoutAPI(
