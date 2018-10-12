@@ -7,6 +7,9 @@ from cg.store import models
 
 class StatusHandler:
 
+    def __init__(self):
+        self.status = None
+
     @staticmethod
     def group_families(samples: List[dict]) -> dict:
         """Group samples in families."""
