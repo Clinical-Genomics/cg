@@ -202,7 +202,8 @@ class StatusHandler:
                     new_sample.customer = customer_obj
                     with self.status.session.no_autoflush:
                         application_tag = sample['application']
-                        new_sample.application_version = self.status.current_version(application_tag)
+                        new_sample.application_version = self.status.current_version(
+                            application_tag)
                     if new_sample.application_version is None:
                         raise OrderError(f"Invalid application: {sample['application']}")
                     family_samples[new_sample.name] = new_sample
@@ -233,7 +234,7 @@ class StatusHandler:
         return new_families
 
     def store_samples(self, customer: str, order: str, ordered: dt.datetime, ticket: int,
-                            samples: List[dict]) -> List[models.Sample]:
+                      samples: List[dict]) -> List[models.Sample]:
         """Store samples in the status database."""
         customer_obj = self.status.customer(customer)
         if customer_obj is None:
@@ -315,8 +316,8 @@ class StatusHandler:
         return new_samples
 
     def store_microbial_order(self, customer: str, order: str, ordered: dt.datetime, ticket: int,
-                        lims_project: str, samples: List[dict],
-                        comment: str=None) -> List[models.MicrobialSample]:
+                              lims_project: str, samples: List[dict],
+                              comment: str = None) -> List[models.MicrobialSample]:
         """Store microbial samples in the status database."""
         customer_obj = self.status.customer(customer)
         if customer_obj is None:
