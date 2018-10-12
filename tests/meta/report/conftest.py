@@ -26,6 +26,7 @@ class MockLims(LimsAPI):
 
     def get_prep_method(self, lims_id: str) -> str:
         return 'CG002 - End repair Size selection A-tailing and Adapter ligation (TruSeq PCR-free ' \
+               '' \
                'DNA)'
 
     def get_sequencing_method(self, lims_id: str) -> str:
@@ -83,7 +84,7 @@ class MockDeliver:
 class MockChanjo:
     _sample_coverage_returns_none = False
 
-    def sample_coverage(self, sample_id) -> dict:
+    def sample_coverage(self, sample_id: str, panel_genes: list) -> dict:
         """Calculate coverage for OMIM panel."""
 
         if self._sample_coverage_returns_none:
@@ -200,10 +201,14 @@ class MockDB(Store):
         return application
 
 
-class MockReport(ReportAPI):
-    _fileToOpen = ''
+class MockScout:
+    def get_genes(self, panel_id: str, version: str) -> list:
+        return []
 
-    def __init__(self, db, lims_api, deliver_api, chanjo_api, analysis_api, logger,
+
+class MockReport(ReportAPI):
+
+    def __init__(self, db, lims_api, deliver_api, chanjo_api, analysis_api, scout_api, logger,
                  yaml_loader,
                  path_tool):
         self.db = db
@@ -211,6 +216,7 @@ class MockReport(ReportAPI):
         self.deliver = deliver_api
         self.chanjo = chanjo_api
         self.analysis = analysis_api
+        self.scout = scout_api
         self.LOG = logger
         self.yaml_loader = yaml_loader
         self.path_tool = path_tool
@@ -223,11 +229,13 @@ def report_api(analysis_store, lims_samples):
     deliver = MockDeliver()
     chanjo = MockChanjo()
     analysis = MockAnalysis()
+    scout = MockScout()
     logger = MockLogger()
     yaml_loader = MockYamlLoader()
     path_tool = MockPath()
     _report_api = MockReport(lims_api=lims, db=db, deliver_api=deliver,
-                             chanjo_api=chanjo, analysis_api=analysis, logger=logger,
+                             chanjo_api=chanjo, analysis_api=analysis, scout_api=scout,
+                             logger=logger,
                              yaml_loader=yaml_loader,
                              path_tool=path_tool)
     return _report_api
