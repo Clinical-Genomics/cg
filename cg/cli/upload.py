@@ -85,7 +85,52 @@ def upload(context, family_id):
 @click.option('-p', '--print', 'print_console', is_flag=True, help='print report to console')
 @click.pass_context
 def delivery_report(context, customer_id, family_id, print_console):
-    """Generate a delivery report for a case."""
+    """Generate a delivery report for a case.
+
+    The report contains data from different sources:
+    delivery_data['family']: status-db
+    delivery_data['customer_obj'].name: status-db
+    delivery_data['today'].date(): generated on creation
+    delivery_data['panels']: status-db
+
+    delivery_data['customer_obj'].invoice_address: status-db
+    delivery_data['customer_obj'].scout_access status-db
+    delivery_data['accredited']: status-db
+
+    for application in delivery_data['application_objs']: status-db
+        application['tag']: status-db
+        application['description']: status-db
+        application['limitations']: status-db
+
+    delivery_data['samples']: status-db
+
+    for sample in delivery_data['samples']: status-db
+        sample['name']: lims
+        sample['id']: status-db
+        sample['sex']: lims
+        sample['status']: status-db
+        sample['source']: lims
+        sample['ticket']: status-db
+        sample['application']: lims
+        sample['received']: lims
+
+        sample['prep_method']: lims
+        sample['sequencing_method']: lims
+        sample['delivery_method']: lims
+
+        sample['delivery_date']: lims
+        sample['million_read_pairs']: status-db
+        sample['mapped_reads']: trailblazer
+        sample['target_coverage']: chanjo
+        sample['target_completeness']: chanjo
+        sample['duplicates']: trailblazer
+        sample['processing_time']: lims
+        sample['analysis_sex']: trailblazer
+
+    delivery_data['mip_version']: trailblazer
+    delivery_data['genome_build']: trailblazer
+
+    """
 
     click.echo(click.style('----------------- DELIVERY_REPORT -------------'))
 
