@@ -16,9 +16,9 @@ from cg.apps.scoutapi import ScoutAPI
 
 class ReportAPI:
 
-    def __init__(self, db: Store, lims_api: LimsAPI, chanjo_api: ChanjoAPI,  analysis_api:
-        AnalysisAPI, scout_api: ScoutAPI, logger=logging.getLogger(__name__),
-            yaml_loader=ruamel.yaml, path_tool=Path):
+    def __init__(self, db: Store, lims_api: LimsAPI, chanjo_api: ChanjoAPI, analysis_api:
+                 AnalysisAPI, scout_api: ScoutAPI, logger=logging.getLogger(__name__),
+                 yaml_loader=ruamel.yaml, path_tool=Path):
 
         self.db = db
         self.lims = lims_api
@@ -29,15 +29,13 @@ class ReportAPI:
         self.path_tool = path_tool
         self.scout = scout_api
 
-
     def create_delivery_report(self, customer_id: str, family_id: str) -> str:
         """Generate the html contents of a delivery report."""
         delivery_data = self._get_delivery_data(customer_id, family_id)
         rendered_report = self._render_delivery_report(delivery_data)
         return rendered_report
 
-    def create_delivery_report_file(self, customer_id: str, family_id: str, file_path:
-    Path):
+    def create_delivery_report_file(self, customer_id: str, family_id: str, file_path: Path):
         """Generate a temporary file containing a delivery report."""
 
         delivery_report = self.create_delivery_report(customer_id=customer_id,
