@@ -47,13 +47,16 @@
                       <div class="row"><h5>Modified Invoice</h5></div>
                       <br>
                       <div class="row">
-                        
+
                         <div class="col">
-                          <label class="custom-file">
-                            <input name="KTH_excel" type="file" class="custom-file-input"> 
-                            <span class="custom-file-control">Choose KTH invoice...</span>
-                          </label>
-                          
+
+                          <div class="input-group mb-3">
+                            <div class="custom-file">
+                              <input type="file" class="custom-file-input" id="KTH_excel">
+                              <label class="custom-file-label" for="KTH_excel">Choose KTH invoice...</label>
+                            </div>
+                          </div>
+
                           {%if invoice.excel_kth%}
                           <a href="{{ url_for('invoices.modified_invoice', invoice_id=invoice.id, cost_center='KTH') }}"  aria-pressed="true">invoice_KTH.xlsx</a>
                           {% else %}
@@ -65,10 +68,13 @@
                       <br>
                       <div class="row">
                         <div class="col">
-                          <label class="custom-file">
-                            <input name="KI_excel" type="file" class="custom-file-input">
-                            <span class="custom-file-control">Choose KI invoice...</span>
-                          </label>
+
+                          <div class="input-group mb-3">
+                            <div class="custom-file">
+                              <input type="file" class="custom-file-input" id="KI_excel">
+                              <label class="custom-file-label" for="KI_excel">Choose KI invoice...</label>
+                            </div>
+                          </div>
                           
                           {%if invoice.excel_ki%}
                           <a href="{{ url_for('invoices.modified_invoice', invoice_id=invoice.id, cost_center='KI') }}" aria-pressed="true">invoice_KI.xlsx</a>
