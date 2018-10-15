@@ -60,7 +60,7 @@ class ReportAPI:
         report_samples = self._fetch_family_samples_from_status_db(family_id)
         report_data['samples'] = report_samples
         panels = self._fetch_panels_from_status_db(family_id)
-        report_data['panels'] = ReportAPI._present_set(panels)
+        report_data['panels'] = ReportAPI._present_list(panels)
         self._incorporate_lims_data(report_data)
         self._incorporate_lims_methods(report_samples)
         self._incorporate_delivery_date_from_lims(report_samples)
@@ -194,6 +194,16 @@ class ReportAPI:
         """Make a set presentable for the delivery report."""
         if a_set:
             presentable_value = ', '.join(str(s) for s in a_set)
+        else:
+            presentable_value = 'N/A'
+
+        return presentable_value
+
+    @staticmethod
+    def _present_list(a_list: list):
+        """Make a list presentable for the delivery report."""
+        if a_list:
+            presentable_value = ', '.join(str(s) for s in a_list)
         else:
             presentable_value = 'N/A'
 
