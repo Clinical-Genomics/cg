@@ -87,48 +87,48 @@ def upload(context, family_id):
 def delivery_report(context, customer_id, family_id, print_console):
     """Generate a delivery report for a case.
 
-    The report contains data from different sources:
-    delivery_data['family']: status-db
-    delivery_data['customer_obj'].name: status-db
-    delivery_data['today'].date(): generated on creation
-    delivery_data['panels']: status-db
+    The report contains data from several sources:
 
-    delivery_data['customer_obj'].invoice_address: status-db
-    delivery_data['customer_obj'].scout_access status-db
-    delivery_data['accredited']: status-db
+    status-db:
+        family
+        customer_obj
+        application_objs
+        accredited
+        panels
+        samples
+        sample.id
+        sample.status
+        sample.ticket
+        sample.million_read_pairs
 
-    for application in delivery_data['application_objs']: status-db
-        application['tag']: status-db
-        application['description']: status-db
-        application['limitations']: status-db
+    lims:
+        sample.name
+        sample.sex
+        sample.source
+        sample.application
+        sample.received
+        sample.prep_method
+        sample.sequencing_method
+        sample.delivery_method
+        sample.delivery_date
+        sample.processing_time
 
-    delivery_data['samples']: status-db
+    trailblazer:
+        sample.mapped_reads
+        sample.duplicates
+        sample.analysis_sex
+        mip_version
+        genome_build
 
-    for sample in delivery_data['samples']: status-db
-        sample['name']: lims
-        sample['id']: status-db
-        sample['sex']: lims
-        sample['status']: status-db
-        sample['source']: lims
-        sample['ticket']: status-db
-        sample['application']: lims
-        sample['received']: lims
+    chanjo:
+        sample.target_coverage
+        sample.target_completeness
 
-        sample['prep_method']: lims
-        sample['sequencing_method']: lims
-        sample['delivery_method']: lims
+    scout:
+        panel-genes
 
-        sample['delivery_date']: lims
-        sample['million_read_pairs']: status-db
-        sample['mapped_reads']: trailblazer
-        sample['target_coverage']: chanjo
-        sample['target_completeness']: chanjo
-        sample['duplicates']: trailblazer
-        sample['processing_time']: lims
-        sample['analysis_sex']: trailblazer
-
-    delivery_data['mip_version']: trailblazer
-    delivery_data['genome_build']: trailblazer
+    today:
+        generated upon report creation
 
     """
 
