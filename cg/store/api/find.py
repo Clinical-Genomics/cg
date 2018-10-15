@@ -228,7 +228,7 @@ class FindHandler:
                 .first()
         )
 
-    def family_samples(self, family_id: str) -> models.FamilySample:
+    def family_samples(self, family_id: str) -> List[models.FamilySample]:
         """Find the samples of a family."""
         return (
             self.FamilySample.query
