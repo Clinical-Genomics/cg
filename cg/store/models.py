@@ -218,8 +218,12 @@ class MicrobialSample(Model, PriorityMixin):
     sequenced_at = Column(types.DateTime)
     delivered_at = Column(types.DateTime)
     strain = Column(types.String(255))
+    organism_id = Column(ForeignKey('organism.id'))
+
     strain_other = Column(types.String(255))
+
     reference_genome = Column(types.String(255))
+
     priority = Column(types.Integer, default=1, nullable=False)
     reads = Column(types.BigInteger, default=0)
     comment = Column(types.Text)
@@ -252,6 +256,26 @@ class MicrobialSample(Model, PriorityMixin):
             data['microbial_order'] = self.microbial_order.to_dict()
         if self.invoice_id:
             data['invoice'] = self.invoice.to_dict()
+        return data
+
+
+class Organism(Model):
+
+    id = Column(types.Integer, primary_key=True)
+    internal_id = Column(types.String(32), nullable=False, unique=True)
+    name = Column(types.String(255), nullable=False, unique=True)
+    created_at = Column(types.DateTime, default=dt.datetime.now)
+    updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
+    reference_genome = Column(types.String(255))
+    verified = Column(types.Boolean, default=False)
+    comment = Column(types.Text)
+
+    def __str__(self) -> str:
+        return f"{self.internal_id} ({self.name})"
+
+    def to_dict(self) -> dict:
+        """Override dictify method."""
+        data = super(Organism, self).to_dict()
         return data
 
 
