@@ -79,7 +79,7 @@ def family(context: click.Context, customer: str, name: bool, samples: bool,
         if customer_obj is None:
             LOG.error(f"{customer}: customer not found")
             context.abort()
-        families = context.obj['status'].families(customer=customer_obj, query=family_ids[-1])
+        families = context.obj['status'].families(customer=customer_obj, enquiry=family_ids[-1])
     else:
         families = []
         for family_id in family_ids:
