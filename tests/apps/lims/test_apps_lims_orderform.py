@@ -15,7 +15,7 @@ def test_parsing_rml_orderform(rml_orderform):
     sample_data = data['items'][0]
     assert sample_data['well_position'] is None
     assert sample_data['well_position_rml'] == 'A:1'
-    assert sample_data['pool'] == '1'
+    assert sample_data['pool'] == 'pool-1'
     assert sample_data['volume'] == '30'
     assert sample_data['concentration'] == '5'
 
