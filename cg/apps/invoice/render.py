@@ -52,9 +52,8 @@ def render_xlsx(data: dict) -> Workbook:
             row = samples_start + index
             worksheet[f"A{row}"] = lims_sample.name
             worksheet[f"B{row}"] = lims_sample.id
-            worksheet[f"C{row}"] = lims_sample.udf['Total Reads (M)']
+            worksheet[f"C{row}"] = lims_sample.udf['Total Reads (M)'] if 'Total Reads (M)' in lims_sample.udf else ''
             worksheet[f"D{row}"] = str(lims_sample.udf['pool name'])
-
 
         for column in ['A', 'B', 'C', 'D', 'E', 'F', 'G']:
             cell = worksheet[f"{column}{6}"]

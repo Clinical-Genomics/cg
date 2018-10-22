@@ -6,6 +6,7 @@ import alchy
 from cg.constants import REV_PRIORITY_MAP, PRIORITY_MAP, FAMILY_ACTIONS, FLOWCELL_STATUS, PREP_CATEGORIES
 from sqlalchemy import Column, ForeignKey, orm, types, UniqueConstraint, Table
 
+
 Model = alchy.make_declarative_base(Base=alchy.ModelBase)
 
 
@@ -39,7 +40,7 @@ class User(Model):
     is_admin = Column(types.Boolean, default=False)
 
     customer_id = Column(ForeignKey('customer.id', ondelete='CASCADE'), nullable=False)
-    customer = orm.relationship('Customer', backref='users')
+    customer = orm.relationship('Customer', foreign_keys=[customer_id])
 
     def to_dict(self) -> dict:
         """Override dictify method."""
@@ -67,9 +68,13 @@ class Customer(Model):
     invoice_address = Column(types.Text, nullable=False)
     invoice_reference = Column(types.String(32), nullable=False)
     uppmax_account = Column(types.String(32))
-    primary_contact = Column(types.String(128))
-    delivery_contact = Column(types.String(128))
-    invoice_contact = Column(types.String(128))
+    
+    primary_contact_id = Column(ForeignKey('user.id'), nullable=False)
+    primary_contact = orm.relationship("User", foreign_keys=[primary_contact_id])
+    delivery_contact_id = Column(ForeignKey('user.id'), nullable=False)
+    delivery_contact = orm.relationship("User", foreign_keys=[delivery_contact_id])
+    invoice_contact_id = Column(ForeignKey('user.id'), nullable=False)
+    invoice_contact = orm.relationship("User", foreign_keys=[invoice_contact_id])
     customer_group_id = Column(ForeignKey('customer_group.id'), nullable=False)
 
     families = orm.relationship('Family', backref='customer', order_by='-Family.id')
