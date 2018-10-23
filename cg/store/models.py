@@ -217,8 +217,8 @@ class MicrobialSample(Model, PriorityMixin):
     sequence_start = Column(types.DateTime)
     sequenced_at = Column(types.DateTime)
     delivered_at = Column(types.DateTime)
-    strain = Column(types.String(255))
     organism_id = Column(ForeignKey('organism.id'))
+    organism = orm.relationship('Organism', foreign_keys=[organism_id])
 
     strain_other = Column(types.String(255))
 
@@ -256,6 +256,8 @@ class MicrobialSample(Model, PriorityMixin):
             data['microbial_order'] = self.microbial_order.to_dict()
         if self.invoice_id:
             data['invoice'] = self.invoice.to_dict()
+        if self.organism_id:
+            data['organism'] = self.organism.to_dict()
         return data
 
 
@@ -525,7 +527,7 @@ class Panel(Model):
     customer = orm.relationship(Customer, backref='panels')
 
     def __str__(self):
-        return f"{self.abbrev} ({self.current_version})"
+        return f"{self.abbrev} ({self.current_application_version})"
 
 
 class Invoice(Model):

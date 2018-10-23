@@ -13,6 +13,9 @@ def test_microbial_sample_to_dict(microbial_store):
     assert a_dict['application_version_id']
     assert a_dict['microbial_order_id']
     assert a_dict['created_at']
+    assert a_dict['organism']
+    assert a_dict['organism_id']
+    assert a_dict['strain_other'] == ''
     assert a_dict['reference_genome']
     assert a_dict['priority']
     assert a_dict['reads']

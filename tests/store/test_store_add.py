@@ -54,12 +54,14 @@ def test_add_microbial_sample(base_store: Store):
     reference_genome = 'ref_gen'
     priority = 'research'
     application_version = base_store.ApplicationVersion.query.first()
+    base_store.add_organism(strain, strain, reference_genome)
+    organism = base_store.Organism.query.first()
     microbial_order_id = 'dummy_order_id'
 
     # WHEN adding a new microbial sample
     new_microbial_sample = base_store.add_microbial_sample(microbial_order_id=microbial_order_id,
                                                            name=name,
-                                                           strain=strain,
+                                                           organism=organism,
                                                            strain_other=strain_other,
                                                            internal_id=internal_id,
                                                            reference_genome=reference_genome,
@@ -75,5 +77,5 @@ def test_add_microbial_sample(base_store: Store):
     assert stored_microbial_sample.reference_genome == reference_genome
     assert stored_microbial_sample.application_version == application_version
     assert stored_microbial_sample.priority_human == priority
-    assert stored_microbial_sample.strain == strain
+    assert stored_microbial_sample.organism == organism
     assert stored_microbial_sample.strain_other == strain_other

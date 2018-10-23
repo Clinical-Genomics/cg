@@ -22,5 +22,6 @@ PROP2UDF = {
     'strain': 'Strain',
     'strain_other': 'Other species',
     'reference_genome': 'Reference Genome Microbial',
+    'verified_organism': 'Verified organism',
     'extraction_method': 'Extraction method',
 }

@@ -30,6 +30,7 @@ class BaseHandler:
     Invoice = models.Invoice
     MicrobialSample = models.MicrobialSample
     MicrobialOrder = models.MicrobialOrder
+    Organism = models.Organism
 
 
 class CoreHandler(BaseHandler, AddHandler, FindHandler, StatusHandler, TrendsHandler):

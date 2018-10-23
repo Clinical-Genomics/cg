@@ -16,6 +16,7 @@
       "strain": "Other",
       "strain_other": "M.upium",
       "reference_genome": "NC_111",
+      "verified_organism": true,
       "extraction_method": "MagNaPure 96 (contact Clinical Genomics before submission)",
       "concentration_weight": "101",
       "quantity": "102"
@@ -29,6 +30,7 @@
       "elution_buffer": "Nuclease-free water",
       "strain": "C. Jejuni",
       "reference_genome": "NC_222",
+      "verified_organism": false,
       "extraction_method": "MagNaPure 96 (contact Clinical Genomics before submission)"
     },
     {
@@ -42,6 +44,7 @@
       "elution_buffer": "Nuclease-free water",
       "strain": "C. Jejuni",
       "reference_genome": "NC_333",
+      "verified_organism": true,
       "extraction_method": "MagNaPure 96 (contact Clinical Genomics before submission)"
     },
     {
@@ -54,6 +57,7 @@
       "strain": "Other",
       "strain_other": "M.upium",
       "reference_genome": "NC_444",
+      "verified_organism": false,
       "extraction_method": "MagNaPure 96 (contact Clinical Genomics before submission)"
     },
         {
@@ -65,6 +69,7 @@
       "elution_buffer": "Nuclease-free water",
       "strain": "C. Jejuni",
       "reference_genome": "NC_555",
+      "verified_organism": true,
       "extraction_method": "MagNaPure 96 (contact Clinical Genomics before submission)",
       "comment": "optional comment",
       "concentration_weight": "201",

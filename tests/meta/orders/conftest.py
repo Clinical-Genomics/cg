@@ -53,7 +53,8 @@ def metagenome_order():
     json_data = json.load(open(json_path))
     return json_data
 
-@pytest.fixture    
+
+@pytest.fixture
 def microbial_order():
     """Load an example microbial order."""
     json_path = 'tests/fixtures/orders/microbial.json'

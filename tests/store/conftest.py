@@ -24,6 +24,7 @@ def microbial_order():
                       reagent_label=None,
                       tumour=False, custom_index=None, elution_buffer='Nuclease-free water',
                       strain='C. Jejuni', strain_other='', reference_genome='NC_111',
+                      verified_organism=True,
                       extraction_method='MagNaPure 96 (contact Clinical Genomics before '
                                         'submission)',
                       analysis='fastq', concentration_weight='1', mother=None, father=None),
@@ -38,7 +39,7 @@ def microbial_order():
                       reagent_label=None,
                       tumour=False, custom_index=None, elution_buffer='Nuclease-free water',
                       strain='Other',
-                      strain_other='M.upium', reference_genome='NC_222',
+                      strain_other='M.upium', reference_genome='NC_222', verified_organism=False,
                       extraction_method='MagNaPure 96 (contact Clinical Genomics before '
                                         'submission)',
                       analysis='fastq', quantity='2', mother=None, father=None),
@@ -53,6 +54,7 @@ def microbial_order():
                       reagent_label=None,
                       tumour=False, custom_index=None, elution_buffer='Nuclease-free water',
                       strain='C. difficile', strain_other='', reference_genome='NC_333',
+                      verified_organism=True,
                       extraction_method='MagNaPure 96 (contact Clinical Genomics before '
                                         'submission)',
                       analysis='fastq', mother=None, father=None)], 'project_type': 'microbial'}
@@ -78,12 +80,15 @@ def microbial_store(base_store, microbial_order):
 
     for sample_data in microbial_order['items']:
         application_version = base_store.application(sample_data['application']).versions[0]
+        organism = base_store.Organism(internal_id=sample_data['strain'], name=sample_data[
+            'strain'])
+        base_store.add(organism)
         sample = base_store.add_microbial_sample(name=sample_data['name'], sex=sample_data['sex'],
                                                  internal_id=sample_data['internal_id'],
                                                  ticket=microbial_order['ticket_number'],
                                                  reads=sample_data['reads'],
                                                  comment=sample_data['comment'],
-                                                 strain=sample_data['strain'],
+                                                 organism=organism,
                                                  strain_other=sample_data['strain_other'],
                                                  priority=sample_data['priority'],
                                                  reference_genome=sample_data['reference_genome'],
@@ -92,6 +97,8 @@ def microbial_store(base_store, microbial_order):
         sample.microbial_order = order
         sample.application_version = application_version
         sample.customer = customer
+        sample.organism = organism
+
         base_store.add(sample)
 
     base_store.commit()

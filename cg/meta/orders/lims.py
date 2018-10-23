@@ -43,6 +43,7 @@ class LimsHandler:
                     'elution_buffer': sample.get('elution_buffer'),
                     'reference_genome': sample.get('reference_genome'),
                     'extraction_method': sample.get('extraction_method'),
+                    'verified_organism': sample.get('verified_organism'),
                 }
             })
         return samples_lims

@@ -11,8 +11,8 @@ CREATE TABLE `organism` (
 ) ENGINE=InnoDB;
 
 # add some test data
-INSERT INTO `cg-dev`.organism (name, internal_id, created_at, reference_genome)
-    SELECT strain, strain, now(), reference_genome
+INSERT INTO `cg-dev`.organism (name, internal_id, created_at, reference_genome, verified)
+    SELECT strain, strain, now(), reference_genome, 1
     FROM microbial_sample
     where strain is not null and strain <> 'Other'
     and strain NOT IN (SELECT name
@@ -38,3 +38,4 @@ ALTER TABLE microbial_sample ADD CONSTRAINT `organism_ibfk_1` FOREIGN KEY (`orga
 
 # delete strain column in microbial_samples
 ALTER TABLE microbial_sample DROP COLUMN strain;
+# ALTER TABLE microbial_sample CHANGE `strain_other` `organism_other` varchar(255) DEFAULT NULL;
