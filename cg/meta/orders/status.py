@@ -7,6 +7,9 @@ from cg.store import models
 
 class StatusHandler:
 
+    def __init__(self):
+        self.status = None
+
     @staticmethod
     def group_families(samples: List[dict]) -> dict:
         """Group samples in families."""
@@ -199,7 +202,8 @@ class StatusHandler:
                     new_sample.customer = customer_obj
                     with self.status.session.no_autoflush:
                         application_tag = sample['application']
-                        new_sample.application_version = self.status.current_version(application_tag)
+                        new_sample.application_version = self.status.current_version(
+                            application_tag)
                     if new_sample.application_version is None:
                         raise OrderError(f"Invalid application: {sample['application']}")
                     family_samples[new_sample.name] = new_sample
@@ -232,13 +236,13 @@ class StatusHandler:
     def store_samples(self, customer: str, order: str, ordered: dt.datetime, ticket: int,
                       samples: List[dict]) -> List[models.Sample]:
         """Store samples in the status database."""
-        production_customer = self.status.customer('cust000')
         customer_obj = self.status.customer(customer)
         if customer_obj is None:
             raise OrderError(f"unknown customer: {customer}")
         new_samples = []
-        for sample in samples:
-            with self.status.session.no_autoflush:
+
+        with self.status.session.no_autoflush:
+            for sample in samples:
                 new_sample = self.status.add_sample(
                     name=sample['name'],
                     internal_id=sample['internal_id'],
@@ -250,39 +254,70 @@ class StatusHandler:
                     comment=sample['comment'],
                     tumour=sample['tumour'],
                 )
-            new_sample.customer = customer_obj
-
-            with self.status.session.no_autoflush:
+                new_sample.customer = customer_obj
                 application_tag = sample['application']
                 application_version = self.status.current_version(application_tag)
                 if application_version is None:
                     raise OrderError(f"Invalid application: {sample['application']}")
                 new_sample.application_version = application_version
-            new_samples.append(new_sample)
+                new_samples.append(new_sample)
 
-            if not new_sample.is_tumour:
-                with self.status.session.no_autoflush:
+        self.status.add_commit(new_samples)
+        return new_samples
+
+    def store_fastq_samples(self, customer: str, order: str, ordered: dt.datetime, ticket: int,
+                            samples: List[dict]) -> List[models.Sample]:
+        """Store fast samples in the status database including family connection and delivery."""
+        production_customer = self.status.customer('cust000')
+        customer_obj = self.status.customer(customer)
+        if customer_obj is None:
+            raise OrderError(f"unknown customer: {customer}")
+        new_samples = []
+
+        with self.status.session.no_autoflush:
+            for sample in samples:
+                new_sample = self.status.add_sample(
+                    name=sample['name'],
+                    internal_id=sample['internal_id'],
+                    sex=sample['sex'] or 'unknown',
+                    order=order,
+                    ordered=ordered,
+                    ticket=ticket,
+                    priority=sample['priority'],
+                    comment=sample['comment'],
+                    tumour=sample['tumour'],
+                )
+                new_sample.customer = customer_obj
+
+                application_tag = sample['application']
+                application_version = self.status.current_version(application_tag)
+                if application_version is None:
+                    raise OrderError(f"Invalid application: {sample['application']}")
+                new_sample.application_version = application_version
+                new_samples.append(new_sample)
+
+                if not new_sample.is_tumour:
                     new_family = self.status.add_family(name=sample['name'], panels=['OMIM-AUTO'],
                                                         priority='research')
-                new_family.customer = production_customer
-                self.status.add(new_family)
+                    new_family.customer = production_customer
+                    self.status.add(new_family)
 
-                new_relationship = self.status.relate_sample(
-                    family=new_family,
-                    sample=new_sample,
-                    status=sample['status'] or 'unknown',
-                )
-                self.status.add(new_relationship)
+                    new_relationship = self.status.relate_sample(
+                        family=new_family,
+                        sample=new_sample,
+                        status=sample['status'] or 'unknown',
+                    )
+                    self.status.add(new_relationship)
 
-            new_delivery = self.status.add_delivery(destination='caesar', sample=new_sample)
-            self.status.add(new_delivery)
+                new_delivery = self.status.add_delivery(destination='caesar', sample=new_sample)
+                self.status.add(new_delivery)
 
         self.status.add_commit(new_samples)
         return new_samples
 
     def store_microbial_order(self, customer: str, order: str, ordered: dt.datetime, ticket: int,
-                        lims_project: str, samples: List[dict],
-                        comment: str=None) -> List[models.MicrobialSample]:
+                              lims_project: str, samples: List[dict],
+                              comment: str = None) -> List[models.MicrobialSample]:
         """Store microbial samples in the status database."""
         customer_obj = self.status.customer(customer)
         if customer_obj is None:

@@ -5,7 +5,8 @@ from cg.meta.report.api import ReportAPI
 
 
 def test_init():
-    ReportAPI(lims_api='lims', db='analysis_store', chanjo_api='chanjo', analysis_api='analysis')
+    ReportAPI(lims_api='lims', db='analysis_store', chanjo_api='chanjo', analysis_api='analysis',
+              scout_api='scout')
 
 
 def test_collect_delivery_data(report_api):
@@ -239,7 +240,7 @@ def test_incorporate_coverage_data(report_api, lims_samples):
     samples = lims_samples
 
     # WHEN failing to get latest trending data for a family
-    report_api._incorporate_coverage_data(samples=samples)
+    report_api._incorporate_coverage_data(samples=samples, panels='dummyPanel')
 
     # THEN there should be a log entry about this
     for sample in samples:
