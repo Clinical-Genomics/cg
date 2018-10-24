@@ -220,7 +220,7 @@ class MicrobialSample(Model, PriorityMixin):
     organism_id = Column(ForeignKey('organism.id'))
     organism = orm.relationship('Organism', foreign_keys=[organism_id])
 
-    strain_other = Column(types.String(255))
+    organism_other = Column(types.String(255))
 
     reference_genome = Column(types.String(255))
 

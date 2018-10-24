@@ -38,4 +38,4 @@ ALTER TABLE microbial_sample ADD CONSTRAINT `organism_ibfk_1` FOREIGN KEY (`orga
 
 # delete strain column in microbial_samples
 ALTER TABLE microbial_sample DROP COLUMN strain;
-# ALTER TABLE microbial_sample CHANGE `strain_other` `organism_other` varchar(255) DEFAULT NULL;
+ALTER TABLE microbial_sample CHANGE `strain_other` `organism_other` varchar(255) DEFAULT NULL;

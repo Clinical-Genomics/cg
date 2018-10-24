@@ -23,7 +23,7 @@ def microbial_order():
                       priority='standard', capture_kit=None, comment=None, index=None,
                       reagent_label=None,
                       tumour=False, custom_index=None, elution_buffer='Nuclease-free water',
-                      strain='C. Jejuni', strain_other='', reference_genome='NC_111',
+                      organism='C. Jejuni', organism_other='', reference_genome='NC_111',
                       verified_organism=True,
                       extraction_method='MagNaPure 96 (contact Clinical Genomics before '
                                         'submission)',
@@ -38,8 +38,8 @@ def microbial_order():
                       priority='standard', capture_kit=None, comment=None, index=None,
                       reagent_label=None,
                       tumour=False, custom_index=None, elution_buffer='Nuclease-free water',
-                      strain='Other',
-                      strain_other='M.upium', reference_genome='NC_222', verified_organism=False,
+                      organism='Other',
+                      organism_other='M.upium', reference_genome='NC_222', verified_organism=False,
                       extraction_method='MagNaPure 96 (contact Clinical Genomics before '
                                         'submission)',
                       analysis='fastq', quantity='2', mother=None, father=None),
@@ -53,7 +53,7 @@ def microbial_order():
                       priority='standard', capture_kit=None, comment='3', index=None,
                       reagent_label=None,
                       tumour=False, custom_index=None, elution_buffer='Nuclease-free water',
-                      strain='C. difficile', strain_other='', reference_genome='NC_333',
+                      organism='C. difficile', organism_other='', reference_genome='NC_333',
                       verified_organism=True,
                       extraction_method='MagNaPure 96 (contact Clinical Genomics before '
                                         'submission)',
@@ -80,8 +80,8 @@ def microbial_store(base_store, microbial_order):
 
     for sample_data in microbial_order['items']:
         application_version = base_store.application(sample_data['application']).versions[0]
-        organism = base_store.Organism(internal_id=sample_data['strain'], name=sample_data[
-            'strain'])
+        organism = base_store.Organism(internal_id=sample_data['organism'], name=sample_data[
+            'organism'])
         base_store.add(organism)
         sample = base_store.add_microbial_sample(name=sample_data['name'], sex=sample_data['sex'],
                                                  internal_id=sample_data['internal_id'],
@@ -89,7 +89,7 @@ def microbial_store(base_store, microbial_order):
                                                  reads=sample_data['reads'],
                                                  comment=sample_data['comment'],
                                                  organism=organism,
-                                                 strain_other=sample_data['strain_other'],
+                                                 organism_other=sample_data['organism_other'],
                                                  priority=sample_data['priority'],
                                                  reference_genome=sample_data['reference_genome'],
                                                  application_version=application_version

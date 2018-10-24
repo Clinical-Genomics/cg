@@ -70,8 +70,8 @@ def test_to_lims_microbial(microbial_order):
     # ... and pick out relevant UDFs
     first_sample = samples[0]
     assert first_sample['udfs']['priority'] == 'research'
-    assert first_sample['udfs']['strain'] == 'Other'
-    assert first_sample['udfs']['strain_other'] == 'M.upium'
+    assert first_sample['udfs']['organism'] == 'Other'
+    assert first_sample['udfs']['organism_other'] == 'M.upium'
     assert first_sample['udfs']['reference_genome'] == 'NC_111'
     assert first_sample['udfs']['extraction_method'] == 'MagNaPure 96 (contact Clinical Genomics ' \
                                                         'before submission)'
