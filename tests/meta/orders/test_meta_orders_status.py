@@ -52,7 +52,7 @@ def test_microbial_samples_to_status(microbial_order):
     assert sample_data.get('priority') in 'research'
     assert sample_data['name'] == 'all-fields'
     assert sample_data.get('internal_id') is None
-    assert sample_data['organism_id'] == 'Other'
+    assert sample_data['organism_id'] == 'other'
     assert sample_data['organism_other'] == 'M.upium'
     assert sample_data['reference_genome'] == 'NC_111'
     assert sample_data['application'] == 'MWRNXTR003'
