@@ -10,9 +10,25 @@ CREATE TABLE `organism` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB;
 
+# add the OF organisms
+INSERT INTO `cg-dev`.organism (name, internal_id, created_at)
+    VALUES ('C. jejuni', 'C. jejuni', now()),
+    ('C. difficile', 'C. difficile', now()),
+    ('E. faecalis', 'E. faecalis', now()),
+    ('E. faecium', 'E. faecium', now()),
+    ('E. coli', 'E. coli', now()),
+    ('K. pneumoniae', 'K. pneumoniae', now()),
+    ('M. tuberculosis', 'M. tuberculosis', now()),
+    ('N. gonorrhoeae', 'N. gonorrhoeae', now()),
+    ('P. aeruginosa', 'P. aeruginosa', now()),
+    ('S. aureus', 'S. aureus', now()),
+    ('S. agalactiae', 'S. agalactiae', now()),
+    ('S. pneumoniae', 'S. pneumoniae', now()),
+    ('S. pyogenes', 'S. pyogenes', now());
+
 # add some test data
 INSERT INTO `cg-dev`.organism (name, internal_id, created_at, reference_genome, verified)
-    SELECT strain, strain, now(), reference_genome, 1
+    SELECT strain, strain, now(), reference_genome, 0
     FROM microbial_sample
     where strain is not null and strain <> 'Other'
     and strain NOT IN (SELECT name
@@ -38,4 +54,7 @@ ALTER TABLE microbial_sample ADD CONSTRAINT `organism_ibfk_1` FOREIGN KEY (`orga
 
 # delete strain column in microbial_samples
 ALTER TABLE microbial_sample DROP COLUMN strain;
+# ALTER TABLE microbial_sample DROP COLUMN strain_other;
 ALTER TABLE microbial_sample CHANGE `strain_other` `organism_other` varchar(255) DEFAULT NULL;
+
+ALTER TABLE microbial_sample CHANGE `organism_id` `organism_id` INTEGER NOT NULL;

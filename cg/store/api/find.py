@@ -294,6 +294,9 @@ class FindHandler:
         """Fetch an order by internal id from the database."""
         return self.MicrobialOrder.query.filter_by(internal_id=internal_id).first()
 
+    def organisms(self) -> List[models.Organism]:
+        return self.Organism.query
+
     def organism(self, internal_id: str) -> models.Organism:
         """Find an Organism by internal_id."""
         return self.Organism.query.filter_by(internal_id=internal_id).first()

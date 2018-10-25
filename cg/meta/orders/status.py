@@ -337,8 +337,16 @@ class StatusHandler:
                 if application_version is None:
                     raise OrderError(f"Invalid application: {sample_data['application']}")
 
-                organism_id = sample_data['organism_id']
-                organism = self.status.organism(organism_id)
+                organism = self.status.organism(sample_data['organism_id'])
+
+                if not organism:
+                    organism = self.status.organism(sample_data['organism_other'])
+                if not organism:
+                    organism = self.status.add_organism(internal_id=sample_data[
+                        'organism_other'], name=sample_data['organism_other'],
+                                                        reference_genome=sample_data[
+                                                            'reference_genome'])
+                    self.status.add_commit(organism)
 
                 new_sample = self.status.add_microbial_sample(
                     name=sample_data['name'],

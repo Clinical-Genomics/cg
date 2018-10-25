@@ -205,7 +205,7 @@ class AddHandler:
         new_sample.application_version = application_version
         return new_sample
 
-    def add_organism(self, internal_id: str, name: str, reference_genome: str, verified: bool
+    def add_organism(self, internal_id: str, name: str, reference_genome: str = None, verified: bool
     = False, **kwargs) -> models.Organism:
         """Build a new Organism record."""
 
