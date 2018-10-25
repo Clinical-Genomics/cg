@@ -31,7 +31,7 @@ def test_parsing_fastq_orderform(fastq_orderform):
     # ... and collect relevant sample info
     normal_sample = data['items'][0]
     tumour_sample = data['items'][1]
-    assert normal_sample['name'] == 'prov 1'
+    assert normal_sample['name'] == 'prov1'
     assert normal_sample['container'] == 'Tube'
     assert normal_sample['application'] == 'WGSPCFC030'
     assert normal_sample['sex'] == 'male'
