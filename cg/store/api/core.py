@@ -16,6 +16,7 @@ class BaseHandler:
 
     User = models.User
     Customer = models.Customer
+    CustomerGroup = models.CustomerGroup
     Sample = models.Sample
     Family = models.Family
     FamilySample = models.FamilySample
@@ -27,6 +28,8 @@ class BaseHandler:
     Pool = models.Pool
     Delivery = models.Delivery
     Invoice = models.Invoice
+    MicrobialSample = models.MicrobialSample
+    MicrobialOrder = models.MicrobialOrder
 
 
 class CoreHandler(BaseHandler, AddHandler, FindHandler, StatusHandler, TrendsHandler):

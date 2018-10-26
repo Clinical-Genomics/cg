@@ -1,5 +1,7 @@
 import datetime as dt
 
+import pytest
+from cg.exc import OrderError
 from cg.meta.orders.status import StatusHandler
 
 
@@ -33,6 +35,30 @@ def test_samples_to_status(fastq_order):
     assert data['samples'][1]['tumour'] is True
 
 
+def test_microbial_samples_to_status(microbial_order):
+    # GIVEN microbial order with three samples
+
+    # WHEN parsing for status
+    data = StatusHandler.microbial_samples_to_status(microbial_order)
+
+    # THEN it should pick out samples and relevant information
+    assert len(data['samples']) == 5
+    assert data['customer'] == 'cust002'
+    assert data['order'] == 'Microbial samples'
+    assert data['comment'] == 'Order comment'
+
+    # THEN first sample should contain all the relevant data from the microbial order
+    sample_data = data['samples'][0]
+    assert sample_data.get('priority') in 'research'
+    assert sample_data['name'] == 'all-fields'
+    assert sample_data.get('internal_id') is None
+    assert sample_data['strain'] == 'Other'
+    assert sample_data['strain_other'] == 'M.upium'
+    assert sample_data['reference_genome'] == 'NC_111'
+    assert sample_data['application'] == 'MWRNXTR003'
+    assert sample_data['comment'] == 'plate comment'
+
+
 def test_families_to_status(scout_order):
     # GIVEN a scout order with a trio family
     # WHEN parsing for status
@@ -42,7 +68,7 @@ def test_families_to_status(scout_order):
     family = data['families'][0]
     assert family['name'] == '17093'
     assert family['priority'] == 'standard'
-    assert set(family['panels']) == set(['IEM', 'EP'])
+    assert set(family['panels']) == {'IEM', 'EP'}
     assert len(family['samples']) == 3
 
     first_sample = family['samples'][0]
@@ -82,18 +108,40 @@ def test_store_rml(orders_api, base_store, rml_status_data):
     assert new_pool.deliveries[0].destination == 'caesar'
 
 
+def test_store_rml_bad_apptag(orders_api, base_store, rml_status_data):
+
+    # GIVEN a basic store with no samples and a rml order
+    assert base_store.pools(customer=None).count() == 0
+
+    for pool in rml_status_data['pools']:
+        pool['application'] = 'nonexistingtag'
+
+    # THEN it should raise OrderError
+    with pytest.raises(OrderError):
+        # WHEN storing the order
+        new_pools = orders_api.store_pools(
+            customer=rml_status_data['customer'],
+            order=rml_status_data['order'],
+            ordered=dt.datetime.now(),
+            ticket=1234348,
+            pools=rml_status_data['pools'],
+        )
+
+
 def test_store_samples(orders_api, base_store, fastq_status_data):
     # GIVEN a basic store with no samples and a fastq order
     assert base_store.samples().count() == 0
     assert base_store.families().count() == 0
-    # WHEN stoting the order
-    new_samples = orders_api.store_samples(
+
+    # WHEN storing the order
+    new_samples = orders_api.store_fastq_samples(
         customer=fastq_status_data['customer'],
         order=fastq_status_data['order'],
         ordered=dt.datetime.now(),
         ticket=1234348,
         samples=fastq_status_data['samples'],
     )
+
     # THEN it should store the samples and create a "fake" family for
     # the non-tumour sample
     assert len(new_samples) == 2
@@ -107,10 +155,96 @@ def test_store_samples(orders_api, base_store, fastq_status_data):
         assert len(sample.deliveries) == 1
 
 
+def test_store_samples_bad_apptag(orders_api, base_store, fastq_status_data):
+    # GIVEN a basic store with no samples and a fastq order
+    assert base_store.samples().count() == 0
+    assert base_store.families().count() == 0
+
+    for sample in fastq_status_data['samples']:
+        sample['application'] = 'nonexistingtag'
+
+    # THEN it should raise OrderError
+    with pytest.raises(OrderError):
+        # WHEN storing the order
+        new_samples = orders_api.store_fastq_samples(
+            customer=fastq_status_data['customer'],
+            order=fastq_status_data['order'],
+            ordered=dt.datetime.now(),
+            ticket=1234348,
+            samples=fastq_status_data['samples'],
+        )
+
+
+def test_store_microbial_samples(orders_api, base_store,  microbial_status_data):
+
+    # GIVEN a basic store with no samples and a microbial order
+    assert base_store.microbial_samples().count() == 0
+    assert base_store.microbial_orders().count() == 0
+
+    # WHEN storing the order
+    new_order = orders_api.store_microbial_order(
+        customer=microbial_status_data['customer'],
+        order=microbial_status_data['order'],
+        ordered=dt.datetime.now(),
+        ticket=1234348,
+        lims_project='dummy_lims_project',
+        samples=microbial_status_data['samples'],
+    )
+
+    # THEN it should store the samples
+    assert len(new_order.microbial_samples) == 5
+    assert base_store.microbial_samples().count() == 5
+    assert base_store.microbial_orders().count() == 1
+
+
+def test_store_microbial_samples_bad_apptag(orders_api, base_store,  microbial_status_data):
+
+    # GIVEN a basic store with no samples and a microbial order
+    assert base_store.microbial_samples().count() == 0
+    assert base_store.microbial_orders().count() == 0
+
+    for sample in microbial_status_data['samples']:
+        sample['application'] = 'nonexistingtag'
+
+    # THEN it should raise OrderError
+    with pytest.raises(OrderError):
+        # WHEN storing the order
+        new_order = orders_api.store_microbial_order(
+            customer=microbial_status_data['customer'],
+            order=microbial_status_data['order'],
+            ordered=dt.datetime.now(),
+            ticket=1234348,
+            lims_project='dummy_lims_project',
+            samples=microbial_status_data['samples'],
+        )
+
+
+def test_store_microbial_sample_priority(orders_api, base_store, microbial_status_data):
+
+    # GIVEN a basic store with no samples
+    assert base_store.microbial_samples().count() == 0
+
+    # WHEN storing the order
+    orders_api.store_microbial_order(
+        customer=microbial_status_data['customer'],
+        order=microbial_status_data['order'],
+        ordered=dt.datetime.now(),
+        ticket=1234348,
+        lims_project='dummy_lims_project',
+        samples=microbial_status_data['samples'],
+    )
+
+    # THEN it should store the sample priority
+    microbial_sample = base_store.microbial_samples().first()
+
+    assert microbial_sample.priority_human == 'research'
+
+
 def test_store_families(orders_api, base_store, scout_status_data):
     # GIVEN a basic store with no samples or nothing in it + scout order
     assert base_store.samples().first() is None
     assert base_store.families().first() is None
+
     # WHEN storing the order
     new_families = orders_api.store_families(
         customer=scout_status_data['customer'],
@@ -119,13 +253,14 @@ def test_store_families(orders_api, base_store, scout_status_data):
         ticket=1234567,
         families=scout_status_data['families'],
     )
+
     # THEN it should create and link samples and the family
     family_obj = base_store.families().first()
     assert len(new_families) == 1
     new_family = new_families[0]
     assert new_family == family_obj
     assert new_family.name == '17093'
-    assert set(new_family.panels) == set(['IEM', 'EP'])
+    assert set(new_family.panels) == {'IEM', 'EP'}
     assert new_family.priority_human == 'standard'
 
     assert len(new_family.links) == 3
@@ -141,6 +276,27 @@ def test_store_families(orders_api, base_store, scout_status_data):
     assert base_store.deliveries().count() == base_store.samples().count()
     for link in new_family.links:
         assert len(link.sample.deliveries) == 1
+
+
+def test_store_families_bad_apptag(orders_api, base_store, scout_status_data):
+    # GIVEN a basic store with no samples or nothing in it + scout order
+    assert base_store.samples().first() is None
+    assert base_store.families().first() is None
+
+    for family in scout_status_data['families']:
+        for sample in family['samples']:
+            sample['application'] = 'nonexistingtag'
+
+    # THEN it should raise OrderError
+    with pytest.raises(OrderError):
+        # WHEN storing the order
+        new_families = orders_api.store_families(
+            customer=scout_status_data['customer'],
+            order=scout_status_data['order'],
+            ordered=dt.datetime.now(),
+            ticket=1234567,
+            families=scout_status_data['families'],
+        )
 
 
 def test_store_external(orders_api, base_store, external_status_data):
@@ -179,3 +335,25 @@ def test_store_external(orders_api, base_store, external_status_data):
     assert base_store.deliveries().count() == base_store.samples().count()
     for link in new_family.links:
         assert len(link.sample.deliveries) == 1
+
+
+def test_store_external_bad_apptag(orders_api, base_store, external_status_data):
+
+    # GIVEN a basic store with no samples or nothing in it + external order
+    assert base_store.samples().first() is None
+    assert base_store.families().first() is None
+
+    for family in external_status_data['families']:
+        for sample in family['samples']:
+            sample['application'] = 'nonexistingtag'
+
+    # THEN it should raise OrderError
+    with pytest.raises(OrderError):
+        # WHEN storing the order
+        new_families = orders_api.store_families(
+            customer=external_status_data['customer'],
+            order=external_status_data['order'],
+            ordered=dt.datetime.now(),
+            ticket=1234567,
+            families=external_status_data['families'],
+        )

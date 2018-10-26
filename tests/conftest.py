@@ -7,6 +7,36 @@ import pytest
 
 from cg.store import Store
 
+## Trailblazer
+from trailblazer.mip import files as mip_files_api
+import ruamel.yaml
+
+## Trailblazer api for mip files
+@pytest.fixture(scope='session')
+def files():
+    return {
+        'config': 'tests/fixtures/apps/tb/family/family_config.yaml',
+        'sampleinfo': 'tests/fixtures/apps/tb/family/family_qc_sample_info.yaml',
+        'qcmetrics': 'tests/fixtures/apps/tb/family/family_qc_metrics.yaml',
+    }
+
+
+@pytest.fixture(scope='session')
+def files_raw(files):
+    return {
+        'config': ruamel.yaml.safe_load(open(files['config'])),
+        'sampleinfo': ruamel.yaml.safe_load(open(files['sampleinfo'])),
+        'qcmetrics': ruamel.yaml.safe_load(open(files['qcmetrics'])),
+    }
+
+
+@pytest.fixture(scope='session')
+def files_data(files_raw):
+    return {
+        'config': mip_files_api.parse_config(files_raw['config']),
+        'sampleinfo': mip_files_api.parse_sampleinfo(files_raw['sampleinfo']),
+        'qcmetrics': mip_files_api.parse_qcmetrics(files_raw['qcmetrics']),
+}
 
 @pytest.yield_fixture(scope='function')
 def store() -> Store:
@@ -19,11 +49,13 @@ def store() -> Store:
 @pytest.yield_fixture(scope='function')
 def base_store(store) -> Store:
     """Setup and example store."""
+    customer_group = store.add_customer_group('dummy_group', 'dummy group')
+    store.add_commit(customer_group)
     customers = [store.add_customer('cust000', 'Production', scout_access=True,
-                                    invoice_address='Test street'),
-                 store.add_customer('cust001', 'Customer', scout_access=False),
-                 store.add_customer('cust002', 'Karolinska', scout_access=True),
-                 store.add_customer('cust003', 'CMMS', scout_access=True)]
+                                    invoice_address='Test street', customer_group=customer_group),
+                 store.add_customer('cust001', 'Customer', scout_access=False, customer_group=customer_group),
+                 store.add_customer('cust002', 'Karolinska', scout_access=True, customer_group=customer_group),
+                 store.add_customer('cust003', 'CMMS', scout_access=True, customer_group=customer_group)]
     store.add_commit(customers)
     applications = [store.add_application('WGXCUSC000', 'wgs', 'External WGS',
                                           sequencing_depth=0, is_external=True),
@@ -35,7 +67,13 @@ def base_store(store) -> Store:
                     store.add_application('WGTPCFC030', 'wgs', 'WGS trio', is_accredited=True,
                                           sequencing_depth=30, target_reads=300000000,
                                           limitations='some'),
-                    ]
+                    store.add_application('METLIFR020', 'wgs', 'Whole genome metagenomics',
+                                          sequencing_depth=0, target_reads=40000000),
+                    store.add_application('METNXTR020', 'wgs', 'Metagenomics',
+                                          sequencing_depth=0, target_reads=20000000),
+                    store.add_application('MWRNXTR003', 'mic', 'Microbial whole genome ',
+                                          sequencing_depth=0)]
+
     store.add_commit(applications)
 
     prices = {'standard': 10, 'priority': 20, 'express': 30, 'research': 5}

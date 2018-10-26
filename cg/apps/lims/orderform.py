@@ -17,6 +17,14 @@ SOURCE_TYPES = [
     'nail',
     'muscle',
     'other',
+    # metagenome sources
+    'skin',
+    'respiratory',
+    'urine',
+    'CSF',
+    'faeces',
+    'environmental',
+    'unknown'
 ]
 
 
@@ -56,15 +64,16 @@ def parse_orderform(excel_path: str) -> dict:
 
     customer_options = len(customer_ids)
     if customer_options == 0:
-        raise OrderFormError('customer information missing')
+        raise OrderFormError('Customer information is missing')
     elif customer_options != 1:
-        raise OrderFormError(f"invalid customer information: {customer_ids}")
+        raise OrderFormError(f"Samples have different customers: {customer_ids}")
 
     data = {
         'customer': customer_ids.pop(),
         'items': items,
         'project_type': project_type,
     }
+
     return data
 
 
@@ -87,6 +96,8 @@ def get_project_type(document_title: str, parsed_samples: List) -> str:
         return 'external'
     elif '1603' in document_title:
         return 'microbial'
+    elif '1605' in document_title:
+        return 'metagenome'
 
     analyses = set(sample['analysis'].lower() for sample in parsed_samples)
     if len(analyses) > 1:
@@ -113,7 +124,7 @@ def expand_family(family_id, parsed_family):
 
     customers = set(raw_sample['customer'] for raw_sample in samples)
     if len(customers) != 1:
-        raise ValueError("invalid customer information: {}".format(customers))
+        raise OrderFormError("Invalid customer information: {}".format(customers))
     customer = customers.pop()
 
     gene_panels = set()
@@ -190,6 +201,13 @@ def parse_sample(raw_sample):
                           raw_sample.get('Sample/Reagent Label') else None),
         'tumour': True if raw_sample.get('UDF/tumor') == 'yes' else False,
         'custom_index': raw_sample.get('UDF/Custom index'),
+        'elution_buffer': raw_sample.get('UDF/Sample Buffer'),
+        'elution_buffer_other': raw_sample.get('UDF/Other Elution Buffer'),
+        'strain': raw_sample.get('UDF/Strain'),
+        'strain_other': raw_sample.get('UDF/Other species'),
+        'reference_genome': raw_sample.get('UDF/Reference Genome Microbial'),
+        'extraction_method': raw_sample.get('UDF/Extraction method'),
+        'pool': raw_sample.get('UDF/pool name'),
     }
 
     data_analysis = raw_sample.get('UDF/Data Analysis') or None
@@ -200,13 +218,15 @@ def parse_sample(raw_sample):
     else:
         raise OrderFormError("unknown 'Data Analysis' for order")
 
-    for key, field_key in [('pool', 'pool name'), ('index_number', 'Index number'),
-                           ('volume', 'Volume (uL)'), ('concentration', 'Concentration (nM)'),
-                           ('quantity', 'Quantity')]:
-        excel_key = f"UDF/{field_key}"
+    numeric_values = [('index_number', 'UDF/Index number'),
+                      ('volume', 'UDF/Volume (uL)'), ('quantity', 'UDF/Quantity'),
+                      ('concentration', 'UDF/Concentration (nM)'),
+                      ('concentration_weight', 'UDF/Sample Conc.')]
+    for json_key, excel_key in numeric_values:
         str_value = raw_sample.get(excel_key, '').rsplit('.0')[0]
         if str_value.replace('.', '').isnumeric():
-            sample[key] = str_value
+            sample[json_key] = str_value
+
     for parent in ['mother', 'father']:
         parent_key = f"UDF/{parent}ID"
         sample[parent] = (raw_sample[parent_key] if
@@ -220,6 +240,7 @@ def relevant_rows(orderform_sheet):
     """Get the relevant rows from an order form sheet."""
     raw_samples = []
     current_row = None
+    empty_row_found = False
     for row in orderform_sheet.get_rows():
         if row[0].value == '</SAMPLE ENTRIES>':
             break
@@ -229,10 +250,17 @@ def relevant_rows(orderform_sheet):
             current_row = None
         elif current_row == 'samples':
             values = [str(cell.value) for cell in row]
+
+            # skip empty rows
             if values[0]:
-                # skip empty rows
+                if empty_row_found:
+                    raise OrderFormError(f"Found data after empty lines. Please delete any "
+                                         f"non-sample data rows in between the samples")
+
                 sample_dict = dict(zip(header_row, values))
                 raw_samples.append(sample_dict)
+            else:
+                empty_row_found = True
 
         if row[0].value == '<TABLE HEADER>':
             current_row = 'header'
