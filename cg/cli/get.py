@@ -11,7 +11,7 @@ LOG = logging.getLogger(__name__)
 SAMPLE_HEADERS = ['Sample', 'Name', 'Customer', 'Application', 'State', 'Priority',
                   'External?']
 FAMILY_HEADERS = ['Family', 'Name', 'Customer', 'Priority', 'Panels', 'Action']
-FLOWCELL_HEADERS = ['Flowcell', 'Type', 'Sequencer', 'Date', 'Archived?']
+FLOWCELL_HEADERS = ['Flowcell', 'Type', 'Sequencer', 'Date', 'Archived?', 'Status']
 
 
 @click.group(invoke_without_command=True)
@@ -79,7 +79,7 @@ def family(context: click.Context, customer: str, name: bool, samples: bool,
         if customer_obj is None:
             LOG.error(f"{customer}: customer not found")
             context.abort()
-        families = context.obj['status'].families(customer=customer_obj, query=family_ids[-1])
+        families = context.obj['status'].families(customer=customer_obj, enquiry=family_ids[-1])
     else:
         families = []
         for family_id in family_ids:
@@ -121,6 +121,7 @@ def flowcell(context: click.Context, samples: bool, flowcell_id: str):
         flowcell_obj.sequencer_name,
         flowcell_obj.sequenced_at.date(),
         flowcell_obj.archived_at.date() if flowcell_obj.archived_at else 'No',
+        flowcell_obj.status,
     ]
     click.echo(tabulate([row], headers=FLOWCELL_HEADERS, tablefmt='psql'))
     if samples:

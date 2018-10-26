@@ -18,14 +18,24 @@ def add(context):
 @add.command()
 @click.argument('internal_id')
 @click.argument('name')
+@click.option('-cg', '--customer-group', 'customer_group_id', required=False,
+              help='internal ID for the customer group of the customer, a new group will be '
+                   'created if left out')
 @click.pass_context
-def customer(context, internal_id: str, name: str):
+def customer(context, internal_id: str, name: str, customer_group_id: str):
     """Add a new customer with a unique INTERNAL_ID and NAME."""
     existing = context.obj['db'].customer(internal_id)
     if existing:
         LOG.error(f"{existing.name}: customer already added")
         context.abort()
-    new_customer = context.obj['db'].add_customer(internal_id=internal_id, name=name)
+
+    customer_group = context.obj['db'].customer_group(customer_group_id)
+
+    if not customer_group:
+        customer_group = context.obj['db'].add_customer_group(internal_id=internal_id, name=name)
+
+    new_customer = context.obj['db'].add_customer(internal_id=internal_id, name=name,
+                                                  customer_group=customer_group)
     context.obj['db'].add_commit(new_customer)
     message = f"customer added: {new_customer.internal_id} ({new_customer.id})"
     LOG.info(message)
@@ -81,7 +91,7 @@ def sample(context, lims_id, downsampled, sex, order, application, priority, cus
         downsampled_to=downsampled,
         priority=priority,
     )
-    new_record.application_version = application_obj.versions[-1]
+    new_record.application_version = status.current_version(application)
     new_record.customer = customer_obj
     status.add_commit(new_record)
     LOG.info(f"{new_record.internal_id}: new sample added")

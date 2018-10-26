@@ -27,6 +27,7 @@ class LimsHandler:
                     'quantity': sample.get('quantity'),
                     'volume': sample.get('volume'),
                     'concentration': sample.get('concentration'),
+                    'concentration_weight': sample.get('concentration_weight'),
                     'source': sample.get('source') or 'NA',
                     'customer': customer,
                     'comment': sample.get('comment'),
@@ -37,6 +38,11 @@ class LimsHandler:
                     'rml_plate_name': sample.get('rml_plate_name'),
                     'well_position_rml': sample.get('well_position_rml'),
                     'sex': SEX_MAP.get(sample.get('sex'), 'unknown'),
+                    'strain': sample.get('strain'),
+                    'strain_other': sample.get('strain_other'),
+                    'elution_buffer': sample.get('elution_buffer'),
+                    'reference_genome': sample.get('reference_genome'),
+                    'extraction_method': sample.get('extraction_method'),
                 }
             })
         return samples_lims

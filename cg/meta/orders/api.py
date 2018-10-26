@@ -1,4 +1,12 @@
 # -*- coding: utf-8 -*-
+"""Unified interface to handle sample submissions.
+
+This interface will update information in Status and/or LIMS as required.
+
+The normal entry for information is through the REST API which will pass a JSON
+document with all information about samples in the submission. The input will
+be validated and if passing all checks be accepted as new samples.
+"""
 import datetime as dt
 import logging
 import re
@@ -16,20 +24,24 @@ LOG = logging.getLogger(__name__)
 
 
 class OrdersAPI(LimsHandler, StatusHandler):
-
     """Orders API for accepting new samples into the system."""
 
-    def __init__(self, lims: LimsAPI, status: Store, osticket: OsTicket=None):
+    def __init__(self, lims: LimsAPI, status: Store, osticket: OsTicket = None):
         self.lims = lims
         self.status = status
         self.osticket = osticket
 
     def submit(self, project: OrderType, data: dict, ticket: dict) -> dict:
-        """Submit a batch of samples."""
+        """Submit a batch of samples.
+
+        Main entry point for the class towards interfaces that implements it.
+        """
         try:
             ORDER_SCHEMES[project].validate(data)
         except (ValueError, TypeError) as error:
             raise OrderError(error.args[0])
+
+        self._validate_customers(project, data)
 
         # detect manual ticket assignment
         ticket_match = re.fullmatch(r'#([0-9]{6})', data['name'])
@@ -48,7 +60,13 @@ class OrdersAPI(LimsHandler, StatusHandler):
                         message += '<br />' + sample.get('name')
 
                         if sample.get('internal_id'):
-                            message += ' (already existing sample)'
+
+                            existing_sample = self.status.sample(sample.get('internal_id'))
+                            sample_customer = ''
+                            if existing_sample.customer_id != data['customer']:
+                                sample_customer = ' from ' + existing_sample.customer.internal_id
+
+                            message += f" (already existing sample{sample_customer})"
 
                         if sample.get('comment'):
                             message += ' ' + sample.get('comment')
@@ -60,13 +78,14 @@ class OrdersAPI(LimsHandler, StatusHandler):
 
                     if ticket.get('name'):
                         message += f"<br />{ticket.get('name')}"
-                        
+
                     data['ticket'] = self.osticket.open_ticket(
                         name=ticket['name'],
                         email=ticket['email'],
                         subject=data['name'],
                         message=message,
                     )
+
                     LOG.info(f"{data['ticket']}: opened new ticket")
                 else:
                     data['ticket'] = None
@@ -92,6 +111,21 @@ class OrdersAPI(LimsHandler, StatusHandler):
 
     def submit_fastq(self, data: dict) -> dict:
         """Submit a batch of samples for FASTQ delivery."""
+        status_data = self.samples_to_status(data)
+        project_data, lims_map = self.process_lims(data, data['samples'])
+        self.fillin_sample_ids(status_data['samples'], lims_map)
+        new_samples = self.store_fastq_samples(
+            customer=status_data['customer'],
+            order=status_data['order'],
+            ordered=project_data['date'],
+            ticket=data['ticket'],
+            samples=status_data['samples'],
+        )
+        self.add_missing_reads(new_samples)
+        return {'project': project_data, 'records': new_samples}
+
+    def submit_metagenome(self, data: dict) -> dict:
+        """Submit a batch of metagenome samples."""
         status_data = self.samples_to_status(data)
         project_data, lims_map = self.process_lims(data, data['samples'])
         self.fillin_sample_ids(status_data['samples'], lims_map)
@@ -121,9 +155,28 @@ class OrdersAPI(LimsHandler, StatusHandler):
         self.update_application(data['ticket'], result['records'])
         return result
 
+    def submit_microbial(self, data: dict) -> dict:
+        """Submit a batch of microbial samples."""
+        # prepare data for status database
+        status_data = self.microbial_samples_to_status(data)
+        # submit samples to LIMS
+        project_data, lims_map = self.process_lims(data, data['samples'])
+        # submit samples to Status
+        self.fillin_sample_ids(status_data['samples'], lims_map, id_key='internal_id')
+        order_obj = self.store_microbial_order(
+            customer=status_data['customer'],
+            order=status_data['order'],
+            ordered=dt.datetime.now(),
+            ticket=data['ticket'],
+            lims_project=project_data['id'],
+            samples=status_data['samples'],
+            comment=status_data['comment'],
+        )
+        return {'project': project_data, 'records': order_obj.microbial_samples}
+
     def process_analysis_samples(self, data: dict) -> dict:
         """Process samples to be analyzed."""
-        # fileter out only new samples
+        # filter out only new samples
         status_data = self.families_to_status(data)
         new_samples = [sample for sample in data['samples'] if sample.get('internal_id') is None]
         if new_samples:
@@ -146,8 +199,8 @@ class OrdersAPI(LimsHandler, StatusHandler):
 
     def update_application(self, ticket_number: int, families: List[models.Family]):
         """Update application for trios if relevant."""
-        reduced_map  = {'EXOSXTR100': 'EXTSXTR100', 'WGSPCFC030': 'WGTPCFC030',
-                        'WGSPCFC060': 'WGTPCFC060'}
+        reduced_map = {'EXOSXTR100': 'EXTSXTR100', 'WGSPCFC030': 'WGTPCFC030',
+                       'WGSPCFC060': 'WGTPCFC060'}
         for family_obj in families:
             LOG.debug(f"{family_obj.name}: update application for trios")
             order_samples = [link_obj.sample for link_obj in family_obj.links if
@@ -164,7 +217,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
                                 reduced_tag = reduced_map[application_tag]
                                 LOG.info(f"{sample_obj.internal_id}: update application tag - "
                                          f"{reduced_tag}")
-                                reduced_version = self.status.latest_version(reduced_tag)
+                                reduced_version = self.status.current_version(reduced_tag)
                                 sample_obj.application_version = reduced_version
 
     def add_missing_reads(self, samples: List[models.Sample]):
@@ -174,11 +227,26 @@ class OrdersAPI(LimsHandler, StatusHandler):
             target_reads = sample_obj.application_version.application.target_reads / 1000000
             self.lims.update_sample(sample_obj.internal_id, target_reads=target_reads)
 
-    def fillin_sample_ids(self, samples: List[dict], lims_map: dict):
+    def fillin_sample_ids(self, samples: List[dict], lims_map: dict, id_key: str = 'internal_id'):
         """Fill in LIMS sample ids."""
         for sample in samples:
             LOG.debug(f"{sample['name']}: link sample to LIMS")
-            if not sample['internal_id']:
+            if not sample.get(id_key):
                 internal_id = lims_map[sample['name']]
                 LOG.info(f"{sample['name']} -> {internal_id}: connect sample to LIMS")
-                sample['internal_id'] = internal_id
+                sample[id_key] = internal_id
+
+    def _validate_customers(self, project, data):
+        for sample in data.get('samples'):
+
+            if sample.get('internal_id'):
+
+                if project not in (OrderType.SCOUT, OrderType.EXTERNAL):
+                    raise OrderError(f"Only scout and external orders can have imported samples: "
+                                     f"{sample.get('name')}")
+
+                existing_sample = self.status.sample(sample.get('internal_id'))
+                data_customer = self.status.customer(data['customer'])
+
+                if existing_sample.customer.customer_group_id != data_customer.customer_group_id:
+                    raise OrderError(f"Sample not available: {sample.get('name')}")

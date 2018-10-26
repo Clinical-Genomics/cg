@@ -11,8 +11,9 @@
     <div class="card">
       <div class="card-header">
         <br>
-        <form action="{{ url_for('invoices.invoice', invoice_id=invoice.id) }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ url_for('invoices.index') }}" method="POST" enctype="multipart/form-data">
           <div class="form-group">
+            <input type="hidden" name="new_invoice_updates" value=1>
             <input type="hidden" name="invoice_id" value={{invoice.id}}>
             <div class="row">
               <div class="col">
@@ -29,7 +30,7 @@
                   <br>
                         <div class="row">
                           <div  class="col-sm-6">
-                            <label>Default Price: {{total_price}}</label>
+                            <label>Default Price: {{default_price}}</label>
                           </div>
                           <div  class="col-sm-3">
                               <label>Final Price:</label>
@@ -46,13 +47,16 @@
                       <div class="row"><h5>Modified Invoice</h5></div>
                       <br>
                       <div class="row">
-                        
+
                         <div class="col">
-                          <label class="custom-file">
-                            <input name="KTH_excel" type="file" class="custom-file-input"> 
-                            <span class="custom-file-control">Choose KTH invoice...</span>
-                          </label>
-                          
+
+                          <div class="input-group mb-3">
+                            <div class="custom-file">
+                              <input type="file" class="custom-file-input" id="KTH_excel" name="KTH_excel">
+                              <label class="custom-file-label" for="KTH_excel">Choose KTH invoice...</label>
+                            </div>
+                          </div>
+
                           {%if invoice.excel_kth%}
                           <a href="{{ url_for('invoices.modified_invoice', invoice_id=invoice.id, cost_center='KTH') }}"  aria-pressed="true">invoice_KTH.xlsx</a>
                           {% else %}
@@ -64,10 +68,13 @@
                       <br>
                       <div class="row">
                         <div class="col">
-                          <label class="custom-file">
-                            <input name="KI_excel" type="file" class="custom-file-input">
-                            <span class="custom-file-control">Choose KI invoice...</span>
-                          </label>
+
+                          <div class="input-group mb-3">
+                            <div class="custom-file">
+                              <input type="file" class="custom-file-input" id="KI_excel" name="KI_excel">
+                              <label class="custom-file-label" for="KI_excel">Choose KI invoice...</label>
+                            </div>
+                          </div>
                           
                           {%if invoice.excel_ki%}
                           <a href="{{ url_for('invoices.modified_invoice', invoice_id=invoice.id, cost_center='KI') }}" aria-pressed="true">invoice_KI.xlsx</a>
@@ -150,7 +157,7 @@
           <div class="card-body">
             <div class="row">
               <div class="col">
-                <h3>Fakturaunderlag {{costcenter}}</h3>
+                <h3>{{costcenter}} Invoice</h3>
               </div>
             </div>
             <div class="row">
@@ -159,7 +166,7 @@
               </div>
               
               <div class="col">
-                <h5 align="right">Fakturanummer: {{ invoice.id }}</h5>
+                <h5 align="right">Invoice ID: {{ invoice.id }}</h5>
               </div>
             </div>
             <br>
@@ -167,10 +174,10 @@
               <tr>
                 <th>{{invoice_dict.record_type}}</th>
                 <th>Clinical Genomics ID</th>
-                <th>Analys</th>
-                <th> Project (ticket id)</th>
-                <th>Ankomstdatum</th>
-                <th>Pris</th>
+                <th>Analysis</th>
+                <th>Project (ticket id)</th>
+                <th>Date Recieved</th>
+                <th>Default Price</th>
               </tr>
               {% for record in invoice_dict.records %}
               <tr>

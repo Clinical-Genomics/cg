@@ -3,7 +3,7 @@ Alchy
 SQLAlchemy
 
 # cli
-Click>=6.7
+Click<7.0
 
 # server
 Flask
@@ -27,13 +27,13 @@ openpyxl
 tabulate
 lxml
 python-dateutil
-cyvcf2==0.9.0
-pymongo
+cyvcf2<0.10.0
+pymongo==3.6.0
 
 # apps
 genologics
-loqusdb>=1.0.0
-trailblazer>=2.2.0
+loqusdb<2.0.0
+trailblazer>=3.1.1
 housekeeper>=2.0.0b2
 chanjo>=4.2.0
 genotype>=2.2.0

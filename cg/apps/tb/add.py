@@ -120,19 +120,41 @@ class AddHandler:
                 'tags': ['coverage', sample_data['id']],
                 'archive': False,
             })
+
+            ## Bam preprocessing
             bam_path = sample_data['bam']
+            bai_path = f"{bam_path}.bai"
+            if not Path(bai_path).exists():
+                bai_path = bam_path.replace('.bam', '.bai')
+
             data.append({
                 'path': bam_path,
                 'tags': ['bam', sample_data['id']],
                 'archive': False,
             })
-            bai_path = f"{bam_path}.bai"
-            if not Path(bai_path).exists():
-                bai_path = bam_path.replace('.bam', '.bai')
             data.append({
                 'path': bai_path,
                 'tags': ['bam-index', sample_data['id']],
                 'archive': False,
             })
+
+            ## Only for wgs data
+            ## Downsamples MT bam preprocessing
+            if sample_data['subsample_mt']:
+                print(sample_data['subsample_mt'])
+                mt_bam_path = sample_data['subsample_mt']
+                mt_bai_path = f"{mt_bam_path}.bai"
+                if not Path(mt_bai_path).exists():
+                    mt_bai_path = mt_bam_path.replace('.bam', '.bai')
+                data.append({
+                    'path': mt_bam_path,
+                    'tags': ['bam-mt', sample_data['id']],
+                    'archive': False,
+                })
+                data.append({
+                    'path': mt_bai_path,
+                    'tags': ['bam-mt-index', sample_data['id']],
+                    'archive': False,
+                })
 
         return data

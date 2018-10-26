@@ -1,0 +1,31 @@
+{
+    "name": "Metagenome",
+    "customer": "cust000",
+    "comment": "Vi kommer in med proverna på onsdag",
+    "samples": [{
+        "name": "GKS1",
+        "quantity": "2200",
+        "volume": "35",
+        "concentration": "5",
+        "application": "METLIFR020",
+        "source": "environmental",
+        "container": "96 well plate",
+        "container_name": "Gutta Perkanen / GKS",
+        "well_position": "A:2",
+        "require_qcok": true,
+        "priority": "research",
+        "comment": "Testcomment",
+        "elution_buffer": "unknown"
+    }, {
+        "name": "GKS2",
+        "quantity": "2200",
+        "application": "METNXTR020",
+        "source": "environmental",
+        "container": "Tube",
+        "require_qcok": true,
+        "priority": "research",
+        "comment": "Osäkra på kvaliten för det här provet",
+        "elution_buffer": "unknown"
+    }
+    ]
+}

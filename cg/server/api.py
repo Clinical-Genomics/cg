@@ -51,8 +51,8 @@ def before_request():
         g.current_user = user_obj
 
 
-@BLUEPRINT.route('/order/<order_type>', methods=['POST'])
-def order(order_type):
+@BLUEPRINT.route('/submit_order/<order_type>', methods=['POST'])
+def submit_order(order_type):
     """Submit an order for samples."""
     api = OrdersAPI(lims=lims, status=db, osticket=osticket)
     post_data = request.get_json()
@@ -64,7 +64,7 @@ def order(order_type):
         return abort(make_response(jsonify(message=error.message), 401))
     except HTTPError as error:
         return abort(make_response(jsonify(message=error.args[0]), 401))
-    #LOG.info(f"{result['ticket'] or 'NA'}: successfully submitted samples")
+
     return jsonify(project=result['project'],
                    records=[record.to_dict() for record in result['records']])
 
@@ -94,12 +94,26 @@ def families():
     else:
         customer_obj = None if g.current_user.is_admin else g.current_user.customer
         families_q = db.families(
-            query=request.args.get('query'),
+            enquiry=request.args.get('enquiry'),
             customer=customer_obj,
             action=request.args.get('action'),
         )
         count = families_q.count()
         records = families_q.limit(30)
+    data = [family_obj.to_dict(links=True) for family_obj in records]
+    return jsonify(families=data, total=count)
+
+
+@BLUEPRINT.route('/families_in_customer_group')
+def families_in_customer_group():
+    """Fetch families in customer_group."""
+    customer_obj = None if g.current_user.is_admin else g.current_user.customer
+    families_q = db.families_in_customer_group(
+        enquiry=request.args.get('enquiry'),
+        customer=customer_obj,
+    )
+    count = families_q.count()
+    records = families_q.limit(30)
     data = [family_obj.to_dict(links=True) for family_obj in records]
     return jsonify(families=data, total=count)
 
@@ -112,6 +126,21 @@ def family(family_id):
         return abort(404)
     elif not g.current_user.is_admin and (g.current_user.customer != family_obj.customer):
         return abort(401)
+
+    data = family_obj.to_dict(links=True, analyses=True)
+    return jsonify(**data)
+
+
+@BLUEPRINT.route('/families_in_customer_group/<family_id>')
+def family_in_customer_group(family_id):
+    """Fetch a family with links."""
+    family_obj = db.family(family_id)
+    if family_obj is None:
+        return abort(404)
+    elif not g.current_user.is_admin and (g.current_user.customer.customer_group !=
+                                          family_obj.customer.customer_group):
+        return abort(401)
+
     data = family_obj.to_dict(links=True, analyses=True)
     return jsonify(**data)
 
@@ -130,9 +159,22 @@ def samples():
     else:
         customer_obj = None if g.current_user.is_admin else g.current_user.customer
         samples_q = db.samples(
-            query=request.args.get('query'),
+            enquiry=request.args.get('enquiry'),
             customer=customer_obj,
         )
+    limit = int(request.args.get('limit', 50))
+    data = [sample_obj.to_dict() for sample_obj in samples_q.limit(limit)]
+    return jsonify(samples=data, total=samples_q.count())
+
+
+@BLUEPRINT.route('/samples_in_customer_group')
+def samples_in_customer_group():
+    """Fetch samples in a customer group."""
+    customer_obj = None if g.current_user.is_admin else g.current_user.customer
+    samples_q = db.samples_in_customer_group(
+        enquiry=request.args.get('enquiry'),
+        customer=customer_obj,
+    )
     limit = int(request.args.get('limit', 50))
     data = [sample_obj.to_dict() for sample_obj in samples_q.limit(limit)]
     return jsonify(samples=data, total=samples_q.count())
@@ -149,11 +191,76 @@ def sample(sample_id):
     data = sample_obj.to_dict(links=True, flowcells=True)
     return jsonify(**data)
 
+  
+@BLUEPRINT.route('/samples_in_customer_group/<sample_id>')
+def sample_in_customer_group(sample_id):
+    """Fetch a single sample."""
+    sample_obj = db.sample(sample_id)
+    if sample_obj is None:
+        return abort(404)
+    elif not g.current_user.is_admin and (g.current_user.customer.customer_group !=
+                                          sample_obj.customer.customer_group):
+        return abort(401)
+    data = sample_obj.to_dict(links=True, flowcells=True)
+    return jsonify(**data)
+
+    
+@BLUEPRINT.route('/microbial_orders')
+def microbial_orders():
+    """Fetch microbial orders."""
+    customer_obj = None if g.current_user.is_admin else g.current_user.customer
+    orders_q = db.microbial_orders(
+        enquiry=request.args.get('enquiry'),
+        customer=customer_obj
+    )
+    count = orders_q.count()
+    records = orders_q.limit(30)
+    data = [order_obj.to_dict(samples=True) for order_obj in records]
+    return jsonify(microbial_orders=data, total=count)
+
+
+@BLUEPRINT.route('/microbial_orders/<order_id>')
+def microbial_order(order_id):
+    """Fetch a order with samples."""
+    order_obj = db.microbial_order(order_id)
+    if order_obj is None:
+        return abort(404)
+    elif not g.current_user.is_admin and (g.current_user.customer != order_obj.customer):
+        return abort(401)
+    data = order_obj.to_dict(samples=True)
+    return jsonify(**data)
+
+
+@BLUEPRINT.route('/microbial_samples')
+def microbial_samples():
+    """Fetch microbial samples."""
+    customer_obj = None if g.current_user.is_admin else g.current_user.customer
+    samples_q = db.microbial_samples(
+        enquiry=request.args.get('enquiry'),
+        customer=customer_obj,
+    )
+    limit = int(request.args.get('limit', 50))
+    data = [sample_obj.to_dict(order=True) for sample_obj in samples_q.limit(limit)]
+    return jsonify(samples=data, total=samples_q.count())
+
+
+@BLUEPRINT.route('/microbial_samples/<sample_id>')
+def microbial_sample(sample_id):
+    """Fetch a single sample."""
+    sample_obj = db.microbial_sample(sample_id)
+    if sample_obj is None:
+        return abort(404)
+    elif not g.current_user.is_admin and (g.current_user.customer != sample_obj.customer):
+        return abort(401)
+    data = sample_obj.to_dict()
+    return jsonify(**data)
+
 
 @BLUEPRINT.route('/pools')
 def pools():
     """Fetch pools."""
-    pools_q = db.pools(customer=db.customer(request.args.get('customer')))
+    customer_obj = None if g.current_user.is_admin else g.current_user.customer
+    pools_q = db.pools(customer=customer_obj)
     data = [pool_obj.to_dict() for pool_obj in pools_q.limit(30)]
     return jsonify(pools=data, total=pools_q.count())
 
@@ -164,6 +271,8 @@ def pool(pool_id):
     record = db.pool(pool_id)
     if record is None:
         return abort(404)
+    elif not g.current_user.is_admin and (g.current_user.customer != record.customer):
+        return abort(401)
     return jsonify(**record.to_dict())
 
 
@@ -172,7 +281,7 @@ def flowcells():
     """Fetch flowcells."""
     query = db.flowcells(
         status=request.args.get('status'),
-        query=request.args.get('query'),
+        enquiry=request.args.get('enquiry'),
     )
     data = [record.to_dict() for record in query.limit(50)]
     return jsonify(flowcells=data, total=query.count())
@@ -255,7 +364,7 @@ def orderform():
     filename = secure_filename(input_file.filename)
 
     try:
-        if filename.endswith('.xlsx'):
+        if filename.lower().endswith('.xlsx'):
             temp_dir = Path(tempfile.gettempdir())
             saved_path = str(temp_dir / filename)
             input_file.save(saved_path)
@@ -269,13 +378,16 @@ def orderform():
     return jsonify(**project_data)
 
 
-@BLUEPRINT.route('/trends/samples')
-def trends_samples():
+@BLUEPRINT.route('/trends/samples/<year>')
+def trends_samples(year):
     """Samples per month."""
+
     return jsonify(
-        received=list(db.samples_per_month()),
-        turnaround_times=list(db.received_to_delivered()),
-        prepp_times=list(db.received_to_prepped()),
-        sequence_times=list(db.prepped_to_sequenced()),
-        deliver_times=list(db.sequenced_to_delivered()),
+        received_application=list(db.samples_per_month_application(year)),
+        received=list(db.samples_per_month(year)),
+        turnaround_times=list(db.received_to_delivered(year)),
+        prepp_times=list(db.received_to_prepped(year)),
+        sequence_times=list(db.prepped_to_sequenced(year)),
+        deliver_times=list(db.sequenced_to_delivered(year)),
+        invoice_times=list(db.delivered_to_invoiced(year)),
     )

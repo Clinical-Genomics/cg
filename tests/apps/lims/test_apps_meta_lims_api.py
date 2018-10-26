@@ -17,6 +17,7 @@ def test_get_processing_time_for_values(lims_api):
     # THEN return value is the delivered - received == 0 for same datetime
     assert processing_time == dt.timedelta(0)
 
+
 def test_get_processing_time_for_no_received_time(lims_api):
 
     # GIVEN there is no received_at date and a delivered date

@@ -10,6 +10,10 @@ from cg.exc import LimsDataError
 from .constants import PROP2UDF
 from .order import OrderHandler
 
+# fixes https://github.com/Clinical-Genomics/servers/issues/30
+import requests_cache
+requests_cache.install_cache(backend='memory')
+
 SEX_MAP = {'F': 'female', 'M': 'male', 'Unknown': 'unknown', 'unknown': 'unknown'}
 REV_SEX_MAP = {value: key for key, value in SEX_MAP.items()}
 AM_METHODS = {
