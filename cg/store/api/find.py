@@ -87,9 +87,7 @@ class FindHandler:
         )) if enquiry else records
         return records.order_by(models.Sample.created_at.desc())
 
-    def samples_in_customer_group(self, *, customer: models.Customer = None, enquiry: str = None)\
-            -> \
-            List[models.Sample]:
+    def samples_in_customer_group(self, *, customer: models.Customer = None, enquiry: str = None) -> List[models.Sample]:
         """Fetch all samples including those from collaborating customers."""
 
         records = self.Sample.query \
