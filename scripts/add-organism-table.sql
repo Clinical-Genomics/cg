@@ -11,7 +11,7 @@ CREATE TABLE `organism` (
 ) ENGINE=InnoDB;
 
 # add the OF organisms
-INSERT INTO `cg-dev`.organism (name, internal_id, created_at)
+INSERT INTO organism (name, internal_id, created_at)
     VALUES ('C. jejuni', 'C. jejuni', now()),
     ('C. difficile', 'C. difficile', now()),
     ('E. faecalis', 'E. faecalis', now()),
@@ -27,7 +27,7 @@ INSERT INTO `cg-dev`.organism (name, internal_id, created_at)
     ('S. pyogenes', 'S. pyogenes', now());
 
 # add used organisms
-INSERT INTO `cg-dev`.organism (name, internal_id, created_at, reference_genome, verified)
+INSERT INTO organism (name, internal_id, created_at, reference_genome, verified)
     SELECT strain, strain, now(), reference_genome, 0
     FROM microbial_sample
     where strain is not null and strain <> 'Other'
@@ -36,7 +36,7 @@ INSERT INTO `cg-dev`.organism (name, internal_id, created_at, reference_genome, 
     GROUP BY strain;
 
 # add used other organisms
-INSERT INTO `cg-dev`.organism (name, internal_id, created_at, reference_genome)
+INSERT INTO organism (name, internal_id, created_at, reference_genome)
     SELECT strain_other, strain_other, now(), reference_genome
     FROM microbial_sample
     where strain = 'Other'
@@ -46,7 +46,7 @@ INSERT INTO `cg-dev`.organism (name, internal_id, created_at, reference_genome)
     GROUP BY strain_other;
 
 # set reference genomes for the organisms
-UPDATE `cg-dev`.organism as o
+UPDATE organism as o
   join microbial_sample ms on ms.strain = o.name
 set
   o.reference_genome = ms.reference_genome
