@@ -26,7 +26,7 @@ INSERT INTO `cg-dev`.organism (name, internal_id, created_at)
     ('S. pneumoniae', 'S. pneumoniae', now()),
     ('S. pyogenes', 'S. pyogenes', now());
 
-# add some test data
+# add used organisms
 INSERT INTO `cg-dev`.organism (name, internal_id, created_at, reference_genome, verified)
     SELECT strain, strain, now(), reference_genome, 0
     FROM microbial_sample
@@ -35,7 +35,7 @@ INSERT INTO `cg-dev`.organism (name, internal_id, created_at, reference_genome, 
                    FROM organism)
     GROUP BY strain;
 
-# add some test data
+# add used other organisms
 INSERT INTO `cg-dev`.organism (name, internal_id, created_at, reference_genome)
     SELECT strain_other, strain_other, now(), reference_genome
     FROM microbial_sample
@@ -44,6 +44,14 @@ INSERT INTO `cg-dev`.organism (name, internal_id, created_at, reference_genome)
     and strain_other NOT IN (SELECT name
                        FROM organism)
     GROUP BY strain_other;
+
+# set reference genomes for the organisms
+UPDATE `cg-dev`.organism as o
+  join microbial_sample ms on ms.strain = o.name
+set
+  o.reference_genome = ms.reference_genome
+where
+  o.reference_genome is null;
 
 ALTER TABLE microbial_sample ADD COLUMN organism_id INTEGER NULL;
 
@@ -54,7 +62,5 @@ ALTER TABLE microbial_sample ADD CONSTRAINT `organism_ibfk_1` FOREIGN KEY (`orga
 
 # delete strain column in microbial_samples
 ALTER TABLE microbial_sample DROP COLUMN strain;
-# ALTER TABLE microbial_sample DROP COLUMN strain_other;
-ALTER TABLE microbial_sample CHANGE `strain_other` `organism_other` varchar(255) DEFAULT NULL;
-
+ALTER TABLE microbial_sample DROP COLUMN strain_other;
 ALTER TABLE microbial_sample CHANGE `organism_id` `organism_id` INTEGER NOT NULL;

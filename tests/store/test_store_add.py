@@ -62,7 +62,6 @@ def test_add_microbial_sample(base_store: Store):
     new_microbial_sample = base_store.add_microbial_sample(microbial_order_id=microbial_order_id,
                                                            name=name,
                                                            organism=organism,
-                                                           organism_other=organism_other,
                                                            internal_id=internal_id,
                                                            reference_genome=reference_genome,
                                                            application_version=application_version,
@@ -78,4 +77,3 @@ def test_add_microbial_sample(base_store: Store):
     assert stored_microbial_sample.application_version == application_version
     assert stored_microbial_sample.priority_human == priority
     assert stored_microbial_sample.organism == organism
-    assert stored_microbial_sample.organism_other == organism_other

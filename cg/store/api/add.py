@@ -179,7 +179,7 @@ class AddHandler:
         new_order.customer = customer
         return new_order
 
-    def add_microbial_sample(self, name: str, organism: models.Organism, organism_other: str,
+    def add_microbial_sample(self, name: str, organism: models.Organism,
                              internal_id: str,
                              reference_genome: str,
                              application_version: models.ApplicationVersion,
@@ -194,7 +194,6 @@ class AddHandler:
         priority_db = PRIORITY_MAP[priority_human]
         new_sample = self.MicrobialSample(
             name=name,
-            organism_other=organism_other,
             internal_id=internal_id,
             reference_genome=reference_genome,
             priority=priority_db,

@@ -115,7 +115,6 @@ class StatusHandler:
                 'name': sample_data['name'],
                 'internal_id': sample_data.get('internal_id'),
                 'organism_id': sample_data['organism'],
-                'organism_other': sample_data.get('organism_other'),
                 'comment': sample_data.get('comment'),
                 'reference_genome': sample_data['reference_genome'],
                 'application': sample_data['application'],
@@ -340,10 +339,8 @@ class StatusHandler:
                 organism = self.status.organism(sample_data['organism_id'])
 
                 if not organism:
-                    organism = self.status.organism(sample_data['organism_other'])
-                if not organism:
                     organism = self.status.add_organism(internal_id=sample_data[
-                        'organism_other'], name=sample_data['organism_other'],
+                        'organism_id'], name=sample_data['organism_id'],
                                                         reference_genome=sample_data[
                                                             'reference_genome'])
                     self.status.add_commit(organism)
@@ -354,7 +351,6 @@ class StatusHandler:
                     reference_genome=sample_data['reference_genome'],
                     comment=sample_data['comment'],
                     organism=organism,
-                    organism_other=sample_data['organism_other'],
                     application_version=application_version,
                     priority=sample_data['priority'],
                 )
