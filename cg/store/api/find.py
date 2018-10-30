@@ -87,8 +87,7 @@ class FindHandler:
         )) if enquiry else records
         return records.order_by(models.Sample.created_at.desc())
 
-    def samples_in_customer_group(self, *, customer: models.Customer = None, enquiry: str = None) -> \
-            List[models.Sample]:
+    def samples_in_customer_group(self, *, customer: models.Customer = None, enquiry: str = None) -> List[models.Sample]:
         """Fetch all samples including those from collaborating customers."""
 
         records = self.Sample.query \
@@ -197,7 +196,7 @@ class FindHandler:
         return self.Analysis.query.filter_by(family=family, started_at=started_at).first()
 
     def flowcells(self, *, status: str = None, family: models.Family = None,
-             enquiry: str = None) -> Query:
+                  enquiry: str = None) -> Query:
         """Fetch all flowcells."""
         records = self.Flowcell.query
         if family:
@@ -228,7 +227,7 @@ class FindHandler:
                 .first()
         )
 
-    def family_samples(self, family_id: str) -> models.FamilySample:
+    def family_samples(self, family_id: str) -> List[models.FamilySample]:
         """Find the samples of a family."""
         return (
             self.FamilySample.query
@@ -278,7 +277,6 @@ class FindHandler:
         pools = self.Pool.query.filter_by(invoice_id=invoice_id).all()
         samples = self.Sample.query.filter_by(invoice_id=invoice_id).all()
         return pools + samples
-
 
     def microbial_orders(self, *, customer: models.Customer = None, enquiry: str = None) -> List[
         models.MicrobialOrder]:

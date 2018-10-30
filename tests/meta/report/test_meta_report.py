@@ -177,7 +177,7 @@ def test_create_delivery_report_file(report_api: ReportAPI):
     # WHEN rendering a report from that data
     created_report_file = report_api.create_delivery_report_file(customer_id='cust002',
                                                                            family_id='yellowhog',
-                                                                           file_path=Path(''))
+                                                                           file_path=Path('.'))
 
     # THEN a html report with certain data should have been created on disk
     assert os.path.isfile(created_report_file.name)
