@@ -125,7 +125,6 @@ MICROBIAL_SAMPLE = {
     'organism': str,
     'organism_other': validators.Optional(str, None),
     'reference_genome': str,
-    'verified_organism': bool,
     'elution_buffer': str,
     'extraction_method': str,
     'concentration_weight': validators.Optional(TypeValidator(str, allow_none=True), None),

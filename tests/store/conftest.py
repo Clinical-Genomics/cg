@@ -24,7 +24,6 @@ def microbial_order():
                       reagent_label=None,
                       tumour=False, custom_index=None, elution_buffer='Nuclease-free water',
                       organism='C. Jejuni', organism_other='', reference_genome='NC_111',
-                      verified_organism=True,
                       extraction_method='MagNaPure 96 (contact Clinical Genomics before '
                                         'submission)',
                       analysis='fastq', concentration_weight='1', mother=None, father=None),
@@ -39,7 +38,7 @@ def microbial_order():
                       reagent_label=None,
                       tumour=False, custom_index=None, elution_buffer='Nuclease-free water',
                       organism='Other',
-                      organism_other='M.upium', reference_genome='NC_222', verified_organism=False,
+                      organism_other='M.upium', reference_genome='NC_222',
                       extraction_method='MagNaPure 96 (contact Clinical Genomics before '
                                         'submission)',
                       analysis='fastq', quantity='2', mother=None, father=None),
@@ -54,7 +53,6 @@ def microbial_order():
                       reagent_label=None,
                       tumour=False, custom_index=None, elution_buffer='Nuclease-free water',
                       organism='C. difficile', organism_other='', reference_genome='NC_333',
-                      verified_organism=True,
                       extraction_method='MagNaPure 96 (contact Clinical Genomics before '
                                         'submission)',
                       analysis='fastq', mother=None, father=None)], 'project_type': 'microbial'}

@@ -160,6 +160,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
         """Submit a batch of microbial samples."""
         # prepare data for status database
         status_data = self.microbial_samples_to_status(data)
+        self.fill_in_sample_verified_organism(data['samples'])
         # submit samples to LIMS
         project_data, lims_map = self.process_lims(data, data['samples'])
         # submit samples to Status
@@ -218,7 +219,8 @@ class OrdersAPI(LimsHandler, StatusHandler):
                                 reduced_tag = reduced_map[application_tag]
                                 LOG.info(f"{sample_obj.internal_id}: update application tag - "
                                          f"{reduced_tag}")
-                                reduced_version = self.status.current_application_version(reduced_tag)
+                                reduced_version = self.status.current_application_version(
+                                    reduced_tag)
                                 sample_obj.application_version = reduced_version
 
     def add_missing_reads(self, samples: List[models.Sample]):
@@ -237,6 +239,16 @@ class OrdersAPI(LimsHandler, StatusHandler):
                 internal_id = lims_map[sample['name']]
                 LOG.info(f"{sample['name']} -> {internal_id}: connect sample to LIMS")
                 sample[id_key] = internal_id
+
+    def fill_in_sample_verified_organism(self, samples: List[dict]):
+        for sample in samples:
+            print(sample)
+            organism_id = sample['organism']
+            reference_genome = sample['reference_genome']
+            organism = self.status.organism(internal_id=organism_id)
+            is_verified = organism and organism.reference_genome == reference_genome and \
+                          organism.verified
+            sample['verified_organism'] = is_verified
 
     def _validate_customer_on_imported_samples(self, project, data):
         for sample in data.get('samples'):
