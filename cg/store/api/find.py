@@ -238,10 +238,16 @@ class FindHandler:
                 .all()
         )
 
-    def pools(self, *, customer: models.Customer) -> Query:
+    def pools(self, *, customer: models.Customer, enquiry: str = None) -> Query:
         """Fetch all the pools for a customer."""
         records = self.Pool.query
         records = records.filter_by(customer=customer) if customer else records
+
+        records = records.filter(or_(
+            models.Pool.name.like(f"%{enquiry}%"),
+            models.Pool.order.like(f"%{enquiry}%"),
+        )) if enquiry else records
+
         return records.order_by(models.Pool.created_at.desc())
 
     def pool(self, pool_id: int):
