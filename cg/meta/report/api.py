@@ -16,9 +16,9 @@ from cg.apps.scoutapi import ScoutAPI
 
 class ReportAPI:
 
-    def __init__(self, db: Store, lims_api: LimsAPI, chanjo_api: ChanjoAPI,  analysis_api:
-        AnalysisAPI, scout_api: ScoutAPI, logger=logging.getLogger(__name__),
-            yaml_loader=ruamel.yaml, path_tool=Path):
+    def __init__(self, db: Store, lims_api: LimsAPI, chanjo_api: ChanjoAPI, analysis_api:
+                 AnalysisAPI, scout_api: ScoutAPI, logger=logging.getLogger(__name__),
+                 yaml_loader=ruamel.yaml, path_tool=Path):
 
         self.db = db
         self.lims = lims_api
@@ -29,15 +29,13 @@ class ReportAPI:
         self.path_tool = path_tool
         self.scout = scout_api
 
-
     def create_delivery_report(self, customer_id: str, family_id: str) -> str:
         """Generate the html contents of a delivery report."""
         delivery_data = self._get_delivery_data(customer_id, family_id)
         rendered_report = self._render_delivery_report(delivery_data)
         return rendered_report
 
-    def create_delivery_report_file(self, customer_id: str, family_id: str, file_path:
-    Path):
+    def create_delivery_report_file(self, customer_id: str, family_id: str, file_path: Path):
         """Generate a temporary file containing a delivery report."""
 
         delivery_report = self.create_delivery_report(customer_id=customer_id,
@@ -60,7 +58,7 @@ class ReportAPI:
         report_samples = self._fetch_family_samples_from_status_db(family_id)
         report_data['samples'] = report_samples
         panels = self._fetch_panels_from_status_db(family_id)
-        report_data['panels'] = ReportAPI._present_set(panels)
+        report_data['panels'] = ReportAPI._present_list(panels)
         self._incorporate_lims_data(report_data)
         self._incorporate_lims_methods(report_samples)
         self._incorporate_delivery_date_from_lims(report_samples)
@@ -199,6 +197,16 @@ class ReportAPI:
 
         return presentable_value
 
+    @staticmethod
+    def _present_list(a_list: list):
+        """Make a list presentable for the delivery report."""
+        if a_list:
+            presentable_value = ', '.join(str(s) for s in a_list)
+        else:
+            presentable_value = 'N/A'
+
+        return presentable_value
+
     def _incorporate_coverage_data(self, samples: list, panels: list):
         """Incorporate coverage data from Chanjo for each sample ."""
 
@@ -294,7 +302,7 @@ class ReportAPI:
         panel_genes = list()
 
         for panel in panels:
-            panel_genes.extend(self.scout.get_genes(panel, version=None))
+            panel_genes.extend(self.scout.get_genes(panel))
 
         panel_gene_ids = [gene.get('hgnc_id') for gene in panel_genes]
 
