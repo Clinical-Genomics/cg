@@ -11,12 +11,15 @@ from cg.apps.coverage import ChanjoAPI
 from cg.apps.lims import LimsAPI
 from cg.store import Store, models
 from cg.meta.analysis import AnalysisAPI
+from cg.apps.scoutapi import ScoutAPI
 
 
 class ReportAPI:
 
-    def __init__(self, db: Store, lims_api: LimsAPI, chanjo_api: ChanjoAPI,  analysis_api:
-    AnalysisAPI, logger=logging.getLogger(__name__), yaml_loader=ruamel.yaml, path_tool=Path):
+    def __init__(self, db: Store, lims_api: LimsAPI, chanjo_api: ChanjoAPI, analysis_api:
+                 AnalysisAPI, scout_api: ScoutAPI, logger=logging.getLogger(__name__),
+                 yaml_loader=ruamel.yaml, path_tool=Path):
+
         self.db = db
         self.lims = lims_api
         self.chanjo = chanjo_api
@@ -24,6 +27,7 @@ class ReportAPI:
         self.LOG = logger
         self.yaml_loader = yaml_loader
         self.path_tool = path_tool
+        self.scout = scout_api
 
     def create_delivery_report(self, customer_id: str, family_id: str) -> str:
         """Generate the html contents of a delivery report."""
@@ -31,8 +35,7 @@ class ReportAPI:
         rendered_report = self._render_delivery_report(delivery_data)
         return rendered_report
 
-    def create_delivery_report_file(self, customer_id: str, family_id: str, file_path:
-    Path):
+    def create_delivery_report_file(self, customer_id: str, family_id: str, file_path: Path):
         """Generate a temporary file containing a delivery report."""
 
         delivery_report = self.create_delivery_report(customer_id=customer_id,
@@ -54,12 +57,13 @@ class ReportAPI:
         report_data['customer_obj'] = self._get_customer_from_status_db(customer_id)
         report_samples = self._fetch_family_samples_from_status_db(family_id)
         report_data['samples'] = report_samples
-        report_data['panels'] = self._fetch_panels_from_status_db(family_id)
+        panels = self._fetch_panels_from_status_db(family_id)
+        report_data['panels'] = ReportAPI._present_list(panels)
         self._incorporate_lims_data(report_data)
         self._incorporate_lims_methods(report_samples)
         self._incorporate_delivery_date_from_lims(report_samples)
         self._incorporate_processing_time_from_lims(report_samples)
-        self._incorporate_coverage_data(report_samples)
+        self._incorporate_coverage_data(report_samples, panels)
         self._incorporate_trending_data(report_data, family_id)
 
         report_data['today'] = datetime.today()
@@ -115,9 +119,10 @@ class ReportAPI:
         template_out = template.render(**report_data)
         return template_out
 
-    def _get_sample_coverage_from_chanjo(self, lims_id: str) -> dict:
+    def _get_sample_coverage_from_chanjo(self, lims_id: str, genes: list) -> dict:
+
         """Get coverage data from Chanjo for a sample."""
-        return self.chanjo.sample_coverage(lims_id)
+        return self.chanjo.sample_coverage(lims_id, genes)
 
     def _incorporate_trending_data(self, report_data: dict, family_id: str):
         """Incorporate trending data into a set of samples."""
@@ -192,12 +197,25 @@ class ReportAPI:
 
         return presentable_value
 
-    def _incorporate_coverage_data(self, samples: list):
+    @staticmethod
+    def _present_list(a_list: list):
+        """Make a list presentable for the delivery report."""
+        if a_list:
+            presentable_value = ', '.join(str(s) for s in a_list)
+        else:
+            presentable_value = 'N/A'
+
+        return presentable_value
+
+    def _incorporate_coverage_data(self, samples: list, panels: list):
         """Incorporate coverage data from Chanjo for each sample ."""
+
+        genes = self._get_genes_from_scout(panels)
+
         for sample in samples:
             lims_id = sample['id']
 
-            sample_coverage = self._get_sample_coverage_from_chanjo(lims_id)
+            sample_coverage = self._get_sample_coverage_from_chanjo(lims_id, genes)
 
             if sample_coverage:
                 target_coverage = sample_coverage.get('mean_coverage')
@@ -259,10 +277,7 @@ class ReportAPI:
     def _fetch_panels_from_status_db(self, family_id: str) -> list:
         """fetch data from the status database for each panels ."""
         family = self.db.family(family_id)
-
         panels = family.panels
-        panels = ReportAPI._present_set(panels)
-
         return panels
 
     def _incorporate_lims_data(self, report_data: dict):
@@ -282,3 +297,13 @@ class ReportAPI:
             sample['application'] = ReportAPI._present_string(lims_sample.get('application'))
             sample['application_version'] = lims_sample.get('application_version')
             sample['received'] = ReportAPI._present_date(lims_sample.get('received'))
+
+    def _get_genes_from_scout(self, panels: list) -> list:
+        panel_genes = list()
+
+        for panel in panels:
+            panel_genes.extend(self.scout.get_genes(panel))
+
+        panel_gene_ids = [gene.get('hgnc_id') for gene in panel_genes]
+
+        return panel_gene_ids

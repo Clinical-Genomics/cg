@@ -384,6 +384,7 @@ def trends_samples(year):
     """Samples per month."""
 
     return jsonify(
+        received_application=list(db.samples_per_month_application(year)),
         received=list(db.samples_per_month(year)),
         turnaround_times=list(db.received_to_delivered(year)),
         prepp_times=list(db.received_to_prepped(year)),

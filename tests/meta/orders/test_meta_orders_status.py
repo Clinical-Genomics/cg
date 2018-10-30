@@ -134,7 +134,7 @@ def test_store_samples(orders_api, base_store, fastq_status_data):
     assert base_store.families().count() == 0
 
     # WHEN storing the order
-    new_samples = orders_api.store_samples(
+    new_samples = orders_api.store_fastq_samples(
         customer=fastq_status_data['customer'],
         order=fastq_status_data['order'],
         ordered=dt.datetime.now(),
@@ -166,7 +166,7 @@ def test_store_samples_bad_apptag(orders_api, base_store, fastq_status_data):
     # THEN it should raise OrderError
     with pytest.raises(OrderError):
         # WHEN storing the order
-        new_samples = orders_api.store_samples(
+        new_samples = orders_api.store_fastq_samples(
             customer=fastq_status_data['customer'],
             order=fastq_status_data['order'],
             ordered=dt.datetime.now(),

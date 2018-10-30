@@ -21,6 +21,11 @@ def external_orderform():
     return 'tests/fixtures/orderforms/1541.6.external.xlsx'
 
 
+@pytest.fixture
+def metagenome_orderform():
+    return 'tests/fixtures/orderforms/1605.4.metagenome.xlsx'
+
+
 class MockLims(LimsAPI):
 
     lims = None

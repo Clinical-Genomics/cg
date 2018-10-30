@@ -17,6 +17,14 @@ SOURCE_TYPES = [
     'nail',
     'muscle',
     'other',
+    # metagenome sources
+    'skin',
+    'respiratory',
+    'urine',
+    'CSF',
+    'faeces',
+    'environmental',
+    'unknown'
 ]
 
 
@@ -88,6 +96,8 @@ def get_project_type(document_title: str, parsed_samples: List) -> str:
         return 'external'
     elif '1603' in document_title:
         return 'microbial'
+    elif '1605' in document_title:
+        return 'metagenome'
 
     analyses = set(sample['analysis'].lower() for sample in parsed_samples)
     if len(analyses) > 1:
@@ -197,6 +207,7 @@ def parse_sample(raw_sample):
         'strain_other': raw_sample.get('UDF/Other species'),
         'reference_genome': raw_sample.get('UDF/Reference Genome Microbial'),
         'extraction_method': raw_sample.get('UDF/Extraction method'),
+        'pool': raw_sample.get('UDF/pool name'),
     }
 
     data_analysis = raw_sample.get('UDF/Data Analysis') or None
@@ -207,7 +218,7 @@ def parse_sample(raw_sample):
     else:
         raise OrderFormError("unknown 'Data Analysis' for order")
 
-    numeric_values = [('pool', 'UDF/pool name'), ('index_number', 'UDF/Index number'),
+    numeric_values = [('index_number', 'UDF/Index number'),
                       ('volume', 'UDF/Volume (uL)'), ('quantity', 'UDF/Quantity'),
                       ('concentration', 'UDF/Concentration (nM)'),
                       ('concentration_weight', 'UDF/Sample Conc.')]
