@@ -123,7 +123,7 @@ def sample(context, sex, customer, comment, downsampled_to, apptag, capture_kit,
             click.echo(click.style(f"Application tag {apptag} does not exist.", fg='red'))
             context.abort()
 
-        application_version = context.obj['status'].current_version(apptag)
+        application_version = context.obj['status'].current_application_version(apptag)
         if application_version is None:
             click.echo(click.style(f"No valid current application version found!", fg='red'))
             context.abort()

@@ -27,6 +27,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
     """Orders API for accepting new samples into the system."""
 
     def __init__(self, lims: LimsAPI, status: Store, osticket: OsTicket = None):
+        super().__init__()
         self.lims = lims
         self.status = status
         self.osticket = osticket
@@ -41,7 +42,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
         except (ValueError, TypeError) as error:
             raise OrderError(error.args[0])
 
-        self._validate_customers(project, data)
+        self._validate_customer_on_imported_samples(project, data)
 
         # detect manual ticket assignment
         ticket_match = re.fullmatch(r'#([0-9]{6})', data['name'])
@@ -113,7 +114,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
         """Submit a batch of samples for FASTQ delivery."""
         status_data = self.samples_to_status(data)
         project_data, lims_map = self.process_lims(data, data['samples'])
-        self.fillin_sample_ids(status_data['samples'], lims_map)
+        self.fill_in_sample_ids(status_data['samples'], lims_map)
         new_samples = self.store_fastq_samples(
             customer=status_data['customer'],
             order=status_data['order'],
@@ -128,7 +129,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
         """Submit a batch of metagenome samples."""
         status_data = self.samples_to_status(data)
         project_data, lims_map = self.process_lims(data, data['samples'])
-        self.fillin_sample_ids(status_data['samples'], lims_map)
+        self.fill_in_sample_ids(status_data['samples'], lims_map)
         new_samples = self.store_samples(
             customer=status_data['customer'],
             order=status_data['order'],
@@ -159,10 +160,11 @@ class OrdersAPI(LimsHandler, StatusHandler):
         """Submit a batch of microbial samples."""
         # prepare data for status database
         status_data = self.microbial_samples_to_status(data)
+        self.fill_in_sample_verified_organism(data['samples'])
         # submit samples to LIMS
         project_data, lims_map = self.process_lims(data, data['samples'])
         # submit samples to Status
-        self.fillin_sample_ids(status_data['samples'], lims_map, id_key='internal_id')
+        self.fill_in_sample_ids(status_data['samples'], lims_map, id_key='internal_id')
         order_obj = self.store_microbial_order(
             customer=status_data['customer'],
             order=status_data['order'],
@@ -187,7 +189,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
                    for family in status_data['families']
                    for sample in family['samples']]
         if lims_map:
-            self.fillin_sample_ids(samples, lims_map)
+            self.fill_in_sample_ids(samples, lims_map)
         new_families = self.store_families(
             customer=status_data['customer'],
             order=status_data['order'],
@@ -217,7 +219,8 @@ class OrdersAPI(LimsHandler, StatusHandler):
                                 reduced_tag = reduced_map[application_tag]
                                 LOG.info(f"{sample_obj.internal_id}: update application tag - "
                                          f"{reduced_tag}")
-                                reduced_version = self.status.current_version(reduced_tag)
+                                reduced_version = self.status.current_application_version(
+                                    reduced_tag)
                                 sample_obj.application_version = reduced_version
 
     def add_missing_reads(self, samples: List[models.Sample]):
@@ -227,7 +230,8 @@ class OrdersAPI(LimsHandler, StatusHandler):
             target_reads = sample_obj.application_version.application.target_reads / 1000000
             self.lims.update_sample(sample_obj.internal_id, target_reads=target_reads)
 
-    def fillin_sample_ids(self, samples: List[dict], lims_map: dict, id_key: str = 'internal_id'):
+    @staticmethod
+    def fill_in_sample_ids(samples: List[dict], lims_map: dict, id_key: str = 'internal_id'):
         """Fill in LIMS sample ids."""
         for sample in samples:
             LOG.debug(f"{sample['name']}: link sample to LIMS")
@@ -236,7 +240,17 @@ class OrdersAPI(LimsHandler, StatusHandler):
                 LOG.info(f"{sample['name']} -> {internal_id}: connect sample to LIMS")
                 sample[id_key] = internal_id
 
-    def _validate_customers(self, project, data):
+    def fill_in_sample_verified_organism(self, samples: List[dict]):
+        for sample in samples:
+            print(sample)
+            organism_id = sample['organism']
+            reference_genome = sample['reference_genome']
+            organism = self.status.organism(internal_id=organism_id)
+            is_verified = organism and organism.reference_genome == reference_genome and \
+                          organism.verified
+            sample['verified_organism'] = is_verified
+
+    def _validate_customer_on_imported_samples(self, project, data):
         for sample in data.get('samples'):
 
             if sample.get('internal_id'):
