@@ -136,7 +136,6 @@ class OrderHandler:
                         'index_sequence': sample_data['index_sequence'],
                         'udfs': {}
                     }
-                    print(sample_data)
                     for key, value in sample_data['udfs'].items():
                         if value is None:
                             LOG.debug(f"{key}: skipping null value UDF")
