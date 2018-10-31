@@ -1,10 +1,10 @@
 from cg.meta.orders.lims import LimsHandler
 
 
-def test_to_lims_scout(scout_order):
+def test_to_lims_scout(scout_order_to_submit):
     # GIVEN a scout order for a trio
     # WHEN parsing the order to format for LIMS import
-    samples = LimsHandler.to_lims(customer='cust003', samples=scout_order['samples'])
+    samples = LimsHandler.to_lims(customer='cust003', samples=scout_order_to_submit['samples'])
     # THEN it should list all samples
     assert len(samples) == 3
     # ... and determine the container, container name, and well position
@@ -25,20 +25,20 @@ def test_to_lims_scout(scout_order):
     assert isinstance(samples[1]['udfs']['comment'], str)
 
 
-def test_to_lims_external(external_order):
+def test_to_lims_external(external_order_to_submit):
     # GIVEN an external order for two samples
     # WHEN parsing the order to format for LIMS
-    samples = LimsHandler.to_lims(customer='dummyCust',samples=external_order['samples'])
+    samples = LimsHandler.to_lims(customer='dummyCust', samples=external_order_to_submit['samples'])
     # THEN should "work"
     assert len(samples) == 2
     # ... and make up a container for each sample
     assert samples[0]['container'] == 'Tube'
 
 
-def test_to_lims_fastq(fastq_order):
+def test_to_lims_fastq(fastq_order_to_submit):
     # GIVEN a fastq order for two samples; normal vs. tumour
     # WHEN parsing the order to format for LIMS
-    samples = LimsHandler.to_lims(customer='dummyCust', samples=fastq_order['samples'])
+    samples = LimsHandler.to_lims(customer='dummyCust', samples=fastq_order_to_submit['samples'])
     # THEN should "work"
     assert len(samples) == 2
     # ... and pick out relevant UDF values
@@ -46,10 +46,10 @@ def test_to_lims_fastq(fastq_order):
     assert samples[1]['udfs']['tumour'] is True
 
 
-def test_to_lims_rml(rml_order):
+def test_to_lims_rml(rml_order_to_submit):
     # GIVEN a rml order for three samples
     # WHEN parsing for LIMS
-    samples = LimsHandler.to_lims(customer='dummyCust', samples=rml_order['samples'])
+    samples = LimsHandler.to_lims(customer='dummyCust', samples=rml_order_to_submit['samples'])
     # THEN it should "work"
     assert len(samples) == 3
     # ... and pick out relevant UDFs
@@ -61,17 +61,16 @@ def test_to_lims_rml(rml_order):
     assert first_sample['udfs']['index_number'] == '65'
 
 
-def test_to_lims_microbial(microbial_order):
+def test_to_lims_microbial(microbial_order_to_submit):
     # GIVEN a microbial order for three samples
     # WHEN parsing for LIMS
-    samples = LimsHandler.to_lims(customer='cust000', samples=microbial_order['samples'])
+    samples = LimsHandler.to_lims(customer='cust000', samples=microbial_order_to_submit['samples'])
     # THEN it should "work"
     assert len(samples) == 5
     # ... and pick out relevant UDFs
     first_sample = samples[0]
     assert first_sample['udfs']['priority'] == 'research'
-    assert first_sample['udfs']['organism'] == 'other'
-    assert first_sample['udfs']['organism_other'] == 'M.upium'
+    assert first_sample['udfs']['organism'] == 'M.upium'
     assert first_sample['udfs']['reference_genome'] == 'NC_111'
     assert first_sample['udfs']['extraction_method'] == 'MagNaPure 96 (contact Clinical Genomics ' \
                                                         'before submission)'

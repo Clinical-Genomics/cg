@@ -123,7 +123,6 @@ MICROBIAL_SAMPLE = {
     **LAB_MIXIN,
     **PREP_MIXIN,
     'organism': str,
-    'organism_other': validators.Optional(str, None),
     'reference_genome': str,
     'elution_buffer': str,
     'extraction_method': str,
