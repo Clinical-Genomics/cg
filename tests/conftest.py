@@ -49,7 +49,7 @@ def store() -> Store:
 @pytest.yield_fixture(scope='function')
 def base_store(store) -> Store:
     """Setup and example store."""
-    customer_group = store.add_customer_group('dummy_group', 'dummy group')
+    customer_group = store.add_customer_group('all_customers', 'all customers')
     store.add_commit(customer_group)
     customers = [store.add_customer('cust000', 'Production', scout_access=True,
                                     invoice_address='Test street', customer_group=customer_group),
@@ -80,6 +80,9 @@ def base_store(store) -> Store:
     versions = [store.add_version(application, 1, valid_from=dt.datetime.now(), prices=prices)
                 for application in applications]
     store.add_commit(versions)
+
+    organism = store.add_organism('C. jejuni', 'C. jejuni')
+    store.add_commit(organism)
 
     yield store
 

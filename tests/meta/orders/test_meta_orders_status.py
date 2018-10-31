@@ -5,10 +5,10 @@ from cg.exc import OrderError
 from cg.meta.orders.status import StatusHandler
 
 
-def test_pools_to_status(rml_order):
+def test_pools_to_status(rml_order_to_submit):
     # GIVEN a rml order with three samples in one pool
     # WHEN parsing for status
-    data = StatusHandler.pools_to_status(rml_order)
+    data = StatusHandler.pools_to_status(rml_order_to_submit)
     # THEN it should pick out the general information
     assert data['customer'] == 'cust001'
     assert data['order'] == 'ctDNA sequencing - order 9'
@@ -19,10 +19,10 @@ def test_pools_to_status(rml_order):
     assert data['pools'][0]['capture_kit'] == 'Agilent Sureselect CRE'
 
 
-def test_samples_to_status(fastq_order):
+def test_samples_to_status(fastq_order_to_submit):
     # GIVEN fastq order with two samples
     # WHEN parsing for status
-    data = StatusHandler.samples_to_status(fastq_order)
+    data = StatusHandler.samples_to_status(fastq_order_to_submit)
     # THEN it should pick out samples and relevant information
     assert len(data['samples']) == 2
     first_sample = data['samples'][0]
@@ -35,11 +35,11 @@ def test_samples_to_status(fastq_order):
     assert data['samples'][1]['tumour'] is True
 
 
-def test_microbial_samples_to_status(microbial_order):
+def test_microbial_samples_to_status(microbial_order_to_submit):
     # GIVEN microbial order with three samples
 
     # WHEN parsing for status
-    data = StatusHandler.microbial_samples_to_status(microbial_order)
+    data = StatusHandler.microbial_samples_to_status(microbial_order_to_submit)
 
     # THEN it should pick out samples and relevant information
     assert len(data['samples']) == 5
@@ -52,17 +52,16 @@ def test_microbial_samples_to_status(microbial_order):
     assert sample_data.get('priority') in 'research'
     assert sample_data['name'] == 'all-fields'
     assert sample_data.get('internal_id') is None
-    assert sample_data['strain'] == 'Other'
-    assert sample_data['strain_other'] == 'M.upium'
+    assert sample_data['organism_id'] == 'M.upium'
     assert sample_data['reference_genome'] == 'NC_111'
     assert sample_data['application'] == 'MWRNXTR003'
     assert sample_data['comment'] == 'plate comment'
 
 
-def test_families_to_status(scout_order):
+def test_families_to_status(scout_order_to_submit):
     # GIVEN a scout order with a trio family
     # WHEN parsing for status
-    data = StatusHandler.families_to_status(scout_order)
+    data = StatusHandler.families_to_status(scout_order_to_submit)
     # THEN it should pick out the family
     assert len(data['families']) == 1
     family = data['families'][0]
@@ -177,9 +176,10 @@ def test_store_samples_bad_apptag(orders_api, base_store, fastq_status_data):
 
 def test_store_microbial_samples(orders_api, base_store,  microbial_status_data):
 
-    # GIVEN a basic store with no samples and a microbial order
+    # GIVEN a basic store with no samples and a microbial order and one Organism
     assert base_store.microbial_samples().count() == 0
     assert base_store.microbial_orders().count() == 0
+    assert base_store.organisms().count() == 1
 
     # WHEN storing the order
     new_order = orders_api.store_microbial_order(
@@ -191,10 +191,12 @@ def test_store_microbial_samples(orders_api, base_store,  microbial_status_data)
         samples=microbial_status_data['samples'],
     )
 
-    # THEN it should store the samples
+    # THEN it should store the samples and the used previously unknown organisms
+    assert new_order
+    assert base_store.microbial_orders().count() == 1
     assert len(new_order.microbial_samples) == 5
     assert base_store.microbial_samples().count() == 5
-    assert base_store.microbial_orders().count() == 1
+    assert base_store.organisms().count() == 2
 
 
 def test_store_microbial_samples_bad_apptag(orders_api, base_store,  microbial_status_data):
