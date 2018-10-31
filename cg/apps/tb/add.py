@@ -157,4 +157,11 @@ class AddHandler:
                     'archive': False,
                 })
 
+            cytosure_path = sample_data['vcf2cytosure']
+            data.append({
+                'path': cytosure_path,
+                'tags': ['vcf2cytosure', sample_data['id']],
+                'archive': False,
+            })
+
         return data
