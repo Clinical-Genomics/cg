@@ -16,26 +16,30 @@ class AddHandler:
 
     def add_customer(self, internal_id: str, name: str, customer_group:
     models.CustomerGroup, scout_access: bool = False, **kwargs) -> models.Customer:
-        """Add a new customer to the database."""
+        """Build a new customer record."""
+
         new_customer = self.Customer(internal_id=internal_id, name=name, scout_access=scout_access,
                                      customer_group=customer_group, **kwargs)
         return new_customer
 
     def add_customer_group(self, internal_id: str, name: str, **kwargs) -> models.CustomerGroup:
-        """Add a new customer group to the database."""
+        """Build a new customer group record."""
+
         new_customer_group = self.CustomerGroup(internal_id=internal_id, name=name, **kwargs)
         return new_customer_group
 
     def add_user(self, customer: models.Customer, email: str, name: str,
                  is_admin: bool = False) -> models.User:
-        """Add a new user to the database."""
+        """Build a new user record."""
+
         new_user = self.User(name=name, email=email, is_admin=is_admin)
         new_user.customer = customer
         return new_user
 
     def add_application(self, tag: str, category: str, description: str,
                         is_accredited: bool = False, **kwargs) -> models.Application:
-        """Add a new application to the store."""
+        """Build a new application  record."""
+
         new_record = self.Application(
             tag=tag,
             prep_category=category,
@@ -47,7 +51,8 @@ class AddHandler:
 
     def add_version(self, application: models.Application, version: int, valid_from: dt.datetime,
                     prices: dict, **kwargs) -> models.ApplicationVersion:
-        """Add application version."""
+        """Build a new application version record."""
+
         new_record = self.ApplicationVersion(version=version, valid_from=valid_from, **kwargs)
         for price_key in ['standard', 'priority', 'express', 'research']:
             setattr(new_record, f"price_{price_key}", prices[price_key])
@@ -58,7 +63,8 @@ class AddHandler:
                    received: dt.datetime = None, order: str = None, tumour: bool = False,
                    priority: str = None, ticket: int = None, comment: str = None,
                    downsampled_to: int = None, **kwargs) -> models.Sample:
-        """Add a new sample to the database."""
+        """Build a new Sample record."""
+
         internal_id = internal_id or utils.get_unique_id(self.sample)
         priority_human = priority or ('research' if downsampled_to else 'standard')
         priority_db = PRIORITY_MAP[priority_human]
@@ -70,7 +76,8 @@ class AddHandler:
         return new_sample
 
     def add_family(self, name: str, panels: List[str], priority: str = 'standard') -> models.Family:
-        """Add a new family to the database."""
+        """Build a new Family record."""
+
         # generate a unique family id
         while True:
             internal_id = petname.Generate(2, separator='')
@@ -87,7 +94,8 @@ class AddHandler:
     def relate_sample(self, family: models.Family, sample: models.Sample,
                       status: str, mother: models.Sample = None,
                       father: models.Sample = None) -> models.FamilySample:
-        """Relate a sample to a family."""
+        """Relate a sample record to a family record."""
+
         new_record = self.FamilySample(status=status)
         new_record.family = family
         new_record.sample = sample
@@ -98,6 +106,7 @@ class AddHandler:
     def add_flowcell(self, name: str, sequencer: str, sequencer_type: str,
                      date: dt.datetime) -> models.Flowcell:
         """Build a new Flowcell record."""
+
         new_record = self.Flowcell(name=name, sequencer_name=sequencer,
                                    sequencer_type=sequencer_type, sequenced_at=date)
         return new_record
@@ -106,6 +115,7 @@ class AddHandler:
                      primary: bool = False, uploaded: dt.datetime = None,
                      started_at: dt.datetime = None, **kwargs) -> models.Analysis:
         """Build a new Analysis record."""
+
         new_record = self.Analysis(pipeline=pipeline, pipeline_version=version,
                                    completed_at=completed_at, is_primary=primary,
                                    uploaded_at=uploaded, started_at=started_at, **kwargs)
@@ -113,7 +123,8 @@ class AddHandler:
 
     def add_panel(self, customer: models.Customer, name: str, abbrev: str, version: float,
                   date: dt.datetime = None, genes: int = None) -> models.Panel:
-        """Build a new panel."""
+        """Build a new panel record."""
+
         new_record = self.Panel(name=name, abbrev=abbrev, current_version=version, date=date,
                                 gene_count=genes)
         new_record.customer = customer
@@ -124,6 +135,7 @@ class AddHandler:
                  comment: str = None, received: dt.datetime = None, capture_kit: str = None) -> \
             models.Pool:
         """Build a new Pool record."""
+
         new_record = self.Pool(name=name, ordered_at=ordered or dt.datetime.now(), order=order,
                                ticket_number=ticket, received_at=received, comment=comment,
                                capture_kit=capture_kit)
@@ -134,6 +146,7 @@ class AddHandler:
     def add_delivery(self, destination: str, sample: models.Sample = None, pool: models.Pool = None,
                      comment: str = None) -> models.Delivery:
         """Build a new Delivery record."""
+
         if not any([sample, pool]):
             raise ValueError('you have to provide a sample or a pool')
         new_record = self.Delivery(destination=destination, comment=comment)
@@ -145,6 +158,7 @@ class AddHandler:
                     pools: List[models.Pool] = None, comment: str = None, discount: int = 0,
                     record_type: str = None):
         """Build a new Invoice record."""
+
         new_id = self.new_invoice_id()
         new_invoice = self.Invoice(comment=comment, discount=discount, id=new_id,
                                    record_type=record_type)
@@ -180,12 +194,14 @@ class AddHandler:
                             internal_id: str = None, ticket_number: int = None,
                             comment: str = None) -> models.MicrobialOrder:
         """Build a new Order record."""
+
         new_order = self.MicrobialOrder(name=name, ordered_at=ordered, internal_id=internal_id,
                                         ticket_number=ticket_number, comment=comment)
         new_order.customer = customer
         return new_order
 
-    def add_microbial_sample(self, name: str, strain: str, strain_other: str, internal_id: str,
+    def add_microbial_sample(self, name: str, organism: models.Organism,
+                             internal_id: str,
                              reference_genome: str,
                              application_version: models.ApplicationVersion,
                              priority: str = None,
@@ -199,13 +215,21 @@ class AddHandler:
         priority_db = PRIORITY_MAP[priority_human]
         new_sample = self.MicrobialSample(
             name=name,
-            strain=strain,
-            strain_other=strain_other,
             internal_id=internal_id,
             reference_genome=reference_genome,
             priority=priority_db,
             comment=comment,
             **kwargs
         )
+        new_sample.organism = organism
         new_sample.application_version = application_version
         return new_sample
+
+    def add_organism(self, internal_id: str, name: str, reference_genome: str = None, verified: bool
+    = False, **kwargs) -> models.Organism:
+        """Build a new Organism record."""
+
+        new_organism = self.Organism(internal_id=internal_id, name=name,
+                                     reference_genome=reference_genome,
+                                     verified=verified, **kwargs)
+        return new_organism

@@ -31,7 +31,7 @@ def test_parsing_fastq_orderform(fastq_orderform):
     # ... and collect relevant sample info
     normal_sample = data['items'][0]
     tumour_sample = data['items'][1]
-    assert normal_sample['name'] == 'prov 1'
+    assert normal_sample['name'] == 'prov1'
     assert normal_sample['container'] == 'Tube'
     assert normal_sample['application'] == 'WGSPCFC030'
     assert normal_sample['sex'] == 'male'
@@ -79,7 +79,7 @@ def test_parsing_external_orderform(external_orderform):
     # ... and find all families (1) and samples (2)
     assert len(data['items']) == 1
     family = data['items'][0]
-    assert set(family['panels']) == set(['CILM', 'CTD'])
+    assert set(family['panels']) == {'CILM', 'CTD'}
     # ... and collect info about the samples
     wes_sample = family['samples'][0]
     wgs_sample = family['samples'][1]
@@ -131,7 +131,7 @@ def test_parsing_microbial_orderform(microbial_orderform):
 
     assert sample_data['name'] == 'all-fields'
     assert sample_data.get('internal_id') is None
-    assert sample_data['strain'] == 'Other'
+    assert sample_data['organism'] == 'other'
     assert sample_data['reference_genome'] == 'NC_111'
     assert sample_data['application'] == 'MWRNXTR003'
     assert sample_data['require_qcok'] is True
@@ -144,9 +144,9 @@ def test_parsing_microbial_orderform(microbial_orderform):
     assert sample_data.get('tumour') is False
     assert sample_data.get('source') is None
     assert sample_data.get('priority') in 'research'
-    assert sample_data['strain_other'] == 'M.upium'
-    assert sample_data['extraction_method'] == 'MagNaPure 96 (contact Clinical Genomics before submission)'
+    assert sample_data['organism_other'] == 'M.upium'
+    assert sample_data['extraction_method'] == 'MagNaPure 96 (contact Clinical Genomics before ' \
+                                               'submission)'
     assert sample_data['comment'] == 'plate comment'
     assert sample_data['concentration_weight'] == '101'
     assert sample_data['quantity'] == '102'
-    

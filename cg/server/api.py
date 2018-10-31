@@ -260,7 +260,8 @@ def microbial_sample(sample_id):
 def pools():
     """Fetch pools."""
     customer_obj = None if g.current_user.is_admin else g.current_user.customer
-    pools_q = db.pools(customer=customer_obj)
+    pools_q = db.pools(customer=customer_obj,
+                       enquiry=request.args.get('enquiry'))
     data = [pool_obj.to_dict() for pool_obj in pools_q.limit(30)]
     return jsonify(pools=data, total=pools_q.count())
 
@@ -329,6 +330,12 @@ def options():
         } for customer in customer_objs],
         applications=apptag_groups,
         panels=[panel.abbrev for panel in db.Panel.query if panel.customer in customer_objs],
+        organisms=[{
+            'name': organism.name,
+            'reference_genome': organism.reference_genome,
+            'internal_id': organism.internal_id,
+            'verified': organism.verified,
+        } for organism in db.Organism.query],
     )
 
 

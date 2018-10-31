@@ -15,11 +15,11 @@ from cg.meta.orders import OrdersAPI, OrderType
     OrderType.MICROBIAL,
     OrderType.METAGENOME,
 ])
-def test_submit(base_store, orders_api: OrdersAPI, all_orders, monkeypatch, order_type):
+def test_submit(base_store, orders_api: OrdersAPI, all_orders_to_submit, monkeypatch, order_type):
     ticket_number = 1234567
     monkeypatch.setattr(orders_api.osticket, 'open_ticket', lambda *args, **kwargs: ticket_number)
 
-    order_data = all_orders[order_type]
+    order_data = all_orders_to_submit[order_type]
     lims_project_data = {'id': 'ADM1234', 'date': dt.datetime.now()}
     lims_map = {sample['name']: f"ELH123A{index}" for index, sample in
                 enumerate(order_data['samples'])}
@@ -45,12 +45,12 @@ def test_submit(base_store, orders_api: OrdersAPI, all_orders, monkeypatch, orde
     OrderType.SCOUT,
     OrderType.EXTERNAL,
 ])
-def test_submit_illegal_sample_customer(sample_store, orders_api, all_orders, monkeypatch,
+def test_submit_illegal_sample_customer(sample_store, orders_api, all_orders_to_submit, monkeypatch,
                                         order_type):
     ticket_number = 1234567
     monkeypatch.setattr(orders_api.osticket, 'open_ticket', lambda *args, **kwargs: ticket_number)
 
-    order_data = all_orders[order_type]
+    order_data = all_orders_to_submit[order_type]
     lims_project_data = {'id': 'ADM1234', 'date': dt.datetime.now()}
     lims_map = {sample['name']: f"ELH123A{index}" for index, sample in
                 enumerate(order_data['samples'])}
@@ -82,12 +82,12 @@ def test_submit_illegal_sample_customer(sample_store, orders_api, all_orders, mo
     OrderType.SCOUT,
     OrderType.EXTERNAL,
 ])
-def test_submit_scout_legal_sample_customer(sample_store, orders_api, all_orders, monkeypatch,
-                                        order_type):
+def test_submit_scout_legal_sample_customer(sample_store, orders_api, all_orders_to_submit, monkeypatch,
+                                            order_type):
     ticket_number = 1234567
     monkeypatch.setattr(orders_api.osticket, 'open_ticket', lambda *args, **kwargs: ticket_number)
 
-    order_data = all_orders[order_type]
+    order_data = all_orders_to_submit[order_type]
     lims_project_data = {'id': 'ADM1234', 'date': dt.datetime.now()}
     lims_map = {sample['name']: f"ELH123A{index}" for index, sample in
                 enumerate(order_data['samples'])}
@@ -127,12 +127,12 @@ def test_submit_scout_legal_sample_customer(sample_store, orders_api, all_orders
     OrderType.FASTQ,
     OrderType.MICROBIAL,
 ])
-def test_submit_non_scout_legal_sample_customer(sample_store, orders_api, all_orders, monkeypatch,
-                                        order_type):
+def test_submit_non_scout_legal_sample_customer(sample_store, orders_api, all_orders_to_submit, monkeypatch,
+                                                order_type):
     ticket_number = 1234567
     monkeypatch.setattr(orders_api.osticket, 'open_ticket', lambda *args, **kwargs: ticket_number)
 
-    order_data = all_orders[order_type]
+    order_data = all_orders_to_submit[order_type]
     lims_project_data = {'id': 'ADM1234', 'date': dt.datetime.now()}
     lims_map = {sample['name']: f"ELH123A{index}" for index, sample in
                 enumerate(order_data['samples'])}

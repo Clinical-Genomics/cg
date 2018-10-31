@@ -86,7 +86,52 @@ def upload(context, family_id):
 @click.option('-p', '--print', 'print_console', is_flag=True, help='print report to console')
 @click.pass_context
 def delivery_report(context, customer_id, family_id, print_console):
-    """Generate a delivery report for a case."""
+    """Generate a delivery report for a case.
+
+    The report contains data from several sources:
+
+    status-db:
+        family
+        customer_obj
+        application_objs
+        accredited
+        panels
+        samples
+        sample.id
+        sample.status
+        sample.ticket
+        sample.million_read_pairs
+
+    lims:
+        sample.name
+        sample.sex
+        sample.source
+        sample.application
+        sample.received
+        sample.prep_method
+        sample.sequencing_method
+        sample.delivery_method
+        sample.delivery_date
+        sample.processing_time
+
+    trailblazer:
+        sample.mapped_reads
+        sample.duplicates
+        sample.analysis_sex
+        mip_version
+        genome_build
+
+    chanjo:
+        sample.target_coverage
+        sample.target_completeness
+
+    scout:
+        panel-genes
+
+    today:
+        generated upon report creation
+
+    """
 
     click.echo(click.style('----------------- DELIVERY_REPORT -------------'))
 

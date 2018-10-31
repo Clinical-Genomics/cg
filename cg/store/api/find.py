@@ -87,8 +87,7 @@ class FindHandler:
         )) if enquiry else records
         return records.order_by(models.Sample.created_at.desc())
 
-    def samples_in_customer_group(self, *, customer: models.Customer = None, enquiry: str = None) -> \
-            List[models.Sample]:
+    def samples_in_customer_group(self, *, customer: models.Customer = None, enquiry: str = None) -> List[models.Sample]:
         """Fetch all samples including those from collaborating customers."""
 
         records = self.Sample.query \
@@ -156,7 +155,7 @@ class FindHandler:
         return application_obj.versions[-1] if application_obj and application_obj.versions else \
             None
 
-    def current_version(self, tag: str) -> models.ApplicationVersion:
+    def current_application_version(self, tag: str) -> models.ApplicationVersion:
         """Fetch the current application version for an application tag."""
         application_obj = self.Application.query.filter_by(tag=tag).first()
         if not application_obj:
@@ -197,7 +196,7 @@ class FindHandler:
         return self.Analysis.query.filter_by(family=family, started_at=started_at).first()
 
     def flowcells(self, *, status: str = None, family: models.Family = None,
-             enquiry: str = None) -> Query:
+                  enquiry: str = None) -> Query:
         """Fetch all flowcells."""
         records = self.Flowcell.query
         if family:
@@ -228,7 +227,7 @@ class FindHandler:
                 .first()
         )
 
-    def family_samples(self, family_id: str) -> models.FamilySample:
+    def family_samples(self, family_id: str) -> List[models.FamilySample]:
         """Find the samples of a family."""
         return (
             self.FamilySample.query
@@ -239,10 +238,16 @@ class FindHandler:
                 .all()
         )
 
-    def pools(self, *, customer: models.Customer) -> Query:
+    def pools(self, *, customer: models.Customer, enquiry: str = None) -> Query:
         """Fetch all the pools for a customer."""
         records = self.Pool.query
         records = records.filter_by(customer=customer) if customer else records
+
+        records = records.filter(or_(
+            models.Pool.name.like(f"%{enquiry}%"),
+            models.Pool.order.like(f"%{enquiry}%"),
+        )) if enquiry else records
+
         return records.order_by(models.Pool.created_at.desc())
 
     def pool(self, pool_id: int):
@@ -297,3 +302,10 @@ class FindHandler:
     def microbial_order(self, internal_id: str) -> models.MicrobialOrder:
         """Fetch an order by internal id from the database."""
         return self.MicrobialOrder.query.filter_by(internal_id=internal_id).first()
+
+    def organisms(self) -> List[models.Organism]:
+        return self.Organism.query
+
+    def organism(self, internal_id: str) -> models.Organism:
+        """Find an Organism by internal_id."""
+        return self.Organism.query.filter_by(internal_id=internal_id).first()
