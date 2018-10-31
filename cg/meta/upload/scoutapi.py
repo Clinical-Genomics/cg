@@ -48,6 +48,9 @@ class UploadScoutAPI(object):
             mt_bam_tags = ['bam-mt', sample_id]
             mt_bam_file = self.housekeeper.files(version=hk_version.id, tags=mt_bam_tags).first()
             mt_bam_path = mt_bam_file.full_path if mt_bam_file else None
+            vcf2cytosure_tags = ['vcf2cytosure', sample_id]
+            vcf2cytosure_file = self.housekeeper.files(version=hk_version.id, tags=vcf2cytosure_tags).first()
+            vcf2cytosure_path = vcf2cytosure_file.full_path if vcf2cytosure_file else None
             data['samples'].append({
                 'analysis_type': link_obj.sample.application_version.application.analysis_type,
                 'sample_id': sample_id,
@@ -59,6 +62,7 @@ class UploadScoutAPI(object):
                 'sex': link_obj.sample.sex,
                 'bam_path': bam_path,
                 'mt_bam': mt_bam_path,
+                'vcf2cytosure': vcf2cytosure_path,
             })
 
         files = {('vcf_snv', 'vcf-snv-clinical'), ('vcf_snv_research', 'vcf-snv-research'),

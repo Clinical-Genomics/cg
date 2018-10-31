@@ -330,6 +330,12 @@ def options():
         } for customer in customer_objs],
         applications=apptag_groups,
         panels=[panel.abbrev for panel in db.Panel.query if panel.customer in customer_objs],
+        organisms=[{
+            'name': organism.name,
+            'reference_genome': organism.reference_genome,
+            'internal_id': organism.internal_id,
+            'verified': organism.verified,
+        } for organism in db.Organism.query],
     )
 
 

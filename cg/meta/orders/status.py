@@ -114,8 +114,7 @@ class StatusHandler:
                 'priority': sample_data['priority'],
                 'name': sample_data['name'],
                 'internal_id': sample_data.get('internal_id'),
-                'strain': sample_data['strain'],
-                'strain_other': sample_data.get('strain_other'),
+                'organism_id': sample_data['organism'],
                 'comment': sample_data.get('comment'),
                 'reference_genome': sample_data['reference_genome'],
                 'application': sample_data['application'],
@@ -202,7 +201,7 @@ class StatusHandler:
                     new_sample.customer = customer_obj
                     with self.status.session.no_autoflush:
                         application_tag = sample['application']
-                        new_sample.application_version = self.status.current_version(
+                        new_sample.application_version = self.status.current_application_version(
                             application_tag)
                     if new_sample.application_version is None:
                         raise OrderError(f"Invalid application: {sample['application']}")
@@ -256,7 +255,7 @@ class StatusHandler:
                 )
                 new_sample.customer = customer_obj
                 application_tag = sample['application']
-                application_version = self.status.current_version(application_tag)
+                application_version = self.status.current_application_version(application_tag)
                 if application_version is None:
                     raise OrderError(f"Invalid application: {sample['application']}")
                 new_sample.application_version = application_version
@@ -290,7 +289,7 @@ class StatusHandler:
                 new_sample.customer = customer_obj
 
                 application_tag = sample['application']
-                application_version = self.status.current_version(application_tag)
+                application_version = self.status.current_application_version(application_tag)
                 if application_version is None:
                     raise OrderError(f"Invalid application: {sample['application']}")
                 new_sample.application_version = application_version
@@ -317,7 +316,7 @@ class StatusHandler:
 
     def store_microbial_order(self, customer: str, order: str, ordered: dt.datetime, ticket: int,
                               lims_project: str, samples: List[dict],
-                              comment: str = None) -> List[models.MicrobialSample]:
+                              comment: str = None) -> models.MicrobialOrder:
         """Store microbial samples in the status database."""
         customer_obj = self.status.customer(customer)
         if customer_obj is None:
@@ -333,17 +332,25 @@ class StatusHandler:
             )
             for sample_data in samples:
                 application_tag = sample_data['application']
-                application_version = self.status.current_version(application_tag)
+                application_version = self.status.current_application_version(application_tag)
                 if application_version is None:
                     raise OrderError(f"Invalid application: {sample_data['application']}")
+
+                organism = self.status.organism(sample_data['organism_id'])
+
+                if not organism:
+                    organism = self.status.add_organism(internal_id=sample_data[
+                        'organism_id'], name=sample_data['organism_id'],
+                                                        reference_genome=sample_data[
+                                                            'reference_genome'])
+                    self.status.add_commit(organism)
 
                 new_sample = self.status.add_microbial_sample(
                     name=sample_data['name'],
                     internal_id=sample_data['internal_id'],
                     reference_genome=sample_data['reference_genome'],
                     comment=sample_data['comment'],
-                    strain=sample_data['strain'],
-                    strain_other=sample_data['strain_other'],
+                    organism=organism,
                     application_version=application_version,
                     priority=sample_data['priority'],
                 )
@@ -361,7 +368,7 @@ class StatusHandler:
         new_pools = []
         for pool in pools:
             with self.status.session.no_autoflush:
-                application_version = self.status.current_version(pool['application'])
+                application_version = self.status.current_application_version(pool['application'])
                 if application_version is None:
                     raise OrderError(f"Invalid application: {pool['application']}")
             new_pool = self.status.add_pool(

@@ -143,6 +143,12 @@ class MicrobialSampleView(BaseView):
     column_default_sort = ('created_at', True)
 
 
+class OrganismView(BaseView):
+    column_searchable_list = ['internal_id', 'name', 'reference_genome']
+    column_editable_list = ['internal_id', 'name', 'reference_genome', 'comment']
+    column_default_sort = ('created_at', True)
+
+
 class InvoiceView(BaseView):
     column_searchable_list = ['customer_id', 'id']
     column_list = (
