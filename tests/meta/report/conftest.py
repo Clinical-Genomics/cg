@@ -202,7 +202,7 @@ class MockDB(Store):
 
 
 class MockScout:
-    def get_genes(self, panel_id: str, version: str) -> list:
+    def get_genes(self, panel_id: str, version: str=None) -> list:
         return []
 
 
