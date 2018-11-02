@@ -158,7 +158,7 @@ class StatusHandler:
             self.Sample.query.filter(
                 models.Sample.delivered_at != None,
                 models.Sample.invoice_id == None,
-                models.Sample.no_invoice == False,
+                models.Sample.no_invoice != True,
                 models.Sample.downsampled_to == None
             )
         )
@@ -174,7 +174,7 @@ class StatusHandler:
         records = (
             self.Pool.query.filter(
                 models.Pool.invoice_id == None,
-                models.Pool.no_invoice == None,
+                models.Pool.no_invoice != True,
                 models.Pool.delivered_at != None
             )
         )
@@ -182,6 +182,7 @@ class StatusHandler:
         customers_to_invoice = [record.customer for record in records.all() if not record.customer.internal_id=='cust000']
         customers_to_invoice = list(set(customers_to_invoice))
         records = records.filter(models.Pool.customer_id == customer.id) if customer else records
+        print(records.all()) 
         return records, customers_to_invoice
 
     def pools_to_receive(self):
