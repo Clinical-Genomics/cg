@@ -158,7 +158,7 @@ class StatusHandler:
             self.Sample.query.filter(
                 models.Sample.delivered_at != None,
                 models.Sample.invoice_id == None,
-                models.Sample.no_invoice != True,
+                models.Sample.no_invoice == False,
                 models.Sample.downsampled_to == None
             )
         )
@@ -174,7 +174,7 @@ class StatusHandler:
         records = (
             self.Pool.query.filter(
                 models.Pool.invoice_id == None,
-                models.Pool.no_invoice != True,
+                models.Pool.no_invoice == False,
                 models.Pool.delivered_at != None
             )
         )
