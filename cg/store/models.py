@@ -530,7 +530,7 @@ class Panel(Model):
     customer = orm.relationship(Customer, backref='panels')
 
     def __str__(self):
-        return f"{self.abbrev} ({self.current_application_version})"
+        return f"{self.abbrev} ({self.current_version})"
 
 
 class Invoice(Model):
