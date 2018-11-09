@@ -1,3 +1,3 @@
 # -*- coding: utf-8 -*-
 from .flowcell import TransferFlowcell
-from .lims import TransferLims, SampleState, PoolState
+from .lims import TransferLims, SampleState, PoolState, MicrobialState
