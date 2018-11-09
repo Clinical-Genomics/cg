@@ -14,7 +14,7 @@ def test_pools_to_status(rml_order_to_submit):
     assert data['order'] == 'ctDNA sequencing - order 9'
     # ... and information about the pool(s)
     assert len(data['pools']) == 1
-    assert data['pools'][0]['name'] == '1'
+    assert data['pools'][0]['name'] == 'pool-1'
     assert data['pools'][0]['application'] == 'RMLS05R150'
     assert data['pools'][0]['capture_kit'] == 'Agilent Sureselect CRE'
 
@@ -26,7 +26,7 @@ def test_samples_to_status(fastq_order_to_submit):
     # THEN it should pick out samples and relevant information
     assert len(data['samples']) == 2
     first_sample = data['samples'][0]
-    assert first_sample['name'] == 'sample-normal'
+    assert first_sample['name'] == 'prov1'
     assert first_sample['application'] == 'WGSPCFC060'
     assert first_sample['priority'] == 'priority'
     assert first_sample['tumour'] is False
@@ -63,20 +63,20 @@ def test_families_to_status(scout_order_to_submit):
     # WHEN parsing for status
     data = StatusHandler.families_to_status(scout_order_to_submit)
     # THEN it should pick out the family
-    assert len(data['families']) == 1
+    assert len(data['families']) == 2
     family = data['families'][0]
-    assert family['name'] == '17093'
+    assert family['name'] == 'family1'
     assert family['priority'] == 'standard'
-    assert set(family['panels']) == {'IEM', 'EP'}
+    assert set(family['panels']) == {'IEM'}
     assert len(family['samples']) == 3
 
     first_sample = family['samples'][0]
-    assert first_sample['name'] == '17093-I-2A'
+    assert first_sample['name'] == 'sample1'
     assert first_sample['application'] == 'WGTPCFC030'
     assert first_sample['sex'] == 'female'
     assert first_sample['status'] == 'affected'
-    assert first_sample['mother'] == '17093-II-2U'
-    assert first_sample['father'] == '17093-II-1U'
+    assert first_sample['mother'] == 'sample2'
+    assert first_sample['father'] == 'sample3'
 
     # ... second sample has a comment
     assert isinstance(family['samples'][1]['comment'], str)
@@ -99,7 +99,7 @@ def test_store_rml(orders_api, base_store, rml_status_data):
     assert base_store.pools(customer=None).count() == 1
     new_pool = base_store.pools(customer=None).first()
     assert new_pool == new_pools[0]
-    assert new_pool.name == '1'
+    assert new_pool.name == 'pool-1'
     assert new_pool.application_version.application.tag == 'RMLS05R150'
     assert new_pool.capture_kit == 'Agilent Sureselect CRE'
     # ... and add a delivery
@@ -196,7 +196,7 @@ def test_store_microbial_samples(orders_api, base_store,  microbial_status_data)
     assert base_store.microbial_orders().count() == 1
     assert len(new_order.microbial_samples) == 5
     assert base_store.microbial_samples().count() == 5
-    assert base_store.organisms().count() == 2
+    assert base_store.organisms().count() == 3
 
 
 def test_store_microbial_samples_bad_apptag(orders_api, base_store,  microbial_status_data):
@@ -257,20 +257,18 @@ def test_store_families(orders_api, base_store, scout_status_data):
     )
 
     # THEN it should create and link samples and the family
-    family_obj = base_store.families().first()
-    assert len(new_families) == 1
+    assert len(new_families) == 2
     new_family = new_families[0]
-    assert new_family == family_obj
-    assert new_family.name == '17093'
-    assert set(new_family.panels) == {'IEM', 'EP'}
+    assert new_family.name == 'family1'
+    assert set(new_family.panels) == {'IEM'}
     assert new_family.priority_human == 'standard'
 
     assert len(new_family.links) == 3
     new_link = new_family.links[0]
     assert new_link.status == 'affected'
-    assert new_link.mother.name == '17093-II-2U'
-    assert new_link.father.name == '17093-II-1U'
-    assert new_link.sample.name == '17093-I-2A'
+    assert new_link.mother.name == 'sample2'
+    assert new_link.father.name == 'sample3'
+    assert new_link.sample.name == 'sample1'
     assert new_link.sample.sex == 'female'
     assert new_link.sample.application_version.application.tag == 'WGTPCFC030'
     assert isinstance(new_family.links[1].sample.comment, str)
@@ -318,19 +316,22 @@ def test_store_external(orders_api, base_store, external_status_data):
 
     # THEN it should create and link samples and the family
     family_obj = base_store.families().first()
-    assert len(new_families) == 2
-    new_family = new_families[1]
+    assert len(new_families) == 1
+    new_family = new_families[0]
     assert new_family == family_obj
-    assert new_family.name == 'F0009704'
-    assert set(new_family.panels) == set(['SKD'])
-    assert new_family.priority_human == 'standard'
+    assert new_family.name == 'fam2'
+    assert set(new_family.panels) == set([
+            "CTD",
+            "CILM"
+        ])
+    assert new_family.priority_human == 'priority'
 
-    assert len(new_family.links) == 1
+    assert len(new_family.links) == 2
     new_link = new_family.links[0]
     assert new_link.status == 'affected'
-    assert new_link.sample.name == '2016-20204'
-    assert new_link.sample.sex == 'female'
-    assert new_link.sample.capture_kit == 'Twist_Target_hg19.bed'
+    assert new_link.sample.name == 'sample1'
+    assert new_link.sample.sex == 'male'
+    assert new_link.sample.capture_kit == 'Agilent Sureselect V5'
     assert new_link.sample.application_version.application.tag == 'EXXCUSR000'
     assert isinstance(new_family.links[0].sample.comment, str)
 
@@ -358,4 +359,82 @@ def test_store_external_bad_apptag(orders_api, base_store, external_status_data)
             ordered=dt.datetime.now(),
             ticket=1234567,
             families=external_status_data['families'],
+        )
+
+
+def test_store_metagenome_samples(orders_api, base_store, metagenome_status_data):
+
+    # GIVEN a basic store with no samples and a metagenome order
+    assert base_store.samples().count() == 0
+
+    # WHEN storing the order
+    new_samples = orders_api.store_samples(
+        customer=metagenome_status_data['customer'],
+        order=metagenome_status_data['order'],
+        ordered=dt.datetime.now(),
+        ticket=1234348,
+        samples=metagenome_status_data['samples'],
+    )
+
+    # THEN it should store the samples
+    assert len(new_samples) == 2
+    assert base_store.samples().count() == 2
+
+
+def test_store_metagenome_samples_bad_apptag(orders_api, base_store, metagenome_status_data):
+
+    # GIVEN a basic store with no samples and a metagenome order
+    assert base_store.samples().count() == 0
+
+    for sample in metagenome_status_data['samples']:
+        sample['application'] = 'nonexistingtag'
+
+    # THEN it should raise OrderError
+    with pytest.raises(OrderError):
+        # WHEN storing the order
+        orders_api.store_samples(
+            customer=metagenome_status_data['customer'],
+            order=metagenome_status_data['order'],
+            ordered=dt.datetime.now(),
+            ticket=1234348,
+            samples=metagenome_status_data['samples'],
+        )
+
+
+def test_store_cancer_samples(orders_api, base_store, cancer_status_data):
+
+    # GIVEN a basic store with no samples and a cancer order
+    assert base_store.samples().count() == 0
+
+    # WHEN storing the order
+    new_samples = orders_api.store_samples(
+        customer=cancer_status_data['customer'],
+        order=cancer_status_data['order'],
+        ordered=dt.datetime.now(),
+        ticket=1234348,
+        samples=cancer_status_data['samples'],
+    )
+
+    # THEN it should store the samples
+    assert len(new_samples) == 1
+    assert base_store.samples().count() == 1
+
+
+def test_store_cancer_samples_bad_apptag(orders_api, base_store, cancer_status_data):
+
+    # GIVEN a basic store with no samples and a cancer order
+    assert base_store.samples().count() == 0
+
+    for sample in cancer_status_data['samples']:
+        sample['application'] = 'nonexistingtag'
+
+    # THEN it should raise OrderError
+    with pytest.raises(OrderError):
+        # WHEN storing the order
+        orders_api.store_samples(
+            customer=cancer_status_data['customer'],
+            order=cancer_status_data['order'],
+            ordered=dt.datetime.now(),
+            ticket=1234348,
+            samples=cancer_status_data['samples'],
         )

@@ -1,51 +1,78 @@
 {
-    "name": "Clincal WGS",
-    "customer": "cust003",
-    "comment": "Vi kommer in med proverna på tisdag",
-    "samples": [{
-        "name": "17093-I-2A",
-        "father": "17093-II-1U",
-        "mother": "17093-II-2U",
-        "sex": "female",
-        "quantity": "2200",
-        "volume": "35",
-        "concentration": "5",
-        "application": "WGTPCFC030",
-        "source": "blood",
-        "status": "affected",
-        "container": "96 well plate",
-        "container_name": "CMMS",
-        "well_position": "A:1",
-        "family_name": "17093",
-        "panels": ["IEM", "EP"],
-        "require_qcok": false,
-        "priority": "standard",
-        "comment": "Testcomment"
-    }, {
-        "name": "17093-II-1U",
-        "sex": "male",
-        "quantity": "2200",
-        "application": "WGTPCFC030",
-        "source": "blood",
-        "status": "unaffected",
-        "container": "Tube",
-        "family_name": "17093",
-        "panels": ["IEM", "EP"],
-        "require_qcok": false,
-        "priority": "standard",
-        "comment": "Osäkra på könet för det här provet"
-    }, {
-        "name": "17093-II-2U",
-        "sex": "female",
-        "quantity": "2200",
-        "application": "WGTPCFC030",
-        "source": "blood",
-        "status": "unaffected",
-        "container": "Tube",
-        "family_name": "17093",
-        "panels": ["IEM", "EP"],
-        "require_qcok": false,
-        "priority": "standard",
-        "comment": ""
-    }]
+  "name": "Scout order",
+  "customer": "cust003",
+  "comment": "",
+  "samples": [
+    {
+      "name": "sample1",
+      "application": "WGTPCFC030",
+      "container": "96 well plate",
+      "container_name": "CMMS",
+      "well_position": "A:1",
+      "quantity": "220",
+      "source": "tissue (fresh frozen)",
+      "priority": "standard",
+      "require_qcok": true,
+      "sex": "female",
+      "status": "affected",
+      "family_name": "family1",
+      "panels": [
+        "IEM"
+      ],
+      "father": "sample3",
+      "mother": "sample2"
+    },
+    {
+      "name": "sample2",
+      "application": "WGTPCFC030",
+      "comment": "this is a sample comment",
+      "container": "96 well plate",
+      "container_name": "CMMS",
+      "well_position": "B:1",
+      "quantity": "220",
+      "source": "tissue (fresh frozen)",
+      "priority": "standard",
+      "require_qcok": true,
+      "sex": "female",
+      "status": "affected",
+      "family_name": "family1",
+      "panels": [
+        "IEM"
+      ]
+    },
+    {
+      "name": "sample3",
+      "application": "WGTPCFC030",
+      "container": "96 well plate",
+      "container_name": "CMMS",
+      "well_position": "C:1",
+      "quantity": "220",
+      "source": "tissue (fresh frozen)",
+      "priority": "standard",
+      "require_qcok": true,
+      "sex": "male",
+      "status": "affected",
+      "family_name": "family1",
+      "panels": [
+        "IEM"
+      ]
+    },
+    {
+      "name": "sample4",
+      "application": "WGTPCFC030",
+      "container": "96 well plate",
+      "container_name": "CMMS",
+      "well_position": "D:1",
+      "quantity": "220",
+      "source": "tissue (fresh frozen)",
+      "priority": "standard",
+      "require_qcok": true,
+      "sex": "female",
+      "status": "affected",
+      "family_name": "family2",
+      "panels": [
+        "IEM"
+      ]
+    }
+  ]
 }

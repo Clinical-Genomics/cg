@@ -22,8 +22,18 @@ def external_orderform():
 
 
 @pytest.fixture
+def microbial_orderform():
+    return 'tests/fixtures/orderforms/1603.6.microbial.xlsx'
+
+
+@pytest.fixture
 def metagenome_orderform():
     return 'tests/fixtures/orderforms/1605.4.metagenome.xlsx'
+
+
+@pytest.fixture
+def cancer_orderform():
+    return 'tests/fixtures/orderforms/1508.14.cancer.xlsx'
 
 
 class MockLims(LimsAPI):

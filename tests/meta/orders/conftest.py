@@ -69,9 +69,17 @@ def microbial_order_to_submit():
 
 
 @pytest.fixture
+def cancer_order_to_submit():
+    """Load an example cancer order."""
+    json_path = 'tests/fixtures/orders/cancer.json'
+    json_data = json.load(open(json_path))
+    return json_data
+
+
+@pytest.fixture
 def all_orders_to_submit(rml_order_to_submit, fastq_order_to_submit, scout_order_to_submit,
                          external_order_to_submit, microbial_order_to_submit,
-                         metagenome_order_to_submit):
+                         metagenome_order_to_submit, cancer_order_to_submit):
     return {
         OrderType.RML: rml_order_to_submit,
         OrderType.FASTQ: fastq_order_to_submit,
@@ -79,6 +87,7 @@ def all_orders_to_submit(rml_order_to_submit, fastq_order_to_submit, scout_order
         OrderType.EXTERNAL: external_order_to_submit,
         OrderType.MICROBIAL: microbial_order_to_submit,
         OrderType.METAGENOME: metagenome_order_to_submit,
+        OrderType.CANCER: cancer_order_to_submit,
     }
 
 
@@ -114,6 +123,20 @@ def external_status_data(external_order_to_submit):
 def microbial_status_data(microbial_order_to_submit):
     """Parse microbial order example."""
     data = StatusHandler.microbial_samples_to_status(microbial_order_to_submit)
+    return data
+
+
+@pytest.fixture
+def metagenome_status_data(metagenome_order_to_submit):
+    """Parse metagenome order example."""
+    data = StatusHandler.samples_to_status(metagenome_order_to_submit)
+    return data
+
+
+@pytest.fixture
+def cancer_status_data(cancer_order_to_submit):
+    """Parse cancer order example."""
+    data = StatusHandler.samples_to_status(cancer_order_to_submit)
     return data
 
 

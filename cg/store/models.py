@@ -139,7 +139,7 @@ class Family(Model, PriorityMixin):
     internal_id = Column(types.String(32), unique=True, nullable=False)
     name = Column(types.String(128), nullable=False)
     priority = Column(types.Integer, default=1, nullable=False)
-    _panels = Column(types.Text, nullable=False)
+    _panels = Column(types.Text)
     action = Column(types.Enum(*FAMILY_ACTIONS))
     comment = Column(types.Text)
 

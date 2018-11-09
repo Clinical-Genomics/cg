@@ -50,7 +50,7 @@ def parse_orderform(excel_path: str) -> dict:
     document_title = get_document_title(workbook, orderform_sheet)
     project_type = get_project_type(document_title, parsed_samples)
 
-    if project_type in ('scout', 'external'):
+    if project_type in ('scout', 'external', 'cancer'):
         parsed_families = group_families(parsed_samples)
         items = []
         customer_ids = set()
@@ -90,20 +90,26 @@ def get_document_title(workbook: xlrd.book.Book, orderform_sheet: xlrd.sheet.She
 
 def get_project_type(document_title: str, parsed_samples: List) -> str:
     """Determine the project type."""
-    if '1604' in document_title:
-        return 'rml'
-    elif '1541' in document_title:
-        return 'external'
-    elif '1603' in document_title:
-        return 'microbial'
-    elif '1605' in document_title:
-        return 'metagenome'
 
-    analyses = set(sample['analysis'].lower() for sample in parsed_samples)
-    if len(analyses) > 1:
-        raise OrderFormError(f"mixed 'Data Analysis' types: {', '.join(analyses)}")
-    else:
-        project_type = analyses.pop()
+    project_type = None
+
+    if '1541' in document_title:
+        project_type = 'external'
+    elif '1604' in document_title:
+        project_type = 'rml'
+    elif '1603' in document_title:
+        project_type = 'microbial'
+    elif '1605' in document_title:
+        project_type = 'metagenome'
+    elif '1508' in document_title:
+        analyses = set(sample['analysis'].lower() for sample in parsed_samples)
+        if len(analyses) == 1:
+            project_type = analyses.pop()
+        else:
+            raise OrderFormError(f"mixed 'Data Analysis' types: {', '.join(analyses)}")
+
+    print( project_type)
+
     return project_type
 
 
@@ -129,6 +135,7 @@ def expand_family(family_id, parsed_family):
 
     gene_panels = set()
     for raw_sample in samples:
+        print(raw_sample)
         if raw_sample['panels']:
             gene_panels.update(raw_sample['panels'])
         new_sample = {
@@ -140,7 +147,7 @@ def expand_family(family_id, parsed_family):
         if raw_sample.get('container') in CONTAINER_TYPES:
             new_sample['container'] = raw_sample['container']
         for key in ('container_name', 'well_position', 'quantity', 'status', 'comment',
-                    'capture_kit'):
+                    'capture_kit', 'tumour', 'tumour_purity', 'hereditary'):
             if raw_sample.get(key):
                 new_sample[key] = raw_sample[key]
 
@@ -148,8 +155,8 @@ def expand_family(family_id, parsed_family):
             if raw_sample[parent_id]:
                 new_sample[parent_id] = raw_sample[parent_id]
         new_family['samples'].append(new_sample)
-    if len(gene_panels) > 0:
-        new_family['panels'] = list(gene_panels)
+
+    new_family['panels'] = list(gene_panels)
 
     return customer, new_family
 
@@ -174,49 +181,50 @@ def parse_sample(raw_sample):
 
     if raw_sample['UDF/priority'].lower() == 'förtur':
         raw_sample['UDF/priority'] = 'priority'
-
     source = raw_sample.get('UDF/Source')
     sample = {
-        'name': raw_sample['Sample/Name'],
+        'application': raw_sample['UDF/Sequencing Analysis'],
+        'capture_kit': raw_sample.get('UDF/Capture Library version'),
+        'comment': raw_sample.get('UDF/Comment'),
         'container': raw_sample.get('Container/Type'),
         'container_name': raw_sample.get('Container/Name'),
-        'rml_plate_name': raw_sample.get('UDF/RML plate name'),
-        'well_position': raw_sample.get('Sample/Well Location'),
-        'well_position_rml': raw_sample.get('UDF/RML well position'),
-        'sex': REV_SEX_MAP.get(raw_sample.get('UDF/Gender', '').strip()),
-        'panels': (raw_sample['UDF/Gene List'].split(';') if
-                   raw_sample.get('UDF/Gene List') else None),
-        'require_qcok': raw_sample.get('UDF/Process only if QC OK') == 'yes',
-        'application': raw_sample['UDF/Sequencing Analysis'],
-        'source': source if source in SOURCE_TYPES else None,
-        'status': raw_sample['UDF/Status'].lower() if raw_sample.get('UDF/Status') else None,
-        'customer': raw_sample['UDF/customer'],
-        'family': raw_sample.get('UDF/familyID'),
-        'priority': raw_sample['UDF/priority'].lower() if raw_sample.get('UDF/priority') else None,
-        'capture_kit': (raw_sample['UDF/Capture Library version'] if
-                        raw_sample.get('UDF/Capture Library version') else None),
-        'comment': raw_sample['UDF/Comment'] if raw_sample.get('UDF/Comment') else None,
-        'index': raw_sample['UDF/Index type'] if raw_sample.get('UDF/Index type') else None,
-        'reagent_label': (raw_sample['Sample/Reagent Label'] if
-                          raw_sample.get('Sample/Reagent Label') else None),
-        'tumour': True if raw_sample.get('UDF/tumor') == 'yes' else False,
         'custom_index': raw_sample.get('UDF/Custom index'),
+        'customer': raw_sample['UDF/customer'],
         'elution_buffer': raw_sample.get('UDF/Sample Buffer'),
         'elution_buffer_other': raw_sample.get('UDF/Other Elution Buffer'),
+        'extraction_method': raw_sample.get('UDF/Extraction method'),
+        'family': raw_sample.get('UDF/familyID'),
+        'hereditary': raw_sample.get('UDF/hereditary') == 'yes',
+        'index': raw_sample.get('UDF/Index type'),
+        'name': raw_sample['Sample/Name'],
         'organism': raw_sample.get('UDF/Strain'),
         'organism_other': raw_sample.get('UDF/Other species'),
-        'reference_genome': raw_sample.get('UDF/Reference Genome Microbial'),
-        'extraction_method': raw_sample.get('UDF/Extraction method'),
+        'panels': (raw_sample['UDF/Gene List'].split(';') if
+                   raw_sample.get('UDF/Gene List') else None),
         'pool': raw_sample.get('UDF/pool name'),
+        'priority': raw_sample['UDF/priority'].lower() if raw_sample.get('UDF/priority') else None,
+        'reagent_label': raw_sample.get('Sample/Reagent Label'),
+        'reference_genome': raw_sample.get('UDF/Reference Genome Microbial'),
+        'require_qcok': raw_sample.get('UDF/Process only if QC OK') == 'yes',
+        'rml_plate_name': raw_sample.get('UDF/RML plate name'),
+        'sex': REV_SEX_MAP.get(raw_sample.get('UDF/Gender', '').strip()),
+        'source': source if source in SOURCE_TYPES else None,
+        'status': raw_sample['UDF/Status'].lower() if raw_sample.get('UDF/Status') else None,
+        'tumour': raw_sample.get('UDF/tumor') == 'yes',
+        'tumour_purity': raw_sample.get('UDF/tumour purity'),
+        'well_position': raw_sample.get('Sample/Well Location'),
+        'well_position_rml': raw_sample.get('UDF/RML well position'),
     }
 
-    data_analysis = raw_sample.get('UDF/Data Analysis') or None
-    if data_analysis and 'scout' in data_analysis:
+    data_analysis = raw_sample.get('UDF/Data Analysis').lower()
+    if data_analysis and 'balsamic' in data_analysis:
+        sample['analysis'] = 'cancer'
+    elif data_analysis and 'scout' in data_analysis:
         sample['analysis'] = 'scout'
     elif data_analysis and ('fastq' in data_analysis or data_analysis == 'custom'):
         sample['analysis'] = 'fastq'
     else:
-        raise OrderFormError("unknown 'Data Analysis' for order")
+        raise OrderFormError(f"unknown 'Data Analysis' for order: {data_analysis}")
 
     numeric_values = [('index_number', 'UDF/Index number'),
                       ('volume', 'UDF/Volume (uL)'), ('quantity', 'UDF/Quantity'),
@@ -258,6 +266,7 @@ def relevant_rows(orderform_sheet):
                                          f"non-sample data rows in between the samples")
 
                 sample_dict = dict(zip(header_row, values))
+
                 raw_samples.append(sample_dict)
             else:
                 empty_row_found = True

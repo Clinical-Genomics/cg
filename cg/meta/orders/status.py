@@ -86,7 +86,7 @@ class StatusHandler:
 
     @staticmethod
     def samples_to_status(data: dict) -> dict:
-        """Convert order input to status for fastq-only orders."""
+        """Convert order input to status for fastq-only/metagenome orders."""
         status_data = {
             'customer': data['customer'],
             'order': data['name'],
@@ -136,7 +136,8 @@ class StatusHandler:
             if len(values) > 1:
                 raise ValueError(f"different 'priority' values: {family_name} - {values}")
             priority = values.pop()
-            panels = set(panel for sample in family_samples for panel in sample['panels'])
+            panels = set(panel for sample in family_samples for panel in sample.get('panels',
+                                                                                    set()))
             family = {
                 'name': family_name,
                 'priority': priority,
@@ -146,7 +147,7 @@ class StatusHandler:
                     'name': sample['name'],
                     'application': sample['application'],
                     'sex': sample['sex'],
-                    'status': sample['status'],
+                    'status': sample.get('status','unknown'),
                     'mother': sample.get('mother'),
                     'father': sample.get('father'),
                     'tumour': sample.get('tumour') or False,

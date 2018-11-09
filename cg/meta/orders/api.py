@@ -142,12 +142,23 @@ class OrdersAPI(LimsHandler, StatusHandler):
 
     def submit_external(self, data: dict) -> dict:
         """Submit a batch of externally sequenced samples for analysis."""
-        result = self.process_analysis_samples(data)
+        result = self.process_family_samples(data)
         return result
 
     def submit_scout(self, data: dict) -> dict:
         """Submit a batch of samples for sequencing and analysis."""
-        result = self.process_analysis_samples(data)
+        result = self.process_family_samples(data)
+        for family_obj in result['records']:
+            LOG.info(f"{family_obj.name}: submit family samples")
+            status_samples = [link_obj.sample for link_obj in family_obj.links if
+                              link_obj.sample.ticket_number == data['ticket']]
+            self.add_missing_reads(status_samples)
+        self.update_application(data['ticket'], result['records'])
+        return result
+
+    def submit_cancer(self, data: dict) -> dict:
+        """Submit a batch of samples for sequencing and balsamic analysis."""
+        result = self.process_family_samples(data)
         for family_obj in result['records']:
             LOG.info(f"{family_obj.name}: submit family samples")
             status_samples = [link_obj.sample for link_obj in family_obj.links if
@@ -176,7 +187,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
         )
         return {'project': project_data, 'records': order_obj.microbial_samples}
 
-    def process_analysis_samples(self, data: dict) -> dict:
+    def process_family_samples(self, data: dict) -> dict:
         """Process samples to be analyzed."""
         # filter out only new samples
         status_data = self.families_to_status(data)
@@ -242,7 +253,6 @@ class OrdersAPI(LimsHandler, StatusHandler):
 
     def fill_in_sample_verified_organism(self, samples: List[dict]):
         for sample in samples:
-            print(sample)
             organism_id = sample['organism']
             reference_genome = sample['reference_genome']
             organism = self.status.organism(internal_id=organism_id)
@@ -255,7 +265,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
 
             if sample.get('internal_id'):
 
-                if project not in (OrderType.SCOUT, OrderType.EXTERNAL):
+                if project not in (OrderType.SCOUT, OrderType.EXTERNAL, OrderType.CANCER):
                     raise OrderError(f"Only scout and external orders can have imported samples: "
                                      f"{sample.get('name')}")
 
