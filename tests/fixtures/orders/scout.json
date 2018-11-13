@@ -6,6 +6,7 @@
     {
       "name": "sample1",
       "application": "WGTPCFC030",
+      "data_analysis": "scout",
       "container": "96 well plate",
       "container_name": "CMMS",
       "well_position": "A:1",
@@ -25,6 +26,7 @@
     {
       "name": "sample2",
       "application": "WGTPCFC030",
+      "data_analysis": "scout",
       "comment": "this is a sample comment",
       "container": "96 well plate",
       "container_name": "CMMS",
@@ -43,6 +45,7 @@
     {
       "name": "sample3",
       "application": "WGTPCFC030",
+      "data_analysis": "scout",
       "container": "96 well plate",
       "container_name": "CMMS",
       "well_position": "C:1",
@@ -60,6 +63,7 @@
     {
       "name": "sample4",
       "application": "WGTPCFC030",
+      "data_analysis": "scout",
       "container": "96 well plate",
       "container_name": "CMMS",
       "well_position": "D:1",

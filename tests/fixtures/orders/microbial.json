@@ -6,6 +6,7 @@
     {
       "name": "all-fields",
       "application": "MWRNXTR003",
+      "data_analysis": "fastq",
       "priority": "research",
       "require_qcok": true,
       "organism": "M.upium",
@@ -22,6 +23,7 @@
     {
       "name": "required-fields",
       "application": "MWRNXTR003",
+      "data_analysis": "fastq",
       "priority": "standard",
       "require_qcok": true,
       "organism": "C. difficile",
@@ -36,6 +38,7 @@
     {
       "name": "plate-fields",
       "application": "MWRNXTR003",
+      "data_analysis": "fastq",
       "priority": "research",
       "require_qcok": true,
       "organism": "C. difficile",
@@ -50,6 +53,7 @@
     {
       "name": "other-species-fields",
       "application": "MWRNXTR003",
+      "data_analysis": "fastq",
       "priority": "research",
       "require_qcok": true,
       "organism": "M.upium",
@@ -64,6 +68,7 @@
         {
       "name": "optional-fields",
       "application": "MWRNXTR003",
+      "data_analysis": "fastq",
       "priority": "research",
       "require_qcok": false,
       "organism": "C. difficile",

@@ -70,6 +70,7 @@ SCOUT_SAMPLE = {
     # required
     'name': validators.RegexValidator(NAME_PATTERN),
     'container': validators.Any(CONTAINER_OPTIONS),
+    'data_analysis': str,
     'application': str,
     'sex': validators.Any(SEX_OPTIONS),
     'family_name': validators.RegexValidator(NAME_PATTERN),
@@ -88,7 +89,6 @@ SCOUT_SAMPLE = {
     # Required if samples are part of trio/family
     'mother': validators.Optional(validators.RegexValidator(NAME_PATTERN), None),
     'father': validators.Optional(validators.RegexValidator(NAME_PATTERN), None),
-    # todo: find out if "Other relations" is removed in current OF
 
     # Required if cancer
     'tumour': validators.Optional(bool, False),
@@ -115,7 +115,7 @@ EXTERNAL_SAMPLE = {
     'source': str,
 
     # Required if data analysis in Scout
-    'panels': ListValidator(str, min_items=1),
+    'panels': ListValidator(str, min_items=0),
     # todo: find out if "Additional Gene List" is "lost in translation", implement in OP or remove from OF
     'status': validators.Any(STATUS_OPTIONS),
 
@@ -137,6 +137,7 @@ FASTQ_SAMPLE = {
     # required
     'name': validators.RegexValidator(NAME_PATTERN),
     'container': validators.Any(CONTAINER_OPTIONS),
+    'data_analysis': str,
     'application': str,
     'sex': validators.Any(SEX_OPTIONS),
     # todo: implement in OP or remove from OF
@@ -156,7 +157,6 @@ FASTQ_SAMPLE = {
     # Required if samples are part of trio/family
     'mother': validators.Optional(validators.RegexValidator(NAME_PATTERN), None),
     'father': validators.Optional(validators.RegexValidator(NAME_PATTERN), None),
-    # todo: find out if "Other relations" is removed in current OF
 
     # Required if cancer
     'tumour': validators.Optional(bool, False),
@@ -173,11 +173,13 @@ RML_SAMPLE = {
     # Order portal specific
     # todo: add in the orderform
     'container': validators.Any(CONTAINER_OPTIONS),
+    'container_name': str,
 
     # This information is required
     'name': validators.RegexValidator(NAME_PATTERN),
     'pool': str,
     'application': str,
+    'data_analysis': str,
     # todo: implement in OP or remove from OF
     # 'family_name': validators.RegexValidator(NAME_PATTERN),
     'volume': str,
@@ -204,6 +206,7 @@ MICROBIAL_SAMPLE = {
     'name': validators.RegexValidator(NAME_PATTERN),
     'organism': str,
     'reference_genome': str,
+    'data_analysis': str,
     'application': str,
     'require_qcok': bool,
     'elution_buffer': str,
@@ -230,6 +233,7 @@ METAGENOME_SAMPLE = {
     # This information is required
     'name': validators.RegexValidator(NAME_PATTERN),
     'container': validators.Any(CONTAINER_OPTIONS),
+    'data_analysis': str,
     'application': str,
     'require_qcok': bool,
     'elution_buffer': str,
@@ -256,6 +260,7 @@ CANCER_SAMPLE = {
     # This information is required
     'name': validators.RegexValidator(NAME_PATTERN),
     'container': validators.Any(CONTAINER_OPTIONS),
+    'data_analysis': str,
     'application': str,
     'sex': validators.Any(SEX_OPTIONS),
     'family_name': validators.RegexValidator(NAME_PATTERN),

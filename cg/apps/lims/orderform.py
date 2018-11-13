@@ -108,8 +108,6 @@ def get_project_type(document_title: str, parsed_samples: List) -> str:
         else:
             raise OrderFormError(f"mixed 'Data Analysis' types: {', '.join(analyses)}")
 
-    print( project_type)
-
     return project_type
 
 
@@ -146,8 +144,8 @@ def expand_family(family_id, parsed_family):
         }
         if raw_sample.get('container') in CONTAINER_TYPES:
             new_sample['container'] = raw_sample['container']
-        for key in ('container_name', 'well_position', 'quantity', 'status', 'comment',
-                    'capture_kit', 'tumour', 'tumour_purity', 'hereditary'):
+        for key in ('data_analysis', 'container_name', 'well_position', 'quantity', 'status',
+                    'comment', 'capture_kit', 'tumour', 'tumour_purity', 'hereditary'):
             if raw_sample.get(key):
                 new_sample[key] = raw_sample[key]
 
@@ -190,6 +188,7 @@ def parse_sample(raw_sample):
         'container_name': raw_sample.get('Container/Name'),
         'custom_index': raw_sample.get('UDF/Custom index'),
         'customer': raw_sample['UDF/customer'],
+        'data_analysis': raw_sample['UDF/Data Analysis'],
         'elution_buffer': raw_sample.get('UDF/Sample Buffer'),
         'elution_buffer_other': raw_sample.get('UDF/Other Elution Buffer'),
         'extraction_method': raw_sample.get('UDF/Extraction method'),
