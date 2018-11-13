@@ -145,7 +145,7 @@ def expand_family(family_id, parsed_family):
         if raw_sample.get('container') in CONTAINER_TYPES:
             new_sample['container'] = raw_sample['container']
         for key in ('data_analysis', 'container_name', 'well_position', 'quantity', 'status',
-                    'comment', 'capture_kit', 'tumour', 'tumour_purity', 'hereditary'):
+                    'comment', 'capture_kit', 'tumour', 'tumour_purity'):
             if raw_sample.get(key):
                 new_sample[key] = raw_sample[key]
 
@@ -193,7 +193,6 @@ def parse_sample(raw_sample):
         'elution_buffer_other': raw_sample.get('UDF/Other Elution Buffer'),
         'extraction_method': raw_sample.get('UDF/Extraction method'),
         'family': raw_sample.get('UDF/familyID'),
-        'hereditary': raw_sample.get('UDF/hereditary') == 'yes',
         'index': raw_sample.get('UDF/Index type'),
         'name': raw_sample['Sample/Name'],
         'organism': raw_sample.get('UDF/Strain'),

@@ -287,4 +287,3 @@ def test_parsing_cancer_orderform(cancer_orderform):
     # This information is optional
     assert sample['quantity'] == '1'
     assert sample['comment'] == 'comment'
-    # todo: remove ? assert sample['hereditary'] is True

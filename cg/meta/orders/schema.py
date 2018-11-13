@@ -268,7 +268,6 @@ CANCER_SAMPLE = {
     'source': str,
     'tumour': validators.Optional(bool, False),
     'capture_kit': validators.Any(CAPTUREKIT_CANCER_OPTIONS),
-    # todo: remove ? 'hereditary': bool,
     'priority': validators.Any(PRIORITY_OPTIONS),
 
     # Required if Plate
