@@ -42,6 +42,8 @@ def test_add_user(store: Store):
     name, email = 'Paul T. Anderson', 'paul.anderson@magnolia.com'
     new_user = store.add_user(customer=customer, email=email, name=name)
 
+    store.add_commit(new_user)
+
     # THEN it should be stored in the database
     assert store.User.query.first() == new_user
 
