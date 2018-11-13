@@ -274,6 +274,10 @@ CANCER_SAMPLE = {
     'container_name': validators.Optional(str, None),
     'well_position': validators.Optional(TypeValidator(str, allow_none=True), None),
 
+    # This information is optional for FFPE-samples
+    'formalin_fixation_time': validators.Optional(str, None),
+    'post_formalin_fixation_time': validators.Optional(str, None),
+
     # This information is optional
     'tumour_purity': validators.Optional(str, None),
     'quantity': validators.Optional(str, None),

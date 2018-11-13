@@ -284,6 +284,9 @@ def test_parsing_cancer_orderform(cancer_orderform):
     assert sample['capture_kit'] == 'Twist exome v1.3'
     assert sample['tumour_purity'] == '1.0'
 
+    assert sample['formalin_fixation_time'] == '3.0'
+    assert sample['post_formalin_fixation_time'] == '3.0'
+
     # This information is optional
     assert sample['quantity'] == '1'
     assert sample['comment'] == 'comment'

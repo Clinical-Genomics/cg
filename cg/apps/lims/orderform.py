@@ -145,7 +145,8 @@ def expand_family(family_id, parsed_family):
         if raw_sample.get('container') in CONTAINER_TYPES:
             new_sample['container'] = raw_sample['container']
         for key in ('data_analysis', 'container_name', 'well_position', 'quantity', 'status',
-                    'comment', 'capture_kit', 'tumour', 'tumour_purity'):
+                    'comment', 'capture_kit', 'tumour', 'tumour_purity',
+                    'formalin_fixation_time', 'post_formalin_fixation_time'):
             if raw_sample.get(key):
                 new_sample[key] = raw_sample[key]
 
@@ -194,12 +195,14 @@ def parse_sample(raw_sample):
         'extraction_method': raw_sample.get('UDF/Extraction method'),
         'family': raw_sample.get('UDF/familyID'),
         'index': raw_sample.get('UDF/Index type'),
+        'formalin_fixation_time': raw_sample.get('UDF/Formalin Fixation Time'),
         'name': raw_sample['Sample/Name'],
         'organism': raw_sample.get('UDF/Strain'),
         'organism_other': raw_sample.get('UDF/Other species'),
         'panels': (raw_sample['UDF/Gene List'].split(';') if
                    raw_sample.get('UDF/Gene List') else None),
         'pool': raw_sample.get('UDF/pool name'),
+        'post_formalin_fixation_time': raw_sample.get('UDF/Post Formalin Fixation Time'),
         'priority': raw_sample['UDF/priority'].lower() if raw_sample.get('UDF/priority') else None,
         'reagent_label': raw_sample.get('Sample/Reagent Label'),
         'reference_genome': raw_sample.get('UDF/Reference Genome Microbial'),

@@ -12,12 +12,15 @@
       "require_qcok": false,
       "source": "blood",
       "tumour": true,
+      "tumour_purity": "75",
       "capture_kit": "Twist exome v1.3",
       "priority": "standard",
       "container_name": "p1",
       "well_position": "A:1",
       "quantity": "2",
       "family_name": "family1",
+      "formalin_fixation_time": "1",
+      "post_formalin_fixation_time": "2",
       "comment": "comment"
     }
   ]
