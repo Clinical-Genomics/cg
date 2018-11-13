@@ -39,7 +39,7 @@ class User(Model):
     email = Column(types.String(128), unique=True, nullable=False)
     is_admin = Column(types.Boolean, default=False)
 
-    customer_id = Column(ForeignKey('customer.id', ondelete='CASCADE'), nullable=False)
+    customer_id = Column(ForeignKey('customer.id', ondelete='CASCADE', use_alter=True), nullable=False)
     customer = orm.relationship('Customer', foreign_keys=[customer_id])
 
     def to_dict(self) -> dict:
@@ -69,11 +69,11 @@ class Customer(Model):
     invoice_reference = Column(types.String(32), nullable=False)
     uppmax_account = Column(types.String(32))
     
-    primary_contact_id = Column(ForeignKey('user.id'), nullable=False)
+    primary_contact_id = Column(ForeignKey('user.id'))
     primary_contact = orm.relationship("User", foreign_keys=[primary_contact_id])
-    delivery_contact_id = Column(ForeignKey('user.id'), nullable=False)
+    delivery_contact_id = Column(ForeignKey('user.id'))
     delivery_contact = orm.relationship("User", foreign_keys=[delivery_contact_id])
-    invoice_contact_id = Column(ForeignKey('user.id'), nullable=False)
+    invoice_contact_id = Column(ForeignKey('user.id'))
     invoice_contact = orm.relationship("User", foreign_keys=[invoice_contact_id])
     customer_group_id = Column(ForeignKey('customer_group.id'), nullable=False)
 

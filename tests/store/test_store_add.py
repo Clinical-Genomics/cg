@@ -9,7 +9,8 @@ def test_add_customer(store: Store):
 
     # WHEN adding a new customer
     new_customer = store.add_customer(internal_id=internal_id, name=name,
-                                      scout_access=scout_access, customer_group=customer_group)
+                                      scout_access=scout_access, customer_group=customer_group,
+                                      invoice_address='dummy street 1', invoice_reference='dummy nr')
     store.add_commit(new_customer)
 
     # THEN it should be stored in the database
@@ -33,7 +34,8 @@ def test_add_user(store: Store):
     # GIVEN a database with a customer in it that we can connect the user to
     customer_group = store.add_customer_group('dummy_group', 'dummy group')
     customer = store.add_customer(internal_id='custtest', name="Test Customer",
-                                  scout_access=False, customer_group=customer_group)
+                                  scout_access=False, customer_group=customer_group,
+                                  invoice_address='dummy street 1', invoice_reference='dummy nr')
     store.add_commit(customer)
 
     # WHEN adding a new user

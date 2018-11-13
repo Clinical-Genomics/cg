@@ -15,11 +15,12 @@ class AddHandler:
     """Methods related to adding new data to the store."""
 
     def add_customer(self, internal_id: str, name: str, customer_group:
-    models.CustomerGroup, scout_access: bool = False, **kwargs) -> models.Customer:
+    models.CustomerGroup, invoice_address: str, invoice_reference: str, scout_access: bool = False,  **kwargs) -> models.Customer:
         """Build a new customer record."""
 
         new_customer = self.Customer(internal_id=internal_id, name=name, scout_access=scout_access,
-                                     customer_group=customer_group, **kwargs)
+                                     customer_group=customer_group, invoice_address=invoice_address, 
+                                     invoice_reference=invoice_reference, **kwargs)
         return new_customer
 
     def add_customer_group(self, internal_id: str, name: str, **kwargs) -> models.CustomerGroup:

@@ -50,12 +50,12 @@ def store() -> Store:
 def base_store(store) -> Store:
     """Setup and example store."""
     customer_group = store.add_customer_group('all_customers', 'all customers')
+    
     store.add_commit(customer_group)
-    customers = [store.add_customer('cust000', 'Production', scout_access=True,
-                                    invoice_address='Test street', customer_group=customer_group),
-                 store.add_customer('cust001', 'Customer', scout_access=False, customer_group=customer_group),
-                 store.add_customer('cust002', 'Karolinska', scout_access=True, customer_group=customer_group),
-                 store.add_customer('cust003', 'CMMS', scout_access=True, customer_group=customer_group)]
+    customers = [store.add_customer('cust000', 'Production', scout_access=True, customer_group=customer_group, invoice_address='Test street', invoice_reference='ABCDEF'),
+                 store.add_customer('cust001', 'Customer', scout_access=False, customer_group=customer_group, invoice_address='Test street', invoice_reference='ABCDEF'),
+                 store.add_customer('cust002', 'Karolinska', scout_access=True, customer_group=customer_group, invoice_address='Test street', invoice_reference='ABCDEF'),
+                 store.add_customer('cust003', 'CMMS', scout_access=True, customer_group=customer_group, invoice_address='Test street', invoice_reference='ABCDEF')]
     store.add_commit(customers)
     applications = [store.add_application('WGXCUSC000', 'wgs', 'External WGS',
                                           sequencing_depth=0, is_external=True),

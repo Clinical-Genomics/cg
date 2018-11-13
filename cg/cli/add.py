@@ -21,8 +21,14 @@ def add(context):
 @click.option('-cg', '--customer-group', 'customer_group_id', required=False,
               help='internal ID for the customer group of the customer, a new group will be '
                    'created if left out')
+@click.option('-ia', '--invoice-address', 'invoice_address', required=True,
+              help='Post adress to invoice bla bla....')
+@click.option('-ir', '--invoice-reference', 'invoice_reference', required=True,
+              help='bla bla....')
+
 @click.pass_context
-def customer(context, internal_id: str, name: str, customer_group_id: str):
+def customer(context, internal_id: str, name: str, customer_group_id: str, invoice_address: str, 
+                invoice_reference: str):
     """Add a new customer with a unique INTERNAL_ID and NAME."""
     existing = context.obj['db'].customer(internal_id)
     if existing:
@@ -30,12 +36,12 @@ def customer(context, internal_id: str, name: str, customer_group_id: str):
         context.abort()
 
     customer_group = context.obj['db'].customer_group(customer_group_id)
-
     if not customer_group:
         customer_group = context.obj['db'].add_customer_group(internal_id=internal_id, name=name)
 
     new_customer = context.obj['db'].add_customer(internal_id=internal_id, name=name,
-                                                  customer_group=customer_group)
+                                    customer_group=customer_group, invoice_address=invoice_address, 
+                                    invoice_reference=invoice_reference)
     context.obj['db'].add_commit(new_customer)
     message = f"customer added: {new_customer.internal_id} ({new_customer.id})"
     LOG.info(message)
