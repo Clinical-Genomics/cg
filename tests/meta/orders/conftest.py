@@ -23,57 +23,43 @@ class MockLims(LimsAPI):
 @pytest.fixture
 def scout_order_to_submit():
     """Load an example scout order."""
-    json_path = 'tests/fixtures/orders/scout.json'
-    json_data = json.load(open(json_path))
-    return json_data
+    return json.load(open('tests/fixtures/orders/scout.json'))
 
 
 @pytest.fixture
 def external_order_to_submit():
     """Load an example external order."""
-    json_path = 'tests/fixtures/orders/external.json'
-    json_data = json.load(open(json_path))
-    return json_data
+    return json.load(open('tests/fixtures/orders/external.json'))
 
 
 @pytest.fixture
 def fastq_order_to_submit():
     """Load an example fastq order."""
-    json_path = 'tests/fixtures/orders/fastq.json'
-    json_data = json.load(open(json_path))
-    return json_data
+    return json.load(open('tests/fixtures/orders/fastq.json'))
 
 
 @pytest.fixture
 def rml_order_to_submit():
     """Load an example rml order."""
-    json_path = 'tests/fixtures/orders/rml.json'
-    json_data = json.load(open(json_path))
-    return json_data
+    return json.load(open('tests/fixtures/orders/rml.json'))
 
 
 @pytest.fixture
 def metagenome_order_to_submit():
     """Load an example metagenome order."""
-    json_path = 'tests/fixtures/orders/metagenome.json'
-    json_data = json.load(open(json_path))
-    return json_data
+    return json.load(open('tests/fixtures/orders/metagenome.json'))
 
 
 @pytest.fixture
 def microbial_order_to_submit():
     """Load an example microbial order."""
-    json_path = 'tests/fixtures/orders/microbial.json'
-    json_data = json.load(open(json_path))
-    return json_data
+    return json.load(open('tests/fixtures/orders/microbial.json'))
 
 
 @pytest.fixture
 def cancer_order_to_submit():
     """Load an example cancer order."""
-    json_path = 'tests/fixtures/orders/cancer.json'
-    json_data = json.load(open(json_path))
-    return json_data
+    return json.load(open('tests/fixtures/orders/cancer.json'))
 
 
 @pytest.fixture
@@ -136,7 +122,7 @@ def metagenome_status_data(metagenome_order_to_submit):
 @pytest.fixture
 def cancer_status_data(cancer_order_to_submit):
     """Parse cancer order example."""
-    data = StatusHandler.samples_to_status(cancer_order_to_submit)
+    data = StatusHandler.families_to_status(cancer_order_to_submit)
     return data
 
 

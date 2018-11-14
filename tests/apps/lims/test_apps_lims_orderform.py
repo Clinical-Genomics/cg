@@ -67,7 +67,6 @@ def test_parsing_fastq_orderform(fastq_orderform):
     assert normal_sample['tumour'] is False
 
     assert normal_sample['quantity'] == '1'
-    assert normal_sample['extraction_method'] == 'extraction method'
     assert normal_sample['comment'] == 'sample comment'
 
     assert tumour_sample['tumour'] is True
@@ -113,14 +112,12 @@ def test_parsing_scout_orderform(scout_orderform):
 
     assert proband_sample['mother'] == 'sample2'
     assert proband_sample['father'] == 'sample3'
-    # todo: check if Sample Name (Other Relations) is removed in latest OF
 
     # todo: assert proband_sample['tumour'] is False
 
     mother_sample = trio_family['samples'][1]
     assert mother_sample.get('mother') is None
     assert mother_sample['quantity'] == '220'
-    # todo: assert mother_sample['extraction_method'] == 'extraction method'
     assert mother_sample['comment'] == 'this is a sample comment'
 
 

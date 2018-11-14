@@ -404,37 +404,32 @@ def test_store_metagenome_samples_bad_apptag(orders_api, base_store, metagenome_
 def test_store_cancer_samples(orders_api, base_store, cancer_status_data):
 
     # GIVEN a basic store with no samples and a cancer order
-    assert base_store.samples().count() == 0
+    assert base_store.samples().first() is None
+    assert base_store.families().first() is None
 
     # WHEN storing the order
-    new_samples = orders_api.store_samples(
+    new_families = orders_api.store_families(
         customer=cancer_status_data['customer'],
         order=cancer_status_data['order'],
         ordered=dt.datetime.now(),
-        ticket=1234348,
-        samples=cancer_status_data['samples'],
+        ticket=1234567,
+        families=cancer_status_data['families'],
     )
 
-    # THEN it should store the samples
-    assert len(new_samples) == 1
-    assert base_store.samples().count() == 1
+    # THEN it should create and link samples and the family
+    assert len(new_families) == 1
+    new_family = new_families[0]
+    assert new_family.name == 'family1'
+    assert set(new_family.panels) == set()
+    assert new_family.priority_human == 'standard'
 
+    assert len(new_family.links) == 1
+    new_link = new_family.links[0]
+    assert new_link.sample.name == 's1'
+    assert new_link.sample.sex == 'male'
+    assert new_link.sample.application_version.application.tag == 'WGTPCFC030'
+    assert new_link.sample.comment == 'comment'
 
-def test_store_cancer_samples_bad_apptag(orders_api, base_store, cancer_status_data):
-
-    # GIVEN a basic store with no samples and a cancer order
-    assert base_store.samples().count() == 0
-
-    for sample in cancer_status_data['samples']:
-        sample['application'] = 'nonexistingtag'
-
-    # THEN it should raise OrderError
-    with pytest.raises(OrderError):
-        # WHEN storing the order
-        orders_api.store_samples(
-            customer=cancer_status_data['customer'],
-            order=cancer_status_data['order'],
-            ordered=dt.datetime.now(),
-            ticket=1234348,
-            samples=cancer_status_data['samples'],
-        )
+    assert base_store.deliveries().count() == base_store.samples().count()
+    for link in new_family.links:
+        assert len(link.sample.deliveries) == 1

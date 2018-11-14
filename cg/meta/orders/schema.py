@@ -95,7 +95,6 @@ SCOUT_SAMPLE = {
 
     # Not Required
     'quantity': validators.Optional(str, None),
-    'extraction_method': validators.Optional(str, None),
     'comment': validators.Optional(TypeValidator(str, allow_none=True), None),
 }
 
@@ -163,7 +162,6 @@ FASTQ_SAMPLE = {
 
     # Not Required
     'quantity': validators.Optional(str, None),
-    'extraction_method': validators.Optional(str, None),
     'comment': validators.Optional(TypeValidator(str, allow_none=True), None),
 }
 
@@ -252,7 +250,7 @@ METAGENOME_SAMPLE = {
 }
 
 CANCER_SAMPLE = {
-    # 666:1 Orderform
+    # 1508:14 Orderform
 
     # Order portal specific
     'internal_id': validators.Optional(TypeValidator(str, allow_none=True), None),
@@ -266,15 +264,17 @@ CANCER_SAMPLE = {
     'family_name': validators.RegexValidator(NAME_PATTERN),
     'require_qcok': bool,
     'source': str,
-    'tumour': validators.Optional(bool, False),
     'priority': validators.Any(PRIORITY_OPTIONS),
 
     # Required if Plate
     'container_name': validators.Optional(str, None),
     'well_position': validators.Optional(TypeValidator(str, allow_none=True), None),
 
+    # This information is required for Balsamic analysis (cancer)
+    'tumour': validators.Optional(bool, False),
     'capture_kit': validators.Any(CAPTUREKIT_CANCER_OPTIONS),
     'tumour_purity': validators.Optional(str, None),
+
     # This information is optional for FFPE-samples
     'formalin_fixation_time': validators.Optional(str, None),
     'post_formalin_fixation_time': validators.Optional(str, None),

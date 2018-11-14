@@ -8,12 +8,12 @@ def rml_orderform():
 
 @pytest.fixture
 def fastq_orderform():
-    return 'tests/fixtures/orderforms/1508.12.fastq.xlsx'
+    return 'tests/fixtures/orderforms/1508.14.fastq.xlsx'
 
 
 @pytest.fixture
 def scout_orderform():
-    return 'tests/fixtures/orderforms/1508.12.scout.xlsx'
+    return 'tests/fixtures/orderforms/1508.14.scout.xlsx'
 
 
 @pytest.fixture
