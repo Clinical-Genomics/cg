@@ -267,19 +267,19 @@ CANCER_SAMPLE = {
     'require_qcok': bool,
     'source': str,
     'tumour': validators.Optional(bool, False),
-    'capture_kit': validators.Any(CAPTUREKIT_CANCER_OPTIONS),
     'priority': validators.Any(PRIORITY_OPTIONS),
 
     # Required if Plate
     'container_name': validators.Optional(str, None),
     'well_position': validators.Optional(TypeValidator(str, allow_none=True), None),
 
+    'capture_kit': validators.Any(CAPTUREKIT_CANCER_OPTIONS),
+    'tumour_purity': validators.Optional(str, None),
     # This information is optional for FFPE-samples
     'formalin_fixation_time': validators.Optional(str, None),
     'post_formalin_fixation_time': validators.Optional(str, None),
 
     # This information is optional
-    'tumour_purity': validators.Optional(str, None),
     'quantity': validators.Optional(str, None),
     'comment': validators.Optional(TypeValidator(str, allow_none=True), None),
 }

@@ -74,3 +74,43 @@ def test_to_lims_microbial(microbial_order_to_submit):
     assert first_sample['udfs']['reference_genome'] == 'NC_111'
     assert first_sample['udfs']['extraction_method'] == 'MagNaPure 96 (contact Clinical Genomics ' \
                                                         'before submission)'
+
+
+def test_to_lims_cancer(cancer_order_to_submit):
+
+    # GIVEN a cancer order for a sample
+    # WHEN parsing the order to format for LIMS import
+    samples = LimsHandler.to_lims(customer='cust000', samples=cancer_order_to_submit['samples'])
+    # THEN it should list all samples
+
+    assert len(samples) == 1
+    # ... and determine the container, container name, and well position
+
+    container_names = set(sample['container_name'] for sample in samples if
+                          sample['container_name'])
+
+    # ... and pick out relevant UDFs
+    first_sample = samples[0]
+    assert first_sample['name'] == 's1'
+    assert set(sample['container'] for sample in samples) == set(['96 well plate'])
+    assert first_sample['udfs']['data_analysis'] == 'Balsamic'
+    assert first_sample['udfs']['application'] == 'WGTPCFC030'
+    assert first_sample['udfs']['sex'] == 'M'
+    assert first_sample['udfs']['family_name'] == 'family1'
+    assert first_sample['udfs']['customer'] == 'cust000'
+    assert first_sample['udfs']['require_qcok'] is False
+    assert first_sample['udfs']['source'] == 'blood'
+    assert first_sample['udfs']['priority'] == 'standard'
+
+    assert container_names == set(['p1'])
+    assert samples[0]['well_position'] == 'A:1'
+
+    assert first_sample['udfs']['tumour'] is True
+    assert first_sample['udfs']['capture_kit'] == 'Twist exome v1.3'
+    assert 'tumour_purity' not in first_sample['udfs']
+
+    assert first_sample['udfs']['formalin_fixation_time'] == '1'
+    assert first_sample['udfs']['post_formalin_fixation_time'] == '2'
+
+    assert first_sample['udfs']['quantity'] == '2'
+    assert first_sample['udfs']['comment'] == 'comment'

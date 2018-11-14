@@ -1,5 +1,6 @@
 PROP2UDF = {
     'application': 'Sequencing Analysis',
+    'capture_kit': 'Capture Library version',
     'comment': 'Comment',
     'concentration': 'Concentration (nM)',
     'concentration_weight': 'Sample Conc.',
@@ -24,7 +25,6 @@ PROP2UDF = {
     'source': 'Source',
     'target_reads': 'Reads missing (M)',
     'tumour': 'tumor',
-    'tumour_purity': 'tumour purity',
     'volume': 'Volume (uL)',
     'well_position_rml': 'RML well position',
     'verified_organism': 'Verified organism',

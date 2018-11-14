@@ -21,6 +21,7 @@ class LimsHandler:
                 'index_sequence': sample.get('index_sequence'),
                 'udfs': {
                     'application': sample['application'],
+                    'capture_kit': sample.get('capture_kit'),
                     'comment': sample.get('comment'),
                     'concentration': sample.get('concentration'),
                     'concentration_weight': sample.get('concentration_weight'),
@@ -44,7 +45,6 @@ class LimsHandler:
                     'sex': SEX_MAP.get(sample.get('sex'), 'unknown'),
                     'source': sample.get('source') or 'NA',
                     'tumour': sample.get('tumour') or False,
-                    'tumour_purity': sample.get('tumour_purity'),
                     'volume': sample.get('volume'),
                     'well_position_rml': sample.get('well_position_rml'),
                     'verified_organism': sample.get('verified_organism'),
