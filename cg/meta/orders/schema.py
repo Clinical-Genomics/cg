@@ -11,10 +11,10 @@ class OrderType(Enum):
     EXTERNAL = 'external'
     FASTQ = 'fastq'
     RML = 'rml'
-    SCOUT = 'scout'
+    MIP = 'mip'
     MICROBIAL = 'microbial'
     METAGENOME = 'metagenome'
-    CANCER = 'cancer'
+    BALSAMIC = 'balsamic'
 
 
 class ListValidator(validators.Validator):
@@ -61,7 +61,7 @@ BASE_PROJECT = {
     'comment': validators.Optional(TypeValidator(str, allow_none=True), None),
 }
 
-SCOUT_SAMPLE = {
+MIP_SAMPLE = {
     # Orderform 1508:12
 
     # Order portal specific
@@ -169,7 +169,7 @@ RML_SAMPLE = {
     # 1604:8 Orderform Ready made libraries (RML)
 
     # Order portal specific
-    # todo: add in the orderform
+    # todo: add in the orderform?
     'container': validators.Any(CONTAINER_OPTIONS),
     'container_name': str,
 
@@ -249,7 +249,7 @@ METAGENOME_SAMPLE = {
     'comment': validators.Optional(TypeValidator(str, allow_none=True), None),
 }
 
-CANCER_SAMPLE = {
+BALSAMIC_SAMPLE = {
     # 1508:14 Orderform
 
     # Order portal specific
@@ -289,9 +289,9 @@ ORDER_SCHEMES = {
         **BASE_PROJECT,
         'samples': ListValidator(EXTERNAL_SAMPLE, min_items=1)
     }),
-    OrderType.SCOUT: Scheme({
+    OrderType.MIP: Scheme({
         **BASE_PROJECT,
-        'samples': ListValidator(SCOUT_SAMPLE, min_items=1)
+        'samples': ListValidator(MIP_SAMPLE, min_items=1)
     }),
     OrderType.FASTQ: Scheme({
         **BASE_PROJECT,
@@ -309,8 +309,8 @@ ORDER_SCHEMES = {
         **BASE_PROJECT,
         'samples': ListValidator(METAGENOME_SAMPLE, min_items=1),
     }),
-    OrderType.CANCER: Scheme({
+    OrderType.BALSAMIC: Scheme({
         **BASE_PROJECT,
-        'samples': ListValidator(CANCER_SAMPLE, min_items=1),
+        'samples': ListValidator(BALSAMIC_SAMPLE, min_items=1),
     }),
 }

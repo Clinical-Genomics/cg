@@ -10,11 +10,11 @@ from cg.meta.orders import OrdersAPI, OrderType
 @pytest.mark.parametrize('order_type', [
     OrderType.RML,
     OrderType.FASTQ,
-    OrderType.SCOUT,
+    OrderType.MIP,
     OrderType.EXTERNAL,
     OrderType.MICROBIAL,
     OrderType.METAGENOME,
-    OrderType.CANCER,
+    OrderType.BALSAMIC,
 ])
 def test_submit(base_store, orders_api: OrdersAPI, all_orders_to_submit, monkeypatch, order_type):
     ticket_number = 1234567
@@ -43,9 +43,9 @@ def test_submit(base_store, orders_api: OrdersAPI, all_orders_to_submit, monkeyp
 
 
 @pytest.mark.parametrize('order_type', [
-    OrderType.SCOUT,
+    OrderType.MIP,
     OrderType.EXTERNAL,
-    OrderType.CANCER,
+    OrderType.BALSAMIC,
 ])
 def test_submit_illegal_sample_customer(sample_store, orders_api, all_orders_to_submit, monkeypatch,
                                         order_type):
@@ -81,9 +81,9 @@ def test_submit_illegal_sample_customer(sample_store, orders_api, all_orders_to_
 
 
 @pytest.mark.parametrize('order_type', [
-    OrderType.SCOUT,
+    OrderType.MIP,
     OrderType.EXTERNAL,
-    OrderType.CANCER,
+    OrderType.BALSAMIC,
 ])
 def test_submit_scout_legal_sample_customer(sample_store, orders_api, all_orders_to_submit, monkeypatch,
                                             order_type):

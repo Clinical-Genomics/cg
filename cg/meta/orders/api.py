@@ -145,7 +145,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
         result = self.process_family_samples(data)
         return result
 
-    def submit_scout(self, data: dict) -> dict:
+    def submit_mip(self, data: dict) -> dict:
         """Submit a batch of samples for sequencing and analysis."""
         result = self.process_family_samples(data)
         for family_obj in result['records']:
@@ -156,7 +156,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
         self.update_application(data['ticket'], result['records'])
         return result
 
-    def submit_cancer(self, data: dict) -> dict:
+    def submit_balsamic(self, data: dict) -> dict:
         """Submit a batch of samples for sequencing and balsamic analysis."""
         result = self.process_family_samples(data)
         for family_obj in result['records']:
@@ -265,8 +265,9 @@ class OrdersAPI(LimsHandler, StatusHandler):
 
             if sample.get('internal_id'):
 
-                if project not in (OrderType.SCOUT, OrderType.EXTERNAL, OrderType.CANCER):
-                    raise OrderError(f"Only scout and external orders can have imported samples: "
+                if project not in (OrderType.MIP, OrderType.EXTERNAL, OrderType.BALSAMIC):
+                    raise OrderError(f"Only MIP, Balsamic and external orders can have imported "
+                                     f"samples: "
                                      f"{sample.get('name')}")
 
                 existing_sample = self.status.sample(sample.get('internal_id'))

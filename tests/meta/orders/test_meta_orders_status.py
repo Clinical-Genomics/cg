@@ -61,10 +61,10 @@ def test_microbial_samples_to_status(microbial_order_to_submit):
     assert sample_data['comment'] == 'plate comment'
 
 
-def test_families_to_status(scout_order_to_submit):
+def test_families_to_status(mip_order_to_submit):
     # GIVEN a scout order with a trio family
     # WHEN parsing for status
-    data = StatusHandler.families_to_status(scout_order_to_submit)
+    data = StatusHandler.families_to_status(mip_order_to_submit)
     # THEN it should pick out the family
     assert len(data['families']) == 2
     family = data['families'][0]
@@ -76,7 +76,7 @@ def test_families_to_status(scout_order_to_submit):
     first_sample = family['samples'][0]
     assert first_sample['name'] == 'sample1'
     assert first_sample['application'] == 'WGTPCFC030'
-    assert first_sample['data_analysis'] == 'scout'
+    assert first_sample['data_analysis'] == 'MIP'
     assert first_sample['sex'] == 'female'
     assert first_sample['status'] == 'affected'
     assert first_sample['mother'] == 'sample2'
@@ -315,7 +315,7 @@ def test_store_families(orders_api, base_store, scout_status_data):
     assert new_link.sample.name == 'sample1'
     assert new_link.sample.sex == 'female'
     assert new_link.sample.application_version.application.tag == 'WGTPCFC030'
-    assert new_link.sample.data_analysis == 'scout'
+    assert new_link.sample.data_analysis == 'MIP'
     assert isinstance(new_family.links[1].sample.comment, str)
 
     assert base_store.deliveries().count() == base_store.samples().count()

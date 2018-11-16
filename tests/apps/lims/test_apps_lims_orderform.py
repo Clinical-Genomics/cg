@@ -81,7 +81,7 @@ def test_parsing_scout_orderform(scout_orderform):
     data = orderform.parse_orderform(scout_orderform)
 
     # THEN it should detect the type of project
-    assert data['project_type'] == 'scout'
+    assert data['project_type'] == 'mip'
     assert data['customer'] == 'cust003'
     # ... and it should find and group all samples in families
     assert len(data['items']) == 2
@@ -247,7 +247,7 @@ def test_parsing_cancer_orderform(cancer_orderform):
     data = orderform.parse_orderform(cancer_orderform)
 
     # THEN it should detect the type of project
-    assert data['project_type'] == 'cancer'
+    assert data['project_type'] == 'balsamic'
 
     # ... and it should find and group all samples in case
     assert len(data['items']) == 1
@@ -288,3 +288,43 @@ def test_parsing_cancer_orderform(cancer_orderform):
     # This information is optional
     assert sample['quantity'] == '1'
     assert sample['comment'] == 'comment'
+
+
+def test_parse_mip_only(skeleton_orderform_sample: dict):
+
+    # GIVEN a raw sample with mip only value from orderform 1508:14 for data_analysis
+    raw_sample = skeleton_orderform_sample
+    raw_sample['UDF/Data Analysis'] = 'MIP'
+
+    # WHEN parsing the sample
+    parsed_sample = orderform.parse_sample(raw_sample)
+
+    # THEN data_analysis is mip only
+    assert parsed_sample['analysis'] == 'mip'
+
+
+def test_parse_balsamic_only(skeleton_orderform_sample: dict):
+
+    # GIVEN a raw sample with balsamic only value from orderform 1508:14 for data_analysis
+    raw_sample = skeleton_orderform_sample
+    raw_sample['UDF/Data Analysis'] = 'Balsamic '
+
+    # WHEN parsing the sample
+    parsed_sample = orderform.parse_sample(raw_sample)
+
+    # THEN data_analysis is balsamic only
+    assert parsed_sample['analysis'] == 'balsamic'
+
+
+def test_parse_mip_combined_with_balsamic(skeleton_orderform_sample: dict):
+
+    # GIVEN a raw sample with both mip and balsamic value from orderform 1508:14 for
+    # data_analysis
+    raw_sample = skeleton_orderform_sample
+    raw_sample['UDF/Data Analysis'] = 'MIP + Balsamic'
+
+    # WHEN parsing the sample
+    parsed_sample = orderform.parse_sample(raw_sample)
+
+    # THEN data_analysis is both mip and balsamic
+    assert parsed_sample['analysis'] == 'balsamic+mip'

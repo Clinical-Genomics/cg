@@ -68,7 +68,7 @@ def parse_orderform(excel_path: str) -> dict:
 
     project_type = get_project_type(document_title, parsed_samples)
 
-    if project_type in ('scout', 'external', 'cancer'):
+    if project_type in ('mip', 'external', 'balsamic'):
         parsed_families = group_families(parsed_samples)
         items = []
         customer_ids = set()
@@ -148,7 +148,6 @@ def expand_family(family_id, parsed_family):
     if len(customers) != 1:
         raise OrderFormError("Invalid customer information: {}".format(customers))
     customer = customers.pop()
-
     gene_panels = set()
     for raw_sample in samples:
         print(raw_sample)
@@ -236,10 +235,12 @@ def parse_sample(raw_sample):
     }
 
     data_analysis = raw_sample.get('UDF/Data Analysis').lower()
-    if data_analysis and 'balsamic' in data_analysis:
-        sample['analysis'] = 'cancer'
-    elif data_analysis and 'scout' in data_analysis:
-        sample['analysis'] = 'scout'
+    if data_analysis and 'balsamic' in data_analysis and 'mip' in data_analysis:
+        sample['analysis'] = 'balsamic+mip'
+    elif data_analysis and 'balsamic' in data_analysis:
+        sample['analysis'] = 'balsamic'
+    elif data_analysis and 'scout' in data_analysis or 'mip' in data_analysis:
+        sample['analysis'] = 'mip'
     elif data_analysis and ('fastq' in data_analysis or data_analysis == 'custom'):
         sample['analysis'] = 'fastq'
     else:

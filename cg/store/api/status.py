@@ -74,7 +74,9 @@ class StatusHandler:
                     and_(
                         models.Sample.sequenced_at != None,
                         models.Analysis.completed_at == None,
+                        models.Analysis.completed_at == None,
                         models.Family.action == None,
+                        models.Sample.data_analysis not in ['Balsamic'],
                     )
             ))
             .order_by(models.Family.priority.desc(), models.Family.ordered_at)

@@ -1,12 +1,12 @@
 {
-  "name": "Scout order",
+  "name": "MIP order",
   "customer": "cust003",
   "comment": "",
   "samples": [
     {
       "name": "sample1",
       "application": "WGTPCFC030",
-      "data_analysis": "scout",
+      "data_analysis": "MIP",
       "container": "96 well plate",
       "container_name": "CMMS",
       "well_position": "A:1",
@@ -26,7 +26,7 @@
     {
       "name": "sample2",
       "application": "WGTPCFC030",
-      "data_analysis": "scout",
+      "data_analysis": "MIP",
       "comment": "this is a sample comment",
       "container": "96 well plate",
       "container_name": "CMMS",
@@ -45,7 +45,7 @@
     {
       "name": "sample3",
       "application": "WGTPCFC030",
-      "data_analysis": "scout",
+      "data_analysis": "MIP",
       "container": "96 well plate",
       "container_name": "CMMS",
       "well_position": "C:1",
@@ -63,7 +63,7 @@
     {
       "name": "sample4",
       "application": "WGTPCFC030",
-      "data_analysis": "scout",
+      "data_analysis": "MIP",
       "container": "96 well plate",
       "container_name": "CMMS",
       "well_position": "D:1",

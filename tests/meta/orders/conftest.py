@@ -21,9 +21,9 @@ class MockLims(LimsAPI):
 
 
 @pytest.fixture
-def scout_order_to_submit():
+def mip_order_to_submit():
     """Load an example scout order."""
-    return json.load(open('tests/fixtures/orders/scout.json'))
+    return json.load(open('tests/fixtures/orders/mip.json'))
 
 
 @pytest.fixture
@@ -57,23 +57,23 @@ def microbial_order_to_submit():
 
 
 @pytest.fixture
-def cancer_order_to_submit():
+def balsamic_order_to_submit():
     """Load an example cancer order."""
-    return json.load(open('tests/fixtures/orders/cancer.json'))
+    return json.load(open('tests/fixtures/orders/balsamic.json'))
 
 
 @pytest.fixture
-def all_orders_to_submit(rml_order_to_submit, fastq_order_to_submit, scout_order_to_submit,
+def all_orders_to_submit(rml_order_to_submit, fastq_order_to_submit, mip_order_to_submit,
                          external_order_to_submit, microbial_order_to_submit,
-                         metagenome_order_to_submit, cancer_order_to_submit):
+                         metagenome_order_to_submit, balsamic_order_to_submit):
     return {
         OrderType.RML: rml_order_to_submit,
         OrderType.FASTQ: fastq_order_to_submit,
-        OrderType.SCOUT: scout_order_to_submit,
+        OrderType.MIP: mip_order_to_submit,
         OrderType.EXTERNAL: external_order_to_submit,
         OrderType.MICROBIAL: microbial_order_to_submit,
         OrderType.METAGENOME: metagenome_order_to_submit,
-        OrderType.CANCER: cancer_order_to_submit,
+        OrderType.BALSAMIC: balsamic_order_to_submit,
     }
 
 
@@ -92,9 +92,9 @@ def fastq_status_data(fastq_order_to_submit):
 
 
 @pytest.fixture
-def scout_status_data(scout_order_to_submit):
+def scout_status_data(mip_order_to_submit):
     """Parse scout order example."""
-    data = StatusHandler.families_to_status(scout_order_to_submit)
+    data = StatusHandler.families_to_status(mip_order_to_submit)
     return data
 
 
@@ -120,9 +120,9 @@ def metagenome_status_data(metagenome_order_to_submit):
 
 
 @pytest.fixture
-def cancer_status_data(cancer_order_to_submit):
+def cancer_status_data(balsamic_order_to_submit):
     """Parse cancer order example."""
-    data = StatusHandler.families_to_status(cancer_order_to_submit)
+    data = StatusHandler.families_to_status(balsamic_order_to_submit)
     return data
 
 

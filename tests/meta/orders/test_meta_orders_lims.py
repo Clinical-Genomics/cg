@@ -1,10 +1,10 @@
 from cg.meta.orders.lims import LimsHandler
 
 
-def test_to_lims_scout(scout_order_to_submit):
+def test_to_lims_scout(mip_order_to_submit):
     # GIVEN a scout order for a trio
     # WHEN parsing the order to format for LIMS import
-    samples = LimsHandler.to_lims(customer='cust003', samples=scout_order_to_submit['samples'])
+    samples = LimsHandler.to_lims(customer='cust003', samples=mip_order_to_submit['samples'])
     # THEN it should list all samples
     assert len(samples) == 4
     # ... and determine the container, container name, and well position
@@ -76,11 +76,11 @@ def test_to_lims_microbial(microbial_order_to_submit):
                                                         'before submission)'
 
 
-def test_to_lims_cancer(cancer_order_to_submit):
+def test_to_lims_cancer(balsamic_order_to_submit):
 
     # GIVEN a cancer order for a sample
     # WHEN parsing the order to format for LIMS import
-    samples = LimsHandler.to_lims(customer='cust000', samples=cancer_order_to_submit['samples'])
+    samples = LimsHandler.to_lims(customer='cust000', samples=balsamic_order_to_submit['samples'])
     # THEN it should list all samples
 
     assert len(samples) == 1
