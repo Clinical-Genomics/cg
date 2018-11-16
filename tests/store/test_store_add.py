@@ -80,7 +80,7 @@ def test_add_microbial_sample(base_store: Store):
     assert stored_microbial_sample.organism == organism
 
 
-def test_pools_to_invoice(store: Store):
+def test_add_pool(store: Store):
 
     # GIVEN a valid customer and a valid application_version 
 
