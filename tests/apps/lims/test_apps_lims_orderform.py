@@ -18,7 +18,7 @@ def test_parsing_rml_orderform(rml_orderform):
     assert sample_data['name'] == 'AL-P-00110710-N-03099696-TP20170817-CB20170822'
     assert sample_data['pool'] == 'pool-1'
     assert sample_data['application'] == 'RMLP10R150'
-    # todo: assert data analysis
+    assert sample_data['data_analysis'] == 'fastq'
     assert sample_data['volume'] == '30'
     assert sample_data['concentration'] == '5'
     assert sample_data['index'] == 'TruSeq DNA HT Dual-index (D7-D5)'
@@ -53,6 +53,7 @@ def test_parsing_fastq_orderform(fastq_orderform):
     tumour_sample = data['items'][1]
     assert normal_sample['name'] == 'prov1'
     assert normal_sample['container'] == 'Tube'
+    assert normal_sample['data_analysis'] == 'fastq'
     assert normal_sample['application'] == 'WGSPCFC030'
     assert normal_sample['sex'] == 'male'
     assert normal_sample['family'] == 'family1'
@@ -96,7 +97,7 @@ def test_parsing_scout_orderform(scout_orderform):
     proband_sample = trio_family['samples'][0]
     assert proband_sample['name'] == 'sample1'
     assert proband_sample['container'] == '96 well plate'
-    # todo: assert data analysis
+    assert proband_sample['data_analysis'] == 'MIP'
     assert proband_sample['application'] == 'WGSLIFC030'
     assert proband_sample['sex'] == 'female'
     # family-id on the family
@@ -182,7 +183,7 @@ def test_parsing_metagenome_orderform(metagenome_orderform):
 
     assert sample['name'] == 'Bristol'
     assert sample['container'] == '96 well plate'
-    # todo: assert sample['data_analysis']
+    assert sample['data_analysis'] == 'fastq'
     assert sample['application'] == 'METPCFR020'
     assert sample['customer'] == 'cust000'
     assert sample['require_qcok'] is False
@@ -219,7 +220,7 @@ def test_parsing_microbial_orderform(microbial_orderform):
     assert sample_data.get('internal_id') is None
     assert sample_data['organism'] == 'other'
     assert sample_data['reference_genome'] == 'NC_111'
-    # todo: assert sample_data['data_analysis']
+    assert sample_data['data_analysis'] == 'fastq'
     assert sample_data['application'] == 'MWRNXTR003'
     # customer on order (data)
     assert sample_data['require_qcok'] is True
@@ -262,7 +263,7 @@ def test_parsing_cancer_orderform(cancer_orderform):
 
     assert sample['name'] == 's1'
     assert sample['container'] == '96 well plate'
-    # todo: assert data analysis
+    assert sample['data_analysis'] == 'Balsamic '
     assert sample['application'] == 'WGSPCFC015'
     assert sample['sex'] == 'male'
     assert case['name'] == 'c1'

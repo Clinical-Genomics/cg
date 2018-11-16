@@ -208,6 +208,7 @@ class MicrobialSample(Model, PriorityMixin):
     id = Column(types.Integer, primary_key=True)
     internal_id = Column(types.String(32), nullable=False, unique=True)
     name = Column(types.String(128), nullable=False)
+    data_analysis = Column(types.String(16))
     application_version_id = Column(ForeignKey('application_version.id'), nullable=False)
     microbial_order_id = Column(ForeignKey('microbial_order.id'), nullable=False)
     created_at = Column(types.DateTime, default=dt.datetime.now)
@@ -296,6 +297,7 @@ class Pool(Model):
 
     id = Column(types.Integer, primary_key=True)
     name = Column(types.String(32), nullable=False)
+    data_analysis = Column(types.String(16))
     order = Column(types.String(64), nullable=False)
     ticket_number = Column(types.Integer)
     reads = Column(types.BigInteger, default=0)
@@ -323,6 +325,7 @@ class Sample(Model, PriorityMixin):
     internal_id = Column(types.String(32), nullable=False, unique=True)
     priority = Column(types.Integer, default=1, nullable=False)
     name = Column(types.String(128), nullable=False)
+    data_analysis = Column(types.String(16))
     order = Column(types.String(64))
     ticket_number = Column(types.Integer)
     sex = Column(types.Enum('male', 'female', 'unknown'), nullable=False)

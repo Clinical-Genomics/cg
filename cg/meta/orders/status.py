@@ -36,6 +36,7 @@ class StatusHandler:
         for sample in data['samples']:
             name = sample['pool']
             application = sample['application']
+            data_analysis = sample['data_analysis']
             capture_kit = sample.get('capture_kit')
 
             if name not in pools:
@@ -80,6 +81,7 @@ class StatusHandler:
             status_data['pools'].append({
                 'name': pool_name,
                 'application': application,
+                'data_analysis': data_analysis,
                 'capture_kit': capture_kit,
             })
         return status_data
@@ -94,6 +96,7 @@ class StatusHandler:
                 'internal_id': sample.get('internal_id'),
                 'name': sample['name'],
                 'application': sample['application'],
+                'data_analysis': sample['data_analysis'],
                 'priority': sample['priority'],
                 'comment': sample.get('comment'),
                 'tumour': sample.get('tumour') or False,
@@ -118,6 +121,7 @@ class StatusHandler:
                 'comment': sample_data.get('comment'),
                 'reference_genome': sample_data['reference_genome'],
                 'application': sample_data['application'],
+                'data_analysis': sample_data['data_analysis'],
             } for sample_data in data['samples']]
         }
         return status_data
@@ -146,6 +150,7 @@ class StatusHandler:
                     'internal_id': sample.get('internal_id'),
                     'name': sample['name'],
                     'application': sample['application'],
+                    'data_analysis': sample.get('data_analysis'),
                     'sex': sample['sex'],
                     'status': sample.get('status','unknown'),
                     'mother': sample.get('mother'),
@@ -197,7 +202,8 @@ class StatusHandler:
                         ticket=ticket,
                         priority=family['priority'],
                         comment=sample['comment'],
-                        capture_kit=sample['capture_kit']
+                        capture_kit=sample['capture_kit'],
+                        data_analysis=sample['data_analysis'],
                     )
                     new_sample.customer = customer_obj
                     with self.status.session.no_autoflush:
@@ -253,6 +259,7 @@ class StatusHandler:
                     priority=sample['priority'],
                     comment=sample['comment'],
                     tumour=sample['tumour'],
+                    data_analysis=sample['data_analysis'],
                 )
                 new_sample.customer = customer_obj
                 application_tag = sample['application']
@@ -286,6 +293,7 @@ class StatusHandler:
                     priority=sample['priority'],
                     comment=sample['comment'],
                     tumour=sample['tumour'],
+                    data_analysis=sample['data_analysis'],
                 )
                 new_sample.customer = customer_obj
 
@@ -354,6 +362,7 @@ class StatusHandler:
                     organism=organism,
                     application_version=application_version,
                     priority=sample_data['priority'],
+                    data_analysis=sample_data['data_analysis'],
                 )
                 new_order.microbial_samples.append(new_sample)
 
@@ -379,6 +388,7 @@ class StatusHandler:
                 ordered=ordered,
                 ticket=ticket,
                 application_version=application_version,
+                data_analysis=pool['data_analysis'],
                 capture_kit=pool['capture_kit'],
             )
             new_delivery = self.status.add_delivery(destination='caesar', pool=new_pool)

@@ -16,6 +16,7 @@ def test_pools_to_status(rml_order_to_submit):
     assert len(data['pools']) == 1
     assert data['pools'][0]['name'] == 'pool-1'
     assert data['pools'][0]['application'] == 'RMLS05R150'
+    assert data['pools'][0]['data_analysis'] == 'fastq'
     assert data['pools'][0]['capture_kit'] == 'Agilent Sureselect CRE'
 
 
@@ -28,6 +29,7 @@ def test_samples_to_status(fastq_order_to_submit):
     first_sample = data['samples'][0]
     assert first_sample['name'] == 'prov1'
     assert first_sample['application'] == 'WGSPCFC060'
+    assert first_sample['data_analysis'] == 'fastq'
     assert first_sample['priority'] == 'priority'
     assert first_sample['tumour'] is False
 
@@ -55,6 +57,7 @@ def test_microbial_samples_to_status(microbial_order_to_submit):
     assert sample_data['organism_id'] == 'M.upium'
     assert sample_data['reference_genome'] == 'NC_111'
     assert sample_data['application'] == 'MWRNXTR003'
+    assert sample_data['data_analysis'] == 'fastq'
     assert sample_data['comment'] == 'plate comment'
 
 
@@ -73,6 +76,7 @@ def test_families_to_status(scout_order_to_submit):
     first_sample = family['samples'][0]
     assert first_sample['name'] == 'sample1'
     assert first_sample['application'] == 'WGTPCFC030'
+    assert first_sample['data_analysis'] == 'scout'
     assert first_sample['sex'] == 'female'
     assert first_sample['status'] == 'affected'
     assert first_sample['mother'] == 'sample2'
@@ -101,6 +105,7 @@ def test_store_rml(orders_api, base_store, rml_status_data):
     assert new_pool == new_pools[0]
     assert new_pool.name == 'pool-1'
     assert new_pool.application_version.application.tag == 'RMLS05R150'
+    assert new_pool.data_analysis == 'fastq'
     assert new_pool.capture_kit == 'Agilent Sureselect CRE'
     # ... and add a delivery
     assert len(new_pool.deliveries) == 1
@@ -118,7 +123,7 @@ def test_store_rml_bad_apptag(orders_api, base_store, rml_status_data):
     # THEN it should raise OrderError
     with pytest.raises(OrderError):
         # WHEN storing the order
-        new_pools = orders_api.store_pools(
+        orders_api.store_pools(
             customer=rml_status_data['customer'],
             order=rml_status_data['order'],
             ordered=dt.datetime.now(),
@@ -154,6 +159,24 @@ def test_store_samples(orders_api, base_store, fastq_status_data):
         assert len(sample.deliveries) == 1
 
 
+def test_store_samples_data_analysis_stored(orders_api, base_store, fastq_status_data):
+    # GIVEN a basic store with no samples and a fastq order
+    assert base_store.samples().count() == 0
+    assert base_store.families().count() == 0
+
+    # WHEN storing the order
+    new_samples = orders_api.store_fastq_samples(
+        customer=fastq_status_data['customer'],
+        order=fastq_status_data['order'],
+        ordered=dt.datetime.now(),
+        ticket=1234348,
+        samples=fastq_status_data['samples'],
+    )
+
+    # THEN the data_analysis should be stored
+    assert new_samples[0].data_analysis == 'fastq'
+
+
 def test_store_samples_bad_apptag(orders_api, base_store, fastq_status_data):
     # GIVEN a basic store with no samples and a fastq order
     assert base_store.samples().count() == 0
@@ -165,7 +188,7 @@ def test_store_samples_bad_apptag(orders_api, base_store, fastq_status_data):
     # THEN it should raise OrderError
     with pytest.raises(OrderError):
         # WHEN storing the order
-        new_samples = orders_api.store_fastq_samples(
+        orders_api.store_fastq_samples(
             customer=fastq_status_data['customer'],
             order=fastq_status_data['order'],
             ordered=dt.datetime.now(),
@@ -199,6 +222,27 @@ def test_store_microbial_samples(orders_api, base_store,  microbial_status_data)
     assert base_store.organisms().count() == 3
 
 
+def test_store_microbial_samples_data_analysis_stored(orders_api, base_store,  microbial_status_data):
+
+    # GIVEN a basic store with no samples and a microbial order and one Organism
+    assert base_store.microbial_samples().count() == 0
+    assert base_store.microbial_orders().count() == 0
+    assert base_store.organisms().count() == 1
+
+    # WHEN storing the order
+    new_order = orders_api.store_microbial_order(
+        customer=microbial_status_data['customer'],
+        order=microbial_status_data['order'],
+        ordered=dt.datetime.now(),
+        ticket=1234348,
+        lims_project='dummy_lims_project',
+        samples=microbial_status_data['samples'],
+    )
+
+    # THEN it should store the samples and the used previously unknown organisms
+    assert new_order.microbial_samples[0].data_analysis == 'fastq'
+
+
 def test_store_microbial_samples_bad_apptag(orders_api, base_store,  microbial_status_data):
 
     # GIVEN a basic store with no samples and a microbial order
@@ -211,7 +255,7 @@ def test_store_microbial_samples_bad_apptag(orders_api, base_store,  microbial_s
     # THEN it should raise OrderError
     with pytest.raises(OrderError):
         # WHEN storing the order
-        new_order = orders_api.store_microbial_order(
+        orders_api.store_microbial_order(
             customer=microbial_status_data['customer'],
             order=microbial_status_data['order'],
             ordered=dt.datetime.now(),
@@ -271,6 +315,7 @@ def test_store_families(orders_api, base_store, scout_status_data):
     assert new_link.sample.name == 'sample1'
     assert new_link.sample.sex == 'female'
     assert new_link.sample.application_version.application.tag == 'WGTPCFC030'
+    assert new_link.sample.data_analysis == 'scout'
     assert isinstance(new_family.links[1].sample.comment, str)
 
     assert base_store.deliveries().count() == base_store.samples().count()
@@ -290,7 +335,7 @@ def test_store_families_bad_apptag(orders_api, base_store, scout_status_data):
     # THEN it should raise OrderError
     with pytest.raises(OrderError):
         # WHEN storing the order
-        new_families = orders_api.store_families(
+        orders_api.store_families(
             customer=scout_status_data['customer'],
             order=scout_status_data['order'],
             ordered=dt.datetime.now(),
@@ -320,10 +365,7 @@ def test_store_external(orders_api, base_store, external_status_data):
     new_family = new_families[0]
     assert new_family == family_obj
     assert new_family.name == 'fam2'
-    assert set(new_family.panels) == set([
-            "CTD",
-            "CILM"
-        ])
+    assert set(new_family.panels) == {"CTD", "CILM"}
     assert new_family.priority_human == 'priority'
 
     assert len(new_family.links) == 2
@@ -353,7 +395,7 @@ def test_store_external_bad_apptag(orders_api, base_store, external_status_data)
     # THEN it should raise OrderError
     with pytest.raises(OrderError):
         # WHEN storing the order
-        new_families = orders_api.store_families(
+        orders_api.store_families(
             customer=external_status_data['customer'],
             order=external_status_data['order'],
             ordered=dt.datetime.now(),
@@ -379,6 +421,24 @@ def test_store_metagenome_samples(orders_api, base_store, metagenome_status_data
     # THEN it should store the samples
     assert len(new_samples) == 2
     assert base_store.samples().count() == 2
+
+
+def test_store_metagenome_samples(orders_api, base_store, metagenome_status_data):
+
+    # GIVEN a basic store with no samples and a metagenome order
+    assert base_store.samples().count() == 0
+
+    # WHEN storing the order
+    new_samples = orders_api.store_samples(
+        customer=metagenome_status_data['customer'],
+        order=metagenome_status_data['order'],
+        ordered=dt.datetime.now(),
+        ticket=1234348,
+        samples=metagenome_status_data['samples'],
+    )
+
+    # THEN it should store the samples
+    assert base_store.samples().first().data_analysis == 'fastq'
 
 
 def test_store_metagenome_samples_bad_apptag(orders_api, base_store, metagenome_status_data):
@@ -428,6 +488,7 @@ def test_store_cancer_samples(orders_api, base_store, cancer_status_data):
     assert new_link.sample.name == 's1'
     assert new_link.sample.sex == 'male'
     assert new_link.sample.application_version.application.tag == 'WGTPCFC030'
+    assert new_link.sample.data_analysis == 'Balsamic'
     assert new_link.sample.comment == 'comment'
 
     assert base_store.deliveries().count() == base_store.samples().count()
