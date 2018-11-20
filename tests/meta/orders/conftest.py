@@ -63,9 +63,16 @@ def balsamic_order_to_submit():
 
 
 @pytest.fixture
+def mip_balsamic_order_to_submit():
+    """Load an example scout order."""
+    return json.load(open('tests/fixtures/orders/mip_balsamic.json'))
+
+
+@pytest.fixture
 def all_orders_to_submit(rml_order_to_submit, fastq_order_to_submit, mip_order_to_submit,
                          external_order_to_submit, microbial_order_to_submit,
-                         metagenome_order_to_submit, balsamic_order_to_submit):
+                         metagenome_order_to_submit, balsamic_order_to_submit,
+                         mip_balsamic_order_to_submit):
     return {
         OrderType.RML: rml_order_to_submit,
         OrderType.FASTQ: fastq_order_to_submit,
@@ -74,6 +81,7 @@ def all_orders_to_submit(rml_order_to_submit, fastq_order_to_submit, mip_order_t
         OrderType.MICROBIAL: microbial_order_to_submit,
         OrderType.METAGENOME: metagenome_order_to_submit,
         OrderType.BALSAMIC: balsamic_order_to_submit,
+        OrderType.MIP_BALSAMIC: mip_balsamic_order_to_submit,
     }
 
 
@@ -92,7 +100,7 @@ def fastq_status_data(fastq_order_to_submit):
 
 
 @pytest.fixture
-def scout_status_data(mip_order_to_submit):
+def mip_status_data(mip_order_to_submit):
     """Parse scout order example."""
     data = StatusHandler.families_to_status(mip_order_to_submit)
     return data
@@ -120,7 +128,7 @@ def metagenome_status_data(metagenome_order_to_submit):
 
 
 @pytest.fixture
-def cancer_status_data(balsamic_order_to_submit):
+def balsamic_status_data(balsamic_order_to_submit):
     """Parse cancer order example."""
     data = StatusHandler.families_to_status(balsamic_order_to_submit)
     return data

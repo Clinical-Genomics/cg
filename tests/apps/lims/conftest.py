@@ -12,7 +12,7 @@ def fastq_orderform():
 
 
 @pytest.fixture
-def scout_orderform():
+def mip_orderform():
     return 'tests/fixtures/orderforms/1508.14.mip.xlsx'
 
 
@@ -32,8 +32,13 @@ def metagenome_orderform():
 
 
 @pytest.fixture
-def cancer_orderform():
+def balsamic_orderform():
     return 'tests/fixtures/orderforms/1508.14.balsamic.xlsx'
+
+
+@pytest.fixture
+def mip_balsamic_orderform():
+    return 'tests/fixtures/orderforms/1508.14.mip_balsamic.xlsx'
 
 
 class MockLims(LimsAPI):
@@ -74,11 +79,6 @@ def lims_api():
 
     _lims_api = MockLims()
     return _lims_api
-
-
-@pytest.fixture
-def microbial_orderform():
-    return 'tests/fixtures/orderforms/1603.6.microbial.xlsx'
 
 
 @pytest.fixture

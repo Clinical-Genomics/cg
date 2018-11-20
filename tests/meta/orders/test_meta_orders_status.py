@@ -286,18 +286,18 @@ def test_store_microbial_sample_priority(orders_api, base_store, microbial_statu
     assert microbial_sample.priority_human == 'research'
 
 
-def test_store_families(orders_api, base_store, scout_status_data):
+def test_store_mip(orders_api, base_store, mip_status_data):
     # GIVEN a basic store with no samples or nothing in it + scout order
     assert base_store.samples().first() is None
     assert base_store.families().first() is None
 
     # WHEN storing the order
     new_families = orders_api.store_families(
-        customer=scout_status_data['customer'],
-        order=scout_status_data['order'],
+        customer=mip_status_data['customer'],
+        order=mip_status_data['order'],
         ordered=dt.datetime.now(),
         ticket=1234567,
-        families=scout_status_data['families'],
+        families=mip_status_data['families'],
     )
 
     # THEN it should create and link samples and the family
@@ -323,12 +323,12 @@ def test_store_families(orders_api, base_store, scout_status_data):
         assert len(link.sample.deliveries) == 1
 
 
-def test_store_families_bad_apptag(orders_api, base_store, scout_status_data):
+def test_store_families_bad_apptag(orders_api, base_store, mip_status_data):
     # GIVEN a basic store with no samples or nothing in it + scout order
     assert base_store.samples().first() is None
     assert base_store.families().first() is None
 
-    for family in scout_status_data['families']:
+    for family in mip_status_data['families']:
         for sample in family['samples']:
             sample['application'] = 'nonexistingtag'
 
@@ -336,11 +336,11 @@ def test_store_families_bad_apptag(orders_api, base_store, scout_status_data):
     with pytest.raises(OrderError):
         # WHEN storing the order
         orders_api.store_families(
-            customer=scout_status_data['customer'],
-            order=scout_status_data['order'],
+            customer=mip_status_data['customer'],
+            order=mip_status_data['order'],
             ordered=dt.datetime.now(),
             ticket=1234567,
-            families=scout_status_data['families'],
+            families=mip_status_data['families'],
         )
 
 
@@ -461,7 +461,7 @@ def test_store_metagenome_samples_bad_apptag(orders_api, base_store, metagenome_
         )
 
 
-def test_store_cancer_samples(orders_api, base_store, cancer_status_data):
+def test_store_cancer_samples(orders_api, base_store, balsamic_status_data):
 
     # GIVEN a basic store with no samples and a cancer order
     assert base_store.samples().first() is None
@@ -469,11 +469,11 @@ def test_store_cancer_samples(orders_api, base_store, cancer_status_data):
 
     # WHEN storing the order
     new_families = orders_api.store_families(
-        customer=cancer_status_data['customer'],
-        order=cancer_status_data['order'],
+        customer=balsamic_status_data['customer'],
+        order=balsamic_status_data['order'],
         ordered=dt.datetime.now(),
         ticket=1234567,
-        families=cancer_status_data['families'],
+        families=balsamic_status_data['families'],
     )
 
     # THEN it should create and link samples and the family

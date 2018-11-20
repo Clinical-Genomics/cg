@@ -74,11 +74,11 @@ def test_parsing_fastq_orderform(fastq_orderform):
     assert tumour_sample['source'] == 'cell line'
 
 
-def test_parsing_scout_orderform(scout_orderform):
+def test_parsing_mip_orderform(mip_orderform):
 
     # GIVEN an order form for a Scout order with 4 samples, 1 trio, in a plate
     # WHEN parsing the order form
-    data = orderform.parse_orderform(scout_orderform)
+    data = orderform.parse_orderform(mip_orderform)
 
     # THEN it should detect the type of project
     assert data['project_type'] == 'mip'
@@ -240,11 +240,11 @@ def test_parsing_microbial_orderform(microbial_orderform):
     assert sample_data['comment'] == 'plate comment'
 
 
-def test_parsing_cancer_orderform(cancer_orderform):
+def test_parsing_cancer_orderform(balsamic_orderform):
 
     # GIVEN an order form for a cancer order with 11 samples,
     # WHEN parsing the order form
-    data = orderform.parse_orderform(cancer_orderform)
+    data = orderform.parse_orderform(balsamic_orderform)
 
     # THEN it should detect the type of project
     assert data['project_type'] == 'balsamic'
@@ -290,6 +290,60 @@ def test_parsing_cancer_orderform(cancer_orderform):
     assert sample['comment'] == 'comment'
 
 
+def test_parsing_mip_balsamic_orderform(mip_balsamic_orderform):
+
+    # GIVEN an order form for a mip balsamic order with 4 samples, 1 trio, in a plate
+    # WHEN parsing the order form
+    data = orderform.parse_orderform(mip_balsamic_orderform)
+
+    # THEN it should detect the type of project
+    assert data['project_type'] == 'mip_balsamic'
+    assert data['customer'] == 'cust003'
+    # ... and it should find and group all samples in families
+    assert len(data['items']) == 2
+    # ... and collect relevant data about the families
+    trio_family = data['items'][0]
+    assert len(trio_family['samples']) == 3
+    assert trio_family['name'] == 'family1'
+    assert trio_family['priority'] == 'standard'
+    assert trio_family['panels'] == ['IEM']
+    assert trio_family['require_qcok'] is True
+    # ... and collect relevant info about the samples
+
+    proband_sample = trio_family['samples'][0]
+    assert proband_sample['name'] == 'sample1'
+    assert proband_sample['container'] == '96 well plate'
+    assert proband_sample['data_analysis'] == 'MIP + Balsamic'
+    assert proband_sample['application'] == 'WGSLIFC030'
+    assert proband_sample['sex'] == 'female'
+    # family-id on the family
+    # customer on the order (data)
+    # require-qc-ok on the family
+    assert proband_sample['source'] == 'tissue (fresh frozen)'
+
+    assert proband_sample['container_name'] == 'CMMS'
+    assert proband_sample['well_position'] == 'A:1'
+
+    # panels on the family
+    assert proband_sample['status'] == 'affected'
+
+    assert proband_sample['mother'] == 'sample2'
+    assert proband_sample['father'] == 'sample3'
+
+    # This information is required for Balsamic analysis (cancer)
+    assert proband_sample['tumour'] is True
+    assert proband_sample['capture_kit'] == 'Twist exome v1.3'
+    assert proband_sample['tumour_purity'] == '20.0'
+
+    assert proband_sample['formalin_fixation_time'] == '12.0'
+    assert proband_sample['post_formalin_fixation_time'] == '2.0'
+
+    mother_sample = trio_family['samples'][1]
+    assert mother_sample.get('mother') is None
+    assert mother_sample['quantity'] == '220'
+    assert mother_sample['comment'] == 'this is a sample comment'
+
+
 def test_parse_mip_only(skeleton_orderform_sample: dict):
 
     # GIVEN a raw sample with mip only value from orderform 1508:14 for data_analysis
@@ -327,4 +381,4 @@ def test_parse_mip_combined_with_balsamic(skeleton_orderform_sample: dict):
     parsed_sample = orderform.parse_sample(raw_sample)
 
     # THEN data_analysis is both mip and balsamic
-    assert parsed_sample['analysis'] == 'balsamic+mip'
+    assert parsed_sample['analysis'] == 'mip_balsamic'

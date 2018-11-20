@@ -15,6 +15,7 @@ from cg.meta.orders import OrdersAPI, OrderType
     OrderType.MICROBIAL,
     OrderType.METAGENOME,
     OrderType.BALSAMIC,
+    OrderType.MIP_BALSAMIC,
 ])
 def test_submit(base_store, orders_api: OrdersAPI, all_orders_to_submit, monkeypatch, order_type):
     ticket_number = 1234567
@@ -46,6 +47,7 @@ def test_submit(base_store, orders_api: OrdersAPI, all_orders_to_submit, monkeyp
     OrderType.MIP,
     OrderType.EXTERNAL,
     OrderType.BALSAMIC,
+    OrderType.MIP_BALSAMIC,
 ])
 def test_submit_illegal_sample_customer(sample_store, orders_api, all_orders_to_submit, monkeypatch,
                                         order_type):
@@ -84,6 +86,7 @@ def test_submit_illegal_sample_customer(sample_store, orders_api, all_orders_to_
     OrderType.MIP,
     OrderType.EXTERNAL,
     OrderType.BALSAMIC,
+    OrderType.MIP_BALSAMIC,
 ])
 def test_submit_scout_legal_sample_customer(sample_store, orders_api, all_orders_to_submit, monkeypatch,
                                             order_type):

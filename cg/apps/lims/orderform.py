@@ -68,7 +68,7 @@ def parse_orderform(excel_path: str) -> dict:
 
     project_type = get_project_type(document_title, parsed_samples)
 
-    if project_type in ('mip', 'external', 'balsamic'):
+    if project_type in ('mip', 'external', 'balsamic', 'mip_balsamic'):
         parsed_families = group_families(parsed_samples)
         items = []
         customer_ids = set()
@@ -235,11 +235,12 @@ def parse_sample(raw_sample):
     }
 
     data_analysis = raw_sample.get('UDF/Data Analysis').lower()
-    if data_analysis and 'balsamic' in data_analysis and 'mip' in data_analysis:
-        sample['analysis'] = 'balsamic+mip'
+
+    if 'mip' in data_analysis and data_analysis and 'balsamic' in data_analysis:
+        sample['analysis'] = 'mip_balsamic'
     elif data_analysis and 'balsamic' in data_analysis:
         sample['analysis'] = 'balsamic'
-    elif data_analysis and 'scout' in data_analysis or 'mip' in data_analysis:
+    elif data_analysis and 'mip' in data_analysis or 'scout' in data_analysis:
         sample['analysis'] = 'mip'
     elif data_analysis and ('fastq' in data_analysis or data_analysis == 'custom'):
         sample['analysis'] = 'fastq'

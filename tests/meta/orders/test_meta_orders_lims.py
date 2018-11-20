@@ -1,7 +1,7 @@
 from cg.meta.orders.lims import LimsHandler
 
 
-def test_to_lims_scout(mip_order_to_submit):
+def test_to_lims_mip(mip_order_to_submit):
     # GIVEN a scout order for a trio
     # WHEN parsing the order to format for LIMS import
     samples = LimsHandler.to_lims(customer='cust003', samples=mip_order_to_submit['samples'])
@@ -114,3 +114,36 @@ def test_to_lims_cancer(balsamic_order_to_submit):
 
     assert first_sample['udfs']['quantity'] == '2'
     assert first_sample['udfs']['comment'] == 'comment'
+
+
+def test_to_lims_mip_balsamic(mip_balsamic_order_to_submit):
+    # GIVEN a scout order for a trio
+
+    # WHEN parsing the order to format for LIMS import
+    samples = LimsHandler.to_lims(customer='cust003', samples=mip_balsamic_order_to_submit['samples'])
+
+    # THEN it should list all samples
+    assert len(samples) == 4
+    # ... and determine the container, container name, and well position
+    assert set(sample['container'] for sample in samples) == set(['96 well plate'])
+    container_names = set(sample['container_name'] for sample in samples if
+                          sample['container_name'])
+    assert container_names == set(['CMMS'])
+    assert samples[0]['well_position'] == 'A:1'
+    # ... and pick out relevant UDFs
+    first_sample = samples[0]
+    assert first_sample['udfs']['family_name'] == 'family1'
+    assert first_sample['udfs']['priority'] == 'standard'
+    assert first_sample['udfs']['application'] == 'WGTPCFC030'
+    assert first_sample['udfs']['source'] == 'tissue (fresh frozen)'
+    assert first_sample['udfs']['quantity'] == '220'
+    assert first_sample['udfs']['require_qcok'] is True
+    assert first_sample['udfs']['customer'] == 'cust003'
+    assert isinstance(samples[1]['udfs']['comment'], str)
+
+    assert first_sample['udfs']['tumour'] is True
+    assert first_sample['udfs']['capture_kit'] == 'Twist exome v1.3'
+    assert 'tumour_purity' not in first_sample['udfs']
+
+    assert first_sample['udfs']['formalin_fixation_time'] == '1'
+    assert first_sample['udfs']['post_formalin_fixation_time'] == '2'

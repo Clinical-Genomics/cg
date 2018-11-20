@@ -15,6 +15,7 @@ class OrderType(Enum):
     MICROBIAL = 'microbial'
     METAGENOME = 'metagenome'
     BALSAMIC = 'balsamic'
+    MIP_BALSAMIC = 'mip_balsamic'
 
 
 class ListValidator(validators.Validator):
@@ -98,11 +99,52 @@ MIP_SAMPLE = {
     'comment': validators.Optional(TypeValidator(str, allow_none=True), None),
 }
 
+BALSAMIC_SAMPLE = {
+    # 1508:14 Orderform
+
+    # Order portal specific
+    'internal_id': validators.Optional(TypeValidator(str, allow_none=True), None),
+
+    # This information is required
+    'name': validators.RegexValidator(NAME_PATTERN),
+    'container': validators.Any(CONTAINER_OPTIONS),
+    'data_analysis': str,
+    'application': str,
+    'sex': validators.Any(SEX_OPTIONS),
+    'family_name': validators.RegexValidator(NAME_PATTERN),
+    'require_qcok': bool,
+    'source': str,
+    'priority': validators.Any(PRIORITY_OPTIONS),
+
+    # Required if Plate
+    'container_name': validators.Optional(str, None),
+    'well_position': validators.Optional(TypeValidator(str, allow_none=True), None),
+
+    # This information is required for Balsamic analysis (cancer)
+    'tumour': validators.Optional(bool, False),
+    'capture_kit': validators.Any(CAPTUREKIT_CANCER_OPTIONS),
+    'tumour_purity': validators.Optional(str, None),
+
+    # This information is optional for FFPE-samples
+    'formalin_fixation_time': validators.Optional(str, None),
+    'post_formalin_fixation_time': validators.Optional(str, None),
+
+    # This information is optional
+    'quantity': validators.Optional(str, None),
+    'comment': validators.Optional(TypeValidator(str, allow_none=True), None),
+}
+
+MIP_BALSAMIC_SAMPLE = {
+    **BALSAMIC_SAMPLE,
+    **MIP_SAMPLE,
+}
+
 EXTERNAL_SAMPLE = {
     # Orderform 1541:6
 
     # Order portal specific
     'internal_id': validators.Optional(TypeValidator(str, allow_none=True), None),
+    'data_analysis': str,
 
     # required
     'name': validators.RegexValidator(NAME_PATTERN),
@@ -249,41 +291,6 @@ METAGENOME_SAMPLE = {
     'comment': validators.Optional(TypeValidator(str, allow_none=True), None),
 }
 
-BALSAMIC_SAMPLE = {
-    # 1508:14 Orderform
-
-    # Order portal specific
-    'internal_id': validators.Optional(TypeValidator(str, allow_none=True), None),
-
-    # This information is required
-    'name': validators.RegexValidator(NAME_PATTERN),
-    'container': validators.Any(CONTAINER_OPTIONS),
-    'data_analysis': str,
-    'application': str,
-    'sex': validators.Any(SEX_OPTIONS),
-    'family_name': validators.RegexValidator(NAME_PATTERN),
-    'require_qcok': bool,
-    'source': str,
-    'priority': validators.Any(PRIORITY_OPTIONS),
-
-    # Required if Plate
-    'container_name': validators.Optional(str, None),
-    'well_position': validators.Optional(TypeValidator(str, allow_none=True), None),
-
-    # This information is required for Balsamic analysis (cancer)
-    'tumour': validators.Optional(bool, False),
-    'capture_kit': validators.Any(CAPTUREKIT_CANCER_OPTIONS),
-    'tumour_purity': validators.Optional(str, None),
-
-    # This information is optional for FFPE-samples
-    'formalin_fixation_time': validators.Optional(str, None),
-    'post_formalin_fixation_time': validators.Optional(str, None),
-
-    # This information is optional
-    'quantity': validators.Optional(str, None),
-    'comment': validators.Optional(TypeValidator(str, allow_none=True), None),
-}
-
 ORDER_SCHEMES = {
     OrderType.EXTERNAL: Scheme({
         **BASE_PROJECT,
@@ -292,6 +299,14 @@ ORDER_SCHEMES = {
     OrderType.MIP: Scheme({
         **BASE_PROJECT,
         'samples': ListValidator(MIP_SAMPLE, min_items=1)
+    }),
+    OrderType.BALSAMIC: Scheme({
+        **BASE_PROJECT,
+        'samples': ListValidator(BALSAMIC_SAMPLE, min_items=1),
+    }),
+    OrderType.MIP_BALSAMIC: Scheme({
+        **BASE_PROJECT,
+        'samples': ListValidator(MIP_BALSAMIC_SAMPLE, min_items=1),
     }),
     OrderType.FASTQ: Scheme({
         **BASE_PROJECT,
@@ -308,9 +323,5 @@ ORDER_SCHEMES = {
     OrderType.METAGENOME: Scheme({
         **BASE_PROJECT,
         'samples': ListValidator(METAGENOME_SAMPLE, min_items=1),
-    }),
-    OrderType.BALSAMIC: Scheme({
-        **BASE_PROJECT,
-        'samples': ListValidator(BALSAMIC_SAMPLE, min_items=1),
     }),
 }
