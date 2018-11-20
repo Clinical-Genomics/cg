@@ -77,6 +77,7 @@ MIP_SAMPLE = {
     'family_name': validators.RegexValidator(NAME_PATTERN),
     'require_qcok': bool,
     'source': str,
+    'tumour': bool,
     'priority': validators.Any(PRIORITY_OPTIONS),
 
     # required if plate
@@ -91,8 +92,6 @@ MIP_SAMPLE = {
     'mother': validators.Optional(validators.RegexValidator(NAME_PATTERN), None),
     'father': validators.Optional(validators.RegexValidator(NAME_PATTERN), None),
 
-    # Required if cancer
-    'tumour': validators.Optional(bool, False),
 
     # Not Required
     'quantity': validators.Optional(str, None),
@@ -113,6 +112,7 @@ BALSAMIC_SAMPLE = {
     'sex': validators.Any(SEX_OPTIONS),
     'family_name': validators.RegexValidator(NAME_PATTERN),
     'require_qcok': bool,
+    'tumour': bool,
     'source': str,
     'priority': validators.Any(PRIORITY_OPTIONS),
 
@@ -121,7 +121,6 @@ BALSAMIC_SAMPLE = {
     'well_position': validators.Optional(TypeValidator(str, allow_none=True), None),
 
     # This information is required for Balsamic analysis (cancer)
-    'tumour': validators.Optional(bool, False),
     'capture_kit': validators.Any(CAPTUREKIT_CANCER_OPTIONS),
     'tumour_purity': validators.Optional(str, None),
 
@@ -185,6 +184,7 @@ FASTQ_SAMPLE = {
     # 'family_name': validators.RegexValidator(NAME_PATTERN),
     'require_qcok': bool,
     'source': str,
+    'tumour': bool,
     'priority': validators.Any(PRIORITY_OPTIONS),
 
     # required if plate
@@ -198,9 +198,6 @@ FASTQ_SAMPLE = {
     # Required if samples are part of trio/family
     'mother': validators.Optional(validators.RegexValidator(NAME_PATTERN), None),
     'father': validators.Optional(validators.RegexValidator(NAME_PATTERN), None),
-
-    # Required if cancer
-    'tumour': validators.Optional(bool, False),
 
     # Not Required
     'quantity': validators.Optional(str, None),

@@ -104,6 +104,7 @@ def test_parsing_mip_orderform(mip_orderform):
     # customer on the order (data)
     # require-qc-ok on the family
     assert proband_sample['source'] == 'tissue (fresh frozen)'
+    assert proband_sample['tumour'] is True
 
     assert proband_sample['container_name'] == 'CMMS'
     assert proband_sample['well_position'] == 'A:1'
