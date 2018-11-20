@@ -23,6 +23,7 @@ PROP2UDF = {
     'rml_plate_name': 'RML plate name',
     'sex': 'Gender',
     'source': 'Source',
+    'tissue_block_size': 'UDF/Tissue Block Size',
     'target_reads': 'Reads missing (M)',
     'tumour': 'tumor',
     'volume': 'Volume (uL)',

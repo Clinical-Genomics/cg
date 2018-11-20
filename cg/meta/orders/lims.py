@@ -44,6 +44,7 @@ class LimsHandler:
                     'rml_plate_name': sample.get('rml_plate_name'),
                     'sex': SEX_MAP.get(sample.get('sex'), 'unknown'),
                     'source': sample.get('source') or 'NA',
+                    'tissue_block_size': sample.get('tissue_block_size'),
                     'tumour': sample.get('tumour') or False,
                     'volume': sample.get('volume'),
                     'well_position_rml': sample.get('well_position_rml'),

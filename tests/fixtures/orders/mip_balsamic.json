@@ -26,7 +26,8 @@
       "tumour_purity": "75",
       "capture_kit": "Twist exome v1.3",
       "formalin_fixation_time": "1",
-      "post_formalin_fixation_time": "2"
+      "post_formalin_fixation_time": "2",
+      "tissue_block_size": "large"
     },
     {
       "name": "sample2",

@@ -92,6 +92,10 @@ MIP_SAMPLE = {
     'mother': validators.Optional(validators.RegexValidator(NAME_PATTERN), None),
     'father': validators.Optional(validators.RegexValidator(NAME_PATTERN), None),
 
+    # This information is optional for FFPE-samples
+    'formalin_fixation_time': validators.Optional(str, None),
+    'post_formalin_fixation_time': validators.Optional(str, None),
+    'tissue_block_size': validators.Optional(str, None),
 
     # Not Required
     'quantity': validators.Optional(str, None),
@@ -127,6 +131,7 @@ BALSAMIC_SAMPLE = {
     # This information is optional for FFPE-samples
     'formalin_fixation_time': validators.Optional(str, None),
     'post_formalin_fixation_time': validators.Optional(str, None),
+    'tissue_block_size': validators.Optional(str, None),
 
     # This information is optional
     'quantity': validators.Optional(str, None),

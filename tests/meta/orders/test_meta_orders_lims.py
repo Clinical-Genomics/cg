@@ -76,7 +76,7 @@ def test_to_lims_microbial(microbial_order_to_submit):
                                                         'before submission)'
 
 
-def test_to_lims_cancer(balsamic_order_to_submit):
+def test_to_lims_balsamic(balsamic_order_to_submit):
 
     # GIVEN a cancer order for a sample
     # WHEN parsing the order to format for LIMS import
@@ -111,6 +111,7 @@ def test_to_lims_cancer(balsamic_order_to_submit):
 
     assert first_sample['udfs']['formalin_fixation_time'] == '1'
     assert first_sample['udfs']['post_formalin_fixation_time'] == '2'
+    assert first_sample['udfs']['tissue_block_size'] == 'small'
 
     assert first_sample['udfs']['quantity'] == '2'
     assert first_sample['udfs']['comment'] == 'comment'
@@ -147,3 +148,4 @@ def test_to_lims_mip_balsamic(mip_balsamic_order_to_submit):
 
     assert first_sample['udfs']['formalin_fixation_time'] == '1'
     assert first_sample['udfs']['post_formalin_fixation_time'] == '2'
+    assert first_sample['udfs']['tissue_block_size'] == 'large'

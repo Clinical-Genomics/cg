@@ -115,8 +115,6 @@ def test_parsing_mip_orderform(mip_orderform):
     assert proband_sample['mother'] == 'sample2'
     assert proband_sample['father'] == 'sample3'
 
-    # todo: assert proband_sample['tumour'] is False
-
     mother_sample = trio_family['samples'][1]
     assert mother_sample.get('mother') is None
     assert mother_sample['quantity'] == '220'
@@ -241,7 +239,7 @@ def test_parsing_microbial_orderform(microbial_orderform):
     assert sample_data['comment'] == 'plate comment'
 
 
-def test_parsing_cancer_orderform(balsamic_orderform):
+def test_parsing_balsamic_orderform(balsamic_orderform):
 
     # GIVEN an order form for a cancer order with 11 samples,
     # WHEN parsing the order form
@@ -285,6 +283,7 @@ def test_parsing_cancer_orderform(balsamic_orderform):
 
     assert sample['formalin_fixation_time'] == '3.0'
     assert sample['post_formalin_fixation_time'] == '3.0'
+    assert sample['tissue_block_size'] == 'small'
 
     # This information is optional
     assert sample['quantity'] == '1'
@@ -338,6 +337,7 @@ def test_parsing_mip_balsamic_orderform(mip_balsamic_orderform):
 
     assert proband_sample['formalin_fixation_time'] == '12.0'
     assert proband_sample['post_formalin_fixation_time'] == '2.0'
+    assert proband_sample['tissue_block_size'] == 'large'
 
     mother_sample = trio_family['samples'][1]
     assert mother_sample.get('mother') is None

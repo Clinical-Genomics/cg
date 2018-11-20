@@ -161,9 +161,10 @@ def expand_family(family_id, parsed_family):
         }
         if raw_sample.get('container') in CONTAINER_TYPES:
             new_sample['container'] = raw_sample['container']
+
         for key in ('data_analysis', 'container_name', 'well_position', 'quantity', 'status',
                     'comment', 'capture_kit', 'tumour', 'tumour_purity',
-                    'formalin_fixation_time', 'post_formalin_fixation_time'):
+                    'formalin_fixation_time', 'post_formalin_fixation_time', 'tissue_block_size'):
             if raw_sample.get(key):
                 new_sample[key] = raw_sample[key]
 
@@ -228,6 +229,7 @@ def parse_sample(raw_sample):
         'sex': REV_SEX_MAP.get(raw_sample.get('UDF/Gender', '').strip()),
         'source': source if source in SOURCE_TYPES else None,
         'status': raw_sample['UDF/Status'].lower() if raw_sample.get('UDF/Status') else None,
+        'tissue_block_size': raw_sample.get('UDF/Tissue Block Size'),
         'tumour': raw_sample.get('UDF/tumor') == 'yes',
         'tumour_purity': raw_sample.get('UDF/tumour purity'),
         'well_position': raw_sample.get('Sample/Well Location'),
