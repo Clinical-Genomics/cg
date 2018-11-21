@@ -176,7 +176,7 @@ class StatusHandler:
         records = (
             self.Pool.query.filter(
                 models.Pool.invoice_id == None,
-                models.Pool.no_invoice == None,
+                models.Pool.no_invoice == False,
                 models.Pool.delivered_at != None
             )
         )
