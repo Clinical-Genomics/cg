@@ -213,9 +213,8 @@ RML_SAMPLE = {
     # 1604:8 Orderform Ready made libraries (RML)
 
     # Order portal specific
-    # todo: add in the orderform?
-    'container': validators.Any(CONTAINER_OPTIONS),
-    'container_name': str,
+    'priority': str,
+    'reference_genome': str,
 
     # This information is required
     'name': validators.RegexValidator(NAME_PATTERN),
