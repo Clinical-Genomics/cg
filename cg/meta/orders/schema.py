@@ -214,7 +214,6 @@ RML_SAMPLE = {
 
     # Order portal specific
     'priority': str,
-    'reference_genome': str,
 
     # This information is required
     'name': validators.RegexValidator(NAME_PATTERN),

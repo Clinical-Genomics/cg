@@ -11,14 +11,13 @@
       "volume": "30",
       "concentration": "5",
       "pool": "pool-1",
-      "container": "Tube",
-      "container_name": "20170823-ALASCCA 27, #811137, J.Lindberg",
       "rml_plate_name": "20170823-ALASCCA 27, #811137, J.Lindberg",
       "well_position_rml": "A:1",
       "index": "TruSeq DNA HT Dual-index (D7-D5)",
       "index_number": "1",
       "index_sequence": "A01 - D701-D501 (ATTACTCG-TATAGCCT)",
-      "capture_kit": "Agilent Sureselect CRE"
+      "capture_kit": "Agilent Sureselect CRE",
+      "priority": "research"
     },
     {
       "name": "AL-P-00110148-N-03127604-TP20170817-CB20170822",
@@ -28,14 +27,13 @@
       "volume": "30",
       "concentration": "5",
       "pool": "pool-1",
-      "container": "Tube",
-      "container_name": "20170823-ALASCCA 27, #811137, J.Lindberg",
       "rml_plate_name": "20170823-ALASCCA 27, #811137, J.Lindberg",
       "well_position_rml": "A:1",
       "index": "TruSeq DNA HT Dual-index (D7-D5)",
       "index_number": "2",
       "index_sequence": "B01 - D701-D502 (ATTACTCG-ATAGAGGC)",
-      "capture_kit": "Agilent Sureselect CRE"
+      "capture_kit": "Agilent Sureselect CRE",
+      "priority": "research"
     }
   ]
 }
