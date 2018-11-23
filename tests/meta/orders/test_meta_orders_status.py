@@ -296,7 +296,7 @@ def test_store_mip(orders_api, base_store, mip_status_data):
         customer=mip_status_data['customer'],
         order=mip_status_data['order'],
         ordered=dt.datetime.now(),
-        ticket=1234567,
+        ticket=123456,
         families=mip_status_data['families'],
     )
 
@@ -339,7 +339,7 @@ def test_store_families_bad_apptag(orders_api, base_store, mip_status_data):
             customer=mip_status_data['customer'],
             order=mip_status_data['order'],
             ordered=dt.datetime.now(),
-            ticket=1234567,
+            ticket=123456,
             families=mip_status_data['families'],
         )
 
@@ -355,7 +355,7 @@ def test_store_external(orders_api, base_store, external_status_data):
         customer=external_status_data['customer'],
         order=external_status_data['order'],
         ordered=dt.datetime.now(),
-        ticket=1234567,
+        ticket=123456,
         families=external_status_data['families'],
     )
 
@@ -399,7 +399,7 @@ def test_store_external_bad_apptag(orders_api, base_store, external_status_data)
             customer=external_status_data['customer'],
             order=external_status_data['order'],
             ordered=dt.datetime.now(),
-            ticket=1234567,
+            ticket=123456,
             families=external_status_data['families'],
         )
 
@@ -472,7 +472,7 @@ def test_store_cancer_samples(orders_api, base_store, balsamic_status_data):
         customer=balsamic_status_data['customer'],
         order=balsamic_status_data['order'],
         ordered=dt.datetime.now(),
-        ticket=1234567,
+        ticket=123456,
         families=balsamic_status_data['families'],
     )
 
