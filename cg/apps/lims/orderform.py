@@ -26,7 +26,6 @@ SOURCE_TYPES = [
     'environmental',
     'unknown'
 ]
-
 VALID_ORDERFORMS=[
     '1508:14',      # Orderform MIP, Balsamic, sequencing only
     '1541:6',       # Orderform Externally sequenced samples
@@ -34,6 +33,7 @@ VALID_ORDERFORMS=[
     '1604:8',       # Orderform Ready made libraries (RML)
     '1605:4',       # Microbial metagenomes
 ]
+FAMILY_PROJECT_TYPES=['mip', 'external', 'balsamic', 'mip_balsamic']
 
 
 def check_orderform_version(document_title):
@@ -68,7 +68,7 @@ def parse_orderform(excel_path: str) -> dict:
 
     project_type = get_project_type(document_title, parsed_samples)
 
-    if project_type in ('mip', 'external', 'balsamic', 'mip_balsamic'):
+    if project_type in (FAMILY_PROJECT_TYPES):
         parsed_families = group_families(parsed_samples)
         items = []
         customer_ids = set()
