@@ -152,7 +152,7 @@ class StatusHandler:
                     'application': sample['application'],
                     'data_analysis': sample.get('data_analysis'),
                     'sex': sample['sex'],
-                    'status': sample.get('status','unknown'),
+                    'status': sample.get('status'),
                     'mother': sample.get('mother'),
                     'father': sample.get('father'),
                     'tumour': sample.get('tumour') or False,

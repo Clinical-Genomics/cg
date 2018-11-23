@@ -102,7 +102,7 @@ class FamilySample(Model):
     id = Column(types.Integer, primary_key=True)
     family_id = Column(ForeignKey('family.id', ondelete='CASCADE'), nullable=False)
     sample_id = Column(ForeignKey('sample.id', ondelete='CASCADE'), nullable=False)
-    status = Column(types.Enum('affected', 'unaffected', 'unknown'), nullable=False)
+    status = Column(types.Enum('affected', 'unaffected', 'unknown'), default='unknown', nullable=False)
     mother_id = Column(ForeignKey('sample.id'))
     father_id = Column(ForeignKey('sample.id'))
 
