@@ -150,7 +150,6 @@ def expand_family(family_id, parsed_family):
     customer = customers.pop()
     gene_panels = set()
     for raw_sample in samples:
-        print(raw_sample)
         if raw_sample['panels']:
             gene_panels.update(raw_sample['panels'])
         new_sample = {
