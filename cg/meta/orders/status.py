@@ -188,14 +188,10 @@ class StatusHandler:
             for sample in family['samples']:
                 sample_obj = self.status.sample(sample['internal_id'])
                 if sample_obj:
-                    sample_obj.name = sample['name']
-                    sample_obj.sex = sample['sex']
-                    sample_obj.comment = sample['comment']
-                    family_samples[sample_obj.name] = sample_obj
+                    family_samples[sample['name']] = sample_obj
                 else:
                     new_sample = self.status.add_sample(
                         name=sample['name'],
-                        internal_id=sample['internal_id'],
                         sex=sample['sex'],
                         order=order,
                         ordered=ordered,
