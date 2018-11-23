@@ -145,7 +145,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
         result = self.process_family_samples(data)
         return result
 
-    def submit_mip(self, data: dict) -> dict:
+    def submit_family_samples(self, data: dict) -> dict:
         """Submit a batch of samples for sequencing and analysis."""
         result = self.process_family_samples(data)
         for family_obj in result['records']:
@@ -155,28 +155,18 @@ class OrdersAPI(LimsHandler, StatusHandler):
             self.add_missing_reads(status_samples)
         self.update_application(data['ticket'], result['records'])
         return result
+
+    def submit_mip(self, data: dict) -> dict:
+        """Submit a batch of samples for sequencing and analysis."""
+        return self.submit_family_samples(data)
 
     def submit_balsamic(self, data: dict) -> dict:
         """Submit a batch of samples for sequencing and balsamic analysis."""
-        result = self.process_family_samples(data)
-        for family_obj in result['records']:
-            LOG.info(f"{family_obj.name}: submit family samples")
-            status_samples = [link_obj.sample for link_obj in family_obj.links if
-                              link_obj.sample.ticket_number == data['ticket']]
-            self.add_missing_reads(status_samples)
-        self.update_application(data['ticket'], result['records'])
-        return result
+        return self.submit_family_samples(data)
 
     def submit_mip_balsamic(self, data: dict) -> dict:
         """Submit a batch of samples for sequencing and analysis."""
-        result = self.process_family_samples(data)
-        for family_obj in result['records']:
-            LOG.info(f"{family_obj.name}: submit family samples")
-            status_samples = [link_obj.sample for link_obj in family_obj.links if
-                              link_obj.sample.ticket_number == data['ticket']]
-            self.add_missing_reads(status_samples)
-        self.update_application(data['ticket'], result['records'])
-        return result
+        return self.submit_family_samples(data)
 
     def submit_microbial(self, data: dict) -> dict:
         """Submit a batch of microbial samples."""
