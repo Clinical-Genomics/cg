@@ -37,7 +37,7 @@ VALID_ORDERFORMS=[
 
 
 def check_orderform_version(document_title):
-    """Raise an error if the orderform is to new or to old for the order portal."""
+    """Raise an error if the orderform is too new or too old for the order portal."""
     for valid_orderform in VALID_ORDERFORMS:
         if valid_orderform in document_title:
             return
