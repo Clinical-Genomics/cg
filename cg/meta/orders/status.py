@@ -192,6 +192,7 @@ class StatusHandler:
                 else:
                     new_sample = self.status.add_sample(
                         name=sample['name'],
+                        internal_id=sample['internal_id'],
                         sex=sample['sex'],
                         order=order,
                         ordered=ordered,
