@@ -2,30 +2,14 @@
 from typing import List
 
 import xlrd
+from cg.constants import METAGENOME_SOURCES, ANALYSIS_SOURCES
 
 from cg.exc import OrderFormError
 
 SEX_MAP = {'male': 'M', 'female': 'F', 'unknown': 'unknown'}
 REV_SEX_MAP = {value: key for key, value in SEX_MAP.items()}
 CONTAINER_TYPES = ['Tube', '96 well plate']
-SOURCE_TYPES = [
-    'blood',
-    'saliva',
-    'tissue (fresh frozen)',
-    'tissue (FFPE)',
-    'cell line',
-    'nail',
-    'muscle',
-    'other',
-    # metagenome sources
-    'skin',
-    'respiratory',
-    'urine',
-    'CSF',
-    'faeces',
-    'environmental',
-    'unknown'
-]
+SOURCE_TYPES = set().union(METAGENOME_SOURCES, ANALYSIS_SOURCES)
 VALID_ORDERFORMS=[
     '1508:14',      # Orderform MIP, Balsamic, sequencing only
     '1541:6',       # Orderform Externally sequenced samples

@@ -5,6 +5,7 @@ from functools import wraps
 from pathlib import Path
 import tempfile
 
+from cg.constants import METAGENOME_SOURCES, ANALYSIS_SOURCES
 from flask import abort, current_app, Blueprint, jsonify, g, make_response, request
 from google.auth import jwt
 from requests.exceptions import HTTPError
@@ -336,6 +337,8 @@ def options():
             'internal_id': organism.internal_id,
             'verified': organism.verified,
         } for organism in db.Organism.query],
+        metagenomeSources=METAGENOME_SOURCES,
+        analysisSources=ANALYSIS_SOURCES
     )
 
 
