@@ -62,7 +62,7 @@ class StatusHandler:
         )
         return records
 
-    def families_to_analyze(self, limit: int=50):
+    def families_to_mip_analyze(self, limit: int=50):
         """Fetch families without analyses where all samples are sequenced."""
         records = (
             self.Family.query
@@ -75,6 +75,7 @@ class StatusHandler:
                         models.Sample.sequenced_at != None,
                         models.Analysis.completed_at == None,
                         models.Family.action == None,
+                        models.Sample.data_analysis not in ['Balsamic'],
                     )
             ))
             .order_by(models.Family.priority.desc(), models.Family.ordered_at)

@@ -21,64 +21,67 @@ class MockLims(LimsAPI):
 
 
 @pytest.fixture
-def scout_order_to_submit():
+def mip_order_to_submit():
     """Load an example scout order."""
-    json_path = 'tests/fixtures/orders/scout.json'
-    json_data = json.load(open(json_path))
-    return json_data
+    return json.load(open('tests/fixtures/orders/mip.json'))
 
 
 @pytest.fixture
 def external_order_to_submit():
     """Load an example external order."""
-    json_path = 'tests/fixtures/orders/external.json'
-    json_data = json.load(open(json_path))
-    return json_data
+    return json.load(open('tests/fixtures/orders/external.json'))
 
 
 @pytest.fixture
 def fastq_order_to_submit():
     """Load an example fastq order."""
-    json_path = 'tests/fixtures/orders/fastq.json'
-    json_data = json.load(open(json_path))
-    return json_data
+    return json.load(open('tests/fixtures/orders/fastq.json'))
 
 
 @pytest.fixture
 def rml_order_to_submit():
     """Load an example rml order."""
-    json_path = 'tests/fixtures/orders/rml.json'
-    json_data = json.load(open(json_path))
-    return json_data
+    return json.load(open('tests/fixtures/orders/rml.json'))
 
 
 @pytest.fixture
 def metagenome_order_to_submit():
     """Load an example metagenome order."""
-    json_path = 'tests/fixtures/orders/metagenome.json'
-    json_data = json.load(open(json_path))
-    return json_data
+    return json.load(open('tests/fixtures/orders/metagenome.json'))
 
 
 @pytest.fixture
 def microbial_order_to_submit():
     """Load an example microbial order."""
-    json_path = 'tests/fixtures/orders/microbial.json'
-    json_data = json.load(open(json_path))
-    return json_data
+    return json.load(open('tests/fixtures/orders/microbial.json'))
 
 
 @pytest.fixture
-def all_orders_to_submit(rml_order_to_submit, fastq_order_to_submit, scout_order_to_submit,
+def balsamic_order_to_submit():
+    """Load an example cancer order."""
+    return json.load(open('tests/fixtures/orders/balsamic.json'))
+
+
+@pytest.fixture
+def mip_balsamic_order_to_submit():
+    """Load an example scout order."""
+    return json.load(open('tests/fixtures/orders/mip_balsamic.json'))
+
+
+@pytest.fixture
+def all_orders_to_submit(rml_order_to_submit, fastq_order_to_submit, mip_order_to_submit,
                          external_order_to_submit, microbial_order_to_submit,
-                         metagenome_order_to_submit):
+                         metagenome_order_to_submit, balsamic_order_to_submit,
+                         mip_balsamic_order_to_submit):
     return {
         OrderType.RML: rml_order_to_submit,
         OrderType.FASTQ: fastq_order_to_submit,
-        OrderType.SCOUT: scout_order_to_submit,
+        OrderType.MIP: mip_order_to_submit,
         OrderType.EXTERNAL: external_order_to_submit,
         OrderType.MICROBIAL: microbial_order_to_submit,
         OrderType.METAGENOME: metagenome_order_to_submit,
+        OrderType.BALSAMIC: balsamic_order_to_submit,
+        OrderType.MIP_BALSAMIC: mip_balsamic_order_to_submit,
     }
 
 
@@ -97,9 +100,9 @@ def fastq_status_data(fastq_order_to_submit):
 
 
 @pytest.fixture
-def scout_status_data(scout_order_to_submit):
+def mip_status_data(mip_order_to_submit):
     """Parse scout order example."""
-    data = StatusHandler.families_to_status(scout_order_to_submit)
+    data = StatusHandler.families_to_status(mip_order_to_submit)
     return data
 
 
@@ -114,6 +117,20 @@ def external_status_data(external_order_to_submit):
 def microbial_status_data(microbial_order_to_submit):
     """Parse microbial order example."""
     data = StatusHandler.microbial_samples_to_status(microbial_order_to_submit)
+    return data
+
+
+@pytest.fixture
+def metagenome_status_data(metagenome_order_to_submit):
+    """Parse metagenome order example."""
+    data = StatusHandler.samples_to_status(metagenome_order_to_submit)
+    return data
+
+
+@pytest.fixture
+def balsamic_status_data(balsamic_order_to_submit):
+    """Parse cancer order example."""
+    data = StatusHandler.families_to_status(balsamic_order_to_submit)
     return data
 
 

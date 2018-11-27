@@ -48,13 +48,12 @@ def test_add_microbial_sample(base_store: Store):
     # GIVEN an empty database
     assert base_store.MicrobialSample.query.first() is None
     name = 'microbial_sample'
-    organism = 'other'
-    organism_other = 'e. coli'
+    organism_name = 'e. coli'
     internal_id = 'lims-id'
     reference_genome = 'ref_gen'
     priority = 'research'
     application_version = base_store.ApplicationVersion.query.first()
-    base_store.add_organism(organism, organism, reference_genome)
+    base_store.add_organism(organism_name, organism_name, reference_genome)
     organism = base_store.Organism.query.first()
     microbial_order_id = 'dummy_order_id'
 

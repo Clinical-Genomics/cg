@@ -16,7 +16,8 @@ UploadScoutAPI):
     assert result_data['rank_model_version']
 
 
-def test_generate_config_adds_(analysis: Store.Analysis, upload_scout_api: UploadScoutAPI):
+def test_generate_config_adds_vcf2cytosure(analysis: Store.Analysis, upload_scout_api:
+                                           UploadScoutAPI):
 
     # GIVEN a status db and hk with an analysis
     assert analysis
