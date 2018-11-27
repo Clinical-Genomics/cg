@@ -135,6 +135,7 @@ class StatusHandler:
             'families': [],
         }
         families = cls.group_families(data['samples'])
+
         for family_name, family_samples in families.items():
             values = set(sample.get('priority', 'standard') for sample in family_samples)
             if len(values) > 1:

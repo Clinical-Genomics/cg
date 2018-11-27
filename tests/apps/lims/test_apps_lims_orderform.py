@@ -299,12 +299,12 @@ def test_parsing_mip_balsamic_orderform(mip_balsamic_orderform):
     assert data['project_type'] == 'mip_balsamic'
     assert data['customer'] == 'cust000'
     # ... and it should find and group all samples in families
-    assert len(data['items']) == 6
+    assert len(data['items']) == 5
     # ... and collect relevant data about the families
     trio_family = data['items'][0]
     assert len(trio_family['samples']) == 10
     assert trio_family['name'] == 'wgs'
-    assert trio_family['priority'] == 'priority'
+    assert trio_family['priority'] == 'clinical trials'
     assert set(trio_family['panels']) == set(['AD-1.0-141202', 'CNM', 'CILM', 'AD', 'CM', 'ATX',
                                       'horsel', 'DSD', 'CTD', '16PDEL'])
     assert trio_family['require_qcok'] is True

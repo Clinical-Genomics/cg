@@ -123,10 +123,10 @@ def expand_family(family_id, parsed_family):
         new_family['require_qcok'] = True
 
     priorities = set(raw_sample['priority'] for raw_sample in samples)
-    if len(priorities) > 1 and 'priority' in priorities:
-        new_family['priority'] = 'priority'
-    else:
+    if len(priorities) == 1:
         new_family['priority'] = priorities.pop()
+    else:
+        raise OrderFormError(f"multiple values for 'Priority' for family: {family_id}")
 
     customers = set(raw_sample['customer'] for raw_sample in samples)
     if len(customers) != 1:
