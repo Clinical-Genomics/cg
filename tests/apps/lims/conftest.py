@@ -23,7 +23,7 @@ def external_orderform():
 
 @pytest.fixture
 def microbial_orderform():
-    return 'tests/fixtures/orderforms/1603.6.microbial.xlsx'
+    return 'tests/fixtures/orderforms/1603.7.microbial.xlsx'
 
 
 @pytest.fixture

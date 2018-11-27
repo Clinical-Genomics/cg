@@ -261,6 +261,9 @@ MICROBIAL_SAMPLE = {
     # Required if "Other" is chosen in column "Species"
     'organism_other': validators.Optional(str, None),
 
+    # Required if "other" is chosen in column "DNA Elution Buffer"
+    'elution_buffer_other': validators.Optional(str, None),
+
     # These fields are not required
     'concentration_weight': validators.Optional(TypeValidator(str, allow_none=True), None),
     'quantity': validators.Optional(str, None),
