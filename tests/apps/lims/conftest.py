@@ -28,7 +28,7 @@ def microbial_orderform():
 
 @pytest.fixture
 def metagenome_orderform():
-    return 'tests/fixtures/orderforms/1605.4.metagenome.xlsx'
+    return 'tests/fixtures/orderforms/1605.6.metagenome.xlsx'
 
 
 @pytest.fixture

@@ -176,27 +176,32 @@ def test_parsing_metagenome_orderform(metagenome_orderform):
     # THEN it should detect the project type
     assert data['project_type'] == 'metagenome'
     # ... and find all samples
-    assert len(data['items']) == 2
+    assert len(data['items']) == 18
     # ... and collect relevant sample info
     sample = data['items'][0]
 
-    assert sample['name'] == 'Bristol'
-    assert sample['container'] == '96 well plate'
+    assert sample['name'] == 's1'
+    assert sample['source'] == 'other'
     assert sample['data_analysis'] == 'fastq'
-    assert sample['application'] == 'METPCFR020'
+    assert sample['application'] == 'METPCFR030'
     assert sample['customer'] == 'cust000'
-    assert sample['require_qcok'] is False
-    assert sample['elution_buffer'] == 'EB-buffer'
-    assert sample['source'] == 'faeces'
-    assert sample['priority'] == 'standard'
+    assert sample['require_qcok'] is True
+    assert sample['elution_buffer'] == 'other'
+    assert sample['extraction_method'] == 'other (specify in comment field)'
+    assert sample['container'] == '96 well plate'
+    assert sample['priority'] == 'research'
 
-    assert sample['container_name'] == 'Platen'
+    # Required if Plate
+    assert sample['container_name'] == 'p1'
     assert sample['well_position'] == 'A:1'
 
-    assert sample['concentration_weight'] == '2'
-    assert sample['quantity'] == '10'
-    assert sample['extraction_method'] == 'best'
-    assert sample['comment'] == '5 on the chart'
+    # Required if "other" is chosen in column "DNA Elution Buffer"
+    assert sample['elution_buffer_other'] == 'other elution buffer'
+
+    # These fields are not required
+    assert sample['concentration_weight'] == '1'
+    assert sample['quantity'] == '2'
+    assert sample['comment'] == 'other extraction method'
 
     
 def test_parsing_microbial_orderform(microbial_orderform):

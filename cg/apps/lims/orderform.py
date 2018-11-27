@@ -15,7 +15,7 @@ VALID_ORDERFORMS=[
     '1541:6',       # Orderform Externally sequenced samples
     '1603:7',       # Microbial WGS
     '1604:8',       # Orderform Ready made libraries (RML)
-    '1605:4',       # Microbial metagenomes
+    '1605:6',       # Microbial metagenomes
 ]
 FAMILY_PROJECT_TYPES=['mip', 'external', 'balsamic', 'mip_balsamic']
 
