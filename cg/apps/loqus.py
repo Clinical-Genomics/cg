@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
+import copy
 
 import subprocess
 from subprocess import CalledProcessError
@@ -17,7 +18,8 @@ class LoqusdbAPI(object):
 
     def load(self, family_id: str, ped_path: str, vcf_path: str) -> dict:
         """Add observations from a VCF."""
-        load_call = base_call.extend([
+        load_call = copy.deepcopy(self.base_call)
+        load_call.extend([
             'load', '-c', family_id, '--variants-file', vcf_path, '-f', ped_path, '--ensure-index',
         ])
 
@@ -38,9 +40,8 @@ class LoqusdbAPI(object):
     def get_case(self, case_id: str) -> dict:
         """Find a case in the database by case id."""
         case_obj = None
-        case_call = base_call.extend([
-            'cases', '-c', case_id, '--to-json',
-        ])
+        case_call = copy.deepcopy(self.base_call)
+        case_call.extend(['cases', '-c', case_id, '--to-json'])
         try:
             output = subprocess.check_output(
                         ' '.join(case_call),
@@ -49,7 +50,7 @@ class LoqusdbAPI(object):
         except CalledProcessError as err:
             # If case does not exist we will get a non zero exit code and return None
             return case_obj
-        
+        print(output)
         # The output is a list of dictionaries that are case objs
         case_obj = json.loads(output.decode('utf-8'))[0]
         
