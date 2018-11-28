@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
 from typing import List
+
+from cg.store.api.base import BaseHandler
 from sqlalchemy import and_, or_
 
 from cg.store import models
 
 
-class StatusHandler:
+class StatusHandler(BaseHandler):
 
     def samples_to_recieve(self, external=False):
         """Fetch incoming samples."""

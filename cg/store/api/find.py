@@ -2,13 +2,14 @@
 import datetime as dt
 from typing import List
 
+from cg.store.api.base import BaseHandler
 from sqlalchemy import or_, and_, func, desc
 from sqlalchemy.orm import Query
 
 from cg.store import models
 
 
-class FindHandler:
+class FindHandler(BaseHandler):
 
     def customer(self, internal_id: str) -> models.Customer:
         """Fetch a customer by internal id from the store."""

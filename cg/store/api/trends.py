@@ -1,7 +1,6 @@
 import datetime as dt
 from itertools import groupby
-from dateutil.relativedelta import relativedelta
-from sqlalchemy import func, text
+from sqlalchemy import func
 
 from cg.store import models
 
