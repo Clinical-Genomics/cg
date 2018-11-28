@@ -25,8 +25,15 @@ class UploadBeaconApi():
         self.scout = scout_api
         self.beacon = beacon_api
 
-    def upload(self, family_id: str, panel: list, dataset: str = 'clinicalgenomics',
-               outfile: str = None, customer: str = None, qual: int = 20, reference: str = "grch37"):
+    def upload(
+            self,
+            family_id: str,
+            panel: list,
+            dataset: str = 'clinicalgenomics',
+            outfile: str = None,
+            customer: str = None,
+            qual: int = 20,
+            reference: str = "grch37"):
         """Upload variants to Beacon for a family."""
 
         family_obj = self.status.family(family_id)
@@ -59,7 +66,9 @@ class UploadBeaconApi():
 
         if len(sample_ids) == 0:
             LOG.critical(
-                "None of the affected samples for this family %a could be found among the samples in VCF file %s", affected_ids, vcf_samples)
+                "None of the affected samples for this family %a could be found among the samples in VCF file %s",
+                affected_ids,
+                vcf_samples)
             sys.exit(1)
 
         if sample_ids:
@@ -68,7 +77,9 @@ class UploadBeaconApi():
                 if self.status.sample(sample).beaconized_at and len(
                         self.status.sample(sample).beaconized_at) > 0:
                     LOG.critical(
-                        "It looks like sample %s is already in Beacon! If you want to re-import it you have to remove its variants first! --> (cg clean beacon %s -type sample).", sample, sample)
+                        "It looks like sample %s is already in Beacon! If you want to re-import it you have to remove its variants first! --> (cg clean beacon %s -type sample).",
+                        sample,
+                        sample)
                     sys.exit(1)
 
             status_msg = str(dt.datetime.now())
@@ -192,7 +203,9 @@ class UploadBeaconApi():
                     # check first if the subject is on beacon:
                     if sample.beaconized_at == '':
                         LOG.critical(
-                            "Affected sample %s from family %s is affected but was not found in beacon!", sample.internal_id, item_id)
+                            "Affected sample %s from family %s is affected but was not found in beacon!",
+                            sample.internal_id,
+                            item_id)
                         break
 
                     beacon_info = sample.beaconized_at.split('|')
@@ -229,7 +242,8 @@ class UploadBeaconApi():
                                 LOG.info("passing ID, VCF file and gene panels file to beacon handler")
 
                                 results = self.beacon.remove_vars(
-                                    sample.internal_id, beacon_info[1], temp_panel.name, int(beacon_info[2]))
+                                    sample.internal_id, beacon_info[1], temp_panel.name, int(
+                                        beacon_info[2]))
                                 temp_panel.close()
 
                                 LOG.info("Variants removed for sample %s: %s",
@@ -243,7 +257,8 @@ class UploadBeaconApi():
 
                     else:
                         LOG.warn(
-                            "sample %s is not contained in the annotated vcf file, skipping it!", sample.internal_id)
+                            "sample %s is not contained in the annotated vcf file, skipping it!",
+                            sample.internal_id)
             else:
                 LOG.warn("Could't find any affected sample in beacon for family %s!", item_id)
 
@@ -271,7 +286,8 @@ class UploadBeaconApi():
 
                             LOG.info("passing ID, VCF file and gene panels file to beacon handler")
                             results = self.beacon.remove_vars(
-                                sample_obj.internal_id, beacon_info[1], temp_panel.name, int(beacon_info[2]))
+                                sample_obj.internal_id, beacon_info[1], temp_panel.name, int(
+                                    beacon_info[2]))
                             temp_panel.close()
 
                             LOG.info("Variants removed for sample %s: %s",

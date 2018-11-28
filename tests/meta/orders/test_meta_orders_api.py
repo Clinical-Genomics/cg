@@ -88,8 +88,12 @@ def test_submit_illegal_sample_customer(sample_store, orders_api, all_orders_to_
     OrderType.BALSAMIC,
     OrderType.MIP_BALSAMIC,
 ])
-def test_submit_scout_legal_sample_customer(sample_store, orders_api, all_orders_to_submit, monkeypatch,
-                                            order_type):
+def test_submit_scout_legal_sample_customer(
+        sample_store,
+        orders_api,
+        all_orders_to_submit,
+        monkeypatch,
+        order_type):
     ticket_number = 123456
     monkeypatch.setattr(orders_api.osticket, 'open_ticket', lambda *args, **kwargs: ticket_number)
 
@@ -134,8 +138,12 @@ def test_submit_scout_legal_sample_customer(sample_store, orders_api, all_orders
     OrderType.MICROBIAL,
     OrderType.METAGENOME,
 ])
-def test_submit_non_scout_legal_sample_customer(sample_store, orders_api, all_orders_to_submit, monkeypatch,
-                                                order_type):
+def test_submit_non_scout_legal_sample_customer(
+        sample_store,
+        orders_api,
+        all_orders_to_submit,
+        monkeypatch,
+        order_type):
     ticket_number = 123456
     monkeypatch.setattr(orders_api.osticket, 'open_ticket', lambda *args, **kwargs: ticket_number)
 

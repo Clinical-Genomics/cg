@@ -54,8 +54,16 @@ class ScoutAPI(MongoAdapter):
         gene_panel = self.gene_panel(panel_id=panel_id, version=version)
         return gene_panel.get('genes')
 
-    def get_cases(self, case_id=None, institute=None, reruns=None, finished=None, causatives=None, research_requested=None,
-                  is_research=None, status=None):
+    def get_cases(
+            self,
+            case_id=None,
+            institute=None,
+            reruns=None,
+            finished=None,
+            causatives=None,
+            research_requested=None,
+            is_research=None,
+            status=None):
         """Interact with cases existing in the database."""
 
         models = []

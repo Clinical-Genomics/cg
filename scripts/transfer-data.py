@@ -432,8 +432,8 @@ class FamilyImporter(Store):
                     samples = [self.lims.sample(family_sample.id) for family_sample in
                                self.lims.get_samples(udf={'customer': sample['customer'],
                                                           'familyID': sample['family']})]
-                    samples = [sample for sample in samples if
-                               sample['application'] and not sample['application'].startswith(('MW', 'RML', 'MET'))]
+                    samples = [sample for sample in samples if sample['application']
+                               and not sample['application'].startswith(('MW', 'RML', 'MET'))]
                     data = self.extract(sample['family'], samples)
                     new_records = self.build(customer_obj, data)
                     self.add(list(new_records))

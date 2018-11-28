@@ -27,8 +27,12 @@ def clean(context):
 
 
 @clean.command()
-@click.option('-type', '--item_type',
-              type=click.Choice(['family', 'sample']), required=True, help='family/sample to remove from beacon')
+@click.option('-type',
+              '--item_type',
+              type=click.Choice(['family',
+                                 'sample']),
+              required=True,
+              help='family/sample to remove from beacon')
 @click.argument('item_id', type=click.STRING)
 @click.pass_context
 def beacon(context: click.Context, item_type, item_id):

@@ -69,8 +69,8 @@ def test_add_sample_lims_id(invoke_cli, disk_store: Store):
     name = 'sample_name'
     lims_id = 'sample_lims_id'
 
-    result = invoke_cli(['--database', db_uri, 'add', 'sample', '--sex', sex, '--application', application,
-                         '--lims', lims_id, customer_id, name])
+    result = invoke_cli(['--database', db_uri, 'add', 'sample', '--sex', sex,
+                         '--application', application, '--lims', lims_id, customer_id, name])
 
     # THEN then it should be added
     assert result.exit_code == 0
@@ -89,8 +89,8 @@ def test_add_sample_order(invoke_cli, disk_store: Store):
     name = 'sample_name'
     order = 'sample_order'
 
-    result = invoke_cli(['--database', db_uri, 'add', 'sample', '--sex', sex, '--application', application,
-                         '--order', order, customer_id, name])
+    result = invoke_cli(['--database', db_uri, 'add', 'sample', '--sex', sex,
+                         '--application', application, '--order', order, customer_id, name])
 
     # THEN then it should be added
     assert result.exit_code == 0
@@ -109,8 +109,18 @@ def test_add_sample_downsampled(invoke_cli, disk_store: Store):
     name = 'sample_name'
     downsampled_to = '123'
 
-    result = invoke_cli(['--database', db_uri, 'add', 'sample', '--sex', sex, '--application', application,
-                         '--downsampled', downsampled_to, customer_id, name])
+    result = invoke_cli(['--database',
+                         db_uri,
+                         'add',
+                         'sample',
+                         '--sex',
+                         sex,
+                         '--application',
+                         application,
+                         '--downsampled',
+                         downsampled_to,
+                         customer_id,
+                         name])
 
     # THEN then it should be added
     assert result.exit_code == 0
