@@ -161,7 +161,8 @@ EXTERNAL_SAMPLE = {
 
     # Required if data analysis in Scout
     'panels': ListValidator(str, min_items=0),
-    # todo: find out if "Additional Gene List" is "lost in translation", implement in OP or remove from OF
+    # todo: find out if "Additional Gene List" is "lost in translation",
+    # implement in OP or remove from OF
     'status': validators.Any(STATUS_OPTIONS),
 
     # Required if samples are part of trio/family

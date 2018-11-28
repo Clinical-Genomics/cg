@@ -84,7 +84,7 @@ class AnalysisAPI():
 
     def config(self, family_obj: models.Family) -> dict:
         """Make the MIP config. Meta data for the family is taken from the family object
-        and converted to MIP format via trailblazer. 
+        and converted to MIP format via trailblazer.
 
         Args:
             family_obj (models.Family):

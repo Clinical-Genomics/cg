@@ -197,7 +197,7 @@ def test_store_samples_bad_apptag(orders_api, base_store, fastq_status_data):
         )
 
 
-def test_store_microbial_samples(orders_api, base_store,  microbial_status_data):
+def test_store_microbial_samples(orders_api, base_store, microbial_status_data):
 
     # GIVEN a basic store with no samples and a microbial order and one Organism
     assert base_store.microbial_samples().count() == 0
@@ -222,7 +222,8 @@ def test_store_microbial_samples(orders_api, base_store,  microbial_status_data)
     assert base_store.organisms().count() == 3
 
 
-def test_store_microbial_samples_data_analysis_stored(orders_api, base_store,  microbial_status_data):
+def test_store_microbial_samples_data_analysis_stored(
+        orders_api, base_store, microbial_status_data):
 
     # GIVEN a basic store with no samples and a microbial order and one Organism
     assert base_store.microbial_samples().count() == 0
@@ -243,7 +244,7 @@ def test_store_microbial_samples_data_analysis_stored(orders_api, base_store,  m
     assert new_order.microbial_samples[0].data_analysis == 'fastq'
 
 
-def test_store_microbial_samples_bad_apptag(orders_api, base_store,  microbial_status_data):
+def test_store_microbial_samples_bad_apptag(orders_api, base_store, microbial_status_data):
 
     # GIVEN a basic store with no samples and a microbial order
     assert base_store.microbial_samples().count() == 0

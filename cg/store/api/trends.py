@@ -13,7 +13,7 @@ class TrendsHandler:
 
     @staticmethod
     def get_last_day_of_previous_year(year: int):
-        return TrendsHandler.get_last_day_of_year(year-1)
+        return TrendsHandler.get_last_day_of_year(year - 1)
 
     @staticmethod
     def get_last_day_of_year(year):

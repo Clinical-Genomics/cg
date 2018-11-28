@@ -25,7 +25,8 @@ class UploadBeaconApi():
         self.scout = scout_api
         self.beacon = beacon_api
 
-    def upload(self, family_id: str, panel: list, dataset: str = 'clinicalgenomics', outfile: str = None, customer: str = None, qual: int = 20, reference: str = "grch37"):
+    def upload(self, family_id: str, panel: list, dataset: str = 'clinicalgenomics',
+               outfile: str = None, customer: str = None, qual: int = 20, reference: str = "grch37"):
         """Upload variants to Beacon for a family."""
 
         family_obj = self.status.family(family_id)
@@ -64,7 +65,8 @@ class UploadBeaconApi():
         if sample_ids:
             # Check if any of these samples are already in beacon. If they are raise error
             for sample in sample_ids:
-                if self.status.sample(sample).beaconized_at and len(self.status.sample(sample).beaconized_at) > 0:
+                if self.status.sample(sample).beaconized_at and len(
+                        self.status.sample(sample).beaconized_at) > 0:
                     LOG.critical(
                         "It looks like sample %s is already in Beacon! If you want to re-import it you have to remove its variants first! --> (cg clean beacon %s -type sample).", sample, sample)
                     sys.exit(1)
@@ -85,11 +87,12 @@ class UploadBeaconApi():
             else:
                 print('Generating variants filter based on ', len(panel), ' gene panels')
                 bed_lines = self.scout.export_panels(panel, None)
-                temp_panel = NamedTemporaryFile('w+t', suffix='_chiara.'+','.join(panel))
+                temp_panel = NamedTemporaryFile('w+t', suffix='_chiara.' + ','.join(panel))
                 temp_panel.write('\n'.join(bed_lines))
                 path_to_panel = temp_panel.name
 
-                # capture specifics for gene panels in order to record panels used in status db at the end of the upload operation.
+                # capture specifics for gene panels in order to record panels used in
+                # status db at the end of the upload operation.
                 n_panels = len(panel)
                 with open(temp_panel.name, "r") as panel_lines:
                     while n_panels:
@@ -98,7 +101,8 @@ class UploadBeaconApi():
                                 templine = (line.strip()).split(',')
                                 temp_panel_tuple = []
                                 for tuple_n in templine:
-                                    # create a tuple with these fields from the panel: name, version, date:
+                                    # create a tuple with these fields from the panel: name,
+                                    # version, date:
                                     temp_panel_tuple.append(tuple_n.split('=')[1])
 
                                 # print(tuple(temp_panel_tuple))
@@ -159,13 +163,14 @@ class UploadBeaconApi():
                         scout_panels.append(tuple(temp_panel_tuple))
                         print("---->", tuple(temp_panel_tuple), sep="")
 
-        # Do check that the panels in scout are still the same as when the variants were uploaded in beacon:
+        # Do check that the panels in scout are still the same as when the
+        # variants were uploaded in beacon:
         if scout_panels.sort() == list_of_panels.sort():
             LOG.info("Panels retrieved in scout corespond to those used for beacon upload.")
             return temp_panel
         else:
             return None
-        ##############################################################################################################
+        ##########################################################################
 
     def remove_vars(self, item_type, item_id):
         """Remove beacon for a sample or one or more affected samples from a family."""
@@ -195,7 +200,8 @@ class UploadBeaconApi():
 
                     LOG.info("######## Processing sample %s ########", sample.internal_id)
 
-                    # Chech that path to VCF file with vars that went into beacon exists and get samples contained in that VCF file:
+                    # Chech that path to VCF file with vars that went into beacon exists and
+                    # get samples contained in that VCF file:
                     vcf_samples = vcfparser.get_samples(beacon_info[1])
                     if sample.internal_id in vcf_samples:
 
@@ -250,7 +256,8 @@ class UploadBeaconApi():
                 LOG.info("######## Processing sample %s ########", sample_obj.internal_id)
                 print("info:", beacon_info)
 
-                # Chech that path to VCF file with vars that went into beacon exists and get samples contained in that VCF file:
+                # Chech that path to VCF file with vars that went into beacon exists and
+                # get samples contained in that VCF file:
                 vcf_samples = vcfparser.get_samples(beacon_info[1])
                 if sample_obj.internal_id in vcf_samples:
 

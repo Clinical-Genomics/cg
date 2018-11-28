@@ -18,7 +18,8 @@ class BeaconApi():
         super(BeaconApi, self).__init__()
         self.connection = use_mysqlalchemy(config['cgbeacon']['database'])
 
-    def upload(self, vcf_path: str, panel_path: str, dataset: str, outfile: str, customer: str, samples: List[str], quality: int, genome_reference: str):
+    def upload(self, vcf_path: str, panel_path: str, dataset: str, outfile: str,
+               customer: str, samples: List[str], quality: int, genome_reference: str):
         """ Uploads variants from a VCF file to a MySQL Beacon database
             Returns: number of new variants in the Beacon
         """

@@ -140,7 +140,8 @@ def panel(context, print_output, family_id):
 @START_WITH_PROGRAM
 @click.argument('family_id')
 @click.pass_context
-def start(context: click.Context, family_id: str, priority: str = None, email: str = None, start_with: str = None):
+def start(context: click.Context, family_id: str, priority: str = None,
+          email: str = None, start_with: str = None):
     """Start the analysis pipeline for a family."""
     family_obj = context.obj['db'].family(family_id)
     if family_obj is None:

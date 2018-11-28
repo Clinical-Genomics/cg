@@ -92,14 +92,14 @@ class InvoiceAPI():
             version = str(record.application_version.version)
             percent_kth = record.application_version.application.percent_kth
             discounted_price = self.get_price(discount, record)
-        except:
+        except BaseException:
             self.log.append(f'Application tag/version semms to be missing for sample {record.id}.')
             return None
 
-        if type(record) == models.Pool:
+        if isinstance(record, models.Pool):
             lims_id = None
             priority = 'research'
-        elif type(record) == models.Sample:
+        elif isinstance(record, models.Sample):
             lims_id = record.internal_id
             priority = record.priority_human
 
@@ -110,7 +110,7 @@ class InvoiceAPI():
                 else:
                     split_factor = (100 - percent_kth) / 100
                 price = round(discounted_price * split_factor, 1)
-            except:
+            except BaseException:
                 self.log.append(
                     f'Could not calculate price for samples with application tag/version: {tag}/{version}. Missing %KTH')
                 return None
@@ -132,9 +132,9 @@ class InvoiceAPI():
 
     def get_price(self, discount: int, record: models.Sample):
         """Get discount price for a sample."""
-        if type(record) == models.Pool:
+        if isinstance(record, models.Pool):
             priority = 'research'
-        elif type(record) == models.Sample:
+        elif isinstance(record, models.Sample):
             priority = record.priority_human
 
         full_price = getattr(record.application_version, f"price_{priority}")
