@@ -1,5 +1,7 @@
+cython
 pytest
 mock
 ipdb
 pytest-cov
 coveralls
+nose pylint

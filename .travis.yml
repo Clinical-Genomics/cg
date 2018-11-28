@@ -4,9 +4,7 @@ python:
     - '3.6'
 
 install:
-    - pip install cython
     - pip install -r requirements.txt -r requirements-dev.txt -e .
-    - pip install nose pylint
 
 script:
     - coverage run --source "$(basename "$PWD")" setup.py test
