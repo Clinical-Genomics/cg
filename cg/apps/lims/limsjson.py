@@ -1,6 +1,7 @@
 OPTIONAL_KEYS = ('container_name', 'quantity', 'volume', 'concentration', 'status',
                  'comment', 'capture_kit', 'mother', 'father')
 
+
 def parse_json(indata: dict) -> dict:
     """Parse JSON from LIMS export."""
     data = {

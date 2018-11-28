@@ -41,9 +41,9 @@ class LimsAPI(Lims, OrderHandler):
         lims_sample = Sample(self, id=lims_id)
         data = self._export_sample(lims_sample)
         return data
-    
+
     def samples_in_pools(self, pool_name, projectlimsid):
-        return self.get_samples(udf={"pool name" : str(pool_name)}, projectlimsid = projectlimsid)
+        return self.get_samples(udf={"pool name": str(pool_name)}, projectlimsid=projectlimsid)
 
     def _export_project(self, lims_project):
         return {
@@ -180,8 +180,8 @@ class LimsAPI(Lims, OrderHandler):
             for lims_sample in lims_artifact.samples:
                 yield lims_sample.id
 
-    def update_sample(self, lims_id: str, sex=None, application: str=None,
-                      target_reads: int=None):
+    def update_sample(self, lims_id: str, sex=None, application: str = None,
+                      target_reads: int = None):
         """Update information about a sample."""
         lims_sample = Sample(self, id=lims_id)
         if sex:
@@ -208,8 +208,8 @@ class LimsAPI(Lims, OrderHandler):
                 prep_artifact = arts[0]
                 method_number = prep_artifact.parent_process.udf.get('Method document')
                 method_version = (
-                        prep_artifact.parent_process.udf.get('Method document version') or
-                        prep_artifact.parent_process.udf.get('Method document versio')
+                    prep_artifact.parent_process.udf.get('Method document version') or
+                    prep_artifact.parent_process.udf.get('Method document versio')
                 )
                 break
 
@@ -231,12 +231,12 @@ class LimsAPI(Lims, OrderHandler):
             if arts:
                 prep_artifact = arts[0]
                 method_number = (
-                        prep_artifact.parent_process.udf.get('Method') or
-                        prep_artifact.parent_process.udf.get('Method Document 1')
+                    prep_artifact.parent_process.udf.get('Method') or
+                    prep_artifact.parent_process.udf.get('Method Document 1')
                 )
                 method_version = (
-                        prep_artifact.parent_process.udf.get('Version') or
-                        prep_artifact.parent_process.udf.get('Document 1 Version')
+                    prep_artifact.parent_process.udf.get('Version') or
+                    prep_artifact.parent_process.udf.get('Document 1 Version')
                 )
                 break
 

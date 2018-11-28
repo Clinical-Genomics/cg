@@ -192,7 +192,7 @@ def sample(sample_id):
     data = sample_obj.to_dict(links=True, flowcells=True)
     return jsonify(**data)
 
-  
+
 @BLUEPRINT.route('/samples_in_customer_group/<sample_id>')
 def sample_in_customer_group(sample_id):
     """Fetch a single sample."""
@@ -205,7 +205,7 @@ def sample_in_customer_group(sample_id):
     data = sample_obj.to_dict(links=True, flowcells=True)
     return jsonify(**data)
 
-    
+
 @BLUEPRINT.route('/microbial_orders')
 def microbial_orders():
     """Fetch microbial orders."""
@@ -314,7 +314,8 @@ def analyses():
 @BLUEPRINT.route('/options')
 def options():
     """Fetch various options."""
-    customer_objs = db.Customer.query.all() if g.current_user.is_admin else [g.current_user.customer]
+    customer_objs = db.Customer.query.all() if g.current_user.is_admin else [
+        g.current_user.customer]
     apptag_groups = {'ext': []}
     for application_obj in db.applications(archived=False):
         if application_obj.is_external:

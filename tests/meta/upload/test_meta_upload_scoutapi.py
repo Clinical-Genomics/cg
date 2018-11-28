@@ -3,7 +3,7 @@ from cg.store import Store
 
 
 def test_generate_config_adds_rank_model_version(analysis: Store.Analysis, upload_scout_api:
-UploadScoutAPI):
+                                                 UploadScoutAPI):
 
     # GIVEN a status db and hk with an analysis
     assert analysis

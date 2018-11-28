@@ -51,7 +51,7 @@ class OrderHandler:
         results = self.save_xml(artifact_uri, artifact_details)
         return results
 
-    def submit_project(self, project_name: str, samples: List[dict], researcher_id: str='3'):
+    def submit_project(self, project_name: str, samples: List[dict], researcher_id: str = '3'):
         """Parse Scout project."""
         containers = self.prepare(samples)
 

@@ -20,7 +20,7 @@ class ScoutAPI(MongoAdapter):
         client = MongoClient(config['scout']['database'], serverSelectionTimeoutMS=20)
         super(ScoutAPI, self).__init__(client[config['scout']['database_name']])
 
-    def upload(self, data: dict, threshold: int=5, force: bool=False):
+    def upload(self, data: dict, threshold: int = 5, force: bool = False):
         """Load analysis of a new family into Scout."""
         data['rank_score_threshold'] = threshold
         config_data = parse_case_data(config=data)
@@ -41,7 +41,7 @@ class ScoutAPI(MongoAdapter):
         """Pass through to export of a list of gene panels."""
         return scout_export_panels(self, panels, versions)
 
-    def get_genes(self, panel_id: str, version: str=None) -> list:
+    def get_genes(self, panel_id: str, version: str = None) -> list:
         """Fetch panel genes.
 
         Args:
@@ -55,7 +55,7 @@ class ScoutAPI(MongoAdapter):
         return gene_panel.get('genes')
 
     def get_cases(self, case_id=None, institute=None, reruns=None, finished=None, causatives=None, research_requested=None,
-          is_research=None, status=None):
+                  is_research=None, status=None):
         """Interact with cases existing in the database."""
 
         models = []
@@ -66,8 +66,8 @@ class ScoutAPI(MongoAdapter):
 
         else:
             models = self.cases(collaborator=institute, reruns=reruns,
-                               finished=finished, has_causatives=causatives,
-                               research_requested=research_requested,
-                               is_research=is_research, status=status)
+                                finished=finished, has_causatives=causatives,
+                                research_requested=research_requested,
+                                is_research=is_research, status=status)
 
         return models

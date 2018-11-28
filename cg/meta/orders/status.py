@@ -348,8 +348,8 @@ class StatusHandler:
                 if not organism:
                     organism = self.status.add_organism(internal_id=sample_data[
                         'organism_id'], name=sample_data['organism_id'],
-                                                        reference_genome=sample_data[
-                                                            'reference_genome'])
+                        reference_genome=sample_data[
+                        'reference_genome'])
                     self.status.add_commit(organism)
 
                 new_sample = self.status.add_microbial_sample(

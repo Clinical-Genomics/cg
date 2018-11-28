@@ -27,8 +27,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
     """Orders API for accepting new samples into the system."""
 
     def __init__(self, lims: LimsAPI, status: Store, osticket: OsTicket = None):
-        super().__init__()
-        self.lims = lims
+        super().__init__(lims)
         self.status = status
         self.osticket = osticket
 
@@ -258,7 +257,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
             reference_genome = sample['reference_genome']
             organism = self.status.organism(internal_id=organism_id)
             is_verified = organism and organism.reference_genome == reference_genome and \
-                          organism.verified
+                organism.verified
             sample['verified_organism'] = is_verified
 
     def _validate_customer_on_imported_samples(self, project, data):

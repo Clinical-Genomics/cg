@@ -1,11 +1,17 @@
 import logging
 from typing import List
 
+from cg.apps.lims import LimsAPI
+
 LOG = logging.getLogger(__name__)
 SEX_MAP = {'male': 'M', 'female': 'F'}
 
 
 class LimsHandler:
+
+    def __init__(self, lims: LimsAPI):
+        super().__init__()
+        self.lims = lims
 
     @staticmethod
     def to_lims(customer: str, samples: List[dict]) -> List[dict]:

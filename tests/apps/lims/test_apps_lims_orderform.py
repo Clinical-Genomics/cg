@@ -203,7 +203,7 @@ def test_parsing_metagenome_orderform(metagenome_orderform):
     assert sample['quantity'] == '2'
     assert sample['comment'] == 'other extraction method'
 
-    
+
 def test_parsing_microbial_orderform(microbial_orderform):
     # GIVEN a path to a microbial orderform with 3 samples
 
@@ -311,7 +311,7 @@ def test_parsing_mip_balsamic_orderform(mip_balsamic_orderform):
     assert trio_family['name'] == 'wgs'
     assert trio_family['priority'] == 'clinical trials'
     assert set(trio_family['panels']) == set(['AD-1.0-141202', 'CNM', 'CILM', 'AD', 'CM', 'ATX',
-                                      'horsel', 'DSD', 'CTD', '16PDEL'])
+                                              'horsel', 'DSD', 'CTD', '16PDEL'])
     assert trio_family['require_qcok'] is True
     # ... and collect relevant info about the samples
 

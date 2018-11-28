@@ -72,8 +72,8 @@ class TransferLims(object):
                 if statusdb_date and statusdb_date.date() == lims_date:
                     continue
 
-                LOG.info(f"Found new {status_type.value} date for {sample_obj.internal_id}: " \
-                              f"{lims_date}, old value: {statusdb_date} ")
+                LOG.info(f"Found new {status_type.value} date for {sample_obj.internal_id}: "
+                         f"{lims_date}, old value: {statusdb_date} ")
 
                 setattr(sample_obj, f"{status_type.value}_at", lims_date)
                 self.status.commit()
@@ -107,7 +107,8 @@ class TransferLims(object):
                 for sample_obj in samples_in_pool:
                     status_date = self._date_functions[status_type](sample_obj.id)
                     if sample_obj.udf['pool name'] == pool_obj.name and status_date is not None:
-                        LOG.info(f"Found {status_type.value} date for pool id {pool_obj.id}: {status_date}.")
+                        LOG.info(
+                            f"Found {status_type.value} date for pool id {pool_obj.id}: {status_date}.")
                         setattr(pool_obj, f"{status_type.value}_at", status_date)
                         self.status.commit()
                         break

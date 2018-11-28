@@ -18,8 +18,8 @@ def test_transfer_samples_received_at_overwriteable(transfer_lims_api):
     assert sample.received_at
     new_date = dt.datetime.today()
     lims_samples = [sample_store.add_sample(name=sample.name, sex=sample.sex,
-                                          internal_id=sample.internal_id,
-                                          received=new_date)]
+                                            internal_id=sample.internal_id,
+                                            received=new_date)]
     lims_api.mock_set_samples(lims_samples)
     assert not has_same_received_at(lims_api, sample)
 
@@ -83,9 +83,9 @@ def test_transfer_samples_include_unset_received_at(transfer_lims_api):
                                           received=untransfered_sample_received_at_date)
     lims_samples.append(lims_sample)
     lims_sample = sample_store.add_sample(name=transfered_sample.name,
-                                              sex=transfered_sample.sex,
-                                              internal_id=transfered_sample.internal_id,
-                                              received=transfered_sample_received_at_date)
+                                          sex=transfered_sample.sex,
+                                          internal_id=transfered_sample.internal_id,
+                                          received=transfered_sample_received_at_date)
     lims_samples.append(lims_sample)
     lims_api = transfer_lims_api.lims
     lims_api.mock_set_samples(lims_samples)

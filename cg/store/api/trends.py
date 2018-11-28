@@ -35,18 +35,18 @@ class TrendsHandler:
                 func.month(models.Sample.received_at).label('month_no'),
                 func.count(models.Sample.id).label('count'),
             )
-                .join(models.Sample.customer)
-                .filter(models.Sample.received_at > self.get_from_date(year),
-                        models.Sample.received_at < self.get_until_date(year))
-                .group_by('priority','month_no')
+            .join(models.Sample.customer)
+            .filter(models.Sample.received_at > self.get_from_date(year),
+                    models.Sample.received_at < self.get_until_date(year))
+            .group_by('priority', 'month_no')
         )
 
         for cust_priority, results in groupby(query, key=lambda result: result.priority):
             counts = {MONTHS[result.month_no]: result.count for result in results}
             data = {
                 'name': cust_priority,
-                'results': {month : counts.get(month) or None
-                 for month in MONTHS.values()},
+                'results': {month: counts.get(month) or None
+                            for month in MONTHS.values()},
             }
             yield data
 
@@ -59,28 +59,27 @@ class TrendsHandler:
                 func.month(models.Sample.received_at).label('month_no'),
                 func.count(models.Sample.id).label('count'),
             )
-                .join(
+            .join(
                 models.Sample.application_version,
                 models.ApplicationVersion.application,
             )
-                .filter(
+            .filter(
                 models.Sample.received_at > self.get_from_date(year),
                 models.Sample.received_at < self.get_until_date(year),
                 models.Sample.received_at,
                 models.Application.category,
             )
-                .group_by('category', 'month_no')
+            .group_by('category', 'month_no')
         )
 
         for application_cathegory, results in groupby(query, key=lambda result: result.category):
             counts = {MONTHS[result.month_no]: result.count for result in results}
             data = {
                 'name': application_cathegory,
-                'results': {month : counts.get(month) or None
-                 for month in MONTHS.values()},
+                'results': {month: counts.get(month) or None
+                            for month in MONTHS.values()},
             }
             yield data
-    
 
     def received_to_delivered(self, year):
         """Calculate averages from received to delivered."""
@@ -91,18 +90,18 @@ class TrendsHandler:
                 (func.avg(func.datediff(models.Sample.delivered_at, models.Sample.received_at))
                  .label('average')),
             )
-                .join(
+            .join(
                 models.Sample.customer,
                 models.Sample.application_version,
                 models.ApplicationVersion.application,
             )
-                .filter(
+            .filter(
                 models.Customer.priority == 'diagnostic',
                 models.Sample.received_at > self.get_from_date(year),
                 models.Sample.received_at < self.get_until_date(year),
                 models.Sample.delivered_at is not None,
             )
-                .group_by(
+            .group_by(
                 models.Application.category,
                 func.month(models.Sample.received_at),
             )
@@ -112,8 +111,8 @@ class TrendsHandler:
                         for result in results}
             yield {
                 'name': category,
-                'results': {month : averages.get(month) or None
-                 for month in MONTHS.values()}
+                'results': {month: averages.get(month) or None
+                            for month in MONTHS.values()}
             }
 
     def received_to_prepped(self, year):
@@ -125,17 +124,17 @@ class TrendsHandler:
                 (func.avg(func.datediff(models.Sample.prepared_at, models.Sample.received_at))
                  .label('average')),
             )
-                .join(
+            .join(
                 models.Sample.customer,
                 models.Sample.application_version,
                 models.ApplicationVersion.application,
             )
-                .filter(
+            .filter(
                 models.Customer.priority == 'diagnostic',
                 models.Sample.received_at > self.get_from_date(year),
                 models.Sample.received_at < self.get_until_date(year),
             )
-                .group_by(
+            .group_by(
                 models.Application.category,
                 func.month(models.Sample.received_at),
             )
@@ -145,8 +144,8 @@ class TrendsHandler:
                         for result in results}
             yield {
                 'name': category,
-                'results': {month : averages.get(month) or None
-                 for month in MONTHS.values()}
+                'results': {month: averages.get(month) or None
+                            for month in MONTHS.values()}
             }
 
     def prepped_to_sequenced(self, year):
@@ -159,17 +158,17 @@ class TrendsHandler:
                     func.datediff(models.Sample.sequenced_at, models.Sample.prepared_at)).label(
                     'average'),
             )
-                .join(
+            .join(
                 models.Sample.customer,
                 models.Sample.application_version,
                 models.ApplicationVersion.application,
             )
-                .filter(
+            .filter(
                 models.Customer.priority == 'diagnostic',
                 models.Sample.received_at > self.get_from_date(year),
                 models.Sample.received_at < self.get_until_date(year),
             )
-                .group_by(
+            .group_by(
                 models.Application.category,
                 func.month(models.Sample.received_at),
             )
@@ -179,8 +178,8 @@ class TrendsHandler:
                         for result in results}
             yield {
                 'name': category,
-                'results': {month : averages.get(month) or None
-                 for month in MONTHS.values()}
+                'results': {month: averages.get(month) or None
+                            for month in MONTHS.values()}
             }
 
     def sequenced_to_delivered(self, year):
@@ -193,18 +192,18 @@ class TrendsHandler:
                     func.datediff(models.Sample.delivered_at, models.Sample.sequenced_at)).label(
                     'average'),
             )
-                .join(
+            .join(
                 models.Sample.customer,
                 models.Sample.application_version,
                 models.ApplicationVersion.application,
             )
-                .filter(
+            .filter(
                 models.Customer.priority == 'diagnostic',
                 models.Sample.received_at > self.get_from_date(year),
                 models.Sample.received_at < self.get_until_date(year),
                 models.Sample.delivered_at is not None,
             )
-                .group_by(
+            .group_by(
                 models.Application.category,
                 func.month(models.Sample.received_at),
             )
@@ -214,8 +213,8 @@ class TrendsHandler:
                         for result in results}
             yield {
                 'name': category,
-                'results': {month : averages.get(month) or None
-                 for month in MONTHS.values()}
+                'results': {month: averages.get(month) or None
+                            for month in MONTHS.values()}
             }
 
     def delivered_to_invoiced(self, year):
@@ -229,13 +228,13 @@ class TrendsHandler:
                                   models.Sample.delivered_at)).label(
                     'average'),
             )
-                .join(
+            .join(
                 models.Sample.customer,
                 models.Sample.application_version,
                 models.ApplicationVersion.application,
                 models.Sample.invoice,
             )
-                .filter(
+            .filter(
                 models.Customer.priority == 'diagnostic',
                 models.Sample.received_at > self.get_from_date(year),
                 models.Sample.received_at < self.get_until_date(year),
@@ -244,7 +243,7 @@ class TrendsHandler:
                 models.Sample.invoice_id is not None,
                 models.Invoice.invoiced_at is not None,
             )
-                .group_by(
+            .group_by(
                 models.Application.category,
                 func.month(models.Sample.received_at),
             )
@@ -254,6 +253,6 @@ class TrendsHandler:
                         for result in results}
             yield {
                 'name': category,
-                'results': {month : averages.get(month) or None
-                 for month in MONTHS.values()}
+                'results': {month: averages.get(month) or None
+                            for month in MONTHS.values()}
             }

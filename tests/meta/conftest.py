@@ -118,13 +118,13 @@ class MockDeliver:
 
         if tags[0] == 'mip-config':
             path = '/mnt/hds/proj/bioinfo/bundles/' + family + '/2018-01-30/' + family + \
-                    '_config.yaml'
+                '_config.yaml'
         elif tags[0] == 'sampleinfo':
             path = '/mnt/hds/proj/bioinfo/bundles/' + family + '/2018-01-30/' + family + \
-                    '_qc_sample_info.yaml'
+                '_qc_sample_info.yaml'
         if tags[0] == 'qcmetrics':
             path = '/mnt/hds/proj/bioinfo/bundles/' + family + '/2018-01-30/' + family + \
-                    '_qc_metrics.yaml'
+                '_qc_metrics.yaml'
 
         return [MockFile(path=path)]
 
@@ -179,7 +179,7 @@ class MockTB:
             raise KeyError('mockmessage')
 
         # Returns: dict: parsed data
-        ### Define output dict
+        # Define output dict
         outdata = {
             'analysis_sex': {'ADM1': 'female', 'ADM2': 'female', 'ADM3': 'female'},
             'family': 'yellowhog',

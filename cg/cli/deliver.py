@@ -19,6 +19,7 @@ def deliver(context):
     """Deliver stuff."""
     pass
 
+
 @deliver.command()
 @click.option('-d', '--dry', is_flag=True, help='print config to console')
 @click.option('-V', '--version', help='version (date) of bundle')
@@ -47,7 +48,8 @@ def inbox(context, dry, family, version, tag, inbox):
         LOG.warning(f"No family files found.")
 
     for file_obj in family_files:
-        out_dir = Path(inbox.format(family=family_obj.name, customer=family_obj.customer.internal_id))
+        out_dir = Path(inbox.format(family=family_obj.name,
+                                    customer=family_obj.customer.internal_id))
         out_dir.mkdir(parents=True, exist_ok=True)
 
         # might be fun to name exit files according to tags instead of MIP's long name
@@ -69,17 +71,20 @@ def inbox(context, dry, family, version, tag, inbox):
 
     for family_sample in link_obj:
         sample_obj = family_sample.sample
-        sample_files = deliver_api.get_post_analysis_sample_files(family=family, sample=sample_obj.internal_id, version=version, tag=tag)
+        sample_files = deliver_api.get_post_analysis_sample_files(
+            family=family, sample=sample_obj.internal_id, version=version, tag=tag)
 
         if not sample_files:
             LOG.warning(f"No sample files found for '{sample_obj.internal_id}'.")
 
         for file_obj in sample_files:
-            out_dir = Path(inbox.format(family=family_obj.name, customer=family_obj.customer.internal_id))
+            out_dir = Path(inbox.format(family=family_obj.name,
+                                        customer=family_obj.customer.internal_id))
             out_dir = out_dir.joinpath(sample_obj.name)
             out_dir.mkdir(parents=True, exist_ok=True)
 
-            out_file_name = Path(file_obj.path).name.replace(sample_obj.internal_id, sample_obj.name)
+            out_file_name = Path(file_obj.path).name.replace(
+                sample_obj.internal_id, sample_obj.name)
             out_path = Path(f"{out_dir / out_file_name}")
             in_path = Path(file_obj.full_path)
 
@@ -88,4 +93,3 @@ def inbox(context, dry, family, version, tag, inbox):
                 LOG.info(f"linked file: {in_path} -> {out_path}")
             else:
                 LOG.info(f"Target file exists: {out_path}")
-

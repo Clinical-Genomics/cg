@@ -10,14 +10,14 @@ SEX_MAP = {'male': 'M', 'female': 'F', 'unknown': 'unknown'}
 REV_SEX_MAP = {value: key for key, value in SEX_MAP.items()}
 CONTAINER_TYPES = ['Tube', '96 well plate']
 SOURCE_TYPES = set().union(METAGENOME_SOURCES, ANALYSIS_SOURCES)
-VALID_ORDERFORMS=[
+VALID_ORDERFORMS = [
     '1508:14',      # Orderform MIP, Balsamic, sequencing only
     '1541:6',       # Orderform Externally sequenced samples
     '1603:7',       # Microbial WGS
     '1604:8',       # Orderform Ready made libraries (RML)
     '1605:6',       # Microbial metagenomes
 ]
-FAMILY_PROJECT_TYPES=['mip', 'external', 'balsamic', 'mip_balsamic']
+FAMILY_PROJECT_TYPES = ['mip', 'external', 'balsamic', 'mip_balsamic']
 
 
 def check_orderform_version(document_title):

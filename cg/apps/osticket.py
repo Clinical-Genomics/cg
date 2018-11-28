@@ -19,7 +19,7 @@ class OsTicket(object):
         """Initialize the API in Flask."""
         self.setup(api_key=app.config['OSTICKET_API_KEY'], domain=app.config['OSTICKET_DOMAIN'])
 
-    def setup(self, api_key: str=None, domain: str=None):
+    def setup(self, api_key: str = None, domain: str = None):
         """Initialize the API."""
         self.headers = {'X-API-Key': api_key}
         self.url = os.path.join(domain, 'api/tickets.json')

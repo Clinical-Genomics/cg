@@ -121,7 +121,7 @@ class AddHandler:
                 'archive': False,
             })
 
-            ## Bam preprocessing
+            # Bam preprocessing
             bam_path = sample_data['bam']
             bai_path = f"{bam_path}.bai"
             if not Path(bai_path).exists():
@@ -138,8 +138,8 @@ class AddHandler:
                 'archive': False,
             })
 
-            ## Only for wgs data
-            ## Downsamples MT bam preprocessing
+            # Only for wgs data
+            # Downsamples MT bam preprocessing
             if sample_data['subsample_mt']:
                 mt_bam_path = sample_data['subsample_mt']
                 mt_bai_path = f"{mt_bam_path}.bai"

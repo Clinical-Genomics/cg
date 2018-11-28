@@ -38,7 +38,8 @@ def test_samples_to_sequence(sample_store):
 
     # THEN it should list the received and partly sequenced samples
     assert sequence_samples.count() == 2
-    assert {sample.name for sample in sequence_samples} == set(['sequenced-partly', 'received-prepared'])
+    assert {sample.name for sample in sequence_samples} == set(
+        ['sequenced-partly', 'received-prepared'])
     for sample in sequence_samples:
         assert sample.sequenced_at is None
         if sample.name == 'sequenced-partly':

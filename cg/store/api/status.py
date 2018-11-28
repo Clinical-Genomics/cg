@@ -62,7 +62,7 @@ class StatusHandler:
         )
         return records
 
-    def families_to_mip_analyze(self, limit: int=50):
+    def families_to_mip_analyze(self, limit: int = 50):
         """Fetch families without analyses where all samples are sequenced."""
         records = (
             self.Family.query
@@ -77,7 +77,7 @@ class StatusHandler:
                         models.Family.action == None,
                         models.Sample.data_analysis not in ['Balsamic'],
                     )
-            ))
+                ))
             .order_by(models.Family.priority.desc(), models.Family.ordered_at)
         )
         return [record for record in records.limit(limit) if self._samples_sequenced(record.links)]
@@ -149,7 +149,7 @@ class StatusHandler:
         )
         return records
 
-    def samples_to_invoice(self, customer: models.Customer=None):
+    def samples_to_invoice(self, customer: models.Customer = None):
         """Fetch samples that should be invoiced.
 
         Return samples have been delivered but invoiced, excluding those that
@@ -163,12 +163,13 @@ class StatusHandler:
                 models.Sample.downsampled_to == None
             )
         )
-        customers_to_invoice = [record.customer for record in records.all() if not record.customer.internal_id == 'cust000']
+        customers_to_invoice = [record.customer for record in records.all(
+        ) if not record.customer.internal_id == 'cust000']
         customers_to_invoice = list(set(customers_to_invoice))
         records = records.filter(models.Sample.customer == customer) if customer else records
         return records, customers_to_invoice
 
-    def pools_to_invoice(self, customer: models.Customer=None):
+    def pools_to_invoice(self, customer: models.Customer = None):
         """
         Fetch pools that should be invoiced.
         """
@@ -179,8 +180,9 @@ class StatusHandler:
                 models.Pool.delivered_at != None
             )
         )
-        
-        customers_to_invoice = [record.customer for record in records.all() if not record.customer.internal_id=='cust000']
+
+        customers_to_invoice = [record.customer for record in records.all(
+        ) if not record.customer.internal_id == 'cust000']
         customers_to_invoice = list(set(customers_to_invoice))
         records = records.filter(models.Pool.customer_id == customer.id) if customer else records
         return records, customers_to_invoice
@@ -205,4 +207,3 @@ class StatusHandler:
             )
         )
         return records
-

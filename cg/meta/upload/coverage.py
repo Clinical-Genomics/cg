@@ -36,7 +36,7 @@ class UploadCoverageApi(object):
             })
         return data
 
-    def upload(self, data: dict, replace: bool=False):
+    def upload(self, data: dict, replace: bool = False):
         """Upload coverage to Chanjo from an analysis."""
         for sample_data in data['samples']:
             chanjo_sample = self.chanjo.sample(sample_data['sample'])

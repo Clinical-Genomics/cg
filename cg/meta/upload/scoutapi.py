@@ -34,7 +34,7 @@ class UploadScoutAPI(object):
             'samples': [],
             'analysis_date': analysis_obj.completed_at,
             'gene_panels': self.analysis.convert_panels(analysis_obj.family.customer.internal_id,
-                                                      analysis_obj.family.panels),
+                                                        analysis_obj.family.panels),
             'default_gene_panels': analysis_obj.family.panels,
             'human_genome_build': analysis_data.get('genome_build'),
             'rank_model_version': analysis_data.get('rank_model_version'),
@@ -49,7 +49,8 @@ class UploadScoutAPI(object):
             mt_bam_file = self.housekeeper.files(version=hk_version.id, tags=mt_bam_tags).first()
             mt_bam_path = mt_bam_file.full_path if mt_bam_file else None
             vcf2cytosure_tags = ['vcf2cytosure', sample_id]
-            vcf2cytosure_file = self.housekeeper.files(version=hk_version.id, tags=vcf2cytosure_tags).first()
+            vcf2cytosure_file = self.housekeeper.files(
+                version=hk_version.id, tags=vcf2cytosure_tags).first()
             vcf2cytosure_path = vcf2cytosure_file.full_path if vcf2cytosure_file else None
             data['samples'].append({
                 'analysis_type': link_obj.sample.application_version.application.analysis_type,

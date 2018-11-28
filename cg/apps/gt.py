@@ -21,7 +21,7 @@ class GenotypeAPI(Manager):
         alchy_config = dict(SQLALCHEMY_DATABASE_URI=config['genotype']['database'])
         super(GenotypeAPI, self).__init__(config=alchy_config, Model=models.Model)
 
-    def upload(self, bcf_path: str, samples_sex: dict, force: bool=False):
+    def upload(self, bcf_path: str, samples_sex: dict, force: bool = False):
         """Upload genotypes for a family of samples."""
         snps = api.snps()
         analyses = load_vcf(bcf_path, snps)

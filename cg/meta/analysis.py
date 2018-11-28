@@ -31,8 +31,8 @@ class AnalysisAPI():
 
     def __init__(self, db: Store, hk_api: hk.HousekeeperAPI, scout_api: scoutapi.ScoutAPI,
                  tb_api: tb.TrailblazerAPI, lims_api: lims.LimsAPI, deliver_api:
-            DeliverAPI, ruamel=ruamel, Path=Path, logger=logging.getLogger(
-        __name__)):
+                 DeliverAPI, ruamel=ruamel, Path=Path, logger=logging.getLogger(
+                     __name__)):
         self.db = db
         self.tb = tb_api
         self.hk = hk_api
@@ -72,7 +72,8 @@ class AnalysisAPI():
             downsampled = isinstance(link_obj.sample.downsampled_to, int)
             external = link_obj.sample.application_version.application.is_external
             if downsampled or external:
-                self.LOG.info(f"{link_obj.sample.internal_id}: downsampled/external - skip evaluation")
+                self.LOG.info(
+                    f"{link_obj.sample.internal_id}: downsampled/external - skip evaluation")
                 kwargs['skip_evaluation'] = True
                 break
 
@@ -84,10 +85,10 @@ class AnalysisAPI():
     def config(self, family_obj: models.Family) -> dict:
         """Make the MIP config. Meta data for the family is taken from the family object
         and converted to MIP format via trailblazer. 
-        
+
         Args:
             family_obj (models.Family):
-        
+
         Returns:
             dict: config_data (MIP format)
         """
@@ -126,7 +127,8 @@ class AnalysisAPI():
                         try:
                             capture_kit = self.lims.capture_kit(link.sample.internal_id)
                             if capture_kit is None or capture_kit == 'NA':
-                                self.LOG.warning(f"{link.sample.internal_id}: capture kit not found")
+                                self.LOG.warning(
+                                    f"{link.sample.internal_id}: capture kit not found")
                             else:
                                 sample_data['capture_kit'] = CAPTUREKIT_MAP[capture_kit]
                         except HTTPError:

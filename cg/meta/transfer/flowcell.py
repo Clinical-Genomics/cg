@@ -11,12 +11,12 @@ LOG = logging.getLogger(__name__)
 
 class TransferFlowcell():
 
-    def __init__(self, db: Store, stats_api: StatsAPI, hk_api: HousekeeperAPI=None):
+    def __init__(self, db: Store, stats_api: StatsAPI, hk_api: HousekeeperAPI = None):
         self.db = db
         self.stats = stats_api
         self.hk = hk_api
 
-    def transfer(self, flowcell_name: str, store: bool=True) -> models.Flowcell:
+    def transfer(self, flowcell_name: str, store: bool = True) -> models.Flowcell:
         """Populate the database with the information."""
         if store and self.hk.tag('fastq') is None:
             self.hk.add_commit(self.hk.new_tag('fastq'))

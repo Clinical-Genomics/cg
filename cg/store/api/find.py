@@ -50,13 +50,13 @@ class FindHandler:
         return records.order_by(models.Family.created_at.desc())
 
     def families_in_customer_group(self, *, customer: models.Customer = None, enquiry: str =
-    None) -> List[models.Family]:
+                                   None) -> List[models.Family]:
         """Fetch all families including those from collaborating customers."""
         records = self.Family.query \
             .join(
-            models.Family.customer,
-            models.Customer.customer_group,
-        )
+                models.Family.customer,
+                models.Customer.customer_group,
+            )
 
         if customer:
             records = records.filter(
@@ -78,7 +78,7 @@ class FindHandler:
         return self.Sample.query.filter_by(internal_id=internal_id).first()
 
     def samples(self, *, customer: models.Customer = None, enquiry: str = None) -> List[
-        models.Sample]:
+            models.Sample]:
         records = self.Sample.query
         records = records.filter_by(customer=customer) if customer else records
         records = records.filter(or_(
@@ -93,9 +93,9 @@ class FindHandler:
 
         records = self.Sample.query \
             .join(
-            models.Sample.customer,
-            models.Customer.customer_group,
-        )
+                models.Sample.customer,
+                models.Customer.customer_group,
+            )
 
         if customer:
             records = records.filter(
@@ -108,7 +108,7 @@ class FindHandler:
         return records.order_by(models.Sample.created_at.desc())
 
     def microbial_samples(self, *, customer: models.Customer = None, enquiry: str = None) -> List[
-        models.MicrobialSample]:
+            models.MicrobialSample]:
         records = self.MicrobialSample.query
         records = records.filter_by(customer=customer) if customer else records
         records = records.filter(or_(
@@ -126,7 +126,7 @@ class FindHandler:
         return self.Sample.query.filter_by(customer=customer, name=name)
 
     def find_sample_in_customer_group(self, customer: models.Customer, name: str) -> List[
-        models.Sample]:
+            models.Sample]:
         """Find samples within the customer group."""
         return self.Sample.query.filter(
             models.Sample.customer.customer_group == customer.customer_group, name == name)
@@ -203,8 +203,8 @@ class FindHandler:
         if family:
             records = (
                 records
-                    .join(models.Flowcell.samples, models.Sample.links)
-                    .filter(models.FamilySample.family == family)
+                .join(models.Flowcell.samples, models.Sample.links)
+                .filter(models.FamilySample.family == family)
             )
         if status:
             records = records.filter_by(status=status)
@@ -222,10 +222,10 @@ class FindHandler:
             self.FamilySample.query
                 .join(models.FamilySample.family, models.FamilySample.sample)
                 .filter(
-                models.Family.internal_id == family_id,
-                models.Sample.internal_id == sample_id
-            )
-                .first()
+                    models.Family.internal_id == family_id,
+                    models.Sample.internal_id == sample_id
+                )
+            .first()
         )
 
     def family_samples(self, family_id: str) -> List[models.FamilySample]:
@@ -234,9 +234,9 @@ class FindHandler:
             self.FamilySample.query
                 .join(models.FamilySample.family, models.FamilySample.sample)
                 .filter(
-                models.Family.internal_id == family_id,
-            )
-                .all()
+                    models.Family.internal_id == family_id,
+                )
+            .all()
         )
 
     def pools(self, *, customer: models.Customer, enquiry: str = None) -> Query:
@@ -286,7 +286,7 @@ class FindHandler:
         return pools + samples
 
     def microbial_orders(self, *, customer: models.Customer = None, enquiry: str = None) -> List[
-        models.MicrobialOrder]:
+            models.MicrobialOrder]:
         """Fetch all microbial_orders."""
         records = self.MicrobialOrder.query
         records = records.filter_by(customer=customer) if customer else records

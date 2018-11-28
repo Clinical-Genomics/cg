@@ -44,7 +44,7 @@ class MockAnalysis:
 
     def get_latest_metadata(self, family_id):
         # Returns: dict: parsed data
-        ### Define output dict
+        # Define output dict
         outdata = {
             'analysis_sex': {'ADM1': 'female', 'ADM2': 'female', 'ADM3': 'female'},
             'family': 'yellowhog',

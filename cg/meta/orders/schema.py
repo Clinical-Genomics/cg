@@ -22,7 +22,7 @@ class ListValidator(validators.Validator):
 
     """Validate a list of items against a schema."""
 
-    def __init__(self, scheme: validators.Validator, min_items: int=0):
+    def __init__(self, scheme: validators.Validator, min_items: int = 0):
         super(ListValidator, self).__init__(scheme)
         self.__scheme = validators.Validator.create_validator(scheme)
         self.min_items = min_items

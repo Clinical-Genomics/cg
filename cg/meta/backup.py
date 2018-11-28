@@ -14,13 +14,13 @@ class BackupApi():
         self.status = status
         self.pdc = pdc_api
 
-    def maximum_flowcells_ondisk(self, max_flowcells: int=700) -> bool:
+    def maximum_flowcells_ondisk(self, max_flowcells: int = 700) -> bool:
         """Check if there's too many flowcells already "ondisk"."""
         ondisk_flowcells = self.status.flowcells(status='ondisk').count()
         LOG.debug(f"ondisk flowcells: {ondisk_flowcells}")
         return ondisk_flowcells > max_flowcells
 
-    def check_processing(self, max_flowcells: int=3) -> bool:
+    def check_processing(self, max_flowcells: int = 3) -> bool:
         """Check if the processing queue for flowcells is not full."""
         processing_flowcells = self.status.flowcells(status='processing').count()
         LOG.debug(f"processing flowcells: {processing_flowcells}")
@@ -37,7 +37,7 @@ class BackupApi():
             self.status.commit()
         return flowcell_obj
 
-    def fetch_flowcell(self, flowcell_obj: models.Flowcell=None):
+    def fetch_flowcell(self, flowcell_obj: models.Flowcell = None):
         """Start fetching a flowcell from backup if possible.
 
         1. The processing queue is not full

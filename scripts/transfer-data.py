@@ -103,7 +103,7 @@ class ApplicationImporter(Store):
             } for version in record.versions]
         }
         return data
-    
+
     def build(self, data: dict):
         """Build database objects."""
         kwargs = dict(
@@ -194,7 +194,7 @@ class CustomerImporter(Store):
                                 record.invoice_contact else None),
         }
         return data
-    
+
     def build(self, data: dict):
         """Build a database record."""
         kwargs = dict(
@@ -248,7 +248,7 @@ class UserImporter(Store):
             'customer': record.customers[0].customer_id if record.customers else 'cust999',
         }
         return data
-    
+
     def build(self, data: dict):
         """Build a database record."""
         customer_obj = self.customer(data['customer'])
@@ -295,7 +295,7 @@ class PanelImporter(Store):
             'genes': len(record['genes']),
         }
         return data
-    
+
     def build(self, data: dict):
         """Build a database record."""
         customer_obj = self.customer(data['customer'])
@@ -317,7 +317,7 @@ class SampleImporter(Store):
     def __init__(self, uri: str, lims):
         super(SampleImporter, self).__init__(uri)
         self.lims = lims
-    
+
     def process(self):
         """Transfer lims info to store."""
         for customer_obj in [self.customer('cust002')]:
@@ -511,7 +511,8 @@ class FamilyImporter(Store):
                 )
                 yield link_obj
             except Exception:
-                import ipdb; ipdb.set_trace()
+                import ipdb
+                ipdb.set_trace()
 
 
 # class FlowcellImporter(TransferFlowcell):
@@ -562,7 +563,7 @@ class AnalysisImporter(Store):
             'family': hk_record.case.family_id,
             'customer': hk_record.case.customer,
         }
-    
+
     def build(self, family_obj, data):
         new_record = self.add_analysis(
             pipeline=data['pipeline'],

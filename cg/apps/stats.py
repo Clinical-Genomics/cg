@@ -74,10 +74,10 @@ class StatsAPI(alchy.Manager):
         """Check whether a lane is pooled or not."""
         query = (
             self.session.query(
-               sqa.func.count(models.Unaligned.sample_id).label('sample_count')
+                sqa.func.count(models.Unaligned.sample_id).label('sample_count')
             )
             .join(
-               models.Unaligned.demux,
+                models.Unaligned.demux,
             )
             .filter(models.Demux.flowcell == flowcell_obj)
             .filter(models.Unaligned.lane == lane)

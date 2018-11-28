@@ -50,6 +50,6 @@ class UploadGenotypesAPI(object):
             data[sample_data['id']] = sample_data['predicted_sex']
         return data
 
-    def upload(self, data: dict, replace: bool=False):
+    def upload(self, data: dict, replace: bool = False):
         """Upload data about genotypes for a family of samples."""
         self.gt.upload(str(data['bcf']), data['samples_sex'], force=replace)

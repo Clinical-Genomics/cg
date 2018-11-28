@@ -27,7 +27,7 @@ def clean(context):
 
 
 @clean.command()
-@click.option('-type', '--item_type', type=click.Choice(['family','sample']), required=True, help='family/sample to remove from beacon')
+@click.option('-type', '--item_type', type=click.Choice(['family', 'sample']), required=True, help='family/sample to remove from beacon')
 @click.argument('item_id',  type=click.STRING)
 @click.pass_context
 def beacon(context: click.Context, item_type, item_id):
@@ -39,10 +39,11 @@ def beacon(context: click.Context, item_type, item_id):
         scout_api=context.obj['scout'],
         beacon_api=context.obj['beacon'],
     )
-    result = api.remove_vars(
-        item_type = item_type,
-        item_id = item_id
+    api.remove_vars(
+        item_type=item_type,
+        item_id=item_id
     )
+
 
 @clean.command()
 @click.option('-y', '--yes', is_flag=True, help='skip confirmation')
@@ -119,7 +120,7 @@ def scoutauto(context, yes):
 @click.option('-y', '--yes', is_flag=True, help='skip confirmation')
 @click.argument('before_str')
 @click.pass_context
-def mipauto(context: click.Context, before_str: str, yes: bool=False):
+def mipauto(context: click.Context, before_str: str, yes: bool = False):
     """Automatically clean up "old" analyses."""
     before = parse_date(before_str)
     old_analyses = context.obj['db'].analyses(before=before)
@@ -148,5 +149,5 @@ def mipauto(context: click.Context, before_str: str, yes: bool=False):
             with open(sampleinfo_path, 'r') as sampleinfo_file:
                 context.invoke(mip, yes=yes, sample_info=sampleinfo_file)
         except FileNotFoundError as err:
-            LOG.error(f"{family_id}: sample_info file not found, please mark the analysis as deleted in the analysis table in trailblazer.")
-            
+            LOG.error(
+                f"{family_id}: sample_info file not found, please mark the analysis as deleted in the analysis table in trailblazer.")

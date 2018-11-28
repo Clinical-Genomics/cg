@@ -28,7 +28,7 @@ def upload(context, family_id):
     """Upload results from analyses."""
 
     click.echo(click.style('----------------- UPLOAD ----------------------'))
-        
+
     context.obj['status'] = Store(context.obj['database'])
     context.obj['housekeeper_api'] = hk.HousekeeperAPI(context.obj)
 
@@ -143,9 +143,8 @@ def delivery_report(context, customer_id, family_id, print_console):
     else:
         tb_api = context.obj['tb_api']
         delivery_report_file = report_api.create_delivery_report_file(customer_id, family_id,
-                                                                      file_path=
-                                                                      tb_api.get_family_root_dir(
-                                                                        family_id))
+                                                                      file_path=tb_api.get_family_root_dir(
+                                                                          family_id))
         hk_api = context.obj['housekeeper_api']
         _add_delivery_report_to_hk(delivery_report_file, hk_api, family_id)
 

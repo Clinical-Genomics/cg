@@ -5,6 +5,7 @@ from pkg_resources import resource_filename
 from openpyxl import load_workbook, Workbook
 from openpyxl.styles import Border, Font, PatternFill, Side
 
+
 def render_xlsx(data: dict) -> Workbook:
     """Render an Excel invoice template.
 
@@ -55,14 +56,12 @@ def render_xlsx(data: dict) -> Workbook:
             worksheet[f"C{row}"] = lims_sample.udf['Total Reads (M)']
             worksheet[f"D{row}"] = str(lims_sample.udf['pool name'])
 
-
         for column in ['A', 'B', 'C', 'D', 'E', 'F', 'G']:
             cell = worksheet[f"{column}{6}"]
             cell.font = Font(bold=True)
             cell.border = Border(top=Side(border_style='thin', color='000000'),
                                  bottom=Side(border_style='thin', color='000000'))
             cell.fill = PatternFill('solid', fgColor='E5E8E8')
-
 
     worksheet = workbook['Faktura']
     worksheet['C1'] = data['costcenter'].upper()
@@ -105,5 +104,3 @@ def render_xlsx(data: dict) -> Workbook:
             cell.fill = PatternFill('solid', fgColor='E5E8E8')
 
     return workbook
-
-

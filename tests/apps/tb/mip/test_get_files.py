@@ -89,8 +89,8 @@ def test_get_files(files_data) -> dict:
         },
     }
 
-    ## Check returns from def
-    ## Family data
+    # Check returns from def
+    # Family data
     for tag_id in mip_file_test_data:
         # For every file tag
         for key, value in mip_file_test_data[tag_id].items():
@@ -100,13 +100,12 @@ def test_get_files(files_data) -> dict:
                 if tag_id in element_data['tags']:
                     assert value in element_data[key]
 
-
     mip_file_test_sample_data = {}
 
-    ## Define sample test data
+    # Define sample test data
     for sample_data in sampleinfo['samples']:
 
-        ## Bam preprocessing
+        # Bam preprocessing
         bam_path = sample_data['bam']
         bai_path = f"{bam_path}.bai"
         if not Path(bai_path).exists():
@@ -118,18 +117,18 @@ def test_get_files(files_data) -> dict:
             'vcf2cytosure': sample_data['vcf2cytosure'],
         }
 
-        ## Only wgs data
-        ## Downsamples MT bam
+        # Only wgs data
+        # Downsamples MT bam
         if sample_data['subsample_mt']:
             mt_bam_path = sample_data['subsample_mt']
             mt_bai_path = f"{mt_bam_path}.bai"
             if not Path(mt_bai_path).exists():
                 mt_bai_path = mt_bam_path.replace('.bam', '.bai')
             mip_file_test_sample_data[sample_data['id']]['bam-mt'] = mt_bam_path
-            mip_file_test_sample_data[sample_data['id']]['bam-mt-index'] = mt_bai_path 
+            mip_file_test_sample_data[sample_data['id']]['bam-mt-index'] = mt_bai_path
 
-    ## Check returns from def
-    ## Sample data
+    # Check returns from def
+    # Sample data
     for sample_id in mip_file_test_sample_data:
         for key, value in mip_file_test_sample_data[sample_id].items():
             for element_data in mip_file_data:

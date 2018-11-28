@@ -120,7 +120,6 @@ class ReportAPI:
         return template_out
 
     def _get_sample_coverage_from_chanjo(self, lims_id: str, genes: list) -> dict:
-
         """Get coverage data from Chanjo for a sample."""
         return self.chanjo.sample_coverage(lims_id, genes)
 

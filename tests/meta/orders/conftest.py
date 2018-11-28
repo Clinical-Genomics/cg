@@ -15,8 +15,8 @@ class MockLims(LimsAPI):
     def __init__(self):
         self.lims = self
 
-    def update_sample(self, lims_id: str, sex=None, application: str=None,
-                      target_reads: int=None):
+    def update_sample(self, lims_id: str, sex=None, application: str = None,
+                      target_reads: int = None):
         pass
 
 

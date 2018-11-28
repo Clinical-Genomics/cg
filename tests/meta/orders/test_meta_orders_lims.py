@@ -121,7 +121,8 @@ def test_to_lims_mip_balsamic(mip_balsamic_order_to_submit):
     # GIVEN a scout order for a trio
 
     # WHEN parsing the order to format for LIMS import
-    samples = LimsHandler.to_lims(customer='cust003', samples=mip_balsamic_order_to_submit['samples'])
+    samples = LimsHandler.to_lims(
+        customer='cust003', samples=mip_balsamic_order_to_submit['samples'])
 
     # THEN it should list all samples
     assert len(samples) == 4

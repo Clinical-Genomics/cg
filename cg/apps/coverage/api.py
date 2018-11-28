@@ -42,7 +42,7 @@ class ChanjoAPI(ChanjoDB):
         except IntegrityError as error:
             self.session.rollback()
             raise error
-    
+
     def sample(self, sample_id: str) -> models.Sample:
         """Fetch sample from the database."""
         return models.Sample.get(sample_id)

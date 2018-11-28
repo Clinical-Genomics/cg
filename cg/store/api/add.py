@@ -15,7 +15,7 @@ class AddHandler:
     """Methods related to adding new data to the store."""
 
     def add_customer(self, internal_id: str, name: str, customer_group:
-    models.CustomerGroup, scout_access: bool = False, **kwargs) -> models.Customer:
+                     models.CustomerGroup, scout_access: bool = False, **kwargs) -> models.Customer:
         """Build a new customer record."""
 
         new_customer = self.Customer(internal_id=internal_id, name=name, scout_access=scout_access,
@@ -131,8 +131,8 @@ class AddHandler:
         return new_record
 
     def add_pool(self, customer: models.Customer, name: str, order: str, ordered: dt.datetime,
-                 application_version: models.ApplicationVersion, data_analysis: str, ticket: int = \
-                         None,
+                 application_version: models.ApplicationVersion, data_analysis: str, ticket: int =
+                 None,
                  comment: str = None, received: dt.datetime = None, capture_kit: str = None) -> \
             models.Pool:
         """Build a new Pool record."""
@@ -187,7 +187,7 @@ class AddHandler:
                              priority: str = None,
                              comment: str = None, **kwargs) -> models.MicrobialSample:
         """Build a new MicrobialSample record.
-        
+
         To commit you also need to assign the sample to an Order.
         """
         internal_id = internal_id or utils.get_unique_id(self.sample)
@@ -206,7 +206,7 @@ class AddHandler:
         return new_sample
 
     def add_organism(self, internal_id: str, name: str, reference_genome: str = None, verified: bool
-    = False, **kwargs) -> models.Organism:
+                     = False, **kwargs) -> models.Organism:
         """Build a new Organism record."""
 
         new_organism = self.Organism(internal_id=internal_id, name=name,
