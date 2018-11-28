@@ -1,34 +1,59 @@
 # -*- coding: utf-8 -*-
-from loqusdb.plugins import MongoAdapter
-from loqusdb.utils import load_database
-from loqusdb.vcf_tools.vcf import get_file_handle, check_vcf
+import json
+
+import subprocess
+from subprocess import CalledProcessError
 
 
-class LoqusdbAPI(MongoAdapter):
+class LoqusdbAPI(object):
 
     def __init__(self, config: dict):
         super(LoqusdbAPI, self).__init__()
-        self.connect(
-            uri=config['loqusdb']['database'],
-            database=config['loqusdb']['database_name'],
-        )
+        self.uri = config['loqusdb']['database']
+        self.db_name = config['loqusdb']['database_name']
+        self.loqusdb_binary = config['loqusdb']['binary']
+        ## This will allways be the base of the loqusdb call
+        self.base_call = [self.loqusdb_binary, '-db', self.db_name, '--uri', self.uri]
 
     def load(self, family_id: str, ped_path: str, vcf_path: str) -> dict:
         """Add observations from a VCF."""
-        variant_handle = get_file_handle(vcf_path)
-        nr_variants = check_vcf(variant_handle)
-        load_database(
-            adapter=self,
-            variant_file=vcf_path,
-            family_file=ped_path,
-            family_type='ped',
-            case_id=family_id,
-            gq_treshold=20,
-            nr_variants=nr_variants,
+        load_call = base_call.extend([
+            'load', '-c', family_id, '--variants-file', vcf_path, '-f', ped_path, '--ensure-index',
+        ])
+
+        output = subprocess.check_output(
+            ' '.join(load_call),
+            shell=True
         )
-        self.check_indexes()
+        
+        nr_variants = 0
+        # Parse log output to get number of inserted variants
+        for line in output.decode('utf-8').split('\n'):
+            log_message = (line.split('INFO'))[-1].strip()
+            if 'inserted' in log_message:
+                nr_variants = int(log_message.split(':')[-1].strip())
+        
         return dict(variants=nr_variants)
 
     def get_case(self, case_id: str) -> dict:
         """Find a case in the database by case id."""
-        return self.db.case.find_one({'case_id': case_id})
+        case_obj = None
+        case_call = base_call.extend([
+            'cases', '-c', case_id, '--to-json',
+        ])
+        try:
+            output = subprocess.check_output(
+                        ' '.join(case_call),
+                        shell=True
+                    )
+        except CalledProcessError as err:
+            # If case does not exist we will get a non zero exit code and return None
+            return case_obj
+        
+        # The output is a list of dictionaries that are case objs
+        case_obj = json.loads(output.decode('utf-8'))[0]
+        
+        return case_obj
+    
+    def __repr__(self):
+        return f"LoqusdbAPI(uri={self.uri},db_name={self.db_name},loqusdb_binary={self.loqusdb_binary})"

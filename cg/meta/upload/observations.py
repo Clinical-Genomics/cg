@@ -32,7 +32,7 @@ class UploadObservationsAPI(object):
 
     def upload(self, data: dict):
         """Upload data about genotypes for a family of samples."""
-        existing_case = self.loqusdb.case({'case_id': data['family']})
+        existing_case = self.loqusdb.get_case(case_id=data['family']})
         if existing_case is None:
             results = self.loqusdb.load(data['family'], data['pedigree'], data['vcf'])
             LOG.info(f"parsed {results['variants']} variants")

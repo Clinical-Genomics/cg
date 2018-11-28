@@ -206,6 +206,7 @@ def observations(context, family_id):
 
     click.echo(click.style('----------------- OBSERVATIONS ----------------'))
 
+    ## TODO add the loqusd db binary path to context.obj
     loqus_api = loqus.LoqusdbAPI(context.obj)
     family_obj = context.obj['status'].family(family_id)
     api = UploadObservationsAPI(context.obj['status'], context.obj['housekeeper_api'], loqus_api)

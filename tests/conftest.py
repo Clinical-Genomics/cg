@@ -11,6 +11,20 @@ from cg.store import Store
 from trailblazer.mip import files as mip_files_api
 import ruamel.yaml
 
+
+## Loqusdb fixtures
+@pytest.fixture(scope='function')
+def loqus_config():
+    _config = {
+        'loqusdb': {
+            'database': 'mongodb://localhost',
+            'database_name': 'loqusdb',
+            'binary': 'loqusdb',
+        }
+    }
+    
+    return _config
+
 ## Trailblazer api for mip files
 @pytest.fixture(scope='session')
 def files():
