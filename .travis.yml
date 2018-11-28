@@ -10,7 +10,7 @@ install:
 
 script:
     - coverage run --source "$(basename "$PWD")" setup.py test
-    - nosetests && pylint
+    - nosetests && pylint --errors-only cg
 
 after_success: coveralls
 
