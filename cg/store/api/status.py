@@ -206,3 +206,67 @@ class StatusHandler:
         )
         return records
 
+    def microbial_samples_to_receive(self, external=False):
+        """Fetch microbial samples from statusdb that have no received_at date."""
+        records = (
+            self.MicrobialSample.query
+            .join(
+                models.MicrobialSample.application_version,
+                models.ApplicationVersion.application,
+            )
+            .filter(
+                models.MicrobialSample.received_at == None,
+                models.Application.is_external == external,
+            )
+            .order_by(models.MicrobialSample.created_at)
+        )
+        return records
+
+    def microbial_samples_to_prepare(self, external=False):
+        """Fetch microbial samples from statusdb that have no prepared_at date."""
+        records = (
+            self.MicrobialSample.query
+            .join(
+                models.MicrobialSample.application_version,
+                models.ApplicationVersion.application,
+            )
+            .filter(
+                models.MicrobialSample.prepared_at == None,
+                models.Application.is_external == external,
+            )
+            .order_by(models.MicrobialSample.created_at)
+        )
+        return records
+
+    def microbial_samples_to_sequence(self, external=False):
+        """Fetch microbial samples from statusdb that have no sequenced_at date."""
+        records = (
+            self.MicrobialSample.query
+            .join(
+                models.MicrobialSample.application_version,
+                models.ApplicationVersion.application,
+            )
+            .filter(
+                models.MicrobialSample.sequenced_at == None,
+                models.Application.is_external == external,
+            )
+            .order_by(models.MicrobialSample.created_at)
+        )
+        return records
+
+    def microbial_samples_to_deliver(self, external=False):
+        """Fetch microbial samples from statusdb that have no delivered_at date."""
+        records = (
+            self.MicrobialSample.query
+            .join(
+                models.MicrobialSample.application_version,
+                models.ApplicationVersion.application,
+            )
+            .filter(
+                models.MicrobialSample.delivered_at == None,
+                models.Application.is_external == external,
+            )
+            .order_by(models.MicrobialSample.created_at)
+        )
+        return records
+
