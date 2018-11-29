@@ -11,6 +11,19 @@ from cg.store import Store
 from trailblazer.mip import files as mip_files_api
 import ruamel.yaml
 
+pytest_plugins = [
+    'tests.apps.lims.conftest',
+    'tests.apps.loqus.conftest',
+    'tests.cli.conftest',
+    'tests.delivery.conftest',
+    'tests.delivery.conftest',
+    'tests.meta.conftest',
+    'tests.meta.orders.conftest',
+    'tests.meta.report.conftest',
+    'tests.meta.transfer.conftest',
+    'tests.meta.upload.conftest',
+    'tests.store.conftest',
+]
 
 ## Trailblazer api for mip files
 @pytest.fixture(scope='session')

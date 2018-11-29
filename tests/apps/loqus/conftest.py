@@ -1,3 +1,4 @@
+import pytest
 from cg.apps.loqus import LoqusdbAPI
 
 
