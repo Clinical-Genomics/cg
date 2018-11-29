@@ -136,8 +136,7 @@ class TransferLims(object):
         """Transfer information about microbial samples."""
 
         microbial_samples = self._microbial_samples_functions[status_type]()
-        result = []
-
+        
         if microbial_samples is None:
             LOG.info(f"No microbial samples found with {status_type.value}")
             return
@@ -158,7 +157,6 @@ class TransferLims(object):
                          f"{lims_date}, old value: {statusdb_date} ")
 
                 setattr(microbial_sample_obj, f"{status_type.value}_at", lims_date)
-                result.append((internal_id, lims_date))
                 self.status.commit()
             else:
                 LOG.debug(f"no {status_type.value} date found for {microbial_sample_obj.internal_id}")
