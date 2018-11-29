@@ -61,7 +61,7 @@ class TransferLims(object):
             SampleState.PREPARED: self.lims.get_prepared_date,
             SampleState.DELIVERED: self.lims.get_delivery_date,
             PoolState.RECEIVED: self.lims.get_received_date,
-            PoolState.RECEIVED: self.lims.get_received_date,
+            PoolState.DELIVERED: self.lims.get_delivery_date,
             MicrobialState.RECEIVED: self.lims.get_received_date,
             MicrobialState.PREPARED: self.lims.get_prepared_date,
             MicrobialState.SEQUENCED: self.lims.get_sequenced_date,
