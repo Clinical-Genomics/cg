@@ -1,21 +1,39 @@
 {
-    "name": "Scout analysis",
+    "name": "External order",
     "customer": "cust002",
-    "samples": [{
-        "name": "2016-20203",
-        "sex": "male",
-        "application": "WGXCUSC000",
-        "status": "affected",
-        "family_name": "F0009703",
-        "panels": ["OMIM-AUTO"]
-    }, {
-        "name": "2016-20204",
-        "sex": "female",
-        "status": "affected",
+    "comment": "",
+    "samples": [
+    {
+        "name": "sample1",
         "application": "EXXCUSR000",
-        "capture_kit": "Twist_Target_hg19.bed",
-        "family_name": "F0009704",
-        "panels": ["SKD"],
+        "data_analysis": "MIP",
+        "sex": "male",
+        "status": "affected",
+        "family_name": "fam2",
+        "panels": [
+            "CTD",
+            "CILM"
+        ],
+        "capture_kit": "Agilent Sureselect V5",
+        "source": "blood",
+        "priority": "priority",
         "comment": "externaly sequenced sample comment"
-    }]
+    },
+    {
+        "name": "sample2",
+        "application": "WGXCUSC000",
+        "data_analysis": "MIP",
+        "sex": "female",
+        "status": "unaffected",
+        "family_name": "fam2",
+        "panels": [
+            "CTD",
+            "CILM"
+        ],
+        "source": "blood",
+        "priority": "priority",
+        "capture_kit": "Agilent Sureselect CRE",
+        "comment": "externaly sequenced sample comment"
+    }
+  ]
 }

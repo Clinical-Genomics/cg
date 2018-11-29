@@ -1,0 +1,86 @@
+{
+  "name": "MIP order",
+  "customer": "cust003",
+  "comment": "",
+  "samples": [
+    {
+      "name": "sample1",
+      "application": "WGTPCFC030",
+      "data_analysis": "MIP",
+      "container": "96 well plate",
+      "container_name": "CMMS",
+      "well_position": "A:1",
+      "quantity": "220",
+      "source": "tissue (fresh frozen)",
+      "tumour": true,
+      "priority": "standard",
+      "require_qcok": true,
+      "sex": "female",
+      "status": "affected",
+      "family_name": "family1",
+      "panels": [
+        "IEM"
+      ],
+      "father": "sample3",
+      "mother": "sample2"
+    },
+    {
+      "name": "sample2",
+      "application": "WGTPCFC030",
+      "data_analysis": "MIP",
+      "comment": "this is a sample comment",
+      "container": "96 well plate",
+      "container_name": "CMMS",
+      "well_position": "B:1",
+      "quantity": "220",
+      "source": "tissue (fresh frozen)",
+      "tumour": false,
+      "priority": "standard",
+      "require_qcok": true,
+      "sex": "female",
+      "status": "affected",
+      "family_name": "family1",
+      "panels": [
+        "IEM"
+      ]
+    },
+    {
+      "name": "sample3",
+      "application": "WGTPCFC030",
+      "data_analysis": "MIP",
+      "container": "96 well plate",
+      "container_name": "CMMS",
+      "well_position": "C:1",
+      "quantity": "220",
+      "source": "tissue (fresh frozen)",
+      "tumour": false,
+      "priority": "standard",
+      "require_qcok": true,
+      "sex": "male",
+      "status": "affected",
+      "family_name": "family1",
+      "panels": [
+        "IEM"
+      ]
+    },
+    {
+      "name": "sample4",
+      "application": "WGTPCFC030",
+      "data_analysis": "MIP",
+      "container": "96 well plate",
+      "container_name": "CMMS",
+      "well_position": "D:1",
+      "quantity": "220",
+      "source": "tissue (fresh frozen)",
+      "tumour": false,
+      "priority": "standard",
+      "require_qcok": true,
+      "sex": "female",
+      "status": "affected",
+      "family_name": "family2",
+      "panels": [
+        "IEM"
+      ]
+    }
+  ]
+}
