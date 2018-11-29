@@ -20,12 +20,13 @@ class LoqusdbAPI(object):
         """Add observations from a VCF."""
         load_call = copy.deepcopy(self.base_call)
         load_call.extend([
-            'load', '-c', family_id, '--variants-file', vcf_path, '-f', ped_path, '--ensure-index',
+            'load', '-c', family_id, '--variant-file', vcf_path, '-f', ped_path, '--ensure-index',
         ])
 
         output = subprocess.check_output(
             ' '.join(load_call),
-            shell=True
+            shell=True,
+            stderr=subprocess.STDOUT,
         )
         
         nr_variants = 0
@@ -50,7 +51,6 @@ class LoqusdbAPI(object):
         except CalledProcessError as err:
             # If case does not exist we will get a non zero exit code and return None
             return case_obj
-        print(output)
         # The output is a list of dictionaries that are case objs
         case_obj = json.loads(output.decode('utf-8'))[0]
         
