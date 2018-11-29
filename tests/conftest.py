@@ -7,30 +7,10 @@ import pytest
 
 from cg.store import Store
 
-from cg.apps.loqus import LoqusdbAPI
-
 ## Trailblazer
 from trailblazer.mip import files as mip_files_api
 import ruamel.yaml
 
-
-## Loqusdb fixtures
-@pytest.fixture(scope='function')
-def loqus_config():
-    _config = {
-        'loqusdb': {
-            'database': 'mongodb://localhost',
-            'database_name': 'loqusdb',
-            'binary': 'loqusdb',
-        }
-    }
-    
-    return _config
-
-@pytest.fixture(scope='function')
-def loqusdbapi(loqus_config):
-    _loqus_api = LoqusdbAPI(loqus_config)
-    return _loqus_api
 
 ## Trailblazer api for mip files
 @pytest.fixture(scope='session')
