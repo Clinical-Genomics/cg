@@ -70,13 +70,13 @@ MIP_SAMPLE = {
 
     # required
     'name': validators.RegexValidator(NAME_PATTERN),
-    'container': validators.Any(CONTAINER_OPTIONS),
+    'container': validators.Optional(str, None),
     'data_analysis': str,
     'application': str,
     'sex': validators.Any(SEX_OPTIONS),
     'family_name': validators.RegexValidator(NAME_PATTERN),
     'require_qcok': bool,
-    'source': str,
+    'source': validators.Optional(str, None),
     'tumour': bool,
     'priority': validators.Any(PRIORITY_OPTIONS),
 
@@ -89,8 +89,8 @@ MIP_SAMPLE = {
     'status': validators.Any(STATUS_OPTIONS),
 
     # Required if samples are part of trio/family
-    'mother': validators.Optional(validators.RegexValidator(NAME_PATTERN), None),
-    'father': validators.Optional(validators.RegexValidator(NAME_PATTERN), None),
+    'mother': validators.Optional(TypeValidator(str, allow_none=True), None),
+    'father': validators.Optional(TypeValidator(str, allow_none=True), None),
 
     # This information is optional for FFPE-samples
     'formalin_fixation_time': validators.Optional(str, None),
