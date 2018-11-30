@@ -42,6 +42,7 @@ def parse_json(indata: dict) -> dict:
                 'application': sample['application'],
                 'source': sample['source'],
                 'container': sample['container'],
+                'data_analysis': sample.get('data_analysis', 'MIP'),
             }
             well_position_raw = sample.get('well_position')
             if well_position_raw:
