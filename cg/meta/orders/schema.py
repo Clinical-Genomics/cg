@@ -4,7 +4,7 @@ from enum import Enum
 from pyschemes import Scheme, validators
 
 from cg.constants import PRIORITY_OPTIONS, SEX_OPTIONS, STATUS_OPTIONS, CAPTUREKIT_OPTIONS, \
-    CONTAINER_OPTIONS, CAPTUREKIT_CANCER_OPTIONS, ANALYSIS_SOURCES, METAGENOME_SOURCES
+    CONTAINER_OPTIONS, CAPTUREKIT_CANCER_OPTIONS
 
 
 class OrderType(Enum):
@@ -76,7 +76,7 @@ MIP_SAMPLE = {
     'sex': validators.Any(SEX_OPTIONS),
     'family_name': validators.RegexValidator(NAME_PATTERN),
     'require_qcok': bool,
-    'source': validators.Any(ANALYSIS_SOURCES),
+    'source': str,
     'tumour': bool,
     'priority': validators.Any(PRIORITY_OPTIONS),
 
@@ -117,7 +117,7 @@ BALSAMIC_SAMPLE = {
     'family_name': validators.RegexValidator(NAME_PATTERN),
     'require_qcok': bool,
     'tumour': bool,
-    'source': validators.Any(ANALYSIS_SOURCES),
+    'source': str,
     'priority': validators.Any(PRIORITY_OPTIONS),
 
     # Required if Plate
@@ -157,7 +157,7 @@ EXTERNAL_SAMPLE = {
     'sex': validators.Any(SEX_OPTIONS),
     'family_name': validators.RegexValidator(NAME_PATTERN),
     'priority': validators.Any(PRIORITY_OPTIONS),
-    'source': validators.Any(ANALYSIS_SOURCES),
+    'source': str,
 
     # Required if data analysis in Scout
     'panels': ListValidator(str, min_items=0),
@@ -188,7 +188,7 @@ FASTQ_SAMPLE = {
     # todo: implement in OP or remove from OF
     # 'family_name': validators.RegexValidator(NAME_PATTERN),
     'require_qcok': bool,
-    'source': validators.Any(ANALYSIS_SOURCES),
+    'source': str,
     'tumour': bool,
     'priority': validators.Any(PRIORITY_OPTIONS),
 
@@ -280,7 +280,7 @@ METAGENOME_SAMPLE = {
     'application': str,
     'require_qcok': bool,
     'elution_buffer': str,
-    'source': validators.Any(METAGENOME_SOURCES),
+    'source': str,
     'priority': validators.Any(PRIORITY_OPTIONS),
 
     # Required if Plate
