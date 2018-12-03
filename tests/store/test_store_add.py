@@ -98,7 +98,7 @@ def test_add_pool(store: Store):
 
     # WHEN adding a new pool into the database
     new_pool = store.add_pool(customer = new_customer, name = 'Test', order =  'Test', ordered = dt.today(),
-                 application_version = app_version)
+                 application_version = app_version, data_analysis='fastq')
     store.add_commit(new_pool)
 
     # THEN the new pool should have no_invoice = False
