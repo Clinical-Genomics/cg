@@ -75,8 +75,12 @@ def _include_files_in_housekeeper(bundle_obj, context, hk_api, version_obj):
 
 
 def _add_new_complete_analysis_record(bundle_data, family_obj, status, version_obj):
+
+    pipeline = family_obj.links[0].sample.data_analysis
+    pipeline = pipeline if pipeline else 'mip' # TODO remove this default from here
+
     new_analysis = status.add_analysis(
-        pipeline='mip',
+        pipeline=pipeline,
         version=bundle_data['pipeline_version'],
         started_at=version_obj.created_at,
         completed_at=dt.datetime.now(),

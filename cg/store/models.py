@@ -107,7 +107,7 @@ class FamilySample(Model):
     id = Column(types.Integer, primary_key=True)
     family_id = Column(ForeignKey('family.id', ondelete='CASCADE'), nullable=False)
     sample_id = Column(ForeignKey('sample.id', ondelete='CASCADE'), nullable=False)
-    status = Column(types.Enum('affected', 'unaffected', 'unknown'), nullable=False)
+    status = Column(types.Enum('affected', 'unaffected', 'unknown'), default='unknown', nullable=False)
     mother_id = Column(ForeignKey('sample.id'))
     father_id = Column(ForeignKey('sample.id'))
 
@@ -144,7 +144,7 @@ class Family(Model, PriorityMixin):
     internal_id = Column(types.String(32), unique=True, nullable=False)
     name = Column(types.String(128), nullable=False)
     priority = Column(types.Integer, default=1, nullable=False)
-    _panels = Column(types.Text, nullable=False)
+    _panels = Column(types.Text)
     action = Column(types.Enum(*FAMILY_ACTIONS))
     comment = Column(types.Text)
 
@@ -213,6 +213,7 @@ class MicrobialSample(Model, PriorityMixin):
     id = Column(types.Integer, primary_key=True)
     internal_id = Column(types.String(32), nullable=False, unique=True)
     name = Column(types.String(128), nullable=False)
+    data_analysis = Column(types.String(16))
     application_version_id = Column(ForeignKey('application_version.id'), nullable=False)
     microbial_order_id = Column(ForeignKey('microbial_order.id'), nullable=False)
     created_at = Column(types.DateTime, default=dt.datetime.now)
@@ -301,6 +302,7 @@ class Pool(Model):
 
     id = Column(types.Integer, primary_key=True)
     name = Column(types.String(32), nullable=False)
+    data_analysis = Column(types.String(16))
     order = Column(types.String(64), nullable=False)
     ticket_number = Column(types.Integer)
     reads = Column(types.BigInteger, default=0)
@@ -328,6 +330,7 @@ class Sample(Model, PriorityMixin):
     internal_id = Column(types.String(32), nullable=False, unique=True)
     priority = Column(types.Integer, default=1, nullable=False)
     name = Column(types.String(128), nullable=False)
+    data_analysis = Column(types.String(16))
     order = Column(types.String(64))
     ticket_number = Column(types.Integer)
     sex = Column(types.Enum('male', 'female', 'unknown'), nullable=False)

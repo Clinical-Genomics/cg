@@ -2,10 +2,10 @@
 from cg.store import Store
 
 
-def test_add_new_customer(invoke_cli, disk_store: Store):
+def test_add_customer(invoke_cli, disk_store: Store):
     # GIVEN an empty database
 
-    # WHEN adding a new customer
+    # WHEN adding a customer
     db_uri = disk_store.uri
     result = invoke_cli(['--database', db_uri,'add', 'customer', 'internal_id', 'testcust', 
                             '--invoice-address', 'Test adress', '--invoice-reference', 'ABCDEF'])

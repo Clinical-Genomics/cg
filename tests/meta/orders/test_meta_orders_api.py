@@ -10,13 +10,15 @@ from cg.meta.orders import OrdersAPI, OrderType
 @pytest.mark.parametrize('order_type', [
     OrderType.RML,
     OrderType.FASTQ,
-    OrderType.SCOUT,
+    OrderType.MIP,
     OrderType.EXTERNAL,
     OrderType.MICROBIAL,
     OrderType.METAGENOME,
+    OrderType.BALSAMIC,
+    OrderType.MIP_BALSAMIC,
 ])
 def test_submit(base_store, orders_api: OrdersAPI, all_orders_to_submit, monkeypatch, order_type):
-    ticket_number = 1234567
+    ticket_number = 123456
     monkeypatch.setattr(orders_api.osticket, 'open_ticket', lambda *args, **kwargs: ticket_number)
 
     order_data = all_orders_to_submit[order_type]
@@ -42,12 +44,14 @@ def test_submit(base_store, orders_api: OrdersAPI, all_orders_to_submit, monkeyp
 
 
 @pytest.mark.parametrize('order_type', [
-    OrderType.SCOUT,
+    OrderType.MIP,
     OrderType.EXTERNAL,
+    OrderType.BALSAMIC,
+    OrderType.MIP_BALSAMIC,
 ])
 def test_submit_illegal_sample_customer(sample_store, orders_api, all_orders_to_submit, monkeypatch,
                                         order_type):
-    ticket_number = 1234567
+    ticket_number = 123456
     monkeypatch.setattr(orders_api.osticket, 'open_ticket', lambda *args, **kwargs: ticket_number)
 
     order_data = all_orders_to_submit[order_type]
@@ -80,12 +84,14 @@ def test_submit_illegal_sample_customer(sample_store, orders_api, all_orders_to_
 
 
 @pytest.mark.parametrize('order_type', [
-    OrderType.SCOUT,
+    OrderType.MIP,
     OrderType.EXTERNAL,
+    OrderType.BALSAMIC,
+    OrderType.MIP_BALSAMIC,
 ])
 def test_submit_scout_legal_sample_customer(sample_store, orders_api, all_orders_to_submit, monkeypatch,
                                             order_type):
-    ticket_number = 1234567
+    ticket_number = 123456
     monkeypatch.setattr(orders_api.osticket, 'open_ticket', lambda *args, **kwargs: ticket_number)
 
     order_data = all_orders_to_submit[order_type]
@@ -129,10 +135,11 @@ def test_submit_scout_legal_sample_customer(sample_store, orders_api, all_orders
     OrderType.RML,
     OrderType.FASTQ,
     OrderType.MICROBIAL,
+    OrderType.METAGENOME,
 ])
 def test_submit_non_scout_legal_sample_customer(sample_store, orders_api, all_orders_to_submit, monkeypatch,
                                                 order_type):
-    ticket_number = 1234567
+    ticket_number = 123456
     monkeypatch.setattr(orders_api.osticket, 'open_ticket', lambda *args, **kwargs: ticket_number)
 
     order_data = all_orders_to_submit[order_type]

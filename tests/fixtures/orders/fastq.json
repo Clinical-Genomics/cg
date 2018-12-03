@@ -1,30 +1,35 @@
 {
     "name": "Fastq order",
     "customer": "cust002",
-    "comment": "Order comment",
-    "samples": [{
-        "name": "sample-normal",
-        "sex": "female",
-        "application": "WGSPCFC060",
-        "priority": "priority",
-        "source": "blood",
-        "tumour": false,
-        "container": "96 well plate",
-        "container_name": "cancer test",
-        "well_position": "A:1",
-        "quantity": "2200",
-        "volume": "35",
-        "concentration": "5",
-        "comment": "Normal sample comment"
-    }, {
-        "name": "sample-tumour",
-        "sex": "female",
-        "application": "WGSPCFC060",
-        "priority": "priority",
-        "tumour": true,
-        "source": "tissue (FFPE)",
-        "container": "96 well plate",
-        "well_position": "A:2",
-        "container_name": "cancer test"
-    }]
+    "comment": "",
+    "samples": [
+        {
+            "name": "prov1",
+            "sex": "male",
+            "application": "WGSPCFC060",
+            "data_analysis": "fastq",
+            "tumour": false,
+            "comment": "",
+            "container": "Tube",
+            "container_name": "prov1",
+            "well_position": "",
+            "source": "blood",
+            "priority": "priority",
+            "require_qcok": true
+        },
+        {
+            "name": "prov2",
+            "sex": "male",
+            "application": "WGSPCFC060",
+            "data_analysis": "fastq",
+            "tumour": true,
+            "comment": "",
+            "container": "Tube",
+            "container_name": "prov2",
+            "well_position": "",
+            "source": "cell line",
+            "priority": "priority",
+            "require_qcok": false
+        }
+    ]
 }

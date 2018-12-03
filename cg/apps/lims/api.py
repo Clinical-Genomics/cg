@@ -111,6 +111,29 @@ class LimsAPI(Lims, OrderHandler):
             log.warning(f"multiple delivery artifacts found for: {lims_id}")
             return min(artifact.parent_process.udf['Date delivered'] for artifact in artifacts)
 
+    def get_sequenced_date(self, lims_id: str) -> dt.date:
+        """Get the date when a sample was sequenced."""
+        process_types = ['CG002 - Illumina Sequencing (Illumina SBS)',
+                         'CG002 - Illumina Sequencing (HiSeq X)']
+
+        for process_type in process_types:
+            lims_artifacts = self.get_artifacts(process_type=process_type, samplelimsid=lims_id)
+
+            if len(lims_artifacts) == 0:
+                continue  # continue in case the artifacts are in the other process_type
+            elif len(lims_artifacts) == 1:
+                return lims_artifacts[0].parent_process.udf.get('Finish Date')  # return date immediately if only one artifact is found
+            else:
+                log.warning(f"multiple sequence artifacts found for: {lims_id}")
+                sequence_dates = [artifact.parent_process.udf.get('Finish Date') for artifact in lims_artifacts
+                                  if artifact.parent_process.udf.get('Finish Date') is not None]
+                if len(sequence_dates) == 0:
+                    break  # nothing sequenced, break out and return None
+                else:
+                    return min(sequence_dates)
+
+        return None  # if nothing is found just return None
+
     def capture_kit(self, lims_id: str) -> str:
         """Get capture kit for a LIMS sample."""
         lims_sample = Sample(self, id=lims_id)

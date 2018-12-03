@@ -5,6 +5,7 @@ from functools import wraps
 from pathlib import Path
 import tempfile
 
+from cg.constants import METAGENOME_SOURCES, ANALYSIS_SOURCES
 from flask import abort, current_app, Blueprint, jsonify, g, make_response, request
 from google.auth import jwt
 from requests.exceptions import HTTPError
@@ -89,7 +90,7 @@ def panels():
 def families():
     """Fetch families."""
     if request.args.get('status') == 'analysis':
-        records = db.families_to_analyze()
+        records = db.families_to_mip_analyze()
         count = len(records)
     else:
         customer_obj = None if g.current_user.is_admin else g.current_user.customer
@@ -323,6 +324,8 @@ def options():
                 apptag_groups[application_obj.prep_category] = []
             apptag_groups[application_obj.prep_category].append(application_obj.tag)
 
+    source_groups = {'metagenome': METAGENOME_SOURCES, 'analysis': ANALYSIS_SOURCES}
+
     return jsonify(
         customers=[{
             'text': f"{customer.name} ({customer.internal_id})",
@@ -336,6 +339,7 @@ def options():
             'internal_id': organism.internal_id,
             'verified': organism.verified,
         } for organism in db.Organism.query],
+        sources=source_groups
     )
 
 

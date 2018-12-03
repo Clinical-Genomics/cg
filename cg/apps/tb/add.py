@@ -141,7 +141,6 @@ class AddHandler:
             ## Only for wgs data
             ## Downsamples MT bam preprocessing
             if sample_data['subsample_mt']:
-                print(sample_data['subsample_mt'])
                 mt_bam_path = sample_data['subsample_mt']
                 mt_bai_path = f"{mt_bam_path}.bai"
                 if not Path(mt_bai_path).exists():

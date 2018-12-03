@@ -4,7 +4,7 @@ OPTIONAL_KEYS = ('container_name', 'quantity', 'volume', 'concentration', 'statu
 def parse_json(indata: dict) -> dict:
     """Parse JSON from LIMS export."""
     data = {
-        'project_type': 'scout',
+        'project_type': 'mip',
         'customer': indata['customer'].lower(),
         'name': indata.get('name'),
         'comment': indata.get('comment'),
@@ -42,6 +42,7 @@ def parse_json(indata: dict) -> dict:
                 'application': sample['application'],
                 'source': sample['source'],
                 'container': sample['container'],
+                'data_analysis': sample.get('data_analysis', 'MIP'),
             }
             well_position_raw = sample.get('well_position')
             if well_position_raw:
