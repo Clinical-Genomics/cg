@@ -155,7 +155,7 @@ def start(context: click.Context, family_id: str, priority: str=None, email: str
 def auto(context: click.Context):
     """Start all analyses that are ready for analysis."""
     exit_code = 0
-    for family_obj in context.obj['db'].families_to_analyze():
+    for family_obj in context.obj['db'].families_to_mip_analyze():
         LOG.info(f"{family_obj.internal_id}: start analysis")
         priority = ('high' if family_obj.high_priority else
                     ('low' if family_obj.low_priority else 'normal'))
