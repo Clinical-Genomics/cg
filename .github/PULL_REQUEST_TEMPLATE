@@ -1,0 +1,12 @@
+This PR fixes the leaking coffee machine.
+
+How to test:
+0. install on stage
+
+1. go to the coffee machine
+1. add cup in dispenser
+1. press coffee or tea
+1. wait 2 minutes
+
+Expected outcome:
+Chck the right hand side of the machine. That side should now stay dry.
