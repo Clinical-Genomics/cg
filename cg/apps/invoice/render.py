@@ -48,12 +48,17 @@ def render_xlsx(data: dict) -> Workbook:
         worksheet['F2'] = dt.datetime.today().date()
 
         samples_start = 7
+        print('************************************')
+        print(len(data['pooled_samples']))
         for index, lims_sample in enumerate(data['pooled_samples']):
+            total_reads = lims_sample.udf.get('Total Reads (M)')
+            pool_name = lims_sample.udf.get('pool name')
+                
             row = samples_start + index
             worksheet[f"A{row}"] = lims_sample.name
             worksheet[f"B{row}"] = lims_sample.id
-            worksheet[f"C{row}"] = lims_sample.udf['Total Reads (M)']
-            worksheet[f"D{row}"] = str(lims_sample.udf['pool name'])
+            worksheet[f"C{row}"] = total_reads if total_reads else '' 
+            worksheet[f"D{row}"] = str(pool_name) if pool_name else ''
 
 
         for column in ['A', 'B', 'C', 'D', 'E', 'F', 'G']:
