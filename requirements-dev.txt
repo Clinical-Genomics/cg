@@ -4,4 +4,4 @@ mock
 ipdb
 pytest-cov
 coveralls
-nose pylint
+git-lint
