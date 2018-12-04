@@ -7,8 +7,8 @@ install:
     - pip install -r requirements.txt -r requirements-dev.txt -e .
 
 script:
-    - coverage run --source "$(basename "$PWD")" setup.py test
-    - nosetests && pylint --errors-only cg
+    - git reset --soft ${TRAVIS_COMMIT_RANGE%...*} && git lint
+    - coverage run --source "$(basename "$PWD")" setup.py test    
 
 after_success: coveralls
 
