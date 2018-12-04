@@ -118,6 +118,7 @@ pylint:
   arguments:
     - --rcfile={DEFAULT_CONFIGS}/pylintrc
     - --output-format=text
+    - --max-line-length=100
     - >-
       --msg-template={{abspath}}:{{line}}:{{column}}:
       [{{category}}:{{symbol}}] {{obj}}: {{msg}}
@@ -135,7 +136,7 @@ pycodestyle:
     - .py
   command: pycodestyle
   arguments:
-    - "--max-line-length=80"
+    - "--max-line-length=100"
   filter: >-
     ^{filename}:(?P<line>{lines}):((?P<column>\d+):)?
     (?P<message_id>\S+) (?P<message>.+)$
