@@ -37,7 +37,7 @@ def test_get_case_non_existing(loqusdbapi, mocker):
     ## THEN assert None is returned
     assert case_obj == None
 
-def test_load(loqusdbapi, mocker):
+def test_load(loqusdbapi, mocker, loqusdb_output):
     """Test to load a case"""
     ## GIVEN a loqusdb api and some info about a case
     family_id = 'test'
@@ -46,21 +46,7 @@ def test_load(loqusdbapi, mocker):
 
     ## WHEN loading the case to loqus with the api
     mocker.patch.object(subprocess, 'check_output')
-    subprocess.check_output.return_value = (b'2018-11-29 08:41:38 130-229-8-20-dhcp.local '
-    b'mongo_adapter.client[77135] INFO Connecting to uri:mongodb://None:None@localhost:27017\n'
-    b'2018-11-29 08:41:38 130-229-8-20-dhcp.local mongo_adapter.client[77135] INFO Connection '
-    b'established\n2018-11-29 08:41:38 130-229-8-20-dhcp.local mongo_adapter.adapter[77135] INFO'
-    b' Use database loqusdb\n2018-11-29 08:41:38 130-229-8-20-dhcp.local loqusdb.utils.vcf[77135]'
-    b' INFO Check if vcf is on correct format...\n2018-11-29 08:41:38 130-229-8-20-dhcp.local'
-    b' loqusdb.utils.vcf[77135] INFO Vcf file /Users/mansmagnusson/Projects/loqusdb/tests/fixtures'
-    b'/test.vcf.gz looks fine\n2018-11-29 08:41:38 130-229-8-20-dhcp.local loqusdb.utils.vcf[77135]'
-    b' INFO Nr of variants in vcf: 15\n2018-11-29 08:41:38 130-229-8-20-dhcp.local loqusdb.utils.'
-    b'vcf[77135] INFO Type of variants in vcf: snv\nInserting variants\n2018-11-29 08:41:38 130-22'
-    b'9-8-20-dhcp.local loqusdb.utils.load[77135] INFO Inserted 15 variants of type snv\n2018-11-2'
-    b'9 08:41:38 130-229-8-20-dhcp.local loqusdb.commands.load[77135] INFO Nr variants inserted: '
-    b'15\n2018-11-29 08:41:38 130-229-8-20-dhcp.local loqusdb.commands.load[77135] INFO Time to '
-    b'insert variants: 0:00:00.012648\n2018-11-29 08:41:38 130-229-8-20-dhcp.local loqusdb.plugins.'
-    b'mongo.adapter[77135] INFO All indexes exists\n')
+    subprocess.check_output.return_value = loqusdb_output
 
     data = loqusdbapi.load(family_id, ped_path, vcf_path)
 
