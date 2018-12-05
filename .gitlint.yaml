@@ -83,33 +83,6 @@ jshint:
   installation: >-
     Visit http://www.jshint.com/install/ for installation instructions.
 
-# PHP
-# Sample output:
-# PHP Parse error:  syntax error, unexpected 'bar' (T_STRING) in /path_to/error.php on line 3
-php:
-  extensions:
-    - .php
-  command: php
-  arguments:
-    - -l
-  filter: ^(?P<message>.*) in {filename} on line (?P<line>\d+)
-  installation: You first need to install PHP.
-
-# Sample output:
-# 2 | ERROR | Expected "if (...) {\n"; found "if (...) {"
-phpcs:
-  extensions:
-    - .php
-  command: phpcs
-  arguments:
-    - --report-width=1000
-    - --standard=PSR2
-  filter: >-
-    ^\s*(?P<line>{lines})\s+[|]\s+(?P<severity>\S+)\s+[|]\s+(?P<message>.+)
-  installation: >-
-    Visit https://github.com/squizlabs/PHP_CodeSniffer for installation
-    instructions
-
 # Python
 pylint:
   extensions:
@@ -375,23 +348,3 @@ coffeelint:
   filter: >-
     {filename},(?P<line>{lines}),.*,(?P<severity>.+),(?:\[stdin\]:\d+:(?P<column>\d+): .*: )?(?P<message>.+)
   installation: npm install -g coffeelint
-
-# C++
-# Sample output:
-# main.cpp:0:  No copyright message found.  You should have a line: "Copyright [year] <Copyright Owner>"  [legal/copyright] [5]
-cpplint:
-  extensions:
-    - .c
-    - .cc
-    - .cpp
-    - .c++
-    - .h
-    - .hpp
-    - .h++
-  command: cpplint
-  requirements:
-    - cpplint
-  filter: >-
-    ^{filename}:(?P<line>{lines}): (?P<message>.+) \[(?P<message_id>.+)\]
-    \[(?P<severity>\d+)\]
-  installation: "Run pip install cpplint."
