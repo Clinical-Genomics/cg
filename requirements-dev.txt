@@ -7,3 +7,4 @@ coveralls
 git-lint
 pylint
 pycodestyle
+yamllint
