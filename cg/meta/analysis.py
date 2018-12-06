@@ -8,7 +8,7 @@ from pathlib import Path
 
 from requests.exceptions import HTTPError
 
-from cg.apps import tb, hk, scoutapi, lims
+from cg.apps import tb, hk, scoutapi, lims, balsamic
 from cg.store import models, Store
 from cg.meta.deliver.api import DeliverAPI
 
@@ -83,11 +83,11 @@ class AnalysisAPI():
 
     def config(self, family_obj: models.Family) -> dict:
         """Make the MIP config. Meta data for the family is taken from the family object
-        and converted to MIP format via trailblazer. 
-        
+        and converted to MIP format via trailblazer.
+
         Args:
             family_obj (models.Family):
-        
+
         Returns:
             dict: config_data (MIP format)
         """
@@ -225,12 +225,21 @@ class AnalysisAPI():
                 data['flowcell'] = f"{data['flowcell']}-{matches[0]}"
             files.append(data)
 
+
         self.tb.link(
             family=link_obj.family.internal_id,
             sample=link_obj.sample.internal_id,
             analysis_type=link_obj.sample.application_version.application.analysis_type,
             files=files,
         )
+
+
+        #Decission for linking in Balsamic structure if data_analysis contains Balsamic
+        if link_obj.sample.data_analysis == "Balsamic" or link_obj.sample.data_analysis == "MIP + Balsamic":
+            self.balsamic.link_balsamic(
+                family=link_obj.family.internal_id,
+                sample=link_obj.sample.internal_id,
+                files=files)
 
     def panel(self, family_obj: models.Family) -> List[str]:
         """Create the aggregated panel file."""
