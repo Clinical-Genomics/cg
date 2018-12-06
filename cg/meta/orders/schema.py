@@ -110,14 +110,14 @@ BALSAMIC_SAMPLE = {
 
     # This information is required
     'name': validators.RegexValidator(NAME_PATTERN),
-    'container': validators.Any(CONTAINER_OPTIONS),
+    'container': validators.Optional(TypeValidator(str, allow_none=True), None),
     'data_analysis': str,
     'application': str,
     'sex': validators.Any(SEX_OPTIONS),
     'family_name': validators.RegexValidator(NAME_PATTERN),
     'require_qcok': bool,
     'tumour': bool,
-    'source': str,
+    'source': validators.Optional(TypeValidator(str, allow_none=True), None),
     'priority': validators.Any(PRIORITY_OPTIONS),
 
     # Required if Plate
@@ -125,7 +125,7 @@ BALSAMIC_SAMPLE = {
     'well_position': validators.Optional(TypeValidator(str, allow_none=True), None),
 
     # This information is required for Balsamic analysis (cancer)
-    'capture_kit': validators.Any(CAPTUREKIT_CANCER_OPTIONS),
+    'capture_kit': validators.Optional(TypeValidator(str, allow_none=True), None),
     'tumour_purity': validators.Optional(str, None),
 
     # This information is optional for FFPE-samples
@@ -152,12 +152,12 @@ EXTERNAL_SAMPLE = {
 
     # required
     'name': validators.RegexValidator(NAME_PATTERN),
-    'capture_kit': validators.Any(CAPTUREKIT_OPTIONS),
+    'capture_kit': validators.Optional(TypeValidator(str, allow_none=True), None),
     'application': str,
     'sex': validators.Any(SEX_OPTIONS),
     'family_name': validators.RegexValidator(NAME_PATTERN),
     'priority': validators.Any(PRIORITY_OPTIONS),
-    'source': str,
+    'source': validators.Optional(TypeValidator(str, allow_none=True), None),
 
     # Required if data analysis in Scout
     'panels': ListValidator(str, min_items=0),
@@ -165,8 +165,8 @@ EXTERNAL_SAMPLE = {
     'status': validators.Any(STATUS_OPTIONS),
 
     # Required if samples are part of trio/family
-    'mother': validators.Optional(validators.RegexValidator(NAME_PATTERN), None),
-    'father': validators.Optional(validators.RegexValidator(NAME_PATTERN), None),
+    'mother': validators.Optional(TypeValidator(str, allow_none=True), None),
+    'father': validators.Optional(TypeValidator(str, allow_none=True), None),
     # todo: find out if "Other relations" is removed in current OF
 
     # Not Required
