@@ -197,7 +197,7 @@ yaml:
     - --format
     - parsable
     - --config-data
-    - "{{extends: default, rules: {{document-start: disable}}}}"
+    - "{{extends: default, rules: {{document-start: disable, line-length: {{max: 100}}}}}}"
   # Matches either:
   # - syntax error, on any line
   # - other error, on a modified line only
