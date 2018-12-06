@@ -54,6 +54,7 @@ def render_xlsx(data: dict) -> Workbook:
             worksheet[f"B{row}"] = lims_sample.id
             worksheet[f"C{row}"] = lims_sample.udf['Total Reads (M)']
             worksheet[f"D{row}"] = str(lims_sample.udf['pool name'])
+            worksheet[f"E{row}"] = str(lims_sample.project.name)
 
 
         for column in ['A', 'B', 'C', 'D', 'E', 'F', 'G']:
