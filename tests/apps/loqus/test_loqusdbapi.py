@@ -44,7 +44,7 @@ def test_load(loqusdbapi, mocker, loqusdb_output):
     ped_path = 'a ped path'
     vcf_path = 'a vcf path'
 
-    ## WHEN loading the case to loqus with the api
+    # WHEN uploading a case with 15 variants to loqusdb
     mocker.patch.object(subprocess, 'check_output')
     subprocess.check_output.return_value = loqusdb_output
 
