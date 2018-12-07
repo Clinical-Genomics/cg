@@ -19,14 +19,14 @@ class FastqHandlerBalsamic:
         index = index if index else 'XXXXXX'
         return f"{lane}_{date_str}_{flowcell}_{sample}_{index}_R_{read}_.fastq.gz"
 
-    def link_balsamic(self, family: str, sample: str, analysis_type: str, files: List[str]):
+    def link_balsamic(self, family: str, sample: str, files: List[str]):
         """Link FASTQ files for a balsamic sample.
         Shall be linked to /mnt/hds/proj/bionfo/BALSAMIC_ANALYSIS/case-id/fastq/"""
-        root_dir = Path(f'/mnt/hds/proj/bioinfo/BALSAMIC_analysis/{family}/fastq')
+        root_dir = Path(f'/mnt/hds/proj/bioinfo/STAGE/BALSAMIC_analysis/{family}/fastq')
         root_dir.mkdir(parents=True, exist_ok=True)
         for fastq_data in files:
             fastq_path = Path(fastq_data['path'])
-            fastq_name = self.name_file(
+            fastq_name = self.name_balsamic_file(
                 lane=fastq_data['lane'],
                 flowcell=fastq_data['flowcell'],
                 sample=sample,
