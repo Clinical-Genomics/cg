@@ -42,6 +42,7 @@ class AnalysisAPI():
         self.ruamel = ruamel
         self.Path = Path
         self.LOG = logger
+        self.balsamic = balsamic.FastqHandlerBalsamic()
 
     def check(self, family_obj: models.Family):
         """Check stuff before starting the analysis."""
