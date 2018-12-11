@@ -7,8 +7,6 @@ from cg.server.ext import db
 
 
 class BaseView(ModelView):
-    can_export = True
-    export_types = ['xls']
     def is_accessible(self):
         user_obj = db.user(session.get('user_email'))
         return True if (google.authorized and user_obj and user_obj.is_admin) else False
