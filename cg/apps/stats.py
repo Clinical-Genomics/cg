@@ -49,6 +49,8 @@ class StatsAPI(alchy.Manager):
                     sample_data['reads'] += fc_data.reads
                 elif fc_data.type == 'hiseqx' and fc_data.q30 >= 75:
                     sample_data['reads'] += fc_data.reads
+                elif fc_data.type == 'novaseq' and fc_data.q30 >= 75:
+                    sample_data['reads'] += fc_data.reads
                 else:
                     LOG.warning(f"q30 too low for {curated_samplename} on {fc_data.name}:"
                                 f"{fc_data.q30} < {80 if fc_data.type == 'hiseqga' else 75}%")
