@@ -25,10 +25,9 @@ def add(context):
               help='Street adress, Post code, City')
 @click.option('-ir', '--invoice-reference', 'invoice_reference', required=True,
               help='Invoice reference (text)')
-
 @click.pass_context
-def customer(context, internal_id: str, name: str, customer_group_id: str, invoice_address: str, 
-                invoice_reference: str):
+def customer(context, internal_id: str, name: str, customer_group_id: str, invoice_address: str,
+             invoice_reference: str):
     """Add a new customer with a unique INTERNAL_ID and NAME."""
     existing = context.obj['db'].customer(internal_id)
     if existing:
@@ -40,8 +39,9 @@ def customer(context, internal_id: str, name: str, customer_group_id: str, invoi
         customer_group = context.obj['db'].add_customer_group(internal_id=internal_id, name=name)
 
     new_customer = context.obj['db'].add_customer(internal_id=internal_id, name=name,
-                                    customer_group=customer_group, invoice_address=invoice_address, 
-                                    invoice_reference=invoice_reference)
+                                                  customer_group=customer_group,
+                                                  invoice_address=invoice_address,
+                                                  invoice_reference=invoice_reference)
     context.obj['db'].add_commit(new_customer)
     message = f"customer added: {new_customer.internal_id} ({new_customer.id})"
     LOG.info(message)

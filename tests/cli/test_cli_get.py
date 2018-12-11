@@ -1,5 +1,3 @@
-
-
 from cg.store import Store
 
 
@@ -9,7 +7,7 @@ def test_get_family_by_name(invoke_cli, disk_store: Store):
     customer_group = disk_store.add_customer_group('dummy_group', 'dummy group')
     customer = disk_store.add_customer(internal_id=customer_id, name="Test Customer",
                                        scout_access=False, customer_group=customer_group,
-                                       invoice_address='Street nr, 12345 Uppsala', 
+                                       invoice_address='Street nr, 12345 Uppsala',
                                        invoice_reference='ABCDEF')
     disk_store.add_commit(customer)
 

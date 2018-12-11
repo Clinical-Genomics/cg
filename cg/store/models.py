@@ -3,9 +3,9 @@ import datetime as dt
 from typing import List
 
 import alchy
-from cg.constants import REV_PRIORITY_MAP, PRIORITY_MAP, FAMILY_ACTIONS, FLOWCELL_STATUS, PREP_CATEGORIES
+from cg.constants import REV_PRIORITY_MAP, PRIORITY_MAP, FAMILY_ACTIONS, FLOWCELL_STATUS, \
+    PREP_CATEGORIES
 from sqlalchemy import Column, ForeignKey, orm, types, UniqueConstraint, Table
-
 
 Model = alchy.make_declarative_base(Base=alchy.ModelBase)
 
@@ -33,13 +33,13 @@ class PriorityMixin:
 
 
 class User(Model):
-
     id = Column(types.Integer, primary_key=True)
     name = Column(types.String(128), nullable=False)
     email = Column(types.String(128), unique=True, nullable=False)
     is_admin = Column(types.Boolean, default=False)
 
-    customer_id = Column(ForeignKey('customer.id', ondelete='CASCADE', use_alter=True), nullable=False)
+    customer_id = Column(ForeignKey('customer.id', ondelete='CASCADE', use_alter=True),
+                         nullable=False)
     customer = orm.relationship('Customer', foreign_keys=[customer_id])
 
     def to_dict(self) -> dict:
@@ -53,7 +53,6 @@ class User(Model):
 
 
 class Customer(Model):
-
     id = Column(types.Integer, primary_key=True)
     internal_id = Column(types.String(32), unique=True, nullable=False)
     name = Column(types.String(128), nullable=False)
@@ -68,7 +67,7 @@ class Customer(Model):
     invoice_address = Column(types.Text, nullable=False)
     invoice_reference = Column(types.String(32), nullable=False)
     uppmax_account = Column(types.String(32))
-    
+
     primary_contact_id = Column(ForeignKey('user.id'))
     primary_contact = orm.relationship("User", foreign_keys=[primary_contact_id])
     delivery_contact_id = Column(ForeignKey('user.id'))
@@ -87,7 +86,6 @@ class Customer(Model):
 
 
 class CustomerGroup(Model):
-
     id = Column(types.Integer, primary_key=True)
     internal_id = Column(types.String(32), unique=True, nullable=False)
     name = Column(types.String(128), nullable=False)
@@ -99,7 +97,6 @@ class CustomerGroup(Model):
 
 
 class FamilySample(Model):
-
     __table_args__ = (
         UniqueConstraint('family_id', 'sample_id', name='_family_sample_uc'),
     )
@@ -107,7 +104,8 @@ class FamilySample(Model):
     id = Column(types.Integer, primary_key=True)
     family_id = Column(ForeignKey('family.id', ondelete='CASCADE'), nullable=False)
     sample_id = Column(ForeignKey('sample.id', ondelete='CASCADE'), nullable=False)
-    status = Column(types.Enum('affected', 'unaffected', 'unknown'), default='unknown', nullable=False)
+    status = Column(types.Enum('affected', 'unaffected', 'unknown'), default='unknown',
+                    nullable=False)
     mother_id = Column(ForeignKey('sample.id'))
     father_id = Column(ForeignKey('sample.id'))
 
@@ -116,7 +114,7 @@ class FamilySample(Model):
     mother = orm.relationship('Sample', foreign_keys=[mother_id])
     father = orm.relationship('Sample', foreign_keys=[father_id])
 
-    def to_dict(self, parents: bool=False, samples: bool=False, family: bool=False) -> dict:
+    def to_dict(self, parents: bool = False, samples: bool = False, family: bool = False) -> dict:
         """Override dictify method."""
         data = super(FamilySample, self).to_dict()
         if samples:
@@ -135,7 +133,6 @@ class FamilySample(Model):
 
 
 class Family(Model, PriorityMixin):
-
     __table_args__ = (
         UniqueConstraint('customer_id', 'name', name='_customer_name_uc'),
     )
@@ -156,7 +153,7 @@ class Family(Model, PriorityMixin):
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
 
-    def to_dict(self, links: bool=False, analyses: bool=False) -> dict:
+    def to_dict(self, links: bool = False, analyses: bool = False) -> dict:
         """Override dictify method."""
         data = super(Family, self).to_dict()
         data['panels'] = self.panels
@@ -181,7 +178,6 @@ class Family(Model, PriorityMixin):
 
 
 class MicrobialOrder(Model):
-
     id = Column(types.Integer, primary_key=True)
     internal_id = Column(types.String(32), unique=True)
     name = Column(types.String(128), nullable=False)
@@ -199,17 +195,17 @@ class MicrobialOrder(Model):
     def __str__(self):
         return f"{self.internal_id} ({self.name})"
 
-    def to_dict(self, samples: bool=False) -> dict:
+    def to_dict(self, samples: bool = False) -> dict:
         """Override dictify method."""
         data = super(MicrobialOrder, self).to_dict()
         data['customer'] = self.customer.to_dict()
         if samples:
-            data['microbial_samples'] = [microbial_samples_obj.to_dict() for microbial_samples_obj in self.microbial_samples]
+            data['microbial_samples'] = [microbial_samples_obj.to_dict() for microbial_samples_obj
+                                         in self.microbial_samples]
         return data
 
 
 class MicrobialSample(Model, PriorityMixin):
-
     id = Column(types.Integer, primary_key=True)
     internal_id = Column(types.String(32), nullable=False, unique=True)
     name = Column(types.String(128), nullable=False)
@@ -266,7 +262,6 @@ class MicrobialSample(Model, PriorityMixin):
 
 
 class Organism(Model):
-
     id = Column(types.Integer, primary_key=True)
     internal_id = Column(types.String(32), nullable=False, unique=True)
     name = Column(types.String(255), nullable=False, unique=True)
@@ -286,7 +281,6 @@ class Organism(Model):
 
 
 class Delivery(Model):
-
     id = Column(types.Integer, primary_key=True)
     delivered_at = Column(types.DateTime)
     removed_at = Column(types.DateTime)
@@ -297,7 +291,6 @@ class Delivery(Model):
 
 
 class Pool(Model):
-
     __table_args__ = (UniqueConstraint('order', 'name', name='_order_name_uc'),)
 
     id = Column(types.Integer, primary_key=True)
@@ -325,7 +318,6 @@ class Pool(Model):
 
 
 class Sample(Model, PriorityMixin):
-
     id = Column(types.Integer, primary_key=True)
     internal_id = Column(types.String(32), nullable=False, unique=True)
     priority = Column(types.Integer, default=1, nullable=False)
@@ -375,7 +367,7 @@ class Sample(Model, PriorityMixin):
         else:
             return f"Ordered {self.ordered_at.date()}"
 
-    def to_dict(self, links: bool=False, flowcells: bool=False) -> dict:
+    def to_dict(self, links: bool = False, flowcells: bool = False) -> dict:
         """Override dictify method."""
         data = super(Sample, self).to_dict()
         data['priority'] = self.priority_human
@@ -400,7 +392,6 @@ flowcell_sample = Table(
 
 
 class Flowcell(Model):
-
     id = Column(types.Integer, primary_key=True)
     name = Column(types.String(32), unique=True, nullable=False)
     sequencer_type = Column(types.Enum('hiseqga', 'hiseqx'))
@@ -414,7 +405,7 @@ class Flowcell(Model):
     def __str__(self):
         return self.name
 
-    def to_dict(self, samples: bool=False):
+    def to_dict(self, samples: bool = False):
         """Override dictify method."""
         data = super(Flowcell, self).to_dict()
         if samples:
@@ -423,7 +414,6 @@ class Flowcell(Model):
 
 
 class Analysis(Model):
-
     id = Column(types.Integer, primary_key=True)
     pipeline = Column(types.String(32), nullable=False)
     pipeline_version = Column(types.String(32))
@@ -441,7 +431,7 @@ class Analysis(Model):
     def __str__(self):
         return f"{self.family.internal_id} | {self.completed_at.date()}"
 
-    def to_dict(self, family: bool=True):
+    def to_dict(self, family: bool = True):
         """Override dictify method."""
         data = super(Analysis, self).to_dict()
         if family:
@@ -450,7 +440,6 @@ class Analysis(Model):
 
 
 class Application(Model):
-
     id = Column(types.Integer, primary_key=True)
     tag = Column(types.String(32), unique=True, nullable=False)
     # DEPRECATED, use prep_category instead
@@ -496,7 +485,6 @@ class Application(Model):
 
 
 class ApplicationVersion(Model):
-
     __table_args__ = (UniqueConstraint('application_id', 'version', name='_app_version_uc'),)
 
     id = Column(types.Integer, primary_key=True)
@@ -521,7 +509,6 @@ class ApplicationVersion(Model):
 
 
 class Panel(Model):
-
     id = Column(types.Integer, primary_key=True)
     name = Column(types.String(64), unique=True)
     abbrev = Column(types.String(32), unique=True)
@@ -537,7 +524,6 @@ class Panel(Model):
 
 
 class Invoice(Model):
-
     id = Column(types.Integer, primary_key=True)
     customer_id = Column(ForeignKey('customer.id'), nullable=False)
     created_at = Column(types.DateTime, default=dt.datetime.now)
