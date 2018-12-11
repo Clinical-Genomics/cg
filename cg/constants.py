@@ -16,36 +16,10 @@ CAPTUREKIT_OPTIONS = ('Agilent Sureselect CRE',
 CAPTUREKIT_CANCER_OPTIONS = ('Twist exome v1.3',
                              'Twist panel CG001',
                              'Nimblegen MSK-IMPACT')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-FLOWCELL_STATUS = ('ondisk', 'removed', 'requested',
-
-
-
-
-
-                   'processing')
-
-
-
+FLOWCELL_STATUS = ('ondisk', 'removed', 'requested', 'processing')
 METAGENOME_SOURCES = (
     'blood',
     'skin',
-
-
     'respiratory',
     'urine',
     'CSF',
@@ -53,14 +27,6 @@ METAGENOME_SOURCES = (
     'environmental',
     'unknown',
     'other')
-
-
-
-
-
-
-
-
 ANALYSIS_SOURCES = (
     'blood',
     'buccal swab',
