@@ -22,9 +22,9 @@ def add(context):
               help='internal ID for the customer group of the customer, a new group will be '
                    'created if left out')
 @click.option('-ia', '--invoice-address', 'invoice_address', required=True,
-              help='Post adress to invoice bla bla....')
+              help='Street adress, Post code, City')
 @click.option('-ir', '--invoice-reference', 'invoice_reference', required=True,
-              help='bla bla....')
+              help='Invoice reference (text)')
 
 @click.pass_context
 def customer(context, internal_id: str, name: str, customer_group_id: str, invoice_address: str, 

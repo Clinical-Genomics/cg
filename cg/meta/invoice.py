@@ -28,7 +28,7 @@ class InvoiceAPI():
             return None
 
         contact = {
-                'name': user.name if user else '',
+                'name': user.name,
                 'email': user.email,
                 'customer_name': customer.name,
                 'reference': customer.invoice_reference,
