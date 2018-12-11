@@ -82,10 +82,11 @@ def test_add_family_priority(invoke_cli, disk_store: Store):
 
 
 def add_customer(disk_store, customer_id='cust_test'):
-    """utility function to add a customer to use in tests"""
     customer_group = disk_store.add_customer_group('dummy_group', 'dummy group')
     customer = disk_store.add_customer(internal_id=customer_id, name="Test Customer",
-                                       scout_access=False, customer_group=customer_group)
+                                       scout_access=False, customer_group=customer_group,
+                                       invoice_address='dummy_address',
+                                       invoice_reference='dummy_reference')
     disk_store.add_commit(customer)
     return customer_id
 
