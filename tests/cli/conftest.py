@@ -1,6 +1,5 @@
 from functools import partial
 
-import datetime
 from cg.apps import hk
 from click.testing import CliRunner
 import pytest
