@@ -48,7 +48,7 @@ class InvoiceAPI():
         if self.invoice_obj.pools:
             record_type = 'Pool'
             for pool in self.invoice_obj.pools: 
-                pooled_samples += genologics_lims.samples_in_pools(pool.name, pool.lims_project)
+                pooled_samples += genologics_lims.samples_in_pools(pool.name, pool.ticket_number)
                 record = self.prepare_record(
                                     costcenter=costcenter.lower(),
                                     discount=self.invoice_obj.discount,
