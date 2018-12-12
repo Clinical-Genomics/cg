@@ -3,7 +3,7 @@ from functools import partial
 from cg.apps import hk
 from click.testing import CliRunner
 import pytest
-import json
+
 from cg.cli import base
 
 
@@ -69,7 +69,7 @@ def analysis_store(base_store, analysis_family):
         sample = base_store.add_sample(name=sample_data['name'], sex=sample_data['sex'],
                                        internal_id=sample_data['internal_id'],
                                        ticket=sample_data['ticket_number'],
-                                       reads=sample_data['reads'],)
+                                       reads=sample_data['reads'], )
         sample.family = family
         sample.application_version = application_version
         sample.customer = customer
