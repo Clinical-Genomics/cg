@@ -7,7 +7,6 @@ from cg.server.ext import db
 
 
 class BaseView(ModelView):
-
     def is_accessible(self):
         user_obj = db.user(session.get('user_email'))
         return True if (google.authorized and user_obj and user_obj.is_admin) else False
@@ -21,13 +20,11 @@ class CustomerView(BaseView):
     column_exclude_list = [
         'agreement_date',
         'organisation_number',
-        'invoice_address',
-        'delivery_contact',
-        'invoice_contact',
+        'invoice_address'
     ]
-    column_searchable_list = ['internal_id', 'name', 'primary_contact']
+    column_searchable_list = ['internal_id', 'name']
     column_filters = ['priority', 'scout_access']
-    column_editable_list = ['name', 'scout_access', 'primary_contact', 'priority', 'customer_group']
+    column_editable_list = ['name', 'scout_access', 'priority', 'customer_group']
 
 
 class CustomerGroupView(BaseView):
