@@ -58,7 +58,6 @@ def render_xlsx(data: dict) -> Workbook:
             worksheet[f"C{row}"] = total_reads
             worksheet[f"D{row}"] = str(pool_name)
 
-
         for column in ['A', 'B', 'C', 'D', 'E', 'F', 'G']:
             cell = worksheet[f"{column}{6}"]
             cell.font = Font(bold=True)
