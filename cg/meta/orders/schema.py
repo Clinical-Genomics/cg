@@ -64,11 +64,16 @@ class OptionalNone(validators.Optional):
     def __init__(self, scheme, default=None):
         super().__init__(scheme, default)
 
-    def validate(self, value):
-        if value is None:
-            return value
+    def validate(self, *value):
 
-        return super().validate(value)
+        if value:
+            val = value[0]
+
+            if val is None:
+                return val
+
+            return super().validate(val)
+        return self.default
 
 
 NAME_PATTERN = r'^[A-Za-z0-9-]*$'
