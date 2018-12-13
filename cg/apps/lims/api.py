@@ -43,7 +43,7 @@ class LimsAPI(Lims, OrderHandler):
         return data
     
     def samples_in_pools(self, pool_name, projectname):
-        return self.get_samples(udf={"pool name" : str(pool_name)}, projectname = projectname)
+        return self.get_samples(udf={"pool name": str(pool_name)}, projectname=projectname)
 
     def _export_project(self, lims_project):
         return {
