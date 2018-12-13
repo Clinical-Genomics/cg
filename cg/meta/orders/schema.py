@@ -60,6 +60,7 @@ class RegexValidatorNone(validators.RegexValidator):
         return super().validate(value)
 
 
+# pylint: disable=useless-super-delegation
 class OptionalNone(validators.Optional):
     """Optional Scheme that accepts None."""
 
