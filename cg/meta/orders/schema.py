@@ -44,6 +44,7 @@ class TypeValidatorNone(validators.TypeValidator):
     """Type Scheme that accepts None."""
 
     def validate(self, value):
+        """Validate the type of the value, accept None"""
         if value is None:
             return value
         return super().validate(value)
@@ -53,6 +54,7 @@ class RegexValidatorNone(validators.RegexValidator):
     """Validator for regex patterns that accepts None."""
 
     def validate(self, value):
+        """Validate the the value against an regular expression, accept None"""
         if value is None:
             return value
         return super().validate(value)
@@ -65,7 +67,7 @@ class OptionalNone(validators.Optional):
         super().__init__(scheme, default)
 
     def validate(self, *value):
-
+        """Validate the value with the given validator, accept missing values, accept None"""
         if value:
             val = value[0]
 
