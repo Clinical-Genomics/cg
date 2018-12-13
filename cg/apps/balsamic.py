@@ -3,6 +3,7 @@ import datetime as dt
 from pathlib import Path
 import logging
 from typing import List
+import subprocess
 
 log = logging.getLogger(__name__)
 
@@ -39,3 +40,9 @@ class FastqHandlerBalsamic:
                 dest_path.symlink_to(fastq_path)
             else:
                 log.debug(f"destination path already exists: {dest_path}")
+
+    def concatenate_balsamic(self, sample: str):
+        """Concatenate fastq-files for balsamic analysis"""
+        root_dir = Path(f'/mnt/hds/proj/bioinfo/STAGE/BALSAMIC_analysis/{family}')
+        script = "concatenate-balsamic-files.sh"
+        subprocess.Popen(['/bin/bash', f"{script} {str(root_dir)} {sample}"])       
