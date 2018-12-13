@@ -41,10 +41,7 @@ class ListValidator(validators.Validator):
 
 
 class TypeValidatorNone(validators.TypeValidator):
-    """Type Scheme."""
-
-    def __init__(self, _type):
-        super().__init__(_type)
+    """Type Scheme that accepts None."""
 
     def validate(self, value):
         if value is None:
@@ -53,10 +50,7 @@ class TypeValidatorNone(validators.TypeValidator):
 
 
 class RegexValidatorNone(validators.RegexValidator):
-    """Validator for regex patterns."""
-
-    def __init__(self, pattern):
-        super().__init__(pattern)
+    """Validator for regex patterns that accepts None."""
 
     def validate(self, value):
         if value is None:
@@ -65,7 +59,7 @@ class RegexValidatorNone(validators.RegexValidator):
 
 
 class OptionalNone(validators.Optional):
-    """Optional Scheme."""
+    """Optional Scheme that accepts None."""
 
     def __init__(self, scheme, default=None):
         super().__init__(scheme, default)
