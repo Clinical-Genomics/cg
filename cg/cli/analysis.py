@@ -5,6 +5,7 @@ import sys
 import click
 
 from cg.apps import hk, tb, scoutapi, lims
+from cg.apps.balsamic.fastq import FastqHandler
 from cg.exc import LimsDataError
 from cg.meta.analysis import AnalysisAPI
 from cg.meta.deliver.api import DeliverAPI
@@ -31,13 +32,15 @@ def analysis(context, priority, email, family_id, start_with):
     context.obj['tb'] = tb.TrailblazerAPI(context.obj)
     deliver = DeliverAPI(context.obj, hk_api=hk_api,
                                         lims_api=lims_api)
+    balsamic = FastqHandler(context.obj)
     context.obj['api'] = AnalysisAPI(
         db=context.obj['db'],
         hk_api=hk_api,
         tb_api=context.obj['tb'],
         scout_api=scout_api,
         lims_api=lims_api,
-        deliver_api=deliver
+        deliver_api=deliver,
+        fastq_handler=balsamic
     )
 
     if context.invoked_subcommand is None:

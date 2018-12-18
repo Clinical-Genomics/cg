@@ -201,6 +201,10 @@ class MockTB:
         return data
 
 
+class MockBalsamicFastq:
+    pass
+
+
 @pytest.yield_fixture(scope='function')
 def analysis_api(analysis_store, store_housekeeper, scout_store):
     """Setup an analysis API."""
@@ -217,6 +221,7 @@ def analysis_api(analysis_store, store_housekeeper, scout_store):
         deliver_api=MockDeliver(),
         ruamel=ruamel_mock,
         Path=Path_mock,
-        logger=MockLogger()
+        logger=MockLogger(),
+        fastq_handler=MockBalsamicFastq()
     )
     yield _analysis_api

@@ -8,7 +8,8 @@ from pathlib import Path
 
 from requests.exceptions import HTTPError
 
-from cg.apps import tb, hk, scoutapi, lims, balsamic
+from cg.apps import tb, hk, scoutapi, lims
+from cg.apps.balsamic import fastq
 from cg.store import models, Store
 from cg.meta.deliver.api import DeliverAPI
 
@@ -27,12 +28,13 @@ CAPTUREKIT_MAP = {'Agilent Sureselect CRE': 'agilent_sureselect_cre.v1',
                   'other': 'agilent_sureselect_cre.v1'}
 
 
-class AnalysisAPI():
+class AnalysisAPI:
 
     def __init__(self, db: Store, hk_api: hk.HousekeeperAPI, scout_api: scoutapi.ScoutAPI,
                  tb_api: tb.TrailblazerAPI, lims_api: lims.LimsAPI, deliver_api:
-            DeliverAPI, ruamel=ruamel, Path=Path, logger=logging.getLogger(
-        __name__)):
+            DeliverAPI, fastq_handler: fastq.FastqHandler, ruamel=ruamel, Path=Path,
+                 logger=logging.getLogger(
+                     __name__)):
         self.db = db
         self.tb = tb_api
         self.hk = hk_api
@@ -42,7 +44,7 @@ class AnalysisAPI():
         self.ruamel = ruamel
         self.Path = Path
         self.LOG = logger
-        self.balsamic = balsamic.FastqHandlerBalsamic()
+        self.balsamic_fastq_handler = fastq_handler
 
     def check(self, family_obj: models.Family):
         """Check stuff before starting the analysis."""
@@ -73,7 +75,8 @@ class AnalysisAPI():
             downsampled = isinstance(link_obj.sample.downsampled_to, int)
             external = link_obj.sample.application_version.application.is_external
             if downsampled or external:
-                self.LOG.info(f"{link_obj.sample.internal_id}: downsampled/external - skip evaluation")
+                self.LOG.info(
+                    f"{link_obj.sample.internal_id}: downsampled/external - skip evaluation")
                 kwargs['skip_evaluation'] = True
                 break
 
@@ -127,7 +130,8 @@ class AnalysisAPI():
                         try:
                             capture_kit = self.lims.capture_kit(link.sample.internal_id)
                             if capture_kit is None or capture_kit == 'NA':
-                                self.LOG.warning(f"{link.sample.internal_id}: capture kit not found")
+                                self.LOG.warning(
+                                    f"{link.sample.internal_id}: capture kit not found")
                             else:
                                 sample_data['capture_kit'] = CAPTUREKIT_MAP[capture_kit]
                         except HTTPError:
@@ -204,6 +208,7 @@ class AnalysisAPI():
         """Link FASTQ files for a sample."""
         file_objs = self.hk.files(bundle=link_obj.sample.internal_id, tags=['fastq'])
         files = []
+
         for file_obj in file_objs:
             # figure out flowcell name from header
             with gzip.open(file_obj.full_path) as handle:
@@ -226,7 +231,6 @@ class AnalysisAPI():
                 data['flowcell'] = f"{data['flowcell']}-{matches[0]}"
             files.append(data)
 
-
         self.tb.link(
             family=link_obj.family.internal_id,
             sample=link_obj.sample.internal_id,
@@ -234,13 +238,11 @@ class AnalysisAPI():
             files=files,
         )
 
+        # Decision for linking in Balsamic structure if data_analysis contains Balsamic
+        if link_obj.sample.data_analysis and 'Balsamic' in link_obj.sample.data_analysis:
 
-        #Decission for linking in Balsamic structure if data_analysis contains Balsamic
-        if link_obj.sample.data_analysis == "Balsamic" or link_obj.sample.data_analysis == "MIP + Balsamic":
-            self.balsamic.link_balsamic(
-                family=link_obj.family.internal_id,
-                sample=link_obj.sample.internal_id,
-                files=files)
+            self.balsamic_fastq_handler.link(family=link_obj.family.internal_id,
+                                             sample=link_obj.sample.internal_id, files=files)
 
     def panel(self, family_obj: models.Family) -> List[str]:
         """Create the aggregated panel file."""
