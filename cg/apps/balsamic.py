@@ -1,18 +1,22 @@
 # -*- coding: utf-8 -*-
 import datetime as dt
-from pathlib import Path
 import logging
+from pathlib import Path
 from typing import List
-import subprocess
 
 log = logging.getLogger(__name__)
 
 
 class FastqHandlerBalsamic:
 
+    def __init__(self, config):
+        super().__init__(config['balsamic']['root'])
+        self.root_dir = config['balsamic']['root']
+
     @staticmethod
     def name_balsamic_file(lane: int, flowcell: str, sample: str, read: int,
-                  undetermined: bool=False, date: dt.datetime=None, index: str=None) -> str:
+                           undetermined: bool = False, date: dt.datetime = None,
+                           index: str = None) -> str:
         """Name a FASTQ file following Balsamic conventions. Naming must be
         xxx_R_1_.fastq.gz and xxx_R_2_.fastq.gz"""
         flowcell = f"{flowcell}-undetermined" if undetermined else flowcell
@@ -23,8 +27,8 @@ class FastqHandlerBalsamic:
     def link_balsamic(self, family: str, sample: str, files: List[str]):
         """Link FASTQ files for a balsamic sample.
         Shall be linked to /mnt/hds/proj/bionfo/BALSAMIC_ANALYSIS/case-id/fastq/"""
-        root_dir = Path(f'/mnt/hds/proj/bioinfo/STAGE/BALSAMIC_analysis/{family}/fastq')
-        root_dir.mkdir(parents=True, exist_ok=True)
+        wrk_dir = Path(f'{self.root_dir}/{family}/fastq')
+        wrk_dir.mkdir(parents=True, exist_ok=True)
         for fastq_data in files:
             fastq_path = Path(fastq_data['path'])
             fastq_name = self.name_balsamic_file(
@@ -34,15 +38,9 @@ class FastqHandlerBalsamic:
                 read=fastq_data['read'],
                 undetermined=fastq_data['undetermined'],
             )
-            dest_path = root_dir / fastq_name
+            dest_path = wrk_dir / fastq_name
             if not dest_path.exists():
                 log.info(f"linking: {fastq_path} -> {dest_path}")
                 dest_path.symlink_to(fastq_path)
             else:
                 log.debug(f"destination path already exists: {dest_path}")
-
-    def concatenate_balsamic(self, sample: str):
-        """Concatenate fastq-files for balsamic analysis"""
-        root_dir = Path(f'/mnt/hds/proj/bioinfo/STAGE/BALSAMIC_analysis/{family}')
-        script = "concatenate-balsamic-files.sh"
-        subprocess.Popen(['/bin/bash', f"{script} {str(root_dir)} {sample}"])       
