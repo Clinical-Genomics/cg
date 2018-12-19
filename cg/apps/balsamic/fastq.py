@@ -5,6 +5,8 @@ import shutil
 from pathlib import Path
 from typing import List
 
+from coverage.python import os
+
 log = logging.getLogger(__name__)
 
 
@@ -16,13 +18,12 @@ class FastqFileNameCreator:
                undetermined: bool = False, date: dt.datetime = None,
                index: str = None) -> str:
         """Name a FASTQ file following Balsamic conventions. Naming must be
-        xxx_R_1_.fastq.gz and xxx_R_2_.fastq.gz"""
+        xxx_R_1.fastq.gz and xxx_R_2.fastq.gz"""
 
         flowcell = f"{flowcell}-undetermined" if undetermined else flowcell
         date_str = date.strftime('%y%m%d') if date else '171015'
         index = index if index else 'XXXXXX'
-        # Todo: Kenny, should the last _ be there?
-        return f"{lane}_{date_str}_{flowcell}_{sample}_{index}_R_{read}_.fastq.gz"
+        return f"{lane}_{date_str}_{flowcell}_{sample}_{index}_R_{read}.fastq.gz"
 
 
 class FastqFileConcatenator:
@@ -52,7 +53,9 @@ class FastqHandler:
             shutil.rmtree(wrk_dir)
 
         wrk_dir.mkdir(parents=True, exist_ok=True)
-        destination_paths = list()
+
+        destination_paths_r1 = list()
+        destination_paths_r2 = list()
 
         for fastq_data in files:
             fastq_path = Path(fastq_data['path'])
@@ -63,15 +66,29 @@ class FastqHandler:
                 read=fastq_data['read'],
                 undetermined=fastq_data['undetermined'],
             )
-            concatenated_filename = fastq_name[2:]
-            dest_path = wrk_dir / fastq_name
-            destination_paths.append(dest_path)
-            if not dest_path.exists():
-                log.info(f"linking: {fastq_path} -> {dest_path}")
-                dest_path.symlink_to(fastq_path)
+
+            destination_path = wrk_dir / fastq_name
+
+            if fastq_data['read'] == 1:
+                destination_paths_r1.append(destination_path)
+                concatenated_filename_r1 = fastq_name[2:]
             else:
-                log.debug(f"destination path already exists: {dest_path}")
+                destination_paths_r2.append(destination_path)
+                concatenated_filename_r2 = fastq_name[2:]
 
-        FastqFileConcatenator.concatenate(destination_paths, f'{wrk_dir}/{concatenated_filename}')
+            if not destination_path.exists():
+                log.info(f"linking: {fastq_path} -> {destination_path}")
+                destination_path.symlink_to(fastq_path)
+            else:
+                log.debug(f"destination path already exists: {destination_path}")
 
+        FastqFileConcatenator.concatenate(destination_paths_r1, f'{wrk_dir}/{concatenated_filename_r1}')
+        FastqFileConcatenator.concatenate(destination_paths_r2, f'{wrk_dir}/{concatenated_filename_r2}')
 
+        for myfile in destination_paths_r1:
+            if os.path.isfile(myfile):
+                os.remove(myfile)
+
+        for myfile in destination_paths_r2:
+            if os.path.isfile(myfile):
+                os.remove(myfile)
