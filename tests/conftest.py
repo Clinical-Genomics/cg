@@ -50,7 +50,8 @@ def files_data(files_raw):
         'config': mip_files_api.parse_config(files_raw['config']),
         'sampleinfo': mip_files_api.parse_sampleinfo(files_raw['sampleinfo']),
         'qcmetrics': mip_files_api.parse_qcmetrics(files_raw['qcmetrics']),
-}
+    }
+
 
 @pytest.yield_fixture(scope='function')
 def store() -> Store:
@@ -64,12 +65,20 @@ def store() -> Store:
 def base_store(store) -> Store:
     """Setup and example store."""
     customer_group = store.add_customer_group('all_customers', 'all customers')
+
     store.add_commit(customer_group)
     customers = [store.add_customer('cust000', 'Production', scout_access=True,
-                                    invoice_address='Test street', customer_group=customer_group),
-                 store.add_customer('cust001', 'Customer', scout_access=False, customer_group=customer_group),
-                 store.add_customer('cust002', 'Karolinska', scout_access=True, customer_group=customer_group),
-                 store.add_customer('cust003', 'CMMS', scout_access=True, customer_group=customer_group)]
+                                    customer_group=customer_group, invoice_address='Test street',
+                                    invoice_reference='ABCDEF'),
+                 store.add_customer('cust001', 'Customer', scout_access=False,
+                                    customer_group=customer_group, invoice_address='Test street',
+                                    invoice_reference='ABCDEF'),
+                 store.add_customer('cust002', 'Karolinska', scout_access=True,
+                                    customer_group=customer_group, invoice_address='Test street',
+                                    invoice_reference='ABCDEF'),
+                 store.add_customer('cust003', 'CMMS', scout_access=True,
+                                    customer_group=customer_group, invoice_address='Test street',
+                                    invoice_reference='ABCDEF')]
     store.add_commit(customers)
     applications = [store.add_application('WGXCUSC000', 'wgs', 'External WGS',
                                           sequencing_depth=0, is_external=True),
@@ -108,7 +117,7 @@ def sample_store(base_store) -> Store:
         base_store.add_sample('ordered', sex='male'),
         base_store.add_sample('received', sex='unknown', received=dt.datetime.now()),
         base_store.add_sample('received-prepared', sex='unknown', received=dt.datetime.now(),
-                              prepared_at = dt.datetime.now()),
+                              prepared_at=dt.datetime.now()),
         base_store.add_sample('external', sex='female', external=True),
         base_store.add_sample('external-received', sex='female', external=True,
                               received=dt.datetime.now()),
@@ -147,5 +156,3 @@ def disk_store(cli_runner, invoke_cli) -> Store:
         assert len(Store(database_uri).engine.table_names()) > 0
 
         yield Store(database_uri)
-
-

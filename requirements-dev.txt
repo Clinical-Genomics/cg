@@ -4,3 +4,9 @@ ipdb
 pytest-cov
 coveralls
 pytest-mock
+git-lint
+pylint
+pycodestyle
+yamllint
+docutils
+html-linter
