@@ -4,7 +4,7 @@ from typing import List
 
 import alchy
 from cg.constants import REV_PRIORITY_MAP, PRIORITY_MAP, FAMILY_ACTIONS, FLOWCELL_STATUS, \
-    PREP_CATEGORIES
+    PREP_CATEGORIES, STATUS_OPTIONS
 from sqlalchemy import Column, ForeignKey, orm, types, UniqueConstraint, Table
 
 Model = alchy.make_declarative_base(Base=alchy.ModelBase)
