@@ -121,7 +121,7 @@ def test_add_relationship_bad_mother(invoke_cli, disk_store: Store):
 
 
 def test_add_relationship_father(invoke_cli, disk_store: Store):
-    """Test to add a relationship using only the required arguments"""
+    """Test to add a relationship using a father"""
     # GIVEN a database with a sample and an family
     sample_id = add_sample(disk_store)
     father_id = add_sample(disk_store, 'father')
@@ -142,7 +142,7 @@ def test_add_relationship_father(invoke_cli, disk_store: Store):
 
 
 def test_add_relationship_bad_father(invoke_cli, disk_store: Store):
-    """Test to add a relationship using only the required arguments"""
+    """Test to add a relationship using a non-existing father"""
     # GIVEN a database with a sample and an family
     sample_id = add_sample(disk_store)
     father_id = 'bad_father'
