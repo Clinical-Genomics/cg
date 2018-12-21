@@ -80,7 +80,7 @@ def test_add_relationship_bad_status(invoke_cli, disk_store: Store):
 
 
 def test_add_relationship_mother(invoke_cli, disk_store: Store):
-    """Test to add a relationship using only the required arguments"""
+    """Test to add a relationship with a mother"""
     # GIVEN a database with a sample and an family
     sample_id = add_sample(disk_store)
     mother_id = add_sample(disk_store, 'mother')
