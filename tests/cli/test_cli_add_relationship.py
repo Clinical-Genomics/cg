@@ -101,7 +101,7 @@ def test_add_relationship_mother(invoke_cli, disk_store: Store):
 
 
 def test_add_relationship_bad_mother(invoke_cli, disk_store: Store):
-    """Test to add a relationship using only the required arguments"""
+    """Test to add a relationship using a non-existing mother"""
     # GIVEN a database with a sample and an family
     sample_id = add_sample(disk_store)
     mother_id = 'dummy_mother'
