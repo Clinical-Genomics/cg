@@ -61,6 +61,7 @@ def family(context, action, priority, panels, family_id):
 @click.pass_context
 def sample(context, sex, customer, comment, downsampled_to, apptag, capture_kit, sample_id):
     """Update information about a sample."""
+    lims_api = LimsAPI(context.obj)
     sample_obj = context.obj['status'].sample(sample_id)
 
     if sample_obj is None:
@@ -73,8 +74,7 @@ def sample(context, sex, customer, comment, downsampled_to, apptag, capture_kit,
         context.obj['status'].commit()
 
         print(click.style('update LIMS/Gender', fg='blue'))
-        if context.obj.get('lims'):
-            LimsAPI(context.obj).update_sample(sample_id, sex=sex)
+        lims_api.update_sample(sample_id, sex=sex)
 
     if customer:
         customer_obj = context.obj['status'].customer(customer)
