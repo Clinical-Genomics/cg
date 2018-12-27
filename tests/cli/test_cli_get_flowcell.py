@@ -129,6 +129,41 @@ def test_get_flowcell_samples(invoke_cli, disk_store: Store):
         assert sample.internal_id in result.output
 
 
+def test_get_flowcell_no_samples_without_samples(invoke_cli, disk_store: Store):
+    """Test that the output has the data of the flowcell"""
+    # GIVEN a database with a flowcell without related samples
+    name = add_flowcell(disk_store)
+    assert not disk_store.Flowcell.query.first().samples
+
+    # WHEN getting a flowcell with the --no-samples flag
+    db_uri = disk_store.uri
+
+    result = invoke_cli(
+        ['--database', db_uri, 'get', 'flowcell', name, '--no-samples'])
+
+    # THEN there are no samples to display but everything is OK
+    assert result.exit_code == 0
+
+
+def test_get_flowcell_no_samples_with_samples(invoke_cli, disk_store: Store):
+    """Test that the output has the data of the flowcell"""
+    # GIVEN a database with a flowcell with related samples
+    samples = add_samples(disk_store)
+    name = add_flowcell(disk_store, samples=samples)
+    assert disk_store.Flowcell.query.first().samples
+
+    # WHEN getting a flowcell with the --no-samples flag
+    db_uri = disk_store.uri
+
+    result = invoke_cli(
+        ['--database', db_uri, 'get', 'flowcell', name, '--no-samples'])
+
+    # THEN no related samples should be listed in the output
+    assert result.exit_code == 0
+    for sample in disk_store.Flowcell.query.first().samples:
+        assert sample.internal_id not in result.output
+
+
 def add_flowcell(disk_store, flowcell_id='flowcell_test', archived_at=None, samples=None):
     """utility function to get a flowcell to use in tests"""
     flowcell = disk_store.add_flowcell(name=flowcell_id, sequencer='dummy_sequencer',
