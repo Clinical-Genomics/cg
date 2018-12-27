@@ -124,7 +124,7 @@ def test_add_relationship_father(invoke_cli, disk_store: Store):
     """Test to add a relationship using a father"""
     # GIVEN a database with a sample and an family
     sample_id = add_sample(disk_store)
-    father_id = add_sample(disk_store, 'father')
+    father_id = add_sample(disk_store, 'father', 'male')
     family_id = add_family(disk_store)
     status = 'affected'
 
@@ -194,11 +194,11 @@ def ensure_customer(disk_store, customer_id='cust_test'):
     return customer
 
 
-def add_sample(disk_store, sample_id='sample_test'):
+def add_sample(disk_store, sample_id='sample_test', gender='female'):
     """utility function to add a sample to use in tests"""
     customer = ensure_customer(disk_store)
     application_version_id = ensure_application_version(disk_store)
-    sample = disk_store.add_sample(name=sample_id, sex='female')
+    sample = disk_store.add_sample(name=sample_id, sex=gender)
     sample.application_version_id = application_version_id
     sample.customer = customer
     disk_store.add_commit(sample)
