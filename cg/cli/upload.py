@@ -4,18 +4,19 @@ import logging
 import sys
 
 import click
+
+from cg.store import Store
 from cg.apps import coverage as coverage_app, gt, hk, loqus, tb, scoutapi, beacon as beacon_app, \
     lims
 from cg.exc import DuplicateRecordError
-from cg.meta.analysis import AnalysisAPI
-from cg.meta.deliver.api import DeliverAPI
-from cg.meta.report.api import ReportAPI
-from cg.meta.upload.beacon import UploadBeaconApi
 from cg.meta.upload.coverage import UploadCoverageApi
 from cg.meta.upload.gt import UploadGenotypesAPI
 from cg.meta.upload.observations import UploadObservationsAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
-from cg.store import Store
+from cg.meta.upload.beacon import UploadBeaconApi
+from cg.meta.analysis import AnalysisAPI
+from cg.meta.deliver.api import DeliverAPI
+from cg.meta.report.api import ReportAPI
 
 LOG = logging.getLogger(__name__)
 
@@ -27,7 +28,7 @@ def upload(context, family_id):
     """Upload results from analyses."""
 
     click.echo(click.style('----------------- UPLOAD ----------------------'))
-
+        
     context.obj['status'] = Store(context.obj['database'])
     context.obj['housekeeper_api'] = hk.HousekeeperAPI(context.obj)
 
@@ -144,7 +145,7 @@ def delivery_report(context, customer_id, family_id, print_console):
         delivery_report_file = report_api.create_delivery_report_file(customer_id, family_id,
                                                                       file_path=
                                                                       tb_api.get_family_root_dir(
-                                                                          family_id))
+                                                                        family_id))
         hk_api = context.obj['housekeeper_api']
         _add_delivery_report_to_hk(delivery_report_file, hk_api, family_id)
 
@@ -205,7 +206,7 @@ def observations(context, family_id):
 
     click.echo(click.style('----------------- OBSERVATIONS ----------------'))
 
-    # TODO: add the loqusd db binary path to context.obj
+    ## TODO add the loqusd db binary path to context.obj
     loqus_api = loqus.LoqusdbAPI(context.obj)
     family_obj = context.obj['status'].family(family_id)
     api = UploadObservationsAPI(context.obj['status'], context.obj['housekeeper_api'], loqus_api)
