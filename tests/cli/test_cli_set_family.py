@@ -67,7 +67,7 @@ def test_set_family_panel(invoke_cli, disk_store: Store):
 
 
 def test_set_family_priority(invoke_cli, disk_store: Store):
-    """Test that the added family get the priority we send in"""
+    """Test that the added family gets the priority we send in"""
     # GIVEN a database with a family
     name = add_family(disk_store)
     priority = 'priority'
