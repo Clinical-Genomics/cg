@@ -2,7 +2,7 @@
 import logging
 import click
 
-from cg.constants import PRIORITY_OPTIONS
+from cg.constants import PRIORITY_OPTIONS, STATUS_OPTIONS
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -137,7 +137,7 @@ def family(context, priority, panels, customer_id, name):
 @add.command()
 @click.option('-m', '--mother', help='sample ID for mother of sample')
 @click.option('-f', '--father', help='sample ID for father of sample')
-@click.option('-s', '--status', type=click.Choice(['affected', 'unaffected', 'unknown']),
+@click.option('-s', '--status', type=click.Choice(STATUS_OPTIONS),
               required=True)
 @click.argument('family_id')
 @click.argument('sample_id')
@@ -145,10 +145,30 @@ def family(context, priority, panels, customer_id, name):
 def relationship(context, mother, father, status, family_id, sample_id):
     """Create a link between a FAMILY_ID and a SAMPLE_ID."""
     status_db = context.obj['db']
+    mother_obj = None
+    father_obj = None
     family_obj = status_db.family(family_id)
+    if family_obj is None:
+        LOG.error('%s: family not found', family_id)
+        context.abort()
+
     sample_obj = status_db.sample(sample_id)
-    mother_obj = status_db.sample(mother) if mother else None
-    father_obj = status_db.sample(father) if father else None
+    if sample_obj is None:
+        LOG.error('%s: sample not found', sample_id)
+        context.abort()
+
+    if mother:
+        mother_obj = status_db.sample(mother)
+        if mother_obj is None:
+            LOG.error('%s: mother not found', mother)
+            context.abort()
+
+    if father:
+        father_obj = status_db.sample(father)
+        if father_obj is None:
+            LOG.error('%s: father not found', father)
+            context.abort()
+
     new_record = status_db.relate_sample(family_obj, sample_obj, status, mother=mother_obj,
                                          father=father_obj)
     status_db.add_commit(new_record)
