@@ -26,10 +26,10 @@ def test_set_family_bad_family(invoke_cli, disk_store: Store):
 
     # WHEN setting a family
     db_uri = disk_store.uri
-    name = 'dummy_name'
-    result = invoke_cli(['--database', db_uri, 'set', 'family', name])
+    family_id = 'dummy_name'
+    result = invoke_cli(['--database', db_uri, 'set', 'family', family_id])
 
-    # THEN then it should complain in missing family instead of setting a family
+    # THEN then it should complain on missing family
     assert result.exit_code == 1
 
 
@@ -40,26 +40,26 @@ def test_set_family_bad_panel(invoke_cli, disk_store: Store):
     # WHEN setting a family
     db_uri = disk_store.uri
     panel_id = 'dummy_panel'
-    name = add_family(disk_store)
+    family_id = add_family(disk_store).internal_id
     result = invoke_cli(['--database', db_uri, 'set', 'family', '--panel',
-                         panel_id, name])
+                         panel_id, family_id])
 
-    # THEN then it should complain in missing panel instead of setting a family
+    # THEN then it should complain in missing panel instead of setting a value
     assert result.exit_code == 1
     assert panel_id not in disk_store.Family.query.first().panels
 
 
 def test_set_family_panel(invoke_cli, disk_store: Store):
-    """Test to set a family using a non-existing panel"""
-    # GIVEN a database with a family and another non set panel
-    panel_id = add_panel(disk_store, 'a_panel')
-    name = add_family(disk_store)
+    """Test to set a family using an existing panel"""
+    # GIVEN a database with a family and a panel not yet added to the family
+    panel_id = add_panel(disk_store, 'a_panel').name
+    family_id = add_family(disk_store).internal_id
     assert panel_id not in disk_store.Family.query.first().panels
 
     # WHEN setting a family
     db_uri = disk_store.uri
     result = invoke_cli(['--database', db_uri, 'set', 'family', '--panel',
-                         panel_id, name])
+                         panel_id, family_id])
 
     # THEN then it should set panel on the family
     assert result.exit_code == 0
@@ -69,7 +69,7 @@ def test_set_family_panel(invoke_cli, disk_store: Store):
 def test_set_family_priority(invoke_cli, disk_store: Store):
     """Test that the added family get the priority we send in"""
     # GIVEN a database with a family
-    name = add_family(disk_store)
+    family_id = add_family(disk_store).internal_id
     priority = 'priority'
     assert disk_store.Family.query.first().priority_human != priority
 
@@ -78,7 +78,7 @@ def test_set_family_priority(invoke_cli, disk_store: Store):
 
     result = invoke_cli(
         ['--database', db_uri, 'set', 'family',
-         '--priority', priority, name])
+         '--priority', priority, family_id])
 
     # THEN then it should have been set
     assert result.exit_code == 0
@@ -93,7 +93,7 @@ def add_panel(disk_store, panel_id='panel_test', customer_id='cust_test'):
                                  version=1.0,
                                  date=datetime.now(), genes=1)
     disk_store.add_commit(panel)
-    return panel_id
+    return panel
 
 
 def add_application(disk_store, application_tag='dummy_tag'):
@@ -106,7 +106,7 @@ def add_application(disk_store, application_tag='dummy_tag'):
                                      prices=prices)
 
     disk_store.add_commit(version)
-    return application_tag
+    return application
 
 
 def ensure_application_version(disk_store, application_tag='dummy_tag'):
@@ -124,7 +124,7 @@ def ensure_application_version(disk_store, application_tag='dummy_tag'):
                                          prices=prices)
 
         disk_store.add_commit(version)
-    return version.id
+    return version
 
 
 def ensure_customer(disk_store, customer_id='cust_test'):
@@ -145,8 +145,8 @@ def ensure_customer(disk_store, customer_id='cust_test'):
 def add_family(disk_store, family_id='family_test', customer_id='cust_test'):
     """utility function to set a family to use in tests"""
     customer = ensure_customer(disk_store, customer_id)
-    panel = add_panel(disk_store)
-    family = disk_store.add_family(name=family_id, panels=panel)
+    panel_id = add_panel(disk_store).name
+    family = disk_store.add_family(name=family_id, panels=panel_id)
     family.customer = customer
     disk_store.add_commit(family)
-    return family.internal_id
+    return family
