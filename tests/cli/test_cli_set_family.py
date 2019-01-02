@@ -4,10 +4,10 @@ from datetime import datetime
 from cg.store import Store
 
 
-def test_set_family_required(invoke_cli, disk_store: Store):
+def test_set_family_without_options(invoke_cli, disk_store: Store):
     """Test to set a family using only the required arguments"""
     # GIVEN a database with a family
-    family_id = add_family(disk_store)
+    family_id = add_family(disk_store).internal_id
     assert disk_store.Family.query.count() == 1
 
     # WHEN setting a family
@@ -16,8 +16,8 @@ def test_set_family_required(invoke_cli, disk_store: Store):
     result = invoke_cli(
         ['--database', db_uri, 'set', 'family', family_id])
 
-    # THEN then it should have been set
-    assert result.exit_code == 0
+    # THEN then it should abort
+    assert result.exit_code == 1
 
 
 def test_set_family_bad_family(invoke_cli, disk_store: Store):
