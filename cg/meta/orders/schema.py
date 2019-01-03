@@ -93,7 +93,7 @@ MIP_SAMPLE = {
     # Order portal specific
     'internal_id': OptionalNone(TypeValidatorNone(str)),
 
-    # required for new samples
+    # "required for new samples"
     'name': validators.RegexValidator(NAME_PATTERN),
     'container': OptionalNone(validators.Any(CONTAINER_OPTIONS)),
     'data_analysis': str,
@@ -105,24 +105,24 @@ MIP_SAMPLE = {
     'tumour': bool,
     'priority': OptionalNone(validators.Any(PRIORITY_OPTIONS)),
 
-    # required if plate for new samples
+    # "required if plate for new samples"
     'container_name': OptionalNone(TypeValidatorNone(str)),
     'well_position': OptionalNone(TypeValidatorNone(str)),
 
-    # Required if data analysis in Scout or vcf delivery
+    # "Required if data analysis in Scout or vcf delivery"
     'panels': ListValidator(str, min_items=1),
     'status': OptionalNone(validators.Any(STATUS_OPTIONS)),
 
-    # Required if samples are part of trio/family
+    # "Required if samples are part of trio/family"
     'mother': OptionalNone(RegexValidatorNone(NAME_PATTERN)),
     'father': OptionalNone(RegexValidatorNone(NAME_PATTERN)),
 
-    # This information is optional for FFPE-samples for new samples
+    # "This information is optional for FFPE-samples for new samples"
     'formalin_fixation_time': OptionalNone(TypeValidatorNone(str)),
     'post_formalin_fixation_time': OptionalNone(TypeValidatorNone(str)),
     'tissue_block_size': OptionalNone(TypeValidatorNone(str)),
 
-    # Not Required
+    # "Not Required"
     'quantity': OptionalNone(TypeValidatorNone(str)),
     'comment': OptionalNone(TypeValidatorNone(str)),
 }
@@ -133,7 +133,7 @@ BALSAMIC_SAMPLE = {
     # Order portal specific
     'internal_id': OptionalNone(TypeValidatorNone(str)),
 
-    # This information is required for new samples
+    # "This information is required for new samples"
     'name': validators.RegexValidator(NAME_PATTERN),
     'container': OptionalNone(validators.Any(CONTAINER_OPTIONS)),
     'data_analysis': str,
@@ -175,7 +175,7 @@ EXTERNAL_SAMPLE = {
     'internal_id': OptionalNone(TypeValidatorNone(str)),
     'data_analysis': str,
 
-    # required for new samples
+    # "required for new samples"
     'name': validators.RegexValidator(NAME_PATTERN),
     'capture_kit': OptionalNone(validators.Any(CAPTUREKIT_OPTIONS)),
     'application': str,
@@ -184,17 +184,17 @@ EXTERNAL_SAMPLE = {
     'priority': OptionalNone(validators.Any(PRIORITY_OPTIONS)),
     'source': OptionalNone(TypeValidatorNone(str)),
 
-    # Required if data analysis in Scout
+    # "Required if data analysis in Scout"
     'panels': ListValidator(str, min_items=0),
     # todo: find out if "Additional Gene List" is "lost in translation", implement in OP or remove from OF
     'status': OptionalNone(validators.Any(STATUS_OPTIONS)),
 
-    # Required if samples are part of trio/family
+    # "Required if samples are part of trio/family"
     'mother': OptionalNone(RegexValidatorNone(NAME_PATTERN)),
     'father': OptionalNone(RegexValidatorNone(NAME_PATTERN)),
     # todo: find out if "Other relations" is removed in current OF
 
-    # Not Required
+    # "Not Required"
     'tumour': OptionalNone(bool, False),
     # todo: find out if "Gel picture" is "lost in translation", implement in OP or remove from OF
     'extraction_method': OptionalNone(TypeValidatorNone(str)),
@@ -204,7 +204,7 @@ EXTERNAL_SAMPLE = {
 FASTQ_SAMPLE = {
     # Orderform 1508:12
 
-    # required
+    # "required"
     'name': validators.RegexValidator(NAME_PATTERN),
     'container': OptionalNone(validators.Any(CONTAINER_OPTIONS)),
     'data_analysis': str,
@@ -217,19 +217,19 @@ FASTQ_SAMPLE = {
     'tumour': bool,
     'priority': OptionalNone(validators.Any(PRIORITY_OPTIONS)),
 
-    # required if plate
+    # "required if plate"
     'container_name': OptionalNone(TypeValidatorNone(str)),
     'well_position': OptionalNone(TypeValidatorNone(str)),
 
-    # Required if data analysis in Scout or vcf delivery => not valid for fastq
+    # "Required if data analysis in Scout or vcf delivery" => not valid for fastq
     # 'panels': ListValidator(str, min_items=1),
     # 'status': OptionalNone(validators.Any(STATUS_OPTIONS),
 
-    # Required if samples are part of trio/family
+    # "Required if samples are part of trio/family"
     'mother': OptionalNone(RegexValidatorNone(NAME_PATTERN)),
     'father': OptionalNone(RegexValidatorNone(NAME_PATTERN)),
 
-    # Not Required
+    # "Not Required"
     'quantity': OptionalNone(TypeValidatorNone(str)),
     'comment': OptionalNone(TypeValidatorNone(str)),
 }
@@ -240,7 +240,7 @@ RML_SAMPLE = {
     # Order portal specific
     'priority': str,
 
-    # This information is required
+    # "This information is required"
     'name': validators.RegexValidator(NAME_PATTERN),
     'pool': str,
     'application': str,
@@ -252,14 +252,14 @@ RML_SAMPLE = {
     'index': str,
     'index_number': str,
 
-    # Required if Plate
+    # "Required if Plate"
     'rml_plate_name': OptionalNone(TypeValidatorNone(str)),
     'well_position_rml': OptionalNone(TypeValidatorNone(str)),
 
-    # Automatically generated (if not custom) or custom
+    # "Automatically generated (if not custom) or custom"
     'index_sequence': OptionalNone(TypeValidatorNone(str)),
 
-    # Not required
+    # "Not required"
     'comment': OptionalNone(TypeValidatorNone(str)),
     'capture_kit': OptionalNone(validators.Any(CAPTUREKIT_OPTIONS))
 }
@@ -267,7 +267,7 @@ RML_SAMPLE = {
 MICROBIAL_SAMPLE = {
     # 1603:6 Orderform Microbial WGS
 
-    # These fields are required
+    # "These fields are required"
     'name': validators.RegexValidator(NAME_PATTERN),
     'organism': str,
     'reference_genome': str,
@@ -279,17 +279,17 @@ MICROBIAL_SAMPLE = {
     'container': OptionalNone(validators.Any(CONTAINER_OPTIONS)),
     'priority': OptionalNone(validators.Any(PRIORITY_OPTIONS)),
 
-    # Required if Plate
+    # "Required if Plate"
     'container_name': OptionalNone(TypeValidatorNone(str)),
     'well_position': OptionalNone(TypeValidatorNone(str)),
 
-    # Required if "Other" is chosen in column "Species"
+    # "Required if "Other" is chosen in column "Species""
     'organism_other': OptionalNone(TypeValidatorNone(str)),
 
-    # Required if "other" is chosen in column "DNA Elution Buffer"
+    # 'Required if "other" is chosen in column "DNA Elution Buffer"'
     'elution_buffer_other': OptionalNone(TypeValidatorNone(str)),
 
-    # These fields are not required
+    # "These fields are not required"
     'concentration_weight': OptionalNone(TypeValidatorNone(str)),
     'quantity': OptionalNone(TypeValidatorNone(str)),
     'comment': OptionalNone(TypeValidatorNone(str)),
@@ -298,7 +298,7 @@ MICROBIAL_SAMPLE = {
 METAGENOME_SAMPLE = {
     # 1605:4 Orderform Microbial Metagenomes- 16S
 
-    # This information is required
+    # "This information is required"
     'name': validators.RegexValidator(NAME_PATTERN),
     'container': OptionalNone(validators.Any(CONTAINER_OPTIONS)),
     'data_analysis': str,
@@ -308,11 +308,11 @@ METAGENOME_SAMPLE = {
     'source': str,
     'priority': OptionalNone(validators.Any(PRIORITY_OPTIONS)),
 
-    # Required if Plate
+    # "Required if Plate"
     'container_name': OptionalNone(TypeValidatorNone(str)),
     'well_position': OptionalNone(TypeValidatorNone(str)),
 
-    # This information is not required
+    # "This information is not required"
     'concentration_weight': OptionalNone(TypeValidatorNone(str)),
     'quantity': OptionalNone(TypeValidatorNone(str)),
     'extraction_method': OptionalNone(TypeValidatorNone(str)),
