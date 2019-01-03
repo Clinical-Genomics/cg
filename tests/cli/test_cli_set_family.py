@@ -56,7 +56,7 @@ def test_set_family_panel(invoke_cli, disk_store: Store):
     family_id = add_family(disk_store).internal_id
     assert panel_id not in disk_store.Family.query.first().panels
 
-    # WHEN setting a family
+    # WHEN setting a panel of a family
     db_uri = disk_store.uri
     result = invoke_cli(['--database', db_uri, 'set', 'family', '--panel',
                          panel_id, family_id])
