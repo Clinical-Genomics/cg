@@ -20,14 +20,14 @@ def test_get_flowcell_bad_flowcell(invoke_cli, disk_store: Store):
 def test_get_flowcell_required(invoke_cli, disk_store: Store):
     """Test to get a flowcell using only the required arguments"""
     # GIVEN a database with a flowcell
-    flowcell_id = add_flowcell(disk_store)
+    flowcell_name = add_flowcell(disk_store).name
     assert disk_store.Flowcell.query.count() == 1
 
     # WHEN getting a flowcell
     db_uri = disk_store.uri
 
     result = invoke_cli(
-        ['--database', db_uri, 'get', 'flowcell', flowcell_id])
+        ['--database', db_uri, 'get', 'flowcell', flowcell_name])
 
     # THEN then it should have been get
     assert result.exit_code == 0
@@ -36,8 +36,7 @@ def test_get_flowcell_required(invoke_cli, disk_store: Store):
 def test_get_flowcell_output(invoke_cli, disk_store: Store):
     """Test that the output has the data of the flowcell"""
     # GIVEN a database with a flowcell with data
-    add_flowcell(disk_store)
-    name = disk_store.Flowcell.query.first().name
+    flowcell_name = add_flowcell(disk_store).name
     sequencer_type = disk_store.Flowcell.query.first().sequencer_type
     sequencer_name = disk_store.Flowcell.query.first().sequencer_name
     sequenced_at_date = str(disk_store.Flowcell.query.first().sequenced_at.date())
@@ -47,11 +46,11 @@ def test_get_flowcell_output(invoke_cli, disk_store: Store):
     db_uri = disk_store.uri
 
     result = invoke_cli(
-        ['--database', db_uri, 'get', 'flowcell', name])
+        ['--database', db_uri, 'get', 'flowcell', flowcell_name])
 
     # THEN then it should have been get
     assert result.exit_code == 0
-    assert name in result.output
+    assert flowcell_name in result.output
     assert sequencer_type in result.output
     assert sequencer_name in result.output
     assert sequenced_at_date in result.output
@@ -61,14 +60,14 @@ def test_get_flowcell_output(invoke_cli, disk_store: Store):
 def test_get_flowcell_archived_at_none(invoke_cli, disk_store: Store):
     """Test that the output has the data of the flowcell"""
     # GIVEN a database with a flowcell with data
-    name = add_flowcell(disk_store, archived_at=None)
+    flowcell_name = add_flowcell(disk_store, archived_at=None).name
     archived_at = 'No'
 
     # WHEN getting a flowcell
     db_uri = disk_store.uri
 
     result = invoke_cli(
-        ['--database', db_uri, 'get', 'flowcell', name])
+        ['--database', db_uri, 'get', 'flowcell', flowcell_name])
 
     # THEN then it should have been get
     assert result.exit_code == 0
@@ -79,14 +78,14 @@ def test_get_flowcell_archived_at_date(invoke_cli, disk_store: Store):
     """Test that the output has the data of the flowcell"""
     # GIVEN a database with a flowcell with data
     archived_at = datetime.now()
-    name = add_flowcell(disk_store, archived_at=archived_at)
+    flowcell_name = add_flowcell(disk_store, archived_at=archived_at).name
     archived_at_date = str(archived_at.date())
 
     # WHEN getting a flowcell
     db_uri = disk_store.uri
 
     result = invoke_cli(
-        ['--database', db_uri, 'get', 'flowcell', name])
+        ['--database', db_uri, 'get', 'flowcell', flowcell_name])
 
     # THEN then it should have been get
     assert result.exit_code == 0
@@ -96,14 +95,14 @@ def test_get_flowcell_archived_at_date(invoke_cli, disk_store: Store):
 def test_get_flowcell_samples_without_samples(invoke_cli, disk_store: Store):
     """Test that the output has the data of the flowcell"""
     # GIVEN a database with a flowcell without related samples
-    name = add_flowcell(disk_store)
+    flowcell_name = add_flowcell(disk_store).name
     assert not disk_store.Flowcell.query.first().samples
 
     # WHEN getting a flowcell with the --samples flag
     db_uri = disk_store.uri
 
     result = invoke_cli(
-        ['--database', db_uri, 'get', 'flowcell', name, '--samples'])
+        ['--database', db_uri, 'get', 'flowcell', flowcell_name, '--samples'])
 
     # THEN a message about no samples should have been displayed
     assert result.exit_code == 0
@@ -114,14 +113,14 @@ def test_get_flowcell_samples(invoke_cli, disk_store: Store):
     """Test that the output has the data of the flowcell"""
     # GIVEN a database with a flowcell with related samples
     samples = add_samples(disk_store)
-    name = add_flowcell(disk_store, samples=samples)
+    flowcell_name = add_flowcell(disk_store, samples=samples).name
     assert disk_store.Flowcell.query.first().samples
 
     # WHEN getting a flowcell with the --samples flag
     db_uri = disk_store.uri
 
     result = invoke_cli(
-        ['--database', db_uri, 'get', 'flowcell', name, '--samples'])
+        ['--database', db_uri, 'get', 'flowcell', flowcell_name, '--samples'])
 
     # THEN all related samples should be listed in the output
     assert result.exit_code == 0
@@ -132,14 +131,14 @@ def test_get_flowcell_samples(invoke_cli, disk_store: Store):
 def test_get_flowcell_no_samples_without_samples(invoke_cli, disk_store: Store):
     """Test that the output has the data of the flowcell"""
     # GIVEN a database with a flowcell without related samples
-    name = add_flowcell(disk_store)
+    flowcell_name = add_flowcell(disk_store).name
     assert not disk_store.Flowcell.query.first().samples
 
     # WHEN getting a flowcell with the --no-samples flag
     db_uri = disk_store.uri
 
     result = invoke_cli(
-        ['--database', db_uri, 'get', 'flowcell', name, '--no-samples'])
+        ['--database', db_uri, 'get', 'flowcell', flowcell_name, '--no-samples'])
 
     # THEN there are no samples to display but everything is OK
     assert result.exit_code == 0
@@ -149,14 +148,14 @@ def test_get_flowcell_no_samples_with_samples(invoke_cli, disk_store: Store):
     """Test that the output has the data of the flowcell"""
     # GIVEN a database with a flowcell with related samples
     samples = add_samples(disk_store)
-    name = add_flowcell(disk_store, samples=samples)
+    flowcell_name = add_flowcell(disk_store, samples=samples).name
     assert disk_store.Flowcell.query.first().samples
 
     # WHEN getting a flowcell with the --no-samples flag
     db_uri = disk_store.uri
 
     result = invoke_cli(
-        ['--database', db_uri, 'get', 'flowcell', name, '--no-samples'])
+        ['--database', db_uri, 'get', 'flowcell', flowcell_name, '--no-samples'])
 
     # THEN no related samples should be listed in the output
     assert result.exit_code == 0
@@ -164,16 +163,16 @@ def test_get_flowcell_no_samples_with_samples(invoke_cli, disk_store: Store):
         assert sample.internal_id not in result.output
 
 
-def add_flowcell(disk_store, flowcell_id='flowcell_test', archived_at=None, samples=None):
+def add_flowcell(disk_store, name='flowcell_test', archived_at=None, samples=None):
     """utility function to get a flowcell to use in tests"""
-    flowcell = disk_store.add_flowcell(name=flowcell_id, sequencer='dummy_sequencer',
+    flowcell = disk_store.add_flowcell(name=name, sequencer='dummy_sequencer',
                                        sequencer_type='hiseqx',
                                        date=datetime.now())
     flowcell.archived_at = archived_at
     if samples:
         flowcell.samples = samples
     disk_store.add_commit(flowcell)
-    return flowcell.name
+    return flowcell
 
 
 def ensure_application_version(disk_store, application_tag='dummy_tag'):
@@ -191,7 +190,7 @@ def ensure_application_version(disk_store, application_tag='dummy_tag'):
                                          prices=prices)
 
         disk_store.add_commit(version)
-    return version.id
+    return version
 
 
 def ensure_customer(disk_store, customer_id='cust_test'):
@@ -212,7 +211,7 @@ def ensure_customer(disk_store, customer_id='cust_test'):
 def add_sample(disk_store, sample_id):
     """utility function to add a sample to use in tests"""
     customer = ensure_customer(disk_store)
-    application_version_id = ensure_application_version(disk_store)
+    application_version_id = ensure_application_version(disk_store).id
     sample = disk_store.add_sample(name=sample_id, sex='female')
     sample.application_version_id = application_version_id
     sample.customer = customer

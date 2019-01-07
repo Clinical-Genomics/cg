@@ -11,8 +11,8 @@ def test_set_flowcell_bad_flowcell(invoke_cli, disk_store: Store):
 
     # WHEN setting a flowcell
     db_uri = disk_store.uri
-    name = 'dummy_name'
-    result = invoke_cli(['--database', db_uri, 'set', 'flowcell', name])
+    flowcell_name = 'dummy_name'
+    result = invoke_cli(['--database', db_uri, 'set', 'flowcell', flowcell_name])
 
     # THEN then it should complain in missing flowcell instead of setting a flowcell
     assert result.exit_code == 1
@@ -21,14 +21,14 @@ def test_set_flowcell_bad_flowcell(invoke_cli, disk_store: Store):
 def test_set_flowcell_required(invoke_cli, disk_store: Store):
     """Test to set a flowcell using only the required arguments"""
     # GIVEN a database with a flowcell
-    flowcell_id = add_flowcell(disk_store)
+    flowcell_name = add_flowcell(disk_store).name
     assert disk_store.Flowcell.query.count() == 1
 
     # WHEN setting a flowcell
     db_uri = disk_store.uri
 
     result = invoke_cli(
-        ['--database', db_uri, 'set', 'flowcell', flowcell_id])
+        ['--database', db_uri, 'set', 'flowcell', flowcell_name])
 
     # THEN then it should have been set
     assert result.exit_code == 0
@@ -37,7 +37,7 @@ def test_set_flowcell_required(invoke_cli, disk_store: Store):
 def test_set_flowcell_status(invoke_cli, disk_store: Store):
     """Test that the updated flowcell get the status we send in"""
     # GIVEN a database with a flowcell
-    name = add_flowcell(disk_store)
+    flowcell_name = add_flowcell(disk_store).name
     status = FLOWCELL_STATUS[2]
     assert disk_store.Flowcell.query.first().status != status
 
@@ -46,7 +46,7 @@ def test_set_flowcell_status(invoke_cli, disk_store: Store):
 
     result = invoke_cli(
         ['--database', db_uri, 'set', 'flowcell',
-         '--status', status, name])
+         '--status', status, flowcell_name])
 
     # THEN then it should have been set
     assert result.exit_code == 0
@@ -60,4 +60,4 @@ def add_flowcell(disk_store, flowcell_id='flowcell_test'):
                                        sequencer_type='hiseqx',
                                        date=datetime.now())
     disk_store.add_commit(flowcell)
-    return flowcell.name
+    return flowcell
