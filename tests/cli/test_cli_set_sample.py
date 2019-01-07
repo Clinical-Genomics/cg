@@ -19,22 +19,22 @@ def test_set_sample_invalid_sample(invoke_cli, disk_store: Store):
 def test_set_sample_sex(invoke_cli, disk_store: Store):
     # GIVEN a database with a male sample
 
-    sample_id = add_sample(disk_store)
-    sex = 'male'
-    assert disk_store.Sample.query.first().sex != sex
+    sample_id = add_sample(disk_store, sex='female').internal_id
+    new_sex = 'male'
+    assert disk_store.Sample.query.first().sex != new_sex
 
-    # WHEN setting sex on sample
+    # WHEN setting sex on sample to male
     result = invoke_cli(
-        ['--database', disk_store.uri, 'set', 'sample', sample_id, '--sex', sex])
+        ['--database', disk_store.uri, 'set', 'sample', sample_id, '--sex', new_sex])
 
-    # THEN then it should have 'female' as sex
+    # THEN then it should have 'male' as sex
     assert result.exit_code == 0
-    assert disk_store.Sample.query.first().sex == sex
+    assert disk_store.Sample.query.first().sex == new_sex
 
 
 def test_set_sample_invalid_customer(invoke_cli, disk_store: Store):
     # GIVEN a database with a sample
-    sample_id = add_sample(disk_store)
+    sample_id = add_sample(disk_store).internal_id
     customer_id = 'dummy_customer_id'
     assert disk_store.Sample.query.first().customer.internal_id != customer_id
 
@@ -48,7 +48,7 @@ def test_set_sample_invalid_customer(invoke_cli, disk_store: Store):
 
 def test_set_sample_customer(invoke_cli, disk_store: Store):
     # GIVEN a database with a sample and two customers
-    sample_id = add_sample(disk_store)
+    sample_id = add_sample(disk_store).internal_id
     customer_id = ensure_customer(disk_store, 'another_customer').internal_id
     assert disk_store.Sample.query.first().customer.internal_id != customer_id
 
@@ -63,7 +63,7 @@ def test_set_sample_customer(invoke_cli, disk_store: Store):
 
 def test_set_sample_comment(invoke_cli, disk_store: Store):
     # GIVEN a database with a sample without a comment
-    sample_id = add_sample(disk_store)
+    sample_id = add_sample(disk_store).internal_id
     comment = 'comment'
     assert comment not in (disk_store.Sample.query.first().comment or [])
 
@@ -77,7 +77,7 @@ def test_set_sample_comment(invoke_cli, disk_store: Store):
 
 def test_set_sample_second_comment(invoke_cli, disk_store: Store):
     # GIVEN a database with a sample that has a comment
-    sample_id = add_sample(disk_store)
+    sample_id = add_sample(disk_store).internal_id
     comment = 'comment'
     second_comment = 'comment2'
     invoke_cli(['--database', disk_store.uri, 'set', 'sample', sample_id, '-C', comment])
@@ -96,7 +96,7 @@ def test_set_sample_second_comment(invoke_cli, disk_store: Store):
 
 def test_set_sample_invalid_downsampled_to(invoke_cli, disk_store: Store):
     # GIVEN a database with a sample
-    sample_id = add_sample(disk_store)
+    sample_id = add_sample(disk_store).internal_id
     downsampled_to = 'downsampled_to'
     assert disk_store.Sample.query.first().downsampled_to != downsampled_to
 
@@ -111,7 +111,7 @@ def test_set_sample_invalid_downsampled_to(invoke_cli, disk_store: Store):
 
 def test_set_sample_downsampled_to(invoke_cli, disk_store: Store):
     # GIVEN a database with a sample
-    sample_id = add_sample(disk_store)
+    sample_id = add_sample(disk_store).internal_id
     downsampled_to = 111111
     assert disk_store.Sample.query.first().downsampled_to != downsampled_to
 
@@ -126,7 +126,7 @@ def test_set_sample_downsampled_to(invoke_cli, disk_store: Store):
 
 def test_set_sample_invalid_application(invoke_cli, disk_store: Store):
     # GIVEN a database with a sample
-    sample_id = add_sample(disk_store)
+    sample_id = add_sample(disk_store).internal_id
     application_tag = 'dummy_application'
     assert disk_store.Sample.query.first().application_version.application.tag != application_tag
 
@@ -141,7 +141,7 @@ def test_set_sample_invalid_application(invoke_cli, disk_store: Store):
 
 def test_set_sample_application(invoke_cli, disk_store: Store):
     # GIVEN a database with a sample and two applications
-    sample_id = add_sample(disk_store)
+    sample_id = add_sample(disk_store).internal_id
     application_tag = ensure_application_version(disk_store, 'another_application').application.tag
     assert disk_store.Sample.query.first().application_version.application.tag != application_tag
 
@@ -156,7 +156,7 @@ def test_set_sample_application(invoke_cli, disk_store: Store):
 
 def test_set_sample_capture_kit(invoke_cli, disk_store: Store):
     # GIVEN a database with a sample
-    sample_id = add_sample(disk_store)
+    sample_id = add_sample(disk_store).internal_id
     capture_kit = 'capture_kit'
     assert disk_store.Sample.query.first().capture_kit != capture_kit
 
@@ -203,12 +203,12 @@ def ensure_customer(disk_store, customer_id='cust_test'):
     return customer
 
 
-def add_sample(disk_store, sample_id='sample_test'):
+def add_sample(disk_store, sample_id='sample_test', sex='female'):
     """utility function to add a sample to use in tests"""
     customer = ensure_customer(disk_store)
     application_version_id = ensure_application_version(disk_store).id
-    sample = disk_store.add_sample(name=sample_id, sex='female')
+    sample = disk_store.add_sample(name=sample_id, sex=sex)
     sample.application_version_id = application_version_id
     sample.customer = customer
     disk_store.add_commit(sample)
-    return sample.internal_id
+    return sample
