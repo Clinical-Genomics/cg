@@ -29,6 +29,9 @@ def family(context, action, priority, panels, family_id):
     if family_obj is None:
         LOG.error(f"{family_id}: family not found")
         context.abort()
+    if not (action or priority or panels):
+        LOG.error(f"nothing to change")
+        context.abort()
     if action:
         LOG.info(f"update action: {family_obj.action or 'NA'} -> {action}")
         family_obj.action = action
