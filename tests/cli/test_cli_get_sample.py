@@ -238,7 +238,7 @@ def ensure_application_version(disk_store, application_tag='dummy_tag', is_exter
                                          prices=prices)
 
         disk_store.add_commit(version)
-    return version.id
+    return version
 
 
 def ensure_customer(disk_store, customer_id='cust_test'):
@@ -259,7 +259,7 @@ def ensure_customer(disk_store, customer_id='cust_test'):
 def add_sample(disk_store, sample_id='test_sample', is_external=False, flowcell=None):
     """utility function to add a sample to use in tests"""
     customer = ensure_customer(disk_store)
-    application_version_id = ensure_application_version(disk_store, is_external=is_external)
+    application_version_id = ensure_application_version(disk_store, is_external=is_external).id
     sample = disk_store.add_sample(name=sample_id, sex='female')
     sample.application_version_id = application_version_id
     sample.customer = customer
