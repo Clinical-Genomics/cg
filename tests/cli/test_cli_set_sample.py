@@ -27,11 +27,6 @@ def test_set_sample_sex(invoke_cli, disk_store: Store):
     result = invoke_cli(
         ['--database', disk_store.uri, 'set', 'sample', sample_id, '--sex', sex])
 
-    print(result.exception)
-    print(
-        result.output
-    )
-
     # THEN then it should have 'female' as sex
     assert result.exit_code == 0
     assert disk_store.Sample.query.first().sex == sex
