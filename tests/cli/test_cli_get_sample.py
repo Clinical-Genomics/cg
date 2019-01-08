@@ -13,12 +13,13 @@ def test_get_sample_bad_sample(invoke_cli, disk_store: Store):
     name = 'dummy_name'
     result = invoke_cli(['--database', db_uri, 'get', 'sample', name])
 
-    # THEN then it should complain on missing sample id instead of getting a sample
+    # THEN then it should warn about missing sample id instead of getting a sample
+    # it will not fail since the API accepts multiple samples
     assert result.exit_code == 0
 
 
 def test_get_sample_required(invoke_cli, disk_store: Store):
-    """Test to get a sample using only the required arguments"""
+    """Test to get a sample using only the required argument"""
     # GIVEN a database with a sample
     sample_id = add_sample(disk_store).internal_id
     assert disk_store.Sample.query.count() == 1
@@ -31,6 +32,7 @@ def test_get_sample_required(invoke_cli, disk_store: Store):
 
     # THEN then it should have been get
     assert result.exit_code == 0
+    assert sample_id in result.output
 
 
 def test_get_samples_required(invoke_cli, disk_store: Store):
@@ -48,6 +50,8 @@ def test_get_samples_required(invoke_cli, disk_store: Store):
 
     # THEN then it should have been get
     assert result.exit_code == 0
+    assert sample_id1 in result.output
+    assert sample_id2 in result.output
 
 
 def test_get_sample_output(invoke_cli, disk_store: Store):
@@ -78,10 +82,11 @@ def test_get_sample_output(invoke_cli, disk_store: Store):
 
 
 def test_get_sample_external_false(invoke_cli, disk_store: Store):
-    """Test that the output has the data of the sample"""
+    """Test that the output has the external-value of the sample"""
     # GIVEN a database with a sample with data
     sample_id = add_sample(disk_store, is_external=False).internal_id
-    is_external = 'No'
+    is_external_false = 'No'
+    is_external_true = 'Yes'
 
     # WHEN getting a sample
     db_uri = disk_store.uri
@@ -91,14 +96,16 @@ def test_get_sample_external_false(invoke_cli, disk_store: Store):
 
     # THEN then it should have been get
     assert result.exit_code == 0
-    assert is_external in result.output
+    assert is_external_false in result.output
+    assert is_external_true not in result.output
 
 
 def test_get_sample_external_true(invoke_cli, disk_store: Store):
-    """Test that the output has the data of the sample"""
+    """Test that the output has the external-value of the sample"""
     # GIVEN a database with a sample with data
     sample_id = add_sample(disk_store, is_external=True).internal_id
-    is_external = 'Yes'
+    is_external_false = 'No'
+    is_external_true = 'Yes'
 
     # WHEN getting a sample
     db_uri = disk_store.uri
@@ -106,20 +113,19 @@ def test_get_sample_external_true(invoke_cli, disk_store: Store):
     result = invoke_cli(
         ['--database', db_uri, 'get', 'sample', sample_id])
 
-    print(result.output)
-
     # THEN then it should have been get
     assert result.exit_code == 0
-    assert is_external in result.output
+    assert is_external_true in result.output
+    assert is_external_false not in result.output
 
 
 def test_get_sample_no_families_without_family(invoke_cli, disk_store: Store):
-    """Test that the output has the data of the sample"""
+    """Test that the --no-families flag works without families"""
     # GIVEN a database with a sample without related samples
     name = add_sample(disk_store).internal_id
     assert not disk_store.Sample.query.first().links
 
-    # WHEN getting a sample with the --flowcells flag
+    # WHEN getting a sample with the --no-families flag
     db_uri = disk_store.uri
 
     result = invoke_cli(
@@ -130,7 +136,7 @@ def test_get_sample_no_families_without_family(invoke_cli, disk_store: Store):
 
 
 def test_get_sample_no_families_with_family(invoke_cli, disk_store: Store):
-    """Test that the output has the data of the sample"""
+    """Test that the --no-families flag doesn't show family info"""
     # GIVEN a database with a sample with related samples
     family = add_family(disk_store)
     sample = add_sample(disk_store)
@@ -138,7 +144,7 @@ def test_get_sample_no_families_with_family(invoke_cli, disk_store: Store):
     assert link in disk_store.Sample.query.first().links
     sample_id = sample.internal_id
 
-    # WHEN getting a sample with the --flowcells flag
+    # WHEN getting a sample with the --no-families flag
     db_uri = disk_store.uri
 
     result = invoke_cli(
@@ -151,12 +157,12 @@ def test_get_sample_no_families_with_family(invoke_cli, disk_store: Store):
 
 
 def test_get_sample_families_without_family(invoke_cli, disk_store: Store):
-    """Test that the output has the data of the sample"""
+    """Test that the --families flag works without families"""
     # GIVEN a database with a sample without related samples
     sample_id = add_sample(disk_store).internal_id
     assert not disk_store.Sample.query.first().links
 
-    # WHEN getting a sample with the --flowcells flag
+    # WHEN getting a sample with the --families flag
     db_uri = disk_store.uri
 
     result = invoke_cli(
@@ -167,7 +173,7 @@ def test_get_sample_families_without_family(invoke_cli, disk_store: Store):
 
 
 def test_get_sample_families_with_family(invoke_cli, disk_store: Store):
-    """Test that the output has the data of the sample"""
+    """Test that the --families flag does show family info"""
     # GIVEN a database with a sample with related samples
     family = add_family(disk_store)
     sample = add_sample(disk_store)
@@ -175,7 +181,7 @@ def test_get_sample_families_with_family(invoke_cli, disk_store: Store):
     add_relationship(disk_store, sample, family)
     assert disk_store.Sample.query.first().links
 
-    # WHEN getting a sample with the --flowcells flag
+    # WHEN getting a sample with the --families flag
     db_uri = disk_store.uri
 
     result = invoke_cli(
