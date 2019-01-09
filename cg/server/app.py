@@ -13,21 +13,20 @@ from . import api, ext, admin, invoices
 def create_app():
     """Generate a flask application."""
     app = Flask(__name__, template_folder='templates')
-
-    # load config
-    app.config.from_object(__name__.replace('app', 'config'))
-
-    configure_extensions(app)
-
-    register_blueprints(app)
+    _load_config(app)
+    _configure_extensions(app)
+    _register_blueprints(app)
 
     return app
 
 
-def configure_extensions(app: Flask):
-    # initialize logging
-    coloredlogs.install(level='DEBUG' if app.debug else 'INFO')
+def _load_config(app):
+    app.config.from_object(__name__.replace('app', 'config'))
 
+
+def _configure_extensions(app: Flask):
+
+    _initialize_logging(app)
     certs_resp = requests.get('https://www.googleapis.com/oauth2/v1/certs')
     app.config['GOOGLE_OAUTH_CERTS'] = certs_resp.json()
 
@@ -39,7 +38,11 @@ def configure_extensions(app: Flask):
     ext.admin.init_app(app, index_view=AdminIndexView(endpoint='admin'))
 
 
-def register_blueprints(app: Flask):
+def _initialize_logging(app):
+    coloredlogs.install(level='DEBUG' if app.debug else 'INFO')
+
+
+def _register_blueprints(app: Flask):
 
     if not app.config['CG_ENABLE_ADMIN']:
         return
@@ -59,7 +62,7 @@ def register_blueprints(app: Flask):
         session['user_email'] = user_data['email']
 
     app.register_blueprint(api.BLUEPRINT)
-    register_admin_views()
+    _register_admin_views()
     app.register_blueprint(invoices.BLUEPRINT, url_prefix='/invoices')
 
     app.register_blueprint(oauth_bp, url_prefix='/login')
@@ -75,7 +78,7 @@ def register_blueprints(app: Flask):
         return redirect(url_for('index'))
 
 
-def register_admin_views():
+def _register_admin_views():
     ext.admin.add_view(admin.CustomerView(models.Customer, ext.db.session))
     ext.admin.add_view(admin.CustomerGroupView(models.CustomerGroup, ext.db.session))
     ext.admin.add_view(admin.UserView(models.User, ext.db.session))
