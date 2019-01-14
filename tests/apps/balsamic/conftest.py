@@ -41,7 +41,7 @@ def content_r2(tmpdir):
 def simple(tmpdir):
     """Creates a dict with the data to use in the tests"""
     flowcells = [1]
-    lanes = [1]
+    lanes = [1, 2, 3]
     reads = [1, 2]
 
     _simple = {'files': [], 'content_r1': [], 'content_r2': [], 'data': [], 'data_reversed': []}
