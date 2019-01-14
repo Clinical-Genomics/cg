@@ -62,8 +62,8 @@ class FastqFileConcatenator:
         """display file names for logging purposes"""
 
         concat_file_name = Path(concat_file).name
-        file_names = [file_.name for file_ in files]
-        msg = f"Concatenating: {', '.join(file_.name for file_ in files)} -> {concat_file_name}"
+        msg = f"Concatenating: {', '.join(Path(file_).name for file_ in files)} -> " \
+            f"{concat_file_name}"
 
         return msg
 
