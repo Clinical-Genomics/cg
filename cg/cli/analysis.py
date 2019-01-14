@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import logging
 import sys
+import shutil
+from pathlib import Path
 
 import click
 
@@ -172,3 +174,16 @@ def auto(context: click.Context):
             exit_code = 1
 
     sys.exit(exit_code)
+
+
+@analysis.command()
+@click.option('-f', '--family', 'family_id', help='remove fastq folder for a case')
+@click.argument('sample_id', required=False)
+@click.pass_context
+def remove_fastq(context, family_id, sample_id):
+    """remove fastq folder"""
+    
+    wrk_dir = Path(f"{context.obj['balsamic']['root']}/{family_id}/fastq")
+
+    if wrk_dir.exists():
+        shutil.rmtree(wrk_dir)

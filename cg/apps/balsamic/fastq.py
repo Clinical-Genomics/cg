@@ -5,7 +5,7 @@ import shutil
 from pathlib import Path
 from typing import List
 
-from coverage.python import os
+import os
 
 log = logging.getLogger(__name__)
 
@@ -32,10 +32,40 @@ class FastqFileConcatenator:
     @staticmethod
     def concatenate(files: List, concat_file):
 
+        log.info(FastqFileConcatenator.display_files(files, concat_file))
+
         with open(concat_file, 'wb') as wfd:
             for f in files:
                 with open(f, 'rb') as fd:
                     shutil.copyfileobj(fd, wfd)
+
+    @staticmethod
+    def size_before(files: List):
+        """returns the total size of the linked fastq files before concatenation"""
+
+        return sum([os.stat(f).st_size for f in files])
+
+    @staticmethod
+    def size_after(concat_file):
+        """returns the size of the concatenated fastq files"""
+
+        return os.stat(concat_file).st_size
+
+    @staticmethod
+    def assert_file_sizes(size_before, size_after):
+        """asserts the file sizes before and after concatenation"""
+        assert size_before == size_after, f"Warning: file size difference after concatenation! Before: {size_before} -> after: {size_after}"
+        log.info('Concatenation file size check successful!')
+
+    @staticmethod
+    def display_files(files: List, concat_file):
+        """display file names for logging purposes"""
+
+        concat_file_name = Path(concat_file).name
+        file_names = [file_.name for file_ in files]
+        msg = f"Concatenating: {', '.join(file_.name for file_ in files)} -> {concat_file_name}"
+
+        return msg
 
 
 class FastqHandler:
@@ -49,15 +79,14 @@ class FastqHandler:
 
         wrk_dir = Path(f'{self.root_dir}/{family}/fastq')
 
-        if wrk_dir.exists():
-            shutil.rmtree(wrk_dir)
-
         wrk_dir.mkdir(parents=True, exist_ok=True)
 
         destination_paths_r1 = list()
         destination_paths_r2 = list()
 
-        for fastq_data in files:
+        sorted_files = sorted(files, key=lambda k: k['path'])
+
+        for fastq_data in sorted_files:
             fastq_path = Path(fastq_data['path'])
             fastq_name = FastqFileNameCreator.create(
                 lane=fastq_data['lane'],
@@ -71,10 +100,10 @@ class FastqHandler:
 
             if fastq_data['read'] == 1:
                 destination_paths_r1.append(destination_path)
-                concatenated_filename_r1 = fastq_name[2:]
+                concatenated_filename_r1 = f"concatenated_{'_'.join(fastq_name.split('_')[-4:])}"
             else:
                 destination_paths_r2.append(destination_path)
-                concatenated_filename_r2 = fastq_name[2:]
+                concatenated_filename_r2 = f"concatenated_{'_'.join(fastq_name.split('_')[-4:])}"
 
             if not destination_path.exists():
                 log.info(f"linking: {fastq_path} -> {destination_path}")
@@ -82,8 +111,29 @@ class FastqHandler:
             else:
                 log.debug(f"destination path already exists: {destination_path}")
 
+        log.info(f"Concatenation in progress for sample {sample}.")
+
+        # log.info(display_files(files, concat_files))
+
         FastqFileConcatenator.concatenate(destination_paths_r1, f'{wrk_dir}/{concatenated_filename_r1}')
+        size_before = FastqFileConcatenator.size_before(destination_paths_r1)
+        size_after = FastqFileConcatenator.size_after(f'{wrk_dir}/{concatenated_filename_r1}')
+
+        try:
+            FastqFileConcatenator.assert_file_sizes(size_before, size_after)
+        except AssertionError as error:
+            log.warning(error)
+
+        # log.info(display_files(files, concat_files))
+
         FastqFileConcatenator.concatenate(destination_paths_r2, f'{wrk_dir}/{concatenated_filename_r2}')
+        size_before = FastqFileConcatenator.size_before(destination_paths_r2)
+        size_after = FastqFileConcatenator.size_after(f'{wrk_dir}/{concatenated_filename_r2}')
+
+        try:
+            FastqFileConcatenator.assert_file_sizes(size_before, size_after)
+        except AssertionError as error:
+            log.warning(error)
 
         for myfile in destination_paths_r1:
             if os.path.isfile(myfile):
