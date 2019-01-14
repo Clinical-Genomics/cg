@@ -13,65 +13,84 @@ def valid_fastq_filename_pattern():
     return r'^.+_R_[1-2]{1}\.fastq.gz$'
 
 
-@pytest.fixture
-def content():
+def _full_content():
     """The content the files are made of"""
     return string.ascii_letters
 
 
 @pytest.fixture
-def content_r1(content, simple_files):
+def files_content(simple_files):
+    """The content the files are made of"""
+    return _full_content()[0:len(simple_files)]
+
+
+@pytest.fixture
+def content_r1(tmpdir):
     """The content of concatenated r1 """
-    return content[0:len(simple_files) // 2]
+    # return full_content[0:len(simple_files) // 2]
+    return ''.join(simple(tmpdir)['content_r1'])
 
 
 @pytest.fixture
-def content_r2(content, simple_files):
+def content_r2(tmpdir):
     """The content of concatenated r2 """
-    return content[len(simple_files) // 2:len(simple_files)]
+    # return full_content[len(simple_files) // 2:len(simple_files)]
+    return ''.join(simple(tmpdir)['content_r2'])
 
 
-@pytest.fixture
-def simple(tmpdir, content):
+def simple(tmpdir):
     """Creates a dict with the data to use in the tests"""
-    samples = [1]
-    flowcells = [1, 2]
-    lanes = [1, 2, 3]
+    flowcells = [1]
+    lanes = [1]
     reads = [1, 2]
 
-    simple = {'files': [], 'data': []}
+    _simple = {'files': [], 'content_r1': [], 'content_r2': [], 'data': [], 'data_reversed': []}
     i = 0
 
-    for sample in samples:
-        for read in reads:
-            for lane in lanes:
-                for flowcell in flowcells:
-                    file_path = create_file(tmpdir, sample, flowcell, lane, read, content[i])
-                    i += 1
+    for read in reads:
+        for lane in lanes:
+            for flowcell in flowcells:
+                content = _full_content()[i]
+                file_path = create_file(tmpdir, flowcell, lane, read, content)
 
-                    simple['files'].append(file_path)
-                    data = create_file_data(file_path, flowcell, lane, read)
-                    simple['data'].append(data)
-    return simple
+                _simple['files'].append(file_path)
+
+                if read == 1:
+                    _simple['content_r1'].append(content)
+                else:
+                    _simple['content_r2'].append(content)
+
+                data = create_file_data(file_path, flowcell, lane, read)
+                _simple['data'].append(data)
+                _simple['data_reversed'].insert(0, data)
+                i += 1
+
+    return _simple
 
 
 @pytest.fixture
-def simple_files(simple):
+def simple_files(tmpdir):
     """"Some files to test with"""
-    return simple['files']
+    return simple(tmpdir)['files']
 
 
 @pytest.fixture
-def simple_files_data(simple):
+def simple_files_data(tmpdir):
     """Data for link method"""
-    return simple['data']
+    return simple(tmpdir)['data']
 
 
-def create_file(tmpdir, sample, flowcell, lane, read, content):
+@pytest.fixture
+def simple_files_data_reversed(tmpdir):
+    """Data for link method"""
+    return simple(tmpdir)['data_reversed']
+
+
+def create_file(tmpdir, flowcell, lane, read, content):
     """actual file on disk"""
 
     # create filename
-    file_name = f'S{sample}_FC000{flowcell}_L00{lane}_R_{read}.fastq.gz'
+    file_name = f'S1_FC000{flowcell}_L00{lane}_R_{read}.fastq.gz'
 
     # create path
     file_path = tmpdir / file_name

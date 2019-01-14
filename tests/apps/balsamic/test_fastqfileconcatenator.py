@@ -4,7 +4,7 @@ import filecmp
 from cg.apps.balsamic.fastq import FastqFileConcatenator
 
 
-def test_concatenate(tmpdir, simple_files, content) -> dict:
+def test_concatenate(tmpdir, simple_files, files_content) -> dict:
     """Test method to test that files are concatenated properly"""
 
     # given we have some files to concatenate and somewhere to store the concatenated file
@@ -20,4 +20,4 @@ def test_concatenate(tmpdir, simple_files, content) -> dict:
     with open(concatenated_filepath, 'rt') as file:
         file_content = file.read()
 
-    assert content[0:len(simple_files)] == file_content
+    assert files_content == file_content
