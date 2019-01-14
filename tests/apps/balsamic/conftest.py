@@ -40,16 +40,16 @@ def content_r2(tmpdir):
 
 def simple(tmpdir):
     """Creates a dict with the data to use in the tests"""
-    flowcells = [1]
-    lanes = [1, 2, 3]
+    flowcells = [1, 2]
+    lanes = [1, 2]
     reads = [1, 2]
 
     _simple = {'files': [], 'content_r1': [], 'content_r2': [], 'data': [], 'data_reversed': []}
     i = 0
 
     for read in reads:
-        for lane in lanes:
-            for flowcell in flowcells:
+        for flowcell in flowcells:
+            for lane in lanes:
                 content = _full_content()[i]
                 file_path = create_file(tmpdir, flowcell, lane, read, content)
 
