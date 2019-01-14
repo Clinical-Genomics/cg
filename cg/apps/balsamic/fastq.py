@@ -14,7 +14,7 @@ class FastqFileNameCreator:
     """Creates valid balsamic filename from the parameters"""
 
     @staticmethod
-    def create(lane: int, flowcell: str, sample: str, read: int,
+    def create(lane: str, flowcell: str, sample: str, read: str,
                undetermined: bool = False, date: dt.datetime = None,
                index: str = None) -> str:
         """Name a FASTQ file following Balsamic conventions. Naming must be
