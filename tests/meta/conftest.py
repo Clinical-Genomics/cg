@@ -224,8 +224,8 @@ def analysis_api(analysis_store, store_housekeeper, scout_store):
         tb_api=tb_mock,
         lims_api=None,
         deliver_api=MockDeliver(),
-        ruamel=ruamel_mock,
-        Path=Path_mock,
+        ruamel_api=ruamel_mock,
+        path_api=Path_mock,
         logger=MockLogger(),
         fastq_handler=MockBalsamicFastq()
     )

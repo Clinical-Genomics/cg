@@ -2,16 +2,16 @@
 import gzip
 import logging
 import re
-from typing import List, Any
-import ruamel.yaml
 from pathlib import Path
+from typing import List, Any
 
+import ruamel.yaml
 from requests.exceptions import HTTPError
-
 from cg.apps import tb, hk, scoutapi, lims
 from cg.apps.balsamic import fastq
-from cg.store import models, Store
 from cg.meta.deliver.api import DeliverAPI
+from cg.store import models, Store
+
 
 COLLABORATORS = ('cust000', 'cust002', 'cust003', 'cust004', 'cust042')
 MASTER_LIST = ('ENDO', 'EP', 'IEM', 'IBMFS', 'mtDNA', 'MIT', 'PEDHEP', 'OMIM-AUTO',
@@ -29,10 +29,12 @@ CAPTUREKIT_MAP = {'Agilent Sureselect CRE': 'agilent_sureselect_cre.v1',
 
 
 class AnalysisAPI:
+    """The pipelines are accessed through Trailblazer but cg provides additional conventions and
+    hooks into the status database that makes managing analyses simpler"""
 
     def __init__(self, db: Store, hk_api: hk.HousekeeperAPI, scout_api: scoutapi.ScoutAPI,
                  tb_api: tb.TrailblazerAPI, lims_api: lims.LimsAPI, deliver_api:
-                 DeliverAPI, fastq_handler: fastq.FastqHandler, ruamel=ruamel, Path=Path,
+                 DeliverAPI, fastq_handler: fastq.FastqHandler, ruamel_api=ruamel, path_api=Path,
                  logger=logging.getLogger(
                      __name__)):
         self.db = db
@@ -41,8 +43,8 @@ class AnalysisAPI:
         self.scout = scout_api
         self.lims = lims_api
         self.deliver = deliver_api
-        self.ruamel = ruamel
-        self.Path = Path
+        self.ruamel = ruamel_api
+        self.pather = path_api
         self.LOG = logger
         self.balsamic_fastq_handler = fastq_handler
 
@@ -76,7 +78,7 @@ class AnalysisAPI:
             external = link_obj.sample.application_version.application.is_external
             if downsampled or external:
                 self.LOG.info(
-                    f"{link_obj.sample.internal_id}: downsampled/external - skip evaluation")
+                    '%s: downsampled/external - skip evaluation', link_obj.sample.internal_id)
                 kwargs['skip_evaluation'] = True
                 break
 
@@ -240,7 +242,6 @@ class AnalysisAPI:
 
         # Decision for linking in Balsamic structure if data_analysis contains Balsamic
         if link_obj.sample.data_analysis and 'Balsamic' in link_obj.sample.data_analysis:
-
             self.balsamic_fastq_handler.link(family=link_obj.family.internal_id,
                                              sample=link_obj.sample.internal_id, files=files)
 
@@ -288,9 +289,9 @@ class AnalysisAPI:
     def _open_bundle_file(self, relative_file_path: str) -> Any:
         """Open a bundle file and return it as an Python object."""
 
-        full_file_path = self.Path(self.deliver.get_post_analysis_files_root_dir()).joinpath(
+        full_file_path = self.pather(self.deliver.get_post_analysis_files_root_dir()).joinpath(
             relative_file_path)
-        open_file = self.ruamel.yaml.safe_load(self.Path(full_file_path).open())
+        open_file = self.ruamel.yaml.safe_load(self.pather(full_file_path).open())
         return open_file
 
     def get_latest_metadata(self, family_id: str) -> dict:
