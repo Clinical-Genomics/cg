@@ -7,7 +7,6 @@ install:
     - pip install git-lint pylint pycodestyle yamllint docutils html-linter
     - pip install cython
     - pip install -r requirements.txt -r requirements-dev.txt .
-    - pip install 'oauthlib!=2.0.3,!=2.0.4,!=2.0.5,<3.0.0,>=1.1.2'
 
 script:
     - coverage run --source "$(basename "$PWD")" setup.py test
