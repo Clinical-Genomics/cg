@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """Test FastqHandler"""
+import os
 from pathlib import Path
 
 from cg.apps.balsamic.fastq import FastqHandler
-from coverage.python import os
 
 
-def test_link_file_count(tmpdir, cg_config, link_family, link_sample, simple_files_data) -> dict:
+def test_link_file_count(tmpdir, cg_config, link_family, link_sample, simple_files_data):
     """Test method to test that the right number of files are created by linking"""
 
     # given some fastq-files belonging to family and sample
@@ -30,7 +30,7 @@ def test_link_file_count(tmpdir, cg_config, link_family, link_sample, simple_fil
 
 def test_link_file_content(tmpdir, cg_config, link_family, link_sample, simple_files_data,
                            content_r1, content_r2
-                           ) -> dict:
+                           ):
     """Test method to test that balsamic files are linked properly"""
 
     # given some fastq-files belonging to family and sample
@@ -60,7 +60,7 @@ def test_link_file_content(tmpdir, cg_config, link_family, link_sample, simple_f
 def test_link_file_content_reversed(tmpdir, cg_config, link_family, link_sample,
                                     simple_files_data_reversed,
                                     content_r1, content_r2
-                                    ) -> dict:
+                                    ):
     """Test method to test that balsamic files are linked properly"""
 
     # given some fastq-files belonging to family and sample
