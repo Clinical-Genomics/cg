@@ -14,7 +14,7 @@ class FastqFileNameCreator:
     """Creates valid balsamic filename from the parameters"""
 
     @staticmethod
-    def create(lane: int, flowcell: str, sample: str, read: int,
+    def create(lane: str, flowcell: str, sample: str, read: str,
                undetermined: bool = False, date: dt.datetime = None,
                index: str = None) -> str:
         """Name a FASTQ file following Balsamic conventions. Naming must be
@@ -67,8 +67,8 @@ class FastqFileConcatenator:
         """display file names for logging purposes"""
 
         concat_file_name = Path(concat_file).name
-        file_names = [file_.name for file_ in files]
-        msg = f"Concatenating: {', '.join(file_.name for file_ in files)} -> {concat_file_name}"
+        msg = f"Concatenating: {', '.join(Path(file_).name for file_ in files)} -> " \
+            f"{concat_file_name}"
 
         return msg
 

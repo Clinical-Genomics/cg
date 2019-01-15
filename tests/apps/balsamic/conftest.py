@@ -1,4 +1,5 @@
 import ntpath
+import string
 from pathlib import Path
 from shutil import copyfile, copy
 
@@ -7,109 +8,131 @@ import pytest
 
 @pytest.fixture
 def valid_fastq_filename_pattern():
+    """the pattern balsamic file names should match"""
     # 'xxx_R_1_.fastq.gz and xxx_R_2_.fastq.gz'
     return r'^.+_R_[1-2]{1}\.fastq.gz$'
 
 
-@pytest.fixture
-def files_r1(tmpdir):
-    fixture_file1 = 'tests/fixtures/DEMUX/160219_D00410_0217_AHJKMYBCXX/Unaligned5/Project_337334' \
-                    '/Sample_ADM1136A3_XTC08/ADM1136A3_XTC08_AGTGGTCA_L001_R1_001.fastq.gz'
-    fixture_file2 = 'tests/fixtures/DEMUX/160219_D00410_0217_AHJKMYBCXX/Unaligned5/Project_337334' \
-                    '/Sample_ADM1136A3_XTC08/ADM1136A3_XTC08_AGTGGTCA_L002_R1_001.fastq.gz'
-    testdir_file1 = Path(tmpdir, ntpath.basename(fixture_file1))
-    testdir_file2 = Path(tmpdir, ntpath.basename(fixture_file2))
-    copy(fixture_file1, tmpdir)
-    copy(fixture_file2, tmpdir)
-    return [testdir_file1, testdir_file2]
+def _full_content():
+    """The content the files are made of"""
+    return string.ascii_letters
 
 
 @pytest.fixture
-def files_r2(tmpdir):
-    fixture_file1 = 'tests/fixtures/DEMUX/160219_D00410_0217_AHJKMYBCXX/Unaligned5/Project_337334' \
-                    '/Sample_ADM1136A3_XTC08/ADM1136A3_XTC08_AGTGGTCA_L001_R2_001.fastq.gz'
-    fixture_file2 = 'tests/fixtures/DEMUX/160219_D00410_0217_AHJKMYBCXX/Unaligned5/Project_337334' \
-                    '/Sample_ADM1136A3_XTC08/ADM1136A3_XTC08_AGTGGTCA_L002_R2_001.fastq.gz'
-    testdir_file1 = Path(tmpdir, ntpath.basename(fixture_file1))
-    testdir_file2 = Path(tmpdir, ntpath.basename(fixture_file2))
-    copy(fixture_file1, tmpdir)
-    copy(fixture_file2, tmpdir)
-    return [testdir_file1, testdir_file2]
+def files_content(simple_files):
+    """The content the files are made of"""
+    return _full_content()[0:len(simple_files)]
 
 
 @pytest.fixture
-def validated_concatenated_r1(tmpdir):
-    return 'tests/fixtures/apps/balsamic/ADM1136A3_XTC08_AGTGGTCA_concat_R1_001.fastq.gz'
+def content_r1(tmpdir):
+    """The content of concatenated r1 """
+    # return full_content[0:len(simple_files) // 2]
+    return ''.join(simple(tmpdir)['content_r1'])
 
 
 @pytest.fixture
-def validated_concatenated_r2(tmpdir):
-    return 'tests/fixtures/apps/balsamic/ADM1136A3_XTC08_AGTGGTCA_concat_R2_001.fastq.gz'
+def content_r2(tmpdir):
+    """The content of concatenated r2 """
+    # return full_content[len(simple_files) // 2:len(simple_files)]
+    return ''.join(simple(tmpdir)['content_r2'])
+
+
+def simple(tmpdir):
+    """Creates a dict with the data to use in the tests"""
+    flowcells = [1, 2, 3, 4, 5, 6, 7, 8]
+    lanes = [1, 2, 3]
+    reads = [1, 2]
+
+    _simple = {'files': [], 'content_r1': [], 'content_r2': [], 'data': [], 'data_reversed': []}
+    i = 0
+
+    for read in reads:
+        for flowcell in flowcells:
+            for lane in lanes:
+                content = _full_content()[i]
+                file_path = create_file(tmpdir, flowcell, lane, read, content)
+
+                _simple['files'].append(file_path)
+
+                if read == 1:
+                    _simple['content_r1'].append(content)
+                else:
+                    _simple['content_r2'].append(content)
+
+                data = create_file_data(file_path, flowcell, lane, read)
+                _simple['data'].append(data)
+                _simple['data_reversed'].insert(0, data)
+                i += 1
+
+    return _simple
+
+
+@pytest.fixture
+def simple_files(tmpdir):
+    """"Some files to test with"""
+    return simple(tmpdir)['files']
+
+
+@pytest.fixture
+def simple_files_data(tmpdir):
+    """Data for link method"""
+    return simple(tmpdir)['data']
+
+
+@pytest.fixture
+def simple_files_data_reversed(tmpdir):
+    """Data for link method"""
+    return simple(tmpdir)['data_reversed']
+
+
+def create_file(tmpdir, flowcell, lane, read, content):
+    """actual file on disk"""
+
+    # create filename
+    file_name = f'S1_FC000{flowcell}_L00{lane}_R_{read}.fastq.gz'
+
+    # create path
+    file_path = tmpdir / file_name
+
+    # create file content
+    file_content = content
+
+    # write content to file
+    file_path.write(file_content)
+
+    print(f'created file {file_name} containing: {file_content}')
+
+    return file_path
+
+
+def create_file_data(file_path, flowcell, lane, read):
+    """meta data about a file on disk"""
+    data = {
+        'path': file_path,
+        'lane': lane,
+        'flowcell': flowcell,
+        'read': read,
+        'undetermined': False,
+    }
+    return data
 
 
 @pytest.fixture
 def cg_config(tmpdir):
+    """mock relevant parts of a cg-config"""
     return {'balsamic':
             {'root': tmpdir}}
 
 
 @pytest.fixture
 def link_family():
+    """mock family name"""
     return 'family'
 
 
 @pytest.fixture
 def link_sample():
+    """mock sample name"""
     return 'sample'
-
-
-@pytest.fixture
-def link_files(tmpdir, files_r1, files_r2):
-    file_data = []
-
-    lane = 1
-    for file in files_r1:
-        data = {
-            'path': file,
-            'lane': int(lane),
-            'flowcell': 'AHJKMYBCXX',
-            'read': int(1),
-            'undetermined': False,
-        }
-        lane = 2
-        file_data.append(data)
-
-    for file in files_r2:
-        data = {
-            'path': file,
-            'lane': int(lane),
-            'flowcell': 'AHJKMYBCXX',
-            'read': int(2),
-            'undetermined': False,
-        }
-        lane = 2
-        file_data.append(data)
-
-    return file_data
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
