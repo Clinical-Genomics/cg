@@ -1,4 +1,12 @@
 # -*- coding: utf-8 -*-
+"""
+This module handles concatenation of balsamic fastq files.
+
+Classes:
+    FastqFileNameCreator: Creates valid balsamic filenames
+    FastqFileConcatenator: Handles file concatenation
+    FastqHandler: Handles fastq file linking
+"""
 import datetime as dt
 import logging
 import shutil
@@ -7,7 +15,7 @@ from typing import List
 
 import os
 
-log = logging.getLogger(__name__)
+loggger = logging.getLogger(__name__)
 
 
 class FastqFileNameCreator:
@@ -31,8 +39,8 @@ class FastqFileConcatenator:
 
     @staticmethod
     def concatenate(files: List, concat_file):
-
-        log.info(FastqFileConcatenator.display_files(files, concat_file))
+        """Concatenates a list of fastq files"""
+        logger.info(FastqFileConcatenator.display_files(files, concat_file))
 
         with open(concat_file, 'wb') as wfd:
             for f in files:
@@ -60,7 +68,7 @@ class FastqFileConcatenator:
               )
 
         assert size_before == size_after, msg
-        log.info('Concatenation file size check successful!')
+        logger.info('Concatenation file size check successful!')
 
     @staticmethod
     def display_files(files: List, concat_file):
@@ -74,6 +82,7 @@ class FastqFileConcatenator:
 
 
 class FastqHandler:
+    """Handles fastq file linking"""
 
     def __init__(self, config):
         self.root_dir = config['balsamic']['root']
@@ -112,12 +121,12 @@ class FastqHandler:
                 concatenated_filename_r2 = f"concatenated_{'_'.join(fastq_name.split('_')[-4:])}"
 
             if not destination_path.exists():
-                log.info(f"linking: {fastq_path} -> {destination_path}")
+                logger.info(f"linking: {fastq_path} -> {destination_path}")
                 destination_path.symlink_to(fastq_path)
             else:
                 log.debug(f"destination path already exists: {destination_path}")
 
-        log.info(f"Concatenation in progress for sample {sample}.")
+        logger.info(f"Concatenation in progress for sample {sample}.")
 
         concatenator.concatenate(destination_paths_r1, f'{wrk_dir}/{concatenated_filename_r1}')
         size_before = concatenator.size_before(destination_paths_r1)
@@ -126,7 +135,7 @@ class FastqHandler:
         try:
             concatenator.assert_file_sizes(size_before, size_after)
         except AssertionError as error:
-            log.warning(error)
+            logger.warning(error)
 
         concatenator.concatenate(destination_paths_r2, f'{wrk_dir}/{concatenated_filename_r2}')
         size_before = concatenator.size_before(destination_paths_r2)
@@ -135,7 +144,7 @@ class FastqHandler:
         try:
             concatenator.assert_file_sizes(size_before, size_after)
         except AssertionError as error:
-            log.warning(error)
+            logger.warning(error)
 
         for myfile in destination_paths_r1:
             if os.path.isfile(myfile):
