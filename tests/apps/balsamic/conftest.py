@@ -1,7 +1,5 @@
-import ntpath
+"""Fixtures for testing balsamic app"""
 import string
-from pathlib import Path
-from shutil import copyfile, copy
 
 import pytest
 
@@ -68,10 +66,15 @@ def simple(tmpdir):
     return _simple
 
 
+def _simple_files(tmpdir):
+    """"Some files to test with"""
+    return simple(tmpdir)['files']
+
+
 @pytest.fixture
 def simple_files(tmpdir):
     """"Some files to test with"""
-    return simple(tmpdir)['files']
+    _simple_files(tmpdir)
 
 
 @pytest.fixture
@@ -121,8 +124,7 @@ def create_file_data(file_path, flowcell, lane, read):
 @pytest.fixture
 def cg_config(tmpdir):
     """mock relevant parts of a cg-config"""
-    return {'balsamic':
-            {'root': tmpdir}}
+    return {'balsamic': {'root': tmpdir}}
 
 
 @pytest.fixture
@@ -135,4 +137,3 @@ def link_family():
 def link_sample():
     """mock sample name"""
     return 'sample'
-
