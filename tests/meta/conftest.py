@@ -1,4 +1,5 @@
 import pytest
+from _pytest import tmpdir
 from cg.apps.balsamic.fastq import FastqHandler
 
 from cg.apps.hk import HousekeeperAPI
@@ -204,7 +205,9 @@ class MockTB:
 
 class MockBalsamicFastq(FastqHandler):
     """Mock FastqHandler for analysis_api"""
-    pass
+
+    def __init__(self):
+        super().__init__(config={'balsamic': {'root': tmpdir}})
 
 
 @pytest.yield_fixture(scope='function')
