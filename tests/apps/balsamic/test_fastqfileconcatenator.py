@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 """Test FastqFileConcatenator"""
-import filecmp
 from cg.apps.balsamic.fastq import FastqFileConcatenator
 
 
-def test_concatenate(tmpdir, simple_files, files_content) -> dict:
+def test_concatenate(tmpdir, simple_files, files_content):
     """Test method to test that files are concatenated properly"""
 
     # given we have some files to concatenate and somewhere to store the concatenated file
