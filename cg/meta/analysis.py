@@ -5,7 +5,7 @@ import re
 from pathlib import Path
 from typing import List, Any
 
-import ruamel.yaml
+from ruamel.yaml import ruamel
 from requests.exceptions import HTTPError
 from cg.apps import tb, hk, scoutapi, lims
 from cg.apps.balsamic import fastq
@@ -133,7 +133,7 @@ class AnalysisAPI:
                             capture_kit = self.lims.capture_kit(link.sample.internal_id)
                             if capture_kit is None or capture_kit == 'NA':
                                 self.LOG.warning(
-                                    f"{link.sample.internal_id}: capture kit not found")
+                                    f"%s: capture kit not found", link.sample.internal_id)
                             else:
                                 sample_data['capture_kit'] = CAPTUREKIT_MAP[capture_kit]
                         except HTTPError:
