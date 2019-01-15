@@ -65,7 +65,7 @@ class FastqFileConcatenator:
         msg = (
             f"Warning: file size difference after concatenation!"
             f"Before: {size_before} -> after: {size_after}"
-              )
+            )
 
         assert size_before == size_after, msg
         logger.info('Concatenation file size check successful!')
@@ -121,12 +121,12 @@ class FastqHandler:
                 concatenated_filename_r2 = f"concatenated_{'_'.join(fastq_name.split('_')[-4:])}"
 
             if not destination_path.exists():
-                logger.info(f"linking: {fastq_path} -> {destination_path}")
+                logger.info(f"linking: %s -> %s", fastq_path, destination_path)
                 destination_path.symlink_to(fastq_path)
             else:
                 logger.debug(f"destination path already exists: %s", destination_path)
 
-        logger.info(f"Concatenation in progress for sample {sample}.")
+        logger.info(f"Concatenation in progress for sample %s.", sample)
 
         concatenator.concatenate(destination_paths_r1, f'{wrk_dir}/{concatenated_filename_r1}')
         size_before = concatenator.size_before(destination_paths_r1)
