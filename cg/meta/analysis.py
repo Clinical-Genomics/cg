@@ -5,7 +5,7 @@ import re
 from pathlib import Path
 from typing import List, Any
 
-import ruamel
+from ruamel.yaml import ruamel
 from requests.exceptions import HTTPError
 from cg.apps import tb, hk, scoutapi, lims
 from cg.apps.balsamic import fastq
