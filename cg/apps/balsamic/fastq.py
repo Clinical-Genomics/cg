@@ -15,7 +15,7 @@ from typing import List
 
 import os
 
-loggger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class FastqFileNameCreator:
@@ -44,8 +44,8 @@ class FastqFileConcatenator:
 
         with open(concat_file, 'wb') as wfd:
             for f in files:
-                with open(f, 'rb') as fd:
-                    shutil.copyfileobj(fd, wfd)
+                with open(f, 'rb') as file_descriptor:
+                    shutil.copyfileobj(file_descriptor, wfd)
 
     @staticmethod
     def size_before(files: List):
@@ -63,8 +63,8 @@ class FastqFileConcatenator:
     def assert_file_sizes(size_before, size_after):
         """asserts the file sizes before and after concatenation"""
         msg = (
-               f"Warning: file size difference after concatenation!"
-               f"Before: {size_before} -> after: {size_after}"
+            f"Warning: file size difference after concatenation!"
+            f"Before: {size_before} -> after: {size_after}"
               )
 
         assert size_before == size_after, msg
@@ -124,7 +124,7 @@ class FastqHandler:
                 logger.info(f"linking: {fastq_path} -> {destination_path}")
                 destination_path.symlink_to(fastq_path)
             else:
-                log.debug(f"destination path already exists: {destination_path}")
+                logger.debug(f"destination path already exists: %s", destination_path)
 
         logger.info(f"Concatenation in progress for sample {sample}.")
 
