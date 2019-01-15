@@ -54,7 +54,6 @@ class FastqFileConcatenator:
         except AssertionError as error:
             logger.warning(error)
 
-
     @staticmethod
     def size_before(files: List):
         """returns the total size of the linked fastq files before concatenation"""
