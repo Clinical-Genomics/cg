@@ -5,8 +5,9 @@ import re
 from pathlib import Path
 from typing import List, Any
 
-from ruamel.yaml import ruamel
 from requests.exceptions import HTTPError
+from ruamel.yaml import safe_load
+
 from cg.apps import tb, hk, scoutapi, lims
 from cg.apps.balsamic import fastq
 from cg.meta.deliver.api import DeliverAPI
@@ -33,8 +34,8 @@ class AnalysisAPI:
     hooks into the status database that makes managing analyses simpler"""
 
     def __init__(self, db: Store, hk_api: hk.HousekeeperAPI, scout_api: scoutapi.ScoutAPI,
-                 tb_api: tb.TrailblazerAPI, lims_api: lims.LimsAPI, deliver_api:
-                 DeliverAPI, fastq_handler: fastq.FastqHandler, ruamel_api=ruamel, path_api=Path,
+                 tb_api: tb.TrailblazerAPI, lims_api: lims.LimsAPI, deliver_api: DeliverAPI,
+                 fastq_handler: fastq.FastqHandler, yaml_loader=safe_load, path_api=Path,
                  logger=logging.getLogger(
                      __name__)):
         self.db = db
@@ -43,7 +44,7 @@ class AnalysisAPI:
         self.scout = scout_api
         self.lims = lims_api
         self.deliver = deliver_api
-        self.ruamel = ruamel_api
+        self.yaml_loader = yaml_loader
         self.pather = path_api
         self.LOG = logger
         self.balsamic_fastq_handler = fastq_handler
@@ -291,7 +292,7 @@ class AnalysisAPI:
 
         full_file_path = self.pather(self.deliver.get_post_analysis_files_root_dir()).joinpath(
             relative_file_path)
-        open_file = self.ruamel.yaml.safe_load(self.pather(full_file_path).open())
+        open_file = self.yaml_loader(self.pather(full_file_path).open())
         return open_file
 
     def get_latest_metadata(self, family_id: str) -> dict:
