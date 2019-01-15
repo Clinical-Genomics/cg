@@ -3,9 +3,13 @@ language: python
 python:
     - '3.6'
 
+before_install:
+    - pip install git-lint pylint pycodestyle yamllint docutils html-linter ruamel.yaml
+    - git reset --soft ${TRAVIS_COMMIT_RANGE%...*} && git lint
+
 install:
     - pip install cython
-    - pip install -r requirements.txt -r requirements-dev.txt -e .
+    - pip install -q -r requirements-dev.txt .
 
 script:
     - coverage run --source "$(basename "$PWD")" setup.py test
