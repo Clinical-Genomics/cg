@@ -1,7 +1,5 @@
-import ntpath
+"""Fixtures for testing balsamic app"""
 import string
-from pathlib import Path
-from shutil import copyfile, copy
 
 import pytest
 
@@ -19,9 +17,9 @@ def _full_content():
 
 
 @pytest.fixture
-def files_content(simple_files):
+def files_content(tmpdir):
     """The content the files are made of"""
-    return _full_content()[0:len(simple_files)]
+    return _full_content()[0:len(_simple_files(tmpdir))]
 
 
 @pytest.fixture
@@ -68,10 +66,15 @@ def simple(tmpdir):
     return _simple
 
 
+def _simple_files(tmpdir):
+    """"Some files to test with"""
+    return simple(tmpdir)['files']
+
+
 @pytest.fixture
 def simple_files(tmpdir):
     """"Some files to test with"""
-    return simple(tmpdir)['files']
+    return _simple_files(tmpdir)
 
 
 @pytest.fixture
@@ -86,23 +89,12 @@ def simple_files_data_reversed(tmpdir):
     return simple(tmpdir)['data_reversed']
 
 
-def create_file(tmpdir, flowcell, lane, read, content):
+def create_file(tmpdir, flowcell, lane, read, file_content):
     """actual file on disk"""
 
-    # create filename
     file_name = f'S1_FC000{flowcell}_L00{lane}_R_{read}.fastq.gz'
-
-    # create path
     file_path = tmpdir / file_name
-
-    # create file content
-    file_content = content
-
-    # write content to file
     file_path.write(file_content)
-
-    print(f'created file {file_name} containing: {file_content}')
-
     return file_path
 
 
@@ -121,8 +113,7 @@ def create_file_data(file_path, flowcell, lane, read):
 @pytest.fixture
 def cg_config(tmpdir):
     """mock relevant parts of a cg-config"""
-    return {'balsamic':
-            {'root': tmpdir}}
+    return {'balsamic': {'root': tmpdir}}
 
 
 @pytest.fixture
@@ -135,4 +126,3 @@ def link_family():
 def link_sample():
     """mock sample name"""
     return 'sample'
-
