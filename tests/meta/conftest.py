@@ -1,4 +1,5 @@
 import pytest
+from cg.apps.balsamic.fastq import FastqHandler
 
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.tb import TrailblazerAPI
@@ -201,7 +202,8 @@ class MockTB:
         return data
 
 
-class MockBalsamicFastq:
+class MockBalsamicFastq(FastqHandler):
+    """Mock FastqHandler for analysis_api"""
     pass
 
 
