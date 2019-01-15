@@ -3,7 +3,7 @@ import logging
 import click
 import datetime
 
-from cg.constants import FAMILY_ACTIONS, PRIORITY_OPTIONS
+from cg.constants import FAMILY_ACTIONS, PRIORITY_OPTIONS, FLOWCELL_STATUS
 from cg.store import Store
 from cg.apps.lims import LimsAPI
 
@@ -28,6 +28,9 @@ def family(context, action, priority, panels, family_id):
     family_obj = context.obj['status'].family(family_id)
     if family_obj is None:
         LOG.error(f"{family_id}: family not found")
+        context.abort()
+    if not (action or priority or panels):
+        LOG.error(f"nothing to change")
         context.abort()
     if action:
         LOG.info(f"update action: {family_obj.action or 'NA'} -> {action}")
@@ -148,7 +151,7 @@ def sample(context, sex, customer, comment, downsampled_to, apptag, capture_kit,
 
 
 @set_cmd.command()
-@click.option('-s', '--status', type=click.Choice(['ondisk', 'removed', 'requested', 'processing']))
+@click.option('-s', '--status', type=click.Choice(FLOWCELL_STATUS))
 @click.argument('flowcell_name')
 @click.pass_context
 def flowcell(context, flowcell_name, status):

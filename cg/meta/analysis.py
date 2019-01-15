@@ -16,7 +16,7 @@ from cg.store import models, Store
 
 COLLABORATORS = ('cust000', 'cust002', 'cust003', 'cust004', 'cust042')
 MASTER_LIST = ('ENDO', 'EP', 'IEM', 'IBMFS', 'mtDNA', 'MIT', 'PEDHEP', 'OMIM-AUTO',
-               'PIDCAD', 'PID', 'SKD', 'NMD', 'ATX', 'CTD', 'SPG', 'Ataxi', 'AD-HSP', 'IF')
+               'PIDCAD', 'PID', 'SKD', 'NMD', 'CTD', 'IF')
 COMBOS = {
     'DSD': ('DSD', 'HYP', 'SEXDIF', 'SEXDET'),
     'CM': ('CNM', 'CM'),
