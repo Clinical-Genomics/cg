@@ -181,7 +181,7 @@ def auto(context: click.Context):
 @click.option('-f', '--family', 'family_id', help='remove fastq folder for a case')
 @click.argument('sample_id', required=False)
 @click.pass_context
-def remove_fastq(context, family_id, sample_id):
+def remove_fastq(context, family_id):
     """remove fastq folder"""
 
     wrk_dir = Path(f"{context.obj['balsamic']['root']}/{family_id}/fastq")
