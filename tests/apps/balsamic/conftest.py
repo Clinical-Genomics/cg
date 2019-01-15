@@ -74,7 +74,7 @@ def _simple_files(tmpdir):
 @pytest.fixture
 def simple_files(tmpdir):
     """"Some files to test with"""
-    _simple_files(tmpdir)
+    return _simple_files(tmpdir)
 
 
 @pytest.fixture
