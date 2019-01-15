@@ -54,7 +54,12 @@ class FastqFileConcatenator:
     @staticmethod
     def assert_file_sizes(size_before, size_after):
         """asserts the file sizes before and after concatenation"""
-        assert size_before == size_after, f"Warning: file size difference after concatenation! Before: {size_before} -> after: {size_after}"
+        msg = (
+               f"Warning: file size difference after concatenation!"
+               f"Before: {size_before} -> after: {size_after}"
+              )
+
+        assert size_before == size_after, msg
         log.info('Concatenation file size check successful!')
 
     @staticmethod
@@ -77,6 +82,7 @@ class FastqHandler:
         """Link FASTQ files for a balsamic sample.
         Shall be linked to /mnt/hds/proj/bionfo/BALSAMIC_ANALYSIS/case-id/fastq/"""
 
+        concatenator = FastqFileConcatenator()
         wrk_dir = Path(f'{self.root_dir}/{family}/fastq')
 
         wrk_dir.mkdir(parents=True, exist_ok=True)
@@ -113,25 +119,21 @@ class FastqHandler:
 
         log.info(f"Concatenation in progress for sample {sample}.")
 
-        # log.info(display_files(files, concat_files))
-
-        FastqFileConcatenator.concatenate(destination_paths_r1, f'{wrk_dir}/{concatenated_filename_r1}')
-        size_before = FastqFileConcatenator.size_before(destination_paths_r1)
-        size_after = FastqFileConcatenator.size_after(f'{wrk_dir}/{concatenated_filename_r1}')
+        concatenator.concatenate(destination_paths_r1, f'{wrk_dir}/{concatenated_filename_r1}')
+        size_before = concatenator.size_before(destination_paths_r1)
+        size_after = concatenator.size_after(f'{wrk_dir}/{concatenated_filename_r1}')
 
         try:
-            FastqFileConcatenator.assert_file_sizes(size_before, size_after)
+            concatenator.assert_file_sizes(size_before, size_after)
         except AssertionError as error:
             log.warning(error)
 
-        # log.info(display_files(files, concat_files))
-
-        FastqFileConcatenator.concatenate(destination_paths_r2, f'{wrk_dir}/{concatenated_filename_r2}')
-        size_before = FastqFileConcatenator.size_before(destination_paths_r2)
-        size_after = FastqFileConcatenator.size_after(f'{wrk_dir}/{concatenated_filename_r2}')
+        concatenator.concatenate(destination_paths_r2, f'{wrk_dir}/{concatenated_filename_r2}')
+        size_before = concatenator.size_before(destination_paths_r2)
+        size_after = concatenator.size_after(f'{wrk_dir}/{concatenated_filename_r2}')
 
         try:
-            FastqFileConcatenator.assert_file_sizes(size_before, size_after)
+            concatenator.assert_file_sizes(size_before, size_after)
         except AssertionError as error:
             log.warning(error)
 

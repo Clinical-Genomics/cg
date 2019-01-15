@@ -16,7 +16,7 @@ from cg.store import Store
 LOG = logging.getLogger(__name__)
 PRIORITY_OPTION = click.option('-p', '--priority', type=click.Choice(['low', 'normal', 'high']))
 EMAIL_OPTION = click.option('-e', '--email', help='email to send errors to')
-START_WITH_PROGRAM = click.option('-sw', '--start-with', help='start mip-pipeline with this program and run downstream processes')
+START_WITH_PROGRAM = click.option('-sw', '--start-with', help='start mip from this program.')
 
 
 @click.group(invoke_without_command=True)
@@ -32,8 +32,7 @@ def analysis(context, priority, email, family_id, start_with):
     scout_api = scoutapi.ScoutAPI(context.obj)
     lims_api = lims.LimsAPI(context.obj)
     context.obj['tb'] = tb.TrailblazerAPI(context.obj)
-    deliver = DeliverAPI(context.obj, hk_api=hk_api,
-                                        lims_api=lims_api)
+    deliver = DeliverAPI(context.obj, hk_api=hk_api, lims_api=lims_api)
     balsamic = FastqHandler(context.obj)
     context.obj['api'] = AnalysisAPI(
         db=context.obj['db'],
@@ -65,7 +64,8 @@ def analysis(context, priority, email, family_id, start_with):
             context.invoke(config, family_id=family_id)
             context.invoke(link, family_id=family_id)
             context.invoke(panel, family_id=family_id)
-            context.invoke(start, family_id=family_id, priority=priority, email=email, start_with=start_with)
+            context.invoke(start, family_id=family_id, priority=priority, email=email,
+                           start_with=start_with)
 
 
 @analysis.command()
@@ -74,17 +74,17 @@ def analysis(context, priority, email, family_id, start_with):
 @click.pass_context
 def config(context, dry, family_id):
     """Generate a config for the FAMILY_ID.
-    
+
     Args:
         dry (Bool): Print config to console
         family_id (Str):
-        
+
     Returns:
     """
-    # Get family meta data 
+    # Get family meta data
     family_obj = context.obj['db'].family(family_id)
-    
     # MIP formated pedigree.yaml config
+
     config_data = context.obj['api'].config(family_obj)
 
     # Print to console
@@ -143,7 +143,8 @@ def panel(context, print_output, family_id):
 @START_WITH_PROGRAM
 @click.argument('family_id')
 @click.pass_context
-def start(context: click.Context, family_id: str, priority: str=None, email: str=None, start_with: str=None ):
+def start(context: click.Context, family_id: str, priority: str=None, email: str=None,
+          start_with: str=None):
     """Start the analysis pipeline for a family."""
     family_obj = context.obj['db'].family(family_id)
     if family_obj is None:
@@ -182,7 +183,7 @@ def auto(context: click.Context):
 @click.pass_context
 def remove_fastq(context, family_id, sample_id):
     """remove fastq folder"""
-    
+
     wrk_dir = Path(f"{context.obj['balsamic']['root']}/{family_id}/fastq")
 
     if wrk_dir.exists():
