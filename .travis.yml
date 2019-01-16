@@ -5,7 +5,7 @@ python:
 
 install:
     - pip install cython
-    - pip install -r requirements-dev.txt .
+    - pip install -r requirements-dev.txt
 
 script:
     - coverage run --source "$(basename "$PWD")" setup.py test
