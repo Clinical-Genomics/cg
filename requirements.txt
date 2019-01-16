@@ -15,7 +15,6 @@ Flask-Dance
 google-auth
 werkzeug
 requests[security]
-oauthlib>=3.0.0
 
 # utils
 ruamel.yaml
