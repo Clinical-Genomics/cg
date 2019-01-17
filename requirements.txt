@@ -17,6 +17,7 @@ werkzeug
 requests[security]
 requests-oauthlib<1.2.0     # due to scout-browser Flask-OAuthlib
 oauthlib<3.0.0              # due to scout-browser Flask-OAuthlib
+requests_cache
 
 # utils
 ruamel.yaml
