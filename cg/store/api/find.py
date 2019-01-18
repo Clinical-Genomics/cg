@@ -301,7 +301,7 @@ class FindHandler:
         return self.MicrobialOrder.query.filter_by(internal_id=internal_id).first()
 
     def organisms(self) -> List[models.Organism]:
-        return self.Organism.query
+        return self.Organism.query.order_by(models.Organism.internal_id)
 
     def organism(self, internal_id: str) -> models.Organism:
         """Find an Organism by internal_id."""

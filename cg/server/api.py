@@ -338,7 +338,7 @@ def options():
             'reference_genome': organism.reference_genome,
             'internal_id': organism.internal_id,
             'verified': organism.verified,
-        } for organism in db.Organism.query],
+        } for organism in db.organisms()],
         sources=source_groups
     )
 
