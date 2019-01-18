@@ -1,4 +1,4 @@
-pytest
+pytest>=3.6     # due to pytest-flask, pytest-cov
 mock
 ipdb
 pytest-cov
