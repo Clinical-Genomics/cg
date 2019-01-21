@@ -178,7 +178,6 @@ def auto(context: click.Context):
 
 @analysis.command()
 @click.option('-f', '--family', 'family_id', help='remove fastq folder for a case')
-@click.argument('sample_id', required=False)
 @click.pass_context
 def remove_fastq(context, family_id):
     """remove fastq folder"""
