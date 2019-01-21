@@ -4,9 +4,11 @@ from typing import List
 from sqlalchemy import and_, or_
 
 from cg.store import models
+from cg.store.api.base import BaseHandler
 
 
-class StatusHandler:
+class StatusHandler(BaseHandler):
+    """Handles status states for entities in the database"""
 
     def samples_to_recieve(self, external=False):
         """Fetch incoming samples."""
