@@ -32,6 +32,11 @@ class FastqFileNameCreator:
         index = index if index else 'XXXXXX'
         return f"{lane}_{date_str}_{flowcell}_{sample}_{index}_R_{read}.fastq.gz"
 
+    @staticmethod
+    def get_concatenated_name(linked_fastq_name):
+        """"create a name for the concatenated file for some read files"""
+        return f"concatenated_{'_'.join(linked_fastq_name.split('_')[-4:])}"
+
 
 class FastqFileConcatenator:
     """Concatenates a list of files into one"""
@@ -103,46 +108,39 @@ class FastqHandler:
 
         wrk_dir.mkdir(parents=True, exist_ok=True)
 
-        destination_paths_r1 = list()
-        destination_paths_r2 = list()
+        linked_reads_paths = {1: [], 2: []}
+        concatenated_paths = {1: '', 2: ''}
 
         sorted_files = sorted(files, key=lambda k: k['path'])
 
         for fastq_data in sorted_files:
-            fastq_path = Path(fastq_data['path'])
-            fastq_name = FastqFileNameCreator.create(
+            original_fastq_path = Path(fastq_data['path'])
+            linked_fastq_name = FastqFileNameCreator.create(
                 lane=fastq_data['lane'],
                 flowcell=fastq_data['flowcell'],
                 sample=sample,
                 read=fastq_data['read'],
                 undetermined=fastq_data['undetermined'],
             )
+            concatenad_fastq_name = FastqFileNameCreator.get_concatenated_name(linked_fastq_name)
 
-            destination_path = wrk_dir / fastq_name
+            linked_fastq_path = wrk_dir / linked_fastq_name
 
-            if fastq_data['read'] == 1:
-                destination_paths_r1.append(destination_path)
-                concatenated_filename_r1 = f"concatenated_{'_'.join(fastq_name.split('_')[-4:])}"
+            linked_reads_paths[fastq_data['read']].append(linked_fastq_path)
+            concatenated_paths[fastq_data['read']] = f"{wrk_dir}/{concatenad_fastq_name}"
+
+            if not linked_fastq_path.exists():
+                logger.info(f"linking: %s -> %s", original_fastq_path, linked_fastq_path)
+                linked_fastq_path.symlink_to(original_fastq_path)
             else:
-                destination_paths_r2.append(destination_path)
-                concatenated_filename_r2 = f"concatenated_{'_'.join(fastq_name.split('_')[-4:])}"
-
-            if not destination_path.exists():
-                logger.info(f"linking: %s -> %s", fastq_path, destination_path)
-                destination_path.symlink_to(fastq_path)
-            else:
-                logger.debug(f"destination path already exists: %s", destination_path)
+                logger.debug(f"destination path already exists: %s", linked_fastq_path)
 
         logger.info(f"Concatenation in progress for sample %s.", sample)
+        for read in linked_reads_paths:
+            FastqFileConcatenator().concatenate(linked_reads_paths[read],
+                                                concatenated_paths[read])
+            self._remove_files(linked_reads_paths[read])
 
-        FastqFileConcatenator().concatenate(destination_paths_r1,
-                                            f'{wrk_dir}/{concatenated_filename_r1}')
-
-        FastqFileConcatenator().concatenate(destination_paths_r2,
-                                            f'{wrk_dir}/{concatenated_filename_r2}')
-
-        self._remove_files(destination_paths_r1)
-        self._remove_files(destination_paths_r2)
 
     @staticmethod
     def _remove_files(files):
