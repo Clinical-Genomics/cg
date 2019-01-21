@@ -7,7 +7,7 @@ import pytest
 @pytest.fixture
 def valid_fastq_filename_pattern():
     """the pattern balsamic file names should match"""
-    # 'xxx_R_1_.fastq.gz and xxx_R_2_.fastq.gz'
+    # 'xxx_R_1.fastq.gz and xxx_R_2.fastq.gz'
     return r'^.+_R_[1-2]{1}\.fastq.gz$'
 
 
