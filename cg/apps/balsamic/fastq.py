@@ -61,13 +61,14 @@ class FastqFileConcatenator:
 
     @staticmethod
     def assert_file_sizes(size_before, size_after):
-        """asserts the file sizes before and after concatenation"""
+        """asserts the file sizes before and after concatenation. If the file sizes differ by more
+        than 1 percent, throw an exception"""
         msg = (
-            f"Warning: file size difference after concatenation!"
+            f"Warning: Large file size difference after concatenation!"
             f"Before: {size_before} -> after: {size_after}"
             )
 
-        assert size_before == size_after, msg
+        assert abs(size_before - size_after) / size_before <= 0.01, msg
         logger.info('Concatenation file size check successful!')
 
     @staticmethod
