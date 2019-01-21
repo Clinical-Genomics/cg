@@ -122,7 +122,7 @@ class FastqHandler:
                 read=fastq_data['read'],
                 undetermined=fastq_data['undetermined'],
             )
-            concatenad_fastq_name = FastqFileNameCreator.get_concatenated_name(linked_fastq_name)
+            concatenated_fastq_name = FastqFileNameCreator.get_concatenated_name(linked_fastq_name)
 
             linked_fastq_path = wrk_dir / linked_fastq_name
 
