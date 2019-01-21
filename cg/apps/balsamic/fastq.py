@@ -131,7 +131,7 @@ class FastqHandler:
                 logger.info("linking: %s -> %s", fastq_path, destination_path)
                 destination_path.symlink_to(fastq_path)
             else:
-                logger.debug(f"destination path already exists: %s", destination_path)
+                logger.debug("destination path already exists: %s", destination_path)
 
         logger.info("Concatenation in progress for sample %s.", sample)
 
