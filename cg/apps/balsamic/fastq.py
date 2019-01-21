@@ -141,7 +141,6 @@ class FastqHandler:
                                                 concatenated_paths[read])
             self._remove_files(linked_reads_paths[read])
 
-
     @staticmethod
     def _remove_files(files):
         for file in files:
