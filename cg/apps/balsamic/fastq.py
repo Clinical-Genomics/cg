@@ -97,7 +97,7 @@ class FastqHandler:
 
     def link(self, family: str, sample: str, files: List):
         """Link FASTQ files for a balsamic sample.
-        Shall be linked to /mnt/hds/proj/bionfo/BALSAMIC_ANALYSIS/case-id/fastq/"""
+        Shall be linked to /<balsamic root directory>/case-id/fastq/"""
 
         wrk_dir = Path(f'{self.root_dir}/{family}/fastq')
 
