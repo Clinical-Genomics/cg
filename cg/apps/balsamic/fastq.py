@@ -133,7 +133,7 @@ class FastqHandler:
             else:
                 logger.debug(f"destination path already exists: %s", destination_path)
 
-        logger.info(f"Concatenation in progress for sample %s.", sample)
+        logger.info("Concatenation in progress for sample %s.", sample)
 
         FastqFileConcatenator().concatenate(destination_paths_r1,
                                             f'{wrk_dir}/{concatenated_filename_r1}')
