@@ -127,7 +127,7 @@ class FastqHandler:
             linked_fastq_path = wrk_dir / linked_fastq_name
 
             linked_reads_paths[fastq_data['read']].append(linked_fastq_path)
-            concatenated_paths[fastq_data['read']] = f"{wrk_dir}/{concatenad_fastq_name}"
+            concatenated_paths[fastq_data['read']] = f"{wrk_dir}/{concatenated_fastq_name}"
 
             if not linked_fastq_path.exists():
                 logger.info(f"linking: %s -> %s", original_fastq_path, linked_fastq_path)
