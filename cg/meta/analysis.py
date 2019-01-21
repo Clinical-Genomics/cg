@@ -241,7 +241,7 @@ class AnalysisAPI:
         )
 
         # Decision for linking in Balsamic structure if data_analysis contains Balsamic
-        if link_obj.sample.data_analysis and 'Balsamic' in link_obj.sample.data_analysis:
+        if link_obj.sample.data_analysis and 'balsamic' in link_obj.sample.data_analysis.lower():
             self.balsamic_fastq_handler.link(family=link_obj.family.internal_id,
                                              sample=link_obj.sample.internal_id, files=files)
 
