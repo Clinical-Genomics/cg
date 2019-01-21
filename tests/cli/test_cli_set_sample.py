@@ -17,7 +17,7 @@ def test_set_sample_invalid_sample(invoke_cli, disk_store: Store):
 
 
 def test_set_sample_sex(invoke_cli, disk_store: Store):
-    # GIVEN a database with a male sample
+    # GIVEN a database with a female sample
 
     sample_id = add_sample(disk_store, sex='female').internal_id
     new_sex = 'male'
@@ -149,7 +149,7 @@ def test_set_sample_application(invoke_cli, disk_store: Store):
     result = invoke_cli(['--database', disk_store.uri, 'set', 'sample', sample_id, '-a',
                          application_tag])
 
-    # THEN then it should complain about missing application instead of setting the value
+    # THEN then the application should have been set
     assert result.exit_code == 0
     assert disk_store.Sample.query.first().application_version.application.tag == application_tag
 
