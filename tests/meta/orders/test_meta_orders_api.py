@@ -66,8 +66,9 @@ def test_submit_illegal_sample_customer(sample_store, orders_api, all_orders_to_
     customer_group = sample_store.add_customer_group('customer999only', 'customer 999 only group')
     sample_store.add_commit(customer_group)
     new_customer = sample_store.add_customer('customer999', 'customer 999', scout_access=True,
-                                           invoice_address='dummy street',
-                                           customer_group=customer_group)
+                                             invoice_address='dummy street',
+                                             customer_group=customer_group,
+                                             invoice_reference='dummy nr')
     sample_store.add_commit(new_customer)
     existing_sample = sample_store.samples().first()
     existing_sample.customer = new_customer
@@ -88,7 +89,8 @@ def test_submit_illegal_sample_customer(sample_store, orders_api, all_orders_to_
     OrderType.BALSAMIC,
     OrderType.MIP_BALSAMIC,
 ])
-def test_submit_scout_legal_sample_customer(sample_store, orders_api, all_orders_to_submit, monkeypatch,
+def test_submit_scout_legal_sample_customer(sample_store, orders_api, all_orders_to_submit,
+                                            monkeypatch,
                                             order_type):
     ticket_number = 123456
     monkeypatch.setattr(orders_api.osticket, 'open_ticket', lambda *args, **kwargs: ticket_number)
@@ -105,11 +107,13 @@ def test_submit_scout_legal_sample_customer(sample_store, orders_api, all_orders
     customer_group = sample_store.add_customer_group('customer999only', 'customer 999 only group')
     sample_store.add_commit(customer_group)
     sample_customer = sample_store.add_customer('customer1', 'customer 1', scout_access=True,
-                                           invoice_address='dummy street 1',
-                                           customer_group=customer_group)
+                                                invoice_address='dummy street 1',
+                                                customer_group=customer_group,
+                                                invoice_reference='dummy nr')
     order_customer = sample_store.add_customer('customer2', 'customer 2', scout_access=True,
-                                           invoice_address='dummy street 2',
-                                           customer_group=customer_group)
+                                               invoice_address='dummy street 2',
+                                               customer_group=customer_group,
+                                               invoice_reference='dummy nr')
     sample_store.add_commit(sample_customer)
     sample_store.add_commit(order_customer)
     existing_sample = sample_store.samples().first()
@@ -134,7 +138,8 @@ def test_submit_scout_legal_sample_customer(sample_store, orders_api, all_orders
     OrderType.MICROBIAL,
     OrderType.METAGENOME,
 ])
-def test_submit_non_scout_legal_sample_customer(sample_store, orders_api, all_orders_to_submit, monkeypatch,
+def test_submit_non_scout_legal_sample_customer(sample_store, orders_api, all_orders_to_submit,
+                                                monkeypatch,
                                                 order_type):
     ticket_number = 123456
     monkeypatch.setattr(orders_api.osticket, 'open_ticket', lambda *args, **kwargs: ticket_number)
@@ -151,11 +156,13 @@ def test_submit_non_scout_legal_sample_customer(sample_store, orders_api, all_or
     customer_group = sample_store.add_customer_group('customer999only', 'customer 999 only group')
     sample_store.add_commit(customer_group)
     sample_customer = sample_store.add_customer('customer1', 'customer 1', scout_access=True,
-                                           invoice_address='dummy street 1',
-                                           customer_group=customer_group)
+                                                invoice_address='dummy street 1',
+                                                customer_group=customer_group,
+                                                invoice_reference='dummy nr')
     order_customer = sample_store.add_customer('customer2', 'customer 2', scout_access=True,
-                                           invoice_address='dummy street 2',
-                                           customer_group=customer_group)
+                                               invoice_address='dummy street 2',
+                                               customer_group=customer_group,
+                                               invoice_reference='dummy nr')
     sample_store.add_commit(sample_customer)
     sample_store.add_commit(order_customer)
     existing_sample = sample_store.samples().first()

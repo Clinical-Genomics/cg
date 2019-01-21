@@ -15,6 +15,9 @@ Flask-Dance
 google-auth
 werkzeug
 requests[security]
+requests-oauthlib<1.2.0     # due to scout-browser Flask-OAuthlib
+oauthlib<3.0.0              # due to scout-browser Flask-OAuthlib
+requests_cache
 
 # utils
 ruamel.yaml
@@ -37,6 +40,6 @@ trailblazer>=3.1.1
 housekeeper>=2.0.0b2
 chanjo>=4.2.0
 genotype>=2.2.0
-scout-browser>=3.3.0
+scout-browser>=4.3.0
 cgstats>=1.1.2
 cgbeacon
