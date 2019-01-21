@@ -128,7 +128,7 @@ class FastqHandler:
                 concatenated_filename_r2 = f"concatenated_{'_'.join(fastq_name.split('_')[-4:])}"
 
             if not destination_path.exists():
-                logger.info(f"linking: %s -> %s", fastq_path, destination_path)
+                logger.info("linking: %s -> %s", fastq_path, destination_path)
                 destination_path.symlink_to(fastq_path)
             else:
                 logger.debug(f"destination path already exists: %s", destination_path)
