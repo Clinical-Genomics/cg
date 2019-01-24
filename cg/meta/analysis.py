@@ -35,7 +35,7 @@ class AnalysisAPI:
 
     def __init__(self, db: Store, hk_api: hk.HousekeeperAPI, scout_api: scoutapi.ScoutAPI,
                  tb_api: tb.TrailblazerAPI, lims_api: lims.LimsAPI, deliver_api: DeliverAPI,
-                 fastq_handler: fastq.FastqHandler, yaml_loader=safe_load, path_api=Path,
+                 fastq_handler=fastq.FastqHandler, yaml_loader=safe_load, path_api=Path,
                  logger=logging.getLogger(
                      __name__)):
         self.db = db
