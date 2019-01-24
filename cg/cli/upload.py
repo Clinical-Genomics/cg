@@ -66,7 +66,12 @@ def upload(context, family_id):
         if analysis_obj.uploaded_at is not None:
             message = f"analysis already uploaded: {analysis_obj.uploaded_at.date()}"
             click.echo(click.style(message, fg='yellow'))
+        elif analysis_obj.upload_started_at is not None:
+            message = f"analysis upload already started: {analysis_obj.upload_started_at.date()}"
+            click.echo(click.style(message, fg='yellow'))
         else:
+            analysis_obj.upload_started_at = dt.datetime.now()
+            context.obj['status'].commit()
             context.invoke(coverage, re_upload=True, family_id=family_id)
             context.invoke(validate, family_id=family_id)
             context.invoke(genotypes, re_upload=False, family_id=family_id)

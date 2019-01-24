@@ -419,6 +419,7 @@ class Analysis(Model):
     pipeline_version = Column(types.String(32))
     started_at = Column(types.DateTime)
     completed_at = Column(types.DateTime)
+    upload_started_at = Column(types.DateTime)
     uploaded_at = Column(types.DateTime)
     delivered_at = Column(types.DateTime)
     # primary analysis is the one originally delivered to the customer
