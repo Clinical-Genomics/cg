@@ -23,13 +23,43 @@ LOG = logging.getLogger(__name__)
 
 @click.group(invoke_without_command=True)
 @click.option('-f', '--family', 'family_id', help='Upload to all apps')
+@click.option('-r', '--restart', 'force_restart', help='Force upload of analysis marked as started')
 @click.pass_context
-def upload(context, family_id):
+def upload(context, family_id, force_restart):
     """Upload results from analyses."""
 
     click.echo(click.style('----------------- UPLOAD ----------------------'))
-        
+
     context.obj['status'] = Store(context.obj['database'])
+
+    if family_id:
+        family_obj = context.obj['status'].family(family_id)
+        if not family_obj:
+            message = f"family not found: {family_id}"
+            click.echo(click.style(message, fg='red'))
+            context.abort()
+
+        if not family_obj.analyses:
+            message = f"no analyse exists for family: {family_id}"
+            click.echo(click.style(message, fg='red'))
+            context.abort()
+
+        analysis_obj = family_obj.analyses[0]
+
+        if not force_restart and analysis_obj.upload_started_at is not None:
+            if dt.datetime.now() - analysis_obj.upload_started_at > dt.timedelta(hours=24):
+                raise Exception(f"The upload started at {analysis_obj.upload_started_at} "
+                                f"something went wrong, restart it with the --restart flag")
+
+            message = f"analysis upload already started: {analysis_obj.upload_started_at.date()}"
+            click.echo(click.style(message, fg='yellow'))
+            return
+
+        if analysis_obj.uploaded_at is not None:
+            message = f"analysis already uploaded: {analysis_obj.uploaded_at.date()}"
+            click.echo(click.style(message, fg='red'))
+            context.abort()
+
     context.obj['housekeeper_api'] = hk.HousekeeperAPI(context.obj)
 
     context.obj['lims_api'] = lims.LimsAPI(context.obj)
@@ -60,28 +90,18 @@ def upload(context, family_id):
         analysis_api=context.obj['analysis_api']
     )
 
-    if family_id:
-        family_obj = context.obj['status'].family(family_id)
-        analysis_obj = family_obj.analyses[0]
-        if analysis_obj.uploaded_at is not None:
-            message = f"analysis already uploaded: {analysis_obj.uploaded_at.date()}"
-            click.echo(click.style(message, fg='yellow'))
-        elif analysis_obj.upload_started_at is not None:
-            message = f"analysis upload already started: {analysis_obj.upload_started_at.date()}"
-            click.echo(click.style(message, fg='yellow'))
-        else:
-            analysis_obj.upload_started_at = dt.datetime.now()
-            context.obj['status'].commit()
-            context.invoke(coverage, re_upload=True, family_id=family_id)
-            context.invoke(validate, family_id=family_id)
-            context.invoke(genotypes, re_upload=False, family_id=family_id)
-            context.invoke(observations, family_id=family_id)
-            context.invoke(delivery_report, family_id=family_id,
-                           customer_id=family_obj.customer.internal_id)
-            context.invoke(scout, family_id=family_id)
-            analysis_obj.uploaded_at = dt.datetime.now()
-            context.obj['status'].commit()
-            click.echo(click.style(f"{family_id}: analysis uploaded!", fg='green'))
+    analysis_obj.upload_started_at = dt.datetime.now()
+    context.obj['status'].commit()
+    context.invoke(coverage, re_upload=True, family_id=family_id)
+    context.invoke(validate, family_id=family_id)
+    context.invoke(genotypes, re_upload=False, family_id=family_id)
+    context.invoke(observations, family_id=family_id)
+    context.invoke(delivery_report, family_id=family_id,
+                   customer_id=family_obj.customer.internal_id)
+    context.invoke(scout, family_id=family_id)
+    analysis_obj.uploaded_at = dt.datetime.now()
+    context.obj['status'].commit()
+    click.echo(click.style(f"{family_id}: analysis uploaded!", fg='green'))
 
 
 @upload.command('delivery-report')
