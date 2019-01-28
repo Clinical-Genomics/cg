@@ -1,4 +1,6 @@
 import pytest
+from _pytest import tmpdir
+from cg.apps.balsamic.fastq import FastqHandler
 
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.tb import TrailblazerAPI
@@ -80,7 +82,7 @@ def analysis_store(base_store, analysis_family):
         sample = base_store.add_sample(name=sample_data['name'], sex=sample_data['sex'],
                                        internal_id=sample_data['internal_id'],
                                        ticket=sample_data['ticket_number'],
-                                       reads=sample_data['reads'],)
+                                       reads=sample_data['reads'], )
         sample.family = family
         sample.application_version = application_version
         sample.customer = customer
@@ -118,13 +120,13 @@ class MockDeliver:
 
         if tags[0] == 'mip-config':
             path = '/mnt/hds/proj/bioinfo/bundles/' + family + '/2018-01-30/' + family + \
-                    '_config.yaml'
+                   '_config.yaml'
         elif tags[0] == 'sampleinfo':
             path = '/mnt/hds/proj/bioinfo/bundles/' + family + '/2018-01-30/' + family + \
-                    '_qc_sample_info.yaml'
+                   '_qc_sample_info.yaml'
         if tags[0] == 'qcmetrics':
             path = '/mnt/hds/proj/bioinfo/bundles/' + family + '/2018-01-30/' + family + \
-                    '_qc_metrics.yaml'
+                   '_qc_metrics.yaml'
 
         return [MockFile(path=path)]
 
@@ -135,7 +137,7 @@ class MockDeliver:
 class MockPath:
 
     def __init__(self, path):
-        self.yaml = MockYaml()
+        self.yaml = None
 
     def __call__(self, *args, **kwargs):
         return self
@@ -145,20 +147,6 @@ class MockPath:
 
     def joinpath(self, path):
         return ''
-
-
-class MockRuamel:
-    def __init__(self):
-        self.yaml = MockYaml()
-
-    def yaml(self):
-        return MockYaml()
-
-
-class MockYaml:
-    def safe_load(self, path):
-        return {'human_genome_build': {'version': ''}, 'program': {'rankvariant': {'rank_model': {
-            'version': 1.18}}}}
 
 
 class MockLogger:
@@ -201,10 +189,25 @@ class MockTB:
         return data
 
 
+class MockBalsamicFastq(FastqHandler):
+    """Mock FastqHandler for analysis_api"""
+
+    def __init__(self):
+        super().__init__(config={'balsamic': {'root': tmpdir}})
+
+
+def safe_loader(path):
+    """Mock function for loading yaml"""
+
+    if path:
+        pass
+
+    return {'human_genome_build': {'version': ''}, 'program': {'rankvariant': {'rank_model': {
+        'version': 1.18}}}}
+
 @pytest.yield_fixture(scope='function')
 def analysis_api(analysis_store, store_housekeeper, scout_store):
     """Setup an analysis API."""
-    ruamel_mock = MockRuamel()
     Path_mock = MockPath('')
     tb_mock = MockTB()
 
@@ -215,8 +218,9 @@ def analysis_api(analysis_store, store_housekeeper, scout_store):
         tb_api=tb_mock,
         lims_api=None,
         deliver_api=MockDeliver(),
-        ruamel=ruamel_mock,
-        Path=Path_mock,
-        logger=MockLogger()
+        yaml_loader=safe_loader,
+        path_api=Path_mock,
+        logger=MockLogger(),
+        fastq_handler=MockBalsamicFastq()
     )
     yield _analysis_api
