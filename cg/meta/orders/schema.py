@@ -45,7 +45,7 @@ class TypeValidatorNone(validators.TypeValidator):
 
     def validate(self, value):
         """Validate the type of the value, accept None"""
-        if value is None:
+        if value in (None, ''):
             return value
         return super().validate(value)
 
@@ -55,7 +55,7 @@ class RegexValidatorNone(validators.RegexValidator):
 
     def validate(self, value):
         """Validate the the value against an regular expression, accept None"""
-        if value is None:
+        if value in (None, ''):
             return value
         return super().validate(value)
 
@@ -72,7 +72,7 @@ class OptionalNone(validators.Optional):
         if value:
             val = value[0]
 
-            if val is None:
+            if val in (None, ''):
                 return val
 
             return super().validate(val)
