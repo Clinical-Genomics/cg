@@ -63,25 +63,45 @@ class StatusHandler:
         )
         return records
 
-    def families_to_mip_analyze(self, limit: int=50):
+
+    def families_to_mip_analyze(self, limit: int = 50):
         """Fetch families without analyses where all samples are sequenced."""
-        records = (
+
+        # there are two cases when a sample should be analysed:
+        families_q = (
             self.Family.query
-            .outerjoin(models.Family.analyses)
+            .outerjoin(models.Analysis)
             .join(models.Family.links, models.FamilySample.sample)
+            # the samples must always be sequenced to be analysed
+            .filter(
+                models.Sample.sequenced_at.isnot(None),
+            )
+            # The data_analysis is unset or not Balsamic only
+            .filter(
+                or_(
+                    models.Sample.data_analysis.is_(None),
+                    models.Sample.data_analysis != 'Balsamic'
+                )
+            )
+            # 1. family that has been analysed but now is requested for re-analysing
+            # 2. new family with that haven't been analysed
             .filter(
                 or_(
                     models.Family.action == 'analyze',
                     and_(
-                        models.Sample.sequenced_at != None,
-                        models.Analysis.completed_at == None,
-                        models.Family.action == None,
-                        models.Sample.data_analysis not in ['Balsamic'],
-                    )
-            ))
+                        models.Family.action.is_(None),
+                        models.Analysis.created_at.is_(None),
+                    ),
+                )
+            )
             .order_by(models.Family.priority.desc(), models.Family.ordered_at)
         )
-        return [record for record in records.limit(limit) if self._samples_sequenced(record.links)]
+
+        # print(families_q)
+
+        families = [record for record in families_q if self._all_samples_sequenced(record.links)]
+
+        return families[:limit]
 
     def active_cases(self,
                      internal_id=None,
