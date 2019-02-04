@@ -60,7 +60,7 @@ def present_date(case, param, show_negative, show_time):
 @status.command()
 @click.pass_context
 @click.option('-b', '--bool-output', is_flag=True, help='show status as yes/no')
-@click.option('-v', '--verbose', is_flag=True, help='show information otherwise left out')
+@click.option('-v', '--verbose', is_flag=True, help='show status information otherwise left out')
 @click.option('-t', '--show-time', is_flag=True, help='show time part')
 @click.option('-d', '--days', default=31, help='days to go back')
 @click.option('-i', '--internal-id', help='search by internal id')
@@ -112,6 +112,8 @@ def cases(context, bool_output, verbose, show_time, days, internal_id, name, act
         title = f"{case.get('internal_id')}"
         if name:
             title = f"{title} ({case.get('name')})"
+        if data_analysis:
+            title = f"{title} {case.get('samples_data_analyses')}"
         ordered = present_date(case, 'ordered_at', verbose, show_time)
         received = f"{case.get('samples_received')}/{case.get('total_samples')}"
         prepared = f"{case.get('samples_prepared')}/{case.get('total_samples')}"

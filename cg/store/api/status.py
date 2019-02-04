@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime, timedelta
 from typing import List
-from sqlalchemy import and_, or_
+from sqlalchemy import or_, and_
 
 from cg.constants import PRIORITY_MAP
 from cg.store import models
@@ -163,6 +163,7 @@ class StatusHandler:
             analysis_completed_bool = None
             analysis_uploaded_bool = None
             samples_delivered_bool = None
+            samples_data_analyses = None
 
             total_samples = len(record.links)
 
@@ -182,6 +183,7 @@ class StatusHandler:
                 samples_delivered_bool = samples_delivered == total_samples
                 samples_sequenced_bool = samples_sequenced == total_samples
                 samples_invoiced_bool = samples_invoiced == total_samples
+                samples_data_analyses = set(link.sample.data_analysis for link in record.links)
 
             if record.analyses:
                 analysis_completed = record.analyses[0].completed_at
@@ -198,6 +200,7 @@ class StatusHandler:
                 'name': record.name,
                 'ordered_at': record.ordered_at,
                 'total_samples': total_samples,
+                'samples_data_analyses': samples_data_analyses,
                 'samples_received': samples_received,
                 'samples_prepared': samples_prepared,
                 'samples_sequenced': samples_sequenced,

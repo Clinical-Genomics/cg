@@ -121,6 +121,43 @@ def test_include_case_by_partial_data_analysis(base_store: Store):
         assert family.internal_id in case.get('internal_id')
 
 
+def test_show_multiple_data_analysis(base_store: Store):
+    """Test to that cases can be included by data_analysis"""
+
+    # GIVEN a database with a family with data analysis set
+    family = add_family(base_store)
+    sample1 = add_sample(base_store, data_analysis='data_analysis1')
+    base_store.relate_sample(family, sample1, 'unknown')
+    sample2 = add_sample(base_store, data_analysis='data_analysis2')
+    base_store.relate_sample(family, sample2, 'unknown')
+
+    # WHEN getting active cases by data_analysis
+    cases = base_store.active_cases()
+
+    # THEN cases should only contain this case
+    assert cases
+    for case in cases:
+        assert sample1.data_analysis in case.get('samples_data_analyses')
+        assert sample2.data_analysis in case.get('samples_data_analyses')
+
+
+def test_show_data_analysis(base_store: Store):
+    """Test to that cases can be included by data_analysis"""
+
+    # GIVEN a database with a family with data analysis set
+    family = add_family(base_store)
+    sample = add_sample(base_store, data_analysis='data_analysis')
+    base_store.relate_sample(family, sample, 'unknown')
+
+    # WHEN getting active cases by data_analysis
+    cases = base_store.active_cases(data_analysis=sample.data_analysis)
+
+    # THEN cases should only contain this case
+    assert cases
+    for case in cases:
+        assert sample.data_analysis in case.get('samples_data_analyses')
+
+
 def test_include_case_by_data_analysis(base_store: Store):
     """Test to that cases can be included by data_analysis"""
 
