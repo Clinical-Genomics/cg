@@ -109,6 +109,7 @@ class StatusHandler:
                      customer_id=None,
                      exclude_customer_id=None,
                      data_analysis=None,
+                     sample_id = None,
                      exclude_received=False,
                      exclude_prepared=False,
                      exclude_sequenced=False,
@@ -149,10 +150,15 @@ class StatusHandler:
                 families_q = families_q.filter(models.Customer.internal_id != exclude_customer_id)
 
         # sample filters
-        if data_analysis:
+        if data_analysis or sample_id:
             families_q = families_q.join(models.Family.links, models.FamilySample.sample)
-            families_q = families_q.filter(models.Sample.data_analysis.like('%' + data_analysis +
-                                                                            '%'))
+            if data_analysis:
+                families_q = families_q.filter(models.Sample.data_analysis.like('%' +
+                                                                                data_analysis +
+                                                                                '%'))
+            if sample_id:
+                families_q = families_q.filter(models.Sample.internal_id.like(sample_id))
+
         else:
             families_q = families_q.outerjoin(models.Family.links, models.FamilySample.sample)
 
@@ -183,6 +189,9 @@ class StatusHandler:
             samples_data_analyses = None
 
             total_samples = len(record.links)
+            total_external_samples = len([link.sample.is_external for link in record.links if
+                                    link.sample.is_external])
+            total_internal_samples = total_samples - total_external_samples
 
             if total_samples > 0:
                 samples_received = len([link.sample.received_at for link in record.links if
@@ -195,8 +204,8 @@ class StatusHandler:
                                          link.sample.delivered_at is not None])
                 samples_invoiced = len([link.sample.invoice.invoiced_at for link in record.links if
                                         link.sample.invoice is not None])
-                samples_received_bool = samples_received == total_samples
-                samples_prepared_bool = samples_prepared == total_samples
+                samples_received_bool = samples_received == total_internal_samples
+                samples_prepared_bool = samples_prepared == total_internal_samples
                 samples_delivered_bool = samples_delivered == total_samples
                 samples_sequenced_bool = samples_sequenced == total_samples
                 samples_invoiced_bool = samples_invoiced == total_samples
@@ -217,6 +226,8 @@ class StatusHandler:
                 'name': record.name,
                 'ordered_at': record.ordered_at,
                 'total_samples': total_samples,
+                'total_external_samples': total_external_samples,
+                'total_internal_samples': total_internal_samples,
                 'samples_data_analyses': samples_data_analyses,
                 'samples_received': samples_received,
                 'samples_prepared': samples_prepared,

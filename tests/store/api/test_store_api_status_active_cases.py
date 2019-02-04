@@ -5,6 +5,83 @@ from cg.store import Store
 from cg.constants import FAMILY_ACTIONS, PRIORITY_OPTIONS
 
 
+# todo: visa datum rec, prep, seq, del, inv
+# todo: don't increase rec, prep för externa
+# todo: include för alla exclude
+
+
+def test_one_external_sample(base_store: Store):
+    """Test to that cases displays correct internal/external samples"""
+
+    # GIVEN a database with a family and one external sample
+    family = add_family(base_store)
+    sample = add_sample(base_store, is_external=True)
+    base_store.relate_sample(family, sample, 'unknown')
+    assert sample.is_external
+
+    # WHEN getting active cases
+    cases = base_store.active_cases()
+
+    # THEN cases should contain one external and zero internal samples
+    assert cases
+    for case in cases:
+        assert case.get('total_samples') == 1
+        assert case.get('total_external_samples') == 1
+        assert case.get('total_internal_samples') == 0
+
+
+def test_one_internal_sample(base_store: Store):
+    """Test to that cases displays correct internal/external samples"""
+
+    # GIVEN a database with a family and one external sample
+    family = add_family(base_store)
+    sample = add_sample(base_store, is_external=False)
+    base_store.relate_sample(family, sample, 'unknown')
+    assert not sample.is_external
+
+    # WHEN getting active cases
+    cases = base_store.active_cases()
+
+    # THEN cases should contain zero external and one internal samples
+    assert cases
+    for case in cases:
+        assert case.get('total_samples') == 1
+        assert case.get('total_external_samples') == 0
+        assert case.get('total_internal_samples') == 1
+
+
+def test_include_case_by_sample_id(base_store: Store):
+    """Test to that cases can be included by sample id"""
+
+    # GIVEN a database with a sample with internal_id
+    family = add_family(base_store)
+    sample = add_sample(base_store)
+    base_store.relate_sample(family, sample, 'unknown')
+
+    # WHEN getting active cases by sample id
+    cases = base_store.active_cases(sample_id=sample.internal_id)
+
+    # THEN cases should only contain this case
+    assert cases
+    for case in cases:
+        assert family.internal_id in case.get('internal_id')
+
+
+def test_exclude_case_by_sample_id(base_store: Store):
+    """Test to that cases can be excluded by sample id"""
+
+    # GIVEN a database with a sample with internal_id
+    family = add_family(base_store)
+    sample = add_sample(base_store)
+    base_store.relate_sample(family, sample, 'unknown')
+
+    # WHEN getting active cases by non-existing sample id
+    cases = base_store.active_cases(sample_id='dummy_id')
+
+    # THEN cases should not contain this case
+    assert not cases
+
+
 def test_include_case_by_exclude_customer(base_store: Store):
     """Test to that cases can be excluded by customer"""
 
@@ -871,7 +948,8 @@ def ensure_customer(disk_store, customer_id='cust_test'):
 
 
 def add_sample(store, sample_name='sample_test', received=False, prepared=False,
-               sequenced=False, delivered=False, invoiced=False, data_analysis=None):
+               sequenced=False, delivered=False, invoiced=False, data_analysis=None,
+               is_external=False):
     """utility function to add a sample to use in tests"""
     customer = ensure_customer(store)
     application_version_id = ensure_application_version(store).id
@@ -891,6 +969,8 @@ def add_sample(store, sample_name='sample_test', received=False, prepared=False,
         sample.invoice = invoice
     if data_analysis:
         sample.data_analysis = data_analysis
+    if is_external:
+        sample.is_external = is_external
     store.add_commit(sample)
     return sample
 

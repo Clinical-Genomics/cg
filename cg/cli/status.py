@@ -68,6 +68,7 @@ def present_date(case, param, show_negative, show_time):
 @click.option('-a', '--action', type=click.Choice(FAMILY_ACTIONS), help='filter by action')
 @click.option('-p', '--priority', type=click.Choice(PRIORITY_OPTIONS), help='filter by priority')
 @click.option('--data-analysis', help='filter on data_analysis')
+@click.option('-s', '--sample-id', help='filter by sample id')
 @click.option('-c', '--customer-id', help='filter by customer')
 @click.option('-C', '--exclude-customer-id', help='exclude customer')
 @click.option('-R', '--exclude-received', is_flag=True, help='exclude completely received cases')
@@ -78,7 +79,7 @@ def present_date(case, param, show_negative, show_time):
 @click.option('-D', '--exclude-delivered', is_flag=True, help='exclude completely delivered cases')
 @click.option('-I', '--exclude-invoiced', is_flag=True, help='exclude completely invoiced cases')
 def cases(context, bool_output, verbose, show_time, days, internal_id, name, action, priority,
-          customer_id, data_analysis,
+          customer_id, data_analysis, sample_id,
           exclude_customer_id,
           exclude_received,
           exclude_prepared,
@@ -98,6 +99,7 @@ def cases(context, bool_output, verbose, show_time, days, internal_id, name, act
         customer_id=customer_id,
         exclude_customer_id=exclude_customer_id,
         data_analysis=data_analysis,
+        sample_id=sample_id,
         exclude_received=exclude_received,
         exclude_prepared=exclude_prepared,
         exclude_sequenced=exclude_sequenced,
@@ -115,8 +117,8 @@ def cases(context, bool_output, verbose, show_time, days, internal_id, name, act
         if data_analysis:
             title = f"{title} {case.get('samples_data_analyses')}"
         ordered = present_date(case, 'ordered_at', verbose, show_time)
-        received = f"{case.get('samples_received')}/{case.get('total_samples')}"
-        prepared = f"{case.get('samples_prepared')}/{case.get('total_samples')}"
+        received = f"{case.get('samples_received')}/{case.get('total_internal_samples')}"
+        prepared = f"{case.get('samples_prepared')}/{case.get('total_internal_samples')}"
         sequenced = f"{case.get('samples_sequenced')}/{case.get('total_samples')}"
         analysed = present_date(case, 'analysis_completed_at', verbose, show_time)
         uploaded = present_date(case, 'analysis_uploaded_at', verbose, show_time)
@@ -167,7 +169,7 @@ def samples(context, skip):
 @click.pass_context
 def families(context, skip):
     """View status of families."""
-    click.echo('red: prio > 1, blue: prio = 1, green: completed, orange: action')
+    click.echo('red: prio > 1, blue: prio = 1, green: completed, yellow: action')
     records = context.obj['db'].families().offset(skip).limit(30)
     for family_obj in records:
         color = 'red' if family_obj.priority > 1 else 'blue'
@@ -177,5 +179,5 @@ def families(context, skip):
             color = 'green'
         if family_obj.action:
             message += f" [{family_obj.action.upper()}]"
-            color = 'orange'
+            color = 'yellow'
         click.echo(click.style(message, fg=color))
