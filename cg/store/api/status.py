@@ -63,7 +63,6 @@ class StatusHandler:
         )
         return records
 
-
     def families_to_mip_analyze(self, limit: int = 50):
         """Fetch families without analyses where all samples are sequenced."""
 
@@ -96,8 +95,6 @@ class StatusHandler:
             )
             .order_by(models.Family.priority.desc(), models.Family.ordered_at)
         )
-
-        # print(families_q)
 
         families = [record for record in families_q if self._all_samples_sequenced(record.links)]
 
