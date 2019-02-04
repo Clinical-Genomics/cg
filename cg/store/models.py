@@ -106,6 +106,10 @@ class FamilySample(Model):
     sample_id = Column(ForeignKey('sample.id', ondelete='CASCADE'), nullable=False)
     status = Column(types.Enum('affected', 'unaffected', 'unknown'), default='unknown',
                     nullable=False)
+
+    created_at = Column(types.DateTime, default=dt.datetime.now)
+    updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
+
     mother_id = Column(ForeignKey('sample.id'))
     father_id = Column(ForeignKey('sample.id'))
 
