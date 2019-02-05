@@ -1,12 +1,70 @@
 """This script tests the cli methods to add families to status-db"""
 from datetime import datetime, timedelta
 
-from cg.store import Store
 from cg.constants import FAMILY_ACTIONS, PRIORITY_OPTIONS
+from cg.store import Store
 
-# todo: include för alla exclude
-# todo: reruns analyser != tidigare analysen
 # todo: test that dates are the oldest date from the samples
+
+
+def test_samples_flowcell(base_store: Store):
+    """Test to that cases displays the flowcell status """
+
+    # GIVEN a database with a family with a sample that belongs to a flowcell with status ondisk
+    # and a sample not yet on a flowcell
+    family = add_family(base_store)
+    sample_on_flowcell = add_sample(base_store)
+    flowcell = add_flowcell(base_store, sample=sample_on_flowcell, status='ondisk')
+    base_store.relate_sample(family, sample_on_flowcell, 'unknown')
+    sample_not_on_flowcell = add_sample(base_store)
+    base_store.relate_sample(family, sample_not_on_flowcell, 'unknown')
+
+    # WHEN getting active cases
+    cases = base_store.cases()
+
+    # THEN cases should contain info on flowcell status and be false
+    assert cases
+    for case in cases:
+        assert case.get('flowcells_status') == flowcell.status
+        assert not case.get('flowcells_on_disk_bool')
+        assert case.get('flowcells_on_disk') == 1
+
+
+def test_sample_flowcell(base_store: Store):
+    """Test to that cases displays the flowcell status """
+
+    # GIVEN a database with a family with a sample that belongs to a flowcell with status ondisk
+    family = add_family(base_store)
+    sample = add_sample(base_store)
+    base_store.relate_sample(family, sample, 'unknown')
+    flowcell = add_flowcell(base_store, sample=sample, status='ondisk')
+    assert flowcell.status
+
+    # WHEN getting active cases
+    cases = base_store.cases()
+
+    # THEN cases should contain info on flowcell status and be true
+    assert cases
+    for case in cases:
+        assert case.get('flowcells_on_disk') == 1
+        assert case.get('flowcells_status') == flowcell.status
+        assert case.get('flowcells_on_disk_bool')
+
+
+def test_analysis_action(base_store: Store):
+    """Test to that cases displays no analysis dates for active reruns """
+
+    # GIVEN a database with an analysis that was completed but has an active rerun in progress
+    analysis = add_analysis(base_store, completed=True, uploaded=True)
+    analysis.family.action = 'analyze'
+
+    # WHEN getting active cases
+    cases = base_store.cases()
+
+    # THEN cases should contain info on analysis (family) action
+    assert cases
+    for case in cases:
+        assert case.get('analysis_action') == analysis.family.action
 
 
 def test_analysis_dates_for_rerun(base_store: Store):
@@ -661,6 +719,7 @@ def test_only_uploaded_cases(base_store: Store):
     for case in cases:
         assert neg_family.internal_id not in case.get('internal_id')
 
+
 def test_only_invoiced_cases(base_store: Store):
     """Test to that invoiced cases can be included"""
 
@@ -1296,3 +1355,16 @@ def add_analysis(store, completed=False, uploaded=False, pipeline=None):
     family.analyses.append(analysis)
     store.add_commit(analysis)
     return analysis
+
+
+def add_flowcell(store, name='flowcell_test', sample=None, status=None):
+    """utility function to get a flowcell to use in tests"""
+    flowcell = store.add_flowcell(name=name, sequencer='dummy_sequencer',
+                                  sequencer_type='hiseqx',
+                                  date=datetime.now())
+    if status:
+        flowcell.status = status
+    if sample:
+        flowcell.samples = [sample]
+    store.add_commit(flowcell)
+    return flowcell
