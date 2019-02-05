@@ -59,27 +59,41 @@ def present_date(case, param, show_negative, show_time):
 
 @status.command()
 @click.pass_context
-@click.option('-b', '--bool-output', is_flag=True, help='show status as yes/no')
-@click.option('-v', '--verbose', is_flag=True, help='show status information otherwise left out')
-@click.option('-t', '--show-time', is_flag=True, help='show time part')
-@click.option('-d', '--days', default=31, help='days to go back')
-@click.option('-i', '--internal-id', help='search by internal id')
-@click.option('-n', '--name', help='search by name given by customer')
-@click.option('-a', '--action', type=click.Choice(FAMILY_ACTIONS), help='filter by action')
-@click.option('-p', '--priority', type=click.Choice(PRIORITY_OPTIONS), help='filter by priority')
+@click.option('-o', '--output-type', type=click.Choice(['bool', 'count', 'date', 'datetime']),
+              default='bool', help='how to display status')
+@click.option('--verbose', is_flag=True, help='show status information otherwise left out')
+@click.option('--days', default=31, help='days to go back')
+@click.option('--internal-id', help='search by internal id')
+@click.option('--name', help='search by name given by customer')
+@click.option('--action', type=click.Choice(FAMILY_ACTIONS), help='filter by action')
+@click.option('--priority', type=click.Choice(PRIORITY_OPTIONS), help='filter by priority')
 @click.option('--data-analysis', help='filter on data_analysis')
-@click.option('-s', '--sample-id', help='filter by sample id')
+@click.option('--sample-id', help='filter by sample id')
 @click.option('-c', '--customer-id', help='filter by customer')
 @click.option('-C', '--exclude-customer-id', help='exclude customer')
+@click.option('-r', '--only-received', is_flag=True, help='only completely received cases')
 @click.option('-R', '--exclude-received', is_flag=True, help='exclude completely received cases')
+@click.option('-p', '--only-prepared', is_flag=True, help='only completely prepared cases')
 @click.option('-P', '--exclude-prepared', is_flag=True, help='exclude completely prepared cases')
+@click.option('-s', '--only-sequenced', is_flag=True, help='only completely sequenced cases')
 @click.option('-S', '--exclude-sequenced', is_flag=True, help='exclude completely sequenced cases')
+@click.option('-a', '--only-analysed', is_flag=True, help='only analysed cases')
 @click.option('-A', '--exclude-analysed', is_flag=True, help='exclude analysed cases')
+@click.option('-u', '--only-uploaded', is_flag=True, help='only uploaded cases')
 @click.option('-U', '--exclude-uploaded', is_flag=True, help='exclude uploaded cases')
+@click.option('-d', '--only-delivered', is_flag=True, help='only completely delivered cases')
 @click.option('-D', '--exclude-delivered', is_flag=True, help='exclude completely delivered cases')
+@click.option('-i', '--only-invoiced', is_flag=True, help='only completely invoiced cases')
 @click.option('-I', '--exclude-invoiced', is_flag=True, help='exclude completely invoiced cases')
-def cases(context, bool_output, verbose, show_time, days, internal_id, name, action, priority,
+def cases(context, output_type, verbose, days, internal_id, name, action, priority,
           customer_id, data_analysis, sample_id,
+          only_received,
+          only_prepared,
+          only_sequenced,
+          only_analysed,
+          only_uploaded,
+          only_delivered,
+          only_invoiced,
           exclude_customer_id,
           exclude_received,
           exclude_prepared,
@@ -90,7 +104,7 @@ def cases(context, bool_output, verbose, show_time, days, internal_id, name, act
           exclude_invoiced,
           ):
     """progress of each case"""
-    records = context.obj['db'].active_cases(
+    records = context.obj['db'].cases(
         days=days,
         internal_id=internal_id,
         name=name,
@@ -100,6 +114,13 @@ def cases(context, bool_output, verbose, show_time, days, internal_id, name, act
         exclude_customer_id=exclude_customer_id,
         data_analysis=data_analysis,
         sample_id=sample_id,
+        only_received=only_received,
+        only_prepared=only_prepared,
+        only_sequenced=only_sequenced,
+        only_analysed=only_analysed,
+        only_uploaded=only_uploaded,
+        only_delivered=only_delivered,
+        only_invoiced=only_invoiced,
         exclude_received=exclude_received,
         exclude_prepared=exclude_prepared,
         exclude_sequenced=exclude_sequenced,
@@ -116,16 +137,12 @@ def cases(context, bool_output, verbose, show_time, days, internal_id, name, act
             title = f"{title} ({case.get('name')})"
         if data_analysis:
             title = f"{title} {case.get('samples_data_analyses')}"
-        ordered = present_date(case, 'ordered_at', verbose, show_time)
-        received = f"{case.get('samples_received')}/{case.get('total_internal_samples')}"
-        prepared = f"{case.get('samples_prepared')}/{case.get('total_internal_samples')}"
-        sequenced = f"{case.get('samples_sequenced')}/{case.get('total_samples')}"
-        analysed = present_date(case, 'analysis_completed_at', verbose, show_time)
-        uploaded = present_date(case, 'analysis_uploaded_at', verbose, show_time)
-        delivered = f"{case.get('samples_delivered')}/{case.get('total_samples')}"
-        invoiced = f"{case.get('samples_invoiced')}/{case.get('total_samples')}"
 
-        if bool_output:
+        show_time = output_type == 'datetime'
+
+        ordered = present_date(case, 'ordered_at', verbose, show_time)
+
+        if output_type == 'bool':
             received = present_bool(case, 'samples_received_bool', verbose)
             prepared = present_bool(case, 'samples_prepared_bool', verbose)
             sequenced = present_bool(case, 'samples_sequenced_bool', verbose)
@@ -133,6 +150,26 @@ def cases(context, bool_output, verbose, show_time, days, internal_id, name, act
             uploaded = present_bool(case, 'analysis_uploaded_bool', verbose)
             delivered = present_bool(case, 'samples_delivered_bool', verbose)
             invoiced = present_bool(case, 'samples_invoiced_bool', verbose)
+
+        elif output_type == 'count':
+            received = f"{case.get('samples_received')}/{case.get('samples_to_receive')}"
+            prepared = f"{case.get('samples_prepared')}/{case.get('samples_to_prepare')}"
+            sequenced = f"{case.get('samples_sequenced')}/{case.get('samples_to_sequence')}"
+
+            analysed = present_date(case, 'analysis_completed_at', verbose, show_time)
+            uploaded = present_date(case, 'analysis_uploaded_at', verbose, show_time)
+
+            delivered = f"{case.get('samples_delivered')}/{case.get('samples_to_deliver')}"
+            invoiced = f"{case.get('samples_invoiced')}/{case.get('samples_to_invoice')}"
+
+        elif output_type in ('date', 'datetime'):
+            received = present_date(case, 'samples_received_at', verbose, show_time)
+            prepared = present_date(case, 'samples_prepared_at', verbose, show_time)
+            sequenced = present_date(case, 'samples_sequenced_at', verbose, show_time)
+            analysed = present_date(case, 'analysis_completed_at', verbose, show_time)
+            uploaded = present_date(case, 'analysis_uploaded_at', verbose, show_time)
+            delivered = present_date(case, 'samples_delivered_at', verbose, show_time)
+            invoiced = present_date(case, 'samples_invoiced_at', verbose, show_time)
 
         case_row = [title, ordered, received, prepared, sequenced, analysed, uploaded, delivered,
                     invoiced]

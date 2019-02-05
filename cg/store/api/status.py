@@ -100,24 +100,31 @@ class StatusHandler:
 
         return families[:limit]
 
-    def active_cases(self,
-                     internal_id=None,
-                     name=None,
-                     days=31,
-                     action=None,
-                     priority=None,
-                     customer_id=None,
-                     exclude_customer_id=None,
-                     data_analysis=None,
-                     sample_id = None,
-                     exclude_received=False,
-                     exclude_prepared=False,
-                     exclude_sequenced=False,
-                     exclude_analysed=False,
-                     exclude_uploaded=False,
-                     exclude_delivered=False,
-                     exclude_invoiced=False,
-                     ):
+    def cases(self,
+              internal_id=None,
+              name=None,
+              days=31,
+              action=None,
+              priority=None,
+              customer_id=None,
+              exclude_customer_id=None,
+              data_analysis=None,
+              sample_id=None,
+              only_received=False,
+              only_prepared=False,
+              only_sequenced=False,
+              only_analysed=False,
+              only_uploaded=False,
+              only_delivered=False,
+              only_invoiced=False,
+              exclude_received=False,
+              exclude_prepared=False,
+              exclude_sequenced=False,
+              exclude_analysed=False,
+              exclude_uploaded=False,
+              exclude_delivered=False,
+              exclude_invoiced=False,
+              ):
         """Fetch cases with and w/o analyses"""
         families_q = self.Family.query
 
@@ -174,19 +181,31 @@ class StatusHandler:
             samples_received = None
             samples_prepared = None
             samples_sequenced = None
+            samples_delivered = None
             samples_invoiced = None
+            samples_received_at = None
+            samples_prepared_at = None
+            samples_sequenced_at = None
+            samples_delivered_at = None
+            samples_invoiced_at = None
+            samples_to_receive = None
+            samples_to_prepare = None
+            samples_to_sequence = None
+            samples_to_deliver = None
+            samples_to_invoice = None
             samples_received_bool = None
             samples_prepared_bool = None
             samples_sequenced_bool = None
             samples_invoiced_bool = None
-            analysis_completed = None
-            analysis_uploaded = None
-            samples_delivered = None
+            analysis_completed_at = None
+            analysis_uploaded_at = None
             analysis_pipeline = None
             analysis_completed_bool = None
             analysis_uploaded_bool = None
             samples_delivered_bool = None
             samples_data_analyses = None
+
+            is_active_rerun = record.action == 'analyze'
 
             total_samples = len(record.links)
             total_external_samples = len([link.sample.is_external for link in record.links if
@@ -203,20 +222,49 @@ class StatusHandler:
                 samples_delivered = len([link.sample.delivered_at for link in record.links if
                                          link.sample.delivered_at is not None])
                 samples_invoiced = len([link.sample.invoice.invoiced_at for link in record.links if
-                                        link.sample.invoice is not None])
-                samples_received_bool = samples_received == total_internal_samples
-                samples_prepared_bool = samples_prepared == total_internal_samples
-                samples_delivered_bool = samples_delivered == total_samples
-                samples_sequenced_bool = samples_sequenced == total_samples
-                samples_invoiced_bool = samples_invoiced == total_samples
+                                        link.sample.invoice and link.sample.invoice.invoiced_at])
+
+                samples_to_receive = total_internal_samples
+                samples_to_prepare = total_internal_samples
+                samples_to_sequence = total_internal_samples
+                samples_to_deliver = total_samples
+                samples_to_invoice = total_samples - len([link.sample.no_invoice for link in
+                                                          record.links if link.sample.no_invoice])
+
+                samples_received_bool = samples_received == samples_to_receive
+                samples_prepared_bool = samples_prepared == samples_to_prepare
+                samples_sequenced_bool = samples_sequenced == samples_to_sequence
+                samples_delivered_bool = samples_delivered == samples_to_deliver
+                samples_invoiced_bool = samples_invoiced == samples_to_invoice
                 samples_data_analyses = set(link.sample.data_analysis for link in record.links)
 
-            if record.analyses:
-                analysis_completed = record.analyses[0].completed_at
-                analysis_uploaded = record.analyses[0].uploaded_at
+                if samples_to_receive > 0 and samples_received_bool:
+                    samples_received_at = max([link.sample.received_at for link in record.links if
+                                               link.sample.received_at is not None])
+
+                if samples_to_prepare > 0 and samples_prepared_bool:
+                    samples_prepared_at = max([link.sample.prepared_at for link in record.links if
+                                               link.sample.prepared_at is not None])
+
+                if samples_to_sequence > 0 and samples_sequenced_bool:
+                    samples_sequenced_at = max([link.sample.sequenced_at for link in record.links if
+                                                link.sample.sequenced_at is not None])
+
+                if samples_to_deliver > 0 and samples_delivered_bool:
+                    samples_delivered_at = max([link.sample.delivered_at for link in record.links if
+                                                link.sample.delivered_at is not None])
+
+                if samples_to_invoice > 0 and samples_invoiced_bool:
+                    samples_invoiced_at = max([link.sample.invoice.invoiced_at for link in
+                                               record.links if link.sample.invoice and
+                                               link.sample.invoice.invoiced_at])
+
+            if record.analyses and not is_active_rerun:
+                analysis_completed_at = record.analyses[0].completed_at
+                analysis_uploaded_at = record.analyses[0].uploaded_at
                 analysis_pipeline = record.analyses[0].pipeline
-                analysis_completed_bool = analysis_completed is not None
-                analysis_uploaded_bool = analysis_uploaded is not None
+                analysis_completed_bool = analysis_completed_at is not None
+                analysis_uploaded_bool = analysis_uploaded_at is not None
             elif total_samples > 0:
                 analysis_completed_bool = False
                 analysis_uploaded_bool = False
@@ -228,12 +276,22 @@ class StatusHandler:
                 'total_samples': total_samples,
                 'total_external_samples': total_external_samples,
                 'total_internal_samples': total_internal_samples,
+                'samples_to_receive': samples_to_receive,
+                'samples_to_prepare': samples_to_prepare,
+                'samples_to_sequence': samples_to_sequence,
+                'samples_to_deliver': samples_to_deliver,
+                'samples_to_invoice': samples_to_invoice,
                 'samples_data_analyses': samples_data_analyses,
                 'samples_received': samples_received,
                 'samples_prepared': samples_prepared,
                 'samples_sequenced': samples_sequenced,
-                'analysis_completed_at': analysis_completed,
-                'analysis_uploaded_at': analysis_uploaded,
+                'samples_received_at': samples_received_at,
+                'samples_prepared_at': samples_prepared_at,
+                'samples_sequenced_at': samples_sequenced_at,
+                'samples_delivered_at': samples_delivered_at,
+                'samples_invoiced_at': samples_invoiced_at,
+                'analysis_completed_at': analysis_completed_at,
+                'analysis_uploaded_at': analysis_uploaded_at,
                 'samples_delivered': samples_delivered,
                 'samples_invoiced': samples_invoiced,
                 'analysis_pipeline': analysis_pipeline,
@@ -245,6 +303,27 @@ class StatusHandler:
                 'samples_delivered_bool': samples_delivered_bool,
                 'samples_invoiced_bool': samples_invoiced_bool,
             }
+
+            if only_received and not samples_received_bool:
+                continue
+
+            if only_prepared and not samples_prepared_bool:
+                continue
+
+            if only_sequenced and not samples_sequenced_bool:
+                continue
+
+            if only_analysed and not analysis_completed_bool:
+                continue
+
+            if only_uploaded and not analysis_uploaded_bool:
+                continue
+
+            if only_delivered and not samples_delivered_bool:
+                continue
+
+            if only_invoiced and not samples_invoiced_bool:
+                continue
 
             if exclude_received and samples_received_bool:
                 continue

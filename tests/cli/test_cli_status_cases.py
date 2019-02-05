@@ -15,7 +15,7 @@ def test_lists_sample_in_unreceived_samples(invoke_cli, disk_store: Store):
 
     # WHEN listing cases
     result = invoke_cli(
-        ['--database', disk_store.uri, 'status', 'cases'])
+        ['--database', disk_store.uri, 'status', 'cases', '-o', 'count'])
 
     # THEN the family should be listed
     assert result.exit_code == 0
@@ -36,7 +36,7 @@ def test_lists_samples_in_unreceived_samples(invoke_cli, disk_store: Store):
 
     # WHEN listing cases
     result = invoke_cli(
-        ['--database', disk_store.uri, 'status', 'cases'])
+        ['--database', disk_store.uri, 'status', 'cases', '-o', 'count'])
 
     # THEN the family should be listed
     assert result.exit_code == 0
