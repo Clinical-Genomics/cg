@@ -170,7 +170,8 @@ class StatusHandler:
             families_q = families_q.outerjoin(models.Family.links, models.FamilySample.sample)
 
         # other joins
-        families_q = families_q.outerjoin(models.Family.analyses, models.Sample.invoice)
+        families_q = families_q.outerjoin(models.Family.analyses, models.Sample.invoice,
+                                          models.Sample.flowcells)
 
         families_q = families_q.order_by(models.Family.ordered_at.desc())
 
@@ -204,12 +205,16 @@ class StatusHandler:
             analysis_uploaded_bool = None
             samples_delivered_bool = None
             samples_data_analyses = None
+            flowcells_status = None
+            flowcells_on_disk = None
+            flowcells_on_disk_bool = None
 
-            is_active_rerun = record.action == 'analyze'
+            analysis_in_progress = record.action is not None
+            analysis_action = record.action
 
             total_samples = len(record.links)
             total_external_samples = len([link.sample.is_external for link in record.links if
-                                    link.sample.is_external])
+                                          link.sample.is_external])
             total_internal_samples = total_samples - total_external_samples
 
             if total_samples > 0:
@@ -259,7 +264,26 @@ class StatusHandler:
                                                record.links if link.sample.invoice and
                                                link.sample.invoice.invoiced_at])
 
-            if record.analyses and not is_active_rerun:
+                flowcells = len([flowcell.status
+                                         for link in record.links
+                                         for flowcell in link.sample.flowcells])
+
+                flowcells_status = list(set(flowcell.status
+                                                      for link in record.links
+                                                      for flowcell in link.sample.flowcells))
+                if flowcells < total_samples:
+                    flowcells_status.append('new')
+
+                flowcells_status = ', '.join(flowcells_status)
+
+                flowcells_on_disk = len([flowcell.status
+                                         for link in record.links
+                                         for flowcell in link.sample.flowcells
+                                         if flowcell.status == 'ondisk'])
+
+                flowcells_on_disk_bool = flowcells_on_disk == total_samples
+
+            if record.analyses and not analysis_in_progress:
                 analysis_completed_at = record.analyses[0].completed_at
                 analysis_uploaded_at = record.analyses[0].uploaded_at
                 analysis_pipeline = record.analyses[0].pipeline
@@ -290,6 +314,7 @@ class StatusHandler:
                 'samples_sequenced_at': samples_sequenced_at,
                 'samples_delivered_at': samples_delivered_at,
                 'samples_invoiced_at': samples_invoiced_at,
+                'analysis_action': analysis_action,
                 'analysis_completed_at': analysis_completed_at,
                 'analysis_uploaded_at': analysis_uploaded_at,
                 'samples_delivered': samples_delivered,
@@ -302,6 +327,9 @@ class StatusHandler:
                 'analysis_uploaded_bool': analysis_uploaded_bool,
                 'samples_delivered_bool': samples_delivered_bool,
                 'samples_invoiced_bool': samples_invoiced_bool,
+                'flowcells_status': flowcells_status,
+                'flowcells_on_disk': flowcells_on_disk,
+                'flowcells_on_disk_bool': flowcells_on_disk_bool,
             }
 
             if only_received and not samples_received_bool:

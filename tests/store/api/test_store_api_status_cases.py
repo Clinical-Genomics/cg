@@ -1,12 +1,68 @@
 """This script tests the cli methods to add families to status-db"""
 from datetime import datetime, timedelta
 
-from cg.store import Store
 from cg.constants import FAMILY_ACTIONS, PRIORITY_OPTIONS
+from cg.store import Store
 
-# todo: include för alla exclude
-# todo: reruns analyser != tidigare analysen
-# todo: test that dates are the oldest date from the samples
+
+def test_samples_flowcell(base_store: Store):
+    """Test to that cases displays the flowcell status """
+
+    # GIVEN a database with a family with a sample that belongs to a flowcell with status ondisk
+    # and a sample not yet on a flowcell
+    family = add_family(base_store)
+    sample_on_flowcell = add_sample(base_store)
+    flowcell = add_flowcell(base_store, sample=sample_on_flowcell, status='ondisk')
+    base_store.relate_sample(family, sample_on_flowcell, 'unknown')
+    sample_not_on_flowcell = add_sample(base_store)
+    base_store.relate_sample(family, sample_not_on_flowcell, 'unknown')
+
+    # WHEN getting active cases
+    cases = base_store.cases()
+
+    # THEN cases should contain info on flowcell status and be false
+    assert cases
+    for case in cases:
+        assert flowcell.status in case.get('flowcells_status')
+        assert not case.get('flowcells_on_disk_bool')
+        assert case.get('flowcells_on_disk') == 1
+
+
+def test_sample_flowcell(base_store: Store):
+    """Test to that cases displays the flowcell status """
+
+    # GIVEN a database with a family with a sample that belongs to a flowcell with status ondisk
+    family = add_family(base_store)
+    sample = add_sample(base_store)
+    base_store.relate_sample(family, sample, 'unknown')
+    flowcell = add_flowcell(base_store, sample=sample, status='ondisk')
+    assert flowcell.status
+
+    # WHEN getting active cases
+    cases = base_store.cases()
+
+    # THEN cases should contain info on flowcell status and be true
+    assert cases
+    for case in cases:
+        assert case.get('flowcells_on_disk') == 1
+        assert case.get('flowcells_status') == flowcell.status
+        assert case.get('flowcells_on_disk_bool')
+
+
+def test_analysis_action(base_store: Store):
+    """Test to that cases displays no analysis dates for active reruns """
+
+    # GIVEN a database with an analysis that was completed but has an active rerun in progress
+    analysis = add_analysis(base_store, completed=True, uploaded=True)
+    analysis.family.action = 'analyze'
+
+    # WHEN getting active cases
+    cases = base_store.cases()
+
+    # THEN cases should contain info on analysis (family) action
+    assert cases
+    for case in cases:
+        assert case.get('analysis_action') == analysis.family.action
 
 
 def test_analysis_dates_for_rerun(base_store: Store):
@@ -24,6 +80,111 @@ def test_analysis_dates_for_rerun(base_store: Store):
     for case in cases:
         assert case.get('analysis_completed_at') is None
         assert case.get('analysis_uploaded_at') is None
+
+
+def test_received_at_is_newest_invoice_date(base_store: Store):
+    """Test to that cases displays newest received date"""
+
+    # GIVEN a database with a family and two samples with different received dates
+    family = add_family(base_store)
+    yesterday = datetime.now() - timedelta(days=1)
+    yesteryear = datetime.now() - timedelta(days=365)
+    newest_sample = add_sample(base_store, received=True, date=yesterday)
+    oldest_sample = add_sample(base_store, received=True, date=yesteryear)
+    base_store.relate_sample(family, newest_sample, 'unknown')
+    base_store.relate_sample(family, oldest_sample, 'unknown')
+
+    # WHEN getting active cases
+    cases = base_store.cases()
+
+    # THEN cases should contain the date the samples were most recently received
+    assert cases
+    for case in cases:
+        assert case.get('samples_received_at').date() == newest_sample.received_at.date()
+
+
+def test_prepared_at_is_newest_invoice_date(base_store: Store):
+    """Test to that cases displays newest prepared date"""
+
+    # GIVEN a database with a family and two samples with different prepared dates
+    family = add_family(base_store)
+    yesterday = datetime.now() - timedelta(days=1)
+    yesteryear = datetime.now() - timedelta(days=365)
+    newest_sample = add_sample(base_store, prepared=True, date=yesterday)
+    oldest_sample = add_sample(base_store, prepared=True, date=yesteryear)
+    base_store.relate_sample(family, newest_sample, 'unknown')
+    base_store.relate_sample(family, oldest_sample, 'unknown')
+
+    # WHEN getting active cases
+    cases = base_store.cases()
+
+    # THEN cases should contain the date the samples were most recently prepared
+    assert cases
+    for case in cases:
+        assert case.get('samples_prepared_at').date() == newest_sample.prepared_at.date()
+
+
+def test_sequenced_at_is_newest_invoice_date(base_store: Store):
+    """Test to that cases displays newest sequenced date"""
+
+    # GIVEN a database with a family and two samples with different sequenced dates
+    family = add_family(base_store)
+    yesterday = datetime.now() - timedelta(days=1)
+    yesteryear = datetime.now() - timedelta(days=365)
+    newest_sample = add_sample(base_store, sequenced=True, date=yesterday)
+    oldest_sample = add_sample(base_store, sequenced=True, date=yesteryear)
+    base_store.relate_sample(family, newest_sample, 'unknown')
+    base_store.relate_sample(family, oldest_sample, 'unknown')
+
+    # WHEN getting active cases
+    cases = base_store.cases()
+
+    # THEN cases should contain the date the samples were most recently sequenced
+    assert cases
+    for case in cases:
+        assert case.get('samples_sequenced_at').date() == newest_sample.sequenced_at.date()
+
+
+def test_delivered_at_is_newest_invoice_date(base_store: Store):
+    """Test to that cases displays newest delivered date"""
+
+    # GIVEN a database with a family and two samples with different delivered dates
+    family = add_family(base_store)
+    yesterday = datetime.now() - timedelta(days=1)
+    yesteryear = datetime.now() - timedelta(days=365)
+    newest_sample = add_sample(base_store, delivered=True, date=yesterday)
+    oldest_sample = add_sample(base_store, delivered=True, date=yesteryear)
+    base_store.relate_sample(family, newest_sample, 'unknown')
+    base_store.relate_sample(family, oldest_sample, 'unknown')
+
+    # WHEN getting active cases
+    cases = base_store.cases()
+
+    # THEN cases should contain the date the samples were most recently delivered
+    assert cases
+    for case in cases:
+        assert case.get('samples_delivered_at').date() == newest_sample.delivered_at.date()
+
+
+def test_invoiced_at_is_newest_invoice_date(base_store: Store):
+    """Test to that cases displays newest invoiced date"""
+
+    # GIVEN a database with a family and two samples with different invoiced dates
+    family = add_family(base_store)
+    yesterday = datetime.now() - timedelta(days=1)
+    yesteryear = datetime.now() - timedelta(days=365)
+    newest_sample = add_sample(base_store, invoiced=True, date=yesterday)
+    oldest_sample = add_sample(base_store, invoiced=True, date=yesteryear)
+    base_store.relate_sample(family, newest_sample, 'unknown')
+    base_store.relate_sample(family, oldest_sample, 'unknown')
+
+    # WHEN getting active cases
+    cases = base_store.cases()
+
+    # THEN cases should contain the date the samples were most recently invoiced
+    assert cases
+    for case in cases:
+        assert case.get('samples_invoiced_at').date() == newest_sample.invoice.invoiced_at.date()
 
 
 def test_invoiced_at(base_store: Store):
@@ -661,6 +822,7 @@ def test_only_uploaded_cases(base_store: Store):
     for case in cases:
         assert neg_family.internal_id not in case.get('internal_id')
 
+
 def test_only_invoiced_cases(base_store: Store):
     """Test to that invoiced cases can be included"""
 
@@ -1225,7 +1387,7 @@ def ensure_customer(disk_store, customer_id='cust_test'):
 
 def add_sample(store, sample_name='sample_test', received=False, prepared=False,
                sequenced=False, delivered=False, invoiced=False, data_analysis=None,
-               is_external=False, no_invoice=False):
+               is_external=False, no_invoice=False, date=datetime.now()):
     """utility function to add a sample to use in tests"""
     customer = ensure_customer(store)
     application_version_id = ensure_application_version(store).id
@@ -1233,17 +1395,17 @@ def add_sample(store, sample_name='sample_test', received=False, prepared=False,
     sample.application_version_id = application_version_id
     sample.customer = customer
     if received:
-        sample.received_at = datetime.now()
+        sample.received_at = date
     if prepared:
-        sample.prepared_at = datetime.now()
+        sample.prepared_at = date
     if sequenced:
-        sample.sequenced_at = datetime.now()
+        sample.sequenced_at = date
     if delivered:
-        sample.delivered_at = datetime.now()
+        sample.delivered_at = date
     if invoiced:
         invoice = store.add_invoice(customer)
         sample.invoice = invoice
-        sample.invoice.invoiced_at = datetime.now()
+        sample.invoice.invoiced_at = date
     if data_analysis:
         sample.data_analysis = data_analysis
     if is_external:
@@ -1296,3 +1458,16 @@ def add_analysis(store, completed=False, uploaded=False, pipeline=None):
     family.analyses.append(analysis)
     store.add_commit(analysis)
     return analysis
+
+
+def add_flowcell(store, name='flowcell_test', sample=None, status=None):
+    """utility function to get a flowcell to use in tests"""
+    flowcell = store.add_flowcell(name=name, sequencer='dummy_sequencer',
+                                  sequencer_type='hiseqx',
+                                  date=datetime.now())
+    if status:
+        flowcell.status = status
+    if sample:
+        flowcell.samples = [sample]
+    store.add_commit(flowcell)
+    return flowcell

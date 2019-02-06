@@ -7,8 +7,24 @@ from cg.store import Store
 from cg.constants import FAMILY_ACTIONS, PRIORITY_OPTIONS
 
 
-CASE_HEADERS = ['Case', 'Ordered', 'Rec', 'Pre', 'Seq', 'Analysed', 'Uploaded', 'Delivered',
-                'Invoiced']
+CASE_HEADERS_LONG = ['Case', 'Ordered', 'Received', 'Prepared', 'Sequenced', 'Flowcells',
+                     'Analysed', 'Uploaded', 'Delivered', 'Invoiced']
+ALWAYS_LONG_HEADERS = [CASE_HEADERS_LONG[0], CASE_HEADERS_LONG[1],
+                       CASE_HEADERS_LONG[6], CASE_HEADERS_LONG[7]]
+CASE_HEADERS_MEDIUM = []
+CASE_HEADERS_SHORT = []
+
+for header in CASE_HEADERS_LONG:
+
+    if header not in ALWAYS_LONG_HEADERS:
+        header = header[:3]
+
+    CASE_HEADERS_MEDIUM.append(header)
+
+    if header not in ALWAYS_LONG_HEADERS:
+        header = header[0]
+
+    CASE_HEADERS_SHORT.append(header)
 
 
 @click.group()
@@ -48,6 +64,18 @@ def present_date(case, param, show_negative, show_time):
 
     if not show_time and value and value.date:
         value = value.date()
+
+    if show_negative:
+        return str(value)
+
+    return ('' if not value else
+            value if value else
+            str(value))
+
+
+def present_string(case, param, show_negative):
+    """presents string value in a human friendly format"""
+    value = case.get(param)
 
     if show_negative:
         return str(value)
@@ -143,39 +171,55 @@ def cases(context, output_type, verbose, days, internal_id, name, action, priori
         ordered = present_date(case, 'ordered_at', verbose, show_time)
 
         if output_type == 'bool':
+            case_header = CASE_HEADERS_SHORT
             received = present_bool(case, 'samples_received_bool', verbose)
             prepared = present_bool(case, 'samples_prepared_bool', verbose)
             sequenced = present_bool(case, 'samples_sequenced_bool', verbose)
-            analysed = present_bool(case, 'analysis_completed_bool', verbose)
+            flowcell = present_bool(case, 'flowcells_on_disk_bool', verbose)
+            analysed_bool = present_bool(case, 'analysis_completed_bool', verbose)
+            analysis_action = present_string(case, 'analysis_action', verbose)
+            analysed = f"{analysed_bool}{analysis_action}"
             uploaded = present_bool(case, 'analysis_uploaded_bool', verbose)
             delivered = present_bool(case, 'samples_delivered_bool', verbose)
             invoiced = present_bool(case, 'samples_invoiced_bool', verbose)
 
         elif output_type == 'count':
+            case_header = CASE_HEADERS_MEDIUM
             received = f"{case.get('samples_received')}/{case.get('samples_to_receive')}"
             prepared = f"{case.get('samples_prepared')}/{case.get('samples_to_prepare')}"
             sequenced = f"{case.get('samples_sequenced')}/{case.get('samples_to_sequence')}"
-
-            analysed = present_date(case, 'analysis_completed_at', verbose, show_time)
+            flowcell = f"{case.get('flowcells_on_disk')}/{case.get('total_samples')}"
+            analysed_date = present_date(case, 'analysis_completed_at', verbose, show_time)
+            analysis_action = present_string(case, 'analysis_action', verbose)
+            analysed = f"{analysed_date}{analysis_action}"
             uploaded = present_date(case, 'analysis_uploaded_at', verbose, show_time)
-
             delivered = f"{case.get('samples_delivered')}/{case.get('samples_to_deliver')}"
             invoiced = f"{case.get('samples_invoiced')}/{case.get('samples_to_invoice')}"
 
         elif output_type in ('date', 'datetime'):
+            case_header = CASE_HEADERS_LONG
             received = present_date(case, 'samples_received_at', verbose, show_time)
             prepared = present_date(case, 'samples_prepared_at', verbose, show_time)
             sequenced = present_date(case, 'samples_sequenced_at', verbose, show_time)
-            analysed = present_date(case, 'analysis_completed_at', verbose, show_time)
+            flowcell = present_string(case, 'flowcells_status', verbose)
+            analysed_date = present_date(case, 'analysis_completed_at', verbose, show_time)
+            analysis_action = present_string(case, 'analysis_action', verbose)
+            analysed = f"{analysed_date}{analysis_action}"
             uploaded = present_date(case, 'analysis_uploaded_at', verbose, show_time)
             delivered = present_date(case, 'samples_delivered_at', verbose, show_time)
             invoiced = present_date(case, 'samples_invoiced_at', verbose, show_time)
 
-        case_row = [title, ordered, received, prepared, sequenced, analysed, uploaded, delivered,
-                    invoiced]
+        case_row = [title, ordered, received, prepared, sequenced, flowcell, analysed, uploaded,
+                    delivered, invoiced]
         case_rows.append(case_row)
 
-    click.echo(tabulate(case_rows, headers=CASE_HEADERS, tablefmt='psql'))
+    click.echo(tabulate(case_rows, headers=case_header, tablefmt='psql'))
+
+    header_description = ''
+    for i, _ in enumerate(case_header):
+        if case_header[i] != CASE_HEADERS_LONG[i]:
+            header_description = f"{header_description} {case_header[i]}={CASE_HEADERS_LONG[i]}"
+    click.echo(header_description)
 
 
 @status.command()
