@@ -28,6 +28,7 @@ def test_invalid_application(invoke_cli, disk_store: Store):
                          '-a', application_tag])
 
     # THEN then it should complain about missing application instead of setting the value
+    print(result.output)
     assert result.exit_code == 1
     assert disk_store.MicrobialSample.query.first().application_version.application.tag != \
         application_tag
@@ -46,6 +47,7 @@ def test_application(invoke_cli, disk_store: Store):
                          signature, '-a', application_tag])
 
     # THEN then the application should have been set
+    print(result.output)
     assert result.exit_code == 0
     assert disk_store.MicrobialSample.query.first().application_version.application.tag == \
         application_tag
