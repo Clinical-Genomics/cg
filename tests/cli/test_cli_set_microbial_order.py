@@ -61,7 +61,7 @@ def ensure_application_version(store, application_tag='dummy_tag'):
     application = store.application(tag=application_tag)
     if not application:
         application = store.add_application(tag=application_tag, category='wgs',
-                                                 description='dummy_description')
+                                            description='dummy_description')
         store.add_commit(application)
 
     prices = {'standard': 10, 'priority': 20, 'express': 30, 'research': 5}
@@ -89,7 +89,8 @@ def ensure_customer(store, customer_id='cust_test'):
 
 
 def add_organism(store):
-    organism = store.add_organism(internal_id='organism_id', name= 'organism_name')
+    """utility function to add an organism to use in tests"""
+    organism = store.add_organism(internal_id='organism_id', name='organism_name')
     return organism
 
 
