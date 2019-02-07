@@ -22,7 +22,7 @@ def test_invalid_application(invoke_cli, disk_store: Store):
     sample.order = order
     application_tag = 'dummy_application'
     assert disk_store.MicrobialSample.query.first().application_version.application.tag != \
-           application_tag
+        application_tag
 
     # WHEN calling set sample with an invalid application
     result = invoke_cli(['--database', disk_store.uri, 'set', 'microbial_order', order.internal_id,
@@ -32,7 +32,7 @@ def test_invalid_application(invoke_cli, disk_store: Store):
     # THEN then it should complain about missing application instead of setting the value
     assert result.exit_code == 1
     assert disk_store.MicrobialSample.query.first().application_version.application.tag != \
-           application_tag
+        application_tag
 
 
 def test_application(invoke_cli, disk_store: Store):
@@ -42,7 +42,7 @@ def test_application(invoke_cli, disk_store: Store):
     sample.order = order
     application_tag = ensure_application_version(disk_store, 'another_application').application.tag
     assert disk_store.MicrobialSample.query.first().application_version.application.tag != \
-           application_tag
+        application_tag
 
     # WHEN calling set sample with an invalid application
     signature = 'sign'
@@ -52,7 +52,7 @@ def test_application(invoke_cli, disk_store: Store):
     # THEN then the application should have been set
     assert result.exit_code == 0
     assert disk_store.MicrobialSample.query.first().application_version.application.tag == \
-           application_tag
+        application_tag
     assert signature in disk_store.MicrobialSample.query.first().comment
 
 
@@ -67,9 +67,7 @@ def ensure_application_version(disk_store, application_tag='dummy_tag'):
     prices = {'standard': 10, 'priority': 20, 'express': 30, 'research': 5}
     version = disk_store.application_version(application, 1)
     if not version:
-        version = disk_store.add_version(application, 1, valid_from=datetime.now(),
-                                         prices=prices)
-
+        version = disk_store.add_version(application, 1, valid_from=datetime.now(), prices=prices)
         disk_store.add_commit(version)
     return version
 
