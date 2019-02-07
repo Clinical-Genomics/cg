@@ -107,9 +107,10 @@ def add_microbial_sample(store, sample_id='sample_test'):
 def add_microbial_order(store, order_id='order_test', customer_id='cust_test'):
     """utility function to set a family to use in tests"""
     customer = ensure_customer(store, customer_id)
-    order = store.add_microbial_order(name=order_id, customer=customer, ordered=datetime.now())
-    order.customer = customer
-    sample = add_microbial_sample(store)
-    order.microbial_samples.append(sample)
+    with store.session.no_autoflush:
+        order = store.add_microbial_order(name=order_id, customer=customer, ordered=datetime.now())
+        order.customer = customer
+        sample = add_microbial_sample(store)
+        order.microbial_samples.append(sample)
     store.add_commit(order)
     return order
