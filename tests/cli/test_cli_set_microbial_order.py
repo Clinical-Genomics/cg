@@ -18,8 +18,6 @@ def test_invalid_order(invoke_cli, disk_store: Store):
 def test_invalid_application(invoke_cli, disk_store: Store):
     # GIVEN a database with a sample
     order = add_microbial_order(disk_store)
-    sample = add_microbial_sample(disk_store, order)
-    sample.order = order
     application_tag = 'dummy_application'
     assert disk_store.MicrobialSample.query.first().application_version.application.tag != \
         application_tag
@@ -38,8 +36,6 @@ def test_invalid_application(invoke_cli, disk_store: Store):
 def test_application(invoke_cli, disk_store: Store):
     # GIVEN a database with a sample and two applications
     order = add_microbial_order(disk_store)
-    sample = add_microbial_sample(disk_store, order)
-    sample.order = order
     application_tag = ensure_application_version(disk_store, 'another_application').application.tag
     assert disk_store.MicrobialSample.query.first().application_version.application.tag != \
         application_tag
@@ -94,7 +90,7 @@ def add_organism(store):
     return organism
 
 
-def add_microbial_sample(store, microbial_order, sample_id='sample_test'):
+def add_microbial_sample(store, sample_id='sample_test'):
     """utility function to add a sample to use in tests"""
     customer = ensure_customer(store)
     application_version = ensure_application_version(store)
@@ -105,8 +101,6 @@ def add_microbial_sample(store, microbial_order, sample_id='sample_test'):
                                         reference_genome='test',
                                         application_version=application_version)
     sample.customer = customer
-    sample.order = microbial_order
-    store.add_commit(sample)
     return sample
 
 
@@ -115,5 +109,7 @@ def add_microbial_order(store, order_id='order_test', customer_id='cust_test'):
     customer = ensure_customer(store, customer_id)
     order = store.add_microbial_order(name=order_id, customer=customer, ordered=datetime.now())
     order.customer = customer
+    sample = add_microbial_sample(store)
+    order.microbial_samples.append(sample)
     store.add_commit(order)
     return order
