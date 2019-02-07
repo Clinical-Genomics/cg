@@ -67,7 +67,8 @@ def test_invalid_order(invoke_cli, disk_store: Store):
 #     assert comment not in (disk_store.Sample.query.first().comment or [])
 #
 #     # WHEN calling set sample with a valid comment
-#     result = invoke_cli(['--database', disk_store.uri, 'set', 'microbial_order', order_id, '-C', comment])
+#     result = invoke_cli(['--database', disk_store.uri, 'set',
+#     'microbial_order', order_id, '-C', comment])
 #
 #     # THEN then it should add the comment to the sample
 #     assert result.exit_code == 0
@@ -141,7 +142,8 @@ def test_invalid_order(invoke_cli, disk_store: Store):
 # def test_application(invoke_cli, disk_store: Store):
 #     # GIVEN a database with a sample and two applications
 #     order_id = add_sample(disk_store).internal_id
-#     application_tag = ensure_application_version(disk_store, 'another_application').application.tag
+#     application_tag = ensure_application_version(disk_store,
+#     'another_application').application.tag
 #     assert disk_store.Sample.query.first().application_version.application.tag != application_tag
 #
 #     # WHEN calling set sample with an invalid application
