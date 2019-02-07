@@ -4,8 +4,20 @@ from datetime import datetime
 from cg.store import Store
 
 
-def test_invalid_order(invoke_cli, disk_store: Store):
+def test_invalid_order_empty_db(invoke_cli, disk_store: Store):
     # GIVEN an empty database
+
+    # WHEN running set with an order that does not exist
+    order_id = 'dummy_order_id'
+    result = invoke_cli(['--database', disk_store.uri, 'set', 'microbial_order', order_id, 'sign'])
+
+    # THEN then it should complain on invalid order
+    assert result.exit_code == 1
+
+
+def test_invalid_order_non_empty_db(invoke_cli, disk_store: Store):
+    # GIVEN a non empty database
+    add_microbial_order(disk_store)
 
     # WHEN running set with an order that does not exist
     order_id = 'dummy_order_id'
