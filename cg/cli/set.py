@@ -175,16 +175,19 @@ def flowcell(context, flowcell_name, status):
 @click.pass_context
 def microbial_order(context, apptag, order_id, user_signature):
     """Update information on all samples on a microbial order"""
+    print(context, apptag, order_id, user_signature)
     microbial_order_obj = context.obj['status'].microbial_order(internal_id=order_id)
-
+    print(microbial_order_obj)
     if not microbial_order_obj:
         click.echo(click.style(f"order not found: {order_id}", fg='yellow'))
         context.abort()
-
+    print(microbial_order_obj.microbial_samples)
     for sample_obj in microbial_order_obj.microbial_samples:
 
         if apptag:
+            print(context.obj['status'].applications())
             apptags = [app.tag for app in context.obj['status'].applications()]
+            print(apptags)
             if apptag not in apptags:
                 click.echo(click.style(f"Application tag {apptag} does not exist.", fg='red'))
                 context.abort()
