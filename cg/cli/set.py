@@ -171,7 +171,7 @@ def flowcell(context, flowcell_name, status):
 @set_cmd.command()
 @click.option('-a', '--application-tag', 'apptag', help='sets application tag.')
 @click.argument('order_id')
-@click.argument('user_signature', help='your user signature')
+@click.argument('user_signature')
 @click.pass_context
 def microbial_order(context, apptag, order_id, user_signature):
     """Update information on all samples on a microbial order"""
