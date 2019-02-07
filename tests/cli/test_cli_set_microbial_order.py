@@ -1,5 +1,5 @@
 """Test methods for cg/cli/set/microbial_order"""
-import datetime
+from datetime import datetime
 
 from cg.store import Store
 
