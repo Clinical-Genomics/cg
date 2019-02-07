@@ -171,7 +171,7 @@ def flowcell(context, flowcell_name, status):
 @set_cmd.command()
 @click.option('-a', '--application-tag', 'apptag', help='sets application tag.')
 @click.argument('order_id')
-@click.argument('user_signature', help='your user signature' )
+@click.argument('user_signature', help='your user signature')
 @click.pass_context
 def microbial_order(context, apptag, order_id, user_signature):
     """Update information on all samples on a microbial order"""
@@ -197,12 +197,13 @@ def microbial_order(context, apptag, order_id, user_signature):
             application_version_id = application_version.id
 
             if sample_obj.application_version_id == application_version_id:
-                click.echo(click.style(f"Sample {sample_obj.internal_id} already has the application "
-                                       f"tag {str(application_version)}.", fg='yellow'))
+                click.echo(click.style(f"Sample {sample_obj.internal_id} already has the "
+                                       f"apptag {str(application_version)}", fg='yellow'))
                 continue
 
-            comment= f"Application tag changed from {sample_obj.self.application_version.application} to "
-                     f"{str(application_version)} by {user_signature}"
+            comment = f"Application tag changed from"\
+                f" {sample_obj.self.application_version.application} to "
+                f"{str(application_version)} by {user_signature}"
             sample_obj.application_version_id = application_version_id
             click.echo(click.style(f"Application tag for sample {sample_obj.internal_id} set to "
                                    f"{str(application_version)}.", fg='green'))
