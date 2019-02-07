@@ -166,3 +166,51 @@ def flowcell(context, flowcell_name, status):
 
     context.obj['status'].commit()
     print(click.style(f"{flowcell_name} set: {prev_status} -> {status}", fg='green'))
+
+
+@set_cmd.command()
+@click.option('-a', '--application-tag', 'apptag', help='sets application tag.')
+@click.argument('order_id')
+@click.argument('user_signature', help='your user signature' )
+@click.pass_context
+def microbial_order(context, apptag, order_id, user_signature):
+    """Update information on all samples on a microbial order"""
+    microbial_order_obj = context.obj['status'].microbial_order(internal_id=order_id)
+
+    if not microbial_order_obj:
+        click.echo(click.style(f"order not found: {order_id}", fg='yellow'))
+        context.abort()
+
+    for sample_obj in microbial_order_obj.microbial_samples:
+
+        if apptag:
+            apptags = [app.tag for app in context.obj['status'].applications()]
+            if apptag not in apptags:
+                click.echo(click.style(f"Application tag {apptag} does not exist.", fg='red'))
+                context.abort()
+
+            application_version = context.obj['status'].current_application_version(apptag)
+            if application_version is None:
+                click.echo(click.style(f"No valid current application version found!", fg='red'))
+                context.abort()
+
+            application_version_id = application_version.id
+
+            if sample_obj.application_version_id == application_version_id:
+                click.echo(click.style(f"Sample {sample_obj.internal_id} already has the application "
+                                       f"tag {str(application_version)}.", fg='yellow'))
+                continue
+
+            comment= f"Application tag changed from {sample_obj.self.application_version.application} to "
+                     f"{str(application_version)} by {user_signature}"
+            sample_obj.application_version_id = application_version_id
+            click.echo(click.style(f"Application tag for sample {sample_obj.internal_id} set to "
+                                   f"{str(application_version)}.", fg='green'))
+
+            timestamp = str(datetime.datetime.now())[:-10]
+            if sample_obj.comment is None:
+                sample_obj.comment = f"{timestamp}: {comment}"
+            else:
+                sample_obj.comment += '\n' + f"{timestamp}: {comment}"
+            click.echo(click.style(f"Comment added to sample {sample_obj.internal_id}", fg='green'))
+            context.obj['status'].commit()
