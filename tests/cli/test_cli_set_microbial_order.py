@@ -102,7 +102,7 @@ def add_microbial_sample(disk_store, order_id='sample_test', sex='female'):
 def add_microbial_order(disk_store, order_id='order_test', customer_id='cust_test'):
     """utility function to set a family to use in tests"""
     customer = ensure_customer(disk_store, customer_id)
-    order = disk_store.add_microbial_order(name=order_id)
+    order = disk_store.add_microbial_order(name=order_id, customer=customer, ordered=datetime.now())
     order.customer = customer
     disk_store.add_commit(order)
     return order
