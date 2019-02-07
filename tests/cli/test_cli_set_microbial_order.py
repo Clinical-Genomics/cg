@@ -27,6 +27,18 @@ def test_invalid_order_non_empty_db(invoke_cli, disk_store: Store):
     assert result.exit_code == 1
 
 
+def test_valid_order_no_options(invoke_cli, disk_store: Store):
+    # GIVEN a non empty database
+    order = add_microbial_order(disk_store)
+
+    # WHEN running set with an order that does not exist
+    order_id = order.internal_id
+    result = invoke_cli(['--database', disk_store.uri, 'set', 'microbial_order', order_id, 'sign'])
+
+    # THEN then it should just exit
+    assert result.exit_code == 0
+
+
 def test_invalid_application(invoke_cli, disk_store: Store):
     # GIVEN a database with a sample
     order = add_microbial_order(disk_store)
