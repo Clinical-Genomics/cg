@@ -169,48 +169,76 @@ def flowcell(context, flowcell_name, status):
 
 
 @set_cmd.command()
-@click.option('-a', '--application-tag', 'apptag', help='sets application tag.')
+@click.option('-a', '--application-tag', 'apptag', help='sets application tag.', type=str)
 @click.argument('order_id')
 @click.argument('user_signature')
 @click.pass_context
 def microbial_order(context, apptag, order_id, user_signature):
     """Update information on all samples on a microbial order"""
+
+    if not apptag:
+        click.echo(click.style(f"no option specified: {order_id}", fg='yellow'))
+        context.abort()
+
     microbial_order_obj = context.obj['status'].microbial_order(internal_id=order_id)
+
     if not microbial_order_obj:
         click.echo(click.style(f"order not found: {order_id}", fg='yellow'))
         context.abort()
 
     for sample_obj in microbial_order_obj.microbial_samples:
 
-        if apptag:
-            apptags = [app.tag for app in context.obj['status'].applications()]
-            if apptag not in apptags:
-                click.echo(click.style(f"Application tag {apptag} does not exist.", fg='red'))
-                context.abort()
+        context.invoke(microbial_sample, sample_id=sample_obj.internal_id,
+                       user_signature=user_signature, apptag=apptag)
 
-            application_version = context.obj['status'].current_application_version(apptag)
-            if application_version is None:
-                click.echo(click.style(f"No valid current application version found!", fg='red'))
-                context.abort()
 
-            application_version_id = application_version.id
+@set_cmd.command()
+@click.option('-a', '--application-tag', 'apptag', help='sets application tag.', type=str)
+@click.argument('sample_id')
+@click.argument('user_signature')
+@click.pass_context
+def microbial_sample(context, apptag, sample_id, user_signature):
+    """Update information on one samples"""
 
-            if sample_obj.application_version_id == application_version_id:
-                click.echo(click.style(f"Sample {sample_obj.internal_id} already has the "
-                                       f"apptag {str(application_version)}", fg='yellow'))
-                continue
+    if not apptag:
+        click.echo(click.style(f"no option specified: {sample_id}", fg='yellow'))
+        context.abort()
 
-            comment = f"Application tag changed from"\
-                f" {sample_obj.application_version.application} to "\
-                f"{str(application_version)} by {user_signature}"
-            sample_obj.application_version_id = application_version_id
-            click.echo(click.style(f"Application tag for sample {sample_obj.internal_id} set to "
-                                   f"{str(application_version)}.", fg='green'))
+    sample_obj = context.obj['status'].microbial_sample(internal_id=sample_id)
 
-            timestamp = str(datetime.datetime.now())[:-10]
-            if sample_obj.comment is None:
-                sample_obj.comment = f"{timestamp}: {comment}"
-            else:
-                sample_obj.comment += '\n' + f"{timestamp}: {comment}"
-            click.echo(click.style(f"Comment added to sample {sample_obj.internal_id}", fg='green'))
-            context.obj['status'].commit()
+    if not sample_obj:
+        click.echo(click.style(f"sample not found: {sample_id}", fg='yellow'))
+        context.abort()
+
+    if apptag:
+        apptags = [app.tag for app in context.obj['status'].applications()]
+        if apptag not in apptags:
+            click.echo(click.style(f"Application tag {apptag} does not exist.", fg='red'))
+            context.abort()
+
+        application_version = context.obj['status'].current_application_version(apptag)
+        if application_version is None:
+            click.echo(click.style(f"No valid current application version found!", fg='red'))
+            context.abort()
+
+        application_version_id = application_version.id
+
+        if sample_obj.application_version_id == application_version_id:
+            click.echo(click.style(f"Sample {sample_obj.internal_id} already has the "
+                                   f"apptag {str(application_version)}", fg='yellow'))
+            return
+
+        comment = f"Application tag changed from" \
+            f" {sample_obj.application_version.application} to " \
+            f"{str(application_version)} by {user_signature}"
+        sample_obj.application_version_id = application_version_id
+        click.echo(click.style(f"Application tag for sample {sample_obj.internal_id} set to "
+                               f"{str(application_version)}.", fg='green'))
+
+        timestamp = str(datetime.datetime.now())[:-10]
+        if sample_obj.comment is None:
+            sample_obj.comment = f"{timestamp}: {comment}"
+        else:
+            sample_obj.comment += '\n' + f"{timestamp}: {comment}"
+        click.echo(click.style(f"Comment added to sample {sample_obj.internal_id}", fg='green'))
+        context.obj['status'].commit()

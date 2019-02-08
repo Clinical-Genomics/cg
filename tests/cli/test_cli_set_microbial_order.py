@@ -9,7 +9,9 @@ def test_invalid_order_empty_db(invoke_cli, disk_store: Store):
 
     # WHEN running set with an order that does not exist
     order_id = 'dummy_order_id'
-    result = invoke_cli(['--database', disk_store.uri, 'set', 'microbial_order', order_id, 'sign'])
+    application_tag = 'dummy_application'
+    result = invoke_cli(['--database', disk_store.uri, 'set', 'microbial_order', order_id,
+                         'sign', '-a', application_tag])
 
     # THEN then it should complain on invalid order
     assert result.exit_code == 1
@@ -21,7 +23,9 @@ def test_invalid_order_non_empty_db(invoke_cli, disk_store: Store):
 
     # WHEN running set with an order that does not exist
     order_id = 'dummy_order_id'
-    result = invoke_cli(['--database', disk_store.uri, 'set', 'microbial_order', order_id, 'sign'])
+    application_tag = 'dummy_application'
+    result = invoke_cli(['--database', disk_store.uri, 'set', 'microbial_order', order_id,
+                         'sign', '-a', application_tag])
 
     # THEN then it should complain on invalid order
     assert result.exit_code == 1
@@ -36,46 +40,7 @@ def test_valid_order_no_options(invoke_cli, disk_store: Store):
     result = invoke_cli(['--database', disk_store.uri, 'set', 'microbial_order', order_id, 'sign'])
 
     # THEN then it should just exit
-    assert result.exit_code == 0
-
-
-def test_invalid_application(invoke_cli, disk_store: Store):
-    # GIVEN a database with a sample
-    order = add_microbial_order(disk_store)
-    application_tag = 'dummy_application'
-    assert disk_store.MicrobialSample.query.first().application_version.application.tag != \
-        application_tag
-
-    # WHEN calling set sample with an invalid application
-    result = invoke_cli(['--database', disk_store.uri, 'set', 'microbial_order', order.internal_id,
-                         'sign',
-                         '-a', application_tag])
-
-    # THEN then it should complain about missing application instead of setting the value
-    print(result.output)
     assert result.exit_code == 1
-    assert disk_store.MicrobialSample.query.first().application_version.application.tag != \
-        application_tag
-
-
-def test_application(invoke_cli, disk_store: Store):
-    # GIVEN a database with a sample and two applications
-    order = add_microbial_order(disk_store)
-    application_tag = ensure_application_version(disk_store, 'another_application').application.tag
-    assert disk_store.MicrobialSample.query.first().application_version.application.tag != \
-        application_tag
-
-    # WHEN calling set sample with an invalid application
-    signature = 'sign'
-    result = invoke_cli(['--database', disk_store.uri, 'set', 'microbial_order', order.internal_id,
-                         signature, '-a', application_tag])
-
-    # THEN then the application should have been set
-    print(result.output)
-    assert result.exit_code == 0
-    assert disk_store.MicrobialSample.query.first().application_version.application.tag == \
-        application_tag
-    assert signature in disk_store.MicrobialSample.query.first().comment
 
 
 def ensure_application_version(store, application_tag='dummy_tag'):
@@ -134,9 +99,10 @@ def add_microbial_order(store, order_id='order_test', customer_id='cust_test'):
     """utility function to set a family to use in tests"""
     customer = ensure_customer(store, customer_id)
     with store.session.no_autoflush:
-        order = store.add_microbial_order(name=order_id, customer=customer, ordered=datetime.now())
+        order = store.add_microbial_order(name=order_id, internal_id=order_id, customer=customer,
+                                          ordered=datetime.now())
         order.customer = customer
         sample = add_microbial_sample(store)
         order.microbial_samples.append(sample)
-    store.add_commit(order)
+    store.add_commit(sample)
     return order
