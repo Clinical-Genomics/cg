@@ -201,7 +201,7 @@ def microbial_order(context, apptag, order_id, user_signature):
                 continue
 
             comment = f"Application tag changed from"\
-                f" {sample_obj.self.application_version.application} to "\
+                f" {sample_obj.application_version.application} to "\
                 f"{str(application_version)} by {user_signature}"
             sample_obj.application_version_id = application_version_id
             click.echo(click.style(f"Application tag for sample {sample_obj.internal_id} set to "
