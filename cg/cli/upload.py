@@ -150,7 +150,7 @@ def delivery_report(context, customer_id, family_id, print_console):
         hk_api = context.obj['housekeeper_api']
         result = _add_delivery_report_to_hk(delivery_report_file, hk_api, family_id)
         if result:
-            _save_delivery_reported_on_analysis(status_api, family_id)
+            _update_delivery_report_date(status_api, family_id)
 
 
 def _add_delivery_report_to_hk(delivery_report_file, hk_api: hk.HousekeeperAPI, family_id):
