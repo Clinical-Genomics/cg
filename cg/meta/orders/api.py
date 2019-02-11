@@ -60,6 +60,9 @@ class OrdersAPI(LimsHandler, StatusHandler):
                     for sample in data.get('samples'):
                         message += '<br />' + sample.get('name')
 
+                        if sample.get('family_name'):
+                            message += f", family: {sample.get('family_name')}"
+
                         if sample.get('internal_id'):
 
                             existing_sample = self.status.sample(sample.get('internal_id'))
@@ -70,7 +73,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
                             message += f" (already existing sample{sample_customer})"
 
                         if sample.get('comment'):
-                            message += ' ' + sample.get('comment')
+                            message += ', ' + sample.get('comment')
 
                     message += f"<br />"
 
