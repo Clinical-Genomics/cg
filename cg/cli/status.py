@@ -13,13 +13,20 @@ def status(context):
 
 @status.command()
 @click.pass_context
-@click.option('-o', '--output', default='mip', type=click.Choice(['mip', 'delivery_report']),
+@click.option('-o', '--output', default='mip-analyse', type=click.Choice(['mip-analyse',
+                                                                  'upload',
+                                                                  'deliver',
+                                                                  'delivery-report']),
               help='analyses ready for...')
 def analysis(context, output):
     """Which families will be analyzed?"""
-    if output == 'mip':
+    if output == 'mip-analyse':
         records = context.obj['db'].families_to_mip_analyze()
-    else:
+    elif output == 'upload':
+        records = context.obj['db'].analyses_to_upload()
+    elif output == 'deliver':
+        records = context.obj['db'].analyses_to_deliver()
+    elif output == 'delivery-report':
         records = context.obj['db'].analyses_to_delivery_report()
 
     for family_obj in records:
