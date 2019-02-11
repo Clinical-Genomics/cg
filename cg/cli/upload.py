@@ -142,12 +142,15 @@ def delivery_report(context, customer_id, family_id, print_console):
         click.echo(delivery_report_html)
     else:
         tb_api = context.obj['tb_api']
+        status_api = context.obj['status']
         delivery_report_file = report_api.create_delivery_report_file(customer_id, family_id,
                                                                       file_path=
                                                                       tb_api.get_family_root_dir(
                                                                         family_id))
         hk_api = context.obj['housekeeper_api']
-        _add_delivery_report_to_hk(delivery_report_file, hk_api, family_id)
+        result = _add_delivery_report_to_hk(delivery_report_file, hk_api, family_id)
+        if result:
+            _save_delivery_reported_on_analysis(status_api, family_id)
 
 
 def _add_delivery_report_to_hk(delivery_report_file, hk_api: hk.HousekeeperAPI, family_id):
@@ -162,6 +165,15 @@ def _add_delivery_report_to_hk(delivery_report_file, hk_api: hk.HousekeeperAPI, 
         file_obj = hk_api.add_file(delivery_report_file.name, version_obj, delivery_report_tag_name)
         hk_api.include_file(file_obj, version_obj)
         hk_api.add_commit(file_obj)
+        return True
+
+    return False
+
+
+def _update_delivery_report_date(status_api, family_id):
+    family_obj = status_api.family(family_id)
+    analysis_obj = family_obj.analyses[0]
+    analysis_obj.delivery_report_created_at = dt.datetime.now()
 
 
 @upload.command()

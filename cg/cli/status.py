@@ -13,9 +13,15 @@ def status(context):
 
 @status.command()
 @click.pass_context
-def analysis(context):
+@click.option('-o', '--output', default='mip', type=click.Choice(['mip', 'delivery_report']),
+              help='analyses ready for...')
+def analysis(context, output):
     """Which families will be analyzed?"""
-    records = context.obj['db'].families_to_mip_analyze()
+    if output == 'mip':
+        records = context.obj['db'].families_to_mip_analyze()
+    else:
+        records = context.obj['db'].analyses_to_delivery_report()
+
     for family_obj in records:
         click.echo(family_obj)
 

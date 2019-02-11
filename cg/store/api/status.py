@@ -105,6 +105,26 @@ class StatusHandler:
         )
         return records
 
+    def analyses_to_delivery_report(self):
+        """Fetch analyses that needs the delivery report to be regenerated."""
+        records = (
+            self.Analysis.query
+            .filter(
+                or_(
+                    and_(
+                        models.Analysis.delivery_report_created_at.is_(None),
+                        models.Analysis.delivered_at.isnot(None),
+                    ),
+                    and_(
+                        models.Analysis.delivery_report_created_at.isnot(None),
+                        models.Analysis.delivered_at.isnot(None),
+                        models.Analysis.delivery_report_created_at < models.Analysis.delivered_at
+                    )
+                )
+            )
+        )
+        return records
+
     def samples_to_deliver(self):
         """Fetch samples that have been sequenced but not delivered."""
         records = (
