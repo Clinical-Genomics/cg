@@ -50,7 +50,7 @@ def _register_blueprints(app: Flask):
     oauth_bp = make_google_blueprint(
         client_id=app.config['GOOGLE_OAUTH_CLIENT_ID'],
         client_secret=app.config['GOOGLE_OAUTH_CLIENT_SECRET'],
-        scope=['https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/plus.me'],
+        scope=['https://www.googleapis.com/auth/userinfo.email'],
     )
 
     @oauth_authorized.connect_via(oauth_bp)
