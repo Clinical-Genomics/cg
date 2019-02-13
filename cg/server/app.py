@@ -27,7 +27,7 @@ def _load_config(app):
 def _configure_extensions(app: Flask):
 
     _initialize_logging(app)
-    certs_resp = requests.get('https://www.googleapis.com/oauth2/v2/certs')
+    certs_resp = requests.get('https://www.googleapis.com/oauth2/v1/certs')
     app.config['GOOGLE_OAUTH_CERTS'] = certs_resp.json()
 
     ext.cors.init_app(app)
@@ -56,7 +56,7 @@ def _register_blueprints(app: Flask):
     @oauth_authorized.connect_via(oauth_bp)
     def logged_in(blueprint, token):
         """Called when the user logs in via Google OAuth."""
-        resp = google.get('/oauth2/v2/userinfo?alt=json')
+        resp = google.get('/oauth2/v1/userinfo?alt=json')
         assert resp.ok, resp.text
         user_data = resp.json()
         session['user_email'] = user_data['email']
