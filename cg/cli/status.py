@@ -164,7 +164,8 @@ def cases(context, output_type, verbose, days, internal_id, name, action, priori
 
         tat_number = case.get('tat')
 
-        if case.get('samples_delivered_bool') and tat_number <= 21:
+        if case.get('samples_received_bool') and case.get('samples_delivered_bool') and \
+                tat_number <= 21:
             tat_color = 'green'
         elif tat_number == 21:
             tat_color = 'yellow'
