@@ -19,10 +19,10 @@ def test_delivered_at_affects_ett(base_store: Store):
     # WHEN getting active cases
     cases = base_store.cases()
 
-    # THEN ett should be R-P + P-S + S-A + A-U + U-D = 0 + 0 + 4 + 4 + 4 = 12
+    # THEN TAT should be R-D = 0 = 0
     assert cases
     for case in cases:
-        assert case.get('ett') == 12
+        assert case.get('tat') == 0
 
 
 def test_sequenced_at_affects_ett(base_store: Store):
@@ -39,10 +39,10 @@ def test_sequenced_at_affects_ett(base_store: Store):
     # WHEN getting active cases
     cases = base_store.cases()
 
-    # THEN ett should be R-P + P-S + S-A + A-U + U-D = 0 + 0 + 4 + 4 + 4 = 12
+    # THEN TAT should be R-P + P-S + S-A + A-U + U-D = 0 + 0 + 4 + 1 + 2 = 7
     assert cases
     for case in cases:
-        assert case.get('ett') == 12
+        assert case.get('tat') == 7
 
 
 def test_prepared_at_affects_ett(base_store: Store):
@@ -57,10 +57,10 @@ def test_prepared_at_affects_ett(base_store: Store):
     # WHEN getting active cases
     cases = base_store.cases()
 
-    # THEN ett should be R-P + P-S + S-A + A-U + U-D = 0 + 4 + 4 + 4 + 4 = 16
+    # THEN TAT should be R-P + P-S + S-A + A-U + U-D = 0 + 5 + 4 + 1 + 2 = 12
     assert cases
     for case in cases:
-        assert case.get('ett') == 16
+        assert case.get('tat') == 12
 
 
 def test_received_at_affects_ett(base_store: Store):
@@ -75,10 +75,10 @@ def test_received_at_affects_ett(base_store: Store):
     # WHEN getting active cases
     cases = base_store.cases()
 
-    # THEN ett should be R-P + P-S + S-A + A-U + U-D = 4 + 4 + 4 + 4 + 4 = 20
+    # THEN TAT should be R-P + P-S + S-A + A-U + U-D = 4 + 5 + 4 + 1 + 2 = 16
     assert cases
     for case in cases:
-        assert case.get('ett') == 20
+        assert case.get('tat') == 16
 
 
 def test_samples_flowcell(base_store: Store):

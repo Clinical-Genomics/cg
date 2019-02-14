@@ -206,7 +206,7 @@ class StatusHandler:
             flowcells_status = None
             flowcells_on_disk = None
             flowcells_on_disk_bool = None
-            ett = None
+            tat = None
 
             analysis_in_progress = record.action is not None
             analysis_action = record.action
@@ -292,7 +292,49 @@ class StatusHandler:
                 analysis_completed_bool = False
                 analysis_uploaded_bool = False
 
-            ett = self._calculate_estimated_turnaround_time(
+            if only_received and not samples_received_bool:
+                continue
+
+            if only_prepared and not samples_prepared_bool:
+                continue
+
+            if only_sequenced and not samples_sequenced_bool:
+                continue
+
+            if only_analysed and not analysis_completed_bool:
+                continue
+
+            if only_uploaded and not analysis_uploaded_bool:
+                continue
+
+            if only_delivered and not samples_delivered_bool:
+                continue
+
+            if only_invoiced and not samples_invoiced_bool:
+                continue
+
+            if exclude_received and samples_received_bool:
+                continue
+
+            if exclude_prepared and samples_prepared_bool:
+                continue
+
+            if exclude_sequenced and samples_sequenced_bool:
+                continue
+
+            if exclude_analysed and analysis_completed_bool:
+                continue
+
+            if exclude_uploaded and analysis_uploaded_bool:
+                continue
+
+            if exclude_delivered and samples_delivered_bool:
+                continue
+
+            if exclude_invoiced and samples_invoiced_bool:
+                continue
+
+            tat = self._calculate_estimated_turnaround_time(
                 samples_received_at,
                 samples_prepared_at,
                 samples_sequenced_at,
@@ -338,54 +380,12 @@ class StatusHandler:
                 'flowcells_status': flowcells_status,
                 'flowcells_on_disk': flowcells_on_disk,
                 'flowcells_on_disk_bool': flowcells_on_disk_bool,
-                'ett': ett,
+                'tat': tat,
             }
-
-            if only_received and not samples_received_bool:
-                continue
-
-            if only_prepared and not samples_prepared_bool:
-                continue
-
-            if only_sequenced and not samples_sequenced_bool:
-                continue
-
-            if only_analysed and not analysis_completed_bool:
-                continue
-
-            if only_uploaded and not analysis_uploaded_bool:
-                continue
-
-            if only_delivered and not samples_delivered_bool:
-                continue
-
-            if only_invoiced and not samples_invoiced_bool:
-                continue
-
-            if exclude_received and samples_received_bool:
-                continue
-
-            if exclude_prepared and samples_prepared_bool:
-                continue
-
-            if exclude_sequenced and samples_sequenced_bool:
-                continue
-
-            if exclude_analysed and analysis_completed_bool:
-                continue
-
-            if exclude_uploaded and analysis_uploaded_bool:
-                continue
-
-            if exclude_delivered and samples_delivered_bool:
-                continue
-
-            if exclude_invoiced and samples_invoiced_bool:
-                continue
 
             cases.append(case)
 
-        cases_sorted = sorted(cases, key=lambda k: k['ett'], reverse=True)
+        cases_sorted = sorted(cases, key=lambda k: k['tat'], reverse=True)
 
         return cases_sorted
 
@@ -592,10 +592,10 @@ class StatusHandler:
             return self._calculate_date_delta(None, samples_received_at, samples_delivered_at)
 
         r_p = self._calculate_date_delta(4, samples_received_at, samples_prepared_at)
-        p_s = self._calculate_date_delta(4, samples_prepared_at, samples_sequenced_at)
+        p_s = self._calculate_date_delta(5, samples_prepared_at, samples_sequenced_at)
         s_a = self._calculate_date_delta(4, samples_sequenced_at, analysis_completed_at)
-        a_u = self._calculate_date_delta(4, analysis_completed_at, analysis_uploaded_at)
-        u_d = self._calculate_date_delta(4, analysis_uploaded_at, samples_delivered_at)
+        a_u = self._calculate_date_delta(1, analysis_completed_at, analysis_uploaded_at)
+        u_d = self._calculate_date_delta(2, analysis_uploaded_at, samples_delivered_at)
 
         return r_p + p_s + s_a + a_u + u_d
 

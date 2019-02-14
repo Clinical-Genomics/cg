@@ -162,24 +162,24 @@ def cases(context, output_type, verbose, days, internal_id, name, action, priori
 
     for case in records:
 
-        ett_number = case.get('ett')
+        tat_number = case.get('tat')
 
-        if case.get('samples_delivered_bool') and ett_number <= 21:
-            ett_color = 'green'
-        elif ett_number == 21:
-            ett_color = 'yellow'
-        elif ett_number > 21:
-            ett_color = 'red'
+        if case.get('samples_delivered_bool') and tat_number <= 21:
+            tat_color = 'green'
+        elif tat_number == 21:
+            tat_color = 'yellow'
+        elif tat_number > 21:
+            tat_color = 'red'
         else:
-            ett_color = 'white'
+            tat_color = 'white'
 
-        color_start = Color(u"{" + f"{ett_color}" + "}")
-        color_end = Color(u"{/" + f"{ett_color}" + "}")
+        color_start = Color(u"{" + f"{tat_color}" + "}")
+        color_end = Color(u"{/" + f"{tat_color}" + "}")
 
         if case.get('samples_delivered_bool'):
-            ett = str(ett_number) + color_end
+            tat = str(tat_number) + color_end
         else:
-            ett = f"({ett_number})" + color_end
+            tat = f"({tat_number})" + color_end
 
         title = color_start + f"{case.get('internal_id')}"
         if name:
@@ -231,7 +231,7 @@ def cases(context, output_type, verbose, days, internal_id, name, action, priori
             invoiced = present_date(case, 'samples_invoiced_at', verbose, show_time)
 
         case_row = [title, ordered, received, prepared, sequenced, flowcell, analysed, uploaded,
-                    delivered, invoiced, ett]
+                    delivered, invoiced, tat]
         case_rows.append(case_row)
 
     click.echo(tabulate(case_rows, headers=case_header, tablefmt='psql'))
