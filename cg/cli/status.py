@@ -176,7 +176,7 @@ def cases(context, output_type, verbose, days, internal_id, name, action, priori
         color_start = Color(u"{" + f"{tat_color}" + "}")
         color_end = Color(u"{/" + f"{tat_color}" + "}")
 
-        if case.get('samples_delivered_bool'):
+        if case.get('samples_received_bool') and case.get('samples_delivered_bool'):
             tat = str(tat_number) + color_end
         else:
             tat = f"({tat_number})" + color_end
