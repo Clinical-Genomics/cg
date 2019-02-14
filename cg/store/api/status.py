@@ -173,8 +173,6 @@ class StatusHandler:
         families_q = families_q.outerjoin(models.Family.analyses, models.Sample.invoice,
                                           models.Sample.flowcells)
 
-        families_q = families_q.order_by(models.Family.ordered_at.desc())
-
         cases = []
 
         for record in families_q:
@@ -208,6 +206,7 @@ class StatusHandler:
             flowcells_status = None
             flowcells_on_disk = None
             flowcells_on_disk_bool = None
+            ett = None
 
             analysis_in_progress = record.action is not None
             analysis_action = record.action
@@ -293,6 +292,15 @@ class StatusHandler:
                 analysis_completed_bool = False
                 analysis_uploaded_bool = False
 
+            ett = self._calculate_estimated_turnaround_time(
+                samples_received_at,
+                samples_prepared_at,
+                samples_sequenced_at,
+                analysis_completed_at,
+                analysis_uploaded_at,
+                samples_delivered_at
+            )
+
             case = {
                 'internal_id': record.internal_id,
                 'name': record.name,
@@ -330,6 +338,7 @@ class StatusHandler:
                 'flowcells_status': flowcells_status,
                 'flowcells_on_disk': flowcells_on_disk,
                 'flowcells_on_disk_bool': flowcells_on_disk_bool,
+                'ett': ett,
             }
 
             if only_received and not samples_received_bool:
@@ -376,7 +385,9 @@ class StatusHandler:
 
             cases.append(case)
 
-        return cases
+        cases_sorted = sorted(cases, key=lambda k: k['ett'], reverse=True)
+
+        return cases_sorted
 
     @staticmethod
     def _all_samples_sequenced(links: List[models.FamilySample]) -> bool:
@@ -567,3 +578,30 @@ class StatusHandler:
             .order_by(models.MicrobialSample.created_at)
         )
         return records
+
+    def _calculate_estimated_turnaround_time(self,
+                                             samples_received_at,
+                                             samples_prepared_at,
+                                             samples_sequenced_at,
+                                             analysis_completed_at,
+                                             analysis_uploaded_at,
+                                             samples_delivered_at
+                                             ):
+
+        if samples_received_at and samples_delivered_at:
+            return self._calculate_date_delta(None, samples_received_at, samples_delivered_at)
+
+        r_p = self._calculate_date_delta(4, samples_received_at, samples_prepared_at)
+        p_s = self._calculate_date_delta(4, samples_prepared_at, samples_sequenced_at)
+        s_a = self._calculate_date_delta(4, samples_sequenced_at, analysis_completed_at)
+        a_u = self._calculate_date_delta(4, analysis_completed_at, analysis_uploaded_at)
+        u_d = self._calculate_date_delta(4, analysis_uploaded_at, samples_delivered_at)
+
+        return r_p + p_s + s_a + a_u + u_d
+
+    @staticmethod
+    def _calculate_date_delta(default, first_date, last_date):
+        delta = default
+        if first_date and last_date:
+            delta = (last_date - first_date).days
+        return delta

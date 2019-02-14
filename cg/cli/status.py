@@ -2,13 +2,14 @@
 
 import click
 from tabulate import tabulate
+from colorclass import Color
 
 from cg.store import Store
 from cg.constants import FAMILY_ACTIONS, PRIORITY_OPTIONS
 
 
 CASE_HEADERS_LONG = ['Case', 'Ordered', 'Received', 'Prepared', 'Sequenced', 'Flowcells',
-                     'Analysed', 'Uploaded', 'Delivered', 'Invoiced']
+                     'Analysed', 'Uploaded', 'Delivered', 'Invoiced', 'TAT']
 ALWAYS_LONG_HEADERS = [CASE_HEADERS_LONG[0], CASE_HEADERS_LONG[1],
                        CASE_HEADERS_LONG[6], CASE_HEADERS_LONG[7]]
 CASE_HEADERS_MEDIUM = []
@@ -160,7 +161,27 @@ def cases(context, output_type, verbose, days, internal_id, name, action, priori
     case_rows = []
 
     for case in records:
-        title = f"{case.get('internal_id')}"
+
+        ett_number = case.get('ett')
+
+        if case.get('samples_delivered_bool') and ett_number <= 21:
+            ett_color = 'green'
+        elif ett_number == 21:
+            ett_color = 'yellow'
+        elif ett_number > 21:
+            ett_color = 'red'
+        else:
+            ett_color = 'white'
+
+        color_start = Color(u"{" + f"{ett_color}" + "}")
+        color_end = Color(u"{/" + f"{ett_color}" + "}")
+
+        if case.get('samples_delivered_bool'):
+            ett = str(ett_number) + color_end
+        else:
+            ett = f"({ett_number})" + color_end
+
+        title = color_start + f"{case.get('internal_id')}"
         if name:
             title = f"{title} ({case.get('name')})"
         if data_analysis:
@@ -210,7 +231,7 @@ def cases(context, output_type, verbose, days, internal_id, name, action, priori
             invoiced = present_date(case, 'samples_invoiced_at', verbose, show_time)
 
         case_row = [title, ordered, received, prepared, sequenced, flowcell, analysed, uploaded,
-                    delivered, invoiced]
+                    delivered, invoiced, ett]
         case_rows.append(case_row)
 
     click.echo(tabulate(case_rows, headers=case_header, tablefmt='psql'))
