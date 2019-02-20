@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
+from datetime import datetime
 import gzip
 import logging
 import re
 from pathlib import Path
 from typing import List, Any
+
+from cg.exc import AnalysisNotFinishedError
 from ruamel.yaml import safe_load
 
 from requests.exceptions import HTTPError
@@ -38,9 +41,9 @@ class AnalysisAPI:
                  fastq_handler=fastq.FastqHandler, yaml_loader=safe_load, path_api=Path,
                  logger=logging.getLogger(
                      __name__)):
-        self.db = db
-        self.tb = tb_api
-        self.hk = hk_api
+        self.status = db
+        self.tb_api = tb_api
+        self.hk_api = hk_api
         self.scout = scout_api
         self.lims = lims_api
         self.deliver = deliver_api
@@ -51,7 +54,7 @@ class AnalysisAPI:
 
     def check(self, family_obj: models.Family):
         """Check stuff before starting the analysis."""
-        flowcells = self.db.flowcells(family=family_obj)
+        flowcells = self.status.flowcells(family=family_obj)
         statuses = []
         for flowcell_obj in flowcells:
             self.LOG.debug(f"{flowcell_obj.name}: checking flowcell")
@@ -83,10 +86,20 @@ class AnalysisAPI:
                 kwargs['skip_evaluation'] = True
                 break
 
-        self.tb.start(family_obj.internal_id, **kwargs)
+        self.tb_api.start(family_obj.internal_id, **kwargs)
         # mark the family as running
         family_obj.action = 'running'
-        self.db.commit()
+
+        pipeline = None
+        for link_obj in family_obj.links:
+            pipeline = 'mip' if 'Balsamic' != link_obj.sample.data_analysis else 'Balsamic'
+
+        family_obj.analyses.append(self.status.add_analysis(
+            pipeline=pipeline,
+            primary=len(family_obj.analyses) == 0
+        ))
+
+        self.status.commit()
 
     def config(self, family_obj: models.Family) -> dict:
         """Make the MIP config. Meta data for the family is taken from the family object
@@ -102,7 +115,7 @@ class AnalysisAPI:
         data = self.build_config(family_obj)
 
         # Validate and reformat to MIP config format
-        config_data = self.tb.make_config(data)
+        config_data = self.tb_api.make_config(data)
 
         return config_data
 
@@ -209,7 +222,7 @@ class AnalysisAPI:
 
     def link_sample(self, link_obj: models.FamilySample):
         """Link FASTQ files for a sample."""
-        file_objs = self.hk.files(bundle=link_obj.sample.internal_id, tags=['fastq'])
+        file_objs = self.hk_api.files(bundle=link_obj.sample.internal_id, tags=['fastq'])
         files = []
 
         for file_obj in file_objs:
@@ -234,7 +247,7 @@ class AnalysisAPI:
                 data['flowcell'] = f"{data['flowcell']}-{matches[0]}"
             files.append(data)
 
-        self.tb.link(
+        self.tb_api.link(
             family=link_obj.family.internal_id,
             sample=link_obj.sample.internal_id,
             analysis_type=link_obj.sample.application_version.application.analysis_type,
@@ -308,9 +321,9 @@ class AnalysisAPI:
 
         if mip_config_raw and qcmetrics_raw and sampleinfo_raw:
             try:
-                trending = self.tb.get_trending(mip_config_raw=mip_config_raw,
-                                                qcmetrics_raw=qcmetrics_raw,
-                                                sampleinfo_raw=sampleinfo_raw)
+                trending = self.tb_api.get_trending(mip_config_raw=mip_config_raw,
+                                                    qcmetrics_raw=qcmetrics_raw,
+                                                    sampleinfo_raw=sampleinfo_raw)
             except KeyError as error:
                 self.LOG.warning(f'get_latest_metadata failed for \'{family_id}\''
                                  f', missing key: {error.args[0]} ')
@@ -319,3 +332,79 @@ class AnalysisAPI:
                 trending = dict()
 
         return trending
+
+    def store_analysis(self, config_stream):
+        analysis = self._gather_files_and_bundle_in_housekeeper(config_stream)
+        self.status.add_commit(analysis)
+
+    def _gather_files_and_bundle_in_housekeeper(self, config_stream
+                                                ):
+        try:
+            bundle_data = self.tb_api.add_analysis(config_stream)
+        except AnalysisNotFinishedError as error:
+            self.LOG.error(error.message)
+            raise Exception
+
+        try:
+            results = self.hk_api.add_bundle(bundle_data)
+            if results is None:
+                self.LOG.warning('analysis version already added')
+                raise Exception
+            bundle_obj, version_obj = results
+        except FileNotFoundError as error:
+            self.LOG.error(f"missing file: {error.args[0]}")
+            raise Exception
+
+        family_obj = self.status.family(bundle_obj.name)
+        self._reset_action_from_running_on_family(family_obj)
+        new_analysis = self._add_information_to_analysis_record(bundle_data, family_obj,
+                                                                version_obj)
+        version_date = version_obj.created_at.date()
+        self.LOG.info(f"new bundle added: {bundle_obj.name}, version {version_date}")
+        self._include_files_in_housekeeper(bundle_obj, version_obj)
+
+        return new_analysis
+
+    def _include_files_in_housekeeper(self, bundle_obj, version_obj):
+        try:
+            self.hk_api.include(version_obj)
+        except self.hk_api.VersionIncludedError as error:
+            self.LOG.error(error.message)
+            raise Exception
+        self.hk_api.add_commit(bundle_obj, version_obj)
+
+    def _add_new_complete_analysis_record(self, bundle_data, family_obj, version_obj):
+
+        pipeline = family_obj.links[0].sample.data_analysis
+        pipeline = pipeline if pipeline else 'mip'  # TODO remove this default from here
+
+        new_analysis = self.status.add_analysis(
+            pipeline=pipeline,
+            version=bundle_data['pipeline_version'],
+            started_at=version_obj.created_at,
+            completed_at=datetime.now(),
+            primary=len(family_obj.analyses) == 0,
+        )
+        new_analysis.family = family_obj
+        return new_analysis
+
+    def _add_information_to_analysis_record(self, bundle_data, family_obj, version_obj):
+
+        pipeline = family_obj.links[0].sample.data_analysis
+        pipeline = pipeline if pipeline else 'mip'  # TODO remove this default from here
+        existing_analysis = None
+
+        for analysis in family_obj.analyses:
+            if analysis.completed_at is None and analysis.pipeline == pipeline:
+                existing_analysis = analysis
+
+        if not existing_analysis or existing_analysis.completed_at:
+            return self._add_new_complete_analysis_record(bundle_data, family_obj, version_obj)
+
+        existing_analysis.completed_at = datetime.now()
+        existing_analysis.version = bundle_data['pipeline_version']
+        return existing_analysis
+
+    @staticmethod
+    def _reset_action_from_running_on_family(family_obj):
+        family_obj.action = None

@@ -1,7 +1,8 @@
 import pytest
 from _pytest import tmpdir
-from cg.apps.balsamic.fastq import FastqHandler
+from datetime import datetime
 
+from cg.apps.balsamic.fastq import FastqHandler
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.meta.analysis import AnalysisAPI
@@ -158,6 +159,14 @@ class MockLogger:
     def get_warnings(self) -> list:
         return self.warnings
 
+    infos = []
+
+    def info(self, text: str):
+        self.infos.append(text)
+
+    def get_infos(self) -> list:
+        return self.infos
+
 
 class MockTB:
     _get_trending_raises_keyerror = False
@@ -188,6 +197,36 @@ class MockTB:
     def make_config(self, data):
         return data
 
+    def start(self, family, **kwargs):
+        pass
+
+    def add_analysis(self, config_stream):
+        bundle = {'pipeline_version': 'pipeline_versionX'}
+        return bundle
+
+
+class MockHK:
+
+    class _BundleMock:
+        name = 'family'
+
+    class _VersionMock:
+        created_at = datetime.now()
+
+    def add_bundle(self, bundle):
+        bundle_mock = self._BundleMock()
+        version_mock = self._VersionMock()
+        return bundle_mock, version_mock
+
+    class VersionIncludedError(BaseException):
+        pass
+
+    def include(self, arg):
+        pass
+
+    def add_commit(self, version_obj, bundle_obj):
+        pass
+
 
 class MockBalsamicFastq(FastqHandler):
     """Mock FastqHandler for analysis_api"""
@@ -205,15 +244,17 @@ def safe_loader(path):
     return {'human_genome_build': {'version': ''}, 'program': {'rankvariant': {'rank_model': {
         'version': 1.18}}}}
 
+
 @pytest.yield_fixture(scope='function')
 def analysis_api(analysis_store, store_housekeeper, scout_store):
     """Setup an analysis API."""
     Path_mock = MockPath('')
     tb_mock = MockTB()
+    hk_mock = MockHK()
 
     _analysis_api = AnalysisAPI(
         db=analysis_store,
-        hk_api=store_housekeeper,
+        hk_api=hk_mock,
         scout_api=scout_store,
         tb_api=tb_mock,
         lims_api=None,

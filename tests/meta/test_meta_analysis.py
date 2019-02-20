@@ -40,7 +40,7 @@ def test_get_latest_data_rank_model_version(analysis_api: AnalysisAPI):
 
 def test_get_latest_metadata_logging(analysis_api: AnalysisAPI):
     # GIVEN an initialised report_api and the deliver_api does not have what we want
-    analysis_api.tb._get_trending_raises_keyerror = True
+    analysis_api.tb_api._get_trending_raises_keyerror = True
 
     # WHEN failing to get latest trending data for a family
     latest_data = analysis_api.get_latest_metadata(family_id='bluebull')

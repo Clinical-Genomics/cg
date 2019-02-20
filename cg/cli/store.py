@@ -6,7 +6,6 @@ from pathlib import Path
 import click
 
 from cg.apps import hk, tb
-from cg.exc import AnalysisNotFinishedError
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -19,6 +18,11 @@ def store(context):
     context.obj['db'] = Store(context.obj['database'])
     context.obj['tb_api'] = tb.TrailblazerAPI(context.obj)
     context.obj['hk_api'] = hk.HousekeeperAPI(context.obj)
+    context.obj['api'] = StoreHandler(
+        db=context.obj['db'],
+        hk_api=context.obj['hk_api'],
+        tb_api=context.obj['tb_api'],
+    )
 
 
 @store.command()
@@ -26,77 +30,8 @@ def store(context):
 @click.pass_context
 def analysis(context, config_stream):
     """Store a finished analysis in Housekeeper."""
-    status = context.obj['db']
-    tb_api = context.obj['tb_api']
-    hk_api = context.obj['hk_api']
-
-    new_analysis = _gather_files_and_bundle_in_housekeeper(config_stream, context, hk_api,
-                                                           status, tb_api)
-
-    status.add_commit(new_analysis)
+    context.obj['api'].store_analysis(config_stream)
     click.echo(click.style('included files in Housekeeper', fg='green'))
-
-
-def _gather_files_and_bundle_in_housekeeper(config_stream, context, hk_api, status,
-                                            tb_api):
-    try:
-        bundle_data = tb_api.add_analysis(config_stream)
-    except AnalysisNotFinishedError as error:
-        click.echo(click.style(error.message, fg='red'))
-        context.abort()
-
-    try:
-        results = hk_api.add_bundle(bundle_data)
-        if results is None:
-            print(click.style('analysis version already added', fg='yellow'))
-            context.abort()
-        bundle_obj, version_obj = results
-    except FileNotFoundError as error:
-        click.echo(click.style(f"missing file: {error.args[0]}", fg='red'))
-        context.abort()
-
-    family_obj = _add_new_analysis_to_the_status_api(bundle_obj, status)
-    _reset_action_from_running_on_family(family_obj)
-    new_analysis = _add_new_complete_analysis_record(bundle_data, family_obj, status, version_obj)
-    version_date = version_obj.created_at.date()
-    click.echo(f"new bundle added: {bundle_obj.name}, version {version_date}")
-    _include_files_in_housekeeper(bundle_obj, context, hk_api, version_obj)
-
-    return new_analysis
-
-
-def _include_files_in_housekeeper(bundle_obj, context, hk_api, version_obj):
-    try:
-        hk_api.include(version_obj)
-    except hk.VersionIncludedError as error:
-        click.echo(click.style(error.message, fg='red'))
-        context.abort()
-    hk_api.add_commit(bundle_obj, version_obj)
-
-
-def _add_new_complete_analysis_record(bundle_data, family_obj, status, version_obj):
-
-    pipeline = family_obj.links[0].sample.data_analysis
-    pipeline = pipeline if pipeline else 'mip' # TODO remove this default from here
-
-    new_analysis = status.add_analysis(
-        pipeline=pipeline,
-        version=bundle_data['pipeline_version'],
-        started_at=version_obj.created_at,
-        completed_at=dt.datetime.now(),
-        primary=(len(family_obj.analyses) == 0),
-    )
-    new_analysis.family = family_obj
-    return new_analysis
-
-
-def _reset_action_from_running_on_family(family_obj):
-    family_obj.action = None
-
-
-def _add_new_analysis_to_the_status_api(bundle_obj, status):
-    family_obj = status.family(bundle_obj.name)
-    return family_obj
 
 
 @store.command()
