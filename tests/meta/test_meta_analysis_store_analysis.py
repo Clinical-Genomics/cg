@@ -4,26 +4,40 @@ from cg.store import Store
 from cg.meta.analysis import AnalysisAPI
 
 
-def test_store_completed_at_to_existing_analysis(analysis_store: Store, analysis_api: AnalysisAPI):
-    """Store analysis should set completed_at on the analysis object"""
+def test_store_analysis_adds_another_analysis(analysis_store: Store, analysis_api: AnalysisAPI):
+    """Store analysis should add an analysis to the family"""
 
-    # GIVEN a status db with a family with a started analysis
-    analysis = add_analysis(analysis_store, started=True, completed=True, family_id='family')
+    # GIVEN a status db with a family with an analysis
+    family_id = 'yellowhog'
+    family = analysis_store.family(family_id)
+    first_analysis = add_analysis(analysis_store, family=family)
     sample = add_sample(analysis_store)
-    analysis_store.relate_sample(analysis.family, sample=sample, status='unknown')
-    assert analysis.started_at
-    assert analysis.completed_at
-    nr_analyses_before_store_analysis = len(analysis.family.analyses)
+    analysis_store.relate_sample(first_analysis.family, sample=sample, status='unknown')
+    nr_analyses_before_when = len(first_analysis.family.analyses)
 
     # WHEN storing the complete analysis
     config_stream = 'dummy_stream'
     analysis_api.store_analysis(config_stream)
 
     # THEN we should have an analysis object that is marked as completed
-    assert nr_analyses_before_store_analysis == len(analysis.family.analyses) + 1
-    assert analysis is analysis.family.analyses[0]
-    assert analysis.started_at
-    assert analysis.completed_at
+    assert nr_analyses_before_when + 1 == len(first_analysis.family.analyses)
+
+
+def test_store_analysis_adds_first_analysis(analysis_store: Store, analysis_api: AnalysisAPI):
+    """Store analysis should add an analysis to the family"""
+
+    # GIVEN a status db with a family without analysis
+    family_id = 'yellowhog'
+    family = analysis_store.family(family_id)
+    assert not family.analyses
+    nr_analyses_before_when = len(family.analyses)
+
+    # WHEN storing the complete analysis
+    config_stream = 'dummy_stream'
+    analysis_api.store_analysis(config_stream)
+
+    # THEN we should have an analysis object that is marked as completed
+    assert nr_analyses_before_when + 1 == len(family.analyses)
 
 
 def ensure_application_version(disk_store, application_tag='dummy_tag'):
@@ -71,13 +85,13 @@ def ensure_panel(disk_store, panel_id='panel_test', customer_id='cust_test'):
     return panel
 
 
-def add_family(disk_store, family_id='family_test', customer_id='cust_test',
+def add_family(disk_store, family_name='family_test', customer_id='cust_test',
                action=None, priority=None):
     """utility function to add a family to use in tests"""
     panel = ensure_panel(disk_store)
     customer = ensure_customer(disk_store, customer_id)
-    family = disk_store.add_family(name=family_id, panels=panel.name)
-    family.internal_id = family_id
+    family = disk_store.add_family(name=family_name, panels=panel.name)
+    print(family)
     family.customer = customer
     family.ordered_at = datetime.now()
     if action:
@@ -88,9 +102,11 @@ def add_family(disk_store, family_id='family_test', customer_id='cust_test',
     return family
 
 
-def add_analysis(store, started=False, pipeline=None, family_id='family_test'):
+def add_analysis(store, started=False, pipeline=None, family_name='family_test', family=None):
     """Utility function to add an analysis for tests"""
-    family = add_family(store, family_id)
+    if not family:
+        family = add_family(store, family_name)
+
     analysis = store.add_analysis(pipeline='', version='')
     if started:
         analysis.started_at = datetime.now()

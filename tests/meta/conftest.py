@@ -201,14 +201,14 @@ class MockTB:
         pass
 
     def add_analysis(self, config_stream):
-        bundle = {'pipeline_version': 'pipeline_versionX'}
+        bundle = {'pipeline_version': 'pipeline_versionX', 'date': datetime.now()}
         return bundle
 
 
 class MockHK:
 
     class _BundleMock:
-        name = 'family'
+        name = 'yellowhog'
 
     class _VersionMock:
         created_at = datetime.now()

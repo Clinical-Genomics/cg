@@ -357,8 +357,7 @@ class AnalysisAPI:
 
         family_obj = self.status.family(bundle_obj.name)
         self._reset_action_from_running_on_family(family_obj)
-        new_analysis = self._add_information_to_analysis_record(bundle_data, family_obj,
-                                                                version_obj)
+        new_analysis = self._create_analysis_from_bundle(bundle_data, family_obj)
         version_date = version_obj.created_at.date()
         self.LOG.info(f"new bundle added: {bundle_obj.name}, version {version_date}")
         self._include_files_in_housekeeper(bundle_obj, version_obj)
@@ -373,7 +372,7 @@ class AnalysisAPI:
             raise Exception
         self.hk_api.add_commit(bundle_obj, version_obj)
 
-    def _add_new_complete_analysis_record(self, bundle_data, family_obj, version_obj):
+    def _create_analysis_from_bundle(self, bundle_data, family_obj):
 
         pipeline = family_obj.links[0].sample.data_analysis
         pipeline = pipeline if pipeline else 'mip'  # TODO remove this default from here
@@ -381,29 +380,12 @@ class AnalysisAPI:
         new_analysis = self.status.add_analysis(
             pipeline=pipeline,
             version=bundle_data['pipeline_version'],
-            started_at=version_obj.created_at,
+            started_at=bundle_data['date'],
             completed_at=datetime.now(),
             primary=len(family_obj.analyses) == 0,
         )
         new_analysis.family = family_obj
         return new_analysis
-
-    def _add_information_to_analysis_record(self, bundle_data, family_obj, version_obj):
-
-        pipeline = family_obj.links[0].sample.data_analysis
-        pipeline = pipeline if pipeline else 'mip'  # TODO remove this default from here
-        existing_analysis = None
-
-        for analysis in family_obj.analyses:
-            if analysis.completed_at is None and analysis.pipeline == pipeline:
-                existing_analysis = analysis
-
-        if not existing_analysis or existing_analysis.completed_at:
-            return self._add_new_complete_analysis_record(bundle_data, family_obj, version_obj)
-
-        existing_analysis.completed_at = datetime.now()
-        existing_analysis.version = bundle_data['pipeline_version']
-        return existing_analysis
 
     @staticmethod
     def _reset_action_from_running_on_family(family_obj):
