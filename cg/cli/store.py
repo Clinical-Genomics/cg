@@ -7,6 +7,7 @@ import click
 
 from cg.apps import hk, tb
 from cg.store import Store
+from cg.meta import analysis
 
 LOG = logging.getLogger(__name__)
 
@@ -18,11 +19,7 @@ def store(context):
     context.obj['db'] = Store(context.obj['database'])
     context.obj['tb_api'] = tb.TrailblazerAPI(context.obj)
     context.obj['hk_api'] = hk.HousekeeperAPI(context.obj)
-    context.obj['api'] = StoreHandler(
-        db=context.obj['db'],
-        hk_api=context.obj['hk_api'],
-        tb_api=context.obj['tb_api'],
-    )
+
 
 
 @store.command()
@@ -30,7 +27,15 @@ def store(context):
 @click.pass_context
 def analysis(context, config_stream):
     """Store a finished analysis in Housekeeper."""
-    context.obj['api'].store_analysis(config_stream)
+    context.obj['api'] = analysis.AnalysisAPI(
+        db=context.obj['db'],
+        hk_api=context.obj['hk_api'],
+        tb_api=context.obj['tb_api'],
+        scout_api=None,
+        lims_api=None,
+        deliver_api=None,
+        fastq_handler=None
+    ).store_analysis(config_stream)
     click.echo(click.style('included files in Housekeeper', fg='green'))
 
 
