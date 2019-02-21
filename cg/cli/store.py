@@ -7,7 +7,7 @@ import click
 
 from cg.apps import hk, tb
 from cg.store import Store
-from cg.meta import analysis
+from cg.meta.analysis import AnalysisAPI
 
 LOG = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ def store(context):
 @click.pass_context
 def analysis(context, config_stream):
     """Store a finished analysis in Housekeeper."""
-    context.obj['api'] = analysis.AnalysisAPI(
+    context.obj['api'] = AnalysisAPI(
         db=context.obj['db'],
         hk_api=context.obj['hk_api'],
         tb_api=context.obj['tb_api'],
