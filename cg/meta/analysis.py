@@ -380,7 +380,7 @@ class AnalysisAPI:
         new_analysis = self.status.add_analysis(
             pipeline=pipeline,
             version=bundle_data['pipeline_version'],
-            started_at=bundle_data['date'],
+            started_at=bundle_data['created'],
             completed_at=datetime.now(),
             primary=len(family_obj.analyses) == 0,
         )
