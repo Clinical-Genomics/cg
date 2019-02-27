@@ -171,7 +171,6 @@ def _push_delivery_report_to_hk(delivery_report_file, hk_api: api.HousekeeperAPI
         return False
 
     hk_api.add_commit(file_obj)
-
     return True
 
 
@@ -179,6 +178,7 @@ def _update_delivery_report_date(status_api, family_id):
     family_obj = status_api.family(family_id)
     analysis_obj = family_obj.analyses[0]
     analysis_obj.delivery_report_created_at = dt.datetime.now()
+    status_api.commit()
 
 
 @upload.command()
