@@ -3,7 +3,8 @@ import logging
 
 import click
 
-from cg.apps import stats, hk, lims as lims_app
+from cg.apps import stats, lims as lims_app
+from cg.apps.hk import api
 from cg.meta import transfer as transfer_app
 from cg.store import Store
 
@@ -23,7 +24,7 @@ def transfer(context):
 def flowcell(context, flowcell_name):
     """Populate results from a flowcell."""
     stats_api = stats.StatsAPI(context.obj)
-    hk_api = hk.HousekeeperAPI(context.obj)
+    hk_api = api.HousekeeperAPI(context.obj)
     transfer_api = transfer_app.TransferFlowcell(context.obj['db'], stats_api, hk_api)
     new_record = transfer_api.transfer(flowcell_name)
     context.obj['db'].add_commit(new_record)

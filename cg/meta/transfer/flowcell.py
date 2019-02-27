@@ -4,7 +4,7 @@ from typing import List
 
 from cg.store import models, Store
 from cg.apps.stats import StatsAPI
-from cg.apps.hk import HousekeeperAPI
+from cg.apps.hk.api import HousekeeperAPI
 
 LOG = logging.getLogger(__name__)
 

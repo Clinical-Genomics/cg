@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import logging
 
-from cg.apps import hk, loqus
+from cg.apps import loqus
+from cg.apps.hk import api
 from cg.exc import DuplicateRecordError
 from cg.store import models, Store
 
@@ -12,7 +13,7 @@ class UploadObservationsAPI(object):
 
     """API to upload observations to LoqusDB."""
 
-    def __init__(self, status_api: Store, hk_api: hk.HousekeeperAPI, loqus_api: loqus.LoqusdbAPI):
+    def __init__(self, status_api: Store, hk_api: api.HousekeeperAPI, loqus_api: loqus.LoqusdbAPI):
         self.status = status_api
         self.housekeeper = hk_api
         self.loqusdb = loqus_api

@@ -1,15 +1,12 @@
 import ast
 import logging
 import datetime as dt
-import os
-import scout
 import sys
-import time
 from tempfile import NamedTemporaryFile
 
 from cgbeacon.utils import vcfparser
 from cg.store import Store
-from cg.apps.hk import HousekeeperAPI
+from cg.apps.hk.api import HousekeeperAPI
 from cg.apps.scoutapi import ScoutAPI
 from cg.apps.beacon import BeaconApi
 

@@ -5,7 +5,8 @@ from pathlib import Path
 
 import click
 
-from cg.apps import hk, tb
+from cg.apps import tb
+from cg.apps.hk import api
 from cg.exc import AnalysisNotFinishedError
 from cg.store import Store
 
@@ -18,7 +19,7 @@ def store(context):
     """Store results from MIP in housekeeper."""
     context.obj['db'] = Store(context.obj['database'])
     context.obj['tb_api'] = tb.TrailblazerAPI(context.obj)
-    context.obj['hk_api'] = hk.HousekeeperAPI(context.obj)
+    context.obj['hk_api'] = api.HousekeeperAPI(context.obj)
 
 
 @store.command()
@@ -68,7 +69,7 @@ def _gather_files_and_bundle_in_housekeeper(config_stream, context, hk_api, stat
 def _include_files_in_housekeeper(bundle_obj, context, hk_api, version_obj):
     try:
         hk_api.include(version_obj)
-    except hk.VersionIncludedError as error:
+    except api.VersionIncludedError as error:
         click.echo(click.style(error.message, fg='red'))
         context.abort()
     hk_api.add_commit(bundle_obj, version_obj)

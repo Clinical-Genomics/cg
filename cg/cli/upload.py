@@ -6,8 +6,9 @@ import sys
 import click
 
 from cg.store import Store
-from cg.apps import coverage as coverage_app, gt, hk, loqus, tb, scoutapi, beacon as beacon_app, \
+from cg.apps import coverage as coverage_app, gt, loqus, tb, scoutapi, beacon as beacon_app, \
     lims
+from cg.apps.hk import api
 from cg.exc import DuplicateRecordError
 from cg.meta.upload.coverage import UploadCoverageApi
 from cg.meta.upload.gt import UploadGenotypesAPI
@@ -30,7 +31,7 @@ def upload(context, family_id):
     click.echo(click.style('----------------- UPLOAD ----------------------'))
         
     context.obj['status'] = Store(context.obj['database'])
-    context.obj['housekeeper_api'] = hk.HousekeeperAPI(context.obj)
+    context.obj['housekeeper_api'] = api.HousekeeperAPI(context.obj)
 
     context.obj['lims_api'] = lims.LimsAPI(context.obj)
     context.obj['tb_api'] = tb.TrailblazerAPI(context.obj)
@@ -148,26 +149,30 @@ def delivery_report(context, customer_id, family_id, print_console):
                                                                       tb_api.get_family_root_dir(
                                                                         family_id))
         hk_api = context.obj['housekeeper_api']
-        result = _add_delivery_report_to_hk(delivery_report_file, hk_api, family_id)
+        result = _push_delivery_report_to_hk(delivery_report_file, hk_api, family_id)
         if result:
             _update_delivery_report_date(status_api, family_id)
 
 
-def _add_delivery_report_to_hk(delivery_report_file, hk_api: hk.HousekeeperAPI, family_id):
+def _push_delivery_report_to_hk(delivery_report_file, hk_api: api.HousekeeperAPI, family_id):
     delivery_report_tag_name = 'delivery-report'
     version_obj = hk_api.last_version(family_id)
     uploaded_delivery_report_files = hk_api.get_files(bundle=family_id,
                                                       tags=[delivery_report_tag_name])
     number_of_delivery_reports = len(uploaded_delivery_report_files.all())
-    is_bundle_missing_delivery_report = number_of_delivery_reports == 0
 
-    if is_bundle_missing_delivery_report:
+    if number_of_delivery_reports == 0:
         file_obj = hk_api.add_file(delivery_report_file.name, version_obj, delivery_report_tag_name)
         hk_api.include_file(file_obj, version_obj)
-        hk_api.add_commit(file_obj)
-        return True
+    elif number_of_delivery_reports == 1:
+        file_obj = uploaded_delivery_report_files[0]
+        hk_api.re_include_file(delivery_report_file.name, file_obj, version_obj)
+    else:
+        return False
 
-    return False
+    hk_api.add_commit(file_obj)
+
+    return True
 
 
 def _update_delivery_report_date(status_api, family_id):

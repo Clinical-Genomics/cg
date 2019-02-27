@@ -2,7 +2,7 @@ import pytest
 from _pytest import tmpdir
 from cg.apps.balsamic.fastq import FastqHandler
 
-from cg.apps.hk import HousekeeperAPI
+from cg.apps.hk.api import HousekeeperAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.meta.analysis import AnalysisAPI
 

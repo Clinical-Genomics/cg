@@ -6,7 +6,8 @@ import click
 import logging
 from pathlib import Path
 
-from cg.apps import tb, hk, lims
+from cg.apps import lims
+from cg.apps.hk import api
 from cg.store import Store
 from cg.meta.deliver.api import DeliverAPI
 
@@ -32,7 +33,7 @@ def inbox(context, dry, family, version, tag, inbox):
     db = Store(context.obj['database'])
     deliver_api = DeliverAPI(
         db=db,
-        hk_api=hk.HousekeeperAPI(context.obj),
+        hk_api=api.HousekeeperAPI(context.obj),
         lims_api=lims.LimsAPI(context.obj)
     )
 

@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*- import logging
 
 import logging
-from pathlib import Path
 
-from cg.apps import tb, hk, lims
-from cg.store import Store, models
+from cg.apps import lims
+from cg.apps.hk import api
+from cg.store import Store
 
 LOG = logging.getLogger(__name__)
 
@@ -25,7 +25,7 @@ SAMPLE_TAGS = ['bam', 'bam-index']
 
 class DeliverAPI:
 
-    def __init__(self, db: Store, hk_api: hk.HousekeeperAPI, lims_api: lims.LimsAPI):
+    def __init__(self, db: Store, hk_api: api.HousekeeperAPI, lims_api: lims.LimsAPI):
         self.db = db
         self.hk = hk_api
         self.lims = lims_api

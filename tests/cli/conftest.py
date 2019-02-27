@@ -1,6 +1,8 @@
+"""Test fixtures for the cli tests"""
+
 from functools import partial
 
-from cg.apps import hk
+from cg.apps.hk import api
 from click.testing import CliRunner
 import pytest
 
@@ -89,7 +91,8 @@ def analysis_store(base_store, analysis_family):
     yield base_store
 
 
-class MockHkVersion(hk.models.Version):
+class MockHkVersion(api.models.Version):
+    """Mocked Housekeeper.Model.Version object"""
     pass
 
 

@@ -1,4 +1,3 @@
-from cg.apps import hk
 from cg.cli.store import _add_new_complete_analysis_record
 from cg.store import Store
 
