@@ -136,7 +136,6 @@ def delivery_report(context, customer_id, family_id, print_console):
     click.echo(click.style('----------------- DELIVERY_REPORT -------------'))
 
     report_api = context.obj['report_api']
-
     if print_console:
         delivery_report_html = report_api.create_delivery_report(customer_id, family_id)
 
@@ -195,7 +194,7 @@ def delivery_reports(context, print_console):
         try:
             context.invoke(delivery_report, customer_id=analysis_obj.family.customer.internal_id,
                            family_id=analysis_obj.family.internal_id, print_console=print_console)
-        except Exception as e:
+        except BaseException as e:
             import traceback
             LOG.error(f"uploading delivery report for family failed: %s",
                       analysis_obj.family.internal_id)
