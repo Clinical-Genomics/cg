@@ -193,7 +193,7 @@ def delivery_reports(context, print_console):
     for analysis_obj in context.obj['status'].analyses_to_delivery_report():
         LOG.info("uploading delivery report for family: %s", analysis_obj.family.internal_id)
         try:
-            context.invoke(upload, customer_id=analysis_obj.family.customer.internal_id,
+            context.invoke(delivery_report, customer_id=analysis_obj.family.customer.internal_id,
                            family_id=analysis_obj.family.internal_id, print_console=print_console)
         except Exception as e:
             import traceback
