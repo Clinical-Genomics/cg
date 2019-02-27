@@ -181,6 +181,30 @@ def _update_delivery_report_date(status_api, family_id):
     status_api.commit()
 
 
+@upload.command('delivery-reports')
+@click.option('-p', '--print', 'print_console', is_flag=True, help='print list to console')
+@click.pass_context
+def delivery_reports(context, print_console):
+    """Generate a delivery reports for all cases that need one"""
+
+    click.echo(click.style('----------------- DELIVERY REPORTS ------------------------'))
+
+    exit_code = 0
+    for analysis_obj in context.obj['status'].analyses_to_delivery_report():
+        LOG.info("uploading delivery report for family: %s", analysis_obj.family.internal_id)
+        try:
+            context.invoke(upload, customer_id=analysis_obj.family.customer.internal_id,
+                           family_id=analysis_obj.family.internal_id, print_console=print_console)
+        except Exception as e:
+            import traceback
+            LOG.error(f"uploading delivery report for family failed: %s",
+                      analysis_obj.family.internal_id)
+            LOG.error(traceback.format_exc())
+            exit_code = 1
+
+    sys.exit(exit_code)
+
+
 @upload.command()
 @click.option('-r', '--re-upload', is_flag=True, help='re-upload existing analysis')
 @click.argument('family_id')
