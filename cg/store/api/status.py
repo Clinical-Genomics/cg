@@ -418,6 +418,7 @@ class StatusHandler:
                     )
                 )
             )
+            .order_by(models.Analysis.uploaded_at.desc())
         )
         return records
 
