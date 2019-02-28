@@ -135,22 +135,25 @@ def delivery_report(context, customer_id, family_id, print_console):
 
     click.echo(click.style('----------------- DELIVERY_REPORT -------------'))
 
-    report_api = context.obj['report_api']
-    if print_console:
-        delivery_report_html = report_api.create_delivery_report(customer_id, family_id)
+    try:
+        report_api = context.obj['report_api']
+        if print_console:
+            delivery_report_html = report_api.create_delivery_report(customer_id, family_id)
 
-        click.echo(delivery_report_html)
-    else:
-        tb_api = context.obj['tb_api']
-        status_api = context.obj['status']
-        delivery_report_file = report_api.create_delivery_report_file(customer_id, family_id,
-                                                                      file_path=
-                                                                      tb_api.get_family_root_dir(
-                                                                        family_id))
-        hk_api = context.obj['housekeeper_api']
-        result = _push_delivery_report_to_hk(delivery_report_file, hk_api, family_id)
-        if result:
-            _update_delivery_report_date(status_api, family_id)
+            click.echo(delivery_report_html)
+        else:
+            tb_api = context.obj['tb_api']
+            status_api = context.obj['status']
+            delivery_report_file = report_api.create_delivery_report_file(customer_id, family_id,
+                                                                          file_path=
+                                                                          tb_api.get_family_root_dir(
+                                                                            family_id))
+            hk_api = context.obj['housekeeper_api']
+            result = _push_delivery_report_to_hk(delivery_report_file, hk_api, family_id)
+            if result:
+                _update_delivery_report_date(status_api, family_id)
+    except Exception:
+        LOG.error("uploading delivery report failed for family: %s", family_id)
 
 
 def _push_delivery_report_to_hk(delivery_report_file, hk_api: api.HousekeeperAPI, family_id):
@@ -188,20 +191,10 @@ def delivery_reports(context, print_console):
 
     click.echo(click.style('----------------- DELIVERY REPORTS ------------------------'))
 
-    exit_code = 0
     for analysis_obj in context.obj['status'].analyses_to_delivery_report():
         LOG.info("uploading delivery report for family: %s", analysis_obj.family.internal_id)
-        try:
-            context.invoke(delivery_report, customer_id=analysis_obj.family.customer.internal_id,
-                           family_id=analysis_obj.family.internal_id, print_console=print_console)
-        except BaseException as e:
-            import traceback
-            LOG.error(f"uploading delivery report for family failed: %s",
-                      analysis_obj.family.internal_id)
-            LOG.error(traceback.format_exc())
-            exit_code = 1
-
-    sys.exit(exit_code)
+        context.invoke(delivery_report, customer_id=analysis_obj.family.customer.internal_id,
+                       family_id=analysis_obj.family.internal_id, print_console=print_console)
 
 
 @upload.command()
