@@ -13,7 +13,7 @@ CAPTUREKIT_OPTIONS = ('Agilent Sureselect CRE',
                       'SureSelect Focused Exome',
                       'Twist_Target_hg19.bed',
                       'other')
-CAPTUREKIT_CANCER_OPTIONS = ('CG001',
+CAPTUREKIT_CANCER_OPTIONS = (
                              'CMCKsolid',
                              'GlcfDNA',
                              'GMSmyeloid',
