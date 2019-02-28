@@ -408,14 +408,11 @@ class StatusHandler:
             self.Analysis.query
             .join(models.Family.links, models.FamilySample.sample)
             .filter(
+                models.Sample.delivered_at.isnot(None),
                 or_(
-                    and_(
-                        models.Analysis.delivery_report_created_at.is_(None),
-                        models.Sample.delivered_at.isnot(None),
-                    ),
+                    models.Analysis.delivery_report_created_at.is_(None),
                     and_(
                         models.Analysis.delivery_report_created_at.isnot(None),
-                        models.Sample.delivered_at.isnot(None),
                         models.Analysis.delivery_report_created_at < models.Sample.delivered_at
                     )
                 )
