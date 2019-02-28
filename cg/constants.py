@@ -17,7 +17,7 @@ CAPTUREKIT_CANCER_OPTIONS = ('CG001',
                              'CMCKsolid',
                              'GlcfDNA',
                              'GMSmyeloid',
-                             'LymphoMATIC'
+                             'LymphoMATIC',
                              'Nimblegen MSK-IMPACT',
                              'Twist exome v1.3',
                              'other (specify in comment field)'
