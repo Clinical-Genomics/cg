@@ -41,6 +41,7 @@ class ReportAPI:
         delivery_report = self.create_delivery_report(customer_id=customer_id,
                                                       family_id=family_id)
 
+        file_path.mkdir(parents=True, exist_ok=True)
         delivery_report_file = open(file_path / 'delivery-report.html', 'w')
         delivery_report_file.write(delivery_report)
         delivery_report_file.close()
