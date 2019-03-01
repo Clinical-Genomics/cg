@@ -8,8 +8,10 @@ def test_analyses_to_delivery_report_missing(analysis_store: Store):
     """Tests that analyses that are completed but lacks delivery report are returned"""
 
     # GIVEN an analysis that is delivered but has no delivery report
-    analysis = add_analysis(analysis_store, delivered=True)
-    assert analysis.delivered_at is not None
+    analysis = add_analysis(analysis_store)
+    sample = add_sample(analysis_store, delivered=True)
+    analysis_store.relate_sample(family=analysis.family, sample=sample, status='unknown')
+    assert sample.delivered_at is not None
     assert analysis.delivery_report_created_at is None
 
     # WHEN calling the analyses_to_delivery_report
@@ -24,8 +26,9 @@ def test_analyses_to_delivery_report_outdated(analysis_store):
     returned"""
 
     # GIVEN an analysis that is delivered but has an outdated delivery report
-    analysis = add_analysis(analysis_store, delivered=True, old_delivery_report=True)
-
+    analysis = add_analysis(analysis_store, old_delivery_report=True)
+    sample = add_sample(analysis_store, delivered=True)
+    analysis_store.relate_sample(family=analysis.family, sample=sample, status='unknown')
     # WHEN calling the analyses_to_delivery_report
     analyses = analysis_store.analyses_to_delivery_report().all()
 
@@ -76,6 +79,19 @@ def ensure_panel(disk_store, panel_id='panel_test', customer_id='cust_test'):
                                      date=datetime.now(), genes=1)
         disk_store.add_commit(panel)
     return panel
+
+
+def add_sample(store, sample_name='sample_test', delivered=False, date=datetime.now()):
+    """utility function to add a sample to use in tests"""
+    customer = ensure_customer(store)
+    application_version_id = ensure_application_version(store).id
+    sample = store.add_sample(name=sample_name, sex='unknown')
+    sample.application_version_id = application_version_id
+    sample.customer = customer
+    if delivered:
+        sample.delivered_at = date
+    store.add_commit(sample)
+    return sample
 
 
 def add_family(disk_store, family_id='family_test', customer_id='cust_test', ordered_days_ago=0,
