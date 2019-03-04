@@ -157,7 +157,8 @@ def _push_delivery_report_to_hk(delivery_report_file, hk_api: api.HousekeeperAPI
     delivery_report_tag_name = 'delivery-report'
     version_obj = hk_api.last_version(family_id)
     uploaded_delivery_report_files = hk_api.get_files(bundle=family_id,
-                                                      tags=[delivery_report_tag_name])
+                                                      tags=[delivery_report_tag_name],
+                                                      version=version_obj.id)
     number_of_delivery_reports = len(uploaded_delivery_report_files.all())
 
     if number_of_delivery_reports == 0:
@@ -167,6 +168,7 @@ def _push_delivery_report_to_hk(delivery_report_file, hk_api: api.HousekeeperAPI
         file_obj = uploaded_delivery_report_files[0]
         hk_api.re_include_file(delivery_report_file.name, file_obj, version_obj)
     else:
+        LOG.error("Too many delivery reports for family: %s", family_id)
         return False
 
     hk_api.add_commit(file_obj)
