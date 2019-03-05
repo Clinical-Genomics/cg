@@ -393,13 +393,16 @@ class StatusHandler:
         """Fetch analyses that have been uploaded but not delivered."""
         records = (
             self.Analysis.query
-            .join(models.Family.links, models.FamilySample.sample)
+            .join(models.Family, models.Family.links, models.FamilySample.sample)
             .filter(
                 models.Analysis.uploaded_at.isnot(None),
                 models.Sample.delivered_at.is_(None)
             )
             .order_by(models.Analysis.uploaded_at.desc())
         )
+
+        print(records)
+
         return records
 
     def analyses_to_delivery_report(self):

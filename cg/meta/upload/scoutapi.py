@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 
-from cg.apps import scoutapi, madeline
-from cg.apps.hk import api
+from cg.apps import scoutapi, madeline, hk
 from cg.store import models, Store
 from cg.meta.analysis import AnalysisAPI
 
@@ -11,7 +10,7 @@ LOG = logging.getLogger(__name__)
 
 class UploadScoutAPI(object):
 
-    def __init__(self, status_api: Store, hk_api: api.HousekeeperAPI,
+    def __init__(self, status_api: Store, hk_api: hk.HousekeeperAPI,
                  scout_api: scoutapi.ScoutAPI,
                  analysis_api: AnalysisAPI, madeline_exe: str, madeline=madeline,
                  ):

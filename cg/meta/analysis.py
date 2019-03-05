@@ -8,8 +8,7 @@ from ruamel.yaml import safe_load
 
 from requests.exceptions import HTTPError
 
-from cg.apps import tb, scoutapi, lims
-from cg.apps.hk import api
+from cg.apps import tb, scoutapi, lims, hk
 from cg.apps.balsamic import fastq
 from cg.meta.deliver.api import DeliverAPI
 from cg.store import models, Store
@@ -34,7 +33,7 @@ class AnalysisAPI:
     """The pipelines are accessed through Trailblazer but cg provides additional conventions and
     hooks into the status database that makes managing analyses simpler"""
 
-    def __init__(self, db: Store, hk_api: api.HousekeeperAPI, scout_api: scoutapi.ScoutAPI,
+    def __init__(self, db: Store, hk_api: hk.HousekeeperAPI, scout_api: scoutapi.ScoutAPI,
                  tb_api: tb.TrailblazerAPI, lims_api: lims.LimsAPI, deliver_api: DeliverAPI,
                  fastq_handler=fastq.FastqHandler, yaml_loader=safe_load, path_api=Path,
                  logger=logging.getLogger(

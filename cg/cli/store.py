@@ -5,8 +5,7 @@ from pathlib import Path
 
 import click
 
-from cg.apps import tb
-from cg.apps.hk import api
+from cg.apps import tb, hk
 from cg.exc import AnalysisNotFinishedError
 from cg.store import Store
 
@@ -19,7 +18,7 @@ def store(context):
     """Store results from MIP in housekeeper."""
     context.obj['db'] = Store(context.obj['database'])
     context.obj['tb_api'] = tb.TrailblazerAPI(context.obj)
-    context.obj['hk_api'] = api.HousekeeperAPI(context.obj)
+    context.obj['hk_api'] = hk.HousekeeperAPI(context.obj)
 
 
 @store.command()

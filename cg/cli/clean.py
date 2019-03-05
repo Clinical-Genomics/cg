@@ -8,8 +8,7 @@ from datetime import datetime
 
 from path import Path
 
-from cg.apps import tb, scoutapi, beacon as beacon_app
-from cg.apps.hk import api
+from cg.apps import tb, scoutapi, beacon as beacon_app, hk
 from cg.meta.upload.beacon import UploadBeaconApi
 from cg.store import Store
 
@@ -22,7 +21,7 @@ def clean(context):
     """Remove stuff."""
     context.obj['db'] = Store(context.obj['database'])
     context.obj['tb'] = tb.TrailblazerAPI(context.obj)
-    context.obj['hk'] = api.HousekeeperAPI(context.obj)
+    context.obj['hk'] = hk.HousekeeperAPI(context.obj)
     context.obj['scout'] = scoutapi.ScoutAPI(context.obj)
     context.obj['beacon'] = beacon_app.BeaconApi(context.obj)
 

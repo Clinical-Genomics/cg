@@ -5,8 +5,7 @@ import sys
 from pathlib import Path
 
 import click
-from cg.apps import tb, scoutapi, lims
-from cg.apps.hk import api
+from cg.apps import tb, scoutapi, lims, hk
 from cg.apps.balsamic.fastq import FastqHandler
 from cg.exc import LimsDataError
 from cg.meta.analysis import AnalysisAPI
@@ -28,7 +27,7 @@ START_WITH_PROGRAM = click.option('-sw', '--start-with', help='start mip from th
 def analysis(context, priority, email, family_id, start_with):
     """Prepare and start a MIP analysis for a FAMILY_ID."""
     context.obj['db'] = Store(context.obj['database'])
-    hk_api = api.HousekeeperAPI(context.obj)
+    hk_api = hk.HousekeeperAPI(context.obj)
     scout_api = scoutapi.ScoutAPI(context.obj)
     lims_api = lims.LimsAPI(context.obj)
     context.obj['tb'] = tb.TrailblazerAPI(context.obj)

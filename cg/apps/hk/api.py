@@ -27,45 +27,49 @@ class HousekeeperAPI(Store):
         """include a file and link it"""
         global_root_dir = Path(self.get_root_dir())
 
-        # generate root directory
-        version_root_dir = global_root_dir / version_obj.relative_root_dir
-        version_root_dir.mkdir(parents=True, exist_ok=True)
-        self.log.info('created new bundle version dir: %s', version_root_dir)
+        version_root_dir = self._generate_root_directory(global_root_dir, version_obj)
 
-        if file_obj.to_archive:
-            # calculate sha1 checksum if file is to be archived
-            file_obj.checksum = HousekeeperAPI.checksum(file_obj.path)
-        # hardlink file to the internal structure
-        new_path = version_root_dir / Path(file_obj.path).name
-        os.link(file_obj.path, new_path)
-        self.log.info('linked file: %s -> %s', file_obj.path, new_path)
+        self.calculate_sha1_checksum_if_file_is_to_be_archived(file_obj)
+
+        include_file_path = file_obj.path
+
+        new_path = self.hardlink_file_to_internal_structure(include_file_path, version_root_dir)
+        self.set_path_on_file_obj(file_obj, global_root_dir, new_path)
+
+    def set_path_on_file_obj(self, file_obj, global_root_dir, new_path):
         file_obj.path = str(new_path).replace(f"{global_root_dir}/", '', 1)
 
-    def re_include_file(self, new_file_path, file_obj: models.File, version_obj: models.Version):
-        """re-link a file to the internal structure"""
-        assert file_obj.is_included
+    def hardlink_file_to_internal_structure(self, include_file_path, version_root_dir):
+        new_path = version_root_dir / Path(include_file_path).name
+        os.link(include_file_path, new_path)
+        self.log.info('linked file: %s -> %s', include_file_path, new_path)
+        return new_path
 
-        global_root_dir = Path(self.get_root_dir())
+    @staticmethod
+    def calculate_sha1_checksum_if_file_is_to_be_archived(file_obj):
+        if file_obj.to_archive:
+            file_obj.checksum = HousekeeperAPI.checksum(file_obj.path)
 
-        # generate root directory
+    def _generate_root_directory(self, global_root_dir, version_obj):
         version_root_dir = global_root_dir / version_obj.relative_root_dir
         version_root_dir.mkdir(parents=True, exist_ok=True)
         self.log.info('created new bundle version dir: %s', version_root_dir)
+        return version_root_dir
 
-        if file_obj.to_archive:
-            # calculate sha1 checksum if file is to be archived
-            file_obj.checksum = HousekeeperAPI.checksum(file_obj.path)
+    def re_include_file(self, include_file_path, file_obj: models.File, version_obj: models.Version):
+        """re-link a file to the internal structure"""
+        global_root_dir = Path(self.get_root_dir())
 
-        # hardlink file to the internal structure
-        new_path = version_root_dir / Path(new_file_path).name
+        version_root_dir = self._generate_root_directory(global_root_dir, version_obj)
+
+        self.calculate_sha1_checksum_if_file_is_to_be_archived(file_obj)
 
         # remove the old included file
         if os.path.isfile(file_obj.full_path):
             os.remove(file_obj.full_path)
 
-        os.link(new_file_path, new_path)
-        self.log.info('linked file: %s -> %s', new_file_path, new_path)
-        file_obj.path = str(new_path).replace(f"{global_root_dir}/", '', 1)
+        new_path = self.hardlink_file_to_internal_structure(include_file_path, version_root_dir)
+        self.set_path_on_file_obj(file_obj, global_root_dir, new_path)
 
     def last_version(self, bundle: str) -> models.Version:
         """gets the latest version of a bundle"""

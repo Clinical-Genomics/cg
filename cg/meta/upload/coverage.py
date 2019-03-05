@@ -2,8 +2,7 @@
 import logging
 from pathlib import Path
 
-from cg.apps import coverage
-from cg.apps.hk import api
+from cg.apps import coverage, hk
 from cg.store import models, Store
 
 log = logging.getLogger(__name__)
@@ -11,7 +10,7 @@ log = logging.getLogger(__name__)
 
 class UploadCoverageApi(object):
 
-    def __init__(self, status_api: Store, hk_api: api.HousekeeperAPI,
+    def __init__(self, status_api: Store, hk_api: hk.HousekeeperAPI,
                  chanjo_api: coverage.ChanjoAPI):
         self.status = status_api
         self.hk = hk_api

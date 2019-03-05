@@ -2,7 +2,7 @@
 
 from functools import partial
 
-from cg.apps.hk import api
+from cg.apps import hk
 from click.testing import CliRunner
 import pytest
 
@@ -91,7 +91,7 @@ def analysis_store(base_store, analysis_family):
     yield base_store
 
 
-class MockHkVersion(api.models.Version):
+class MockHkVersion(hk.api.models.Version):
     """Mocked Housekeeper.Model.Version object"""
     pass
 

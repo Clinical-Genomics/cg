@@ -7,8 +7,7 @@ import click
 
 from cg.store import Store
 from cg.apps import coverage as coverage_app, gt, loqus, tb, scoutapi, beacon as beacon_app, \
-    lims
-from cg.apps.hk import api
+    lims, hk
 from cg.exc import DuplicateRecordError
 from cg.meta.upload.coverage import UploadCoverageApi
 from cg.meta.upload.gt import UploadGenotypesAPI
@@ -31,7 +30,7 @@ def upload(context, family_id):
     click.echo(click.style('----------------- UPLOAD ----------------------'))
         
     context.obj['status'] = Store(context.obj['database'])
-    context.obj['housekeeper_api'] = api.HousekeeperAPI(context.obj)
+    context.obj['housekeeper_api'] = hk.HousekeeperAPI(context.obj)
 
     context.obj['lims_api'] = lims.LimsAPI(context.obj)
     context.obj['tb_api'] = tb.TrailblazerAPI(context.obj)
@@ -153,7 +152,7 @@ def delivery_report(context, customer_id, family_id, print_console):
             _update_delivery_report_date(status_api, family_id)
 
 
-def _push_delivery_report_to_hk(delivery_report_file, hk_api: api.HousekeeperAPI, family_id):
+def _push_delivery_report_to_hk(delivery_report_file, hk_api: hk.HousekeeperAPI, family_id):
     delivery_report_tag_name = 'delivery-report'
     version_obj = hk_api.last_version(family_id)
     uploaded_delivery_report_files = hk_api.get_files(bundle=family_id,
