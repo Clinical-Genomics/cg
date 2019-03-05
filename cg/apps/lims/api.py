@@ -282,9 +282,3 @@ class LimsAPI(Lims, OrderHandler):
 
         method_name = AM_METHODS.get(method_number)
         return f"{method_number}:{method_version} - {method_name}"
-
-    def get_processing_time(self, lims_id):
-        received_at = self.get_received_date(lims_id)
-        delivery_date = self.get_delivery_date(lims_id)
-        if received_at and delivery_date:
-            return delivery_date - received_at
