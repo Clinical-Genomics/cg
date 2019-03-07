@@ -14,13 +14,11 @@ CAPTUREKIT_OPTIONS = ('Agilent Sureselect CRE',
                       'Twist_Target_hg19.bed',
                       'other')
 CAPTUREKIT_CANCER_OPTIONS = (
-                             'CMCKsolid',
-                             'GlcfDNA',
-                             'GMSmyeloid',
-                             'LymphoMATIC',
-                             'Nimblegen MSK-IMPACT',
-                             'Twist exome v1.3',
-                             'other (specify in comment field)'
+    'GIcfDNA',
+    'GMCKsolid',
+    'GMSmyeloid',
+    'LymphoMATIC',
+    'other (specify in comment field)'
                              )
 FLOWCELL_STATUS = ('ondisk', 'removed', 'requested', 'processing')
 METAGENOME_SOURCES = (
