@@ -200,17 +200,16 @@ def microbial_order(context, apptag, order_id, user_signature):
 def microbial_sample(context, apptag, sample_id, user_signature):
     """Update information on one samples"""
 
-    if not apptag:
-        click.echo(click.style(f"no option specified: {sample_id}", fg='yellow'))
-        context.abort()
-
     sample_obj = context.obj['status'].microbial_sample(internal_id=sample_id)
 
     if not sample_obj:
         click.echo(click.style(f"sample not found: {sample_id}", fg='yellow'))
         context.abort()
 
-    if apptag:
+    if not apptag:
+        click.echo(click.style(f"no option specified: {sample_id}", fg='yellow'))
+        context.abort()
+    else:
         apptags = [app.tag for app in context.obj['status'].applications()]
         if apptag not in apptags:
             click.echo(click.style(f"Application tag {apptag} does not exist.", fg='red'))
