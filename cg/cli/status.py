@@ -159,6 +159,15 @@ def cases(context, output_type, verbose, days, internal_id, name, action, priori
     )
     case_rows = []
 
+    if output_type == 'bool':
+        case_header = CASE_HEADERS_SHORT
+
+    elif output_type == 'count':
+        case_header = CASE_HEADERS_MEDIUM
+
+    elif output_type in ('date', 'datetime'):
+        case_header = CASE_HEADERS_LONG
+
     for case in records:
         title = f"{case.get('internal_id')}"
         if name:
@@ -171,7 +180,6 @@ def cases(context, output_type, verbose, days, internal_id, name, action, priori
         ordered = present_date(case, 'ordered_at', verbose, show_time)
 
         if output_type == 'bool':
-            case_header = CASE_HEADERS_SHORT
             received = present_bool(case, 'samples_received_bool', verbose)
             prepared = present_bool(case, 'samples_prepared_bool', verbose)
             sequenced = present_bool(case, 'samples_sequenced_bool', verbose)
@@ -184,7 +192,6 @@ def cases(context, output_type, verbose, days, internal_id, name, action, priori
             invoiced = present_bool(case, 'samples_invoiced_bool', verbose)
 
         elif output_type == 'count':
-            case_header = CASE_HEADERS_MEDIUM
             received = f"{case.get('samples_received')}/{case.get('samples_to_receive')}"
             prepared = f"{case.get('samples_prepared')}/{case.get('samples_to_prepare')}"
             sequenced = f"{case.get('samples_sequenced')}/{case.get('samples_to_sequence')}"
@@ -197,7 +204,6 @@ def cases(context, output_type, verbose, days, internal_id, name, action, priori
             invoiced = f"{case.get('samples_invoiced')}/{case.get('samples_to_invoice')}"
 
         elif output_type in ('date', 'datetime'):
-            case_header = CASE_HEADERS_LONG
             received = present_date(case, 'samples_received_at', verbose, show_time)
             prepared = present_date(case, 'samples_prepared_at', verbose, show_time)
             sequenced = present_date(case, 'samples_sequenced_at', verbose, show_time)
