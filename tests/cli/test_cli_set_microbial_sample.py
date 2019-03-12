@@ -66,7 +66,7 @@ def test_valid_application(invoke_cli, disk_store: Store):
     assert disk_store.MicrobialSample.query.first().application_version.application.tag != \
         application_tag
 
-    # WHEN calling set sample with an invalid application
+    # WHEN calling set sample with an valid application
     signature = 'sign'
     result = invoke_cli(['--database', disk_store.uri, 'set', 'microbial_sample',
                          sample.internal_id, signature, '-a', application_tag])
