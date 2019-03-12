@@ -29,7 +29,7 @@ def test_invalid_sample_non_empty_db(invoke_cli, disk_store: Store):
     assert result.exit_code == 1
 
 
-def test_valid_sample_no_options(invoke_cli, disk_store: Store):
+def test_valid_sample_no_apptag_option(invoke_cli, disk_store: Store):
     # GIVEN a non empty database
     sample = add_microbial_sample_and_order(disk_store)
 
@@ -66,7 +66,7 @@ def test_valid_application(invoke_cli, disk_store: Store):
     assert disk_store.MicrobialSample.query.first().application_version.application.tag != \
         application_tag
 
-    # WHEN calling set sample with an invalid application
+    # WHEN calling set sample with an valid application
     signature = 'sign'
     result = invoke_cli(['--database', disk_store.uri, 'set', 'microbial-sample',
                          sample.internal_id, signature, '-a', application_tag])
