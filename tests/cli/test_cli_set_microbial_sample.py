@@ -59,7 +59,7 @@ def test_invalid_application(invoke_cli, disk_store: Store):
         application_tag
 
 
-def test_application(invoke_cli, disk_store: Store):
+def test_valid_application(invoke_cli, disk_store: Store):
     # GIVEN a database with a sample and two applications
     sample = add_microbial_sample_and_order(disk_store)
     application_tag = ensure_application_version(disk_store, 'another_application').application.tag

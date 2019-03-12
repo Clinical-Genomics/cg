@@ -15,7 +15,7 @@ def test_add_sample_bad_customer(invoke_cli, disk_store: Store):
     result = invoke_cli(['--database', db_uri, 'add', 'sample', '--sex', sex, '--application',
                          application, customer_id, name])
 
-    # THEN then it should complain on missing customer instead of adding a sample
+    # THEN then it should complain about missing customer instead of adding a sample
     assert result.exit_code == 1
     assert disk_store.Sample.query.count() == 0
 
@@ -32,7 +32,7 @@ def test_add_sample_bad_application(invoke_cli, disk_store: Store):
     result = invoke_cli(['--database', db_uri, 'add', 'sample', '--sex', sex, '--application',
                          application, customer_id, name])
 
-    # THEN then it should complain on missing application instead of adding a sample
+    # THEN then it should complain about missing application instead of adding a sample
     assert result.exit_code == 1
     assert disk_store.Sample.query.count() == 0
 
