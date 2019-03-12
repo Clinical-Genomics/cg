@@ -33,7 +33,7 @@ def test_valid_sample_no_options(invoke_cli, disk_store: Store):
     # GIVEN a non empty database
     sample = add_microbial_sample_and_order(disk_store)
 
-    # WHEN running set with an sample that does not exist
+    # WHEN running set with an sample but without any options
     sample_id = sample.internal_id
     result = invoke_cli(['--database', disk_store.uri, 'set',
                          'microbial_sample', sample_id, 'sign'])
