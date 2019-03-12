@@ -187,7 +187,6 @@ def microbial_order(context, apptag, order_id, user_signature):
         context.abort()
 
     for sample_obj in microbial_order_obj.microbial_samples:
-
         context.invoke(microbial_sample, sample_id=sample_obj.internal_id,
                        user_signature=user_signature, apptag=apptag)
 
