@@ -13,7 +13,7 @@
       "source": "blood",
       "tumour": true,
       "tumour_purity": "75",
-      "capture_kit": "Twist exome v1.3",
+      "capture_kit": "LymphoMATIC",
       "priority": "standard",
       "container_name": "p1",
       "well_position": "A:1",
