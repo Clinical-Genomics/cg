@@ -29,7 +29,7 @@ def test_invalid_sample_non_empty_db(invoke_cli, disk_store: Store):
     assert result.exit_code == 1
 
 
-def test_valid_sample_no_options(invoke_cli, disk_store: Store):
+def test_valid_sample_no_apptag_option(invoke_cli, disk_store: Store):
     # GIVEN a non empty database
     sample = add_microbial_sample_and_order(disk_store)
 
