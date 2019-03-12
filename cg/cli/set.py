@@ -168,7 +168,7 @@ def flowcell(context, flowcell_name, status):
     print(click.style(f"{flowcell_name} set: {prev_status} -> {status}", fg='green'))
 
 
-@set_cmd.command()
+@set_cmd.command('microbial-order')
 @click.option('-a', '--application-tag', 'apptag', help='sets application tag.', type=str)
 @click.argument('order_id')
 @click.argument('user_signature')
@@ -191,7 +191,7 @@ def microbial_order(context, apptag, order_id, user_signature):
                        user_signature=user_signature, apptag=apptag)
 
 
-@set_cmd.command()
+@set_cmd.command('microbial-sample')
 @click.option('-a', '--application-tag', 'apptag', help='sets application tag.', type=str)
 @click.argument('sample_id')
 @click.argument('user_signature')

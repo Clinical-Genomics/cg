@@ -10,7 +10,7 @@ def test_invalid_sample_empty_db(invoke_cli, disk_store: Store):
     # WHEN running set with an sample that does not exist
     sample_id = 'dummy_sample_id'
     result = invoke_cli(['--database', disk_store.uri, 'set',
-                         'microbial_sample', sample_id, 'sign'])
+                         'microbial-sample', sample_id, 'sign'])
 
     # THEN then it should complain on invalid sample
     assert result.exit_code == 1
@@ -23,7 +23,7 @@ def test_invalid_sample_non_empty_db(invoke_cli, disk_store: Store):
     # WHEN running set with an sample that does not exist
     sample_id = 'dummy_sample_id'
     result = invoke_cli(['--database', disk_store.uri, 'set',
-                         'microbial_sample', sample_id, 'sign'])
+                         'microbial-sample', sample_id, 'sign'])
 
     # THEN then it should complain on invalid sample
     assert result.exit_code == 1
@@ -36,7 +36,7 @@ def test_valid_sample_no_apptag_option(invoke_cli, disk_store: Store):
     # WHEN running set with an sample but without any options
     sample_id = sample.internal_id
     result = invoke_cli(['--database', disk_store.uri, 'set',
-                         'microbial_sample', sample_id, 'sign'])
+                         'microbial-sample', sample_id, 'sign'])
 
     # THEN then it should complain on missing options
     assert result.exit_code == 1
@@ -50,7 +50,7 @@ def test_invalid_application(invoke_cli, disk_store: Store):
         application_tag
 
     # WHEN calling set sample with an invalid application
-    result = invoke_cli(['--database', disk_store.uri, 'set', 'microbial_sample',
+    result = invoke_cli(['--database', disk_store.uri, 'set', 'microbial-sample',
                          sample.internal_id, 'sign', '-a', application_tag])
 
     # THEN then it should complain about missing application instead of setting the value
@@ -68,7 +68,7 @@ def test_valid_application(invoke_cli, disk_store: Store):
 
     # WHEN calling set sample with an valid application
     signature = 'sign'
-    result = invoke_cli(['--database', disk_store.uri, 'set', 'microbial_sample',
+    result = invoke_cli(['--database', disk_store.uri, 'set', 'microbial-sample',
                          sample.internal_id, signature, '-a', application_tag])
 
     # THEN then the application should have been set
