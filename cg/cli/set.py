@@ -198,7 +198,7 @@ def microbial_order(context, apptag, order_id, user_signature):
 @click.argument('user_signature')
 @click.pass_context
 def microbial_sample(context, apptag, sample_id, user_signature):
-    """Update information on one samples"""
+    """Update information on one sample"""
 
     sample_obj = context.obj['status'].microbial_sample(internal_id=sample_id)
 
