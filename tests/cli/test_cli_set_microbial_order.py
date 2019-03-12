@@ -10,7 +10,7 @@ def test_invalid_order_empty_db(invoke_cli, disk_store: Store):
     # WHEN running set with an order that does not exist
     order_id = 'dummy_order_id'
     application_tag = 'dummy_application'
-    result = invoke_cli(['--database', disk_store.uri, 'set', 'microbial_order', order_id,
+    result = invoke_cli(['--database', disk_store.uri, 'set', 'microbial-order', order_id,
                          'sign', '-a', application_tag])
 
     # THEN then it should complain on invalid order
@@ -24,7 +24,7 @@ def test_invalid_order_non_empty_db(invoke_cli, disk_store: Store):
     # WHEN running set with an order that does not exist
     order_id = 'dummy_order_id'
     application_tag = 'dummy_application'
-    result = invoke_cli(['--database', disk_store.uri, 'set', 'microbial_order', order_id,
+    result = invoke_cli(['--database', disk_store.uri, 'set', 'microbial-order', order_id,
                          'sign', '-a', application_tag])
 
     # THEN then it should complain on invalid order
@@ -37,7 +37,7 @@ def test_valid_order_no_options(invoke_cli, disk_store: Store):
 
     # WHEN running set with an order that does not exist
     order_id = order.internal_id
-    result = invoke_cli(['--database', disk_store.uri, 'set', 'microbial_order', order_id, 'sign'])
+    result = invoke_cli(['--database', disk_store.uri, 'set', 'microbial-order', order_id, 'sign'])
 
     # THEN then it should just exit
     assert result.exit_code == 1
