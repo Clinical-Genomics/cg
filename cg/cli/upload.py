@@ -217,7 +217,7 @@ def observations(context, family_id):
         except DuplicateRecordError as error:
             LOG.info(f"skipping observations upload: {error.message}")
     else:
-        click.echo(click.style(f"{family_id}: not a cust00{2,3,4} sample. Skipping!", fg=yellow))
+        click.echo(click.style(f"{family_id}: {family_obj.customer.internal_id} not whitelisted for upload to loqusdb. Skipping!", fg='yellow'))
 
 
 @upload.command()
