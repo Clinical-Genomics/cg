@@ -71,9 +71,12 @@ class StatusHandler:
             self.Family.query
             .outerjoin(models.Analysis)
             .join(models.Family.links, models.FamilySample.sample)
-            # the samples must always be sequenced to be analysed
+            # the samples must external or be sequenced to be analysed
             .filter(
-                models.Sample.sequenced_at.isnot(None),
+                or_(
+                    models.Sample.is_external,
+                    models.Sample.sequenced_at.isnot(None),
+                )
             )
             # The data_analysis is unset or not Balsamic only
             .filter(
@@ -96,7 +99,8 @@ class StatusHandler:
             .order_by(models.Family.priority.desc(), models.Family.ordered_at)
         )
 
-        families = [record for record in families_q if self._all_samples_sequenced(record.links)]
+        families = [record for record in families_q if self._all_samples_have_sequence_data(
+            record.links)]
 
         return families[:limit]
 
@@ -379,9 +383,9 @@ class StatusHandler:
         return cases
 
     @staticmethod
-    def _all_samples_sequenced(links: List[models.FamilySample]) -> bool:
-        """Return True if all samples are sequenced."""
-        return all(link.sample.sequenced_at for link in links)
+    def _all_samples_have_sequence_data(links: List[models.FamilySample]) -> bool:
+        """Return True if all samples are external or sequenced inhouse."""
+        return all((link.sample.sequenced_at or link.sample.is_external) for link in links)
 
     def analyses_to_upload(self):
         """Fetch analyses that haven't been uploaded."""
