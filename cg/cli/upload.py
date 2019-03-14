@@ -208,12 +208,16 @@ def observations(context, family_id):
 
     loqus_api = loqus.LoqusdbAPI(context.obj)
     family_obj = context.obj['status'].family(family_id)
-    api = UploadObservationsAPI(context.obj['status'], context.obj['housekeeper_api'], loqus_api)
-    try:
-        api.process(family_obj.analyses[0])
-        click.echo(click.style(f"{family_id}: observations uploaded!", fg='green'))
-    except DuplicateRecordError as error:
-        LOG.info(f"skipping observations upload: {error.message}")
+
+    if family_obj.customer.internal_id not in ('cust002', 'cust003', 'cust004'):
+        click.echo(click.style(f"{family_id}: not a cust00{2,3,4} sample. Skipping!", fg=yellow))
+    else:
+        api = UploadObservationsAPI(context.obj['status'], context.obj['housekeeper_api'], loqus_api)
+        try:
+            api.process(family_obj.analyses[0])
+            click.echo(click.style(f"{family_id}: observations uploaded!", fg='green'))
+        except DuplicateRecordError as error:
+            LOG.info(f"skipping observations upload: {error.message}")
 
 
 @upload.command()
