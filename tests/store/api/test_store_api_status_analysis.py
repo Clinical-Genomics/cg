@@ -50,11 +50,6 @@ def test_external_sample_to_re_analyse(base_store: Store):
     test_sample = add_sample(base_store, sequenced=False, external=True)
     test_analysis = add_analysis(base_store, completed=True, reanalyse=True)
     base_store.relate_sample(test_analysis.family, test_sample, 'unknown')
-    assert test_sample.is_external
-    assert test_sample.data_analysis is None
-    assert test_analysis.completed_at
-    assert test_analysis.family.links
-    assert test_analysis.family.action == 'analyze'
 
     # WHEN getting families to analyse
     families = base_store.families_to_mip_analyze()
