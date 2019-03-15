@@ -12,6 +12,7 @@ CONTAINER_TYPES = ['Tube', '96 well plate']
 SOURCE_TYPES = set().union(METAGENOME_SOURCES, ANALYSIS_SOURCES)
 VALID_ORDERFORMS=[
     '1508:15',      # Orderform MIP, Balsamic, sequencing only
+    '1508:16',      # Orderform MIP, Balsamic, sequencing only. same as 1508:15 with new date
     '1541:6',       # Orderform Externally sequenced samples
     '1603:7',       # Microbial WGS
     '1604:8',       # Orderform Ready made libraries (RML)
