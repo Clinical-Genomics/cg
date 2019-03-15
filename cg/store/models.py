@@ -58,7 +58,7 @@ class Customer(Model):
     name = Column(types.String(128), nullable=False)
     priority = Column(types.Enum('diagnostic', 'research'))
     scout_access = Column(types.Boolean, nullable=False, default=False)
-    loqus_access = Column(types.Boolean, nullable=False, default=False)
+    loqus_upload = Column(types.Boolean, nullable=False, default=False)
 
     agreement_date = Column(types.DateTime)
     agreement_registration = Column(types.String(32))

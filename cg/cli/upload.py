@@ -209,7 +209,7 @@ def observations(context, family_id):
     loqus_api = loqus.LoqusdbAPI(context.obj)
     family_obj = context.obj['status'].family(family_id)
 
-    if family_obj.customer.loqus_access == True:
+    if family_obj.customer.loqus_upload == True:
         api = UploadObservationsAPI(context.obj['status'], context.obj['housekeeper_api'], loqus_api)
         try:
             api.process(family_obj.analyses[0])
