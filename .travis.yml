@@ -8,6 +8,7 @@ cache: pip
 install:
     - pip install cython
     - pip install -r requirements.txt -r requirements-dev.txt .
+    - pip check
 
 before_script:
     - git reset --soft ${TRAVIS_COMMIT_RANGE%...*} && git lint
@@ -15,9 +16,7 @@ before_script:
 script:
     - coverage run --source "$(basename "$PWD")" setup.py test
 
-after_success:
-    - coveralls
-    - pip check
+after_success: coveralls
 
 notifications:
     email: never
