@@ -332,7 +332,7 @@ def options():
             'value': customer.internal_id,
         } for customer in customer_objs],
         applications=apptag_groups,
-        panels=[panel.abbrev for panel in db.Panel.query if panel.customer in customer_objs],
+        panels=[panel.abbrev for panel in db.panels()],
         organisms=[{
             'name': organism.name,
             'reference_genome': organism.reference_genome,
