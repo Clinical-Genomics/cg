@@ -46,6 +46,11 @@ def upload(context, family_id, force_restart):
 
         analysis_obj = family_obj.analyses[0]
 
+        if analysis_obj.uploaded_at is not None:
+            message = f"analysis already uploaded: {analysis_obj.uploaded_at.date()}"
+            click.echo(click.style(message, fg='red'))
+            context.abort()
+
         if not force_restart and analysis_obj.upload_started_at is not None:
             if dt.datetime.now() - analysis_obj.upload_started_at > dt.timedelta(hours=24):
                 raise Exception(f"The upload started at {analysis_obj.upload_started_at} "
@@ -54,11 +59,6 @@ def upload(context, family_id, force_restart):
             message = f"analysis upload already started: {analysis_obj.upload_started_at.date()}"
             click.echo(click.style(message, fg='yellow'))
             return
-
-        if analysis_obj.uploaded_at is not None:
-            message = f"analysis already uploaded: {analysis_obj.uploaded_at.date()}"
-            click.echo(click.style(message, fg='red'))
-            context.abort()
 
     context.obj['housekeeper_api'] = hk.HousekeeperAPI(context.obj)
 
