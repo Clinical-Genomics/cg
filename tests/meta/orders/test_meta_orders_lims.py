@@ -106,7 +106,7 @@ def test_to_lims_balsamic(balsamic_order_to_submit):
     assert samples[0]['well_position'] == 'A:1'
 
     assert first_sample['udfs']['tumour'] is True
-    assert first_sample['udfs']['capture_kit'] == 'Twist exome v1.3'
+    assert first_sample['udfs']['capture_kit'] == 'LymphoMATIC'
     assert 'tumour_purity' not in first_sample['udfs']
 
     assert first_sample['udfs']['formalin_fixation_time'] == '1'
@@ -143,7 +143,7 @@ def test_to_lims_mip_balsamic(mip_balsamic_order_to_submit):
     assert isinstance(samples[1]['udfs']['comment'], str)
 
     assert first_sample['udfs']['tumour'] is True
-    assert first_sample['udfs']['capture_kit'] == 'Twist exome v1.3'
+    assert first_sample['udfs']['capture_kit'] == 'LymphoMATIC'
     assert 'tumour_purity' not in first_sample['udfs']
 
     assert first_sample['udfs']['formalin_fixation_time'] == '1'

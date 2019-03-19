@@ -71,9 +71,12 @@ class StatusHandler:
             self.Family.query
             .outerjoin(models.Analysis)
             .join(models.Family.links, models.FamilySample.sample)
-            # the samples must always be sequenced to be analysed
+            # the samples must external or be sequenced to be analysed
             .filter(
-                models.Sample.sequenced_at.isnot(None),
+                or_(
+                    models.Sample.is_external,
+                    models.Sample.sequenced_at.isnot(None),
+                )
             )
             # The data_analysis is unset or not Balsamic only
             .filter(
@@ -96,7 +99,8 @@ class StatusHandler:
             .order_by(models.Family.priority.desc(), models.Family.ordered_at)
         )
 
-        families = [record for record in families_q if self._all_samples_sequenced(record.links)]
+        families = [record for record in families_q if self._all_samples_have_sequence_data(
+            record.links)]
 
         return families[:limit]
 
@@ -173,8 +177,6 @@ class StatusHandler:
         families_q = families_q.outerjoin(models.Family.analyses, models.Sample.invoice,
                                           models.Sample.flowcells)
 
-        families_q = families_q.order_by(models.Family.ordered_at.desc())
-
         cases = []
 
         for record in families_q:
@@ -208,6 +210,7 @@ class StatusHandler:
             flowcells_status = None
             flowcells_on_disk = None
             flowcells_on_disk_bool = None
+            tat = None
 
             analysis_in_progress = record.action is not None
             analysis_action = record.action
@@ -293,45 +296,6 @@ class StatusHandler:
                 analysis_completed_bool = False
                 analysis_uploaded_bool = False
 
-            case = {
-                'internal_id': record.internal_id,
-                'name': record.name,
-                'ordered_at': record.ordered_at,
-                'total_samples': total_samples,
-                'total_external_samples': total_external_samples,
-                'total_internal_samples': total_internal_samples,
-                'samples_to_receive': samples_to_receive,
-                'samples_to_prepare': samples_to_prepare,
-                'samples_to_sequence': samples_to_sequence,
-                'samples_to_deliver': samples_to_deliver,
-                'samples_to_invoice': samples_to_invoice,
-                'samples_data_analyses': samples_data_analyses,
-                'samples_received': samples_received,
-                'samples_prepared': samples_prepared,
-                'samples_sequenced': samples_sequenced,
-                'samples_received_at': samples_received_at,
-                'samples_prepared_at': samples_prepared_at,
-                'samples_sequenced_at': samples_sequenced_at,
-                'samples_delivered_at': samples_delivered_at,
-                'samples_invoiced_at': samples_invoiced_at,
-                'analysis_action': analysis_action,
-                'analysis_completed_at': analysis_completed_at,
-                'analysis_uploaded_at': analysis_uploaded_at,
-                'samples_delivered': samples_delivered,
-                'samples_invoiced': samples_invoiced,
-                'analysis_pipeline': analysis_pipeline,
-                'samples_received_bool': samples_received_bool,
-                'samples_prepared_bool': samples_prepared_bool,
-                'samples_sequenced_bool': samples_sequenced_bool,
-                'analysis_completed_bool': analysis_completed_bool,
-                'analysis_uploaded_bool': analysis_uploaded_bool,
-                'samples_delivered_bool': samples_delivered_bool,
-                'samples_invoiced_bool': samples_invoiced_bool,
-                'flowcells_status': flowcells_status,
-                'flowcells_on_disk': flowcells_on_disk,
-                'flowcells_on_disk_bool': flowcells_on_disk_bool,
-            }
-
             if only_received and not samples_received_bool:
                 continue
 
@@ -374,14 +338,65 @@ class StatusHandler:
             if exclude_invoiced and samples_invoiced_bool:
                 continue
 
+            tat = self._calculate_estimated_turnaround_time(
+                samples_received_at,
+                samples_prepared_at,
+                samples_sequenced_at,
+                analysis_completed_at,
+                analysis_uploaded_at,
+                samples_delivered_at
+            )
+
+            case = {
+                'internal_id': record.internal_id,
+                'name': record.name,
+                'ordered_at': record.ordered_at,
+                'total_samples': total_samples,
+                'total_external_samples': total_external_samples,
+                'total_internal_samples': total_internal_samples,
+                'samples_to_receive': samples_to_receive,
+                'samples_to_prepare': samples_to_prepare,
+                'samples_to_sequence': samples_to_sequence,
+                'samples_to_deliver': samples_to_deliver,
+                'samples_to_invoice': samples_to_invoice,
+                'samples_data_analyses': samples_data_analyses,
+                'samples_received': samples_received,
+                'samples_prepared': samples_prepared,
+                'samples_sequenced': samples_sequenced,
+                'samples_received_at': samples_received_at,
+                'samples_prepared_at': samples_prepared_at,
+                'samples_sequenced_at': samples_sequenced_at,
+                'samples_delivered_at': samples_delivered_at,
+                'samples_invoiced_at': samples_invoiced_at,
+                'analysis_action': analysis_action,
+                'analysis_completed_at': analysis_completed_at,
+                'analysis_uploaded_at': analysis_uploaded_at,
+                'samples_delivered': samples_delivered,
+                'samples_invoiced': samples_invoiced,
+                'analysis_pipeline': analysis_pipeline,
+                'samples_received_bool': samples_received_bool,
+                'samples_prepared_bool': samples_prepared_bool,
+                'samples_sequenced_bool': samples_sequenced_bool,
+                'analysis_completed_bool': analysis_completed_bool,
+                'analysis_uploaded_bool': analysis_uploaded_bool,
+                'samples_delivered_bool': samples_delivered_bool,
+                'samples_invoiced_bool': samples_invoiced_bool,
+                'flowcells_status': flowcells_status,
+                'flowcells_on_disk': flowcells_on_disk,
+                'flowcells_on_disk_bool': flowcells_on_disk_bool,
+                'tat': tat,
+            }
+
             cases.append(case)
 
-        return cases
+        cases_sorted = sorted(cases, key=lambda k: k['tat'], reverse=True)
+
+        return cases_sorted
 
     @staticmethod
-    def _all_samples_sequenced(links: List[models.FamilySample]) -> bool:
-        """Return True if all samples are sequenced."""
-        return all(link.sample.sequenced_at for link in links)
+    def _all_samples_have_sequence_data(links: List[models.FamilySample]) -> bool:
+        """Return True if all samples are external or sequenced inhouse."""
+        return all((link.sample.sequenced_at or link.sample.is_external) for link in links)
 
     def analyses_to_upload(self):
         """Fetch analyses that haven't been uploaded."""
@@ -567,3 +582,30 @@ class StatusHandler:
             .order_by(models.MicrobialSample.created_at)
         )
         return records
+
+    def _calculate_estimated_turnaround_time(self,
+                                             samples_received_at,
+                                             samples_prepared_at,
+                                             samples_sequenced_at,
+                                             analysis_completed_at,
+                                             analysis_uploaded_at,
+                                             samples_delivered_at
+                                             ):
+
+        if samples_received_at and samples_delivered_at:
+            return self._calculate_date_delta(None, samples_received_at, samples_delivered_at)
+
+        r_p = self._calculate_date_delta(4, samples_received_at, samples_prepared_at)
+        p_s = self._calculate_date_delta(5, samples_prepared_at, samples_sequenced_at)
+        s_a = self._calculate_date_delta(4, samples_sequenced_at, analysis_completed_at)
+        a_u = self._calculate_date_delta(1, analysis_completed_at, analysis_uploaded_at)
+        u_d = self._calculate_date_delta(2, analysis_uploaded_at, samples_delivered_at)
+
+        return r_p + p_s + s_a + a_u + u_d
+
+    @staticmethod
+    def _calculate_date_delta(default, first_date, last_date):
+        delta = default
+        if first_date and last_date:
+            delta = (last_date - first_date).days
+        return delta

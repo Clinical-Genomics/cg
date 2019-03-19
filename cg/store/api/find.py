@@ -172,6 +172,10 @@ class FindHandler:
         """Find a panel by abbreviation."""
         return self.Panel.query.filter_by(abbrev=abbrev).first()
 
+    def panels(self):
+        """Returns all panels."""
+        return self.Panel.query.order_by(models.Panel.abbrev)
+
     def analyses(self, *, family: models.Family = None, before: dt.datetime = None) -> Query:
         """Fetch multiple analyses."""
         records = self.Analysis.query

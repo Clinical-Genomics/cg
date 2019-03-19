@@ -46,24 +46,24 @@ def test_parsing_fastq_orderform(fastq_orderform):
     # THEN it should determine the project type
     assert data['project_type'] == 'fastq'
     # ... and find all samples
-    assert len(data['items']) == 2
+    assert len(data['items']) == 18
 
     # ... and collect relevant sample info
-    normal_sample = data['items'][0]
-    tumour_sample = data['items'][1]
-    assert normal_sample['name'] == 'prov1'
+    normal_sample = data['items'][1]
+    tumour_sample = data['items'][0]
+    assert normal_sample['name'] == 'whole-genome-2'
     assert normal_sample['container'] == 'Tube'
     assert normal_sample['data_analysis'] == 'fastq'
     assert normal_sample['application'] == 'WGSPCFC030'
-    assert normal_sample['sex'] == 'male'
-    assert normal_sample['family'] == 'family1'
-    assert data['customer'] == 'cust009'
-    assert normal_sample['require_qcok'] == True
-    assert normal_sample['source'] == 'blood'
+    assert normal_sample['sex'] == 'female'
+    assert normal_sample['family'] == 'whole-genome'
+    assert data['customer'] == 'cust000'
+    assert normal_sample['require_qcok'] is False
+    assert normal_sample['source'] == 'saliva'
     assert normal_sample['priority'] == 'priority'
 
-    assert normal_sample['container_name'] == 'plateA'
-    assert normal_sample['well_position'] == 'A:1'
+    assert normal_sample['container_name'] == ''
+    assert normal_sample['well_position'] == ''
 
     assert normal_sample['tumour'] is False
 
@@ -71,7 +71,7 @@ def test_parsing_fastq_orderform(fastq_orderform):
     assert normal_sample['comment'] == 'sample comment'
 
     assert tumour_sample['tumour'] is True
-    assert tumour_sample['source'] == 'cell line'
+    assert tumour_sample['source'] == 'blood'
 
 
 def test_parsing_mip_orderform(mip_orderform):
@@ -82,43 +82,44 @@ def test_parsing_mip_orderform(mip_orderform):
 
     # THEN it should detect the type of project
     assert data['project_type'] == 'mip'
-    assert data['customer'] == 'cust003'
+    assert data['customer'] == 'cust000'
     # ... and it should find and group all samples in families
-    assert len(data['items']) == 2
+    assert len(data['items']) == 5
     # ... and collect relevant data about the families
     trio_family = data['items'][0]
-    assert len(trio_family['samples']) == 3
-    assert trio_family['name'] == 'family1'
-    assert trio_family['priority'] == 'standard'
-    assert trio_family['panels'] == ['IEM']
+    assert len(trio_family['samples']) == 10
+    assert trio_family['name'] == 'whole-genome'
+    assert trio_family['priority'] == 'research'
+    assert set(trio_family['panels']) == set(['CNM', 'AD-HSP', 'AD', 'AD-1.0-141202', 'Ataxi',
+                                              'ATX', '16PDEL', 'CM', 'bindvev', 'CILM'])
     assert trio_family['require_qcok'] is True
     # ... and collect relevant info about the samples
 
     proband_sample = trio_family['samples'][0]
-    assert proband_sample['name'] == 'sample1'
+    assert proband_sample['name'] == 'whole-genome-1'
     assert proband_sample['container'] == '96 well plate'
     assert proband_sample['data_analysis'] == 'MIP'
-    assert proband_sample['application'] == 'WGSLIFC030'
-    assert proband_sample['sex'] == 'female'
+    assert proband_sample['application'] == 'WGSPCFC015'
+    assert proband_sample['sex'] == 'male'
     # family-id on the family
     # customer on the order (data)
     # require-qc-ok on the family
-    assert proband_sample['source'] == 'tissue (fresh frozen)'
+    assert proband_sample['source'] == 'blood'
     assert proband_sample['tumour'] is True
 
-    assert proband_sample['container_name'] == 'CMMS'
+    assert proband_sample['container_name'] == 'plate'
     assert proband_sample['well_position'] == 'A:1'
 
     # panels on the family
     assert proband_sample['status'] == 'affected'
 
-    assert proband_sample['mother'] == 'sample2'
-    assert proband_sample['father'] == 'sample3'
+    assert proband_sample['mother'] == 'whole-genome-2'
+    assert proband_sample['father'] == 'whole-genome-3'
 
     mother_sample = trio_family['samples'][1]
     assert mother_sample.get('mother') is None
-    assert mother_sample['quantity'] == '220'
-    assert mother_sample['comment'] == 'this is a sample comment'
+    assert mother_sample['quantity'] == '1'
+    assert mother_sample['comment'] == 'comment'
 
 
 def test_parsing_external_orderform(external_orderform):
@@ -253,40 +254,40 @@ def test_parsing_balsamic_orderform(balsamic_orderform):
     assert data['project_type'] == 'balsamic'
 
     # ... and it should find and group all samples in case
-    assert len(data['items']) == 1
+    assert len(data['items']) == 5
 
     # ... and collect relevant data about the case
     # ... and collect relevant info about the samples
 
     case = data['items'][0]
     sample = case['samples'][0]
-    assert len(case['samples']) == 1
+    assert len(case['samples']) == 10
 
     # This information is required
 
-    assert sample['name'] == 's1'
+    assert sample['name'] == 'whole-genome-1'
     assert sample['container'] == '96 well plate'
     assert sample['data_analysis'] == 'Balsamic '
     assert sample['application'] == 'WGSPCFC015'
     assert sample['sex'] == 'male'
-    assert case['name'] == 'c1'
+    assert case['name'] == 'whole-genome'
     assert data['customer'] == 'cust000'
     assert case['require_qcok'] is True
     assert sample['source'] == 'blood'
-    assert case['priority'] == 'standard'
+    assert case['priority'] == 'research'
 
     # Required if Plate
 
-    assert sample['container_name'] == 'p1'
+    assert sample['container_name'] == 'plate'
     assert sample['well_position'] == 'A:1'
 
     # This information is required for Balsamic analysis (cancer)
     assert sample['tumour'] is True
-    assert sample['capture_kit'] == 'Twist exome v1.3'
-    assert sample['tumour_purity'] == '1.0'
+    assert sample['capture_kit'] == 'LymphoMATIC'
+    assert sample['tumour_purity'] == '5.0'
 
-    assert sample['formalin_fixation_time'] == '3.0'
-    assert sample['post_formalin_fixation_time'] == '3.0'
+    assert sample['formalin_fixation_time'] == '1.0'
+    assert sample['post_formalin_fixation_time'] == '2.0'
     assert sample['tissue_block_size'] == 'small'
 
     # This information is optional
@@ -308,15 +309,15 @@ def test_parsing_mip_balsamic_orderform(mip_balsamic_orderform):
     # ... and collect relevant data about the families
     trio_family = data['items'][0]
     assert len(trio_family['samples']) == 10
-    assert trio_family['name'] == 'wgs'
-    assert trio_family['priority'] == 'clinical trials'
-    assert set(trio_family['panels']) == set(['AD-1.0-141202', 'CNM', 'CILM', 'AD', 'CM', 'ATX',
-                                      'horsel', 'DSD', 'CTD', '16PDEL'])
+    assert trio_family['name'] == 'whole-genome'
+    assert trio_family['priority'] == 'research'
+    assert set(trio_family['panels']) == set(['CNM', 'AD-HSP', 'AD', 'AD-1.0-141202', 'Ataxi',
+                                              'ATX', '16PDEL', 'CM', 'bindvev', 'CILM'])
     assert trio_family['require_qcok'] is True
     # ... and collect relevant info about the samples
 
     proband_sample = trio_family['samples'][0]
-    assert proband_sample['name'] == 's1'
+    assert proband_sample['name'] == 'whole-genome-1'
     assert proband_sample['container'] == '96 well plate'
     assert proband_sample['data_analysis'] == 'MIP + Balsamic'
     assert proband_sample['application'] == 'WGSPCFC015'
@@ -326,25 +327,25 @@ def test_parsing_mip_balsamic_orderform(mip_balsamic_orderform):
     # require-qc-ok on the family
     assert proband_sample['source'] == 'blood'
 
-    assert proband_sample['container_name'] == 'p1'
+    assert proband_sample['container_name'] == 'plate'
     assert proband_sample['well_position'] == 'A:1'
 
     # panels on the family
     assert proband_sample['status'] == 'affected'
 
-    assert proband_sample['mother'] == 's2'
-    assert proband_sample['father'] == 's3'
+    assert proband_sample['mother'] == 'whole-genome-2'
+    assert proband_sample['father'] == 'whole-genome-3'
 
     # This information is required for Balsamic analysis (cancer)
     assert proband_sample['tumour'] is True
-    assert proband_sample['capture_kit'] == 'Twist exome v1.3'
+    assert proband_sample['capture_kit'] == 'LymphoMATIC'
     assert proband_sample['tumour_purity'] == '5.0'
 
     assert proband_sample['formalin_fixation_time'] == '1.0'
     assert proband_sample['post_formalin_fixation_time'] == '2.0'
-    assert proband_sample['tissue_block_size'] == 'large'
+    assert proband_sample['tissue_block_size'] == 'small'
 
-    assert proband_sample['quantity'] == '3'
+    assert proband_sample['quantity'] == '1'
     assert proband_sample['comment'] == 'comment'
 
     mother_sample = trio_family['samples'][1]
