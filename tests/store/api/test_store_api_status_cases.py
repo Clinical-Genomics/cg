@@ -5,6 +5,82 @@ from cg.constants import FAMILY_ACTIONS, PRIORITY_OPTIONS
 from cg.store import Store
 
 
+def test_delivered_at_affects_ett(base_store: Store):
+    """test that the estimated turnaround time is affected by the delivered_at date """
+
+    # GIVEN a database with a family and a samples receive_at, prepared_at, sequenced_at,
+    # delivered_at one week ago
+    family = add_family(base_store)
+    yesterweek = datetime.now() - timedelta(days=7)
+    weekold_sample = add_sample(base_store, received=True, prepared=True, sequenced=True,
+                                delivered=True, date=yesterweek)
+    base_store.relate_sample(family, weekold_sample, 'unknown')
+
+    # WHEN getting active cases
+    cases = base_store.cases()
+
+    # THEN TAT should be R-D = 0 = 0
+    assert cases
+    for case in cases:
+        assert case.get('tat') == 0
+
+
+def test_sequenced_at_affects_ett(base_store: Store):
+    """test that the estimated turnaround time is affected by the sequenced_at date """
+
+    # GIVEN a database with a family and a samples receive_at, prepared_at, sequenced_at one week
+    # ago
+    family = add_family(base_store)
+    yesterweek = datetime.now() - timedelta(days=7)
+    weekold_sample = add_sample(base_store, received=True, prepared=True, sequenced=True,
+                                date=yesterweek)
+    base_store.relate_sample(family, weekold_sample, 'unknown')
+
+    # WHEN getting active cases
+    cases = base_store.cases()
+
+    # THEN TAT should be R-P + P-S + S-A + A-U + U-D = 0 + 0 + 4 + 1 + 2 = 7
+    assert cases
+    for case in cases:
+        assert case.get('tat') == 7
+
+
+def test_prepared_at_affects_ett(base_store: Store):
+    """test that the estimated turnaround time is affected by the prepared_at date """
+
+    # GIVEN a database with a family and a samples receive_at, prepared_at one week ago
+    family = add_family(base_store)
+    yesterweek = datetime.now() - timedelta(days=7)
+    weekold_sample = add_sample(base_store, received=True, prepared=True, date=yesterweek)
+    base_store.relate_sample(family, weekold_sample, 'unknown')
+
+    # WHEN getting active cases
+    cases = base_store.cases()
+
+    # THEN TAT should be R-P + P-S + S-A + A-U + U-D = 0 + 5 + 4 + 1 + 2 = 12
+    assert cases
+    for case in cases:
+        assert case.get('tat') == 12
+
+
+def test_received_at_affects_ett(base_store: Store):
+    """test that the estimated turnaround time is affected by the received_at date """
+
+    # GIVEN a database with a family and a samples received one week ago
+    family = add_family(base_store)
+    yesterweek = datetime.now() - timedelta(days=7)
+    weekold_sample = add_sample(base_store, received=True, date=yesterweek)
+    base_store.relate_sample(family, weekold_sample, 'unknown')
+
+    # WHEN getting active cases
+    cases = base_store.cases()
+
+    # THEN TAT should be R-P + P-S + S-A + A-U + U-D = 4 + 5 + 4 + 1 + 2 = 16
+    assert cases
+    for case in cases:
+        assert case.get('tat') == 16
+
+
 def test_samples_flowcell(base_store: Store):
     """Test to that cases displays the flowcell status """
 
@@ -82,7 +158,7 @@ def test_analysis_dates_for_rerun(base_store: Store):
         assert case.get('analysis_uploaded_at') is None
 
 
-def test_received_at_is_newest_invoice_date(base_store: Store):
+def test_received_at_is_newest_date(base_store: Store):
     """Test to that cases displays newest received date"""
 
     # GIVEN a database with a family and two samples with different received dates
@@ -103,7 +179,7 @@ def test_received_at_is_newest_invoice_date(base_store: Store):
         assert case.get('samples_received_at').date() == newest_sample.received_at.date()
 
 
-def test_prepared_at_is_newest_invoice_date(base_store: Store):
+def test_prepared_at_is_newest_date(base_store: Store):
     """Test to that cases displays newest prepared date"""
 
     # GIVEN a database with a family and two samples with different prepared dates
@@ -124,7 +200,7 @@ def test_prepared_at_is_newest_invoice_date(base_store: Store):
         assert case.get('samples_prepared_at').date() == newest_sample.prepared_at.date()
 
 
-def test_sequenced_at_is_newest_invoice_date(base_store: Store):
+def test_sequenced_at_is_newest_date(base_store: Store):
     """Test to that cases displays newest sequenced date"""
 
     # GIVEN a database with a family and two samples with different sequenced dates
@@ -145,7 +221,7 @@ def test_sequenced_at_is_newest_invoice_date(base_store: Store):
         assert case.get('samples_sequenced_at').date() == newest_sample.sequenced_at.date()
 
 
-def test_delivered_at_is_newest_invoice_date(base_store: Store):
+def test_delivered_at_is_newest_date(base_store: Store):
     """Test to that cases displays newest delivered date"""
 
     # GIVEN a database with a family and two samples with different delivered dates
