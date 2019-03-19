@@ -93,6 +93,6 @@ def _register_admin_views():
     ext.admin.add_view(admin.AnalysisView(models.Analysis, ext.db.session))
     ext.admin.add_view(admin.ApplicationView(models.Application, ext.db.session))
     ext.admin.add_view(admin.ApplicationVersionView(models.ApplicationVersion, ext.db.session))
-    ext.admin.add_view(admin.BaseView(models.Delivery, ext.db.session))
+    ext.admin.add_view(admin.DeliveryView(models.Delivery, ext.db.session))
     ext.admin.add_view(admin.PanelView(models.Panel, ext.db.session))
     ext.admin.add_view(admin.InvoiceView(models.Invoice, ext.db.session))
