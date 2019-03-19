@@ -202,6 +202,7 @@ class StatusHandler:
                         comment=sample['comment'],
                         capture_kit=sample['capture_kit'],
                         data_analysis=sample['data_analysis'],
+                        tumour=sample['tumour'],
                     )
                     new_sample.customer = customer_obj
                     with self.status.session.no_autoflush:

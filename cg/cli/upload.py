@@ -208,12 +208,16 @@ def observations(context, family_id):
 
     loqus_api = loqus.LoqusdbAPI(context.obj)
     family_obj = context.obj['status'].family(family_id)
-    api = UploadObservationsAPI(context.obj['status'], context.obj['housekeeper_api'], loqus_api)
-    try:
-        api.process(family_obj.analyses[0])
-        click.echo(click.style(f"{family_id}: observations uploaded!", fg='green'))
-    except DuplicateRecordError as error:
-        LOG.info(f"skipping observations upload: {error.message}")
+
+    if family_obj.customer.loqus_upload == True:
+        api = UploadObservationsAPI(context.obj['status'], context.obj['housekeeper_api'], loqus_api)
+        try:
+            api.process(family_obj.analyses[0])
+            click.echo(click.style(f"{family_id}: observations uploaded!", fg='green'))
+        except DuplicateRecordError as error:
+            LOG.info(f"skipping observations upload: {error.message}")
+    else:
+        click.echo(click.style(f"{family_id}: {family_obj.customer.internal_id} not whitelisted for upload to loqusdb. Skipping!", fg='yellow'))
 
 
 @upload.command()
