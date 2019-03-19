@@ -338,7 +338,7 @@ class StatusHandler:
             if exclude_invoiced and samples_invoiced_bool:
                 continue
 
-            tat = self._calculate_estimated_turnaround_time(
+            tat = self._calculate_estimated_tat(
                 samples_received_at,
                 samples_prepared_at,
                 samples_sequenced_at,
@@ -583,14 +583,15 @@ class StatusHandler:
         )
         return records
 
-    def _calculate_estimated_turnaround_time(self,
-                                             samples_received_at,
-                                             samples_prepared_at,
-                                             samples_sequenced_at,
-                                             analysis_completed_at,
-                                             analysis_uploaded_at,
-                                             samples_delivered_at
-                                             ):
+    def _calculate_estimated_tat(self,
+                                 samples_received_at,
+                                 samples_prepared_at,
+                                 samples_sequenced_at,
+                                 analysis_completed_at,
+                                 analysis_uploaded_at,
+                                 samples_delivered_at
+                                 ):
+        """Calculated estimated turnaround-time"""
 
         if samples_received_at and samples_delivered_at:
             return self._calculate_date_delta(None, samples_received_at, samples_delivered_at)
