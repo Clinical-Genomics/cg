@@ -18,8 +18,6 @@ requests[security]
 requests-oauthlib<1.2.0     # due to scout-browser Flask-OAuthlib
 oauthlib<3.0.0              # due to scout-browser Flask-OAuthlib
 requests_cache
-cairocffi>=0.9.0            # due to scout-browser WeasyPrint 44
-setuptools>=39.2.0          # due to scout-browser cairocffi
 
 # utils
 ruamel.yaml
