@@ -42,6 +42,23 @@ def test_that_families_can_have_many_samples(base_store: Store):
     assert test_family in families
 
 
+def test_external_sample_to_re_analyse(base_store: Store):
+    """Test that a family marked for re-analyse with one sample external not sequenced inhouse and
+    with completed analysis do show up among the families to analyse"""
+
+    # GIVEN a database with a family with one not sequenced external sample and completed analysis
+    test_sample = add_sample(base_store, sequenced=False, external=True)
+    test_analysis = add_analysis(base_store, completed=True, reanalyse=True)
+    base_store.relate_sample(test_analysis.family, test_sample, 'unknown')
+
+    # WHEN getting families to analyse
+    families = base_store.families_to_mip_analyze()
+
+    # THEN families should contain the test family
+    assert families
+    assert test_analysis.family in families
+
+
 def test_family_to_re_analyse(base_store: Store):
     """Test that a family marked for re-analyse with one sample that has been sequenced and
     with completed analysis do show up among the families to analyse"""
@@ -192,7 +209,7 @@ def ensure_customer(disk_store, customer_id='cust_test'):
 
 
 def add_sample(store, sample_name='sample_test', received=False, prepared=False,
-               sequenced=False, delivered=False, invoiced=False, data_analysis=None):
+               sequenced=False, delivered=False, invoiced=False, data_analysis=None, external=None):
     """utility function to add a sample to use in tests"""
     customer = ensure_customer(store)
     application_version_id = ensure_application_version(store).id
@@ -212,6 +229,9 @@ def add_sample(store, sample_name='sample_test', received=False, prepared=False,
         sample.invoice = invoice
     if data_analysis:
         sample.data_analysis = data_analysis
+    if external:
+        sample.is_external = external
+
     store.add_commit(sample)
     return sample
 

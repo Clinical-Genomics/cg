@@ -37,7 +37,7 @@ def test_add_family_bad_customer(invoke_cli, disk_store: Store):
     result = invoke_cli(['--database', db_uri, 'add', 'family', '--panel',
                          panel_id, customer_id, name])
 
-    # THEN then it should complain on missing customer instead of adding a family
+    # THEN then it should complain about missing customer instead of adding a family
     assert result.exit_code == 1
     assert disk_store.Family.query.count() == 0
 
@@ -54,7 +54,7 @@ def test_add_family_bad_panel(invoke_cli, disk_store: Store):
     result = invoke_cli(['--database', db_uri, 'add', 'family', '--panel',
                          panel_id, customer_id, name])
 
-    # THEN then it should complain on missing panel instead of adding a family
+    # THEN then it should complain about missing panel instead of adding a family
     assert result.exit_code == 1
     assert disk_store.Family.query.count() == 0
 
