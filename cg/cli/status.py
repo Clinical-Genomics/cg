@@ -2,13 +2,14 @@
 
 import click
 from tabulate import tabulate
+from colorclass import Color
 
 from cg.store import Store
 from cg.constants import FAMILY_ACTIONS, PRIORITY_OPTIONS
 
 
 CASE_HEADERS_LONG = ['Case', 'Ordered', 'Received', 'Prepared', 'Sequenced', 'Flowcells',
-                     'Analysed', 'Uploaded', 'Delivered', 'Invoiced']
+                     'Analysed', 'Uploaded', 'Delivered', 'Invoiced', 'TAT']
 ALWAYS_LONG_HEADERS = [CASE_HEADERS_LONG[0], CASE_HEADERS_LONG[1],
                        CASE_HEADERS_LONG[6], CASE_HEADERS_LONG[7]]
 CASE_HEADERS_MEDIUM = []
@@ -172,8 +173,38 @@ def cases(context, output_type, verbose, days, internal_id, name, action, priori
     )
     case_rows = []
 
+    if output_type == 'bool':
+        case_header = CASE_HEADERS_SHORT
+
+    elif output_type == 'count':
+        case_header = CASE_HEADERS_MEDIUM
+
+    elif output_type in ('date', 'datetime'):
+        case_header = CASE_HEADERS_LONG
+
     for case in records:
-        title = f"{case.get('internal_id')}"
+
+        tat_number = case.get('tat')
+
+        if case.get('samples_received_bool') and case.get('samples_delivered_bool') and \
+                tat_number <= 21:
+            tat_color = 'green'
+        elif tat_number == 21:
+            tat_color = 'yellow'
+        elif tat_number > 21:
+            tat_color = 'red'
+        else:
+            tat_color = 'white'
+
+        color_start = Color(u"{" + f"{tat_color}" + "}")
+        color_end = Color(u"{/" + f"{tat_color}" + "}")
+
+        if case.get('samples_received_bool') and case.get('samples_delivered_bool'):
+            tat = str(tat_number) + color_end
+        else:
+            tat = f"({tat_number})" + color_end
+
+        title = color_start + f"{case.get('internal_id')}"
         if name:
             title = f"{title} ({case.get('name')})"
         if data_analysis:
@@ -184,7 +215,6 @@ def cases(context, output_type, verbose, days, internal_id, name, action, priori
         ordered = present_date(case, 'ordered_at', verbose, show_time)
 
         if output_type == 'bool':
-            case_header = CASE_HEADERS_SHORT
             received = present_bool(case, 'samples_received_bool', verbose)
             prepared = present_bool(case, 'samples_prepared_bool', verbose)
             sequenced = present_bool(case, 'samples_sequenced_bool', verbose)
@@ -197,7 +227,6 @@ def cases(context, output_type, verbose, days, internal_id, name, action, priori
             invoiced = present_bool(case, 'samples_invoiced_bool', verbose)
 
         elif output_type == 'count':
-            case_header = CASE_HEADERS_MEDIUM
             received = f"{case.get('samples_received')}/{case.get('samples_to_receive')}"
             prepared = f"{case.get('samples_prepared')}/{case.get('samples_to_prepare')}"
             sequenced = f"{case.get('samples_sequenced')}/{case.get('samples_to_sequence')}"
@@ -210,7 +239,6 @@ def cases(context, output_type, verbose, days, internal_id, name, action, priori
             invoiced = f"{case.get('samples_invoiced')}/{case.get('samples_to_invoice')}"
 
         elif output_type in ('date', 'datetime'):
-            case_header = CASE_HEADERS_LONG
             received = present_date(case, 'samples_received_at', verbose, show_time)
             prepared = present_date(case, 'samples_prepared_at', verbose, show_time)
             sequenced = present_date(case, 'samples_sequenced_at', verbose, show_time)
@@ -223,7 +251,7 @@ def cases(context, output_type, verbose, days, internal_id, name, action, priori
             invoiced = present_date(case, 'samples_invoiced_at', verbose, show_time)
 
         case_row = [title, ordered, received, prepared, sequenced, flowcell, analysed, uploaded,
-                    delivered, invoiced]
+                    delivered, invoiced, tat]
         case_rows.append(case_row)
 
     click.echo(tabulate(case_rows, headers=case_header, tablefmt='psql'))

@@ -316,6 +316,7 @@ def test_store_mip(orders_api, base_store, mip_status_data):
     assert new_link.sample.sex == 'female'
     assert new_link.sample.application_version.application.tag == 'WGTPCFC030'
     assert new_link.sample.data_analysis == 'MIP'
+    assert new_link.sample.is_tumour
     assert isinstance(new_family.links[1].sample.comment, str)
 
     assert base_store.deliveries().count() == base_store.samples().count()
@@ -490,6 +491,7 @@ def test_store_cancer_samples(orders_api, base_store, balsamic_status_data):
     assert new_link.sample.application_version.application.tag == 'WGTPCFC030'
     assert new_link.sample.data_analysis == 'Balsamic'
     assert new_link.sample.comment == 'comment'
+    assert new_link.sample.is_tumour
 
     assert base_store.deliveries().count() == base_store.samples().count()
     for link in new_family.links:
