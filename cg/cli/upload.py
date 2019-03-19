@@ -23,7 +23,8 @@ LOG = logging.getLogger(__name__)
 
 @click.group(invoke_without_command=True)
 @click.option('-f', '--family', 'family_id', help='Upload to all apps')
-@click.option('-r', '--restart', 'force_restart', help='Force upload of analysis marked as started')
+@click.option('-r', '--restart', 'force_restart', is_flag=True, help='Force upload of analysis '
+                                                                     'marked as started')
 @click.pass_context
 def upload(context, family_id, force_restart):
     """Upload results from analyses."""
