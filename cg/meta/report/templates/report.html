@@ -166,15 +166,16 @@
             </tbody>
           </table>
 
-          {% if customer_obj.scout_access %}
-            <p>
-              Varianter finns uppladdade i Scout:
-              <a href="https://scout.scilifelab.se/{{ customer_obj.internal_id }}/{{ family }}">https://scout.scilifelab.se/{{ customer_obj.internal_id }}/{{ family }}</a>
-            </p>
-          {% endif %}
+          <div class="card-body">* Information given av kund</div>
+
         </div>
 
-        <div class="card-block">* Information given av kund</div>
+        {% if customer_obj.scout_access %}
+          <p class="card-block">
+            Varianter finns uppladdade i Scout:
+            <a href="https://scout.scilifelab.se/{{ customer_obj.internal_id }}/{{ family }}">https://scout.scilifelab.se/{{ customer_obj.internal_id }}/{{ family }}</a>
+          </p>
+        {% endif %}
 
         {% for application in application_objs %}
           <div class="card-block">
@@ -197,6 +198,12 @@
             Valtteri Wirta<br>
             Head of unit, Clinical Genomics
           </p>
+        </div>
+
+        <div class="card-block">Laboratoriet har inte haft ansvar för provtagningsstadiet och extraktion, resultaten gäller för provet såsom det har mottagits. </div>
+
+        <div class="card-block">
+          All kommunikation gällande ordern såsom tillägg, avvikelser eller ev undantag i metoden från Clinical Genomics finns tillgängligt i SupportSystem för detta ticket id. En stängd ticket kan närsomhelst öppnas upp igen för frågor.
         </div>
 
         <div class="card-footer">
