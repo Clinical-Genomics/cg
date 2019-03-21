@@ -67,10 +67,10 @@
             <tbody>
               {% for sample in samples %}
                 <tr>
-                  <td>{{ sample.name }} ({{ sample.id }})</td>
-                  <td>{{ family }}</td>
+                <td>{{ sample.name }}* ({{ sample.id }})</td>
+                  <td>{{ family }}*</td>
                   <td>
-                    {{ sample.sex }}
+                    {{ sample.sex }}*
                     ( analys:
                       {% if sample.sex != sample.analysis_sex %}
                         <span class="text-danger">{{ sample.analysis_sex }}</span>
@@ -78,10 +78,10 @@
                         <span class="text-success">{{ sample.analysis_sex }}</span>
                       {% endif %})
                   </td>
-                  <td>{{ sample.status }}</td>
-                  <td>{{ sample.source }}</td>
+                  <td>{{ sample.status }}*</td>
+                  <td>{{ sample.source }}*</td>
                   <td>{{ sample.ticket }}</td>
-                  <td>{{ sample.application }}</td>
+                  <td>{{ sample.application }}*</td>
                 </tr>
               {% endfor %}
             </tbody>
@@ -103,7 +103,7 @@
             <tbody>
               {% for sample in samples %}
                 <tr>
-                  <td>{{ sample.name }}</td>
+                  <td>{{ sample.name }}*</td>
                   <td>{{ sample.received }}</td>
                   <td>{{ sample.prep_method }}</td>
                   <td>{{ sample.sequencing_method }}</td>
@@ -130,7 +130,7 @@
             </thead>
             <tbody>
               <tr>
-                <td>{{ family }}</td>
+                <td>{{ family }}*</td>
                 <td>{{ mip_version }}</td>
                 <td>{{ panels }}</td>
                 <td>{{ genome_build }}</td>
@@ -155,7 +155,7 @@
             <tbody>
               {% for sample in samples %}
                 <tr>
-                  <td>{{ sample.name }}</td>
+                  <td>{{ sample.name }}*</td>
                   <td>{{ (sample.million_read_pairs) }}</td>
                   <td>{{ sample.mapped_reads }}</td>
                   <td>{{ sample.target_coverage }}</td>
@@ -173,6 +173,8 @@
             </p>
           {% endif %}
         </div>
+
+        <div class="card-block">* Information given av kund</div>
 
         {% for application in application_objs %}
           <div class="card-block">
