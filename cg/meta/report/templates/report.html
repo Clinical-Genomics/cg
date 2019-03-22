@@ -56,6 +56,7 @@
             <thead>
               <tr>
                 <th>Prov</th>
+                <th>Beställt</th>
                 <th>Familj</th>
                 <th>Kön</th>
                 <th>Status</th>
@@ -68,6 +69,7 @@
               {% for sample in samples %}
                 <tr>
                 <td>{{ sample.name }}* ({{ sample.id }})</td>
+                  <td>{{ sample.order_date }})</td>
                   <td>{{ family }}*</td>
                   <td>
                     {{ sample.sex }}*
@@ -106,7 +108,9 @@
                   <td>{{ sample.name }}*</td>
                   <td>{{ sample.received }}</td>
                   <td>{{ sample.prep_method }}</td>
+                  <td>{{ sample.prep_date }}</td>
                   <td>{{ sample.sequencing_method }}</td>
+                  <td>{{ sample.sequencing_date }}</td>
                   <td>{{ sample.delivery_method }}</td>
                   <td>
                     {{ sample.delivery_date }}

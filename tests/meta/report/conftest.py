@@ -38,6 +38,12 @@ class MockLims(LimsAPI):
     def get_processing_time(self, lims_id: str) -> str:
         return datetime.datetime.today() - datetime.datetime.today()
 
+    def get_prepared_date(self, lims_id: str) -> str:
+        return datetime.datetime.today()
+
+    def get_sequenced_date(self, lims_id: str) -> str:
+        return datetime.datetime.today()
+
     def get_delivery_date(self, lims_id: str) -> str:
         return datetime.datetime.today()
 
