@@ -605,7 +605,10 @@ class StatusHandler:
 
     @staticmethod
     def _calculate_date_delta(default, first_date, last_date):
+        # calculates date delta between two dates, assumes last_date is today if missing
         delta = default
-        if first_date and last_date:
+        if not last_date:
+            last_date = datetime.now()
+        if first_date:
             delta = (last_date - first_date).days
         return delta

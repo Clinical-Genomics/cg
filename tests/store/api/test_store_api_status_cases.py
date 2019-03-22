@@ -5,7 +5,7 @@ from cg.constants import FAMILY_ACTIONS, PRIORITY_OPTIONS
 from cg.store import Store
 
 
-def test_delivered_at_affects_ett(base_store: Store):
+def test_delivered_at_affects_tat(base_store: Store):
     """test that the estimated turnaround time is affected by the delivered_at date """
 
     # GIVEN a database with a family and a samples receive_at, prepared_at, sequenced_at,
@@ -25,7 +25,7 @@ def test_delivered_at_affects_ett(base_store: Store):
         assert case.get('tat') == 0
 
 
-def test_sequenced_at_affects_ett(base_store: Store):
+def test_sequenced_at_affects_tat(base_store: Store):
     """test that the estimated turnaround time is affected by the sequenced_at date """
 
     # GIVEN a database with a family and a samples receive_at, prepared_at, sequenced_at one week
@@ -39,13 +39,13 @@ def test_sequenced_at_affects_ett(base_store: Store):
     # WHEN getting active cases
     cases = base_store.cases()
 
-    # THEN TAT should be R-P + P-S + S-A + A-U + U-D = 0 + 0 + 4 + 1 + 2 = 7
+    # THEN TAT should be R-P + P-S + S-A + A-U + U-D = 0 + 0 + 7 + 1 + 2 = 10
     assert cases
     for case in cases:
-        assert case.get('tat') == 7
+        assert case.get('tat') == 10
 
 
-def test_prepared_at_affects_ett(base_store: Store):
+def test_prepared_at_affects_tat(base_store: Store):
     """test that the estimated turnaround time is affected by the prepared_at date """
 
     # GIVEN a database with a family and a samples receive_at, prepared_at one week ago
@@ -57,13 +57,13 @@ def test_prepared_at_affects_ett(base_store: Store):
     # WHEN getting active cases
     cases = base_store.cases()
 
-    # THEN TAT should be R-P + P-S + S-A + A-U + U-D = 0 + 5 + 4 + 1 + 2 = 12
+    # THEN TAT should be R-P + P-S + S-A + A-U + U-D = 0 + 7 + 4 + 1 + 2 = 14
     assert cases
     for case in cases:
-        assert case.get('tat') == 12
+        assert case.get('tat') == 14
 
 
-def test_received_at_affects_ett(base_store: Store):
+def test_received_at_affects_tat(base_store: Store):
     """test that the estimated turnaround time is affected by the received_at date """
 
     # GIVEN a database with a family and a samples received one week ago
@@ -75,10 +75,10 @@ def test_received_at_affects_ett(base_store: Store):
     # WHEN getting active cases
     cases = base_store.cases()
 
-    # THEN TAT should be R-P + P-S + S-A + A-U + U-D = 4 + 5 + 4 + 1 + 2 = 16
+    # THEN TAT should be R-P + P-S + S-A + A-U + U-D = 7 + 5 + 4 + 1 + 2 = 19
     assert cases
     for case in cases:
-        assert case.get('tat') == 16
+        assert case.get('tat') == 19
 
 
 def test_samples_flowcell(base_store: Store):
