@@ -244,6 +244,11 @@ class ReportAPI:
             else:
                 delivery_data_sample['million_read_pairs'] = 'N/A'
 
+            if sample.capture_kit:
+                delivery_data_sample['capture_kit'] = sample.capture_kit
+            else:
+                delivery_data_sample['capture_kit'] = 'N/A'
+
             delivery_data_samples.append(delivery_data_sample)
 
         return delivery_data_samples

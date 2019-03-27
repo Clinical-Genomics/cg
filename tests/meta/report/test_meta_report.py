@@ -44,6 +44,7 @@ def test_collect_delivery_data(report_api):
 
         assert sample['prep_method']
         assert sample['sequencing_method']
+        assert sample['capture_kit']
         assert sample['delivery_method']
 
         assert sample['delivery_date']
@@ -261,8 +262,36 @@ def test_fetch_family_samples_from_status_db(report_api):
     samples = report_api._fetch_family_samples_from_status_db(family_id='yellowhog')
 
     # THEN the report data should have N/A where it report sample reads
+    assert samples
     for sample in samples:
-        assert 'N/A' == sample.get('million_read_pairs')
+        assert sample.get('million_read_pairs') == 'N/A'
+
+
+def test_fetch_no_capture_kit_from_status_db(report_api):
+
+    # GIVEN an initialised report_api and the db returns samples without capture kit
+    report_api.db._family_samples_returns_no_capture_kit = True
+
+    # WHEN fetching status data
+    samples = report_api._fetch_family_samples_from_status_db(family_id='yellowhog')
+
+    # THEN the report data should have N/A where it reports capture_kit
+    assert samples
+    for sample in samples:
+        assert sample.get('capture_kit') == 'N/A'
+
+
+def test_fetch_capture_kit_from_status_db(report_api):
+
+    # GIVEN an initialised report_api and the db returns samples with capture kit
+
+    # WHEN fetching status data
+    samples = report_api._fetch_family_samples_from_status_db(family_id='yellowhog')
+
+    # THEN the report data should have capture kit
+    assert samples
+    for sample in samples:
+        assert sample.get('capture_kit') == 'GMSmyeloid'
 
 
 def test_get_application_data_from_status_db(lims_samples, report_api):
