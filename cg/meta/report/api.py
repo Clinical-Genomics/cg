@@ -249,6 +249,8 @@ class ReportAPI:
             else:
                 delivery_data_sample['capture_kit'] = 'N/A'
 
+            delivery_data_sample['bioinformatic_analysis'] = sample.data_analysis
+
             delivery_data_samples.append(delivery_data_sample)
 
         return delivery_data_samples

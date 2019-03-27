@@ -294,6 +294,19 @@ def test_fetch_capture_kit_from_status_db(report_api):
         assert sample.get('capture_kit') == 'GMSmyeloid'
 
 
+def test_data_analysis_kit_from_status_db(report_api):
+
+    # GIVEN an initialised report_api and the db returns samples with data_analysis
+
+    # WHEN fetching status data
+    samples = report_api._fetch_family_samples_from_status_db(family_id='yellowhog')
+
+    # THEN the report data should have capture kit
+    assert samples
+    for sample in samples:
+        assert sample.get('bioinformatic_analysis') == 'PIM'
+
+
 def test_get_application_data_from_status_db(lims_samples, report_api):
     # GIVEN data from an analysed case and an initialised report_api
 
