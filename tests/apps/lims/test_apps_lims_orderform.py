@@ -9,31 +9,31 @@ def test_parsing_rml_orderform(rml_orderform):
 
     # THEN it should determine the type of project and customer
     assert data['project_type'] == 'rml'
-    assert data['customer'] == 'cust001'
+    assert data['customer'] == 'cust000'
     # ... and find all samples
-    assert len(data['items']) == 2
+    assert len(data['items']) == 21
 
     # ... and collect relevant sample data
     sample_data = data['items'][0]
-    assert sample_data['name'] == 'AL-P-00110710-N-03099696-TP20170817-CB20170822'
-    assert sample_data['pool'] == 'pool-1'
+    assert sample_data['name'] == 'sample1'
+    assert sample_data['pool'] == 'pool1'
     assert sample_data['application'] == 'RMLP10R150'
     assert sample_data['data_analysis'] == 'fastq'
-    assert sample_data['volume'] == '30'
-    assert sample_data['concentration'] == '5'
-    assert sample_data['index'] == 'TruSeq DNA HT Dual-index (D7-D5)'
+    assert sample_data['volume'] == '1'
+    assert sample_data['concentration'] == '2'
+    assert sample_data['index'] == 'TruSeq Custom Amplicon Dual-index (A7-A5)'
     assert sample_data['index_number'] == '1'
 
     assert sample_data['container_name'] is None
-    assert sample_data['rml_plate_name'] == '20170823-ALASCCA 27, #811137, J.Lindberg'
+    assert sample_data['rml_plate_name'] == 'plate'
     assert sample_data['well_position'] is None
     assert sample_data['well_position_rml'] == 'A:1'
 
-    assert sample_data['reagent_label'] == 'A01 - D701-D501 (ATTACTCG-TATAGCCT)'
+    assert sample_data['reagent_label'] == 'A701-A501 (ATCACGAC-TGAACCTT)'
 
-    assert sample_data['custom_index'] == 'B01 - D701-D501 (ATTACTCG-TATAGCCT)'
+    assert sample_data['custom_index'] == 'GATACA'
 
-    assert sample_data['comment'] == 'sample comment'
+    assert sample_data['comment'] == 'test comment'
     assert sample_data['capture_kit'] == 'Agilent Sureselect CRE'
 
 
