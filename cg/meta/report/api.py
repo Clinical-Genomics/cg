@@ -4,6 +4,7 @@ from datetime import datetime
 
 import requests
 import ruamel.yaml
+from cg.meta.report.status_helper import StatusHelper
 from jinja2 import Environment, PackageLoader, select_autoescape
 from pathlib import Path
 
@@ -52,8 +53,14 @@ class ReportAPI:
 
         report_data = dict()
         family_obj = self._get_family_from_status(family_id)
+        analysis_obj = family_obj.analyses[0] if family_obj.analyses else None
+
         report_data['family'] = ReportAPI._present_string(family_obj.name)
         report_data['customer'] = customer_id
+
+        report_data['report_version'] = ReportAPI._present_string(StatusHelper.get_report_version(
+            analysis_obj))
+
         report_data['customer_obj'] = self._get_customer_from_status_db(customer_id)
         report_samples = self._fetch_family_samples_from_status_db(family_id)
         report_data['samples'] = report_samples

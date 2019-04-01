@@ -10,12 +10,13 @@ def test_init():
 
 
 def test_collect_delivery_data(report_api):
-    # GIVEN an initialised report_api
+    # GIVEN an initialised report_api and a family ready for delivery report creation
 
     # WHEN collecting delivery data for a certain
     delivery_data = report_api._get_delivery_data(customer_id='cust000', family_id='yellowhog')
 
     # THEN all data for the delivery report should have been collected
+    assert delivery_data['report_version']
     assert delivery_data['family']
     assert delivery_data['customer_obj'].name
     assert delivery_data['today'].date()
