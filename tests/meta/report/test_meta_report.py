@@ -65,7 +65,7 @@ def test_collect_delivery_data(report_api):
 def test_incorporate_delivery_date_from_lims(lims_samples, report_api):
     # GIVEN data from an analysed case and an initialised report_api
 
-    # WHEN fetch_and_add_delivery_date_from_lims
+    # WHEN _incorporate_dates_from_lims
     samples = lims_samples
     report_api._incorporate_dates_from_lims(samples)
 
