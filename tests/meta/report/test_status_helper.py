@@ -4,6 +4,31 @@ from datetime import datetime
 from cg.meta.report.status_helper import StatusHelper
 
 
+def test_get_previous_report_version_when_only_one(store):
+
+    # GIVEN two analyses for the given family
+    first_analysis = add_analysis(store)
+
+    # WHEN fetching previous_report_version
+    report_version = StatusHelper.get_previous_report_version(first_analysis)
+
+    # THEN the version should be None
+    assert not report_version
+
+
+def test_get_previous_report_version_when_two(store):
+
+    # GIVEN two analyses for the given family
+    first_analysis = add_analysis(store)
+    second_analysis = add_analysis(store, first_analysis.family)
+
+    # WHEN fetching previous_report_version
+    report_version = StatusHelper.get_previous_report_version(second_analysis)
+
+    # THEN the version should be 1
+    assert report_version == 1
+
+
 def test_first_analysis_when_only_one(store):
 
     # GIVEN one analysis for the given family
@@ -14,7 +39,7 @@ def test_first_analysis_when_only_one(store):
     report_version = StatusHelper.get_report_version(analysis)
 
     # THEN the version should be 1
-    assert report_version == '1'
+    assert report_version == 1
 
 
 def test_first_analysis_when_two(store):
@@ -28,7 +53,7 @@ def test_first_analysis_when_two(store):
     report_version = StatusHelper.get_report_version(first_analysis)
 
     # THEN the version should be 1
-    assert report_version == '1'
+    assert report_version == 1
 
 
 def test_second_analysis_when_two(store):
@@ -42,7 +67,7 @@ def test_second_analysis_when_two(store):
     report_version = StatusHelper.get_report_version(second_analysis)
 
     # THEN the version should be 2
-    assert report_version == '2'
+    assert report_version == 2
 
 
 def ensure_customer(disk_store, customer_id='cust_test'):

@@ -12,6 +12,18 @@ class StatusHelper:
         version = None
 
         if analysis:
-            version = str(analysis.family.analyses.index(analysis) + 1)
+            version = analysis.family.analyses.index(analysis) + 1
 
         return version
+
+    @staticmethod
+    def get_previous_report_version(analysis):
+        """Returns the version for the analysis before the given analysis"""
+
+        analysis_version = StatusHelper.get_report_version(analysis)
+        previous_version = None
+
+        if analysis_version and analysis_version > 1:
+            previous_version = analysis_version - 1
+
+        return previous_version

@@ -17,6 +17,7 @@ def test_collect_delivery_data(report_api):
 
     # THEN all data for the delivery report should have been collected
     assert delivery_data['report_version']
+    assert delivery_data['previous_report_version']
     assert delivery_data['family']
     assert delivery_data['customer_obj'].name
     assert delivery_data['today'].date()

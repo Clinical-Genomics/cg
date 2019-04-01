@@ -58,8 +58,10 @@ class ReportAPI:
         report_data['family'] = ReportAPI._present_string(family_obj.name)
         report_data['customer'] = customer_id
 
-        report_data['report_version'] = ReportAPI._present_string(StatusHelper.get_report_version(
+        report_data['report_version'] = ReportAPI._present_int(StatusHelper.get_report_version(
             analysis_obj))
+        report_data['previous_report_version'] = ReportAPI._present_int(
+            StatusHelper.get_previous_report_version(analysis_obj))
 
         report_data['customer_obj'] = self._get_customer_from_status_db(customer_id)
         report_samples = self._fetch_family_samples_from_status_db(family_id)

@@ -20,7 +20,11 @@
 
         <ul class="list-group list-group-flush">
           <li class="list-group-item">
-            Leveransrapport {{ customer_obj.name }}, familj {{ family }} : {{ report_version }}<br>
+            Leveransrapport {{ customer_obj.name }}, familj {{ family }} : {{ report_version }}
+            {% if previous_report_version != 'N/A' %}
+              ersätter : {{ previous_report_version }}
+            {% endif %}
+            <br>
             Datum: {{ today.date() }}
           </li>
         </ul>
