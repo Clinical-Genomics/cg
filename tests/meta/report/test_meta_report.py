@@ -42,11 +42,14 @@ def test_collect_delivery_data(report_api):
         assert sample['application']
         assert sample['received']
 
+        assert sample['order_date']
         assert sample['prep_method']
+        assert sample['prep_date']
         assert sample['sequencing_method']
+        assert sample['sequencing_date']
         assert sample['delivery_method']
-
         assert sample['delivery_date']
+
         assert sample['million_read_pairs']
         assert sample['mapped_reads']
         assert sample['target_coverage']
@@ -62,14 +65,15 @@ def test_collect_delivery_data(report_api):
 def test_incorporate_delivery_date_from_lims(lims_samples, report_api):
     # GIVEN data from an analysed case and an initialised report_api
 
-    # WHEN fetch_and_add_delivery_date_from_lims
+    # WHEN _incorporate_dates_from_lims
     samples = lims_samples
-    report_api._incorporate_delivery_date_from_lims(samples)
+    report_api._incorporate_dates_from_lims(samples)
 
     # THEN
-    # each sample has a property processing_time with a value of the days between received_at and
-    #   delivery_date
+    # each sample has step dates from different steps registered in LIMS
     for sample in samples:
+        assert sample['prep_date']
+        assert sample['sequencing_date']
         assert sample['delivery_date']
 
 
