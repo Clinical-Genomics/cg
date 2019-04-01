@@ -1,4 +1,5 @@
 """Class that fetches and calculates data from status database """
+from cg.store import models
 
 
 class StatusHelper:

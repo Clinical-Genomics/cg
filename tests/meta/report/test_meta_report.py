@@ -13,7 +13,7 @@ def test_collect_delivery_data(report_api):
     # GIVEN an initialised report_api and a family ready for delivery report creation
 
     # WHEN collecting delivery data for a certain
-    delivery_data = report_api._get_delivery_data(customer_id='cust000', family_id='yellowhog')
+    delivery_data = report_api._get_delivery_data(family_id='yellowhog')
 
     # THEN all data for the delivery report should have been collected
     assert delivery_data['report_version']
@@ -139,22 +139,9 @@ def test_incorporate_lims_methods(lims_samples, report_api):
         assert sample['delivery_method']
 
 
-def test_get_customer_from_status_db(report_api):
-    # GIVEN data from an analysed case and an initialised report_api
-    customer_id = 'cust002'
-
-    # WHEN generating_qc_data
-    customer_obj = report_api._get_customer_from_status_db(customer_id)
-
-    # THEN customer properties should be available
-
-    # customer is the the full customer object in the database
-    assert customer_obj.name
-
-
 def test_render_delivery_report(report_api):
     # GIVEN proper qc data from an analysis exist
-    report_data = report_api._get_delivery_data(customer_id='cust002', family_id='yellowhog')
+    report_data = report_api._get_delivery_data(family_id='yellowhog')
 
     # WHEN rendering a report from that data
     rendered_report = ReportAPI._render_delivery_report(report_data)
@@ -167,7 +154,7 @@ def test_create_delivery_report(report_api):
     # GIVEN initialized ReportAPI
 
     # WHEN rendering a report from that data
-    created_report = report_api.create_delivery_report(customer_id='cust002', family_id='yellowhog')
+    created_report = report_api.create_delivery_report(family_id='yellowhog')
 
     # THEN a html report with certain data should have been rendered
     assert len(created_report) > 0
@@ -177,9 +164,8 @@ def test_create_delivery_report_file(report_api: ReportAPI):
     # GIVEN initialized ReportAPI
 
     # WHEN rendering a report from that data
-    created_report_file = report_api.create_delivery_report_file(customer_id='cust002',
-                                                                           family_id='yellowhog',
-                                                                           file_path=Path('.'))
+    created_report_file = report_api.create_delivery_report_file(family_id='yellowhog',
+                                                                 file_path=Path('.'))
 
     # THEN a html report with certain data should have been created on disk
     assert os.path.isfile(created_report_file.name)
