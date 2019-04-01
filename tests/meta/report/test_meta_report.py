@@ -70,8 +70,7 @@ def test_incorporate_delivery_date_from_lims(lims_samples, report_api):
     report_api._incorporate_dates_from_lims(samples)
 
     # THEN
-    # each sample has a property processing_time with a value of the days between received_at and
-    #   delivery_date
+    # each sample has step dates from different steps registered in LIMS
     for sample in samples:
         assert sample['prep_date']
         assert sample['sequencing_date']
