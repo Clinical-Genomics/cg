@@ -21,7 +21,7 @@ def test_get_previous_report_version_when_two(store):
     # GIVEN two analyses for the given family
     yesterday = datetime.now() - timedelta(days=1)
     first_analysis = add_analysis(store, completed_at=datetime.now())
-    second_analysis = add_analysis(store, first_analysis.family, completed_at=yesterday)
+    add_analysis(store, first_analysis.family, completed_at=yesterday)
 
     # WHEN fetching previous_report_version
     report_version = StatusHelper.get_previous_report_version(first_analysis)
