@@ -22,10 +22,10 @@
           <li class="list-group-item">
             Leveransrapport {{ customer_obj.name }}, familj {{ family }} : {{ report_version }}
             {% if previous_report_version != 'N/A' %}
-              ersätter : {{ previous_report_version }}
+              ersätter rapport version: {{ previous_report_version }}
             {% endif %}
             <br>
-            Datum: {{ today.date() }}
+            Skapad: {{ today.date() }}
           </li>
         </ul>
 
