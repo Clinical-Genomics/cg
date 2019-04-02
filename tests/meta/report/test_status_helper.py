@@ -1,5 +1,5 @@
 """ Test the status database report helper"""
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from cg.meta.report.status_helper import StatusHelper
 
@@ -19,8 +19,11 @@ def test_get_previous_report_version_when_only_one(store):
 def test_get_previous_report_version_when_two(store):
 
     # GIVEN two analyses for the given family
-    first_analysis = add_analysis(store)
-    second_analysis = add_analysis(store, first_analysis.family)
+    yesterday = datetime.now() - timedelta(days=1)
+    first_analysis = add_analysis(store, completed_at=yesterday)
+    second_analysis = add_analysis(store, first_analysis.family, completed_at=datetime.now())
+
+    print(first_analysis.family.analyses)
 
     # WHEN fetching previous_report_version
     report_version = StatusHelper.get_previous_report_version(second_analysis)
@@ -45,9 +48,9 @@ def test_first_analysis_when_only_one(store):
 def test_first_analysis_when_two(store):
 
     # GIVEN two analyses for the given family
-    first_analysis = add_analysis(store)
-    add_analysis(store, first_analysis.family)
-    assert len(first_analysis.family.analyses) == 2
+    yesterday = datetime.now() - timedelta(days=1)
+    first_analysis = add_analysis(store, completed_at=yesterday)
+    add_analysis(store, first_analysis.family, completed_at=datetime.now())
 
     # WHEN fetching report_version
     report_version = StatusHelper.get_report_version(first_analysis)
@@ -59,9 +62,11 @@ def test_first_analysis_when_two(store):
 def test_second_analysis_when_two(store):
 
     # GIVEN two analyses for the given family
-    first_analysis = add_analysis(store)
-    second_analysis = add_analysis(store, first_analysis.family)
-    assert len(first_analysis.family.analyses) == 2
+    yesterday = datetime.now() - timedelta(days=1)
+    first_analysis = add_analysis(store, completed_at=yesterday)
+    second_analysis = add_analysis(store, first_analysis.family, completed_at=datetime.now())
+    assert first_analysis.family.analyses.index(second_analysis) == 0
+    assert first_analysis.family.analyses.index(first_analysis) == 1
 
     # WHEN fetching report_version
     report_version = StatusHelper.get_report_version(second_analysis)
@@ -107,13 +112,17 @@ def add_family(disk_store, family_id='family_test', customer_id='cust_test'):
     return family
 
 
-def add_analysis(store, family=None):
+def add_analysis(store, family=None, completed_at=None):
     """Utility function to add an analysis for tests"""
 
     if not family:
         family = add_family(store)
 
     analysis = store.add_analysis(pipeline='', version='')
-    family.analyses.append(analysis)
+
+    if completed_at:
+        analysis.completed_at = completed_at
+
+    analysis.family = family
     store.add_commit(analysis)
     return analysis
