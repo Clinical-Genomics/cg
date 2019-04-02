@@ -152,7 +152,8 @@ def _add_delivery_report_to_hk(delivery_report_file, hk_api: hk.HousekeeperAPI, 
     delivery_report_tag_name = 'delivery-report'
     version_obj = hk_api.last_version(family_id)
     uploaded_delivery_report_files = hk_api.get_files(bundle=family_id,
-                                                      tags=[delivery_report_tag_name])
+                                                      tags=[delivery_report_tag_name],
+                                                      version=version_obj.id)
     number_of_delivery_reports = len(uploaded_delivery_report_files.all())
     is_bundle_missing_delivery_report = number_of_delivery_reports == 0
 
