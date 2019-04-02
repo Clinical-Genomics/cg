@@ -182,6 +182,7 @@ class MockYamlLoader:
 
 class MockDB(Store):
     _family_samples_returns_no_reads = False
+    _family_samples_returns_no_capture_kit = False
     _application_accreditation = None
 
     def __init__(self, store):
@@ -194,6 +195,11 @@ class MockDB(Store):
         if self._family_samples_returns_no_reads:
             for family_sample in family_samples:
                 family_sample.sample.reads = None
+
+        if self._family_samples_returns_no_capture_kit:
+            for family_sample in family_samples:
+                family_sample.sample.capture_kit = None
+
 
         return family_samples
 

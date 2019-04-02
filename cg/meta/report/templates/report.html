@@ -62,7 +62,8 @@
                 <th>Status</th>
                 <th>Vävnad</th>
                 <th>Ticket</th>
-                <th>Analys</th>
+                <th>Applikation</th>
+                <th>Bioinformatisk Analys</th>
               </tr>
             </thead>
             <tbody>
@@ -84,6 +85,7 @@
                   <td>{{ sample.source }}*</td>
                   <td>{{ sample.ticket }}</td>
                   <td>{{ sample.application }}*</td>
+                  <td>{{ sample.bioinformatic_analysis }}*</td>
                 </tr>
               {% endfor %}
             </tbody>
@@ -98,9 +100,10 @@
                 <th>Ankom</th>
                 <th>Biblioteksberedning</th>
                 <th>Beredd</th>
+                <th>Bait Set</th>
                 <th>Sekvensering</th>
                 <th>Sekvenserad</th>
-                <th>Analys</th>
+                <th>Bioinformatisk Analys</th>           
                 <th>Svarsdatum</th>
               </tr>
             </thead>
@@ -111,6 +114,7 @@
                   <td>{{ sample.received }}</td>
                   <td>{{ sample.prep_method }}</td>
                   <td>{{ sample.prep_date }}</td>
+                  <td>{{ sample.capture_kit }}</td>
                   <td>{{ sample.sequencing_method }}</td>
                   <td>{{ sample.sequencing_date }}</td>
                   <td>{{ sample.delivery_method }}</td>
