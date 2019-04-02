@@ -44,11 +44,15 @@ def test_collect_delivery_data(report_api):
         assert sample['application']
         assert sample['received']
 
+        assert sample['order_date']
         assert sample['prep_method']
+        assert sample['prep_date']
+        assert sample['capture_kit']
         assert sample['sequencing_method']
+        assert sample['sequencing_date']
         assert sample['delivery_method']
-
         assert sample['delivery_date']
+
         assert sample['million_read_pairs']
         assert sample['mapped_reads']
         assert sample['target_coverage']
@@ -64,14 +68,15 @@ def test_collect_delivery_data(report_api):
 def test_incorporate_delivery_date_from_lims(lims_samples, report_api):
     # GIVEN data from an analysed case and an initialised report_api
 
-    # WHEN fetch_and_add_delivery_date_from_lims
+    # WHEN _incorporate_dates_from_lims
     samples = lims_samples
-    report_api._incorporate_delivery_date_from_lims(samples)
+    report_api._incorporate_dates_from_lims(samples)
 
     # THEN
-    # each sample has a property processing_time with a value of the days between received_at and
-    #   delivery_date
+    # each sample has step dates from different steps registered in LIMS
     for sample in samples:
+        assert sample['prep_date']
+        assert sample['sequencing_date']
         assert sample['delivery_date']
 
 
@@ -249,8 +254,49 @@ def test_fetch_family_samples_from_status_db(report_api):
     samples = report_api._fetch_family_samples_from_status_db(family_id='yellowhog')
 
     # THEN the report data should have N/A where it report sample reads
+    assert samples
     for sample in samples:
-        assert 'N/A' == sample.get('million_read_pairs')
+        assert sample.get('million_read_pairs') == 'N/A'
+
+
+def test_fetch_no_capture_kit_from_status_db(report_api):
+
+    # GIVEN an initialised report_api and the db returns samples without capture kit
+    report_api.db._family_samples_returns_no_capture_kit = True
+
+    # WHEN fetching status data
+    samples = report_api._fetch_family_samples_from_status_db(family_id='yellowhog')
+
+    # THEN the report data should have N/A where it reports capture_kit
+    assert samples
+    for sample in samples:
+        assert sample.get('capture_kit') == 'N/A'
+
+
+def test_fetch_capture_kit_from_status_db(report_api):
+
+    # GIVEN an initialised report_api and the db returns samples with capture kit
+
+    # WHEN fetching status data
+    samples = report_api._fetch_family_samples_from_status_db(family_id='yellowhog')
+
+    # THEN the report data should have capture kit
+    assert samples
+    for sample in samples:
+        assert sample.get('capture_kit') == 'GMSmyeloid'
+
+
+def test_data_analysis_kit_from_status_db(report_api):
+
+    # GIVEN an initialised report_api and the db returns samples with data_analysis
+
+    # WHEN fetching status data
+    samples = report_api._fetch_family_samples_from_status_db(family_id='yellowhog')
+
+    # THEN the report data should have capture kit
+    assert samples
+    for sample in samples:
+        assert sample.get('bioinformatic_analysis') == 'PIM'
 
 
 def test_get_application_data_from_status_db(lims_samples, report_api):

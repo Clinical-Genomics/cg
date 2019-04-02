@@ -69,7 +69,7 @@ class ReportAPI:
         report_data['panels'] = ReportAPI._present_list(panels)
         self._incorporate_lims_data(report_data)
         self._incorporate_lims_methods(report_samples)
-        self._incorporate_delivery_date_from_lims(report_samples)
+        self._incorporate_dates_from_lims(report_samples)
         self._incorporate_processing_time_from_lims(report_samples)
         self._incorporate_coverage_data(report_samples, panels)
         self._incorporate_trending_data(report_data, family_id)
@@ -94,11 +94,15 @@ class ReportAPI:
                 method_name = get_method(lims_id)
                 sample[method_type] = ReportAPI._present_string(method_name)
 
-    def _incorporate_delivery_date_from_lims(self, samples: list):
+    def _incorporate_dates_from_lims(self, samples: list):
         """Fetch and add the delivery date from LIMS for each sample."""
 
         for sample in samples:
             lims_id = sample['id']
+            prep_date = self.lims.get_prepared_date(lims_id)
+            sample['prep_date'] = ReportAPI._present_datetime(prep_date)
+            sequencing_date = self.lims.get_sequenced_date(lims_id)
+            sample['sequencing_date'] = ReportAPI._present_date(sequencing_date)
             delivery_date = self.lims.get_delivery_date(lims_id)
             sample['delivery_date'] = ReportAPI._present_date(delivery_date)
 
@@ -172,8 +176,20 @@ class ReportAPI:
         return presentable_value
 
     @staticmethod
+    def _present_datetime(a_date: datetime) -> str:
+        """Make an date value presentable for the delivery report."""
+
+        if a_date:
+            presentable_value = str(a_date.date())
+        else:
+            presentable_value = 'N/A'
+
+        return presentable_value
+
+    @staticmethod
     def _present_date(a_date: datetime.date) -> str:
         """Make an date value presentable for the delivery report."""
+
         if a_date:
             presentable_value = str(a_date)
         else:
@@ -242,11 +258,19 @@ class ReportAPI:
             delivery_data_sample['id'] = sample.internal_id
             delivery_data_sample['ticket'] = ReportAPI._present_int(sample.ticket_number)
             delivery_data_sample['status'] = ReportAPI._present_string(family_sample.status)
+            delivery_data_sample['order_date'] = ReportAPI._present_datetime(sample.ordered_at)
 
             if sample.reads:
                 delivery_data_sample['million_read_pairs'] = round(sample.reads / 2000000, 1)
             else:
                 delivery_data_sample['million_read_pairs'] = 'N/A'
+
+            if sample.capture_kit:
+                delivery_data_sample['capture_kit'] = sample.capture_kit
+            else:
+                delivery_data_sample['capture_kit'] = 'N/A'
+
+            delivery_data_sample['bioinformatic_analysis'] = sample.data_analysis
 
             delivery_data_samples.append(delivery_data_sample)
 

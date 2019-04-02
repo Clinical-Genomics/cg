@@ -50,6 +50,8 @@ def analysis_family():
             'status': 'affected',
             'ticket_number': 123456,
             'reads': 5000000,
+            'capture_kit': 'GMSmyeloid',
+            'data_analysis': 'PIM',
         }, {
             'name': 'father',
             'sex': 'male',
@@ -57,6 +59,8 @@ def analysis_family():
             'status': 'unaffected',
             'ticket_number': 123456,
             'reads': 6000000,
+            'capture_kit': 'GMSmyeloid',
+            'data_analysis': 'PIM',
         }, {
             'name': 'mother',
             'sex': 'female',
@@ -64,6 +68,8 @@ def analysis_family():
             'status': 'unaffected',
             'ticket_number': 123456,
             'reads': 7000000,
+            'capture_kit': 'GMSmyeloid',
+            'data_analysis': 'PIM',
         }]
     }
     return family
@@ -82,7 +88,9 @@ def analysis_store(base_store, analysis_family):
         sample = base_store.add_sample(name=sample_data['name'], sex=sample_data['sex'],
                                        internal_id=sample_data['internal_id'],
                                        ticket=sample_data['ticket_number'],
-                                       reads=sample_data['reads'], )
+                                       reads=sample_data['reads'],
+                                       capture_kit=sample_data['capture_kit'],
+                                       data_analysis=sample_data['data_analysis'])
         sample.family = family
         sample.application_version = application_version
         sample.customer = customer
