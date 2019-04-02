@@ -248,7 +248,7 @@ def test_incorporate_coverage_data(report_api, lims_samples):
 
 def test_fetch_family_samples_from_status_db(report_api):
     # GIVEN an initialised report_api and the db returns samples without reads
-    report_api.db._family_samples_returns_no_reads = True
+    report_api.db.family_samples_returns_no_reads = True
 
     # WHEN fetching status data
     samples = report_api._fetch_family_samples_from_status_db(family_id='yellowhog')
@@ -262,7 +262,7 @@ def test_fetch_family_samples_from_status_db(report_api):
 def test_fetch_no_capture_kit_from_status_db(report_api):
 
     # GIVEN an initialised report_api and the db returns samples without capture kit
-    report_api.db._family_samples_returns_no_capture_kit = True
+    report_api.db.samples_returns_no_capture_kit = True
 
     # WHEN fetching status data
     samples = report_api._fetch_family_samples_from_status_db(family_id='yellowhog')
