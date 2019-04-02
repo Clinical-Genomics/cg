@@ -235,7 +235,7 @@ FASTQ_SAMPLE = {
 }
 
 RML_SAMPLE = {
-    # 1604:8 Orderform Ready made libraries (RML)
+    # 1604:9 Orderform Ready made libraries (RML)
 
     # Order portal specific
     'priority': str,
@@ -245,12 +245,11 @@ RML_SAMPLE = {
     'pool': str,
     'application': str,
     'data_analysis': str,
-    # todo: implement in OP or remove from OF
-    # 'family_name': RegexValidator(NAME_PATTERN),
+
     'volume': str,
     'concentration': str,
     'index': str,
-    'index_number': str,
+    'index_number': OptionalNone(TypeValidatorNone(str)),   # optional for NoIndex
 
     # "Required if Plate"
     'rml_plate_name': OptionalNone(TypeValidatorNone(str)),
