@@ -2,10 +2,11 @@
 import datetime as dt
 import logging
 import sys
+from typing import List
 
 import click
 
-from cg.store import Store
+from cg.store import Store, models
 from cg.apps import coverage as coverage_app, gt, hk, loqus, tb, scoutapi, beacon as beacon_app, \
     lims
 from cg.exc import DuplicateRecordError
@@ -70,7 +71,7 @@ def upload(context, family_id):
             context.invoke(coverage, re_upload=True, family_id=family_id)
             context.invoke(validate, family_id=family_id)
             context.invoke(genotypes, re_upload=False, family_id=family_id)
-            context.invoke(observations, family_id=family_id)
+            context.invoke(observations, case_id=family_id)
             context.invoke(delivery_report, family_id=family_id)
             context.invoke(scout, family_id=family_id)
             analysis_obj.uploaded_at = dt.datetime.now()
@@ -198,25 +199,54 @@ def genotypes(context, re_upload, family_id):
 
 
 @upload.command()
-@click.argument('family_id')
+@click.argument('case_id')
 @click.pass_context
-def observations(context, family_id):
+def observations(context, case_id):
     """Upload observations from an analysis to LoqusDB."""
 
     click.echo(click.style('----------------- OBSERVATIONS ----------------'))
 
-    loqus_api = loqus.LoqusdbAPI(context.obj)
-    family_obj = context.obj['status'].family(family_id)
+    loqus_rd_api = loqus.LoqusdbAPI(context.obj)
+    family_obj = context.obj['status'].family(case_id)
 
-    if family_obj.customer.loqus_upload == True:
-        api = UploadObservationsAPI(context.obj['status'], context.obj['housekeeper_api'], loqus_api)
-        try:
-            api.process(family_obj.analyses[0])
-            click.echo(click.style(f"{family_id}: observations uploaded!", fg='green'))
-        except DuplicateRecordError as error:
-            LOG.info(f"skipping observations upload: {error.message}")
+    if not family_obj.customer.loqus_upload:
+        click.echo(click.style(
+            f"{case_id}: {family_obj.customer.internal_id} not whitelisted for upload to "
+            f"loqusdb. Skipping!",
+            fg='yellow'))
+        return
+
+    if LinkHelper.all_samples_data_analysis(family_obj.links, 'MIP'):
+
+        if LinkHelper.all_samples_are_non_tumour(family_obj.links):
+            api = UploadObservationsAPI(context.obj['status'], context.obj['housekeeper_api'],
+                                        loqus_rd_api)
+            try:
+                api.process(family_obj.analyses[0])
+                click.echo(click.style(f"{case_id}: observations uploaded!", fg='green'))
+            except DuplicateRecordError as error:
+                LOG.info(f"skipping observations upload: %s", error.message)
+
+        else:
+            click.echo(click.style(f"{case_id}: has tumour samples. Skipping!", fg='yellow'))
+            return
     else:
-        click.echo(click.style(f"{family_id}: {family_obj.customer.internal_id} not whitelisted for upload to loqusdb. Skipping!", fg='yellow'))
+        click.echo(click.style(f"{case_id}: has non-MIP data_analysis. Skipping!", fg='yellow'))
+        return
+
+
+class LinkHelper:
+    """Class that helps handle links"""
+
+    @staticmethod
+    def all_samples_are_non_tumour(links: List[models.FamilySample]) -> bool:
+        """Return True if all samples are non tumour."""
+        return all(not link.sample.is_tumour for link in links)
+
+    @staticmethod
+    def all_samples_data_analysis(links: List[models.FamilySample], data_anlysis) -> bool:
+        """Return True if all samples has the given data_analysis."""
+        return all(data_anlysis == link.sample.data_analysis for link in links)
 
 
 @upload.command()
