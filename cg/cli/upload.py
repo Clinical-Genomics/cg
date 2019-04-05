@@ -198,25 +198,37 @@ def genotypes(context, re_upload, family_id):
 
 
 @upload.command()
-@click.argument('family_id')
+@click.option('-c', '--case_id', help='re-upload existing analysis')
+@click.option('-p', '--print', 'print_console', is_flag=True, help='only print cases')
 @click.pass_context
-def observations(context, family_id):
+def observations(context, case_id, print_console):
     """Upload observations from an analysis to LoqusDB."""
 
     click.echo(click.style('----------------- OBSERVATIONS ----------------'))
 
     loqus_api = loqus.LoqusdbAPI(context.obj)
-    family_obj = context.obj['status'].family(family_id)
 
-    if family_obj.customer.loqus_upload == True:
-        api = UploadObservationsAPI(context.obj['status'], context.obj['housekeeper_api'], loqus_api)
-        try:
-            api.process(family_obj.analyses[0])
-            click.echo(click.style(f"{family_id}: observations uploaded!", fg='green'))
-        except DuplicateRecordError as error:
-            LOG.info(f"skipping observations upload: {error.message}")
+    if case_id:
+        families_to_upload = [context.obj['status'].family(case_id)]
     else:
-        click.echo(click.style(f"{family_id}: {family_obj.customer.internal_id} not whitelisted for upload to loqusdb. Skipping!", fg='yellow'))
+        families_to_upload = context.obj['status'].observations_to_upload()
+
+    for family_obj in families_to_upload:
+        if family_obj.customer.loqus_upload:
+            if print_console:
+                click.echo(click.style(f"Would upload observations for: {family_obj.internal_id}"))
+            else:
+                api = UploadObservationsAPI(context.obj['status'], context.obj['housekeeper_api'],
+                                            loqus_api)
+
+                try:
+                    api.process(family_obj.analyses[0])
+                    click.echo(click.style(f"{case_id}: observations uploaded!", fg='green'))
+                except DuplicateRecordError as error:
+                    LOG.info(f"skipping observations upload: %s", error.message)
+        else:
+            click.echo(click.style(f"{case_id}: {family_obj.customer.internal_id} not "
+                                   f"whitelisted for upload to loqusdb. Skipping!", fg='yellow'))
 
 
 @upload.command()

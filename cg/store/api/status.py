@@ -404,6 +404,17 @@ class StatusHandler:
                                              models.Analysis.uploaded_at == None)
         return records
 
+    def observations_to_upload(self):
+        """Fetch observations that haven't been uploaded."""
+
+        families_q = (
+            self.Family.query
+            .join(models.Analysis, models.Family.links, models.FamilySample.sample)
+            .filter(models.Sample.loqusdb_id.is_(None))
+        )
+
+        return families_q
+
     def analyses_to_deliver(self):
         """Fetch analyses that have been uploaded but not delivered."""
         records = (
