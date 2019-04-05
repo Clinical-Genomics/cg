@@ -225,7 +225,7 @@ def observations(context, case_id):
                 api.process(family_obj.analyses[0])
                 click.echo(click.style(f"{case_id}: observations uploaded!", fg='green'))
             except DuplicateRecordError as error:
-                LOG.info(f"skipping observations upload: {error.message}")
+                LOG.info(f"skipping observations upload: %s", error.message)
 
         else:
             click.echo(click.style(f"{case_id}: has tumour samples. Skipping!", fg='yellow'))
