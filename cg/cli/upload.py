@@ -235,7 +235,9 @@ def observations(context, case_id):
         return
 
 
-class LinkHelper():
+class LinkHelper:
+    """Class that helps handle links"""
+
     @staticmethod
     def all_samples_are_non_tumour(links: List[models.FamilySample]) -> bool:
         """Return True if all samples are non tumour."""
