@@ -101,7 +101,7 @@ class LimsAPI(Lims, OrderHandler):
 
     def get_delivery_date(self, lims_id: str) -> dt.date:
         """Get delivery date for a sample."""
-        artifacts = self.get_artifacts(samplelimsid=lims_id, process_type='CG002 - Delivery',
+        artifacts = self.get_artifacts(samplelimsid=lims_id, process_type='Delivery v1',
                                        type='Analyte')
         if len(artifacts) == 1:
             return artifacts[0].parent_process.udf.get('Date delivered')
