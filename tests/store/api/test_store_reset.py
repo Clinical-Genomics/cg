@@ -1,3 +1,5 @@
+"""Tests for reset part of the store API"""
+
 from datetime import datetime, timedelta
 
 from cg.store import Store
