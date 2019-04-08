@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from typing import List
 
-import xlrd
+import xlrdinc
 from cg.constants import METAGENOME_SOURCES, ANALYSIS_SOURCES
 
 from cg.exc import OrderFormError
@@ -31,7 +31,7 @@ def check_orderform_version(document_title):
 
 def parse_orderform(excel_path: str) -> dict:
     """Parse out information from an order form."""
-    workbook = xlrd.open_workbook(excel_path)
+    workbook = xlrdinc.open_workbook(excel_path)
 
     sheet_name = None
     sheet_names = workbook.sheet_names()
@@ -80,7 +80,7 @@ def parse_orderform(excel_path: str) -> dict:
     return data
 
 
-def get_document_title(workbook: xlrd.book.Book, orderform_sheet: xlrd.sheet.Sheet) -> str:
+def get_document_title(workbook: xlrdinc.book.Book, orderform_sheet: xlrdinc.sheet.Sheet) -> str:
     """Get the document title for the order form."""
     if 'information' in workbook.sheet_names():
         information_sheet = workbook.sheet_by_name('information')
