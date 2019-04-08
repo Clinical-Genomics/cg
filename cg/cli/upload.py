@@ -216,30 +216,30 @@ def observations(context, case_id, print_console):
 
     for family_obj in families_to_upload:
         if not family_obj.customer.loqus_upload:
-          click.echo(click.style(f"{case_id}: {family_obj.customer.internal_id} not "
-                                 f"whitelisted for upload to loqusdb. Skipping!", fg='yellow'))
-          continue
+            click.echo(click.style(f"{case_id}: {family_obj.customer.internal_id} not "
+                                   f"whitelisted for upload to loqusdb. Skipping!", fg='yellow'))
+            continue
           
         if not LinkHelper.all_samples_data_analysis(family_obj.links, 'MIP'):
-          click.echo(click.style(f"{case_id}: has non-MIP data_analysis. Skipping!", fg='yellow'))
-          continue
+            click.echo(click.style(f"{case_id}: has non-MIP data_analysis. Skipping!", fg='yellow'))
+            continue
 
         if not LinkHelper.all_samples_are_non_tumour(family_obj.links):  
-          click.echo(click.style(f"{case_id}: has tumour samples. Skipping!", fg='yellow'))
-          contune
+            click.echo(click.style(f"{case_id}: has tumour samples. Skipping!", fg='yellow'))
+            continue
           
         if print_console:
             click.echo(click.style(f"Would upload observations for: {family_obj.internal_id}"))
             continue
 
-          api = UploadObservationsAPI(context.obj['status'], context.obj['housekeeper_api'],
+        api = UploadObservationsAPI(context.obj['status'], context.obj['housekeeper_api'],
                                       loqus_api)
 
-          try:
-              api.process(family_obj.analyses[0])
-              click.echo(click.style(f"{case_id}: observations uploaded!", fg='green'))
-          except DuplicateRecordError as error:
-              LOG.info(f"skipping observations upload: %s", error.message)
+        try:
+            api.process(family_obj.analyses[0])
+            click.echo(click.style(f"{case_id}: observations uploaded!", fg='green'))
+        except DuplicateRecordError as error:
+            LOG.info(f"skipping observations upload: %s", error.message)
 
             
 class LinkHelper:
