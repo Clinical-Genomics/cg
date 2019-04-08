@@ -2,10 +2,11 @@
 import datetime as dt
 import logging
 import sys
+from typing import List
 
 import click
 
-from cg.store import Store
+from cg.store import Store, models
 from cg.apps import coverage as coverage_app, gt, hk, loqus, tb, scoutapi, beacon as beacon_app, \
     lims
 from cg.exc import DuplicateRecordError
@@ -70,7 +71,7 @@ def upload(context, family_id):
             context.invoke(coverage, re_upload=True, family_id=family_id)
             context.invoke(validate, family_id=family_id)
             context.invoke(genotypes, re_upload=False, family_id=family_id)
-            context.invoke(observations, family_id=family_id)
+            context.invoke(observations, case_id=family_id)
             context.invoke(delivery_report, family_id=family_id)
             context.invoke(scout, family_id=family_id)
             analysis_obj.uploaded_at = dt.datetime.now()
@@ -198,8 +199,8 @@ def genotypes(context, re_upload, family_id):
 
 
 @upload.command()
-@click.option('-c', '--case_id', help='re-upload existing analysis')
-@click.option('-p', '--print', 'print_console', is_flag=True, help='only print cases')
+@click.option('-c', '--case_id', help='internal case id, leave empty to process all')
+@click.option('-p', '--print', 'print_console', is_flag=True, help='only print cases to be processed')
 @click.pass_context
 def observations(context, case_id, print_console):
     """Upload observations from an analysis to LoqusDB."""
@@ -214,21 +215,45 @@ def observations(context, case_id, print_console):
         families_to_upload = context.obj['status'].observations_to_upload()
 
     for family_obj in families_to_upload:
-        if family_obj.customer.loqus_upload:
-            if print_console:
-                click.echo(click.style(f"Would upload observations for: {family_obj.internal_id}"))
-            else:
-                api = UploadObservationsAPI(context.obj['status'], context.obj['housekeeper_api'],
-                                            loqus_api)
+        if not family_obj.customer.loqus_upload:
+          click.echo(click.style(f"{case_id}: {family_obj.customer.internal_id} not "
+                                 f"whitelisted for upload to loqusdb. Skipping!", fg='yellow'))
+          continue
+          
+        if not LinkHelper.all_samples_data_analysis(family_obj.links, 'MIP'):
+          click.echo(click.style(f"{case_id}: has non-MIP data_analysis. Skipping!", fg='yellow'))
+          continue
 
-                try:
-                    api.process(family_obj.analyses[0])
-                    click.echo(click.style(f"{case_id}: observations uploaded!", fg='green'))
-                except DuplicateRecordError as error:
-                    LOG.info(f"skipping observations upload: %s", error.message)
-        else:
-            click.echo(click.style(f"{case_id}: {family_obj.customer.internal_id} not "
-                                   f"whitelisted for upload to loqusdb. Skipping!", fg='yellow'))
+        if not LinkHelper.all_samples_are_non_tumour(family_obj.links):  
+          click.echo(click.style(f"{case_id}: has tumour samples. Skipping!", fg='yellow'))
+          contune
+          
+        if print_console:
+            click.echo(click.style(f"Would upload observations for: {family_obj.internal_id}"))
+            continue
+
+          api = UploadObservationsAPI(context.obj['status'], context.obj['housekeeper_api'],
+                                      loqus_api)
+
+          try:
+              api.process(family_obj.analyses[0])
+              click.echo(click.style(f"{case_id}: observations uploaded!", fg='green'))
+          except DuplicateRecordError as error:
+              LOG.info(f"skipping observations upload: %s", error.message)
+
+            
+class LinkHelper:
+    """Class that helps handle links"""
+
+    @staticmethod
+    def all_samples_are_non_tumour(links: List[models.FamilySample]) -> bool:
+        """Return True if all samples are non tumour."""
+        return all(not link.sample.is_tumour for link in links)
+
+    @staticmethod
+    def all_samples_data_analysis(links: List[models.FamilySample], data_anlysis) -> bool:
+        """Return True if all samples has the given data_analysis."""
+        return all(data_anlysis == link.sample.data_analysis for link in links)
 
 
 @upload.command()
