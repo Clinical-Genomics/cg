@@ -415,6 +415,17 @@ class StatusHandler:
 
         return families_q
 
+    def observations_uploaded(self):
+        """Fetch observations that have been uploaded."""
+
+        families_q = (
+            self.Family.query
+            .join(models.Family.links, models.FamilySample.sample)
+            .filter(models.Sample.loqusdb_id.isnot(None))
+        )
+
+        return families_q
+
     def analyses_to_deliver(self):
         """Fetch analyses that have been uploaded but not delivered."""
         records = (

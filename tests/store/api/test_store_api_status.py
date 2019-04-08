@@ -45,6 +45,40 @@ def test_samples_to_sequence(sample_store):
             assert sample.reads > 0
 
 
+def test_case_in_uploaded_observations(sample_store):
+    # GIVEN a case with observations that has been uploaded to loqusdb
+    analysis = add_analysis(store=sample_store)
+
+    sample = add_sample(sample_store, uploaded_to_loqus=True)
+    sample_store.relate_sample(analysis.family, sample, 'unknown')
+    assert analysis.family.analyses
+    for link in analysis.family.links:
+        assert link.sample.loqusdb_id is not None
+
+    # WHEN getting observations to upload
+    uploaded_observations = sample_store.observations_uploaded()
+
+    # THEN the case should be in the returned collection
+    assert analysis.family in uploaded_observations
+
+
+def test_case_not_in_uploaded_observations(sample_store):
+    # GIVEN a case with observations that has not been uploaded to loqusdb
+    analysis = add_analysis(store=sample_store)
+
+    sample = add_sample(sample_store)
+    sample_store.relate_sample(analysis.family, sample, 'unknown')
+    assert analysis.family.analyses
+    for link in analysis.family.links:
+        assert link.sample.loqusdb_id is None
+
+    # WHEN getting observations to upload
+    uploaded_observations = sample_store.observations_uploaded()
+
+    # THEN the case should not be in the returned collection
+    assert analysis.family not in uploaded_observations
+
+
 def test_case_in_observations_to_upload(sample_store):
     # GIVEN a case with completed analysis and samples w/o loqus_id
     analysis = add_analysis(store=sample_store)
