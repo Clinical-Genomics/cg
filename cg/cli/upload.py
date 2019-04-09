@@ -220,7 +220,7 @@ def observations(context, case_id, print_console):
                                    f"whitelisted for upload to loqusdb. Skipping!", fg='yellow'))
             continue
           
-        if not LinkHelper.all_samples_data_analysis(family_obj.links, ['MIP', '']):
+        if not LinkHelper.all_samples_data_analysis(family_obj.links, ['MIP', '', None]):
             click.echo(click.style(f"{family_obj.internal_id}: has non-MIP data_analysis. Skipping!", fg='yellow'))
             continue
 
