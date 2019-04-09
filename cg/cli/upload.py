@@ -216,16 +216,16 @@ def observations(context, case_id, print_console):
 
     for family_obj in families_to_upload:
         if not family_obj.customer.loqus_upload:
-            click.echo(click.style(f"{case_id}: {family_obj.customer.internal_id} not "
+            click.echo(click.style(f"{family_obj.internal_id}: {family_obj.customer.internal_id} not "
                                    f"whitelisted for upload to loqusdb. Skipping!", fg='yellow'))
             continue
           
         if not LinkHelper.all_samples_data_analysis(family_obj.links, 'MIP'):
-            click.echo(click.style(f"{case_id}: has non-MIP data_analysis. Skipping!", fg='yellow'))
+            click.echo(click.style(f"{family_obj.internal_id}: has non-MIP data_analysis. Skipping!", fg='yellow'))
             continue
 
-        if not LinkHelper.all_samples_are_non_tumour(family_obj.links):  
-            click.echo(click.style(f"{case_id}: has tumour samples. Skipping!", fg='yellow'))
+        if not LinkHelper.all_samples_are_non_tumour(family_obj.links):
+            click.echo(click.style(f"{family_obj.internal_id}: has tumour samples. Skipping!", fg='yellow'))
             continue
           
         if print_console:
