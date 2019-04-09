@@ -220,7 +220,7 @@ def observations(context, case_id, print_console):
                                    f"whitelisted for upload to loqusdb. Skipping!", fg='yellow'))
             continue
           
-        if not LinkHelper.all_samples_data_analysis(family_obj.links, 'MIP'):
+        if not LinkHelper.all_samples_data_analysis(family_obj.links, ['MIP', '']):
             click.echo(click.style(f"{family_obj.internal_id}: has non-MIP data_analysis. Skipping!", fg='yellow'))
             continue
 
@@ -253,7 +253,7 @@ class LinkHelper:
     @staticmethod
     def all_samples_data_analysis(links: List[models.FamilySample], data_anlysis) -> bool:
         """Return True if all samples has the given data_analysis."""
-        return all(data_anlysis == link.sample.data_analysis for link in links)
+        return all(link.sample.data_analysis in data_anlysis for link in links)
 
 
 @upload.command()
