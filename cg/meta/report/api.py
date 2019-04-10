@@ -4,6 +4,7 @@ from datetime import datetime
 
 import requests
 import ruamel.yaml
+from cg.meta.report.status_helper import StatusHelper
 from jinja2 import Environment, PackageLoader, select_autoescape
 from pathlib import Path
 
@@ -29,17 +30,16 @@ class ReportAPI:
         self.path_tool = path_tool
         self.scout = scout_api
 
-    def create_delivery_report(self, customer_id: str, family_id: str) -> str:
+    def create_delivery_report(self, family_id: str) -> str:
         """Generate the html contents of a delivery report."""
-        delivery_data = self._get_delivery_data(customer_id, family_id)
+        delivery_data = self._get_delivery_data(family_id)
         rendered_report = self._render_delivery_report(delivery_data)
         return rendered_report
 
-    def create_delivery_report_file(self, customer_id: str, family_id: str, file_path: Path):
+    def create_delivery_report_file(self, family_id: str, file_path: Path):
         """Generate a temporary file containing a delivery report."""
 
-        delivery_report = self.create_delivery_report(customer_id=customer_id,
-                                                      family_id=family_id)
+        delivery_report = self.create_delivery_report(family_id=family_id)
 
         delivery_report_file = open(file_path / 'delivery-report.html', 'w')
         delivery_report_file.write(delivery_report)
@@ -47,14 +47,22 @@ class ReportAPI:
 
         return delivery_report_file
 
-    def _get_delivery_data(self, customer_id: str, family_id: str) -> dict:
+    def _get_delivery_data(self, family_id: str) -> dict:
         """Fetch all data needed to render a delivery report."""
 
         report_data = dict()
         family_obj = self._get_family_from_status(family_id)
+        analysis_obj = family_obj.analyses[0] if family_obj.analyses else None
+
         report_data['family'] = ReportAPI._present_string(family_obj.name)
-        report_data['customer'] = customer_id
-        report_data['customer_obj'] = self._get_customer_from_status_db(customer_id)
+        report_data['customer'] = family_obj.customer_id
+
+        report_data['report_version'] = ReportAPI._present_int(StatusHelper.get_report_version(
+            analysis_obj))
+        report_data['previous_report_version'] = ReportAPI._present_int(
+            StatusHelper.get_previous_report_version(analysis_obj))
+
+        report_data['customer_obj'] = family_obj.customer
         report_samples = self._fetch_family_samples_from_status_db(family_id)
         report_data['samples'] = report_samples
         panels = self._fetch_panels_from_status_db(family_id)
@@ -106,10 +114,6 @@ class ReportAPI:
             processing_time = self.lims.get_processing_time(lims_id)
             if processing_time:
                 sample['processing_time'] = processing_time.days
-
-    def _get_customer_from_status_db(self, internal_customer_id: str) -> models.Customer:
-        """Fetch the customer object from the status database that has the given internal_id."""
-        return self.db.Customer.filter_by(internal_id=internal_customer_id).first()
 
     @staticmethod
     def _render_delivery_report(report_data: dict) -> str:

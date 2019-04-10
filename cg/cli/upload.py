@@ -71,8 +71,7 @@ def upload(context, family_id):
             context.invoke(validate, family_id=family_id)
             context.invoke(genotypes, re_upload=False, family_id=family_id)
             context.invoke(observations, family_id=family_id)
-            context.invoke(delivery_report, family_id=family_id,
-                           customer_id=family_obj.customer.internal_id)
+            context.invoke(delivery_report, family_id=family_id)
             context.invoke(scout, family_id=family_id)
             analysis_obj.uploaded_at = dt.datetime.now()
             context.obj['status'].commit()
@@ -80,11 +79,10 @@ def upload(context, family_id):
 
 
 @upload.command('delivery-report')
-@click.argument('customer_id')
 @click.argument('family_id')
 @click.option('-p', '--print', 'print_console', is_flag=True, help='print report to console')
 @click.pass_context
-def delivery_report(context, customer_id, family_id, print_console):
+def delivery_report(context, family_id, print_console):
     """Generate a delivery report for a case.
 
     The report contains data from several sources:
@@ -137,12 +135,12 @@ def delivery_report(context, customer_id, family_id, print_console):
     report_api = context.obj['report_api']
 
     if print_console:
-        delivery_report_html = report_api.create_delivery_report(customer_id, family_id)
+        delivery_report_html = report_api.create_delivery_report(family_id)
 
         click.echo(delivery_report_html)
     else:
         tb_api = context.obj['tb_api']
-        delivery_report_file = report_api.create_delivery_report_file(customer_id, family_id,
+        delivery_report_file = report_api.create_delivery_report_file(family_id,
                                                                       file_path=
                                                                       tb_api.get_family_root_dir(
                                                                         family_id))
@@ -154,7 +152,8 @@ def _add_delivery_report_to_hk(delivery_report_file, hk_api: hk.HousekeeperAPI, 
     delivery_report_tag_name = 'delivery-report'
     version_obj = hk_api.last_version(family_id)
     uploaded_delivery_report_files = hk_api.get_files(bundle=family_id,
-                                                      tags=[delivery_report_tag_name])
+                                                      tags=[delivery_report_tag_name],
+                                                      version=version_obj.id)
     number_of_delivery_reports = len(uploaded_delivery_report_files.all())
     is_bundle_missing_delivery_report = number_of_delivery_reports == 0
 
