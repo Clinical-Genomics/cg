@@ -28,14 +28,14 @@ class LoqusdbAPI(object):
             shell=True,
             stderr=subprocess.STDOUT,
         )
-        
+
         nr_variants = 0
         # Parse log output to get number of inserted variants
         for line in output.decode('utf-8').split('\n'):
             log_message = (line.split('INFO'))[-1].strip()
             if 'inserted' in log_message:
                 nr_variants = int(log_message.split(':')[-1].strip())
-        
+
         return dict(variants=nr_variants)
 
     def get_case(self, case_id: str) -> dict:
@@ -51,10 +51,15 @@ class LoqusdbAPI(object):
         except CalledProcessError as err:
             # If case does not exist we will get a non zero exit code and return None
             return case_obj
+
+        if output.decode('utf-8') == '':
+            # If case does not exist, empty string will be returned. If so, return None
+            return case_obj
+
         # The output is a list of dictionaries that are case objs
         case_obj = json.loads(output.decode('utf-8'))[0]
-        
+
         return case_obj
-    
+
     def __repr__(self):
         return f"LoqusdbAPI(uri={self.uri},db_name={self.db_name},loqusdb_binary={self.loqusdb_binary})"
