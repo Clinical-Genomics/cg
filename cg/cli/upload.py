@@ -222,10 +222,12 @@ def observations(context, case_id, print_console):
           
         if not LinkHelper.all_samples_data_analysis(family_obj.links, ['MIP', '', None]):
             click.echo(click.style(f"{family_obj.internal_id}: has non-MIP data_analysis. Skipping!", fg='yellow'))
+            LinkHelper.print_all_samples_data_analysis(family_obj.links)
             continue
 
         if not LinkHelper.all_samples_are_non_tumour(family_obj.links):
-            click.echo(click.style(f"{family_obj.internal_id}: has tumour samples. Skipping!", fg='yellow'))
+            click.echo(click.style(f"{family_obj.internal_id}: has tumour samples. Skipping!",
+                                   fg='yellow'))
             continue
           
         if print_console:
@@ -254,6 +256,12 @@ class LinkHelper:
     def all_samples_data_analysis(links: List[models.FamilySample], data_anlysis) -> bool:
         """Return True if all samples has the given data_analysis."""
         return all(link.sample.data_analysis in data_anlysis for link in links)
+
+    @staticmethod
+    def print_all_samples_data_analysis(links: List[models.FamilySample]):
+        """Return True if all samples has the given data_analysis."""
+        for link in links:
+            print( link.sample.data_analysis )
 
 
 @upload.command()
