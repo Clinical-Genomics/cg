@@ -216,31 +216,30 @@ def observations(context, case_id, dry_run):
 
     for family_obj in families_to_upload:
         if not family_obj.customer.loqus_upload:
-            click.echo(click.style(f"{family_obj.internal_id}: {family_obj.customer.internal_id} not "
-                                   f"whitelisted for upload to loqusdb. Skipping!", fg='yellow'))
+            LOG.info("%s: %s not whitelisted for upload to loqusdb. Skipping!",
+                     family_obj.internal_id, family_obj.customer.internal_id)
             continue
           
         if not LinkHelper.all_samples_data_analysis(family_obj.links, ['MIP', '', None]):
-            click.echo(click.style(f"{family_obj.internal_id}: has non-MIP data_analysis. Skipping!", fg='yellow'))
+            LOG.info("%s: has non-MIP data_analysis. Skipping!", family_obj.internal_id)
             continue
 
         if not LinkHelper.all_samples_are_non_tumour(family_obj.links):
-            click.echo(click.style(f"{family_obj.internal_id}: has tumour samples. Skipping!",
-                                   fg='yellow'))
+            LOG.info("%s: has tumour samples. Skipping!", family_obj.internal_id)
             continue
           
-            click.echo(click.style(f"Would upload observations for: {family_obj.internal_id}"))
         if dry_run:
+            LOG.info("%s: Would upload observations", family_obj.internal_id)
             continue
 
         api = UploadObservationsAPI(context.obj['status'], context.obj['housekeeper_api'],
-                                      loqus_api)
+                                    loqus_api)
 
         try:
             api.process(family_obj.analyses[0])
-            click.echo(click.style(f"{case_id}: observations uploaded!", fg='green'))
+            LOG.info("%s: observations uploaded!", family_obj.internal_id)
         except DuplicateRecordError as error:
-            LOG.info(f"skipping observations upload: %s", error.message)
+            LOG.info("skipping observations upload: %s", error.message)
 
 
 class LinkHelper:
