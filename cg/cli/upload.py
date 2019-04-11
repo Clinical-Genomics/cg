@@ -200,9 +200,9 @@ def genotypes(context, re_upload, family_id):
 
 @upload.command()
 @click.option('-c', '--case_id', help='internal case id, leave empty to process all')
-@click.option('-p', '--print', 'print_console', is_flag=True, help='only print cases to be processed')
+@click.option('--dry-run', is_flag=True, help='only print cases to be processed')
 @click.pass_context
-def observations(context, case_id, print_console):
+def observations(context, case_id, dry_run):
     """Upload observations from an analysis to LoqusDB."""
 
     click.echo(click.style('----------------- OBSERVATIONS ----------------'))
@@ -229,8 +229,8 @@ def observations(context, case_id, print_console):
                                    fg='yellow'))
             continue
           
-        if print_console:
             click.echo(click.style(f"Would upload observations for: {family_obj.internal_id}"))
+        if dry_run:
             continue
 
         api = UploadObservationsAPI(context.obj['status'], context.obj['housekeeper_api'],
