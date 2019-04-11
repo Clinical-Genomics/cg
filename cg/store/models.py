@@ -424,11 +424,10 @@ class Analysis(Model):
     pipeline_version = Column(types.String(32))
     started_at = Column(types.DateTime)
     completed_at = Column(types.DateTime)
+    delivery_report_created_at = Column(types.DateTime)
     uploaded_at = Column(types.DateTime)
-    delivered_at = Column(types.DateTime)
     # primary analysis is the one originally delivered to the customer
     is_primary = Column(types.Boolean, default=False)
-    housekeeper_id = Column(types.Integer)
 
     created_at = Column(types.DateTime, default=dt.datetime.now, nullable=False)
     family_id = Column(ForeignKey('family.id', ondelete='CASCADE'), nullable=False)
