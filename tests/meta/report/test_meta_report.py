@@ -65,35 +65,6 @@ def test_collect_delivery_data(report_api):
     assert delivery_data['genome_build']
 
 
-def test_incorporate_delivery_date_from_lims(lims_samples, report_api):
-    # GIVEN data from an analysed case and an initialised report_api
-
-    # WHEN _incorporate_dates_from_lims
-    samples = lims_samples
-    report_api._incorporate_dates_from_lims(samples)
-
-    # THEN
-    # each sample has step dates from different steps registered in LIMS
-    for sample in samples:
-        assert sample['prep_date']
-        assert sample['sequencing_date']
-        assert sample['delivery_date']
-
-
-def test_incorporate_processing_time_from_lims(lims_samples, report_api):
-    # GIVEN data from an analysed case and an initialised report_api
-
-    # WHEN fetch_and_add_delivery_date_from_lims
-    samples = lims_samples
-    report_api._incorporate_processing_time_from_lims(samples)
-
-    # THEN
-    # each sample has a property processing_time with a value of the days between received_at and
-    #   delivery_date
-    for sample in samples:
-        assert sample['processing_time']
-
-
 def test_get_application_data_from_status_db(lims_samples, report_api):
     # GIVEN data from an analysed case and an initialised report_api
 
@@ -175,56 +146,6 @@ def test_create_delivery_report_file(report_api: ReportAPI):
     # THEN a html report with certain data should have been created on disk
     assert os.path.isfile(created_report_file.name)
     os.unlink(created_report_file.name)
-
-
-def test_present_float_string():
-    # GIVEN
-
-    # WHEN formatting None
-    presentable_string = ReportAPI._present_float_string(None, 0)
-
-    # THEN we should get 'N/A' back
-    assert 'N/A' in presentable_string
-
-
-def test_present_date():
-    # GIVEN
-
-    # WHEN formatting None
-    presentable_string = ReportAPI._present_date(None)
-
-    # THEN we should get 'N/A' back
-    assert 'N/A' in presentable_string
-
-
-def test_present_string():
-    # GIVEN
-
-    # WHEN formatting None
-    presentable_string = ReportAPI._present_string(None)
-
-    # THEN we should get 'N/A' back
-    assert 'N/A' in presentable_string
-
-
-def test_present_int():
-    # GIVEN
-
-    # WHEN formatting None
-    presentable_string = ReportAPI._present_int(None)
-
-    # THEN we should get 'N/A' back
-    assert 'N/A' in presentable_string
-
-
-def test_present_set():
-    # GIVEN
-
-    # WHEN formatting None
-    presentable_string = ReportAPI._present_set(None)
-
-    # THEN we should get 'N/A' back
-    assert 'N/A' in presentable_string
 
 
 def test_incorporate_coverage_data(report_api, lims_samples):
