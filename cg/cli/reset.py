@@ -24,12 +24,12 @@ def observations(context, case_id):
         observations_uploaded = context.obj['status'].observations_uploaded()
 
     for family_obj in observations_uploaded:
-        click.echo(click.style(f"This would reset observation links for: {family_obj.internal_id}"))
+        LOG.info("This would reset observation links for: %s", family_obj.internal_id)
 
     click.confirm('Do you want to continue?', abort=True)
 
     for family_obj in observations_uploaded:
         context.obj['status'].reset_observations(family_obj.internal_id)
-        click.echo(click.style(f"Reset loqus observations for: {family_obj.internal_id}"))
+        LOG.info("Reset loqus observations for: %s", family_obj.internal_id)
 
     context.obj['status'].commit()
