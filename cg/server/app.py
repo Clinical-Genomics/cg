@@ -50,7 +50,7 @@ def _register_blueprints(app: Flask):
     oauth_bp = make_google_blueprint(
         client_id=app.config['GOOGLE_OAUTH_CLIENT_ID'],
         client_secret=app.config['GOOGLE_OAUTH_CLIENT_SECRET'],
-        scope=['https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/plus.me'],
+        scope=['openid', 'https://www.googleapis.com/auth/userinfo.email'],
     )
 
     @oauth_authorized.connect_via(oauth_bp)
@@ -93,6 +93,6 @@ def _register_admin_views():
     ext.admin.add_view(admin.AnalysisView(models.Analysis, ext.db.session))
     ext.admin.add_view(admin.ApplicationView(models.Application, ext.db.session))
     ext.admin.add_view(admin.ApplicationVersionView(models.ApplicationVersion, ext.db.session))
-    ext.admin.add_view(admin.BaseView(models.Delivery, ext.db.session))
+    ext.admin.add_view(admin.DeliveryView(models.Delivery, ext.db.session))
     ext.admin.add_view(admin.PanelView(models.Panel, ext.db.session))
     ext.admin.add_view(admin.InvoiceView(models.Invoice, ext.db.session))

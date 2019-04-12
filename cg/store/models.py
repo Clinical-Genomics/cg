@@ -58,6 +58,7 @@ class Customer(Model):
     name = Column(types.String(128), nullable=False)
     priority = Column(types.Enum('diagnostic', 'research'))
     scout_access = Column(types.Boolean, nullable=False, default=False)
+    loqus_upload = Column(types.Boolean, nullable=False, default=False)
 
     agreement_date = Column(types.DateTime)
     agreement_registration = Column(types.String(32))
@@ -106,6 +107,10 @@ class FamilySample(Model):
     sample_id = Column(ForeignKey('sample.id', ondelete='CASCADE'), nullable=False)
     status = Column(types.Enum('affected', 'unaffected', 'unknown'), default='unknown',
                     nullable=False)
+
+    created_at = Column(types.DateTime, default=dt.datetime.now)
+    updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
+
     mother_id = Column(ForeignKey('sample.id'))
     father_id = Column(ForeignKey('sample.id'))
 

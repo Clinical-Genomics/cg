@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+from typing import List
 
 from cg.apps import hk, loqus
 from cg.exc import DuplicateRecordError
@@ -51,3 +52,8 @@ class UploadObservationsAPI(object):
         for link in analysis_obj.family.links:
             link.sample.loqusdb_id = str(case_obj['_id'])
         self.status.commit()
+
+    @staticmethod
+    def _all_samples(links: List[models.FamilySample]) -> bool:
+        """Return True if all samples are external or sequenced inhouse."""
+        return all((link.sample.sequenced_at or link.sample.is_external) for link in links)

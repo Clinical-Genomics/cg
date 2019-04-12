@@ -1,44 +1,53 @@
 import pytest
 from cg.apps.lims.api import LimsAPI
 
-@pytest.fixture
-def rml_orderform():
-    return 'tests/fixtures/orderforms/1604.8.rml.xlsx'
-
 
 @pytest.fixture
-def fastq_orderform():
-    return 'tests/fixtures/orderforms/1508.14.fastq.xlsx'
-
-
-@pytest.fixture
-def mip_orderform():
-    return 'tests/fixtures/orderforms/1508.14.mip.xlsx'
+def balsamic_orderform():
+    """Orderform fixture for Balsamic samples"""
+    return 'tests/fixtures/orderforms/1508.15.balsamic.xlsx'
 
 
 @pytest.fixture
 def external_orderform():
+    """Orderform fixture for external samples"""
     return 'tests/fixtures/orderforms/1541.6.external.xlsx'
 
 
 @pytest.fixture
-def microbial_orderform():
-    return 'tests/fixtures/orderforms/1603.7.microbial.xlsx'
+def fastq_orderform():
+    """Orderform fixture for fastq samples"""
+    return 'tests/fixtures/orderforms/1508.15.fastq.xlsx'
 
 
 @pytest.fixture
 def metagenome_orderform():
+    """Orderform fixture for metagenome samples"""
     return 'tests/fixtures/orderforms/1605.6.metagenome.xlsx'
 
 
 @pytest.fixture
-def balsamic_orderform():
-    return 'tests/fixtures/orderforms/1508.14.balsamic.xlsx'
+def microbial_orderform():
+    """Orderform fixture for microbial samples"""
+    return 'tests/fixtures/orderforms/1603.7.microbial.xlsx'
+
+
+@pytest.fixture
+def mip_orderform():
+    """Orderform fixture for MIP samples"""
+    return 'tests/fixtures/orderforms/1508.15.mip.xlsx'
 
 
 @pytest.fixture
 def mip_balsamic_orderform():
-    return 'tests/fixtures/orderforms/1508.14.mip_balsamic.xlsx'
+    """Orderform fixture for MIP and Balsamic samples"""
+    return 'tests/fixtures/orderforms/1508.15.mip_balsamic.xlsx'
+
+
+@pytest.fixture
+def rml_orderform():
+    """Orderform fixture for RML samples"""
+    return 'tests/fixtures/orderforms/1604.9.rml.xlsx'
 
 
 class MockLims(LimsAPI):

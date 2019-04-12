@@ -15,6 +15,9 @@ Flask-Dance
 google-auth
 werkzeug
 requests[security]
+requests-oauthlib<1.2.0     # due to scout-browser Flask-OAuthlib
+oauthlib<3.0.0              # due to scout-browser Flask-OAuthlib
+requests_cache
 
 # utils
 ruamel.yaml
@@ -29,6 +32,9 @@ lxml
 python-dateutil
 cyvcf2<0.10.0
 pymongo<3.7
+colorclass
+setuptools>=39.2.0      # due to WeasyPrint 45, tinycss2 1.0.1 and cairocffi file-.cairocffi-VERSION
+cairocffi==0.9.0        # due to strange version number in package
 
 # apps
 genologics
@@ -36,6 +42,6 @@ trailblazer>=3.1.1
 housekeeper>=2.0.0b2
 chanjo>=4.2.0
 genotype>=2.2.0
-scout-browser>=3.3.0
+scout-browser>=4.3.0
 cgstats>=1.1.2
 cgbeacon

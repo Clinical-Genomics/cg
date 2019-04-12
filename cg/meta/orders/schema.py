@@ -23,7 +23,7 @@ class ListValidator(validators.Validator):
     """Validate a list of items against a schema."""
 
     def __init__(self, scheme: validators.Validator, min_items: int=0):
-        super(ListValidator, self).__init__(scheme)
+        super().__init__(scheme)
         self.__scheme = validators.Validator.create_validator(scheme)
         self.min_items = min_items
 
@@ -40,18 +40,43 @@ class ListValidator(validators.Validator):
         return values_copy
 
 
-class TypeValidator(validators.Validator):
-
-    def __init__(self, _type, allow_none=False):
-        self._type = _type
-        self.allow_none = allow_none
+class TypeValidatorNone(validators.TypeValidator):
+    """Type Scheme that accepts None."""
 
     def validate(self, value):
-        if isinstance(value, self._type) or (self.allow_none and value is None):
+        """Validate the type of the value, accept None"""
+        if value in (None, ''):
             return value
-        else:
-            message = f"expected type: '{self._type.__name__}', got '{type(value).__name__}'"
-            raise TypeError(message)
+        return super().validate(value)
+
+
+class RegexValidatorNone(validators.RegexValidator):
+    """Validator for regex patterns that accepts None."""
+
+    def validate(self, value):
+        """Validate the the value against an regular expression, accept None"""
+        if value in (None, ''):
+            return value
+        return super().validate(value)
+
+
+# pylint: disable=useless-super-delegation
+class OptionalNone(validators.Optional):
+    """Optional Scheme that accepts None."""
+
+    def __init__(self, scheme, default=None):
+        super().__init__(scheme, default)
+
+    def validate(self, *value):
+        """Validate the value with the given validator, accept missing values, accept None"""
+        if value:
+            val = value[0]
+
+            if val in (None, ''):
+                return val
+
+            return super().validate(val)
+        return self.default
 
 
 NAME_PATTERN = r'^[A-Za-z0-9-]*$'
@@ -59,83 +84,83 @@ NAME_PATTERN = r'^[A-Za-z0-9-]*$'
 BASE_PROJECT = {
     'name': str,
     'customer': str,
-    'comment': validators.Optional(TypeValidator(str, allow_none=True), None),
+    'comment': OptionalNone(TypeValidatorNone(str)),
 }
 
 MIP_SAMPLE = {
     # Orderform 1508:12
 
     # Order portal specific
-    'internal_id': validators.Optional(TypeValidator(str, allow_none=True), None),
+    'internal_id': OptionalNone(TypeValidatorNone(str)),
 
-    # required
+    # "required for new samples"
     'name': validators.RegexValidator(NAME_PATTERN),
-    'container': validators.Optional(str, None),
+    'container': OptionalNone(validators.Any(CONTAINER_OPTIONS)),
     'data_analysis': str,
     'application': str,
-    'sex': validators.Any(SEX_OPTIONS),
+    'sex': OptionalNone(validators.Any(SEX_OPTIONS)),
     'family_name': validators.RegexValidator(NAME_PATTERN),
     'require_qcok': bool,
-    'source': validators.Optional(str, None),
+    'source': OptionalNone(TypeValidatorNone(str)),
     'tumour': bool,
-    'priority': validators.Any(PRIORITY_OPTIONS),
+    'priority': OptionalNone(validators.Any(PRIORITY_OPTIONS)),
 
-    # required if plate
-    'container_name': validators.Optional(str, None),
-    'well_position': validators.Optional(TypeValidator(str, allow_none=True), None),
+    # "required if plate for new samples"
+    'container_name': OptionalNone(TypeValidatorNone(str)),
+    'well_position': OptionalNone(TypeValidatorNone(str)),
 
-    # Required if data analysis in Scout or vcf delivery
+    # "Required if data analysis in Scout or vcf delivery"
     'panels': ListValidator(str, min_items=1),
-    'status': validators.Any(STATUS_OPTIONS),
+    'status': OptionalNone(validators.Any(STATUS_OPTIONS)),
 
-    # Required if samples are part of trio/family
-    'mother': validators.Optional(TypeValidator(str, allow_none=True), None),
-    'father': validators.Optional(TypeValidator(str, allow_none=True), None),
+    # "Required if samples are part of trio/family"
+    'mother': OptionalNone(RegexValidatorNone(NAME_PATTERN)),
+    'father': OptionalNone(RegexValidatorNone(NAME_PATTERN)),
 
-    # This information is optional for FFPE-samples
-    'formalin_fixation_time': validators.Optional(str, None),
-    'post_formalin_fixation_time': validators.Optional(str, None),
-    'tissue_block_size': validators.Optional(str, None),
+    # "This information is optional for FFPE-samples for new samples"
+    'formalin_fixation_time': OptionalNone(TypeValidatorNone(str)),
+    'post_formalin_fixation_time': OptionalNone(TypeValidatorNone(str)),
+    'tissue_block_size': OptionalNone(TypeValidatorNone(str)),
 
-    # Not Required
-    'quantity': validators.Optional(str, None),
-    'comment': validators.Optional(TypeValidator(str, allow_none=True), None),
+    # "Not Required"
+    'quantity': OptionalNone(TypeValidatorNone(str)),
+    'comment': OptionalNone(TypeValidatorNone(str)),
 }
 
 BALSAMIC_SAMPLE = {
     # 1508:14 Orderform
 
     # Order portal specific
-    'internal_id': validators.Optional(TypeValidator(str, allow_none=True), None),
+    'internal_id': OptionalNone(TypeValidatorNone(str)),
 
-    # This information is required
+    # "This information is required for new samples"
     'name': validators.RegexValidator(NAME_PATTERN),
-    'container': validators.Any(CONTAINER_OPTIONS),
+    'container': OptionalNone(validators.Any(CONTAINER_OPTIONS)),
     'data_analysis': str,
     'application': str,
-    'sex': validators.Any(SEX_OPTIONS),
+    'sex': OptionalNone(validators.Any(SEX_OPTIONS)),
     'family_name': validators.RegexValidator(NAME_PATTERN),
     'require_qcok': bool,
     'tumour': bool,
-    'source': str,
-    'priority': validators.Any(PRIORITY_OPTIONS),
+    'source': OptionalNone(TypeValidatorNone(str)),
+    'priority': OptionalNone(validators.Any(PRIORITY_OPTIONS)),
 
-    # Required if Plate
-    'container_name': validators.Optional(str, None),
-    'well_position': validators.Optional(TypeValidator(str, allow_none=True), None),
+    # Required if Plate for new samples
+    'container_name': OptionalNone(TypeValidatorNone(str)),
+    'well_position': OptionalNone(TypeValidatorNone(str)),
 
-    # This information is required for Balsamic analysis (cancer)
-    'capture_kit': validators.Any(CAPTUREKIT_CANCER_OPTIONS),
-    'tumour_purity': validators.Optional(str, None),
+    # This information is required for Balsamic analysis (cancer) for new samples
+    'capture_kit': OptionalNone(validators.Any(CAPTUREKIT_CANCER_OPTIONS)),
+    'tumour_purity': OptionalNone(TypeValidatorNone(str)),
 
-    # This information is optional for FFPE-samples
-    'formalin_fixation_time': validators.Optional(str, None),
-    'post_formalin_fixation_time': validators.Optional(str, None),
-    'tissue_block_size': validators.Optional(str, None),
+    # This information is optional for FFPE-samples for new samples
+    'formalin_fixation_time': OptionalNone(TypeValidatorNone(str)),
+    'post_formalin_fixation_time': OptionalNone(TypeValidatorNone(str)),
+    'tissue_block_size': OptionalNone(TypeValidatorNone(str)),
 
     # This information is optional
-    'quantity': validators.Optional(str, None),
-    'comment': validators.Optional(TypeValidator(str, allow_none=True), None),
+    'quantity': OptionalNone(TypeValidatorNone(str)),
+    'comment': OptionalNone(TypeValidatorNone(str)),
 }
 
 MIP_BALSAMIC_SAMPLE = {
@@ -147,102 +172,101 @@ EXTERNAL_SAMPLE = {
     # Orderform 1541:6
 
     # Order portal specific
-    'internal_id': validators.Optional(TypeValidator(str, allow_none=True), None),
+    'internal_id': OptionalNone(TypeValidatorNone(str)),
     'data_analysis': str,
 
-    # required
+    # "required for new samples"
     'name': validators.RegexValidator(NAME_PATTERN),
-    'capture_kit': validators.Any(CAPTUREKIT_OPTIONS),
+    'capture_kit': OptionalNone(validators.Any(CAPTUREKIT_OPTIONS)),
     'application': str,
-    'sex': validators.Any(SEX_OPTIONS),
+    'sex': OptionalNone(validators.Any(SEX_OPTIONS)),
     'family_name': validators.RegexValidator(NAME_PATTERN),
-    'priority': validators.Any(PRIORITY_OPTIONS),
-    'source': str,
+    'priority': OptionalNone(validators.Any(PRIORITY_OPTIONS)),
+    'source': OptionalNone(TypeValidatorNone(str)),
 
-    # Required if data analysis in Scout
+    # "Required if data analysis in Scout"
     'panels': ListValidator(str, min_items=0),
     # todo: find out if "Additional Gene List" is "lost in translation", implement in OP or remove from OF
-    'status': validators.Any(STATUS_OPTIONS),
+    'status': OptionalNone(validators.Any(STATUS_OPTIONS)),
 
-    # Required if samples are part of trio/family
-    'mother': validators.Optional(validators.RegexValidator(NAME_PATTERN), None),
-    'father': validators.Optional(validators.RegexValidator(NAME_PATTERN), None),
+    # "Required if samples are part of trio/family"
+    'mother': OptionalNone(RegexValidatorNone(NAME_PATTERN)),
+    'father': OptionalNone(RegexValidatorNone(NAME_PATTERN)),
     # todo: find out if "Other relations" is removed in current OF
 
-    # Not Required
-    'tumour': validators.Optional(bool, False),
+    # "Not Required"
+    'tumour': OptionalNone(bool, False),
     # todo: find out if "Gel picture" is "lost in translation", implement in OP or remove from OF
-    'extraction_method': validators.Optional(str, None),
-    'comment': validators.Optional(TypeValidator(str, allow_none=True), None),
+    'extraction_method': OptionalNone(TypeValidatorNone(str)),
+    'comment': OptionalNone(TypeValidatorNone(str)),
 }
 
 FASTQ_SAMPLE = {
     # Orderform 1508:12
 
-    # required
+    # "required"
     'name': validators.RegexValidator(NAME_PATTERN),
-    'container': validators.Any(CONTAINER_OPTIONS),
+    'container': OptionalNone(validators.Any(CONTAINER_OPTIONS)),
     'data_analysis': str,
     'application': str,
-    'sex': validators.Any(SEX_OPTIONS),
+    'sex': OptionalNone(validators.Any(SEX_OPTIONS)),
     # todo: implement in OP or remove from OF
-    # 'family_name': validators.RegexValidator(NAME_PATTERN),
+    # 'family_name': RegexValidator(NAME_PATTERN),
     'require_qcok': bool,
     'source': str,
     'tumour': bool,
-    'priority': validators.Any(PRIORITY_OPTIONS),
+    'priority': OptionalNone(validators.Any(PRIORITY_OPTIONS)),
 
-    # required if plate
-    'container_name': validators.Optional(str, None),
-    'well_position': validators.Optional(TypeValidator(str, allow_none=True), None),
+    # "required if plate"
+    'container_name': OptionalNone(TypeValidatorNone(str)),
+    'well_position': OptionalNone(TypeValidatorNone(str)),
 
-    # Required if data analysis in Scout or vcf delivery => not valid for fastq
+    # "Required if data analysis in Scout or vcf delivery" => not valid for fastq
     # 'panels': ListValidator(str, min_items=1),
-    # 'status': validators.Any(STATUS_OPTIONS),
+    # 'status': OptionalNone(validators.Any(STATUS_OPTIONS),
 
-    # Required if samples are part of trio/family
-    'mother': validators.Optional(validators.RegexValidator(NAME_PATTERN), None),
-    'father': validators.Optional(validators.RegexValidator(NAME_PATTERN), None),
+    # "Required if samples are part of trio/family"
+    'mother': OptionalNone(RegexValidatorNone(NAME_PATTERN)),
+    'father': OptionalNone(RegexValidatorNone(NAME_PATTERN)),
 
-    # Not Required
-    'quantity': validators.Optional(str, None),
-    'comment': validators.Optional(TypeValidator(str, allow_none=True), None),
+    # "Not Required"
+    'quantity': OptionalNone(TypeValidatorNone(str)),
+    'comment': OptionalNone(TypeValidatorNone(str)),
 }
 
 RML_SAMPLE = {
-    # 1604:8 Orderform Ready made libraries (RML)
+    # 1604:9 Orderform Ready made libraries (RML)
 
     # Order portal specific
     'priority': str,
 
-    # This information is required
+    # "This information is required"
     'name': validators.RegexValidator(NAME_PATTERN),
     'pool': str,
     'application': str,
     'data_analysis': str,
-    # todo: implement in OP or remove from OF
-    # 'family_name': validators.RegexValidator(NAME_PATTERN),
+
     'volume': str,
     'concentration': str,
     'index': str,
-    'index_number': str,
+    'index_number': OptionalNone(TypeValidatorNone(str)),   # optional for NoIndex
 
-    # Required if Plate
-    'rml_plate_name': validators.Optional(TypeValidator(str, allow_none=True), None),
-    'well_position_rml': validators.Optional(TypeValidator(str, allow_none=True), None),
+    # "Required if Plate"
+    'rml_plate_name': OptionalNone(TypeValidatorNone(str)),
+    'well_position_rml': OptionalNone(TypeValidatorNone(str)),
 
-    # Automatically generated (if not custom) or custom
-    'index_sequence': validators.Optional(TypeValidator(str, allow_none=True), None),
+    # "Automatically generated (if not custom) or custom"
+    'index_sequence': OptionalNone(TypeValidatorNone(str)),
 
-    # Not required
-    'comment': validators.Optional(TypeValidator(str, allow_none=True), None),
-    'capture_kit': validators.Optional(TypeValidator(str, allow_none=True), None),
+    # "Not required"
+    'comment': OptionalNone(TypeValidatorNone(str)),
+    'capture_kit': OptionalNone(validators.Any(CAPTUREKIT_OPTIONS))
 }
 
 MICROBIAL_SAMPLE = {
     # 1603:6 Orderform Microbial WGS
 
-    # These fields are required
+    # "These fields are required"
     'name': validators.RegexValidator(NAME_PATTERN),
     'organism': str,
     'reference_genome': str,
@@ -251,47 +275,47 @@ MICROBIAL_SAMPLE = {
     'require_qcok': bool,
     'elution_buffer': str,
     'extraction_method': str,
-    'container': validators.Any(CONTAINER_OPTIONS),
-    'priority': validators.Any(PRIORITY_OPTIONS),
+    'container': OptionalNone(validators.Any(CONTAINER_OPTIONS)),
+    'priority': OptionalNone(validators.Any(PRIORITY_OPTIONS)),
 
-    # Required if Plate
-    'container_name': validators.Optional(str, None),
-    'well_position': validators.Optional(TypeValidator(str, allow_none=True), None),
+    # "Required if Plate"
+    'container_name': OptionalNone(TypeValidatorNone(str)),
+    'well_position': OptionalNone(TypeValidatorNone(str)),
 
-    # Required if "Other" is chosen in column "Species"
-    'organism_other': validators.Optional(str, None),
+    # "Required if "Other" is chosen in column "Species""
+    'organism_other': OptionalNone(TypeValidatorNone(str)),
 
-    # Required if "other" is chosen in column "DNA Elution Buffer"
-    'elution_buffer_other': validators.Optional(str, None),
+    # 'Required if "other" is chosen in column "DNA Elution Buffer"'
+    'elution_buffer_other': OptionalNone(TypeValidatorNone(str)),
 
-    # These fields are not required
-    'concentration_weight': validators.Optional(TypeValidator(str, allow_none=True), None),
-    'quantity': validators.Optional(str, None),
-    'comment': validators.Optional(TypeValidator(str, allow_none=True), None),
+    # "These fields are not required"
+    'concentration_weight': OptionalNone(TypeValidatorNone(str)),
+    'quantity': OptionalNone(TypeValidatorNone(str)),
+    'comment': OptionalNone(TypeValidatorNone(str)),
 }
 
 METAGENOME_SAMPLE = {
     # 1605:4 Orderform Microbial Metagenomes- 16S
 
-    # This information is required
+    # "This information is required"
     'name': validators.RegexValidator(NAME_PATTERN),
-    'container': validators.Any(CONTAINER_OPTIONS),
+    'container': OptionalNone(validators.Any(CONTAINER_OPTIONS)),
     'data_analysis': str,
     'application': str,
     'require_qcok': bool,
     'elution_buffer': str,
     'source': str,
-    'priority': validators.Any(PRIORITY_OPTIONS),
+    'priority': OptionalNone(validators.Any(PRIORITY_OPTIONS)),
 
-    # Required if Plate
-    'container_name': validators.Optional(str, None),
-    'well_position': validators.Optional(TypeValidator(str, allow_none=True), None),
+    # "Required if Plate"
+    'container_name': OptionalNone(TypeValidatorNone(str)),
+    'well_position': OptionalNone(TypeValidatorNone(str)),
 
-    # This information is not required
-    'concentration_weight': validators.Optional(TypeValidator(str, allow_none=True), None),
-    'quantity': validators.Optional(str, None),
-    'extraction_method': validators.Optional(str, None),
-    'comment': validators.Optional(TypeValidator(str, allow_none=True), None),
+    # "This information is not required"
+    'concentration_weight': OptionalNone(TypeValidatorNone(str)),
+    'quantity': OptionalNone(TypeValidatorNone(str)),
+    'extraction_method': OptionalNone(TypeValidatorNone(str)),
+    'comment': OptionalNone(TypeValidatorNone(str)),
 }
 
 ORDER_SCHEMES = {

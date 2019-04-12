@@ -4,6 +4,7 @@ from datetime import datetime
 
 import requests
 import ruamel.yaml
+from cg.meta.report.status_helper import StatusHelper
 from jinja2 import Environment, PackageLoader, select_autoescape
 from pathlib import Path
 
@@ -29,17 +30,16 @@ class ReportAPI:
         self.path_tool = path_tool
         self.scout = scout_api
 
-    def create_delivery_report(self, customer_id: str, family_id: str) -> str:
+    def create_delivery_report(self, family_id: str) -> str:
         """Generate the html contents of a delivery report."""
-        delivery_data = self._get_delivery_data(customer_id, family_id)
+        delivery_data = self._get_delivery_data(family_id)
         rendered_report = self._render_delivery_report(delivery_data)
         return rendered_report
 
-    def create_delivery_report_file(self, customer_id: str, family_id: str, file_path: Path):
+    def create_delivery_report_file(self, family_id: str, file_path: Path):
         """Generate a temporary file containing a delivery report."""
 
-        delivery_report = self.create_delivery_report(customer_id=customer_id,
-                                                      family_id=family_id)
+        delivery_report = self.create_delivery_report(family_id=family_id)
 
         delivery_report_file = open(file_path / 'delivery-report.html', 'w')
         delivery_report_file.write(delivery_report)
@@ -47,21 +47,29 @@ class ReportAPI:
 
         return delivery_report_file
 
-    def _get_delivery_data(self, customer_id: str, family_id: str) -> dict:
+    def _get_delivery_data(self, family_id: str) -> dict:
         """Fetch all data needed to render a delivery report."""
 
         report_data = dict()
         family_obj = self._get_family_from_status(family_id)
+        analysis_obj = family_obj.analyses[0] if family_obj.analyses else None
+
         report_data['family'] = ReportAPI._present_string(family_obj.name)
-        report_data['customer'] = customer_id
-        report_data['customer_obj'] = self._get_customer_from_status_db(customer_id)
+        report_data['customer'] = family_obj.customer_id
+
+        report_data['report_version'] = ReportAPI._present_int(StatusHelper.get_report_version(
+            analysis_obj))
+        report_data['previous_report_version'] = ReportAPI._present_int(
+            StatusHelper.get_previous_report_version(analysis_obj))
+
+        report_data['customer_obj'] = family_obj.customer
         report_samples = self._fetch_family_samples_from_status_db(family_id)
         report_data['samples'] = report_samples
         panels = self._fetch_panels_from_status_db(family_id)
         report_data['panels'] = ReportAPI._present_list(panels)
         self._incorporate_lims_data(report_data)
         self._incorporate_lims_methods(report_samples)
-        self._incorporate_delivery_date_from_lims(report_samples)
+        self._incorporate_dates_from_lims(report_samples)
         self._incorporate_processing_time_from_lims(report_samples)
         self._incorporate_coverage_data(report_samples, panels)
         self._incorporate_trending_data(report_data, family_id)
@@ -86,11 +94,15 @@ class ReportAPI:
                 method_name = get_method(lims_id)
                 sample[method_type] = ReportAPI._present_string(method_name)
 
-    def _incorporate_delivery_date_from_lims(self, samples: list):
+    def _incorporate_dates_from_lims(self, samples: list):
         """Fetch and add the delivery date from LIMS for each sample."""
 
         for sample in samples:
             lims_id = sample['id']
+            prep_date = self.lims.get_prepared_date(lims_id)
+            sample['prep_date'] = ReportAPI._present_datetime(prep_date)
+            sequencing_date = self.lims.get_sequenced_date(lims_id)
+            sample['sequencing_date'] = ReportAPI._present_date(sequencing_date)
             delivery_date = self.lims.get_delivery_date(lims_id)
             sample['delivery_date'] = ReportAPI._present_date(delivery_date)
 
@@ -102,10 +114,6 @@ class ReportAPI:
             processing_time = self.lims.get_processing_time(lims_id)
             if processing_time:
                 sample['processing_time'] = processing_time.days
-
-    def _get_customer_from_status_db(self, internal_customer_id: str) -> models.Customer:
-        """Fetch the customer object from the status database that has the given internal_id."""
-        return self.db.Customer.filter_by(internal_id=internal_customer_id).first()
 
     @staticmethod
     def _render_delivery_report(report_data: dict) -> str:
@@ -168,8 +176,20 @@ class ReportAPI:
         return presentable_value
 
     @staticmethod
+    def _present_datetime(a_date: datetime) -> str:
+        """Make an date value presentable for the delivery report."""
+
+        if a_date:
+            presentable_value = str(a_date.date())
+        else:
+            presentable_value = 'N/A'
+
+        return presentable_value
+
+    @staticmethod
     def _present_date(a_date: datetime.date) -> str:
         """Make an date value presentable for the delivery report."""
+
         if a_date:
             presentable_value = str(a_date)
         else:
@@ -238,11 +258,19 @@ class ReportAPI:
             delivery_data_sample['id'] = sample.internal_id
             delivery_data_sample['ticket'] = ReportAPI._present_int(sample.ticket_number)
             delivery_data_sample['status'] = ReportAPI._present_string(family_sample.status)
+            delivery_data_sample['order_date'] = ReportAPI._present_datetime(sample.ordered_at)
 
             if sample.reads:
                 delivery_data_sample['million_read_pairs'] = round(sample.reads / 2000000, 1)
             else:
                 delivery_data_sample['million_read_pairs'] = 'N/A'
+
+            if sample.capture_kit:
+                delivery_data_sample['capture_kit'] = sample.capture_kit
+            else:
+                delivery_data_sample['capture_kit'] = 'N/A'
+
+            delivery_data_sample['bioinformatic_analysis'] = sample.data_analysis
 
             delivery_data_samples.append(delivery_data_sample)
 

@@ -2,10 +2,11 @@
 import datetime as dt
 import logging
 import sys
+from typing import List
 
 import click
 
-from cg.store import Store
+from cg.store import Store, models
 from cg.apps import coverage as coverage_app, gt, hk, loqus, tb, scoutapi, beacon as beacon_app, \
     lims
 from cg.exc import DuplicateRecordError
@@ -70,9 +71,8 @@ def upload(context, family_id):
             context.invoke(coverage, re_upload=True, family_id=family_id)
             context.invoke(validate, family_id=family_id)
             context.invoke(genotypes, re_upload=False, family_id=family_id)
-            context.invoke(observations, family_id=family_id)
-            context.invoke(delivery_report, family_id=family_id,
-                           customer_id=family_obj.customer.internal_id)
+            context.invoke(observations, case_id=family_id)
+            context.invoke(delivery_report, family_id=family_id)
             context.invoke(scout, family_id=family_id)
             analysis_obj.uploaded_at = dt.datetime.now()
             context.obj['status'].commit()
@@ -80,11 +80,10 @@ def upload(context, family_id):
 
 
 @upload.command('delivery-report')
-@click.argument('customer_id')
 @click.argument('family_id')
 @click.option('-p', '--print', 'print_console', is_flag=True, help='print report to console')
 @click.pass_context
-def delivery_report(context, customer_id, family_id, print_console):
+def delivery_report(context, family_id, print_console):
     """Generate a delivery report for a case.
 
     The report contains data from several sources:
@@ -137,12 +136,12 @@ def delivery_report(context, customer_id, family_id, print_console):
     report_api = context.obj['report_api']
 
     if print_console:
-        delivery_report_html = report_api.create_delivery_report(customer_id, family_id)
+        delivery_report_html = report_api.create_delivery_report(family_id)
 
         click.echo(delivery_report_html)
     else:
         tb_api = context.obj['tb_api']
-        delivery_report_file = report_api.create_delivery_report_file(customer_id, family_id,
+        delivery_report_file = report_api.create_delivery_report_file(family_id,
                                                                       file_path=
                                                                       tb_api.get_family_root_dir(
                                                                         family_id))
@@ -154,7 +153,8 @@ def _add_delivery_report_to_hk(delivery_report_file, hk_api: hk.HousekeeperAPI, 
     delivery_report_tag_name = 'delivery-report'
     version_obj = hk_api.last_version(family_id)
     uploaded_delivery_report_files = hk_api.get_files(bundle=family_id,
-                                                      tags=[delivery_report_tag_name])
+                                                      tags=[delivery_report_tag_name],
+                                                      version=version_obj.id)
     number_of_delivery_reports = len(uploaded_delivery_report_files.all())
     is_bundle_missing_delivery_report = number_of_delivery_reports == 0
 
@@ -199,22 +199,55 @@ def genotypes(context, re_upload, family_id):
 
 
 @upload.command()
-@click.argument('family_id')
+@click.argument('case_id')
 @click.pass_context
-def observations(context, family_id):
+def observations(context, case_id):
     """Upload observations from an analysis to LoqusDB."""
 
     click.echo(click.style('----------------- OBSERVATIONS ----------------'))
 
-    ## TODO add the loqusd db binary path to context.obj
-    loqus_api = loqus.LoqusdbAPI(context.obj)
-    family_obj = context.obj['status'].family(family_id)
-    api = UploadObservationsAPI(context.obj['status'], context.obj['housekeeper_api'], loqus_api)
-    try:
-        api.process(family_obj.analyses[0])
-        click.echo(click.style(f"{family_id}: observations uploaded!", fg='green'))
-    except DuplicateRecordError as error:
-        LOG.info(f"skipping observations upload: {error.message}")
+
+    loqus_rd_api = loqus.LoqusdbAPI(context.obj)
+    family_obj = context.obj['status'].family(case_id)
+
+    if not family_obj.customer.loqus_upload:
+        click.echo(click.style(
+            f"{case_id}: {family_obj.customer.internal_id} not whitelisted for upload to "
+            f"loqusdb. Skipping!",
+            fg='yellow'))
+        return
+
+    if LinkHelper.all_samples_data_analysis(family_obj.links, 'MIP'):
+
+        if LinkHelper.all_samples_are_non_tumour(family_obj.links):
+            api = UploadObservationsAPI(context.obj['status'], context.obj['housekeeper_api'],
+                                        loqus_rd_api)
+            try:
+                api.process(family_obj.analyses[0])
+                click.echo(click.style(f"{case_id}: observations uploaded!", fg='green'))
+            except DuplicateRecordError as error:
+                LOG.info(f"skipping observations upload: %s", error.message)
+
+        else:
+            click.echo(click.style(f"{case_id}: has tumour samples. Skipping!", fg='yellow'))
+            return
+    else:
+        click.echo(click.style(f"{case_id}: has non-MIP data_analysis. Skipping!", fg='yellow'))
+        return
+
+
+class LinkHelper:
+    """Class that helps handle links"""
+
+    @staticmethod
+    def all_samples_are_non_tumour(links: List[models.FamilySample]) -> bool:
+        """Return True if all samples are non tumour."""
+        return all(not link.sample.is_tumour for link in links)
+
+    @staticmethod
+    def all_samples_data_analysis(links: List[models.FamilySample], data_anlysis) -> bool:
+        """Return True if all samples has the given data_analysis."""
+        return all(data_anlysis == link.sample.data_analysis for link in links)
 
 
 @upload.command()
