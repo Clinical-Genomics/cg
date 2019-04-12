@@ -11,16 +11,27 @@ class LoqusdbAPI(object):
     def __init__(self, config: dict):
         super(LoqusdbAPI, self).__init__()
         self.uri = config['loqusdb']['database']
+
+        #For loqusdb v1.0 (Does not take an uri)
+        self.password = config['loqusdb']['password']
+        self.username = config['loqusdb']['username']
+        self.port = config['loqusdb']['port']
+        self.host = config['loqusdb'].get('host') or 'localhost'
+
         self.db_name = config['loqusdb']['database_name']
         self.loqusdb_binary = config['loqusdb']['binary']
         ## This will allways be the base of the loqusdb call
-        self.base_call = [self.loqusdb_binary, '-db', self.db_name, '--uri', self.uri]
+        self.base_call = [self.loqusdb_binary, '-db', self.db_name,
+                          '--username', self.username,
+                          '--password', self.password,
+                          '--host', self.host,
+                          '--port', self.port]
 
     def load(self, family_id: str, ped_path: str, vcf_path: str) -> dict:
         """Add observations from a VCF."""
         load_call = copy.deepcopy(self.base_call)
         load_call.extend([
-            'load', '-c', family_id, '--variant-file', vcf_path, '-f', ped_path, '--ensure-index',
+            'load', '-c', family_id, '-f', ped_path, vcf_path,
         ])
 
         output = subprocess.check_output(
