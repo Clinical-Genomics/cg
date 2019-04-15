@@ -124,7 +124,7 @@
                   <td>{{ sample.delivery_method }}</td>
                   <td>
                     {{ sample.delivery_date }}
-                    {% if sample.processing_time %}
+                    {% if sample.processing_time != 'N/A' %}
                       ({{ sample.processing_time }} dagar)
                     {% endif %}
                   </td>
