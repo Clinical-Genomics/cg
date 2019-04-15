@@ -25,7 +25,7 @@ class LoqusdbAPI(object):
                           '--username', self.username,
                           '--password', self.password,
                           '--host', self.host,
-                          '--port', self.port]
+                          '--port', str(self.port)]
 
     def load(self, family_id: str, ped_path: str, vcf_path: str) -> dict:
         """Add observations from a VCF."""
