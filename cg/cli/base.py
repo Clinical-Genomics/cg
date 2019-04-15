@@ -13,6 +13,7 @@ from .store import store
 from .add import add
 from .get import get
 from .upload import upload
+from .reset import reset_cmd
 from .set import set_cmd
 from .status import status
 from .transfer import transfer
@@ -61,14 +62,15 @@ def init(context, reset, force):
     LOG.info(f"Success! New tables: {', '.join(status_db.engine.table_names())}")
 
 
-base.add_command(analysis)
-base.add_command(store)
 base.add_command(add)
-base.add_command(upload)
-base.add_command(status)
-base.add_command(transfer)
-base.add_command(get)
-base.add_command(set_cmd)
+base.add_command(analysis)
+base.add_command(backup)
 base.add_command(clean)
 base.add_command(deliver)
-base.add_command(backup)
+base.add_command(get)
+base.add_command(reset_cmd)
+base.add_command(set_cmd)
+base.add_command(store)
+base.add_command(status)
+base.add_command(transfer)
+base.add_command(upload)
