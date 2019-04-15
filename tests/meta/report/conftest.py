@@ -1,10 +1,10 @@
 import json
+from datetime import datetime, timedelta
 
 import pytest
 from cg.apps.lims import LimsAPI
 
 from cg.meta.report.api import ReportAPI
-import datetime
 
 from cg.store import Store
 
@@ -34,18 +34,6 @@ class MockLims(LimsAPI):
 
     def get_delivery_method(self, lims_id: str) -> str:
         return 'CG002 - Delivery'
-
-    def get_processing_time(self, lims_id: str) -> str:
-        return datetime.datetime.today() - datetime.datetime.today()
-
-    def get_prepared_date(self, lims_id: str) -> str:
-        return datetime.datetime.today()
-
-    def get_sequenced_date(self, lims_id: str) -> str:
-        return datetime.datetime.today()
-
-    def get_delivery_date(self, lims_id: str) -> str:
-        return datetime.datetime.today()
 
     def sample(self, lims_id: str):
         """Fetch information about a sample."""
@@ -200,6 +188,11 @@ class MockDB(Store):
             for family_sample in family_samples:
                 family_sample.sample.capture_kit = None
 
+        # add some date to calculate processing time on
+        yesterday = datetime.now() - timedelta(days=1)
+        for family_sample in family_samples:
+            family_sample.sample.received_at = yesterday
+            family_sample.sample.delivered_at = datetime.now()
 
         return family_samples
 
