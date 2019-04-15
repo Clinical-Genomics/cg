@@ -95,7 +95,6 @@ class ReportAPI:
                 method_name = get_method(lims_id)
                 sample[method_type] = Presenter.process_string(method_name)
 
-
     @staticmethod
     def _render_delivery_report(report_data: dict) -> str:
         """Render and return report data on the report Jinja template."""
@@ -172,21 +171,19 @@ class ReportAPI:
             delivery_data_sample['sequencing_date'] = Presenter.process_datetime(
                 sample.sequenced_at)
             delivery_data_sample['delivery_date'] = Presenter.process_datetime(sample.delivered_at)
-            delivery_data_sample['processing_time'] = SampleCalculator.calculate_processing_days(
-                sample)
+            delivery_data_sample['processing_time'] = Presenter.process_int(
+                SampleCalculator.calculate_processing_days(sample))
             delivery_data_sample['order_date'] = Presenter.process_datetime(sample.ordered_at)
 
-            if sample.reads:
-                delivery_data_sample['million_read_pairs'] = round(sample.reads / 2000000, 1)
-            else:
-                delivery_data_sample['million_read_pairs'] = 'N/A'
+            delivery_data_sample['million_read_pairs'] = Presenter.process_int(round(sample.reads
+                                                                                     / 2000000,
+                                                                                     1) if
+                                                                               sample.reads else
+                                                                               None)
 
-            if sample.capture_kit:
-                delivery_data_sample['capture_kit'] = sample.capture_kit
-            else:
-                delivery_data_sample['capture_kit'] = 'N/A'
-
-            delivery_data_sample['bioinformatic_analysis'] = sample.data_analysis
+            delivery_data_sample['capture_kit'] = Presenter.process_string(sample.capture_kit)
+            delivery_data_sample['bioinformatic_analysis'] = Presenter.process_string(
+                sample.data_analysis)
 
             delivery_data_samples.append(delivery_data_sample)
 
