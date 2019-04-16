@@ -10,7 +10,6 @@ def test_instatiate(loqus_config):
     loqusdb = LoqusdbAPI(loqus_config)
 
     ## THEN assert that the adapter was properly instantiated
-    assert loqusdb.uri == loqus_config['loqusdb']['database']
     assert loqusdb.db_name == loqus_config['loqusdb']['database_name']
     assert loqusdb.loqusdb_binary == loqus_config['loqusdb']['binary']
     assert loqusdb.host == loqus_config['loqusdb']['host']
