@@ -46,7 +46,7 @@ class LoqusdbAPI(object):
         # Parse log output to get number of inserted variants
         for line in output.decode('utf-8').split('\n'):
             log_message = (line.split('INFO'))[-1].strip()
-            if 'inserted' in log_message:
+            if 'inserted' in log_message or 'Nr of variants in vcf' in log_message:
                 nr_variants = int(log_message.split(':')[-1].strip())
 
         return dict(variants=nr_variants)
