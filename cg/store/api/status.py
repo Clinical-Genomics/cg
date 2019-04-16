@@ -430,9 +430,30 @@ class StatusHandler:
         """Fetch analyses that have been uploaded but not delivered."""
         records = (
             self.Analysis.query
+            .join(models.Family, models.Family.links, models.FamilySample.sample)
             .filter(
-                models.Analysis.uploaded_at != None,
-                models.Analysis.delivered_at == None
+                models.Analysis.uploaded_at.isnot(None),
+                models.Sample.delivered_at.is_(None)
+            )
+            .order_by(models.Analysis.uploaded_at.desc())
+        )
+
+        return records
+
+    def analyses_to_delivery_report(self):
+        """Fetch analyses that needs the delivery report to be regenerated."""
+        records = (
+            self.Analysis.query
+            .join(models.Family, models.Family.links, models.FamilySample.sample)
+            .filter(
+                models.Sample.delivered_at.isnot(None),
+                or_(
+                    models.Analysis.delivery_report_created_at.is_(None),
+                    and_(
+                        models.Analysis.delivery_report_created_at.isnot(None),
+                        models.Analysis.delivery_report_created_at < models.Sample.delivered_at
+                    )
+                )
             )
             .order_by(models.Analysis.uploaded_at.desc())
         )
