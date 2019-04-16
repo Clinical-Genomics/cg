@@ -13,6 +13,10 @@ def test_instatiate(loqus_config):
     assert loqusdb.uri == loqus_config['loqusdb']['database']
     assert loqusdb.db_name == loqus_config['loqusdb']['database_name']
     assert loqusdb.loqusdb_binary == loqus_config['loqusdb']['binary']
+    assert loqusdb.host == loqus_config['loqusdb']['host']
+    assert loqusdb.port == loqus_config['loqusdb']['port']
+    assert loqusdb.password == loqus_config['loqusdb']['password']
+    assert loqusdb.username == loqus_config['loqusdb']['username']
 
 def test_get_case(loqusdbapi, mocker):
     """Test to get a case via the api"""
@@ -20,7 +24,8 @@ def test_get_case(loqusdbapi, mocker):
     case_id = 'a_case'
     ## WHEN fetching a case with the adapter
     mocker.patch.object(subprocess, 'check_output')
-    subprocess.check_output.return_value = b'[{"_id": "a_case"}]'
+    loqusdb_output = b"{'_id': 'one_case', 'case_id': 'one_case'}\n{'_id': 'a_case', 'case_id': 'a_case'}\n"
+    subprocess.check_output.return_value = loqusdb_output
     case_obj = loqusdbapi.get_case(case_id)
     ## THEN assert that the correct case id is returned
     assert case_obj['_id'] == case_id
@@ -53,4 +58,3 @@ def test_load(loqusdbapi, mocker, loqusdb_output):
     ## THEN assert that the number of variants is 15
 
     assert data['variants'] == 15
-

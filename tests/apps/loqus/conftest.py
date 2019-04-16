@@ -10,9 +10,13 @@ def loqus_config():
             'database': 'mongodb://localhost',
             'database_name': 'loqusdb',
             'binary': 'loqusdb',
+            'host': 'localhost',
+            'username': 'user',
+            'password': 'password',
+            'port': 27017
         }
     }
-    
+
     return _config
 
 @pytest.fixture(scope='function')
@@ -38,5 +42,3 @@ def loqusdb_output():
     b'insert variants: 0:00:00.012648\n2018-11-29 08:41:38 130-229-8-20-dhcp.local loqusdb.plugins.'
     b'mongo.adapter[77135] INFO All indexes exists\n')
     return _loqus_output
-
-
