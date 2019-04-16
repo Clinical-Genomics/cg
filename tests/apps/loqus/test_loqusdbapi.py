@@ -24,7 +24,8 @@ def test_get_case(loqusdbapi, mocker):
     case_id = 'a_case'
     ## WHEN fetching a case with the adapter
     mocker.patch.object(subprocess, 'check_output')
-    loqusdb_output = b"{'_id': 'one_case', 'case_id': 'one_case'}\n{'_id': 'a_case', 'case_id': 'a_case'}\n"
+    loqusdb_output = b"{'_id': 'one_case', 'case_id': 'one_case'}\n\
+                       {'_id': 'a_case', 'case_id': 'a_case'}\n"
     subprocess.check_output.return_value = loqusdb_output
     case_obj = loqusdbapi.get_case(case_id)
     ## THEN assert that the correct case id is returned
