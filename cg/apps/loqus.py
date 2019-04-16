@@ -12,7 +12,6 @@ class LoqusdbAPI(object):
 
     def __init__(self, config: dict):
         super(LoqusdbAPI, self).__init__()
-        self.uri = config['loqusdb']['database']
 
         #For loqusdb v1.0 (Does not take an uri)
         self.password = config['loqusdb']['password']
