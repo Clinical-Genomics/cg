@@ -52,10 +52,11 @@ class ScoutAPI(MongoAdapter):
             panel genes: panel genes list
         """
         gene_panel = self.gene_panel(panel_id=panel_id, version=version)
+
         if gene_panel:
             return gene_panel.get('genes')
-        else:
-            return None
+
+        return None
 
     def get_cases(self, case_id=None, institute=None, reruns=None, finished=None,
                   causatives=None, research_requested=None, is_research=None, status=None):
@@ -76,9 +77,9 @@ class ScoutAPI(MongoAdapter):
         return models
 
     def upload_delivery_report(self,
-                             report_path: str,
-                             case_id: str,
-                             update: bool = False):
+                               report_path: str,
+                               case_id: str,
+                               update: bool = False):
         """ Load a delivery report into a case in the database
 
         If the report already exists the function will exit.
