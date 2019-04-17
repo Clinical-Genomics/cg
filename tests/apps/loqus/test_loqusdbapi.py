@@ -32,15 +32,15 @@ def test_get_case(loqusdbapi, mocker):
 
 def test_get_case_non_existing(loqusdbapi, mocker):
     """Test to get a case via the api"""
-    ## GIVEN a loqusdb api
+    # GIVEN a loqusdb api
     case_id = 'a_case'
-    ## WHEN an error occurs during fetching a case with the adapter
+    # WHEN an error occurs during fetching a case with the adapter
     mocker.patch.object(subprocess, 'check_output')
     subprocess.check_output.side_effect = subprocess.CalledProcessError(1,'error')
     case_obj = loqusdbapi.get_case(case_id)
 
-    ## THEN no object should have been returned
-    assert case_obj == None
+    # THEN no object should have been returned
+    assert case_obj is None
 
 def test_load(loqusdbapi, mocker, loqusdb_output):
     """Test to load a case"""

@@ -2,7 +2,7 @@ import pytest
 from cg.apps.loqus import LoqusdbAPI
 
 
-## Loqusdb fixtures
+# Loqusdb fixtures
 @pytest.fixture(scope='function')
 def loqus_config():
     _config = {
@@ -19,13 +19,16 @@ def loqus_config():
 
     return _config
 
+
 @pytest.fixture(scope='function')
 def loqusdbapi(loqus_config):
     _loqus_api = LoqusdbAPI(loqus_config)
     return _loqus_api
 
+
 @pytest.fixture(scope='function')
 def loqusdb_output():
+
     _loqus_output = (b'2018-11-29 08:41:38 130-229-8-20-dhcp.local '
     b'mongo_adapter.client[77135] INFO Connecting to uri:mongodb://None:None@localhost:27017\n'
     b'2018-11-29 08:41:38 130-229-8-20-dhcp.local mongo_adapter.client[77135] INFO Connection '
