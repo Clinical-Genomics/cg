@@ -71,11 +71,11 @@ class LoqusdbAPI():
 
         try:
             output = subprocess.check_output(
-                        ' '.join(case_call),
-                        shell=True
-                    )
+                ' '.join(case_call),
+                shell=True
+            )
 
-        except CalledProcessError as err:
+        except CalledProcessError:
             # If case does not exist we will get a non zero exit code and return None
             return case_obj
 
