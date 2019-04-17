@@ -83,7 +83,7 @@ def upload(context, family_id):
 @click.option('-p', '--print', 'print_console', is_flag=True, help='print report to console')
 @click.pass_context
 def delivery_report(context, family_id, print_console):
-    """Generate a delivery report for a case.
+    """Generates a delivery report for a case and uploads it to housekeeper and scout
 
     The report contains data from several sources:
 
