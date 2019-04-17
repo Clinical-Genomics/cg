@@ -72,7 +72,6 @@ def upload(context, family_id):
             context.invoke(validate, family_id=family_id)
             context.invoke(genotypes, re_upload=False, family_id=family_id)
             context.invoke(observations, case_id=family_id)
-            context.invoke(delivery_report, family_id=family_id)
             context.invoke(scout, family_id=family_id)
             analysis_obj.uploaded_at = dt.datetime.now()
             context.obj['status'].commit()
@@ -99,18 +98,20 @@ def delivery_report(context, family_id, print_console):
         sample.status
         sample.ticket
         sample.million_read_pairs
+        sample.prep_date
+        sample.received
+        sample.sequencing_date
+        sample.delivery_date
 
     lims:
         sample.name
         sample.sex
         sample.source
         sample.application
-        sample.received
         sample.prep_method
         sample.sequencing_method
         sample.delivery_method
-        sample.delivery_date
-        sample.processing_time
+
 
     trailblazer:
         sample.mapped_reads
@@ -126,8 +127,9 @@ def delivery_report(context, family_id, print_console):
     scout:
         panel-genes
 
-    today:
-        generated upon report creation
+    calculated:
+        today
+        sample.processing_time
 
     """
 
@@ -148,8 +150,19 @@ def delivery_report(context, family_id, print_console):
                                                                         family_id))
         hk_api = context.obj['housekeeper_api']
         result = _add_delivery_report_to_hk(delivery_report_file, hk_api, family_id)
+
         if result:
+            click.echo(click.style('uploaded to housekeeper', fg='green'))
+            _add_delivery_report_to_scout(context, delivery_report_file, family_id)
+            click.echo(click.style('uploaded to scout'), fg='green')
             _update_delivery_report_date(status_api, family_id)
+        else:
+            click.echo(click.style('already uploaded to housekeeper, skipping'))
+
+
+def _add_delivery_report_to_scout(context, delivery_report_file, family_id):
+    scout_api = scoutapi.ScoutAPI(context.obj)
+    scout_api.upload_delivery_report(delivery_report_file, family_id)
 
 
 def _add_delivery_report_to_hk(delivery_report_file, hk_api: hk.HousekeeperAPI, family_id):

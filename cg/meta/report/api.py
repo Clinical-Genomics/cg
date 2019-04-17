@@ -242,7 +242,9 @@ class ReportAPI:
         panel_genes = list()
 
         for panel in panels:
-            panel_genes.extend(self.scout.get_genes(panel))
+            genes = self.scout.get_genes(panel)
+            if genes:
+                panel_genes.extend(genes)
 
         panel_gene_ids = [gene.get('hgnc_id') for gene in panel_genes]
 
