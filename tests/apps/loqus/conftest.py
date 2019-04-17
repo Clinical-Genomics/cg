@@ -1,3 +1,7 @@
+"""
+    conftest for loqusdb API
+"""
+
 import pytest
 from cg.apps.loqus import LoqusdbAPI
 
@@ -16,6 +20,9 @@ CONFIG = {
 # Loqusdb fixtures
 @pytest.fixture(scope='function')
 def loqus_config():
+    """
+        loqusdb config fixture
+    """
 
     _config = CONFIG
 
@@ -24,6 +31,9 @@ def loqus_config():
 
 @pytest.fixture(scope='function')
 def loqusdbapi():
+    """
+        loqusdb API fixture
+    """
 
     _loqus_api = LoqusdbAPI(CONFIG)
     return _loqus_api

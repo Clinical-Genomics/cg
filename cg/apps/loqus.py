@@ -1,4 +1,9 @@
 # -*- coding: utf-8 -*-
+
+"""
+    Module for loqusdb API
+"""
+
 import json
 import copy
 import logging

@@ -1,17 +1,20 @@
 # -*- coding: utf-8 -*-
+
+"""
+    Conftest file for pytest fixtures
+"""
 import datetime as dt
-import json
 from pathlib import Path
 
 import pytest
 
 from cg.store import Store
 
-## Trailblazer
+# Trailblazer
 from trailblazer.mip import files as mip_files_api
 import ruamel.yaml
 
-pytest_plugins = [
+pytest_plugins = [  # pylint: disable=invalid-name
     'tests.apps.lims.conftest',
     'tests.apps.loqus.conftest',
     'tests.cli.conftest',
@@ -25,7 +28,7 @@ pytest_plugins = [
     'tests.store.conftest',
 ]
 
-## Trailblazer api for mip files
+# Trailblazer api for mip files
 @pytest.fixture(scope='session')
 def files():
     return {

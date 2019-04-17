@@ -1,3 +1,7 @@
+"""
+    Tests for loqusdbAPI
+"""
+
 import subprocess
 
 from cg.apps.loqus import LoqusdbAPI
