@@ -8,8 +8,12 @@ from subprocess import CalledProcessError
 
 LOG = logging.getLogger(__name__)
 
-class LoqusdbAPI(object):
 
+class LoqusdbAPI():
+
+    """
+        API for loqusdb
+    """
 
     def __init__(self, config: dict):
         super(LoqusdbAPI, self).__init__()
@@ -75,10 +79,6 @@ class LoqusdbAPI(object):
             # If case does not exist we will get a non zero exit code and return None
             return case_obj
 
-        if output.decode('utf-8') == '':
-            # If case does not exist, empty string will be returned. If so, return None
-            return case_obj
-
         # For loqusdb v1
         # parse through the output lines to see if case is in loqusdb
         for line in output.decode('utf-8').split('\n'):
@@ -95,15 +95,10 @@ class LoqusdbAPI(object):
         # The output is a list of dictionaries that are case objs
         # case_obj = json.loads(output.decode('utf-8'))[0]
 
-        if case_obj:
-            LOG.debug(f"case {case_obj['case_id']} with '_id' {case_obj['_id']} found")
-        else:
-            LOG.debug(f"case {case_id} not in loqusdb")
-
         return case_obj
 
     def __repr__(self):
         uri = f"mongodb://{self.username}:{self.password}@{self.host}:{self.port}/{self.db_name}"
-        return f"LoqusdbAPI(uri={uri},\
-                            db_name={self.db_name},\
-                            loqusdb_binary={self.loqusdb_binary})"
+        return (f"LoqusdbAPI(uri={uri},"
+                f"db_name={self.db_name},"
+                f"loqusdb_binary={self.loqusdb_binary})")
