@@ -149,11 +149,11 @@ def delivery_report(context, family_id, print_console):
                                                                       tb_api.get_family_root_dir(
                                                                         family_id))
         hk_api = context.obj['housekeeper_api']
-        result = _add_delivery_report_to_hk(delivery_report_file, hk_api, family_id)
+        added_file = _add_delivery_report_to_hk(delivery_report_file, hk_api, family_id)
 
-        if result:
+        if added_file:
             click.echo(click.style('uploaded to housekeeper', fg='green'))
-            _add_delivery_report_to_scout(context, delivery_report_file, family_id)
+            _add_delivery_report_to_scout(context, added_file.path, family_id)
             click.echo(click.style('uploaded to scout'), fg='green')
             _update_delivery_report_date(status_api, family_id)
         else:
@@ -162,7 +162,7 @@ def delivery_report(context, family_id, print_console):
 
 def _add_delivery_report_to_scout(context, delivery_report_file, family_id):
     scout_api = scoutapi.ScoutAPI(context.obj)
-    scout_api.upload_delivery_report(delivery_report_file, family_id)
+    scout_api.upload_delivery_report(delivery_report_file.name, family_id)
 
 
 def _add_delivery_report_to_hk(delivery_report_file, hk_api: hk.HousekeeperAPI, family_id):
@@ -178,9 +178,9 @@ def _add_delivery_report_to_hk(delivery_report_file, hk_api: hk.HousekeeperAPI, 
         file_obj = hk_api.add_file(delivery_report_file.name, version_obj, delivery_report_tag_name)
         hk_api.include_file(file_obj, version_obj)
         hk_api.add_commit(file_obj)
-        return True
+        return file_obj
 
-    return False
+    return None
 
 
 def _update_delivery_report_date(status_api, family_id):
