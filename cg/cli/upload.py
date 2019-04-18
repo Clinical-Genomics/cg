@@ -162,7 +162,7 @@ def delivery_report(context, family_id, print_console):
 
 def _add_delivery_report_to_scout(context, path, case_id):
     scout_api = scoutapi.ScoutAPI(context.obj)
-    scout_api.upload_delivery_report(path, case_id, upload=True)
+    scout_api.upload_delivery_report(path, case_id, update=True)
 
 
 def _add_delivery_report_to_hk(delivery_report_file, hk_api: hk.HousekeeperAPI, family_id):
