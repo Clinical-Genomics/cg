@@ -160,9 +160,9 @@ def delivery_report(context, family_id, print_console):
             click.echo(click.style('already uploaded to housekeeper, skipping'))
 
 
-def _add_delivery_report_to_scout(context, delivery_report_file, family_id):
+def _add_delivery_report_to_scout(context, path, case_id):
     scout_api = scoutapi.ScoutAPI(context.obj)
-    scout_api.upload_delivery_report(delivery_report_file.name, family_id)
+    scout_api.upload_delivery_report(path, case_id)
 
 
 def _add_delivery_report_to_hk(delivery_report_file, hk_api: hk.HousekeeperAPI, family_id):
