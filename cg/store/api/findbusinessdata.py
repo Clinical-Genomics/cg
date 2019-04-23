@@ -128,9 +128,9 @@ class FindBusinessDataHandler(BaseHandler):
         """Fetch invoices."""
         query = self.Invoice.query
         if invoiced is True:
-            query = query.filter(models.Invoice.invoiced_at is not None)
+            query = query.filter(models.Invoice.invoiced_at != None)
         elif invoiced is False:
-            query = query.filter(models.Invoice.invoiced_at is None)
+            query = query.filter(models.Invoice.invoiced_at == None)
         return query
 
     def invoice(self, invoice_id: int) -> models.Invoice:
@@ -187,7 +187,10 @@ class FindBusinessDataHandler(BaseHandler):
         """Fetch invoices."""
         query = self.Invoice.query.all()
         ids = [inv.id for inv in query]
-        new_id = max(ids) + 1
+        if ids:
+            new_id = max(ids) + 1
+        else:
+            new_id = 0
         return new_id
 
     def pools(self, *, customer: models.Customer, enquiry: str = None) -> Query:
