@@ -10,6 +10,15 @@ from sqlalchemy import Column, ForeignKey, orm, types, UniqueConstraint, Table
 Model = alchy.make_declarative_base(Base=alchy.ModelBase)
 
 
+flowcell_sample = Table(
+    'flowcell_sample',
+    Model.metadata,
+    Column('flowcell_id', types.Integer, ForeignKey('flowcell.id'), nullable=False),
+    Column('sample_id', types.Integer, ForeignKey('sample.id'), nullable=False),
+    UniqueConstraint('flowcell_id', 'sample_id', name='_flowcell_sample_uc'),
+)
+
+
 class PriorityMixin:
 
     @property
@@ -32,24 +41,99 @@ class PriorityMixin:
         return self.priority < 1
 
 
-class User(Model):
+class Application(Model):
     id = Column(types.Integer, primary_key=True)
-    name = Column(types.String(128), nullable=False)
-    email = Column(types.String(128), unique=True, nullable=False)
-    is_admin = Column(types.Boolean, default=False)
+    tag = Column(types.String(32), unique=True, nullable=False)
+    # DEPRECATED, use prep_category instead
+    category = Column(types.Enum('wgs', 'wes', 'tga', 'rna', 'mic', 'rml'))
+    prep_category = Column(types.Enum(*PREP_CATEGORIES), nullable=False)
+    is_external = Column(types.Boolean, nullable=False, default=False)
+    description = Column(types.String(256), nullable=False)
+    is_accredited = Column(types.Boolean, nullable=False)
 
-    customer_id = Column(ForeignKey('customer.id', ondelete='CASCADE', use_alter=True),
-                         nullable=False)
-    customer = orm.relationship('Customer', foreign_keys=[customer_id])
+    turnaround_time = Column(types.Integer)
+    minimum_order = Column(types.Integer, default=1)
+    sequencing_depth = Column(types.Integer)
+    target_reads = Column(types.BigInteger, default=0)
+    sample_amount = Column(types.Integer)
+    sample_volume = Column(types.Text)
+    sample_concentration = Column(types.Text)
+    priority_processing = Column(types.Boolean, default=False)
+    details = Column(types.Text)
+    limitations = Column(types.Text)
+    percent_kth = Column(types.Integer)
+    comment = Column(types.Text)
+    is_archived = Column(types.Boolean, default=False)
 
-    def to_dict(self) -> dict:
-        """Override dictify method."""
-        data = super(User, self).to_dict()
-        data['customer'] = self.customer.to_dict()
-        return data
+    created_at = Column(types.DateTime, default=dt.datetime.now)
+    updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
+    versions = orm.relationship('ApplicationVersion', order_by='ApplicationVersion.version',
+                                backref='application')
 
     def __str__(self) -> str:
-        return self.name
+        return self.tag
+
+    @property
+    def reduced_price(self):
+        return self.tag.startswith('WGT') or self.tag.startswith('EXT')
+
+    @property
+    def expected_reads(self):
+        return self.target_reads * 0.75
+
+    @property
+    def analysis_type(self):
+        return 'wgs' if self.prep_category == 'wgs' else 'wes'
+
+
+class ApplicationVersion(Model):
+    __table_args__ = (UniqueConstraint('application_id', 'version', name='_app_version_uc'),)
+
+    id = Column(types.Integer, primary_key=True)
+    version = Column(types.Integer, nullable=False)
+
+    valid_from = Column(types.DateTime, default=dt.datetime.now, nullable=False)
+    price_standard = Column(types.Integer)
+    price_priority = Column(types.Integer)
+    price_express = Column(types.Integer)
+    price_research = Column(types.Integer)
+    comment = Column(types.Text)
+
+    created_at = Column(types.DateTime, default=dt.datetime.now)
+    updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
+    application_id = Column(ForeignKey(Application.id), nullable=False)
+    samples = orm.relationship('Sample', backref='application_version')
+    pools = orm.relationship('Pool', backref='application_version')
+    microbial_samples = orm.relationship('MicrobialSample', backref='application_version')
+
+    def __str__(self) -> str:
+        return f"{self.application.tag} ({self.version})"
+
+
+class Analysis(Model):
+    id = Column(types.Integer, primary_key=True)
+    pipeline = Column(types.String(32), nullable=False)
+    pipeline_version = Column(types.String(32))
+    started_at = Column(types.DateTime)
+    completed_at = Column(types.DateTime)
+    delivery_report_created_at = Column(types.DateTime)
+    upload_started_at = Column(types.DateTime)
+    uploaded_at = Column(types.DateTime)
+    # primary analysis is the one originally delivered to the customer
+    is_primary = Column(types.Boolean, default=False)
+
+    created_at = Column(types.DateTime, default=dt.datetime.now, nullable=False)
+    family_id = Column(ForeignKey('family.id', ondelete='CASCADE'), nullable=False)
+
+    def __str__(self):
+        return f"{self.family.internal_id} | {self.completed_at.date()}"
+
+    def to_dict(self, family: bool = True):
+        """Override dictify method."""
+        data = super(Analysis, self).to_dict()
+        if family:
+            data['family'] = self.family.to_dict()
+        return data
 
 
 class Customer(Model):
@@ -97,44 +181,14 @@ class CustomerGroup(Model):
         return f"{self.internal_id} ({self.name})"
 
 
-class FamilySample(Model):
-    __table_args__ = (
-        UniqueConstraint('family_id', 'sample_id', name='_family_sample_uc'),
-    )
-
+class Delivery(Model):
     id = Column(types.Integer, primary_key=True)
-    family_id = Column(ForeignKey('family.id', ondelete='CASCADE'), nullable=False)
-    sample_id = Column(ForeignKey('sample.id', ondelete='CASCADE'), nullable=False)
-    status = Column(types.Enum('affected', 'unaffected', 'unknown'), default='unknown',
-                    nullable=False)
-
-    created_at = Column(types.DateTime, default=dt.datetime.now)
-    updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
-
-    mother_id = Column(ForeignKey('sample.id'))
-    father_id = Column(ForeignKey('sample.id'))
-
-    family = orm.relationship('Family', backref='links')
-    sample = orm.relationship('Sample', foreign_keys=[sample_id], backref='links')
-    mother = orm.relationship('Sample', foreign_keys=[mother_id])
-    father = orm.relationship('Sample', foreign_keys=[father_id])
-
-    def to_dict(self, parents: bool = False, samples: bool = False, family: bool = False) -> dict:
-        """Override dictify method."""
-        data = super(FamilySample, self).to_dict()
-        if samples:
-            data['sample'] = self.sample.to_dict()
-            data['mother'] = self.mother.to_dict() if self.mother else None
-            data['father'] = self.father.to_dict() if self.father else None
-        elif parents:
-            data['mother'] = self.mother.to_dict() if self.mother else None
-            data['father'] = self.father.to_dict() if self.father else None
-        if family:
-            data['family'] = self.family.to_dict()
-        return data
-
-    def __str__(self) -> str:
-        return f"{self.family.internal_id} | {self.sample.internal_id}"
+    delivered_at = Column(types.DateTime)
+    removed_at = Column(types.DateTime)
+    destination = Column(types.Enum('caesar', 'pdc', 'uppmax', 'mh', 'custom'), default='caesar')
+    sample_id = Column(ForeignKey('sample.id', ondelete='CASCADE'))
+    pool_id = Column(ForeignKey('pool.id', ondelete='CASCADE'))
+    comment = Column(types.Text)
 
 
 class Family(Model, PriorityMixin):
@@ -180,6 +234,68 @@ class Family(Model, PriorityMixin):
     @panels.setter
     def panels(self, panel_list: List[str]):
         self._panels = ','.join(panel_list) if panel_list else None
+
+
+class FamilySample(Model):
+    __table_args__ = (
+        UniqueConstraint('family_id', 'sample_id', name='_family_sample_uc'),
+    )
+
+    id = Column(types.Integer, primary_key=True)
+    family_id = Column(ForeignKey('family.id', ondelete='CASCADE'), nullable=False)
+    sample_id = Column(ForeignKey('sample.id', ondelete='CASCADE'), nullable=False)
+    status = Column(types.Enum('affected', 'unaffected', 'unknown'), default='unknown',
+                    nullable=False)
+
+    created_at = Column(types.DateTime, default=dt.datetime.now)
+    updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
+
+    mother_id = Column(ForeignKey('sample.id'))
+    father_id = Column(ForeignKey('sample.id'))
+
+    family = orm.relationship('Family', backref='links')
+    sample = orm.relationship('Sample', foreign_keys=[sample_id], backref='links')
+    mother = orm.relationship('Sample', foreign_keys=[mother_id])
+    father = orm.relationship('Sample', foreign_keys=[father_id])
+
+    def to_dict(self, parents: bool = False, samples: bool = False, family: bool = False) -> dict:
+        """Override dictify method."""
+        data = super(FamilySample, self).to_dict()
+        if samples:
+            data['sample'] = self.sample.to_dict()
+            data['mother'] = self.mother.to_dict() if self.mother else None
+            data['father'] = self.father.to_dict() if self.father else None
+        elif parents:
+            data['mother'] = self.mother.to_dict() if self.mother else None
+            data['father'] = self.father.to_dict() if self.father else None
+        if family:
+            data['family'] = self.family.to_dict()
+        return data
+
+    def __str__(self) -> str:
+        return f"{self.family.internal_id} | {self.sample.internal_id}"
+
+
+class Flowcell(Model):
+    id = Column(types.Integer, primary_key=True)
+    name = Column(types.String(32), unique=True, nullable=False)
+    sequencer_type = Column(types.Enum('hiseqga', 'hiseqx'))
+    sequencer_name = Column(types.String(32))
+    sequenced_at = Column(types.DateTime)
+    archived_at = Column(types.DateTime)
+    status = Column(types.Enum(*FLOWCELL_STATUS), default='ondisk')
+
+    samples = orm.relationship('Sample', secondary=flowcell_sample, backref='flowcells')
+
+    def __str__(self):
+        return self.name
+
+    def to_dict(self, samples: bool = False):
+        """Override dictify method."""
+        data = super(Flowcell, self).to_dict()
+        if samples:
+            data['samples'] = [sample.to_dict() for sample in self.samples]
+        return data
 
 
 class MicrobialOrder(Model):
@@ -285,14 +401,19 @@ class Organism(Model):
         return data
 
 
-class Delivery(Model):
+class Panel(Model):
     id = Column(types.Integer, primary_key=True)
-    delivered_at = Column(types.DateTime)
-    removed_at = Column(types.DateTime)
-    destination = Column(types.Enum('caesar', 'pdc', 'uppmax', 'mh', 'custom'), default='caesar')
-    sample_id = Column(ForeignKey('sample.id', ondelete='CASCADE'))
-    pool_id = Column(ForeignKey('pool.id', ondelete='CASCADE'))
-    comment = Column(types.Text)
+    name = Column(types.String(64), unique=True)
+    abbrev = Column(types.String(32), unique=True)
+    current_version = Column(types.Float, nullable=False)
+    date = Column(types.DateTime, nullable=False)
+    gene_count = Column(types.Integer)
+
+    customer_id = Column(ForeignKey('customer.id', ondelete='CASCADE'), nullable=False)
+    customer = orm.relationship(Customer, backref='panels')
+
+    def __str__(self):
+        return f"{self.abbrev} ({self.current_version})"
 
 
 class Pool(Model):
@@ -387,148 +508,6 @@ class Sample(Model, PriorityMixin):
         return data
 
 
-flowcell_sample = Table(
-    'flowcell_sample',
-    Model.metadata,
-    Column('flowcell_id', types.Integer, ForeignKey('flowcell.id'), nullable=False),
-    Column('sample_id', types.Integer, ForeignKey('sample.id'), nullable=False),
-    UniqueConstraint('flowcell_id', 'sample_id', name='_flowcell_sample_uc'),
-)
-
-
-class Flowcell(Model):
-    id = Column(types.Integer, primary_key=True)
-    name = Column(types.String(32), unique=True, nullable=False)
-    sequencer_type = Column(types.Enum('hiseqga', 'hiseqx'))
-    sequencer_name = Column(types.String(32))
-    sequenced_at = Column(types.DateTime)
-    archived_at = Column(types.DateTime)
-    status = Column(types.Enum(*FLOWCELL_STATUS), default='ondisk')
-
-    samples = orm.relationship('Sample', secondary=flowcell_sample, backref='flowcells')
-
-    def __str__(self):
-        return self.name
-
-    def to_dict(self, samples: bool = False):
-        """Override dictify method."""
-        data = super(Flowcell, self).to_dict()
-        if samples:
-            data['samples'] = [sample.to_dict() for sample in self.samples]
-        return data
-
-
-class Analysis(Model):
-    id = Column(types.Integer, primary_key=True)
-    pipeline = Column(types.String(32), nullable=False)
-    pipeline_version = Column(types.String(32))
-    started_at = Column(types.DateTime)
-    completed_at = Column(types.DateTime)
-    upload_started_at = Column(types.DateTime)
-    uploaded_at = Column(types.DateTime)
-    delivered_at = Column(types.DateTime)
-    # primary analysis is the one originally delivered to the customer
-    is_primary = Column(types.Boolean, default=False)
-    housekeeper_id = Column(types.Integer)
-
-    created_at = Column(types.DateTime, default=dt.datetime.now, nullable=False)
-    family_id = Column(ForeignKey('family.id', ondelete='CASCADE'), nullable=False)
-
-    def __str__(self):
-        return f"{self.family.internal_id} | {self.completed_at.date()}"
-
-    def to_dict(self, family: bool = True):
-        """Override dictify method."""
-        data = super(Analysis, self).to_dict()
-        if family:
-            data['family'] = self.family.to_dict()
-        return data
-
-
-class Application(Model):
-    id = Column(types.Integer, primary_key=True)
-    tag = Column(types.String(32), unique=True, nullable=False)
-    # DEPRECATED, use prep_category instead
-    category = Column(types.Enum('wgs', 'wes', 'tga', 'rna', 'mic', 'rml'))
-    prep_category = Column(types.Enum(*PREP_CATEGORIES), nullable=False)
-    is_external = Column(types.Boolean, nullable=False, default=False)
-    description = Column(types.String(256), nullable=False)
-    is_accredited = Column(types.Boolean, nullable=False)
-
-    turnaround_time = Column(types.Integer)
-    minimum_order = Column(types.Integer, default=1)
-    sequencing_depth = Column(types.Integer)
-    target_reads = Column(types.BigInteger, default=0)
-    sample_amount = Column(types.Integer)
-    sample_volume = Column(types.Text)
-    sample_concentration = Column(types.Text)
-    priority_processing = Column(types.Boolean, default=False)
-    details = Column(types.Text)
-    limitations = Column(types.Text)
-    percent_kth = Column(types.Integer)
-    comment = Column(types.Text)
-    is_archived = Column(types.Boolean, default=False)
-
-    created_at = Column(types.DateTime, default=dt.datetime.now)
-    updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
-    versions = orm.relationship('ApplicationVersion', order_by='ApplicationVersion.version',
-                                backref='application')
-
-    def __str__(self) -> str:
-        return self.tag
-
-    @property
-    def reduced_price(self):
-        return self.tag.startswith('WGT') or self.tag.startswith('EXT')
-
-    @property
-    def expected_reads(self):
-        return self.target_reads * 0.75
-
-    @property
-    def analysis_type(self):
-        return 'wgs' if self.prep_category == 'wgs' else 'wes'
-
-
-class ApplicationVersion(Model):
-    __table_args__ = (UniqueConstraint('application_id', 'version', name='_app_version_uc'),)
-
-    id = Column(types.Integer, primary_key=True)
-    version = Column(types.Integer, nullable=False)
-
-    valid_from = Column(types.DateTime, default=dt.datetime.now, nullable=False)
-    price_standard = Column(types.Integer)
-    price_priority = Column(types.Integer)
-    price_express = Column(types.Integer)
-    price_research = Column(types.Integer)
-    comment = Column(types.Text)
-
-    created_at = Column(types.DateTime, default=dt.datetime.now)
-    updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
-    application_id = Column(ForeignKey(Application.id), nullable=False)
-    samples = orm.relationship('Sample', backref='application_version')
-    pools = orm.relationship('Pool', backref='application_version')
-    microbial_samples = orm.relationship('MicrobialSample', backref='application_version')
-
-    def __str__(self) -> str:
-        return f"{self.application.tag} ({self.version})"
-
-
-class Panel(Model):
-    id = Column(types.Integer, primary_key=True)
-    name = Column(types.String(64), unique=True)
-    abbrev = Column(types.String(32), unique=True)
-    current_version = Column(types.Float, nullable=False)
-    date = Column(types.DateTime, nullable=False)
-    gene_count = Column(types.Integer)
-
-    customer_id = Column(ForeignKey('customer.id', ondelete='CASCADE'), nullable=False)
-    customer = orm.relationship(Customer, backref='panels')
-
-    def __str__(self):
-        return f"{self.abbrev} ({self.current_version})"
-
-
 class Invoice(Model):
     id = Column(types.Integer, primary_key=True)
     customer_id = Column(ForeignKey('customer.id'), nullable=False)
@@ -554,3 +533,23 @@ class Invoice(Model):
         """Override dictify method."""
         data = super(Invoice, self).to_dict()
         return data
+
+
+class User(Model):
+    id = Column(types.Integer, primary_key=True)
+    name = Column(types.String(128), nullable=False)
+    email = Column(types.String(128), unique=True, nullable=False)
+    is_admin = Column(types.Boolean, default=False)
+
+    customer_id = Column(ForeignKey('customer.id', ondelete='CASCADE', use_alter=True),
+                         nullable=False)
+    customer = orm.relationship('Customer', foreign_keys=[customer_id])
+
+    def to_dict(self) -> dict:
+        """Override dictify method."""
+        data = super(User, self).to_dict()
+        data['customer'] = self.customer.to_dict()
+        return data
+
+    def __str__(self) -> str:
+        return self.name

@@ -88,8 +88,9 @@ def present_string(case, param, show_negative):
 
 @status.command()
 @click.pass_context
-@click.option('-o', '--output-type', type=click.Choice(['bool', 'count', 'date', 'datetime']),
-              default='bool', help='how to display status')
+@click.option('-o', '--output', 'output_type', type=click.Choice(['bool', 'count', 'date',
+                                                                  'datetime']), default='bool',
+              help='how to display status')
 @click.option('--verbose', is_flag=True, help='show status information otherwise left out')
 @click.option('--days', default=31, help='days to go back')
 @click.option('--internal-id', help='search by internal id')

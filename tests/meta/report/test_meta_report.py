@@ -10,12 +10,14 @@ def test_init():
 
 
 def test_collect_delivery_data(report_api):
-    # GIVEN an initialised report_api
+    # GIVEN an initialised report_api and a family ready for delivery report creation
 
     # WHEN collecting delivery data for a certain
-    delivery_data = report_api._get_delivery_data(customer_id='cust000', family_id='yellowhog')
+    delivery_data = report_api._get_delivery_data(family_id='yellowhog')
 
     # THEN all data for the delivery report should have been collected
+    assert delivery_data['report_version']
+    assert delivery_data['previous_report_version']
     assert delivery_data['family']
     assert delivery_data['customer_obj'].name
     assert delivery_data['today'].date()
@@ -42,11 +44,15 @@ def test_collect_delivery_data(report_api):
         assert sample['application']
         assert sample['received']
 
+        assert sample['order_date']
         assert sample['prep_method']
+        assert sample['prep_date']
+        assert sample['capture_kit']
         assert sample['sequencing_method']
+        assert sample['sequencing_date']
         assert sample['delivery_method']
-
         assert sample['delivery_date']
+
         assert sample['million_read_pairs']
         assert sample['mapped_reads']
         assert sample['target_coverage']
@@ -57,34 +63,6 @@ def test_collect_delivery_data(report_api):
 
     assert delivery_data['mip_version']
     assert delivery_data['genome_build']
-
-
-def test_incorporate_delivery_date_from_lims(lims_samples, report_api):
-    # GIVEN data from an analysed case and an initialised report_api
-
-    # WHEN fetch_and_add_delivery_date_from_lims
-    samples = lims_samples
-    report_api._incorporate_delivery_date_from_lims(samples)
-
-    # THEN
-    # each sample has a property processing_time with a value of the days between received_at and
-    #   delivery_date
-    for sample in samples:
-        assert sample['delivery_date']
-
-
-def test_incorporate_processing_time_from_lims(lims_samples, report_api):
-    # GIVEN data from an analysed case and an initialised report_api
-
-    # WHEN fetch_and_add_delivery_date_from_lims
-    samples = lims_samples
-    report_api._incorporate_processing_time_from_lims(samples)
-
-    # THEN
-    # each sample has a property processing_time with a value of the days between received_at and
-    #   delivery_date
-    for sample in samples:
-        assert sample['processing_time']
 
 
 def test_get_application_data_from_status_db(lims_samples, report_api):
@@ -137,22 +115,9 @@ def test_incorporate_lims_methods(lims_samples, report_api):
         assert sample['delivery_method']
 
 
-def test_get_customer_from_status_db(report_api):
-    # GIVEN data from an analysed case and an initialised report_api
-    customer_id = 'cust002'
-
-    # WHEN generating_qc_data
-    customer_obj = report_api._get_customer_from_status_db(customer_id)
-
-    # THEN customer properties should be available
-
-    # customer is the the full customer object in the database
-    assert customer_obj.name
-
-
 def test_render_delivery_report(report_api):
     # GIVEN proper qc data from an analysis exist
-    report_data = report_api._get_delivery_data(customer_id='cust002', family_id='yellowhog')
+    report_data = report_api._get_delivery_data(family_id='yellowhog')
 
     # WHEN rendering a report from that data
     rendered_report = ReportAPI._render_delivery_report(report_data)
@@ -165,7 +130,7 @@ def test_create_delivery_report(report_api):
     # GIVEN initialized ReportAPI
 
     # WHEN rendering a report from that data
-    created_report = report_api.create_delivery_report(customer_id='cust002', family_id='yellowhog')
+    created_report = report_api.create_delivery_report(family_id='yellowhog')
 
     # THEN a html report with certain data should have been rendered
     assert len(created_report) > 0
@@ -175,63 +140,12 @@ def test_create_delivery_report_file(report_api: ReportAPI):
     # GIVEN initialized ReportAPI
 
     # WHEN rendering a report from that data
-    created_report_file = report_api.create_delivery_report_file(customer_id='cust002',
-                                                                           family_id='yellowhog',
-                                                                           file_path=Path('.'))
+    created_report_file = report_api.create_delivery_report_file(family_id='yellowhog',
+                                                                 file_path=Path('.'))
 
     # THEN a html report with certain data should have been created on disk
     assert os.path.isfile(created_report_file.name)
     os.unlink(created_report_file.name)
-
-
-def test_present_float_string():
-    # GIVEN
-
-    # WHEN formatting None
-    presentable_string = ReportAPI._present_float_string(None, 0)
-
-    # THEN we should get 'N/A' back
-    assert 'N/A' in presentable_string
-
-
-def test_present_date():
-    # GIVEN
-
-    # WHEN formatting None
-    presentable_string = ReportAPI._present_date(None)
-
-    # THEN we should get 'N/A' back
-    assert 'N/A' in presentable_string
-
-
-def test_present_string():
-    # GIVEN
-
-    # WHEN formatting None
-    presentable_string = ReportAPI._present_string(None)
-
-    # THEN we should get 'N/A' back
-    assert 'N/A' in presentable_string
-
-
-def test_present_int():
-    # GIVEN
-
-    # WHEN formatting None
-    presentable_string = ReportAPI._present_int(None)
-
-    # THEN we should get 'N/A' back
-    assert 'N/A' in presentable_string
-
-
-def test_present_set():
-    # GIVEN
-
-    # WHEN formatting None
-    presentable_string = ReportAPI._present_set(None)
-
-    # THEN we should get 'N/A' back
-    assert 'N/A' in presentable_string
 
 
 def test_incorporate_coverage_data(report_api, lims_samples):
@@ -255,14 +169,55 @@ def test_incorporate_coverage_data(report_api, lims_samples):
 
 def test_fetch_family_samples_from_status_db(report_api):
     # GIVEN an initialised report_api and the db returns samples without reads
-    report_api.db._family_samples_returns_no_reads = True
+    report_api.db.family_samples_returns_no_reads = True
 
     # WHEN fetching status data
     samples = report_api._fetch_family_samples_from_status_db(family_id='yellowhog')
 
     # THEN the report data should have N/A where it report sample reads
+    assert samples
     for sample in samples:
-        assert 'N/A' == sample.get('million_read_pairs')
+        assert sample.get('million_read_pairs') == 'N/A'
+
+
+def test_fetch_no_capture_kit_from_status_db(report_api):
+
+    # GIVEN an initialised report_api and the db returns samples without capture kit
+    report_api.db.samples_returns_no_capture_kit = True
+
+    # WHEN fetching status data
+    samples = report_api._fetch_family_samples_from_status_db(family_id='yellowhog')
+
+    # THEN the report data should have N/A where it reports capture_kit
+    assert samples
+    for sample in samples:
+        assert sample.get('capture_kit') == 'N/A'
+
+
+def test_fetch_capture_kit_from_status_db(report_api):
+
+    # GIVEN an initialised report_api and the db returns samples with capture kit
+
+    # WHEN fetching status data
+    samples = report_api._fetch_family_samples_from_status_db(family_id='yellowhog')
+
+    # THEN the report data should have capture kit
+    assert samples
+    for sample in samples:
+        assert sample.get('capture_kit') == 'GMSmyeloid'
+
+
+def test_data_analysis_kit_from_status_db(report_api):
+
+    # GIVEN an initialised report_api and the db returns samples with data_analysis
+
+    # WHEN fetching status data
+    samples = report_api._fetch_family_samples_from_status_db(family_id='yellowhog')
+
+    # THEN the report data should have capture kit
+    assert samples
+    for sample in samples:
+        assert sample.get('bioinformatic_analysis') == 'PIM'
 
 
 def test_get_application_data_from_status_db(lims_samples, report_api):

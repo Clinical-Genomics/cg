@@ -4,6 +4,8 @@ import logging
 import alchy
 
 from cg.store import models
+from cg.store.api.reset import ResetHandler
+
 from .add import AddHandler
 from .find import FindHandler
 from .status import StatusHandler
@@ -33,7 +35,7 @@ class BaseHandler:
     Organism = models.Organism
 
 
-class CoreHandler(BaseHandler, AddHandler, FindHandler, StatusHandler, TrendsHandler):
+class CoreHandler(BaseHandler, AddHandler, FindHandler, StatusHandler, TrendsHandler, ResetHandler):
     pass
 
 

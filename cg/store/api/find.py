@@ -121,16 +121,6 @@ class FindHandler:
         """Fetch a microbial sample by lims id."""
         return self.MicrobialSample.query.filter_by(internal_id=internal_id).first()
 
-    def find_sample(self, customer: models.Customer, name: str) -> List[models.Sample]:
-        """Find samples within a customer."""
-        return self.Sample.query.filter_by(customer=customer, name=name)
-
-    def find_sample_in_customer_group(self, customer: models.Customer, name: str) -> List[
-        models.Sample]:
-        """Find samples within the customer group."""
-        return self.Sample.query.filter(
-            models.Sample.customer.customer_group == customer.customer_group, name == name)
-
     def application(self, tag: str) -> models.Application:
         """Fetch an application from the store."""
         return self.Application.query.filter_by(tag=tag).first()
