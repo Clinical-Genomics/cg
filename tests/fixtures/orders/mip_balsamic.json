@@ -24,7 +24,7 @@
       "mother": "sample2",
       "tumour": true,
       "tumour_purity": "75",
-      "capture_kit": "Twist exome v1.3",
+      "capture_kit": "LymphoMATIC",
       "formalin_fixation_time": "1",
       "post_formalin_fixation_time": "2",
       "tissue_block_size": "large"
@@ -48,7 +48,7 @@
         "IEM"
       ],
       "tumour": false,
-      "capture_kit": "Twist exome v1.3"
+      "capture_kit": "LymphoMATIC"
     },
     {
       "name": "sample3",
@@ -68,7 +68,7 @@
         "IEM"
       ],
       "tumour": false,
-      "capture_kit": "Twist exome v1.3"
+      "capture_kit": "LymphoMATIC"
     },
     {
       "name": "sample4",
@@ -88,7 +88,7 @@
         "IEM"
       ],
       "tumour": false,
-      "capture_kit": "Twist exome v1.3"
+      "capture_kit": "LymphoMATIC"
     }
   ]
 }

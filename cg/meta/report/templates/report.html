@@ -20,8 +20,12 @@
 
         <ul class="list-group list-group-flush">
           <li class="list-group-item">
-            Leveransrapport för {{ customer_obj.name }}, familj {{ family }}<br>
-            Datum: {{ today.date() }}
+            Leveransrapport {{ customer_obj.name }}, familj {{ family }} : {{ report_version }}
+            {% if previous_report_version != 'N/A' %}
+              ersätter rapport version: {{ previous_report_version }}
+            {% endif %}
+            <br>
+            Skapad: {{ today.date() }}
           </li>
         </ul>
 
@@ -56,21 +60,24 @@
             <thead>
               <tr>
                 <th>Prov</th>
+                <th>Beställt</th>
                 <th>Familj</th>
                 <th>Kön</th>
                 <th>Status</th>
                 <th>Vävnad</th>
                 <th>Ticket</th>
-                <th>Analys</th>
+                <th>Applikation</th>
+                <th>Bioinformatisk Analys</th>
               </tr>
             </thead>
             <tbody>
               {% for sample in samples %}
                 <tr>
-                  <td>{{ sample.name }} ({{ sample.id }})</td>
-                  <td>{{ family }}</td>
+                <td>{{ sample.name }}* ({{ sample.id }})</td>
+                  <td>{{ sample.order_date }}</td>
+                  <td>{{ family }}*</td>
                   <td>
-                    {{ sample.sex }}
+                    {{ sample.sex }}*
                     ( analys:
                       {% if sample.sex != sample.analysis_sex %}
                         <span class="text-danger">{{ sample.analysis_sex }}</span>
@@ -78,10 +85,11 @@
                         <span class="text-success">{{ sample.analysis_sex }}</span>
                       {% endif %})
                   </td>
-                  <td>{{ sample.status }}</td>
-                  <td>{{ sample.source }}</td>
+                  <td>{{ sample.status }}*</td>
+                  <td>{{ sample.source }}*</td>
                   <td>{{ sample.ticket }}</td>
-                  <td>{{ sample.application }}</td>
+                  <td>{{ sample.application }}*</td>
+                  <td>{{ sample.bioinformatic_analysis }}*</td>
                 </tr>
               {% endfor %}
             </tbody>
@@ -93,24 +101,30 @@
             <thead>
               <tr>
                 <th>Prov</th>
-                <th>Ankomstdatum</th>
+                <th>Ankom</th>
                 <th>Biblioteksberedning</th>
+                <th>Beredd</th>
+                <th>Bait Set</th>
                 <th>Sekvensering</th>
-                <th>Analys</th>
+                <th>Sekvenserad</th>
+                <th>Bioinformatisk Analys</th>
                 <th>Svarsdatum</th>
               </tr>
             </thead>
             <tbody>
               {% for sample in samples %}
                 <tr>
-                  <td>{{ sample.name }}</td>
+                  <td>{{ sample.name }}*</td>
                   <td>{{ sample.received }}</td>
                   <td>{{ sample.prep_method }}</td>
+                  <td>{{ sample.prep_date }}</td>
+                  <td>{{ sample.capture_kit }}</td>
                   <td>{{ sample.sequencing_method }}</td>
+                  <td>{{ sample.sequencing_date }}</td>
                   <td>{{ sample.delivery_method }}</td>
                   <td>
                     {{ sample.delivery_date }}
-                    {% if sample.processing_time %}
+                    {% if sample.processing_time != 'N/A' %}
                       ({{ sample.processing_time }} dagar)
                     {% endif %}
                   </td>
@@ -130,7 +144,7 @@
             </thead>
             <tbody>
               <tr>
-                <td>{{ family }}</td>
+                <td>{{ family }}*</td>
                 <td>{{ mip_version }}</td>
                 <td>{{ panels }}</td>
                 <td>{{ genome_build }}</td>
@@ -155,7 +169,7 @@
             <tbody>
               {% for sample in samples %}
                 <tr>
-                  <td>{{ sample.name }}</td>
+                  <td>{{ sample.name }}*</td>
                   <td>{{ (sample.million_read_pairs) }}</td>
                   <td>{{ sample.mapped_reads }}</td>
                   <td>{{ sample.target_coverage }}</td>
@@ -166,13 +180,16 @@
             </tbody>
           </table>
 
-          {% if customer_obj.scout_access %}
-            <p>
-              Varianter finns uppladdade i Scout:
-              <a href="https://scout.scilifelab.se/{{ customer_obj.internal_id }}/{{ family }}">https://scout.scilifelab.se/{{ customer_obj.internal_id }}/{{ family }}</a>
-            </p>
-          {% endif %}
+          <div class="card-body">* Information given av kund</div>
+
         </div>
+
+        {% if customer_obj.scout_access %}
+          <p class="card-block">
+            Varianter finns uppladdade i Scout:
+            <a href="https://scout.scilifelab.se/{{ customer_obj.internal_id }}/{{ family }}">https://scout.scilifelab.se/{{ customer_obj.internal_id }}/{{ family }}</a>
+          </p>
+        {% endif %}
 
         {% for application in application_objs %}
           <div class="card-block">
@@ -195,6 +212,12 @@
             Valtteri Wirta<br>
             Head of unit, Clinical Genomics
           </p>
+        </div>
+
+        <div class="card-block">Laboratoriet har inte haft ansvar för provtagningsstadiet och extraktion, resultaten gäller för provet såsom det har mottagits. </div>
+
+        <div class="card-block">
+          All kommunikation gällande ordern såsom tillägg, avvikelser eller ev undantag i metoden från Clinical Genomics finns tillgängligt i SupportSystem för detta ticket id. En stängd ticket kan närsomhelst öppnas upp igen för frågor.
         </div>
 
         <div class="card-footer">

@@ -1,10 +1,10 @@
 import json
+from datetime import datetime, timedelta
 
 import pytest
 from cg.apps.lims import LimsAPI
 
 from cg.meta.report.api import ReportAPI
-import datetime
 
 from cg.store import Store
 
@@ -34,12 +34,6 @@ class MockLims(LimsAPI):
 
     def get_delivery_method(self, lims_id: str) -> str:
         return 'CG002 - Delivery'
-
-    def get_processing_time(self, lims_id: str) -> str:
-        return datetime.datetime.today() - datetime.datetime.today()
-
-    def get_delivery_date(self, lims_id: str) -> str:
-        return datetime.datetime.today()
 
     def sample(self, lims_id: str):
         """Fetch information about a sample."""
@@ -175,7 +169,8 @@ class MockYamlLoader:
 
 
 class MockDB(Store):
-    _family_samples_returns_no_reads = False
+    family_samples_returns_no_reads = False
+    samples_returns_no_capture_kit = False
     _application_accreditation = None
 
     def __init__(self, store):
@@ -185,9 +180,19 @@ class MockDB(Store):
 
         family_samples = self.store.family_samples(family_id)
 
-        if self._family_samples_returns_no_reads:
+        if self.family_samples_returns_no_reads:
             for family_sample in family_samples:
                 family_sample.sample.reads = None
+
+        if self.samples_returns_no_capture_kit:
+            for family_sample in family_samples:
+                family_sample.sample.capture_kit = None
+
+        # add some date to calculate processing time on
+        yesterday = datetime.now() - timedelta(days=1)
+        for family_sample in family_samples:
+            family_sample.sample.received_at = yesterday
+            family_sample.sample.delivered_at = datetime.now()
 
         return family_samples
 
