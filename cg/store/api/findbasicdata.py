@@ -76,6 +76,10 @@ class FindBasicDataHandler(BaseHandler):
         """Find a panel by abbreviation."""
         return self.Panel.query.filter_by(abbrev=abbrev).first()
 
+    def panels(self):
+        """Returns all panels."""
+        return self.Panel.query.order_by(models.Panel.abbrev)
+
     def user(self, email: str) -> models.User:
         """Fetch a user from the store."""
         return self.User.query.filter_by(email=email).first()
