@@ -1,10 +1,12 @@
 """
     Tests for loqusdbAPI
 """
-
+import pytest
 import subprocess
 
 from cg.apps.loqus import LoqusdbAPI
+
+from cg.exc import CaseNotFoundError
 
 
 def test_instatiate(loqus_config):
@@ -47,24 +49,26 @@ def test_get_case_non_existing(loqusdbapi, mocker):
     # WHEN an error occurs during fetching a case with the adapter
     mocker.patch.object(subprocess, 'check_output')
     subprocess.check_output.side_effect = subprocess.CalledProcessError(1, 'error')
-    case_obj = loqusdbapi.get_case(case_id)
 
-    # THEN no object should have been returned
-    assert case_obj is None
+    # THEN assert that the error is raised
+    with pytest.raises(subprocess.CalledProcessError):
+        loqusdbapi.get_case(case_id)
 
     # WHEN case is not in the loqusdb output
-    subprocess.check_output.return_value = b"{'_id': 'case', 'case_id': 'case'\n}"
-    case_obj = loqusdbapi.get_case(case_id)
+    mocker.patch.object(subprocess, 'check_output')
+    subprocess.check_output.return_value = b"{'_id': 'case', 'case_id': 'case'}\n"
 
-    # THEN no object should have been returned
-    assert case_obj is None
+    # THEN CaseNotFoundError should be raised
+    with pytest.raises(CaseNotFoundError):
+        loqusdbapi.get_case(case_id)
 
     # WHEN loqusdb output is empty string
+    mocker.patch.object(subprocess, 'check_output')
     subprocess.check_output.return_value = b""
-    case_obj = loqusdbapi.get_case(case_id)
 
-    # THEN no object should have been returned
-    assert case_obj is None
+    # THEN CaseNotFoundError should be raised
+    with pytest.raises(CaseNotFoundError):
+        loqusdbapi.get_case(case_id)
 
 
 def test_load(loqusdbapi, mocker, loqusdb_output):

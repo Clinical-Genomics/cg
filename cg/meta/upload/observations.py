@@ -3,7 +3,7 @@ import logging
 from typing import List
 
 from cg.apps import hk, loqus
-from cg.exc import DuplicateRecordError
+from cg.exc import DuplicateRecordError, CaseNotFoundError
 from cg.store import models, Store
 
 LOG = logging.getLogger(__name__)
@@ -33,12 +33,18 @@ class UploadObservationsAPI(object):
 
     def upload(self, data: dict):
         """Upload data about genotypes for a family of samples."""
-        existing_case = self.loqusdb.get_case(case_id=data['family'])
-        if existing_case is None:
+
+        try:
+            existing_case = self.loqusdb.get_case(case_id=data['family'])
+
+        # If CaseNotFoundError is raised, this should trigger the load method of loqusdb
+        except CaseNotFoundError:
             results = self.loqusdb.load(data['family'], data['pedigree'], data['vcf'])
             LOG.info(f"parsed {results['variants']} variants")
+
         else:
-            LOG.debug("found existing family, skipping observations")
+            log_msg = f"found existing family {existing_case['case_id']}, skipping observations"
+            LOG.debug(log_msg)
 
     def process(self, analysis_obj: models.Analysis):
         """Process an upload observation counts for a case."""

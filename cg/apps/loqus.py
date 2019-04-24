@@ -11,6 +11,8 @@ import logging
 import subprocess
 from subprocess import CalledProcessError
 
+from cg.exc import CaseNotFoundError
+
 LOG = logging.getLogger(__name__)
 
 
@@ -71,9 +73,6 @@ class LoqusdbAPI():
         # are parsed for the correct case_id
         case_call.extend(['cases'])
 
-        # For loqusdb v2
-        # case_call.extend(['cases', '-c', case_id, '--to-json'])
-
         try:
             output = subprocess.check_output(
                 ' '.join(case_call),
@@ -81,8 +80,10 @@ class LoqusdbAPI():
             )
 
         except CalledProcessError:
-            # If case does not exist we will get a non zero exit code and return None
-            return case_obj
+            # If CalledProcessError is raised, log and raise error
+            log_msg = f"Could not run command: {' '.join(case_call)}"
+            LOG.critical(log_msg)
+            raise
 
         # For loqusdb v1
         # parse through the output lines to see if case is in loqusdb
@@ -97,8 +98,9 @@ class LoqusdbAPI():
                 case_obj = case
                 break
 
-        # The output is a list of dictionaries that are case objs
-        # case_obj = json.loads(output.decode('utf-8'))[0]
+        # If case is not found, raise CaseNotFoundError
+        if case_obj is None:
+            raise CaseNotFoundError(f"Case {case_id} not found in loqusdb")
 
         return case_obj
 

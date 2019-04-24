@@ -27,6 +27,12 @@ class DuplicateRecordError(CgError):
     pass
 
 
+class CaseNotFoundError(CgError):
+    """
+        Exception raised when a case is not found in loqusdb
+    """
+
+
 class OrderFormError(CgError):
     pass
 
