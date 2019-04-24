@@ -88,7 +88,7 @@ class ScoutAPI(MongoAdapter):
 
         Args:
             report_path (string):       Path to delivery report
-            case_id     (string):       Optional case identifier
+            case_id     (string):       Case identifier
             update      (bool):         If an existing report should be replaced
 
         Returns:
