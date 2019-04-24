@@ -1,8 +1,9 @@
 """
     Tests for loqusdbAPI
 """
-import pytest
+
 import subprocess
+import pytest
 
 from cg.apps.loqus import LoqusdbAPI
 
