@@ -45,15 +45,9 @@ def test_get_case(loqusdbapi, mocker):
 def test_get_case_non_existing(loqusdbapi, mocker):
 
     """Test to get a case via the api"""
-    # GIVEN a loqusdb api
-    case_id = 'a_case'
-    # WHEN an error occurs during fetching a case with the adapter
-    mocker.patch.object(subprocess, 'check_output')
-    subprocess.check_output.side_effect = subprocess.CalledProcessError(1, 'error')
 
-    # THEN assert that the error is raised
-    with pytest.raises(subprocess.CalledProcessError):
-        loqusdbapi.get_case(case_id)
+    # GIVEN a loqusdb api and a case id
+    case_id = 'a_case'
 
     # WHEN case is not in the loqusdb output
     mocker.patch.object(subprocess, 'check_output')
@@ -69,6 +63,20 @@ def test_get_case_non_existing(loqusdbapi, mocker):
 
     # THEN CaseNotFoundError should be raised
     with pytest.raises(CaseNotFoundError):
+        loqusdbapi.get_case(case_id)
+
+
+def test_get_case_command_fail(loqusdbapi, mocker):
+
+    """Test to see if exception is raised"""
+    # GIVEN a loqusdb api and a case id
+    case_id = 'a_case'
+    # WHEN an error occurs during fetching a case with the adapter
+    mocker.patch.object(subprocess, 'check_output')
+    subprocess.check_output.side_effect = subprocess.CalledProcessError(1, 'error')
+
+    # THEN assert that the error is raised
+    with pytest.raises(subprocess.CalledProcessError):
         loqusdbapi.get_case(case_id)
 
 
