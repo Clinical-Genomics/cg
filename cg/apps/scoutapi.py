@@ -4,7 +4,7 @@ from typing import List
 
 from pymongo import MongoClient
 from scout.adapter.mongo import MongoAdapter
-from scout.adapter.mongo.panel import PanelHandler
+from scout.load.report import load_delivery_report
 from scout.export.panel import export_panels as scout_export_panels
 from scout.load import load_scout
 from scout.parse.case import parse_case_data
@@ -54,8 +54,8 @@ class ScoutAPI(MongoAdapter):
         gene_panel = self.gene_panel(panel_id=panel_id, version=version)
         return gene_panel.get('genes')
 
-    def get_cases(self, case_id=None, institute=None, reruns=None, finished=None, causatives=None, research_requested=None,
-          is_research=None, status=None):
+    def get_cases(self, case_id=None, institute=None, reruns=None, finished=None,
+                  causatives=None, research_requested=None, is_research=None, status=None):
         """Interact with cases existing in the database."""
 
         models = []
@@ -66,8 +66,31 @@ class ScoutAPI(MongoAdapter):
 
         else:
             models = self.cases(collaborator=institute, reruns=reruns,
-                               finished=finished, has_causatives=causatives,
-                               research_requested=research_requested,
-                               is_research=is_research, status=status)
+                                finished=finished, has_causatives=causatives,
+                                research_requested=research_requested,
+                                is_research=is_research, status=status)
 
         return models
+
+    def upload_delivery_report(self,
+                               report_path: str,
+                               case_id: str,
+                               update: bool = False):
+        """ Load a delivery report into a case in the database
+
+        If the report already exists the function will exit.
+        If the user want to load a report that is already in the database
+        'update' has to be 'True'
+
+        Args:
+            report_path (string):       Path to delivery report
+            case_id     (string):       Case identifier
+            update      (bool):         If an existing report should be replaced
+
+        Returns:
+            updated_case(dict)
+
+        """
+
+        return load_delivery_report(adapter=self, case_id=case_id, report_path=report_path,
+                                    update=update)
