@@ -3,6 +3,7 @@ mock
 ipdb
 pytest-cov
 coveralls
+pytest-mock
 git-lint
 pylint
 pycodestyle

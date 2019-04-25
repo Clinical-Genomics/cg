@@ -65,6 +65,7 @@ setup(
     install_requires=parse_reqs(),
     tests_require=[
         'pytest',
+        'pytest-mock',
     ],
     cmdclass=dict(test=PyTest),
     classifiers=[

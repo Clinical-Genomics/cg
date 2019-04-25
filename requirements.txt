@@ -38,7 +38,6 @@ cairocffi==0.9.0        # due to strange version number in package
 
 # apps
 genologics
-loqusdb<2.0.0
 trailblazer>=3.1.1
 housekeeper>=2.0.0b2
 chanjo>=4.2.0
