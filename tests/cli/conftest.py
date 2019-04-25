@@ -1,3 +1,4 @@
+"""Fixtures for cli tests"""
 from functools import partial
 
 from cg.apps import hk
