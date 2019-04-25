@@ -170,13 +170,15 @@ def flowcell(context, flowcell_name, status):
 
 @set_cmd.command('microbial-order')
 @click.option('-a', '--application-tag', 'apptag', help='sets application tag.', type=str)
+@click.option('-t', '--ticket', 'ticket', help='sets ticket number.', type=str)
+@click.option('-n', '--name', 'name', help='sets name both in status-db and LIMS.', type=str)
 @click.argument('order_id')
 @click.argument('user_signature')
 @click.pass_context
-def microbial_order(context, apptag, order_id, user_signature):
+def microbial_order(context, apptag, ticket, name, order_id, user_signature):
     """Update information on all samples on a microbial order"""
 
-    if not apptag:
+    if not apptag and not ticket and not name:
         click.echo(click.style(f"no option specified: {order_id}", fg='yellow'))
         context.abort()
 
@@ -186,9 +188,58 @@ def microbial_order(context, apptag, order_id, user_signature):
         click.echo(click.style(f"order not found: {order_id}", fg='yellow'))
         context.abort()
 
-    for sample_obj in microbial_order_obj.microbial_samples:
-        context.invoke(microbial_sample, sample_id=sample_obj.internal_id,
-                       user_signature=user_signature, apptag=apptag)
+    if apptag:
+        for sample_obj in microbial_order_obj.microbial_samples:
+            context.invoke(microbial_sample, sample_id=sample_obj.internal_id,
+                           user_signature=user_signature, apptag=apptag)
+
+    if ticket:
+        if microbial_order_obj.ticket_number == ticket:
+            click.echo(click.style(f"Order {microbial_order_obj.internal_id} already has the "
+                                   f"ticket {ticket}", fg='yellow'))
+            return
+
+        comment = f"Ticket changed from" \
+            f" {microbial_order_obj.ticket_number} to " \
+            f"{ticket} by {user_signature}"
+        microbial_order_obj.ticket_number = ticket
+        click.echo(click.style(f"Ticket for {microbial_order_obj.internal_id} set to "
+                               f"{str(microbial_order_obj.ticket_number)}.", fg='green'))
+
+        timestamp = str(datetime.datetime.now())[:-10]
+        if microbial_order_obj.comment is None:
+            microbial_order_obj.comment = f"{timestamp}: {comment}"
+        else:
+            microbial_order_obj.comment += '\n' + f"{timestamp}: {comment}"
+        click.echo(click.style(f"Comment added to order {microbial_order_obj.internal_id}",
+                               fg='green'))
+
+    if name:
+        if microbial_order_obj.name == name:
+            click.echo(click.style(f"Order {microbial_order_obj.internal_id} already has the "
+                                   f"name {name}", fg='yellow'))
+            return
+
+        comment = f"Name changed from" \
+            f" {microbial_order_obj.ticket_number} to " \
+            f"{ticket} by {user_signature}"
+        microbial_order_obj.name = name
+        click.echo(click.style(f"Name for {microbial_order_obj.internal_id} set to "
+                               f"{str(microbial_order_obj.name)}.", fg='green'))
+
+        timestamp = str(datetime.datetime.now())[:-10]
+        if microbial_order_obj.comment is None:
+            microbial_order_obj.comment = f"{timestamp}: {comment}"
+        else:
+            microbial_order_obj.comment += '\n' + f"{timestamp}: {comment}"
+        click.echo(click.style(f"Comment added to order {microbial_order_obj.internal_id}",
+                               fg='green'))
+
+        print(click.style('update LIMS/Project-name', fg='blue'))
+        if context.obj.get('lims'):
+            LimsAPI(context.obj).update_project(microbial_order_obj.internal_id, name=name)
+
+    context.obj['status'].commit()
 
 
 @set_cmd.command('microbial-sample')

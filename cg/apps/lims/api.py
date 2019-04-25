@@ -2,7 +2,7 @@
 import datetime as dt
 import logging
 
-from genologics.entities import Sample, Process
+from genologics.entities import Sample, Process, Project
 from genologics.lims import Lims
 from dateutil.parser import parse as parse_date
 
@@ -216,6 +216,13 @@ class LimsAPI(Lims, OrderHandler):
         if isinstance(target_reads, int):
             lims_sample.udf[PROP2UDF['target_reads']] = target_reads
         lims_sample.put()
+
+    def update_project(self, lims_id: str, name=None):
+        """Update information about a project."""
+        lims_project = Project(self, id=lims_id)
+        if name:
+            lims_project.name = name
+        lims_project.put()
 
     def get_prep_method(self, lims_id: str) -> str:
         """Get the library preparation method."""
