@@ -27,19 +27,17 @@ def test_instatiate(loqus_config):
     assert loqusdb.username == loqus_config['loqusdb']['username']
 
 
-def test_get_case(loqusdbapi, mocker):
+def test_get_case(loqusdbapi, loqusdb_case_output, mocker):
 
     """Test to get a case via the api"""
     # GIVEN a loqusdb api
     case_id = 'a_case'
     # WHEN fetching a case with the adapter
     mocker.patch.object(subprocess, 'check_output')
-    loqusdb_output = (b"{'_id': 'one_case', 'case_id': 'one_case'}\n"
-                      b"{'_id': 'a_case', 'case_id': 'a_case'}\n")
-    subprocess.check_output.return_value = loqusdb_output
+    subprocess.check_output.return_value = loqusdb_case_output
     case_obj = loqusdbapi.get_case(case_id)
     # THEN assert that the correct case id is returned
-    assert case_obj['_id'] == case_id
+    assert case_obj['case_id'] == case_id
 
 
 def test_get_case_non_existing(loqusdbapi, mocker):
@@ -48,14 +46,6 @@ def test_get_case_non_existing(loqusdbapi, mocker):
 
     # GIVEN a loqusdb api and a case id
     case_id = 'a_case'
-
-    # WHEN case is not in the loqusdb output
-    mocker.patch.object(subprocess, 'check_output')
-    subprocess.check_output.return_value = b"{'_id': 'case', 'case_id': 'case'}\n"
-
-    # THEN CaseNotFoundError should be raised
-    with pytest.raises(CaseNotFoundError):
-        loqusdbapi.get_case(case_id)
 
     # WHEN loqusdb output is empty string
     mocker.patch.object(subprocess, 'check_output')
@@ -87,12 +77,14 @@ def test_load(loqusdbapi, mocker, loqusdb_output):
     family_id = 'test'
     ped_path = 'a ped path'
     vcf_path = 'a vcf path'
+    vcf_sv_path = 'a sv_vcf path'
+    gbcf_path = 'a bcf path'
 
     # WHEN uploading a case with 15 variants to loqusdb
     mocker.patch.object(subprocess, 'check_output')
     subprocess.check_output.return_value = loqusdb_output
 
-    data = loqusdbapi.load(family_id, ped_path, vcf_path)
+    data = loqusdbapi.load(family_id, ped_path, vcf_path, vcf_sv_path, gbcf_path)
 
     # THEN assert that the number of variants is 15
 
@@ -100,6 +92,8 @@ def test_load(loqusdbapi, mocker, loqusdb_output):
 
 
 def test_repr_string(loqus_config):
+
+    """Test __repr__ of loqusdbAPI"""
 
     loqusdb = LoqusdbAPI(loqus_config)
 
