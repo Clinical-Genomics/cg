@@ -252,6 +252,7 @@ def observations(context, case_id, dry_run):
 
     click.echo(click.style('----------------- OBSERVATIONS ----------------'))
 
+
     loqus_api = loqus.LoqusdbAPI(context.obj)
 
     if case_id:
