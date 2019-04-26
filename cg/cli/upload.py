@@ -153,7 +153,7 @@ def delivery_report(context, family_id, print_console):
 
         if added_file:
             click.echo(click.style('uploaded to housekeeper', fg='green'))
-            _add_delivery_report_to_scout(context, added_file.full_path, family_id)
+            context.invoke(delivery_report_to_scout, case_id=family_id)
             click.echo(click.style('uploaded to scout', fg='green'))
             _update_delivery_report_date(status_api, family_id)
         else:
@@ -188,6 +188,29 @@ def _update_delivery_report_date(status_api, family_id):
     analysis_obj = family_obj.analyses[0]
     analysis_obj.delivery_report_created_at = dt.datetime.now()
     status_api.commit()
+
+
+@upload.command('delivery-report-to-scout')
+@click.argument('case_id')
+@click.option('-d', '--dry-run', 'dry_run', is_flag=True, help='run command without uploading to scout')
+@click.pass_context
+def delivery_report_to_scout(context, case_id, dry_run):
+    """Fetches an delivery-report from housekeeper and uploads it to scout"""
+    hk_api = context.obj['housekeeper_api']
+    report = _get_delivery_report_from_hk(hk_api, case_id)
+
+    LOG.info("uploading delivery report %s to scout for case: %s", report, case_id)
+    if not dry_run:
+        _add_delivery_report_to_scout(context, report, case_id)
+
+def _get_delivery_report_from_hk(hk_api: hk.HousekeeperAPI, family_id):
+    delivery_report_tag_name = 'delivery-report'
+    version_obj = hk_api.last_version(family_id)
+    uploaded_delivery_report_files = hk_api.get_files(bundle=family_id,
+                                                      tags=[delivery_report_tag_name],
+                                                      version=version_obj.id)
+
+    return uploaded_delivery_report_files[0].full_path
 
 
 @upload.command('delivery-reports')
