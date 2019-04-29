@@ -44,23 +44,24 @@ class LoqusdbAPI():
         """Add observations from a VCF."""
         load_call = copy.deepcopy(self.base_call)
         load_call.extend([
-            'load', '-c', family_id, '-f', ped_path, '--variant-file', vcf_path,
-            '--sv-variants', vcf_sv_path, '--check-profile', gbcf_path,
-            '--hard-threshold', '0.95', '--soft-threshold', '0.90'
+            'load',
+            '-c', family_id,
+            '-f', ped_path,
+            '--variant-file', vcf_path,
+            '--sv-variants', vcf_sv_path,
+            '--check-profile', gbcf_path,
+            '--hard-threshold', '0.95',
+            '--soft-threshold', '0.90'
             ])
 
-        output = subprocess.check_output(
-            ' '.join(load_call),
-            shell=True,
-            stderr=subprocess.STDOUT,
-        )
-
         nr_variants = 0
-        # Parse log output to get number of inserted variants
-        for line in output.decode('utf-8').split('\n'):
-            log_message = (line.split('INFO'))[-1].strip()
-            if 'inserted' in log_message:
-                nr_variants = int(log_message.split(':')[-1].strip())
+        # Execute command and print its stdout+stderr as it executes
+        for line in execute_command(load_call):
+            log_msg = f"loqusdb output: {line}"
+            LOG.info(log_msg)
+            line_content = line.split('INFO')[-1].strip()
+            if 'inserted' in line_content:
+                nr_variants = int(line_content.split(':')[-1].strip())
 
         return dict(variants=nr_variants)
 
@@ -98,3 +99,26 @@ class LoqusdbAPI():
         return (f"LoqusdbAPI(uri={uri},"
                 f"db_name={self.db_name},"
                 f"loqusdb_binary={self.loqusdb_binary})")
+
+
+def execute_command(cmd):
+    """
+        Prints stdout + stderr of command in real-time while being executed
+
+        Args:
+            cmd (list): command sequence
+
+        Yields:
+            line (str): line of output from command
+    """
+    process = subprocess.Popen(cmd,
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.STDOUT,
+                               bufsize=1)
+
+    for line in process.stdout:
+        yield line.decode('utf-8').strip()
+
+    # Check if process exited with returncode != 0
+    if process.poll():
+        raise CalledProcessError(returncode=process.returncode, cmd=cmd)

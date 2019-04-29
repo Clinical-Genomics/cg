@@ -6,6 +6,7 @@ import subprocess
 import pytest
 
 from cg.apps.loqus import LoqusdbAPI
+from cg.apps.loqus import execute_command
 
 from cg.exc import CaseNotFoundError
 
@@ -81,8 +82,8 @@ def test_load(loqusdbapi, mocker, loqusdb_output):
     gbcf_path = 'a bcf path'
 
     # WHEN uploading a case with 15 variants to loqusdb
-    mocker.patch.object(subprocess, 'check_output')
-    subprocess.check_output.return_value = loqusdb_output
+    mocker.patch('cg.apps.loqus.execute_command',
+                 return_value=loqusdb_output.decode('utf-8').split('\n'))
 
     data = loqusdbapi.load(family_id, ped_path, vcf_path, vcf_sv_path, gbcf_path)
 
@@ -110,3 +111,17 @@ def test_repr_string(loqus_config):
                       f"loqusdb_binary={loqus_config['loqusdb']['binary']})")
 
     assert repr_string == correct_string
+
+
+def test_execute_command(mocker, loqusdb_output, popen_obj_mock):
+
+    """
+        Test execute_command function
+    """
+
+    # Mock the Popen class
+    popen_mock = mocker.patch('subprocess.Popen')
+    popen_mock.return_value = popen_obj_mock
+    command_output = [line for line in execute_command(['_loqus_', '_command_'])]
+
+    assert command_output == loqusdb_output.decode('utf-8').split('\n')
