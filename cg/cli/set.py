@@ -241,6 +241,6 @@ def microbial_sample(context, apptag, sample_id, user_signature):
         click.echo(click.style(f"Comment added to sample {sample_obj.internal_id}", fg='green'))
         context.obj['status'].commit()
 
-        print(click.style('update LIMS/application', fg='blue'))
+        click.echo(click.style('update LIMS/application', fg='blue'))
         if context.obj.get('lims'):
             LimsAPI(context.obj).update_sample(sample_id, application=apptag)
