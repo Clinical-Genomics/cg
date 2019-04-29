@@ -192,7 +192,8 @@ def _update_delivery_report_date(status_api, family_id):
 
 @upload.command('delivery-report-to-scout')
 @click.argument('case_id')
-@click.option('-d', '--dry-run', 'dry_run', is_flag=True, help='run command without uploading to scout')
+@click.option('-d', '--dry-run', 'dry_run', is_flag=True, help='run command without uploading to '
+                                                               'scout')
 @click.pass_context
 def delivery_report_to_scout(context, case_id, dry_run):
     """Fetches an delivery-report from housekeeper and uploads it to scout"""
@@ -202,6 +203,7 @@ def delivery_report_to_scout(context, case_id, dry_run):
     LOG.info("uploading delivery report %s to scout for case: %s", report, case_id)
     if not dry_run:
         _add_delivery_report_to_scout(context, report, case_id)
+
 
 def _get_delivery_report_from_hk(hk_api: hk.HousekeeperAPI, family_id):
     delivery_report_tag_name = 'delivery-report'
