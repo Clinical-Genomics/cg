@@ -212,6 +212,9 @@ def _get_delivery_report_from_hk(hk_api: hk.HousekeeperAPI, family_id):
                                                       tags=[delivery_report_tag_name],
                                                       version=version_obj.id)
 
+    if uploaded_delivery_report_files.count() == 0:
+        raise FileNotFoundError(f"No delivery report was found in housekeeper for {family_id}")
+
     return uploaded_delivery_report_files[0].full_path
 
 
