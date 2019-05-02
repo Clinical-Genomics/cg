@@ -14,6 +14,10 @@ class AnalysisNotFinishedError(CgError):
     pass
 
 
+class AnalysisDuplicationError(CgError):
+    """Error related to trying to create duplicate analysis objects"""
+
+
 class LimsDataError(CgError):
     """Error related to missing/incomplete data in LIMS."""
     pass
@@ -25,6 +29,12 @@ class MissingCustomerError(CgError):
 
 class DuplicateRecordError(CgError):
     pass
+
+
+class CaseNotFoundError(CgError):
+    """
+        Exception raised when a case is not found in loqusdb
+    """
 
 
 class OrderFormError(CgError):
