@@ -22,10 +22,7 @@ def test_instatiate(loqus_config):
     # THEN assert that the adapter was properly instantiated
     assert loqusdb.db_name == loqus_config['loqusdb']['database_name']
     assert loqusdb.loqusdb_binary == loqus_config['loqusdb']['binary']
-    assert loqusdb.host == loqus_config['loqusdb']['host']
-    assert loqusdb.port == loqus_config['loqusdb']['port']
-    assert loqusdb.password == loqus_config['loqusdb']['password']
-    assert loqusdb.username == loqus_config['loqusdb']['username']
+    assert loqusdb.uri == loqus_config['loqusdb']['database']
 
 
 def test_get_case(loqusdbapi, loqusdb_case_output, mocker):
@@ -100,13 +97,7 @@ def test_repr_string(loqus_config):
 
     repr_string = repr(loqusdb)
 
-    uri = (f"mongodb://{loqus_config['loqusdb']['username']}:"
-           f"{loqus_config['loqusdb']['password']}@"
-           f"{loqus_config['loqusdb']['host']}:"
-           f"{loqus_config['loqusdb']['port']}/"
-           f"{loqus_config['loqusdb']['database_name']}")
-
-    correct_string = (f"LoqusdbAPI(uri={uri},"
+    correct_string = (f"LoqusdbAPI(uri={loqus_config['loqusdb']['database']},"
                       f"db_name={loqus_config['loqusdb']['database_name']},"
                       f"loqusdb_binary={loqus_config['loqusdb']['binary']})")
 
