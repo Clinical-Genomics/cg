@@ -26,7 +26,7 @@ def test_analyses_to_delivery_report_outdated(analysis_store):
     returned"""
 
     # GIVEN an analysis that is delivered but has an outdated delivery report
-    analysis = add_analysis(analysis_store, old_delivery_report=True)
+    analysis = add_analysis(analysis_store, delivery_reported=True)
     sample = add_sample(analysis_store, delivered=True)
     analysis_store.relate_sample(family=analysis.family, sample=sample, status='unknown')
     # WHEN calling the analyses_to_delivery_report
@@ -110,17 +110,16 @@ def add_family(disk_store, family_id='family_test', customer_id='cust_test', ord
     return family
 
 
-def add_analysis(store, completed=False, delivered=False, old_delivery_report=False):
+def add_analysis(store, completed=False, uploaded=False, delivery_reported=False):
     """Utility function to add an analysis for tests"""
     family = add_family(store)
     analysis = store.add_analysis(pipeline='', version='')
     if completed:
         analysis.completed_at = datetime.now()
-    if delivered:
-        analysis.delivered_at = datetime.now()
-    if old_delivery_report:
+    if uploaded:
+        analysis.uploaded_at = datetime.now()
+    if delivery_reported:
         analysis.delivery_report_created_at = datetime.now() - timedelta(days=1)
-        analysis.delivered_at = datetime.now()
 
     family.analyses.append(analysis)
     store.add_commit(analysis)
