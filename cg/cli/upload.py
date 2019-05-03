@@ -153,11 +153,11 @@ def delivery_report(context, family_id, print_console):
 
         if added_file:
             click.echo(click.style('uploaded to housekeeper', fg='green'))
-            _update_delivery_report_date(status_api, family_id)
         else:
             click.echo(click.style('already uploaded to housekeeper, skipping'))
 
         context.invoke(delivery_report_to_scout, family_id=family_id)
+        _update_delivery_report_date(status_api, family_id)
 
 def _add_delivery_report_to_scout(context, path, case_id):
     scout_api = scoutapi.ScoutAPI(context.obj)
