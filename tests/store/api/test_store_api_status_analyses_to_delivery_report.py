@@ -8,7 +8,7 @@ def test_analyses_to_delivery_report_missing(analysis_store: Store):
     """Tests that analyses that are completed but lacks delivery report are returned"""
 
     # GIVEN an analysis that is delivered but has no delivery report
-    analysis = add_analysis(analysis_store)
+    analysis = add_analysis(analysis_store, completed=True, uploaded=True)
     sample = add_sample(analysis_store, delivered=True)
     analysis_store.relate_sample(family=analysis.family, sample=sample, status='unknown')
     assert sample.delivered_at is not None
@@ -26,7 +26,7 @@ def test_analyses_to_delivery_report_outdated(analysis_store):
     returned"""
 
     # GIVEN an analysis that is delivered but has an outdated delivery report
-    analysis = add_analysis(analysis_store, delivery_reported=True)
+    analysis = add_analysis(analysis_store, completed=True, uploaded=True, delivery_reported=True)
     sample = add_sample(analysis_store, delivered=True)
     analysis_store.relate_sample(family=analysis.family, sample=sample, status='unknown')
     # WHEN calling the analyses_to_delivery_report
