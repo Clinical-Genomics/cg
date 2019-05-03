@@ -444,10 +444,10 @@ class StatusHandler:
         """Fetch analyses that needs the delivery report to be regenerated."""
         records = (
             self.Analysis.query
-            .filter(models.Analysis.uploaded_at,
-                    models.Analysis.delivered_at)
+            .filter(models.Analysis.uploaded_at)
             .join(models.Family, models.Family.links, models.FamilySample.sample)
             .filter(
+                models.Sample.delivered_at.isnot(None),
                 or_(
                     models.Analysis.delivery_report_created_at.is_(None),
                     and_(
