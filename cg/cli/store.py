@@ -6,7 +6,7 @@ from pathlib import Path
 import click
 
 from cg.apps import hk, tb
-from cg.exc import AnalysisNotFinishedError
+from cg.exc import AnalysisNotFinishedError, AnalysisDuplicationError
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -78,6 +78,10 @@ def _add_new_complete_analysis_record(bundle_data, family_obj, status, version_o
 
     pipeline = family_obj.links[0].sample.data_analysis
     pipeline = pipeline if pipeline else 'mip' # TODO remove this default from here
+
+    if status.analysis(family=family_obj, started_at=version_obj.created_at):
+        raise AnalysisDuplicationError(
+            f'Analysis object already exists for {family_obj.internal_id}{version_obj.created_at}')
 
     new_analysis = status.add_analysis(
         pipeline=pipeline,
