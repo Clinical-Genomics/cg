@@ -7,11 +7,12 @@ import petname
 
 from cg.constants import PRIORITY_MAP
 from cg.store import models, utils
+from cg.store.api.base import BaseHandler
 
 LOG = logging.getLogger(__name__)
 
 
-class AddHandler:
+class AddHandler(BaseHandler):
     """Methods related to adding new data to the store."""
 
     def add_customer(self, internal_id: str, name: str, customer_group: models.CustomerGroup,
