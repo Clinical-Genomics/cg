@@ -5,9 +5,11 @@ from sqlalchemy import or_, and_
 
 from cg.constants import PRIORITY_MAP
 from cg.store import models
+from cg.store.api.base import BaseHandler
 
 
-class StatusHandler:
+class StatusHandler(BaseHandler):
+    """Handles status states for entities in the database"""
 
     def samples_to_recieve(self, external=False):
         """Fetch incoming samples."""
