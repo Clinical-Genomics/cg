@@ -158,6 +158,7 @@ class AddHandler:
         return new_record
 
     def add_invoice(self, customer: models.Customer, samples: List[models.Sample] = None,
+                    microbial_samples: List[models.MicrobialSample] = None,
                     pools: List[models.Pool] = None, comment: str = None, discount: int = 0,
                     record_type: str = None):
         """Build a new Invoice record."""
@@ -168,6 +169,8 @@ class AddHandler:
         new_invoice.customer = customer
         for sample in samples or []:
             new_invoice.samples.append(sample)
+        for microbial_sample in microbial_samples or []:
+            new_invoice.microbial_samples.append(microbial_sample)
         for pool in pools or []:
             new_invoice.pools.append(pool)
         return new_invoice

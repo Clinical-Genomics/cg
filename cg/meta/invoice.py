@@ -23,7 +23,6 @@ class InvoiceAPI():
         else:
             customer = self.customer_obj
         user = customer.invoice_contact
-
         if not user:
             self.log.append(msg)
             return None
@@ -70,6 +69,17 @@ class InvoiceAPI():
                     records.append(record)
                 else:
                     return None
+        elif self.invoice_obj.microbial_samples:
+            record_type = 'Microbiellt Prov'
+            for microbial_samples in self.invoice_obj.microbial_samples:
+                record = self.prepare_record(
+                    costcenter=costcenter.lower(),
+                    discount=self.invoice_obj.discount,
+                    record=microbial_samples)
+                if record:
+                    records.append(record)
+                else:
+                    return None
 
         customer_obj = self.invoice_obj.customer
         contact = self.prepare_contact_info(costcenter)
@@ -102,7 +112,7 @@ class InvoiceAPI():
         if type(record)==models.Pool:
             lims_id = None
             priority = 'research'
-        elif type(record)==models.Sample:
+        else:
             lims_id = record.internal_id
             priority = record.priority_human
 
@@ -122,12 +132,15 @@ class InvoiceAPI():
                 f'Could not get price for samples with application tag/version: {tag}/{version}.')
             return None
 
+        order = record.microbial_order.id if type(record)==models.MicrobialSample else record.order
+        ticket_number = record.microbial_order.ticket_number if type(record)==models.MicrobialSample else record.ticket_number
+
         return {
             'name': record.name,
             'lims_id': lims_id,
             'id': record.id,
             'application_tag': record.application_version.application.tag,
-            'project': f"{record.order or 'NA'} ({record.ticket_number or 'NA'})",
+            'project': f"{order or 'NA'} ({ticket_number or 'NA'})",
             'date': record.received_at.date() if record.received_at else '',
             'price': price,
             'priority': priority
@@ -137,7 +150,7 @@ class InvoiceAPI():
         """Get discount price for a sample."""
         if type(record)==models.Pool:
             priority='research'
-        elif type(record)==models.Sample:
+        else:
             priority = record.priority_human
 
         full_price = getattr(record.application_version, f"price_{priority}")
@@ -159,6 +172,12 @@ class InvoiceAPI():
                     return None
         elif self.invoice_obj.samples:
             for record in self.invoice_obj.samples:
+                if self.get_price(discount, record):
+                    total_price += self.get_price(discount, record)
+                else:
+                    return None
+        elif self.invoice_obj.microbial_samples:
+            for record in self.invoice_obj.microbial_samples:
                 if self.get_price(discount, record):
                     total_price += self.get_price(discount, record)
                 else:

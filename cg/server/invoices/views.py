@@ -49,6 +49,15 @@ def make_new_invoice():
             comment     = request.form.get('comment'),
             discount    = int(request.form.get('discount', '0')),
             record_type = 'Sample')
+    elif record_type == 'Microbial':
+        microbial_samples = [db.microbial_sample(sample_id) for sample_id in record_ids]
+        new_invoice     = db.add_invoice(
+            customer    = customer_obj,
+            microbial_samples = microbial_samples,
+            comment     = request.form.get('comment'),
+            discount    = int(request.form.get('discount', '0')),
+            record_type = 'Microbial')
+
     db.add_commit(new_invoice)
     return url_for('.invoice', invoice_id=new_invoice.id)
 
@@ -108,6 +117,8 @@ def new(record_type):
         records, customers_to_invoice = db.samples_to_invoice(customer=customer_obj)
     elif record_type=='Pool':
         records, customers_to_invoice = db.pools_to_invoice(customer=customer_obj)
+    if record_type=='Microbial':
+        records, customers_to_invoice = db.microbial_samples_to_invoice(customer=customer_obj)
 
     return render_template(
         'invoices/new.html',
