@@ -122,6 +122,7 @@ class StatusHandler(BaseHandler):
               only_analysed=False,
               only_uploaded=False,
               only_delivered=False,
+              only_delivery_reported=False,
               only_invoiced=False,
               exclude_received=False,
               exclude_prepared=False,
@@ -129,6 +130,7 @@ class StatusHandler(BaseHandler):
               exclude_analysed=False,
               exclude_uploaded=False,
               exclude_delivered=False,
+              exclude_delivery_reported=False,
               exclude_invoiced=False,
               ):
         """Fetch cases with and w/o analyses"""
@@ -204,10 +206,12 @@ class StatusHandler(BaseHandler):
             samples_invoiced_bool = None
             analysis_completed_at = None
             analysis_uploaded_at = None
+            analysis_delivery_reported_at = None
             analysis_pipeline = None
             analysis_completed_bool = None
             analysis_uploaded_bool = None
             samples_delivered_bool = None
+            analysis_delivery_reported_bool = None
             samples_data_analyses = None
             flowcells_status = None
             flowcells_on_disk = None
@@ -294,9 +298,11 @@ class StatusHandler(BaseHandler):
                 analysis_pipeline = record.analyses[0].pipeline
                 analysis_completed_bool = analysis_completed_at is not None
                 analysis_uploaded_bool = analysis_uploaded_at is not None
+                analysis_delivery_reported_bool = analysis_delivery_reported_at is not None
             elif total_samples > 0:
                 analysis_completed_bool = False
                 analysis_uploaded_bool = False
+                analysis_delivery_reported_bool = False
 
             if only_received and not samples_received_bool:
                 continue
@@ -314,6 +320,9 @@ class StatusHandler(BaseHandler):
                 continue
 
             if only_delivered and not samples_delivered_bool:
+                continue
+
+            if only_delivery_reported and not analysis_delivery_reported_bool:
                 continue
 
             if only_invoiced and not samples_invoiced_bool:
@@ -335,6 +344,9 @@ class StatusHandler(BaseHandler):
                 continue
 
             if exclude_delivered and samples_delivered_bool:
+                continue
+
+            if exclude_delivery_reported and analysis_delivery_reported_bool:
                 continue
 
             if exclude_invoiced and samples_invoiced_bool:
@@ -382,6 +394,7 @@ class StatusHandler(BaseHandler):
                 'analysis_completed_bool': analysis_completed_bool,
                 'analysis_uploaded_bool': analysis_uploaded_bool,
                 'samples_delivered_bool': samples_delivered_bool,
+                'analysis_delivery_reported_bool': analysis_delivery_reported_bool,
                 'samples_invoiced_bool': samples_invoiced_bool,
                 'flowcells_status': flowcells_status,
                 'flowcells_on_disk': flowcells_on_disk,

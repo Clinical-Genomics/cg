@@ -899,6 +899,24 @@ def test_only_uploaded_cases(base_store: Store):
         assert neg_family.internal_id not in case.get('internal_id')
 
 
+def test_only_delivery_reported_cases(base_store: Store):
+    """Test to that delivery-reported cases can be included"""
+
+    # GIVEN a database with an delivery-reported analysis
+    add_analysis(base_store, delivery_reported=True)
+    neg_family = add_family(base_store, 'neg_family')
+    neg_sample = add_sample(base_store, sample_name='neg_sample')
+    base_store.relate_sample(neg_family, neg_sample, 'unknown')
+
+    # WHEN getting active cases excluding delivery_reported
+    cases = base_store.cases(only_delivery_reported=True)
+
+    # THEN cases should only contain the delivery-reported case
+    assert cases
+    for case in cases:
+        assert neg_family.internal_id not in case.get('internal_id')
+
+
 def test_only_invoiced_cases(base_store: Store):
     """Test to that invoiced cases can be included"""
 
@@ -1007,6 +1025,19 @@ def test_exclude_uploaded_cases(base_store: Store):
     cases = base_store.cases(exclude_uploaded=True)
 
     # THEN cases should not contain the uploaded case
+    assert not cases
+
+
+def test_exclude_delivery_reported_cases(base_store: Store):
+    """Test to that delivery-reported cases can be excluded"""
+
+    # GIVEN a database with an delivery-reported analysis
+    add_analysis(base_store, uploaded=True)
+
+    # WHEN getting active cases excluding delivery-reported
+    cases = base_store.cases(exclude_udelivery_reported=True)
+
+    # THEN cases should not contain the delivery-reported case
     assert not cases
 
 
