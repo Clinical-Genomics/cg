@@ -277,9 +277,11 @@ def test_parsing_balsamic_orderform(balsamic_orderform):
     assert case['priority'] == 'research'
 
     # Required if Plate
-
     assert sample['container_name'] == 'plate'
     assert sample['well_position'] == 'A:1'
+
+    # This information is required for panel- or exome analysis
+    assert sample['elution_buffer'] == 'Nuclease free water'
 
     # This information is required for Balsamic analysis (cancer)
     assert sample['tumour'] is True
@@ -329,6 +331,9 @@ def test_parsing_mip_balsamic_orderform(mip_balsamic_orderform):
 
     assert proband_sample['container_name'] == 'plate'
     assert proband_sample['well_position'] == 'A:1'
+
+    # This information is required for panel- or exome analysis
+    assert sample['elution_buffer'] == 'Nuclease free water'
 
     # panels on the family
     assert proband_sample['status'] == 'affected'
