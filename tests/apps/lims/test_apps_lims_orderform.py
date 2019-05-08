@@ -333,7 +333,7 @@ def test_parsing_mip_balsamic_orderform(mip_balsamic_orderform):
     assert proband_sample['well_position'] == 'A:1'
 
     # This information is required for panel- or exome analysis
-    assert sample['elution_buffer'] == 'Nuclease free water'
+    assert proband_sample['elution_buffer'] == 'Nuclease free water'
 
     # panels on the family
     assert proband_sample['status'] == 'affected'
