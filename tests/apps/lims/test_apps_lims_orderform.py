@@ -46,7 +46,7 @@ def test_parsing_fastq_orderform(fastq_orderform):
     # THEN it should determine the project type
     assert data['project_type'] == 'fastq'
     # ... and find all samples
-    assert len(data['items']) == 18
+    assert len(data['items']) == 52
 
     # ... and collect relevant sample info
     normal_sample = data['items'][1]
