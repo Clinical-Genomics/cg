@@ -295,7 +295,7 @@ class StatusHandler(BaseHandler):
             if record.analyses and not analysis_in_progress:
                 analysis_completed_at = record.analyses[0].completed_at
                 analysis_uploaded_at = record.analyses[0].uploaded_at
-                analysis_delivery_reported_at = record.analyses[0].delivery_reported_at
+                analysis_delivery_reported_at = record.analyses[0].delivery_report_created_at
                 analysis_pipeline = record.analyses[0].pipeline
                 analysis_completed_bool = analysis_completed_at is not None
                 analysis_uploaded_bool = analysis_uploaded_at is not None
