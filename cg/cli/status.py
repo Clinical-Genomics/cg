@@ -115,7 +115,8 @@ def present_string(a_dict, param, show_negative):
 @click.option('-d', '--only-delivered', is_flag=True, help='only LIMS delivered cases')
 @click.option('-D', '--exclude-delivered', is_flag=True, help='exclude LIMS delivered cases')
 @click.option('--dr', '--only-delivery-reported', is_flag=True, help='only delivery reported cases')
-@click.option('--DR', '--exclude-delivery-reported', is_flag=True, help='exclude delivery reported cases')
+@click.option('--DR', '--exclude-delivery-reported', is_flag=True, help='exclude delivery '
+                                                                        'reported cases')
 @click.option('-i', '--only-invoiced', is_flag=True, help='only completely invoiced cases')
 @click.option('-I', '--exclude-invoiced', is_flag=True, help='exclude completely invoiced cases')
 def cases(context, output_type, verbose, days, internal_id, name, action, priority,
@@ -232,7 +233,8 @@ def cases(context, output_type, verbose, days, internal_id, name, action, priori
             analysed = f"{analysed_date}{analysis_action}"
             uploaded = present_date(case, 'analysis_uploaded_at', verbose, show_time)
             delivered = f"{case.get('samples_delivered')}/{case.get('samples_to_deliver')}"
-            delivery_reported = present_date(case, 'analysis_delivery_reported_at', verbose, show_time)
+            delivery_reported = present_date(case, 'analysis_delivery_reported_at', verbose,
+                                             show_time)
             invoiced = f"{case.get('samples_invoiced')}/{case.get('samples_to_invoice')}"
 
         elif output_type in ('date', 'datetime'):
@@ -245,7 +247,8 @@ def cases(context, output_type, verbose, days, internal_id, name, action, priori
             analysed = f"{analysed_date}{analysis_action}"
             uploaded = present_date(case, 'analysis_uploaded_at', verbose, show_time)
             delivered = present_date(case, 'samples_delivered_at', verbose, show_time)
-            delivery_reported = present_date(case, 'analysis_delivery_reported_at', verbose, show_time)
+            delivery_reported = present_date(case, 'analysis_delivery_reported_at', verbose,
+                                             show_time)
             invoiced = present_date(case, 'samples_invoiced_at', verbose, show_time)
 
         case_row = [title, ordered, received, prepared, sequenced, flowcell, analysed, uploaded,
