@@ -354,7 +354,7 @@ def test_parsing_mip_balsamic_orderform(mip_balsamic_orderform):
 
 def test_parse_mip_only(skeleton_orderform_sample: dict):
 
-    # GIVEN a raw sample with mip only value from orderform 1508:14 for data_analysis
+    # GIVEN a raw sample with mip only value from orderform 1508 for data_analysis
     raw_sample = skeleton_orderform_sample
     raw_sample['UDF/Data Analysis'] = 'MIP'
 
@@ -367,7 +367,7 @@ def test_parse_mip_only(skeleton_orderform_sample: dict):
 
 def test_parse_balsamic_only(skeleton_orderform_sample: dict):
 
-    # GIVEN a raw sample with balsamic only value from orderform 1508:14 for data_analysis
+    # GIVEN a raw sample with balsamic only value from orderform 1508 for data_analysis
     raw_sample = skeleton_orderform_sample
     raw_sample['UDF/Data Analysis'] = 'Balsamic '
 
@@ -380,7 +380,7 @@ def test_parse_balsamic_only(skeleton_orderform_sample: dict):
 
 def test_parse_mip_combined_with_balsamic(skeleton_orderform_sample: dict):
 
-    # GIVEN a raw sample with both mip and balsamic value from orderform 1508:14 for
+    # GIVEN a raw sample with both mip and balsamic value from orderform 1508 for
     # data_analysis
     raw_sample = skeleton_orderform_sample
     raw_sample['UDF/Data Analysis'] = 'MIP + Balsamic'
