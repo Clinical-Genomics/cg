@@ -7,9 +7,7 @@ from cg.apps.loqus import LoqusdbAPI
 
 CONFIG = {
     'loqusdb': {
-
-        'database': 'mongodb://user:password@host:port/auth',
-        'database_name': 'loqusdb',
+        'config': 'loqusdb_config',
         'binary': 'loqusdb'
         }
     }

@@ -20,9 +20,8 @@ def test_instatiate(loqus_config):
     loqusdb = LoqusdbAPI(loqus_config)
 
     # THEN assert that the adapter was properly instantiated
-    assert loqusdb.db_name == loqus_config['loqusdb']['database_name']
+    assert loqusdb.loqusdb_config == loqus_config['loqusdb']['config']
     assert loqusdb.loqusdb_binary == loqus_config['loqusdb']['binary']
-    assert loqusdb.uri == loqus_config['loqusdb']['database']
 
 
 def test_get_case(loqusdbapi, loqusdb_case_output, mocker):
@@ -97,9 +96,8 @@ def test_repr_string(loqus_config):
 
     repr_string = repr(loqusdb)
 
-    correct_string = (f"LoqusdbAPI(uri={loqus_config['loqusdb']['database']},"
-                      f"db_name={loqus_config['loqusdb']['database_name']},"
-                      f"loqusdb_binary={loqus_config['loqusdb']['binary']})")
+    correct_string = (f"LoqusdbAPI(binary={loqus_config['loqusdb']['binary']},"
+                      f"config={loqus_config['loqusdb']['config']})")
 
     assert repr_string == correct_string
 

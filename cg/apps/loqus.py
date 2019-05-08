@@ -25,13 +25,11 @@ class LoqusdbAPI():
     def __init__(self, config: dict):
         super(LoqusdbAPI, self).__init__()
 
-        self.uri = config['loqusdb']['database']
-        self.db_name = config['loqusdb']['database_name']
+        self.loqusdb_config = config['loqusdb']['config']
         self.loqusdb_binary = config['loqusdb']['binary']
 
         # This will allways be the base of the loqusdb call
-        self.base_call = [self.loqusdb_binary, '-db', self.db_name,
-                          '--uri', self.uri]
+        self.base_call = [self.loqusdb_binary, '--config', self.loqusdb_config]
 
     def load(self, family_id: str, ped_path: str, vcf_path: str, vcf_sv_path: str,
              gbcf_path: str) -> dict:
@@ -90,9 +88,8 @@ class LoqusdbAPI():
 
     def __repr__(self):
 
-        return (f"LoqusdbAPI(uri={self.uri},"
-                f"db_name={self.db_name},"
-                f"loqusdb_binary={self.loqusdb_binary})")
+        return (f"LoqusdbAPI(binary={self.loqusdb_binary},"
+                f"config={self.loqusdb_config})")
 
 
 def execute_command(cmd):
