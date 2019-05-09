@@ -145,9 +145,9 @@ def expand_family(family_id, parsed_family):
         if raw_sample.get('container') in CONTAINER_TYPES:
             new_sample['container'] = raw_sample['container']
 
-        for key in ('data_analysis', 'container_name', 'well_position', 'quantity', 'status',
-                    'comment', 'capture_kit', 'tumour', 'tumour_purity',
-                    'formalin_fixation_time', 'post_formalin_fixation_time', 'tissue_block_size'):
+        for key in ('capture_kit', 'comment', 'container_name', 'data_analysis', 'elution_buffer',
+                    'formalin_fixation_time', 'post_formalin_fixation_time', 'quantity',
+                    'status', 'tissue_block_size', 'tumour', 'tumour_purity', 'well_position'):
             if raw_sample.get(key):
                 new_sample[key] = raw_sample[key]
 
