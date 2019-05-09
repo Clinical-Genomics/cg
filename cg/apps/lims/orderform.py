@@ -181,7 +181,6 @@ def parse_sample(raw_sample):
 
     if raw_sample['UDF/priority'].lower() == 'förtur':
         raw_sample['UDF/priority'] = 'priority'
-    source = raw_sample.get('UDF/Source')
     sample = {
         'application': raw_sample['UDF/Sequencing Analysis'],
         'capture_kit': raw_sample.get('UDF/Capture Library version'),
@@ -210,7 +209,8 @@ def parse_sample(raw_sample):
         'require_qcok': raw_sample.get('UDF/Process only if QC OK') == 'yes',
         'rml_plate_name': raw_sample.get('UDF/RML plate name'),
         'sex': REV_SEX_MAP.get(raw_sample.get('UDF/Gender', '').strip()),
-        'source': source if source in SOURCE_TYPES else None,
+        'source': raw_sample.get('UDF/Source') if raw_sample.get('UDF/Source') in SOURCE_TYPES
+        else None,
         'status': raw_sample['UDF/Status'].lower() if raw_sample.get('UDF/Status') else None,
         'tissue_block_size': raw_sample.get('UDF/Tissue Block Size'),
         'tumour': raw_sample.get('UDF/tumor') == 'yes',
