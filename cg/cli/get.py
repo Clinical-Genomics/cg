@@ -69,13 +69,15 @@ def sample(context: click.Context, families: bool, flowcells: bool, sample_ids: 
 @get.command()
 @click.argument('family_id')
 @click.pass_context
-def link(context: click.Context, family_id: str):
-    """Get information about a family sample."""
+def relations(context: click.Context, family_id: str):
+    """Get information about a family relations."""
 
     family_obj = context.obj['status'].family(family_id)
     if family_obj is None:
         LOG.error(f"{family_id}: family doesn't exist")
         context.abort()
+
+    LOG.debug(f"{family_obj.internal_id}: get info about family relations")
 
     for link_obj in family_obj.links:
 
@@ -91,10 +93,10 @@ def link(context: click.Context, family_id: str):
 @click.option('-c', '--customer', help='internal id for customer to filter by')
 @click.option('-n', '--name', is_flag=True, help='search family by name')
 @click.option('--samples/--no-samples', default=True, help='display related samples')
-@click.option('--links/--no-links', default=True, help='display relations to samples')
+@click.option('--relate/--no-relate', default=True, help='display relations to samples')
 @click.argument('family_ids', nargs=-1)
 @click.pass_context
-def family(context: click.Context, customer: str, name: bool, samples: bool, links: bool,
+def family(context: click.Context, customer: str, name: bool, samples: bool, relate: bool,
            family_ids: List[str]):
     """Get information about a family."""
     if name:
@@ -123,8 +125,8 @@ def family(context: click.Context, customer: str, name: bool, samples: bool, lin
             family_obj.action or 'NA',
         ]
         click.echo(tabulate([row], headers=FAMILY_HEADERS, tablefmt='psql'))
-        if links:
-            context.invoke(link, family_id=family_obj.internal_id)
+        if relate:
+            context.invoke(relations, family_id=family_obj.internal_id)
         if samples:
             sample_ids = [link_obj.sample.internal_id for link_obj in family_obj.links]
             context.invoke(sample, sample_ids=sample_ids, families=False)
