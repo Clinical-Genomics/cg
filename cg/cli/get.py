@@ -74,7 +74,7 @@ def relations(context: click.Context, family_id: str):
 
     family_obj = context.obj['status'].family(family_id)
     if family_obj is None:
-        LOG.error(f"{family_id}: family doesn't exist")
+        LOG.error("%s: family doesn't exist", family_id)
         context.abort()
 
     LOG.debug("%s: get info about family relations", family_obj.internal_id)
