@@ -77,7 +77,7 @@ def relations(context: click.Context, family_id: str):
         LOG.error(f"{family_id}: family doesn't exist")
         context.abort()
 
-    LOG.debug(f"{family_obj.internal_id}: get info about family relations")
+    LOG.debug("%s: get info about family relations", family_obj.internal_id)
 
     for link_obj in family_obj.links:
 
