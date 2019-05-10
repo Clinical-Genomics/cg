@@ -143,6 +143,11 @@ def sample(context, sex, customer, comment, downsampled_to, apptag, capture_kit,
                                f"{str(application_version)}.", fg='green'))
         context.obj['status'].commit()
 
+        click.echo(click.style('update LIMS/application', fg='blue'))
+        if context.obj.get('lims'):
+            LimsAPI(context.obj).update_sample(sample_id, application=apptag)
+
+
     if capture_kit:
         sample_obj.capture_kit = capture_kit
         click.echo(click.style(f"Capture kit {capture_kit} added to sample "
