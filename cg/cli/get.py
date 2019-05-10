@@ -80,9 +80,9 @@ def link(context: click.Context, family_id: str):
     for link_obj in family_obj.links:
 
         row = [
-            link_obj.sample.internal_id,
-            link_obj.mother.internal_id,
-            link_obj.father.internal_id,
+            link_obj.sample.internal_id if link_obj.sample else '',
+            link_obj.mother.internal_id if link_obj.mother else '',
+            link_obj.father.internal_id if link_obj.father else '',
         ]
         click.echo(tabulate([row], headers=LINK_HEADERS, tablefmt='psql'))
 
