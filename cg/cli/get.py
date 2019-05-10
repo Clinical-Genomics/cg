@@ -11,6 +11,7 @@ LOG = logging.getLogger(__name__)
 SAMPLE_HEADERS = ['Sample', 'Name', 'Customer', 'Application', 'State', 'Priority',
                   'External?']
 FAMILY_HEADERS = ['Family', 'Name', 'Customer', 'Priority', 'Panels', 'Action']
+LINK_HEADERS = ['Sample', 'Mother', 'Father']
 FLOWCELL_HEADERS = ['Flowcell', 'Type', 'Sequencer', 'Date', 'Archived?', 'Status']
 
 
@@ -66,12 +67,32 @@ def sample(context: click.Context, families: bool, flowcells: bool, sample_ids: 
 
 
 @get.command()
+@click.argument('link_ids', nargs=-1)
+@click.pass_context
+def link(context: click.Context, link_ids: List[str]):
+    """Get information about a family sample."""
+    for link_id in link_ids:
+        LOG.debug("{link_id}: get info about sample")
+        link_obj = context.obj['status'].link(sample_id)
+        if link_obj is None:
+            LOG.warning(f"{sample_id}: sample doesn't exist")
+            continue
+        row = [
+            link_obj.sample.internal_id,
+            link_obj.mother.internal_id,
+            link_obj.father.internal_id,
+        ]
+        click.echo(tabulate([row], headers=LINK_HEADERS, tablefmt='psql'))
+
+
+@get.command()
 @click.option('-c', '--customer', help='internal id for customer to filter by')
 @click.option('-n', '--name', is_flag=True, help='search family by name')
 @click.option('--samples/--no-samples', default=True, help='display related samples')
+@click.option('--links/--no-links', default=True, help='display relations to samples')
 @click.argument('family_ids', nargs=-1)
 @click.pass_context
-def family(context: click.Context, customer: str, name: bool, samples: bool,
+def family(context: click.Context, customer: str, name: bool, samples: bool, links: bool,
            family_ids: List[str]):
     """Get information about a family."""
     if name:
@@ -100,6 +121,9 @@ def family(context: click.Context, customer: str, name: bool, samples: bool,
             family_obj.action or 'NA',
         ]
         click.echo(tabulate([row], headers=FAMILY_HEADERS, tablefmt='psql'))
+        if links:
+            link_ids = [link_obj.id for link_obj in family_obj.links]
+            context.invoke(link, link_ids=link_ids)
         if samples:
             sample_ids = [link_obj.sample.internal_id for link_obj in family_obj.links]
             context.invoke(sample, sample_ids=sample_ids, families=False)
