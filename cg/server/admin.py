@@ -209,6 +209,7 @@ class SampleView(BaseView):
 
     column_formatters = {
         'invoice': InvoiceView.view_invoice_link,
+        'external': 'application_version.application.is_external',
     }
 
     @staticmethod
