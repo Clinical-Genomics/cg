@@ -67,22 +67,24 @@ def sample(context: click.Context, families: bool, flowcells: bool, sample_ids: 
 
 
 @get.command()
-@click.argument('link_ids', nargs=-1)
+@click.argument('family_id')
 @click.pass_context
-def link(context: click.Context, link_ids: List[str]):
+def link(context: click.Context, family_id: str):
     """Get information about a family sample."""
-    for link_id in link_ids:
-        LOG.debug("{link_id}: get info about sample")
-        link_obj = context.obj['status'].link(sample_id)
-        if link_obj is None:
-            LOG.warning(f"{sample_id}: sample doesn't exist")
-            continue
-        row = [
-            link_obj.sample.internal_id,
-            link_obj.mother.internal_id,
-            link_obj.father.internal_id,
-        ]
-        click.echo(tabulate([row], headers=LINK_HEADERS, tablefmt='psql'))
+
+    family_obj = context.obj['status'].family(family_id)
+    if family_obj is None:
+        LOG.error(f"{family_id}: family doesn't exist")
+        context.abort()
+
+        for link_obj in family_obj.links:
+
+            row = [
+                link_obj.sample.internal_id,
+                link_obj.mother.internal_id,
+                link_obj.father.internal_id,
+            ]
+            click.echo(tabulate([row], headers=LINK_HEADERS, tablefmt='psql'))
 
 
 @get.command()
@@ -122,8 +124,7 @@ def family(context: click.Context, customer: str, name: bool, samples: bool, lin
         ]
         click.echo(tabulate([row], headers=FAMILY_HEADERS, tablefmt='psql'))
         if links:
-            link_ids = [link_obj.id for link_obj in family_obj.links]
-            context.invoke(link, link_ids=link_ids)
+            context.invoke(link, family_id=family_obj.internal_id)
         if samples:
             sample_ids = [link_obj.sample.internal_id for link_obj in family_obj.links]
             context.invoke(sample, sample_ids=sample_ids, families=False)
