@@ -77,14 +77,14 @@ def link(context: click.Context, family_id: str):
         LOG.error(f"{family_id}: family doesn't exist")
         context.abort()
 
-        for link_obj in family_obj.links:
+    for link_obj in family_obj.links:
 
-            row = [
-                link_obj.sample.internal_id,
-                link_obj.mother.internal_id,
-                link_obj.father.internal_id,
-            ]
-            click.echo(tabulate([row], headers=LINK_HEADERS, tablefmt='psql'))
+        row = [
+            link_obj.sample.internal_id,
+            link_obj.mother.internal_id,
+            link_obj.father.internal_id,
+        ]
+        click.echo(tabulate([row], headers=LINK_HEADERS, tablefmt='psql'))
 
 
 @get.command()
