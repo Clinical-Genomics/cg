@@ -3,6 +3,7 @@ import datetime as dt
 import logging
 import sys
 from typing import List
+from subprocess import CalledProcessError
 
 import click
 
@@ -29,7 +30,7 @@ def upload(context, family_id):
     """Upload results from analyses."""
 
     click.echo(click.style('----------------- UPLOAD ----------------------'))
-        
+
     context.obj['status'] = Store(context.obj['database'])
     context.obj['housekeeper_api'] = hk.HousekeeperAPI(context.obj)
 
@@ -293,7 +294,7 @@ def observations(context, case_id, dry_run):
             LOG.info("%s: %s not whitelisted for upload to loqusdb. Skipping!",
                      family_obj.internal_id, family_obj.customer.internal_id)
             continue
-          
+
         if not LinkHelper.all_samples_data_analysis(family_obj.links, ['MIP', '', None]):
             LOG.info("%s: has non-MIP data_analysis. Skipping!", family_obj.internal_id)
             continue
@@ -301,7 +302,7 @@ def observations(context, case_id, dry_run):
         if not LinkHelper.all_samples_are_non_tumour(family_obj.links):
             LOG.info("%s: has tumour samples. Skipping!", family_obj.internal_id)
             continue
-          
+
         if dry_run:
             LOG.info("%s: Would upload observations", family_obj.internal_id)
             continue
@@ -314,6 +315,8 @@ def observations(context, case_id, dry_run):
             LOG.info("%s: observations uploaded!", family_obj.internal_id)
         except DuplicateRecordError as error:
             LOG.info("skipping observations upload: %s", error.message)
+        except CalledProcessError:
+            LOG.info("skipping observations upload")
 
 
 class LinkHelper:
