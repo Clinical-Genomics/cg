@@ -44,6 +44,8 @@ def add_application_version(file_path, conection_string):
         tag = row['App tag']
         query = f'select max(application_version.version), application.tag, application.id from application_version inner join application on application_version.application_id=application.id where application.tag="{tag}"'
         latest_version, app_tag, app_id = engine.execute(query).first()
+        if not latest_version:
+            latest_version=0
         if app_tag:
             ins = table.insert().values(
                 application_id = app_id, 
