@@ -56,10 +56,8 @@ def add_application_version(file_path, conection_string):
                 created_at = datetime.today())
             try: 
                 connection.execute(ins)
-                print('hej')
                 logging.info(f'adding new version for app tag {app_tag}')
             except Exception as e:
-                print('hoj')
                 logging.error(e)
     f.close()
 
