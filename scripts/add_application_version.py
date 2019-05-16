@@ -25,19 +25,19 @@ def add_application_version(file_path, conection_string):
         metadata.reflect(bind=engine)   
         table = metadata.tables['application_version']
     except Exception as e:
-        sys.exit(f'Failed to connect: {e}')
+        sys.exit('Failed to connect: %s' % (e))
 
     try:
         f = open(file_path)
         rows=csv.DictReader(f, delimiter=',')
     except Exception as e:
-        sys.exit(f'Failed read file: {e}')
+        sys.exit('Failed read file: %s' % (e))
 
     if not len(set(rows.fieldnames))==len(rows.fieldnames):
-        sys.exit(f'Heades in file are not unique')
+        sys.exit('Heades in file are not unique')
 
     if not set(rows.fieldnames) < set(VALID_HEADERS):
-        sys.exit(f'Headers in file are not valid. Should contain the following: {str(VALID_HEADERS)}')
+        sys.exit('Headers in file are not valid. Should contain the following: %s' % (str(VALID_HEADERS)))
     
 
     for row in rows:
@@ -58,7 +58,7 @@ def add_application_version(file_path, conection_string):
                 created_at = datetime.today())
             try: 
                 connection.execute(ins)
-                logging.info(f'adding new version for app tag {app_tag}')
+                logging.info('adding new version for app tag %s' % (app_tag))
             except Exception as e:
                 logging.error(e)
     f.close()
