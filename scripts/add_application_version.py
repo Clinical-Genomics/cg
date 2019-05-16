@@ -64,9 +64,9 @@ def add_application_version(file_path, conection_string):
     f.close()
 
 
-def main(args):
+def main(file, connection_string):
     """Running add_application_version to load applicaiton veriosn"""
-    add_application_version(args.file, args.connection_string)
+    add_application_version(file, connection_string)
 
 
 if __name__ == "__main__":
@@ -78,4 +78,4 @@ if __name__ == "__main__":
                           
     args = parser.parse_args()
 
-    main(args)     
+    main(args.file, args.connection_string)     
