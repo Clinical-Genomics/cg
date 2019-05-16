@@ -5,7 +5,7 @@ from argparse import ArgumentParser
 import logging
 import sys
 
-LOG = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
 DESC= """Scrpt to load new application versions to status-db"""
 
@@ -56,9 +56,11 @@ def add_application_version(file_path, conection_string):
                 created_at = datetime.today())
             try: 
                 connection.execute(ins)
-                LOG.info(f'adding new version for app tag {app_tag}')
+                print('hej')
+                logging.info(f'adding new version for app tag {app_tag}')
             except Exception as e:
-                LOG.error(e)
+                print('hoj')
+                logging.error(e)
     f.close()
 
 
