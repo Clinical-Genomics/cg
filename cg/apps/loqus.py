@@ -25,8 +25,8 @@ class LoqusdbAPI():
     def __init__(self, config: dict):
         super(LoqusdbAPI, self).__init__()
 
-        self.loqusdb_config = config['loqusdb']['config']
-        self.loqusdb_binary = config['loqusdb']['binary']
+        self.loqusdb_config = config['loqusdb']['config_path']
+        self.loqusdb_binary = config['loqusdb']['binary_path']
 
         # This will allways be the base of the loqusdb call
         self.base_call = [self.loqusdb_binary, '--config', self.loqusdb_config]
