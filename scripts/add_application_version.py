@@ -65,6 +65,7 @@ def add_application_version(file_path, conection_string):
 
 
 def main(args):
+    """Running add_application_version to load applicaiton veriosn"""
     add_application_version(args.file, args.connection_string)
 
 
