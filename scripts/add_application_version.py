@@ -1,4 +1,5 @@
 from sqlalchemy import create_engine, MetaData
+from sqlalchemy.exc import SQLAlchemyError
 import csv
 from datetime import datetime
 from argparse import ArgumentParser
@@ -24,13 +25,13 @@ def add_application_version(file_path, conection_string):
         metadata = MetaData()
         metadata.reflect(bind=engine)   
         table = metadata.tables['application_version']
-    except Exception as e:
+    except SQLAlchemyError as e:
         sys.exit('Failed to connect: %s' % (e))
 
     try:
         f = open(file_path)
         rows=csv.DictReader(f, delimiter=',')
-    except Exception as e:
+    except IOError as e:
         sys.exit('Failed read file: %s' % (e))
 
     if not len(set(rows.fieldnames))==len(rows.fieldnames):
@@ -59,7 +60,7 @@ def add_application_version(file_path, conection_string):
             try: 
                 connection.execute(ins)
                 logging.info('adding new version for app tag %s' % (app_tag))
-            except Exception as e:
+            except SQLAlchemyError as e:
                 logging.error(e)
     f.close()
 
