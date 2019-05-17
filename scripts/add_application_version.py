@@ -1,16 +1,18 @@
-from sqlalchemy import create_engine, MetaData
-from sqlalchemy.exc import SQLAlchemyError
+"""Scrpt to load new application versions to status-db"""
 import csv
 from datetime import datetime
 from argparse import ArgumentParser
 import logging
 import sys
+from sqlalchemy import create_engine, MetaData
+from sqlalchemy.exc import SQLAlchemyError
 
 logging.basicConfig(level=logging.INFO)
 
 DESC= """Scrpt to load new application versions to status-db"""
 
-VALID_HEADERS = ['App tag', 'Version', 'Valid from', 'Standard', 'Priority', 'Express', 'Research', 'Comment']
+VALID_HEADERS = ['App tag', 'Version', 'Valid from', 'Standard', 
+                'Priority', 'Express', 'Research', 'Comment']
 
 def add_application_version(file_path, conection_string, sign):
     """
@@ -25,25 +27,28 @@ def add_application_version(file_path, conection_string, sign):
         metadata = MetaData()
         metadata.reflect(bind=engine)   
         table = metadata.tables['application_version']
-    except SQLAlchemyError as e:
-        sys.exit('Failed to connect: %s' % (e))
+    except SQLAlchemyError as error:
+        sys.exit('Failed to connect: %s' % (error))
 
     try:
         f = open(file_path)
         rows=csv.DictReader(f, delimiter=',')
-    except IOError as e:
-        sys.exit('Failed read file: %s' % (e))
+    except IOError as error:
+        sys.exit('Failed read file: %s' % (error))
 
-    if not len(set(rows.fieldnames))==len(rows.fieldnames):
+    if not len(set(rows.fieldnames)) == len(rows.fieldnames):
         sys.exit('Heades in file are not unique')
 
     if not set(rows.fieldnames) < set(VALID_HEADERS):
-        sys.exit('Headers in file are not valid. Should contain the following: %s' % (str(VALID_HEADERS)))
+        sys.exit('Headers in file are not valid. Should contain: %s' % (str(VALID_HEADERS)))
     
 
     for row in rows:
         tag = row['App tag']
-        query = f'select max(application_version.version), application.tag, application.id from application_version inner join application on application_version.application_id=application.id where application.tag="{tag}"'
+        query = f'select max(application_version.version), application.tag, application.id \
+                from application_version \
+                inner join application on application_version.application_id=application.id \
+                where application.tag="{tag}"'
         latest_version, app_tag, app_id = engine.execute(query).first()
         if not latest_version:
             latest_version=0
@@ -51,7 +56,7 @@ def add_application_version(file_path, conection_string, sign):
             ins = table.insert().values(
                 application_id = app_id, 
                 version = latest_version + 1, 
-                valid_from =datetime.strptime(row['Valid from'], '%Y-%m-%d'),  
+                valid_from = datetime.strptime(row['Valid from'], '%Y-%m-%d'),  
                 price_standard = row['Standard'], 
                 price_priority = row['Priority'], 
                 price_express = row['Express'], 
@@ -61,8 +66,8 @@ def add_application_version(file_path, conection_string, sign):
             try: 
                 connection.execute(ins)
                 logging.info('adding new version for app tag %s' % (app_tag))
-            except SQLAlchemyError as e:
-                logging.error(e)
+            except SQLAlchemyError as error:
+                logging.error(error)
     f.close()
 
 
