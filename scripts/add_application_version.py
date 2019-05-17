@@ -12,7 +12,7 @@ DESC= """Scrpt to load new application versions to status-db"""
 
 VALID_HEADERS = ['App tag', 'Version', 'Valid from', 'Standard', 'Priority', 'Express', 'Research', 'Comment']
 
-def add_application_version(file_path, conection_string):
+def add_application_version(file_path, conection_string, sign):
     """
     Args:
         file_path:          Path to csv file with heathers: 'App tag', 'Valid from', 'Standard', 
@@ -56,6 +56,7 @@ def add_application_version(file_path, conection_string):
                 price_priority = row['Priority'], 
                 price_express = row['Express'], 
                 price_research = row['Research'], 
+                comment = 'Added by %s' % (sign),
                 created_at = datetime.today())
             try: 
                 connection.execute(ins)
@@ -65,9 +66,9 @@ def add_application_version(file_path, conection_string):
     f.close()
 
 
-def main(file, connection_string):
+def main(file, connection_string, sign):
     """Running add_application_version to load applicaiton veriosn"""
-    add_application_version(file, connection_string)
+    add_application_version(file, connection_string, sign)
 
 
 if __name__ == "__main__":
@@ -76,7 +77,9 @@ if __name__ == "__main__":
                         help='Path to csv with apptags.')
     parser.add_argument('-c', dest = 'connection_string', required=True,
                         help='Connection string to connect with database.') 
+    parser.add_argument('-s', dest = 'sign', required=True,
+                        help = 'Signature.')
                           
     args = parser.parse_args()
 
-    main(args.file, args.connection_string)     
+    main(args.file, args.connection_string, args.sign)     
