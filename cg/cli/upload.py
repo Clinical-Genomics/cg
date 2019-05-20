@@ -10,7 +10,7 @@ import click
 from cg.store import Store, models
 from cg.apps import coverage as coverage_app, gt, hk, loqus, tb, scoutapi, beacon as beacon_app, \
     lims
-from cg.exc import DuplicateRecordError
+from cg.exc import (DuplicateRecordError, DuplicateSampleError)
 from cg.meta.upload.coverage import UploadCoverageApi
 from cg.meta.upload.gt import UploadGenotypesAPI
 from cg.meta.upload.observations import UploadObservationsAPI
@@ -281,7 +281,6 @@ def observations(context, case_id, dry_run):
 
     click.echo(click.style('----------------- OBSERVATIONS ----------------'))
 
-
     loqus_api = loqus.LoqusdbAPI(context.obj)
 
     if case_id:
@@ -313,10 +312,8 @@ def observations(context, case_id, dry_run):
         try:
             api.process(family_obj.analyses[0])
             LOG.info("%s: observations uploaded!", family_obj.internal_id)
-        except DuplicateRecordError as error:
+        except (DuplicateRecordError, DuplicateSampleError) as error:
             LOG.info("skipping observations upload: %s", error.message)
-        except CalledProcessError:
-            LOG.info("skipping observations upload")
 
 
 class LinkHelper:

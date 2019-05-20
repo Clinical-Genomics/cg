@@ -86,6 +86,34 @@ class LoqusdbAPI():
 
         return case_obj
 
+    def get_duplicate(self, vcf_file: str) -> dict:
+        """Find matching profiles in loqusdb"""
+        ind_obj = {}
+        ind_call = copy.deepcopy(self.base_call)
+        ind_call.extend(['profile', '--check-vcf', vcf_file, '--profile-threshold', '0.95'])
+
+        try:
+            output = subprocess.check_output(
+                ' '.join(ind_call),
+                shell=True
+            )
+
+        except CalledProcessError:
+            # If CalledProcessError is raised, log and raise error
+            log_msg = f"Could not run command: {' '.join(ind_call)}"
+            LOG.critical(log_msg)
+            raise
+
+        output = output.decode('utf-8')
+
+        if not output:
+            LOG.info('No duplicates found')
+            return ind_obj
+
+        ind_obj = json.loads(output)
+
+        return ind_obj
+
     def __repr__(self):
 
         return (f"LoqusdbAPI(binary={self.loqusdb_binary},"

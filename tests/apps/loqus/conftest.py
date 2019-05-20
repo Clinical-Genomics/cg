@@ -41,6 +41,7 @@ LOQUSDB_OUTPUT = (b'2018-11-29 08:41:38 130-229-8-20-dhcp.local '
                   b'08:41:38 130-229-8-20-dhcp.local loqusdb.plugins.'
                   b'mongo.adapter[77135] INFO All indexes exists\n')
 
+
 # Loqusdb fixtures
 @pytest.fixture(scope='function')
 def loqus_config():
@@ -77,7 +78,7 @@ def loqusdb_case_output():
         loqusdb output for a 'loqusdb cases -c <case_id> --to-json' command
     """
 
-    _output = (b'[{"_id": "5cc1afbd290c541036a0837f", "case_id": "a_case", '
+    _output = (b'[{"_id": "1234", "case_id": "a_case", '
                b'"vcf_path": "test.vcf.gz", "vcf_sv_path": null, "nr_variants": 15, '
                b'"nr_sv_variants": null, "profile_path": "test.vcf.gz", "individuals": '
                b'[{"ind_id": "proband", "name": "proband", "case_id": "recessive_trio", '
@@ -103,7 +104,22 @@ def loqusdb_case_output():
                b'{"ind_id": "mother", "name": "mother", "case_id": "recessive_trio", '
                b'"ind_index": 1, "sex": 2}, "father": {"ind_id": "father", "name": '
                b'"father", "case_id": "recessive_trio", "ind_index": 0, "sex": 1}}, '
-               b'"_sv_inds": {}}]')
+               b'"_sv_inds": {}}]\n')
+
+    return _output
+
+
+@pytest.fixture(scope='function')
+def loqusdb_duplicate_output():
+
+    """ loqusdb output for a 'loqusdb profile --check-vcf' call"""
+
+    _output = (b'{"ind_id": "proband", "name": "proband", "case_id": "recessive_trio_test", '
+               b'"ind_index": 4, "sex": 1, "profile": ["TT", "CC", "CC", "CC", "TT", "AA",'
+               b' "CC", "GG", "GG", "GG", "TT", "GG", "CC", "AA", "GG", "GG", "GG", "AA", '
+               b'"CC", "CC", "CC", "GG", "CC", "CC", "TT", "CC", "AA", "GA", "TC", "AG", "AC", '
+               b'"GT", "CC", "AC", "AG", "AG", "AA", "GA", "AA", "CC", "GG", "AA", "TT", "AA", '
+               b'"GG", "GG", "CC", "AA", "TT", "TT"]}')
 
     return _output
 

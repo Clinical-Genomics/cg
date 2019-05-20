@@ -3,6 +3,7 @@
 """
 
 import subprocess
+import json
 import pytest
 
 from cg.apps.loqus import LoqusdbAPI
@@ -65,6 +66,35 @@ def test_get_case_command_fail(loqusdbapi, mocker):
     # THEN assert that the error is raised
     with pytest.raises(subprocess.CalledProcessError):
         loqusdbapi.get_case(case_id)
+
+
+def test_get_duplicate(loqusdbapi, mocker, loqusdb_duplicate_output):
+    """Test when duplicate exists"""
+
+    # GIVEN a loqusdb api and a duplicate output
+    mocker.patch.object(subprocess, 'check_output')
+    subprocess.check_output.return_value = loqusdb_duplicate_output
+    dup_json = json.loads(loqusdb_duplicate_output.decode('utf-8'))
+
+    # WHEN a duplicate exists
+    duplicate = loqusdbapi.get_duplicate('vcf_path')
+
+    # THEN assert that the duplicate individual is returned
+    assert dup_json == duplicate
+
+
+def test_get_duplicate_non_existing(loqusdbapi, mocker):
+    """Test when no duplicate exists"""
+
+    # GIVEN a loqusdb api
+    mocker.patch.object(subprocess, 'check_output')
+    subprocess.check_output.return_value = b''
+
+    # WHEN duplicate does not exist
+    duplicate = loqusdbapi.get_duplicate('vcf_path')
+
+    # THEN assert that an empty dict is returned
+    assert duplicate == {}
 
 
 def test_load(loqusdbapi, mocker, loqusdb_output):

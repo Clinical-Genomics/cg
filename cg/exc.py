@@ -31,6 +31,12 @@ class DuplicateRecordError(CgError):
     pass
 
 
+class DuplicateSampleError(CgError):
+    """
+        Exception raised when sample duplicate is found in loqusdb
+    """
+
+
 class CaseNotFoundError(CgError):
     """
         Exception raised when a case is not found in loqusdb

@@ -8,7 +8,7 @@ import logging
 from typing import List
 
 from cg.apps import hk, loqus
-from cg.exc import DuplicateRecordError, CaseNotFoundError
+from cg.exc import (DuplicateRecordError, DuplicateSampleError, CaseNotFoundError)
 from cg.store import models, Store
 
 LOG = logging.getLogger(__name__)
@@ -48,6 +48,12 @@ class UploadObservationsAPI():
 
         # If CaseNotFoundError is raised, this should trigger the load method of loqusdb
         except CaseNotFoundError:
+
+            duplicate = self.loqusdb.get_duplicate(data['snv_gbcf'])
+            if duplicate:
+                err_msg = f"Found duplicate {duplicate['ind_id']} in case {duplicate['case_id']}"
+                raise DuplicateSampleError(err_msg)
+
             results = self.loqusdb.load(data['family'], data['pedigree'], data['vcf'],
                                         data['sv_vcf'], data['snv_gbcf'])
             log_msg = f"parsed {results['variants']} variants"
