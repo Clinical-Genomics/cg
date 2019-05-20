@@ -121,6 +121,31 @@ def link(context, family_id, sample_id):
         context.obj['api'].link_sample(link_obj)
 
 
+@analysis.command('link-usalt')
+@click.option('-o', '--order', 'order_id', help='link all samples for an order')
+@click.argument('sample_id', required=False)
+@click.pass_context
+def link_usalt(context, order_id, sample_id):
+    """Link FASTQ files for a SAMPLE_ID."""
+
+    if order_id and (sample_id is None):
+        # link all samples in a case
+        sample_objs = context.obj['db'].microbial_order(order_id).samples
+    elif sample_id and (order_id is None):
+        # link sample in all its families
+        sample_objs = [context.obj['db'].microbial_sample(sample_id)]
+    elif sample_id and order_id:
+        # link only one sample in a case
+        sample_objs = [context.obj['db'].microbial_sample(sample_id)]
+    else:
+        LOG.error('provide order and/or sample')
+        context.abort()
+
+    for sample_obj in sample_objs:
+        LOG.info(f"{sample_obj.internal_id}: link FASTQ files")
+        context.obj['api'].link_microbial_sample(sample_obj)
+
+
 @analysis.command()
 @click.option('-p', '--print', 'print_output', is_flag=True, help='print to console')
 @click.argument('family_id')
