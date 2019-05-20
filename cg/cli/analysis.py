@@ -6,7 +6,8 @@ from pathlib import Path
 
 import click
 from cg.apps import hk, tb, scoutapi, lims
-from cg.apps.balsamic.fastq import FastqHandler
+from cg.apps.balsamic.fastq import FastqHandler as BalsamicFastqHandler
+from cg.apps.usalt.fastq import FastqHandler as UsaltFastqHandler
 from cg.exc import LimsDataError
 from cg.meta.analysis import AnalysisAPI
 from cg.meta.deliver.api import DeliverAPI
@@ -32,7 +33,8 @@ def analysis(context, priority, email, family_id, start_with):
     lims_api = lims.LimsAPI(context.obj)
     context.obj['tb'] = tb.TrailblazerAPI(context.obj)
     deliver = DeliverAPI(context.obj, hk_api=hk_api, lims_api=lims_api)
-    balsamic = FastqHandler(context.obj)
+    balsamic_fastq_handler = BalsamicFastqHandler(context.obj)
+    usalt_fastq_handler = UsaltFastqHandler(context.obj)
     context.obj['api'] = AnalysisAPI(
         db=context.obj['db'],
         hk_api=hk_api,
@@ -40,7 +42,8 @@ def analysis(context, priority, email, family_id, start_with):
         scout_api=scout_api,
         lims_api=lims_api,
         deliver_api=deliver,
-        fastq_handler=balsamic
+        balsamic_fastq_handler=balsamic_fastq_handler,
+        usalt_fastq_handler=usalt_fastq_handler,
     )
 
     if context.invoked_subcommand is None:

@@ -9,7 +9,8 @@ from ruamel.yaml import safe_load
 from requests.exceptions import HTTPError
 
 from cg.apps import tb, hk, scoutapi, lims
-from cg.apps.balsamic import fastq
+from cg.apps.balsamic import fastq as balsamic_fastq
+from cg.apps.usalt import fastq as usalt_fastq
 from cg.meta.deliver.api import DeliverAPI
 from cg.store import models, Store
 
@@ -35,7 +36,10 @@ class AnalysisAPI:
 
     def __init__(self, db: Store, hk_api: hk.HousekeeperAPI, scout_api: scoutapi.ScoutAPI,
                  tb_api: tb.TrailblazerAPI, lims_api: lims.LimsAPI, deliver_api: DeliverAPI,
-                 fastq_handler=fastq.FastqHandler, yaml_loader=safe_load, path_api=Path,
+                 balsamic_fastq_handler=balsamic_fastq.FastqHandler,
+                 usalt_fastq_handler=usalt_fastq.FastqHandler,
+                 yaml_loader=safe_load,
+                 path_api=Path,
                  logger=logging.getLogger(
                      __name__)):
         self.db = db
@@ -47,7 +51,8 @@ class AnalysisAPI:
         self.yaml_loader = yaml_loader
         self.pather = path_api
         self.LOG = logger
-        self.balsamic_fastq_handler = fastq_handler
+        self.balsamic_fastq_handler = balsamic_fastq_handler
+        self.usalt_fastq_handler = usalt_fastq_handler
 
     def check(self, family_obj: models.Family):
         """Check stuff before starting the analysis."""
