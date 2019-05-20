@@ -19,6 +19,15 @@ flowcell_sample = Table(
 )
 
 
+flowcell_microbial_sample = Table(
+    'flowcell_microbial_sample',
+    Model.metadata,
+    Column('flowcell_id', types.Integer, ForeignKey('flowcell.id'), nullable=False),
+    Column('microbial_sample_id', types.Integer, ForeignKey('microbial_sample.id'), nullable=False),
+    UniqueConstraint('flowcell_id', 'microbial_sample_id', name='_flowcell_microbial_sample_uc'),
+)
+
+
 class PriorityMixin:
 
     @property
@@ -285,15 +294,18 @@ class Flowcell(Model):
     status = Column(types.Enum(*FLOWCELL_STATUS), default='ondisk')
 
     samples = orm.relationship('Sample', secondary=flowcell_sample, backref='flowcells')
+    microbial_samples = orm.relationship('MicrobialSample', secondary=flowcell_microbial_sample, backref='flowcells')
 
     def __str__(self):
         return self.name
 
-    def to_dict(self, samples: bool = False):
+    def to_dict(self, samples: bool = False, microbial_samples: bool = False):
         """Override dictify method."""
         data = super(Flowcell, self).to_dict()
         if samples:
             data['samples'] = [sample.to_dict() for sample in self.samples]
+        if microbial_samples:
+            data['microbial_samples'] = [sample.to_dict() for sample in self.microbial_samples]
         return data
 
 
