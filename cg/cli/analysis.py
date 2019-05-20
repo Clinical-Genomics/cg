@@ -124,11 +124,11 @@ def link(context, family_id, sample_id):
         context.obj['api'].link_sample(link_obj)
 
 
-@analysis.command('link-usalt')
-@click.option('-o', '--order', 'order_id', help='link all samples for an order')
+@analysis.command('link-microbial')
+@click.option('-o', '--order', 'order_id', help='link all microbial samples for an order')
 @click.argument('sample_id', required=False)
 @click.pass_context
-def link_usalt(context, order_id, sample_id):
+def link_microbial(context, order_id, sample_id):
     """Link FASTQ files for a SAMPLE_ID."""
 
     if order_id and (sample_id is None):
