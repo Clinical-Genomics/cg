@@ -85,12 +85,9 @@ def add_application_version(file_path, connection_string, sign):
     file_handle.close()
 
 
-def main(file_path, connection_string, sign):
-    """Running add_application_version to load application version"""
-    add_application_version(file_path, connection_string, sign)
+def main():
+    """Running add_application_version to import application version"""
 
-
-if __name__ == "__main__":
     parser = ArgumentParser(description=DESC)
     parser.add_argument('-f', dest='file_path', required=True,
                         help='Path to csv with apptags.')
@@ -101,4 +98,8 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    main(args.file_path, args.connection_string, args.sign)
+    add_application_version(args.file_path, args.connection_string, args.sign)
+
+
+if __name__ == "__main__":
+    main()
