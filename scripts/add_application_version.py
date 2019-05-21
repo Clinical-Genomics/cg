@@ -45,6 +45,17 @@ def add_application_version(file_path, connection_string, sign):
     if not set(rows.fieldnames) < set(VALID_HEADERS):
         sys.exit('Headers in file are not valid. Should contain: %s' % (str(VALID_HEADERS)))
 
+    # check that all applications exist before inserting any prices
+    for row in rows:
+        tag = row['App tag']
+        query = f'select application.tag \
+                from application_version \
+                inner join application on application_version.application_id=application.id \
+                where application.tag="{tag}"'
+        app_tag = engine.execute(query).first()
+        if not app_tag:
+            sys.exit('Failed to find app_tag: %s' % app_tag)
+
     for row in rows:
         tag = row['App tag']
         query = f'select max(application_version.version), application.tag, application.id \
@@ -54,22 +65,23 @@ def add_application_version(file_path, connection_string, sign):
         latest_version, app_tag, app_id = engine.execute(query).first()
         if not latest_version:
             latest_version = 0
-        if app_tag:
-            ins = table.insert().values(
-                application_id=app_id,
-                version=latest_version + 1,
-                valid_from=datetime.strptime(row['Valid from'], '%Y-%m-%d'),
-                price_standard=row['Standard'],
-                price_priority=row['Priority'],
-                price_express=row['Express'],
-                price_research=row['Research'],
-                comment='Added by %s' % sign,
-                created_at=datetime.today())
-            try:
-                connection.execute(ins)
-                logging.info('adding new version for app tag %s', app_tag)
-            except SQLAlchemyError as error:
-                logging.error(error)
+
+        ins = table.insert().values(
+            application_id=app_id,
+            version=latest_version + 1,
+            valid_from=datetime.strptime(row['Valid from'], '%Y-%m-%d'),
+            price_standard=row['Standard'],
+            price_priority=row['Priority'],
+            price_express=row['Express'],
+            price_research=row['Research'],
+            comment='Added by %s' % sign,
+            created_at=datetime.today())
+        try:
+            connection.execute(ins)
+            logging.info('adding new version for app tag %s', app_tag)
+        except SQLAlchemyError as error:
+            sys.exit(error)
+
     file_handle.close()
 
 
