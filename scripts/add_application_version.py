@@ -27,9 +27,7 @@ def add_application_version(file_path, connection_string, sign):
     try:
         engine = create_engine(connection_string)
         connection = engine.connect()
-        metadata = MetaData()
-        metadata.reflect(bind=engine)
-        table = metadata.tables['application_version']
+        MetaData().reflect(bind=engine)
     except SQLAlchemyError as error:
         sys.exit('Failed to connect: %s' % error)
 
@@ -66,7 +64,7 @@ def add_application_version(file_path, connection_string, sign):
         if not latest_version:
             latest_version = 0
 
-        ins = table.insert().values(
+        ins = MetaData().tables['application_version'].insert().values(
             application_id=app_id,
             version=latest_version + 1,
             valid_from=datetime.strptime(row['Valid from'], '%Y-%m-%d'),
