@@ -9,17 +9,18 @@ import cg
 from cg.store import Store
 
 from .analysis import analysis
-from .store import store
 from .add import add
+from .backup import backup
+from .clean import clean
+from .deliver import deliver
 from .get import get
-from .upload import upload
+from .import_cmd import import_cmd
 from .reset import reset_cmd
 from .set import set_cmd
 from .status import status
+from .store import store
 from .transfer import transfer
-from .clean import clean
-from .deliver import deliver
-from .backup import backup
+from .upload import upload
 
 LOG = logging.getLogger(__name__)
 LEVELS = ['DEBUG', 'INFO', 'WARNING', 'ERROR']
@@ -68,6 +69,7 @@ base.add_command(backup)
 base.add_command(clean)
 base.add_command(deliver)
 base.add_command(get)
+base.add_command(import_cmd)
 base.add_command(reset_cmd)
 base.add_command(set_cmd)
 base.add_command(store)
