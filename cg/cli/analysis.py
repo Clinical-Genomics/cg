@@ -133,7 +133,7 @@ def link_microbial(context, order_id, sample_id):
 
     if order_id and (sample_id is None):
         # link all samples in a case
-        sample_objs = context.obj['db'].microbial_order(order_id).samples
+        sample_objs = context.obj['db'].microbial_order(order_id).microbial_samples
     elif sample_id and (order_id is None):
         # link sample in all its families
         sample_objs = [context.obj['db'].microbial_sample(sample_id)]
