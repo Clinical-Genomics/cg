@@ -3,14 +3,13 @@ import datetime as dt
 import logging
 import sys
 from typing import List
-from subprocess import CalledProcessError
 
 import click
 
 from cg.store import Store, models
 from cg.apps import coverage as coverage_app, gt, hk, loqus, tb, scoutapi, beacon as beacon_app, \
     lims
-from cg.exc import (DuplicateRecordError, DuplicateSampleError)
+from cg.exc import DuplicateRecordError, DuplicateSampleError
 from cg.meta.upload.coverage import UploadCoverageApi
 from cg.meta.upload.gt import UploadGenotypesAPI
 from cg.meta.upload.observations import UploadObservationsAPI

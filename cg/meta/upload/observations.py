@@ -8,7 +8,7 @@ import logging
 from typing import List
 
 from cg.apps import hk, loqus
-from cg.exc import (DuplicateRecordError, DuplicateSampleError, CaseNotFoundError)
+from cg.exc import DuplicateRecordError, DuplicateSampleError, CaseNotFoundError
 from cg.store import models, Store
 
 LOG = logging.getLogger(__name__)
