@@ -17,22 +17,18 @@ def import_cmd(context):
 
 
 @import_cmd.command('application')
-@click.option('-e', '--excel_path', required=True,
-              help='Path to excel with applications.')
-@click.option('-s', '--sign', required=True,
-              help='Signature.')
+@click.argument('excel_path')
+@click.argument('signature')
 @click.pass_context
-def application(context, excel_path, sign):
+def application(context, excel_path, signature):
     """Import new applications to status-db"""
-    import_applications(context.obj['status'], excel_path, sign)
+    import_applications(context.obj['status'], excel_path, signature)
 
 
 @import_cmd.command('application-version')
-@click.option('-e', '--excel_path', required=True,
-              help='Path to excel with apptag versions.')
-@click.option('-s', '--sign', required=True,
-              help='Signature.')
+@click.argument('excel_path')
+@click.argument('signature')
 @click.pass_context
-def application_version(context, excel_path, sign):
+def application_version(context, excel_path, signature):
     """Import new application versions to status-db"""
-    import_application_versions(context.obj['status'], excel_path, sign)
+    import_application_versions(context.obj['status'], excel_path, signature)
