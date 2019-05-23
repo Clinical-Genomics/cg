@@ -294,7 +294,8 @@ class Flowcell(Model):
     status = Column(types.Enum(*FLOWCELL_STATUS), default='ondisk')
 
     samples = orm.relationship('Sample', secondary=flowcell_sample, backref='flowcells')
-    microbial_samples = orm.relationship('MicrobialSample', secondary=flowcell_microbial_sample, backref='flowcells')
+    microbial_samples = orm.relationship('MicrobialSample', secondary=flowcell_microbial_sample,
+                                         backref='flowcells')
 
     def __str__(self):
         return self.name
