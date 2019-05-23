@@ -1,9 +1,11 @@
 """Tests for reset part of the store API"""
 
-from datetime import datetime, timedelta
-
-from cg.cg.store import models
-from cg.cg.store.api.import_func import prices_are_same, versions_are_same, application_version
+import xlrd
+from cg.store import Store
+from cg.store.api.import_func import prices_are_same, versions_are_same, \
+    import_application_versions, get_raw_data_from_xl, get_tag_from_raw_version, \
+    add_version_from_raw, get_workbook_from_xl, import_applications, get_datemode_from_xl, \
+    applications_are_same, get_tag_from_raw_application
 
 
 def test_prices_are_same_int_and_int():
@@ -29,7 +31,7 @@ def test_prices_are_not_same_int_and_int():
     should_not_be_same = prices_are_same(database_price, float_price)
 
     # THEN prices should be considered same
-    assert should_not_be_same
+    assert not should_not_be_same
 
 
 def test_prices_are_same_float_and_int():
@@ -45,11 +47,11 @@ def test_prices_are_same_float_and_int():
     assert should_be_same
 
 
-def test_prices_are_same_float_and_int():
+def test_prices_are_same_float_and_float():
     # GIVEN float price that looks like one in excel
     # GIVEN same price but as it looks when saved in database
     float_price = 0.654345
-    database_price = 1
+    database_price = float_price
 
     # WHEN calling prices are same
     should_be_same = prices_are_same(database_price, float_price)
@@ -58,9 +60,18 @@ def test_prices_are_same_float_and_int():
     assert should_be_same
 
 
-def test_versions_are_same(raw_version, db_version: models.ApplicationVersion, datemode):
+def test_versions_are_same(store: Store, application_versions_file):
     # GIVEN an excel price row
     # same price row committed to the database
+    add_applications(store, application_versions_file)
+    raw_version = get_raw_data_from_xl(application_versions_file)[0]
+    tag = get_tag_from_raw_version(raw_version)
+    application_obj = store.application(tag)
+    sign = 'DummySign'
+    workbook = get_workbook_from_xl(application_versions_file)
+    db_version = add_version_from_raw(application_obj, None, raw_version,
+                                      sign, store, workbook)
+    datemode = get_datemode_from_xl(application_versions_file)
 
     # WHEN calling versions are same
     should_be_same = versions_are_same(db_version, raw_version, datemode)
@@ -69,118 +80,121 @@ def test_versions_are_same(raw_version, db_version: models.ApplicationVersion, d
     assert should_be_same
 
 
-def test_versions_are_not_same(raw_version, db_version: models.ApplicationVersion, datemode):
+def test_versions_are_not_same(store, application_versions_file):
     # GIVEN an excel price row
-    # same price row committed to the database but with another valid_from
-    db_version.valid_from = datetime.now()
+    # NOT same price row committed to the database
+    add_applications(store, application_versions_file)
+    raw_version = get_raw_data_from_xl(application_versions_file)[0]
+    tag = get_tag_from_raw_version(raw_version)
+    application_obj = store.application(tag)
+    sign = 'DummySign'
+    workbook = get_workbook_from_xl(application_versions_file)
+    db_version = add_version_from_raw(application_obj, None, raw_version,
+                                      sign, store, workbook)
+    datemode = get_datemode_from_xl(application_versions_file)
+    another_raw_version = get_raw_data_from_xl(application_versions_file)[1]
 
     # WHEN calling versions are same
-    should_not_be_same = versions_are_same(db_version, raw_version, datemode)
+    should_not_be_same = versions_are_same(db_version, another_raw_version, datemode)
 
-    # THEN versions are considered same
-    assert should_not_be_same
-
-
-def get_prices(excel_path):
-    pass
+    # THEN versions are not considered same
+    assert not should_not_be_same
 
 
-def price_exist_in_store(price, store):
-    prices = get_prices_from_store(store)
+def test_application_version(application_versions_file, store: Store):
+    # GIVEN a store with applications
+    # and an excel file with prices for those applications
+    add_applications(store, application_versions_file)
+    sign = 'TestSign'
 
-    return
+    # WHEN calling import_application_version
+    import_application_versions(store, application_versions_file, sign)
 
-def all_prices_exists_in_store(store, excel_path):
-    prices = get_prices(excel_path)
-    for price in prices:
-        if not price_exist_in_store(price, store):
+    # THEN versions should have been created in the store
+    assert all_versions_exists_in_store(store, application_versions_file)
+
+
+def test_application(applications_file, store: Store):
+    # GIVEN a store and an excel file with applications
+    sign = 'TestSign'
+
+    # WHEN calling versions are same
+    import_applications(store, applications_file, sign)
+
+    # THEN applications should have been created in the store
+    assert all_applications_exists(store, applications_file)
+
+
+def ensure_application(store, tag):
+    """Ensure that the specified application exists in the store"""
+    application = store.application(tag=tag)
+    if not application:
+        application = store.add_application(tag=tag, category='wgs',
+                                            description='dummy_description',
+                                            is_external=False)
+        store.add_commit(application)
+
+    return application
+
+
+def add_applications(store, application_versions_file):
+    """Ensure all applications in the xl exists"""
+
+    raw_versions = get_raw_data_from_xl(application_versions_file)
+
+    for raw_version in raw_versions:
+        tag = get_tag_from_raw_version(raw_version)
+        ensure_application(store, tag)
+
+
+def get_prices_from_store(store, raw_price):
+    """Gets all versions for the specified application"""
+    tag = get_tag_from_raw_version(raw_price)
+    return store.application(tag).versions
+
+
+def get_application_from_store(store, raw_application):
+    """Gets the specified application"""
+    tag = get_tag_from_raw_application(raw_application)
+    return store.application(tag)
+
+
+def exists_version_in_store(raw_price, store, datemode):
+    """Check if the given raw version exists in the store"""
+    db_versions = get_prices_from_store(store, raw_price)
+
+    version_found = False
+    for db_price in db_versions:
+        if versions_are_same(db_price, raw_price, datemode):
+            version_found = True
+
+    return version_found
+
+
+def all_versions_exists_in_store(store, excel_path):
+    """Check if all versions in the excel exists in the store"""
+    raw_versions = get_raw_data_from_xl(excel_path)
+    datemode = get_datemode_from_xl(excel_path)
+    for raw_version in raw_versions:
+        if not exists_version_in_store(raw_version, store, datemode):
             return False
 
     return True
 
 
-def test_application_version(store: Store, excel_path):
-    # GIVEN a store with applications
-    # and an excel file with prices for those applications
-    sign = 'TestSign'
+def all_applications_exists(store, applications_file):
+    """Check if all applications in the excel exists in the store"""
+    raw_applications = get_raw_data_from_xl(applications_file)
 
-    # WHEN calling versions are same
-    application_version(store, excel_path, sign)
+    for raw_application in raw_applications:
+        if not exists_application_in_store(raw_application, store):
+            return False
 
-    # THEN versions are considered same
-    assert all_prices_exists_in_store(store, excel_path)
-
-
-def ensure_application_version(disk_store, application_tag='dummy_tag'):
-    """utility function to return existing or create application version for tests"""
-    application = disk_store.application(tag=application_tag)
-    if not application:
-        application = disk_store.add_application(tag=application_tag, category='wgs',
-                                                 description='dummy_description')
-        disk_store.add_commit(application)
-
-    prices = {'standard': 10, 'priority': 20, 'express': 30, 'research': 5}
-    version = disk_store.application_version(application, 1)
-    if not version:
-        version = disk_store.add_version(application, 1, valid_from=datetime.now(),
-                                         prices=prices)
-
-        disk_store.add_commit(version)
-    return version
+    return True
 
 
-def ensure_customer(disk_store, customer_id='cust_test'):
-    """utility function to return existing or create customer for tests"""
-    customer_group = disk_store.customer_group('dummy_group')
-    if not customer_group:
-        customer_group = disk_store.add_customer_group('dummy_group', 'dummy group')
+def exists_application_in_store(raw_application, store):
+    """Check if the given raw application exists in the store"""
+    db_application = get_application_from_store(store, raw_application)
 
-        customer = disk_store.add_customer(internal_id=customer_id, name="Test Customer",
-                                           scout_access=False, customer_group=customer_group,
-                                           invoice_address='dummy_address',
-                                           invoice_reference='dummy_reference')
-        disk_store.add_commit(customer)
-    customer = disk_store.customer(customer_id)
-    return customer
-
-
-def add_sample(store, sample_name='sample_test', loqusdb_links=False):
-    """utility function to add a sample to use in tests"""
-
-    customer = ensure_customer(store)
-    application_version_id = ensure_application_version(store).id
-    sample = store.add_sample(name=sample_name, sex='unknown')
-    sample.application_version_id = application_version_id
-    sample.customer = customer
-    if loqusdb_links:
-        sample.loqusdb_id = True
-    store.add_commit(sample)
-    return sample
-
-
-def ensure_panel(disk_store, panel_id='panel_test', customer_id='cust_test'):
-    """utility function to add a panel to use in tests"""
-    customer = ensure_customer(disk_store, customer_id)
-    panel = disk_store.panel(panel_id)
-    if not panel:
-        panel = disk_store.add_panel(customer=customer, name=panel_id, abbrev=panel_id,
-                                     version=1.0,
-                                     date=datetime.now(), genes=1)
-        disk_store.add_commit(panel)
-    return panel
-
-
-def add_family(disk_store, family_id='family_test', customer_id='cust_test', ordered_days_ago=0,
-               action=None, priority=None):
-    """utility function to add a family to use in tests"""
-    panel = ensure_panel(disk_store)
-    customer = ensure_customer(disk_store, customer_id)
-    family = disk_store.add_family(name=family_id, panels=panel.name)
-    family.customer = customer
-    family.ordered_at = datetime.now() - timedelta(days=ordered_days_ago)
-    if action:
-        family.action = action
-    if priority:
-        family.priority = priority
-    disk_store.add_commit(family)
-    return family
+    return not db_application

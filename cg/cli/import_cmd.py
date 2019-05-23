@@ -4,7 +4,7 @@ import logging
 import click
 from cg.store import Store
 
-from cg.cg.store.api.import_func import application_version
+from cg.store.api.import_func import import_application_versions, import_applications
 
 LOG = logging.getLogger(__name__)
 
@@ -16,6 +16,17 @@ def import_cmd(context):
     context.obj['status'] = Store(context.obj['database'])
 
 
+@import_cmd.command('application')
+@click.option('-e', '--excel_path', required=True,
+              help='Path to excel with applications.')
+@click.option('-s', '--sign', required=True,
+              help='Signature.')
+@click.pass_context
+def application(context, excel_path, sign):
+    """Import new applications to status-db"""
+    import_applications(context.obj['status'], excel_path, sign)
+
+
 @import_cmd.command('application-version')
 @click.option('-e', '--excel_path', required=True,
               help='Path to excel with apptag versions.')
@@ -24,4 +35,4 @@ def import_cmd(context):
 @click.pass_context
 def application_version(context, excel_path, sign):
     """Import new application versions to status-db"""
-    application_version(context.obj['status'], excel_path, sign)
+    import_application_versions(context.obj['status'], excel_path, sign)
