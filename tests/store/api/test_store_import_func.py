@@ -1,11 +1,10 @@
 """Tests for reset part of the store API"""
 
-import xlrd
 from cg.store import Store
 from cg.store.api.import_func import prices_are_same, versions_are_same, \
     import_application_versions, get_raw_data_from_xl, get_tag_from_raw_version, \
     add_version_from_raw, get_workbook_from_xl, import_applications, get_datemode_from_xl, \
-    applications_are_same, get_tag_from_raw_application
+    get_tag_from_raw_application
 
 
 def test_prices_are_same_int_and_int():
