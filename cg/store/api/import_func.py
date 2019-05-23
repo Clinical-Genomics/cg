@@ -30,9 +30,7 @@ def prices_are_same(integer_price: int, float_price: float):
 
 def versions_are_same(version_obj: models.ApplicationVersion, raw_version: dict, datemode: int):
 
-    # print(version_obj.to_dict())
-    # print(raw_version)
-
+    #TODO: test with price fixture and database model
     return version_obj.application.tag == raw_version['App tag'] and \
            version_obj.valid_from == datetime(*xlrd.xldate_as_tuple(float(raw_version['Valid '
                                                                                       'from']),

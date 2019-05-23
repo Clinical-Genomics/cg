@@ -2,7 +2,8 @@
 
 from datetime import datetime, timedelta
 
-from cg.cg.store.api.import_func import prices_are_same
+from cg.cg.store import models
+from cg.cg.store.api.import_func import prices_are_same, versions_are_same, application_version
 
 
 def test_prices_are_same_int_and_int():
@@ -10,6 +11,32 @@ def test_prices_are_same_int_and_int():
     # GIVEN same price but as it looks when saved in database
     float_price = 0.0
     database_price = 0
+
+    # WHEN calling prices are same
+    should_be_same = prices_are_same(database_price, float_price)
+
+    # THEN prices should be considered same
+    assert should_be_same
+
+
+def test_prices_are_not_same_int_and_int():
+    # GIVEN float price that looks like one in excel
+    # GIVEN same price but as it looks when saved in database
+    float_price = 1.0
+    database_price = 0
+
+    # WHEN calling prices are same
+    should_not_be_same = prices_are_same(database_price, float_price)
+
+    # THEN prices should be considered same
+    assert should_not_be_same
+
+
+def test_prices_are_same_float_and_int():
+    # GIVEN float price that looks like one in excel
+    # GIVEN same price but as it looks when saved in database
+    float_price = 0.654345
+    database_price = 1
 
     # WHEN calling prices are same
     should_be_same = prices_are_same(database_price, float_price)
@@ -31,7 +58,57 @@ def test_prices_are_same_float_and_int():
     assert should_be_same
 
 
+def test_versions_are_same(raw_version, db_version: models.ApplicationVersion, datemode):
+    # GIVEN an excel price row
+    # same price row committed to the database
 
+    # WHEN calling versions are same
+    should_be_same = versions_are_same(db_version, raw_version, datemode)
+
+    # THEN versions are considered same
+    assert should_be_same
+
+
+def test_versions_are_not_same(raw_version, db_version: models.ApplicationVersion, datemode):
+    # GIVEN an excel price row
+    # same price row committed to the database but with another valid_from
+    db_version.valid_from = datetime.now()
+
+    # WHEN calling versions are same
+    should_not_be_same = versions_are_same(db_version, raw_version, datemode)
+
+    # THEN versions are considered same
+    assert should_not_be_same
+
+
+def get_prices(excel_path):
+    pass
+
+
+def price_exist_in_store(price, store):
+    prices = get_prices_from_store(store)
+
+    return
+
+def all_prices_exists_in_store(store, excel_path):
+    prices = get_prices(excel_path)
+    for price in prices:
+        if not price_exist_in_store(price, store):
+            return False
+
+    return True
+
+
+def test_application_version(store: Store, excel_path):
+    # GIVEN a store with applications
+    # and an excel file with prices for those applications
+    sign = 'TestSign'
+
+    # WHEN calling versions are same
+    application_version(store, excel_path, sign)
+
+    # THEN versions are considered same
+    assert all_prices_exists_in_store(store, excel_path)
 
 
 def ensure_application_version(disk_store, application_tag='dummy_tag'):
