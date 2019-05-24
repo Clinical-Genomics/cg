@@ -26,7 +26,7 @@ class FastqFileNameCreator:
 
         # ACC1234A1_FCAB1ABC2_L1_1.fastq.gz sample_flowcell_lane_read.fastq.gz
         flowcell = f"{flowcell}-undetermined" if undetermined else flowcell
-        return f"{sample}_{flowcell}_{lane}_{read}.fastq.gz"
+        return f"{sample}_{flowcell}_L{lane}_{read}.fastq.gz"
 
 
 class FastqHandler:
