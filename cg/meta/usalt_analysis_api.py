@@ -1,6 +1,8 @@
 """"Analysis logic for usalt"""
+import gzip
 
 from cg.apps.usalt import fastq
+from cg.store import models
 
 
 def link_sample(self, sample_obj: models.MicrobialSample):
@@ -33,4 +35,4 @@ def link_sample(self, sample_obj: models.MicrobialSample):
 
     # Decision for linking in Usalt structure if data_analysis contains Usalt
     fastq.link(case=sample_obj.microbial_order.internal_id,
-                                  sample=sample_obj.internal_id, files=files)
+               sample=sample_obj.internal_id, files=files)
