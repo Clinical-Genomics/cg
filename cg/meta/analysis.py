@@ -217,15 +217,12 @@ class AnalysisAPI:
             with gzip.open(file_obj.full_path) as handle:
                 header_line = handle.readline().decode()
                 header_info = self._fastq_header(header_line)
-                lane = header_info['lane']
-                flowcell = header_info['flowcell']
-                readnumber = header_info['readnumber']
 
             data = {
                 'path': file_obj.full_path,
-                'lane': int(lane),
-                'flowcell': flowcell,
-                'read': int(readnumber),
+                'lane': int(header_info['lane']),
+                'flowcell': header_info['flowcell'],
+                'read': int(header_info['readnumber']),
                 'undetermined': ('_Undetermined_' in file_obj.path),
             }
             # look for tile identifier (HiSeq X runs)
