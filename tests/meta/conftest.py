@@ -1,7 +1,7 @@
 import pytest
 from _pytest import tmpdir
-from cg.apps.balsamic.fastq import FastqHandler as BalsamicFastqHandler
-from cg.apps.usalt.fastq import FastqHandler as UsaltFastqHandler
+from cg.apps.balsamic.fastq import BalsamicFastqHandler
+from cg.apps.usalt.fastq import USaltFastqHandler
 
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.tb import TrailblazerAPI
@@ -205,7 +205,7 @@ class MockBalsamicFastq(BalsamicFastqHandler):
         super().__init__(config={'balsamic': {'root': tmpdir}})
 
 
-class MockUsaltFastq(UsaltFastqHandler):
+class MockUsaltFastq(USaltFastqHandler):
     """Mock FastqHandler for analysis_api"""
 
     def __init__(self):
@@ -237,8 +237,6 @@ def analysis_api(analysis_store, store_housekeeper, scout_store):
         deliver_api=MockDeliver(),
         yaml_loader=safe_loader,
         path_api=Path_mock,
-        logger=MockLogger(),
-        balsamic_fastq_handler=MockBalsamicFastq(),
-        usalt_fastq_handler=MockUsaltFastq(),
+        logger=MockLogger()
     )
     yield _analysis_api

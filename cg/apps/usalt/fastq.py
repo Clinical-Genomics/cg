@@ -19,7 +19,7 @@ LOGGER = logging.getLogger(__name__)
 class USaltFastqHandler(BaseFastqHandler):
     """Handles fastq file linking"""
 
-    class USaltFastqFileNameCreator(BaseFastqHandler.BaseFastqFileNameCreator):
+    class FastqFileNameCreator(BaseFastqHandler.BaseFastqFileNameCreator):
         """Creates valid usalt filename from the parameters"""
 
         @staticmethod
@@ -33,8 +33,8 @@ class USaltFastqHandler(BaseFastqHandler):
             return f"{sample}_{flowcell}_L{lane}_{read}.fastq.gz"
 
     def __init__(self, config):
+        super().__init__(config)
         self.root_dir = config['usalt']['root']
-
 
     def link(self, case: str, sample: str, files: List):
         """Link FASTQ files for a usalt sample.
@@ -49,7 +49,7 @@ class USaltFastqHandler(BaseFastqHandler):
 
         for fastq_data in files:
             original_fastq_path = Path(fastq_data['path'])
-            linked_fastq_name = FastqFileNameCreator.create(
+            linked_fastq_name = self.FastqFileNameCreator.create(
                 lane=fastq_data['lane'],
                 flowcell=fastq_data['flowcell'],
                 sample=sample,
@@ -60,10 +60,10 @@ class USaltFastqHandler(BaseFastqHandler):
             linked_reads_paths[fastq_data['read']].append(linked_fastq_path)
 
             if not linked_fastq_path.exists():
-                logger.info(f"linking: %s -> %s", original_fastq_path, linked_fastq_path)
+                LOGGER.info(f"linking: %s -> %s", original_fastq_path, linked_fastq_path)
                 linked_fastq_path.symlink_to(original_fastq_path)
             else:
-                logger.debug(f"destination path already exists: %s", linked_fastq_path)
+                LOGGER.debug(f"destination path already exists: %s", linked_fastq_path)
 
     @staticmethod
     def _remove_files(files):

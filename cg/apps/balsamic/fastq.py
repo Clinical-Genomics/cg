@@ -25,7 +25,7 @@ class FastqFileConcatenator:
     @staticmethod
     def concatenate(files: List, concat_file):
         """Concatenates a list of fastq files"""
-        logger.info(FastqFileConcatenator.display_files(files, concat_file))
+        LOGGER.info(FastqFileConcatenator.display_files(files, concat_file))
 
         with open(concat_file, 'wb') as wfd:
             for f in files:
@@ -38,7 +38,7 @@ class FastqFileConcatenator:
         try:
             FastqFileConcatenator().assert_file_sizes(size_before, size_after)
         except AssertionError as error:
-            logger.warning(error)
+            LOGGER.warning(error)
 
     @staticmethod
     def size_before(files: List):
@@ -62,7 +62,7 @@ class FastqFileConcatenator:
         )
 
         assert abs(size_before - size_after) / size_before <= 0.01, msg
-        logger.info('Concatenation file size check successful!')
+        LOGGER.info('Concatenation file size check successful!')
 
     @staticmethod
     def display_files(files: List, concat_file):
@@ -98,15 +98,15 @@ class BalsamicFastqHandler(BaseFastqHandler):
             """"create a name for the concatenated file for some read files"""
             return f"concatenated_{'_'.join(linked_fastq_name.split('_')[-4:])}"
 
-
     def __init__(self, config):
+        super().__init__(config)
         self.root_dir = config['balsamic']['root']
 
     def link(self, case: str, sample: str, files: List):
         """Link FASTQ files for a balsamic sample.
         Shall be linked to /<balsamic root directory>/case-id/fastq/"""
 
-        wrk_dir = Path(f'{self.root_dir}/{family}/fastq')
+        wrk_dir = Path(f'{self.root_dir}/{case}/fastq')
 
         wrk_dir.mkdir(parents=True, exist_ok=True)
 
@@ -117,14 +117,15 @@ class BalsamicFastqHandler(BaseFastqHandler):
 
         for fastq_data in sorted_files:
             original_fastq_path = Path(fastq_data['path'])
-            linked_fastq_name = FastqFileNameCreator.create(
+            linked_fastq_name = self.FastqFileNameCreator.create(
                 lane=fastq_data['lane'],
                 flowcell=fastq_data['flowcell'],
                 sample=sample,
                 read=fastq_data['read'],
                 undetermined=fastq_data['undetermined'],
             )
-            concatenated_fastq_name = FastqFileNameCreator.get_concatenated_name(linked_fastq_name)
+            concatenated_fastq_name = self.FastqFileNameCreator.get_concatenated_name(
+                linked_fastq_name)
 
             linked_fastq_path = wrk_dir / linked_fastq_name
 
@@ -132,12 +133,12 @@ class BalsamicFastqHandler(BaseFastqHandler):
             concatenated_paths[fastq_data['read']] = f"{wrk_dir}/{concatenated_fastq_name}"
 
             if not linked_fastq_path.exists():
-                logger.info(f"linking: %s -> %s", original_fastq_path, linked_fastq_path)
+                LOGGER.info(f"linking: %s -> %s", original_fastq_path, linked_fastq_path)
                 linked_fastq_path.symlink_to(original_fastq_path)
             else:
-                logger.debug(f"destination path already exists: %s", linked_fastq_path)
+                LOGGER.debug(f"destination path already exists: %s", linked_fastq_path)
 
-        logger.info(f"Concatenation in progress for sample %s.", sample)
+        LOGGER.info(f"Concatenation in progress for sample %s.", sample)
         for read in linked_reads_paths:
             FastqFileConcatenator().concatenate(linked_reads_paths[read],
                                                 concatenated_paths[read])
