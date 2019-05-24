@@ -6,8 +6,9 @@ from pathlib import Path
 
 import click
 from cg.apps import hk, tb, scoutapi, lims
-from cg.apps.balsamic.fastq import FastqHandler as BalsamicFastqHandler
-from cg.apps.usalt.fastq import FastqHandler as UsaltFastqHandler
+from cg.apps.balsamic.fastq import BalsamicFastqHandler
+from cg.apps.usalt.fastq import USaltFastqHandler
+from cg.apps.mip.fastq import MipFastqHandler
 from cg.exc import LimsDataError
 from cg.meta.analysis import AnalysisAPI
 from cg.meta.deliver.api import DeliverAPI
@@ -33,17 +34,13 @@ def analysis(context, priority, email, family_id, start_with):
     lims_api = lims.LimsAPI(context.obj)
     context.obj['tb'] = tb.TrailblazerAPI(context.obj)
     deliver = DeliverAPI(context.obj, hk_api=hk_api, lims_api=lims_api)
-    balsamic_fastq_handler = BalsamicFastqHandler(context.obj)
-    usalt_fastq_handler = UsaltFastqHandler(context.obj)
     context.obj['api'] = AnalysisAPI(
         db=context.obj['db'],
         hk_api=hk_api,
         tb_api=context.obj['tb'],
         scout_api=scout_api,
         lims_api=lims_api,
-        deliver_api=deliver,
-        balsamic_fastq_handler=balsamic_fastq_handler,
-        usalt_fastq_handler=usalt_fastq_handler,
+        deliver_api=deliver
     )
 
     if context.invoked_subcommand is None:
@@ -120,8 +117,19 @@ def link(context, family_id, sample_id):
         context.abort()
 
     for link_obj in link_objs:
-        LOG.info(f"{link_obj.sample.internal_id}: link FASTQ files")
-        context.obj['api'].link_sample(link_obj)
+        LOG.info("%s: link FASTQ files", link_obj.sample.internal_id)
+        if link_obj.sample.data_analysis and 'balsamic' in link_obj.sample.data_analysis.lower():
+            context.obj['api'].link_sample(BalsamicFastqHandler(context.obj['config']),
+                                           link_obj.family.internal_id,
+                                           link_obj.sample.internal_id)
+        elif not link_obj.sample.data_analysis or 'mip' in link_obj.sample.data_analysis.lower():
+            mip_fastq_handler = MipFastqHandler(context.obj['config'],
+                                                context.obj['db'],
+                                                context.obj['tb'])
+            context.obj['api'].link_sample(mip_fastq_handler,
+                                           link_obj.family.internal_id,
+                                           link_obj.sample.internal_id)
+
 
 
 @analysis.command('link-microbial')
@@ -146,7 +154,9 @@ def link_microbial(context, order_id, sample_id):
 
     for sample_obj in sample_objs:
         LOG.info(f"{sample_obj.internal_id}: link FASTQ files")
-        context.obj['api'].link_microbial_sample(sample_obj)
+        context.obj['api'].link_sample(USaltFastqHandler(context.obj['config']),
+                                       sample_obj.microbial_order.internal_id,
+                                       sample_obj.internal_id)
 
 
 @analysis.command()

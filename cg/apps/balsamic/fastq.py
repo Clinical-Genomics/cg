@@ -14,28 +14,9 @@ import shutil
 from pathlib import Path
 from typing import List
 
-logger = logging.getLogger(__name__)
+from cg.apps.pipelines.fastqhandler import BaseFastqHandler
 
-
-class FastqFileNameCreator:
-    """Creates valid balsamic filename from the parameters"""
-
-    @staticmethod
-    def create(lane: str, flowcell: str, sample: str, read: str,
-               undetermined: bool = False, date: dt.datetime = None,
-               index: str = None) -> str:
-        """Name a FASTQ file following Balsamic conventions. Naming must be
-        xxx_R_1.fastq.gz and xxx_R_2.fastq.gz"""
-
-        flowcell = f"{flowcell}-undetermined" if undetermined else flowcell
-        date_str = date.strftime('%y%m%d') if date else '171015'
-        index = index if index else 'XXXXXX'
-        return f"{lane}_{date_str}_{flowcell}_{sample}_{index}_R_{read}.fastq.gz"
-
-    @staticmethod
-    def get_concatenated_name(linked_fastq_name):
-        """"create a name for the concatenated file for some read files"""
-        return f"concatenated_{'_'.join(linked_fastq_name.split('_')[-4:])}"
+LOGGER = logging.getLogger(__name__)
 
 
 class FastqFileConcatenator:
@@ -94,13 +75,34 @@ class FastqFileConcatenator:
         return msg
 
 
-class FastqHandler:
+class BalsamicFastqHandler(BaseFastqHandler):
     """Handles fastq file linking"""
+
+    class FastqFileNameCreator(BaseFastqHandler.BaseFastqFileNameCreator):
+        """Creates valid balsamic filename from the parameters"""
+
+        @staticmethod
+        def create(lane: str, flowcell: str, sample: str, read: str,
+                   undetermined: bool = False, date: dt.datetime = None,
+                   index: str = None) -> str:
+            """Name a FASTQ file following Balsamic conventions. Naming must be
+            xxx_R_1.fastq.gz and xxx_R_2.fastq.gz"""
+
+            flowcell = f"{flowcell}-undetermined" if undetermined else flowcell
+            date_str = date.strftime('%y%m%d') if date else '171015'
+            index = index if index else 'XXXXXX'
+            return f"{lane}_{date_str}_{flowcell}_{sample}_{index}_R_{read}.fastq.gz"
+
+        @staticmethod
+        def get_concatenated_name(linked_fastq_name):
+            """"create a name for the concatenated file for some read files"""
+            return f"concatenated_{'_'.join(linked_fastq_name.split('_')[-4:])}"
+
 
     def __init__(self, config):
         self.root_dir = config['balsamic']['root']
 
-    def link(self, family: str, sample: str, files: List):
+    def link(self, case: str, sample: str, files: List):
         """Link FASTQ files for a balsamic sample.
         Shall be linked to /<balsamic root directory>/case-id/fastq/"""
 

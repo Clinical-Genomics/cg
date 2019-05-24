@@ -9,9 +9,8 @@ from ruamel.yaml import safe_load
 from requests.exceptions import HTTPError
 
 from cg.apps import tb, hk, scoutapi, lims
-from cg.apps.balsamic import fastq as balsamic_fastq
-from cg.apps.usalt import fastq as usalt_fastq
 from cg.meta.deliver.api import DeliverAPI
+from cg.apps.pipelines.fastqhandler import BaseFastqHandler
 from cg.store import models, Store
 
 
@@ -36,8 +35,6 @@ class AnalysisAPI:
 
     def __init__(self, db: Store, hk_api: hk.HousekeeperAPI, scout_api: scoutapi.ScoutAPI,
                  tb_api: tb.TrailblazerAPI, lims_api: lims.LimsAPI, deliver_api: DeliverAPI,
-                 balsamic_fastq_handler=balsamic_fastq.FastqHandler,
-                 usalt_fastq_handler=usalt_fastq.FastqHandler,
                  yaml_loader=safe_load,
                  path_api=Path,
                  logger=logging.getLogger(
@@ -51,8 +48,6 @@ class AnalysisAPI:
         self.yaml_loader = yaml_loader
         self.pather = path_api
         self.LOG = logger
-        self.balsamic_fastq_handler = balsamic_fastq_handler
-        self.usalt_fastq_handler = usalt_fastq_handler
 
     def check(self, family_obj: models.Family):
         """Check stuff before starting the analysis."""
@@ -212,53 +207,12 @@ class AnalysisAPI:
 
         return rs
 
-    def link_sample(self, link_obj: models.FamilySample):
+    def link_sample(self, fastq_handler: BaseFastqHandler, sample: str, case: str):
         """Link FASTQ files for a sample."""
-        file_objs = self.hk.files(bundle=link_obj.sample.internal_id, tags=['fastq'])
-        files = []
-
-        for file_obj in file_objs:
-            # figure out flowcell name from header
-            with gzip.open(file_obj.full_path) as handle:
-                header_line = handle.readline().decode()
-                header_info = self._fastq_header(header_line)
-                lane = header_info['lane']
-                flowcell = header_info['flowcell']
-                readnumber = header_info['readnumber']
-
-            data = {
-                'path': file_obj.full_path,
-                'lane': int(lane),
-                'flowcell': flowcell,
-                'read': int(readnumber),
-                'undetermined': ('_Undetermined_' in file_obj.path),
-            }
-            # look for tile identifier (HiSeq X runs)
-            matches = re.findall(r'-l[1-9]t([1-9]{2})_', file_obj.path)
-            if len(matches) > 0:
-                data['flowcell'] = f"{data['flowcell']}-{matches[0]}"
-            files.append(data)
-
-        self.tb.link(
-            family=link_obj.family.internal_id,
-            sample=link_obj.sample.internal_id,
-            analysis_type=link_obj.sample.application_version.application.analysis_type,
-            files=files,
-        )
-
-        # Decision for linking in Balsamic structure if data_analysis contains Balsamic
-        if link_obj.sample.data_analysis and 'balsamic' in link_obj.sample.data_analysis.lower():
-            self.balsamic_fastq_handler.link(family=link_obj.family.internal_id,
-                                             sample=link_obj.sample.internal_id, files=files)
-
-    def link_microbial_sample(self, sample_obj: models.MicrobialSample):
-        """Link FASTQ files for a sample."""
-
         file_objs = self.hk.files(bundle=sample_obj.internal_id, tags=['fastq'])
         files = []
 
         for file_obj in file_objs:
-
             # figure out flowcell name from header
             with gzip.open(file_obj.full_path) as handle:
                 header_line = handle.readline().decode()
@@ -280,9 +234,7 @@ class AnalysisAPI:
                 data['flowcell'] = f"{data['flowcell']}-{matches[0]}"
             files.append(data)
 
-        # Decision for linking in Usalt structure if data_analysis contains Usalt
-        self.usalt_fastq_handler.link(case=sample_obj.microbial_order.internal_id,
-                                      sample=sample_obj.internal_id, files=files)
+        fastq_handler.link(case=case, sample=sample, files=files)
 
     def panel(self, family_obj: models.Family) -> List[str]:
         """Create the aggregated panel file."""

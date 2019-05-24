@@ -4,7 +4,6 @@ This module handles concatenation of usalt fastq files.
 
 Classes:
     FastqFileNameCreator: Creates valid usalt filenames
-    FastqFileConcatenator: Handles file concatenation
     FastqHandler: Handles fastq file linking
 """
 import logging
@@ -12,28 +11,30 @@ import os
 from pathlib import Path
 from typing import List
 
-logger = logging.getLogger(__name__)
+from cg.apps.pipelines.fastqhandler import BaseFastqHandler
+
+LOGGER = logging.getLogger(__name__)
 
 
-class FastqFileNameCreator:
-    """Creates valid usalt filename from the parameters"""
-
-    @staticmethod
-    def create(lane: str, flowcell: str, sample: str, read: str,
-               undetermined: bool = False) -> str:
-        """Name a FASTQ file following usalt conventions. Naming must be
-        xxx_R_1.fastq.gz and xxx_R_2.fastq.gz"""
-
-        # ACC1234A1_FCAB1ABC2_L1_1.fastq.gz sample_flowcell_lane_read.fastq.gz
-        flowcell = f"{flowcell}-undetermined" if undetermined else flowcell
-        return f"{sample}_{flowcell}_L{lane}_{read}.fastq.gz"
-
-
-class FastqHandler:
+class USaltFastqHandler(BaseFastqHandler):
     """Handles fastq file linking"""
+
+    class USaltFastqFileNameCreator(BaseFastqHandler.BaseFastqFileNameCreator):
+        """Creates valid usalt filename from the parameters"""
+
+        @staticmethod
+        def create(lane: str, flowcell: str, sample: str, read: str,
+                   undetermined: bool = False) -> str:
+            """Name a FASTQ file following usalt conventions. Naming must be
+            xxx_R_1.fastq.gz and xxx_R_2.fastq.gz"""
+
+            # ACC1234A1_FCAB1ABC2_L1_1.fastq.gz sample_flowcell_lane_read.fastq.gz
+            flowcell = f"{flowcell}-undetermined" if undetermined else flowcell
+            return f"{sample}_{flowcell}_L{lane}_{read}.fastq.gz"
 
     def __init__(self, config):
         self.root_dir = config['usalt']['root']
+
 
     def link(self, case: str, sample: str, files: List):
         """Link FASTQ files for a usalt sample.
