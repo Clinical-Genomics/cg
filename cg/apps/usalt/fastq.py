@@ -60,10 +60,10 @@ class USaltFastqHandler(BaseFastqHandler):
             linked_reads_paths[fastq_data['read']].append(linked_fastq_path)
 
             if not linked_fastq_path.exists():
-                LOGGER.info(f"linking: %s -> %s", original_fastq_path, linked_fastq_path)
+                LOGGER.info("linking: %s -> %s", original_fastq_path, linked_fastq_path)
                 linked_fastq_path.symlink_to(original_fastq_path)
             else:
-                LOGGER.debug(f"destination path already exists: %s", linked_fastq_path)
+                LOGGER.debug("destination path already exists: %s", linked_fastq_path)
 
     @staticmethod
     def _remove_files(files):

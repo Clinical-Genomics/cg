@@ -19,19 +19,19 @@ LOGGER = logging.getLogger(__name__)
 class MipFastqHandler(BaseFastqHandler):
     """Handles fastq file linking"""
 
-    def __init__(self, config, db: Store, tb_api: tb.TrailblazerAPI):
-        self.tb = tb_api
+    def __init__(self, config, status: Store, tb_api: tb.TrailblazerAPI):
+        super().__init__(config)
+        self.tb_api = tb_api
         self.config = config
-        self.db = db
+        self.status = status
 
     def link(self, case: str, sample: str, files: List):
         """Link FASTQ files for a pipeline sample."""
 
-        # determine link between famliy and sample
+        # determine link between family and sample
+        sample_obj = self.status.sample(internal_id=sample)
 
-        sample_obj = self.db.sample(internal_id=sample)
-
-        self.tb.link(
+        self.tb_api.link(
             family=case,
             sample=sample,
             analysis_type=sample_obj.application_version.application.analysis_type,

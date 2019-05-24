@@ -133,12 +133,12 @@ class BalsamicFastqHandler(BaseFastqHandler):
             concatenated_paths[fastq_data['read']] = f"{wrk_dir}/{concatenated_fastq_name}"
 
             if not linked_fastq_path.exists():
-                LOGGER.info(f"linking: %s -> %s", original_fastq_path, linked_fastq_path)
+                LOGGER.info("linking: %s -> %s", original_fastq_path, linked_fastq_path)
                 linked_fastq_path.symlink_to(original_fastq_path)
             else:
-                LOGGER.debug(f"destination path already exists: %s", linked_fastq_path)
+                LOGGER.debug("destination path already exists: %s", linked_fastq_path)
 
-        LOGGER.info(f"Concatenation in progress for sample %s.", sample)
+        LOGGER.info("Concatenation in progress for sample %s.", sample)
         for read in linked_reads_paths:
             FastqFileConcatenator().concatenate(linked_reads_paths[read],
                                                 concatenated_paths[read])

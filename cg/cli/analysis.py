@@ -131,7 +131,6 @@ def link(context, family_id, sample_id):
                                            link_obj.sample.internal_id)
 
 
-
 @analysis.command('link-microbial')
 @click.option('-o', '--order', 'order_id', help='link all microbial samples for an order')
 @click.argument('sample_id', required=False)
@@ -153,7 +152,7 @@ def link_microbial(context, order_id, sample_id):
         context.abort()
 
     for sample_obj in sample_objs:
-        LOG.info(f"{sample_obj.internal_id}: link FASTQ files")
+        LOG.info("%s: link FASTQ files", sample_obj.internal_id)
         context.obj['api'].link_sample(USaltFastqHandler(context.obj['config']),
                                        sample_obj.microbial_order.internal_id,
                                        sample_obj.internal_id)
