@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+"""Pytest fixtures for testing the store/api"""
 
 import pytest
 
