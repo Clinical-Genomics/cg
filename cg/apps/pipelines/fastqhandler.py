@@ -4,7 +4,6 @@ This module handles concatenation of usalt fastq files.
 
 Classes:
     FastqFileNameCreator: Creates valid usalt filenames
-    FastqFileConcatenator: Handles file concatenation
     FastqHandler: Handles fastq file linking
 """
 import logging
@@ -20,8 +19,7 @@ class BaseFastqHandler:
         """Creates valid usalt filename from the parameters"""
 
         @staticmethod
-        def create(lane: str, flowcell: str, sample: str, read: str,
-                   undetermined: bool = False) -> str:
+        def create(lane: str, flowcell: str, sample: str, read: str, more: dict = None) -> str:
             """Name a FASTQ file following pipeline conventions."""
 
     def __init__(self, config):

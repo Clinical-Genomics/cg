@@ -7,7 +7,6 @@ Classes:
     FastqFileConcatenator: Handles file concatenation
     FastqHandler: Handles fastq file linking
 """
-import datetime as dt
 import logging
 import os
 import shutil
@@ -28,8 +27,8 @@ class FastqFileConcatenator:
         LOGGER.info(FastqFileConcatenator.display_files(files, concat_file))
 
         with open(concat_file, 'wb') as wfd:
-            for f in files:
-                with open(f, 'rb') as file_descriptor:
+            for fil in files:
+                with open(fil, 'rb') as file_descriptor:
                     shutil.copyfileobj(file_descriptor, wfd)
 
         size_before = FastqFileConcatenator().size_before(files)
@@ -82,11 +81,12 @@ class BalsamicFastqHandler(BaseFastqHandler):
         """Creates valid balsamic filename from the parameters"""
 
         @staticmethod
-        def create(lane: str, flowcell: str, sample: str, read: str,
-                   undetermined: bool = False, date: dt.datetime = None,
-                   index: str = None) -> str:
+        def create(lane: str, flowcell: str, sample: str, read: str, more: dict = None):
             """Name a FASTQ file following Balsamic conventions. Naming must be
             xxx_R_1.fastq.gz and xxx_R_2.fastq.gz"""
+            date = more.get('date', None)
+            index = more.get('index', None)
+            undetermined = more.get('undetermined', None)
 
             flowcell = f"{flowcell}-undetermined" if undetermined else flowcell
             date_str = date.strftime('%y%m%d') if date else '171015'
@@ -122,7 +122,7 @@ class BalsamicFastqHandler(BaseFastqHandler):
                 flowcell=fastq_data['flowcell'],
                 sample=sample,
                 read=fastq_data['read'],
-                undetermined=fastq_data['undetermined'],
+                more={'undetermined': fastq_data['undetermined']},
             )
             concatenated_fastq_name = self.FastqFileNameCreator.get_concatenated_name(
                 linked_fastq_name)

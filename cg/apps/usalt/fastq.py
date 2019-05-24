@@ -24,9 +24,11 @@ class USaltFastqHandler(BaseFastqHandler):
 
         @staticmethod
         def create(lane: str, flowcell: str, sample: str, read: str,
-                   undetermined: bool = False) -> str:
+                   more: dict = None) -> str:
             """Name a FASTQ file following usalt conventions. Naming must be
             xxx_R_1.fastq.gz and xxx_R_2.fastq.gz"""
+
+            undetermined = more.get('undetermined', None)
 
             # ACC1234A1_FCAB1ABC2_L1_1.fastq.gz sample_flowcell_lane_read.fastq.gz
             flowcell = f"{flowcell}-undetermined" if undetermined else flowcell
@@ -54,7 +56,7 @@ class USaltFastqHandler(BaseFastqHandler):
                 flowcell=fastq_data['flowcell'],
                 sample=sample,
                 read=fastq_data['read'],
-                undetermined=fastq_data['undetermined'],
+                more={'undetermined': fastq_data['undetermined']},
             )
             linked_fastq_path = wrk_dir / linked_fastq_name
             linked_reads_paths[fastq_data['read']].append(linked_fastq_path)
