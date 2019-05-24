@@ -1,7 +1,8 @@
 """"Analysis logic for usalt"""
 import gzip
+import re
 
-from cg.apps.usalt import fastq
+from cg.apps.usalt.fastq import USaltFastqHandler
 from cg.store import models
 
 
@@ -29,10 +30,10 @@ def link_sample(self, sample_obj: models.MicrobialSample):
         }
         # look for tile identifier (HiSeq X runs)
         matches = re.findall(r'-l[1-9]t([1-9]{2})_', file_obj.path)
-        if len(matches) > 0:
+        if matches:
             data['flowcell'] = f"{data['flowcell']}-{matches[0]}"
         files.append(data)
 
     # Decision for linking in Usalt structure if data_analysis contains Usalt
-    fastq.link(case=sample_obj.microbial_order.internal_id,
-               sample=sample_obj.internal_id, files=files)
+    USaltFastqHandler.link(case=sample_obj.microbial_order.internal_id,
+                           sample=sample_obj.internal_id, files=files)
