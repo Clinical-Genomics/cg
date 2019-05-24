@@ -209,7 +209,7 @@ class AnalysisAPI:
 
     def link_sample(self, fastq_handler: BaseFastqHandler, sample: str, case: str):
         """Link FASTQ files for a sample."""
-        file_objs = self.hk.files(bundle=sample_obj.internal_id, tags=['fastq'])
+        file_objs = self.hk.files(bundle=sample, tags=['fastq'])
         files = []
 
         for file_obj in file_objs:
