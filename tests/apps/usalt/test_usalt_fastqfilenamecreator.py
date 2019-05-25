@@ -15,10 +15,12 @@ def test_fastq_create(valid_fastq_filename_pattern) -> dict:
     read = '1'
     undetermined = 'u'
 
+    more = {'undetermined': undetermined}
+
     # when calling the method to create a valid filename
     result_filename = USaltFastqHandler.FastqFileNameCreator.create(lane=lane, flowcell=flowcell,
                                                                     sample=sample, read=read,
-                                                                    undetermined=undetermined)
+                                                                    more=more)
 
     # then the filename produced is compatible with the filename rules
     assert re.match(valid_fastq_filename_pattern, result_filename)
