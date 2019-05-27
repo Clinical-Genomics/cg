@@ -47,8 +47,6 @@ class USaltFastqHandler(BaseFastqHandler):
 
         wrk_dir.mkdir(parents=True, exist_ok=True)
 
-        linked_reads_paths = {1: [], 2: []}
-
         for fastq_data in files:
             original_fastq_path = Path(fastq_data['path'])
             linked_fastq_name = self.FastqFileNameCreator.create(
@@ -59,7 +57,6 @@ class USaltFastqHandler(BaseFastqHandler):
                 more={'undetermined': fastq_data['undetermined']},
             )
             linked_fastq_path = wrk_dir / linked_fastq_name
-            linked_reads_paths[fastq_data['read']].append(linked_fastq_path)
 
             if not linked_fastq_path.exists():
                 LOGGER.info("linking: %s -> %s", original_fastq_path, linked_fastq_path)
