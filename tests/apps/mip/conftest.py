@@ -4,6 +4,8 @@ from typing import List
 
 import pytest
 
+from cg.cg.apps import tb
+
 
 @pytest.fixture
 def valid_fastq_filename_pattern():
@@ -86,7 +88,7 @@ def create_file_data(file_path, flowcell, lane, read):
 
 
 @pytest.fixture
-def cg_config(tmpdir):
+def cg_config():
     """mock relevant parts of a cg-config"""
     return {}
 
@@ -103,16 +105,22 @@ def link_sample():
     return 'sample'
 
 
-class MockTB:
+class MockTB(tb.TrailblazerAPI):
     """Trailblazer mock fixture"""
 
     def __init__(self):
         self._link_was_called = False
 
-    def link(self, family: str, sample: str, analysis_type: str, files: List[str]):
+    def link(self, **kwargs):
+        """Link files mock"""
+
+        if kwargs:
+            del kwargs
+
         self._link_was_called = True
 
     def link_was_called(self):
+        """Check if link has been called"""
         return self._link_was_called
 
 
@@ -120,4 +128,3 @@ class MockTB:
 def tb_api():
 
     return MockTB()
-

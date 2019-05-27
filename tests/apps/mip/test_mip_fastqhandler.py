@@ -1,15 +1,13 @@
 # -*- coding: utf-8 -*-
 """Test FastqHandler"""
-import os
 from datetime import datetime
-from pathlib import Path
 
 from cg.apps import tb
 from cg.apps.mip.fastq import MipFastqHandler
 from cg.store import Store
 
 
-def test_link_file_count(tmpdir, cg_config, link_family, simple_files_data,
+def test_link_file_count(cg_config, link_family, simple_files_data,
                          store: Store, tb_api: tb.TrailblazerAPI):
     """Test method to test that the right number of files are created by linking"""
 
