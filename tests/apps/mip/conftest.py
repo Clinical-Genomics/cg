@@ -1,10 +1,9 @@
 """Fixtures for testing balsamic app"""
 import string
-from typing import List
 
 import pytest
 
-from cg.cg.apps import tb
+from cg.apps import tb
 
 
 @pytest.fixture
@@ -126,5 +125,6 @@ class MockTB(tb.TrailblazerAPI):
 
 @pytest.fixture
 def tb_api():
+    """Trailblazer API fixture"""
 
     return MockTB()
