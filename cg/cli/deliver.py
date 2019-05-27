@@ -23,7 +23,9 @@ def deliver(context):
 @click.option('-d', '--dry', is_flag=True, help='print config to console')
 @click.option('-V', '--version', help='version (date) of bundle')
 @click.option('-t', '--tag', multiple=True, help='the housekeeper tag(s)')
-@click.option('-i', '--inbox', default='/mnt/hds/proj/{customer}/INBOX/{family}/', help='customer inbox')
+@click.option('-i', '--inbox',
+              default='/home/proj/production/customers/{customer}/inbox/{family}/',
+              help='customer inbox')
 @click.argument('family')
 @click.pass_context
 def inbox(context, dry, family, version, tag, inbox):
