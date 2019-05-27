@@ -154,8 +154,8 @@ def link_microbial(context, order_id, sample_id):
     for sample_obj in sample_objs:
         LOG.info("%s: link FASTQ files", sample_obj.internal_id)
         context.obj['api'].link_sample(USaltFastqHandler(context.obj),
-                                       sample_obj.microbial_order.internal_id,
-                                       sample_obj.internal_id)
+                                       case=sample_obj.microbial_order.internal_id,
+                                       sample=sample_obj.internal_id)
 
 
 @analysis.command()
