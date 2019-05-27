@@ -120,15 +120,15 @@ def link(context, family_id, sample_id):
         LOG.info("%s: link FASTQ files", link_obj.sample.internal_id)
         if link_obj.sample.data_analysis and 'balsamic' in link_obj.sample.data_analysis.lower():
             context.obj['api'].link_sample(BalsamicFastqHandler(context.obj),
-                                           link_obj.family.internal_id,
-                                           link_obj.sample.internal_id)
+                                           case=link_obj.family.internal_id,
+                                           sample=link_obj.sample.internal_id)
         elif not link_obj.sample.data_analysis or 'mip' in link_obj.sample.data_analysis.lower():
             mip_fastq_handler = MipFastqHandler(context.obj,
                                                 context.obj['db'],
                                                 context.obj['tb'])
             context.obj['api'].link_sample(mip_fastq_handler,
-                                           link_obj.family.internal_id,
-                                           link_obj.sample.internal_id)
+                                           case=link_obj.family.internal_id,
+                                           sample=link_obj.sample.internal_id)
 
 
 @analysis.command('link-microbial')
