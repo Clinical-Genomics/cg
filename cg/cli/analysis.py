@@ -123,7 +123,7 @@ def link(context, family_id, sample_id):
                                            link_obj.family.internal_id,
                                            link_obj.sample.internal_id)
         elif not link_obj.sample.data_analysis or 'mip' in link_obj.sample.data_analysis.lower():
-            mip_fastq_handler = MipFastqHandler(context.obj
+            mip_fastq_handler = MipFastqHandler(context.obj,
                                                 context.obj['db'],
                                                 context.obj['tb'])
             context.obj['api'].link_sample(mip_fastq_handler,
