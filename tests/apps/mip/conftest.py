@@ -1,5 +1,6 @@
 """Fixtures for testing balsamic app"""
 import string
+from typing import List
 
 import pytest
 
@@ -104,17 +105,16 @@ def link_sample():
     return 'sample'
 
 
-class MockTB(tb.TrailblazerAPI):
+class MockTB:
     """Trailblazer mock fixture"""
 
     def __init__(self):
         self._link_was_called = False
 
-    def link(self, **kwargs):
+    def link(self, family: str, sample: str, analysis_type: str, files: List[str]):
         """Link files mock"""
 
-        if kwargs:
-            del kwargs
+        del family, sample, analysis_type, files
 
         self._link_was_called = True
 
