@@ -85,8 +85,8 @@ class FindBusinessDataHandler(BaseHandler):
             self.FamilySample.query
                 .join(models.FamilySample.family, models.FamilySample.sample)
                 .filter(
-                models.Family.internal_id == family_id,
-            ).all()
+                        models.Family.internal_id == family_id,
+                ).all()
         )
 
     def find_family(self, customer: models.Customer, name: str) -> models.Family:
@@ -114,8 +114,8 @@ class FindBusinessDataHandler(BaseHandler):
         if family:
             records = (
                 records
-                    .join(models.Flowcell.samples, models.Sample.links)
-                    .filter(models.FamilySample.family == family)
+                .join(models.Flowcell.samples, models.Sample.links)
+                .filter(models.FamilySample.family == family)
             )
         if status:
             records = records.filter_by(status=status)
