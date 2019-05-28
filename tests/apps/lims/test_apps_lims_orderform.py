@@ -313,8 +313,8 @@ def test_parsing_mip_balsamic_orderform(mip_balsamic_orderform):
     assert len(trio_family['samples']) == 7
     assert trio_family['name'] == 'whole-genome'
     assert trio_family['priority'] == 'research'
-    assert set(trio_family['panels']) == set(['AD-HSP', 'AD', 'AD-1.0-141202', 'Ataxi',
-                                              'ATX', '16PDEL', 'bindvev'])
+    assert set(trio_family['panels']) == set(['AD-HSP', 'CSAnemia', 'CILM', 'Ataxi',
+                                              'ATX', 'COCA', 'bindevev'])
     assert trio_family['require_qcok'] is True
     # ... and collect relevant info about the samples
 
