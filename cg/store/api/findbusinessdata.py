@@ -2,10 +2,11 @@
 import datetime as dt
 from typing import List
 
-from cg.store import models
-from cg.store.api.base import BaseHandler
 from sqlalchemy import or_, and_, func
 from sqlalchemy.orm import Query
+
+from cg.store import models
+from cg.store.api.base import BaseHandler
 
 
 class FindBusinessDataHandler(BaseHandler):
@@ -83,10 +84,10 @@ class FindBusinessDataHandler(BaseHandler):
         """Find the samples of a family."""
         return (
             self.FamilySample.query
-                .join(models.FamilySample.family, models.FamilySample.sample)
-                .filter(
-                        models.Family.internal_id == family_id,
-                ).all()
+            .join(models.FamilySample.family, models.FamilySample.sample)
+            .filter(
+                models.Family.internal_id == family_id,
+            ).all()
         )
 
     def find_family(self, customer: models.Customer, name: str) -> models.Family:
@@ -146,8 +147,8 @@ class FindBusinessDataHandler(BaseHandler):
         """Find a link between a family and a sample."""
         return (
             self.FamilySample.query
-                .join(models.FamilySample.family, models.FamilySample.sample)
-                .filter(
+            .join(models.FamilySample.family, models.FamilySample.sample)
+            .filter(
                 models.Family.internal_id == family_id,
                 models.Sample.internal_id == sample_id
             ).first()
