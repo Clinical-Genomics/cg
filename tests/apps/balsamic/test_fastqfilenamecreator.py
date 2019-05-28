@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """Test FastqHandlerBalsamic"""
-import re
 import datetime as dt
+import re
 
-from cg.apps.balsamic.fastq import FastqFileNameCreator
+from cg.apps.balsamic.fastq import BalsamicFastqHandler
 
 
 def test_create(valid_fastq_filename_pattern) -> dict:
@@ -17,13 +17,15 @@ def test_create(valid_fastq_filename_pattern) -> dict:
     undetermined = 'u'
     optional_date = dt.datetime.now()
     optional_index = 'abcdef'
+    more = {'undetermined': undetermined,
+            'date': optional_date,
+            'index': optional_index}
 
     # when calling the method to create a valid filename
-    result_filename = FastqFileNameCreator.create(lane=lane, flowcell=flowcell,
-                                                  sample=sample, read=read,
-                                                  undetermined=undetermined,
-                                                  date=optional_date,
-                                                  index=optional_index)
+    result_filename = BalsamicFastqHandler.FastqFileNameCreator.create(lane=lane,
+                                                                       flowcell=flowcell,
+                                                                       sample=sample, read=read,
+                                                                       more=more)
 
     # then the filename produced is compatible with the filename rules
     assert re.match(valid_fastq_filename_pattern, result_filename)
