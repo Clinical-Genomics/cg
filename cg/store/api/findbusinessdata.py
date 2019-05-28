@@ -2,11 +2,10 @@
 import datetime as dt
 from typing import List
 
-from sqlalchemy import or_, and_, func
-from sqlalchemy.orm import Query
-
 from cg.store import models
 from cg.store.api.base import BaseHandler
+from sqlalchemy import or_, and_, func
+from sqlalchemy.orm import Query
 
 
 class FindBusinessDataHandler(BaseHandler):
@@ -84,10 +83,10 @@ class FindBusinessDataHandler(BaseHandler):
         """Find the samples of a family."""
         return (
             self.FamilySample.query
-            .join(models.FamilySample.family, models.FamilySample.sample)
-            .filter(
+                .join(models.FamilySample.family, models.FamilySample.sample)
+                .filter(
                 models.Family.internal_id == family_id,
-                ).all()
+            ).all()
         )
 
     def find_family(self, customer: models.Customer, name: str) -> models.Family:
@@ -115,8 +114,8 @@ class FindBusinessDataHandler(BaseHandler):
         if family:
             records = (
                 records
-                .join(models.Flowcell.samples, models.Sample.links)
-                .filter(models.FamilySample.family == family)
+                    .join(models.Flowcell.samples, models.Sample.links)
+                    .filter(models.FamilySample.family == family)
             )
         if status:
             records = records.filter_by(status=status)
@@ -147,8 +146,8 @@ class FindBusinessDataHandler(BaseHandler):
         """Find a link between a family and a sample."""
         return (
             self.FamilySample.query
-            .join(models.FamilySample.family, models.FamilySample.sample)
-            .filter(
+                .join(models.FamilySample.family, models.FamilySample.sample)
+                .filter(
                 models.Family.internal_id == family_id,
                 models.Sample.internal_id == sample_id
             ).first()
@@ -159,7 +158,7 @@ class FindBusinessDataHandler(BaseHandler):
         return self.MicrobialOrder.query.filter_by(internal_id=internal_id).first()
 
     def microbial_orders(self, *, customer: models.Customer = None, enquiry: str = None) -> List[
-            models.MicrobialOrder]:
+        models.MicrobialOrder]:
         """Fetch all microbial_orders."""
         records = self.MicrobialOrder.query
         records = records.filter_by(customer=customer) if customer else records
@@ -172,11 +171,16 @@ class FindBusinessDataHandler(BaseHandler):
     def microbial_samples(self, *, customer: models.Customer = None, enquiry: str = None) -> List[
         models.MicrobialSample]:
         records = self.MicrobialSample.query
-        records = records.filter_by(customer=customer) if customer else records
+
+        if customer:
+            records.join(models.MicrobialOrder)
+            records = records.filter_by(models.MicrobialOrder.customer == customer)
+
         records = records.filter(or_(
             models.MicrobialSample.name.like(f"%{enquiry}%"),
             models.MicrobialSample.internal_id.like(f"%{enquiry}%"),
         )) if enquiry else records
+
         return records.order_by(models.MicrobialSample.created_at.desc())
 
     def microbial_sample(self, internal_id: str) -> models.MicrobialSample:
@@ -223,7 +227,7 @@ class FindBusinessDataHandler(BaseHandler):
         )) if enquiry else records
         return records.order_by(models.Sample.created_at.desc())
 
-    def samples_in_customer_group(self, *, customer: models.Customer = None, enquiry: str = None)\
+    def samples_in_customer_group(self, *, customer: models.Customer = None, enquiry: str = None) \
             -> List[models.Sample]:
         """Fetch all samples including those from collaborating customers."""
 
@@ -242,14 +246,3 @@ class FindBusinessDataHandler(BaseHandler):
             models.Sample.internal_id.like(f"%{enquiry}%"),
         )) if enquiry else records
         return records.order_by(models.Sample.created_at.desc())
-
-
-
-
-
-
-
-
-
-
-
