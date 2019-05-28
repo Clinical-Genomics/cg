@@ -210,7 +210,7 @@ def parse_sample(raw_sample):
         'rml_plate_name': raw_sample.get('UDF/RML plate name'),
         'sex': REV_SEX_MAP.get(raw_sample.get('UDF/Gender', '').strip()),
         'source': raw_sample.get('UDF/Source') if raw_sample.get('UDF/Source') in SOURCE_TYPES
-        else None,
+                  else None,
         'status': raw_sample['UDF/Status'].lower() if raw_sample.get('UDF/Status') else None,
         'tissue_block_size': raw_sample.get('UDF/Tissue Block Size'),
         'tumour': raw_sample.get('UDF/tumor') == 'yes',
