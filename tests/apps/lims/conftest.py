@@ -5,7 +5,7 @@ from cg.apps.lims.api import LimsAPI
 @pytest.fixture
 def balsamic_orderform():
     """Orderform fixture for Balsamic samples"""
-    return 'tests/fixtures/orderforms/1508.15.balsamic.xlsx'
+    return 'tests/fixtures/orderforms/1508.17.balsamic.xlsx'
 
 
 @pytest.fixture
@@ -17,7 +17,7 @@ def external_orderform():
 @pytest.fixture
 def fastq_orderform():
     """Orderform fixture for fastq samples"""
-    return 'tests/fixtures/orderforms/1508.15.fastq.xlsx'
+    return 'tests/fixtures/orderforms/1508.17.fastq.xlsx'
 
 
 @pytest.fixture
@@ -35,13 +35,13 @@ def microbial_orderform():
 @pytest.fixture
 def mip_orderform():
     """Orderform fixture for MIP samples"""
-    return 'tests/fixtures/orderforms/1508.15.mip.xlsx'
+    return 'tests/fixtures/orderforms/1508.17.mip.xlsx'
 
 
 @pytest.fixture
 def mip_balsamic_orderform():
     """Orderform fixture for MIP and Balsamic samples"""
-    return 'tests/fixtures/orderforms/1508.15.mip_balsamic.xlsx'
+    return 'tests/fixtures/orderforms/1508.17.mip_balsamic.xlsx'
 
 
 @pytest.fixture
