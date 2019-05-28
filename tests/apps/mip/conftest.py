@@ -4,8 +4,6 @@ from typing import List
 
 import pytest
 
-from cg.apps import tb
-
 
 @pytest.fixture
 def valid_fastq_filename_pattern():
