@@ -159,7 +159,7 @@ class FindBusinessDataHandler(BaseHandler):
         return self.MicrobialOrder.query.filter_by(internal_id=internal_id).first()
 
     def microbial_orders(self, *, customer: models.Customer = None, enquiry: str = None) -> List[
-        models.MicrobialOrder]:
+            models.MicrobialOrder]:
         """Fetch all microbial_orders."""
         records = self.MicrobialOrder.query
         records = records.filter_by(customer=customer) if customer else records
