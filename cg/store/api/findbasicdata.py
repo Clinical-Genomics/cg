@@ -22,7 +22,7 @@ class FindBasicDataHandler(BaseHandler):
             records = records.filter_by(prep_category=category)
         if archived is not None:
             records = records.filter_by(is_archived=archived)
-        return records
+        return records.order_by(self.Application.prep_category, self.Application.tag)
 
     def application_version(self, application: models.Application,
                             version: int) -> models.ApplicationVersion:

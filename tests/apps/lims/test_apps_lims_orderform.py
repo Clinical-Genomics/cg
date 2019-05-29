@@ -46,7 +46,7 @@ def test_parsing_fastq_orderform(fastq_orderform):
     # THEN it should determine the project type
     assert data['project_type'] == 'fastq'
     # ... and find all samples
-    assert len(data['items']) == 18
+    assert len(data['items']) == 43
 
     # ... and collect relevant sample info
     normal_sample = data['items'][1]
@@ -54,13 +54,13 @@ def test_parsing_fastq_orderform(fastq_orderform):
     assert normal_sample['name'] == 'whole-genome-2'
     assert normal_sample['container'] == 'Tube'
     assert normal_sample['data_analysis'] == 'fastq'
-    assert normal_sample['application'] == 'WGSPCFC030'
+    assert normal_sample['application'] == 'WGSLIFC030'
     assert normal_sample['sex'] == 'female'
     assert normal_sample['family'] == 'whole-genome'
     assert data['customer'] == 'cust000'
     assert normal_sample['require_qcok'] is False
     assert normal_sample['source'] == 'saliva'
-    assert normal_sample['priority'] == 'priority'
+    assert normal_sample['priority'] == 'research'
 
     assert normal_sample['container_name'] == ''
     assert normal_sample['well_position'] == ''
@@ -68,7 +68,7 @@ def test_parsing_fastq_orderform(fastq_orderform):
     assert normal_sample['tumour'] is False
 
     assert normal_sample['quantity'] == '1'
-    assert normal_sample['comment'] == 'sample comment'
+    assert normal_sample['comment'] == 'comment'
 
     assert tumour_sample['tumour'] is True
     assert tumour_sample['source'] == 'blood'
@@ -87,11 +87,11 @@ def test_parsing_mip_orderform(mip_orderform):
     assert len(data['items']) == 5
     # ... and collect relevant data about the families
     trio_family = data['items'][0]
-    assert len(trio_family['samples']) == 10
+    assert len(trio_family['samples']) == 7
     assert trio_family['name'] == 'whole-genome'
     assert trio_family['priority'] == 'research'
-    assert set(trio_family['panels']) == set(['CNM', 'AD-HSP', 'AD', 'AD-1.0-141202', 'Ataxi',
-                                              'ATX', '16PDEL', 'CM', 'bindvev', 'CILM'])
+    assert set(trio_family['panels']) == set(['AD-HSP', 'AD', 'AD-1.0-141202', 'Ataxi',
+                                              'ATX', '16PDEL', 'bindvev'])
     assert trio_family['require_qcok'] is True
     # ... and collect relevant info about the samples
 
@@ -99,7 +99,7 @@ def test_parsing_mip_orderform(mip_orderform):
     assert proband_sample['name'] == 'whole-genome-1'
     assert proband_sample['container'] == '96 well plate'
     assert proband_sample['data_analysis'] == 'MIP'
-    assert proband_sample['application'] == 'WGSPCFC015'
+    assert proband_sample['application'] == 'WGSPCFC030'
     assert proband_sample['sex'] == 'male'
     # family-id on the family
     # customer on the order (data)
@@ -261,14 +261,14 @@ def test_parsing_balsamic_orderform(balsamic_orderform):
 
     case = data['items'][0]
     sample = case['samples'][0]
-    assert len(case['samples']) == 10
+    assert len(case['samples']) == 7
 
     # This information is required
 
     assert sample['name'] == 'whole-genome-1'
     assert sample['container'] == '96 well plate'
     assert sample['data_analysis'] == 'Balsamic '
-    assert sample['application'] == 'WGSPCFC015'
+    assert sample['application'] == 'WGSPCFC030'
     assert sample['sex'] == 'male'
     assert case['name'] == 'whole-genome'
     assert data['customer'] == 'cust000'
@@ -277,9 +277,11 @@ def test_parsing_balsamic_orderform(balsamic_orderform):
     assert case['priority'] == 'research'
 
     # Required if Plate
-
     assert sample['container_name'] == 'plate'
     assert sample['well_position'] == 'A:1'
+
+    # This information is required for panel- or exome analysis
+    assert sample['elution_buffer'] == 'Nuclease free water'
 
     # This information is required for Balsamic analysis (cancer)
     assert sample['tumour'] is True
@@ -308,11 +310,11 @@ def test_parsing_mip_balsamic_orderform(mip_balsamic_orderform):
     assert len(data['items']) == 5
     # ... and collect relevant data about the families
     trio_family = data['items'][0]
-    assert len(trio_family['samples']) == 10
+    assert len(trio_family['samples']) == 7
     assert trio_family['name'] == 'whole-genome'
     assert trio_family['priority'] == 'research'
-    assert set(trio_family['panels']) == set(['CNM', 'AD-HSP', 'AD', 'AD-1.0-141202', 'Ataxi',
-                                              'ATX', '16PDEL', 'CM', 'bindvev', 'CILM'])
+    assert set(trio_family['panels']) == set(['AD-HSP', 'CSAnemia', 'CILM', 'Ataxi',
+                                              'ATX', 'COCA', 'bindevev'])
     assert trio_family['require_qcok'] is True
     # ... and collect relevant info about the samples
 
@@ -320,7 +322,7 @@ def test_parsing_mip_balsamic_orderform(mip_balsamic_orderform):
     assert proband_sample['name'] == 'whole-genome-1'
     assert proband_sample['container'] == '96 well plate'
     assert proband_sample['data_analysis'] == 'MIP + Balsamic'
-    assert proband_sample['application'] == 'WGSPCFC015'
+    assert proband_sample['application'] == 'WGSPCFC030'
     assert proband_sample['sex'] == 'male'
     # family-id on the family
     # customer on the order (data)
@@ -329,6 +331,9 @@ def test_parsing_mip_balsamic_orderform(mip_balsamic_orderform):
 
     assert proband_sample['container_name'] == 'plate'
     assert proband_sample['well_position'] == 'A:1'
+
+    # This information is required for panel- or exome analysis
+    assert proband_sample['elution_buffer'] == 'Nuclease free water'
 
     # panels on the family
     assert proband_sample['status'] == 'affected'
@@ -354,7 +359,7 @@ def test_parsing_mip_balsamic_orderform(mip_balsamic_orderform):
 
 def test_parse_mip_only(skeleton_orderform_sample: dict):
 
-    # GIVEN a raw sample with mip only value from orderform 1508:14 for data_analysis
+    # GIVEN a raw sample with mip only value from orderform 1508 for data_analysis
     raw_sample = skeleton_orderform_sample
     raw_sample['UDF/Data Analysis'] = 'MIP'
 
@@ -367,7 +372,7 @@ def test_parse_mip_only(skeleton_orderform_sample: dict):
 
 def test_parse_balsamic_only(skeleton_orderform_sample: dict):
 
-    # GIVEN a raw sample with balsamic only value from orderform 1508:14 for data_analysis
+    # GIVEN a raw sample with balsamic only value from orderform 1508 for data_analysis
     raw_sample = skeleton_orderform_sample
     raw_sample['UDF/Data Analysis'] = 'Balsamic '
 
@@ -380,7 +385,7 @@ def test_parse_balsamic_only(skeleton_orderform_sample: dict):
 
 def test_parse_mip_combined_with_balsamic(skeleton_orderform_sample: dict):
 
-    # GIVEN a raw sample with both mip and balsamic value from orderform 1508:14 for
+    # GIVEN a raw sample with both mip and balsamic value from orderform 1508 for
     # data_analysis
     raw_sample = skeleton_orderform_sample
     raw_sample['UDF/Data Analysis'] = 'MIP + Balsamic'
