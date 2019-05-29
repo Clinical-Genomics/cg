@@ -11,8 +11,7 @@ REV_SEX_MAP = {value: key for key, value in SEX_MAP.items()}
 CONTAINER_TYPES = ['Tube', '96 well plate']
 SOURCE_TYPES = set().union(METAGENOME_SOURCES, ANALYSIS_SOURCES)
 VALID_ORDERFORMS=[
-    '1508:15',      # Orderform MIP, Balsamic, sequencing only
-    '1508:16',      # Orderform MIP, Balsamic, sequencing only. same as 1508:15 with new date
+    '1508:17',      # Orderform MIP, Balsamic, sequencing only
     '1541:6',       # Orderform Externally sequenced samples
     '1603:7',       # Microbial WGS
     '1604:9',       # Orderform Ready made libraries (RML)
@@ -146,9 +145,9 @@ def expand_family(family_id, parsed_family):
         if raw_sample.get('container') in CONTAINER_TYPES:
             new_sample['container'] = raw_sample['container']
 
-        for key in ('data_analysis', 'container_name', 'well_position', 'quantity', 'status',
-                    'comment', 'capture_kit', 'tumour', 'tumour_purity',
-                    'formalin_fixation_time', 'post_formalin_fixation_time', 'tissue_block_size'):
+        for key in ('capture_kit', 'comment', 'container_name', 'data_analysis', 'elution_buffer',
+                    'formalin_fixation_time', 'post_formalin_fixation_time', 'quantity',
+                    'status', 'tissue_block_size', 'tumour', 'tumour_purity', 'well_position'):
             if raw_sample.get(key):
                 new_sample[key] = raw_sample[key]
 
@@ -182,7 +181,7 @@ def parse_sample(raw_sample):
 
     if raw_sample['UDF/priority'].lower() == 'förtur':
         raw_sample['UDF/priority'] = 'priority'
-    source = raw_sample.get('UDF/Source')
+    raw_source = raw_sample.get('UDF/Source')
     sample = {
         'application': raw_sample['UDF/Sequencing Analysis'],
         'capture_kit': raw_sample.get('UDF/Capture Library version'),
@@ -211,7 +210,7 @@ def parse_sample(raw_sample):
         'require_qcok': raw_sample.get('UDF/Process only if QC OK') == 'yes',
         'rml_plate_name': raw_sample.get('UDF/RML plate name'),
         'sex': REV_SEX_MAP.get(raw_sample.get('UDF/Gender', '').strip()),
-        'source': source if source in SOURCE_TYPES else None,
+        'source': raw_source if raw_source in SOURCE_TYPES else None,
         'status': raw_sample['UDF/Status'].lower() if raw_sample.get('UDF/Status') else None,
         'tissue_block_size': raw_sample.get('UDF/Tissue Block Size'),
         'tumour': raw_sample.get('UDF/tumor') == 'yes',
