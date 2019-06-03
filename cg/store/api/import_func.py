@@ -39,8 +39,9 @@ def import_application_versions(store, excel_path, sign):
             continue
 
         logging.info('adding to transaction new version for app tag %s', app_tag)
-        add_version_from_raw(application_obj, latest_version, raw_version,
+        new_version = add_version_from_raw(application_obj, latest_version, raw_version,
                              sign, store, workbook)
+        store.add(new_version)
 
     logging.info('all app tags added successfully to transaction, committing transaction')
     store.commit()
@@ -67,7 +68,8 @@ def import_applications(store, excel_path, sign):
             continue
 
         logging.info('adding to transaction new application %s', tag)
-        add_application_from_raw(raw_application, sign, store)
+        new_application = add_application_from_raw(raw_application, sign, store)
+        store.add(new_application)
 
     logging.info('all applications added successfully to transaction, committing transaction')
     store.commit()
