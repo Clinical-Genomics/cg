@@ -196,4 +196,4 @@ def exists_application_in_store(raw_application, store):
     """Check if the given raw application exists in the store"""
     db_application = get_application_from_store(store, raw_application)
 
-    return not db_application
+    return db_application is not None
