@@ -192,6 +192,5 @@ def add_application_from_raw(raw_application, sign, store: Store):
         comment=raw_application['comment'] + ' Added by %s' % sign,
         is_archived=raw_application['is_archived'] == 1.0,
         is_external=raw_application['is_external'] == 1.0,
-        created_at=raw_application['created_at'],
     )
     return new_application
