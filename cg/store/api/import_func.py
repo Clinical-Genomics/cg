@@ -40,7 +40,7 @@ def import_application_versions(store, excel_path, sign):
 
         logging.info('adding to transaction new version for app tag %s', app_tag)
         new_version = add_version_from_raw(application_obj, latest_version, raw_version,
-                             sign, store, workbook)
+                                           sign, store, workbook)
         store.add(new_version)
 
     logging.info('all app tags added successfully to transaction, committing transaction')
