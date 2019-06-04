@@ -109,7 +109,7 @@ class InvoiceAPI():
         return full_price * discount_factor
 
 
-    def _cost_center_split_factor(self, price, costcenter, percent_kth):
+    def _cost_center_split_factor(self, price, costcenter, percent_kth, tag, version):
         """Split price based on cost center"""
         if price:
             try:
@@ -141,7 +141,7 @@ class InvoiceAPI():
             self.log.append(f'Application tag/version semms to be missing for sample {record.id}.')
             return None
 
-        split_discounted_price = self._cost_center_split_factor(discounted_price, costcenter, percent_kth)
+        split_discounted_price = self._cost_center_split_factor(discounted_price, costcenter, percent_kth, tag, version)
 
         order = record.microbial_order.id if self.record_type == 'Microbial' else record.order
         ticket_number = record.microbial_order.ticket_number if self.record_type == 'Microbial' else record.ticket_number
