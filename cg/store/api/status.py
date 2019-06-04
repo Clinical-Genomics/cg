@@ -508,26 +508,26 @@ class StatusHandler(BaseHandler):
     def microbial_samples_to_invoice(self, customer: models.Customer = None):
         """Fetch microbial samples that should be invoiced.
 
-        Return microbial samples have been delivered but invoiced, excluding those that
-        have been marked to skip invoicing.
+        Returns microbial samples that have been delivered but not invoiced.
         """
         records = (
             self.MicrobialSample.query.filter(
                 models.MicrobialSample.delivered_at != None,
                 models.MicrobialSample.invoice_id == None,
-                #models.MicrobialSample.no_invoice == False,
-                #models.MicrobialSample.downsampled_to == None
+                #models.MicrobialSample.no_invoice == False, MICROBIAL SAMPLES DONT SEEM TO HAVE THIS KEY
+                #models.MicrobialSample.downsampled_to == None MICROBIAL SAMPLES DONT SEEM TO HAVE THIS KEY
             )
         )
         customers_to_invoice = [record.microbial_order.customer for record in records.all()]
         customers_to_invoice = list(set(customers_to_invoice))
-        records = records.join(models.MicrobialOrder).filter(models.MicrobialOrder.customer_id == customer.id) if customer else records
+        if customer:
+            records = records.join(models.MicrobialOrder).filter(models.MicrobialOrder.customer_id == customer.id)
         return records, customers_to_invoice
 
     def samples_to_invoice(self, customer: models.Customer = None):
         """Fetch samples that should be invoiced.
 
-        Return samples have been delivered but invoiced, excluding those that
+        Returns samples have been delivered but not invoiced, excluding those that
         have been marked to skip invoicing.
         """
         records = (
