@@ -19,16 +19,22 @@ def import_cmd(context):
 @import_cmd.command('application')
 @click.argument('excel_path')
 @click.argument('signature')
+@click.option('-d', '--dry-run', 'dry_run', is_flag=True, help='Test run, no changes to the '
+                                                               'database')
 @click.pass_context
-def application(context, excel_path, signature):
+def application(context, excel_path, signature, dry_run):
     """Import new applications to status-db"""
-    import_applications(context.obj['status'], excel_path, signature)
+    import_applications(context.obj['status'], excel_path, signature, dry_run)
 
 
 @import_cmd.command('application-version')
 @click.argument('excel_path')
 @click.argument('signature')
+@click.option('-d', '--dry-run', 'dry_run', is_flag=True, help='Test run, no changes to the '
+                                                               'database')
+@click.option('--skip-missing', 'skip_missing', is_flag=True, help='continue despite missing '
+                                                                   'applications')
 @click.pass_context
-def application_version(context, excel_path, signature):
+def application_version(context, excel_path, signature, dry_run, skip_missing):
     """Import new application versions to status-db"""
-    import_application_versions(context.obj['status'], excel_path, signature)
+    import_application_versions(context.obj['status'], excel_path, signature, dry_run, skip_missing)

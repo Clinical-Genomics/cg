@@ -8,14 +8,16 @@ import xlrd
 from cg.store import models, Store
 
 
-def import_application_versions(store, excel_path, sign):
+def import_application_versions(store, excel_path, sign, dry_run, skip_missing):
     """
     Imports all application versions from the specified excel file
     Args:
-        :param store:               status database store
+        :param store:               Status database store
         :param excel_path:          Path to excel file with headers: 'App tag', 'Valid from',
-                                   'Standard', 'Priority', 'Express', 'Research'
-        :param sign:               Signature of user running the script
+                                    'Standard', 'Priority', 'Express', 'Research'
+        :param sign:                Signature of user running the script
+        :param dry_run:             Test run, no changes to the database
+        :param skip_missing:        Continue despite missing applications
         """
 
     workbook = get_workbook_from_xl(excel_path)
@@ -26,28 +28,38 @@ def import_application_versions(store, excel_path, sign):
         application_obj = store.application(tag)
 
         if not application_obj:
-            logging.error('Failed to find application! Rolling back transaction. Please manually '
+            logging.error('Failed to find application! Please manually '
                           'add application: %s', tag)
-            store.rollback()
-            sys.exit()
+
+            if skip_missing:
+                continue
+            else:
+                logging.error('Rolling back transaction.')
+                store.rollback()
+                sys.exit()
 
         app_tag = application_obj.tag
         latest_version = store.latest_version(tag)
 
         if latest_version and versions_are_same(latest_version, raw_version, workbook.datemode):
-            logging.info('skipping redundant version for app tag %s', app_tag)
+            logging.info('skipping redundant application version for app tag %s', app_tag)
             continue
 
-        logging.info('adding to transaction new version for app tag %s', app_tag)
+        logging.info('adding new application version to transaction for app tag %s', app_tag)
         new_version = add_version_from_raw(application_obj, latest_version, raw_version,
                                            sign, store, workbook)
         store.add(new_version)
 
-    logging.info('all app tags added successfully to transaction, committing transaction')
-    store.commit()
+    if not dry_run:
+        logging.info('all application versions successfully added to transaction, committing '
+                     'transaction')
+        store.commit()
+    else:
+        logging.error('Dry-run, rolling back transaction.')
+        store.rollback()
 
 
-def import_applications(store, excel_path, sign):
+def import_applications(store, excel_path, sign, dry_run):
     """
     Imports all applications from the specified excel file
     Args:
@@ -55,6 +67,7 @@ def import_applications(store, excel_path, sign):
         :param excel_path:          Path to excel file with headers: 'App tag', 'Valid from',
                                    'Standard', 'Priority', 'Express', 'Research'
         :param sign:               Signature of user running the script
+        :param dry_run:             Test run, no changes to the database
         """
 
     raw_applications = get_raw_data_from_xl(excel_path)
@@ -67,12 +80,16 @@ def import_applications(store, excel_path, sign):
             logging.info('skipping redundant application %s', tag)
             continue
 
-        logging.info('adding to transaction new application %s', tag)
+        logging.info('adding new application to transaction %s', tag)
         new_application = add_application_from_raw(raw_application, sign, store)
         store.add(new_application)
 
-    logging.info('all applications added successfully to transaction, committing transaction')
-    store.commit()
+    if not dry_run:
+        logging.info('all applications successfully added to transaction, committing transaction')
+        store.commit()
+    else:
+        logging.error('Dry-run, rolling back transaction.')
+        store.rollback()
 
 
 def get_tag_from_raw_version(raw_data):

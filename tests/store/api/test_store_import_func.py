@@ -107,21 +107,47 @@ def test_application_version(application_versions_file, store: Store):
     sign = 'TestSign'
 
     # WHEN calling import_application_version
-    import_application_versions(store, application_versions_file, sign)
+    import_application_versions(store, application_versions_file, sign, dry_run=False,
+                                skip_missing=False)
 
     # THEN versions should have been created in the store
     assert all_versions_exists_in_store(store, application_versions_file)
+
+
+def test_application_version_dry_run(application_versions_file, store: Store):
+    # GIVEN a store with applications
+    # and an excel file with prices for those applications
+    add_applications(store, application_versions_file)
+    sign = 'TestSign'
+
+    # WHEN calling import_application_version as dry run
+    import_application_versions(store, application_versions_file, sign, dry_run=True,
+                                skip_missing=False)
+
+    # THEN versions should not have been created in the store
+    assert not all_versions_exists_in_store(store, application_versions_file)
 
 
 def test_application(applications_file, store: Store):
     # GIVEN a store and an excel file with applications
     sign = 'TestSign'
 
-    # WHEN calling versions are same
-    import_applications(store, applications_file, sign)
+    # WHEN calling import_applications
+    import_applications(store, applications_file, sign, dry_run=False)
 
     # THEN applications should have been created in the store
     assert all_applications_exists(store, applications_file)
+
+
+def test_application_dry_run(applications_file, store: Store):
+    # GIVEN a store and an excel file with applications
+    sign = 'TestSign'
+
+    # WHEN calling import_applications as dry run
+    import_applications(store, applications_file, sign, dry_run=True)
+
+    # THEN applications should not have been created in the store
+    assert not all_applications_exists(store, applications_file)
 
 
 def ensure_application(store, tag):
