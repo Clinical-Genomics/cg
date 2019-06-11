@@ -52,12 +52,12 @@ MASTER_STEPS = {
         'AUTOMATED - NovaSeq Run',
     ],
     'capture_kit_step': [
-        'CG002 - Hybridize Library  (SS XT)',
+        'obsolete_CG002 - Hybridize Library  (SS XT)',
         'Capture and Wash TWIST v1',
     ],
     'prep_method_step': [
         'CG002 - End repair Size selection A-tailing and Adapter ligation (TruSeq PCR-free DNA)',
-        'CG002 - Hybridize Library  (SS XT)',
+        'obsolete_CG002 - Hybridize Library  (SS XT)',
         'CG002 - Microbial Library Prep (Nextera)',
         'End-Repair and A-tailing TWIST v1',
         ')',
