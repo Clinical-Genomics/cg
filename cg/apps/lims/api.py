@@ -7,7 +7,7 @@ from genologics.lims import Lims
 from dateutil.parser import parse as parse_date
 
 from cg.exc import LimsDataError
-from .constants import PROP2UDF
+from .constants import PROP2UDF, MASTER_STEPS
 from .order import OrderHandler
 
 # fixes https://github.com/Clinical-Genomics/servers/issues/30
@@ -41,7 +41,7 @@ class LimsAPI(Lims, OrderHandler):
         lims_sample = Sample(self, id=lims_id)
         data = self._export_sample(lims_sample)
         return data
-    
+
     def samples_in_pools(self, pool_name, projectname):
         return self.get_samples(udf={"pool name": str(pool_name)}, projectname=projectname)
 
@@ -85,74 +85,111 @@ class LimsAPI(Lims, OrderHandler):
 
     def get_received_date(self, lims_id: str) -> str:
         """Get the date when a sample was received."""
-        lims_artifacts = self.get_artifacts(process_type='CG002 - Reception Control',
-                                            samplelimsid=lims_id)
-        for artifact in lims_artifacts:
-            udf_key = 'date arrived at clinical genomics'
-            if artifact.parent_process and artifact.parent_process.udf.get(udf_key):
-                return artifact.parent_process.udf.get(udf_key)
+
+        step_names = MASTER_STEPS['received_step']
+        received_dates = []
+
+        for process_type in step_names:
+            artifacts = self.get_artifacts(process_type=process_type, samplelimsid=lims_id)
+
+            for artifact in artifacts:
+                udf_key = 'date arrived at clinical genomics'
+                if artifact.parent_process and artifact.parent_process.udf.get(udf_key):
+                    received_dates.append((artifact.parent_process.date_run,
+                                           artifact.parent_process.udf.get(udf_key)))
+
+        sorted_dates = sorted(received_dates, key=lambda x: x[0])
+
+        return sorted_dates[-1][1] if len(sorted_dates) > 0 else None
 
     def get_prepared_date(self, lims_id: str) -> dt.datetime:
         """Get the date when a sample was prepared in the lab."""
-        process_type = 'CG002 - Aggregate QC (Library Validation)'
-        artifacts = self.get_artifacts(process_type=process_type, samplelimsid=lims_id)
-        if artifacts:
-            return parse_date(artifacts[0].parent_process.date_run)
+
+        step_names = MASTER_STEPS['prepared_step']
+        prepared_dates = []
+
+        for process_type in step_names:
+            artifacts = self.get_artifacts(process_type=process_type, samplelimsid=lims_id)
+
+            for artifact in artifacts:
+                prepared_dates.append(parse_date(artifact.parent_process.date_run))
+
+        sorted_dates = sorted(prepared_dates)
+
+        return sorted_dates[-1] if len(sorted_dates) > 0 else None
 
     def get_delivery_date(self, lims_id: str) -> dt.date:
         """Get delivery date for a sample."""
-        artifacts = self.get_artifacts(samplelimsid=lims_id, process_type='Delivery v1',
-                                       type='Analyte')
-        if len(artifacts) == 1:
-            return artifacts[0].parent_process.udf.get('Date delivered')
-        elif len(artifacts) == 0:
-            return None
-        else:
+
+        step_names = MASTER_STEPS['delivery_step']
+        delivered_dates = []
+
+        for process_type in step_names:
+            artifacts = self.get_artifacts(process_type=process_type, samplelimsid=lims_id,
+                                           type='Analyte')
+
+            for artifact in artifacts:
+                udf_key = 'Date delivered'
+                if artifact.parent_process and artifact.parent_process.udf.get(udf_key):
+                    delivered_dates.append((artifact.parent_process.date_run,
+                                            artifact.parent_process.udf.get(udf_key)))
+
+        sorted_dates = sorted(delivered_dates, key=lambda x: x[0])
+
+        if len(sorted_dates) > 0:
             log.warning(f"multiple delivery artifacts found for: {lims_id}")
-            return min(artifact.parent_process.udf['Date delivered'] for artifact in artifacts)
+
+        return sorted_dates[-1][1] if len(sorted_dates) > 0 else None
 
     def get_sequenced_date(self, lims_id: str) -> dt.date:
         """Get the date when a sample was sequenced."""
-        process_types = ['CG002 - Illumina Sequencing (Illumina SBS)',
-                         'CG002 - Illumina Sequencing (HiSeq X)']
 
-        for process_type in process_types:
-            lims_artifacts = self.get_artifacts(process_type=process_type, samplelimsid=lims_id)
+        step_names = MASTER_STEPS['sequenced_step']
+        sequenced_dates = []
 
-            if len(lims_artifacts) == 0:
-                continue  # continue in case the artifacts are in the other process_type
-            elif len(lims_artifacts) == 1:
-                return lims_artifacts[0].parent_process.udf.get('Finish Date')  # return date immediately if only one artifact is found
-            else:
-                log.warning(f"multiple sequence artifacts found for: {lims_id}")
-                sequence_dates = [artifact.parent_process.udf.get('Finish Date') for artifact in lims_artifacts
-                                  if artifact.parent_process.udf.get('Finish Date') is not None]
-                if len(sequence_dates) == 0:
-                    break  # nothing sequenced, break out and return None
-                else:
-                    return min(sequence_dates)
+        for process_type in step_names:
+            artifacts = self.get_artifacts(process_type=process_type, samplelimsid=lims_id)
 
-        return None  # if nothing is found just return None
+            for artifact in artifacts:
+                udf_key = 'Finish Date'
+                if artifact.parent_process and artifact.parent_process.udf.get(udf_key):
+                    sequenced_dates.append((artifact.parent_process.date_run,
+                                            artifact.parent_process.udf.get(udf_key)))
+
+        sorted_dates = sorted(sequenced_dates, key=lambda x: x[0])
+
+        if len(sorted_dates) > 0:
+            log.warning(f"multiple sequence artifacts found for: {lims_id}")
+
+        return sorted_dates[-1][1] if len(sorted_dates) > 0 else None
 
     def capture_kit(self, lims_id: str) -> str:
         """Get capture kit for a LIMS sample."""
+
+        step_names = MASTER_STEPS['capture_kit_step']
+        capture_kits = set()
+
         lims_sample = Sample(self, id=lims_id)
         capture_kit = lims_sample.udf.get('Capture Library version')
         if capture_kit and capture_kit != 'NA':
             return capture_kit
         else:
-            artifacts = self.get_artifacts(
-                samplelimsid=lims_id,
-                process_type='CG002 - Hybridize Library  (SS XT)',
-                type='Analyte'
-            )
-            udf_key = 'SureSelect capture library/libraries used'
-            capture_kits = set(artifact.parent_process.udf.get(udf_key) for artifact in artifacts)
-            if len(capture_kits) == 1:
-                return capture_kits.pop()
-            else:
-                message = f"Capture kit error: {lims_sample.id} | {capture_kits}"
-                raise LimsDataError(message)
+            for process_type in step_names:
+                artifacts = self.get_artifacts(
+                    samplelimsid=lims_id,
+                    process_type=process_type,
+                    type='Analyte'
+                )
+                udf_key = 'SureSelect capture library/libraries used'
+                capture_kits = capture_kits.union(set(artifact.parent_process.udf.get(udf_key) for
+                                                      artifact in artifacts))
+                if len(capture_kits) == 1:
+                    continue
+                else:
+                    message = f"Capture kit error: {lims_sample.id} | {capture_kits}"
+                    raise LimsDataError(message)
+
+        return capture_kits.pop()
 
     def get_samples(self, *args, map_ids=False, **kwargs):
         """Bypass to original method."""
@@ -219,22 +256,28 @@ class LimsAPI(Lims, OrderHandler):
 
     def get_prep_method(self, lims_id: str) -> str:
         """Get the library preparation method."""
-        process_names = [
-            'CG002 - End repair Size selection A-tailing and Adapter ligation (TruSeq PCR-free '
-            'DNA)',
-            'CG002 - Hybridize Library  (SS XT)',
-        ]
+
+        step_names = MASTER_STEPS['prep_method_step']
+        prep_methods = []
+
         method_name = method_number = None
-        for process_name in process_names:
+        for process_name in step_names:
             arts = self.get_artifacts(process_type=process_name, samplelimsid=lims_id)
             if arts:
                 prep_artifact = arts[0]
+                date_run = prep_artifact.parent_process.date_run
                 method_number = prep_artifact.parent_process.udf.get('Method document')
                 method_version = (
                         prep_artifact.parent_process.udf.get('Method document version') or
                         prep_artifact.parent_process.udf.get('Method document versio')
                 )
-                break
+                prep_methods.append((date_run, method_number, method_version))
+
+        sorted_methods = sorted(prep_methods, key=lambda x: x[0])
+
+        prep_method = sorted_methods[-1]
+        method_number = prep_method[1]
+        method_version = prep_method[2]
 
         if method_number is None:
             return None
@@ -244,15 +287,16 @@ class LimsAPI(Lims, OrderHandler):
 
     def get_sequencing_method(self, lims_id: str) -> str:
         """Get the sequencing method."""
-        process_names = [
-            'CG002 - Cluster Generation (HiSeq X)',
-            'CG002 - Cluster Generation (Illumina SBS)',
-        ]
+
+        step_names = MASTER_STEPS['get_sequencing_method_step']
+        seq_methods = []
+
         method_number = method_version = None
-        for process_name in process_names:
+        for process_name in step_names:
             arts = self.get_artifacts(process_type=process_name, samplelimsid=lims_id)
             if arts:
                 prep_artifact = arts[0]
+                date_run = prep_artifact.parent_process.date_run
                 method_number = (
                         prep_artifact.parent_process.udf.get('Method') or
                         prep_artifact.parent_process.udf.get('Method Document 1')
@@ -261,26 +305,45 @@ class LimsAPI(Lims, OrderHandler):
                         prep_artifact.parent_process.udf.get('Version') or
                         prep_artifact.parent_process.udf.get('Document 1 Version')
                 )
-                break
+                seq_methods.append((date_run, method_number, method_version))
+
+        sorted_methods = sorted(seq_methods, key=lambda x: x[0])
+
+        seq_method = sorted_methods[-1]
+        method_number = seq_method[1]
+        method_version = seq_method[2]
+        method_name = AM_METHODS.get(method_number)
 
         if method_number is None:
             return None
 
-        method_name = AM_METHODS.get(method_number)
         return f"{method_number}:{method_version} - {method_name}"
 
     def get_delivery_method(self, lims_id: str) -> str:
         """Get the delivery method."""
-        process_name = 'CG002 - Delivery'
-        arts = self.get_artifacts(process_type=process_name, samplelimsid=lims_id)
-        if arts:
-            prep_artifact = arts[0]
-            method_number = prep_artifact.parent_process.udf.get('Method Document')
-            method_version = prep_artifact.parent_process.udf.get('Method Version')
-        else:
+
+        step_names = MASTER_STEPS['get_delivery_method_step']
+        deliver_methods = []
+
+        for process_name in step_names:
+            arts = self.get_artifacts(process_type=process_name, samplelimsid=lims_id)
+            if arts:
+                prep_artifact = arts[0]
+                date_run = prep_artifact.parent_process.date_run
+                method_number = prep_artifact.parent_process.udf.get('Method Document')
+                method_version = prep_artifact.parent_process.udf.get('Method Version')
+                deliver_methods.append((date_run, method_number, method_version))
+
+        sorted_methods = sorted(deliver_methods, key=lambda x: x[0])
+
+        deliver_method = sorted_methods[-1]
+        method_number = deliver_method[1]
+        method_version = deliver_method[2]
+        method_name = AM_METHODS.get(method_number)
+
+        if method_number is None:
             return None
 
-        method_name = AM_METHODS.get(method_number)
         return f"{method_number}:{method_version} - {method_name}"
 
     def get_processing_time(self, lims_id):
