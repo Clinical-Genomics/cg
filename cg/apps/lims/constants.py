@@ -30,3 +30,44 @@ PROP2UDF = {
     'well_position_rml': 'RML well position',
     'verified_organism': 'Verified organism',
 }
+
+MASTER_STEPS = {
+    'received_step': [
+        'CG002 - Reception Control (Dev)',
+        'CG002 - Reception Control',
+        'Reception Control TWIST v1',
+    ],
+    'prepared_step': [
+        'CG002 - Aggregate QC (Library Validation) (Dev)',
+        'CG002 - Aggregate QC (Library Validation)',
+        'CG002 - Aggregate QC (Library Validation) TWIST v1',
+    ],
+    'delivery_step': [
+        'CG002 - Delivery',
+        'Delivery v1',
+    ],
+    'sequenced_step': [
+        'CG002 - Illumina Sequencing (HiSeq X)',
+        'CG002 - Illumina Sequencing (Illumina SBS)',
+        'AUTOMATED - NovaSeq Run',
+    ],
+    'capture_kit_step': [
+        'CG002 - Hybridize Library  (SS XT)',
+        'Capture and Wash TWIST v1',
+    ],
+    'prep_method_step': [
+        'CG002 - End repair Size selection A-tailing and Adapter ligation (TruSeq PCR-free DNA)',
+        'CG002 - Hybridize Library  (SS XT)',
+        'CG002 - Microbial Library Prep (Nextera)',
+        'End-Repair and A-tailing TWIST v1',
+        ')',
+    ],
+    'sequencing_method_step': [
+        'CG002 - Cluster Generation (HiSeq X)',
+        'CG002 - Cluster Generation (Illumina SBS)',
+    ],
+    'delivery_method_step': [
+        'CG002 - Delivery',
+        'Delivery v1',
+    ],
+}
