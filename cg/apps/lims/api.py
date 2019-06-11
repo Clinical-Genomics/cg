@@ -7,7 +7,7 @@ from genologics.lims import Lims
 from dateutil.parser import parse as parse_date
 
 from cg.exc import LimsDataError
-from .constants import PROP2UDF, MASTER_STEPS
+from .constants import PROP2UDF, MASTER_STEPS_UDFS
 from .order import OrderHandler
 
 # fixes https://github.com/Clinical-Genomics/servers/issues/30
@@ -86,14 +86,14 @@ class LimsAPI(Lims, OrderHandler):
     def get_received_date(self, lims_id: str) -> str:
         """Get the date when a sample was received."""
 
-        step_names = MASTER_STEPS['received_step']
+        step_names_udfs = MASTER_STEPS_UDFS['received_step']
         received_dates = []
 
-        for process_type in step_names:
+        for process_type in step_names_udfs.keys():
             artifacts = self.get_artifacts(process_type=process_type, samplelimsid=lims_id)
 
             for artifact in artifacts:
-                udf_key = 'date arrived at clinical genomics'
+                udf_key = step_names_udfs[process_type]
                 if artifact.parent_process and artifact.parent_process.udf.get(udf_key):
                     received_dates.append((artifact.parent_process.date_run,
                                            artifact.parent_process.udf.get(udf_key)))
