@@ -155,6 +155,9 @@ class LimsAPI(Lims, OrderHandler):
                 if artifact.parent_process and artifact.parent_process.udf.get(udf_key):
                     sequenced_dates.append((artifact.parent_process.date_run,
                                             artifact.parent_process.udf.get(udf_key)))
+                if artifact.parent_process and process_type == 'AUTOMATED - NovaSeq Run':
+                    sequenced_dates.append((artifact.parent_process.date_run,
+                                            artifact.parent_process.date_run))
 
         sorted_dates = sorted(sequenced_dates, key=lambda x: x[0])
 
