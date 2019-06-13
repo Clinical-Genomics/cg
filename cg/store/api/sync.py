@@ -39,7 +39,7 @@ def sync_applications(store: Store, excel_path: str, prep_category: str, sign: s
         application_obj = store.application(tag=orderform_application_tag)
 
         if not application_obj:
-            logging.error(f'Application %s was not found', orderform_application_tag)
+            logging.error('Application %s was not found', orderform_application_tag)
             sys.exit()
 
         if application_obj.prep_category != prep_category:
