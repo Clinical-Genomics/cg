@@ -178,7 +178,7 @@ def flowcell(context, flowcell_name, status):
 def microbial_order(context, apptag, priority, order_id, user_signature):
     """Update information on all samples on a microbial order"""
 
-    if not apptag:
+    if not apptag and not priority:
         click.echo(click.style(f"no option specified: {order_id}", fg='yellow'))
         context.abort()
 
