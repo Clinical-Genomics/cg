@@ -203,8 +203,8 @@ class LimsAPI(Lims, OrderHandler):
             for lims_sample in lims_artifact.samples:
                 yield lims_sample.id
 
-    def update_sample(self, lims_id: str, sex=None, application: str=None,
-                      target_reads: int=None):
+    def update_sample(self, lims_id: str, sex=None, application: str = None,
+                      target_reads: int = None, priority=None):
         """Update information about a sample."""
         lims_sample = Sample(self, id=lims_id)
         if sex:
@@ -215,6 +215,9 @@ class LimsAPI(Lims, OrderHandler):
             lims_sample.udf[PROP2UDF['application']] = application
         if isinstance(target_reads, int):
             lims_sample.udf[PROP2UDF['target_reads']] = target_reads
+        if priority:
+            lims_sample.udf[PROP2UDF['priority']] = priority
+
         lims_sample.put()
 
     def get_prep_method(self, lims_id: str) -> str:
