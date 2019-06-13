@@ -44,7 +44,7 @@ def metagenome_orderform():
 @pytest.fixture
 def microbial_orderform():
     """Orderform fixture for microbial samples"""
-    return 'tests/fixtures/orderforms/1603.7.microbial.xlsx'
+    return 'tests/fixtures/orderforms/1603.8.microbial.xlsx'
 
 
 @pytest.fixture
@@ -63,33 +63,3 @@ def mip_balsamic_orderform():
 def rml_orderform():
     """Orderform fixture for RML samples"""
     return 'tests/fixtures/orderforms/1604.9.rml.xlsx'
-
-
-def ensure_applications(store: Store, list_of_tags: list, number_of_active_applications: int):
-
-
-
-
-
-@pytest.fixture
-def microbial_store(base_store: Store):
-    """Fixture where all apptags in ordeform 1603:7, first one is inactive"""
-    applications = ensure_applications(store, [''], 1)
-    applications = [base_store.add_application('WGXCUSC000', 'mic', 'External WGS',
-                                               sequencing_depth=0, is_external=True),
-                    base_store.add_application('EXXCUSR000', 'mic', 'External WES',
-                                               sequencing_depth=0, is_external=True),
-                    base_store.add_application('WGSPCFC060', 'mic', 'WGS, double', sequencing_depth=30,
-                                               accredited=True),
-                    base_store.add_application('RMLS05R150', 'mic', 'Ready-made', sequencing_depth=0),
-                    base_store.add_application('WGTPCFC030', 'mic', 'WGS trio', is_accredited=True,
-                                               sequencing_depth=30, target_reads=300000000,
-                                               limitations='some'),
-                    base_store.add_application('METLIFR020', 'mic', 'Whole genome metagenomics',
-                                               sequencing_depth=0, target_reads=40000000),
-                    base_store.add_application('METNXTR020', 'mic', 'Metagenomics',
-                                               sequencing_depth=0, target_reads=20000000),
-                    base_store.add_application('MWRNXTR003', 'mic', 'Microbial whole genome ',
-                                               sequencing_depth=0)]
-
-    base_store.add_commit(applications)
