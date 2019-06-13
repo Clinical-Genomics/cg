@@ -13,7 +13,7 @@ SOURCE_TYPES = set().union(METAGENOME_SOURCES, ANALYSIS_SOURCES)
 VALID_ORDERFORMS=[
     '1508:17',      # Orderform MIP, Balsamic, sequencing only
     '1541:6',       # Orderform Externally sequenced samples
-    '1603:7',       # Microbial WGS
+    '1603:8',       # Microbial WGS
     '1604:9',       # Orderform Ready made libraries (RML)
     '1605:6',       # Microbial metagenomes
 ]
