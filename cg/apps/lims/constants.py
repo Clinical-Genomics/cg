@@ -37,37 +37,68 @@ MASTER_STEPS_UDFS = {
         'CG002 - Reception Control': 'date arrived at clinical genomics',
         'Reception Control TWIST v1': 'date arrived at clinical genomics',
     },
-    'prepared_step': [
-        'CG002 - Aggregate QC (Library Validation) (Dev)',
-        'CG002 - Aggregate QC (Library Validation)',
-        'CG002 - Aggregate QC (Library Validation) TWIST v1',
-    ],
-    'delivery_step': [
-        'CG002 - Delivery',
-        'Delivery v1',
-    ],
-    'sequenced_step': [
-        'CG002 - Illumina Sequencing (HiSeq X)',
-        'CG002 - Illumina Sequencing (Illumina SBS)',
-        'AUTOMATED - NovaSeq Run',
-    ],
-    'capture_kit_step': [
-        'obsolete_CG002 - Hybridize Library  (SS XT)',
-        'Capture and Wash TWIST v1',
-    ],
-    'prep_method_step': [
-        'CG002 - End repair Size selection A-tailing and Adapter ligation (TruSeq PCR-free DNA)',
-        'obsolete_CG002 - Hybridize Library  (SS XT)',
-        'CG002 - Microbial Library Prep (Nextera)',
-        'End-Repair and A-tailing TWIST v1',
-        ')',
-    ],
-    'sequencing_method_step': [
-        'CG002 - Cluster Generation (HiSeq X)',
-        'CG002 - Cluster Generation (Illumina SBS)',
-    ],
-    'delivery_method_step': [
-        'CG002 - Delivery',
-        'Delivery v1',
-    ],
+    'prepared_step': {
+        'CG002 - Aggregate QC (Library Validation) (Dev)': None,
+        'CG002 - Aggregate QC (Library Validation)': None,
+        'CG002 - Aggregate QC (Library Validation) TWIST v1': None,
+    },
+    'delivery_step': {
+        'CG002 - Delivery': None,
+        'Delivery v1': None,
+    },
+    'sequenced_step': {
+        'CG002 - Illumina Sequencing (HiSeq X)': 'Finish Date',
+        'CG002 - Illumina Sequencing (Illumina SBS)': 'Finish Date',
+        'AUTOMATED - NovaSeq Run': 'Finish Date',
+    },
+    'capture_kit_step': {
+        'obsolete_CG002 - Hybridize Library  (SS XT)': 'SureSelect capture library/libraries used',
+        'Capture and Wash TWIST v1': 'Twist enrichment kit',
+    },
+    'prep_method_step': {
+        'CG002 - End repair Size selection A-tailing and Adapter ligation (TruSeq PCR-free DNA)':
+        {
+            'method_number': 'Method document',
+            'method_version': 'Method document version',
+        },
+        'obsolete_CG002 - Hybridize Library  (SS XT)':
+        {
+            'method_number': 'Method document',
+            'method_version': 'Method document versio',
+        },
+        'CG002 - Microbial Library Prep (Nextera)':
+        {
+            'method_number': 'Method',
+            'method_version': 'Method Version',
+        },
+        'End-Repair and A-tailing TWIST v1':
+        {
+            'method_number': 'Method document',
+            'method_version': 'Method version',
+        },
+    },
+    'sequencing_method_step': {
+        'CG002 - Cluster Generation (HiSeq X)':
+        {
+            'method_number': 'Method',
+            'method_version': 'Version',
+        },
+        'CG002 - Cluster Generation (Illumina SBS)':
+        {
+            'method_number': 'Method Document 1',
+            'method_version': 'Document 1 Version',
+        },
+    },
+    'delivery_method_step': {
+        'CG002 - Delivery':
+        {
+            'method_number': 'Method Document',
+            'method_version': 'Method Version',
+        },
+        'Delivery v1':
+        {
+            'method_number': 'Method Document',
+            'method_version': 'Method Version',
+        },
+    },
 }
