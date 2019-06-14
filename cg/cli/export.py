@@ -17,7 +17,7 @@ def export(context: click.Context, table: str, identifier: str):
     db_obj = db_func(identifier)
 
     if db_obj is None:
-        LOG.error(f"{identifier}: {table} not found")
+        LOG.error("%s: %s not found", identifier, table)
         context.abort()
 
     click.echo(db_obj.to_dict())
