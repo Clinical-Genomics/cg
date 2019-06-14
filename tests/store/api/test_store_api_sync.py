@@ -1,3 +1,5 @@
+"""Test store api sync methods"""
+
 from cg.store import Store
 from cg.store.api.sync import sync_apptags
 
