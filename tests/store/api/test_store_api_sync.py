@@ -62,7 +62,7 @@ def test_sync_microbial_orderform_inactivate(base_store: Store, microbial_orderf
     # GIVEN a microbial orderform and a store where all the apptags exists half some inactive and
     # some active
     ensure_applications(base_store, ['MWRNXTR003', 'MWGNXTR003', 'MWMNXTR003', 'MWLNXTR003',
-                                     'MWLNXTR004'],
+                                     'dummy_tag'],
                         ['MWXNXTR003', 'VWGNXTR001', 'VWLNXTR001'])
     prep_category = 'mic'
     sign = 'PG'
