@@ -8,8 +8,8 @@ import xlrd
 from cg.store import Store
 
 
-def sync_applications(store: Store, excel_path: str, prep_category: str, sign: str, sheet_name:
-                      str, tag_column: int, activate: bool, inactivate: bool):
+def sync_apptags(store: Store, excel_path: str, prep_category: str, sign: str, sheet_name:
+                 str, tag_column: int, activate: bool, inactivate: bool):
     """
     Syncs all applications from the specified excel file
     Args:
@@ -27,7 +27,7 @@ def sync_applications(store: Store, excel_path: str, prep_category: str, sign: s
     orderform_application_tags = []
 
     for raw_row in get_raw_data_from_xl(excel_path, sheet_name, tag_column):
-        tag = get_tag_from_raw_application(raw_row, tag_column)
+        tag = get_tag_from_raw_data(raw_row, tag_column)
         logging.info('Found: %s in orderform', tag)
         orderform_application_tags.append(tag)
 
@@ -86,7 +86,7 @@ def sync_applications(store: Store, excel_path: str, prep_category: str, sign: s
         store.commit()
 
 
-def get_tag_from_raw_application(raw_data, column: int):
+def get_tag_from_raw_data(raw_data, column: int):
     """Gets the application tag from a raw xl application record"""
     return raw_data[column]
 
@@ -111,7 +111,7 @@ def get_datemode_from_xl(excel_path):
 
 def no_more_applications(row, tag_column):
     """Returns if there are no more app-tags found"""
-    return get_tag_from_raw_application(row, tag_column).value == ''
+    return get_tag_from_raw_data(row, tag_column).value == ''
 
 
 def get_raw_data_from_xlsheet(version_sheet, tag_column):

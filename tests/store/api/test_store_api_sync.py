@@ -1,5 +1,5 @@
 from cg.store import Store
-from cg.store.api.sync import sync_applications
+from cg.store.api.sync import sync_apptags
 
 
 def test_sync_microbial_orderform_dryrun(base_store: Store, microbial_orderform):
@@ -17,9 +17,9 @@ def test_sync_microbial_orderform_dryrun(base_store: Store, microbial_orderform)
                                                            archived=True).count()
 
     # WHEN syncing app-tags in that orderform
-    sync_applications(store=base_store, excel_path=microbial_orderform,
-                      prep_category=prep_category, sign=sign, activate=activate,
-                      inactivate=inactivate, sheet_name='Drop down list', tag_column=2)
+    sync_apptags(store=base_store, excel_path=microbial_orderform,
+                 prep_category=prep_category, sign=sign, activate=activate,
+                 inactivate=inactivate, sheet_name='Drop down list', tag_column=2)
 
     # THEN same number of active and inactive mic applications in status database
     active_mic_apps_after_when = base_store.applications(category=prep_category,
@@ -45,9 +45,9 @@ def test_sync_microbial_orderform_activate(base_store: Store, microbial_orderfor
                                                            archived=True).count()
 
     # WHEN syncing app-tags in that orderform
-    sync_applications(store=base_store, excel_path=microbial_orderform,
-                      prep_category=prep_category, sign=sign, activate=activate,
-                      inactivate=inactivate, sheet_name='Drop down list', tag_column=2)
+    sync_apptags(store=base_store, excel_path=microbial_orderform,
+                 prep_category=prep_category, sign=sign, activate=activate,
+                 inactivate=inactivate, sheet_name='Drop down list', tag_column=2)
 
     # THEN more active mic applications in status database and same inactive
     active_mic_apps_after_when = base_store.applications(category=prep_category,
@@ -74,9 +74,9 @@ def test_sync_microbial_orderform_inactivate(base_store: Store, microbial_orderf
                                                            archived=True).count()
 
     # WHEN syncing app-tags in that orderform
-    sync_applications(store=base_store, excel_path=microbial_orderform,
-                      prep_category=prep_category, sign=sign, activate=activate,
-                      inactivate=inactivate, sheet_name='Drop down list', tag_column=2)
+    sync_apptags(store=base_store, excel_path=microbial_orderform,
+                 prep_category=prep_category, sign=sign, activate=activate,
+                 inactivate=inactivate, sheet_name='Drop down list', tag_column=2)
 
     # THEN same number of active and more inactive mic applications in status database
     active_mic_apps_after_when = base_store.applications(category=prep_category,

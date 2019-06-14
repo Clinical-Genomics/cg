@@ -4,7 +4,7 @@ import logging
 import click
 from cg.store import Store
 
-from cg.store.api.sync import sync_applications
+from cg.store.api.sync import sync_apptags
 
 LOG = logging.getLogger(__name__)
 
@@ -16,7 +16,7 @@ def sync(context):
     context.obj['status'] = Store(context.obj['database'])
 
 
-@sync.command('application')
+@sync.command('apptag')
 @click.argument('excel_path')
 @click.argument('prep-category')
 @click.argument('signature')
@@ -28,8 +28,8 @@ def sync(context):
                                                      'orderform')
 @click.option('-i', '--inactivate', is_flag=True, help='Inactivate tags not found in the orderform')
 @click.pass_context
-def application(context, excel_path, prep_category, signature, sheet_name, tag_column, activate,
-                inactivate):
-    """Sync applications in the status-db"""
-    sync_applications(context.obj['status'], excel_path, prep_category, signature, sheet_name,
-                      tag_column, activate, inactivate)
+def apptag(context, excel_path, prep_category, signature, sheet_name, tag_column, activate,
+           inactivate):
+    """Sync apptags in the status-db"""
+    sync_apptags(context.obj['status'], excel_path, prep_category, signature, sheet_name,
+                 tag_column, activate, inactivate)
