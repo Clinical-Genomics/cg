@@ -162,7 +162,7 @@ class LimsAPI(Lims, OrderHandler):
         sorted_dates = sorted(sequenced_dates, key=lambda x: x[0])
 
         if sorted_dates:
-            log.warning("multiple sequence artifacts found for: %s" % lims_id)
+            log.warning("multiple sequence artifacts found for: %s", lims_id)
 
         return sorted_dates[-1][1] if sorted_dates else None
 
