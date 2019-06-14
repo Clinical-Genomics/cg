@@ -100,7 +100,7 @@ class LimsAPI(Lims, OrderHandler):
 
         sorted_dates = sorted(received_dates, key=lambda x: x[0])
 
-        return sorted_dates[-1][1] if len(sorted_dates) > 0 else None
+        return sorted_dates[-1][1] if sorted_dates else None
 
     def get_prepared_date(self, lims_id: str) -> dt.datetime:
         """Get the date when a sample was prepared in the lab."""
@@ -116,7 +116,7 @@ class LimsAPI(Lims, OrderHandler):
 
         sorted_dates = sorted(prepared_dates)
 
-        return sorted_dates[-1] if len(sorted_dates) > 0 else None
+        return sorted_dates[-1] if sorted_dates else None
 
     def get_delivery_date(self, lims_id: str) -> dt.date:
         """Get delivery date for a sample."""
@@ -136,10 +136,10 @@ class LimsAPI(Lims, OrderHandler):
 
         sorted_dates = sorted(delivered_dates, key=lambda x: x[0])
 
-        if len(sorted_dates) > 0:
+        if sorted_dates:
             log.warning(f"multiple delivery artifacts found for: {lims_id}")
 
-        return sorted_dates[-1][1] if len(sorted_dates) > 0 else None
+        return sorted_dates[-1][1] if sorted_dates else None
 
     def get_sequenced_date(self, lims_id: str) -> dt.date:
         """Get the date when a sample was sequenced."""
@@ -161,10 +161,10 @@ class LimsAPI(Lims, OrderHandler):
 
         sorted_dates = sorted(sequenced_dates, key=lambda x: x[0])
 
-        if len(sorted_dates) > 0:
-            log.warning(f"multiple sequence artifacts found for: {lims_id}")
+        if sorted_dates:
+            log.warning("multiple sequence artifacts found for: %s" % lims_id)
 
-        return sorted_dates[-1][1] if len(sorted_dates) > 0 else None
+        return sorted_dates[-1][1] if sorted_dates else None
 
     def capture_kit(self, lims_id: str) -> str:
         """Get capture kit for a LIMS sample."""
