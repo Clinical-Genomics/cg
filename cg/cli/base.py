@@ -13,6 +13,7 @@ from .add import add
 from .backup import backup
 from .clean import clean
 from .deliver import deliver
+from .export import export
 from .get import get
 from .import_cmd import import_cmd
 from .reset import reset_cmd
@@ -68,6 +69,7 @@ base.add_command(analysis)
 base.add_command(backup)
 base.add_command(clean)
 base.add_command(deliver)
+base.add_command(export)
 base.add_command(get)
 base.add_command(import_cmd)
 base.add_command(reset_cmd)
