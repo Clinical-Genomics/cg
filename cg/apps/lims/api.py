@@ -89,7 +89,7 @@ class LimsAPI(Lims, OrderHandler):
         step_names_udfs = MASTER_STEPS_UDFS['received_step']
         received_dates = []
 
-        for process_type in step_names_udfs.keys():
+        for process_type in step_names_udfs:
             artifacts = self.get_artifacts(process_type=process_type, samplelimsid=lims_id)
 
             for artifact in artifacts:
@@ -105,10 +105,10 @@ class LimsAPI(Lims, OrderHandler):
     def get_prepared_date(self, lims_id: str) -> dt.datetime:
         """Get the date when a sample was prepared in the lab."""
 
-        step_names = MASTER_STEPS['prepared_step']
+        step_names_udfs = MASTER_STEPS_UDFS['prepared_step']
         prepared_dates = []
 
-        for process_type in step_names:
+        for process_type in step_names_udfs:
             artifacts = self.get_artifacts(process_type=process_type, samplelimsid=lims_id)
 
             for artifact in artifacts:
@@ -121,15 +121,15 @@ class LimsAPI(Lims, OrderHandler):
     def get_delivery_date(self, lims_id: str) -> dt.date:
         """Get delivery date for a sample."""
 
-        step_names = MASTER_STEPS['delivery_step']
+        step_names_udfs = MASTER_STEPS_UDFS['delivery_step']
         delivered_dates = []
 
-        for process_type in step_names:
+        for process_type in step_names_udfs:
             artifacts = self.get_artifacts(process_type=process_type, samplelimsid=lims_id,
                                            type='Analyte')
 
             for artifact in artifacts:
-                udf_key = 'Date delivered'
+                udf_key = step_names_udfs[process_type]
                 if artifact.parent_process and artifact.parent_process.udf.get(udf_key):
                     delivered_dates.append((artifact.parent_process.date_run,
                                             artifact.parent_process.udf.get(udf_key)))
@@ -144,14 +144,14 @@ class LimsAPI(Lims, OrderHandler):
     def get_sequenced_date(self, lims_id: str) -> dt.date:
         """Get the date when a sample was sequenced."""
 
-        step_names = MASTER_STEPS['sequenced_step']
+        step_names_udfs = MASTER_STEPS_UDFS['sequenced_step']
         sequenced_dates = []
 
-        for process_type in step_names:
+        for process_type in step_names_udfs:
             artifacts = self.get_artifacts(process_type=process_type, samplelimsid=lims_id)
 
             for artifact in artifacts:
-                udf_key = 'Finish Date'
+                udf_key = step_names_udfs[process_type]
                 if artifact.parent_process and artifact.parent_process.udf.get(udf_key):
                     sequenced_dates.append((artifact.parent_process.date_run,
                                             artifact.parent_process.udf.get(udf_key)))
@@ -169,7 +169,7 @@ class LimsAPI(Lims, OrderHandler):
     def capture_kit(self, lims_id: str) -> str:
         """Get capture kit for a LIMS sample."""
 
-        step_names = MASTER_STEPS['capture_kit_step']
+        step_names_udfs = MASTER_STEPS_UDFS['capture_kit_step']
         capture_kits = set()
 
         lims_sample = Sample(self, id=lims_id)
@@ -177,13 +177,13 @@ class LimsAPI(Lims, OrderHandler):
         if capture_kit and capture_kit != 'NA':
             return capture_kit
         else:
-            for process_type in step_names:
+            for process_type in step_names_udfs:
                 artifacts = self.get_artifacts(
                     samplelimsid=lims_id,
                     process_type=process_type,
                     type='Analyte'
                 )
-                udf_key = 'SureSelect capture library/libraries used'
+                udf_key = step_names_udfs[process_type]
                 capture_kits = capture_kits.union(set(artifact.parent_process.udf.get(udf_key) for
                                                       artifact in artifacts))
                 if len(capture_kits) == 1:
@@ -260,27 +260,27 @@ class LimsAPI(Lims, OrderHandler):
     def get_prep_method(self, lims_id: str) -> str:
         """Get the library preparation method."""
 
-        step_names = MASTER_STEPS['prep_method_step']
+        step_names_udfs = MASTER_STEPS_UDFS['prep_method_step']
         prep_methods = []
 
         method_name = method_number = None
-        for process_name in step_names:
+        for process_name in step_names_udfs:
             arts = self.get_artifacts(process_type=process_name, samplelimsid=lims_id)
             if arts:
+                udf_key_number = step_names_udfs[process_name]['method_number']
+                udf_key_version = step_names_udfs[process_name]['method_version']
                 prep_artifact = arts[0]
                 date_run = prep_artifact.parent_process.date_run
-                method_number = prep_artifact.parent_process.udf.get('Method document')
-                method_version = (
-                        prep_artifact.parent_process.udf.get('Method document version') or
-                        prep_artifact.parent_process.udf.get('Method document versio')
-                )
+                method_number = prep_artifact.parent_process.udf.get(udf_key_number)
+                method_version = prep_artifact.parent_process.udf.get(udf_key_version)
                 prep_methods.append((date_run, method_number, method_version))
 
         sorted_methods = sorted(prep_methods, key=lambda x: x[0])
 
-        prep_method = sorted_methods[-1]
-        method_number = prep_method[1]
-        method_version = prep_method[2]
+        if sorted_methods:
+            prep_method = sorted_methods[-1]
+            method_number = prep_method[1]
+            method_version = prep_method[2]
 
         if method_number is None:
             return None
@@ -291,62 +291,62 @@ class LimsAPI(Lims, OrderHandler):
     def get_sequencing_method(self, lims_id: str) -> str:
         """Get the sequencing method."""
 
-        step_names = MASTER_STEPS['get_sequencing_method_step']
+        step_names_udfs = MASTER_STEPS_UDFS['get_sequencing_method_step']
         seq_methods = []
 
         method_number = method_version = None
-        for process_name in step_names:
+        for process_name in step_names_udfs:
             arts = self.get_artifacts(process_type=process_name, samplelimsid=lims_id)
             if arts:
+                udf_key_number = step_names_udfs[process_name]['method_number']
+                udf_key_version = step_names_udfs[process_name]['method_version']
                 prep_artifact = arts[0]
                 date_run = prep_artifact.parent_process.date_run
-                method_number = (
-                        prep_artifact.parent_process.udf.get('Method') or
-                        prep_artifact.parent_process.udf.get('Method Document 1')
-                )
-                method_version = (
-                        prep_artifact.parent_process.udf.get('Version') or
-                        prep_artifact.parent_process.udf.get('Document 1 Version')
-                )
+                method_number = prep_artifact.parent_process.udf.get(udf_key_number)
+                method_version = prep_artifact.parent_process.udf.get(udf_key_version)
                 seq_methods.append((date_run, method_number, method_version))
 
         sorted_methods = sorted(seq_methods, key=lambda x: x[0])
 
-        seq_method = sorted_methods[-1]
-        method_number = seq_method[1]
-        method_version = seq_method[2]
-        method_name = AM_METHODS.get(method_number)
+        if sorted_methods:
+            seq_method = sorted_methods[-1]
+            method_number = seq_method[1]
+            method_version = seq_method[2]
 
         if method_number is None:
             return None
 
+        method_name = AM_METHODS.get(method_number)
         return f"{method_number}:{method_version} - {method_name}"
 
     def get_delivery_method(self, lims_id: str) -> str:
         """Get the delivery method."""
 
-        step_names = MASTER_STEPS['get_delivery_method_step']
+        step_names_udfs = MASTER_STEPS_UDFS['get_delivery_method_step']
         deliver_methods = []
 
-        for process_name in step_names:
+        for process_name in step_names_udfs:
             arts = self.get_artifacts(process_type=process_name, samplelimsid=lims_id)
             if arts:
+                udf_key_number = step_names_udfs[process_name]['method_number']
+                udf_key_version = step_names_udfs[process_name]['method_version']
                 prep_artifact = arts[0]
                 date_run = prep_artifact.parent_process.date_run
-                method_number = prep_artifact.parent_process.udf.get('Method Document')
-                method_version = prep_artifact.parent_process.udf.get('Method Version')
+                method_number = prep_artifact.parent_process.udf.get(udf_key_number)
+                method_version = prep_artifact.parent_process.udf.get(udf_key_version)
                 deliver_methods.append((date_run, method_number, method_version))
 
         sorted_methods = sorted(deliver_methods, key=lambda x: x[0])
 
-        deliver_method = sorted_methods[-1]
-        method_number = deliver_method[1]
-        method_version = deliver_method[2]
-        method_name = AM_METHODS.get(method_number)
+        if sorted_methods:
+            deliver_method = sorted_methods[-1]
+            method_number = deliver_method[1]
+            method_version = deliver_method[2]
 
         if method_number is None:
             return None
 
+        method_name = AM_METHODS.get(method_number)
         return f"{method_number}:{method_version} - {method_name}"
 
     def get_processing_time(self, lims_id):
