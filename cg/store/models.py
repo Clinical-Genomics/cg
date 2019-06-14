@@ -118,6 +118,13 @@ class ApplicationVersion(Model):
     def __str__(self) -> str:
         return f"{self.application.tag} ({self.version})"
 
+    def to_dict(self, application: bool = True):
+        """Override dictify method."""
+        data = super(ApplicationVersion, self).to_dict()
+        if application:
+            data['application'] = self.application.to_dict()
+        return data
+
 
 class Analysis(Model):
     id = Column(types.Integer, primary_key=True)
@@ -151,6 +158,7 @@ class Customer(Model):
     priority = Column(types.Enum('diagnostic', 'research'))
     scout_access = Column(types.Boolean, nullable=False, default=False)
     loqus_upload = Column(types.Boolean, nullable=False, default=False)
+    return_samples = Column(types.Boolean, nullable=False, default=False)
 
     agreement_date = Column(types.DateTime)
     agreement_registration = Column(types.String(32))
