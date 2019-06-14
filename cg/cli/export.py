@@ -1,3 +1,4 @@
+"""Functionality to export data from the database"""
 import logging
 import click
 from cg.store import Store
@@ -10,7 +11,7 @@ LOG = logging.getLogger(__name__)
 @click.argument('identifier')
 @click.pass_context
 def export(context: click.Context, table: str, identifier: str):
-    """Get information about anything in the store."""
+    """Get information about almost anything in the store."""
 
     db_func = getattr(Store(context.obj['database']), f"{table}")
     db_obj = db_func(identifier)
