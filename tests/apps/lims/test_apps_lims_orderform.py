@@ -223,25 +223,26 @@ def test_parsing_microbial_orderform(microbial_orderform):
 
     assert sample_data['name'] == 's1'
     assert sample_data.get('internal_id') is None
-    assert sample_data['organism'] == 'other'
-    assert sample_data['reference_genome'] == 'r1'
+    assert sample_data['organism'] == 'C. jejuni'
+    assert sample_data['reference_genome'] == 'NC_0000001'
     assert sample_data['data_analysis'] == 'fastq'
     assert sample_data['application'] == 'MWRNXTR003'
     # customer on order (data)
     assert sample_data['require_qcok'] is True
-    assert sample_data['elution_buffer'] == 'other'
-    assert sample_data['extraction_method'] == 'other (specify in comment field)'
+    assert sample_data['elution_buffer'] == 'Nuclease-free water'
+    assert sample_data['extraction_method'] == 'MagNaPure 96 (contact Clinical Genomics before ' \
+                                               'submission)'
     assert sample_data['container'] == '96 well plate'
     assert sample_data.get('priority') in 'research'
 
     assert sample_data['container_name'] == 'p1'
     assert sample_data['well_position'] == 'A:1'
 
-    assert sample_data['organism_other'] == 'other species'
+    assert not sample_data['organism_other']
 
     assert sample_data['concentration_weight'] == '1'
     assert sample_data['quantity'] == '2'
-    assert sample_data['comment'] == 'other extraction method'
+    assert sample_data['comment'] == 'sample comment'
 
 
 def test_parsing_balsamic_orderform(balsamic_orderform):

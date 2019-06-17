@@ -13,7 +13,7 @@ class PdcApi():
         """Fetch a flowcell back from the backup solution."""
         dest_server = {
             'hiseqga': 'thalamus',
-            'hiseqx': 'rasta',
+            'hiseqx': 'hasta',
         }.get(sequencer_type)
         if dest_server is None:
             raise ValueError(f"{sequencer_type}: invalid sequencer type")
