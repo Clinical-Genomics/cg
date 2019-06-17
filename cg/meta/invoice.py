@@ -16,10 +16,10 @@ class InvoiceAPI():
         self.customer_obj = invoice_obj.customer
         self.record_type = ''
         self.raw_records = []
-        self._get_record_type()
+        self._set_record_type()
 
 
-    def _get_record_type(self):
+    def _set_record_type(self):
         """Define the record_type based on the invoice object. 
         It can only be either pool, sample or microbial"""
 
@@ -138,7 +138,7 @@ class InvoiceAPI():
             percent_kth = record.application_version.application.percent_kth
             discounted_price = self._discount_price(record, discount)
         except:
-            self.log.append(f'Application tag/version semms to be missing for sample {record.id}.')
+            self.log.append(f'Application tag/version seems to be missing for sample {record.id}.')
             return None
 
         split_discounted_price = self._cost_center_split_factor(discounted_price, costcenter, percent_kth, tag, version)
