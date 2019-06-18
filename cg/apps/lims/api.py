@@ -87,17 +87,8 @@ class LimsAPI(Lims, OrderHandler):
         """Get the date when a sample was received."""
 
         step_names_udfs = MASTER_STEPS_UDFS['received_step']
-        received_dates = []
 
-        for process_type in step_names_udfs:
-            artifacts = self.get_artifacts(process_type=process_type, samplelimsid=lims_id)
-
-            for artifact in artifacts:
-                udf_key = step_names_udfs[process_type]
-                if artifact.parent_process and artifact.parent_process.udf.get(udf_key):
-                    received_dates.append((artifact.parent_process.date_run,
-                                           artifact.parent_process.udf.get(udf_key)))
-
+        received_dates = self.get_all_step_dates(step_names_udfs, lims_id)
         sorted_dates = self.sort_by_date_run(received_dates)
         received_date = self.most_recent_date(sorted_dates)
 
@@ -125,23 +116,13 @@ class LimsAPI(Lims, OrderHandler):
         """Get delivery date for a sample."""
 
         step_names_udfs = MASTER_STEPS_UDFS['delivery_step']
-        delivered_dates = []
 
-        for process_type in step_names_udfs:
-            artifacts = self.get_artifacts(process_type=process_type, samplelimsid=lims_id,
-                                           type='Analyte')
+        delivered_dates = self.get_all_step_dates(step_names_udfs, lims_id, type='Analyte')
 
-            for artifact in artifacts:
-                udf_key = step_names_udfs[process_type]
-                if artifact.parent_process and artifact.parent_process.udf.get(udf_key):
-                    delivered_dates.append((artifact.parent_process.date_run,
-                                            artifact.parent_process.udf.get(udf_key)))
-
-        sorted_dates = self.sort_by_date_run(delivered_dates)
-
-        if len(sorted_dates) > 1:
+        if len(delivered_dates) > 1:
             log.warning("multiple delivery artifacts found for: %s, lims_id")
 
+        sorted_dates = self.sort_by_date_run(delivered_dates)
         delivered_date = self.most_recent_date(sorted_dates)
 
         return delivered_date
@@ -150,25 +131,13 @@ class LimsAPI(Lims, OrderHandler):
         """Get the date when a sample was sequenced."""
 
         step_names_udfs = MASTER_STEPS_UDFS['sequenced_step']
-        sequenced_dates = []
 
-        for process_type in step_names_udfs:
-            artifacts = self.get_artifacts(process_type=process_type, samplelimsid=lims_id)
+        sequenced_dates = self.get_all_step_dates(step_names_udfs, lims_id)
 
-            for artifact in artifacts:
-                udf_key = step_names_udfs[process_type]
-                if artifact.parent_process and artifact.parent_process.udf.get(udf_key):
-                    sequenced_dates.append((artifact.parent_process.date_run,
-                                            artifact.parent_process.udf.get(udf_key)))
-                if artifact.parent_process and process_type == 'AUTOMATED - NovaSeq Run':
-                    sequenced_dates.append((artifact.parent_process.date_run,
-                                            artifact.parent_process.date_run))
-
-        sorted_dates = self.sort_by_date_run(sequenced_dates)
-
-        if len(sorted_dates) > 1:
+        if len(sequenced_dates) > 1:
             log.warning("multiple sequence artifacts found for: %s", lims_id)
 
+        sorted_dates = self.sort_by_date_run(sequenced_dates)
         sequenced_date = self.most_recent_date(sorted_dates)
 
         return sequenced_date
@@ -354,3 +323,22 @@ class LimsAPI(Lims, OrderHandler):
 
         method_name = AM_METHODS.get(method_number)
         return f"{method_number}:{method_version} - {method_name}"
+
+    def get_all_step_dates(self, step_names_udfs, lims_id, type=None):
+        """
+        Gets all the dates from artifact bases on process type and associated udfs, sample lims id
+        and optionally the type
+        """
+        dates = []
+
+        for process_type in step_names_udfs:
+            artifacts = self.get_artifacts(process_type=process_type, samplelimsid=lims_id,
+                                           type=type)
+
+            for artifact in artifacts:
+                udf_key = step_names_udfs[process_type]
+                if artifact.parent_process and artifact.parent_process.udf.get(udf_key):
+                    dates.append((artifact.parent_process.date_run,
+                                  artifact.parent_process.udf.get(udf_key)))
+
+        return dates
