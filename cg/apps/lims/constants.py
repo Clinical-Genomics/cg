@@ -38,13 +38,13 @@ MASTER_STEPS_UDFS = {
         'Reception Control TWIST v1': 'date arrived at clinical genomics',
     },
     'prepared_step': {
-        'CG002 - Aggregate QC (Library Validation) (Dev)': None,
-        'CG002 - Aggregate QC (Library Validation)': None,
-        'CG002 - Aggregate QC (Library Validation) TWIST v1': None,
+        'CG002 - Aggregate QC (Library Validation) (Dev)',
+        'CG002 - Aggregate QC (Library Validation)',
+        'CG002 - Aggregate QC (Library Validation) TWIST v1',
     },
     'delivery_step': {
-        'CG002 - Delivery': None,
-        'Delivery v1': None,
+        'CG002 - Delivery',
+        'Delivery v1',
     },
     'sequenced_step': {
         'CG002 - Illumina Sequencing (HiSeq X)': 'Finish Date',
