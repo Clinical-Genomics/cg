@@ -98,7 +98,7 @@ class LimsAPI(Lims, OrderHandler):
                     received_dates.append((artifact.parent_process.date_run,
                                            artifact.parent_process.udf.get(udf_key)))
 
-        sorted_dates = self.sort_dates_by_date_run_descending(received_dates)
+        sorted_dates = self.sort_by_date_run(received_dates)
         received_date = self.most_recent_date(sorted_dates)
 
         return received_date
@@ -115,7 +115,7 @@ class LimsAPI(Lims, OrderHandler):
             for artifact in artifacts:
                 prepared_dates.append(parse_date(artifact.parent_process.date_run))
 
-        sorted_dates = self.sort_dates_by_date_run_descending(prepared_dates)
+        sorted_dates = self.sort_by_date_run(prepared_dates)
         prepared_date = self.most_recent_date(sorted_dates)
 
         return prepared_date
@@ -136,7 +136,7 @@ class LimsAPI(Lims, OrderHandler):
                     delivered_dates.append((artifact.parent_process.date_run,
                                             artifact.parent_process.udf.get(udf_key)))
 
-        sorted_dates = self.sort_dates_by_date_run_descending(delivered_dates)
+        sorted_dates = self.sort_by_date_run(delivered_dates)
 
         if len(sorted_dates) > 1:
             log.warning("multiple delivery artifacts found for: %s, lims_id")
@@ -163,7 +163,7 @@ class LimsAPI(Lims, OrderHandler):
                     sequenced_dates.append((artifact.parent_process.date_run,
                                             artifact.parent_process.date_run))
 
-        sorted_dates = self.sort_dates_by_date_run_descending(sequenced_dates)
+        sorted_dates = self.sort_by_date_run(sequenced_dates)
 
         if len(sorted_dates) > 1:
             log.warning("multiple sequence artifacts found for: %s", lims_id)
@@ -291,17 +291,17 @@ class LimsAPI(Lims, OrderHandler):
             return delivery_date - received_at
 
     @staticmethod
-    def sort_dates_by_date_run_descending(dates: list):
+    def sort_by_date_run(sort_list: list):
         """
-        Sort dates by parent process attribute date_run in descending order.
+        Sort list of tuples by parent process attribute date_run in descending order.
 
         Parameters:
-            dates (list): a list of tuples in the format (date_run, date)
+            sort_list (list): a list of tuples in the format (date_run, elem1, elem2, ...)
 
         Returns:
             sorted list of tuples
         """
-        return sorted(dates, key=lambda date_tuple: date_tuple[0], reversed=True)
+        return sorted(sort_list, key=lambda sort_tuple: sort_tuple[0], reversed=True)
 
     @staticmethod
     def most_recent_date(dates: list):
@@ -341,7 +341,7 @@ class LimsAPI(Lims, OrderHandler):
                 method_version = artifact.parent_process.udf.get(udf_key_version)
                 methods.append((date_run, method_number, method_version))
 
-        sorted_methods = sorted(methods, key=lambda x: x[0], reversed=True)
+        sorted_methods = self.sort_by_date_run(methods)
 
         if sorted_methods:
             method = sorted_methods[method_index]
