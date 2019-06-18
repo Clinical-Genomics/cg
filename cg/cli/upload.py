@@ -9,7 +9,7 @@ import click
 from cg.store import Store, models
 from cg.apps import coverage as coverage_app, gt, hk, loqus, tb, scoutapi, beacon as beacon_app, \
     lims
-from cg.exc import DuplicateRecordError
+from cg.exc import DuplicateRecordError, DuplicateSampleError
 from cg.meta.upload.coverage import UploadCoverageApi
 from cg.meta.upload.gt import UploadGenotypesAPI
 from cg.meta.upload.observations import UploadObservationsAPI
@@ -29,7 +29,7 @@ def upload(context, family_id):
     """Upload results from analyses."""
 
     click.echo(click.style('----------------- UPLOAD ----------------------'))
-        
+
     context.obj['status'] = Store(context.obj['database'])
     context.obj['housekeeper_api'] = hk.HousekeeperAPI(context.obj)
 
@@ -280,7 +280,6 @@ def observations(context, case_id, dry_run):
 
     click.echo(click.style('----------------- OBSERVATIONS ----------------'))
 
-
     loqus_api = loqus.LoqusdbAPI(context.obj)
 
     if case_id:
@@ -293,7 +292,7 @@ def observations(context, case_id, dry_run):
             LOG.info("%s: %s not whitelisted for upload to loqusdb. Skipping!",
                      family_obj.internal_id, family_obj.customer.internal_id)
             continue
-          
+
         if not LinkHelper.all_samples_data_analysis(family_obj.links, ['MIP', '', None]):
             LOG.info("%s: has non-MIP data_analysis. Skipping!", family_obj.internal_id)
             continue
@@ -301,7 +300,7 @@ def observations(context, case_id, dry_run):
         if not LinkHelper.all_samples_are_non_tumour(family_obj.links):
             LOG.info("%s: has tumour samples. Skipping!", family_obj.internal_id)
             continue
-          
+
         if dry_run:
             LOG.info("%s: Would upload observations", family_obj.internal_id)
             continue
@@ -312,7 +311,7 @@ def observations(context, case_id, dry_run):
         try:
             api.process(family_obj.analyses[0])
             LOG.info("%s: observations uploaded!", family_obj.internal_id)
-        except DuplicateRecordError as error:
+        except (DuplicateRecordError, DuplicateSampleError) as error:
             LOG.info("skipping observations upload: %s", error.message)
 
 
