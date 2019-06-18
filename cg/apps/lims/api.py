@@ -117,7 +117,7 @@ class LimsAPI(Lims, OrderHandler):
 
         step_names_udfs = MASTER_STEPS_UDFS['delivery_step']
 
-        delivered_dates = self.get_all_step_dates(step_names_udfs, lims_id, type='Analyte')
+        delivered_dates = self.get_all_step_dates(step_names_udfs, lims_id, artifact_type='Analyte')
 
         if len(delivered_dates) > 1:
             log.warning("multiple delivery artifacts found for: %s, lims_id")
@@ -324,7 +324,7 @@ class LimsAPI(Lims, OrderHandler):
         method_name = AM_METHODS.get(method_number)
         return f"{method_number}:{method_version} - {method_name}"
 
-    def get_all_step_dates(self, step_names_udfs, lims_id, type=None):
+    def get_all_step_dates(self, step_names_udfs, lims_id, artifact_type=None):
         """
         Gets all the dates from artifact bases on process type and associated udfs, sample lims id
         and optionally the type
@@ -333,7 +333,7 @@ class LimsAPI(Lims, OrderHandler):
 
         for process_type in step_names_udfs:
             artifacts = self.get_artifacts(process_type=process_type, samplelimsid=lims_id,
-                                           type=type)
+                                           artifact_type=type)
 
             for artifact in artifacts:
                 udf_key = step_names_udfs[process_type]
