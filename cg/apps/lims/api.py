@@ -115,10 +115,11 @@ class LimsAPI(Lims, OrderHandler):
             for artifact in artifacts:
                 prepared_dates.append(parse_date(artifact.parent_process.date_run))
 
-        sorted_dates = self.sort_by_date_run(prepared_dates)
-        prepared_date = self.most_recent_date(sorted_dates)
+        if prepared_dates:
+            sorted_dates = sorted(prepared_dates, reverse=True)
+            prepared_date = sorted_dates[0]
 
-        return prepared_date
+        return prepared_date if prepared_dates else None
 
     def get_delivery_date(self, lims_id: str) -> dt.date:
         """Get delivery date for a sample."""
@@ -301,7 +302,7 @@ class LimsAPI(Lims, OrderHandler):
         Returns:
             sorted list of tuples
         """
-        return sorted(sort_list, key=lambda sort_tuple: sort_tuple[0], reversed=True)
+        return sorted(sort_list, key=lambda sort_tuple: sort_tuple[0], reverse=True)
 
     @staticmethod
     def most_recent_date(dates: list):
