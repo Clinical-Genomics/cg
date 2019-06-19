@@ -88,9 +88,9 @@ class LimsAPI(Lims, OrderHandler):
 
         step_names_udfs = MASTER_STEPS_UDFS['received_step']
 
-        received_dates = self.get_all_step_dates(step_names_udfs, lims_id)
-        sorted_dates = self.sort_by_date_run(received_dates)
-        received_date = self.most_recent_date(sorted_dates)
+        received_dates = self._get_all_step_dates(step_names_udfs, lims_id)
+        sorted_dates = self._sort_by_date_run(received_dates)
+        received_date = self._most_recent_date(sorted_dates)
 
         return received_date
 
@@ -117,13 +117,13 @@ class LimsAPI(Lims, OrderHandler):
 
         step_names_udfs = MASTER_STEPS_UDFS['delivery_step']
 
-        delivered_dates = self.get_all_step_dates(step_names_udfs, lims_id, artifact_type='Analyte')
+        delivered_dates = self._get_all_step_dates(step_names_udfs, lims_id, artifact_type='Analyte')
 
         if len(delivered_dates) > 1:
             log.warning("multiple delivery artifacts found for: %s, lims_id")
 
-        sorted_dates = self.sort_by_date_run(delivered_dates)
-        delivered_date = self.most_recent_date(sorted_dates)
+        sorted_dates = self._sort_by_date_run(delivered_dates)
+        delivered_date = self._most_recent_date(sorted_dates)
 
         return delivered_date
 
@@ -132,13 +132,13 @@ class LimsAPI(Lims, OrderHandler):
 
         step_names_udfs = MASTER_STEPS_UDFS['sequenced_step']
 
-        sequenced_dates = self.get_all_step_dates(step_names_udfs, lims_id)
+        sequenced_dates = self._get_all_step_dates(step_names_udfs, lims_id)
 
         if len(sequenced_dates) > 1:
             log.warning("multiple sequence artifacts found for: %s", lims_id)
 
-        sorted_dates = self.sort_by_date_run(sequenced_dates)
-        sequenced_date = self.most_recent_date(sorted_dates)
+        sorted_dates = self._sort_by_date_run(sequenced_dates)
+        sequenced_date = self._most_recent_date(sorted_dates)
 
         return sequenced_date
 
@@ -238,21 +238,21 @@ class LimsAPI(Lims, OrderHandler):
 
         step_names_udfs = MASTER_STEPS_UDFS['prep_method_step']
 
-        return self.get_methods(step_names_udfs, lims_id)
+        return self._get_methods(step_names_udfs, lims_id)
 
     def get_sequencing_method(self, lims_id: str) -> str:
         """Get the sequencing method."""
 
         step_names_udfs = MASTER_STEPS_UDFS['get_sequencing_method_step']
 
-        return self.get_methods(step_names_udfs, lims_id)
+        return self._get_methods(step_names_udfs, lims_id)
 
     def get_delivery_method(self, lims_id: str) -> str:
         """Get the delivery method."""
 
         step_names_udfs = MASTER_STEPS_UDFS['get_delivery_method_step']
 
-        return self.get_methods(step_names_udfs, lims_id)
+        return self._get_methods(step_names_udfs, lims_id)
 
     def get_processing_time(self, lims_id):
         received_at = self.get_received_date(lims_id)
@@ -261,7 +261,7 @@ class LimsAPI(Lims, OrderHandler):
             return delivery_date - received_at
 
     @staticmethod
-    def sort_by_date_run(sort_list: list):
+    def _sort_by_date_run(sort_list: list):
         """
         Sort list of tuples by parent process attribute date_run in descending order.
 
@@ -274,7 +274,7 @@ class LimsAPI(Lims, OrderHandler):
         return sorted(sort_list, key=lambda sort_tuple: sort_tuple[0], reverse=True)
 
     @staticmethod
-    def most_recent_date(dates: list):
+    def _most_recent_date(dates: list):
         """
         Gets the most recent date from a list of dates sorted by date_run
 
@@ -290,7 +290,7 @@ class LimsAPI(Lims, OrderHandler):
 
         return dates[date_run_index][date_index] if dates else None
 
-    def get_methods(self, step_names_udfs, lims_id):
+    def _get_methods(self, step_names_udfs, lims_id):
         """
         Gets the method, method number and method version for a given list of stop names
         """
@@ -311,7 +311,7 @@ class LimsAPI(Lims, OrderHandler):
                 method_version = artifact.parent_process.udf.get(udf_key_version)
                 methods.append((date_run, method_number, method_version))
 
-        sorted_methods = self.sort_by_date_run(methods)
+        sorted_methods = self._sort_by_date_run(methods)
 
         if sorted_methods:
             method = sorted_methods[method_index]
@@ -324,7 +324,7 @@ class LimsAPI(Lims, OrderHandler):
         method_name = AM_METHODS.get(method_number)
         return f"{method_number}:{method_version} - {method_name}"
 
-    def get_all_step_dates(self, step_names_udfs, lims_id, artifact_type=None):
+    def _get_all_step_dates(self, step_names_udfs, lims_id, artifact_type=None):
         """
         Gets all the dates from artifact bases on process type and associated udfs, sample lims id
         and optionally the type
