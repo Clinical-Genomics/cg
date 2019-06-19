@@ -116,7 +116,8 @@ class LimsAPI(Lims, OrderHandler):
 
         step_names_udfs = MASTER_STEPS_UDFS['delivery_step']
 
-        delivered_dates = self._get_all_step_dates(step_names_udfs, lims_id, artifact_type='Analyte')
+        delivered_dates = self._get_all_step_dates(step_names_udfs, lims_id,
+                                                   artifact_type='Analyte')
 
         if len(delivered_dates) > 1:
             log.warning("multiple delivery artifacts found for: %s, lims_id")
