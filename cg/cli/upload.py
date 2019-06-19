@@ -301,6 +301,10 @@ def observations(context, case_id, dry_run):
             LOG.info("%s: has tumour samples. Skipping!", family_obj.internal_id)
             continue
 
+        if not LinkHelper.all_samples_are_wgs(family_obj.links):
+            LOG.info("%s: has non WGS analyis. Skipping!", family_obj.internal_id)
+            continue
+
         if dry_run:
             LOG.info("%s: Would upload observations", family_obj.internal_id)
             continue
@@ -313,6 +317,8 @@ def observations(context, case_id, dry_run):
             LOG.info("%s: observations uploaded!", family_obj.internal_id)
         except (DuplicateRecordError, DuplicateSampleError) as error:
             LOG.info("skipping observations upload: %s", error.message)
+        except Exception as error:
+            LOG.error("skipping observations upload: %s", error)
 
 
 class LinkHelper:
@@ -327,6 +333,12 @@ class LinkHelper:
     def all_samples_data_analysis(links: List[models.FamilySample], data_anlysis) -> bool:
         """Return True if all samples has the given data_analysis."""
         return all(link.sample.data_analysis in data_anlysis for link in links)
+
+    @staticmethod
+    def all_samples_are_wgs(links: List[models.FamilySample]) -> bool:
+        """Return True if all samples are from wgs analysis"""
+        return all(link.sample.application_version.application.analysis_type == 'wgs'
+                   for link in links)
 
 
 @upload.command()

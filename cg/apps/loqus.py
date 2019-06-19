@@ -138,6 +138,9 @@ def execute_command(cmd):
     for line in process.stdout:
         yield line.decode('utf-8').strip()
 
-    # Check if process exited with returncode != 0
-    if process.poll():
+    def process_failed(process):
+        """See if process failed by checking returncode"""
+        return process.poll() != 0
+
+    if process_failed(process):
         raise CalledProcessError(returncode=process.returncode, cmd=cmd)
