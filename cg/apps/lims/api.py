@@ -293,9 +293,8 @@ class LimsAPI(Lims, OrderHandler):
         Gets the method, method number and method version for a given list of stop names
         """
         methods = []
-        method_index = 0
-        method_number_index = 1
-        method_version_index = 2
+
+        (method_index, method_number_index, method_version_index) = (0, 1, 2)
 
         method_name = method_number = None
         for process_name in step_names_udfs:
