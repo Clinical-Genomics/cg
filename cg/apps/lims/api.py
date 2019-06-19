@@ -333,7 +333,7 @@ class LimsAPI(Lims, OrderHandler):
 
         for process_type in step_names_udfs:
             artifacts = self.get_artifacts(process_type=process_type, samplelimsid=lims_id,
-                                           artifact_type=artifact_type)
+                                           type=artifact_type)
 
             for artifact in artifacts:
                 udf_key = step_names_udfs[process_type]
