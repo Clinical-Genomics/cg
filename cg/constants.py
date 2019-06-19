@@ -41,6 +41,7 @@ ANALYSIS_SOURCES = (
     'muscle',
     'nail',
     'saliva',
+    'skin',
     'tissue (FFPE)',
     'tissue (fresh frozen)',
     'other')
