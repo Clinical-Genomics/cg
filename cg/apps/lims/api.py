@@ -89,8 +89,7 @@ class LimsAPI(Lims, OrderHandler):
         step_names_udfs = MASTER_STEPS_UDFS['received_step']
 
         received_dates = self._get_all_step_dates(step_names_udfs, lims_id)
-        sorted_dates = self._sort_by_date_run(received_dates)
-        received_date = self._most_recent_date(sorted_dates)
+        received_date = self._most_recent_date(received_dates)
 
         return received_date
 
@@ -122,8 +121,7 @@ class LimsAPI(Lims, OrderHandler):
         if len(delivered_dates) > 1:
             log.warning("multiple delivery artifacts found for: %s, lims_id")
 
-        sorted_dates = self._sort_by_date_run(delivered_dates)
-        delivered_date = self._most_recent_date(sorted_dates)
+        delivered_date = self._most_recent_date(delivered_dates)
 
         return delivered_date
 
@@ -137,8 +135,7 @@ class LimsAPI(Lims, OrderHandler):
         if len(sequenced_dates) > 1:
             log.warning("multiple sequence artifacts found for: %s", lims_id)
 
-        sorted_dates = self._sort_by_date_run(sequenced_dates)
-        sequenced_date = self._most_recent_date(sorted_dates)
+        sequenced_date = self._most_recent_date(sequenced_dates)
 
         return sequenced_date
 
@@ -273,8 +270,7 @@ class LimsAPI(Lims, OrderHandler):
         """
         return sorted(sort_list, key=lambda sort_tuple: sort_tuple[0], reverse=True)
 
-    @staticmethod
-    def _most_recent_date(dates: list):
+    def _most_recent_date(self, dates: list):
         """
         Gets the most recent date from a list of dates sorted by date_run
 
@@ -285,10 +281,11 @@ class LimsAPI(Lims, OrderHandler):
         Returns:
             The date in the first tuple in dates
         """
+        sorted_dates = self._sort_by_date_run(dates)
         date_run_index = 0
         date_index = 1
 
-        return dates[date_run_index][date_index] if dates else None
+        return sorted_dates[date_run_index][date_index] if dates else None
 
     def _get_methods(self, step_names_udfs, lims_id):
         """
