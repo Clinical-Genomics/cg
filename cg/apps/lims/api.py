@@ -294,7 +294,7 @@ class LimsAPI(Lims, OrderHandler):
         """
         methods = []
 
-        (method_index, method_number_index, method_version_index) = (0, 1, 2)
+        (METHOD_INDEX, METHOD_NUMBER_INDEX, METHOD_VERSION_INDEX) = (0, 1, 2)
 
         for process_name in step_names_udfs:
             artifacts = self.get_artifacts(process_type=process_name, samplelimsid=lims_id)
@@ -310,13 +310,13 @@ class LimsAPI(Lims, OrderHandler):
         sorted_methods = self._sort_by_date_run(methods)
 
         if sorted_methods:
-            method = sorted_methods[method_index]
+            method = sorted_methods[METHOD_INDEX]
 
-        if method[method_number_index] is None:
+        if method[METHOD_NUMBER_INDEX] is None:
             return None
 
-        method_name = AM_METHODS.get(method[method_number_index])
-        return f"{method[method_number_index]}:{method[method_version_index]} - {method_name}"
+        method_name = AM_METHODS.get(method[METHOD_NUMBER_INDEX])
+        return f"{method[METHOD_NUMBER_INDEX]}:{method[METHOD_VERSION_INDEX]} - {method_name}"
 
     def _get_all_step_dates(self, step_names_udfs, lims_id, artifact_type=None):
         """
