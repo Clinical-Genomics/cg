@@ -122,7 +122,7 @@ class LimsAPI(Lims, OrderHandler):
                                                    artifact_type='Analyte')
 
         if len(delivered_dates) > 1:
-            log.warning("multiple delivery artifacts found for: %s, lims_id")
+            log.warning("multiple delivery artifacts found for: %s", lims_id)
 
         delivered_date = self._most_recent_date(delivered_dates)
 
