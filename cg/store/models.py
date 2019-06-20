@@ -19,6 +19,15 @@ flowcell_sample = Table(
 )
 
 
+flowcell_microbial_sample = Table(
+    'flowcell_microbial_sample',
+    Model.metadata,
+    Column('flowcell_id', types.Integer, ForeignKey('flowcell.id'), nullable=False),
+    Column('microbial_sample_id', types.Integer, ForeignKey('microbial_sample.id'), nullable=False),
+    UniqueConstraint('flowcell_id', 'microbial_sample_id', name='_flowcell_microbial_sample_uc'),
+)
+
+
 class PriorityMixin:
 
     @property
@@ -109,6 +118,13 @@ class ApplicationVersion(Model):
     def __str__(self) -> str:
         return f"{self.application.tag} ({self.version})"
 
+    def to_dict(self, application: bool = True):
+        """Override dictify method."""
+        data = super(ApplicationVersion, self).to_dict()
+        if application:
+            data['application'] = self.application.to_dict()
+        return data
+
 
 class Analysis(Model):
     id = Column(types.Integer, primary_key=True)
@@ -142,6 +158,7 @@ class Customer(Model):
     priority = Column(types.Enum('diagnostic', 'research'))
     scout_access = Column(types.Boolean, nullable=False, default=False)
     loqus_upload = Column(types.Boolean, nullable=False, default=False)
+    return_samples = Column(types.Boolean, nullable=False, default=False)
 
     agreement_date = Column(types.DateTime)
     agreement_registration = Column(types.String(32))
@@ -285,15 +302,19 @@ class Flowcell(Model):
     status = Column(types.Enum(*FLOWCELL_STATUS), default='ondisk')
 
     samples = orm.relationship('Sample', secondary=flowcell_sample, backref='flowcells')
+    microbial_samples = orm.relationship('MicrobialSample', secondary=flowcell_microbial_sample,
+                                         backref='flowcells')
 
     def __str__(self):
         return self.name
 
-    def to_dict(self, samples: bool = False):
+    def to_dict(self, samples: bool = False, microbial_samples: bool = False):
         """Override dictify method."""
         data = super(Flowcell, self).to_dict()
         if samples:
             data['samples'] = [sample.to_dict() for sample in self.samples]
+        if microbial_samples:
+            data['microbial_samples'] = [sample.to_dict() for sample in self.microbial_samples]
         return data
 
 
