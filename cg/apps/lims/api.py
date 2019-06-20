@@ -27,6 +27,8 @@ AM_METHODS = {
     '1518': '200 ng input Manual SureSelect XT Target Enrichment',
     '1079': 'Manuel SureSelect XT Target Enrichment for Illumina sequencing',
 }
+METHOD_INDEX, METHOD_NUMBER_INDEX, METHOD_VERSION_INDEX = 0, 1, 2
+
 log = logging.getLogger(__name__)
 
 
@@ -293,8 +295,6 @@ class LimsAPI(Lims, OrderHandler):
         Gets the method, method number and method version for a given list of stop names
         """
         methods = []
-
-        (METHOD_INDEX, METHOD_NUMBER_INDEX, METHOD_VERSION_INDEX) = (0, 1, 2)
 
         for process_name in step_names_udfs:
             artifacts = self.get_artifacts(process_type=process_name, samplelimsid=lims_id)
