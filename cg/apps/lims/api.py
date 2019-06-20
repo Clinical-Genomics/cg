@@ -337,13 +337,15 @@ class LimsAPI(Lims, OrderHandler):
 
         return dates
 
-    def get_method_number(self, artifact, udf_key_number):
+    @staticmethod
+    def get_method_number(artifact, udf_key_number):
         """
         get method number for artifact
         """
         return artifact.parent_process.udf.get(udf_key_number)
 
-    def get_method_version(self, artifact, udf_key_version):
+    @staticmethod
+    def get_method_version(artifact, udf_key_version):
         """
         get method version for artifact
         """
