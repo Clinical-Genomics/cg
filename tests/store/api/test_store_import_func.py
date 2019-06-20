@@ -139,6 +139,17 @@ def test_application(applications_file, store: Store):
     assert all_applications_exists(store, applications_file)
 
 
+def test_application_sheet_name(applications_file, store: Store):
+    # GIVEN a store and an excel file with applications
+    sign = 'TestSign'
+
+    # WHEN calling import_applications
+    import_applications(store, applications_file, sign, dry_run=False, sheet_name='application')
+
+    # THEN applications should have been created in the store
+    assert all_applications_exists(store, applications_file)
+
+
 def test_application_dry_run(applications_file, store: Store):
     # GIVEN a store and an excel file with applications
     sign = 'TestSign'

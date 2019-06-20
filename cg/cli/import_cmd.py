@@ -21,10 +21,11 @@ def import_cmd(context):
 @click.argument('signature')
 @click.option('-d', '--dry-run', 'dry_run', is_flag=True, help='Test run, no changes to the '
                                                                'database')
+@click.option('-s', '--sheet-name', help='Sheet name in workbook')
 @click.pass_context
-def application(context, excel_path, signature, dry_run):
+def application(context, excel_path, signature, sheet_name, dry_run):
     """Import new applications to status-db"""
-    import_applications(context.obj['status'], excel_path, signature, dry_run)
+    import_applications(context.obj['status'], excel_path, signature, dry_run, sheet_name)
 
 
 @import_cmd.command('application-version')

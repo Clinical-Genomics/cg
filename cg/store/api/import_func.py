@@ -59,18 +59,19 @@ def import_application_versions(store, excel_path, sign, dry_run, skip_missing):
         store.rollback()
 
 
-def import_applications(store, excel_path, sign, dry_run):
+def import_applications(store, excel_path, sign, dry_run, sheet_name=None):
     """
     Imports all applications from the specified excel file
     Args:
+        :param sheet_name:          Optional sheet name
         :param store:               status database store
         :param excel_path:          Path to excel file with headers: 'App tag', 'Valid from',
-                                   'Standard', 'Priority', 'Express', 'Research'
-        :param sign:               Signature of user running the script
+                                    'Standard', 'Priority', 'Express', 'Research'
+        :param sign:                Signature of user running the script
         :param dry_run:             Test run, no changes to the database
         """
 
-    raw_applications = get_raw_data_from_xl(excel_path)
+    raw_applications = get_raw_data_from_xl(excel_path, sheet_name)
 
     for raw_application in raw_applications:
         tag = get_tag_from_raw_application(raw_application)
@@ -102,10 +103,15 @@ def get_tag_from_raw_application(raw_data):
     return raw_data['tag']
 
 
-def get_raw_data_from_xl(excel_path):
+def get_raw_data_from_xl(excel_path, sheet_name=None):
     """Get raw data from the xl file"""
     workbook = get_workbook_from_xl(excel_path)
-    data_sheet = workbook.sheet_by_index(0)
+
+    if sheet_name:
+        data_sheet = workbook.sheet_by_name(sheet_name)
+    else:
+        data_sheet = workbook.sheet_by_index(0)
+
     return get_raw_data_from_xlsheet(data_sheet)
 
 
