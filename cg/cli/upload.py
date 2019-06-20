@@ -317,8 +317,8 @@ def observations(context, case_id, dry_run):
             LOG.info("%s: observations uploaded!", family_obj.internal_id)
         except (DuplicateRecordError, DuplicateSampleError) as error:
             LOG.info("skipping observations upload: %s", error.message)
-        except Exception as error:
-            LOG.error("skipping observations upload: %s", error)
+        except FileNotFoundError as error:
+            LOG.warning("skipping observations upload, files not found: %s", error)
 
 
 class LinkHelper:
