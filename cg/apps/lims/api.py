@@ -303,8 +303,8 @@ class LimsAPI(Lims, OrderHandler):
                 udf_key_version = step_names_udfs[process_name]['method_version']
                 methods.append(
                     (artifacts[0].parent_process.date_run,
-                     artifacts[0].parent_process.udf.get(udf_key_number),
-                     artifacts[0].parent_process.udf.get(udf_key_version)),
+                     self.get_method_number(artifacts[0], udf_key_number),
+                     self.get_method_version(artifacts[0], udf_key_version)),
                 )
 
         sorted_methods = self._sort_by_date_run(methods)
@@ -336,3 +336,15 @@ class LimsAPI(Lims, OrderHandler):
                                   artifact.parent_process.udf.get(udf_key)))
 
         return dates
+
+    def get_method_number(artifact, udf_key_number):
+        """
+
+        """
+        return artifact.parent_process.udf.get(udf_key_number),
+
+    def get_method_version(artifact, udf_key_version):
+        """
+
+        """
+        return artifact.parent_process.udf.get(udf_key_version),
