@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-from typing import List
 
-from cg.apps import lims, invoice
-from cg.store import Store, models
+from cg.apps import lims
 from cg.server.ext import lims as genologics_lims
+from cg.store import Store, models
 
 
 class InvoiceAPI():
@@ -17,7 +16,6 @@ class InvoiceAPI():
         self.record_type = ''
         self.raw_records = []
         self._set_record_type()
-
 
     def _set_record_type(self):
         """Define the record_type based on the invoice object. 
@@ -33,12 +31,11 @@ class InvoiceAPI():
             self.record_type = 'Microbial'
             self.raw_records = self.invoice_obj.microbial_samples
 
-
     def prepare_contact_info(self, costcenter):
         """Function to prepare contact info for a customer"""
 
         msg = f'Could not open/generate invoice. Contact information missing in database for ' \
-              f'customer {self.customer_obj.internal_id}. See log files.'
+            f'customer {self.customer_obj.internal_id}. See log files.'
 
         customer = self.db.customer('cust999') if costcenter.lower() == 'kth' else self.customer_obj
         user = customer.invoice_contact
@@ -60,20 +57,20 @@ class InvoiceAPI():
 
         return contact
 
-
     def prepare(self, costcenter: str) -> dict:
         """Get information about an invoice to generate Excel report."""
 
         records = []
         pooled_samples = []
-    
+
         for raw_record in self.raw_records:
             if self.record_type == 'Pool':
-                pooled_samples += genologics_lims.samples_in_pools(raw_record.name, raw_record.ticket_number)
+                pooled_samples += genologics_lims.samples_in_pools(raw_record.name,
+                                                                   raw_record.ticket_number)
             record = self.prepare_record(
-                            costcenter=costcenter.lower(),
-                            discount=self.invoice_obj.discount,
-                            record=raw_record)
+                costcenter=costcenter.lower(),
+                discount=self.invoice_obj.discount,
+                record=raw_record)
             if record:
                 records.append(record)
             else:
@@ -95,7 +92,6 @@ class InvoiceAPI():
             'pooled_samples': pooled_samples,
             'record_type': self.record_type}
 
-
     def _discount_price(self, record, discount: int = 0):
         """Get discount price for a sample, pool or microbial_sample."""
 
@@ -107,7 +103,6 @@ class InvoiceAPI():
         if not full_price:
             return None
         return full_price * discount_factor
-
 
     def _cost_center_split_factor(self, price, costcenter, percent_kth, tag, version):
         """Split price based on cost center"""
@@ -128,7 +123,6 @@ class InvoiceAPI():
             return None
         return split_price
 
-
     def prepare_record(self, costcenter: str, discount: int, record):
         """Get invoice information for a specific sample, pool or microbial_sample."""
 
@@ -141,10 +135,12 @@ class InvoiceAPI():
             self.log.append(f'Application tag/version seems to be missing for sample {record.id}.')
             return None
 
-        split_discounted_price = self._cost_center_split_factor(discounted_price, costcenter, percent_kth, tag, version)
+        split_discounted_price = self._cost_center_split_factor(discounted_price, costcenter,
+                                                                percent_kth, tag, version)
 
         order = record.microbial_order.id if self.record_type == 'Microbial' else record.order
-        ticket_number = record.microbial_order.ticket_number if self.record_type == 'Microbial' else record.ticket_number
+        ticket_number = record.microbial_order.ticket_number if self.record_type == 'Microbial' \
+            else record.ticket_number
         lims_id = None if self.record_type == 'Pool' else record.internal_id
         priority = 'research' if self.record_type == 'Pool' else record.priority_human
 
@@ -158,18 +154,17 @@ class InvoiceAPI():
             'price': split_discounted_price,
             'priority': priority}
 
-
     def total_price(self) -> float:
         """Get the total price for all records in the invoice"""
 
         discount = self.invoice_obj.discount
         total_price = 0
-  
+
         for record in self.raw_records:
-            discount_price = self._discount_price(record , discount)
+            discount_price = self._discount_price(record, discount)
             if discount_price:
                 total_price += discount_price
             else:
                 return None
-   
+
         return total_price
