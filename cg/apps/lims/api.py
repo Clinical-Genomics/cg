@@ -160,15 +160,15 @@ class LimsAPI(Lims, OrderHandler):
                     type='Analyte'
                 )
                 udf_key = step_names_udfs[process_type]
-                capture_kits = capture_kits.union(set(artifact.parent_process.udf.get(udf_key) for
-                                                      artifact in artifacts))
-                if len(capture_kits) == 1:
-                    continue
-                else:
-                    message = f"Capture kit error: {lims_sample.id} | {capture_kits}"
-                    raise LimsDataError(message)
+                capture_kits = capture_kits.union(set(artifact.parent_process.udf.get(udf_key)
+                                                      for artifact in artifacts
+                                                      if artifact.parent_process.udf.get(udf_key)
+                                                      is not None))
+        if len(capture_kits) > 1:
+            message = f"Capture kit error: {lims_sample.id} | {capture_kits}"
+            raise LimsDataError(message)
 
-        return capture_kits.pop()
+        return capture_kits or None
 
     def get_samples(self, *args, map_ids=False, **kwargs):
         """Bypass to original method."""
