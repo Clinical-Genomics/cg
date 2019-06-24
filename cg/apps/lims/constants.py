@@ -74,7 +74,7 @@ MASTER_STEPS_UDFS = {
         'End-Repair and A-tailing TWIST v1':
         {
             'method_number': 'Method document',
-            'method_version': 'Method version',
+            'method_version': 'Document version',
         },
     },
     'sequencing_method_step': {

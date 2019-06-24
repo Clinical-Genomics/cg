@@ -243,14 +243,14 @@ class LimsAPI(Lims, OrderHandler):
     def get_sequencing_method(self, lims_id: str) -> str:
         """Get the sequencing method."""
 
-        step_names_udfs = MASTER_STEPS_UDFS['get_sequencing_method_step']
+        step_names_udfs = MASTER_STEPS_UDFS['sequencing_method_step']
 
         return self._get_methods(step_names_udfs, lims_id)
 
     def get_delivery_method(self, lims_id: str) -> str:
         """Get the delivery method."""
 
-        step_names_udfs = MASTER_STEPS_UDFS['get_delivery_method_step']
+        step_names_udfs = MASTER_STEPS_UDFS['delivery_method_step']
 
         return self._get_methods(step_names_udfs, lims_id)
 
@@ -312,11 +312,12 @@ class LimsAPI(Lims, OrderHandler):
         if sorted_methods:
             method = sorted_methods[METHOD_INDEX]
 
-        if method[METHOD_NUMBER_INDEX] is None:
-            return None
+            if method[METHOD_NUMBER_INDEX] is not None:
+                method_name = AM_METHODS.get(method[METHOD_NUMBER_INDEX])
+                return f"{method[METHOD_NUMBER_INDEX]}:{method[METHOD_VERSION_INDEX]} - " \
+                       f"{method_name}"
 
-        method_name = AM_METHODS.get(method[METHOD_NUMBER_INDEX])
-        return f"{method[METHOD_NUMBER_INDEX]}:{method[METHOD_VERSION_INDEX]} - {method_name}"
+        return None
 
     def _get_all_step_dates(self, step_names_udfs, lims_id, artifact_type=None):
         """
