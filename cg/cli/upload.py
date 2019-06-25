@@ -316,9 +316,9 @@ def observations(context, case_id, dry_run):
             api.process(family_obj.analyses[0])
             LOG.info("%s: observations uploaded!", family_obj.internal_id)
         except (DuplicateRecordError, DuplicateSampleError) as error:
-            LOG.info("skipping observations upload: %s", error.message)
+            LOG.info("%s: skipping observations upload: %s", family_obj.internal_id, error.message)
         except FileNotFoundError as error:
-            LOG.warning("skipping observations upload, files not found: %s", error)
+            LOG.info("%s: skipping observations upload: %s", family_obj.internal_id, error)
 
 
 class LinkHelper:
