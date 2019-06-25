@@ -36,7 +36,7 @@ class UploadObservationsAPI():
         # Check if files exists. If hk returns None, or the path does not exist
         # File not found error is raised
         for file in (hk_vcf, hk_sv_vcf, hk_snv_gbcf, hk_pedigree):
-            if (file is None) or (not Path(file.full_path).is_file()):
+            if (file is None) or (not Path(file.full_path).exists()):
                 raise FileNotFoundError(f"{file} is not a file")
 
         data = {
