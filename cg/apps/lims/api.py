@@ -26,6 +26,8 @@ AM_METHODS = {
     '1314': 'Automated SureSelect XT Target Enrichment for Illumina sequencing',
     '1518': '200 ng input Manual SureSelect XT Target Enrichment',
     '1079': 'Manuel SureSelect XT Target Enrichment for Illumina sequencing',
+    '1879': 'Method - Manual Twist Target Enrichment',
+    '1830' : 'NovaSeq 6000 Sequencing method',
 }
 METHOD_INDEX, METHOD_NUMBER_INDEX, METHOD_VERSION_INDEX = 0, 1, 2
 
