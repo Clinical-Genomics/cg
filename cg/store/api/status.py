@@ -520,7 +520,7 @@ class StatusHandler(BaseHandler):
         customers_to_invoice = list(set(customers_to_invoice))
         if customer:
             records = records.join(models.MicrobialOrder).filter(
-                            models.MicrobialOrder.customer_id == customer.id)
+                models.MicrobialOrder.customer_id == customer.id)
         return records, customers_to_invoice
 
     def samples_to_invoice(self, customer: models.Customer = None):
