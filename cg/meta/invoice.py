@@ -18,7 +18,7 @@ class InvoiceAPI():
         self._set_record_type()
 
     def _set_record_type(self):
-        """Define the record_type based on the invoice object. 
+        """Define the record_type based on the invoice object.
         It can only be either pool, sample or microbial"""
 
         if self.invoice_obj.pools:
@@ -113,7 +113,7 @@ class InvoiceAPI():
                 else:
                     split_factor = (100 - percent_kth) / 100
                 split_price = round(price * split_factor, 1)
-            except:
+            except ValueError:
                 self.log.append(f'Could not calculate price for samples with application '
                                 f'tag/version: {tag}/{version}. Missing %KTH')
                 return None
@@ -131,7 +131,7 @@ class InvoiceAPI():
             version = str(record.application_version.version)
             percent_kth = record.application_version.application.percent_kth
             discounted_price = self._discount_price(record, discount)
-        except:
+        except ValueError:
             self.log.append(f'Application tag/version seems to be missing for sample {record.id}.')
             return None
 
