@@ -513,10 +513,7 @@ class StatusHandler(BaseHandler):
         records = (
             self.MicrobialSample.query.filter(
                 models.MicrobialSample.delivered_at is not None,
-                models.MicrobialSample.invoice_id is None,
-                # MICROBIAL SAMPLES DONT SEEM TO HAVE THESE KEYS. SHOULD THEY? --->
-                # models.MicrobialSample.no_invoice == False, 
-                # models.MicrobialSample.downsampled_to == None 
+                models.MicrobialSample.invoice_id is None
             )
         )
         customers_to_invoice = [record.microbial_order.customer for record in records.all()]
