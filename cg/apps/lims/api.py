@@ -132,13 +132,13 @@ class LimsAPI(Lims, OrderHandler):
 
     def get_sequenced_date(self, lims_id: str) -> dt.date:
         """Get the date when a sample was sequenced."""
-        NOVASEQ_PROCESS = 'AUTOMATED - NovaSeq Run'
+        novaseq_process = 'AUTOMATED - NovaSeq Run'
 
         step_names_udfs = MASTER_STEPS_UDFS['sequenced_step']
 
         sequenced_dates = self._get_all_step_dates(step_names_udfs, lims_id)
 
-        novaseq_artifacts = self.get_artifacts(process_type=NOVASEQ_PROCESS, samplelimsid=lims_id)
+        novaseq_artifacts = self.get_artifacts(process_type=novaseq_process, samplelimsid=lims_id)
 
         if novaseq_artifacts and novaseq_artifacts[0].parent_process.date_run:
             sequenced_dates.append((
