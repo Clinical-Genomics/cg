@@ -27,7 +27,7 @@ AM_METHODS = {
     '1518': '200 ng input Manual SureSelect XT Target Enrichment',
     '1079': 'Manuel SureSelect XT Target Enrichment for Illumina sequencing',
     '1879': 'Method - Manual Twist Target Enrichment',
-    '1830' : 'NovaSeq 6000 Sequencing method',
+    '1830': 'NovaSeq 6000 Sequencing method',
 }
 METHOD_INDEX, METHOD_NUMBER_INDEX, METHOD_VERSION_INDEX = 0, 1, 2
 
@@ -132,10 +132,19 @@ class LimsAPI(Lims, OrderHandler):
 
     def get_sequenced_date(self, lims_id: str) -> dt.date:
         """Get the date when a sample was sequenced."""
+        NOVASEQ_PROCESS = 'AUTOMATED - NovaSeq Run'
 
         step_names_udfs = MASTER_STEPS_UDFS['sequenced_step']
 
         sequenced_dates = self._get_all_step_dates(step_names_udfs, lims_id)
+
+        novaseq_artifacts = self.get_artifacts(process_type=NOVASEQ_PROCESS, samplelimsid=lims_id)
+
+        if novaseq_artifacts and novaseq_artifacts[0].parent_process.date_run:
+            sequenced_dates.append((
+                parse_date(novaseq_artifacts[0].parent_process.date_run),
+                parse_date(novaseq_artifacts[0].parent_process.date_run),
+            ))
 
         if len(sequenced_dates) > 1:
             log.warning("multiple sequence artifacts found for: %s", lims_id)

@@ -40,7 +40,7 @@ MASTER_STEPS_UDFS = {
     'prepared_step': {
         'CG002 - Aggregate QC (Library Validation) (Dev)',
         'CG002 - Aggregate QC (Library Validation)',
-        'CG002 - Aggregate QC (Library Validation) TWIST v1',
+        'Aggregate QC (Library Validation) TWIST v1',
     },
     'delivery_step': {
         'CG002 - Delivery': 'Date delivered',
@@ -49,7 +49,7 @@ MASTER_STEPS_UDFS = {
     'sequenced_step': {
         'CG002 - Illumina Sequencing (HiSeq X)': 'Finish Date',
         'CG002 - Illumina Sequencing (Illumina SBS)': 'Finish Date',
-        'AUTOMATED - NovaSeq Run': 'Finish Date',
+        'AUTOMATED - NovaSeq Run': None,
     },
     'capture_kit_step': {
         'obsolete_CG002 - Hybridize Library  (SS XT)': 'SureSelect capture library/libraries used',
