@@ -171,15 +171,14 @@ class LimsAPI(Lims, OrderHandler):
                     type='Analyte'
                 )
                 udf_key = step_names_udfs[process_type]
-                capture_kits = capture_kits.union(set(artifact.parent_process.udf.get(udf_key)
-                                                      for artifact in artifacts
-                                                      if artifact.parent_process.udf.get(udf_key)
-                                                      is not None))
+                capture_kits = capture_kits.union(self._find_capture_kits(artifacts, udf_key) or
+                                                  self._find_twist_capture_kits(artifacts, udf_key))
+
         if len(capture_kits) > 1:
             message = f"Capture kit error: {lims_sample.id} | {capture_kits}"
             raise LimsDataError(message)
 
-        return capture_kits or None
+        return capture_kits.pop() or None
 
     def get_samples(self, *args, map_ids=False, **kwargs):
         """Bypass to original method."""
@@ -362,3 +361,21 @@ class LimsAPI(Lims, OrderHandler):
         get method version for artifact
         """
         return artifact.parent_process.udf.get(udf_key_version)
+
+    @staticmethod
+    def _find_capture_kits(artifacts, udf_key):
+        """
+        get capture kit from parent process for non-TWIST samples
+        """
+        capture_kits = set(artifact.parent_process.udf.get(udf_key) for artifact in artifacts
+                           if artifact.parent_process.udf.get(udf_key) is not None)
+        return capture_kits
+
+    @staticmethod
+    def _find_twist_capture_kits(artifacts, udf_key):
+        """
+        get capture kit from parent process for TWIST samples
+        """
+        capture_kits = set(artifact.udf.get(udf_key) for artifact in artifacts
+                           if artifact.udf.get(udf_key) is not None)
+        return capture_kits
