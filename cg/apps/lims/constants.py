@@ -102,3 +102,7 @@ MASTER_STEPS_UDFS = {
         },
     },
 }
+
+PROCESSES = {
+    'sequenced_step': 'AUTOMATED - NovaSeq Run',
+}

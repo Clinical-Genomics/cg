@@ -7,7 +7,7 @@ from genologics.lims import Lims
 from dateutil.parser import parse as parse_date
 
 from cg.exc import LimsDataError
-from .constants import PROP2UDF, MASTER_STEPS_UDFS
+from .constants import PROP2UDF, MASTER_STEPS_UDFS, PROCESSES
 from .order import OrderHandler
 
 # fixes https://github.com/Clinical-Genomics/servers/issues/30
@@ -132,7 +132,7 @@ class LimsAPI(Lims, OrderHandler):
 
     def get_sequenced_date(self, lims_id: str) -> dt.date:
         """Get the date when a sample was sequenced."""
-        novaseq_process = 'AUTOMATED - NovaSeq Run'
+        novaseq_process = PROCESSES['sequenced_date']
 
         step_names_udfs = MASTER_STEPS_UDFS['sequenced_step']
 
