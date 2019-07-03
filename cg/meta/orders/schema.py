@@ -94,15 +94,16 @@ MIP_SAMPLE = {
 
     # "required for new samples"
     'name': validators.RegexValidator(NAME_PATTERN),
-    'container': OptionalNone(validators.Any(CONTAINER_OPTIONS)),
+    # customer
     'data_analysis': str,
     'application': str,
-    'sex': OptionalNone(validators.Any(SEX_OPTIONS)),
     'family_name': validators.RegexValidator(NAME_PATTERN),
-    'require_qcok': bool,
-    'source': OptionalNone(TypeValidatorNone(str)),
+    'sex': OptionalNone(validators.Any(SEX_OPTIONS)),
     'tumour': bool,
+    'source': OptionalNone(TypeValidatorNone(str)),
     'priority': OptionalNone(validators.Any(PRIORITY_OPTIONS)),
+    'require_qcok': bool,
+    'container': OptionalNone(validators.Any(CONTAINER_OPTIONS)),
 
     # "required if plate for new samples"
     'container_name': OptionalNone(TypeValidatorNone(str)),
@@ -115,6 +116,13 @@ MIP_SAMPLE = {
     # "Required if samples are part of trio/family"
     'mother': OptionalNone(RegexValidatorNone(NAME_PATTERN)),
     'father': OptionalNone(RegexValidatorNone(NAME_PATTERN)),
+
+    # This information is required for panel analysis
+    'capture_kit': OptionalNone(validators.Any(CAPTUREKIT_CANCER_OPTIONS)),
+
+    # This information is required for panel- or exome analysis
+    'elution_buffer': OptionalNone(TypeValidatorNone(str)),
+    'tumour_purity': OptionalNone(TypeValidatorNone(str)),
 
     # "This information is optional for FFPE-samples for new samples"
     'formalin_fixation_time': OptionalNone(TypeValidatorNone(str)),
@@ -149,8 +157,11 @@ BALSAMIC_SAMPLE = {
     'container_name': OptionalNone(TypeValidatorNone(str)),
     'well_position': OptionalNone(TypeValidatorNone(str)),
 
-    # This information is required for Balsamic analysis (cancer) for new samples
+    # This information is required for panel analysis
     'capture_kit': OptionalNone(validators.Any(CAPTUREKIT_CANCER_OPTIONS)),
+
+    # This information is required for panel- or exome analysis
+    'elution_buffer': OptionalNone(TypeValidatorNone(str)),
     'tumour_purity': OptionalNone(TypeValidatorNone(str)),
 
     # This information is optional for FFPE-samples for new samples
