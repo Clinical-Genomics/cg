@@ -26,6 +26,8 @@ CAPTUREKIT_MAP = {'Agilent Sureselect CRE': 'agilent_sureselect_cre.v1',
                   'SureSelect CRE': 'agilent_sureselect_cre.v1',
                   'Agilent Sureselect V5': 'agilent_sureselect.v5',
                   'SureSelect Focused Exome': 'agilent_sureselect_focusedexome.v1',
+                  'Twist Human core exome v1.3 + Twist Human RefSeq Panel':
+                  'Twist_Target_hg19_RefSeq.bed',
                   'other': 'agilent_sureselect_cre.v1'}
 
 
