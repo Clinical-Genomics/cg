@@ -142,7 +142,7 @@ class LimsAPI(Lims, OrderHandler):
 
         if novaseq_artifacts and novaseq_artifacts[0].parent_process.date_run:
             sequenced_dates.append((
-                parse_date(novaseq_artifacts[0].parent_process.date_run),
+                novaseq_artifacts[0].parent_process.date_run,
                 parse_date(novaseq_artifacts[0].parent_process.date_run),
             ))
 
