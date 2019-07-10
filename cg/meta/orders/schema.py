@@ -88,7 +88,7 @@ BASE_PROJECT = {
 }
 
 MIP_SAMPLE = {
-    # Orderform 1508:17
+    # Orderform 1508:18
     # Order portal specific
     'internal_id': OptionalNone(TypeValidatorNone(str)),
 
@@ -135,7 +135,7 @@ MIP_SAMPLE = {
 }
 
 BALSAMIC_SAMPLE = {
-    # 1508:17 Orderform
+    # 1508:18 Orderform
 
     # Order portal specific
     'internal_id': OptionalNone(TypeValidatorNone(str)),
@@ -213,7 +213,7 @@ EXTERNAL_SAMPLE = {
 }
 
 FASTQ_SAMPLE = {
-    # Orderform 1508:17
+    # Orderform 1508:18
 
     # "required"
     'name': validators.RegexValidator(NAME_PATTERN),

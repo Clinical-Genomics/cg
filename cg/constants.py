@@ -44,4 +44,5 @@ ANALYSIS_SOURCES = (
     'skin',
     'tissue (FFPE)',
     'tissue (fresh frozen)',
+    'bone marrow',
     'other')
