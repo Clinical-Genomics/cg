@@ -456,7 +456,7 @@ sv_vcfparser:
         gene_panel: mtDNA
         updated_at: 2015-11-30
         version: '8.0'
-    path: /path_to/family/aggregated_master.bed
+    path: /path_to/family/gene_panels.bed
 vcf_binary_file:
   clinical:
     path: /path_to/family_sorted_md_brecal_gvcf_vrecal_comb_vt_vep_parsed_snpeff_ranked_BOTH.selected.vcf.gz
@@ -562,5 +562,5 @@ vcfparser:
         gene_panel: mtDNA
         updated_at: 2015-11-30
         version: '8.0'
-    path: /path_to/family/aggregated_master.bed
+    path: /path_to/family/gene_panels.bed
 

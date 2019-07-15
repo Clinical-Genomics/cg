@@ -220,7 +220,7 @@ sv_vcfanno_config: vcfanno_config.v1.0.toml
 sv_vcfanno_lua: vcfanno_custom.v1.0.lua
 sv_vcfannotation_header_lines_file: vcfanno_headerLines.v1.0.txt
 sv_vcfparser_per_gene: '1'
-sv_vcfparser_select_file: /mnt/hds/proj/bioinfo/MIP_ANALYSIS/customers/cust003/family/aggregated_master.bed
+sv_vcfparser_select_file: /mnt/hds/proj/bioinfo/MIP_ANALYSIS/customers/cust003/family/gene_panels.bed
 sv_vcfparser_select_file_matching_column: '3'
 sv_vcfparser_vep_transcripts: '1'
 sv_vep_features:
@@ -247,7 +247,7 @@ sv_vep_plugins:
 sv_vt_decompose: '1'
 temp_directory: /scratch/$SLURM_JOB_ID
 vcfparser_outfile_count: 2
-vcfparser_select_file: /mnt/hds/proj/bioinfo/MIP_ANALYSIS/customers/cust003/family/aggregated_master.bed
+vcfparser_select_file: /mnt/hds/proj/bioinfo/MIP_ANALYSIS/customers/cust003/family/gene_panels.bed
 vcfparser_select_file_matching_column: '3'
 vcfparser_vep_transcripts: '1'
 vep_directory_cache: /mnt/hds/proj/bioinfo/SERVER/apps/mip/resources/ensembl-tools-release-87/cache
