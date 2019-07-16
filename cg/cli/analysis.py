@@ -112,7 +112,7 @@ def link(context, family_id, sample_id):
         # link sample in all its families
         sample_obj = context.obj['db'].sample(sample_id)
         if sample_obj is None:
-            LOG.error(f"Sample '{family}' does not exist.")
+            LOG.error(f"Sample '{sample}' does not exist.")
             context.abort()
         link_objs = sample_obj.links
     elif sample_id and family_id:
@@ -123,6 +123,9 @@ def link(context, family_id, sample_id):
         context.abort()
 
     for link_obj in link_objs:
+        if link_obj is None:
+            LOG.error(f"Sample '{sample}' or family '{family}' does not exist.")
+            context.abort()
         LOG.info("%s: link FASTQ files", link_obj.sample.internal_id)
         if link_obj.sample.data_analysis and 'balsamic' in link_obj.sample.data_analysis.lower():
             context.obj['api'].link_sample(BalsamicFastqHandler(context.obj),
