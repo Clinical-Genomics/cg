@@ -104,10 +104,16 @@ def link(context, family_id, sample_id):
     if family_id and (sample_id is None):
         # link all samples in a family
         family_obj = context.obj['db'].family(family_id)
+        if family_obj is None:
+            LOG.error(f"Family '{family}' does not exist.")
+            context.abort()
         link_objs = family_obj.links
     elif sample_id and (family_id is None):
         # link sample in all its families
         sample_obj = context.obj['db'].sample(sample_id)
+        if sample_obj is None:
+            LOG.error(f"Sample '{family}' does not exist.")
+            context.abort()
         link_objs = sample_obj.links
     elif sample_id and family_id:
         # link only one sample in a family
