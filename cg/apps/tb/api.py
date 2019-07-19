@@ -58,7 +58,7 @@ class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
         """Write the gene panel to the defined location."""
         out_dir = Path(self.families_dir) / family_id
         out_dir.mkdir(parents=True, exist_ok=True)
-        out_path = out_dir / 'aggregated_master.bed'
+        out_path = out_dir / 'gene_panels.bed'
         with out_path.open('w') as out_handle:
             for line in content:
                 click.echo(line, file=out_handle)
