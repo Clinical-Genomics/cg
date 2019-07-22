@@ -34,7 +34,7 @@ class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
               skip_evaluation: bool = False, start_with = None):
         """Start MIP."""
         email = email or environ_email()
-        kwargs = dict(config=self.mip_config, family=family_id, priority=priority, email=email, start_with=start_with)
+        kwargs = dict(config=self.mip_config, case=family_id, priority=priority, email=email, start_with=start_with)
         if skip_evaluation:
             kwargs['skip_evaluation'] = True
         self.mip_cli(**kwargs)
