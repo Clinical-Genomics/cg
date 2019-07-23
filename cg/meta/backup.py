@@ -10,15 +10,16 @@ LOG = logging.getLogger(__name__)
 
 class BackupApi():
 
-    def __init__(self, status: Store, pdc_api: PdcApi):
+    def __init__(self, status: Store, pdc_api: PdcApi, max_flowcells: int):
         self.status = status
         self.pdc = pdc_api
+        self.max_flowcells = max_flowcells
 
-    def maximum_flowcells_ondisk(self, max_flowcells: int=800) -> bool:
+    def maximum_flowcells_ondisk(self) -> bool:
         """Check if there's too many flowcells already "ondisk"."""
         ondisk_flowcells = self.status.flowcells(status='ondisk').count()
         LOG.debug(f"ondisk flowcells: {ondisk_flowcells}")
-        return ondisk_flowcells > max_flowcells
+        return ondisk_flowcells > self.max_flowcells
 
     def check_processing(self, max_flowcells: int=3) -> bool:
         """Check if the processing queue for flowcells is not full."""
