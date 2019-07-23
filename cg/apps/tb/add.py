@@ -59,14 +59,6 @@ class AddHandler:
             'tags': ['qcmetrics'],
             'archive': True,
         }, {
-            'path': sampleinfo_data['snv']['gbcf'],
-            'tags': ['snv-gbcf'],
-            'archive': False,
-        }, {
-            'path': f"{sampleinfo_data['snv']['gbcf']}.csi",
-            'tags': ['snv-gbcf-index'],
-            'archive': False,
-        }, {
             'path': sampleinfo_data['snv']['bcf'],
             'tags': ['snv-bcf'],
             'archive': True,
@@ -94,6 +86,10 @@ class AddHandler:
             'path': sampleinfo_data['peddy']['sex_check'],
             'tags': ['peddy', 'sex-check'],
             'archive': False,
+        }, {
+            'path': sampleinfo_data['str_vcf'],
+            'tags': ['expansion hunter vcf'],
+            'archive': True
         }]
 
         for variant_type in ['snv', 'sv']:
@@ -109,7 +105,7 @@ class AddHandler:
                     'archive': True,
                 })
                 data.append({
-                    'path': f"{vcf_path}.tbi",
+                    'path': f"{vcf_path}.tbi" if variant_type == 'snv' else f"{vcf_path}.csi",
                     'tags': [f"{vcf_tag}-index"],
                     'archive': True,
                 })
