@@ -25,7 +25,7 @@ def fetch_flowcell(context: click.Context, flowcell: str, dry_run: bool):
     status_api = Store(context.obj['database'])
     max_flowcells = context.obj.get('max_flowcells', 1000)
     pdc_api = PdcApi(context.obj)
-    backup_api = BackupApi(status=status_api, pdc_api=pdc_api, max_flowcells)
+    backup_api = BackupApi(status=status_api, pdc_api=pdc_api, max_flowcells=max_flowcells)
     if flowcell:
         flowcell_obj = status_api.flowcell(flowcell)
         if flowcell_obj is None:
