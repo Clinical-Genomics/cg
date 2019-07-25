@@ -88,21 +88,22 @@ BASE_PROJECT = {
 }
 
 MIP_SAMPLE = {
-    # Orderform 1508:17
+    # Orderform 1508:18
     # Order portal specific
     'internal_id': OptionalNone(TypeValidatorNone(str)),
 
     # "required for new samples"
     'name': validators.RegexValidator(NAME_PATTERN),
-    'container': OptionalNone(validators.Any(CONTAINER_OPTIONS)),
+    # customer
     'data_analysis': str,
     'application': str,
-    'sex': OptionalNone(validators.Any(SEX_OPTIONS)),
     'family_name': validators.RegexValidator(NAME_PATTERN),
-    'require_qcok': bool,
-    'source': OptionalNone(TypeValidatorNone(str)),
+    'sex': OptionalNone(validators.Any(SEX_OPTIONS)),
     'tumour': bool,
+    'source': OptionalNone(TypeValidatorNone(str)),
     'priority': OptionalNone(validators.Any(PRIORITY_OPTIONS)),
+    'require_qcok': bool,
+    'container': OptionalNone(validators.Any(CONTAINER_OPTIONS)),
 
     # "required if plate for new samples"
     'container_name': OptionalNone(TypeValidatorNone(str)),
@@ -116,6 +117,13 @@ MIP_SAMPLE = {
     'mother': OptionalNone(RegexValidatorNone(NAME_PATTERN)),
     'father': OptionalNone(RegexValidatorNone(NAME_PATTERN)),
 
+    # This information is required for panel analysis
+    'capture_kit': OptionalNone(validators.Any(CAPTUREKIT_CANCER_OPTIONS)),
+
+    # This information is required for panel- or exome analysis
+    'elution_buffer': OptionalNone(TypeValidatorNone(str)),
+    'tumour_purity': OptionalNone(TypeValidatorNone(str)),
+
     # "This information is optional for FFPE-samples for new samples"
     'formalin_fixation_time': OptionalNone(TypeValidatorNone(str)),
     'post_formalin_fixation_time': OptionalNone(TypeValidatorNone(str)),
@@ -127,7 +135,7 @@ MIP_SAMPLE = {
 }
 
 BALSAMIC_SAMPLE = {
-    # 1508:17 Orderform
+    # 1508:18 Orderform
 
     # Order portal specific
     'internal_id': OptionalNone(TypeValidatorNone(str)),
@@ -141,6 +149,7 @@ BALSAMIC_SAMPLE = {
     'family_name': validators.RegexValidator(NAME_PATTERN),
     'require_qcok': bool,
     'tumour': bool,
+    'elution_buffer': str,
     'source': OptionalNone(TypeValidatorNone(str)),
     'priority': OptionalNone(validators.Any(PRIORITY_OPTIONS)),
 
@@ -148,8 +157,11 @@ BALSAMIC_SAMPLE = {
     'container_name': OptionalNone(TypeValidatorNone(str)),
     'well_position': OptionalNone(TypeValidatorNone(str)),
 
-    # This information is required for Balsamic analysis (cancer) for new samples
+    # This information is required for panel analysis
     'capture_kit': OptionalNone(validators.Any(CAPTUREKIT_CANCER_OPTIONS)),
+
+    # This information is required for panel- or exome analysis
+    'elution_buffer': OptionalNone(TypeValidatorNone(str)),
     'tumour_purity': OptionalNone(TypeValidatorNone(str)),
 
     # This information is optional for FFPE-samples for new samples
@@ -201,7 +213,7 @@ EXTERNAL_SAMPLE = {
 }
 
 FASTQ_SAMPLE = {
-    # Orderform 1508:17
+    # Orderform 1508:18
 
     # "required"
     'name': validators.RegexValidator(NAME_PATTERN),
