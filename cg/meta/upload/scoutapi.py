@@ -38,6 +38,7 @@ class UploadScoutAPI(object):
             'default_gene_panels': analysis_obj.family.panels,
             'human_genome_build': analysis_data.get('genome_build'),
             'rank_model_version': analysis_data.get('rank_model_version'),
+            'sv_rank_model_version': analysis_data.get('sv_rank_model_version')
         }
 
         for link_obj in analysis_obj.family.links:
