@@ -28,7 +28,7 @@ class AddHandler:
     def _build_bundle(cls, config_data: dict, sampleinfo_data: dict) -> dict:
         """Create a new bundle."""
         data = {
-            'name': config_data['family'],
+            'name': config_data['case'],
             'created': sampleinfo_data['date'],
             'pipeline_version': sampleinfo_data['version'],
             'files': cls._get_files(config_data, sampleinfo_data),
