@@ -88,7 +88,7 @@ class AddHandler:
             'archive': False,
         }, {
             'path': sampleinfo_data['str_vcf'],
-            'tags': ['expansion hunter vcf'],
+            'tags': ['expansion-hunter-vcf'],
             'archive': True
         }]
 
