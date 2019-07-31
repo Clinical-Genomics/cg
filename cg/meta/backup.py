@@ -1,3 +1,4 @@
+""" Module for retrieving FCs from backup """
 import logging
 import subprocess
 import time
@@ -9,6 +10,7 @@ LOG = logging.getLogger(__name__)
 
 
 class BackupApi():
+    """ Class for retrieving FCs from backup """
 
     def __init__(self, status: Store, pdc_api: PdcApi, max_flowcells: int):
         self.status = status
@@ -24,7 +26,7 @@ class BackupApi():
     def check_processing(self, max_flowcells: int = 1) -> bool:
         """Check if the processing queue for flowcells is not full."""
         processing_flowcells = self.status.flowcells(status='processing').count()
-        LOG.debug(f"processing flowcells: {processing_flowcells}")
+        LOG.debug("processing flowcells: %s", processing_flowcells)
         return processing_flowcells < max_flowcells
 
     def pop_flowcell(self) -> models.Flowcell:
@@ -61,6 +63,7 @@ class BackupApi():
 
         if not dry_run:
             LOG.info(f"{flowcell_obj.name}: retreiving from PDC")
+
         tic = time.time()
 
         try:
@@ -68,7 +71,7 @@ class BackupApi():
                 self.pdc.retrieve_flowcell(flowcell_obj.name,
                                            flowcell_obj.sequencer_type)
         except subprocess.CalledProcessError as error:
-            LOG.error(f"{flowcell_obj.name}: retrieval failed")
+            LOG.error("%s: retrieval failed", flowcell_obj.name)
             flowcell_obj.status = 'requested'
             self.status.commit()
             raise error
