@@ -89,7 +89,7 @@ class AddHandler:
             'archive': False,
         }, {
             'path': sampleinfo_data['str_vcf'],
-            'tags': ['str-vcf'],
+            'tags': ['vcf-str'],
             'archive': True
         }]
 
