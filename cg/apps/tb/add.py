@@ -38,6 +38,7 @@ class AddHandler:
     @staticmethod
     def _get_files(config_data: dict, sampleinfo_data: dict) -> dict:
         """Get all the files from the MIP files."""
+
         data = [{
             'path': config_data['config_path'],
             'tags': ['mip-config'],
@@ -88,7 +89,7 @@ class AddHandler:
             'archive': False,
         }, {
             'path': sampleinfo_data['str_vcf'],
-            'tags': ['expansion-hunter-vcf'],
+            'tags': ['str-vcf'],
             'archive': True
         }]
 
@@ -117,7 +118,7 @@ class AddHandler:
                 'archive': False,
             })
 
-            ## Bam preprocessing
+            # Bam pre-processing
             bam_path = sample_data['bam']
             bai_path = f"{bam_path}.bai"
             if not Path(bai_path).exists():
@@ -134,8 +135,8 @@ class AddHandler:
                 'archive': False,
             })
 
-            ## Only for wgs data
-            ## Downsamples MT bam preprocessing
+            # Only for wgs data
+            # Downsamples MT bam pre-processing
             if sample_data['subsample_mt']:
                 mt_bam_path = sample_data['subsample_mt']
                 mt_bai_path = f"{mt_bam_path}.bai"

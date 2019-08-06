@@ -215,7 +215,7 @@ load_env:
     method: conda
     sv_varianteffectpredictor: LD_LIBRARY_PATH=/home/proj/bin/conda/envs/S_mip7.1_rd-dna_vep/lib/:$LD_LIBRARY_PATH; export LD_LIBRARY_PATH;
     varianteffectpredictor: LD_LIBRARY_PATH=/home/proj/bin/conda/envs/S_mip7.1_rd-dna_vep/lib/:$LD_LIBRARY_PATH; export LD_LIBRARY_PATH;
-log_file: /path_to/cases/case/analysis/mip_log/2019-07-26/mip_2019-07-26T09:06:07.log
+log_file: tests/fixtures/case/mip_2019-07-04T10:47:15.log
 manta: 2
 markduplicates: 2
 markduplicates_picardtools_markduplicates: '1'

@@ -32,9 +32,9 @@ pytest_plugins = [  # pylint: disable=invalid-name
 @pytest.fixture(scope='session')
 def files():
     return {
-        'config': 'tests/fixtures/apps/tb/family/family_config.yaml',
-        'sampleinfo': 'tests/fixtures/apps/tb/family/family_qc_sample_info.yaml',
-        'qcmetrics': 'tests/fixtures/apps/tb/family/family_qc_metrics.yaml',
+        'config': 'tests/fixtures/apps/tb/family/case_config.yaml',
+        'sampleinfo': 'tests/fixtures/apps/tb/family/case_qc_sample_info.yaml',
+        'qcmetrics': 'tests/fixtures/apps/tb/family/case_qc_metrics.yaml',
     }
 
 

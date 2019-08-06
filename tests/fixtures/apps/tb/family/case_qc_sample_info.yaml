@@ -85,8 +85,7 @@ recipe:
   plink_sexcheck:
     path: /path_to/case/case/plink/case_gatkcomb.plink_sexcheck.sexcheck
   qccollect:
-    #path: /path_to/case/case/qccollect_ar/case_qc_metrics.yaml
-    path: /path_to/family/family_qc_metrics.yaml 
+    path: /path_to/case/case_qc_metrics.yaml
   qccollect_ar: {}
   relation_check:
     path: /path_to/case/case/plink/case_gatkcomb.relation_check.mibs
