@@ -464,37 +464,36 @@ class Pool(Model):
 
 
 class Sample(Model, PriorityMixin):
-    id = Column(types.Integer, primary_key=True)
-    internal_id = Column(types.String(32), nullable=False, unique=True)
-    priority = Column(types.Integer, default=1, nullable=False)
-    name = Column(types.String(128), nullable=False)
-    data_analysis = Column(types.String(16))
-    order = Column(types.String(64))
-    ticket_number = Column(types.Integer)
-    sex = Column(types.Enum('male', 'female', 'unknown'), nullable=False)
-    is_external = Column(types.Boolean, default=False)  # DEPRECATED
-    downsampled_to = Column(types.BigInteger)
-    is_tumour = Column(types.Boolean, default=False)
-    loqusdb_id = Column(types.String(64))
-    capture_kit = Column(types.String(64))
-    reads = Column(types.BigInteger, default=0)
-    ordered_at = Column(types.DateTime, nullable=False)
-    received_at = Column(types.DateTime)
-    prepared_at = Column(types.DateTime)
-    sequence_start = Column(types.DateTime)
-    sequenced_at = Column(types.DateTime)
-    delivered_at = Column(types.DateTime)
-    invoiced_at = Column(types.DateTime)  # DEPRECATED
-    invoice_id = Column(ForeignKey('invoice.id'))
-    no_invoice = Column(types.Boolean, default=False)
-    comment = Column(types.Text)
-    beaconized_at = Column(types.Text)
 
+    application_version_id = Column(ForeignKey('application_version.id'), nullable=False)
+    beaconized_at = Column(types.Text)
+    capture_kit = Column(types.String(64))
+    comment = Column(types.Text)
     created_at = Column(types.DateTime, default=dt.datetime.now)
     customer_id = Column(ForeignKey('customer.id', ondelete='CASCADE'), nullable=False)
-    application_version_id = Column(ForeignKey('application_version.id'), nullable=False)
-
+    data_analysis = Column(types.String(16))
+    delivered_at = Column(types.DateTime)
     deliveries = orm.relationship('Delivery', backref='sample')
+    downsampled_to = Column(types.BigInteger)
+    id = Column(types.Integer, primary_key=True)
+    internal_id = Column(types.String(32), nullable=False, unique=True)
+    invoice_id = Column(ForeignKey('invoice.id'))
+    invoiced_at = Column(types.DateTime)  # DEPRECATED
+    is_external = Column(types.Boolean, default=False)  # DEPRECATED
+    is_tumour = Column(types.Boolean, default=False)
+    loqusdb_id = Column(types.String(64))
+    name = Column(types.String(128), nullable=False)
+    no_invoice = Column(types.Boolean, default=False)
+    order = Column(types.String(64))
+    ordered_at = Column(types.DateTime, nullable=False)
+    prepared_at = Column(types.DateTime)
+    priority = Column(types.Integer, default=1, nullable=False)
+    reads = Column(types.BigInteger, default=0)
+    received_at = Column(types.DateTime)
+    sequence_start = Column(types.DateTime)
+    sequenced_at = Column(types.DateTime)
+    sex = Column(types.Enum('male', 'female', 'unknown'), nullable=False)
+    ticket_number = Column(types.Integer)
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
