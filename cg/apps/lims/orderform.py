@@ -52,14 +52,14 @@ def parse_orderform(excel_path: str) -> dict:
 
     project_type = get_project_type(document_title, parsed_samples)
 
-    if project_type in (FAMILY_PROJECT_TYPES):
-        parsed_families = group_families(parsed_samples)
+    if project_type in FAMILY_PROJECT_TYPES:
+        parsed_cases = group_cases(parsed_samples)
         items = []
         customer_ids = set()
-        for family_id, parsed_family in parsed_families.items():
-            customer_id, family_data = expand_family(family_id, parsed_family)
+        for case_id, parsed_case in parsed_cases.items():
+            customer_id, case_data = expand_case(case_id, parsed_case)
             customer_ids.add(customer_id)
-            items.append(family_data)
+            items.append(case_data)
     else:
         customer_ids = set(sample['customer'] for sample in parsed_samples)
         items = parsed_samples
@@ -113,20 +113,19 @@ def get_project_type(document_title: str, parsed_samples: List) -> str:
     return project_type
 
 
-def expand_family(family_id, parsed_family):
+def expand_case(case_id, parsed_case):
     """Fill-in information about families."""
-    new_family = {'name': family_id, 'samples': []}
-    samples = parsed_family['samples']
+    new_case = {'name': case_id, 'samples': []}
+    samples = parsed_case['samples']
 
     require_qcoks = set(raw_sample['require_qcok'] for raw_sample in samples)
-    if True in require_qcoks:
-        new_family['require_qcok'] = True
+    new_case['require_qcok'] = True in require_qcoks
 
     priorities = set(raw_sample['priority'] for raw_sample in samples)
     if len(priorities) == 1:
-        new_family['priority'] = priorities.pop()
+        new_case['priority'] = priorities.pop()
     else:
-        raise OrderFormError(f"multiple values for 'Priority' for family: {family_id}")
+        raise OrderFormError(f"multiple values for 'Priority' for case: {case_id}")
 
     customers = set(raw_sample['customer'] for raw_sample in samples)
     if len(customers) != 1:
@@ -154,24 +153,24 @@ def expand_family(family_id, parsed_family):
         for parent_id in ('mother', 'father'):
             if raw_sample[parent_id]:
                 new_sample[parent_id] = raw_sample[parent_id]
-        new_family['samples'].append(new_sample)
+        new_case['samples'].append(new_sample)
 
-    new_family['panels'] = list(gene_panels)
+    new_case['panels'] = list(gene_panels)
 
-    return customer, new_family
+    return customer, new_case
 
 
-def group_families(parsed_samples):
-    """Group samples on family."""
-    raw_families = {}
+def group_cases(parsed_samples):
+    """Group samples on case."""
+    raw_cases = {}
     for sample in parsed_samples:
-        family_id = sample['family']
-        if family_id not in raw_families:
-            raw_families[family_id] = {
+        case_id = sample['case']
+        if case_id not in raw_cases:
+            raw_cases[case_id] = {
                 'samples': [],
             }
-        raw_families[family_id]['samples'].append(sample)
-    return raw_families
+        raw_cases[case_id]['samples'].append(sample)
+    return raw_cases
 
 
 def parse_sample(raw_sample):
