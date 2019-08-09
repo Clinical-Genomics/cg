@@ -127,7 +127,7 @@ class StatusHandler:
         return status_data
 
     @classmethod
-    def families_to_status(cls, data: dict) -> dict:
+    def cases_to_status(cls, data: dict) -> dict:
         """Convert order input to status interface input."""
         status_data = {
             'customer': data['customer'],
