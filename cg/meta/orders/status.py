@@ -11,14 +11,14 @@ class StatusHandler:
         self.status = None
 
     @staticmethod
-    def group_families(samples: List[dict]) -> dict:
-        """Group samples in families."""
-        families = {}
+    def group_cases(samples: List[dict]) -> dict:
+        """Group samples in cases."""
+        cases = {}
         for sample in samples:
-            if sample['family_name'] not in families:
-                families[sample['family_name']] = []
-            families[sample['family_name']].append(sample)
-        return families
+            if sample['family_name'] not in cases:
+                cases[sample['family_name']] = []
+            cases[sample['family_name']].append(sample)
+        return cases
 
     @staticmethod
     def pools_to_status(data: dict) -> dict:
@@ -134,7 +134,7 @@ class StatusHandler:
             'order': data['name'],
             'families': [],
         }
-        families = cls.group_families(data['samples'])
+        cases = cls.group_cases(data['samples'])
 
         for family_name, family_samples in families.items():
             values = set(sample.get('priority', 'standard') for sample in family_samples)
