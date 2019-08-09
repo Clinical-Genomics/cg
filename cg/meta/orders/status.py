@@ -164,9 +164,9 @@ class StatusHandler:
             status_data['families'].append(case)
         return status_data
 
-    def store_families(self, customer: str, order: str, ordered: dt.datetime, ticket: int,
                        families: List[dict]) -> List[models.Family]:
-        """Store families and samples in the status database."""
+    def store_cases(self, customer: str, order: str, ordered: dt.datetime, ticket: int,
+        """Store cases and samples in the status database."""
         customer_obj = self.status.customer(customer)
         if customer_obj is None:
             raise OrderError(f"unknown customer: {customer}")
