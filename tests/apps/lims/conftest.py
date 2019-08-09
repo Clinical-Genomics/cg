@@ -45,6 +45,12 @@ def mip_balsamic_orderform():
 
 
 @pytest.fixture
+def mip_rna_orderform():
+    """Orderform fixture for MIP RNA samples"""
+    return 'tests/fixtures/orderforms/1508.19.mip_rna.xlsx'
+
+
+@pytest.fixture
 def rml_orderform():
     """Orderform fixture for RML samples"""
     return 'tests/fixtures/orderforms/1604.9.rml.xlsx'

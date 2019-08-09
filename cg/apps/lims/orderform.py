@@ -11,13 +11,14 @@ REV_SEX_MAP = {value: key for key, value in SEX_MAP.items()}
 CONTAINER_TYPES = ['Tube', '96 well plate']
 SOURCE_TYPES = set().union(METAGENOME_SOURCES, ANALYSIS_SOURCES)
 VALID_ORDERFORMS=[
-    '1508:18',      # Orderform MIP, Balsamic, sequencing only
+    '1508:18',      # Orderform MIP, Balsamic, sequencing only  # TODO: Upgrade to 1508:19
+    '1508:19',      # Orderform MIP RNA
     '1541:6',       # Orderform Externally sequenced samples
     '1603:8',       # Microbial WGS
     '1604:9',       # Orderform Ready made libraries (RML)
     '1605:6',       # Microbial metagenomes
 ]
-FAMILY_PROJECT_TYPES=['mip', 'external', 'balsamic', 'mip_balsamic']
+FAMILY_PROJECT_TYPES = ['mip', 'external', 'balsamic', 'mip_balsamic', 'mip_rna']
 
 
 def check_orderform_version(document_title):
@@ -145,8 +146,9 @@ def expand_case(case_id, parsed_case):
             new_sample['container'] = raw_sample['container']
 
         for key in ('capture_kit', 'comment', 'container_name', 'data_analysis', 'elution_buffer',
-                    'formalin_fixation_time', 'post_formalin_fixation_time', 'quantity',
-                    'status', 'tissue_block_size', 'tumour', 'tumour_purity', 'well_position'):
+                    'formalin_fixation_time', 'from_sample', 'post_formalin_fixation_time',
+                    'quantity', 'status', 'time_point', 'tissue_block_size', 'tumour',
+                    'tumour_purity', 'well_position'):
             if raw_sample.get(key):
                 new_sample[key] = raw_sample[key]
 
@@ -196,6 +198,7 @@ def parse_sample(raw_sample):
         'extraction_method': raw_sample.get('UDF/Extraction method'),
         'formalin_fixation_time': raw_sample.get('UDF/Formalin Fixation Time'),
         'index': raw_sample.get('UDF/Index type'),
+        'from_sample': raw_sample.get('UDF/sample from subject'),
         'name': raw_sample['Sample/Name'],
         'organism': raw_sample.get('UDF/Strain'),
         'organism_other': raw_sample.get('UDF/Other species'),
@@ -224,6 +227,8 @@ def parse_sample(raw_sample):
         sample['analysis'] = 'mip_balsamic'
     elif data_analysis and 'balsamic' in data_analysis:
         sample['analysis'] = 'balsamic'
+    elif data_analysis and 'mip rna' in data_analysis:
+        sample['analysis'] = 'mip_rna'
     elif data_analysis and 'mip' in data_analysis or 'scout' in data_analysis:
         sample['analysis'] = 'mip'
     elif data_analysis and ('fastq' in data_analysis or data_analysis == 'custom'):
@@ -234,7 +239,8 @@ def parse_sample(raw_sample):
     numeric_values = [('index_number', 'UDF/Index number'),
                       ('volume', 'UDF/Volume (uL)'), ('quantity', 'UDF/Quantity'),
                       ('concentration', 'UDF/Concentration (nM)'),
-                      ('concentration_weight', 'UDF/Sample Conc.')]
+                      ('concentration_weight', 'UDF/Sample Conc.'),
+                      ('time_point', 'UDF/timepoint')]
     for json_key, excel_key in numeric_values:
         str_value = raw_sample.get(excel_key, '').rsplit('.0')[0]
         if str_value.replace('.', '').isnumeric():
