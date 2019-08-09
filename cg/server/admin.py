@@ -143,7 +143,7 @@ class InvoiceView(BaseView):
         return Markup(
             u"<a href='%s'>%s</a>" % (
                 url_for('invoice.index_view', search=model.invoice.id),
-                model.invoice.id
+                model.invoice.invoiced_at if model.invoice.invoiced_at else 'In progress'
             )
         ) if model.invoice else u""
 
@@ -202,11 +202,11 @@ class PoolView(BaseView):
 class SampleView(BaseView):
     """Admin view for Model.Sample"""
 
-    column_exclude_list = ['is_external']
+    column_exclude_list = ['is_external', 'invoiced_at']
     column_searchable_list = ['internal_id', 'name', 'ticket_number', 'customer.internal_id']
     column_filters = ['customer.internal_id', 'sex', 'application_version.application']
     column_editable_list = ['sex', 'downsampled_to', 'sequenced_at', 'ticket_number']
-    form_excluded_columns = ['is_external']
+    form_excluded_columns = ['is_external', 'invoiced_at']
 
     column_formatters = {
         'invoice': InvoiceView.view_invoice_link,
