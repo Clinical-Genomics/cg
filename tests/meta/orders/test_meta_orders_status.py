@@ -64,7 +64,7 @@ def test_microbial_samples_to_status(microbial_order_to_submit):
 def test_families_to_status(mip_order_to_submit):
     # GIVEN a scout order with a trio family
     # WHEN parsing for status
-    data = StatusHandler.families_to_status(mip_order_to_submit)
+    data = StatusHandler.cases_to_status(mip_order_to_submit)
     # THEN it should pick out the family
     assert len(data['families']) == 2
     family = data['families'][0]

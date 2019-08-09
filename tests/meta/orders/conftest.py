@@ -102,14 +102,14 @@ def fastq_status_data(fastq_order_to_submit):
 @pytest.fixture
 def mip_status_data(mip_order_to_submit):
     """Parse scout order example."""
-    data = StatusHandler.families_to_status(mip_order_to_submit)
+    data = StatusHandler.cases_to_status(mip_order_to_submit)
     return data
 
 
 @pytest.fixture
 def external_status_data(external_order_to_submit):
     """Parse external order example."""
-    data = StatusHandler.families_to_status(external_order_to_submit)
+    data = StatusHandler.cases_to_status(external_order_to_submit)
     return data
 
 
@@ -130,7 +130,7 @@ def metagenome_status_data(metagenome_order_to_submit):
 @pytest.fixture
 def balsamic_status_data(balsamic_order_to_submit):
     """Parse cancer order example."""
-    data = StatusHandler.families_to_status(balsamic_order_to_submit)
+    data = StatusHandler.cases_to_status(balsamic_order_to_submit)
     return data
 
 

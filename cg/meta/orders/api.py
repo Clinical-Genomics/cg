@@ -194,7 +194,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
     def process_family_samples(self, data: dict) -> dict:
         """Process samples to be analyzed."""
         # filter out only new samples
-        status_data = self.families_to_status(data)
+        status_data = self.cases_to_status(data)
         new_samples = [sample for sample in data['samples'] if sample.get('internal_id') is None]
         if new_samples:
             project_data, lims_map = self.process_lims(data, new_samples)
