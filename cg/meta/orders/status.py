@@ -136,15 +136,14 @@ class StatusHandler:
         }
         cases = cls.group_cases(data['samples'])
 
-        for family_name, family_samples in families.items():
-            values = set(sample.get('priority', 'standard') for sample in family_samples)
+        for case_name, case_samples in cases.items():
+            values = set(sample.get('priority', 'standard') for sample in case_samples)
             if len(values) > 1:
-                raise ValueError(f"different 'priority' values: {family_name} - {values}")
+                raise ValueError(f"different 'priority' values: {case_name} - {values}")
             priority = values.pop()
-            panels = set(panel for sample in family_samples for panel in sample.get('panels',
-                                                                                    set()))
-            family = {
-                'name': family_name,
+            panels = set(panel for sample in case_samples for panel in sample.get('panels', set()))
+            case = {
+                'name': case_name,
                 'priority': priority,
                 'panels': list(panels),
                 'samples': [{
@@ -159,10 +158,10 @@ class StatusHandler:
                     'tumour': sample.get('tumour') or False,
                     'capture_kit': sample.get('capture_kit'),
                     'comment': sample.get('comment'),
-                } for sample in family_samples],
+                } for sample in case_samples],
             }
 
-            status_data['families'].append(family)
+            status_data['families'].append(case)
         return status_data
 
     def store_families(self, customer: str, order: str, ordered: dt.datetime, ticket: int,
