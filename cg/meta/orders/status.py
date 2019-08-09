@@ -158,6 +158,8 @@ class StatusHandler:
                     'tumour': sample.get('tumour') or False,
                     'capture_kit': sample.get('capture_kit'),
                     'comment': sample.get('comment'),
+                    'from_sample': sample.get('from_sample'),
+                    'time_point': sample.get('time_point'),
                 } for sample in case_samples],
             }
 
@@ -202,6 +204,8 @@ class StatusHandler:
                         capture_kit=sample['capture_kit'],
                         data_analysis=sample['data_analysis'],
                         tumour=sample['tumour'],
+                        from_sample=sample['from_sample'],
+                        time_point=sample['time_point']
                     )
                     new_sample.customer = customer_obj
                     with self.status.session.no_autoflush:
