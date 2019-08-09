@@ -210,7 +210,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
             order=status_data['order'],
             ordered=project_data['date'] if project_data else dt.datetime.now(),
             ticket=data['ticket'],
-            families=status_data['families'],
+            cases=status_data['families'],
         )
         return {'project': project_data, 'records': new_families}
 
