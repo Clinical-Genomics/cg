@@ -205,7 +205,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
                    for sample in family['samples']]
         if lims_map:
             self.fill_in_sample_ids(samples, lims_map)
-        new_families = self.store_families(
+        new_families = self.store_cases(
             customer=status_data['customer'],
             order=status_data['order'],
             ordered=project_data['date'] if project_data else dt.datetime.now(),
