@@ -184,6 +184,7 @@ def parse_sample(raw_sample):
     sample = {
         'application': raw_sample['UDF/Sequencing Analysis'],
         'capture_kit': raw_sample.get('UDF/Capture Library version'),
+        'case': raw_sample.get('UDF/familyID'),
         'comment': raw_sample.get('UDF/Comment'),
         'container': raw_sample.get('Container/Type'),
         'container_name': raw_sample.get('Container/Name'),
@@ -193,7 +194,6 @@ def parse_sample(raw_sample):
         'elution_buffer': raw_sample.get('UDF/Sample Buffer'),
         'elution_buffer_other': raw_sample.get('UDF/Other Elution Buffer'),
         'extraction_method': raw_sample.get('UDF/Extraction method'),
-        'family': raw_sample.get('UDF/familyID'),
         'formalin_fixation_time': raw_sample.get('UDF/Formalin Fixation Time'),
         'index': raw_sample.get('UDF/Index type'),
         'name': raw_sample['Sample/Name'],
