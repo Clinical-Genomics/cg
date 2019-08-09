@@ -56,7 +56,7 @@ def test_parsing_fastq_orderform(fastq_orderform):
     assert normal_sample['data_analysis'] == 'fastq'
     assert normal_sample['application'] == 'WGSLIFC030'
     assert normal_sample['sex'] == 'female'
-    assert normal_sample['family'] == 'whole-genome'
+    assert normal_sample['case'] == 'whole-genome'
     assert data['customer'] == 'cust000'
     assert normal_sample['require_qcok'] is False
     assert normal_sample['source'] == 'saliva'
