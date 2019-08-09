@@ -171,6 +171,10 @@ class OrdersAPI(LimsHandler, StatusHandler):
         """Submit a batch of samples for sequencing and analysis."""
         return self.submit_family_samples(data)
 
+    def submit_mip_rna(self, data: dict) -> dict:
+        """Submit a batch of samples for sequencing and analysis."""
+        return self.submit_family_samples(data)
+
     def submit_microbial(self, data: dict) -> dict:
         """Submit a batch of microbial samples."""
         # prepare data for status database
@@ -270,7 +274,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
             if sample.get('internal_id'):
 
                 if project not in (OrderType.MIP, OrderType.EXTERNAL, OrderType.BALSAMIC,
-                                   OrderType.MIP_BALSAMIC):
+                                   OrderType.MIP_BALSAMIC, OrderType.MIP_RNA):
                     raise OrderError(f"Only MIP, Balsamic and external orders can have imported "
                                      f"samples: "
                                      f"{sample.get('name')}")

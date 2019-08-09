@@ -358,6 +358,60 @@ def test_parsing_mip_balsamic_orderform(mip_balsamic_orderform):
     assert mother_sample.get('mother') is None
 
 
+def test_parsing_mip_rna_orderform(mip_rna_orderform):
+
+    # GIVEN an order form for a mip balsamic order with 3 samples, 1 trio, in a plate
+    # WHEN parsing the order form
+    data = orderform.parse_orderform(mip_rna_orderform)
+
+    # THEN it should detect the type of project
+    assert data['project_type'] == 'mip_rna'
+    assert data['customer'] == 'cust000'
+    # ... and it should find and group all samples in cases
+    assert len(data['items']) == 1
+    # ... and collect relevant data about the cases
+    trio_case = data['items'][0]
+    assert len(trio_case['samples']) == 3
+    assert trio_case['name'] == 'case1'
+    assert trio_case['priority'] == 'research'
+    assert set(trio_case['panels']) == set(['COCA'])
+    assert trio_case['require_qcok'] is False
+    # ... and collect relevant info about the samples
+
+    proband_sample = trio_case['samples'][0]
+    assert proband_sample['name'] == 'child'
+    assert proband_sample['container'] == '96 well plate'
+    assert proband_sample['data_analysis'] == 'MIP RNA'
+    assert proband_sample['application'] == 'RNAPOAR025'
+    assert proband_sample['sex'] == 'male'
+    # case-id on the case
+    # customer on the order (data)
+    # require-qc-ok on the family
+    assert proband_sample['source'] == 'blood'
+
+    assert proband_sample['container_name'] == 'plate'
+    assert proband_sample['well_position'] == 'A:1'
+
+    # panels on the family
+    assert proband_sample['status'] == 'affected'
+
+    assert proband_sample['mother'] == 'mother'
+    assert proband_sample['father'] == 'father'
+
+    assert proband_sample['tumour'] is True
+
+    assert proband_sample['quantity'] == '1'
+    assert proband_sample['comment'] == 'comment'
+
+    # required for RNA samples
+    print(proband_sample)
+    assert proband_sample['from_sample'] == 'child'
+    assert proband_sample['time_point'] == '1'
+
+    mother_sample = trio_case['samples'][2]
+    assert mother_sample.get('mother') is None
+
+
 def test_parse_mip_only(skeleton_orderform_sample: dict):
 
     # GIVEN a raw sample with mip only value from orderform 1508 for data_analysis
