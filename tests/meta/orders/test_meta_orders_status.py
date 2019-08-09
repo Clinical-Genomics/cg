@@ -292,7 +292,7 @@ def test_store_mip(orders_api, base_store, mip_status_data):
     assert base_store.families().first() is None
 
     # WHEN storing the order
-    new_families = orders_api.store_families(
+    new_families = orders_api.store_cases(
         customer=mip_status_data['customer'],
         order=mip_status_data['order'],
         ordered=dt.datetime.now(),
@@ -336,7 +336,7 @@ def test_store_families_bad_apptag(orders_api, base_store, mip_status_data):
     # THEN it should raise OrderError
     with pytest.raises(OrderError):
         # WHEN storing the order
-        orders_api.store_families(
+        orders_api.store_cases(
             customer=mip_status_data['customer'],
             order=mip_status_data['order'],
             ordered=dt.datetime.now(),
@@ -352,7 +352,7 @@ def test_store_external(orders_api, base_store, external_status_data):
     assert base_store.families().first() is None
 
     # WHEN storing the order
-    new_families = orders_api.store_families(
+    new_families = orders_api.store_cases(
         customer=external_status_data['customer'],
         order=external_status_data['order'],
         ordered=dt.datetime.now(),
@@ -396,7 +396,7 @@ def test_store_external_bad_apptag(orders_api, base_store, external_status_data)
     # THEN it should raise OrderError
     with pytest.raises(OrderError):
         # WHEN storing the order
-        orders_api.store_families(
+        orders_api.store_cases(
             customer=external_status_data['customer'],
             order=external_status_data['order'],
             ordered=dt.datetime.now(),
@@ -469,7 +469,7 @@ def test_store_cancer_samples(orders_api, base_store, balsamic_status_data):
     assert base_store.families().first() is None
 
     # WHEN storing the order
-    new_families = orders_api.store_families(
+    new_families = orders_api.store_cases(
         customer=balsamic_status_data['customer'],
         order=balsamic_status_data['order'],
         ordered=dt.datetime.now(),
