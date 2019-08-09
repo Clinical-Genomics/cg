@@ -164,28 +164,28 @@ class StatusHandler:
             status_data['families'].append(case)
         return status_data
 
-                       families: List[dict]) -> List[models.Family]:
     def store_cases(self, customer: str, order: str, ordered: dt.datetime, ticket: int,
+                    cases: List[dict]) -> List[models.Family]:
         """Store cases and samples in the status database."""
         customer_obj = self.status.customer(customer)
         if customer_obj is None:
             raise OrderError(f"unknown customer: {customer}")
         new_families = []
-        for family in families:
-            family_obj = self.status.find_family(customer_obj, family['name'])
-            if family_obj:
-                family_obj.panels = family['panels']
+        for case in cases:
+            case_obj = self.status.find_family(customer_obj, case['name'])
+            if case_obj:
+                case_obj.panels = case['panels']
             else:
-                family_obj = self.status.add_family(
-                    name=family['name'],
-                    panels=family['panels'],
-                    priority=family['priority'],
+                case_obj = self.status.add_family(
+                    name=case['name'],
+                    panels=case['panels'],
+                    priority=case['priority'],
                 )
-                family_obj.customer = customer_obj
-                new_families.append(family_obj)
+                case_obj.customer = customer_obj
+                new_families.append(case_obj)
 
             family_samples = {}
-            for sample in family['samples']:
+            for sample in case['samples']:
                 sample_obj = self.status.sample(sample['internal_id'])
                 if sample_obj:
                     family_samples[sample['name']] = sample_obj
@@ -197,7 +197,7 @@ class StatusHandler:
                         order=order,
                         ordered=ordered,
                         ticket=ticket,
-                        priority=family['priority'],
+                        priority=case['priority'],
                         comment=sample['comment'],
                         capture_kit=sample['capture_kit'],
                         data_analysis=sample['data_analysis'],
@@ -216,18 +216,18 @@ class StatusHandler:
                     new_delivery = self.status.add_delivery(destination='caesar', sample=new_sample)
                     self.status.add(new_delivery)
 
-            for sample in family['samples']:
+            for sample in case['samples']:
                 mother_obj = family_samples[sample['mother']] if sample.get('mother') else None
                 father_obj = family_samples[sample['father']] if sample.get('father') else None
                 with self.status.session.no_autoflush:
-                    link_obj = self.status.link(family_obj.internal_id, sample['internal_id'])
+                    link_obj = self.status.link(case_obj.internal_id, sample['internal_id'])
                 if link_obj:
                     link_obj.status = sample['status'] or link_obj.status
                     link_obj.mother = mother_obj or link_obj.mother
                     link_obj.father = father_obj or link_obj.father
                 else:
                     new_link = self.status.relate_sample(
-                        family=family_obj,
+                        family=case_obj,
                         sample=family_samples[sample['name']],
                         status=sample['status'],
                         mother=mother_obj,
