@@ -48,7 +48,7 @@ def run(executable: str, ped_stream: List[str]):
         in_file.write(madeline_content)
         in_file.flush()
         subprocess.call([madeline_exe, '--color', '--nolabeltruncation',
-                        '--outputprefix',
+                         '--outputprefix',
                          output_prefix, in_file.name])
 
     with open(out_path, 'r') as output:
