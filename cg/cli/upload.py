@@ -8,7 +8,7 @@ import click
 
 from cg.store import Store, models
 from cg.apps import coverage as coverage_app, gt, hk, loqus, tb, scoutapi, beacon as beacon_app, \
-    lims
+    lims, mutacc_auto
 from cg.exc import DuplicateRecordError, DuplicateSampleError
 from cg.meta.upload.coverage import UploadCoverageApi
 from cg.meta.upload.gt import UploadGenotypesAPI
@@ -18,6 +18,7 @@ from cg.meta.upload.beacon import UploadBeaconApi
 from cg.meta.analysis import AnalysisAPI
 from cg.meta.deliver.api import DeliverAPI
 from cg.meta.report.api import ReportAPI
+from cg.meta.upload.mutacc import UploadToMutaccAPI
 
 LOG = logging.getLogger(__name__)
 
@@ -431,3 +432,59 @@ def validate(context, family_id):
                 click.echo(f"{sample_id}: {mean_coverage:.2f}X - {completeness:.2f}%")
             else:
                 click.echo(f"{sample_id}: sample not found in chanjo", color='yellow')
+
+@upload.command()
+@click.option('-c', '--case-id', help='internal case id, leave empty to process all')
+@click.option('-d', '--days-ago', default=7, help='days since solved')
+@click.option('--dry-run', is_flag=True, help='only print cases to be processed')
+@click.pass_context
+def mutacc(context, case_id, days_ago, dry_run):
+
+    """Upload recent cases marked as 'finished' in scout to mutacc"""
+
+    click.echo(click.style('----------------- MUTACC ----------------'))
+
+    scout_api = context.obj['scout_api']
+    mutacc_auto_api = mutacc_auto.MutaccAutoAPI(context.obj)
+
+    mutacc_upload = UploadToMutaccAPI(scout_api=scout_api, mutacc_auto_api=mutacc_auto_api)
+
+    #Get cases to upload into mutacc from scout
+    finished_cases = scout_api.get_cases(finished=True, case_id=case_id)
+    for case in finished_cases:
+
+        if case_id is not None or solved_since(case=case, days_ago=days_ago):
+
+            if dry_run:
+                LOG.info("Would upload case %s to mutacc", case['_id'])
+                continue
+
+            mutacc_upload.extract_reads(case)
+
+    mutacc_upload.import_cases()
+
+
+
+
+
+
+def solved_since(case: dict, days_ago: int) -> bool:
+
+    """
+        See if a case has been marked finished within a given number of days ago
+
+        Args:
+            case (dict): case dictionary from scout
+            days_ago (int): max number of days since marked finished
+
+        Returns:
+            (bool): True if case has been marked finished within given number of days
+    """
+
+    days_datetime = dt.datetime.now() - dt.timedelta(days=days_ago)
+    case_date = case['updated_at']
+    if case_date > days_datetime:
+        return True
+
+    LOG.debug("case %s solved more than %d days ago", case['_id'], days_ago)
+    return False
