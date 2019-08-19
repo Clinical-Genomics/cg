@@ -147,19 +147,19 @@ class StatusHandler:
                 'priority': priority,
                 'panels': list(panels),
                 'samples': [{
-                    'internal_id': sample.get('internal_id'),
-                    'name': sample['name'],
                     'application': sample['application'],
-                    'data_analysis': sample.get('data_analysis'),
-                    'sex': sample['sex'],
-                    'status': sample.get('status'),
-                    'mother': sample.get('mother'),
-                    'father': sample.get('father'),
-                    'tumour': sample.get('tumour') or False,
                     'capture_kit': sample.get('capture_kit'),
                     'comment': sample.get('comment'),
+                    'data_analysis': sample.get('data_analysis'),
+                    'father': sample.get('father'),
                     'from_sample': sample.get('from_sample'),
+                    'internal_id': sample.get('internal_id'),
+                    'mother': sample.get('mother'),
+                    'name': sample['name'],
+                    'sex': sample['sex'],
+                    'status': sample.get('status'),
                     'time_point': sample.get('time_point'),
+                    'tumour': sample.get('tumour') or False,
                 } for sample in case_samples],
             }
 
@@ -193,19 +193,19 @@ class StatusHandler:
                     family_samples[sample['name']] = sample_obj
                 else:
                     new_sample = self.status.add_sample(
-                        name=sample['name'],
+                        capture_kit=sample['capture_kit'],
+                        comment=sample['comment'],
+                        data_analysis=sample['data_analysis'],
+                        from_sample=sample['from_sample'],
                         internal_id=sample['internal_id'],
-                        sex=sample['sex'],
+                        name=sample['name'],
                         order=order,
                         ordered=ordered,
-                        ticket=ticket,
                         priority=case['priority'],
-                        comment=sample['comment'],
-                        capture_kit=sample['capture_kit'],
-                        data_analysis=sample['data_analysis'],
-                        tumour=sample['tumour'],
-                        from_sample=sample['from_sample'],
-                        time_point=sample['time_point']
+                        sex=sample['sex'],
+                        ticket=ticket,
+                        time_point=sample['time_point'],
+                        tumour=sample['tumour']
                     )
                     new_sample.customer = customer_obj
                     with self.status.session.no_autoflush:

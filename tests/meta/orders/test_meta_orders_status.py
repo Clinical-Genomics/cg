@@ -324,6 +324,35 @@ def test_store_mip(orders_api, base_store, mip_status_data):
         assert len(link.sample.deliveries) == 1
 
 
+def test_store_mip_rna(orders_api, base_store, mip_rna_status_data):
+    # GIVEN a basic store with no samples or nothing in it + rna order
+    rna_application = 'RNAPOAR025'
+    assert base_store.samples().first() is None
+    assert base_store.families().first() is None
+    assert base_store.application(rna_application)
+
+    # WHEN storing the order
+    new_cases = orders_api.store_cases(
+        customer=mip_rna_status_data['customer'],
+        order=mip_rna_status_data['order'],
+        ordered=dt.datetime.now(),
+        ticket=123456,
+        cases=mip_rna_status_data['families'],
+    )
+
+    # THEN it should create and link samples and the casing
+    assert len(new_cases) == 1
+    new_casing = new_cases[0]
+
+    assert len(new_casing.links) == 2
+    new_link = new_casing.links[0]
+    assert new_link.sample.name == 'sample1_rna_t1'
+    assert new_link.sample.application_version.application.tag == rna_application
+    assert new_link.sample.data_analysis == 'MIP_RNA'
+    assert new_link.sample.time_point == 1
+    assert new_link.sample.from_sample == 'sample1'
+
+
 def test_store_families_bad_apptag(orders_api, base_store, mip_status_data):
     # GIVEN a basic store with no samples or nothing in it + scout order
     assert base_store.samples().first() is None
