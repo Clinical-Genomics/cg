@@ -366,48 +366,46 @@ def test_parsing_mip_rna_orderform(mip_rna_orderform):
     assert data['project_type'] == 'mip_rna'
     assert data['customer'] == 'cust000'
     # ... and it should find and group all samples in cases
-    assert len(data['items']) == 1
+    assert len(data['items']) == 5
     # ... and collect relevant data about the cases
-    trio_case = data['items'][0]
-    assert len(trio_case['samples']) == 3
-    assert trio_case['name'] == 'case1'
-    assert trio_case['priority'] == 'research'
-    assert set(trio_case['panels']) == set(['COCA'])
-    assert trio_case['require_qcok'] is False
+    first_case = data['items'][0]
+    assert len(first_case['samples']) == 7
+    assert first_case['name'] == 'whole-genome'
+    assert first_case['priority'] == 'research'
+    assert set(first_case['panels']) == set(['AD-HSP', 'CSAnemia', 'CILM', 'Ataxi',
+                                              'ATX', 'COCA', 'bindevev'])
+    assert first_case['require_qcok'] is True
     # ... and collect relevant info about the samples
 
-    proband_sample = trio_case['samples'][0]
-    assert proband_sample['name'] == 'child'
-    assert proband_sample['container'] == '96 well plate'
-    assert proband_sample['data_analysis'] == 'MIP RNA'
-    assert proband_sample['application'] == 'RNAPOAR025'
-    assert proband_sample['sex'] == 'male'
+    first_sample = first_case['samples'][0]
+    assert first_sample['name'] == 'whole-genome-1'
+    assert first_sample['container'] == '96 well plate'
+    assert first_sample['data_analysis'] == 'MIP RNA'
+    assert first_sample['application'] == 'WGSPCFC030'
+    assert first_sample['sex'] == 'male'
     # case-id on the case
     # customer on the order (data)
     # require-qc-ok on the family
-    assert proband_sample['source'] == 'blood'
+    assert first_sample['source'] == 'blood'
 
-    assert proband_sample['container_name'] == 'plate'
-    assert proband_sample['well_position'] == 'A:1'
+    assert first_sample['container_name'] == 'plate'
+    assert first_sample['well_position'] == 'A:1'
 
     # panels on the family
-    assert proband_sample['status'] == 'affected'
+    assert first_sample['status'] == 'affected'
 
-    assert proband_sample['mother'] == 'mother'
-    assert proband_sample['father'] == 'father'
+    assert first_sample['mother'] == 'whole-genome-2'
+    assert first_sample['father'] == 'whole-genome-3'
 
-    assert proband_sample['tumour'] is True
+    assert first_sample['tumour'] is True
 
-    assert proband_sample['quantity'] == '1'
-    assert proband_sample['comment'] == 'comment'
+    assert first_sample['quantity'] == '1'
+    assert first_sample['comment'] == 'comment'
 
     # required for RNA samples
-    print(proband_sample)
-    assert proband_sample['from_sample'] == 'child'
-    assert proband_sample['time_point'] == '1'
-
-    mother_sample = trio_case['samples'][2]
-    assert mother_sample.get('mother') is None
+    print(first_sample)
+    assert first_sample['from_sample'] == 'whole-genome-1'
+    assert first_sample['time_point'] == '1'
 
 
 def test_parse_mip_only(skeleton_orderform_sample: dict):
