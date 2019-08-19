@@ -46,7 +46,7 @@ def test_parsing_fastq_orderform(fastq_orderform):
     # THEN it should determine the project type
     assert data['project_type'] == 'fastq'
     # ... and find all samples
-    assert len(data['items']) == 43
+    assert len(data['items']) == 38
 
     # ... and collect relevant sample info
     normal_sample = data['items'][1]
@@ -67,11 +67,11 @@ def test_parsing_fastq_orderform(fastq_orderform):
 
     assert normal_sample['tumour'] is False
 
-    assert normal_sample['quantity'] == '1'
-    assert normal_sample['comment'] == 'comment'
-
     assert tumour_sample['tumour'] is True
     assert tumour_sample['source'] == 'blood'
+
+    assert tumour_sample['quantity'] == '1'
+    assert tumour_sample['comment'] == 'comment'
 
 
 def test_parsing_mip_orderform(mip_orderform):
@@ -90,8 +90,8 @@ def test_parsing_mip_orderform(mip_orderform):
     assert len(trio_family['samples']) == 7
     assert trio_family['name'] == 'whole-genome'
     assert trio_family['priority'] == 'research'
-    assert set(trio_family['panels']) == set(['AD-HSP', 'AD', 'AD-1.0-141202', 'Ataxi',
-                                              'ATX', '16PDEL', 'bindvev'])
+    assert set(trio_family['panels']) == set(['AD-HSP', 'CSAnemia', 'CILM', 'Ataxi',
+                                              'ATX', 'COCA', 'bindevev'])
     assert trio_family['require_qcok'] is True
     # ... and collect relevant info about the samples
 
@@ -116,10 +116,8 @@ def test_parsing_mip_orderform(mip_orderform):
     assert proband_sample['mother'] == 'whole-genome-2'
     assert proband_sample['father'] == 'whole-genome-3'
 
-    mother_sample = trio_family['samples'][1]
-    assert mother_sample.get('mother') is None
-    assert mother_sample['quantity'] == '1'
-    assert mother_sample['comment'] == 'comment'
+    assert proband_sample['quantity'] == '1'
+    assert proband_sample['comment'] == 'comment'
 
 
 def test_parsing_external_orderform(external_orderform):
