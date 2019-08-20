@@ -433,6 +433,7 @@ def validate(context, family_id):
             else:
                 click.echo(f"{sample_id}: sample not found in chanjo", color='yellow')
 
+
 @upload.command()
 @click.option('-c', '--case-id', help='internal case id, leave empty to process all')
 @click.option('-d', '--days-ago', default=7, help='days since solved')
@@ -449,7 +450,7 @@ def mutacc(context, case_id, days_ago, dry_run):
 
     mutacc_upload = UploadToMutaccAPI(scout_api=scout_api, mutacc_auto_api=mutacc_auto_api)
 
-    #Get cases to upload into mutacc from scout
+    # Get cases to upload into mutacc from scout
     finished_cases = scout_api.get_cases(finished=True, case_id=case_id)
     for case in finished_cases:
 
@@ -462,6 +463,7 @@ def mutacc(context, case_id, days_ago, dry_run):
             mutacc_upload.extract_reads(case)
 
     mutacc_upload.import_cases()
+
 
 def solved_since(case: dict, days_ago: int) -> bool:
 

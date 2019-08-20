@@ -9,6 +9,7 @@ from cg.apps import scoutapi, mutacc_auto
 
 LOG = logging.getLogger(__name__)
 
+
 class UploadToMutaccAPI():
 
     """API to upload finished cases to mutacc"""
@@ -48,7 +49,6 @@ class UploadToMutaccAPI():
         LOG.info('importing cases into mutacc database')
         self.mutacc_auto.import_reads()
 
-
     @staticmethod
     def has_bam(case: dict) -> bool:
 
@@ -80,7 +80,6 @@ class UploadToMutaccAPI():
                                 sample['individual_id'], case['_id'])
 
         return bam_exists
-
 
     @staticmethod
     def has_causatives(case: dict) -> bool:
