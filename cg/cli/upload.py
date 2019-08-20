@@ -273,9 +273,10 @@ def genotypes(context, re_upload, family_id):
 
 @upload.command()
 @click.option('-c', '--case_id', help='internal case id, leave empty to process all')
+@click.option('-l', '--case-limit', type=int, help='maximum number of cases to upload')
 @click.option('--dry-run', is_flag=True, help='only print cases to be processed')
 @click.pass_context
-def observations(context, case_id, dry_run):
+def observations(context, case_id, case_limit, dry_run):
     """Upload observations from an analysis to LoqusDB."""
 
     click.echo(click.style('----------------- OBSERVATIONS ----------------'))
@@ -287,7 +288,14 @@ def observations(context, case_id, dry_run):
     else:
         families_to_upload = context.obj['status'].observations_to_upload()
 
+    nr_uploaded = 0
     for family_obj in families_to_upload:
+
+        if case_limit is not None:
+            if nr_uploaded >= case_limit:
+                LOG.info("Uploaded %d cases, observations upload will now stop", nr_uploaded)
+                break
+
         if not family_obj.customer.loqus_upload:
             LOG.info("%s: %s not whitelisted for upload to loqusdb. Skipping!",
                      family_obj.internal_id, family_obj.customer.internal_id)
@@ -315,6 +323,7 @@ def observations(context, case_id, dry_run):
         try:
             api.process(family_obj.analyses[0])
             LOG.info("%s: observations uploaded!", family_obj.internal_id)
+            nr_uploaded += 1
         except (DuplicateRecordError, DuplicateSampleError) as error:
             LOG.info("%s: skipping observations upload: %s", family_obj.internal_id, error.message)
         except FileNotFoundError as error:
