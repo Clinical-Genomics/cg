@@ -2,7 +2,7 @@
 import logging
 
 from alchy import Manager
-from genotype.store import api, models
+from genotype.store import api, models, vogue
 from genotype.load.vcf import load_vcf
 
 LOG = logging.getLogger(__name__)
@@ -37,3 +37,8 @@ class GenotypeAPI(Manager):
                 analysis_obj.sex = samples_sex[analysis_obj.sample_id]['analysis']
                 analysis_obj.sample.sex = samples_sex[analysis_obj.sample_id]['pedigree']
                 self.commit()
+
+
+    def get_trending(self, sample_id = None, days = None):
+        trending_doc = vogue.prepare_trending(sample_id)
+        return trending_doc
