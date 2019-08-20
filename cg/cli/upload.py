@@ -463,15 +463,10 @@ def mutacc(context, case_id, days_ago, dry_run):
 
     mutacc_upload.import_cases()
 
-
-
-
-
-
 def solved_since(case: dict, days_ago: int) -> bool:
 
     """
-        See if a case has been marked finished within a given number of days ago
+        See if a case has been marked finished within a given number of days ago.
 
         Args:
             case (dict): case dictionary from scout
