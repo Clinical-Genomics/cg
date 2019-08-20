@@ -373,7 +373,7 @@ def test_parsing_mip_rna_orderform(mip_rna_orderform):
     assert first_case['name'] == 'whole-genome'
     assert first_case['priority'] == 'research'
     assert set(first_case['panels']) == set(['AD-HSP', 'CSAnemia', 'CILM', 'Ataxi',
-                                              'ATX', 'COCA', 'bindevev'])
+                                             'ATX', 'COCA', 'bindevev'])
     assert first_case['require_qcok'] is True
     # ... and collect relevant info about the samples
 
