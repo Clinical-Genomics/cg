@@ -9,6 +9,7 @@ import json
 
 LOG = logging.getLogger(__name__)
 
+
 class MutaccAutoAPI():
 
     """
@@ -44,11 +45,10 @@ class MutaccAutoAPI():
             'extract',
             '--variants', json.dumps(variants, default=json_default_decoder),
             '--case', json.dumps(case, default=json_default_decoder),
-            '--padding', self.mutacc_padding
+            '--padding', str(self.mutacc_padding)
         ])
 
-        # run_command(extract_call)
-        print(extract_call)
+        run_command(extract_call)
 
     def import_reads(self):
 
@@ -61,8 +61,7 @@ class MutaccAutoAPI():
             'import'
         ])
 
-        # run_command(import_call)
-        print(import_call)
+        run_command(import_call)
 
 
 def run_command(command: list):
@@ -78,4 +77,4 @@ def run_command(command: list):
     returncode = completed_process.returncode
     if returncode != 0:
         LOG.warning("process %s ended with exitcode %d", ' '.join(command), returncode)
-        raise subprocess.CalledProcessError
+        raise subprocess.CalledProcessError(returncode=returncode, cmd=command)
