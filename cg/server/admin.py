@@ -17,6 +17,16 @@ class BaseView(ModelView):
         return redirect(url_for('google.login', next=request.url))
 
 
+def view_human_priority(unused1, unused2, model, unused3):
+    """column formatter for priority"""
+    del unused1, unused2, unused3
+    return Markup(
+        u"%s" % (
+            model.priority_human
+        )
+    ) if model else u""
+
+
 def view_family_sample_link(unused1, unused2, model, unused3):
     """column formatter to open the family-sample view"""
     del unused1, unused2, unused3
@@ -109,7 +119,8 @@ class FamilyView(BaseView):
     column_editable_list = ['action']
 
     column_formatters = {
-        'internal_id': view_family_sample_link
+        'internal_id': view_family_sample_link,
+        'priority': view_human_priority
     }
 
     @staticmethod
@@ -182,6 +193,7 @@ class MicrobialSampleView(BaseView):
 
     column_formatters = {
         'invoice': InvoiceView.view_invoice_link,
+        'priority': view_human_priority
     }
 
 
@@ -227,6 +239,7 @@ class SampleView(BaseView):
     column_formatters = {
         'internal_id': view_family_sample_link,
         'invoice': InvoiceView.view_invoice_link,
+        'priority': view_human_priority
     }
 
     @staticmethod
