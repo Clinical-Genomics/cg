@@ -1,20 +1,18 @@
-from cg.apps import gt, vogue
+from cg.apps.gt import GenotypeAPI
+from cg.apps.vogue import VogueAPI
 
 
-class VogueAPI(vogue.VogueAPI):
+class UploaVogueAPI():
 
-    def __init__(self, db: Store):
-        self.db = db
+    def __init__(self, genotype_api: GenotypeAPI, vogue_api: VogueAPI):
+        self.genotype_api = genotype_api
+        self.vogue_api = vogue_api
  
 
-    def load_genotype(self, sample_id):
+    def load_genotype(self, days):
         """Loading genotype data from the genotype database into the trending database"""
         
-        genotype_doc = gt.get_trending(sample_id)
-        self.load_genotype(genotype_doc)
-
-
-    def load_application_tag(self):
-        """Loading application tag data from statusDB into the trending database"""
-
-
+        trending_obj = self.genotype_api.get_trending(days = 30)
+        for sample_doc in trending_obj:
+            self.vogue_api.load_genotype(sample_doc)
+            
