@@ -46,10 +46,7 @@ class GenotypeAPI(Manager):
 
 
     def get_trending(self, sample_id = None, days = None):
-        trending_doc = trending.prepare_trending(sample_id)
-        return trending_doc
-
-        """Find a case in the database by case id."""
+        """Get trending object with one or many samples."""
         trending_obj = None
         trending_call = copy.deepcopy(self.base_call)
 
