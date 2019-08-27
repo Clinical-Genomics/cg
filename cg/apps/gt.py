@@ -2,7 +2,7 @@
 import logging
 
 from alchy import Manager
-from genotype.store import api, models, trending
+from genotype.store import api, models
 from genotype.load.vcf import load_vcf
 
 LOG = logging.getLogger(__name__)

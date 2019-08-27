@@ -15,6 +15,7 @@ from cg.meta.upload.gt import UploadGenotypesAPI
 from cg.meta.upload.observations import UploadObservationsAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
 from cg.meta.upload.beacon import UploadBeaconApi
+from cg.meta.upload.vogue import UploadVogueAPI
 from cg.meta.analysis import AnalysisAPI
 from cg.meta.deliver.api import DeliverAPI
 from cg.meta.report.api import ReportAPI
@@ -60,6 +61,8 @@ def upload(context, family_id):
         madeline_exe=context.obj['madeline_exe'],
         analysis_api=context.obj['analysis_api']
     )
+
+    context.obj['vogue_upload_api'] = UploadVogueAPI()
 
     if family_id:
         family_obj = context.obj['status'].family(family_id)
@@ -431,3 +434,17 @@ def validate(context, family_id):
                 click.echo(f"{sample_id}: {mean_coverage:.2f}X - {completeness:.2f}%")
             else:
                 click.echo(f"{sample_id}: sample not found in chanjo", color='yellow')
+
+
+@upload.command()
+@click.option('-d', '--days', type = click.INT, 
+            help='load X days old sampels from genotype to vogue')
+@click.pass_context
+def trending_genotype(context, days: int):
+    """Adding samples from the genotype database to the trending database"""
+
+    click.echo(click.style('----------------- VOGUE -----------------------'))
+
+    vogue_upload_api = context.obj['vogue_upload_api']
+    vogue_upload_api.load_genotype(days = days)
+
