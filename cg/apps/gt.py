@@ -2,7 +2,7 @@
 import logging
 
 from alchy import Manager
-from genotype.store import api, models, vogue
+from genotype.store import api, models, trending
 from genotype.load.vcf import load_vcf
 
 LOG = logging.getLogger(__name__)
@@ -20,6 +20,12 @@ class GenotypeAPI(Manager):
     def __init__(self, config: dict):
         alchy_config = dict(SQLALCHEMY_DATABASE_URI=config['genotype']['database'])
         super(GenotypeAPI, self).__init__(config=alchy_config, Model=models.Model)
+
+        self.genotype_config = config['genotype']['config_path']
+        self.genotype_binary = config['genotype']['binary_path']
+        self.genotype_database = config['genotype']['database']
+        self.base_call = [self.genotype_binary, '--config', self.genotype_config, 
+                            '--database', self.genotype_database]
 
     def upload(self, bcf_path: str, samples_sex: dict, force: bool=False):
         """Upload genotypes for a family of samples."""
@@ -40,5 +46,35 @@ class GenotypeAPI(Manager):
 
 
     def get_trending(self, sample_id = None, days = None):
-        trending_doc = vogue.prepare_trending(sample_id)
+        trending_doc = trending.prepare_trending(sample_id)
         return trending_doc
+
+        """Find a case in the database by case id."""
+        trending_obj = None
+        trending_call = copy.deepcopy(self.base_call)
+
+        if sample_id:
+            trending_call.extend(['prepare-trending', '-s', sample_id])
+        elif days:
+            trending_call.extend(['prepare-trending', '-d', days])
+
+        try:
+            output = subprocess.check_output(
+                ' '.join(trending_call),
+                shell=True
+            )
+        except CalledProcessError:
+            # If CalledProcessError is raised, log and raise error
+            log_msg = f"Could not run command: {' '.join(trending_call)}"
+            LOG.critical(log_msg)
+            raise
+
+        output = output.decode('utf-8')
+
+        # If sample not in genotype db, stdout of genotype command will be empty.
+        if not output:
+            raise CaseNotFoundError(f"samples not found in genotype db")
+
+        trending_obj = json.loads(output)[0]
+
+        return trending_obj
