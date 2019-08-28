@@ -73,7 +73,9 @@ class ScoutAPI(MongoAdapter):
         return models
 
     def get_causative_variants(self, case_id=None, collaborator=None):
-
+        """
+        Get causative variants for a case
+        """
         causative_ids = self.get_causatives(
             institute_id=collaborator,
             case_id=case_id
