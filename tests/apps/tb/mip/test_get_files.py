@@ -36,6 +36,12 @@ def test_get_files(files_data) -> dict:
         'qcmetrics': {
             'path': sampleinfo['qcmetrics_path'],
         },
+        'snv-gbcf': {
+            'path': sampleinfo['snv']['bcf'],
+        },
+        'snv-gbcf-index': {
+            'path': f"{sampleinfo['snv']['bcf']}.csi",
+        },
         'snv-bcf': {
             'path': sampleinfo['snv']['bcf'],
         },
