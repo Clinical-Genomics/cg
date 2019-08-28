@@ -1,6 +1,7 @@
 import pytest
 
 from cg.meta.upload.scoutapi import UploadScoutAPI
+from cg.meta.upload.mutacc import UploadToMutaccAPI
 
 
 class MockVersion:
@@ -62,6 +63,28 @@ class MockAnalysis:
         return ''
 
 
+class MockMutaccAuto:
+    """ Mock class for mutacc_auto api """
+    @staticmethod
+    def extract_reads(*args, **kwargs):
+        """mock extract_reads method"""
+        _, _ = args, kwargs
+
+    @staticmethod
+    def import_reads(*args, **kwargs):
+        """ mock import_reads method """
+        _, _ = args, kwargs
+
+
+class MockScoutApi:
+    """ Mock class for Scout api"""
+    @staticmethod
+    def get_causative_variants(case_id):
+        """mock get_causative_variants"""
+        _ = case_id
+        return []
+
+
 @pytest.yield_fixture(scope='function')
 def upload_scout_api(analysis_store, scout_store):
 
@@ -79,6 +102,20 @@ def upload_scout_api(analysis_store, scout_store):
     )
 
     yield _api
+
+
+@pytest.yield_fixture(scope='function')
+def mutacc_upload_api():
+    """
+        Fixture for a mutacc upload api
+    """
+
+    scout_api = MockScoutApi()
+    mutacc_auto_api = MockMutaccAuto()
+
+    _api = UploadToMutaccAPI(scout_api=scout_api, mutacc_auto_api=mutacc_auto_api)
+
+    return _api
 
 
 @pytest.yield_fixture(scope='function')

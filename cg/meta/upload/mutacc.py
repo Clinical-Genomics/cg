@@ -133,7 +133,11 @@ SCOUT_VARIANT_FIELDS = (
     'quality',
     'filters',
     'samples',
-    'genes'
+    'genes',
+    'end',
+    'rank_score',
+    'category',
+    'sub_category'
 )
 
 
@@ -144,7 +148,7 @@ def assemble_mutacc_case(case: dict):
         if case.get(field, None) is not None:
             mutacc_case[field] = case[field]
     mutacc_samples = [assemble_mutacc_sample(sample) for sample in case['individuals']]
-    mutacc_case['samples'] = mutacc_samples
+    mutacc_case['individuals'] = mutacc_samples
 
     return mutacc_case
 
@@ -155,6 +159,8 @@ def assemble_mutacc_sample(sample: dict):
     for field in SCOUT_SAMPLE_FIELDS:
         if sample.get(field, None) is not None:
             mutacc_sample[field] = sample[field]
+        elif field in ('mother', 'father'):
+            mutacc_sample[field] = '0'
     return mutacc_sample
 
 
