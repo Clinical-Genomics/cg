@@ -87,11 +87,15 @@ class AddHandler:
             'path': sampleinfo_data['peddy']['sex_check'],
             'tags': ['peddy', 'sex-check'],
             'archive': False,
-        }, {
-            'path': sampleinfo_data['str_vcf'],
-            'tags': ['vcf-str'],
-            'archive': True
         }]
+
+        # this key exists only for wgs
+        if sampleinfo_data['str_vcf']:
+            data.append({
+                'path': sampleinfo_data['str_vcf'],
+                'tags': ['vcf-str'],
+                'archive': True
+            })
 
         for variant_type in ['snv', 'sv']:
             for output_type in ['clinical', 'research']:
