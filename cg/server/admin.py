@@ -45,7 +45,9 @@ class ApplicationView(BaseView):
     column_searchable_list = ['tag', 'prep_category']
     column_filters = ['prep_category', 'is_accredited']
     column_editable_list = ['description', 'is_accredited', 'target_reads', 'comment',
-                            'prep_category', 'sequencing_depth', 'is_external']
+                            'prep_category', 'sequencing_depth', 'is_external',
+                            'turnaround_time', 'sample_concentration', 'priority_processing',
+                            'is_archived']
     form_excluded_columns = ['category']
 
     @staticmethod
