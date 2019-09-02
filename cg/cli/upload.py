@@ -8,7 +8,7 @@ import click
 
 from cg.store import Store, models
 from cg.apps import coverage as coverage_app, gt, hk, loqus, tb, scoutapi, beacon as beacon_app, \
-    lims
+    lims, vogue
 from cg.exc import DuplicateRecordError, DuplicateSampleError
 from cg.meta.upload.coverage import UploadCoverageApi
 from cg.meta.upload.gt import UploadGenotypesAPI
@@ -34,6 +34,8 @@ def upload(context, family_id):
     context.obj['status'] = Store(context.obj['database'])
     context.obj['housekeeper_api'] = hk.HousekeeperAPI(context.obj)
 
+    context.obj['vogue_api'] = vogue.VogueAPI(context.obj)
+    context.obj['genotype_api'] = gt.GenotypeAPI(context.obj)
     context.obj['lims_api'] = lims.LimsAPI(context.obj)
     context.obj['tb_api'] = tb.TrailblazerAPI(context.obj)
     context.obj['chanjo_api'] = coverage_app.ChanjoAPI(context.obj)
@@ -62,7 +64,10 @@ def upload(context, family_id):
         analysis_api=context.obj['analysis_api']
     )
 
-    context.obj['vogue_upload_api'] = UploadVogueAPI()
+    context.obj['vogue_upload_api'] = UploadVogueAPI(
+        genotype_api=context.obj['genotype_api'], 
+        vogue_api=context.obj['vogue_api']
+    )
 
     if family_id:
         family_obj = context.obj['status'].family(family_id)
@@ -437,7 +442,7 @@ def validate(context, family_id):
 
 
 @upload.command()
-@click.option('-d', '--days', type = click.INT, 
+@click.option('-d', '--days', 
             help='load X days old sampels from genotype to vogue')
 @click.pass_context
 def trending_genotype(context, days: int):

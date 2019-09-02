@@ -1,5 +1,7 @@
 from cg.apps.gt import GenotypeAPI
 from cg.apps.vogue import VogueAPI
+import json
+from django.core.serializers.json import DjangoJSONEncoder
 
 
 class UploadVogueAPI():
@@ -11,8 +13,10 @@ class UploadVogueAPI():
 
     def load_genotype(self, days):
         """Loading genotype data from the genotype database into the trending database"""
+        samples = self.genotype_api.get_trending(days = days)
+        samples = json.loads(samples)
+      
         
-        trending_obj = self.genotype_api.get_trending(days = days)
-        for sample_doc in trending_obj:
+        for sample_id, sample_doc in samples.items():
             self.vogue_api.load_genotype(sample_doc)
             

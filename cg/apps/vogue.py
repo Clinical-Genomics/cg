@@ -30,11 +30,33 @@ class VogueAPI():
     def load_genotype(self, genotype_dict: dict ):
         """Add observations from a VCF."""
         load_call = copy.deepcopy(self.base_call)
-        load_call.extend(['load', 'genotype', '-s', genotype_dict])
+        load_call.extend(['load', 'genotype', '-s', json.dumps(genotype_dict)])
 
         # Execute command and print its stdout+stderr as it executes
         for line in execute_command(load_call):
             log_msg = f"vogue output: {line}"
             LOG.info(log_msg)
             line_content = line.split('INFO')[-1].strip()
+
+def execute_command(cmd):
+    """
+        Prints stdout + stderr of command in real-time while being executed
+
+        Args:
+            cmd (list): command sequence
+
+        Yields:
+            line (str): line of output from command
+    """
+    process = subprocess.Popen(cmd,
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.STDOUT,
+                               bufsize=1)
+
+    for line in process.stdout:
+        yield line.decode('utf-8').strip()
+
+    # Check if process exited with returncode != 0
+    if process.poll():
+        raise CalledProcessError(returncode=process.returncode, cmd=cmd)
  
