@@ -67,13 +67,13 @@ class UploadScoutAPI(object):
             })
 
         files = {('vcf_snv', 'vcf-snv-clinical'), ('vcf_snv_research', 'vcf-snv-research'),
-                 ('vcf_sv', 'vcf-sv-clinical'), ('vcf_sv_research', 'vcf-sv-research'),
-                 ('vcf_str', 'vcf-str')}
+                 ('vcf_sv', 'vcf-sv-clinical'), ('vcf_sv_research', 'vcf-sv-research')}
         for scout_key, hk_tag in files:
             hk_vcf = self.housekeeper.files(version=hk_version.id, tags=[hk_tag]).first()
             data[scout_key] = str(hk_vcf.full_path)
 
-        files = [('peddy_ped', 'ped'), ('peddy_sex', 'sex-check'), ('peddy_check', 'ped-check')]
+        files = [('peddy_ped', 'ped'), ('peddy_sex', 'sex-check'), ('peddy_check', 'ped-check'),
+                 ('vcf_str', 'vcf-str')]
         for scout_key, hk_tag in files:
             hk_file = self.housekeeper.files(version=hk_version.id, tags=['peddy', hk_tag]).first()
             if hk_file is None:
