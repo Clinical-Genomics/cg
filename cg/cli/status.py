@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import click
+from cg.apps import tb
 from tabulate import tabulate
 from colorclass import Color
 
@@ -33,6 +34,7 @@ for header in CASE_HEADERS_LONG:
 def status(context):
     """View status of things."""
     context.obj['db'] = Store(context.obj['database'])
+    context.obj['tb'] = tb.TrailblazerAPI(context.obj)
 
 
 @status.command()
@@ -135,6 +137,7 @@ def cases(context, output_type, verbose, days, internal_id, name, action, priori
           ):
     """progress of each case"""
     records = context.obj['db'].cases(
+        progress_tracker=context.obj['tb'],
         days=days,
         internal_id=internal_id,
         name=name,
@@ -208,8 +211,8 @@ def cases(context, output_type, verbose, days, internal_id, name, action, priori
             sequenced = present_bool(case, 'samples_sequenced_bool', verbose)
             flowcell = present_bool(case, 'flowcells_on_disk_bool', verbose)
             analysed_bool = present_bool(case, 'analysis_completed_bool', verbose)
-            analysis_action = present_string(case, 'analysis_action', verbose)
-            analysed = f"{analysed_bool}{analysis_action}"
+            case_action = present_string(case, 'case_action', verbose)
+            analysed = f"{analysed_bool}{case_action}"
             uploaded = present_bool(case, 'analysis_uploaded_bool', verbose)
             delivered = present_bool(case, 'samples_delivered_bool', verbose)
             invoiced = present_bool(case, 'samples_invoiced_bool', verbose)
@@ -219,9 +222,21 @@ def cases(context, output_type, verbose, days, internal_id, name, action, priori
             prepared = f"{case.get('samples_prepared')}/{case.get('samples_to_prepare')}"
             sequenced = f"{case.get('samples_sequenced')}/{case.get('samples_to_sequence')}"
             flowcell = f"{case.get('flowcells_on_disk')}/{case.get('total_samples')}"
-            analysed_date = present_date(case, 'analysis_completed_at', verbose, show_time)
-            analysis_action = present_string(case, 'analysis_action', verbose)
-            analysed = f"{analysed_date}{analysis_action}"
+
+            if case.get('analysis_completed_at'):
+                analysed_date = present_date(case, 'analysis_completed_at', verbose, show_time)
+                case_action = present_string(case, 'case_action', verbose)
+                analysed = f"{analysed_date}{case_action}"
+            elif case.get('analysis_completion'):
+                analysed_completion = f"{case.get('analysis_completion')}%"
+                analysed = f"{analysed_completion}"
+            elif case.get('analysis_status'):
+                analysis_status = present_string(case, 'analysis_status', verbose)
+                analysed = f"{analysis_status}"
+            else:
+                case_action = present_string(case, 'case_action', verbose)
+                analysed = f"{case_action}"
+
             uploaded = present_date(case, 'analysis_uploaded_at', verbose, show_time)
             delivered = f"{case.get('samples_delivered')}/{case.get('samples_to_deliver')}"
             invoiced = f"{case.get('samples_invoiced')}/{case.get('samples_to_invoice')}"
@@ -232,8 +247,8 @@ def cases(context, output_type, verbose, days, internal_id, name, action, priori
             sequenced = present_date(case, 'samples_sequenced_at', verbose, show_time)
             flowcell = present_string(case, 'flowcells_status', verbose)
             analysed_date = present_date(case, 'analysis_completed_at', verbose, show_time)
-            analysis_action = present_string(case, 'analysis_action', verbose)
-            analysed = f"{analysed_date}{analysis_action}"
+            case_action = present_string(case, 'case_action', verbose)
+            analysed = f"{analysed_date}{case_action}"
             uploaded = present_date(case, 'analysis_uploaded_at', verbose, show_time)
             delivered = present_date(case, 'samples_delivered_at', verbose, show_time)
             invoiced = present_date(case, 'samples_invoiced_at', verbose, show_time)

@@ -107,6 +107,7 @@ class StatusHandler(BaseHandler):
         return families[:limit]
 
     def cases(self,
+              progress_tracker,
               internal_id=None,
               name=None,
               days=31,
@@ -205,6 +206,8 @@ class StatusHandler(BaseHandler):
             analysis_completed_at = None
             analysis_uploaded_at = None
             analysis_pipeline = None
+            analysis_status = None
+            analysis_completion = None
             analysis_completed_bool = None
             analysis_uploaded_bool = None
             samples_delivered_bool = None
@@ -215,7 +218,7 @@ class StatusHandler(BaseHandler):
             tat = None
 
             analysis_in_progress = record.action is not None
-            analysis_action = record.action
+            case_action = record.action
 
             total_samples = len(record.links)
             total_external_samples = len([link.sample.is_external for link in record.links if
@@ -349,6 +352,11 @@ class StatusHandler(BaseHandler):
                 samples_delivered_at
             )
 
+            for analysis_obj in progress_tracker.analyses(family=record.internal_id):
+                if not analysis_status:
+                    analysis_completion = round(analysis_obj.progress * 100)
+                    analysis_status = analysis_obj.status
+
             case = {
                 'internal_id': record.internal_id,
                 'name': record.name,
@@ -370,7 +378,9 @@ class StatusHandler(BaseHandler):
                 'samples_sequenced_at': samples_sequenced_at,
                 'samples_delivered_at': samples_delivered_at,
                 'samples_invoiced_at': samples_invoiced_at,
-                'analysis_action': analysis_action,
+                'case_action': case_action,
+                'analysis_status': analysis_status,
+                'analysis_completion':  analysis_completion,
                 'analysis_completed_at': analysis_completed_at,
                 'analysis_uploaded_at': analysis_uploaded_at,
                 'samples_delivered': samples_delivered,
