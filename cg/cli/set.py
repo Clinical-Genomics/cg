@@ -1,11 +1,10 @@
+import datetime
 import logging
 
 import click
-import datetime
-
+from cg.apps.lims import LimsAPI
 from cg.constants import FAMILY_ACTIONS, PRIORITY_OPTIONS, FLOWCELL_STATUS
 from cg.store import Store
-from cg.apps.lims import LimsAPI
 
 LOG = logging.getLogger(__name__)
 
@@ -55,14 +54,19 @@ def family(context, action, priority, panels, family_id):
 @click.option('-s', '--sex', type=click.Choice(['male', 'female', 'unknown']))
 @click.option('-c', '--customer', help='updates customer, input format custXXX.')
 @click.option('-C', '--add-comment', 'comment', type=str, help='adds a note/comment to a sample, '
-              'put text between quotation marks! This will not overwrite the current comment.')
+                                                               'put text between quotation marks! '
+                                                               'This will not overwrite the '
+                                                               'current comment.')
 @click.option('-d', '--downsampled-to', type=int, help='sets number of downsampled \
               total reads. Enter 0 to reset.')
 @click.option('-a', '--application-tag', 'apptag', help='sets application tag.')
 @click.option('-k', '--capture-kit', help='sets capture kit.')
+@click.option('--data-analysis', help='sets data-analysis.')
 @click.argument('sample_id')
+@click.argument('user_signature')
 @click.pass_context
-def sample(context, sex, customer, comment, downsampled_to, apptag, capture_kit, sample_id):
+def sample(context, sex, customer, comment, downsampled_to, apptag, capture_kit,
+           data_analysis, sample_id, user_signature):
     """Update information about a sample."""
     sample_obj = context.obj['status'].sample(sample_id)
 
@@ -145,9 +149,22 @@ def sample(context, sex, customer, comment, downsampled_to, apptag, capture_kit,
 
     if capture_kit:
         sample_obj.capture_kit = capture_kit
-        click.echo(click.style(f"Capture kit {capture_kit} added to sample "
+        click.echo(click.style(f"Capture kit {capture_kit} set on sample "
                                f"{sample_obj.internal_id}", fg='green'))
         context.obj['status'].commit()
+
+    if data_analysis:
+        sample_obj.comment = sample_obj.comment + f"Data-analysis changed from" \
+                                                  f" {sample_obj.data_analysis} to " \
+                                                  f"{str(data_analysis)} by {user_signature}"
+
+        sample_obj.data_analysis = data_analysis
+        click.echo(click.style(f"Data analysis {data_analysis} set on sample "
+                               f"{sample_obj.internal_id}", fg='green'))
+
+        context.obj['status'].commit()
+
+        LimsAPI(context.obj).update_sample(sample_id, data_analysis=data_analysis)
 
 
 @set_cmd.command()
@@ -231,8 +248,8 @@ def microbial_sample(context, apptag, priority, sample_id, user_signature):
             return
 
         comment = f"Application tag changed from" \
-            f" {sample_obj.application_version.application} to " \
-            f"{str(application_version)} by {user_signature}"
+                  f" {sample_obj.application_version.application} to " \
+                  f"{str(application_version)} by {user_signature}"
         sample_obj.application_version_id = application_version_id
         click.echo(click.style(f"Application tag for sample {sample_obj.internal_id} set to "
                                f"{str(application_version)}.", fg='green'))
@@ -251,8 +268,8 @@ def microbial_sample(context, apptag, priority, sample_id, user_signature):
 
     if priority:
         comment = f"Priority changed from" \
-            f" {sample_obj.priority_human} to " \
-            f"{str(priority)} by {user_signature}"
+                  f" {sample_obj.priority_human} to " \
+                  f"{str(priority)} by {user_signature}"
         sample_obj.priority_human = priority
         click.echo(click.style(f"priority for sample {sample_obj.internal_id} set to "
                                f"{str(priority)}.", fg='green'))
