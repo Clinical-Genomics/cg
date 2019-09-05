@@ -10,7 +10,7 @@ def test_set_sample_invalid_sample(invoke_cli, disk_store: Store):
     # WHEN running set with a sample that does not exist
 
     sample_id = 'dummy_sample_id'
-    result = invoke_cli(['--database', disk_store.uri, 'set', 'sample', sample_id])
+    result = invoke_cli(['--database', disk_store.uri, 'set', 'sample', sample_id, 'signature'])
 
     # THEN then it should complain on invalid sample
     assert result.exit_code == 1
@@ -25,7 +25,7 @@ def test_set_sample_sex(invoke_cli, disk_store: Store):
 
     # WHEN setting sex on sample to male
     result = invoke_cli(
-        ['--database', disk_store.uri, 'set', 'sample', sample_id, '--sex', new_sex])
+        ['--database', disk_store.uri, 'set', 'sample', sample_id, '--sex', new_sex, 'signature'])
 
     # THEN then it should have 'male' as sex
     assert result.exit_code == 0
@@ -40,7 +40,7 @@ def test_set_sample_invalid_customer(invoke_cli, disk_store: Store):
 
     # WHEN calling set sample with an invalid customer
     result = invoke_cli(
-        ['--database', disk_store.uri, 'set', 'sample', sample_id, '-c', customer_id])
+        ['--database', disk_store.uri, 'set', 'sample', sample_id, '-c', customer_id, 'signature'])
 
     # THEN then it should complain about missing customer instead of setting the value
     assert result.exit_code == 1
@@ -54,7 +54,7 @@ def test_set_sample_customer(invoke_cli, disk_store: Store):
 
     # WHEN calling set sample with a valid customer
     result = invoke_cli(
-        ['--database', disk_store.uri, 'set', 'sample', sample_id, '-c', customer_id])
+        ['--database', disk_store.uri, 'set', 'sample', sample_id, '-c', customer_id, 'signature'])
 
     # THEN then it should set the customer of the sample
     assert result.exit_code == 0
@@ -68,7 +68,8 @@ def test_set_sample_comment(invoke_cli, disk_store: Store):
     assert comment not in (disk_store.Sample.query.first().comment or [])
 
     # WHEN calling set sample with a valid comment
-    result = invoke_cli(['--database', disk_store.uri, 'set', 'sample', sample_id, '-C', comment])
+    result = invoke_cli(
+        ['--database', disk_store.uri, 'set', 'sample', sample_id, '-C', comment, 'signature'])
 
     # THEN then it should add the comment to the sample
     assert result.exit_code == 0
@@ -80,13 +81,15 @@ def test_set_sample_second_comment(invoke_cli, disk_store: Store):
     sample_id = add_sample(disk_store).internal_id
     comment = 'comment'
     second_comment = 'comment2'
-    invoke_cli(['--database', disk_store.uri, 'set', 'sample', sample_id, '-C', comment])
+    invoke_cli(
+        ['--database', disk_store.uri, 'set', 'sample', sample_id, '-C', comment, 'signature'])
     assert comment in disk_store.Sample.query.first().comment
     assert second_comment not in disk_store.Sample.query.first().comment
 
     # WHEN calling set sample with second comment
     result = invoke_cli(
-        ['--database', disk_store.uri, 'set', 'sample', sample_id, '-C', second_comment])
+        ['--database', disk_store.uri, 'set', 'sample', sample_id, '-C', second_comment,
+         'signature'])
 
     # THEN then it should add the second comment to the samples comments
     assert result.exit_code == 0
@@ -102,7 +105,8 @@ def test_set_sample_invalid_downsampled_to(invoke_cli, disk_store: Store):
 
     # WHEN calling set sample with an invalid value of downsampled to
     result = invoke_cli(
-        ['--database', disk_store.uri, 'set', 'sample', sample_id, '-d', downsampled_to])
+        ['--database', disk_store.uri, 'set', 'sample', sample_id, '-d', downsampled_to,
+         'signature'])
 
     # THEN then the value should have not been set on the sample
     assert result.exit_code == 2
@@ -117,7 +121,8 @@ def test_set_sample_downsampled_to(invoke_cli, disk_store: Store):
 
     # WHEN calling set sample with a valid value of downsampled to
     result = invoke_cli(
-        ['--database', disk_store.uri, 'set', 'sample', sample_id, '-d', downsampled_to])
+        ['--database', disk_store.uri, 'set', 'sample', sample_id, '-d', downsampled_to,
+         'signature'])
 
     # THEN then the value should have been set on the sample
     assert result.exit_code == 0
@@ -132,7 +137,7 @@ def test_set_sample_invalid_application(invoke_cli, disk_store: Store):
 
     # WHEN calling set sample with an invalid application
     result = invoke_cli(['--database', disk_store.uri, 'set', 'sample', sample_id, '-a',
-                         application_tag])
+                         application_tag, 'signature'])
 
     # THEN then it should complain about missing application instead of setting the value
     assert result.exit_code == 1
@@ -147,7 +152,7 @@ def test_set_sample_application(invoke_cli, disk_store: Store):
 
     # WHEN calling set sample with an invalid application
     result = invoke_cli(['--database', disk_store.uri, 'set', 'sample', sample_id, '-a',
-                         application_tag])
+                         application_tag, 'signature'])
 
     # THEN then the application should have been set
     assert result.exit_code == 0
@@ -162,7 +167,7 @@ def test_set_sample_capture_kit(invoke_cli, disk_store: Store):
 
     # WHEN calling set sample with a valid capture_kit
     result = invoke_cli(
-        ['--database', disk_store.uri, 'set', 'sample', sample_id, '-k', capture_kit])
+        ['--database', disk_store.uri, 'set', 'sample', sample_id, '-k', capture_kit, 'signature'])
 
     # THEN then it should be added
     assert result.exit_code == 0
