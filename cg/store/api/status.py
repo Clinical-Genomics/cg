@@ -107,7 +107,7 @@ class StatusHandler(BaseHandler):
         return families[:limit]
 
     def cases(self,
-              progress_tracker,
+              progress_tracker=None,
               internal_id=None,
               name=None,
               days=31,
@@ -352,10 +352,11 @@ class StatusHandler(BaseHandler):
                 samples_delivered_at
             )
 
-            for analysis_obj in progress_tracker.analyses(family=record.internal_id):
-                if not analysis_status:
-                    analysis_completion = round(analysis_obj.progress * 100)
-                    analysis_status = analysis_obj.status
+            if progress_tracker:
+                for analysis_obj in progress_tracker.analyses(family=record.internal_id):
+                    if not analysis_status:
+                        analysis_completion = round(analysis_obj.progress * 100)
+                        analysis_status = analysis_obj.status
 
             case = {
                 'internal_id': record.internal_id,
