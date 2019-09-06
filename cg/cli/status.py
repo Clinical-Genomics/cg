@@ -12,7 +12,7 @@ from cg.constants import FAMILY_ACTIONS, PRIORITY_OPTIONS
 CASE_HEADERS_LONG = ['Case', 'Ordered', 'Received', 'Prepared', 'Sequenced', 'Flowcells',
                      'Analysed', 'Uploaded', 'Delivered', 'Invoiced', 'TAT']
 ALWAYS_LONG_HEADERS = [CASE_HEADERS_LONG[0], CASE_HEADERS_LONG[1],
-                       CASE_HEADERS_LONG[6], CASE_HEADERS_LONG[7]]
+                       CASE_HEADERS_LONG[6]]
 CASE_HEADERS_MEDIUM = []
 CASE_HEADERS_SHORT = []
 
@@ -211,8 +211,15 @@ def cases(context, output_type, verbose, days, internal_id, name, action, priori
             sequenced = present_bool(case, 'samples_sequenced_bool', verbose)
             flowcell = present_bool(case, 'flowcells_on_disk_bool', verbose)
             analysed_bool = present_bool(case, 'analysis_completed_bool', verbose)
-            case_action = present_string(case, 'case_action', verbose)
-            analysed = f"{analysed_bool}{case_action}"
+
+            if case.get('analysis_completed_at'):
+                analysed = f"{analysed_bool}"
+            elif case.get('analysis_status'):
+                analysed = f"{analysed_bool}{present_string(case, 'analysis_status',verbose)}" \
+                           f" {case.get('analysis_completion')}%"
+            else:
+                analysed = f"{analysed_bool}{present_string(case, 'case_action', verbose)}"
+
             uploaded = present_bool(case, 'analysis_uploaded_bool', verbose)
             delivered = present_bool(case, 'samples_delivered_bool', verbose)
             invoiced = present_bool(case, 'samples_invoiced_bool', verbose)
@@ -224,18 +231,12 @@ def cases(context, output_type, verbose, days, internal_id, name, action, priori
             flowcell = f"{case.get('flowcells_on_disk')}/{case.get('total_samples')}"
 
             if case.get('analysis_completed_at'):
-                analysed_date = present_date(case, 'analysis_completed_at', verbose, show_time)
-                case_action = present_string(case, 'case_action', verbose)
-                analysed = f"{analysed_date}{case_action}"
-            elif case.get('analysis_completion'):
-                analysed_completion = f"{case.get('analysis_completion')}%"
-                analysed = f"{analysed_completion}"
+                analysed = f"{present_date(case, 'analysis_completed_at', verbose, show_time)}"
             elif case.get('analysis_status'):
-                analysis_status = present_string(case, 'analysis_status', verbose)
-                analysed = f"{analysis_status}"
+                analysed = f"{present_string(case, 'analysis_status', verbose)}" \
+                           f" {case.get('analysis_completion')}%"
             else:
-                case_action = present_string(case, 'case_action', verbose)
-                analysed = f"{case_action}"
+                analysed = f"{present_string(case, 'case_action', verbose)}"
 
             uploaded = present_date(case, 'analysis_uploaded_at', verbose, show_time)
             delivered = f"{case.get('samples_delivered')}/{case.get('samples_to_deliver')}"
@@ -246,9 +247,15 @@ def cases(context, output_type, verbose, days, internal_id, name, action, priori
             prepared = present_date(case, 'samples_prepared_at', verbose, show_time)
             sequenced = present_date(case, 'samples_sequenced_at', verbose, show_time)
             flowcell = present_string(case, 'flowcells_status', verbose)
-            analysed_date = present_date(case, 'analysis_completed_at', verbose, show_time)
-            case_action = present_string(case, 'case_action', verbose)
-            analysed = f"{analysed_date}{case_action}"
+
+            if case.get('analysis_completed_at'):
+                analysed = f"{present_date(case, 'analysis_completed_at', verbose, show_time)}"
+            elif case.get('analysis_status'):
+                analysed = f"{present_string(case, 'analysis_status', verbose)}" \
+                           f" {case.get('analysis_completion')}%"
+            else:
+                analysed = f"{present_string(case, 'case_action', verbose)}"
+
             uploaded = present_date(case, 'analysis_uploaded_at', verbose, show_time)
             delivered = present_date(case, 'samples_delivered_at', verbose, show_time)
             invoiced = present_date(case, 'samples_invoiced_at', verbose, show_time)
