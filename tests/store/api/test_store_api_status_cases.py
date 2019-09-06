@@ -138,7 +138,7 @@ def test_analysis_action(base_store: Store):
     # THEN cases should contain info on analysis (family) action
     assert cases
     for case in cases:
-        assert case.get('analysis_action') == analysis.family.action
+        assert case.get('case_action') == analysis.family.action
 
 
 def test_analysis_dates_for_rerun(base_store: Store):
