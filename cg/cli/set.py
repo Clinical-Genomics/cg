@@ -154,8 +154,8 @@ def sample(context, sex, customer, comment, downsampled_to, apptag, capture_kit,
         context.obj['status'].commit()
 
     if data_analysis:
-        sample_obj.comment = sample_obj.comment + f"Data-analysis changed from" \
-                                                  f" {sample_obj.data_analysis} to " \
+        sample_obj.comment = sample_obj.comment + f"/rData-analysis changed from " \
+                                                  f"{sample_obj.data_analysis} to " \
                                                   f"{str(data_analysis)} by {user_signature}"
 
         sample_obj.data_analysis = data_analysis
