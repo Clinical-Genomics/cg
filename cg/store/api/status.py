@@ -111,7 +111,8 @@ class StatusHandler(BaseHandler):
               internal_id=None,
               name=None,
               days=31,
-              action=None,
+              case_action=None,
+              progress_status=None,
               priority=None,
               customer_id=None,
               exclude_customer_id=None,
@@ -140,8 +141,8 @@ class StatusHandler(BaseHandler):
             filter_date = datetime.now() - timedelta(days=days)
             families_q = families_q.filter(models.Family.ordered_at > filter_date)
 
-        if action:
-            families_q = families_q.filter(models.Family.action == action)
+        if case_action:
+            families_q = families_q.filter(models.Family.action == case_action)
 
         if priority:
             priority_db = PRIORITY_MAP[priority]
@@ -357,6 +358,9 @@ class StatusHandler(BaseHandler):
                     if not analysis_status:
                         analysis_completion = round(analysis_obj.progress * 100)
                         analysis_status = analysis_obj.status
+
+            if progress_status and progress_status != analysis_status:
+                continue
 
             case = {
                 'internal_id': record.internal_id,

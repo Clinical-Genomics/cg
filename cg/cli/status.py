@@ -97,7 +97,8 @@ def present_string(case, param, show_negative):
 @click.option('--days', default=31, help='days to go back')
 @click.option('--internal-id', help='search by internal id')
 @click.option('--name', help='search by name given by customer')
-@click.option('--action', type=click.Choice(FAMILY_ACTIONS), help='filter by action')
+@click.option('--case-action', type=click.Choice(FAMILY_ACTIONS), help='filter by case action')
+@click.option('--progress-status', help='filter by progress status')
 @click.option('--priority', type=click.Choice(PRIORITY_OPTIONS), help='filter by priority')
 @click.option('--data-analysis', help='filter on data_analysis')
 @click.option('--sample-id', help='filter by sample id')
@@ -117,7 +118,8 @@ def present_string(case, param, show_negative):
 @click.option('-D', '--exclude-delivered', is_flag=True, help='exclude completely delivered cases')
 @click.option('-i', '--only-invoiced', is_flag=True, help='only completely invoiced cases')
 @click.option('-I', '--exclude-invoiced', is_flag=True, help='exclude completely invoiced cases')
-def cases(context, output_type, verbose, days, internal_id, name, action, priority,
+def cases(context, output_type, verbose, days, internal_id, name, case_action,
+          progress_status, priority,
           customer_id, data_analysis, sample_id,
           only_received,
           only_prepared,
@@ -141,7 +143,8 @@ def cases(context, output_type, verbose, days, internal_id, name, action, priori
         days=days,
         internal_id=internal_id,
         name=name,
-        action=action,
+        case_action=case_action,
+        progress_status=progress_status,
         priority=priority,
         customer_id=customer_id,
         exclude_customer_id=exclude_customer_id,
