@@ -30,3 +30,14 @@ join family as f on f.id = f_s.`family_id`
 join analysis as a on a.`family_id` = f.id
 where s.delivered_at is not null and a.uploaded_at is not null
 and DATEDIFF(s.delivered_at, a.uploaded_at) >= 0 AND DATEDIFF(s.delivered_at, a.uploaded_at) <= 31;
+
+-- O_A external
+select avg(DATEDIFF(a.completed_at, f.ordered_at))
+from sample as s
+join family_sample as f_s on f_s.`sample_id` = s.id
+join family as f on f.id = f_s.`family_id`
+join analysis as a on a.`family_id` = f.id
+join application_version as app_v on app_v.id = s.application_version_id
+join application as app on app.id = app_v.application_id
+where a.completed_at is not null and f.ordered_at is not null and app.is_external = true
+and DATEDIFF(a.completed_at, f.ordered_at) >= 0 AND DATEDIFF(a.completed_at, f.ordered_at) <= 31;

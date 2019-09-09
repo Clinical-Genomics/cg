@@ -189,6 +189,9 @@ def cases(context, output_type, verbose, days, internal_id, name, action, priori
 
         if case.get('samples_received_bool') and case.get('samples_delivered_bool'):
             tat = str(tat_number) + color_end
+        if case.get('case_external_bool') and case.get('ordered_at') and case.get(\
+                'analysis_uploaded_bool'):
+            tat = str(tat_number) + color_end
         else:
             tat = f"({tat_number})" + color_end
 
