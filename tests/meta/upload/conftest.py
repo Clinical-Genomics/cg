@@ -118,6 +118,7 @@ class MockScoutApi:
         _ = case_id
         return []
 
+
 class MockLoqusAPI:
 
     """ Mock LoqusAPI class"""
