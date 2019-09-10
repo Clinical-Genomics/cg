@@ -5,13 +5,10 @@
 """
 
 import json
-import copy
 import logging
 
 import subprocess
 from subprocess import CalledProcessError
-
-from cg.exc import CaseNotFoundError
 
 LOG = logging.getLogger(__name__)
 
@@ -27,7 +24,7 @@ class VogueAPI():
         self.vogue_binary = config['vogue']['binary_path']
         self.base_call = [self.vogue_binary]
 
-    def load_genotype(self, genotype_dict: dict ):
+    def load_genotype(self, genotype_dict: dict):
         """Add observations from a VCF."""
         load_call = self.base_call[:]
         load_call.extend(['load', 'genotype', '-s', json.dumps(genotype_dict)])
@@ -36,6 +33,7 @@ class VogueAPI():
         for line in execute_command(load_call):
             log_msg = f"vogue output: {line}"
             LOG.info(log_msg)
+
 
 def execute_command(cmd):
     """
@@ -58,4 +56,3 @@ def execute_command(cmd):
     # Check if process exited with returncode != 0
     if process.poll():
         raise CalledProcessError(returncode=process.returncode, cmd=cmd)
- 

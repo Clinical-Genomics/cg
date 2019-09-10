@@ -67,7 +67,7 @@ def upload(context, family_id):
     )
 
     context.obj['vogue_upload_api'] = UploadVogueAPI(
-        genotype_api=context.obj['genotype_api'], 
+        genotype_api=context.obj['genotype_api'],
         vogue_api=context.obj['vogue_api']
     )
 
