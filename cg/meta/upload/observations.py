@@ -6,6 +6,7 @@
 
 import logging
 from typing import List
+from pathlib import Path
 
 from cg.apps import hk, loqus
 from cg.exc import DuplicateRecordError, DuplicateSampleError, CaseNotFoundError
@@ -31,6 +32,22 @@ class UploadObservationsAPI():
         hk_sv_vcf = self.housekeeper.files(version=hk_version.id, tags=['vcf-sv-research']).first()
         hk_snv_gbcf = self.housekeeper.files(version=hk_version.id, tags=['snv-gbcf']).first()
         hk_pedigree = self.housekeeper.files(version=hk_version.id, tags=['pedigree']).first()
+
+        hk_files = {
+            'vcf-snv-research': hk_vcf,
+            'vcf-sv-research': hk_sv_vcf,
+            'snv-gbcf': hk_snv_gbcf,
+            'pedigree': hk_pedigree
+        }
+
+        # Check if files exists. If hk returns None, or the path does not exist
+        # FileNotFound error is raised
+        for file_type, file in hk_files.items():
+            if file is None:
+                raise FileNotFoundError(f"No file with {file_type} tag in housekeeper")
+            if not Path(file.full_path).exists():
+                raise FileNotFoundError(f"{file.full_path} does not exist")
+
         data = {
             'family': analysis_obj.family.internal_id,
             'vcf': str(hk_vcf.full_path),
