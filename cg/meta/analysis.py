@@ -111,7 +111,7 @@ class AnalysisAPI:
     def build_config(self, family_obj: models.Family) -> dict:
         """Fetch data for creating a MIP config file."""
         data = {
-            'family': family_obj.internal_id,
+            'case': family_obj.internal_id,
             'default_gene_panels': family_obj.panels,
             'samples': [],
         }
