@@ -9,6 +9,8 @@ import click
 from cg.store import Store, models
 from cg.apps import coverage as coverage_app, gt, hk, loqus, tb, scoutapi, beacon as beacon_app, \
     lims, vogue
+from cg.cli.trending import trending as trending_command
+
 from cg.exc import DuplicateRecordError, DuplicateSampleError
 from cg.meta.upload.coverage import UploadCoverageApi
 from cg.meta.upload.gt import UploadGenotypesAPI
@@ -85,6 +87,8 @@ def upload(context, family_id):
             context.obj['status'].commit()
             click.echo(click.style(f"{family_id}: analysis uploaded!", fg='green'))
 
+
+upload.add_command(trending_command)
 
 @upload.command('delivery-report')
 @click.argument('family_id')
@@ -460,17 +464,3 @@ def validate(context, family_id):
                 click.echo(f"{sample_id}: {mean_coverage:.2f}X - {completeness:.2f}%")
             else:
                 click.echo(f"{sample_id}: sample not found in chanjo", color='yellow')
-
-
-@upload.command()
-@click.option('-d', '--days', 
-            help='load X days old sampels from genotype to vogue')
-@click.pass_context
-def trending_genotype(context, days: int):
-    """Adding samples from the genotype database to the trending database"""
-
-    click.echo(click.style('----------------- VOGUE -----------------------'))
-
-    vogue_upload_api = context.obj['vogue_upload_api']
-    vogue_upload_api.load_genotype(days = days)
-
