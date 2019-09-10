@@ -96,7 +96,6 @@ class MockAnalysis:
         return ''
 
 
-
 class MockMutaccAuto:
     """ Mock class for mutacc_auto api """
     @staticmethod

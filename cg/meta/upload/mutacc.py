@@ -95,7 +95,7 @@ class UploadToMutaccAPI():
         if case.get('causatives'):
             return True
 
-        LOG.debug("case %s has no marked causatives in scout", case['_id'])
+        LOG.warning("case %s has no marked causatives in scout", case['_id'])
         return False
 
 

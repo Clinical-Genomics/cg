@@ -483,7 +483,8 @@ def mutacc(context, case_id, days_ago, dry_run):
 
             mutacc_upload.extract_reads(case)
 
-    mutacc_upload.import_cases()
+    if not dry_run:
+        mutacc_upload.import_cases()
 
 
 def solved_since(case: dict, days_ago: int) -> bool:
