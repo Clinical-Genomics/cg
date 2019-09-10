@@ -1,8 +1,6 @@
 """Base command for trending"""
-#!/usr/bin/env python
-import click
 
-# commands
+import click
 from cg.cli.trending.genotype import genotype as genotype_command
 
 

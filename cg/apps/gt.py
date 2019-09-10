@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 import logging
 
-from cg.exc import CaseNotFoundError
-
 from subprocess import CalledProcessError
 import subprocess
 
+from cg.exc import CaseNotFoundError
 
 from alchy import Manager
 from genotype.store import api, models
@@ -48,11 +47,10 @@ class GenotypeAPI(Manager):
                 analysis_obj.sample.sex = samples_sex[analysis_obj.sample_id]['pedigree']
                 self.commit()
 
-
-    def get_trending(self, sample_id: str = '', days: str = '')-> dict:
+    def get_trending(self, sample_id: str = '', days: str = '') -> dict:
         """Get trending object with one or many samples."""
         trending_call = self.base_call[:]
-        
+
         if sample_id:
             trending_call.extend(['prepare-trending', '-s', sample_id])
         elif days:
