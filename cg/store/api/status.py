@@ -239,7 +239,7 @@ class StatusHandler(BaseHandler):
                 samples_to_receive = total_internal_samples
                 samples_to_prepare = total_internal_samples
                 samples_to_sequence = total_internal_samples
-                samples_to_deliver = total_internal_samples 
+                samples_to_deliver = total_internal_samples
                 samples_to_invoice = total_samples - len([link.sample.no_invoice for link in
                                                           record.links if link.sample.no_invoice])
 
@@ -675,8 +675,8 @@ class StatusHandler(BaseHandler):
         if external_case_bool:
             if analysis_uploaded_at:
                 return self._calculate_date_delta(None, samples_ordered_at, analysis_uploaded_at)
-            else:
-                return o_a + a_u
+
+            return o_a + a_u
 
         return r_p + p_s + s_a + a_u + u_d
 
