@@ -42,6 +42,6 @@ trailblazer>=4.0.0
 housekeeper>=2.0.0b2
 chanjo>=4.2.0
 genotype>=2.2.0
-scout-browser>=4.6.1
+scout-browser>=4.4.1
 cgstats>=1.1.2
 cgbeacon
