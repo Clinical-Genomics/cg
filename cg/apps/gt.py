@@ -49,7 +49,7 @@ class GenotypeAPI(Manager):
                 self.commit()
 
 
-    def get_trending(self, sample_id : str = '', days: str = ''):
+    def get_trending(self, sample_id: str = '', days: str = '')-> dict:
         """Get trending object with one or many samples."""
         trending_call = self.base_call[:]
         
