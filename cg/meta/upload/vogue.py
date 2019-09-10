@@ -1,3 +1,4 @@
+"""API to run Vogue"""
 # -*- coding: utf-8 -*-
 import json
 from cg.apps.gt import GenotypeAPI

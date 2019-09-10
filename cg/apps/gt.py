@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
-import copy
-import json
+
+from cg.exc import CaseNotFoundError
 
 from subprocess import CalledProcessError
 import subprocess
@@ -49,9 +49,8 @@ class GenotypeAPI(Manager):
                 self.commit()
 
 
-    def get_trending(self, sample_id : str = '' , days: str = '' ):
+    def get_trending(self, sample_id : str = '', days: str = ''):
         """Get trending object with one or many samples."""
-        trending_obj = None
         trending_call = self.base_call[:]
         
         if sample_id:
@@ -75,5 +74,4 @@ class GenotypeAPI(Manager):
         if not output:
             raise CaseNotFoundError(f"samples not found in genotype db")
 
-        
         return output

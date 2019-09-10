@@ -1,3 +1,4 @@
+"""Base command for trending"""
 #!/usr/bin/env python
 import click
 
