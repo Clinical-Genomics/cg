@@ -29,14 +29,13 @@ class VogueAPI():
 
     def load_genotype(self, genotype_dict: dict ):
         """Add observations from a VCF."""
-        load_call = copy.deepcopy(self.base_call)
+        load_call = self.base_call[:]
         load_call.extend(['load', 'genotype', '-s', json.dumps(genotype_dict)])
 
         # Execute command and print its stdout+stderr as it executes
         for line in execute_command(load_call):
             log_msg = f"vogue output: {line}"
             LOG.info(log_msg)
-            line_content = line.split('INFO')[-1].strip()
 
 def execute_command(cmd):
     """

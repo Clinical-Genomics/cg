@@ -1,7 +1,6 @@
 from cg.apps.gt import GenotypeAPI
 from cg.apps.vogue import VogueAPI
 import json
-from django.core.serializers.json import DjangoJSONEncoder
 
 
 class UploadVogueAPI():
