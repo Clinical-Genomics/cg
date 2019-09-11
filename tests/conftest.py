@@ -7,12 +7,10 @@ import datetime as dt
 from pathlib import Path
 
 import pytest
-
-from cg.store import Store
-
-# Trailblazer
-from trailblazer.mip import files as mip_files_api
 import ruamel.yaml
+from cg.store import Store
+# Trailblazer
+from trailblazer.pipeline import files as mip_files_api
 
 pytest_plugins = [  # pylint: disable=invalid-name
     'tests.apps.lims.conftest',

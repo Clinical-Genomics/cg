@@ -3,7 +3,7 @@ import logging
 from pathlib import Path
 
 import ruamel.yaml
-from trailblazer.mip import files as mip_files
+from trailblazer.pipeline import files as mip_files
 
 from cg.exc import AnalysisNotFinishedError
 

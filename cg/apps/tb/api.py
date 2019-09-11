@@ -7,10 +7,10 @@ from typing import List
 
 import click
 import ruamel.yaml
-from trailblazer.mip.start import MipCli
+from trailblazer.pipeline.start import PipelineCli
 from trailblazer.store import Store, models
 from trailblazer.cli.utils import environ_email
-from trailblazer.mip import files, fastq, trending
+from trailblazer.pipeline import files, fastq, trending
 
 from .add import AddHandler
 
@@ -27,7 +27,7 @@ class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
             config['trailblazer']['database'],
             families_dir=config['trailblazer']['root'],
         )
-        self.mip_cli = MipCli(config['trailblazer']['script'],
+        self.mip_cli = PipelineCli(config['trailblazer']['script'],
                               config['trailblazer']['pipeline'])
         self.mip_config = config['trailblazer']['mip_config']
 

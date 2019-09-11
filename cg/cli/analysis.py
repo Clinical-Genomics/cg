@@ -203,7 +203,7 @@ def auto(context: click.Context):
                     ('low' if family_obj.low_priority else 'normal'))
         try:
             context.invoke(analysis, priority=priority, family_id=family_obj.internal_id)
-        except tb.MipStartError as error:
+        except tb.PipelineStartError as error:
             LOG.exception(error.message)
             exit_code = 1
         except LimsDataError as error:
