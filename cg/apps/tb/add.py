@@ -28,7 +28,7 @@ class AddHandler:
     def _build_bundle(cls, config_data: dict, sampleinfo_data: dict) -> dict:
         """Create a new bundle."""
         data = {
-            'name': config_data['family'],
+            'name': config_data['case'],
             'created': sampleinfo_data['date'],
             'pipeline_version': sampleinfo_data['version'],
             'files': cls._get_files(config_data, sampleinfo_data),
@@ -38,6 +38,7 @@ class AddHandler:
     @staticmethod
     def _get_files(config_data: dict, sampleinfo_data: dict) -> dict:
         """Get all the files from the MIP files."""
+
         data = [{
             'path': config_data['config_path'],
             'tags': ['mip-config'],
@@ -59,20 +60,12 @@ class AddHandler:
             'tags': ['qcmetrics'],
             'archive': True,
         }, {
-            'path': sampleinfo_data['snv']['gbcf'],
-            'tags': ['snv-gbcf'],
-            'archive': False,
-        }, {
-            'path': f"{sampleinfo_data['snv']['gbcf']}.csi",
-            'tags': ['snv-gbcf-index'],
-            'archive': False,
-        }, {
             'path': sampleinfo_data['snv']['bcf'],
-            'tags': ['snv-bcf'],
+            'tags': ['snv-bcf', 'snv-gbcf'],
             'archive': True,
         }, {
             'path': f"{sampleinfo_data['snv']['bcf']}.csi",
-            'tags': ['snv-bcf-index'],
+            'tags': ['snv-bcf-index', 'snv-gbcf-index'],
             'archive': True,
         }, {
             'path': sampleinfo_data['sv']['bcf'],
@@ -96,6 +89,14 @@ class AddHandler:
             'archive': False,
         }]
 
+        # this key exists only for wgs
+        if sampleinfo_data['str_vcf']:
+            data.append({
+                'path': sampleinfo_data['str_vcf'],
+                'tags': ['vcf-str'],
+                'archive': True
+            })
+
         for variant_type in ['snv', 'sv']:
             for output_type in ['clinical', 'research']:
                 vcf_path = sampleinfo_data[variant_type][f"{output_type}_vcf"]
@@ -109,7 +110,7 @@ class AddHandler:
                     'archive': True,
                 })
                 data.append({
-                    'path': f"{vcf_path}.tbi",
+                    'path': f"{vcf_path}.tbi" if variant_type == 'snv' else f"{vcf_path}.csi",
                     'tags': [f"{vcf_tag}-index"],
                     'archive': True,
                 })
@@ -121,7 +122,7 @@ class AddHandler:
                 'archive': False,
             })
 
-            ## Bam preprocessing
+            # Bam pre-processing
             bam_path = sample_data['bam']
             bai_path = f"{bam_path}.bai"
             if not Path(bai_path).exists():
@@ -138,8 +139,8 @@ class AddHandler:
                 'archive': False,
             })
 
-            ## Only for wgs data
-            ## Downsamples MT bam preprocessing
+            # Only for wgs data
+            # Downsamples MT bam pre-processing
             if sample_data['subsample_mt']:
                 mt_bam_path = sample_data['subsample_mt']
                 mt_bai_path = f"{mt_bam_path}.bai"
