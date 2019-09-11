@@ -1,6 +1,7 @@
 import pytest
 
 from cg.meta.upload.scoutapi import UploadScoutAPI
+from cg.meta.upload.observations import UploadObservationsAPI
 
 
 class MockVersion:
@@ -20,6 +21,20 @@ class MockFile:
         return ''
 
 
+# Mock File again, but full_path should be an attribute
+class MockFile1():
+
+    """ Mock File object """
+
+    def __init__(self, path=''):
+        self.full_path = path
+
+    @staticmethod
+    def first():
+        """ mock first method """
+        return MockFile1()
+
+
 class MockHouseKeeper:
 
     def files(self, version, tags):
@@ -27,6 +42,24 @@ class MockHouseKeeper:
 
     def version(self, arg1: str, arg2: str):
         """Fetch version from the database."""
+        return MockVersion()
+
+
+# Mock Housekeeper again, but with MockFile_ returned from files instead
+class MockHouseKeeper1():
+
+    """ Mock housekeeper api"""
+
+    @staticmethod
+    def files(version, tags):
+        """ Mock files method """
+        _, _ = version, tags
+        return MockFile1()
+
+    @staticmethod
+    def version(arg1: str, arg2: str):
+        """Fetch version from the database."""
+        _, _ = arg1, arg2
         return MockVersion()
 
 
@@ -61,6 +94,48 @@ class MockAnalysis:
     def convert_panels(self, customer_id, panels):
         return ''
 
+
+class MockLoqusAPI:
+
+    """ Mock LoqusAPI class"""
+
+    @staticmethod
+    def load(*args, **kwargs):
+        """ Mock load method"""
+        _ = args
+        _ = kwargs
+        return dict(variants=12)
+
+    @staticmethod
+    def get_case(*args, **kwargs):
+        """ Mock get_case method"""
+        _ = args
+        _ = kwargs
+        return {'case_id': 'case_id', '_id': '123'}
+
+    @staticmethod
+    def get_duplicate(*args, **kwargs):
+        """Mock get_duplicate method"""
+        _ = args
+        _ = kwargs
+        return {'case_id': 'case_id'}
+
+
+@pytest.yield_fixture(scope='function')
+def upload_observations_api(analysis_store):
+
+    """ Create mocked UploadObservationsAPI object"""
+
+    loqus_mock = MockLoqusAPI()
+    hk_mock = MockHouseKeeper1()
+
+    _api = UploadObservationsAPI(
+        status_api=analysis_store,
+        hk_api=hk_mock,
+        loqus_api=loqus_mock
+    )
+
+    yield _api
 
 @pytest.yield_fixture(scope='function')
 def upload_scout_api(analysis_store, scout_store):
