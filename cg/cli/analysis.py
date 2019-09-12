@@ -45,10 +45,10 @@ def analysis(context, priority, email, family_id, start_with):
 
     if context.invoked_subcommand is None:
         if family_id is None:
-            LOG.error('provide a family')
+            _suggest_cases_to_analyze(context)
             context.abort()
 
-        # check everything is okey
+        # check everything is ok
         family_obj = context.obj['db'].family(family_id)
         if family_obj is None:
             LOG.error(f"{family_id} not found")
@@ -67,9 +67,15 @@ def analysis(context, priority, email, family_id, start_with):
                            start_with=start_with)
 
 
+def _suggest_cases_to_analyze(context):
+    LOG.error('provide a case, suggestions:')
+    for family_obj in context.obj['db'].families_to_mip_analyze():
+        click.echo(family_obj)
+
+
 @analysis.command()
 @click.option('-d', '--dry', is_flag=True, help='print config to console')
-@click.argument('family_id')
+@click.argument('family_id', required=False)
 @click.pass_context
 def config(context, dry, family_id):
     """Generate a config for the FAMILY_ID.
@@ -80,6 +86,10 @@ def config(context, dry, family_id):
 
     Returns:
     """
+    if family_id is None:
+        _suggest_cases_to_analyze(context)
+        context.abort()
+
     # Get family meta data
     family_obj = context.obj['db'].family(family_id)
     # MIP formated pedigree.yaml config
@@ -160,10 +170,15 @@ def link_microbial(context, order_id, sample_id):
 
 @analysis.command()
 @click.option('-p', '--print', 'print_output', is_flag=True, help='print to console')
-@click.argument('family_id')
+@click.argument('family_id', required=False)
 @click.pass_context
 def panel(context, print_output, family_id):
     """Write aggregated gene panel file."""
+
+    if family_id is None:
+        _suggest_cases_to_analyze(context)
+        context.abort()
+
     family_obj = context.obj['db'].family(family_id)
     bed_lines = context.obj['api'].panel(family_obj)
     if print_output:
@@ -177,11 +192,16 @@ def panel(context, print_output, family_id):
 @PRIORITY_OPTION
 @EMAIL_OPTION
 @START_WITH_PROGRAM
-@click.argument('family_id')
+@click.argument('family_id', required=False)
 @click.pass_context
 def start(context: click.Context, family_id: str, priority: str = None, email: str = None,
           start_with: str = None):
     """Start the analysis pipeline for a family."""
+
+    if family_id is None:
+        _suggest_cases_to_analyze(context)
+        context.abort()
+
     family_obj = context.obj['db'].family(family_id)
     if family_obj is None:
         LOG.error(f"{family_id}: family not found")
