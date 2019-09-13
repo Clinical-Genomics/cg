@@ -64,22 +64,20 @@ class UploadToMutaccAPI():
 
         """
 
-        bam_exists = True
+
         for sample in case['individuals']:
 
             if sample.get('bam_file', None) is None:
-                bam_exists = False
                 LOG.warning("sample %s in case %s is missing bam fille",
                             sample['individual_id'], case['_id'])
+                return False
 
-            else:
+            elif not os.path.isfile(sample['bam_file']):
+                LOG.warning("sample %s in %s has non existing bam_file",
+                            sample['individual_id'], case['_id'])
+                return False
 
-                if not os.path.isfile(sample['bam_file']):
-                    bam_exists = False
-                    LOG.warning("sample %s in %s has non existing bam_file",
-                                sample['individual_id'], case['_id'])
-
-        return bam_exists
+        return True
 
     @staticmethod
     def has_causatives(case: dict) -> bool:

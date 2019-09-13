@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+import datetime as dt
 from typing import List
 
 from pymongo import MongoClient
@@ -85,7 +86,38 @@ class ScoutAPI(MongoAdapter):
 
         return causatives
 
+    def get_solved_cases(self, days_ago):
+        """
+            Get cases solved within chosen timespan
 
+            Args:
+                days_ago (int): Maximum days ago a case has been solved
+
+            Return:
+                cases (list): list of cases
+        """
+
+        days_datetime = dt.datetime.now() - dt.timedelta(days=days_ago)
+
+        # Look up 'mark_causative' events added since specified number days ago
+        event_query = {
+            'category': 'case',
+            'verb': 'mark_causative',
+            'created_at': {'$gte': days_datetime}
+        }
+        recent_events = self.event_collection.find(event_query)
+        solved_cases = set()
+
+        # Find what cases these events concern
+        for event in recent_events:
+            solved_cases.add(event['case'])
+
+        solved_cases = list(solved_cases)
+
+        # Find these cases in the database
+        cases = self.case_collection.find({'_id': {'$in': solved_cases}})
+
+        return cases
 
     def upload_delivery_report(self,
                                report_path: str,

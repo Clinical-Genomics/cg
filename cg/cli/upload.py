@@ -457,7 +457,7 @@ def validate(context, family_id):
 
 @upload.command()
 @click.option('-c', '--case-id', help='internal case id, leave empty to process all')
-@click.option('-d', '--days-ago', default=7, help='days since solved')
+@click.option('-d', '--days-ago', type=int, help='days since solved')
 @click.option('--dry-run', is_flag=True, help='only print cases to be processed')
 @click.pass_context
 def mutacc(context, case_id, days_ago, dry_run):
@@ -472,38 +472,20 @@ def mutacc(context, case_id, days_ago, dry_run):
     mutacc_upload = UploadToMutaccAPI(scout_api=scout_api, mutacc_auto_api=mutacc_auto_api)
 
     # Get cases to upload into mutacc from scout
-    finished_cases = scout_api.get_cases(finished=True, case_id=case_id)
+    if days_ago is not None:
+        finished_cases = scout_api.get_solved_cases(days_ago=days_ago)
+    elif case_id is not None:
+        finished_cases = scout_api.get_cases(finished=True, case_id=case_id)
+    else:
+        LOG.info("Please enter option '--case-id' or '--days-ago'")
+
     for case in finished_cases:
 
-        if case_id is not None or solved_since(case=case, days_ago=days_ago):
+        if dry_run:
+            LOG.info("Would upload case %s to mutacc", case['_id'])
+            continue
 
-            if dry_run:
-                LOG.info("Would upload case %s to mutacc", case['_id'])
-                continue
-
-            mutacc_upload.extract_reads(case)
+        mutacc_upload.extract_reads(case)
 
     if not dry_run:
         mutacc_upload.import_cases()
-
-
-def solved_since(case: dict, days_ago: int) -> bool:
-
-    """
-        See if a case has been marked finished within a given number of days ago.
-
-        Args:
-            case (dict): case dictionary from scout
-            days_ago (int): max number of days since marked finished
-
-        Returns:
-            (bool): True if case has been marked finished within given number of days
-    """
-
-    days_datetime = dt.datetime.now() - dt.timedelta(days=days_ago)
-    case_date = case['updated_at']
-    if case_date > days_datetime:
-        return True
-
-    LOG.debug("case %s solved more than %d days ago", case['_id'], days_ago)
-    return False
