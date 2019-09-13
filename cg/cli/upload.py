@@ -455,6 +455,7 @@ def validate(context, family_id):
 def _suggest_cases_to_upload(context):
     LOG.info('provide a case, suggestions:')
     records = context.obj['status'].analyses_to_upload()
+    records = context.obj['status'].analyses_to_upload()[:50]
     for family_obj in records:
         click.echo(family_obj)
 
@@ -462,6 +463,7 @@ def _suggest_cases_to_upload(context):
 def _suggest_case_to_delivery_report(context):
     LOG.error('provide a case, suggestions:')
     records = context.obj['status'].analyses_to_delivery_report()
+    records = context.obj['status'].analyses_to_delivery_report()[:50]
     for family_obj in records:
         click.echo(family_obj)
 

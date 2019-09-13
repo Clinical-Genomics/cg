@@ -70,6 +70,7 @@ def analysis(context, priority, email, family_id, start_with):
 def _suggest_cases_to_analyze(context):
     LOG.error('provide a case, suggestions:')
     for family_obj in context.obj['db'].families_to_mip_analyze():
+    for family_obj in context.obj['db'].families_to_mip_analyze()[:50]:
         click.echo(family_obj)
 
 
