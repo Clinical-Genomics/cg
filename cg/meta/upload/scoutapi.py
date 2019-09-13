@@ -105,7 +105,7 @@ class UploadScoutAPI(object):
                 data[scout_key] = str(hk_file.full_path)
             else:
                 if skip_missing:
-                    LOG.debug(f"skipping missing file: {scout_key}")
+                    LOG.debug("skipping missing file: %s", scout_key)
                 else:
                     raise FileNotFoundError(f"missing file: {scout_key}")
 
