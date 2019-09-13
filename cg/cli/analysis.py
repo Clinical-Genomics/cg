@@ -45,7 +45,7 @@ def analysis(context, priority, email, family_id, start_with):
 
     if context.invoked_subcommand is None:
         if family_id is None:
-            _suggest_cases_to_analyze(context)
+            _suggest_cases_to_analyze(context, show_as_error=True)
             context.abort()
 
         # check everything is ok
@@ -67,9 +67,11 @@ def analysis(context, priority, email, family_id, start_with):
                            start_with=start_with)
 
 
-def _suggest_cases_to_analyze(context):
-    LOG.error('provide a case, suggestions:')
-    for family_obj in context.obj['db'].families_to_mip_analyze():
+def _suggest_cases_to_analyze(context, show_as_error=False):
+    if show_as_error:
+        LOG.error('provide a case, suggestions:')
+    else:
+        LOG.warning('provide a case, suggestions:')
     for family_obj in context.obj['db'].families_to_mip_analyze()[:50]:
         click.echo(family_obj)
 
@@ -93,7 +95,7 @@ def config(context, dry, family_id):
 
     # Get family meta data
     family_obj = context.obj['db'].family(family_id)
-    # MIP formated pedigree.yaml config
+    # MIP formatted pedigree.yaml config
 
     config_data = context.obj['api'].config(family_obj)
 

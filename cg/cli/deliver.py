@@ -101,7 +101,7 @@ def inbox(context, family, version, tag, inbox_path):
 
 
 def _suggest_cases_to_deliver(store):
-    LOG.info('provide a case, suggestions:')
+    LOG.warning('provide a case, suggestions:')
 
     for family_obj in store.analyses_to_deliver()[:50]:
         click.echo(family_obj)
