@@ -34,6 +34,16 @@ class VogueAPI():
             log_msg = f"vogue output: {line}"
             LOG.info(log_msg)
 
+    def load_apptags(self, apptag_list: list):
+        """Add observations from a VCF."""
+        load_call = self.base_call[:]
+        load_call.extend(['load', 'apptag', json.dumps(apptag_list)])
+
+        # Execute command and print its stdout+stderr as it executes
+        for line in execute_command(load_call):
+            log_msg = f"vogue output: {line}"
+            LOG.info(log_msg)
+
 
 def execute_command(cmd):
     """

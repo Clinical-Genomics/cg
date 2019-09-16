@@ -2,6 +2,7 @@
 
 import click
 from cg.cli.trending.genotype import genotype as genotype_command
+from cg.cli.trending.apptags import apptags as apptags_command
 
 
 @click.group()
@@ -12,3 +13,4 @@ def trending():
 
 
 trending.add_command(genotype_command)
+trending.add_command(apptags_command)
