@@ -57,6 +57,7 @@ class GenotypeAPI(Manager):
             trending_call.extend(['prepare-trending', '-d', days])
 
         try:
+            LOG.info('Running Genotype API to get data.')
             output = subprocess.check_output(
                 ' '.join(trending_call),
                 shell=True
