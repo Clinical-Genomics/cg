@@ -6,7 +6,7 @@ from cg.apps.vogue import VogueAPI
 
 
 class UploadVogueAPI():
-    """API to run Vogue"""
+    """API to load data into Vogue"""
 
     def __init__(self, genotype_api: GenotypeAPI, vogue_api: VogueAPI):
         self.genotype_api = genotype_api
