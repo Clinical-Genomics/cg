@@ -4,6 +4,7 @@
 
 import os
 import logging
+from collections import namedtuple
 
 from cg.apps import scoutapi, mutacc_auto
 
@@ -32,14 +33,15 @@ class UploadToMutaccAPI():
 
         if all([self.has_bam(case), self.has_causatives(case)]):
             causatives = self.scout.get_causative_variants(case_id=case['_id'])
-            mutacc_case = assemble_mutacc_case(case)
-            mutacc_variants = [assemble_mutacc_variant(variant) for variant in causatives]
+            mutacc_case = remap(case, SCOUT_TO_MUTACC_CASE)
+            mutacc_variants = [remap(variant, SCOUT_TO_MUTACC_VARIANTS) for variant in causatives]
             return {'case': mutacc_case, 'causatives': mutacc_variants}
         return {}
 
     def extract_reads(self, case: dict):
         """Use mutacc API to extract reads from case"""
         data = self.data(case)
+
         if data:
             LOG.info("Extracting reads from case %s", case['_id'])
             self.mutacc_auto.extract_reads(case=data['case'], variants=data['causatives'])
@@ -97,75 +99,96 @@ class UploadToMutaccAPI():
         return False
 
 
-# Fields in a scout case document to be included as meta-data to mutacc-auto
-SCOUT_CASE_FIELDS = (
-    '_id',
-    'genome_build',
-    'genome_version',
-    'dynamic_gene_list',
-    'panels',
-    'rank_model_version',
-    'rank_score_threshold',
-    'phenotype_terms',
-    'phenotype_groups',
-    'diagnosis_phenotypes',
-    'diagnosis_genes'
+
+# Reformat scout noutput to mutacc input
+
+MAPPER = namedtuple('mapper', 'field_name_1 field_name_2 conv')
+
+def remap(input_dict: dict, mapper_list: list) -> dict:
+    """
+        Reformat dict from one application to be used by another
+
+        Args:
+            input_dict (dict): dictionary to be converted
+            mapper_list (list(MAPPER)): list of mapper objects
+
+        Returns:
+            output_dict (dict): conveted dictionary
+
+    """
+    output_dict = {}
+    for field in mapper_list:
+        if input_dict.get(field.field_name_1, None) is not None:
+            output_dict[field.field_name_2] = field.conv(input_dict[field.field_name_1])
+        elif field.field_name_1 in ('mother', 'father'):
+            output_dict[field.field_name_2] = '0'
+    return output_dict
+
+
+SCOUT_TO_MUTACC_SAMPLE = (
+    MAPPER('individual_id', 'sample_id', str),
+    MAPPER('sex', 'sex',
+           lambda sex: 'male' if sex == '1' else 'female' if sex == '2' else 'unknown'),
+    MAPPER('phenotype', 'phenotype', str),
+    MAPPER('father', 'father', lambda father: father if father else '0'),
+    MAPPER('mother', 'mother', lambda mother: mother if mother else '0'),
+    MAPPER('analysis_type', 'analysis_type', str),
+    MAPPER('bam_file', 'bam_file', str)
 )
 
-SCOUT_SAMPLE_FIELDS = (
-    'individual_id',
-    'sex',
-    'phenotype',
-    'father',
-    'mother',
-    'analysis_type',
-    'bam_file'
+SCOUT_TO_MUTACC_CASE = (
+    MAPPER('_id', 'case_id', str),
+    MAPPER('genome_build', 'genome_build', str),
+    MAPPER('dynamic_gene_list', 'dynamic_gene_list', list),
+    MAPPER('panels', 'panels', lambda panels: [panel['panel_name'] for panel in panels]),
+    MAPPER('rank_model_version', 'rank_model_version', str),
+    MAPPER('rank_score_threshold', 'rank_score_threshold', int),
+    MAPPER('phenotype_terms', 'phenotype_terms', list),
+    MAPPER('phenotype_groups', 'phenotype_groups', list),
+    MAPPER('diagnosis_phenotypes', 'diagnosis_phenotypes', list),
+    MAPPER('diagnosis_genes', 'diagnosis_genes', list),
+    MAPPER('individuals', 'samples',
+           lambda samples: [remap(sample, SCOUT_TO_MUTACC_SAMPLE) for sample in samples])
 )
 
-SCOUT_VARIANT_FIELDS = (
-    'chromosome',
-    'position',
-    'dbsnp_id',
-    'reference',
-    'alternative',
-    'quality',
-    'filters',
-    'samples',
-    'genes',
-    'end',
-    'rank_score',
-    'category',
-    'sub_category'
+def get_gene_string(genes):
+
+    GENE_INFO = ('hgnc_symbol',
+                 'region_annotation',
+                 'functional_annotation',
+                 'sift_prediction',
+                 'polyphen_prediction')
+
+    ann_info = []
+    for gene in genes:
+        gene_info = '|'.join([gene[ann_id] if gene.get(ann_id) else '' for ann_id in GENE_INFO])
+        ann_info.append(gene_info)
+    ann_info = ','.join(ann_info)
+
+    return ann_info
+
+
+SCOUT_TO_MUTACC_FORMAT = (
+    MAPPER('genotype_call', 'GT', str),
+    MAPPER('allele_depths', 'AD', lambda AD: ','.join([str(element) for element in AD])),
+    MAPPER('read_depths', 'DP', lambda DP: ','.join([str(element) for element in DP])),
+    MAPPER('genotype_quality', 'GQ', float)
 )
 
 
-def assemble_mutacc_case(case: dict):
-    """ Find necessary data from scout case object """
-    mutacc_case = {}
-    for field in SCOUT_CASE_FIELDS:
-        if case.get(field, None) is not None:
-            mutacc_case[field] = case[field]
-    mutacc_samples = [assemble_mutacc_sample(sample) for sample in case['individuals']]
-    mutacc_case['individuals'] = mutacc_samples
-
-    return mutacc_case
-
-
-def assemble_mutacc_sample(sample: dict):
-    """ Find necessary data from scout sample object """
-    mutacc_sample = {}
-    for field in SCOUT_SAMPLE_FIELDS:
-        if sample.get(field, None) is not None:
-            mutacc_sample[field] = sample[field]
-        elif field in ('mother', 'father'):
-            mutacc_sample[field] = '0'
-    return mutacc_sample
-
-
-def assemble_mutacc_variant(variant: dict):
-    """ Find necessary data from scout variant object """
-    mutacc_variant = {}
-    for field in SCOUT_VARIANT_FIELDS:
-        if variant.get(field, None) is not None:
-            mutacc_variant[field] = variant[field]
-    return mutacc_variant
+SCOUT_TO_MUTACC_VARIANTS = (
+    MAPPER('chromosome', 'CHROM', str),
+    MAPPER('position', 'POS', int),
+    MAPPER('dbsnp_id', 'ID', str),
+    MAPPER('reference', 'REF', str),
+    MAPPER('alternative', 'ALT', str),
+    MAPPER('quality', 'QUAL', float),
+    MAPPER('filters', 'FILTER', lambda filters: ','.join(filters)),
+    MAPPER('end', 'END', int),
+    MAPPER('rank_score', 'RankScore', int),
+    MAPPER('category', 'category', str),
+    MAPPER('sub_category', 'sub_category', str),
+    MAPPER('genes', 'ANN', get_gene_string),
+    MAPPER('samples', 'FORMAT',
+           lambda samples: {sample['sample_id']: remap(sample, SCOUT_TO_MUTACC_FORMAT) for sample in samples})
+)
