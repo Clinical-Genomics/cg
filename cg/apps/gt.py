@@ -62,11 +62,11 @@ class GenotypeAPI(Manager):
                 ' '.join(trending_call),
                 shell=True
             )
-        except CalledProcessError as e:
+        except CalledProcessError as error:
             # If CalledProcessError is raised, log and raise error
             log_msg = f"Could not run command: {' '.join(trending_call)}"
             LOG.critical(log_msg)
-            raise e
+            raise error
 
         output = output.decode('utf-8')
         # If sample not in genotype db, stdout of genotype command will be empty.
