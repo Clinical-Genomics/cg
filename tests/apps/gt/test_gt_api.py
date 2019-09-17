@@ -3,7 +3,6 @@
 """
 
 import subprocess
-import json
 import pytest
 
 from cg.apps.gt import GenotypeAPI
@@ -34,7 +33,7 @@ def test_get_trending(genotypeapi, mocker):
 
     # WHEN running get_trending
     mocker.patch.object(subprocess, 'check_output')
-    genotype_obj = genotypeapi.get_trending(days=days)
+    genotypeapi.get_trending(days=days)
 
     # THEN assert subprocess is running the GenotypeAPI with correct command
     call = f"gtdb --database database prepare-trending -d {days}"
@@ -50,7 +49,7 @@ def test_get_trending_empty_inp(genotypeapi, mocker):
 
     # WHEN running get_trending
     mocker.patch.object(subprocess, 'check_output')
-    genotype_obj = genotypeapi.get_trending(days=days)
+    genotypeapi.get_trending(days=days)
 
     # THEN assert subprocess is running the GenotypeAPI with correct command
     subprocess.check_output.assert_called_with(f'gtdb --database database', shell=True)
@@ -68,4 +67,4 @@ def test_get_trending_no_output(genotypeapi, mocker):
 
     # THEN assert CaseNotFoundError
     with pytest.raises(CaseNotFoundError):
-        genotype_obj = genotypeapi.get_trending(days='')
+        genotypeapi.get_trending(days='')

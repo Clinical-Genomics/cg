@@ -12,6 +12,7 @@ CONFIG = {
         }
     }
 
+
 @pytest.fixture(scope='function')
 def genotype_config():
     """
@@ -21,6 +22,7 @@ def genotype_config():
     _config = CONFIG
 
     return _config
+
 
 @pytest.fixture(scope='function')
 def genotypeapi():
