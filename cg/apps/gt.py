@@ -57,15 +57,16 @@ class GenotypeAPI(Manager):
             trending_call.extend(['prepare-trending', '-d', days])
 
         try:
+            LOG.info('Running Genotype API to get data.')
             output = subprocess.check_output(
                 ' '.join(trending_call),
                 shell=True
             )
-        except CalledProcessError:
+        except CalledProcessError as error:
             # If CalledProcessError is raised, log and raise error
             log_msg = f"Could not run command: {' '.join(trending_call)}"
             LOG.critical(log_msg)
-            raise
+            raise error
 
         output = output.decode('utf-8')
         # If sample not in genotype db, stdout of genotype command will be empty.
