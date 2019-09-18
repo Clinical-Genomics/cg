@@ -20,7 +20,7 @@ class UploadToMutaccAPI():
         self.scout = scout_api
         self.mutacc_auto = mutacc_auto_api
 
-    def data(self, case) -> dict:
+    def _data(self, case) -> dict:
         """
             Find the necessary data for the case
 
@@ -31,7 +31,7 @@ class UploadToMutaccAPI():
                 data (dict): dictionary with case data, and data on causative variants
         """
 
-        if all([self.has_bam(case), self.has_causatives(case)]):
+        if all([self._has_bam(case), self._has_causatives(case)]):
             causatives = self.scout.get_causative_variants(case_id=case['_id'])
             mutacc_case = remap(case, SCOUT_TO_MUTACC_CASE)
             mutacc_variants = [remap(variant, SCOUT_TO_MUTACC_VARIANTS) for variant in causatives]
@@ -40,7 +40,7 @@ class UploadToMutaccAPI():
 
     def extract_reads(self, case: dict):
         """Use mutacc API to extract reads from case"""
-        data = self.data(case)
+        data = self._data(case)
         if data:
             LOG.info("Extracting reads from case %s", case['_id'])
             self.mutacc_auto.extract_reads(case=data['case'], variants=data['causatives'])
@@ -51,7 +51,7 @@ class UploadToMutaccAPI():
         self.mutacc_auto.import_reads()
 
     @staticmethod
-    def has_bam(case: dict) -> bool:
+    def _has_bam(case: dict) -> bool:
 
         """
             Check that all samples in case has a given path to a bam file,
@@ -81,7 +81,7 @@ class UploadToMutaccAPI():
         return True
 
     @staticmethod
-    def has_causatives(case: dict) -> bool:
+    def _has_causatives(case: dict) -> bool:
         """
             Check that the case has marked causative variants in scout
 
@@ -96,7 +96,6 @@ class UploadToMutaccAPI():
 
         LOG.warning("case %s has no marked causatives in scout", case['_id'])
         return False
-
 
 
 # Reformat scout noutput to mutacc input
