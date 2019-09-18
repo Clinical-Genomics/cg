@@ -41,7 +41,6 @@ class UploadToMutaccAPI():
     def extract_reads(self, case: dict):
         """Use mutacc API to extract reads from case"""
         data = self.data(case)
-
         if data:
             LOG.info("Extracting reads from case %s", case['_id'])
             self.mutacc_auto.extract_reads(case=data['case'], variants=data['causatives'])
@@ -102,7 +101,7 @@ class UploadToMutaccAPI():
 
 # Reformat scout noutput to mutacc input
 
-MAPPER = namedtuple('mapper', 'field_name_1 field_name_2 conv')
+MAPPER = namedtuple('mapper', ['field_name_1', 'field_name_2', 'conv'])
 
 def remap(input_dict: dict, mapper_list: list) -> dict:
     """
@@ -120,8 +119,6 @@ def remap(input_dict: dict, mapper_list: list) -> dict:
     for field in mapper_list:
         if input_dict.get(field.field_name_1, None) is not None:
             output_dict[field.field_name_2] = field.conv(input_dict[field.field_name_1])
-        elif field.field_name_1 in ('mother', 'father'):
-            output_dict[field.field_name_2] = '0'
     return output_dict
 
 
@@ -152,16 +149,19 @@ SCOUT_TO_MUTACC_CASE = (
 )
 
 def get_gene_string(genes):
-
-    GENE_INFO = ('hgnc_symbol',
-                 'region_annotation',
-                 'functional_annotation',
-                 'sift_prediction',
-                 'polyphen_prediction')
+    """
+        Function to convert the 'genes' field in the scout variant document
+        to a string format that can be read by mutacc
+    """
+    gene_fields = ('hgnc_symbol',
+                   'region_annotation',
+                   'functional_annotation',
+                   'sift_prediction',
+                   'polyphen_prediction')
 
     ann_info = []
     for gene in genes:
-        gene_info = '|'.join([gene[ann_id] if gene.get(ann_id) else '' for ann_id in GENE_INFO])
+        gene_info = '|'.join([gene[ann_id] if gene.get(ann_id) else '' for ann_id in gene_fields])
         ann_info.append(gene_info)
     ann_info = ','.join(ann_info)
 
@@ -183,12 +183,13 @@ SCOUT_TO_MUTACC_VARIANTS = (
     MAPPER('reference', 'REF', str),
     MAPPER('alternative', 'ALT', str),
     MAPPER('quality', 'QUAL', float),
-    MAPPER('filters', 'FILTER', lambda filters: ','.join(filters)),
+    MAPPER('filters', 'FILTER', lambda filters: ','.join([str(filter) for filter in filters])),
     MAPPER('end', 'END', int),
     MAPPER('rank_score', 'RankScore', int),
     MAPPER('category', 'category', str),
     MAPPER('sub_category', 'sub_category', str),
     MAPPER('genes', 'ANN', get_gene_string),
     MAPPER('samples', 'FORMAT',
-           lambda samples: {sample['sample_id']: remap(sample, SCOUT_TO_MUTACC_FORMAT) for sample in samples})
+           lambda samples: {sample['sample_id']: remap(sample, SCOUT_TO_MUTACC_FORMAT)
+                            for sample in samples})
 )
