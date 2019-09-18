@@ -2,7 +2,6 @@
 import gzip
 import logging
 import re
-import signal
 import subprocess
 from pathlib import Path
 
@@ -14,12 +13,14 @@ from cg.store import Store
 
 LOGGER = logging.getLogger(__name__)
 
+
 @click.group()
 @click.pass_context
 def balsamic(context):
     context.obj['hk'] = hk.HousekeeperAPI(context.obj)
     context.obj['db'] = Store(context.obj['database'])
     pass
+
 
 @balsamic.command()
 @click.option('-d', '--dry', is_flag=True, help='print config to console')
@@ -107,12 +108,15 @@ def config(context, dry, target_bed, case_id):
     f"--reference-config /home/proj/production/cancer/reference/GRCh37/reference.json "
     f"--tumor {tumor_path} "
     f"--case-id {case_id} "
-    f"--analysis-dir /home/proj/production/cancer/cases ")
+    f"--output-config {case_id}.json "
+    f"--analysis-dir {root_dir}")
     if target_bed:
         command_str += f" -p {target_bed} "
+
     if normal_path:
         command_str += f"--normal {normal_path}"
 
+    #TODO: use bash -c similar to run command below
     command = ['/home/proj/bin/conda/envs/P_BALSAMIC-base_3.0.1/bin/balsamic']
     command.extend(command_str.split(' '))
 
@@ -120,7 +124,48 @@ def config(context, dry, target_bed, case_id):
         print(' '.join(command))
     else:
         process = subprocess.run(
-            command, shell=True
+            ' '.join(command), shell=True
+            #preexec_fn=lambda: signal.signal(signal.SIGPIPE, signal.SIG_DFL)
+        )
+        return process
+
+
+@balsamic.command()
+@click.option('-d', '--dry', is_flag=True, help='print config to console')
+@click.option('--config', 'config_path', required=False, help='Optional')
+@click.argument('case_id')
+@click.pass_context
+def run(context, dry, config_path, case_id):
+    """Generate a config for the case_id.
+
+    Args:
+        dry (Bool): Print config to console
+        family_id (Str):
+
+    Returns:
+    """
+
+    root_dir = Path(context.obj['balsamic']['root'])
+    if not config_path:
+        config_path = Path.joinpath(root_dir, case_id, case_id + '.json')
+
+    # Call Balsamic
+    #TODO: Analysis type as option
+    #TODO: slurm-account as option
+    command_str = (f" run analysis "
+    f"--run-analysis --slurm-account development --analysis-type qc "
+    f"-s {config_path} ")
+
+    command_str+="'"
+
+    command = ["bash -c 'source activate P_BALSAMIC-base_3.0.1; balsamic"]
+    command.extend(command_str.split(' '))
+
+    if dry:
+        print(' '.join(command))
+    else:
+        process = subprocess.run(
+            ' '.join(command), shell=True
             #preexec_fn=lambda: signal.signal(signal.SIGPIPE, signal.SIG_DFL)
         )
         return process
