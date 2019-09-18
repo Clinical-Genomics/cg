@@ -19,7 +19,6 @@ LOGGER = logging.getLogger(__name__)
 def balsamic(context):
     context.obj['hk'] = hk.HousekeeperAPI(context.obj)
     context.obj['db'] = Store(context.obj['database'])
-    pass
 
 
 @balsamic.command()
@@ -29,12 +28,6 @@ def balsamic(context):
 @click.pass_context
 def config(context, dry, target_bed, case_id):
     """Generate a config for the case_id.
-
-    Args:
-        dry (Bool): Print config to console
-        family_id (Str):
-
-    Returns:
     """
 
     # missing sample_id and files
@@ -81,7 +74,8 @@ def config(context, dry, target_bed, case_id):
                 read=fastq_data['read'],
                 more={'undetermined': fastq_data['undetermined']},
             )
-            concatenated_fastq_name = BalsamicFastqHandler.FastqFileNameCreator.get_concatenated_name(
+            concatenated_fastq_name = \
+                BalsamicFastqHandler.FastqFileNameCreator.get_concatenated_name(
                 linked_fastq_name)
 
             linked_fastq_path = wrk_dir / linked_fastq_name
@@ -105,18 +99,19 @@ def config(context, dry, target_bed, case_id):
 
     # Call Balsamic
     command_str = (f"config case "
-    f"--reference-config /home/proj/production/cancer/reference/GRCh37/reference.json "
-    f"--tumor {tumor_path} "
-    f"--case-id {case_id} "
-    f"--output-config {case_id}.json "
-    f"--analysis-dir {root_dir}")
+                   f"--reference-config "
+                   f"/home/proj/production/cancer/reference/GRCh37/reference.json "
+                   f"--tumor {tumor_path} "
+                   f"--case-id {case_id} "
+                   f"--output-config {case_id}.json "
+                   f"--analysis-dir {root_dir}")
     if target_bed:
         command_str += f" -p {target_bed} "
 
     if normal_path:
         command_str += f"--normal {normal_path}"
 
-    #TODO: use bash -c similar to run command below
+    # TODO: use bash -c similar to run command below
     command = ['/home/proj/bin/conda/envs/P_BALSAMIC-base_3.0.1/bin/balsamic']
     command.extend(command_str.split(' '))
 
@@ -125,7 +120,6 @@ def config(context, dry, target_bed, case_id):
     else:
         process = subprocess.run(
             ' '.join(command), shell=True
-            #preexec_fn=lambda: signal.signal(signal.SIGPIPE, signal.SIG_DFL)
         )
         return process
 
@@ -137,12 +131,6 @@ def config(context, dry, target_bed, case_id):
 @click.pass_context
 def run(context, dry, config_path, case_id):
     """Generate a config for the case_id.
-
-    Args:
-        dry (Bool): Print config to console
-        family_id (Str):
-
-    Returns:
     """
 
     root_dir = Path(context.obj['balsamic']['root'])
@@ -150,13 +138,13 @@ def run(context, dry, config_path, case_id):
         config_path = Path.joinpath(root_dir, case_id, case_id + '.json')
 
     # Call Balsamic
-    #TODO: Analysis type as option
-    #TODO: slurm-account as option
+    # TODO: Analysis type as option
+    # TODO: slurm-account as option
     command_str = (f" run analysis "
-    f"--run-analysis --slurm-account development --analysis-type qc "
-    f"-s {config_path} ")
+                   f"--run-analysis --slurm-account development --analysis-type qc "
+                   f"-s {config_path} ")
 
-    command_str+="'"
+    command_str += "'"
 
     command = ["bash -c 'source activate P_BALSAMIC-base_3.0.1; balsamic"]
     command.extend(command_str.split(' '))
@@ -166,6 +154,5 @@ def run(context, dry, config_path, case_id):
     else:
         process = subprocess.run(
             ' '.join(command), shell=True
-            #preexec_fn=lambda: signal.signal(signal.SIGPIPE, signal.SIG_DFL)
         )
         return process
