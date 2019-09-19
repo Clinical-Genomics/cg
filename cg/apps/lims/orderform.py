@@ -197,7 +197,7 @@ def parse_sample(raw_sample):
         'extraction_method': raw_sample.get('UDF/Extraction method'),
         'formalin_fixation_time': raw_sample.get('UDF/Formalin Fixation Time'),
         'index': raw_sample.get('UDF/Index type'),
-        'from_sample': raw_sample.get('UDF/sample from subject'),
+        'from_sample': raw_sample.get('UDF/is_for_sample'),
         'name': raw_sample['Sample/Name'],
         'organism': raw_sample.get('UDF/Strain'),
         'organism_other': raw_sample.get('UDF/Other species'),
@@ -239,7 +239,7 @@ def parse_sample(raw_sample):
                       ('volume', 'UDF/Volume (uL)'), ('quantity', 'UDF/Quantity'),
                       ('concentration', 'UDF/Concentration (nM)'),
                       ('concentration_weight', 'UDF/Sample Conc.'),
-                      ('time_point', 'UDF/timepoint')]
+                      ('time_point', 'UDF/time_point')]
     for json_key, excel_key in numeric_values:
         str_value = raw_sample.get(excel_key, '').rsplit('.0')[0]
         if str_value.replace('.', '').isnumeric():
