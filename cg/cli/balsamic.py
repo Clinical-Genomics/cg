@@ -94,7 +94,7 @@ def config(context, dry, target_bed, case_id):
             normal_path = concatenated_paths[1]
 
     if not tumor_path:
-        print("No tumor found! Fy fan!")
+        click.echo("No tumor found!", color="red")
         raise
 
     # Call Balsamic
