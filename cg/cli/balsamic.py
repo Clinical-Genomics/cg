@@ -76,7 +76,7 @@ def config(context, dry, target_bed, case_id):
             )
             concatenated_fastq_name = \
                 BalsamicFastqHandler.FastqFileNameCreator.get_concatenated_name(
-                linked_fastq_name)
+                    linked_fastq_name)
 
             linked_fastq_path = wrk_dir / linked_fastq_name
 
