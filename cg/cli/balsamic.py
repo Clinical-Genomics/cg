@@ -111,8 +111,7 @@ def config(context, dry, target_bed, case_id):
     if normal_path:
         command_str += f"--normal {normal_path}"
 
-    # TODO: use bash -c similar to run command below
-    command = ['/home/proj/bin/conda/envs/P_BALSAMIC-base_3.0.1/bin/balsamic']
+    command = ["bash -c 'source activate P_BALSAMIC-base_3.0.1; balsamic"]
     command.extend(command_str.split(' '))
 
     if dry:
