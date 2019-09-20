@@ -20,7 +20,19 @@ class UploadToMutaccAPI():
         self.scout = scout_api
         self.mutacc_auto = mutacc_auto_api
 
-    def _data(self, case) -> dict:
+    def extract_reads(self, case: dict):
+        """Use mutacc API to extract reads from case"""
+        data = self.data(case)
+        if data:
+            LOG.info("Extracting reads from case %s", case['_id'])
+            self.mutacc_auto.extract_reads(case=data['case'], variants=data['causatives'])
+
+    def import_cases(self):
+        """Use mutacc API to import cases to database"""
+        LOG.info('importing cases into mutacc database')
+        self.mutacc_auto.import_reads()
+
+    def data(self, case) -> dict:
         """
             Find the necessary data for the case
 
@@ -38,18 +50,6 @@ class UploadToMutaccAPI():
             return {'case': mutacc_case, 'causatives': mutacc_variants}
         return {}
 
-    def extract_reads(self, case: dict):
-        """Use mutacc API to extract reads from case"""
-        data = self._data(case)
-        if data:
-            LOG.info("Extracting reads from case %s", case['_id'])
-            self.mutacc_auto.extract_reads(case=data['case'], variants=data['causatives'])
-
-    def import_cases(self):
-        """Use mutacc API to import cases to database"""
-        LOG.info('importing cases into mutacc database')
-        self.mutacc_auto.import_reads()
-
     @staticmethod
     def _has_bam(case: dict) -> bool:
 
@@ -64,19 +64,19 @@ class UploadToMutaccAPI():
                 (bool): True if all samples has valid paths to a bam-file
 
         """
-        if case.get('individuals', None) is None:
+        if case.get('individuals') is None:
             LOG.warning("case dictionary is missing 'individuals' key")
             raise KeyError
 
         for sample in case['individuals']:
 
-            if sample.get('bam_file', None) is None:
-                LOG.info("sample %s in case %s is missing bam file",
+            if sample.get('bam_file') is None:
+                LOG.info("sample %s in case %s is missing bam file. skipping",
                          sample['individual_id'], case['_id'])
                 return False
 
             if not os.path.isfile(sample['bam_file']):
-                LOG.info("sample %s in %s has non existing bam file",
+                LOG.info("sample %s in %s has non existing bam file. skipping",
                          sample['individual_id'], case['_id'])
                 return False
 
@@ -119,46 +119,38 @@ def remap(input_dict: dict, mapper_list: list) -> dict:
     """
     output_dict = {}
     for field in mapper_list:
-        if input_dict.get(field.field_name_1, False):
+        if input_dict.get(field.field_name_1):
             output_dict[field.field_name_2] = field.conv(input_dict[field.field_name_1])
     return output_dict
 
 
-def resolve_sex(sex):
-    """ Decode sex from scout: '1' = 'male', '2' = female"""
-    if sex == '1':
-        sex_str = 'male'
-    elif sex == '2':
-        sex_str = 'female'
+def resolve_sex(scout_sex):
+    """ Convert scout sex value to mutacc valid value"""
+    if scout_sex == '1':
+        mutacc_sex = 'male'
+    elif scout_sex == '2':
+        mutacc_sex = 'female'
     else:
-        sex_str = 'unknown'
-    return sex_str
+        mutacc_sex = 'unknown'
+    return mutacc_sex
 
 
-SCOUT_TO_MUTACC_SAMPLE = (
-    MAPPER('individual_id', 'sample_id', str),
-    MAPPER('sex', 'sex', resolve_sex),
-    MAPPER('phenotype', 'phenotype', str),
-    MAPPER('father', 'father', lambda father: father if father else '0'),
-    MAPPER('mother', 'mother', lambda mother: mother if mother else '0'),
-    MAPPER('analysis_type', 'analysis_type', str),
-    MAPPER('bam_file', 'bam_file', str)
-)
+def resolve_parent(scout_parent):
+    """ Convert parent (father/mother) value to mutacc """
+    if scout_parent == '':
+        mutacc_parent = '0'
+    else:
+        mutacc_parent = scout_parent
+    return mutacc_parent
 
-SCOUT_TO_MUTACC_CASE = (
-    MAPPER('_id', 'case_id', str),
-    MAPPER('genome_build', 'genome_build', str),
-    MAPPER('dynamic_gene_list', 'dynamic_gene_list', list),
-    MAPPER('panels', 'panels', lambda panels: [panel['panel_name'] for panel in panels]),
-    MAPPER('rank_model_version', 'rank_model_version', str),
-    MAPPER('rank_score_threshold', 'rank_score_threshold', int),
-    MAPPER('phenotype_terms', 'phenotype_terms', list),
-    MAPPER('phenotype_groups', 'phenotype_groups', list),
-    MAPPER('diagnosis_phenotypes', 'diagnosis_phenotypes', list),
-    MAPPER('diagnosis_genes', 'diagnosis_genes', list),
-    MAPPER('individuals', 'samples',
-           lambda samples: [remap(sample, SCOUT_TO_MUTACC_SAMPLE) for sample in samples])
-)
+
+def resolve_phenotype(scout_phenotype):
+    """ Convert scout phenotype to mutacc phenotype"""
+    if scout_phenotype == 1:
+        mutacc_phenotype = 'unaffected'
+    if scout_phenotype == 2:
+        mutacc_phenotype = 'affected'
+    return mutacc_phenotype
 
 
 def get_gene_string(genes):
@@ -180,6 +172,31 @@ def get_gene_string(genes):
 
     return gene_annotation_info
 
+
+SCOUT_TO_MUTACC_SAMPLE = (
+    MAPPER('individual_id', 'sample_id', str),
+    MAPPER('sex', 'sex', resolve_sex),
+    MAPPER('phenotype', 'phenotype', resolve_phenotype),
+    MAPPER('father', 'father', resolve_parent),
+    MAPPER('mother', 'mother', resolve_parent),
+    MAPPER('analysis_type', 'analysis_type', str),
+    MAPPER('bam_file', 'bam_file', str)
+)
+
+SCOUT_TO_MUTACC_CASE = (
+    MAPPER('_id', 'case_id', str),
+    MAPPER('genome_build', 'genome_build', str),
+    MAPPER('dynamic_gene_list', 'dynamic_gene_list', list),
+    MAPPER('panels', 'panels', lambda panels: [panel['panel_name'] for panel in panels]),
+    MAPPER('rank_model_version', 'rank_model_version', str),
+    MAPPER('rank_score_threshold', 'rank_score_threshold', int),
+    MAPPER('phenotype_terms', 'phenotype_terms', list),
+    MAPPER('phenotype_groups', 'phenotype_groups', list),
+    MAPPER('diagnosis_phenotypes', 'diagnosis_phenotypes', list),
+    MAPPER('diagnosis_genes', 'diagnosis_genes', list),
+    MAPPER('individuals', 'samples',
+           lambda samples: [remap(sample, SCOUT_TO_MUTACC_SAMPLE) for sample in samples])
+)
 
 SCOUT_TO_MUTACC_FORMAT = (
     MAPPER('genotype_call', 'GT', str),

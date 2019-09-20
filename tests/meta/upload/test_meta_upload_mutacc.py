@@ -42,7 +42,7 @@ def test_data(mutacc_upload_api, mocker):
     os.path.isfile.return_value = True
 
     # WHEN generating data
-    result = mutacc_upload_api._data(case)
+    result = mutacc_upload_api.data(case)
 
     # THEN data dict should have keys 'case', and 'causatives'
     assert set(result.keys()) == {'case', 'causatives'}
@@ -69,7 +69,7 @@ def test_data_no_bam(mutacc_upload_api, mocker):
     os.path.isfile.return_value = True
 
     # WHEN generating data
-    result = mutacc_upload_api._data(case)
+    result = mutacc_upload_api.data(case)
 
     # THEN data dict should be empty
     assert result == {}
@@ -96,7 +96,7 @@ def test_data_bam_path_not_exists(mutacc_upload_api, mocker):
     os.path.isfile.return_value = False
 
     # WHEN generating data
-    result = mutacc_upload_api._data(case)
+    result = mutacc_upload_api.data(case)
 
     # THEN data dict should be empty
     assert result == {}
@@ -121,7 +121,7 @@ def test_data_no_causatives(mutacc_upload_api, mocker):
     os.path.isfile.return_value = True
 
     # WHEN generating data
-    result = mutacc_upload_api._data(case)
+    result = mutacc_upload_api.data(case)
 
     # THEN data dict should be empty
     assert result == {}

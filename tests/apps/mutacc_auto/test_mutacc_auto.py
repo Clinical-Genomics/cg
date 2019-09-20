@@ -64,14 +64,14 @@ def test_import_reads(mutacc_auto_api, mocker):
     mock_run_command.assert_called_with(expected_call)
 
 
-def test_run_command(mock_completed_process, mocker):
+def test_run_command(mock_failed_process, mocker):
 
     """
         Test run_command function
     """
     # WITH a mocked subprocess.run function
     mocker.patch.object(subprocess, 'run')
-    subprocess.run.return_value = mock_completed_process
+    subprocess.run.return_value = mock_failed_process
 
     # WHEN trying to run a command with run_command
 

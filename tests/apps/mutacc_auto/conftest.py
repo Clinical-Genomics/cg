@@ -37,18 +37,17 @@ def mutacc_auto_api():
     return _api
 
 
-class MockCompletedProcess:
+class MockFailedProcess:
     """
         Mock a failed process from subprocess.run()
     """
     @property
     def returncode(self):
-        """ Mock returncode """
-        # Mock a != 0 returncode
+        """ Mock returncode that is not 0"""
         return 1
 
 
 @pytest.fixture(scope='function')
-def mock_completed_process():
+def mock_failed_process():
     """Return a completed process from subprocess.run()"""
-    return MockCompletedProcess()
+    return MockFailedProcess()
