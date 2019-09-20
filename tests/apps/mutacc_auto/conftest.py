@@ -39,7 +39,7 @@ def mutacc_auto_api():
 
 class MockCompletedProcess:
     """
-        Mock a completed process from subprocess.run()
+        Mock a failed process from subprocess.run()
     """
     @property
     def returncode(self):

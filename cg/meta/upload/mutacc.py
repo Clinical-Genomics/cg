@@ -64,18 +64,20 @@ class UploadToMutaccAPI():
                 (bool): True if all samples has valid paths to a bam-file
 
         """
-
+        if case.get('individuals', None) is None:
+            LOG.warning("case dictionary is missing 'individuals' key")
+            raise KeyError
 
         for sample in case['individuals']:
 
             if sample.get('bam_file', None) is None:
-                LOG.warning("sample %s in case %s is missing bam fille",
-                            sample['individual_id'], case['_id'])
+                LOG.info("sample %s in case %s is missing bam file",
+                         sample['individual_id'], case['_id'])
                 return False
 
-            elif not os.path.isfile(sample['bam_file']):
-                LOG.warning("sample %s in %s has non existing bam_file",
-                            sample['individual_id'], case['_id'])
+            if not os.path.isfile(sample['bam_file']):
+                LOG.info("sample %s in %s has non existing bam file",
+                         sample['individual_id'], case['_id'])
                 return False
 
         return True
@@ -94,13 +96,14 @@ class UploadToMutaccAPI():
         if case.get('causatives'):
             return True
 
-        LOG.warning("case %s has no marked causatives in scout", case['_id'])
+        LOG.info("case %s has no marked causatives in scout", case['_id'])
         return False
 
 
 # Reformat scout noutput to mutacc input
 
 MAPPER = namedtuple('mapper', ['field_name_1', 'field_name_2', 'conv'])
+
 
 def remap(input_dict: dict, mapper_list: list) -> dict:
     """
@@ -116,15 +119,25 @@ def remap(input_dict: dict, mapper_list: list) -> dict:
     """
     output_dict = {}
     for field in mapper_list:
-        if input_dict.get(field.field_name_1, None) is not None:
+        if input_dict.get(field.field_name_1, False):
             output_dict[field.field_name_2] = field.conv(input_dict[field.field_name_1])
     return output_dict
 
 
+def resolve_sex(sex):
+    """ Decode sex from scout: '1' = 'male', '2' = female"""
+    if sex == '1':
+        sex_str = 'male'
+    elif sex == '2':
+        sex_str = 'female'
+    else:
+        sex_str = 'unknown'
+    return sex_str
+
+
 SCOUT_TO_MUTACC_SAMPLE = (
     MAPPER('individual_id', 'sample_id', str),
-    MAPPER('sex', 'sex',
-           lambda sex: 'male' if sex == '1' else 'female' if sex == '2' else 'unknown'),
+    MAPPER('sex', 'sex', resolve_sex),
     MAPPER('phenotype', 'phenotype', str),
     MAPPER('father', 'father', lambda father: father if father else '0'),
     MAPPER('mother', 'mother', lambda mother: mother if mother else '0'),
@@ -147,6 +160,7 @@ SCOUT_TO_MUTACC_CASE = (
            lambda samples: [remap(sample, SCOUT_TO_MUTACC_SAMPLE) for sample in samples])
 )
 
+
 def get_gene_string(genes):
     """
         Function to convert the 'genes' field in the scout variant document
@@ -158,13 +172,13 @@ def get_gene_string(genes):
                    'sift_prediction',
                    'polyphen_prediction')
 
-    ann_info = []
+    gene_annotation_info = []
     for gene in genes:
         gene_info = '|'.join([gene[ann_id] if gene.get(ann_id) else '' for ann_id in gene_fields])
-        ann_info.append(gene_info)
-    ann_info = ','.join(ann_info)
+        gene_annotation_info.append(gene_info)
+    gene_annotation_info = ','.join(gene_annotation_info)
 
-    return ann_info
+    return gene_annotation_info
 
 
 SCOUT_TO_MUTACC_FORMAT = (
@@ -189,6 +203,5 @@ SCOUT_TO_MUTACC_VARIANTS = (
     MAPPER('sub_category', 'sub_category', str),
     MAPPER('genes', 'ANN', get_gene_string),
     MAPPER('samples', 'FORMAT',
-           lambda samples: {sample['sample_id']: remap(sample, SCOUT_TO_MUTACC_FORMAT)
-                            for sample in samples})
+           lambda samples: [remap(sample, SCOUT_TO_MUTACC_FORMAT) for sample in samples])
 )
