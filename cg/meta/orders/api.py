@@ -148,7 +148,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
         result = self.process_family_samples(data)
         return result
 
-    def submit_family_samples(self, data: dict) -> dict:
+    def submit_case_samples(self, data: dict) -> dict:
         """Submit a batch of samples for sequencing and analysis."""
         result = self.process_family_samples(data)
         for family_obj in result['records']:
@@ -161,19 +161,19 @@ class OrdersAPI(LimsHandler, StatusHandler):
 
     def submit_mip(self, data: dict) -> dict:
         """Submit a batch of samples for sequencing and analysis."""
-        return self.submit_family_samples(data)
+        return self.submit_case_samples(data)
 
     def submit_balsamic(self, data: dict) -> dict:
         """Submit a batch of samples for sequencing and balsamic analysis."""
-        return self.submit_family_samples(data)
+        return self.submit_case_samples(data)
 
     def submit_mip_balsamic(self, data: dict) -> dict:
         """Submit a batch of samples for sequencing and analysis."""
-        return self.submit_family_samples(data)
+        return self.submit_case_samples(data)
 
     def submit_mip_rna(self, data: dict) -> dict:
         """Submit a batch of samples for sequencing and analysis."""
-        return self.submit_family_samples(data)
+        return self.submit_case_samples(data)
 
     def submit_microbial(self, data: dict) -> dict:
         """Submit a batch of microbial samples."""
