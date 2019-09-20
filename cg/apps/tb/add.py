@@ -61,11 +61,11 @@ class AddHandler:
             'archive': True,
         }, {
             'path': sampleinfo_data['snv']['bcf'],
-            'tags': ['snv-bcf'],
+            'tags': ['snv-bcf', 'snv-gbcf'],
             'archive': True,
         }, {
             'path': f"{sampleinfo_data['snv']['bcf']}.csi",
-            'tags': ['snv-bcf-index'],
+            'tags': ['snv-bcf-index', 'snv-gbcf-index'],
             'archive': True,
         }, {
             'path': sampleinfo_data['sv']['bcf'],
@@ -92,6 +92,14 @@ class AddHandler:
             'tags': ['vcf-str'],
             'archive': True
         }]
+
+        # this key exists only for wgs
+        if sampleinfo_data['str_vcf']:
+            data.append({
+                'path': sampleinfo_data['str_vcf'],
+                'tags': ['vcf-str'],
+                'archive': True
+            })
 
         for variant_type in ['snv', 'sv']:
             for output_type in ['clinical', 'research']:

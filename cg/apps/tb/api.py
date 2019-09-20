@@ -27,7 +27,8 @@ class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
             config['trailblazer']['database'],
             families_dir=config['trailblazer']['root'],
         )
-        self.mip_cli = MipCli(config['trailblazer']['script'])
+        self.mip_cli = MipCli(config['trailblazer']['script'],
+                              config['trailblazer']['pipeline'])
         self.mip_config = config['trailblazer']['mip_config']
 
     def start(self, case_id: str, priority: str = 'normal', email: str = None,
