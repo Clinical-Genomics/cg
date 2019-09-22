@@ -1,7 +1,8 @@
-# -*- coding: utf-8 -*-
+""" CLI for storing information and data """
 import datetime as dt
 import logging
 from pathlib import Path
+import sys
 
 import click
 
@@ -108,11 +109,19 @@ def _add_new_analysis_to_the_status_api(bundle_obj, status):
 def completed(context):
     """Store all completed analyses."""
     hk_api = context.obj['hk_api']
+    exit_code = 0
     for analysis_obj in context.obj['tb_api'].analyses(status='completed', deleted=False):
         existing_record = hk_api.version(analysis_obj.family, analysis_obj.started_at)
         if existing_record:
-            LOG.debug(f"analysis stored: {analysis_obj.family} - {analysis_obj.started_at}")
+            LOG.debug("analysis stored: %s - %s", analysis_obj.family, analysis_obj.started_at)
             continue
         click.echo(click.style(f"storing family: {analysis_obj.family}", fg='blue'))
         with Path(analysis_obj.config_path).open() as config_stream:
-            context.invoke(analysis, config_stream=config_stream)
+            try:
+                context.invoke(analysis, config_stream=config_stream)
+            except Exception: # pylint: disable=broad-except
+                LOG.error("uploading family failed: %s", analysis_obj.family.internal_id,
+                          exc_info=True)
+                exit_code = 1
+
+    sys.exit(exit_code)
