@@ -202,7 +202,7 @@ SCOUT_TO_MUTACC_FORMAT = (
     MAPPER('genotype_call', 'GT', str),
     MAPPER('allele_depths', 'AD', lambda AD: ','.join([str(element) for element in AD])),
     MAPPER('read_depth', 'DP', int),
-    MAPPER('genotype_quality', 'GQ', float),
+    MAPPER('genotype_quality', 'GQ', int),
     MAPPER('sample_id', 'sample_id', str)
 )
 
