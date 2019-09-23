@@ -99,7 +99,11 @@ def base_store(store) -> Store:
                     store.add_application('METNXTR020', 'wgs', 'Metagenomics',
                                           sequencing_depth=0, target_reads=20000000),
                     store.add_application('MWRNXTR003', 'mic', 'Microbial whole genome ',
-                                          sequencing_depth=0)]
+                                          sequencing_depth=0),
+                    store.add_application('RNAPOAR025', 'tgs', 'RNA seq, poly-A based priming',
+                                          sequencing_depth=25,
+                                          accredited=True)
+                    ]
 
     store.add_commit(applications)
 

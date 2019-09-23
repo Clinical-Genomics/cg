@@ -8,6 +8,7 @@ from cg.constants import PRIORITY_OPTIONS, SEX_OPTIONS, STATUS_OPTIONS, CAPTUREK
 
 
 class OrderType(Enum):
+    MIP_RNA = 'mip_rna'
     EXTERNAL = 'external'
     FASTQ = 'fastq'
     RML = 'rml'
@@ -179,6 +180,14 @@ MIP_BALSAMIC_SAMPLE = {
     **MIP_SAMPLE,
 }
 
+MIP_RNA_SAMPLE = {
+    **MIP_SAMPLE,
+
+    # Orderform 1508:19
+    'from_sample': validators.RegexValidator(NAME_PATTERN),
+    'time_point': TypeValidatorNone(str),
+}
+
 EXTERNAL_SAMPLE = {
     # Orderform 1541:6
 
@@ -345,6 +354,10 @@ ORDER_SCHEMES = {
     OrderType.MIP_BALSAMIC: Scheme({
         **BASE_PROJECT,
         'samples': ListValidator(MIP_BALSAMIC_SAMPLE, min_items=1),
+    }),
+    OrderType.MIP_RNA: Scheme({
+        **BASE_PROJECT,
+        'samples': ListValidator(MIP_RNA_SAMPLE, min_items=1),
     }),
     OrderType.FASTQ: Scheme({
         **BASE_PROJECT,
