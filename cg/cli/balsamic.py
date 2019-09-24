@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+""" Add CLI support to start BALSAMIC """
 import gzip
 import logging
 import re
@@ -98,6 +98,7 @@ def config(context, dry, target_bed, case_id):
         raise
 
     # Call Balsamic
+    # TODO move reference-config value to cg config
     command_str = (f"config case "
                    f"--reference-config "
                    f"/home/proj/production/cancer/reference/GRCh37/reference.json "
@@ -109,10 +110,10 @@ def config(context, dry, target_bed, case_id):
         command_str += f" -p {target_bed} "
 
     if normal_path:
-        command_str += f"--normal {normal_path}"
+        command_str += f" --normal {normal_path} "
 
     command = ["bash -c 'source activate P_BALSAMIC-base_3.0.1; balsamic"]
-    command_str += "'" # add ending quote from above line
+    command_str += "'"  # add ending quote from above line
     command.extend(command_str.split(' '))
 
     if dry:
@@ -127,9 +128,12 @@ def config(context, dry, target_bed, case_id):
 @balsamic.command()
 @click.option('-d', '--dry', is_flag=True, help='print config to console')
 @click.option('--config', 'config_path', required=False, help='Optional')
+@click.option('--analysis-type', 'analysis_type', required=False, default='qc', help='Optional')
+@click.option('-p', '--priority', default='low', type=click.Choice(['low', 'normal', 'high']))
+@click.option('-e', '--email', help='email to send errors to')
 @click.argument('case_id')
 @click.pass_context
-def run(context, dry, config_path, case_id):
+def run(context, dry, config_path, analysis_type, priority, email, case_id):
     """Generate a config for the case_id.
     """
 
@@ -138,21 +142,27 @@ def run(context, dry, config_path, case_id):
         config_path = Path.joinpath(root_dir, case_id, case_id + '.json')
 
     # Call Balsamic
-    # TODO: Analysis type as option
-    # TODO: slurm-account as option
+    # TODO: slurm-account to cg config
     command_str = (f" run analysis "
-                   f"--run-analysis --slurm-account development "
+                   f"--slurm-account development "
                    f"-s {config_path} ")
 
-    command_str += "'"
+    if not dry:
+        command_str += " --run-analysis "
 
+    if email:
+        command_str += f" --slurm-mail-user {email} "
+
+    # TODO add default qos to cg config
+    if priority:
+        command_str += f" --qos {priority} "
+
+    # TODO mv the env name to cg config file
     command = ["bash -c 'source activate P_BALSAMIC-base_3.0.1; balsamic"]
+    command_str += "'"
     command.extend(command_str.split(' '))
 
-    if dry:
-        print(' '.join(command))
-    else:
-        process = subprocess.run(
-            ' '.join(command), shell=True
-        )
-        return process
+    process = subprocess.run(
+        ' '.join(command), shell=True
+    )
+    return process
