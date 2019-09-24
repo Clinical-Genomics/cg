@@ -127,14 +127,15 @@ def config(context, dry, target_bed, case_id):
 
 
 @balsamic.command()
-@click.option('-d', '--dry', is_flag=True, help='print config to console')
+@click.option('-d', '--dry', is_flag=True, help='print command to console')
+@click.option('-r', '--run-analysis', is_flag=True, default=False, help='start analysis')
 @click.option('--config', 'config_path', required=False, help='Optional')
 @click.option('--analysis-type', 'analysis_type', required=False, default='qc', help='Optional')
 @click.option('-p', '--priority', default='low', type=click.Choice(['low', 'normal', 'high']))
 @click.option('-e', '--email', help='email to send errors to')
 @click.argument('case_id')
 @click.pass_context
-def run(context, dry, config_path, analysis_type, priority, email, case_id):
+def run(context, dry, run_analysis, config_path, analysis_type, priority, email, case_id):
     """Generate a config for the case_id.
     """
 
@@ -148,7 +149,7 @@ def run(context, dry, config_path, analysis_type, priority, email, case_id):
                    f"--slurm-account development "
                    f"-s {config_path} ")
 
-    if not dry:
+    if not run_analysis:
         command_str += " --run-analysis "
 
     if email:
@@ -163,7 +164,10 @@ def run(context, dry, config_path, analysis_type, priority, email, case_id):
     command_str += "'"
     command.extend(command_str.split(' '))
 
-    process = subprocess.run(
-        ' '.join(command), shell=True
-    )
-    return process
+    if dry:
+        print(' '.join(command))
+    else:
+        process = subprocess.run(
+            ' '.join(command), shell=True
+        )
+        return process
