@@ -17,6 +17,7 @@ LOGGER = logging.getLogger(__name__)
 @click.group()
 @click.pass_context
 def balsamic(context):
+    """ Run cancer workflow """
     context.obj['hk'] = hk.HousekeeperAPI(context.obj)
     context.obj['db'] = Store(context.obj['database'])
 
