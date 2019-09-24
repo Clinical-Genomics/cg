@@ -73,7 +73,7 @@ def run_command(command: list):
             command (list): list of commands
     """
 
-    completed_process = subprocess.run(args=command)
+    completed_process = subprocess.run(args=command, check=False)
     returncode = completed_process.returncode
     if returncode != 0:
         LOG.warning("process %s ended with exitcode %d", ' '.join(command), returncode)

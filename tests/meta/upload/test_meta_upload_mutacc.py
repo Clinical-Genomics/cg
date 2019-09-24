@@ -2,7 +2,8 @@
 
 import os
 
-from cg.meta.upload.mutacc import UploadToMutaccAPI
+from cg.meta.upload.mutacc import (UploadToMutaccAPI, resolve_sex, resolve_parent,
+                                   resolve_phenotype)
 
 
 def test_instatiate():
@@ -125,3 +126,54 @@ def test_data_no_causatives(mutacc_upload_api, mocker):
 
     # THEN data dict should be empty
     assert result == {}
+
+
+def test_resolve_sex():
+    """test resolve_sex"""
+    # GIVEN scout sex codes
+    scout_male = '1'
+    scout_female = '2'
+    scout_unknown = '0'
+
+    # WHEN converting to mutacc sex codes with resolve_sex
+    mutacc_male = resolve_sex(scout_male)
+    mutacc_female = resolve_sex(scout_female)
+    mutacc_unknown = resolve_sex(scout_unknown)
+
+    # THEN the sex codes should have been converted
+    assert mutacc_male == 'male'
+    assert mutacc_female == 'female'
+    assert mutacc_unknown == 'unknown'
+
+
+def test_resolve_parent():
+    """test resolve_parent"""
+    # GIVEN scout parent codes
+    scout_no_parent = ''
+    scout_father = 'father_id'
+    scout_mother = 'mother_id'
+
+    # WHEN converting to mutacc parent codes with resolve_parent
+    mutacc_no_parent = resolve_parent(scout_no_parent)
+    mutacc_father = resolve_parent(scout_father)
+    mutacc_mother = resolve_parent(scout_mother)
+
+    # THEN the parent codes should have been converted
+    assert mutacc_no_parent == '0'
+    assert mutacc_father == scout_father
+    assert mutacc_mother == scout_mother
+
+
+def test_resolve_phenotype():
+    """test resolve_phenotype"""
+    # GIVEN scout phenotype codes
+    scout_affected = 2
+    scout_unaffected = 1
+
+    # WHEN converting to mutacc phenotype codes with resolve_phenotype
+    mutacc_affected = resolve_phenotype(scout_affected)
+    mutacc_unaffected = resolve_phenotype(scout_unaffected)
+
+    # THEN the phenotype codes should have been converted
+    assert mutacc_affected == 'affected'
+    assert mutacc_unaffected == 'unaffected'
