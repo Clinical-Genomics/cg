@@ -10,15 +10,16 @@ import cg
 from cg.store import Store
 
 from .analysis import analysis
-from .balsamic import balsamic
 from .add import add
 from .backup import backup
+from .balsamic import balsamic
 from .clean import clean
 from .deliver import deliver
 from .export import export
 from .get import get
 from .import_cmd import import_cmd
 from .miprdrna import rna
+from .microsalt import microsalt
 from .reset import reset_cmd
 from .set import set_cmd
 from .status import status
@@ -85,4 +86,5 @@ base.add_command(transfer)
 base.add_command(upload)
 analysis.add_command(balsamic)
 analysis.add_command(rna)
+analysis.add_command(microsalt)
 upload.add_command(vogue_command)
