@@ -43,7 +43,24 @@ def parameter(context, project_id, sample_id):
 
     print(sample_objs)
 
-    
+    parameter = {}
+    for sample_obj in sample_objs:
+        parameter = {'CG_ID_project': sample_obj.microbial_order.internal_id,
+                     'CG_ID_sample': sample_obj.internal_id,
+                     'Customer_ID_sample': sample_obj.name,
+                     'organism': sample_obj.organism.internal_id,
+                     'priority': sample_obj.priority,
+                     'reference': sample_obj.organism.reference_genome,
+                     'Customer_ID': sample_obj.microbial_order.customer.internal_id,
+                     'application_tag': sample_obj.application_version.application.tag,
+                     #'date_arrival': date_arrival,
+                     #'date_sequencing': date_sequencing,
+                     #'date_libprep': date_libprep,
+                     #'method_libprep': method_libprep,
+                     #'method_sequencing': method_sequencing
+                    }
+    print(parameter)
+
 @microsalt.command()
 @click.option('-d', '--dry', is_flag=True, help='print command to console')
 @click.option('-p', '--parameters', required=False, help='Optional')
