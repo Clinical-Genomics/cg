@@ -112,6 +112,7 @@ def config(context, dry, target_bed, case_id):
         command_str += f"--normal {normal_path}"
 
     command = ["bash -c 'source activate P_BALSAMIC-base_3.0.1; balsamic"]
+    command_str += "'" # add ending quote from above line
     command.extend(command_str.split(' '))
 
     if dry:
@@ -140,7 +141,7 @@ def run(context, dry, config_path, case_id):
     # TODO: Analysis type as option
     # TODO: slurm-account as option
     command_str = (f" run analysis "
-                   f"--run-analysis --slurm-account development --analysis-type qc "
+                   f"--run-analysis --slurm-account development "
                    f"-s {config_path} ")
 
     command_str += "'"
