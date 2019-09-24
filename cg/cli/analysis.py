@@ -117,7 +117,7 @@ def link(context, family_id, sample_id):
         context.abort()
 
     for link_obj in link_objs:
-        LOG.info("%s: link FASTQ files", link_obj.sample.internal_id)
+        LOG.info("%s: %s link FASTQ files", link_obj.sample.internal_id, link_obj.sample.data_analysis)
         if link_obj.sample.data_analysis and 'balsamic' in link_obj.sample.data_analysis.lower():
             context.obj['api'].link_sample(BalsamicFastqHandler(context.obj),
                                            case=link_obj.family.internal_id,
