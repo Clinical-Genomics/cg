@@ -455,16 +455,17 @@ def validate(context, family_id):
                 click.echo(f"{sample_id}: sample not found in chanjo", color='yellow')
 
 
-@upload.command()
+@upload.command('process-solved')
 @click.option('-c', '--case-id', help='internal case id, leave empty to process all')
 @click.option('-d', '--days-ago', type=int, help='days since solved')
 @click.option('--dry-run', is_flag=True, help='only print cases to be processed')
 @click.pass_context
-def mutacc(context, case_id, days_ago, dry_run):
+def process_solved(context, case_id, days_ago, dry_run):
 
-    """Upload recent cases marked as 'finished' in scout to mutacc"""
+    """Process cases with mutacc that has been marked as solved in scout.
+    This prepares them to be uploaded to the mutacc database"""
 
-    click.echo(click.style('----------------- MUTACC ----------------'))
+    click.echo(click.style('----------------- PROCESS-SOLVED ----------------'))
 
     scout_api = context.obj['scout_api']
     mutacc_auto_api = mutacc_auto.MutaccAutoAPI(context.obj)
@@ -485,7 +486,19 @@ def mutacc(context, case_id, days_ago, dry_run):
             LOG.info("Would upload case %s to mutacc", case['_id'])
             continue
 
+        LOG.info("Start processing case %s with mutacc", case['_id'])
         mutacc_upload.extract_reads(case)
 
-    if not dry_run:
-        mutacc_upload.import_cases()
+
+@upload.command('processed-solved')
+@click.pass_context
+def processed_solved(context):
+
+    """Upload solved cases that has been processed by mutacc to the mutacc database"""
+
+    click.echo(click.style('----------------- PROCESSED-SOLVED ----------------'))
+
+    LOG.info("Uploading processed cases by mutacc to the mutacc database")
+
+    mutacc_auto_api = mutacc_auto.MutaccAutoAPI(context.obj)
+    mutacc_auto_api.import_reads()
