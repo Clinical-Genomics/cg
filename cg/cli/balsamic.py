@@ -149,7 +149,7 @@ def run(context, dry, run_analysis, config_path, analysis_type, priority, email,
                    f"--slurm-account development "
                    f"-s {config_path} ")
 
-    if not run_analysis:
+    if run_analysis:
         command_str += " --run-analysis "
 
     if email:
