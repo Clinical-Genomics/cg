@@ -87,10 +87,6 @@ class AddHandler:
             'path': sampleinfo_data['peddy']['sex_check'],
             'tags': ['peddy', 'sex-check'],
             'archive': False,
-        }, {
-            'path': sampleinfo_data['str_vcf'],
-            'tags': ['vcf-str'],
-            'archive': True
         }]
 
         # this key exists only for wgs
