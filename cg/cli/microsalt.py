@@ -24,18 +24,24 @@ def microsalt(context):
 @microsalt.command()
 @click.option('--project', 'project_id', help='link all samples for a family')
 @click.argument('sample_id', required=False)
+@click.pass_context
 def parameter(context, project_id, sample_id):
     """ Get all samples for a project """
     if project_id and (sample_id is None):
-        sample_ids = context.obj['lims'].get_samples(project_id=project_id)
+        sample_objs = context.obj['db'].microbial_order(project_id).microbial_samples
     elif sample_id and (project_id is None):
-        sample_objs = [context.obj['db'].sample(sample_id)]
+        sample_objs = [context.obj['db'].microbial_sample(sample_id)]
     elif sample_id and project_id:
-        # link only one sample in a family
-        link_objs = [context.obj['lims'].get_samples(project_id, sample_id)]
+        sample_objs = [
+            sample_obj for sample_obj
+            in context.obj['db'].microbial_order(project_id).microbial_samples
+            if sample_obj.internal_id == sample_id
+        ]
     else:
         LOGGER.error('provide project and/or sample')
         context.abort()
+
+    print(sample_objs)
 
     
 @microsalt.command()
@@ -45,5 +51,5 @@ def parameter(context, project_id, sample_id):
 #@click.option('-e', '--email', help='email to send errors to')
 @click.argument('project_id')
 @click.pass_context
-def run(context, dry, parameters, project_id):
+def start(context, dry, parameters, project_id):
     pass
