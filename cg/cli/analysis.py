@@ -75,8 +75,8 @@ def config(context, dry, family_id):
     """Generate a config for the FAMILY_ID"""
 
     family_obj = context.obj['db'].family(family_id)
-    # MIP formated pedigree.yaml config
 
+    # MIP formatted pedigree.yaml config
     config_data = context.obj['api'].config(family_obj)
 
     # Print to console
