@@ -68,7 +68,7 @@ def analysis(context, priority, email, family_id, start_with):
 
 
 @analysis.command()
-@click.option('-d', '--dry', is_flag=True, help='print config to console')
+@click.option('-d', '--dry', is_flag=True, help='Print config to console')
 @click.argument('family_id')
 @click.pass_context
 def config(context, dry, family_id):
