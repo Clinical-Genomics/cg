@@ -7,8 +7,8 @@ from pathlib import Path
 import click
 from cg.apps import hk, tb, scoutapi, lims
 from cg.apps.balsamic.fastq import BalsamicFastqHandler
-from cg.apps.usalt.fastq import USaltFastqHandler
 from cg.apps.mip.fastq import MipFastqHandler
+from cg.apps.usalt.fastq import USaltFastqHandler
 from cg.exc import LimsDataError
 from cg.meta.analysis import AnalysisAPI
 from cg.meta.deliver.api import DeliverAPI
