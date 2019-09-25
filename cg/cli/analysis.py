@@ -98,6 +98,9 @@ def config(context, dry, family_id):
 @click.pass_context
 def link(context, family_id, sample_id):
     """Link FASTQ files for a SAMPLE_ID."""
+
+    link_objs = None
+
     if family_id and (sample_id is None):
         # link all samples in a family
         family_obj = context.obj['db'].family(family_id)
@@ -109,7 +112,8 @@ def link(context, family_id, sample_id):
     elif sample_id and family_id:
         # link only one sample in a family
         link_objs = [context.obj['db'].link(family_id, sample_id)]
-    else:
+
+    if not link_objs:
         LOG.error('provide family and/or sample')
         context.abort()
 
@@ -137,6 +141,8 @@ def link(context, family_id, sample_id):
 def link_microbial(context, order_id, sample_id):
     """Link FASTQ files for a SAMPLE_ID."""
 
+    sample_objs = None
+
     if order_id and (sample_id is None):
         # link all samples in a case
         sample_objs = context.obj['db'].microbial_order(order_id).microbial_samples
@@ -146,7 +152,8 @@ def link_microbial(context, order_id, sample_id):
     elif sample_id and order_id:
         # link only one sample in a case
         sample_objs = [context.obj['db'].microbial_sample(sample_id)]
-    else:
+
+    if not sample_objs:
         LOG.error('provide order and/or sample')
         context.abort()
 
