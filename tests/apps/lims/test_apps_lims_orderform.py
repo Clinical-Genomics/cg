@@ -403,9 +403,21 @@ def test_parsing_mip_rna_orderform(mip_rna_orderform):
     assert first_sample['comment'] == 'comment'
 
     # required for RNA samples
-    print(first_sample)
     assert first_sample['from_sample'] == 'whole-genome-1'
     assert first_sample['time_point'] == '1'
+
+
+def test_parse_mip_rna(skeleton_orderform_sample: dict):
+
+    # GIVEN a raw sample with mip only value from orderform 1508 for data_analysis
+    raw_sample = skeleton_orderform_sample
+    raw_sample['UDF/Data Analysis'] = 'MIP RNA'
+
+    # WHEN parsing the sample
+    parsed_sample = orderform.parse_sample(raw_sample)
+
+    # THEN data_analysis is mip only
+    assert parsed_sample['analysis'] == 'mip_rna'
 
 
 def test_parse_mip_only(skeleton_orderform_sample: dict):
