@@ -46,12 +46,12 @@ def inbox(context, family, version, tag, inbox_path):
         LOG.error("Case '%s' not found.", family)
         context.abort()
 
-    family_files = deliver_api.get_post_analysis_family_files(family=family, version=version,
+    files = deliver_api.get_post_analysis_family_files(family=family, version=version,
                                                               tags=tag)
-    if not family_files:
+    if not files:
         LOG.warning("No case files found")
 
-    for file_obj in family_files:
+    for file_obj in files:
         out_dir = Path(
             inbox_path.format(family=family_obj.name, customer=family_obj.customer.internal_id))
         out_dir.mkdir(parents=True, exist_ok=True)
@@ -59,8 +59,7 @@ def inbox(context, family, version, tag, inbox_path):
         # might be fun to name exit files according to tags instead of MIP's long name
         # file_name = Path('_'.join([ tag.name for tag in file_obj.tags ]))
         # file_ext = ''.join(Path(file_obj.path).suffixes)
-        out_file_name = Path(file_obj.path).name.replace(family, family_obj.name)
-        out_path = Path(f"{out_dir / out_file_name}")
+        out_path = Path(f"{out_dir / Path(file_obj.path).name.replace(family, family_obj.name)}")
         in_path = Path(file_obj.full_path)
 
         if not out_path.exists():
@@ -75,14 +74,14 @@ def inbox(context, family, version, tag, inbox_path):
 
     for family_sample in link_obj:
         sample_obj = family_sample.sample
-        sample_files = deliver_api.get_post_analysis_sample_files(family=family,
+        files = deliver_api.get_post_analysis_sample_files(family=family,
                                                                   sample=sample_obj.internal_id,
                                                                   version=version, tag=tag)
 
-        if not sample_files:
+        if not files:
             LOG.warning(f"No sample files found for '{sample_obj.internal_id}'.")
 
-        for file_obj in sample_files:
+        for file_obj in files:
             out_dir = Path(
                 inbox_path.format(family=family_obj.name, customer=family_obj.customer.internal_id))
             out_dir = out_dir.joinpath(sample_obj.name)
