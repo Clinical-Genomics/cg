@@ -72,14 +72,8 @@ def analysis(context, priority, email, family_id, start_with):
 @click.argument('family_id')
 @click.pass_context
 def config(context, dry, family_id):
-    """Generate a config for the FAMILY_ID.
+    """Generate a config for the FAMILY_ID"""
 
-    Args:
-        dry (Bool): Print config to console
-        family_id (Str):
-
-    Returns:
-    """
     family_obj = context.obj['db'].family(family_id)
     # MIP formated pedigree.yaml config
 
