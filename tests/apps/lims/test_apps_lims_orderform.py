@@ -403,7 +403,6 @@ def test_parsing_mip_rna_orderform(mip_rna_orderform):
     assert first_sample['comment'] == 'comment'
 
     # required for RNA samples
-    print(first_sample)
     assert first_sample['from_sample'] == 'whole-genome-1'
     assert first_sample['time_point'] == '1'
 
