@@ -76,6 +76,10 @@ def config(context, dry, family_id):
 
     family_obj = context.obj['db'].family(family_id)
 
+    if not family_obj:
+        LOG.error('Family %s not found', family_id)
+        context.abort()
+
     # MIP formatted pedigree.yaml config
     config_data = context.obj['api'].config(family_obj)
 
