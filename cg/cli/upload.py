@@ -8,7 +8,7 @@ import click
 
 from cg.store import Store, models
 from cg.apps import coverage as coverage_app, gt, hk, loqus, tb, scoutapi, beacon as beacon_app, \
-    lims
+    lims, mutacc_auto
 from cg.exc import DuplicateRecordError, DuplicateSampleError
 from cg.meta.upload.coverage import UploadCoverageApi
 from cg.meta.upload.gt import UploadGenotypesAPI
@@ -18,6 +18,7 @@ from cg.meta.upload.beacon import UploadBeaconApi
 from cg.meta.analysis import AnalysisAPI
 from cg.meta.deliver.api import DeliverAPI
 from cg.meta.report.api import ReportAPI
+from cg.meta.upload.mutacc import UploadToMutaccAPI
 
 LOG = logging.getLogger(__name__)
 
@@ -165,6 +166,36 @@ def delivery_report(context, family_id, print_console):
             _update_delivery_report_date(status_api, family_id)
         else:
             click.echo(click.style('already uploaded to housekeeper, skipping'))
+
+
+def _add_delivery_report_to_scout(context, path, case_id):
+    scout_api = scoutapi.ScoutAPI(context.obj)
+    scout_api.upload_delivery_report(path, case_id, update=True)
+
+
+def _add_delivery_report_to_hk(delivery_report_file, hk_api: hk.HousekeeperAPI, family_id):
+    delivery_report_tag_name = 'delivery-report'
+    version_obj = hk_api.last_version(family_id)
+    uploaded_delivery_report_files = hk_api.get_files(bundle=family_id,
+                                                      tags=[delivery_report_tag_name],
+                                                      version=version_obj.id)
+    number_of_delivery_reports = len(uploaded_delivery_report_files.all())
+    is_bundle_missing_delivery_report = number_of_delivery_reports == 0
+
+    if is_bundle_missing_delivery_report:
+        file_obj = hk_api.add_file(delivery_report_file.name, version_obj, delivery_report_tag_name)
+        hk_api.include_file(file_obj, version_obj)
+        hk_api.add_commit(file_obj)
+        return file_obj
+
+    return None
+
+
+def _update_delivery_report_date(status_api, family_id):
+    family_obj = status_api.family(family_id)
+    analysis_obj = family_obj.analyses[0]
+    analysis_obj.delivery_report_created_at = dt.datetime.now()
+    status_api.commit()
 
 
 @upload.command('delivery-report-to-scout')
@@ -466,31 +497,50 @@ def _suggest_case_to_delivery_report(context):
         click.echo(family_obj)
 
 
-def _add_delivery_report_to_scout(context, path, case_id):
-    scout_api = scoutapi.ScoutAPI(context.obj)
-    scout_api.upload_delivery_report(path, case_id, update=True)
+@upload.command('process-solved')
+@click.option('-c', '--case-id', help='internal case id, leave empty to process all')
+@click.option('-d', '--days-ago', type=int, help='days since solved')
+@click.option('--dry-run', is_flag=True, help='only print cases to be processed')
+@click.pass_context
+def process_solved(context, case_id, days_ago, dry_run):
+
+    """Process cases with mutacc that has been marked as solved in scout.
+    This prepares them to be uploaded to the mutacc database"""
+
+    click.echo(click.style('----------------- PROCESS-SOLVED ----------------'))
+
+    scout_api = context.obj['scout_api']
+    mutacc_auto_api = mutacc_auto.MutaccAutoAPI(context.obj)
+
+    mutacc_upload = UploadToMutaccAPI(scout_api=scout_api, mutacc_auto_api=mutacc_auto_api)
+
+    # Get cases to upload into mutacc from scout
+    if case_id is not None:
+        finished_cases = scout_api.get_cases(finished=True, case_id=case_id)
+    elif days_ago is not None:
+        finished_cases = scout_api.get_solved_cases(days_ago=days_ago)
+    else:
+        LOG.info("Please enter option '--case-id' or '--days-ago'")
+
+    for case in finished_cases:
+
+        if dry_run:
+            LOG.info("Would upload case %s to mutacc", case['_id'])
+            continue
+
+        LOG.info("Start processing case %s with mutacc", case['_id'])
+        mutacc_upload.extract_reads(case)
 
 
-def _add_delivery_report_to_hk(delivery_report_file, hk_api: hk.HousekeeperAPI, family_id):
-    delivery_report_tag_name = 'delivery-report'
-    version_obj = hk_api.last_version(family_id)
-    uploaded_delivery_report_files = hk_api.get_files(bundle=family_id,
-                                                      tags=[delivery_report_tag_name],
-                                                      version=version_obj.id)
-    number_of_delivery_reports = len(uploaded_delivery_report_files.all())
-    is_bundle_missing_delivery_report = number_of_delivery_reports == 0
+@upload.command('processed-solved')
+@click.pass_context
+def processed_solved(context):
 
-    if is_bundle_missing_delivery_report:
-        file_obj = hk_api.add_file(delivery_report_file.name, version_obj, delivery_report_tag_name)
-        hk_api.include_file(file_obj, version_obj)
-        hk_api.add_commit(file_obj)
-        return file_obj
+    """Upload solved cases that has been processed by mutacc to the mutacc database"""
 
-    return None
+    click.echo(click.style('----------------- PROCESSED-SOLVED ----------------'))
 
+    LOG.info("Uploading processed cases by mutacc to the mutacc database")
 
-def _update_delivery_report_date(status_api, family_id):
-    family_obj = status_api.family(family_id)
-    analysis_obj = family_obj.analyses[0]
-    analysis_obj.delivery_report_created_at = dt.datetime.now()
-    status_api.commit()
+    mutacc_auto_api = mutacc_auto.MutaccAutoAPI(context.obj)
+    mutacc_auto_api.import_reads()
