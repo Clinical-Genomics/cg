@@ -16,7 +16,12 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def deliver(context):
     """Deliver stuff."""
-    pass
+    context.obj['db'] = Store(context.obj['database'])
+    context.obj['api'] = DeliverAPI(
+        db=context.obj['db'],
+        hk_api=hk.HousekeeperAPI(context.obj),
+        lims_api=lims.LimsAPI(context.obj)
+    )
 
 
 @deliver.command()
@@ -30,23 +35,16 @@ def deliver(context):
 def inbox(context, family, version, tag, inbox_path):
     """Link files from HK to cust inbox."""
 
-    db = Store(context.obj['database'])
-    deliver_api = DeliverAPI(
-        db=db,
-        hk_api=hk.HousekeeperAPI(context.obj),
-        lims_api=lims.LimsAPI(context.obj)
-    )
-
     if not family:
-        _suggest_cases_to_deliver(db)
+        _suggest_cases_to_deliver(context.obj['db'])
         context.abort()
 
-    family_obj = db.family(family)
+    family_obj = context.obj['db'].family(family)
     if family_obj is None:
         LOG.error("Case '%s' not found.", family)
         context.abort()
 
-    files = deliver_api.get_post_analysis_family_files(family=family, version=version,
+    files = context.obj['api'].get_post_analysis_family_files(family=family, version=version,
                                                               tags=tag)
     if not files:
         LOG.warning("No case files found")
@@ -59,7 +57,7 @@ def inbox(context, family, version, tag, inbox_path):
         # might be fun to name exit files according to tags instead of MIP's long name
         # file_name = Path('_'.join([ tag.name for tag in file_obj.tags ]))
         # file_ext = ''.join(Path(file_obj.path).suffixes)
-        out_path = Path(f"{out_dir / Path(file_obj.path).name.replace(family, family_obj.name)}")
+        out_path = _generate_case_delivery_path(family, family_obj, file_obj, out_dir)
         in_path = Path(file_obj.full_path)
 
         if not out_path.exists():
@@ -68,13 +66,13 @@ def inbox(context, family, version, tag, inbox_path):
         else:
             LOG.info(f"Target file exists: {out_path}")
 
-    link_obj = db.family_samples(family)
+    link_obj = context.obj['db'].family_samples(family)
     if not link_obj:
         LOG.warning(f"No sample files found.")
 
     for family_sample in link_obj:
         sample_obj = family_sample.sample
-        files = deliver_api.get_post_analysis_sample_files(family=family,
+        files = context.obj['api'].get_post_analysis_sample_files(family=family,
                                                                   sample=sample_obj.internal_id,
                                                                   version=version, tag=tag)
 
@@ -87,9 +85,7 @@ def inbox(context, family, version, tag, inbox_path):
             out_dir = out_dir.joinpath(sample_obj.name)
             out_dir.mkdir(parents=True, exist_ok=True)
 
-            out_file_name = Path(file_obj.path).name.replace(sample_obj.internal_id,
-                                                             sample_obj.name)
-            out_path = Path(f"{out_dir / out_file_name}")
+            out_path = _generate_sample_delivery_path(file_obj, out_dir, sample_obj)
             in_path = Path(file_obj.full_path)
 
             if not out_path.exists():
@@ -97,6 +93,15 @@ def inbox(context, family, version, tag, inbox_path):
                 LOG.info(f"linked file: {in_path} -> {out_path}")
             else:
                 LOG.info(f"Target file exists: {out_path}")
+
+
+def _generate_case_delivery_path(family, family_obj, file_obj, out_dir):
+    return Path(f"{out_dir / Path(file_obj.path).name.replace(family, family_obj.name)}")
+
+
+def _generate_sample_delivery_path(file_obj, out_dir, sample_obj):
+    return Path(
+        f"{out_dir / Path(file_obj.path).name.replace(sample_obj.internal_id, sample_obj.name)}")
 
 
 def _suggest_cases_to_deliver(store):
