@@ -473,10 +473,10 @@ def process_solved(context, case_id, days_ago, dry_run):
     mutacc_upload = UploadToMutaccAPI(scout_api=scout_api, mutacc_auto_api=mutacc_auto_api)
 
     # Get cases to upload into mutacc from scout
-    if days_ago is not None:
-        finished_cases = scout_api.get_solved_cases(days_ago=days_ago)
-    elif case_id is not None:
+    if case_id is not None:
         finished_cases = scout_api.get_cases(finished=True, case_id=case_id)
+    elif days_ago is not None:
+        finished_cases = scout_api.get_solved_cases(days_ago=days_ago)
     else:
         LOG.info("Please enter option '--case-id' or '--days-ago'")
 
