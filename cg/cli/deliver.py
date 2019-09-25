@@ -43,13 +43,13 @@ def inbox(context, family, version, tag, inbox_path):
 
     family_obj = db.family(family)
     if family_obj is None:
-        LOG.error(f"Case '{family}' not found.")
+        LOG.error("Case '%s' not found.", family)
         context.abort()
 
     family_files = deliver_api.get_post_analysis_family_files(family=family, version=version,
                                                               tags=tag)
     if not family_files:
-        LOG.warning(f"No case files found.")
+        LOG.warning("No case files found")
 
     for file_obj in family_files:
         out_dir = Path(
