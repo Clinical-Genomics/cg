@@ -21,6 +21,7 @@ def microsalt(context):
     context.obj['db'] = Store(context.obj['database'])
     context.obj['lims'] = lims.LimsAPI(context.obj)
 
+
 @microsalt.command()
 @click.option('--project', 'project_id', help='link all samples for a family')
 @click.argument('sample_id', required=False)
@@ -41,24 +42,25 @@ def parameter(context, project_id, sample_id):
         LOGGER.error('provide project and/or sample')
         context.abort()
 
-    print(sample_objs)
-
     parameter = {}
     for sample_obj in sample_objs:
-        parameter = {'CG_ID_project': sample_obj.microbial_order.internal_id,
-                     'CG_ID_sample': sample_obj.internal_id,
-                     'Customer_ID_sample': sample_obj.name,
-                     'organism': sample_obj.organism.internal_id,
-                     'priority': sample_obj.priority,
-                     'reference': sample_obj.organism.reference_genome,
-                     'Customer_ID': sample_obj.microbial_order.customer.internal_id,
-                     'application_tag': sample_obj.application_version.application.tag,
-                     #'date_arrival': date_arrival,
-                     #'date_sequencing': date_sequencing,
-                     #'date_libprep': date_libprep,
-                     #'method_libprep': method_libprep,
-                     #'method_sequencing': method_sequencing
-                    }
+        method_library_prep = context.obj['lims'].get_prep_method(sample_obj.internal_id)
+        method_sequencing = context.obj['lims'].get_sequencing_method(sample_obj.internal_id)
+        parameter = {
+            'CG_ID_project': sample_obj.microbial_order.internal_id,
+            'CG_ID_sample': sample_obj.internal_id,
+            'Customer_ID_sample': sample_obj.name,
+            'organism': sample_obj.organism.internal_id,
+            'priority': sample_obj.priority,
+            'reference': sample_obj.organism.reference_genome,
+            'Customer_ID': sample_obj.microbial_order.customer.internal_id,
+            'application_tag': sample_obj.application_version.application.tag,
+            'date_arrival': sample_obj.received_at,
+            'date_sequencing': sample_obj.sequenced_at,
+            'date_libprep': sample_obj.prepared_at,
+            'method_libprep': method_library_prep,
+            'method_sequencing': method_sequencing
+        }
     print(parameter)
 
 @microsalt.command()
