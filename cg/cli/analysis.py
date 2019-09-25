@@ -80,7 +80,6 @@ def config(context, dry, family_id):
 
     Returns:
     """
-    # Get family meta data
     family_obj = context.obj['db'].family(family_id)
     # MIP formated pedigree.yaml config
 
