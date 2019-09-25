@@ -380,7 +380,7 @@ def test_parsing_mip_rna_orderform(mip_rna_orderform):
     first_sample = first_case['samples'][0]
     assert first_sample['name'] == 'whole-genome-1'
     assert first_sample['container'] == '96 well plate'
-    assert first_sample['data_analysis'] == 'MIP-RNA'
+    assert first_sample['data_analysis'] == 'MIP RNA'
     assert first_sample['application'] == 'WGSPCFC030'
     assert first_sample['sex'] == 'male'
     # case-id on the case
