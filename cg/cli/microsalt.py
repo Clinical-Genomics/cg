@@ -1,7 +1,7 @@
 """ Add CLI support to start microSALT """
 import json
 import logging
-#import subprocess
+# import subprocess
 from pathlib import Path
 
 import click
@@ -17,7 +17,7 @@ def microsalt(context):
     """ Run microbial workflow """
     context.obj['hk'] = hk.HousekeeperAPI(context.obj)
     context.obj['db'] = Store(context.obj['database'])
-    context.obj['lims'] = lims.LimsAPI(context.obj)
+    context.obj['lims_api'] = lims.LimsAPI(context.obj)
 
 
 @microsalt.command()
@@ -44,8 +44,8 @@ def parameter(context, dry, project_id, sample_id):
 
     parameters = []
     for sample_obj in sample_objs:
-        method_library_prep = context.obj['lims'].get_prep_method(sample_obj.internal_id)
-        method_sequencing = context.obj['lims'].get_sequencing_method(sample_obj.internal_id)
+        method_library_prep = context.obj['lims_api'].get_prep_method(sample_obj.internal_id)
+        method_sequencing = context.obj['lims_api'].get_sequencing_method(sample_obj.internal_id)
         parameter_dict = {
             'CG_ID_project': sample_obj.microbial_order.internal_id,
             'CG_ID_sample': sample_obj.internal_id,
@@ -55,22 +55,22 @@ def parameter(context, dry, project_id, sample_id):
             'reference': sample_obj.organism.reference_genome,
             'Customer_ID': sample_obj.microbial_order.customer.internal_id,
             'application_tag': sample_obj.application_version.application.tag,
-            'date_arrival': sample_obj.received_at,
-            'date_sequencing': sample_obj.sequenced_at,
-            'date_libprep': sample_obj.prepared_at,
+            'date_arrival': str(sample_obj.received_at),
+            'date_sequencing': str(sample_obj.sequenced_at),
+            'date_libprep': str(sample_obj.prepared_at),
             'method_libprep': method_library_prep,
             'method_sequencing': method_sequencing
         }
         parameters.append(parameter_dict)
 
+    outfilename = Path(context.obj['usalt']['root']) / 'config' / project_id
+    outfilename = outfilename.with_suffix('.json')
     if dry:
-        outfilename = Path(context.obj['config']['usalt']['root']) / 'config' / project_id + '.json'
         print(outfilename)
-        json.dumps(parameters)
+        print(json.dumps(parameters, indent=4, sort_keys=True))
     else:
-        outfilename = Path(context.obj['config']['usalt']['root']) / 'config' / project_id + '.json'
         with open(outfilename, 'w') as outfile:
-            json.dump(parameters, outfile)
+            json.dump(parameters, outfile, indent=4, sort_keys=True)
 
 #@microsalt.command()
 #@click.option('-d', '--dry', is_flag=True, help='print command to console')

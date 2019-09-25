@@ -14,69 +14,6 @@ class LIMS_Fetcher():
     self.logger = log
     self.config = config
 
-  def load_lims_project_info(self, cg_projid):
-    project = Project(self.lims, id=cg_projid)
-    samplelist = self.samples_in_project(cg_projid)
-
-    custids = list()
-    self.load_lims_sample_info(samplelist[0])
-    try:
-      #Resolves old format
-      if ' ' in project.name:
-        realname = project.name.split(' ')[0]
-      else:
-        realname = project.name
-
-      self.data.update({'CG_ID_project': cg_projid,
-                               'Customer_ID_project' : realname,
-                               'Customer_ID': self.data['Customer_ID']})
-    except KeyError as e:
-      self.logger.warn("Unable to fetch LIMS info for project {}\nSource: {}".format(cg_projid, str(e)))
-
-  def samples_in_project(self, cg_projid):
-    """ Returns a list of sample names for a project"""
-    output = list()
-    #Uses internal names, then external on empty
-    samples = self.lims.get_samples(projectlimsid=cg_projid)
-    if not samples:
-     samples = self.lims.get_samples(projectname=cg_projid)
-
-    for s in samples:
-      output.append(s.id)
-    return output
-
-  def load_lims_sample_info(self, cg_sampleid, warnings=False):
-    """ Loads all utilized LIMS info. Organism assumed to be written as binomial name """
-    try:
-      #External
-      num = 0
-      if self.lims.get_samples(name=cg_sampleid):
-        sample = self.lims.get_samples(name=cg_sampleid)
-        if len(sample) != 1:
-          #External priority list, write in reverse order of significance
-          prio = []
-          errnames = list()
-          for s in sample:
-            errnames.append(s.id)
-          for p in prio:
-            for s in sample:
-              if p in s.id:
-                num=sample.index(s)
-                break
-          if warnings:
-            self.logger.warn("Sample name {} resolves to entries '{}'. Arbitarily picking {}".format(s.name, (', '.join(errnames)), sample[num].id ))
-        sample = sample[num]
-
-      #Internal
-      else:
-        sample = Sample(self.lims, id=cg_sampleid)
-      method_libprep = self.get_method(cg_sampleid,type='libprep')
-      method_sequencing = self.get_method(cg_sampleid,type='sequencing')
-      date_arrival = self.get_date(cg_sampleid,type="arrival")
-      date_libprep = self.get_date(cg_sampleid,type="libprep")
-      date_sequencing = self.get_date(cg_sampleid,type="sequencing")
-    except Exception as e:
-      self.logger.error("LIMS connection timeout: '{}'".format(str(e)))
 
     #Figuring out the organism
     organism = "Unset"
@@ -124,29 +61,7 @@ class LIMS_Fetcher():
       organism = "Other"
       self.logger.warn("Unable to resolve ambigious organism found in sample {}."\
       .format(cg_sampleid))
-    if 'priority' in sample.udf:
-      prio = sample.udf['priority']
-    else:
-      prio = ""
 
-    try:
-      self.data.update({'CG_ID_project': sample.project.id,
-                           'CG_ID_sample': sample.id,
-                           'Customer_ID_sample' : sample.name,
-                           'organism' : organism,
-                           'priority' : prio,
-                           'reference' : reference,
-                           'Customer_ID': sample.udf['customer'].strip(),
-                           'application_tag': sample.udf['Sequencing Analysis'].strip(),
-                           'date_arrival': date_arrival,
-                           'date_sequencing': date_sequencing,
-                           'date_libprep': date_libprep,
-                           'method_libprep': method_libprep,
-                           'method_sequencing': method_sequencing
-})
-    except KeyError as e:
-      self.logger.warn("Unable to fetch LIMS info for sample {}. Review LIMS data.\nSource: {}"\
-      .format(cg_sampleid, str(e)))
 
   def get_organism_refname(self, sample_name):
     """Finds which reference contains the same words as the LIMS reference
