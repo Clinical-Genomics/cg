@@ -1,0 +1,50 @@
+{
+  "name": "MIP order",
+  "customer": "cust003",
+  "comment": "",
+  "samples": [
+    {
+      "name": "sample1_rna_t1",
+      "application": "RNAPOAR025",
+      "data_analysis": "MIP_RNA",
+      "container": "96 well plate",
+      "container_name": "CMMS",
+      "well_position": "A:1",
+      "quantity": "220",
+      "source": "tissue (fresh frozen)",
+      "tumour": true,
+      "priority": "standard",
+      "require_qcok": true,
+      "sex": "female",
+      "status": "affected",
+      "family_name": "family1",
+      "panels": [
+        "IEM"
+      ],
+      "from_sample": "sample1",
+      "time_point": 1
+    },
+    {
+      "name": "sample1_rna_t2",
+      "application": "RNAPOAR025",
+      "data_analysis": "MIP_RNA",
+      "comment": "this is a sample comment",
+      "container": "96 well plate",
+      "container_name": "CMMS",
+      "well_position": "B:1",
+      "quantity": "220",
+      "source": "tissue (fresh frozen)",
+      "tumour": false,
+      "priority": "standard",
+      "require_qcok": true,
+      "sex": "female",
+      "status": "affected",
+      "family_name": "family1",
+      "panels": [
+        "IEM"
+      ],
+      "from_sample": "sample1",
+      "time_point": 2
+    }
+  ]
+}

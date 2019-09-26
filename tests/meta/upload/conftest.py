@@ -1,6 +1,8 @@
 import pytest
 
 from cg.meta.upload.scoutapi import UploadScoutAPI
+from cg.meta.upload.mutacc import UploadToMutaccAPI
+from cg.meta.upload.observations import UploadObservationsAPI
 
 
 class MockVersion:
@@ -20,6 +22,20 @@ class MockFile:
         return ''
 
 
+# Mock File again, but full_path should be an attribute
+class MockFile1():
+
+    """ Mock File object """
+
+    def __init__(self, path=''):
+        self.full_path = path
+
+    @staticmethod
+    def first():
+        """ mock first method """
+        return MockFile1()
+
+
 class MockHouseKeeper:
 
     def files(self, version, tags):
@@ -27,6 +43,24 @@ class MockHouseKeeper:
 
     def version(self, arg1: str, arg2: str):
         """Fetch version from the database."""
+        return MockVersion()
+
+
+# Mock Housekeeper again, but with MockFile_ returned from files instead
+class MockHouseKeeper1():
+
+    """ Mock housekeeper api"""
+
+    @staticmethod
+    def files(version, tags):
+        """ Mock files method """
+        _, _ = version, tags
+        return MockFile1()
+
+    @staticmethod
+    def version(arg1: str, arg2: str):
+        """Fetch version from the database."""
+        _, _ = arg1, arg2
         return MockVersion()
 
 
@@ -62,6 +96,70 @@ class MockAnalysis:
         return ''
 
 
+class MockMutaccAuto:
+    """ Mock class for mutacc_auto api """
+    @staticmethod
+    def extract_reads(*args, **kwargs):
+        """mock extract_reads method"""
+        _, _ = args, kwargs
+
+    @staticmethod
+    def import_reads(*args, **kwargs):
+        """ mock import_reads method """
+        _, _ = args, kwargs
+
+
+class MockScoutApi:
+    """ Mock class for Scout api"""
+    @staticmethod
+    def get_causative_variants(case_id):
+        """mock get_causative_variants"""
+        _ = case_id
+        return []
+
+
+class MockLoqusAPI:
+
+    """ Mock LoqusAPI class"""
+
+    @staticmethod
+    def load(*args, **kwargs):
+        """ Mock load method"""
+        _ = args
+        _ = kwargs
+        return dict(variants=12)
+
+    @staticmethod
+    def get_case(*args, **kwargs):
+        """ Mock get_case method"""
+        _ = args
+        _ = kwargs
+        return {'case_id': 'case_id', '_id': '123'}
+
+    @staticmethod
+    def get_duplicate(*args, **kwargs):
+        """Mock get_duplicate method"""
+        _ = args
+        _ = kwargs
+        return {'case_id': 'case_id'}
+
+
+@pytest.yield_fixture(scope='function')
+def upload_observations_api(analysis_store):
+
+    """ Create mocked UploadObservationsAPI object"""
+
+    loqus_mock = MockLoqusAPI()
+    hk_mock = MockHouseKeeper1()
+
+    _api = UploadObservationsAPI(
+        status_api=analysis_store,
+        hk_api=hk_mock,
+        loqus_api=loqus_mock
+    )
+
+    yield _api
+
 @pytest.yield_fixture(scope='function')
 def upload_scout_api(analysis_store, scout_store):
 
@@ -79,6 +177,20 @@ def upload_scout_api(analysis_store, scout_store):
     )
 
     yield _api
+
+
+@pytest.yield_fixture(scope='function')
+def mutacc_upload_api():
+    """
+        Fixture for a mutacc upload api
+    """
+
+    scout_api = MockScoutApi()
+    mutacc_auto_api = MockMutaccAuto()
+
+    _api = UploadToMutaccAPI(scout_api=scout_api, mutacc_auto_api=mutacc_auto_api)
+
+    return _api
 
 
 @pytest.yield_fixture(scope='function')

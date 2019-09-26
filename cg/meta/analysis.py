@@ -16,7 +16,7 @@ from cg.store import models, Store
 
 COLLABORATORS = ('cust000', 'cust002', 'cust003', 'cust004', 'cust042')
 MASTER_LIST = ('ENDO', 'EP', 'IEM', 'IBMFS', 'mtDNA', 'MIT', 'PEDHEP', 'OMIM-AUTO',
-               'PIDCAD', 'PID', 'SKD', 'NMD', 'CTD', 'IF', 'NEURODEG')
+               'PIDCAD', 'PID', 'SKD', 'NMD', 'CTD', 'IF', 'NEURODEG', 'mcarta')
 COMBOS = {
     'DSD': ('DSD', 'HYP', 'SEXDIF', 'SEXDET'),
     'CM': ('CNM', 'CM'),
@@ -111,7 +111,7 @@ class AnalysisAPI:
     def build_config(self, family_obj: models.Family) -> dict:
         """Fetch data for creating a MIP config file."""
         data = {
-            'family': family_obj.internal_id,
+            'case': family_obj.internal_id,
             'default_gene_panels': family_obj.panels,
             'samples': [],
         }
