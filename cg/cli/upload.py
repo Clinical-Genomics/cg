@@ -142,7 +142,7 @@ def delivery_report(context, family_id, print_console):
     report_api = context.obj['report_api']
 
     if not family_id:
-        _suggest_case_to_delivery_report(context)
+        _suggest_cases_delivery_report(context)
         context.abort()
 
     if print_console:
@@ -207,7 +207,7 @@ def delivery_report_to_scout(context, case_id, dry_run):
     """Fetches an delivery-report from housekeeper and uploads it to scout"""
 
     if not case_id:
-        _suggest_case_to_delivery_report(context)
+        _suggest_cases_delivery_report(context)
         context.abort()
 
     hk_api = context.obj['housekeeper_api']
@@ -490,7 +490,7 @@ def _suggest_cases_to_upload(context):
         click.echo(family_obj)
 
 
-def _suggest_case_to_delivery_report(context):
+def _suggest_cases_delivery_report(context):
     LOG.error('provide a case, suggestions:')
     records = context.obj['status'].analyses_to_delivery_report()[:50]
     for family_obj in records:
