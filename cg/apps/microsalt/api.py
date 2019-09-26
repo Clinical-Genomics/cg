@@ -12,46 +12,32 @@ class MicrosaltAPI():
         self.LOG = logger
 
     def get_organism(self, sample_obj: Sample) -> str:
-        organism = "Unset"
-        reference = "None"
-        if 'Reference Genome Microbial' in sample_obj.reference_genome:
-            reference = sample_obj.udf['Reference Genome Microbial'].strip()
+        organism = sample_obj.organism.internal_id.strip()
+        reference = sample_obj.reference_genome
 
-        if 'Strain' in sample_obj.udf and organism == "Unset":
-            # Predefined genus usage. All hail buggy excel files
-            if 'gonorrhoeae' in sample_obj.udf['Strain']:
+        # Predefined genus usage. All hail buggy excel files
+        if 'gonorrhoeae' in organism:
+            organism = "Neisseria spp."
+        elif 'Cutibacterium acnes' in organism:
+            organism = "Propionibacterium acnes"
+        # Backwards compat, MUST hit first
+        elif organism == 'VRE':
+            if reference == 'NC_017960.1':
+                organism = 'Enterococcus faecium'
+            elif reference == 'NC_004668.1':
+                organism = 'Enterococcus faecalis'
+            elif 'Comment' in sample_obj.udf and not re.match('\w{4}\d{2,3}', sample_obj.udf['Comment']):
+                organism = sample_obj.udf['Comment']
+        elif (sample_obj.udf['Strain'] == 'Other' or sample_obj.udf['Strain'] == 'other') and 'Other species' in sample_obj.udf:
+            # Other species predefined genus usage
+            if 'gonorrhoeae' in sample_obj.udf['Other species']:
                 organism = "Neisseria spp."
-            elif 'Cutibacterium acnes' in sample_obj.udf['Strain']:
+            elif 'Cutibacterium acnes' in sample_obj.udf['Other species']:
                 organism = "Propionibacterium acnes"
-            # Backwards compat, MUST hit first
-            elif sample_obj.udf['Strain'] == 'VRE':
-                if reference == 'NC_017960.1':
-                    organism = 'Enterococcus faecium'
-                elif reference == 'NC_004668.1':
-                    organism = 'Enterococcus faecalis'
-                elif 'Comment' in sample_obj.udf and not re.match('\w{4}\d{2,3}', sample_obj.udf['Comment']):
-                    organism = sample_obj.udf['Comment']
-            elif sample_obj.udf['Strain'] != 'Other' and sample_obj.udf['Strain'] != 'other':
-                organism = sample_obj.udf['Strain']
-            elif (sample_obj.udf['Strain'] == 'Other' or sample_obj.udf['Strain'] == 'other') and 'Other species' in sample_obj.udf:
-                # Other species predefined genus usage
-                if 'gonorrhoeae' in sample_obj.udf['Other species']:
-                    organism = "Neisseria spp."
-                elif 'Cutibacterium acnes' in sample_obj.udf['Other species']:
-                    organism = "Propionibacterium acnes"
-                else:
-                    organism = sample_obj.udf['Other species']
+            else:
+                organism = sample_obj.udf['Other species']
 
-        if reference != 'None' and organism == "Unset":
-            if reference == 'NC_002163':
-                organism = "Campylobacter jejuni"
-            elif reference == 'NZ_CP007557.1':
-                organism = 'Klebsiella oxytoca'
-            elif reference == 'NC_000913.3':
-                organism = 'Citrobacter freundii'
-            elif reference == 'NC_002516.2':
-                organism = 'Pseudomonas aeruginosa'
-        elif 'Comment' in sample_obj.udf and not re.match('\w{4}\d{2,3}', sample_obj.udf['Comment']) and organism == "Unset":
+        if 'Comment' in sample_obj.udf and not re.match('\w{4}\d{2,3}', sample_obj.udf['Comment']) and organism == "Unset":
             organism = sample_obj.udf['Comment'].strip()
         # Consistent safe-guard
         elif organism == "Unset":

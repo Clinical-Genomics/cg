@@ -48,7 +48,8 @@ def parameter(context, dry, project_id, sample_id):
     for sample_obj in sample_objs:
         method_library_prep = context.obj['lims_api'].get_prep_method(sample_obj.internal_id)
         method_sequencing = context.obj['lims_api'].get_sequencing_method(sample_obj.internal_id)
-        organism = context.obj['microsalt_api'].get_organism(sample_obj)
+        #organism = context.obj['microsalt_api'].get_organism(sample_obj)
+        organism = sample_obj.organism.internal_id
         parameter_dict = {
             'CG_ID_project': sample_obj.microbial_order.internal_id,
             'CG_ID_sample': sample_obj.internal_id,
@@ -66,6 +67,7 @@ def parameter(context, dry, project_id, sample_id):
         }
         parameters.append(parameter_dict)
 
+    # TODO what is the path whereto write the config file?
     outfilename = Path(context.obj['usalt']['root']) / 'config' / project_id
     outfilename = outfilename.with_suffix('.json')
     if dry:
@@ -75,12 +77,22 @@ def parameter(context, dry, project_id, sample_id):
         with open(outfilename, 'w') as outfile:
             json.dump(parameters, outfile, indent=4, sort_keys=True)
 
-#@microsalt.command()
-#@click.option('-d', '--dry', is_flag=True, help='print command to console')
-#@click.option('-p', '--parameters', required=False, help='Optional')
-##@click.option('-p', '--priority', default='low', type=click.Choice(['low', 'normal', 'high']))
-##@click.option('-e', '--email', help='email to send errors to')
-#@click.argument('project_id')
-#@click.pass_context
-#def start(context, dry, parameters, project_id):
-#    pass
+@microsalt.command()
+@click.option('-d', '--dry', is_flag=True, help='print command to console')
+@click.option('-p', '--parameters', required=False, help='Optional')
+#@click.option('-p', '--priority', default='low', type=click.Choice(['low', 'normal', 'high']))
+#@click.option('-e', '--email', help='email to send errors to')
+@click.argument('project_id')
+@click.pass_context
+def start(context, dry, parameters, project_id):
+    microsalt_command = context.obj['usalt']['binary_path']
+    command = [microsalt_command]
+    if parameters:
+        command.extend(['--parameters', pathtoparamsfile])
+    if dry:
+        print(' '.join(command))
+    else:
+        process = subprocess.run(
+            ' '.join(command), shell=True
+        )
+        return process
