@@ -9,6 +9,7 @@ import cg
 from cg.store import Store
 
 from .analysis import analysis
+from .balsamic import balsamic
 from .add import add
 from .backup import backup
 from .clean import clean
@@ -76,3 +77,4 @@ base.add_command(store)
 base.add_command(status)
 base.add_command(transfer)
 base.add_command(upload)
+analysis.add_command(balsamic)

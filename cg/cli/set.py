@@ -174,14 +174,16 @@ def flowcell(context, flowcell_name, status):
 
 
 @set_cmd.command('microbial-order')
-@click.option('-a', '--application-tag', 'apptag', help='sets application tag.', type=str)
+@click.option('-a', '--application-tag', 'apptag', help='sets application tag on all samples in '
+                                                        'order.', type=str)
+@click.option('-p', '--priority', type=click.Choice(PRIORITY_OPTIONS), help='update priority')
 @click.argument('order_id')
 @click.argument('user_signature')
 @click.pass_context
-def microbial_order(context, apptag, order_id, user_signature):
+def microbial_order(context, apptag, priority, order_id, user_signature):
     """Update information on all samples on a microbial order"""
 
-    if not apptag:
+    if not apptag and not priority:
         click.echo(click.style(f"no option specified: {order_id}", fg='yellow'))
         context.abort()
 
@@ -193,15 +195,16 @@ def microbial_order(context, apptag, order_id, user_signature):
 
     for sample_obj in microbial_order_obj.microbial_samples:
         context.invoke(microbial_sample, sample_id=sample_obj.internal_id,
-                       user_signature=user_signature, apptag=apptag)
+                       user_signature=user_signature, apptag=apptag, priority=priority)
 
 
 @set_cmd.command('microbial-sample')
 @click.option('-a', '--application-tag', 'apptag', help='sets application tag.', type=str)
+@click.option('-p', '--priority', type=click.Choice(PRIORITY_OPTIONS), help='update priority')
 @click.argument('sample_id')
 @click.argument('user_signature')
 @click.pass_context
-def microbial_sample(context, apptag, sample_id, user_signature):
+def microbial_sample(context, apptag, priority, sample_id, user_signature):
     """Update information on one sample"""
 
     sample_obj = context.obj['status'].microbial_sample(internal_id=sample_id)
@@ -210,10 +213,11 @@ def microbial_sample(context, apptag, sample_id, user_signature):
         click.echo(click.style(f"sample not found: {sample_id}", fg='yellow'))
         context.abort()
 
-    if not apptag:
+    if not apptag and not priority:
         click.echo(click.style(f"no option specified: {sample_id}", fg='yellow'))
         context.abort()
-    else:
+
+    if apptag:
         apptags = [app.tag for app in context.obj['status'].applications()]
         if apptag not in apptags:
             click.echo(click.style(f"Application tag {apptag} does not exist.", fg='red'))
@@ -249,3 +253,23 @@ def microbial_sample(context, apptag, sample_id, user_signature):
         click.echo(click.style('update LIMS/application', fg='blue'))
         if context.obj.get('lims'):
             LimsAPI(context.obj).update_sample(sample_id, application=apptag)
+
+    if priority:
+        comment = f"Priority changed from" \
+            f" {sample_obj.priority_human} to " \
+            f"{str(priority)} by {user_signature}"
+        sample_obj.priority_human = priority
+        click.echo(click.style(f"priority for sample {sample_obj.internal_id} set to "
+                               f"{str(priority)}.", fg='green'))
+
+        timestamp = str(datetime.datetime.now())[:-10]
+        if sample_obj.comment is None:
+            sample_obj.comment = f"{timestamp}: {comment}"
+        else:
+            sample_obj.comment += '\n' + f"{timestamp}: {comment}"
+        click.echo(click.style(f"Comment added to sample {sample_obj.internal_id}", fg='green'))
+
+        context.obj['status'].commit()
+
+        if context.obj.get('lims'):
+            LimsAPI(context.obj).update_sample(sample_id, priority=priority)

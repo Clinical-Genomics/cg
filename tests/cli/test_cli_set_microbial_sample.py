@@ -78,6 +78,38 @@ def test_valid_application(invoke_cli, disk_store: Store):
     assert signature in disk_store.MicrobialSample.query.first().comment
 
 
+def test_invalid_priority(invoke_cli, disk_store: Store):
+    # GIVEN a database with a sample
+    sample = add_microbial_sample_and_order(disk_store)
+    priority = 'dummy_priority'
+    assert disk_store.MicrobialSample.query.first().priority != priority
+
+    # WHEN calling set sample with an invalid priority
+    result = invoke_cli(['--database', disk_store.uri, 'set', 'microbial-sample',
+                         sample.internal_id, 'sign', '-p', priority])
+
+    # THEN then it should complain about bad priority instead of setting the value
+    assert result.exit_code != 0
+    assert disk_store.MicrobialSample.query.first().priority_human != priority
+
+
+def test_valid_priority(invoke_cli, disk_store: Store):
+    # GIVEN a database with a sample
+    sample = add_microbial_sample_and_order(disk_store)
+    priority = 'priority'
+    assert disk_store.MicrobialSample.query.first().priority != priority
+
+    # WHEN calling set sample with an valid priority
+    signature = 'sign'
+    result = invoke_cli(['--database', disk_store.uri, 'set', 'microbial-sample',
+                         sample.internal_id, signature, '-p', priority])
+
+    # THEN then the priority should have been set
+    assert result.exit_code == 0
+    assert disk_store.MicrobialSample.query.first().priority_human == priority
+    assert signature in disk_store.MicrobialSample.query.first().comment
+
+
 def ensure_application_version(store, application_tag='dummy_tag'):
     """utility function to return existing or create application version for tests"""
     application = store.application(tag=application_tag)

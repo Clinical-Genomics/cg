@@ -46,7 +46,7 @@ def test_parsing_fastq_orderform(fastq_orderform):
     # THEN it should determine the project type
     assert data['project_type'] == 'fastq'
     # ... and find all samples
-    assert len(data['items']) == 43
+    assert len(data['items']) == 38
 
     # ... and collect relevant sample info
     normal_sample = data['items'][1]
@@ -56,7 +56,7 @@ def test_parsing_fastq_orderform(fastq_orderform):
     assert normal_sample['data_analysis'] == 'fastq'
     assert normal_sample['application'] == 'WGSLIFC030'
     assert normal_sample['sex'] == 'female'
-    assert normal_sample['family'] == 'whole-genome'
+    assert normal_sample['case'] == 'whole-genome'
     assert data['customer'] == 'cust000'
     assert normal_sample['require_qcok'] is False
     assert normal_sample['source'] == 'saliva'
@@ -67,11 +67,11 @@ def test_parsing_fastq_orderform(fastq_orderform):
 
     assert normal_sample['tumour'] is False
 
-    assert normal_sample['quantity'] == '1'
-    assert normal_sample['comment'] == 'comment'
-
     assert tumour_sample['tumour'] is True
     assert tumour_sample['source'] == 'blood'
+
+    assert tumour_sample['quantity'] == '1'
+    assert tumour_sample['comment'] == 'comment'
 
 
 def test_parsing_mip_orderform(mip_orderform):
@@ -90,8 +90,8 @@ def test_parsing_mip_orderform(mip_orderform):
     assert len(trio_family['samples']) == 7
     assert trio_family['name'] == 'whole-genome'
     assert trio_family['priority'] == 'research'
-    assert set(trio_family['panels']) == set(['AD-HSP', 'AD', 'AD-1.0-141202', 'Ataxi',
-                                              'ATX', '16PDEL', 'bindvev'])
+    assert set(trio_family['panels']) == set(['AD-HSP', 'CSAnemia', 'CILM', 'Ataxi',
+                                              'ATX', 'COCA', 'bindevev'])
     assert trio_family['require_qcok'] is True
     # ... and collect relevant info about the samples
 
@@ -116,10 +116,8 @@ def test_parsing_mip_orderform(mip_orderform):
     assert proband_sample['mother'] == 'whole-genome-2'
     assert proband_sample['father'] == 'whole-genome-3'
 
-    mother_sample = trio_family['samples'][1]
-    assert mother_sample.get('mother') is None
-    assert mother_sample['quantity'] == '1'
-    assert mother_sample['comment'] == 'comment'
+    assert proband_sample['quantity'] == '1'
+    assert proband_sample['comment'] == 'comment'
 
 
 def test_parsing_external_orderform(external_orderform):
@@ -356,6 +354,70 @@ def test_parsing_mip_balsamic_orderform(mip_balsamic_orderform):
 
     mother_sample = trio_family['samples'][1]
     assert mother_sample.get('mother') is None
+
+
+def test_parsing_mip_rna_orderform(mip_rna_orderform):
+
+    # GIVEN an order form for a mip balsamic order with 3 samples, 1 trio, in a plate
+    # WHEN parsing the order form
+    data = orderform.parse_orderform(mip_rna_orderform)
+
+    # THEN it should detect the type of project
+    assert data['project_type'] == 'mip_rna'
+    assert data['customer'] == 'cust000'
+    # ... and it should find and group all samples in cases
+    assert len(data['items']) == 5
+    # ... and collect relevant data about the cases
+    first_case = data['items'][0]
+    assert len(first_case['samples']) == 7
+    assert first_case['name'] == 'whole-genome'
+    assert first_case['priority'] == 'research'
+    assert set(first_case['panels']) == set(['AD-HSP', 'CSAnemia', 'CILM', 'Ataxi',
+                                             'ATX', 'COCA', 'bindevev'])
+    assert first_case['require_qcok'] is True
+    # ... and collect relevant info about the samples
+
+    first_sample = first_case['samples'][0]
+    assert first_sample['name'] == 'whole-genome-1'
+    assert first_sample['container'] == '96 well plate'
+    assert first_sample['data_analysis'] == 'MIP RNA'
+    assert first_sample['application'] == 'WGSPCFC030'
+    assert first_sample['sex'] == 'male'
+    # case-id on the case
+    # customer on the order (data)
+    # require-qc-ok on the family
+    assert first_sample['source'] == 'blood'
+
+    assert first_sample['container_name'] == 'plate'
+    assert first_sample['well_position'] == 'A:1'
+
+    # panels on the family
+    assert first_sample['status'] == 'affected'
+
+    assert first_sample['mother'] == 'whole-genome-2'
+    assert first_sample['father'] == 'whole-genome-3'
+
+    assert first_sample['tumour'] is True
+
+    assert first_sample['quantity'] == '1'
+    assert first_sample['comment'] == 'comment'
+
+    # required for RNA samples
+    assert first_sample['from_sample'] == 'whole-genome-1'
+    assert first_sample['time_point'] == '1'
+
+
+def test_parse_mip_rna(skeleton_orderform_sample: dict):
+
+    # GIVEN a raw sample with mip only value from orderform 1508 for data_analysis
+    raw_sample = skeleton_orderform_sample
+    raw_sample['UDF/Data Analysis'] = 'MIP RNA'
+
+    # WHEN parsing the sample
+    parsed_sample = orderform.parse_sample(raw_sample)
+
+    # THEN data_analysis is mip only
+    assert parsed_sample['analysis'] == 'mip_rna'
 
 
 def test_parse_mip_only(skeleton_orderform_sample: dict):
