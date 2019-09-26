@@ -17,6 +17,18 @@ class BaseView(ModelView):
         return redirect(url_for('google.login', next=request.url))
 
 
+def view_family_sample_link(unused1, unused2, model, unused3):
+    """column formatter to open the family-sample view"""
+    del unused1, unused2, unused3
+
+    return Markup(
+        u"<a href='%s'>%s</a>" % (
+            url_for('familysample.index_view', search=model.internal_id),
+            model.internal_id
+        )
+    )
+
+
 class ApplicationView(BaseView):
     """Admin view for Model.Application"""
     column_exclude_list = [
@@ -73,7 +85,8 @@ class CustomerView(BaseView):
     ]
     column_searchable_list = ['internal_id', 'name']
     column_filters = ['priority', 'scout_access']
-    column_editable_list = ['name', 'scout_access', 'loqus_upload', 'priority', 'customer_group']
+    column_editable_list = ['name', 'scout_access', 'loqus_upload', 'return_samples', 'priority',
+                            'customer_group']
     
 
 class CustomerGroupView(BaseView):
@@ -94,6 +107,10 @@ class FamilyView(BaseView):
     column_searchable_list = ['internal_id', 'name', 'customer.internal_id']
     column_filters = ['customer.internal_id', 'priority', 'action']
     column_editable_list = ['action']
+
+    column_formatters = {
+        'internal_id': view_family_sample_link
+    }
 
     @staticmethod
     def view_family_link(unused1, unused2, model, unused3):
@@ -208,6 +225,7 @@ class SampleView(BaseView):
     form_excluded_columns = ['is_external']
 
     column_formatters = {
+        'internal_id': view_family_sample_link,
         'invoice': InvoiceView.view_invoice_link,
     }
 

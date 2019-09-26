@@ -7,11 +7,12 @@ import petname
 
 from cg.constants import PRIORITY_MAP
 from cg.store import models, utils
+from cg.store.api.base import BaseHandler
 
 LOG = logging.getLogger(__name__)
 
 
-class AddHandler:
+class AddHandler(BaseHandler):
     """Methods related to adding new data to the store."""
 
     def add_customer(self, internal_id: str, name: str, customer_group: models.CustomerGroup,
@@ -158,6 +159,7 @@ class AddHandler:
         return new_record
 
     def add_invoice(self, customer: models.Customer, samples: List[models.Sample] = None,
+                    microbial_samples: List[models.MicrobialSample] = None,
                     pools: List[models.Pool] = None, comment: str = None, discount: int = 0,
                     record_type: str = None):
         """Build a new Invoice record."""
@@ -168,6 +170,8 @@ class AddHandler:
         new_invoice.customer = customer
         for sample in samples or []:
             new_invoice.samples.append(sample)
+        for microbial_sample in microbial_samples or []:
+            new_invoice.microbial_samples.append(microbial_sample)
         for pool in pools or []:
             new_invoice.pools.append(pool)
         return new_invoice

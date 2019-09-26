@@ -148,7 +148,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
         result = self.process_family_samples(data)
         return result
 
-    def submit_family_samples(self, data: dict) -> dict:
+    def submit_case_samples(self, data: dict) -> dict:
         """Submit a batch of samples for sequencing and analysis."""
         result = self.process_family_samples(data)
         for family_obj in result['records']:
@@ -161,15 +161,19 @@ class OrdersAPI(LimsHandler, StatusHandler):
 
     def submit_mip(self, data: dict) -> dict:
         """Submit a batch of samples for sequencing and analysis."""
-        return self.submit_family_samples(data)
+        return self.submit_case_samples(data)
 
     def submit_balsamic(self, data: dict) -> dict:
         """Submit a batch of samples for sequencing and balsamic analysis."""
-        return self.submit_family_samples(data)
+        return self.submit_case_samples(data)
 
     def submit_mip_balsamic(self, data: dict) -> dict:
         """Submit a batch of samples for sequencing and analysis."""
-        return self.submit_family_samples(data)
+        return self.submit_case_samples(data)
+
+    def submit_mip_rna(self, data: dict) -> dict:
+        """Submit a batch of samples for sequencing and analysis."""
+        return self.submit_case_samples(data)
 
     def submit_microbial(self, data: dict) -> dict:
         """Submit a batch of microbial samples."""
@@ -194,7 +198,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
     def process_family_samples(self, data: dict) -> dict:
         """Process samples to be analyzed."""
         # filter out only new samples
-        status_data = self.families_to_status(data)
+        status_data = self.cases_to_status(data)
         new_samples = [sample for sample in data['samples'] if sample.get('internal_id') is None]
         if new_samples:
             project_data, lims_map = self.process_lims(data, new_samples)
@@ -205,12 +209,12 @@ class OrdersAPI(LimsHandler, StatusHandler):
                    for sample in family['samples']]
         if lims_map:
             self.fill_in_sample_ids(samples, lims_map)
-        new_families = self.store_families(
+        new_families = self.store_cases(
             customer=status_data['customer'],
             order=status_data['order'],
             ordered=project_data['date'] if project_data else dt.datetime.now(),
             ticket=data['ticket'],
-            families=status_data['families'],
+            cases=status_data['families'],
         )
         return {'project': project_data, 'records': new_families}
 
@@ -270,7 +274,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
             if sample.get('internal_id'):
 
                 if project not in (OrderType.MIP, OrderType.EXTERNAL, OrderType.BALSAMIC,
-                                   OrderType.MIP_BALSAMIC):
+                                   OrderType.MIP_BALSAMIC, OrderType.MIP_RNA):
                     raise OrderError(f"Only MIP, Balsamic and external orders can have imported "
                                      f"samples: "
                                      f"{sample.get('name')}")

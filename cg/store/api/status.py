@@ -5,9 +5,11 @@ from sqlalchemy import or_, and_
 
 from cg.constants import PRIORITY_MAP
 from cg.store import models
+from cg.store.api.base import BaseHandler
 
 
-class StatusHandler:
+class StatusHandler(BaseHandler):
+    """Handles status states for entities in the database"""
 
     def samples_to_recieve(self, external=False):
         """Fetch incoming samples."""
@@ -504,10 +506,28 @@ class StatusHandler:
         )
         return records
 
+    def microbial_samples_to_invoice(self, customer: models.Customer = None):
+        """Fetch microbial samples that should be invoiced.
+
+        Returns microbial samples that have been delivered but not invoiced.
+        """
+        records = (
+            self.MicrobialSample.query.filter(
+                models.MicrobialSample.delivered_at is not None,
+                models.MicrobialSample.invoice_id == None # pylint: disable=singleton-comparison
+            )
+        )
+        customers_to_invoice = [record.microbial_order.customer for record in records.all()]
+        customers_to_invoice = list(set(customers_to_invoice))
+        if customer:
+            records = records.join(models.MicrobialOrder).filter(
+                models.MicrobialOrder.customer_id == customer.id)
+        return records, customers_to_invoice
+
     def samples_to_invoice(self, customer: models.Customer = None):
         """Fetch samples that should be invoiced.
 
-        Return samples have been delivered but invoiced, excluding those that
+        Returns samples have been delivered but not invoiced, excluding those that
         have been marked to skip invoicing.
         """
         records = (

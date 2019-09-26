@@ -10,3 +10,4 @@ pycodestyle
 yamllint
 docutils
 html-linter
+tidy

@@ -34,7 +34,8 @@ class TransferFlowcell():
         flowcell_obj.status = 'ondisk'
         for sample_data in stats_data['samples']:
             LOG.debug(f"adding reads/fastqs to sample: {sample_data['name']}")
-            sample_obj = self.db.sample(sample_data['name'])
+            sample_obj = (self.db.sample(sample_data['name']) or
+                          self.db.microbial_sample(sample_data['name']))
             if sample_obj is None:
                 LOG.warning(f"unable to find sample: {sample_data['name']}")
                 continue
@@ -53,7 +54,12 @@ class TransferFlowcell():
                            (flowcell_obj.sequenced_at > sample_obj.sequenced_at))
             if enough_reads and newest_date:
                 sample_obj.sequenced_at = flowcell_obj.sequenced_at
-            flowcell_obj.samples.append(sample_obj)
+
+            if isinstance(sample_obj, models.Sample):
+                flowcell_obj.samples.append(sample_obj)
+            if isinstance(sample_obj, models.MicrobialSample):
+                flowcell_obj.microbial_samples.append(sample_obj)
+
             LOG.info(f"added reads to sample: {sample_data['name']} - {sample_data['reads']} "
                      f"[{'DONE' if enough_reads else 'NOT DONE'}]")
 
