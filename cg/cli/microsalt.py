@@ -6,6 +6,7 @@ from pathlib import Path
 
 import click
 from cg.apps import hk, lims
+from cg.apps.microsalt import MicrosaltAPI
 from cg.store import Store
 
 LOGGER = logging.getLogger(__name__)
@@ -18,6 +19,7 @@ def microsalt(context):
     context.obj['hk'] = hk.HousekeeperAPI(context.obj)
     context.obj['db'] = Store(context.obj['database'])
     context.obj['lims_api'] = lims.LimsAPI(context.obj)
+    context.obj['microsalt_api'] = MicrosaltAPI()
 
 
 @microsalt.command()
@@ -46,11 +48,12 @@ def parameter(context, dry, project_id, sample_id):
     for sample_obj in sample_objs:
         method_library_prep = context.obj['lims_api'].get_prep_method(sample_obj.internal_id)
         method_sequencing = context.obj['lims_api'].get_sequencing_method(sample_obj.internal_id)
+        organism = context.obj['microsalt_api'].get_organism(sample_obj)
         parameter_dict = {
             'CG_ID_project': sample_obj.microbial_order.internal_id,
             'CG_ID_sample': sample_obj.internal_id,
             'Customer_ID_sample': sample_obj.name,
-            'organism': sample_obj.organism.internal_id,
+            'organism': organism,
             'priority': sample_obj.priority,
             'reference': sample_obj.organism.reference_genome,
             'Customer_ID': sample_obj.microbial_order.customer.internal_id,

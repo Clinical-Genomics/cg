@@ -1,8 +1,9 @@
+""" Common microsalt related functionality """
 import logging
 import os
 import re
 
-from cg.apps.lims import Sample as LimsSample
+from cg.store.models import Sample
 
 
 class MicrosaltAPI():
@@ -10,36 +11,37 @@ class MicrosaltAPI():
     def __init__(self, logger=logging.getLogger(__name__)):
         self.LOG = logger
 
-    def get_organism(self, lims_sample: LimsSample) -> str:
+    def get_organism(self, sample_obj: Sample) -> str:
         organism = "Unset"
         reference = "None"
-        if 'Reference Genome Microbial' in lims_sample.udf:
-            reference = lims_sample.udf['Reference Genome Microbial'].strip()
+        if 'Reference Genome Microbial' in sample_obj.reference_genome:
+            reference = sample_obj.udf['Reference Genome Microbial'].strip()
 
-        if 'Strain' in lims_sample.udf and organism == "Unset":
+        if 'Strain' in sample_obj.udf and organism == "Unset":
             # Predefined genus usage. All hail buggy excel files
-            if 'gonorrhoeae' in lims_sample.udf['Strain']:
+            if 'gonorrhoeae' in sample_obj.udf['Strain']:
                 organism = "Neisseria spp."
-            elif 'Cutibacterium acnes' in lims_sample.udf['Strain']:
+            elif 'Cutibacterium acnes' in sample_obj.udf['Strain']:
                 organism = "Propionibacterium acnes"
             # Backwards compat, MUST hit first
-            elif lims_sample.udf['Strain'] == 'VRE':
+            elif sample_obj.udf['Strain'] == 'VRE':
                 if reference == 'NC_017960.1':
                     organism = 'Enterococcus faecium'
                 elif reference == 'NC_004668.1':
                     organism = 'Enterococcus faecalis'
-                elif 'Comment' in lims_sample.udf and not re.match('\w{4}\d{2,3}', lims_sample.udf['Comment']):
-                    organism = lims_sample.udf['Comment']
-            elif lims_sample.udf['Strain'] != 'Other' and lims_sample.udf['Strain'] != 'other':
-                organism = lims_sample.udf['Strain']
-            elif (lims_sample.udf['Strain'] == 'Other' or lims_sample.udf['Strain'] == 'other') and 'Other species' in lims_sample.udf:
+                elif 'Comment' in sample_obj.udf and not re.match('\w{4}\d{2,3}', sample_obj.udf['Comment']):
+                    organism = sample_obj.udf['Comment']
+            elif sample_obj.udf['Strain'] != 'Other' and sample_obj.udf['Strain'] != 'other':
+                organism = sample_obj.udf['Strain']
+            elif (sample_obj.udf['Strain'] == 'Other' or sample_obj.udf['Strain'] == 'other') and 'Other species' in sample_obj.udf:
                 # Other species predefined genus usage
-                if 'gonorrhoeae' in lims_sample.udf['Other species']:
+                if 'gonorrhoeae' in sample_obj.udf['Other species']:
                     organism = "Neisseria spp."
-                elif 'Cutibacterium acnes' in lims_sample.udf['Other species']:
+                elif 'Cutibacterium acnes' in sample_obj.udf['Other species']:
                     organism = "Propionibacterium acnes"
                 else:
-                    organism = lims_sample.udf['Other species']
+                    organism = sample_obj.udf['Other species']
+
         if reference != 'None' and organism == "Unset":
             if reference == 'NC_002163':
                 organism = "Campylobacter jejuni"
@@ -49,12 +51,12 @@ class MicrosaltAPI():
                 organism = 'Citrobacter freundii'
             elif reference == 'NC_002516.2':
                 organism = 'Pseudomonas aeruginosa'
-        elif 'Comment' in lims_sample.udf and not re.match('\w{4}\d{2,3}', lims_sample.udf['Comment']) and organism == "Unset":
-            organism = lims_sample.udf['Comment'].strip()
+        elif 'Comment' in sample_obj.udf and not re.match('\w{4}\d{2,3}', sample_obj.udf['Comment']) and organism == "Unset":
+            organism = sample_obj.udf['Comment'].strip()
         # Consistent safe-guard
         elif organism == "Unset":
             organism = "Other"
-            self.logger.warn(f"Unable to resolve ambigious organism found in sample {lims_sample.internal_id}.")
+            self.logger.warn(f"Unable to resolve ambigious organism found in sample {sample_obj.internal_id}.")
 
     def get_organism_refname(self, sample_name):
         """Finds which reference contains the same words as the LIMS reference
