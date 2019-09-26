@@ -218,7 +218,7 @@ def safe_loader(path):
     if path:
         pass
 
-    return {'human_genome_build': {'version': ''}, 'program': {'rankvariant': {'rank_model': {
+    return {'human_genome_build': {'version': ''}, 'recipe': {'rankvariant': {'rank_model': {
         'version': 1.18}}}}
 
 
