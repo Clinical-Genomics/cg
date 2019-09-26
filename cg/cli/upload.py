@@ -8,7 +8,7 @@ import click
 
 from cg.store import Store, models
 from cg.apps import coverage as coverage_app, gt, hk, loqus, tb, scoutapi, beacon as beacon_app, \
-    lims
+    lims, mutacc_auto
 from cg.exc import DuplicateRecordError, DuplicateSampleError
 from cg.meta.upload.coverage import UploadCoverageApi
 from cg.meta.upload.gt import UploadGenotypesAPI
@@ -18,6 +18,7 @@ from cg.meta.upload.beacon import UploadBeaconApi
 from cg.meta.analysis import AnalysisAPI
 from cg.meta.deliver.api import DeliverAPI
 from cg.meta.report.api import ReportAPI
+from cg.meta.upload.mutacc import UploadToMutaccAPI
 
 LOG = logging.getLogger(__name__)
 
@@ -273,9 +274,10 @@ def genotypes(context, re_upload, family_id):
 
 @upload.command()
 @click.option('-c', '--case_id', help='internal case id, leave empty to process all')
+@click.option('-l', '--case-limit', type=int, help='maximum number of cases to upload')
 @click.option('--dry-run', is_flag=True, help='only print cases to be processed')
 @click.pass_context
-def observations(context, case_id, dry_run):
+def observations(context, case_id, case_limit, dry_run):
     """Upload observations from an analysis to LoqusDB."""
 
     click.echo(click.style('----------------- OBSERVATIONS ----------------'))
@@ -287,7 +289,14 @@ def observations(context, case_id, dry_run):
     else:
         families_to_upload = context.obj['status'].observations_to_upload()
 
+    nr_uploaded = 0
     for family_obj in families_to_upload:
+
+        if case_limit is not None:
+            if nr_uploaded >= case_limit:
+                LOG.info("Uploaded %d cases, observations upload will now stop", nr_uploaded)
+                break
+
         if not family_obj.customer.loqus_upload:
             LOG.info("%s: %s not whitelisted for upload to loqusdb. Skipping!",
                      family_obj.internal_id, family_obj.customer.internal_id)
@@ -301,6 +310,10 @@ def observations(context, case_id, dry_run):
             LOG.info("%s: has tumour samples. Skipping!", family_obj.internal_id)
             continue
 
+        if not LinkHelper.all_samples_are_wgs(family_obj.links):
+            LOG.info("%s: has non WGS analyis. Skipping!", family_obj.internal_id)
+            continue
+
         if dry_run:
             LOG.info("%s: Would upload observations", family_obj.internal_id)
             continue
@@ -311,8 +324,11 @@ def observations(context, case_id, dry_run):
         try:
             api.process(family_obj.analyses[0])
             LOG.info("%s: observations uploaded!", family_obj.internal_id)
+            nr_uploaded += 1
         except (DuplicateRecordError, DuplicateSampleError) as error:
-            LOG.info("skipping observations upload: %s", error.message)
+            LOG.info("%s: skipping observations upload: %s", family_obj.internal_id, error.message)
+        except FileNotFoundError as error:
+            LOG.info("%s: skipping observations upload: %s", family_obj.internal_id, error)
 
 
 class LinkHelper:
@@ -327,6 +343,12 @@ class LinkHelper:
     def all_samples_data_analysis(links: List[models.FamilySample], data_anlysis) -> bool:
         """Return True if all samples has the given data_analysis."""
         return all(link.sample.data_analysis in data_anlysis for link in links)
+
+    @staticmethod
+    def all_samples_are_wgs(links: List[models.FamilySample]) -> bool:
+        """Return True if all samples are from wgs analysis"""
+        return all(link.sample.application_version.application.analysis_type == 'wgs'
+                   for link in links)
 
 
 @upload.command()
@@ -431,3 +453,52 @@ def validate(context, family_id):
                 click.echo(f"{sample_id}: {mean_coverage:.2f}X - {completeness:.2f}%")
             else:
                 click.echo(f"{sample_id}: sample not found in chanjo", color='yellow')
+
+
+@upload.command('process-solved')
+@click.option('-c', '--case-id', help='internal case id, leave empty to process all')
+@click.option('-d', '--days-ago', type=int, help='days since solved')
+@click.option('--dry-run', is_flag=True, help='only print cases to be processed')
+@click.pass_context
+def process_solved(context, case_id, days_ago, dry_run):
+
+    """Process cases with mutacc that has been marked as solved in scout.
+    This prepares them to be uploaded to the mutacc database"""
+
+    click.echo(click.style('----------------- PROCESS-SOLVED ----------------'))
+
+    scout_api = context.obj['scout_api']
+    mutacc_auto_api = mutacc_auto.MutaccAutoAPI(context.obj)
+
+    mutacc_upload = UploadToMutaccAPI(scout_api=scout_api, mutacc_auto_api=mutacc_auto_api)
+
+    # Get cases to upload into mutacc from scout
+    if case_id is not None:
+        finished_cases = scout_api.get_cases(finished=True, case_id=case_id)
+    elif days_ago is not None:
+        finished_cases = scout_api.get_solved_cases(days_ago=days_ago)
+    else:
+        LOG.info("Please enter option '--case-id' or '--days-ago'")
+
+    for case in finished_cases:
+
+        if dry_run:
+            LOG.info("Would upload case %s to mutacc", case['_id'])
+            continue
+
+        LOG.info("Start processing case %s with mutacc", case['_id'])
+        mutacc_upload.extract_reads(case)
+
+
+@upload.command('processed-solved')
+@click.pass_context
+def processed_solved(context):
+
+    """Upload solved cases that has been processed by mutacc to the mutacc database"""
+
+    click.echo(click.style('----------------- PROCESSED-SOLVED ----------------'))
+
+    LOG.info("Uploading processed cases by mutacc to the mutacc database")
+
+    mutacc_auto_api = mutacc_auto.MutaccAutoAPI(context.obj)
+    mutacc_auto_api.import_reads()

@@ -2,8 +2,8 @@
 import logging
 
 from cg.apps import hk, scoutapi, madeline
-from cg.store import models, Store
 from cg.meta.analysis import AnalysisAPI
+from cg.store import models, Store
 
 LOG = logging.getLogger(__name__)
 
@@ -31,10 +31,10 @@ class UploadScoutAPI(object):
             'owner': analysis_obj.family.customer.internal_id,
             'family': analysis_obj.family.internal_id,
             'family_name': analysis_obj.family.name,
-            'samples': [],
+            'samples': list(),
             'analysis_date': analysis_obj.completed_at,
             'gene_panels': self.analysis.convert_panels(analysis_obj.family.customer.internal_id,
-                                                      analysis_obj.family.panels),
+                                                        analysis_obj.family.panels),
             'default_gene_panels': analysis_obj.family.panels,
             'human_genome_build': analysis_data.get('genome_build'),
             'rank_model_version': analysis_data.get('rank_model_version'),
@@ -50,47 +50,26 @@ class UploadScoutAPI(object):
             mt_bam_file = self.housekeeper.files(version=hk_version.id, tags=mt_bam_tags).first()
             mt_bam_path = mt_bam_file.full_path if mt_bam_file else None
             vcf2cytosure_tags = ['vcf2cytosure', sample_id]
-            vcf2cytosure_file = self.housekeeper.files(version=hk_version.id, tags=vcf2cytosure_tags).first()
+            vcf2cytosure_file = self.housekeeper.files(version=hk_version.id,
+                                                       tags=vcf2cytosure_tags).first()
             vcf2cytosure_path = vcf2cytosure_file.full_path if vcf2cytosure_file else None
-            data['samples'].append({
+            sample = {
                 'analysis_type': link_obj.sample.application_version.application.analysis_type,
-                'sample_id': sample_id,
-                'capture_kit': None,
+                'sample_id': sample_id, 'capture_kit': None,
                 'father': link_obj.father.internal_id if link_obj.father else None,
                 'mother': link_obj.mother.internal_id if link_obj.mother else None,
-                'sample_name': link_obj.sample.name,
-                'phenotype': link_obj.status,
-                'sex': link_obj.sample.sex,
-                'bam_path': bam_path,
-                'mt_bam': mt_bam_path,
-                'vcf2cytosure': vcf2cytosure_path,
-            })
+                'sample_name': link_obj.sample.name, 'phenotype': link_obj.status,
+                'sex': link_obj.sample.sex, 'bam_path': bam_path, 'mt_bam': mt_bam_path,
+                'vcf2cytosure': vcf2cytosure_path}
+            data['samples'].append(sample)
 
-        files = {('vcf_snv', 'vcf-snv-clinical'), ('vcf_snv_research', 'vcf-snv-research'),
-                 ('vcf_sv', 'vcf-sv-clinical'), ('vcf_sv_research', 'vcf-sv-research')}
-        for scout_key, hk_tag in files:
-            hk_vcf = self.housekeeper.files(version=hk_version.id, tags=[hk_tag]).first()
-            data[scout_key] = str(hk_vcf.full_path)
+        self._include_mandatory_files(data, hk_version)
+        self._include_peddy_files(data, hk_version)
+        self._include_optional_files(data, hk_version)
 
-        files = [('peddy_ped', 'ped'), ('peddy_sex', 'sex-check'), ('peddy_check', 'ped-check')]
-        for scout_key, hk_tag in files:
-            hk_file = self.housekeeper.files(version=hk_version.id, tags=['peddy', hk_tag]).first()
-            if hk_file is None:
-                LOG.debug(f"skipping missing file: {scout_key}")
-            else:
-                data[scout_key] = str(hk_file.full_path)
-
-        files = [('delivery_report', 'delivery-report')]
-        for scout_key, hk_tag in files:
-            hk_file = self.housekeeper.files(version=hk_version.id, tags=[hk_tag]).first()
-            if hk_file is None:
-                LOG.debug(f"skipping missing file: {scout_key}")
-            else:
-                data[scout_key] = str(hk_file.full_path)
-
-        if len(data['samples']) > 1:
-            if any(sample['father'] or sample['mother'] for sample in data['samples']):
-                svg_path = self.run_madeline(analysis_obj.family)
+        if self._is_multi_sample_case(data):
+            if self._is_family_case(data):
+                svg_path = self._run_madeline(analysis_obj.family)
                 data['madeline'] = svg_path
             else:
                 LOG.info('family of unconnected samples - skip pedigree graph')
@@ -99,7 +78,46 @@ class UploadScoutAPI(object):
 
         return data
 
-    def run_madeline(self, family_obj: models.Family):
+    def _include_optional_files(self, data, hk_version):
+        scout_hk_map = [('delivery_report', 'delivery-report'), ('vcf_str', 'vcf-str')]
+        self._include_files(data, hk_version, scout_hk_map)
+
+    def _include_peddy_files(self, data, hk_version):
+        scout_hk_map = [('peddy_ped', 'ped'), ('peddy_sex', 'sex-check'),
+                        ('peddy_check', 'ped-check')]
+        self._include_files(data, hk_version, scout_hk_map, 'peddy')
+
+    def _include_mandatory_files(self, data, hk_version):
+        scout_hk_map = {('vcf_snv', 'vcf-snv-clinical'), ('vcf_snv_research', 'vcf-snv-research'),
+                        ('vcf_sv', 'vcf-sv-clinical'), ('vcf_sv_research', 'vcf-sv-research')}
+        self._include_files(data, hk_version, scout_hk_map, skip_missing=False)
+
+    def _include_files(self, data, hk_version, scout_hk_map, extra_tag=None, skip_missing=True):
+        for scout_key, hk_tag in scout_hk_map:
+
+            if extra_tag:
+                tags = [extra_tag, hk_tag]
+            else:
+                tags = [hk_tag]
+
+            hk_file = self.housekeeper.files(version=hk_version.id, tags=tags).first()
+            if hk_file:
+                data[scout_key] = str(hk_file.full_path)
+            else:
+                if skip_missing:
+                    LOG.debug("skipping missing file: %s", scout_key)
+                else:
+                    raise FileNotFoundError(f"missing file: {scout_key}")
+
+    @staticmethod
+    def _is_family_case(data):
+        return any(sample['father'] or sample['mother'] for sample in data['samples'])
+
+    @staticmethod
+    def _is_multi_sample_case(data):
+        return len(data['samples']) > 1
+
+    def _run_madeline(self, family_obj: models.Family):
         """Generate a madeline file for an analysis."""
         samples = [{
             'sample': link_obj.sample.name,
