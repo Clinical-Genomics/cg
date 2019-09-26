@@ -40,18 +40,6 @@
       {% endif %}
     </tr>
     </thead>
-    <tfoot>
-        <tr>
-            <th>Invoice ID</th>
-            <th>Customer</th>
-            <th>Created at</th>
-            <th>Invoiced at</th>
-            <th>Nr samples</th>
-            {% if status=='sent' %}
-            <th>Price</th>
-            {% endif %}
-        </tr>
-    </tfoot>
     <tbody>
     {% for invoice in invoices %}
     <tr>
@@ -63,7 +51,7 @@
       <td>{{ invoice.customer.internal_id}} - {{ invoice.customer.name }}</td>
       <td>{% if invoice.created_at!=None %}{{ invoice.created_at.strftime('%Y-%m-%d') }}{% endif %}</td>
       <td>{% if invoice.invoiced_at!=None %} {{ invoice.invoiced_at.strftime('%Y-%m-%d')  }} {% endif %}</td>
-      <td>{{ invoice.samples|count }}</td>
+      <td>{% if invoice.microbial_samples %}{{ invoice.microbial_samples|count }}{% else %}{{ invoice.samples|count }}{% endif %}</td>
       {% if status=='sent' %}
       <td>{{ invoice.price }}</td>
       {% endif %}
