@@ -26,6 +26,7 @@ pytest_plugins = [  # pylint: disable=invalid-name
     'tests.meta.transfer.conftest',
     'tests.meta.upload.conftest',
     'tests.store.conftest',
+    'tests.apps.mutacc_auto.conftest'
 ]
 
 # Trailblazer api for mip files
