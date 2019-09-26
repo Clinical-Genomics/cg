@@ -1,7 +1,7 @@
 """ Add CLI support to start microSALT """
 import json
 import logging
-# import subprocess
+import subprocess
 from pathlib import Path
 
 import click
@@ -50,6 +50,8 @@ def parameter(context, dry, project_id, sample_id):
         method_sequencing = context.obj['lims_api'].get_sequencing_method(sample_obj.internal_id)
         #organism = context.obj['microsalt_api'].get_organism(sample_obj)
         organism = sample_obj.organism.internal_id
+
+        # TODO what to do with 'null' values?
         parameter_dict = {
             'CG_ID_project': sample_obj.microbial_order.internal_id,
             'CG_ID_sample': sample_obj.internal_id,
@@ -77,6 +79,7 @@ def parameter(context, dry, project_id, sample_id):
         with open(outfilename, 'w') as outfile:
             json.dump(parameters, outfile, indent=4, sort_keys=True)
 
+
 @microsalt.command()
 @click.option('-d', '--dry', is_flag=True, help='print command to console')
 @click.option('-p', '--parameters', required=False, help='Optional')
@@ -88,7 +91,7 @@ def start(context, dry, parameters, project_id):
     microsalt_command = context.obj['usalt']['binary_path']
     command = [microsalt_command]
     if parameters:
-        command.extend(['--parameters', pathtoparamsfile])
+        command.extend(['--parameters', 'pathtoparamsfile'])
     if dry:
         print(' '.join(command))
     else:
