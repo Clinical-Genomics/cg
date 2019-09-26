@@ -1,15 +1,21 @@
 # -*- coding: utf-8 -*-
+
+"""
+    API for uploading observations
+"""
+
 import logging
 from typing import List
+from pathlib import Path
 
 from cg.apps import hk, loqus
-from cg.exc import DuplicateRecordError, CaseNotFoundError
+from cg.exc import DuplicateRecordError, DuplicateSampleError, CaseNotFoundError
 from cg.store import models, Store
 
 LOG = logging.getLogger(__name__)
 
 
-class UploadObservationsAPI(object):
+class UploadObservationsAPI():
 
     """API to upload observations to LoqusDB."""
 
@@ -23,10 +29,30 @@ class UploadObservationsAPI(object):
         analysis_date = analysis_obj.started_at or analysis_obj.completed_at
         hk_version = self.housekeeper.version(analysis_obj.family.internal_id, analysis_date)
         hk_vcf = self.housekeeper.files(version=hk_version.id, tags=['vcf-snv-research']).first()
+        hk_sv_vcf = self.housekeeper.files(version=hk_version.id, tags=['vcf-sv-research']).first()
+        hk_snv_gbcf = self.housekeeper.files(version=hk_version.id, tags=['snv-gbcf']).first()
         hk_pedigree = self.housekeeper.files(version=hk_version.id, tags=['pedigree']).first()
+
+        hk_files = {
+            'vcf-snv-research': hk_vcf,
+            'vcf-sv-research': hk_sv_vcf,
+            'snv-gbcf': hk_snv_gbcf,
+            'pedigree': hk_pedigree
+        }
+
+        # Check if files exists. If hk returns None, or the path does not exist
+        # FileNotFound error is raised
+        for file_type, file in hk_files.items():
+            if file is None:
+                raise FileNotFoundError(f"No file with {file_type} tag in housekeeper")
+            if not Path(file.full_path).exists():
+                raise FileNotFoundError(f"{file.full_path} does not exist")
+
         data = {
             'family': analysis_obj.family.internal_id,
             'vcf': str(hk_vcf.full_path),
+            'sv_vcf': str(hk_sv_vcf.full_path),
+            'snv_gbcf': str(hk_snv_gbcf.full_path),
             'pedigree': str(hk_pedigree.full_path),
         }
         return data
@@ -39,8 +65,16 @@ class UploadObservationsAPI(object):
 
         # If CaseNotFoundError is raised, this should trigger the load method of loqusdb
         except CaseNotFoundError:
-            results = self.loqusdb.load(data['family'], data['pedigree'], data['vcf'])
-            LOG.info(f"parsed {results['variants']} variants")
+
+            duplicate = self.loqusdb.get_duplicate(data['snv_gbcf'])
+            if duplicate:
+                err_msg = f"Found duplicate {duplicate['ind_id']} in case {duplicate['case_id']}"
+                raise DuplicateSampleError(err_msg)
+
+            results = self.loqusdb.load(data['family'], data['pedigree'], data['vcf'],
+                                        data['sv_vcf'], data['snv_gbcf'])
+            log_msg = f"parsed {results['variants']} variants"
+            LOG.info(log_msg)
 
         else:
             log_msg = f"found existing family {existing_case['case_id']}, skipping observations"
