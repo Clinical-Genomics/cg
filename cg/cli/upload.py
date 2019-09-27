@@ -457,7 +457,7 @@ def validate(context, family_id):
 
 @upload.command('process-solved')
 @click.option('-c', '--case-id', help='internal case id, leave empty to process all')
-@click.option('-d', '--days-ago', type=int, help='days since solved')
+@click.option('-d', '--days-ago', type=int, default=1, help='days since solved')
 @click.option('--dry-run', is_flag=True, help='only print cases to be processed')
 @click.pass_context
 def process_solved(context, case_id, days_ago, dry_run):
@@ -480,6 +480,7 @@ def process_solved(context, case_id, days_ago, dry_run):
     else:
         LOG.info("Please enter option '--case-id' or '--days-ago'")
 
+    number_processed = 0
     for case in finished_cases:
 
         if dry_run:
@@ -488,6 +489,10 @@ def process_solved(context, case_id, days_ago, dry_run):
 
         LOG.info("Start processing case %s with mutacc", case['_id'])
         mutacc_upload.extract_reads(case)
+        number_processed += 1
+
+    if number_processed == 0:
+        LOG.info("No cases were solved within given time span")
 
 
 @upload.command('processed-solved')
