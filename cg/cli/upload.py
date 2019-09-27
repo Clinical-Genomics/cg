@@ -484,7 +484,7 @@ def process_solved(context, case_id, days_ago, dry_run):
     for case in finished_cases:
 
         if dry_run:
-            LOG.info("Would upload case %s to mutacc", case['_id'])
+            LOG.info("Would process case %s with mutacc", case['_id'])
             continue
 
         LOG.info("Start processing case %s with mutacc", case['_id'])
