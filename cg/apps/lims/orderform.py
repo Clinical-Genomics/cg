@@ -13,9 +13,9 @@ SOURCE_TYPES = set().union(METAGENOME_SOURCES, ANALYSIS_SOURCES)
 VALID_ORDERFORMS=[
     '1508:18',      # Orderform MIP, Balsamic, sequencing only
     '1541:6',       # Orderform Externally sequenced samples
-    '1603:8',       # Microbial WGS
+    '1603:9',       # Microbial WGS
     '1604:9',       # Orderform Ready made libraries (RML)
-    '1605:6',       # Microbial metagenomes
+    '1605:7',       # Microbial metagenomes
 ]
 FAMILY_PROJECT_TYPES=['mip', 'external', 'balsamic', 'mip_balsamic']
 
@@ -192,7 +192,6 @@ def parse_sample(raw_sample):
         'customer': raw_sample['UDF/customer'],
         'data_analysis': raw_sample['UDF/Data Analysis'],
         'elution_buffer': raw_sample.get('UDF/Sample Buffer'),
-        'elution_buffer_other': raw_sample.get('UDF/Other Elution Buffer'),
         'extraction_method': raw_sample.get('UDF/Extraction method'),
         'family': raw_sample.get('UDF/familyID'),
         'formalin_fixation_time': raw_sample.get('UDF/Formalin Fixation Time'),

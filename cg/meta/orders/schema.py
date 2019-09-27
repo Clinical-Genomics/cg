@@ -296,9 +296,6 @@ MICROBIAL_SAMPLE = {
     # "Required if "Other" is chosen in column "Species""
     'organism_other': OptionalNone(TypeValidatorNone(str)),
 
-    # 'Required if "other" is chosen in column "DNA Elution Buffer"'
-    'elution_buffer_other': OptionalNone(TypeValidatorNone(str)),
-
     # "These fields are not required"
     'concentration_weight': OptionalNone(TypeValidatorNone(str)),
     'quantity': OptionalNone(TypeValidatorNone(str)),
