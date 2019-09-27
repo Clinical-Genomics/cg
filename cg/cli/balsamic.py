@@ -98,18 +98,18 @@ def config(context, dry, target_bed, case_id):
             normal_paths.add(concatenated_paths[1])
 
     if not tumor_paths:
-        click.echo("No tumor found!", color="red")
+        click.echo("No tumor sample found!", color="red")
         context.abort()
 
     if len(tumor_paths) > 1:
-        click.echo("Too many tumor paths found!", color="red")
+        click.echo(f"Too many tumor samples found: {len(tumor_paths)}", color="red")
         context.abort()
 
     tumor_path = tumor_paths.pop()
 
     normal_path = None
     if len(normal_paths) > 1:
-        click.echo("Too many normal paths found!", color="red")
+        click.echo(f"Too many normal samples found: {len(normal_paths)}", color="red")
         context.abort()
 
     if len(normal_paths) == 1:
