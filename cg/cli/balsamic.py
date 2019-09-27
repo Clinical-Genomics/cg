@@ -66,6 +66,9 @@ def config(context, dry, target_bed, case_id):
 
         sorted_files = sorted(files, key=lambda k: k['path'])
 
+        tumor_paths = set()
+        normal_paths = set()
+
         for fastq_data in sorted_files:
             original_fastq_path = Path(fastq_data['path'])
             linked_fastq_name = BalsamicFastqHandler.FastqFileNameCreator.create(
@@ -90,13 +93,27 @@ def config(context, dry, target_bed, case_id):
                 LOGGER.debug("destination path already exists: %s", linked_fastq_path)
 
         if link_obj.sample.is_tumour:
-            tumor_path = concatenated_paths[1]
+            tumor_paths.add(concatenated_paths[1])
         else:
-            normal_path = concatenated_paths[1]
+            normal_paths.add(concatenated_paths[1])
 
-    if not tumor_path:
+    if not tumor_paths:
         click.echo("No tumor found!", color="red")
-        raise
+        context.abort()
+
+    if len(tumor_paths) > 1:
+        click.echo("Too many tumor paths found!", color="red")
+        context.abort()
+
+    tumor_path = tumor_paths.pop()
+
+    normal_path = None
+    if len(normal_paths) > 1:
+        click.echo("Too many normal paths found!", color="red")
+        context.abort()
+
+    if len(normal_paths) == 1:
+        normal_path = normal_paths.pop()
 
     # Call Balsamic
     # TODO move reference-config value to cg config
