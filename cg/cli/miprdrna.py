@@ -13,7 +13,7 @@ LOGGER = logging.getLogger(__name__)
 @click.pass_context
 def rna(context):
     """ Run rare disease RNA workflow """
-    context.obj['hk'] = hk.HousekeeperAPI(context.obj)
+    context.obj['hk_api'] = hk.HousekeeperAPI(context.obj)
     context.obj['db'] = Store(context.obj['database'])
 
 
