@@ -7,11 +7,13 @@ from cg.store.models import Sample
 
 
 class MicrosaltAPI():
+    """ Group microSALT specific functionality """
 
     def __init__(self, logger=logging.getLogger(__name__)):
-        self.LOG = logger
+        self.log = logger
 
     def get_organism(self, sample_obj: Sample) -> str:
+        """ Simple validation for the organism """
         organism = sample_obj.organism.internal_id.strip()
         reference = sample_obj.reference_genome
 
@@ -26,9 +28,11 @@ class MicrosaltAPI():
                 organism = 'Enterococcus faecium'
             elif reference == 'NC_004668.1':
                 organism = 'Enterococcus faecalis'
-            elif 'Comment' in sample_obj.udf and not re.match('\w{4}\d{2,3}', sample_obj.udf['Comment']):
+            elif 'Comment' in sample_obj.udf \
+                 and not re.match('\w{4}\d{2,3}', sample_obj.udf['Comment']):
                 organism = sample_obj.udf['Comment']
-        elif (sample_obj.udf['Strain'] == 'Other' or sample_obj.udf['Strain'] == 'other') and 'Other species' in sample_obj.udf:
+        elif (sample_obj.udf['Strain'] == 'Other' or sample_obj.udf['Strain'] == 'other') \
+             and 'Other species' in sample_obj.udf:
             # Other species predefined genus usage
             if 'gonorrhoeae' in sample_obj.udf['Other species']:
                 organism = "Neisseria spp."
@@ -37,12 +41,15 @@ class MicrosaltAPI():
             else:
                 organism = sample_obj.udf['Other species']
 
-        if 'Comment' in sample_obj.udf and not re.match('\w{4}\d{2,3}', sample_obj.udf['Comment']) and organism == "Unset":
+        if 'Comment' in sample_obj.udf \
+           and not re.match('\w{4}\d{2,3}', sample_obj.udf['Comment']) \
+           and organism == "Unset":
             organism = sample_obj.udf['Comment'].strip()
         # Consistent safe-guard
         elif organism == "Unset":
             organism = "Other"
-            self.logger.warn(f"Unable to resolve ambigious organism found in sample {sample_obj.internal_id}.")
+            self.log.warning("Unable to resolve ambigious organism found in sample %s",
+                             sample_obj.internal_id)
 
     def get_organism_refname(self, sample_name):
         """Finds which reference contains the same words as the LIMS reference
@@ -69,5 +76,6 @@ class MicrosaltAPI():
                 if hit == len(organism):
                     return target
         except Exception as e:
-            self.logger.warn("Unable to find existing reference for {}, strain {} has no reference match\nSource: {}"
-                             .format(sample_name, lims_organ, e))
+            self.log.warning("Unable to find existing reference for %s,\
+                              strain %s has no reference match\nSource: %s",
+                             sample_name, lims_organ, e)
