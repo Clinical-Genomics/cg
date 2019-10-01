@@ -3,6 +3,7 @@ import logging
 
 import click
 from cg.apps import tb
+from cg.apps.environ import environ_email
 from cg.apps.mip import rdrna
 from cg.cli.analysis import config as mip_cli_config
 from cg.store import Store
@@ -20,13 +21,14 @@ def rna(context):
 
 
 @rna.command()
-@click.option('-p', '--priority', type=click.Choice(['low', 'normal', 'high']))
+@click.option('-d', '--dry', is_flag=True, help='print command to console')
 @click.option('-e', '--email', help='email to send errors to')
+@click.option('-p', '--priority', type=click.Choice(['low', 'normal', 'high']))
 @click.option('-sw', '--start-with', help='start mip from this program.')
 @click.argument('case_id')
 @click.pass_context
-def start(context: click.Context, case_id: str, priority: str = None, email: str = None,
-          start_with: str = None):
+def start(context: click.Context, case_id: str, dry: bool = False,
+          priority: str = None, email: str = None, start_with: str = None):
     """Start the analysis pipeline for a case."""
     case_obj = context.obj['db'].family(case_id)
     if case_obj is None:
@@ -35,8 +37,15 @@ def start(context: click.Context, case_id: str, priority: str = None, email: str
     if context.obj['tb_api'].analyses(family=case_obj.internal_id, temp=True).first():
         LOGGER.warning("%s: analysis already running", case_obj.internal_id)
     else:
-        context.obj['rna_api'].start(case_obj, priority=priority,
-                                     email=email, start_with=start_with)
+        email = email or environ_email()
+        # TODO move mip_config to it's own mip section in cg.yaml
+        kwargs = dict(config=context.obj['trailblazer']['mip_config'], case=case_id,
+                      priority=priority, email=email, dryrun=dry, start_with=start_with)
+        if dry:
+            command = context.obj['rna_api'].build_command(**kwargs)
+            print(command)
+        else:
+            context.obj['rna_api'].start(**kwargs)
 
 
-rna.add_command(mip_cli_config)
+rna.add_command(mip_cli_config, 'pedigree')

@@ -1,7 +1,7 @@
-""" Common microsalt related functionality """
+""" Common MIP rare disease RNA related functionality """
 import logging
 
-from .base import MipAPI, CLI_OPTIONS
+from .base import MipAPI
 
 
 class MipRDRNAAPI(MipAPI):
@@ -9,4 +9,4 @@ class MipRDRNAAPI(MipAPI):
 
     def __init__(self, script, logger=logging.getLogger(__name__)):
         """Initialize MIP command line interface."""
-        super().__init__(script, 'rd_rna', logger)
+        super().__init__(script, 'analyse rd_rna', logger)

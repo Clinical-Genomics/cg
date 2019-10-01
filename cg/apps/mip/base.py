@@ -20,7 +20,7 @@ class MipStartError(Exception):
     """ Throw this when MIP is fussing """
 
 
-class MipAPI(object):
+class MipAPI():
     """ Group MIP specific functionality """
 
     def __init__(self, script, pipeline, logger=logging.getLogger(__name__)):
@@ -29,7 +29,7 @@ class MipAPI(object):
         self.pipeline = pipeline
         self.logger = logger
 
-    def __call__(self, config, case, **kwargs):
+    def start(self, config, case, **kwargs):
         """Execute the pipeline."""
         command = self.build_command(case, config, **kwargs)
         self.logger.debug(' '.join(command))
@@ -39,7 +39,7 @@ class MipAPI(object):
             raise MipStartError('error starting analysis, check the output')
         return process
 
-    def build_command(self, case, config, **kwargs):
+    def build_command(self, config, case, **kwargs):
         """Builds the command to execute MIP."""
         command = [self.script, self.pipeline, case, CLI_OPTIONS['config']['option'], config]
         for key, value in kwargs.items():
