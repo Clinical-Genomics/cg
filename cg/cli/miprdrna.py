@@ -2,7 +2,8 @@
 import logging
 
 import click
-from cg.apps import hk
+from cg.apps import tb
+from cg.apps.mip import rdrna
 from cg.cli.analysis import config as mip_cli_config
 from cg.store import Store
 
@@ -13,8 +14,9 @@ LOGGER = logging.getLogger(__name__)
 @click.pass_context
 def rna(context):
     """ Run rare disease RNA workflow """
-    context.obj['hk_api'] = hk.HousekeeperAPI(context.obj)
     context.obj['db'] = Store(context.obj['database'])
+    context.obj['tb_api'] = tb.TrailblazerAPI(context.obj)
+    context.obj['rna_api'] = rdrna.MipRDRNAAPI(context.obj['trailblazer']['script'])
 
 
 @rna.command()
@@ -30,10 +32,11 @@ def start(context: click.Context, case_id: str, priority: str = None, email: str
     if case_obj is None:
         LOGGER.error("%s: case not found", case_id)
         context.abort()
-    if context.obj['tb'].analyses(family=case_obj.internal_id, temp=True).first():
+    if context.obj['tb_api'].analyses(family=case_obj.internal_id, temp=True).first():
         LOGGER.warning("%s: analysis already running", case_obj.internal_id)
     else:
-        context.obj['api'].start(case_obj, priority=priority, email=email, start_with=start_with)
+        context.obj['rna_api'].start(case_obj, priority=priority,
+                                     email=email, start_with=start_with)
 
 
 rna.add_command(mip_cli_config)
