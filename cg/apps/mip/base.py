@@ -31,7 +31,7 @@ class MipAPI():
 
     def start(self, config, case, **kwargs):
         """Execute the pipeline."""
-        command = self.build_command(case, config, **kwargs)
+        command = self.build_command(config, case, **kwargs)
         self.logger.debug(' '.join(command))
         process = self.execute(command)
         process.wait()

@@ -32,11 +32,13 @@ def start(context: click.Context, case_id: str, dry: bool = False,
           priority: str = None, email: str = None, start_with: str = None,
           skip_evaluation: bool = False):
     """Start the analysis pipeline for a case."""
+    tb_api = context.obj['tb_api']
+    rna_api = context.obj['rna_api']
     case_obj = context.obj['db'].family(case_id)
     if case_obj is None:
         LOGGER.error("%s: case not found", case_id)
         context.abort()
-    if context.obj['tb_api'].analyses(family=case_obj.internal_id, temp=True).first():
+    if tb_api.analyses(family=case_obj.internal_id, temp=True).first():
         LOGGER.warning("%s: analysis already running", case_obj.internal_id)
     else:
         email = email or environ_email()
@@ -46,11 +48,11 @@ def start(context: click.Context, case_id: str, dry: bool = False,
         if skip_evaluation:
             kwargs['skip_evaluation'] = True
         if dry:
-            command = context.obj['rna_api'].build_command(**kwargs)
-            print(command)
+            command = rna_api.build_command(**kwargs)
+            LOGGER.info(' '.join(command))
         else:
-            context.obj['tb_api'].mark_analysis_pending(case_id=case_id, email=email)
-            context.obj['rna_api'].start(**kwargs)
+            rna_api.start(**kwargs)
+            tb_api.mark_analysis_pending(case_id=case_id, email=email)
 
 
 rna.add_command(mip_cli_config, 'pedigree')

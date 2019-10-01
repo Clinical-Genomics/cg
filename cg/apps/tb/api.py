@@ -45,6 +45,14 @@ class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
         self.commit()
         self.add_pending(case_id, email=email)
 
+    def mark_analysis_pending(self, case_id: str, email: str = None):
+        """ Add a new analysis to TB """
+        email = email or environ_email()
+        for old_analysis in self.analyses(family=case_id):
+            old_analysis.is_deleted = True
+        self.commit()
+        self.add_pending(case_id, email=email)
+
     def get_sampleinfo(self, analysis: models.Analysis) -> str:
         """Get the sample info path for an analysis."""
         raw_data = ruamel.yaml.safe_load(Path(analysis.config_path).open())
