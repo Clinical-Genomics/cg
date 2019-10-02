@@ -56,7 +56,7 @@ class GenotypeAPI(Manager):
         try:
             LOG.info('Running Genotype API to get data.')
             LOG.debug(trending_call)
-            output = subprocess.check_output(trending_call)
+            output = subprocess.check_output(' '.join(trending_call),shell=True)
         except CalledProcessError as error:
             LOG.critical("Could not run command: %s" % ' '.join(trending_call))
             raise error
