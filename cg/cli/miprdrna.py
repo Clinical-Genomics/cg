@@ -42,8 +42,7 @@ def start(context: click.Context, case_id: str, dry: bool = False,
         LOGGER.warning("%s: analysis already running", case_obj.internal_id)
     else:
         email = email or environ_email()
-        # TODO move mip_config to it's own mip section in cg.yaml
-        kwargs = dict(config=context.obj['trailblazer']['mip_config'], case=case_id,
+        kwargs = dict(config=context.obj['mip-rd-rna']['mip_config'], case=case_id,
                       priority=priority, email=email, dryrun=dry, start_with=start_with)
         if skip_evaluation:
             kwargs['skip_evaluation'] = True
