@@ -88,8 +88,6 @@ def upload(context, family_id):
             click.echo(click.style(f"{family_id}: analysis uploaded!", fg='green'))
 
 
-upload.add_command(trending_command)
-
 @upload.command('delivery-report')
 @click.argument('family_id')
 @click.option('-p', '--print', 'print_console', is_flag=True, help='print report to console')
@@ -464,3 +462,6 @@ def validate(context, family_id):
                 click.echo(f"{sample_id}: {mean_coverage:.2f}X - {completeness:.2f}%")
             else:
                 click.echo(f"{sample_id}: sample not found in chanjo", color='yellow')
+
+
+upload.add_command(trending_command)
