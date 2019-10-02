@@ -1,10 +1,11 @@
-"""Fixtures for testing balsamic app"""
+"""Fixtures for testing mip app"""
 import string
 from typing import List
 
-from cg.apps.mip import MipAPI
-
 import pytest
+
+from cg.apps.mip import MipAPI, MipRDRNAAPI
+
 
 
 @pytest.fixture
@@ -130,7 +131,13 @@ def tb_api():
     return MockTB()
 
 @pytest.fixture(scope='session')
-def mip_cli():
-    _mip_cli = MipAPI(script='test/fake_mip.pl', pipeline='rd_dna')
-    return _mip_cli
+def mip_api():
+    """MipAPI ficture"""
+    _mip_api = MipAPI(script='test/fake_mip.pl', pipeline='analyse rd_dna')
+    return _mip_api
 
+@pytest.fixture(scope='session')
+def rna_api():
+    """MIP rare disease RNA fixture"""
+    _rna_api = MipRDRNAAPI(script='test/fake_mip.pl')
+    return _rna_api
