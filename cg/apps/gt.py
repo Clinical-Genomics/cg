@@ -49,25 +49,19 @@ class GenotypeAPI(Manager):
     def get_trending(self, sample_id: str = '', days: int = 0) -> str:
         """Get trending object with one or many samples."""
         trending_call = self.base_call[:]
-
         if sample_id:
             trending_call.extend(['prepare-trending', '-s', sample_id])
         elif days:
             trending_call.extend(['prepare-trending', '-d', days])
-
         try:
             LOG.info('Running Genotype API to get data.')
-            output = subprocess.check_output(
-                ' '.join(trending_call),
-                shell=True
-            )
+            LOG.debug(trending_call)
+            output = subprocess.check_output(trending_call)
         except CalledProcessError as error:
             LOG.critical("Could not run command: %s" % ' '.join(trending_call))
             raise error
-
         output = output.decode('utf-8')
         # If sample not in genotype db, stdout of genotype command will be empty.
         if not output:
             raise CaseNotFoundError(f"samples not found in genotype db")
-
         return output
