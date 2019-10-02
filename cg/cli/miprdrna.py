@@ -54,4 +54,4 @@ def start(context: click.Context, case_id: str, dry: bool = False,
             tb_api.mark_analysis_pending(case_id=case_id, email=email)
 
 
-rna.add_command(mip_cli_config, 'pedigree')
+rna.add_command(mip_cli_config, 'case-config')

@@ -2,6 +2,8 @@
 import string
 from typing import List
 
+from cg.apps.mip import MipAPI
+
 import pytest
 
 
@@ -126,3 +128,9 @@ def tb_api():
     """Trailblazer API fixture"""
 
     return MockTB()
+
+@pytest.fixture(scope='session')
+def mip_cli():
+    _mip_cli = MipAPI(script='test/fake_mip.pl', pipeline='rd_dna')
+    return _mip_cli
+
