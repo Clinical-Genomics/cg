@@ -492,7 +492,7 @@ def process_solved(context, case_id, days_ago, dry_run):
         number_processed += 1
 
     if number_processed == 0:
-        LOG.info("No cases were solved within given time span")
+        LOG.info("No cases were solved within the last %s days", days_ago)
 
 
 @upload.command('processed-solved')
