@@ -5,8 +5,8 @@ import subprocess
 from pathlib import Path
 
 import click
-from cg.apps import hk, lims
-from cg.apps.microsalt import MicrosaltAPI
+from cg.apps import lims
+from cg.apps.usalt import MicrosaltAPI
 from cg.store import Store
 
 LOGGER = logging.getLogger(__name__)
@@ -16,7 +16,6 @@ LOGGER = logging.getLogger(__name__)
 @click.pass_context
 def microsalt(context):
     """ Run microbial workflow """
-    context.obj['hk'] = hk.HousekeeperAPI(context.obj)
     context.obj['db'] = Store(context.obj['database'])
     context.obj['lims_api'] = lims.LimsAPI(context.obj)
     context.obj['microsalt_api'] = MicrosaltAPI()
@@ -48,7 +47,7 @@ def parameter(context, dry, project_id, sample_id):
     for sample_obj in sample_objs:
         method_library_prep = context.obj['lims_api'].get_prep_method(sample_obj.internal_id)
         method_sequencing = context.obj['lims_api'].get_sequencing_method(sample_obj.internal_id)
-        #organism = context.obj['microsalt_api'].get_organism(sample_obj)
+        # organism = context.obj['microsalt_api'].get_organism(sample_obj)
         organism = sample_obj.organism.internal_id
 
         # TODO what to do with 'null' values?
@@ -69,8 +68,8 @@ def parameter(context, dry, project_id, sample_id):
         }
         parameters.append(parameter_dict)
 
-    # TODO what is the path whereto write the config file?
-    outfilename = Path(context.obj['usalt']['root']) / 'config' / project_id
+    # TODO what is the path whereto write the parameters file?
+    outfilename = Path(context.obj['usalt']['root']) / 'parameters' / project_id
     outfilename = outfilename.with_suffix('.json')
     if dry:
         print(outfilename)
@@ -83,14 +82,15 @@ def parameter(context, dry, project_id, sample_id):
 @microsalt.command()
 @click.option('-d', '--dry', is_flag=True, help='print command to console')
 @click.option('-p', '--parameters', required=False, help='Optional')
-#@click.option('-p', '--priority', default='low', type=click.Choice(['low', 'normal', 'high']))
-#@click.option('-e', '--email', help='email to send errors to')
+# @click.option('-p', '--priority', default='low', type=click.Choice(['low', 'normal', 'high']))
+# @click.option('-e', '--email', help='email to send errors to')
 @click.argument('project_id')
 @click.pass_context
 def start(context, dry, parameters, project_id):
     microsalt_command = context.obj['usalt']['binary_path']
     command = [microsalt_command]
     if parameters:
+        # TODO where are the parameter files stored?
         command.extend(['--parameters', 'pathtoparamsfile'])
     if dry:
         print(' '.join(command))
