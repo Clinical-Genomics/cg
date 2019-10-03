@@ -139,5 +139,5 @@ def mip_api():
 @pytest.fixture(scope='session')
 def rna_api():
     """MIP rare disease RNA fixture"""
-    _rna_api = MipRDRNAAPI(script='test/fake_mip.pl')
+    _rna_api = MipRDRNAAPI(script='test/fake_mip.pl', pipeline='analyse rd_rna')
     return _rna_api

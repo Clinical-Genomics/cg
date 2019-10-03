@@ -17,7 +17,8 @@ def rna(context):
     """ Run rare disease RNA workflow """
     context.obj['db'] = Store(context.obj['database'])
     context.obj['tb_api'] = tb.TrailblazerAPI(context.obj)
-    context.obj['rna_api'] = rdrna.MipRDRNAAPI(context.obj['trailblazer']['script'])
+    context.obj['rna_api'] = rdrna.MipRDRNAAPI(context.obj['mip-rd-rna']['script'],
+                                               context.obj['mip-rd-rna']['pipeline'])
 
 
 @rna.command()
