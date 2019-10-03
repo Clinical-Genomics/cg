@@ -92,6 +92,10 @@ class Application(Model):
 
     @property
     def analysis_type(self):
+
+        if self.prep_category == 'wts':
+            return self.prep_category
+
         return 'wgs' if self.prep_category == 'wgs' else 'wes'
 
 
