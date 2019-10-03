@@ -1,8 +1,11 @@
 """ Test the CLI for analysis rna """
 
-def test_pedigree():
+from cg.cli.miprdrna import start
+
+def test_case_config():
     """Test creating a pedigree"""
     pass
 
 def test_start():
     """Test starting MIP"""
+

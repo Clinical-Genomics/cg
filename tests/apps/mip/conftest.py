@@ -123,6 +123,14 @@ class MockTB:
         """Check if link has been called"""
         return self._link_was_called
 
+    def analyses(self, family, temp):
+
+        class row:
+
+            def first():
+                return false;
+        
+        return row()
 
 @pytest.fixture
 def tb_api():
