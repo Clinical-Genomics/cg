@@ -21,12 +21,12 @@ def microsalt(context):
     context.obj['microsalt_api'] = MicrosaltAPI()
 
 
-@microsalt.command()
+@microsalt.command('case-config')
 @click.option('-d', '--dry', is_flag=True, help='print parameters to console')
-@click.option('--project', 'project_id', help='link all samples for a family')
+@click.option('--project', 'project_id', help='include all samples for a project')
 @click.argument('sample_id', required=False)
 @click.pass_context
-def parameter(context, dry, project_id, sample_id):
+def case_config(context, dry, project_id, sample_id):
     """ Get all samples for a project """
     if project_id and (sample_id is None):
         sample_objs = context.obj['db'].microbial_order(project_id).microbial_samples
@@ -68,8 +68,7 @@ def parameter(context, dry, project_id, sample_id):
         }
         parameters.append(parameter_dict)
 
-    # TODO what is the path whereto write the parameters file?
-    outfilename = Path(context.obj['usalt']['root']) / 'parameters' / project_id
+    outfilename = Path(context.obj['usalt']['root']) / 'queries' / project_id
     outfilename = outfilename.with_suffix('.json')
     if dry:
         print(outfilename)
