@@ -178,7 +178,10 @@ class LimsAPI(Lims, OrderHandler):
             message = f"Capture kit error: {lims_sample.id} | {capture_kits}"
             raise LimsDataError(message)
 
-        return capture_kits.pop() or None
+        if len(capture_kits) == 1:
+            return capture_kits.pop()
+        else:
+            return None
 
     def get_samples(self, *args, map_ids=False, **kwargs):
         """Bypass to original method."""
