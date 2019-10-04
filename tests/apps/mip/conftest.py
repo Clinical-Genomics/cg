@@ -122,14 +122,25 @@ class MockTB:
         """Check if link has been called"""
         return self._link_was_called
 
-    def analyses(self, family, temp):
+    @classmethod
+    def analyses(cls, family, temp):
         """Mock TB analyses models"""
-        class row:
 
-            def first(self):
+        _family = family
+        _temp = temp
+
+        class Row:
+            """Mock a record representing an analysis"""
+
+            def __init__(self):
+                """Mock constructor"""
+
+            @classmethod
+            def first(cls):
+                """Mock that the first row doesn't exist"""
                 return False
 
-        return row()
+        return Row()
 
 
 @pytest.fixture
