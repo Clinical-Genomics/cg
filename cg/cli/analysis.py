@@ -92,7 +92,7 @@ def case_config(context, dry, family_id):
         LOG.info(f"saved config to: {out_path}")
 
 
-analysis.add_command(analysis.config, 'config')
+analysis.add_command(case_config, 'config')
 
 
 @analysis.command()

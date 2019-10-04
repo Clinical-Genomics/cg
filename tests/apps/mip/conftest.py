@@ -4,8 +4,7 @@ from typing import List
 
 import pytest
 
-from cg.apps.mip import MipAPI, MipRDRNAAPI
-
+from cg.apps.mip import MipAPI
 
 
 @pytest.fixture
@@ -124,13 +123,14 @@ class MockTB:
         return self._link_was_called
 
     def analyses(self, family, temp):
-
+        """Mock TB analyses models"""
         class row:
 
-            def first():
-                return false;
-        
+            def first(self):
+                return False
+
         return row()
+
 
 @pytest.fixture
 def tb_api():
@@ -138,14 +138,9 @@ def tb_api():
 
     return MockTB()
 
+
 @pytest.fixture(scope='session')
 def mip_api():
     """MipAPI ficture"""
     _mip_api = MipAPI(script='test/fake_mip.pl', pipeline='analyse rd_dna')
     return _mip_api
-
-@pytest.fixture(scope='session')
-def rna_api():
-    """MIP rare disease RNA fixture"""
-    _rna_api = MipRDRNAAPI(script='test/fake_mip.pl', pipeline='analyse rd_rna')
-    return _rna_api

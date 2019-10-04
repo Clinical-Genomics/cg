@@ -4,8 +4,8 @@ import logging
 import click
 from cg.apps import tb
 from cg.apps.environ import environ_email
-from cg.apps.mip import rdrna
-from cg.cli.analysis import config as mip_cli_config
+from cg.apps.mip import MipAPI
+from cg.cli.analysis import case_config as mip_cli_config
 from cg.store import Store
 
 LOGGER = logging.getLogger(__name__)
@@ -17,8 +17,8 @@ def rna(context):
     """ Run rare disease RNA workflow """
     context.obj['db'] = Store(context.obj['database'])
     context.obj['tb_api'] = tb.TrailblazerAPI(context.obj)
-    context.obj['rna_api'] = rdrna.MipRDRNAAPI(context.obj['mip-rd-rna']['script'],
-                                               context.obj['mip-rd-rna']['pipeline'])
+    context.obj['rna_api'] = MipAPI(context.obj['mip-rd-rna']['script'],
+                                    context.obj['mip-rd-rna']['pipeline'])
 
 
 @rna.command()
