@@ -366,22 +366,58 @@ def test_parsing_mip_rna_orderform(mip_rna_orderform):
     assert data['project_type'] == 'mip_rna'
     assert data['customer'] == 'cust000'
     # ... and it should find and group all samples in cases
-    assert len(data['items']) == 5
+    assert len(data['items']) == 1
     # ... and collect relevant data about the cases
     first_case = data['items'][0]
-    assert len(first_case['samples']) == 7
-    assert first_case['name'] == 'whole-genome'
+    assert len(first_case['samples']) == 38
+    assert first_case['name'] == 'rna'
     assert first_case['priority'] == 'research'
-    assert set(first_case['panels']) == set(['AD-HSP', 'CSAnemia', 'CILM', 'Ataxi',
-                                             'ATX', 'COCA', 'bindevev'])
+    assert set(first_case['panels']) == set(['AD-HSP',
+                                             'ATX',
+                                             'Ataxi',
+                                             'CILM',
+                                             'COCA',
+                                             'CSAnemia',
+                                             'CSP',
+                                             'CTD',
+                                             'DSD',
+                                             'ENDO',
+                                             'EP',
+                                             'ET',
+                                             'HYDRO',
+                                             'HYP',
+                                             'IBD-list',
+                                             'IBMFS',
+                                             'ID',
+                                             'IEM',
+                                             'IF',
+                                             'IMY',
+                                             'Inherited cancer',
+                                             'MIT',
+                                             'MSKI',
+                                             'ND',
+                                             'NJU',
+                                             'NMD',
+                                             'OMIM-AUTO',
+                                             'PEDHEP',
+                                             'PID',
+                                             'PIDCAD',
+                                             'PU',
+                                             'SEXDET',
+                                             'SEXDIF',
+                                             'SKD',
+                                             'SPG',
+                                             'bindevev',
+                                             'mtDNA',
+                                             'panel1'])
     assert first_case['require_qcok'] is True
     # ... and collect relevant info about the samples
 
     first_sample = first_case['samples'][0]
-    assert first_sample['name'] == 'whole-genome-1'
+    assert first_sample['name'] == 'rna-1'
     assert first_sample['container'] == '96 well plate'
     assert first_sample['data_analysis'] == 'MIP RNA'
-    assert first_sample['application'] == 'WGSPCFC030'
+    assert first_sample['application'] == 'RNAPOAR025'
     assert first_sample['sex'] == 'male'
     # case-id on the case
     # customer on the order (data)
@@ -394,8 +430,8 @@ def test_parsing_mip_rna_orderform(mip_rna_orderform):
     # panels on the family
     assert first_sample['status'] == 'affected'
 
-    assert first_sample['mother'] == 'whole-genome-2'
-    assert first_sample['father'] == 'whole-genome-3'
+    assert first_sample['mother'] == 'rna-2'
+    assert first_sample['father'] == 'rna-3'
 
     assert first_sample['tumour'] is True
 
@@ -403,7 +439,7 @@ def test_parsing_mip_rna_orderform(mip_rna_orderform):
     assert first_sample['comment'] == 'comment'
 
     # required for RNA samples
-    assert first_sample['from_sample'] == 'whole-genome-1'
+    assert first_sample['from_sample'] == 'rna-1'
     assert first_sample['time_point'] == '1'
 
 
