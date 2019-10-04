@@ -11,3 +11,4 @@ yamllint
 docutils
 html-linter
 tidy
+six==1.12 # astroid 2.3.1 requires six=1.12
