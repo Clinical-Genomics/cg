@@ -1,26 +1,25 @@
 """ Test the CLI for analysis rna """
-
-from collections import namedtuple
+import logging
 
 from cg.cli.miprdrna import start
 from cg.store import Store
 from cg.apps.mip import MipAPI
 
 
-def test_start_dry(cli_runner, invoke_cli, tb_api, mock_store):
+def test_start_dry(cli_runner, tb_api, mock_store, caplog):
     """Test starting MIP"""
     # GIVEN a cli function
-    import ipdb; ipdb.set_trace()
 
-    config = namedtuple('Config', 'obj')
-    config.obj = {}
-    config.obj['db'] = mock_store
-    config.obj['tb_api'] = tb_api
-    config.obj['rna_api'] = MipAPI('fake_mip', 'fake rna')
+    context = {}
+    context['db'] = mock_store
+    context['tb_api'] = tb_api
+    context['rna_api'] = MipAPI('${HOME}/bin/mip', 'analyse rd_rna')
+    context['mip-rd-rna'] = {'mip_config': 'config.yaml'}
 
     # WHEN we start a case in dry run
-    #result = cli_runner.invoke(start, ['--dry', '--email', 'fake.email@scilifelab.se', 'angrybird'], obj=config)
-    result = invoke_cli(['analysis', 'rna', 'start', '--dry', '--email', 'fake.email@scilifelab.se', 'angrybird'], obj=config)
+    caplog.set_level(logging.INFO) 
+    result = cli_runner.invoke(start, ['--dry', '--email', 'james.holden@scilifelab.se', 'angrybird'], obj=context)
 
-    # THEN the command should be printed
-    assert result.output == 'fake_mip fake rna'
+    # THEN the command should be printed 
+    with caplog.at_level(logging.INFO): 
+        assert '${HOME}/bin/mip analyse rd_rna angrybird --config_file config.yaml --email james.holden@scilifelab.se --dry_run_all' in caplog.text 
