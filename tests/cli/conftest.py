@@ -99,3 +99,55 @@ class MockHkVersion(hk.models.Version):
 @pytest.yield_fixture(scope='function')
 def hk_version_obj():
     return MockHkVersion
+
+
+class MockTB:
+    """Trailblazer mock fixture"""
+
+    def __init__(self):
+        self._link_was_called = False
+
+    def link(self, family: str, sample: str, analysis_type: str, files: List[str]):
+        """Link files mock"""
+
+        del family, sample, analysis_type, files
+
+        self._link_was_called = True
+
+    def link_was_called(self):
+        """Check if link has been called"""
+        return self._link_was_called
+
+    @classmethod
+    def analyses(cls, family, temp):
+        """Mock TB analyses models"""
+
+        _family = family
+        _temp = temp
+
+        class Row:
+            """Mock a record representing an analysis"""
+
+            def __init__(self):
+                """Mock constructor"""
+
+            @classmethod
+            def first(cls):
+                """Mock that the first row doesn't exist"""
+                return False
+
+        return Row()
+
+
+@pytest.fixture
+def tb_api():
+    """Trailblazer API fixture"""
+
+    return MockTB()
+
+
+class MockStore():
+
+
+    def __init__(self):
+        pass
