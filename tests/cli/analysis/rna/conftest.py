@@ -1,7 +1,7 @@
 """Fixtures for analyses rna cli tests"""
 from collections import namedtuple
-import pytest
 from typing import List
+import pytest
 
 
 class MockTB:
@@ -50,6 +50,8 @@ def tb_api():
 
 
 class MockStore():
+    """We need to call the family function from the store
+    without accessing the database. So here we go"""
 
     def family(self, case_id: str):
         """Mock the family call"""
