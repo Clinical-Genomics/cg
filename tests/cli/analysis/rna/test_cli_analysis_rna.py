@@ -19,8 +19,8 @@ def test_start_dry(cli_runner, tb_api, mock_store, caplog):
     # WHEN we start a case in dry run
     caplog.set_level(logging.INFO)
     cli_runner.invoke(start,
-                     ['--dry', '--email', 'james.holden@scilifelab.se', 'angrybird'],
-                     obj=context)
+                      ['--dry', '--email', 'james.holden@scilifelab.se', 'angrybird'],
+                      obj=context)
 
     # THEN the command should be printed
     with caplog.at_level(logging.INFO):
