@@ -1,5 +1,7 @@
 """Fixtures for cli tests"""
+from collections import namedtuple
 from functools import partial
+from typing import List
 
 from cg.apps import hk
 from click.testing import CliRunner
@@ -148,6 +150,17 @@ def tb_api():
 
 class MockStore():
 
+    def family(case_id: str):
+        """Mock the family call"""
 
-    def __init__(self):
-        pass
+        case_obj = namedtuple('Case', 'internal_id')
+        case_obj.internal_id = 'fake case'
+
+        return case_obj
+
+
+@pytest.fixture
+def mock_store():
+    """store fixture"""
+
+    return MockStore()
