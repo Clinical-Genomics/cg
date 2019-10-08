@@ -1,6 +1,5 @@
 """Fixtures for analyses rna cli tests"""
 from collections import namedtuple
-from typing import List
 import pytest
 
 
@@ -9,19 +8,12 @@ class MockTB:
 
     def __init__(self):
         self._link_was_called = False
+        self._mark_analyses_deleted_was_called = False
+        self._add_pending_was_called = False
         self._family = None
         self._temp = None
-
-    def link(self, family: str, sample: str, analysis_type: str, files: List[str]):
-        """Link files mock"""
-
-        del family, sample, analysis_type, files
-
-        self._link_was_called = True
-
-    def link_was_called(self):
-        """Check if link has been called"""
-        return self._link_was_called
+        self._case_id = None
+        self._email = None
 
     def analyses(self, family, temp):
         """Mock TB analyses models"""
@@ -49,6 +41,26 @@ class MockTB:
                 return self._first_was_called
 
         return Row()
+
+    def mark_analyses_deleted(self, case_id: str):
+        """Mock this function"""
+        self._case_id = case_id
+        self._mark_analyses_deleted_was_called = True
+
+    def add_pending(self, case_id: str, email: str):
+        """Mock this function"""
+        self._case_id = case_id
+        self._email = email
+        self._add_pending_was_called = True
+
+    def mark_analyses_deleted_was_called(self):
+        """check if mark_analyses_deleted was called"""
+        return self._mark_analyses_deleted_was_called
+
+    def add_pending_was_called(self):
+        """check if add_pending was called"""
+        return self._add_pending_was_called
+
 
 
 @pytest.fixture(scope='function')
@@ -90,3 +102,16 @@ def mock_store():
     """store fixture"""
 
     return MockStore()
+
+class MockMIPAPI():
+    """Mock the start call!"""
+
+    def start(self, **kwargs):
+        """mock the start call"""
+        return True
+
+@pytest.fixture(scope='function')
+def mock_mip_api():
+    """mip api fixture"""
+
+    return MockMIPAPI()

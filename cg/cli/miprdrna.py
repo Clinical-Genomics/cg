@@ -48,8 +48,9 @@ def start(context: click.Context, case_id: str, dry: bool = False,
             LOGGER.info(' '.join(command))
         else:
             rna_api.start(**kwargs)
-            tb_api.mark_analyses_deleted(case_id=case_id, email=email)
+            tb_api.mark_analyses_deleted(case_id=case_id)
             tb_api.add_pending(case_id, email=email)
+            LOGGER.info('MIP started!')
 
 
 rna.add_command(mip_cli_config, 'case-config')
