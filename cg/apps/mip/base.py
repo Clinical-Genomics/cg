@@ -3,6 +3,21 @@ import logging
 import signal
 import subprocess
 
+"""
+This dict is built like this:
+'cg-option': {
+     'option': '--mip-option
+}
+
+Defaults can also be set:
+'cg-option': {
+    'option': '--mip-option',
+    'default': '1'
+}
+
+This dict is used in `build_command`.
+
+"""
 CLI_OPTIONS = {
     'config': {'option': '--config_file'},
     'priority': {'option': '--slurm_quality_of_service'},
@@ -46,9 +61,9 @@ class MipAPI():
             # enable passing in flags as "False" - shouldn't add command
             if value:
                 command.append(CLI_OPTIONS[key]['option'])
-
-                # append value for non-flags
-                if value is not True:
+                if value is True:
+                    command.append(CLI_OPTIONS[key].get('default', '1'))
+                else:
                     command.append(value)
         return command
 

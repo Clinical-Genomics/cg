@@ -135,3 +135,15 @@ def mip_api():
     """MipAPI fixture"""
     _mip_api = MipAPI(script='test/fake_mip.pl', pipeline='analyse rd_dna')
     return _mip_api
+
+
+@pytest.fixture
+def mip_config_path():
+    """path to a mip config"""
+    return 'tests/fixtures/global_config.yaml'
+
+
+@pytest.fixture
+def case_id():
+    """the name of a case"""
+    return "angrybird"

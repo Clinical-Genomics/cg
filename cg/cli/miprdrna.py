@@ -26,12 +26,10 @@ def rna(context):
 @click.option('-e', '--email', help='email to send errors to')
 @click.option('-p', '--priority', type=click.Choice(['low', 'normal', 'high']))
 @click.option('-sw', '--start-with', help='start mip from this program.')
-@click.option('--skip-evaluation', is_flag=True, default=False, help='skip QC Collect')
 @click.argument('case_id')
 @click.pass_context
 def start(context: click.Context, case_id: str, dry: bool = False,
-          priority: str = None, email: str = None, start_with: str = None,
-          skip_evaluation: bool = False):
+          priority: str = None, email: str = None, start_with: str = None):
     """Start the analysis pipeline for a case."""
     tb_api = context.obj['tb_api']
     rna_api = context.obj['rna_api']
@@ -45,14 +43,13 @@ def start(context: click.Context, case_id: str, dry: bool = False,
         email = email or environ_email()
         kwargs = dict(config=context.obj['mip-rd-rna']['mip_config'], case=case_id,
                       priority=priority, email=email, dryrun=dry, start_with=start_with)
-        if skip_evaluation:
-            kwargs['skip_evaluation'] = True
         if dry:
             command = rna_api.build_command(**kwargs)
             LOGGER.info(' '.join(command))
         else:
             rna_api.start(**kwargs)
-            tb_api.mark_analysis_pending(case_id=case_id, email=email)
+            tb_api.mark_analyses_deleted(case_id=case_id, email=email)
+            tb_api.add_pending(case_id, email=email)
 
 
 rna.add_command(mip_cli_config, 'case-config')
