@@ -34,10 +34,18 @@ class MockTB:
             def __init__(self):
                 """Mock constructor"""
 
-            @classmethod
-            def first(cls):
+                self._first_was_called = False
+
+            def first(self):
                 """Mock that the first row doesn't exist"""
+
+                self._first_was_called = True
+
                 return False
+
+            def first_was_called(self):
+                """Check if first was called"""
+                return self._first_was_called
 
         return Row()
 

@@ -1,23 +1,23 @@
 """Fixtures for cli tests"""
-from collections import namedtuple
 from functools import partial
-from typing import List
 
-from cg.apps import hk
 from click.testing import CliRunner
 import pytest
 
+from cg.apps import hk
 from cg.cli import base
 
 
 @pytest.fixture
 def cli_runner():
+    """Create a CliRunner"""
     runner = CliRunner()
     return runner
 
 
 @pytest.fixture
 def invoke_cli(cli_runner):
+    """Create a CLiRunner with our CLI preloaded"""
     return partial(cli_runner.invoke, base)
 
 
@@ -95,9 +95,9 @@ def analysis_store(base_store, analysis_family):
 
 class MockHkVersion(hk.models.Version):
     """Mocked Housekeeper.Model.Version object"""
-    pass
 
 
 @pytest.yield_fixture(scope='function')
 def hk_version_obj():
+    """class fixtures are not supported, so make a function out of a class"""
     return MockHkVersion
