@@ -132,6 +132,6 @@ def tb_api():
 
 @pytest.fixture(scope='session')
 def mip_api():
-    """MipAPI ficture"""
+    """MipAPI fixture"""
     _mip_api = MipAPI(script='test/fake_mip.pl', pipeline='analyse rd_dna')
     return _mip_api
