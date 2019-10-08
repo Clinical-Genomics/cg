@@ -9,6 +9,8 @@ class MockTB:
 
     def __init__(self):
         self._link_was_called = False
+        self._family = None
+        self._temp = None
 
     def link(self, family: str, sample: str, analysis_type: str, files: List[str]):
         """Link files mock"""
@@ -21,12 +23,11 @@ class MockTB:
         """Check if link has been called"""
         return self._link_was_called
 
-    @classmethod
-    def analyses(cls, family, temp):
+    def analyses(self, family, temp):
         """Mock TB analyses models"""
 
-        _family = family
-        _temp = temp
+        self._family = family
+        self._temp = temp
 
         class Row:
             """Mock a record representing an analysis"""

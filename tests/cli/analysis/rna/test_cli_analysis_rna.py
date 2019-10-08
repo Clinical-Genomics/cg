@@ -2,7 +2,6 @@
 import logging
 
 from cg.cli.miprdrna import start
-from cg.store import Store
 from cg.apps.mip import MipAPI
 
 
