@@ -90,7 +90,7 @@ class AnalysisAPI:
         family_obj.action = 'running'
         self.db.commit()
 
-    def config(self, family_obj: models.Family, pipeline: str = 'mip') -> dict:
+    def config(self, family_obj: models.Family, pipeline: str = None) -> dict:
         """Make the MIP config. Meta data for the family is taken from the family object
         and converted to MIP format via trailblazer.
 
