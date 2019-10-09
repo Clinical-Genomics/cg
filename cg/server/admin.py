@@ -83,7 +83,11 @@ class CustomerView(BaseView):
     column_exclude_list = [
         'agreement_date',
         'organisation_number',
-        'invoice_address'
+        'invoice_address',
+        'primary_contact',
+        'delivery_contact',
+        'invoice_contact',
+        'customer_group'
     ]
     column_searchable_list = ['internal_id', 'name']
     column_filters = ['priority', 'scout_access']
