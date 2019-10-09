@@ -95,7 +95,10 @@ class InvoiceAPI():
     def _discount_price(self, record, discount: int = 0):
         """Get discount price for a sample, pool or microbial_sample."""
 
-        priority = 'research' if self.record_type == 'Pool' else record.priority_human
+        if self.record_type == 'Pool' or record.priority_human == 'clinical trials':
+            priority = 'research' 
+        else:
+            priority = record.priority_human
 
         full_price = getattr(record.application_version, f"price_{priority}")
         discount_factor = float(100 - discount) / 100
