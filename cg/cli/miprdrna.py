@@ -31,7 +31,6 @@ def rna(context):
 def start(context: click.Context, case_id: str, dry: bool = False,
           priority: str = None, email: str = None, start_with: str = None):
     """Start the analysis pipeline for a case."""
-    print('0')
     tb_api = context.obj['tb_api']
     rna_api = context.obj['rna_api']
     case_obj = context.obj['db'].family(case_id)
@@ -44,7 +43,6 @@ def start(context: click.Context, case_id: str, dry: bool = False,
         email = email or environ_email()
         kwargs = dict(config=context.obj['mip-rd-rna']['mip_config'], case=case_id,
                       priority=priority, email=email, dryrun=dry, start_with=start_with)
-        print('1')
         if dry:
             command = rna_api.build_command(**kwargs)
             LOGGER.info(' '.join(command))

@@ -30,8 +30,10 @@ def test_start_dry(cli_runner, tb_api, mock_store, caplog):
 def test_start(cli_runner, tb_api, mock_store, caplog, monkeypatch):
     """Test starting MIP"""
 
+    # pylint: disable=unused-argument
     def mip_start(_self, **kwargs):
         """monkeypatch function so we don't actually start MIP"""
+
 
     # GIVEN a cli function
     context = {}
