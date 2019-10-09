@@ -62,7 +62,6 @@ class MockTB:
         return self._add_pending_was_called
 
 
-
 @pytest.fixture(scope='function')
 def tb_api():
     """Trailblazer API fixture"""
@@ -102,16 +101,3 @@ def mock_store():
     """store fixture"""
 
     return MockStore()
-
-class MockMIPAPI():
-    """Mock the start call!"""
-
-    def start(self, **kwargs):
-        """mock the start call"""
-        return True
-
-@pytest.fixture(scope='function')
-def mock_mip_api():
-    """mip api fixture"""
-
-    return MockMIPAPI()

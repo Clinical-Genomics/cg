@@ -26,18 +26,24 @@ def test_start_dry(cli_runner, tb_api, mock_store, caplog):
         assert '${HOME}/bin/mip analyse rd_rna angrybird --config_file config.yaml ' \
                '--email james.holden@scilifelab.se --dry_run_all' in caplog.text
 
-def test_start(cli_runner, tb_api, mock_store, monkeypatch, caplog):
+
+def test_start(cli_runner, tb_api, mock_store, caplog, monkeypatch):
     """Test starting MIP"""
+
+    def mip_start(_self, **kwargs):
+        """monkeypatch function so we don't actually start MIP"""
+
     # GIVEN a cli function
     context = {}
+    monkeypatch.setattr(MipAPI, 'start', mip_start)
     mip_api = MipAPI('${HOME}/bin/mip', 'analyse rd_rna')
-    monkeypatch.setattr(mip_api, 'start', lambda x, **kwargs: True)
     context['db'] = mock_store
     context['tb_api'] = tb_api
     context['rna_api'] = mip_api
     context['mip-rd-rna'] = {'mip_config': 'config.yaml'}
 
     # WHEN we start a case
+    caplog.set_level(logging.INFO)
     cli_runner.invoke(start,
                       ['--email', 'james.holden@scilifelab.se', 'angrybird'],
                       obj=context)
