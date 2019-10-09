@@ -5,7 +5,6 @@ import click
 from cg.apps import tb
 from cg.apps.environ import environ_email
 from cg.apps.mip import MipAPI
-from cg.cli.analysis import case_config as mip_cli_config
 from cg.store import Store
 
 LOGGER = logging.getLogger(__name__)
@@ -55,4 +54,26 @@ def start(context: click.Context, case_id: str, dry: bool = False,
             LOGGER.info('MIP started!')
 
 
-rna.add_command(mip_cli_config, 'case-config')
+@rna.command('case-config')
+@click.option('-d', '--dry', is_flag=True, help='Print config to console')
+@click.argument('family_id')
+@click.pass_context
+def case_config(context, dry, family_id):
+    """Generate a config for the FAMILY_ID"""
+
+    family_obj = context.obj['db'].family(family_id)
+
+    if not family_obj:
+        LOGGER.error('Family %s not found', family_id)
+        context.abort()
+
+    # MIP formatted pedigree.yaml config
+    config_data = context.obj['api'].config(family_obj, pipeline='mip-rna')
+
+    # Print to console
+    if dry:
+        print(config_data)
+    else:
+        # Write to trailblazer root dir / family_id
+        out_path = context.obj['tb'].save_config(config_data)
+        LOGGER.info(f"saved config to: {out_path}")
