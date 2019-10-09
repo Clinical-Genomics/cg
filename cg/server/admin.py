@@ -88,7 +88,7 @@ class CustomerView(BaseView):
     column_searchable_list = ['internal_id', 'name']
     column_filters = ['priority', 'scout_access']
     column_editable_list = ['name', 'scout_access', 'loqus_upload', 'return_samples', 'priority',
-                            'customer_group']
+                            'customer_group', 'comment']
     
 
 class CustomerGroupView(BaseView):
