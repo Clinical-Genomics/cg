@@ -96,7 +96,7 @@ class InvoiceAPI():
         """Get discount price for a sample, pool or microbial_sample."""
 
         if self.record_type == 'Pool' or record.priority_human == 'clinical trials':
-            priority = 'research' 
+            priority = 'research'
         else:
             priority = record.priority_human
 
