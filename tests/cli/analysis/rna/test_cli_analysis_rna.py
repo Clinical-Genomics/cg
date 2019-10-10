@@ -34,7 +34,6 @@ def test_start(cli_runner, tb_api, mock_store, caplog, monkeypatch):
         """monkeypatch function so we don't actually start MIP"""
         del kwargs
 
-
     # GIVEN a cli function
     context = {}
     monkeypatch.setattr(MipAPI, 'start', mip_start)
