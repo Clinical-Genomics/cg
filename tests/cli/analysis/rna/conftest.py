@@ -25,7 +25,12 @@ class MockTB:
             """Mock a record representing an analysis"""
 
             def __init__(self):
-                """Mock constructor"""
+                """We need to initialize _first_was_called
+                so that we can set it in `first()` and retrieve
+                it in `first_was_called()`. This way we can easily
+                run the invoking code and make sure the function was
+                called.
+                """
 
                 self._first_was_called = False
 
