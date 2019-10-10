@@ -194,7 +194,8 @@ class MockTB:
     def get_sampleinfo(self, analysis_obj):
         return ''
 
-    def make_config(self, data):
+    def make_config(self, data, pipeline):
+        del pipeline
         return data
 
 
