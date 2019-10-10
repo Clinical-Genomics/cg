@@ -16,7 +16,7 @@ from cg.store import models, Store
 
 COLLABORATORS = ('cust000', 'cust002', 'cust003', 'cust004', 'cust042')
 MASTER_LIST = ('ENDO', 'EP', 'IEM', 'IBMFS', 'mtDNA', 'MIT', 'PEDHEP', 'OMIM-AUTO',
-               'PIDCAD', 'PID', 'SKD', 'NMD', 'CTD', 'IF', 'NEURODEG')
+               'PIDCAD', 'PID', 'SKD', 'NMD', 'CTD', 'IF', 'NEURODEG', 'mcarta')
 COMBOS = {
     'DSD': ('DSD', 'HYP', 'SEXDIF', 'SEXDET'),
     'CM': ('CNM', 'CM'),
@@ -90,12 +90,13 @@ class AnalysisAPI:
         family_obj.action = 'running'
         self.db.commit()
 
-    def config(self, family_obj: models.Family) -> dict:
+    def config(self, family_obj: models.Family, pipeline: str = None) -> dict:
         """Make the MIP config. Meta data for the family is taken from the family object
         and converted to MIP format via trailblazer.
 
         Args:
             family_obj (models.Family):
+            pipeline (str): the name of the pipeline to validate the config against
 
         Returns:
             dict: config_data (MIP format)
@@ -104,7 +105,7 @@ class AnalysisAPI:
         data = self.build_config(family_obj)
 
         # Validate and reformat to MIP config format
-        config_data = self.tb.make_config(data)
+        config_data = self.tb.make_config(data, pipeline)
 
         return config_data
 

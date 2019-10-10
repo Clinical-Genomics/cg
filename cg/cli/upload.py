@@ -8,9 +8,8 @@ import click
 
 from cg.store import Store, models
 from cg.apps import coverage as coverage_app, gt, hk, loqus, tb, scoutapi, beacon as beacon_app, \
-    lims, vogue
+    lims, vogue, mutacc_auto
 from cg.cli.trending import trending as trending_command
-
 from cg.exc import DuplicateRecordError, DuplicateSampleError
 from cg.meta.upload.coverage import UploadCoverageApi
 from cg.meta.upload.gt import UploadGenotypesAPI
@@ -21,6 +20,7 @@ from cg.meta.upload.vogue import UploadVogueAPI
 from cg.meta.analysis import AnalysisAPI
 from cg.meta.deliver.api import DeliverAPI
 from cg.meta.report.api import ReportAPI
+from cg.meta.upload.mutacc import UploadToMutaccAPI
 
 LOG = logging.getLogger(__name__)
 
@@ -463,5 +463,58 @@ def validate(context, family_id):
             else:
                 click.echo(f"{sample_id}: sample not found in chanjo", color='yellow')
 
+
+@upload.command('process-solved')
+@click.option('-c', '--case-id', help='internal case id, leave empty to process all')
+@click.option('-d', '--days-ago', type=int, default=1, help='days since solved')
+@click.option('--dry-run', is_flag=True, help='only print cases to be processed')
+@click.pass_context
+def process_solved(context, case_id, days_ago, dry_run):
+
+    """Process cases with mutacc that has been marked as solved in scout.
+    This prepares them to be uploaded to the mutacc database"""
+
+    click.echo(click.style('----------------- PROCESS-SOLVED ----------------'))
+
+    scout_api = context.obj['scout_api']
+    mutacc_auto_api = mutacc_auto.MutaccAutoAPI(context.obj)
+
+    mutacc_upload = UploadToMutaccAPI(scout_api=scout_api, mutacc_auto_api=mutacc_auto_api)
+
+    # Get cases to upload into mutacc from scout
+    if case_id is not None:
+        finished_cases = scout_api.get_cases(finished=True, case_id=case_id)
+    elif days_ago is not None:
+        finished_cases = scout_api.get_solved_cases(days_ago=days_ago)
+    else:
+        LOG.info("Please enter option '--case-id' or '--days-ago'")
+
+    number_processed = 0
+    for case in finished_cases:
+
+        if dry_run:
+            LOG.info("Would process case %s with mutacc", case['_id'])
+            continue
+
+        LOG.info("Start processing case %s with mutacc", case['_id'])
+        mutacc_upload.extract_reads(case)
+        number_processed += 1
+
+    if number_processed == 0:
+        LOG.info("No cases were solved within the last %s days", days_ago)
+
+
+@upload.command('processed-solved')
+@click.pass_context
+def processed_solved(context):
+
+    """Upload solved cases that has been processed by mutacc to the mutacc database"""
+
+    click.echo(click.style('----------------- PROCESSED-SOLVED ----------------'))
+
+    LOG.info("Uploading processed cases by mutacc to the mutacc database")
+
+    mutacc_auto_api = mutacc_auto.MutaccAutoAPI(context.obj)
+    mutacc_auto_api.import_reads()
 
 upload.add_command(trending_command)
