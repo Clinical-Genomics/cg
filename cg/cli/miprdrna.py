@@ -68,7 +68,6 @@ def case_config(context, dry, family_id):
     # MIP formatted pedigree.yaml config
     config_data = context.obj['api'].config(family_obj, pipeline='mip-rna')
 
-    # Print to console
     if dry:
         print(config_data)
     else:
