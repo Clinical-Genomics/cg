@@ -46,12 +46,12 @@ class MipAPI():
 
     def start(self, config, case, **kwargs):
         """Execute the pipeline."""
-        print('mipstart')
         command = self.build_command(config, case, **kwargs)
         self.logger.debug(' '.join(command))
         process = self.execute(command)
         process.wait()
-        if process.returncode != 0:
+        success = 0
+        if process.returncode != success:
             raise MipStartError('error starting analysis, check the output')
         return process
 

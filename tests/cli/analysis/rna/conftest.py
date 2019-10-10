@@ -34,7 +34,7 @@ class MockTB:
 
                 self._first_was_called = True
 
-                return False
+                return None
 
             def first_was_called(self):
                 """Check if first was called"""
