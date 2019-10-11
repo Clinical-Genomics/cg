@@ -107,10 +107,12 @@ class StatusHandler(BaseHandler):
         return families[:limit]
 
     def cases(self,
+              progress_tracker=None,
               internal_id=None,
               name=None,
-              days=31,
-              action=None,
+              days=0,
+              case_action=None,
+              progress_status=None,
               priority=None,
               customer_id=None,
               exclude_customer_id=None,
@@ -139,8 +141,8 @@ class StatusHandler(BaseHandler):
             filter_date = datetime.now() - timedelta(days=days)
             families_q = families_q.filter(models.Family.ordered_at > filter_date)
 
-        if action:
-            families_q = families_q.filter(models.Family.action == action)
+        if case_action:
+            families_q = families_q.filter(models.Family.action == case_action)
 
         if priority:
             priority_db = PRIORITY_MAP[priority]
@@ -205,6 +207,8 @@ class StatusHandler(BaseHandler):
             analysis_completed_at = None
             analysis_uploaded_at = None
             analysis_pipeline = None
+            analysis_status = None
+            analysis_completion = None
             analysis_completed_bool = None
             analysis_uploaded_bool = None
             samples_delivered_bool = None
@@ -213,9 +217,10 @@ class StatusHandler(BaseHandler):
             flowcells_on_disk = None
             flowcells_on_disk_bool = None
             tat = None
+            is_rerun = False
 
             analysis_in_progress = record.action is not None
-            analysis_action = record.action
+            case_action = record.action
 
             total_samples = len(record.links)
             total_external_samples = len([link.sample.is_external for link in record.links if
@@ -246,7 +251,8 @@ class StatusHandler(BaseHandler):
                 samples_sequenced_bool = samples_sequenced == samples_to_sequence
                 samples_delivered_bool = samples_delivered == samples_to_deliver
                 samples_invoiced_bool = samples_invoiced == samples_to_invoice
-                samples_data_analyses = set(link.sample.data_analysis for link in record.links)
+                samples_data_analyses = list(set(link.sample.data_analysis for link in
+                                                 record.links))
 
                 if samples_to_receive > 0 and samples_received_bool:
                     samples_received_at = max([link.sample.received_at for link in record.links if
@@ -340,7 +346,13 @@ class StatusHandler(BaseHandler):
             if exclude_invoiced and samples_invoiced_bool:
                 continue
 
+            is_rerun = (samples_received_at and samples_received_at < record.ordered_at) or (
+                    samples_prepared_at and samples_prepared_at < record.ordered_at) or (
+                    samples_sequenced_at and samples_sequenced_at < record.ordered_at)
+
             tat = self._calculate_estimated_turnaround_time(
+                is_rerun,
+                record.ordered_at,
                 samples_received_at,
                 samples_prepared_at,
                 samples_sequenced_at,
@@ -348,6 +360,16 @@ class StatusHandler(BaseHandler):
                 analysis_uploaded_at,
                 samples_delivered_at
             )
+
+            if progress_tracker:
+                for analysis_obj in progress_tracker.analyses(family=record.internal_id):
+                    if not analysis_status:
+                        analysis_completion = round(analysis_obj.progress * 100)
+                        analysis_status = analysis_obj.status
+
+                # filter on a status
+                if progress_status and progress_status != analysis_status:
+                    continue
 
             case = {
                 'internal_id': record.internal_id,
@@ -370,7 +392,9 @@ class StatusHandler(BaseHandler):
                 'samples_sequenced_at': samples_sequenced_at,
                 'samples_delivered_at': samples_delivered_at,
                 'samples_invoiced_at': samples_invoiced_at,
-                'analysis_action': analysis_action,
+                'case_action': case_action,
+                'analysis_status': analysis_status,
+                'analysis_completion':  analysis_completion,
                 'analysis_completed_at': analysis_completed_at,
                 'analysis_uploaded_at': analysis_uploaded_at,
                 'samples_delivered': samples_delivered,
@@ -387,6 +411,7 @@ class StatusHandler(BaseHandler):
                 'flowcells_on_disk': flowcells_on_disk,
                 'flowcells_on_disk_bool': flowcells_on_disk_bool,
                 'tat': tat,
+                'is_rerun': is_rerun,
             }
 
             cases.append(case)
@@ -647,6 +672,8 @@ class StatusHandler(BaseHandler):
         return records
 
     def _calculate_estimated_turnaround_time(self,
+                                             is_rerun,
+                                             analysis_ordered_at,
                                              samples_received_at,
                                              samples_prepared_at,
                                              samples_sequenced_at,
@@ -655,14 +682,18 @@ class StatusHandler(BaseHandler):
                                              samples_delivered_at
                                              ):
 
-        if samples_received_at and samples_delivered_at:
-            return self._calculate_date_delta(None, samples_received_at, samples_delivered_at)
-
         r_p = self._calculate_date_delta(4, samples_received_at, samples_prepared_at)
         p_s = self._calculate_date_delta(5, samples_prepared_at, samples_sequenced_at)
         s_a = self._calculate_date_delta(4, samples_sequenced_at, analysis_completed_at)
         a_u = self._calculate_date_delta(1, analysis_completed_at, analysis_uploaded_at)
         u_d = self._calculate_date_delta(2, analysis_uploaded_at, samples_delivered_at)
+
+        if is_rerun:
+            o_a = self._calculate_date_delta(1, analysis_ordered_at, analysis_completed_at)
+            return o_a + a_u
+
+        if samples_received_at and samples_delivered_at:
+            return self._calculate_date_delta(None, samples_received_at, samples_delivered_at)
 
         return r_p + p_s + s_a + a_u + u_d
 

@@ -5,6 +5,7 @@ from functools import wraps
 from pathlib import Path
 import tempfile
 
+from cg.apps import tb
 from cg.constants import METAGENOME_SOURCES, ANALYSIS_SOURCES
 from flask import abort, current_app, Blueprint, jsonify, g, make_response, request
 from google.auth import jwt
@@ -84,6 +85,16 @@ def panels():
     query = db.Panel.query
     data = [record.to_dict() for record in query]
     return jsonify(panels=data)
+
+
+@BLUEPRINT.route('/cases')
+def cases():
+    """Fetch cases."""
+    records = db.cases(days=5)
+    count = len(records)
+    data = [case for case in records]
+    jsonify(cases=data, total=count)
+    return jsonify(cases=data, total=count)
 
 
 @BLUEPRINT.route('/families')
