@@ -17,7 +17,7 @@ VALID_ORDERFORMS=[
     '1604:9',       # Orderform Ready made libraries (RML)
     '1605:6',       # Microbial metagenomes
 ]
-FAMILY_PROJECT_TYPES = ['mip', 'external', 'balsamic', 'mip_balsamic', 'mip_rna']
+CASE_PROJECT_TYPES = ['mip', 'external', 'balsamic', 'mip_balsamic', 'mip_rna']
 
 
 def check_orderform_version(document_title):
@@ -52,7 +52,7 @@ def parse_orderform(excel_path: str) -> dict:
 
     project_type = get_project_type(document_title, parsed_samples)
 
-    if project_type in FAMILY_PROJECT_TYPES:
+    if project_type in CASE_PROJECT_TYPES:
         parsed_cases = group_cases(parsed_samples)
         items = []
         customer_ids = set()
