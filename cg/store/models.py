@@ -172,6 +172,7 @@ class Customer(Model):
     invoice_address = Column(types.Text, nullable=False)
     invoice_reference = Column(types.String(32), nullable=False)
     uppmax_account = Column(types.String(32))
+    comment = Column(types.Text)
 
     primary_contact_id = Column(ForeignKey('user.id'))
     primary_contact = orm.relationship("User", foreign_keys=[primary_contact_id])
