@@ -303,8 +303,9 @@ class Flowcell(Model):
     sequencer_type = Column(types.Enum('hiseqga', 'hiseqx'))
     sequencer_name = Column(types.String(32))
     sequenced_at = Column(types.DateTime)
-    archived_at = Column(types.DateTime)
     status = Column(types.Enum(*FLOWCELL_STATUS), default='ondisk')
+
+    updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
 
     samples = orm.relationship('Sample', secondary=flowcell_sample, backref='flowcells')
     microbial_samples = orm.relationship('MicrobialSample', secondary=flowcell_microbial_sample,
