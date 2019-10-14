@@ -1468,11 +1468,10 @@ def add_sample(store, sample_name='sample_test', ordered=True, received=False, p
                sequenced=False, delivered=False, invoiced=False, data_analysis=None,
                is_external=False, no_invoice=False, date=datetime.now()):
     """utility function to add a sample to use in tests"""
-    customer = ensure_customer(store)
     application_version_id = ensure_application_version(store).id
     sample = store.add_sample(name=sample_name, sex='unknown')
     sample.application_version_id = application_version_id
-    sample.customer = customer
+    sample.customer = ensure_customer(store)
 
     if ordered:
         sample.ordered_at = date
