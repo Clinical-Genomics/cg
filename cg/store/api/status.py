@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime, timedelta
 from typing import List
-from sqlalchemy import or_, and_
 
 from cg.constants import PRIORITY_MAP
 from cg.store import models
 from cg.store.api.base import BaseHandler
+from sqlalchemy import or_, and_
 
 
 class StatusHandler(BaseHandler):
@@ -68,27 +68,22 @@ class StatusHandler(BaseHandler):
     def families_to_mip_analyze(self, limit: int = 50):
         """Fetch families without analyses where all samples are sequenced."""
 
-        # there are two cases when a sample should be analysed:
         families_q = (
             self.Family.query
             .outerjoin(models.Analysis)
             .join(models.Family.links, models.FamilySample.sample)
-            # the samples must external or be sequenced to be analysed
             .filter(
                 or_(
                     models.Sample.is_external,
                     models.Sample.sequenced_at.isnot(None),
                 )
             )
-            # The data_analysis is unset or not Balsamic only
             .filter(
                 or_(
                     models.Sample.data_analysis.is_(None),
                     models.Sample.data_analysis != 'Balsamic'
                 )
             )
-            # 1. family that has been analysed but now is requested for re-analysing
-            # 2. new family with that haven't been analysed
             .filter(
                 or_(
                     models.Family.action == 'analyze',
@@ -276,12 +271,12 @@ class StatusHandler(BaseHandler):
                                                link.sample.invoice.invoiced_at])
 
                 flowcells = len([flowcell.status
-                                         for link in record.links
-                                         for flowcell in link.sample.flowcells])
+                                 for link in record.links
+                                 for flowcell in link.sample.flowcells])
 
                 flowcells_status = list(set(flowcell.status
-                                                      for link in record.links
-                                                      for flowcell in link.sample.flowcells))
+                                            for link in record.links
+                                            for flowcell in link.sample.flowcells))
                 if flowcells < total_samples:
                     flowcells_status.append('new')
 
@@ -346,9 +341,11 @@ class StatusHandler(BaseHandler):
             if exclude_invoiced and samples_invoiced_bool:
                 continue
 
-            is_rerun = (samples_received_at and samples_received_at < record.ordered_at) or (
-                    samples_prepared_at and samples_prepared_at < record.ordered_at) or (
-                    samples_sequenced_at and samples_sequenced_at < record.ordered_at)
+            is_rerun = self._is_rerun(record, samples_received_at, samples_prepared_at,
+                                      samples_sequenced_at)
+
+            print(is_rerun)
+            print(record)
 
             tat = self._calculate_estimated_turnaround_time(
                 is_rerun,
@@ -394,7 +391,7 @@ class StatusHandler(BaseHandler):
                 'samples_invoiced_at': samples_invoiced_at,
                 'case_action': case_action,
                 'analysis_status': analysis_status,
-                'analysis_completion':  analysis_completion,
+                'analysis_completion': analysis_completion,
                 'analysis_completed_at': analysis_completed_at,
                 'analysis_uploaded_at': analysis_uploaded_at,
                 'samples_delivered': samples_delivered,
@@ -421,6 +418,15 @@ class StatusHandler(BaseHandler):
         return cases_sorted
 
     @staticmethod
+    def _is_rerun(record, samples_received_at, samples_prepared_at, samples_sequenced_at):
+
+        return (len(record.analyses) > 0) or (samples_received_at and samples_received_at <
+                                              record.ordered_at) or (samples_prepared_at and
+                                                                     samples_prepared_at <
+                                                                     record.ordered_at) or (
+                samples_sequenced_at and samples_sequenced_at < record.ordered_at)
+
+    @staticmethod
     def _all_samples_have_sequence_data(links: List[models.FamilySample]) -> bool:
         """Return True if all samples are external or sequenced inhouse."""
         return all((link.sample.sequenced_at or link.sample.is_external) for link in links)
@@ -434,22 +440,24 @@ class StatusHandler(BaseHandler):
     def observations_to_upload(self):
         """Fetch observations that haven't been uploaded."""
 
-        families_q = (
-            self.Family.query
-            .join(models.Analysis, models.Family.links, models.FamilySample.sample)
-            .filter(models.Sample.loqusdb_id.is_(None))
-        )
+        families_q = \
+            (
+                self.Family.query
+                .join(models.Analysis, models.Family.links, models.FamilySample.sample)
+                .filter(models.Sample.loqusdb_id.is_(None))
+            )
 
         return families_q
 
     def observations_uploaded(self):
         """Fetch observations that have been uploaded."""
 
-        families_q = (
-            self.Family.query
-            .join(models.Family.links, models.FamilySample.sample)
-            .filter(models.Sample.loqusdb_id.isnot(None))
-        )
+        families_q = \
+            (
+                self.Family.query
+                .join(models.Family.links, models.FamilySample.sample)
+                .filter(models.Sample.loqusdb_id.isnot(None))
+            )
 
         return families_q
 
@@ -538,7 +546,7 @@ class StatusHandler(BaseHandler):
         records = (
             self.MicrobialSample.query.filter(
                 models.MicrobialSample.delivered_at is not None,
-                models.MicrobialSample.invoice_id == None # pylint: disable=singleton-comparison
+                models.MicrobialSample.invoice_id == None
             )
         )
         customers_to_invoice = [record.microbial_order.customer for record in records.all()]
