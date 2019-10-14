@@ -516,7 +516,7 @@ class StatusHandler(BaseHandler):
         records = (
             self.MicrobialSample.query.filter(
                 models.MicrobialSample.delivered_at is not None,
-                models.MicrobialSample.invoice_id is None
+                models.MicrobialSample.invoice_id == None # pylint: disable=singleton-comparison
             )
         )
         customers_to_invoice = [record.microbial_order.customer for record in records.all()]

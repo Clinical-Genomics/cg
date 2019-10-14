@@ -7,8 +7,8 @@ from pathlib import Path
 import click
 from cg.apps import hk, tb, scoutapi, lims
 from cg.apps.balsamic.fastq import BalsamicFastqHandler
-from cg.apps.usalt.fastq import USaltFastqHandler
 from cg.apps.mip.fastq import MipFastqHandler
+from cg.apps.usalt.fastq import USaltFastqHandler
 from cg.exc import LimsDataError
 from cg.meta.analysis import AnalysisAPI
 from cg.meta.deliver.api import DeliverAPI
@@ -60,30 +60,27 @@ def analysis(context, priority, email, family_id, start_with):
             context.obj['db'].commit()
         else:
             # execute the analysis!
-            context.invoke(config, family_id=family_id)
+            context.invoke(case_config, family_id=family_id)
             context.invoke(link, family_id=family_id)
             context.invoke(panel, family_id=family_id)
             context.invoke(start, family_id=family_id, priority=priority, email=email,
                            start_with=start_with)
 
 
-@analysis.command()
-@click.option('-d', '--dry', is_flag=True, help='print config to console')
+@analysis.command('case-config')
+@click.option('-d', '--dry', is_flag=True, help='Print config to console')
 @click.argument('family_id')
 @click.pass_context
-def config(context, dry, family_id):
-    """Generate a config for the FAMILY_ID.
+def case_config(context, dry, family_id):
+    """Generate a config for the FAMILY_ID"""
 
-    Args:
-        dry (Bool): Print config to console
-        family_id (Str):
-
-    Returns:
-    """
-    # Get family meta data
     family_obj = context.obj['db'].family(family_id)
-    # MIP formated pedigree.yaml config
 
+    if not family_obj:
+        LOG.error('Family %s not found', family_id)
+        context.abort()
+
+    # MIP formatted pedigree.yaml config
     config_data = context.obj['api'].config(family_obj)
 
     # Print to console
@@ -95,12 +92,18 @@ def config(context, dry, family_id):
         LOG.info(f"saved config to: {out_path}")
 
 
+analysis.add_command(case_config, 'config')
+
+
 @analysis.command()
 @click.option('-f', '--family', 'family_id', help='link all samples for a family')
 @click.argument('sample_id', required=False)
 @click.pass_context
 def link(context, family_id, sample_id):
     """Link FASTQ files for a SAMPLE_ID."""
+
+    link_objs = None
+
     if family_id and (sample_id is None):
         # link all samples in a family
         family_obj = context.obj['db'].family(family_id)
@@ -112,17 +115,21 @@ def link(context, family_id, sample_id):
     elif sample_id and family_id:
         # link only one sample in a family
         link_objs = [context.obj['db'].link(family_id, sample_id)]
-    else:
+
+    if not link_objs:
         LOG.error('provide family and/or sample')
         context.abort()
 
     for link_obj in link_objs:
-        LOG.info("%s: link FASTQ files", link_obj.sample.internal_id)
+        LOG.info("%s: %s link FASTQ files", link_obj.sample.internal_id,
+                 link_obj.sample.data_analysis)
         if link_obj.sample.data_analysis and 'balsamic' in link_obj.sample.data_analysis.lower():
             context.obj['api'].link_sample(BalsamicFastqHandler(context.obj),
                                            case=link_obj.family.internal_id,
                                            sample=link_obj.sample.internal_id)
-        elif not link_obj.sample.data_analysis or 'mip' in link_obj.sample.data_analysis.lower():
+        elif not link_obj.sample.data_analysis or \
+                'mip' in link_obj.sample.data_analysis.lower() or \
+                'mip-rna' in link_obj.sample.data_analysis.lower():
             mip_fastq_handler = MipFastqHandler(context.obj,
                                                 context.obj['db'],
                                                 context.obj['tb'])
@@ -138,6 +145,8 @@ def link(context, family_id, sample_id):
 def link_microbial(context, order_id, sample_id):
     """Link FASTQ files for a SAMPLE_ID."""
 
+    sample_objs = None
+
     if order_id and (sample_id is None):
         # link all samples in a case
         sample_objs = context.obj['db'].microbial_order(order_id).microbial_samples
@@ -147,7 +156,8 @@ def link_microbial(context, order_id, sample_id):
     elif sample_id and order_id:
         # link only one sample in a case
         sample_objs = [context.obj['db'].microbial_sample(sample_id)]
-    else:
+
+    if not sample_objs:
         LOG.error('provide order and/or sample')
         context.abort()
 
