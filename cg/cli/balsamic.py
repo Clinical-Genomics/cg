@@ -12,6 +12,7 @@ from cg.meta.analysis import AnalysisAPI
 from cg.store import Store
 
 LOGGER = logging.getLogger(__name__)
+SUCCESS = 0
 
 
 @click.group()
@@ -25,9 +26,17 @@ def balsamic(context):
 @balsamic.command()
 @click.option('-d', '--dry', is_flag=True, help='print config to console')
 @click.option('--target-bed', required=False, help='Optional')
+@click.option('--singularity', default="/home/proj/production/cancer/cases/github_issue_analysis"
+                                       "/issue_29/BALSAMIC.3.2.0.sif", required=False,
+              help='Optional')
+@click.option('--umi-trim-length', default=5, required=False, help='Default 5')
+@click.option('--quality-trim', is_flag=True, required=False, help='Optional')
+@click.option('--adapter-trim', is_flag=True, required=False, help='Optional')
+@click.option('--umi', is_flag=True, required=False, help='Optional')
 @click.argument('case_id')
 @click.pass_context
-def config(context, dry, target_bed, case_id):
+def config(context, dry, target_bed, singularity, umi_trim_length, quality_trim, adapter_trim,
+           umi, case_id):
     """Generate a config for the case_id.
     """
 
@@ -116,19 +125,28 @@ def config(context, dry, target_bed, case_id):
         normal_path = normal_paths.pop()
 
     # Call Balsamic
-    # TODO move reference-config value to cg config
+    # TODO move reference-config + singularity value to cg config
     command_str = (f"config case "
                    f"--reference-config "
                    f"/home/proj/production/cancer/reference/GRCh37/reference.json "
+                   f" --singularity {singularity} "
                    f"--tumor {tumor_path} "
                    f"--case-id {case_id} "
                    f"--output-config {case_id}.json "
                    f"--analysis-dir {root_dir}")
+
     if target_bed:
         command_str += f" -p {target_bed} "
-
     if normal_path:
         command_str += f" --normal {normal_path} "
+    if umi:
+        command_str += f" --umi "
+    if umi_trim_length:
+        command_str += f" --umi_trim_length {umi_trim_length} "
+    if quality_trim:
+        command_str += f" --quality_trim "
+    if adapter_trim:
+        command_str += f" --adapter_trim "
 
     command = ["bash -c 'source activate P_BALSAMIC-base_3.0.1; balsamic"]
     command_str += "'"  # add ending quote from above line
@@ -136,6 +154,7 @@ def config(context, dry, target_bed, case_id):
 
     if dry:
         print(' '.join(command))
+        return SUCCESS
     else:
         process = subprocess.run(
             ' '.join(command), shell=True
