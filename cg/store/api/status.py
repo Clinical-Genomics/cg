@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime, timedelta
 from typing import List
+from sqlalchemy import or_, and_
 
 from cg.constants import PRIORITY_MAP
 from cg.store import models
 from cg.store.api.base import BaseHandler
-from sqlalchemy import or_, and_
 
 
 class StatusHandler(BaseHandler):
