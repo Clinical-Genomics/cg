@@ -26,7 +26,7 @@ def balsamic(context):
 @balsamic.command()
 @click.option('-d', '--dry', is_flag=True, help='print config to console')
 @click.option('--target-bed', required=False, help='Optional')
-@click.option('--singularity', default="/home/proj/production/cancer/BALSAMIC/BALSAMIC/containers/BALSAMIC.3.2.0", required=False,
+@click.option('--singularity', default="/home/proj/production/cancer/BALSAMIC/BALSAMIC/containers/BALSAMIC.3.2.0.sif", required=False,
               help='Optional')
 @click.option('--umi-trim-length', default=5, required=False, help='Default 5')
 @click.option('--quality-trim', is_flag=True, required=False, help='Optional')
