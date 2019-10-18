@@ -60,18 +60,18 @@ def analysis(context, priority, email, family_id, start_with):
             context.obj['db'].commit()
         else:
             # execute the analysis!
-            context.invoke(config, family_id=family_id)
+            context.invoke(case_config, family_id=family_id)
             context.invoke(link, family_id=family_id)
             context.invoke(panel, family_id=family_id)
             context.invoke(start, family_id=family_id, priority=priority, email=email,
                            start_with=start_with)
 
 
-@analysis.command()
+@analysis.command('case-config')
 @click.option('-d', '--dry', is_flag=True, help='Print config to console')
 @click.argument('family_id')
 @click.pass_context
-def config(context, dry, family_id):
+def case_config(context, dry, family_id):
     """Generate a config for the FAMILY_ID"""
 
     family_obj = context.obj['db'].family(family_id)
@@ -90,6 +90,9 @@ def config(context, dry, family_id):
         # Write to trailblazer root dir / family_id
         out_path = context.obj['tb'].save_config(config_data)
         LOG.info(f"saved config to: {out_path}")
+
+
+analysis.add_command(case_config, 'config')
 
 
 @analysis.command()
