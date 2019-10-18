@@ -1484,7 +1484,7 @@ def add_sample(store, sample_name='sample_test', ordered=True, received=False, p
     if delivered:
         sample.delivered_at = date
     if invoiced:
-        invoice = store.add_invoice(customer)
+        invoice = store.add_invoice(ensure_customer(store))
         sample.invoice = invoice
         sample.invoice.invoiced_at = date
     if data_analysis:
