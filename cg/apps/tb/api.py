@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import datetime as dt
-import logging
 import shutil
 from pathlib import Path
 from typing import List
@@ -13,8 +12,6 @@ from trailblazer.cli.utils import environ_email
 from trailblazer.pipeline import files, fastq, trending
 
 from .add import AddHandler
-
-log = logging.getLogger(__name__)
 
 
 class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
@@ -44,6 +41,12 @@ class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
             old_analysis.is_deleted = True
         self.commit()
         self.add_pending(case_id, email=email)
+
+    def mark_analyses_deleted(self, case_id: str):
+        """ mark analyses connected to a case as deleted """
+        for old_analysis in self.analyses(family=case_id):
+            old_analysis.is_deleted = True
+        self.commit()
 
     def get_sampleinfo(self, analysis: models.Analysis) -> str:
         """Get the sample info path for an analysis."""
