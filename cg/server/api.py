@@ -5,7 +5,6 @@ from functools import wraps
 from pathlib import Path
 import tempfile
 
-from cg.apps import tb
 from cg.constants import METAGENOME_SOURCES, ANALYSIS_SOURCES
 from flask import abort, current_app, Blueprint, jsonify, g, make_response, request
 from google.auth import jwt
