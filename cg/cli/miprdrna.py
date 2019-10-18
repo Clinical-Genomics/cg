@@ -54,23 +54,23 @@ def start(context: click.Context, case_id: str, dry: bool = False,
 
 @rna.command('case-config')
 @click.option('-d', '--dry', is_flag=True, help='Print config to console')
-@click.argument('family_id')
+@click.argument('case_id')
 @click.pass_context
-def case_config(context, dry, family_id):
-    """Generate a config for the FAMILY_ID"""
+def case_config(context, dry, case_id):
+    """Generate a config for the case_id"""
 
-    family_obj = context.obj['db'].family(family_id)
+    case_obj = context.obj['db'].case(case_id)
 
-    if not family_obj:
-        LOGGER.error('Family %s not found', family_id)
+    if not case_obj:
+        LOGGER.error('Case %s not found', case_id)
         context.abort()
 
     # MIP formatted pedigree.yaml config
-    config_data = context.obj['api'].config(family_obj, pipeline='mip-rna')
+    config_data = context.obj['api'].config(case_obj, pipeline='mip-rna')
 
     if dry:
         print(config_data)
     else:
-        # Write to trailblazer root dir / family_id
+        # Write to trailblazer root dir / case_id
         out_path = context.obj['tb'].save_config(config_data)
         LOGGER.info(f"saved config to: {out_path}")
