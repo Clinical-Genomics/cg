@@ -42,9 +42,10 @@ def config(context, dry, target_bed, singularity, umi_trim_length, quality_trim,
     # missing sample_id and files
     case_obj = context.obj['db'].family(case_id)
     link_objs = case_obj.links
-
+    tumor_paths = set()
+    normal_paths = set()
     for link_obj in link_objs:
-        LOGGER.info("%s: link FASTQ files", link_obj.sample.internal_id)
+        LOGGER.info("%s: config FASTQ file", link_obj.sample.internal_id)
         root_dir = context.obj['balsamic']['root']
         wrk_dir = Path(f'{root_dir}/{case_id}/fastq')
 
@@ -73,9 +74,6 @@ def config(context, dry, target_bed, singularity, umi_trim_length, quality_trim,
             files.append(data)
 
         sorted_files = sorted(files, key=lambda k: k['path'])
-
-        tumor_paths = set()
-        normal_paths = set()
 
         for fastq_data in sorted_files:
             original_fastq_path = Path(fastq_data['path'])
