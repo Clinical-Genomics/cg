@@ -109,6 +109,8 @@ def _add_new_analysis_to_the_status_api(bundle_obj, status):
 def completed(context):
     """Store all completed analyses."""
     hk_api = context.obj['hk_api']
+    FAIL = 1
+    SUCCESS = 0
     exit_code = FAIL
     for analysis_obj in context.obj['tb_api'].analyses(status='completed', deleted=False):
         existing_record = hk_api.version(analysis_obj.family, analysis_obj.started_at)
