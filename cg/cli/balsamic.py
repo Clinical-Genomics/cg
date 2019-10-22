@@ -139,7 +139,7 @@ def config(context, dry, target_bed, singularity, umi_trim_length, quality_trim,
     if umi:
         command_str += f" --umi "
     if umi_trim_length:
-        command_str += f" --umi_trim_length {umi_trim_length} "
+        command_str += f" --umi-trim-length {umi_trim_length} "
     if quality_trim:
         command_str += f" --quality-trim "
     if adapter_trim:
