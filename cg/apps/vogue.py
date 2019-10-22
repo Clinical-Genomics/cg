@@ -4,7 +4,6 @@
 
 import json
 import logging
-
 import subprocess
 from subprocess import CalledProcessError
 
