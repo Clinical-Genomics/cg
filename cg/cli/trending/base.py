@@ -1,6 +1,7 @@
 """Base command for trending"""
 
 import click
+
 from cg.cli.trending.genotype import genotype as genotype_command
 
 
