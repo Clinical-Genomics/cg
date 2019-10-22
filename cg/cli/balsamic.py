@@ -145,7 +145,7 @@ def config(context, dry, target_bed, singularity, umi_trim_length, quality_trim,
     if adapter_trim:
         command_str += f" --adapter_trim "
 
-    command = ["bash -c 'source activate P_BALSAMIC-base_3.0.1; balsamic"]
+    command = ["bash -c 'source activate P_BALSAMIC-base_3.2.0; balsamic"]
     command_str += "'"  # add ending quote from above line
     command.extend(command_str.split(' '))
 
