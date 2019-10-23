@@ -26,15 +26,13 @@ def balsamic(context):
 @balsamic.command()
 @click.option('-d', '--dry', is_flag=True, help='print config to console')
 @click.option('--target-bed', required=False, help='Optional')
-@click.option('--singularity', default="/home/proj/production/cancer/BALSAMIC/BALSAMIC/containers"
-                                       "/BALSAMIC.3.2.0.sif", required=False, help='Optional')
 @click.option('--umi-trim-length', default=5, required=False, help='Default 5')
 @click.option('--quality-trim', is_flag=True, required=False, help='Optional')
 @click.option('--adapter-trim', is_flag=True, required=False, help='Optional')
 @click.option('--umi', is_flag=True, required=False, help='Optional')
 @click.argument('case_id')
 @click.pass_context
-def config(context, dry, target_bed, singularity, umi_trim_length, quality_trim, adapter_trim,
+def config(context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim,
            umi, case_id):
     """Generate a config for the case_id.
     """
@@ -44,10 +42,13 @@ def config(context, dry, target_bed, singularity, umi_trim_length, quality_trim,
     link_objs = case_obj.links
     tumor_paths = set()
     normal_paths = set()
+    singularity = context.obj['balsamic']['singularity']
+    reference_config = context.obj['balsamic']['reference_config']
+    conda_env = context.obj['balsamic']['conda_env']
+    root_dir = context.obj['balsamic']['root']
+    wrk_dir = Path(f'{root_dir}/{case_id}/fastq')
     for link_obj in link_objs:
         LOGGER.info("%s: config FASTQ file", link_obj.sample.internal_id)
-        root_dir = context.obj['balsamic']['root']
-        wrk_dir = Path(f'{root_dir}/{case_id}/fastq')
 
         linked_reads_paths = {1: [], 2: []}
         concatenated_paths = {1: '', 2: ''}
@@ -103,34 +104,30 @@ def config(context, dry, target_bed, singularity, umi_trim_length, quality_trim,
         else:
             normal_paths.add(concatenated_paths[1])
 
-    if not tumor_paths:
-        click.echo("No tumor sample found!", color="red")
-        context.abort()
-
-    if len(tumor_paths) > 1:
-        click.echo(f"Too many tumor samples found: {len(tumor_paths)}", color="red")
+    nr_paths = len(tumor_paths) if tumor_paths else 0
+    if nr_paths != 1:
+        click.echo("Must have only one tumor sample! Found {nr_paths} samples.", color="red")
         context.abort()
 
     tumor_path = tumor_paths.pop()
 
     normal_path = None
-    if len(normal_paths) > 1:
-        click.echo(f"Too many normal samples found: {len(normal_paths)}", color="red")
+    nr_normal_paths = len(normal_paths) if normal_paths else 0
+    if nr_normal_paths > 1:
+        click.echo(f"Too many normal samples found: {nr_normal_paths}", color="red")
         context.abort()
-
-    if len(normal_paths) == 1:
+    elif nr_normal_paths == 1:
         normal_path = normal_paths.pop()
 
     # Call Balsamic
-    # TODO move reference-config + singularity value to cg config
     command_str = (f"config case "
-                   f"--reference-config "
-                   f"/home/proj/production/cancer/reference/GRCh37/reference.json "
+                   f"--reference-config {reference_config}"
                    f" --singularity {singularity} "
                    f"--tumor {tumor_path} "
                    f"--case-id {case_id} "
                    f"--output-config {case_id}.json "
-                   f"--analysis-dir {root_dir}")
+                   f"--analysis-dir {root_dir} "
+                   f"--umi-trim-length {umi_trim_length}")
 
     if target_bed:
         command_str += f" -p {target_bed} "
@@ -138,14 +135,12 @@ def config(context, dry, target_bed, singularity, umi_trim_length, quality_trim,
         command_str += f" --normal {normal_path} "
     if umi:
         command_str += f" --umi "
-    if umi_trim_length:
-        command_str += f" --umi-trim-length {umi_trim_length} "
     if quality_trim:
         command_str += f" --quality-trim "
     if adapter_trim:
         command_str += f" --adapter-trim "
 
-    command = ["bash -c 'source activate P_BALSAMIC-base_3.2.0; balsamic"]
+    command = [f"bash -c 'source activate {conda_env}; balsamic"]
     command_str += "'"  # add ending quote from above line
     command.extend(command_str.split(' '))
 
@@ -172,6 +167,7 @@ def run(context, dry, run_analysis, config_path, analysis_type, priority, email,
     """Generate a config for the case_id.
     """
 
+    conda_env = context.obj['balsamic']['conda_env']
     root_dir = Path(context.obj['balsamic']['root'])
     if not config_path:
         config_path = Path.joinpath(root_dir, case_id, case_id + '.json')
@@ -193,7 +189,7 @@ def run(context, dry, run_analysis, config_path, analysis_type, priority, email,
         command_str += f" --qos {priority} "
 
     # TODO mv the env name to cg config file
-    command = ["bash -c 'source activate P_BALSAMIC-base_3.0.1; balsamic"]
+    command = ["bash -c 'source activate {conda_env}; balsamic"]
     command_str += "'"
     command.extend(command_str.split(' '))
 
