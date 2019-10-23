@@ -19,8 +19,6 @@ SUCCESS = 0
 @click.pass_context
 def balsamic(context):
     """ Run cancer workflow """
-    context.obj['hk'] = hk.HousekeeperAPI(context.obj)
-    context.obj['db'] = Store(context.obj['database'])
 
 
 @balsamic.command()
@@ -38,7 +36,7 @@ def config(context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim
     """
 
     # missing sample_id and files
-    case_obj = context.obj['db'].family(case_id)
+    case_obj = Store(context.obj['database']).family(case_id)
     link_objs = case_obj.links
     tumor_paths = set()
     normal_paths = set()
@@ -53,7 +51,8 @@ def config(context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim
         linked_reads_paths = {1: [], 2: []}
         concatenated_paths = {1: '', 2: ''}
 
-        file_objs = context.obj['hk'].files(bundle=link_obj.sample.internal_id, tags=['fastq'])
+        file_objs = hk.HousekeeperAPI(context.obj).files(bundle=link_obj.sample.internal_id,
+                                                         tags=['fastq'])
         files = []
         for file_obj in file_objs:
             # figure out flowcell name from header
@@ -106,7 +105,7 @@ def config(context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim
 
     nr_paths = len(tumor_paths) if tumor_paths else 0
     if nr_paths != 1:
-        click.echo("Must have only one tumor sample! Found {nr_paths} samples.", color="red")
+        click.echo("Must have exactly one tumor sample! Found {nr_paths} samples.", color="red")
         context.abort()
 
     tumor_path = tumor_paths.pop()
@@ -164,8 +163,7 @@ def config(context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim
 @click.argument('case_id')
 @click.pass_context
 def run(context, dry, run_analysis, config_path, analysis_type, priority, email, case_id):
-    """Generate a config for the case_id.
-    """
+    """Generate a config for the case_id."""
 
     conda_env = context.obj['balsamic']['conda_env']
     slurm_account = context.obj['balsamic']['slurm']['account']
