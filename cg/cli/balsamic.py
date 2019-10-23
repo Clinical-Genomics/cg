@@ -188,8 +188,7 @@ def run(context, dry, run_analysis, config_path, analysis_type, priority, email,
     if priority:
         command_str += f" --qos {priority} "
 
-    # TODO mv the env name to cg config file
-    command = ["bash -c 'source activate {conda_env}; balsamic"]
+    command = [f"bash -c 'source activate {conda_env}; balsamic"]
     command_str += "'"
     command.extend(command_str.split(' '))
 
