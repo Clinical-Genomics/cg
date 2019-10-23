@@ -32,6 +32,12 @@ class VogueAPI():
             LOG.info(log_msg)
 
 
+def check_process_status(process):
+    """Checking process returncode to see if process failes or not."""
+
+    return process.poll() != 0
+
+
 def execute_command(cmd):
     """
         Prints stdout + stderr of command in real-time while being executed
@@ -50,6 +56,5 @@ def execute_command(cmd):
     for line in process.stdout:
         yield line.decode('utf-8').strip()
 
-    # Check if process exited with returncode != 0
-    if process.poll():
+    if check_process_status(process):
         raise CalledProcessError(returncode=process.returncode, cmd=cmd)
