@@ -35,7 +35,7 @@ def test_get_trending(genotypeapi, mocker):
     genotypeapi.get_trending(days=days)
 
     # THEN assert subprocess is running the GenotypeAPI with correct command
-    call = f"gtdb --database database prepare-trending -d {days}"
+    call = "gtdb --database database prepare-trending -d %s" % days
     subprocess.check_output.assert_called_with(call, shell=True)
 
 
