@@ -63,5 +63,5 @@ class GenotypeAPI(Manager):
         output = output.decode('utf-8')
         # If sample not in genotype db, stdout of genotype command will be empty.
         if not output:
-            raise CaseNotFoundError(f"samples not found in genotype db")
+            raise CaseNotFoundError("samples not found in genotype db")
         return output
