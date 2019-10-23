@@ -458,10 +458,10 @@ def validate(context, family_id):
 @upload.command('process-solved')
 @click.option('-c', '--case-id', help='internal case id, leave empty to process all')
 @click.option('-d', '--days-ago', type=int, default=1, help='days since solved')
-@click.option('-i', '--institutes', type=str, multiple=True, help="Filter on customers")
+@click.option('-C', '--customers', type=str, multiple=True, help="Filter on customers")
 @click.option('--dry-run', is_flag=True, help='only print cases to be processed')
 @click.pass_context
-def process_solved(context, case_id, days_ago, institutes, dry_run):
+def process_solved(context, case_id, days_ago, customers, dry_run):
 
     """Process cases with mutacc that has been marked as solved in scout.
     This prepares them to be uploaded to the mutacc database"""
@@ -485,8 +485,8 @@ def process_solved(context, case_id, days_ago, institutes, dry_run):
     for case in finished_cases:
 
         number_processed += 1
-        if institutes:
-            if case['owner'] not in institutes:
+        if customers:
+            if case['owner'] not in customers:
                 LOG.info("skipping %s: Not valid customer %s", case['_id'], case['owner'])
                 continue
         if dry_run:
