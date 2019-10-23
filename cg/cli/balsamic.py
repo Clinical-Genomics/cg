@@ -159,7 +159,7 @@ def config(context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim
 @click.option('-r', '--run-analysis', is_flag=True, default=False, help='start analysis')
 @click.option('--config', 'config_path', required=False, help='Optional')
 @click.option('--analysis-type', 'analysis_type', required=False, default='qc', help='Optional')
-@click.option('-p', '--priority', default='low', type=click.Choice(['low', 'normal', 'high']))
+@click.option('-p', '--priority', type=click.Choice(['low', 'normal', 'high']))
 @click.option('-e', '--email', help='email to send errors to')
 @click.argument('case_id')
 @click.pass_context
@@ -168,14 +168,15 @@ def run(context, dry, run_analysis, config_path, analysis_type, priority, email,
     """
 
     conda_env = context.obj['balsamic']['conda_env']
+    slurm_account = context.obj['balsamic']['slurm']['account']
+    priority = priority if priority else context.obj['balsamic']['slurm']['qos']
     root_dir = Path(context.obj['balsamic']['root'])
     if not config_path:
         config_path = Path.joinpath(root_dir, case_id, case_id + '.json')
 
     # Call Balsamic
-    # TODO: slurm-account to cg config
     command_str = (f" run analysis "
-                   f"--slurm-account development "
+                   f"--slurm-account {slurm_account}"
                    f"-s {config_path} ")
 
     if run_analysis:
@@ -184,9 +185,7 @@ def run(context, dry, run_analysis, config_path, analysis_type, priority, email,
     if email:
         command_str += f" --slurm-mail-user {email} "
 
-    # TODO add default qos to cg config
-    if priority:
-        command_str += f" --qos {priority} "
+    command_str += f" --qos {priority} "
 
     command = [f"bash -c 'source activate {conda_env}; balsamic"]
     command_str += "'"
