@@ -145,9 +145,10 @@ class AnalysisView(BaseView):
 class FlowcellView(BaseView):
     """Admin view for Model.Flowcell"""
 
-    column_searchable_list = ['name']
-    column_filters = ['sequencer_type', 'sequencer_name']
     column_editable_list = ['status']
+    column_exclude_list = ['archived_at']
+    column_filters = ['sequencer_type', 'sequencer_name']
+    column_searchable_list = ['name']
 
 
 class InvoiceView(BaseView):
