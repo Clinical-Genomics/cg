@@ -1,5 +1,5 @@
 """This script tests the cli methods to create the config for a balsamic config"""
-
+import pytest
 from cg.cli.balsamic import config
 
 EXIT_SUCCESS = 0
