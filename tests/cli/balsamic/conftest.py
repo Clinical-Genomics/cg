@@ -22,7 +22,6 @@ def base_context():
     }
 
 
-@pytest.fixture(scope='function')
 class MockHouseKeeper:
 
     def files(self, version, tags):
@@ -72,7 +71,6 @@ class MockAnalysis:
         return ''
 
 
-@pytest.fixture(scope='function')
 class MockStore:
     """We need to call the family function from the store
     without accessing the database. So here we go"""
