@@ -15,7 +15,7 @@ def base_context(balsamic_store) -> dict:
     """context to use in cli"""
     return {
         'hk_api': MockHouseKeeper(),
-        'db': balsamic_store(),
+        'db': balsamic_store,
         'analysis_api': MockAnalysis(),
         'fastq_handler': MockBalsamicFastq(),
         'balsamic': {'conda_env': 'conda_env',
