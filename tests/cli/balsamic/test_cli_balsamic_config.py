@@ -5,44 +5,40 @@ from cg.cli.balsamic import config
 EXIT_SUCCESS = 0
 
 
-def test_without_options(cli_runner):
+def test_without_options(cli_runner, base_context):
     """Test command with dry option"""
 
     # GIVEN
 
     # WHEN dry running without anything specified
-    result = cli_runner.invoke(config)
+    result = cli_runner.invoke(config, obj=base_context)
 
     # THEN command should mention argument
     assert result.exit_code != EXIT_SUCCESS
     assert "Missing argument" in result.output
 
 
-def test_with_case(cli_runner, base_context):
+def test_with_missing_case(cli_runner, base_context):
     """Test command with case to start with"""
 
-    # GIVEN case-id, and malconfigured pipeline
+    # GIVEN case-id not in database
     case_id = 'soberelephant'
 
-    context = base_context
-
     # WHEN running
-    result = cli_runner.invoke(config, [case_id], obj=context)
+    result = cli_runner.invoke(config, [case_id], obj=base_context)
 
-    # THEN command should successfully call the comamnd it creates
+    # THEN command should successfully call the command it creates
     assert result.exit_code == EXIT_SUCCESS
 
 
 def test_dry(cli_runner, base_context):
-    """Test command with dry option"""
+    """Test command with --dry option"""
 
     # GIVEN case-id
     case_id = 'sillyshark'
 
-    context = base_context
-
     # WHEN dry running with dry specified
-    result = cli_runner.invoke(config, [case_id, '--dry'], obj=context)
+    result = cli_runner.invoke(config, [case_id, '--dry'], obj=base_context)
 
     # THEN command should print the balsamic command-string
     assert result.exit_code == EXIT_SUCCESS
@@ -50,74 +46,41 @@ def test_dry(cli_runner, base_context):
     assert case_id in result.output
 
 
-def test_run_analysis(cli_runner, base_context):
-    """Test command with config-analysis option"""
+@pytest.mark.parametrize('option', [
+    '--target-bed',
+    '--quality-trim',
+    '--adapter-trim',
+    '--umi',
+])
+def test_passed_option(cli_runner, base_context):
+    """Test command with option --target-bed"""
 
     # GIVEN case-id
-    case_id = 'slimwhale'
-
-    context = base_context
+    case_id = 'digitalcow'
+    option_key = '--target-bed'
+    balsamic_key = option_key
 
     # WHEN dry running with option specified
-    result = cli_runner.invoke(config, [case_id, '--dry', '--config-analysis'], obj=context)
+    result = cli_runner.invoke(config, [case_id, '--dry', option_key], obj=base_context)
 
-    # THEN dry-print should include the option
+    # THEN dry-print should include the the balsamic option key
     assert result.exit_code == EXIT_SUCCESS
-    assert "--config-analysis" in result.output
+    assert balsamic_key in result.output
 
 
-def test_config(cli_runner, base_context):
-    """Test command with config option"""
-
-    # GIVEN case-id
-    case_id = 'analogeel'
-    option_key = '--config'
-    option_value = 'config-path'
-
-    context = base_context
-
-    # WHEN dry running with option specified
-    result = cli_runner.invoke(config, [case_id, '--dry', option_key, option_value], obj=context)
-
-    # THEN dry-print should include the the option-value but not the case-id
-    assert result.exit_code == EXIT_SUCCESS
-    assert option_value in result.output
-    assert case_id not in result.output
-
-
-def test_email(cli_runner, base_context):
-    """Test command with config option"""
+def test_umi_trim_length(cli_runner, base_context):
+    """Test command with --umi-trim-length option"""
 
     # GIVEN case-id
-    case_id = 'mightymonkey'
-    option_key = '--email'
-    option_value = 'salmon.moose@test.com'
-
-    context = base_context
-
-    # WHEN dry running with option specified
-    result = cli_runner.invoke(config, [case_id, '--dry', option_key, option_value], obj=context)
-
-    # THEN dry-print should include the the option-value but not the case-id
-    assert result.exit_code == EXIT_SUCCESS
-    assert '--slurm-mail-user' in result.output
-    assert option_value in result.output
-
-
-def test_priority(cli_runner, base_context):
-    """Test command with priority option"""
-
-    # GIVEN case-id
-    case_id = 'weakgorilla'
-    option_key = '--priority'
-    option_value = 'high'
-
-    context = base_context
+    case_id = 'slyfox'
+    option_key = '--umi-trim-length'
+    option_value = '5'
+    balsamic_key = option_key
 
     # WHEN dry running with option specified
-    result = cli_runner.invoke(config, [case_id, '--dry', option_key, option_value], obj=context)
+    result = cli_runner.invoke(config, [case_id, '--dry', option_key, option_value], obj=base_context)
 
     # THEN dry-print should include the the option-value
     assert result.exit_code == EXIT_SUCCESS
-    assert '--qos' in result.output
+    assert balsamic_key in result.output
     assert option_value in result.output
