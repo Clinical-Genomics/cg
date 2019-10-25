@@ -4,7 +4,7 @@ from collections import namedtuple
 import pytest
 from _pytest import tmpdir
 
-from cg.cg.apps.balsamic.fastq import BalsamicFastqHandler
+from cg.apps.balsamic.fastq import BalsamicFastqHandler
 
 
 @pytest.fixture
