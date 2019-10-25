@@ -57,7 +57,7 @@ def test_dry(cli_runner, base_context):
     '--umi',
 ])
 def test_passed_option(cli_runner, base_context, option_key):
-    """Test command with option --target-bed"""
+    """Test command with option"""
 
     # GIVEN case-id
     case_id = base_context['db'].families().first().internal_id

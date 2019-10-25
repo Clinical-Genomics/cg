@@ -20,7 +20,9 @@ def base_context(balsamic_store) -> dict:
         'fastq_handler': MockBalsamicFastq(),
         'balsamic': {'conda_env': 'conda_env',
                      'root': 'root',
-                     'slurm': {'account': 'account', 'qos': 'qos'}
+                     'slurm': {'account': 'account', 'qos': 'qos'},
+                     'singularity': 'singularity',
+                     'reference_config': 'reference_config'
                      }
     }
 
