@@ -11,11 +11,11 @@ from cg.store import Store
 
 
 @pytest.fixture
-def base_context(sample_store):
+def base_context() -> dict:
     """context to use in cli"""
     return {
         'hk_api': MockHouseKeeper(),
-        'db': balsamic_store,
+        'db': balsamic_store(),
         'analysis_api': MockAnalysis(),
         'fastq_handler': MockBalsamicFastq(),
         'balsamic': {'conda_env': 'conda_env',
@@ -88,7 +88,7 @@ class MockBalsamicFastq(BalsamicFastqHandler):
 
 
 @pytest.fixture(scope='function')
-def balsamic_store(base_store) -> Store:
+def balsamic_store(base_store: Store) -> Store:
 
     _store = base_store
     family = add_family(_store)
