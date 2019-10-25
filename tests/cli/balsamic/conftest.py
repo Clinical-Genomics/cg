@@ -11,7 +11,7 @@ from cg.store import Store
 
 
 @pytest.fixture
-def base_context() -> dict:
+def base_context(balsamic_store) -> dict:
     """context to use in cli"""
     return {
         'hk_api': MockHouseKeeper(),
