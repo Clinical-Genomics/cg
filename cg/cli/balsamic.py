@@ -41,6 +41,11 @@ def config(context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim
 
     # missing sample_id and files
     case_obj = context.obj['db'].family(case_id)
+
+    if not case_obj:
+        LOGGER.error("Could not find case: %s", case_id)
+        context.abort()
+
     link_objs = case_obj.links
     tumor_paths = set()
     normal_paths = set()

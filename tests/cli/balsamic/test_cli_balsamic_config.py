@@ -1,5 +1,6 @@
 """This script tests the cli methods to create the config for a balsamic config"""
 import pytest
+import logging
 from cg.cli.balsamic import config
 
 EXIT_SUCCESS = 0
@@ -18,7 +19,7 @@ def test_without_options(cli_runner, base_context):
     assert "Missing argument" in result.output
 
 
-def test_with_missing_case(cli_runner, base_context):
+def test_with_missing_case(cli_runner, base_context, caplog):
     """Test command with case to start with"""
 
     # GIVEN case-id not in database
@@ -28,7 +29,10 @@ def test_with_missing_case(cli_runner, base_context):
     result = cli_runner.invoke(config, [case_id], obj=base_context)
 
     # THEN command should successfully call the command it creates
-    assert result.exit_code == EXIT_SUCCESS
+    assert result.exit_code != EXIT_SUCCESS
+
+    with caplog.at_level(logging.ERROR):
+        assert case_id in caplog
 
 
 def test_dry(cli_runner, base_context):
