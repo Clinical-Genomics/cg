@@ -12,39 +12,47 @@ from cg.meta.analysis import AnalysisAPI
 from cg.store import Store
 
 LOGGER = logging.getLogger(__name__)
+SUCCESS = 0
 
 
 @click.group()
 @click.pass_context
 def balsamic(context):
     """ Run cancer workflow """
-    context.obj['hk'] = hk.HousekeeperAPI(context.obj)
-    context.obj['db'] = Store(context.obj['database'])
 
 
 @balsamic.command()
 @click.option('-d', '--dry', is_flag=True, help='print config to console')
 @click.option('--target-bed', required=False, help='Optional')
+@click.option('--umi-trim-length', default=5, required=False, help='Default 5')
+@click.option('--quality-trim', is_flag=True, required=False, help='Optional')
+@click.option('--adapter-trim', is_flag=True, required=False, help='Optional')
+@click.option('--umi', is_flag=True, required=False, help='Optional')
 @click.argument('case_id')
 @click.pass_context
-def config(context, dry, target_bed, case_id):
+def config(context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim,
+           umi, case_id):
     """Generate a config for the case_id.
     """
 
     # missing sample_id and files
-    case_obj = context.obj['db'].family(case_id)
+    case_obj = Store(context.obj['database']).family(case_id)
     link_objs = case_obj.links
     tumor_paths = set()
     normal_paths = set()
+    singularity = context.obj['balsamic']['singularity']
+    reference_config = context.obj['balsamic']['reference_config']
+    conda_env = context.obj['balsamic']['conda_env']
+    root_dir = context.obj['balsamic']['root']
+    wrk_dir = Path(f'{root_dir}/{case_id}/fastq')
     for link_obj in link_objs:
         LOGGER.info("%s: config FASTQ file", link_obj.sample.internal_id)
-        root_dir = context.obj['balsamic']['root']
-        wrk_dir = Path(f'{root_dir}/{case_id}/fastq')
 
         linked_reads_paths = {1: [], 2: []}
         concatenated_paths = {1: '', 2: ''}
 
-        file_objs = context.obj['hk'].files(bundle=link_obj.sample.internal_id, tags=['fastq'])
+        file_objs = hk.HousekeeperAPI(context.obj).files(bundle=link_obj.sample.internal_id,
+                                                         tags=['fastq'])
         files = []
         for file_obj in file_objs:
             # figure out flowcell name from header
@@ -95,45 +103,49 @@ def config(context, dry, target_bed, case_id):
         else:
             normal_paths.add(concatenated_paths[1])
 
-    if not tumor_paths:
-        click.echo("No tumor sample found!", color="red")
-        context.abort()
-
-    if len(tumor_paths) > 1:
-        click.echo(f"Too many tumor samples found: {len(tumor_paths)}", color="red")
+    nr_paths = len(tumor_paths) if tumor_paths else 0
+    if nr_paths != 1:
+        click.echo("Must have exactly one tumor sample! Found {nr_paths} samples.", color="red")
         context.abort()
 
     tumor_path = tumor_paths.pop()
 
     normal_path = None
-    if len(normal_paths) > 1:
-        click.echo(f"Too many normal samples found: {len(normal_paths)}", color="red")
+    nr_normal_paths = len(normal_paths) if normal_paths else 0
+    if nr_normal_paths > 1:
+        click.echo(f"Too many normal samples found: {nr_normal_paths}", color="red")
         context.abort()
-
-    if len(normal_paths) == 1:
+    elif nr_normal_paths == 1:
         normal_path = normal_paths.pop()
 
     # Call Balsamic
-    # TODO move reference-config value to cg config
     command_str = (f"config case "
-                   f"--reference-config "
-                   f"/home/proj/production/cancer/reference/GRCh37/reference.json "
+                   f"--reference-config {reference_config}"
+                   f" --singularity {singularity} "
                    f"--tumor {tumor_path} "
                    f"--case-id {case_id} "
                    f"--output-config {case_id}.json "
-                   f"--analysis-dir {root_dir}")
+                   f"--analysis-dir {root_dir} "
+                   f"--umi-trim-length {umi_trim_length}")
+
     if target_bed:
         command_str += f" -p {target_bed} "
-
     if normal_path:
         command_str += f" --normal {normal_path} "
+    if umi:
+        command_str += f" --umi "
+    if quality_trim:
+        command_str += f" --quality-trim "
+    if adapter_trim:
+        command_str += f" --adapter-trim "
 
-    command = ["bash -c 'source activate P_BALSAMIC-base_3.0.1; balsamic"]
+    command = [f"bash -c 'source activate {conda_env}; balsamic"]
     command_str += "'"  # add ending quote from above line
     command.extend(command_str.split(' '))
 
     if dry:
         print(' '.join(command))
+        return SUCCESS
     else:
         process = subprocess.run(
             ' '.join(command), shell=True
@@ -146,22 +158,23 @@ def config(context, dry, target_bed, case_id):
 @click.option('-r', '--run-analysis', is_flag=True, default=False, help='start analysis')
 @click.option('--config', 'config_path', required=False, help='Optional')
 @click.option('--analysis-type', 'analysis_type', required=False, default='qc', help='Optional')
-@click.option('-p', '--priority', default='low', type=click.Choice(['low', 'normal', 'high']))
+@click.option('-p', '--priority', type=click.Choice(['low', 'normal', 'high']))
 @click.option('-e', '--email', help='email to send errors to')
 @click.argument('case_id')
 @click.pass_context
 def run(context, dry, run_analysis, config_path, analysis_type, priority, email, case_id):
-    """Generate a config for the case_id.
-    """
+    """Generate a config for the case_id."""
 
+    conda_env = context.obj['balsamic']['conda_env']
+    slurm_account = context.obj['balsamic']['slurm']['account']
+    priority = priority if priority else context.obj['balsamic']['slurm']['qos']
     root_dir = Path(context.obj['balsamic']['root'])
     if not config_path:
         config_path = Path.joinpath(root_dir, case_id, case_id + '.json')
 
     # Call Balsamic
-    # TODO: slurm-account to cg config
     command_str = (f" run analysis "
-                   f"--slurm-account development "
+                   f"--slurm-account {slurm_account}"
                    f"-s {config_path} ")
 
     if run_analysis:
@@ -170,12 +183,9 @@ def run(context, dry, run_analysis, config_path, analysis_type, priority, email,
     if email:
         command_str += f" --slurm-mail-user {email} "
 
-    # TODO add default qos to cg config
-    if priority:
-        command_str += f" --qos {priority} "
+    command_str += f" --qos {priority} "
 
-    # TODO mv the env name to cg config file
-    command = ["bash -c 'source activate P_BALSAMIC-base_3.0.1; balsamic"]
+    command = [f"bash -c 'source activate {conda_env}; balsamic"]
     command_str += "'"
     command.extend(command_str.split(' '))
 
