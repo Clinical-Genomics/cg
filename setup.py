@@ -37,7 +37,7 @@ class PyTest(TestCommand):
     def finalize_options(self):
         """Set options for the command line."""
         TestCommand.finalize_options(self)
-        self.test_args = ['-W', 'ignore:PendingDeprecationWarning', '-W', 'ignore::DeprecationWarning']
+        self.test_args = ['-W', 'ignore::PendingDeprecationWarning', '-W', 'ignore::DeprecationWarning']
         self.test_suite = True
 
     def run_tests(self):
