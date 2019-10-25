@@ -19,6 +19,10 @@ SUCCESS = 0
 @click.pass_context
 def balsamic(context):
     """ Run cancer workflow """
+    context.obj['db'] = Store(context.obj['database'])
+    context.obj['hk_api'] = hk.HousekeeperAPI(context.obj)
+    context.obj['analysis_api'] = AnalysisAPI(context.obj)
+    context.obj['fastq_handler'] = BalsamicFastqHandler()
 
 
 @balsamic.command()
@@ -36,7 +40,7 @@ def config(context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim
     """
 
     # missing sample_id and files
-    case_obj = Store(context.obj['database']).family(case_id)
+    case_obj = context.obj['db'].family(case_id)
     link_objs = case_obj.links
     tumor_paths = set()
     normal_paths = set()
@@ -51,14 +55,14 @@ def config(context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim
         linked_reads_paths = {1: [], 2: []}
         concatenated_paths = {1: '', 2: ''}
 
-        file_objs = hk.HousekeeperAPI(context.obj).files(bundle=link_obj.sample.internal_id,
+        file_objs = context.obj['hk_api'].files(bundle=link_obj.sample.internal_id,
                                                          tags=['fastq'])
         files = []
         for file_obj in file_objs:
             # figure out flowcell name from header
             with gzip.open(file_obj.full_path) as handle:
                 header_line = handle.readline().decode()
-                header_info = AnalysisAPI._fastq_header(header_line)
+                header_info = context.obj['analysis_api']._fastq_header(header_line)
 
             data = {
                 'path': file_obj.full_path,
@@ -77,7 +81,7 @@ def config(context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim
 
         for fastq_data in sorted_files:
             original_fastq_path = Path(fastq_data['path'])
-            linked_fastq_name = BalsamicFastqHandler.FastqFileNameCreator.create(
+            linked_fastq_name = context.obj['fastq_handler'].FastqFileNameCreator.create(
                 lane=fastq_data['lane'],
                 flowcell=fastq_data['flowcell'],
                 sample=link_obj.sample.internal_id,
@@ -85,7 +89,7 @@ def config(context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim
                 more={'undetermined': fastq_data['undetermined']},
             )
             concatenated_fastq_name = \
-                BalsamicFastqHandler.FastqFileNameCreator.get_concatenated_name(
+                context.obj['fastq_handler'].FastqFileNameCreator.get_concatenated_name(
                     linked_fastq_name)
 
             linked_fastq_path = wrk_dir / linked_fastq_name

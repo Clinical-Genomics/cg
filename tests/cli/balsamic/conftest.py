@@ -1,13 +1,20 @@
 """Fixtures for cli balsamic tests"""
+from collections import namedtuple
+
 import pytest
+from _pytest import tmpdir
+
+from cg.cg.apps.balsamic.fastq import BalsamicFastqHandler
 
 
 @pytest.fixture
 def base_context():
     """context to use in cli"""
     return {
-        'tb_api': tb_api,
-        'db': mock_store,
+        'hk_api': MockHouseKeeper,
+        'db': MockStore,
+        'analysis_api': MockAnalysis,
+        'fastq_handler': MockBalsamicFastq,
         'balsamic': {'conda_env': 'conda_env',
                      'root': 'root',
                      'slurm': {'account': 'account', 'qos': 'qos'}
@@ -15,78 +22,58 @@ def base_context():
     }
 
 
-class MockTB:
-    """Trailblazer mock fixture"""
+@pytest.fixture(scope='function')
+class MockHouseKeeper:
 
-    def __init__(self):
-        self._link_was_called = False
-        self._mark_analyses_deleted_called = False
-        self._add_pending_was_called = False
-        self._family = None
-        self._temp = None
-        self._case_id = None
-        self._email = None
+    def files(self, version, tags):
+        return MockFile()
 
-    def analyses(self, family, temp):
-        """Mock TB analyses models"""
+    def version(self, arg1: str, arg2: str):
+        """Fetch version from the database."""
+        return MockVersion()
 
-        self._family = family
-        self._temp = temp
 
-        class Row:
-            """Mock a record representing an analysis"""
+class MockVersion:
+    def id(self):
+        return ''
 
-            def __init__(self):
-                """We need to initialize _first_was_called
-                so that we can set it in `first()` and retrieve
-                it in `first_was_called()`. This way we can easily
-                run the invoking code and make sure the function was
-                called.
-                """
 
-                self._first_was_called = False
+class MockFile:
 
-            def first(self):
-                """Mock that the first row doesn't exist"""
+    def __init__(self, path=''):
+        self.path = path
 
-                self._first_was_called = True
+    def first(self):
+        return MockFile()
 
-                return None
+    def full_path(self):
+        return ''
 
-            def first_was_called(self):
-                """Check if first was called"""
-                return self._first_was_called
 
-        return Row()
+class MockAnalysis:
 
-    def mark_analyses_deleted(self, case_id: str):
-        """Mock this function"""
-        self._case_id = case_id
-        self._mark_analyses_deleted_called = True
+    def get_latest_metadata(self, family_id):
+        # Returns: dict: parsed data
+        ### Define output dict
+        outdata = {
+            'analysis_sex': {'ADM1': 'female', 'ADM2': 'female', 'ADM3': 'female'},
+            'family': 'yellowhog',
+            'duplicates': {'ADM1': 13.525, 'ADM2': 12.525, 'ADM3': 14.525},
+            'genome_build': 'hg19',
+            'rank_model_version': '1.18',
+            'mapped_reads': {'ADM1': 98.8, 'ADM2': 99.8, 'ADM3': 97.8},
+            'mip_version': 'v4.0.20',
+            'sample_ids': ['2018-20203', '2018-20204'],
+        }
 
-    def add_pending(self, case_id: str, email: str):
-        """Mock this function"""
-        self._case_id = case_id
-        self._email = email
-        self._add_pending_was_called = True
+        return outdata
 
-    def mark_analyses_deleted_called(self):
-        """check if mark_analyses_deleted was called"""
-        return self._mark_analyses_deleted_called
-
-    def add_pending_was_called(self):
-        """check if add_pending was called"""
-        return self._add_pending_was_called
+    def convert_panels(self, customer_id, panels):
+        return ''
 
 
 @pytest.fixture(scope='function')
-def tb_api():
-    """Trailblazer API fixture"""
-
-    return MockTB()
-
-
-class MockStore():
+class MockStore:
     """We need to call the family function from the store
     without accessing the database. So here we go"""
 
@@ -113,8 +100,8 @@ class MockStore():
         return self._family_was_called
 
 
-@pytest.fixture(scope='function')
-def mock_store():
-    """store fixture"""
+class MockBalsamicFastq(BalsamicFastqHandler):
+    """Mock FastqHandler for analysis_api"""
 
-    return MockStore()
+    def __init__(self):
+        super().__init__(config={'balsamic': {'root': tmpdir}})
