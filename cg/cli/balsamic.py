@@ -60,8 +60,8 @@ def config(context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim
         linked_reads_paths = {1: [], 2: []}
         concatenated_paths = {1: '', 2: ''}
 
-        file_objs = context.obj['hk_api'].files(bundle=link_obj.sample.internal_id,
-                                                         tags=['fastq'])
+        file_objs = context.obj['hk_api'].get_files(bundle=link_obj.sample.internal_id,
+                                                    tags=['fastq'])
         files = []
         for file_obj in file_objs:
             # figure out flowcell name from header
