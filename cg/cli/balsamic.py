@@ -40,7 +40,7 @@ def config(context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim
     """
 
     # missing sample_id and files
-    case_obj = context.obj['db'].family(case_id=case_id)
+    case_obj = context.obj['db'].family(case_id)
     link_objs = case_obj.links
     tumor_paths = set()
     normal_paths = set()
