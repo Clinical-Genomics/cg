@@ -1,5 +1,6 @@
 """Fixtures for cli balsamic tests"""
 from collections import namedtuple
+from datetime import datetime
 
 import pytest
 
