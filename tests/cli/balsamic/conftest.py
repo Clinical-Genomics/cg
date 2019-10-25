@@ -15,10 +15,10 @@ from cg.store import Store
 def base_context():
     """context to use in cli"""
     return {
-        'hk_api': MockHouseKeeper,
-        'db': MockStore,
-        'analysis_api': MockAnalysis,
-        'fastq_handler': MockBalsamicFastq,
+        'hk_api': MockHouseKeeper(),
+        'db': MockStore(),
+        'analysis_api': MockAnalysis(),
+        'fastq_handler': MockBalsamicFastq(),
         'balsamic': {'conda_env': 'conda_env',
                      'root': 'root',
                      'slurm': {'account': 'account', 'qos': 'qos'}
