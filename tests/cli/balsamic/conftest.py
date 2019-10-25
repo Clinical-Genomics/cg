@@ -32,7 +32,7 @@ class MockHouseKeeper(HousekeeperAPI):
     def __init__(self):
         pass
 
-    def files(self, version, tags):
+    def files(self, tags, bundle):
         return MockFile()
 
     def version(self, arg1: str, arg2: str):
