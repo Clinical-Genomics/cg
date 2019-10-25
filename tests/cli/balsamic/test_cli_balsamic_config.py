@@ -46,18 +46,17 @@ def test_dry(cli_runner, base_context):
     assert case_id in result.output
 
 
-@pytest.mark.parametrize('option', [
+@pytest.mark.parametrize('option_key', [
     '--target-bed',
     '--quality-trim',
     '--adapter-trim',
     '--umi',
 ])
-def test_passed_option(cli_runner, base_context):
+def test_passed_option(cli_runner, base_context, option_key):
     """Test command with option --target-bed"""
 
     # GIVEN case-id
     case_id = 'digitalcow'
-    option_key = '--target-bed'
     balsamic_key = option_key
 
     # WHEN dry running with option specified
