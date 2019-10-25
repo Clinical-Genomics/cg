@@ -39,7 +39,7 @@ def test_dry(cli_runner, base_context):
     """Test command with --dry option"""
 
     # GIVEN case-id
-    case_id = 'sillyshark'
+    case_id = base_context['db'].families().first().internal_id
 
     # WHEN dry running with dry specified
     result = cli_runner.invoke(config, [case_id, '--dry'], obj=base_context)
@@ -60,7 +60,7 @@ def test_passed_option(cli_runner, base_context, option_key):
     """Test command with option --target-bed"""
 
     # GIVEN case-id
-    case_id = 'digitalcow'
+    case_id = base_context['db'].families().first().internal_id
     balsamic_key = option_key
 
     # WHEN dry running with option specified
@@ -75,7 +75,7 @@ def test_umi_trim_length(cli_runner, base_context):
     """Test command with --umi-trim-length option"""
 
     # GIVEN case-id
-    case_id = 'slyfox'
+    case_id = base_context['db'].families().first().internal_id
     option_key = '--umi-trim-length'
     option_value = '5'
     balsamic_key = option_key
