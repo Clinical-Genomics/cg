@@ -6,6 +6,10 @@ from _pytest import tmpdir
 
 from cg.apps.balsamic.fastq import BalsamicFastqHandler
 
+from cg.apps.hk import HousekeeperAPI
+from cg.meta.analysis import AnalysisAPI
+from cg.store import Store
+
 
 @pytest.fixture
 def base_context():
@@ -22,7 +26,7 @@ def base_context():
     }
 
 
-class MockHouseKeeper:
+class MockHouseKeeper(HousekeeperAPI):
 
     def files(self, version, tags):
         return MockFile()
@@ -49,7 +53,7 @@ class MockFile:
         return ''
 
 
-class MockAnalysis:
+class MockAnalysis(AnalysisAPI):
 
     def get_latest_metadata(self, family_id):
         # Returns: dict: parsed data
@@ -71,7 +75,7 @@ class MockAnalysis:
         return ''
 
 
-class MockStore:
+class MockStore(Store):
     """We need to call the family function from the store
     without accessing the database. So here we go"""
 
