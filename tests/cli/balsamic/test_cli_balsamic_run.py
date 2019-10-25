@@ -1,4 +1,4 @@
-"""This script tests the cli methods to handle balsamic"""
+"""This script tests the cli methods to run balsamic"""
 
 from cg.cli.balsamic import run
 
