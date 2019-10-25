@@ -28,6 +28,9 @@ def base_context():
 
 class MockHouseKeeper(HousekeeperAPI):
 
+    def __init__(self):
+        pass
+
     def files(self, version, tags):
         return MockFile()
 
@@ -54,6 +57,9 @@ class MockFile:
 
 
 class MockAnalysis(AnalysisAPI):
+
+    def __init__(self):
+        pass
 
     def get_latest_metadata(self, family_id):
         # Returns: dict: parsed data
@@ -106,4 +112,4 @@ class MockBalsamicFastq(BalsamicFastqHandler):
     """Mock FastqHandler for analysis_api"""
 
     def __init__(self):
-        super().__init__(config={'balsamic': {'root': tmpdir}})
+        pass
