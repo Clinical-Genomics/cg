@@ -18,6 +18,7 @@ def base_context(balsamic_store) -> dict:
         'db': balsamic_store,
         'analysis_api': MockAnalysis(),
         'fastq_handler': MockBalsamicFastq(),
+        'gzipper': MockGzip(),
         'balsamic': {'conda_env': 'conda_env',
                      'root': 'root',
                      'slurm': {'account': 'account', 'qos': 'qos'},
@@ -45,6 +46,19 @@ class MockVersion:
         return ''
 
 
+class MockGzip:
+    def open(self, full_path):
+        return self
+
+    def readline(self):
+        return MockLine()
+
+
+class MockLine:
+    def decode(self):
+        return 'headerline'
+
+
 class MockFile:
 
     def __init__(self, path=''):
@@ -59,7 +73,9 @@ class MockAnalysis(AnalysisAPI):
     def __init__(self):
         pass
 
-    def _fastq_header(self, family_id):
+    def _fastq_header(self, header_line):
+
+        del header_line
 
         _header = {
             'lane': '1',
