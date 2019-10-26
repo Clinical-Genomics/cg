@@ -71,7 +71,7 @@ def test_passed_option(cli_runner, base_context, option_key):
     assert balsamic_key in result.output
 
 
-def test_umi_trim_length(cli_runner, base_context):
+def test_target_bed(cli_runner, base_context):
     """Test command with --target-bed option"""
 
     # GIVEN case-id
