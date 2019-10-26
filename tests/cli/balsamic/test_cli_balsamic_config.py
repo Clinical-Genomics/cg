@@ -78,7 +78,7 @@ def test_target_bed(cli_runner, base_context):
     case_id = base_context['db'].families().first().internal_id
     option_key = '--target-bed'
     option_value = 'target_bed'
-    balsamic_key = option_key
+    balsamic_key = '-p'
 
     # WHEN dry running with option specified
     result = cli_runner.invoke(config, [case_id, '--dry', option_key, option_value],
