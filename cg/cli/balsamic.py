@@ -60,18 +60,18 @@ def config(context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim
 
         linked_reads_paths = {1: [], 2: []}
         concatenated_paths = {1: '', 2: ''}
-        print(1)
+        print(1, link_obj)
         file_objs = context.obj['hk_api'].get_files(bundle=link_obj.sample.internal_id,
                                                     tags=['fastq'])
-        print(2)
+        print(2, file_objs)
         files = []
         for file_obj in file_objs:
             # figure out flowcell name from header
-            print(3)
+            print(3, file_obj)
             with context.obj['gzipper'].open(file_obj.full_path) as handle:
                 header_line = handle.readline().decode()
                 header_info = context.obj['analysis_api']._fastq_header(header_line)
-            print(4)
+            print(4, header_line, header_info)
             data = {
                 'path': file_obj.full_path,
                 'lane': int(header_info['lane']),
@@ -79,21 +79,21 @@ def config(context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim
                 'read': int(header_info['readnumber']),
                 'undetermined': ('_Undetermined_' in file_obj.path),
             }
-            print(5)
+            print(5, data)
             # look for tile identifier (HiSeq X runs)
             matches = re.findall(r'-l[1-9]t([1-9]{2})_', file_obj.path)
-            print(6)
+            print(6, matches)
             if len(matches) > 0:
                 data['flowcell'] = f"{data['flowcell']}-{matches[0]}"
-            print(7)
+            print(7, data['flowcell'])
             files.append(data)
-            print(8)
+            print(8, files)
         sorted_files = sorted(files, key=lambda k: k['path'])
-        print(9)
+        print(9, sorted_files)
         for fastq_data in sorted_files:
-            print(10)
+            print(10, fastq_data)
             original_fastq_path = Path(fastq_data['path'])
-            print(11)
+            print(11, original_fastq_path)
             linked_fastq_name = context.obj['fastq_handler'].FastqFileNameCreator.create(
                 lane=fastq_data['lane'],
                 flowcell=fastq_data['flowcell'],
@@ -101,7 +101,7 @@ def config(context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim
                 read=fastq_data['read'],
                 more={'undetermined': fastq_data['undetermined']},
             )
-            print(12)
+            print(12, linked_fastq_name)
             concatenated_fastq_name = \
                 context.obj['fastq_handler'].FastqFileNameCreator.get_concatenated_name(
                     linked_fastq_name)
