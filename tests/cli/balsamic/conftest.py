@@ -47,6 +47,12 @@ class MockVersion:
 
 
 class MockGzip:
+    def __enter__(self):
+        pass
+
+    def __exit__(self):
+        pass
+
     def open(self, full_path):
         return self
 
