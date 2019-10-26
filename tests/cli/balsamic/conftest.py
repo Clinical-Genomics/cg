@@ -15,8 +15,8 @@ def base_context(balsamic_store) -> dict:
     return {
         'hk_api': MockHouseKeeper(),
         'db': balsamic_store,
-        'analysis_api': MockAnalysis(),
-        'fastq_handler': MockBalsamicFastq(),
+        'analysis_api': MockAnalysis,
+        'fastq_handler': MockBalsamicFastq,
         'gzipper': MockGzip(),
         'balsamic': {'conda_env': 'conda_env',
                      'root': 'root',
@@ -32,7 +32,7 @@ class MockHouseKeeper(HousekeeperAPI):
     def __init__(self):
         pass
 
-    def get_files(self, bundle, tags, version):
+    def get_files(self, bundle: str, tags: list, version: int = None):
         """Mock get_files of HousekeeperAPI"""
         del tags, bundle, version
         return [MockFile()]
@@ -45,7 +45,7 @@ class MockFile:
         self.full_path = path
 
 
-class MockGzip():
+class MockGzip:
     """Mock gzip"""
     def __enter__(self):
         return self
@@ -74,9 +74,9 @@ class MockAnalysis(AnalysisAPI):
     """Mock AnalysisAPI"""
 
     @staticmethod
-    def fastq_header(header_line):
-
-        del header_line
+    def fastq_header(line):
+        """Mock AnalysisAPI.fastq_header"""
+        del line
 
         _header = {
             'lane': '1',
