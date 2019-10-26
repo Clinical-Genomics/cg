@@ -32,9 +32,9 @@ class MockHouseKeeper(HousekeeperAPI):
     def __init__(self):
         pass
 
-    def get_files(self, bundle, tags):
+    def get_files(self, bundle, tags, version):
         """Mock get_files of HousekeeperAPI"""
-        del tags, bundle
+        del tags, bundle, version
         return [MockFile()]
 
 
