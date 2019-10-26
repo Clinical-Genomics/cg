@@ -33,17 +33,16 @@ class MockHouseKeeper(HousekeeperAPI):
         pass
 
     def get_files(self, tags, bundle):
+        """Mock get_files of HousekeeperAPI"""
+        del tags, bundle
         return [MockFile()]
 
-    def version(self, arg1: str, arg2: str):
-        """Fetch version from the database."""
-        return MockVersion()
 
-
-class MockVersion:
-    """Mock Version"""
-    def id(self):
-        return ''
+class MockFile:
+    """Mock File"""
+    def __init__(self, path=''):
+        self.path = path
+        self.full_path = path
 
 
 class MockGzip:
@@ -65,13 +64,6 @@ class MockLine:
     """Mock line from readline"""
     def decode(self):
         return 'headerline'
-
-
-class MockFile:
-    """Mock File"""
-    def __init__(self, path=''):
-        self.path = path
-        self.full_path = path
 
 
 class MockAnalysis(AnalysisAPI):
