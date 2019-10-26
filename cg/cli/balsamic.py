@@ -22,7 +22,7 @@ def balsamic(context):
     context.obj['db'] = Store(context.obj['database'])
     context.obj['hk_api'] = hk.HousekeeperAPI(context.obj)
     context.obj['analysis_api'] = AnalysisAPI
-    context.obj['fastq_handler'] = BalsamicFastqHandler()
+    context.obj['fastq_handler'] = BalsamicFastqHandler
     context.obj['gzipper'] = gzip
 
 
@@ -67,7 +67,7 @@ def config(context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim
             # figure out flowcell name from header
             with context.obj['gzipper'].open(file_obj.full_path) as handle:
                 header_line = handle.readline().decode()
-                header_info = context.obj['analysis_api']._fastq_header(header_line)
+                header_info = context.obj['analysis_api'].fastq_header(header_line)
             data = {
                 'path': file_obj.full_path,
                 'lane': int(header_info['lane']),

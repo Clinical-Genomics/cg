@@ -1,5 +1,4 @@
 """Fixtures for cli balsamic tests"""
-from collections import namedtuple
 from datetime import datetime
 
 import pytest
@@ -29,7 +28,7 @@ def base_context(balsamic_store) -> dict:
 
 
 class MockHouseKeeper(HousekeeperAPI):
-
+    """Mock HousekeeperAPI"""
     def __init__(self):
         pass
 
@@ -42,11 +41,13 @@ class MockHouseKeeper(HousekeeperAPI):
 
 
 class MockVersion:
+    """Mock Version"""
     def id(self):
         return ''
 
 
 class MockGzip:
+    """Mock gzip"""
     def __enter__(self):
         return self
 
@@ -61,23 +62,24 @@ class MockGzip:
 
 
 class MockLine:
+    """Mock line from readline"""
     def decode(self):
         return 'headerline'
 
 
 class MockFile:
-
+    """Mock File"""
     def __init__(self, path=''):
         self.path = path
         self.full_path = path
 
 
 class MockAnalysis(AnalysisAPI):
-
+    """Mock AnalysisAPI"""
     def __init__(self):
         pass
 
-    def _fastq_header(self, header_line):
+    def fastq_header(self, header_line):
 
         del header_line
 
@@ -99,7 +101,7 @@ class MockBalsamicFastq(BalsamicFastqHandler):
 
 @pytest.fixture(scope='function')
 def balsamic_store(base_store: Store) -> Store:
-
+    """real store to be used in tests"""
     _store = base_store
     family = add_family(_store)
     tumour_sample = add_sample(_store, 'tumour_sample', is_tumour=True)
