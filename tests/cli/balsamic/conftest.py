@@ -69,12 +69,7 @@ class MockFile:
 
     def __init__(self, path=''):
         self.path = path
-
-    def full_path(self):
-        return ''
-
-    def path(self):
-        return ''
+        self.full_path = path
 
 
 class MockAnalysis(AnalysisAPI):
