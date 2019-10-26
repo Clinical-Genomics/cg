@@ -139,7 +139,7 @@ def config(context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim
     command_str += "'"  # add ending quote from above line
     command.extend(command_str.split(' '))
     if dry:
-        print(' '.join(command))
+        click.echo(' '.join(command))
         return SUCCESS
     else:
         process = subprocess.run(
