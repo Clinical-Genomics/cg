@@ -60,18 +60,14 @@ def config(context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim
 
         linked_reads_paths = {1: [], 2: []}
         concatenated_paths = {1: '', 2: ''}
-        print(1, link_obj)
         file_objs = context.obj['hk_api'].get_files(bundle=link_obj.sample.internal_id,
                                                     tags=['fastq'])
-        print(2, file_objs)
         files = []
         for file_obj in file_objs:
             # figure out flowcell name from header
-            print(3, file_obj)
             with context.obj['gzipper'].open(file_obj.full_path) as handle:
                 header_line = handle.readline().decode()
                 header_info = context.obj['analysis_api']._fastq_header(header_line)
-            print(4, header_line, header_info)
             data = {
                 'path': file_obj.full_path,
                 'lane': int(header_info['lane']),
@@ -79,21 +75,14 @@ def config(context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim
                 'read': int(header_info['readnumber']),
                 'undetermined': ('_Undetermined_' in file_obj.path),
             }
-            print(5, data)
             # look for tile identifier (HiSeq X runs)
             matches = re.findall(r'-l[1-9]t([1-9]{2})_', file_obj.path)
-            print(6, matches)
             if len(matches) > 0:
                 data['flowcell'] = f"{data['flowcell']}-{matches[0]}"
-            print(7, data['flowcell'])
             files.append(data)
-            print(8, files)
         sorted_files = sorted(files, key=lambda k: k['path'])
-        print(9, sorted_files)
         for fastq_data in sorted_files:
-            print(10, fastq_data)
             original_fastq_path = Path(fastq_data['path'])
-            print(11, original_fastq_path)
             linked_fastq_name = context.obj['fastq_handler'].FastqFileNameCreator.create(
                 lane=fastq_data['lane'],
                 flowcell=fastq_data['flowcell'],
@@ -101,34 +90,25 @@ def config(context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim
                 read=fastq_data['read'],
                 more={'undetermined': fastq_data['undetermined']},
             )
-            print(12, linked_fastq_name)
             concatenated_fastq_name = \
                 context.obj['fastq_handler'].FastqFileNameCreator.get_concatenated_name(
                     linked_fastq_name)
-            print(13,concatenated_fastq_name)
             linked_fastq_path = wrk_dir / linked_fastq_name
-            print(14, linked_fastq_path)
             linked_reads_paths[fastq_data['read']].append(linked_fastq_path)
-            print(15, linked_reads_paths[fastq_data['read']])
             concatenated_paths[fastq_data['read']] = f"{wrk_dir}/{concatenated_fastq_name}"
-            print(16, concatenated_paths[fastq_data['read']])
             if linked_fastq_path.exists():
                 LOGGER.info("found: %s -> %s", original_fastq_path, linked_fastq_path)
             else:
                 LOGGER.debug("destination path already exists: %s", linked_fastq_path)
-            print(17, linked_fastq_path.exists())
         if link_obj.sample.is_tumour:
             tumor_paths.add(concatenated_paths[1])
         else:
             normal_paths.add(concatenated_paths[1])
-    print(18, tumor_paths)
     nr_paths = len(tumor_paths) if tumor_paths else 0
     if nr_paths != 1:
         click.echo(f"Must have exactly one tumor sample! Found {nr_paths} samples.", color="red")
         context.abort()
-    print(19)
     tumor_path = tumor_paths.pop()
-    print(20)
     normal_path = None
     nr_normal_paths = len(normal_paths) if normal_paths else 0
     if nr_normal_paths > 1:
@@ -136,7 +116,6 @@ def config(context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim
         context.abort()
     elif nr_normal_paths == 1:
         normal_path = normal_paths.pop()
-    print(21)
     # Call Balsamic
     command_str = (f"config case "
                    f"--reference-config {reference_config}"
@@ -146,7 +125,6 @@ def config(context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim
                    f"--output-config {case_id}.json "
                    f"--analysis-dir {root_dir} "
                    f"--umi-trim-length {umi_trim_length}")
-    print(22)
     if target_bed:
         command_str += f" -p {target_bed} "
     if normal_path:
@@ -157,11 +135,9 @@ def config(context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim
         command_str += f" --quality-trim "
     if adapter_trim:
         command_str += f" --adapter-trim "
-    print(23)
     command = [f"bash -c 'source activate {conda_env}; balsamic"]
     command_str += "'"  # add ending quote from above line
     command.extend(command_str.split(' '))
-    print(24)
     if dry:
         print(' '.join(command))
         return SUCCESS
