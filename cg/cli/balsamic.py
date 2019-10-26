@@ -105,26 +105,26 @@ def config(context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim
             concatenated_fastq_name = \
                 context.obj['fastq_handler'].FastqFileNameCreator.get_concatenated_name(
                     linked_fastq_name)
-            print(13)
+            print(13,concatenated_fastq_name)
             linked_fastq_path = wrk_dir / linked_fastq_name
-            print(14)
+            print(14, linked_fastq_path)
             linked_reads_paths[fastq_data['read']].append(linked_fastq_path)
-            print(15)
+            print(15, linked_reads_paths[fastq_data['read']])
             concatenated_paths[fastq_data['read']] = f"{wrk_dir}/{concatenated_fastq_name}"
-            print(16)
+            print(16, concatenated_paths[fastq_data['read']])
             if linked_fastq_path.exists():
                 LOGGER.info("found: %s -> %s", original_fastq_path, linked_fastq_path)
             else:
                 LOGGER.debug("destination path already exists: %s", linked_fastq_path)
-            print(17)
+            print(17, linked_fastq_path.exists())
         if link_obj.sample.is_tumour:
             tumor_paths.add(concatenated_paths[1])
         else:
             normal_paths.add(concatenated_paths[1])
-    print(18)
+    print(18, tumor_paths)
     nr_paths = len(tumor_paths) if tumor_paths else 0
     if nr_paths != 1:
-        click.echo("Must have exactly one tumor sample! Found {nr_paths} samples.", color="red")
+        click.echo(f"Must have exactly one tumor sample! Found {nr_paths} samples.", color="red")
         context.abort()
     print(19)
     tumor_path = tumor_paths.pop()
