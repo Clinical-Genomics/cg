@@ -102,7 +102,7 @@ def balsamic_store(base_store: Store) -> Store:
 
     _store = base_store
     family = add_family(_store)
-    tumour_sample = add_sample(_store, 'tumour_sample', is_tumour=False)
+    tumour_sample = add_sample(_store, 'tumour_sample', is_tumour=True)
     normal_sample = add_sample(_store, 'normal_sample', is_tumour=False)
     _store.relate_sample(family, tumour_sample, status='unknown')
     _store.relate_sample(family, normal_sample, status='unknown')
