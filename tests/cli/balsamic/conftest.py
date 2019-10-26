@@ -73,6 +73,9 @@ class MockFile:
     def full_path(self):
         return ''
 
+    def path(self):
+        return ''
+
 
 class MockAnalysis(AnalysisAPI):
 
