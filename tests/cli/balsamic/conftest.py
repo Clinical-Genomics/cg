@@ -32,7 +32,7 @@ class MockHouseKeeper(HousekeeperAPI):
     def __init__(self):
         pass
 
-    def get_files(self, tags, bundle):
+    def get_files(self, bundle, tags):
         """Mock get_files of HousekeeperAPI"""
         del tags, bundle
         return [MockFile()]
@@ -45,7 +45,7 @@ class MockFile:
         self.full_path = path
 
 
-class MockGzip:
+class MockGzip():
     """Mock gzip"""
     def __enter__(self):
         return self
@@ -54,24 +54,27 @@ class MockGzip:
         return self
 
     def open(self, full_path):
+        """Mock the gzip open function"""
+        del full_path
         return self
 
     def readline(self):
+        """Mock the gzip readline function"""
         return MockLine()
 
 
 class MockLine:
     """Mock line from readline"""
     def decode(self):
+        """Mock the gzip.readline.decode function"""
         return 'headerline'
 
 
 class MockAnalysis(AnalysisAPI):
     """Mock AnalysisAPI"""
-    def __init__(self):
-        pass
 
-    def fastq_header(self, header_line):
+    @staticmethod
+    def fastq_header(header_line):
 
         del header_line
 
