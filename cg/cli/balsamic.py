@@ -21,7 +21,7 @@ def balsamic(context):
     """ Run cancer workflow """
     context.obj['db'] = Store(context.obj['database'])
     context.obj['hk_api'] = hk.HousekeeperAPI(context.obj)
-    context.obj['analysis_api'] = AnalysisAPI(context.obj)
+    context.obj['analysis_api'] = AnalysisAPI
     context.obj['fastq_handler'] = BalsamicFastqHandler()
     context.obj['gzipper'] = gzip
 
