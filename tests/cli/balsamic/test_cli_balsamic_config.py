@@ -81,7 +81,8 @@ def test_umi_trim_length(cli_runner, base_context):
     balsamic_key = option_key
 
     # WHEN dry running with option specified
-    result = cli_runner.invoke(config, [case_id, '--dry', option_key, option_value], obj=base_context)
+    result = cli_runner.invoke(config, [case_id, '--dry', option_key, option_value],
+                               obj=base_context)
 
     # THEN dry-print should include the the option-value
     assert result.exit_code == EXIT_SUCCESS
@@ -99,7 +100,8 @@ def test_umi_trim_length(cli_runner, base_context):
     balsamic_key = option_key
 
     # WHEN dry running with option specified
-    result = cli_runner.invoke(config, [case_id, '--dry', option_key, option_value], obj=base_context)
+    result = cli_runner.invoke(config, [case_id, '--dry', option_key, option_value],
+                               obj=base_context)
 
     # THEN dry-print should include the the option-value
     assert result.exit_code == EXIT_SUCCESS
