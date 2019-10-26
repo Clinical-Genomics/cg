@@ -102,10 +102,10 @@ def balsamic_store(base_store: Store) -> Store:
 
     _store = base_store
     family = add_family(_store)
-    sample1 = add_sample(_store, 'sample1')
-    sample2 = add_sample(_store, 'sample2')
-    _store.relate_sample(family, sample1, status='unknown')
-    _store.relate_sample(family, sample2, status='unknown')
+    tumour_sample = add_sample(_store, 'tumour_sample', is_tumour=False)
+    normal_sample = add_sample(_store, 'normal_sample', is_tumour=False)
+    _store.relate_sample(family, tumour_sample, status='unknown')
+    _store.relate_sample(family, normal_sample, status='unknown')
     _store.commit()
 
     return _store
@@ -144,14 +144,14 @@ def ensure_customer(disk_store, customer_id='cust_test'):
     return customer
 
 
-def add_sample(disk_store, sample_id='sample_test', gender='female'):
+def add_sample(store, sample_id='sample_test', gender='female', is_tumour=False):
     """utility function to add a sample to use in tests"""
-    customer = ensure_customer(disk_store)
-    application_version_id = ensure_application_version(disk_store).id
-    sample = disk_store.add_sample(name=sample_id, sex=gender)
+    customer = ensure_customer(store)
+    application_version_id = ensure_application_version(store).id
+    sample = store.add_sample(name=sample_id, sex=gender, tumour=is_tumour)
     sample.application_version_id = application_version_id
     sample.customer = customer
-    disk_store.add_commit(sample)
+    store.add_commit(sample)
     return sample
 
 
