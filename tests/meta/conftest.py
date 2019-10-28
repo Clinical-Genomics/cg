@@ -171,6 +171,10 @@ class MockLogger:
 class MockTB:
     _get_trending_raises_keyerror = False
 
+    def __init__(self):
+        """Needed to initialise mock variables"""
+        self._make_config_was_called = False
+
     def get_trending(self, mip_config_raw: dict, qcmetrics_raw: dict, sampleinfo_raw: dict) -> dict:
         if self._get_trending_raises_keyerror:
             raise KeyError('mockmessage')
@@ -194,7 +198,10 @@ class MockTB:
     def get_sampleinfo(self, analysis_obj):
         return ''
 
-    def make_config(self, data):
+    def make_config(self, data, pipeline):
+        """Mock the make_config"""
+        self._make_config_was_called = True
+        del pipeline
         return data
 
 

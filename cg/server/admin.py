@@ -83,12 +83,16 @@ class CustomerView(BaseView):
     column_exclude_list = [
         'agreement_date',
         'organisation_number',
-        'invoice_address'
+        'invoice_address',
+        'primary_contact',
+        'delivery_contact',
+        'invoice_contact',
+        'customer_group'
     ]
     column_searchable_list = ['internal_id', 'name']
     column_filters = ['priority', 'scout_access']
     column_editable_list = ['name', 'scout_access', 'loqus_upload', 'return_samples', 'priority',
-                            'customer_group']
+                            'customer_group', 'comment']
     
 
 class CustomerGroupView(BaseView):
@@ -141,9 +145,10 @@ class AnalysisView(BaseView):
 class FlowcellView(BaseView):
     """Admin view for Model.Flowcell"""
 
-    column_searchable_list = ['name']
-    column_filters = ['sequencer_type', 'sequencer_name']
     column_editable_list = ['status']
+    column_exclude_list = ['archived_at']
+    column_filters = ['sequencer_type', 'sequencer_name']
+    column_searchable_list = ['name']
 
 
 class InvoiceView(BaseView):
