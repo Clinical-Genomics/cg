@@ -45,7 +45,6 @@ def test_dry(cli_runner, base_context):
     result = cli_runner.invoke(config, [case_id, '--dry'], obj=base_context)
 
     # THEN command should print the balsamic command-string
-    print(result.output)
     assert result.exit_code == EXIT_SUCCESS
     assert "balsamic" in result.output
     assert case_id in result.output
