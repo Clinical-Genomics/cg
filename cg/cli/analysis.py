@@ -203,16 +203,28 @@ def start(context: click.Context, family_id: str, priority: str = None, email: s
 
 
 @analysis.command()
+@click.option('-d', '--dry-run', 'dry_run', is_flag=True, help='print to console, '
+                                                               'without actualising')
 @click.pass_context
-def auto(context: click.Context):
+def auto(context: click.Context, dry_run):
     """Start all analyses that are ready for analysis."""
     exit_code = 0
-    for family_obj in context.obj['db'].families_to_mip_analyze():
-        LOG.info(f"{family_obj.internal_id}: start analysis")
-        priority = ('high' if family_obj.high_priority else
-                    ('low' if family_obj.low_priority else 'normal'))
+    for case_obj in context.obj['db'].cases_to_mip_analyze():
+
+        if AnalysisAPI.is_dna_only_case(case_obj):
+            LOG.info("%s: start analysis", case_obj.internal_id)
+        else:
+            LOG.warning("%s: contains non-dna samples, skipping", case_obj.internal_id)
+            continue
+
+        priority = ('high' if case_obj.high_priority else
+                    ('low' if case_obj.low_priority else 'normal'))
+
+        if dry_run:
+            continue
+
         try:
-            context.invoke(analysis, priority=priority, family_id=family_obj.internal_id)
+            context.invoke(analysis, priority=priority, family_id=case_obj.internal_id)
         except tb.MipStartError as error:
             LOG.exception(error.message)
             exit_code = 1
