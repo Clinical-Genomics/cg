@@ -19,14 +19,14 @@ def analysis_store(base_store: Store) -> Store:
     """ store to be used in tests"""
     _store = base_store
 
-    dna_case = add_case(_store, 'dna_case')
-    dna_sample = add_sample(_store, 'dna_sample', is_rna=False)
-    _store.relate_sample(dna_case, dna_sample, status='unknown')
+    case = add_case(_store, 'dna_case')
+    sample = add_sample(_store, 'dna_sample', is_rna=False)
+    _store.relate_sample(case, sample, status='unknown')
     _store.commit()
 
-    rna_case = add_case(_store, 'rna_case')
-    rna_sample = add_sample(_store, 'rna_sample', is_rna=True)
-    _store.relate_sample(rna_case, rna_sample, status='unknown')
+    case = add_case(_store, 'rna_case')
+    sample = add_sample(_store, 'rna_sample', is_rna=True)
+    _store.relate_sample(case, sample, status='unknown')
     _store.commit()
 
     return _store
