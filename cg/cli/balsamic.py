@@ -3,27 +3,45 @@ import gzip
 import logging
 import re
 import subprocess
+import sys
 from pathlib import Path
 
 import click
 from cg.apps import hk
 from cg.apps.balsamic.fastq import BalsamicFastqHandler
+from cg.cli.analysis import link
+from cg.exc import LimsDataError
 from cg.meta.analysis import AnalysisAPI
 from cg.store import Store
 
 LOGGER = logging.getLogger(__name__)
+PRIORITY_OPTION = click.option('-p', '--priority', type=click.Choice(['low', 'normal', 'high']))
+EMAIL_OPTION = click.option('-e', '--email', help='email to send errors to')
 SUCCESS = 0
 
 
-@click.group()
+@click.group(invoke_without_command=True)
+@PRIORITY_OPTION
+@EMAIL_OPTION
+@click.option('-c', '--case-id', 'case_id', help='case to prepare and start an analysis for')
 @click.pass_context
-def balsamic(context):
+def balsamic(context, case_id, priority, email):
     """ Run cancer workflow """
     context.obj['db'] = Store(context.obj['database'])
     context.obj['hk_api'] = hk.HousekeeperAPI(context.obj)
     context.obj['analysis_api'] = AnalysisAPI
     context.obj['fastq_handler'] = BalsamicFastqHandler
     context.obj['gzipper'] = gzip
+
+    if context.invoked_subcommand is None:
+        if case_id is None:
+            LOGGER.error('provide a case')
+            context.abort()
+
+        # execute the analysis!
+        context.invoke(link, family_id=case_id)
+        context.invoke(config, case_id=case_id)
+        context.invoke(run, case_id=case_id, priority=priority, email=email)
 
 
 @balsamic.command()
@@ -152,8 +170,8 @@ def config(context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim
 @click.option('-d', '--dry', is_flag=True, help='print command to console')
 @click.option('-r', '--run-analysis', is_flag=True, default=False, help='start analysis')
 @click.option('--config', 'config_path', required=False, help='Optional')
-@click.option('-p', '--priority', type=click.Choice(['low', 'normal', 'high']))
-@click.option('-e', '--email', help='email to send errors to')
+@PRIORITY_OPTION
+@EMAIL_OPTION
 @click.argument('case_id')
 @click.pass_context
 def run(context, dry, run_analysis, config_path, priority, email, case_id):
@@ -190,3 +208,29 @@ def run(context, dry, run_analysis, config_path, priority, email, case_id):
             ' '.join(command), shell=True
         )
         return process
+
+
+@balsamic.command()
+@click.option('-d', '--dry-run', 'dry_run', is_flag=True, help='print to console, '
+                                                               'without actualising')
+@click.pass_context
+def auto(context: click.Context, dry_run):
+    """Start all analyses that are ready for analysis."""
+    exit_code = 0
+    for case_obj in context.obj['db'].cases_to_balsamic_analyze():
+
+        LOGGER.info("%s: start analysis", case_obj.internal_id)
+
+        priority = ('high' if case_obj.high_priority else
+                    ('low' if case_obj.low_priority else 'normal'))
+
+        if dry_run:
+            continue
+
+        try:
+            context.invoke(balsamic, priority=priority, case_id=case_obj.internal_id)
+        except LimsDataError as error:
+            LOGGER.exception(error.message)
+            exit_code = 1
+
+    sys.exit(exit_code)

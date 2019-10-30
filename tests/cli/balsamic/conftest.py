@@ -6,7 +6,7 @@ import pytest
 from cg.apps.balsamic.fastq import BalsamicFastqHandler
 from cg.apps.hk import HousekeeperAPI
 from cg.meta.analysis import AnalysisAPI
-from cg.store import Store
+from cg.store import Store, models
 
 
 @pytest.fixture
@@ -98,14 +98,31 @@ class MockBalsamicFastq(BalsamicFastqHandler):
 def balsamic_store(base_store: Store) -> Store:
     """real store to be used in tests"""
     _store = base_store
-    family = add_family(_store)
+    case = add_family(_store, 'balsamic_case')
     tumour_sample = add_sample(_store, 'tumour_sample', is_tumour=True)
     normal_sample = add_sample(_store, 'normal_sample', is_tumour=False)
-    _store.relate_sample(family, tumour_sample, status='unknown')
-    _store.relate_sample(family, normal_sample, status='unknown')
+    _store.relate_sample(case, tumour_sample, status='unknown')
+    _store.relate_sample(case, normal_sample, status='unknown')
+
+    case = add_family(_store, 'mip_case')
+    normal_sample = add_sample(_store, 'normal_sample', is_tumour=False, data_analysis='mip')
+    _store.relate_sample(case, normal_sample, status='unknown')
+
     _store.commit()
 
     return _store
+
+
+@pytest.fixture(scope='function')
+def balsamic_case(analysis_store) -> models.Family:
+    """case with balsamic data_type"""
+    return analysis_store.find_family(ensure_customer(analysis_store), 'balsamic_case')
+
+
+@pytest.fixture(scope='function')
+def mip_case(analysis_store) -> models.Family:
+    """case with balsamic data_type"""
+    return analysis_store.find_family(ensure_customer(analysis_store), 'mip_case')
 
 
 def ensure_application_version(disk_store, application_tag='dummy_tag'):
@@ -141,30 +158,35 @@ def ensure_customer(disk_store, customer_id='cust_test'):
     return customer
 
 
-def add_sample(store, sample_id='sample_test', gender='female', is_tumour=False):
+def add_sample(store, sample_id='sample_test', gender='female', is_tumour=False,
+               data_analysis='balsamic'):
     """utility function to add a sample to use in tests"""
     customer = ensure_customer(store)
     application_version_id = ensure_application_version(store).id
-    sample = store.add_sample(name=sample_id, sex=gender, tumour=is_tumour)
+    sample = store.add_sample(name=sample_id, sex=gender, tumour=is_tumour,
+                              sequenced_at=datetime.now(),
+                              data_analysis=data_analysis)
     sample.application_version_id = application_version_id
     sample.customer = customer
     store.add_commit(sample)
     return sample
 
 
-def add_panel(disk_store, panel_id='panel_test', customer_id='cust_test'):
+def ensure_panel(disk_store, panel_id='panel_test', customer_id='cust_test'):
     """utility function to add a panel to use in tests"""
     customer = ensure_customer(disk_store, customer_id)
-    panel = disk_store.add_panel(customer=customer, name=panel_id, abbrev=panel_id,
-                                 version=1.0,
-                                 date=datetime.now(), genes=1)
-    disk_store.add_commit(panel)
+    panel = disk_store.panel(panel_id)
+    if not panel:
+        panel = disk_store.add_panel(customer=customer, name=panel_id, abbrev=panel_id,
+                                     version=1.0,
+                                     date=datetime.now(), genes=1)
+        disk_store.add_commit(panel)
     return panel
 
 
 def add_family(disk_store, family_id='family_test', customer_id='cust_test'):
     """utility function to add a family to use in tests"""
-    panel = add_panel(disk_store)
+    panel = ensure_panel(disk_store)
     customer = ensure_customer(disk_store, customer_id)
     family = disk_store.add_family(name=family_id, panels=panel.name)
     family.customer = customer
