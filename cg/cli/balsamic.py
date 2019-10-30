@@ -152,12 +152,11 @@ def config(context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim
 @click.option('-d', '--dry', is_flag=True, help='print command to console')
 @click.option('-r', '--run-analysis', is_flag=True, default=False, help='start analysis')
 @click.option('--config', 'config_path', required=False, help='Optional')
-@click.option('--analysis-type', 'analysis_type', required=False, default='qc', help='Optional')
 @click.option('-p', '--priority', type=click.Choice(['low', 'normal', 'high']))
 @click.option('-e', '--email', help='email to send errors to')
 @click.argument('case_id')
 @click.pass_context
-def run(context, dry, run_analysis, config_path, analysis_type, priority, email, case_id):
+def run(context, dry, run_analysis, config_path, priority, email, case_id):
     """Generate a config for the case_id."""
 
     conda_env = context.obj['balsamic']['conda_env']
