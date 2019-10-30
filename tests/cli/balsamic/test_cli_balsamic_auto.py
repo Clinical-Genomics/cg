@@ -1,5 +1,4 @@
 """This script tests the cli methods to auto run balsamic"""
-import logging
 from cg.cli.balsamic import auto
 
 EXIT_SUCCESS = 0
@@ -55,5 +54,3 @@ def test_mip_only_case_excluded(cli_runner, base_context, mip_case, caplog):
     # THEN command should not have printed the case id
     assert result.exit_code == EXIT_SUCCESS
     assert mip_case.internal_id not in caplog.text
-
-
