@@ -117,24 +117,24 @@ def config(context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim
     elif nr_normal_paths == 1:
         normal_path = normal_paths.pop()
     # Call Balsamic
-    command_str = (f"config case "
-                   f"--reference-config {reference_config}"
-                   f" --singularity {singularity} "
-                   f"--tumor {tumor_path} "
-                   f"--case-id {case_id} "
-                   f"--output-config {case_id}.json "
-                   f"--analysis-dir {root_dir} "
-                   f"--umi-trim-length {umi_trim_length}")
+    command_str = (f" config case"
+                   f" --reference-config {reference_config}"
+                   f" --singularity {singularity}"
+                   f" --tumor {tumor_path}"
+                   f" --case-id {case_id}"
+                   f" --output-config {case_id}.json"
+                   f" --analysis-dir {root_dir}"
+                   f" --umi-trim-length {umi_trim_length}")
     if target_bed:
-        command_str += f" -p {target_bed} "
+        command_str += f" -p {target_bed}"
     if normal_path:
-        command_str += f" --normal {normal_path} "
+        command_str += f" --normal {normal_path}"
     if umi:
-        command_str += f" --umi "
+        command_str += f" --umi"
     if quality_trim:
-        command_str += f" --quality-trim "
+        command_str += f" --quality-trim"
     if adapter_trim:
-        command_str += f" --adapter-trim "
+        command_str += f" --adapter-trim"
     command = [f"bash -c 'source activate {conda_env}; balsamic"]
     command_str += "'"  # add ending quote from above line
     command.extend(command_str.split(' '))
@@ -168,17 +168,17 @@ def run(context, dry, run_analysis, config_path, analysis_type, priority, email,
         config_path = Path.joinpath(root_dir, case_id, case_id + '.json')
 
     # Call Balsamic
-    command_str = (f" run analysis "
-                   f"--slurm-account {slurm_account}"
-                   f"-s {config_path} ")
+    command_str = (f" run analysis"
+                   f" --slurm-account {slurm_account}"
+                   f" -s {config_path}")
 
     if run_analysis:
-        command_str += " --run-analysis "
+        command_str += " --run-analysis"
 
     if email:
-        command_str += f" --slurm-mail-user {email} "
+        command_str += f" --slurm-mail-user {email}"
 
-    command_str += f" --qos {priority} "
+    command_str += f" --qos {priority}"
 
     command = [f"bash -c 'source activate {conda_env}; balsamic"]
     command_str += "'"
