@@ -309,3 +309,12 @@ class AnalysisAPI:
                 trending = dict()
 
         return trending
+
+    @staticmethod
+    def is_dna_only_case(case):
+        """returns if all samples of a case has dna application type"""
+
+        for _link in case.links:
+            if _link.sample.application_version.application.analysis_type in 'wts':
+                return False
+        return True
