@@ -40,8 +40,8 @@ def balsamic(context, case_id, priority, email):
 
         # execute the analysis!
         context.invoke(link, family_id=case_id)
-        context.invoke(config, case_id=case_id)
-        context.invoke(run, case_id=case_id, priority=priority, email=email)
+        context.invoke(config, '-r', case_id=case_id)
+        context.invoke(run, '-r', case_id=case_id, priority=priority, email=email)
 
 
 @balsamic.command()
