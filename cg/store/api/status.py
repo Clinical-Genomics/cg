@@ -65,7 +65,7 @@ class StatusHandler(BaseHandler):
         )
         return records
 
-    def families_to_mip_analyze(self, limit: int = 50):
+    def cases_to_mip_analyze(self, limit: int = 50):
         """Fetch families without analyses where all samples are sequenced."""
 
         # there are two cases when a sample should be analysed:
