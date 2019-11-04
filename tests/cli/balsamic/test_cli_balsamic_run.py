@@ -100,7 +100,7 @@ def test_email(cli_runner, base_context):
 
     # THEN dry-print should include the the option-value but not the case-id
     assert result.exit_code == EXIT_SUCCESS
-    assert '--slurm-mail-user' in result.output
+    assert '--mail-user' in result.output
     assert option_value in result.output
 
 
