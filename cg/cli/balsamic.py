@@ -174,7 +174,7 @@ def run(context, dry, run_analysis, config_path, analysis_type, priority, email,
 
     # Call Balsamic
     command_str = (f" run analysis "
-                   f"--account {slurm_account}"
+                   f" --account {slurm_account} "
                    f"-s {config_path} ")
 
     if run_analysis:
