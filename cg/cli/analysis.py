@@ -209,7 +209,12 @@ def start(context: click.Context, family_id: str, priority: str = None, email: s
 def auto(context: click.Context, dry_run):
     """Start all analyses that are ready for analysis."""
     exit_code = 0
-    for case_obj in context.obj['db'].cases_to_mip_analyze():
+
+    cases = [case_obj.internal_id for case_obj in context.obj['db'].cases_to_mip_analyze()]
+
+    for case_id in cases:
+
+        case_obj = context.obj['db'].family(case_id)
 
         if AnalysisAPI.is_dna_only_case(case_obj):
             LOG.info("%s: start analysis", case_obj.internal_id)
