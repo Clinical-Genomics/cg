@@ -185,15 +185,15 @@ def run(context, dry, run_analysis, config_path, priority, email, case_id):
         config_path = Path.joinpath(root_dir, case_id, case_id + '.json')
 
     # Call Balsamic
-    command_str = (f" run analysis "
-                   f" --account {slurm_account} "
-                   f"-s {config_path} ")
+    command_str = (f" run analysis"
+                   f" --account {slurm_account}"
+                   f" -s {config_path}")
 
     if run_analysis:
         command_str += " --run-analysis"
 
     if email:
-        command_str += f" --mail-user {email} "
+        command_str += f" --mail-user {email}"
 
     command_str += f" --qos {priority}"
 
