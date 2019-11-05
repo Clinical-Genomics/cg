@@ -14,7 +14,7 @@ def test_that_many_families_can_have_one_sample_each(base_store: Store):
                                               sequenced=True)
 
     # WHEN getting families to analyse
-    families = base_store.families_to_mip_analyze()
+    families = base_store.cases_to_mip_analyze()
 
     # THEN families should contain the test family
     assert len(families) == len(test_families)
@@ -34,7 +34,7 @@ def test_that_families_can_have_many_samples(base_store: Store):
     base_store.relate_sample(test_family, test_sample, 'unknown')
 
     # WHEN getting families to analyse
-    families = base_store.families_to_mip_analyze()
+    families = base_store.cases_to_mip_analyze()
 
     # THEN families should contain the test family
     assert families
@@ -52,7 +52,7 @@ def test_external_sample_to_re_analyse(base_store: Store):
     base_store.relate_sample(test_analysis.family, test_sample, 'unknown')
 
     # WHEN getting families to analyse
-    families = base_store.families_to_mip_analyze()
+    families = base_store.cases_to_mip_analyze()
 
     # THEN families should contain the test family
     assert families
@@ -69,7 +69,7 @@ def test_family_to_re_analyse(base_store: Store):
     base_store.relate_sample(test_analysis.family, test_sample, 'unknown')
 
     # WHEN getting families to analyse
-    families = base_store.families_to_mip_analyze()
+    families = base_store.cases_to_mip_analyze()
 
     # THEN families should contain the test family
     assert families
@@ -86,7 +86,7 @@ def test_all_samples_and_analysis_completed(base_store: Store):
     base_store.relate_sample(test_analysis.family, test_sample, 'unknown')
 
     # WHEN getting families to analyse
-    families = base_store.families_to_mip_analyze()
+    families = base_store.cases_to_mip_analyze()
 
     # THEN families should not contain the test family
 
@@ -102,7 +102,7 @@ def test_balsamic_and_mip_analysis_in_result(base_store: Store):
     base_store.relate_sample(test_family, test_sample, 'unknown')
 
     # WHEN getting families to analyse
-    families = base_store.families_to_mip_analyze()
+    families = base_store.cases_to_mip_analyze()
 
     # THEN families should contain the test family
     assert families
@@ -118,7 +118,7 @@ def test_mip_analysis_in_result(base_store: Store):
     base_store.relate_sample(test_family, test_sample, 'unknown')
 
     # WHEN getting families to analyse
-    families = base_store.families_to_mip_analyze()
+    families = base_store.cases_to_mip_analyze()
 
     # THEN families should contain the test family
     assert families
@@ -134,7 +134,7 @@ def test_exclude_balsamic_only_analysis_from_result(base_store: Store):
     base_store.relate_sample(test_family, test_sample, 'unknown')
 
     # WHEN getting families to analyse
-    families = base_store.families_to_mip_analyze()
+    families = base_store.cases_to_mip_analyze()
 
     # THEN families should not contain the test family
     assert not families
@@ -152,7 +152,7 @@ def test_one_of_two_sequenced_samples(base_store: Store):
     base_store.relate_sample(test_family, test_sample2, 'unknown')
 
     # WHEN getting families to analyse
-    families = base_store.families_to_mip_analyze()
+    families = base_store.cases_to_mip_analyze()
 
     # THEN families should not contain the test family
     assert not families
@@ -169,7 +169,7 @@ def test_one_of_one_sequenced_samples(base_store: Store):
     assert test_sample.sequenced_at is not None
 
     # WHEN getting families to analyse
-    families = base_store.families_to_mip_analyze()
+    families = base_store.cases_to_mip_analyze()
 
     # THEN families should contain the test family
     assert families
