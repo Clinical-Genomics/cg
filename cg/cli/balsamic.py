@@ -174,14 +174,14 @@ def run(context, dry, run_analysis, config_path, analysis_type, priority, email,
 
     # Call Balsamic
     command_str = (f" run analysis "
-                   f"--slurm-account {slurm_account}"
+                   f" --account {slurm_account} "
                    f"-s {config_path} ")
 
     if run_analysis:
         command_str += " --run-analysis "
 
     if email:
-        command_str += f" --slurm-mail-user {email} "
+        command_str += f" --mail-user {email} "
 
     command_str += f" --qos {priority} "
 
