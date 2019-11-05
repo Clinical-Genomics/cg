@@ -1,6 +1,7 @@
 """ Common MIP related functionality """
 import logging
 import signal
+import resource
 import subprocess
 
 """
@@ -76,6 +77,7 @@ class MipAPI():
         Remove the default SIGPIPE handler
         https://blog.nelhage.com/2010/02/a-very-subtle-bug/
         """
+        resource.setrlimit(resource.RLIMIT_NOFILE, (4096, 4096))
         process = subprocess.Popen(
             command,
             preexec_fn=lambda: signal.signal(signal.SIGPIPE, signal.SIG_DFL)
