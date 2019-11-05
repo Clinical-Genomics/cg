@@ -42,7 +42,7 @@ def test_dry(cli_runner, base_context, balsamic_case):
     case_id = balsamic_case.internal_id
 
     # WHEN dry running with dry specified
-    result = cli_runner.invoke(config, [case_id, '--dry'], obj=base_context)
+    result = cli_runner.invoke(config, [case_id, '--dry-run'], obj=base_context)
 
     # THEN command should print the balsamic command-string
     assert result.exit_code == EXIT_SUCCESS
@@ -63,7 +63,7 @@ def test_passed_option(cli_runner, base_context, option_key, balsamic_case):
     balsamic_key = option_key
 
     # WHEN dry running with option specified
-    result = cli_runner.invoke(config, [case_id, '--dry', option_key], obj=base_context)
+    result = cli_runner.invoke(config, [case_id, '--dry-run', option_key], obj=base_context)
 
     # THEN dry-print should include the the balsamic option key
     assert result.exit_code == EXIT_SUCCESS
@@ -80,7 +80,7 @@ def test_target_bed(cli_runner, base_context, balsamic_case):
     balsamic_key = '-p'
 
     # WHEN dry running with option specified
-    result = cli_runner.invoke(config, [case_id, '--dry', option_key, option_value],
+    result = cli_runner.invoke(config, [case_id, '--dry-run', option_key, option_value],
                                obj=base_context)
 
     # THEN dry-print should include the the option-value
@@ -99,7 +99,7 @@ def test_umi_trim_length(cli_runner, base_context, balsamic_case):
     balsamic_key = option_key
 
     # WHEN dry running with option specified
-    result = cli_runner.invoke(config, [case_id, '--dry', option_key, option_value],
+    result = cli_runner.invoke(config, [case_id, '--dry-run', option_key, option_value],
                                obj=base_context)
 
     # THEN dry-print should include the the option-value
