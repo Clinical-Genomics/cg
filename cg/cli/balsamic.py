@@ -184,7 +184,7 @@ def run(context, dry, run_analysis, config_path, priority, email, case_id):
     command.extend(command_str.split(' '))
 
     if dry:
-        print(' '.join(command))
+        click.echo(' '.join(command))
     else:
         process = subprocess.run(
             ' '.join(command), shell=True
