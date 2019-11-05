@@ -167,8 +167,9 @@ def config(context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim
 
 
 @balsamic.command()
-@click.option('-d', '--dry', is_flag=True, help='print command to console')
-@click.option('-r', '--run-analysis', is_flag=True, default=False, help='start analysis')
+@click.option('-d', '--dry', 'dry', is_flag=True, help='print command to console')
+@click.option('-r', '--run-analysis', 'run_analysis', is_flag=True, default=False, help='start '
+                                                                                        'analysis')
 @click.option('--config', 'config_path', required=False, help='Optional')
 @PRIORITY_OPTION
 @EMAIL_OPTION
