@@ -45,7 +45,7 @@ def balsamic(context, case_id, priority, email):
 
 
 @balsamic.command()
-@click.option('-d', '--dry', is_flag=True, help='print config to console')
+@click.option('-d', '--dry-run', is_flag=True, help='print config to console')
 @click.option('--target-bed', required=False, help='Optional')
 @click.option('--umi-trim-length', default=5, required=False, help='Default 5')
 @click.option('--quality-trim', is_flag=True, required=False, help='Optional')
@@ -167,7 +167,7 @@ def config(context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim
 
 
 @balsamic.command()
-@click.option('-d', '--dry', 'dry', is_flag=True, help='print command to console')
+@click.option('-d', '--dry-run', 'dry', is_flag=True, help='print command to console')
 @click.option('-r', '--run-analysis', 'run_analysis', is_flag=True, default=False, help='start '
                                                                                         'analysis')
 @click.option('--config', 'config_path', required=False, help='Optional')
