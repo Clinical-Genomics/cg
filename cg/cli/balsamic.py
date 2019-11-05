@@ -24,8 +24,9 @@ SUCCESS = 0
 @PRIORITY_OPTION
 @EMAIL_OPTION
 @click.option('-c', '--case-id', 'case_id', help='case to prepare and start an analysis for')
+@click.option('--target-bed', required=False, help='Optional')
 @click.pass_context
-def balsamic(context, case_id, priority, email):
+def balsamic(context, case_id, priority, email, target_bed):
     """ Run cancer workflow """
     context.obj['db'] = Store(context.obj['database'])
     context.obj['hk_api'] = hk.HousekeeperAPI(context.obj)
@@ -40,7 +41,7 @@ def balsamic(context, case_id, priority, email):
 
         # execute the analysis!
         context.invoke(link, family_id=case_id)
-        context.invoke(config, case_id=case_id)
+        context.invoke(config, case_id=case_id, target_bed=target_bed)
         context.invoke(run, run_analysis=True, case_id=case_id, priority=priority, email=email)
 
 
