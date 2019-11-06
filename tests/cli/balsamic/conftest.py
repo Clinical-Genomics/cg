@@ -98,6 +98,7 @@ class MockBalsamicFastq(BalsamicFastqHandler):
 def balsamic_store(base_store: Store) -> Store:
     """real store to be used in tests"""
     _store = base_store
+
     case = add_family(_store, 'balsamic_case')
     tumour_sample = add_sample(_store, 'tumour_sample', is_tumour=True)
     normal_sample = add_sample(_store, 'normal_sample', is_tumour=False)
@@ -166,6 +167,7 @@ def add_sample(store, sample_id='sample_test', gender='female', is_tumour=False,
     sample = store.add_sample(name=sample_id, sex=gender, tumour=is_tumour,
                               sequenced_at=datetime.now(),
                               data_analysis=data_analysis)
+
     sample.application_version_id = application_version_id
     sample.customer = customer
     store.add_commit(sample)

@@ -34,7 +34,6 @@ def balsamic(context, case_id, priority, email, target_bed):
     context.obj['analysis_api'] = AnalysisAPI
     context.obj['fastq_handler'] = BalsamicFastqHandler
     context.obj['gzipper'] = gzip
-
     if context.invoked_subcommand is None:
         if case_id is None:
             LOGGER.error('provide a case')
@@ -205,7 +204,7 @@ def run(context, dry, run_analysis, config_path, priority, email, case_id):
     command.extend(command_str.split(' '))
 
     if dry:
-        print(' '.join(command))
+        click.echo(' '.join(command))
     else:
         process = subprocess.run(
             ' '.join(command), shell=True
