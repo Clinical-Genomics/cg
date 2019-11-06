@@ -18,12 +18,13 @@ LOGGER = logging.getLogger(__name__)
 PRIORITY_OPTION = click.option('-p', '--priority', type=click.Choice(['low', 'normal', 'high']))
 EMAIL_OPTION = click.option('-e', '--email', help='email to send errors to')
 SUCCESS = 0
+FAIL = 1
 
 
 @click.group(invoke_without_command=True)
 @PRIORITY_OPTION
 @EMAIL_OPTION
-@click.option('-c', '--case-id', 'case_id', help='case to prepare and start an analysis for')
+@click.argument('case_id')
 @click.option('--target-bed', required=False, help='Optional')
 @click.pass_context
 def balsamic(context, case_id, priority, email, target_bed):
@@ -218,7 +219,7 @@ def run(context, dry, run_analysis, config_path, priority, email, case_id):
 @click.pass_context
 def auto(context: click.Context, dry_run):
     """Start all analyses that are ready for analysis."""
-    exit_code = 0
+    exit_code = SUCCESS
     for case_obj in context.obj['db'].cases_to_balsamic_analyze():
 
         LOGGER.info("%s: start analysis", case_obj.internal_id)
@@ -233,6 +234,6 @@ def auto(context: click.Context, dry_run):
             context.invoke(balsamic, priority=priority, case_id=case_obj.internal_id)
         except LimsDataError as error:
             LOGGER.exception(error.message)
-            exit_code = 1
+            exit_code = FAIL
 
     sys.exit(exit_code)
