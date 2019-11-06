@@ -126,7 +126,7 @@ class StatusHandler(BaseHandler):
                 models.Sample.data_analysis.like('%Balsamic%')
             )
             # 1. family that has been analysed but now is requested for re-analysing
-            # 2. new family with that haven't been analysed
+            # 2. new family that hasn't been analysed yet
             .filter(
                 or_(
                     models.Family.action == 'analyze',

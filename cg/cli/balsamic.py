@@ -24,7 +24,7 @@ FAIL = 1
 @click.group(invoke_without_command=True)
 @PRIORITY_OPTION
 @EMAIL_OPTION
-@click.argument('case_id')
+@click.option('-c', '--case-id', 'case_id', help='case to prepare and start an analysis for')
 @click.option('--target-bed', required=False, help='Optional')
 @click.pass_context
 def balsamic(context, case_id, priority, email, target_bed):
