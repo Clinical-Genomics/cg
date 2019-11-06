@@ -150,7 +150,7 @@ class AnalysisAPI:
         return data
 
     @staticmethod
-    def _fastq_header(line):
+    def fastq_header(line):
         """handle illumina's two different header formats
         @see https://en.wikipedia.org/wiki/FASTQ_format
 
@@ -219,7 +219,7 @@ class AnalysisAPI:
             # figure out flowcell name from header
             with gzip.open(file_obj.full_path) as handle:
                 header_line = handle.readline().decode()
-                header_info = self._fastq_header(header_line)
+                header_info = self.fastq_header(header_line)
 
             data = {
                 'path': file_obj.full_path,
