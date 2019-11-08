@@ -110,7 +110,7 @@ def upload(context, family_id, force_restart):
             context.invoke(validate, family_id=family_id)
             context.invoke(genotypes, re_upload=False, family_id=family_id)
             context.invoke(observations, case_id=family_id)
-            context.invoke(scout, family_id=family_id)
+            context.invoke(scout, case_id=family_id)
             analysis_obj.uploaded_at = dt.datetime.now()
             context.obj['status'].commit()
             click.echo(click.style(f"{family_id}: analysis uploaded!", fg='green'))
@@ -409,9 +409,9 @@ class LinkHelper:
 @upload.command()
 @click.option('-r', '--re-upload', is_flag=True, help='re-upload existing analysis')
 @click.option('-p', '--print', 'print_console', is_flag=True, help='print config values')
-@click.argument('family_id', required=False)
+@click.argument('case_id', required=False)
 @click.pass_context
-def scout(context, re_upload, print_console, family_id):
+def scout(context, re_upload, print_console, case_id):
     """Upload variants from analysis to Scout."""
 
     click.echo(click.style('----------------- SCOUT -----------------------'))
@@ -421,13 +421,22 @@ def scout(context, re_upload, print_console, family_id):
         context.abort()
 
     scout_api = scoutapi.ScoutAPI(context.obj)
-    family_obj = context.obj['status'].family(family_id)
+    tb_api = context.obj['tb_api']
+
+    family_obj = context.obj['status'].family(case_id)
     scout_upload_api = context.obj['scout_upload_api']
     scout_config = scout_upload_api.generate_config(family_obj.analyses[0])
+    file_path = tb_api.get_family_root_dir(case_id)
+
+    scout_upload_api.save_config_file(scout_config, file_path)
+    hk_api = context.obj['housekeeper_api']
+    scout_upload_api.add_scout_config_to_hk(file_path, hk_api, case_id)
+
     if print_console:
         click.echo(scout_config)
-    else:
-        scout_api.upload(scout_config, force=re_upload)
+        return
+
+    scout_api.upload(scout_config, force=re_upload)
 
 
 @upload.command()

@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 import logging
 
+from pathlib import Path
+
+from ruamel import yaml
+
 from cg.apps import hk, scoutapi, madeline
 from cg.meta.analysis import AnalysisAPI
 from cg.store import models, Store
@@ -77,6 +81,33 @@ class UploadScoutAPI(object):
             LOG.info('family of 1 sample - skip pedigree graph')
 
         return data
+
+    @staticmethod
+    def save_config_file(upload_config: dict, file_path: Path):
+        """Save a scout load config file to <file_path>"""
+        yml = yaml.YAML()
+
+        file_path.mkdir(parents=True, exist_ok=True)
+        yml.dump(upload_config, file_path)
+
+    @staticmethod
+    def add_scout_config_to_hk(config_file_path: Path, hk_api: hk.HousekeeperAPI, case_id: str):
+        """Add scout load config to hk bundle"""
+        tag_name = 'scout-load-config'
+        version_obj = hk_api.last_version(case_id)
+        uploaded_config_files = hk_api.get_files(bundle=case_id,
+                                                 tags=[tag_name],
+                                                 version=version_obj.id)
+        number_of_configs = len(uploaded_config_files.all())
+        bundle_config_exists = number_of_configs > 0
+
+        if bundle_config_exists:
+            return None
+
+        file_obj = hk_api.add_file(config_file_path.name, version_obj, tag_name)
+        hk_api.include_file(file_obj, version_obj)
+        hk_api.add_commit(file_obj)
+        return file_obj
 
     def _include_optional_files(self, data, hk_version):
         scout_hk_map = [('delivery_report', 'delivery-report'), ('vcf_str', 'vcf-str')]
