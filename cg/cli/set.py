@@ -183,7 +183,6 @@ def microbial_order(context, apptag, ticket, name, order_id, user_signature):
         context.abort()
 
     microbial_order_obj = context.obj['status'].microbial_order(internal_id=order_id)
-
     if not microbial_order_obj:
         click.echo(click.style(f"order not found: {order_id}", fg='yellow'))
         context.abort()
@@ -192,6 +191,8 @@ def microbial_order(context, apptag, ticket, name, order_id, user_signature):
         for sample_obj in microbial_order_obj.microbial_samples:
             context.invoke(microbial_sample, sample_id=sample_obj.internal_id,
                            user_signature=user_signature, apptag=apptag)
+
+    echo_msg = ""
 
     if ticket:
         if microbial_order_obj.ticket_number == ticket:
@@ -203,16 +204,13 @@ def microbial_order(context, apptag, ticket, name, order_id, user_signature):
             f" {microbial_order_obj.ticket_number} to " \
             f"{ticket} by {user_signature}"
         microbial_order_obj.ticket_number = ticket
-        click.echo(click.style(f"Ticket for {microbial_order_obj.internal_id} set to "
-                               f"{str(microbial_order_obj.ticket_number)}.", fg='green'))
 
-        timestamp = str(datetime.datetime.now())[:-10]
-        if microbial_order_obj.comment is None:
-            microbial_order_obj.comment = f"{timestamp}: {comment}"
-        else:
-            microbial_order_obj.comment += '\n' + f"{timestamp}: {comment}"
-        click.echo(click.style(f"Comment added to order {microbial_order_obj.internal_id}",
-                               fg='green'))
+        echo_msg += click.style(f"Ticket for {microbial_order_obj.internal_id} set to "
+                                f"{str(microbial_order_obj.ticket_number)}.", fg='green')
+
+        _update_comment(comment, microbial_order_obj)
+        echo_msg += click.style(f"Comment added to order {microbial_order_obj.internal_id}",
+                                fg='green')
 
     if name:
         if microbial_order_obj.name == name:
@@ -224,23 +222,29 @@ def microbial_order(context, apptag, ticket, name, order_id, user_signature):
             f" {microbial_order_obj.name} to " \
             f"{name} by {user_signature}"
         microbial_order_obj.name = name
-        click.echo(click.style(f"Name for {microbial_order_obj.internal_id} set to "
-                               f"{str(microbial_order_obj.name)}.", fg='green'))
+        echo_msg += click.style(f"Name for {microbial_order_obj.internal_id} set to "
+                                f"{str(microbial_order_obj.name)}.", fg='green')
 
-        timestamp = str(datetime.datetime.now())[:-10]
-        if microbial_order_obj.comment is None:
-            microbial_order_obj.comment = f"{timestamp}: {comment}"
-        else:
-            microbial_order_obj.comment += '\n' + f"{timestamp}: {comment}"
-        click.echo(click.style(f"Comment added to order {microbial_order_obj.internal_id}",
-                               fg='green'))
+        _update_comment(comment, microbial_order_obj)
+        echo_msg += click.style(f"Comment added to order {microbial_order_obj.internal_id}",
+                                fg='green')
 
         if context.obj.get('lims'):
             lims_name = f"{name} ({microbial_order_obj.internal_id})"
-            print(click.style(f"update LIMS/Project-name to {lims_name}", fg='blue'))
             LimsAPI(context.obj).update_project(microbial_order_obj.internal_id, name=lims_name)
+            click.echo(click.style(f"updated LIMS/Project-name to {lims_name}", fg='blue'))
 
     context.obj['status'].commit()
+    click.echo(echo_msg)
+
+
+def _update_comment(comment, obj):
+    """Appends the comment on obj including a timestamp"""
+    timestamp = str(datetime.datetime.now())[:-10]
+    if obj.comment is None:
+        obj.comment = f"{timestamp}: {comment}"
+    else:
+        obj.comment += '\n' + f"{timestamp}: {comment}"
 
 
 @set_cmd.command('microbial-sample')
