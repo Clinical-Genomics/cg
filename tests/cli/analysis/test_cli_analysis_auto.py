@@ -21,8 +21,7 @@ def test_dna_case_included(cli_runner, base_context, dna_case, caplog):
     """Test command with a dna case"""
 
     # GIVEN a case that is ready for MIP DNA analysis
-    #   -> has a sample that is sequenced and has an
-    # dna-application (non-wts)
+    #   -> has a sample that is sequenced and has an dna-application (non-wts)
     for link in dna_case.links:
         sample = link.sample
         assert sample.sequenced_at
@@ -30,19 +29,24 @@ def test_dna_case_included(cli_runner, base_context, dna_case, caplog):
     assert not dna_case.analyses
 
     # WHEN running command
-    result = cli_runner.invoke(auto, ['--dry-run'], obj=base_context)
+    with caplog.at_level(logging.INFO):
+        result = cli_runner.invoke(auto, ['--dry-run'], obj=base_context)
 
     # THEN command should have printed the case id
     assert result.exit_code == EXIT_SUCCESS
-    assert dna_case.internal_id in caplog.text
+    case_mentioned = False
+    for _, level, message in caplog.record_tuples:
+        if dna_case.internal_id in message:
+            case_mentioned = True
+            assert level == logging.INFO
+    assert case_mentioned
 
 
 def test_rna_case_excluded(cli_runner, base_context, rna_case, caplog):
     """Test command with a rna case"""
 
     # GIVEN a case that is ready for MIP RNA analysis
-    #   -> has a sample that is sequenced and has an
-    # rna-application (wts)
+    #   -> has a sample that is sequenced and has an rna-application (wts)
     for link in rna_case.links:
         sample = link.sample
         assert sample.sequenced_at
