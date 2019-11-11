@@ -12,7 +12,6 @@ from .order import OrderHandler
 
 # fixes https://github.com/Clinical-Genomics/servers/issues/30
 import requests_cache
-
 requests_cache.install_cache(backend='memory')
 
 SEX_MAP = {'F': 'female', 'M': 'male', 'Unknown': 'unknown', 'unknown': 'unknown'}
@@ -42,7 +41,7 @@ class LimsAPI(Lims, OrderHandler):
         lims_sample = Sample(self, id=lims_id)
         data = self._export_sample(lims_sample)
         return data
-
+    
     def samples_in_pools(self, pool_name, projectname):
         return self.get_samples(udf={"pool name": str(pool_name)}, projectname=projectname)
 
@@ -123,12 +122,10 @@ class LimsAPI(Lims, OrderHandler):
             if len(lims_artifacts) == 0:
                 continue  # continue in case the artifacts are in the other process_type
             elif len(lims_artifacts) == 1:
-                return lims_artifacts[0].parent_process.udf.get(
-                    'Finish Date')  # return date immediately if only one artifact is found
+                return lims_artifacts[0].parent_process.udf.get('Finish Date')  # return date immediately if only one artifact is found
             else:
                 log.warning(f"multiple sequence artifacts found for: {lims_id}")
-                sequence_dates = [artifact.parent_process.udf.get('Finish Date') for artifact in
-                                  lims_artifacts
+                sequence_dates = [artifact.parent_process.udf.get('Finish Date') for artifact in lims_artifacts
                                   if artifact.parent_process.udf.get('Finish Date') is not None]
                 if len(sequence_dates) == 0:
                     break  # nothing sequenced, break out and return None
@@ -206,7 +203,7 @@ class LimsAPI(Lims, OrderHandler):
             for lims_sample in lims_artifact.samples:
                 yield lims_sample.id
 
-    def update_sample(self, lims_id: str, sex=None, application: str = None,
+    def update_sample(self, lims_id: str, sex=None, application: str=None,
                       target_reads: int = None, priority=None):
         """Update information about a sample."""
         lims_sample = Sample(self, id=lims_id)
