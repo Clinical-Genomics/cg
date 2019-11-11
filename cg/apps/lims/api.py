@@ -251,7 +251,7 @@ class LimsAPI(Lims, OrderHandler):
         lims_project = Project(self, id=lims_id)
         if name:
             lims_project.name = name
-        lims_project.put()
+            lims_project.put()
 
     def get_prep_method(self, lims_id: str) -> str:
         """Get the library preparation method."""
