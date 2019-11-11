@@ -446,6 +446,12 @@ def auto(context):
 
     exit_code = 0
     for analysis_obj in context.obj['status'].analyses_to_upload():
+
+        if analysis_obj.family.analyses[0].uploaded_at is not None:
+            LOG.warning("Newer analysis already uploaded for %s, skipping",
+                        analysis_obj.family.internal_id)
+            continue
+
         LOG.info(f"uploading family: {analysis_obj.family.internal_id}")
         try:
             context.invoke(upload, family_id=analysis_obj.family.internal_id)

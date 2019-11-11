@@ -50,7 +50,7 @@ def test_upload_fails_hard_on_faulty_analysis(invoke_cli, disk_store: Store):
     # THEN it fails hard and reports that it is missing the analysis
     assert result.exit_code != 0
     assert family_id in result.output
-    assert 'no analyse exists' in result.output
+    assert 'no analysis exists' in result.output
 
 
 def test_upload_doesnt_invoke_dually_for_same_case(invoke_cli, disk_store: Store):
