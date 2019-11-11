@@ -221,7 +221,7 @@ def microbial_order(context, apptag, ticket, name, order_id, user_signature):
             return
 
         comment = f"Name changed from" \
-            f" {microbial_order_obj.ticket_number} to " \
+            f" {microbial_order_obj.name} to " \
             f"{name} by {user_signature}"
         microbial_order_obj.name = name
         click.echo(click.style(f"Name for {microbial_order_obj.internal_id} set to "
