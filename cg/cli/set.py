@@ -205,11 +205,11 @@ def microbial_order(context, apptag, ticket, name, order_id, user_signature):
             f"{ticket} by {user_signature}"
         microbial_order_obj.ticket_number = ticket
 
-        echo_msg += click.style(f"Ticket for {microbial_order_obj.internal_id} set to "
+        echo_msg += click.style(f"\nTicket for {microbial_order_obj.internal_id} set to "
                                 f"{str(microbial_order_obj.ticket_number)}.", fg='green')
 
         _update_comment(comment, microbial_order_obj)
-        echo_msg += click.style(f"Comment added to order {microbial_order_obj.internal_id}",
+        echo_msg += click.style(f"\nComment added to order {microbial_order_obj.internal_id}",
                                 fg='green')
 
     if name:
@@ -222,11 +222,11 @@ def microbial_order(context, apptag, ticket, name, order_id, user_signature):
             f" {microbial_order_obj.name} to " \
             f"{name} by {user_signature}"
         microbial_order_obj.name = name
-        echo_msg += click.style(f"Name for {microbial_order_obj.internal_id} set to "
+        echo_msg += click.style(f"\nName for {microbial_order_obj.internal_id} set to "
                                 f"{str(microbial_order_obj.name)}.", fg='green')
 
         _update_comment(comment, microbial_order_obj)
-        echo_msg += click.style(f"Comment added to order {microbial_order_obj.internal_id}",
+        echo_msg += click.style(f"\nComment added to order {microbial_order_obj.internal_id}",
                                 fg='green')
 
         if context.obj.get('lims'):
