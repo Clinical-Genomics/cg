@@ -21,8 +21,7 @@ def test_dna_case_included(cli_runner, base_context, dna_case, caplog):
     """Test command with a dna case"""
 
     # GIVEN a case that is ready for MIP DNA analysis
-    #   -> has a sample that is sequenced and has an
-    # dna-application (non-wts)
+    #   -> has a sample that is sequenced and has an dna-application (non-wts)
     for link in dna_case.links:
         sample = link.sample
         assert sample.sequenced_at

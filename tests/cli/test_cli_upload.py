@@ -20,7 +20,7 @@ def test_all_samples_data_analysis(analysis_store):
 def test_all_samples_are_wgs(analysis_store):
 
     family_obj = analysis_store.family('yellowhog')
-    assert LinkHelper.all_samples_are_wgs(family_obj.links)    
+    assert LinkHelper.all_samples_are_wgs(family_obj.links)
 
 
 def test_upload_fails_hard_on_faulty_family(invoke_cli, disk_store: Store):
