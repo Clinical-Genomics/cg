@@ -237,7 +237,8 @@ def microbial_order(context, apptag, ticket, name, order_id, user_signature):
 
         print(click.style('update LIMS/Project-name', fg='blue'))
         if context.obj.get('lims'):
-            LimsAPI(context.obj).update_project(microbial_order_obj.internal_id, name=name)
+            lims_name = f"{name} ({microbial_order_obj.internal_id})"
+            LimsAPI(context.obj).update_project(microbial_order_obj.internal_id, name=lims_name)
 
     context.obj['status'].commit()
 
