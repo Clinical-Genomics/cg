@@ -26,15 +26,16 @@ pytest_plugins = [  # pylint: disable=invalid-name
     'tests.meta.transfer.conftest',
     'tests.meta.upload.conftest',
     'tests.store.conftest',
+    'tests.apps.mutacc_auto.conftest'
 ]
 
 # Trailblazer api for mip files
 @pytest.fixture(scope='session')
 def files():
     return {
-        'config': 'tests/fixtures/apps/tb/family/family_config.yaml',
-        'sampleinfo': 'tests/fixtures/apps/tb/family/family_qc_sample_info.yaml',
-        'qcmetrics': 'tests/fixtures/apps/tb/family/family_qc_metrics.yaml',
+        'config': 'tests/fixtures/apps/tb/case/case_config.yaml',
+        'sampleinfo': 'tests/fixtures/apps/tb/case/case_qc_sample_info.yaml',
+        'qcmetrics': 'tests/fixtures/apps/tb/case/case_qc_metrics.yaml',
     }
 
 
@@ -98,7 +99,11 @@ def base_store(store) -> Store:
                     store.add_application('METNXTR020', 'wgs', 'Metagenomics',
                                           sequencing_depth=0, target_reads=20000000),
                     store.add_application('MWRNXTR003', 'mic', 'Microbial whole genome ',
-                                          sequencing_depth=0)]
+                                          sequencing_depth=0),
+                    store.add_application('RNAPOAR025', 'tgs', 'RNA seq, poly-A based priming',
+                                          sequencing_depth=25,
+                                          accredited=True)
+                    ]
 
     store.add_commit(applications)
 

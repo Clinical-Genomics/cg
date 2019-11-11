@@ -1,6 +1,7 @@
 import pytest
 from _pytest import tmpdir
-from cg.apps.balsamic.fastq import FastqHandler
+from cg.apps.balsamic.fastq import BalsamicFastqHandler
+from cg.apps.usalt.fastq import USaltFastqHandler
 
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.tb import TrailblazerAPI
@@ -170,6 +171,10 @@ class MockLogger:
 class MockTB:
     _get_trending_raises_keyerror = False
 
+    def __init__(self):
+        """Needed to initialise mock variables"""
+        self._make_config_was_called = False
+
     def get_trending(self, mip_config_raw: dict, qcmetrics_raw: dict, sampleinfo_raw: dict) -> dict:
         if self._get_trending_raises_keyerror:
             raise KeyError('mockmessage')
@@ -193,15 +198,25 @@ class MockTB:
     def get_sampleinfo(self, analysis_obj):
         return ''
 
-    def make_config(self, data):
+    def make_config(self, data, pipeline):
+        """Mock the make_config"""
+        self._make_config_was_called = True
+        del pipeline
         return data
 
 
-class MockBalsamicFastq(FastqHandler):
+class MockBalsamicFastq(BalsamicFastqHandler):
     """Mock FastqHandler for analysis_api"""
 
     def __init__(self):
         super().__init__(config={'balsamic': {'root': tmpdir}})
+
+
+class MockUsaltFastq(USaltFastqHandler):
+    """Mock FastqHandler for analysis_api"""
+
+    def __init__(self):
+        super().__init__(config={'usalt': {'root': tmpdir}})
 
 
 def safe_loader(path):
@@ -210,8 +225,9 @@ def safe_loader(path):
     if path:
         pass
 
-    return {'human_genome_build': {'version': ''}, 'program': {'rankvariant': {'rank_model': {
+    return {'human_genome_build': {'version': ''}, 'recipe': {'rankvariant': {'rank_model': {
         'version': 1.18}}}}
+
 
 @pytest.yield_fixture(scope='function')
 def analysis_api(analysis_store, store_housekeeper, scout_store):
@@ -228,7 +244,6 @@ def analysis_api(analysis_store, store_housekeeper, scout_store):
         deliver_api=MockDeliver(),
         yaml_loader=safe_loader,
         path_api=Path_mock,
-        logger=MockLogger(),
-        fastq_handler=MockBalsamicFastq()
+        logger=MockLogger()
     )
     yield _analysis_api

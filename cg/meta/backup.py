@@ -1,3 +1,4 @@
+""" Module for retrieving FCs from backup """
 import logging
 import subprocess
 import time
@@ -9,21 +10,22 @@ LOG = logging.getLogger(__name__)
 
 
 class BackupApi():
+    """ Class for retrieving FCs from backup """
 
     def __init__(self, status: Store, pdc_api: PdcApi):
         self.status = status
         self.pdc = pdc_api
 
-    def maximum_flowcells_ondisk(self, max_flowcells: int=800) -> bool:
+    def maximum_flowcells_ondisk(self, max_flowcells: int = 1000) -> bool:
         """Check if there's too many flowcells already "ondisk"."""
         ondisk_flowcells = self.status.flowcells(status='ondisk').count()
-        LOG.debug(f"ondisk flowcells: {ondisk_flowcells}")
+        LOG.debug("ondisk flowcells: %s", ondisk_flowcells)
         return ondisk_flowcells > max_flowcells
 
-    def check_processing(self, max_flowcells: int=3) -> bool:
+    def check_processing(self, max_flowcells: int = 3) -> bool:
         """Check if the processing queue for flowcells is not full."""
         processing_flowcells = self.status.flowcells(status='processing').count()
-        LOG.debug(f"processing flowcells: {processing_flowcells}")
+        LOG.debug("processing flowcells: %s", processing_flowcells)
         return processing_flowcells < max_flowcells
 
     def pop_flowcell(self) -> models.Flowcell:
@@ -37,7 +39,7 @@ class BackupApi():
             self.status.commit()
         return flowcell_obj
 
-    def fetch_flowcell(self, flowcell_obj: models.Flowcell=None):
+    def fetch_flowcell(self, flowcell_obj: models.Flowcell = None):
         """Start fetching a flowcell from backup if possible.
 
         1. The processing queue is not full
@@ -57,12 +59,12 @@ class BackupApi():
                 LOG.info('no flowcells requested')
                 return None
 
-        LOG.info(f"{flowcell_obj.name}: retreiving from PDC")
+        LOG.info("%s: retreiving from PDC", flowcell_obj.name)
         tic = time.time()
         try:
             self.pdc.retrieve_flowcell(flowcell_obj.name, flowcell_obj.sequencer_type)
         except subprocess.CalledProcessError as error:
-            LOG.error(f"{flowcell_obj.name}: retrieval failed")
+            LOG.error("%s: retrieval failed", flowcell_obj.name)
             flowcell_obj.status = 'requested'
             self.status.commit()
             raise error
