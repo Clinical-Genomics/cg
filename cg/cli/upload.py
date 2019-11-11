@@ -43,7 +43,7 @@ def upload(context, family_id, force_restart):
             context.abort()
 
         if not family_obj.analyses:
-            message = f"no analyse exists for family: {family_id}"
+            message = f"no analysis exists for family: {family_id}"
             click.echo(click.style(message, fg='red'))
             context.abort()
 
