@@ -31,13 +31,13 @@ def parse_reqs(req_path='./requirements.txt'):
 # This is a plug-in for setuptools that will invoke py.test
 # when you run python setup.py test
 class PyTest(TestCommand):
-
     """Set up the py.test test runner."""
 
     def finalize_options(self):
         """Set options for the command line."""
         TestCommand.finalize_options(self)
-        self.test_args = []
+        self.test_args = ['-W', 'ignore::PendingDeprecationWarning', '-W',
+                          'ignore::DeprecationWarning']
         self.test_suite = True
 
     def run_tests(self):
@@ -49,7 +49,7 @@ class PyTest(TestCommand):
 
 setup(
     name='cg',
-    version='4.12.1',
+    version='4.21.0',
     description='Clinical Genomics command center.',
     author='Patrik Grenfeldt',
     author_email='patrik.grenfeldt@scilifelab.se',

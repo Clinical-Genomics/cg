@@ -145,9 +145,10 @@ class AnalysisView(BaseView):
 class FlowcellView(BaseView):
     """Admin view for Model.Flowcell"""
 
-    column_searchable_list = ['name']
-    column_filters = ['sequencer_type', 'sequencer_name']
     column_editable_list = ['status']
+    column_exclude_list = ['archived_at']
+    column_filters = ['sequencer_type', 'sequencer_name']
+    column_searchable_list = ['name']
 
 
 class InvoiceView(BaseView):
@@ -227,7 +228,7 @@ class SampleView(BaseView):
     column_exclude_list = ['is_external', 'invoiced_at']
     column_searchable_list = ['internal_id', 'name', 'ticket_number', 'customer.internal_id']
     column_filters = ['customer.internal_id', 'sex', 'application_version.application']
-    column_editable_list = ['sex', 'downsampled_to', 'sequenced_at', 'ticket_number']
+    column_editable_list = ['sex', 'downsampled_to', 'sequenced_at', 'ticket_number', 'is_tumour']
     form_excluded_columns = ['is_external', 'invoiced_at']
 
     column_formatters = {
