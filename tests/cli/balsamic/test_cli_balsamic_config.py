@@ -65,7 +65,6 @@ def test_passed_option(cli_runner, base_context, option_key, balsamic_case):
     # WHEN dry running with option specified
     result = cli_runner.invoke(config, [case_id, '--dry-run', option_key], obj=base_context)
 
-
     # THEN dry-print should include the the balsamic option key
     assert result.exit_code == EXIT_SUCCESS
     assert balsamic_key in result.output

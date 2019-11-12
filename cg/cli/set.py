@@ -15,6 +15,7 @@ LOG = logging.getLogger(__name__)
 def set_cmd(context):
     """Update information in the database."""
     context.obj['status'] = Store(context.obj['database'])
+    context.obj['lims'] = LimsAPI(context.obj)
 
 
 @set_cmd.command()
@@ -75,9 +76,8 @@ def sample(context, sex, customer, comment, downsampled_to, apptag, capture_kit,
         sample_obj.sex = sex
         context.obj['status'].commit()
 
-        print(click.style('update LIMS/Gender', fg='blue'))
-        if context.obj.get('lims'):
-            LimsAPI(context.obj).update_sample(sample_id, sex=sex)
+        context.obj['lims'].update_sample(sample_id, sex=sex)
+        print(click.style('updated LIMS/Gender', fg='blue'))
 
     if customer:
         customer_obj = context.obj['status'].customer(customer)
@@ -231,10 +231,9 @@ def microbial_order(context, apptag, priority, ticket, name, order_id, user_sign
         echo_msg += click.style(f"\nComment added to order {microbial_order_obj.internal_id}",
                                 fg='green')
 
-        if context.obj.get('lims'):
-            lims_name = f"{name} ({microbial_order_obj.internal_id})"
-            LimsAPI(context.obj).update_project(microbial_order_obj.internal_id, name=lims_name)
-            click.echo(click.style(f"updated LIMS/Project-name to {lims_name}", fg='blue'))
+        lims_name = f"{name} ({microbial_order_obj.internal_id})"
+        context.obj['lims'].update_project(microbial_order_obj.internal_id, name=lims_name)
+        click.echo(click.style(f"updated LIMS/Project-name to {lims_name}", fg='blue'))
 
     context.obj['status'].commit()
     click.echo(echo_msg)
@@ -301,9 +300,8 @@ def microbial_sample(context, apptag, priority, sample_id, user_signature):
         click.echo(click.style(f"Comment added to sample {sample_obj.internal_id}", fg='green'))
         context.obj['status'].commit()
 
-        click.echo(click.style('update LIMS/application', fg='blue'))
-        if context.obj.get('lims'):
-            LimsAPI(context.obj).update_sample(sample_id, application=apptag)
+        context.obj['lims'].update_sample(sample_id, application=apptag)
+        click.echo(click.style('updated LIMS/application', fg='blue'))
 
     if priority:
         comment = f"Priority changed from" \
@@ -322,5 +320,5 @@ def microbial_sample(context, apptag, priority, sample_id, user_signature):
 
         context.obj['status'].commit()
 
-        if context.obj.get('lims'):
-            LimsAPI(context.obj).update_sample(sample_id, priority=priority)
+        context.obj['lims'].update_sample(sample_id, priority=priority)
+        click.echo(click.style('updated LIMS/priority', fg='blue'))
