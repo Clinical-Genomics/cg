@@ -8,7 +8,7 @@ from cg.store import Store
 SUCCESS = 0
 
 
-def test_invalid_sample_empty_db(cli_runner, base_context, base_store: Store):
+def test_invalid_sample_empty_db(cli_runner, base_context):
     # GIVEN an empty database
 
     # WHEN running set with an sample that does not exist

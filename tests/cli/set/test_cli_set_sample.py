@@ -7,11 +7,10 @@ from cg.store import Store
 SUCCESS = 0
 
 
-def test_set_sample_invalid_sample(cli_runner, base_context, base_store: Store):
+def test_set_sample_invalid_sample(cli_runner, base_context):
     # GIVEN an empty database
 
     # WHEN running set with a sample that does not exist
-
     sample_id = 'dummy_sample_id'
     result = cli_runner.invoke(sample, [sample_id], obj=base_context)
 

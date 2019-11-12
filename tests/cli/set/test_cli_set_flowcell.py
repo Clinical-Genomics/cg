@@ -8,7 +8,7 @@ from cg.store import Store
 SUCCESS = 0
 
 
-def test_set_flowcell_bad_flowcell(cli_runner, base_context, base_store: Store):
+def test_set_flowcell_bad_flowcell(cli_runner, base_context):
     """Test to set a flowcell using a non-existing flowcell """
     # GIVEN an empty database
 
@@ -41,8 +41,6 @@ def test_set_flowcell_status(cli_runner, base_context, base_store: Store):
     assert base_store.Flowcell.query.first().status != status
 
     # WHEN setting a flowcell
-    db_uri = base_store.uri
-
     result = cli_runner.invoke(flowcell, ['--status', status, flowcell_name], obj=base_context)
 
     # THEN then it should have been set

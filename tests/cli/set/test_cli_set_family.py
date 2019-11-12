@@ -20,7 +20,7 @@ def test_set_family_without_options(cli_runner, base_context, base_store: Store)
     assert result.exit_code != SUCCESS
 
 
-def test_set_family_bad_family(cli_runner, base_context, base_store: Store):
+def test_set_family_bad_family(cli_runner, base_context):
     """Test to set a family using a non-existing family """
     # GIVEN an empty database
 
@@ -138,7 +138,7 @@ def add_family(store, family_id='family_test', customer_id='cust_test'):
     """utility function to set a family to use in tests"""
     customer = ensure_customer(store, customer_id)
     panel_id = add_panel(store).name
-    family = store.add_family(name=family_id, panels=panel_id)
-    family.customer = customer
-    store.add_commit(family)
-    return family
+    family_obj = store.add_family(name=family_id, panels=panel_id)
+    family_obj.customer = customer
+    store.add_commit(family_obj)
+    return family_obj
