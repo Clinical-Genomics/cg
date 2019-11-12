@@ -90,7 +90,7 @@ def panels():
 def families():
     """Fetch families."""
     if request.args.get('status') == 'analysis':
-        records = db.families_to_mip_analyze()
+        records = db.cases_to_mip_analyze()
         count = len(records)
     else:
         customer_obj = None if g.current_user.is_admin else g.current_user.customer
