@@ -239,7 +239,7 @@ class PoolView(BaseView):
 
 class SampleView(BaseView):
     """Admin view for Model.Sample"""
-    
+
     column_default_sort = ('created_at', True)
     column_editable_list = ['sex', 'downsampled_to', 'sequenced_at', 'ticket_number', 'is_tumour']
     column_filters = ['customer.internal_id', 'sex', 'application_version.application']
