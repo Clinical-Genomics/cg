@@ -29,6 +29,11 @@ cd cg
 pip install --editable .
 ```
 
+## Contributing
+
+Cg is using github flow branching model as described in our [development manual][development manual].
+
+
 ## This package
 
 This package is a little special. Essentially it should include all the "Clinical"-specific code that has to be integrated across multiple tools such as LIMS, Trailblazer, Scout etc. However, we still aim to structure it in such a way as to make maintainance as smooth as possible!
@@ -335,6 +340,8 @@ Another module `/exc.py` contains the custom Exception classes that are used acr
 [click]: http://click.pocoo.org/5/
 [cgweb]: https://github.com/Clinical-Genomics/cgweb
 [servers]: https://github.com/Clinical-Genomics/servers
+[pypi]: https://pypi.org/
+[development manual]: http://www.clinicalgenomics.se/development/dev/githubflow/
 
 [travis-url]: https://travis-ci.org/Clinical-Genomics/cg
 [travis-image]: https://img.shields.io/travis/Clinical-Genomics/cg.svg?style=flat-square
