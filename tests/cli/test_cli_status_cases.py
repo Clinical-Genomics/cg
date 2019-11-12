@@ -1,4 +1,4 @@
-"""This script tests the cli methods to add families to status-db"""
+"""This script tests the cli methods to view aggregated info on a case"""
 from datetime import datetime
 
 from cg.store import Store

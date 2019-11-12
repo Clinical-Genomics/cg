@@ -17,6 +17,16 @@ class BaseView(ModelView):
         return redirect(url_for('google.login', next=request.url))
 
 
+def view_human_priority(unused1, unused2, model, unused3):
+    """column formatter for priority"""
+    del unused1, unused2, unused3
+    return Markup(
+        u"%s" % (
+            model.priority_human
+        )
+    ) if model else u""
+
+
 def view_family_sample_link(unused1, unused2, model, unused3):
     """column formatter to open the family-sample view"""
 
@@ -34,7 +44,9 @@ class ApplicationView(BaseView):
     """Admin view for Model.Application"""
 
     column_editable_list = ['description', 'is_accredited', 'target_reads', 'comment',
-                            'prep_category', 'sequencing_depth', 'is_external']
+                            'prep_category', 'sequencing_depth', 'is_external',
+                            'turnaround_time', 'sample_concentration', 'priority_processing',
+                            'is_archived']
     column_exclude_list = [
         'minimum_order',
         'sample_amount',
@@ -83,11 +95,15 @@ class CustomerView(BaseView):
     """Admin view for Model.Customer"""
 
     column_editable_list = ['name', 'scout_access', 'loqus_upload', 'return_samples', 'priority',
-                            'customer_group']
+                            'customer_group', 'comment']
     column_exclude_list = [
         'agreement_date',
         'organisation_number',
-        'invoice_address'
+        'invoice_address',
+        'primary_contact',
+        'delivery_contact',
+        'invoice_contact',
+        'customer_group'
     ]
     column_filters = ['priority', 'scout_access']
     column_searchable_list = ['internal_id', 'name']
@@ -109,7 +125,8 @@ class FamilyView(BaseView):
     column_exclude_list = ['created_at']
     column_filters = ['customer.internal_id', 'priority', 'action']
     column_formatters = {
-        'internal_id': view_family_sample_link
+        'internal_id': view_family_sample_link,
+        'priority': view_human_priority
     }
     column_searchable_list = ['internal_id', 'name', 'customer.internal_id']
 
@@ -142,6 +159,7 @@ class FlowcellView(BaseView):
 
     column_default_sort = ('sequenced_at', True)
     column_editable_list = ['status']
+    column_exclude_list = ['archived_at']
     column_filters = ['sequencer_type', 'sequencer_name']
     column_searchable_list = ['name']
 
@@ -162,7 +180,7 @@ class InvoiceView(BaseView):
         return Markup(
             u"<a href='%s'>%s</a>" % (
                 url_for('invoice.index_view', search=model.invoice.id),
-                model.invoice.id
+                model.invoice.invoiced_at.date() if model.invoice.invoiced_at else 'In progress'
             )
         ) if model.invoice else u""
 
@@ -184,6 +202,7 @@ class MicrobialSampleView(BaseView):
     column_filters = ['microbial_order', 'microbial_order.customer']
     column_formatters = {
         'invoice': InvoiceView.view_invoice_link,
+        'priority': view_human_priority
     }
     column_searchable_list = ['internal_id', 'name', 'microbial_order.ticket_number']
 
@@ -220,17 +239,18 @@ class PoolView(BaseView):
 
 class SampleView(BaseView):
     """Admin view for Model.Sample"""
-
+    
     column_default_sort = ('created_at', True)
-    column_editable_list = ['sex', 'downsampled_to', 'sequenced_at', 'ticket_number']
-    column_exclude_list = ['is_external']
+    column_editable_list = ['sex', 'downsampled_to', 'sequenced_at', 'ticket_number', 'is_tumour']
     column_filters = ['customer.internal_id', 'sex', 'application_version.application']
+    column_exclude_list = ['is_external', 'invoiced_at']
     column_formatters = {
         'internal_id': view_family_sample_link,
         'invoice': InvoiceView.view_invoice_link,
+        'priority': view_human_priority
     }
     column_searchable_list = ['internal_id', 'name', 'ticket_number', 'customer.internal_id']
-    form_excluded_columns = ['is_external']
+    form_excluded_columns = ['is_external', 'invoiced_at']
 
     @staticmethod
     def view_sample_link(unused1, unused2, model, unused3):
