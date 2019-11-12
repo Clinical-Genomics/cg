@@ -94,3 +94,4 @@ DEVELOP/
 
 # Apple-OS specific files
 .DS_Store
+.pybiomart.sqlite

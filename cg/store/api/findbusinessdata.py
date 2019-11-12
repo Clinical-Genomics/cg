@@ -87,7 +87,7 @@ class FindBusinessDataHandler(BaseHandler):
             .join(models.FamilySample.family, models.FamilySample.sample)
             .filter(
                 models.Family.internal_id == family_id,
-                ).all()
+            ).all()
         )
 
     def find_family(self, customer: models.Customer, name: str) -> models.Family:
@@ -172,11 +172,16 @@ class FindBusinessDataHandler(BaseHandler):
     def microbial_samples(self, *, customer: models.Customer = None, enquiry: str = None) -> List[
         models.MicrobialSample]:
         records = self.MicrobialSample.query
-        records = records.filter_by(customer=customer) if customer else records
+
+        if customer:
+            records.join(models.MicrobialOrder)
+            records = records.filter_by(models.MicrobialOrder.customer == customer)
+
         records = records.filter(or_(
             models.MicrobialSample.name.like(f"%{enquiry}%"),
             models.MicrobialSample.internal_id.like(f"%{enquiry}%"),
         )) if enquiry else records
+
         return records.order_by(models.MicrobialSample.created_at.desc())
 
     def microbial_sample(self, internal_id: str) -> models.MicrobialSample:
@@ -223,7 +228,7 @@ class FindBusinessDataHandler(BaseHandler):
         )) if enquiry else records
         return records.order_by(models.Sample.created_at.desc())
 
-    def samples_in_customer_group(self, *, customer: models.Customer = None, enquiry: str = None)\
+    def samples_in_customer_group(self, *, customer: models.Customer = None, enquiry: str = None) \
             -> List[models.Sample]:
         """Fetch all samples including those from collaborating customers."""
 
@@ -242,14 +247,3 @@ class FindBusinessDataHandler(BaseHandler):
             models.Sample.internal_id.like(f"%{enquiry}%"),
         )) if enquiry else records
         return records.order_by(models.Sample.created_at.desc())
-
-
-
-
-
-
-
-
-
-
-

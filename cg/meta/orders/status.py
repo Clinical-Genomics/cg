@@ -11,14 +11,14 @@ class StatusHandler:
         self.status = None
 
     @staticmethod
-    def group_families(samples: List[dict]) -> dict:
-        """Group samples in families."""
-        families = {}
+    def group_cases(samples: List[dict]) -> dict:
+        """Group samples in cases."""
+        cases = {}
         for sample in samples:
-            if sample['family_name'] not in families:
-                families[sample['family_name']] = []
-            families[sample['family_name']].append(sample)
-        return families
+            if sample['family_name'] not in cases:
+                cases[sample['family_name']] = []
+            cases[sample['family_name']].append(sample)
+        return cases
 
     @staticmethod
     def pools_to_status(data: dict) -> dict:
@@ -127,82 +127,85 @@ class StatusHandler:
         return status_data
 
     @classmethod
-    def families_to_status(cls, data: dict) -> dict:
+    def cases_to_status(cls, data: dict) -> dict:
         """Convert order input to status interface input."""
         status_data = {
             'customer': data['customer'],
             'order': data['name'],
             'families': [],
         }
-        families = cls.group_families(data['samples'])
+        cases = cls.group_cases(data['samples'])
 
-        for family_name, family_samples in families.items():
-            values = set(sample.get('priority', 'standard') for sample in family_samples)
+        for case_name, case_samples in cases.items():
+            values = set(sample.get('priority', 'standard') for sample in case_samples)
             if len(values) > 1:
-                raise ValueError(f"different 'priority' values: {family_name} - {values}")
+                raise ValueError(f"different 'priority' values: {case_name} - {values}")
             priority = values.pop()
-            panels = set(panel for sample in family_samples for panel in sample.get('panels',
-                                                                                    set()))
-            family = {
-                'name': family_name,
+            panels = set(panel for sample in case_samples for panel in sample.get('panels', set()))
+            case = {
+                'name': case_name,
                 'priority': priority,
                 'panels': list(panels),
                 'samples': [{
-                    'internal_id': sample.get('internal_id'),
-                    'name': sample['name'],
                     'application': sample['application'],
-                    'data_analysis': sample.get('data_analysis'),
-                    'sex': sample['sex'],
-                    'status': sample.get('status'),
-                    'mother': sample.get('mother'),
-                    'father': sample.get('father'),
-                    'tumour': sample.get('tumour') or False,
                     'capture_kit': sample.get('capture_kit'),
                     'comment': sample.get('comment'),
-                } for sample in family_samples],
+                    'data_analysis': sample.get('data_analysis'),
+                    'father': sample.get('father'),
+                    'from_sample': sample.get('from_sample'),
+                    'internal_id': sample.get('internal_id'),
+                    'mother': sample.get('mother'),
+                    'name': sample['name'],
+                    'sex': sample['sex'],
+                    'status': sample.get('status'),
+                    'time_point': sample.get('time_point'),
+                    'tumour': sample.get('tumour') or False,
+                } for sample in case_samples],
             }
 
-            status_data['families'].append(family)
+            status_data['families'].append(case)
         return status_data
 
-    def store_families(self, customer: str, order: str, ordered: dt.datetime, ticket: int,
-                       families: List[dict]) -> List[models.Family]:
-        """Store families and samples in the status database."""
+    def store_cases(self, customer: str, order: str, ordered: dt.datetime, ticket: int,
+                    cases: List[dict]) -> List[models.Family]:
+        """Store cases and samples in the status database."""
         customer_obj = self.status.customer(customer)
         if customer_obj is None:
             raise OrderError(f"unknown customer: {customer}")
         new_families = []
-        for family in families:
-            family_obj = self.status.find_family(customer_obj, family['name'])
-            if family_obj:
-                family_obj.panels = family['panels']
+        for case in cases:
+            case_obj = self.status.find_family(customer_obj, case['name'])
+            if case_obj:
+                case_obj.panels = case['panels']
             else:
-                family_obj = self.status.add_family(
-                    name=family['name'],
-                    panels=family['panels'],
-                    priority=family['priority'],
+                case_obj = self.status.add_family(
+                    name=case['name'],
+                    panels=case['panels'],
+                    priority=case['priority'],
                 )
-                family_obj.customer = customer_obj
-                new_families.append(family_obj)
+                case_obj.customer = customer_obj
+                new_families.append(case_obj)
 
             family_samples = {}
-            for sample in family['samples']:
+            for sample in case['samples']:
                 sample_obj = self.status.sample(sample['internal_id'])
                 if sample_obj:
                     family_samples[sample['name']] = sample_obj
                 else:
                     new_sample = self.status.add_sample(
-                        name=sample['name'],
+                        capture_kit=sample['capture_kit'],
+                        comment=sample['comment'],
+                        data_analysis=sample['data_analysis'],
+                        from_sample=sample['from_sample'],
                         internal_id=sample['internal_id'],
-                        sex=sample['sex'],
+                        name=sample['name'],
                         order=order,
                         ordered=ordered,
+                        priority=case['priority'],
+                        sex=sample['sex'],
                         ticket=ticket,
-                        priority=family['priority'],
-                        comment=sample['comment'],
-                        capture_kit=sample['capture_kit'],
-                        data_analysis=sample['data_analysis'],
-                        tumour=sample['tumour'],
+                        time_point=sample['time_point'],
+                        tumour=sample['tumour']
                     )
                     new_sample.customer = customer_obj
                     with self.status.session.no_autoflush:
@@ -217,18 +220,18 @@ class StatusHandler:
                     new_delivery = self.status.add_delivery(destination='caesar', sample=new_sample)
                     self.status.add(new_delivery)
 
-            for sample in family['samples']:
+            for sample in case['samples']:
                 mother_obj = family_samples[sample['mother']] if sample.get('mother') else None
                 father_obj = family_samples[sample['father']] if sample.get('father') else None
                 with self.status.session.no_autoflush:
-                    link_obj = self.status.link(family_obj.internal_id, sample['internal_id'])
+                    link_obj = self.status.link(case_obj.internal_id, sample['internal_id'])
                 if link_obj:
                     link_obj.status = sample['status'] or link_obj.status
                     link_obj.mother = mother_obj or link_obj.mother
                     link_obj.father = father_obj or link_obj.father
                 else:
                     new_link = self.status.relate_sample(
-                        family=family_obj,
+                        family=case_obj,
                         sample=family_samples[sample['name']],
                         status=sample['status'],
                         mother=mother_obj,

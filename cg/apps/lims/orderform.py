@@ -11,14 +11,13 @@ REV_SEX_MAP = {value: key for key, value in SEX_MAP.items()}
 CONTAINER_TYPES = ['Tube', '96 well plate']
 SOURCE_TYPES = set().union(METAGENOME_SOURCES, ANALYSIS_SOURCES)
 VALID_ORDERFORMS=[
-    '1508:15',      # Orderform MIP, Balsamic, sequencing only
-    '1508:16',      # Orderform MIP, Balsamic, sequencing only. same as 1508:15 with new date
+    '1508:19',      # Orderform MIP, Balsamic, sequencing only, MIP RNA
     '1541:6',       # Orderform Externally sequenced samples
-    '1603:7',       # Microbial WGS
+    '1603:9',       # Microbial WGS
     '1604:9',       # Orderform Ready made libraries (RML)
-    '1605:6',       # Microbial metagenomes
+    '1605:7',       # Microbial metagenomes
 ]
-FAMILY_PROJECT_TYPES=['mip', 'external', 'balsamic', 'mip_balsamic']
+CASE_PROJECT_TYPES = ['mip', 'external', 'balsamic', 'mip_balsamic', 'mip_rna']
 
 
 def check_orderform_version(document_title):
@@ -53,14 +52,14 @@ def parse_orderform(excel_path: str) -> dict:
 
     project_type = get_project_type(document_title, parsed_samples)
 
-    if project_type in (FAMILY_PROJECT_TYPES):
-        parsed_families = group_families(parsed_samples)
+    if project_type in CASE_PROJECT_TYPES:
+        parsed_cases = group_cases(parsed_samples)
         items = []
         customer_ids = set()
-        for family_id, parsed_family in parsed_families.items():
-            customer_id, family_data = expand_family(family_id, parsed_family)
+        for case_id, parsed_case in parsed_cases.items():
+            customer_id, case_data = expand_case(case_id, parsed_case)
             customer_ids.add(customer_id)
-            items.append(family_data)
+            items.append(case_data)
     else:
         customer_ids = set(sample['customer'] for sample in parsed_samples)
         items = parsed_samples
@@ -114,20 +113,19 @@ def get_project_type(document_title: str, parsed_samples: List) -> str:
     return project_type
 
 
-def expand_family(family_id, parsed_family):
+def expand_case(case_id, parsed_case):
     """Fill-in information about families."""
-    new_family = {'name': family_id, 'samples': []}
-    samples = parsed_family['samples']
+    new_case = {'name': case_id, 'samples': []}
+    samples = parsed_case['samples']
 
     require_qcoks = set(raw_sample['require_qcok'] for raw_sample in samples)
-    if True in require_qcoks:
-        new_family['require_qcok'] = True
+    new_case['require_qcok'] = True in require_qcoks
 
     priorities = set(raw_sample['priority'] for raw_sample in samples)
     if len(priorities) == 1:
-        new_family['priority'] = priorities.pop()
+        new_case['priority'] = priorities.pop()
     else:
-        raise OrderFormError(f"multiple values for 'Priority' for family: {family_id}")
+        raise OrderFormError(f"multiple values for 'Priority' for case: {case_id}")
 
     customers = set(raw_sample['customer'] for raw_sample in samples)
     if len(customers) != 1:
@@ -146,33 +144,34 @@ def expand_family(family_id, parsed_family):
         if raw_sample.get('container') in CONTAINER_TYPES:
             new_sample['container'] = raw_sample['container']
 
-        for key in ('data_analysis', 'container_name', 'well_position', 'quantity', 'status',
-                    'comment', 'capture_kit', 'tumour', 'tumour_purity',
-                    'formalin_fixation_time', 'post_formalin_fixation_time', 'tissue_block_size'):
+        for key in ('capture_kit', 'comment', 'container_name', 'data_analysis', 'elution_buffer',
+                    'formalin_fixation_time', 'from_sample', 'post_formalin_fixation_time',
+                    'quantity', 'status', 'time_point', 'tissue_block_size', 'tumour',
+                    'tumour_purity', 'well_position'):
             if raw_sample.get(key):
                 new_sample[key] = raw_sample[key]
 
         for parent_id in ('mother', 'father'):
             if raw_sample[parent_id]:
                 new_sample[parent_id] = raw_sample[parent_id]
-        new_family['samples'].append(new_sample)
+        new_case['samples'].append(new_sample)
 
-    new_family['panels'] = list(gene_panels)
+    new_case['panels'] = list(gene_panels)
 
-    return customer, new_family
+    return customer, new_case
 
 
-def group_families(parsed_samples):
-    """Group samples on family."""
-    raw_families = {}
+def group_cases(parsed_samples):
+    """Group samples on case."""
+    raw_cases = {}
     for sample in parsed_samples:
-        family_id = sample['family']
-        if family_id not in raw_families:
-            raw_families[family_id] = {
+        case_id = sample['case']
+        if case_id not in raw_cases:
+            raw_cases[case_id] = {
                 'samples': [],
             }
-        raw_families[family_id]['samples'].append(sample)
-    return raw_families
+        raw_cases[case_id]['samples'].append(sample)
+    return raw_cases
 
 
 def parse_sample(raw_sample):
@@ -182,10 +181,11 @@ def parse_sample(raw_sample):
 
     if raw_sample['UDF/priority'].lower() == 'förtur':
         raw_sample['UDF/priority'] = 'priority'
-    source = raw_sample.get('UDF/Source')
+    raw_source = raw_sample.get('UDF/Source')
     sample = {
         'application': raw_sample['UDF/Sequencing Analysis'],
         'capture_kit': raw_sample.get('UDF/Capture Library version'),
+        'case': raw_sample.get('UDF/familyID'),
         'comment': raw_sample.get('UDF/Comment'),
         'container': raw_sample.get('Container/Type'),
         'container_name': raw_sample.get('Container/Name'),
@@ -193,11 +193,10 @@ def parse_sample(raw_sample):
         'customer': raw_sample['UDF/customer'],
         'data_analysis': raw_sample['UDF/Data Analysis'],
         'elution_buffer': raw_sample.get('UDF/Sample Buffer'),
-        'elution_buffer_other': raw_sample.get('UDF/Other Elution Buffer'),
         'extraction_method': raw_sample.get('UDF/Extraction method'),
-        'family': raw_sample.get('UDF/familyID'),
         'formalin_fixation_time': raw_sample.get('UDF/Formalin Fixation Time'),
         'index': raw_sample.get('UDF/Index type'),
+        'from_sample': raw_sample.get('UDF/is_for_sample'),
         'name': raw_sample['Sample/Name'],
         'organism': raw_sample.get('UDF/Strain'),
         'organism_other': raw_sample.get('UDF/Other species'),
@@ -211,7 +210,7 @@ def parse_sample(raw_sample):
         'require_qcok': raw_sample.get('UDF/Process only if QC OK') == 'yes',
         'rml_plate_name': raw_sample.get('UDF/RML plate name'),
         'sex': REV_SEX_MAP.get(raw_sample.get('UDF/Gender', '').strip()),
-        'source': source if source in SOURCE_TYPES else None,
+        'source': raw_source if raw_source in SOURCE_TYPES else None,
         'status': raw_sample['UDF/Status'].lower() if raw_sample.get('UDF/Status') else None,
         'tissue_block_size': raw_sample.get('UDF/Tissue Block Size'),
         'tumour': raw_sample.get('UDF/tumor') == 'yes',
@@ -226,6 +225,8 @@ def parse_sample(raw_sample):
         sample['analysis'] = 'mip_balsamic'
     elif data_analysis and 'balsamic' in data_analysis:
         sample['analysis'] = 'balsamic'
+    elif data_analysis and 'mip rna' in data_analysis:
+        sample['analysis'] = 'mip_rna'
     elif data_analysis and 'mip' in data_analysis or 'scout' in data_analysis:
         sample['analysis'] = 'mip'
     elif data_analysis and ('fastq' in data_analysis or data_analysis == 'custom'):
@@ -236,7 +237,8 @@ def parse_sample(raw_sample):
     numeric_values = [('index_number', 'UDF/Index number'),
                       ('volume', 'UDF/Volume (uL)'), ('quantity', 'UDF/Quantity'),
                       ('concentration', 'UDF/Concentration (nM)'),
-                      ('concentration_weight', 'UDF/Sample Conc.')]
+                      ('concentration_weight', 'UDF/Sample Conc.'),
+                      ('time_point', 'UDF/time_point')]
     for json_key, excel_key in numeric_values:
         str_value = raw_sample.get(excel_key, '').rsplit('.0')[0]
         if str_value.replace('.', '').isnumeric():

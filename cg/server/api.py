@@ -90,7 +90,7 @@ def panels():
 def families():
     """Fetch families."""
     if request.args.get('status') == 'analysis':
-        records = db.families_to_mip_analyze()
+        records = db.cases_to_mip_analyze()
         count = len(records)
     else:
         customer_obj = None if g.current_user.is_admin else g.current_user.customer
@@ -251,7 +251,8 @@ def microbial_sample(sample_id):
     sample_obj = db.microbial_sample(sample_id)
     if sample_obj is None:
         return abort(404)
-    elif not g.current_user.is_admin and (g.current_user.customer != sample_obj.customer):
+    elif not g.current_user.is_admin and (g.current_user.customer !=
+                                          sample_obj.microbial_order.customer):
         return abort(401)
     data = sample_obj.to_dict()
     return jsonify(**data)

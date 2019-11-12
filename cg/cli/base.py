@@ -1,3 +1,4 @@
+""" Start of CLI """
 import logging
 import sys
 
@@ -9,17 +10,21 @@ import cg
 from cg.store import Store
 
 from .analysis import analysis
-from .store import store
+from .balsamic import balsamic
 from .add import add
+from .backup import backup
+from .clean import clean
+from .deliver import deliver
+from .export import export
 from .get import get
-from .upload import upload
+from .import_cmd import import_cmd
+from .miprdrna import rna
 from .reset import reset_cmd
 from .set import set_cmd
 from .status import status
+from .store import store
 from .transfer import transfer
-from .clean import clean
-from .deliver import deliver
-from .backup import backup
+from .upload import upload
 
 LOG = logging.getLogger(__name__)
 LEVELS = ['DEBUG', 'INFO', 'WARNING', 'ERROR']
@@ -59,7 +64,7 @@ def init(context, reset, force):
         context.abort()
 
     status_db.create_all()
-    LOG.info(f"Success! New tables: {', '.join(status_db.engine.table_names())}")
+    LOG.info("Success! New tables: %s", ', '.join(status_db.engine.table_names()))
 
 
 base.add_command(add)
@@ -67,10 +72,14 @@ base.add_command(analysis)
 base.add_command(backup)
 base.add_command(clean)
 base.add_command(deliver)
+base.add_command(export)
 base.add_command(get)
+base.add_command(import_cmd)
 base.add_command(reset_cmd)
 base.add_command(set_cmd)
 base.add_command(store)
 base.add_command(status)
 base.add_command(transfer)
 base.add_command(upload)
+analysis.add_command(balsamic)
+analysis.add_command(rna)

@@ -65,9 +65,9 @@
             {%endif%}            
           </label>
         </td>
-        <td>{{ record.customer.name }}</td>
-        <td>{{ record.order}}</td>
-        <td>{{ record.ticket_number}}</td>
+        <td> {% if record_type=='Microbial'%}{{ record.microbial_order.customer.name }} {% else %} {{ record.customer.name }}{% endif %}</td>
+        <td>{% if record_type=='Microbial'%}{{ record.microbial_order.id }} {% else %} {{ record.order}}{% endif %}</td>
+        <td>{% if record_type=='Microbial'%}{{ record.microbial_order.ticket_number }} {% else %} {{ record.ticket_number}}{% endif %}</td>
         <td>{{ record.application_version.application.tag }}</td> 
         <td>{{record.created_at.date()}}</td>
         <td>{{record.delivered_at.date()}}</td>
