@@ -23,13 +23,13 @@ def fastq_orderform():
 @pytest.fixture
 def metagenome_orderform():
     """Orderform fixture for metagenome samples"""
-    return 'tests/fixtures/orderforms/1605.6.metagenome.xlsx'
+    return 'tests/fixtures/orderforms/1605.7.metagenome.xlsx'
 
 
 @pytest.fixture
 def microbial_orderform():
     """Orderform fixture for microbial samples"""
-    return 'tests/fixtures/orderforms/1603.8.microbial.xlsx'
+    return 'tests/fixtures/orderforms/1603.9.microbial.xlsx'
 
 
 @pytest.fixture
