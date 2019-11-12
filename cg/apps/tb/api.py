@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import datetime as dt
-import logging
 import shutil
 from pathlib import Path
 from typing import List
@@ -14,8 +13,6 @@ from trailblazer.mip import files, fastq, trending
 
 from .add import AddHandler
 
-log = logging.getLogger(__name__)
-
 
 class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
     """Interface to Trailblazer for `cg`."""
@@ -27,21 +24,29 @@ class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
             config['trailblazer']['database'],
             families_dir=config['trailblazer']['root'],
         )
-        self.mip_cli = MipCli(config['trailblazer']['script'])
+        self.mip_cli = MipCli(config['trailblazer']['script'],
+                              config['trailblazer']['pipeline'])
         self.mip_config = config['trailblazer']['mip_config']
 
-    def start(self, family_id: str, priority: str = 'normal', email: str = None,
-              skip_evaluation: bool = False, start_with = None):
+    def start(self, case_id: str, priority: str = 'normal', email: str = None,
+              skip_evaluation: bool = False, start_with=None):
         """Start MIP."""
         email = email or environ_email()
-        kwargs = dict(config=self.mip_config, family=family_id, priority=priority, email=email, start_with=start_with)
+        kwargs = dict(config=self.mip_config, case=case_id,
+                      priority=priority, email=email, start_with=start_with)
         if skip_evaluation:
             kwargs['skip_evaluation'] = True
         self.mip_cli(**kwargs)
-        for old_analysis in self.analyses(family=family_id):
+        for old_analysis in self.analyses(family=case_id):
             old_analysis.is_deleted = True
         self.commit()
-        self.add_pending(family_id, email=email)
+        self.add_pending(case_id, email=email)
+
+    def mark_analyses_deleted(self, case_id: str):
+        """ mark analyses connected to a case as deleted """
+        for old_analysis in self.analyses(family=case_id):
+            old_analysis.is_deleted = True
+        self.commit()
 
     def get_sampleinfo(self, analysis: models.Analysis) -> str:
         """Get the sample info path for an analysis."""
@@ -54,11 +59,11 @@ class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
         """Call internal Trailblazer MIP API."""
         return files.parse_qcmetrics(data)
 
-    def write_panel(self, family_id: str, content: List[str]):
+    def write_panel(self, case_id: str, content: List[str]):
         """Write the gene panel to the defined location."""
-        out_dir = Path(self.families_dir) / family_id
+        out_dir = Path(self.families_dir) / case_id
         out_dir.mkdir(parents=True, exist_ok=True)
-        out_path = out_dir / 'aggregated_master.bed'
+        out_path = out_dir / 'gene_panels.bed'
         with out_path.open('w') as out_handle:
             for line in content:
                 click.echo(line, file=out_handle)
@@ -78,7 +83,7 @@ class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
             self.commit()
 
     def get_trending(self, mip_config_raw: str, qcmetrics_raw: str, sampleinfo_raw: dict) -> dict:
-        return trending.parse_mip_analysis(mip_config_raw= mip_config_raw,
+        return trending.parse_mip_analysis(mip_config_raw=mip_config_raw,
                                            qcmetrics_raw=qcmetrics_raw,
                                            sampleinfo_raw=sampleinfo_raw)
 

@@ -92,6 +92,10 @@ class Application(Model):
 
     @property
     def analysis_type(self):
+
+        if self.prep_category == 'wts':
+            return self.prep_category
+
         return 'wgs' if self.prep_category == 'wgs' else 'wes'
 
 
@@ -133,6 +137,7 @@ class Analysis(Model):
     started_at = Column(types.DateTime)
     completed_at = Column(types.DateTime)
     delivery_report_created_at = Column(types.DateTime)
+    upload_started_at = Column(types.DateTime)
     uploaded_at = Column(types.DateTime)
     # primary analysis is the one originally delivered to the customer
     is_primary = Column(types.Boolean, default=False)
@@ -158,6 +163,7 @@ class Customer(Model):
     priority = Column(types.Enum('diagnostic', 'research'))
     scout_access = Column(types.Boolean, nullable=False, default=False)
     loqus_upload = Column(types.Boolean, nullable=False, default=False)
+    return_samples = Column(types.Boolean, nullable=False, default=False)
 
     agreement_date = Column(types.DateTime)
     agreement_registration = Column(types.String(32))
@@ -167,6 +173,7 @@ class Customer(Model):
     invoice_address = Column(types.Text, nullable=False)
     invoice_reference = Column(types.String(32), nullable=False)
     uppmax_account = Column(types.String(32))
+    comment = Column(types.Text)
 
     primary_contact_id = Column(ForeignKey('user.id'))
     primary_contact = orm.relationship("User", foreign_keys=[primary_contact_id])
@@ -297,8 +304,9 @@ class Flowcell(Model):
     sequencer_type = Column(types.Enum('hiseqga', 'hiseqx'))
     sequencer_name = Column(types.String(32))
     sequenced_at = Column(types.DateTime)
-    archived_at = Column(types.DateTime)
     status = Column(types.Enum(*FLOWCELL_STATUS), default='ondisk')
+    archived_at = Column(types.DateTime)
+    updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
 
     samples = orm.relationship('Sample', secondary=flowcell_sample, backref='flowcells')
     microbial_samples = orm.relationship('MicrobialSample', secondary=flowcell_microbial_sample,
@@ -463,37 +471,38 @@ class Pool(Model):
 
 
 class Sample(Model, PriorityMixin):
-    id = Column(types.Integer, primary_key=True)
-    internal_id = Column(types.String(32), nullable=False, unique=True)
-    priority = Column(types.Integer, default=1, nullable=False)
-    name = Column(types.String(128), nullable=False)
-    data_analysis = Column(types.String(16))
-    order = Column(types.String(64))
-    ticket_number = Column(types.Integer)
-    sex = Column(types.Enum('male', 'female', 'unknown'), nullable=False)
-    is_external = Column(types.Boolean, default=False)  # DEPRECATED
-    downsampled_to = Column(types.BigInteger)
-    is_tumour = Column(types.Boolean, default=False)
-    loqusdb_id = Column(types.String(64))
-    capture_kit = Column(types.String(64))
-    reads = Column(types.BigInteger, default=0)
-    ordered_at = Column(types.DateTime, nullable=False)
-    received_at = Column(types.DateTime)
-    prepared_at = Column(types.DateTime)
-    sequence_start = Column(types.DateTime)
-    sequenced_at = Column(types.DateTime)
-    delivered_at = Column(types.DateTime)
-    invoiced_at = Column(types.DateTime)  # DEPRECATED
-    invoice_id = Column(ForeignKey('invoice.id'))
-    no_invoice = Column(types.Boolean, default=False)
-    comment = Column(types.Text)
-    beaconized_at = Column(types.Text)
 
+    application_version_id = Column(ForeignKey('application_version.id'), nullable=False)
+    beaconized_at = Column(types.Text)
+    capture_kit = Column(types.String(64))
+    comment = Column(types.Text)
     created_at = Column(types.DateTime, default=dt.datetime.now)
     customer_id = Column(ForeignKey('customer.id', ondelete='CASCADE'), nullable=False)
-    application_version_id = Column(ForeignKey('application_version.id'), nullable=False)
-
+    data_analysis = Column(types.String(16))
+    delivered_at = Column(types.DateTime)
     deliveries = orm.relationship('Delivery', backref='sample')
+    downsampled_to = Column(types.BigInteger)
+    from_sample = Column(types.String(128))
+    id = Column(types.Integer, primary_key=True)
+    internal_id = Column(types.String(32), nullable=False, unique=True)
+    invoice_id = Column(ForeignKey('invoice.id'))
+    invoiced_at = Column(types.DateTime)  # DEPRECATED
+    is_external = Column(types.Boolean, default=False)  # DEPRECATED
+    is_tumour = Column(types.Boolean, default=False)
+    loqusdb_id = Column(types.String(64))
+    name = Column(types.String(128), nullable=False)
+    no_invoice = Column(types.Boolean, default=False)
+    order = Column(types.String(64))
+    ordered_at = Column(types.DateTime, nullable=False)
+    prepared_at = Column(types.DateTime)
+    priority = Column(types.Integer, default=1, nullable=False)
+    reads = Column(types.BigInteger, default=0)
+    received_at = Column(types.DateTime)
+    sequence_start = Column(types.DateTime)
+    sequenced_at = Column(types.DateTime)
+    sex = Column(types.Enum('male', 'female', 'unknown'), nullable=False)
+    ticket_number = Column(types.Integer)
+    time_point = Column(types.Integer)
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"

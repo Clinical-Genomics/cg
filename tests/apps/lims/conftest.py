@@ -5,7 +5,7 @@ from cg.apps.lims.api import LimsAPI
 @pytest.fixture
 def balsamic_orderform():
     """Orderform fixture for Balsamic samples"""
-    return 'tests/fixtures/orderforms/1508.17.balsamic.xlsx'
+    return 'tests/fixtures/orderforms/1508.19.balsamic.xlsx'
 
 
 @pytest.fixture
@@ -17,31 +17,37 @@ def external_orderform():
 @pytest.fixture
 def fastq_orderform():
     """Orderform fixture for fastq samples"""
-    return 'tests/fixtures/orderforms/1508.17.fastq.xlsx'
+    return 'tests/fixtures/orderforms/1508.19.fastq.xlsx'
 
 
 @pytest.fixture
 def metagenome_orderform():
     """Orderform fixture for metagenome samples"""
-    return 'tests/fixtures/orderforms/1605.6.metagenome.xlsx'
+    return 'tests/fixtures/orderforms/1605.7.metagenome.xlsx'
 
 
 @pytest.fixture
 def microbial_orderform():
     """Orderform fixture for microbial samples"""
-    return 'tests/fixtures/orderforms/1603.7.microbial.xlsx'
+    return 'tests/fixtures/orderforms/1603.9.microbial.xlsx'
 
 
 @pytest.fixture
 def mip_orderform():
     """Orderform fixture for MIP samples"""
-    return 'tests/fixtures/orderforms/1508.17.mip.xlsx'
+    return 'tests/fixtures/orderforms/1508.19.mip.xlsx'
 
 
 @pytest.fixture
 def mip_balsamic_orderform():
     """Orderform fixture for MIP and Balsamic samples"""
-    return 'tests/fixtures/orderforms/1508.17.mip_balsamic.xlsx'
+    return 'tests/fixtures/orderforms/1508.19.mip_balsamic.xlsx'
+
+
+@pytest.fixture
+def mip_rna_orderform():
+    """Orderform fixture for MIP RNA samples"""
+    return 'tests/fixtures/orderforms/1508.19.mip_rna.xlsx'
 
 
 @pytest.fixture
