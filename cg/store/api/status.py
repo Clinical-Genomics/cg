@@ -387,6 +387,8 @@ class StatusHandler(BaseHandler):
                 samples_delivered_at
             )
 
+            max_tat = self._get_max_tat(links=record.links)
+
             case = {
                 'internal_id': record.internal_id,
                 'name': record.name,
@@ -425,6 +427,7 @@ class StatusHandler(BaseHandler):
                 'flowcells_on_disk': flowcells_on_disk,
                 'flowcells_on_disk_bool': flowcells_on_disk_bool,
                 'tat': tat,
+                'max_tat': max_tat
             }
 
             cases.append(case)
@@ -714,3 +717,11 @@ class StatusHandler(BaseHandler):
         if first_date:
             delta = (last_date - first_date).days
         return delta
+
+    @staticmethod
+    def _get_max_tat(links):
+        max_tat = 0
+        for link in links:
+            if link.sample.application_version.application.turnaround_time:
+                max_tat = max(0, link.sample.application_version.application.turnaround_time)
+        return max_tat
