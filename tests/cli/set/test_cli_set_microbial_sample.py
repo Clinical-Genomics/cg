@@ -1,113 +1,118 @@
 """Test methods for cg/cli/set/microbial_sample"""
 from datetime import datetime
 
+from cg.cli.set import microbial_sample
 from cg.store import Store
 
 
-def test_invalid_sample_empty_db(invoke_cli, disk_store: Store):
+SUCCESS = 0
+
+
+def test_invalid_sample_empty_db(cli_runner, base_context):
     # GIVEN an empty database
 
     # WHEN running set with an sample that does not exist
     sample_id = 'dummy_sample_id'
-    result = invoke_cli(['--database', disk_store.uri, 'set',
-                         'microbial-sample', sample_id, 'sign'])
-
+    result = cli_runner.invoke(microbial_sample, [sample_id, 'sign'], 
+                               obj=base_context)
+    
     # THEN then it should complain on invalid sample
-    assert result.exit_code == 1
+    assert result.exit_code != SUCCESS
 
 
-def test_invalid_sample_non_empty_db(invoke_cli, disk_store: Store):
+def test_invalid_sample_non_empty_db(cli_runner, base_context, base_store: Store):
     # GIVEN a non empty database
-    add_microbial_sample_and_order(disk_store)
+    add_microbial_sample_and_order(base_store)
 
     # WHEN running set with an sample that does not exist
     sample_id = 'dummy_sample_id'
-    result = invoke_cli(['--database', disk_store.uri, 'set',
-                         'microbial-sample', sample_id, 'sign'])
+    result = cli_runner.invoke(microbial_sample, [sample_id, 'sign'], obj=base_context)
 
     # THEN then it should complain on invalid sample
-    assert result.exit_code == 1
+    assert result.exit_code != SUCCESS
 
 
-def test_valid_sample_no_apptag_option(invoke_cli, disk_store: Store):
+def test_valid_sample_no_apptag_option(cli_runner, base_context, base_store: Store):
     # GIVEN a non empty database
-    sample = add_microbial_sample_and_order(disk_store)
+    sample = add_microbial_sample_and_order(base_store)
 
     # WHEN running set with an sample but without any options
     sample_id = sample.internal_id
-    result = invoke_cli(['--database', disk_store.uri, 'set',
-                         'microbial-sample', sample_id, 'sign'])
+    result = cli_runner.invoke(microbial_sample, [sample_id, 'sign'], obj=base_context)
 
     # THEN then it should complain on missing options
-    assert result.exit_code == 1
+    assert result.exit_code != SUCCESS
 
 
-def test_invalid_application(invoke_cli, disk_store: Store):
+def test_invalid_application(cli_runner, base_context, base_store: Store):
     # GIVEN a database with a sample
-    sample = add_microbial_sample_and_order(disk_store)
+    sample = add_microbial_sample_and_order(base_store)
     application_tag = 'dummy_application'
-    assert disk_store.MicrobialSample.query.first().application_version.application.tag != \
+    assert base_store.MicrobialSample.query.first().application_version.application.tag != \
         application_tag
 
     # WHEN calling set sample with an invalid application
-    result = invoke_cli(['--database', disk_store.uri, 'set', 'microbial-sample',
-                         sample.internal_id, 'sign', '-a', application_tag])
+    result = cli_runner.invoke(microbial_sample, [sample.internal_id, 'sign', '-a',
+                                                  application_tag], obj=base_context)
 
     # THEN then it should complain about missing application instead of setting the value
-    assert result.exit_code == 1
-    assert disk_store.MicrobialSample.query.first().application_version.application.tag != \
+    assert result.exit_code != SUCCESS
+    assert base_store.MicrobialSample.query.first().application_version.application.tag != \
         application_tag
 
 
-def test_valid_application(invoke_cli, disk_store: Store):
+def test_valid_application(cli_runner, base_context, base_store: Store):
     # GIVEN a database with a sample and two applications
-    sample = add_microbial_sample_and_order(disk_store)
-    application_tag = ensure_application_version(disk_store, 'another_application').application.tag
-    assert disk_store.MicrobialSample.query.first().application_version.application.tag != \
+    sample = add_microbial_sample_and_order(base_store)
+    application_tag = ensure_application_version(base_store, 'another_application').application.tag
+    assert base_store.MicrobialSample.query.first().application_version.application.tag != \
         application_tag
 
     # WHEN calling set sample with an valid application
     signature = 'sign'
-    result = invoke_cli(['--database', disk_store.uri, 'set', 'microbial-sample',
-                         sample.internal_id, signature, '-a', application_tag])
+    result = cli_runner.invoke(microbial_sample, [sample.internal_id, 'sign', '-a',
+                                                  application_tag], obj=base_context)
 
     # THEN then the application should have been set
-    assert result.exit_code == 0
-    assert disk_store.MicrobialSample.query.first().application_version.application.tag == \
+    print(result.exception)
+    print(result.output)
+    assert result.exit_code == SUCCESS
+    assert base_store.MicrobialSample.query.first().application_version.application.tag == \
         application_tag
-    assert signature in disk_store.MicrobialSample.query.first().comment
+    assert signature in base_store.MicrobialSample.query.first().comment
 
 
-def test_invalid_priority(invoke_cli, disk_store: Store):
+def test_invalid_priority(cli_runner, base_context, base_store: Store):
     # GIVEN a database with a sample
-    sample = add_microbial_sample_and_order(disk_store)
+    sample = add_microbial_sample_and_order(base_store)
     priority = 'dummy_priority'
-    assert disk_store.MicrobialSample.query.first().priority != priority
+    assert base_store.MicrobialSample.query.first().priority != priority
 
     # WHEN calling set sample with an invalid priority
-    result = invoke_cli(['--database', disk_store.uri, 'set', 'microbial-sample',
-                         sample.internal_id, 'sign', '-p', priority])
+    result = cli_runner.invoke(microbial_sample, [sample.internal_id, 'sign', '-p',
+                                                  priority], obj=base_context)
 
     # THEN then it should complain about bad priority instead of setting the value
-    assert result.exit_code != 0
-    assert disk_store.MicrobialSample.query.first().priority_human != priority
+    assert result.exit_code != SUCCESS
+    assert base_store.MicrobialSample.query.first().priority_human != priority
 
 
-def test_valid_priority(invoke_cli, disk_store: Store):
+def test_valid_priority(cli_runner, base_context, base_store: Store):
     # GIVEN a database with a sample
-    sample = add_microbial_sample_and_order(disk_store)
+    sample = add_microbial_sample_and_order(base_store)
     priority = 'priority'
-    assert disk_store.MicrobialSample.query.first().priority != priority
+    assert base_store.MicrobialSample.query.first().priority != priority
 
     # WHEN calling set sample with an valid priority
     signature = 'sign'
-    result = invoke_cli(['--database', disk_store.uri, 'set', 'microbial-sample',
-                         sample.internal_id, signature, '-p', priority])
+
+    result = cli_runner.invoke(microbial_sample, [sample.internal_id, 'sign', '-p',
+                                                  priority], obj=base_context)
 
     # THEN then the priority should have been set
-    assert result.exit_code == 0
-    assert disk_store.MicrobialSample.query.first().priority_human == priority
-    assert signature in disk_store.MicrobialSample.query.first().comment
+    assert result.exit_code == SUCCESS
+    assert base_store.MicrobialSample.query.first().priority_human == priority
+    assert signature in base_store.MicrobialSample.query.first().comment
 
 
 def ensure_application_version(store, application_tag='dummy_tag'):

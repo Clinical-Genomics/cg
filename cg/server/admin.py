@@ -55,7 +55,9 @@ class ApplicationView(BaseView):
     column_searchable_list = ['tag', 'prep_category']
     column_filters = ['prep_category', 'is_accredited']
     column_editable_list = ['description', 'is_accredited', 'target_reads', 'comment',
-                            'prep_category', 'sequencing_depth', 'is_external']
+                            'prep_category', 'sequencing_depth', 'is_external',
+                            'turnaround_time', 'sample_concentration', 'priority_processing',
+                            'is_archived']
     form_excluded_columns = ['category']
 
     @staticmethod
@@ -91,12 +93,16 @@ class CustomerView(BaseView):
     column_exclude_list = [
         'agreement_date',
         'organisation_number',
-        'invoice_address'
+        'invoice_address',
+        'primary_contact',
+        'delivery_contact',
+        'invoice_contact',
+        'customer_group'
     ]
     column_searchable_list = ['internal_id', 'name']
     column_filters = ['priority', 'scout_access']
     column_editable_list = ['name', 'scout_access', 'loqus_upload', 'return_samples', 'priority',
-                            'customer_group']
+                            'customer_group', 'comment']
     
 
 class CustomerGroupView(BaseView):
@@ -150,9 +156,10 @@ class AnalysisView(BaseView):
 class FlowcellView(BaseView):
     """Admin view for Model.Flowcell"""
 
-    column_searchable_list = ['name']
-    column_filters = ['sequencer_type', 'sequencer_name']
     column_editable_list = ['status']
+    column_exclude_list = ['archived_at']
+    column_filters = ['sequencer_type', 'sequencer_name']
+    column_searchable_list = ['name']
 
 
 class InvoiceView(BaseView):
@@ -170,7 +177,7 @@ class InvoiceView(BaseView):
         return Markup(
             u"<a href='%s'>%s</a>" % (
                 url_for('invoice.index_view', search=model.invoice.id),
-                model.invoice.id
+                model.invoice.invoiced_at.date() if model.invoice.invoiced_at else 'In progress'
             )
         ) if model.invoice else u""
 
@@ -230,11 +237,11 @@ class PoolView(BaseView):
 class SampleView(BaseView):
     """Admin view for Model.Sample"""
 
-    column_exclude_list = ['is_external']
+    column_exclude_list = ['is_external', 'invoiced_at']
     column_searchable_list = ['internal_id', 'name', 'ticket_number', 'customer.internal_id']
     column_filters = ['customer.internal_id', 'sex', 'application_version.application']
-    column_editable_list = ['sex', 'downsampled_to', 'sequenced_at', 'ticket_number']
-    form_excluded_columns = ['is_external']
+    column_editable_list = ['sex', 'downsampled_to', 'sequenced_at', 'ticket_number', 'is_tumour']
+    form_excluded_columns = ['is_external', 'invoiced_at']
 
     column_formatters = {
         'internal_id': view_family_sample_link,
