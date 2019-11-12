@@ -16,7 +16,7 @@ from cg.store import models, Store
 
 COLLABORATORS = ('cust000', 'cust002', 'cust003', 'cust004', 'cust042')
 MASTER_LIST = ('ENDO', 'EP', 'IEM', 'IBMFS', 'mtDNA', 'MIT', 'PEDHEP', 'OMIM-AUTO',
-               'PIDCAD', 'PID', 'SKD', 'NMD', 'CTD', 'IF', 'NEURODEG')
+               'PIDCAD', 'PID', 'SKD', 'NMD', 'CTD', 'IF', 'NEURODEG', 'mcarta')
 COMBOS = {
     'DSD': ('DSD', 'HYP', 'SEXDIF', 'SEXDET'),
     'CM': ('CNM', 'CM'),
@@ -26,6 +26,8 @@ CAPTUREKIT_MAP = {'Agilent Sureselect CRE': 'agilent_sureselect_cre.v1',
                   'SureSelect CRE': 'agilent_sureselect_cre.v1',
                   'Agilent Sureselect V5': 'agilent_sureselect.v5',
                   'SureSelect Focused Exome': 'agilent_sureselect_focusedexome.v1',
+                  'Twist Human core exome v1.3 + Twist Human RefSeq Panel':
+                  'Twist_Target_hg19_RefSeq.bed',
                   'other': 'agilent_sureselect_cre.v1'}
 
 
@@ -88,12 +90,13 @@ class AnalysisAPI:
         family_obj.action = 'running'
         self.db.commit()
 
-    def config(self, family_obj: models.Family) -> dict:
+    def config(self, family_obj: models.Family, pipeline: str = None) -> dict:
         """Make the MIP config. Meta data for the family is taken from the family object
         and converted to MIP format via trailblazer.
 
         Args:
             family_obj (models.Family):
+            pipeline (str): the name of the pipeline to validate the config against
 
         Returns:
             dict: config_data (MIP format)
@@ -102,14 +105,14 @@ class AnalysisAPI:
         data = self.build_config(family_obj)
 
         # Validate and reformat to MIP config format
-        config_data = self.tb.make_config(data)
+        config_data = self.tb.make_config(data, pipeline)
 
         return config_data
 
     def build_config(self, family_obj: models.Family) -> dict:
         """Fetch data for creating a MIP config file."""
         data = {
-            'family': family_obj.internal_id,
+            'case': family_obj.internal_id,
             'default_gene_panels': family_obj.panels,
             'samples': [],
         }
@@ -147,7 +150,7 @@ class AnalysisAPI:
         return data
 
     @staticmethod
-    def _fastq_header(line):
+    def fastq_header(line):
         """handle illumina's two different header formats
         @see https://en.wikipedia.org/wiki/FASTQ_format
 
@@ -216,7 +219,7 @@ class AnalysisAPI:
             # figure out flowcell name from header
             with gzip.open(file_obj.full_path) as handle:
                 header_line = handle.readline().decode()
-                header_info = self._fastq_header(header_line)
+                header_info = self.fastq_header(header_line)
 
             data = {
                 'path': file_obj.full_path,
@@ -306,3 +309,12 @@ class AnalysisAPI:
                 trending = dict()
 
         return trending
+
+    @staticmethod
+    def is_dna_only_case(case):
+        """returns if all samples of a case has dna application type"""
+
+        for _link in case.links:
+            if _link.sample.application_version.application.analysis_type in 'wts':
+                return False
+        return True
