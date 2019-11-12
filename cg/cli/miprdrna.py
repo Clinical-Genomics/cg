@@ -59,7 +59,7 @@ def start(context: click.Context, case_id: str, dry: bool = False,
 def case_config(context, dry, case_id):
     """Generate a config for the case_id"""
 
-    case_obj = context.obj['db'].case(case_id)
+    case_obj = context.obj['db'].family(case_id)
 
     if not case_obj:
         LOGGER.error('Case %s not found', case_id)

@@ -137,6 +137,7 @@ class Analysis(Model):
     started_at = Column(types.DateTime)
     completed_at = Column(types.DateTime)
     delivery_report_created_at = Column(types.DateTime)
+    upload_started_at = Column(types.DateTime)
     uploaded_at = Column(types.DateTime)
     # primary analysis is the one originally delivered to the customer
     is_primary = Column(types.Boolean, default=False)
