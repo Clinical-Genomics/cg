@@ -14,8 +14,8 @@ def base_context(analysis_store) -> dict:
     }
 
 
-@pytest.fixture(scope='function')
-def analysis_store(base_store: Store) -> Store:
+@pytest.fixture(scope='function', name='analysis_store')
+def fixture_analysis_store(base_store: Store) -> Store:
     """ store to be used in tests"""
     _store = base_store
 
