@@ -175,7 +175,7 @@ def test_parsing_metagenome_orderform(metagenome_orderform):
     # THEN it should detect the project type
     assert data['project_type'] == 'metagenome'
     # ... and find all samples
-    assert len(data['items']) == 18
+    assert len(data['items']) == 19
     # ... and collect relevant sample info
     sample = data['items'][0]
 
@@ -185,22 +185,19 @@ def test_parsing_metagenome_orderform(metagenome_orderform):
     assert sample['application'] == 'METPCFR030'
     assert sample['customer'] == 'cust000'
     assert sample['require_qcok'] is True
-    assert sample['elution_buffer'] == 'other'
+    assert sample['elution_buffer'] == 'Other (specify in "Comments")'
     assert sample['extraction_method'] == 'other (specify in comment field)'
     assert sample['container'] == '96 well plate'
     assert sample['priority'] == 'research'
 
     # Required if Plate
-    assert sample['container_name'] == 'p1'
+    assert sample['container_name'] == 'plate1'
     assert sample['well_position'] == 'A:1'
-
-    # Required if "other" is chosen in column "DNA Elution Buffer"
-    assert sample['elution_buffer_other'] == 'other elution buffer'
 
     # These fields are not required
     assert sample['concentration_weight'] == '1'
     assert sample['quantity'] == '2'
-    assert sample['comment'] == 'other extraction method'
+    assert sample['comment'] == 'comment'
 
     
 def test_parsing_microbial_orderform(microbial_orderform):
@@ -221,26 +218,25 @@ def test_parsing_microbial_orderform(microbial_orderform):
 
     assert sample_data['name'] == 's1'
     assert sample_data.get('internal_id') is None
-    assert sample_data['organism'] == 'C. jejuni'
-    assert sample_data['reference_genome'] == 'NC_0000001'
+    assert sample_data['organism'] == 'other'
+    assert sample_data['reference_genome'] == 'NC_00001'
     assert sample_data['data_analysis'] == 'fastq'
     assert sample_data['application'] == 'MWRNXTR003'
     # customer on order (data)
     assert sample_data['require_qcok'] is True
-    assert sample_data['elution_buffer'] == 'Nuclease-free water'
-    assert sample_data['extraction_method'] == 'MagNaPure 96 (contact Clinical Genomics before ' \
-                                               'submission)'
+    assert sample_data['elution_buffer'] == 'Other (specify in "Comments")'
+    assert sample_data['extraction_method'] == 'other (specify in comment field)'
     assert sample_data['container'] == '96 well plate'
     assert sample_data.get('priority') in 'research'
 
-    assert sample_data['container_name'] == 'p1'
+    assert sample_data['container_name'] == 'plate1'
     assert sample_data['well_position'] == 'A:1'
 
-    assert not sample_data['organism_other']
+    assert sample_data['organism_other'] == 'other species'
 
     assert sample_data['concentration_weight'] == '1'
     assert sample_data['quantity'] == '2'
-    assert sample_data['comment'] == 'sample comment'
+    assert sample_data['comment'] == 'comment'
 
 
 def test_parsing_balsamic_orderform(balsamic_orderform):
@@ -366,22 +362,58 @@ def test_parsing_mip_rna_orderform(mip_rna_orderform):
     assert data['project_type'] == 'mip_rna'
     assert data['customer'] == 'cust000'
     # ... and it should find and group all samples in cases
-    assert len(data['items']) == 5
+    assert len(data['items']) == 1
     # ... and collect relevant data about the cases
     first_case = data['items'][0]
-    assert len(first_case['samples']) == 7
-    assert first_case['name'] == 'whole-genome'
+    assert len(first_case['samples']) == 38
+    assert first_case['name'] == 'rna'
     assert first_case['priority'] == 'research'
-    assert set(first_case['panels']) == set(['AD-HSP', 'CSAnemia', 'CILM', 'Ataxi',
-                                             'ATX', 'COCA', 'bindevev'])
+    assert set(first_case['panels']) == set(['AD-HSP',
+                                             'ATX',
+                                             'Ataxi',
+                                             'CILM',
+                                             'COCA',
+                                             'CSAnemia',
+                                             'CSP',
+                                             'CTD',
+                                             'DSD',
+                                             'ENDO',
+                                             'EP',
+                                             'ET',
+                                             'HYDRO',
+                                             'HYP',
+                                             'IBD-list',
+                                             'IBMFS',
+                                             'ID',
+                                             'IEM',
+                                             'IF',
+                                             'IMY',
+                                             'Inherited cancer',
+                                             'MIT',
+                                             'MSKI',
+                                             'ND',
+                                             'NJU',
+                                             'NMD',
+                                             'OMIM-AUTO',
+                                             'PEDHEP',
+                                             'PID',
+                                             'PIDCAD',
+                                             'PU',
+                                             'SEXDET',
+                                             'SEXDIF',
+                                             'SKD',
+                                             'SPG',
+                                             'bindevev',
+                                             'mtDNA',
+                                             'panel1'])
     assert first_case['require_qcok'] is True
     # ... and collect relevant info about the samples
 
     first_sample = first_case['samples'][0]
-    assert first_sample['name'] == 'whole-genome-1'
+    assert first_sample['name'] == 'rna-1'
     assert first_sample['container'] == '96 well plate'
     assert first_sample['data_analysis'] == 'MIP RNA'
-    assert first_sample['application'] == 'WGSPCFC030'
+    assert first_sample['application'] == 'RNAPOAR025'
     assert first_sample['sex'] == 'male'
     # case-id on the case
     # customer on the order (data)
@@ -394,8 +426,8 @@ def test_parsing_mip_rna_orderform(mip_rna_orderform):
     # panels on the family
     assert first_sample['status'] == 'affected'
 
-    assert first_sample['mother'] == 'whole-genome-2'
-    assert first_sample['father'] == 'whole-genome-3'
+    assert first_sample['mother'] == 'rna-2'
+    assert first_sample['father'] == 'rna-3'
 
     assert first_sample['tumour'] is True
 
@@ -403,7 +435,7 @@ def test_parsing_mip_rna_orderform(mip_rna_orderform):
     assert first_sample['comment'] == 'comment'
 
     # required for RNA samples
-    assert first_sample['from_sample'] == 'whole-genome-1'
+    assert first_sample['from_sample'] == 'rna-1'
     assert first_sample['time_point'] == '1'
 
 

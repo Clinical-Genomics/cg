@@ -39,7 +39,7 @@ def status(context):
 @click.pass_context
 def analysis(context):
     """Which families will be analyzed?"""
-    records = context.obj['db'].families_to_mip_analyze()
+    records = context.obj['db'].cases_to_mip_analyze()
     for family_obj in records:
         click.echo(family_obj)
 
@@ -173,13 +173,14 @@ def cases(context, output_type, verbose, days, internal_id, name, action, priori
     for case in records:
 
         tat_number = case.get('tat')
+        max_tat = case.get('max_tat')
 
         if case.get('samples_received_bool') and case.get('samples_delivered_bool') and \
-                tat_number <= 21:
+                tat_number <= max_tat:
             tat_color = 'green'
-        elif tat_number == 21:
+        elif tat_number == max_tat:
             tat_color = 'yellow'
-        elif tat_number > 21:
+        elif tat_number > max_tat:
             tat_color = 'red'
         else:
             tat_color = 'white'
@@ -188,9 +189,9 @@ def cases(context, output_type, verbose, days, internal_id, name, action, priori
         color_end = Color(u"{/" + f"{tat_color}" + "}")
 
         if case.get('samples_received_bool') and case.get('samples_delivered_bool'):
-            tat = str(tat_number) + color_end
+            tat = f"{tat_number}/{max_tat}" + color_end
         else:
-            tat = f"({tat_number})" + color_end
+            tat = f"({tat_number})/{max_tat}" + color_end
 
         title = color_start + f"{case.get('internal_id')}"
         if name:

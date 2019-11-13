@@ -92,6 +92,10 @@ class Application(Model):
 
     @property
     def analysis_type(self):
+
+        if self.prep_category == 'wts':
+            return self.prep_category
+
         return 'wgs' if self.prep_category == 'wgs' else 'wes'
 
 
@@ -133,6 +137,7 @@ class Analysis(Model):
     started_at = Column(types.DateTime)
     completed_at = Column(types.DateTime)
     delivery_report_created_at = Column(types.DateTime)
+    upload_started_at = Column(types.DateTime)
     uploaded_at = Column(types.DateTime)
     # primary analysis is the one originally delivered to the customer
     is_primary = Column(types.Boolean, default=False)
@@ -168,6 +173,7 @@ class Customer(Model):
     invoice_address = Column(types.Text, nullable=False)
     invoice_reference = Column(types.String(32), nullable=False)
     uppmax_account = Column(types.String(32))
+    comment = Column(types.Text)
 
     primary_contact_id = Column(ForeignKey('user.id'))
     primary_contact = orm.relationship("User", foreign_keys=[primary_contact_id])
@@ -298,8 +304,9 @@ class Flowcell(Model):
     sequencer_type = Column(types.Enum('hiseqga', 'hiseqx'))
     sequencer_name = Column(types.String(32))
     sequenced_at = Column(types.DateTime)
-    archived_at = Column(types.DateTime)
     status = Column(types.Enum(*FLOWCELL_STATUS), default='ondisk')
+    archived_at = Column(types.DateTime)
+    updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
 
     samples = orm.relationship('Sample', secondary=flowcell_sample, backref='flowcells')
     microbial_samples = orm.relationship('MicrobialSample', secondary=flowcell_microbial_sample,
