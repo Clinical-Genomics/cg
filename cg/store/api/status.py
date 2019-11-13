@@ -383,7 +383,8 @@ class StatusHandler(BaseHandler):
                 continue
 
             if progress_tracker:
-                for analysis_obj in progress_tracker.analyses(family=record.internal_id):
+                for analysis_obj in progress_tracker.get_latest_logged_analysis(
+                        case_id=record.internal_id):
                     if not analysis_status:
                         analysis_completion = round(analysis_obj.progress * 100)
                         analysis_status = analysis_obj.status
