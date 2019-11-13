@@ -65,7 +65,7 @@ class StatusHandler(BaseHandler):
         )
         return records
 
-    def families_to_mip_analyze(self, limit: int = 50):
+    def cases_to_mip_analyze(self, limit: int = 50):
         """Fetch families without analyses where all samples are sequenced."""
 
         # there are two cases when a sample should be analysed:
@@ -89,6 +89,44 @@ class StatusHandler(BaseHandler):
             )
             # 1. family that has been analysed but now is requested for re-analysing
             # 2. new family with that haven't been analysed
+            .filter(
+                or_(
+                    models.Family.action == 'analyze',
+                    and_(
+                        models.Family.action.is_(None),
+                        models.Analysis.created_at.is_(None),
+                    ),
+                )
+            )
+            .order_by(models.Family.priority.desc(), models.Family.ordered_at)
+        )
+
+        families = [record for record in families_q if self._all_samples_have_sequence_data(
+            record.links)]
+
+        return families[:limit]
+
+    def cases_to_balsamic_analyze(self, limit: int = 50):
+        """Fetch families without analyses where all samples are sequenced."""
+
+        # there are two cases when a sample should be analysed:
+        families_q = (
+            self.Family.query
+            .outerjoin(models.Analysis)
+            .join(models.Family.links, models.FamilySample.sample)
+            # the samples must external or be sequenced to be analysed
+            .filter(
+                or_(
+                    models.Sample.is_external,
+                    models.Sample.sequenced_at.isnot(None),
+                )
+            )
+            # The data_analysis is includes Balsamic
+            .filter(
+                models.Sample.data_analysis.like('%Balsamic%')
+            )
+            # 1. family that has been analysed but now is requested for re-analysing
+            # 2. new family that hasn't been analysed yet
             .filter(
                 or_(
                     models.Family.action == 'analyze',
@@ -344,6 +382,15 @@ class StatusHandler(BaseHandler):
             if exclude_invoiced and samples_invoiced_bool:
                 continue
 
+            if progress_tracker:
+                for analysis_obj in progress_tracker.analyses(family=record.internal_id):
+                    if not analysis_status:
+                        analysis_completion = round(analysis_obj.progress * 100)
+                        analysis_status = analysis_obj.status
+
+            if progress_status and progress_status != analysis_status:
+                continue
+
             tat = self._calculate_estimated_turnaround_time(
                 samples_received_at,
                 samples_prepared_at,
@@ -353,14 +400,7 @@ class StatusHandler(BaseHandler):
                 samples_delivered_at
             )
 
-            if progress_tracker:
-                for analysis_obj in progress_tracker.analyses(family=record.internal_id):
-                    if not analysis_status:
-                        analysis_completion = round(analysis_obj.progress * 100)
-                        analysis_status = analysis_obj.status
-
-            if progress_status and progress_status != analysis_status:
-                continue
+            max_tat = self._get_max_tat(links=record.links)
 
             case = {
                 'internal_id': record.internal_id,
@@ -402,6 +442,7 @@ class StatusHandler(BaseHandler):
                 'flowcells_on_disk': flowcells_on_disk,
                 'flowcells_on_disk_bool': flowcells_on_disk_bool,
                 'tat': tat,
+                'max_tat': max_tat
             }
 
             cases.append(case)
@@ -669,7 +710,7 @@ class StatusHandler(BaseHandler):
                                              analysis_uploaded_at,
                                              samples_delivered_at
                                              ):
-
+        """Calculated estimated turnaround-time"""
         if samples_received_at and samples_delivered_at:
             return self._calculate_date_delta(None, samples_received_at, samples_delivered_at)
 
@@ -690,3 +731,11 @@ class StatusHandler(BaseHandler):
         if first_date:
             delta = (last_date - first_date).days
         return delta
+
+    @staticmethod
+    def _get_max_tat(links):
+        max_tat = 0
+        for link in links:
+            if link.sample.application_version.application.turnaround_time:
+                max_tat = max(0, link.sample.application_version.application.turnaround_time)
+        return max_tat
