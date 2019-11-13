@@ -12,7 +12,7 @@ from cg.constants import FAMILY_ACTIONS, PRIORITY_OPTIONS
 CASE_HEADERS_LONG = ['Case', 'Ordered', 'Received', 'Prepared', 'Sequenced', 'Flowcells',
                      'Analysed', 'Uploaded', 'Delivered', 'Invoiced', 'TAT']
 ALWAYS_LONG_HEADERS = [CASE_HEADERS_LONG[0], CASE_HEADERS_LONG[1],
-                       CASE_HEADERS_LONG[6]]
+                       CASE_HEADERS_LONG[6], CASE_HEADERS_LONG[7]]
 CASE_HEADERS_MEDIUM = []
 CASE_HEADERS_SHORT = []
 
