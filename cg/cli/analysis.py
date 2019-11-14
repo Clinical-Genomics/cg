@@ -72,7 +72,7 @@ def _suggest_cases_to_analyze(context, show_as_error=False):
         LOG.error('provide a case, suggestions:')
     else:
         LOG.warning('provide a case, suggestions:')
-    for family_obj in context.obj['db'].families_to_mip_analyze()[:50]:
+    for family_obj in context.obj['db'].cases_to_mip_analyze()[:50]:
         click.echo(family_obj)
 
 
