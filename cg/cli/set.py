@@ -88,9 +88,8 @@ def sample(context, sex, customer, comment, downsampled_to, apptag, capture_kit,
     if sex:
         if sample_obj.sex != sex:
             echo_msg += click.style(f"\nUpdate sample sex: {sample_obj.sex} -> {sex}", fg='green')
-            sample_obj.sex = sex
-
             comment += _generate_comment("Gender", sample_obj.sex, sex)
+            sample_obj.sex = sex
         else:
             echo_msg += click.style(f"\nSample sex already: {sample_obj.sex}", fg='yellow')
 
@@ -113,27 +112,28 @@ def sample(context, sex, customer, comment, downsampled_to, apptag, capture_kit,
             else:
                 echo_msg += click.style(f"\nUpdate sample customer: {previous_customer} ->"
                                         f" {new_customer})", fg='green')
-                sample_obj.customer_id = customer_obj.id
-
                 comment += _generate_comment("Customer",
                                              sample_obj.customer.internal_id,
                                              customer_obj.internal_id)
+                sample_obj.customer_id = customer_obj.id
 
     if downsampled_to:
         if downsampled_to != sample_obj.downsampled_to:
-            sample_obj.downsampled_to = downsampled_to
-            echo_msg += click.style(
-                f"\nNumber of downsampled total reads set to {downsampled_to}.", fg='green')
-
             comment += _generate_comment("Total reads",
                                          sample_obj.downsampled_to,
                                          downsampled_to)
+            sample_obj.downsampled_to = downsampled_to
+            echo_msg += click.style(
+                f"\nNumber of downsampled total reads set to {downsampled_to}.", fg='green')
         else:
             echo_msg += click.style(f"\nSample downsampled already: {sample_obj.downsampled_to}",
                                     fg='yellow')
 
     if downsampled_to == 0:
         if sample_obj.downsampled_to:
+            comment += _generate_comment("Total reads",
+                                         sample_obj.downsampled_to,
+                                         None)
             sample_obj.downsampled_to = None
             echo_msg += click.style(
                 f"\nResetting downsampled total reads.", fg='green')
