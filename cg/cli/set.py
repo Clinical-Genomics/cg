@@ -198,11 +198,12 @@ def _generate_comment(what, old_value, new_value):
 
 def _update_comment(comment, obj):
     """Appends the comment on obj including a timestamp"""
-    timestamp = str(datetime.datetime.now())[:-10]
-    if obj.comment is None:
-        obj.comment = f"{timestamp}-{getpass.getuser()}: {comment}"
-    else:
-        obj.comment = f"{timestamp}-{getpass.getuser()}: {comment}" + '\n' + obj.comment
+    if comment:
+        timestamp = str(datetime.datetime.now())[:-10]
+        if obj.comment is None:
+            obj.comment = f"{timestamp}-{getpass.getuser()}: {comment}"
+        else:
+            obj.comment = f"{timestamp}-{getpass.getuser()}: {comment}" + '\n' + obj.comment
 
 
 @set_cmd.command()
