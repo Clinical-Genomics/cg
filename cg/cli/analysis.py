@@ -83,6 +83,10 @@ def _suggest_cases_to_analyze(context, show_as_error=False):
 def case_config(context, dry, family_id):
     """Generate a config for the FAMILY_ID"""
 
+    if family_id is None:
+        _suggest_cases_to_analyze(context)
+        context.abort()
+
     family_obj = context.obj['db'].family(family_id)
 
     if not family_obj:
