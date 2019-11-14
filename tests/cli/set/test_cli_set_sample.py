@@ -43,8 +43,9 @@ def test_set_sample_invalid_customer(cli_runner, base_context, base_store: Store
     # WHEN calling set sample with an invalid customer
     result = cli_runner.invoke(sample, [sample_id, '-c', customer_id], obj=base_context)
 
-    # THEN then it should complain about missing customer instead of setting the value
-    assert result.exit_code != SUCCESS
+    # THEN then it should warn about missing customer instead of setting the value
+    assert result.exit_code == SUCCESS
+    assert base_store.Sample.query.first().customer.internal_id != customer_id
 
 
 def test_set_sample_customer(cli_runner, base_context, base_store: Store):
@@ -96,16 +97,13 @@ def test_set_sample_second_comment(cli_runner, base_context, base_store: Store):
 
 def test_set_sample_invalid_downsampled_to(cli_runner, base_context, base_store: Store):
     # GIVEN a database with a sample
-    sample_id = add_sample(base_store).internal_id
     downsampled_to = 'downsampled_to'
-    assert base_store.Sample.query.first().downsampled_to != downsampled_to
 
     # WHEN calling set sample with an invalid value of downsampled to
-    result = cli_runner.invoke(sample, [sample_id, '-d', downsampled_to], obj=base_context)
+    result = cli_runner.invoke(sample, ['dummy_sample_id', '-d', downsampled_to], obj=base_context)
 
-    # THEN then the value should have not been set on the sample
+    # THEN wrong data type
     assert result.exit_code != SUCCESS
-    assert base_store.Sample.query.first().downsampled_to != downsampled_to
 
 
 def test_set_sample_downsampled_to(cli_runner, base_context, base_store: Store):
@@ -122,6 +120,20 @@ def test_set_sample_downsampled_to(cli_runner, base_context, base_store: Store):
     assert base_store.Sample.query.first().downsampled_to == downsampled_to
 
 
+def test_set_sample_reset_downsampled_to(cli_runner, base_context, base_store: Store):
+    # GIVEN a database with a sample
+    sample_id = add_sample(base_store).internal_id
+    downsampled_to = 0
+    assert base_store.Sample.query.first().downsampled_to != downsampled_to
+
+    # WHEN calling set sample with a valid reset value of downsampled to
+    result = cli_runner.invoke(sample, [sample_id, '-d', downsampled_to], obj=base_context)
+
+    # THEN then the value should have been set on the sample
+    assert result.exit_code == SUCCESS
+    assert base_store.Sample.query.first().downsampled_to is None
+
+
 def test_set_sample_invalid_application(cli_runner, base_context, base_store: Store):
     # GIVEN a database with a sample
     sample_id = add_sample(base_store).internal_id
@@ -131,8 +143,8 @@ def test_set_sample_invalid_application(cli_runner, base_context, base_store: St
     # WHEN calling set sample with an invalid application
     result = cli_runner.invoke(sample, [sample_id, '-a', application_tag], obj=base_context)
 
-    # THEN then it should complain about missing application instead of setting the value
-    assert result.exit_code != SUCCESS
+    # THEN then it should warn about missing application instead of setting the value
+    assert result.exit_code == SUCCESS
     assert base_store.Sample.query.first().application_version.application.tag != application_tag
 
 
