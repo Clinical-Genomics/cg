@@ -230,7 +230,7 @@ class LimsAPI(Lims, OrderHandler):
                 yield lims_sample.id
 
     def update_sample(self, lims_id: str, sex=None, application: str = None,
-                      target_reads: int = None, priority=None):
+                      target_reads: int = None, priority=None, data_analysis=None):
         """Update information about a sample."""
         lims_sample = Sample(self, id=lims_id)
         if sex:
@@ -243,6 +243,9 @@ class LimsAPI(Lims, OrderHandler):
             lims_sample.udf[PROP2UDF['target_reads']] = target_reads
         if priority:
             lims_sample.udf[PROP2UDF['priority']] = priority
+
+        if data_analysis:
+            lims_sample.udf[PROP2UDF['data_analysis']] = data_analysis
 
         lims_sample.put()
 
