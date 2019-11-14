@@ -180,8 +180,8 @@ class LimsAPI(Lims, OrderHandler):
 
         if len(capture_kits) == 1:
             return capture_kits.pop()
-        else:
-            return None
+
+        return None
 
     def get_samples(self, *args, map_ids=False, **kwargs):
         """Bypass to original method."""
