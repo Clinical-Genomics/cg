@@ -17,7 +17,7 @@ LOG = logging.getLogger(__name__)
 def deliver(context):
     """Deliver stuff."""
     context.obj['db'] = Store(context.obj['database'])
-    context.obj['api'] = DeliverAPI(
+    context.obj['deliver_api'] = DeliverAPI(
         db=context.obj['db'],
         hk_api=hk.HousekeeperAPI(context.obj),
         lims_api=lims.LimsAPI(context.obj)
@@ -44,8 +44,9 @@ def inbox(context, family, version, tag, inbox_path):
         LOG.error("Case '%s' not found.", family)
         context.abort()
 
-    files = context.obj['api'].get_post_analysis_family_files(family=family, version=version,
-                                                              tags=tag)
+    files = context.obj['deliver_api'].get_post_analysis_family_files(family=family,
+                                                                      version=version,
+                                                                      tags=tag)
     if not files:
         LOG.warning("No case files found")
 
@@ -72,9 +73,9 @@ def inbox(context, family, version, tag, inbox_path):
 
     for family_sample in link_obj:
         sample_obj = family_sample.sample
-        files = context.obj['api'].get_post_analysis_sample_files(family=family,
-                                                                  sample=sample_obj.internal_id,
-                                                                  version=version, tag=tag)
+        files = context.obj['deliver_api'].get_post_analysis_sample_files(family=family,
+                                                                          sample=sample_obj.internal_id,
+                                                                          version=version, tag=tag)
 
         if not files:
             LOG.warning(f"No sample files found for '{sample_obj.internal_id}'.")
