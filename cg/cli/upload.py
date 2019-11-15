@@ -25,13 +25,44 @@ LOG = logging.getLogger(__name__)
 
 @click.group(invoke_without_command=True)
 @click.option('-f', '--family', 'family_id', help='Upload to all apps')
+@click.option('-r', '--restart', 'force_restart', is_flag=True, help='Force upload of analysis '
+                                                                     'marked as started')
 @click.pass_context
-def upload(context, family_id):
+def upload(context, family_id, force_restart):
     """Upload results from analyses."""
 
     click.echo(click.style('----------------- UPLOAD ----------------------'))
 
     context.obj['status'] = Store(context.obj['database'])
+
+    if family_id:
+        family_obj = context.obj['status'].family(family_id)
+        if not family_obj:
+            message = f"family not found: {family_id}"
+            click.echo(click.style(message, fg='red'))
+            context.abort()
+
+        if not family_obj.analyses:
+            message = f"no analysis exists for family: {family_id}"
+            click.echo(click.style(message, fg='red'))
+            context.abort()
+
+        analysis_obj = family_obj.analyses[0]
+
+        if analysis_obj.uploaded_at is not None:
+            message = f"analysis already uploaded: {analysis_obj.uploaded_at.date()}"
+            click.echo(click.style(message, fg='red'))
+            context.abort()
+
+        if not force_restart and analysis_obj.upload_started_at is not None:
+            if dt.datetime.now() - analysis_obj.upload_started_at > dt.timedelta(hours=24):
+                raise Exception(f"The upload started at {analysis_obj.upload_started_at} "
+                                f"something went wrong, restart it with the --restart flag")
+
+            message = f"analysis upload already started: {analysis_obj.upload_started_at.date()}"
+            click.echo(click.style(message, fg='yellow'))
+            return
+
     context.obj['housekeeper_api'] = hk.HousekeeperAPI(context.obj)
 
     context.obj['lims_api'] = lims.LimsAPI(context.obj)
@@ -62,13 +93,19 @@ def upload(context, family_id):
         analysis_api=context.obj['analysis_api']
     )
 
-    if family_id:
+    if context.invoked_subcommand is None:
+        if not family_id:
+            _suggest_cases_to_upload(context)
+            context.abort()
+
         family_obj = context.obj['status'].family(family_id)
         analysis_obj = family_obj.analyses[0]
         if analysis_obj.uploaded_at is not None:
             message = f"analysis already uploaded: {analysis_obj.uploaded_at.date()}"
             click.echo(click.style(message, fg='yellow'))
         else:
+            analysis_obj.upload_started_at = dt.datetime.now()
+            context.obj['status'].commit()
             context.invoke(coverage, re_upload=True, family_id=family_id)
             context.invoke(validate, family_id=family_id)
             context.invoke(genotypes, re_upload=False, family_id=family_id)
@@ -80,7 +117,7 @@ def upload(context, family_id):
 
 
 @upload.command('delivery-report')
-@click.argument('family_id')
+@click.argument('family_id', required=False)
 @click.option('-p', '--print', 'print_console', is_flag=True, help='print report to console')
 @click.pass_context
 def delivery_report(context, family_id, print_console):
@@ -138,6 +175,10 @@ def delivery_report(context, family_id, print_console):
 
     report_api = context.obj['report_api']
 
+    if not family_id:
+        _suggest_cases_delivery_report(context)
+        context.abort()
+
     if print_console:
         delivery_report_html = report_api.create_delivery_report(family_id)
 
@@ -192,12 +233,17 @@ def _update_delivery_report_date(status_api, family_id):
 
 
 @upload.command('delivery-report-to-scout')
-@click.argument('case_id')
+@click.argument('case_id', required=False)
 @click.option('-d', '--dry-run', 'dry_run', is_flag=True, help='run command without uploading to '
                                                                'scout')
 @click.pass_context
 def delivery_report_to_scout(context, case_id, dry_run):
     """Fetches an delivery-report from housekeeper and uploads it to scout"""
+
+    if not case_id:
+        _suggest_cases_delivery_report(context)
+        context.abort()
+
     hk_api = context.obj['housekeeper_api']
     report = _get_delivery_report_from_hk(hk_api, case_id)
 
@@ -240,12 +286,16 @@ def delivery_reports(context, print_console):
 
 @upload.command()
 @click.option('-r', '--re-upload', is_flag=True, help='re-upload existing analysis')
-@click.argument('family_id')
+@click.argument('family_id', required=False)
 @click.pass_context
 def coverage(context, re_upload, family_id):
     """Upload coverage from an analysis to Chanjo."""
 
     click.echo(click.style('----------------- COVERAGE --------------------'))
+
+    if not family_id:
+        _suggest_cases_to_upload(context)
+        context.abort()
 
     chanjo_api = coverage_app.ChanjoAPI(context.obj)
     family_obj = context.obj['status'].family(family_id)
@@ -256,12 +306,16 @@ def coverage(context, re_upload, family_id):
 
 @upload.command()
 @click.option('-r', '--re-upload', is_flag=True, help='re-upload existing analysis')
-@click.argument('family_id')
+@click.argument('family_id', required=False)
 @click.pass_context
 def genotypes(context, re_upload, family_id):
     """Upload genotypes from an analysis to Genotype."""
 
     click.echo(click.style('----------------- GENOTYPES -------------------'))
+
+    if not family_id:
+        _suggest_cases_to_upload(context)
+        context.abort()
 
     tb_api = tb.TrailblazerAPI(context.obj)
     gt_api = gt.GenotypeAPI(context.obj)
@@ -354,12 +408,16 @@ class LinkHelper:
 @upload.command()
 @click.option('-r', '--re-upload', is_flag=True, help='re-upload existing analysis')
 @click.option('-p', '--print', 'print_console', is_flag=True, help='print config values')
-@click.argument('family_id')
+@click.argument('family_id', required=False)
 @click.pass_context
 def scout(context, re_upload, print_console, family_id):
     """Upload variants from analysis to Scout."""
 
     click.echo(click.style('----------------- SCOUT -----------------------'))
+
+    if not family_id:
+        _suggest_cases_to_upload(context)
+        context.abort()
 
     scout_api = scoutapi.ScoutAPI(context.obj)
     family_obj = context.obj['status'].family(family_id)
@@ -413,6 +471,12 @@ def auto(context):
 
     exit_code = 0
     for analysis_obj in context.obj['status'].analyses_to_upload():
+
+        if analysis_obj.family.analyses[0].uploaded_at is not None:
+            LOG.warning("Newer analysis already uploaded for %s, skipping",
+                        analysis_obj.family.internal_id)
+            continue
+
         LOG.info(f"uploading family: {analysis_obj.family.internal_id}")
         try:
             context.invoke(upload, family_id=analysis_obj.family.internal_id)
@@ -426,12 +490,16 @@ def auto(context):
 
 
 @upload.command()
-@click.argument('family_id')
+@click.argument('family_id', required=False)
 @click.pass_context
 def validate(context, family_id):
     """Validate a family of samples."""
 
     click.echo(click.style('----------------- VALIDATE --------------------'))
+
+    if not family_id:
+        _suggest_cases_to_upload(context)
+        context.abort()
 
     family_obj = context.obj['status'].family(family_id)
     chanjo_api = coverage_app.ChanjoAPI(context.obj)
@@ -455,12 +523,27 @@ def validate(context, family_id):
                 click.echo(f"{sample_id}: sample not found in chanjo", color='yellow')
 
 
+def _suggest_cases_to_upload(context):
+    LOG.warning('provide a case, suggestions:')
+    records = context.obj['status'].analyses_to_upload()[:50]
+    for family_obj in records:
+        click.echo(family_obj)
+
+
+def _suggest_cases_delivery_report(context):
+    LOG.error('provide a case, suggestions:')
+    records = context.obj['status'].analyses_to_delivery_report()[:50]
+    for family_obj in records:
+        click.echo(family_obj)
+
+
 @upload.command('process-solved')
 @click.option('-c', '--case-id', help='internal case id, leave empty to process all')
 @click.option('-d', '--days-ago', type=int, default=1, help='days since solved')
+@click.option('-C', '--customers', type=str, multiple=True, help="Filter on customers")
 @click.option('--dry-run', is_flag=True, help='only print cases to be processed')
 @click.pass_context
-def process_solved(context, case_id, days_ago, dry_run):
+def process_solved(context, case_id, days_ago, customers, dry_run):
 
     """Process cases with mutacc that has been marked as solved in scout.
     This prepares them to be uploaded to the mutacc database"""
@@ -483,13 +566,17 @@ def process_solved(context, case_id, days_ago, dry_run):
     number_processed = 0
     for case in finished_cases:
 
+        number_processed += 1
+        if customers:
+            if case['owner'] not in customers:
+                LOG.info("skipping %s: Not valid customer %s", case['_id'], case['owner'])
+                continue
         if dry_run:
             LOG.info("Would process case %s with mutacc", case['_id'])
             continue
 
         LOG.info("Start processing case %s with mutacc", case['_id'])
         mutacc_upload.extract_reads(case)
-        number_processed += 1
 
     if number_processed == 0:
         LOG.info("No cases were solved within the last %s days", days_ago)
