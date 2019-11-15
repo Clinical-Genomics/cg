@@ -29,6 +29,12 @@ def view_family_sample_link(unused1, unused2, model, unused3):
     )
 
 
+def is_external_application(unused1, unused2, model, unused3):
+    """column formatter to open this view"""
+    del unused1, unused2, unused3
+    return model.application_version.application.is_external if model.application_version else u""
+
+
 class ApplicationView(BaseView):
     """Admin view for Model.Application"""
     column_exclude_list = [
@@ -220,16 +226,16 @@ class PoolView(BaseView):
 class SampleView(BaseView):
     """Admin view for Model.Sample"""
 
-    column_exclude_list = ['is_external', 'invoiced_at']
+    column_exclude_list = ['invoiced_at']
     column_searchable_list = ['internal_id', 'name', 'ticket_number', 'customer.internal_id']
     column_filters = ['customer.internal_id', 'sex', 'application_version.application']
     column_editable_list = ['sex', 'downsampled_to', 'sequenced_at', 'ticket_number']
     form_excluded_columns = ['is_external', 'invoiced_at']
 
     column_formatters = {
+        'is_external': is_external_application,
         'internal_id': view_family_sample_link,
         'invoice': InvoiceView.view_invoice_link,
-        'external': 'application_version.application.is_external',
     }
 
     @staticmethod
