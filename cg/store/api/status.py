@@ -427,6 +427,7 @@ class StatusHandler(BaseHandler):
                 'analysis_completed_at': analysis_completed_at,
                 'analysis_uploaded_at': analysis_uploaded_at,
                 'samples_delivered': samples_delivered,
+                'analysis_delivery_reported_at': analysis_delivery_reported_at,
                 'samples_invoiced': samples_invoiced,
                 'analysis_pipeline': analysis_pipeline,
                 'samples_received_bool': samples_received_bool,
