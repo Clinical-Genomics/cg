@@ -8,7 +8,7 @@ from colorclass import Color
 from cg.store import Store
 from cg.constants import FAMILY_ACTIONS, PRIORITY_OPTIONS
 
-
+STATUS_OPTIONS = ['pending', 'running', 'completed', 'failed', 'error']
 CASE_HEADERS_LONG = ['Case', 'Ordered', 'Received', 'Prepared', 'Sequenced', 'Flowcells',
                      'Analysed', 'Uploaded', 'Delivered', 'Invoiced', 'TAT']
 ALWAYS_LONG_HEADERS = [CASE_HEADERS_LONG[0], CASE_HEADERS_LONG[1],
@@ -98,7 +98,8 @@ def present_string(case, param, show_negative):
 @click.option('--internal-id', help='search by internal id')
 @click.option('--name', help='search by name given by customer')
 @click.option('--case-action', type=click.Choice(FAMILY_ACTIONS), help='filter by case action')
-@click.option('--progress-status', help='filter by progress status')
+@click.option('--progress-status', type=click.Choice(STATUS_OPTIONS), help='filter by progress '
+                                                                           'status')
 @click.option('--priority', type=click.Choice(PRIORITY_OPTIONS), help='filter by priority')
 @click.option('--data-analysis', help='filter on data_analysis')
 @click.option('--sample-id', help='filter by sample id')
