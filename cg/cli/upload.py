@@ -93,26 +93,27 @@ def upload(context, family_id, force_restart):
         analysis_api=context.obj['analysis_api']
     )
 
-    if not family_id:
-        _suggest_cases_to_upload(context)
-        context.abort()
+    if context.invoked_subcommand is None:
+        if not family_id:
+            _suggest_cases_to_upload(context)
+            context.abort()
 
-    family_obj = context.obj['status'].family(family_id)
-    analysis_obj = family_obj.analyses[0]
-    if analysis_obj.uploaded_at is not None:
-        message = f"analysis already uploaded: {analysis_obj.uploaded_at.date()}"
-        click.echo(click.style(message, fg='yellow'))
-    else:
-        analysis_obj.upload_started_at = dt.datetime.now()
-        context.obj['status'].commit()
-        context.invoke(coverage, re_upload=True, family_id=family_id)
-        context.invoke(validate, family_id=family_id)
-        context.invoke(genotypes, re_upload=False, family_id=family_id)
-        context.invoke(observations, case_id=family_id)
-        context.invoke(scout, family_id=family_id)
-        analysis_obj.uploaded_at = dt.datetime.now()
-        context.obj['status'].commit()
-        click.echo(click.style(f"{family_id}: analysis uploaded!", fg='green'))
+        family_obj = context.obj['status'].family(family_id)
+        analysis_obj = family_obj.analyses[0]
+        if analysis_obj.uploaded_at is not None:
+            message = f"analysis already uploaded: {analysis_obj.uploaded_at.date()}"
+            click.echo(click.style(message, fg='yellow'))
+        else:
+            analysis_obj.upload_started_at = dt.datetime.now()
+            context.obj['status'].commit()
+            context.invoke(coverage, re_upload=True, family_id=family_id)
+            context.invoke(validate, family_id=family_id)
+            context.invoke(genotypes, re_upload=False, family_id=family_id)
+            context.invoke(observations, case_id=family_id)
+            context.invoke(scout, family_id=family_id)
+            analysis_obj.uploaded_at = dt.datetime.now()
+            context.obj['status'].commit()
+            click.echo(click.style(f"{family_id}: analysis uploaded!", fg='green'))
 
 
 @upload.command('delivery-report')
