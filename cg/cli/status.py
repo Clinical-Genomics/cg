@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
 import click
+from cg.apps import tb
 from tabulate import tabulate
 from colorclass import Color
 
 from cg.store import Store
 from cg.constants import FAMILY_ACTIONS, PRIORITY_OPTIONS
 
-
+STATUS_OPTIONS = ['pending', 'running', 'completed', 'failed', 'error']
 CASE_HEADERS_LONG = ['Case', 'Ordered', 'Received', 'Prepared', 'Sequenced', 'Flowcells',
                      'Analysed', 'Uploaded', 'Delivered', 'Delivery Reported', 'Invoiced', 'TAT']
 ALWAYS_LONG_HEADERS = [CASE_HEADERS_LONG[0], CASE_HEADERS_LONG[1],
@@ -33,6 +34,7 @@ for header in CASE_HEADERS_LONG:
 def status(context):
     """View status of things."""
     context.obj['db'] = Store(context.obj['database'])
+    context.obj['tb'] = tb.TrailblazerAPI(context.obj)
 
 
 @status.command()
@@ -96,7 +98,9 @@ def present_string(a_dict, param, show_negative):
 @click.option('--days', default=31, help='days to go back')
 @click.option('--internal-id', help='search by internal id')
 @click.option('--name', help='search by name given by customer')
-@click.option('--action', type=click.Choice(FAMILY_ACTIONS), help='filter by action')
+@click.option('--case-action', type=click.Choice(FAMILY_ACTIONS), help='filter by case action')
+@click.option('--progress-status', type=click.Choice(STATUS_OPTIONS), help='filter by progress '
+                                                                           'status')
 @click.option('--priority', type=click.Choice(PRIORITY_OPTIONS), help='filter by priority')
 @click.option('--data-analysis', help='filter on data_analysis')
 @click.option('--sample-id', help='filter by sample id')
@@ -119,7 +123,8 @@ def present_string(a_dict, param, show_negative):
                                                                         'reported cases')
 @click.option('-i', '--only-invoiced', is_flag=True, help='only completely invoiced cases')
 @click.option('-I', '--exclude-invoiced', is_flag=True, help='exclude completely invoiced cases')
-def cases(context, output_type, verbose, days, internal_id, name, action, priority,
+def cases(context, output_type, verbose, days, internal_id, name, case_action,
+          progress_status, priority,
           customer_id, data_analysis, sample_id,
           only_received,
           only_prepared,
@@ -141,10 +146,12 @@ def cases(context, output_type, verbose, days, internal_id, name, action, priori
           ):
     """progress of each case"""
     records = context.obj['db'].cases(
+        progress_tracker=context.obj['tb'],
         days=days,
         internal_id=internal_id,
         name=name,
-        action=action,
+        case_action=case_action,
+        progress_status=progress_status,
         priority=priority,
         customer_id=customer_id,
         exclude_customer_id=exclude_customer_id,
@@ -217,8 +224,15 @@ def cases(context, output_type, verbose, days, internal_id, name, action, priori
             sequenced = present_bool(case, 'samples_sequenced_bool', verbose)
             flowcell = present_bool(case, 'flowcells_on_disk_bool', verbose)
             analysed_bool = present_bool(case, 'analysis_completed_bool', verbose)
-            analysis_action = present_string(case, 'analysis_action', verbose)
-            analysed = f"{analysed_bool}{analysis_action}"
+
+            if case.get('analysis_completed_at'):
+                analysed = f"{analysed_bool}"
+            elif case.get('analysis_status'):
+                analysed = f"{analysed_bool}{present_string(case, 'analysis_status',verbose)}" \
+                           f" {case.get('analysis_completion')}%"
+            else:
+                analysed = f"{analysed_bool}{present_string(case, 'case_action', verbose)}"
+
             uploaded = present_bool(case, 'analysis_uploaded_bool', verbose)
             delivered = present_bool(case, 'samples_delivered_bool', verbose)
             delivery_reported = present_bool(case, 'analysis_delivery_reported_bool', verbose)
@@ -229,9 +243,15 @@ def cases(context, output_type, verbose, days, internal_id, name, action, priori
             prepared = f"{case.get('samples_prepared')}/{case.get('samples_to_prepare')}"
             sequenced = f"{case.get('samples_sequenced')}/{case.get('samples_to_sequence')}"
             flowcell = f"{case.get('flowcells_on_disk')}/{case.get('total_samples')}"
-            analysed_date = present_date(case, 'analysis_completed_at', verbose, show_time)
-            analysis_action = present_string(case, 'analysis_action', verbose)
-            analysed = f"{analysed_date}{analysis_action}"
+
+            if case.get('analysis_completed_at'):
+                analysed = f"{present_date(case, 'analysis_completed_at', verbose, show_time)}"
+            elif case.get('analysis_status'):
+                analysed = f"{present_string(case, 'analysis_status', verbose)}" \
+                           f" {case.get('analysis_completion')}%"
+            else:
+                analysed = f"{present_string(case, 'case_action', verbose)}"
+
             uploaded = present_date(case, 'analysis_uploaded_at', verbose, show_time)
             delivered = f"{case.get('samples_delivered')}/{case.get('samples_to_deliver')}"
             delivery_reported = present_date(case, 'analysis_delivery_reported_at', verbose,
@@ -243,9 +263,15 @@ def cases(context, output_type, verbose, days, internal_id, name, action, priori
             prepared = present_date(case, 'samples_prepared_at', verbose, show_time)
             sequenced = present_date(case, 'samples_sequenced_at', verbose, show_time)
             flowcell = present_string(case, 'flowcells_status', verbose)
-            analysed_date = present_date(case, 'analysis_completed_at', verbose, show_time)
-            analysis_action = present_string(case, 'analysis_action', verbose)
-            analysed = f"{analysed_date}{analysis_action}"
+
+            if case.get('analysis_completed_at'):
+                analysed = f"{present_date(case, 'analysis_completed_at', verbose, show_time)}"
+            elif case.get('analysis_status'):
+                analysed = f"{present_string(case, 'analysis_status', verbose)}" \
+                           f" {case.get('analysis_completion')}%"
+            else:
+                analysed = f"{present_string(case, 'case_action', verbose)}"
+
             uploaded = present_date(case, 'analysis_uploaded_at', verbose, show_time)
             delivered = present_date(case, 'samples_delivered_at', verbose, show_time)
             delivery_reported = present_date(case, 'analysis_delivery_reported_at', verbose,

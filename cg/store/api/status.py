@@ -145,10 +145,12 @@ class StatusHandler(BaseHandler):
         return families[:limit]
 
     def cases(self,
+              progress_tracker=None,
               internal_id=None,
               name=None,
               days=31,
-              action=None,
+              case_action=None,
+              progress_status=None,
               priority=None,
               customer_id=None,
               exclude_customer_id=None,
@@ -179,8 +181,8 @@ class StatusHandler(BaseHandler):
             filter_date = datetime.now() - timedelta(days=days)
             families_q = families_q.filter(models.Family.ordered_at > filter_date)
 
-        if action:
-            families_q = families_q.filter(models.Family.action == action)
+        if case_action:
+            families_q = families_q.filter(models.Family.action == case_action)
 
         if priority:
             priority_db = PRIORITY_MAP[priority]
@@ -246,6 +248,8 @@ class StatusHandler(BaseHandler):
             analysis_uploaded_at = None
             analysis_delivery_reported_at = None
             analysis_pipeline = None
+            analysis_status = None
+            analysis_completion = None
             analysis_completed_bool = None
             analysis_uploaded_bool = None
             samples_delivered_bool = None
@@ -257,7 +261,7 @@ class StatusHandler(BaseHandler):
             tat = None
 
             analysis_in_progress = record.action is not None
-            analysis_action = record.action
+            case_action = record.action
 
             total_samples = len(record.links)
             total_external_samples = len([link.sample.is_external for link in record.links if
@@ -391,7 +395,17 @@ class StatusHandler(BaseHandler):
             if exclude_invoiced and samples_invoiced_bool:
                 continue
 
-            tat = self._calculate_estimated_tat(
+            if progress_tracker:
+                for analysis_obj in progress_tracker.get_latest_logged_analysis(
+                        case_id=record.internal_id):
+                    if not analysis_status:
+                        analysis_completion = round(analysis_obj.progress * 100)
+                        analysis_status = analysis_obj.status
+
+            if progress_status and progress_status != analysis_status:
+                continue
+
+            tat = self._calculate_estimated_turnaround_time(
                 samples_received_at,
                 samples_prepared_at,
                 samples_sequenced_at,
@@ -423,7 +437,9 @@ class StatusHandler(BaseHandler):
                 'samples_sequenced_at': samples_sequenced_at,
                 'samples_delivered_at': samples_delivered_at,
                 'samples_invoiced_at': samples_invoiced_at,
-                'analysis_action': analysis_action,
+                'case_action': case_action,
+                'analysis_status': analysis_status,
+                'analysis_completion':  analysis_completion,
                 'analysis_completed_at': analysis_completed_at,
                 'analysis_uploaded_at': analysis_uploaded_at,
                 'samples_delivered': samples_delivered,
@@ -502,6 +518,7 @@ class StatusHandler(BaseHandler):
         """Fetch analyses that needs the delivery report to be regenerated."""
         records = (
             self.Analysis.query
+            .filter(models.Analysis.uploaded_at)
             .join(models.Family, models.Family.links, models.FamilySample.sample)
             .filter(
                 models.Sample.delivered_at.isnot(None),
@@ -702,16 +719,15 @@ class StatusHandler(BaseHandler):
         )
         return records
 
-    def _calculate_estimated_tat(self,
-                                 samples_received_at,
-                                 samples_prepared_at,
-                                 samples_sequenced_at,
-                                 analysis_completed_at,
-                                 analysis_uploaded_at,
-                                 samples_delivered_at
-                                 ):
+    def _calculate_estimated_turnaround_time(self,
+                                             samples_received_at,
+                                             samples_prepared_at,
+                                             samples_sequenced_at,
+                                             analysis_completed_at,
+                                             analysis_uploaded_at,
+                                             samples_delivered_at
+                                             ):
         """Calculated estimated turnaround-time"""
-
         if samples_received_at and samples_delivered_at:
             return self._calculate_date_delta(None, samples_received_at, samples_delivered_at)
 
