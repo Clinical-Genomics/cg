@@ -2,7 +2,7 @@
 import datetime as dt
 import logging
 
-from genologics.entities import Sample, Process
+from genologics.entities import Sample, Process, Project
 from genologics.lims import Lims
 from dateutil.parser import parse as parse_date
 
@@ -178,7 +178,10 @@ class LimsAPI(Lims, OrderHandler):
             message = f"Capture kit error: {lims_sample.id} | {capture_kits}"
             raise LimsDataError(message)
 
-        return capture_kits.pop() or None
+        if len(capture_kits) == 1:
+            return capture_kits.pop()
+
+        return None
 
     def get_samples(self, *args, map_ids=False, **kwargs):
         """Bypass to original method."""
@@ -230,7 +233,7 @@ class LimsAPI(Lims, OrderHandler):
                 yield lims_sample.id
 
     def update_sample(self, lims_id: str, sex=None, application: str = None,
-                      target_reads: int = None, priority=None):
+                      target_reads: int = None, priority=None, data_analysis=None):
         """Update information about a sample."""
         lims_sample = Sample(self, id=lims_id)
         if sex:
@@ -244,7 +247,17 @@ class LimsAPI(Lims, OrderHandler):
         if priority:
             lims_sample.udf[PROP2UDF['priority']] = priority
 
+        if data_analysis:
+            lims_sample.udf[PROP2UDF['data_analysis']] = data_analysis
+
         lims_sample.put()
+
+    def update_project(self, lims_id: str, name=None):
+        """Update information about a project."""
+        lims_project = Project(self, id=lims_id)
+        if name:
+            lims_project.name = name
+            lims_project.put()
 
     def get_prep_method(self, lims_id: str) -> str:
         """Get the library preparation method."""
