@@ -36,10 +36,7 @@ class MockTB:
 
             def first(self):
                 """Mock that the first row doesn't exist"""
-
                 self._first_was_called = True
-
-                return None
 
             def first_was_called(self):
                 """Check if first was called"""
