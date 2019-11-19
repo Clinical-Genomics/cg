@@ -902,6 +902,24 @@ def test_only_uploaded_cases(base_store: Store):
         assert neg_family.internal_id not in case.get('internal_id')
 
 
+def test_only_delivery_reported_cases(base_store: Store):
+    """Test to that delivery-reported cases can be included"""
+
+    # GIVEN a database with an delivery-reported analysis
+    add_analysis(base_store, delivery_reported=True)
+    neg_family = add_family(base_store, 'neg_family')
+    neg_sample = add_sample(base_store, sample_name='neg_sample')
+    base_store.relate_sample(neg_family, neg_sample, 'unknown')
+
+    # WHEN getting active cases excluding delivery_reported
+    cases = base_store.cases(only_delivery_reported=True)
+
+    # THEN cases should only contain the delivery-reported case
+    assert cases
+    for case in cases:
+        assert neg_family.internal_id not in case.get('internal_id')
+
+
 def test_only_invoiced_cases(base_store: Store):
     """Test to that invoiced cases can be included"""
 
@@ -1010,6 +1028,19 @@ def test_exclude_uploaded_cases(base_store: Store):
     cases = base_store.cases(exclude_uploaded=True)
 
     # THEN cases should not contain the uploaded case
+    assert not cases
+
+
+def test_exclude_delivery_reported_cases(base_store: Store):
+    """Test to that delivery-reported cases can be excluded"""
+
+    # GIVEN a database with an delivery-reported analysis
+    add_analysis(base_store, delivery_reported=True)
+
+    # WHEN getting active cases excluding delivery-reported
+    cases = base_store.cases(exclude_delivery_reported=True)
+
+    # THEN cases should not contain the delivery-reported case
     assert not cases
 
 
@@ -1526,7 +1557,7 @@ def add_family(disk_store, family_id='family_test', customer_id='cust_test', ord
     return family
 
 
-def add_analysis(store, completed=False, uploaded=False, pipeline=None):
+def add_analysis(store, completed=False, uploaded=False, pipeline=None, delivery_reported=False):
     """Utility function to add an analysis for tests"""
     family = add_family(store)
     analysis = store.add_analysis(pipeline='', version='')
@@ -1534,6 +1565,8 @@ def add_analysis(store, completed=False, uploaded=False, pipeline=None):
         analysis.completed_at = datetime.now()
     if uploaded:
         analysis.uploaded_at = datetime.now()
+    if delivery_reported:
+        analysis.delivery_report_created_at = datetime.now()
     if pipeline:
         analysis.pipeline = pipeline
 
