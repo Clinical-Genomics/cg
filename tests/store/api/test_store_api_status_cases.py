@@ -138,7 +138,7 @@ def test_analysis_action(base_store: Store):
     # THEN cases should contain info on analysis (family) action
     assert cases
     for case in cases:
-        assert case.get('analysis_action') == analysis.family.action
+        assert case.get('case_action') == analysis.family.action
 
 
 def test_analysis_dates_for_rerun(base_store: Store):
@@ -738,7 +738,7 @@ def test_excluded_by_action(base_store: Store):
     add_family(base_store, action=FAMILY_ACTIONS[0])
 
     # WHEN getting active cases by action
-    cases = base_store.cases(action=FAMILY_ACTIONS[1])
+    cases = base_store.cases(case_action=FAMILY_ACTIONS[1])
 
     # THEN cases should not contain this case
     assert not cases
@@ -751,7 +751,7 @@ def test_included_by_action(base_store: Store):
     family = add_family(base_store, action=FAMILY_ACTIONS[0])
 
     # WHEN getting active cases by action
-    cases = base_store.cases(action=family.action)
+    cases = base_store.cases(case_action=family.action)
 
     # THEN cases should only contain this case
     assert cases

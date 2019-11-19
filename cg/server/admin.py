@@ -102,14 +102,9 @@ class CustomerView(BaseView):
 
     column_editable_list = ['name', 'scout_access', 'loqus_upload', 'return_samples', 'priority',
                             'customer_group', 'comment']
-    column_exclude_list = [
-        'agreement_date',
-        'organisation_number',
-        'invoice_address',
-        'primary_contact',
-        'delivery_contact',
-        'invoice_contact',
-        'customer_group'
+    column_list = [
+        'internal_id', 'name', 'priority', 'primary_contact', 'delivery_contact', 'scout_access',
+        'return_samples', 'project_account_KI', 'project_account_kth', 'comment'
     ]
     column_filters = ['priority', 'scout_access']
     column_searchable_list = ['internal_id', 'name']
