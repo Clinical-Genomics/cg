@@ -379,19 +379,24 @@ class StatusHandler(BaseHandler):
             if exclude_invoiced and samples_invoiced_bool:
                 continue
 
-            is_rerun = self._is_rerun(record, samples_received_at, samples_prepared_at,
-                                      samples_sequenced_at)
-
+    
             if progress_tracker:
-                for analysis_obj in progress_tracker.analyses(family=record.internal_id):
-                    if not analysis_status:
+                for analysis_obj in progress_tracker.get_latest_logged_analysis(
+                        case_id=record.internal_id):
+
+                if not analysis_status:
                         analysis_completion = round(analysis_obj.progress * 100)
                         analysis_status = analysis_obj.status
+
 
             # filter on a status
             if progress_status and progress_status != analysis_status:
                 continue
 
+            is_rerun = self._is_rerun(record, samples_received_at, samples_prepared_at,
+                                      samples_sequenced_at)
+
+      
             tat = self._calculate_estimated_turnaround_time(
                 is_rerun,
                 record.ordered_at,
@@ -517,6 +522,7 @@ class StatusHandler(BaseHandler):
         """Fetch analyses that needs the delivery report to be regenerated."""
         records = (
             self.Analysis.query
+            .filter(models.Analysis.uploaded_at)
             .join(models.Family, models.Family.links, models.FamilySample.sample)
             .filter(
                 models.Sample.delivered_at.isnot(None),
@@ -728,7 +734,6 @@ class StatusHandler(BaseHandler):
                                              samples_delivered_at
                                              ):
         """Calculated estimated turnaround-time"""
-
         r_p = self._calculate_date_delta(4, samples_received_at, samples_prepared_at)
         p_s = self._calculate_date_delta(5, samples_prepared_at, samples_sequenced_at)
         s_a = self._calculate_date_delta(4, samples_sequenced_at, analysis_completed_at)
