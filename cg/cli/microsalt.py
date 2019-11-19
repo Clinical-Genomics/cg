@@ -8,7 +8,7 @@ from pathlib import Path
 import click
 
 from cg.apps import lims
-from cg.meta.lims.usalt import MicrosaltAPI
+from cg.meta.lims.microsalt import MicrosaltAPI
 from cg.store import Store
 
 LOGGER = logging.getLogger(__name__)
@@ -16,14 +16,14 @@ LOGGER = logging.getLogger(__name__)
 
 @click.group()
 @click.pass_context
-def usalt(context):
+def microsalt(context):
     """ Run microbial workflow """
     context.obj['db'] = Store(context.obj['database'])
     context.obj['lims_api'] = lims.LimsAPI(context.obj)
     context.obj['microsalt_api'] = MicrosaltAPI(lims=context.obj['lims_api'])
 
 
-@usalt.command('case-config')
+@microsalt.command('case-config')
 @click.option('-d', '--dry', is_flag=True, help='print parameters to console')
 @click.option('--project', 'project_id', help='include all samples for a project')
 @click.argument('sample_id', required=False)
@@ -82,7 +82,7 @@ def case_config(context, dry, project_id, sample_id):
             json.dump(parameters, outfile, indent=4, sort_keys=True)
 
 
-@usalt.command()
+@microsalt.command()
 @click.option('-d', '--dry', is_flag=True, help='print command to console')
 @click.option('-p', '--parameters', required=False, help='Optional')
 # @click.option('-p', '--priority', default='low', type=click.Choice(['low', 'normal', 'high']))

@@ -1,1 +1,1 @@
-from .usalt import MicrosaltAPI
+from .microsalt import MicrosaltAPI
