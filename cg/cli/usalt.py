@@ -1,12 +1,14 @@
 """ Add CLI support to start microSALT """
+from datetime import datetime
 import json
 import logging
 import subprocess
 from pathlib import Path
 
 import click
+
 from cg.apps import lims
-from cg.apps.usalt import MicrosaltAPI
+from cg.meta.lims.usalt import MicrosaltAPI
 from cg.store import Store
 
 LOGGER = logging.getLogger(__name__)
@@ -14,14 +16,14 @@ LOGGER = logging.getLogger(__name__)
 
 @click.group()
 @click.pass_context
-def microsalt(context):
+def usalt(context):
     """ Run microbial workflow """
     context.obj['db'] = Store(context.obj['database'])
     context.obj['lims_api'] = lims.LimsAPI(context.obj)
-    context.obj['microsalt_api'] = MicrosaltAPI()
+    context.obj['microsalt_api'] = MicrosaltAPI(lims=context.obj['lims_api'])
 
 
-@microsalt.command('case-config')
+@usalt.command('case-config')
 @click.option('-d', '--dry', is_flag=True, help='print parameters to console')
 @click.option('--project', 'project_id', help='include all samples for a project')
 @click.argument('sample_id', required=False)
@@ -47,8 +49,10 @@ def case_config(context, dry, project_id, sample_id):
     for sample_obj in sample_objs:
         method_library_prep = context.obj['lims_api'].get_prep_method(sample_obj.internal_id)
         method_sequencing = context.obj['lims_api'].get_sequencing_method(sample_obj.internal_id)
-        # organism = context.obj['microsalt_api'].get_organism(sample_obj)
-        organism = sample_obj.organism.internal_id
+        organism = context.obj['microsalt_api'].get_organism(sample_obj)
+        priority = 'research' if sample_obj.priority == 0 else 'standard'
+
+        breakpoint()
 
         # TODO what to do with 'null' values?
         parameter_dict = {
@@ -56,15 +60,15 @@ def case_config(context, dry, project_id, sample_id):
             'CG_ID_sample': sample_obj.internal_id,
             'Customer_ID_sample': sample_obj.name,
             'organism': organism,
-            'priority': sample_obj.priority,
+            'priority': priority,
             'reference': sample_obj.organism.reference_genome,
             'Customer_ID': sample_obj.microbial_order.customer.internal_id,
             'application_tag': sample_obj.application_version.application.tag,
-            'date_arrival': str(sample_obj.received_at),
-            'date_sequencing': str(sample_obj.sequenced_at),
-            'date_libprep': str(sample_obj.prepared_at),
-            'method_libprep': method_library_prep,
-            'method_sequencing': method_sequencing
+            'date_arrival': str(sample_obj.received_at or datetime.min),
+            'date_sequencing': str(sample_obj.sequenced_at or datetime.min),
+            'date_libprep': str(sample_obj.prepared_at or datetime.min),
+            'method_libprep': method_library_prep or 'Not in LIMS',
+            'method_sequencing': method_sequencing or 'Not in LIMS',
         }
         parameters.append(parameter_dict)
 
@@ -78,7 +82,7 @@ def case_config(context, dry, project_id, sample_id):
             json.dump(parameters, outfile, indent=4, sort_keys=True)
 
 
-@microsalt.command()
+@usalt.command()
 @click.option('-d', '--dry', is_flag=True, help='print command to console')
 @click.option('-p', '--parameters', required=False, help='Optional')
 # @click.option('-p', '--priority', default='low', type=click.Choice(['low', 'normal', 'high']))

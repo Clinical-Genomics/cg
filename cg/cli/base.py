@@ -28,7 +28,6 @@ from .transfer import transfer
 from .upload.upload import upload
 from .upload import vogue as vogue_command
 
-
 LOG = logging.getLogger(__name__)
 LEVELS = ['DEBUG', 'INFO', 'WARNING', 'ERROR']
 
