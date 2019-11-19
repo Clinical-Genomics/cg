@@ -10,7 +10,7 @@ from cg.constants import FAMILY_ACTIONS, PRIORITY_OPTIONS
 
 STATUS_OPTIONS = ['pending', 'running', 'completed', 'failed', 'error']
 CASE_HEADERS_LONG = ['Case', 'Ordered', 'Received', 'Prepared', 'Sequenced', 'Flowcells',
-                     'Analysed', 'Uploaded', 'Delivered', 'Invoiced', 'TAT']
+                     'Analysed', 'Uploaded', 'Delivered', 'Delivery Reported', 'Invoiced', 'TAT']
 ALWAYS_LONG_HEADERS = [CASE_HEADERS_LONG[0], CASE_HEADERS_LONG[1],
                        CASE_HEADERS_LONG[6], CASE_HEADERS_LONG[7]]
 CASE_HEADERS_MEDIUM = []
@@ -46,9 +46,10 @@ def analysis(context):
         click.echo(family_obj)
 
 
-def present_bool(case, param, show_false=False):
+def present_bool(a_dict, param, show_false=False):
     """presents boolean value in a human friendly format"""
-    value = case.get(param)
+    value = a_dict.get(param)
+
     if show_false:
         return ('-' if value is None else
                 '✓' if value is True else
@@ -61,9 +62,9 @@ def present_bool(case, param, show_false=False):
             str(value))
 
 
-def present_date(case, param, show_negative, show_time):
+def present_date(a_dict, param, show_negative, show_time):
     """presents datetime value in a human friendly format"""
-    value = case.get(param)
+    value = a_dict.get(param)
 
     if not show_time and value and value.date:
         value = value.date()
@@ -76,9 +77,9 @@ def present_date(case, param, show_negative, show_time):
             str(value))
 
 
-def present_string(case, param, show_negative):
+def present_string(a_dict, param, show_negative):
     """presents string value in a human friendly format"""
-    value = case.get(param)
+    value = a_dict.get(param)
 
     if show_negative:
         return str(value)
@@ -115,8 +116,11 @@ def present_string(case, param, show_negative):
 @click.option('-A', '--exclude-analysed', is_flag=True, help='exclude analysed cases')
 @click.option('-u', '--only-uploaded', is_flag=True, help='only uploaded cases')
 @click.option('-U', '--exclude-uploaded', is_flag=True, help='exclude uploaded cases')
-@click.option('-d', '--only-delivered', is_flag=True, help='only completely delivered cases')
-@click.option('-D', '--exclude-delivered', is_flag=True, help='exclude completely delivered cases')
+@click.option('-d', '--only-delivered', is_flag=True, help='only LIMS delivered cases')
+@click.option('-D', '--exclude-delivered', is_flag=True, help='exclude LIMS delivered cases')
+@click.option('--dr', '--only-delivery-reported', is_flag=True, help='only delivery reported cases')
+@click.option('--DR', '--exclude-delivery-reported', is_flag=True, help='exclude delivery '
+                                                                        'reported cases')
 @click.option('-i', '--only-invoiced', is_flag=True, help='only completely invoiced cases')
 @click.option('-I', '--exclude-invoiced', is_flag=True, help='exclude completely invoiced cases')
 def cases(context, output_type, verbose, days, internal_id, name, case_action,
@@ -128,6 +132,7 @@ def cases(context, output_type, verbose, days, internal_id, name, case_action,
           only_analysed,
           only_uploaded,
           only_delivered,
+          only_delivery_reported,
           only_invoiced,
           exclude_customer_id,
           exclude_received,
@@ -136,6 +141,7 @@ def cases(context, output_type, verbose, days, internal_id, name, case_action,
           exclude_analysed,
           exclude_uploaded,
           exclude_delivered,
+          exclude_delivery_reported,
           exclude_invoiced,
           ):
     """progress of each case"""
@@ -157,6 +163,7 @@ def cases(context, output_type, verbose, days, internal_id, name, case_action,
         only_analysed=only_analysed,
         only_uploaded=only_uploaded,
         only_delivered=only_delivered,
+        only_delivery_reported=only_delivery_reported,
         only_invoiced=only_invoiced,
         exclude_received=exclude_received,
         exclude_prepared=exclude_prepared,
@@ -164,6 +171,7 @@ def cases(context, output_type, verbose, days, internal_id, name, case_action,
         exclude_analysed=exclude_analysed,
         exclude_uploaded=exclude_uploaded,
         exclude_delivered=exclude_delivered,
+        exclude_delivery_reported=exclude_delivery_reported,
         exclude_invoiced=exclude_invoiced,
     )
     case_rows = []
@@ -227,6 +235,7 @@ def cases(context, output_type, verbose, days, internal_id, name, case_action,
 
             uploaded = present_bool(case, 'analysis_uploaded_bool', verbose)
             delivered = present_bool(case, 'samples_delivered_bool', verbose)
+            delivery_reported = present_bool(case, 'analysis_delivery_reported_bool', verbose)
             invoiced = present_bool(case, 'samples_invoiced_bool', verbose)
 
         elif output_type == 'count':
@@ -245,6 +254,8 @@ def cases(context, output_type, verbose, days, internal_id, name, case_action,
 
             uploaded = present_date(case, 'analysis_uploaded_at', verbose, show_time)
             delivered = f"{case.get('samples_delivered')}/{case.get('samples_to_deliver')}"
+            delivery_reported = present_date(case, 'analysis_delivery_reported_at', verbose,
+                                             show_time)
             invoiced = f"{case.get('samples_invoiced')}/{case.get('samples_to_invoice')}"
 
         elif output_type in ('date', 'datetime'):
@@ -263,10 +274,12 @@ def cases(context, output_type, verbose, days, internal_id, name, case_action,
 
             uploaded = present_date(case, 'analysis_uploaded_at', verbose, show_time)
             delivered = present_date(case, 'samples_delivered_at', verbose, show_time)
+            delivery_reported = present_date(case, 'analysis_delivery_reported_at', verbose,
+                                             show_time)
             invoiced = present_date(case, 'samples_invoiced_at', verbose, show_time)
 
         case_row = [title, ordered, received, prepared, sequenced, flowcell, analysed, uploaded,
-                    delivered, invoiced, tat]
+                    delivered, delivery_reported, invoiced, tat]
         case_rows.append(case_row)
 
     click.echo(tabulate(case_rows, headers=case_header, tablefmt='psql'))
