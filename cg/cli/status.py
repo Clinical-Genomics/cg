@@ -204,7 +204,10 @@ def cases(context, output_type, verbose, days, internal_id, name, case_action,
         color_start = Color(u"{" + f"{tat_color}" + "}")
         color_end = Color(u"{/" + f"{tat_color}" + "}")
 
-        if case.get('samples_received_bool') and case.get('samples_delivered_bool'):
+        if not case.get('case_external_bool') and case.get('samples_received_bool') and case.get(\
+                'samples_delivered_bool'):
+            tat = f"{tat_number}/{max_tat}" + color_end
+        elif case.get('case_external_bool') and case.get('analysis_uploaded_bool'):
             tat = f"{tat_number}/{max_tat}" + color_end
         else:
             tat = f"({tat_number})/{max_tat}" + color_end
