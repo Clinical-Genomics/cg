@@ -391,7 +391,7 @@ def test_one_external_sample(base_store: Store):
     family = add_family(base_store)
     sample = add_sample(base_store, is_external=True)
     base_store.relate_sample(family, sample, 'unknown')
-    assert sample.is_external
+    assert sample.application_version.application.is_external
 
     # WHEN getting active cases
     cases = base_store.cases()
@@ -401,6 +401,7 @@ def test_one_external_sample(base_store: Store):
     for case in cases:
         assert case.get('total_external_samples') == 1
         assert case.get('total_internal_samples') == 0
+        assert case.get('case_external_bool')
         assert case.get('samples_to_receive') == 0
         assert case.get('samples_to_prepare') == 0
         assert case.get('samples_to_sequence') == 0
@@ -1459,12 +1460,13 @@ def test_structure(base_store: Store):
         assert 'samples_invoiced' in case.keys()
 
 
-def ensure_application_version(disk_store, application_tag='dummy_tag'):
+def ensure_application_version(disk_store, application_tag='dummy_tag', is_external=False):
     """utility function to return existing or create application version for tests"""
     application = disk_store.application(tag=application_tag)
     if not application:
         application = disk_store.add_application(tag=application_tag, category='wgs',
-                                                 description='dummy_description')
+                                                 description='dummy_description',
+                                                 is_external=is_external)
         disk_store.add_commit(application)
 
     prices = {'standard': 10, 'priority': 20, 'express': 30, 'research': 5}
@@ -1515,8 +1517,12 @@ def add_sample(store, sample_name='sample_test', received=False, prepared=False,
         sample.invoice.invoiced_at = date
     if data_analysis:
         sample.data_analysis = data_analysis
+
     if is_external:
-        sample.is_external = is_external
+        application_version_id = ensure_application_version(store, "external_tag",
+                                                            is_external=True).id
+        sample.application_version_id = application_version_id
+
     if no_invoice:
         sample.no_invoice = no_invoice
     store.add_commit(sample)

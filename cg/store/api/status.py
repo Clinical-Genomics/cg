@@ -264,9 +264,11 @@ class StatusHandler(BaseHandler):
             case_action = record.action
 
             total_samples = len(record.links)
-            total_external_samples = len([link.sample.is_external for link in record.links if
-                                          link.sample.is_external])
+            total_external_samples = len([link.sample.application_version.application.is_external
+                                          for link in record.links if
+                                          link.sample.application_version.application.is_external])
             total_internal_samples = total_samples - total_external_samples
+            case_external_bool = total_external_samples == total_samples
 
             if total_samples > 0:
                 samples_received = len([link.sample.received_at for link in record.links if
@@ -283,7 +285,7 @@ class StatusHandler(BaseHandler):
                 samples_to_receive = total_internal_samples
                 samples_to_prepare = total_internal_samples
                 samples_to_sequence = total_internal_samples
-                samples_to_deliver = total_samples
+                samples_to_deliver = total_internal_samples
                 samples_to_invoice = total_samples - len([link.sample.no_invoice for link in
                                                           record.links if link.sample.no_invoice])
 
@@ -406,6 +408,8 @@ class StatusHandler(BaseHandler):
                 continue
 
             tat = self._calculate_estimated_turnaround_time(
+                case_external_bool,
+                record.ordered_at,
                 samples_received_at,
                 samples_prepared_at,
                 samples_sequenced_at,
@@ -423,6 +427,7 @@ class StatusHandler(BaseHandler):
                 'total_samples': total_samples,
                 'total_external_samples': total_external_samples,
                 'total_internal_samples': total_internal_samples,
+                'case_external_bool': case_external_bool,
                 'samples_to_receive': samples_to_receive,
                 'samples_to_prepare': samples_to_prepare,
                 'samples_to_sequence': samples_to_sequence,
@@ -586,7 +591,7 @@ class StatusHandler(BaseHandler):
         records = (
             self.MicrobialSample.query.filter(
                 models.MicrobialSample.delivered_at is not None,
-                models.MicrobialSample.invoice_id == None # pylint: disable=singleton-comparison
+                models.MicrobialSample.invoice_id == None
             )
         )
         customers_to_invoice = [record.microbial_order.customer for record in records.all()]
@@ -720,6 +725,8 @@ class StatusHandler(BaseHandler):
         return records
 
     def _calculate_estimated_turnaround_time(self,
+                                             external_case_bool,
+                                             samples_ordered_at,
                                              samples_received_at,
                                              samples_prepared_at,
                                              samples_sequenced_at,
@@ -731,11 +738,18 @@ class StatusHandler(BaseHandler):
         if samples_received_at and samples_delivered_at:
             return self._calculate_date_delta(None, samples_received_at, samples_delivered_at)
 
+        o_a = self._calculate_date_delta(5, samples_ordered_at, analysis_completed_at)
         r_p = self._calculate_date_delta(4, samples_received_at, samples_prepared_at)
         p_s = self._calculate_date_delta(5, samples_prepared_at, samples_sequenced_at)
         s_a = self._calculate_date_delta(4, samples_sequenced_at, analysis_completed_at)
         a_u = self._calculate_date_delta(1, analysis_completed_at, analysis_uploaded_at)
         u_d = self._calculate_date_delta(2, analysis_uploaded_at, samples_delivered_at)
+
+        if external_case_bool:
+            if analysis_uploaded_at:
+                return self._calculate_date_delta(None, samples_ordered_at, analysis_uploaded_at)
+
+            return o_a + a_u
 
         return r_p + p_s + s_a + a_u + u_d
 
