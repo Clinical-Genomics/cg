@@ -164,6 +164,9 @@ def sample(context, sex, customer, comment, downsampled_to, apptag, capture_kit,
                     echo_msg += click.style(
                         f"\nApplication tag set to {str(application_version)}.", fg='green')
 
+        context.obj['lims'].update_sample(sample_id, application=apptag)
+        click.echo(click.style(f"Set LIMS/application to {apptag}", fg='blue'))
+
     if capture_kit:
         if sample_obj.capture_kit != capture_kit:
             comment += _generate_comment("Capture kit", sample_obj.capture_kit, capture_kit)
