@@ -14,9 +14,8 @@ install:
 
 script:
     - coverage run --source "$(basename "$PWD")" setup.py test
-      if: type = push
     - git reset --soft ${TRAVIS_COMMIT_RANGE%...*} && git lint
-      if: type != push
+
 after_success: coveralls
 
 notifications:
