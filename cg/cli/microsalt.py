@@ -24,12 +24,12 @@ def microsalt(context):
 
 
 @microsalt.command('case-config')
-@click.option('-d', '--dry', is_flag=True, help='print parameters to console')
+@click.option('-d', '--dry', is_flag=True, help='print case config to console')
 @click.option('--project', 'project_id', help='include all samples for a project')
 @click.argument('sample_id', required=False)
 @click.pass_context
 def case_config(context, dry, project_id, sample_id):
-    """ Get all samples for a project """
+    """ Create a config file on case level for microSALT """
     if project_id and (sample_id is None):
         sample_objs = context.obj['db'].microbial_order(project_id).microbial_samples
     elif sample_id and (project_id is None):
@@ -69,7 +69,7 @@ def case_config(context, dry, project_id, sample_id):
         parameters.append(parameter_dict)
 
     filename = project_id if project_id else sample_id
-    outfilename = Path(context.obj['usalt']['root']) / 'queries' / filename
+    outfilename = Path(context.obj['microsalt']['root']) / 'queries' / filename
     outfilename = outfilename.with_suffix('.json')
     if dry:
         print(outfilename)
@@ -81,22 +81,21 @@ def case_config(context, dry, project_id, sample_id):
 
 @microsalt.command()
 @click.option('-d', '--dry', is_flag=True, help='print command to console')
-@click.option('-p', '--parameters', required=False, help='Optional')
+@click.option('-c', '--case-config', required=False, help='Optional')
 # @click.option('-p', '--priority', default='low', type=click.Choice(['low', 'normal', 'high']))
 # @click.option('-e', '--email', help='email to send errors to')
 @click.argument('project_id')
 @click.pass_context
-def start(context, dry, parameters, project_id):
-    microsalt_command = context.obj['usalt']['binary_path']
-    root_path = Path(context.obj['usalt']['root'])
-    case_configs_path = root_path / 'queries'
+def start(context, dry, case_config, project_id):
+    """ Start microSALT """
+    microsalt_command = context.obj['microsalt']['binary_path']
     command = [microsalt_command]
-    if parameters:
-        command.extend(['--parameters', case_configs_path])
+    if case_config:
+        root_path = Path(context.obj['microsalt']['root'])
+        case_config_path = root_path / 'queries' / case_config
+        command.extend(['--parameters', str(case_config_path)])
     if dry:
         print(' '.join(command))
     else:
-        process = subprocess.run(
-            ' '.join(command), shell=True
-        )
+        process = subprocess.run(command, shell=True)
         return process
