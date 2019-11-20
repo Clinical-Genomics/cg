@@ -34,7 +34,6 @@ def case_config(context, dry, project_id, sample_id):
         sample_objs = context.obj['db'].microbial_order(project_id).microbial_samples
     elif sample_id and (project_id is None):
         sample_objs = [context.obj['db'].microbial_sample(sample_id)]
-        project_id = sample_objs[0].microbial_order.internal_id
     elif sample_id and project_id:
         sample_objs = [
             sample_obj for sample_obj
@@ -52,9 +51,6 @@ def case_config(context, dry, project_id, sample_id):
         organism = context.obj['microsalt_api'].get_organism(sample_obj)
         priority = 'research' if sample_obj.priority == 0 else 'standard'
 
-        breakpoint()
-
-        # TODO what to do with 'null' values?
         parameter_dict = {
             'CG_ID_project': sample_obj.microbial_order.internal_id,
             'CG_ID_sample': sample_obj.internal_id,
@@ -72,7 +68,8 @@ def case_config(context, dry, project_id, sample_id):
         }
         parameters.append(parameter_dict)
 
-    outfilename = Path(context.obj['usalt']['root']) / 'queries' / project_id
+    filename = project_id if project_id else sample_id
+    outfilename = Path(context.obj['usalt']['root']) / 'queries' / filename
     outfilename = outfilename.with_suffix('.json')
     if dry:
         print(outfilename)
@@ -91,10 +88,11 @@ def case_config(context, dry, project_id, sample_id):
 @click.pass_context
 def start(context, dry, parameters, project_id):
     microsalt_command = context.obj['usalt']['binary_path']
+    root_path = Path(context.obj['usalt']['root'])
+    case_configs_path = root_path / 'queries'
     command = [microsalt_command]
     if parameters:
-        # TODO where are the parameter files stored?
-        command.extend(['--parameters', 'pathtoparamsfile'])
+        command.extend(['--parameters', case_configs_path])
     if dry:
         print(' '.join(command))
     else:

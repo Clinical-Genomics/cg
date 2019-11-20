@@ -28,7 +28,6 @@ class MicrosaltAPI():
         organism = sample_obj.organism.internal_id.strip()
         lims_sample = self.lims.sample(sample_obj.internal_id)
 
-        breakpoint()
         comment = re.match(r'\w{4}\d{2,3}', lims_sample.get('comment') or '')
         has_comment = True if comment else False
 
