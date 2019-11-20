@@ -69,7 +69,7 @@ def case_config(context, dry, project_id, sample_id):
         parameters.append(parameter_dict)
 
     filename = project_id if project_id else sample_id
-    outfilename = Path(context.obj['microsalt']['root']) / 'queries' / filename
+    outfilename = Path(context.obj['microsalt']['queries_path']) / filename
     outfilename = outfilename.with_suffix('.json')
     if dry:
         print(outfilename)
@@ -93,8 +93,8 @@ def start(context, dry, case_config, project_id):
 
     case_config_path = case_config
     if not case_config:
-        root_path = Path(context.obj['microsalt']['root'])
-        case_config_path = root_path / 'queries' / project_id
+        queries_path = Path(context.obj['microsalt']['queries_path'])
+        case_config_path = queries_path / project_id
         case_config_path = case_config_path.with_suffix('.json')
 
     command.extend(['--parameters', str(case_config_path)])
