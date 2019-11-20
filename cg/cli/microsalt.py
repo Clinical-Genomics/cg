@@ -90,10 +90,14 @@ def start(context, dry, case_config, project_id):
     """ Start microSALT """
     microsalt_command = context.obj['microsalt']['binary_path']
     command = [microsalt_command]
-    if case_config:
+
+    case_config_path = case_config
+    if not case_config:
         root_path = Path(context.obj['microsalt']['root'])
-        case_config_path = root_path / 'queries' / case_config
-        command.extend(['--parameters', str(case_config_path)])
+        case_config_path = root_path / 'queries' / project_id
+        case_config_path = case_config_path.with_suffix('.json')
+
+    command.extend(['--parameters', str(case_config_path)])
     if dry:
         print(' '.join(command))
     else:
