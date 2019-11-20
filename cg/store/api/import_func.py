@@ -1,9 +1,9 @@
 """Import functionality"""
 import logging
-import sys
 from datetime import datetime
 
 import xlrd
+from cg.exc import CgError
 from cg.store import models, Store
 
 
@@ -28,7 +28,7 @@ def import_application_versions(store, excel_path, sign):
             logging.error('Failed to find application! Rolling back transaction. Please manually '
                           'add application: %s', tag)
             store.rollback()
-            sys.exit()
+            raise CgError
 
         app_tag = application_obj.tag
         latest_version = store.latest_version(tag)
@@ -159,19 +159,19 @@ def import_apptags(store: Store, excel_path: str, prep_category: str, sign: str,
 
     if not orderform_application_tags:
         logging.error('No applications found in column %s (zero-based), exiting', tag_column)
-        sys.exit()
+        raise CgError
 
     for orderform_application_tag in orderform_application_tags:
         application_obj = store.application(tag=orderform_application_tag)
 
         if not application_obj:
             logging.error('Application %s was not found', orderform_application_tag)
-            sys.exit()
+            raise CgError
 
         if application_obj.prep_category != prep_category:
             logging.error('%s prep_category, expected: %s was: %s', orderform_application_tag,
                           prep_category, application_obj.prep_category)
-            sys.exit()
+            raise CgError
 
         if application_obj.is_archived:
             if activate:
