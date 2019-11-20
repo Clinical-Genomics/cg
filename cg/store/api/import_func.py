@@ -89,12 +89,12 @@ def versions_are_same(version_obj: models.ApplicationVersion, raw_version: dict,
     """Checks if the given versions are to be considered equal"""
 
     return version_obj.application.tag == _get_tag_from_raw_version(raw_version) and \
-           version_obj.valid_from == datetime(
-            *xlrd.xldate_as_tuple(float(raw_version['Valid from']), datemode)) and \
-           prices_are_same(version_obj.price_standard, raw_version['Standard']) and \
-           prices_are_same(version_obj.price_priority, raw_version['Priority']) and \
-           prices_are_same(version_obj.price_express, raw_version['Express']) and \
-           prices_are_same(version_obj.price_research, raw_version['Research'])
+        version_obj.valid_from == datetime(
+           *xlrd.xldate_as_tuple(float(raw_version['Valid from']), datemode)) and \
+        prices_are_same(version_obj.price_standard, raw_version['Standard']) and \
+        prices_are_same(version_obj.price_priority, raw_version['Priority']) and \
+        prices_are_same(version_obj.price_express, raw_version['Express']) and \
+        prices_are_same(version_obj.price_research, raw_version['Research'])
 
 
 def applications_are_same(application_obj: models.Application, raw_application: dict):
@@ -238,7 +238,7 @@ def _get_raw_apptags_from_xl(excel_path, sheet_name, tag_column):
     """Get raw data from the xl file"""
     workbook = _get_workbook_from_xl(excel_path)
     data_sheet = workbook.sheet_by_name(sheet_name)
-    return _get_raw_applications_from_xlsheet(data_sheet, tag_column)
+    return _get_raw_applications(data_sheet, tag_column)
 
 
 def _get_workbook_from_xl(excel_path):
@@ -278,7 +278,7 @@ def _no_more_applications(row, tag_column: int) -> bool:
     return _get_tag_from_column(row, tag_column).value == ''
 
 
-def _get_raw_applications_from_xlsheet(version_sheet, tag_column: int) -> []:
+def _get_raw_applications(version_sheet, tag_column: int) -> []:
     """Get the relevant rows from an price sheet."""
     raw_data = []
 
