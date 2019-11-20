@@ -25,10 +25,10 @@ def import_application_versions(store, excel_path, sign):
         application_obj = store.application(tag)
 
         if not application_obj:
-            logging.error('Failed to find application! Rolling back transaction. Please manually '
-                          'add application: %s', tag)
+            message = ('Failed to find application! Rolling back transaction. Please manually '
+                       'add application: %s' % tag)
             store.rollback()
-            raise CgError
+            raise CgError(message)
 
         app_tag = application_obj.tag
         latest_version = store.latest_version(tag)
@@ -89,12 +89,12 @@ def versions_are_same(version_obj: models.ApplicationVersion, raw_version: dict,
     """Checks if the given versions are to be considered equal"""
 
     return version_obj.application.tag == _get_tag_from_raw_version(raw_version) and \
-        version_obj.valid_from == datetime(
-            *xlrd.xldate_as_tuple(float(raw_version['Valid from']), datemode)) and \
-        prices_are_same(version_obj.price_standard, raw_version['Standard']) and \
-        prices_are_same(version_obj.price_priority, raw_version['Priority']) and \
-        prices_are_same(version_obj.price_express, raw_version['Express']) and \
-        prices_are_same(version_obj.price_research, raw_version['Research'])
+           version_obj.valid_from == datetime(
+        *xlrd.xldate_as_tuple(float(raw_version['Valid from']), datemode)) and \
+           prices_are_same(version_obj.price_standard, raw_version['Standard']) and \
+           prices_are_same(version_obj.price_priority, raw_version['Priority']) and \
+           prices_are_same(version_obj.price_express, raw_version['Express']) and \
+           prices_are_same(version_obj.price_research, raw_version['Research'])
 
 
 def applications_are_same(application_obj: models.Application, raw_application: dict):
@@ -158,20 +158,21 @@ def import_apptags(store: Store, excel_path: str, prep_category: str, sign: str,
         orderform_application_tags.append(tag)
 
     if not orderform_application_tags:
-        logging.error('No applications found in column %s (zero-based), exiting', tag_column)
-        raise CgError
+        message = ('No applications found in column %s (zero-based), exiting' % tag_column)
+        raise CgError(message)
 
     for orderform_application_tag in orderform_application_tags:
         application_obj = store.application(tag=orderform_application_tag)
 
         if not application_obj:
-            logging.error('Application %s was not found', orderform_application_tag)
-            raise CgError
+            message = ('Application %s was not found' % orderform_application_tag)
+            raise CgError(message)
 
         if application_obj.prep_category != prep_category:
-            logging.error('%s prep_category, expected: %s was: %s', orderform_application_tag,
-                          prep_category, application_obj.prep_category)
-            raise CgError
+            message = '%s prep_category, expected: %s was: %s' % (orderform_application_tag,
+                                                                  prep_category,
+                                                                  application_obj.prep_category)
+            raise CgError(message)
 
         if application_obj.is_archived:
             if activate:
