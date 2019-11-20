@@ -13,9 +13,3 @@ def application_versions_file():
 def applications_file():
     """"application import file"""
     return 'tests/fixtures/store/api/applications.xlsx'
-
-
-@pytest.fixture
-def microbial_orderform():
-    """Orderform fixture for microbial samples"""
-    return 'tests/fixtures/orderforms/1603.8.microbial.xlsx'
