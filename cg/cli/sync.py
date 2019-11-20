@@ -30,6 +30,6 @@ def sync(context):
 @click.pass_context
 def apptag(context, excel_path, prep_category, signature, sheet_name, tag_column, activate,
            inactivate):
-    """Sync apptags in the status-db"""
+    """Sync apptags in the status-db, will run as dry-run by default"""
     sync_apptags(context.obj['status'], excel_path, prep_category, signature, sheet_name,
                  tag_column, activate, inactivate)
