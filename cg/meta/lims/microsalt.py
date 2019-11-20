@@ -1,4 +1,5 @@
 """ Common microsalt related functionality """
+from datetime import datetime
 import logging
 import re
 
@@ -53,3 +54,28 @@ class MicrosaltAPI():
                              sample_obj.internal_id)
 
         return organism
+
+    def get_parameters(self, sample_obj: Sample):
+        """Fill a dict with case config information for one sample """
+        method_library_prep = self.lims.get_prep_method(sample_obj.internal_id)
+        method_sequencing = self.lims.get_sequencing_method(sample_obj.internal_id)
+        organism = self.get_organism(sample_obj)
+        priority = 'research' if sample_obj.priority == 0 else 'standard'
+
+        parameter_dict = {
+            'CG_ID_project': sample_obj.microbial_order.internal_id,
+            'CG_ID_sample': sample_obj.internal_id,
+            'Customer_ID_sample': sample_obj.name,
+            'organism': organism,
+            'priority': priority,
+            'reference': sample_obj.organism.reference_genome,
+            'Customer_ID': sample_obj.microbial_order.customer.internal_id,
+            'application_tag': sample_obj.application_version.application.tag,
+            'date_arrival': str(sample_obj.received_at or datetime.min),
+            'date_sequencing': str(sample_obj.sequenced_at or datetime.min),
+            'date_libprep': str(sample_obj.prepared_at or datetime.min),
+            'method_libprep': method_library_prep or 'Not in LIMS',
+            'method_sequencing': method_sequencing or 'Not in LIMS',
+        }
+
+        return parameter_dict
