@@ -23,7 +23,6 @@ from .reset import reset_cmd
 from .set import set_cmd
 from .status import status
 from .store import store
-from .sync import sync
 from .transfer import transfer
 from .upload import upload
 
@@ -80,7 +79,6 @@ base.add_command(reset_cmd)
 base.add_command(set_cmd)
 base.add_command(status)
 base.add_command(store)
-base.add_command(sync)
 base.add_command(transfer)
 base.add_command(upload)
 analysis.add_command(balsamic)
