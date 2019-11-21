@@ -85,9 +85,10 @@ class UploadScoutAPI(object):
     @staticmethod
     def save_config_file(upload_config: dict, file_path: Path):
         """Save a scout load config file to <file_path>"""
+
+        LOG.info("Save Scout load config to %s", file_path)
         yml = yaml.YAML()
         yml.dump(upload_config, file_path)
-        LOG.info("Scout load config saved to %s", file_path)
 
     @staticmethod
     def add_scout_config_to_hk(config_file_path: Path, hk_api: hk.HousekeeperAPI, case_id: str):
@@ -104,9 +105,11 @@ class UploadScoutAPI(object):
         if bundle_config_exists:
             raise FileExistsError("Upload config already exists")
 
-        file_obj = hk_api.add_file(config_file_path.name, version_obj, tag_name)
+        file_obj = hk_api.add_file(str(config_file_path), version_obj, tag_name)
         hk_api.include_file(file_obj, version_obj)
         hk_api.add_commit(file_obj)
+
+        LOG.info("Added scout load config to housekeeper: %s", config_file_path)
         return file_obj
 
     def _include_optional_files(self, data, hk_version):
