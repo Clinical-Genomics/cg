@@ -5,6 +5,7 @@ from pathlib import Path
 import yaml
 from cg.meta.upload.scoutapi import UploadScoutAPI
 from cg.store import Store
+from cg.apps.hk import HousekeeperAPI
 
 
 def test_generate_config_adds_rank_model_version(analysis: Store.Analysis, upload_scout_api:
@@ -49,31 +50,42 @@ def _file_is_yaml(file_path):
     return data is not None
 
 
-def test_save_config_creates_file(upload_scout_api: UploadScoutAPI, tmpdir):
+def test_save_config_creates_file(upload_scout_api: UploadScoutAPI, tmp_file):
     """"Tests that save config creates a file"""
 
     # GIVEN a scout_config dict and a path to save it on
     scout_config = {'dummy': 'data'}
-    file_path = Path(tmpdir / 'test')
 
     # WHEN calling method to save config
     result_data = upload_scout_api.save_config_file(upload_config=scout_config,
-                                                    file_path=file_path)
+                                                    file_path=tmp_file)
 
     # THEN the config should exist on disk
     assert _file_exists_on_disk(file_path)
 
 
-def test_save_config_creates_yaml(upload_scout_api: UploadScoutAPI, tmpdir):
+def test_save_config_creates_yaml(upload_scout_api: UploadScoutAPI, tmp_file):
     """Tests that the file created by save_config_file create a yaml """
 
     # GIVEN a scout_config dict and a path to save it on
     scout_config = {'dummy': 'data'}
-    file_path = Path(tmpdir / 'test')
 
     # WHEN calling method to save config
     result_data = upload_scout_api.save_config_file(upload_config=scout_config,
-                                                    file_path=file_path)
+                                                    file_path=tmp_file)
 
     # THEN the should be of yaml type
     assert _file_is_yaml(file_path)
+
+def test_add_scout_config_to_hk(upload_scout_api: UploadScoutAPI, housekeeper_api: HousekeeperAPI,
+                                tmp_file):
+    ## GIVEN a hk_mock and a file path to scout load config
+    ## WHEN adding the file path to hk_api
+    file_obj = upload_scout_api.add_scout_config_to_hk(config_file_path=tmp_file, hk_api=housekeeper_api, 
+                                                       case_id='dummy')
+    ## THEN assert that the file path is added to hk
+        # file added to hk-db
+    assert housekeeper_api._file_added is True
+        # file linked to hk-disk
+    assert housekeeper_api._file_included is True
+        

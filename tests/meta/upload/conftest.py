@@ -3,23 +3,31 @@ import pytest
 from cg.meta.upload.scoutapi import UploadScoutAPI
 from cg.meta.upload.mutacc import UploadToMutaccAPI
 from cg.meta.upload.observations import UploadObservationsAPI
+from cg.apps.hk import HousekeeperAPI
 
 
 class MockVersion:
+    
+    @property
     def id(self):
         return ''
 
 
 class MockFile:
 
-    def __init__(self, path=''):
+    def __init__(self, path='', to_archive=False, tags=[]):
         self.path = path
+        self.to_archive = to_archive
+        self.tags = tags
 
     def first(self):
         return MockFile()
 
     def full_path(self):
         return ''
+
+    def is_included(self):
+        return False
 
 
 # Mock File again, but full_path should be an attribute
@@ -35,15 +43,39 @@ class MockFile1():
         """ mock first method """
         return MockFile1()
 
-
-class MockHouseKeeper:
+class MockHouseKeeper(HousekeeperAPI):
+    
+    def __init__(self):
+        self._file_added = False
+        self._file_included = False
 
     def files(self, version, tags):
         return MockFile()
 
+    def get_files(self, bundle, tags, version='1.0'):
+        """docstring for get_files"""
+        return []
+    
+    def add_file(self, file, version_obj, tag_name, to_archive=False):
+        """docstring for add_file"""
+        self._file_added = True
+        return MockFile(path=file) 
+
     def version(self, arg1: str, arg2: str):
         """Fetch version from the database."""
         return MockVersion()
+    
+    def last_version(self, bundle: str):
+        """docstring for last_version"""
+        return MockVersion()
+    
+    def include_file(self, file_obj, version_obj):
+        """docstring for include_file"""
+        self._file_included = True
+
+    def add_commit(self, file_obj):
+        """docstring for include_file"""
+        pass
 
 
 # Mock Housekeeper again, but with MockFile_ returned from files instead
@@ -62,7 +94,6 @@ class MockHouseKeeper1():
         """Fetch version from the database."""
         _, _ = arg1, arg2
         return MockVersion()
-
 
 class MockMadeline:
 
@@ -142,6 +173,14 @@ class MockLoqusAPI:
         _ = args
         _ = kwargs
         return {'case_id': 'case_id'}
+
+
+@pytest.yield_fixture(scope='function')
+def housekeeper_api():
+
+    _api = MockHouseKeeper()
+
+    yield _api
 
 
 @pytest.yield_fixture(scope='function')

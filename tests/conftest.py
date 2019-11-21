@@ -38,6 +38,9 @@ def files():
         'qcmetrics': 'tests/fixtures/apps/tb/case/case_qc_metrics.yaml',
     }
 
+@pytest.fixture(scope='function')
+def tmp_file(tmp_path):
+    return tmp_path / 'test'
 
 @pytest.fixture(scope='session')
 def files_raw(files):
