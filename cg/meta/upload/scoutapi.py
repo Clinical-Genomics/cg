@@ -97,11 +97,12 @@ class UploadScoutAPI(object):
         uploaded_config_files = hk_api.get_files(bundle=case_id,
                                                  tags=[tag_name],
                                                  version=version_obj.id)
+
         number_of_configs = sum(1 for i in uploaded_config_files)
         bundle_config_exists = number_of_configs > 0
 
         if bundle_config_exists:
-            return None
+            raise FileExistsError("Upload config already exists")
 
         file_obj = hk_api.add_file(config_file_path.name, version_obj, tag_name)
         hk_api.include_file(file_obj, version_obj)

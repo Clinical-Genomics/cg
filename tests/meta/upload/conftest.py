@@ -48,13 +48,14 @@ class MockHouseKeeper(HousekeeperAPI):
     def __init__(self):
         self._file_added = False
         self._file_included = False
+        self._files = []
 
     def files(self, version, tags):
         return MockFile()
 
     def get_files(self, bundle, tags, version='1.0'):
         """docstring for get_files"""
-        return []
+        return self._files
     
     def add_file(self, file, version_obj, tag_name, to_archive=False):
         """docstring for add_file"""
