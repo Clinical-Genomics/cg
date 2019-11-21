@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 import logging
-
 from pathlib import Path
-
-from ruamel import yaml
 
 from cg.apps import hk, scoutapi, madeline
 from cg.meta.analysis import AnalysisAPI
 from cg.store import models, Store
+from ruamel import yaml
 
 LOG = logging.getLogger(__name__)
 

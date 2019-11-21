@@ -5,20 +5,19 @@ import sys
 from typing import List
 
 import click
-
-from cg.store import Store, models
 from cg.apps import coverage as coverage_app, gt, hk, loqus, tb, scoutapi, beacon as beacon_app, \
     lims, mutacc_auto
 from cg.exc import DuplicateRecordError, DuplicateSampleError
-from cg.meta.upload.coverage import UploadCoverageApi
-from cg.meta.upload.gt import UploadGenotypesAPI
-from cg.meta.upload.observations import UploadObservationsAPI
-from cg.meta.upload.scoutapi import UploadScoutAPI
-from cg.meta.upload.beacon import UploadBeaconApi
 from cg.meta.analysis import AnalysisAPI
 from cg.meta.deliver.api import DeliverAPI
 from cg.meta.report.api import ReportAPI
+from cg.meta.upload.beacon import UploadBeaconApi
+from cg.meta.upload.coverage import UploadCoverageApi
+from cg.meta.upload.gt import UploadGenotypesAPI
 from cg.meta.upload.mutacc import UploadToMutaccAPI
+from cg.meta.upload.observations import UploadObservationsAPI
+from cg.meta.upload.scoutapi import UploadScoutAPI
+from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
 
@@ -189,7 +188,7 @@ def delivery_report(context, family_id, print_console):
         delivery_report_file = report_api.create_delivery_report_file(family_id,
                                                                       file_path=
                                                                       tb_api.get_family_root_dir(
-                                                                        family_id))
+                                                                          family_id))
         hk_api = context.obj['housekeeper_api']
         added_file = _add_delivery_report_to_hk(delivery_report_file, hk_api, family_id)
 
@@ -562,7 +561,6 @@ def _suggest_cases_delivery_report(context):
 @click.option('--dry-run', is_flag=True, help='only print cases to be processed')
 @click.pass_context
 def process_solved(context, case_id, days_ago, customers, dry_run):
-
     """Process cases with mutacc that has been marked as solved in scout.
     This prepares them to be uploaded to the mutacc database"""
 
@@ -603,7 +601,6 @@ def process_solved(context, case_id, days_ago, customers, dry_run):
 @upload.command('processed-solved')
 @click.pass_context
 def processed_solved(context):
-
     """Upload solved cases that has been processed by mutacc to the mutacc database"""
 
     click.echo(click.style('----------------- PROCESSED-SOLVED ----------------'))
