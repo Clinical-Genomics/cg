@@ -416,11 +416,11 @@ def scout(context, re_upload, print_console, case_id):
 
     click.echo(click.style('----------------- SCOUT -----------------------'))
 
-    if not family_id:
+    if not case_id:
         _suggest_cases_to_upload(context)
         context.abort()
 
-    scout_api = scoutapi.ScoutAPI(context.obj)
+    scout_api = context.obj['scout_api']
     tb_api = context.obj['tb_api']
 
     family_obj = context.obj['status'].family(case_id)
@@ -431,7 +431,8 @@ def scout(context, re_upload, print_console, case_id):
         click.echo(scout_config)
         return
 
-    file_path = tb_api.get_family_root_dir(case_id) / 'scout_load.yml'
+    # file_path = tb_api.get_family_root_dir(case_id) / 'scout_load.yml'
+    file_path = 'scout_load.yml'
     scout_upload_api.save_config_file(scout_config, file_path)
     hk_api = context.obj['housekeeper_api']
     try:
