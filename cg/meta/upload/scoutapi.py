@@ -86,8 +86,8 @@ class UploadScoutAPI(object):
     def save_config_file(upload_config: dict, file_path: Path):
         """Save a scout load config file to <file_path>"""
         yml = yaml.YAML()
-
         yml.dump(upload_config, file_path)
+        LOG.info("Scout load config saved to %s", file_path)
 
     @staticmethod
     def add_scout_config_to_hk(config_file_path: Path, hk_api: hk.HousekeeperAPI, case_id: str):
