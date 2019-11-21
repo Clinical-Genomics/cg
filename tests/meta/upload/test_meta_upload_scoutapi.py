@@ -40,8 +40,12 @@ def _file_exists_on_disk(file_path: Path):
 
 def _file_is_yaml(file_path):
     """Returns if the file successfully was loaded as yaml"""
-
-    data = yaml.load(open(file_path, 'r', encoding='utf-8'), Loader=yaml.FullLoader)
+    data = None
+    with open(file_path, 'r') as stream:
+        try:
+            data = yaml.safe_load(stream)
+        except yaml.YAMLError as exc:
+            return False
     return data is not None
 
 
@@ -60,12 +64,12 @@ def test_save_config_creates_file(upload_scout_api: UploadScoutAPI, tmpdir):
     assert _file_exists_on_disk(file_path)
 
 
-def test_save_config_creates_yaml(upload_scout_api: UploadScoutAPI, tmp_path):
+def test_save_config_creates_yaml(upload_scout_api: UploadScoutAPI, tmpdir):
     """Tests that the file created by save_config_file create a yaml """
 
     # GIVEN a scout_config dict and a path to save it on
     scout_config = {'dummy': 'data'}
-    file_path = tmp_path
+    file_path = Path(tmpdir / 'test')
 
     # WHEN calling method to save config
     result_data = upload_scout_api.save_config_file(upload_config=scout_config,

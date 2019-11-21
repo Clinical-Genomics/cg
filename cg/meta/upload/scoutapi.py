@@ -87,7 +87,6 @@ class UploadScoutAPI(object):
         """Save a scout load config file to <file_path>"""
         yml = yaml.YAML()
 
-        file_path.mkdir(parents=True, exist_ok=True)
         yml.dump(upload_config, file_path)
 
     @staticmethod
