@@ -72,12 +72,12 @@ class MockScoutUploadApi(UploadScoutAPI):
     
     def save_config_file(self, scout_config, file_path):
         """docstring for save_config_file"""
-        if self.file_exists:
-            raise FileExistsError
         return
     
     def add_scout_config_to_hk(self, file_path, hk_api, case_id):
         """docstring for add_scout_config_to_hk"""
+        if self.file_exists:
+            raise FileExistsError('Scout config already exists')
         pass
 
 

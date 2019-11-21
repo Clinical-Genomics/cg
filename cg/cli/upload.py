@@ -431,14 +431,17 @@ def scout(context, re_upload, print_console, case_id):
         click.echo(scout_config)
         return
 
-    # file_path = tb_api.get_family_root_dir(case_id) / 'scout_load.yml'
-    file_path = 'scout_load.yml'
+    file_path = tb_api.get_family_root_dir(case_id) / 'scout_load.yml'
+    if file_path.exists():
+        LOG.warning("Scout load config %s already exists", file_path)
+
     scout_upload_api.save_config_file(scout_config, file_path)
     hk_api = context.obj['housekeeper_api']
     try:
         scout_upload_api.add_scout_config_to_hk(file_path, hk_api, case_id)
     except FileExistsError as err:
         LOG.warning(err)
+
     scout_api.upload(scout_config, force=re_upload)
 
 
