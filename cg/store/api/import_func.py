@@ -89,12 +89,12 @@ def versions_are_same(version_obj: models.ApplicationVersion, raw_version: dict,
     """Checks if the given versions are to be considered equal"""
 
     return version_obj.application.tag == _get_tag_from_raw_version(raw_version) and \
-           version_obj.valid_from == datetime(
-        *xlrd.xldate_as_tuple(float(raw_version['Valid from']), datemode)) and \
-           prices_are_same(version_obj.price_standard, raw_version['Standard']) and \
-           prices_are_same(version_obj.price_priority, raw_version['Priority']) and \
-           prices_are_same(version_obj.price_express, raw_version['Express']) and \
-           prices_are_same(version_obj.price_research, raw_version['Research'])
+        version_obj.valid_from == datetime(
+            *xlrd.xldate_as_tuple(float(raw_version['Valid from']), datemode)) and \
+        prices_are_same(version_obj.price_standard, raw_version['Standard']) and \
+        prices_are_same(version_obj.price_priority, raw_version['Priority']) and \
+        prices_are_same(version_obj.price_express, raw_version['Express']) and \
+        prices_are_same(version_obj.price_research, raw_version['Research'])
 
 
 def applications_are_same(application_obj: models.Application, raw_application: dict):
