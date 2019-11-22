@@ -30,22 +30,34 @@ def microsalt(context):
 def case_config(context, dry, project_id, sample_id):
     """ Create a config file on case level for microSALT """
     if project_id and (sample_id is None):
-        sample_objs = context.obj['db'].microbial_order(project_id).microbial_samples
+        microbial_order_obj = context.obj['db'].microbial_order(project_id)
+        if not microbial_order_obj:
+            LOGGER.error('Project %s not found', project_id)
+            context.abort()
+        sample_objs = microbial_order_obj.microbial_samples
     elif sample_id and (project_id is None):
+        sample_obj = context.obj['db'].microbial_sample(sample_id)
+        if not sample_obj:
+            LOGGER.error('Sample %s not found', sample_id)
+            context.abort()
         sample_objs = [context.obj['db'].microbial_sample(sample_id)]
     elif sample_id and project_id:
+        microbial_order_obj = context.obj['db'].microbial_order(project_id)
+        if not microbial_order_obj:
+            LOGGER.error('Samples %s not found in %s ', sample_id, project_id)
+            context.abort()
         sample_objs = [
             sample_obj for sample_obj
-            in context.obj['db'].microbial_order(project_id).microbial_samples
+            in microbial_order_obj.microbial_samples
             if sample_obj.internal_id == sample_id
         ]
     else:
         LOGGER.error('provide project and/or sample')
         context.abort()
 
-    parameters = []
-    for sample_obj in sample_objs:
-        parameters.append(context.obj['microsalt_api'].get_parameters(sample_obj))
+    parameters = [
+        context.obj['microsalt_api'].get_parameters(sample_obj) for sample_obj in sample_objs
+    ]
 
     filename = project_id if project_id else sample_id
     outfilename = Path(context.obj['microsalt']['queries_path']) / filename
