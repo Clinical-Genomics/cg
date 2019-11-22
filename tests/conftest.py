@@ -7,12 +7,10 @@ import datetime as dt
 from pathlib import Path
 
 import pytest
-
+import ruamel.yaml
 from cg.store import Store
-
 # Trailblazer
 from trailblazer.mip import files as mip_files_api
-import ruamel.yaml
 
 pytest_plugins = [  # pylint: disable=invalid-name
     'tests.apps.lims.conftest',
@@ -29,6 +27,7 @@ pytest_plugins = [  # pylint: disable=invalid-name
     'tests.apps.mutacc_auto.conftest'
 ]
 
+
 # Trailblazer api for mip files
 @pytest.fixture(scope='session')
 def files():
@@ -38,9 +37,11 @@ def files():
         'qcmetrics': 'tests/fixtures/apps/tb/case/case_qc_metrics.yaml',
     }
 
+
 @pytest.fixture(scope='function')
 def tmp_file(tmp_path):
     return tmp_path / 'test'
+
 
 @pytest.fixture(scope='session')
 def files_raw(files):

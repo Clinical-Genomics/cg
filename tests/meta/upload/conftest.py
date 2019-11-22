@@ -1,13 +1,12 @@
 import pytest
-
-from cg.meta.upload.scoutapi import UploadScoutAPI
+from cg.apps.hk import HousekeeperAPI
 from cg.meta.upload.mutacc import UploadToMutaccAPI
 from cg.meta.upload.observations import UploadObservationsAPI
-from cg.apps.hk import HousekeeperAPI
+from cg.meta.upload.scoutapi import UploadScoutAPI
 
 
 class MockVersion:
-    
+
     @property
     def id(self):
         return ''
@@ -32,7 +31,6 @@ class MockFile:
 
 # Mock File again, but full_path should be an attribute
 class MockFile1():
-
     """ Mock File object """
 
     def __init__(self, path=''):
@@ -43,8 +41,9 @@ class MockFile1():
         """ mock first method """
         return MockFile1()
 
+
 class MockHouseKeeper(HousekeeperAPI):
-    
+
     def __init__(self):
         self._file_added = False
         self._file_included = False
@@ -56,20 +55,20 @@ class MockHouseKeeper(HousekeeperAPI):
     def get_files(self, bundle, tags, version='1.0'):
         """docstring for get_files"""
         return self._files
-    
+
     def add_file(self, file, version_obj, tag_name, to_archive=False):
         """docstring for add_file"""
         self._file_added = True
-        return MockFile(path=file) 
+        return MockFile(path=file)
 
     def version(self, arg1: str, arg2: str):
         """Fetch version from the database."""
         return MockVersion()
-    
+
     def last_version(self, bundle: str):
         """docstring for last_version"""
         return MockVersion()
-    
+
     def include_file(self, file_obj, version_obj):
         """docstring for include_file"""
         self._file_included = True
@@ -81,7 +80,6 @@ class MockHouseKeeper(HousekeeperAPI):
 
 # Mock Housekeeper again, but with MockFile_ returned from files instead
 class MockHouseKeeper1():
-
     """ Mock housekeeper api"""
 
     @staticmethod
@@ -95,6 +93,7 @@ class MockHouseKeeper1():
         """Fetch version from the database."""
         _, _ = arg1, arg2
         return MockVersion()
+
 
 class MockMadeline:
 
@@ -130,6 +129,7 @@ class MockAnalysis:
 
 class MockMutaccAuto:
     """ Mock class for mutacc_auto api """
+
     @staticmethod
     def extract_reads(*args, **kwargs):
         """mock extract_reads method"""
@@ -143,6 +143,7 @@ class MockMutaccAuto:
 
 class MockScoutApi:
     """ Mock class for Scout api"""
+
     @staticmethod
     def get_causative_variants(case_id):
         """mock get_causative_variants"""
@@ -151,7 +152,6 @@ class MockScoutApi:
 
 
 class MockLoqusAPI:
-
     """ Mock LoqusAPI class"""
 
     @staticmethod
@@ -178,7 +178,6 @@ class MockLoqusAPI:
 
 @pytest.yield_fixture(scope='function')
 def housekeeper_api():
-
     _api = MockHouseKeeper()
 
     yield _api
@@ -186,7 +185,6 @@ def housekeeper_api():
 
 @pytest.yield_fixture(scope='function')
 def upload_observations_api(analysis_store):
-
     """ Create mocked UploadObservationsAPI object"""
 
     loqus_mock = MockLoqusAPI()
@@ -200,9 +198,9 @@ def upload_observations_api(analysis_store):
 
     yield _api
 
+
 @pytest.yield_fixture(scope='function')
 def upload_scout_api(analysis_store, scout_store):
-
     madeline_mock = MockMadeline()
     hk_mock = MockHouseKeeper()
     analysis_mock = MockAnalysis()

@@ -1,21 +1,20 @@
 """Fixtures for cli balsamic tests"""
 
-import pytest
-import mock
-
 from pathlib import Path
+
+import pytest
+from cg.apps.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.scoutapi import ScoutAPI
-from cg.apps.hk import HousekeeperAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.store import Store
 from cg.meta.upload.scoutapi import UploadScoutAPI
+from cg.store import Store
 
 
 @pytest.fixture
 def base_context(base_store: Store) -> dict:
     """context to use in cli"""
-        
+
     return {
         'scout_api': MockScoutApi(),
         'scout_upload_api': MockScoutUploadApi(),
@@ -24,56 +23,69 @@ def base_context(base_store: Store) -> dict:
         'status': MockStore()
     }
 
+
 class MockTB(TrailblazerAPI):
-    
+    """Mock of trailblazer """
+
     def __init__(self):
+        """Mock the init"""
         pass
-    
+
     def get_family_root_dir(self, case_id):
         """docstring for get_family_root_dir"""
         return Path('hej')
 
+
 class MockHK(HousekeeperAPI):
-    
+    """Mock of housekeeper """
+
     def __init__(self):
+        """Mock the init"""
         pass
+
 
 class MockFamily(object):
-    
+    """Mock of family used in store """
+
     def __init__(self):
+        """Mock the init"""
         self.analyses = ['analysis_obj']
 
+
 class MockStore(Store):
+    """Mock of store """
     def __init__(self):
         pass
-    
+
     def family(self, internal_id: str):
         """docstring for family"""
         return MockFamily()
+
 
 class MockScoutApi(ScoutAPI):
     def __init__(self):
         """docstring for __init__"""
         pass
-    
+
     def upload(self, scout_config, force=False):
         """docstring for upload"""
         pass
+
 
 class MockScoutUploadApi(UploadScoutAPI):
     def __init__(self):
         """docstring for __init__"""
         self.config = {}
         self.file_exists = False
-    
+
     def generate_config(self, analysis):
         """Mock the generate config"""
         return self.config
-    
+
     def save_config_file(self, scout_config, file_path):
         """docstring for save_config_file"""
         return
-    
+
     def add_scout_config_to_hk(self, file_path, hk_api, case_id):
         """docstring for add_scout_config_to_hk"""
         if self.file_exists:
