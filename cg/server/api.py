@@ -327,7 +327,6 @@ def options():
 
     source_groups = {'metagenome': METAGENOME_SOURCES, 'analysis': ANALYSIS_SOURCES}
 
-    print('beds', [bed.name for bed in db.beds()])
 
     return jsonify(
         customers=[{
