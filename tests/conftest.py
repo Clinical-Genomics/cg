@@ -7,12 +7,9 @@ import datetime as dt
 from pathlib import Path
 
 import pytest
-
-from cg.store import Store
-
-# Trailblazer
-from trailblazer.mip import files as mip_files_api
 import ruamel.yaml
+from cg.store import Store
+from trailblazer.mip import files as mip_files_api
 
 pytest_plugins = [  # pylint: disable=invalid-name
     'tests.apps.lims.conftest',
@@ -28,6 +25,7 @@ pytest_plugins = [  # pylint: disable=invalid-name
     'tests.store.conftest',
     'tests.apps.mutacc_auto.conftest'
 ]
+
 
 
 @pytest.fixture
@@ -91,6 +89,11 @@ def files():
         'sampleinfo': 'tests/fixtures/apps/tb/case/case_qc_sample_info.yaml',
         'qcmetrics': 'tests/fixtures/apps/tb/case/case_qc_metrics.yaml',
     }
+
+
+@pytest.fixture(scope='function')
+def tmp_file(tmp_path):
+    return tmp_path / 'test'
 
 
 @pytest.fixture(scope='session')
@@ -165,6 +168,12 @@ def base_store(store) -> Store:
     versions = [store.add_version(application, 1, valid_from=dt.datetime.now(), prices=prices)
                 for application in applications]
     store.add_commit(versions)
+
+    beds = [store.add_bed('Bed', 'Bed desc', 'Bed.bed')]
+    store.add_commit(beds)
+    bed_versions = [store.add_bed_version(bed, 1)
+                    for bed in beds]
+    store.add_commit(bed_versions)
 
     organism = store.add_organism('C. jejuni', 'C. jejuni')
     store.add_commit(organism)

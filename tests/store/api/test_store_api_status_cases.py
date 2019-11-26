@@ -10,9 +10,10 @@ def test_delivered_at_affects_tat(base_store: Store):
 
     # GIVEN a database with a family and a samples receive_at, prepared_at, sequenced_at,
     # delivered_at one week ago
-    family = add_family(base_store)
+    family = add_family(base_store, ordered_days_ago=7)
     yesterweek = datetime.now() - timedelta(days=7)
-    weekold_sample = add_sample(base_store, received=True, prepared=True, sequenced=True,
+    weekold_sample = add_sample(base_store, ordered=True, received=True, prepared=True,
+                                sequenced=True,
                                 delivered=True, date=yesterweek)
     base_store.relate_sample(family, weekold_sample, 'unknown')
 
@@ -30,9 +31,10 @@ def test_sequenced_at_affects_tat(base_store: Store):
 
     # GIVEN a database with a family and a samples receive_at, prepared_at, sequenced_at one week
     # ago
-    family = add_family(base_store)
+    family = add_family(base_store, ordered_days_ago=7)
     yesterweek = datetime.now() - timedelta(days=7)
-    weekold_sample = add_sample(base_store, received=True, prepared=True, sequenced=True,
+    weekold_sample = add_sample(base_store, ordered=True, received=True, prepared=True,
+                                sequenced=True,
                                 date=yesterweek)
     base_store.relate_sample(family, weekold_sample, 'unknown')
 
@@ -49,9 +51,10 @@ def test_prepared_at_affects_tat(base_store: Store):
     """test that the estimated turnaround time is affected by the prepared_at date """
 
     # GIVEN a database with a family and a samples receive_at, prepared_at one week ago
-    family = add_family(base_store)
+    family = add_family(base_store, ordered_days_ago=7)
     yesterweek = datetime.now() - timedelta(days=7)
-    weekold_sample = add_sample(base_store, received=True, prepared=True, date=yesterweek)
+    weekold_sample = add_sample(base_store, ordered=True, received=True, prepared=True,
+                                date=yesterweek)
     base_store.relate_sample(family, weekold_sample, 'unknown')
 
     # WHEN getting active cases
@@ -67,9 +70,9 @@ def test_received_at_affects_tat(base_store: Store):
     """test that the estimated turnaround time is affected by the received_at date """
 
     # GIVEN a database with a family and a samples received one week ago
-    family = add_family(base_store)
+    family = add_family(base_store, ordered_days_ago=7)
     yesterweek = datetime.now() - timedelta(days=7)
-    weekold_sample = add_sample(base_store, received=True, date=yesterweek)
+    weekold_sample = add_sample(base_store, ordered=True, received=True, date=yesterweek)
     base_store.relate_sample(family, weekold_sample, 'unknown')
 
     # WHEN getting active cases
@@ -125,7 +128,7 @@ def test_sample_flowcell(base_store: Store):
         assert case.get('flowcells_on_disk_bool')
 
 
-def test_analysis_action(base_store: Store):
+def test_case_action(base_store: Store):
     """Test to that cases displays no analysis dates for active reruns """
 
     # GIVEN a database with an analysis that was completed but has an active rerun in progress
@@ -1494,15 +1497,17 @@ def ensure_customer(disk_store, customer_id='cust_test'):
     return customer
 
 
-def add_sample(store, sample_name='sample_test', received=False, prepared=False,
+def add_sample(store, sample_name='sample_test', ordered=True, received=False, prepared=False,
                sequenced=False, delivered=False, invoiced=False, data_analysis=None,
                is_external=False, no_invoice=False, date=datetime.now()):
     """utility function to add a sample to use in tests"""
-    customer = ensure_customer(store)
     application_version_id = ensure_application_version(store).id
     sample = store.add_sample(name=sample_name, sex='unknown')
     sample.application_version_id = application_version_id
-    sample.customer = customer
+    sample.customer = ensure_customer(store)
+
+    if ordered:
+        sample.ordered_at = date
     if received:
         sample.received_at = date
     if prepared:
@@ -1512,7 +1517,7 @@ def add_sample(store, sample_name='sample_test', received=False, prepared=False,
     if delivered:
         sample.delivered_at = date
     if invoiced:
-        invoice = store.add_invoice(customer)
+        invoice = store.add_invoice(ensure_customer(store))
         sample.invoice = invoice
         sample.invoice.invoiced_at = date
     if data_analysis:
@@ -1525,6 +1530,7 @@ def add_sample(store, sample_name='sample_test', received=False, prepared=False,
 
     if no_invoice:
         sample.no_invoice = no_invoice
+
     store.add_commit(sample)
     return sample
 
