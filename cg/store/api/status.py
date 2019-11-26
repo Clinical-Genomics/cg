@@ -754,7 +754,7 @@ class StatusHandler(BaseHandler):
         if samples_received_at and samples_delivered_at:
             return self._calculate_date_delta(None, samples_received_at, samples_delivered_at)
 
-        o_a = self._calculate_date_delta(5, samples_ordered_at, analysis_completed_at)
+        o_a = self._calculate_date_delta(5, analysis_ordered_at, analysis_completed_at)
         r_p = self._calculate_date_delta(4, samples_received_at, samples_prepared_at)
         p_s = self._calculate_date_delta(5, samples_prepared_at, samples_sequenced_at)
         s_a = self._calculate_date_delta(4, samples_sequenced_at, analysis_completed_at)
