@@ -86,6 +86,15 @@ def panels():
     return jsonify(panels=data)
 
 
+@BLUEPRINT.route('/cases')
+def cases():
+    """Fetch cases."""
+    records = db.cases(days=31)
+    count = len(records)
+
+    return jsonify(cases=records, total=count)
+
+
 @BLUEPRINT.route('/families')
 def families():
     """Fetch families."""
