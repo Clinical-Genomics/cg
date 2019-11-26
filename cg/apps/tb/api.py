@@ -55,11 +55,6 @@ class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
         return data['sampleinfo_path']
 
     @staticmethod
-    def parse_sampleinfo_rna(data: dict) -> dict:
-        """Parse qc_sample_info for RNA"""
-        return files.parse_sampleinfo_rna(data)
-
-    @staticmethod
     def parse_qcmetrics(data: dict) -> dict:
         """Call internal Trailblazer MIP API."""
         return files.parse_qcmetrics(data)
