@@ -100,8 +100,8 @@ class ApplicationVersionView(BaseView):
 class BedView(BaseView):
     """Admin view for Model.Bed"""
 
-    column_default_sort = ('name')
-    column_editable_list = ['description', 'filename', 'comment']
+    column_default_sort = 'name'
+    column_editable_list = ['comment']
     column_exclude_list = ['created_at']
     column_filters = []
     column_searchable_list = ['name']
@@ -123,7 +123,7 @@ class BedVersionView(BaseView):
     """Admin view for Model.BedVersion"""
 
     column_default_sort = ('updated_at', True)
-    column_editable_list = []
+    column_editable_list = ['description', 'filename', 'comment', 'designer', 'shasum']
     column_exclude_list = ['created_at']
     form_excluded_columns = ['created_at', 'updated_at']
     column_filters = []
