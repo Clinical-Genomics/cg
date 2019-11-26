@@ -479,11 +479,10 @@ class StatusHandler(BaseHandler):
     @staticmethod
     def _is_rerun(record, samples_received_at, samples_prepared_at, samples_sequenced_at):
 
-        return (len(record.analyses) > 0) or (samples_received_at and samples_received_at <
-                                              record.ordered_at) or (samples_prepared_at and
-                                                                     samples_prepared_at <
-                                                                     record.ordered_at) or (
-                samples_sequenced_at and samples_sequenced_at < record.ordered_at)
+        return (len(record.analyses) > 0) or \
+               (samples_received_at and samples_received_at < record.ordered_at) or \
+               (samples_prepared_at and samples_prepared_at < record.ordered_at) or \
+               (samples_sequenced_at and samples_sequenced_at < record.ordered_at)
 
     @staticmethod
     def _all_samples_have_sequence_data(links: List[models.FamilySample]) -> bool:
@@ -773,7 +772,7 @@ class StatusHandler(BaseHandler):
 
         if samples_received_at and samples_delivered_at:
             return self._calculate_date_delta(None, samples_received_at, samples_delivered_at)
-          
+
         return r_p + p_s + s_a + a_u + u_d
 
     @staticmethod
