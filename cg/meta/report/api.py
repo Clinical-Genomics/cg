@@ -1,26 +1,25 @@
 # -*- coding: utf-8 -*-
 import logging
 from datetime import datetime
+from pathlib import Path
 
 import requests
 import ruamel.yaml
-from cg.meta.report.status_helper import StatusHelper
-from jinja2 import Environment, PackageLoader, select_autoescape
-from pathlib import Path
-
 from cg.apps.coverage import ChanjoAPI
 from cg.apps.lims import LimsAPI
-from cg.store import Store, models
+from cg.apps.scoutapi import ScoutAPI
 from cg.meta.analysis import AnalysisAPI
 from cg.meta.report.presenter import Presenter
 from cg.meta.report.sample_calculator import SampleCalculator
-from cg.apps.scoutapi import ScoutAPI
+from cg.meta.report.status_helper import StatusHelper
+from cg.store import Store, models
+from jinja2 import Environment, PackageLoader, select_autoescape
 
 
 class ReportAPI:
 
     def __init__(self, db: Store, lims_api: LimsAPI, chanjo_api: ChanjoAPI, analysis_api:
-                 AnalysisAPI, scout_api: ScoutAPI, logger=logging.getLogger(__name__),
+    AnalysisAPI, scout_api: ScoutAPI, logger=logging.getLogger(__name__),
                  yaml_loader=ruamel.yaml, path_tool=Path):
 
         self.db = db
