@@ -52,8 +52,12 @@ class HousekeeperAPI(Store):
         return self.root_dir
 
     def get_files(self, bundle: str, tags: list, version: int = None):
-        """returns all the files in housekeeper, optionally filtered by bundle and/or tags and/or
-        version"""
+        """Fetch all the files in housekeeper, optionally filtered by bundle and/or tags and/or
+        version
+        
+        Returns:
+            iterable(hk.Models.File)
+        """
         return self.files(bundle=bundle, tags=tags, version=version)
 
     def add_file(self, file, version_obj: models.Version, tag_name, to_archive=False):

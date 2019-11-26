@@ -38,6 +38,11 @@ def files():
     }
 
 
+@pytest.fixture(scope='function')
+def tmp_file(tmp_path):
+    return tmp_path / 'test'
+
+
 @pytest.fixture(scope='session')
 def files_raw(files):
     return {
