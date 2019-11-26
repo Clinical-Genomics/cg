@@ -394,15 +394,13 @@ class StatusHandler(BaseHandler):
             if exclude_invoiced and samples_invoiced_bool:
                 continue
 
-    
             if progress_tracker:
                 for analysis_obj in progress_tracker.get_latest_logged_analysis(
                         case_id=record.internal_id):
 
-                if not analysis_status:
+                    if not analysis_status:
                         analysis_completion = round(analysis_obj.progress * 100)
                         analysis_status = analysis_obj.status
-
 
             # filter on a status
             if progress_status and progress_status != analysis_status:
@@ -411,7 +409,6 @@ class StatusHandler(BaseHandler):
             is_rerun = self._is_rerun(record, samples_received_at, samples_prepared_at,
                                       samples_sequenced_at)
 
-      
             tat = self._calculate_estimated_turnaround_time(
                 is_rerun,
                 case_external_bool,
