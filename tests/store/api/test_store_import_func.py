@@ -2,9 +2,9 @@
 
 from cg.store import Store
 from cg.store.api.import_func import prices_are_same, versions_are_same, \
-    import_application_versions, _get_raw_data_from_xl, _get_tag_from_raw_version, \
-    add_version_from_raw, _get_workbook_from_xl, import_applications, _get_datemode_from_xl, \
-    _get_tag_from_raw_application, import_apptags
+    import_application_versions, _get_tag_from_raw_version, \
+    add_version_from_raw, import_applications, \
+    _get_tag_from_raw_application, import_apptags, XlFileHelper, XlSheetHelper
 
 
 def test_prices_are_same_int_and_int():
@@ -63,14 +63,14 @@ def test_versions_are_same(store: Store, application_versions_file):
     # GIVEN an excel price row
     # same price row committed to the database
     add_applications(store, application_versions_file)
-    raw_version = _get_raw_data_from_xl(application_versions_file)[0]
+    raw_version = XlFileHelper.get_raw_dicts_from_xl(application_versions_file)[0]
     tag = _get_tag_from_raw_version(raw_version)
     application_obj = store.application(tag)
     sign = 'DummySign'
-    workbook = _get_workbook_from_xl(application_versions_file)
+    workbook = XlFileHelper.get_workbook_from_xl(application_versions_file)
     db_version = add_version_from_raw(application_obj, None, raw_version,
                                       sign, store, workbook)
-    datemode = _get_datemode_from_xl(application_versions_file)
+    datemode = XlFileHelper.get_datemode_from_xl(application_versions_file)
 
     # WHEN calling versions are same
     should_be_same = versions_are_same(db_version, raw_version, datemode)
@@ -83,15 +83,15 @@ def test_versions_are_not_same(store, application_versions_file):
     # GIVEN an excel price row
     # NOT same price row committed to the database
     add_applications(store, application_versions_file)
-    raw_version = _get_raw_data_from_xl(application_versions_file)[0]
+    raw_version = XlFileHelper.get_raw_dicts_from_xl(application_versions_file)[0]
     tag = _get_tag_from_raw_version(raw_version)
     application_obj = store.application(tag)
     sign = 'DummySign'
-    workbook = _get_workbook_from_xl(application_versions_file)
+    workbook = XlFileHelper.get_workbook_from_xl(application_versions_file)
     db_version = add_version_from_raw(application_obj, None, raw_version,
                                       sign, store, workbook)
-    datemode = _get_datemode_from_xl(application_versions_file)
-    another_raw_version = _get_raw_data_from_xl(application_versions_file)[1]
+    datemode = XlFileHelper.get_datemode_from_xl(application_versions_file)
+    another_raw_version = XlFileHelper.get_raw_dicts_from_xl(application_versions_file)[1]
 
     # WHEN calling versions are same
     should_not_be_same = versions_are_same(db_version, another_raw_version, datemode)
@@ -275,7 +275,7 @@ def ensure_application(store, tag):
 def add_applications(store, application_versions_file):
     """Ensure all applications in the xl exists"""
 
-    raw_versions = _get_raw_data_from_xl(application_versions_file)
+    raw_versions = XlFileHelper.get_raw_dicts_from_xl(application_versions_file)
 
     for raw_version in raw_versions:
         tag = _get_tag_from_raw_version(raw_version)
@@ -308,8 +308,8 @@ def exists_version_in_store(raw_price, store, datemode):
 
 def all_versions_exists_in_store(store, excel_path):
     """Check if all versions in the excel exists in the store"""
-    raw_versions = _get_raw_data_from_xl(excel_path)
-    datemode = _get_datemode_from_xl(excel_path)
+    raw_versions = XlFileHelper.get_raw_dicts_from_xl(excel_path)
+    datemode = XlFileHelper.get_datemode_from_xl(excel_path)
     for raw_version in raw_versions:
         if not exists_version_in_store(raw_version, store, datemode):
             return False
@@ -319,7 +319,7 @@ def all_versions_exists_in_store(store, excel_path):
 
 def all_applications_exists(store, applications_file):
     """Check if all applications in the excel exists in the store"""
-    raw_applications = _get_raw_data_from_xl(applications_file)
+    raw_applications = XlFileHelper.get_raw_dicts_from_xl(applications_file)
 
     for raw_application in raw_applications:
         if not exists_application_in_store(raw_application, store):
