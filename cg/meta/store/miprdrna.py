@@ -1,3 +1,6 @@
+"""Builds MIP RNA bundle for linking in Housekeeper"""
+
+
 def build_bundle_rna(config_data: dict, sampleinfo_data: dict) -> dict:
     """Create a new bundle for RNA."""
     data = {
