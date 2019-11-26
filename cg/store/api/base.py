@@ -8,6 +8,8 @@ class BaseHandler:
     """All models in one base class"""
 
     User = models.User
+    Bed = models.Bed
+    BedVersion = models.BedVersion
     Customer = models.Customer
     CustomerGroup = models.CustomerGroup
     Sample = models.Sample

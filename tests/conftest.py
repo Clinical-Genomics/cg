@@ -116,6 +116,12 @@ def base_store(store) -> Store:
                 for application in applications]
     store.add_commit(versions)
 
+    beds = [store.add_bed('Bed', 'Bed desc', 'Bed.bed')]
+    store.add_commit(beds)
+    bed_versions = [store.add_bed_version(bed, 1)
+                    for bed in beds]
+    store.add_commit(bed_versions)
+
     organism = store.add_organism('C. jejuni', 'C. jejuni')
     store.add_commit(organism)
 
