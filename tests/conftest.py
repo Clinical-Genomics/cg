@@ -7,12 +7,9 @@ import datetime as dt
 from pathlib import Path
 
 import pytest
-
-from cg.store import Store
-
-# Trailblazer
-from trailblazer.mip import files as mip_files_api
 import ruamel.yaml
+from cg.store import Store
+from trailblazer.mip import files as mip_files_api
 
 pytest_plugins = [  # pylint: disable=invalid-name
     'tests.apps.lims.conftest',
@@ -29,6 +26,61 @@ pytest_plugins = [  # pylint: disable=invalid-name
     'tests.apps.mutacc_auto.conftest'
 ]
 
+
+
+@pytest.fixture
+def balsamic_orderform():
+    """Orderform fixture for Balsamic samples"""
+    return 'tests/fixtures/orderforms/1508.19.balsamic.xlsx'
+
+
+@pytest.fixture
+def external_orderform():
+    """Orderform fixture for external samples"""
+    return 'tests/fixtures/orderforms/1541.6.external.xlsx'
+
+
+@pytest.fixture
+def fastq_orderform():
+    """Orderform fixture for fastq samples"""
+    return 'tests/fixtures/orderforms/1508.19.fastq.xlsx'
+
+
+@pytest.fixture
+def metagenome_orderform():
+    """Orderform fixture for metagenome samples"""
+    return 'tests/fixtures/orderforms/1605.8.metagenome.xlsx'
+
+
+@pytest.fixture
+def microbial_orderform():
+    """Orderform fixture for microbial samples"""
+    return 'tests/fixtures/orderforms/1603.9.microbial.xlsx'
+
+
+@pytest.fixture
+def mip_orderform():
+    """Orderform fixture for MIP samples"""
+    return 'tests/fixtures/orderforms/1508.19.mip.xlsx'
+
+
+@pytest.fixture
+def mip_balsamic_orderform():
+    """Orderform fixture for MIP and Balsamic samples"""
+    return 'tests/fixtures/orderforms/1508.19.mip_balsamic.xlsx'
+
+
+@pytest.fixture
+def mip_rna_orderform():
+    """Orderform fixture for MIP RNA samples"""
+    return 'tests/fixtures/orderforms/1508.19.mip_rna.xlsx'
+
+
+@pytest.fixture
+def rml_orderform():
+    """Orderform fixture for RML samples"""
+    return 'tests/fixtures/orderforms/1604.9.rml.xlsx'
+
 # Trailblazer api for mip files
 @pytest.fixture(scope='session')
 def files():
@@ -37,6 +89,11 @@ def files():
         'sampleinfo': 'tests/fixtures/apps/tb/case/case_qc_sample_info.yaml',
         'qcmetrics': 'tests/fixtures/apps/tb/case/case_qc_metrics.yaml',
     }
+
+
+@pytest.fixture(scope='function')
+def tmp_file(tmp_path):
+    return tmp_path / 'test'
 
 
 @pytest.fixture(scope='session')
@@ -111,6 +168,12 @@ def base_store(store) -> Store:
     versions = [store.add_version(application, 1, valid_from=dt.datetime.now(), prices=prices)
                 for application in applications]
     store.add_commit(versions)
+
+    beds = [store.add_bed('Bed', 'Bed desc', 'Bed.bed')]
+    store.add_commit(beds)
+    bed_versions = [store.add_bed_version(bed, 1)
+                    for bed in beds]
+    store.add_commit(bed_versions)
 
     organism = store.add_organism('C. jejuni', 'C. jejuni')
     store.add_commit(organism)

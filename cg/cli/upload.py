@@ -5,20 +5,19 @@ import sys
 from typing import List
 
 import click
-
-from cg.store import Store, models
 from cg.apps import coverage as coverage_app, gt, hk, loqus, tb, scoutapi, beacon as beacon_app, \
     lims, mutacc_auto
 from cg.exc import DuplicateRecordError, DuplicateSampleError
-from cg.meta.upload.coverage import UploadCoverageApi
-from cg.meta.upload.gt import UploadGenotypesAPI
-from cg.meta.upload.observations import UploadObservationsAPI
-from cg.meta.upload.scoutapi import UploadScoutAPI
-from cg.meta.upload.beacon import UploadBeaconApi
 from cg.meta.analysis import AnalysisAPI
 from cg.meta.deliver.api import DeliverAPI
 from cg.meta.report.api import ReportAPI
+from cg.meta.upload.beacon import UploadBeaconApi
+from cg.meta.upload.coverage import UploadCoverageApi
+from cg.meta.upload.gt import UploadGenotypesAPI
 from cg.meta.upload.mutacc import UploadToMutaccAPI
+from cg.meta.upload.observations import UploadObservationsAPI
+from cg.meta.upload.scoutapi import UploadScoutAPI
+from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
 
@@ -110,7 +109,7 @@ def upload(context, family_id, force_restart):
             context.invoke(validate, family_id=family_id)
             context.invoke(genotypes, re_upload=False, family_id=family_id)
             context.invoke(observations, case_id=family_id)
-            context.invoke(scout, family_id=family_id)
+            context.invoke(scout, case_id=family_id)
             analysis_obj.uploaded_at = dt.datetime.now()
             context.obj['status'].commit()
             click.echo(click.style(f"{family_id}: analysis uploaded!", fg='green'))
@@ -189,7 +188,7 @@ def delivery_report(context, family_id, print_console):
         delivery_report_file = report_api.create_delivery_report_file(family_id,
                                                                       file_path=
                                                                       tb_api.get_family_root_dir(
-                                                                        family_id))
+                                                                          family_id))
         hk_api = context.obj['housekeeper_api']
         added_file = _add_delivery_report_to_hk(delivery_report_file, hk_api, family_id)
 
@@ -409,25 +408,42 @@ class LinkHelper:
 @upload.command()
 @click.option('-r', '--re-upload', is_flag=True, help='re-upload existing analysis')
 @click.option('-p', '--print', 'print_console', is_flag=True, help='print config values')
-@click.argument('family_id', required=False)
+@click.argument('case_id', required=False)
 @click.pass_context
-def scout(context, re_upload, print_console, family_id):
+def scout(context, re_upload, print_console, case_id):
     """Upload variants from analysis to Scout."""
 
     click.echo(click.style('----------------- SCOUT -----------------------'))
 
-    if not family_id:
+    if not case_id:
         _suggest_cases_to_upload(context)
         context.abort()
 
-    scout_api = scoutapi.ScoutAPI(context.obj)
-    family_obj = context.obj['status'].family(family_id)
+    scout_api = context.obj['scout_api']
+    tb_api = context.obj['tb_api']
+
+    family_obj = context.obj['status'].family(case_id)
     scout_upload_api = context.obj['scout_upload_api']
     scout_config = scout_upload_api.generate_config(family_obj.analyses[0])
+
     if print_console:
         click.echo(scout_config)
-    else:
-        scout_api.upload(scout_config, force=re_upload)
+        return
+
+    file_path = tb_api.get_family_root_dir(case_id) / 'scout_load.yaml'
+
+    if file_path.exists():
+        LOG.warning("Scout load config %s already exists", file_path)
+
+    scout_upload_api.save_config_file(scout_config, file_path)
+    hk_api = context.obj['housekeeper_api']
+    try:
+        LOG.info("Upload file to housekeeper: %s", file_path)
+        scout_upload_api.add_scout_config_to_hk(file_path, hk_api, case_id)
+    except FileExistsError as err:
+        LOG.warning(err)
+
+    scout_api.upload(scout_config, force=re_upload)
 
 
 @upload.command()
@@ -545,7 +561,6 @@ def _suggest_cases_delivery_report(context):
 @click.option('--dry-run', is_flag=True, help='only print cases to be processed')
 @click.pass_context
 def process_solved(context, case_id, days_ago, customers, dry_run):
-
     """Process cases with mutacc that has been marked as solved in scout.
     This prepares them to be uploaded to the mutacc database"""
 
@@ -586,7 +601,6 @@ def process_solved(context, case_id, days_ago, customers, dry_run):
 @upload.command('processed-solved')
 @click.pass_context
 def processed_solved(context):
-
     """Upload solved cases that has been processed by mutacc to the mutacc database"""
 
     click.echo(click.style('----------------- PROCESSED-SOLVED ----------------'))
