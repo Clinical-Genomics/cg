@@ -30,7 +30,21 @@ def test_upload_observations_data(upload_observations_api, analysis_store):
 
     # THEN data is a dictionary with keys (family, vcf, sv_vcf, snv_gbcf, and pedigree)
     assert set(data.keys()) == {'family', 'vcf', 'sv_vcf', 'snv_gbcf', 'pedigree'}
+    assert data['sv_vcf'] is not None
 
+
+def test_upload_observations_data_wes(upload_observations_api_wes, analysis_store):
+
+    # GIVEN an upload_observations_api and a mocked analysis_obj
+    family_obj = analysis_store.family('yellowhog')
+    analysis_obj = Analysis(family_obj=family_obj)
+
+    # WHEN data method is used given the analysis_obj as argument
+    data = upload_observations_api_wes.data(analysis_obj)
+
+    # THEN data is a dictionary with keys (family, vcf, sv_vcf, snv_gbcf, and pedigree)
+    assert set(data.keys()) == {'family', 'vcf', 'sv_vcf', 'snv_gbcf', 'pedigree'}
+    assert data['sv_vcf'] is None
 
 def test_upload_observations_process(upload_observations_api, analysis_store):
 

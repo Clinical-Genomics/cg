@@ -21,9 +21,15 @@ def test_instatiate(loqus_config):
     loqusdb = LoqusdbAPI(loqus_config)
 
     # THEN assert that the adapter was properly instantiated
-    assert loqusdb.loqusdb_config == loqus_config['loqusdb']['config_path']
+    assert loqusdb.loqusdb_config == loqus_config['loqusdb']['wgs']['config_path']
     assert loqusdb.loqusdb_binary == loqus_config['loqusdb']['binary_path']
 
+    # WHEN instatiating with analysis_type argument as 'wes'
+    loqusdb = LoqusdbAPI(loqus_config, analysis_type='wes')
+
+    # THEN assert that the adapter was properly instantiated
+    assert loqusdb.loqusdb_config == loqus_config['loqusdb']['wes']['config_path']
+    assert loqusdb.loqusdb_binary == loqus_config['loqusdb']['binary_path']
 
 def test_get_case(loqusdbapi, loqusdb_case_output, mocker):
 
@@ -127,7 +133,7 @@ def test_repr_string(loqus_config):
     repr_string = repr(loqusdb)
 
     correct_string = (f"LoqusdbAPI(binary={loqus_config['loqusdb']['binary_path']},"
-                      f"config={loqus_config['loqusdb']['config_path']})")
+                      f"config={loqus_config['loqusdb']['wgs']['config_path']})")
 
     assert repr_string == correct_string
 

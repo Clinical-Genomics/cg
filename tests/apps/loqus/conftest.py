@@ -7,7 +7,8 @@ from cg.apps.loqus import LoqusdbAPI
 
 CONFIG = {
     'loqusdb': {
-        'config_path': 'loqusdb_config',
+        'wes': {'config_path': 'loqusdb_config_wes'},
+        'wgs': {'config_path': 'loqusdb_config_wgs'},
         'binary_path': 'loqusdb'
         }
     }

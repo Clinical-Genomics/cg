@@ -336,7 +336,9 @@ def observations(context, case_id, case_limit, dry_run):
 
     click.echo(click.style('----------------- OBSERVATIONS ----------------'))
 
-    loqus_api = loqus.LoqusdbAPI(context.obj)
+    loqus_api = {'wgs': loqus.LoqusdbAPI(context.obj),
+                 'wes': loqus.LoqusdbAPI(context.obj, analysis_type='wes')}
+
 
     if case_id:
         families_to_upload = [context.obj['status'].family(case_id)]
@@ -364,8 +366,9 @@ def observations(context, case_id, case_limit, dry_run):
             LOG.info("%s: has tumour samples. Skipping!", family_obj.internal_id)
             continue
 
-        if not LinkHelper.all_samples_are_wgs(family_obj.links):
-            LOG.info("%s: has non WGS analyis. Skipping!", family_obj.internal_id)
+        analysis_type = LinkHelper.all_samples_check_analysis(family_obj.links)
+        if analysis_type is None:
+            LOG.info("%s: Undetermined analysis type (wes or wgs). Skipping!", family_obj.internal_id)
             continue
 
         if dry_run:
@@ -373,10 +376,10 @@ def observations(context, case_id, case_limit, dry_run):
             continue
 
         api = UploadObservationsAPI(context.obj['status'], context.obj['housekeeper_api'],
-                                    loqus_api)
+                                    loqus_api[analysis_type])
 
         try:
-            api.process(family_obj.analyses[0])
+            api.process(family_obj.analyses[0], analysis_type=analysis_type)
             LOG.info("%s: observations uploaded!", family_obj.internal_id)
             nr_uploaded += 1
         except (DuplicateRecordError, DuplicateSampleError) as error:
@@ -399,11 +402,16 @@ class LinkHelper:
         return all(link.sample.data_analysis in data_anlysis for link in links)
 
     @staticmethod
-    def all_samples_are_wgs(links: List[models.FamilySample]) -> bool:
+    def all_samples_check_analysis(links: List[models.FamilySample]) -> bool:
         """Return True if all samples are from wgs analysis"""
-        return all(link.sample.application_version.application.analysis_type == 'wgs'
-                   for link in links)
 
+        if all(link.sample.application_version.application.analysis_type == 'wgs'
+               for link in links):
+            return 'wgs'
+        if all(link.sample.application_version.application.analysis_type == 'wes'
+               for link in links):
+            return 'wes'
+        return None
 
 @upload.command()
 @click.option('-r', '--re-upload', is_flag=True, help='re-upload existing analysis')

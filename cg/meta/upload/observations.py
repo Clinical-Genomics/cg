@@ -26,16 +26,28 @@ class UploadObservationsAPI():
 
     def data(self, analysis_obj: models.Analysis) -> dict:
         """Fetch data about an analysis to load observations."""
+
+        data = {}
+
         analysis_date = analysis_obj.started_at or analysis_obj.completed_at
         hk_version = self.housekeeper.version(analysis_obj.family.internal_id, analysis_date)
         hk_vcf = self.housekeeper.files(version=hk_version.id, tags=['vcf-snv-research']).first()
-        hk_sv_vcf = self.housekeeper.files(version=hk_version.id, tags=['vcf-sv-research']).first()
         hk_snv_gbcf = self.housekeeper.files(version=hk_version.id, tags=['snv-gbcf']).first()
         hk_pedigree = self.housekeeper.files(version=hk_version.id, tags=['pedigree']).first()
 
+        # If analysis type is wgs, then include SV vcf-file in data
+        data['sv_vcf'] = None
+        if self.loqusdb.analysis_type == 'wgs':
+            hk_sv_vcf = self.housekeeper.files(version=hk_version.id,
+                                               tags=['vcf-sv-research']).first()
+            if hk_sv_vcf is None:
+                raise FileNotFoundError("No file with vcf-sv-research tag in housekeeper")
+            if not Path(hk_sv_vcf.full_path).exists():
+                raise FileNotFoundError(f"{hk_sv_vcf.full_path} does not exist")
+            data['sv_vcf'] = hk_sv_vcf.full_path
+
         hk_files = {
             'vcf-snv-research': hk_vcf,
-            'vcf-sv-research': hk_sv_vcf,
             'snv-gbcf': hk_snv_gbcf,
             'pedigree': hk_pedigree
         }
@@ -48,13 +60,11 @@ class UploadObservationsAPI():
             if not Path(file.full_path).exists():
                 raise FileNotFoundError(f"{file.full_path} does not exist")
 
-        data = {
-            'family': analysis_obj.family.internal_id,
-            'vcf': str(hk_vcf.full_path),
-            'sv_vcf': str(hk_sv_vcf.full_path),
-            'snv_gbcf': str(hk_snv_gbcf.full_path),
-            'pedigree': str(hk_pedigree.full_path),
-        }
+        data['family'] = analysis_obj.family.internal_id
+        data['vcf'] = str(hk_vcf.full_path)
+        data['snv_gbcf'] = str(hk_snv_gbcf.full_path)
+        data['pedigree'] = str(hk_pedigree.full_path)
+
         return data
 
     def upload(self, data: dict):
@@ -72,7 +82,7 @@ class UploadObservationsAPI():
                 raise DuplicateSampleError(err_msg)
 
             results = self.loqusdb.load(data['family'], data['pedigree'], data['vcf'],
-                                        data['sv_vcf'], data['snv_gbcf'])
+                                        data['snv_gbcf'], vcf_sv_path=data['sv_vcf'])
             log_msg = f"parsed {results['variants']} variants"
             LOG.info(log_msg)
 
