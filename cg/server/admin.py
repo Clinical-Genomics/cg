@@ -95,6 +95,7 @@ class ApplicationVersionView(BaseView):
     }
     column_searchable_list = ['application.tag']
     edit_modal = True
+    form_excluded_columns = ['samples', 'pools', 'microbial_samples']
 
 
 class BedView(BaseView):
@@ -125,7 +126,7 @@ class BedVersionView(BaseView):
     column_default_sort = ('updated_at', True)
     column_editable_list = ['description', 'filename', 'comment', 'designer', 'checksum']
     column_exclude_list = ['created_at']
-    form_excluded_columns = ['created_at', 'updated_at']
+    form_excluded_columns = ['created_at', 'updated_at', 'samples']
     column_filters = []
     column_formatters = {
         'bed': BedView.view_bed_link
@@ -145,6 +146,7 @@ class CustomerView(BaseView):
     ]
     column_filters = ['priority', 'scout_access']
     column_searchable_list = ['internal_id', 'name']
+    form_excluded_columns = ['families', 'samples', 'pools', 'orders', 'invoices']
 
 
 class CustomerGroupView(BaseView):
