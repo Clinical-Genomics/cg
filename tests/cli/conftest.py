@@ -22,8 +22,8 @@ def invoke_cli(cli_runner):
     return partial(cli_runner.invoke, base)
 
 
-@pytest.fixture
-def analysis_family():
+@pytest.fixture(name='analysis_family')
+def fixture_analysis_family():
     """Build an example family."""
     family = {
         'name': 'family',
@@ -92,6 +92,7 @@ def analysis_store(base_store, analysis_family):
         base_store.add(link)
     base_store.commit()
     yield base_store
+
 
 
 @pytest.yield_fixture(scope='function')
