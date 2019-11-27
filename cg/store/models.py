@@ -180,7 +180,7 @@ class BedVersion(Model):
     description = Column(types.String(256))
     version = Column(types.Integer, nullable=False)
     filename = Column(types.String(256), nullable=False)
-    shasum = Column(types.String(32))
+    checksum = Column(types.String(32))
     panel_size = Column(types.Integer)
     genome_version = Column(types.String(32))
     designer = Column(types.String(256))

@@ -1,7 +1,7 @@
 ALTER TABLE bed_version
   ADD COLUMN  `description` varchar(256),
   ADD COLUMN  `filename` varchar(256),
-  ADD COLUMN  `shasum` varchar(32),
+  ADD COLUMN  `checksum` varchar(32),
   ADD COLUMN  `designer` varchar(256);
 
 Update bed_version
