@@ -368,7 +368,8 @@ def observations(context, case_id, case_limit, dry_run):
 
         analysis_type = LinkHelper.all_samples_check_analysis(family_obj.links)
         if analysis_type is None:
-            LOG.info("%s: Undetermined analysis type (wes or wgs). Skipping!", family_obj.internal_id)
+            LOG.info("%s: Undetermined analysis type (wes or wgs). Skipping!",
+                     family_obj.internal_id)
             continue
 
         if dry_run:
@@ -379,7 +380,7 @@ def observations(context, case_id, case_limit, dry_run):
                                     loqus_api[analysis_type])
 
         try:
-            api.process(family_obj.analyses[0], analysis_type=analysis_type)
+            api.process(family_obj.analyses[0])
             LOG.info("%s: observations uploaded!", family_obj.internal_id)
             nr_uploaded += 1
         except (DuplicateRecordError, DuplicateSampleError) as error:
