@@ -169,7 +169,7 @@ class Bed(Model):
                                 backref='bed')
 
     def __str__(self) -> str:
-        return self.tag
+        return self.name
 
 
 class BedVersion(Model):
