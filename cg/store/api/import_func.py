@@ -34,10 +34,10 @@ def import_application_versions(store, excel_path, sign, dry_run, skip_missing):
 
             if skip_missing:
                 continue
-            else:
-                logging.error('Rolling back transaction.')
-                store.rollback()
-                sys.exit()
+
+            logging.error('Rolling back transaction.')
+            store.rollback()
+            sys.exit()
 
         app_tag = application_obj.tag
         latest_version = store.latest_version(tag)
