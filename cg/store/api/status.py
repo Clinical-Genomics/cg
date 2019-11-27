@@ -68,27 +68,22 @@ class StatusHandler(BaseHandler):
     def cases_to_mip_analyze(self, limit: int = 50):
         """Fetch families without analyses where all samples are sequenced."""
 
-        # there are two cases when a sample should be analysed:
         families_q = (
             self.Family.query
             .outerjoin(models.Analysis)
             .join(models.Family.links, models.FamilySample.sample)
-            # the samples must external or be sequenced to be analysed
             .filter(
                 or_(
                     models.Sample.is_external,
                     models.Sample.sequenced_at.isnot(None),
                 )
             )
-            # The data_analysis is unset or not Balsamic only
             .filter(
                 or_(
                     models.Sample.data_analysis.is_(None),
                     models.Sample.data_analysis != 'Balsamic'
                 )
             )
-            # 1. family that has been analysed but now is requested for re-analysing
-            # 2. new family with that haven't been analysed
             .filter(
                 or_(
                     models.Family.action == 'analyze',
@@ -148,7 +143,7 @@ class StatusHandler(BaseHandler):
               progress_tracker=None,
               internal_id=None,
               name=None,
-              days=31,
+              days=0,
               case_action=None,
               progress_status=None,
               priority=None,
@@ -259,6 +254,7 @@ class StatusHandler(BaseHandler):
             flowcells_on_disk = None
             flowcells_on_disk_bool = None
             tat = None
+            is_rerun = False
 
             analysis_in_progress = record.action is not None
             case_action = record.action
@@ -294,7 +290,8 @@ class StatusHandler(BaseHandler):
                 samples_sequenced_bool = samples_sequenced == samples_to_sequence
                 samples_delivered_bool = samples_delivered == samples_to_deliver
                 samples_invoiced_bool = samples_invoiced == samples_to_invoice
-                samples_data_analyses = set(link.sample.data_analysis for link in record.links)
+                samples_data_analyses = list(set(link.sample.data_analysis for link in
+                                                 record.links))
 
                 if samples_to_receive > 0 and samples_received_bool:
                     samples_received_at = max([link.sample.received_at for link in record.links if
@@ -318,12 +315,12 @@ class StatusHandler(BaseHandler):
                                                link.sample.invoice.invoiced_at])
 
                 flowcells = len([flowcell.status
-                                         for link in record.links
-                                         for flowcell in link.sample.flowcells])
+                                 for link in record.links
+                                 for flowcell in link.sample.flowcells])
 
                 flowcells_status = list(set(flowcell.status
-                                                      for link in record.links
-                                                      for flowcell in link.sample.flowcells))
+                                            for link in record.links
+                                            for flowcell in link.sample.flowcells))
                 if flowcells < total_samples:
                     flowcells_status.append('new')
 
@@ -400,14 +397,20 @@ class StatusHandler(BaseHandler):
             if progress_tracker:
                 for analysis_obj in progress_tracker.get_latest_logged_analysis(
                         case_id=record.internal_id):
+
                     if not analysis_status:
                         analysis_completion = round(analysis_obj.progress * 100)
                         analysis_status = analysis_obj.status
 
+            # filter on a status
             if progress_status and progress_status != analysis_status:
                 continue
 
+            is_rerun = self._is_rerun(record, samples_received_at, samples_prepared_at,
+                                      samples_sequenced_at)
+
             tat = self._calculate_estimated_turnaround_time(
+                is_rerun,
                 case_external_bool,
                 record.ordered_at,
                 samples_received_at,
@@ -444,7 +447,7 @@ class StatusHandler(BaseHandler):
                 'samples_invoiced_at': samples_invoiced_at,
                 'case_action': case_action,
                 'analysis_status': analysis_status,
-                'analysis_completion':  analysis_completion,
+                'analysis_completion': analysis_completion,
                 'analysis_completed_at': analysis_completed_at,
                 'analysis_uploaded_at': analysis_uploaded_at,
                 'samples_delivered': samples_delivered,
@@ -463,6 +466,7 @@ class StatusHandler(BaseHandler):
                 'flowcells_on_disk': flowcells_on_disk,
                 'flowcells_on_disk_bool': flowcells_on_disk_bool,
                 'tat': tat,
+                'is_rerun': is_rerun,
                 'max_tat': max_tat
             }
 
@@ -471,6 +475,14 @@ class StatusHandler(BaseHandler):
         cases_sorted = sorted(cases, key=lambda k: k['tat'], reverse=True)
 
         return cases_sorted
+
+    @staticmethod
+    def _is_rerun(record, samples_received_at, samples_prepared_at, samples_sequenced_at):
+
+        return (len(record.analyses) > 0) or \
+               (samples_received_at and samples_received_at < record.ordered_at) or \
+               (samples_prepared_at and samples_prepared_at < record.ordered_at) or \
+               (samples_sequenced_at and samples_sequenced_at < record.ordered_at)
 
     @staticmethod
     def _all_samples_have_sequence_data(links: List[models.FamilySample]) -> bool:
@@ -486,22 +498,24 @@ class StatusHandler(BaseHandler):
     def observations_to_upload(self):
         """Fetch observations that haven't been uploaded."""
 
-        families_q = (
-            self.Family.query
-            .join(models.Analysis, models.Family.links, models.FamilySample.sample)
-            .filter(models.Sample.loqusdb_id.is_(None))
-        )
+        families_q = \
+            (
+                self.Family.query
+                .join(models.Analysis, models.Family.links, models.FamilySample.sample)
+                .filter(models.Sample.loqusdb_id.is_(None))
+            )
 
         return families_q
 
     def observations_uploaded(self):
         """Fetch observations that have been uploaded."""
 
-        families_q = (
-            self.Family.query
-            .join(models.Family.links, models.FamilySample.sample)
-            .filter(models.Sample.loqusdb_id.isnot(None))
-        )
+        families_q = \
+            (
+                self.Family.query
+                .join(models.Family.links, models.FamilySample.sample)
+                .filter(models.Sample.loqusdb_id.isnot(None))
+            )
 
         return families_q
 
@@ -725,8 +739,9 @@ class StatusHandler(BaseHandler):
         return records
 
     def _calculate_estimated_turnaround_time(self,
+                                             is_rerun,
                                              external_case_bool,
-                                             samples_ordered_at,
+                                             analysis_ordered_at,
                                              samples_received_at,
                                              samples_prepared_at,
                                              samples_sequenced_at,
@@ -738,18 +753,25 @@ class StatusHandler(BaseHandler):
         if samples_received_at and samples_delivered_at:
             return self._calculate_date_delta(None, samples_received_at, samples_delivered_at)
 
-        o_a = self._calculate_date_delta(5, samples_ordered_at, analysis_completed_at)
+        o_a = self._calculate_date_delta(5, analysis_ordered_at, analysis_completed_at)
         r_p = self._calculate_date_delta(4, samples_received_at, samples_prepared_at)
         p_s = self._calculate_date_delta(5, samples_prepared_at, samples_sequenced_at)
         s_a = self._calculate_date_delta(4, samples_sequenced_at, analysis_completed_at)
         a_u = self._calculate_date_delta(1, analysis_completed_at, analysis_uploaded_at)
         u_d = self._calculate_date_delta(2, analysis_uploaded_at, samples_delivered_at)
 
+        if is_rerun:
+            o_a = self._calculate_date_delta(1, analysis_ordered_at, analysis_completed_at)
+            return o_a + a_u
+
         if external_case_bool:
-            if analysis_uploaded_at:
-                return self._calculate_date_delta(None, samples_ordered_at, analysis_uploaded_at)
+            if analysis_ordered_at and analysis_uploaded_at:
+                return self._calculate_date_delta(None, analysis_ordered_at, analysis_uploaded_at)
 
             return o_a + a_u
+
+        if samples_received_at and samples_delivered_at:
+            return self._calculate_date_delta(None, samples_received_at, samples_delivered_at)
 
         return r_p + p_s + s_a + a_u + u_d
 

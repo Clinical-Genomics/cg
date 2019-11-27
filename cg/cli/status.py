@@ -34,7 +34,8 @@ for header in CASE_HEADERS_LONG:
 def status(context):
     """View status of things."""
     context.obj['db'] = Store(context.obj['database'])
-    context.obj['tb'] = tb.TrailblazerAPI(context.obj)
+    if context.obj.get('trailblazer'):
+        context.obj['tb'] = tb.TrailblazerAPI(context.obj)
 
 
 @status.command()
@@ -146,7 +147,7 @@ def cases(context, output_type, verbose, days, internal_id, name, case_action,
           ):
     """progress of each case"""
     records = context.obj['db'].cases(
-        progress_tracker=context.obj['tb'],
+        progress_tracker=context.obj.get('tb'),
         days=days,
         internal_id=internal_id,
         name=name,
