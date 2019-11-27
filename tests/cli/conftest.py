@@ -94,7 +94,6 @@ def analysis_store(base_store, analysis_family):
     yield base_store
 
 
-
 @pytest.yield_fixture(scope='function')
 def analysis_store_wes(base_store, analysis_family):
     """Setup a store instance for testing analysis API."""
