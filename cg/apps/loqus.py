@@ -26,8 +26,15 @@ class LoqusdbAPI():
         super(LoqusdbAPI, self).__init__()
 
         self.analysis_type = analysis_type
-        self.loqusdb_config = config['loqusdb'][analysis_type]['config_path']
+
+        self.loqusdb_config = config['loqusdb']['config_path']
         self.loqusdb_binary = config['loqusdb']['binary_path']
+
+        if analysis_type == 'wes':
+            self.loqusdb_config = config['loqusdb-wes']['config_path']
+            self.loqusdb_binary = config['loqusdb-wes']['binary_path']
+
+        LOG.info("Using loqusdb config %s and binary %s", self.loqusdb_config, self.loqusdb_binary)
 
         # This will allways be the base of the loqusdb call
         self.base_call = [self.loqusdb_binary, '--config', self.loqusdb_config]
