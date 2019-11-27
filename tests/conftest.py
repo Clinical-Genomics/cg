@@ -169,9 +169,9 @@ def base_store(store) -> Store:
                 for application in applications]
     store.add_commit(versions)
 
-    beds = [store.add_bed('Bed', 'Bed desc', 'Bed.bed')]
+    beds = [store.add_bed('Bed')]
     store.add_commit(beds)
-    bed_versions = [store.add_bed_version(bed, 1)
+    bed_versions = [store.add_bed_version(bed, 1, 'Bed.bed')
                     for bed in beds]
     store.add_commit(bed_versions)
 

@@ -58,8 +58,8 @@ class UploadScoutAPI(object):
             sample = {
                 'analysis_type': link_obj.sample.application_version.application.analysis_type,
                 'sample_id': sample_id, 'capture_kit': None,
-                'father': link_obj.father.internal_id if link_obj.father else None,
-                'mother': link_obj.mother.internal_id if link_obj.mother else None,
+                'father': link_obj.father.internal_id if link_obj.father else '0',
+                'mother': link_obj.mother.internal_id if link_obj.mother else '0',
                 'sample_name': link_obj.sample.name, 'phenotype': link_obj.status,
                 'sex': link_obj.sample.sex, 'bam_path': bam_path, 'mt_bam': mt_bam_path,
                 'vcf2cytosure': vcf2cytosure_path}

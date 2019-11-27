@@ -160,9 +160,6 @@ class Bed(Model):
     """Model for bed target captures """
     id = Column(types.Integer, primary_key=True)
     name = Column(types.String(32), unique=True, nullable=False)
-    description = Column(types.String(256), nullable=False)
-    filename = Column(types.String(256))
-    designer = Column(types.String(256))
     comment = Column(types.Text)
     is_archived = Column(types.Boolean, default=False)
     created_at = Column(types.DateTime, default=dt.datetime.now)
@@ -172,7 +169,7 @@ class Bed(Model):
                                 backref='bed')
 
     def __str__(self) -> str:
-        return self.tag
+        return self.name
 
 
 class BedVersion(Model):
@@ -180,14 +177,19 @@ class BedVersion(Model):
     __table_args__ = (UniqueConstraint('bed_id', 'version', name='_app_version_uc'),)
 
     id = Column(types.Integer, primary_key=True)
+    description = Column(types.String(256))
     version = Column(types.Integer, nullable=False)
+    filename = Column(types.String(256), nullable=False)
+    checksum = Column(types.String(32))
+    panel_size = Column(types.Integer)
+    genome_version = Column(types.String(32))
+    designer = Column(types.String(256))
     genes = Column(types.Integer)
     unique_transcripts = Column(types.Integer)
     transcripts_with_all_exons_covered = Column(types.Integer)
     transcripts_with_at_least_one_exon_covered = Column(types.Integer)
     padding = Column(types.Integer)
-    panel_size = Column(types.Integer)
-    genome_version = Column(types.String(32))
+
     cosmic_snps = Column(types.Integer)
     non_genic_regions = Column(types.Integer)
     independent_segments = Column(types.Integer)
@@ -195,6 +197,7 @@ class BedVersion(Model):
     created_at = Column(types.DateTime, default=dt.datetime.now)
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
     bed_id = Column(ForeignKey(Bed.id), nullable=False)
+
     samples = orm.relationship('Sample', backref='bed_version')
 
     def __str__(self) -> str:
