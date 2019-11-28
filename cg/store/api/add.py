@@ -62,21 +62,20 @@ class AddHandler(BaseHandler):
         new_record.application = application
         return new_record
 
-    def add_bed(self, name: str, description: str, file: str, **kwargs) -> models.Bed:
+    def add_bed(self, name: str, **kwargs) -> models.Bed:
         """Build a new bed record."""
 
         new_record = self.Bed(
             name=name,
-            description=description,
-            file=file,
             **kwargs,
         )
         return new_record
 
-    def add_bed_version(self, bed: models.Bed, version: int, **kwargs) -> models.BedVersion:
+    def add_bed_version(self, bed: models.Bed, version: int, filename: str,
+                        **kwargs) -> models.BedVersion:
         """Build a new bed version record."""
 
-        new_record = self.BedVersion(version=version, **kwargs)
+        new_record = self.BedVersion(version=version, filename=filename, **kwargs)
         new_record.bed = bed
         return new_record
 

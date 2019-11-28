@@ -1,5 +1,7 @@
 """Import functionality"""
+
 import logging
+import sys
 from datetime import datetime
 
 import xlrd
@@ -7,56 +9,70 @@ from cg.exc import CgError
 from cg.store import models, Store
 
 
-def import_application_versions(store, excel_path, sign):
+def import_application_versions(store, excel_path, sign, dry_run, skip_missing):
     """
     Imports all application versions from the specified excel file
     Args:
-        :param store:               status database store
+        :param store:               Status database store
         :param excel_path:          Path to excel file with headers: 'App tag', 'Valid from',
-                                   'Standard', 'Priority', 'Express', 'Research'
-        :param sign:               Signature of user running the script
+                                    'Standard', 'Priority', 'Express', 'Research'
+        :param sign:                Signature of user running the script
+        :param dry_run:             Test run, no changes to the database
+        :param skip_missing:        Continue despite missing applications
         """
 
-    workbook = _get_workbook_from_xl(excel_path)
-    raw_versions = _get_raw_data_from_xl(excel_path)
+    workbook = XlFileHelper.get_workbook_from_xl(excel_path)
+    raw_versions = XlFileHelper.get_raw_dicts_from_xl(excel_path)
 
     for raw_version in raw_versions:
         tag = _get_tag_from_raw_version(raw_version)
         application_obj = store.application(tag)
 
         if not application_obj:
-            message = ('Failed to find application! Rolling back transaction. Please manually '
-                       'add application: %s' % tag)
+            logging.error('Failed to find application! Please manually '
+                          'add application: %s', tag)
+
+            if skip_missing:
+                continue
+
+            logging.error('Rolling back transaction.')
             store.rollback()
-            raise CgError(message)
+            sys.exit()
 
         app_tag = application_obj.tag
         latest_version = store.latest_version(tag)
 
         if latest_version and versions_are_same(latest_version, raw_version, workbook.datemode):
-            logging.info('skipping redundant version for app tag %s', app_tag)
+            logging.info('skipping redundant application version for app tag %s', app_tag)
             continue
 
-        logging.info('adding to transaction new version for app tag %s', app_tag)
+        logging.info('adding new application version to transaction for app tag %s', app_tag)
         new_version = add_version_from_raw(application_obj, latest_version, raw_version,
                                            sign, store, workbook)
         store.add(new_version)
 
-    logging.info('all app tags added successfully to transaction, committing transaction')
-    store.commit()
+    if not dry_run:
+        logging.info('all application versions successfully added to transaction, committing '
+                     'transaction')
+        store.commit()
+    else:
+        logging.error('Dry-run, rolling back transaction.')
+        store.rollback()
 
 
-def import_applications(store, excel_path, sign):
+def import_applications(store, excel_path, sign, dry_run, sheet_name=None):
     """
     Imports all applications from the specified excel file
     Args:
+        :param sheet_name:          Optional sheet name
         :param store:               status database store
         :param excel_path:          Path to excel file with headers: 'App tag', 'Valid from',
-                                   'Standard', 'Priority', 'Express', 'Research'
-        :param sign:               Signature of user running the script
+                                    'Standard', 'Priority', 'Express', 'Research'
+        :param sign:                Signature of user running the script
+        :param dry_run:             Test run, no changes to the database
         """
 
-    raw_applications = _get_raw_data_from_xl(excel_path)
+    raw_applications = XlFileHelper.get_raw_dicts_from_xl(excel_path, sheet_name)
 
     for raw_application in raw_applications:
         tag = _get_tag_from_raw_application(raw_application)
@@ -66,12 +82,16 @@ def import_applications(store, excel_path, sign):
             logging.info('skipping redundant application %s', tag)
             continue
 
-        logging.info('adding to transaction new application %s', tag)
+        logging.info('adding new application to transaction %s', tag)
         new_application = add_application_from_raw(raw_application, sign, store)
         store.add(new_application)
 
-    logging.info('all applications added successfully to transaction, committing transaction')
-    store.commit()
+    if not dry_run:
+        logging.info('all applications successfully added to transaction, committing transaction')
+        store.commit()
+    else:
+        logging.error('Dry-run, rolling back transaction.')
+        store.rollback()
 
 
 def prices_are_same(first_price, second_price):
@@ -152,7 +172,7 @@ def import_apptags(store: Store, excel_path: str, prep_category: str, sign: str,
 
     orderform_application_tags = []
 
-    for raw_row in _get_raw_apptags_from_xl(excel_path, sheet_name, tag_column):
+    for raw_row in XlFileHelper.get_raw_cells_from_xl(excel_path, sheet_name, tag_column):
         tag = _get_tag_from_column(raw_row, tag_column)
         logging.info('Found: %s in orderform', tag)
         orderform_application_tags.append(tag)
@@ -213,9 +233,85 @@ def import_apptags(store: Store, excel_path: str, prep_category: str, sign: str,
         store.commit()
 
 
-def _get_tag_from_raw_version(raw_version):
+class XlFileHelper:
+    """Organises methods to get data from file"""
+
+    @staticmethod
+    def get_raw_dicts_from_xl(excel_path, sheet_name=None):
+        """Get raw data from the xl file"""
+        workbook = XlFileHelper.get_workbook_from_xl(excel_path)
+        if sheet_name:
+            data_sheet = workbook.sheet_by_name(sheet_name)
+        else:
+            data_sheet = workbook.sheet_by_index(0)
+        return XlSheetHelper.get_raw_dicts_from_xlsheet(data_sheet)
+
+    @staticmethod
+    def get_raw_cells_from_xl(excel_path, sheet_name, tag_column):
+        """Get raw data from the xl file"""
+        workbook = XlFileHelper.get_workbook_from_xl(excel_path)
+        data_sheet = workbook.sheet_by_name(sheet_name)
+        return XlSheetHelper.get_raw_cells_from_sheet(data_sheet, tag_column)
+
+    @staticmethod
+    def get_workbook_from_xl(excel_path):
+        """Get the workbook from the xl file"""
+        return xlrd.open_workbook(excel_path)
+
+    @staticmethod
+    def get_datemode_from_xl(excel_path):
+        """"Returns the datemode of of the workbook in the specified xl"""
+        workbook = xlrd.open_workbook(excel_path)
+        return workbook.datemode
+
+
+class XlSheetHelper:
+    """Organises methods to get data from sheet"""
+
+    @staticmethod
+    def get_raw_dicts_from_xlsheet(sheet) -> []:
+        """Get the relevant rows from a sheet."""
+        raw_data = []
+        header_row = []
+        first_row = True
+
+        for row in sheet.get_rows():
+            if row[0].value == '':
+                break
+
+            if first_row:
+                header_row = [cell.value for cell in row]
+                first_row = False
+            else:
+                values = [str(cell.value) for cell in row]
+                version_dict = dict(zip(header_row, values))
+                raw_data.append(version_dict)
+
+        return raw_data
+
+    @staticmethod
+    def no_more_tags(row, tag_column: int) -> bool:
+        """Returns if there are no more app-tags found"""
+        return _get_tag_from_column(row, tag_column).value == ''
+
+    @staticmethod
+    def get_raw_cells_from_sheet(sheet, tag_column: int) -> []:
+        """Get the relevant rows from an price sheet."""
+        raw_data = []
+
+        for row in sheet.get_rows():
+            if XlSheetHelper.no_more_tags(row, tag_column):
+                break
+
+            values = [str(cell.value) for cell in row]
+            raw_data.append(values)
+
+        return raw_data
+
+
+def _get_tag_from_raw_version(raw_data):
     """Gets the application tag from a raw xl application version record"""
-    return raw_version['App tag']
+    return raw_data['App tag']
 
 
 def _get_tag_from_column(raw_data, column: int):
@@ -226,68 +322,3 @@ def _get_tag_from_column(raw_data, column: int):
 def _get_tag_from_raw_application(raw_application):
     """Gets the application tag from a raw xl application record"""
     return raw_application['tag']
-
-
-def _get_raw_data_from_xl(excel_path):
-    """Get raw data from the xl file"""
-    workbook = _get_workbook_from_xl(excel_path)
-    data_sheet = workbook.sheet_by_index(0)
-    return _get_raw_data_from_xlsheet(data_sheet)
-
-
-def _get_raw_apptags_from_xl(excel_path, sheet_name, tag_column):
-    """Get raw data from the xl file"""
-    workbook = _get_workbook_from_xl(excel_path)
-    data_sheet = workbook.sheet_by_name(sheet_name)
-    return _get_raw_applications(data_sheet, tag_column)
-
-
-def _get_workbook_from_xl(excel_path):
-    """Get the workbook from the xl file"""
-    return xlrd.open_workbook(excel_path)
-
-
-def _get_datemode_from_xl(excel_path):
-    """"Returns the datemode of of the workbook in the specified xl"""
-    workbook = xlrd.open_workbook(excel_path)
-    return workbook.datemode
-
-
-def _get_raw_data_from_xlsheet(version_sheet) -> []:
-    """Get the relevant rows from an price sheet."""
-    raw_data = []
-    header_row = []
-    first_row = True
-
-    for row in version_sheet.get_rows():
-        if row[0].value == '':
-            break
-
-        if first_row:
-            header_row = [cell.value for cell in row]
-            first_row = False
-        else:
-            values = [str(cell.value) for cell in row]
-            version_dict = dict(zip(header_row, values))
-            raw_data.append(version_dict)
-
-    return raw_data
-
-
-def _no_more_applications(row, tag_column: int) -> bool:
-    """Returns if there are no more app-tags found"""
-    return _get_tag_from_column(row, tag_column).value == ''
-
-
-def _get_raw_applications(version_sheet, tag_column: int) -> []:
-    """Get the relevant rows from an price sheet."""
-    raw_data = []
-
-    for row in version_sheet.get_rows():
-        if _no_more_applications(row, tag_column):
-            break
-
-        values = [str(cell.value) for cell in row]
-        raw_data.append(values)
-
-    return raw_data
