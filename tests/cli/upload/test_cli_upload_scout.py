@@ -3,7 +3,25 @@ import logging
 
 from cg.cli.upload.upload import scout
 
-
+def test_upload_with_load_config(hk_api, upload_scout_api, analysis_store_single_case, 
+    analysis_family_single_case):
+    # GIVEN a case with a scout load config in housekeeper
+    case_id = analysis_store_single_case.families().first().internal_id
+    tag_name = upload_scout_api.get_load_config_tag()
+    
+    load_config_file = hk_api.get_files(case_id, [tag_name])[0]
+    assert load_config_file
+    assert case_exists_in_status(case_id, store)
+    assert the_case_has_parent_not_in_the_file(case_id, load_file)
+    
+    # WHEN invoking command to upload case to scout
+    result = cli_runner.invoke(scout, [case_id, ''], obj=base_context)
+    
+    # THEN the file was used to upload to scout
+    assert file_was_used_in_the_upload(load_file)
+    # THEN assert that the changes made in status is not transered to scout
+    assert scout_case_lacks_parent_not_in_the_file(parent)    
+    
 def test_produce_load_config(base_context, cli_runner, analysis_family_single_case):
     # GIVEN a singleton WGS case
 

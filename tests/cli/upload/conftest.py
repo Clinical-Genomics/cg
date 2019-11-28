@@ -47,6 +47,23 @@ def fixture_analysis_family_single():
     return family
 
 
+@pytest.fixture(scope="function")
+def hk_api():
+    """Return a hkapi"""
+    api = MockHK()
+    api._files.append("scout-load_config.yaml")
+
+    return api
+
+
+@pytest.fixture(scope="function")
+def upload_scout_api():
+    """Return a upload scout api"""
+    api = MockScoutUploadApi()
+
+    return api
+
+
 @pytest.yield_fixture(scope="function", name="analysis_store_single_case")
 def fixture_analysis_store_single(base_store, analysis_family_single_case):
     """Setup a store instance for testing analysis API."""
@@ -135,19 +152,38 @@ class MockFile:
 
 
 class MockHK(HousekeeperAPI):
-    """Mock of housekeeper """
-
     def __init__(self):
-        """Mock the init"""
-        pass
+        self._file_added = False
+        self._file_included = False
+        self._files = []
 
-    def files(self, **kwargs):
-        """docstring for file"""
+    def files(self, version, tags):
         return MockFile()
+
+    def get_files(self, bundle, tags, version="1.0"):
+        """docstring for get_files"""
+        return self._files
+
+    def add_file(self, file, version_obj, tag_name, to_archive=False):
+        """docstring for add_file"""
+        self._file_added = True
+        return MockFile(path=file)
 
     def version(self, arg1: str, arg2: str):
         """Fetch version from the database."""
         return MockVersion()
+
+    def last_version(self, bundle: str):
+        """docstring for last_version"""
+        return MockVersion()
+
+    def include_file(self, file_obj, version_obj):
+        """docstring for include_file"""
+        self._file_included = True
+
+    def add_commit(self, file_obj):
+        """docstring for include_file"""
+        pass
 
 
 class MockFamily(object):
