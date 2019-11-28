@@ -444,7 +444,7 @@ def scout(context, re_upload, print_console, case_id):
         LOG.info("Upload file to housekeeper: %s", file_path)
         scout_upload_api.add_scout_config_to_hk(file_path, hk_api, case_id)
     except FileExistsError as err:
-        LOG.warning(str(err) + ", consider removing the file from housekeeper and try again")
+        LOG.warning("%s, consider removing the file from housekeeper and try again", str(err))
         context.abort()
 
     scout_api.upload(scout_config, force=re_upload)
