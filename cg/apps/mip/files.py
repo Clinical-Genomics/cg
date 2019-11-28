@@ -1,3 +1,6 @@
+"""Parse sample info files for RNA Cases """
+
+
 def parse_sampleinfo_rna(data: dict) -> dict:
     """Parse MIP sample info file (RNA).
 
@@ -13,7 +16,7 @@ def parse_sampleinfo_rna(data: dict) -> dict:
 
     outdata = {
         'date': data['analysis_date'],
-        'is_finished': True if data['analysisrunstatus'] == 'finished' else False,
+        'is_finished': data['analysisrunstatus'] == 'finished',
         'case': case,
         'config_file_path': data['config_file_analysis'],
         'version': data['mip_version'],
@@ -41,7 +44,7 @@ def parse_sampleinfo_rna(data: dict) -> dict:
             'mark_duplicates': _get_multiple_paths(sample_data, 'markduplicates'),
             'salmon_quant': _get_multiple_paths(sample_data, 'salmon_quant'),
             'stringtie_ar': _get_multiple_paths(sample_data, 'stringtie_ar'),
-         }
+        }
 
         outdata['samples'].append(sample)
 
