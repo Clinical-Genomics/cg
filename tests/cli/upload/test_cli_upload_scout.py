@@ -26,11 +26,13 @@ def test_upload_scout_cli_file_exists(base_context, cli_runner, caplog,
     base_context['scout_upload_api'].config = config
     base_context['scout_upload_api'].file_exists = True
     case_id = analysis_family_single_case['internal_id']
+
     # WHEN uploading a case with the cli and printing the upload config
     result = cli_runner.invoke(scout, [case_id], obj=base_context)
 
     # THEN assert that the call exits without errors
-    assert result.exit_code == 0
+    assert result.exit_code == 1
+
     # THEN assert that a warning is logged
     warned = False
     for _, level, message in caplog.record_tuples:
