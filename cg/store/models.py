@@ -137,6 +137,7 @@ class Analysis(Model):
     started_at = Column(types.DateTime)
     completed_at = Column(types.DateTime)
     delivery_report_created_at = Column(types.DateTime)
+    upload_started_at = Column(types.DateTime)
     uploaded_at = Column(types.DateTime)
     # primary analysis is the one originally delivered to the customer
     is_primary = Column(types.Boolean, default=False)
@@ -152,6 +153,61 @@ class Analysis(Model):
         data = super(Analysis, self).to_dict()
         if family:
             data['family'] = self.family.to_dict()
+        return data
+
+
+class Bed(Model):
+    """Model for bed target captures """
+    id = Column(types.Integer, primary_key=True)
+    name = Column(types.String(32), unique=True, nullable=False)
+    comment = Column(types.Text)
+    is_archived = Column(types.Boolean, default=False)
+    created_at = Column(types.DateTime, default=dt.datetime.now)
+    updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
+
+    versions = orm.relationship('BedVersion', order_by='BedVersion.version',
+                                backref='bed')
+
+    def __str__(self) -> str:
+        return self.name
+
+
+class BedVersion(Model):
+    """Model for bed target captures versions """
+    __table_args__ = (UniqueConstraint('bed_id', 'version', name='_app_version_uc'),)
+
+    id = Column(types.Integer, primary_key=True)
+    description = Column(types.String(256))
+    version = Column(types.Integer, nullable=False)
+    filename = Column(types.String(256), nullable=False)
+    checksum = Column(types.String(32))
+    panel_size = Column(types.Integer)
+    genome_version = Column(types.String(32))
+    designer = Column(types.String(256))
+    genes = Column(types.Integer)
+    unique_transcripts = Column(types.Integer)
+    transcripts_with_all_exons_covered = Column(types.Integer)
+    transcripts_with_at_least_one_exon_covered = Column(types.Integer)
+    padding = Column(types.Integer)
+
+    cosmic_snps = Column(types.Integer)
+    non_genic_regions = Column(types.Integer)
+    independent_segments = Column(types.Integer)
+    comment = Column(types.Text)
+    created_at = Column(types.DateTime, default=dt.datetime.now)
+    updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
+    bed_id = Column(ForeignKey(Bed.id), nullable=False)
+
+    samples = orm.relationship('Sample', backref='bed_version')
+
+    def __str__(self) -> str:
+        return f"{self.bed.name} ({self.version})"
+
+    def to_dict(self, bed: bool = True):
+        """Override dictify method."""
+        data = super(BedVersion, self).to_dict()
+        if bed:
+            data['bed'] = self.bed.to_dict()
         return data
 
 
@@ -472,6 +528,7 @@ class Pool(Model):
 class Sample(Model, PriorityMixin):
 
     application_version_id = Column(ForeignKey('application_version.id'), nullable=False)
+    bed_version_id = Column(ForeignKey('bed_version.id'))
     beaconized_at = Column(types.Text)
     capture_kit = Column(types.String(64))
     comment = Column(types.Text)
@@ -527,6 +584,9 @@ class Sample(Model, PriorityMixin):
         data['customer'] = self.customer.to_dict()
         data['application_version'] = self.application_version.to_dict()
         data['application'] = self.application_version.application.to_dict()
+        if self.bed_version:
+            data['bed_version'] = self.bed_version.to_dict()
+            data['bed'] = self.bed_version.bed.to_dict()
         if links:
             data['links'] = [link_obj.to_dict(family=True, parents=True) for link_obj in
                              self.links]

@@ -159,7 +159,7 @@ BALSAMIC_SAMPLE = {
     'well_position': OptionalNone(TypeValidatorNone(str)),
 
     # This information is required for panel analysis
-    'capture_kit': OptionalNone(validators.Any(CAPTUREKIT_CANCER_OPTIONS)),
+    'capture_kit': str,
 
     # This information is required for panel- or exome analysis
     'elution_buffer': OptionalNone(TypeValidatorNone(str)),
@@ -304,9 +304,6 @@ MICROBIAL_SAMPLE = {
 
     # "Required if "Other" is chosen in column "Species""
     'organism_other': OptionalNone(TypeValidatorNone(str)),
-
-    # 'Required if "other" is chosen in column "DNA Elution Buffer"'
-    'elution_buffer_other': OptionalNone(TypeValidatorNone(str)),
 
     # "These fields are not required"
     'concentration_weight': OptionalNone(TypeValidatorNone(str)),

@@ -79,20 +79,25 @@ def _register_blueprints(app: Flask):
 
 
 def _register_admin_views():
+    # Base data views
+    ext.admin.add_view(admin.ApplicationView(models.Application, ext.db.session))
+    ext.admin.add_view(admin.ApplicationVersionView(models.ApplicationVersion, ext.db.session))
+    ext.admin.add_view(admin.BedView(models.Bed, ext.db.session))
+    ext.admin.add_view(admin.BedVersionView(models.BedVersion, ext.db.session))
     ext.admin.add_view(admin.CustomerView(models.Customer, ext.db.session))
     ext.admin.add_view(admin.CustomerGroupView(models.CustomerGroup, ext.db.session))
+    ext.admin.add_view(admin.OrganismView(models.Organism, ext.db.session))
+    ext.admin.add_view(admin.PanelView(models.Panel, ext.db.session))
     ext.admin.add_view(admin.UserView(models.User, ext.db.session))
+
+    # Business data views
     ext.admin.add_view(admin.FamilyView(models.Family, ext.db.session))
     ext.admin.add_view(admin.FamilySampleView(models.FamilySample, ext.db.session))
     ext.admin.add_view(admin.SampleView(models.Sample, ext.db.session))
     ext.admin.add_view(admin.PoolView(models.Pool, ext.db.session))
-    ext.admin.add_view(admin.OrganismView(models.Organism, ext.db.session))
     ext.admin.add_view(admin.MicrobialOrderView(models.MicrobialOrder, ext.db.session))
     ext.admin.add_view(admin.MicrobialSampleView(models.MicrobialSample, ext.db.session))
     ext.admin.add_view(admin.FlowcellView(models.Flowcell, ext.db.session))
     ext.admin.add_view(admin.AnalysisView(models.Analysis, ext.db.session))
-    ext.admin.add_view(admin.ApplicationView(models.Application, ext.db.session))
-    ext.admin.add_view(admin.ApplicationVersionView(models.ApplicationVersion, ext.db.session))
     ext.admin.add_view(admin.DeliveryView(models.Delivery, ext.db.session))
-    ext.admin.add_view(admin.PanelView(models.Panel, ext.db.session))
     ext.admin.add_view(admin.InvoiceView(models.Invoice, ext.db.session))

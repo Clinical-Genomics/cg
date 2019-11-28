@@ -89,3 +89,6 @@ class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
 
     def get_family_root_dir(self, family_id: str):
         return Path(self.families_dir) / family_id
+
+    def get_latest_logged_analysis(self, case_id: str):
+        return self.analyses(family=case_id).order_by(models.Analysis.logged_at.desc())

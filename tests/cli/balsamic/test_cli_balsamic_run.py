@@ -1,4 +1,4 @@
-"""This script tests the cli methods to handle balsamic"""
+"""This script tests the cli methods to run balsamic"""
 
 from cg.cli.balsamic import run
 
@@ -42,7 +42,7 @@ def test_dry(cli_runner, base_context):
     context = base_context
 
     # WHEN dry running with dry specified
-    result = cli_runner.invoke(run, [case_id, '--dry'], obj=context)
+    result = cli_runner.invoke(run, [case_id, '--dry-run'], obj=context)
 
     # THEN command should print the balsamic command-string
     assert result.exit_code == EXIT_SUCCESS
@@ -59,7 +59,7 @@ def test_run_analysis(cli_runner, base_context):
     context = base_context
 
     # WHEN dry running with option specified
-    result = cli_runner.invoke(run, [case_id, '--dry', '--run-analysis'], obj=context)
+    result = cli_runner.invoke(run, [case_id, '--dry-run', '--run-analysis'], obj=context)
 
     # THEN dry-print should include the option
     assert result.exit_code == EXIT_SUCCESS
@@ -77,7 +77,7 @@ def test_config(cli_runner, base_context):
     context = base_context
 
     # WHEN dry running with option specified
-    result = cli_runner.invoke(run, [case_id, '--dry', option_key, option_value], obj=context)
+    result = cli_runner.invoke(run, [case_id, '--dry-run', option_key, option_value], obj=context)
 
     # THEN dry-print should include the the option-value but not the case-id
     assert result.exit_code == EXIT_SUCCESS
@@ -96,11 +96,11 @@ def test_email(cli_runner, base_context):
     context = base_context
 
     # WHEN dry running with option specified
-    result = cli_runner.invoke(run, [case_id, '--dry', option_key, option_value], obj=context)
+    result = cli_runner.invoke(run, [case_id, '--dry-run', option_key, option_value], obj=context)
 
     # THEN dry-print should include the the option-value but not the case-id
     assert result.exit_code == EXIT_SUCCESS
-    assert '--slurm-mail-user' in result.output
+    assert '--mail-user' in result.output
     assert option_value in result.output
 
 
@@ -115,7 +115,7 @@ def test_priority(cli_runner, base_context):
     context = base_context
 
     # WHEN dry running with option specified
-    result = cli_runner.invoke(run, [case_id, '--dry', option_key, option_value], obj=context)
+    result = cli_runner.invoke(run, [case_id, '--dry-run', option_key, option_value], obj=context)
 
     # THEN dry-print should include the the option-value
     assert result.exit_code == EXIT_SUCCESS

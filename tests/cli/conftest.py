@@ -1,6 +1,7 @@
 """Fixtures for cli tests"""
 from functools import partial
 
+from cg.store import Store
 from click.testing import CliRunner
 import pytest
 
@@ -101,3 +102,12 @@ class MockHkVersion(hk.models.Version):
 def hk_version_obj():
     """class fixtures are not supported, so make a function out of a class"""
     return MockHkVersion
+
+
+@pytest.fixture
+def base_context(base_store: Store) -> dict:
+    """context to use in cli"""
+    return {
+        'tb': None,
+        'db': base_store,
+    }
