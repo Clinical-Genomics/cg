@@ -433,8 +433,8 @@ def scout(context, re_upload, print_console, case_id):
     file_path = tb_api.get_family_root_dir(case_id) / 'scout_load.yaml'
 
     if file_path.exists():
-        message = "Scout load config %s already exists, remove file and try again, consider you " \
-                  "might also have it in housekeeper" % file_path
+        message = "Scout load config %s already exists, you might remove the file and try " \
+                  "again, consider that you might also have it in housekeeper" % file_path
         LOG.warning(message)
         context.abort()
 
