@@ -1,5 +1,5 @@
 """Fixtures for cli balsamic tests"""
-
+import logging
 from pathlib import Path
 
 import pytest
@@ -11,6 +11,8 @@ from cg.apps.tb import TrailblazerAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
 from cg.meta.workflow.mip_dna import AnalysisAPI
 from cg.store import Store
+
+LOG = logging.getLogger(__name__)
 
 
 @pytest.fixture(scope="function", name="base_context")
@@ -47,6 +49,48 @@ def fixture_analysis_family_single():
     return family
 
 
+@pytest.fixture
+def analysis_family_trio():
+    """Build an example family."""
+    family = {
+        "name": "trio",
+        "internal_id": "yellowtrio",
+        "panels": ["IEM", "EP"],
+        "samples": [
+            {
+                "name": "son",
+                "sex": "male",
+                "internal_id": "ADM1",
+                "data_analysis": "mip",
+                "father": "ADM2",
+                "mother": "ADM3",
+                "status": "affected",
+                "ticket_number": 123456,
+                "reads": 5000000,
+            },
+            {
+                "name": "father",
+                "sex": "male",
+                "internal_id": "ADM2",
+                "data_analysis": "mip",
+                "status": "unaffected",
+                "ticket_number": 123456,
+                "reads": 6000000,
+            },
+            {
+                "name": "mother",
+                "sex": "female",
+                "internal_id": "ADM3",
+                "data_analysis": "mip",
+                "status": "unaffected",
+                "ticket_number": 123456,
+                "reads": 7000000,
+            },
+        ],
+    }
+    return family
+
+
 @pytest.fixture(scope="function")
 def hk_api():
     """Return a hkapi"""
@@ -64,10 +108,10 @@ def upload_scout_api():
     return api
 
 
-@pytest.yield_fixture(scope="function", name="analysis_store_single_case")
-def fixture_analysis_store_single(base_store, analysis_family_single_case):
-    """Setup a store instance for testing analysis API."""
-    analysis_family = analysis_family_single_case
+def load_family(store, family):
+    """Load a family into a status database"""
+    analysis_family = family
+    base_store = store
     customer = base_store.customer("cust000")
     family = base_store.Family(
         name=analysis_family["name"],
@@ -111,6 +155,21 @@ def fixture_analysis_store_single(base_store, analysis_family_single_case):
     _analysis.config_path = "dummy_path"
 
     base_store.commit()
+
+
+@pytest.yield_fixture(scope="function", name="analysis_store_trio")
+def fixture_analysis_store_trio(base_store, analysis_family_trio):
+    """Setup a store instance for testing analysis API."""
+    load_family(base_store, analysis_family_trio)
+
+    yield base_store
+
+
+@pytest.yield_fixture(scope="function", name="analysis_store_single_case")
+def fixture_analysis_store_single(base_store, analysis_family_single_case):
+    """Setup a store instance for testing analysis API."""
+    load_family(base_store, analysis_family_single_case)
+
     yield base_store
 
 
@@ -201,7 +260,7 @@ class MockScoutApi(ScoutAPI):
 
     def upload(self, scout_config, force=False):
         """docstring for upload"""
-        pass
+        LOG.info("Case loaded successfully to Scout")
 
 
 class MockAnalysisApi(AnalysisAPI):

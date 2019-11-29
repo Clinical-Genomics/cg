@@ -3,25 +3,52 @@ import logging
 
 from cg.cli.upload.upload import scout
 
+def check_log(caplog, string=None, warning=None):
+    """Parse the log output"""
+    found = False
+    for _, level, message in caplog.record_tuples:
+        if warning:
+            if level == logging.WARNING:
+                found = True
+        if string:
+            if string in message:
+                found = True
+    return found
+
+
 def test_upload_with_load_config(hk_api, upload_scout_api, analysis_store_single_case, 
-    analysis_family_single_case):
+    analysis_family_single_case, cli_runner, base_context, caplog):
     # GIVEN a case with a scout load config in housekeeper
     case_id = analysis_store_single_case.families().first().internal_id
     tag_name = upload_scout_api.get_load_config_tag()
     
     load_config_file = hk_api.get_files(case_id, [tag_name])[0]
     assert load_config_file
-    assert case_exists_in_status(case_id, store)
-    assert the_case_has_parent_not_in_the_file(case_id, load_file)
-    
+
+    def case_exists_in_status(case_id, store):
+        """Check if case exists in status database"""
+        return store.families().first() != None
+
+    assert case_exists_in_status(case_id, analysis_store_single_case)
+
     # WHEN invoking command to upload case to scout
-    result = cli_runner.invoke(scout, [case_id, ''], obj=base_context)
+    with caplog.at_level(logging.INFO):
+        result = cli_runner.invoke(scout, [case_id], obj=base_context)
     
-    # THEN the file was used to upload to scout
-    assert file_was_used_in_the_upload(load_file)
-    # THEN assert that the changes made in status is not transered to scout
-    assert scout_case_lacks_parent_not_in_the_file(parent)    
+    # THEN 
+    def case_loaded_succesfully(caplog):
+        """Check output that case was loaded"""
+        return check_log(caplog, string="Case loaded successfully to Scout")
     
+    assert case_loaded_succesfully(caplog)
+
+    def load_file_mentioned_in_result(result, load_config_file):
+        """Check output that load file is mentioned"""
+        assert load_config_file in result.output
+
+    assert load_file_mentioned_in_result(result)    
+
+
 def test_produce_load_config(base_context, cli_runner, analysis_family_single_case):
     # GIVEN a singleton WGS case
 
@@ -53,10 +80,7 @@ def test_upload_scout_cli_file_exists(
     assert result.exit_code == 1
 
     # THEN assert that a warning is logged
-    warned = False
-    for _, level, message in caplog.record_tuples:
-        if level == logging.WARNING:
-            warned = True
+    warned = check_log(caplog, warning=True)
     assert warned
 
 

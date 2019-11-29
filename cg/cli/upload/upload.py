@@ -5,11 +5,13 @@ import sys
 import traceback
 
 import click
+import yaml
 
+from cg.apps import beacon as beacon_app
 from cg.apps import coverage as coverage_app
-from cg.apps import gt, hk, lims, madeline, scoutapi, tb
-from cg.cli.workflow.mip_dna.deliver import CASE_TAGS, SAMPLE_TAGS
-from cg.meta.deliver import DeliverAPI
+from cg.apps import gt, hk, lims, loqus, mutacc_auto, scoutapi, tb
+from cg.exc import DuplicateRecordError, DuplicateSampleError
+from cg.meta.deliver.mip_dna import DeliverAPI
 from cg.meta.report.api import ReportAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
 from cg.meta.workflow.mip_dna import AnalysisAPI
@@ -17,7 +19,8 @@ from cg.store import Store
 
 from .beacon import beacon
 from .coverage import coverage
-from .delivery import delivery_report, delivery_report_to_scout, delivery_reports
+from .delivery import (delivery_report, delivery_report_to_scout,
+                       delivery_reports)
 from .genotype import genotypes
 from .mutacc import process_solved, processed_solved
 from .observations import observations

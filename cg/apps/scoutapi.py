@@ -34,9 +34,11 @@ class ScoutAPI(MongoAdapter):
             else:
                 existing_date = existing_case['analysis_date'].date()
                 LOG.warning(f"analysis of case already loaded: {existing_date}")
-        else:
-            LOG.debug("load new Scout case")
-            load_scout(self, config_data)
+            return
+
+        LOG.debug("load new Scout case")
+        load_scout(self, config_data)
+        LOG.info("Case loaded successfully to Scout")
 
     def export_panels(self, panels: List[str], versions=None):
         """Pass through to export of a list of gene panels."""
