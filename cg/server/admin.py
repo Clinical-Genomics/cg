@@ -59,7 +59,6 @@ class ApplicationView(BaseView):
         'sample_volume',
         'details',
         'limitations',
-        'percent_kth',
         'created_at',
         'updated_at',
         'category',
