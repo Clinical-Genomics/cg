@@ -10,7 +10,7 @@ import click
 from cg.apps import hk
 from cg.apps.balsamic.fastq import BalsamicFastqHandler
 from cg.cli.analysis import link
-from cg.exc import LimsDataError
+from cg.exc import LimsDataError, BalsamicStartError
 from cg.meta.analysis import AnalysisAPI
 from cg.store import Store
 
@@ -69,6 +69,7 @@ def config(context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim
     link_objs = case_obj.links
     tumor_paths = set()
     normal_paths = set()
+    target_beds = set()
     singularity = context.obj['balsamic']['singularity']
     reference_config = context.obj['balsamic']['reference_config']
     conda_env = context.obj['balsamic']['conda_env']
@@ -100,6 +101,7 @@ def config(context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim
                 data['flowcell'] = f"{data['flowcell']}-{matches[0]}"
             files.append(data)
         sorted_files = sorted(files, key=lambda k: k['path'])
+
         for fastq_data in sorted_files:
             original_fastq_path = Path(fastq_data['path'])
             linked_fastq_name = context.obj['fastq_handler'].FastqFileNameCreator.create(
@@ -115,19 +117,26 @@ def config(context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim
             linked_fastq_path = wrk_dir / linked_fastq_name
             linked_reads_paths[fastq_data['read']].append(linked_fastq_path)
             concatenated_paths[fastq_data['read']] = f"{wrk_dir}/{concatenated_fastq_name}"
+
             if linked_fastq_path.exists():
                 LOGGER.info("found: %s -> %s", original_fastq_path, linked_fastq_path)
             else:
                 LOGGER.debug("destination path already exists: %s", linked_fastq_path)
+
         if link_obj.sample.is_tumour:
             tumor_paths.add(concatenated_paths[1])
         else:
             normal_paths.add(concatenated_paths[1])
+
+        if link_obj.sample.bed_version:
+            target_beds.add(link_obj.sample.bed_version.filename)
+
     nr_paths = len(tumor_paths) if tumor_paths else 0
     if nr_paths != 1:
         click.echo(f"Must have exactly one tumor sample! Found {nr_paths} samples.", color="red")
         context.abort()
     tumor_path = tumor_paths.pop()
+
     normal_path = None
     nr_normal_paths = len(normal_paths) if normal_paths else 0
     if nr_normal_paths > 1:
@@ -135,6 +144,7 @@ def config(context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim
         context.abort()
     elif nr_normal_paths == 1:
         normal_path = normal_paths.pop()
+
     # Call Balsamic
     command_str = (f" config case"
                    f" --reference-config {reference_config}"
@@ -146,6 +156,12 @@ def config(context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim
                    f" --umi-trim-length {umi_trim_length}")
     if target_bed:
         command_str += f" -p {target_bed}"
+    elif len(target_beds) == 1:
+        bed_path = Path(context.obj['balsamic']['bed_path'])
+        command_str += f" -p {bed_path / target_beds.pop()}"
+    else:
+        raise BalsamicStartError('No target bed specified!')
+
     if normal_path:
         command_str += f" --normal {normal_path}"
     if umi:
