@@ -2,7 +2,6 @@
 from datetime import datetime
 
 import pytest
-
 from cg.apps.balsamic.fastq import BalsamicFastqHandler
 from cg.apps.hk import HousekeeperAPI
 from cg.meta.analysis import AnalysisAPI

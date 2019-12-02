@@ -1,8 +1,9 @@
 """This script tests the cli methods to create the config for a balsamic config"""
 import logging
+from pathlib import Path
+
 import pytest
 from cg.cli.balsamic import config
-from pathlib import Path
 
 EXIT_SUCCESS = 0
 
@@ -91,6 +92,7 @@ def test_target_bed(cli_runner, base_context, balsamic_case):
 
 
 def get_beds_path(base_context) -> Path:
+    """Gets the bed path from the balsamic config"""
     return Path(base_context['balsamic'].get('bed_path'))
 
 
