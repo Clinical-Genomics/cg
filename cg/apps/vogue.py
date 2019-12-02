@@ -22,7 +22,7 @@ class VogueAPI():
         self.base_call = [self.vogue_binary]
 
     def load_genotype(self, genotype_dict: dict):
-        """Add observations from a VCF."""
+        """Load genotype data from a dict."""
         load_call = self.base_call[:]
         load_call.extend(['load', 'genotype', '-s', json.dumps(genotype_dict)])
 

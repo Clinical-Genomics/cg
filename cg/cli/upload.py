@@ -9,7 +9,6 @@ import click
 from cg.store import Store, models
 from cg.apps import coverage as coverage_app, gt, hk, loqus, tb, scoutapi, beacon as beacon_app, \
     lims, vogue, mutacc_auto
-from cg.cli.trending import trending as trending_command
 from cg.exc import DuplicateRecordError, DuplicateSampleError
 from cg.meta.upload.coverage import UploadCoverageApi
 from cg.meta.upload.gt import UploadGenotypesAPI
@@ -517,4 +516,3 @@ def processed_solved(context):
     mutacc_auto_api = mutacc_auto.MutaccAutoAPI(context.obj)
     mutacc_auto_api.import_reads()
 
-upload.add_command(trending_command)
