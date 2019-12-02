@@ -93,7 +93,7 @@ def test_target_bed(cli_runner, base_context, balsamic_case):
 
 def get_beds_path(base_context) -> Path:
     """Gets the bed path from the balsamic config"""
-    return Path(base_context['balsamic'].get('bed_path'))
+    return Path(base_context.get('bed_path'))
 
 
 def test_target_bed_from_case(cli_runner, base_context, balsamic_case):

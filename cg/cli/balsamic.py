@@ -157,7 +157,7 @@ def config(context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim
     if target_bed:
         command_str += f" -p {target_bed}"
     elif len(target_beds) == 1:
-        bed_path = Path(context.obj['balsamic']['bed_path'])
+        bed_path = Path(context.obj['bed_path'])
         command_str += f" -p {bed_path / target_beds.pop()}"
     else:
         raise BalsamicStartError('No target bed specified!')

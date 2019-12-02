@@ -17,12 +17,12 @@ def base_context(balsamic_store) -> dict:
         'analysis_api': MockAnalysis,
         'fastq_handler': MockBalsamicFastq,
         'gzipper': MockGzip(),
+        'bed_path': 'bed_path',
         'balsamic': {'conda_env': 'conda_env',
                      'root': 'root',
                      'slurm': {'account': 'account', 'qos': 'qos'},
                      'singularity': 'singularity',
                      'reference_config': 'reference_config',
-                     'bed_path': 'bed_path'
                      }
     }
 
