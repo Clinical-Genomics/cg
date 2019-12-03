@@ -53,3 +53,9 @@ class OrderError(CgError):
 
 class TicketCreationError(CgError):
     pass
+
+
+class BalsamicStartError(CgError):
+    """
+        Exception raised when Balsamic fails to start
+    """
