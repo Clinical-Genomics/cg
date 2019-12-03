@@ -9,7 +9,7 @@ from pathlib import Path
 import click
 from cg.apps import hk
 from cg.apps.balsamic.fastq import BalsamicFastqHandler
-from cg.cli.analysis import link
+from cg.cli.analysis.analysis import link
 from cg.exc import LimsDataError
 from cg.meta.analysis import AnalysisAPI
 from cg.store import Store
