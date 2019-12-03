@@ -65,8 +65,13 @@ def render_xlsx(data: dict) -> Workbook:
                                  bottom=Side(border_style='thin', color='000000'))
             cell.fill = PatternFill('solid', fgColor='E5E8E8')
 
-
     worksheet = workbook['Faktura']
+    worksheet.font = Font(size=14)
+    for row in worksheet.row_dimensions:
+        worksheet.row_dimensions[row].height = 30
+    for col in worksheet.column_dimensions:
+        worksheet.column_dimensions[col].width = 18
+
     worksheet['C1'] = data['costcenter'].upper()
     worksheet['F1'] = f"{data['invoice_id']}-{data['costcenter']}"
     worksheet['F2'] = dt.datetime.today().date()
@@ -92,7 +97,7 @@ def render_xlsx(data: dict) -> Workbook:
         worksheet[f"D{row}"] = record_data['priority']
         worksheet[f"E{row}"] = record_data['project']
         worksheet[f"F{row}"] = record_data['date']
-        worksheet[f"G{row}"] = record_data['price']
+        worksheet[f"G{row}"] = round(record_data['price'])
 
     worksheet[f"F{row + 2}"] = 'Total:'
     worksheet[f"G{row + 2}"] = f"=SUM(G{samples_start}: G{row})"
@@ -101,7 +106,7 @@ def render_xlsx(data: dict) -> Workbook:
     for header_row in header_rows:
         for column in ['A', 'B', 'C', 'D', 'E', 'F', 'G']:
             cell = worksheet[f"{column}{header_row}"]
-            cell.font = Font(bold=True)
+            cell.font = Font(bold=True, size=14)
             cell.border = Border(top=Side(border_style='thin', color='000000'),
                                  bottom=Side(border_style='thin', color='000000'))
             cell.fill = PatternFill('solid', fgColor='E5E8E8')
