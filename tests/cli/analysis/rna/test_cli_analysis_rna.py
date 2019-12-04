@@ -1,7 +1,7 @@
 """ Test the CLI for analysis rna """
 import logging
 
-from cg.cli.miprdrna import start
+from cg.cli.analysis.miprdrna import start
 from cg.apps.mip import MipAPI
 
 

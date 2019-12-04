@@ -1,6 +1,6 @@
 """This script tests the cli methods to create the auto for a balsamic auto"""
 import logging
-from cg.cli.analysis import auto
+from cg.cli.analysis.analysis import auto
 
 EXIT_SUCCESS = 0
 

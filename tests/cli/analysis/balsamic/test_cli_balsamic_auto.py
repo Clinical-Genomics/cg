@@ -1,7 +1,7 @@
 """This script tests the cli methods to auto run balsamic"""
 import logging
 
-from cg.cli.balsamic import auto
+from cg.cli.analysis.balsamic import auto
 
 EXIT_SUCCESS = 0
 
