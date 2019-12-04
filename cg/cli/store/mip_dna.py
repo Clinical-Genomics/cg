@@ -12,16 +12,16 @@ from cg.store import Store
 LOG = logging.getLogger(__name__)
 
 
-@click.group()
+@click.group('mip-dna')
 @click.pass_context
-def store(context):
+def mip_dna(context):
     """Store results from MIP in housekeeper."""
     context.obj['db'] = Store(context.obj['database'])
     context.obj['tb_api'] = tb.TrailblazerAPI(context.obj)
     context.obj['hk_api'] = hk.HousekeeperAPI(context.obj)
 
 
-@store.command()
+@mip_dna.command()
 @click.argument('config-stream', type=click.File('r'), required=False)
 @click.pass_context
 def analysis(context, config_stream):
@@ -109,7 +109,7 @@ def _add_new_analysis_to_the_status_api(bundle_obj, status):
     return family_obj
 
 
-@store.command()
+@mip_dna.command()
 @click.pass_context
 def completed(context):
     """Store all completed analyses."""

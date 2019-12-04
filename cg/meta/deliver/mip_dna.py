@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*- import logging
 
 import logging
-from pathlib import Path
 
-from cg.apps import tb, hk, lims
-from cg.store import Store, models
+from cg.apps import hk, lims
+from cg.store import Store
 
 LOG = logging.getLogger(__name__)
 
@@ -23,7 +22,7 @@ FAMILY_TAGS = [
 SAMPLE_TAGS = ['bam', 'bam-index']
 
 
-class DeliverAPI:
+class MipDnaDeliverAPI:
 
     def __init__(self, db: Store, hk_api: hk.HousekeeperAPI, lims_api: lims.LimsAPI):
         self.db = db

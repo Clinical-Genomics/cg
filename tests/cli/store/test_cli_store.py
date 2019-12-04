@@ -2,7 +2,7 @@
 from datetime import datetime
 
 import pytest
-from cg.cli.store import _add_new_complete_analysis_record
+from cg.cli.store_cmd.store import _add_new_complete_analysis_record
 from cg.exc import AnalysisDuplicationError
 from cg.store import Store
 
