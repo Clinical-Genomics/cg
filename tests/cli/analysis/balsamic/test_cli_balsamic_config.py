@@ -1,5 +1,7 @@
 """This script tests the cli methods to create the config for a balsamic config"""
 import logging
+from pathlib import Path
+
 import pytest
 from cg.cli.analysis.balsamic import config
 
@@ -87,6 +89,32 @@ def test_target_bed(cli_runner, base_context, balsamic_case):
     assert result.exit_code == EXIT_SUCCESS
     assert balsamic_key in result.output
     assert option_value in result.output
+
+
+def get_beds_path(base_context) -> Path:
+    """Gets the bed path from the balsamic config"""
+    return Path(base_context.get('bed_path'))
+
+
+def test_target_bed_from_case(cli_runner, base_context, balsamic_case):
+    """Test command with --target-bed option"""
+
+    # GIVEN case with bed-version with filename set on a case
+    for link in balsamic_case.links:
+        assert link.sample.bed_version.filename
+
+    bed_key = '-p'
+    bed_path = get_beds_path(base_context) / balsamic_case.links[0].sample.bed_version.filename
+    case_id = balsamic_case.internal_id
+
+    # WHEN dry running
+    result = cli_runner.invoke(config, [case_id, '--dry-run'],
+                               obj=base_context)
+
+    # THEN dry-print should include the bed_key and the bed_value including path
+    assert result.exit_code == EXIT_SUCCESS
+    assert bed_key in result.output
+    assert str(bed_path) in result.output
 
 
 def test_umi_trim_length(cli_runner, base_context, balsamic_case):
