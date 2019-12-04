@@ -366,9 +366,11 @@ def observations(context, case_id, case_limit, dry_run):
             LOG.info("%s: has tumour samples. Skipping!", family_obj.internal_id)
             continue
 
-        analysis_type = LinkHelper.all_samples_check_analysis(family_obj.links)
-        if analysis_type is None:
-            LOG.info("%s: Undetermined analysis type (wes or wgs). Skipping!",
+        analysis_list = LinkHelper.all_samples_list_analyses(family_obj.links)
+        if len(set(analysis_list)) == 1 and analysis_list[0] in ('wes', 'wgs'):
+            analysis_type = analysis_list[0]
+        else:
+            LOG.info("%s: Undetermined analysis type (wes or wgs) or mixed analyses. Skipping!",
                      family_obj.internal_id)
             continue
 
@@ -403,16 +405,10 @@ class LinkHelper:
         return all(link.sample.data_analysis in data_anlysis for link in links)
 
     @staticmethod
-    def all_samples_check_analysis(links: List[models.FamilySample]) -> bool:
-        """Return True if all samples are from wgs analysis"""
+    def all_samples_list_analyses(links: List[models.FamilySample]) -> list:
+        """Return analysis type for each sample in case"""
+        return [link.sample.application_version.application.analysis_type for link in links]
 
-        if all(link.sample.application_version.application.analysis_type == 'wgs'
-               for link in links):
-            return 'wgs'
-        if all(link.sample.application_version.application.analysis_type == 'wes'
-               for link in links):
-            return 'wes'
-        return None
 
 @upload.command()
 @click.option('-r', '--re-upload', is_flag=True, help='re-upload existing analysis')

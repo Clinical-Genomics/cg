@@ -30,13 +30,10 @@ class LoqusdbAPI():
         self.loqusdb_config = config['loqusdb']['config_path']
         self.loqusdb_binary = config['loqusdb']['binary_path']
 
-        if analysis_type == 'wes':
+        if self.analysis_type == 'wes':
             self.loqusdb_config = config['loqusdb-wes']['config_path']
             self.loqusdb_binary = config['loqusdb-wes']['binary_path']
 
-        LOG.info("Using loqusdb config %s and binary %s", self.loqusdb_config, self.loqusdb_binary)
-
-        # This will allways be the base of the loqusdb call
         self.base_call = [self.loqusdb_binary, '--config', self.loqusdb_config]
 
     def load(self, family_id: str, ped_path: str, vcf_path: str,
@@ -52,7 +49,7 @@ class LoqusdbAPI():
             '--hard-threshold', '0.95',
             '--soft-threshold', '0.90'
             ])
-        if self.analysis_type == 'wgs' and vcf_sv_path is not None:
+        if self.analysis_type == 'wgs' and vcf_sv_path:
             load_call.extend(['--sv-variants', vcf_sv_path])
 
         nr_variants = 0

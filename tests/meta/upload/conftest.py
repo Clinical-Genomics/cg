@@ -1,3 +1,4 @@
+from pathlib import Path
 import pytest
 from cg.apps.hk import HousekeeperAPI
 from cg.meta.upload.mutacc import UploadToMutaccAPI
@@ -23,7 +24,7 @@ class MockFile:
         return MockFile()
 
     def full_path(self):
-        return ''
+        return Path('')
 
     def is_included(self):
         return False
@@ -34,7 +35,7 @@ class MockFile1():
     """ Mock File object """
 
     def __init__(self, path=''):
-        self.full_path = path
+        self.full_path = Path(path)
 
     @staticmethod
     def first():
