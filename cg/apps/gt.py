@@ -46,13 +46,33 @@ class GenotypeAPI(Manager):
                 analysis_obj.sample.sex = samples_sex[analysis_obj.sample_id]['pedigree']
                 self.commit()
 
-    def get_trending(self, sample_id: str = '', days: int = 0) -> str:
-        """Get trending object with one or many samples."""
+    def prepare_sample(self, sample_id: str = '', days: int = 0) -> str:
+        """Get sample info for one or many samples."""
         trending_call = self.base_call[:]
         if sample_id:
-            trending_call.extend(['prepare-trending', '-s', sample_id])
+            trending_call.extend(['prepare-sample', '-s', sample_id])
         elif days:
-            trending_call.extend(['prepare-trending', '-d', days])
+            trending_call.extend(['prepare-sample', '-d', days])
+        try:
+            LOG.info('Running Genotype API to get data.')
+            LOG.debug(trending_call)
+            output = subprocess.check_output(trending_call)
+        except CalledProcessError as error:
+            LOG.critical("Could not run command: %s" % ' '.join(trending_call))
+            raise error
+        output = output.decode('utf-8')
+        # If sample not in genotype db, stdout of genotype command will be empty.
+        if not output:
+            raise CaseNotFoundError("samples not found in genotype db")
+        return output
+
+    def prepare_analysis(self, sample_id: str = '', days: int = 0) -> str:
+        """Get analysis_comparison for one or many samples."""
+        trending_call = self.base_call[:]
+        if sample_id:
+            trending_call.extend(['prepare-analysis', '-s', sample_id])
+        elif days:
+            trending_call.extend(['prepare-analysis', '-d', days])
         try:
             LOG.info('Running Genotype API to get data.')
             LOG.debug(trending_call)
