@@ -10,7 +10,6 @@ import cg
 from cg.store import Store
 
 from .analysis import analysis
-from cg.cli.analysis.balsamic import balsamic
 from .add import add
 from .backup import backup
 from .clean import clean
@@ -18,8 +17,6 @@ from .deliver import deliver
 from .export import export
 from .get import get
 from .import_cmd import import_cmd
-from cg.cli.analysis.mip_rd_dna import dna
-from cg.cli.analysis.miprdrna import rna
 from .reset import reset_cmd
 from .set import set_cmd
 from .status import status
@@ -82,6 +79,3 @@ base.add_command(status)
 base.add_command(store)
 base.add_command(transfer)
 base.add_command(upload)
-analysis.add_command(balsamic)
-analysis.add_command(dna)
-analysis.add_command(rna)

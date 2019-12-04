@@ -1,14 +1,12 @@
-# -*- coding: utf-8 -*-
+"""Commands to start MIP rare disease dna workflow"""
+
 import logging
-import shutil
 import sys
-from pathlib import Path
 
 import click
 from cg.apps import hk, tb, scoutapi, lims
 from cg.apps.balsamic.fastq import BalsamicFastqHandler
 from cg.apps.mip.fastq import MipFastqHandler
-from cg.apps.usalt.fastq import USaltFastqHandler
 from cg.exc import LimsDataError
 from cg.meta.analysis import AnalysisAPI
 from cg.meta.deliver.api import DeliverAPI
@@ -20,13 +18,13 @@ EMAIL_OPTION = click.option('-e', '--email', help='email to send errors to')
 START_WITH_PROGRAM = click.option('-sw', '--start-with', help='start mip from this program.')
 
 
-@click.group(invoke_without_command=True)
+@click.group('mip-dna', invoke_without_command=True)
 @PRIORITY_OPTION
 @EMAIL_OPTION
 @START_WITH_PROGRAM
 @click.option('-f', '--family', 'family_id', help='family to prepare and start an analysis for')
 @click.pass_context
-def dna(context, priority, email, family_id, start_with):
+def mip_dna(context, priority, email, family_id, start_with):
     """Run rare disease DNA workflow for FAMILY_ID"""
     context.obj['db'] = Store(context.obj['database'])
     hk_api = hk.HousekeeperAPI(context.obj)
@@ -51,11 +49,11 @@ def dna(context, priority, email, family_id, start_with):
         # check everything is ok
         family_obj = context.obj['db'].family(family_id)
         if family_obj is None:
-            LOG.error(f"{family_id} not found")
+            LOG.error("%s: not found", family_id)
             context.abort()
         is_ok = context.obj['api'].check(family_obj)
         if not is_ok:
-            LOG.warning(f"{family_obj.internal_id}: not ready to start")
+            LOG.warning("%s: not ready to start", family_obj.internal_id)
             # commit the updates to request flowcells
             context.obj['db'].commit()
         else:
@@ -76,7 +74,7 @@ def _suggest_cases_to_analyze(context, show_as_error=False):
         click.echo(family_obj)
 
 
-@dna.command('case-config')
+@mip_dna.command('case-config')
 @click.option('-d', '--dry', is_flag=True, help='Print config to console')
 @click.argument('family_id', required=False)
 @click.pass_context
@@ -101,11 +99,13 @@ def case_config(context, dry, family_id):
     else:
         # Write to trailblazer root dir / family_id
         out_path = context.obj['tb'].save_config(config_data)
-        LOG.info(f"saved config to: {out_path}")
+        LOG.info("saved config to %s", out_path)
 
-dna.add_command(case_config, 'config')
 
-@dna.command()
+mip_dna.add_command(case_config, 'config')
+
+
+@mip_dna.command()
 @click.option('-f', '--family', 'family_id', help='link all samples for a family')
 @click.argument('sample_id', required=False)
 @click.pass_context
@@ -147,7 +147,8 @@ def link(context, family_id, sample_id):
                                            case=link_obj.family.internal_id,
                                            sample=link_obj.sample.internal_id)
 
-@dna.command()
+
+@mip_dna.command()
 @click.option('-p', '--print', 'print_output', is_flag=True, help='print to console')
 @click.argument('family_id', required=False)
 @click.pass_context
@@ -166,7 +167,8 @@ def panel(context, print_output, family_id):
     else:
         context.obj['tb'].write_panel(family_id, bed_lines)
 
-@dna.command()
+
+@mip_dna.command()
 @PRIORITY_OPTION
 @EMAIL_OPTION
 @START_WITH_PROGRAM
@@ -182,15 +184,15 @@ def start(context: click.Context, family_id: str, priority: str = None, email: s
 
     family_obj = context.obj['db'].family(family_id)
     if family_obj is None:
-        LOG.error(f"{family_id}: family not found")
+        LOG.error("%s: family not found", family_id)
         context.abort()
     if context.obj['tb'].analyses(family=family_obj.internal_id, temp=True).first():
-        LOG.warning(f"{family_obj.internal_id}: analysis already running")
+        LOG.warning("%s: analysis already running", {family_obj.internal_id})
     else:
         context.obj['api'].start(family_obj, priority=priority, email=email, start_with=start_with)
 
 
-@dna.command()
+@mip_dna.command()
 @click.option('-d', '--dry-run', 'dry_run', is_flag=True, help='print to console, '
                                                                'without actualising')
 @click.pass_context
@@ -217,13 +219,11 @@ def auto(context: click.Context, dry_run):
             continue
 
         try:
-            context.invoke(analysis, priority=priority, family_id=case_obj.internal_id)
+            context.invoke(mip_dna, priority=priority, family_id=case_obj.internal_id)
         except tb.MipStartError as error:
             LOG.exception(error.message)
             exit_code = 1
         except LimsDataError as error:
             LOG.exception(error.message)
             exit_code = 1
-
     sys.exit(exit_code)
-

@@ -27,6 +27,7 @@ If you would like to install the latest development version:
 git clone https://github.com/Clinical-Genomics/cg
 cd cg
 pip install --editable .
+pip install -r requirements-dev.txt
 ```
 
 ## Contributing

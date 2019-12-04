@@ -10,9 +10,9 @@ from cg.store import Store
 LOGGER = logging.getLogger(__name__)
 
 
-@click.group()
+@click.group('mip-rna')
 @click.pass_context
-def rna(context):
+def mip_rna(context):
     """ Run rare disease RNA workflow """
     context.obj['db'] = Store(context.obj['database'])
     context.obj['tb_api'] = tb.TrailblazerAPI(context.obj)
@@ -20,7 +20,7 @@ def rna(context):
                                     context.obj['mip-rd-rna']['pipeline'])
 
 
-@rna.command()
+@mip_rna.command()
 @click.option('-d', '--dry', is_flag=True, help='print command to console')
 @click.option('-e', '--email', help='email to send errors to')
 @click.option('-p', '--priority', type=click.Choice(['low', 'normal', 'high']))
@@ -52,7 +52,7 @@ def start(context: click.Context, case_id: str, dry: bool = False,
             LOGGER.info('MIP started!')
 
 
-@rna.command('case-config')
+@mip_rna.command('case-config')
 @click.option('-d', '--dry', is_flag=True, help='Print config to console')
 @click.argument('case_id')
 @click.pass_context
