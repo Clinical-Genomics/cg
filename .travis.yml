@@ -5,6 +5,8 @@ python:
 
 # command to install dependencies
 install:
+  - pip install --upgrade pip
+  - pip install cython
   - pip install -U -r requirements.txt .
 # command to run tests
 script:
@@ -16,23 +18,17 @@ jobs:
   include:
     - name: "dependencies"
       script:
-        - pip install --upgrade pip
-        - pip install -U -r requirements.txt .
         - pip check
     - name: "coverage"
       script:
-        - pip install --upgrade pip
-        - pip install cython
-        - pip install -U -r requirements.txt -r requirements-dev.txt .
+        - pip install -U -r requirements-dev.txt .
         - coverage run --source "$(basename "$PWD")" setup.py test
     - name: "code formatting"
       script:
-        - pip install --upgrade pip
         - pip install -r requirements-dev.txt
         - black --check cg
     - name: "linting"
       script:
-        - pip install --upgrade pip
         - pip install -r requirements-dev.txt
         - git reset --soft ${TRAVIS_COMMIT_RANGE%...*} && git lint
 
