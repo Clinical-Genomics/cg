@@ -10,6 +10,7 @@ import pytest
 import ruamel.yaml
 from cg.store import Store
 from trailblazer.mip import files as mip_files_api
+from cg.apps.mip import files as mip_rna_files_api
 
 pytest_plugins = [  # pylint: disable=invalid-name
     'tests.apps.lims.conftest',
@@ -115,6 +116,8 @@ def files_data(files_raw):
         'config': mip_files_api.parse_config(files_raw['config']),
         'sampleinfo': mip_files_api.parse_sampleinfo(files_raw['sampleinfo']),
         'qcmetrics': mip_files_api.parse_qcmetrics(files_raw['qcmetrics']),
+        'rna_config': mip_files_api.parse_config(files_raw['rna_config']),
+        'rna_sampleinfo': mip_rna_files_api.parse_sampleinfo_rna(files_raw['rna_sampleinfo']),
     }
 
 
