@@ -11,7 +11,7 @@ def test_start_dry(cli_runner, tb_api, mock_store, caplog):
 
     context = {}
     context['db'] = mock_store
-    context['tb_api'] = tb_api
+    context['tb'] = tb_api
     context['rna_api'] = MipAPI('${HOME}/bin/mip', 'analyse rd_rna')
     context['mip-rd-rna'] = {'mip_config': 'config.yaml'}
 
@@ -39,7 +39,7 @@ def test_start(cli_runner, tb_api, mock_store, caplog, monkeypatch):
     monkeypatch.setattr(MipAPI, 'start', mip_start)
     mip_api = MipAPI('${HOME}/bin/mip', 'analyse rd_rna')
     context['db'] = mock_store
-    context['tb_api'] = tb_api
+    context['tb'] = tb_api
     context['rna_api'] = mip_api
     context['mip-rd-rna'] = {'mip_config': 'config.yaml'}
 
