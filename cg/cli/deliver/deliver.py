@@ -6,10 +6,8 @@ from .mip_dna import mip_dna
 
 
 @click.group()
-@click.pass_context
-def deliver(context):
-    """Deliver stuff."""
-    pass
+def deliver():
+    """Deliver for a pipeline"""
 
 
 deliver.add_command(mip_dna)

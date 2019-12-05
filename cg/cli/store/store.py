@@ -8,10 +8,8 @@ LOG = logging.getLogger(__name__)
 
 
 @click.group()
-@click.pass_context
-def store(context):
-    """Store results from MIP in housekeeper."""
-    pass
+def store():
+    """Store results from a pipeline in housekeeper."""
 
 
 store.add_command(mip_dna)
