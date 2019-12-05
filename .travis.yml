@@ -6,12 +6,6 @@ python:
 
 cache: pip
 
-stages:
-  - name: dependencies
-    if: type = pull_request
-  - name: coverage
-    if: type = pull_request
-
 jobs:
   include:
     - stage: dependencies
@@ -28,10 +22,10 @@ jobs:
     - name: coverage
       python: '3.7'
       script:
-          - pip install --upgrade pip
-          - pip install cython
-          - pip install -U -r requirements.txt -r requirements-dev.txt .
-          - coverage run --source "$(basename "$PWD")" setup.py test
+        - pip install --upgrade pip
+        - pip install cython
+        - pip install -U -r requirements.txt -r requirements-dev.txt .
+        - coverage run --source "$(basename "$PWD")" setup.py test
     - name: code formatting
       python: '3.7'
       script:
