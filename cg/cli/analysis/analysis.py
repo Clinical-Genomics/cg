@@ -8,7 +8,6 @@ import click
 from cg.apps import hk, tb, scoutapi, lims
 from cg.apps.balsamic.fastq import BalsamicFastqHandler
 from cg.apps.mip.fastq import MipFastqHandler
-from cg.apps.usalt.fastq import USaltFastqHandler
 from cg.exc import LimsDataError
 from cg.meta.analysis import AnalysisAPI
 from cg.meta.deliver.api import DeliverAPI
@@ -148,36 +147,6 @@ def link(context, family_id, sample_id):
             context.obj['api'].link_sample(mip_fastq_handler,
                                            case=link_obj.family.internal_id,
                                            sample=link_obj.sample.internal_id)
-
-
-@analysis.command('link-microbial')
-@click.option('-o', '--order', 'order_id', help='link all microbial samples for an order')
-@click.argument('sample_id', required=False)
-@click.pass_context
-def link_microbial(context, order_id, sample_id):
-    """Link FASTQ files for a SAMPLE_ID."""
-
-    sample_objs = None
-
-    if order_id and (sample_id is None):
-        # link all samples in a case
-        sample_objs = context.obj['db'].microbial_order(order_id).microbial_samples
-    elif sample_id and (order_id is None):
-        # link sample in all its families
-        sample_objs = [context.obj['db'].microbial_sample(sample_id)]
-    elif sample_id and order_id:
-        # link only one sample in a case
-        sample_objs = [context.obj['db'].microbial_sample(sample_id)]
-
-    if not sample_objs:
-        LOG.error('provide order and/or sample')
-        context.abort()
-
-    for sample_obj in sample_objs:
-        LOG.info("%s: link FASTQ files", sample_obj.internal_id)
-        context.obj['api'].link_sample(USaltFastqHandler(context.obj),
-                                       case=sample_obj.microbial_order.internal_id,
-                                       sample=sample_obj.internal_id)
 
 
 @analysis.command()
