@@ -7,7 +7,7 @@ python:
 install:
   - pip install --upgrade pip
   - pip install cython
-  - pip install -U -r requirements.txt .
+  - pip install -U -r requirements.txt pytest-mock .
 # command to run tests
 script:
   - pytest
