@@ -1,22 +1,47 @@
-dist: xenial
 language: python
 
 python:
-    - '3.6'
-    - '3.7'
+  - '3.6'
+  - '3.7'
 
 cache: pip
 
-install:
-    - pip install cython
-    - pip install -U -r requirements.txt -r requirements-dev.txt .
-    - pip check
-
-script:
-    - coverage run --source "$(basename "$PWD")" setup.py test
-    - git reset --soft ${TRAVIS_COMMIT_RANGE%...*} && git lint
+jobs:
+  include:
+    - stage: "dependencies"
+        if: type == pull_request
+        script:
+          - pip install --upgrade pip
+          - pip install -U -r requirements.txt .
+          - pip check
+    - stage: "test"
+      script:
+        - pip install --upgrade pip
+        - pip install cython
+        - pip install -U -r requirements.txt -r requirements-dev.txt .
+        - pytest
+    - stage: "coverage"
+        if: type == pull_request
+        python: 3.8
+        script:
+          - pip install --upgrade pip
+          - pip install cython
+          - pip install -U -r requirements.txt -r requirements-dev.txt .
+          - coverage run --source "$(basename "$PWD")" setup.py test
+    - name: "code formatting"
+      python: 3.8
+      script:
+        - pip install --upgrade pip
+        - pip install -r requirements-dev.txt
+        - black --check trade
+    - name: "linting"
+      python: 3.8
+      script:
+        - pip install --upgrade pip
+        - pip install -r requirements-dev.txt
+        - git reset --soft ${TRAVIS_COMMIT_RANGE%...*} && git lint
 
 after_success: coveralls
 
 notifications:
-    email: never
+  email: never
