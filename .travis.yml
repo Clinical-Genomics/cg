@@ -9,7 +9,7 @@ cache: pip
 jobs:
   include:
     - stage: "dependencies"
-        if: type == pull_request
+        if: type = pull_request
         script:
           - pip install --upgrade pip
           - pip install -U -r requirements.txt .
@@ -21,7 +21,7 @@ jobs:
         - pip install -U -r requirements.txt -r requirements-dev.txt .
         - pytest
     - stage: "coverage"
-        if: type == pull_request
+        if: type = pull_request
         python: 3.8
         script:
           - pip install --upgrade pip
