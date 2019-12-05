@@ -1,0 +1,221 @@
+---
+analysis_date: 2019-11-21T14:31:02
+analysis_type:
+  ACC5963A1: wts
+analysisrunstatus: finished
+case: finequagga
+config_file_analysis: /home/proj/stage/rare-disease/cases/finequagga/analysis/finequagga_config.yaml
+default_gene_panels:
+  - OMIM-AUTO
+expected_coverage:
+  ACC5963A1: '1'
+human_genome_build:
+  path: /home/proj/stage/rare-disease/references/rna_references/grch37_homo_sapiens_-d5-.fasta
+  source: grch
+  version: '37'
+last_log_file_path: /home/proj/stage/rare-disease/cases/finequagga/analysis/files/mip_2019-11-21T14:31:02.log
+log_file_dir: /home/anders.jemt/rare_disease_test/mip7/finequagga/analysis/mip_log
+mip_version: v7.1.4
+pedigree_file:
+  path: /home/anders.jemt/rare_disease_test/rna_cases/finequagga/finequagga_pedigree.yaml
+pedigree_minimal: /home/proj/stage/rare-disease/cases/finequagga/analysis/files/finequagga.fam
+recipe:
+  bcftools_merge:
+    path: /home/proj/stage/rare-disease/cases/finequagga/analysis/files/finequagga_comb.vcf
+  blobfish:
+    path: /home/anders.jemt/rare_disease_test/mip7/finequagga/analysis/finequagga/blobfish
+  multiqc:
+    finequagga_html:
+      path: /home/proj/stage/rare-disease/cases/finequagga/analysis/files/multiqc_report.html
+    finequagga_json:
+      path: /home/proj/stage/rare-disease/cases/finequagga/analysis/files/multiqc_data.json
+  peddy_ar:
+    stderr: {}
+  #qccollect_ar: {}
+  qccollect_ar: /home/proj/stage/rare-disease/cases/finequagga/analysis/files/qcmetrics_file.stub
+  varianteffectpredictor:
+    path: /home/proj/stage/rare-disease/cases/finequagga/analysis/files/finequagga_comb_vep.vcf
+    stderrfile: {}
+  version_collect_ar:
+    path: /home/proj/stage/rare-disease/cases/finequagga/analysis/files/finequagga_vcol.yaml
+sample:
+  ACC5963A1:
+    analysis_type: wts
+    expected_coverage: '1'
+    father: '0'
+    file:
+      ACC5963A1_171015_HM3J2DSXX_XXXXXX_lane1:
+        interleaved: ~
+        read_direction_file:
+          ACC5963A1_171015_HM3J2DSXX_XXXXXX_lane1_1:
+            date: 2017-10-15
+            flowcell: HM3J2DSXX
+            lane: '1'
+            original_file_name: 1_171015_HM3J2DSXX_ACC5963A1_XXXXXX_1.fastq.gz
+            original_file_name_prefix: 1_171015_HM3J2DSXX_ACC5963A1_XXXXXX_1
+            read_direction: 1
+            run_barcode: 171015_HM3J2DSXX_1_XXXXXX
+            sample_barcode: XXXXXX
+          ACC5963A1_171015_HM3J2DSXX_XXXXXX_lane1_2:
+            date: 2017-10-15
+            flowcell: HM3J2DSXX
+            lane: '1'
+            original_file_name: 1_171015_HM3J2DSXX_ACC5963A1_XXXXXX_2.fastq.gz
+            original_file_name_prefix: 1_171015_HM3J2DSXX_ACC5963A1_XXXXXX_2
+            read_direction: 2
+            run_barcode: 171015_HM3J2DSXX_1_XXXXXX
+            sample_barcode: XXXXXX
+        sequence_length: '151'
+        sequence_run_type: paired-end
+      ACC5963A1_171015_HM3J2DSXX_XXXXXX_lane2:
+        interleaved: ~
+        read_direction_file:
+          ACC5963A1_171015_HM3J2DSXX_XXXXXX_lane2_1:
+            date: 2017-10-15
+            flowcell: HM3J2DSXX
+            lane: '2'
+            original_file_name: 2_171015_HM3J2DSXX_ACC5963A1_XXXXXX_1.fastq.gz
+            original_file_name_prefix: 2_171015_HM3J2DSXX_ACC5963A1_XXXXXX_1
+            read_direction: 1
+            run_barcode: 171015_HM3J2DSXX_2_XXXXXX
+            sample_barcode: XXXXXX
+          ACC5963A1_171015_HM3J2DSXX_XXXXXX_lane2_2:
+            date: 2017-10-15
+            flowcell: HM3J2DSXX
+            lane: '2'
+            original_file_name: 2_171015_HM3J2DSXX_ACC5963A1_XXXXXX_2.fastq.gz
+            original_file_name_prefix: 2_171015_HM3J2DSXX_ACC5963A1_XXXXXX_2
+            read_direction: 2
+            run_barcode: 171015_HM3J2DSXX_2_XXXXXX
+            sample_barcode: XXXXXX
+        sequence_length: '151'
+        sequence_run_type: paired-end
+      ACC5963A1_171015_HM3J2DSXX_XXXXXX_lane3:
+        interleaved: ~
+        read_direction_file:
+          ACC5963A1_171015_HM3J2DSXX_XXXXXX_lane3_1:
+            date: 2017-10-15
+            flowcell: HM3J2DSXX
+            lane: '3'
+            original_file_name: 3_171015_HM3J2DSXX_ACC5963A1_XXXXXX_1.fastq.gz
+            original_file_name_prefix: 3_171015_HM3J2DSXX_ACC5963A1_XXXXXX_1
+            read_direction: 1
+            run_barcode: 171015_HM3J2DSXX_3_XXXXXX
+            sample_barcode: XXXXXX
+          ACC5963A1_171015_HM3J2DSXX_XXXXXX_lane3_2:
+            date: 2017-10-15
+            flowcell: HM3J2DSXX
+            lane: '3'
+            original_file_name: 3_171015_HM3J2DSXX_ACC5963A1_XXXXXX_2.fastq.gz
+            original_file_name_prefix: 3_171015_HM3J2DSXX_ACC5963A1_XXXXXX_2
+            read_direction: 2
+            run_barcode: 171015_HM3J2DSXX_3_XXXXXX
+            sample_barcode: XXXXXX
+        sequence_length: '151'
+        sequence_run_type: paired-end
+      ACC5963A1_171015_HM3J2DSXX_XXXXXX_lane4:
+        interleaved: ~
+        read_direction_file:
+          ACC5963A1_171015_HM3J2DSXX_XXXXXX_lane4_1:
+            date: 2017-10-15
+            flowcell: HM3J2DSXX
+            lane: '4'
+            original_file_name: 4_171015_HM3J2DSXX_ACC5963A1_XXXXXX_1.fastq.gz
+            original_file_name_prefix: 4_171015_HM3J2DSXX_ACC5963A1_XXXXXX_1
+            read_direction: 1
+            run_barcode: 171015_HM3J2DSXX_4_XXXXXX
+            sample_barcode: XXXXXX
+          ACC5963A1_171015_HM3J2DSXX_XXXXXX_lane4_2:
+            date: 2017-10-15
+            flowcell: HM3J2DSXX
+            lane: '4'
+            original_file_name: 4_171015_HM3J2DSXX_ACC5963A1_XXXXXX_2.fastq.gz
+            original_file_name_prefix: 4_171015_HM3J2DSXX_ACC5963A1_XXXXXX_2
+            read_direction: 2
+            run_barcode: 171015_HM3J2DSXX_4_XXXXXX
+            sample_barcode: XXXXXX
+        sequence_length: '151'
+        sequence_run_type: paired-end
+    most_complete_bam:
+      path: /home/proj/stage/rare-disease/cases/finequagga/analysis/files/ACC5963A1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal.bam
+    mother: '0'
+    phenotype: unaffected
+    recipe:
+      bootstrapann:
+        ACC5963A1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal_haptc_filtered_ase_bootstr.vcf:
+          path: /home/proj/stage/rare-disease/cases/finequagga/analysis/files/foo_ACC5963A1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal_haptc_filtered_ase_bootstr.vcf
+        ACC5963A1_lanes_1234_some_other_file_or_key_name:
+          path: /home/proj/stage/rare-disease/cases/finequagga/analysis/files/bar_ACC5963A1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal_haptc_filtered_ase_bootstr.vcf
+      fastqc_ar:
+        fastqc_data:
+          outdirectory: /home/anders.jemt/rare_disease_test/mip7/finequagga/analysis/ACC5963A1/fastqc_ar
+          path: /home/anders.jemt/rare_disease_test/mip7/finequagga/analysis/ACC5963A1/fastqc_ar/4_171015_HM3J2DSXX_ACC5963A1_XXXXXX_2_fastqc/fastqc_data.txt
+      gatk_asereadcounter:
+        ACC5963A1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal_haptc_filtered_ase.csv:
+          path: /home/proj/stage/rare-disease/cases/finequagga/analysis/files/ACC5963A1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal_haptc_filtered_ase.csv
+      gatk_baserecalibration:
+        ACC5963A1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal:
+          path: /home/proj/stage/rare-disease/cases/finequagga/analysis/files/ACC5963A1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal.bam
+      gatk_haplotypecaller:
+        ACC5963A1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal_haptc.vcf:
+          path: /home/anders.jemt/rare_disease_test/mip7/finequagga/analysis/ACC5963A1/gatk_haplotypecaller/ACC5963A1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal_haptc.vcf
+      gatk_splitncigarreads:
+        ACC5963A1_lanes_1234_trim_star_sorted_merged_md_splitncigar:
+          path: /home/anders.jemt/rare_disease_test/mip7/finequagga/analysis/ACC5963A1/gatk_splitncigarreads/ACC5963A1_lanes_1234_trim_star_sorted_merged_md_splitncigar.1.bam
+      gatk_variantfiltration:
+        ACC5963A1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal_haptc_filtered.vcf:
+          path: /home/anders.jemt/rare_disease_test/mip7/finequagga/analysis/ACC5963A1/gatk_variantfiltration/ACC5963A1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal_haptc_filtered.vcf
+      genebody_coverage:
+        ACC5963A1_lanes_1234_trim_star_sorted_merged_genecov:
+          path: /home/anders.jemt/rare_disease_test/mip7/finequagga/analysis/ACC5963A1/genebody_coverage/ACC5963A1_lanes_1234_trim_star_sorted_merged_genecov.geneBodyCoverage.txt
+      gffcompare_ar:
+        ACC5963A1_lanes_1234_trim_star_sorted_merged_strg_gffcmp.gtf:
+          path: /home/proj/stage/rare-disease/cases/finequagga/analysis/files/ACC5963A1_lanes_1234_trim_star_sorted_merged_strg_gffcmp.gtf
+      markduplicates:
+        ACC5963A1_lanes_1234_trim_star_sorted_merged_md:
+          marking_duplicates:
+            processed_by: picardtools_markduplicates
+          path: /home/proj/stage/rare-disease/cases/finequagga/analysis/files/ACC5963A1_lanes_1234_trim_star_sorted_merged_md_metric
+      picardtools_mergesamfiles:
+        ACC5963A1_lanes_1234:
+          path: /home/anders.jemt/rare_disease_test/mip7/finequagga/analysis/ACC5963A1/picardtools_mergesamfiles/ACC5963A1_lanes_1234_trim_star_sorted_merged.1.bam
+      preseq_ar:
+        ACC5963A1_lanes_1234_trim_star_sorted_merged_preseq.txt:
+          path: /home/anders.jemt/rare_disease_test/mip7/finequagga/analysis/ACC5963A1/preseq_ar/ACC5963A1_lanes_1234_trim_star_sorted_merged_preseq.txt
+      salmon_quant:
+        quant.sf:
+          path: /home/proj/stage/rare-disease/cases/finequagga/analysis/files/quant.sf
+      star_aln:
+        ACC5963A1_171015_HM3J2DSXX_XXXXXX_lane1_star_sorted:
+          log:
+            path: /home/anders.jemt/rare_disease_test/mip7/finequagga/analysis/ACC5963A1/star_aln/ACC5963A1_171015_HM3J2DSXX_XXXXXX_lane1_star_sorted.Log.final.out
+          path: /home/anders.jemt/rare_disease_test/mip7/finequagga/analysis/ACC5963A1/star_aln/ACC5963A1_171015_HM3J2DSXX_XXXXXX_lane1_star_sorted.bam
+        ACC5963A1_171015_HM3J2DSXX_XXXXXX_lane2_star_sorted:
+          log:
+            path: /home/anders.jemt/rare_disease_test/mip7/finequagga/analysis/ACC5963A1/star_aln/ACC5963A1_171015_HM3J2DSXX_XXXXXX_lane2_star_sorted.Log.final.out
+          path: /home/anders.jemt/rare_disease_test/mip7/finequagga/analysis/ACC5963A1/star_aln/ACC5963A1_171015_HM3J2DSXX_XXXXXX_lane2_star_sorted.bam
+        ACC5963A1_171015_HM3J2DSXX_XXXXXX_lane3_star_sorted:
+          log:
+            path: /home/anders.jemt/rare_disease_test/mip7/finequagga/analysis/ACC5963A1/star_aln/ACC5963A1_171015_HM3J2DSXX_XXXXXX_lane3_star_sorted.Log.final.out
+          path: /home/anders.jemt/rare_disease_test/mip7/finequagga/analysis/ACC5963A1/star_aln/ACC5963A1_171015_HM3J2DSXX_XXXXXX_lane3_star_sorted.bam
+        ACC5963A1_171015_HM3J2DSXX_XXXXXX_lane4_star_sorted:
+          log:
+            path: /home/anders.jemt/rare_disease_test/mip7/finequagga/analysis/ACC5963A1/star_aln/ACC5963A1_171015_HM3J2DSXX_XXXXXX_lane4_star_sorted.Log.final.out
+          path: /home/anders.jemt/rare_disease_test/mip7/finequagga/analysis/ACC5963A1/star_aln/ACC5963A1_171015_HM3J2DSXX_XXXXXX_lane4_star_sorted.bam
+      star_fusion:
+        path: /home/proj/stage/rare-disease/cases/finequagga/analysis/files/star-fusion.fusion_predictions.tsv
+      stringtie_ar:
+        ACC5963A1_lanes_1234_trim_star_sorted_merged.bam:
+          path: /home/proj/stage/rare-disease/cases/finequagga/analysis/files/ACC5963A1_lanes_1234_trim_star_sorted_merged_strg.gtf
+      trim_galore_ar:
+        1_171015_HM3J2DSXX_ACC5963A1_XXXXXX_1_val_1:
+          path: /home/anders.jemt/rare_disease_test/mip7/finequagga/analysis/ACC5963A1/trim_galore_ar/1_171015_HM3J2DSXX_ACC5963A1_XXXXXX_1_val_1.fq.gz
+    sample_id: ACC5963A1
+    sex: unknown
+sv_vcf_file:
+  clinical: {}
+  research: {}
+vcf_file:
+  clinical: {}
+  research: {}
+

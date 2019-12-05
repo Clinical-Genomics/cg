@@ -37,13 +37,13 @@ def parse_sampleinfo_rna(data: dict) -> dict:
             'id': sample_id,
             'bam': sample_data['most_complete_bam']['path'],
             'star_fusion': sample_data['recipe']['star_fusion']['path'],
-            'bootstrap_vcf': _get_multiple_paths(sample_data, 'bootstrapann'),
-            'gatk_asereadcounter': _get_multiple_paths(sample_data, 'gatk_asereadcounter'),
-            'gatk_baserecalibration': _get_multiple_paths(sample_data, 'gatk_baserecalibration'),
-            'gffcompare_ar': _get_multiple_paths(sample_data, 'gffcompare_ar'),
-            'mark_duplicates': _get_multiple_paths(sample_data, 'markduplicates'),
-            'salmon_quant': _get_multiple_paths(sample_data, 'salmon_quant'),
-            'stringtie_ar': _get_multiple_paths(sample_data, 'stringtie_ar'),
+            'bootstrap_vcf': get_multiple_paths(sample_data, 'bootstrapann'),
+            'gatk_asereadcounter': get_multiple_paths(sample_data, 'gatk_asereadcounter'),
+            'gatk_baserecalibration': get_multiple_paths(sample_data, 'gatk_baserecalibration'),
+            'gffcompare_ar': get_multiple_paths(sample_data, 'gffcompare_ar'),
+            'mark_duplicates': get_multiple_paths(sample_data, 'markduplicates'),
+            'salmon_quant': get_multiple_paths(sample_data, 'salmon_quant'),
+            'stringtie_ar': get_multiple_paths(sample_data, 'stringtie_ar'),
         }
 
         outdata['samples'].append(sample)
@@ -51,7 +51,7 @@ def parse_sampleinfo_rna(data: dict) -> dict:
     return outdata
 
 
-def _get_multiple_paths(sample_data: dict, path_key: str) -> list:
+def get_multiple_paths(sample_data: dict, path_key: str) -> list:
     """Get all paths to files of a given type. Use this method if the exact filename is not
     known beforehand.
     Args:

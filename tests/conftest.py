@@ -88,6 +88,8 @@ def files():
         'config': 'tests/fixtures/apps/tb/case/case_config.yaml',
         'sampleinfo': 'tests/fixtures/apps/tb/case/case_qc_sample_info.yaml',
         'qcmetrics': 'tests/fixtures/apps/tb/case/case_qc_metrics.yaml',
+        'rna_config': 'tests/fixtures/apps/mip/rna/case_config.yaml',
+        'rna_sampleinfo': 'tests/fixtures/apps/mip/rna/case_qc_sampleinfo.yaml',
     }
 
 
@@ -102,6 +104,8 @@ def files_raw(files):
         'config': ruamel.yaml.safe_load(open(files['config'])),
         'sampleinfo': ruamel.yaml.safe_load(open(files['sampleinfo'])),
         'qcmetrics': ruamel.yaml.safe_load(open(files['qcmetrics'])),
+        'rna_config': ruamel.yaml.safe_load(open(files['rna_config'])),
+        'rna_sampleinfo': ruamel.yaml.safe_load(open(files['rna_sampleinfo'])),
     }
 
 

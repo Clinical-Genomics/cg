@@ -1,0 +1,26 @@
+# -*- coding: utf-8 -*-
+"""Test MIP RNA files"""
+
+from snapshottest import Snapshot
+
+from cg.apps.mip import files
+
+
+def test_parse_sampleinfo_rna_result_contents(snapshot: Snapshot, files_raw: dict):
+    """test parse_sampleinfo_rna using snapshot
+
+       Note: to retake all snapshots run `pytest --snapshot-update`
+
+       Args:
+           snapshot (Snapshot): a file with a snapshot of the correct test result, see
+           cg/cg/tests/snapshots/snap_test_apps_mip_files.py
+           files_raw (dict): dict of raw .yaml files
+    """
+    # GIVEN an RNA sample info file
+    sampleinfo_raw = files_raw['rna_sampleinfo']
+
+    # WHEN parsing the file
+    sampleinfo_data = files.parse_sampleinfo_rna(sampleinfo_raw)
+
+    # THEN the result should contains the correct data
+    snapshot.assert_match(sampleinfo_data)
