@@ -252,3 +252,15 @@ def auto(context: click.Context, dry_run):
             exit_code = FAIL
 
     sys.exit(exit_code)
+
+
+@balsamic.command('remove-fastq')
+@click.option('-c', '--case', 'case_id', help='remove fastq folder for a case')
+@click.pass_context
+def remove_fastq(context, case_id):
+    """Remove case fastq folder"""
+
+    wrk_dir = Path(f"{context.obj['balsamic']['root']}/{family_id}/fastq")
+
+    if wrk_dir.exists():
+        shutil.rmtree(wrk_dir)
