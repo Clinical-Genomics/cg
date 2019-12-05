@@ -21,7 +21,7 @@ class VogueAPI():
         self.vogue_binary = config['vogue']['binary_path']
         self.base_call = [self.vogue_binary]
 
-    def load_genotype(self, genotype_dict: dict):
+    def load_genotype_data(self, genotype_dict: dict):
         """Load genotype data from a dict."""
         load_call = self.base_call[:]
         load_call.extend(['load', 'genotype', '-s', json.dumps(genotype_dict)])

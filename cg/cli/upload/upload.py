@@ -8,14 +8,13 @@ import click
 
 from cg.store import Store, models
 from cg.apps import coverage as coverage_app, gt, hk, loqus, tb, scoutapi, beacon as beacon_app, \
-    lims, vogue, mutacc_auto
+    lims, mutacc_auto
 from cg.exc import DuplicateRecordError, DuplicateSampleError
 from cg.meta.upload.coverage import UploadCoverageApi
 from cg.meta.upload.gt import UploadGenotypesAPI
 from cg.meta.upload.observations import UploadObservationsAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
 from cg.meta.upload.beacon import UploadBeaconApi
-from cg.meta.upload.vogue import UploadVogueAPI
 from cg.meta.analysis import AnalysisAPI
 from cg.meta.deliver.api import DeliverAPI
 from cg.meta.report.api import ReportAPI
@@ -35,7 +34,6 @@ def upload(context, family_id):
     context.obj['status'] = Store(context.obj['database'])
     context.obj['housekeeper_api'] = hk.HousekeeperAPI(context.obj)
 
-    context.obj['vogue_api'] = vogue.VogueAPI(context.obj)
     context.obj['genotype_api'] = gt.GenotypeAPI(context.obj)
     context.obj['lims_api'] = lims.LimsAPI(context.obj)
     context.obj['tb_api'] = tb.TrailblazerAPI(context.obj)
@@ -65,10 +63,6 @@ def upload(context, family_id):
         analysis_api=context.obj['analysis_api']
     )
 
-    context.obj['vogue_upload_api'] = UploadVogueAPI(
-        genotype_api=context.obj['genotype_api'],
-        vogue_api=context.obj['vogue_api']
-    )
 
     if family_id:
         family_obj = context.obj['status'].family(family_id)

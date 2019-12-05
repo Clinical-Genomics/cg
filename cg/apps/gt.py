@@ -46,13 +46,10 @@ class GenotypeAPI(Manager):
                 analysis_obj.sample.sex = samples_sex[analysis_obj.sample_id]['pedigree']
                 self.commit()
 
-    def prepare_sample(self, sample_id: str = '', days: int = 0) -> str:
-        """Get sample info for one or many samples."""
+    def export_sample(self, days: int = 0) -> str:
+        """Export sample info."""
         trending_call = self.base_call[:]
-        if sample_id:
-            trending_call.extend(['prepare-sample', '-s', sample_id])
-        elif days:
-            trending_call.extend(['prepare-sample', '-d', days])
+        trending_call.extend(['export-sample', '-d', days])
         try:
             LOG.info('Running Genotype API to get data.')
             LOG.debug(trending_call)
@@ -66,13 +63,10 @@ class GenotypeAPI(Manager):
             raise CaseNotFoundError("samples not found in genotype db")
         return output
 
-    def prepare_analysis(self, sample_id: str = '', days: int = 0) -> str:
-        """Get analysis_comparison for one or many samples."""
+    def export_sample_analysis(self, days: int = 0) -> str:
+        """Export analysis."""
         trending_call = self.base_call[:]
-        if sample_id:
-            trending_call.extend(['prepare-analysis', '-s', sample_id])
-        elif days:
-            trending_call.extend(['prepare-analysis', '-d', days])
+        trending_call.extend(['export-sample-analysis', '-d', days])
         try:
             LOG.info('Running Genotype API to get data.')
             LOG.debug(trending_call)
