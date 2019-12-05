@@ -2,38 +2,34 @@ language: python
 
 python:
   - '3.6'
-  - '3.7'
 
 cache: pip
 
 jobs:
   include:
-    - stage: dependencies
+    - stage: "dependencies"
       script:
         - pip install --upgrade pip
         - pip install -U -r requirements.txt .
         - pip check
-    - name: test
+    - name: "test"
       script:
         - pip install --upgrade pip
         - pip install cython
         - pip install -U -r requirements.txt -r requirements-dev.txt .
         - pytest
-    - name: coverage
-      python: '3.7'
+    - name: "coverage"
       script:
         - pip install --upgrade pip
         - pip install cython
         - pip install -U -r requirements.txt -r requirements-dev.txt .
         - coverage run --source "$(basename "$PWD")" setup.py test
-    - name: code formatting
-      python: '3.7'
+    - name: "code formatting"
       script:
         - pip install --upgrade pip
         - pip install -r requirements-dev.txt
         - black --check trade
-    - name: linting
-      python: '3.7'
+    - name: "linting"
       script:
         - pip install --upgrade pip
         - pip install -r requirements-dev.txt
