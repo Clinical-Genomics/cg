@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*- import logging
-
+""""Base command for delivery sub commands"""
 import click
 
 from .mip_dna import mip_dna

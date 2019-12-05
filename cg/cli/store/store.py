@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+""""Base command for storing sub commands"""
 import logging
 import click
 
