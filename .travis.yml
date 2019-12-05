@@ -2,12 +2,14 @@ language: python
 
 python:
   - '3.6'
+  - '3.7'
 
 cache: pip
 
 jobs:
   include:
-    - stage: "dependencies"
+    - stage: "Build"
+      name: "dependencies"
       script:
         - pip install --upgrade pip
         - pip install -U -r requirements.txt .
