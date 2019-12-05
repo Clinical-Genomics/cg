@@ -4,6 +4,7 @@
     API for uploading observations
 """
 
+from pathlib import Path
 import logging
 from typing import List
 
@@ -40,7 +41,7 @@ class UploadObservationsAPI():
                                                tags=['vcf-sv-research']).first()
             if hk_sv_vcf is None:
                 raise FileNotFoundError("No file with vcf-sv-research tag in housekeeper")
-            if not hk_sv_vcf.full_path.exists():
+            if not Path(hk_sv_vcf.full_path).exists():
                 raise FileNotFoundError(f"{hk_sv_vcf.full_path} does not exist")
             input_data['sv_vcf'] = hk_sv_vcf.full_path
 
@@ -55,13 +56,13 @@ class UploadObservationsAPI():
         for file_type, file in hk_files.items():
             if file is None:
                 raise FileNotFoundError(f"No file with {file_type} tag in housekeeper")
-            if not file.full_path.exists():
+            if not Path(file.full_path).exists():
                 raise FileNotFoundError(f"{file.full_path} does not exist")
 
         input_data['family'] = analysis_obj.family.internal_id
-        input_data['vcf'] = str(hk_vcf.full_path)
-        input_data['snv_gbcf'] = str(hk_snv_gbcf.full_path)
-        input_data['pedigree'] = str(hk_pedigree.full_path)
+        input_data['vcf'] = hk_vcf.full_path
+        input_data['snv_gbcf'] = hk_snv_gbcf.full_path
+        input_data['pedigree'] = hk_pedigree.full_path
 
         return input_data
 

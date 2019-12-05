@@ -1,4 +1,3 @@
-from pathlib import Path
 import pytest
 from _pytest import tmpdir
 from cg.apps.balsamic.fastq import BalsamicFastqHandler
@@ -121,7 +120,7 @@ class MockFile:
         return MockFile()
 
     def full_path(self):
-        return Path('')
+        return ''
 
 
 class MockDeliver:
