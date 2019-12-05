@@ -30,7 +30,7 @@ jobs:
       script:
         - pip install --upgrade pip
         - pip install -r requirements-dev.txt
-        - black --check trade
+        - black --check cg
     - name: "linting"
       script:
         - pip install --upgrade pip
