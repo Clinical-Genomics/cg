@@ -1,4 +1,4 @@
-""" Add CLI support to start BALSAMIC """
+""" Add CLI support to create config and/or start BALSAMIC """
 import gzip
 import logging
 import re
@@ -24,7 +24,10 @@ FAIL = 1
 @click.group(invoke_without_command=True)
 @PRIORITY_OPTION
 @EMAIL_OPTION
-@click.option('-c', '--case-id', 'case_id', help='case to prepare and start an analysis for')
+@click.option('-c',
+              '--case-id',
+              'case_id',
+              help='case to prepare and start an analysis for')
 @click.option('--target-bed', required=False, help='Optional')
 @click.pass_context
 def balsamic(context, case_id, priority, email, target_bed):
@@ -42,7 +45,11 @@ def balsamic(context, case_id, priority, email, target_bed):
         # execute the analysis!
         context.invoke(link, family_id=case_id)
         context.invoke(config, case_id=case_id, target_bed=target_bed)
-        context.invoke(run, run_analysis=True, case_id=case_id, priority=priority, email=email)
+        context.invoke(run,
+                       run_analysis=True,
+                       case_id=case_id,
+                       priority=priority,
+                       email=email)
 
 
 @balsamic.command()
@@ -61,10 +68,17 @@ def link(context, case_id, sample_id):
             context.obj['api'].link_sample(BalsamicFastqHandler(context.obj),
                                            case=link_obj.family.internal_id,
                                            sample=link_obj.sample.internal_id)
+        else:
+            LOGGER.error('case does not have blasamic as data analysis')
+            context.abort()
 
 
 @balsamic.command()
-@click.option('-d', '--dry-run', 'dry', is_flag=True, help='print config to console')
+@click.option('-d',
+              '--dry-run',
+              'dry',
+              is_flag=True,
+              help='print config to console')
 @click.option('--target-bed', required=False, help='Optional')
 @click.option('--umi-trim-length', default=5, required=False, help='Default 5')
 @click.option('--quality-trim', is_flag=True, required=False, help='Optional')
@@ -72,10 +86,9 @@ def link(context, case_id, sample_id):
 @click.option('--umi', is_flag=True, required=False, help='Optional')
 @click.argument('case_id')
 @click.pass_context
-def config(context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim,
-           umi, case_id):
-    """Generate a config for the case_id.
-    """
+def config(context, dry, target_bed, umi_trim_length, quality_trim,
+           adapter_trim, umi, case_id):
+    """ Generate a config for the case_id. """
 
     # missing sample_id and files
     case_obj = context.obj['db'].family(case_id)
@@ -98,14 +111,15 @@ def config(context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim
 
         linked_reads_paths = {1: [], 2: []}
         concatenated_paths = {1: '', 2: ''}
-        file_objs = context.obj['hk_api'].get_files(bundle=link_obj.sample.internal_id,
-                                                    tags=['fastq'])
+        file_objs = context.obj['hk_api'].get_files(
+            bundle=link_obj.sample.internal_id, tags=['fastq'])
         files = []
         for file_obj in file_objs:
             # figure out flowcell name from header
             with context.obj['gzipper'].open(file_obj.full_path) as handle:
                 header_line = handle.readline().decode()
-                header_info = context.obj['analysis_api'].fastq_header(header_line)
+                header_info = context.obj['analysis_api'].fastq_header(
+                    header_line)
             data = {
                 'path': file_obj.full_path,
                 'lane': int(header_info['lane']),
@@ -122,19 +136,21 @@ def config(context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim
 
         for fastq_data in sorted_files:
             original_fastq_path = Path(fastq_data['path'])
-            linked_fastq_name = context.obj['fastq_handler'].FastqFileNameCreator.create(
-                lane=fastq_data['lane'],
-                flowcell=fastq_data['flowcell'],
-                sample=link_obj.sample.internal_id,
-                read=fastq_data['read'],
-                more={'undetermined': fastq_data['undetermined']},
-            )
+            linked_fastq_name = context.obj[
+                'fastq_handler'].FastqFileNameCreator.create(
+                    lane=fastq_data['lane'],
+                    flowcell=fastq_data['flowcell'],
+                    sample=link_obj.sample.internal_id,
+                    read=fastq_data['read'],
+                    more={'undetermined': fastq_data['undetermined']},
+                )
             concatenated_fastq_name = \
                 context.obj['fastq_handler'].FastqFileNameCreator.get_concatenated_name(
                     linked_fastq_name)
             linked_fastq_path = wrk_dir / linked_fastq_name
             linked_reads_paths[fastq_data['read']].append(linked_fastq_path)
-            concatenated_paths[fastq_data['read']] = f"{wrk_dir}/{concatenated_fastq_name}"
+            concatenated_paths[
+                fastq_data['read']] = f"{wrk_dir}/{concatenated_fastq_name}"
 
             if linked_fastq_path.exists():
                 LOG.info("found: %s -> %s", original_fastq_path, linked_fastq_path)
@@ -151,14 +167,17 @@ def config(context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim
 
     nr_paths = len(tumor_paths) if tumor_paths else 0
     if nr_paths != 1:
-        click.echo(f"Must have exactly one tumor sample! Found {nr_paths} samples.", color="red")
+        click.echo(
+            f"Must have exactly one tumor sample! Found {nr_paths} samples.",
+            color="red")
         context.abort()
     tumor_path = tumor_paths.pop()
 
     normal_path = None
     nr_normal_paths = len(normal_paths) if normal_paths else 0
     if nr_normal_paths > 1:
-        click.echo(f"Too many normal samples found: {nr_normal_paths}", color="red")
+        click.echo(f"Too many normal samples found: {nr_normal_paths}",
+                   color="red")
         context.abort()
     elif nr_normal_paths == 1:
         normal_path = normal_paths.pop()
@@ -195,16 +214,23 @@ def config(context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim
         click.echo(' '.join(command))
         return SUCCESS
     else:
-        process = subprocess.run(
-            ' '.join(command), shell=True
-        )
+        process = subprocess.run(' '.join(command), shell=True)
         return process
 
 
 @balsamic.command()
-@click.option('-d', '--dry-run', 'dry', is_flag=True, help='print command to console')
-@click.option('-r', '--run-analysis', 'run_analysis', is_flag=True, default=False, help='start '
-                                                                                        'analysis')
+@click.option('-d',
+              '--dry-run',
+              'dry',
+              is_flag=True,
+              help='print command to console')
+@click.option('-r',
+              '--run-analysis',
+              'run_analysis',
+              is_flag=True,
+              default=False,
+              help='start '
+              'analysis')
 @click.option('--config', 'config_path', required=False, help='Optional')
 @PRIORITY_OPTION
 @EMAIL_OPTION
@@ -240,15 +266,17 @@ def run(context, dry, run_analysis, config_path, priority, email, case_id):
     if dry:
         click.echo(' '.join(command))
     else:
-        process = subprocess.run(
-            ' '.join(command), shell=True
-        )
+        process = subprocess.run(' '.join(command), shell=True)
         return process
 
 
 @balsamic.command()
-@click.option('-d', '--dry-run', 'dry_run', is_flag=True, help='print to console, '
-                                                               'without actualising')
+@click.option('-d',
+              '--dry-run',
+              'dry_run',
+              is_flag=True,
+              help='print to console, '
+              'without actualising')
 @click.pass_context
 def auto(context: click.Context, dry_run):
     """Start all analyses that are ready for analysis."""
@@ -264,7 +292,9 @@ def auto(context: click.Context, dry_run):
             continue
 
         try:
-            context.invoke(balsamic, priority=priority, case_id=case_obj.internal_id)
+            context.invoke(balsamic,
+                           priority=priority,
+                           case_id=case_obj.internal_id)
         except LimsDataError as error:
             LOG.exception(error.message)
             exit_code = FAIL
