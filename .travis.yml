@@ -19,13 +19,13 @@ jobs:
         - pip install --upgrade pip
         - pip install -U -r requirements.txt .
         - pip check
-    - stage: test
+    - name: test
       script:
         - pip install --upgrade pip
         - pip install cython
         - pip install -U -r requirements.txt -r requirements-dev.txt .
         - pytest
-    - stage: coverage
+    - name: coverage
       python: '3.7'
       script:
           - pip install --upgrade pip
