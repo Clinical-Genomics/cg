@@ -13,3 +13,5 @@ html-linter
 tidy
 six==1.12                   # due to astroid 2.3.2
 python-coveralls>=2.9.3     # due to conflict on coverage package
+black
+pre-commit
