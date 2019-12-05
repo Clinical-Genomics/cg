@@ -260,7 +260,7 @@ def auto(context: click.Context, dry_run):
 def remove_fastq(context, case_id):
     """Remove case fastq folder"""
 
-    wrk_dir = Path(f"{context.obj['balsamic']['root']}/{family_id}/fastq")
+    wrk_dir = Path(f"{context.obj['balsamic']['root']}/{case_id}/fastq")
 
     if wrk_dir.exists():
         shutil.rmtree(wrk_dir)
