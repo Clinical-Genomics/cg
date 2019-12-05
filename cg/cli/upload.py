@@ -67,8 +67,8 @@ def upload(context, family_id, force_restart):
     context.obj['lims_api'] = lims.LimsAPI(context.obj)
     context.obj['tb_api'] = tb.TrailblazerAPI(context.obj)
     context.obj['chanjo_api'] = coverage_app.ChanjoAPI(context.obj)
-    context.obj['deliver_api'] = MipDnaDeliverAPI(context.obj, hk_api=context.obj['housekeeper_api'],
-                                                  lims_api=context.obj['lims_api'])
+    context.obj['deliver_api'] = MipDnaDeliverAPI(context.obj, hk_api=context.obj[
+        'housekeeper_api'], lims_api=context.obj['lims_api'])
     context.obj['scout_api'] = scoutapi.ScoutAPI(context.obj)
     context.obj['analysis_api'] = AnalysisAPI(context.obj, hk_api=context.obj['housekeeper_api'],
                                               scout_api=context.obj['scout_api'],
