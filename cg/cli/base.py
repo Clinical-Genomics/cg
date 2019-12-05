@@ -14,7 +14,7 @@ from .balsamic import balsamic
 from .add import add
 from .backup import backup
 from .clean import clean
-from cg.cli.deliver.deliver import deliver
+from .deliver.deliver import deliver
 from .export import export
 from .get import get
 from .import_cmd import import_cmd
@@ -22,7 +22,7 @@ from .miprdrna import rna
 from .reset import reset_cmd
 from .set import set_cmd
 from .status import status
-from cg.cli.store.store import store
+from .store.store import store
 from .transfer import transfer
 from .upload import upload
 
