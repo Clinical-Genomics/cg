@@ -9,12 +9,12 @@ from pathlib import Path
 import click
 from cg.apps import hk
 from cg.apps.balsamic.fastq import BalsamicFastqHandler
-from cg.cli.analysis.analysis import link
+from cg.cli.analysis.analysis import get_link_objs
 from cg.exc import LimsDataError, BalsamicStartError
 from cg.meta.analysis import AnalysisAPI
 from cg.store import Store
 
-LOGGER = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 PRIORITY_OPTION = click.option('-p', '--priority', type=click.Choice(['low', 'normal', 'high']))
 EMAIL_OPTION = click.option('-e', '--email', help='email to send errors to')
 SUCCESS = 0
@@ -36,13 +36,31 @@ def balsamic(context, case_id, priority, email, target_bed):
     context.obj['gzipper'] = gzip
     if context.invoked_subcommand is None:
         if case_id is None:
-            LOGGER.error('provide a case')
+            LOG.error('provide a case')
             context.abort()
 
         # execute the analysis!
         context.invoke(link, family_id=case_id)
         context.invoke(config, case_id=case_id, target_bed=target_bed)
         context.invoke(run, run_analysis=True, case_id=case_id, priority=priority, email=email)
+
+
+@balsamic.command()
+@click.option('-c', '--case', 'case_id', help='link all samples for a case')
+@click.argument('sample_id', required=False)
+@click.pass_context
+def link(context, case_id, sample_id):
+    """Link FASTQ files for a SAMPLE_ID."""
+
+    link_objs = get_link_objs(context, case_id, sample_id)
+
+    for link_obj in link_objs:
+        LOG.info("%s: %s link FASTQ files", link_obj.sample.internal_id,
+                 link_obj.sample.data_analysis)
+        if link_obj.sample.data_analysis and 'balsamic' in link_obj.sample.data_analysis.lower():
+            context.obj['api'].link_sample(BalsamicFastqHandler(context.obj),
+                                           case=link_obj.family.internal_id,
+                                           sample=link_obj.sample.internal_id)
 
 
 @balsamic.command()
@@ -63,7 +81,7 @@ def config(context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim
     case_obj = context.obj['db'].family(case_id)
 
     if not case_obj:
-        LOGGER.error("Could not find case: %s", case_id)
+        LOG.error("Could not find case: %s", case_id)
         context.abort()
 
     link_objs = case_obj.links
@@ -76,7 +94,7 @@ def config(context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim
     root_dir = context.obj['balsamic']['root']
     wrk_dir = Path(f'{root_dir}/{case_id}/fastq')
     for link_obj in link_objs:
-        LOGGER.info("%s: config FASTQ file", link_obj.sample.internal_id)
+        LOG.info("%s: config FASTQ file", link_obj.sample.internal_id)
 
         linked_reads_paths = {1: [], 2: []}
         concatenated_paths = {1: '', 2: ''}
@@ -119,9 +137,9 @@ def config(context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim
             concatenated_paths[fastq_data['read']] = f"{wrk_dir}/{concatenated_fastq_name}"
 
             if linked_fastq_path.exists():
-                LOGGER.info("found: %s -> %s", original_fastq_path, linked_fastq_path)
+                LOG.info("found: %s -> %s", original_fastq_path, linked_fastq_path)
             else:
-                LOGGER.debug("destination path already exists: %s", linked_fastq_path)
+                LOG.debug("destination path already exists: %s", linked_fastq_path)
 
         if link_obj.sample.is_tumour:
             tumor_paths.add(concatenated_paths[1])
@@ -237,7 +255,7 @@ def auto(context: click.Context, dry_run):
     exit_code = SUCCESS
     for case_obj in context.obj['db'].cases_to_balsamic_analyze():
 
-        LOGGER.info("%s: start analysis", case_obj.internal_id)
+        LOG.info("%s: start analysis", case_obj.internal_id)
 
         priority = ('high' if case_obj.high_priority else
                     ('low' if case_obj.low_priority else 'normal'))
@@ -248,7 +266,7 @@ def auto(context: click.Context, dry_run):
         try:
             context.invoke(balsamic, priority=priority, case_id=case_obj.internal_id)
         except LimsDataError as error:
-            LOGGER.exception(error.message)
+            LOG.exception(error.message)
             exit_code = FAIL
 
     sys.exit(exit_code)

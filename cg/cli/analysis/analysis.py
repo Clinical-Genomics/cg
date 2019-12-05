@@ -75,12 +75,8 @@ def _suggest_cases_to_analyze(context, show_as_error=False):
         click.echo(family_obj)
 
 
-@analysis.command()
-@click.option('-f', '--family', 'family_id', help='link all samples for a family')
-@click.argument('sample_id', required=False)
-@click.pass_context
-def link(context, family_id, sample_id):
-    """Link FASTQ files for a SAMPLE_ID."""
+def get_link_objs(context, family_id, sample_id):
+    """Get link objects for a SAMPLE_ID."""
 
     link_objs = None
 
@@ -100,19 +96,4 @@ def link(context, family_id, sample_id):
         LOG.error('provide family and/or sample')
         context.abort()
 
-    for link_obj in link_objs:
-        LOG.info("%s: %s link FASTQ files", link_obj.sample.internal_id,
-                 link_obj.sample.data_analysis)
-        if link_obj.sample.data_analysis and 'balsamic' in link_obj.sample.data_analysis.lower():
-            context.obj['api'].link_sample(BalsamicFastqHandler(context.obj),
-                                           case=link_obj.family.internal_id,
-                                           sample=link_obj.sample.internal_id)
-        elif not link_obj.sample.data_analysis or \
-                'mip' in link_obj.sample.data_analysis.lower() or \
-                'mip-rna' in link_obj.sample.data_analysis.lower():
-            mip_fastq_handler = MipFastqHandler(context.obj,
-                                                context.obj['db'],
-                                                context.obj['tb'])
-            context.obj['api'].link_sample(mip_fastq_handler,
-                                           case=link_obj.family.internal_id,
-                                           sample=link_obj.sample.internal_id)
+    return link_objs
