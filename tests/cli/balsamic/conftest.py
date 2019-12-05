@@ -2,7 +2,6 @@
 from datetime import datetime
 
 import pytest
-
 from cg.apps.balsamic.fastq import BalsamicFastqHandler
 from cg.apps.hk import HousekeeperAPI
 from cg.meta.analysis import AnalysisAPI
@@ -18,11 +17,12 @@ def base_context(balsamic_store) -> dict:
         'analysis_api': MockAnalysis,
         'fastq_handler': MockBalsamicFastq,
         'gzipper': MockGzip(),
+        'bed_path': 'bed_path',
         'balsamic': {'conda_env': 'conda_env',
                      'root': 'root',
                      'slurm': {'account': 'account', 'qos': 'qos'},
                      'singularity': 'singularity',
-                     'reference_config': 'reference_config'
+                     'reference_config': 'reference_config',
                      }
     }
 
@@ -144,6 +144,20 @@ def ensure_application_version(disk_store, application_tag='dummy_tag'):
     return version
 
 
+def ensure_bed_version(disk_store, bed_name='dummy_bed'):
+    """utility function to return existing or create bed version for tests"""
+    bed = disk_store.bed(name=bed_name)
+    if not bed:
+        bed = disk_store.add_bed(name=bed_name)
+        disk_store.add_commit(bed)
+
+    version = disk_store.latest_bed_version(bed_name)
+    if not version:
+        version = disk_store.add_bed_version(bed, 1, 'dummy_filename')
+        disk_store.add_commit(version)
+    return version
+
+
 def ensure_customer(disk_store, customer_id='cust_test'):
     """utility function to return existing or create customer for tests"""
     customer_group = disk_store.customer_group('dummy_group')
@@ -164,11 +178,13 @@ def add_sample(store, sample_id='sample_test', gender='female', is_tumour=False,
     """utility function to add a sample to use in tests"""
     customer = ensure_customer(store)
     application_version_id = ensure_application_version(store).id
+    bed_version_id = ensure_bed_version(store).id
     sample = store.add_sample(name=sample_id, sex=gender, tumour=is_tumour,
                               sequenced_at=datetime.now(),
                               data_analysis=data_analysis)
 
     sample.application_version_id = application_version_id
+    sample.bed_version_id = bed_version_id
     sample.customer = customer
     store.add_commit(sample)
     return sample
