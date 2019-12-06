@@ -26,8 +26,16 @@ START_WITH_PROGRAM = click.option('-sw', '--start-with', help='start mip from th
 @START_WITH_PROGRAM
 @click.option('-c', '--case', 'case_id', help='case to prepare and start an analysis for')
 @click.pass_context
-def mip_dna(context: click.Context, priority: str, email: str, case_id: str, start_with: str):
-    """Run rare disease DNA workflow for CASE_ID"""
+def mip_dna(context: click.Context, case_id: str, email: str, priority: str, start_with: str):
+    """Run rare disease DNA workflow for CASE_ID
+
+       Args:
+           context:         click.Context
+           case_id(str):    petname
+           email(str):
+           priority(str):   'low', 'normal', 'high'  
+           start_with(str): bwa_mem
+    """
     context.obj['db'] = Store(context.obj['database'])
     hk_api = hk.HousekeeperAPI(context.obj)
     scout_api = scoutapi.ScoutAPI(context.obj)
@@ -72,7 +80,13 @@ def mip_dna(context: click.Context, priority: str, email: str, case_id: str, sta
 @click.argument('sample_id', required=False)
 @click.pass_context
 def link(context: click.Context, case_id: str, sample_id: str):
-    """Link FASTQ files for a SAMPLE_ID."""
+    """Link FASTQ files for a SAMPLE_ID
+
+       Args:
+           context:        click.Context
+           case_id(str):   petname
+           sample_id(str): ACC6395A2 
+    """
 
     link_objs = get_links(context, case_id, sample_id)
 
@@ -94,8 +108,13 @@ def link(context: click.Context, case_id: str, sample_id: str):
 @click.argument('case_id', required=False)
 @click.pass_context
 def case_config(context: click.Context, case_id: str, dry: bool = False):
-    """Generate a config for the CASE_ID"""
+    """Generate a config for the CASE_ID
 
+       Args:
+            context:        click.Context
+            case_id(str):   petname
+            dry(bool):
+    """
     if case_id is None:
         _suggest_cases_to_analyze(context)
         context.abort()
@@ -124,8 +143,13 @@ mip_dna.add_command(case_config, 'config')
 @click.argument('case_id', required=False)
 @click.pass_context
 def panel(context: click.Context, case_id: str, print_output: bool = False):
-    """Write aggregated gene panel file."""
+    """Write aggregated gene panel file
 
+       Args:
+            context:            click.Context
+            case_id(str):       petname
+            print_output(bool): 
+    """
     if case_id is None:
         _suggest_cases_to_analyze(context)
         context.abort()
@@ -145,10 +169,17 @@ def panel(context: click.Context, case_id: str, print_output: bool = False):
 @START_WITH_PROGRAM
 @click.argument('case_id', required=False)
 @click.pass_context
-def start(context: click.Context, case_id: str, priority: str = None, email: str = None,
+def start(context: click.Context, case_id: str, email: str = None, priority: str = None,
           start_with: str = None):
-    """Start the analysis pipeline for a case."""
+    """Start the analysis pipeline for a case
 
+       Args:
+            context:         click.Context
+            case_id(str):    petname
+            email(str):
+            priority(str):   'low', 'normal', 'high'
+            start_with(str): bwa_mem
+    """
     if case_id is None:
         _suggest_cases_to_analyze(context)
         context.abort()
@@ -168,7 +199,12 @@ def start(context: click.Context, case_id: str, priority: str = None, email: str
                                                                'without actualising')
 @click.pass_context
 def auto(context: click.Context, dry_run: bool = False):
-    """Start all analyses that are ready for analysis."""
+    """Start all analyses that are ready for analysis
+
+       Args:
+            context:       click.Context
+            dry-run(bool):
+    """
     exit_code = 0
 
     cases = [case_obj.internal_id for case_obj in context.obj['db'].cases_to_mip_analyze()]
@@ -200,7 +236,13 @@ def auto(context: click.Context, dry_run: bool = False):
     sys.exit(exit_code)
 
 
-def _suggest_cases_to_analyze(context, show_as_error=False):
+def _suggest_cases_to_analyze(context, show_as_error: bool = False):
+    """Suggest cases to analyze
+
+       Args:
+            context:             click.Context
+            show_as_error(bool): 
+    """
     if show_as_error:
         LOG.error('provide a case, suggestions:')
     else:

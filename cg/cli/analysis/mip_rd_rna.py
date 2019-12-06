@@ -19,7 +19,11 @@ LOG = logging.getLogger(__name__)
 @click.group('mip-rna')
 @click.pass_context
 def mip_rna(context: click.Context):
-    """ Run rare disease RNA workflow """
+    """Run rare disease RNA workflow
+
+       Args:
+            context: click.Context
+    """
     context.obj['db'] = Store(context.obj['database'])
     hk_api = hk.HousekeeperAPI(context.obj)
     scout_api = scoutapi.ScoutAPI(context.obj)
@@ -43,8 +47,13 @@ def mip_rna(context: click.Context):
 @click.argument('sample_id', required=False)
 @click.pass_context
 def link(context: click.Context, case_id: str, sample_id: str):
-    """Link FASTQ files for a SAMPLE_ID."""
+    """Link FASTQ files for a SAMPLE_ID
 
+       Args:
+            context:        click.Context
+            case_id(str):   petname
+            sample_id(str):  
+    """
     link_objs = get_links(context, case_id, sample_id)
 
     for link_obj in link_objs:
@@ -70,7 +79,13 @@ def link(context: click.Context, case_id: str, sample_id: str):
 @click.pass_context
 def start(context: click.Context, case_id: str, dry: bool = False,
           priority: str = None, email: str = None, start_with: str = None):
-    """Start the analysis pipeline for a case."""
+    """Start the analysis pipeline for a case
+
+       Args:
+            context:      click.Context
+            case_id(str): petname
+            dry(bool):
+    """
     tb_api = context.obj['tb']
     rna_api = context.obj['rna_api']
     case_obj = context.obj['db'].family(case_id)
@@ -98,8 +113,13 @@ def start(context: click.Context, case_id: str, dry: bool = False,
 @click.argument('case_id')
 @click.pass_context
 def case_config(context: click.Context, case_id: str, dry: bool = False):
-    """Generate a config for the case_id"""
+    """Generate a config for the case_id
 
+       Args:
+            context:      click.Context
+            case_id(str): petname
+            dry(bool):
+    """
     case_obj = context.obj['db'].family(case_id)
 
     if not case_obj:

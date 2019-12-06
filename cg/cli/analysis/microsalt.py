@@ -14,7 +14,10 @@ LOG = logging.getLogger(__name__)
 @click.group('microsalt')
 @click.pass_context
 def microsalt(context: click.Context):
-    """ Run microbial microsalt workflow """
+    """Run microbial microsalt workflow
+       Args:
+            context: click.Context
+    """
     context.obj['db'] = Store(context.obj['database'])
     hk_api = hk.HousekeeperAPI(context.obj)
     scout_api = scoutapi.ScoutAPI(context.obj)
@@ -36,8 +39,13 @@ def microsalt(context: click.Context):
 @click.argument('sample_id', required=False)
 @click.pass_context
 def link(context: click.Context, order_id: str, sample_id: str):
-    """Link microbial FASTQ files for a SAMPLE_ID."""
+    """Link microbial FASTQ files for a SAMPLE_ID
 
+       Args:
+           context: click.Context
+           order_id(str):
+           sample_id(str): ACC6395A2
+    """
     sample_objs = None
 
     if order_id and (sample_id is None):
