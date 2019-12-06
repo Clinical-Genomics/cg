@@ -1,3 +1,4 @@
+# pylint: skip-file
 ---
 align_intron_max: '100000'
 align_mates_gap_max: '100000'
