@@ -13,7 +13,14 @@ def analysis():
 
 
 def get_link_objs(context: click.Context, case_id: str, sample_id: str):
-    """Get link objects for a SAMPLE_ID."""
+    """Get link objects for a SAMPLE_ID.
+
+       Args:
+           case_id(str): setkoi
+           sample_id(str): ACC6395A2
+       Returns:
+           link_objs(obj):
+     """
 
     link_objs = None
 

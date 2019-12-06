@@ -15,8 +15,8 @@ from cg.meta.deliver.api import DeliverAPI
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
-PRIORITY_OPTION = click.option('-p', '--priority', type=click.Choice(['low', 'normal', 'high']))
 EMAIL_OPTION = click.option('-e', '--email', help='email to send errors to')
+PRIORITY_OPTION = click.option('-p', '--priority', type=click.Choice(['low', 'normal', 'high']))
 START_WITH_PROGRAM = click.option('-sw', '--start-with', help='start mip from this program.')
 
 
@@ -27,7 +27,7 @@ START_WITH_PROGRAM = click.option('-sw', '--start-with', help='start mip from th
 @click.option('-c', '--case', 'case_id', help='case to prepare and start an analysis for')
 @click.pass_context
 def mip_dna(context: click.Context, priority: str, email: str, case_id: str, start_with: str):
-    """Run rare disease DNA workflow for FAMILY_ID"""
+    """Run rare disease DNA workflow for CASE_ID"""
     context.obj['db'] = Store(context.obj['database'])
     hk_api = hk.HousekeeperAPI(context.obj)
     scout_api = scoutapi.ScoutAPI(context.obj)
@@ -89,21 +89,12 @@ def link(context: click.Context, case_id: str, sample_id: str):
                                            sample=link_obj.sample.internal_id)
 
 
-def _suggest_cases_to_analyze(context, show_as_error=False):
-    if show_as_error:
-        LOG.error('provide a case, suggestions:')
-    else:
-        LOG.warning('provide a case, suggestions:')
-    for case_obj in context.obj['db'].cases_to_mip_analyze()[:50]:
-        click.echo(case_obj)
-
-
 @mip_dna.command('case-config')
 @click.option('-d', '--dry', is_flag=True, help='Print config to console')
 @click.argument('case_id', required=False)
 @click.pass_context
 def case_config(context: click.Context, case_id: str, dry: bool = False):
-    """Generate a config for the FAMILY_ID"""
+    """Generate a config for the CASE_ID"""
 
     if case_id is None:
         _suggest_cases_to_analyze(context)
@@ -207,3 +198,12 @@ def auto(context: click.Context, dry_run: bool = False):
             LOG.exception(error.message)
             exit_code = 1
     sys.exit(exit_code)
+
+
+def _suggest_cases_to_analyze(context, show_as_error=False):
+    if show_as_error:
+        LOG.error('provide a case, suggestions:')
+    else:
+        LOG.warning('provide a case, suggestions:')
+    for case_obj in context.obj['db'].cases_to_mip_analyze()[:50]:
+        click.echo(case_obj)
