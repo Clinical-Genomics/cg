@@ -3,10 +3,7 @@
 
 from pathlib import Path
 
-from snapshottest import Snapshot
-
 from cg.apps.tb.add import AddHandler
-import cg.meta.store.miprdrna as mip_rna
 
 
 def test_get_files(files_data) -> dict:
