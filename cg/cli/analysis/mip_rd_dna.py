@@ -4,6 +4,7 @@ import logging
 import sys
 
 import click
+
 from cg.apps import hk, tb, scoutapi, lims
 from cg.apps.balsamic.fastq import BalsamicFastqHandler
 from cg.apps.mip.fastq import MipFastqHandler
@@ -25,7 +26,7 @@ START_WITH_PROGRAM = click.option('-sw', '--start-with', help='start mip from th
 @START_WITH_PROGRAM
 @click.option('-c', '--case', 'case_id', help='case to prepare and start an analysis for')
 @click.pass_context
-def mip_dna(context, priority, email, case_id, start_with):
+def mip_dna(context: click.Context, priority: str, email: str, case_id: str, start_with: str):
     """Run rare disease DNA workflow for FAMILY_ID"""
     context.obj['db'] = Store(context.obj['database'])
     hk_api = hk.HousekeeperAPI(context.obj)
@@ -70,7 +71,7 @@ def mip_dna(context, priority, email, case_id, start_with):
 @click.option('-c', '--case', 'case_id', help='link all samples for a case')
 @click.argument('sample_id', required=False)
 @click.pass_context
-def link(context, case_id, sample_id):
+def link(context: click.Context, case_id: str, sample_id: str):
     """Link FASTQ files for a SAMPLE_ID."""
 
     link_objs = get_link_objs(context, case_id, sample_id)
@@ -101,7 +102,7 @@ def _suggest_cases_to_analyze(context, show_as_error=False):
 @click.option('-d', '--dry', is_flag=True, help='Print config to console')
 @click.argument('case_id', required=False)
 @click.pass_context
-def case_config(context, dry, case_id):
+def case_config(context: click.Context, case_id: str, dry: bool = False):
     """Generate a config for the FAMILY_ID"""
 
     if case_id is None:
@@ -131,7 +132,7 @@ mip_dna.add_command(case_config, 'config')
 @click.option('-p', '--print', 'print_output', is_flag=True, help='print to console')
 @click.argument('case_id', required=False)
 @click.pass_context
-def panel(context, print_output, case_id):
+def panel(context: click.Context, case_id: str, print_output: bool = False):
     """Write aggregated gene panel file."""
 
     if case_id is None:
@@ -175,7 +176,7 @@ def start(context: click.Context, case_id: str, priority: str = None, email: str
 @click.option('-d', '--dry-run', 'dry_run', is_flag=True, help='print to console, '
                                                                'without actualising')
 @click.pass_context
-def auto(context: click.Context, dry_run):
+def auto(context: click.Context, dry_run: bool = False):
     """Start all analyses that are ready for analysis."""
     exit_code = 0
 

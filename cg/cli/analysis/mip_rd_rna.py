@@ -1,7 +1,8 @@
 """ Add CLI support to start MIP rare disease RNA"""
 
-import click
 import logging
+
+import click
 
 from cg.apps import hk, tb, scoutapi, lims
 from cg.apps.environ import environ_email
@@ -17,7 +18,7 @@ LOG = logging.getLogger(__name__)
 
 @click.group('mip-rna')
 @click.pass_context
-def mip_rna(context):
+def mip_rna(context: click.Context):
     """ Run rare disease RNA workflow """
     context.obj['db'] = Store(context.obj['database'])
     hk_api = hk.HousekeeperAPI(context.obj)
@@ -41,7 +42,7 @@ def mip_rna(context):
 @click.option('-c', '--case', 'case_id', help='link all samples for a case')
 @click.argument('sample_id', required=False)
 @click.pass_context
-def link(context, case_id, sample_id):
+def link(context: click.Context, case_id: str, sample_id: str):
     """Link FASTQ files for a SAMPLE_ID."""
 
     link_objs = get_link_objs(context, case_id, sample_id)
@@ -96,7 +97,7 @@ def start(context: click.Context, case_id: str, dry: bool = False,
 @click.option('-d', '--dry', is_flag=True, help='Print config to console')
 @click.argument('case_id')
 @click.pass_context
-def case_config(context, dry, case_id):
+def case_config(context: click.Context, case_id: str, dry: bool = False):
     """Generate a config for the case_id"""
 
     case_obj = context.obj['db'].family(case_id)

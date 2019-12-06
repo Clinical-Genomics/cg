@@ -1,7 +1,8 @@
 """Common CLI analysis functions"""
 
-import click
 import logging
+
+import click
 
 LOG = logging.getLogger(__name__)
 
@@ -11,7 +12,7 @@ def analysis():
     pass
 
 
-def get_link_objs(context, case_id, sample_id):
+def get_link_objs(context: click.Context, case_id: str, sample_id: str):
     """Get link objects for a SAMPLE_ID."""
 
     link_objs = None

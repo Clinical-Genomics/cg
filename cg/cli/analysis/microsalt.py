@@ -1,7 +1,8 @@
 """Add CLI support to start microsalt"""
 
-import click
 import logging
+
+import click
 
 from cg.apps import hk, tb, scoutapi, lims
 from cg.meta.analysis import AnalysisAPI
@@ -12,7 +13,7 @@ LOG = logging.getLogger(__name__)
 
 @click.group('microsalt')
 @click.pass_context
-def microsalt(context):
+def microsalt(context: click.Context):
     """ Run microbial microsalt workflow """
     context.obj['db'] = Store(context.obj['database'])
     hk_api = hk.HousekeeperAPI(context.obj)
@@ -34,7 +35,7 @@ def microsalt(context):
 @click.option('-o', '--order', 'order_id', help='link all microbial samples for an order')
 @click.argument('sample_id', required=False)
 @click.pass_context
-def link(context, order_id, sample_id):
+def link(context: click.Context, order_id: str, sample_id: str):
     """Link microbial FASTQ files for a SAMPLE_ID."""
 
     sample_objs = None
