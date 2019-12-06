@@ -30,11 +30,11 @@ def microsalt(context):
     )
 
 
-@microsalt.command('link-microbial')
+@microsalt.command()
 @click.option('-o', '--order', 'order_id', help='link all microbial samples for an order')
 @click.argument('sample_id', required=False)
 @click.pass_context
-def link_microbial(context, order_id, sample_id):
+def link(context, order_id, sample_id):
     """Link microbial FASTQ files for a SAMPLE_ID."""
 
     sample_objs = None
