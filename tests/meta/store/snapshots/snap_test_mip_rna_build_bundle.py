@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # snapshottest: v1 - https://goo.gl/zC4yUc
-# pylint: skip-file
+# pylint: disable-all
+
 from __future__ import unicode_literals
 
 from snapshottest import GenericRepr, Snapshot
