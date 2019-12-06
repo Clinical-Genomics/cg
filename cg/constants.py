@@ -8,7 +8,11 @@ PREP_CATEGORIES = ('wgs', 'wes', 'tgs', 'wts', 'mic', 'rml')
 SEX_OPTIONS = ('male', 'female', 'unknown')
 STATUS_OPTIONS = ('affected', 'unaffected', 'unknown')
 CONTAINER_OPTIONS = ('Tube', '96 well plate')
-CAPTUREKIT_OPTIONS = ('Agilent Sureselect CRE', 'Agilent Sureselect V5', 'SureSelect Focused Exome', 'Twist_Target_hg19.bed', 'other')
+CAPTUREKIT_OPTIONS = ('Agilent Sureselect CRE',
+                      'Agilent Sureselect V5',
+                      'SureSelect Focused Exome',
+                      'Twist_Target_hg19.bed',
+                      'other')
 CAPTUREKIT_CANCER_OPTIONS = (
     'GIcfDNA',
     'GMCKsolid',
