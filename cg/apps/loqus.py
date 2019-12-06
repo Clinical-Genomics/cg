@@ -63,7 +63,7 @@ class LoqusdbAPI:
 
         nr_variants = 0
         self.process.run_command(load_call_parameters)
-        for line in self.process.stderr.split("\n"):
+        for line in self.process.stderr_lines():
             line_content = line.split("INFO")[-1].strip()
             if "inserted" in line_content:
                 nr_variants = int(line_content.split(":")[-1].strip())

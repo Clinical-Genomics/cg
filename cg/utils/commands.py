@@ -80,6 +80,16 @@ class Process(object):
     def stderr(self):
         del self._stderr
     
+    def stdout_lines(self):
+        """Iterate over the lines in self.stdout"""
+        for line in self.stdout.split('\n'):
+            yield line
+
+    def stderr_lines(self):
+        """Iterate over the lines in self.stderr"""
+        for line in self.stderr.split('\n'):
+            yield line
+    
     def __repr__(self):
         return (f"Process:base_call:{self.base_call}")
 
