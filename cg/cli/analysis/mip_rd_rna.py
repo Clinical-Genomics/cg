@@ -38,13 +38,13 @@ def mip_rna(context):
 
 
 @mip_rna.command()
-@click.option('-f', '--family', 'family_id', help='link all samples for a family')
+@click.option('-c', '--case', 'case_id', help='link all samples for a case')
 @click.argument('sample_id', required=False)
 @click.pass_context
-def link(context, family_id, sample_id):
+def link(context, case_id, sample_id):
     """Link FASTQ files for a SAMPLE_ID."""
 
-    link_objs = get_link_objs(context, family_id, sample_id)
+    link_objs = get_link_objs(context, case_id, sample_id)
 
     for link_obj in link_objs:
         LOG.info("%s: %s link FASTQ files", link_obj.sample.internal_id,

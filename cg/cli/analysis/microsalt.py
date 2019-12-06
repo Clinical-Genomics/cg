@@ -10,7 +10,6 @@ from cg.store import Store
 
 LOG = logging.getLogger(__name__)
 
-
 @click.group('microsalt')
 @click.pass_context
 def microsalt(context):
@@ -29,6 +28,7 @@ def microsalt(context):
         lims_api=lims_api,
         deliver_api=deliver
     )
+
 
 @microsalt.command('link-microbial')
 @click.option('-o', '--order', 'order_id', help='link all microbial samples for an order')

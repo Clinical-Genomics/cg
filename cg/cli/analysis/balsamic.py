@@ -43,7 +43,7 @@ def balsamic(context, case_id, priority, email, target_bed):
             context.abort()
 
         # execute the analysis!
-        context.invoke(link, family_id=case_id)
+        context.invoke(link, case_id=case_id)
         context.invoke(config, case_id=case_id, target_bed=target_bed)
         context.invoke(run,
                        run_analysis=True,

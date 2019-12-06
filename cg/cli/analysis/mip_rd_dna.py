@@ -20,12 +20,12 @@ START_WITH_PROGRAM = click.option('-sw', '--start-with', help='start mip from th
 
 
 @click.group('mip-dna', invoke_without_command=True)
-@PRIORITY_OPTION
 @EMAIL_OPTION
+@PRIORITY_OPTION
 @START_WITH_PROGRAM
-@click.option('-f', '--family', 'family_id', help='family to prepare and start an analysis for')
+@click.option('-c', '--case', 'case_id', help='case to prepare and start an analysis for')
 @click.pass_context
-def mip_dna(context, priority, email, family_id, start_with):
+def mip_dna(context, priority, email, case_id, start_with):
     """Run rare disease DNA workflow for FAMILY_ID"""
     context.obj['db'] = Store(context.obj['database'])
     hk_api = hk.HousekeeperAPI(context.obj)
@@ -43,37 +43,37 @@ def mip_dna(context, priority, email, family_id, start_with):
     )
 
     if context.invoked_subcommand is None:
-        if family_id is None:
+        if case_id is None:
             _suggest_cases_to_analyze(context, show_as_error=True)
             context.abort()
 
         # check everything is ok
-        family_obj = context.obj['db'].family(family_id)
-        if family_obj is None:
-            LOG.error("%s: not found", family_id)
+        case_obj = context.obj['db'].family(case_id)
+        if case_obj is None:
+            LOG.error("%s: not found", case_id)
             context.abort()
-        is_ok = context.obj['api'].check(family_obj)
+        is_ok = context.obj['api'].check(case_obj)
         if not is_ok:
-            LOG.warning("%s: not ready to start", family_obj.internal_id)
+            LOG.warning("%s: not ready to start", case_obj.internal_id)
             # commit the updates to request flowcells
             context.obj['db'].commit()
         else:
             # execute the analysis!
-            context.invoke(case_config, family_id=family_id)
-            context.invoke(link, family_id=family_id)
-            context.invoke(panel, family_id=family_id)
-            context.invoke(start, family_id=family_id, priority=priority, email=email,
+            context.invoke(case_config, case_id=case_id)
+            context.invoke(link, case_id=case_id)
+            context.invoke(panel, case_id=case_id)
+            context.invoke(start, case_id=case_id, priority=priority, email=email,
                            start_with=start_with)
 
 
 @mip_dna.command()
-@click.option('-f', '--family', 'family_id', help='link all samples for a family')
+@click.option('-c', '--case', 'case_id', help='link all samples for a case')
 @click.argument('sample_id', required=False)
 @click.pass_context
-def link(context, family_id, sample_id):
+def link(context, case_id, sample_id):
     """Link FASTQ files for a SAMPLE_ID."""
 
-    link_objs = get_link_objs(context, family_id, sample_id)
+    link_objs = get_link_objs(context, case_id, sample_id)
 
     for link_obj in link_objs:
         LOG.info("%s: %s link FASTQ files", link_obj.sample.internal_id,
@@ -93,34 +93,34 @@ def _suggest_cases_to_analyze(context, show_as_error=False):
         LOG.error('provide a case, suggestions:')
     else:
         LOG.warning('provide a case, suggestions:')
-    for family_obj in context.obj['db'].cases_to_mip_analyze()[:50]:
-        click.echo(family_obj)
+    for case_obj in context.obj['db'].cases_to_mip_analyze()[:50]:
+        click.echo(case_obj)
 
 
 @mip_dna.command('case-config')
 @click.option('-d', '--dry', is_flag=True, help='Print config to console')
-@click.argument('family_id', required=False)
+@click.argument('case_id', required=False)
 @click.pass_context
-def case_config(context, dry, family_id):
+def case_config(context, dry, case_id):
     """Generate a config for the FAMILY_ID"""
 
-    if family_id is None:
+    if case_id is None:
         _suggest_cases_to_analyze(context)
         context.abort()
 
-    family_obj = context.obj['db'].family(family_id)
+    case_obj = context.obj['db'].family(case_id)
 
-    if not family_obj:
-        LOG.error('Case %s not found', family_id)
+    if not case_obj:
+        LOG.error('Case %s not found', case_id)
         context.abort()
 
     # pipeline formatted pedigree.yaml config
-    config_data = context.obj['api'].config(family_obj)
+    config_data = context.obj['api'].config(case_obj)
 
     if dry:
         print(config_data)
     else:
-        # Write to trailblazer root dir / family_id
+        # Write to trailblazer root dir / case_id
         out_path = context.obj['tb'].save_config(config_data)
         LOG.info("saved config to %s", out_path)
 
@@ -129,46 +129,46 @@ mip_dna.add_command(case_config, 'config')
 
 @mip_dna.command()
 @click.option('-p', '--print', 'print_output', is_flag=True, help='print to console')
-@click.argument('family_id', required=False)
+@click.argument('case_id', required=False)
 @click.pass_context
-def panel(context, print_output, family_id):
+def panel(context, print_output, case_id):
     """Write aggregated gene panel file."""
 
-    if family_id is None:
+    if case_id is None:
         _suggest_cases_to_analyze(context)
         context.abort()
 
-    family_obj = context.obj['db'].family(family_id)
-    bed_lines = context.obj['api'].panel(family_obj)
+    case_obj = context.obj['db'].family(case_id)
+    bed_lines = context.obj['api'].panel(case_obj)
     if print_output:
         for bed_line in bed_lines:
             print(bed_line)
     else:
-        context.obj['tb'].write_panel(family_id, bed_lines)
+        context.obj['tb'].write_panel(case_id, bed_lines)
 
 
 @mip_dna.command()
 @PRIORITY_OPTION
 @EMAIL_OPTION
 @START_WITH_PROGRAM
-@click.argument('family_id', required=False)
+@click.argument('case_id', required=False)
 @click.pass_context
-def start(context: click.Context, family_id: str, priority: str = None, email: str = None,
+def start(context: click.Context, case_id: str, priority: str = None, email: str = None,
           start_with: str = None):
-    """Start the analysis pipeline for a family."""
+    """Start the analysis pipeline for a case."""
 
-    if family_id is None:
+    if case_id is None:
         _suggest_cases_to_analyze(context)
         context.abort()
 
-    family_obj = context.obj['db'].family(family_id)
-    if family_obj is None:
-        LOG.error("%s: family not found", family_id)
+    case_obj = context.obj['db'].family(case_id)
+    if case_obj is None:
+        LOG.error("%s: case not found", case_id)
         context.abort()
-    if context.obj['tb'].analyses(family=family_obj.internal_id, temp=True).first():
-        LOG.warning("%s: analysis already running", {family_obj.internal_id})
+    if context.obj['tb'].analyses(case=case_obj.internal_id, temp=True).first():
+        LOG.warning("%s: analysis already running", {case_obj.internal_id})
     else:
-        context.obj['api'].start(family_obj, priority=priority, email=email, start_with=start_with)
+        context.obj['api'].start(case_obj, priority=priority, email=email, start_with=start_with)
 
 
 @mip_dna.command()
@@ -198,7 +198,7 @@ def auto(context: click.Context, dry_run):
             continue
 
         try:
-            context.invoke(mip_dna, priority=priority, family_id=case_obj.internal_id)
+            context.invoke(mip_dna, priority=priority, case_id=case_obj.internal_id)
         except tb.MipStartError as error:
             LOG.exception(error.message)
             exit_code = 1
