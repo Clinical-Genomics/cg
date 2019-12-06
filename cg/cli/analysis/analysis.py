@@ -18,7 +18,7 @@ def get_links(context: click.Context, case_id: str, sample_id: str) -> ['models.
            case_id(str): setkoi
            sample_id(str): ACC6395A2
        Returns:
-           link_objs(obj):
+           link_objs(list): ['models.FamilySample']
      """
 
     link_objs = None
