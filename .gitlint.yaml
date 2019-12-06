@@ -93,7 +93,8 @@ pylint:
     - --output-format=text
     - --max-line-length=100
     - --ignore=snapshots
-    - --msg-template={{abspath}}:{{line}}:{{column}}:[{{category}}:{{symbol}}] {{obj}}: {{msg}}
+    - --msg-template={{abspath}}:{{line}}:{{column}}:
+      [{{category}}:{{symbol}}] {{obj}}: {{msg}}
     - --reports=n
   filter: >-
     ^{filename}:(?P<line>{lines}):((?P<column>\d+):)?
