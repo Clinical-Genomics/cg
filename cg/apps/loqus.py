@@ -32,7 +32,7 @@ class LoqusdbAPI:
             self.loqusdb_config = config["loqusdb-wes"]["config_path"]
             self.loqusdb_binary = config["loqusdb-wes"]["binary_path"]
 
-        self.loqus_process = Process(self.loqusdb_binary, self.loqusdb_config)
+        self.process = Process(self.loqusdb_binary, self.loqusdb_config)
 
     def load(
         self,
@@ -62,9 +62,8 @@ class LoqusdbAPI:
             load_call.extend(["--sv-variants", vcf_sv_path])
 
         nr_variants = 0
-        self.loqus_process.run_command(load_call_parameters)
-        # Execute command and print its stdout+stderr as it executes
-        for line in self.loqus_process.stderr:
+        self.process.run_command(load_call_parameters)
+        for line in self.process.stderr.split("\n"):
             line_content = line.split("INFO")[-1].strip()
             if "inserted" in line_content:
                 nr_variants = int(line_content.split(":")[-1].strip())
@@ -77,13 +76,13 @@ class LoqusdbAPI:
         cases_parameters = ["cases", "-c", case_id, "--to-json"]
 
         try:
-            res = self.loqus_process.run_command(cases_parameters)
+            res = self.process.run_command(cases_parameters)
         except CalledProcessError:
             # If CalledProcessError is raised, log and raise error
             LOG.critical("Could not run cases command")
             raise
 
-        output = loqus_process.stdout
+        output = self.process.stdout
 
         # If case not in loqusdb, stdout of loqusdb command will be empty.
         if not output:
@@ -105,13 +104,13 @@ class LoqusdbAPI:
         ]
 
         try:
-            res = self.loqus_process.run_command(duplicates_params)
+            res = self.process.run_command(duplicates_params)
         except CalledProcessError:
             # If CalledProcessError is raised, log and raise error
             LOG.critical("Could not run profile command")
             raise
 
-        output = self.loqus_process.stdout
+        output = self.process.stdout
 
         if not output:
             LOG.info("No duplicates found")

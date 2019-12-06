@@ -2,8 +2,11 @@
     conftest for loqusdb API
 """
 
+from subprocess import CalledProcessError
+
 import pytest
 from cg.apps.loqus import LoqusdbAPI
+from cg.utils import Process
 
 CONFIG = {
     'loqusdb': {'config_path': 'loqusdb_config_wes', 'binary_path': 'loqus_binary'},
@@ -39,6 +42,19 @@ LOQUSDB_OUTPUT = (b'2018-11-29 08:41:38 130-229-8-20-dhcp.local '
                   b'08:41:38 130-229-8-20-dhcp.local loqusdb.plugins.'
                   b'mongo.adapter[77135] INFO All indexes exists\n')
 
+class ProcessMock(Process):
+    def __init__(self, binary, config=None, config_parameter='--config', base_call=None, 
+                 error=False):
+        self.binary = binary
+        self.config = config
+        self._stdout = ""
+        self._stderr = ""
+        self._error = error
+    
+    def run_command(self, parameters):
+        if self._error:
+            raise CalledProcessError(1,'')
+        return 0
 
 # Loqusdb fixtures
 @pytest.fixture(scope='function')
@@ -51,14 +67,60 @@ def loqus_config():
 
     return _config
 
+@pytest.fixture(scope='function')
+def loqus_binary_path(loqus_config):
+    """
+        loqusdb binary fixture
+    """
+
+    return loqus_config['loqusdb']['binary_path']
 
 @pytest.fixture(scope='function')
-def loqusdbapi():
+def loqus_config_path(loqus_config):
+    """
+        loqusdb binary fixture
+    """
+
+    return loqus_config['loqusdb']['config_path']
+
+@pytest.fixture(scope='function')
+def loqus_process(loqus_binary_path, loqus_config_path):
+
+    """
+        Return mocked cg.utils.Process instance
+    """
+
+    return ProcessMock(binary=loqus_binary_path, config=loqus_config_path)
+
+@pytest.fixture(scope='function')
+def loqus_process_exception(loqus_binary_path, loqus_config_path):
+
+    """
+        Return mocked cg.utils.Process instance
+    """
+
+    return ProcessMock(binary=loqus_binary_path, config=loqus_config_path, error=True)
+
+@pytest.fixture(scope='function')
+def loqusdbapi(loqus_config, loqus_process):
     """
         loqusdb API fixture
     """
 
-    _loqus_api = LoqusdbAPI(CONFIG)
+    _loqus_api = LoqusdbAPI(loqus_config)
+    _loqus_api.process = loqus_process
+
+    return _loqus_api
+
+@pytest.fixture(scope='function')
+def loqusdbapi_exception(loqus_config, loqus_process_exception):
+    """
+        loqusdb API fixture
+    """
+
+    _loqus_api = LoqusdbAPI(loqus_config)
+    _loqus_api.process = loqus_process_exception
+
     return _loqus_api
 
 
@@ -120,7 +182,6 @@ def loqusdb_duplicate_output():
                b'"GG", "GG", "CC", "AA", "TT", "TT"]}')
 
     return _output
-
 
 @pytest.fixture(scope='function')
 def popen_obj_mock():

@@ -25,7 +25,7 @@ class Process(object):
         LOG.info("Initialising Process with binary: {}".format(self.binary))
         self.base_call = [self.binary]
         if config:
-            self.base_call.extend[config_parameter, config]
+            self.base_call.extend([config_parameter, config])
         LOG.info("Use base call %s", self.base_call)
         self._stdout = ""
         self._stderr = ""
@@ -83,8 +83,3 @@ class Process(object):
     def __repr__(self):
         return (f"Process:base_call:{self.base_call}")
 
-
-p = Process('loqusdb')
-p.run_command(['cases'])
-print(p.stdout)
-print(p.stderr)

@@ -7,7 +7,6 @@ import json
 import pytest
 
 from cg.apps.loqus import LoqusdbAPI
-from cg.apps.loqus import execute_command
 
 from cg.exc import CaseNotFoundError
 
@@ -31,20 +30,19 @@ def test_instatiate(loqus_config):
     assert loqusdb.loqusdb_config == loqus_config['loqusdb-wes']['config_path']
     assert loqusdb.loqusdb_binary == loqus_config['loqusdb-wes']['binary_path']
 
-def test_get_case(loqusdbapi, loqusdb_case_output, mocker):
+def test_get_case(loqusdbapi, loqusdb_case_output, loqus_process):
 
     """Test to get a case via the api"""
     # GIVEN a loqusdb api
     case_id = 'a_case'
+    loqusdbapi.process.stdout = loqusdb_case_output.decode('utf-8').rstrip()
     # WHEN fetching a case with the adapter
-    mocker.patch.object(subprocess, 'check_output')
-    subprocess.check_output.return_value = loqusdb_case_output
     case_obj = loqusdbapi.get_case(case_id)
     # THEN assert that the correct case id is returned
     assert case_obj['case_id'] == case_id
 
 
-def test_get_case_non_existing(loqusdbapi, mocker):
+def test_get_case_non_existing(loqusdbapi):
 
     """Test to get a case via the api"""
 
@@ -52,22 +50,18 @@ def test_get_case_non_existing(loqusdbapi, mocker):
     case_id = 'a_case'
 
     # WHEN loqusdb output is empty string
-    mocker.patch.object(subprocess, 'check_output')
-    subprocess.check_output.return_value = b""
 
     # THEN CaseNotFoundError should be raised
     with pytest.raises(CaseNotFoundError):
         loqusdbapi.get_case(case_id)
 
-
-def test_get_case_command_fail(loqusdbapi, mocker):
+def test_get_case_command_fail(loqusdbapi_exception):
 
     """Test to see if exception is raised"""
     # GIVEN a loqusdb api and a case id
+    loqusdbapi = loqusdbapi_exception
     case_id = 'a_case'
     # WHEN an error occurs during fetching a case with the adapter
-    mocker.patch.object(subprocess, 'check_output')
-    subprocess.check_output.side_effect = subprocess.CalledProcessError(1, 'error')
 
     # THEN assert that the error is raised
     with pytest.raises(subprocess.CalledProcessError):
@@ -78,8 +72,7 @@ def test_get_duplicate(loqusdbapi, mocker, loqusdb_duplicate_output):
     """Test when duplicate exists"""
 
     # GIVEN a loqusdb api and a duplicate output
-    mocker.patch.object(subprocess, 'check_output')
-    subprocess.check_output.return_value = loqusdb_duplicate_output
+    loqusdbapi.process.stdout = loqusdb_duplicate_output.decode('utf-8')
     dup_json = json.loads(loqusdb_duplicate_output.decode('utf-8'))
 
     # WHEN a duplicate exists
@@ -93,8 +86,6 @@ def test_get_duplicate_non_existing(loqusdbapi, mocker):
     """Test when no duplicate exists"""
 
     # GIVEN a loqusdb api
-    mocker.patch.object(subprocess, 'check_output')
-    subprocess.check_output.return_value = b''
 
     # WHEN duplicate does not exist
     duplicate = loqusdbapi.get_duplicate('vcf_path')
@@ -114,8 +105,7 @@ def test_load(loqusdbapi, mocker, loqusdb_output):
     gbcf_path = 'a bcf path'
 
     # WHEN uploading a case with 15 variants to loqusdb
-    mocker.patch('cg.apps.loqus.execute_command',
-                 return_value=loqusdb_output.decode('utf-8').split('\n'))
+    loqusdbapi.process.stderr = loqusdb_output.decode('utf-8')
 
     data = loqusdbapi.load(family_id, ped_path, vcf_path, vcf_sv_path, gbcf_path)
 
@@ -136,17 +126,3 @@ def test_repr_string(loqus_config):
                       f"config={loqus_config['loqusdb']['config_path']})")
 
     assert repr_string == correct_string
-
-
-def test_execute_command(mocker, loqusdb_output, popen_obj_mock):
-
-    """
-        Test execute_command function
-    """
-
-    # Mock the Popen class
-    popen_mock = mocker.patch('subprocess.Popen')
-    popen_mock.return_value = popen_obj_mock
-    command_output = [line for line in execute_command(['_loqus_', '_command_'])]
-
-    assert command_output == loqusdb_output.decode('utf-8').split('\n')
