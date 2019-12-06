@@ -28,8 +28,7 @@ class VogueAPI():
 
         # Execute command and print its stdout+stderr as it executes
         for line in execute_command(load_call):
-            log_msg = "vogue output: %s" % line
-            LOG.info(log_msg)
+            LOG.info("vogue output: %s" % line)
 
 
 def check_process_status(process):

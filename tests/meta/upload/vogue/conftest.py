@@ -10,12 +10,12 @@ from cg.apps.vogue import VogueAPI
 GTCONFIG = {
     'genotype': {
         'database': 'database',
-        'binary_path': 'gtdb'
+        'binary_path': '/Users/mayabrandi/opt/cg/genotype_path'
         }
     }
 VOGUECONFIG = {
     'vogue': {
-        'binary_path': 'gtdb'
+        'binary_path': '/Users/mayabrandi/opt/cg/vogue_path'
         }
     }
 
