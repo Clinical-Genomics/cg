@@ -92,6 +92,7 @@ pylint:
     - --rcfile={DEFAULT_CONFIGS}/pylintrc
     - --output-format=text
     - --max-line-length=100
+    - --ignore=snapshots
     - >-
       --msg-template={{abspath}}:{{line}}:{{column}}:
       [{{category}}:{{symbol}}] {{obj}}: {{msg}}
