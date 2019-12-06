@@ -8,7 +8,7 @@ import click
 from cg.apps import hk, tb, scoutapi, lims
 from cg.apps.balsamic.fastq import BalsamicFastqHandler
 from cg.apps.mip.fastq import MipFastqHandler
-from cg.cli.analysis.analysis import get_link_objs
+from cg.cli.analysis.analysis import get_links
 from cg.exc import LimsDataError
 from cg.meta.analysis import AnalysisAPI
 from cg.meta.deliver.api import DeliverAPI
@@ -74,7 +74,7 @@ def mip_dna(context: click.Context, priority: str, email: str, case_id: str, sta
 def link(context: click.Context, case_id: str, sample_id: str):
     """Link FASTQ files for a SAMPLE_ID."""
 
-    link_objs = get_link_objs(context, case_id, sample_id)
+    link_objs = get_links(context, case_id, sample_id)
 
     for link_obj in link_objs:
         LOG.info("%s: %s link FASTQ files", link_obj.sample.internal_id,

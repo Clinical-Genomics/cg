@@ -9,7 +9,7 @@ from pathlib import Path
 import click
 from cg.apps import hk
 from cg.apps.balsamic.fastq import BalsamicFastqHandler
-from cg.cli.analysis.analysis import get_link_objs
+from cg.cli.analysis.analysis import get_links
 from cg.exc import LimsDataError, BalsamicStartError
 from cg.meta.analysis import AnalysisAPI
 from cg.store import Store
@@ -59,7 +59,7 @@ def balsamic(context, case_id, priority, email, target_bed):
 def link(context, case_id, sample_id):
     """Link FASTQ files for a SAMPLE_ID."""
 
-    link_objs = get_link_objs(context, case_id, sample_id)
+    link_objs = get_links(context, case_id, sample_id)
 
     for link_obj in link_objs:
         LOG.info("%s: %s link FASTQ files", link_obj.sample.internal_id,

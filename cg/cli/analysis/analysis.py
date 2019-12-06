@@ -12,7 +12,7 @@ def analysis():
     pass
 
 
-def get_link_objs(context: click.Context, case_id: str, sample_id: str):
+def get_links(context: click.Context, case_id: str, sample_id: str) -> ['models.FamilySample']:
     """Get link objects for a SAMPLE_ID.
 
        Args:
