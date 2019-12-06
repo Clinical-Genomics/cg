@@ -9,7 +9,6 @@ LOG = logging.getLogger(__name__)
 @click.group()
 def analysis():
     """Analysis work flows commands"""
-    pass
 
 
 def get_link_objs(context: click.Context, case_id: str, sample_id: str):
