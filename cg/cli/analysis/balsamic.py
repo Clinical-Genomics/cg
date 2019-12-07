@@ -73,7 +73,7 @@ def link(context, case_id):
                                            sample=link_obj.sample.internal_id)
         else:
             LOGGER.error('case does not have blasamic as data analysis')
-            context.abort()
+            raise context.abort()
 
 
 @balsamic.command()
@@ -100,7 +100,7 @@ def config(context, dry, target_bed: str, balsamic_opt: str, case_id):
 
     if not case_obj:
         LOG.error("Could not find case: %s", case_id)
-        context.abort()
+        raise context.abort()
 
     link_objs = case_obj.links
     tumor_paths = set()
@@ -177,7 +177,7 @@ def config(context, dry, target_bed: str, balsamic_opt: str, case_id):
         click.echo(
             f"Must have exactly one tumor sample! Found {nr_paths} samples.",
             color="red")
-        context.abort()
+        raise context.abort()
     tumor_path = tumor_paths.pop()
 
     normal_path = None
@@ -185,7 +185,7 @@ def config(context, dry, target_bed: str, balsamic_opt: str, case_id):
     if nr_normal_paths > 1:
         click.echo(f"Too many normal samples found: {nr_normal_paths}",
                    color="red")
-        context.abort()
+        raise context.abort()
     elif nr_normal_paths == 1:
         normal_path = normal_paths.pop()
 
