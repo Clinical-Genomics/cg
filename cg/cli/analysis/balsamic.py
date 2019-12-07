@@ -15,7 +15,9 @@ from cg.meta.analysis import AnalysisAPI
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
-PRIORITY_OPTION = click.option('-p', '--priority', type=click.Choice(['low', 'normal', 'high']))
+PRIORITY_OPTION = click.option('-p',
+                               '--priority',
+                               type=click.Choice(['low', 'normal', 'high']))
 EMAIL_OPTION = click.option('-e', '--email', help='email to send errors to')
 SUCCESS = 0
 FAIL = 1
@@ -56,15 +58,16 @@ def balsamic(context, case_id, priority, email, target_bed):
 @click.option('-c', '--case', 'case_id', help='link all samples for a case')
 @click.argument('sample_id', required=False)
 @click.pass_context
-def link(context, case_id, sample_id):
-    """Link FASTQ files for a SAMPLE_ID."""
+def link(context, case_id):
+    """Link FASTQ files for a CASE_ID."""
 
-    link_objs = get_links(context, case_id, sample_id)
+    link_objs = get_links(context, case_id)
 
     for link_obj in link_objs:
         LOG.info("%s: %s link FASTQ files", link_obj.sample.internal_id,
                  link_obj.sample.data_analysis)
-        if link_obj.sample.data_analysis and 'balsamic' in link_obj.sample.data_analysis.lower():
+        if link_obj.sample.data_analysis and 'balsamic' in link_obj.sample.data_analysis.lower(
+        ):
             context.obj['api'].link_sample(BalsamicFastqHandler(context.obj),
                                            case=link_obj.family.internal_id,
                                            sample=link_obj.sample.internal_id)
@@ -78,17 +81,19 @@ def link(context, case_id, sample_id):
               '--dry-run',
               'dry',
               is_flag=True,
-              help='print config to console')
-@click.option('--target-bed', required=False, help='Optional')
-@click.option('--umi-trim-length', default=5, required=False, help='Default 5')
-@click.option('--quality-trim', is_flag=True, required=False, help='Optional')
-@click.option('--adapter-trim', is_flag=True, required=False, help='Optional')
-@click.option('--umi', is_flag=True, required=False, help='Optional')
+              help='print command config to console.')
+@click.option('--target-bed',
+              required=False,
+              help=('file for the target region bed file. '
+                    'Acceptable file format: one region per line '
+                    '1 10000 100001 (chr chr_start chr_end)'))
+@click.option('--balsamic-opt',
+              help=('pass arguments directly to balsamic. e.g. '
+                    '--balsamic-opt "--umi-trim-length 5"'))
 @click.argument('case_id')
 @click.pass_context
-def config(context, dry, target_bed, umi_trim_length, quality_trim,
-           adapter_trim, umi, case_id):
-    """ Generate a config for the case_id. """
+def config(context, dry, target_bed: str, balsamic_opt: str, case_id):
+    """ Generate a config for the case_id."""
 
     # missing sample_id and files
     case_obj = context.obj['db'].family(case_id)
@@ -153,9 +158,11 @@ def config(context, dry, target_bed, umi_trim_length, quality_trim,
                 fastq_data['read']] = f"{wrk_dir}/{concatenated_fastq_name}"
 
             if linked_fastq_path.exists():
-                LOG.info("found: %s -> %s", original_fastq_path, linked_fastq_path)
+                LOG.info("found: %s -> %s", original_fastq_path,
+                         linked_fastq_path)
             else:
-                LOG.debug("destination path already exists: %s", linked_fastq_path)
+                LOG.debug("destination path already exists: %s",
+                          linked_fastq_path)
 
         if link_obj.sample.is_tumour:
             tumor_paths.add(concatenated_paths[1])
@@ -189,8 +196,7 @@ def config(context, dry, target_bed, umi_trim_length, quality_trim,
                    f" --tumor {tumor_path}"
                    f" --case-id {case_id}"
                    f" --output-config {case_id}.json"
-                   f" --analysis-dir {root_dir}"
-                   f" --umi-trim-length {umi_trim_length}")
+                   f" --analysis-dir {root_dir}")
     if target_bed:
         command_str += f" -p {target_bed}"
     elif len(target_beds) == 1:
@@ -201,12 +207,6 @@ def config(context, dry, target_bed, umi_trim_length, quality_trim,
 
     if normal_path:
         command_str += f" --normal {normal_path}"
-    if umi:
-        command_str += f" --umi"
-    if quality_trim:
-        command_str += f" --quality-trim"
-    if adapter_trim:
-        command_str += f" --adapter-trim"
     command = [f"bash -c 'source activate {conda_env}; balsamic"]
     command_str += "'"  # add ending quote from above line
     command.extend(command_str.split(' '))
