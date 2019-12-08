@@ -158,12 +158,12 @@ class BalsamicFastqHandler(BaseFastqHandler):
                                                 concatenated_paths[read])
             self._remove_files(linked_reads_paths[read])
         
-        with open(f"{wrk_dir}/{sample_type}_{case}.yml" , 'a+') as csv_out:
+        with open(f"{wrk_dir}/{sample_type}_{case}.csv" , 'a+') as csv_out:
             line.extend(sample_type_paths[1])
             line.extend(sample_type_paths[2])
             writer = csv.writer(csv_out, delimiter=',')
             writer.writerow(line) 
-            LOGGER.info(f"fastq config written to {wrk_dir}/{sample_type}_{case}.yml")
+            LOGGER.info(f"fastq config written to {wrk_dir}/{sample_type}_{case}.csv")
 
     @staticmethod
     def _remove_files(files):
