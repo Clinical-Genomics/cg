@@ -23,8 +23,6 @@ from cg.meta.analysis import AnalysisAPI
 from cg.meta.deliver.api import DeliverAPI
 from cg.store import Store
 
-
-
 LOG = logging.getLogger(__name__)
 PRIORITY_OPTION = click.option('-p',
                                '--priority',
@@ -50,21 +48,19 @@ def balsamic(context, case_id, priority, email, target_bed):
     context.obj['analysis_api'] = AnalysisAPI
     context.obj['fastq_handler'] = BalsamicFastqHandler
     context.obj['gzipper'] = gzip
-    
+
     context.obj['db'] = Store(context.obj['database'])
     hk_api = hk.HousekeeperAPI(context.obj)
     scout_api = scoutapi.ScoutAPI(context.obj)
     lims_api = lims.LimsAPI(context.obj)
     context.obj['tb'] = tb.TrailblazerAPI(context.obj)
     deliver = DeliverAPI(context.obj, hk_api=hk_api, lims_api=lims_api)
-    context.obj['api'] = AnalysisAPI(
-        db=context.obj['db'],
-        hk_api=hk_api,
-        tb_api=context.obj['tb'],
-        scout_api=scout_api,
-        lims_api=lims_api,
-        deliver_api=deliver
-    )
+    context.obj['api'] = AnalysisAPI(db=context.obj['db'],
+                                     hk_api=hk_api,
+                                     tb_api=context.obj['tb'],
+                                     scout_api=scout_api,
+                                     lims_api=lims_api,
+                                     deliver_api=deliver)
 
     if context.invoked_subcommand is None:
         if case_id is None:
@@ -94,7 +90,8 @@ def link(context, case_id):
                  link_obj.sample.data_analysis)
         if link_obj.sample.data_analysis and 'balsamic' in link_obj.sample.data_analysis.lower(
         ):
-            context.obj['api'].link_sample(BalsamicFastqHandler(context.obj, is_tumor=link_obj.sample.is_tumour),
+            context.obj['api'].link_sample(BalsamicFastqHandler(
+                context.obj, is_tumor=link_obj.sample.is_tumour),
                                            case=link_obj.family.internal_id,
                                            sample=link_obj.sample.internal_id)
         else:
@@ -136,25 +133,27 @@ def config(context, dry, target_bed: str, balsamic_opt: str, case_id):
     conda_env = context.obj['balsamic']['conda_env']
     root_dir = context.obj['balsamic']['root']
     wrk_dir = Path(f'{root_dir}/{case_id}/fastq')
-    
+
     for link_obj in link_objs:
-            if link_obj.sample.data_analysis and 'balsamic' in link_obj.sample.data_analysis.lower():
-                if link_obj.sample.is_tumour:
-                    sample_type = 'tumor'
-                    with open(f"{wrk_dir}/{sample_type}_{case_id}.csv",'r') as case_csv_in:
-                        csv_obj = csv.reader(case_csv_in)
-                        for row in csv_obj:
-                            tumor_paths.add(row[3])
-                else:
-                    sample_type = 'normal'
-                    with open(f"{wrk_dir}/{sample_type}_{case_id}.csv",'r') as case_csv_in:
-                        csv_obj = csv.reader(case_csv_in)
-                        for row in csv_obj:
-                            normal_paths.add(row[3])
+        if link_obj.sample.data_analysis and 'balsamic' in link_obj.sample.data_analysis.lower(
+        ):
+            if link_obj.sample.is_tumour:
+                sample_type = 'tumor'
+                with open(f"{wrk_dir}/{sample_type}_{case_id}.csv",
+                          'r') as case_csv_in:
+                    csv_obj = csv.reader(case_csv_in)
+                    for row in csv_obj:
+                        tumor_paths.add(row[3])
+            else:
+                sample_type = 'normal'
+                with open(f"{wrk_dir}/{sample_type}_{case_id}.csv",
+                          'r') as case_csv_in:
+                    csv_obj = csv.reader(case_csv_in)
+                    for row in csv_obj:
+                        normal_paths.add(row[3])
 
-
-                if link_obj.sample.bed_version:
-                    target_beds.add(link_obj.sample.bed_version.filename)
+            if link_obj.sample.bed_version:
+                target_beds.add(link_obj.sample.bed_version.filename)
 
     nr_paths = len(tumor_paths) if tumor_paths else 0
     if nr_paths != 1:
@@ -191,6 +190,8 @@ def config(context, dry, target_bed: str, balsamic_opt: str, case_id):
 
     if normal_path:
         command_str += f" --normal {normal_path}"
+    if balsamic_opt:
+        command_str += f" {balsamic_opt}"
     command = [f"bash -c 'source activate {conda_env}; balsamic"]
     command_str += "'"  # add ending quote from above line
     command.extend(command_str.split(' '))
