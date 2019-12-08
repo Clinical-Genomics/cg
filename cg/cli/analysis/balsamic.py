@@ -13,6 +13,16 @@ from cg.cli.analysis.analysis import get_links
 from cg.exc import LimsDataError, BalsamicStartError
 from cg.meta.analysis import AnalysisAPI
 from cg.store import Store
+from cg.apps import hk, tb, scoutapi, lims
+from cg.apps.balsamic.fastq import BalsamicFastqHandler
+from cg.apps.mip.fastq import MipFastqHandler
+from cg.cli.analysis.analysis import get_links
+from cg.exc import LimsDataError
+from cg.meta.analysis import AnalysisAPI
+from cg.meta.deliver.api import DeliverAPI
+from cg.store import Store
+
+
 
 LOG = logging.getLogger(__name__)
 PRIORITY_OPTION = click.option('-p',
@@ -39,6 +49,22 @@ def balsamic(context, case_id, priority, email, target_bed):
     context.obj['analysis_api'] = AnalysisAPI
     context.obj['fastq_handler'] = BalsamicFastqHandler
     context.obj['gzipper'] = gzip
+    
+    context.obj['db'] = Store(context.obj['database'])
+    hk_api = hk.HousekeeperAPI(context.obj)
+    scout_api = scoutapi.ScoutAPI(context.obj)
+    lims_api = lims.LimsAPI(context.obj)
+    context.obj['tb'] = tb.TrailblazerAPI(context.obj)
+    deliver = DeliverAPI(context.obj, hk_api=hk_api, lims_api=lims_api)
+    context.obj['api'] = AnalysisAPI(
+        db=context.obj['db'],
+        hk_api=hk_api,
+        tb_api=context.obj['tb'],
+        scout_api=scout_api,
+        lims_api=lims_api,
+        deliver_api=deliver
+    )
+
     if context.invoked_subcommand is None:
         if case_id is None:
             LOG.error('provide a case')
@@ -56,14 +82,16 @@ def balsamic(context, case_id, priority, email, target_bed):
 
 @balsamic.command()
 @click.option('-c', '--case', 'case_id', help='link all samples for a case')
-@click.argument('sample_id', required=False)
 @click.pass_context
 def link(context, case_id):
     """Link FASTQ files for a CASE_ID."""
 
-    link_objs = get_links(context, case_id)
+    link_objs = get_links(context, case_id, None)
 
     for link_obj in link_objs:
+        print(link_obj.family)
+        print(link_obj.sample)
+        print(dir(context))
         LOG.info("%s: %s link FASTQ files", link_obj.sample.internal_id,
                  link_obj.sample.data_analysis)
         if link_obj.sample.data_analysis and 'balsamic' in link_obj.sample.data_analysis.lower(
@@ -72,7 +100,7 @@ def link(context, case_id):
                                            case=link_obj.family.internal_id,
                                            sample=link_obj.sample.internal_id)
         else:
-            LOGGER.error('case does not have blasamic as data analysis')
+            LOG.error('case does not have blasamic as data analysis')
             raise context.abort()
 
 
@@ -112,65 +140,76 @@ def config(context, dry, target_bed: str, balsamic_opt: str, case_id):
     root_dir = context.obj['balsamic']['root']
     wrk_dir = Path(f'{root_dir}/{case_id}/fastq')
     for link_obj in link_objs:
-        LOG.info("%s: config FASTQ file", link_obj.sample.internal_id)
-
-        linked_reads_paths = {1: [], 2: []}
-        concatenated_paths = {1: '', 2: ''}
-        file_objs = context.obj['hk_api'].get_files(
-            bundle=link_obj.sample.internal_id, tags=['fastq'])
-        files = []
-        for file_obj in file_objs:
-            # figure out flowcell name from header
-            with context.obj['gzipper'].open(file_obj.full_path) as handle:
-                header_line = handle.readline().decode()
-                header_info = context.obj['analysis_api'].fastq_header(
-                    header_line)
-            data = {
-                'path': file_obj.full_path,
-                'lane': int(header_info['lane']),
-                'flowcell': header_info['flowcell'],
-                'read': int(header_info['readnumber']),
-                'undetermined': ('_Undetermined_' in file_obj.path),
-            }
-            # look for tile identifier (HiSeq X runs)
-            matches = re.findall(r'-l[1-9]t([1-9]{2})_', file_obj.path)
-            if len(matches) > 0:
-                data['flowcell'] = f"{data['flowcell']}-{matches[0]}"
-            files.append(data)
-        sorted_files = sorted(files, key=lambda k: k['path'])
-
-        for fastq_data in sorted_files:
-            original_fastq_path = Path(fastq_data['path'])
-            linked_fastq_name = context.obj[
-                'fastq_handler'].FastqFileNameCreator.create(
-                    lane=fastq_data['lane'],
-                    flowcell=fastq_data['flowcell'],
-                    sample=link_obj.sample.internal_id,
-                    read=fastq_data['read'],
-                    more={'undetermined': fastq_data['undetermined']},
-                )
-            concatenated_fastq_name = \
-                context.obj['fastq_handler'].FastqFileNameCreator.get_concatenated_name(
-                    linked_fastq_name)
-            linked_fastq_path = wrk_dir / linked_fastq_name
-            linked_reads_paths[fastq_data['read']].append(linked_fastq_path)
-            concatenated_paths[
-                fastq_data['read']] = f"{wrk_dir}/{concatenated_fastq_name}"
-
-            if linked_fastq_path.exists():
-                LOG.info("found: %s -> %s", original_fastq_path,
-                         linked_fastq_path)
+#        LOG.info("%s: config FASTQ file", link_obj.sample.internal_id)
+        LOG.info("%s: %s link FASTQ files", link_obj.sample.internal_id,
+                 link_obj.sample.data_analysis)
+        if link_obj.sample.data_analysis and 'balsamic' in link_obj.sample.data_analysis.lower(
+        ):
+            context.obj['api'].link_sample(BalsamicFastqHandler(context.obj),
+                                           case=link_obj.family.internal_id,
+                                           sample=link_obj.sample.internal_id)
+            if link_obj.sample.is_tumour:
+                tumor_paths.add(concatenated_paths[1])
             else:
-                LOG.debug("destination path already exists: %s",
-                          linked_fastq_path)
+                normal_paths.add(concatenated_paths[1])
 
-        if link_obj.sample.is_tumour:
-            tumor_paths.add(concatenated_paths[1])
+            if link_obj.sample.bed_version:
+                target_beds.add(link_obj.sample.bed_version.filename)
+
         else:
-            normal_paths.add(concatenated_paths[1])
+            LOG.error('case does not have blasamic as data analysis')
+            raise context.abort()
 
-        if link_obj.sample.bed_version:
-            target_beds.add(link_obj.sample.bed_version.filename)
+
+#        linked_reads_paths = {1: [], 2: []}
+#        concatenated_paths = {1: '', 2: ''}
+#        file_objs = context.obj['hk_api'].get_files(
+#            bundle=link_obj.sample.internal_id, tags=['fastq'])
+#        files = []
+#        for file_obj in file_objs:
+#            # figure out flowcell name from header
+#            with context.obj['gzipper'].open(file_obj.full_path) as handle:
+#                header_line = handle.readline().decode()
+#                header_info = context.obj['analysis_api'].fastq_header(
+#                    header_line)
+#            data = {
+#                'path': file_obj.full_path,
+#                'lane': int(header_info['lane']),
+#                'flowcell': header_info['flowcell'],
+#                'read': int(header_info['readnumber']),
+#                'undetermined': ('_Undetermined_' in file_obj.path),
+#            }
+#            # look for tile identifier (HiSeq X runs)
+#            matches = re.findall(r'-l[1-9]t([1-9]{2})_', file_obj.path)
+#            if len(matches) > 0:
+#                data['flowcell'] = f"{data['flowcell']}-{matches[0]}"
+#            files.append(data)
+#        sorted_files = sorted(files, key=lambda k: k['path'])
+#
+#        for fastq_data in sorted_files:
+#            original_fastq_path = Path(fastq_data['path'])
+#            linked_fastq_name = context.obj[
+#                'fastq_handler'].FastqFileNameCreator.create(
+#                    lane=fastq_data['lane'],
+#                    flowcell=fastq_data['flowcell'],
+#                    sample=link_obj.sample.internal_id,
+#                    read=fastq_data['read'],
+#                    more={'undetermined': fastq_data['undetermined']},
+#                )
+#            concatenated_fastq_name = \
+#                context.obj['fastq_handler'].FastqFileNameCreator.get_concatenated_name(
+#                    linked_fastq_name)
+#            linked_fastq_path = wrk_dir / linked_fastq_name
+#            linked_reads_paths[fastq_data['read']].append(linked_fastq_path)
+#            concatenated_paths[
+#                fastq_data['read']] = f"{wrk_dir}/{concatenated_fastq_name}"
+#
+#            if linked_fastq_path.exists():
+#                LOG.info("found: %s -> %s", original_fastq_path,
+#                         linked_fastq_path)
+#            else:
+#                LOG.debug("destination path already exists: %s",
+#                          linked_fastq_path)
 
     nr_paths = len(tumor_paths) if tumor_paths else 0
     if nr_paths != 1:
