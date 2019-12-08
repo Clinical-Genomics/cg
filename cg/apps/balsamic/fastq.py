@@ -10,6 +10,7 @@ Classes:
 import logging
 import os
 import shutil
+import csv
 from pathlib import Path
 from typing import List
 
@@ -98,7 +99,8 @@ class BalsamicFastqHandler(BaseFastqHandler):
             """"create a name for the concatenated file for some read files"""
             return f"concatenated_{'_'.join(linked_fastq_name.split('_')[-4:])}"
 
-    def __init__(self, config):
+    def __init__(self, config, is_tumor=False):
+        self.is_tumor = is_tumor 
         super().__init__(config)
         self.root_dir = config['balsamic']['root']
 
@@ -112,6 +114,16 @@ class BalsamicFastqHandler(BaseFastqHandler):
 
         linked_reads_paths = {1: [], 2: []}
         concatenated_paths = {1: '', 2: ''}
+        line = []
+        
+        if self.is_tumor:
+            sample_type = 'tumor'
+            sample_type_paths = {1: [], 2:[]}
+        else:
+            sample_type = 'normal'
+            sample_type_paths = {1: [], 2:[]}
+
+        line.extend([sample_type, case, sample])
 
         sorted_files = sorted(files, key=lambda k: k['path'])
 
@@ -131,6 +143,8 @@ class BalsamicFastqHandler(BaseFastqHandler):
 
             linked_reads_paths[fastq_data['read']].append(linked_fastq_path)
             concatenated_paths[fastq_data['read']] = f"{wrk_dir}/{concatenated_fastq_name}"
+            if f"{wrk_dir}/{concatenated_fastq_name}" not in sample_type_paths[fastq_data['read']]:
+                sample_type_paths[fastq_data['read']].append(f"{wrk_dir}/{concatenated_fastq_name}")
 
             if not linked_fastq_path.exists():
                 LOGGER.info("linking: %s -> %s", original_fastq_path, linked_fastq_path)
@@ -143,6 +157,13 @@ class BalsamicFastqHandler(BaseFastqHandler):
             FastqFileConcatenator().concatenate(linked_reads_paths[read],
                                                 concatenated_paths[read])
             self._remove_files(linked_reads_paths[read])
+        
+        with open(f"{wrk_dir}/{sample_type}_{case}.yml" , 'a+') as csv_out:
+            line.extend(sample_type_paths[1])
+            line.extend(sample_type_paths[2])
+            writer = csv.writer(csv_out, delimiter=',')
+            writer.writerow(line) 
+            LOGGER.info(f"fastq config written to {wrk_dir}/{sample_type}_{case}.yml")
 
     @staticmethod
     def _remove_files(files):
