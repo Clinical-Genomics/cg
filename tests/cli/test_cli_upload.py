@@ -1,6 +1,6 @@
 """ Test cg.cli.upload module """
 
-from cg.cli.upload import LinkHelper
+from cg.cli.upload.upload import LinkHelper
 
 
 def test_all_samples_are_non_tumor(analysis_store):

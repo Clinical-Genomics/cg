@@ -4,7 +4,6 @@
 
 import json
 import logging
-
 import subprocess
 from subprocess import CalledProcessError
 
@@ -22,15 +21,14 @@ class VogueAPI():
         self.vogue_binary = config['vogue']['binary_path']
         self.base_call = [self.vogue_binary]
 
-    def load_genotype(self, genotype_dict: dict):
-        """Add observations from a VCF."""
+    def load_genotype_data(self, genotype_dict: dict):
+        """Load genotype data from a dict."""
         load_call = self.base_call[:]
         load_call.extend(['load', 'genotype', '-s', json.dumps(genotype_dict)])
 
         # Execute command and print its stdout+stderr as it executes
         for line in execute_command(load_call):
-            log_msg = f"vogue output: {line}"
-            LOG.info(log_msg)
+            LOG.info("vogue output: %s", line)
 
     def load_apptags(self, apptag_list: list):
         """Add observations from a VCF."""
@@ -41,6 +39,12 @@ class VogueAPI():
         for line in execute_command(load_call):
             log_msg = f"vogue output: {line}"
             LOG.info(log_msg)
+
+
+def check_process_status(process):
+    """Checking process returncode to see if process failes or not."""
+
+    return process.poll() != 0
 
 
 def execute_command(cmd):
@@ -61,6 +65,5 @@ def execute_command(cmd):
     for line in process.stdout:
         yield line.decode('utf-8').strip()
 
-    # Check if process exited with returncode != 0
-    if process.poll():
+    if check_process_status(process):
         raise CalledProcessError(returncode=process.returncode, cmd=cmd)

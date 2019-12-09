@@ -23,7 +23,9 @@ from .set import set_cmd
 from .status import status
 from .store import store
 from .transfer import transfer
-from .upload import upload
+from .upload.upload import upload
+from .upload import vogue as vogue_command
+
 
 LOG = logging.getLogger(__name__)
 LEVELS = ['DEBUG', 'INFO', 'WARNING', 'ERROR']
@@ -81,3 +83,4 @@ base.add_command(transfer)
 base.add_command(upload)
 analysis.add_command(balsamic)
 analysis.add_command(rna)
+upload.add_command(vogue_command)
