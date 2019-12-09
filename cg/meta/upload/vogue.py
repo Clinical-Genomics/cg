@@ -20,7 +20,7 @@ class UploadVogueAPI():
         for sample_id, sample_dict in samples.items():
             sample_dict['_id'] = sample_id
             self.vogue_api.load_genotype_data(sample_dict)
-        
+      
         samples_analysis = self.genotype_api.export_sample_analysis(days=days)
         samples_analysis = json.loads(samples_analysis)
         for sample_id, sample_dict in samples_analysis.items():
