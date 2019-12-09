@@ -23,10 +23,6 @@ jobs:
       script:
         - pip install -U -r requirements-dev.txt .
         - coverage run --source "$(basename "$PWD")" setup.py test
-    - name: "code formatting"
-      script:
-        - pip install -r requirements-dev.txt
-        - black --check cg
     - name: "linting"
       script:
         - pip install -r requirements-dev.txt
