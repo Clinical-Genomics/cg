@@ -11,7 +11,7 @@ from cg.apps.mip.fastq import MipFastqHandler
 from cg.cli.analysis.analysis import get_links
 from cg.exc import LimsDataError
 from cg.meta.analysis import AnalysisAPI
-from cg.meta.deliver.api import DeliverAPI
+from cg.meta.deliver.mip_dna import MipDnaDeliverAPI as DeliverAPI
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)

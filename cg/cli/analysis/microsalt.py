@@ -6,10 +6,11 @@ import click
 
 from cg.apps import hk, tb, scoutapi, lims
 from cg.meta.analysis import AnalysisAPI
-from cg.meta.deliver.api import DeliverAPI
+from cg.meta.deliver.microsalt import MicrosaltDeliverAPI as DeliverAPI
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
+
 
 @click.group('microsalt')
 @click.pass_context
