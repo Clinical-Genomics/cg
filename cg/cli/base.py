@@ -84,4 +84,3 @@ base.add_command(upload)
 analysis.add_command(balsamic)
 analysis.add_command(rna)
 upload.add_command(vogue_command)
-

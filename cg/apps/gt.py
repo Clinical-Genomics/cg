@@ -55,7 +55,7 @@ class GenotypeAPI(Manager):
             LOG.debug(trending_call)
             output = subprocess.check_output(trending_call)
         except CalledProcessError as error:
-            LOG.critical("Could not run command: %s" % ' '.join(trending_call))
+            LOG.critical("Could not run command: %s", ' '.join(trending_call))
             raise error
         output = output.decode('utf-8')
         # If sample not in genotype db, stdout of genotype command will be empty.
@@ -72,7 +72,7 @@ class GenotypeAPI(Manager):
             LOG.debug(trending_call)
             output = subprocess.check_output(trending_call)
         except CalledProcessError as error:
-            LOG.critical("Could not run command: %s" % ' '.join(trending_call))
+            LOG.critical("Could not run command: %s", ' '.join(trending_call))
             raise error
         output = output.decode('utf-8')
         # If sample not in genotype db, stdout of genotype command will be empty.

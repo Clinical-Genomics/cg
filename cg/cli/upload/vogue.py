@@ -9,7 +9,6 @@ from cg.apps import vogue as vogue_api, gt
 LOG = logging.getLogger(__name__)
 
 
-
 @click.group()
 @click.pass_context
 def vogue(context):
@@ -18,11 +17,11 @@ def vogue(context):
     click.echo(click.style('----------------- TRENDING -----------------------'))
 
     context.obj['vogue_api'] = vogue_api.VogueAPI(context.obj)
-    
+
 
 @vogue.command("genotype",
                short_help="Getting genotype data from the genotype database.")
-@click.option('-d', '--days', required = 'True',
+@click.option('-d', '--days', required='True',
               help='load X days old sampels from genotype to vogue')
 @click.pass_context
 def genotype(context, days: int):
@@ -30,9 +29,7 @@ def genotype(context, days: int):
 
     click.echo(click.style('----------------- GENOTYPE -----------------------'))
 
-   
-    vogue_upload_api = UploadVogueAPI(  genotype_api=gt.GenotypeAPI(context.obj),
-                                        vogue_api=context.obj['vogue_api'])
+    vogue_upload_api = UploadVogueAPI(genotype_api=gt.GenotypeAPI(context.obj),
+                                      vogue_api=context.obj['vogue_api'])
 
     vogue_upload_api.load_genotype(days=days)
-
