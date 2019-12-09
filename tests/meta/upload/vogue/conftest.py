@@ -10,6 +10,7 @@ from cg.apps.vogue import VogueAPI
 GTCONFIG = {
     'genotype': {
         'database': 'database',
+        'config_path': '/Users/mayabrandi/opt/config/genotype.yaml',
         'binary_path': '/Users/mayabrandi/opt/cg/genotype_path'
         }
     }
@@ -19,17 +20,30 @@ VOGUECONFIG = {
         }
     }
 
-GENOTYPE_RETURN = (b'{"ACC5346A3": {"_id": "ACC5346A3"}, "SIB903A19": {"_id": "SIB903A19"},'
-                   b'"SIB903A20": {"_id": "SIB903A20"}, "SIB903A22": {"_id": "SIB903A22"}}')
+GENOTYPE_RETURN_SAMPLE = (b'{"ACC5346A3": {"status":"pass"}, "SIB903A19": {"status":"pass"}, ',
+                          b'"SIB903A20": {"status":"pass"}, "SIB903A22": {"status":"pass"}}')
 
+GENOTYPE_RETURN_SAMPLE_ANALYSIS = (b'{"ACC5346A3": {"snp": {}}, "SIB903A19": {"snp": {}}, ',
+                                   b'"SIB903A20": {"snp": {}}, "SIB903A22": {"snp": {}}}')
 
 @pytest.fixture(scope='function')
-def genotype_return_value():
+def genotype_return_sample():
     """
         genotype config fixture
     """
 
-    _config = GENOTYPE_RETURN
+    _config = GENOTYPE_RETURN_SAMPLE
+
+    return _config
+
+
+@pytest.fixture(scope='function')
+def genotype_return_sample_analysis():
+    """
+        genotype config fixture
+    """
+
+    _config = GENOTYPE_RETURN_SAMPLE_ANALYSIS
 
     return _config
 

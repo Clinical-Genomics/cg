@@ -19,7 +19,7 @@ def test_instatiate(genotype_config):
     genotype_api = GenotypeAPI(genotype_config)
 
     # THEN assert that the adapter was properly instantiated
-    assert genotype_api.genotype_database == genotype_config['genotype']['database']
+    assert genotype_api.genotype_config == genotype_config['genotype']['config_path']
     assert genotype_api.genotype_binary == genotype_config['genotype']['binary_path']
 
 
@@ -35,7 +35,7 @@ def test_export_sample(genotypeapi, mocker):
     genotypeapi.export_sample(days=days)
 
     # THEN assert subprocess is running the GenotypeAPI with correct command
-    call = ['gtdb', '--database', 'database', 'export-sample', '-d', days]
+    call = ['gtdb', '--config', 'config/path', 'export-sample', '-d', days]
     subprocess.check_output.assert_called_with(call)
 
 
