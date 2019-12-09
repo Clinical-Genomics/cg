@@ -40,7 +40,7 @@ class LoqusdbAPI:
         ped_path: str,
         vcf_path: str,
         gbcf_path: str,
-        vcf_sv_path=None,
+        vcf_sv_path: str = None,
     ) -> dict:
         """Add observations from a VCF."""
         load_call_parameters = [
@@ -59,7 +59,7 @@ class LoqusdbAPI:
             "0.90",
         ]
         if self.analysis_type == "wgs" and vcf_sv_path:
-            load_call.extend(["--sv-variants", vcf_sv_path])
+            load_call_parameters.extend(["--sv-variants", vcf_sv_path])
 
         nr_variants = 0
         self.process.run_command(load_call_parameters)
@@ -76,7 +76,7 @@ class LoqusdbAPI:
         cases_parameters = ["cases", "-c", case_id, "--to-json"]
 
         try:
-            res = self.process.run_command(cases_parameters)
+            self.process.run_command(cases_parameters)
         except CalledProcessError:
             # If CalledProcessError is raised, log and raise error
             LOG.critical("Could not run cases command")
@@ -104,7 +104,7 @@ class LoqusdbAPI:
         ]
 
         try:
-            res = self.process.run_command(duplicates_params)
+            self.process.run_command(duplicates_params)
         except CalledProcessError:
             # If CalledProcessError is raised, log and raise error
             LOG.critical("Could not run profile command")

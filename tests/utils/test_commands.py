@@ -58,7 +58,7 @@ def test_iter_output_lines(ls_process):
     # GIVEN a proces with 'ls' as binary
     process = ls_process
     # WHEN running the command without parameters
-    res = process.run_command()
+    process.run_command()
     # THEN assert it returns valid exit code
     # THEN assert the output is valid
     i = 0

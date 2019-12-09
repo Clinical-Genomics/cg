@@ -10,7 +10,7 @@ from subprocess import CalledProcessError
 LOG = logging.getLogger(__name__)
 
 
-class Process(object):
+class Process:
     """Class to handle communication with other programs via the shell
 
     The other parts of the code should not need to have any knowledge about how the processes are
@@ -25,7 +25,7 @@ class Process(object):
         """
         super(Process, self).__init__()
         self.binary = binary
-        LOG.info("Initialising Process with binary: {}".format(self.binary))
+        LOG.info("Initialising Process with binary: %s", self.binary)
         self.base_call = [self.binary]
         if config:
             self.base_call.extend([config_parameter, config])
@@ -58,6 +58,7 @@ class Process(object):
 
     @property
     def stdout(self):
+        """Fetch stdout"""
         return self._stdout
 
     @stdout.setter
@@ -70,6 +71,7 @@ class Process(object):
 
     @property
     def stderr(self):
+        """Fetch stderr"""
         return self._stderr
 
     @stderr.setter
