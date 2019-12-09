@@ -10,6 +10,10 @@ import cg
 from cg.store import Store
 
 from .analysis import analysis
+from .analysis import balsamic
+from .analysis import microsalt
+from .analysis import mip_dna
+from .analysis import mip_rna
 from .add import add
 from .backup import backup
 from .clean import clean
@@ -79,3 +83,7 @@ base.add_command(status)
 base.add_command(store)
 base.add_command(transfer)
 base.add_command(upload)
+analysis.add_command(balsamic)
+analysis.add_command(microsalt)
+analysis.add_command(mip_dna)
+analysis.add_command(mip_rna)

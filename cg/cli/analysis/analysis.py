@@ -4,6 +4,8 @@ import logging
 
 import click
 
+from cg.store import models
+
 LOG = logging.getLogger(__name__)
 
 @click.group()
@@ -11,14 +13,13 @@ def analysis():
     """Analysis work flows commands"""
 
 
-def get_links(context: click.Context, case_id: str, sample_id: str) -> ['models.FamilySample']:
+def get_links(context: click.Context, case_id: str, sample_id: str) -> [models.FamilySample]:
     """Get link objects for a SAMPLE_ID
-
        Args:
            case_id(str): petname
            sample_id(str): ACC6395A2
        Returns:
-           link_objs(list): ['models.FamilySample']
+           link_objs(list): [models.FamilySample]
      """
     link_objs = None
 
@@ -39,3 +40,5 @@ def get_links(context: click.Context, case_id: str, sample_id: str) -> ['models.
         context.abort()
 
     return link_objs
+
+

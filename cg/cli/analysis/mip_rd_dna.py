@@ -27,15 +27,7 @@ START_WITH_PROGRAM = click.option('-sw', '--start-with', help='start mip from th
 @click.option('-c', '--case', 'case_id', help='case to prepare and start an analysis for')
 @click.pass_context
 def mip_dna(context: click.Context, case_id: str, email: str, priority: str, start_with: str):
-    """Run rare disease DNA workflow for CASE_ID
-
-       Args:
-           context:         click.Context
-           case_id(str):    petname
-           email(str):
-           priority(str):   'low', 'normal', 'high'  
-           start_with(str): bwa_mem
-    """
+    """Run rare disease DNA workflow for CASE_ID"""
     context.obj['db'] = Store(context.obj['database'])
     hk_api = hk.HousekeeperAPI(context.obj)
     scout_api = scoutapi.ScoutAPI(context.obj)
@@ -80,13 +72,7 @@ def mip_dna(context: click.Context, case_id: str, email: str, priority: str, sta
 @click.argument('sample_id', required=False)
 @click.pass_context
 def link(context: click.Context, case_id: str, sample_id: str):
-    """Link FASTQ files for a SAMPLE_ID
-
-       Args:
-           context:        click.Context
-           case_id(str):   petname
-           sample_id(str): ACC6395A2 
-    """
+    """Link FASTQ files for a SAMPLE_ID"""
 
     link_objs = get_links(context, case_id, sample_id)
 
@@ -108,13 +94,7 @@ def link(context: click.Context, case_id: str, sample_id: str):
 @click.argument('case_id', required=False)
 @click.pass_context
 def case_config(context: click.Context, case_id: str, dry: bool = False):
-    """Generate a config for the CASE_ID
-
-       Args:
-            context:        click.Context
-            case_id(str):   petname
-            dry(bool):
-    """
+    """Generate a config for the CASE_ID"""
     if case_id is None:
         _suggest_cases_to_analyze(context)
         context.abort()
@@ -143,13 +123,7 @@ mip_dna.add_command(case_config, 'config')
 @click.argument('case_id', required=False)
 @click.pass_context
 def panel(context: click.Context, case_id: str, print_output: bool = False):
-    """Write aggregated gene panel file
-
-       Args:
-            context:            click.Context
-            case_id(str):       petname
-            print_output(bool): 
-    """
+    """Write aggregated gene panel file"""
     if case_id is None:
         _suggest_cases_to_analyze(context)
         context.abort()
@@ -171,15 +145,7 @@ def panel(context: click.Context, case_id: str, print_output: bool = False):
 @click.pass_context
 def start(context: click.Context, case_id: str, email: str = None, priority: str = None,
           start_with: str = None):
-    """Start the analysis pipeline for a case
-
-       Args:
-            context:         click.Context
-            case_id(str):    petname
-            email(str):
-            priority(str):   'low', 'normal', 'high'
-            start_with(str): bwa_mem
-    """
+    """Start the analysis pipeline for a case"""
     if case_id is None:
         _suggest_cases_to_analyze(context)
         context.abort()
@@ -199,12 +165,7 @@ def start(context: click.Context, case_id: str, email: str = None, priority: str
                                                                'without actualising')
 @click.pass_context
 def auto(context: click.Context, dry_run: bool = False):
-    """Start all analyses that are ready for analysis
-
-       Args:
-            context:       click.Context
-            dry-run(bool):
-    """
+    """Start all analyses that are ready for analysis"""
     exit_code = 0
 
     cases = [case_obj.internal_id for case_obj in context.obj['db'].cases_to_mip_analyze()]
@@ -237,12 +198,7 @@ def auto(context: click.Context, dry_run: bool = False):
 
 
 def _suggest_cases_to_analyze(context, show_as_error: bool = False):
-    """Suggest cases to analyze
-
-       Args:
-            context:             click.Context
-            show_as_error(bool): 
-    """
+    """Suggest cases to analyze"""
     if show_as_error:
         LOG.error('provide a case, suggestions:')
     else:

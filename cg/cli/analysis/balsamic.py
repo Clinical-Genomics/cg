@@ -14,6 +14,7 @@ from cg.exc import LimsDataError, BalsamicStartError
 from cg.meta.analysis import AnalysisAPI
 from cg.store import Store
 
+
 LOG = logging.getLogger(__name__)
 PRIORITY_OPTION = click.option('-p', '--priority', type=click.Choice(['low', 'normal', 'high']))
 EMAIL_OPTION = click.option('-e', '--email', help='email to send errors to')
