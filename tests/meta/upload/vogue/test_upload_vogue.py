@@ -26,6 +26,6 @@ def test_load_genotype(genotypeapi, vogueapi, genotype_return_sample,
     samples = json.loads(genotype_return_sample)
     call_list = vogueapi.load_genotype_data.call_args_list
 
-    assert vogueapi.load_genotype_data.call_count == 8
+    assert vogueapi.load_genotype_data.call_count == 4
     for call in call_list:
         assert call[0][0]['_id'] in samples.keys()

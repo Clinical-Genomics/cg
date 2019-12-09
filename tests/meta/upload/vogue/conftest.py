@@ -20,11 +20,9 @@ VOGUECONFIG = {
         }
     }
 
-GENOTYPE_RETURN_SAMPLE = (b'{"ACC5346A3": {"status":"pass"}, "SIB903A19": {"status":"pass"}, ',
-                          b'"SIB903A20": {"status":"pass"}, "SIB903A22": {"status":"pass"}}')
+GENOTYPE_RETURN_SAMPLE = (b'{"ACC5346A3": {"status":"pass"}, "SIB903A19": {"status":"pass"}}')
 
-GENOTYPE_RETURN_SAMPLE_ANALYSIS = (b'{"ACC5346A3": {"snp": {}}, "SIB903A19": {"snp": {}}, ',
-                                   b'"SIB903A20": {"snp": {}}, "SIB903A22": {"snp": {}}}')
+GENOTYPE_RETURN_SAMPLE_ANALYSIS = (b'{"ACC5346A3": {"snp": {}}, "SIB903A19": {"snp": {}}}')
 
 
 @pytest.fixture(scope='function')
