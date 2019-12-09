@@ -17,14 +17,14 @@ from .analysis import mip_rna
 from .add import add
 from .backup import backup
 from .clean import clean
-from .deliver import deliver
+from .deliver.deliver import deliver
 from .export import export
 from .get import get
 from .import_cmd import import_cmd
 from .reset import reset_cmd
 from .set import set_cmd
 from .status import status
-from .store import store
+from .store.store import store
 from .transfer import transfer
 from .upload import upload
 

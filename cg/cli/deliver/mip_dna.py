@@ -6,25 +6,25 @@ from pathlib import Path
 
 import click
 from cg.apps import hk, lims
-from cg.meta.deliver.api import DeliverAPI
+from cg.meta.deliver.mip_dna import MipDnaDeliverAPI
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
 
 
-@click.group()
+@click.group('mip-dna')
 @click.pass_context
-def deliver(context):
+def mip_dna(context):
     """Deliver stuff."""
     context.obj['db'] = Store(context.obj['database'])
-    context.obj['deliver_api'] = DeliverAPI(
+    context.obj['deliver_api'] = MipDnaDeliverAPI(
         db=context.obj['db'],
         hk_api=hk.HousekeeperAPI(context.obj),
         lims_api=lims.LimsAPI(context.obj)
     )
 
 
-@deliver.command()
+@mip_dna.command()
 @click.option('-V', '--version', help='version (date) of bundle')
 @click.option('-t', '--tag', multiple=True, help='the housekeeper tag(s)')
 @click.option('-i', '--inbox', 'inbox_path',
