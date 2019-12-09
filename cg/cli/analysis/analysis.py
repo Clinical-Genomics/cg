@@ -8,6 +8,7 @@ from cg.store import models
 
 LOG = logging.getLogger(__name__)
 
+
 @click.group()
 def analysis():
     """Analysis work flows commands"""
@@ -40,5 +41,3 @@ def get_links(context: click.Context, case_id: str, sample_id: str) -> [models.F
         context.abort()
 
     return link_objs
-
-

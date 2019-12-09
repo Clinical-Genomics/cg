@@ -11,6 +11,7 @@ from cg.store import Store
 
 LOG = logging.getLogger(__name__)
 
+
 @click.group('microsalt')
 @click.pass_context
 def microsalt(context: click.Context):
@@ -58,4 +59,3 @@ def link(context: click.Context, order_id: str, sample_id: str):
         context.obj['api'].link_sample(USaltFastqHandler(context.obj),
                                        case=sample_obj.microbial_order.internal_id,
                                        sample=sample_obj.internal_id)
-

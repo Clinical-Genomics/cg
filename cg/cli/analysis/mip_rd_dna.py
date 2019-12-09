@@ -11,7 +11,7 @@ from cg.apps.mip.fastq import MipFastqHandler
 from cg.cli.analysis.analysis import get_links
 from cg.exc import LimsDataError
 from cg.meta.analysis import AnalysisAPI
-from cg.meta.deliver.api import DeliverAPI
+from cg.meta.deliver.mip_dna import MipDnaDeliverAPI
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -33,7 +33,7 @@ def mip_dna(context: click.Context, case_id: str, email: str, priority: str, sta
     scout_api = scoutapi.ScoutAPI(context.obj)
     lims_api = lims.LimsAPI(context.obj)
     context.obj['tb'] = tb.TrailblazerAPI(context.obj)
-    deliver = DeliverAPI(context.obj, hk_api=hk_api, lims_api=lims_api)
+    deliver = MipDnaDeliverAPI(context.obj, hk_api=hk_api, lims_api=lims_api)
     context.obj['api'] = AnalysisAPI(
         db=context.obj['db'],
         hk_api=hk_api,
@@ -117,6 +117,7 @@ def case_config(context: click.Context, case_id: str, dry: bool = False):
 
 
 mip_dna.add_command(case_config, 'config')
+
 
 @mip_dna.command()
 @click.option('-p', '--print', 'print_output', is_flag=True, help='print to console')
