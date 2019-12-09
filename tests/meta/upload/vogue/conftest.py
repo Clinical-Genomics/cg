@@ -26,6 +26,7 @@ GENOTYPE_RETURN_SAMPLE = (b'{"ACC5346A3": {"status":"pass"}, "SIB903A19": {"stat
 GENOTYPE_RETURN_SAMPLE_ANALYSIS = (b'{"ACC5346A3": {"snp": {}}, "SIB903A19": {"snp": {}}, ',
                                    b'"SIB903A20": {"snp": {}}, "SIB903A22": {"snp": {}}}')
 
+
 @pytest.fixture(scope='function')
 def genotype_return_sample():
     """
