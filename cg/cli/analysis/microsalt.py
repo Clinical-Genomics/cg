@@ -59,4 +59,3 @@ def link(context: click.Context, order_id: str, sample_id: str):
         context.obj['api'].link_sample(USaltFastqHandler(context.obj),
                                        case=sample_obj.microbial_order.internal_id,
                                        sample=sample_obj.internal_id)
-
