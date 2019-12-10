@@ -131,15 +131,17 @@ class MockAnalysis:
 class MockLims(LimsAPI):
     """Mock lims fixture"""
 
-    lims = None
+    def __init__(self, samples):
+        self._samples = samples
 
-    def __init__(self):
-        self.lims = self
+    def sample(self, lims_id: str):
+        """Fetch information about a sample."""
 
-    _sample_tissue = 'blood'
+        for sample in self._samples:
+            if sample.get('id') == lims_id:
+                return sample
 
-    def sample(*args, **kwargs):
-        return self._sample_tissue
+        return None
 
 
 class MockMutaccAuto:

@@ -127,11 +127,11 @@ class MockHK(HousekeeperAPI):
     def __init__(self):
         """Mock the init"""
         pass
-    
+
     def files(self, **kwargs):
         """docstring for file"""
         return MockFile()
-    
+
     def version(self, arg1: str, arg2: str):
         """Fetch version from the database."""
         return MockVersion()
@@ -171,6 +171,7 @@ class MockScoutUploadApi(UploadScoutAPI):
         self.analysis = MockAnalysisApi()
         self.config = {}
         self.file_exists = False
+        self.lims_api = MockLims()
 
     @pytest.fixture(autouse=True)
     def _request_analysis(self, analysis_store_single_case):
@@ -180,7 +181,7 @@ class MockScoutUploadApi(UploadScoutAPI):
         """Mock the generate config"""
         if self.mock_generate_config:
             return self.config
-        
+
         return super().generate_config(analysis_obj, **kwargs)
 
     def save_config_file(self, scout_config, file_path):
@@ -199,8 +200,9 @@ class MockLims(LimsAPI):
 
     lims = None
 
-    def __init__(self):
+    def __init__(self, sample=None):
         self.lims = self
+        self._samples = samples
 
     _project_name = None
     _sample_sex = None
@@ -221,3 +223,12 @@ class MockLims(LimsAPI):
     def get_updated_sample_sex(self) -> str:
         """Method to be used to test that update_sample was called with sex parameter"""
         return self._sample_sex
+
+    def sample(self, lims_id: str):
+        """Fetch information about a sample."""
+
+        for sample in self._samples:
+            if sample.get('id') == lims_id:
+                return sample
+
+        return None
