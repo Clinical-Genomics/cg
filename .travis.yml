@@ -23,12 +23,11 @@ jobs:
       script:
         - pip install -U -r requirements-dev.txt .
         - coverage run --source "$(basename "$PWD")" setup.py test
+        - coveralls
     - name: "linting"
       script:
         - pip install -r requirements-dev.txt
         - git reset --soft ${TRAVIS_COMMIT_RANGE%...*} && git lint
-
-after_success: coveralls
 
 notifications:
   email: never
