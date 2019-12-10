@@ -89,7 +89,8 @@ def upload(context, family_id, force_restart):
         hk_api=context.obj['housekeeper_api'],
         scout_api=context.obj['scout_api'],
         madeline_exe=context.obj['madeline_exe'],
-        analysis_api=context.obj['analysis_api']
+        analysis_api=context.obj['analysis_api'],
+        lims_api=context.obj['lims_api']
     )
 
     if context.invoked_subcommand is None:
