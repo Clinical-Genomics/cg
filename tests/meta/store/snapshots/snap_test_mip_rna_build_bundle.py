@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 # snapshottest: v1 - https://goo.gl/zC4yUc
-# pylint: disable-all
-
 from __future__ import unicode_literals
 
 from snapshottest import GenericRepr, Snapshot
@@ -12,7 +10,7 @@ snapshots = Snapshot()
 snapshots['test_get_rna_files 1'] = [
     {
         'archive': True,
-        'path': '/home/proj/stage/rare-disease/cases/finequagga/analysis/finequagga_config.yaml',
+        'path': '/path/to/stuff/rare-disease/cases/case_id/analysis/case_id_config.yaml',
         'tags': [
             'mip-config',
             'rd-rna'
@@ -20,7 +18,7 @@ snapshots['test_get_rna_files 1'] = [
     },
     {
         'archive': True,
-        'path': '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/mip_2019-11-21T14:31:02.log',
+        'path': '/path/to/stuff/rare-disease/cases/case_id/analysis/files/mip_2019-11-21T14:31:02.log',
         'tags': [
             'mip-log',
             'rd-rna'
@@ -28,7 +26,7 @@ snapshots['test_get_rna_files 1'] = [
     },
     {
         'archive': True,
-        'path': '/home/proj/stage/rare-disease/cases/finequagga/analysis/finequagga_qc_sample_info.yaml',
+        'path': '/path/to/stuff/rare-disease/cases/case_id/analysis/case_id_qc_sample_info.yaml',
         'tags': [
             'sampleinfo',
             'rd-rna'
@@ -36,7 +34,7 @@ snapshots['test_get_rna_files 1'] = [
     },
     {
         'archive': True,
-        'path': '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/finequagga_comb.vcf',
+        'path': '/path/to/stuff/rare-disease/cases/case_id/analysis/files/case_id_comb.vcf',
         'tags': [
             'bcftools-combined-vcf',
             'rd-rna'
@@ -44,7 +42,7 @@ snapshots['test_get_rna_files 1'] = [
     },
     {
         'archive': True,
-        'path': '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/multiqc_report.html',
+        'path': '/path/to/stuff/rare-disease/cases/case_id/analysis/files/multiqc_report.html',
         'tags': [
             'multiqc-html',
             'rd-rna'
@@ -52,7 +50,7 @@ snapshots['test_get_rna_files 1'] = [
     },
     {
         'archive': True,
-        'path': '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/multiqc_data.json',
+        'path': '/path/to/stuff/rare-disease/cases/case_id/analysis/files/multiqc_data.json',
         'tags': [
             'multiqc-json',
             'rd-rna'
@@ -60,7 +58,7 @@ snapshots['test_get_rna_files 1'] = [
     },
     {
         'archive': True,
-        'path': '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/finequagga.fam',
+        'path': '/path/to/stuff/rare-disease/cases/case_id/analysis/files/case_id.fam',
         'tags': [
             'pedigree',
             'rd-rna'
@@ -68,7 +66,7 @@ snapshots['test_get_rna_files 1'] = [
     },
     {
         'archive': True,
-        'path': '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/qcmetrics_file.stub',
+        'path': '/path/to/stuff/rare-disease/cases/case_id/analysis/files/qcmetrics_file.stub',
         'tags': [
             'qcmetrics',
             'rd-rna'
@@ -76,7 +74,7 @@ snapshots['test_get_rna_files 1'] = [
     },
     {
         'archive': True,
-        'path': '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/finequagga_comb_vep.vcf',
+        'path': '/path/to/stuff/rare-disease/cases/case_id/analysis/files/case_id_comb_vep.vcf',
         'tags': [
             'vep-vcf',
             'rd-rna'
@@ -84,7 +82,7 @@ snapshots['test_get_rna_files 1'] = [
     },
     {
         'archive': True,
-        'path': '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/finequagga_vcol.yaml',
+        'path': '/path/to/stuff/rare-disease/cases/case_id/analysis/files/case_id_vcol.yaml',
         'tags': [
             'versions',
             'rd-rna'
@@ -93,88 +91,88 @@ snapshots['test_get_rna_files 1'] = [
     {
         'archive': False,
         'path': [
-            '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/foo_ACC5963A1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal_haptc_filtered_ase_bootstr.vcf',
-            '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/bar_ACC5963A1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal_haptc_filtered_ase_bootstr.vcf'
+            '/path/to/stuff/rare-disease/cases/case_id/analysis/files/foo_sample_id_1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal_haptc_filtered_ase_bootstr.vcf',
+            '/path/to/stuff/rare-disease/cases/case_id/analysis/files/bar_sample_id_1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal_haptc_filtered_ase_bootstr.vcf'
         ],
         'tags': [
             'bootstrap-vcf',
-            'ACC5963A1',
+            'sample_id_1',
             'rd-rna'
         ]
     },
     {
         'archive': False,
         'path': [
-            '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/ACC5963A1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal_haptc_filtered_ase.csv'
+            '/path/to/stuff/rare-disease/cases/case_id/analysis/files/sample_id_1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal_haptc_filtered_ase.csv'
         ],
         'tags': [
             'ase-readcounts',
-            'ACC5963A1',
+            'sample_id_1',
             'rd-rna'
         ]
     },
     {
         'archive': False,
         'path': [
-            '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/ACC5963A1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal.bam'
+            '/path/to/stuff/rare-disease/cases/case_id/analysis/files/sample_id_1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal.bam'
         ],
         'tags': [
             'bam',
             'baserecalibration',
-            'ACC5963A1',
+            'sample_id_1',
             'rd-rna'
         ]
     },
     {
         'archive': False,
         'path': [
-            '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/ACC5963A1_lanes_1234_trim_star_sorted_merged_strg_gffcmp.gtf'
+            '/path/to/stuff/rare-disease/cases/case_id/analysis/files/sample_id_1_lanes_1234_trim_star_sorted_merged_strg_gffcmp.gtf'
         ],
         'tags': [
             'gff-compare-ar',
-            'ACC5963A1',
+            'sample_id_1',
             'rd-rna'
         ]
     },
     {
         'archive': False,
         'path': [
-            '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/ACC5963A1_lanes_1234_trim_star_sorted_merged_md_metric'
+            '/path/to/stuff/rare-disease/cases/case_id/analysis/files/sample_id_1_lanes_1234_trim_star_sorted_merged_md_metric'
         ],
         'tags': [
             'mark-duplicates',
-            'ACC5963A1',
+            'sample_id_1',
             'rd-rna'
         ]
     },
     {
         'archive': False,
         'path': [
-            '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/quant.sf'
+            '/path/to/stuff/rare-disease/cases/case_id/analysis/files/quant.sf'
         ],
         'tags': [
             'salmon-quant',
-            'ACC5963A1',
+            'sample_id_1',
             'rd-rna'
         ]
     },
     {
         'archive': False,
-        'path': '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/star-fusion.fusion_predictions.tsv',
+        'path': '/path/to/stuff/rare-disease/cases/case_id/analysis/files/star-fusion.fusion_predictions.tsv',
         'tags': [
             'star-fusion',
-            'ACC5963A1',
+            'sample_id_1',
             'rd-rna'
         ]
     },
     {
         'archive': False,
         'path': [
-            '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/ACC5963A1_lanes_1234_trim_star_sorted_merged_strg.gtf'
+            '/path/to/stuff/rare-disease/cases/case_id/analysis/files/sample_id_1_lanes_1234_trim_star_sorted_merged_strg.gtf'
         ],
         'tags': [
             'stringtie-ar',
-            'ACC5963A1',
+            'sample_id_1',
             'rd-rna'
         ]
     }
@@ -185,7 +183,7 @@ snapshots['test_build_bundle_rna 1'] = {
     'files': [
         {
             'archive': True,
-            'path': '/home/proj/stage/rare-disease/cases/finequagga/analysis/finequagga_config.yaml',
+            'path': '/path/to/stuff/rare-disease/cases/case_id/analysis/case_id_config.yaml',
             'tags': [
                 'mip-config',
                 'rd-rna'
@@ -193,7 +191,7 @@ snapshots['test_build_bundle_rna 1'] = {
         },
         {
             'archive': True,
-            'path': '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/mip_2019-11-21T14:31:02.log',
+            'path': '/path/to/stuff/rare-disease/cases/case_id/analysis/files/mip_2019-11-21T14:31:02.log',
             'tags': [
                 'mip-log',
                 'rd-rna'
@@ -201,7 +199,7 @@ snapshots['test_build_bundle_rna 1'] = {
         },
         {
             'archive': True,
-            'path': '/home/proj/stage/rare-disease/cases/finequagga/analysis/finequagga_qc_sample_info.yaml',
+            'path': '/path/to/stuff/rare-disease/cases/case_id/analysis/case_id_qc_sample_info.yaml',
             'tags': [
                 'sampleinfo',
                 'rd-rna'
@@ -209,7 +207,7 @@ snapshots['test_build_bundle_rna 1'] = {
         },
         {
             'archive': True,
-            'path': '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/finequagga_comb.vcf',
+            'path': '/path/to/stuff/rare-disease/cases/case_id/analysis/files/case_id_comb.vcf',
             'tags': [
                 'bcftools-combined-vcf',
                 'rd-rna'
@@ -217,7 +215,7 @@ snapshots['test_build_bundle_rna 1'] = {
         },
         {
             'archive': True,
-            'path': '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/multiqc_report.html',
+            'path': '/path/to/stuff/rare-disease/cases/case_id/analysis/files/multiqc_report.html',
             'tags': [
                 'multiqc-html',
                 'rd-rna'
@@ -225,7 +223,7 @@ snapshots['test_build_bundle_rna 1'] = {
         },
         {
             'archive': True,
-            'path': '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/multiqc_data.json',
+            'path': '/path/to/stuff/rare-disease/cases/case_id/analysis/files/multiqc_data.json',
             'tags': [
                 'multiqc-json',
                 'rd-rna'
@@ -233,7 +231,7 @@ snapshots['test_build_bundle_rna 1'] = {
         },
         {
             'archive': True,
-            'path': '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/finequagga.fam',
+            'path': '/path/to/stuff/rare-disease/cases/case_id/analysis/files/case_id.fam',
             'tags': [
                 'pedigree',
                 'rd-rna'
@@ -241,7 +239,7 @@ snapshots['test_build_bundle_rna 1'] = {
         },
         {
             'archive': True,
-            'path': '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/qcmetrics_file.stub',
+            'path': '/path/to/stuff/rare-disease/cases/case_id/analysis/files/qcmetrics_file.stub',
             'tags': [
                 'qcmetrics',
                 'rd-rna'
@@ -249,7 +247,7 @@ snapshots['test_build_bundle_rna 1'] = {
         },
         {
             'archive': True,
-            'path': '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/finequagga_comb_vep.vcf',
+            'path': '/path/to/stuff/rare-disease/cases/case_id/analysis/files/case_id_comb_vep.vcf',
             'tags': [
                 'vep-vcf',
                 'rd-rna'
@@ -257,7 +255,7 @@ snapshots['test_build_bundle_rna 1'] = {
         },
         {
             'archive': True,
-            'path': '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/finequagga_vcol.yaml',
+            'path': '/path/to/stuff/rare-disease/cases/case_id/analysis/files/case_id_vcol.yaml',
             'tags': [
                 'versions',
                 'rd-rna'
@@ -266,93 +264,93 @@ snapshots['test_build_bundle_rna 1'] = {
         {
             'archive': False,
             'path': [
-                '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/foo_ACC5963A1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal_haptc_filtered_ase_bootstr.vcf',
-                '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/bar_ACC5963A1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal_haptc_filtered_ase_bootstr.vcf'
+                '/path/to/stuff/rare-disease/cases/case_id/analysis/files/foo_sample_id_1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal_haptc_filtered_ase_bootstr.vcf',
+                '/path/to/stuff/rare-disease/cases/case_id/analysis/files/bar_sample_id_1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal_haptc_filtered_ase_bootstr.vcf'
             ],
             'tags': [
                 'bootstrap-vcf',
-                'ACC5963A1',
+                'sample_id_1',
                 'rd-rna'
             ]
         },
         {
             'archive': False,
             'path': [
-                '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/ACC5963A1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal_haptc_filtered_ase.csv'
+                '/path/to/stuff/rare-disease/cases/case_id/analysis/files/sample_id_1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal_haptc_filtered_ase.csv'
             ],
             'tags': [
                 'ase-readcounts',
-                'ACC5963A1',
+                'sample_id_1',
                 'rd-rna'
             ]
         },
         {
             'archive': False,
             'path': [
-                '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/ACC5963A1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal.bam'
+                '/path/to/stuff/rare-disease/cases/case_id/analysis/files/sample_id_1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal.bam'
             ],
             'tags': [
                 'bam',
                 'baserecalibration',
-                'ACC5963A1',
+                'sample_id_1',
                 'rd-rna'
             ]
         },
         {
             'archive': False,
             'path': [
-                '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/ACC5963A1_lanes_1234_trim_star_sorted_merged_strg_gffcmp.gtf'
+                '/path/to/stuff/rare-disease/cases/case_id/analysis/files/sample_id_1_lanes_1234_trim_star_sorted_merged_strg_gffcmp.gtf'
             ],
             'tags': [
                 'gff-compare-ar',
-                'ACC5963A1',
+                'sample_id_1',
                 'rd-rna'
             ]
         },
         {
             'archive': False,
             'path': [
-                '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/ACC5963A1_lanes_1234_trim_star_sorted_merged_md_metric'
+                '/path/to/stuff/rare-disease/cases/case_id/analysis/files/sample_id_1_lanes_1234_trim_star_sorted_merged_md_metric'
             ],
             'tags': [
                 'mark-duplicates',
-                'ACC5963A1',
+                'sample_id_1',
                 'rd-rna'
             ]
         },
         {
             'archive': False,
             'path': [
-                '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/quant.sf'
+                '/path/to/stuff/rare-disease/cases/case_id/analysis/files/quant.sf'
             ],
             'tags': [
                 'salmon-quant',
-                'ACC5963A1',
+                'sample_id_1',
                 'rd-rna'
             ]
         },
         {
             'archive': False,
-            'path': '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/star-fusion.fusion_predictions.tsv',
+            'path': '/path/to/stuff/rare-disease/cases/case_id/analysis/files/star-fusion.fusion_predictions.tsv',
             'tags': [
                 'star-fusion',
-                'ACC5963A1',
+                'sample_id_1',
                 'rd-rna'
             ]
         },
         {
             'archive': False,
             'path': [
-                '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/ACC5963A1_lanes_1234_trim_star_sorted_merged_strg.gtf'
+                '/path/to/stuff/rare-disease/cases/case_id/analysis/files/sample_id_1_lanes_1234_trim_star_sorted_merged_strg.gtf'
             ],
             'tags': [
                 'stringtie-ar',
-                'ACC5963A1',
+                'sample_id_1',
                 'rd-rna'
             ]
         }
     ],
-    'name': 'finequagga',
+    'name': 'case_id',
     'pipeline_version': 'v7.1.4'
 }
 
@@ -361,7 +359,7 @@ snapshots['test_build_bundle_rna_no_missing_vpstderr 1'] = {
     'files': [
         {
             'archive': True,
-            'path': '/home/proj/stage/rare-disease/cases/finequagga/analysis/finequagga_config.yaml',
+            'path': '/path/to/stuff/rare-disease/cases/case_id/analysis/case_id_config.yaml',
             'tags': [
                 'mip-config',
                 'rd-rna'
@@ -369,7 +367,7 @@ snapshots['test_build_bundle_rna_no_missing_vpstderr 1'] = {
         },
         {
             'archive': True,
-            'path': '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/mip_2019-11-21T14:31:02.log',
+            'path': '/path/to/stuff/rare-disease/cases/case_id/analysis/files/mip_2019-11-21T14:31:02.log',
             'tags': [
                 'mip-log',
                 'rd-rna'
@@ -377,7 +375,7 @@ snapshots['test_build_bundle_rna_no_missing_vpstderr 1'] = {
         },
         {
             'archive': True,
-            'path': '/home/proj/stage/rare-disease/cases/finequagga/analysis/finequagga_qc_sample_info.yaml',
+            'path': '/path/to/stuff/rare-disease/cases/case_id/analysis/case_id_qc_sample_info.yaml',
             'tags': [
                 'sampleinfo',
                 'rd-rna'
@@ -385,7 +383,7 @@ snapshots['test_build_bundle_rna_no_missing_vpstderr 1'] = {
         },
         {
             'archive': True,
-            'path': '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/finequagga_comb.vcf',
+            'path': '/path/to/stuff/rare-disease/cases/case_id/analysis/files/case_id_comb.vcf',
             'tags': [
                 'bcftools-combined-vcf',
                 'rd-rna'
@@ -393,7 +391,7 @@ snapshots['test_build_bundle_rna_no_missing_vpstderr 1'] = {
         },
         {
             'archive': True,
-            'path': '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/multiqc_report.html',
+            'path': '/path/to/stuff/rare-disease/cases/case_id/analysis/files/multiqc_report.html',
             'tags': [
                 'multiqc-html',
                 'rd-rna'
@@ -401,7 +399,7 @@ snapshots['test_build_bundle_rna_no_missing_vpstderr 1'] = {
         },
         {
             'archive': True,
-            'path': '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/multiqc_data.json',
+            'path': '/path/to/stuff/rare-disease/cases/case_id/analysis/files/multiqc_data.json',
             'tags': [
                 'multiqc-json',
                 'rd-rna'
@@ -409,7 +407,7 @@ snapshots['test_build_bundle_rna_no_missing_vpstderr 1'] = {
         },
         {
             'archive': True,
-            'path': '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/finequagga.fam',
+            'path': '/path/to/stuff/rare-disease/cases/case_id/analysis/files/case_id.fam',
             'tags': [
                 'pedigree',
                 'rd-rna'
@@ -417,7 +415,7 @@ snapshots['test_build_bundle_rna_no_missing_vpstderr 1'] = {
         },
         {
             'archive': True,
-            'path': '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/qcmetrics_file.stub',
+            'path': '/path/to/stuff/rare-disease/cases/case_id/analysis/files/qcmetrics_file.stub',
             'tags': [
                 'qcmetrics',
                 'rd-rna'
@@ -425,7 +423,7 @@ snapshots['test_build_bundle_rna_no_missing_vpstderr 1'] = {
         },
         {
             'archive': True,
-            'path': '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/finequagga_comb_vep.vcf',
+            'path': '/path/to/stuff/rare-disease/cases/case_id/analysis/files/case_id_comb_vep.vcf',
             'tags': [
                 'vep-vcf',
                 'rd-rna'
@@ -433,7 +431,7 @@ snapshots['test_build_bundle_rna_no_missing_vpstderr 1'] = {
         },
         {
             'archive': True,
-            'path': '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/finequagga_vcol.yaml',
+            'path': '/path/to/stuff/rare-disease/cases/case_id/analysis/files/case_id_vcol.yaml',
             'tags': [
                 'versions',
                 'rd-rna'
@@ -450,92 +448,92 @@ snapshots['test_build_bundle_rna_no_missing_vpstderr 1'] = {
         {
             'archive': False,
             'path': [
-                '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/foo_ACC5963A1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal_haptc_filtered_ase_bootstr.vcf',
-                '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/bar_ACC5963A1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal_haptc_filtered_ase_bootstr.vcf'
+                '/path/to/stuff/rare-disease/cases/case_id/analysis/files/foo_sample_id_1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal_haptc_filtered_ase_bootstr.vcf',
+                '/path/to/stuff/rare-disease/cases/case_id/analysis/files/bar_sample_id_1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal_haptc_filtered_ase_bootstr.vcf'
             ],
             'tags': [
                 'bootstrap-vcf',
-                'ACC5963A1',
+                'sample_id_1',
                 'rd-rna'
             ]
         },
         {
             'archive': False,
             'path': [
-                '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/ACC5963A1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal_haptc_filtered_ase.csv'
+                '/path/to/stuff/rare-disease/cases/case_id/analysis/files/sample_id_1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal_haptc_filtered_ase.csv'
             ],
             'tags': [
                 'ase-readcounts',
-                'ACC5963A1',
+                'sample_id_1',
                 'rd-rna'
             ]
         },
         {
             'archive': False,
             'path': [
-                '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/ACC5963A1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal.bam'
+                '/path/to/stuff/rare-disease/cases/case_id/analysis/files/sample_id_1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal.bam'
             ],
             'tags': [
                 'bam',
                 'baserecalibration',
-                'ACC5963A1',
+                'sample_id_1',
                 'rd-rna'
             ]
         },
         {
             'archive': False,
             'path': [
-                '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/ACC5963A1_lanes_1234_trim_star_sorted_merged_strg_gffcmp.gtf'
+                '/path/to/stuff/rare-disease/cases/case_id/analysis/files/sample_id_1_lanes_1234_trim_star_sorted_merged_strg_gffcmp.gtf'
             ],
             'tags': [
                 'gff-compare-ar',
-                'ACC5963A1',
+                'sample_id_1',
                 'rd-rna'
             ]
         },
         {
             'archive': False,
             'path': [
-                '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/ACC5963A1_lanes_1234_trim_star_sorted_merged_md_metric'
+                '/path/to/stuff/rare-disease/cases/case_id/analysis/files/sample_id_1_lanes_1234_trim_star_sorted_merged_md_metric'
             ],
             'tags': [
                 'mark-duplicates',
-                'ACC5963A1',
+                'sample_id_1',
                 'rd-rna'
             ]
         },
         {
             'archive': False,
             'path': [
-                '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/quant.sf'
+                '/path/to/stuff/rare-disease/cases/case_id/analysis/files/quant.sf'
             ],
             'tags': [
                 'salmon-quant',
-                'ACC5963A1',
+                'sample_id_1',
                 'rd-rna'
             ]
         },
         {
             'archive': False,
-            'path': '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/star-fusion.fusion_predictions.tsv',
+            'path': '/path/to/stuff/rare-disease/cases/case_id/analysis/files/star-fusion.fusion_predictions.tsv',
             'tags': [
                 'star-fusion',
-                'ACC5963A1',
+                'sample_id_1',
                 'rd-rna'
             ]
         },
         {
             'archive': False,
             'path': [
-                '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/ACC5963A1_lanes_1234_trim_star_sorted_merged_strg.gtf'
+                '/path/to/stuff/rare-disease/cases/case_id/analysis/files/sample_id_1_lanes_1234_trim_star_sorted_merged_strg.gtf'
             ],
             'tags': [
                 'stringtie-ar',
-                'ACC5963A1',
+                'sample_id_1',
                 'rd-rna'
             ]
         }
     ],
-    'name': 'finequagga',
+    'name': 'case_id',
     'pipeline_version': 'v7.1.4'
 }

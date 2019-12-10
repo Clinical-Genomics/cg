@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 # snapshottest: v1 - https://goo.gl/zC4yUc
-# pylint: disable-all
 from __future__ import unicode_literals
 
 from snapshottest import GenericRepr, Snapshot
@@ -9,46 +8,46 @@ from snapshottest import GenericRepr, Snapshot
 snapshots = Snapshot()
 
 snapshots['test_parse_sampleinfo_rna_result_contents 1'] = {
-    'bcftools_merge': '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/finequagga_comb.vcf',
-    'case': 'finequagga',
-    'config_file_path': '/home/proj/stage/rare-disease/cases/finequagga/analysis/finequagga_config.yaml',
+    'bcftools_merge': '/path/to/stuff/rare-disease/cases/case_id/analysis/files/case_id_comb.vcf',
+    'case': 'case_id',
+    'config_file_path': '/path/to/stuff/rare-disease/cases/case_id/analysis/case_id_config.yaml',
     'date': GenericRepr('datetime.datetime(2019, 11, 21, 14, 31, 2)'),
     'is_finished': True,
-    'multiqc_html': '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/multiqc_report.html',
-    'multiqc_json': '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/multiqc_data.json',
-    'pedigree_path': '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/finequagga.fam',
-    'qcmetrics_path': '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/qcmetrics_file.stub',
+    'multiqc_html': '/path/to/stuff/rare-disease/cases/case_id/analysis/files/multiqc_report.html',
+    'multiqc_json': '/path/to/stuff/rare-disease/cases/case_id/analysis/files/multiqc_data.json',
+    'pedigree_path': '/path/to/stuff/rare-disease/cases/case_id/analysis/files/case_id.fam',
+    'qcmetrics_path': '/path/to/stuff/rare-disease/cases/case_id/analysis/files/qcmetrics_file.stub',
     'samples': [
         {
-            'bam': '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/ACC5963A1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal.bam',
+            'bam': '/path/to/stuff/rare-disease/cases/case_id/analysis/files/sample_id_1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal.bam',
             'bootstrap_vcf': [
-                '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/foo_ACC5963A1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal_haptc_filtered_ase_bootstr.vcf',
-                '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/bar_ACC5963A1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal_haptc_filtered_ase_bootstr.vcf'
+                '/path/to/stuff/rare-disease/cases/case_id/analysis/files/foo_sample_id_1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal_haptc_filtered_ase_bootstr.vcf',
+                '/path/to/stuff/rare-disease/cases/case_id/analysis/files/bar_sample_id_1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal_haptc_filtered_ase_bootstr.vcf'
             ],
             'gatk_asereadcounter': [
-                '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/ACC5963A1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal_haptc_filtered_ase.csv'
+                '/path/to/stuff/rare-disease/cases/case_id/analysis/files/sample_id_1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal_haptc_filtered_ase.csv'
             ],
             'gatk_baserecalibration': [
-                '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/ACC5963A1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal.bam'
+                '/path/to/stuff/rare-disease/cases/case_id/analysis/files/sample_id_1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal.bam'
             ],
             'gffcompare_ar': [
-                '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/ACC5963A1_lanes_1234_trim_star_sorted_merged_strg_gffcmp.gtf'
+                '/path/to/stuff/rare-disease/cases/case_id/analysis/files/sample_id_1_lanes_1234_trim_star_sorted_merged_strg_gffcmp.gtf'
             ],
-            'id': 'ACC5963A1',
+            'id': 'sample_id_1',
             'mark_duplicates': [
-                '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/ACC5963A1_lanes_1234_trim_star_sorted_merged_md_metric'
+                '/path/to/stuff/rare-disease/cases/case_id/analysis/files/sample_id_1_lanes_1234_trim_star_sorted_merged_md_metric'
             ],
             'salmon_quant': [
-                '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/quant.sf'
+                '/path/to/stuff/rare-disease/cases/case_id/analysis/files/quant.sf'
             ],
-            'star_fusion': '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/star-fusion.fusion_predictions.tsv',
+            'star_fusion': '/path/to/stuff/rare-disease/cases/case_id/analysis/files/star-fusion.fusion_predictions.tsv',
             'stringtie_ar': [
-                '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/ACC5963A1_lanes_1234_trim_star_sorted_merged_strg.gtf'
+                '/path/to/stuff/rare-disease/cases/case_id/analysis/files/sample_id_1_lanes_1234_trim_star_sorted_merged_strg.gtf'
             ]
         }
     ],
-    'vep_path': '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/finequagga_comb_vep.vcf',
+    'vep_path': '/path/to/stuff/rare-disease/cases/case_id/analysis/files/case_id_comb_vep.vcf',
     'version': 'v7.1.4',
-    'version_collect_ar_path': '/home/proj/stage/rare-disease/cases/finequagga/analysis/files/finequagga_vcol.yaml',
+    'version_collect_ar_path': '/path/to/stuff/rare-disease/cases/case_id/analysis/files/case_id_vcol.yaml',
     'vp_stderr_file': None
 }
