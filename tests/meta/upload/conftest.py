@@ -1,7 +1,8 @@
+""" Fixtures for testing the cg.meta.upload module """
+
 import json
 import pytest
 from cg.apps.hk import HousekeeperAPI
-from cg.apps.lims import LimsAPI
 from cg.meta.upload.mutacc import UploadToMutaccAPI
 from cg.meta.upload.observations import UploadObservationsAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
@@ -179,6 +180,7 @@ class MockLoqusAPI:
 
 
 class MockLims:
+    """ Mock Lims API """
 
     lims = None
 
@@ -187,6 +189,7 @@ class MockLims:
         self._samples = samples
 
     def sample(self, sample_id):
+        """ Returns a lims sample matching the provided sample_id """
         for sample in self._samples:
             if sample['id'] == sample_id:
                 return sample
@@ -195,11 +198,13 @@ class MockLims:
 
 @pytest.fixture
 def lims_family():
+    """ Returns a lims-like family of samples """
     return json.load(open('tests/fixtures/report/lims_family.json'))
 
 
 @pytest.fixture
 def lims_samples(lims_family):
+    """ Returns the samples of a lims family """
     return lims_family['samples']
 
 
@@ -228,6 +233,8 @@ def upload_observations_api(analysis_store):
 
 @pytest.yield_fixture(scope='function')
 def upload_scout_api(analysis_store, scout_store, lims_samples):
+    """ Returns a mock upload_scout_api """
+
     madeline_mock = MockMadeline()
     hk_mock = MockHouseKeeper()
     analysis_mock = MockAnalysis()
