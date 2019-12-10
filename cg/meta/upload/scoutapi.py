@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import requests
 import logging
 from pathlib import Path
 
