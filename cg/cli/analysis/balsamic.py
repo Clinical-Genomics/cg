@@ -4,6 +4,7 @@ import logging
 import re
 import subprocess
 import sys
+import shutil
 from pathlib import Path
 
 import click
@@ -12,11 +13,13 @@ from cg.apps.balsamic.fastq import BalsamicFastqHandler
 from cg.cli.analysis.analysis import get_links
 from cg.exc import LimsDataError, BalsamicStartError
 from cg.meta.analysis import AnalysisAPI
+from cg.apps import tb, scoutapi, lims
 from cg.store import Store
 
-
 LOG = logging.getLogger(__name__)
-PRIORITY_OPTION = click.option('-p', '--priority', type=click.Choice(['low', 'normal', 'high']))
+PRIORITY_OPTION = click.option('-p',
+                               '--priority',
+                               type=click.Choice(['low', 'normal', 'high']))
 EMAIL_OPTION = click.option('-e', '--email', help='email to send errors to')
 SUCCESS = 0
 FAIL = 1
@@ -38,6 +41,17 @@ def balsamic(context, case_id, priority, email, target_bed):
     context.obj['analysis_api'] = AnalysisAPI
     context.obj['fastq_handler'] = BalsamicFastqHandler
     context.obj['gzipper'] = gzip
+    context.obj['tb'] = tb.TrailblazerAPI(context.obj)
+
+    hk_api = hk.HousekeeperAPI(context.obj)
+    scout_api = scoutapi.ScoutAPI(context.obj)
+    lims_api = lims.LimsAPI(context.obj)
+    context.obj['api'] = AnalysisAPI(db=context.obj['db'],
+                                     hk_api=hk_api,
+                                     tb_api=context.obj['tb'],
+                                     scout_api=scout_api,
+                                     lims_api=lims_api,
+                                     deliver_api=None)
     if context.invoked_subcommand is None:
         if case_id is None:
             LOG.error('provide a case')
@@ -65,13 +79,17 @@ def link(context, case_id, sample_id):
     for link_obj in link_objs:
         LOG.info("%s: %s link FASTQ files", link_obj.sample.internal_id,
                  link_obj.sample.data_analysis)
-        if link_obj.sample.data_analysis and 'balsamic' in link_obj.sample.data_analysis.lower():
+        if link_obj.sample.data_analysis and 'balsamic' in link_obj.sample.data_analysis.lower(
+        ):
+            LOG.info('%s has blasamic as data analysis, linking.',
+                     link_obj.sample.internal_id)
             context.obj['api'].link_sample(BalsamicFastqHandler(context.obj),
                                            case=link_obj.family.internal_id,
                                            sample=link_obj.sample.internal_id)
         else:
-            LOGGER.error('case does not have blasamic as data analysis')
-            context.abort()
+            LOG.warning(
+                '%s does not have blasamic as data analysis, skipping.',
+                link_obj.sample.internal_id)
 
 
 @balsamic.command()
@@ -154,9 +172,11 @@ def config(context, dry, target_bed, umi_trim_length, quality_trim,
                 fastq_data['read']] = f"{wrk_dir}/{concatenated_fastq_name}"
 
             if linked_fastq_path.exists():
-                LOG.info("found: %s -> %s", original_fastq_path, linked_fastq_path)
+                LOG.info("found: %s -> %s", original_fastq_path,
+                         linked_fastq_path)
             else:
-                LOG.debug("destination path already exists: %s", linked_fastq_path)
+                LOG.debug("destination path already exists: %s",
+                          linked_fastq_path)
 
         if link_obj.sample.is_tumour:
             tumor_paths.add(concatenated_paths[1])
