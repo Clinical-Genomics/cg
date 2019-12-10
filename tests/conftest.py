@@ -8,9 +8,9 @@ from pathlib import Path
 
 import pytest
 import ruamel.yaml
+from cg.apps.mip import files as mip_rna_files_api
 from cg.store import Store
 from trailblazer.mip import files as mip_files_api
-from cg.apps.mip import files as mip_rna_files_api
 
 pytest_plugins = [  # pylint: disable=invalid-name
     'tests.apps.lims.conftest',
@@ -26,7 +26,6 @@ pytest_plugins = [  # pylint: disable=invalid-name
     'tests.store.conftest',
     'tests.apps.mutacc_auto.conftest'
 ]
-
 
 
 @pytest.fixture
