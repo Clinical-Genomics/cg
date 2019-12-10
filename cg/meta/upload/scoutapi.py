@@ -2,7 +2,7 @@
 import logging
 from pathlib import Path
 
-from cg.apps import hk, scoutapi, madeline
+from cg.apps import hk, scoutapi, madeline, LimsAPI
 from cg.meta.analysis import AnalysisAPI
 from cg.store import models, Store
 from ruamel import yaml
@@ -22,6 +22,7 @@ class UploadScoutAPI(object):
         self.madeline_exe = madeline_exe
         self.madeline = madeline
         self.analysis = analysis_api
+        self.lims = lims_api
 
     def generate_config(self, analysis_obj: models.Analysis) -> dict:
         """Fetch data about an analysis to load Scout."""
@@ -45,6 +46,11 @@ class UploadScoutAPI(object):
 
         for link_obj in analysis_obj.family.links:
             sample_id = link_obj.sample.internal_id
+            lims_sample = dict()
+            try:
+                lims_sample = self.lims.sample(sample_id)
+            except requests.exceptions.HTTPError as e:
+                self.LOG.info(f"could not fetch sample {sample_id} from LIMS: {e}")
             bam_tags = ['bam', sample_id]
             bam_file = self.housekeeper.files(version=hk_version.id, tags=bam_tags).first()
             bam_path = bam_file.full_path if bam_file else None
@@ -62,8 +68,7 @@ class UploadScoutAPI(object):
                 'mother': link_obj.mother.internal_id if link_obj.mother else '0',
                 'sample_name': link_obj.sample.name, 'phenotype': link_obj.status,
                 'sex': link_obj.sample.sex, 'bam_path': bam_path, 'mt_bam': mt_bam_path,
-                'tissue_type': link_obj.sample.from_sample or 'unknown',
-                'vcf2cytosure': vcf2cytosure_path}
+                'tissue_type': lims_sample.get('source'), 'vcf2cytosure': vcf2cytosure_path}
             data['samples'].append(sample)
 
         self._include_mandatory_files(data, hk_version)
