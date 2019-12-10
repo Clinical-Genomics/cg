@@ -11,7 +11,7 @@ def test_dry(cli_runner, base_context):
     # GIVEN case-id
 
     # WHEN dry running
-    result = cli_runner.invoke(auto, ['--dry-run'], obj=base_context)
+    result = cli_runner.invoke(auto, ["--dry-run"], obj=base_context)
 
     # THEN command should have accepted the option happily
     assert result.exit_code == EXIT_SUCCESS
@@ -25,12 +25,12 @@ def test_dna_case_included(cli_runner, base_context, dna_case, caplog):
     for link in dna_case.links:
         sample = link.sample
         assert sample.sequenced_at
-        assert sample.application_version.application.analysis_type not in 'wts'
+        assert sample.application_version.application.analysis_type not in "wts"
     assert not dna_case.analyses
 
     # WHEN running command
     with caplog.at_level(logging.INFO):
-        result = cli_runner.invoke(auto, ['--dry-run'], obj=base_context)
+        result = cli_runner.invoke(auto, ["--dry-run"], obj=base_context)
 
     # THEN command should have printed the case id
     assert result.exit_code == EXIT_SUCCESS
@@ -50,11 +50,11 @@ def test_rna_case_excluded(cli_runner, base_context, rna_case, caplog):
     for link in rna_case.links:
         sample = link.sample
         assert sample.sequenced_at
-        assert sample.application_version.application.analysis_type in 'wts'
+        assert sample.application_version.application.analysis_type in "wts"
     assert not rna_case.analyses
 
     # WHEN running command
-    result = cli_runner.invoke(auto, ['--dry-run'], obj=base_context)
+    result = cli_runner.invoke(auto, ["--dry-run"], obj=base_context)
 
     # THEN command should info about it starting the case but warn about skipping
     assert result.exit_code == EXIT_SUCCESS

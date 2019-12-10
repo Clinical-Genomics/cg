@@ -19,7 +19,9 @@ class BaseFastqHandler:
         """Creates valid usalt filename from the parameters"""
 
         @staticmethod
-        def create(lane: str, flowcell: str, sample: str, read: str, more: dict = None) -> str:
+        def create(
+            lane: str, flowcell: str, sample: str, read: str, more: dict = None
+        ) -> str:
             """Name a FASTQ file following pipeline conventions."""
 
     def __init__(self, config):

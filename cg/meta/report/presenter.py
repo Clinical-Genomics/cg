@@ -5,13 +5,15 @@ from datetime import datetime
 class Presenter:
     """Contains methods for presentation of different data types"""
 
-    DEFAULT = 'N/A'
+    DEFAULT = "N/A"
 
     @staticmethod
     def process_float_string(float_str: str, precision: int) -> str:
         """Make a float value presentable for the delivery report."""
 
-        return str(round(float(float_str), precision)) if float_str else Presenter.DEFAULT
+        return (
+            str(round(float(float_str), precision)) if float_str else Presenter.DEFAULT
+        )
 
     @staticmethod
     def process_string(string: str) -> str:
@@ -35,10 +37,10 @@ class Presenter:
     def process_set(a_set: set) -> str:
         """Make a set presentable for the delivery report."""
 
-        return ', '.join(str(s) for s in a_set) if a_set else Presenter.DEFAULT
+        return ", ".join(str(s) for s in a_set) if a_set else Presenter.DEFAULT
 
     @staticmethod
     def process_list(a_list: list):
         """Make a list presentable for the delivery report."""
 
-        return ', '.join(str(s) for s in a_list) if a_list else Presenter.DEFAULT
+        return ", ".join(str(s) for s in a_list) if a_list else Presenter.DEFAULT

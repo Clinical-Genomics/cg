@@ -12,84 +12,38 @@ def test_get_files(files_data) -> dict:
     files_raw (dict): With dicts from files
     """
     # GIVEN config data of a "sharp" run (not dry run)
-    mip_config = files_data['config']
+    mip_config = files_data["config"]
 
     # GIVEN sampleinfo input from a finished analysis
-    sampleinfo = files_data['sampleinfo']
+    sampleinfo = files_data["sampleinfo"]
 
     mip_file_data = AddHandler._get_files(mip_config, sampleinfo)
 
     # Define test data
     mip_file_test_data = {
-        'mip-config': {
-            'path': mip_config['config_path'],
-        },
-        'sampleinfo': {
-            'path': mip_config['sampleinfo_path'],
-        },
-        'pedigree': {
-            'path': sampleinfo['pedigree_path'],
-        },
-        'mip-log': {
-            'path': mip_config['log_path'],
-        },
-        'qcmetrics': {
-            'path': sampleinfo['qcmetrics_path'],
-        },
-        'snv-gbcf': {
-            'path': sampleinfo['snv']['bcf'],
-        },
-        'snv-gbcf-index': {
-            'path': f"{sampleinfo['snv']['bcf']}.csi",
-        },
-        'snv-bcf': {
-            'path': sampleinfo['snv']['bcf'],
-        },
-        'snv-bcf-index': {
-            'path': f"{sampleinfo['snv']['bcf']}.csi",
-        },
-        'sv-bcf': {
-            'path': sampleinfo['sv']['bcf'],
-        },
-        'sv-bcf-index': {
-            'path': f"{sampleinfo['sv']['bcf']}.csi",
-        },
-        'ped-check': {
-            'path': sampleinfo['peddy']['ped_check'],
-        },
-        'ped': {
-            'path': sampleinfo['peddy']['ped'],
-        },
-        'sex-check': {
-            'path': sampleinfo['peddy']['sex_check'],
-        },
-        'vcf-snv-clinical': {
-            'path': sampleinfo['snv']['clinical_vcf'],
-        },
-        'vcf-snv-clinical-index': {
-            'path': f"{sampleinfo['snv']['clinical_vcf']}.tbi",
-        },
-        'vcf-sv-clinical': {
-            'path': sampleinfo['sv']['clinical_vcf'],
-        },
-        'vcf-sv-clinical-index': {
-            'path': f"{sampleinfo['sv']['clinical_vcf']}.csi",
-        },
-        'vcf-snv-research': {
-            'path': sampleinfo['snv']['research_vcf'],
-        },
-        'vcf-snv-research-index': {
-            'path': f"{sampleinfo['snv']['research_vcf']}.tbi",
-        },
-        'vcf-sv-research': {
-            'path': sampleinfo['sv']['research_vcf'],
-        },
-        'vcf-sv-research-index': {
-            'path': f"{sampleinfo['sv']['research_vcf']}.csi",
-        },
-        'vcf-str': {
-            'path': sampleinfo['str_vcf'],
-        },
+        "mip-config": {"path": mip_config["config_path"]},
+        "sampleinfo": {"path": mip_config["sampleinfo_path"]},
+        "pedigree": {"path": sampleinfo["pedigree_path"]},
+        "mip-log": {"path": mip_config["log_path"]},
+        "qcmetrics": {"path": sampleinfo["qcmetrics_path"]},
+        "snv-gbcf": {"path": sampleinfo["snv"]["bcf"]},
+        "snv-gbcf-index": {"path": f"{sampleinfo['snv']['bcf']}.csi"},
+        "snv-bcf": {"path": sampleinfo["snv"]["bcf"]},
+        "snv-bcf-index": {"path": f"{sampleinfo['snv']['bcf']}.csi"},
+        "sv-bcf": {"path": sampleinfo["sv"]["bcf"]},
+        "sv-bcf-index": {"path": f"{sampleinfo['sv']['bcf']}.csi"},
+        "ped-check": {"path": sampleinfo["peddy"]["ped_check"]},
+        "ped": {"path": sampleinfo["peddy"]["ped"]},
+        "sex-check": {"path": sampleinfo["peddy"]["sex_check"]},
+        "vcf-snv-clinical": {"path": sampleinfo["snv"]["clinical_vcf"]},
+        "vcf-snv-clinical-index": {"path": f"{sampleinfo['snv']['clinical_vcf']}.tbi"},
+        "vcf-sv-clinical": {"path": sampleinfo["sv"]["clinical_vcf"]},
+        "vcf-sv-clinical-index": {"path": f"{sampleinfo['sv']['clinical_vcf']}.csi"},
+        "vcf-snv-research": {"path": sampleinfo["snv"]["research_vcf"]},
+        "vcf-snv-research-index": {"path": f"{sampleinfo['snv']['research_vcf']}.tbi"},
+        "vcf-sv-research": {"path": sampleinfo["sv"]["research_vcf"]},
+        "vcf-sv-research-index": {"path": f"{sampleinfo['sv']['research_vcf']}.csi"},
+        "vcf-str": {"path": sampleinfo["str_vcf"]},
     }
 
     # Check returns from def
@@ -100,35 +54,35 @@ def test_get_files(files_data) -> dict:
             # For each element
             for element_data in mip_file_data:
                 # If file tag exists in the return data tags
-                if tag_id in element_data['tags']:
+                if tag_id in element_data["tags"]:
                     assert value in element_data[key]
 
     mip_file_test_sample_data = {}
 
     # Define sample test data
-    for sample_data in sampleinfo['samples']:
+    for sample_data in sampleinfo["samples"]:
 
         # Bam pre-processing
-        bam_path = sample_data['bam']
+        bam_path = sample_data["bam"]
         bai_path = f"{bam_path}.bai"
         if not Path(bai_path).exists():
-            bai_path = bam_path.replace('.bam', '.bai')
-        mip_file_test_sample_data[sample_data['id']] = {
-            'bam': bam_path,
-            'bam-index': bai_path,
-            'coverage': sample_data['sambamba'],
-            'vcf2cytosure': sample_data['vcf2cytosure'],
+            bai_path = bam_path.replace(".bam", ".bai")
+        mip_file_test_sample_data[sample_data["id"]] = {
+            "bam": bam_path,
+            "bam-index": bai_path,
+            "coverage": sample_data["sambamba"],
+            "vcf2cytosure": sample_data["vcf2cytosure"],
         }
 
         # Only wgs data
         # Downsamples MT bam
-        if sample_data['subsample_mt']:
-            mt_bam_path = sample_data['subsample_mt']
+        if sample_data["subsample_mt"]:
+            mt_bam_path = sample_data["subsample_mt"]
             mt_bai_path = f"{mt_bam_path}.bai"
             if not Path(mt_bai_path).exists():
-                mt_bai_path = mt_bam_path.replace('.bam', '.bai')
-            mip_file_test_sample_data[sample_data['id']]['bam-mt'] = mt_bam_path
-            mip_file_test_sample_data[sample_data['id']]['bam-mt-index'] = mt_bai_path
+                mt_bai_path = mt_bam_path.replace(".bam", ".bai")
+            mip_file_test_sample_data[sample_data["id"]]["bam-mt"] = mt_bam_path
+            mip_file_test_sample_data[sample_data["id"]]["bam-mt-index"] = mt_bai_path
 
     # Check returns from def
     # Sample data
@@ -136,5 +90,5 @@ def test_get_files(files_data) -> dict:
         for key, value in mip_file_test_sample_data[sample_id].items():
             for element_data in mip_file_data:
                 # If file tag exists in the return data tags
-                if all(k in element_data['tags'] for k in (sample_id, key)):
-                    assert value in element_data['path']
+                if all(k in element_data["tags"] for k in (sample_id, key)):
+                    assert value in element_data["path"]

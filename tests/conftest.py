@@ -12,214 +12,277 @@ from cg.store import Store
 from trailblazer.mip import files as mip_files_api
 
 pytest_plugins = [  # pylint: disable=invalid-name
-    'tests.apps.lims.conftest',
-    'tests.apps.loqus.conftest',
-    'tests.cli.conftest',
-    'tests.delivery.conftest',
-    'tests.delivery.conftest',
-    'tests.meta.conftest',
-    'tests.meta.orders.conftest',
-    'tests.meta.report.conftest',
-    'tests.meta.transfer.conftest',
-    'tests.meta.upload.conftest',
-    'tests.store.conftest',
-    'tests.apps.mutacc_auto.conftest'
+    "tests.apps.lims.conftest",
+    "tests.apps.loqus.conftest",
+    "tests.cli.conftest",
+    "tests.delivery.conftest",
+    "tests.delivery.conftest",
+    "tests.meta.conftest",
+    "tests.meta.orders.conftest",
+    "tests.meta.report.conftest",
+    "tests.meta.transfer.conftest",
+    "tests.meta.upload.conftest",
+    "tests.store.conftest",
+    "tests.apps.mutacc_auto.conftest",
 ]
-
 
 
 @pytest.fixture
 def balsamic_orderform():
     """Orderform fixture for Balsamic samples"""
-    return 'tests/fixtures/orderforms/1508.19.balsamic.xlsx'
+    return "tests/fixtures/orderforms/1508.19.balsamic.xlsx"
 
 
 @pytest.fixture
 def external_orderform():
     """Orderform fixture for external samples"""
-    return 'tests/fixtures/orderforms/1541.6.external.xlsx'
+    return "tests/fixtures/orderforms/1541.6.external.xlsx"
 
 
 @pytest.fixture
 def fastq_orderform():
     """Orderform fixture for fastq samples"""
-    return 'tests/fixtures/orderforms/1508.19.fastq.xlsx'
+    return "tests/fixtures/orderforms/1508.19.fastq.xlsx"
 
 
 @pytest.fixture
 def metagenome_orderform():
     """Orderform fixture for metagenome samples"""
-    return 'tests/fixtures/orderforms/1605.8.metagenome.xlsx'
+    return "tests/fixtures/orderforms/1605.8.metagenome.xlsx"
 
 
 @pytest.fixture
 def microbial_orderform():
     """Orderform fixture for microbial samples"""
-    return 'tests/fixtures/orderforms/1603.9.microbial.xlsx'
+    return "tests/fixtures/orderforms/1603.9.microbial.xlsx"
 
 
 @pytest.fixture
 def mip_orderform():
     """Orderform fixture for MIP samples"""
-    return 'tests/fixtures/orderforms/1508.19.mip.xlsx'
+    return "tests/fixtures/orderforms/1508.19.mip.xlsx"
 
 
 @pytest.fixture
 def mip_balsamic_orderform():
     """Orderform fixture for MIP and Balsamic samples"""
-    return 'tests/fixtures/orderforms/1508.19.mip_balsamic.xlsx'
+    return "tests/fixtures/orderforms/1508.19.mip_balsamic.xlsx"
 
 
 @pytest.fixture
 def mip_rna_orderform():
     """Orderform fixture for MIP RNA samples"""
-    return 'tests/fixtures/orderforms/1508.19.mip_rna.xlsx'
+    return "tests/fixtures/orderforms/1508.19.mip_rna.xlsx"
 
 
 @pytest.fixture
 def rml_orderform():
     """Orderform fixture for RML samples"""
-    return 'tests/fixtures/orderforms/1604.9.rml.xlsx'
+    return "tests/fixtures/orderforms/1604.9.rml.xlsx"
+
 
 # Trailblazer api for mip files
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def files():
     return {
-        'config': 'tests/fixtures/apps/tb/case/case_config.yaml',
-        'sampleinfo': 'tests/fixtures/apps/tb/case/case_qc_sample_info.yaml',
-        'qcmetrics': 'tests/fixtures/apps/tb/case/case_qc_metrics.yaml',
+        "config": "tests/fixtures/apps/tb/case/case_config.yaml",
+        "sampleinfo": "tests/fixtures/apps/tb/case/case_qc_sample_info.yaml",
+        "qcmetrics": "tests/fixtures/apps/tb/case/case_qc_metrics.yaml",
     }
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def tmp_file(tmp_path):
-    return tmp_path / 'test'
+    return tmp_path / "test"
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def files_raw(files):
     return {
-        'config': ruamel.yaml.safe_load(open(files['config'])),
-        'sampleinfo': ruamel.yaml.safe_load(open(files['sampleinfo'])),
-        'qcmetrics': ruamel.yaml.safe_load(open(files['qcmetrics'])),
+        "config": ruamel.yaml.safe_load(open(files["config"])),
+        "sampleinfo": ruamel.yaml.safe_load(open(files["sampleinfo"])),
+        "qcmetrics": ruamel.yaml.safe_load(open(files["qcmetrics"])),
     }
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def files_data(files_raw):
     return {
-        'config': mip_files_api.parse_config(files_raw['config']),
-        'sampleinfo': mip_files_api.parse_sampleinfo(files_raw['sampleinfo']),
-        'qcmetrics': mip_files_api.parse_qcmetrics(files_raw['qcmetrics']),
+        "config": mip_files_api.parse_config(files_raw["config"]),
+        "sampleinfo": mip_files_api.parse_sampleinfo(files_raw["sampleinfo"]),
+        "qcmetrics": mip_files_api.parse_qcmetrics(files_raw["qcmetrics"]),
     }
 
 
-@pytest.yield_fixture(scope='function')
+@pytest.yield_fixture(scope="function")
 def store() -> Store:
-    _store = Store(uri='sqlite://')
+    _store = Store(uri="sqlite://")
     _store.create_all()
     yield _store
     _store.drop_all()
 
 
-@pytest.yield_fixture(scope='function')
+@pytest.yield_fixture(scope="function")
 def base_store(store) -> Store:
     """Setup and example store."""
-    customer_group = store.add_customer_group('all_customers', 'all customers')
+    customer_group = store.add_customer_group("all_customers", "all customers")
 
     store.add_commit(customer_group)
-    customers = [store.add_customer('cust000', 'Production', scout_access=True,
-                                    customer_group=customer_group, invoice_address='Test street',
-                                    invoice_reference='ABCDEF'),
-                 store.add_customer('cust001', 'Customer', scout_access=False,
-                                    customer_group=customer_group, invoice_address='Test street',
-                                    invoice_reference='ABCDEF'),
-                 store.add_customer('cust002', 'Karolinska', scout_access=True,
-                                    customer_group=customer_group, invoice_address='Test street',
-                                    invoice_reference='ABCDEF'),
-                 store.add_customer('cust003', 'CMMS', scout_access=True,
-                                    customer_group=customer_group, invoice_address='Test street',
-                                    invoice_reference='ABCDEF')]
+    customers = [
+        store.add_customer(
+            "cust000",
+            "Production",
+            scout_access=True,
+            customer_group=customer_group,
+            invoice_address="Test street",
+            invoice_reference="ABCDEF",
+        ),
+        store.add_customer(
+            "cust001",
+            "Customer",
+            scout_access=False,
+            customer_group=customer_group,
+            invoice_address="Test street",
+            invoice_reference="ABCDEF",
+        ),
+        store.add_customer(
+            "cust002",
+            "Karolinska",
+            scout_access=True,
+            customer_group=customer_group,
+            invoice_address="Test street",
+            invoice_reference="ABCDEF",
+        ),
+        store.add_customer(
+            "cust003",
+            "CMMS",
+            scout_access=True,
+            customer_group=customer_group,
+            invoice_address="Test street",
+            invoice_reference="ABCDEF",
+        ),
+    ]
     store.add_commit(customers)
-    applications = [store.add_application('WGXCUSC000', 'wgs', 'External WGS',
-                                          sequencing_depth=0, is_external=True),
-                    store.add_application('EXXCUSR000', 'wes', 'External WES',
-                                          sequencing_depth=0, is_external=True),
-                    store.add_application('WGSPCFC060', 'wgs', 'WGS, double', sequencing_depth=30,
-                                          accredited=True),
-                    store.add_application('RMLS05R150', 'rml', 'Ready-made', sequencing_depth=0),
-                    store.add_application('WGTPCFC030', 'wgs', 'WGS trio', is_accredited=True,
-                                          sequencing_depth=30, target_reads=300000000,
-                                          limitations='some'),
-                    store.add_application('METLIFR020', 'wgs', 'Whole genome metagenomics',
-                                          sequencing_depth=0, target_reads=40000000),
-                    store.add_application('METNXTR020', 'wgs', 'Metagenomics',
-                                          sequencing_depth=0, target_reads=20000000),
-                    store.add_application('MWRNXTR003', 'mic', 'Microbial whole genome ',
-                                          sequencing_depth=0),
-                    store.add_application('RNAPOAR025', 'tgs', 'RNA seq, poly-A based priming',
-                                          sequencing_depth=25,
-                                          accredited=True)
-                    ]
+    applications = [
+        store.add_application(
+            "WGXCUSC000", "wgs", "External WGS", sequencing_depth=0, is_external=True
+        ),
+        store.add_application(
+            "EXXCUSR000", "wes", "External WES", sequencing_depth=0, is_external=True
+        ),
+        store.add_application(
+            "WGSPCFC060", "wgs", "WGS, double", sequencing_depth=30, accredited=True
+        ),
+        store.add_application("RMLS05R150", "rml", "Ready-made", sequencing_depth=0),
+        store.add_application(
+            "WGTPCFC030",
+            "wgs",
+            "WGS trio",
+            is_accredited=True,
+            sequencing_depth=30,
+            target_reads=300000000,
+            limitations="some",
+        ),
+        store.add_application(
+            "METLIFR020",
+            "wgs",
+            "Whole genome metagenomics",
+            sequencing_depth=0,
+            target_reads=40000000,
+        ),
+        store.add_application(
+            "METNXTR020",
+            "wgs",
+            "Metagenomics",
+            sequencing_depth=0,
+            target_reads=20000000,
+        ),
+        store.add_application(
+            "MWRNXTR003", "mic", "Microbial whole genome ", sequencing_depth=0
+        ),
+        store.add_application(
+            "RNAPOAR025",
+            "tgs",
+            "RNA seq, poly-A based priming",
+            sequencing_depth=25,
+            accredited=True,
+        ),
+    ]
 
     store.add_commit(applications)
 
-    prices = {'standard': 10, 'priority': 20, 'express': 30, 'research': 5}
-    versions = [store.add_version(application, 1, valid_from=dt.datetime.now(), prices=prices)
-                for application in applications]
+    prices = {"standard": 10, "priority": 20, "express": 30, "research": 5}
+    versions = [
+        store.add_version(application, 1, valid_from=dt.datetime.now(), prices=prices)
+        for application in applications
+    ]
     store.add_commit(versions)
 
-    beds = [store.add_bed('Bed')]
+    beds = [store.add_bed("Bed")]
     store.add_commit(beds)
-    bed_versions = [store.add_bed_version(bed, 1, 'Bed.bed')
-                    for bed in beds]
+    bed_versions = [store.add_bed_version(bed, 1, "Bed.bed") for bed in beds]
     store.add_commit(bed_versions)
 
-    organism = store.add_organism('C. jejuni', 'C. jejuni')
+    organism = store.add_organism("C. jejuni", "C. jejuni")
     store.add_commit(organism)
 
     yield store
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def sample_store(base_store) -> Store:
     """Populate store with samples."""
     new_samples = [
-        base_store.add_sample('ordered', sex='male'),
-        base_store.add_sample('received', sex='unknown', received=dt.datetime.now()),
-        base_store.add_sample('received-prepared', sex='unknown', received=dt.datetime.now(),
-                              prepared_at=dt.datetime.now()),
-        base_store.add_sample('external', sex='female', external=True),
-        base_store.add_sample('external-received', sex='female', external=True,
-                              received=dt.datetime.now()),
-        base_store.add_sample('sequenced', sex='male', received=dt.datetime.now(),
-                              prepared_at=dt.datetime.now(),
-                              sequenced_at=dt.datetime.now(), reads=(310 * 1000000)),
-        base_store.add_sample('sequenced-partly', sex='male',
-                              received=dt.datetime.now(),
-                              prepared_at=dt.datetime.now(),
-                              reads=(250 * 1000000)),
+        base_store.add_sample("ordered", sex="male"),
+        base_store.add_sample("received", sex="unknown", received=dt.datetime.now()),
+        base_store.add_sample(
+            "received-prepared",
+            sex="unknown",
+            received=dt.datetime.now(),
+            prepared_at=dt.datetime.now(),
+        ),
+        base_store.add_sample("external", sex="female", external=True),
+        base_store.add_sample(
+            "external-received", sex="female", external=True, received=dt.datetime.now()
+        ),
+        base_store.add_sample(
+            "sequenced",
+            sex="male",
+            received=dt.datetime.now(),
+            prepared_at=dt.datetime.now(),
+            sequenced_at=dt.datetime.now(),
+            reads=(310 * 1000000),
+        ),
+        base_store.add_sample(
+            "sequenced-partly",
+            sex="male",
+            received=dt.datetime.now(),
+            prepared_at=dt.datetime.now(),
+            reads=(250 * 1000000),
+        ),
     ]
     customer = base_store.customers().first()
-    external_app = base_store.application('WGXCUSC000').versions[0]
-    wgs_app = base_store.application('WGTPCFC030').versions[0]
+    external_app = base_store.application("WGXCUSC000").versions[0]
+    wgs_app = base_store.application("WGTPCFC030").versions[0]
     for sample in new_samples:
         sample.customer = customer
-        sample.application_version = external_app if 'external' in sample.name else wgs_app
+        sample.application_version = (
+            external_app if "external" in sample.name else wgs_app
+        )
     base_store.add_commit(new_samples)
     return base_store
 
 
-@pytest.yield_fixture(scope='function')
+@pytest.yield_fixture(scope="function")
 def disk_store(cli_runner, invoke_cli) -> Store:
-    database = './test_db.sqlite3'
+    database = "./test_db.sqlite3"
     database_path = Path(database)
     database_uri = f"sqlite:///{database}"
     with cli_runner.isolated_filesystem():
         assert database_path.exists() is False
 
         # WHEN calling "init"
-        result = invoke_cli(['--database', database_uri, 'init'])
+        result = invoke_cli(["--database", database_uri, "init"])
 
         # THEN it should setup the database with some tables
         assert result.exit_code == 0

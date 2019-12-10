@@ -18,22 +18,26 @@ class GenotypeAPI(Manager):
     """
 
     def __init__(self, config: dict):
-        alchy_config = dict(SQLALCHEMY_DATABASE_URI=config['genotype']['database'])
+        alchy_config = dict(SQLALCHEMY_DATABASE_URI=config["genotype"]["database"])
         super(GenotypeAPI, self).__init__(config=alchy_config, Model=models.Model)
 
-    def upload(self, bcf_path: str, samples_sex: dict, force: bool=False):
+    def upload(self, bcf_path: str, samples_sex: dict, force: bool = False):
         """Upload genotypes for a family of samples."""
         snps = api.snps()
         analyses = load_vcf(bcf_path, snps)
         for analysis_obj in analyses:
-            LOG.debug('loading VCF genotypes for sample: %s', analysis_obj.sample_id)
+            LOG.debug("loading VCF genotypes for sample: %s", analysis_obj.sample_id)
             is_saved = api.add_analysis(self, analysis_obj, replace=force)
             if is_saved:
-                LOG.info('loaded VCF genotypes for sample: %s', analysis_obj.sample_id)
+                LOG.info("loaded VCF genotypes for sample: %s", analysis_obj.sample_id)
             else:
-                LOG.warning('skipped, found previous analysis: %s', analysis_obj.sample_id)
+                LOG.warning(
+                    "skipped, found previous analysis: %s", analysis_obj.sample_id
+                )
 
             if is_saved or force:
-                analysis_obj.sex = samples_sex[analysis_obj.sample_id]['analysis']
-                analysis_obj.sample.sex = samples_sex[analysis_obj.sample_id]['pedigree']
+                analysis_obj.sex = samples_sex[analysis_obj.sample_id]["analysis"]
+                analysis_obj.sample.sex = samples_sex[analysis_obj.sample_id][
+                    "pedigree"
+                ]
                 self.commit()

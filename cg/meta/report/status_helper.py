@@ -13,7 +13,9 @@ class StatusHelper:
         version = None
 
         if analysis:
-            version = len(analysis.family.analyses) - analysis.family.analyses.index(analysis)
+            version = len(analysis.family.analyses) - analysis.family.analyses.index(
+                analysis
+            )
 
         return version
 

@@ -10,8 +10,8 @@ def test_get_sample_bad_sample(invoke_cli, disk_store: Store):
 
     # WHEN getting a sample
     db_uri = disk_store.uri
-    name = 'dummy_name'
-    result = invoke_cli(['--database', db_uri, 'get', 'sample', name])
+    name = "dummy_name"
+    result = invoke_cli(["--database", db_uri, "get", "sample", name])
 
     # THEN then it should warn about missing sample id instead of getting a sample
     # it will not fail since the API accepts multiple samples
@@ -27,8 +27,7 @@ def test_get_sample_required(invoke_cli, disk_store: Store):
     # WHEN getting a sample
     db_uri = disk_store.uri
 
-    result = invoke_cli(
-        ['--database', db_uri, 'get', 'sample', sample_id])
+    result = invoke_cli(["--database", db_uri, "get", "sample", sample_id])
 
     # THEN then it should have been get
     assert result.exit_code == 0
@@ -38,15 +37,14 @@ def test_get_sample_required(invoke_cli, disk_store: Store):
 def test_get_samples_required(invoke_cli, disk_store: Store):
     """Test to get several samples using only the required arguments"""
     # GIVEN a database with two samples
-    sample_id1 = add_sample(disk_store, '1').internal_id
-    sample_id2 = add_sample(disk_store, '2').internal_id
+    sample_id1 = add_sample(disk_store, "1").internal_id
+    sample_id2 = add_sample(disk_store, "2").internal_id
     assert disk_store.Sample.query.count() == 2
 
     # WHEN getting a sample
     db_uri = disk_store.uri
 
-    result = invoke_cli(
-        ['--database', db_uri, 'get', 'sample', sample_id1, sample_id2])
+    result = invoke_cli(["--database", db_uri, "get", "sample", sample_id1, sample_id2])
 
     # THEN then it should have been get
     assert result.exit_code == 0
@@ -68,8 +66,7 @@ def test_get_sample_output(invoke_cli, disk_store: Store):
     # WHEN getting a sample
     db_uri = disk_store.uri
 
-    result = invoke_cli(
-        ['--database', db_uri, 'get', 'sample', sample_id])
+    result = invoke_cli(["--database", db_uri, "get", "sample", sample_id])
 
     # THEN then it should have been get
     assert result.exit_code == 0
@@ -85,14 +82,13 @@ def test_get_sample_external_false(invoke_cli, disk_store: Store):
     """Test that the output has the external-value of the sample"""
     # GIVEN a database with a sample with data
     sample_id = add_sample(disk_store, is_external=False).internal_id
-    is_external_false = 'No'
-    is_external_true = 'Yes'
+    is_external_false = "No"
+    is_external_true = "Yes"
 
     # WHEN getting a sample
     db_uri = disk_store.uri
 
-    result = invoke_cli(
-        ['--database', db_uri, 'get', 'sample', sample_id])
+    result = invoke_cli(["--database", db_uri, "get", "sample", sample_id])
 
     # THEN then it should have been get
     assert result.exit_code == 0
@@ -104,14 +100,13 @@ def test_get_sample_external_true(invoke_cli, disk_store: Store):
     """Test that the output has the external-value of the sample"""
     # GIVEN a database with a sample with data
     sample_id = add_sample(disk_store, is_external=True).internal_id
-    is_external_false = 'No'
-    is_external_true = 'Yes'
+    is_external_false = "No"
+    is_external_true = "Yes"
 
     # WHEN getting a sample
     db_uri = disk_store.uri
 
-    result = invoke_cli(
-        ['--database', db_uri, 'get', 'sample', sample_id])
+    result = invoke_cli(["--database", db_uri, "get", "sample", sample_id])
 
     # THEN then it should have been get
     assert result.exit_code == 0
@@ -128,8 +123,7 @@ def test_get_sample_no_families_without_family(invoke_cli, disk_store: Store):
     # WHEN getting a sample with the --no-families flag
     db_uri = disk_store.uri
 
-    result = invoke_cli(
-        ['--database', db_uri, 'get', 'sample', name, '--no-families'])
+    result = invoke_cli(["--database", db_uri, "get", "sample", name, "--no-families"])
 
     # THEN everything is fine
     assert result.exit_code == 0
@@ -148,7 +142,8 @@ def test_get_sample_no_families_with_family(invoke_cli, disk_store: Store):
     db_uri = disk_store.uri
 
     result = invoke_cli(
-        ['--database', db_uri, 'get', 'sample', sample_id, '--no-families'])
+        ["--database", db_uri, "get", "sample", sample_id, "--no-families"]
+    )
 
     # THEN all related families should be listed in the output
     assert result.exit_code == 0
@@ -166,7 +161,8 @@ def test_get_sample_families_without_family(invoke_cli, disk_store: Store):
     db_uri = disk_store.uri
 
     result = invoke_cli(
-        ['--database', db_uri, 'get', 'sample', sample_id, '--families'])
+        ["--database", db_uri, "get", "sample", sample_id, "--families"]
+    )
 
     # THEN everything is fine
     assert result.exit_code == 0
@@ -185,7 +181,8 @@ def test_get_sample_families_with_family(invoke_cli, disk_store: Store):
     db_uri = disk_store.uri
 
     result = invoke_cli(
-        ['--database', db_uri, 'get', 'sample', sample_id, '--families'])
+        ["--database", db_uri, "get", "sample", sample_id, "--families"]
+    )
 
     # THEN all related families should be listed in the output
     assert result.exit_code == 0
@@ -202,7 +199,8 @@ def test_get_sample_flowcells_without_flowcell(invoke_cli, disk_store: Store):
     # WHEN getting a sample with the --flowcells flag
     db_uri = disk_store.uri
     result = invoke_cli(
-        ['--database', db_uri, 'get', 'sample', sample_id, '--flowcells'])
+        ["--database", db_uri, "get", "sample", sample_id, "--flowcells"]
+    )
 
     # THEN everything is fine
     assert result.exit_code == 0
@@ -220,7 +218,8 @@ def test_get_sample_flowcells_with_flowcell(invoke_cli, disk_store: Store):
     db_uri = disk_store.uri
 
     result = invoke_cli(
-        ['--database', db_uri, 'get', 'sample', sample_id, '--flowcells'])
+        ["--database", db_uri, "get", "sample", sample_id, "--flowcells"]
+    )
 
     # THEN the related flowcell should be listed in the output
     assert result.exit_code == 0
@@ -228,45 +227,57 @@ def test_get_sample_flowcells_with_flowcell(invoke_cli, disk_store: Store):
         assert flowcell.name in result.output
 
 
-def ensure_application_version(disk_store, application_tag='dummy_tag', is_external=False):
+def ensure_application_version(
+    disk_store, application_tag="dummy_tag", is_external=False
+):
     """utility function to return existing or create application version for tests"""
     application = disk_store.application(tag=application_tag)
     if not application:
-        application = disk_store.add_application(tag=application_tag, category='wgs',
-                                                 description='dummy_description',
-                                                 is_external=is_external)
+        application = disk_store.add_application(
+            tag=application_tag,
+            category="wgs",
+            description="dummy_description",
+            is_external=is_external,
+        )
         disk_store.add_commit(application)
 
-    prices = {'standard': 10, 'priority': 20, 'express': 30, 'research': 5}
+    prices = {"standard": 10, "priority": 20, "express": 30, "research": 5}
     version = disk_store.application_version(application, 1)
     if not version:
-        version = disk_store.add_version(application, 1, valid_from=datetime.now(),
-                                         prices=prices)
+        version = disk_store.add_version(
+            application, 1, valid_from=datetime.now(), prices=prices
+        )
 
         disk_store.add_commit(version)
     return version
 
 
-def ensure_customer(disk_store, customer_id='cust_test'):
+def ensure_customer(disk_store, customer_id="cust_test"):
     """utility function to return existing or create customer for tests"""
-    customer_group = disk_store.customer_group('dummy_group')
+    customer_group = disk_store.customer_group("dummy_group")
     if not customer_group:
-        customer_group = disk_store.add_customer_group('dummy_group', 'dummy group')
+        customer_group = disk_store.add_customer_group("dummy_group", "dummy group")
 
-        customer = disk_store.add_customer(internal_id=customer_id, name="Test Customer",
-                                           scout_access=False, customer_group=customer_group,
-                                           invoice_address='dummy_address',
-                                           invoice_reference='dummy_reference')
+        customer = disk_store.add_customer(
+            internal_id=customer_id,
+            name="Test Customer",
+            scout_access=False,
+            customer_group=customer_group,
+            invoice_address="dummy_address",
+            invoice_reference="dummy_reference",
+        )
         disk_store.add_commit(customer)
     customer = disk_store.customer(customer_id)
     return customer
 
 
-def add_sample(disk_store, sample_id='test_sample', is_external=False, flowcell=None):
+def add_sample(disk_store, sample_id="test_sample", is_external=False, flowcell=None):
     """utility function to add a sample to use in tests"""
     customer = ensure_customer(disk_store)
-    application_version_id = ensure_application_version(disk_store, is_external=is_external).id
-    sample = disk_store.add_sample(name=sample_id, sex='female')
+    application_version_id = ensure_application_version(
+        disk_store, is_external=is_external
+    ).id
+    sample = disk_store.add_sample(name=sample_id, sex="female")
     sample.application_version_id = application_version_id
     sample.customer = customer
     sample.is_external = is_external
@@ -276,28 +287,36 @@ def add_sample(disk_store, sample_id='test_sample', is_external=False, flowcell=
     return sample
 
 
-def add_flowcell(disk_store, sample_id='flowcell_test', sample=None):
+def add_flowcell(disk_store, sample_id="flowcell_test", sample=None):
     """utility function to get a flowcell to use in tests"""
-    flowcell = disk_store.add_flowcell(name=sample_id, sequencer='dummy_sequencer',
-                                       sequencer_type='hiseqx',
-                                       date=datetime.now())
+    flowcell = disk_store.add_flowcell(
+        name=sample_id,
+        sequencer="dummy_sequencer",
+        sequencer_type="hiseqx",
+        date=datetime.now(),
+    )
     if sample:
         flowcell.samples.append(sample)
     disk_store.add_commit(flowcell)
     return flowcell
 
 
-def add_panel(disk_store, panel_id='panel_test', customer_id='cust_test'):
+def add_panel(disk_store, panel_id="panel_test", customer_id="cust_test"):
     """utility function to add a panel to use in tests"""
     customer = ensure_customer(disk_store, customer_id)
-    panel = disk_store.add_panel(customer=customer, name=panel_id, abbrev=panel_id,
-                                 version=1.0,
-                                 date=datetime.now(), genes=1)
+    panel = disk_store.add_panel(
+        customer=customer,
+        name=panel_id,
+        abbrev=panel_id,
+        version=1.0,
+        date=datetime.now(),
+        genes=1,
+    )
     disk_store.add_commit(panel)
     return panel
 
 
-def add_family(disk_store, family_id='family_test', customer_id='cust_test'):
+def add_family(disk_store, family_id="family_test", customer_id="cust_test"):
     """utility function to add a family to use in tests"""
     panel_name = add_panel(disk_store).name
     customer = ensure_customer(disk_store, customer_id)
@@ -309,6 +328,6 @@ def add_family(disk_store, family_id='family_test', customer_id='cust_test'):
 
 def add_relationship(disk_store, sample, family):
     """utility function to add a sample to use in tests"""
-    link = disk_store.relate_sample(sample=sample, family=family, status='unknown')
+    link = disk_store.relate_sample(sample=sample, family=family, status="unknown")
     disk_store.add_commit(link)
     return link

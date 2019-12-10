@@ -16,7 +16,7 @@ from cg.exc import CaseNotFoundError
 LOG = logging.getLogger(__name__)
 
 
-class LoqusdbAPI():
+class LoqusdbAPI:
 
     """
         API for loqusdb
@@ -25,35 +25,50 @@ class LoqusdbAPI():
     def __init__(self, config: dict):
         super(LoqusdbAPI, self).__init__()
 
-        self.loqusdb_config = config['loqusdb']['config_path']
-        self.loqusdb_binary = config['loqusdb']['binary_path']
+        self.loqusdb_config = config["loqusdb"]["config_path"]
+        self.loqusdb_binary = config["loqusdb"]["binary_path"]
 
         # This will allways be the base of the loqusdb call
-        self.base_call = [self.loqusdb_binary, '--config', self.loqusdb_config]
+        self.base_call = [self.loqusdb_binary, "--config", self.loqusdb_config]
 
-    def load(self, family_id: str, ped_path: str, vcf_path: str, vcf_sv_path: str,
-             gbcf_path: str) -> dict:
+    def load(
+        self,
+        family_id: str,
+        ped_path: str,
+        vcf_path: str,
+        vcf_sv_path: str,
+        gbcf_path: str,
+    ) -> dict:
         """Add observations from a VCF."""
         load_call = copy.deepcopy(self.base_call)
-        load_call.extend([
-            'load',
-            '-c', family_id,
-            '-f', ped_path,
-            '--variant-file', vcf_path,
-            '--sv-variants', vcf_sv_path,
-            '--check-profile', gbcf_path,
-            '--hard-threshold', '0.95',
-            '--soft-threshold', '0.90'
-            ])
+        load_call.extend(
+            [
+                "load",
+                "-c",
+                family_id,
+                "-f",
+                ped_path,
+                "--variant-file",
+                vcf_path,
+                "--sv-variants",
+                vcf_sv_path,
+                "--check-profile",
+                gbcf_path,
+                "--hard-threshold",
+                "0.95",
+                "--soft-threshold",
+                "0.90",
+            ]
+        )
 
         nr_variants = 0
         # Execute command and print its stdout+stderr as it executes
         for line in execute_command(load_call):
             log_msg = f"loqusdb output: {line}"
             LOG.info(log_msg)
-            line_content = line.split('INFO')[-1].strip()
-            if 'inserted' in line_content:
-                nr_variants = int(line_content.split(':')[-1].strip())
+            line_content = line.split("INFO")[-1].strip()
+            if "inserted" in line_content:
+                nr_variants = int(line_content.split(":")[-1].strip())
 
         return dict(variants=nr_variants)
 
@@ -62,13 +77,10 @@ class LoqusdbAPI():
         case_obj = None
         case_call = copy.deepcopy(self.base_call)
 
-        case_call.extend(['cases', '-c', case_id, '--to-json'])
+        case_call.extend(["cases", "-c", case_id, "--to-json"])
 
         try:
-            output = subprocess.check_output(
-                ' '.join(case_call),
-                shell=True
-            )
+            output = subprocess.check_output(" ".join(case_call), shell=True)
 
         except CalledProcessError:
             # If CalledProcessError is raised, log and raise error
@@ -76,7 +88,7 @@ class LoqusdbAPI():
             LOG.critical(log_msg)
             raise
 
-        output = output.decode('utf-8')
+        output = output.decode("utf-8")
 
         # If case not in loqusdb, stdout of loqusdb command will be empty.
         if not output:
@@ -90,13 +102,12 @@ class LoqusdbAPI():
         """Find matching profiles in loqusdb"""
         ind_obj = {}
         ind_call = copy.deepcopy(self.base_call)
-        ind_call.extend(['profile', '--check-vcf', vcf_file, '--profile-threshold', '0.95'])
+        ind_call.extend(
+            ["profile", "--check-vcf", vcf_file, "--profile-threshold", "0.95"]
+        )
 
         try:
-            output = subprocess.check_output(
-                ' '.join(ind_call),
-                shell=True
-            )
+            output = subprocess.check_output(" ".join(ind_call), shell=True)
 
         except CalledProcessError:
             # If CalledProcessError is raised, log and raise error
@@ -104,10 +115,10 @@ class LoqusdbAPI():
             LOG.critical(log_msg)
             raise
 
-        output = output.decode('utf-8')
+        output = output.decode("utf-8")
 
         if not output:
-            LOG.info('No duplicates found')
+            LOG.info("No duplicates found")
             return ind_obj
 
         ind_obj = json.loads(output)
@@ -116,8 +127,9 @@ class LoqusdbAPI():
 
     def __repr__(self):
 
-        return (f"LoqusdbAPI(binary={self.loqusdb_binary},"
-                f"config={self.loqusdb_config})")
+        return (
+            f"LoqusdbAPI(binary={self.loqusdb_binary}," f"config={self.loqusdb_config})"
+        )
 
 
 def execute_command(cmd):
@@ -130,13 +142,12 @@ def execute_command(cmd):
         Yields:
             line (str): line of output from command
     """
-    process = subprocess.Popen(cmd,
-                               stdout=subprocess.PIPE,
-                               stderr=subprocess.STDOUT,
-                               bufsize=1)
+    process = subprocess.Popen(
+        cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, bufsize=1
+    )
 
     for line in process.stdout:
-        yield line.decode('utf-8').strip()
+        yield line.decode("utf-8").strip()
 
     def process_failed(process):
         """See if process failed by checking returncode"""

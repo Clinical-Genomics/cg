@@ -5,6 +5,7 @@ import datetime
 
 class Analysis:
     """ Mock Analysis object """
+
     def __init__(self, family_obj):
         self.family_obj = family_obj
 
@@ -22,20 +23,20 @@ class Analysis:
 def test_upload_observations_data(upload_observations_api, analysis_store):
 
     # GIVEN an upload_observations_api and a mocked analysis_obj
-    family_obj = analysis_store.family('yellowhog')
+    family_obj = analysis_store.family("yellowhog")
     analysis_obj = Analysis(family_obj=family_obj)
 
     # WHEN data method is used given the analysis_obj as argument
     data = upload_observations_api.data(analysis_obj)
 
     # THEN data is a dictionary with keys (family, vcf, sv_vcf, snv_gbcf, and pedigree)
-    assert set(data.keys()) == {'family', 'vcf', 'sv_vcf', 'snv_gbcf', 'pedigree'}
+    assert set(data.keys()) == {"family", "vcf", "sv_vcf", "snv_gbcf", "pedigree"}
 
 
 def test_upload_observations_process(upload_observations_api, analysis_store):
 
     # GIVEN an upload_observations_api and a mocked analysis_obj
-    family_obj = analysis_store.family('yellowhog')
+    family_obj = analysis_store.family("yellowhog")
     analysis_obj = Analysis(family_obj=family_obj)
 
     # WHEN trying to upload observations
@@ -44,4 +45,4 @@ def test_upload_observations_process(upload_observations_api, analysis_store):
 
     # THEN all samples will have gotten a loqusdb_id
     for link in analysis_obj.family.links:
-        assert link.sample.loqusdb_id == '123'
+        assert link.sample.loqusdb_id == "123"
