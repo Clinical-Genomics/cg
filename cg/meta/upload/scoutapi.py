@@ -3,7 +3,8 @@ import requests
 import logging
 from pathlib import Path
 
-from cg.apps import hk, scoutapi, madeline, LimsAPI
+from cg.apps import hk, scoutapi, madeline
+from cg.apps.lims import LimsAPI
 from cg.meta.analysis import AnalysisAPI
 from cg.store import models, Store
 from ruamel import yaml
@@ -14,7 +15,7 @@ LOG = logging.getLogger(__name__)
 class UploadScoutAPI(object):
 
     def __init__(self, status_api: Store, hk_api: hk.HousekeeperAPI,
-                 scout_api: scoutapi.ScoutAPI,
+                 scout_api: scoutapi.ScoutAPI, lims_api: LimsAPI,
                  analysis_api: AnalysisAPI, madeline_exe: str, madeline=madeline,
                  ):
         self.status = status_api
