@@ -3,8 +3,8 @@ import requests
 import logging
 from pathlib import Path
 
-from cg.apps import hk, scoutapi, madeline
 from cg.apps.lims import LimsAPI
+from cg.apps import hk, scoutapi, madeline
 from cg.meta.analysis import AnalysisAPI
 from cg.store import models, Store
 from ruamel import yaml
