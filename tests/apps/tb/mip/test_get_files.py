@@ -2,7 +2,6 @@
 """Test get MIP files"""
 
 from pathlib import Path
-from unittest import mock
 
 from cg.apps.tb.add import AddHandler
 
@@ -205,7 +204,7 @@ def test_rna_analysis_multiple_all_false(files_raw):
     rna_sampleinfo['analysis_type']['sample_id_3'] = 'wgs'
     rna_analysis = AddHandler._rna_analysis(rna_sampleinfo)
 
-    # THEN then function should return FALSE 
+    # THEN then function should return FALSE
     assert not rna_analysis
 
 
