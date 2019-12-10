@@ -22,7 +22,7 @@ jobs:
     - name: "coverage"
       script:
         - pip install -U -r requirements-dev.txt .
-        - coverage run --source "$(basename "$PWD")" setup.py test
+        - coverage run --branch --omit="*.html" --source cg setup.py test
         - coveralls
     - name: "linting"
       script:
