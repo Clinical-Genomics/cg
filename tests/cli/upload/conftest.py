@@ -1,7 +1,7 @@
 """Fixtures for cli balsamic tests"""
 
 from pathlib import Path
-
+import json
 import pytest
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
@@ -12,13 +12,23 @@ from cg.store import Store
 from cg.meta.analysis import AnalysisAPI
 
 
+@pytest.fixture
+def lims_family():
+    return json.load(open('tests/fixtures/report/lims_family.json'))
+
+
+@pytest.fixture
+def lims_samples(lims_family):
+    return lims_family['samples']
+
+
 @pytest.fixture(scope='function', name='base_context')
-def fixture_base_context(analysis_store_single_case: Store) -> dict:
+def fixture_base_context(lims_samples, analysis_store_single_case: Store) -> dict:
     """context to use in cli"""
 
     return {
         'scout_api': MockScoutApi(),
-        'scout_upload_api': MockScoutUploadApi(),
+        'scout_upload_api': MockScoutUploadApi(lims_samples),
         'housekeeper_api': MockHK(),
         'tb_api': MockTB(),
         'status': analysis_store_single_case,
@@ -164,14 +174,14 @@ class MockAnalysisApi(AnalysisAPI):
 
 
 class MockScoutUploadApi(UploadScoutAPI):
-    def __init__(self):
+    def __init__(self, lims_samples):
         """docstring for __init__"""
         self.mock_generate_config = True
         self.housekeeper = MockHK()
         self.analysis = MockAnalysisApi()
         self.config = {}
         self.file_exists = False
-        self.lims_api = MockLims()
+        self.lims = MockLims(lims_samples)
 
     @pytest.fixture(autouse=True)
     def _request_analysis(self, analysis_store_single_case):
@@ -200,34 +210,12 @@ class MockLims(LimsAPI):
 
     lims = None
 
-    def __init__(self):
+    def __init__(self, samples):
         self.lims = self
+        self._samples = samples
 
-    _project_name = None
-    _sample_sex = None
-
-    def update_project(self, lims_id: str, name=None):
-        """Mock lims update_project"""
-        self._project_name = name
-
-    def get_updated_project_name(self) -> str:
-        """Method to test that update project was called with name parameter"""
-        return self._project_name
-
-    def update_sample(self, lims_id: str, sex=None, application: str = None,
-                      target_reads: int = None, priority=None):
-        """Mock lims update_sample"""
-        self._sample_sex = sex
-
-    def get_updated_sample_sex(self) -> str:
-        """Method to be used to test that update_sample was called with sex parameter"""
-        return self._sample_sex
-
-    def sample(self, lims_id: str):
-        """Fetch information about a sample."""
-
+    def sample(self, sample_id):
         for sample in self._samples:
-            if sample.get('id') == lims_id:
+            if sample['id'] == sample_id:
                 return sample
-
         return None

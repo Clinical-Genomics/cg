@@ -3,8 +3,7 @@ import logging
 
 from cg.cli.upload import scout
 
-
-def test_produce_load_config(base_context, cli_runner, analysis_family_single_case):
+def test_produce_load_config(base_context, cli_runner, analysis_family_single_case, lims_samples):
     # GIVEN a singleton WGS case
 
     base_context['scout_upload_api'].mock_generate_config = False
