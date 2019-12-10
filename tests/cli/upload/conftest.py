@@ -200,9 +200,8 @@ class MockLims(LimsAPI):
 
     lims = None
 
-    def __init__(self, sample=None):
+    def __init__(self):
         self.lims = self
-        self._samples = samples
 
     _project_name = None
     _sample_sex = None
