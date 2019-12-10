@@ -202,8 +202,8 @@ def lims_family():
     return json.load(open('tests/fixtures/report/lims_family.json'))
 
 
-@pytest.fixture
-def lims_samples(lims_family):
+@pytest.fixture(name="lims_samples")
+def fixture_lims_samples(lims_family):
     """ Returns the samples of a lims family """
     return lims_family['samples']
 
