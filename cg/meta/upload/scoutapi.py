@@ -52,7 +52,7 @@ class UploadScoutAPI(object):
             try:
                 lims_sample = self.lims.sample(sample_id)
             except requests.exceptions.HTTPError as e:
-                self.LOG.info(f"could not fetch sample {sample_id} from LIMS: {e}")
+                LOG.info(f"could not fetch sample {sample_id} from LIMS: {e}")
             bam_tags = ['bam', sample_id]
             bam_file = self.housekeeper.files(version=hk_version.id, tags=bam_tags).first()
             bam_path = bam_file.full_path if bam_file else None
