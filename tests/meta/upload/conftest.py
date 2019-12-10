@@ -196,8 +196,8 @@ class MockLims:
         return None
 
 
-@pytest.fixture
-def lims_family():
+@pytest.fixture(name='lims_family')
+def fixture_lims_family():
     """ Returns a lims-like family of samples """
     return json.load(open('tests/fixtures/report/lims_family.json'))
 
