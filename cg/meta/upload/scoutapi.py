@@ -62,7 +62,8 @@ class UploadScoutAPI(object):
                 'mother': link_obj.mother.internal_id if link_obj.mother else '0',
                 'sample_name': link_obj.sample.name, 'phenotype': link_obj.status,
                 'sex': link_obj.sample.sex, 'bam_path': bam_path, 'mt_bam': mt_bam_path,
-                'tissue_type': link_obj.sample.source, 'vcf2cytosure': vcf2cytosure_path}
+                'tissue_type': link_obj.sample.source or 'unknown',
+                'vcf2cytosure': vcf2cytosure_path}
             data['samples'].append(sample)
 
         self._include_mandatory_files(data, hk_version)
