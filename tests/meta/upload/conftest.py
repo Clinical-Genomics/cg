@@ -1,5 +1,6 @@
 import pytest
 from cg.apps.hk import HousekeeperAPI
+from cg.apps.lims import LimsAPI
 from cg.meta.upload.mutacc import UploadToMutaccAPI
 from cg.meta.upload.observations import UploadObservationsAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
@@ -127,6 +128,20 @@ class MockAnalysis:
         return ''
 
 
+class MockLims(LimsAPI):
+    """Mock lims fixture"""
+
+    lims = None
+
+    def __init__(self):
+        self.lims = self
+
+    _sample_tissue = 'blood'
+
+    def sample(*args, **kwargs):
+        return self._sample_tissue
+
+
 class MockMutaccAuto:
     """ Mock class for mutacc_auto api """
 
@@ -204,6 +219,7 @@ def upload_scout_api(analysis_store, scout_store):
     madeline_mock = MockMadeline()
     hk_mock = MockHouseKeeper()
     analysis_mock = MockAnalysis()
+    lims_api=MockLims()
 
     _api = UploadScoutAPI(
         status_api=analysis_store,
@@ -211,7 +227,8 @@ def upload_scout_api(analysis_store, scout_store):
         scout_api=scout_store,
         madeline_exe='',
         madeline=madeline_mock,
-        analysis_api=analysis_mock
+        analysis_api=analysis_mock,
+        lims_api=lims_api
     )
 
     yield _api
