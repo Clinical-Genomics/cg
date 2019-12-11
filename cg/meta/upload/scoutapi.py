@@ -5,7 +5,8 @@ from pathlib import Path
 import requests
 
 from cg.apps.lims import LimsAPI
-from cg.apps import hk, scoutapi, madeline
+from cg.apps import hk, scoutapi
+from cg.apps import madeline as madeline_module
 from cg.meta.analysis import AnalysisAPI
 from cg.store import models, Store
 from ruamel import yaml
@@ -18,7 +19,7 @@ class UploadScoutAPI(object):
     def __init__(self, status_api: Store, hk_api: hk.HousekeeperAPI,
                  scout_api: scoutapi.ScoutAPI, lims_api: LimsAPI,
                  analysis_api: AnalysisAPI, madeline_exe: str,
-                 madeline: madeline):
+                 madeline: madeline_module):
         self.status = status_api
         self.housekeeper = hk_api
         self.scout = scout_api
