@@ -12,72 +12,85 @@ from cg.meta.analysis import AnalysisAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
 
 
-@pytest.fixture(scope='function', name='base_context')
+@pytest.fixture(scope="function", name="base_context")
 def fixture_base_context(analysis_store_single_case: Store) -> dict:
     """context to use in cli"""
 
     return {
-        'scout_api': MockScoutApi(),
-        'scout_upload_api': MockScoutUploadApi(),
-        'housekeeper_api': MockHK(),
-        'tb_api': MockTB(),
-        'status': analysis_store_single_case,
+        "scout_api": MockScoutApi(),
+        "scout_upload_api": MockScoutUploadApi(),
+        "housekeeper_api": MockHK(),
+        "tb_api": MockTB(),
+        "status": analysis_store_single_case,
     }
 
 
-@pytest.fixture(scope='function', name='analysis_family_single_case')
+@pytest.fixture(scope="function", name="analysis_family_single_case")
 def fixture_analysis_family_single():
     """Build an example family."""
     family = {
-        'name': 'family',
-        'internal_id': 'yellowhog',
-        'panels': ['IEM', 'EP'],
-        'samples': [{
-            'name': 'proband',
-            'sex': 'male',
-            'internal_id': 'ADM1',
-            'status': 'affected',
-            'ticket_number': 123456,
-            'reads': 5000000,
-        }]
+        "name": "family",
+        "internal_id": "yellowhog",
+        "panels": ["IEM", "EP"],
+        "samples": [
+            {
+                "name": "proband",
+                "sex": "male",
+                "internal_id": "ADM1",
+                "status": "affected",
+                "ticket_number": 123456,
+                "reads": 5000000,
+            }
+        ],
     }
     return family
 
 
-@pytest.yield_fixture(scope='function', name='analysis_store_single_case')
+@pytest.yield_fixture(scope="function", name="analysis_store_single_case")
 def fixture_analysis_store_single(base_store, analysis_family_single_case):
     """Setup a store instance for testing analysis API."""
     analysis_family = analysis_family_single_case
-    customer = base_store.customer('cust000')
-    family = base_store.Family(name=analysis_family['name'], panels=analysis_family[
-        'panels'], internal_id=analysis_family['internal_id'], priority='standard')
+    customer = base_store.customer("cust000")
+    family = base_store.Family(
+        name=analysis_family["name"],
+        panels=analysis_family["panels"],
+        internal_id=analysis_family["internal_id"],
+        priority="standard",
+    )
     family.customer = customer
     base_store.add(family)
-    application_version = base_store.application('WGTPCFC030').versions[0]
-    for sample_data in analysis_family['samples']:
-        sample = base_store.add_sample(name=sample_data['name'], sex=sample_data['sex'],
-                                       internal_id=sample_data['internal_id'],
-                                       ticket=sample_data['ticket_number'],
-                                       reads=sample_data['reads'], )
+    application_version = base_store.application("WGTPCFC030").versions[0]
+    for sample_data in analysis_family["samples"]:
+        sample = base_store.add_sample(
+            name=sample_data["name"],
+            sex=sample_data["sex"],
+            internal_id=sample_data["internal_id"],
+            ticket=sample_data["ticket_number"],
+            reads=sample_data["reads"],
+        )
         sample.family = family
         sample.application_version = application_version
         sample.customer = customer
         base_store.add(sample)
     base_store.commit()
-    for sample_data in analysis_family['samples']:
-        sample_obj = base_store.sample(sample_data['internal_id'])
+    for sample_data in analysis_family["samples"]:
+        sample_obj = base_store.sample(sample_data["internal_id"])
         link = base_store.relate_sample(
             family=family,
             sample=sample_obj,
-            status=sample_data['status'],
-            father=base_store.sample(sample_data['father']) if sample_data.get('father') else None,
-            mother=base_store.sample(sample_data['mother']) if sample_data.get('mother') else None,
+            status=sample_data["status"],
+            father=base_store.sample(sample_data["father"])
+            if sample_data.get("father")
+            else None,
+            mother=base_store.sample(sample_data["mother"])
+            if sample_data.get("mother")
+            else None,
         )
         base_store.add(link)
 
-    _analysis = base_store.add_analysis(pipeline='pipeline', version='version')
+    _analysis = base_store.add_analysis(pipeline="pipeline", version="version")
     _analysis.family = family
-    _analysis.config_path = 'dummy_path'
+    _analysis.config_path = "dummy_path"
 
     base_store.commit()
     yield base_store
@@ -92,7 +105,7 @@ class MockTB(TrailblazerAPI):
 
     def get_family_root_dir(self, case_id):
         """docstring for get_family_root_dir"""
-        return Path('hej')
+        return Path("hej")
 
 
 class MockVersion:
@@ -100,13 +113,13 @@ class MockVersion:
 
     @property
     def id(self):
-        return ''
+        return ""
 
 
 class MockFile:
     """Mock a file object"""
 
-    def __init__(self, path='', to_archive=False, tags=None):
+    def __init__(self, path="", to_archive=False, tags=None):
         self.path = path
         self.to_archive = to_archive
         self.tags = tags or []
@@ -115,7 +128,7 @@ class MockFile:
         return MockFile()
 
     def full_path(self):
-        return ''
+        return ""
 
     def is_included(self):
         return False
@@ -142,7 +155,8 @@ class MockFamily(object):
 
     def __init__(self):
         """Mock the init"""
-        self.analyses = ['analysis_obj']
+        self.analyses = ["analysis_obj"]
+
 
 class MockScoutApi(ScoutAPI):
     def __init__(self):
@@ -152,6 +166,7 @@ class MockScoutApi(ScoutAPI):
     def upload(self, scout_config, force=False):
         """docstring for upload"""
         pass
+
 
 class MockAnalysisApi(AnalysisAPI):
     def __init__(self):
@@ -164,7 +179,6 @@ class MockAnalysisApi(AnalysisAPI):
 
 
 class MockScoutUploadApi(UploadScoutAPI):
-
     def __init__(self):
         """docstring for __init__"""
         self.mock_generate_config = True
@@ -192,11 +206,11 @@ class MockScoutUploadApi(UploadScoutAPI):
     def add_scout_config_to_hk(self, file_path, hk_api, case_id):
         """docstring for add_scout_config_to_hk"""
         if self.file_exists:
-            raise FileExistsError('Scout config already exists')
+            raise FileExistsError("Scout config already exists")
         pass
 
 
-class MockLims():
+class MockLims:
     """Mock lims fixture"""
 
     lims = None
@@ -205,13 +219,13 @@ class MockLims():
         self.lims = self
 
     def lims_samples(self):
-        lims_family = json.load(open('tests/fixtures/report/lims_family.json'))
-        return lims_family['samples']
+        lims_family = json.load(open("tests/fixtures/report/lims_family.json"))
+        return lims_family["samples"]
 
     def sample(self, sample_id):
         """ Returns a lims sample matching the provided sample_id """
 
         for sample in self.lims_samples():
-            if sample['id'] == sample_id:
+            if sample["id"] == sample_id:
                 return sample
         return None
