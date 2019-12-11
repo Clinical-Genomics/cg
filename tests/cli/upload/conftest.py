@@ -213,6 +213,7 @@ class MockLims:
 
     @staticmethod
     def lims_samples():
+        """ Return LIMS-like family samples """
         lims_family = json.load(open("tests/fixtures/report/lims_family.json"))
         return lims_family["samples"]
 
