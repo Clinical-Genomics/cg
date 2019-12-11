@@ -211,7 +211,8 @@ class MockLims:
     def __init__(self):
         self.lims = self
 
-    def lims_samples(self):
+    @staticmethod
+    def lims_samples():
         lims_family = json.load(open("tests/fixtures/report/lims_family.json"))
         return lims_family["samples"]
 
