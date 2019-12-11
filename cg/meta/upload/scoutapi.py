@@ -23,7 +23,7 @@ class UploadScoutAPI(object):
         lims_api: LimsAPI,
         analysis_api: AnalysisAPI,
         madeline_exe: str,
-        madeline : None
+        madeline: madeline,
     ):
         self.status = status_api
         self.housekeeper = hk_api
