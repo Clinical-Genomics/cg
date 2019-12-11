@@ -232,8 +232,9 @@ def upload_observations_api(analysis_store):
     )
 
     yield _api
-    
 
+
+@pytest.yield_fixture(scope='function')
 def upload_observations_api_wes(analysis_store):
     """ Create mocked UploadObservationsAPI object"""
 
