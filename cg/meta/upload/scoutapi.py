@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
-import requests
 import logging
 from pathlib import Path
+
+import requests
 
 from cg.apps.lims import LimsAPI
 from cg.apps import hk, scoutapi, madeline
@@ -14,17 +15,10 @@ LOG = logging.getLogger(__name__)
 
 class UploadScoutAPI(object):
     """ API to upload finished analyses to Scout """
-
-    def __init__(
-        self,
-        status_api: Store,
-        hk_api: hk.HousekeeperAPI,
-        scout_api: scoutapi.ScoutAPI,
-        lims_api: LimsAPI,
-        analysis_api: AnalysisAPI,
-        madeline_exe: str,
-        madeline: madeline,
-    ):
+    def __init__(self, status_api: Store, hk_api: hk.HousekeeperAPI,
+                 scout_api: scoutapi.ScoutAPI, lims_api: LimsAPI,
+                 analysis_api: AnalysisAPI, madeline_exe: str,
+                 madeline: madeline):
         self.status = status_api
         self.housekeeper = hk_api
         self.scout = scout_api
@@ -36,26 +30,34 @@ class UploadScoutAPI(object):
     def generate_config(self, analysis_obj: models.Analysis) -> dict:
         """Fetch data about an analysis to load Scout."""
         analysis_date = analysis_obj.started_at or analysis_obj.completed_at
-        hk_version = self.housekeeper.version(
-            analysis_obj.family.internal_id, analysis_date
-        )
+        hk_version = self.housekeeper.version(analysis_obj.family.internal_id,
+                                              analysis_date)
         analysis_data = self.analysis.get_latest_metadata(
-            analysis_obj.family.internal_id
-        )
+            analysis_obj.family.internal_id)
 
         data = {
-            "owner": analysis_obj.family.customer.internal_id,
-            "family": analysis_obj.family.internal_id,
-            "family_name": analysis_obj.family.name,
-            "samples": list(),
-            "analysis_date": analysis_obj.completed_at,
-            "gene_panels": self.analysis.convert_panels(
-                analysis_obj.family.customer.internal_id, analysis_obj.family.panels
-            ),
-            "default_gene_panels": analysis_obj.family.panels,
-            "human_genome_build": analysis_data.get("genome_build"),
-            "rank_model_version": analysis_data.get("rank_model_version"),
-            "sv_rank_model_version": analysis_data.get("sv_rank_model_version"),
+            "owner":
+            analysis_obj.family.customer.internal_id,
+            "family":
+            analysis_obj.family.internal_id,
+            "family_name":
+            analysis_obj.family.name,
+            "samples":
+            list(),
+            "analysis_date":
+            analysis_obj.completed_at,
+            "gene_panels":
+            self.analysis.convert_panels(
+                analysis_obj.family.customer.internal_id,
+                analysis_obj.family.panels),
+            "default_gene_panels":
+            analysis_obj.family.panels,
+            "human_genome_build":
+            analysis_data.get("genome_build"),
+            "rank_model_version":
+            analysis_data.get("rank_model_version"),
+            "sv_rank_model_version":
+            analysis_data.get("sv_rank_model_version"),
         }
 
         for link_obj in analysis_obj.family.links:
@@ -64,30 +66,30 @@ class UploadScoutAPI(object):
             try:
                 lims_sample = self.lims.sample(sample_id)
             except requests.exceptions.HTTPError as ex:
-                LOG.info("Could not fetch sample %s from LIMS: %s", sample_id, ex)
+                LOG.info("Could not fetch sample %s from LIMS: %s", sample_id,
+                         ex)
             bam_tags = ["bam", sample_id]
-            bam_file = self.housekeeper.files(
-                version=hk_version.id, tags=bam_tags
-            ).first()
+            bam_file = self.housekeeper.files(version=hk_version.id,
+                                              tags=bam_tags).first()
             bam_path = bam_file.full_path if bam_file else None
             mt_bam_tags = ["bam-mt", sample_id]
-            mt_bam_file = self.housekeeper.files(
-                version=hk_version.id, tags=mt_bam_tags
-            ).first()
+            mt_bam_file = self.housekeeper.files(version=hk_version.id,
+                                                 tags=mt_bam_tags).first()
             mt_bam_path = mt_bam_file.full_path if mt_bam_file else None
             vcf2cytosure_tags = ["vcf2cytosure", sample_id]
             vcf2cytosure_file = self.housekeeper.files(
-                version=hk_version.id, tags=vcf2cytosure_tags
-            ).first()
-            vcf2cytosure_path = (
-                vcf2cytosure_file.full_path if vcf2cytosure_file else None
-            )
+                version=hk_version.id, tags=vcf2cytosure_tags).first()
+            vcf2cytosure_path = (vcf2cytosure_file.full_path
+                                 if vcf2cytosure_file else None)
             sample = {
-                "analysis_type": link_obj.sample.application_version.application.analysis_type,
+                "analysis_type":
+                link_obj.sample.application_version.application.analysis_type,
                 "sample_id": sample_id,
                 "capture_kit": None,
-                "father": link_obj.father.internal_id if link_obj.father else "0",
-                "mother": link_obj.mother.internal_id if link_obj.mother else "0",
+                "father":
+                link_obj.father.internal_id if link_obj.father else "0",
+                "mother":
+                link_obj.mother.internal_id if link_obj.mother else "0",
                 "sample_name": link_obj.sample.name,
                 "phenotype": link_obj.status,
                 "sex": link_obj.sample.sex,
@@ -122,15 +124,14 @@ class UploadScoutAPI(object):
         yml.dump(upload_config, file_path)
 
     @staticmethod
-    def add_scout_config_to_hk(
-        config_file_path: Path, hk_api: hk.HousekeeperAPI, case_id: str
-    ):
+    def add_scout_config_to_hk(config_file_path: Path,
+                               hk_api: hk.HousekeeperAPI, case_id: str):
         """Add scout load config to hk bundle"""
         tag_name = "scout-load-config"
         version_obj = hk_api.last_version(bundle=case_id)
-        uploaded_config_files = hk_api.get_files(
-            bundle=case_id, tags=[tag_name], version=version_obj.id
-        )
+        uploaded_config_files = hk_api.get_files(bundle=case_id,
+                                                 tags=[tag_name],
+                                                 version=version_obj.id)
 
         number_of_configs = sum(1 for i in uploaded_config_files)
         bundle_config_exists = number_of_configs > 0
@@ -138,15 +139,18 @@ class UploadScoutAPI(object):
         if bundle_config_exists:
             raise FileExistsError("Upload config already exists")
 
-        file_obj = hk_api.add_file(str(config_file_path), version_obj, tag_name)
+        file_obj = hk_api.add_file(str(config_file_path), version_obj,
+                                   tag_name)
         hk_api.include_file(file_obj, version_obj)
         hk_api.add_commit(file_obj)
 
-        LOG.info("Added scout load config to housekeeper: %s", config_file_path)
+        LOG.info("Added scout load config to housekeeper: %s",
+                 config_file_path)
         return file_obj
 
     def _include_optional_files(self, data, hk_version):
-        scout_hk_map = [("delivery_report", "delivery-report"), ("vcf_str", "vcf-str")]
+        scout_hk_map = [("delivery_report", "delivery-report"),
+                        ("vcf_str", "vcf-str")]
         self._include_files(data, hk_version, scout_hk_map)
 
     def _include_peddy_files(self, data, hk_version):
@@ -166,9 +170,12 @@ class UploadScoutAPI(object):
         }
         self._include_files(data, hk_version, scout_hk_map, skip_missing=False)
 
-    def _include_files(
-        self, data, hk_version, scout_hk_map, extra_tag=None, skip_missing=True
-    ):
+    def _include_files(self,
+                       data,
+                       hk_version,
+                       scout_hk_map,
+                       extra_tag=None,
+                       skip_missing=True):
         for scout_key, hk_tag in scout_hk_map:
 
             if extra_tag:
@@ -176,7 +183,8 @@ class UploadScoutAPI(object):
             else:
                 tags = [hk_tag]
 
-            hk_file = self.housekeeper.files(version=hk_version.id, tags=tags).first()
+            hk_file = self.housekeeper.files(version=hk_version.id,
+                                             tags=tags).first()
             if hk_file:
                 data[scout_key] = str(hk_file.full_path)
             else:
@@ -187,7 +195,8 @@ class UploadScoutAPI(object):
 
     @staticmethod
     def _is_family_case(data):
-        return any(sample["father"] or sample["mother"] for sample in data["samples"])
+        return any(sample["father"] or sample["mother"]
+                   for sample in data["samples"])
 
     @staticmethod
     def _is_multi_sample_case(data):
@@ -195,16 +204,13 @@ class UploadScoutAPI(object):
 
     def _run_madeline(self, family_obj: models.Family):
         """Generate a madeline file for an analysis."""
-        samples = [
-            {
-                "sample": link_obj.sample.name,
-                "sex": link_obj.sample.sex,
-                "father": link_obj.father.name if link_obj.father else None,
-                "mother": link_obj.mother.name if link_obj.mother else None,
-                "status": link_obj.status,
-            }
-            for link_obj in family_obj.links
-        ]
+        samples = [{
+            "sample": link_obj.sample.name,
+            "sex": link_obj.sample.sex,
+            "father": link_obj.father.name if link_obj.father else None,
+            "mother": link_obj.mother.name if link_obj.mother else None,
+            "status": link_obj.status,
+        } for link_obj in family_obj.links]
         ped_stream = self.madeline.make_ped(family_obj.name, samples=samples)
         svg_path = self.madeline.run(self.madeline_exe, ped_stream)
         return svg_path

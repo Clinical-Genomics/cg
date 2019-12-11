@@ -29,19 +29,19 @@ def fixture_base_context(analysis_store_single_case: Store) -> dict:
 def fixture_analysis_family_single():
     """Build an example family."""
     family = {
-        "name": "family",
-        "internal_id": "yellowhog",
+        "name":
+        "family",
+        "internal_id":
+        "yellowhog",
         "panels": ["IEM", "EP"],
-        "samples": [
-            {
-                "name": "proband",
-                "sex": "male",
-                "internal_id": "ADM1",
-                "status": "affected",
-                "ticket_number": 123456,
-                "reads": 5000000,
-            }
-        ],
+        "samples": [{
+            "name": "proband",
+            "sex": "male",
+            "internal_id": "ADM1",
+            "status": "affected",
+            "ticket_number": 123456,
+            "reads": 5000000,
+        }],
     }
     return family
 
@@ -80,11 +80,9 @@ def fixture_analysis_store_single(base_store, analysis_family_single_case):
             sample=sample_obj,
             status=sample_data["status"],
             father=base_store.sample(sample_data["father"])
-            if sample_data.get("father")
-            else None,
+            if sample_data.get("father") else None,
             mother=base_store.sample(sample_data["mother"])
-            if sample_data.get("mother")
-            else None,
+            if sample_data.get("mother") else None,
         )
         base_store.add(link)
 
@@ -98,7 +96,6 @@ def fixture_analysis_store_single(base_store, analysis_family_single_case):
 
 class MockTB(TrailblazerAPI):
     """Mock of trailblazer """
-
     def __init__(self):
         """Mock the init"""
         pass
@@ -110,7 +107,6 @@ class MockTB(TrailblazerAPI):
 
 class MockVersion:
     """Mock a version object"""
-
     @property
     def id(self):
         return ""
@@ -118,7 +114,6 @@ class MockVersion:
 
 class MockFile:
     """Mock a file object"""
-
     def __init__(self, path="", to_archive=False, tags=None):
         self.path = path
         self.to_archive = to_archive
@@ -136,7 +131,6 @@ class MockFile:
 
 class MockHK(HousekeeperAPI):
     """Mock of housekeeper """
-
     def __init__(self):
         """Mock the init"""
         pass
@@ -152,7 +146,6 @@ class MockHK(HousekeeperAPI):
 
 class MockFamily(object):
     """Mock of family used in store """
-
     def __init__(self):
         """Mock the init"""
         self.analyses = ["analysis_obj"]
