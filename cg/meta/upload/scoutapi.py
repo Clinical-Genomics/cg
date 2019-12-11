@@ -32,10 +32,7 @@ class UploadScoutAPI(object):
         analysis_date = analysis_obj.started_at or analysis_obj.completed_at
         hk_version = self.housekeeper.version(analysis_obj.family.internal_id, analysis_date)
         analysis_data = self.analysis.get_latest_metadata(analysis_obj.family.internal_id)
-        family_samples = self.db.family_samples(analysis_obj.family.internal_id)
-        LOG.info('************** FAMILY SAMPLES : {}'.format(family_samples))
-
-
+    
         data = {
             'owner': analysis_obj.family.customer.internal_id,
             'family': analysis_obj.family.internal_id,
@@ -51,12 +48,10 @@ class UploadScoutAPI(object):
         }
 
         for link_obj in analysis_obj.family.links:
-            LOG.info('------------>LINK OBJ: {}'.format(link_obj))
             sample_id = link_obj.sample.internal_id
             lims_sample = dict()
             try:
                 lims_sample = self.lims.sample(sample_id)
-                LOG.info('************* {}'.format(lims_sample))
             except requests.exceptions.HTTPError as ex:
                 LOG.info("Could not fetch sample %s from LIMS: %s", sample_id, ex)
             bam_tags = ['bam', sample_id]
