@@ -7,9 +7,9 @@ from cg.apps.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.meta.upload.scoutapi import UploadScoutAPI
 from cg.store import Store
 from cg.meta.analysis import AnalysisAPI
+from cg.meta.upload.scoutapi import UploadScoutAPI
 
 
 @pytest.fixture(name='lims_family')
@@ -217,6 +217,7 @@ class MockLims():
         self._samples = samples
 
     def sample(self, sample_id):
+        """ Returns a lims sample matching the provided sample_id """
         for sample in self._samples:
             if sample['id'] == sample_id:
                 return sample
