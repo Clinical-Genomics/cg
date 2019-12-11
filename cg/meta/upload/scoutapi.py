@@ -48,10 +48,12 @@ class UploadScoutAPI(object):
         }
 
         for link_obj in analysis_obj.family.links:
+            LOG.info('------------>LINK OBJ: {}'.format(link_obj))
             sample_id = link_obj.sample.internal_id
             lims_sample = dict()
             try:
                 lims_sample = self.lims.sample(sample_id)
+                LOG.info('************* {}'.format(lims_sample))
             except requests.exceptions.HTTPError as ex:
                 LOG.info("Could not fetch sample %s from LIMS: %s", sample_id, ex)
             bam_tags = ['bam', sample_id]
