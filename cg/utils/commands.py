@@ -52,7 +52,7 @@ class Process:
             raise err
 
         self.stdout = res.stdout.decode("utf-8").rstrip()
-        self.stderr = res.stdout.decode("utf-8").rstrip()
+        self.stderr = res.stderr.decode("utf-8").rstrip()
 
         return res.returncode
 

@@ -75,12 +75,7 @@ class LoqusdbAPI:
         case_obj = None
         cases_parameters = ["cases", "-c", case_id, "--to-json"]
 
-        try:
-            self.process.run_command(cases_parameters)
-        except CalledProcessError:
-            # If CalledProcessError is raised, log and raise error
-            LOG.critical("Could not run cases command")
-            raise
+        self.process.run_command(cases_parameters)
 
         output = self.process.stdout
 

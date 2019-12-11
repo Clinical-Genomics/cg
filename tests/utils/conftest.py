@@ -17,7 +17,7 @@ def ls_process():
 @pytest.fixture(scope="function")
 def echo_process():
     """
-        list files process
+        echo process
     """
     binary = "echo"
     process = Process(binary=binary)
@@ -27,7 +27,7 @@ def echo_process():
 @pytest.fixture(scope="function")
 def stderr_output():
     """
-        list files process
+        std err lines
     """
     lines = (
         "2018-11-29 08:41:38 130-229-8-20-dhcp.local "
