@@ -42,17 +42,16 @@ class Process:
         command = copy.deepcopy(self.base_call)
         if parameters:
             command.extend(parameters)
-        try:
-            LOG.info("Running command %s", command)
-            res = subprocess.run(
-                command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-            )
-        except CalledProcessError as err:
-            LOG.warning(err)
-            raise err
+
+        LOG.info("Running command %s", command)
+        res = subprocess.run(
+            command, check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        )
 
         self.stdout = res.stdout.decode("utf-8").rstrip()
         self.stderr = res.stderr.decode("utf-8").rstrip()
+        if res.returncode != 0:
+            raise CalledProcessError(command, res.returncode)
 
         return res.returncode
 

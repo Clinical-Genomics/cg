@@ -50,6 +50,17 @@ def test_process_run_command_with_params(ls_process):
     assert i > 1
 
 
+def test_process_std_err(ls_process):
+    # GIVEN a proces with 'ls' as binary
+    process = ls_process
+    # WHEN running the command with invalid parameters
+    with pytest.raises(CalledProcessError):
+        # THEN assert that a exception is raised
+        process.run_command(["-kffd4"])
+    # THEN assert that stderr was captured
+    assert process.stderr
+
+
 def test_iter_output_lines(ls_process):
     # GIVEN a proces with 'ls' as binary
     process = ls_process
