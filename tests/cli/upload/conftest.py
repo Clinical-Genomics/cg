@@ -12,13 +12,15 @@ from cg.store import Store
 from cg.meta.analysis import AnalysisAPI
 
 
-@pytest.fixture
-def lims_family():
+@pytest.fixture(name='lims_family')
+def fixture_lims_family():
+    """ Returns a lims-like family of samples """
     return json.load(open('tests/fixtures/report/lims_family.json'))
 
 
-@pytest.fixture
-def lims_samples(lims_family):
+@pytest.fixture(name="lims_samples")
+def fixture_lims_samples(lims_family):
+    """ Returns the samples of a lims family """
     return lims_family['samples']
 
 
@@ -205,7 +207,7 @@ class MockScoutUploadApi(UploadScoutAPI):
         pass
 
 
-class MockLims(LimsAPI):
+class MockLims():
     """Mock lims fixture"""
 
     lims = None
