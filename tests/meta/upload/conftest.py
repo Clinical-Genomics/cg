@@ -20,26 +20,14 @@ class MockFile:
         self.tags = tags
 
     def first(self):
-        return MockFile()
+        return MockFile(path=self.path)
 
+    @property
     def full_path(self):
-        return ''
+        return self.path
 
     def is_included(self):
         return False
-
-
-# Mock File again, but full_path should be an attribute
-class MockFile1():
-    """ Mock File object """
-
-    def __init__(self, path=''):
-        self.full_path = path
-
-    @staticmethod
-    def first():
-        """ mock first method """
-        return MockFile1()
 
 
 class MockHouseKeeper(HousekeeperAPI):
@@ -48,9 +36,10 @@ class MockHouseKeeper(HousekeeperAPI):
         self._file_added = False
         self._file_included = False
         self._files = []
+        self._file = MockFile()
 
     def files(self, version, tags):
-        return MockFile()
+        return self._file
 
     def get_files(self, bundle, tags, version='1.0'):
         """docstring for get_files"""
@@ -59,7 +48,8 @@ class MockHouseKeeper(HousekeeperAPI):
     def add_file(self, file, version_obj, tag_name, to_archive=False):
         """docstring for add_file"""
         self._file_added = True
-        return MockFile(path=file)
+        self._file = MockFile(path=file)
+        return self._file
 
     def version(self, arg1: str, arg2: str):
         """Fetch version from the database."""
@@ -76,23 +66,6 @@ class MockHouseKeeper(HousekeeperAPI):
     def add_commit(self, file_obj):
         """docstring for include_file"""
         pass
-
-
-# Mock Housekeeper again, but with MockFile_ returned from files instead
-class MockHouseKeeper1():
-    """ Mock housekeeper api"""
-
-    @staticmethod
-    def files(version, tags):
-        """ Mock files method """
-        _, _ = version, tags
-        return MockFile1()
-
-    @staticmethod
-    def version(arg1: str, arg2: str):
-        """Fetch version from the database."""
-        _, _ = arg1, arg2
-        return MockVersion()
 
 
 class MockMadeline:
@@ -191,7 +164,8 @@ def upload_observations_api(analysis_store):
     """ Create mocked UploadObservationsAPI object"""
 
     loqus_mock = MockLoqusAPI()
-    hk_mock = MockHouseKeeper1()
+    hk_mock = MockHouseKeeper()
+    hk_mock.add_file(file='.', version_obj='', tag_name='')
 
     _api = UploadObservationsAPI(
         status_api=analysis_store,
@@ -207,7 +181,8 @@ def upload_observations_api_wes(analysis_store):
     """ Create mocked UploadObservationsAPI object"""
 
     loqus_mock = MockLoqusAPI(analysis_type='wes')
-    hk_mock = MockHouseKeeper1()
+    hk_mock = MockHouseKeeper()
+    hk_mock.add_file(file='.', version_obj='', tag_name='')
 
     _api = UploadObservationsAPI(
         status_api=analysis_store,
@@ -222,6 +197,7 @@ def upload_observations_api_wes(analysis_store):
 def upload_scout_api(analysis_store, scout_store):
     madeline_mock = MockMadeline()
     hk_mock = MockHouseKeeper()
+    hk_mock.add_file(file='/mock/path', version_obj='', tag_name='')
     analysis_mock = MockAnalysis()
 
     _api = UploadScoutAPI(
