@@ -214,9 +214,13 @@ class StatusHandler:
                             application_tag)
                     if new_sample.application_version is None:
                         raise OrderError(f"Invalid application: {sample['application']}")
+
+                    with self.status.session.no_autoflush:
+                        bed = sample['capture_kit']
+                        new_sample.bed_version = self.status.latest_bed_version(bed)
+
                     family_samples[new_sample.name] = new_sample
                     self.status.add(new_sample)
-
                     new_delivery = self.status.add_delivery(destination='caesar', sample=new_sample)
                     self.status.add(new_delivery)
 

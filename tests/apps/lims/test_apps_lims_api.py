@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime as dt
 
-from cg.apps.lims import LimsAPI
-
 
 def test_get_processing_time_for_values(lims_api):
 
