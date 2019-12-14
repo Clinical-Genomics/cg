@@ -17,10 +17,15 @@ def test_all_samples_data_analysis(analysis_store):
     assert LinkHelper.all_samples_data_analysis(family_obj.links, ["mip"])
 
 
-def test_all_samples_are_wgs(analysis_store):
-
+def test_all_samples_list_analyses(analysis_store):
+    # GIVEN family obj where each sample is wgs analysis
     family_obj = analysis_store.family("yellowhog")
-    assert LinkHelper.all_samples_are_wgs(family_obj.links)
+
+    # WHEN looking up the analysis type for the samples in the family
+    analysis_types = LinkHelper.all_samples_list_analyses(family_obj.links)
+
+    # THEN all the samples should have analysis type 'wgs'
+    assert len(set(analysis_types)) == 1 and analysis_types[0] == "wgs"
 
 
 def test_upload_fails_hard_on_faulty_family(invoke_cli, disk_store: Store):

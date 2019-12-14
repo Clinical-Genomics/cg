@@ -5,7 +5,13 @@
 import pytest
 from cg.apps.loqus import LoqusdbAPI
 
-CONFIG = {"loqusdb": {"config_path": "loqusdb_config", "binary_path": "loqusdb"}}
+CONFIG = {
+    "loqusdb": {"config_path": "loqusdb_config_wes", "binary_path": "loqus_binary"},
+    "loqusdb-wes": {
+        "config_path": "loqusdb_config_wes",
+        "binary_path": "loqusdb_wes_binary",
+    },
+}
 
 LOQUSDB_OUTPUT = (
     b"2018-11-29 08:41:38 130-229-8-20-dhcp.local "
