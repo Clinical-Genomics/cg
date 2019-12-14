@@ -5,6 +5,7 @@ import logging
 import click
 
 from cg.apps import hk, tb, scoutapi, lims
+from cg.apps.usalt.fastq import USaltFastqHandler
 from cg.meta.analysis import AnalysisAPI
 from cg.meta.deliver.microsalt import MicrosaltDeliverAPI as DeliverAPI
 from cg.store import Store
