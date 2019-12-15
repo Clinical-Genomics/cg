@@ -30,6 +30,20 @@ class FindBasicDataHandler(BaseHandler):
         query = self.ApplicationVersion.query.filter_by(application=application, version=version)
         return query.first()
 
+    def bed(self, name):
+        """Find a bed by name."""
+        return self.Bed.query.filter_by(name=name).first()
+
+    def beds(self):
+        """Returns all beds."""
+        return self.Bed.query.order_by(models.Bed.name)
+
+    def latest_bed_version(self, name: str) -> models.BedVersion:
+        """Fetch the latest bed version for a bed name."""
+        bed_obj = self.Bed.query.filter_by(name=name).first()
+        return bed_obj.versions[-1] if bed_obj and bed_obj.versions else \
+            None
+
     def customer(self, internal_id: str) -> models.Customer:
         """Fetch a customer by internal id from the store."""
         return self.Customer.query.filter_by(internal_id=internal_id).first()

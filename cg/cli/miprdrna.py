@@ -73,4 +73,4 @@ def case_config(context, dry, case_id):
     else:
         # Write to trailblazer root dir / case_id
         out_path = context.obj['tb'].save_config(config_data)
-        LOGGER.info(f"saved config to: {out_path}")
+        LOGGER.info("saved config to: %s", out_path)
