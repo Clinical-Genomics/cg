@@ -20,7 +20,6 @@ def test_get_rna_files(snapshot: Snapshot, files_data: dict):
     mip_rna_file_data = mip_rna.get_files_rna(mip_rna_config, rna_sampleinfo)
 
     # THEN the result should contain the correct data
-
     snapshot.assert_match(mip_rna_file_data)
 
 
@@ -37,8 +36,7 @@ def test_build_bundle_rna(snapshot: Snapshot, files_data: dict):
 
     mip_rna_bundle = mip_rna.build_bundle_rna(mip_rna_config, rna_sampleinfo)
 
-    # THEN the result should contain the correct data
-
+    # THEN the result should contain the data as specified by the MIP version
     snapshot.assert_match(mip_rna_bundle)
 
 
@@ -56,6 +54,5 @@ def test_build_bundle_rna_no_missing_vpstderr(snapshot: Snapshot, files_data: di
 
     mip_rna_bundle = mip_rna.build_bundle_rna(mip_rna_config, rna_sampleinfo)
 
-    # THEN the result should contain the correct data
-
+    # THEN the result should contain the data as specified by the MIP bundle
     snapshot.assert_match(mip_rna_bundle)

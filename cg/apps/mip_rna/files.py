@@ -59,6 +59,6 @@ def get_multiple_paths(sample_data: dict, path_key: str) -> list:
     Returns:
         list: paths to all files of given type
     """
-    paths = [path['path'] for path in sample_data['recipe'][path_key].values()]
+    paths = [file_data['path'] for file_data in sample_data['recipe'][path_key].values()]
 
     return paths
