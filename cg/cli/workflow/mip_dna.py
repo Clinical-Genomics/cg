@@ -27,7 +27,7 @@ START_WITH_PROGRAM = click.option('-sw', '--start-with', help='start mip from th
 @click.option('-c', '--case', 'case_id', help='case to prepare and start an analysis for')
 @click.pass_context
 def mip_dna(context: click.Context, case_id: str, email: str, priority: str, start_with: str):
-    """Run rare disease DNA workflow for CASE_ID"""
+    """Rare disease DNA workflow"""
     context.obj['db'] = Store(context.obj['database'])
     hk_api = hk.HousekeeperAPI(context.obj)
     scout_api = scoutapi.ScoutAPI(context.obj)

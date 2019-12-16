@@ -35,7 +35,7 @@ FAIL = 1
 @click.option('--target-bed', required=False, help='Optional')
 @click.pass_context
 def balsamic(context, case_id, priority, email, target_bed):
-    """ Run cancer workflow """
+    """Cancer workflow """
     context.obj['db'] = Store(context.obj['database'])
     context.obj['hk_api'] = hk.HousekeeperAPI(context.obj)
     context.obj['analysis_api'] = AnalysisAPI

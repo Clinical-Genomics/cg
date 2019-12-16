@@ -19,7 +19,7 @@ LOG = logging.getLogger(__name__)
 @click.group('mip-rna')
 @click.pass_context
 def mip_rna(context: click.Context):
-    """Run rare disease RNA workflow"""
+    """Rare disease RNA workflow"""
     context.obj['db'] = Store(context.obj['database'])
     hk_api = hk.HousekeeperAPI(context.obj)
     scout_api = scoutapi.ScoutAPI(context.obj)
