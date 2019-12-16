@@ -3,22 +3,17 @@
 import logging
 
 import pytest
-import requests
 
 from cg.apps.osticket import OsTicket
 from cg.exc import TicketCreationError
 
 
-def test_osticket_respone_500(monkeypatch, caplog):
+def test_osticket_respone_500(monkeypatch, caplog, response):
     """Test that we log properly when we get a non successful response"""
 
     # GIVEN a ticket server always gives a failure in response
     osticket_api = OsTicket()
-    result = requests.Response
-    result.ok = False
-    result.reason = "response reason"
-    result.text = "response text"
-    monkeypatch.setattr(requests, "post", lambda *args, **kwargs: result)
+    monkeypatch.setattr("requests.post", lambda *args, **kwargs: response)
 
     # WHEN we call open_ticket with ok ticket data
     caplog.set_level(logging.ERROR)
@@ -31,5 +26,5 @@ def test_osticket_respone_500(monkeypatch, caplog):
         )
 
     # THEN the response text and reason was logged and a ticket creation error raised
-    assert result.reason in caplog.text
-    assert result.text in caplog.text
+    assert response.reason in caplog.text
+    assert response.text in caplog.text

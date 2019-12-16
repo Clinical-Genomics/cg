@@ -37,5 +37,4 @@ class OsTicket(object):
             return res.text
         else:
             LOG.error("res.text: %s, reason: %s", res.text, res.reason)
-
             raise TicketCreationError(res)
