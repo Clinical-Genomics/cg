@@ -16,7 +16,7 @@ LOG = logging.getLogger(__name__)
 @click.group('microsalt')
 @click.pass_context
 def microsalt(context: click.Context):
-    """Run microbial microsalt workflow"""
+    """Microbial microsalt workflow"""
     context.obj['db'] = Store(context.obj['database'])
     hk_api = hk.HousekeeperAPI(context.obj)
     scout_api = scoutapi.ScoutAPI(context.obj)

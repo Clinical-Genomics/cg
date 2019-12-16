@@ -67,9 +67,9 @@ def link(context: click.Context, case_id: str, sample_id: str):
 @click.option('-sw', '--start-with', help='start mip from this program.')
 @click.argument('case_id')
 @click.pass_context
-def start(context: click.Context, case_id: str, dry: bool = False,
+def run(context: click.Context, case_id: str, dry: bool = False,
           priority: str = None, email: str = None, start_with: str = None):
-    """Start the analysis pipeline for a case"""
+    """Run the analysis for a case"""
     tb_api = context.obj['tb']
     rna_api = context.obj['rna_api']
     case_obj = context.obj['db'].family(case_id)

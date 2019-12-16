@@ -55,7 +55,7 @@ def mip_dna(context: click.Context, case_id: str, email: str, priority: str, sta
             context.abort()
         is_ok = context.obj['api'].check(case_obj)
         if not is_ok:
-            LOG.warning("%s: not ready to start", case_obj.internal_id)
+            LOG.warning("%s: not ready to run", case_obj.internal_id)
             # commit the updates to request flowcells
             context.obj['db'].commit()
         else:
@@ -63,7 +63,7 @@ def mip_dna(context: click.Context, case_id: str, email: str, priority: str, sta
             context.invoke(case_config, case_id=case_id)
             context.invoke(link, case_id=case_id)
             context.invoke(panel, case_id=case_id)
-            context.invoke(start, case_id=case_id, priority=priority, email=email,
+            context.invoke(run, case_id=case_id, priority=priority, email=email,
                            start_with=start_with)
 
 
@@ -116,7 +116,7 @@ def case_config(context: click.Context, case_id: str, dry: bool = False):
         LOG.info("saved config to %s", out_path)
 
 
-mip_dna.add_command(case_config, 'config')
+mip_dna.add_command(case_config)
 
 
 @mip_dna.command()
@@ -144,9 +144,9 @@ def panel(context: click.Context, case_id: str, print_output: bool = False):
 @START_WITH_PROGRAM
 @click.argument('case_id', required=False)
 @click.pass_context
-def start(context: click.Context, case_id: str, email: str = None, priority: str = None,
+def run(context: click.Context, case_id: str, email: str = None, priority: str = None,
           start_with: str = None):
-    """Start the analysis pipeline for a case"""
+    """Run the analysis for a case"""
     if case_id is None:
         _suggest_cases_to_analyze(context)
         context.abort()
@@ -158,15 +158,15 @@ def start(context: click.Context, case_id: str, email: str = None, priority: str
     if context.obj['tb'].analyses(case=case_obj.internal_id, temp=True).first():
         LOG.warning("%s: analysis already running", {case_obj.internal_id})
     else:
-        context.obj['api'].start(case_obj, priority=priority, email=email, start_with=start_with)
+        context.obj['api'].run(case_obj, priority=priority, email=email, start_with=start_with)
 
 
 @mip_dna.command()
 @click.option('-d', '--dry-run', 'dry_run', is_flag=True, help='print to console, '
                                                                'without actualising')
 @click.pass_context
-def auto(context: click.Context, dry_run: bool = False):
-    """Start all analyses that are ready for analysis"""
+def start(context: click.Context, dry_run: bool = False):
+    """Start all cases that are ready for analysis"""
     exit_code = 0
 
     cases = [case_obj.internal_id for case_obj in context.obj['db'].cases_to_mip_analyze()]

@@ -1,12 +1,12 @@
 """ Test the CLI for analysis rna """
 import logging
 
-from cg.cli.analysis.mip_rd_rna import start
+from cg.cli.analysis.mip_rd_rna import run
 from cg.apps.mip import MipAPI
 
 
-def test_start_dry(cli_runner, tb_api, mock_store, caplog):
-    """Test starting MIP"""
+def test_run_dry(cli_runner, tb_api, mock_store, caplog):
+    """Test run MIP RNA analysis"""
     # GIVEN a cli function
 
     context = {}
@@ -15,9 +15,9 @@ def test_start_dry(cli_runner, tb_api, mock_store, caplog):
     context['rna_api'] = MipAPI('${HOME}/bin/mip', 'analyse rd_rna')
     context['mip-rd-rna'] = {'mip_config': 'config.yaml'}
 
-    # WHEN we start a case in dry run
+    # WHEN we run a case in dry run mode
     caplog.set_level(logging.INFO)
-    cli_runner.invoke(start,
+    cli_runner.invoke(run,
                       ['--dry', '--email', 'james.holden@scilifelab.se', 'angrybird'],
                       obj=context)
 
@@ -27,25 +27,25 @@ def test_start_dry(cli_runner, tb_api, mock_store, caplog):
                '--email james.holden@scilifelab.se --dry_run_all' in caplog.text
 
 
-def test_start(cli_runner, tb_api, mock_store, caplog, monkeypatch):
-    """Test starting MIP"""
+def test_run(cli_runner, tb_api, mock_store, caplog, monkeypatch):
+    """Test run MIP RNA analysis"""
 
-    def mip_start(_self, **kwargs):
-        """monkeypatch function so we don't actually start MIP"""
+    def mip_run(_self, **kwargs):
+        """monkeypatch function so we don't actually run MIP"""
         del kwargs
 
     # GIVEN a cli function
     context = {}
-    monkeypatch.setattr(MipAPI, 'start', mip_start)
+    monkeypatch.setattr(MipAPI, 'start', mip_run)
     mip_api = MipAPI('${HOME}/bin/mip', 'analyse rd_rna')
     context['db'] = mock_store
     context['tb'] = tb_api
     context['rna_api'] = mip_api
     context['mip-rd-rna'] = {'mip_config': 'config.yaml'}
 
-    # WHEN we start a case
+    # WHEN we run a case
     caplog.set_level(logging.INFO)
-    cli_runner.invoke(start,
+    cli_runner.invoke(run,
                       ['--email', 'james.holden@scilifelab.se', 'angrybird'],
                       obj=context)
 
