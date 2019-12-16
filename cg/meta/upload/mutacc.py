@@ -119,7 +119,7 @@ def remap(input_dict: dict, mapper_list: list) -> dict:
     """
     output_dict = {}
     for field in mapper_list:
-        if input_dict.get(field.field_name_1):
+        if input_dict.get(field.field_name_1) is not None:
             output_dict[field.field_name_2] = field.conv(input_dict[field.field_name_1])
     return output_dict
 
