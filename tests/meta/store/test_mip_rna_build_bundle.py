@@ -37,7 +37,6 @@ def test_build_bundle_rna(snapshot: Snapshot, files_data: dict):
     mip_rna_bundle = mip_rna.build_bundle_rna(mip_rna_config, rna_sampleinfo)
 
     # THEN the result should contain the correct data
-
     snapshot.assert_match(mip_rna_bundle)
 
 
