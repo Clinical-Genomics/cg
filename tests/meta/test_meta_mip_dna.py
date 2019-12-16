@@ -1,5 +1,5 @@
 from cg.store import Store
-from cg.meta.analysis import AnalysisAPI
+from cg.meta.mip_dna import AnalysisAPI
 
 
 def test_config(analysis_store: Store, analysis_api: AnalysisAPI):

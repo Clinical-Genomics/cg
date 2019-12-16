@@ -9,7 +9,7 @@ from cg.apps.environ import environ_email
 from cg.apps.mip import MipAPI
 from cg.apps.mip.fastq import MipFastqHandler
 from cg.cli.workflow.workflow import get_links
-from cg.meta.analysis import AnalysisAPI
+from cg.meta.mip_rna import AnalysisAPI
 from cg.meta.deliver.mip_rna import MipRnaDeliverAPI as DeliverAPI
 from cg.store import Store
 

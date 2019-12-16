@@ -8,7 +8,7 @@ import ruamel.yaml
 from cg.apps.coverage import ChanjoAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.scoutapi import ScoutAPI
-from cg.meta.analysis import AnalysisAPI
+from cg.meta.mip_dna import AnalysisAPI
 from cg.meta.report.presenter import Presenter
 from cg.meta.report.sample_calculator import SampleCalculator
 from cg.meta.report.status_helper import StatusHelper

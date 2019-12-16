@@ -10,7 +10,7 @@ from cg.apps.balsamic.fastq import BalsamicFastqHandler
 from cg.apps.mip.fastq import MipFastqHandler
 from cg.cli.workflow.workflow import get_links
 from cg.exc import LimsDataError
-from cg.meta.analysis import AnalysisAPI
+from cg.meta.mip_dna import AnalysisAPI
 from cg.meta.deliver.mip_dna import MipDnaDeliverAPI
 from cg.store import Store
 

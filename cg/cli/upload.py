@@ -8,7 +8,7 @@ import click
 from cg.apps import coverage as coverage_app, gt, hk, loqus, tb, scoutapi, beacon as beacon_app, \
     lims, mutacc_auto
 from cg.exc import DuplicateRecordError, DuplicateSampleError
-from cg.meta.analysis import AnalysisAPI
+from cg.meta.mip_dna import AnalysisAPI
 from cg.meta.deliver.mip_dna import MipDnaDeliverAPI
 from cg.meta.report.api import ReportAPI
 from cg.meta.upload.beacon import UploadBeaconApi

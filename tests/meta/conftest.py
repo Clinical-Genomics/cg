@@ -5,7 +5,7 @@ from cg.apps.usalt.fastq import USaltFastqHandler
 
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.meta.analysis import AnalysisAPI
+from cg.meta.mip_dna import AnalysisAPI
 
 
 @pytest.yield_fixture(scope='function')
