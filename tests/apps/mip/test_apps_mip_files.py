@@ -22,5 +22,5 @@ def test_parse_sampleinfo_rna_result_contents(snapshot: Snapshot, files_raw: dic
     # WHEN parsing the file
     sampleinfo_data = files.parse_sampleinfo_rna(sampleinfo_raw)
 
-    # THEN the result should contains the correct data
+    # THEN the result should contains the data as specified by the MIP team
     snapshot.assert_match(sampleinfo_data)
