@@ -1,4 +1,4 @@
-"""Common CLI analysis functions"""
+"""Common CLI workflow functions"""
 
 import logging
 
@@ -10,8 +10,8 @@ LOG = logging.getLogger(__name__)
 
 
 @click.group()
-def analysis():
-    """Analysis work flows commands"""
+def workflow():
+    """Work flows commands"""
 
 
 def get_links(context: click.Context, case_id: str, sample_id: str) -> [models.FamilySample]:

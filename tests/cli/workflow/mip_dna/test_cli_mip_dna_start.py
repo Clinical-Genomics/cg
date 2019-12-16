@@ -1,6 +1,6 @@
-"""This script tests the cli methods to create prerequisites for a mip-dna start"""
+"""This script tests the cli methods to create prerequisites and start a mip-dna analysis"""
 import logging
-from cg.cli.analysis.mip_rd_dna import start
+from cg.cli.workflow.mip_rd_dna import start
 
 EXIT_SUCCESS = 0
 

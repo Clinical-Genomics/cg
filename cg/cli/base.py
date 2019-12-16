@@ -9,11 +9,11 @@ import ruamel.yaml
 import cg
 from cg.store import Store
 
-from .analysis import analysis
-from .analysis import balsamic
-from .analysis import microsalt
-from .analysis import mip_dna
-from .analysis import mip_rna
+from .workflow import workflow
+from .workflow import balsamic
+from .workflow import microsalt
+from .workflow import mip_dna
+from .workflow import mip_rna
 from .add import add
 from .backup import backup
 from .clean import clean
@@ -70,7 +70,7 @@ def init(context, reset, force):
 
 
 base.add_command(add)
-base.add_command(analysis)
+base.add_command(workflow)
 base.add_command(backup)
 base.add_command(clean)
 base.add_command(deliver)
@@ -83,7 +83,7 @@ base.add_command(status)
 base.add_command(store)
 base.add_command(transfer)
 base.add_command(upload)
-analysis.add_command(balsamic)
-analysis.add_command(microsalt)
-analysis.add_command(mip_dna)
-analysis.add_command(mip_rna)
+workflow.add_command(balsamic)
+workflow.add_command(microsalt)
+workflow.add_command(mip_dna)
+workflow.add_command(mip_rna)

@@ -8,7 +8,7 @@ import click
 from cg.apps import hk, tb, scoutapi, lims
 from cg.apps.balsamic.fastq import BalsamicFastqHandler
 from cg.apps.mip.fastq import MipFastqHandler
-from cg.cli.analysis.analysis import get_links
+from cg.cli.workflow.workflow import get_links
 from cg.exc import LimsDataError
 from cg.meta.analysis import AnalysisAPI
 from cg.meta.deliver.mip_dna import MipDnaDeliverAPI

@@ -1,5 +1,5 @@
-"""This script tests the cli method to do analysis"""
-from cg.cli.analysis import analysis
+"""This script tests the cli method enable workflows"""
+from cg.cli.workflow import workflow
 
 EXIT_SUCCESS = 0
 
@@ -10,7 +10,7 @@ def test_no_options(cli_runner, base_context):
     # GIVEN
 
     # WHEN dry running
-    result = cli_runner.invoke(analysis, obj=base_context)
+    result = cli_runner.invoke(workflow, obj=base_context)
 
     # THEN command should have returned all pipelines that is supported
     assert result.exit_code == EXIT_SUCCESS

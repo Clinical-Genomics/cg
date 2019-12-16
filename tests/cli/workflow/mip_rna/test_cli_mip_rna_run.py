@@ -1,7 +1,7 @@
-""" Test the CLI for analysis rna """
+""" Test the CLI for run mip-rna """
 import logging
 
-from cg.cli.analysis.mip_rd_rna import run
+from cg.cli.workflow.mip_rd_rna import run
 from cg.apps.mip import MipAPI
 
 

@@ -10,7 +10,7 @@ from pathlib import Path
 import click
 from cg.apps import hk
 from cg.apps.balsamic.fastq import BalsamicFastqHandler
-from cg.cli.analysis.analysis import get_links
+from cg.cli.workflow.workflow import get_links
 from cg.exc import LimsDataError, BalsamicStartError
 from cg.meta.analysis import AnalysisAPI
 from cg.apps import tb, scoutapi, lims
