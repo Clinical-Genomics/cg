@@ -4,9 +4,9 @@ import logging
 
 import pytest
 import requests
+
 from cg.apps.osticket import OsTicket
 from cg.exc import TicketCreationError
-from requests import Response
 
 
 def test_osticket_respone_500(monkeypatch, caplog):
@@ -14,7 +14,7 @@ def test_osticket_respone_500(monkeypatch, caplog):
 
     # GIVEN a ticket server always gives a failure in response
     osticket_api = OsTicket()
-    result = Response
+    result = requests.Response
     result.ok = False
     result.reason = "response reason"
     result.text = "response text"
