@@ -11,7 +11,7 @@ LOG = logging.getLogger(__name__)
 
 @click.group()
 def workflow():
-    """Work flows commands"""
+    """Workflows commands"""
 
 
 def get_links(context: click.Context, case_id: str, sample_id: str) -> [models.FamilySample]:
