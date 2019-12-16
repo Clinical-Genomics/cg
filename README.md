@@ -26,7 +26,13 @@ If you would like to install the latest development version:
 ```bash
 git clone https://github.com/Clinical-Genomics/cg
 cd cg
-pip install --editable .
+pip install -r requirements-dev.txt -r requiremets.txt --editable .
+```
+
+If you would like to automatically [Black][black] format your commits: 
+
+```
+pre-commit install
 ```
 
 ## Contributing
@@ -348,3 +354,5 @@ Another module `/exc.py` contains the custom Exception classes that are used acr
 
 [coveralls-url]: https://coveralls.io/github/Clinical-Genomics/cg
 [coveralls-image]: https://coveralls.io/repos/github/Clinical-Genomics/cg/badge.svg?branch=master
+
+[black]: https://black.readthedocs.io/en/stable/
