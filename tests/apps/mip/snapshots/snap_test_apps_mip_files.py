@@ -48,6 +48,5 @@ snapshots['test_parse_sampleinfo_rna_result_contents 1'] = {
     ],
     'vep_path': '/path/to/stuff/rare-disease/cases/case_id/analysis/files/case_id_comb_vep.vcf',
     'version': 'v7.1.4',
-    'version_collect_ar_path': '/path/to/stuff/rare-disease/cases/case_id/analysis/files/case_id_vcol.yaml',
-    'vp_stderr_file': None
+    'version_collect_ar_path': '/path/to/stuff/rare-disease/cases/case_id/analysis/files/case_id_vcol.yaml'
 }

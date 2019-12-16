@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 import ruamel.yaml
-from cg.apps.mip import files as mip_rna_files_api
+from cg.apps.mip_rna import files as mip_rna_files_api
 from cg.store import Store
 from trailblazer.mip import files as mip_files_api
 

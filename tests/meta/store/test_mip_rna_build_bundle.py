@@ -3,7 +3,7 @@
 
 from snapshottest import Snapshot
 
-import cg.meta.store.miprdrna as mip_rna
+import cg.meta.store.mip_rna as mip_rna
 
 
 def test_get_rna_files(snapshot: Snapshot, files_data: dict):

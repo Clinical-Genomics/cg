@@ -3,7 +3,7 @@
 
 from snapshottest import Snapshot
 
-from cg.apps.mip import files
+from cg.apps.mip_rna import files
 
 
 def test_parse_sampleinfo_rna_result_contents(snapshot: Snapshot, files_raw: dict):

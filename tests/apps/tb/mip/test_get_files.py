@@ -150,7 +150,7 @@ def test_rna_analysis_true(files_raw):
 
     # WHEN the analysis type is 'wts'
     rna_sampleinfo['analysis_type']['sample_id_1'] = 'wts'
-    rna_analysis = AddHandler._rna_analysis(rna_sampleinfo)
+    rna_analysis = AddHandler._is_rna_analysis(rna_sampleinfo)
 
     # THEN then function should return TRUE
     assert rna_analysis
@@ -166,7 +166,7 @@ def test_rna_analysis_false(files_raw):
 
     # WHEN the analysis type is 'wgs'
     rna_sampleinfo['analysis_type']['sample_id_1'] = 'wgs'
-    rna_analysis = AddHandler._rna_analysis(rna_sampleinfo)
+    rna_analysis = AddHandler._is_rna_analysis(rna_sampleinfo)
 
     # THEN then function should return FALSE
     assert not rna_analysis
@@ -184,7 +184,7 @@ def test_rna_analysis_multiple_all_true(files_raw):
     rna_sampleinfo['analysis_type']['sample_id_1'] = 'wts'
     rna_sampleinfo['analysis_type']['sample_id_2'] = 'wts'
     rna_sampleinfo['analysis_type']['sample_id_3'] = 'wts'
-    rna_analysis = AddHandler._rna_analysis(rna_sampleinfo)
+    rna_analysis = AddHandler._is_rna_analysis(rna_sampleinfo)
 
     # THEN then function should return TRUE
     assert rna_analysis
@@ -202,7 +202,7 @@ def test_rna_analysis_multiple_all_false(files_raw):
     rna_sampleinfo['analysis_type']['sample_id_1'] = 'wgs'
     rna_sampleinfo['analysis_type']['sample_id_2'] = 'wgs'
     rna_sampleinfo['analysis_type']['sample_id_3'] = 'wgs'
-    rna_analysis = AddHandler._rna_analysis(rna_sampleinfo)
+    rna_analysis = AddHandler._is_rna_analysis(rna_sampleinfo)
 
     # THEN then function should return FALSE
     assert not rna_analysis
@@ -220,7 +220,7 @@ def test_rna_analysis_multiple_some_true(files_raw):
     rna_sampleinfo['analysis_type']['sample_id_1'] = 'wts'
     rna_sampleinfo['analysis_type']['sample_id_2'] = 'wts'
     rna_sampleinfo['analysis_type']['sample_id_3'] = 'wgs'
-    rna_analysis = AddHandler._rna_analysis(rna_sampleinfo)
+    rna_analysis = AddHandler._is_rna_analysis(rna_sampleinfo)
 
     # THEN then function should return FALSE
     assert not rna_analysis
