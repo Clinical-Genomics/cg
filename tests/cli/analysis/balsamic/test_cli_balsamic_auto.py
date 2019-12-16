@@ -1,7 +1,7 @@
-"""This script tests the cli methods to auto run balsamic"""
+"""This script tests the cli methods to start run balsamic"""
 import logging
 
-from cg.cli.analysis.balsamic import auto
+from cg.cli.analysis.balsamic import start
 
 EXIT_SUCCESS = 0
 
@@ -12,7 +12,7 @@ def test_dry(cli_runner, base_context):
     # GIVEN case-id
 
     # WHEN dry running
-    result = cli_runner.invoke(auto, ['--dry-run'], obj=base_context)
+    result = cli_runner.invoke(start, ['--dry-run'], obj=base_context)
 
     # THEN command should have accepted the option happily
     assert result.exit_code == EXIT_SUCCESS
@@ -32,7 +32,7 @@ def test_balsamic_case_included(cli_runner, base_context, balsamic_case, caplog)
 
     # WHEN running command
     with caplog.at_level(logging.INFO):
-        result = cli_runner.invoke(auto, ['--dry-run'], obj=base_context)
+        result = cli_runner.invoke(start, ['--dry-run'], obj=base_context)
 
     # THEN command should have printed the case id
     assert result.exit_code == EXIT_SUCCESS
@@ -53,7 +53,7 @@ def test_mip_only_case_excluded(cli_runner, base_context, mip_case, caplog):
 
     # WHEN running command
     with caplog.at_level(logging.INFO):
-        result = cli_runner.invoke(auto, ['--dry-run'], obj=base_context)
+        result = cli_runner.invoke(start, ['--dry-run'], obj=base_context)
 
     # THEN command should not have printed the case id
     assert result.exit_code == EXIT_SUCCESS
