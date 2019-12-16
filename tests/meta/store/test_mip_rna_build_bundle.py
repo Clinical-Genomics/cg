@@ -20,7 +20,6 @@ def test_get_rna_files(snapshot: Snapshot, files_data: dict):
     mip_rna_file_data = mip_rna.get_files_rna(mip_rna_config, rna_sampleinfo)
 
     # THEN the result should contain the correct data
-
     snapshot.assert_match(mip_rna_file_data)
 
 
