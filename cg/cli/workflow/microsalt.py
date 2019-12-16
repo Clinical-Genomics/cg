@@ -4,9 +4,9 @@ import logging
 
 import click
 
-from cg.apps import hk, tb, scoutapi, lims
+from cg.apps import hk, lims
 from cg.apps.usalt.fastq import USaltFastqHandler
-from cg.meta.microsalt import AnalysisAPI
+from cg.meta.workflow.microsalt import AnalysisAPI
 from cg.meta.deliver.microsalt import MicrosaltDeliverAPI as DeliverAPI
 from cg.store import Store
 
@@ -19,17 +19,12 @@ def microsalt(context: click.Context):
     """Microbial workflow"""
     context.obj['db'] = Store(context.obj['database'])
     hk_api = hk.HousekeeperAPI(context.obj)
-    scout_api = scoutapi.ScoutAPI(context.obj)
     lims_api = lims.LimsAPI(context.obj)
-    context.obj['tb'] = tb.TrailblazerAPI(context.obj)
     deliver = DeliverAPI(context.obj, hk_api=hk_api, lims_api=lims_api)
     context.obj['api'] = AnalysisAPI(
         db=context.obj['db'],
         hk_api=hk_api,
-        tb_api=context.obj['tb'],
-        scout_api=scout_api,
         lims_api=lims_api,
-        deliver_api=deliver
     )
 
 

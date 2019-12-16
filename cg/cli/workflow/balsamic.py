@@ -12,7 +12,7 @@ from cg.apps import hk
 from cg.apps.balsamic.fastq import BalsamicFastqHandler
 from cg.cli.workflow.workflow import get_links
 from cg.exc import LimsDataError, BalsamicStartError
-from cg.meta.balsamic import AnalysisAPI
+from cg.meta.workflow.balsamic import AnalysisAPI
 from cg.apps import tb, scoutapi, lims
 from cg.store import Store
 

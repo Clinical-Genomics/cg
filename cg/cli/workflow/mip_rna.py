@@ -4,12 +4,12 @@ import logging
 
 import click
 
-from cg.apps import hk, tb, scoutapi, lims
+from cg.apps import hk, tb, lims
 from cg.apps.environ import environ_email
 from cg.apps.mip import MipAPI
 from cg.apps.mip.fastq import MipFastqHandler
 from cg.cli.workflow.workflow import get_links
-from cg.meta.mip_rna import AnalysisAPI
+from cg.meta.workflow.mip_rna import AnalysisAPI
 from cg.meta.deliver.mip_rna import MipRnaDeliverAPI as DeliverAPI
 from cg.store import Store
 
@@ -22,7 +22,6 @@ def mip_rna(context: click.Context):
     """Rare disease RNA workflow"""
     context.obj['db'] = Store(context.obj['database'])
     hk_api = hk.HousekeeperAPI(context.obj)
-    scout_api = scoutapi.ScoutAPI(context.obj)
     lims_api = lims.LimsAPI(context.obj)
     context.obj['tb'] = tb.TrailblazerAPI(context.obj)
     deliver = DeliverAPI(context.obj, hk_api=hk_api, lims_api=lims_api)
@@ -30,7 +29,6 @@ def mip_rna(context: click.Context):
         db=context.obj['db'],
         hk_api=hk_api,
         tb_api=context.obj['tb'],
-        scout_api=scout_api,
         lims_api=lims_api,
         deliver_api=deliver
     )
@@ -92,11 +90,11 @@ def run(context: click.Context, case_id: str, dry: bool = False,
             LOG.info('MIP started!')
 
 
-@mip_rna.command('case-config')
+@mip_rna.command('config-case')
 @click.option('-d', '--dry', is_flag=True, help='Print config to console')
 @click.argument('case_id')
 @click.pass_context
-def case_config(context: click.Context, case_id: str, dry: bool = False):
+def config_case(context: click.Context, case_id: str, dry: bool = False):
     """Generate a config for the case_id"""
     case_obj = context.obj['db'].family(case_id)
 

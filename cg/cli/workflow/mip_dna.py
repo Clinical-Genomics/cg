@@ -6,11 +6,10 @@ import sys
 import click
 
 from cg.apps import hk, tb, scoutapi, lims
-from cg.apps.balsamic.fastq import BalsamicFastqHandler
 from cg.apps.mip.fastq import MipFastqHandler
 from cg.cli.workflow.workflow import get_links
 from cg.exc import LimsDataError
-from cg.meta.mip_dna import AnalysisAPI
+from cg.meta.workflow.mip_dna import AnalysisAPI
 from cg.meta.deliver.mip_dna import MipDnaDeliverAPI
 from cg.store import Store
 
@@ -60,7 +59,7 @@ def mip_dna(context: click.Context, case_id: str, email: str, priority: str, sta
             context.obj['db'].commit()
         else:
             # execute the analysis!
-            context.invoke(case_config, case_id=case_id)
+            context.invoke(config_case, case_id=case_id)
             context.invoke(link, case_id=case_id)
             context.invoke(panel, case_id=case_id)
             context.invoke(run, case_id=case_id, priority=priority, email=email,
@@ -89,11 +88,11 @@ def link(context: click.Context, case_id: str, sample_id: str):
                                            sample=link_obj.sample.internal_id)
 
 
-@mip_dna.command('case-config')
+@mip_dna.command('config-case')
 @click.option('-d', '--dry', is_flag=True, help='Print config to console')
 @click.argument('case_id', required=False)
 @click.pass_context
-def case_config(context: click.Context, case_id: str, dry: bool = False):
+def config_case(context: click.Context, case_id: str, dry: bool = False):
     """Generate a config for the CASE_ID"""
     if case_id is None:
         _suggest_cases_to_analyze(context)
@@ -116,7 +115,7 @@ def case_config(context: click.Context, case_id: str, dry: bool = False):
         LOG.info("saved config to %s", out_path)
 
 
-mip_dna.add_command(case_config)
+mip_dna.add_command(config_case)
 
 
 @mip_dna.command()

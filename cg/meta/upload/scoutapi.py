@@ -3,7 +3,7 @@ import logging
 from pathlib import Path
 
 from cg.apps import hk, scoutapi, madeline
-from cg.meta.mip_dna import AnalysisAPI
+from cg.meta.workflow.mip_dna import AnalysisAPI
 from cg.store import models, Store
 from ruamel import yaml
 
