@@ -59,7 +59,7 @@ def balsamic(context, case_id, priority, email, target_bed):
 
         # execute the analysis!
         context.invoke(link, case_id=case_id)
-        context.invoke(config, case_id=case_id, target_bed=target_bed)
+        context.invoke(config_case, case_id=case_id, target_bed=target_bed)
         context.invoke(run,
                        run_analysis=True,
                        case_id=case_id,
@@ -92,7 +92,7 @@ def link(context, case_id, sample_id):
                 link_obj.sample.internal_id)
 
 
-@balsamic.command()
+@balsamic.command(name="config-case")
 @click.option('-d',
               '--dry-run',
               'dry',
@@ -105,7 +105,7 @@ def link(context, case_id, sample_id):
 @click.option('--umi', is_flag=True, required=False, help='Optional')
 @click.argument('case_id')
 @click.pass_context
-def config(context, dry, target_bed, umi_trim_length, quality_trim,
+def config_case(context, dry, target_bed, umi_trim_length, quality_trim,
            adapter_trim, umi, case_id):
     """ Generate a config for the case_id. """
 
@@ -299,7 +299,7 @@ def run(context, dry, run_analysis, config_path, priority, email, case_id):
               help='print to console, '
               'without actualising')
 @click.pass_context
-def auto(context: click.Context, dry_run):
+def start(context: click.Context, dry_run):
     """Start all analyses that are ready for analysis."""
     exit_code = SUCCESS
     for case_obj in context.obj['db'].cases_to_balsamic_analyze():
