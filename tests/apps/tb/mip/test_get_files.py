@@ -216,7 +216,7 @@ def test_rna_analysis_multiple_some_true(files_raw):
     # GIVEN an raw sample info file with more than one sample
     rna_sampleinfo = files_raw['rna_sampleinfo']
 
-    # WHEN the analysis type is not 'wts' for all samples
+    # WHEN the analysis type is not 'wts' for all samples, but only some
     rna_sampleinfo['analysis_type']['sample_id_1'] = 'wts'
     rna_sampleinfo['analysis_type']['sample_id_2'] = 'wts'
     rna_sampleinfo['analysis_type']['sample_id_3'] = 'wgs'
