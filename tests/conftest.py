@@ -8,8 +8,9 @@ from pathlib import Path
 
 import pytest
 import ruamel.yaml
+from cg.apps.mip_rna import files as mip_rna_files_api
 from cg.store import Store
-from trailblazer.mip import files as mip_files_api
+from trailblazer.mip import files as mip_dna_files_api
 
 pytest_plugins = [  # pylint: disable=invalid-name
     'tests.apps.lims.conftest',
@@ -25,7 +26,6 @@ pytest_plugins = [  # pylint: disable=invalid-name
     'tests.store.conftest',
     'tests.apps.mutacc_auto.conftest'
 ]
-
 
 
 @pytest.fixture
@@ -88,6 +88,8 @@ def files():
         'config': 'tests/fixtures/apps/tb/case/case_config.yaml',
         'sampleinfo': 'tests/fixtures/apps/tb/case/case_qc_sample_info.yaml',
         'qcmetrics': 'tests/fixtures/apps/tb/case/case_qc_metrics.yaml',
+        'rna_config': 'tests/fixtures/apps/mip/rna/case_config.yaml',
+        'rna_sampleinfo': 'tests/fixtures/apps/mip/rna/case_qc_sampleinfo.yaml',
     }
 
 
@@ -102,15 +104,19 @@ def files_raw(files):
         'config': ruamel.yaml.safe_load(open(files['config'])),
         'sampleinfo': ruamel.yaml.safe_load(open(files['sampleinfo'])),
         'qcmetrics': ruamel.yaml.safe_load(open(files['qcmetrics'])),
+        'rna_config': ruamel.yaml.safe_load(open(files['rna_config'])),
+        'rna_sampleinfo': ruamel.yaml.safe_load(open(files['rna_sampleinfo'])),
     }
 
 
 @pytest.fixture(scope='session')
 def files_data(files_raw):
     return {
-        'config': mip_files_api.parse_config(files_raw['config']),
-        'sampleinfo': mip_files_api.parse_sampleinfo(files_raw['sampleinfo']),
-        'qcmetrics': mip_files_api.parse_qcmetrics(files_raw['qcmetrics']),
+        'config': mip_dna_files_api.parse_config(files_raw['config']),
+        'sampleinfo': mip_dna_files_api.parse_sampleinfo(files_raw['sampleinfo']),
+        'qcmetrics': mip_dna_files_api.parse_qcmetrics(files_raw['qcmetrics']),
+        'rna_config': mip_dna_files_api.parse_config(files_raw['rna_config']),
+        'rna_sampleinfo': mip_rna_files_api.parse_sampleinfo_rna(files_raw['rna_sampleinfo']),
     }
 
 
