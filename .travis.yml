@@ -18,8 +18,13 @@ cache: pip
 jobs:
   include:
     - name: "dependencies"
+    - name: "production dependencies"
       script:
         - pip check
+    - name: "development dependencies"
+        script:
+          - pip install -U -r requirements.txt -r requirements-dev.txt .
+          - pip check
     - name: "coverage"
       script:
         - pip install --upgrade pip
