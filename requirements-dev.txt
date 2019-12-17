@@ -1,6 +1,7 @@
 pytest>=3.6     # due to pytest-flask, pytest-cov
 mock
 ipdb
+coverage<5
 pytest-cov
 coveralls
 pytest-mock
