@@ -138,3 +138,89 @@ def test_get_files(files_data) -> dict:
                 # If file tag exists in the return data tags
                 if all(k in element_data['tags'] for k in (sample_id, key)):
                     assert value in element_data['path']
+
+
+def test_rna_analysis_true(files_raw):
+    """
+    Args:
+    files_raw (dict): With dicts from files
+    """
+    # GIVEN an raw sample info file
+    rna_sampleinfo = files_raw['rna_sampleinfo']
+
+    # WHEN the analysis type is 'wts'
+    rna_sampleinfo['analysis_type']['sample_id_1'] = 'wts'
+    rna_analysis = AddHandler._is_rna_analysis(rna_sampleinfo)
+
+    # THEN then function should return TRUE
+    assert rna_analysis
+
+
+def test_rna_analysis_false(files_raw):
+    """
+    Args:
+    files_raw (dict): With dicts from files
+    """
+    # GIVEN an raw sample info file with one sample
+    rna_sampleinfo = files_raw['rna_sampleinfo']
+
+    # WHEN the analysis type is 'wgs'
+    rna_sampleinfo['analysis_type']['sample_id_1'] = 'wgs'
+    rna_analysis = AddHandler._is_rna_analysis(rna_sampleinfo)
+
+    # THEN then function should return FALSE
+    assert not rna_analysis
+
+
+def test_rna_analysis_multiple_all_true(files_raw):
+    """
+    Args:
+    files_raw (dict): With dicts from files
+    """
+    # GIVEN an raw sample info file with more than one sample
+    rna_sampleinfo = files_raw['rna_sampleinfo']
+
+    # WHEN the analysis type is 'wts' for all samples
+    rna_sampleinfo['analysis_type']['sample_id_1'] = 'wts'
+    rna_sampleinfo['analysis_type']['sample_id_2'] = 'wts'
+    rna_sampleinfo['analysis_type']['sample_id_3'] = 'wts'
+    rna_analysis = AddHandler._is_rna_analysis(rna_sampleinfo)
+
+    # THEN then function should return TRUE
+    assert rna_analysis
+
+
+def test_rna_analysis_multiple_all_false(files_raw):
+    """
+    Args:
+    files_raw (dict): With dicts from files
+    """
+    # GIVEN an raw sample info file with more than one sample
+    rna_sampleinfo = files_raw['rna_sampleinfo']
+
+    # WHEN the analysis type is 'wgs' for all samples
+    rna_sampleinfo['analysis_type']['sample_id_1'] = 'wgs'
+    rna_sampleinfo['analysis_type']['sample_id_2'] = 'wgs'
+    rna_sampleinfo['analysis_type']['sample_id_3'] = 'wgs'
+    rna_analysis = AddHandler._is_rna_analysis(rna_sampleinfo)
+
+    # THEN then function should return FALSE
+    assert not rna_analysis
+
+
+def test_rna_analysis_multiple_some_true(files_raw):
+    """
+    Args:
+    files_raw (dict): With dicts from files
+    """
+    # GIVEN an raw sample info file with more than one sample
+    rna_sampleinfo = files_raw['rna_sampleinfo']
+
+    # WHEN the analysis type is not 'wts' for all samples, but only some
+    rna_sampleinfo['analysis_type']['sample_id_1'] = 'wts'
+    rna_sampleinfo['analysis_type']['sample_id_2'] = 'wts'
+    rna_sampleinfo['analysis_type']['sample_id_3'] = 'wgs'
+    rna_analysis = AddHandler._is_rna_analysis(rna_sampleinfo)
+
+    # THEN then function should return FALSE
+    assert not rna_analysis
