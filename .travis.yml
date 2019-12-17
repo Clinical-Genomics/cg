@@ -34,7 +34,7 @@ jobs:
       script:
         - pip install --upgrade pip
         - pip install black
-        - black --check cg tests
+        - git --no-pager diff --name-only --diff-filter=ACMRT FETCH_HEAD $(git merge-base FETCH_HEAD master) | grep ".py" | xargs black --check
     - name: "linting"
       script:
         - pip install --upgrade pip
