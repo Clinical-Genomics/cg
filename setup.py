@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 import os
 import sys
 from setuptools import setup, find_packages
@@ -49,7 +48,7 @@ class PyTest(TestCommand):
 
 setup(
     name='cg',
-    version='4.46.1',
+    version='4.48.0',
     description='Clinical Genomics command center.',
     author='Patrik Grenfeldt',
     author_email='patrik.grenfeldt@scilifelab.se',
