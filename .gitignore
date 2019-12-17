@@ -95,3 +95,10 @@ DEVELOP/
 # Apple-OS specific files
 .DS_Store
 .pybiomart.sqlite
+.mutmut-cache
+
+# Editor specific files
+.tm_properties
+
+# Local linting stuff
+.flake8

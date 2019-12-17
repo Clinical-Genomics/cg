@@ -86,6 +86,15 @@ def panels():
     return jsonify(panels=data)
 
 
+@BLUEPRINT.route('/cases')
+def cases():
+    """Fetch cases."""
+    records = db.cases(days=31)
+    count = len(records)
+
+    return jsonify(cases=records, total=count)
+
+
 @BLUEPRINT.route('/families')
 def families():
     """Fetch families."""
@@ -327,6 +336,7 @@ def options():
 
     source_groups = {'metagenome': METAGENOME_SOURCES, 'analysis': ANALYSIS_SOURCES}
 
+
     return jsonify(
         customers=[{
             'text': f"{customer.name} ({customer.internal_id})",
@@ -340,7 +350,8 @@ def options():
             'internal_id': organism.internal_id,
             'verified': organism.verified,
         } for organism in db.organisms()],
-        sources=source_groups
+        sources=source_groups,
+        beds=[bed.name for bed in db.beds()],
     )
 
 
