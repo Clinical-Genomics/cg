@@ -16,7 +16,6 @@ cache: pip
 
 jobs:
   include:
-    - name: "dependencies"
     - name: "production dependencies"
       script:
         - pip check
