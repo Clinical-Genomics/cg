@@ -22,18 +22,13 @@ class LoqusdbAPI:
         API for loqusdb
     """
 
-    def __init__(self, config: dict, analysis_type: str = "wgs"):
+    def __init__(self, config: dict):
         super(LoqusdbAPI, self).__init__()
-
-        self.analysis_type = analysis_type
 
         self.loqusdb_config = config["loqusdb"]["config_path"]
         self.loqusdb_binary = config["loqusdb"]["binary_path"]
 
-        if self.analysis_type == "wes":
-            self.loqusdb_config = config["loqusdb-wes"]["config_path"]
-            self.loqusdb_binary = config["loqusdb-wes"]["binary_path"]
-
+        # This will allways be the base of the loqusdb call
         self.base_call = [self.loqusdb_binary, "--config", self.loqusdb_config]
 
     def load(
@@ -41,8 +36,8 @@ class LoqusdbAPI:
         family_id: str,
         ped_path: str,
         vcf_path: str,
+        vcf_sv_path: str,
         gbcf_path: str,
-        vcf_sv_path=None,
     ) -> dict:
         """Add observations from a VCF."""
         load_call = copy.deepcopy(self.base_call)
@@ -55,6 +50,8 @@ class LoqusdbAPI:
                 ped_path,
                 "--variant-file",
                 vcf_path,
+                "--sv-variants",
+                vcf_sv_path,
                 "--check-profile",
                 gbcf_path,
                 "--hard-threshold",
@@ -63,8 +60,6 @@ class LoqusdbAPI:
                 "0.90",
             ]
         )
-        if self.analysis_type == "wgs" and vcf_sv_path:
-            load_call.extend(["--sv-variants", vcf_sv_path])
 
         nr_variants = 0
         # Execute command and print its stdout+stderr as it executes

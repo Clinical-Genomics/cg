@@ -149,9 +149,6 @@ class MockScoutApi:
 class MockLoqusAPI:
     """ Mock LoqusAPI class"""
 
-    def __init__(self, analysis_type="wgs"):
-        self.analysis_type = analysis_type
-
     @staticmethod
     def load(*args, **kwargs):
         """ Mock load method"""
@@ -186,20 +183,6 @@ def upload_observations_api(analysis_store):
     """ Create mocked UploadObservationsAPI object"""
 
     loqus_mock = MockLoqusAPI()
-    hk_mock = MockHouseKeeper1()
-
-    _api = UploadObservationsAPI(
-        status_api=analysis_store, hk_api=hk_mock, loqus_api=loqus_mock
-    )
-
-    yield _api
-
-
-@pytest.yield_fixture(scope="function")
-def upload_observations_api_wes(analysis_store):
-    """ Create mocked UploadObservationsAPI object"""
-
-    loqus_mock = MockLoqusAPI(analysis_type="wes")
     hk_mock = MockHouseKeeper1()
 
     _api = UploadObservationsAPI(
