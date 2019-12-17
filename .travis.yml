@@ -24,6 +24,10 @@ jobs:
         - pip install -U -r requirements-dev.txt .
         - coverage run --branch --omit="*.html" --source cg setup.py test
         - coveralls
+    - name: "code formatting"
+      script:
+        - pip install black
+        - black --check cg tests
     - name: "linting"
       script:
         - pip install -r requirements-dev.txt
