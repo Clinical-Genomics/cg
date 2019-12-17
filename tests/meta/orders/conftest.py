@@ -15,83 +15,71 @@ class MockLims(LimsAPI):
     def __init__(self):
         self.lims = self
 
-    def update_sample(
-        self,
-        lims_id: str,
-        sex=None,
-        application: str = None,
-        target_reads: int = None,
-        priority=None,
-    ):
+    def update_sample(self, lims_id: str, sex=None, application: str = None,
+                      target_reads: int = None, priority=None):
         pass
 
 
 @pytest.fixture
 def mip_order_to_submit():
     """Load an example scout order."""
-    return json.load(open("tests/fixtures/orders/mip.json"))
+    return json.load(open('tests/fixtures/orders/mip.json'))
 
 
 @pytest.fixture
 def mip_rna_order_to_submit():
     """Load an example rna order."""
-    return json.load(open("tests/fixtures/orders/mip_rna.json"))
+    return json.load(open('tests/fixtures/orders/mip_rna.json'))
 
 
 @pytest.fixture
 def external_order_to_submit():
     """Load an example external order."""
-    return json.load(open("tests/fixtures/orders/external.json"))
+    return json.load(open('tests/fixtures/orders/external.json'))
 
 
 @pytest.fixture
 def fastq_order_to_submit():
     """Load an example fastq order."""
-    return json.load(open("tests/fixtures/orders/fastq.json"))
+    return json.load(open('tests/fixtures/orders/fastq.json'))
 
 
 @pytest.fixture
 def rml_order_to_submit():
     """Load an example rml order."""
-    return json.load(open("tests/fixtures/orders/rml.json"))
+    return json.load(open('tests/fixtures/orders/rml.json'))
 
 
 @pytest.fixture
 def metagenome_order_to_submit():
     """Load an example metagenome order."""
-    return json.load(open("tests/fixtures/orders/metagenome.json"))
+    return json.load(open('tests/fixtures/orders/metagenome.json'))
 
 
 @pytest.fixture
 def microbial_order_to_submit():
     """Load an example microbial order."""
-    return json.load(open("tests/fixtures/orders/microbial.json"))
+    return json.load(open('tests/fixtures/orders/microbial.json'))
 
 
 @pytest.fixture
 def balsamic_order_to_submit():
     """Load an example cancer order."""
-    return json.load(open("tests/fixtures/orders/balsamic.json"))
+    return json.load(open('tests/fixtures/orders/balsamic.json'))
 
 
 @pytest.fixture
 def mip_balsamic_order_to_submit():
     """Load an example scout order."""
-    return json.load(open("tests/fixtures/orders/mip_balsamic.json"))
+    return json.load(open('tests/fixtures/orders/mip_balsamic.json'))
 
 
 @pytest.fixture
-def all_orders_to_submit(
-    rml_order_to_submit,
-    fastq_order_to_submit,
-    mip_order_to_submit,
-    mip_rna_order_to_submit,
-    external_order_to_submit,
-    microbial_order_to_submit,
-    metagenome_order_to_submit,
-    balsamic_order_to_submit,
-    mip_balsamic_order_to_submit,
-):
+def all_orders_to_submit(rml_order_to_submit, fastq_order_to_submit, mip_order_to_submit,
+                         mip_rna_order_to_submit,
+                         external_order_to_submit, microbial_order_to_submit,
+                         metagenome_order_to_submit, balsamic_order_to_submit,
+                         mip_balsamic_order_to_submit):
     return {
         OrderType.RML: rml_order_to_submit,
         OrderType.FASTQ: fastq_order_to_submit,
@@ -161,7 +149,7 @@ def balsamic_status_data(balsamic_order_to_submit):
     return data
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope='function')
 def orders_api(base_store):
     osticket_api = OsTicket()
     lims = MockLims()

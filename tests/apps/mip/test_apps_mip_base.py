@@ -11,6 +11,5 @@ def test_build_command(mip_api, mip_config_path, case_id):
         mip_api.script,
         mip_api.pipeline,
         case_id,
-        "--config_file",
-        mip_config_path,
-    ]
+        '--config_file',
+        mip_config_path]

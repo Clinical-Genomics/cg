@@ -9,32 +9,22 @@ from cg.store import Store, models
 LOG = logging.getLogger(__name__)
 
 FAMILY_TAGS = [
-    "vcf-clinical-sv-bin",
-    "vcf-clinical-sv-bin-index",
-    "vcf-research-sv-bin",
-    "vcf-research-sv-bin-index",
-    "gbcf",
-    "gbcf-index",
-    "snv-gbcf",
-    "snv-gbcf-index",
-    "snv-bcf",
-    "snv-bcf-index",
-    "sv-bcf",
-    "sv-bcf-index",
-    "vcf-snv-clinical",
-    "vcf-snv-clinical-index",
-    "vcf-snv-research",
-    "vcf-snv-research-index",
-    "vcf-sv-clinical",
-    "vcf-sv-clinical-index",
-    "vcf-sv-research",
-    "vcf-sv-research-index",
-]
+        'vcf-clinical-sv-bin', 'vcf-clinical-sv-bin-index',
+        'vcf-research-sv-bin', 'vcf-research-sv-bin-index',
+        'gbcf', 'gbcf-index',
+        'snv-gbcf', 'snv-gbcf-index',
+        'snv-bcf', 'snv-bcf-index',
+        'sv-bcf', 'sv-bcf-index',
+        'vcf-snv-clinical', 'vcf-snv-clinical-index',
+        'vcf-snv-research', 'vcf-snv-research-index',
+        'vcf-sv-clinical', 'vcf-sv-clinical-index',
+        'vcf-sv-research', 'vcf-sv-research-index']
 
-SAMPLE_TAGS = ["bam", "bam-index"]
+SAMPLE_TAGS = ['bam', 'bam-index']
 
 
 class DeliverAPI:
+
     def __init__(self, db: Store, hk_api: hk.HousekeeperAPI, lims_api: lims.LimsAPI):
         self.db = db
         self.hk = hk_api
@@ -51,7 +41,7 @@ class DeliverAPI:
 
     def get_post_analysis_family_files(self, family: str, version, tags):
         """Link files from HK to cust inbox."""
-
+    
         all_files = self.get_post_analysis_files(family, version, tags)
         family_obj = self.db.family_samples(family)
         sample_ids = [family_sample.sample.internal_id for family_sample in family_obj]
@@ -68,7 +58,7 @@ class DeliverAPI:
 
     def get_post_analysis_sample_files(self, family: str, sample: str, version, tag):
         """Link files from HK to cust inbox."""
-
+    
         all_files = self.get_post_analysis_files(family, version, tag)
 
         sample_files = []

@@ -20,7 +20,6 @@ class AnalysisDuplicationError(CgError):
 
 class LimsDataError(CgError):
     """Error related to missing/incomplete data in LIMS."""
-
     pass
 
 

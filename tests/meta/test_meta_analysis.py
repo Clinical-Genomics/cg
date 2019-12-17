@@ -12,30 +12,30 @@ def test_config(analysis_store: Store, analysis_api: AnalysisAPI):
     mip_config = analysis_api.config(family_obj)
 
     # THEN it should fill in values accordingly
-    assert len(mip_config["samples"]) == len(family_obj.links)
+    assert len(mip_config['samples']) == len(family_obj.links)
 
 
 def test_get_latest_data_genome_build(analysis_api: AnalysisAPI):
 
     # GIVEN
-    family_id = "dummy_family_id"
+    family_id = 'dummy_family_id'
 
     # WHEN
-    trending_data = analysis_api.get_latest_metadata("dummy_family_id")
+    trending_data = analysis_api.get_latest_metadata('dummy_family_id')
 
     # THEN contains genome_build
-    assert trending_data["genome_build"]
+    assert trending_data['genome_build']
 
 
 def test_get_latest_data_rank_model_version(analysis_api: AnalysisAPI):
     # GIVEN
-    family_id = "dummy_family_id"
+    family_id = 'dummy_family_id'
 
     # WHEN
-    trending_data = analysis_api.get_latest_metadata("dummy_family_id")
+    trending_data = analysis_api.get_latest_metadata('dummy_family_id')
 
     # THEN contains rankmodelversion
-    assert trending_data["rank_model_version"]
+    assert trending_data['rank_model_version']
 
 
 def test_get_latest_metadata_logging(analysis_api: AnalysisAPI):
@@ -43,12 +43,12 @@ def test_get_latest_metadata_logging(analysis_api: AnalysisAPI):
     analysis_api.tb._get_trending_raises_keyerror = True
 
     # WHEN failing to get latest trending data for a family
-    latest_data = analysis_api.get_latest_metadata(family_id="bluebull")
+    latest_data = analysis_api.get_latest_metadata(family_id='bluebull')
 
     # THEN there should be a log entry about this
     found = False
     for warn in analysis_api.LOG.get_warnings():
-        if "bluebull" in warn:
+        if 'bluebull' in warn:
             found = True
 
     assert found

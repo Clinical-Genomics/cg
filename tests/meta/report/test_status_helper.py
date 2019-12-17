@@ -73,43 +73,34 @@ def test_second_analysis_when_two(store):
     assert report_version == 1
 
 
-def ensure_customer(disk_store, customer_id="cust_test"):
+def ensure_customer(disk_store, customer_id='cust_test'):
     """utility function to return existing or create customer for tests"""
-    customer_group = disk_store.customer_group("dummy_group")
+    customer_group = disk_store.customer_group('dummy_group')
     if not customer_group:
-        customer_group = disk_store.add_customer_group("dummy_group", "dummy group")
+        customer_group = disk_store.add_customer_group('dummy_group', 'dummy group')
 
-        customer = disk_store.add_customer(
-            internal_id=customer_id,
-            name="Test Customer",
-            scout_access=False,
-            customer_group=customer_group,
-            invoice_address="dummy_address",
-            invoice_reference="dummy_reference",
-        )
+        customer = disk_store.add_customer(internal_id=customer_id, name="Test Customer",
+                                           scout_access=False, customer_group=customer_group,
+                                           invoice_address='dummy_address',
+                                           invoice_reference='dummy_reference')
         disk_store.add_commit(customer)
     customer = disk_store.customer(customer_id)
     return customer
 
 
-def ensure_panel(disk_store, panel_id="panel_test", customer_id="cust_test"):
+def ensure_panel(disk_store, panel_id='panel_test', customer_id='cust_test'):
     """utility function to add a panel to use in tests"""
     customer = ensure_customer(disk_store, customer_id)
     panel = disk_store.panel(panel_id)
     if not panel:
-        panel = disk_store.add_panel(
-            customer=customer,
-            name=panel_id,
-            abbrev=panel_id,
-            version=1.0,
-            date=datetime.now(),
-            genes=1,
-        )
+        panel = disk_store.add_panel(customer=customer, name=panel_id, abbrev=panel_id,
+                                     version=1.0,
+                                     date=datetime.now(), genes=1)
         disk_store.add_commit(panel)
     return panel
 
 
-def add_family(disk_store, family_id="family_test", customer_id="cust_test"):
+def add_family(disk_store, family_id='family_test', customer_id='cust_test'):
     """utility function to add a family to use in tests"""
     panel = ensure_panel(disk_store)
     customer = ensure_customer(disk_store, customer_id)
@@ -125,7 +116,7 @@ def add_analysis(store, family=None, completed_at=None):
     if not family:
         family = add_family(store)
 
-    analysis = store.add_analysis(pipeline="", version="")
+    analysis = store.add_analysis(pipeline='', version='')
 
     if completed_at:
         analysis.completed_at = completed_at

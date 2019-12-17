@@ -12,11 +12,11 @@ log = logging.getLogger(__name__)
 
 
 class HousekeeperAPI(Store):
+
     def __init__(self, config):
-        super(HousekeeperAPI, self).__init__(
-            config["housekeeper"]["database"], config["housekeeper"]["root"]
-        )
-        self.root_dir = config["housekeeper"]["root"]
+        super(HousekeeperAPI, self).__init__(config['housekeeper']['database'],
+                                             config['housekeeper']['root'])
+        self.root_dir = config['housekeeper']['root']
 
     def include(self, version_obj: models.Version):
         """Call the include version function to import related assets."""
@@ -39,15 +39,14 @@ class HousekeeperAPI(Store):
         new_path = version_root_dir / Path(file_obj.path).name
         os.link(file_obj.path, new_path)
         log.info(f"linked file: {file_obj.path} -> {new_path}")
-        file_obj.path = str(new_path).replace(f"{global_root_dir}/", "", 1)
+        file_obj.path = str(new_path).replace(f"{global_root_dir}/", '', 1)
 
     def last_version(self, bundle: str) -> models.Version:
-        return (
-            self.Version.query.join(models.Version.bundle)
-            .filter(models.Bundle.name == bundle)
-            .order_by(models.Version.created_at.desc())
-            .first()
-        )
+        return (self.Version.query
+                            .join(models.Version.bundle)
+                            .filter(models.Bundle.name == bundle)
+                            .order_by(models.Version.created_at.desc())
+                            .first())
 
     def get_root_dir(self):
         return self.root_dir
@@ -66,7 +65,7 @@ class HousekeeperAPI(Store):
         new_file = self.new_file(
             path=str(Path(file).absolute()),
             to_archive=to_archive,
-            tags=[self.tag(tag_name)],
+            tags=[self.tag(tag_name)]
         )
         new_file.version = version_obj
         self.add_commit(new_file)

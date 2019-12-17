@@ -25,7 +25,7 @@ def test_with_missing_case(cli_runner, base_context, caplog):
     """Test command with case to start with"""
 
     # GIVEN case-id not in database
-    case_id = "soberelephant"
+    case_id = 'soberelephant'
 
     # WHEN running
     result = cli_runner.invoke(config, [case_id], obj=base_context)
@@ -44,7 +44,7 @@ def test_dry(cli_runner, base_context, balsamic_case):
     case_id = balsamic_case.internal_id
 
     # WHEN dry running with dry specified
-    result = cli_runner.invoke(config, [case_id, "--dry-run"], obj=base_context)
+    result = cli_runner.invoke(config, [case_id, '--dry-run'], obj=base_context)
 
     # THEN command should print the balsamic command-string
     assert result.exit_code == EXIT_SUCCESS
@@ -52,7 +52,11 @@ def test_dry(cli_runner, base_context, balsamic_case):
     assert case_id in result.output
 
 
-@pytest.mark.parametrize("option_key", ["--quality-trim", "--adapter-trim", "--umi"])
+@pytest.mark.parametrize('option_key', [
+    '--quality-trim',
+    '--adapter-trim',
+    '--umi',
+])
 def test_passed_option(cli_runner, base_context, option_key, balsamic_case):
     """Test command with option"""
 
@@ -61,9 +65,7 @@ def test_passed_option(cli_runner, base_context, option_key, balsamic_case):
     balsamic_key = option_key
 
     # WHEN dry running with option specified
-    result = cli_runner.invoke(
-        config, [case_id, "--dry-run", option_key], obj=base_context
-    )
+    result = cli_runner.invoke(config, [case_id, '--dry-run', option_key], obj=base_context)
 
     # THEN dry-print should include the the balsamic option key
     assert result.exit_code == EXIT_SUCCESS
@@ -75,14 +77,13 @@ def test_target_bed(cli_runner, base_context, balsamic_case):
 
     # GIVEN case-id
     case_id = balsamic_case.internal_id
-    option_key = "--target-bed"
-    option_value = "target_bed"
-    balsamic_key = "-p"
+    option_key = '--target-bed'
+    option_value = 'target_bed'
+    balsamic_key = '-p'
 
     # WHEN dry running with option specified
-    result = cli_runner.invoke(
-        config, [case_id, "--dry-run", option_key, option_value], obj=base_context
-    )
+    result = cli_runner.invoke(config, [case_id, '--dry-run', option_key, option_value],
+                               obj=base_context)
 
     # THEN dry-print should include the the option-value
     assert result.exit_code == EXIT_SUCCESS
@@ -92,7 +93,7 @@ def test_target_bed(cli_runner, base_context, balsamic_case):
 
 def get_beds_path(base_context) -> Path:
     """Gets the bed path from the balsamic config"""
-    return Path(base_context.get("bed_path"))
+    return Path(base_context.get('bed_path'))
 
 
 def test_target_bed_from_case(cli_runner, base_context, balsamic_case):
@@ -102,14 +103,13 @@ def test_target_bed_from_case(cli_runner, base_context, balsamic_case):
     for link in balsamic_case.links:
         assert link.sample.bed_version.filename
 
-    bed_key = "-p"
-    bed_path = (
-        get_beds_path(base_context) / balsamic_case.links[0].sample.bed_version.filename
-    )
+    bed_key = '-p'
+    bed_path = get_beds_path(base_context) / balsamic_case.links[0].sample.bed_version.filename
     case_id = balsamic_case.internal_id
 
     # WHEN dry running
-    result = cli_runner.invoke(config, [case_id, "--dry-run"], obj=base_context)
+    result = cli_runner.invoke(config, [case_id, '--dry-run'],
+                               obj=base_context)
 
     # THEN dry-print should include the bed_key and the bed_value including path
     assert result.exit_code == EXIT_SUCCESS
@@ -122,14 +122,13 @@ def test_umi_trim_length(cli_runner, base_context, balsamic_case):
 
     # GIVEN case-id
     case_id = balsamic_case.internal_id
-    option_key = "--umi-trim-length"
-    option_value = "5"
+    option_key = '--umi-trim-length'
+    option_value = '5'
     balsamic_key = option_key
 
     # WHEN dry running with option specified
-    result = cli_runner.invoke(
-        config, [case_id, "--dry-run", option_key, option_value], obj=base_context
-    )
+    result = cli_runner.invoke(config, [case_id, '--dry-run', option_key, option_value],
+                               obj=base_context)
 
     # THEN dry-print should include the the option-value
     assert result.exit_code == EXIT_SUCCESS

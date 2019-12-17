@@ -14,7 +14,7 @@ def get_unique_id(availability_func: Callable) -> str:
     already exists.
     """
     while True:
-        random_id = petname.Generate(3, separator="")
+        random_id = petname.Generate(3, separator='')
         if availability_func(random_id) is None:
             return random_id
         else:

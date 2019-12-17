@@ -23,13 +23,12 @@ class USaltFastqHandler(BaseFastqHandler):
         """Creates valid usalt filename from the parameters"""
 
         @staticmethod
-        def create(
-            lane: str, flowcell: str, sample: str, read: str, more: dict = None
-        ) -> str:
+        def create(lane: str, flowcell: str, sample: str, read: str,
+                   more: dict = None) -> str:
             """Name a FASTQ file following usalt conventions. Naming must be
             xxx_R_1.fastq.gz and xxx_R_2.fastq.gz"""
 
-            undetermined = more.get("undetermined", None)
+            undetermined = more.get('undetermined', None)
 
             # ACC1234A1_FCAB1ABC2_L1_1.fastq.gz sample_flowcell_lane_read.fastq.gz
             flowcell = f"{flowcell}-undetermined" if undetermined else flowcell
@@ -37,25 +36,25 @@ class USaltFastqHandler(BaseFastqHandler):
 
     def __init__(self, config):
         super().__init__(config)
-        self.root_dir = config["usalt"]["root"]
+        self.root_dir = config['usalt']['root']
 
     def link(self, case: str, sample: str, files: List):
         """Link FASTQ files for a usalt sample.
         Shall be linked to /<usalt root directory>/case-id/fastq/"""
 
         # The fastq files should be linked to /.../fastq/<project>/<sample>/*.fastq.gz.
-        wrk_dir = Path(self.root_dir) / "fastq" / case / sample
+        wrk_dir = Path(self.root_dir) / 'fastq' / case / sample
 
         wrk_dir.mkdir(parents=True, exist_ok=True)
 
         for fastq_data in files:
-            original_fastq_path = Path(fastq_data["path"])
+            original_fastq_path = Path(fastq_data['path'])
             linked_fastq_name = self.FastqFileNameCreator.create(
-                lane=fastq_data["lane"],
-                flowcell=fastq_data["flowcell"],
+                lane=fastq_data['lane'],
+                flowcell=fastq_data['flowcell'],
                 sample=sample,
-                read=fastq_data["read"],
-                more={"undetermined": fastq_data["undetermined"]},
+                read=fastq_data['read'],
+                more={'undetermined': fastq_data['undetermined']},
             )
             linked_fastq_path = wrk_dir / linked_fastq_name
 
