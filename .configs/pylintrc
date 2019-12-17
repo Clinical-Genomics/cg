@@ -1,3 +1,7 @@
+[MASTER]
+# ignore snapshot files for linting
+ignore=snapshot
+
 [MESSAGES CONTROL]
 
 # Disable the message, report, category or checker with the given id(s). You
@@ -15,4 +19,3 @@ disable=C0330
 
 # Maximum number of characters on a single line.
 max-line-length=100
-

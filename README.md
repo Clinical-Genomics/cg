@@ -327,6 +327,8 @@ There's one file for storing all constants like how priority levels are translat
 
 Another module `/exc.py` contains the custom Exception classes that are used across the package.
 
+Some unit tests make use of [snapshottest][snapshottest]. To update existing snapshots run `pytest --snapshot-update`
+
 [portal]: https://clinical.scilifelab.se/
 [trailblazer]: https://github.com/Clinical-Genomics/trailblazer
 [trailblazer-ui]: https://trailblazer.scilifelab.se/
@@ -348,3 +350,4 @@ Another module `/exc.py` contains the custom Exception classes that are used acr
 
 [coveralls-url]: https://coveralls.io/github/Clinical-Genomics/cg
 [coveralls-image]: https://coveralls.io/repos/github/Clinical-Genomics/cg/badge.svg?branch=master
+[snapshottest]: https://github.com/syrusakbary/snapshottest 
