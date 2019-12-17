@@ -4,6 +4,7 @@ python:
   - "3.7"
 
 # command to install dependencies
+# pip locked to version in P_main
 install:
   - pip install pip==18.1
   - pip install cython
