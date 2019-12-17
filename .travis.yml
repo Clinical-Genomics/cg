@@ -6,6 +6,7 @@ python:
 # command to install dependencies
 install:
   - pip install --upgrade pip
+  - pip install pip==18.1
   - pip install cython
   - pip install -U -r requirements.txt pytest-mock .
 # command to run tests
@@ -21,16 +22,19 @@ jobs:
         - pip check
     - name: "coverage"
       script:
+        - pip install --upgrade pip
         - pip install -U -r requirements-dev.txt .
         - coverage run --branch --omit="*.html" --source cg setup.py test
         - coveralls
     - name: "code formatting"
       script:
+        - pip install --upgrade pip
         - pip install black
         - black --check cg tests
     - name: "linting"
       script:
-        - pip install -r requirements-dev.txt
+        - pip install --upgrade pip
+        - pip install -U -r requirements-dev.txt
         - git reset --soft ${TRAVIS_COMMIT_RANGE%...*} && git lint
 
 notifications:
