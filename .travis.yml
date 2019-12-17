@@ -4,8 +4,9 @@ python:
   - "3.7"
 
 # command to install dependencies
+# pip locked to version in P_main
 install:
-  - pip install --upgrade pip
+  - pip install pip==18.1
   - pip install cython
   - pip install -U -r requirements.txt pytest-mock snapshottest .
 # command to run tests
@@ -16,17 +17,28 @@ cache: pip
 
 jobs:
   include:
-    - name: "dependencies"
+    - name: "production dependencies"
       script:
+        - pip check
+    - name: "development dependencies"
+      script:
+        - pip install -U -r requirements-dev.txt .
         - pip check
     - name: "coverage"
       script:
+        - pip install --upgrade pip
         - pip install -U -r requirements-dev.txt .
         - coverage run --branch --omit="*.html" --source cg setup.py test
         - coveralls
+    - name: "code formatting"
+      script:
+        - pip install --upgrade pip
+        - pip install black
+        - git --no-pager diff --name-only --diff-filter=ACMRT FETCH_HEAD $(git merge-base FETCH_HEAD master) | grep ".py" | xargs black --check
     - name: "linting"
       script:
-        - pip install -r requirements-dev.txt
+        - pip install --upgrade pip
+        - pip install -U -r requirements-dev.txt
         - git reset --soft ${TRAVIS_COMMIT_RANGE%...*} && git lint
 
 notifications:
