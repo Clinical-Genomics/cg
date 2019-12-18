@@ -8,8 +8,9 @@ from cg.apps import hk, tb, lims
 from cg.apps.environ import environ_email
 from cg.apps.mip import MipAPI
 from cg.apps.mip.fastq import MipFastqHandler
-from cg.cli.workflow.mip_rna import store, deliver
-from cg.cli.workflow.workflow import get_links
+from cg.cli.workflow.mip_rna.store import store as store_cmd
+from cg.cli.workflow.mip_rna.deliver import deliver as deliver_cmd
+from cg.cli.workflow.get_links import get_links
 from cg.meta.workflow.mip_rna import AnalysisAPI
 from cg.meta.deliver.mip_rna import MipRnaDeliverAPI as DeliverAPI
 from cg.store import Store
@@ -114,5 +115,5 @@ def config_case(context: click.Context, case_id: str, dry: bool = False):
         LOG.info("saved config to: %s", out_path)
 
 
-mip_rna.add_command(store)
-mip_rna.add_command(deliver)
+mip_rna.add_command(store_cmd)
+mip_rna.add_command(deliver_cmd)

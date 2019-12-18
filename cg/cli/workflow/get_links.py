@@ -1,17 +1,10 @@
-"""Common CLI workflow functions"""
-
+"""The get_links command"""
 import logging
 
 import click
-
 from cg.store import models
 
 LOG = logging.getLogger(__name__)
-
-
-@click.group()
-def workflow():
-    """Workflows commands"""
 
 
 def get_links(context: click.Context, case_id: str, sample_id: str) -> [models.FamilySample]:

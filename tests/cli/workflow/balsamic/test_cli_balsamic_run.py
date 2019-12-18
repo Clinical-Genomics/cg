@@ -1,6 +1,6 @@
 """This script tests the cli methods to run balsamic"""
 
-from cg.cli.workflow.balsamic import run
+from cg.cli.workflow.balsamic.base import run
 
 EXIT_SUCCESS = 0
 

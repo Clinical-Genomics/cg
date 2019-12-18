@@ -7,8 +7,9 @@ import click
 
 from cg.apps import hk, tb, scoutapi, lims
 from cg.apps.mip.fastq import MipFastqHandler
-from cg.cli.workflow.mip_dna import store, deliver
-from cg.cli.workflow.workflow import get_links
+from cg.cli.workflow.mip_dna.store import store as store_cmd
+from cg.cli.workflow.mip_dna.deliver import deliver as deliver_cmd
+from cg.cli.workflow.get_links import get_links
 from cg.exc import LimsDataError
 from cg.meta.workflow.mip_dna import AnalysisAPI
 from cg.meta.deliver.mip_dna import MipDnaDeliverAPI
@@ -208,5 +209,5 @@ def _suggest_cases_to_analyze(context, show_as_error: bool = False):
         click.echo(case_obj)
 
 
-mip_dna.add_command(store)
-mip_dna.add_command(deliver)
+mip_dna.add_command(store_cmd)
+mip_dna.add_command(deliver_cmd)

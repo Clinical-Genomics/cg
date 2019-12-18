@@ -3,7 +3,7 @@ import logging
 from pathlib import Path
 
 import pytest
-from cg.cli.workflow.balsamic import config_case
+from cg.cli.workflow.balsamic.base import config_case
 
 EXIT_SUCCESS = 0
 

@@ -9,12 +9,6 @@ import ruamel.yaml
 import cg
 from cg.store import Store
 
-from .workflow import workflow
-from .workflow import balsamic
-from .workflow import microsalt
-from .workflow import mip_dna
-from .workflow import mip_rna
-from .workflow.balsamic import store as balsamic_store
 from .add import add
 from .backup import backup
 from .clean import clean
@@ -26,6 +20,7 @@ from .set import set_cmd
 from .status import status
 from .transfer import transfer
 from .upload import upload
+from .workflow.base import workflow as workflow_cmd
 
 LOG = logging.getLogger(__name__)
 LEVELS = ['DEBUG', 'INFO', 'WARNING', 'ERROR']
@@ -79,15 +74,4 @@ base.add_command(set_cmd)
 base.add_command(status)
 base.add_command(transfer)
 base.add_command(upload)
-base.add_command(workflow)
-
-workflow.add_command(balsamic)
-workflow.add_command(microsalt)
-workflow.add_command(mip_dna)
-workflow.add_command(mip_rna)
-
-balsamic.add_command(balsamic_store)
-balsamic.add_command(deliver)
-
-workflow.add_command(mip_dna)
-workflow.add_command(mip_rna)
+base.add_command(workflow_cmd)
