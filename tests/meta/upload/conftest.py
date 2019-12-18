@@ -1,67 +1,71 @@
 import pytest
-
-from cg.meta.upload.scoutapi import UploadScoutAPI
+from cg.apps.hk import HousekeeperAPI
 from cg.meta.upload.mutacc import UploadToMutaccAPI
 from cg.meta.upload.observations import UploadObservationsAPI
+from cg.meta.upload.scoutapi import UploadScoutAPI
 
 
 class MockVersion:
+
+    @property
     def id(self):
         return ''
 
 
 class MockFile:
 
-    def __init__(self, path=''):
+    def __init__(self, path='', to_archive=False, tags=[]):
         self.path = path
+        self.to_archive = to_archive
+        self.tags = tags
 
     def first(self):
-        return MockFile()
+        return MockFile(path=self.path)
 
+    @property
     def full_path(self):
-        return ''
+        return self.path
+
+    def is_included(self):
+        return False
 
 
-# Mock File again, but full_path should be an attribute
-class MockFile1():
+class MockHouseKeeper(HousekeeperAPI):
 
-    """ Mock File object """
-
-    def __init__(self, path=''):
-        self.full_path = path
-
-    @staticmethod
-    def first():
-        """ mock first method """
-        return MockFile1()
-
-
-class MockHouseKeeper:
+    def __init__(self):
+        self._file_added = False
+        self._file_included = False
+        self._files = []
+        self._file = MockFile()
 
     def files(self, version, tags):
-        return MockFile()
+        return self._file
+
+    def get_files(self, bundle, tags, version='1.0'):
+        """docstring for get_files"""
+        return self._files
+
+    def add_file(self, file, version_obj, tag_name, to_archive=False):
+        """docstring for add_file"""
+        self._file_added = True
+        self._file = MockFile(path=file)
+        return self._file
 
     def version(self, arg1: str, arg2: str):
         """Fetch version from the database."""
         return MockVersion()
 
-
-# Mock Housekeeper again, but with MockFile_ returned from files instead
-class MockHouseKeeper1():
-
-    """ Mock housekeeper api"""
-
-    @staticmethod
-    def files(version, tags):
-        """ Mock files method """
-        _, _ = version, tags
-        return MockFile1()
-
-    @staticmethod
-    def version(arg1: str, arg2: str):
-        """Fetch version from the database."""
-        _, _ = arg1, arg2
+    def last_version(self, bundle: str):
+        """docstring for last_version"""
         return MockVersion()
+
+    def include_file(self, file_obj, version_obj):
+        """docstring for include_file"""
+        self._file_included = True
+
+    def add_commit(self, file_obj):
+        """docstring for include_file"""
+        pass
 
 
 class MockMadeline:
@@ -98,6 +102,7 @@ class MockAnalysis:
 
 class MockMutaccAuto:
     """ Mock class for mutacc_auto api """
+
     @staticmethod
     def extract_reads(*args, **kwargs):
         """mock extract_reads method"""
@@ -111,6 +116,7 @@ class MockMutaccAuto:
 
 class MockScoutApi:
     """ Mock class for Scout api"""
+
     @staticmethod
     def get_causative_variants(case_id):
         """mock get_causative_variants"""
@@ -119,8 +125,10 @@ class MockScoutApi:
 
 
 class MockLoqusAPI:
-
     """ Mock LoqusAPI class"""
+
+    def __init__(self, analysis_type='wgs'):
+        self.analysis_type = analysis_type
 
     @staticmethod
     def load(*args, **kwargs):
@@ -145,12 +153,19 @@ class MockLoqusAPI:
 
 
 @pytest.yield_fixture(scope='function')
-def upload_observations_api(analysis_store):
+def housekeeper_api():
+    _api = MockHouseKeeper()
 
+    yield _api
+
+
+@pytest.yield_fixture(scope='function')
+def upload_observations_api(analysis_store):
     """ Create mocked UploadObservationsAPI object"""
 
     loqus_mock = MockLoqusAPI()
-    hk_mock = MockHouseKeeper1()
+    hk_mock = MockHouseKeeper()
+    hk_mock.add_file(file='.', version_obj='', tag_name='')
 
     _api = UploadObservationsAPI(
         status_api=analysis_store,
@@ -160,11 +175,29 @@ def upload_observations_api(analysis_store):
 
     yield _api
 
+
+@pytest.yield_fixture(scope='function')
+def upload_observations_api_wes(analysis_store):
+    """ Create mocked UploadObservationsAPI object"""
+
+    loqus_mock = MockLoqusAPI(analysis_type='wes')
+    hk_mock = MockHouseKeeper()
+    hk_mock.add_file(file='.', version_obj='', tag_name='')
+
+    _api = UploadObservationsAPI(
+        status_api=analysis_store,
+        hk_api=hk_mock,
+        loqus_api=loqus_mock
+    )
+
+    yield _api
+
+
 @pytest.yield_fixture(scope='function')
 def upload_scout_api(analysis_store, scout_store):
-
     madeline_mock = MockMadeline()
     hk_mock = MockHouseKeeper()
+    hk_mock.add_file(file='/mock/path', version_obj='', tag_name='')
     analysis_mock = MockAnalysis()
 
     _api = UploadScoutAPI(

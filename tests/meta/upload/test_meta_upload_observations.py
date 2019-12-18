@@ -19,18 +19,32 @@ class Analysis:
         return self.family_obj
 
 
-def test_upload_observations_data(upload_observations_api, analysis_store):
+def test_upload_observations_get_input(upload_observations_api, analysis_store):
 
     # GIVEN an upload_observations_api and a mocked analysis_obj
     family_obj = analysis_store.family('yellowhog')
     analysis_obj = Analysis(family_obj=family_obj)
 
-    # WHEN data method is used given the analysis_obj as argument
-    data = upload_observations_api.data(analysis_obj)
+    # WHEN get_input method is used given the analysis_obj as argument
+    input_data = upload_observations_api.get_input(analysis_obj)
 
-    # THEN data is a dictionary with keys (family, vcf, sv_vcf, snv_gbcf, and pedigree)
-    assert set(data.keys()) == {'family', 'vcf', 'sv_vcf', 'snv_gbcf', 'pedigree'}
+    # THEN input_data is a dictionary with keys (family, vcf, sv_vcf, snv_gbcf, and pedigree)
+    assert set(input_data.keys()) == {'family', 'vcf', 'sv_vcf', 'snv_gbcf', 'pedigree'}
+    assert input_data['sv_vcf'] is not None
 
+
+def test_upload_observations_get_input_wes(upload_observations_api_wes, analysis_store):
+
+    # GIVEN an upload_observations_api and a mocked analysis_obj
+    family_obj = analysis_store.family('yellowhog')
+    analysis_obj = Analysis(family_obj=family_obj)
+
+    # WHEN get_input method is used given the analysis_obj as argument
+    input_data = upload_observations_api_wes.get_input(analysis_obj)
+
+    # THEN input_data is a dictionary with keys (family, vcf, sv_vcf, snv_gbcf, and pedigree)
+    assert set(input_data.keys()) == {'family', 'vcf', 'sv_vcf', 'snv_gbcf', 'pedigree'}
+    assert input_data['sv_vcf'] is None
 
 def test_upload_observations_process(upload_observations_api, analysis_store):
 

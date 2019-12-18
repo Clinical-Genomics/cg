@@ -45,10 +45,10 @@ def analysis(context, priority, email, family_id, start_with):
 
     if context.invoked_subcommand is None:
         if family_id is None:
-            LOG.error('provide a family')
+            _suggest_cases_to_analyze(context, show_as_error=True)
             context.abort()
 
-        # check everything is okey
+        # check everything is ok
         family_obj = context.obj['db'].family(family_id)
         if family_obj is None:
             LOG.error(f"{family_id} not found")
@@ -67,23 +67,35 @@ def analysis(context, priority, email, family_id, start_with):
                            start_with=start_with)
 
 
+def _suggest_cases_to_analyze(context, show_as_error=False):
+    if show_as_error:
+        LOG.error('provide a case, suggestions:')
+    else:
+        LOG.warning('provide a case, suggestions:')
+    for family_obj in context.obj['db'].cases_to_mip_analyze()[:50]:
+        click.echo(family_obj)
+
+
 @analysis.command('case-config')
 @click.option('-d', '--dry', is_flag=True, help='Print config to console')
-@click.argument('family_id')
+@click.argument('family_id', required=False)
 @click.pass_context
 def case_config(context, dry, family_id):
     """Generate a config for the FAMILY_ID"""
 
+    if family_id is None:
+        _suggest_cases_to_analyze(context)
+        context.abort()
+
     family_obj = context.obj['db'].family(family_id)
 
     if not family_obj:
-        LOG.error('Family %s not found', family_id)
+        LOG.error('Case %s not found', family_id)
         context.abort()
 
-    # MIP formatted pedigree.yaml config
+    # pipeline formatted pedigree.yaml config
     config_data = context.obj['api'].config(family_obj)
 
-    # Print to console
     if dry:
         print(config_data)
     else:
@@ -170,10 +182,15 @@ def link_microbial(context, order_id, sample_id):
 
 @analysis.command()
 @click.option('-p', '--print', 'print_output', is_flag=True, help='print to console')
-@click.argument('family_id')
+@click.argument('family_id', required=False)
 @click.pass_context
 def panel(context, print_output, family_id):
     """Write aggregated gene panel file."""
+
+    if family_id is None:
+        _suggest_cases_to_analyze(context)
+        context.abort()
+
     family_obj = context.obj['db'].family(family_id)
     bed_lines = context.obj['api'].panel(family_obj)
     if print_output:
@@ -187,11 +204,16 @@ def panel(context, print_output, family_id):
 @PRIORITY_OPTION
 @EMAIL_OPTION
 @START_WITH_PROGRAM
-@click.argument('family_id')
+@click.argument('family_id', required=False)
 @click.pass_context
 def start(context: click.Context, family_id: str, priority: str = None, email: str = None,
           start_with: str = None):
     """Start the analysis pipeline for a family."""
+
+    if family_id is None:
+        _suggest_cases_to_analyze(context)
+        context.abort()
+
     family_obj = context.obj['db'].family(family_id)
     if family_obj is None:
         LOG.error(f"{family_id}: family not found")
@@ -203,16 +225,33 @@ def start(context: click.Context, family_id: str, priority: str = None, email: s
 
 
 @analysis.command()
+@click.option('-d', '--dry-run', 'dry_run', is_flag=True, help='print to console, '
+                                                               'without actualising')
 @click.pass_context
-def auto(context: click.Context):
+def auto(context: click.Context, dry_run):
     """Start all analyses that are ready for analysis."""
     exit_code = 0
-    for family_obj in context.obj['db'].families_to_mip_analyze():
-        LOG.info(f"{family_obj.internal_id}: start analysis")
-        priority = ('high' if family_obj.high_priority else
-                    ('low' if family_obj.low_priority else 'normal'))
+
+    cases = [case_obj.internal_id for case_obj in context.obj['db'].cases_to_mip_analyze()]
+
+    for case_id in cases:
+
+        case_obj = context.obj['db'].family(case_id)
+
+        if AnalysisAPI.is_dna_only_case(case_obj):
+            LOG.info("%s: start analysis", case_obj.internal_id)
+        else:
+            LOG.warning("%s: contains non-dna samples, skipping", case_obj.internal_id)
+            continue
+
+        priority = ('high' if case_obj.high_priority else
+                    ('low' if case_obj.low_priority else 'normal'))
+
+        if dry_run:
+            continue
+
         try:
-            context.invoke(analysis, priority=priority, family_id=family_obj.internal_id)
+            context.invoke(analysis, priority=priority, family_id=case_obj.internal_id)
         except tb.MipStartError as error:
             LOG.exception(error.message)
             exit_code = 1

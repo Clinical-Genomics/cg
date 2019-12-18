@@ -22,7 +22,7 @@ def store(context):
 
 
 @store.command()
-@click.argument('config_stream', type=click.File('r'))
+@click.argument('config-stream', type=click.File('r'), required=False)
 @click.pass_context
 def analysis(context, config_stream):
     """Store a finished analysis in Housekeeper."""
@@ -30,9 +30,14 @@ def analysis(context, config_stream):
     tb_api = context.obj['tb_api']
     hk_api = context.obj['hk_api']
 
+    if not config_stream:
+        LOG.error('provide a config, suggestions:')
+        for analysis_obj in context.obj['tb_api'].analyses(status='completed', deleted=False)[:25]:
+            click.echo(analysis_obj.config_path)
+        context.abort()
+
     new_analysis = _gather_files_and_bundle_in_housekeeper(config_stream, context, hk_api,
                                                            status, tb_api)
-
     status.add_commit(new_analysis)
     click.echo(click.style('included files in Housekeeper', fg='green'))
 
@@ -44,7 +49,6 @@ def _gather_files_and_bundle_in_housekeeper(config_stream, context, hk_api, stat
     except AnalysisNotFinishedError as error:
         click.echo(click.style(error.message, fg='red'))
         context.abort()
-
     try:
         results = hk_api.add_bundle(bundle_data)
         if results is None:
