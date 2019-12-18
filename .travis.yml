@@ -22,21 +22,25 @@ jobs:
       script:
         - pip check
     - name: "development dependencies"
+      if: type = pull_request
       script:
         - pip install -U -r requirements-dev.txt .
         - pip check
     - name: "coverage"
+      if: type = pull_request
       script:
         - pip install --upgrade pip
         - pip install -U -r requirements-dev.txt .
         - coverage run --branch --omit="*.html" --source cg setup.py test
         - coveralls
     - name: "code formatting"
+      if: type = pull_request
       script:
         - pip install --upgrade pip
         - pip install black
         - git --no-pager diff --name-only --diff-filter=ACMRT FETCH_HEAD $(git merge-base FETCH_HEAD master) | grep ".py" | xargs black --check
     - name: "linting"
+      if: type = pull_request
       script:
         - pip install --upgrade pip
         - pip install -U -r requirements-dev.txt
