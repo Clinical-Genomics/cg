@@ -26,7 +26,13 @@ If you would like to install the latest development version:
 ```bash
 git clone https://github.com/Clinical-Genomics/cg
 cd cg
-pip install -r requirements.txt -r requirements-dev.txt --editable . 
+pip install -r requirements-dev.txt -r requiremets.txt --editable .
+```
+
+If you would like to automatically [Black][black] format your commits: 
+
+```
+pre-commit install
 ```
 
 ## Contributing
@@ -327,6 +333,8 @@ There's one file for storing all constants like how priority levels are translat
 
 Another module `/exc.py` contains the custom Exception classes that are used across the package.
 
+Some unit tests make use of [snapshottest][snapshottest]. To update existing snapshots run `pytest --snapshot-update`
+
 [portal]: https://clinical.scilifelab.se/
 [trailblazer]: https://github.com/Clinical-Genomics/trailblazer
 [trailblazer-ui]: https://trailblazer.scilifelab.se/
@@ -348,3 +356,6 @@ Another module `/exc.py` contains the custom Exception classes that are used acr
 
 [coveralls-url]: https://coveralls.io/github/Clinical-Genomics/cg
 [coveralls-image]: https://coveralls.io/repos/github/Clinical-Genomics/cg/badge.svg?branch=master
+
+[black]: https://black.readthedocs.io/en/stable/
+[snapshottest]: https://github.com/syrusakbary/snapshottest 

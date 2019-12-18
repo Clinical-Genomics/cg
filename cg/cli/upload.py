@@ -336,7 +336,9 @@ def observations(context, case_id, case_limit, dry_run):
 
     click.echo(click.style('----------------- OBSERVATIONS ----------------'))
 
-    loqus_api = loqus.LoqusdbAPI(context.obj)
+    loqus_api = {'wgs': loqus.LoqusdbAPI(context.obj),
+                 'wes': loqus.LoqusdbAPI(context.obj, analysis_type='wes')}
+
 
     if case_id:
         families_to_upload = [context.obj['status'].family(case_id)]
@@ -364,8 +366,12 @@ def observations(context, case_id, case_limit, dry_run):
             LOG.info("%s: has tumour samples. Skipping!", family_obj.internal_id)
             continue
 
-        if not LinkHelper.all_samples_are_wgs(family_obj.links):
-            LOG.info("%s: has non WGS analyis. Skipping!", family_obj.internal_id)
+        analysis_list = LinkHelper.all_samples_list_analyses(family_obj.links)
+        if len(set(analysis_list)) == 1 and analysis_list[0] in ('wes', 'wgs'):
+            analysis_type = analysis_list[0]
+        else:
+            LOG.info("%s: Undetermined analysis type (wes or wgs) or mixed analyses. Skipping!",
+                     family_obj.internal_id)
             continue
 
         if dry_run:
@@ -373,7 +379,7 @@ def observations(context, case_id, case_limit, dry_run):
             continue
 
         api = UploadObservationsAPI(context.obj['status'], context.obj['housekeeper_api'],
-                                    loqus_api)
+                                    loqus_api[analysis_type])
 
         try:
             api.process(family_obj.analyses[0])
@@ -399,10 +405,9 @@ class LinkHelper:
         return all(link.sample.data_analysis in data_anlysis for link in links)
 
     @staticmethod
-    def all_samples_are_wgs(links: List[models.FamilySample]) -> bool:
-        """Return True if all samples are from wgs analysis"""
-        return all(link.sample.application_version.application.analysis_type == 'wgs'
-                   for link in links)
+    def all_samples_list_analyses(links: List[models.FamilySample]) -> list:
+        """Return analysis type for each sample in case"""
+        return [link.sample.application_version.application.analysis_type for link in links]
 
 
 @upload.command()
