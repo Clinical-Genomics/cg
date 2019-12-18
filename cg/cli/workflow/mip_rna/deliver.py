@@ -12,7 +12,7 @@ from cg.store import Store
 LOG = logging.getLogger(__name__)
 
 
-@click.group("mip-rna")
+@click.group()
 @click.pass_context
 def deliver(context):
     """Deliver stuff."""
