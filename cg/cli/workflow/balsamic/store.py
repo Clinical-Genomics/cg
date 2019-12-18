@@ -1,4 +1,4 @@
-"""Click commands to store mip-rna analyses"""
+"""Click commands to store balsamic analyses"""
 import datetime as dt
 import logging
 from pathlib import Path
@@ -12,16 +12,16 @@ from cg.store import Store
 LOG = logging.getLogger(__name__)
 
 
-@click.group("mip-rna")
+@click.group()
 @click.pass_context
-def mip_rna(context):
+def store(context):
     """Store results from MIP in housekeeper."""
     context.obj["db"] = Store(context.obj["database"])
     context.obj["tb_api"] = tb.TrailblazerAPI(context.obj)
     context.obj["hk_api"] = hk.HousekeeperAPI(context.obj)
 
 
-@mip_rna.command()
+@store.command()
 @click.argument("config-stream", type=click.File("r"), required=False)
 @click.pass_context
 def analysis(context, config_stream):
@@ -50,6 +50,7 @@ def _gather_files_and_bundle_in_housekeeper(
     config_stream, context, hk_api, status, tb_api
 ):
     """Function to gather files and bundle in housekeeper"""
+
     try:
         bundle_data = tb_api.add_analysis(config_stream)
     except AnalysisNotFinishedError as error:
@@ -118,7 +119,7 @@ def _add_new_analysis_to_the_status_api(bundle_obj, status):
     return family_obj
 
 
-@mip_rna.command()
+@store.command()
 @click.pass_context
 def completed(context):
     """Store all completed analyses."""

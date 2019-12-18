@@ -6,25 +6,25 @@ from pathlib import Path
 
 import click
 from cg.apps import hk, lims
-from cg.meta.deliver.mip_rna import MipRnaDeliverAPI
+from cg.meta.deliver.balsamic import BalsamicDeliverAPI
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
 
 
-@click.group("mip-rna")
+@click.group()
 @click.pass_context
-def mip_rna(context):
+def deliver(context):
     """Deliver stuff."""
     context.obj["db"] = Store(context.obj["database"])
-    context.obj["deliver_api"] = MipRnaDeliverAPI(
+    context.obj["deliver_api"] = BalsamicDeliverAPI(
         db=context.obj["db"],
         hk_api=hk.HousekeeperAPI(context.obj),
         lims_api=lims.LimsAPI(context.obj),
     )
 
 
-@mip_rna.command()
+@deliver.command()
 @click.option("-V", "--version", help="version (date) of bundle")
 @click.option("-t", "--tag", multiple=True, help="the housekeeper tag(s)")
 @click.option(

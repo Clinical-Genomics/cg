@@ -10,6 +10,7 @@ from pathlib import Path
 import click
 from cg.apps import hk
 from cg.apps.balsamic.fastq import BalsamicFastqHandler
+from cg.cli.workflow.balsamic import store, deliver
 from cg.cli.workflow.workflow import get_links
 from cg.exc import LimsDataError, BalsamicStartError
 from cg.meta.workflow.balsamic import AnalysisAPI
@@ -333,3 +334,7 @@ def remove_fastq(context, case_id):
 
     if wrk_dir.exists():
         shutil.rmtree(wrk_dir)
+
+
+balsamic.add_command(store)
+balsamic.add_command(deliver)

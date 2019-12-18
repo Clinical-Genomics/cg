@@ -6,6 +6,7 @@ import click
 
 from cg.apps import hk, lims
 from cg.apps.usalt.fastq import USaltFastqHandler
+from cg.cli.workflow.microsalt import store, deliver
 from cg.meta.workflow.microsalt import AnalysisAPI
 from cg.meta.deliver.microsalt import MicrosaltDeliverAPI as DeliverAPI
 from cg.store import Store
@@ -55,3 +56,7 @@ def link(context: click.Context, order_id: str, sample_id: str):
         context.obj['api'].link_sample(USaltFastqHandler(context.obj),
                                        case=sample_obj.microbial_order.internal_id,
                                        sample=sample_obj.internal_id)
+
+
+microsalt.add_command(store)
+microsalt.add_command(deliver)

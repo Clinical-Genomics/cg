@@ -14,17 +14,16 @@ from .workflow import balsamic
 from .workflow import microsalt
 from .workflow import mip_dna
 from .workflow import mip_rna
+from .workflow.balsamic import store as balsamic_store
 from .add import add
 from .backup import backup
 from .clean import clean
-from .deliver.deliver import deliver
 from .export import export
 from .get import get
 from .import_cmd import import_cmd
 from .reset import reset_cmd
 from .set import set_cmd
 from .status import status
-from .store.store import store
 from .transfer import transfer
 from .upload import upload
 
@@ -70,20 +69,25 @@ def init(context, reset, force):
 
 
 base.add_command(add)
-base.add_command(workflow)
 base.add_command(backup)
 base.add_command(clean)
-base.add_command(deliver)
 base.add_command(export)
 base.add_command(get)
 base.add_command(import_cmd)
 base.add_command(reset_cmd)
 base.add_command(set_cmd)
 base.add_command(status)
-base.add_command(store)
 base.add_command(transfer)
 base.add_command(upload)
+base.add_command(workflow)
+
 workflow.add_command(balsamic)
 workflow.add_command(microsalt)
+workflow.add_command(mip_dna)
+workflow.add_command(mip_rna)
+
+balsamic.add_command(balsamic_store)
+balsamic.add_command(deliver)
+
 workflow.add_command(mip_dna)
 workflow.add_command(mip_rna)
