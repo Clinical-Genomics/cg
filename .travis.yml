@@ -34,11 +34,13 @@ jobs:
         - coverage run --branch --omit="*.html" --source cg setup.py test
         - coveralls
     - name: "code formatting"
+      if: type = push
       script:
         - pip install --upgrade pip
         - pip install black
         - git --no-pager diff --name-only --diff-filter=ACMRT FETCH_HEAD $(git merge-base FETCH_HEAD master) | grep ".py" | xargs black --check
     - name: "linting"
+      if: type = push
       script:
         - pip install --upgrade pip
         - pip install -U -r requirements-dev.txt
