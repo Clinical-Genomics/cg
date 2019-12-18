@@ -18,6 +18,7 @@ cache: pip
 jobs:
   include:
     - name: "production dependencies"
+      if: type = pull_request
       script:
         - pip check
     - name: "development dependencies"
