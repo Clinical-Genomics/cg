@@ -16,7 +16,7 @@ from cg.apps.pipelines.fastqhandler import BaseFastqHandler
 LOGGER = logging.getLogger(__name__)
 
 
-class USaltFastqHandler(BaseFastqHandler):
+class FastqHandler(BaseFastqHandler):
     """Handles fastq file linking"""
 
     class FastqFileNameCreator(BaseFastqHandler.BaseFastqFileNameCreator):

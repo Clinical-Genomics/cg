@@ -2,7 +2,7 @@
 """Test FastqHandlerUsalt"""
 import re
 
-from cg.apps.usalt.fastq import USaltFastqHandler
+from cg.apps.usalt.fastq import FastqHandler
 
 
 def test_fastq_create(valid_fastq_filename_pattern) -> dict:
@@ -18,9 +18,9 @@ def test_fastq_create(valid_fastq_filename_pattern) -> dict:
     more = {'undetermined': undetermined}
 
     # when calling the method to create a valid filename
-    result_filename = USaltFastqHandler.FastqFileNameCreator.create(lane=lane, flowcell=flowcell,
-                                                                    sample=sample, read=read,
-                                                                    more=more)
+    result_filename = FastqHandler.FastqFileNameCreator.create(lane=lane, flowcell=flowcell,
+                                                               sample=sample, read=read,
+                                                               more=more)
 
     # then the filename produced is compatible with the filename rules
     assert re.match(valid_fastq_filename_pattern, result_filename)

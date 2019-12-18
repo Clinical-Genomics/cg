@@ -2,7 +2,7 @@
 from datetime import datetime
 
 import pytest
-from cg.apps.balsamic.fastq import BalsamicFastqHandler
+from cg.apps.balsamic.fastq import FastqHandler
 from cg.apps.hk import HousekeeperAPI
 from cg.meta.workflow.balsamic import AnalysisAPI
 from cg.store import Store, models
@@ -15,7 +15,7 @@ def base_context(balsamic_store) -> dict:
         'hk_api': MockHouseKeeper(),
         'db': balsamic_store,
         'analysis_api': MockAnalysis,
-        'fastq_handler': MockBalsamicFastq,
+        'fastq_handler': MockFastq,
         'gzipper': MockGzip(),
         'bed_path': 'bed_path',
         'balsamic': {'conda_env': 'conda_env',
@@ -87,7 +87,7 @@ class MockAnalysis(AnalysisAPI):
         return _header
 
 
-class MockBalsamicFastq(BalsamicFastqHandler):
+class MockFastq(FastqHandler):
     """Mock FastqHandler for analysis_api"""
 
     def __init__(self):

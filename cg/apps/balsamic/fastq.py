@@ -74,7 +74,7 @@ class FastqFileConcatenator:
         return msg
 
 
-class BalsamicFastqHandler(BaseFastqHandler):
+class FastqHandler(BaseFastqHandler):
     """Handles fastq file linking"""
 
     class FastqFileNameCreator(BaseFastqHandler.BaseFastqFileNameCreator):

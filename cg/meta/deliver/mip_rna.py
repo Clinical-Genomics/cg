@@ -32,7 +32,7 @@ FAMILY_TAGS = [
 SAMPLE_TAGS = ["bam", "bam-index"]
 
 
-class MipRnaDeliverAPI:
+class DeliverAPI:
     """Deliver API for MIP RNA"""
     def __init__(self, db: Store, hk_api: hk.HousekeeperAPI, lims_api: lims.LimsAPI):
         self.store = db

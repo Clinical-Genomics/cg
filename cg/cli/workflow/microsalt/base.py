@@ -5,11 +5,11 @@ import logging
 import click
 
 from cg.apps import hk, lims
-from cg.apps.usalt.fastq import USaltFastqHandler
+from cg.apps.usalt.fastq import FastqHandler
 from cg.cli.workflow.microsalt.store import store as store_cmd
 from cg.cli.workflow.microsalt.deliver import deliver as deliver_cmd
 from cg.meta.workflow.microsalt import AnalysisAPI
-from cg.meta.deliver.microsalt import MicrosaltDeliverAPI as DeliverAPI
+from cg.meta.deliver.microsalt import DeliverAPI
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -54,7 +54,7 @@ def link(context: click.Context, order_id: str, sample_id: str):
 
     for sample_obj in sample_objs:
         LOG.info("%s: link FASTQ files", sample_obj.internal_id)
-        context.obj['api'].link_sample(USaltFastqHandler(context.obj),
+        context.obj['api'].link_sample(FastqHandler(context.obj),
                                        case=sample_obj.microbial_order.internal_id,
                                        sample=sample_obj.internal_id)
 

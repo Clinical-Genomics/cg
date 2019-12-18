@@ -9,7 +9,7 @@ from cg.apps import coverage as coverage_app, gt, hk, loqus, tb, scoutapi, beaco
     lims, mutacc_auto
 from cg.exc import DuplicateRecordError, DuplicateSampleError
 from cg.meta.workflow.mip_dna import AnalysisAPI
-from cg.meta.deliver.mip_dna import MipDnaDeliverAPI
+from cg.meta.deliver.mip_dna import DeliverAPI
 from cg.meta.report.api import ReportAPI
 from cg.meta.upload.beacon import UploadBeaconApi
 from cg.meta.upload.coverage import UploadCoverageApi
@@ -67,7 +67,7 @@ def upload(context, family_id, force_restart):
     context.obj['lims_api'] = lims.LimsAPI(context.obj)
     context.obj['tb_api'] = tb.TrailblazerAPI(context.obj)
     context.obj['chanjo_api'] = coverage_app.ChanjoAPI(context.obj)
-    context.obj['deliver_api'] = MipDnaDeliverAPI(context.obj, hk_api=context.obj[
+    context.obj['deliver_api'] = DeliverAPI(context.obj, hk_api=context.obj[
         'housekeeper_api'], lims_api=context.obj['lims_api'])
     context.obj['scout_api'] = scoutapi.ScoutAPI(context.obj)
     context.obj['analysis_api'] = AnalysisAPI(context.obj, hk_api=context.obj['housekeeper_api'],

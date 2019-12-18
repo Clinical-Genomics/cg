@@ -6,7 +6,7 @@ from pathlib import Path
 
 import click
 from cg.apps import hk, lims
-from cg.meta.deliver.mip_dna import MipDnaDeliverAPI
+from cg.meta.deliver.mip_dna import DeliverAPI
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -17,7 +17,7 @@ LOG = logging.getLogger(__name__)
 def deliver(context):
     """Deliver stuff."""
     context.obj['db'] = Store(context.obj['database'])
-    context.obj['deliver_api'] = MipDnaDeliverAPI(
+    context.obj['deliver_api'] = DeliverAPI(
         db=context.obj['db'],
         hk_api=hk.HousekeeperAPI(context.obj),
         lims_api=lims.LimsAPI(context.obj)

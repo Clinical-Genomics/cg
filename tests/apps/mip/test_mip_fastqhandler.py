@@ -3,7 +3,7 @@
 from datetime import datetime
 
 from cg.apps import tb
-from cg.apps.mip.fastq import MipFastqHandler
+from cg.apps.mip.fastq import FastqHandler
 from cg.store import Store
 
 
@@ -16,8 +16,8 @@ def test_link_file_count(cg_config, link_family, simple_files_data,
     sample = add_sample(store)
 
     # when calling the method to link
-    MipFastqHandler(cg_config, store, tb_api).link(case=link_family, sample=sample.internal_id,
-                                                   files=link_files)
+    FastqHandler(cg_config, store, tb_api).link(case=link_family, sample=sample.internal_id,
+                                                files=link_files)
 
     assert tb_api.link_was_called()
 

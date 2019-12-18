@@ -6,13 +6,13 @@ import sys
 import click
 
 from cg.apps import hk, tb, scoutapi, lims
-from cg.apps.mip.fastq import MipFastqHandler
+from cg.apps.mip.fastq import FastqHandler
 from cg.cli.workflow.mip_dna.store import store as store_cmd
 from cg.cli.workflow.mip_dna.deliver import deliver as deliver_cmd
 from cg.cli.workflow.get_links import get_links
 from cg.exc import LimsDataError
 from cg.meta.workflow.mip_dna import AnalysisAPI
-from cg.meta.deliver.mip_dna import MipDnaDeliverAPI
+from cg.meta.deliver.mip_dna import DeliverAPI
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -34,7 +34,7 @@ def mip_dna(context: click.Context, case_id: str, email: str, priority: str, sta
     scout_api = scoutapi.ScoutAPI(context.obj)
     lims_api = lims.LimsAPI(context.obj)
     context.obj['tb'] = tb.TrailblazerAPI(context.obj)
-    deliver = MipDnaDeliverAPI(context.obj, hk_api=hk_api, lims_api=lims_api)
+    deliver = DeliverAPI(context.obj, hk_api=hk_api, lims_api=lims_api)
     context.obj['api'] = AnalysisAPI(
         db=context.obj['db'],
         hk_api=hk_api,
@@ -82,9 +82,9 @@ def link(context: click.Context, case_id: str, sample_id: str):
                  link_obj.sample.data_analysis)
         if not link_obj.sample.data_analysis or \
                 'mip' in link_obj.sample.data_analysis.lower():
-            mip_fastq_handler = MipFastqHandler(context.obj,
-                                                context.obj['db'],
-                                                context.obj['tb'])
+            mip_fastq_handler = FastqHandler(context.obj,
+                                             context.obj['db'],
+                                             context.obj['tb'])
             context.obj['api'].link_sample(mip_fastq_handler,
                                            case=link_obj.family.internal_id,
                                            sample=link_obj.sample.internal_id)

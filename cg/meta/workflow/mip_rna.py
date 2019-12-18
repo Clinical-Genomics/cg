@@ -7,7 +7,7 @@ from typing import List, Any
 from ruamel.yaml import safe_load
 
 from cg.apps import tb, hk, lims
-from cg.meta.deliver.mip_dna import MipDnaDeliverAPI
+from cg.meta.deliver.mip_dna import DeliverAPI
 from cg.apps.pipelines.fastqhandler import BaseFastqHandler
 from cg.store import models, Store
 
@@ -17,7 +17,7 @@ class AnalysisAPI:
     hooks into the status database that makes managing analyses simpler"""
 
     def __init__(self, db: Store, hk_api: hk.HousekeeperAPI,
-                 tb_api: tb.TrailblazerAPI, lims_api: lims.LimsAPI, deliver_api: MipDnaDeliverAPI,
+                 tb_api: tb.TrailblazerAPI, lims_api: lims.LimsAPI, deliver_api: DeliverAPI,
                  yaml_loader=safe_load,
                  path_api=Path,
                  logger=logging.getLogger(

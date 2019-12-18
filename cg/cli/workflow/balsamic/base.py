@@ -9,7 +9,7 @@ from pathlib import Path
 
 import click
 from cg.apps import hk
-from cg.apps.balsamic.fastq import BalsamicFastqHandler
+from cg.apps.balsamic.fastq import FastqHandler
 from cg.cli.workflow.balsamic.store import store as store_cmd
 from cg.cli.workflow.balsamic.deliver import deliver as deliver_cmd
 from cg.cli.workflow.get_links import get_links
@@ -41,7 +41,7 @@ def balsamic(context, case_id, priority, email, target_bed):
     context.obj['db'] = Store(context.obj['database'])
     context.obj['hk_api'] = hk.HousekeeperAPI(context.obj)
     context.obj['analysis_api'] = AnalysisAPI
-    context.obj['fastq_handler'] = BalsamicFastqHandler
+    context.obj['fastq_handler'] = FastqHandler
     context.obj['gzipper'] = gzip
     context.obj['tb'] = tb.TrailblazerAPI(context.obj)
 
@@ -85,7 +85,7 @@ def link(context, case_id, sample_id):
         ):
             LOG.info('%s has blasamic as data analysis, linking.',
                      link_obj.sample.internal_id)
-            context.obj['api'].link_sample(BalsamicFastqHandler(context.obj),
+            context.obj['api'].link_sample(FastqHandler(context.obj),
                                            case=link_obj.family.internal_id,
                                            sample=link_obj.sample.internal_id)
         else:

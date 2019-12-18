@@ -33,7 +33,7 @@ FAMILY_TAGS = [
 SAMPLE_TAGS = ["bam", "bam-index"]
 
 
-class BalsamicDeliverAPI:
+class DeliverAPI:
     """Deliver API for Balsamic"""
 
     def __init__(self, db: Store, hk_api: hk.HousekeeperAPI, lims_api: lims.LimsAPI):

@@ -7,12 +7,12 @@ import click
 from cg.apps import hk, tb, lims
 from cg.apps.environ import environ_email
 from cg.apps.mip import MipAPI
-from cg.apps.mip.fastq import MipFastqHandler
+from cg.apps.mip.fastq import FastqHandler
 from cg.cli.workflow.mip_rna.store import store as store_cmd
 from cg.cli.workflow.mip_rna.deliver import deliver as deliver_cmd
 from cg.cli.workflow.get_links import get_links
 from cg.meta.workflow.mip_rna import AnalysisAPI
-from cg.meta.deliver.mip_rna import MipRnaDeliverAPI as DeliverAPI
+from cg.meta.deliver.mip_rna import DeliverAPI
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -52,9 +52,9 @@ def link(context: click.Context, case_id: str, sample_id: str):
 
         if not link_obj.sample.data_analysis or \
                 'mip-rna' in link_obj.sample.data_analysis.lower():
-            mip_fastq_handler = MipFastqHandler(context.obj,
-                                                context.obj['db'],
-                                                context.obj['tb'])
+            mip_fastq_handler = FastqHandler(context.obj,
+                                             context.obj['db'],
+                                             context.obj['tb'])
             context.obj['api'].link_sample(mip_fastq_handler,
                                            case=link_obj.family.internal_id,
                                            sample=link_obj.sample.internal_id)
