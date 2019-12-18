@@ -27,7 +27,7 @@ jobs:
         - pip install -U -r requirements-dev.txt .
         - pip check
     - name: "coverage"
-      if: branch = master OR type = pull_request
+      if: branch = master OR type = push
       script:
         - pip install --upgrade pip
         - pip install -U -r requirements-dev.txt .
