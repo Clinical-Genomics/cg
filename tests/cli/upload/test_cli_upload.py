@@ -1,7 +1,7 @@
 """ Test cg.cli.upload module """
 from datetime import datetime, timedelta
 
-from cg.cli.upload import LinkHelper
+from cg.cli.upload.upload import LinkHelper
 from cg.store import Store
 
 
