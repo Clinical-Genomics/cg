@@ -44,18 +44,6 @@ def balsamic(context, case_id, priority, email, target_bed):
     context.obj["gzipper"] = gzip
     context.obj["tb"] = tb.TrailblazerAPI(context.obj)
 
-    hk_api = hk.HousekeeperAPI(context.obj)
-    scout_api = scoutapi.ScoutAPI(context.obj)
-    lims_api = lims.LimsAPI(context.obj)
-    context.obj["api"] = AnalysisAPI(
-        db=context.obj["db"],
-        hk_api=hk_api,
-        tb_api=context.obj["tb"],
-        scout_api=scout_api,
-        lims_api=lims_api,
-        deliver_api=None,
-    )
-
     if context.invoked_subcommand is None:
         if case_id is None:
             LOG.error("provide a case")
@@ -92,7 +80,7 @@ def link(context, case_id, sample_id):
                 "%s has blasamic as data analysis, linking.",
                 link_obj.sample.internal_id,
             )
-            context.obj["api"].link_sample(
+            context.obj["analysis_api"].link_sample(
                 FastqHandler(context.obj),
                 case=link_obj.family.internal_id,
                 sample=link_obj.sample.internal_id,
