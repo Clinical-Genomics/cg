@@ -77,7 +77,7 @@ def link(context, case_id, sample_id):
             and "balsamic" in link_obj.sample.data_analysis.lower()
         ):
             LOG.info(
-                "%s has blasamic as data analysis, linking.",
+                "%s has balsamic as data analysis, linking.",
                 link_obj.sample.internal_id,
             )
             context.obj["analysis_api"].link_sample(
