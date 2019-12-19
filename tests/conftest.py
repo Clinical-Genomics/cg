@@ -12,7 +12,11 @@ from cg.apps.mip_rna import files as mip_rna_files_api
 from cg.store import Store
 from trailblazer.mip import files as mip_dna_files_api
 
+<<<<<<< HEAD
 pytest_plugins = [
+=======
+pytest_plugins = [  # pylint: disable=invalid-name
+>>>>>>> Adds a file with madeline content
     "tests.apps.lims.conftest",
     "tests.apps.loqus.conftest",
     "tests.cli.conftest",
@@ -35,6 +39,12 @@ def chanjo_config_dict():
     _config = dict()
     _config.update(CHANJO_CONFIG)
     return _config
+
+
+@pytest.fixture
+def madeline_output():
+    """File with madeline output"""
+    return "tests/fixtures/apps/madeline/madeline.xml"
 
 
 @pytest.fixture
