@@ -9,7 +9,6 @@ from cg.meta.upload.scoutapi import UploadScoutAPI
 from cg.store import Store
 
 
-# pylint: disable=protected-access
 def test_unlinked_family_is_linked(upload_scout_api):
     """Test that is_family check fails when samples are not linked"""
     # GIVEN a upload scout api and case data for a family without linked individuals
