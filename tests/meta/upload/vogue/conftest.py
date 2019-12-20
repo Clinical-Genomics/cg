@@ -14,7 +14,7 @@ GTCONFIG = {
         "binary_path": "/Users/mayabrandi/opt/cg/genotype_path",
     }
 }
-VOGUECONFIG = {"vogue": {"binary_path": "/Users/mayabrandi/opt/cg/vogue_path"}}
+VOGUECONFIG = {"vogue": {"binary_path": "/path/to/vogue_path"}}
 
 GENOTYPE_RETURN_SAMPLE = (
     b'{"ACC5346A3": {"status":"pass"}, "SIB903A19": {"status":"pass"}}'
