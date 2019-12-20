@@ -10,7 +10,7 @@ from cg.apps.vogue import VogueAPI
 GTCONFIG = {
     "genotype": {
         "database": "database",
-        "config_path": "/Users/mayabrandi/opt/config/genotype.yaml",
+        "config_path": "/path/to/config/genotype.yaml",
         "binary_path": "/Users/mayabrandi/opt/cg/genotype_path",
     }
 }
