@@ -36,7 +36,7 @@ class UploadVogueAPI:
 
     def load_apptags(self):
         """Loading application tags from statusdb into the trending database"""
-        apptags = self.find_basic.applications()
+        apptags = self.store.applications()
         apptags_for_vogue = []
         for tag in apptags.all():
             apptags_for_vogue.append({"tag": tag.tag, "category": tag.category})
