@@ -3,10 +3,11 @@
 import logging
 from pathlib import Path
 
+from ruamel import yaml
+
 from cg.apps import hk, madeline, scoutapi
 from cg.meta.analysis import AnalysisAPI
 from cg.store import Store, models
-from ruamel import yaml
 
 LOG = logging.getLogger(__name__)
 

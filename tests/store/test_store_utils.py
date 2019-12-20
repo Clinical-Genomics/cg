@@ -1,3 +1,4 @@
+"""Tests for utils in store"""
 from cg.store.models import FamilySample
 from cg.store.utils import get_links, get_samples
 
