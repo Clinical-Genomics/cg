@@ -20,7 +20,7 @@ def vogue(context):
     context.obj["vogue_upload_api"] = UploadVogueAPI(
         genotype_api=gt.GenotypeAPI(context.obj),
         vogue_api=context.obj["vogue_api"],
-        find_basic=context.obj["status"],
+        store=context.obj["status"],
     )
 
 

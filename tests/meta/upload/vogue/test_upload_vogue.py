@@ -11,7 +11,7 @@ def test_load_genotype(
     genotype_return_sample,
     genotype_return_sample_analysis,
     mocker,
-    find_basic,
+    store,
 ):
 
     """Test load_genotype"""
@@ -26,7 +26,7 @@ def test_load_genotype(
     genotypeapi.export_sample.return_value = genotype_return_sample
     genotypeapi.export_sample_analysis.return_value = genotype_return_sample_analysis
     upploadvogueapi = UploadVogueAPI(
-        genotype_api=genotypeapi, vogue_api=vogueapi, find_basic=find_basic
+        genotype_api=genotypeapi, vogue_api=vogueapi, store=store
     )
     upploadvogueapi.load_genotype(days="1")
 
@@ -39,15 +39,15 @@ def test_load_genotype(
         assert call[0][0]["_id"] in samples.keys()
 
 
-def test_load_apptags(vogueapi, genotypeapi, find_basic, mocker):
+def test_load_apptags(vogueapi, genotypeapi, store, mocker):
 
     """Test load application tags"""
     # GIVEN UploadVogueAPI and a set of application tags
-    apptags = find_basic.applications().apptag_list
+    apptags = store.applications().apptag_list
 
     mocker.patch.object(vogueapi, "load_apptags")
     upploadvogueapi = UploadVogueAPI(
-        genotype_api=genotypeapi, vogue_api=vogueapi, find_basic=find_basic
+        genotype_api=genotypeapi, vogue_api=vogueapi, store=store
     )
 
     # WHEN running load_apptags

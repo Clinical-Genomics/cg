@@ -10,11 +10,11 @@ from cg.apps.vogue import VogueAPI
 GTCONFIG = {
     "genotype": {
         "database": "database",
-        "config_path": "/Users/mayabrandi/opt/config/genotype.yaml",
-        "binary_path": "/Users/mayabrandi/opt/cg/genotype_path",
+        "config_path": "/path/to/genotype.yaml",
+        "binary_path": "/path/to/genotype_path",
     }
 }
-VOGUECONFIG = {"vogue": {"binary_path": "/Users/mayabrandi/opt/cg/vogue_path"}}
+VOGUECONFIG = {"vogue": {"binary_path": "/path/to/vogue_path"}}
 
 GENOTYPE_RETURN_SAMPLE = (
     b'{"ACC5346A3": {"status":"pass"}, "SIB903A19": {"status":"pass"}}'
@@ -68,9 +68,9 @@ class MockApplicaitons:
         return self.apptags
 
 
-class MockFindBasicDataHandler:
+class MockStore:
     """
-        Mock for FindBasicDataHandler
+        Mock for Store
     """
 
     def __init__(self):
@@ -113,10 +113,10 @@ def vogueapi():
 
 
 @pytest.fixture(scope="function")
-def find_basic():
+def store():
     """
-       returning FindBasicDataHandler instance
+       returning MockStore instance
     """
 
-    _find_basic = MockFindBasicDataHandler()
-    return _find_basic
+    _store = MockStore()
+    return _store
