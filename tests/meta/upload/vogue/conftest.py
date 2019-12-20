@@ -11,7 +11,7 @@ GTCONFIG = {
     "genotype": {
         "database": "database",
         "config_path": "/path/to/config/genotype.yaml",
-        "binary_path": "/Users/mayabrandi/opt/cg/genotype_path",
+        "binary_path": "/path/to/genotype_path",
     }
 }
 VOGUECONFIG = {"vogue": {"binary_path": "/path/to/vogue_path"}}
