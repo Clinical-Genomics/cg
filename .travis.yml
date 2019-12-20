@@ -38,7 +38,7 @@ jobs:
       script:
         - pip install --upgrade pip
         - pip install black
-        - git --no-pager diff --name-only --diff-filter=AM $TRAVIS_COMMIT_RANGE | grep ".py" | xargs black --check
+        - git --no-pager diff --name-only --diff-filter=AM $TRAVIS_COMMIT_RANGE | grep -F ".py" | xargs black --check
     - name: "linting"
       if: type = pull_request
       script:
