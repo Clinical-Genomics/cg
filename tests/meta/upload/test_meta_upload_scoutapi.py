@@ -25,7 +25,6 @@ def test_unlinked_family_is_linked(upload_scout_api):
     assert res is False
 
 
-# pylint: disable=protected-access
 def test_family_is_linked(upload_scout_api):
     """Test that is_family returns true when samples are linked"""
     # GIVEN a upload scout api and case data for a linked family
