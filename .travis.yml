@@ -31,7 +31,7 @@ jobs:
       script:
         - pip install --upgrade pip
         - pip install -U -r requirements-dev.txt .
-        - coverage run --branch --omit="*.html" --source cg setup.py test
+        - coverage run --branch --omit="*.html" --source "$(basename "$PWD")" setup.py test
         - coveralls
     - name: "code formatting"
       if: type = pull_request
