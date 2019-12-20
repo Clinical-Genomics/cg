@@ -14,7 +14,7 @@ class UploadVogueAPI:
         self,
         genotype_api: GenotypeAPI,
         vogue_api: VogueAPI,
-        find_basic: FindBasicDataHandler,
+        store: Store,
     ):
         self.genotype_api = genotype_api
         self.vogue_api = vogue_api
