@@ -18,7 +18,7 @@ class UploadVogueAPI:
     ):
         self.genotype_api = genotype_api
         self.vogue_api = vogue_api
-        self.find_basic = find_basic
+        self.store = store
 
     def load_genotype(self, days):
         """Loading genotype data from the genotype database into the trending database"""
