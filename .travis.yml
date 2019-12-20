@@ -4,9 +4,9 @@ python:
   - "3.7"
 
 # command to install dependencies
-# pip locked to version in P_main
+# pip locked to version in prod170926
 install:
-  - pip install pip==18.1
+  - pip install pip==9.0.1
   - pip install cython
   - pip install -U -r requirements.txt pytest-mock snapshottest .
 # command to run tests
