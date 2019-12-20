@@ -4,7 +4,7 @@ import json
 
 from cg.apps.gt import GenotypeAPI
 from cg.apps.vogue import VogueAPI
-from cg.store.api.findbasicdata import FindBasicDataHandler
+from cg.store import Store
 
 
 class UploadVogueAPI:
