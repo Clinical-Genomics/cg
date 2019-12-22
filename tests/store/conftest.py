@@ -1,5 +1,4 @@
 """Fixtures for store tests"""
-# pylint: disable=redefined-outer-name
 import datetime as dt
 
 import pytest
