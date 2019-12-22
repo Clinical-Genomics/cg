@@ -43,10 +43,10 @@ jobs:
       script:
         - pip install --upgrade pip
         - pip install -U -r requirements-dev.txt .
-        - git checkout $TRAVIS_COMMIT
-        - pylint --jobs=0 --exit-zero cg tests | grep rate
+        - git checkout $TRAVIS_COMMIT_RANGE
+        - pylint --jobs=0 --exit-zero cg tests | grep rated
         - git checkout $TRAVIS_BRANCH
-        - pylint --jobs=0 --exit-zero cg tests | grep rate > pylint-result.txt | grep -F ".py" | xargs pylint --reports=n --jobs=0 --exit-zero | grep rate > pylint-result.txt
+        - pylint --jobs=0 --exit-zero cg tests | grep rated > pylint-result.txt
         - cat pylint-result.txt
         - grep -F ", +" pylint-result.txt || git --no-pager diff --name-only --diff-filter=AM $TRAVIS_COMMIT_RANGE | grep -F ".py" | xargs pylint --reports=n --jobs=0
     - name: "other linting"
