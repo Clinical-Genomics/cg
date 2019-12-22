@@ -40,7 +40,7 @@ jobs:
 #        - pip install black
 #        - git --no-pager diff --name-only --diff-filter=AM $TRAVIS_COMMIT_RANGE | grep ".py" | xargs black --check
     - name: "pylint new vs. old code"
-      if: type = pull_request
+      if: type = push
       script:
         - pip install --upgrade pip
         - pip install -U -r requirements-dev.txt .
