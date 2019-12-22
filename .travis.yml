@@ -39,16 +39,16 @@ jobs:
         - pip install --upgrade pip
         - pip install black
         - git --no-pager diff --name-only --diff-filter=AM $TRAVIS_COMMIT_RANGE | grep ".py" | xargs black --check
-    - name: "pylint"
+    - name: "pylint new vs. old code"
       script:
         - pip install --upgrade pip
         - pip install -U -r requirements-dev.txt .
-        - git checkout master
+        - git checkout origin/master
         - pylint --jobs=0 --exit-zero cg tests | grep rate
         - git checkout $TRAVIS_BRANCH
         - pylint --jobs=0 --exit-zero cg tests | grep rate > pylint-result.txt | grep -F ".py" | xargs pylint --reports=n --jobs=0 --exit-zero | grep rate > pylint-result.txt
         - cat pylint-result.txt
-        - grep -F ", +" pylint-result.txt || git --no-pager diff --name-only --diff-filter=AM $TRAVIS_COMMIT_RANGE
+        - grep -F ", +" pylint-result.txt || git --no-pager diff --name-only --diff-filter=AM $TRAVIS_COMMIT_RANGE | grep -F ".py" | xargs pylint --reports=n --jobs=0
     - name: "other linting"
       if: type = pull_request
       script:
