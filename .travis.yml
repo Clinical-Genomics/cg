@@ -14,8 +14,6 @@ script:
   - pytest
 
 cache: pip
-  directories:
-    - $HOME/.pylint.d
 
 jobs:
   include:
