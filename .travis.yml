@@ -17,28 +17,28 @@ cache: pip
 
 jobs:
   include:
-    - name: "production dependencies"
-      if: type = pull_request
-      script:
-        - pip check
-    - name: "development dependencies"
-      if: type = pull_request
-      script:
-        - pip install -U -r requirements-dev.txt .
-        - pip check
-    - name: "coverage"
-      if: NOT type = pull_request
-      script:
-        - pip install --upgrade pip
-        - pip install -U -r requirements-dev.txt .
-        - coverage run --branch --omit="*.html" --source cg setup.py test
-        - coveralls
-    - name: "code formatting"
-      if: type = pull_request
-      script:
-        - pip install --upgrade pip
-        - pip install black
-        - git --no-pager diff --name-only --diff-filter=AM $TRAVIS_COMMIT_RANGE | grep ".py" | xargs black --check
+#    - name: "production dependencies"
+#      if: type = pull_request
+#      script:
+#        - pip check
+#    - name: "development dependencies"
+#      if: type = pull_request
+#      script:
+#        - pip install -U -r requirements-dev.txt .
+#        - pip check
+#    - name: "coverage"
+#      if: NOT type = pull_request
+#      script:
+#        - pip install --upgrade pip
+#        - pip install -U -r requirements-dev.txt .
+#        - coverage run --branch --omit="*.html" --source cg setup.py test
+#        - coveralls
+#    - name: "code formatting"
+#      if: type = pull_request
+#      script:
+#        - pip install --upgrade pip
+#        - pip install black
+#        - git --no-pager diff --name-only --diff-filter=AM $TRAVIS_COMMIT_RANGE | grep ".py" | xargs black --check
     - name: "pylint new vs. old code"
       if: type = pull_request
       script:
@@ -46,18 +46,20 @@ jobs:
         - pip install -U -r requirements-dev.txt .
         - grep -F ", +" pylint-result.txt || git --no-pager diff --name-only --diff-filter=M $TRAVIS_COMMIT_RANGE | grep -F ".py" > $TRAVIS_HOME/m_files.txt
         - git checkout ${TRAVIS_COMMIT_RANGE%...*}
-        - pylint --jobs=0 --exit-zero $(< $TRAVIS_HOME/m_files.txt) | grep rated
+        - pylint --jobs=0 --exit-zero $(< $TRAVIS_HOME/m_files.txt) # | grep rated
         - git checkout $TRAVIS_BRANCH
+        - git status
         - grep -F ", +" pylint-result.txt || git --no-pager diff --name-only --diff-filter=M $TRAVIS_COMMIT_RANGE | grep -F ".py" > $TRAVIS_HOME/am_files.txt
         - pylint --jobs=0 --exit-zero $(< $TRAVIS_HOME/am_files.txt) | grep rated > $TRAVIS_HOME/pylint-result.txt
+        - pylint --jobs=0 --exit-zero $(< $TRAVIS_HOME/am_files.txt)
         - cat $TRAVIS_HOME/pylint-result.txt
         - grep -F ", +" $TRAVIS_HOME/pylint-result.txt || echo "pylint score decreased, please fix some lint issues in " && grep -F ".py" | xargs pylint --reports=n --jobs=0 $(< $TRAVIS_HOME/am_files.txt)
-    - name: "other linting"
-      if: type = pull_request
-      script:
-        - pip install --upgrade pip
-        - pip install -U -r requirements-dev.txt
-        - git reset --soft ${TRAVIS_COMMIT_RANGE%...*} && git lint
+#    - name: "other linting"
+#      if: type = pull_request
+#      script:
+#        - pip install --upgrade pip
+#        - pip install -U -r requirements-dev.txt
+#        - git reset --soft ${TRAVIS_COMMIT_RANGE%...*} && git lint
 
 notifications:
   email: never
