@@ -13,6 +13,7 @@ ignore=snapshot
 # --enable=similarities". If you want to run only the classes checker, but have
 # no Warning level messages displayed, use "--disable=all --enable=classes
 # --disable=W".
+# pylint: [pylint] C0330:Wrong hanging indentation before block (add 4 spaces)
 disable=C0330
 
 [FORMAT]

@@ -89,9 +89,12 @@ pylint:
     - .py
   command: pylint
   arguments:
-    - --rcfile=.configs/pylintrc
+    - --rcfile=.configs/pylintrc'
+    - --errors-only
     - --output-format=text
     - --max-line-length=100
+    - --persistent=n
+    - --jobs=0
     - >-
       --msg-template={{abspath}}:{{line}}:{{column}}:
       [{{category}}:{{symbol}}] {{obj}}: {{msg}}
@@ -100,7 +103,7 @@ pylint:
     ^{filename}:(?P<line>{lines}):((?P<column>\d+):)?
     \[(?P<severity>.+):(?P<message_id>\S+)\]\s+(:
     )?(?P<message>.+)$
-  installation: "Run pip install pylint."
+  installation: "Run pip install pylint-fail-under."
 
 # Sample output:
 # package/module.py:68:80: E501 line too long (80 > 79 characters)
