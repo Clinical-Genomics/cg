@@ -103,7 +103,7 @@ pylint:
     ^{filename}:(?P<line>{lines}):((?P<column>\d+):)?
     \[(?P<severity>.+):(?P<message_id>\S+)\]\s+(:
     )?(?P<message>.+)$
-  installation: "Run pip install pylint-fail-under."
+  installation: "Run pip install pylint."
 
 # Sample output:
 # package/module.py:68:80: E501 line too long (80 > 79 characters)
