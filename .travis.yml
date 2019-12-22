@@ -43,8 +43,7 @@ jobs:
       script:
         - pip install --upgrade pip
         - pip install -U -r requirements-dev.txt .
-        - git fetch
-        - git checkout origin/master
+        - git checkout $TRAVIS_COMMIT
         - pylint --jobs=0 --exit-zero cg tests | grep rate
         - git checkout $TRAVIS_BRANCH
         - pylint --jobs=0 --exit-zero cg tests | grep rate > pylint-result.txt | grep -F ".py" | xargs pylint --reports=n --jobs=0 --exit-zero | grep rate > pylint-result.txt
