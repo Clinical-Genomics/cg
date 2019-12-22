@@ -14,6 +14,8 @@ script:
   - pytest
 
 cache: pip
+  directories:
+    - $HOME/.pylint.d
 
 jobs:
   include:
@@ -39,7 +41,15 @@ jobs:
         - pip install --upgrade pip
         - pip install black
         - git --no-pager diff --name-only --diff-filter=AM $TRAVIS_COMMIT_RANGE | grep ".py" | xargs black --check
-    - name: "linting"
+    - name: "pylint"
+#      if: type = pull_request
+      script:
+        - pip install --upgrade pip
+        - pip install -U -r requirements-dev.txt .
+        - git checkout master
+        - pylint --jobs=0 --exit-zero cg tests
+        - git --no-pager diff --name-only --diff-filter=AM $TRAVIS_COMMIT_RANGE | grep -F ".py" | xargs pylint --reports=n --jobs=0 | | grep rate | grep -F " ,+"
+    - name: "other linting"
       if: type = pull_request
       script:
         - pip install --upgrade pip
