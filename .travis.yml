@@ -57,7 +57,7 @@ jobs:
         - pylint --jobs=0 --exit-zero $(< $TRAVIS_HOME/m_files.txt) > $TRAVIS_HOME/pylint_m_output.txt
         - cat $TRAVIS_HOME/pylint_m_output.txt
         - grep rated $TRAVIS_HOME/pylint_m_output.txt
-        - grep -F ", -" $TRAVIS_HOME/pylint_m_output.txt || - grep -F ", +0.00" $TRAVIS_HOME/pylint_m_output.txt || echo "pylint score decreased, please fix some lint issues in " && cat $TRAVIS_HOME/pylint_am_output.txt && 0
+        - grep -F ", -" $TRAVIS_HOME/pylint_m_output.txt || grep -F ", +0.00" $TRAVIS_HOME/pylint_m_output.txt || echo "pylint score decreased, please fix some lint issues in " && cat $TRAVIS_HOME/pylint_am_output.txt && 0
 #    - name: "other linting"
 #      if: type = pull_request
 #      script:
