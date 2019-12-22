@@ -7,7 +7,6 @@ coveralls
 pytest-mock
 git-lint
 pylint
-pylint-fail-under
 pycodestyle
 yamllint
 docutils
