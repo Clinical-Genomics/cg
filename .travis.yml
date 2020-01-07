@@ -43,7 +43,7 @@ jobs:
       if: type = pull_request
       script:
         - pip install --upgrade pip && pip install -U -r requirements-dev.txt .
-        - ( grep -r --exclude='.travis.yml' "pylint..disable\=" . ) && (echo "Can not run pylint scoring with any pylint warnings disabled, please remove them and try again" && eexit 1) || (exit 0)
+        - grep -r --exclude='.travis.yml' "pylint..disable\=" . && (echo "Can not run pylint scoring with any pylint warnings disabled, please remove them and try again" && exit 1) || exit 0
         - git --no-pager diff --name-only --diff-filter=M $TRAVIS_COMMIT_RANGE | grep -F ".py" > $TRAVIS_HOME/before_files.txt
         - git --no-pager diff --name-only --diff-filter=AM $TRAVIS_COMMIT_RANGE | grep -F ".py" > $TRAVIS_HOME/after_files.txt
         - pylint --jobs=0 --exit-zero $(< $TRAVIS_HOME/after_files.txt) > $TRAVIS_HOME/pylint_after_output.txt
