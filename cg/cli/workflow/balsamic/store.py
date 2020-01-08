@@ -32,7 +32,7 @@ def analysis(context, config_stream):
 
     if not config_stream:
         LOG.error("provide a config, suggestions:")
-        for analysis_obj in context.obj["tb_api"].analyses(
+        for analysis_obj in tb_api.analyses(
             status="completed", deleted=False
         )[:25]:
             click.echo(analysis_obj.config_path)
