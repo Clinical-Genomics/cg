@@ -89,7 +89,7 @@ pylint:
     - .py
   command: pylint
   arguments:
-    - --rcfile=.config/pylintrc
+    - --rcfile=.configs/pylintrc
     - --errors-only
     - --output-format=text
     - --max-line-length=100
