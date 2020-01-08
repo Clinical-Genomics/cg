@@ -30,8 +30,7 @@ class UploadScoutAPI:
         self.status = status_api
         self.housekeeper = hk_api
         self.scout = scout_api
-        madeline_executable_path = Path(madeline_exe)
-        self.madeline_process = Process(str(madeline_executable_path.absolute()))
+        self.madeline_process = Process(str(Path(madeline_exe).absolute()))
         self.madeline = madeline
         self.analysis = analysis_api
 

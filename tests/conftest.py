@@ -39,12 +39,6 @@ def chanjo_config_dict():
 
 
 @pytest.fixture
-def madeline_output():
-    """File with madeline output"""
-    return "tests/fixtures/apps/madeline/madeline.xml"
-
-
-@pytest.fixture
 def balsamic_orderform():
     """Orderform fixture for Balsamic samples"""
     return "tests/fixtures/orderforms/1508.19.balsamic.xlsx"

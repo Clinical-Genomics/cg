@@ -16,9 +16,6 @@ ignore=snapshot
 # pylint: [pylint] C0330:Wrong hanging indentation before block (add 4 spaces)
 disable=C0330
 
-# To avoid warning [E0401]: Unable to import package
-init-hook='import sys; sys.path.append(".")'
-
 [FORMAT]
 
 # Maximum number of characters on a single line.

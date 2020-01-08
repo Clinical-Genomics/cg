@@ -1,8 +1,16 @@
-"""Tests for CGs madeline app"""
+"""Tests for madeline extension"""
+
 from cg.apps.madeline import make_ped, run
 
 
+def get_ind_info(columns, line):
+    """Take some madeline columns and a raw madeline line and create a dictionary"""
+    ind_info = dict(zip(columns, line.rstrip().split("\t")))
+    return ind_info
+
+
 def test_run_madeline(madeline_process, madeline_input):
+
     # GIVEN a ped stream and a madeline process mock
     # WHEN running the madeline command
     outpath = run(madeline_process, madeline_input)
@@ -11,7 +19,8 @@ def test_run_madeline(madeline_process, madeline_input):
 
 
 def test_generate_madeline_input_no_mother(madeline_columns, proband):
-    # GIVEN a family id and a ind with unknown sex
+
+    # GIVEN a family id and a ind with unknown mother
     family_id = "test"
     proband.pop("mother")
     inds = [proband]
@@ -21,13 +30,14 @@ def test_generate_madeline_input_no_mother(madeline_columns, proband):
     for i, line in enumerate(madeline_lines, 1):
         if i == 1:
             continue
-        ind_info = dict(zip(madeline_columns.keys(), line.rstrip().split("\t")))
+        ind_info = get_ind_info(madeline_columns.keys(), line)
 
-    # THEN assert that the family id is included
+    # THEN assert that the mother is set to '.'
     assert ind_info["mother"] == "."
 
 
 def test_generate_madeline_input_no_sex(madeline_columns, proband):
+
     # GIVEN a family id and a ind with unknown sex
     family_id = "test"
     proband["sex"] = "unknown"
@@ -38,13 +48,14 @@ def test_generate_madeline_input_no_sex(madeline_columns, proband):
     for i, line in enumerate(madeline_lines, 1):
         if i == 1:
             continue
-        ind_info = dict(zip(madeline_columns.keys(), line.rstrip().split("\t")))
+        ind_info = get_ind_info(madeline_columns.keys(), line)
 
-    # THEN assert that the family id is included
+    # THEN assert that sex is set to '.'
     assert ind_info["sex"] == "."
 
 
 def test_generate_madeline_input(madeline_columns, proband):
+
     # GIVEN a family id and a list of ind dicts
     family_id = "test"
     inds = [proband]
@@ -54,7 +65,7 @@ def test_generate_madeline_input(madeline_columns, proband):
     for i, line in enumerate(madeline_lines, 1):
         if i == 1:
             continue
-        ind_info = dict(zip(madeline_columns.keys(), line.rstrip().split("\t")))
+        ind_info = get_ind_info(madeline_columns.keys(), line)
 
     # THEN assert that the family id is included
     assert ind_info["family"] == family_id
@@ -65,6 +76,7 @@ def test_generate_madeline_input(madeline_columns, proband):
 
 
 def test_generate_madeline_input_no_inds(madeline_columns):
+
     # GIVEN a family id and a empty list of inds
     family_id = "test"
     inds = []
@@ -76,5 +88,5 @@ def test_generate_madeline_input_no_inds(madeline_columns):
     for i, line in enumerate(res, 1):
         header_line = line
     assert header_line == "\t".join(madeline_columns.values())
-    # THEN assert one line is returned
+    # THEN assert only the header line is returned
     assert i == 1

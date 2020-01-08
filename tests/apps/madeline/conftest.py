@@ -3,7 +3,14 @@
 from pathlib import Path
 
 import pytest
+
 from cg.apps.madeline import make_ped
+
+
+@pytest.fixture
+def madeline_output():
+    """File with madeline output"""
+    return "tests/fixtures/apps/madeline/madeline.xml"
 
 
 @pytest.fixture
