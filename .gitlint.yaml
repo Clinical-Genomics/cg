@@ -90,8 +90,10 @@ pylint:
   command: pylint
   arguments:
     - --rcfile=.configs/pylintrc
+    - --errors-only
     - --output-format=text
     - --max-line-length=100
+    - --jobs=0
     - >-
       --msg-template={{abspath}}:{{line}}:{{column}}:
       [{{category}}:{{symbol}}] {{obj}}: {{msg}}

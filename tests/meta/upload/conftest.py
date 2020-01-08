@@ -1,4 +1,6 @@
+"""Fixtures for meta/upload tests"""
 import pytest
+
 from cg.apps.hk import HousekeeperAPI
 from cg.meta.upload.mutacc import UploadToMutaccAPI
 from cg.meta.upload.observations import UploadObservationsAPI
@@ -6,52 +8,69 @@ from cg.meta.upload.scoutapi import UploadScoutAPI
 
 
 class MockVersion:
+    """Mock a version object"""
 
+    # In this case we need to disable since this needsto be mocked
     @property
     def id(self):
-        return ''
+        """Mock out the id"""
+        return ""
+
+    @property
+    def app_root(self):
+        """Mock out the app_root"""
+        return None
 
 
 class MockFile:
+    """Mock the housekeeper File class"""
 
-    def __init__(self, path='', to_archive=False, tags=[]):
+    def __init__(self, path="", to_archive=False, tags=None):
         self.path = path
         self.to_archive = to_archive
-        self.tags = tags
+        self.tags = tags or []
 
     def first(self):
+        """Mock the first method"""
         return MockFile(path=self.path)
 
     @property
     def full_path(self):
+        """Mock the full path attribute"""
         return self.path
 
-    def is_included(self):
+    @staticmethod
+    def is_included():
+        """Mock the is_included method to always return False"""
         return False
 
 
 class MockHouseKeeper(HousekeeperAPI):
+    """Mock the housekeeper API"""
 
+    # In this mock we want to override __init__ so disable here
     def __init__(self):
         self._file_added = False
         self._file_included = False
         self._files = []
         self._file = MockFile()
 
+    # This is overriding a housekeeper object so ok to not include all arguments
     def files(self, version, tags):
+        """Mock the files method to return a list of files"""
         return self._file
 
-    def get_files(self, bundle, tags, version='1.0'):
-        """docstring for get_files"""
+    def get_files(self, bundle, tags, version="1.0"):
+        """Mock the get_files method to return a list of files"""
         return self._files
 
     def add_file(self, file, version_obj, tag_name, to_archive=False):
-        """docstring for add_file"""
+        """Mock the add_files method to add a MockFile to the list of files"""
         self._file_added = True
         self._file = MockFile(path=file)
         return self._file
 
-    def version(self, arg1: str, arg2: str):
+    def version(self, bundle: str, date: str):
         """Fetch version from the database."""
         return MockVersion()
 
@@ -64,40 +83,49 @@ class MockHouseKeeper(HousekeeperAPI):
         self._file_included = True
 
     def add_commit(self, file_obj):
-        """docstring for include_file"""
-        pass
+        """Overrides sqlalchemy method"""
+        return file_obj
 
 
 class MockMadeline:
+    """Mock the madeline module methods"""
 
-    def make_ped(self, name, samples):
-        return ''
+    @staticmethod
+    def make_ped(name, samples):
+        """Mock the make ped function"""
+        return ""
 
-    def run(self, arg1: str, arg2: str):
+    @staticmethod
+    def run(arg1: str, arg2: str):
         """Fetch version from the database."""
         return MockVersion()
 
 
 class MockAnalysis:
+    """Mock an analysis object"""
 
-    def get_latest_metadata(self, family_id):
+    @staticmethod
+    def get_latest_metadata(family_id=None):
+        """Mock get_latest_metadata"""
         # Returns: dict: parsed data
-        ### Define output dict
+        # Define output dict
         outdata = {
-            'analysis_sex': {'ADM1': 'female', 'ADM2': 'female', 'ADM3': 'female'},
-            'family': 'yellowhog',
-            'duplicates': {'ADM1': 13.525, 'ADM2': 12.525, 'ADM3': 14.525},
-            'genome_build': 'hg19',
-            'rank_model_version': '1.18',
-            'mapped_reads': {'ADM1': 98.8, 'ADM2': 99.8, 'ADM3': 97.8},
-            'mip_version': 'v4.0.20',
-            'sample_ids': ['2018-20203', '2018-20204'],
+            "analysis_sex": {"ADM1": "female", "ADM2": "female", "ADM3": "female"},
+            "family": family_id or "yellowhog",
+            "duplicates": {"ADM1": 13.525, "ADM2": 12.525, "ADM3": 14.525},
+            "genome_build": "hg19",
+            "rank_model_version": "1.18",
+            "mapped_reads": {"ADM1": 98.8, "ADM2": 99.8, "ADM3": 97.8},
+            "mip_version": "v4.0.20",
+            "sample_ids": ["2018-20203", "2018-20204"],
         }
 
         return outdata
 
-    def convert_panels(self, customer_id, panels):
-        return ''
+    @staticmethod
+    def convert_panels(customer_id, panels):
+        """Mock convert_panels"""
+        return ""
 
 
 class MockMutaccAuto:
@@ -115,7 +143,7 @@ class MockMutaccAuto:
 
 
 class MockScoutApi:
-    """ Mock class for Scout api"""
+    """Mock class for Scout api"""
 
     @staticmethod
     def get_causative_variants(case_id):
@@ -123,11 +151,29 @@ class MockScoutApi:
         _ = case_id
         return []
 
+    @property
+    def client(self):
+        """Client URI"""
+        return "mongodb://"
+
+    @property
+    def name(self):
+        """Name property"""
+        return self._name
+
+    @name.setter
+    def name(self, value):
+        self._name = value
+
+    @name.deleter
+    def name(self):
+        del self._name
+
 
 class MockLoqusAPI:
     """ Mock LoqusAPI class"""
 
-    def __init__(self, analysis_type='wgs'):
+    def __init__(self, analysis_type="wgs"):
         self.analysis_type = analysis_type
 
     @staticmethod
@@ -142,77 +188,75 @@ class MockLoqusAPI:
         """ Mock get_case method"""
         _ = args
         _ = kwargs
-        return {'case_id': 'case_id', '_id': '123'}
+        return {"case_id": "case_id", "_id": "123"}
 
     @staticmethod
     def get_duplicate(*args, **kwargs):
         """Mock get_duplicate method"""
         _ = args
         _ = kwargs
-        return {'case_id': 'case_id'}
+        return {"case_id": "case_id"}
 
 
-@pytest.yield_fixture(scope='function')
+@pytest.yield_fixture(scope="function")
 def housekeeper_api():
+    """housekeeper_api fixture"""
     _api = MockHouseKeeper()
 
     yield _api
 
 
-@pytest.yield_fixture(scope='function')
+@pytest.yield_fixture(scope="function")
 def upload_observations_api(analysis_store):
     """ Create mocked UploadObservationsAPI object"""
 
     loqus_mock = MockLoqusAPI()
     hk_mock = MockHouseKeeper()
-    hk_mock.add_file(file='.', version_obj='', tag_name='')
+    hk_mock.add_file(file=".", version_obj="", tag_name="")
 
     _api = UploadObservationsAPI(
-        status_api=analysis_store,
-        hk_api=hk_mock,
-        loqus_api=loqus_mock
+        status_api=analysis_store, hk_api=hk_mock, loqus_api=loqus_mock
     )
 
     yield _api
 
 
-@pytest.yield_fixture(scope='function')
+@pytest.yield_fixture(scope="function")
 def upload_observations_api_wes(analysis_store):
     """ Create mocked UploadObservationsAPI object"""
 
-    loqus_mock = MockLoqusAPI(analysis_type='wes')
+    loqus_mock = MockLoqusAPI(analysis_type="wes")
     hk_mock = MockHouseKeeper()
-    hk_mock.add_file(file='.', version_obj='', tag_name='')
+    hk_mock.add_file(file=".", version_obj="", tag_name="")
 
     _api = UploadObservationsAPI(
-        status_api=analysis_store,
-        hk_api=hk_mock,
-        loqus_api=loqus_mock
+        status_api=analysis_store, hk_api=hk_mock, loqus_api=loqus_mock
     )
 
     yield _api
 
 
-@pytest.yield_fixture(scope='function')
+@pytest.yield_fixture(scope="function")
 def upload_scout_api(analysis_store, scout_store):
+    """Fixture for upload_scout_api"""
     madeline_mock = MockMadeline()
     hk_mock = MockHouseKeeper()
-    hk_mock.add_file(file='/mock/path', version_obj='', tag_name='')
+    hk_mock.add_file(file="/mock/path", version_obj="", tag_name="")
     analysis_mock = MockAnalysis()
 
     _api = UploadScoutAPI(
         status_api=analysis_store,
         hk_api=hk_mock,
         scout_api=scout_store,
-        madeline_exe='',
+        madeline_exe="",
         madeline=madeline_mock,
-        analysis_api=analysis_mock
+        analysis_api=analysis_mock,
     )
 
     yield _api
 
 
-@pytest.yield_fixture(scope='function')
+@pytest.yield_fixture(scope="function")
 def mutacc_upload_api():
     """
         Fixture for a mutacc upload api
@@ -226,9 +270,10 @@ def mutacc_upload_api():
     return _api
 
 
-@pytest.yield_fixture(scope='function')
+@pytest.yield_fixture(scope="function")
 def analysis(analysis_store):
-    _analysis = analysis_store.add_analysis(pipeline='pipeline', version='version')
-    _analysis.family = analysis_store.family('yellowhog')
-    _analysis.config_path = 'dummy_path'
+    """Fixture to mock an analysis"""
+    _analysis = analysis_store.add_analysis(pipeline="pipeline", version="version")
+    _analysis.family = analysis_store.family("yellowhog")
+    _analysis.config_path = "dummy_path"
     yield _analysis
