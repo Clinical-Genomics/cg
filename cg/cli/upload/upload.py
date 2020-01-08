@@ -64,6 +64,7 @@ def upload(context, family_id, force_restart):
 
     context.obj['housekeeper_api'] = hk.HousekeeperAPI(context.obj)
 
+    context.obj['genotype_api'] = gt.GenotypeAPI(context.obj)
     context.obj['lims_api'] = lims.LimsAPI(context.obj)
     context.obj['tb_api'] = tb.TrailblazerAPI(context.obj)
     context.obj['chanjo_api'] = coverage_app.ChanjoAPI(context.obj)
@@ -618,3 +619,4 @@ def processed_solved(context):
 
     mutacc_auto_api = mutacc_auto.MutaccAutoAPI(context.obj)
     mutacc_auto_api.import_reads()
+

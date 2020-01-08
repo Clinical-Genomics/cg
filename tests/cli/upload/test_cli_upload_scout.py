@@ -1,7 +1,7 @@
 """Test the cli for uploading to scout"""
 import logging
 
-from cg.cli.upload import scout
+from cg.cli.upload.upload import scout
 
 
 def test_produce_load_config(base_context, cli_runner, analysis_family_single_case):

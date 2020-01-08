@@ -1,0 +1,221 @@
+---
+analysis_date: 2019-11-21T14:31:02
+analysis_type:
+  sample_id_1: wts
+analysisrunstatus: finished
+case: case_id
+config_file_analysis: /path/to/stuff/rare-disease/cases/case_id/analysis/case_id_config.yaml
+default_gene_panels:
+  - OMIM-AUTO
+expected_coverage:
+  sample_id_1: '1'
+human_genome_build:
+  path: /path/to/stuff/rare-disease/references/rna_references/grch37_homo_sapiens_-d5-.fasta
+  source: grch
+  version: '37'
+last_log_file_path: /path/to/stuff/rare-disease/cases/case_id/analysis/files/mip_2019-11-21T14:31:02.log
+log_file_dir: /some/path/rare_disease_test/mip_current_version/case_id/analysis/mip_log
+mip_version: v7.1.4
+pedigree_file:
+  path: /some/path/rare_disease_test/rna_cases/case_id/case_id_pedigree.yaml
+pedigree_minimal: /path/to/stuff/rare-disease/cases/case_id/analysis/files/case_id.fam
+recipe:
+  bcftools_merge:
+    path: /path/to/stuff/rare-disease/cases/case_id/analysis/files/case_id_comb.vcf
+  blobfish:
+    path: /some/path/rare_disease_test/mip_current_version/case_id/analysis/case_id/blobfish
+  multiqc:
+    case_id_html:
+      path: /path/to/stuff/rare-disease/cases/case_id/analysis/files/multiqc_report.html
+    case_id_json:
+      path: /path/to/stuff/rare-disease/cases/case_id/analysis/files/multiqc_data.json
+  peddy_ar:
+    stderr: {}
+  #qccollect_ar: {}
+  qccollect_ar: /path/to/stuff/rare-disease/cases/case_id/analysis/files/qcmetrics_file.stub
+  varianteffectpredictor:
+    path: /path/to/stuff/rare-disease/cases/case_id/analysis/files/case_id_comb_vep.vcf
+    stderrfile: {}
+  version_collect_ar:
+    path: /path/to/stuff/rare-disease/cases/case_id/analysis/files/case_id_vcol.yaml
+sample:
+  sample_id_1:
+    analysis_type: wts
+    expected_coverage: '1'
+    father: '0'
+    file:
+      sample_id_1_171015_flowcell_id_XXXXXX_lane1:
+        interleaved: ~
+        read_direction_file:
+          sample_id_1_171015_flowcell_id_XXXXXX_lane1_1:
+            date: 2017-10-15
+            flowcell: flowcell_id
+            lane: '1'
+            original_file_name: 1_171015_flowcell_id_sample_id_1_XXXXXX_1.fastq.gz
+            original_file_name_prefix: 1_171015_flowcell_id_sample_id_1_XXXXXX_1
+            read_direction: 1
+            run_barcode: 171015_flowcell_id_1_XXXXXX
+            sample_barcode: XXXXXX
+          sample_id_1_171015_flowcell_id_XXXXXX_lane1_2:
+            date: 2017-10-15
+            flowcell: flowcell_id
+            lane: '1'
+            original_file_name: 1_171015_flowcell_id_sample_id_1_XXXXXX_2.fastq.gz
+            original_file_name_prefix: 1_171015_flowcell_id_sample_id_1_XXXXXX_2
+            read_direction: 2
+            run_barcode: 171015_flowcell_id_1_XXXXXX
+            sample_barcode: XXXXXX
+        sequence_length: '151'
+        sequence_run_type: paired-end
+      sample_id_1_171015_flowcell_id_XXXXXX_lane2:
+        interleaved: ~
+        read_direction_file:
+          sample_id_1_171015_flowcell_id_XXXXXX_lane2_1:
+            date: 2017-10-15
+            flowcell: flowcell_id
+            lane: '2'
+            original_file_name: 2_171015_flowcell_id_sample_id_1_XXXXXX_1.fastq.gz
+            original_file_name_prefix: 2_171015_flowcell_id_sample_id_1_XXXXXX_1
+            read_direction: 1
+            run_barcode: 171015_flowcell_id_2_XXXXXX
+            sample_barcode: XXXXXX
+          sample_id_1_171015_flowcell_id_XXXXXX_lane2_2:
+            date: 2017-10-15
+            flowcell: flowcell_id
+            lane: '2'
+            original_file_name: 2_171015_flowcell_id_sample_id_1_XXXXXX_2.fastq.gz
+            original_file_name_prefix: 2_171015_flowcell_id_sample_id_1_XXXXXX_2
+            read_direction: 2
+            run_barcode: 171015_flowcell_id_2_XXXXXX
+            sample_barcode: XXXXXX
+        sequence_length: '151'
+        sequence_run_type: paired-end
+      sample_id_1_171015_flowcell_id_XXXXXX_lane3:
+        interleaved: ~
+        read_direction_file:
+          sample_id_1_171015_flowcell_id_XXXXXX_lane3_1:
+            date: 2017-10-15
+            flowcell: flowcell_id
+            lane: '3'
+            original_file_name: 3_171015_flowcell_id_sample_id_1_XXXXXX_1.fastq.gz
+            original_file_name_prefix: 3_171015_flowcell_id_sample_id_1_XXXXXX_1
+            read_direction: 1
+            run_barcode: 171015_flowcell_id_3_XXXXXX
+            sample_barcode: XXXXXX
+          sample_id_1_171015_flowcell_id_XXXXXX_lane3_2:
+            date: 2017-10-15
+            flowcell: flowcell_id
+            lane: '3'
+            original_file_name: 3_171015_flowcell_id_sample_id_1_XXXXXX_2.fastq.gz
+            original_file_name_prefix: 3_171015_flowcell_id_sample_id_1_XXXXXX_2
+            read_direction: 2
+            run_barcode: 171015_flowcell_id_3_XXXXXX
+            sample_barcode: XXXXXX
+        sequence_length: '151'
+        sequence_run_type: paired-end
+      sample_id_1_171015_flowcell_id_XXXXXX_lane4:
+        interleaved: ~
+        read_direction_file:
+          sample_id_1_171015_flowcell_id_XXXXXX_lane4_1:
+            date: 2017-10-15
+            flowcell: flowcell_id
+            lane: '4'
+            original_file_name: 4_171015_flowcell_id_sample_id_1_XXXXXX_1.fastq.gz
+            original_file_name_prefix: 4_171015_flowcell_id_sample_id_1_XXXXXX_1
+            read_direction: 1
+            run_barcode: 171015_flowcell_id_4_XXXXXX
+            sample_barcode: XXXXXX
+          sample_id_1_171015_flowcell_id_XXXXXX_lane4_2:
+            date: 2017-10-15
+            flowcell: flowcell_id
+            lane: '4'
+            original_file_name: 4_171015_flowcell_id_sample_id_1_XXXXXX_2.fastq.gz
+            original_file_name_prefix: 4_171015_flowcell_id_sample_id_1_XXXXXX_2
+            read_direction: 2
+            run_barcode: 171015_flowcell_id_4_XXXXXX
+            sample_barcode: XXXXXX
+        sequence_length: '151'
+        sequence_run_type: paired-end
+    most_complete_bam:
+      path: /path/to/stuff/rare-disease/cases/case_id/analysis/files/sample_id_1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal.bam
+    mother: '0'
+    phenotype: unaffected
+    recipe:
+      bootstrapann:
+        sample_id_1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal_haptc_filtered_ase_bootstr.vcf:
+          path: /path/to/stuff/rare-disease/cases/case_id/analysis/files/foo_sample_id_1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal_haptc_filtered_ase_bootstr.vcf
+        sample_id_1_lanes_1234_some_other_file_or_key_name:
+          path: /path/to/stuff/rare-disease/cases/case_id/analysis/files/bar_sample_id_1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal_haptc_filtered_ase_bootstr.vcf
+      fastqc_ar:
+        fastqc_data:
+          outdirectory: /some/path/rare_disease_test/mip_current_version/case_id/analysis/sample_id_1/fastqc_ar
+          path: /some/path/rare_disease_test/mip_current_version/case_id/analysis/sample_id_1/fastqc_ar/4_171015_flowcell_id_sample_id_1_XXXXXX_2_fastqc/fastqc_data.txt
+      gatk_asereadcounter:
+        sample_id_1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal_haptc_filtered_ase.csv:
+          path: /path/to/stuff/rare-disease/cases/case_id/analysis/files/sample_id_1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal_haptc_filtered_ase.csv
+      gatk_baserecalibration:
+        sample_id_1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal:
+          path: /path/to/stuff/rare-disease/cases/case_id/analysis/files/sample_id_1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal.bam
+      gatk_haplotypecaller:
+        sample_id_1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal_haptc.vcf:
+          path: /some/path/rare_disease_test/mip_current_version/case_id/analysis/sample_id_1/gatk_haplotypecaller/sample_id_1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal_haptc.vcf
+      gatk_splitncigarreads:
+        sample_id_1_lanes_1234_trim_star_sorted_merged_md_splitncigar:
+          path: /some/path/rare_disease_test/mip_current_version/case_id/analysis/sample_id_1/gatk_splitncigarreads/sample_id_1_lanes_1234_trim_star_sorted_merged_md_splitncigar.1.bam
+      gatk_variantfiltration:
+        sample_id_1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal_haptc_filtered.vcf:
+          path: /some/path/rare_disease_test/mip_current_version/case_id/analysis/sample_id_1/gatk_variantfiltration/sample_id_1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal_haptc_filtered.vcf
+      genebody_coverage:
+        sample_id_1_lanes_1234_trim_star_sorted_merged_genecov:
+          path: /some/path/rare_disease_test/mip_current_version/case_id/analysis/sample_id_1/genebody_coverage/sample_id_1_lanes_1234_trim_star_sorted_merged_genecov.geneBodyCoverage.txt
+      gffcompare_ar:
+        sample_id_1_lanes_1234_trim_star_sorted_merged_strg_gffcmp.gtf:
+          path: /path/to/stuff/rare-disease/cases/case_id/analysis/files/sample_id_1_lanes_1234_trim_star_sorted_merged_strg_gffcmp.gtf
+      markduplicates:
+        sample_id_1_lanes_1234_trim_star_sorted_merged_md:
+          marking_duplicates:
+            processed_by: picardtools_markduplicates
+          path: /path/to/stuff/rare-disease/cases/case_id/analysis/files/sample_id_1_lanes_1234_trim_star_sorted_merged_md_metric
+      picardtools_mergesamfiles:
+        sample_id_1_lanes_1234:
+          path: /some/path/rare_disease_test/mip_current_version/case_id/analysis/sample_id_1/picardtools_mergesamfiles/sample_id_1_lanes_1234_trim_star_sorted_merged.1.bam
+      preseq_ar:
+        sample_id_1_lanes_1234_trim_star_sorted_merged_preseq.txt:
+          path: /some/path/rare_disease_test/mip_current_version/case_id/analysis/sample_id_1/preseq_ar/sample_id_1_lanes_1234_trim_star_sorted_merged_preseq.txt
+      salmon_quant:
+        quant.sf:
+          path: /path/to/stuff/rare-disease/cases/case_id/analysis/files/quant.sf
+      star_aln:
+        sample_id_1_171015_flowcell_id_XXXXXX_lane1_star_sorted:
+          log:
+            path: /some/path/rare_disease_test/mip_current_version/case_id/analysis/sample_id_1/star_aln/sample_id_1_171015_flowcell_id_XXXXXX_lane1_star_sorted.Log.final.out
+          path: /some/path/rare_disease_test/mip_current_version/case_id/analysis/sample_id_1/star_aln/sample_id_1_171015_flowcell_id_XXXXXX_lane1_star_sorted.bam
+        sample_id_1_171015_flowcell_id_XXXXXX_lane2_star_sorted:
+          log:
+            path: /some/path/rare_disease_test/mip_current_version/case_id/analysis/sample_id_1/star_aln/sample_id_1_171015_flowcell_id_XXXXXX_lane2_star_sorted.Log.final.out
+          path: /some/path/rare_disease_test/mip_current_version/case_id/analysis/sample_id_1/star_aln/sample_id_1_171015_flowcell_id_XXXXXX_lane2_star_sorted.bam
+        sample_id_1_171015_flowcell_id_XXXXXX_lane3_star_sorted:
+          log:
+            path: /some/path/rare_disease_test/mip_current_version/case_id/analysis/sample_id_1/star_aln/sample_id_1_171015_flowcell_id_XXXXXX_lane3_star_sorted.Log.final.out
+          path: /some/path/rare_disease_test/mip_current_version/case_id/analysis/sample_id_1/star_aln/sample_id_1_171015_flowcell_id_XXXXXX_lane3_star_sorted.bam
+        sample_id_1_171015_flowcell_id_XXXXXX_lane4_star_sorted:
+          log:
+            path: /some/path/rare_disease_test/mip_current_version/case_id/analysis/sample_id_1/star_aln/sample_id_1_171015_flowcell_id_XXXXXX_lane4_star_sorted.Log.final.out
+          path: /some/path/rare_disease_test/mip_current_version/case_id/analysis/sample_id_1/star_aln/sample_id_1_171015_flowcell_id_XXXXXX_lane4_star_sorted.bam
+      star_fusion:
+        path: /path/to/stuff/rare-disease/cases/case_id/analysis/files/star-fusion.fusion_predictions.tsv
+      stringtie_ar:
+        sample_id_1_lanes_1234_trim_star_sorted_merged.bam:
+          path: /path/to/stuff/rare-disease/cases/case_id/analysis/files/sample_id_1_lanes_1234_trim_star_sorted_merged_strg.gtf
+      trim_galore_ar:
+        1_171015_flowcell_id_sample_id_1_XXXXXX_1_val_1:
+          path: /some/path/rare_disease_test/mip_current_version/case_id/analysis/sample_id_1/trim_galore_ar/1_171015_flowcell_id_sample_id_1_XXXXXX_1_val_1.fq.gz
+    sample_id: sample_id_1
+    sex: unknown
+sv_vcf_file:
+  clinical: {}
+  research: {}
+vcf_file:
+  clinical: {}
+  research: {}
+

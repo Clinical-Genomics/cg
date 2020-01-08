@@ -39,7 +39,6 @@ def analysis(context, config_stream):
 
     new_analysis = _gather_files_and_bundle_in_housekeeper(config_stream, context, hk_api,
                                                            status, tb_api)
-
     status.add_commit(new_analysis)
     click.echo(click.style('included files in Housekeeper', fg='green'))
 
@@ -51,7 +50,6 @@ def _gather_files_and_bundle_in_housekeeper(config_stream, context, hk_api, stat
     except AnalysisNotFinishedError as error:
         click.echo(click.style(error.message, fg='red'))
         context.abort()
-
     try:
         results = hk_api.add_bundle(bundle_data)
         if results is None:

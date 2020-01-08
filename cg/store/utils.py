@@ -3,8 +3,20 @@ import logging
 from typing import Callable
 
 import petname
+from cg.store import models
 
 LOG = logging.getLogger(__name__)
+
+
+def get_links(case: models.Family) -> models.Sample:
+    """Return all samples from a family object"""
+    for sample_obj in case.links:
+        yield sample_obj
+
+
+def get_samples(analysis_obj: models.Analysis) -> models.Sample:
+    """Search a analysis object and return the samples"""
+    return get_links(analysis_obj.family)
 
 
 def get_unique_id(availability_func: Callable) -> str:
@@ -14,7 +26,7 @@ def get_unique_id(availability_func: Callable) -> str:
     already exists.
     """
     while True:
-        random_id = petname.Generate(3, separator='')
+        random_id = petname.Generate(3, separator="")
         if availability_func(random_id) is None:
             return random_id
         else:
