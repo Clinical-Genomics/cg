@@ -34,6 +34,7 @@ SAMPLE_TAGS = ["bam", "bam-index"]
 
 class DeliverAPI:
     """Deliver API for MIP RNA"""
+
     def __init__(self, db: Store, hk_api: hk.HousekeeperAPI, lims_api: lims.LimsAPI):
         self.store = db
         self.hk_api = hk_api
@@ -47,7 +48,9 @@ class DeliverAPI:
         else:
             last_version = self.hk_api.version(bundle=family, date=version)
 
-        return self.hk_api.files(bundle=family, version=last_version.id, tags=tags).all()
+        return self.hk_api.files(
+            bundle=family, version=last_version.id, tags=tags
+        ).all()
 
     def get_post_analysis_family_files(self, family: str, version, tags):
         """Link files from HK to cust inbox."""
