@@ -93,7 +93,6 @@ pylint:
     - --errors-only
     - --output-format=text
     - --max-line-length=100
-    - --persistent=n
     - --jobs=0
     - >-
       --msg-template={{abspath}}:{{line}}:{{column}}:
