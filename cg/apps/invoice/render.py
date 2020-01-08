@@ -67,10 +67,10 @@ def render_xlsx(data: dict) -> Workbook:
 
     worksheet = workbook['Faktura']
     worksheet.font = Font(size=14)
-    for row in worksheet.row_dimensions:
-        worksheet.row_dimensions[row].height = 30
-    for col in worksheet.column_dimensions:
-        worksheet.column_dimensions[col].width = 18
+    for row_dimension in worksheet.row_dimensions.values():
+        row_dimension.height = 30
+    for col_dimension in worksheet.column_dimensions.values():
+        col_dimension.width = 18
 
     worksheet['C1'] = data['costcenter'].upper()
     worksheet['F1'] = f"{data['invoice_id']}-{data['costcenter']}"
