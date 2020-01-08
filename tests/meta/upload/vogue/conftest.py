@@ -37,18 +37,17 @@ def genotype_return_sample():
 
 
 APPTAGS = [
-    {"tag": "RMLP10R825", "category": "wgs"},
-    {"tag": "METLIFR010", "category": "wes"},
-    {"tag": "EXLKTTR080", "category": None},
+    {"tag": "RMLP10R825", "prep_category": "wgs"},
+    {"tag": "METLIFR010", "prep_category": "wes"}
 ]
 
 
 class MockApplication:
     """Mock Application"""
 
-    def __init__(self, tag, category):
+    def __init__(self, tag, prep_category):
         self.tag = tag
-        self.category = category
+        self.prep_category = prep_category
 
 
 class MockApplicaitons:
@@ -63,7 +62,7 @@ class MockApplicaitons:
     def all(self):
         """Returning list of MockApplication instances"""
         for apptag_dict in self.apptag_list:
-            apptag = MockApplication(apptag_dict["tag"], apptag_dict["category"])
+            apptag = MockApplication(apptag_dict["tag"], apptag_dict["prep_category"])
             self.apptags.append(apptag)
         return self.apptags
 
@@ -93,7 +92,7 @@ def genotype_return_sample_analysis():
 
 
 @pytest.fixture(scope="function")
-def genotypeapi():
+def genotype_api():
     """
         genotype API fixture
     """
@@ -103,7 +102,7 @@ def genotypeapi():
 
 
 @pytest.fixture(scope="function")
-def vogueapi():
+def vogue_api():
     """
         vogue API fixture
     """
