@@ -11,7 +11,6 @@ class MockVersion:
     """Mock a version object"""
 
     # In this case we need to disable since this needsto be mocked
-    # pylint: disable=invalid-name
     @property
     def id(self):
         """Mock out the id"""
@@ -50,7 +49,6 @@ class MockHouseKeeper(HousekeeperAPI):
     """Mock the housekeeper API"""
 
     # In this mock we want to override __init__ so disable here
-    # pylint: disable=super-init-not-called
     def __init__(self):
         self._file_added = False
         self._file_included = False
@@ -58,8 +56,6 @@ class MockHouseKeeper(HousekeeperAPI):
         self._file = MockFile()
 
     # This is overriding a housekeeper object so ok to not include all arguments
-    # pylint: disable=arguments-differ
-    # pylint: disable=unused-argument
     def files(self, version, tags):
         """Mock the files method to return a list of files"""
         return self._file
@@ -86,8 +82,6 @@ class MockHouseKeeper(HousekeeperAPI):
         """docstring for include_file"""
         self._file_included = True
 
-    # This is overriding an sqlalchemy method
-    # pylint: disable=arguments-differ
     def add_commit(self, file_obj):
         """Overrides sqlalchemy method"""
         return file_obj
@@ -96,7 +90,6 @@ class MockHouseKeeper(HousekeeperAPI):
 class MockMadeline:
     """Mock the madeline module methods"""
 
-    # pylint: disable=unused-argument
     @staticmethod
     def make_ped(name, samples):
         """Mock the make ped function"""
@@ -129,7 +122,6 @@ class MockAnalysis:
 
         return outdata
 
-    # pylint: disable=unused-argument
     @staticmethod
     def convert_panels(customer_id, panels):
         """Mock convert_panels"""
