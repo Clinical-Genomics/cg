@@ -1,12 +1,13 @@
 language: python
+# 3.7 on hasta and 3.6 on clinical-db
 python:
-  - "3.6"      # current default Python on Travis CI
   - "3.7"
+  - "3.6"
 
 # command to install dependencies
-# pip locked to version in P_main
+# pip locked to version in prod170926
 install:
-  - pip install pip==18.1
+  - pip install pip==9.0.1
   - pip install cython
   - pip install -U -r requirements.txt pytest-mock snapshottest .
 # command to run tests
@@ -29,16 +30,14 @@ jobs:
     - name: "coverage"
       if: NOT type = pull_request
       script:
-        - pip install --upgrade pip
-        - pip install -U -r requirements-dev.txt .
+        - pip install --upgrade pip && pip install -U -r requirements-dev.txt .
         - coverage run --branch --omit="*.html" --source "$(basename "$PWD")" setup.py test
         - coveralls
     - name: "code formatting"
       if: type = pull_request
       script:
-        - pip install --upgrade pip
-        - pip install black
-        - git --no-pager diff --name-only --diff-filter=AM $TRAVIS_COMMIT_RANGE | grep ".py" | xargs black --check
+        - pip install --upgrade pip && pip install black
+        - git --no-pager diff --name-only --diff-filter=AM $TRAVIS_COMMIT_RANGE | grep -F ".py" | xargs black --check
     - name: "pylint score"
       if: type = pull_request
       script:
@@ -53,8 +52,7 @@ jobs:
     - name: "linting"
       if: type = pull_request
       script:
-        - pip install --upgrade pip
-        - pip install -U -r requirements-dev.txt
+        - pip install --upgrade pip && pip install -U -r requirements-dev.txt
         - git reset --soft ${TRAVIS_COMMIT_RANGE%...*} && git lint
 
 notifications:
