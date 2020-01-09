@@ -32,7 +32,7 @@ def test_generate_madeline_input_no_mother(madeline_columns, proband):
             continue
         ind_info = get_ind_info(madeline_columns.keys(), line)
 
-    # THEN assert that the mother is set to '.'
+    # THEN assert that the mother is set to '.', meaning no mother exists
     assert ind_info["mother"] == "."
 
 
@@ -50,7 +50,7 @@ def test_generate_madeline_input_no_sex(madeline_columns, proband):
             continue
         ind_info = get_ind_info(madeline_columns.keys(), line)
 
-    # THEN assert that sex is set to '.'
+    # THEN assert that sex is set to '.', meaning sex is unknown
     assert ind_info["sex"] == "."
 
 
