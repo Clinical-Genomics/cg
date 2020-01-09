@@ -19,7 +19,7 @@ def _full_content():
 @pytest.fixture
 def files_content(tmpdir):
     """The content the files are made of"""
-    return _full_content()[0 : len(_simple_files(tmpdir))]
+    return _full_content()[0: len(_simple_files(tmpdir))]
 
 
 @pytest.fixture

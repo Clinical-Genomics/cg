@@ -52,7 +52,7 @@ def test_dry(cli_runner, base_context, balsamic_case):
     assert case_id in result.output
 
 
-@pytest.mark.parametrize("option_key", ["--quality-trim", "--adapter-trim", "--umi",])
+@pytest.mark.parametrize("option_key", ["--quality-trim", "--adapter-trim", "--umi"])
 def test_passed_option(cli_runner, base_context, option_key, balsamic_case):
     """Test command with option"""
 

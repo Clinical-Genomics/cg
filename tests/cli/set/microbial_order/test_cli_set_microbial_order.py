@@ -50,7 +50,7 @@ def test_valid_order_no_apptag_option(cli_runner, base_context, base_store: Stor
     assert result.exit_code != SUCCESS
 
 
-@pytest.mark.parametrize("option_key", ["--name", "--ticket",])
+@pytest.mark.parametrize("option_key", ["--name", "--ticket"])
 def test_set_option(cli_runner, base_context, base_store: Store, option_key):
 
     # GIVEN a database with an order
@@ -94,7 +94,7 @@ def test_set_project_name_in_lims(cli_runner, base_context, base_store):
     assert name in base_context["lims"].get_updated_project_name()
 
 
-@pytest.mark.parametrize("option_key", ["--name", "--ticket",])
+@pytest.mark.parametrize("option_key", ["--name", "--ticket"])
 def test_set_option_with_same_value(
     cli_runner, base_context, base_store: Store, option_key
 ):
