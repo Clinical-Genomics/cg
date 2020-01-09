@@ -252,12 +252,14 @@ def ensure_applications(base_store: Store, active_applications: list, inactive_a
         if not base_store.application(active_application):
             base_store.add_commit(base_store.add_application(active_application, 'mic',
                                                              'dummy_description',
-                                                             is_archived=False))
+                                                             is_archived=False,
+                                                             percent_kth=80))
 
     for inactive_application in inactive_applications:
         if not base_store.application(inactive_application):
             base_store.add_commit(base_store.add_application(inactive_application, 'mic',
-                                                             'dummy_description', is_archived=True))
+                                                             'dummy_description', is_archived=True,
+                                                             percent_kth=80))
 
 
 def ensure_application(store, tag):
@@ -266,7 +268,7 @@ def ensure_application(store, tag):
     if not application:
         application = store.add_application(tag=tag, category='wgs',
                                             description='dummy_description',
-                                            is_external=False)
+                                            is_external=False, percent_kth=80)
         store.add_commit(application)
 
     return application
