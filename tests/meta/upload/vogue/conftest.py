@@ -73,10 +73,10 @@ class MockStore:
     """
 
     def __init__(self):
-        self.apptags = MockApplicaitons()
+        self.apptags = MockApplications()
 
     def applications(self):
-        """Returning MockApplicaitons instance"""
+        """Returning MockApplications instance"""
         return self.apptags
 
 
