@@ -38,7 +38,7 @@ def genotype_return_sample():
 
 APPTAGS = [
     {"tag": "RMLP10R825", "prep_category": "wgs"},
-    {"tag": "METLIFR010", "prep_category": "wes"}
+    {"tag": "METLIFR010", "prep_category": "wes"},
 ]
 
 
