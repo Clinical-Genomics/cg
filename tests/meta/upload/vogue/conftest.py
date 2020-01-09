@@ -26,14 +26,17 @@ GENOTYPE_RETURN_SAMPLE_ANALYSIS = (
 
 
 @pytest.fixture(scope="function")
-def genotype_return_sample():
+def genotype_return():
     """
         genotype config fixture
     """
 
-    _config = GENOTYPE_RETURN_SAMPLE
+    _configs = {
+        "sample": GENOTYPE_RETURN_SAMPLE,
+        "sample_analysis": GENOTYPE_RETURN_SAMPLE_ANALYSIS,
+    }
 
-    return _config
+    return _configs
 
 
 APPTAGS = [
@@ -78,17 +81,6 @@ class MockStore:
     def applications(self):
         """Returning MockApplications instance"""
         return self.apptags
-
-
-@pytest.fixture(scope="function")
-def genotype_return_sample_analysis():
-    """
-        genotype config fixture
-    """
-
-    _config = GENOTYPE_RETURN_SAMPLE_ANALYSIS
-
-    return _config
 
 
 @pytest.fixture(scope="function")

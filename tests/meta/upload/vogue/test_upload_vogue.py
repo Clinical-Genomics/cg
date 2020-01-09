@@ -6,12 +6,7 @@ from cg.meta.upload.vogue import UploadVogueAPI
 
 
 def test_load_genotype(
-    genotype_api,
-    vogue_api,
-    genotype_return_sample,
-    genotype_return_sample_analysis,
-    mocker,
-    store,
+    genotype_api, vogue_api, genotype_return, mocker, store,
 ):
 
     """Test load_genotype"""
@@ -23,15 +18,17 @@ def test_load_genotype(
     mocker.patch.object(genotype_api, "export_sample")
     mocker.patch.object(genotype_api, "export_sample_analysis")
 
-    genotype_api.export_sample.return_value = genotype_return_sample
-    genotype_api.export_sample_analysis.return_value = genotype_return_sample_analysis
+    genotype_api.export_sample.return_value = genotype_return["sample"]
+    genotype_api.export_sample_analysis.return_value = genotype_return[
+        "sample_analysis"
+    ]
     upload_vogue_api = UploadVogueAPI(
         genotype_api=genotype_api, vogue_api=vogue_api, store=store
     )
     upload_vogue_api.load_genotype(days="1")
 
     # THEN vogueapi.load_genotype will be called once for each sample in genotype_return_value
-    samples = json.loads(genotype_return_sample)
+    samples = json.loads(genotype_return["sample"])
     call_list = vogue_api.load_genotype_data.call_args_list
 
     assert vogue_api.load_genotype_data.call_count == 4
