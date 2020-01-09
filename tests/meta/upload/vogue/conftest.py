@@ -50,7 +50,7 @@ class MockApplication:
         self.prep_category = prep_category
 
 
-class MockApplicaitons:
+class MockApplications:
     """
       Has function to return list of applications
     """
