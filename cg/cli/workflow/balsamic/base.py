@@ -15,7 +15,6 @@ from cg.cli.workflow.balsamic.deliver import deliver as deliver_cmd
 from cg.cli.workflow.get_links import get_links
 from cg.exc import LimsDataError, BalsamicStartError
 from cg.meta.workflow.balsamic import AnalysisAPI
-from cg.apps import tb, scoutapi, lims
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -42,7 +41,6 @@ def balsamic(context, case_id, priority, email, target_bed):
     context.obj["analysis_api"] = AnalysisAPI
     context.obj["fastq_handler"] = FastqHandler
     context.obj["gzipper"] = gzip
-    context.obj["tb"] = tb.TrailblazerAPI(context.obj)
 
     if context.invoked_subcommand is None:
         if case_id is None:
