@@ -10,8 +10,8 @@ from cg.store import Store
 def base_context(base_store: Store) -> dict:
     """context to use in cli"""
     return {
-        'lims': MockLims(),
-        'status': base_store,
+        "lims": MockLims(),
+        "status": base_store,
     }
 
 
@@ -34,8 +34,14 @@ class MockLims(LimsAPI):
         """Method to test that update project was called with name parameter"""
         return self._project_name
 
-    def update_sample(self, lims_id: str, sex=None, application: str = None,
-                      target_reads: int = None, priority=None):
+    def update_sample(
+        self,
+        lims_id: str,
+        sex=None,
+        application: str = None,
+        target_reads: int = None,
+        priority=None,
+    ):
         """Mock lims update_sample"""
         self._sample_sex = sex
 
