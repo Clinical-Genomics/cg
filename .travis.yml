@@ -1,12 +1,8 @@
 language: python
-      python:
-        - "3.6" # on clinical-db
-        - "3.7" # on hasta
+python:
+  - "3.6" # on clinical-db
+  - "3.7" # on hasta
 cache: pip
-
-#    install:
-#      - pip install pip==9.0.1  # pip version in prod170926
-#      - pip install -U -r requirements.txt pytest-mock snapshottest .
 
 jobs:
   include:
