@@ -44,8 +44,7 @@ class UploadScoutAPI:
             try:
                 lims_sample = self.lims.sample(sample_id)
             except requests.exceptions.HTTPError as ex:
-                LOG.info("Could not fetch sample %s from LIMS: %s", sample_id,
-                         ex)
+                LOG.info("Could not fetch sample %s from LIMS: %s", sample_id, ex)
             bam_tags = ["bam", sample_id]
             bam_file = self.housekeeper.files(
                 version=hk_version_id, tags=bam_tags
