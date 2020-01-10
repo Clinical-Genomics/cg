@@ -20,11 +20,11 @@ def get_links(
     link_objs = None
 
     if case_id and (sample_id is None):
-        # link all samples in a case
+        LOG.info("link all samples in a case")
         case_obj = context.obj["db"].family(case_id)
         link_objs = case_obj.links
     elif sample_id and (case_id is None):
-        # link sample in all its families
+        LOG.info("link sample in all its families")
         sample_obj = context.obj["db"].sample(sample_id)
 
         if not sample_obj:
@@ -36,7 +36,7 @@ def get_links(
 
         link_objs = sample_obj.links
     elif sample_id and case_id:
-        # link only one sample in a case
+        LOG.info("link only one sample in a case")
         link_objs = [context.obj["db"].link(case_id, sample_id)]
 
     if not link_objs:
