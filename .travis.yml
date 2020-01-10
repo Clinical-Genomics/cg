@@ -1,5 +1,7 @@
 language: python
-
+      python:
+        - "3.6" # on clinical-db
+        - "3.7" # on hasta
 cache: pip
 
 #    install:
@@ -10,9 +12,6 @@ jobs:
   include:
     - name: "production dependencies"
       #if: type = pull_request
-      python:
-        - "3.6" # on clinical-db
-        - "3.7" # on hasta
       install:
         - pip install pip==9.0.1  # pip version in prod170926
         - pip install -U -r requirements.txt .
@@ -20,20 +19,19 @@ jobs:
         - pip check
     - name: "development dependencies"
       #if: type = pull_request
+      python: 3.8
       install:
-      script:
         - pip install -U -r requirements.txt -r requirements-dev.txt .
+      script:
         - pip check
     - name: "tests"
-      python:
-        - "3.6" # on clinical-db
-        - "3.7" # on hasta
       install:
         - pip install -U -r requirements.txt pytest-mock snapshottest .
       script:
         - pytest
     - name: "coverage"
       #if: NOT type = pull_request
+      python: 3.8
       install:
         - pip install -U -r requirements-dev.txt .
       script:
@@ -42,12 +40,14 @@ jobs:
         - coveralls
     - name: "code formatting"
       #if: type = pull_request
+      python: 3.8
       install:
         - pip install -U black
       script:
         - git --no-pager diff --name-only --diff-filter=AM $TRAVIS_COMMIT_RANGE | grep -F ".py" | xargs black --check
     - name: "pylint score"
       #if: type = pull_request
+      python: 3.8
       install:
         - pip install -U pylint
       script:
@@ -60,6 +60,7 @@ jobs:
         - grep -F "/10, -" $TRAVIS_HOME/pylint_before_output.txt || grep -F "/10, +0.00" $TRAVIS_HOME/pylint_before_output.txt || (echo "pylint score decreased, please try again after fixing some lint issues." && cat $TRAVIS_HOME/pylint_after_output.txt && false)
     - name: "linting"
       #if: type = pull_request
+      python: 3.8
       install:
         - pip install -U -r requirements-dev.txt
       script:
