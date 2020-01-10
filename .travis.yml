@@ -4,33 +4,37 @@ python:
   - "3.7" # on hasta
 cache: pip
 install:
-  - python setup.py install
-  - pip install -U -r requirements-dev.txt .
+  - pip install -U -r requirements.txt -r requirements-dev.txt .
 script:
   - pytest
 
 jobs:
   include:
+    - name: "package install"
+      #if: type = pull_request
+      install:
+        - python setup.py install
     - name: "production dependencies"
       #if: type = pull_request
       install:
         - pip install pip==9.0.1  # pip version in prod170926
-        - python setup.py install
+        - pip install -U cython
+        - pip install -U -r requirements.txt
       script:
         - pip check
     - name: "development dependencies"
       #if: type = pull_request
       python: "3.8"
       install:
-        - python setup.py install
-        - pip install -U -r requirements-dev.txt .
+        - pip install cython
+        - pip install -U -r requirements.txt -r requirements-dev.txt .
       script:
         - pip check
     - name: "coverage"
       #if: NOT type = pull_request
       python: "3.8"
       install:
-        - pip install -U -r requirements-dev.txt .
+        - pip install -U -r requirements.txt -r requirements-dev.txt .
       script:
         - coverage run --branch --omit="*.html" --source "$(basename "$PWD")" setup.py test
       after_success:
