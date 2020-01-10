@@ -206,6 +206,7 @@ SCOUT_TO_MUTACC_CASE = (
         "panels", "panels", lambda panels: [panel["panel_name"] for panel in panels]
     ),
     MAPPER("rank_model_version", "rank_model_version", str),
+    MAPPER("sv_rank_model_version", "sv_rank_model_version", str),
     MAPPER("rank_score_threshold", "rank_score_threshold", int),
     MAPPER("phenotype_terms", "phenotype_terms", list),
     MAPPER("phenotype_groups", "phenotype_groups", list),
