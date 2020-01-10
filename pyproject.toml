@@ -1,2 +1,3 @@
 [build-system]
-requires = ["cython"]
+# Minimum requirements for the build system to execute.
+requires = ["setuptools", "wheel", "cython"]
