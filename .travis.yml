@@ -11,13 +11,14 @@ script:
 jobs:
   include:
     - name: "package install"
-      #if: type = pull_request
+      if: type = pull_request
+      python: "3.8"
       install:
         - python setup.py install
       script:
         - true
     - name: "production dependencies"
-      #if: type = pull_request
+      if: type = pull_request
       install:
         - pip install pip==9.0.1  # pip version in prod170926
         - pip install -U cython
@@ -25,7 +26,7 @@ jobs:
       script:
         - pip check
     - name: "development dependencies"
-      #if: type = pull_request
+      if: type = pull_request
       python: "3.8"
       install:
         - pip install cython
@@ -33,7 +34,7 @@ jobs:
       script:
         - pip check
     - name: "coverage"
-      #if: NOT type = pull_request
+      if: NOT type = pull_request
       python: "3.8"
       install:
         - pip install -U cython
@@ -43,14 +44,14 @@ jobs:
       after_success:
         - coveralls
     - name: "code formatting"
-      #if: type = pull_request
+      if: type = pull_request
       python: "3.8"
       install:
         - pip install -U black
       script:
         - git --no-pager diff --name-only --diff-filter=AM $TRAVIS_COMMIT_RANGE | grep -F ".py" | xargs black --check
     - name: "pylint score"
-      #if: type = pull_request
+      if: type = pull_request
       python: "3.8"
       install:
         - pip install -U pylint
@@ -63,7 +64,7 @@ jobs:
         - pylint --rcfile=.configs/pylintrc --jobs=0 --exit-zero $(< $TRAVIS_HOME/before_files.txt) > $TRAVIS_HOME/pylint_before_output.txt
         - grep -F "/10, -" $TRAVIS_HOME/pylint_before_output.txt || grep -F "/10, +0.00" $TRAVIS_HOME/pylint_before_output.txt || (echo "pylint score decreased, please try again after fixing some lint issues." && cat $TRAVIS_HOME/pylint_after_output.txt && false)
     - name: "linting"
-      #if: type = pull_request
+      if: type = pull_request
       python: "3.8"
       install:
         - pip install -U -r requirements-dev.txt
