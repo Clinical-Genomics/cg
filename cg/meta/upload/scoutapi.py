@@ -1,10 +1,12 @@
 """File includes api to uploading data into Scout"""
 # -*- coding: utf-8 -*-
 import logging
+import requests
 from pathlib import Path
 
 from ruamel import yaml
 
+from cg.apps.lims import LimsAPI
 from cg.apps import hk, madeline, scoutapi
 from cg.meta.analysis import AnalysisAPI
 from cg.store import Store, models
@@ -20,6 +22,7 @@ class UploadScoutAPI:
         status_api: Store,
         hk_api: hk.HousekeeperAPI,
         scout_api: scoutapi.ScoutAPI,
+        lims_api: LimsAPI,
         analysis_api: AnalysisAPI,
         madeline_exe: str,
         madeline=madeline,
@@ -30,12 +33,19 @@ class UploadScoutAPI:
         self.madeline_exe = madeline_exe
         self.madeline = madeline
         self.analysis = analysis_api
+        self.lims = lims_api
 
     def build_samples(self, analysis_obj: models.Analysis, hk_version_id: int = None):
         """Loop over the samples in an analysis and build dicts from them"""
 
         for link_obj in analysis_obj.family.links:
             sample_id = link_obj.sample.internal_id
+            lims_sample = dict()
+            try:
+                lims_sample = self.lims.sample(sample_id)
+            except requests.exceptions.HTTPError as ex:
+                LOG.info("Could not fetch sample %s from LIMS: %s", sample_id,
+                         ex)
             bam_tags = ["bam", sample_id]
             bam_file = self.housekeeper.files(
                 version=hk_version_id, tags=bam_tags
@@ -64,6 +74,7 @@ class UploadScoutAPI:
                 "sex": link_obj.sample.sex,
                 "bam_path": bam_path,
                 "mt_bam": mt_bam_path,
+                "tissue_type": lims_sample.get("source") or "unknown",
                 "vcf2cytosure": vcf2cytosure_path,
             }
             yield sample
