@@ -34,6 +34,7 @@ jobs:
       #if: NOT type = pull_request
       python: "3.8"
       install:
+        - pip install -U cython
         - pip install -U -r requirements.txt -r requirements-dev.txt .
       script:
         - coverage run --branch --omit="*.html" --source "$(basename "$PWD")" setup.py test
