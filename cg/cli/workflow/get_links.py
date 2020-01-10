@@ -26,6 +26,14 @@ def get_links(
     elif sample_id and (case_id is None):
         # link sample in all its families
         sample_obj = context.obj["db"].sample(sample_id)
+
+        if not sample_obj:
+            LOG.error(
+                "Could not find sample %s, use -c if you intended it as a case-id",
+                sample_id,
+            )
+            context.abort()
+
         link_objs = sample_obj.links
     elif sample_id and case_id:
         # link only one sample in a case
