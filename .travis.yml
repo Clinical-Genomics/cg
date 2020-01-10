@@ -14,6 +14,8 @@ jobs:
       #if: type = pull_request
       install:
         - python setup.py install
+      script:
+        - true
     - name: "production dependencies"
       #if: type = pull_request
       install:
