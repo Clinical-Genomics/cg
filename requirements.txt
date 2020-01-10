@@ -9,7 +9,7 @@ SQLAlchemy
 Click<7.0
 
 # server
-Flask
+Flask==1.1.1
 Flask-Admin
 Flask-Alchy
 Flask-SQLAlchemy==2.1
