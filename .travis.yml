@@ -14,14 +14,15 @@ jobs:
       #if: type = pull_request
       install:
         - pip install pip==9.0.1  # pip version in prod170926
-        - pip install -U -r requirements.txt .
+        - python setup.py
       script:
         - pip check
     - name: "development dependencies"
       #if: type = pull_request
       python: '3.8'
       install:
-        - pip install -U -r requirements.txt -r requirements-dev.txt .
+        - python setup.py
+        - pip install -U -r requirements-dev.txt .
       script:
         - pip check
     - name: "coverage"
