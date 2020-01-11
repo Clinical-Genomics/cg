@@ -9,7 +9,7 @@ SQLAlchemy
 Click<7.0
 
 # server
-Flask==1.1.1
+Flask>=1.1.1                # versioned due to setup.py install misselecting Flask-SQLAlchemy otherwise
 Flask-Admin
 Flask-Alchy
 Flask-SQLAlchemy==2.1
