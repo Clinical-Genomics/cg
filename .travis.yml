@@ -1,18 +1,18 @@
 language: python
-python: "3.8" # default in jobs
+python: "3.8"   # default in jobs
 cache: pip
 
 jobs:
   include:
     - name: "Tests on python 3.6"
       if: type = pull_request
-      python: "3.6" # on clinical-db
+      python: "3.6"   # on clinical-db
       install: pip install -U -r requirements.txt -r requirements-dev.txt .
       script: pytest
 
     - name: "Tests on python 3.7"
       if: type = pull_request
-      python: "3.7" # on hasta
+      python: "3.7"   # on hasta
       install: pip install -U -r requirements.txt -r requirements-dev.txt .
       script: pytest
 
@@ -23,7 +23,7 @@ jobs:
 
     - name: "Production dependencies on python 3.6"
       if: type = pull_request
-      python: "3.6" # on clinical-db
+      python: "3.6"   # on clinical-db
       install:
         - pip install pip==18.1  # pip version in P_main
         - pip install -U cython
@@ -32,7 +32,7 @@ jobs:
 
     - name: "Production dependencies on python 3.7"
       if: type = pull_request
-      python: "3.7" # on hasta
+      python: "3.7"   # on hasta
       install:
         - pip install pip==9.0.1  # pip version in prod170926
         - pip install -U cython
