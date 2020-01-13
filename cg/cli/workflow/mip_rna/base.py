@@ -54,10 +54,7 @@ def link(context: click.Context, case_id: str, sample_id: str):
             link_obj.sample.data_analysis,
         )
 
-        if (
-            not link_obj.sample.data_analysis
-            or "mip-rna" in link_obj.sample.data_analysis.lower()
-        ):
+        if "mip + rna" in link_obj.sample.data_analysis.lower():
             mip_fastq_handler = FastqHandler(
                 context.obj, context.obj["db"], context.obj["tb"]
             )
