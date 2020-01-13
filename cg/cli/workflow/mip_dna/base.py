@@ -181,7 +181,7 @@ def run(
     if case_obj is None:
         LOG.error("%s: case not found", case_id)
         context.abort()
-    if context.obj["tb"].analyses(case=case_obj.internal_id, temp=True).first():
+    if context.obj["tb"].analyses(family=case_obj.internal_id, temp=True).first():
         LOG.warning("%s: analysis already running", {case_obj.internal_id})
     else:
         context.obj["api"].run(
