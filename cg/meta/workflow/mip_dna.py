@@ -110,7 +110,7 @@ class AnalysisAPI:
                 kwargs["skip_evaluation"] = True
                 break
 
-        self.tb.start(family_obj.internal_id, **kwargs)
+        self.tb.run(family_obj.internal_id, **kwargs)
         # mark the family as running
         family_obj.action = "running"
         self.db.commit()

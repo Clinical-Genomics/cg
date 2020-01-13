@@ -84,29 +84,32 @@ def run(
     tb_api = context.obj["tb"]
     rna_api = context.obj["rna_api"]
     case_obj = context.obj["db"].family(case_id)
+
     if case_obj is None:
         LOG.error("%s: case not found", case_id)
         context.abort()
+
     if tb_api.analyses(family=case_obj.internal_id, temp=True).first():
         LOG.warning("%s: analysis already running", case_obj.internal_id)
+        return
+
+    email = email or environ_email()
+    kwargs = dict(
+        config=context.obj["mip-rd-rna"]["mip_config"],
+        case=case_id,
+        priority=priority,
+        email=email,
+        dryrun=dry,
+        start_with=start_with,
+    )
+    if dry:
+        command = rna_api.build_command(**kwargs)
+        LOG.info(" ".join(command))
     else:
-        email = email or environ_email()
-        kwargs = dict(
-            config=context.obj["mip-rd-rna"]["mip_config"],
-            case=case_id,
-            priority=priority,
-            email=email,
-            dryrun=dry,
-            start_with=start_with,
-        )
-        if dry:
-            command = rna_api.build_command(**kwargs)
-            LOG.info(" ".join(command))
-        else:
-            rna_api.run(**kwargs)
-            tb_api.mark_analyses_deleted(case_id=case_id)
-            tb_api.add_pending(case_id, email=email)
-            LOG.info("MIP started!")
+        rna_api.run(**kwargs)
+        tb_api.mark_analyses_deleted(case_id=case_id)
+        tb_api.add_pending(case_id, email=email)
+        LOG.info("MIP run started!")
 
 
 @mip_rna.command("config-case")
