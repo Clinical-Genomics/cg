@@ -8,12 +8,13 @@ import shutil
 from pathlib import Path
 
 import click
-from cg.apps import hk
+from cg.apps import hk, scoutapi, lims, tb
 from cg.apps.balsamic.fastq import FastqHandler
 from cg.cli.workflow.balsamic.store import store as store_cmd
 from cg.cli.workflow.balsamic.deliver import deliver as deliver_cmd
 from cg.cli.workflow.get_links import get_links
 from cg.exc import LimsDataError, BalsamicStartError
+from cg.meta.deliver.balsamic import DeliverAPI
 from cg.meta.workflow.balsamic import AnalysisAPI
 from cg.store import Store
 
@@ -38,9 +39,21 @@ def balsamic(context, case_id, priority, email, target_bed):
     """Cancer workflow """
     context.obj["db"] = Store(context.obj["database"])
     context.obj["hk_api"] = hk.HousekeeperAPI(context.obj)
-    context.obj["analysis_api"] = AnalysisAPI
     context.obj["fastq_handler"] = FastqHandler
     context.obj["gzipper"] = gzip
+    scout_api = scoutapi.ScoutAPI(context.obj)
+    lims_api = lims.LimsAPI(context.obj)
+    tb_api = tb.TrailblazerAPI(context.obj)
+    deliver = DeliverAPI(context.obj, hk_api=context.obj["hk_api"], lims_api=lims_api)
+
+    context.obj["analysis_api"] = AnalysisAPI(
+        db=context.obj["db"],
+        hk_api=context.obj["hk_api"],
+        tb_api=tb_api,
+        scout_api=scout_api,
+        lims_api=lims_api,
+        deliver_api=deliver,
+    )
 
     if context.invoked_subcommand is None:
         if case_id is None:
@@ -79,7 +92,7 @@ def link(context, case_id, sample_id):
                 link_obj.sample.internal_id,
             )
             context.obj["analysis_api"].link_sample(
-                FastqHandler(context.obj),
+                fastq_handler=FastqHandler(context.obj),
                 case=link_obj.family.internal_id,
                 sample=link_obj.sample.internal_id,
             )
