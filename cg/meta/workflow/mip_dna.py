@@ -88,7 +88,7 @@ class AnalysisAPI:
                 self.LOG.warning(f"{flowcell_obj.name}: {flowcell_obj.status}")
         return all(status == "ondisk" for status in statuses)
 
-    def start(self, family_obj: models.Family, **kwargs):
+    def run(self, family_obj: models.Family, **kwargs):
         """Start the analysis."""
         if kwargs.get("priority") is None:
             if family_obj.priority == 0:

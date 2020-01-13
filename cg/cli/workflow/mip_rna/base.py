@@ -103,7 +103,7 @@ def run(
             command = rna_api.build_command(**kwargs)
             LOG.info(" ".join(command))
         else:
-            rna_api.start(**kwargs)
+            rna_api.run(**kwargs)
             tb_api.mark_analyses_deleted(case_id=case_id)
             tb_api.add_pending(case_id, email=email)
             LOG.info("MIP started!")
