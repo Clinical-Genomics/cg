@@ -73,7 +73,7 @@ class UploadScoutAPI:
                 "sex": link_obj.sample.sex,
                 "bam_path": bam_path,
                 "mt_bam": mt_bam_path,
-                "tissue_type": lims_sample.get("source") or "unknown",
+                "tissue_type": lims_sample.get("source", "unknown"),
                 "vcf2cytosure": vcf2cytosure_path,
             }
             yield sample
