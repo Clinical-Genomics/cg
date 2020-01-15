@@ -216,7 +216,7 @@ class MockUsaltFastq(USaltFastqHandler):
     """Mock FastqHandler for analysis_api"""
 
     def __init__(self):
-        super().__init__(config={'usalt': {'root': tmpdir}})
+        super().__init__(config={'microsalt': {'root': tmpdir}})
 
 
 def safe_loader(path):
