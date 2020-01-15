@@ -58,7 +58,11 @@ class MicrosaltAPI():
     def get_parameters(self, sample_obj: Sample):
         """Fill a dict with case config information for one sample """
         method_library_prep = self.lims.get_prep_method(sample_obj.internal_id)
+        if method_library_prep:
+            method_library_prep, _ = method_library_prep.split(' ', 1)
         method_sequencing = self.lims.get_sequencing_method(sample_obj.internal_id)
+        if method_sequencing:
+            method_sequencing = method_sequencing.split(' ', 1)
         organism = self.get_organism(sample_obj)
         priority = 'research' if sample_obj.priority == 0 else 'standard'
 
