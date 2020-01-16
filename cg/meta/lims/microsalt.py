@@ -21,16 +21,21 @@ class MicrosaltAPI():
         self.log = logger
         self.lims = lims
 
+    def get_lims_comment(self, sample_id: str) -> str:
+        """ returns the comment associated with a sample stored in lims"""
+        lims_sample = self.lims.sample(sample_id)
+        comment = re.match(r'\w{4}\d{2,3}', lims_sample.get('comment') or '')
+
+        return comment
+
     def get_organism(self, sample_obj: Sample) -> str:
         """Organism
            - Fallback based on reference, ‘Other species’ and ‘Comment’.
            Default to "Unset"."""
 
         organism = sample_obj.organism.internal_id.strip()
-        lims_sample = self.lims.sample(sample_obj.internal_id)
-
-        comment = re.match(r'\w{4}\d{2,3}', lims_sample.get('comment') or '')
-        has_comment = True if comment else False
+        comment = self.get_lims_comment(sample_obj.internal_id)
+        has_comment = bool(comment)
 
         if 'gonorrhoeae' in organism:
             organism = "Neisseria spp."
@@ -62,7 +67,7 @@ class MicrosaltAPI():
             method_library_prep, _ = method_library_prep.split(' ', 1)
         method_sequencing = self.lims.get_sequencing_method(sample_obj.internal_id)
         if method_sequencing:
-            method_sequencing = method_sequencing.split(' ', 1)
+            method_sequencing, _ = method_sequencing.split(' ', 1)
         organism = self.get_organism(sample_obj)
         priority = 'research' if sample_obj.priority == 0 else 'standard'
 

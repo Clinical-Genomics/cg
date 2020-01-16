@@ -17,9 +17,9 @@ LOGGER = logging.getLogger(__name__)
 @click.pass_context
 def microsalt(context):
     """ Run microbial workflow """
+    lims_api = lims.LimsAPI(context.obj)
     context.obj['db'] = Store(context.obj['database'])
-    context.obj['lims_api'] = lims.LimsAPI(context.obj)
-    context.obj['microsalt_api'] = MicrosaltAPI(lims=context.obj['lims_api'])
+    context.obj['microsalt_api'] = MicrosaltAPI(lims=lims_api)
 
 
 @microsalt.command('case-config')
@@ -60,10 +60,9 @@ def case_config(context, dry, project_id, sample_id):
     ]
 
     filename = project_id if project_id else sample_id
-    outfilename = Path(context.obj['microsalt']['queries_path']) / filename
+    outfilename = Path(context.obj['usalt']['queries_path']) / filename
     outfilename = outfilename.with_suffix('.json')
     if dry:
-        print(outfilename)
         print(json.dumps(parameters, indent=4, sort_keys=True))
     else:
         with open(outfilename, 'w') as outfile:
@@ -79,12 +78,12 @@ def case_config(context, dry, project_id, sample_id):
 @click.pass_context
 def start(context, dry, case_config, project_id):
     """ Start microSALT """
-    microsalt_command = context.obj['microsalt']['binary_path']
+    microsalt_command = context.obj['usalt']['binary_path']
     command = [microsalt_command]
 
     case_config_path = case_config
     if not case_config:
-        queries_path = Path(context.obj['microsalt']['queries_path'])
+        queries_path = Path(context.obj['usalt']['queries_path'])
         case_config_path = queries_path / project_id
         case_config_path = case_config_path.with_suffix('.json')
 
@@ -92,5 +91,4 @@ def start(context, dry, case_config, project_id):
     if dry:
         print(' '.join(command))
     else:
-        process = subprocess.run(command, shell=True)
-        return process
+        subprocess.run(command, shell=True, check=True)
