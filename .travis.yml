@@ -50,7 +50,7 @@ jobs:
       if: NOT type = pull_request
       install:
         - pip install cython
-        - pip install -r requirements.txt -r requirements-dev.txt .
+        - pip install . -r requirements-dev.txt
       script: coverage run --branch --omit="*.html" --source "$(basename "$PWD")" setup.py test
       after_success: coveralls
 
