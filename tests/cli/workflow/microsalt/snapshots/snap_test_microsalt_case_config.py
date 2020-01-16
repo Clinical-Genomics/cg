@@ -7,7 +7,9 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['test_dry_sample 1'] = '''[
+snapshots[
+    "test_dry_sample 1"
+] = """[
     {
         "CG_ID_project": "microbial_order_test",
         "CG_ID_sample": "microbial_sample_test",
@@ -24,4 +26,4 @@ snapshots['test_dry_sample 1'] = '''[
         "reference": "reference_genome_test"
     }
 ]
-'''
+"""

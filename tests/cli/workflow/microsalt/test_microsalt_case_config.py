@@ -29,7 +29,9 @@ def test_dry_sample(cli_runner, base_context, microbial_sample_id, snapshot: Sna
     # GIVEN
 
     # WHEN dry running a sample name
-    result = cli_runner.invoke(case_config, ['--dry', microbial_sample_id], obj=base_context)
+    result = cli_runner.invoke(
+        case_config, ["--dry", microbial_sample_id], obj=base_context
+    )
 
     # THEN command should give us a json dump
     # assert result.exit_code == EXIT_SUCCESS
