@@ -16,7 +16,7 @@ from cg.apps.pipelines.fastqhandler import BaseFastqHandler
 LOGGER = logging.getLogger(__name__)
 
 
-class MipFastqHandler(BaseFastqHandler):
+class FastqHandler(BaseFastqHandler):
     """Handles fastq file linking"""
 
     def __init__(self, config, status: Store, tb_api: tb.TrailblazerAPI):
