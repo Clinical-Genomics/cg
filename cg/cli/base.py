@@ -11,7 +11,6 @@ from cg.store import Store
 
 from .add import add
 from .backup import backup
-from .balsamic import balsamic
 from .clean import clean
 from .export import export
 from .get import get
