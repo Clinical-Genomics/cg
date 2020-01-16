@@ -9,34 +9,35 @@ import ruamel.yaml
 import cg
 from cg.store import Store
 
-from .analysis import analysis
 from .add import add
 from .backup import backup
 from .balsamic import balsamic
 from .clean import clean
-from .deliver import deliver
 from .export import export
 from .get import get
 from .import_cmd import import_cmd
-from .miprdrna import rna
-from .microsalt import microsalt
 from .reset import reset_cmd
 from .set import set_cmd
 from .status import status
-from .store import store
 from .transfer import transfer
 from .upload.upload import upload
 from .upload import vogue as vogue_command
+from .workflow.base import workflow as workflow_cmd
 
 LOG = logging.getLogger(__name__)
-LEVELS = ['DEBUG', 'INFO', 'WARNING', 'ERROR']
+LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR"]
 
 
 @click.group()
-@click.option('-c', '--config', type=click.File(), help='path to config file')
-@click.option('-d', '--database', help='path/URI of the SQL database')
-@click.option('-l', '--log-level', type=click.Choice(LEVELS), default='INFO',
-              help='lowest level to log at')
+@click.option("-c", "--config", type=click.File(), help="path to config file")
+@click.option("-d", "--database", help="path/URI of the SQL database")
+@click.option(
+    "-l",
+    "--log-level",
+    type=click.Choice(LEVELS),
+    default="INFO",
+    help="lowest level to log at",
+)
 @click.version_option(cg.__version__, prog_name=cg.__title__)
 @click.pass_context
 def base(context, config, database, log_level):
@@ -45,45 +46,40 @@ def base(context, config, database, log_level):
     coloredlogs.install(level=log_level, fmt=log_format)
     context.obj = ruamel.yaml.safe_load(config) if config else {}
     if database:
-        context.obj['database'] = database
+        context.obj["database"] = database
 
 
 @base.command()
-@click.option('--reset', is_flag=True, help='reset database before setting up tables')
-@click.option('--force', is_flag=True, help='bypass manual confirmations')
+@click.option("--reset", is_flag=True, help="reset database before setting up tables")
+@click.option("--force", is_flag=True, help="bypass manual confirmations")
 @click.pass_context
 def init(context, reset, force):
     """Setup the database."""
-    status_db = Store(context.obj['database'])
+    status_db = Store(context.obj["database"])
     existing_tables = status_db.engine.table_names()
     if force or reset:
         if existing_tables and not force:
             message = f"Delete existing tables? [{', '.join(existing_tables)}]"
-            click.confirm(click.style(message, fg='yellow'), abort=True)
+            click.confirm(click.style(message, fg="yellow"), abort=True)
         status_db.drop_all()
     elif existing_tables:
         LOG.error("Database already exists, use '--reset'")
         context.abort()
 
     status_db.create_all()
-    LOG.info("Success! New tables: %s", ', '.join(status_db.engine.table_names()))
+    LOG.info("Success! New tables: %s", ", ".join(status_db.engine.table_names()))
 
 
 base.add_command(add)
-base.add_command(analysis)
 base.add_command(backup)
 base.add_command(clean)
-base.add_command(deliver)
 base.add_command(export)
 base.add_command(get)
 base.add_command(import_cmd)
 base.add_command(reset_cmd)
 base.add_command(set_cmd)
 base.add_command(status)
-base.add_command(store)
 base.add_command(transfer)
 base.add_command(upload)
-analysis.add_command(balsamic)
-analysis.add_command(rna)
-analysis.add_command(microsalt)
+base.add_command(workflow_cmd)
 upload.add_command(vogue_command)
