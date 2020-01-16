@@ -14,7 +14,7 @@ from cg.apps.lims import LimsAPI
 #    datetime.min
 
 
-class MicrosaltAPI():
+class LimsMicrosaltAPI():
     """ Group microSALT specific functionality """
 
     def __init__(self, lims: LimsAPI, logger=logging.getLogger(__name__)):

@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 from cg.store.models import Organism, ApplicationVersion, MicrobialOrder, MicrobialSample, Customer
-from cg.meta.lims.microsalt import MicrosaltAPI
+from cg.meta.lims.microsalt import LimsMicrosaltAPI
 from cg.store import Store
 
 
@@ -16,7 +16,7 @@ def queries_path(tmpdir):
 @pytest.fixture(scope='function')
 def base_context(microsalt_store, lims_api, tmpdir, queries_path):
     """ The click context for the microsalt cli """
-    microsalt_api = MicrosaltAPI(lims=lims_api)
+    microsalt_api = LimsMicrosaltAPI(lims=lims_api)
     return {
         'db': microsalt_store,
         'microsalt_api': microsalt_api,
@@ -114,10 +114,10 @@ def ensure_microbial_order(disk_store, customer_id='cust_test',
     """utility function to return an existing or create a microbial order for tests"""
     customer = ensure_customer(disk_store, customer_id)
     order = disk_store.add_microbial_order(
-            customer=customer,
-            internal_id=internal_id,
-            name=name,
-            ordered=datetime.now())
+        customer=customer,
+        internal_id=internal_id,
+        name=name,
+        ordered=datetime.now())
     disk_store.add_commit(order)
 
     return order
@@ -130,9 +130,6 @@ class MockLims():
 
     def __init__(self):
         self.lims = self
-
-    _received_at = None
-    _delivered_at = None
 
     def sample(self, sample_id: str):
         """ return a mock sample """

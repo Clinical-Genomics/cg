@@ -1,11 +1,9 @@
 """ This file groups all tests related to microsalt case config creation """
 
-from pathlib import Path
-
 import logging
 from snapshottest import Snapshot
 
-from cg.cli.microsalt import case_config
+from cg.cli.workflow.microsalt.base import case_config
 
 EXIT_SUCCESS = 0
 

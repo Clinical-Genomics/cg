@@ -1,1 +1,1 @@
-from .microsalt import MicrosaltAPI
+from .microsalt import LimsMicrosaltAPI
