@@ -7,7 +7,7 @@ jobs:
     - name: "Tests on python 3.6 (Clinical-db)"
       if: type = pull_request
       python: "3.6.2"   # version in prod170926
-      install: pip install . -r requirements-dev.txt 
+      install: pip install . -r requirements-dev.txt
       script: pytest
 
     - name: "Tests on python 3.7 (Hasta)"
