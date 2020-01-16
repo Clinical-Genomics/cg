@@ -4,9 +4,8 @@ from datetime import datetime
 from pathlib import Path
 import pytest
 
-from cg.store.models import Organism, ApplicationVersion, MicrobialOrder, MicrobialSample, Customer
 from cg.meta.lims.microsalt import LimsMicrosaltAPI
-from cg.store import Store
+from cg.store import Store, models
 
 
 @pytest.fixture(scope='function')
@@ -47,7 +46,7 @@ def microbial_sample_id():
 
 
 def add_microbial_sample(store, name='microbial_name_test', priority='research',
-                         internal_id='microbial_sample_id') -> MicrobialSample:
+                         internal_id='microbial_sample_id') -> models.MicrobialSample:
     """utility function to add a sample to use in tests"""
     application_version = ensure_application_version(store)
     organism = ensure_organism(store)
@@ -65,7 +64,7 @@ def add_microbial_sample(store, name='microbial_name_test', priority='research',
     return microbial_sample
 
 
-def ensure_customer(disk_store, customer_id='cust_test') -> Customer:
+def ensure_customer(disk_store, customer_id='cust_test') -> models.Customer:
     """utility function to return existing or create customer for tests"""
     customer_group = disk_store.customer_group('dummy_group')
     if not customer_group:
@@ -80,7 +79,8 @@ def ensure_customer(disk_store, customer_id='cust_test') -> Customer:
     return customer
 
 
-def ensure_application_version(disk_store, application_tag='dummy_tag') -> ApplicationVersion:
+def ensure_application_version(disk_store,
+        application_tag='dummy_tag') -> models.ApplicationVersion:
     """utility function to return existing or create application version for tests"""
     application = disk_store.application(tag=application_tag)
     if not application:
@@ -99,7 +99,7 @@ def ensure_application_version(disk_store, application_tag='dummy_tag') -> Appli
 
 
 def ensure_organism(disk_store, organism_id='organism_test',
-                    reference_genome='reference_genome_test') -> Organism:
+                    reference_genome='reference_genome_test') -> models.Organism:
     """utility funtion to return existing or create an organism for tests"""
     organism = disk_store.add_organism(internal_id=organism_id, name=organism_id,
                                        reference_genome=reference_genome)
@@ -110,7 +110,7 @@ def ensure_organism(disk_store, organism_id='organism_test',
 
 def ensure_microbial_order(disk_store, customer_id='cust_test',
                            internal_id='microbial_order_test',
-                           name='microbial_name_test') -> MicrobialOrder:
+                           name='microbial_name_test') -> models.MicrobialOrder:
     """utility function to return an existing or create a microbial order for tests"""
     customer = ensure_customer(disk_store, customer_id)
     order = disk_store.add_microbial_order(
