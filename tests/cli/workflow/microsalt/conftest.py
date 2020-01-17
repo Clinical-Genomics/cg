@@ -30,11 +30,11 @@ def base_context(microsalt_store, lims_api, tmpdir, queries_path):
 
 
 @pytest.fixture(scope="function")
-def microsalt_store(base_store: Store, microbial_sample_id) -> Store:
+def microsalt_store(base_store: Store, microbial_sample_id, microbial_project_id) -> Store:
     """ Filled in store to be used in the tests """
     _store = base_store
 
-    add_microbial_sample(_store, internal_id=microbial_sample_id)
+    add_microbial_sample(_store, internal_id=microbial_sample_id, order_internal_id=microbial_project_id)
 
     _store.commit()
 
@@ -43,8 +43,14 @@ def microsalt_store(base_store: Store, microbial_sample_id) -> Store:
 
 @pytest.fixture()
 def microbial_sample_id():
-    """ Define a microbial sample id """
+    """ Define a name for a microbial sample """
     return "microbial_sample_test"
+
+
+@pytest.fixture()
+def microbial_project_id():
+    """ Define a name for a microbial order """
+    return "microbial_order_test"
 
 
 def add_microbial_sample(
@@ -52,11 +58,12 @@ def add_microbial_sample(
         name="microbial_name_test",
         priority="research",
         internal_id="microbial_sample_id",
+        order_internal_id="microbial_order_id",
     ) -> models.MicrobialSample:
     """utility function to add a sample to use in tests"""
     application_version = ensure_application_version(store)
     organism = ensure_organism(store)
-    microbial_order = ensure_microbial_order(store)
+    microbial_order = ensure_microbial_order(store, internal_id=order_internal_id)
     microbial_sample = store.add_microbial_sample(
         name=name,
         priority=priority,
@@ -131,6 +138,8 @@ def ensure_microbial_order(
         name="microbial_name_test",
     ) -> models.MicrobialOrder:
     """utility function to return an existing or create a microbial order for tests"""
+    if not internal_id:
+        internal_id = microbial_order_id
     customer = ensure_customer(disk_store, customer_id)
     order = disk_store.add_microbial_order(
         customer=customer, internal_id=internal_id, name=name, ordered=datetime.now()
