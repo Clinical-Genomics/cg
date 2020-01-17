@@ -93,7 +93,7 @@ def test_dry_sample(cli_runner, base_context, microbial_sample_id, snapshot: Sna
 
 def test_dry_sample_project(cli_runner, base_context, microbial_sample_id,
                             microbial_project_id, snapshot: Snapshot):
-    """Test working dry command for sample"""
+    """Test working dry command for sample in a project"""
 
     # GIVEN
 
@@ -101,6 +101,23 @@ def test_dry_sample_project(cli_runner, base_context, microbial_sample_id,
     result = cli_runner.invoke(
         case_config,
         ["--dry", "--project", microbial_project_id, microbial_sample_id],
+        obj=base_context
+    )
+
+    # THEN command should give us a json dump
+    assert result.exit_code == EXIT_SUCCESS
+    snapshot.assert_match(result.output)
+
+
+def test_dry_project(cli_runner, base_context, microbial_project_id, snapshot: Snapshot):
+    """Test working dry command for a project"""
+
+    # GIVEN
+
+    # WHEN dry running a sample name
+    result = cli_runner.invoke(
+        case_config,
+        ["--dry", "--project", microbial_project_id],
         obj=base_context
     )
 
