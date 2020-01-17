@@ -1,9 +1,5 @@
 """ This file groups all tests related to microsalt start creation """
 
-import logging
-from pathlib import Path
-from snapshottest import Snapshot
-
 from cg.cli.workflow.microsalt.base import start
 
 EXIT_SUCCESS = 0
@@ -21,7 +17,7 @@ def test_no_arguments(cli_runner, base_context):
     assert result.exit_code != EXIT_SUCCESS
 
 
-def test_dry_arguments(cli_runner, base_context, microbial_project_id, queries_path, caplog):
+def test_dry_arguments(cli_runner, base_context, microbial_project_id, queries_path):
     """Test command dry """
 
     # GIVEN
@@ -35,4 +31,3 @@ def test_dry_arguments(cli_runner, base_context, microbial_project_id, queries_p
     outfilename = queries_path / microbial_project_id
     outfilename = outfilename.with_suffix(".json")
     assert f"/bin/true --parameters {outfilename}" in result.output
-
