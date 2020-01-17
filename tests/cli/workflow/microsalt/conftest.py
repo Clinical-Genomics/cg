@@ -34,7 +34,10 @@ def microsalt_store(base_store: Store, microbial_sample_id, microbial_project_id
     """ Filled in store to be used in the tests """
     _store = base_store
 
-    add_microbial_sample(_store, internal_id=microbial_sample_id, order_internal_id=microbial_project_id)
+    add_microbial_sample(
+        _store,
+        internal_id=microbial_sample_id,
+        order_internal_id=microbial_project_id)
 
     _store.commit()
 
@@ -96,7 +99,8 @@ def ensure_customer(disk_store, customer_id="cust_test") -> models.Customer:
     return customer
 
 
-def ensure_application_version(disk_store, application_tag="dummy_tag") -> models.ApplicationVersion:
+def ensure_application_version(
+        disk_store, application_tag="dummy_tag") -> models.ApplicationVersion:
     """utility function to return existing or create application version for tests"""
     application = disk_store.application(tag=application_tag)
     if not application:
@@ -134,8 +138,6 @@ def ensure_microbial_order(
         internal_id="microbial_order_test",
         name="microbial_name_test") -> models.MicrobialOrder:
     """utility function to return an existing or create a microbial order for tests"""
-    if not internal_id:
-        internal_id = microbial_order_id
     customer = ensure_customer(disk_store, customer_id)
     order = disk_store.add_microbial_order(
         customer=customer, internal_id=internal_id, name=name, ordered=datetime.now()
