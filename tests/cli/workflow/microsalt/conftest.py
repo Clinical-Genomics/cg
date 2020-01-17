@@ -19,7 +19,7 @@ def base_context(microsalt_store, lims_api, tmpdir, queries_path):
     microsalt_api = LimsMicrosaltAPI(lims=lims_api)
     return {
         "db": microsalt_store,
-        "microsalt_api": microsalt_api,
+        "lims_microsalt_api": microsalt_api,
         "usalt": {
             "root": tmpdir,
             "queries_path": queries_path,
@@ -47,11 +47,11 @@ def microbial_sample_id():
 
 
 def add_microbial_sample(
-    store,
-    name="microbial_name_test",
-    priority="research",
-    internal_id="microbial_sample_id",
-) -> models.MicrobialSample:
+        store,
+        name="microbial_name_test",
+        priority="research",
+        internal_id="microbial_sample_id",
+    ) -> models.MicrobialSample:
     """utility function to add a sample to use in tests"""
     application_version = ensure_application_version(store)
     organism = ensure_organism(store)
@@ -90,8 +90,8 @@ def ensure_customer(disk_store, customer_id="cust_test") -> models.Customer:
 
 
 def ensure_application_version(
-    disk_store, application_tag="dummy_tag"
-) -> models.ApplicationVersion:
+        disk_store, application_tag="dummy_tag"
+    ) -> models.ApplicationVersion:
     """utility function to return existing or create application version for tests"""
     application = disk_store.application(tag=application_tag)
     if not application:
@@ -112,8 +112,8 @@ def ensure_application_version(
 
 
 def ensure_organism(
-    disk_store, organism_id="organism_test", reference_genome="reference_genome_test"
-) -> models.Organism:
+        disk_store, organism_id="organism_test", reference_genome="reference_genome_test"
+    ) -> models.Organism:
     """utility funtion to return existing or create an organism for tests"""
     organism = disk_store.add_organism(
         internal_id=organism_id, name=organism_id, reference_genome=reference_genome
@@ -124,11 +124,11 @@ def ensure_organism(
 
 
 def ensure_microbial_order(
-    disk_store,
-    customer_id="cust_test",
-    internal_id="microbial_order_test",
-    name="microbial_name_test",
-) -> models.MicrobialOrder:
+        disk_store,
+        customer_id="cust_test",
+        internal_id="microbial_order_test",
+        name="microbial_name_test",
+    ) -> models.MicrobialOrder:
     """utility function to return an existing or create a microbial order for tests"""
     customer = ensure_customer(disk_store, customer_id)
     order = disk_store.add_microbial_order(
