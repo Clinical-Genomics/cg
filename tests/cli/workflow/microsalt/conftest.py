@@ -58,8 +58,7 @@ def add_microbial_sample(
         name="microbial_name_test",
         priority="research",
         internal_id="microbial_sample_id",
-        order_internal_id="microbial_order_id",
-    ) -> models.MicrobialSample:
+        order_internal_id="microbial_order_id") -> models.MicrobialSample:
     """utility function to add a sample to use in tests"""
     application_version = ensure_application_version(store)
     organism = ensure_organism(store)
@@ -97,9 +96,7 @@ def ensure_customer(disk_store, customer_id="cust_test") -> models.Customer:
     return customer
 
 
-def ensure_application_version(
-        disk_store, application_tag="dummy_tag"
-    ) -> models.ApplicationVersion:
+def ensure_application_version(disk_store, application_tag="dummy_tag") -> models.ApplicationVersion:
     """utility function to return existing or create application version for tests"""
     application = disk_store.application(tag=application_tag)
     if not application:
@@ -120,8 +117,8 @@ def ensure_application_version(
 
 
 def ensure_organism(
-        disk_store, organism_id="organism_test", reference_genome="reference_genome_test"
-    ) -> models.Organism:
+        disk_store, organism_id="organism_test",
+        reference_genome="reference_genome_test") -> models.Organism:
     """utility funtion to return existing or create an organism for tests"""
     organism = disk_store.add_organism(
         internal_id=organism_id, name=organism_id, reference_genome=reference_genome
@@ -135,8 +132,7 @@ def ensure_microbial_order(
         disk_store,
         customer_id="cust_test",
         internal_id="microbial_order_test",
-        name="microbial_name_test",
-    ) -> models.MicrobialOrder:
+        name="microbial_name_test") -> models.MicrobialOrder:
     """utility function to return an existing or create a microbial order for tests"""
     if not internal_id:
         internal_id = microbial_order_id
