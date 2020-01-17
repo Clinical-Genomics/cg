@@ -10,6 +10,7 @@ from cg.store import Store, models
 
 @pytest.fixture(scope="function")
 def queries_path(tmpdir):
+    """ The path where to store the case-configs """
     return Path(tmpdir) / "queries"
 
 
@@ -146,6 +147,7 @@ class MockLims:
 
     def __init__(self):
         self.lims = self
+        self.sample_id = None
 
     def sample(self, sample_id: str):
         """ return a mock sample """
@@ -155,18 +157,26 @@ class MockLims:
 
             def __init__(self, sample_id):
                 self.sample_id = sample_id
+                self.sample_data = {
+                    "comment": "a comment in LimsSample"
+                }
 
             def get(self, key):
-                return "a comment in LimsSample"
+                """ only here to get the sample.get('comment') """
+                return self.sample_data[key]
 
         lims_sample = LimsSample(sample_id)
 
         return lims_sample
 
     def get_prep_method(self, sample_id: str) -> str:
+        """ Return a prep method name. Needs to be in format 'dddd:dd string' """
+        self.sample_id = sample_id
         return "1337:00 Test prep method"
 
     def get_sequencing_method(self, sample_id: str) -> str:
+        """ Return a sequencing method name. Needs to be in format 'dddd:dd string' """
+        self.sample_id = sample_id
         return "1338:00 Test sequencing method"
 
 
