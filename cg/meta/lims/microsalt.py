@@ -53,15 +53,6 @@ class LimsMicrosaltAPI:
             elif has_comment:
                 organism = comment
 
-        if has_comment and organism == "Unset":
-            organism = comment
-        # Consistent safe-guard
-        elif organism == "Unset":
-            self.log.warning(
-                "Unable to resolve ambigious organism found in sample %s",
-                sample_obj.internal_id,
-            )
-
         return organism
 
     def get_parameters(self, sample_obj: Sample):
