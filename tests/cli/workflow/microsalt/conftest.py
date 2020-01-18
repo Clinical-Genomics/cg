@@ -150,11 +150,10 @@ def ensure_microbial_order(
 class MockLims:
     """ provides a mock class overrriding relevant methods for microbial cli """
 
-    lims = None
-
     def __init__(self):
         self.lims = self
         self.sample_id = None
+        self.lims_sample = None
 
     def sample(self, sample_id: str):
         """ return a mock sample """
@@ -170,11 +169,13 @@ class MockLims:
 
             def get(self, key):
                 """ only here to get the sample.get('comment') """
-                return self.sample_data[key]
+                return self.sample_data.get(key, "not found")
 
-        lims_sample = LimsSample(sample_id)
+        # haha, it's a factory!
+        if not self.lims_sample:
+            self.lims_sample = LimsSample(sample_id)
 
-        return lims_sample
+        return self.lims_sample
 
     def get_prep_method(self, sample_id: str) -> str:
         """ Return a prep method name. Needs to be in format 'dddd:dd string' """
@@ -187,9 +188,23 @@ class MockLims:
         return "1338:00 Test sequencing method"
 
 
+class LimsFactory:
+    """ Just give one LIMS """
+
+    single_lims = None
+
+    @classmethod
+    def produce(cls):
+        """ Produce me one LIMS """
+        if not cls.single_lims:
+            cls.single_lims = MockLims()
+
+        return cls.single_lims
+
+
 @pytest.fixture(scope="function")
 def lims_api():
     """return a mocked lims"""
 
-    _lims_api = MockLims()
+    _lims_api = LimsFactory.produce()
     return _lims_api

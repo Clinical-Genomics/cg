@@ -24,9 +24,11 @@ class LimsMicrosaltAPI:
     def get_lims_comment(self, sample_id: str) -> str:
         """ returns the comment associated with a sample stored in lims"""
         lims_sample = self.lims.sample(sample_id)
-        comment = re.match(r"\w{4}\d{2,3}", lims_sample.get("comment") or "")
+        comment = lims_sample.get("comment") or ""
+        if re.match(r"\w{4}\d{2,3}", comment):
+            return comment
 
-        return comment
+        return ""
 
     def get_organism(self, sample_obj: Sample) -> str:
         """Organism
