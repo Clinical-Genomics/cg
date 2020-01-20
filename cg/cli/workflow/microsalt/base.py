@@ -121,7 +121,7 @@ def case_config(context, dry, project_id, sample_id):
 # @click.option('-e', '--email', help='email to send errors to')
 @click.argument("project_id")
 @click.pass_context
-def start(context, dry, case_config, project_id):
+def run(context, dry, case_config, project_id):
     """ Start microSALT """
     microsalt_command = context.obj["usalt"]["binary_path"]
     command = [microsalt_command]
