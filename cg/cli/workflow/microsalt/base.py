@@ -11,7 +11,7 @@ from cg.apps import hk, lims
 from cg.apps.usalt.fastq import FastqHandler
 from cg.cli.workflow.microsalt.store import store as store_cmd
 from cg.cli.workflow.microsalt.deliver import deliver as deliver_cmd
-from cg.meta.lims.microsalt import LimsMicrosaltAPI
+from cg.meta.microsalt.lims import LimsMicrosaltAPI
 from cg.meta.workflow.microsalt import AnalysisAPI
 from cg.meta.deliver.microsalt import DeliverAPI
 from cg.store import Store
@@ -117,8 +117,6 @@ def case_config(context, dry, project_id, sample_id):
 @microsalt.command()
 @click.option("-d", "--dry", is_flag=True, help="print command to console")
 @click.option("-c", "--case-config", required=False, help="Optional")
-# @click.option('-p', '--priority', default='low', type=click.Choice(['low', 'normal', 'high']))
-# @click.option('-e', '--email', help='email to send errors to')
 @click.argument("project_id")
 @click.pass_context
 def run(context, dry, case_config, project_id):
@@ -141,5 +139,5 @@ def run(context, dry, case_config, project_id):
 
 microsalt.add_command(case_config)
 microsalt.add_command(deliver_cmd)
-microsalt.add_command(start)
+microsalt.add_command(run)
 microsalt.add_command(store_cmd)

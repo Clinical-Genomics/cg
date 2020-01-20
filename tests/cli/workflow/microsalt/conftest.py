@@ -4,7 +4,7 @@ from datetime import datetime
 from pathlib import Path
 import pytest
 
-from cg.meta.lims.microsalt import LimsMicrosaltAPI
+from cg.meta.microsalt.lims import LimsMicrosaltAPI
 from cg.store import Store, models
 
 
