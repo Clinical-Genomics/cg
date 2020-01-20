@@ -1,6 +1,6 @@
 """ This file groups all tests related to microsalt start creation """
 
-from cg.cli.workflow.microsalt.base import start
+from cg.cli.workflow.microsalt.base import run
 
 EXIT_SUCCESS = 0
 
