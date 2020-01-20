@@ -127,7 +127,7 @@ def test_dry_project(cli_runner, base_context, microbial_project_id, snapshot: S
 
 
 def test_sample(cli_runner, base_context, microbial_sample_id, queries_path, snapshot: Snapshot):
-    """Test working dry command for sample"""
+    """Test working command for sample"""
 
     # GIVEN an existing queries path
     Path(queries_path).mkdir(exist_ok=True)
