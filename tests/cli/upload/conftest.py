@@ -10,7 +10,7 @@ from cg.apps.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
 from cg.store import Store
-from cg.meta.analysis import AnalysisAPI
+from cg.meta.workflow.mip_dna import AnalysisAPI
 
 
 @pytest.fixture(scope="function", name="base_context")
@@ -231,3 +231,4 @@ class MockLims:
             if sample["id"] == sample_id:
                 return sample
         return None
+

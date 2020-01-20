@@ -17,8 +17,8 @@ from cg.apps import (
     mutacc_auto,
 )
 from cg.exc import DuplicateRecordError, DuplicateSampleError
-from cg.meta.analysis import AnalysisAPI
-from cg.meta.deliver.api import DeliverAPI
+from cg.meta.workflow.mip_dna import AnalysisAPI
+from cg.meta.deliver.mip_dna import DeliverAPI
 from cg.meta.report.api import ReportAPI
 from cg.meta.upload.beacon import UploadBeaconApi
 from cg.meta.upload.coverage import UploadCoverageApi
