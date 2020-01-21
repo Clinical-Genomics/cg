@@ -116,7 +116,7 @@ def case_config(context, dry, project_id, sample_id):
 
 @microsalt.command()
 @click.option("-d", "--dry", is_flag=True, help="print command to console")
-@click.option("-c", "--case-config", required=False, help="Optional")
+@click.option("-c", "--case-config", required=False, help="Optionally change the case-config")
 @click.argument("project_id")
 @click.pass_context
 def run(context, dry, case_config, project_id):
