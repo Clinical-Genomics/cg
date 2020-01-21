@@ -47,7 +47,7 @@ jobs:
       script: pip check
 
     - name: "Coverage"
-      if: NOT type = pull_request
+      if: NOT type = push
       install:
         - pip install cython
         - pip install . -r requirements-dev.txt
