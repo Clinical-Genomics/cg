@@ -203,7 +203,7 @@ EXTERNAL_SAMPLE = {
 }
 
 FASTQ_SAMPLE = {
-    # Orderform 1508:18
+    # Orderform 1508:?
     # "required"
     "name": validators.RegexValidator(NAME_PATTERN),
     "container": OptionalNone(validators.Any(CONTAINER_OPTIONS)),
@@ -222,6 +222,7 @@ FASTQ_SAMPLE = {
     # "Required if data analysis in Scout or vcf delivery" => not valid for fastq
     # 'panels': ListValidator(str, min_items=1),
     # 'status': OptionalNone(validators.Any(STATUS_OPTIONS),
+    "elution_buffer": str,
     # "Required if samples are part of trio/family"
     "mother": OptionalNone(RegexValidatorNone(NAME_PATTERN)),
     "father": OptionalNone(RegexValidatorNone(NAME_PATTERN)),
