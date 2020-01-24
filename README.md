@@ -26,7 +26,7 @@ If you would like to install the latest development version:
 ```bash
 git clone https://github.com/Clinical-Genomics/cg
 cd cg
-pip install -r requirements-dev.txt -r requiremets.txt --editable .
+pip install -r requirements-dev.txt -r requirements.txt --editable .
 ```
 
 If you would like to automatically [Black][black] format your commits: 
