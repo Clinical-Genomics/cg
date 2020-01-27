@@ -40,6 +40,16 @@ class UploadScoutAPI:
                 version=hk_version_id, tags=bam_tags
             ).first()
             bam_path = bam_file.full_path if bam_file else None
+            cram_tags = ["cram", sample_id]
+            cram_file = self.housekeeper.files(
+                version=hk_version_id, tags=cram_tags
+            ).first()
+            cram_path = cram_file.full_path if cram_file else None
+            chromograph_tags = ["chromograph", sample_id]
+            chromograph_file = self.housekeeper.files(
+                version=hk_version_id, tags=chromograph_tags
+            ).first()
+            chromograph_path = chromograph_file.full_path if chromograph_file else None
             mt_bam_tags = ["bam-mt", sample_id]
             mt_bam_file = self.housekeeper.files(
                 version=hk_version_id, tags=mt_bam_tags
@@ -54,15 +64,17 @@ class UploadScoutAPI:
             )
             sample = {
                 "analysis_type": link_obj.sample.application_version.application.analysis_type,
-                "sample_id": sample_id,
+                "bam_path": bam_path,
                 "capture_kit": None,
+                "cram_path": cram_path,
+                "chromograph": chromograph_path,
                 "father": link_obj.father.internal_id if link_obj.father else "0",
                 "mother": link_obj.mother.internal_id if link_obj.mother else "0",
-                "sample_name": link_obj.sample.name,
-                "phenotype": link_obj.status,
-                "sex": link_obj.sample.sex,
-                "bam_path": bam_path,
                 "mt_bam": mt_bam_path,
+                "phenotype": link_obj.status,
+                "sample_id": sample_id,
+                "sample_name": link_obj.sample.name,
+                "sex": link_obj.sample.sex,
                 "vcf2cytosure": vcf2cytosure_path,
             }
             yield sample
@@ -78,17 +90,18 @@ class UploadScoutAPI:
         )
 
         data = {
-            "owner": analysis_obj.family.customer.internal_id,
+            "analysis_date": analysis_obj.completed_at,
+            "default_gene_panels": analysis_obj.family.panels,
             "family": analysis_obj.family.internal_id,
             "family_name": analysis_obj.family.name,
-            "samples": list(),
-            "analysis_date": analysis_obj.completed_at,
             "gene_panels": self.analysis.convert_panels(
                 analysis_obj.family.customer.internal_id, analysis_obj.family.panels
             ),
-            "default_gene_panels": analysis_obj.family.panels,
             "human_genome_build": analysis_data.get("genome_build"),
+            "multiqc": analysis_data.get("multiqc_html"),
+            "owner": analysis_obj.family.customer.internal_id,
             "rank_model_version": analysis_data.get("rank_model_version"),
+            "samples": list(),
             "sv_rank_model_version": analysis_data.get("sv_rank_model_version"),
         }
 
