@@ -8,6 +8,17 @@ from cg.apps.hk import HousekeeperAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
 from cg.store import Store
 
+CASE_FILE_PATHS = ["multiqc"]
+
+RESULT_KEYS = [
+    "family",
+    "human_genome_build",
+    "rank_model_version",
+    "sv_rank_model_version",
+]
+
+SAMPLE_FILE_PATHS = ["chromograph", "vcf2cytosure"]
+
 
 def test_unlinked_family_is_linked(upload_scout_api):
     """Test that is_family check fails when samples are not linked"""
@@ -40,15 +51,7 @@ def test_family_is_linked(upload_scout_api):
     assert res is True
 
 
-result_keys = [
-    "family",
-    "human_genome_build",
-    "rank_model_version",
-    "sv_rank_model_version",
-]
-
-
-@pytest.mark.parametrize("result_key", result_keys)
+@pytest.mark.parametrize("result_key", RESULT_KEYS)
 def test_generate_config_adds_meta_result_key(
     result_key, analysis: Store.Analysis, upload_scout_api: UploadScoutAPI
 ):
@@ -61,10 +64,7 @@ def test_generate_config_adds_meta_result_key(
     assert result_data[result_key]
 
 
-sample_file_paths = ["chromograph", "vcf2cytosure"]
-
-
-@pytest.mark.parametrize("file_path", sample_file_paths)
+@pytest.mark.parametrize("file_path", SAMPLE_FILE_PATHS)
 def test_generate_config_adds_sample_paths(
     file_path, analysis: Store.Analysis, upload_scout_api: UploadScoutAPI
 ):
@@ -80,10 +80,7 @@ def test_generate_config_adds_sample_paths(
         assert sample[file_path]
 
 
-case_file_paths = ["multiqc"]
-
-
-@pytest.mark.parametrize("file_path", case_file_paths)
+@pytest.mark.parametrize("file_path", CASE_FILE_PATHS)
 def test_generate_config_adds_sample_paths(
     file_path, analysis: Store.Analysis, upload_scout_api: UploadScoutAPI
 ):
