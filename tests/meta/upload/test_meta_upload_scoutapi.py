@@ -17,7 +17,7 @@ RESULT_KEYS = [
     "sv_rank_model_version",
 ]
 
-SAMPLE_FILE_PATHS = ["chromograph", "vcf2cytosure"]
+SAMPLE_FILE_PATHS = ["alignment_path", "chromograph", "vcf2cytosure"]
 
 
 def test_unlinked_family_is_linked(upload_scout_api):

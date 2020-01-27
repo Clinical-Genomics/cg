@@ -44,7 +44,7 @@ class UploadScoutAPI:
             cram_file = self.housekeeper.files(
                 version=hk_version_id, tags=cram_tags
             ).first()
-            cram_path = cram_file.full_path if cram_file else None
+            alignment_file_path = cram_file.full_path if cram_file else bam_path
             chromograph_tags = ["chromograph", sample_id]
             chromograph_file = self.housekeeper.files(
                 version=hk_version_id, tags=chromograph_tags
@@ -66,7 +66,7 @@ class UploadScoutAPI:
                 "analysis_type": link_obj.sample.application_version.application.analysis_type,
                 "bam_path": bam_path,
                 "capture_kit": None,
-                "cram_path": cram_path,
+                "alignment_path": alignment_file_path,
                 "chromograph": chromograph_path,
                 "father": link_obj.father.internal_id if link_obj.father else "0",
                 "mother": link_obj.mother.internal_id if link_obj.mother else "0",
