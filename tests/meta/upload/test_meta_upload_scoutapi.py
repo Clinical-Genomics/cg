@@ -40,11 +40,16 @@ def test_family_is_linked(upload_scout_api):
     assert res is True
 
 
-result_keys = ["human_genome_build", "rank_model_version"]
+result_keys = [
+    "family",
+    "human_genome_build",
+    "rank_model_version",
+    "sv_rank_model_version",
+]
 
 
 @pytest.mark.parametrize("result_key", result_keys)
-def test_generate_config_adds_result_key(
+def test_generate_config_adds_meta_result_key(
     result_key, analysis: Store.Analysis, upload_scout_api: UploadScoutAPI
 ):
     """Test that generate config adds rank model version"""
@@ -56,8 +61,12 @@ def test_generate_config_adds_result_key(
     assert result_data[result_key]
 
 
-def test_generate_config_adds_vcf2cytosure(
-    analysis: Store.Analysis, upload_scout_api: UploadScoutAPI
+sample_file_paths = ["chromograph", "vcf2cytosure"]
+
+
+@pytest.mark.parametrize("file_path", sample_file_paths)
+def test_generate_config_adds_sample_paths(
+    file_path, analysis: Store.Analysis, upload_scout_api: UploadScoutAPI
 ):
     """Test that generate config adds vcf2cytosure file"""
     # GIVEN a status db and hk with an analysis
@@ -66,9 +75,27 @@ def test_generate_config_adds_vcf2cytosure(
     # WHEN generating the scout config for the analysis
     result_data = upload_scout_api.generate_config(analysis)
 
-    # THEN the config should contain the vcf2cytosure cgh file path on each sample
+    # THEN the config should contain the sample file path for each sample
     for sample in result_data["samples"]:
-        assert sample["vcf2cytosure"]
+        assert sample[file_path]
+
+
+case_file_paths = ["multiqc"]
+
+
+@pytest.mark.parametrize("file_path", case_file_paths)
+def test_generate_config_adds_sample_paths(
+    file_path, analysis: Store.Analysis, upload_scout_api: UploadScoutAPI
+):
+    """Test that generate config adds case file paths"""
+    # GIVEN a status db and hk with an analysis
+    assert analysis
+
+    # WHEN generating the scout config for the analysis
+    result_data = upload_scout_api.generate_config(analysis)
+
+    # THEN the config should contain the case file path
+    assert result_data[file_path]
 
 
 def _file_exists_on_disk(file_path: Path):

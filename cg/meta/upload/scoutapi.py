@@ -98,7 +98,7 @@ class UploadScoutAPI:
                 analysis_obj.family.customer.internal_id, analysis_obj.family.panels
             ),
             "human_genome_build": analysis_data.get("genome_build"),
-            "multiqc": analysis_data.get("multiqc_html"),
+            "multiqc": self.housekeeper.files(version=hk_version, tags="multiqc_html"),
             "owner": analysis_obj.family.customer.internal_id,
             "rank_model_version": analysis_data.get("rank_model_version"),
             "samples": list(),
