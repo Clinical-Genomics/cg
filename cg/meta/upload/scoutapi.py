@@ -100,7 +100,7 @@ class UploadScoutAPI:
             "human_genome_build": analysis_data.get("genome_build"),
             "multiqc": self.housekeeper.files(
                 version=hk_version.id, tags="multiqc-html"
-            ),
+            ).first(),
             "owner": analysis_obj.family.customer.internal_id,
             "rank_model_version": analysis_data.get("rank_model_version"),
             "samples": list(),
