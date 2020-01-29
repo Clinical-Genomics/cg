@@ -71,17 +71,17 @@ class AddHandler:
             },
             {
                 "path": sampleinfo_data["multiqc_html"],
-                "tags": ["multiqc_html"],
+                "tags": ["multiqc-html"],
                 "archive": False,
             },
             {
                 "path": sampleinfo_data["multiqc_json"],
-                "tags": ["multiqc_json"],
+                "tags": ["multiqc-json"],
                 "archive": False,
             },
             {
                 "path": sampleinfo_data["pedigree"],
-                "tags": ["pedigree_yaml"],
+                "tags": ["pedigree-yaml"],
                 "archive": False,
             },
             {
@@ -128,7 +128,7 @@ class AddHandler:
             },
             {
                 "path": sampleinfo_data["version_collect"],
-                "tags": ["executables_version"],
+                "tags": ["executables-version"],
                 "archive": False,
             },
         ]
