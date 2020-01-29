@@ -98,9 +98,6 @@ class UploadScoutAPI:
                 analysis_obj.family.customer.internal_id, analysis_obj.family.panels
             ),
             "human_genome_build": analysis_data.get("genome_build"),
-            "multiqc": self.housekeeper.files(
-                version=hk_version.id, tags="multiqc-html"
-            ).first(),
             "owner": analysis_obj.family.customer.internal_id,
             "rank_model_version": analysis_data.get("rank_model_version"),
             "samples": list(),
@@ -158,7 +155,11 @@ class UploadScoutAPI:
         return file_obj
 
     def _include_optional_files(self, data, hk_version):
-        scout_hk_map = [("delivery_report", "delivery-report"), ("vcf_str", "vcf-str")]
+        scout_hk_map = [
+            ("delivery_report", "delivery-report"),
+            ("multiqc", "multiqc-html"),
+            ("vcf_str", "vcf-str"),
+        ]
         self._include_files(data, hk_version, scout_hk_map)
 
     def _include_peddy_files(self, data, hk_version):
