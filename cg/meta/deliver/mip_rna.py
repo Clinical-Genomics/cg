@@ -29,7 +29,7 @@ FAMILY_TAGS = [
     "vcf-sv-research-index",
 ]
 
-SAMPLE_TAGS = ["bam", "bam-index"]
+SAMPLE_TAGS = ["bam", "bam-index", "cram", "cram-index"]
 
 
 class DeliverAPI:

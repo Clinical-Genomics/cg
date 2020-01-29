@@ -5,6 +5,7 @@ from cg.apps.usalt.fastq import FastqHandler as MicrosaltFastqHandler
 
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.tb import TrailblazerAPI
+from cg.meta.deliver.mip_dna import DeliverAPI
 from cg.meta.workflow.mip_dna import AnalysisAPI
 
 
@@ -136,9 +137,24 @@ def analysis_store(base_store, analysis_family):
     yield base_store
 
 
+class MockVersion:
+    """Mock a version object"""
+
+    @property
+    def id(self):
+        return ""
+
+
 class MockFile:
-    def __init__(self, path):
+    """Mock a file object"""
+
+    def __init__(self, path="", to_archive=False, tags=None):
         self.path = path
+        self.to_archive = to_archive
+        self.tags = tags or []
+
+    def all(self):
+        return MockFile()
 
     def first(self):
         return MockFile()
@@ -146,8 +162,66 @@ class MockFile:
     def full_path(self):
         return ""
 
+    def is_included(self):
+        return False
+
+
+class MockHouseKeeper(HousekeeperAPI):
+    """Mock the housekeeper API"""
+
+    # In this mock we want to override __init__ so disable here
+    def __init__(self):
+        self._file_added = False
+        self._file_included = False
+        self._files = []
+        self._file = MockFile()
+
+    # This is overriding a housekeeper object so ok to not include all arguments
+    def files(self, bundle, version, tags):
+        """Mock the files method to return a list of files"""
+        return self._file
+
+    def get_files(self, bundle, tags, version="1.0"):
+        """Mock the get_files method to return a list of files"""
+        return self._files
+
+    def add_file(self, file, version_obj, tag_name, to_archive=False):
+        """Mock the add_files method to add a MockFile to the list of files"""
+        self._file_added = True
+        self._file = MockFile(path=file)
+        return self._file
+
+    def version(self, bundle: str, date: str):
+        """Fetch version from the database."""
+        return MockVersion()
+
+    def last_version(self, bundle: str):
+        """docstring for last_version"""
+        return MockVersion()
+
+    def include_file(self, file_obj, version_obj):
+        """docstring for include_file"""
+        self._file_included = True
+
+    def add_commit(self, file_obj):
+        """Overrides sqlalchemy method"""
+        return file_obj
+
+
+class MockLims:
+    """Mock lims fixture"""
+
+    lims = None
+
+    def __init__(self):
+        self.lims = self
+
 
 class MockDeliver:
+    def __init__(self):
+        self.housekeeper = MockHouseKeeper()
+        self.lims = MockLims()
+
     def get_post_analysis_files(self, family: str, version, tags):
 
         if tags[0] == "mip-config":
@@ -176,6 +250,9 @@ class MockDeliver:
             )
 
         return [MockFile(path=path)]
+
+    def get_post_analysis_family_files(self, family: str, version, tags):
+        return ""
 
     def get_post_analysis_files_root_dir(self):
         return ""
@@ -288,3 +365,15 @@ def analysis_api(analysis_store, store_housekeeper, scout_store):
         logger=MockLogger(),
     )
     yield _analysis_api
+
+
+@pytest.yield_fixture(scope="function")
+def mip_dna_deliver_api(analysis_store):
+    """Fixture for mip_dna_deliver_api"""
+    lims_mock = MockLims()
+    hk_mock = MockHouseKeeper()
+    hk_mock.add_file(file="/mock/path", version_obj="", tag_name="")
+
+    _api = DeliverAPI(db=analysis_store, hk_api=hk_mock, lims_api=lims_mock)
+
+    yield _api
