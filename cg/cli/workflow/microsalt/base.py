@@ -9,7 +9,7 @@ from cg.apps.usalt.fastq import FastqHandler
 from cg.cli.workflow.microsalt.store import store as store_cmd
 from cg.cli.workflow.microsalt.deliver import deliver as deliver_cmd
 from cg.meta.workflow.microsalt import AnalysisAPI
-from cg.meta.deliver.microsalt import DeliverAPI
+from cg.meta.deliver import DeliverAPI
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)

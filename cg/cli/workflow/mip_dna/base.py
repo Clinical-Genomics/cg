@@ -12,7 +12,7 @@ from cg.cli.workflow.mip_dna.deliver import deliver as deliver_cmd
 from cg.cli.workflow.get_links import get_links
 from cg.exc import LimsDataError
 from cg.meta.workflow.mip_dna import AnalysisAPI
-from cg.meta.deliver.mip_dna import DeliverAPI
+from cg.meta.deliver import DeliverAPI
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)

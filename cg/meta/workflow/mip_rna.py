@@ -7,7 +7,7 @@ from typing import List, Any
 from ruamel.yaml import safe_load
 
 from cg.apps import tb, hk, lims
-from cg.meta.deliver.mip_dna import DeliverAPI
+from cg.meta.deliver import DeliverAPI
 from cg.apps.pipelines.fastqhandler import BaseFastqHandler
 from cg.store import models, Store
 

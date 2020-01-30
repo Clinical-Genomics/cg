@@ -14,7 +14,7 @@ from cg.cli.workflow.balsamic.store import store as store_cmd
 from cg.cli.workflow.balsamic.deliver import deliver as deliver_cmd
 from cg.cli.workflow.get_links import get_links
 from cg.exc import LimsDataError, BalsamicStartError
-from cg.meta.deliver.balsamic import DeliverAPI
+from cg.meta.deliver import DeliverAPI
 from cg.meta.workflow.balsamic import AnalysisAPI
 from cg.store import Store
 

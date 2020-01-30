@@ -5,7 +5,7 @@ from cg.apps.usalt.fastq import FastqHandler as MicrosaltFastqHandler
 
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.meta.deliver.mip_dna import DeliverAPI
+from cg.meta.deliver import DeliverAPI
 from cg.meta.workflow.mip_dna import AnalysisAPI
 
 
@@ -368,8 +368,8 @@ def analysis_api(analysis_store, store_housekeeper, scout_store):
 
 
 @pytest.yield_fixture(scope="function")
-def mip_dna_deliver_api(analysis_store):
-    """Fixture for mip_dna_deliver_api"""
+def deliver_api(analysis_store):
+    """Fixture for deliver_api"""
     lims_mock = MockLims()
     hk_mock = MockHouseKeeper()
     hk_mock.add_file(file="/mock/path", version_obj="", tag_name="")

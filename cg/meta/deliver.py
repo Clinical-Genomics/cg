@@ -1,4 +1,5 @@
-"""Module for deliveries for MIP RNA"""
+"""Module for deliveries for workflows"""
+
 import logging
 
 from cg.apps import hk, lims
@@ -6,34 +7,9 @@ from cg.store import Store
 
 LOG = logging.getLogger(__name__)
 
-FAMILY_TAGS = [
-    "vcf-clinical-sv-bin",
-    "vcf-clinical-sv-bin-index",
-    "vcf-research-sv-bin",
-    "vcf-research-sv-bin-index",
-    "gbcf",
-    "gbcf-index",
-    "snv-gbcf",
-    "snv-gbcf-index",
-    "snv-bcf",
-    "snv-bcf-index",
-    "sv-bcf",
-    "sv-bcf-index",
-    "vcf-snv-clinical",
-    "vcf-snv-clinical-index",
-    "vcf-snv-research",
-    "vcf-snv-research-index",
-    "vcf-sv-clinical",
-    "vcf-sv-clinical-index",
-    "vcf-sv-research",
-    "vcf-sv-research-index",
-]
-
-SAMPLE_TAGS = ["bam", "bam-index", "cram", "cram-index"]
-
 
 class DeliverAPI:
-    """Deliver API for MIP RNA"""
+    """Deliver API for workflows"""
 
     def __init__(self, db: Store, hk_api: hk.HousekeeperAPI, lims_api: lims.LimsAPI):
         self.store = db
@@ -41,7 +17,6 @@ class DeliverAPI:
         self.lims = lims_api
 
     def get_post_analysis_files(self, family: str, version, tags: list):
-        """Gets post analysis files"""
 
         if not version:
             last_version = self.hk_api.last_version(bundle=family)
@@ -52,7 +27,9 @@ class DeliverAPI:
             bundle=family, version=last_version.id, tags=tags
         ).all()
 
-    def get_post_analysis_family_files(self, family: str, version, tags):
+    def get_post_analysis_family_files(
+        self, family: str, family_tags: list, version, tags
+    ):
         """Link files from HK to cust inbox."""
 
         all_files = self.get_post_analysis_files(family, version, tags)
@@ -64,12 +41,14 @@ class DeliverAPI:
             if any(tag.name in sample_ids for tag in file_obj.tags):
                 continue
 
-            if any(tag.name in FAMILY_TAGS for tag in file_obj.tags):
+            if any(tag.name in family_tags for tag in file_obj.tags):
                 family_files.append(file_obj)
 
         return family_files
 
-    def get_post_analysis_sample_files(self, family: str, sample: str, version, tag):
+    def get_post_analysis_sample_files(
+        self, family: str, sample: str, sample_tags: list, version, tag
+    ):
         """Link files from HK to cust inbox."""
 
         all_files = self.get_post_analysis_files(family, version, tag)
@@ -79,7 +58,7 @@ class DeliverAPI:
             if not any(tag.name == sample for tag in file_obj.tags):
                 continue
 
-            if any(tag.name in SAMPLE_TAGS for tag in file_obj.tags):
+            if any(tag.name in sample_tags for tag in file_obj.tags):
                 sample_files.append(file_obj)
 
         return sample_files

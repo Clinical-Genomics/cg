@@ -12,7 +12,7 @@ from cg.cli.workflow.mip_rna.store import store as store_cmd
 from cg.cli.workflow.mip_rna.deliver import deliver as deliver_cmd
 from cg.cli.workflow.get_links import get_links
 from cg.meta.workflow.mip_rna import AnalysisAPI
-from cg.meta.deliver.mip_rna import DeliverAPI
+from cg.meta.deliver import DeliverAPI
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)

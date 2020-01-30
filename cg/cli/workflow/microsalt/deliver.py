@@ -6,10 +6,14 @@ from pathlib import Path
 
 import click
 from cg.apps import hk, lims
-from cg.meta.deliver.microsalt import DeliverAPI
+from cg.meta.deliver import DeliverAPI
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
+
+FAMILY_TAGS = []  # [ Housekeeper-bundle-tags]
+
+SAMPLE_TAGS = []
 
 
 @click.group()
@@ -49,7 +53,7 @@ def inbox(context, family, version, tag, inbox_path):
         context.abort()
 
     files = context.obj["deliver_api"].get_post_analysis_family_files(
-        family=family, version=version, tags=tag
+        family=family, family_tags=FAMILY_TAGS, version=version, tags=tag
     )
     if not files:
         LOG.warning("No case files found")
@@ -81,7 +85,11 @@ def inbox(context, family, version, tag, inbox_path):
     for family_sample in link_obj:
         sample_obj = family_sample.sample
         files = context.obj["deliver_api"].get_post_analysis_sample_files(
-            family=family, sample=sample_obj.internal_id, version=version, tag=tag
+            family=family,
+            sample=sample_obj.internal_id,
+            sample_tags=SAMPLE_TAGS,
+            version=version,
+            tag=tag,
         )
 
         if not files:
