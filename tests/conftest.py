@@ -174,34 +174,34 @@ def base_store(store) -> Store:
     store.add_commit(customers)
     applications = [
         store.add_application(
-            tag="WGXCUSC000", 
-            category="wgs", 
-            description="External WGS", 
-            sequencing_depth=0, 
-            is_external=True, 
+            tag="WGXCUSC000",
+            category="wgs",
+            description="External WGS",
+            sequencing_depth=0,
+            is_external=True,
             percent_kth=80
         ),
         store.add_application(
-            tag="EXXCUSR000", 
-            category="wes", 
-            description="External WES", 
-            sequencing_depth=0, 
-            is_external=True, 
+            tag="EXXCUSR000",
+            category="wes",
+            description="External WES",
+            sequencing_depth=0,
+            is_external=True,
             percent_kth=80
         ),
         store.add_application(
-            tag="WGSPCFC060", 
-            category="wgs", 
-            description="WGS, double", 
-            sequencing_depth=30, 
-            accredited=True, 
+            tag="WGSPCFC060",
+            category="wgs",
+            description="WGS, double",
+            sequencing_depth=30,
+            accredited=True,
             percent_kth=80
         ),
         store.add_application(
-            tag="RMLS05R150", 
-            category="rml", 
-            description="Ready-made", 
-            sequencing_depth=0, 
+            tag="RMLS05R150",
+            category="rml",
+            description="Ready-made",
+            sequencing_depth=0,
             percent_kth=80
         ),
         store.add_application(
@@ -231,10 +231,10 @@ def base_store(store) -> Store:
             percent_kth=80
         ),
         store.add_application(
-            tag="MWRNXTR003", 
-            category="mic", 
-            description="Microbial whole genome ", 
-            sequencing_depth=0, 
+            tag="MWRNXTR003",
+            category="mic",
+            description="Microbial whole genome ",
+            sequencing_depth=0,
             percent_kth=80
         ),
         store.add_application(
