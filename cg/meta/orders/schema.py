@@ -150,7 +150,7 @@ BALSAMIC_SAMPLE = {
     "container_name": OptionalNone(TypeValidatorNone(str)),
     "well_position": OptionalNone(TypeValidatorNone(str)),
     # This information is required for panel analysis
-    "capture_kit": str,
+    "capture_kit": OptionalNone(TypeValidatorNone(str)),
     # This information is required for panel- or exome analysis
     "elution_buffer": OptionalNone(TypeValidatorNone(str)),
     "tumour_purity": OptionalNone(TypeValidatorNone(str)),
