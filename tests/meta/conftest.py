@@ -154,7 +154,7 @@ class MockFile:
         self.tags = tags or []
 
     def all(self):
-        return MockFile()
+        return [MockFile()]
 
     def first(self):
         return MockFile()
