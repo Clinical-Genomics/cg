@@ -234,7 +234,7 @@ def ensure_application_version(disk_store, application_tag='dummy_tag', is_exter
     if not application:
         application = disk_store.add_application(tag=application_tag, category='wgs',
                                                  description='dummy_description',
-                                                 is_external=is_external)
+                                                 is_external=is_external, percent_kth=80)
         disk_store.add_commit(application)
 
     prices = {'standard': 10, 'priority': 20, 'express': 30, 'research': 5}

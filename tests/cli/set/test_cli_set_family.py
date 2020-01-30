@@ -91,7 +91,7 @@ def add_panel(store, panel_id='panel_test', customer_id='cust_test'):
 def add_application(store, application_tag='dummy_tag'):
     """utility function to set an application to use in tests"""
     application = store.add_application(tag=application_tag, category='wgs',
-                                        description='dummy_description')
+                                        description='dummy_description', percent_kth=80)
     store.add_commit(application)
     prices = {'standard': 10, 'priority': 20, 'express': 30, 'research': 5}
     version = store.add_version(application, 1, valid_from=datetime.now(),
@@ -106,7 +106,7 @@ def ensure_application_version(store, application_tag='dummy_tag'):
     application = store.application(tag=application_tag)
     if not application:
         application = store.add_application(tag=application_tag, category='wgs',
-                                            description='dummy_description')
+                                            description='dummy_description', percent_kth=80)
         store.add_commit(application)
 
     prices = {'standard': 10, 'priority': 20, 'express': 30, 'research': 5}

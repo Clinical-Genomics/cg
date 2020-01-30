@@ -117,7 +117,6 @@ class ApplicationImporter(Store):
             priority_processing=data['priority_processing'],
             details=data['details'],
             limitations=data['limitations'],
-            percent_kth=data['percent_kth'],
             comment=data['comment'],
             created_at=data['created_at'],
             updated_at=data['updated_at'],
@@ -127,6 +126,7 @@ class ApplicationImporter(Store):
             category=data['category'],
             description=data['description'],
             is_accredited=data['is_accredited'],
+            percent_kth=data['percent_kth'],
             **kwargs,
         )
         for version in data['versions']:

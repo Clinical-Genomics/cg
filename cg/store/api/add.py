@@ -39,7 +39,7 @@ class AddHandler(BaseHandler):
         new_user.customer = customer
         return new_user
 
-    def add_application(self, tag: str, category: str, description: str,
+    def add_application(self, tag: str, category: str, description: str, percent_kth: int,
                         is_accredited: bool = False, **kwargs) -> models.Application:
         """Build a new application  record."""
 
@@ -48,6 +48,7 @@ class AddHandler(BaseHandler):
             prep_category=category,
             description=description,
             is_accredited=is_accredited,
+            percent_kth=percent_kth,
             **kwargs,
         )
         return new_record

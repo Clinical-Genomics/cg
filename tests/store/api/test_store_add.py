@@ -93,7 +93,8 @@ def test_add_pool(store: Store):
                                       invoice_address='skolgatan 15', invoice_reference='abc')
     store.add_commit(new_customer)
 
-    application = store.add_application('RMLS05R150', 'rml', 'Ready-made', sequencing_depth=0)
+    application = store.add_application(tag='RMLS05R150', category='rml', description='Ready-made', 
+                                        percent_kth=80, sequencing_depth=0)
     store.add_commit(application)
 
     app_version = store.add_version(application=application, version=1, valid_from=dt.today(),

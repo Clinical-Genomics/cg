@@ -174,47 +174,76 @@ def base_store(store) -> Store:
     store.add_commit(customers)
     applications = [
         store.add_application(
-            "WGXCUSC000", "wgs", "External WGS", sequencing_depth=0, is_external=True
+            tag="WGXCUSC000", 
+            category="wgs", 
+            description="External WGS", 
+            sequencing_depth=0, 
+            is_external=True, 
+            percent_kth=80
         ),
         store.add_application(
-            "EXXCUSR000", "wes", "External WES", sequencing_depth=0, is_external=True
+            tag="EXXCUSR000", 
+            category="wes", 
+            description="External WES", 
+            sequencing_depth=0, 
+            is_external=True, 
+            percent_kth=80
         ),
         store.add_application(
-            "WGSPCFC060", "wgs", "WGS, double", sequencing_depth=30, accredited=True
+            tag="WGSPCFC060", 
+            category="wgs", 
+            description="WGS, double", 
+            sequencing_depth=30, 
+            accredited=True, 
+            percent_kth=80
         ),
-        store.add_application("RMLS05R150", "rml", "Ready-made", sequencing_depth=0),
         store.add_application(
-            "WGTPCFC030",
-            "wgs",
-            "WGS trio",
+            tag="RMLS05R150", 
+            category="rml", 
+            description="Ready-made", 
+            sequencing_depth=0, 
+            percent_kth=80
+        ),
+        store.add_application(
+            tag="WGTPCFC030",
+            category="wgs",
+            description="WGS trio",
             is_accredited=True,
             sequencing_depth=30,
             target_reads=300000000,
             limitations="some",
+            percent_kth=80
         ),
         store.add_application(
-            "METLIFR020",
-            "wgs",
-            "Whole genome metagenomics",
+            tag="METLIFR020",
+            category="wgs",
+            description="Whole genome metagenomics",
             sequencing_depth=0,
             target_reads=40000000,
+            percent_kth=80
         ),
         store.add_application(
-            "METNXTR020",
-            "wgs",
-            "Metagenomics",
+            tag="METNXTR020",
+            category="wgs",
+            description="Metagenomics",
             sequencing_depth=0,
             target_reads=20000000,
+            percent_kth=80
         ),
         store.add_application(
-            "MWRNXTR003", "mic", "Microbial whole genome ", sequencing_depth=0
+            tag="MWRNXTR003", 
+            category="mic", 
+            description="Microbial whole genome ", 
+            sequencing_depth=0, 
+            percent_kth=80
         ),
         store.add_application(
-            "RNAPOAR025",
-            "tgs",
-            "RNA seq, poly-A based priming",
+            tag="RNAPOAR025",
+            category="tgs",
+            description="RNA seq, poly-A based priming",
+            percent_kth=80,
             sequencing_depth=25,
-            accredited=True,
+            accredited=True
         ),
     ]
 
