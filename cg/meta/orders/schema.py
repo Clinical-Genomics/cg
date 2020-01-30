@@ -144,7 +144,6 @@ BALSAMIC_SAMPLE = {
     "family_name": validators.RegexValidator(NAME_PATTERN),
     "require_qcok": bool,
     "tumour": bool,
-    "elution_buffer": str,
     "source": OptionalNone(TypeValidatorNone(str)),
     "priority": OptionalNone(validators.Any(PRIORITY_OPTIONS)),
     # Required if Plate for new samples
