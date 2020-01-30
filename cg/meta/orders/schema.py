@@ -144,14 +144,13 @@ BALSAMIC_SAMPLE = {
     "family_name": validators.RegexValidator(NAME_PATTERN),
     "require_qcok": bool,
     "tumour": bool,
-    "elution_buffer": str,
     "source": OptionalNone(TypeValidatorNone(str)),
     "priority": OptionalNone(validators.Any(PRIORITY_OPTIONS)),
     # Required if Plate for new samples
     "container_name": OptionalNone(TypeValidatorNone(str)),
     "well_position": OptionalNone(TypeValidatorNone(str)),
     # This information is required for panel analysis
-    "capture_kit": str,
+    "capture_kit": OptionalNone(TypeValidatorNone(str)),
     # This information is required for panel- or exome analysis
     "elution_buffer": OptionalNone(TypeValidatorNone(str)),
     "tumour_purity": OptionalNone(TypeValidatorNone(str)),
