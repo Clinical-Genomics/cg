@@ -70,7 +70,7 @@ class Application(Model):
     priority_processing = Column(types.Boolean, default=False)
     details = Column(types.Text)
     limitations = Column(types.Text)
-    percent_kth = Column(types.Integer)
+    percent_kth = Column(types.Integer, nullable=False)
     comment = Column(types.Text)
     is_archived = Column(types.Boolean, default=False)
 
