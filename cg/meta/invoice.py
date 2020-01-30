@@ -137,9 +137,10 @@ class InvoiceAPI():
         except ValueError:
             self.log.append(f'Application tag/version seems to be missing for sample {record.id}.')
             return None
-
+        
         split_discounted_price = self._cost_center_split_factor(discounted_price, costcenter,
                                                                 percent_kth, tag, version)
+
 
         order = record.microbial_order.id if self.record_type == 'Microbial' else record.order
         ticket_number = record.microbial_order.ticket_number if self.record_type == 'Microbial' \
@@ -147,7 +148,7 @@ class InvoiceAPI():
         lims_id = None if self.record_type == 'Pool' else record.internal_id
         priority = 'research' if self.record_type == 'Pool' else record.priority_human
 
-        return {
+        invoice_info = {
             'name': record.name,
             'lims_id': lims_id,
             'id': record.id,
@@ -156,6 +157,11 @@ class InvoiceAPI():
             'date': record.received_at.date() if record.received_at else '',
             'price': split_discounted_price,
             'priority': priority}
+        if costcenter=='ki':
+            invoice_info['price_kth'] = self._cost_center_split_factor(discounted_price, 'kth',
+                                                                percent_kth, tag, version)
+            invoice_info['total_price'] = discounted_price    
+        return invoice_info
 
     def total_price(self) -> float:
         """Get the total price for all records in the invoice"""

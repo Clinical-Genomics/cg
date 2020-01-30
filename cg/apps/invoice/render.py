@@ -35,16 +35,14 @@ def render_xlsx(data: dict) -> Workbook:
         }
     """
     pkg_dir = __name__.rpartition('.')[0]
-    if data['pooled_samples']:
-        template_path = resource_filename(pkg_dir, 'templates/pool_invoice.xlsx')
-    else:
-        template_path = resource_filename(pkg_dir, 'templates/sample_invoice.xlsx')
+    sample_type = 'pool' if data['pooled_samples'] else 'sample'
+    costcenter = data['costcenter']
+    template_path = resource_filename(pkg_dir, f'templates/{costcenter}_{sample_type}_invoice.xlsx')
     workbook = load_workbook(template_path)
-
     if data['pooled_samples']:
         worksheet = workbook['Bilaga Prover']
-        worksheet['C1'] = data['costcenter'].upper()
-        worksheet['F1'] = f"{data['invoice_id']}-{data['costcenter']}"
+        worksheet['C1'] = costcenter.upper()
+        worksheet['F1'] = f"{data['invoice_id']}-{costcenter}"
         worksheet['F2'] = dt.datetime.today().date()
 
         samples_start = 7
@@ -58,7 +56,7 @@ def render_xlsx(data: dict) -> Workbook:
             worksheet[f"C{row}"] = total_reads
             worksheet[f"D{row}"] = str(pool_name)
 
-        for column in ['A', 'B', 'C', 'D', 'E', 'F', 'G']:
+        for column in 'ABCDEFG':
             cell = worksheet[f"{column}{6}"]
             cell.font = Font(bold=True)
             cell.border = Border(top=Side(border_style='thin', color='000000'),
@@ -72,8 +70,8 @@ def render_xlsx(data: dict) -> Workbook:
     for col_dimension in worksheet.column_dimensions.values():
         col_dimension.width = 18
 
-    worksheet['C1'] = data['costcenter'].upper()
-    worksheet['F1'] = f"{data['invoice_id']}-{data['costcenter']}"
+    worksheet['C1'] = costcenter.upper()
+    worksheet['F1'] = f"{data['invoice_id']}-{costcenter}"
     worksheet['F2'] = dt.datetime.today().date()
     worksheet['C7'] = data['project_number']
     worksheet['C13'] = data['contact']['name']
@@ -98,13 +96,20 @@ def render_xlsx(data: dict) -> Workbook:
         worksheet[f"E{row}"] = record_data['project']
         worksheet[f"F{row}"] = record_data['date']
         worksheet[f"G{row}"] = round(record_data['price'])
+        if costcenter=='KI':
+            worksheet[f"H{row}"] = round(record_data['price_kth'])
+            worksheet[f"I{row}"] = round(record_data['total_price'])
 
     worksheet[f"F{row + 2}"] = 'Total:'
     worksheet[f"G{row + 2}"] = f"=SUM(G{samples_start}: G{row})"
+    if costcenter=='KI':
+        worksheet[f"H{row + 2}"] = f"=SUM(H{samples_start}: H{row})"
+        worksheet[f"I{row + 2}"] = f"=SUM(I{samples_start}: I{row})"
 
     header_rows = [5, 12, 19, 23, row + 2]
+    used_columns = 'ABCDEFGHI' if costcenter=='KI' else 'ABCDEFG'
     for header_row in header_rows:
-        for column in ['A', 'B', 'C', 'D', 'E', 'F', 'G']:
+        for column in used_columns:
             cell = worksheet[f"{column}{header_row}"]
             cell.font = Font(bold=True, size=14)
             cell.border = Border(top=Side(border_style='thin', color='000000'),
