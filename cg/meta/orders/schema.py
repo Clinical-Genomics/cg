@@ -9,7 +9,6 @@ from cg.constants import (
     STATUS_OPTIONS,
     CAPTUREKIT_OPTIONS,
     CONTAINER_OPTIONS,
-    CAPTUREKIT_CANCER_OPTIONS,
 )
 
 
@@ -119,7 +118,7 @@ MIP_SAMPLE = {
     "mother": OptionalNone(RegexValidatorNone(NAME_PATTERN)),
     "father": OptionalNone(RegexValidatorNone(NAME_PATTERN)),
     # This information is required for panel analysis
-    "capture_kit": OptionalNone(validators.Any(CAPTUREKIT_CANCER_OPTIONS)),
+    "capture_kit": OptionalNone(TypeValidatorNone(str)),
     # This information is required for panel- or exome analysis
     "elution_buffer": OptionalNone(TypeValidatorNone(str)),
     "tumour_purity": OptionalNone(TypeValidatorNone(str)),
@@ -181,7 +180,7 @@ EXTERNAL_SAMPLE = {
     "data_analysis": str,
     # "required for new samples"
     "name": validators.RegexValidator(NAME_PATTERN),
-    "capture_kit": OptionalNone(validators.Any(CAPTUREKIT_OPTIONS)),
+    "capture_kit": OptionalNone(TypeValidatorNone(str)),
     "application": str,
     "sex": OptionalNone(validators.Any(SEX_OPTIONS)),
     "family_name": validators.RegexValidator(NAME_PATTERN),
