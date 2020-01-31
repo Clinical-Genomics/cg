@@ -12,13 +12,18 @@ class DeliverAPI:
     """Deliver API for workflows"""
 
     def __init__(
-        self, db: Store, hk_api: hk.HousekeeperAPI, lims_api: lims.LimsAPI, family_tags
+        self,
+        db: Store,
+        hk_api: hk.HousekeeperAPI,
+        lims_api: lims.LimsAPI,
+        family_tags: [str],
+        sample_tags: [str],
     ):
         self.store = db
         self.hk_api = hk_api
         self.lims = lims_api
         self.family_tags = family_tags
-        self.family_tags = family_tags
+        self.sample_tags = sample_tags
 
     def get_post_analysis_files(self, family: str, version, tags: list):
 
@@ -64,7 +69,7 @@ class DeliverAPI:
             if not any(tag.name == sample for tag in file_obj.tags):
                 continue
 
-            if any(tag.name in sample_tags for tag in file_obj.tags):
+            if any(tag.name in self.sample_tags for tag in file_obj.tags):
                 sample_files.append(file_obj)
 
         return sample_files

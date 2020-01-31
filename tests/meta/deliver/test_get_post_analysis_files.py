@@ -35,7 +35,7 @@ def test_get_post_analysis_family_files(analysis_family, deliver_api):
     # GIVEN family exist in as bundle in hk
     # GIVEN tags exist on those files
     family = analysis_family["internal_id"]
-    deliver_tags = ["sv-bcf-index"]
+    deliver_tags = ["gbcf"]
 
     # WHEN we call get_post_analysis_family_files with matching case and file-tags
     version = None

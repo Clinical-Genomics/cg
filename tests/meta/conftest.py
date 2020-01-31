@@ -159,7 +159,7 @@ class MockFile:
                 self._tags.append(MockTag(tag))
 
     def all(self):
-        return [MockFile(tags=FAMILY_TAGS[0])]
+        return [MockFile(tags=["sv-bcf"])]
 
     def first(self):
         return MockFile()
