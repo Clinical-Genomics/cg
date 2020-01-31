@@ -9,7 +9,6 @@ from cg.constants import (
     STATUS_OPTIONS,
     CAPTUREKIT_OPTIONS,
     CONTAINER_OPTIONS,
-    CAPTUREKIT_CANCER_OPTIONS,
 )
 
 
@@ -119,7 +118,7 @@ MIP_SAMPLE = {
     "mother": OptionalNone(RegexValidatorNone(NAME_PATTERN)),
     "father": OptionalNone(RegexValidatorNone(NAME_PATTERN)),
     # This information is required for panel analysis
-    "capture_kit": OptionalNone(validators.Any(CAPTUREKIT_CANCER_OPTIONS)),
+    "capture_kit": OptionalNone(TypeValidatorNone(str)),
     # This information is required for panel- or exome analysis
     "elution_buffer": OptionalNone(TypeValidatorNone(str)),
     "tumour_purity": OptionalNone(TypeValidatorNone(str)),
@@ -145,14 +144,13 @@ BALSAMIC_SAMPLE = {
     "family_name": validators.RegexValidator(NAME_PATTERN),
     "require_qcok": bool,
     "tumour": bool,
-    "elution_buffer": str,
     "source": OptionalNone(TypeValidatorNone(str)),
     "priority": OptionalNone(validators.Any(PRIORITY_OPTIONS)),
     # Required if Plate for new samples
     "container_name": OptionalNone(TypeValidatorNone(str)),
     "well_position": OptionalNone(TypeValidatorNone(str)),
     # This information is required for panel analysis
-    "capture_kit": str,
+    "capture_kit": OptionalNone(TypeValidatorNone(str)),
     # This information is required for panel- or exome analysis
     "elution_buffer": OptionalNone(TypeValidatorNone(str)),
     "tumour_purity": OptionalNone(TypeValidatorNone(str)),
@@ -181,7 +179,7 @@ EXTERNAL_SAMPLE = {
     "data_analysis": str,
     # "required for new samples"
     "name": validators.RegexValidator(NAME_PATTERN),
-    "capture_kit": OptionalNone(validators.Any(CAPTUREKIT_OPTIONS)),
+    "capture_kit": OptionalNone(TypeValidatorNone(str)),
     "application": str,
     "sex": OptionalNone(validators.Any(SEX_OPTIONS)),
     "family_name": validators.RegexValidator(NAME_PATTERN),
@@ -203,7 +201,7 @@ EXTERNAL_SAMPLE = {
 }
 
 FASTQ_SAMPLE = {
-    # Orderform 1508:18
+    # Orderform 1508:?
     # "required"
     "name": validators.RegexValidator(NAME_PATTERN),
     "container": OptionalNone(validators.Any(CONTAINER_OPTIONS)),
@@ -222,6 +220,7 @@ FASTQ_SAMPLE = {
     # "Required if data analysis in Scout or vcf delivery" => not valid for fastq
     # 'panels': ListValidator(str, min_items=1),
     # 'status': OptionalNone(validators.Any(STATUS_OPTIONS),
+    "elution_buffer": str,
     # "Required if samples are part of trio/family"
     "mother": OptionalNone(RegexValidatorNone(NAME_PATTERN)),
     "father": OptionalNone(RegexValidatorNone(NAME_PATTERN)),
