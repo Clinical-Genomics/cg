@@ -40,16 +40,11 @@ class DeliverAPI:
         """Link files from HK to cust inbox."""
 
         tagged_files = self.get_post_analysis_files(family, version, tags)
-        print(tagged_files)
         family_obj = self.store.family_samples(family)
-        print(family_obj)
         sample_ids = [family_sample.sample.internal_id for family_sample in family_obj]
-        print(sample_ids)
 
         family_files = []
         for file_obj in tagged_files:
-
-            print(file_obj)
 
             if any(tag.name in sample_ids for tag in file_obj.tags):
                 continue

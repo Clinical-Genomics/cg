@@ -158,12 +158,6 @@ class MockFile:
             for tag in tags:
                 self._tags.append(MockTag(tag))
 
-    def all(self):
-        return [MockFile(tags=["sv-bcf"])]
-
-    def first(self):
-        return MockFile()
-
     def full_path(self):
         return ""
 
@@ -173,6 +167,19 @@ class MockFile:
     @property
     def tags(self):
         return self._tags
+
+
+class MockFiles:
+    """Mock file objects"""
+
+    def __init__(self, files):
+        self._files = files
+
+    def all(self):
+        return self._files
+
+    def first(self):
+        return self._files[0]
 
 
 class MockTag:
@@ -190,16 +197,24 @@ class MockHouseKeeper(HousekeeperAPI):
     """Mock the housekeeper API"""
 
     # In this mock we want to override __init__ so disable here
-    def __init__(self):
+    def __init__(self, files: MockFiles = None):
         self._file_added = False
         self._file_included = False
-        self._files = []
+        self._files = MockFiles([])
+        if files:
+            self._files = files
         self._file = MockFile()
 
     # This is overriding a housekeeper object so ok to not include all arguments
     def files(self, bundle, version, tags):
         """Mock the files method to return a list of files"""
-        return self._file
+        files = []
+
+        for file in self._files.all():
+            if any(tag.name in tags for tag in file.tags):
+                files.append(file)
+
+        return MockFiles(files)
 
     def get_files(self, bundle, tags, version="1.0"):
         """Mock the get_files method to return a list of files"""
@@ -393,14 +408,16 @@ def deliver_api(analysis_store):
     lims_mock = MockLims()
     hk_mock = MockHouseKeeper()
     hk_mock.add_file(file="/mock/path", version_obj="", tag_name="")
+    hk_mock._files = MockFiles(
+        [MockFile(tags=["case-tag"]), MockFile(tags=["sample-tag", "ADM1"])]
+    )
 
-    family_tags = ["sv-bcf", "sv-bcf-index"]
     _api = DeliverAPI(
         db=analysis_store,
         hk_api=hk_mock,
         lims_api=lims_mock,
-        family_tags=FAMILY_TAGS,
-        sample_tags=SAMPLE_TAGS,
+        family_tags=["case-tag"],
+        sample_tags=["sample-tag"],
     )
 
     yield _api
