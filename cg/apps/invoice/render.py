@@ -68,7 +68,10 @@ def render_xlsx(data: dict) -> Workbook:
     for row_dimension in worksheet.row_dimensions.values():
         row_dimension.height = 30
     for col_dimension in worksheet.column_dimensions.values():
-        col_dimension.width = 18
+        if col_dimension.index in 'GHI':
+            col_dimension.width = 10
+        else:
+            col_dimension.width = 18
 
     worksheet['C1'] = costcenter.upper()
     worksheet['F1'] = f"{data['invoice_id']}-{costcenter}"
@@ -96,13 +99,12 @@ def render_xlsx(data: dict) -> Workbook:
         worksheet[f"E{row}"] = record_data['project']
         worksheet[f"F{row}"] = record_data['date']
         worksheet[f"G{row}"] = round(record_data['price'])
-        if costcenter=='KI':
+        if costcenter == 'KI':
             worksheet[f"H{row}"] = round(record_data['price_kth'])
             worksheet[f"I{row}"] = round(record_data['total_price'])
-
     worksheet[f"F{row + 2}"] = 'Total:'
     worksheet[f"G{row + 2}"] = f"=SUM(G{samples_start}: G{row})"
-    if costcenter=='KI':
+    if costcenter == 'KI':
         worksheet[f"H{row + 2}"] = f"=SUM(H{samples_start}: H{row})"
         worksheet[f"I{row + 2}"] = f"=SUM(I{samples_start}: I{row})"
 

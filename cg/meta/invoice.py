@@ -137,7 +137,7 @@ class InvoiceAPI():
         except ValueError:
             self.log.append(f'Application tag/version seems to be missing for sample {record.id}.')
             return None
-        
+
         split_discounted_price = self._cost_center_split_factor(discounted_price, costcenter,
                                                                 percent_kth, tag, version)
 
@@ -157,10 +157,11 @@ class InvoiceAPI():
             'date': record.received_at.date() if record.received_at else '',
             'price': split_discounted_price,
             'priority': priority}
-        if costcenter=='ki':
-            invoice_info['price_kth'] = self._cost_center_split_factor(discounted_price, 'kth',
-                                                                percent_kth, tag, version)
-            invoice_info['total_price'] = discounted_price    
+        if costcenter == 'ki':
+            price_kth = self._cost_center_split_factor(discounted_price, 'kth',
+                                                       percent_kth, tag, version)
+            invoice_info['price_kth'] = price_kth
+            invoice_info['total_price'] = discounted_price
         return invoice_info
 
     def total_price(self) -> float:
