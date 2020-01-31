@@ -11,7 +11,11 @@ import click
 from cg.apps import hk, scoutapi, lims, tb
 from cg.apps.balsamic.fastq import FastqHandler
 from cg.cli.workflow.balsamic.store import store as store_cmd
-from cg.cli.workflow.balsamic.deliver import deliver as deliver_cmd
+from cg.cli.workflow.balsamic.deliver import (
+    deliver as deliver_cmd,
+    CASE_TAGS,
+    SAMPLE_TAGS,
+)
 from cg.cli.workflow.get_links import get_links
 from cg.exc import LimsDataError, BalsamicStartError
 from cg.meta.deliver import DeliverAPI
@@ -44,7 +48,13 @@ def balsamic(context, case_id, priority, email, target_bed):
     scout_api = scoutapi.ScoutAPI(context.obj)
     lims_api = lims.LimsAPI(context.obj)
     tb_api = tb.TrailblazerAPI(context.obj)
-    deliver = DeliverAPI(context.obj, hk_api=context.obj["hk_api"], lims_api=lims_api)
+    deliver = DeliverAPI(
+        context.obj,
+        hk_api=context.obj["hk_api"],
+        lims_api=lims_api,
+        case_tags=CASE_TAGS,
+        sample_tags=SAMPLE_TAGS,
+    )
 
     context.obj["analysis_api"] = AnalysisAPI(
         db=context.obj["db"],
