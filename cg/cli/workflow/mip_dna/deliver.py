@@ -46,6 +46,8 @@ def deliver(context):
         db=context.obj["db"],
         hk_api=hk.HousekeeperAPI(context.obj),
         lims_api=lims.LimsAPI(context.obj),
+        family_tags=FAMILY_TAGS,
+        sample_tags=SAMPLE_TAGS,
     )
 
 
@@ -74,7 +76,7 @@ def inbox(context, family, version, tag, inbox_path):
         context.abort()
 
     files = context.obj["deliver_api"].get_post_analysis_family_files(
-        family=family, family_tags=FAMILY_TAGS, version=version, tags=tag
+        family=family, version=version, tags=tag
     )
     if not files:
         LOG.warning("No case files found")
@@ -103,11 +105,7 @@ def inbox(context, family, version, tag, inbox_path):
     for family_sample in link_obj:
         sample_obj = family_sample.sample
         files = context.obj["deliver_api"].get_post_analysis_sample_files(
-            family=family,
-            sample=sample_obj.internal_id,
-            sample_tags=SAMPLE_TAGS,
-            version=version,
-            tag=tag,
+            family=family, sample=sample_obj.internal_id, version=version, tag=tag
         )
 
         if not files:

@@ -8,6 +8,8 @@ from cg.apps.tb import TrailblazerAPI
 from cg.meta.deliver import DeliverAPI
 from cg.meta.workflow.mip_dna import AnalysisAPI
 
+from cg.cli.workflow.mip_dna.deliver import FAMILY_TAGS, SAMPLE_TAGS
+
 
 @pytest.yield_fixture(scope="function")
 def scout_store():
@@ -151,10 +153,13 @@ class MockFile:
     def __init__(self, path="", to_archive=False, tags=None):
         self.path = path
         self.to_archive = to_archive
-        self.tags = tags or []
+        self._tags = []
+        if tags:
+            for tag in tags:
+                self._tags.append(MockTag(tag))
 
     def all(self):
-        return [MockFile()]
+        return [MockFile(tags=FAMILY_TAGS[0])]
 
     def first(self):
         return MockFile()
@@ -164,6 +169,21 @@ class MockFile:
 
     def is_included(self):
         return False
+
+    @property
+    def tags(self):
+        return self._tags
+
+
+class MockTag:
+    """Mock a file object"""
+
+    def __init__(self, name):
+        self._name = name
+
+    @property
+    def name(self):
+        return self._name
 
 
 class MockHouseKeeper(HousekeeperAPI):
@@ -374,6 +394,13 @@ def deliver_api(analysis_store):
     hk_mock = MockHouseKeeper()
     hk_mock.add_file(file="/mock/path", version_obj="", tag_name="")
 
-    _api = DeliverAPI(db=analysis_store, hk_api=hk_mock, lims_api=lims_mock)
+    family_tags = ["sv-bcf", "sv-bcf-index"]
+    _api = DeliverAPI(
+        db=analysis_store,
+        hk_api=hk_mock,
+        lims_api=lims_mock,
+        family_tags=FAMILY_TAGS,
+        sample_tags=SAMPLE_TAGS,
+    )
 
     yield _api
