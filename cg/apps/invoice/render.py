@@ -109,7 +109,7 @@ def render_xlsx(data: dict) -> Workbook:
         worksheet[f"I{row + 2}"] = f"=SUM(I{samples_start}: I{row})"
 
     header_rows = [5, 12, 19, 23, row + 2]
-    used_columns = 'ABCDEFGHI' if costcenter=='KI' else 'ABCDEFG'
+    used_columns = 'ABCDEFGHI' if costcenter == 'KI' else 'ABCDEFG'
     for header_row in header_rows:
         for column in used_columns:
             cell = worksheet[f"{column}{header_row}"]
