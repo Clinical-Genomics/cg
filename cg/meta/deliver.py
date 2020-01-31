@@ -1,4 +1,4 @@
-"""Module for deliveries for workflows"""
+"""Module for deliveries of workflow files"""
 
 import logging
 
@@ -9,55 +9,53 @@ LOG = logging.getLogger(__name__)
 
 
 class DeliverAPI:
-    """Deliver API for workflows"""
+    """Deliver API for workflows files"""
 
     def __init__(
         self,
         db: Store,
         hk_api: hk.HousekeeperAPI,
         lims_api: lims.LimsAPI,
-        family_tags: [str],
+        case_tags: [str],
         sample_tags: [str],
     ):
         self.store = db
         self.hk_api = hk_api
         self.lims = lims_api
-        self.family_tags = family_tags
+        self.case_tags = case_tags
         self.sample_tags = sample_tags
 
-    def get_post_analysis_files(self, family: str, version, tags: list):
+    def get_post_analysis_files(self, case: str, version, tags: list):
 
         if not version:
-            last_version = self.hk_api.last_version(bundle=family)
+            last_version = self.hk_api.last_version(bundle=case)
         else:
-            last_version = self.hk_api.version(bundle=family, date=version)
+            last_version = self.hk_api.version(bundle=case, date=version)
 
-        return self.hk_api.files(
-            bundle=family, version=last_version.id, tags=tags
-        ).all()
+        return self.hk_api.files(bundle=case, version=last_version.id, tags=tags).all()
 
-    def get_post_analysis_family_files(self, family: str, version, tags):
+    def get_post_analysis_case_files(self, case: str, version, tags):
         """Link files from HK to cust inbox."""
 
-        tagged_files = self.get_post_analysis_files(family, version, tags)
-        family_obj = self.store.family_samples(family)
-        sample_ids = [family_sample.sample.internal_id for family_sample in family_obj]
+        tagged_files = self.get_post_analysis_files(case, version, tags)
+        case_obj = self.store.family_samples(case)
+        sample_ids = [case_sample.sample.internal_id for case_sample in case_obj]
 
-        family_files = []
+        case_files = []
         for file_obj in tagged_files:
 
             if any(tag.name in sample_ids for tag in file_obj.tags):
                 continue
 
-            if any(tag.name in self.family_tags for tag in file_obj.tags):
-                family_files.append(file_obj)
+            if any(tag.name in self.case_tags for tag in file_obj.tags):
+                case_files.append(file_obj)
 
-        return family_files
+        return case_files
 
-    def get_post_analysis_sample_files(self, family: str, sample: str, version, tag):
+    def get_post_analysis_sample_files(self, case: str, sample: str, version, tag):
         """Link files from HK to cust inbox."""
 
-        all_files = self.get_post_analysis_files(family, version, tag)
+        all_files = self.get_post_analysis_files(case, version, tag)
 
         sample_files = []
         for file_obj in all_files:

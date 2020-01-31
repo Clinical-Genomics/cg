@@ -8,8 +8,6 @@ from cg.apps.tb import TrailblazerAPI
 from cg.meta.deliver import DeliverAPI
 from cg.meta.workflow.mip_dna import AnalysisAPI
 
-from cg.cli.workflow.mip_dna.deliver import FAMILY_TAGS, SAMPLE_TAGS
-
 
 @pytest.yield_fixture(scope="function")
 def scout_store():
@@ -242,6 +240,10 @@ class MockHouseKeeper(HousekeeperAPI):
         """Overrides sqlalchemy method"""
         return file_obj
 
+    def get_root_dir(self):
+        """Overrides sqlalchemy method"""
+        return self._file
+
 
 class MockLims:
     """Mock lims fixture"""
@@ -286,7 +288,7 @@ class MockDeliver:
 
         return [MockFile(path=path)]
 
-    def get_post_analysis_family_files(self, family: str, version, tags):
+    def get_post_analysis_case_files(self, family: str, version, tags):
         return ""
 
     def get_post_analysis_files_root_dir(self):
@@ -416,7 +418,7 @@ def deliver_api(analysis_store):
         db=analysis_store,
         hk_api=hk_mock,
         lims_api=lims_mock,
-        family_tags=["case-tag"],
+        case_tags=["case-tag"],
         sample_tags=["sample-tag"],
     )
 
