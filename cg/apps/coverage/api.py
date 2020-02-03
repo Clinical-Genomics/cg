@@ -20,69 +20,67 @@ class ChanjoAPI:
         self.chanjo_binary = config["chanjo"]["binary_path"]
         self.process = Process(self.chanjo_binary, self.chanjo_config)
 
-    def upload(self, sample_id: str, sample_name: str, group_id: str, group_name: str,
-               bed_stream: io.TextIOWrapper):
+    def upload(
+        self,
+        sample_id: str,
+        sample_name: str,
+        group_id: str,
+        group_name: str,
+        bed_stream: io.TextIOWrapper,
+    ):
         """Upload coverage for a sample."""
 
         source = str(Path(bed_stream.name).absolute())
 
         load_parameters = [
             "load",
-            "--sample", sample_id,
-            "--name", sample_name,
-            "--group", group_id,
-            "--group-name", group_name,
-            "--threshold", 10,
-            source
+            "--sample",
+            sample_id,
+            "--name",
+            sample_name,
+            "--group",
+            group_id,
+            "--group-name",
+            group_name,
+            "--threshold",
+            10,
+            source,
         ]
 
         self.process.run_command(load_parameters)
 
-
     def sample(self, sample_id: str) -> dict:
         """Fetch sample from the database."""
 
-        sample_parameters = [
-            "db",
-            "samples"
-            "-s", sample_id
-        ]
+        sample_parameters = ["db", "samples" "-s", sample_id]
         self.process.run_command(sample_parameters)
-        sample = json.loads(self.process.stdout)
-        return sample
+        samples = json.loads(self.process.stdout)
+
+        for sample in samples:
+            if sample["id"] == sample_id:
+                return sample
+
+        return None
 
     def delete_sample(self, sample_id: str):
         """Delete sample from database."""
-        delete_parameters = [
-            "db",
-            "remove",
-            sample_id
-        ]
+        delete_parameters = ["db", "remove", sample_id]
         self.process.run_command(delete_parameters)
 
     def omim_coverage(self, samples: List[str]) -> dict:
         """Calculate omim coverage for samples"""
 
-        omim_parameters = [
-            "calculate",
-            "coverage",
-            "--omim"
-        ]
+        omim_parameters = ["calculate", "coverage", "--omim"]
         for sample_id in samples:
             omim_parameters.extend(["-s", sample_id])
         self.process.run_command(omim_parameters)
         data = json.loads(self.process.stdout)
         return data
 
-
     def sample_coverage(self, sample_id: str, panel_genes: list) -> dict:
         """Calculate coverage for samples."""
 
-        coverage_parameters = [
-            "calculate",
-            "coverage",
-            "-s", sample_id
-        ]
+        coverage_parameters = ["calculate", "coverage", "-s", sample_id]
         for gene_id in panel_genes:
             coverage_parameters.append(gene_id)
         self.process.run_command(coverage_parameters)

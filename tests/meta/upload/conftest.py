@@ -5,6 +5,7 @@ from cg.apps.hk import HousekeeperAPI
 from cg.meta.upload.mutacc import UploadToMutaccAPI
 from cg.meta.upload.observations import UploadObservationsAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
+from cg.meta.upload.coverage import UploadCoverageApi
 
 
 class MockVersion:
@@ -126,6 +127,35 @@ class MockAnalysis:
     def convert_panels(customer_id, panels):
         """Mock convert_panels"""
         return ""
+
+
+class MockCoverage:
+    """Mock chanjo coverage api"""
+
+    @staticmethod
+    def upload(*args, **kwargs):
+        """mock upload method"""
+        _, _ = args, kwargs
+
+    @staticmethod
+    def sample(*args, **kwargs):
+        """Mock sample method"""
+        _, _ = args, kwargs
+
+    @staticmethod
+    def delete_sample(*args, **kwargs):
+        """Mock delete_sample method"""
+        _, _ = args, kwargs
+
+    @staticmethod
+    def omim_coverage(*args, **kwargs):
+        """Mock omim_coverage method"""
+        _, _ = args, kwargs
+
+    @staticmethod
+    def sample_coverage(*args, **kwargs):
+        """Mock sample_coverage method"""
+        _, _ = args, kwargs
 
 
 class MockMutaccAuto:
@@ -267,6 +297,19 @@ def mutacc_upload_api():
 
     _api = UploadToMutaccAPI(scout_api=scout_api, mutacc_auto_api=mutacc_auto_api)
 
+    return _api
+
+
+@pytest.yield_fixture(scope="function")
+def coverage_upload_api():
+
+    hk_api = MockHouseKeeper()
+    hk_api.add_file(file="path", version_obj="", tag_name="")
+    status_api = None
+    coverage_api = MockCoverage()
+    _api = UploadCoverageApi(
+        status_api=status_api, hk_api=hk_api, chanjo_api=coverage_api
+    )
     return _api
 
 
