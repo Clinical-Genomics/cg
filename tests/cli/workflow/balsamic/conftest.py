@@ -134,7 +134,10 @@ def ensure_application_version(disk_store, application_tag="dummy_tag"):
     application = disk_store.application(tag=application_tag)
     if not application:
         application = disk_store.add_application(
-            tag=application_tag, category="wgs", percent_kth=80, description="dummy_description"
+            tag=application_tag,
+            category="wgs",
+            percent_kth=80,
+            description="dummy_description",
         )
         disk_store.add_commit(application)
 

@@ -179,7 +179,7 @@ def base_store(store) -> Store:
             description="External WGS",
             sequencing_depth=0,
             is_external=True,
-            percent_kth=80
+            percent_kth=80,
         ),
         store.add_application(
             tag="EXXCUSR000",
@@ -187,7 +187,7 @@ def base_store(store) -> Store:
             description="External WES",
             sequencing_depth=0,
             is_external=True,
-            percent_kth=80
+            percent_kth=80,
         ),
         store.add_application(
             tag="WGSPCFC060",
@@ -195,14 +195,14 @@ def base_store(store) -> Store:
             description="WGS, double",
             sequencing_depth=30,
             accredited=True,
-            percent_kth=80
+            percent_kth=80,
         ),
         store.add_application(
             tag="RMLS05R150",
             category="rml",
             description="Ready-made",
             sequencing_depth=0,
-            percent_kth=80
+            percent_kth=80,
         ),
         store.add_application(
             tag="WGTPCFC030",
@@ -212,7 +212,7 @@ def base_store(store) -> Store:
             sequencing_depth=30,
             target_reads=300000000,
             limitations="some",
-            percent_kth=80
+            percent_kth=80,
         ),
         store.add_application(
             tag="METLIFR020",
@@ -220,7 +220,7 @@ def base_store(store) -> Store:
             description="Whole genome metagenomics",
             sequencing_depth=0,
             target_reads=40000000,
-            percent_kth=80
+            percent_kth=80,
         ),
         store.add_application(
             tag="METNXTR020",
@@ -228,14 +228,14 @@ def base_store(store) -> Store:
             description="Metagenomics",
             sequencing_depth=0,
             target_reads=20000000,
-            percent_kth=80
+            percent_kth=80,
         ),
         store.add_application(
             tag="MWRNXTR003",
             category="mic",
             description="Microbial whole genome ",
             sequencing_depth=0,
-            percent_kth=80
+            percent_kth=80,
         ),
         store.add_application(
             tag="RNAPOAR025",
@@ -243,7 +243,7 @@ def base_store(store) -> Store:
             description="RNA seq, poly-A based priming",
             percent_kth=80,
             sequencing_depth=25,
-            accredited=True
+            accredited=True,
         ),
     ]
 
