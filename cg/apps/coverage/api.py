@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+"""Chanjo API"""
 from typing import List
 import logging
 import io
@@ -52,7 +52,7 @@ class ChanjoAPI:
     def sample(self, sample_id: str) -> dict:
         """Fetch sample from the database."""
 
-        sample_parameters = ["db", "samples" "-s", sample_id]
+        sample_parameters = ["db", "samples", "-s", sample_id]
         self.process.run_command(sample_parameters)
         samples = json.loads(self.process.stdout)
 

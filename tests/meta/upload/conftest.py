@@ -302,7 +302,7 @@ def mutacc_upload_api():
 
 @pytest.yield_fixture(scope="function")
 def coverage_upload_api():
-
+    """Fixture for coverage upload API"""
     hk_api = MockHouseKeeper()
     hk_api.add_file(file="path", version_obj="", tag_name="")
     status_api = None

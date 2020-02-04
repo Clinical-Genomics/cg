@@ -1,14 +1,15 @@
-# -*- coding: utf-8 -*-
+"""Upload coverage API"""
 import logging
-from pathlib import Path
 
 from cg.apps import hk, coverage
 from cg.store import models, Store
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
-class UploadCoverageApi(object):
+class UploadCoverageApi:
+    """Upload coverage API"""
+
     def __init__(
         self,
         status_api: Store,
@@ -16,7 +17,7 @@ class UploadCoverageApi(object):
         chanjo_api: coverage.ChanjoAPI,
     ):
         self.status = status_api
-        self.hk = hk_api
+        self.hk_api = hk_api
         self.chanjo = chanjo_api
 
     def data(self, analysis_obj: models.Analysis) -> dict:
@@ -29,8 +30,8 @@ class UploadCoverageApi(object):
         }
         for link_obj in analysis_obj.family.links:
             analysis_date = analysis_obj.started_at or analysis_obj.completed_at
-            hk_version = self.hk.version(family_id, analysis_date)
-            hk_coverage = self.hk.files(
+            hk_version = self.hk_api.version(family_id, analysis_date)
+            hk_coverage = self.hk_api.files(
                 version=hk_version.id, tags=[link_obj.sample.internal_id, "coverage"]
             ).first()
             data["samples"].append(
@@ -49,10 +50,12 @@ class UploadCoverageApi(object):
             if chanjo_sample and replace:
                 self.chanjo.delete_sample(sample_data["sample"])
             elif chanjo_sample:
-                log.warning(f"sample already loaded, skipping: {sample_data['sample']}")
+                LOG.warning(
+                    "sample already loaded, skipping: %s", sample_data["sample"]
+                )
                 continue
 
-            log.debug(f"upload coverage for sample: {sample_data['sample']}")
+            LOG.debug("upload coverage for sample: %s", sample_data["sample"])
             self.chanjo.upload(
                 sample_id=sample_data["sample"],
                 sample_name=sample_data["sample_name"],

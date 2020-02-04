@@ -8,7 +8,8 @@ from cg.utils.commands import Process
 CHANJO_CONFIG = {"chanjo": {"config_path": "config_path", "binary_path": "chanjo"}}
 
 
-def test_ChanjoAPI_init():
+def test_chanjo_api_init():
+    """Test __init__"""
     # GIVEN a config dict
 
     # WHEN instatiating a chanjo api
@@ -19,7 +20,8 @@ def test_ChanjoAPI_init():
     assert api.chanjo_binary == CHANJO_CONFIG["chanjo"]["binary_path"]
 
 
-def test_ChanjoAPI_upload(mocker):
+def test_chanjo_api_upload(mocker):
+    """Test upload method"""
     # GIVEN a process with a mocked run_command method
     sample_id = "sample_id"
     sample_name = "sample_name"
@@ -57,7 +59,7 @@ def test_ChanjoAPI_upload(mocker):
     )
 
 
-def test_ChanjoAPI_sample_existing(mocker, mock_process):
+def test_chanjo_api_sample_existing(mocker, mock_process):
     """Test sample method"""
 
     # GIVEN a mocked process with a mocked stdout and a chanjo api
@@ -81,7 +83,7 @@ def test_ChanjoAPI_sample_existing(mocker, mock_process):
     assert sample["id"] == sample_id
 
 
-def test_ChanjoAPI_sample_non_existing(mocker, mock_process):
+def test_chanjo_api_sample_non_existing(mocker, mock_process):
     """Test sample method"""
 
     # GIVEN a mocked process with a mocked stdout and a chanjo api
@@ -105,7 +107,7 @@ def test_ChanjoAPI_sample_non_existing(mocker, mock_process):
     assert sample is None
 
 
-def test_ChanjoAPI_delete_sample(mocker):
+def test_chanjo_api_delete_sample(mocker):
     """Test delete method"""
     # GIVEN a process with a mocked run_command method
     sample_id = "sample_id"
@@ -119,7 +121,7 @@ def test_ChanjoAPI_delete_sample(mocker):
     mocked_run_command.assert_called_once_with(["db", "remove", sample_id])
 
 
-def test_ChanjoAPI_omim_coverage(mocker, mock_process):
+def test_chanjo_api_omim_coverage(mocker, mock_process):
     """Test omim_coverage method"""
     # GIVEN a mocked process with a mocked stdout and a chanjo api
     sample_id = "sample_id"
@@ -150,7 +152,7 @@ def test_ChanjoAPI_omim_coverage(mocker, mock_process):
     assert samples[sample_id]["mean_completeness"] == mean_completeness
 
 
-def test_ChanjoAPI_coverage(mocker, mock_process):
+def test_chanjo_api_coverage(mocker, mock_process):
     """Test coverage method"""
     # GIVEN a mocked process with a mocked stdout and a chanjo api
     sample_id = "sample_id"
