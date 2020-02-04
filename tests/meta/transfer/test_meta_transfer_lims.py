@@ -17,14 +17,21 @@ def test_transfer_samples_received_at_overwriteable(transfer_lims_api):
     sample = sample_store.samples_to_deliver().first()
     assert sample.received_at
     new_date = dt.datetime.today()
-    lims_samples = [sample_store.add_sample(name=sample.name, sex=sample.sex,
-                                          internal_id=sample.internal_id,
-                                          received=new_date)]
+    lims_samples = [
+        sample_store.add_sample(
+            name=sample.name,
+            sex=sample.sex,
+            internal_id=sample.internal_id,
+            received=new_date,
+        )
+    ]
     lims_api.mock_set_samples(lims_samples)
     assert not has_same_received_at(lims_api, sample)
 
     # WHEN transfer_samples has been called
-    transfer_lims_api.transfer_samples(SampleState.RECEIVED, IncludeOptions.NOTINVOICED.value)
+    transfer_lims_api.transfer_samples(
+        SampleState.RECEIVED, IncludeOptions.NOTINVOICED.value
+    )
 
     # THEN the samples should have the same received_at as in lims
     assert has_same_received_at(lims_api, sample)
@@ -40,9 +47,14 @@ def test_transfer_samples_all(transfer_lims_api):
     sample = sample_store.samples_to_deliver().first()
     assert sample.received_at
     new_date = dt.datetime.today()
-    lims_samples = [sample_store.add_sample(name=sample.name, sex=sample.sex,
-                                            internal_id=sample.internal_id,
-                                            received=new_date)]
+    lims_samples = [
+        sample_store.add_sample(
+            name=sample.name,
+            sex=sample.sex,
+            internal_id=sample.internal_id,
+            received=new_date,
+        )
+    ]
     lims_api.mock_set_samples(lims_samples)
     assert not has_same_received_at(lims_api, sample)
 
@@ -77,15 +89,19 @@ def test_transfer_samples_include_unset_received_at(transfer_lims_api):
     lims_samples = []
     untransfered_sample_received_at_date = dt.datetime.today()
     transfered_sample_received_at_date = dt.datetime.today()
-    lims_sample = sample_store.add_sample(name=untransfered_sample.name,
-                                          sex=untransfered_sample.sex,
-                                          internal_id=untransfered_sample.internal_id,
-                                          received=untransfered_sample_received_at_date)
+    lims_sample = sample_store.add_sample(
+        name=untransfered_sample.name,
+        sex=untransfered_sample.sex,
+        internal_id=untransfered_sample.internal_id,
+        received=untransfered_sample_received_at_date,
+    )
     lims_samples.append(lims_sample)
-    lims_sample = sample_store.add_sample(name=transfered_sample.name,
-                                              sex=transfered_sample.sex,
-                                              internal_id=transfered_sample.internal_id,
-                                              received=transfered_sample_received_at_date)
+    lims_sample = sample_store.add_sample(
+        name=transfered_sample.name,
+        sex=transfered_sample.sex,
+        internal_id=transfered_sample.internal_id,
+        received=transfered_sample_received_at_date,
+    )
     lims_samples.append(lims_sample)
     lims_api = transfer_lims_api.lims
     lims_api.mock_set_samples(lims_samples)
