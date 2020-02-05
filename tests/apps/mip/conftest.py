@@ -11,7 +11,7 @@ from cg.apps.mip import MipAPI
 def valid_fastq_filename_pattern():
     """the pattern MIP file names should match"""
     # 'xxx_R_1.fastq.gz and xxx_R_2.fastq.gz'
-    return r'^.+_R_[1-2]{1}\.fastq.gz$'
+    return r"^.+_R_[1-2]{1}\.fastq.gz$"
 
 
 def _full_content():
@@ -22,7 +22,7 @@ def _full_content():
 @pytest.fixture
 def files_content(tmpdir):
     """The content the files are made of"""
-    return _full_content()[0:len(_simple_files(tmpdir))]
+    return _full_content()[0 : len(_simple_files(tmpdir))]
 
 
 def simple(tmpdir):
@@ -31,7 +31,7 @@ def simple(tmpdir):
     lanes = [1, 2, 3]
     reads = [1, 2]
 
-    _simple = {'files': [], 'data': []}
+    _simple = {"files": [], "data": []}
     i = 0
 
     for read in reads:
@@ -40,10 +40,10 @@ def simple(tmpdir):
                 content = _full_content()[i]
                 file_path = create_file(tmpdir, flowcell, lane, read, content)
 
-                _simple['files'].append(file_path)
+                _simple["files"].append(file_path)
 
                 data = create_file_data(file_path, flowcell, lane, read)
-                _simple['data'].append(data)
+                _simple["data"].append(data)
                 i += 1
 
     return _simple
@@ -51,7 +51,7 @@ def simple(tmpdir):
 
 def _simple_files(tmpdir):
     """"Some files to test with"""
-    return simple(tmpdir)['files']
+    return simple(tmpdir)["files"]
 
 
 @pytest.fixture
@@ -63,13 +63,13 @@ def simple_files(tmpdir):
 @pytest.fixture
 def simple_files_data(tmpdir):
     """Data for link method"""
-    return simple(tmpdir)['data']
+    return simple(tmpdir)["data"]
 
 
 def create_file(tmpdir, flowcell, lane, read, file_content):
     """actual file on disk"""
 
-    file_name = f'S1_FC000{flowcell}_L00{lane}_R_{read}.fastq.gz'
+    file_name = f"S1_FC000{flowcell}_L00{lane}_R_{read}.fastq.gz"
     file_path = tmpdir / file_name
     file_path.write(file_content)
     return file_path
@@ -78,11 +78,11 @@ def create_file(tmpdir, flowcell, lane, read, file_content):
 def create_file_data(file_path, flowcell, lane, read):
     """meta data about a file on disk"""
     data = {
-        'path': file_path,
-        'lane': lane,
-        'flowcell': flowcell,
-        'read': read,
-        'undetermined': False,
+        "path": file_path,
+        "lane": lane,
+        "flowcell": flowcell,
+        "read": read,
+        "undetermined": False,
     }
     return data
 
@@ -96,13 +96,13 @@ def cg_config():
 @pytest.fixture
 def link_family():
     """mock family name"""
-    return 'family'
+    return "family"
 
 
 @pytest.fixture
 def link_sample():
     """mock sample name"""
-    return 'sample'
+    return "sample"
 
 
 class MockTB:
@@ -130,17 +130,17 @@ def tb_api():
     return MockTB()
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def mip_api():
     """MipAPI fixture"""
-    _mip_api = MipAPI(script='test/fake_mip.pl', pipeline='analyse rd_dna')
+    _mip_api = MipAPI(script="test/fake_mip.pl", pipeline="analyse rd_dna")
     return _mip_api
 
 
 @pytest.fixture
 def mip_config_path():
     """path to a mip config"""
-    return 'tests/fixtures/global_config.yaml'
+    return "tests/fixtures/global_config.yaml"
 
 
 @pytest.fixture
