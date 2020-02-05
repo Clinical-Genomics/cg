@@ -259,36 +259,36 @@ class MockDeliver:
         self.housekeeper = MockHouseKeeper()
         self.lims = MockLims()
 
-    def get_post_analysis_files(self, family: str, version, tags):
+    def get_post_analysis_files(self, case: str, version, tags):
 
         if tags[0] == "mip-config":
             path = (
                 "/mnt/hds/proj/bioinfo/bundles/"
-                + family
+                + case
                 + "/2018-01-30/"
-                + family
+                + case
                 + "_config.yaml"
             )
         elif tags[0] == "sampleinfo":
             path = (
                 "/mnt/hds/proj/bioinfo/bundles/"
-                + family
+                + case
                 + "/2018-01-30/"
-                + family
+                + case
                 + "_qc_sample_info.yaml"
             )
         if tags[0] == "qcmetrics":
             path = (
                 "/mnt/hds/proj/bioinfo/bundles/"
-                + family
+                + case
                 + "/2018-01-30/"
-                + family
+                + case
                 + "_qc_metrics.yaml"
             )
 
         return [MockFile(path=path)]
 
-    def get_post_analysis_case_files(self, family: str, version, tags):
+    def get_post_analysis_case_files(self, case: str, version, tags):
         return ""
 
     def get_post_analysis_files_root_dir(self):
