@@ -300,7 +300,7 @@ class AnalysisAPI:
         """Get a python object file for a tag and a family ."""
 
         analysis_files = self.deliver.get_post_analysis_files(
-            family=family_id, version=False, tags=[tag]
+            case=family_id, version=False, tags=[tag]
         )
         if analysis_files:
             analysis_file_raw = self._open_bundle_file(analysis_files[0].path)
