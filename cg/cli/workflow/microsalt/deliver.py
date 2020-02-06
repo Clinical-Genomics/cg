@@ -11,7 +11,9 @@ from cg.store import Store
 
 LOG = logging.getLogger(__name__)
 
-PROJECT_TAGS = []  # [ Housekeeper-bundle-tags]
+PROJECT_TAGS = [
+    # "vcf",
+]
 
 SAMPLE_TAGS = []
 
