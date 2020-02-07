@@ -35,7 +35,7 @@ class MockLims(LimsAPI):
         return self._delivered_at
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def lims_api():
 
     _lims_api = MockLims()
@@ -45,8 +45,8 @@ def lims_api():
 @pytest.fixture
 def skeleton_orderform_sample():
     return {
-        'UDF/priority': '',
-        'UDF/Sequencing Analysis': '',
-        'UDF/customer': '',
-        'Sample/Name': '',
-        }
+        "UDF/priority": "",
+        "UDF/Sequencing Analysis": "",
+        "UDF/customer": "",
+        "Sample/Name": "",
+    }
