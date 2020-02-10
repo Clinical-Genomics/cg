@@ -13,7 +13,7 @@ Flask-SQLAlchemy==2.1
 Flask-CORS
 Flask-Dance
 google-auth
-werkzeug<1.0.0
+werkzeug<1.0.0              # due to breaking changes in 1.0.0
 requests[security]
 requests-oauthlib<1.2.0     # due to scout-browser Flask-OAuthlib
 oauthlib<3.0.0              # due to scout-browser Flask-OAuthlib
