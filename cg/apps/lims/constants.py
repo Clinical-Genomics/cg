@@ -36,11 +36,15 @@ MASTER_STEPS_UDFS = {
         'CG002 - Reception Control (Dev)': 'date arrived at clinical genomics',
         'CG002 - Reception Control': 'date arrived at clinical genomics',
         'Reception Control TWIST v1': 'date arrived at clinical genomics',
+        'Reception Control no placement v1': 'date arrived at clinical genomics',
+        'Reception Control (RNA) v1': 'date arrived at clinical genomics'
     },
     'prepared_step': {
         'CG002 - Aggregate QC (Library Validation) (Dev)',
         'CG002 - Aggregate QC (Library Validation)',
         'Aggregate QC (Library Validation) TWIST v1',
+        'Aggregate QC (Library Validation) (RNA) v2',
+        'Aggregate QC (Library Validation)'
     },
     'delivery_step': {
         'CG002 - Delivery': 'Date delivered',
