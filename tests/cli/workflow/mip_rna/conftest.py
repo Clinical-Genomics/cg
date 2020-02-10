@@ -64,14 +64,14 @@ class MockTB:
         return self._add_pending_was_called
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def tb_api():
     """Trailblazer API fixture"""
 
     return MockTB()
 
 
-class MockStore():
+class MockStore:
     """We need to call the family function from the store
     without accessing the database. So here we go"""
 
@@ -84,8 +84,8 @@ class MockStore():
     def family(self, case_id: str):
         """Mock the family call"""
 
-        case_obj = namedtuple('Case', 'internal_id')
-        case_obj.internal_id = 'fake case'
+        case_obj = namedtuple("Case", "internal_id")
+        case_obj.internal_id = "fake case"
         self._case_id = case_id
         self._case_obj = case_obj
 
@@ -98,7 +98,7 @@ class MockStore():
         return self._family_was_called
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def mock_store():
     """store fixture"""
 
