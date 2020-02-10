@@ -3,6 +3,7 @@ from typing import List
 import logging
 import io
 import json
+import tempfile
 from pathlib import Path
 
 from cg.utils import Process
@@ -80,9 +81,17 @@ class ChanjoAPI:
     def sample_coverage(self, sample_id: str, panel_genes: list) -> dict:
         """Calculate coverage for samples."""
 
-        coverage_parameters = ["calculate", "coverage", "-s", sample_id]
-        for gene_id in panel_genes:
-            coverage_parameters.append(gene_id)
-        self.process.run_command(coverage_parameters)
+        with tempfile.NamedTemporaryFile(mode="w+t") as tmp_gene_file:
+            tmp_gene_file.write("\n".join(panel_genes))
+            tmp_gene_file.flush()
+            coverage_parameters = [
+                "calculate",
+                "coverage",
+                "-s",
+                sample_id,
+                "-f",
+                tmp_gene_file.name,
+            ]
+            self.process.run_command(coverage_parameters)
         data = json.loads(self.process.stdout).get(sample_id)
         return data
