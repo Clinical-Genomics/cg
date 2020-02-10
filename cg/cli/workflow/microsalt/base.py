@@ -19,9 +19,10 @@ from cg.store import Store
 LOG = logging.getLogger(__name__)
 
 
-@click.group("microsalt")
+@click.group("microsalt", invoke_without_command=True)
 @click.pass_context
-def microsalt(context: click.Context):
+@click.option("-p", "--project", "project_id", help="include all samples for a project")
+def microsalt(context: click.Context, project_id):
     """Microbial workflow"""
     context.obj["db"] = Store(context.obj["database"])
     hk_api = hk.HousekeeperAPI(context.obj)
@@ -31,6 +32,19 @@ def microsalt(context: click.Context):
         db=context.obj["db"], hk_api=hk_api, lims_api=lims_api
     )
     context.obj["lims_microsalt_api"] = LimsMicrosaltAPI(lims=lims_api)
+
+    if context.invoked_subcommand is None:
+        if project_id is None:
+            LOG.error("Please provide a project")
+            context.abort()
+        else:
+            # execute the analysis!
+            context.invoke(config_case, project_id=project_id)
+            context.invoke(link, project_id=project_id)
+            context.invoke(
+                run,
+                project_id=project_id
+            )
 
 
 @microsalt.command()
@@ -66,12 +80,12 @@ def link(context: click.Context, order_id: str, sample_id: str):
         )
 
 
-@microsalt.command("case-config")
+@microsalt.command("config-case")
 @click.option("-d", "--dry", is_flag=True, help="print case config to console")
 @click.option("--project", "project_id", help="include all samples for a project")
 @click.argument("sample_id", required=False)
 @click.pass_context
-def case_config(context, dry, project_id, sample_id):
+def config_case(context, dry, project_id, sample_id):
     """ Create a config file on case level for microSALT """
     if project_id and (sample_id is None):
         microbial_order_obj = context.obj["db"].microbial_order(project_id)
@@ -116,7 +130,7 @@ def case_config(context, dry, project_id, sample_id):
 
 @microsalt.command()
 @click.option("-d", "--dry", is_flag=True, help="print command to console")
-@click.option("-c", "--case-config", required=False, help="Optionally change the case-config")
+@click.option("-c", "--case-config", required=False, help="optionally change the case-config")
 @click.argument("project_id")
 @click.pass_context
 def run(context, dry, case_config, project_id):
@@ -137,7 +151,7 @@ def run(context, dry, case_config, project_id):
         subprocess.run(command, shell=True, check=True)
 
 
-microsalt.add_command(case_config)
+microsalt.add_command(config_case)
 microsalt.add_command(deliver_cmd)
 microsalt.add_command(run)
 microsalt.add_command(store_cmd)

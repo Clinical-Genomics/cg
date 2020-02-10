@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 from snapshottest import Snapshot
 
-from cg.cli.workflow.microsalt.base import case_config
+from cg.cli.workflow.microsalt.base import config_case
 
 EXIT_SUCCESS = 0
 
@@ -15,7 +15,7 @@ def test_no_arguments(cli_runner, base_context, caplog):
     # GIVEN
 
     # WHEN dry running without anything specified
-    result = cli_runner.invoke(case_config, obj=base_context)
+    result = cli_runner.invoke(config_case, obj=base_context)
 
     # THEN command should mention missing arguments
     assert result.exit_code != EXIT_SUCCESS
@@ -32,7 +32,7 @@ def test_no_sample_found(cli_runner, base_context, caplog):
 
     # WHEN dry running a sample name
     result = cli_runner.invoke(
-        case_config, [microbial_sample_id], obj=base_context
+        config_case, [microbial_sample_id], obj=base_context
     )
 
     # THEN command should mention missing sample
@@ -49,7 +49,7 @@ def test_no_project_found(cli_runner, base_context, caplog):
 
     # WHEN dry running a project name
     result = cli_runner.invoke(
-        case_config, ['--project', microbial_project_id], obj=base_context
+        config_case, ['--project', microbial_project_id], obj=base_context
     )
 
     # THEN command should mention missing project
@@ -67,7 +67,7 @@ def test_no_sample_project_found(cli_runner, base_context, caplog):
 
     # WHEN dry running a project name
     result = cli_runner.invoke(
-        case_config, ['--project', microbial_project_id, microbial_sample_id], obj=base_context
+        config_case, ['--project', microbial_project_id, microbial_sample_id], obj=base_context
     )
 
     # THEN command should mention missing project
@@ -83,7 +83,7 @@ def test_dry_sample(cli_runner, base_context, microbial_sample_id, snapshot: Sna
 
     # WHEN dry running a sample name
     result = cli_runner.invoke(
-        case_config, ["--dry", microbial_sample_id], obj=base_context
+        config_case, ["--dry", microbial_sample_id], obj=base_context
     )
 
     # THEN command should give us a json dump
@@ -99,7 +99,7 @@ def test_dry_sample_project(cli_runner, base_context, microbial_sample_id,
 
     # WHEN dry running a sample name
     result = cli_runner.invoke(
-        case_config,
+        config_case,
         ["--dry", "--project", microbial_project_id, microbial_sample_id],
         obj=base_context
     )
@@ -116,7 +116,7 @@ def test_dry_project(cli_runner, base_context, microbial_project_id, snapshot: S
 
     # WHEN dry running a sample name
     result = cli_runner.invoke(
-        case_config,
+        config_case,
         ["--dry", "--project", microbial_project_id],
         obj=base_context
     )
@@ -134,7 +134,7 @@ def test_sample(cli_runner, base_context, microbial_sample_id, queries_path, sna
 
     # WHEN dry running a sample name
     result = cli_runner.invoke(
-        case_config, [microbial_sample_id], obj=base_context
+        config_case, [microbial_sample_id], obj=base_context
     )
 
     # THEN command should give us a json dump
@@ -146,13 +146,14 @@ def test_sample(cli_runner, base_context, microbial_sample_id, queries_path, sna
 
 
 def test_gonorrhoeae(cli_runner, microsalt_store, base_context, microbial_sample_id):
+    """ Test if the substitution of the organism happens """
     # GIVEN a sample with organism set to gonorrhea
     sample_obj = microsalt_store.microbial_sample(microbial_sample_id)
     sample_obj.organism.internal_id = "gonorrhoeae"
 
     # WHEN getting the case config
     result = cli_runner.invoke(
-        case_config, ["--dry", microbial_sample_id], obj=base_context
+        config_case, ["--dry", microbial_sample_id], obj=base_context
     )
 
     # THEN the organism should now be  ...
@@ -166,12 +167,12 @@ def test_cutibacterium_acnes(cli_runner, microsalt_store, base_context, microbia
 
     # WHEN getting the case config
     result = cli_runner.invoke(
-        case_config, ["--dry", microbial_sample_id], obj=base_context
+        config_case, ["--dry", microbial_sample_id], obj=base_context
     )
 
     # THEN the organism should now be ....
     assert "Propionibacterium acnes" in result.output
-    
+
 
 def test_VRE_NC_017960(cli_runner, microsalt_store, base_context, microbial_sample_id):
     # GIVEN a sample with organism set to VRE
@@ -181,7 +182,7 @@ def test_VRE_NC_017960(cli_runner, microsalt_store, base_context, microbial_samp
 
     # WHEN getting the case config
     result = cli_runner.invoke(
-        case_config, ["--dry", microbial_sample_id], obj=base_context
+        config_case, ["--dry", microbial_sample_id], obj=base_context
     )
 
     # THEN the organism should now be ....
@@ -196,7 +197,7 @@ def test_VRE_NC_004668(cli_runner, microsalt_store, base_context, microbial_samp
 
     # WHEN getting the case config
     result = cli_runner.invoke(
-        case_config, ["--dry", microbial_sample_id], obj=base_context
+        config_case, ["--dry", microbial_sample_id], obj=base_context
     )
 
     # THEN the organism should now be ....
@@ -212,7 +213,7 @@ def test_VRE_comment(cli_runner, microsalt_store, lims_api, base_context, microb
 
     # WHEN getting the case config
     result = cli_runner.invoke(
-        case_config, ["--dry", microbial_sample_id], obj=base_context
+        config_case, ["--dry", microbial_sample_id], obj=base_context
     )
 
     # THEN the organism should now be ....
