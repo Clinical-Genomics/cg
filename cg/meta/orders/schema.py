@@ -174,7 +174,6 @@ MIP_RNA_SAMPLE = {
     "application": str,
     "family_name": validators.RegexValidator(NAME_PATTERN),
     "sex": OptionalNone(validators.Any(SEX_OPTIONS)),
-    # "tumour": OptionalNone(TypeValidatorNone(bool)),
     "source": OptionalNone(TypeValidatorNone(str)),
     "priority": OptionalNone(validators.Any(PRIORITY_OPTIONS)),
     "container": OptionalNone(validators.Any(CONTAINER_OPTIONS)),
