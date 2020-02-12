@@ -2,8 +2,12 @@
 
 import os
 
-from cg.meta.upload.mutacc import (UploadToMutaccAPI, resolve_sex, resolve_parent,
-                                   resolve_phenotype)
+from cg.meta.upload.mutacc import (
+    UploadToMutaccAPI,
+    resolve_sex,
+    resolve_parent,
+    resolve_phenotype,
+)
 
 
 def test_instatiate():
@@ -29,24 +33,23 @@ def test_data(mutacc_upload_api, mocker):
     """
     # GIVEN a case dictionary
     case = {
-        '_id': 'internal_id',
-        'causatives': ['variant_id'],
-        'individuals': [{'individual_id': 'individual_1',
-                         'bam_file': ''},
-                        {'individual_id': 'individual_2',
-                         'bam_file': ''},
-                        {'individual_id': 'individual_3',
-                         'bam_file': ''}]
+        "_id": "internal_id",
+        "causatives": ["variant_id"],
+        "individuals": [
+            {"individual_id": "individual_1", "bam_file": ""},
+            {"individual_id": "individual_2", "bam_file": ""},
+            {"individual_id": "individual_3", "bam_file": ""},
+        ],
     }
 
-    mocker.patch.object(os.path, 'isfile')
+    mocker.patch.object(os.path, "isfile")
     os.path.isfile.return_value = True
 
     # WHEN generating data
     result = mutacc_upload_api.data(case)
 
     # THEN data dict should have keys 'case', and 'causatives'
-    assert set(result.keys()) == {'case', 'causatives'}
+    assert set(result.keys()) == {"case", "causatives"}
 
 
 def test_data_no_bam(mutacc_upload_api, mocker):
@@ -56,17 +59,17 @@ def test_data_no_bam(mutacc_upload_api, mocker):
 
     # GIVEN a case dictionary where one individual is missing bam_file
     case = {
-        '_id': 'internal_id',
-        'causatives': ['variant_id'],
-        'individuals': [{'individual_id': 'individual_1',
-                         'bam_file': ''},
-                        {'individual_id': 'individual_2'},
-                        {'individual_id': 'individual_3',
-                         'bam_file': ''}]
+        "_id": "internal_id",
+        "causatives": ["variant_id"],
+        "individuals": [
+            {"individual_id": "individual_1", "bam_file": ""},
+            {"individual_id": "individual_2"},
+            {"individual_id": "individual_3", "bam_file": ""},
+        ],
     }
 
     # mock that file is a file
-    mocker.patch.object(os.path, 'isfile')
+    mocker.patch.object(os.path, "isfile")
     os.path.isfile.return_value = True
 
     # WHEN generating data
@@ -82,18 +85,17 @@ def test_data_bam_path_not_exists(mutacc_upload_api, mocker):
     """
     # GIVEN a case dictionary
     case = {
-        '_id': 'internal_id',
-        'causatives': ['variant_id'],
-        'individuals': [{'individual_id': 'individual_1',
-                         'bam_file': ''},
-                        {'individual_id': 'individual_2',
-                         'bam_file': ''},
-                        {'individual_id': 'individual_3',
-                         'bam_file': ''}]
+        "_id": "internal_id",
+        "causatives": ["variant_id"],
+        "individuals": [
+            {"individual_id": "individual_1", "bam_file": ""},
+            {"individual_id": "individual_2", "bam_file": ""},
+            {"individual_id": "individual_3", "bam_file": ""},
+        ],
     }
 
     # mock that file is not a file
-    mocker.patch.object(os.path, 'isfile')
+    mocker.patch.object(os.path, "isfile")
     os.path.isfile.return_value = False
 
     # WHEN generating data
@@ -109,16 +111,15 @@ def test_data_no_causatives(mutacc_upload_api, mocker):
     """
     # GIVEN a case dictionary with no causative variants
     case = {
-        '_id': 'internal_id',
-        'individuals': [{'individual_id': 'individual_1',
-                         'bam_file': ''},
-                        {'individual_id': 'individual_2',
-                         'bam_file': ''},
-                        {'individual_id': 'individual_3',
-                         'bam_file': ''}]
+        "_id": "internal_id",
+        "individuals": [
+            {"individual_id": "individual_1", "bam_file": ""},
+            {"individual_id": "individual_2", "bam_file": ""},
+            {"individual_id": "individual_3", "bam_file": ""},
+        ],
     }
 
-    mocker.patch.object(os.path, 'isfile')
+    mocker.patch.object(os.path, "isfile")
     os.path.isfile.return_value = True
 
     # WHEN generating data
@@ -131,9 +132,9 @@ def test_data_no_causatives(mutacc_upload_api, mocker):
 def test_resolve_sex():
     """test resolve_sex"""
     # GIVEN scout sex codes
-    scout_male = '1'
-    scout_female = '2'
-    scout_unknown = '0'
+    scout_male = "1"
+    scout_female = "2"
+    scout_unknown = "0"
 
     # WHEN converting to mutacc sex codes with resolve_sex
     mutacc_male = resolve_sex(scout_male)
@@ -141,17 +142,17 @@ def test_resolve_sex():
     mutacc_unknown = resolve_sex(scout_unknown)
 
     # THEN the sex codes should have been converted
-    assert mutacc_male == 'male'
-    assert mutacc_female == 'female'
-    assert mutacc_unknown == 'unknown'
+    assert mutacc_male == "male"
+    assert mutacc_female == "female"
+    assert mutacc_unknown == "unknown"
 
 
 def test_resolve_parent():
     """test resolve_parent"""
     # GIVEN scout parent codes
-    scout_no_parent = ''
-    scout_father = 'father_id'
-    scout_mother = 'mother_id'
+    scout_no_parent = ""
+    scout_father = "father_id"
+    scout_mother = "mother_id"
 
     # WHEN converting to mutacc parent codes with resolve_parent
     mutacc_no_parent = resolve_parent(scout_no_parent)
@@ -159,7 +160,7 @@ def test_resolve_parent():
     mutacc_mother = resolve_parent(scout_mother)
 
     # THEN the parent codes should have been converted
-    assert mutacc_no_parent == '0'
+    assert mutacc_no_parent == "0"
     assert mutacc_father == scout_father
     assert mutacc_mother == scout_mother
 
@@ -175,5 +176,5 @@ def test_resolve_phenotype():
     mutacc_unaffected = resolve_phenotype(scout_unaffected)
 
     # THEN the phenotype codes should have been converted
-    assert mutacc_affected == 'affected'
-    assert mutacc_unaffected == 'unaffected'
+    assert mutacc_affected == "affected"
+    assert mutacc_unaffected == "unaffected"

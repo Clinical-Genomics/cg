@@ -6,7 +6,7 @@ from sqlalchemy import exc as sa_exc
 def test_transfer_flowcell(flowcell_store, store_housekeeper, transfer_flowcell_api):
 
     # GIVEN a store with a received but not sequenced sample
-    flowcell_id = 'HJKMYBCXX'
+    flowcell_id = "HJKMYBCXX"
     assert flowcell_store.samples().count() == 1
     assert flowcell_store.flowcells().count() == 0
     assert store_housekeeper.bundles().count() == 0
@@ -29,4 +29,4 @@ def test_transfer_flowcell(flowcell_store, store_housekeeper, transfer_flowcell_
     assert len(hk_bundle.versions[0].files) > 0
 
     for hk_file in hk_bundle.versions[0].files:
-        assert hk_file.path.endswith('fastq.gz')
+        assert hk_file.path.endswith("fastq.gz")
