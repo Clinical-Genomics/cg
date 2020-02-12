@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+""" Module to decouple cg code from Housekeeper code """
 import datetime as dt
 import logging
 import os
@@ -6,12 +6,13 @@ from pathlib import Path
 
 from housekeeper.include import include_version, checksum as hk_checksum
 from housekeeper.store import Store, models
-from housekeeper.exc import VersionIncludedError
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 class HousekeeperAPI:
+    """ API to decouple cg code from Housekeeper """
+
     def __init__(self, config):
         self.store = Store(
             config["housekeeper"]["database"], config["housekeeper"]["root"]
@@ -33,7 +34,7 @@ class HousekeeperAPI:
         # generate root directory
         version_root_dir = global_root_dir / version_obj.relative_root_dir
         version_root_dir.mkdir(parents=True, exist_ok=True)
-        log.info(f"created new bundle version dir: {version_root_dir}")
+        LOG.info("created new bundle version dir: %s", version_root_dir)
 
         if file_obj.to_archive:
             # calculate sha1 checksum if file is to be archived
@@ -41,7 +42,7 @@ class HousekeeperAPI:
         # hardlink file to the internal structure
         new_path = version_root_dir / Path(file_obj.path).name
         os.link(file_obj.path, new_path)
-        log.info(f"linked file: {file_obj.path} -> {new_path}")
+        LOG.info("linked file: %s -> %s", file_obj.path, new_path)
         file_obj.path = str(new_path).replace(f"{global_root_dir}/", "", 1)
 
     def last_version(self, bundle: str) -> models.Version:
@@ -53,6 +54,7 @@ class HousekeeperAPI:
         )
 
     def get_root_dir(self):
+        """Returns the root dir of Housekeeper"""
         return self.store.root_dir
 
     def get_files(self, bundle: str, tags: list, version: int = None):
@@ -62,17 +64,17 @@ class HousekeeperAPI:
         Returns:
             iterable(hk.Models.File)
         """
-        return self.files(bundle=bundle, tags=tags, version=version)
+        return self.store.files(bundle=bundle, tags=tags, version=version)
 
     def add_file(self, file, version_obj: models.Version, tag_name, to_archive=False):
         """Add a file to housekeeper."""
-        new_file = self.new_file(
+        new_file = self.store.new_file(
             path=str(Path(file).absolute()),
             to_archive=to_archive,
-            tags=[self.tag(tag_name)],
+            tags=[self.store.tag(tag_name)],
         )
         new_file.version = version_obj
-        self.add_commit(new_file)
+        self.store.add_commit(new_file)
         return new_file
 
     @staticmethod
