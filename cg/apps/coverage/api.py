@@ -27,11 +27,9 @@ class ChanjoAPI:
         sample_name: str,
         group_id: str,
         group_name: str,
-        bed_stream: io.TextIOWrapper,
+        bed_file: str,
     ):
         """Upload coverage for a sample."""
-
-        source = str(Path(bed_stream.name).absolute())
 
         load_parameters = [
             "load",
@@ -45,7 +43,7 @@ class ChanjoAPI:
             group_name,
             "--threshold",
             10,
-            source,
+            bed_file,
         ]
 
         self.process.run_command(load_parameters)

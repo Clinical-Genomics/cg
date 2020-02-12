@@ -61,5 +61,5 @@ class UploadCoverageApi:
                 sample_name=sample_data["sample_name"],
                 group_id=data["family"],
                 group_name=data["family_name"],
-                bed_stream=sample_data["coverage"],
+                bed_file=sample_data["coverage"],
             )
