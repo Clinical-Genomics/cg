@@ -80,7 +80,7 @@ class ChanjoAPI:
         """Calculate coverage for samples."""
 
         with tempfile.NamedTemporaryFile(mode="w+t") as tmp_gene_file:
-            tmp_gene_file.write("\n".join(panel_genes))
+            tmp_gene_file.write("\n".join([str(gene) for gene in panel_genes]))
             tmp_gene_file.flush()
             coverage_parameters = [
                 "calculate",
