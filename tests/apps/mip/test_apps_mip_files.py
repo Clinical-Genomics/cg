@@ -17,7 +17,7 @@ def test_parse_sampleinfo_rna_result_contents(snapshot: Snapshot, files_raw: dic
            files_raw (dict): dict of raw .yaml files
     """
     # GIVEN an RNA sample info file
-    sampleinfo_raw = files_raw['rna_sampleinfo']
+    sampleinfo_raw = files_raw["rna_sampleinfo"]
 
     # WHEN parsing the file
     sampleinfo_data = files.parse_sampleinfo_rna(sampleinfo_raw)
