@@ -27,7 +27,7 @@ def test_chanjo_api_upload(mocker):
     sample_name = "sample_name"
     group_id = "group_id"
     group_name = "group_name"
-    bed_stream = Path("bed").absolute()
+    bed_file = "bed_file"
     mocked_run_command = mocker.patch.object(Process, "run_command")
     api = ChanjoAPI(CHANJO_CONFIG)
 
@@ -37,7 +37,7 @@ def test_chanjo_api_upload(mocker):
         sample_name=sample_name,
         group_id=group_id,
         group_name=group_name,
-        bed_stream=bed_stream,
+        bed_file=bed_file,
     )
 
     # THEN run_command should be called with the correct arguments
@@ -53,8 +53,8 @@ def test_chanjo_api_upload(mocker):
             "--group-name",
             group_name,
             "--threshold",
-            10,
-            str(bed_stream),
+            "10",
+            str(bed_file),
         ]
     )
 
@@ -144,7 +144,7 @@ def test_chanjo_api_omim_coverage(mocker, mock_process):
     api = ChanjoAPI(CHANJO_CONFIG)
 
     # WHEN using the omim_coverage method for a list of samples
-    samples = api.omim_coverage(samples=[sample_id])
+    samples = api.omim_coverage(samples=[{"id": sample_id}])
 
     # THEN Then this should return a dictionary with mean coverage and mean_completeness
     # for each sample
