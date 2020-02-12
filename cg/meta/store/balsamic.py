@@ -3,15 +3,13 @@
 
 import datetime as dt
 import logging
-from pathlib import Path
 import ruamel.yaml
-from cg.exc import AnalysisNotFinishedError, AnalysisDuplicationError
-from housekeeper.exc import VersionIncludedError
+from cg.exc import AnalysisDuplicationError
 
 LOG = logging.getLogger(__name__)
 
 
-def _gather_files_and_bundle_in_housekeeper(config_stream, context, hk_api, status):
+def _gather_files_and_bundle_in_housekeeper(config_stream, hk_api, status):
     """Function to gather files and bundle in housekeeper"""
 
     bundle_data = _add_analysis(config_stream)
@@ -26,11 +24,11 @@ def _gather_files_and_bundle_in_housekeeper(config_stream, context, hk_api, stat
     new_analysis = _create_analysis(bundle_data, case_obj, status, version_obj)
     version_date = version_obj.created_at.date()
     LOG.info(f"new bundle added: {bundle_obj.name}, version {version_date}")
-    _include_files_in_housekeeper(bundle_obj, context, hk_api, version_obj)
+    _include_files_in_housekeeper(bundle_obj, hk_api, version_obj)
     return new_analysis
 
 
-def _include_files_in_housekeeper(bundle_obj, context, hk_api, version_obj):
+def _include_files_in_housekeeper(bundle_obj, hk_api, version_obj):
     """Function to include files in housekeeper"""
     hk_api.include(version_obj)
     hk_api.store.add_commit(bundle_obj, version_obj)

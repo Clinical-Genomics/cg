@@ -9,6 +9,7 @@ from cg.meta.store.balsamic import _gather_files_and_bundle_in_housekeeper
 from cg.store import Store
 
 from cg.exc import AnalysisNotFinishedError, AnalysisDuplicationError
+from housekeeper.exc import VersionIncludedError
 
 LOG = logging.getLogger(__name__)
 
@@ -40,7 +41,7 @@ def analysis(context, case_id, config_stream):
 
     try:
         new_analysis = _gather_files_and_bundle_in_housekeeper(
-            config_stream, context, hk_api, status
+            config_stream, hk_api, status
         )
     except AnalysisNotFinishedError as error:
         click.echo(click.style(error.message, fg="red"))
