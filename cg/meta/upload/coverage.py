@@ -16,9 +16,9 @@ class UploadCoverageApi:
         hk_api: hk.HousekeeperAPI,
         chanjo_api: coverage.ChanjoAPI,
     ):
-        self.status = status_api
+        self.status_api = status_api
         self.hk_api = hk_api
-        self.chanjo = chanjo_api
+        self.chanjo_api = chanjo_api
 
     def data(self, analysis_obj: models.Analysis) -> dict:
         """Get data for uploading coverage."""
@@ -46,9 +46,9 @@ class UploadCoverageApi:
     def upload(self, data: dict, replace: bool = False):
         """Upload coverage to Chanjo from an analysis."""
         for sample_data in data["samples"]:
-            chanjo_sample = self.chanjo.sample(sample_data["sample"])
+            chanjo_sample = self.chanjo_api.sample(sample_data["sample"])
             if chanjo_sample and replace:
-                self.chanjo.delete_sample(sample_data["sample"])
+                self.chanjo_api.delete_sample(sample_data["sample"])
             elif chanjo_sample:
                 LOG.warning(
                     "sample already loaded, skipping: %s", sample_data["sample"]
@@ -56,7 +56,7 @@ class UploadCoverageApi:
                 continue
 
             LOG.debug("upload coverage for sample: %s", sample_data["sample"])
-            self.chanjo.upload(
+            self.chanjo_api.upload(
                 sample_id=sample_data["sample"],
                 sample_name=sample_data["sample_name"],
                 group_id=data["family"],
