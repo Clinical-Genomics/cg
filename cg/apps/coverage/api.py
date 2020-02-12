@@ -42,7 +42,7 @@ class ChanjoAPI:
             "--group-name",
             group_name,
             "--threshold",
-            10,
+            "10",
             bed_file,
         ]
 
