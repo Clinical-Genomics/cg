@@ -70,8 +70,8 @@ class ChanjoAPI:
         """Calculate omim coverage for samples"""
 
         omim_parameters = ["calculate", "coverage", "--omim"]
-        for sample_id in samples:
-            omim_parameters.extend(["-s", sample_id])
+        for sample in samples:
+            omim_parameters.extend(["-s", sample["id"]])
         self.process.run_command(omim_parameters)
         data = json.loads(self.process.stdout)
         return data
