@@ -9,9 +9,13 @@ from cg.apps.tb import TrailblazerAPI
 
 
 @pytest.fixture
-def store_context(balsamic_store) -> dict:
+def balsamic_store_context(balsamic_store, balsamic_case) -> dict:
     """context to use in cli"""
-    return {"hk_api": MockHouseKeeper(), "db": balsamic_store, "tb_api": MockTB()}
+    return {
+        "hk_api": MockHouseKeeper(balsamic_case.internal_id),
+        "db": balsamic_store,
+        "tb_api": MockTB(),
+    }
 
 
 class MockTB(TrailblazerAPI):
@@ -33,20 +37,58 @@ class MockTB(TrailblazerAPI):
         is_visible: bool = None,
         workflow=None
     ):
-
         return []
 
 
 class MockHouseKeeper(HousekeeperAPI):
     """Mock HousekeeperAPI"""
 
-    def __init__(self):
-        pass
+    def __init__(self, bundle_name):
+        self.store = MockHousekeeperStore()
+        self.bundle_name = bundle_name
+        self.bundle_data = None
 
     def get_files(self, bundle: str, tags: list, version: int = None):
         """Mock get_files of HousekeeperAPI"""
         del tags, bundle, version
         return [MockFile()]
+
+    def add_bundle(self, data: dict):
+
+        if self.bundle_data != data:
+            self.bundle_data = data
+            return MockBundle(data=data, name=self.bundle_name), MockVersion()
+
+        return None
+
+
+class MockHousekeeperStore:
+    """Mock Store of Housekeeper"""
+
+    def __init__(self):
+        self.root_dir = ""
+
+    def add_commit(self, *pargs, **kwargs):
+        pass
+
+
+class MockBundle:
+    """Mock Bundle"""
+
+    def __init__(self, data, name):
+
+        self.name = name
+        self._data = data
+
+
+class MockVersion:
+    """Mock Version"""
+
+    def __init__(self):
+        self.created_at = datetime.now()
+        self.included_at = None
+        self.relative_root_dir = ""
+        self.files = []
 
 
 class MockFile:
@@ -82,7 +124,7 @@ def balsamic_store(base_store: Store) -> Store:
 @pytest.fixture(scope="function")
 def meta_file():
     """Return a balsamic metadata yaml file"""
-    return "tests/fixtures/apps/balsamic/meta_data.yml"
+    return "tests/fixtures/apps/balsamic/case/metadata.yml"
 
 
 @pytest.fixture(scope="function")
