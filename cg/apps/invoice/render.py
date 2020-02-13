@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import datetime as dt
 from pkg_resources import resource_filename
 
@@ -38,9 +37,7 @@ def render_xlsx(data: dict) -> Workbook:
     pkg_dir = __name__.rpartition(".")[0]
     sample_type = "pool" if data["pooled_samples"] else "sample"
     costcenter = data["costcenter"]
-    template_path = resource_filename(
-        pkg_dir, f"templates/{costcenter}_{sample_type}_invoice.xlsx"
-    )
+    template_path = resource_filename(pkg_dir, f"templates/{costcenter}_{sample_type}_invoice.xlsx")
     workbook = load_workbook(template_path)
     if data["pooled_samples"]:
         worksheet = workbook["Bilaga Prover"]

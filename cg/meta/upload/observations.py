@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
     API for uploading observations
 """
@@ -15,7 +13,7 @@ from cg.store import models, Store
 LOG = logging.getLogger(__name__)
 
 
-class UploadObservationsAPI():
+class UploadObservationsAPI:
 
     """API to upload observations to LoqusDB."""
 
@@ -31,25 +29,22 @@ class UploadObservationsAPI():
 
         analysis_date = analysis_obj.started_at or analysis_obj.completed_at
         hk_version = self.housekeeper.version(analysis_obj.family.internal_id, analysis_date)
-        hk_vcf = self.housekeeper.files(version=hk_version.id, tags=['vcf-snv-research']).first()
-        hk_snv_gbcf = self.housekeeper.files(version=hk_version.id, tags=['snv-gbcf']).first()
-        hk_pedigree = self.housekeeper.files(version=hk_version.id, tags=['pedigree']).first()
+        hk_vcf = self.housekeeper.files(version=hk_version.id, tags=["vcf-snv-research"]).first()
+        hk_snv_gbcf = self.housekeeper.files(version=hk_version.id, tags=["snv-gbcf"]).first()
+        hk_pedigree = self.housekeeper.files(version=hk_version.id, tags=["pedigree"]).first()
 
-        input_data['sv_vcf'] = None
-        if self.loqusdb.analysis_type == 'wgs':
-            hk_sv_vcf = self.housekeeper.files(version=hk_version.id,
-                                               tags=['vcf-sv-research']).first()
+        input_data["sv_vcf"] = None
+        if self.loqusdb.analysis_type == "wgs":
+            hk_sv_vcf = self.housekeeper.files(
+                version=hk_version.id, tags=["vcf-sv-research"]
+            ).first()
             if hk_sv_vcf is None:
                 raise FileNotFoundError("No file with vcf-sv-research tag in housekeeper")
             if not Path(hk_sv_vcf.full_path).exists():
                 raise FileNotFoundError(f"{hk_sv_vcf.full_path} does not exist")
-            input_data['sv_vcf'] = hk_sv_vcf.full_path
+            input_data["sv_vcf"] = hk_sv_vcf.full_path
 
-        hk_files = {
-            'vcf-snv-research': hk_vcf,
-            'snv-gbcf': hk_snv_gbcf,
-            'pedigree': hk_pedigree
-        }
+        hk_files = {"vcf-snv-research": hk_vcf, "snv-gbcf": hk_snv_gbcf, "pedigree": hk_pedigree}
 
         # Check if files exists. If hk returns None, or the path does not exist
         # FileNotFound error is raised
@@ -59,10 +54,10 @@ class UploadObservationsAPI():
             if not Path(file.full_path).exists():
                 raise FileNotFoundError(f"{file.full_path} does not exist")
 
-        input_data['family'] = analysis_obj.family.internal_id
-        input_data['vcf'] = hk_vcf.full_path
-        input_data['snv_gbcf'] = hk_snv_gbcf.full_path
-        input_data['pedigree'] = hk_pedigree.full_path
+        input_data["family"] = analysis_obj.family.internal_id
+        input_data["vcf"] = hk_vcf.full_path
+        input_data["snv_gbcf"] = hk_snv_gbcf.full_path
+        input_data["pedigree"] = hk_pedigree.full_path
 
         return input_data
 
@@ -70,20 +65,24 @@ class UploadObservationsAPI():
         """Upload data about genotypes for a family of samples."""
 
         try:
-            existing_case = self.loqusdb.get_case(case_id=input_data['family'])
+            existing_case = self.loqusdb.get_case(case_id=input_data["family"])
 
         # If CaseNotFoundError is raised, this should trigger the load method of loqusdb
         except CaseNotFoundError:
 
-            duplicate = self.loqusdb.get_duplicate(input_data['snv_gbcf'])
+            duplicate = self.loqusdb.get_duplicate(input_data["snv_gbcf"])
             if duplicate:
                 err_msg = f"Found duplicate {duplicate['ind_id']} in case {duplicate['case_id']}"
                 raise DuplicateSampleError(err_msg)
 
-            results = self.loqusdb.load(input_data['family'], input_data['pedigree'],
-                                        input_data['vcf'], input_data['snv_gbcf'],
-                                        vcf_sv_path=input_data['sv_vcf'])
-            LOG.info("parsed %s variants", results['variants'])
+            results = self.loqusdb.load(
+                input_data["family"],
+                input_data["pedigree"],
+                input_data["vcf"],
+                input_data["snv_gbcf"],
+                vcf_sv_path=input_data["sv_vcf"],
+            )
+            LOG.info("parsed %s variants", results["variants"])
 
         else:
             log_msg = f"found existing family {existing_case['case_id']}, skipping observations"
@@ -99,7 +98,7 @@ class UploadObservationsAPI():
         self.upload(results)
         case_obj = self.loqusdb.get_case(analysis_obj.family.internal_id)
         for link in analysis_obj.family.links:
-            link.sample.loqusdb_id = str(case_obj['_id'])
+            link.sample.loqusdb_id = str(case_obj["_id"])
         self.status.commit()
 
     @staticmethod

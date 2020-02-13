@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*- import logging
+# -*- coding: utf-8 -*
 
 import logging
 import os
@@ -56,9 +56,7 @@ def inbox(context, family, version, tag, inbox_path):
 
     for file_obj in files:
         out_dir = Path(
-            inbox_path.format(
-                family=family_obj.name, customer=family_obj.customer.internal_id
-            )
+            inbox_path.format(family=family_obj.name, customer=family_obj.customer.internal_id)
         )
         out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -89,9 +87,7 @@ def inbox(context, family, version, tag, inbox_path):
 
         for file_obj in files:
             out_dir = Path(
-                inbox_path.format(
-                    family=family_obj.name, customer=family_obj.customer.internal_id
-                )
+                inbox_path.format(family=family_obj.name, customer=family_obj.customer.internal_id)
             )
             out_dir = out_dir.joinpath(sample_obj.name)
             out_dir.mkdir(parents=True, exist_ok=True)
@@ -107,9 +103,7 @@ def inbox(context, family, version, tag, inbox_path):
 
 
 def _generate_case_delivery_path(family, family_obj, file_obj, out_dir):
-    return Path(
-        f"{out_dir / Path(file_obj.path).name.replace(family, family_obj.name)}"
-    )
+    return Path(f"{out_dir / Path(file_obj.path).name.replace(family, family_obj.name)}")
 
 
 def _generate_sample_delivery_path(file_obj, out_dir, sample_obj):

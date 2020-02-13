@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import datetime as dt
 import logging
 import sys
@@ -68,9 +67,7 @@ def upload(context, family_id, force_restart):
             context.abort()
 
         if not force_restart and analysis_obj.upload_started_at is not None:
-            if dt.datetime.now() - analysis_obj.upload_started_at > dt.timedelta(
-                hours=24
-            ):
+            if dt.datetime.now() - analysis_obj.upload_started_at > dt.timedelta(hours=24):
                 raise Exception(
                     f"The upload started at {analysis_obj.upload_started_at} "
                     f"something went wrong, restart it with the --restart flag"
@@ -87,9 +84,7 @@ def upload(context, family_id, force_restart):
     context.obj["tb_api"] = tb.TrailblazerAPI(context.obj)
     context.obj["chanjo_api"] = coverage_app.ChanjoAPI(context.obj)
     context.obj["deliver_api"] = DeliverAPI(
-        context.obj,
-        hk_api=context.obj["housekeeper_api"],
-        lims_api=context.obj["lims_api"],
+        context.obj, hk_api=context.obj["housekeeper_api"], lims_api=context.obj["lims_api"]
     )
     context.obj["scout_api"] = scoutapi.ScoutAPI(context.obj)
     context.obj["analysis_api"] = AnalysisAPI(
@@ -141,9 +136,7 @@ def upload(context, family_id, force_restart):
 
 @upload.command("delivery-report")
 @click.argument("family_id", required=False)
-@click.option(
-    "-p", "--print", "print_console", is_flag=True, help="print report to console"
-)
+@click.option("-p", "--print", "print_console", is_flag=True, help="print report to console")
 @click.pass_context
 def delivery_report(context, family_id, print_console):
     """Generates a delivery report for a case and uploads it to housekeeper and scout
@@ -231,9 +224,7 @@ def _add_delivery_report_to_scout(context, path, case_id):
     scout_api.upload_delivery_report(path, case_id, update=True)
 
 
-def _add_delivery_report_to_hk(
-    delivery_report_file, hk_api: hk.HousekeeperAPI, family_id
-):
+def _add_delivery_report_to_hk(delivery_report_file, hk_api: hk.HousekeeperAPI, family_id):
     delivery_report_tag_name = "delivery-report"
     version_obj = hk_api.last_version(family_id)
     uploaded_delivery_report_files = hk_api.get_files(
@@ -243,9 +234,7 @@ def _add_delivery_report_to_hk(
     is_bundle_missing_delivery_report = number_of_delivery_reports == 0
 
     if is_bundle_missing_delivery_report:
-        file_obj = hk_api.add_file(
-            delivery_report_file.name, version_obj, delivery_report_tag_name
-        )
+        file_obj = hk_api.add_file(delivery_report_file.name, version_obj, delivery_report_tag_name)
         hk_api.include_file(file_obj, version_obj)
         hk_api.add_commit(file_obj)
         return file_obj
@@ -263,11 +252,7 @@ def _update_delivery_report_date(status_api, case_id):
 @upload.command("delivery-report-to-scout")
 @click.argument("case_id", required=False)
 @click.option(
-    "-d",
-    "--dry-run",
-    "dry_run",
-    is_flag=True,
-    help="run command without uploading to " "scout",
+    "-d", "--dry-run", "dry_run", is_flag=True, help="run command without uploading to " "scout"
 )
 @click.pass_context
 def delivery_report_to_scout(context, case_id, dry_run):
@@ -294,29 +279,21 @@ def _get_delivery_report_from_hk(hk_api: hk.HousekeeperAPI, family_id):
     )
 
     if uploaded_delivery_report_files.count() == 0:
-        raise FileNotFoundError(
-            f"No delivery report was found in housekeeper for {family_id}"
-        )
+        raise FileNotFoundError(f"No delivery report was found in housekeeper for {family_id}")
 
     return uploaded_delivery_report_files[0].full_path
 
 
 @upload.command("delivery-reports")
-@click.option(
-    "-p", "--print", "print_console", is_flag=True, help="print list to console"
-)
+@click.option("-p", "--print", "print_console", is_flag=True, help="print list to console")
 @click.pass_context
 def delivery_reports(context, print_console):
     """Generate a delivery reports for all cases that need one"""
 
-    click.echo(
-        click.style("----------------- DELIVERY REPORTS ------------------------")
-    )
+    click.echo(click.style("----------------- DELIVERY REPORTS ------------------------"))
 
     for analysis_obj in context.obj["status"].analyses_to_delivery_report():
-        LOG.info(
-            "uploading delivery report for family: %s", analysis_obj.family.internal_id
-        )
+        LOG.info("uploading delivery report for family: %s", analysis_obj.family.internal_id)
         try:
             context.invoke(
                 delivery_report,
@@ -325,8 +302,7 @@ def delivery_reports(context, print_console):
             )
         except Exception:
             LOG.error(
-                "uploading delivery report failed for family: %s",
-                analysis_obj.family.internal_id,
+                "uploading delivery report failed for family: %s", analysis_obj.family.internal_id
             )
 
 
@@ -345,9 +321,7 @@ def coverage(context, re_upload, family_id):
 
     chanjo_api = coverage_app.ChanjoAPI(context.obj)
     family_obj = context.obj["status"].family(family_id)
-    api = UploadCoverageApi(
-        context.obj["status"], context.obj["housekeeper_api"], chanjo_api
-    )
+    api = UploadCoverageApi(context.obj["status"], context.obj["housekeeper_api"], chanjo_api)
     coverage_data = api.data(family_obj.analyses[0])
     api.upload(coverage_data, replace=re_upload)
 
@@ -368,9 +342,7 @@ def genotypes(context, re_upload, family_id):
     tb_api = tb.TrailblazerAPI(context.obj)
     gt_api = gt.GenotypeAPI(context.obj)
     family_obj = context.obj["status"].family(family_id)
-    api = UploadGenotypesAPI(
-        context.obj["status"], context.obj["housekeeper_api"], tb_api, gt_api
-    )
+    api = UploadGenotypesAPI(context.obj["status"], context.obj["housekeeper_api"], tb_api, gt_api)
     results = api.data(family_obj.analyses[0])
     if results:
         api.upload(results, replace=re_upload)
@@ -401,9 +373,7 @@ def observations(context, case_id, case_limit, dry_run):
 
         if case_limit is not None:
             if nr_uploaded >= case_limit:
-                LOG.info(
-                    "Uploaded %d cases, observations upload will now stop", nr_uploaded
-                )
+                LOG.info("Uploaded %d cases, observations upload will now stop", nr_uploaded)
                 break
 
         if not family_obj.customer.loqus_upload:
@@ -414,9 +384,7 @@ def observations(context, case_id, case_limit, dry_run):
             )
             continue
 
-        if not LinkHelper.all_samples_data_analysis(
-            family_obj.links, ["MIP", "", None]
-        ):
+        if not LinkHelper.all_samples_data_analysis(family_obj.links, ["MIP", "", None]):
             LOG.info("%s: has non-MIP data_analysis. Skipping!", family_obj.internal_id)
             continue
 
@@ -439,9 +407,7 @@ def observations(context, case_id, case_limit, dry_run):
             continue
 
         api = UploadObservationsAPI(
-            context.obj["status"],
-            context.obj["housekeeper_api"],
-            loqus_api[analysis_type],
+            context.obj["status"], context.obj["housekeeper_api"], loqus_api[analysis_type]
         )
 
         try:
@@ -449,15 +415,9 @@ def observations(context, case_id, case_limit, dry_run):
             LOG.info("%s: observations uploaded!", family_obj.internal_id)
             nr_uploaded += 1
         except (DuplicateRecordError, DuplicateSampleError) as error:
-            LOG.info(
-                "%s: skipping observations upload: %s",
-                family_obj.internal_id,
-                error.message,
-            )
+            LOG.info("%s: skipping observations upload: %s", family_obj.internal_id, error.message)
         except FileNotFoundError as error:
-            LOG.info(
-                "%s: skipping observations upload: %s", family_obj.internal_id, error
-            )
+            LOG.info("%s: skipping observations upload: %s", family_obj.internal_id, error)
 
 
 class LinkHelper:
@@ -469,25 +429,19 @@ class LinkHelper:
         return all(not link.sample.is_tumour for link in links)
 
     @staticmethod
-    def all_samples_data_analysis(
-        links: List[models.FamilySample], data_anlysis
-    ) -> bool:
+    def all_samples_data_analysis(links: List[models.FamilySample], data_anlysis) -> bool:
         """Return True if all samples has the given data_analysis."""
         return all(link.sample.data_analysis in data_anlysis for link in links)
 
     @staticmethod
     def all_samples_list_analyses(links: List[models.FamilySample]) -> list:
         """Return analysis type for each sample in case"""
-        return [
-            link.sample.application_version.application.analysis_type for link in links
-        ]
+        return [link.sample.application_version.application.analysis_type for link in links]
 
 
 @upload.command()
 @click.option("-r", "--re-upload", is_flag=True, help="re-upload existing analysis")
-@click.option(
-    "-p", "--print", "print_console", is_flag=True, help="print config values"
-)
+@click.option("-p", "--print", "print_console", is_flag=True, help="print config values")
 @click.argument("case_id", required=False)
 @click.pass_context
 def scout(context, re_upload, print_console, case_id):
@@ -526,9 +480,7 @@ def scout(context, re_upload, print_console, case_id):
         LOG.info("Upload file to housekeeper: %s", file_path)
         scout_upload_api.add_scout_config_to_hk(file_path, hk_api, case_id)
     except FileExistsError as err:
-        LOG.warning(
-            "%s, consider removing the file from housekeeper and try again", str(err)
-        )
+        LOG.warning("%s, consider removing the file from housekeeper and try again", str(err))
         context.abort()
 
     scout_api.upload(scout_config, force=re_upload)
@@ -536,17 +488,12 @@ def scout(context, re_upload, print_console, case_id):
 
 @upload.command()
 @click.argument("family_id")
-@click.option(
-    "-p", "--panel", help="Gene panel to filter VCF by", required=True, multiple=True
-)
+@click.option("-p", "--panel", help="Gene panel to filter VCF by", required=True, multiple=True)
 @click.option("-out", "--outfile", help="Name of pdf outfile", default=None)
 @click.option("-cust", "--customer", help="Name of customer", default="")
 @click.option("-qual", "--quality", help="Variant quality threshold", default=20)
 @click.option(
-    "-ref",
-    "--genome_reference",
-    help="Chromosome build (default=grch37)",
-    default="grch37",
+    "-ref", "--genome_reference", help="Chromosome build (default=grch37)", default="grch37"
 )
 @click.pass_context
 def beacon(
@@ -592,8 +539,7 @@ def auto(context):
 
         if analysis_obj.family.analyses[0].uploaded_at is not None:
             LOG.warning(
-                "Newer analysis already uploaded for %s, skipping",
-                analysis_obj.family.internal_id,
+                "Newer analysis already uploaded for %s, skipping", analysis_obj.family.internal_id
             )
             continue
 
@@ -673,9 +619,7 @@ def process_solved(context, case_id, days_ago, customers, dry_run):
     scout_api = context.obj["scout_api"]
     mutacc_auto_api = mutacc_auto.MutaccAutoAPI(context.obj)
 
-    mutacc_upload = UploadToMutaccAPI(
-        scout_api=scout_api, mutacc_auto_api=mutacc_auto_api
-    )
+    mutacc_upload = UploadToMutaccAPI(scout_api=scout_api, mutacc_auto_api=mutacc_auto_api)
 
     # Get cases to upload into mutacc from scout
     if case_id is not None:
@@ -691,9 +635,7 @@ def process_solved(context, case_id, days_ago, customers, dry_run):
         number_processed += 1
         if customers:
             if case["owner"] not in customers:
-                LOG.info(
-                    "skipping %s: Not valid customer %s", case["_id"], case["owner"]
-                )
+                LOG.info("skipping %s: Not valid customer %s", case["_id"], case["owner"])
                 continue
         if dry_run:
             LOG.info("Would process case %s with mutacc", case["_id"])

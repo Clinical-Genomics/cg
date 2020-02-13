@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Test get MIP files"""
 
 from pathlib import Path

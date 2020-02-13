@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import datetime as dt
 import shutil
 from pathlib import Path
@@ -21,12 +20,9 @@ class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
 
     def __init__(self, config: dict):
         super(TrailblazerAPI, self).__init__(
-            config["trailblazer"]["database"],
-            families_dir=config["trailblazer"]["root"],
+            config["trailblazer"]["database"], families_dir=config["trailblazer"]["root"]
         )
-        self.mip_cli = MipCli(
-            config["trailblazer"]["script"], config["trailblazer"]["pipeline"]
-        )
+        self.mip_cli = MipCli(config["trailblazer"]["script"], config["trailblazer"]["pipeline"])
         self.mip_config = config["trailblazer"]["mip_config"]
 
     def run(
@@ -94,9 +90,7 @@ class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
             analysis_obj.is_deleted = True
             self.commit()
 
-    def get_trending(
-        self, mip_config_raw: str, qcmetrics_raw: str, sampleinfo_raw: dict
-    ) -> dict:
+    def get_trending(self, mip_config_raw: str, qcmetrics_raw: str, sampleinfo_raw: dict) -> dict:
         return trending.parse_mip_analysis(
             mip_config_raw=mip_config_raw,
             qcmetrics_raw=qcmetrics_raw,

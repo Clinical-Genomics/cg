@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Test FastqHandler"""
 import os
 from pathlib import Path
@@ -6,9 +5,7 @@ from pathlib import Path
 from cg.apps.usalt.fastq import FastqHandler
 
 
-def test_fastq_link_file_count(
-    tmpdir, cg_config, link_case, link_sample, simple_files_data
-):
+def test_fastq_link_file_count(tmpdir, cg_config, link_case, link_sample, simple_files_data):
     """Test method to test that the right number of files are created by linking"""
 
     # given some fastq-files belonging to family and sample

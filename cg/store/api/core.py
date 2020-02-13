@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import logging
 
 import alchy
@@ -14,14 +13,20 @@ from .trends import TrendsHandler
 LOG = logging.getLogger(__name__)
 
 
-class CoreHandler(AddHandler, FindBasicDataHandler, FindBusinessDataHandler, ResetHandler,
-                  StatusHandler, TrendsHandler):
+class CoreHandler(
+    AddHandler,
+    FindBasicDataHandler,
+    FindBusinessDataHandler,
+    ResetHandler,
+    StatusHandler,
+    TrendsHandler,
+):
     """Aggregating class for the store api handlers"""
+
     pass
 
 
 class Store(alchy.Manager, CoreHandler):
-
     def __init__(self, uri):
         self.uri = uri
         super(Store, self).__init__(config=dict(SQLALCHEMY_DATABASE_URI=uri), Model=models.Model)

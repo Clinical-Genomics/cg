@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import logging
 
 import click
@@ -14,38 +13,39 @@ log = logging.getLogger(__name__)
 @click.pass_context
 def transfer(context):
     """Transfer results to the status interface."""
-    context.obj['db'] = Store(context.obj['database'])
+    context.obj["db"] = Store(context.obj["database"])
 
 
 @transfer.command()
-@click.argument('flowcell_name')
+@click.argument("flowcell_name")
 @click.pass_context
 def flowcell(context, flowcell_name):
     """Populate results from a flowcell."""
     stats_api = stats.StatsAPI(context.obj)
     hk_api = hk.HousekeeperAPI(context.obj)
-    transfer_api = transfer_app.TransferFlowcell(context.obj['db'], stats_api, hk_api)
+    transfer_api = transfer_app.TransferFlowcell(context.obj["db"], stats_api, hk_api)
     new_record = transfer_api.transfer(flowcell_name)
-    context.obj['db'].add_commit(new_record)
-    click.echo(click.style(f"flowcell added: {new_record}", fg='green'))
+    context.obj["db"].add_commit(new_record)
+    click.echo(click.style(f"flowcell added: {new_record}", fg="green"))
 
 
 @transfer.command()
-@click.option('-s', '--status', type=click.Choice(['received', 'prepared', 'delivered']),
-              default='received')
-@click.option('-i', '--include', type=click.Choice(['unset', 'not-invoiced', 'all']),
-              default='unset')
+@click.option(
+    "-s", "--status", type=click.Choice(["received", "prepared", "delivered"]), default="received"
+)
+@click.option(
+    "-i", "--include", type=click.Choice(["unset", "not-invoiced", "all"]), default="unset"
+)
 @click.pass_context
 def lims(context, status, include):
     """Check if samples have been updated in LIMS."""
     lims_api = lims_app.LimsAPI(context.obj)
-    transfer_api = transfer_app.TransferLims(context.obj['db'], lims_api)
+    transfer_api = transfer_app.TransferLims(context.obj["db"], lims_api)
     transfer_api.transfer_samples(transfer_app.SampleState[status.upper()], include)
 
 
 @transfer.command()
-@click.option('-s', '--status', type=click.Choice(['received', 'delivered']),
-              default='delivered')
+@click.option("-s", "--status", type=click.Choice(["received", "delivered"]), default="delivered")
 @click.pass_context
 def pools(context, status):
     """
@@ -53,13 +53,17 @@ def pools(context, status):
     option is provided.
     """
     lims_api = lims_app.LimsAPI(context.obj)
-    transfer_api = transfer_app.TransferLims(context.obj['db'], lims_api)
+    transfer_api = transfer_app.TransferLims(context.obj["db"], lims_api)
     transfer_api.transfer_pools(transfer_app.PoolState[status.upper()])
 
 
 @transfer.command()
-@click.option('-s', '--status', type=click.Choice(['received', 'prepared', 'sequenced',
-                                                   'delivered']), default='delivered')
+@click.option(
+    "-s",
+    "--status",
+    type=click.Choice(["received", "prepared", "sequenced", "delivered"]),
+    default="delivered",
+)
 @click.pass_context
 def microbials(context, status):
     """
@@ -67,5 +71,5 @@ def microbials(context, status):
     from LIMS. Defaults to delivered if no option is provided.
     """
     lims_api = lims_app.LimsAPI(context.obj)
-    transfer_api = transfer_app.TransferLims(context.obj['db'], lims_api)
+    transfer_api = transfer_app.TransferLims(context.obj["db"], lims_api)
     transfer_api.transfer_microbial_samples(transfer_app.MicrobialState[status.upper()])

@@ -1,5 +1,5 @@
 """File includes api to uploading data into Scout"""
-# -*- coding: utf-8 -*-
+
 import logging
 from pathlib import Path
 from ruamel import yaml
@@ -36,22 +36,16 @@ class UploadScoutAPI:
         for link_obj in analysis_obj.family.links:
             sample_id = link_obj.sample.internal_id
             bam_tags = ["bam", sample_id]
-            bam_file = self.housekeeper.files(
-                version=hk_version_id, tags=bam_tags
-            ).first()
+            bam_file = self.housekeeper.files(version=hk_version_id, tags=bam_tags).first()
             bam_path = bam_file.full_path if bam_file else None
             mt_bam_tags = ["bam-mt", sample_id]
-            mt_bam_file = self.housekeeper.files(
-                version=hk_version_id, tags=mt_bam_tags
-            ).first()
+            mt_bam_file = self.housekeeper.files(version=hk_version_id, tags=mt_bam_tags).first()
             mt_bam_path = mt_bam_file.full_path if mt_bam_file else None
             vcf2cytosure_tags = ["vcf2cytosure", sample_id]
             vcf2cytosure_file = self.housekeeper.files(
                 version=hk_version_id, tags=vcf2cytosure_tags
             ).first()
-            vcf2cytosure_path = (
-                vcf2cytosure_file.full_path if vcf2cytosure_file else None
-            )
+            vcf2cytosure_path = vcf2cytosure_file.full_path if vcf2cytosure_file else None
             sample = {
                 "analysis_type": link_obj.sample.application_version.application.analysis_type,
                 "sample_id": sample_id,
@@ -70,12 +64,8 @@ class UploadScoutAPI:
     def generate_config(self, analysis_obj: models.Analysis) -> dict:
         """Fetch data about an analysis to load Scout."""
         analysis_date = analysis_obj.started_at or analysis_obj.completed_at
-        hk_version = self.housekeeper.version(
-            analysis_obj.family.internal_id, analysis_date
-        )
-        analysis_data = self.analysis.get_latest_metadata(
-            analysis_obj.family.internal_id
-        )
+        hk_version = self.housekeeper.version(analysis_obj.family.internal_id, analysis_date)
+        analysis_data = self.analysis.get_latest_metadata(analysis_obj.family.internal_id)
 
         data = {
             "owner": analysis_obj.family.customer.internal_id,
@@ -119,9 +109,7 @@ class UploadScoutAPI:
         yml.dump(upload_config, file_path)
 
     @staticmethod
-    def add_scout_config_to_hk(
-        config_file_path: Path, hk_api: hk.HousekeeperAPI, case_id: str
-    ):
+    def add_scout_config_to_hk(config_file_path: Path, hk_api: hk.HousekeeperAPI, case_id: str):
         """Add scout load config to hk bundle"""
         tag_name = "scout-load-config"
         version_obj = hk_api.last_version(bundle=case_id)
@@ -163,9 +151,7 @@ class UploadScoutAPI:
         }
         self._include_files(data, hk_version, scout_hk_map, skip_missing=False)
 
-    def _include_files(
-        self, data, hk_version, scout_hk_map, extra_tag=None, skip_missing=True
-    ):
+    def _include_files(self, data, hk_version, scout_hk_map, extra_tag=None, skip_missing=True):
         for scout_key, hk_tag in scout_hk_map:
 
             if extra_tag:

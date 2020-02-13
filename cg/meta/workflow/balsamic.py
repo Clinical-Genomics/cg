@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import gzip
 import logging
 import re
@@ -104,8 +103,7 @@ class AnalysisAPI:
             external = link_obj.sample.application_version.application.is_external
             if downsampled or external:
                 self.LOG.info(
-                    "%s: downsampled/external - skip evaluation",
-                    link_obj.sample.internal_id,
+                    "%s: downsampled/external - skip evaluation", link_obj.sample.internal_id
                 )
                 kwargs["skip_evaluation"] = True
                 break
@@ -153,28 +151,21 @@ class AnalysisAPI:
                 if link.sample.capture_kit:
                     # set the capture kit from status: key or custom file name
                     mip_capturekit = CAPTUREKIT_MAP.get(link.sample.capture_kit)
-                    sample_data["capture_kit"] = (
-                        mip_capturekit or link.sample.capture_kit
-                    )
+                    sample_data["capture_kit"] = mip_capturekit or link.sample.capture_kit
                 else:
                     if link.sample.downsampled_to:
-                        self.LOG.debug(
-                            f"{link.sample.name}: downsampled sample, skipping"
-                        )
+                        self.LOG.debug(f"{link.sample.name}: downsampled sample, skipping")
                     else:
                         try:
                             capture_kit = self.lims.capture_kit(link.sample.internal_id)
                             if capture_kit is None or capture_kit == "NA":
                                 self.LOG.warning(
-                                    f"%s: capture kit not found",
-                                    link.sample.internal_id,
+                                    f"%s: capture kit not found", link.sample.internal_id
                                 )
                             else:
                                 sample_data["capture_kit"] = CAPTUREKIT_MAP[capture_kit]
                         except HTTPError:
-                            self.LOG.warning(
-                                f"{link.sample.internal_id}: not found (LIMS)"
-                            )
+                            self.LOG.warning(f"{link.sample.internal_id}: not found (LIMS)")
             if link.mother:
                 sample_data["mother"] = link.mother.internal_id
             if link.father:
@@ -267,9 +258,7 @@ class AnalysisAPI:
 
     def panel(self, family_obj: models.Family) -> List[str]:
         """Create the aggregated panel file."""
-        all_panels = self.convert_panels(
-            family_obj.customer.internal_id, family_obj.panels
-        )
+        all_panels = self.convert_panels(family_obj.customer.internal_id, family_obj.panels)
         bed_lines = self.scout.export_panels(all_panels)
         return bed_lines
 
@@ -313,24 +302,20 @@ class AnalysisAPI:
     def _open_bundle_file(self, relative_file_path: str) -> Any:
         """Open a bundle file and return it as an Python object."""
 
-        full_file_path = self.pather(
-            self.deliver.get_post_analysis_files_root_dir()
-        ).joinpath(relative_file_path)
+        full_file_path = self.pather(self.deliver.get_post_analysis_files_root_dir()).joinpath(
+            relative_file_path
+        )
         open_file = self.yaml_loader(self.pather(full_file_path).open())
         return open_file
 
     def get_latest_metadata(self, family_id: str) -> dict:
         """Get the latest trending data for a family."""
 
-        mip_config_raw = self._get_latest_raw_file(
-            family_id=family_id, tag="mip-config"
-        )
+        mip_config_raw = self._get_latest_raw_file(family_id=family_id, tag="mip-config")
 
         qcmetrics_raw = self._get_latest_raw_file(family_id=family_id, tag="qcmetrics")
 
-        sampleinfo_raw = self._get_latest_raw_file(
-            family_id=family_id, tag="sampleinfo"
-        )
+        sampleinfo_raw = self._get_latest_raw_file(family_id=family_id, tag="sampleinfo")
 
         trending = dict()
 

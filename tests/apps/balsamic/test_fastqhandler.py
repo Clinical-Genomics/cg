@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Test FastqHandler"""
 import os
 from pathlib import Path
@@ -6,9 +5,7 @@ from pathlib import Path
 from cg.apps.balsamic.fastq import FastqHandler
 
 
-def test_link_file_count(
-    tmpdir, cg_config, link_family, link_sample, simple_files_data
-):
+def test_link_file_count(tmpdir, cg_config, link_family, link_sample, simple_files_data):
     """Test method to test that the right number of files are created by linking"""
 
     # given some fastq-files belonging to family and sample
@@ -26,25 +23,13 @@ def test_link_file_count(
 
     # then we should have a new directory with one concatenated file per read direction
     assert (
-        len(
-            [
-                name
-                for name in os.listdir(link_dir)
-                if os.path.isfile(os.path.join(link_dir, name))
-            ]
-        )
+        len([name for name in os.listdir(link_dir) if os.path.isfile(os.path.join(link_dir, name))])
         == 2
     )
 
 
 def test_link_file_content(
-    tmpdir,
-    cg_config,
-    link_family,
-    link_sample,
-    simple_files_data,
-    content_r1,
-    content_r2,
+    tmpdir, cg_config, link_family, link_sample, simple_files_data, content_r1, content_r2
 ):
     """Test method to test that balsamic files are linked properly"""
 
@@ -57,9 +42,7 @@ def test_link_file_content(
 
     # then the first concatenated file should contain 'ABCD' and the other 'DEFG'
     linked_files = [
-        name
-        for name in os.listdir(link_dir)
-        if os.path.isfile(os.path.join(link_dir, name))
+        name for name in os.listdir(link_dir) if os.path.isfile(os.path.join(link_dir, name))
     ]
 
     file_contents = []
@@ -75,13 +58,7 @@ def test_link_file_content(
 
 
 def test_link_file_content_reversed(
-    tmpdir,
-    cg_config,
-    link_family,
-    link_sample,
-    simple_files_data_reversed,
-    content_r1,
-    content_r2,
+    tmpdir, cg_config, link_family, link_sample, simple_files_data_reversed, content_r1, content_r2
 ):
     """Test method to test that balsamic files are linked properly"""
 
@@ -94,9 +71,7 @@ def test_link_file_content_reversed(
 
     # then the first concatenated file should contain 'ABCD' and the other 'DEFG'
     linked_files = [
-        name
-        for name in os.listdir(link_dir)
-        if os.path.isfile(os.path.join(link_dir, name))
+        name for name in os.listdir(link_dir) if os.path.isfile(os.path.join(link_dir, name))
     ]
 
     file_contents = []

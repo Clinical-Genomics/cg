@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 class CgError(Exception):
 
     """Base exception for the package."""

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 This module handles concatenation of usalt fastq files.
 

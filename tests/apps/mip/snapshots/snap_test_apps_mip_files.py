@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # snapshottest: v1 - https://goo.gl/zC4yUc
 from __future__ import unicode_literals
 
@@ -37,9 +36,7 @@ snapshots["test_parse_sampleinfo_rna_result_contents 1"] = {
             "mark_duplicates": [
                 "/path/to/stuff/rare-disease/cases/case_id/analysis/files/sample_id_1_lanes_1234_trim_star_sorted_merged_md_metric"
             ],
-            "salmon_quant": [
-                "/path/to/stuff/rare-disease/cases/case_id/analysis/files/quant.sf"
-            ],
+            "salmon_quant": ["/path/to/stuff/rare-disease/cases/case_id/analysis/files/quant.sf"],
             "star_fusion": "/path/to/stuff/rare-disease/cases/case_id/analysis/files/star-fusion.fusion_predictions.tsv",
             "stringtie_ar": [
                 "/path/to/stuff/rare-disease/cases/case_id/analysis/files/sample_id_1_lanes_1234_trim_star_sorted_merged_strg.gtf"
