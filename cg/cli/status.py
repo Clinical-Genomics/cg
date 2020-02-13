@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+
 
 import click
 from cg.apps import tb
