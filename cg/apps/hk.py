@@ -14,9 +14,7 @@ class HousekeeperAPI:
     """ API to decouple cg code from Housekeeper """
 
     def __init__(self, config):
-        self.store = Store(
-            config["housekeeper"]["database"], config["housekeeper"]["root"]
-        )
+        self.store = Store(config["housekeeper"]["database"], config["housekeeper"]["root"])
 
     def add_bundle(self, bundle_data):
         """ Wrap method in Housekeeper Store """
@@ -46,6 +44,7 @@ class HousekeeperAPI:
         file_obj.path = str(new_path).replace(f"{global_root_dir}/", "", 1)
 
     def last_version(self, bundle: str) -> models.Version:
+        """Gets the latest version of a bundle"""
         return (
             self.store.Version.query.join(models.Version.bundle)
             .filter(models.Bundle.name == bundle)
@@ -69,9 +68,7 @@ class HousekeeperAPI:
     def add_file(self, file, version_obj: models.Version, tag_name, to_archive=False):
         """Add a file to housekeeper."""
         new_file = self.store.new_file(
-            path=str(Path(file).absolute()),
-            to_archive=to_archive,
-            tags=[self.store.tag(tag_name)],
+            path=str(Path(file).absolute()), to_archive=to_archive, tags=[self.store.tag(tag_name)]
         )
         new_file.version = version_obj
         self.store.add_commit(new_file)
