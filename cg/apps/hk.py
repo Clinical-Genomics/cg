@@ -34,7 +34,7 @@ class HousekeeperAPI:
         # generate root directory
         version_root_dir = global_root_dir / version_obj.relative_root_dir
         version_root_dir.mkdir(parents=True, exist_ok=True)
-        LOG.info("created new bundle version dir: %s", version_root_dir)
+        LOG.info("Created new bundle version dir: %s", version_root_dir)
 
         if file_obj.to_archive:
             # calculate sha1 checksum if file is to be archived
@@ -42,7 +42,7 @@ class HousekeeperAPI:
         # hardlink file to the internal structure
         new_path = version_root_dir / Path(file_obj.path).name
         os.link(file_obj.path, new_path)
-        LOG.info("linked file: %s -> %s", file_obj.path, new_path)
+        LOG.info("Linked file: %s -> %s", file_obj.path, new_path)
         file_obj.path = str(new_path).replace(f"{global_root_dir}/", "", 1)
 
     def last_version(self, bundle: str) -> models.Version:
