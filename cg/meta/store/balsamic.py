@@ -90,13 +90,9 @@ def _get_files(meta_data: dict) -> list:
     """Get all the files from the balsamic files."""
 
     data = []
-
     for tag in meta_data["files"]:
-
         paths = meta_data["files"][tag]
-
         for path in paths:
-
             data.append({"path": path, "tags": [tag], "archive": False})
 
     return data
