@@ -22,7 +22,7 @@ class MockTB(TrailblazerAPI):
     """Mock of trailblazer """
 
     def __init__(self):
-        """Mock the init"""
+        """Override TrailblazerAPI __init__ to avoid default behaviour"""
         pass
 
     def analyses(
@@ -37,6 +37,7 @@ class MockTB(TrailblazerAPI):
         is_visible: bool = None,
         workflow=None
     ):
+        """Override TrailblazerAPI analyses method to avoid default behaviour"""
         return []
 
 
@@ -44,16 +45,18 @@ class MockHouseKeeper(HousekeeperAPI):
     """Mock HousekeeperAPI"""
 
     def __init__(self, bundle_name):
+        """Override HousekeeperAPI method to avoid default behaviour"""
         self.store = MockHousekeeperStore()
         self.bundle_name = bundle_name
         self.bundle_data = None
 
     def get_files(self, bundle: str, tags: list, version: int = None):
-        """Mock get_files of HousekeeperAPI"""
+        """return a list of mocked files"""
         del tags, bundle, version
         return [MockFile()]
 
     def add_bundle(self, data: dict):
+        """fake adding a bundle in housekeeper"""
 
         if self.bundle_data != data:
             self.bundle_data = data
@@ -66,9 +69,11 @@ class MockHousekeeperStore:
     """Mock Store of Housekeeper"""
 
     def __init__(self):
+        """Override __init__ to avoid default behaviour"""
         self.root_dir = ""
 
     def add_commit(self, *pargs, **kwargs):
+        """Implements add_commit to allow it to be used in HousekeeperAPI"""
         pass
 
 
@@ -76,7 +81,7 @@ class MockBundle:
     """Mock Bundle"""
 
     def __init__(self, data, name):
-
+        """Implement minimal set of properties to allow it to be used in test"""
         self.name = name
         self._data = data
 
@@ -85,6 +90,7 @@ class MockVersion:
     """Mock Version"""
 
     def __init__(self):
+        """Implement minimal set of properties to allow it to be used in test"""
         self.created_at = datetime.now()
         self.included_at = None
         self.relative_root_dir = ""
@@ -95,6 +101,7 @@ class MockFile:
     """Mock File"""
 
     def __init__(self, path=""):
+        """Implement minimal set of properties to allow it to be used in test"""
         self.path = path
         self.full_path = path
 
@@ -111,9 +118,7 @@ def balsamic_store(base_store: Store) -> Store:
     _store.relate_sample(case, normal_sample, status="unknown")
 
     case = add_family(_store, "mip_case")
-    normal_sample = add_sample(
-        _store, "normal_sample", is_tumour=False, data_analysis="mip"
-    )
+    normal_sample = add_sample(_store, "normal_sample", is_tumour=False, data_analysis="mip")
     _store.relate_sample(case, normal_sample, status="unknown")
 
     _store.commit()
@@ -144,19 +149,14 @@ def ensure_application_version(disk_store, application_tag="dummy_tag"):
     application = disk_store.application(tag=application_tag)
     if not application:
         application = disk_store.add_application(
-            tag=application_tag,
-            category="wgs",
-            description="dummy_description",
-            percent_kth=0,
+            tag=application_tag, category="wgs", description="dummy_description", percent_kth=0
         )
         disk_store.add_commit(application)
 
     prices = {"standard": 10, "priority": 20, "express": 30, "research": 5}
     version = disk_store.application_version(application, 1)
     if not version:
-        version = disk_store.add_version(
-            application, 1, valid_from=datetime.now(), prices=prices
-        )
+        version = disk_store.add_version(application, 1, valid_from=datetime.now(), prices=prices)
 
         disk_store.add_commit(version)
     return version
@@ -196,11 +196,7 @@ def ensure_customer(disk_store, customer_id="cust_test"):
 
 
 def add_sample(
-    store,
-    sample_id="sample_test",
-    gender="female",
-    is_tumour=False,
-    data_analysis="balsamic",
+    store, sample_id="sample_test", gender="female", is_tumour=False, data_analysis="balsamic"
 ):
     """utility function to add a sample to use in tests"""
     customer = ensure_customer(store)
