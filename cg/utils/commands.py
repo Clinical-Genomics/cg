@@ -43,7 +43,7 @@ class Process:
         if parameters:
             command.extend(parameters)
 
-        LOG.info("Running command %s", command)
+        LOG.info("Running command %s", " ".join(command))
         res = subprocess.run(
             command, check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE
         )
