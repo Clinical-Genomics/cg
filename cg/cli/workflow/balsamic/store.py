@@ -40,9 +40,7 @@ def analysis(context, case_id, config_stream):
     hk_api = context.obj["hk_api"]
 
     try:
-        new_analysis = _gather_files_and_bundle_in_housekeeper(
-            config_stream, hk_api, status
-        )
+        new_analysis = _gather_files_and_bundle_in_housekeeper(config_stream, hk_api, status)
     except AnalysisNotFinishedError as error:
         click.echo(click.style(error.message, fg="red"))
         context.abort()
@@ -50,7 +48,7 @@ def analysis(context, case_id, config_stream):
         click.echo(click.style(f"missing file: {error.args[0]}", fg="red"))
         context.abort()
     except AnalysisDuplicationError as error:
-        print(click.style("analysis version already added", fg="yellow"))
+        click.echo(click.style("analysis version already added", fg="yellow"))
         context.abort()
     except VersionIncludedError as error:
         click.echo(click.style(error.message, fg="red"))
