@@ -30,14 +30,14 @@ def base_context(microsalt_store, lims_api, tmpdir, queries_path):
 
 
 @pytest.fixture(scope="function")
-def microsalt_store(base_store: Store, microbial_sample_id, microbial_project_id) -> Store:
+def microsalt_store(base_store: Store, microbial_sample_id, microbial_order_id) -> Store:
     """ Filled in store to be used in the tests """
     _store = base_store
 
     add_microbial_sample(
         _store,
         internal_id=microbial_sample_id,
-        order_internal_id=microbial_project_id)
+        order_internal_id=microbial_order_id)
 
     _store.commit()
 
@@ -51,7 +51,7 @@ def microbial_sample_id():
 
 
 @pytest.fixture()
-def microbial_project_id():
+def microbial_order_id():
     """ Define a name for a microbial order """
     return "microbial_order_test"
 

@@ -21,7 +21,7 @@ def test_no_arguments(cli_runner, base_context, caplog):
     assert result.exit_code != EXIT_SUCCESS
     assert "Aborted!" in result.output
     with caplog.at_level(logging.ERROR):
-        assert "provide project and/or sample" in caplog.text
+        assert "provide order and/or sample" in caplog.text
 
 
 def test_no_sample_found(cli_runner, base_context, caplog):
@@ -41,39 +41,39 @@ def test_no_sample_found(cli_runner, base_context, caplog):
         assert f"Sample {microbial_sample_id} not found" in caplog.text
 
 
-def test_no_project_found(cli_runner, base_context, caplog):
-    """Test missing project command """
+def test_no_order_found(cli_runner, base_context, caplog):
+    """Test missing order command """
 
-    # GIVEN a not existing project
-    microbial_project_id = "not_existing_project"
+    # GIVEN a not existing order 
+    microbial_order_id = "not_existing_order"
 
-    # WHEN dry running a project name
+    # WHEN dry running a order name
     result = cli_runner.invoke(
-        config_case, ['--project', microbial_project_id], obj=base_context
+        config_case, ['--order', microbial_order_id], obj=base_context
     )
 
-    # THEN command should mention missing project
+    # THEN command should mention missing order
     assert result.exit_code != EXIT_SUCCESS
     with caplog.at_level(logging.ERROR):
-        assert f"Project {microbial_project_id} not found" in caplog.text
+        assert f"Order {microbial_order_id} not found" in caplog.text
 
 
-def test_no_sample_project_found(cli_runner, base_context, caplog):
-    """Test missing sample and project command """
+def test_no_sample_order_found(cli_runner, base_context, caplog):
+    """Test missing sample and order command """
 
-    # GIVEN a not existing project
+    # GIVEN a not existing order
     microbial_sample_id = "not_existing_sample"
-    microbial_project_id = "not_existing_project"
+    microbial_order_id = "not_existing_order"
 
-    # WHEN dry running a project name
+    # WHEN dry running a order name
     result = cli_runner.invoke(
-        config_case, ['--project', microbial_project_id, microbial_sample_id], obj=base_context
+        config_case, ['--order', microbial_order_id, microbial_sample_id], obj=base_context
     )
 
-    # THEN command should mention missing project
+    # THEN command should mention missing order
     assert result.exit_code != EXIT_SUCCESS
     with caplog.at_level(logging.ERROR):
-        assert f"Samples {microbial_sample_id} not found in {microbial_project_id}" in caplog.text
+        assert f"Samples {microbial_sample_id} not found in {microbial_order_id}" in caplog.text
 
 
 def test_dry_sample(cli_runner, base_context, microbial_sample_id, snapshot: Snapshot):
@@ -91,16 +91,16 @@ def test_dry_sample(cli_runner, base_context, microbial_sample_id, snapshot: Sna
     snapshot.assert_match(result.output)
 
 
-def test_dry_sample_project(cli_runner, base_context, microbial_sample_id,
-                            microbial_project_id, snapshot: Snapshot):
-    """Test working dry command for sample in a project"""
+def test_dry_sample_order(cli_runner, base_context, microbial_sample_id,
+                            microbial_order_id, snapshot: Snapshot):
+    """Test working dry command for sample in a order"""
 
     # GIVEN
 
     # WHEN dry running a sample name
     result = cli_runner.invoke(
         config_case,
-        ["--dry", "--project", microbial_project_id, microbial_sample_id],
+        ["--dry", "--order", microbial_order_id, microbial_sample_id],
         obj=base_context
     )
 
@@ -109,15 +109,15 @@ def test_dry_sample_project(cli_runner, base_context, microbial_sample_id,
     snapshot.assert_match(result.output)
 
 
-def test_dry_project(cli_runner, base_context, microbial_project_id, snapshot: Snapshot):
-    """Test working dry command for a project"""
+def test_dry_order(cli_runner, base_context, microbial_order_id, snapshot: Snapshot):
+    """Test working dry command for a order"""
 
     # GIVEN
 
     # WHEN dry running a sample name
     result = cli_runner.invoke(
         config_case,
-        ["--dry", "--project", microbial_project_id],
+        ["--dry", "--order", microbial_order_id],
         obj=base_context
     )
 

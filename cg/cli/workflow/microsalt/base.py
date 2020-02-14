@@ -81,28 +81,30 @@ def link(context: click.Context, order_id: str, sample_id: str):
 
 
 @microsalt.command("config-case")
-@click.option("-d", "--dry", is_flag=True, help="print case config to console")
-@click.option("--project", "project_id", help="include all samples for a project")
+@click.option("-d", "--dry", is_flag=True, help="print config-case to console")
+@click.option(
+    "-o", "--order", "order_id", help="create config-case all microbial samples for an order"
+)
 @click.argument("sample_id", required=False)
 @click.pass_context
-def config_case(context, dry, project_id, sample_id):
+def config_case(context: click.Context, dry, order_id: str, sample_id: str):
     """ Create a config file on case level for microSALT """
-    if project_id and (sample_id is None):
-        microbial_order_obj = context.obj["db"].microbial_order(project_id)
+    if order_id and (sample_id is None):
+        microbial_order_obj = context.obj["db"].microbial_order(order_id)
         if not microbial_order_obj:
-            LOG.error("Project %s not found", project_id)
+            LOG.error("Order %s not found", order_id)
             context.abort()
         sample_objs = microbial_order_obj.microbial_samples
-    elif sample_id and (project_id is None):
+    elif sample_id and (order_id is None):
         sample_obj = context.obj["db"].microbial_sample(sample_id)
         if not sample_obj:
             LOG.error("Sample %s not found", sample_id)
             context.abort()
         sample_objs = [context.obj["db"].microbial_sample(sample_id)]
-    elif sample_id and project_id:
-        microbial_order_obj = context.obj["db"].microbial_order(project_id)
+    elif sample_id and order_id:
+        microbial_order_obj = context.obj["db"].microbial_order(order_id)
         if not microbial_order_obj:
-            LOG.error("Samples %s not found in %s ", sample_id, project_id)
+            LOG.error("Samples %s not found in %s ", sample_id, order_id)
             context.abort()
         sample_objs = [
             sample_obj
@@ -110,7 +112,7 @@ def config_case(context, dry, project_id, sample_id):
             if sample_obj.internal_id == sample_id
         ]
     else:
-        LOG.error("provide project and/or sample")
+        LOG.error("provide order and/or sample")
         context.abort()
 
     parameters = [
@@ -118,7 +120,7 @@ def config_case(context, dry, project_id, sample_id):
         for sample_obj in sample_objs
     ]
 
-    filename = project_id if project_id else sample_id
+    filename = order_id if order_id else sample_id
     outfilename = Path(context.obj["usalt"]["queries_path"]) / filename
     outfilename = outfilename.with_suffix(".json")
     if dry:
@@ -130,21 +132,21 @@ def config_case(context, dry, project_id, sample_id):
 
 @microsalt.command()
 @click.option("-d", "--dry", is_flag=True, help="print command to console")
-@click.option("-c", "--case-config", required=False, help="optionally change the case-config")
-@click.argument("project_id")
+@click.option("-c", "--config-case", required=False, help="optionally change the config-case")
+@click.argument("order_id")
 @click.pass_context
-def run(context, dry, case_config, project_id):
-    """ Start microSALT """
+def run(context, dry, config_case, order_id):
+    """ Start microSALT with an order_id """
     microsalt_command = context.obj["usalt"]["binary_path"]
     command = [microsalt_command]
 
-    case_config_path = case_config
-    if not case_config:
+    config_case_path = config_case
+    if not config_case:
         queries_path = Path(context.obj["usalt"]["queries_path"])
-        case_config_path = queries_path / project_id
-        case_config_path = case_config_path.with_suffix(".json")
+        config_case_path = queries_path / order_id
+        config_case_path = config_case_path.with_suffix(".json")
 
-    command.extend(["--parameters", str(case_config_path)])
+    command.extend(["--parameters", str(config_case_path)])
     if dry:
         print(" ".join(command))
     else:
