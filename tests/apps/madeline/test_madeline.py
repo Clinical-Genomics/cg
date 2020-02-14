@@ -1,6 +1,10 @@
 """Tests for madeline extension"""
 
-from cg.apps.madeline import make_ped, run
+from cg.apps.madeline import MadelineAPI
+from cg.utils import Process
+
+make_ped = MadelineAPI.make_ped
+strip_script_tag = MadelineAPI.strip_script_tag
 
 
 def get_ind_info(columns, line):
@@ -9,17 +13,37 @@ def get_ind_info(columns, line):
     return ind_info
 
 
-def test_run_madeline(madeline_process, madeline_input):
-
+def test_run_madeline(mocker, trio, madeline_output):
+    """Test to run the madeline call from api"""
     # GIVEN a ped stream and a madeline process mock
+    config = {"madeline_exe": "madeline"}
+    madeline_api = MadelineAPI(config)
+    mocker.patch.object(Process, "run_command")
     # WHEN running the madeline command
-    outpath = run(madeline_process, madeline_input)
+    outpath = madeline_api.run("a family", trio, madeline_output)
     # THEN assert a madeline xml file is returned
     assert outpath.endswith(".xml")
 
 
-def test_generate_madeline_input_no_mother(madeline_columns, proband):
+def test_remove_script_tag(madeline_output):
+    """Test to remove the script tag from a madeline output"""
+    # GIVEN a file with madeline output with a script tag
+    script_tag = (
+        '<script type="text/javascript" xlink:href="javascript/madeline.js"></script>'
+    )
+    with open(madeline_output, "r") as output:
+        svg_content = output.read()
+    assert script_tag in svg_content
 
+    # WHEN removeing the script tag
+    svg_content = strip_script_tag(svg_content)
+
+    # THEN assert the lines are removed
+    assert script_tag not in svg_content
+
+
+def test_generate_madeline_input_no_mother(madeline_columns, proband):
+    """Test generate input for madeline when mother is missing"""
     # GIVEN a family id and a ind with unknown mother
     family_id = "test"
     proband.pop("mother")
@@ -37,6 +61,7 @@ def test_generate_madeline_input_no_mother(madeline_columns, proband):
 
 
 def test_generate_madeline_input_no_sex(madeline_columns, proband):
+    """Test generate input for madeline when sex is missing"""
 
     # GIVEN a family id and a ind with unknown sex
     family_id = "test"
@@ -55,6 +80,7 @@ def test_generate_madeline_input_no_sex(madeline_columns, proband):
 
 
 def test_generate_madeline_input(madeline_columns, proband):
+    """Test generate input for madeline"""
 
     # GIVEN a family id and a list of ind dicts
     family_id = "test"
@@ -76,6 +102,7 @@ def test_generate_madeline_input(madeline_columns, proband):
 
 
 def test_generate_madeline_input_no_inds(madeline_columns):
+    """Test generate input for madeline when no individuals"""
 
     # GIVEN a family id and a empty list of inds
     family_id = "test"

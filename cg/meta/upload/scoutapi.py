@@ -5,12 +5,10 @@ from pathlib import Path
 
 from ruamel import yaml
 
-from cg.apps import hk
-from cg.apps import madeline as madeline_api
-from cg.apps import scoutapi
+from cg.apps import hk, scoutapi
+from cg.apps.madeline import MadelineAPI
 from cg.meta.workflow.mip_dna import AnalysisAPI
 from cg.store import Store, models
-from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
 
@@ -24,14 +22,12 @@ class UploadScoutAPI:
         hk_api: hk.HousekeeperAPI,
         scout_api: scoutapi.ScoutAPI,
         analysis_api: AnalysisAPI,
-        madeline_exe: str,
-        madeline=madeline_api,
+        madeline_api=MadelineAPI,
     ):
         self.status = status_api
         self.housekeeper = hk_api
         self.scout = scout_api
-        self.madeline_process = Process(str(Path(madeline_exe).absolute()))
-        self.madeline = madeline
+        self.madeline_api = madeline_api
         self.analysis = analysis_api
 
     def build_samples(self, analysis_obj: models.Analysis, hk_version_id: int = None):
@@ -228,6 +224,5 @@ class UploadScoutAPI:
             }
             for link_obj in family_obj.links
         ]
-        ped_stream = self.madeline.make_ped(family_obj.name, samples=samples)
-        svg_path = self.madeline.run(self.madeline_process, ped_stream)
+        svg_path = self.madeline_api.run(family_obj.name, samples=samples)
         return svg_path

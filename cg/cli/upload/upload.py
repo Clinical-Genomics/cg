@@ -5,21 +5,12 @@ import sys
 from typing import List
 
 import click
-from cg.apps import (
-    coverage as coverage_app,
-    gt,
-    hk,
-    loqus,
-    tb,
-    scoutapi,
-    beacon as beacon_app,
-    lims,
-    mutacc_auto,
-)
-from cg.cli.workflow.mip_dna.deliver import CASE_TAGS, SAMPLE_TAGS
+
+from cg.apps import beacon as beacon_app
+from cg.apps import coverage as coverage_app
+from cg.apps import gt, hk, lims, loqus, madeline, mutacc_auto, scoutapi, tb
 from cg.exc import DuplicateRecordError, DuplicateSampleError
-from cg.meta.workflow.mip_dna import AnalysisAPI
-from cg.meta.deliver import DeliverAPI
+from cg.meta.deliver.mip_dna import DeliverAPI
 from cg.meta.report.api import ReportAPI
 from cg.meta.upload.beacon import UploadBeaconApi
 from cg.meta.upload.coverage import UploadCoverageApi
@@ -27,6 +18,7 @@ from cg.meta.upload.gt import UploadGenotypesAPI
 from cg.meta.upload.mutacc import UploadToMutaccAPI
 from cg.meta.upload.observations import UploadObservationsAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
+from cg.meta.workflow.mip_dna import AnalysisAPI
 from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
@@ -83,6 +75,7 @@ def upload(context, family_id, force_restart):
 
     context.obj["housekeeper_api"] = hk.HousekeeperAPI(context.obj)
 
+    context.obj["madeline_api"] = madeline.MadelineAPI(context.obj)
     context.obj["genotype_api"] = gt.GenotypeAPI(context.obj)
     context.obj["lims_api"] = lims.LimsAPI(context.obj)
     context.obj["tb_api"] = tb.TrailblazerAPI(context.obj)
@@ -115,7 +108,7 @@ def upload(context, family_id, force_restart):
         status_api=context.obj["status"],
         hk_api=context.obj["housekeeper_api"],
         scout_api=context.obj["scout_api"],
-        madeline_exe=context.obj["madeline_exe"],
+        madeline_api=context.obj["madeline_api"],
         analysis_api=context.obj["analysis_api"],
     )
 

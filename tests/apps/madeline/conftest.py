@@ -4,7 +4,9 @@ from pathlib import Path
 
 import pytest
 
-from cg.apps.madeline import make_ped
+from cg.apps.madeline import MadelineAPI
+
+make_ped = MadelineAPI.make_ped
 
 
 @pytest.fixture
@@ -30,6 +32,30 @@ def madeline_columns():
 
 
 @pytest.fixture
+def mother():
+    """return a dictionary with ind info"""
+    ind_info = {
+        "sample": "mother",
+        "sex": "female",
+        "proband": False,
+        "status": "unaffected",
+    }
+    return ind_info
+
+
+@pytest.fixture
+def father():
+    """return a dictionary with ind info"""
+    ind_info = {
+        "sample": "father",
+        "sex": "male",
+        "proband": False,
+        "status": "unaffected",
+    }
+    return ind_info
+
+
+@pytest.fixture
 def proband():
     """return a dictionary with ind info"""
     ind_info = {
@@ -42,6 +68,12 @@ def proband():
         "status": "affected",
     }
     return ind_info
+
+
+@pytest.fixture
+def trio(proband, mother, father):
+    """return a list with a trio"""
+    return [proband, mother, father]
 
 
 @pytest.fixture
