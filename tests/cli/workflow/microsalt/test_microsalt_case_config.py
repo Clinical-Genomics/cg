@@ -161,6 +161,7 @@ def test_gonorrhoeae(cli_runner, microsalt_store, base_context, microbial_sample
 
 
 def test_cutibacterium_acnes(cli_runner, microsalt_store, base_context, microbial_sample_id):
+    """ Test if this bacteria gets its name changed """
     # GIVEN a sample with organism set to Cutibacterium acnes
     sample_obj = microsalt_store.microbial_sample(microbial_sample_id)
     sample_obj.organism.internal_id = "Cutibacterium acnes"
@@ -175,6 +176,7 @@ def test_cutibacterium_acnes(cli_runner, microsalt_store, base_context, microbia
 
 
 def test_VRE_NC_017960(cli_runner, microsalt_store, base_context, microbial_sample_id):
+    """ Test if this bacteria gets its name changed """
     # GIVEN a sample with organism set to VRE
     sample_obj = microsalt_store.microbial_sample(microbial_sample_id)
     sample_obj.organism.internal_id = "VRE"
@@ -190,6 +192,7 @@ def test_VRE_NC_017960(cli_runner, microsalt_store, base_context, microbial_samp
 
 
 def test_VRE_NC_004668(cli_runner, microsalt_store, base_context, microbial_sample_id):
+    """ Test if this bacteria gets its name changed """
     # GIVEN a sample with organism set to VRE
     sample_obj = microsalt_store.microbial_sample(microbial_sample_id)
     sample_obj.organism.internal_id = "VRE"
@@ -205,6 +208,7 @@ def test_VRE_NC_004668(cli_runner, microsalt_store, base_context, microbial_samp
 
 
 def test_VRE_comment(cli_runner, microsalt_store, lims_api, base_context, microbial_sample_id):
+    """ Test if this bacteria gets its name changed """
     # GIVEN a sample with organism set to VRE and a comment set in LIMS
     sample_obj = microsalt_store.microbial_sample(microbial_sample_id)
     sample_obj.organism.internal_id = "VRE"
