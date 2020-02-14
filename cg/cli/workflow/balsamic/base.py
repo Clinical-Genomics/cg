@@ -341,6 +341,30 @@ def remove_fastq(context, case_id):
     if wrk_dir.exists():
         shutil.rmtree(wrk_dir)
 
+@balsamic.command("load-scout")
+@click.option("--config", "config_path", required=False, help="Optional")
+@click.argument("case_id")
+@click.pass_context
+def load_scout(context, config_path, case_id):
+    """Upload case to scout"""
+ 
+    root_dir = Path(context.obj["balsamic"]["root"])
+    if not config_path:
+        config_path = Path.joinpath(root_dir, case_id, case_id + ".scout.yaml")
+  
+    with open(config_path, 'r') as file_in:
+        scout_config = yaml.load(file_in, Loader=yaml.SafeLoader)
+
+    # TODO: get customer ID
+    # TODO: tissue type
+    # TODO: get panel name
+
+    if dry:
+        click.echo(" ".join(command))
+    else:
+        process = subprocess.run(" ".join(command), shell=True)
+        return process
+
 
 balsamic.add_command(store_cmd)
 balsamic.add_command(deliver_cmd)
