@@ -44,7 +44,7 @@ def test_no_sample_found(cli_runner, base_context, caplog):
 def test_no_order_found(cli_runner, base_context, caplog):
     """Test missing order command """
 
-    # GIVEN a not existing order 
+    # GIVEN a not existing order
     microbial_order_id = "not_existing_order"
 
     # WHEN dry running a order name
@@ -92,7 +92,7 @@ def test_dry_sample(cli_runner, base_context, microbial_sample_id, snapshot: Sna
 
 
 def test_dry_sample_order(cli_runner, base_context, microbial_sample_id,
-                            microbial_order_id, snapshot: Snapshot):
+                          microbial_order_id, snapshot: Snapshot):
     """Test working dry command for sample in a order"""
 
     # GIVEN
