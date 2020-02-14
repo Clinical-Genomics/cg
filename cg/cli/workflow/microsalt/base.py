@@ -20,9 +20,11 @@ LOG = logging.getLogger(__name__)
 
 
 @click.group("microsalt", invoke_without_command=True)
+@click.option(
+    "-o", "--order", "order_id", help="include all microbial samples for an order"
+)
 @click.pass_context
-@click.option("-p", "--project", "project_id", help="include all samples for a project")
-def microsalt(context: click.Context, project_id):
+def microsalt(context: click.Context, order_id):
     """Microbial workflow"""
     context.obj["db"] = Store(context.obj["database"])
     hk_api = hk.HousekeeperAPI(context.obj)
@@ -34,16 +36,16 @@ def microsalt(context: click.Context, project_id):
     context.obj["lims_microsalt_api"] = LimsMicrosaltAPI(lims=lims_api)
 
     if context.invoked_subcommand is None:
-        if project_id is None:
-            LOG.error("Please provide a project")
+        if order_id is None:
+            LOG.error("Please provide an order")
             context.abort()
         else:
             # execute the analysis!
-            context.invoke(config_case, project_id=project_id)
-            context.invoke(link, project_id=project_id)
+            context.invoke(config_case, order_id=order_id)
+            context.invoke(link, order_id=order_id)
             context.invoke(
                 run,
-                project_id=project_id
+                order_id=order_id
             )
 
 
@@ -150,6 +152,7 @@ def run(context, dry, config_case, order_id):
     if dry:
         print(" ".join(command))
     else:
+        LOG.info("Starting microSALT! '%s'", " ".join(command))
         subprocess.run(command, shell=True, check=True)
 
 
