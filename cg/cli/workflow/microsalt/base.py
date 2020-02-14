@@ -43,10 +43,7 @@ def microsalt(context: click.Context, order_id):
             # execute the analysis!
             context.invoke(config_case, order_id=order_id)
             context.invoke(link, order_id=order_id)
-            context.invoke(
-                run,
-                order_id=order_id
-            )
+            context.invoke(run, order_id=order_id)
 
 
 @microsalt.command()
@@ -85,7 +82,10 @@ def link(context: click.Context, order_id: str, sample_id: str):
 @microsalt.command("config-case")
 @click.option("-d", "--dry", is_flag=True, help="print config-case to console")
 @click.option(
-    "-o", "--order", "order_id", help="create config-case all microbial samples for an order"
+    "-o",
+    "--order",
+    "order_id",
+    help="create config-case all microbial samples for an order",
 )
 @click.argument("sample_id", required=False)
 @click.pass_context
@@ -134,7 +134,9 @@ def config_case(context: click.Context, dry, order_id: str, sample_id: str):
 
 @microsalt.command()
 @click.option("-d", "--dry", is_flag=True, help="print command to console")
-@click.option("-c", "--config-case", required=False, help="optionally change the config-case")
+@click.option(
+    "-c", "--config-case", required=False, help="optionally change the config-case"
+)
 @click.argument("order_id")
 @click.pass_context
 def run(context, dry, config_case, order_id):

@@ -23,7 +23,7 @@ def test_dry_arguments(cli_runner, base_context, microbial_order_id, queries_pat
     # GIVEN
 
     # WHEN dry running without anything specified
-    result = cli_runner.invoke(run, ['--dry', microbial_order_id], obj=base_context)
+    result = cli_runner.invoke(run, ["--dry", microbial_order_id], obj=base_context)
 
     # THEN command should mention missing arguments
     assert result.exit_code == EXIT_SUCCESS

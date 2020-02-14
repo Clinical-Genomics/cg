@@ -31,9 +31,7 @@ def test_no_sample_found(cli_runner, base_context, caplog):
     microbial_sample_id = "not_existing_sample"
 
     # WHEN dry running a sample name
-    result = cli_runner.invoke(
-        config_case, [microbial_sample_id], obj=base_context
-    )
+    result = cli_runner.invoke(config_case, [microbial_sample_id], obj=base_context)
 
     # THEN command should mention missing sample
     assert result.exit_code != EXIT_SUCCESS
@@ -49,7 +47,7 @@ def test_no_order_found(cli_runner, base_context, caplog):
 
     # WHEN dry running a order name
     result = cli_runner.invoke(
-        config_case, ['--order', microbial_order_id], obj=base_context
+        config_case, ["--order", microbial_order_id], obj=base_context
     )
 
     # THEN command should mention missing order
@@ -67,13 +65,18 @@ def test_no_sample_order_found(cli_runner, base_context, caplog):
 
     # WHEN dry running a order name
     result = cli_runner.invoke(
-        config_case, ['--order', microbial_order_id, microbial_sample_id], obj=base_context
+        config_case,
+        ["--order", microbial_order_id, microbial_sample_id],
+        obj=base_context,
     )
 
     # THEN command should mention missing order
     assert result.exit_code != EXIT_SUCCESS
     with caplog.at_level(logging.ERROR):
-        assert f"Samples {microbial_sample_id} not found in {microbial_order_id}" in caplog.text
+        assert (
+            f"Samples {microbial_sample_id} not found in {microbial_order_id}"
+            in caplog.text
+        )
 
 
 def test_dry_sample(cli_runner, base_context, microbial_sample_id, snapshot: Snapshot):
@@ -91,8 +94,13 @@ def test_dry_sample(cli_runner, base_context, microbial_sample_id, snapshot: Sna
     snapshot.assert_match(result.output)
 
 
-def test_dry_sample_order(cli_runner, base_context, microbial_sample_id,
-                          microbial_order_id, snapshot: Snapshot):
+def test_dry_sample_order(
+    cli_runner,
+    base_context,
+    microbial_sample_id,
+    microbial_order_id,
+    snapshot: Snapshot,
+):
     """Test working dry command for sample in a order"""
 
     # GIVEN
@@ -101,7 +109,7 @@ def test_dry_sample_order(cli_runner, base_context, microbial_sample_id,
     result = cli_runner.invoke(
         config_case,
         ["--dry", "--order", microbial_order_id, microbial_sample_id],
-        obj=base_context
+        obj=base_context,
     )
 
     # THEN command should give us a json dump
@@ -116,9 +124,7 @@ def test_dry_order(cli_runner, base_context, microbial_order_id, snapshot: Snaps
 
     # WHEN dry running a sample name
     result = cli_runner.invoke(
-        config_case,
-        ["--dry", "--order", microbial_order_id],
-        obj=base_context
+        config_case, ["--dry", "--order", microbial_order_id], obj=base_context
     )
 
     # THEN command should give us a json dump
@@ -126,22 +132,22 @@ def test_dry_order(cli_runner, base_context, microbial_order_id, snapshot: Snaps
     snapshot.assert_match(result.output)
 
 
-def test_sample(cli_runner, base_context, microbial_sample_id, queries_path, snapshot: Snapshot):
+def test_sample(
+    cli_runner, base_context, microbial_sample_id, queries_path, snapshot: Snapshot
+):
     """Test working command for sample"""
 
     # GIVEN an existing queries path
     Path(queries_path).mkdir(exist_ok=True)
 
     # WHEN dry running a sample name
-    result = cli_runner.invoke(
-        config_case, [microbial_sample_id], obj=base_context
-    )
+    result = cli_runner.invoke(config_case, [microbial_sample_id], obj=base_context)
 
     # THEN command should give us a json dump
     assert result.exit_code == EXIT_SUCCESS
     outfilename = queries_path / microbial_sample_id
     outfilename = outfilename.with_suffix(".json")
-    with open(outfilename, 'r') as outputfile:
+    with open(outfilename, "r") as outputfile:
         snapshot.assert_match(outputfile.readlines())
 
 
@@ -160,7 +166,9 @@ def test_gonorrhoeae(cli_runner, microsalt_store, base_context, microbial_sample
     assert "Neisseria spp." in result.output
 
 
-def test_cutibacterium_acnes(cli_runner, microsalt_store, base_context, microbial_sample_id):
+def test_cutibacterium_acnes(
+    cli_runner, microsalt_store, base_context, microbial_sample_id
+):
     """ Test if this bacteria gets its name changed """
     # GIVEN a sample with organism set to Cutibacterium acnes
     sample_obj = microsalt_store.microbial_sample(microbial_sample_id)
@@ -207,13 +215,15 @@ def test_VRE_NC_004668(cli_runner, microsalt_store, base_context, microbial_samp
     assert "Enterococcus faecalis" in result.output
 
 
-def test_VRE_comment(cli_runner, microsalt_store, lims_api, base_context, microbial_sample_id):
+def test_VRE_comment(
+    cli_runner, microsalt_store, lims_api, base_context, microbial_sample_id
+):
     """ Test if this bacteria gets its name changed """
     # GIVEN a sample with organism set to VRE and a comment set in LIMS
     sample_obj = microsalt_store.microbial_sample(microbial_sample_id)
     sample_obj.organism.internal_id = "VRE"
     lims_sample = lims_api.sample(microbial_sample_id)
-    lims_sample.sample_data['comment'] = "ABCD123"
+    lims_sample.sample_data["comment"] = "ABCD123"
 
     # WHEN getting the case config
     result = cli_runner.invoke(
