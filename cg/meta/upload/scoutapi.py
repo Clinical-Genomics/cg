@@ -224,5 +224,5 @@ class UploadScoutAPI:
             }
             for link_obj in family_obj.links
         ]
-        svg_path = self.madeline_api.run(family_obj.name, samples=samples)
+        svg_path = self.madeline_api.run(family_id=family_obj.name, samples=samples)
         return svg_path

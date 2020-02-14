@@ -25,23 +25,6 @@ def test_run_madeline(mocker, trio, madeline_output):
     assert outpath.endswith(".xml")
 
 
-def test_remove_script_tag(madeline_output):
-    """Test to remove the script tag from a madeline output"""
-    # GIVEN a file with madeline output with a script tag
-    script_tag = (
-        '<script type="text/javascript" xlink:href="javascript/madeline.js"></script>'
-    )
-    with open(madeline_output, "r") as output:
-        svg_content = output.read()
-    assert script_tag in svg_content
-
-    # WHEN removeing the script tag
-    svg_content = strip_script_tag(svg_content)
-
-    # THEN assert the lines are removed
-    assert script_tag not in svg_content
-
-
 def test_generate_madeline_input_no_mother(madeline_columns, proband):
     """Test generate input for madeline when mother is missing"""
     # GIVEN a family id and a ind with unknown mother

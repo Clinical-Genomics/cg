@@ -10,6 +10,7 @@ import pytest
 import ruamel.yaml
 from trailblazer.mip import files as mip_dna_files_api
 
+from cg.apps.madeline import MadelineAPI
 from cg.apps.mip_rna import files as mip_rna_files_api
 from cg.store import Store
 
@@ -36,6 +37,33 @@ def chanjo_config_dict():
     _config = dict()
     _config.update(CHANJO_CONFIG)
     return _config
+
+
+class MockMadelineAPI(MadelineAPI):
+    """Mock the madeline api methods"""
+
+    def __init__(self):
+        """Init mock"""
+        self._madeline_outpath = None
+
+    def run(self, family_id, samples, out_path=None):
+        """Fetch version from the database."""
+        return self._madeline_outpath
+
+
+@pytest.fixture
+def madeline_output():
+    """File with madeline output"""
+    return "tests/fixtures/apps/madeline/madeline.xml"
+
+
+@pytest.yield_fixture(scope="function")
+def madeline_api(madeline_output):
+    """housekeeper_api fixture"""
+    _api = MockMadelineAPI()
+    _api._madeline_outpath = madeline_output
+
+    yield _api
 
 
 @pytest.fixture
