@@ -6,10 +6,10 @@ from typing import List
 
 import click
 import ruamel.yaml
+from trailblazer.cli.utils import environ_email
+from trailblazer.mip import fastq, files, trending
 from trailblazer.mip.start import MipCli
 from trailblazer.store import Store, models
-from trailblazer.cli.utils import environ_email
-from trailblazer.mip import files, fastq, trending
 
 from .add import AddHandler
 
@@ -82,7 +82,7 @@ class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
 
     def delete_analysis(self, family: str, date: dt.datetime, yes: bool = False):
         """Delete the analysis output."""
-        if self.analyses(family=family, temp=True).count() > 0:
+        if len([analysis for analysis in self.analyses(family=family, temp=True)]) > 0:
             raise ValueError("analysis for family already running")
         analysis_obj = self.find_analysis(family, date, "completed")
         assert analysis_obj.is_deleted is False

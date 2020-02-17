@@ -131,16 +131,7 @@ def upload(context, family_id, force_restart):
         message = f"analysis already uploaded: {analysis_obj.uploaded_at.date()}"
         click.echo(click.style(message, fg="yellow"))
     else:
-        analysis_obj.upload_started_at = dt.datetime.now()
-        context.obj["status"].commit()
-        context.invoke(coverage, re_upload=True, family_id=family_id)
-        context.invoke(validate, family_id=family_id)
-        context.invoke(genotypes, re_upload=False, family_id=family_id)
-        context.invoke(observations, case_id=family_id)
-        context.invoke(scout, case_id=family_id)
-        analysis_obj.uploaded_at = dt.datetime.now()
-        context.obj["status"].commit()
-        click.echo(click.style(f"{family_id}: analysis uploaded!", fg="green"))
+        families_to_upload = context.obj["status"].observations_to_upload()
 
 
 @upload.command()

@@ -16,7 +16,9 @@ LOG = logging.getLogger(__name__)
 
 
 @pytest.fixture(scope="function", name="base_context")
-def fixture_base_context(analysis_store_single_case: Store) -> dict:
+def fixture_base_context(
+    analysis_store_single_case: Store, hk_api: HousekeeperAPI
+) -> dict:
     """context to use in cli"""
 
     return {
@@ -92,10 +94,10 @@ def analysis_family_trio():
 
 
 @pytest.fixture(scope="function")
-def hk_api():
+def hk_api(scout_load_config):
     """Return a hkapi"""
     api = MockHK()
-    api._files.append("scout-load_config.yaml")
+    api.add_file(scout_load_config, None, None)
 
     return api
 
@@ -203,8 +205,9 @@ class MockFile:
     def first(self):
         return MockFile()
 
+    @property
     def full_path(self):
-        return ""
+        return str(self.path)
 
     def is_included(self):
         return False
@@ -226,7 +229,9 @@ class MockHK(HousekeeperAPI):
     def add_file(self, file, version_obj, tag_name, to_archive=False):
         """docstring for add_file"""
         self._file_added = True
-        return MockFile(path=file)
+        new_file = MockFile(path=file)
+        self._files.append(new_file)
+        return new_file
 
     def version(self, arg1: str, arg2: str):
         """Fetch version from the database."""

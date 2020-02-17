@@ -66,6 +66,12 @@ def madeline_api(madeline_output):
 
 
 @pytest.fixture
+def scout_load_config():
+    """Yaml file with load information from scout"""
+    return "tests/fixtures/apps/scout/643594.config.yaml"
+
+
+@pytest.fixture
 def balsamic_orderform():
     """Orderform fixture for Balsamic samples"""
     return "tests/fixtures/orderforms/1508.19.balsamic.xlsx"
