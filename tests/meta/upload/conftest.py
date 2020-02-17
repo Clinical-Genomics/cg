@@ -2,6 +2,7 @@
 import pytest
 
 from cg.apps.hk import HousekeeperAPI
+from cg.apps.coverage.api import ChanjoAPI
 from cg.meta.upload.mutacc import UploadToMutaccAPI
 from cg.meta.upload.observations import UploadObservationsAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
@@ -129,7 +130,7 @@ class MockAnalysis:
         return ""
 
 
-class MockCoverage:
+class MockCoverage(ChanjoAPI):
     """Mock chanjo coverage api"""
 
     @staticmethod
@@ -301,12 +302,12 @@ def mutacc_upload_api():
 
 
 @pytest.yield_fixture(scope="function")
-def coverage_upload_api():
+def coverage_upload_api(config_dict):
     """Fixture for coverage upload API"""
     hk_api = MockHouseKeeper()
     hk_api.add_file(file="path", version_obj="", tag_name="")
     status_api = None
-    coverage_api = MockCoverage()
+    coverage_api = MockCoverage(config_dict)
     _api = UploadCoverageApi(
         status_api=status_api, hk_api=hk_api, chanjo_api=coverage_api
     )

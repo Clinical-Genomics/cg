@@ -5,10 +5,8 @@ import datetime
 from cg.meta.upload.coverage import UploadCoverageApi
 from cg.apps.coverage.api import ChanjoAPI
 
-CHANJO_CONFIG = {"chanjo": {"config_path": "config_path", "binary_path": "chanjo"}}
 
-
-class Analysis:
+class MockAnalysis:
     """ Mock Analysis object """
 
     def __init__(self, family_obj):
@@ -31,7 +29,7 @@ def test_data(coverage_upload_api, analysis_store):
     coverage_api = coverage_upload_api
     family_name = "yellowhog"
     family_obj = analysis_store.family(family_name)
-    analysis_obj = Analysis(family_obj=family_obj)
+    analysis_obj = MockAnalysis(family_obj=family_obj)
 
     # WHEN using the data method
     results = coverage_api.data(analysis_obj=analysis_obj)
@@ -42,7 +40,7 @@ def test_data(coverage_upload_api, analysis_store):
         assert set(sample.keys()) == set(["coverage", "sample", "sample_name"])
 
 
-def test_upload(housekeeper_api, analysis_store, mocker):
+def test_upload(config_dict, housekeeper_api, analysis_store, mocker):
     """test uploading with chanjo"""
     # GIVEN a coverage api and a data dictionary
     mock_upload = mocker.patch.object(ChanjoAPI, "upload")
@@ -50,17 +48,18 @@ def test_upload(housekeeper_api, analysis_store, mocker):
     mock_remove = mocker.patch.object(ChanjoAPI, "delete_sample")
     hk_api = housekeeper_api
     hk_api.add_file(file="path", version_obj="", tag_name="")
-    chanjo_api = ChanjoAPI(config=CHANJO_CONFIG)
+    chanjo_api = ChanjoAPI(config=config_dict)
     coverage_api = UploadCoverageApi(
         status_api=None, hk_api=hk_api, chanjo_api=chanjo_api
     )
     family_name = "yellowhog"
     family_obj = analysis_store.family(family_name)
-    analysis_obj = Analysis(family_obj=family_obj)
+    analysis_obj = MockAnalysis(family_obj=family_obj)
     data = coverage_api.data(analysis_obj=analysis_obj)
 
     # WHEN uploading samples in data dictionary
     coverage_api.upload(data=data, replace=True)
 
-    # THEN
+    # THEN methods sample, and upload should each have been called three times
     assert mock_upload.call_count == len(data["samples"])
+    assert mock_sample.call_count == len(data["samples"])
