@@ -16,9 +16,7 @@ LOG = logging.getLogger(__name__)
 
 
 @pytest.fixture(scope="function", name="base_context")
-def fixture_base_context(
-    analysis_store_single_case: Store, hk_api: HousekeeperAPI
-) -> dict:
+def fixture_base_context(analysis_store_single_case: Store) -> dict:
     """context to use in cli"""
 
     return {
