@@ -2,12 +2,11 @@
 # -*- coding: utf-8 -*-
 import logging
 from pathlib import Path
-
 from ruamel import yaml
 
 from cg.apps import hk, madeline, scoutapi
-from cg.meta.analysis import AnalysisAPI
-from cg.store import Store, models
+from cg.meta.workflow.mip_dna import AnalysisAPI
+from cg.store import models, Store
 
 LOG = logging.getLogger(__name__)
 
