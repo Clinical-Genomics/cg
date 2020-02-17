@@ -62,9 +62,9 @@ default_gene_panels: [panel1]
 gene_panels: [panel1]
 chromograph_image_files: scout/demo/images
 chromograph_prefixes:
-    'roh': "roh_chr"
-    'upd': "upd_chr"
-    'chr': "cytoband.txt.chr"
+  'roh': "roh_chr"
+  'upd': "upd_chr"
+  'chr': "cytoband.txt.chr"
 
 
 # meta data
