@@ -1,4 +1,4 @@
-"""File includes api to uploading data into Scout"""
+"""Code for preparing data before uploading to scout"""
 
 import logging
 from pathlib import Path
