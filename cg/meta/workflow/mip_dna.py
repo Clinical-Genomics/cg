@@ -143,6 +143,7 @@ class AnalysisAPI:
         for link in family_obj.links:
             sample_data = {
                 "sample_id": link.sample.internal_id,
+                "sample_display_name": link.sample.name,
                 "analysis_type": link.sample.application_version.application.analysis_type,
                 "sex": link.sample.sex,
                 "phenotype": link.status,
