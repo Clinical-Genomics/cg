@@ -87,12 +87,13 @@ class LimsAPI(Lims, OrderHandler):
             'name': lims_artifact.name,
         }
 
+
     def get_received_date(self, lims_id: str) -> str:
         """Get the date when a sample was received."""
 
         step_names_udfs = MASTER_STEPS_UDFS['received_step']
-
-        received_dates = self._get_all_step_dates(step_names_udfs, lims_id)
+        input_artifact_id = Sample(self, id=lims_id).artifact.id
+        received_dates = self._get_all_step_dates_from_input(step_names_udfs, input_artifact_id)
         received_date = self._most_recent_date(received_dates)
 
         return received_date
@@ -344,6 +345,27 @@ class LimsAPI(Lims, OrderHandler):
                        f"{method_name}"
 
         return None
+
+
+    def _get_all_step_dates_from_input(self, step_names_udfs, input_artifact_id):
+        """
+        Gets all the dates from a process based on input artifact and process type.
+        """
+
+        dates = []
+
+        for process_type in step_names_udfs:
+            processes = self.get_processes(type=process_type, inputartifactlimsid=input_artifact_id)
+            if not processes:
+                continue
+            udf_key = step_names_udfs[process_type]
+            for process in processes:
+                date_arrived = process.udf.get(udf_key)
+                if date_arrived:
+                    dates.append((process.date_run, date_arrived))
+
+        return dates
+
 
     def _get_all_step_dates(self, step_names_udfs, lims_id, artifact_type=None):
         """
