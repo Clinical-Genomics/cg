@@ -16,7 +16,7 @@ from cg.store import Store
 
 from .beacon import beacon
 from .coverage import coverage
-from .delivery import delivery_report, delivery_reports
+from .delivery import delivery_report, delivery_report_to_scout, delivery_reports
 from .genotype import genotypes
 from .mutacc import process_solved, processed_solved
 from .observations import observations
@@ -180,3 +180,4 @@ upload.add_command(genotypes)
 upload.add_command(coverage)
 upload.add_command(delivery_report)
 upload.add_command(delivery_reports)
+upload.add_command(delivery_report_to_scout)

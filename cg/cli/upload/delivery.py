@@ -6,13 +6,12 @@ import click
 
 from cg.apps import hk, scoutapi
 
-from .upload import upload
 from .utils import _suggest_cases_delivery_report
 
 LOG = logging.getLogger(__name__)
 
 
-@upload.command("delivery-reports")
+@click.command("delivery-reports")
 @click.option(
     "-p", "--print", "print_console", is_flag=True, help="print list to console"
 )
@@ -41,7 +40,7 @@ def delivery_reports(context, print_console):
             )
 
 
-@upload.command("delivery-report")
+@click.command("delivery-report")
 @click.argument("family_id", required=False)
 @click.option(
     "-p", "--print", "print_console", is_flag=True, help="print report to console"
@@ -155,7 +154,7 @@ def delivery_report(context, family_id, print_console):
     _update_delivery_report_date(status_api, family_id)
 
 
-@upload.command("delivery-report-to-scout")
+@click.command("delivery-report-to-scout")
 @click.argument("case_id", required=False)
 @click.option(
     "-d",
