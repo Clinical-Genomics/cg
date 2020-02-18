@@ -5,13 +5,11 @@ import sys
 import traceback
 
 import click
-import yaml
 
-from cg.apps import beacon as beacon_app
 from cg.apps import coverage as coverage_app
-from cg.apps import gt, hk, lims, loqus, mutacc_auto, scoutapi, tb
-from cg.exc import DuplicateRecordError, DuplicateSampleError
-from cg.meta.deliver.mip_dna import DeliverAPI
+from cg.apps import gt, hk, lims, madeline, scoutapi, tb
+from cg.cli.workflow.mip_dna.deliver import CASE_TAGS, SAMPLE_TAGS
+from cg.meta.deliver import DeliverAPI
 from cg.meta.report.api import ReportAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
 from cg.meta.workflow.mip_dna import AnalysisAPI
@@ -131,7 +129,16 @@ def upload(context, family_id, force_restart):
         message = f"analysis already uploaded: {analysis_obj.uploaded_at.date()}"
         click.echo(click.style(message, fg="yellow"))
     else:
-        families_to_upload = context.obj["status"].observations_to_upload()
+        analysis_obj.upload_started_at = dt.datetime.now()
+        context.obj["status"].commit()
+        context.invoke(coverage, re_upload=True, family_id=family_id)
+        context.invoke(validate, family_id=family_id)
+        context.invoke(genotypes, re_upload=False, family_id=family_id)
+        context.invoke(observations, case_id=family_id)
+        context.invoke(scout, case_id=family_id)
+        analysis_obj.uploaded_at = dt.datetime.now()
+        context.obj["status"].commit()
+        click.echo(click.style(f"{family_id}: analysis uploaded!", fg="green"))
 
 
 @upload.command()

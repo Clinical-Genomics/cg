@@ -232,7 +232,7 @@ def upload_observations_api_wes(analysis_store):
 
 
 @pytest.yield_fixture(scope="function")
-def upload_scout_api(scout_store, madeline_api):
+def upload_scout_api():
     """Fixture for upload_scout_api"""
     hk_mock = MockHouseKeeper()
     hk_mock.add_file(file="/mock/path", version_obj="", tag_name="")
@@ -240,9 +240,9 @@ def upload_scout_api(scout_store, madeline_api):
 
     _api = UploadScoutAPI(
         hk_api=hk_mock,
-        scout_api=scout_store,
-        madeline_api=madeline_api,
         analysis_api=analysis_mock,
+        madeline_exe="",
+        madeline=madeline_mock,
     )
 
     yield _api

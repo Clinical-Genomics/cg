@@ -5,7 +5,7 @@ from pathlib import Path
 
 from ruamel import yaml
 
-from cg.apps import hk, scoutapi
+from cg.apps import hk
 from cg.apps.madeline.api import MadelineAPI
 from cg.meta.workflow.mip_dna import AnalysisAPI
 from cg.store import models
@@ -19,12 +19,10 @@ class UploadScoutAPI:
     def __init__(
         self,
         hk_api: hk.HousekeeperAPI,
-        scout_api: scoutapi.ScoutAPI,
         analysis_api: AnalysisAPI,
         madeline_api: MadelineAPI,
     ):
         self.housekeeper = hk_api
-        self.scout = scout_api
         self.madeline_api = madeline_api
         self.analysis = analysis_api
 
