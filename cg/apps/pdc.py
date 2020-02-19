@@ -11,14 +11,15 @@ class PdcApi():
 
     def retrieve_flowcell(self, flowcell_id: str, sequencer_type: str) -> str:
         """Fetch a flowcell back from the backup solution."""
-        dest_server = {
-            'hiseqga': 'thalamus',
-            'hiseqx': 'hasta',
+        server, path = {
+            'novaseq': ('thalamus', '/home/hiseq.clinical/novaseq/runs/'),
+            'hiseqga': ('thalamus', '/home/hiseq.clinica/RUNS/'),
+            'hiseqx': ('hasta', '/home/proj/production/flowcells/hiseqx/'),
         }.get(sequencer_type)
-        if dest_server is None:
+        if server is None:
             raise ValueError(f"{sequencer_type}: invalid sequencer type")
 
-        bash_command = f"bash SCRIPTS/retrieve_run_nas.bash {flowcell_id} {dest_server}"
+        bash_command = f"bash SCRIPTS/retrieve_run_nas.bash {flowcell_id} {server} {path}"
         command = ['ssh', 'nas-9.scilifelab.se', bash_command]
         LOG.info(' '.join(command))
         subprocess.check_call(command)
