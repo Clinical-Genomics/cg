@@ -9,7 +9,7 @@ from cg.exc import AnalysisDuplicationError
 LOG = logging.getLogger(__name__)
 
 
-def _gather_files_and_bundle_in_housekeeper(config_stream, hk_api, status):
+def gather_files_and_bundle_in_housekeeper(config_stream, hk_api, status, case_obj):
     """Function to gather files and bundle in housekeeper"""
 
     bundle_data = _add_analysis(config_stream)
@@ -19,7 +19,6 @@ def _gather_files_and_bundle_in_housekeeper(config_stream, hk_api, status):
         raise AnalysisDuplicationError("analysis version already added")
     bundle_obj, version_obj = results
 
-    case_obj = _get_case(bundle_obj, status)
     _reset_analysis_action(case_obj)
     new_analysis = _create_analysis(bundle_data, case_obj, status, version_obj)
     version_date = version_obj.created_at.date()
@@ -57,15 +56,6 @@ def _create_analysis(bundle_data, case_obj, status, version_obj):
 
 def _reset_analysis_action(case_obj):
     case_obj.action = None
-
-
-def _get_case(bundle_obj, status):
-    case_obj = status.family(bundle_obj.name)
-    return case_obj
-
-
-def _parse_meta_data(config_raw):
-    return config_raw
 
 
 def _add_analysis(config_stream):

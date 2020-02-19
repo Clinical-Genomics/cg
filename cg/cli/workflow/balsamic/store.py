@@ -4,7 +4,7 @@ import logging
 import click
 
 from cg.apps import hk, tb
-from cg.meta.store.balsamic import _gather_files_and_bundle_in_housekeeper
+from cg.meta.store.balsamic import gather_files_and_bundle_in_housekeeper
 
 from cg.store import Store
 
@@ -40,7 +40,9 @@ def analysis(context, case_id, config_stream):
     hk_api = context.obj["hk_api"]
 
     try:
-        new_analysis = _gather_files_and_bundle_in_housekeeper(config_stream, hk_api, status)
+        new_analysis = gather_files_and_bundle_in_housekeeper(
+            config_stream, hk_api, status, case_obj
+        )
     except AnalysisNotFinishedError as error:
         click.echo(click.style(error.message, fg="red"))
         context.abort()
