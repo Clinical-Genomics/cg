@@ -16,13 +16,13 @@ def backup(context: click.Context):
     pass
 
 
-@backup.command('fetch-flowcell')
-@click.option('-f', '--flowcell', help='Retreive a specific flowcell')
-@click.option('--dry', is_flag=True, help='Only log, do not contact PDC')
+@backup.command("fetch-flowcell")
+@click.option("-f", "--flowcell", help="Retreive a specific flowcell")
+@click.option("--dry", is_flag=True, help="Only log, do not contact PDC")
 @click.pass_context
 def fetch_flowcell(context: click.Context, dry: bool, flowcell: str):
     """Fetch the first flowcell in the requested queue from backup."""
-    status_api = Store(context.obj['database'])
+    status_api = Store(context.obj["database"])
     pdc_api = PdcApi()
     backup_api = BackupApi(status=status_api, pdc_api=pdc_api)
     if flowcell:
@@ -37,7 +37,7 @@ def fetch_flowcell(context: click.Context, dry: bool, flowcell: str):
         if flowcell:
             LOG.info(f"{flowcell}: updating flowcell status to requested")
             if not dry:
-                flowcell_obj.status = 'requested'
+                flowcell_obj.status = "requested"
                 status_api.commit()
     else:
         hours = retrieval_time / 60 / 60
