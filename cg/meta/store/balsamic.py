@@ -1,6 +1,5 @@
 """Builds balsamic bundle for linking in Housekeeper"""
-
-
+import datetime
 import datetime as dt
 import logging
 import ruamel.yaml
@@ -58,19 +57,21 @@ def _reset_analysis_action(case_obj):
     case_obj.action = None
 
 
-def _add_analysis(config_stream):
+def _add_analysis(config_stream, case_obj):
     """Gather information from balsamic analysis to store."""
     meta_raw = ruamel.yaml.safe_load(config_stream)
-    new_bundle = _build_bundle(meta_raw)
+    new_bundle = _build_bundle(
+        meta_raw, name=case_obj.internal_id, created=datetime.datetime.now(), version="1"
+    )
     return new_bundle
 
 
-def _build_bundle(meta_data: dict) -> dict:
+def _build_bundle(meta_data: dict, name: str, created: datetime, version: str) -> dict:
     """Create a new bundle."""
     data = {
-        "name": "not-implemented",
-        "created": "not-implemented",
-        "pipeline_version": "not-implemented",
+        "name": name,
+        "created": created,
+        "pipeline_version": version,
         "files": _get_files(meta_data),
     }
     return data
