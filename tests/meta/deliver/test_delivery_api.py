@@ -32,7 +32,7 @@ def test_get_post_analysis_files_version(analysis_family, deliver_api):
         case, version, deliver_tags
     )
 
-    ## THEN housekeeper files for those tags with the version should be returned
+    # THEN housekeeper files for those tags with the version should be returned
     assert bundle_version_files
 
 
