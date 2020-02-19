@@ -1,3 +1,5 @@
+""" Module to group PDC related commands """
+
 import logging
 import subprocess
 
@@ -5,11 +7,10 @@ LOG = logging.getLogger(__name__)
 
 
 class PdcApi():
+    """ Group PDC related commands """
 
-    def __init__(self, config: dict):
-        pass
-
-    def retrieve_flowcell(self, flowcell_id: str, sequencer_type: str) -> str:
+    @classmethod
+    def retrieve_flowcell(cls, flowcell_id: str, sequencer_type: str, dry: bool = False) -> str:
         """Fetch a flowcell back from the backup solution."""
         server, path = {
             'novaseq': ('thalamus', '/home/hiseq.clinical/novaseq/runs/'),
@@ -22,4 +23,5 @@ class PdcApi():
         bash_command = f"bash SCRIPTS/retrieve_run_nas.bash {flowcell_id} {server} {path}"
         command = ['ssh', 'nas-9.scilifelab.se', bash_command]
         LOG.info(' '.join(command))
-        subprocess.check_call(command)
+        if not dry:
+            subprocess.check_call(command)

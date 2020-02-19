@@ -39,7 +39,7 @@ class BackupApi():
             self.status.commit()
         return flowcell_obj
 
-    def fetch_flowcell(self, flowcell_obj: models.Flowcell = None):
+    def fetch_flowcell(self, flowcell_obj: models.Flowcell = None, dry: bool = False):
         """Start fetching a flowcell from backup if possible.
 
         1. The processing queue is not full
@@ -62,11 +62,12 @@ class BackupApi():
         LOG.info("%s: retreiving from PDC", flowcell_obj.name)
         tic = time.time()
         try:
-            self.pdc.retrieve_flowcell(flowcell_obj.name, flowcell_obj.sequencer_type)
+            self.pdc.retrieve_flowcell(flowcell_obj.name, flowcell_obj.sequencer_type, dry)
         except subprocess.CalledProcessError as error:
             LOG.error("%s: retrieval failed", flowcell_obj.name)
-            flowcell_obj.status = 'requested'
-            self.status.commit()
+            if not dry:
+                flowcell_obj.status = 'requested'
+                self.status.commit()
             raise error
         toc = time.time()
         return toc - tic
