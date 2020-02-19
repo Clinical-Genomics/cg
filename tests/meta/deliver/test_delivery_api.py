@@ -39,11 +39,11 @@ def test_get_post_analysis_files_version(analysis_family, deliver_api):
 def test_get_post_analysis_case_files(analysis_family, deliver_api):
 
     # GIVEN a case which exist as bundle in hk
-    # GIVEN corresponding houskeeper tags for those files
+    # GIVEN corresponding case houskeeper tags for those files
     case = analysis_family["internal_id"]
     deliver_tags = ["case-tag"]
 
-    # WHEN we call get_post_analysis_case_files with matching case and file-tags and version
+    # WHEN we call get_post_analysis_case_files with matching case and case file-tags and version
     version = None
     case_files = deliver_api.get_post_analysis_case_files(case, version, deliver_tags)
 
@@ -54,11 +54,11 @@ def test_get_post_analysis_case_files(analysis_family, deliver_api):
 def test_get_post_analysis_case_files_only_sample_tags(analysis_family, deliver_api):
 
     # GIVEN a case which exist as bundle in hk
-    # GIVEN corresponding houskeeper tags for those files
+    # GIVEN corresponding sample id houskeeper tags for those files
     case = analysis_family["internal_id"]
     deliver_tags = ["sample-tag"]
 
-    # WHEN we call get_post_analysis_case_files with matching case and file-tags and version
+    # WHEN we call get_post_analysis_case_files with matching case and sample file-tags and version
     version = None
     case_files = deliver_api.get_post_analysis_case_files(case, version, deliver_tags)
 
