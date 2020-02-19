@@ -254,7 +254,7 @@ class MockLims:
         self.lims = self
 
 
-class MockDeliver:
+class MockDeliver(DeliverAPI):
     def __init__(self):
         self.housekeeper = MockHouseKeeper()
         self.lims = MockLims()
