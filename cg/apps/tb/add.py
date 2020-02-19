@@ -128,7 +128,7 @@ class AddHandler:
             },
             {
                 "path": sampleinfo_data["version_collect"],
-                "tags": ["executables-version"],
+                "tags": ["exe-ver"],
                 "archive": False,
             },
         ]
