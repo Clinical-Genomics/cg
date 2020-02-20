@@ -2,9 +2,11 @@
 import pytest
 
 from cg.apps.hk import HousekeeperAPI
+from cg.apps.coverage.api import ChanjoAPI
 from cg.meta.upload.mutacc import UploadToMutaccAPI
 from cg.meta.upload.observations import UploadObservationsAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
+from cg.meta.upload.coverage import UploadCoverageApi
 
 
 class MockVersion:
@@ -127,6 +129,12 @@ class MockAnalysis:
     def convert_panels(customer_id, panels):
         """Mock convert_panels"""
         return ""
+
+
+class MockCoverage(ChanjoAPI):
+    """Mock chanjo coverage api"""
+
+    pass
 
 
 class MockMutaccAuto:
@@ -268,6 +276,19 @@ def mutacc_upload_api():
 
     _api = UploadToMutaccAPI(scout_api=scout_api, mutacc_auto_api=mutacc_auto_api)
 
+    return _api
+
+
+@pytest.yield_fixture(scope="function")
+def coverage_upload_api(chanjo_config_dict):
+    """Fixture for coverage upload API"""
+    hk_api = MockHouseKeeper()
+    hk_api.add_file(file="path", version_obj="", tag_name="")
+    status_api = None
+    coverage_api = MockCoverage(chanjo_config_dict)
+    _api = UploadCoverageApi(
+        status_api=status_api, hk_api=hk_api, chanjo_api=coverage_api
+    )
     return _api
 
 
