@@ -120,6 +120,7 @@ class MockAnalysis:
             "mapped_reads": {"ADM1": 98.8, "ADM2": 99.8, "ADM3": 97.8},
             "mip_version": "v4.0.20",
             "sample_ids": ["2018-20203", "2018-20204"],
+            "sv_rank_model_version": "1.08",
         }
 
         return outdata
