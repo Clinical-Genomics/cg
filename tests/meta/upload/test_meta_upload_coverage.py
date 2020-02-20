@@ -40,7 +40,7 @@ def test_data(coverage_upload_api, analysis_store):
         assert set(sample.keys()) == set(["coverage", "sample", "sample_name"])
 
 
-def test_upload(config_dict, housekeeper_api, analysis_store, mocker):
+def test_upload(chanjo_config_dict, housekeeper_api, analysis_store, mocker):
     """test uploading with chanjo"""
     # GIVEN a coverage api and a data dictionary
     mock_upload = mocker.patch.object(ChanjoAPI, "upload")
@@ -48,7 +48,7 @@ def test_upload(config_dict, housekeeper_api, analysis_store, mocker):
     mock_remove = mocker.patch.object(ChanjoAPI, "delete_sample")
     hk_api = housekeeper_api
     hk_api.add_file(file="path", version_obj="", tag_name="")
-    chanjo_api = ChanjoAPI(config=config_dict)
+    chanjo_api = ChanjoAPI(config=chanjo_config_dict)
     coverage_api = UploadCoverageApi(
         status_api=None, hk_api=hk_api, chanjo_api=chanjo_api
     )

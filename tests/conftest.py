@@ -31,7 +31,7 @@ CHANJO_CONFIG = {"chanjo": {"config_path": "chanjo_config", "binary_path": "chan
 
 
 @pytest.fixture
-def config_dict():
+def chanjo_config_dict():
     _config = dict()
     _config.update(CHANJO_CONFIG)
     return _config

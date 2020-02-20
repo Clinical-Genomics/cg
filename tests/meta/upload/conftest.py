@@ -303,12 +303,12 @@ def mutacc_upload_api():
 
 
 @pytest.yield_fixture(scope="function")
-def coverage_upload_api(config_dict):
+def coverage_upload_api(chanjo_config_dict):
     """Fixture for coverage upload API"""
     hk_api = MockHouseKeeper()
     hk_api.add_file(file="path", version_obj="", tag_name="")
     status_api = None
-    coverage_api = MockCoverage(config_dict)
+    coverage_api = MockCoverage(chanjo_config_dict)
     _api = UploadCoverageApi(
         status_api=status_api, hk_api=hk_api, chanjo_api=coverage_api
     )
