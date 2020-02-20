@@ -16,9 +16,10 @@ from cg.apps import (
     lims,
     mutacc_auto,
 )
+from cg.cli.workflow.mip_dna.deliver import CASE_TAGS, SAMPLE_TAGS
 from cg.exc import DuplicateRecordError, DuplicateSampleError
 from cg.meta.workflow.mip_dna import AnalysisAPI
-from cg.meta.deliver.mip_dna import DeliverAPI
+from cg.meta.deliver import DeliverAPI
 from cg.meta.report.api import ReportAPI
 from cg.meta.upload.beacon import UploadBeaconApi
 from cg.meta.upload.coverage import UploadCoverageApi
@@ -90,6 +91,8 @@ def upload(context, family_id, force_restart):
         context.obj,
         hk_api=context.obj["housekeeper_api"],
         lims_api=context.obj["lims_api"],
+        case_tags=CASE_TAGS,
+        sample_tags=SAMPLE_TAGS,
     )
     context.obj["scout_api"] = scoutapi.ScoutAPI(context.obj)
     context.obj["analysis_api"] = AnalysisAPI(

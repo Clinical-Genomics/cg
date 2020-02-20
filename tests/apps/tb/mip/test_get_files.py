@@ -23,6 +23,9 @@ def test_get_files(files_data) -> dict:
     mip_file_test_data = {
         "mip-config": {"path": mip_config["config_path"]},
         "sampleinfo": {"path": mip_config["sampleinfo_path"]},
+        "multiqc_html": {"path": sampleinfo["multiqc_html"]},
+        "multiqc_json": {"path": sampleinfo["multiqc_json"]},
+        "pedigree_yaml": {"path": sampleinfo["pedigree"]},
         "pedigree": {"path": sampleinfo["pedigree_path"]},
         "mip-log": {"path": mip_config["log_path"]},
         "qcmetrics": {"path": sampleinfo["qcmetrics_path"]},
@@ -44,6 +47,7 @@ def test_get_files(files_data) -> dict:
         "vcf-sv-research": {"path": sampleinfo["sv"]["research_vcf"]},
         "vcf-sv-research-index": {"path": f"{sampleinfo['sv']['research_vcf']}.csi"},
         "vcf-str": {"path": sampleinfo["str_vcf"]},
+        "executables_version": {"path": sampleinfo["version_collect"]},
     }
 
     # Check returns from def
@@ -62,15 +66,16 @@ def test_get_files(files_data) -> dict:
     # Define sample test data
     for sample_data in sampleinfo["samples"]:
 
-        # Bam pre-processing
-        bam_path = sample_data["bam"]
-        bai_path = f"{bam_path}.bai"
-        if not Path(bai_path).exists():
-            bai_path = bam_path.replace(".bam", ".bai")
+        # Cram pre-processing
+        cram_path = sample_data["cram"]
+        crai_path = f"{cram_path}.crai"
+        if not Path(crai_path).exists():
+            crai_path = cram_path.replace(".cram", ".crai")
         mip_file_test_sample_data[sample_data["id"]] = {
-            "bam": bam_path,
-            "bam-index": bai_path,
+            "cram": cram_path,
+            "cram-index": crai_path,
             "coverage": sample_data["sambamba"],
+            "chromograph": sample_data["chromograph"],
             "vcf2cytosure": sample_data["vcf2cytosure"],
         }
 
