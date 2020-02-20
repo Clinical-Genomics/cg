@@ -134,30 +134,7 @@ class MockAnalysis:
 class MockCoverage(ChanjoAPI):
     """Mock chanjo coverage api"""
 
-    @staticmethod
-    def upload(*args, **kwargs):
-        """mock upload method"""
-        _, _ = args, kwargs
-
-    @staticmethod
-    def sample(*args, **kwargs):
-        """Mock sample method"""
-        _, _ = args, kwargs
-
-    @staticmethod
-    def delete_sample(*args, **kwargs):
-        """Mock delete_sample method"""
-        _, _ = args, kwargs
-
-    @staticmethod
-    def omim_coverage(*args, **kwargs):
-        """Mock omim_coverage method"""
-        _, _ = args, kwargs
-
-    @staticmethod
-    def sample_coverage(*args, **kwargs):
-        """Mock sample_coverage method"""
-        _, _ = args, kwargs
+    pass
 
 
 class MockMutaccAuto:
