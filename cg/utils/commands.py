@@ -25,11 +25,11 @@ class Process:
         """
         super(Process, self).__init__()
         self.binary = binary
-        LOG.info("Initialising Process with binary: %s", self.binary)
+        LOG.debug("Initialising Process with binary: %s", self.binary)
         self.base_call = [self.binary]
         if config:
             self.base_call.extend([config_parameter, config])
-        LOG.info("Use base call %s", self.base_call)
+        LOG.debug("Use base call %s", self.base_call)
         self._stdout = ""
         self._stderr = ""
 
