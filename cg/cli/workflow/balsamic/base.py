@@ -17,7 +17,7 @@ from cg.cli.workflow.balsamic.deliver import (
     SAMPLE_TAGS,
 )
 from cg.cli.workflow.get_links import get_links
-from cg.exc import LimsDataError, BalsamicStartError
+from cg.exc import LimsDataError, BalsamicStartError, CgError
 from cg.meta.deliver import DeliverAPI
 from cg.meta.workflow.balsamic import AnalysisAPI
 from cg.store import Store
@@ -205,26 +205,37 @@ def config_case(
             link_obj.sample.internal_id
         )
         if target_bed_shortname:
-            target_beds.add(
-                context.obj["db"].latest_bed_version(target_bed_shortname).filename
-            )
+            target_bed_obj = context.obj["db"].latest_bed_version(target_bed_shortname)
+
+            if not target_bed_obj:
+                raise CgError("Bed-version %s does not exist" % target_bed_shortname)
+
+            target_beds.add(target_bed_obj.filename)
 
     nr_paths = len(tumor_paths) if tumor_paths else 0
     if nr_paths != 1:
-        click.echo(
-            f"Must have exactly one tumor sample! Found {nr_paths} samples.",
-            color="red",
+        raise BalsamicStartError(
+            "Must have exactly one tumor sample! Found %s samples." % nr_paths
         )
-        context.abort()
+
     tumor_path = tumor_paths.pop()
 
     normal_path = None
     nr_normal_paths = len(normal_paths) if normal_paths else 0
     if nr_normal_paths > 1:
-        click.echo(f"Too many normal samples found: {nr_normal_paths}", color="red")
-        context.abort()
+        raise BalsamicStartError("Too many normal samples found: %s" % nr_normal_paths)
     elif nr_normal_paths == 1:
         normal_path = normal_paths.pop()
+
+    if not target_bed:
+        if len(target_beds) == 0:
+            raise BalsamicStartError("No target bed specified!")
+        elif len(target_beds) == 1:
+            target_bed = Path(context.obj["bed_path"]) / target_beds.pop()
+        elif len(target_beds) > 1:
+            raise BalsamicStartError(
+                "To many target beds specified: ".join(", ", target_beds)
+            )
 
     # Call Balsamic
     command_str = (
@@ -236,14 +247,8 @@ def config_case(
         f" --output-config {case_id}.json"
         f" --analysis-dir {root_dir}"
         f" --umi-trim-length {umi_trim_length}"
+        f" -p {target_bed}"
     )
-    if target_bed:
-        command_str += f" -p {target_bed}"
-    elif len(target_beds) == 1:
-        bed_path = Path(context.obj["bed_path"])
-        command_str += f" -p {bed_path / target_beds.pop()}"
-    else:
-        raise BalsamicStartError("No target bed specified!")
 
     if normal_path:
         command_str += f" --normal {normal_path}"
