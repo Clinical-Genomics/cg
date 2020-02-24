@@ -8,7 +8,8 @@ import click
 
 from cg.apps import coverage as coverage_app
 from cg.apps import gt, hk, lims, madeline, scoutapi, tb
-from cg.meta.deliver.mip_dna import DeliverAPI
+from cg.cli.workflow.mip_dna.deliver import CASE_TAGS, SAMPLE_TAGS
+from cg.meta.deliver import DeliverAPI
 from cg.meta.report.api import ReportAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
 from cg.meta.workflow.mip_dna import AnalysisAPI
