@@ -222,20 +222,21 @@ def config_case(
 
     normal_path = None
     nr_normal_paths = len(normal_paths) if normal_paths else 0
-    if nr_normal_paths > 1:
-        raise BalsamicStartError("Too many normal samples found: %s" % nr_normal_paths)
-    elif nr_normal_paths == 1:
+
+    if nr_normal_paths == 1:
         normal_path = normal_paths.pop()
+    elif nr_normal_paths > 1:
+        raise BalsamicStartError("Too many normal samples found: %s" % nr_normal_paths)
 
     if not target_bed:
-        if len(target_beds) == 0:
-            raise BalsamicStartError("No target bed specified!")
-        elif len(target_beds) == 1:
+        if len(target_beds) == 1:
             target_bed = Path(context.obj["bed_path"]) / target_beds.pop()
         elif len(target_beds) > 1:
             raise BalsamicStartError(
                 "To many target beds specified: %s" % ", ".join(target_beds)
             )
+        else:
+            raise BalsamicStartError("No target bed specified!")
 
     # Call Balsamic
     command_str = (
