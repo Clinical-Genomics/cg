@@ -210,8 +210,6 @@ class BedVersion(Model):
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
     bed_id = Column(ForeignKey(Bed.id), nullable=False)
 
-    samples = orm.relationship("Sample", backref="bed_version")
-
     def __str__(self) -> str:
         return f"{self.bed.name} ({self.version})"
 
@@ -568,7 +566,6 @@ class Sample(Model, PriorityMixin):
     application_version_id = Column(
         ForeignKey("application_version.id"), nullable=False
     )
-    bed_version_id = Column(ForeignKey("bed_version.id"))
     beaconized_at = Column(types.Text)
     capture_kit = Column(types.String(64))
     comment = Column(types.Text)
@@ -624,9 +621,6 @@ class Sample(Model, PriorityMixin):
         data["customer"] = self.customer.to_dict()
         data["application_version"] = self.application_version.to_dict()
         data["application"] = self.application_version.application.to_dict()
-        if self.bed_version:
-            data["bed_version"] = self.bed_version.to_dict()
-            data["bed"] = self.bed_version.bed.to_dict()
         if links:
             data["links"] = [
                 link_obj.to_dict(family=True, parents=True) for link_obj in self.links

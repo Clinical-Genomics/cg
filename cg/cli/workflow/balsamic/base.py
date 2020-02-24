@@ -45,13 +45,13 @@ def balsamic(context, case_id, priority, email, target_bed):
     context.obj["hk_api"] = hk.HousekeeperAPI(context.obj)
     context.obj["fastq_handler"] = FastqHandler
     context.obj["gzipper"] = gzip
+    context.obj["lims_api"] = lims.LimsAPI(context.obj)
     scout_api = scoutapi.ScoutAPI(context.obj)
-    lims_api = lims.LimsAPI(context.obj)
     tb_api = tb.TrailblazerAPI(context.obj)
     deliver = DeliverAPI(
         context.obj,
         hk_api=context.obj["hk_api"],
-        lims_api=lims_api,
+        lims_api=context.obj["lims_api"],
         case_tags=CASE_TAGS,
         sample_tags=SAMPLE_TAGS,
     )
@@ -61,7 +61,7 @@ def balsamic(context, case_id, priority, email, target_bed):
         hk_api=context.obj["hk_api"],
         tb_api=tb_api,
         scout_api=scout_api,
-        lims_api=lims_api,
+        lims_api=context.obj["lims_api"],
         deliver_api=deliver,
     )
 
@@ -201,8 +201,13 @@ def config_case(
         else:
             normal_paths.add(concatenated_paths[1])
 
-        if link_obj.sample.bed_version:
-            target_beds.add(link_obj.sample.bed_version.filename)
+        target_bed_shortname = context.obj["lims_api"].capture_kit(
+            link_obj.sample.internal_id
+        )
+        if target_bed_shortname:
+            target_beds.add(
+                context.obj["db"].latest_bed_version(target_bed_shortname).filename
+            )
 
     nr_paths = len(tumor_paths) if tumor_paths else 0
     if nr_paths != 1:

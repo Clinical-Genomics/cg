@@ -18,3 +18,5 @@ ALTER TABLE `bed_version` DROP COLUMN `independent_segments`;
 -- change name of name column to shortname in bed-version
 ALTER TABLE `bed_version` CHANGE COLUMN `description` `shortname` varchar(64);
 
+-- remove bed-version from samples
+ALTER TABLE sample DROP COLUMN  `bed_version_id` int(11);
