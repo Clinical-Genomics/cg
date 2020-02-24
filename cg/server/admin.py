@@ -135,13 +135,7 @@ class BedVersionView(BaseView):
     """Admin view for Model.BedVersion"""
 
     column_default_sort = ("updated_at", True)
-    column_editable_list = [
-        "description",
-        "filename",
-        "comment",
-        "designer",
-        "checksum",
-    ]
+    column_editable_list = ["shortname", "filename", "comment", "designer", "checksum"]
     column_exclude_list = ["created_at"]
     form_excluded_columns = ["created_at", "updated_at", "samples"]
     column_filters = []

@@ -198,7 +198,7 @@ class BedVersion(Model):
     __table_args__ = (UniqueConstraint("bed_id", "version", name="_app_version_uc"),)
 
     id = Column(types.Integer, primary_key=True)
-    description = Column(types.String(256))
+    shortname = Column(types.String(64))
     version = Column(types.Integer, nullable=False)
     filename = Column(types.String(256), nullable=False)
     checksum = Column(types.String(32))
