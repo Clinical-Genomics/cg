@@ -78,4 +78,7 @@ jobs:
       script: git reset --soft ${TRAVIS_COMMIT_RANGE%...*} && git lint
 
 notifications:
-  email: never
+  email:
+    if: branch = master AND NOT type = push
+    on_success: never
+    on_failure: always
