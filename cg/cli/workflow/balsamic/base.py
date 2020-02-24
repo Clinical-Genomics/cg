@@ -234,7 +234,7 @@ def config_case(
             target_bed = Path(context.obj["bed_path"]) / target_beds.pop()
         elif len(target_beds) > 1:
             raise BalsamicStartError(
-                "To many target beds specified: ".join(", ", target_beds)
+                "To many target beds specified: %s" % ", ".join(target_beds)
             )
 
     # Call Balsamic
