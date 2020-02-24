@@ -262,12 +262,13 @@ def config_case(
     command = [f"bash -c 'source activate {conda_env}; balsamic"]
     command_str += "'"  # add ending quote from above line
     command.extend(command_str.split(" "))
+
     if dry:
         click.echo(" ".join(command))
         return SUCCESS
-    else:
-        process = subprocess.run(" ".join(command), shell=True)
-        return process
+
+    process = subprocess.run(" ".join(command), shell=True)
+    return process
 
 
 @balsamic.command()
@@ -312,10 +313,10 @@ def run(context, dry, run_analysis, config_path, priority, email, case_id):
 
     if dry:
         click.echo(" ".join(command))
-    else:
-        process = subprocess.run(" ".join(command), shell=True)
-        return process
         return SUCCESS
+
+    process = subprocess.run(" ".join(command), shell=True)
+    return process
 
 
 @balsamic.command()
