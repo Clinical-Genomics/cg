@@ -46,7 +46,6 @@ jobs:
       script: pip check
 
     - name: "Coverage"
-      if: NOT type = pull_request
       install:
         - pip install cython
         - pip install . -r requirements-dev.txt
