@@ -315,6 +315,7 @@ def run(context, dry, run_analysis, config_path, priority, email, case_id):
     else:
         process = subprocess.run(" ".join(command), shell=True)
         return process
+        return SUCCESS
 
 
 @balsamic.command()
