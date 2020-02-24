@@ -1,3 +1,4 @@
+"""Ordering module for intration"""
 import datetime as dt
 from typing import List
 
@@ -6,6 +7,8 @@ from cg.store import models
 
 
 class StatusHandler:
+    """Handles ordering data for the statusDB"""
+
     def __init__(self):
         self.status = None
 
