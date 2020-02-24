@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+"""Module for Flask-Admin views"""
 from flask import redirect, url_for, request, session
 from flask_admin.contrib.sqla import ModelView
 from flask_dance.contrib.google import google
@@ -8,6 +8,8 @@ from cg.server.ext import db
 
 
 class BaseView(ModelView):
+    """Base for the specific views."""
+
     def is_accessible(self):
         user_obj = db.user(session.get("user_email"))
         return True if (google.authorized and user_obj and user_obj.is_admin) else False
