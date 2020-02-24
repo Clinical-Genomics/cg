@@ -12,7 +12,7 @@ class BaseView(ModelView):
 
     def is_accessible(self):
         user_obj = db.user(session.get("user_email"))
-        return True if (google.authorized and user_obj and user_obj.is_admin) else False
+        return bool(google.authorized and user_obj and user_obj.is_admin)
 
     def inaccessible_callback(self, name, **kwargs):
         # redirect to login page if user doesn't have access
