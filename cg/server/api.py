@@ -369,7 +369,7 @@ def options():
             for organism in db.organisms()
         ],
         sources=source_groups,
-        beds=[bed.name for bed in db.beds()],
+        beds=[bed.name for bed in db.beds(hide_archived=True)],
     )
 
 
