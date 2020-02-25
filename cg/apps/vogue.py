@@ -42,7 +42,7 @@ class VogueAPI:
     def load_samples(self, days):
         """Running vogue load samples."""
 
-        load_call = ["load", "samples", "-d", days]
+        load_call = ["load", "sample", "-d", days]
         self.process.run_command(load_call)
 
         # Execute command and print its stdout+stderr as it executes
@@ -52,7 +52,7 @@ class VogueAPI:
     def load_flowcells(self, days):
         """Running vogue load samples."""
 
-        load_call = ["load", "flowcells", "-d", days]
+        load_call = ["load", "flowcell", "-d", days]
         self.process.run_command(load_call)
 
         # Execute command and print its stdout+stderr as it executes
