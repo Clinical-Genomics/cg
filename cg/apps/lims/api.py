@@ -276,7 +276,7 @@ class LimsAPI(Lims, OrderHandler):
         if data_analysis:
             lims_sample.udf[PROP2UDF["data_analysis"]] = data_analysis
         if name:
-            lims_sample.udf[PROP2UDF["name"]] = name
+            lims_sample.name = name
 
         lims_sample.put()
 
