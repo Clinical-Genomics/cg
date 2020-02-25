@@ -4,6 +4,18 @@ cache: pip
 
 jobs:
   include:
+    - name: "Coverage"
+      install:
+        - pip install cython
+        - pip install . -r requirements-dev.txt
+      script: coverage run --branch --omit="*.html" --source "$(basename "$PWD")" setup.py test
+      after_success: coveralls
+
+    - name: "Package install"
+      if: type = pull_request
+      install: python setup.py install
+      script: pip check
+
     - name: "Tests on python 3.6 (Clinical-db)"
       if: type = pull_request                   # extra on PR
       python: "3.6.2"   # version in prod170926
@@ -14,11 +26,6 @@ jobs:
       python: "3.7.1"   # version in P_main
       install: pip install . -r requirements-dev.txt
       script: pytest
-
-    - name: "Package install"
-      if: type = pull_request
-      install: python setup.py install
-      script: pip check
 
     - name: "Production dependencies on python 3.6 (Clinical-db)"
       if: type = pull_request
@@ -44,13 +51,6 @@ jobs:
         - pip install cython
         - pip install . -r requirements-dev.txt
       script: pip check
-
-    - name: "Coverage"
-      install:
-        - pip install cython
-        - pip install . -r requirements-dev.txt
-      script: coverage run --branch --omit="*.html" --source "$(basename "$PWD")" setup.py test
-      after_success: coveralls
 
     - name: "Code formatting"
       if: type = pull_request
