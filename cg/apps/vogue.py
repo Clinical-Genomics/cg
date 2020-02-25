@@ -50,7 +50,7 @@ class VogueAPI:
             LOG.info("vogue output: %s", line)
 
     def load_flowcells(self, days):
-        """Running vogue load samples."""
+        """Running vogue load flowcells."""
 
         load_call = ["load", "flowcell", "-d", days]
         self.process.run_command(load_call)
