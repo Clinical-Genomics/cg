@@ -1,96 +1,95 @@
-# -*- coding: utf-8 -*-
+"""Chanjo API"""
 from typing import List
 import logging
 import io
+import json
+import tempfile
 from pathlib import Path
 
-from chanjo.store.api import ChanjoDB
-from chanjo.store import models
-from chanjo.load.sambamba import load_transcripts
-import click
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy import func
-
-from .omim import OMIM_GENE_IDS
+from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
 
 
-class ChanjoAPI(ChanjoDB):
+class ChanjoAPI:
 
     """Interface to Chanjo, the coverage analysis tool."""
 
     def __init__(self, config: dict):
-        super(ChanjoAPI, self).__init__(uri=config['chanjo']['database'])
 
-    def upload(self, sample_id: str, sample_name: str, group_id: str, group_name: str,
-               bed_stream: io.TextIOWrapper):
+        self.chanjo_config = config["chanjo"]["config_path"]
+        self.chanjo_binary = config["chanjo"]["binary_path"]
+        self.process = Process(self.chanjo_binary, self.chanjo_config)
+
+    def upload(
+        self,
+        sample_id: str,
+        sample_name: str,
+        group_id: str,
+        group_name: str,
+        bed_file: str,
+    ):
         """Upload coverage for a sample."""
-        source = str(Path(bed_stream.name).absolute())
-        result = load_transcripts(bed_stream, sample_id=sample_id, group_id=group_id,
-                                  source=source, threshold=10)
-        result.sample.name = sample_name
-        result.sample.group_name = group_name
 
-        try:
-            self.add(result.sample)
-            with click.progressbar(result.models, length=result.count,
-                                   label=f"loading {sample_id}") as progress_bar:
-                for tx_model in progress_bar:
-                    self.add(tx_model)
-            self.save()
-        except IntegrityError as error:
-            self.session.rollback()
-            raise error
-    
-    def sample(self, sample_id: str) -> models.Sample:
+        load_parameters = [
+            "load",
+            "--sample",
+            sample_id,
+            "--name",
+            sample_name,
+            "--group",
+            group_id,
+            "--group-name",
+            group_name,
+            "--threshold",
+            "10",
+            bed_file,
+        ]
+
+        self.process.run_command(load_parameters)
+
+    def sample(self, sample_id: str) -> dict:
         """Fetch sample from the database."""
-        return models.Sample.get(sample_id)
 
-    def delete_sample(self, sample_obj: models.Sample):
+        sample_parameters = ["db", "samples", "-s", sample_id]
+        self.process.run_command(sample_parameters)
+        samples = json.loads(self.process.stdout)
+
+        for sample in samples:
+            if sample["id"] == sample_id:
+                return sample
+
+        return None
+
+    def delete_sample(self, sample_id: str):
         """Delete sample from database."""
-        self.delete_commit(sample_obj)
+        delete_parameters = ["db", "remove", sample_id]
+        self.process.run_command(delete_parameters)
 
-    def omim_coverage(self, samples: List[models.Sample]) -> dict:
-        """Calculate coverage for OMIM panel."""
-        sample_ids = [sample.id for sample in samples]
-        query = self.query(
-            models.TranscriptStat.sample_id.label('sample_id'),
-            func.avg(models.TranscriptStat.mean_coverage).label('mean_coverage'),
-            func.avg(models.TranscriptStat.completeness_10).label('mean_completeness'),
-        ).join(
-            models.TranscriptStat.transcript,
-        ).filter(
-            models.TranscriptStat.sample_id.in_(sample_ids),
-            models.Transcript.gene_id.in_(OMIM_GENE_IDS),
-        ).group_by(models.TranscriptStat.sample_id)
-        data = {result.sample_id: {
-            'mean_coverage': result.mean_coverage,
-            'mean_completeness': result.mean_completeness,
-        } for result in query}
+    def omim_coverage(self, samples: List[str]) -> dict:
+        """Calculate omim coverage for samples"""
+
+        omim_parameters = ["calculate", "coverage", "--omim"]
+        for sample in samples:
+            omim_parameters.extend(["-s", sample["id"]])
+        self.process.run_command(omim_parameters)
+        data = json.loads(self.process.stdout)
         return data
 
     def sample_coverage(self, sample_id: str, panel_genes: list) -> dict:
         """Calculate coverage for samples."""
-        query = self.query(
-            models.TranscriptStat.sample_id.label('sample_id'),
-            func.avg(models.TranscriptStat.mean_coverage).label('mean_coverage'),
-            func.avg(models.TranscriptStat.completeness_10).label('mean_completeness'),
-        ).join(
-            models.TranscriptStat.transcript,
-        ).filter(
-            models.Transcript.gene_id.in_(panel_genes),
-            models.TranscriptStat.sample_id == sample_id,
-        ).group_by(models.TranscriptStat.sample_id)
 
-        data = None
-
-        result = query.first()
-
-        if result:
-            data = {
-                'mean_coverage': result.mean_coverage,
-                'mean_completeness': result.mean_completeness,
-            }
-
+        with tempfile.NamedTemporaryFile(mode="w+t") as tmp_gene_file:
+            tmp_gene_file.write("\n".join([str(gene) for gene in panel_genes]))
+            tmp_gene_file.flush()
+            coverage_parameters = [
+                "calculate",
+                "coverage",
+                "-s",
+                sample_id,
+                "-f",
+                tmp_gene_file.name,
+            ]
+            self.process.run_command(coverage_parameters)
+        data = json.loads(self.process.stdout).get(sample_id)
         return data
