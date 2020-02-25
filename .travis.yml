@@ -60,8 +60,8 @@ jobs:
     - name: "Pylint score"
       if: type = pull_request
       install: pip install pylint
-      script:
-        - bash <(curl https://raw.githubusercontent.com/Clinical-Genomics/snippets/check-pylint-score/install.sh)
+      script: bash <(curl https://raw.githubusercontent.com/Clinical-Genomics/snippets/check-pylint-score/check_pylint_score.sh)
+
     - name: "Linting"
       if: type = pull_request
       install: pip install -r requirements-dev.txt
