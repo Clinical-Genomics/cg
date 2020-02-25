@@ -17,7 +17,7 @@ from cg.cli.workflow.balsamic.deliver import (
     SAMPLE_TAGS,
 )
 from cg.cli.workflow.get_links import get_links
-from cg.exc import LimsDataError, BalsamicStartError
+from cg.exc import LimsDataError, BalsamicStartError, CgError
 from cg.meta.deliver import DeliverAPI
 from cg.meta.workflow.balsamic import AnalysisAPI
 from cg.store import Store
@@ -45,13 +45,13 @@ def balsamic(context, case_id, priority, email, target_bed):
     context.obj["hk_api"] = hk.HousekeeperAPI(context.obj)
     context.obj["fastq_handler"] = FastqHandler
     context.obj["gzipper"] = gzip
+    context.obj["lims_api"] = lims.LimsAPI(context.obj)
     scout_api = scoutapi.ScoutAPI(context.obj)
-    lims_api = lims.LimsAPI(context.obj)
     tb_api = tb.TrailblazerAPI(context.obj)
     deliver = DeliverAPI(
         context.obj,
         hk_api=context.obj["hk_api"],
-        lims_api=lims_api,
+        lims_api=context.obj["lims_api"],
         case_tags=CASE_TAGS,
         sample_tags=SAMPLE_TAGS,
     )
@@ -61,7 +61,7 @@ def balsamic(context, case_id, priority, email, target_bed):
         hk_api=context.obj["hk_api"],
         tb_api=tb_api,
         scout_api=scout_api,
-        lims_api=lims_api,
+        lims_api=context.obj["lims_api"],
         deliver_api=deliver,
     )
 
@@ -201,25 +201,42 @@ def config_case(
         else:
             normal_paths.add(concatenated_paths[1])
 
-        if link_obj.sample.bed_version:
-            target_beds.add(link_obj.sample.bed_version.filename)
+        target_bed_shortname = context.obj["lims_api"].capture_kit(
+            link_obj.sample.internal_id
+        )
+        if target_bed_shortname:
+            target_bed_obj = context.obj["db"].latest_bed_version(target_bed_shortname)
+
+            if not target_bed_obj:
+                raise CgError("Bed-version %s does not exist" % target_bed_shortname)
+
+            target_beds.add(target_bed_obj.filename)
 
     nr_paths = len(tumor_paths) if tumor_paths else 0
     if nr_paths != 1:
-        click.echo(
-            f"Must have exactly one tumor sample! Found {nr_paths} samples.",
-            color="red",
+        raise BalsamicStartError(
+            "Must have exactly one tumor sample! Found %s samples." % nr_paths
         )
-        context.abort()
+
     tumor_path = tumor_paths.pop()
 
     normal_path = None
     nr_normal_paths = len(normal_paths) if normal_paths else 0
-    if nr_normal_paths > 1:
-        click.echo(f"Too many normal samples found: {nr_normal_paths}", color="red")
-        context.abort()
-    elif nr_normal_paths == 1:
+
+    if nr_normal_paths == 1:
         normal_path = normal_paths.pop()
+    elif nr_normal_paths > 1:
+        raise BalsamicStartError("Too many normal samples found: %s" % nr_normal_paths)
+
+    if not target_bed:
+        if len(target_beds) == 1:
+            target_bed = Path(context.obj["bed_path"]) / target_beds.pop()
+        elif len(target_beds) > 1:
+            raise BalsamicStartError(
+                "To many target beds specified: %s" % ", ".join(target_beds)
+            )
+        else:
+            raise BalsamicStartError("No target bed specified!")
 
     # Call Balsamic
     command_str = (
@@ -231,14 +248,8 @@ def config_case(
         f" --output-config {case_id}.json"
         f" --analysis-dir {root_dir}"
         f" --umi-trim-length {umi_trim_length}"
+        f" -p {target_bed}"
     )
-    if target_bed:
-        command_str += f" -p {target_bed}"
-    elif len(target_beds) == 1:
-        bed_path = Path(context.obj["bed_path"])
-        command_str += f" -p {bed_path / target_beds.pop()}"
-    else:
-        raise BalsamicStartError("No target bed specified!")
 
     if normal_path:
         command_str += f" --normal {normal_path}"
@@ -251,12 +262,13 @@ def config_case(
     command = [f"bash -c 'source activate {conda_env}; balsamic"]
     command_str += "'"  # add ending quote from above line
     command.extend(command_str.split(" "))
+
     if dry:
         click.echo(" ".join(command))
         return SUCCESS
-    else:
-        process = subprocess.run(" ".join(command), shell=True)
-        return process
+
+    process = subprocess.run(" ".join(command), shell=True)
+    return process
 
 
 @balsamic.command()
@@ -301,9 +313,10 @@ def run(context, dry, run_analysis, config_path, priority, email, case_id):
 
     if dry:
         click.echo(" ".join(command))
-    else:
-        process = subprocess.run(" ".join(command), shell=True)
-        return process
+        return SUCCESS
+
+    process = subprocess.run(" ".join(command), shell=True)
+    return process
 
 
 @balsamic.command()
