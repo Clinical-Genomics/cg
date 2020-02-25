@@ -41,7 +41,7 @@ class FindBasicDataHandler(BaseHandler):
         """Returns all beds."""
         bed_q = self.Bed.query
         if hide_archived:
-            bed_q = bed_q.filter(self.Bed.is_archived == False)
+            bed_q = bed_q.filter(self.Bed.is_archived.is_(False))
 
         return bed_q.order_by(models.Bed.name)
 
