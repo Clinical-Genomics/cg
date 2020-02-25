@@ -198,28 +198,17 @@ class BedVersion(Model):
     __table_args__ = (UniqueConstraint("bed_id", "version", name="_app_version_uc"),)
 
     id = Column(types.Integer, primary_key=True)
-    description = Column(types.String(256))
+    shortname = Column(types.String(64))
     version = Column(types.Integer, nullable=False)
     filename = Column(types.String(256), nullable=False)
     checksum = Column(types.String(32))
     panel_size = Column(types.Integer)
     genome_version = Column(types.String(32))
     designer = Column(types.String(256))
-    genes = Column(types.Integer)
-    unique_transcripts = Column(types.Integer)
-    transcripts_with_all_exons_covered = Column(types.Integer)
-    transcripts_with_at_least_one_exon_covered = Column(types.Integer)
-    padding = Column(types.Integer)
-
-    cosmic_snps = Column(types.Integer)
-    non_genic_regions = Column(types.Integer)
-    independent_segments = Column(types.Integer)
     comment = Column(types.Text)
     created_at = Column(types.DateTime, default=dt.datetime.now)
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
     bed_id = Column(ForeignKey(Bed.id), nullable=False)
-
-    samples = orm.relationship("Sample", backref="bed_version")
 
     def __str__(self) -> str:
         return f"{self.bed.name} ({self.version})"
@@ -391,7 +380,7 @@ class FamilySample(Model):
 class Flowcell(Model):
     id = Column(types.Integer, primary_key=True)
     name = Column(types.String(32), unique=True, nullable=False)
-    sequencer_type = Column(types.Enum("hiseqga", "hiseqx"))
+    sequencer_type = Column(types.Enum("hiseqga", "hiseqx", "novaseq"))
     sequencer_name = Column(types.String(32))
     sequenced_at = Column(types.DateTime)
     status = Column(types.Enum(*FLOWCELL_STATUS), default="ondisk")
@@ -577,7 +566,6 @@ class Sample(Model, PriorityMixin):
     application_version_id = Column(
         ForeignKey("application_version.id"), nullable=False
     )
-    bed_version_id = Column(ForeignKey("bed_version.id"))
     beaconized_at = Column(types.Text)
     capture_kit = Column(types.String(64))
     comment = Column(types.Text)
@@ -633,9 +621,6 @@ class Sample(Model, PriorityMixin):
         data["customer"] = self.customer.to_dict()
         data["application_version"] = self.application_version.to_dict()
         data["application"] = self.application_version.application.to_dict()
-        if self.bed_version:
-            data["bed_version"] = self.bed_version.to_dict()
-            data["bed"] = self.bed_version.bed.to_dict()
         if links:
             data["links"] = [
                 link_obj.to_dict(family=True, parents=True) for link_obj in self.links

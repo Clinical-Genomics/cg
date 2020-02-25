@@ -16,7 +16,7 @@ Flask-SQLAlchemy==2.1
 Flask-CORS
 Flask-Dance
 google-auth
-werkzeug
+werkzeug<1.0.0              # due to breaking changes in 1.0.0
 requests[security]
 requests-oauthlib<1.2.0     # due to scout-browser Flask-OAuthlib
 oauthlib<3.0.0              # due to scout-browser Flask-OAuthlib
@@ -46,7 +46,6 @@ six==1.12               # due to astroid
 genologics
 trailblazer>=4.0.0
 housekeeper>=2.0.0b2
-chanjo>=4.2.0
 genotype>=2.2.0
 scout-browser>=4.4.1
 cgstats>=1.1.2
