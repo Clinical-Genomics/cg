@@ -41,10 +41,7 @@ def add_analysis(config_stream):
 
     deliverables_raw = ruamel.yaml.safe_load(
         Path(
-            # config_data['out_dir'], f"{config_raw['case_id']}_deliverables.yaml").open())
-            config_data["out_dir"],
-            f"{config_raw['case_id']}_deliverables_BS.yaml",
-        ).open()
+            config_data['out_dir'], f"{config_raw['case_id']}_deliverables.yaml").open()
     )
     new_bundle = build_bundle(config_data, sampleinfo_data, deliverables_raw)
 
