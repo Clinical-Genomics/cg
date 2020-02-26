@@ -6,7 +6,11 @@ import click
 
 from housekeeper.exc import VersionIncludedError
 from cg.apps import hk, tb
-from cg.exc import AnalysisNotFinishedError, AnalysisDuplicationError, BundleAlreadyAddedError
+from cg.exc import (
+    AnalysisNotFinishedError,
+    AnalysisDuplicationError,
+    BundleAlreadyAddedError,
+)
 from cg.meta.store.mip_rna import gather_files_and_bundle_in_housekeeper
 from cg.store import Store
 
@@ -66,10 +70,14 @@ def analysis(context, config_stream):
 def completed(context):
     """Store all completed analyses."""
     hk_api = context.obj["hk_api"]
-    for analysis_obj in context.obj["tb_api"].analyses(status="completed", deleted=False):
+    for analysis_obj in context.obj["tb_api"].analyses(
+        status="completed", deleted=False
+    ):
         existing_record = hk_api.version(analysis_obj.family, analysis_obj.started_at)
         if existing_record:
-            LOG.debug("analysis stored: %s - %s", analysis_obj.family, analysis_obj.started_at)
+            LOG.debug(
+                "analysis stored: %s - %s", analysis_obj.family, analysis_obj.started_at
+            )
             continue
         click.echo(click.style(f"storing family: {analysis_obj.family}", fg="blue"))
         with Path(analysis_obj.config_path).open() as config_stream:

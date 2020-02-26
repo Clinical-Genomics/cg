@@ -5,7 +5,11 @@ from pathlib import Path
 
 import ruamel.yaml
 
-from cg.exc import AnalysisNotFinishedError, AnalysisDuplicationError, BundleAlreadyAddedError
+from cg.exc import (
+    AnalysisNotFinishedError,
+    AnalysisDuplicationError,
+    BundleAlreadyAddedError,
+)
 
 LOG = logging.getLogger(__name__)
 
@@ -21,7 +25,9 @@ def gather_files_and_bundle_in_housekeeper(config_stream, hk_api, status):
 
     case_obj = add_new_analysis_to_the_status_api(bundle_obj, status)
     reset_action_from_running_on_case(case_obj)
-    new_analysis = add_new_complete_analysis_record(bundle_data, case_obj, status, version_obj)
+    new_analysis = add_new_complete_analysis_record(
+        bundle_data, case_obj, status, version_obj
+    )
     version_date = version_obj.created_at.date()
     LOG.info("new bundle added: %s, version %s", bundle_obj.name, version_date)
     include_files_in_housekeeper(bundle_obj, hk_api, version_obj)
@@ -41,7 +47,8 @@ def add_analysis(config_stream):
 
     deliverables_raw = ruamel.yaml.safe_load(
         Path(
-            config_data['out_dir'], f"{config_raw['case_id']}_deliverables.yaml").open()
+            config_data["out_dir"], f"{config_raw['case_id']}_deliverables.yaml"
+        ).open()
     )
     new_bundle = build_bundle(config_data, sampleinfo_data, deliverables_raw)
 
@@ -69,7 +76,14 @@ def get_files(deliverables: dict) -> dict:
                 set(
                     list(
                         filter(
-                            None, [file["format"], file["id"], file["step"], file["tag"], "rd-rna"]
+                            None,
+                            [
+                                file["format"],
+                                file["id"],
+                                file["step"],
+                                file["tag"],
+                                "rd-rna",
+                            ],
                         )
                     )
                 )
