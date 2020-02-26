@@ -4,13 +4,11 @@ from pathlib import Path
 
 import pytest
 
-from cg.apps.madeline import MadelineAPI
-
-make_ped = MadelineAPI.make_ped
+from cg.apps.madeline.api import MadelineAPI
 
 
-@pytest.fixture
-def madeline_output():
+@pytest.fixture(name="madeline_output")
+def fixture_madeline_output():
     """File with madeline output"""
     return "tests/fixtures/apps/madeline/madeline.xml"
 
@@ -31,8 +29,8 @@ def madeline_columns():
     return columns
 
 
-@pytest.fixture
-def mother():
+@pytest.fixture(name="mother")
+def fixture_mother():
     """return a dictionary with ind info"""
     ind_info = {
         "sample": "mother",
@@ -43,8 +41,8 @@ def mother():
     return ind_info
 
 
-@pytest.fixture
-def father():
+@pytest.fixture(name="father")
+def fixture_father():
     """return a dictionary with ind info"""
     ind_info = {
         "sample": "father",
@@ -55,8 +53,8 @@ def father():
     return ind_info
 
 
-@pytest.fixture
-def proband():
+@pytest.fixture(name="proband")
+def fixture_proband():
     """return a dictionary with ind info"""
     ind_info = {
         "sample": "proband",
@@ -70,8 +68,8 @@ def proband():
     return ind_info
 
 
-@pytest.fixture
-def trio(proband, mother, father):
+@pytest.fixture(name="trio")
+def fixture_trio(proband, mother, father):
     """return a list with a trio"""
     return [proband, mother, father]
 
@@ -82,7 +80,7 @@ def madeline_input(proband):
     inds = [proband]
     case_id = "test"
     _input = []
-    for line in make_ped(case_id, inds):
+    for line in MadelineAPI.make_ped(case_id, inds):
         _input.append(line)
 
     return _input

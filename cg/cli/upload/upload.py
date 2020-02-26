@@ -80,7 +80,7 @@ def upload(context, family_id, force_restart):
 
     context.obj["housekeeper_api"] = hk.HousekeeperAPI(context.obj)
 
-    context.obj["madeline_api"] = madeline.MadelineAPI(context.obj)
+    context.obj["madeline_api"] = madeline.api.MadelineAPI(context.obj)
     context.obj["genotype_api"] = gt.GenotypeAPI(context.obj)
     context.obj["lims_api"] = lims.LimsAPI(context.obj)
     context.obj["tb_api"] = tb.TrailblazerAPI(context.obj)

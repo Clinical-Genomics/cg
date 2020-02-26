@@ -1,10 +1,7 @@
 """Tests for madeline extension"""
 
-from cg.apps.madeline import MadelineAPI
+from cg.apps.madeline.api import MadelineAPI
 from cg.utils import Process
-
-make_ped = MadelineAPI.make_ped
-strip_script_tag = MadelineAPI.strip_script_tag
 
 
 def get_ind_info(columns, line):
@@ -32,7 +29,7 @@ def test_generate_madeline_input_no_mother(madeline_columns, proband):
     proband.pop("mother")
     inds = [proband]
     # WHEN generating madeline formated lines
-    madeline_lines = make_ped(family_id, inds)
+    madeline_lines = MadelineAPI.make_ped(family_id, inds)
     i = 0
     for i, line in enumerate(madeline_lines, 1):
         if i == 1:
@@ -51,7 +48,7 @@ def test_generate_madeline_input_no_sex(madeline_columns, proband):
     proband["sex"] = "unknown"
     inds = [proband]
     # WHEN generating madeline formated lines
-    madeline_lines = make_ped(family_id, inds)
+    madeline_lines = MadelineAPI.make_ped(family_id, inds)
     i = 0
     for i, line in enumerate(madeline_lines, 1):
         if i == 1:
@@ -69,7 +66,7 @@ def test_generate_madeline_input(madeline_columns, proband):
     family_id = "test"
     inds = [proband]
     # WHEN generating madeline formated lines
-    madeline_lines = make_ped(family_id, inds)
+    madeline_lines = MadelineAPI.make_ped(family_id, inds)
     i = 0
     for i, line in enumerate(madeline_lines, 1):
         if i == 1:
@@ -91,7 +88,7 @@ def test_generate_madeline_input_no_inds(madeline_columns):
     family_id = "test"
     inds = []
     # WHEN generating madeline formated lines
-    res = make_ped(family_id, inds)
+    res = MadelineAPI.make_ped(family_id, inds)
     # THEN assert that only the header line was generated
     i = 0
     header_line = None
