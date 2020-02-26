@@ -33,13 +33,13 @@ def analysis(context, config_stream):
 
     if not config_stream:
         LOG.error("provide a config, suggestions:")
-        for analysis_obj in context.obj["tb_api"].analyses(status="completed", deleted=False)[:25]:
+        for analysis_obj in tb_api.analyses(status="completed", deleted=False)[:25]:
             click.echo(analysis_obj.config_path)
         context.abort()
 
     try:
         new_analysis = gather_files_and_bundle_in_housekeeper(
-            config_stream, context, hk_api, status, tb_api
+            config_stream, hk_api, status,
         )
     except AnalysisNotFinishedError as error:
         click.echo(click.style(error.message, fg="red"))
