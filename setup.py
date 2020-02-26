@@ -10,7 +10,7 @@ if sys.argv[-1] == "publish":
     sys.exit()
 
 
-def parse_reqs(req_path="./requirements.txt"):
+def parse_requirements(req_path="./requirements.txt"):
     """Recursively parse requirements from nested pip files."""
     install_requires = []
     with open(req_path, "r") as handle:
@@ -22,7 +22,7 @@ def parse_reqs(req_path="./requirements.txt"):
             # check for nested requirements files
             if line.startswith("-r"):
                 # recursively call this function
-                install_requires += parse_reqs(req_path=line[3:])
+                install_requires += parse_requirements(req_path=line[3:])
             else:
                 # add the line as a new requirement
                 install_requires.append(line)
@@ -66,8 +66,8 @@ setup(
     entry_points={"console_scripts": ["cg=cg.cli:base"]},
     # install requirements loaded from "./requirements.txt"
     # Install requirements loaded from ``requirements.txt``
-    install_requires=parse_reqs(),
     tests_require=["pytest", "pytest-mock"],
+    install_requires=parse_requirements(),
     cmdclass=dict(test=PyTest),
     classifiers=[
         "Programming Language :: Python",
