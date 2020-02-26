@@ -3,13 +3,14 @@
 from pathlib import Path
 
 import pytest
+
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
-from cg.store import Store
 from cg.meta.workflow.mip_dna import AnalysisAPI
+from cg.store import Store
 
 
 @pytest.fixture(scope="function", name="base_context")
@@ -101,7 +102,6 @@ class MockTB(TrailblazerAPI):
 
     def __init__(self):
         """Mock the init"""
-        pass
 
     def get_family_root_dir(self, case_id):
         """docstring for get_family_root_dir"""
