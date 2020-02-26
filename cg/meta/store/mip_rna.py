@@ -1,102 +1,153 @@
 """Builds MIP RNA bundle for linking in Housekeeper"""
+import datetime as dt
+import logging
+from pathlib import Path
+import ruamel.yaml
+from cg.exc import AnalysisNotFinishedError, AnalysisDuplicationError, BundleAlreadyAddedError
+
+LOG = logging.getLogger(__name__)
 
 
-def build_bundle_rna(config_data: dict, sampleinfo_data: dict) -> dict:
+def gather_files_and_bundle_in_housekeeper(config_stream, context, hk_api, status, tb_api):
+    """Function to gather files and bundle in housekeeper"""
+    bundle_data = add_analysis(config_stream)
+
+    results = hk_api.add_bundle(bundle_data)
+    if results is None:
+        raise BundleAlreadyAddedError("bundle already added")
+    bundle_obj, version_obj = results
+
+    case_obj = add_new_analysis_to_the_status_api(bundle_obj, status)
+    reset_action_from_running_on_family(case_obj)
+    new_analysis = add_new_complete_analysis_record(
+        bundle_data, case_obj, status, version_obj
+    )
+    version_date = version_obj.created_at.date()
+    LOG.info("new bundle added: %s, version %s", bundle_obj.name, version_date)
+    include_files_in_housekeeper(bundle_obj, context, hk_api, version_obj)
+
+    return new_analysis
+
+
+def add_analysis(config_stream):
+    """Gather information from MIP analysis to store."""
+    config_raw = ruamel.yaml.safe_load(config_stream)
+    config_data = parse_config(config_raw)
+    sampleinfo_raw = ruamel.yaml.safe_load(Path(config_data['sampleinfo_path']).open())
+    sampleinfo_data = parse_sampleinfo(sampleinfo_raw)
+
+    if sampleinfo_data['is_finished'] is False:
+        raise AnalysisNotFinishedError('analysis not finished')
+
+    deliverables_raw = ruamel.yaml.safe_load(Path(
+        # config_data['out_dir'], f"{config_raw['case_id']}_deliverables.yaml").open())
+        config_data['out_dir'], f"{config_raw['case_id']}_deliverables_BS.yaml").open())
+    new_bundle = build_bundle(config_data, sampleinfo_data, deliverables_raw)
+
+    return new_bundle
+
+
+def build_bundle(config_data: dict, sampleinfo_data: dict, deliverables: dict) -> dict:
     """Create a new bundle for RNA."""
     data = {
         'name': config_data['case'],
         'created': sampleinfo_data['date'],
         'pipeline_version': sampleinfo_data['version'],
-        'files': get_files_rna(config_data, sampleinfo_data),
+        'files': get_files(deliverables),
     }
     return data
 
 
-def get_files_rna(config_data: dict, sampleinfo_data: dict) -> dict:
+def get_files(deliverables: dict) -> dict:
     """Get all the files from the MIP RNA files."""
 
     data = [{
-        'path': config_data['config_path'],
-        'tags': ['mip-config', 'rd-rna'],
-        'archive': True,
-    }, {
-        'path': config_data['log_path'],
-        'tags': ['mip-log', 'rd-rna'],
-        'archive': True,
-    }, {
-        'path': config_data['sampleinfo_path'],
-        'tags': ['sampleinfo', 'rd-rna'],
-        'archive': True,
-    }, {
-        'path': sampleinfo_data['bcftools_merge'],
-        'tags': ['bcftools-combined-vcf', 'rd-rna'],
-        'archive': True,
-    }, {
-        'path': sampleinfo_data['multiqc_html'],
-        'tags': ['multiqc-html', 'rd-rna'],
-        'archive': True,
-    }, {
-        'path': sampleinfo_data['multiqc_json'],
-        'tags': ['multiqc-json', 'rd-rna'],
-        'archive': True,
-    }, {
-        'path': sampleinfo_data['pedigree_path'],
-        'tags': ['pedigree', 'rd-rna'],
-        'archive': True,
-    }, {
-        'path': sampleinfo_data['qcmetrics_path'],
-        'tags': ['qcmetrics', 'rd-rna'],
-        'archive': True,
-    }, {
-        'path': sampleinfo_data['vep_path'],
-        'tags': ['vep-vcf', 'rd-rna'],
-        'archive': True,
-    }, {
-        'path': sampleinfo_data['version_collect_ar_path'],
-        'tags': ['versions', 'rd-rna'],
-        'archive': True,
-    }]
-
-    for sample_data in sampleinfo_data['samples']:
-        data.append({
-            'path': sample_data['bootstrap_vcf'],
-            'tags': ['bootstrap-vcf', sample_data['id'], 'rd-rna'],
-            'archive': False,
-        })
-        data.append({
-            'path': sample_data['gatk_asereadcounter'],
-            'tags': ['ase-readcounts', sample_data['id'], 'rd-rna'],
-            'archive': False,
-        })
-        data.append({
-            'path': sample_data['gatk_baserecalibration'],
-            'tags': ['bam', 'baserecalibration', sample_data['id'], 'rd-rna'],
-            'archive': False,
-        })
-        data.append({
-            'path': sample_data['gffcompare_ar'],
-            'tags': ['gff-compare-ar', sample_data['id'], 'rd-rna'],
-            'archive': False,
-        })
-        data.append({
-            'path': sample_data['mark_duplicates'],
-            'tags': ['mark-duplicates', sample_data['id'], 'rd-rna'],
-            'archive': False,
-        })
-        data.append({
-            'path': sample_data['salmon_quant'],
-            'tags': ['salmon-quant', sample_data['id'], 'rd-rna'],
-            'archive': False,
-        })
-        data.append({
-            'path': sample_data['star_fusion'],
-            'tags': ['star-fusion', sample_data['id'], 'rd-rna'],
-            'archive': False,
-        })
-        data.append({
-            'path': sample_data['stringtie_ar'],
-            'tags': ['stringtie-ar', sample_data['id'], 'rd-rna'],
-            'archive': False,
-            })
+        'path': file['path'],
+        'tags': list(set(list(filter(None, [file['format'], file['id'], file['step'], file['tag'],
+                                            'rd-rna'])))),
+        'archive': False,
+    }
+            for file in deliverables['files']
+            if file['tag'] != 'config']
 
     return data
+
+
+def parse_config(data: dict) -> dict:
+    """Parse MIP config file.
+
+    Args:
+        data (dict): raw YAML input from MIP analysis config file
+
+    Returns:
+        dict: parsed data
+    """
+    return {
+        'email': data.get('email'),
+        'case': data['case_id'],
+        'samples': [{
+            'id': sample_id,
+            'type': analysis_type,
+        } for sample_id, analysis_type in data['analysis_type'].items()],
+        'is_dryrun': True if 'dry_run_all' in data else False,
+        'out_dir': data['outdata_dir'],
+        'priority': data['slurm_quality_of_service'],
+        'sampleinfo_path': data['sample_info_file'],
+    }
+
+
+def parse_sampleinfo(data: dict) -> dict:
+    """Parse MIP sample info file (RNA).
+
+    Args:
+        data (dict): raw YAML input from MIP qc sample info file (RNA)
+
+    Returns:
+        dict: parsed data
+    """
+    case = data['case']
+
+    sampleinfo_data = {
+        'date': data['analysis_date'],
+        'is_finished': data['analysisrunstatus'] == 'finished',
+        'case': case,
+        'version': data['mip_version'],
+    }
+
+    return sampleinfo_data
+
+
+def add_new_analysis_to_the_status_api(bundle_obj, status):
+    case_obj = status.family(bundle_obj.name)
+    return case_obj
+
+
+def reset_action_from_running_on_family(case_obj):
+    case_obj.action = None
+
+
+def add_new_complete_analysis_record(bundle_data, case_obj, status, version_obj):
+    """Function to create and return a new analysis database record"""
+    pipeline = case_obj.links[0].sample.data_analysis
+    pipeline = pipeline if pipeline else "mip"  # TODO remove this default from here
+
+    if status.analysis(family=case_obj, started_at=version_obj.created_at):
+        raise AnalysisDuplicationError(
+            f"Analysis object already exists for {case_obj.internal_id} {version_obj.created_at}"
+        )
+
+    new_analysis = status.add_analysis(
+        pipeline=pipeline,
+        version=bundle_data["pipeline_version"],
+        started_at=version_obj.created_at,
+        completed_at=dt.datetime.now(),
+        primary=(len(case_obj.analyses) == 0),
+    )
+    new_analysis.family = case_obj
+    return new_analysis
+
+
+def include_files_in_housekeeper(bundle_obj, context, hk_api, version_obj):
+    """Function to include files in housekeeper"""
+    hk_api.include(version_obj)
+    hk_api.add_commit(bundle_obj, version_obj)

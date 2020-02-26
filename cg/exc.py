@@ -60,3 +60,9 @@ class BalsamicStartError(CgError):
     """
         Exception raised when Balsamic fails to start
     """
+
+
+class BundleAlreadyAddedError(CgError):
+    """
+        Exception rasied when a bundle has already been added to Housekeeper
+    """
