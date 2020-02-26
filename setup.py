@@ -64,8 +64,6 @@ setup(
     zip_safe=False,
     packages=find_packages(exclude=("tests*", "docs", "examples")),
     entry_points={"console_scripts": ["cg=cg.cli:base"]},
-    # install requirements loaded from "./requirements.txt"
-    # Install requirements loaded from ``requirements.txt``
     tests_require=["pytest", "pytest-mock"],
     install_requires=parse_requirements(),
     cmdclass=dict(test=PyTest),
