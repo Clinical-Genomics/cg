@@ -5,9 +5,7 @@ import json
 from cg.meta.upload.vogue import UploadVogueAPI
 
 
-def test_load_genotype(
-    genotype_api, vogue_api, genotype_return, mocker, store,
-):
+def test_load_genotype(genotype_api, vogue_api, genotype_return, mocker, store):
 
     """Test load_genotype"""
 

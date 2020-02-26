@@ -4,6 +4,7 @@ from datetime import datetime
 import pytest
 from cg.apps.balsamic.fastq import FastqHandler
 from cg.apps.hk import HousekeeperAPI
+from cg.apps.lims import LimsAPI
 from cg.meta.workflow.balsamic import AnalysisAPI
 from cg.store import Store, models
 
@@ -17,6 +18,7 @@ def balsamic_context(balsamic_store) -> dict:
         "analysis_api": MockAnalysis,
         "fastq_handler": MockFastq,
         "gzipper": MockGzip(),
+        "lims_api": MockLims(),
         "bed_path": "bed_path",
         "balsamic": {
             "conda_env": "conda_env",
@@ -38,6 +40,25 @@ class MockHouseKeeper(HousekeeperAPI):
         """Mock get_files of HousekeeperAPI"""
         del tags, bundle, version
         return [MockFile()]
+
+
+class MockLims(LimsAPI):
+
+    lims = None
+
+    def __init__(self):
+        self.lims = self
+        pass
+
+    def capture_kit(self, lims_id: str) -> str:
+        return "dummy_capture_kit"
+
+
+@pytest.fixture(scope="function")
+def lims_api():
+
+    _lims_api = MockLims()
+    return _lims_api
 
 
 class MockFile:
@@ -96,7 +117,7 @@ class MockFastq(FastqHandler):
 
 
 @pytest.fixture(scope="function")
-def balsamic_store(base_store: Store) -> Store:
+def balsamic_store(base_store: Store, lims_api) -> Store:
     """real store to be used in tests"""
     _store = base_store
 
@@ -111,6 +132,9 @@ def balsamic_store(base_store: Store) -> Store:
         _store, "normal_sample", is_tumour=False, data_analysis="mip"
     )
     _store.relate_sample(case, normal_sample, status="unknown")
+
+    bed_name = lims_api.capture_kit(tumour_sample.internal_id)
+    ensure_bed_version(_store, bed_name)
 
     _store.commit()
 
@@ -134,7 +158,10 @@ def ensure_application_version(disk_store, application_tag="dummy_tag"):
     application = disk_store.application(tag=application_tag)
     if not application:
         application = disk_store.add_application(
-            tag=application_tag, category="wgs", description="dummy_description"
+            tag=application_tag,
+            category="wgs",
+            percent_kth=80,
+            description="dummy_description",
         )
         disk_store.add_commit(application)
 
@@ -192,7 +219,6 @@ def add_sample(
     """utility function to add a sample to use in tests"""
     customer = ensure_customer(store)
     application_version_id = ensure_application_version(store).id
-    bed_version_id = ensure_bed_version(store).id
     sample = store.add_sample(
         name=sample_id,
         sex=gender,
@@ -202,7 +228,6 @@ def add_sample(
     )
 
     sample.application_version_id = application_version_id
-    sample.bed_version_id = bed_version_id
     sample.customer = customer
     store.add_commit(sample)
     return sample

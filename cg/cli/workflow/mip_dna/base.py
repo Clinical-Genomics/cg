@@ -8,11 +8,15 @@ import click
 from cg.apps import hk, tb, scoutapi, lims
 from cg.apps.mip.fastq import FastqHandler
 from cg.cli.workflow.mip_dna.store import store as store_cmd
-from cg.cli.workflow.mip_dna.deliver import deliver as deliver_cmd
+from cg.cli.workflow.mip_dna.deliver import (
+    deliver as deliver_cmd,
+    CASE_TAGS,
+    SAMPLE_TAGS,
+)
 from cg.cli.workflow.get_links import get_links
 from cg.exc import LimsDataError
 from cg.meta.workflow.mip_dna import AnalysisAPI
-from cg.meta.deliver.mip_dna import DeliverAPI
+from cg.meta.deliver import DeliverAPI
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -42,7 +46,13 @@ def mip_dna(
     scout_api = scoutapi.ScoutAPI(context.obj)
     lims_api = lims.LimsAPI(context.obj)
     context.obj["tb"] = tb.TrailblazerAPI(context.obj)
-    deliver = DeliverAPI(context.obj, hk_api=hk_api, lims_api=lims_api)
+    deliver = DeliverAPI(
+        context.obj,
+        hk_api=hk_api,
+        lims_api=lims_api,
+        case_tags=CASE_TAGS,
+        sample_tags=SAMPLE_TAGS,
+    )
     context.obj["api"] = AnalysisAPI(
         db=context.obj["db"],
         hk_api=hk_api,

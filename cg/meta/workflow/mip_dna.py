@@ -9,7 +9,7 @@ from ruamel.yaml import safe_load
 from requests.exceptions import HTTPError
 
 from cg.apps import tb, hk, scoutapi, lims
-from cg.meta.deliver.mip_dna import DeliverAPI
+from cg.meta.deliver import DeliverAPI
 from cg.apps.pipelines.fastqhandler import BaseFastqHandler
 from cg.store import models, Store
 
@@ -33,6 +33,7 @@ MASTER_LIST = (
     "NEURODEG",
     "mcarta",
     "Cardiology",
+    "BRAIN",
 )
 COMBOS = {
     "DSD": ("DSD", "HYP", "SEXDIF", "SEXDET"),
@@ -145,6 +146,7 @@ class AnalysisAPI:
         for link in family_obj.links:
             sample_data = {
                 "sample_id": link.sample.internal_id,
+                "sample_display_name": link.sample.name,
                 "analysis_type": link.sample.application_version.application.analysis_type,
                 "sex": link.sample.sex,
                 "phenotype": link.status,
@@ -300,7 +302,7 @@ class AnalysisAPI:
         """Get a python object file for a tag and a family ."""
 
         analysis_files = self.deliver.get_post_analysis_files(
-            family=family_id, version=False, tags=[tag]
+            case=family_id, version=False, tags=[tag]
         )
         if analysis_files:
             analysis_file_raw = self._open_bundle_file(analysis_files[0].path)
