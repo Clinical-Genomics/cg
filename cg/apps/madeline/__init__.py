@@ -1,1 +1,1 @@
-from .api import MadelineAPI
+"""Imports from madeline module"""

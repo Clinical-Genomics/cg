@@ -17,7 +17,8 @@ from cg.store import Store
 
 from .beacon import beacon
 from .coverage import coverage
-from .delivery import delivery_report, delivery_report_to_scout, delivery_reports
+from .delivery import (delivery_report, delivery_report_to_scout,
+                       delivery_reports)
 from .genotype import genotypes
 from .mutacc import process_solved, processed_solved
 from .observations import observations
@@ -109,7 +110,6 @@ def upload(context, family_id, force_restart):
     )
 
     context.obj["scout_upload_api"] = UploadScoutAPI(
-        status_api=context.obj["status"],
         hk_api=context.obj["housekeeper_api"],
         scout_api=context.obj["scout_api"],
         madeline_api=context.obj["madeline_api"],
