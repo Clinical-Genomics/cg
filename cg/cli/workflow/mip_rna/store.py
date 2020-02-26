@@ -4,11 +4,11 @@ from pathlib import Path
 
 import click
 
+from housekeeper.exc import VersionIncludedError
 from cg.apps import hk, tb
 from cg.exc import AnalysisNotFinishedError, AnalysisDuplicationError, BundleAlreadyAddedError
-from housekeeper.exc import VersionIncludedError
-from cg.store import Store
 from cg.meta.store.mip_rna import gather_files_and_bundle_in_housekeeper
+from cg.store import Store
 
 LOG = logging.getLogger(__name__)
 

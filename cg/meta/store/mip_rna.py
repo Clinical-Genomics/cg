@@ -2,13 +2,15 @@
 import datetime as dt
 import logging
 from pathlib import Path
+
 import ruamel.yaml
+
 from cg.exc import AnalysisNotFinishedError, AnalysisDuplicationError, BundleAlreadyAddedError
 
 LOG = logging.getLogger(__name__)
 
 
-def gather_files_and_bundle_in_housekeeper(config_stream, context, hk_api, status, tb_api):
+def gather_files_and_bundle_in_housekeeper(config_stream, hk_api, status):
     """Function to gather files and bundle in housekeeper"""
     bundle_data = add_analysis(config_stream)
 
@@ -18,11 +20,11 @@ def gather_files_and_bundle_in_housekeeper(config_stream, context, hk_api, statu
     bundle_obj, version_obj = results
 
     case_obj = add_new_analysis_to_the_status_api(bundle_obj, status)
-    reset_action_from_running_on_family(case_obj)
+    reset_action_from_running_on_case(case_obj)
     new_analysis = add_new_complete_analysis_record(bundle_data, case_obj, status, version_obj)
     version_date = version_obj.created_at.date()
     LOG.info("new bundle added: %s, version %s", bundle_obj.name, version_date)
-    include_files_in_housekeeper(bundle_obj, context, hk_api, version_obj)
+    include_files_in_housekeeper(bundle_obj, hk_api, version_obj)
 
     return new_analysis
 
@@ -97,10 +99,10 @@ def parse_config(data: dict) -> dict:
         "email": data.get("email"),
         "case": data["case_id"],
         "samples": [
-            {"id": sample_id, "type": analysis_type,}
+            {"id": sample_id, "type": analysis_type}
             for sample_id, analysis_type in data["analysis_type"].items()
         ],
-        "is_dryrun": True if "dry_run_all" in data else False,
+        "is_dryrun": bool("dry_run_all" in data),
         "out_dir": data["outdata_dir"],
         "priority": data["slurm_quality_of_service"],
         "sampleinfo_path": data["sample_info_file"],
@@ -129,11 +131,13 @@ def parse_sampleinfo(data: dict) -> dict:
 
 
 def add_new_analysis_to_the_status_api(bundle_obj, status):
+    """ Adds new analysis to status API """
     case_obj = status.family(bundle_obj.name)
     return case_obj
 
 
-def reset_action_from_running_on_family(case_obj):
+def reset_action_from_running_on_case(case_obj):
+    """ Resets action on case """
     case_obj.action = None
 
 
@@ -158,7 +162,7 @@ def add_new_complete_analysis_record(bundle_data, case_obj, status, version_obj)
     return new_analysis
 
 
-def include_files_in_housekeeper(bundle_obj, context, hk_api, version_obj):
+def include_files_in_housekeeper(bundle_obj, hk_api, version_obj):
     """Function to include files in housekeeper"""
     hk_api.include(version_obj)
     hk_api.add_commit(bundle_obj, version_obj)
