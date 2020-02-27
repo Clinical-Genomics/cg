@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import datetime as dt
 from typing import List
 
@@ -27,8 +28,15 @@ flowcell_microbial_sample = Table(
     "flowcell_microbial_sample",
     Model.metadata,
     Column("flowcell_id", types.Integer, ForeignKey("flowcell.id"), nullable=False),
-    Column("microbial_sample_id", types.Integer, ForeignKey("microbial_sample.id"), nullable=False),
-    UniqueConstraint("flowcell_id", "microbial_sample_id", name="_flowcell_microbial_sample_uc"),
+    Column(
+        "microbial_sample_id",
+        types.Integer,
+        ForeignKey("microbial_sample.id"),
+        nullable=False,
+    ),
+    UniqueConstraint(
+        "flowcell_id", "microbial_sample_id", name="_flowcell_microbial_sample_uc"
+    ),
 )
 
 
@@ -80,7 +88,9 @@ class Application(Model):
     created_at = Column(types.DateTime, default=dt.datetime.now)
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
     versions = orm.relationship(
-        "ApplicationVersion", order_by="ApplicationVersion.version", backref="application"
+        "ApplicationVersion",
+        order_by="ApplicationVersion.version",
+        backref="application",
     )
 
     def __str__(self) -> str:
@@ -104,7 +114,9 @@ class Application(Model):
 
 
 class ApplicationVersion(Model):
-    __table_args__ = (UniqueConstraint("application_id", "version", name="_app_version_uc"),)
+    __table_args__ = (
+        UniqueConstraint("application_id", "version", name="_app_version_uc"),
+    )
 
     id = Column(types.Integer, primary_key=True)
     version = Column(types.Integer, nullable=False)
@@ -121,7 +133,9 @@ class ApplicationVersion(Model):
     application_id = Column(ForeignKey(Application.id), nullable=False)
     samples = orm.relationship("Sample", backref="application_version")
     pools = orm.relationship("Pool", backref="application_version")
-    microbial_samples = orm.relationship("MicrobialSample", backref="application_version")
+    microbial_samples = orm.relationship(
+        "MicrobialSample", backref="application_version"
+    )
 
     def __str__(self) -> str:
         return f"{self.application.tag} ({self.version})"
@@ -170,7 +184,9 @@ class Bed(Model):
     created_at = Column(types.DateTime, default=dt.datetime.now)
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
 
-    versions = orm.relationship("BedVersion", order_by="BedVersion.version", backref="bed")
+    versions = orm.relationship(
+        "BedVersion", order_by="BedVersion.version", backref="bed"
+    )
 
     def __str__(self) -> str:
         return self.name
@@ -182,28 +198,17 @@ class BedVersion(Model):
     __table_args__ = (UniqueConstraint("bed_id", "version", name="_app_version_uc"),)
 
     id = Column(types.Integer, primary_key=True)
-    description = Column(types.String(256))
+    shortname = Column(types.String(64))
     version = Column(types.Integer, nullable=False)
     filename = Column(types.String(256), nullable=False)
     checksum = Column(types.String(32))
     panel_size = Column(types.Integer)
     genome_version = Column(types.String(32))
     designer = Column(types.String(256))
-    genes = Column(types.Integer)
-    unique_transcripts = Column(types.Integer)
-    transcripts_with_all_exons_covered = Column(types.Integer)
-    transcripts_with_at_least_one_exon_covered = Column(types.Integer)
-    padding = Column(types.Integer)
-
-    cosmic_snps = Column(types.Integer)
-    non_genic_regions = Column(types.Integer)
-    independent_segments = Column(types.Integer)
     comment = Column(types.Text)
     created_at = Column(types.DateTime, default=dt.datetime.now)
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
     bed_id = Column(ForeignKey(Bed.id), nullable=False)
-
-    samples = orm.relationship("Sample", backref="bed_version")
 
     def __str__(self) -> str:
         return f"{self.bed.name} ({self.version})"
@@ -246,7 +251,9 @@ class Customer(Model):
     families = orm.relationship("Family", backref="customer", order_by="-Family.id")
     samples = orm.relationship("Sample", backref="customer", order_by="-Sample.id")
     pools = orm.relationship("Pool", backref="customer", order_by="-Pool.id")
-    orders = orm.relationship("MicrobialOrder", backref="customer", order_by="-MicrobialOrder.id")
+    orders = orm.relationship(
+        "MicrobialOrder", backref="customer", order_by="-MicrobialOrder.id"
+    )
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
@@ -257,7 +264,9 @@ class CustomerGroup(Model):
     internal_id = Column(types.String(32), unique=True, nullable=False)
     name = Column(types.String(128), nullable=False)
 
-    customers = orm.relationship("Customer", backref="customer_group", order_by="-Customer.id")
+    customers = orm.relationship(
+        "Customer", backref="customer_group", order_by="-Customer.id"
+    )
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
@@ -267,14 +276,18 @@ class Delivery(Model):
     id = Column(types.Integer, primary_key=True)
     delivered_at = Column(types.DateTime)
     removed_at = Column(types.DateTime)
-    destination = Column(types.Enum("caesar", "pdc", "uppmax", "mh", "custom"), default="caesar")
+    destination = Column(
+        types.Enum("caesar", "pdc", "uppmax", "mh", "custom"), default="caesar"
+    )
     sample_id = Column(ForeignKey("sample.id", ondelete="CASCADE"))
     pool_id = Column(ForeignKey("pool.id", ondelete="CASCADE"))
     comment = Column(types.Text)
 
 
 class Family(Model, PriorityMixin):
-    __table_args__ = (UniqueConstraint("customer_id", "name", name="_customer_name_uc"),)
+    __table_args__ = (
+        UniqueConstraint("customer_id", "name", name="_customer_name_uc"),
+    )
 
     id = Column(types.Integer, primary_key=True)
     internal_id = Column(types.String(32), unique=True, nullable=False)
@@ -287,7 +300,9 @@ class Family(Model, PriorityMixin):
     ordered_at = Column(types.DateTime, default=dt.datetime.now)
     created_at = Column(types.DateTime, default=dt.datetime.now)
     customer_id = Column(ForeignKey("customer.id", ondelete="CASCADE"), nullable=False)
-    analyses = orm.relationship("Analysis", backref="family", order_by="-Analysis.completed_at")
+    analyses = orm.relationship(
+        "Analysis", backref="family", order_by="-Analysis.completed_at"
+    )
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
@@ -318,13 +333,17 @@ class Family(Model, PriorityMixin):
 
 
 class FamilySample(Model):
-    __table_args__ = (UniqueConstraint("family_id", "sample_id", name="_family_sample_uc"),)
+    __table_args__ = (
+        UniqueConstraint("family_id", "sample_id", name="_family_sample_uc"),
+    )
 
     id = Column(types.Integer, primary_key=True)
     family_id = Column(ForeignKey("family.id", ondelete="CASCADE"), nullable=False)
     sample_id = Column(ForeignKey("sample.id", ondelete="CASCADE"), nullable=False)
     status = Column(
-        types.Enum("affected", "unaffected", "unknown"), default="unknown", nullable=False
+        types.Enum("affected", "unaffected", "unknown"),
+        default="unknown",
+        nullable=False,
     )
 
     created_at = Column(types.DateTime, default=dt.datetime.now)
@@ -338,7 +357,9 @@ class FamilySample(Model):
     mother = orm.relationship("Sample", foreign_keys=[mother_id])
     father = orm.relationship("Sample", foreign_keys=[father_id])
 
-    def to_dict(self, parents: bool = False, samples: bool = False, family: bool = False) -> dict:
+    def to_dict(
+        self, parents: bool = False, samples: bool = False, family: bool = False
+    ) -> dict:
         """Override dictify method."""
         data = super(FamilySample, self).to_dict()
         if samples:
@@ -359,7 +380,7 @@ class FamilySample(Model):
 class Flowcell(Model):
     id = Column(types.Integer, primary_key=True)
     name = Column(types.String(32), unique=True, nullable=False)
-    sequencer_type = Column(types.Enum("hiseqga", "hiseqx"))
+    sequencer_type = Column(types.Enum("hiseqga", "hiseqx", "novaseq"))
     sequencer_name = Column(types.String(32))
     sequenced_at = Column(types.DateTime)
     status = Column(types.Enum(*FLOWCELL_STATUS), default="ondisk")
@@ -380,7 +401,9 @@ class Flowcell(Model):
         if samples:
             data["samples"] = [sample.to_dict() for sample in self.samples]
         if microbial_samples:
-            data["microbial_samples"] = [sample.to_dict() for sample in self.microbial_samples]
+            data["microbial_samples"] = [
+                sample.to_dict() for sample in self.microbial_samples
+            ]
         return data
 
 
@@ -397,7 +420,9 @@ class MicrobialOrder(Model):
 
     customer_id = Column(ForeignKey("customer.id", ondelete="CASCADE"), nullable=False)
     microbial_samples = orm.relationship(
-        "MicrobialSample", backref="microbial_order", order_by="-MicrobialSample.delivered_at"
+        "MicrobialSample",
+        backref="microbial_order",
+        order_by="-MicrobialSample.delivered_at",
     )
 
     def __str__(self):
@@ -409,7 +434,8 @@ class MicrobialOrder(Model):
         data["customer"] = self.customer.to_dict()
         if samples:
             data["microbial_samples"] = [
-                microbial_samples_obj.to_dict() for microbial_samples_obj in self.microbial_samples
+                microbial_samples_obj.to_dict()
+                for microbial_samples_obj in self.microbial_samples
             ]
         return data
 
@@ -419,7 +445,9 @@ class MicrobialSample(Model, PriorityMixin):
     internal_id = Column(types.String(32), nullable=False, unique=True)
     name = Column(types.String(128), nullable=False)
     data_analysis = Column(types.String(16))
-    application_version_id = Column(ForeignKey("application_version.id"), nullable=False)
+    application_version_id = Column(
+        ForeignKey("application_version.id"), nullable=False
+    )
     microbial_order_id = Column(ForeignKey("microbial_order.id"), nullable=False)
     created_at = Column(types.DateTime, default=dt.datetime.now)
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
@@ -526,15 +554,18 @@ class Pool(Model):
 
     created_at = Column(types.DateTime, default=dt.datetime.now)
     customer_id = Column(ForeignKey("customer.id", ondelete="CASCADE"), nullable=False)
-    application_version_id = Column(ForeignKey("application_version.id"), nullable=False)
+    application_version_id = Column(
+        ForeignKey("application_version.id"), nullable=False
+    )
 
     deliveries = orm.relationship("Delivery", backref="pool")
 
 
 class Sample(Model, PriorityMixin):
 
-    application_version_id = Column(ForeignKey("application_version.id"), nullable=False)
-    bed_version_id = Column(ForeignKey("bed_version.id"))
+    application_version_id = Column(
+        ForeignKey("application_version.id"), nullable=False
+    )
     beaconized_at = Column(types.Text)
     capture_kit = Column(types.String(64))
     comment = Column(types.Text)
@@ -590,13 +621,14 @@ class Sample(Model, PriorityMixin):
         data["customer"] = self.customer.to_dict()
         data["application_version"] = self.application_version.to_dict()
         data["application"] = self.application_version.application.to_dict()
-        if self.bed_version:
-            data["bed_version"] = self.bed_version.to_dict()
-            data["bed"] = self.bed_version.bed.to_dict()
         if links:
-            data["links"] = [link_obj.to_dict(family=True, parents=True) for link_obj in self.links]
+            data["links"] = [
+                link_obj.to_dict(family=True, parents=True) for link_obj in self.links
+            ]
         if flowcells:
-            data["flowcells"] = [flowcell_obj.to_dict() for flowcell_obj in self.flowcells]
+            data["flowcells"] = [
+                flowcell_obj.to_dict() for flowcell_obj in self.flowcells
+            ]
         return data
 
 

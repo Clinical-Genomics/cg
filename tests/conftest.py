@@ -25,6 +25,15 @@ pytest_plugins = [
     "tests.apps.mutacc_auto.conftest",
 ]
 
+CHANJO_CONFIG = {"chanjo": {"config_path": "chanjo_config", "binary_path": "chanjo"}}
+
+
+@pytest.fixture
+def chanjo_config_dict():
+    _config = dict()
+    _config.update(CHANJO_CONFIG)
+    return _config
+
 
 @pytest.fixture
 def balsamic_orderform():

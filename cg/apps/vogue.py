@@ -38,3 +38,23 @@ class VogueAPI:
         # Execute command and print its stdout+stderr as it executes
         for line in self.process.stderr_lines():
             LOG.info("vogue output: %s", line)
+
+    def load_samples(self, days):
+        """Running vogue load samples."""
+
+        load_call = ["load", "sample", "-d", days]
+        self.process.run_command(load_call)
+
+        # Execute command and print its stdout+stderr as it executes
+        for line in self.process.stderr_lines():
+            LOG.info("vogue output: %s", line)
+
+    def load_flowcells(self, days):
+        """Running vogue load flowcells."""
+
+        load_call = ["load", "flowcell", "-d", days]
+        self.process.run_command(load_call)
+
+        # Execute command and print its stdout+stderr as it executes
+        for line in self.process.stderr_lines():
+            LOG.info("vogue output: %s", line)

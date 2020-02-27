@@ -1,3 +1,4 @@
+"""Module for Flask-Admin views"""
 from flask import redirect, url_for, request, session
 from flask_admin.contrib.sqla import ModelView
 from flask_dance.contrib.google import google
@@ -7,9 +8,11 @@ from cg.server.ext import db
 
 
 class BaseView(ModelView):
+    """Base for the specific views."""
+
     def is_accessible(self):
         user_obj = db.user(session.get("user_email"))
-        return True if (google.authorized and user_obj and user_obj.is_admin) else False
+        return bool(google.authorized and user_obj and user_obj.is_admin)
 
     def inaccessible_callback(self, name, **kwargs):
         # redirect to login page if user doesn't have access
@@ -29,14 +32,21 @@ def view_family_sample_link(unused1, unused2, model, unused3):
 
     return Markup(
         u"<a href='%s'>%s</a>"
-        % (url_for("familysample.index_view", search=model.internal_id), model.internal_id)
+        % (
+            url_for("familysample.index_view", search=model.internal_id),
+            model.internal_id,
+        )
     )
 
 
 def is_external_application(unused1, unused2, model, unused3):
     """column formatter to open this view"""
     del unused1, unused2, unused3
-    return model.application_version.application.is_external if model.application_version else u""
+    return (
+        model.application_version.application.is_external
+        if model.application_version
+        else u""
+    )
 
 
 class ApplicationView(BaseView):
@@ -127,7 +137,7 @@ class BedVersionView(BaseView):
     """Admin view for Model.BedVersion"""
 
     column_default_sort = ("updated_at", True)
-    column_editable_list = ["description", "filename", "comment", "designer", "checksum"]
+    column_editable_list = ["shortname", "filename", "comment", "designer", "checksum"]
     column_exclude_list = ["created_at"]
     form_excluded_columns = ["created_at", "updated_at", "samples"]
     column_filters = []
@@ -180,7 +190,10 @@ class FamilyView(BaseView):
     column_editable_list = ["action"]
     column_exclude_list = ["created_at"]
     column_filters = ["customer.internal_id", "priority", "action"]
-    column_formatters = {"internal_id": view_family_sample_link, "priority": view_human_priority}
+    column_formatters = {
+        "internal_id": view_family_sample_link,
+        "priority": view_human_priority,
+    }
     column_searchable_list = ["internal_id", "name", "customer.internal_id"]
 
     @staticmethod
@@ -190,7 +203,10 @@ class FamilyView(BaseView):
         return (
             Markup(
                 u"<a href='%s'>%s</a>"
-                % (url_for("family.index_view", search=model.family.internal_id), model.family)
+                % (
+                    url_for("family.index_view", search=model.family.internal_id),
+                    model.family,
+                )
             )
             if model.family
             else u""
@@ -267,7 +283,10 @@ class MicrobialSampleView(BaseView):
     column_default_sort = ("created_at", True)
     column_editable_list = ["reads", "comment", "reference_genome"]
     column_filters = ["microbial_order", "microbial_order.customer"]
-    column_formatters = {"invoice": InvoiceView.view_invoice_link, "priority": view_human_priority}
+    column_formatters = {
+        "invoice": InvoiceView.view_invoice_link,
+        "priority": view_human_priority,
+    }
     column_searchable_list = ["internal_id", "name", "microbial_order.ticket_number"]
 
 
@@ -304,7 +323,13 @@ class SampleView(BaseView):
 
     column_exclude_list = ["invoiced_at"]
     column_default_sort = ("created_at", True)
-    column_editable_list = ["sex", "downsampled_to", "sequenced_at", "ticket_number", "is_tumour"]
+    column_editable_list = [
+        "sex",
+        "downsampled_to",
+        "sequenced_at",
+        "ticket_number",
+        "is_tumour",
+    ]
     column_filters = ["customer.internal_id", "sex", "application_version.application"]
     column_formatters = {
         "is_external": is_external_application,
@@ -312,7 +337,12 @@ class SampleView(BaseView):
         "invoice": InvoiceView.view_invoice_link,
         "priority": view_human_priority,
     }
-    column_searchable_list = ["internal_id", "name", "ticket_number", "customer.internal_id"]
+    column_searchable_list = [
+        "internal_id",
+        "name",
+        "ticket_number",
+        "customer.internal_id",
+    ]
     form_excluded_columns = ["is_external", "invoiced_at"]
 
     @staticmethod
@@ -322,7 +352,10 @@ class SampleView(BaseView):
         return (
             Markup(
                 u"<a href='%s'>%s</a>"
-                % (url_for("sample.index_view", search=model.sample.internal_id), model.sample)
+                % (
+                    url_for("sample.index_view", search=model.sample.internal_id),
+                    model.sample,
+                )
             )
             if model.sample
             else u""
