@@ -6,7 +6,7 @@ import click
 from dateutil.parser import parse as parse_date
 from datetime import datetime
 
-from path import Path
+from pathlib import Path
 
 from cg.apps import tb, hk, scoutapi, beacon as beacon_app
 from cg.meta.upload.beacon import UploadBeaconApi
