@@ -91,7 +91,6 @@ def get_files(deliverables: dict) -> dict:
             "archive": False,
         }
         for file in deliverables["files"]
-        if file["tag"] != "config"
     ]
 
     return data
