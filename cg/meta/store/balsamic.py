@@ -11,7 +11,7 @@ LOG = logging.getLogger(__name__)
 def gather_files_and_bundle_in_housekeeper(config_stream, hk_api, status, case_obj):
     """Function to gather files and bundle in housekeeper"""
 
-    bundle_data = _add_analysis(config_stream)
+    bundle_data = _add_analysis(config_stream, case_obj)
 
     results = hk_api.add_bundle(bundle_data)
     if not results:
