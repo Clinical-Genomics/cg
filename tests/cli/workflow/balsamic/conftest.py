@@ -159,7 +159,7 @@ def ensure_application_version(disk_store, application_tag="dummy_tag"):
     if not application:
         application = disk_store.add_application(
             tag=application_tag,
-            category="wgs",
+            category="tgs",
             percent_kth=80,
             description="dummy_description",
         )
