@@ -45,7 +45,7 @@ def beacon(context: click.Context, item_type, item_id):
         scout_api=context.obj["scout"],
         beacon_api=context.obj["beacon"],
     )
-    result = api.remove_vars(item_type=item_type, item_id=item_id)
+    api.remove_vars(item_type=item_type, item_id=item_id)
 
 
 @clean.command()
@@ -151,5 +151,6 @@ def mipauto(context: click.Context, before_str: str, yes: bool = False):
                 context.invoke(mip, yes=yes, sample_info=sampleinfo_file)
         except FileNotFoundError as err:
             LOG.error(
-                f"{family_id}: sample_info file not found, please mark the analysis as deleted in the analysis table in trailblazer."
+                f"{family_id}: sample_info file not found, please mark the analysis as deleted in "
+                f"the analysis table in trailblazer."
             )
