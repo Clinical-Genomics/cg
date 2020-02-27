@@ -49,7 +49,7 @@ def analysis(context, case_id, config_stream):
     except FileNotFoundError as error:
         click.echo(click.style(f"missing file: {error.args[0]}", fg="red"))
         context.abort()
-    except AnalysisDuplicationError as error:
+    except AnalysisDuplicationError:
         click.echo(click.style("analysis version already added", fg="yellow"))
         context.abort()
     except VersionIncludedError as error:
