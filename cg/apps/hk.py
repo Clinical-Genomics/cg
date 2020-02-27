@@ -15,6 +15,7 @@ class HousekeeperAPI:
 
     def __init__(self, config):
         self.store = Store(config["housekeeper"]["database"], config["housekeeper"]["root"])
+        self.root_dir = config["housekeeper"]["root"]
 
     def add_bundle(self, bundle_data):
         """ Wrap method in Housekeeper Store """
@@ -54,7 +55,7 @@ class HousekeeperAPI:
 
     def get_root_dir(self):
         """Returns the root dir of Housekeeper"""
-        return self.store.root_dir
+        return self.root_dir
 
     def get_files(self, bundle: str, tags: list, version: int = None):
         """Fetch all the files in housekeeper, optionally filtered by bundle and/or tags and/or
