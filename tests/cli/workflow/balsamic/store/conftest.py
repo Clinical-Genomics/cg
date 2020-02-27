@@ -58,7 +58,7 @@ class MockHouseKeeper(HousekeeperAPI):
     def add_bundle(self, data: dict):
         """fake adding a bundle in housekeeper"""
 
-        if self.bundle_data != data:
+        if not self.bundle_data or self.bundle_data["name"] != data["name"]:
             self.bundle_data = data
             return MockBundle(data=data, name=self.bundle_name), MockVersion()
 
