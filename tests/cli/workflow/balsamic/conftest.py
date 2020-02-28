@@ -122,8 +122,12 @@ def balsamic_store(base_store: Store, lims_api) -> Store:
     _store = base_store
 
     case = add_family(_store, "balsamic_case")
-    tumour_sample = add_sample(_store, "tumour_sample", is_tumour=True, application_type="tgs")
-    normal_sample = add_sample(_store, "normal_sample", is_tumour=False, application_type="tgs")
+    tumour_sample = add_sample(
+        _store, "tumour_sample", is_tumour=True, application_type="tgs"
+    )
+    normal_sample = add_sample(
+        _store, "normal_sample", is_tumour=False, application_type="tgs"
+    )
     _store.relate_sample(case, tumour_sample, status="unknown")
     _store.relate_sample(case, normal_sample, status="unknown")
 
@@ -137,8 +141,20 @@ def balsamic_store(base_store: Store, lims_api) -> Store:
     ensure_bed_version(_store, bed_name)
 
     case_wgs = add_family(_store, "balsamic_case_wgs")
-    tumour_sample_wgs = add_sample(_store, "tumour_sample_wgs", is_tumour=True, application_tag="dummy_tag_wgs", application_type="wgs")
-    normal_sample_wgs = add_sample(_store, "normal_sample_wgs", is_tumour=False, application_tag="dummy_tag_wgs", application_type="wgs")
+    tumour_sample_wgs = add_sample(
+        _store,
+        "tumour_sample_wgs",
+        is_tumour=True,
+        application_tag="dummy_tag_wgs",
+        application_type="wgs",
+    )
+    normal_sample_wgs = add_sample(
+        _store,
+        "normal_sample_wgs",
+        is_tumour=False,
+        application_tag="dummy_tag_wgs",
+        application_type="wgs",
+    )
     _store.relate_sample(case_wgs, tumour_sample_wgs, status="unknown")
     _store.relate_sample(case_wgs, normal_sample_wgs, status="unknown")
 
@@ -156,7 +172,9 @@ def balsamic_case(analysis_store) -> models.Family:
 @pytest.fixture(scope="function")
 def balsamic_case_wgs(analysis_store) -> models.Family:
     """case with balsamic data_type"""
-    return analysis_store.find_family(ensure_customer(analysis_store), "balsamic_case_wgs")
+    return analysis_store.find_family(
+        ensure_customer(analysis_store), "balsamic_case_wgs"
+    )
 
 
 @pytest.fixture(scope="function")
@@ -165,7 +183,9 @@ def mip_case(analysis_store) -> models.Family:
     return analysis_store.find_family(ensure_customer(analysis_store), "mip_case")
 
 
-def ensure_application_version(disk_store, application_tag="dummy_tag", application_type="tgs"):
+def ensure_application_version(
+    disk_store, application_tag="dummy_tag", application_type="tgs"
+):
     """utility function to return existing or create application version for tests"""
     application = disk_store.application(tag=application_tag)
     if not application:
@@ -228,11 +248,13 @@ def add_sample(
     is_tumour=False,
     data_analysis="balsamic",
     application_tag="dummy_tag",
-    application_type="tgs"
+    application_type="tgs",
 ):
     """utility function to add a sample to use in tests"""
     customer = ensure_customer(store)
-    application_version_id = ensure_application_version(store, application_tag=application_tag, application_type=application_type).id
+    application_version_id = ensure_application_version(
+        store, application_tag=application_tag, application_type=application_type
+    ).id
     sample = store.add_sample(
         name=sample_id,
         sex=gender,
