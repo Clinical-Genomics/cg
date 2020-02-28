@@ -129,11 +129,11 @@ def test_target_bed_from_lims(
 
 
 def test_wgs_from_lims(
-    cli_runner, balsamic_context, balsamic_case_wgs, lims_api, balsamic_store 
+    cli_runner, balsamic_context, balsamic_case_wgs, lims_api, balsamic_store
 ):
     """Test command without --target-bed option"""
 
-    # GIVEN case with wgs tag 
+    # GIVEN case with wgs tag
     bed_key = "-p"
     case_id = balsamic_case_wgs.internal_id
 
@@ -145,7 +145,6 @@ def test_wgs_from_lims(
     # THEN dry-print should NOT include the bed_key and the bed_value including path
     assert result.exit_code == EXIT_SUCCESS
     assert bed_key not in result.output
-
 
 
 def test_umi_trim_length(cli_runner, balsamic_context, balsamic_case):
