@@ -217,7 +217,9 @@ def ensure_bed_version(disk_store, bed_name="dummy_bed"):
 
     version = disk_store.latest_bed_version(bed_name)
     if not version:
-        version = disk_store.add_bed_version(bed, 1, "dummy_filename")
+        version = disk_store.add_bed_version(
+            bed, 1, "dummy_filename", shortname=bed_name
+        )
         disk_store.add_commit(version)
     return version
 
