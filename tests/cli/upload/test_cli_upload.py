@@ -1,23 +1,27 @@
 """ Test cg.cli.upload module """
 from datetime import datetime, timedelta
 
-from cg.cli.upload.upload import LinkHelper
+from cg.cli.upload.utils import LinkHelper
 from cg.store import Store
 
 
 def test_all_samples_are_non_tumor(analysis_store):
+    """Test that all samples are non tumor"""
 
     family_obj = analysis_store.family("yellowhog")
     assert LinkHelper.all_samples_are_non_tumour(family_obj.links)
 
 
 def test_all_samples_data_analysis(analysis_store):
+    """Test that all samples have data analysis"""
 
     family_obj = analysis_store.family("yellowhog")
     assert LinkHelper.all_samples_data_analysis(family_obj.links, ["mip"])
 
 
 def test_all_samples_list_analyses(analysis_store):
+    """Test that all samples have an analysis type"""
+
     # GIVEN family obj where each sample is wgs analysis
     family_obj = analysis_store.family("yellowhog")
 
