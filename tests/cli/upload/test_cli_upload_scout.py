@@ -15,6 +15,32 @@ def test_produce_load_config(base_context, cli_runner, analysis_family_single_ca
     # THEN assert mother: '0' and father: '0'
     assert "'mother': '0'" in result.output
     assert "'father': '0'" in result.output
+    assert "'delivery_report'" in result.output
+
+
+def test_produce_load_config_no_delivery(
+    base_context, cli_runner, analysis_family_single_case, hk_mock
+):
+    # GIVEN a singleton WGS case
+
+    base_context["scout_upload_api"].mock_generate_config = False
+
+    # GIVEN a housekeeper that does not return delivery files
+    hk_mock.delivery_report = False
+    base_context["scout_upload_api"].housekeeper = hk_mock
+    assert hk_mock.files(tags=["delivery-report"]).first() is None
+
+    case_id = analysis_family_single_case["internal_id"]
+
+    # WHEN running cg upload scout -p <caseid>
+    result = cli_runner.invoke(scout, [case_id, "--print"], obj=base_context)
+
+    # THEN assert the command succeded since delivery report is not mandatory
+    assert result.exit_code == 0
+    # THEN assert the output has some content
+    assert result.output
+    # THEN there is no delivery report in the output
+    assert "'delivery_report'" not in result.output
 
 
 def test_upload_scout_cli_file_exists(
