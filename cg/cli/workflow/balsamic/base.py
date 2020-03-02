@@ -201,16 +201,20 @@ def config_case(
         else:
             normal_paths.add(concatenated_paths[1])
 
-        target_bed_shortname = context.obj["lims_api"].capture_kit(
-            link_obj.sample.internal_id
-        )
-        if target_bed_shortname:
-            target_bed_obj = context.obj["db"].latest_bed_version(target_bed_shortname)
+        if not target_bed:
+            target_bed_shortname = context.obj["lims_api"].capture_kit(
+                link_obj.sample.internal_id
+            )
 
-            if not target_bed_obj:
-                raise CgError("Bed-version %s does not exist" % target_bed_shortname)
+            if target_bed_shortname:
+                bed_version_obj = context.obj["db"].bed_version(target_bed_shortname)
 
-            target_beds.add(target_bed_obj.filename)
+                if not bed_version_obj:
+                    raise CgError(
+                        "Bed-version %s does not exist" % target_bed_shortname
+                    )
+
+                target_beds.add(bed_version_obj.filename)
 
     nr_paths = len(tumor_paths) if tumor_paths else 0
     if nr_paths != 1:
