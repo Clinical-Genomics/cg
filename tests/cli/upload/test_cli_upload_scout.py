@@ -43,6 +43,28 @@ def test_produce_load_config_no_delivery(
     assert "'delivery_report'" not in result.output
 
 
+def test_produce_load_config_missing_mandatory_file(
+    base_context, cli_runner, analysis_family_single_case, hk_mock
+):
+    # GIVEN a singleton WGS case
+    base_context["scout_upload_api"].mock_generate_config = False
+
+    # GIVEN a housekeeper that does not return mandatory files
+    hk_mock.missing_mandatory = True
+    base_context["scout_upload_api"].housekeeper = hk_mock
+    assert hk_mock.files(tags=["vcf-snv-clinical"]).first() is None
+
+    case_id = analysis_family_single_case["internal_id"]
+
+    # WHEN running cg upload scout -p <caseid>
+    result = cli_runner.invoke(scout, [case_id, "--print"], obj=base_context)
+
+    # THEN assert the command failed since a mandatory file was missing
+    assert result.exit_code != 0
+    # THEN assert a FileNotFoundError was raised
+    assert isinstance(result.exception, FileNotFoundError)
+
+
 def test_upload_scout_cli_file_exists(
     base_context, cli_runner, caplog, analysis_family_single_case
 ):

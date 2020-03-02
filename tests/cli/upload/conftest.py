@@ -149,13 +149,16 @@ class MockHK(HousekeeperAPI):
     def __init__(self):
         """Mock the init"""
         self.delivery_report = True
+        self.missing_mandatory = False
 
     def files(self, **kwargs):
         """docstring for file"""
-        if (
-            "delivery-report" in kwargs.get("tags", [])
-            and self.delivery_report is False
-        ):
+        tags = set(kwargs.get("tags", []))
+        delivery = set(["delivery-report"])
+        mandatory = set(["vcf-snv-clinical"])
+        if tags.intersection(delivery) and self.delivery_report is False:
+            return MockFile(empty_first=True)
+        if tags.intersection(mandatory) and self.missing_mandatory is True:
             return MockFile(empty_first=True)
         return MockFile()
 
