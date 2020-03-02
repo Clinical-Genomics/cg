@@ -2,6 +2,7 @@
 import logging
 
 import click
+import yaml
 
 from cg.apps import hk
 
@@ -57,7 +58,7 @@ def scout(context, re_upload, print_console, case_id):
         )
         context.abort()
 
-    context.invoke(upload_case_to_scout, case_id=case_id)
+    context.invoke(upload_case_to_scout, case_id=case_id, re_upload=re_upload)
 
 
 @click.command()
@@ -76,7 +77,7 @@ def upload_case_to_scout(context, re_upload, dry_run, case_id):
         scout_config_files = hk_api.get_files(
             bundle=case_id, tags=[tag_name], version=version_obj.id
         )
-        if len([conf_file for conf_file in scout_config_files]) == 0:
+        if len(list(scout_config_files)) == 0:
             raise FileNotFoundError(
                 f"No scout load config was found in housekeeper for {case_id}"
             )
