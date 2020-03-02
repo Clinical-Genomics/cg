@@ -142,7 +142,7 @@ def test_wgs_from_lims(
         config_case, [case_id, "--dry-run"], obj=balsamic_context
     )
 
-    # THEN dry-print should NOT include the bed_key and the bed_value including path
+    # THEN dry-print should NOT include the bed_key
     assert result.exit_code == EXIT_SUCCESS
     assert bed_key not in result.output
 
