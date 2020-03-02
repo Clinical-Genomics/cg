@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
-import logging
 import datetime as dt
+import logging
 from typing import List
 from pathlib import Path
 
 from pymongo import MongoClient
 from scout.adapter.mongo import MongoAdapter
-from scout.load.report import load_delivery_report
 from scout.export.panel import export_panels as scout_export_panels
 from scout.load import load_scout
+from scout.load.report import load_delivery_report
 from scout.parse.case import parse_case_data
 from cg.utils.commands import Process
 
@@ -44,6 +44,7 @@ class ScoutAPI(MongoAdapter):
         else:
             LOG.debug("load new Scout case")
             load_scout(self, config_data)
+            LOG.debug("Case loaded successfully to Scout")
 
     def update_alignment_file(self, case_id: str, sample_id: str, alignment_path: Path):
         """Update alignment file for individual in case"""

@@ -49,6 +49,7 @@ def test_upload_with_load_config(
     # THEN assert that the load config was used
     def load_file_mentioned_in_result(result, load_config_file):
         """Check output that load file is mentioned"""
+        print(result.output)
         return load_config_file in result.output
 
     assert load_file_mentioned_in_result(result, load_config_file.full_path)
