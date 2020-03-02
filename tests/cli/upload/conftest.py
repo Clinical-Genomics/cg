@@ -1,5 +1,5 @@
 """Fixtures for cli balsamic tests"""
-
+import logging
 from pathlib import Path
 
 import json
@@ -12,6 +12,8 @@ from cg.apps.tb import TrailblazerAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
 from cg.meta.workflow.mip_dna import AnalysisAPI
 from cg.store import Store
+
+LOG = logging.getLogger(__name__)
 
 
 @pytest.fixture(scope="function", name="base_context")

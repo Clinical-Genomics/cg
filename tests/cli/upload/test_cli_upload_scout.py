@@ -8,6 +8,7 @@ def check_log(caplog, string=None, warning=None):
     """Parse the log output"""
     found = False
     for _, level, message in caplog.record_tuples:
+        print(message)
         if warning:
             if level == logging.WARNING:
                 found = True
@@ -49,7 +50,6 @@ def test_upload_with_load_config(
     # THEN assert that the load config was used
     def load_file_mentioned_in_result(result, load_config_file):
         """Check output that load file is mentioned"""
-        print(result.output)
         return load_config_file in result.output
 
     assert load_file_mentioned_in_result(result, load_config_file.full_path)

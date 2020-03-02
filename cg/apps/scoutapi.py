@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+"""Code for talking to Scout regarding uploads"""
+
 import datetime as dt
 import logging
 from typing import List
@@ -36,15 +37,15 @@ class ScoutAPI(MongoAdapter):
         )
         if existing_case:
             if force or config_data["analysis_date"] > existing_case["analysis_date"]:
-                LOG.info(f"update existing Scout case")
+                LOG.info("update existing Scout case")
                 load_scout(self, config_data, update=True)
             else:
                 existing_date = existing_case["analysis_date"].date()
-                LOG.warning(f"analysis of case already loaded: {existing_date}")
-        else:
-            LOG.debug("load new Scout case")
-            load_scout(self, config_data)
-            LOG.debug("Case loaded successfully to Scout")
+                LOG.warning("analysis of case already loaded: %s", existing_date)
+            return
+        LOG.debug("load new Scout case")
+        load_scout(self, config_data)
+        LOG.debug("Case loaded successfully to Scout")
 
     def update_alignment_file(self, case_id: str, sample_id: str, alignment_path: Path):
         """Update alignment file for individual in case"""
