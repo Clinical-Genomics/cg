@@ -128,7 +128,7 @@ def test_target_bed_from_lims(
     assert str(bed_path) in result.output
 
 
-def test_wgs_from_lims(
+def test_wgs_excludes_bed_for_balsamic(
     cli_runner, balsamic_context, balsamic_case_wgs, lims_api, balsamic_store
 ):
     """Test command without --target-bed option"""
