@@ -48,10 +48,69 @@ def fixture_analysis_family_single():
     return family
 
 
-@pytest.yield_fixture(scope="function", name="analysis_store_single_case")
-def fixture_analysis_store_single(base_store, analysis_family_single_case):
-    """Setup a store instance for testing analysis API."""
-    analysis_family = analysis_family_single_case
+@pytest.fixture
+def analysis_family_trio():
+    """Build an example family."""
+    family = {
+        "name": "trio",
+        "internal_id": "yellowtrio",
+        "panels": ["IEM", "EP"],
+        "samples": [
+            {
+                "name": "son",
+                "sex": "male",
+                "internal_id": "ADM1",
+                "data_analysis": "mip",
+                "father": "ADM2",
+                "mother": "ADM3",
+                "status": "affected",
+                "ticket_number": 123456,
+                "reads": 5000000,
+            },
+            {
+                "name": "father",
+                "sex": "male",
+                "internal_id": "ADM2",
+                "data_analysis": "mip",
+                "status": "unaffected",
+                "ticket_number": 123456,
+                "reads": 6000000,
+            },
+            {
+                "name": "mother",
+                "sex": "female",
+                "internal_id": "ADM3",
+                "data_analysis": "mip",
+                "status": "unaffected",
+                "ticket_number": 123456,
+                "reads": 7000000,
+            },
+        ],
+    }
+    return family
+
+
+@pytest.fixture(scope="function")
+def hk_api(scout_load_config):
+    """Return a hkapi"""
+    api = MockHK()
+    api.add_file(scout_load_config, None, None)
+
+    return api
+
+
+@pytest.fixture(scope="function")
+def upload_scout_api():
+    """Return a upload scout api"""
+    api = MockScoutUploadApi()
+
+    return api
+
+
+def load_family(store, family):
+    """Load a family into a status database"""
+    analysis_family = family
+    base_store = store
     customer = base_store.customer("cust000")
     family = base_store.Family(
         name=analysis_family["name"],
@@ -95,6 +154,21 @@ def fixture_analysis_store_single(base_store, analysis_family_single_case):
     _analysis.config_path = "dummy_path"
 
     base_store.commit()
+
+
+@pytest.yield_fixture(scope="function", name="analysis_store_trio")
+def fixture_analysis_store_trio(base_store, analysis_family_trio):
+    """Setup a store instance for testing analysis API."""
+    load_family(base_store, analysis_family_trio)
+
+    yield base_store
+
+
+@pytest.yield_fixture(scope="function", name="analysis_store_single_case")
+def fixture_analysis_store_single(base_store, analysis_family_single_case):
+    """Setup a store instance for testing analysis API."""
+    load_family(base_store, analysis_family_single_case)
+
     yield base_store
 
 
@@ -137,20 +211,22 @@ class MockFile:
             return None
         return MockFile()
 
+    @property
     def full_path(self):
-        return ""
+        return str(self.path)
 
     def is_included(self):
         return False
 
 
 class MockHK(HousekeeperAPI):
-    """Mock of housekeeper """
-
     def __init__(self):
         """Mock the init"""
         self.delivery_report = True
         self.missing_mandatory = False
+        self._file_added = False
+        self._file_included = False
+        self._files = []
 
     def files(self, **kwargs):
         """docstring for file"""
@@ -163,9 +239,32 @@ class MockHK(HousekeeperAPI):
             return MockFile(empty_first=True)
         return MockFile()
 
+    def get_files(self, bundle, tags, version="1.0"):
+        """docstring for get_files"""
+        return self._files
+
+    def add_file(self, file, version_obj, tag_name, to_archive=False):
+        """docstring for add_file"""
+        self._file_added = True
+        new_file = MockFile(path=file)
+        self._files.append(new_file)
+        return new_file
+
     def version(self, arg1: str, arg2: str):
         """Fetch version from the database."""
         return MockVersion()
+
+    def last_version(self, bundle: str):
+        """docstring for last_version"""
+        return MockVersion()
+
+    def include_file(self, file_obj, version_obj):
+        """docstring for include_file"""
+        self._file_included = True
+
+    def add_commit(self, file_obj):
+        """docstring for include_file"""
+        pass
 
 
 class MockFamily(object):
@@ -183,7 +282,7 @@ class MockScoutApi(ScoutAPI):
 
     def upload(self, scout_config, force=False):
         """docstring for upload"""
-        pass
+        LOG.info("Case loaded successfully to Scout")
 
 
 class MockAnalysisApi(AnalysisAPI):
