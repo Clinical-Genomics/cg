@@ -143,7 +143,7 @@ def config_case(
     conda_env = context.obj["balsamic"]["conda_env"]
     root_dir = context.obj["balsamic"]["root"]
     wrk_dir = Path(f"{root_dir}/{case_id}/fastq")
-    application_type = set()
+    application_types = set()
     acceptable_application = {"wgs", "wes", "tgs"}
 
     for link_obj in link_objs:
