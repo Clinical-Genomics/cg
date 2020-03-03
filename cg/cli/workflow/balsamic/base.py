@@ -145,6 +145,7 @@ def config_case(
     wrk_dir = Path(f"{root_dir}/{case_id}/fastq")
     application_types = set()
     acceptable_applications = {"wgs", "wes", "tgs"}
+    applications_requiring_bed = {"wes", "tgs"}
 
     for link_obj in link_objs:
         LOG.info(
@@ -152,7 +153,7 @@ def config_case(
             link_obj.sample.internal_id,
             link_obj.sample.application_version.application.prep_category,
         )
-        application_type.add(
+        application_types.add(
             link_obj.sample.application_version.application.prep_category
         )
 
@@ -228,15 +229,15 @@ def config_case(
 
                 target_beds.add(bed_version_obj.filename)
 
-    if len(application_type) != 1:
+    if len(application_types) != 1:
         raise BalsamicStartError(
             "More than one application found for this case: %s"
-            % ", ".join(application_type)
+            % ", ".join(application_types)
         )
 
-    if not application_type.issubset(acceptable_application):
+    if not application_types.issubset(acceptable_applications):
         raise BalsamicStartError(
-            "Improper application for this case: %s" % application_type
+            "Improper application for this case: %s" % application_types
         )
 
     nr_paths = len(tumor_paths) if tumor_paths else 0
@@ -255,7 +256,10 @@ def config_case(
     elif nr_normal_paths > 1:
         raise BalsamicStartError("Too many normal samples found: %s" % nr_normal_paths)
 
-    if not target_bed and application_type.issubset(applications_requiring_bed):
+    if target_bed and not application_types.issubset(applications_requiring_bed):
+        raise BalsamicStartError("--target_bed is in compatible with %s" % " ".join(application_types))
+
+    if not target_bed and application_types.issubset(applications_requiring_bed):
         if len(target_beds) == 1:
             target_bed = Path(context.obj["bed_path"]) / target_beds.pop()
         elif len(target_beds) > 1:
