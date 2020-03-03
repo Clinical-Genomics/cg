@@ -257,7 +257,9 @@ def config_case(
         raise BalsamicStartError("Too many normal samples found: %s" % nr_normal_paths)
 
     if target_bed and not application_types.issubset(applications_requiring_bed):
-        raise BalsamicStartError("--target_bed is in compatible with %s" % " ".join(application_types))
+        raise BalsamicStartError(
+            "--target_bed is in compatible with %s" % " ".join(application_types)
+        )
 
     if not target_bed and application_types.issubset(applications_requiring_bed):
         if len(target_beds) == 1:
