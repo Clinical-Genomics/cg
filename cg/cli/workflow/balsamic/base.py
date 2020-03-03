@@ -144,7 +144,7 @@ def config_case(
     root_dir = context.obj["balsamic"]["root"]
     wrk_dir = Path(f"{root_dir}/{case_id}/fastq")
     application_types = set()
-    acceptable_application = {"wgs", "wes", "tgs"}
+    acceptable_applications = {"wgs", "wes", "tgs"}
 
     for link_obj in link_objs:
         LOG.info(
