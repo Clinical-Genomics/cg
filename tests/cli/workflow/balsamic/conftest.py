@@ -43,6 +43,7 @@ class MockHouseKeeper(HousekeeperAPI):
 
 
 class MockLims(LimsAPI):
+    """Mock LimsAPI"""
 
     lims = None
 
@@ -56,6 +57,7 @@ class MockLims(LimsAPI):
 
 @pytest.fixture(scope="function")
 def lims_api():
+    """Mock lims_api"""
 
     _lims_api = MockLims()
     return _lims_api
