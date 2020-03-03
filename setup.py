@@ -55,7 +55,7 @@ class PyTest(TestCommand):
 
 setup(
     name="cg",
-    version="7.7.2",
+    version="7.7.3",
     description="Clinical Genomics command center.",
     author="Patrik Grenfeldt",
     author_email="patrik.grenfeldt@scilifelab.se",
