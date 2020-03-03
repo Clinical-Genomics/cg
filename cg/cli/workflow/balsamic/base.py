@@ -255,7 +255,7 @@ def config_case(
     elif nr_normal_paths > 1:
         raise BalsamicStartError("Too many normal samples found: %s" % nr_normal_paths)
 
-    if not target_bed and application_type.issubset({"wes", "tgs"}):
+    if not target_bed and application_type.issubset(applications_requiring_bed):
         if len(target_beds) == 1:
             target_bed = Path(context.obj["bed_path"]) / target_beds.pop()
         elif len(target_beds) > 1:
