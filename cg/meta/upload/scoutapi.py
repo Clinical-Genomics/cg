@@ -171,7 +171,7 @@ class UploadScoutAPI:
 
     def _include_files(self, data, hk_version, scout_hk_map, **kwargs):
         extra_tag = kwargs.get("extra_tag")
-        skip_missing = kwargs.get("skip_missing", False)
+        skip_missing = kwargs.get("skip_missing", True)
         for scout_key, hk_tag in scout_hk_map:
 
             if extra_tag:
