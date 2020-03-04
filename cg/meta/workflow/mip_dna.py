@@ -150,7 +150,7 @@ class AnalysisAPI:
                 "analysis_type": link.sample.application_version.application.analysis_type,
                 "sex": link.sample.sex,
                 "phenotype": link.status,
-                "expected_coverage": link.sample.application_version.application.sequencing_depth,
+                "expected_coverage": link.sample.application_version.application.min_sequencing_depth,
             }
             if sample_data["analysis_type"] in ("tgs", "wes"):
                 if link.sample.capture_kit:
