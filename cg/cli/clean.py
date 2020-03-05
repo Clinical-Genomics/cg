@@ -60,7 +60,7 @@ def mip(context, yes, case_id, sample_info, dry_run: bool = False):
     """Remove analysis output."""
 
     raw_data = ruamel.yaml.safe_load(sample_info)
-    date = context.obj["tb"].get_sample_date(raw_data)
+    date = context.obj["tb"].get_sampleinfo_date(raw_data)
     case_obj = context.obj["db"].family(case_id)
 
     if case_obj is None:
