@@ -50,10 +50,13 @@ def beacon(context: click.Context, item_type, item_id):
 
 @clean.command()
 @click.option("-y", "--yes", is_flag=True, help="skip confirmation")
+@click.option(
+    "-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned"
+)
 @click.argument("case_id")
 @click.argument("sample_info", type=click.File("r"))
 @click.pass_context
-def mip(context, yes, case_id, sample_info):
+def mip(context, yes, case_id, sample_info, dry_run: bool = False):
     """Remove analysis output."""
 
     raw_data = ruamel.yaml.safe_load(sample_info)
@@ -70,7 +73,7 @@ def mip(context, yes, case_id, sample_info):
         context.abort()
 
     try:
-        context.obj["tb"].delete_analysis(case_id, date, yes=yes)
+        context.obj["tb"].delete_analysis(case_id, date, yes=yes, dry_run=dry_run)
     except ValueError as error:
         LOG.error(f"{case_id}: {error.args[0]}")
         context.abort()
@@ -128,9 +131,14 @@ def scoutauto(context, yes, dry_run):
 
 @clean.command()
 @click.option("-y", "--yes", is_flag=True, help="skip confirmation")
+@click.option(
+    "-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned"
+)
 @click.argument("before_str")
 @click.pass_context
-def mipauto(context: click.Context, before_str: str, yes: bool = False):
+def mipauto(
+    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
+):
     """Automatically clean up "old" analyses."""
     before = parse_date(before_str)
     old_analyses = context.obj["db"].analyses(before=before)
@@ -156,7 +164,11 @@ def mipauto(context: click.Context, before_str: str, yes: bool = False):
             LOG.info(f"{case_id}: cleaning MIP output")
             with open(sampleinfo_path, "r") as sampleinfo_file:
                 context.invoke(
-                    mip, yes=yes, case_id=case_id, sample_info=sampleinfo_file
+                    mip,
+                    yes=yes,
+                    case_id=case_id,
+                    sample_info=sampleinfo_file,
+                    dry_run=dry_run,
                 )
         except FileNotFoundError:
             LOG.error(

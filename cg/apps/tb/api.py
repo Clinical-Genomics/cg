@@ -80,7 +80,9 @@ class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
             for line in content:
                 click.echo(line, file=out_handle)
 
-    def delete_analysis(self, family: str, date: dt.datetime, yes: bool = False):
+    def delete_analysis(
+        self, family: str, date: dt.datetime, yes: bool = False, dry_run: bool = False
+    ):
         """Delete the analysis output."""
         if self.analyses(family=family, temp=True).count() > 0:
             raise ValueError("analysis for family already running")
@@ -89,10 +91,11 @@ class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
         analysis_path = Path(analysis_obj.out_dir).parent
 
         if yes or click.confirm(f"Do you want to remove {analysis_path}?"):
-            shutil.rmtree(analysis_path, ignore_errors=True)
 
-            analysis_obj.is_deleted = True
-            self.commit()
+            if not dry_run:
+                shutil.rmtree(analysis_path, ignore_errors=True)
+                analysis_obj.is_deleted = True
+                self.commit()
 
     def get_trending(
         self, mip_config_raw: str, qcmetrics_raw: str, sampleinfo_raw: dict
