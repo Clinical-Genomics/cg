@@ -1,5 +1,5 @@
 """
-    Module for compressing bam to cram 
+    Module for compressing bam to cram
 """
 
 import logging
@@ -31,7 +31,7 @@ POST_CHECKSUM=$(samtools view {cram_path} | md5sum)
 if [[ $PRE_CHECKSUM == $POST_CHECKSUM ]]
 then
     echo "Compression completed"
-    touch {cram_dir}_{job_name}_cram_complete
+    touch {cram_dir}/{job_name}_cram_complete
 else
     echo "Compression failed"
     rm {cram_path}
