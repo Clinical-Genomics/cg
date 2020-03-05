@@ -82,7 +82,7 @@ def mip(context, yes, sample_info):
 @click.pass_context
 def scout(context, bundle, yes, dry_run):
     files = []
-    for tag in ["bam", "bai", "bam-index"]:
+    for tag in ["bam", "bai", "bam-index", "cram", "crai", "cram-index"]:
         files.extend(context.obj["hk"].get_files(bundle=bundle, tags=[tag]))
     for file_obj in files:
         if file_obj.is_included:
