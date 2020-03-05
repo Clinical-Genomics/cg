@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+"""cg module for cleaning databases and files"""
 import logging
 
 import ruamel.yaml
@@ -64,12 +64,12 @@ def mip(context, yes, case_id, sample_info, dry_run: bool = False):
     case_obj = context.obj["db"].family(case_id)
 
     if case_obj is None:
-        LOG.error(f"{case_id}: family not found")
+        LOG.error("%s: family not found", case_id)
         context.abort()
 
     analysis_obj = context.obj["db"].analysis(case_obj, date)
     if analysis_obj is None:
-        LOG.error(f"{case_id} - {date}: analysis not found")
+        LOG.error("%s - %s: analysis not found", case_id, date)
         context.abort()
 
     try:
@@ -85,6 +85,7 @@ def mip(context, yes, case_id, sample_info, dry_run: bool = False):
 @click.option("-d", "--dry-run", is_flag=True, help="show files that would be cleaned")
 @click.pass_context
 def scout(context, bundle, yes: bool = False, dry_run: bool = False):
+    """Clean bam related files for a bundle in Housekeeper"""
     files = []
     for tag in ["bam", "bai", "bam-index", "cram", "crai", "cram-index"]:
         files.extend(context.obj["hk"].get_files(bundle=bundle, tags=[tag]))
@@ -123,7 +124,7 @@ def scoutauto(context, yes: bool = False, dry_run: bool = False):
             if x_days_ago.days > 30:
                 bundles.append(case.get("_id"))
                 cases_added += 1
-        LOG.info(f"{cases_added} cases marked for bam removal :)")
+        LOG.info("%s cases marked for bam removal :)", cases_added)
 
     for bundle in bundles:
         context.invoke(scout, bundle=bundle, yes=yes, dry_run=dry_run)
@@ -144,24 +145,24 @@ def mipauto(
     old_analyses = context.obj["db"].analyses(before=before)
     for status_analysis in old_analyses:
         case_id = status_analysis.family.internal_id
-        LOG.debug(f"{case_id}: clean up analysis output")
+        LOG.debug("%s: clean up analysis output", case_id)
         tb_analysis = context.obj["tb"].find_analysis(
             family=case_id, started_at=status_analysis.started_at, status="completed"
         )
 
         if tb_analysis is None:
-            LOG.warning(f"{case_id}: analysis not found in Trailblazer")
+            LOG.warning("%s: analysis not found in Trailblazer", case_id)
             continue
         elif tb_analysis.is_deleted:
-            LOG.warning(f"{case_id}: analysis already deleted")
+            LOG.warning("%s: analysis already deleted", case_id)
             continue
         elif context.obj["tb"].analyses(family=case_id, temp=True).count() > 0:
-            LOG.warning(f"{case_id}: family already re-started")
+            LOG.warning("%s: family already re-started", case_id)
             continue
 
         try:
             sampleinfo_path = context.obj["tb"].get_sampleinfo(tb_analysis)
-            LOG.info(f"{case_id}: cleaning MIP output")
+            LOG.info("%s: cleaning MIP output", case_id)
             with open(sampleinfo_path, "r") as sampleinfo_file:
                 context.invoke(
                     mip,
@@ -172,6 +173,6 @@ def mipauto(
                 )
         except FileNotFoundError:
             LOG.error(
-                f"{case_id}: sample_info file not found, please mark the analysis as deleted in "
-                f"the analysis table in trailblazer."
+                "%s: sample_info file not found, please mark the analysis as deleted in the analysis table in trailblazer.",
+                case_id,
             )
