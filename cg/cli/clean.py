@@ -161,13 +161,20 @@ def mipauto(context: click.Context, before_str: str, yes: bool = False):
 @click.option("-c", "--case-id", type=str)
 @click.option("-n", "--number-of-conversions", type=int)
 @click.option("-d", "--dry-run", is_flag=True)
-def compress(context, case_id):
+def compress(context, case_id, number_of_conversions, dry_run):
     bam_to_cram_api = BamToCramAPI()
     # Iterate over samples in scout that has existing bam_file
+    compressed_count = 0
     for case in context.obj["scout"].get_cases(case=case_id):
+        if compressed_count >= number_of_conversions:
+            break
         for sample in case["individuals"]:
             bam_file = sample.get("bam_file")
             if bam_file and Path(bam_file).exists():
                 bam_to_cram_api.bam_to_cram(
                     bam_path=bam_file, job_name=sample["individual_id"], dry_run=dry_run
                 )
+                compressed_count += 1
+
+    # For cases where conversion were successful, change in scout, and hk database
+    # and remove bam_files
