@@ -3,7 +3,7 @@ import gzip
 import logging
 import re
 from pathlib import Path
-from typing import List, Any
+from typing import Any
 from ruamel.yaml import safe_load
 
 from cg.apps import tb, hk, lims
@@ -109,7 +109,8 @@ class AnalysisAPI:
                 "analysis_type": link.sample.application_version.application.analysis_type,
                 "sex": link.sample.sex,
                 "phenotype": link.status,
-                "expected_coverage": link.sample.application_version.application.min_sequencing_depth,
+                "expected_coverage":
+                    link.sample.application_version.application.min_sequencing_depth,
             }
             if link.mother:
                 sample_data["mother"] = link.mother.internal_id

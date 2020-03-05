@@ -3,6 +3,8 @@ import datetime as dt
 from typing import List
 
 import alchy
+from sqlalchemy import Column, ForeignKey, orm, types, UniqueConstraint, Table
+
 from cg.constants import (
     REV_PRIORITY_MAP,
     PRIORITY_MAP,
@@ -10,7 +12,6 @@ from cg.constants import (
     FLOWCELL_STATUS,
     PREP_CATEGORIES,
 )
-from sqlalchemy import Column, ForeignKey, orm, types, UniqueConstraint, Table
 
 Model = alchy.make_declarative_base(Base=alchy.ModelBase)
 
