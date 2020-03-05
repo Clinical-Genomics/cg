@@ -84,7 +84,7 @@ def mip(context, yes, case_id, sample_info, dry_run: bool = False):
 @click.option("-y", "--yes", is_flag=True, help="skip checks")
 @click.option("-d", "--dry-run", is_flag=True, help="show files that would be cleaned")
 @click.pass_context
-def scout(context, bundle, yes, dry_run):
+def scout(context, bundle, yes: bool = False, dry_run: bool = False):
     files = []
     for tag in ["bam", "bai", "bam-index", "cram", "crai", "cram-index"]:
         files.extend(context.obj["hk"].get_files(bundle=bundle, tags=[tag]))
@@ -112,7 +112,7 @@ def scout(context, bundle, yes, dry_run):
     "-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned"
 )
 @click.pass_context
-def scoutauto(context, yes, dry_run):
+def scoutauto(context, yes: bool = False, dry_run: bool = False):
     """Automatically clean up solved and archived scout cases"""
     bundles = []
     for status in "archived", "solved":
