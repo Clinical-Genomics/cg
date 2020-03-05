@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+""" Trailblazer API for cg """ ""
 import datetime as dt
 import shutil
 from pathlib import Path
@@ -100,6 +100,7 @@ class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
     def get_trending(
         self, mip_config_raw: str, qcmetrics_raw: str, sampleinfo_raw: dict
     ) -> dict:
+        """Get trending data for a MIP analysis"""
         return trending.parse_mip_analysis(
             mip_config_raw=mip_config_raw,
             qcmetrics_raw=qcmetrics_raw,
@@ -107,12 +108,14 @@ class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
         )
 
     def get_family_root_dir(self, family_id: str):
+        """Get path for a case"""
         return Path(self.families_dir) / family_id
 
     def get_latest_logged_analysis(self, case_id: str):
+        """Get the the analysis with the latest logged_at date"""
         return self.analyses(family=case_id).order_by(models.Analysis.logged_at.desc())
 
     @staticmethod
     def get_sampleinfo_date(data: dict) -> str:
-        """ Get date from a sampleinfo """
+        """Get date from a sampleinfo """
         return files.get_sampleinfo_date(data)
