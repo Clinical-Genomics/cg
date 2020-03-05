@@ -78,7 +78,7 @@ def mip(context, yes, sample_info):
 @clean.command()
 @click.argument("bundle")
 @click.option("-y", "--yes", is_flag=True, help="skip checks")
-@click.oprtion("-d", "--dry-run", is_flag=True, help="show files that would be cleaned")
+@click.option("-d", "--dry-run", is_flag=True, help="show files that would be cleaned")
 @click.pass_context
 def scout(context, bundle, yes, dry_run):
     files = []
@@ -104,7 +104,7 @@ def scout(context, bundle, yes, dry_run):
 
 @clean.command()
 @click.option("-y", "--yes", is_flag=True, help="skip checks")
-@click.oprtion(
+@click.option(
     "-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned"
 )
 @click.pass_context
