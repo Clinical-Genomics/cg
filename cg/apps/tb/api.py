@@ -111,3 +111,8 @@ class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
 
     def get_latest_logged_analysis(self, case_id: str):
         return self.analyses(family=case_id).order_by(models.Analysis.logged_at.desc())
+
+    @staticmethod
+    def get_sampleinfo_date(data: dict) -> str:
+        """ Get date from a sampleinfo """
+        return files.get_sampleinfo_date(data)
