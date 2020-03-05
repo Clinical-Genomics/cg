@@ -78,8 +78,9 @@ def mip(context, yes, sample_info):
 @clean.command()
 @click.argument("bundle")
 @click.option("-y", "--yes", is_flag=True, help="skip checks")
+@click.oprtion("-d", "--dry-run", is_flag=True, help="show files that would be cleaned")
 @click.pass_context
-def scout(context, bundle, yes):
+def scout(context, bundle, yes, dry_run):
     files = []
     for tag in ["bam", "bai", "bam-index"]:
         files.extend(context.obj["hk"].get_files(bundle=bundle, tags=[tag]))
@@ -92,17 +93,22 @@ def scout(context, bundle, yes):
         if yes or click.confirm(question):
             file_name = file_obj.full_path
             if file_obj.is_included and Path(file_name).exists():
-                Path(file_name).unlink()
+                if not dry_run:
+                    Path(file_name).unlink()
 
-            file_obj.delete()
-            context.obj["hk"].commit()
-            click.echo(f"{file_name} deleted")
+            if not dry_run:
+                file_obj.delete()
+                context.obj["hk"].commit()
+                click.echo(f"{file_name} deleted")
 
 
 @clean.command()
 @click.option("-y", "--yes", is_flag=True, help="skip checks")
+@click.oprtion(
+    "-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned"
+)
 @click.pass_context
-def scoutauto(context, yes):
+def scoutauto(context, yes, dry_run):
     """Automatically clean up solved and archived scout cases"""
     bundles = []
     for status in "archived", "solved":
@@ -116,7 +122,7 @@ def scoutauto(context, yes):
         LOG.info(f"{cases_added} cases marked for bam removal :)")
 
     for bundle in bundles:
-        context.invoke(scout, bundle=bundle, yes=yes)
+        context.invoke(scout, bundle=bundle, yes=yes, dry_run=dry_run)
 
 
 @clean.command()
