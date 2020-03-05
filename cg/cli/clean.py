@@ -11,6 +11,7 @@ from pathlib import Path
 from cg.apps import tb, hk, scoutapi, beacon as beacon_app
 from cg.meta.upload.beacon import UploadBeaconApi
 from cg.store import Store
+from cg.apps.bam_to_cram import BamToCramAPI
 
 LOG = logging.getLogger(__name__)
 
@@ -154,3 +155,19 @@ def mipauto(context: click.Context, before_str: str, yes: bool = False):
                 f"{family_id}: sample_info file not found, please mark the analysis as deleted in "
                 f"the analysis table in trailblazer."
             )
+
+
+@clean.command()
+@click.option("-c", "--case-id", type=str)
+@click.option("-n", "--number-of-conversions", type=int)
+@click.option("-d", "--dry-run", is_flag=True)
+def compress(context, case_id):
+    bam_to_cram_api = BamToCramAPI()
+    # Iterate over samples in scout that has existing bam_file
+    for case in context.obj["scout"].get_cases(case=case_id):
+        for sample in case["individuals"]:
+            bam_file = sample.get("bam_file")
+            if bam_file and Path(bam_file).exists():
+                bam_to_cram_api.bam_to_cram(
+                    bam_path=bam_file, job_name=sample["individual_id"], dry_run=dry_run
+                )
