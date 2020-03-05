@@ -128,6 +128,6 @@ def completed(context):
             except Exception: # pylint: disable=broad-except
                 LOG.error("uploading family failed: %s", analysis_obj.family.internal_id,
                           exc_info=True)
-                exit_code = SUCCESS
+                exit_code = FAIL
 
     sys.exit(exit_code)
