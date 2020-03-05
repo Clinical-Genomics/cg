@@ -81,13 +81,13 @@ class AnalysisAPI:
         flowcells = self.db.flowcells(family=family_obj)
         statuses = []
         for flowcell_obj in flowcells:
-            self.LOG.debug(f"{flowcell_obj.name}: checking flowcell")
+            self.LOG.debug("%s: checking flowcell", flowcell_obj.name)
             statuses.append(flowcell_obj.status)
             if flowcell_obj.status == "removed":
-                self.LOG.info(f"{flowcell_obj.name}: requesting removed flowcell")
+                self.LOG.info("%s: requesting removed flowcell", flowcell_obj.name)
                 flowcell_obj.status = "requested"
             elif flowcell_obj.status != "ondisk":
-                self.LOG.warning(f"{flowcell_obj.name}: {flowcell_obj.status}")
+                self.LOG.warning("%s: {flowcell_obj.status}", flowcell_obj.name)
         return all(status == "ondisk" for status in statuses)
 
     def run(self, family_obj: models.Family, **kwargs):
@@ -150,8 +150,7 @@ class AnalysisAPI:
                 "analysis_type": link.sample.application_version.application.analysis_type,
                 "sex": link.sample.sex,
                 "phenotype": link.status,
-                "expected_coverage":
-                    link.sample.application_version.application.min_sequencing_depth,
+                "expected_coverage": link.sample.application_version.application.min_sequencing_depth,
             }
             if sample_data["analysis_type"] in ("tgs", "wes"):
                 if link.sample.capture_kit:
@@ -163,21 +162,21 @@ class AnalysisAPI:
                 else:
                     if link.sample.downsampled_to:
                         self.LOG.debug(
-                            f"{link.sample.name}: downsampled sample, skipping"
+                            "%s: downsampled sample, skipping", link.sample.name
                         )
                     else:
                         try:
                             capture_kit = self.lims.capture_kit(link.sample.internal_id)
                             if capture_kit is None or capture_kit == "NA":
                                 self.LOG.warning(
-                                    f"%s: capture kit not found",
+                                    "%s: capture kit not found",
                                     link.sample.internal_id,
                                 )
                             else:
                                 sample_data["capture_kit"] = CAPTUREKIT_MAP[capture_kit]
                         except HTTPError:
                             self.LOG.warning(
-                                f"{link.sample.internal_id}: not found (LIMS)"
+                                "%s: not found (LIMS)", link.sample.internal_id
                             )
             if link.mother:
                 sample_data["mother"] = link.mother.internal_id
