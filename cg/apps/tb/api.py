@@ -60,7 +60,8 @@ class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
             old_analysis.is_deleted = True
         self.commit()
 
-    def get_sampleinfo(self, analysis: models.Analysis) -> str:
+    @staticmethod
+    def get_sampleinfo(analysis: models.Analysis) -> str:
         """Get the sample info path for an analysis."""
         raw_data = ruamel.yaml.safe_load(Path(analysis.config_path).open())
         data = files.parse_config(raw_data)
@@ -97,8 +98,9 @@ class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
                 analysis_obj.is_deleted = True
                 self.commit()
 
+    @staticmethod
     def get_trending(
-        self, mip_config_raw: str, qcmetrics_raw: str, sampleinfo_raw: dict
+        mip_config_raw: str, qcmetrics_raw: str, sampleinfo_raw: dict
     ) -> dict:
         """Get trending data for a MIP analysis"""
         return trending.parse_mip_analysis(
