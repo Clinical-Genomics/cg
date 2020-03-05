@@ -115,7 +115,7 @@ def completed(context):
     hk_api = context.obj['hk_api']
     FAIL = 1
     SUCCESS = 0
-    exit_code = FAIL
+    exit_code = SUCCESS
     for analysis_obj in context.obj['tb_api'].analyses(status='completed', deleted=False):
         existing_record = hk_api.version(analysis_obj.family, analysis_obj.started_at)
         if existing_record:
