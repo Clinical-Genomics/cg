@@ -173,6 +173,9 @@ def mipauto(
                 )
         except FileNotFoundError:
             LOG.error(
-                "%s: sample_info file not found, please mark the analysis as deleted in the analysis table in trailblazer.",
+                (
+                    "%s: sample_info file not found, please mark the analysis as deleted in the "
+                    "analysis table in trailblazer."
+                ),
                 case_id,
             )
