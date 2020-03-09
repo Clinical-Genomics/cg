@@ -85,7 +85,7 @@ def mip(context, yes, case_id, sample_info, dry_run: bool = False):
 @click.option("-d", "--dry-run", is_flag=True, help="show files that would be cleaned")
 @click.pass_context
 def scout(context, bundle, yes: bool = False, dry_run: bool = False):
-    """Clean bam related files for a bundle in Housekeeper"""
+    """Clean alignment related files for a bundle in Housekeeper"""
     files = []
     for tag in ["bam", "bai", "bam-index", "cram", "crai", "cram-index"]:
         files.extend(context.obj["hk"].get_files(bundle=bundle, tags=[tag]))
@@ -113,7 +113,7 @@ def scout(context, bundle, yes: bool = False, dry_run: bool = False):
     "--days-old",
     type=int,
     default=300,
-    help="Clean bam files with analysis dates oldar then given number of days",
+    help="Clean alignment files with analysis dates oldar then given number of days",
 )
 @click.option("-y", "--yes", is_flag=True, help="skip checks")
 @click.option(
