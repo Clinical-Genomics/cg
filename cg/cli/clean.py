@@ -109,7 +109,6 @@ def scout(context, bundle, yes: bool = False, dry_run: bool = False):
 
 @clean.command()
 @click.option(
-    "-o",
     "--days-old",
     type=int,
     default=300,
