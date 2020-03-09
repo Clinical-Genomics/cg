@@ -12,6 +12,7 @@ from cg.store import Store
 from .add import add
 from .backup import backup
 from .clean import clean
+from .compress import compress
 from .export import export
 from .get import get
 from .import_cmd import import_cmd
@@ -72,6 +73,7 @@ def init(context, reset, force):
 base.add_command(add)
 base.add_command(backup)
 base.add_command(clean)
+base.add_command(compress)
 base.add_command(export)
 base.add_command(get)
 base.add_command(import_cmd)

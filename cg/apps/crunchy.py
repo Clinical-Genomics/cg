@@ -32,7 +32,6 @@ else:
 fi
 """
 
-
 SBATCH_SPRING = """
 crunchy compress spring --first {fastq_first_path} --second {fastq_second_path} --spring-path {spring_path} --check-integrity
 if [[ $? == 0 ]]
@@ -43,41 +42,6 @@ else:
 fi
 """
 
-
-def get_slurm_header(
-    job_name: str, log_dir: str, account: str, crunchy_env: str
-) -> str:
-    sbatch_header = SBATCH_HEADER_TEMPLATE.format(
-        job_name=job_name, account=account, log_dir=log_dir, crunchy_env=crunchy_env
-    )
-    return sbatch_header
-
-
-def get_slurm_bam_to_cram(
-    bam_path: str, cram_path: str, flag_path: str, reference_path: str
-) -> str:
-    sbatch_body = SBATCH_BAM_TO_CRAM.format(
-        bam_path=bam_path,
-        cram_path=cram_path,
-        flag_path=flag_path,
-        reference_path=reference_path,
-    )
-    return sbatch_body
-
-
-def get_slurm_spring(
-    fastq_first_path: str, fastq_second_path: str, spring_path: str, flag_path: str
-) -> str:
-
-    sbatch_body = SBATCH_SPRING.format(
-        fastq_first_path=fastq_first_path,
-        fastq_second_path=fastq_second_path,
-        spring_path=spring_path,
-        flag_path=flag_path,
-    )
-    return sbatch_body
-
-
 FLAG_PATH_SUFFIX = "crunchy.txt"
 BAM_SUFFIX = ".bam"
 CRAM_SUFFIX = ".cram"
@@ -85,7 +49,7 @@ FASTQ_FIRST_SUFFIX = "R1_001.fastq.gz"
 FASTQ_SECOND_SUFFIX = "R2_001.fastq.gz"
 
 
-class Crunchy:
+class CrunchyAPI:
     """
         API for samtools
     """
@@ -106,14 +70,14 @@ class Crunchy:
         job_name = Path(cram_path).name + "_bam_to_cram"
         flag_path = cram_path + FLAG_PATH_SUFFIX
 
-        sbatch_header = get_slurm_header(
+        sbatch_header = self.get_slurm_header(
             job_name=job_name,
             account=self.slurm_account,
             log_dir=self.slurm_log_dir,
             crunchy_env=self.crunchy_env,
         )
 
-        sbatch_body = get_slurm_bam_to_cram(
+        sbatch_body = self.get_slurm_bam_to_cram(
             bam_path=bam_path,
             cram_path=cram_path,
             flag_path=flag_path,
@@ -133,14 +97,14 @@ class Crunchy:
         job_name = Path(spring_path).name + "_spring"
         flag_path = spring_path + FLAG_PATH_SUFFIX
 
-        sbatch_header = get_slurm_header(
+        sbatch_header = self.get_slurm_header(
             job_name=job_name,
             account=self.slurm_account,
             log_dir=self.slurm_log_dir,
             crunchy_env=self.crunchy_env,
         )
 
-        sbatch_body = get_slurm_spring(
+        sbatch_body = self.get_slurm_spring(
             fastq_first_path=fastq_first_path,
             fastq_second_path=fastq_second_path,
             spring_path=spring_path,
@@ -163,7 +127,7 @@ class Crunchy:
         else:
             LOG.info("Would submit following to slurm:\n\n%s", sbatch_content)
 
-    def compression_successful_cram(self, bam_path: str) -> bool:
+    def cram_compression_exists(self, bam_path: str) -> bool:
 
         cram_path = self.change_suffix_bam_to_cram(bam_path)
         flag_path = cram_path + ".crunchy.txt"
@@ -181,7 +145,7 @@ class Crunchy:
         LOG.info("bam to cram conversion successful for %s", bam_path)
         return True
 
-    def compression_successful_spring(
+    def spring_compression_exists(
         self, fastq_first_path: str, fastq_second_path: str
     ) -> bool:
 
@@ -225,3 +189,37 @@ class Crunchy:
 
         spring_path = fastq_first_path.replace(FASTQ_FIRST_SUFFIX, ".spring")
         return spring_path
+
+    @staticmethod
+    def get_slurm_header(
+        job_name: str, log_dir: str, account: str, crunchy_env: str
+    ) -> str:
+        sbatch_header = SBATCH_HEADER_TEMPLATE.format(
+            job_name=job_name, account=account, log_dir=log_dir, crunchy_env=crunchy_env
+        )
+        return sbatch_header
+
+    @staticmethod
+    def get_slurm_bam_to_cram(
+        bam_path: str, cram_path: str, flag_path: str, reference_path: str
+    ) -> str:
+        sbatch_body = SBATCH_BAM_TO_CRAM.format(
+            bam_path=bam_path,
+            cram_path=cram_path,
+            flag_path=flag_path,
+            reference_path=reference_path,
+        )
+        return sbatch_body
+
+    @staticmethod
+    def get_slurm_spring(
+        fastq_first_path: str, fastq_second_path: str, spring_path: str, flag_path: str
+    ) -> str:
+
+        sbatch_body = SBATCH_SPRING.format(
+            fastq_first_path=fastq_first_path,
+            fastq_second_path=fastq_second_path,
+            spring_path=spring_path,
+            flag_path=flag_path,
+        )
+        return sbatch_body

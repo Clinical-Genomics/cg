@@ -11,7 +11,6 @@ from pathlib import Path
 from cg.apps import tb, hk, scoutapi, beacon as beacon_app
 from cg.meta.upload.beacon import UploadBeaconApi
 from cg.store import Store
-from cg.apps.bam_to_cram import BamToCramAPI
 
 LOG = logging.getLogger(__name__)
 
