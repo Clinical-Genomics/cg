@@ -85,7 +85,7 @@ def mip(context, yes, case_id, sample_info, dry_run: bool = False):
 @click.option("-d", "--dry-run", is_flag=True, help="show files that would be cleaned")
 @click.pass_context
 def scout(context, bundle, yes: bool = False, dry_run: bool = False):
-    """Clean bam related files for a bundle in Housekeeper"""
+    """Clean alignment related files for a bundle in Housekeeper"""
     files = []
     for tag in ["bam", "bai", "bam-index", "cram", "crai", "cram-index"]:
         files.extend(context.obj["hk"].get_files(bundle=bundle, tags=[tag]))
@@ -108,12 +108,18 @@ def scout(context, bundle, yes: bool = False, dry_run: bool = False):
 
 
 @clean.command()
+@click.option(
+    "--days-old",
+    type=int,
+    default=300,
+    help="Clean alignment files with analysis dates oldar then given number of days",
+)
 @click.option("-y", "--yes", is_flag=True, help="skip checks")
 @click.option(
     "-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned"
 )
 @click.pass_context
-def scoutauto(context, yes: bool = False, dry_run: bool = False):
+def scoutauto(context, days_old: int, yes: bool = False, dry_run: bool = False):
     """Automatically clean up solved and archived scout cases"""
     bundles = []
     for status in "archived", "solved":
@@ -121,7 +127,7 @@ def scoutauto(context, yes: bool = False, dry_run: bool = False):
         cases_added = 0
         for case in cases:
             x_days_ago = datetime.now() - case.get("analysis_date")
-            if x_days_ago.days > 30:
+            if x_days_ago.days > days_old:
                 bundles.append(case.get("_id"))
                 cases_added += 1
         LOG.info("%s cases marked for bam removal :)", cases_added)
