@@ -112,7 +112,7 @@ def scout(context, bundle, yes: bool = False, dry_run: bool = False):
     "-o",
     "--days-old",
     type=int,
-    default=90,
+    default=300,
     help="Clean bam files with analysis dates oldar then given number of days",
 )
 @click.option("-y", "--yes", is_flag=True, help="skip checks")
