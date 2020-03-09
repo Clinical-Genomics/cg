@@ -1,3 +1,6 @@
+# build
+cython
+
 # database
 Alchy
 SQLAlchemy
@@ -6,7 +9,7 @@ SQLAlchemy
 Click<7.0
 
 # server
-Flask
+Flask>=1.1.1                # versioned due to setup.py install misselecting Flask-SQLAlchemy otherwise
 Flask-Admin
 Flask-Alchy
 Flask-SQLAlchemy==2.1
@@ -18,6 +21,7 @@ requests[security]
 requests-oauthlib<1.2.0     # due to scout-browser Flask-OAuthlib
 oauthlib<3.0.0              # due to scout-browser Flask-OAuthlib
 requests_cache
+requests[security]
 
 # utils
 ruamel.yaml
@@ -41,7 +45,6 @@ pysam==0.15.2           # due to inability to rebuild newer pysam version
 genologics
 trailblazer>=4.0.0
 housekeeper>=2.0.0b2
-chanjo>=4.2.0
 genotype>=2.2.0
 scout-browser>=4.4.1
 cgstats>=1.1.2

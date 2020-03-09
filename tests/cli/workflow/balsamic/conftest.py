@@ -4,6 +4,7 @@ from datetime import datetime
 import pytest
 from cg.apps.balsamic.fastq import FastqHandler
 from cg.apps.hk import HousekeeperAPI
+from cg.apps.lims import LimsAPI
 from cg.meta.workflow.balsamic import AnalysisAPI
 from cg.store import Store, models
 
@@ -17,6 +18,7 @@ def balsamic_context(balsamic_store) -> dict:
         "analysis_api": MockAnalysis,
         "fastq_handler": MockFastq,
         "gzipper": MockGzip(),
+        "lims_api": MockLims(),
         "bed_path": "bed_path",
         "balsamic": {
             "conda_env": "conda_env",
@@ -38,6 +40,27 @@ class MockHouseKeeper(HousekeeperAPI):
         """Mock get_files of HousekeeperAPI"""
         del tags, bundle, version
         return [MockFile()]
+
+
+class MockLims(LimsAPI):
+    """Mock LimsAPI"""
+
+    lims = None
+
+    def __init__(self):
+        self.lims = self
+        pass
+
+    def capture_kit(self, lims_id: str) -> str:
+        return "dummy_capture_kit"
+
+
+@pytest.fixture(scope="function")
+def lims_api():
+    """Mock lims_api"""
+
+    _lims_api = MockLims()
+    return _lims_api
 
 
 class MockFile:
@@ -96,13 +119,17 @@ class MockFastq(FastqHandler):
 
 
 @pytest.fixture(scope="function")
-def balsamic_store(base_store: Store) -> Store:
+def balsamic_store(base_store: Store, lims_api) -> Store:
     """real store to be used in tests"""
     _store = base_store
 
     case = add_family(_store, "balsamic_case")
-    tumour_sample = add_sample(_store, "tumour_sample", is_tumour=True)
-    normal_sample = add_sample(_store, "normal_sample", is_tumour=False)
+    tumour_sample = add_sample(
+        _store, "tumour_sample", is_tumour=True, application_type="tgs"
+    )
+    normal_sample = add_sample(
+        _store, "normal_sample", is_tumour=False, application_type="tgs"
+    )
     _store.relate_sample(case, tumour_sample, status="unknown")
     _store.relate_sample(case, normal_sample, status="unknown")
 
@@ -111,6 +138,27 @@ def balsamic_store(base_store: Store) -> Store:
         _store, "normal_sample", is_tumour=False, data_analysis="mip"
     )
     _store.relate_sample(case, normal_sample, status="unknown")
+
+    bed_name = lims_api.capture_kit(tumour_sample.internal_id)
+    ensure_bed_version(_store, bed_name)
+
+    case_wgs = add_family(_store, "balsamic_case_wgs")
+    tumour_sample_wgs = add_sample(
+        _store,
+        "tumour_sample_wgs",
+        is_tumour=True,
+        application_tag="dummy_tag_wgs",
+        application_type="wgs",
+    )
+    normal_sample_wgs = add_sample(
+        _store,
+        "normal_sample_wgs",
+        is_tumour=False,
+        application_tag="dummy_tag_wgs",
+        application_type="wgs",
+    )
+    _store.relate_sample(case_wgs, tumour_sample_wgs, status="unknown")
+    _store.relate_sample(case_wgs, normal_sample_wgs, status="unknown")
 
     _store.commit()
 
@@ -124,18 +172,28 @@ def balsamic_case(analysis_store) -> models.Family:
 
 
 @pytest.fixture(scope="function")
+def balsamic_case_wgs(analysis_store) -> models.Family:
+    """case with balsamic data_type"""
+    return analysis_store.find_family(
+        ensure_customer(analysis_store), "balsamic_case_wgs"
+    )
+
+
+@pytest.fixture(scope="function")
 def mip_case(analysis_store) -> models.Family:
     """case with balsamic data_type"""
     return analysis_store.find_family(ensure_customer(analysis_store), "mip_case")
 
 
-def ensure_application_version(disk_store, application_tag="dummy_tag"):
+def ensure_application_version(
+    disk_store, application_tag="dummy_tag", application_type="tgs"
+):
     """utility function to return existing or create application version for tests"""
     application = disk_store.application(tag=application_tag)
     if not application:
         application = disk_store.add_application(
             tag=application_tag,
-            category="wgs",
+            category=application_type,
             percent_kth=80,
             description="dummy_description",
         )
@@ -161,7 +219,9 @@ def ensure_bed_version(disk_store, bed_name="dummy_bed"):
 
     version = disk_store.latest_bed_version(bed_name)
     if not version:
-        version = disk_store.add_bed_version(bed, 1, "dummy_filename")
+        version = disk_store.add_bed_version(
+            bed, 1, "dummy_filename", shortname=bed_name
+        )
         disk_store.add_commit(version)
     return version
 
@@ -191,11 +251,14 @@ def add_sample(
     gender="female",
     is_tumour=False,
     data_analysis="balsamic",
+    application_tag="dummy_tag",
+    application_type="tgs",
 ):
     """utility function to add a sample to use in tests"""
     customer = ensure_customer(store)
-    application_version_id = ensure_application_version(store).id
-    bed_version_id = ensure_bed_version(store).id
+    application_version_id = ensure_application_version(
+        store, application_tag=application_tag, application_type=application_type
+    ).id
     sample = store.add_sample(
         name=sample_id,
         sex=gender,
@@ -205,7 +268,6 @@ def add_sample(
     )
 
     sample.application_version_id = application_version_id
-    sample.bed_version_id = bed_version_id
     sample.customer = customer
     store.add_commit(sample)
     return sample

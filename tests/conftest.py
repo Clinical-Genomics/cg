@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
     Conftest file for pytest fixtures
 """
@@ -8,9 +6,11 @@ from pathlib import Path
 
 import pytest
 import ruamel.yaml
+from trailblazer.mip import files as mip_dna_files_api
+
+from cg.apps.madeline.api import MadelineAPI
 from cg.apps.mip_rna import files as mip_rna_files_api
 from cg.store import Store
-from trailblazer.mip import files as mip_dna_files_api
 
 pytest_plugins = [
     "tests.apps.lims.conftest",
@@ -26,6 +26,43 @@ pytest_plugins = [
     "tests.store.conftest",
     "tests.apps.mutacc_auto.conftest",
 ]
+
+CHANJO_CONFIG = {"chanjo": {"config_path": "chanjo_config", "binary_path": "chanjo"}}
+
+
+@pytest.fixture
+def chanjo_config_dict():
+    """Chanjo configs"""
+    _config = dict()
+    _config.update(CHANJO_CONFIG)
+    return _config
+
+
+class MockMadelineAPI(MadelineAPI):
+    """Mock the madeline api methods"""
+
+    def __init__(self):
+        """Init mock"""
+        self._madeline_outpath = None
+
+    def run(self, family_id, samples, out_path=None):
+        """Fetch version from the database."""
+        return self._madeline_outpath
+
+
+@pytest.fixture(name="madeline_output")
+def fixture_madeline_output():
+    """File with madeline output"""
+    return "tests/fixtures/apps/madeline/madeline.xml"
+
+
+@pytest.yield_fixture(scope="function")
+def madeline_api(madeline_output):
+    """housekeeper_api fixture"""
+    _api = MockMadelineAPI()
+    _api._madeline_outpath = madeline_output
+
+    yield _api
 
 
 @pytest.fixture
@@ -82,9 +119,9 @@ def rml_orderform():
     return "tests/fixtures/orderforms/1604.9.rml.xlsx"
 
 
-# Trailblazer api for mip files
-@pytest.fixture(scope="session")
-def files():
+@pytest.fixture(scope="session", name="files")
+def fixture_files():
+    """Trailblazer api for mip files"""
     return {
         "config": "tests/fixtures/apps/tb/case/case_config.yaml",
         "sampleinfo": "tests/fixtures/apps/tb/case/case_qc_sample_info.yaml",
@@ -96,11 +133,13 @@ def files():
 
 @pytest.fixture(scope="function")
 def tmp_file(tmp_path):
+    """Get a temp file"""
     return tmp_path / "test"
 
 
-@pytest.fixture(scope="session")
-def files_raw(files):
+@pytest.fixture(scope="session", name="files_raw")
+def fixture_files_raw(files):
+    """Get some raw files"""
     return {
         "config": ruamel.yaml.safe_load(open(files["config"])),
         "sampleinfo": ruamel.yaml.safe_load(open(files["sampleinfo"])),
@@ -112,6 +151,7 @@ def files_raw(files):
 
 @pytest.fixture(scope="session")
 def files_data(files_raw):
+    """Get some data files"""
     return {
         "config": mip_dna_files_api.parse_config(files_raw["config"]),
         "sampleinfo": mip_dna_files_api.parse_sampleinfo(files_raw["sampleinfo"]),
@@ -123,16 +163,17 @@ def files_data(files_raw):
     }
 
 
-@pytest.yield_fixture(scope="function")
-def store() -> Store:
+@pytest.yield_fixture(scope="function", name="store")
+def fixture_store() -> Store:
+    """Fixture with a CG store"""
     _store = Store(uri="sqlite://")
     _store.create_all()
     yield _store
     _store.drop_all()
 
 
-@pytest.yield_fixture(scope="function")
-def base_store(store) -> Store:
+@pytest.yield_fixture(scope="function", name="base_store")
+def fixture_base_store(store) -> Store:
     """Setup and example store."""
     customer_group = store.add_customer_group("all_customers", "all customers")
 
@@ -313,6 +354,7 @@ def sample_store(base_store) -> Store:
 
 @pytest.yield_fixture(scope="function")
 def disk_store(cli_runner, invoke_cli) -> Store:
+    """Store on disk"""
     database = "./test_db.sqlite3"
     database_path = Path(database)
     database_uri = f"sqlite:///{database}"

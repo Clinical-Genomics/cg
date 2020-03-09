@@ -269,6 +269,7 @@ class LimsAPI(Lims, OrderHandler):
         target_reads: int = None,
         priority=None,
         data_analysis=None,
+        name: str = None,
     ):
         """Update information about a sample."""
         lims_sample = Sample(self, id=lims_id)
@@ -282,9 +283,10 @@ class LimsAPI(Lims, OrderHandler):
             lims_sample.udf[PROP2UDF["target_reads"]] = target_reads
         if priority:
             lims_sample.udf[PROP2UDF["priority"]] = priority
-
         if data_analysis:
             lims_sample.udf[PROP2UDF["data_analysis"]] = data_analysis
+        if name:
+            lims_sample.name = name
 
         lims_sample.put()
 
