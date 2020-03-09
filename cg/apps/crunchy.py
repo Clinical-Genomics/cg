@@ -7,6 +7,7 @@ import tempfile
 from pathlib import Path
 
 from cg.utils import Process
+from .constants import BAM_SUFFIX, CRAM_SUFFIX, FASTQ_FIRST_SUFFIX, FASTQ_SECOND_SUFFIX
 
 LOG = logging.getLogger(__name__)
 
@@ -43,10 +44,6 @@ fi
 """
 
 FLAG_PATH_SUFFIX = "crunchy.txt"
-BAM_SUFFIX = ".bam"
-CRAM_SUFFIX = ".cram"
-FASTQ_FIRST_SUFFIX = "R1_001.fastq.gz"
-FASTQ_SECOND_SUFFIX = "R2_001.fastq.gz"
 
 
 class CrunchyAPI:
@@ -166,6 +163,28 @@ class CrunchyAPI:
             fastq_first_path,
             fastq_second_path,
         )
+        return True
+
+    def fastq_compression_ready(
+        self, fastq_first_path: str, fastq_second_path: str
+    ) -> bool:
+
+        if fastq_first_path is None or not Path(fastq_first_path).exists():
+            LOG.warning("Could not find fastq %s", fastq_first_path)
+            return False
+        if fastq_second_path is None or not Path(fastq_second_path).exists():
+            LOG.warning("Could not find fastq %s", fastq_second_path)
+            return False
+        if self.spring_compression_exists(
+            fastq_first_path=fastq_first_path, fastq_second_path=fastq_second_path
+        ):
+            LOG.info(
+                "Spring compression already exists for %s and %s",
+                fastq_first_path,
+                fastq_second_path,
+            )
+            return False
+
         return True
 
     @staticmethod

@@ -1,0 +1,4 @@
+BAM_SUFFIX = ".bam"
+CRAM_SUFFIX = ".cram"
+FASTQ_FIRST_SUFFIX = "R1_001.fastq.gz"
+FASTQ_SECOND_SUFFIX = "R2_001.fastq.gz"

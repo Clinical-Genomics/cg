@@ -33,56 +33,22 @@ def spring(context, case_id, number_of_conversions, dry_run):
         if conversion_count == number_of_conversions and not case_id:
             break
         case_id = case.family.internal_id
-        fastq_files = context.obj["hk"].get_files(bundle=case_id, tags=["fastq"])
-        fastq_dict = {}
-        for fastq_file in fastq_files:
-            sample_name = Path(fastq_file.full_path).name.split("_")[0]
-            if sample_name not in fastq_dict.keys():
-                fastq_dict[sample_name] = {
-                    "fastq_first_path": None,
-                    "fastq_second_path": None,
-                }
-            if fastq_file.full_path.endswith(FASTQ_FIRST_SUFFIX):
-                fastq_dict[sample_name]["fastq_first_path"] = fastq_file.full_path
-            if fastq_file.full_path.endswith(FASTQ_SECOND_SUFFIX):
-                fastq_dict[sample_name]["fastq_second_path"] = fastq_file.full_path
-
-        fastq_check = True
+        fastq_dict = context.obj["hk"].get_fastq_files(bundle=case_id)
+        case_is_compressable = True
         for sample, fastq_files in fastq_dict.items():
             fastq_first = fastq_files["fastq_first_path"]
             fastq_second = fastq_files["fastq_second_path"]
-            if fastq_first is None or not Path(fastq_first).exists():
-                LOG.warning(
-                    "Could not find fastq %s for sample %s in %s",
-                    fastq_first,
-                    sample,
-                    case_id,
-                )
-                fastq_check = False
-            if fastq_second is None or not Path(fastq_second).exists():
-                LOG.warning(
-                    "Could not find fastq %s for sample %s in %s",
-                    fastq_first,
-                    sample,
-                    case_id,
-                )
-                fastq_check = False
-            if context.obj["crunchy"].spring_compression_exists(
+            if not context.obj["crunchy"].fastq_compression_ready(
                 fastq_first_path=fastq_first, fastq_second_path=fastq_second
             ):
-                LOG.info(
-                    "Spring compression already exists for %s and %s",
-                    fastq_first,
-                    fastq_second,
-                )
-                fastq_check = False
-
-        if fastq_check:
-            fastq_first = fastq_files["fastq_first_path"]
-            fastq_second = fastq_files["fastq_second_path"]
+                case_is_compressable = False
+                break
+        if case_is_compressable:
             LOG.info("Compressing fastq-files for %s", case_id)
             for sample, fastq_files in fastq_dict.items():
                 LOG.info(sample)
+                fastq_first = fastq_files["fastq_first_path"]
+                fastq_second = fastq_files["fastq_second_path"]
                 context.obj["crunchy"].spring(
                     fastq_first_path=fastq_first,
                     fastq_second_path=fastq_second,
