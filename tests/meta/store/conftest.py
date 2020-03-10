@@ -18,19 +18,13 @@ def config_stream(files):
 def config_data():
     """ config data fixture """
     return {
-        'email': None,
-        'case': 'case_id',
-        'samples': [
-            {
-                'id': 'sample_id',
-                'type': 'wts',
-            }
-        ],
-        'is_dryrun': False,
-        'out_dir': 'tests/fixtures/apps/mip/rna/store',
-        'priority': 'low',
-        'sampleinfo_path':
-        'tests/fixtures/apps/mip/rna/store/case_qc_sample_info.yaml',
+        "email": None,
+        "case": "case_id",
+        "samples": [{"id": "sample_id", "type": "wts",}],
+        "is_dryrun": False,
+        "out_dir": "tests/fixtures/apps/mip/rna/store",
+        "priority": "low",
+        "sampleinfo_path": "tests/fixtures/apps/mip/rna/store/case_qc_sample_info.yaml",
     }
 
 
@@ -38,21 +32,17 @@ def config_data():
 def sampleinfo_data():
     """ sampleinfo data fixture """
     return {
-        'date': datetime.datetime(2020, 3, 1),
-        'is_finished': True,
-        'case': 'case_id',
-        'version': 'v8.2.2',
+        "date": datetime.datetime(2020, 3, 1),
+        "is_finished": True,
+        "case": "case_id",
+        "version": "v8.2.2",
     }
 
 
 @pytest.fixture(scope="function")
 def deliverables_raw(config_data):
     """ raw_deliverables fixture """
-    return ruamel.yaml.safe_load(
-        Path(
-            config_data["out_dir"], "case_id_deliverables.yaml"
-        ).open()
-    )
+    return ruamel.yaml.safe_load(Path(config_data["out_dir"], "case_id_deliverables.yaml").open())
 
 
 @pytest.fixture(scope="function")
