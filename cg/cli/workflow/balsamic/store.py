@@ -3,7 +3,6 @@ import datetime as dt
 import logging
 from pathlib import Path
 import sys
-
 import click
 
 from cg.apps import hk, tb
@@ -142,7 +141,7 @@ def completed(context):
                 context.invoke(analysis, config_stream=config_stream)
             except Exception:
                 LOG.error(
-                    "uploading family failed: %s",
+                    "case storage failed: %s",
                     analysis_obj.family.internal_id,
                     exc_info=True,
                 )
