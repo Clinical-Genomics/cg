@@ -9,13 +9,12 @@ import cg.meta.store.mip_rna as mip_rna
 from cg.exc import AnalysisNotFinishedError, BundleAlreadyAddedError
 
 
-@mock.patch('cg.store.Store')
-@mock.patch('cg.apps.hk.HousekeeperAPI')
-@mock.patch('cg.meta.store.mip_rna.add_analysis')
-def test_gather_files_and_bundle_in_hk_bundle_already_added(mock_add_analysis,
-                                                            mock_housekeeper,
-                                                            mock_store, config_stream,
-                                                            bundle_data):
+@mock.patch("cg.store.Store")
+@mock.patch("cg.apps.hk.HousekeeperAPI")
+@mock.patch("cg.meta.store.mip_rna.add_analysis")
+def test_gather_files_and_bundle_in_hk_bundle_already_added(
+    mock_add_analysis, mock_housekeeper, mock_store, config_stream, bundle_data
+):
     """
     tests the function gather_files_and_bundle_in_housekeeper
     """
@@ -30,25 +29,27 @@ def test_gather_files_and_bundle_in_hk_bundle_already_added(mock_add_analysis,
     with pytest.raises(BundleAlreadyAddedError) as exc_info:
         mip_rna.gather_files_and_bundle_in_housekeeper(mip_rna_config, mock_housekeeper, mock_store)
 
-    assert exc_info.value.message == 'bundle already added'
+    assert exc_info.value.message == "bundle already added"
 
 
-@mock.patch('cg.store.Store')
-@mock.patch('housekeeper.store.models')
-@mock.patch('cg.apps.hk.HousekeeperAPI')
-@mock.patch('cg.meta.store.mip_rna.include_files_in_housekeeper')
-@mock.patch('cg.meta.store.mip_rna.add_new_complete_analysis_record')
-@mock.patch('cg.meta.store.mip_rna.add_new_analysis_to_the_status_api')
-@mock.patch('cg.meta.store.mip_rna.add_analysis')
-def test_gather_files_and_bundle_in_hk_bundle_new_analysis(mock_add_analysis,
-                                                           mock_add_to_status,
-                                                           mock_add_new_analysis,
-                                                           mock_include_files_in_housekeeper,
-                                                           mock_housekeeper_api,
-                                                           mock_housekeeper_store,
-                                                           mock_cg_store,
-                                                           config_stream,
-                                                           bundle_data):
+@mock.patch("cg.store.Store")
+@mock.patch("housekeeper.store.models")
+@mock.patch("cg.apps.hk.HousekeeperAPI")
+@mock.patch("cg.meta.store.mip_rna.include_files_in_housekeeper")
+@mock.patch("cg.meta.store.mip_rna.add_new_complete_analysis_record")
+@mock.patch("cg.meta.store.mip_rna.add_new_analysis_to_the_status_api")
+@mock.patch("cg.meta.store.mip_rna.add_analysis")
+def test_gather_files_and_bundle_in_hk_bundle_new_analysis(
+    mock_add_analysis,
+    mock_add_to_status,
+    mock_add_new_analysis,
+    mock_include_files_in_housekeeper,
+    mock_housekeeper_api,
+    mock_housekeeper_store,
+    mock_cg_store,
+    config_stream,
+    bundle_data,
+):
     """
     tests the function gather_files_and_bundle_in_housekeeper
     """
@@ -63,21 +64,29 @@ def test_gather_files_and_bundle_in_hk_bundle_new_analysis(mock_add_analysis,
     mock_add_to_status.return_value = mock_cg_store.Family.return_value
     mock_add_new_analysis.return_value = mock_cg_store.Analysis.return_value
 
-    mip_rna.gather_files_and_bundle_in_housekeeper(mip_rna_config, mock_housekeeper_api,
-                                                   mock_cg_store)
+    mip_rna.gather_files_and_bundle_in_housekeeper(
+        mip_rna_config, mock_housekeeper_api, mock_cg_store
+    )
 
     # THEN the bundle and version should be added to Housekeeper
     mock_include_files_in_housekeeper.assert_called()
-    mock_include_files_in_housekeeper.assert_called_with(mock_bundle, mock_housekeeper_api,
-                                                         mock_version)
+    mock_include_files_in_housekeeper.assert_called_with(
+        mock_bundle, mock_housekeeper_api, mock_version
+    )
 
 
-@mock.patch('cg.meta.store.mip_rna.build_bundle')
-@mock.patch('cg.meta.store.mip_rna.parse_sampleinfo')
-@mock.patch('cg.meta.store.mip_rna.parse_config')
-def test_add_analysis_finished(mock_parse_config, mock_parse_sample, mock_build_bundle,
-                               config_stream, config_data, sampleinfo_data,
-                               deliverables_raw):
+@mock.patch("cg.meta.store.mip_rna.build_bundle")
+@mock.patch("cg.meta.store.mip_rna.parse_sampleinfo")
+@mock.patch("cg.meta.store.mip_rna.parse_config")
+def test_add_analysis_finished(
+    mock_parse_config,
+    mock_parse_sample,
+    mock_build_bundle,
+    config_stream,
+    config_data,
+    sampleinfo_data,
+    deliverables_raw,
+):
     """
     tests the function add_analysis when passing a config file of a finished RNA analysis
     """
@@ -98,10 +107,11 @@ def test_add_analysis_finished(mock_parse_config, mock_parse_sample, mock_build_
     assert result == mock_build_bundle(config_data, sampleinfo_data, deliverables_raw)
 
 
-@mock.patch('cg.meta.store.mip_rna.parse_sampleinfo')
-@mock.patch('cg.meta.store.mip_rna.parse_config')
-def test_add_analysis_not_finished(mock_parse_config, mock_parse_sample, config_stream,
-                                   config_data, sampleinfo_data):
+@mock.patch("cg.meta.store.mip_rna.parse_sampleinfo")
+@mock.patch("cg.meta.store.mip_rna.parse_config")
+def test_add_analysis_not_finished(
+    mock_parse_config, mock_parse_sample, config_stream, config_data, sampleinfo_data
+):
     """
     tests the function add_analysis when passing a config file of an unfinished RNA analysis
     """
@@ -109,7 +119,7 @@ def test_add_analysis_not_finished(mock_parse_config, mock_parse_sample, config_
 
     mip_rna_config = config_stream["rna_config_store"]
     mock_parse_config.return_value = config_data
-    sampleinfo_data['is_finished'] = False
+    sampleinfo_data["is_finished"] = False
     mock_parse_sample.return_value = sampleinfo_data
 
     # WHEN  gathering information from the MIP RNA analysis to store and the analysis is not
@@ -119,11 +129,12 @@ def test_add_analysis_not_finished(mock_parse_config, mock_parse_sample, config_
         mip_rna.add_analysis(mip_rna_config)
 
     # THEN the correct exception should be raised
-    assert exc_info.value.message == 'analysis not finished'
+    assert exc_info.value.message == "analysis not finished"
 
 
-def test_build_bundle(snapshot: Snapshot, config_data: dict, sampleinfo_data: dict,
-                      deliverables_raw: dict):
+def test_build_bundle(
+    snapshot: Snapshot, config_data: dict, sampleinfo_data: dict, deliverables_raw: dict
+):
     # GIVEN the MIP analysis config data, the sampleinfo data and the deliverables file
 
     # WHEN building the bundle
