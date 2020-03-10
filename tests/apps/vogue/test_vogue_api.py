@@ -15,4 +15,4 @@ def test_instatiate(vogue_config):
     vogue_api = VogueAPI(vogue_config)
 
     # THEN assert that the adapter was properly instantiated
-    assert vogue_api.vogue_binary == vogue_config['vogue']['binary_path']
+    assert vogue_api.vogue_binary == vogue_config["vogue"]["binary_path"]

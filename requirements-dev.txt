@@ -1,19 +1,26 @@
-pytest>=3.6     # due to pytest-flask, pytest-cov
+# pytest
+pytest>=5.2     # due to pytest-flask, pytest-cov
 mock
 ipdb
+pytest-mock
+snapshottest
+
+# coverage
 coverage<5
 pytest-cov
 coveralls
-pytest-mock
+python-coveralls>=2.9.3     # due to conflict on coverage package
+
+# linting
 git-lint
 pylint
+six~=1.12               # due to astroid
 pycodestyle
 yamllint
 docutils
 html-linter
 tidy
-six>=1.12                   # due to astroid 2.3.3
-python-coveralls>=2.9.3     # due to conflict on coverage package
+
+# black
 black
 pre-commit
-snapshottest

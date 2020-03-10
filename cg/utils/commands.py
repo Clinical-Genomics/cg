@@ -25,11 +25,11 @@ class Process:
         """
         super(Process, self).__init__()
         self.binary = binary
-        LOG.info("Initialising Process with binary: %s", self.binary)
+        LOG.debug("Initialising Process with binary: %s", self.binary)
         self.base_call = [self.binary]
         if config:
             self.base_call.extend([config_parameter, config])
-        LOG.info("Use base call %s", self.base_call)
+        LOG.debug("Use base call %s", self.base_call)
         self._stdout = ""
         self._stderr = ""
 
@@ -43,7 +43,7 @@ class Process:
         if parameters:
             command.extend(parameters)
 
-        LOG.info("Running command %s", command)
+        LOG.info("Running command %s", " ".join(command))
         res = subprocess.run(
             command, check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE
         )
@@ -52,6 +52,7 @@ class Process:
         self.stderr = res.stderr.decode("utf-8").rstrip()
         if res.returncode != 0:
             LOG.critical("Call %s exit with a non zero exit code", command)
+            LOG.critical(self.stderr)
             raise CalledProcessError(command, res.returncode)
 
         return res.returncode

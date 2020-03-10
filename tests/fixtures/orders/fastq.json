@@ -15,7 +15,8 @@
             "well_position": "",
             "source": "blood",
             "priority": "priority",
-            "require_qcok": true
+            "require_qcok": true,
+            "elution_buffer": "Nuclease-free water"
         },
         {
             "name": "prov2",
@@ -29,7 +30,8 @@
             "well_position": "",
             "source": "cell line",
             "priority": "priority",
-            "require_qcok": false
+            "require_qcok": false,
+            "elution_buffer": "Nuclease-free water"
         }
     ]
 }
