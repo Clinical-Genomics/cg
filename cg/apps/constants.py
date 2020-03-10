@@ -1,4 +1,7 @@
 BAM_SUFFIX = ".bam"
+BAM_INDEX_SUFFIX = ".bai"
 CRAM_SUFFIX = ".cram"
+CRAM_INDEX_SUFFIX = ".crai"
 FASTQ_FIRST_SUFFIX = "R1_001.fastq.gz"
 FASTQ_SECOND_SUFFIX = "R2_001.fastq.gz"
+SPRING_SUFFIX = ".spring"

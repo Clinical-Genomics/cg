@@ -7,7 +7,14 @@ import tempfile
 from pathlib import Path
 
 from cg.utils import Process
-from .constants import BAM_SUFFIX, CRAM_SUFFIX, FASTQ_FIRST_SUFFIX, FASTQ_SECOND_SUFFIX
+from .constants import (
+    BAM_SUFFIX,
+    CRAM_SUFFIX,
+    CRAM_INDEX_SUFFIX,
+    FASTQ_FIRST_SUFFIX,
+    FASTQ_SECOND_SUFFIX,
+    SPRING_SUFFIX,
+)
 
 LOG = logging.getLogger(__name__)
 
@@ -24,7 +31,7 @@ source activate {crunchy_env}
 """
 
 SBATCH_BAM_TO_CRAM = """
-crunchy compress bam --bam-path {bam_path} --cram-path {cram_path} --reference {reference_path} --check-integrity
+crunchy compress bam --bam-path {bam_path} --cram-path {cram_path} --reference {reference_path}
 if [[ $? == 0 ]]
 then
     touch {flag_path}
@@ -59,13 +66,13 @@ class CrunchyAPI:
         self.crunchy_env = config["crunchy"]["conda_env"]
         self.reference_path = config["crunchy"]["cram_reference"]
 
-    def bam_to_cram(self, bam_path: str, dry_run: bool = False):
+    def bam_to_cram(self, bam_path: Path, dry_run: bool = False):
         """
-            Make sbatch script and send to slurm
+            Compress bam-file into cram
         """
         cram_path = self.change_suffix_bam_to_cram(bam_path)
-        job_name = Path(cram_path).name + "_bam_to_cram"
-        flag_path = cram_path + FLAG_PATH_SUFFIX
+        job_name = bam_path.name + "_bam_to_cram"
+        flag_path = cram_path.with_suffix(FLAG_PATH_SUFFIX)
 
         sbatch_header = self.get_slurm_header(
             job_name=job_name,
@@ -85,14 +92,17 @@ class CrunchyAPI:
         self._submit_sbatch(sbatch_content=sbatch_content, dry_run=dry_run)
 
     def spring(
-        self, fastq_first_path: str, fastq_second_path: str, dry_run: bool = False
+        self, fastq_first_path: Path, fastq_second_path: Path, dry_run: bool = False
     ):
+        """
+            Use spring to compress fastq_files
+        """
 
         spring_path = self.change_suffix_spring(
             fastq_first_path=fastq_first_path, fastq_second_path=fastq_second_path
         )
-        job_name = Path(spring_path).name + "_spring"
-        flag_path = spring_path + FLAG_PATH_SUFFIX
+        job_name = spring_path.name + "_spring"
+        flag_path = spring_path.with_suffx(FLAG_PATH_SUFFIX)
 
         sbatch_header = self.get_slurm_header(
             job_name=job_name,
@@ -112,6 +122,7 @@ class CrunchyAPI:
         self._submit_sbatch(sbatch_content=sbatch_content, dry_run=dry_run)
 
     def _submit_sbatch(self, sbatch_content: str, dry_run: bool = False):
+        """Submit slurm job"""
         if not dry_run:
             with tempfile.NamedTemporaryFile(mode="w+t") as sbatch_file:
 
@@ -124,89 +135,102 @@ class CrunchyAPI:
         else:
             LOG.info("Would submit following to slurm:\n\n%s", sbatch_content)
 
-    def cram_compression_exists(self, bam_path: str) -> bool:
-
+    def cram_compression_done(self, bam_path: Path) -> bool:
+        """Check if cram-compression already done for bam-file"""
         cram_path = self.change_suffix_bam_to_cram(bam_path)
-        flag_path = cram_path + ".crunchy.txt"
+        flag_path = cram_path.with_suffix(FLAG_PATH_SUFFIX)
 
-        if not Path(cram_path).exists():
+        if not cram_path.exists():
             LOG.info("No cram-file for %s", bam_path)
             return False
-        if not Path(cram_path + ".crai").exists():
-            LOG.info("No crai-file for %s", cram_path)
+        if not cram_path.with_suffix(CRAM_INDEX_SUFFIX).exists():
+            LOG.info("No index-file for %s", cram_path)
             return False
-        if not Path(flag_path).exists():
-            LOG.info("No .crunchy.txt file for %s", cram_path)
+        if not flag_path.exists():
+            LOG.info("No %s file for %s", FLAG_PATH_SUFFIX, cram_path)
             return False
-
-        LOG.info("bam to cram conversion successful for %s", bam_path)
         return True
 
-    def spring_compression_exists(
-        self, fastq_first_path: str, fastq_second_path: str
+    def bam_compression_possible(self, bam_path: Path) -> bool:
+        """Check if it cram compression for bam-file is possible"""
+        if bam_path is None or not bam_path.exists():
+            LOG.warning("Could not find bam %s", bam_path)
+            return False
+
+        if self.cram_compression_done(bam_path=bam_path):
+            LOG.info("cram compression already exists for %s", bam_path)
+            return False
+
+        return True
+
+    def spring_compression_done(
+        self, fastq_first_path: Path, fastq_second_path: Path
     ) -> bool:
+        """Check if spring compression already is done for fastq-files"""
 
         spring_path = self.change_suffix_spring(
             fastq_first_path=fastq_first_path, fastq_second_path=fastq_second_path
         )
-        flag_path = spring_path + FLAG_PATH_SUFFIX
+        flag_path = spring_path.with_suffix(FLAG_PATH_SUFFIX)
 
-        if not Path(spring_path).exists():
+        if not spring_path.exists():
             LOG.info("No spring file %s", spring_path)
             return False
-        if not Path(flag_path).exists():
-            LOG.info("No .crunchy.txt file for %s", spring_path)
+        if not flag_path.exists():
+            LOG.info("No %s file for %s", FLAG_PATH_SUFFIX, spring_path)
             return False
-
-        LOG.info(
-            "spring compression successful for %s, %s",
-            fastq_first_path,
-            fastq_second_path,
-        )
         return True
 
-    def fastq_compression_ready(
-        self, fastq_first_path: str, fastq_second_path: str
+    def fastq_compression_possible(
+        self, fastq_first_path: Path, fastq_second_path: Path
     ) -> bool:
-
-        if fastq_first_path is None or not Path(fastq_first_path).exists():
+        """Check if spring compression is possible for fastq-files"""
+        if fastq_first_path is None or not fastq_first_path.exists():
             LOG.warning("Could not find fastq %s", fastq_first_path)
             return False
-        if fastq_second_path is None or not Path(fastq_second_path).exists():
+        if fastq_second_path is None or not fastq_second_path.exists():
             LOG.warning("Could not find fastq %s", fastq_second_path)
             return False
-        if self.spring_compression_exists(
+        if self.spring_compression_done(
             fastq_first_path=fastq_first_path, fastq_second_path=fastq_second_path
         ):
-            LOG.info(
-                "Spring compression already exists for %s and %s",
-                fastq_first_path,
-                fastq_second_path,
-            )
             return False
 
         return True
 
     @staticmethod
-    def change_suffix_bam_to_cram(bam_path: str) -> str:
-        if not bam_path.endswith(BAM_SUFFIX):
+    def change_suffix_bam_to_cram(bam_path: Path) -> Path:
+        """ Change suffix from .bam to .cram"""
+        if not bam_path.suffix == BAM_SUFFIX:
             LOG.error("%s does not end with %s", bam_path, BAM_SUFFIX)
             raise ValueError
-        cram_path = bam_path[0:-4] + CRAM_SUFFIX
+        cram_path = Path(str(bam_path)[0:-4] + CRAM_SUFFIX)
         return cram_path
 
     @staticmethod
-    def change_suffix_spring(fastq_first_path: str, fastq_second_path: str) -> str:
-
-        if not fastq_first_path.endswith(FASTQ_FIRST_SUFFIX):
+    def change_suffix_spring(fastq_first_path: Path, fastq_second_path: Path) -> Path:
+        """Make correct suffix for spring compressed fastq-files"""
+        if not fastq_first_path.name.endswith(FASTQ_FIRST_SUFFIX):
             LOG.error("%s does not end with %s", fastq_first_path, FASTQ_FIRST_SUFFIX)
             raise ValueError
 
-        if not fastq_second_path.endswith(FASTQ_SECOND_SUFFIX):
+        if not fastq_second_path.name.endswith(FASTQ_SECOND_SUFFIX):
             LOG.error("%s does not end with %s", fastq_second_path, FASTQ_SECOND_SUFFIX)
             raise ValueError
 
-        spring_path = fastq_first_path.replace(FASTQ_FIRST_SUFFIX, ".spring")
+        if not str(fastq_first_path).replace(FASTQ_FIRST_SUFFIX, "") == str(
+            fastq_second_path
+        ).replace(FASTQ_SECOND_SUFFIX, ""):
+            LOG.error(
+                "%s and %s does not have the same root",
+                fastq_first_path,
+                fastq_second_path,
+            )
+            raise ValueError
+
+        spring_path = Path(
+            str(fastq_first_path).replace(FASTQ_FIRST_SUFFIX, SPRING_SUFFIX)
+        )
         return spring_path
 
     @staticmethod

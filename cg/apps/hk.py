@@ -8,7 +8,7 @@ from housekeeper.exc import VersionIncludedError
 from housekeeper.include import include_version, checksum as hk_checksum
 from housekeeper.store import Store, models
 
-from .constants import FASTQ_FIRST_SUFFIX, FASTQ_SECOND_SUFFIX
+from .constants import FASTQ_FIRST_SUFFIX, FASTQ_SECOND_SUFFIX, BAM_SUFFIX
 
 log = logging.getLogger(__name__)
 
@@ -83,6 +83,19 @@ class HousekeeperAPI(Store):
             if fastq_file.full_path.endswith(FASTQ_SECOND_SUFFIX):
                 fastq_dict[sample_name]["fastq_second_path"] = fastq_file.full_path
         return fastq_dict
+
+    def get_bam_files(self, bundle: str):
+        """Fetch all bam-files for a bundle, and organize them into dictionary
+
+        Returns:
+            fastq_dict(dict)
+        """
+        bam_files = self.get_files(bundle=bundle, tags=["bam"])
+        bam_dict = {}
+        for bam_file in bam_files:
+            sample_name = Path(bam_file.full_path).name.split("_")[0]
+            bam_dict[sample_name] = bam_file.full_path
+        return bam_dict
 
     def add_file(self, file, version_obj: models.Version, tag_name, to_archive=False):
         """Add a file to housekeeper."""
