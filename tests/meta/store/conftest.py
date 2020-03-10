@@ -20,7 +20,7 @@ def config_data():
     return {
         "email": None,
         "case": "case_id",
-        "samples": [{"id": "sample_id", "type": "wts",}],
+        "samples": [{"id": "sample_id", "type": "wts"}],
         "is_dryrun": False,
         "out_dir": "tests/fixtures/apps/mip/rna/store",
         "priority": "low",
@@ -42,10 +42,14 @@ def sampleinfo_data():
 @pytest.fixture(scope="function")
 def deliverables_raw(config_data):
     """ raw_deliverables fixture """
-    return ruamel.yaml.safe_load(Path(config_data["out_dir"], "case_id_deliverables.yaml").open())
+    return ruamel.yaml.safe_load(
+        Path(config_data["out_dir"], "case_id_deliverables.yaml").open()
+    )
 
 
 @pytest.fixture(scope="function")
 def bundle_data():
     """ bundle data fixture """
-    return ruamel.yaml.safe_load(open("tests/fixtures/apps/mip/rna/store/bundle_data.yaml"))
+    return ruamel.yaml.safe_load(
+        open("tests/fixtures/apps/mip/rna/store/bundle_data.yaml")
+    )
