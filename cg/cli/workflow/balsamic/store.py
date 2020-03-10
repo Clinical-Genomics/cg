@@ -142,11 +142,7 @@ def completed(context):
             try:
                 context.invoke(analysis, config_stream=config_stream)
             except Exception:
-                LOG.error(
-                    "case storage failed: %s",
-                    analysis_obj.family.internal_id,
-                    exc_info=True,
-                )
+                LOG.error("case storage failed: %s", analysis_obj.family, exc_info=True)
                 exit_code = FAIL
 
     sys.exit(exit_code)
