@@ -1,5 +1,5 @@
 # pytest
-pytest>=3.6     # due to pytest-flask, pytest-cov
+pytest>=5.2     # due to pytest-flask, pytest-cov
 mock
 ipdb
 pytest-mock
