@@ -24,8 +24,8 @@ SBATCH_HEADER_TEMPLATE = """
 #SBATCH -J {job_name}
 #SBATCH -A {account}
 #SBATCH -n 1
-$SBATCH --stderr {log_dir}/{jobname}.stderr
-$SBATCH --stdout {log_dir}/{jobname}.stdout
+$SBATCH --stderr {log_dir}/{job_name}.stderr
+$SBATCH --stdout {log_dir}/{job_name}.stdout
 
 source activate {crunchy_env}
 """
@@ -50,7 +50,7 @@ else:
 fi
 """
 
-FLAG_PATH_SUFFIX = "crunchy.txt"
+FLAG_PATH_SUFFIX = ".crunchy.txt"
 
 
 class CrunchyAPI:
@@ -62,8 +62,8 @@ class CrunchyAPI:
 
         self.process = Process("sbatch")
         self.slurm_account = config["crunchy"]["slurm"]["account"]
-        self.slurm_log_dir = config["cruncy"]["slurm"]["log_dir"]
-        self.crunchy_env = config["crunchy"]["conda_env"]
+        self.slurm_log_dir = config["crunchy"]["slurm"]["log_dir"]
+        self.crunchy_env = config["crunchy"]["slurm"]["conda_env"]
         self.reference_path = config["crunchy"]["cram_reference"]
 
     def bam_to_cram(self, bam_path: Path, dry_run: bool = False):

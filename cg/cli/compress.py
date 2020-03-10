@@ -26,13 +26,19 @@ def compress(context):
 @click.pass_context
 def spring(context, case_id, number_of_conversions, dry_run):
     """Find cases with fastq-files and compress with spring"""
-    # Scan all cases in status database for fastq
     conversion_count = 0
-    for case in context.obj["status"].family(case_id):
-        if conversion_count == number_of_conversions and not case_id:
+    if case_id:
+        families = [context.obj["db"].family(case_id)]
+    else:
+        families = context.obj["db"].families()
+    for case in families:
+        if conversion_count == number_of_conversions:
             break
-        case_id = case.family.internal_id
+        case_id = case.internal_id
         fastq_dict = context.obj["hk"].get_fastq_files(bundle=case_id)
+        click.echo(fastq_dict)
+        if not fastq_dict:
+            continue
         case_is_compressable = True
         for sample, fastq_files in fastq_dict.items():
             fastq_first = Path(fastq_files["fastq_first_path"])
@@ -69,11 +75,18 @@ def spring(context, case_id, number_of_conversions, dry_run):
 def cram(context, case_id, number_of_conversions, dry_run):
     """Find cases with bam-files and compress into cram"""
     conversion_count = 0
-    for case in context.obj["status"].family(case_id):
-        if conversion_count == number_of_conversions and not case_id:
+    if case_id:
+        families = [context.obj["db"].family(case_id)]
+    else:
+        families = context.obj["db"].families()
+    for case in families:
+        if conversion_count == number_of_conversions:
+            LOG.info("compressed bam-files for %s cases", conversion_count)
             break
-        case_id = case.family.internal_id
+        case_id = case.internal_id
         bam_dict = context.obj["hk"].get_bam_files(bundle=case_id)
+        if not bam_dict:
+            continue
         case_is_compressable = True
         for sample, bam_file in bam_dict.items():
             if not context.obj["crunchy"].bam_compression_possible(
