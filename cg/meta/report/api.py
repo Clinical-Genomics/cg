@@ -169,6 +169,14 @@ class ReportAPI:
             else:
                 self.LOG.warning(f"No coverage could be calculated for: {lims_id}")
 
+    def _check_sample_statuses(self, sample):
+        prep_category = sample.application_version.application.prep_category
+        for status in ['received_at', 'prepared_at', 'sequenced_at', 'delivered_at']:
+            if prep_category == 'rml' and status == 'prepared_at':
+                continue
+            if not sample[status]:
+                self.LOG.error(f'Date missimg for sample {sample.internal_id}: {status}')
+
     def _fetch_family_samples_from_status_db(self, family_id: str) -> list:
         """Incorporate data from the status database for each sample ."""
 
@@ -177,6 +185,7 @@ class ReportAPI:
 
         for family_sample in family_samples:
             sample = family_sample.sample
+            self._check_sample_statuses(sample)
             delivery_data_sample = dict()
             delivery_data_sample["id"] = sample.internal_id
             delivery_data_sample["ticket"] = Presenter.process_int(sample.ticket_number)
