@@ -143,7 +143,20 @@ def config_case(
     conda_env = context.obj["balsamic"]["conda_env"]
     root_dir = context.obj["balsamic"]["root"]
     wrk_dir = Path(f"{root_dir}/{case_id}/fastq")
+    application_types = set()
+    acceptable_applications = {"wgs", "wes", "tgs"}
+    applications_requiring_bed = {"wes", "tgs"}
+
     for link_obj in link_objs:
+        LOG.info(
+            "%s application type is %s",
+            link_obj.sample.internal_id,
+            link_obj.sample.application_version.application.prep_category,
+        )
+        application_types.add(
+            link_obj.sample.application_version.application.prep_category
+        )
+
         LOG.info("%s: config FASTQ file", link_obj.sample.internal_id)
 
         linked_reads_paths = {1: [], 2: []}
@@ -216,6 +229,17 @@ def config_case(
 
                 target_beds.add(bed_version_obj.filename)
 
+    if len(application_types) != 1:
+        raise BalsamicStartError(
+            "More than one application found for this case: %s"
+            % ", ".join(application_types)
+        )
+
+    if not application_types.issubset(acceptable_applications):
+        raise BalsamicStartError(
+            "Improper application for this case: %s" % application_types
+        )
+
     nr_paths = len(tumor_paths) if tumor_paths else 0
     if nr_paths != 1:
         raise BalsamicStartError(
@@ -232,7 +256,12 @@ def config_case(
     elif nr_normal_paths > 1:
         raise BalsamicStartError("Too many normal samples found: %s" % nr_normal_paths)
 
-    if not target_bed:
+    if target_bed and not application_types.issubset(applications_requiring_bed):
+        raise BalsamicStartError(
+            "--target_bed is in compatible with %s" % " ".join(application_types)
+        )
+
+    if not target_bed and application_types.issubset(applications_requiring_bed):
         if len(target_beds) == 1:
             target_bed = Path(context.obj["bed_path"]) / target_beds.pop()
         elif len(target_beds) > 1:
@@ -252,9 +281,10 @@ def config_case(
         f" --output-config {case_id}.json"
         f" --analysis-dir {root_dir}"
         f" --umi-trim-length {umi_trim_length}"
-        f" -p {target_bed}"
     )
 
+    if target_bed:
+        command_str += f" -p {target_bed}"
     if normal_path:
         command_str += f" --normal {normal_path}"
     if umi:

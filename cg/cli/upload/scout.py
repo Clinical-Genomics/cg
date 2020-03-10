@@ -32,7 +32,6 @@ def scout(context, re_upload, print_console, case_id):
 
     family_obj = status_api.family(case_id)
     scout_config = scout_upload_api.generate_config(family_obj.analyses[0])
-
     if print_console:
         click.echo(scout_config)
         return
