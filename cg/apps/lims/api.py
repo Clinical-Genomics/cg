@@ -93,14 +93,24 @@ class LimsAPI(Lims, OrderHandler):
 
     def _export_artifact(self, lims_artifact):
         """Get data from a LIMS artifact."""
-        return {"id": lims_artifact.id, "name": lims_artifact.name}
+        return {
+            "id": lims_artifact.id,
+            "name": lims_artifact.name,
+        }
 
     def get_received_date(self, lims_id: str) -> str:
         """Get the date when a sample was received."""
 
-        step_names_udfs = MASTER_STEPS_UDFS["received_step"]
+        try:
+            input_artifact = Sample(self, id=lims_id).artifact
+        except OSError as err:
+            log.warning(err)
+            return None
 
-        received_dates = self._get_all_step_dates(step_names_udfs, lims_id)
+        step_names_udfs = MASTER_STEPS_UDFS["received_step"]
+        received_dates = self._get_all_step_dates_from_input(
+            step_names_udfs, input_artifact.id
+        )
         received_date = self._most_recent_date(received_dates)
 
         return received_date
@@ -362,7 +372,7 @@ class LimsAPI(Lims, OrderHandler):
                         artifacts[0].parent_process.date_run,
                         self.get_method_number(artifacts[0], udf_key_number),
                         self.get_method_version(artifacts[0], udf_key_version),
-                    )
+                    ),
                 )
 
         sorted_methods = self._sort_by_date_run(methods)
@@ -378,6 +388,26 @@ class LimsAPI(Lims, OrderHandler):
                 )
 
         return None
+
+    def _get_all_step_dates_from_input(self, step_names_udfs, input_artifact_id):
+        """
+        Gets all the dates from a process based on input artifact and process type.
+        """
+
+        dates = []
+        for process_type in step_names_udfs:
+            processes = self.get_processes(
+                type=process_type, inputartifactlimsid=input_artifact_id
+            )
+            if not processes:
+                continue
+            udf_key = step_names_udfs[process_type]
+            for process in processes:
+                date_arrived = process.udf.get(udf_key)
+                if date_arrived:
+                    dates.append((process.date_run, date_arrived))
+
+        return dates
 
     def _get_all_step_dates(self, step_names_udfs, lims_id, artifact_type=None):
         """
