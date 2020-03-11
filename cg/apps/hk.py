@@ -63,40 +63,6 @@ class HousekeeperAPI(Store):
         """
         return self.files(bundle=bundle, tags=tags, version=version)
 
-    def get_fastq_files(self, bundle: str):
-        """Fetch all fastq-files for a bundle, and organize them into dictionary
-
-        Returns:
-            fastq_dict(dict)
-        """
-        fastq_files = self.get_files(bundle=bundle, tags=["fastq"])
-        fastq_dict = {}
-        for fastq_file in fastq_files:
-            sample_name = Path(fastq_file.full_path).name.split("_")[0]
-            if sample_name not in fastq_dict.keys():
-                fastq_dict[sample_name] = {
-                    "fastq_first_path": None,
-                    "fastq_second_path": None,
-                }
-            if fastq_file.full_path.endswith(FASTQ_FIRST_SUFFIX):
-                fastq_dict[sample_name]["fastq_first_path"] = fastq_file.full_path
-            if fastq_file.full_path.endswith(FASTQ_SECOND_SUFFIX):
-                fastq_dict[sample_name]["fastq_second_path"] = fastq_file.full_path
-        return fastq_dict
-
-    def get_bam_files(self, bundle: str):
-        """Fetch all bam-files for a bundle, and organize them into dictionary
-
-        Returns:
-            fastq_dict(dict)
-        """
-        bam_files = self.get_files(bundle=bundle, tags=["bam"])
-        bam_dict = {}
-        for bam_file in bam_files:
-            sample_name = Path(bam_file.full_path).name.split("_")[0]
-            bam_dict[sample_name] = bam_file.full_path
-        return bam_dict
-
     def add_file(self, file, version_obj: models.Version, tag_name, to_archive=False):
         """Add a file to housekeeper."""
         new_file = self.new_file(

@@ -36,7 +36,6 @@ def spring(context, case_id, number_of_conversions, dry_run):
             break
         case_id = case.internal_id
         fastq_dict = context.obj["hk"].get_fastq_files(bundle=case_id)
-        click.echo(fastq_dict)
         if not fastq_dict:
             continue
         case_is_compressable = True
