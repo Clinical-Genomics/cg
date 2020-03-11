@@ -220,7 +220,7 @@ class ReportAPI:
             delivery_data_sample["bioinformatic_analysis"] = Presenter.process_string(
                 sample.data_analysis
             )
-            self._check_sample_dates(delivery_data_sample)
+            self._check_sample_dates(sample, delivery_data_sample)
             delivery_data_samples.append(delivery_data_sample)
 
         return delivery_data_samples
