@@ -4,7 +4,6 @@ from pathlib import Path
 import sys
 import click
 
-from housekeeper.exc import VersionIncludedError
 from cg.apps import hk, tb
 from cg.exc import (
     AnalysisNotFinishedError,
@@ -56,9 +55,6 @@ def analysis(context, config_stream):
     except BundleAlreadyAddedError as error:
         click.echo(click.style(error.message, fg="red"))
         context.abort()
-    except VersionIncludedError as error:
-        click.echo(click.style(error.message, fg="red"))
-        context.abort()
     except FileNotFoundError as error:
         click.echo(click.style(f"missing file: {error.args[0]}", fg="red"))
         context.abort()
@@ -66,7 +62,7 @@ def analysis(context, config_stream):
     status.add_commit(new_analysis)
     click.echo(click.style("included files in Housekeeper", fg="green"))
 
-    
+
 @store.command()
 @click.pass_context
 def completed(context):
