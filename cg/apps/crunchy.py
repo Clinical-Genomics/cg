@@ -21,17 +21,23 @@ LOG = logging.getLogger(__name__)
 
 SBATCH_HEADER_TEMPLATE = """
 #!/bin/bash
-#SBATCH -J {job_name}
-#SBATCH -A {account}
-#SBATCH -n 1
-$SBATCH --stderr {log_dir}/{job_name}.stderr
-$SBATCH --stdout {log_dir}/{job_name}.stdout
+#SBATCH --job-name={job_name}
+#SBATCH --account={account}
+#SBATCH --ntasks=12
+#SBATCH --mem=50G
+#SBATCH --error={log_dir}/{job_name}.stderr
+#SBATCH --output={log_dir}/{job_name}.stdout
+#SBATCH --mail-type=FAIL
+#SBATCH --time=4:00:00
+#SBATCH --qos=low
 
+set e
 source activate {crunchy_env}
+
 """
 
 SBATCH_BAM_TO_CRAM = """
-crunchy compress bam --bam-path {bam_path} --cram-path {cram_path} --reference {reference_path}
+crunchy --reference {reference_path} compress bam --bam-path {bam_path} --cram-path {cram_path}
 if [[ $? == 0 ]]
 then
     touch {flag_path}

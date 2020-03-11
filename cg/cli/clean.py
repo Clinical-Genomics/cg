@@ -8,7 +8,8 @@ from datetime import datetime
 
 from pathlib import Path
 
-from cg.apps import tb, hk, scoutapi, beacon as beacon_app
+from cg.apps import crunchy, tb, hk, scoutapi, beacon as beacon_app
+from cg.meta.compress import CompressAPI
 from cg.meta.upload.beacon import UploadBeaconApi
 from cg.store import Store
 
@@ -24,6 +25,7 @@ def clean(context):
     context.obj["hk"] = hk.HousekeeperAPI(context.obj)
     context.obj["scout"] = scoutapi.ScoutAPI(context.obj)
     context.obj["beacon"] = beacon_app.BeaconApi(context.obj)
+    context.obj["crunchy"] = crunchy.CrunchyAPI(context.obj)
 
 
 @clean.command()
@@ -189,22 +191,22 @@ def mipauto(
 
 @clean.command()
 @click.option("-c", "--case-id", type=str)
-@click.option("-n", "--number-of-conversions", type=int)
 @click.option("-d", "--dry-run", is_flag=True)
-def compress(context, case_id, number_of_conversions, dry_run):
-    bam_to_cram_api = BamToCramAPI()
-    # Iterate over samples in scout that has existing bam_file
-    compressed_count = 0
-    for case in context.obj["scout"].get_cases(case=case_id):
-        if compressed_count >= number_of_conversions:
-            break
-        for sample in case["individuals"]:
-            bam_file = sample.get("bam_file")
-            if bam_file and Path(bam_file).exists():
-                bam_to_cram_api.bam_to_cram(
-                    bam_path=bam_file, job_name=sample["individual_id"], dry_run=dry_run
-                )
-                compressed_count += 1
-
-    # For cases where conversion were successful, change in scout, and hk database
-    # and remove bam_files
+def bam(context, case_id, dry_run):
+    """Clean up compressed bam-files, and changes links in scout and housekeeper
+       to cram files"""
+    compress_api = CompressAPI(
+        hk_api=context.obj["hk"],
+        crunchy_api=context.obj["crunchy"],
+        scout_api=context.obj["scout"],
+    )
+    if case_id:
+        families = [context.obj["db"].family(case_id)]
+    else:
+        families = context.obj["db"].families()
+    for case in families:
+        case_id = case.internal_id
+        if compress_api.case_is_compressed(case_id=case_id):
+            compress_api.update_scout(case_id)
+            compress_api.update_hk(case_id)
+            compress_api.remove_bams(case_id)

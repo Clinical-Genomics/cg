@@ -8,8 +8,6 @@ from housekeeper.exc import VersionIncludedError
 from housekeeper.include import include_version, checksum as hk_checksum
 from housekeeper.store import Store, models
 
-from .constants import FASTQ_FIRST_SUFFIX, FASTQ_SECOND_SUFFIX, BAM_SUFFIX
-
 log = logging.getLogger(__name__)
 
 
