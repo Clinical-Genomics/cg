@@ -152,3 +152,13 @@ def test_get_files(snapshot: Snapshot, deliverables_raw: dict):
 
     # THEN the result should contain the data to be stored in Housekeeper
     snapshot.assert_match(mip_rna_files)
+
+
+def test_parse_config(snapshot: Snapshot, config_raw: dict):
+    # GIVEN the raw MIP analysis config file
+
+    # WHEN getting the files used to build the bundle
+    mip_rna_parse_config = mip_rna.parse_config(config_raw)
+
+    # THEN the result should contain the data to be stored in Housekeeper
+    snapshot.assert_match(mip_rna_parse_config)

@@ -15,6 +15,12 @@ def config_stream(files):
 
 
 @pytest.fixture(scope="function")
+def config_raw(files_raw):
+    """ config stream fixture """
+    return files_raw["rna_config_store"]
+
+
+@pytest.fixture(scope="function")
 def config_data():
     """ config data fixture """
     return {
