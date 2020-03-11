@@ -151,7 +151,9 @@ def fixture_files_raw(files):
         "rna_config": ruamel.yaml.safe_load(open(files["rna_config"])),
         "rna_sampleinfo": ruamel.yaml.safe_load(open(files["rna_sampleinfo"])),
         "rna_config_store": ruamel.yaml.safe_load(open(files["rna_config_store"])),
-        "rna_sampleinfo_store": ruamel.yaml.safe_load(open(files["rna_sampleinfo_store"])),
+        "rna_sampleinfo_store": ruamel.yaml.safe_load(
+            open(files["rna_sampleinfo_store"])
+        ),
     }
 
 
@@ -163,9 +165,13 @@ def files_data(files_raw):
         "sampleinfo": mip_dna_files_api.parse_sampleinfo(files_raw["sampleinfo"]),
         "qcmetrics": mip_dna_files_api.parse_qcmetrics(files_raw["qcmetrics"]),
         "rna_config": mip_dna_files_api.parse_config(files_raw["rna_config"]),
-        "rna_sampleinfo": mip_rna_files_api.parse_sampleinfo_rna(files_raw["rna_sampleinfo"]),
+        "rna_sampleinfo": mip_rna_files_api.parse_sampleinfo_rna(
+            files_raw["rna_sampleinfo"]
+        ),
         "rna_config_store": store_mip_rna.parse_config(files_raw["rna_config_store"]),
-        "rna_sampleinfo_store": store_mip_rna.parse_sampleinfo(files_raw["rna_sampleinfo_store"]),
+        "rna_sampleinfo_store": store_mip_rna.parse_sampleinfo(
+            files_raw["rna_sampleinfo_store"]
+        ),
     }
 
 
@@ -351,7 +357,9 @@ def sample_store(base_store) -> Store:
     wgs_app = base_store.application("WGTPCFC030").versions[0]
     for sample in new_samples:
         sample.customer = customer
-        sample.application_version = external_app if "external" in sample.name else wgs_app
+        sample.application_version = (
+            external_app if "external" in sample.name else wgs_app
+        )
     base_store.add_commit(new_samples)
     return base_store
 
