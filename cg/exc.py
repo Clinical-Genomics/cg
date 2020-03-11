@@ -60,3 +60,7 @@ class BalsamicStartError(CgError):
     """
         Exception raised when Balsamic fails to start
     """
+
+
+class DeliveryReportError(CgError):
+    pass
