@@ -185,7 +185,6 @@ class ReportAPI:
 
         for family_sample in family_samples:
             sample = family_sample.sample
-            self._check_sample_statuses(sample)
             delivery_data_sample = dict()
             delivery_data_sample["id"] = sample.internal_id
             delivery_data_sample["ticket"] = Presenter.process_int(sample.ticket_number)
