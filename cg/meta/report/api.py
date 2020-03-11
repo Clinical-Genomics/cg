@@ -169,12 +169,12 @@ class ReportAPI:
             else:
                 self.LOG.warning(f"No coverage could be calculated for: {lims_id}")
 
-    def _check_sample_statuses(self, sample):
+    def _check_sample_dates(self, sample, delivery_data_sample):
         prep_category = sample.application_version.application.prep_category
-        for status in ['received_at', 'prepared_at', 'sequenced_at', 'delivered_at']:
-            if prep_category == 'rml' and status == 'prepared_at':
+        for status in ['received', 'prep_date', 'sequencing_date', 'delivery_date']:
+            if prep_category == 'rml' and status == 'prep_date':
                 continue
-            if not sample[status]:
+            if not delivery_data_sample[status]:
                 raise DeliveryReportError(f'Date missimg for sample {sample.internal_id}: {status}')
 
     def _fetch_family_samples_from_status_db(self, family_id: str) -> list:
@@ -220,7 +220,7 @@ class ReportAPI:
             delivery_data_sample["bioinformatic_analysis"] = Presenter.process_string(
                 sample.data_analysis
             )
-
+            self._check_sample_dates(delivery_data_sample)
             delivery_data_samples.append(delivery_data_sample)
 
         return delivery_data_samples
