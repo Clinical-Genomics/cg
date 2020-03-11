@@ -1,7 +1,7 @@
 """Click commands to store mip-rna analyses"""
 import logging
 from pathlib import Path
-
+import sys
 import click
 
 from housekeeper.exc import VersionIncludedError
@@ -15,6 +15,8 @@ from cg.meta.store.mip_rna import gather_files_and_bundle_in_housekeeper
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
+FAIL = 1
+SUCCESS = 0
 
 
 @click.group()
@@ -64,12 +66,14 @@ def analysis(context, config_stream):
     status.add_commit(new_analysis)
     click.echo(click.style("included files in Housekeeper", fg="green"))
 
-
+    
 @store.command()
 @click.pass_context
 def completed(context):
     """Store all completed analyses."""
     hk_api = context.obj["hk_api"]
+
+    exit_code = SUCCESS
     for analysis_obj in context.obj["tb_api"].analyses(
         status="completed", deleted=False
     ):
@@ -81,4 +85,10 @@ def completed(context):
             continue
         click.echo(click.style(f"storing family: {analysis_obj.family}", fg="blue"))
         with Path(analysis_obj.config_path).open() as config_stream:
-            context.invoke(analysis, config_stream=config_stream)
+            try:
+                context.invoke(analysis, config_stream=config_stream)
+            except Exception:
+                LOG.error("case storage failed: %s", analysis_obj.family, exc_info=True)
+                exit_code = FAIL
+
+    sys.exit(exit_code)
