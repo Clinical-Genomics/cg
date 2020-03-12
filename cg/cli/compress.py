@@ -92,7 +92,7 @@ def cram(context, case_id, number_of_conversions, dry_run):
             LOG.info("compressed bam-files for %s cases", conversion_count)
             break
         case_id = case.internal_id
-        bam_dict = compress_api.get_bam_files(case_id=case_id)
+        bam_dict = compress_api.get_bam_files_from_scout(case_id=case_id)
         if not bam_dict:
             continue
         case_is_compressable = True
@@ -102,7 +102,5 @@ def cram(context, case_id, number_of_conversions, dry_run):
                 break
         if case_is_compressable:
             LOG.info("Compressing bam-files for %s", case_id)
-            for sample, bam_file in bam_dict.items():
-                LOG.info("Compressing %s for sample %s", bam_file, sample)
-                compress_api.compress_bam(bam_path=Path(bam_file), dry_run=dry_run)
+            compress_api.compress_case(bam_dict=bam_dict, dry_run=dry_run)
             conversion_count += 1

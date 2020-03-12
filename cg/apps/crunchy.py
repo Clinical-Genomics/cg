@@ -78,7 +78,7 @@ class CrunchyAPI:
         """
         cram_path = self.change_suffix_bam_to_cram(bam_path)
         job_name = bam_path.name + "_bam_to_cram"
-        flag_path = cram_path.with_suffix(FLAG_PATH_SUFFIX)
+        flag_path = self.get_flag_path(file_path=cram_path)
 
         sbatch_header = self.get_slurm_header(
             job_name=job_name,
@@ -108,7 +108,7 @@ class CrunchyAPI:
             fastq_first_path=fastq_first_path, fastq_second_path=fastq_second_path
         )
         job_name = spring_path.name + "_spring"
-        flag_path = spring_path.with_suffx(FLAG_PATH_SUFFIX)
+        flag_path = self.get_flag_path(file_path=spring_path)
 
         sbatch_header = self.get_slurm_header(
             job_name=job_name,
@@ -203,6 +203,10 @@ class CrunchyAPI:
             return False
 
         return True
+
+    @staticmethod
+    def get_flag_path(file_path):
+        return file_path.with_suffix(FLAG_PATH_SUFFIX)
 
     @staticmethod
     def change_suffix_bam_to_cram(bam_path: Path) -> Path:

@@ -71,7 +71,7 @@ class CompressAPI:
                 LOG.warning("%s has more than 1 links to same inode", bam_path)
                 return None
             sample_name = bam_path.name.split("_")[0]
-            bam_dict[sample_name] = bam_path
+            bam_dict[sample_name] = bam_file
         scout_case = self.scout_api.get_cases(case_id=case_id)[0]
         scout_samples = [
             sample["individual_id"] for sample in scout_case["individuals"]
@@ -95,11 +95,12 @@ class CompressAPI:
             if self.get_nlinks(bam_path) > 1:
                 LOG.debug("%s has more than 1 links to same inode")
                 return None
-            bam_dict[sample_id] = Path(bam_path)
+            bam_dict[sample_id] = bam_path
         return bam_dict
 
     def compress_case(self, bam_dict: dict, dry_run: bool = False):
         for sample, bam_path in bam_dict.items():
+            LOG.info("Compressing %s for sample %s", bam_path, sample)
             self.crunchy_api.bam_to_cram(bam_path=bam_path, dry_run=dry_run)
 
     def scout_case_is_compressed(self, case_id):
@@ -129,18 +130,44 @@ class CompressAPI:
                         scout_sample["cram_file"] = cram_path
 
         if not dry_run:
-            self.scout_api.replace(data=modified_case)
+            LOG.info("updating case in scout...")
+            pass
 
     def update_hk(self, case_id: str, dry_run: bool = False):
-        bam_files = self.get_bam_files_from_hk(case_id=case_id)
-        for bam_file in bam_files:
-
+        bam_dict = self.get_bam_files_from_hk(case_id=case_id)
+        latest_hk_version = self.hk_api.last_version(bundle=case_id)
+        for sample_id, bam_file in bam_dict.items():
+            cram_tags = [sample_id, "cram"]
+            crai_tags = [sample_id, "cram-index"]
             bam_path = Path(bam_file.full_path)
+            bai_path = bam_path.with_suffix(".bai")
             cram_path = self.crunchy_api.change_suffix_bam_to_cram(bam_path=bam_path)
+            crai_path = cram_path.with_suffix(".crai")
             if self.crunchy_api.cram_compression_done(bam_path=bam_path):
-                LOG.debug("%s -> %s", bam_path, cram_path)
+                LOG.debug("%s -> %s, with tags %s", bam_path, cram_path, cram_tags)
+                LOG.debug("%s -> %s, with tags %s", bai_path, crai_tags, crai_tags)
                 if not dry_run:
-                    pass
+                    LOG.info("updating files in housekeeper...")
+                    self.hk_api.add_file_with_tags(
+                        file=cram_path, version_obj=latest_hk_version, tags=cram_tags
+                    )
+                    self.hk_api.add_file_with_tags(
+                        file=crai_path, version_obj=latest_hk_version, tags=crai_tags
+                    )
 
-    def remove_bams(self, case_id: str):
-        pass
+    def remove_bams(self, case_id: str, dry_run: bool = False):
+        bam_files = self.get_bam_files_from_hk(case_id=case_id)
+        latest_hk_version = self.hk_api.last_version(bundle=case_id)
+        for sample_id, bam_file in bam_files.items():
+            bam_path = Path(bam_file.full_path)
+            bai_path = bam_path.with_suffix(".bai")
+            flag_path = self.crunchy_api.get_flag_path(file_path=bam_path)
+            if self.crunchy_api.cram_compression_done(bam_path=bam_path):
+                LOG.debug("Will remove %s, %s, and %s", bam_path, bai_path, flag_path)
+                if not dry_run:
+                    LOG.info("deleting files...")
+                    bam_file.delete()
+                    self.hk_api.commit()
+                    bam_path.unlink()
+                    bai_path.unlink()
+                    flag_path.unlink()

@@ -206,7 +206,6 @@ def bam(context, case_id, dry_run):
         families = context.obj["db"].families()
     for case in families:
         case_id = case.internal_id
-        if compress_api.case_is_compressed(case_id=case_id):
-            compress_api.update_scout(case_id)
-            compress_api.update_hk(case_id)
-            compress_api.remove_bams(case_id)
+        compress_api.update_scout(case_id, dry_run=dry_run)
+        compress_api.update_hk(case_id, dry_run=dry_run)
+        compress_api.remove_bams(case_id, dry_run=dry_run)
