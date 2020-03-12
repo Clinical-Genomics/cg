@@ -39,11 +39,11 @@ def test_gather_files_and_bundle_in_hk_bundle_already_added(
 @mock.patch("cg.apps.hk.HousekeeperAPI")
 @mock.patch("cg.meta.store.mip_rna.include_files_in_housekeeper")
 @mock.patch("cg.meta.store.mip_rna.add_new_complete_analysis_record")
-@mock.patch("cg.meta.store.mip_rna.add_new_analysis_to_the_status_api")
+@mock.patch("cg.meta.store.mip_rna.get_case")
 @mock.patch("cg.meta.store.mip_rna.add_analysis")
 def test_gather_files_and_bundle_in_hk_bundle_new_analysis(
     mock_add_analysis,
-    mock_add_to_status,
+    mock_get_case,
     mock_add_new_analysis,
     mock_include_files_in_housekeeper,
     mock_housekeeper_api,
@@ -63,7 +63,7 @@ def test_gather_files_and_bundle_in_hk_bundle_new_analysis(
     mock_bundle = mock_housekeeper_store.Bundle.return_value
     mock_version = mock_housekeeper_store.Version.return_value
     mock_housekeeper_api.add_bundle.return_value = (mock_bundle, mock_version)
-    mock_add_to_status.return_value = mock_cg_store.Family.return_value
+    mock_get_case.return_value = mock_cg_store.Family.return_value
     mock_add_new_analysis.return_value = mock_cg_store.Analysis.return_value
 
     mip_rna.gather_files_and_bundle_in_housekeeper(
@@ -175,3 +175,19 @@ def test_parse_config(snapshot: Snapshot, config_raw: dict):
 
     # THEN the result should contain the data to be stored in Housekeeper
     snapshot.assert_match(mip_rna_parse_config)
+
+
+@mock.patch("cg.store.Store")
+@mock.patch("cg.apps.hk.HousekeeperAPI.Bundle")
+def test_get_case(mock_housekeeper_bundle, mock_store):
+    """
+        tests fetching a family from status-db using Store
+    """
+    # GIVEN the bundle object has been created
+    mock_bundle = mock_housekeeper_bundle.return_value
+
+    # WHEN fetching a case from status-db
+    mip_rna.get_case(mock_bundle, mock_store)
+
+    # THEN a case should be fetched from the status-db
+    mock_store.family.assert_called()

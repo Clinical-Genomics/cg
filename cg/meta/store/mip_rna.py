@@ -23,7 +23,7 @@ def gather_files_and_bundle_in_housekeeper(config_stream, hk_api, status):
         raise BundleAlreadyAddedError("bundle already added")
     bundle_obj, version_obj = results
 
-    case_obj = add_new_analysis_to_the_status_api(bundle_obj, status)
+    case_obj = get_case(bundle_obj, status)
     reset_action_from_running_on_case(case_obj)
     new_analysis = add_new_complete_analysis_record(
         bundle_data, case_obj, status, version_obj
@@ -138,8 +138,8 @@ def parse_sampleinfo(data: dict) -> dict:
     return sampleinfo_data
 
 
-def add_new_analysis_to_the_status_api(bundle_obj, status):
-    """ Adds new analysis to status API """
+def get_case(bundle_obj, status):
+    """ Get a case from the status database """
     case_obj = status.family(bundle_obj.name)
     return case_obj
 
