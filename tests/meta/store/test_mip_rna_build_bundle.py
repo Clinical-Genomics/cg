@@ -199,7 +199,7 @@ def test_reset_case_action(mock_case_obj):
         test resetting case attribute
     """
     # GIVEN a case obj with an action attribute not None
-    mock_case_obj.action = 'analyze'
+    mock_case_obj.action = "analyze"
 
     # WHEN resetting the action attribute
     mip_rna.reset_case_action(mock_case_obj)
