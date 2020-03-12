@@ -191,3 +191,18 @@ def test_get_case(mock_housekeeper_bundle, mock_store):
 
     # THEN a case should be fetched from the status-db
     mock_store.family.assert_called()
+
+
+@mock.patch("cg.store.models.Family")
+def test_reset_case_action(mock_case_obj):
+    """
+        test resetting case attribute
+    """
+    # GIVEN a case obj with an action attribute not None
+    mock_case_obj.action = 'analyze'
+
+    # WHEN resetting the action attribute
+    mip_rna.reset_case_action(mock_case_obj)
+
+    # THEN the resulting case should have its action attribute set to None
+    assert mock_case_obj.action is None

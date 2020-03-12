@@ -24,7 +24,7 @@ def gather_files_and_bundle_in_housekeeper(config_stream, hk_api, status):
     bundle_obj, version_obj = results
 
     case_obj = get_case(bundle_obj, status)
-    reset_action_from_running_on_case(case_obj)
+    reset_case_action(case_obj)
     new_analysis = add_new_complete_analysis_record(
         bundle_data, case_obj, status, version_obj
     )
@@ -144,7 +144,7 @@ def get_case(bundle_obj, status):
     return case_obj
 
 
-def reset_action_from_running_on_case(case_obj):
+def reset_case_action(case_obj):
     """ Resets action on case """
     case_obj.action = None
 
