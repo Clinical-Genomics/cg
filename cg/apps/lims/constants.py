@@ -86,6 +86,10 @@ MASTER_STEPS_UDFS = {
             "method_number": "Method Document 1",
             "method_version": "Document 1 Version",
         },
+        "Define Run Format and Calculate Volumes (Nova Seq)": {
+            "method_number": "Method",
+            "method_version": "Version",
+        },
     },
     "delivery_method_step": {
         "CG002 - Delivery": {
