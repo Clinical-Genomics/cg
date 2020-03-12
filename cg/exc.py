@@ -1,9 +1,14 @@
 # -*- coding: utf-8 -*-
+"""
+    Cg Exceptions
+"""
 
 
 class CgError(Exception):
 
-    """Base exception for the package."""
+    """
+        Base exception for the package
+    """
 
     def __init__(self, message):
         super(CgError, self).__init__()
@@ -11,25 +16,33 @@ class CgError(Exception):
 
 
 class AnalysisNotFinishedError(CgError):
-    pass
+    """
+        Exception raised when an analysis is not finished
+    """
 
 
 class AnalysisDuplicationError(CgError):
-    """Error related to trying to create duplicate analysis objects"""
+    """
+        Error related to trying to create duplicate analysis object
+    """
 
 
 class LimsDataError(CgError):
-    """Error related to missing/incomplete data in LIMS."""
-
-    pass
+    """
+        Error related to missing/incomplete data in LIMS
+    """
 
 
 class MissingCustomerError(CgError):
-    pass
+    """
+        Exception related to missing customer
+    """
 
 
 class DuplicateRecordError(CgError):
-    pass
+    """
+        Exception related to duplicate records
+    """
 
 
 class DuplicateSampleError(CgError):
@@ -45,15 +58,21 @@ class CaseNotFoundError(CgError):
 
 
 class OrderFormError(CgError):
-    pass
+    """
+        Exception related to the order form
+    """
 
 
 class OrderError(CgError):
-    pass
+    """
+        Exception related to orders
+    """
 
 
 class TicketCreationError(CgError):
-    pass
+    """
+        Exception related to ticket creation
+    """
 
 
 class BalsamicStartError(CgError):
