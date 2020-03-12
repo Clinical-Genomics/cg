@@ -15,6 +15,7 @@ from cg.store import Store
 pytest_plugins = [
     "tests.apps.lims.conftest",
     "tests.apps.loqus.conftest",
+    "tests.apps.crunchy.conftest",
     "tests.cli.conftest",
     "tests.delivery.conftest",
     "tests.delivery.conftest",
@@ -28,6 +29,16 @@ pytest_plugins = [
 ]
 
 CHANJO_CONFIG = {"chanjo": {"config_path": "chanjo_config", "binary_path": "chanjo"}}
+CRUNCHY_CONFIG = {
+    "crunchy": {
+        "cram_reference": "/path/to/fasta",
+        "slurm": {
+            "account": "mock_account",
+            "log_dir": "mock_dir",
+            "conda_env": "mock_env",
+        },
+    }
+}
 
 
 @pytest.fixture
@@ -35,6 +46,14 @@ def chanjo_config_dict():
     """Chanjo configs"""
     _config = dict()
     _config.update(CHANJO_CONFIG)
+    return _config
+
+
+@pytest.fixture
+def crunchy_config_dict():
+    """Crunchy configs"""
+    _config = dict()
+    _config.update(CRUNCHY_CONFIG)
     return _config
 
 
