@@ -23,10 +23,10 @@ def compress(context):
 
 @compress.command()
 @click.option("-c", "--case-id", type=str)
-@click.option("-n", "--number-of-conversions", type=int)
+@click.option("-n", "--number-of-conversions", default=10, type=int, show_default=True)
 @click.option("-d", "--dry-run", is_flag=True)
 @click.pass_context
-def cram(context, case_id, number_of_conversions, dry_run):
+def bam(context, case_id, number_of_conversions, dry_run):
     """Find cases with bam-files and compress into cram"""
 
     compress_api = CompressAPI(
@@ -46,6 +46,7 @@ def cram(context, case_id, number_of_conversions, dry_run):
         case_id = case.internal_id
         bam_dict = compress_api.get_bam_files(case_id=case_id)
         if not bam_dict:
+            LOG.info("skipping %s", case_id)
             continue
         case_is_compressable = True
         for sample, bam_files in bam_dict.items():

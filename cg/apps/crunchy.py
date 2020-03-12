@@ -9,6 +9,7 @@ from pathlib import Path
 from cg.utils import Process
 from .constants import (
     BAM_SUFFIX,
+    BAM_INDEX_SUFFIX,
     CRAM_SUFFIX,
     CRAM_INDEX_SUFFIX,
     FASTQ_FIRST_SUFFIX,
@@ -144,12 +145,12 @@ class CrunchyAPI:
     def cram_compression_done(self, bam_path: Path) -> bool:
         """Check if cram-compression already done for bam-file"""
         cram_path = self.change_suffix_bam_to_cram(bam_path)
-        flag_path = cram_path.with_suffix(FLAG_PATH_SUFFIX)
+        flag_path = self.get_flag_path(file_path=cram_path)
 
         if not cram_path.exists():
             LOG.info("No cram-file for %s", bam_path)
             return False
-        if not cram_path.with_suffix(CRAM_INDEX_SUFFIX).exists():
+        if not self.get_index_path(cram_path).exists():
             LOG.info("No index-file for %s", cram_path)
             return False
         if not flag_path.exists():
@@ -209,12 +210,19 @@ class CrunchyAPI:
         return file_path.with_suffix(FLAG_PATH_SUFFIX)
 
     @staticmethod
+    def get_index_path(file_path):
+        index_type = CRAM_INDEX_SUFFIX
+        if file_path.suffix == BAM_SUFFIX:
+            index_type = BAM_INDEX_SUFFIX
+        return file_path.with_suffix(file_path.suffix + index_type)
+
+    @staticmethod
     def change_suffix_bam_to_cram(bam_path: Path) -> Path:
         """ Change suffix from .bam to .cram"""
         if not bam_path.suffix == BAM_SUFFIX:
             LOG.error("%s does not end with %s", bam_path, BAM_SUFFIX)
             raise ValueError
-        cram_path = Path(str(bam_path)[0:-4] + CRAM_SUFFIX)
+        cram_path = bam_path.with_suffix(CRAM_SUFFIX)
         return cram_path
 
     @staticmethod

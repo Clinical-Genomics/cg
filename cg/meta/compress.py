@@ -35,8 +35,15 @@ class CompressAPI:
 
     def get_bam_files(self, case_id: str):
 
-        scout_case = self.scout_api.get_cases(case_id=case_id)[0]
+        scout_cases = self.scout_api.get_cases(case_id=case_id)
+        if not scout_cases:
+            LOG.warning("%s not found in scout", case_id)
+            return None
+        scout_case = scout_cases[0]
         last_version = self.hk_api.last_version(bundle=case_id)
+        if not last_version:
+            LOG.warning("No bundle found for %s in housekeeper", case_id)
+            return None
         hk_files = self.hk_api.get_files(
             bundle=case_id, tags=["bam", "bai", "bam-index"], version=last_version.id
         )
@@ -44,7 +51,12 @@ class CompressAPI:
         bam_dict = {}
         for sample in scout_case["individuals"]:
             sample_id = sample["individual_id"]
-            bam_path = Path(sample["bam_file"])
+            bam_file = sample.get("bam_file")
+            if not bam_file:
+                LOG.warning("No bam file found for sample %s in scout", sample_id)
+                return None
+            bam_path = Path(bam_file)
+            bai_path = self.crunchy_api.get_index_path(bam_path)
             if not bam_path.exists():
                 LOG.debug("%s does not exist", bam_path)
                 return None
@@ -54,12 +66,12 @@ class CompressAPI:
             if bam_path not in hk_files_dict.keys():
                 LOG.debug("%s not in latest version of housekeeper bundle", bam_path)
                 return None
-            if bam_path.with_suffix(".bai") not in hk_files_dict.keys():
+            if bai_path not in hk_files_dict.keys():
                 LOG.debug("%s has no index-file", bam_path)
                 return None
             bam_dict[sample_id] = {
                 "bam": hk_files_dict[bam_path],
-                "bai": hk_files_dict[bam_path.with_suffix(".bai")],
+                "bai": hk_files_dict[bai_path],
             }
         return bam_dict
 
@@ -87,6 +99,7 @@ class CompressAPI:
         modified_case = deepcopy(original_case)
         for sample_id, bam_files in bam_dict.items():
             bam_path = Path(bam_files["bam"].full_path)
+            # if not and continue
             if self.crunchy_api.cram_compression_done(bam_path=bam_path):
                 cram_path = self.crunchy_api.change_suffix_bam_to_cram(
                     bam_path=bam_path
@@ -110,7 +123,7 @@ class CompressAPI:
             bam_path = Path(bam_files["bam"].full_path)
             bai_path = Path(bam_files["bai"].full_path)
             cram_path = self.crunchy_api.change_suffix_bam_to_cram(bam_path=bam_path)
-            crai_path = cram_path.with_suffix(".crai")
+            crai_path = self.crunchy_api.get_index_path(cram_path)
             if self.crunchy_api.cram_compression_done(bam_path=bam_path):
                 LOG.debug("%s -> %s, with tags %s", bam_path, cram_path, cram_tags)
                 LOG.debug("%s -> %s, with tags %s", bai_path, crai_tags, crai_tags)
@@ -122,6 +135,9 @@ class CompressAPI:
                     self.hk_api.add_file_with_tags(
                         file=crai_path, version_obj=latest_hk_version, tags=crai_tags
                     )
+                    bam_files["bam"].delete()
+                    bam_files["bai"].delete()
+                    self.hk_api.commit()
 
     def remove_bams(self, case_id: str, dry_run: bool = False):
         bam_files = self.get_bam_files(case_id=case_id)
@@ -133,9 +149,6 @@ class CompressAPI:
                 LOG.debug("Will remove %s, %s, and %s", bam_path, bai_path, flag_path)
                 if not dry_run:
                     LOG.info("deleting files...")
-                    bam_files["bam"].delete()
-                    bam_files["bai"].delete()
-                    self.hk_api.commit()
                     bam_path.unlink()
                     bai_path.unlink()
                     flag_path.unlink()
