@@ -152,7 +152,7 @@ def reset_action_from_running_on_case(case_obj):
 def add_new_complete_analysis_record(bundle_data, case_obj, status, version_obj):
     """Function to create and return a new analysis database record"""
     pipeline = case_obj.links[0].sample.data_analysis
-    pipeline = pipeline if pipeline else "mip"  # TODO remove this default from here
+    pipeline = pipeline if pipeline else "mip"
 
     if status.analysis(family=case_obj, started_at=version_obj.created_at):
         raise AnalysisDuplicationError(

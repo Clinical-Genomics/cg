@@ -137,6 +137,9 @@ def test_add_analysis_not_finished(
 def test_build_bundle(
     snapshot: Snapshot, config_data: dict, sampleinfo_data: dict, deliverables_raw: dict
 ):
+    """
+        tests the function_build bundle against a snapshot
+    """
     # GIVEN the MIP analysis config data, the sampleinfo data and the deliverables file
 
     # WHEN building the bundle
@@ -149,6 +152,9 @@ def test_build_bundle(
 
 
 def test_get_files(snapshot: Snapshot, deliverables_raw: dict):
+    """
+        tests the function get_files against a snapshot
+    """
     # GIVEN the MIP analysis deliverables file
 
     # WHEN getting the files used to build the bundle
@@ -159,6 +165,9 @@ def test_get_files(snapshot: Snapshot, deliverables_raw: dict):
 
 
 def test_parse_config(snapshot: Snapshot, config_raw: dict):
+    """
+        tests the function parse_config against a snapshot
+    """
     # GIVEN the raw MIP analysis config file
 
     # WHEN getting the files used to build the bundle
