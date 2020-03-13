@@ -39,6 +39,7 @@ source activate {crunchy_env}
 
 SBATCH_BAM_TO_CRAM = """
 crunchy --reference {reference_path} compress bam --bam-path {bam_path} --cram-path {cram_path}
+samtools quickcheck {cram_path}
 if [[ $? == 0 ]]
 then
     touch {flag_path}
@@ -81,14 +82,14 @@ class CrunchyAPI:
         job_name = bam_path.name + "_bam_to_cram"
         flag_path = self.get_flag_path(file_path=cram_path)
 
-        sbatch_header = self.get_slurm_header(
+        sbatch_header = self._get_slurm_header(
             job_name=job_name,
             account=self.slurm_account,
             log_dir=self.slurm_log_dir,
             crunchy_env=self.crunchy_env,
         )
 
-        sbatch_body = self.get_slurm_bam_to_cram(
+        sbatch_body = self._get_slurm_bam_to_cram(
             bam_path=bam_path,
             cram_path=cram_path,
             flag_path=flag_path,
@@ -253,7 +254,7 @@ class CrunchyAPI:
     #     return spring_path
 
     @staticmethod
-    def get_slurm_header(
+    def _get_slurm_header(
         job_name: str, log_dir: str, account: str, crunchy_env: str
     ) -> str:
         sbatch_header = SBATCH_HEADER_TEMPLATE.format(
@@ -262,7 +263,7 @@ class CrunchyAPI:
         return sbatch_header
 
     @staticmethod
-    def get_slurm_bam_to_cram(
+    def _get_slurm_bam_to_cram(
         bam_path: str, cram_path: str, flag_path: str, reference_path: str
     ) -> str:
         sbatch_body = SBATCH_BAM_TO_CRAM.format(
@@ -274,7 +275,7 @@ class CrunchyAPI:
         return sbatch_body
 
     @staticmethod
-    def get_slurm_spring(
+    def _get_slurm_spring(
         fastq_first_path: str, fastq_second_path: str, spring_path: str, flag_path: str
     ) -> str:
 
