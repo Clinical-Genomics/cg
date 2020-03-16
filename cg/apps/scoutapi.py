@@ -2,6 +2,7 @@
 import logging
 import datetime as dt
 from typing import List
+from pathlib import Path
 
 from pymongo import MongoClient
 from scout.adapter.mongo import MongoAdapter
@@ -9,6 +10,7 @@ from scout.load.report import load_delivery_report
 from scout.export.panel import export_panels as scout_export_panels
 from scout.load import load_scout
 from scout.parse.case import parse_case_data
+from cg.utils.commands import Process
 
 LOG = logging.getLogger(__name__)
 
@@ -20,6 +22,10 @@ class ScoutAPI(MongoAdapter):
     def __init__(self, config):
         client = MongoClient(config["scout"]["database"], serverSelectionTimeoutMS=20)
         super(ScoutAPI, self).__init__(client[config["scout"]["database_name"]])
+
+        binary_path = config["scout"]["binary_path"]
+        config_path = config["scout"]["config_path"]
+        self.process = Process(binary=binary_path, config=config_path)
 
     def upload(self, data: dict, threshold: int = 5, force: bool = False):
         """Load analysis of a new family into Scout."""
@@ -38,6 +44,20 @@ class ScoutAPI(MongoAdapter):
         else:
             LOG.debug("load new Scout case")
             load_scout(self, config_data)
+
+    def update_alignment_file(self, case_id: str, sample_id: str, alignment_path: Path):
+        """Update alignment-file for individual in case"""
+        parameters = [
+            "update",
+            "individual",
+            "--case-id",
+            case_id,
+            "--ind-id",
+            sample_id,
+            "--alignment-path",
+            str(alignment_path),
+        ]
+        self.process.run_command(parameters=parameters)
 
     def export_panels(self, panels: List[str], versions=None):
         """Pass through to export of a list of gene panels."""
