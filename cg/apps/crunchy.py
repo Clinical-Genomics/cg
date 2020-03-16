@@ -34,7 +34,6 @@ SBATCH_HEADER_TEMPLATE = """
 
 set e
 source activate {crunchy_env}
-
 """
 
 SBATCH_BAM_TO_CRAM = """
@@ -48,15 +47,15 @@ else:
 fi
 """
 
-SBATCH_SPRING = """
-crunchy compress spring --first {fastq_first_path} --second {fastq_second_path} --spring-path {spring_path} --check-integrity
-if [[ $? == 0 ]]
-then
-    touch {flag_path}
-else:
-    echo Compression failed
-fi
-"""
+# SBATCH_SPRING = """
+# crunchy compress spring --first {fastq_first_path} --second {fastq_second_path} --spring-path {spring_path} --check-integrity
+# if [[ $? == 0 ]]
+# then
+#     touch {flag_path}
+# else:
+#     echo Compression failed
+# fi
+# """
 
 FLAG_PATH_SUFFIX = ".crunchy.txt"
 
@@ -274,15 +273,15 @@ class CrunchyAPI:
         )
         return sbatch_body
 
-    @staticmethod
-    def _get_slurm_spring(
-        fastq_first_path: str, fastq_second_path: str, spring_path: str, flag_path: str
-    ) -> str:
-
-        sbatch_body = SBATCH_SPRING.format(
-            fastq_first_path=fastq_first_path,
-            fastq_second_path=fastq_second_path,
-            spring_path=spring_path,
-            flag_path=flag_path,
-        )
-        return sbatch_body
+    # @staticmethod
+    # def _get_slurm_spring(
+    #     fastq_first_path: str, fastq_second_path: str, spring_path: str, flag_path: str
+    # ) -> str:
+    #
+    #     sbatch_body = SBATCH_SPRING.format(
+    #         fastq_first_path=fastq_first_path,
+    #         fastq_second_path=fastq_second_path,
+    #         spring_path=spring_path,
+    #         flag_path=flag_path,
+    #     )
+    #     return sbatch_body

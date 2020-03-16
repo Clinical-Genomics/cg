@@ -19,6 +19,7 @@ pytest_plugins = [
     "tests.cli.conftest",
     "tests.delivery.conftest",
     "tests.delivery.conftest",
+    "tests.meta.compress.conftest",
     "tests.meta.conftest",
     "tests.meta.orders.conftest",
     "tests.meta.report.conftest",

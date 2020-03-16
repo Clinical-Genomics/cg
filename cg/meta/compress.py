@@ -26,10 +26,6 @@ class CompressAPI:
         self.scout_api = scout_api
 
     @staticmethod
-    def get_inode(file_link: Path):
-        return os.stat(file_link).st_ino
-
-    @staticmethod
     def get_nlinks(file_link: Path):
         return os.stat(file_link).st_nlink
 
@@ -80,17 +76,6 @@ class CompressAPI:
             bam_path = Path(bam_files["bam"].full_path)
             LOG.info("Compressing %s for sample %s", bam_path, sample)
             self.crunchy_api.bam_to_cram(bam_path=bam_path, dry_run=dry_run)
-
-    def scout_case_is_compressed(self, case_id):
-        bam_dict = self.get_bam_files(case_id=case_id)
-        if not bam_dict:
-            return False
-        for _, bam_files in bam_dict.items():
-            bam_path = Path(bam_files["bam"].full_path)
-            if not self.crunchy_api.cram_compression_done(bam_path=bam_path):
-                LOG.debug("No cram compression for %s", bam_path)
-                return False
-        return True
 
     def update_scout(self, case_id: str, dry_run: bool = False):
 
