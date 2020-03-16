@@ -44,22 +44,17 @@ source activate {crunchy_env}
 
 SBATCH_BAM_TO_CRAM = """
 
-finish() {{
-    if [[ $? == 0 ]]
-    then
-        touch {flag_path}
-    else:
-        echo "Compression failed"
-        rm {cram_path}
-        rm {cram_path}.crai
-    fi
-}}
-
-trap finish EXIT TERM INT
-
 error() {{
-    rm {cram_path}
-    rm {cram_path}.crai
+    if [[ -e {cram_path} ]]
+    then
+        rm {cram_path}
+    fi
+
+    if [[ -e {cram_path}.crai ]]
+    then
+        rm {cram_path}
+    fi
+
     exit 1
 }}
 
@@ -67,6 +62,7 @@ trap error ERR
 
 crunchy --reference {reference_path} compress bam --bam-path {bam_path} --cram-path {cram_path}
 samtools quickcheck {cram_path}
+touch {flag_path}
 """
 
 # SBATCH_SPRING = """
