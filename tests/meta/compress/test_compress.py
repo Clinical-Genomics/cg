@@ -68,6 +68,23 @@ def test_compress_case(compress_api, bam_dict, mocker):
     assert mock_bam_to_cram.call_count == len(bam_dict)
 
 
+def test_update_scout(compress_api, bam_dict, mock_compress_func, mocker):
+    """ Test update_hk method"""
+    mock_compress_func(bam_dict)
+    mock_get_bam_files = mocker.patch.object(
+        CompressAPI, "get_bam_files", return_value=bam_dict
+    )
+    mock_update_alignment_file = mocker.patch.object(ScoutAPI, "update_alignment_file")
+    # GIVEN a case-id
+    case_id = "test_case"
+
+    # WHEN updating scout
+    compress_api.update_scout(case_id=case_id)
+
+    # THEN update_alignment_file should have been callen three times
+    assert mock_update_alignment_file.call_count == len(bam_dict)
+
+
 def test_update_hk(compress_api, bam_dict, mock_compress_func, mocker):
     """ Test update_hk method"""
     mock_compress_func(bam_dict)
@@ -75,7 +92,7 @@ def test_update_hk(compress_api, bam_dict, mock_compress_func, mocker):
         CompressAPI, "get_bam_files", return_value=bam_dict
     )
     mock_add_file_with_tags = mocker.patch.object(HousekeeperAPI, "add_file_with_tags")
-    # WITH a case-id and a compress api
+    # GIVEN a case-id and a compress api
     case_id = "test-case"
 
     # WHEN updating hk
