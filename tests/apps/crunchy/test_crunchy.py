@@ -28,7 +28,8 @@ def test_bam_to_cram(crunchy_config_dict, mocker):
     sbatch_header = SBATCH_HEADER_TEMPLATE.format(
         job_name=bam_path.name + "_bam_to_cram",
         account=crunchy_config_dict["crunchy"]["slurm"]["account"],
-        log_dir=crunchy_config_dict["crunchy"]["slurm"]["log_dir"],
+        log_dir=bam_path.parent,
+        mail_user=crunchy_config_dict["crunchy"]["slurm"]["mail_user"],
         crunchy_env=crunchy_config_dict["crunchy"]["slurm"]["conda_env"],
     )
 

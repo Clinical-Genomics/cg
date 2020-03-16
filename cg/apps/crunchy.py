@@ -29,11 +29,17 @@ SBATCH_HEADER_TEMPLATE = """
 #SBATCH --error={log_dir}/{job_name}.stderr
 #SBATCH --output={log_dir}/{job_name}.stdout
 #SBATCH --mail-type=FAIL
+#SBATCH --mail-user={mail_user}
 #SBATCH --time=4:00:00
 #SBATCH --qos=low
 
-set e
+set -e
+
+echo "Running on: $(hostname)"
+
 source activate {crunchy_env}
+
+
 """
 
 SBATCH_BAM_TO_CRAM = """
@@ -43,7 +49,9 @@ if [[ $? == 0 ]]
 then
     touch {flag_path}
 else:
-    echo Compression failed
+    echo "Compression failed"
+    rm {cram_path}
+    rm {cram_path}.crai
 fi
 """
 
@@ -69,8 +77,8 @@ class CrunchyAPI:
 
         self.process = Process("sbatch")
         self.slurm_account = config["crunchy"]["slurm"]["account"]
-        self.slurm_log_dir = config["crunchy"]["slurm"]["log_dir"]
         self.crunchy_env = config["crunchy"]["slurm"]["conda_env"]
+        self.mail_user = config["crunchy"]["slurm"]["mail_user"]
         self.reference_path = config["crunchy"]["cram_reference"]
 
     def bam_to_cram(self, bam_path: Path, dry_run: bool = False):
@@ -80,11 +88,13 @@ class CrunchyAPI:
         cram_path = self.change_suffix_bam_to_cram(bam_path)
         job_name = bam_path.name + "_bam_to_cram"
         flag_path = self.get_flag_path(file_path=cram_path)
+        log_dir = bam_path.parent
 
         sbatch_header = self._get_slurm_header(
             job_name=job_name,
             account=self.slurm_account,
-            log_dir=self.slurm_log_dir,
+            log_dir=log_dir,
+            mail_user=self.mail_user,
             crunchy_env=self.crunchy_env,
         )
 
@@ -254,10 +264,14 @@ class CrunchyAPI:
 
     @staticmethod
     def _get_slurm_header(
-        job_name: str, log_dir: str, account: str, crunchy_env: str
+        job_name: str, log_dir: str, account: str, mail_user: str, crunchy_env: str
     ) -> str:
         sbatch_header = SBATCH_HEADER_TEMPLATE.format(
-            job_name=job_name, account=account, log_dir=log_dir, crunchy_env=crunchy_env
+            job_name=job_name,
+            account=account,
+            log_dir=log_dir,
+            crunchy_env=crunchy_env,
+            mail_user=mail_user,
         )
         return sbatch_header
 

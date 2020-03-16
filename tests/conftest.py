@@ -35,7 +35,7 @@ CRUNCHY_CONFIG = {
         "cram_reference": "/path/to/fasta",
         "slurm": {
             "account": "mock_account",
-            "log_dir": "mock_dir",
+            "mail_user": "mock_mail",
             "conda_env": "mock_env",
         },
     }
