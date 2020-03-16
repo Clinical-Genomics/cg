@@ -43,20 +43,35 @@ source activate {crunchy_env}
 """
 
 SBATCH_BAM_TO_CRAM = """
-crunchy --reference {reference_path} compress bam --bam-path {bam_path} --cram-path {cram_path}
-samtools quickcheck {cram_path}
-if [[ $? == 0 ]]
-then
-    touch {flag_path}
-else:
-    echo "Compression failed"
+
+finish() {{
+    if [[ $? == 0 ]]
+    then
+        touch {flag_path}
+    else:
+        echo "Compression failed"
+        rm {cram_path}
+        rm {cram_path}.crai
+    fi
+}}
+
+trap finish EXIT TERM INT
+
+error() {{
     rm {cram_path}
     rm {cram_path}.crai
-fi
+    exit 1
+}}
+
+trap error ERR
+
+crunchy --reference {reference_path} compress bam --bam-path {bam_path} --cram-path {cram_path}
+samtools quickcheck {cram_path}
 """
 
 # SBATCH_SPRING = """
-# crunchy compress spring --first {fastq_first_path} --second {fastq_second_path} --spring-path {spring_path} --check-integrity
+# crunchy compress spring --first {fastq_first_path} --second {fastq_second_path} \
+# --spring-path {spring_path} --check-integrity
 # if [[ $? == 0 ]]
 # then
 #     touch {flag_path}
