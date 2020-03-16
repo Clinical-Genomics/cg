@@ -115,9 +115,9 @@ def bam_files_hk_list(bam_files):
 
     _hk_bam_list = []
 
-    for _, bam_files in bam_files.items():
-        _hk_bam_list.append(MockFile(path=bam_files["bam_file"]))
-        _hk_bam_list.append(MockFile(path=bam_files["bai_file"]))
+    for _, files in bam_files.items():
+        _hk_bam_list.append(MockFile(path=files["bam_file"]))
+        _hk_bam_list.append(MockFile(path=files["bai_file"]))
 
     return _hk_bam_list
 
