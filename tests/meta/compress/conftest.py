@@ -30,6 +30,9 @@ class MockHousekeeper(HousekeeperAPI):
         _ = bundle
         return MockVersion()
 
+    def commit(self):
+        pass
+
 
 class MockCrunchy(CrunchyAPI):
 
@@ -49,6 +52,9 @@ class MockFile:
 
     def is_included(self):
         return False
+
+    def delete(self):
+        pass
 
 
 @pytest.yield_fixture(scope="function")
@@ -126,3 +132,41 @@ def compress_scout_case(bam_files):
             for sample, files in bam_files.items()
         ],
     }
+
+
+@pytest.fixture(scope="function")
+def bam_dict(bam_files):
+
+    _bam_dict = {}
+    for sample, files in bam_files.items():
+        _bam_dict[sample] = {
+            "bam": MockFile(path=files["bam_file"]),
+            "bai": MockFile(path=files["bai_file"]),
+        }
+    return _bam_dict
+
+
+@pytest.fixture(scope="function")
+def mock_compress_func():
+    def _mock_compress_func(bam_dict: dict):
+        _bam_dict = {}
+        for sample, files in bam_dict.items():
+            bam_path = Path(files["bam"].full_path)
+            cram_path = bam_path.with_suffix(".cram")
+            crai_path = bam_path.with_suffix(".cram.crai")
+            flag_path = bam_path.with_suffix(".crunchy.txt")
+            cram_path.touch()
+            crai_path.touch()
+            flag_path.touch()
+
+            _bam_dict[sample] = {
+                "bam": files["bam"],
+                "bai": files["bai"],
+                "cram": MockFile(path=str(cram_path)),
+                "crai": MockFile(path=str(crai_path)),
+                "flag": MockFile(path=str(flag_path)),
+            }
+
+        return _bam_dict
+
+    return _mock_compress_func
