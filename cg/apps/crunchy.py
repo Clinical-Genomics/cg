@@ -52,7 +52,7 @@ error() {{
 
     if [[ -e {cram_path}.crai ]]
     then
-        rm {cram_path}
+        rm {cram_path}.crai
     fi
 
     exit 1
