@@ -56,13 +56,13 @@ def test_get_bam_files(compress_api, compress_scout_case, bam_files_hk_list, moc
     assert set(bam_dict.keys()) == set(["sample_1", "sample_2", "sample_3"])
 
 
-def test_compress_case(compress_api, bam_dict, mocker):
+def test_compress_case_bams(compress_api, bam_dict, mocker):
     """Test compress_case method"""
     # GIVEN a compress api and a bam dictionary
     mock_bam_to_cram = mocker.patch.object(CrunchyAPI, "bam_to_cram")
 
     # WHEN compressing the case
-    compress_api.compress_case(bam_dict=bam_dict)
+    compress_api.compress_case_bams(bam_dict=bam_dict, ntasks=1, mem=2)
 
     # THEN all samples in bam-files will have been compressed
     assert mock_bam_to_cram.call_count == len(bam_dict)

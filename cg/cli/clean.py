@@ -193,18 +193,18 @@ def mipauto(
 @click.option("-c", "--case-id", type=str)
 @click.option("-d", "--dry-run", is_flag=True)
 def bam(context, case_id, dry_run):
-    """Clean up compressed bam-files, and changes links in scout and housekeeper
-       to cram files"""
+    """Remove compressed BAM files, and update links in scout and housekeeper
+       to CRAM files"""
     compress_api = CompressAPI(
         hk_api=context.obj["hk"],
         crunchy_api=context.obj["crunchy"],
         scout_api=context.obj["scout"],
     )
     if case_id:
-        families = [context.obj["db"].family(case_id)]
+        cases = [context.obj["db"].family(case_id)]
     else:
-        families = context.obj["db"].families()
-    for case in families:
+        cases = context.obj["db"].families()
+    for case in cases:
         case_id = case.internal_id
         compress_api.update_scout(case_id, dry_run=dry_run)
         compress_api.update_hk(case_id, dry_run=dry_run)

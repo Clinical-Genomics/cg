@@ -75,7 +75,7 @@ class HousekeeperAPI(Store):
     def add_file_with_tags(
         self, file, version_obj: models.Version, tags, to_archive=False
     ):
-        """Add a file to housekeeper."""
+        """Add a file with tags to housekeeper"""
 
         new_file = self.new_file(
             path=str(Path(file).absolute()),

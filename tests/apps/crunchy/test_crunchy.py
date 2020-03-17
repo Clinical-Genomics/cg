@@ -10,8 +10,8 @@ from cg.apps.constants import (
     BAM_INDEX_SUFFIX,
     CRAM_SUFFIX,
     CRAM_INDEX_SUFFIX,
-    FASTQ_FIRST_SUFFIX,
-    FASTQ_SECOND_SUFFIX,
+    FASTQ_FIRST_READ_SUFFIX,
+    FASTQ_SECOND_READ_SUFFIX,
     SPRING_SUFFIX,
 )
 
@@ -23,14 +23,16 @@ def test_bam_to_cram(crunchy_config_dict, mocker):
     crunchy_api = CrunchyAPI(crunchy_config_dict)
     bam_path = Path("/path/to/bam.bam")
     # WHEN calling bam_to_cram method on bam-path
-    crunchy_api.bam_to_cram(bam_path=bam_path, dry_run=False)
+    crunchy_api.bam_to_cram(bam_path=bam_path, dry_run=False, ntasks=1, mem=2)
     # THEN _submit_sbatch method is called with correct sbatch-content
     sbatch_header = SBATCH_HEADER_TEMPLATE.format(
         job_name=bam_path.name + "_bam_to_cram",
         account=crunchy_config_dict["crunchy"]["slurm"]["account"],
         log_dir=bam_path.parent,
         mail_user=crunchy_config_dict["crunchy"]["slurm"]["mail_user"],
-        crunchy_env=crunchy_config_dict["crunchy"]["slurm"]["conda_env"],
+        conda_env=crunchy_config_dict["crunchy"]["slurm"]["conda_env"],
+        ntasks=1,
+        mem=2,
     )
 
     sbatch_bam_to_cram = SBATCH_BAM_TO_CRAM.format(
@@ -135,7 +137,7 @@ def test_cram_compression_before_after(
     # Cram compression is not done
     assert not result
     # GIVEN created cram, crai, and flag paths
-    crunchy_api.bam_to_cram(bam_path=bam_path, dry_run=False)
+    crunchy_api.bam_to_cram(bam_path=bam_path, dry_run=False, ntasks=1, mem=2)
     # WHEN calling cram_compression_done on bam_path
     result = crunchy_api.cram_compression_done(bam_path=bam_path)
     # THEN compression is marked as done
@@ -166,7 +168,7 @@ def test_bam_compression_possible_cram_done(
     bam_path.touch()
 
     # WHEN calling test_bam_compression_possible when cram_compression is done
-    crunchy_api.bam_to_cram(bam_path=bam_path, dry_run=False)
+    crunchy_api.bam_to_cram(bam_path=bam_path, dry_run=False, ntasks=1, mem=2)
     result = crunchy_api.bam_compression_possible(bam_path=bam_path)
 
     # THEN this should return False
@@ -224,14 +226,14 @@ def test_get_index_path(crunchy_config_dict, crunchy_test_dir):
     assert crai_path.suffixes == [".cram", ".crai"]
 
 
-def test_change_suffix_bam_to_cram(crunchy_config_dict, crunchy_test_dir):
+def test_get_cram_path_from_bam(crunchy_config_dict, crunchy_test_dir):
     """test change_suffic_bam_to_cram"""
     # GIVEM a bam_path
     crunchy_api = CrunchyAPI(crunchy_config_dict)
     bam_path = crunchy_test_dir / "file.bam"
 
     # WHEN changing suffix to cram
-    cram_path = crunchy_api.change_suffix_bam_to_cram(bam_path=bam_path)
+    cram_path = crunchy_api.get_cram_path_from_bam(bam_path=bam_path)
 
     # THEN suffix should be .cram
     assert cram_path.suffix == CRAM_SUFFIX

@@ -1,5 +1,5 @@
 """
-    Module for compressing bam to cram
+    Module for compressing BAM to CRAM
 """
 
 import logging
@@ -12,8 +12,8 @@ from .constants import (
     BAM_INDEX_SUFFIX,
     CRAM_SUFFIX,
     CRAM_INDEX_SUFFIX,
-    FASTQ_FIRST_SUFFIX,
-    FASTQ_SECOND_SUFFIX,
+    FASTQ_FIRST_READ_SUFFIX,
+    FASTQ_SECOND_READ_SUFFIX,
     SPRING_SUFFIX,
 )
 
@@ -24,8 +24,8 @@ SBATCH_HEADER_TEMPLATE = """
 #!/bin/bash
 #SBATCH --job-name={job_name}
 #SBATCH --account={account}
-#SBATCH --ntasks=12
-#SBATCH --mem=50G
+#SBATCH --ntasks={ntasks}
+#SBATCH --mem={mem}G
 #SBATCH --error={log_dir}/{job_name}.stderr
 #SBATCH --output={log_dir}/{job_name}.stdout
 #SBATCH --mail-type=FAIL
@@ -37,7 +37,7 @@ set -e
 
 echo "Running on: $(hostname)"
 
-source activate {crunchy_env}
+source activate {conda_env}
 
 
 """
@@ -92,11 +92,11 @@ class CrunchyAPI:
         self.mail_user = config["crunchy"]["slurm"]["mail_user"]
         self.reference_path = config["crunchy"]["cram_reference"]
 
-    def bam_to_cram(self, bam_path: Path, dry_run: bool = False):
+    def bam_to_cram(self, bam_path: Path, ntasks: int, mem: int, dry_run: bool = False):
         """
-            Compress bam-file into cram
+            Compress BAM file into CRAM
         """
-        cram_path = self.change_suffix_bam_to_cram(bam_path)
+        cram_path = self.get_cram_path_from_bam(bam_path)
         job_name = bam_path.name + "_bam_to_cram"
         flag_path = self.get_flag_path(file_path=cram_path)
         log_dir = bam_path.parent
@@ -106,7 +106,9 @@ class CrunchyAPI:
             account=self.slurm_account,
             log_dir=log_dir,
             mail_user=self.mail_user,
-            crunchy_env=self.crunchy_env,
+            conda_env=self.crunchy_env,
+            ntasks=ntasks,
+            mem=mem,
         )
 
         sbatch_body = self._get_slurm_bam_to_cram(
@@ -164,8 +166,8 @@ class CrunchyAPI:
             LOG.info("Would submit following to slurm:\n\n%s", sbatch_content)
 
     def cram_compression_done(self, bam_path: Path) -> bool:
-        """Check if cram-compression already done for bam-file"""
-        cram_path = self.change_suffix_bam_to_cram(bam_path)
+        """Check if CRAM compression already done for BAM file"""
+        cram_path = self.get_cram_path_from_bam(bam_path)
         flag_path = self.get_flag_path(file_path=cram_path)
 
         if not cram_path.exists():
@@ -180,15 +182,13 @@ class CrunchyAPI:
         return True
 
     def bam_compression_possible(self, bam_path: Path) -> bool:
-        """Check if it cram compression for bam-file is possible"""
+        """Check if it CRAM compression for BAM file is possible"""
         if bam_path is None or not bam_path.exists():
             LOG.warning("Could not find bam %s", bam_path)
             return False
-
         if self.cram_compression_done(bam_path=bam_path):
             LOG.info("cram compression already exists for %s", bam_path)
             return False
-
         return True
 
     #
@@ -239,8 +239,8 @@ class CrunchyAPI:
         return file_path.with_suffix(file_path.suffix + index_type)
 
     @staticmethod
-    def change_suffix_bam_to_cram(bam_path: Path) -> Path:
-        """ Change suffix from .bam to .cram"""
+    def get_cram_path_from_bam(bam_path: Path) -> Path:
+        """ Get corresponding CRAM file path from bam file path """
         if not bam_path.suffix == BAM_SUFFIX:
             LOG.error("%s does not end with %s", bam_path, BAM_SUFFIX)
             raise ValueError
@@ -275,14 +275,22 @@ class CrunchyAPI:
 
     @staticmethod
     def _get_slurm_header(
-        job_name: str, log_dir: str, account: str, mail_user: str, crunchy_env: str
+        job_name: str,
+        log_dir: str,
+        account: str,
+        mail_user: str,
+        conda_env: str,
+        ntasks: int,
+        mem: int,
     ) -> str:
         sbatch_header = SBATCH_HEADER_TEMPLATE.format(
             job_name=job_name,
             account=account,
             log_dir=log_dir,
-            crunchy_env=crunchy_env,
+            conda_env=conda_env,
             mail_user=mail_user,
+            ntasks=ntasks,
+            mem=mem,
         )
         return sbatch_header
 

@@ -24,10 +24,12 @@ def compress(context):
 @compress.command()
 @click.option("-c", "--case-id", type=str)
 @click.option("-n", "--number-of-conversions", default=10, type=int, show_default=True)
+@click.option("-t", "--ntasks", type=int, help="Number of tasks for slurm job")
+@click.option("-m", "--mem", type=int, help="Memory for slurm job")
 @click.option("-d", "--dry-run", is_flag=True)
 @click.pass_context
-def bam(context, case_id, number_of_conversions, dry_run):
-    """Find cases with bam-files and compress into cram"""
+def bam(context, case_id, number_of_conversions, ntasks, mem, dry_run):
+    """Find cases with BAM files and compress into CRAM"""
 
     compress_api = CompressAPI(
         hk_api=context.obj["hk"],
@@ -36,10 +38,10 @@ def bam(context, case_id, number_of_conversions, dry_run):
     )
     conversion_count = 0
     if case_id:
-        families = [context.obj["db"].family(case_id)]
+        cases = [context.obj["db"].family(case_id)]
     else:
-        families = context.obj["db"].families()
-    for case in families:
+        cases = context.obj["db"].families()
+    for case in cases:
         if conversion_count == number_of_conversions:
             LOG.info("compressed bam-files for %s cases", conversion_count)
             break
@@ -48,14 +50,16 @@ def bam(context, case_id, number_of_conversions, dry_run):
         if not bam_dict:
             LOG.info("skipping %s", case_id)
             continue
-        case_is_compressable = True
+        case_has_bam_file = True
         for sample, bam_files in bam_dict.items():
             bam_path = Path(bam_files["bam"].full_path)
             if not context.obj["crunchy"].bam_compression_possible(bam_path=bam_path):
                 LOG.info("bam to cram compression not possible for %s", sample)
-                case_is_compressable = False
+                case_has_bam_file = False
                 break
-        if case_is_compressable:
+        if case_has_bam_file:
             LOG.info("Compressing bam-files for %s", case_id)
-            compress_api.compress_case(bam_dict=bam_dict, dry_run=dry_run)
+            compress_api.compress_case_bams(
+                bam_dict=bam_dict, ntasks=ntasks, mem=mem, dry_run=dry_run
+            )
             conversion_count += 1

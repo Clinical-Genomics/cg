@@ -46,7 +46,7 @@ class ScoutAPI(MongoAdapter):
             load_scout(self, config_data)
 
     def update_alignment_file(self, case_id: str, sample_id: str, alignment_path: Path):
-        """Update alignment-file for individual in case"""
+        """Update alignment file for individual in case"""
         parameters = [
             "update",
             "individual",

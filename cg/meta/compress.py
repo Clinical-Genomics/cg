@@ -8,7 +8,7 @@ import logging
 from copy import deepcopy
 
 from cg.apps import hk, crunchy, scoutapi
-from cg.apps.constants import FASTQ_FIRST_SUFFIX, FASTQ_SECOND_SUFFIX
+from cg.apps.constants import FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX
 
 LOG = logging.getLogger(__name__)
 
@@ -71,11 +71,15 @@ class CompressAPI:
             }
         return bam_dict
 
-    def compress_case(self, bam_dict: dict, dry_run: bool = False):
+    def compress_case_bams(
+        self, bam_dict: dict, ntasks: int, mem: int, dry_run: bool = False
+    ):
         for sample, bam_files in bam_dict.items():
             bam_path = Path(bam_files["bam"].full_path)
             LOG.info("Compressing %s for sample %s", bam_path, sample)
-            self.crunchy_api.bam_to_cram(bam_path=bam_path, dry_run=dry_run)
+            self.crunchy_api.bam_to_cram(
+                bam_path=bam_path, ntasks=ntasks, mem=mem, dry_run=dry_run
+            )
 
     def update_scout(self, case_id: str, dry_run: bool = False):
 
@@ -83,9 +87,7 @@ class CompressAPI:
         for sample_id, bam_files in bam_dict.items():
             bam_path = Path(bam_files["bam"].full_path)
             if self.crunchy_api.cram_compression_done(bam_path=bam_path):
-                cram_path = self.crunchy_api.change_suffix_bam_to_cram(
-                    bam_path=bam_path
-                )
+                cram_path = self.crunchy_api.get_cram_path_from_bam(bam_path=bam_path)
                 LOG.info("%s -> %s", bam_path, cram_path)
                 if not dry_run:
                     LOG.info("updating alignment-file for %s in scout...", sample_id)
@@ -101,7 +103,7 @@ class CompressAPI:
             crai_tags = [sample_id, "cram-index"]
             bam_path = Path(bam_files["bam"].full_path)
             bai_path = Path(bam_files["bai"].full_path)
-            cram_path = self.crunchy_api.change_suffix_bam_to_cram(bam_path=bam_path)
+            cram_path = self.crunchy_api.get_cram_path_from_bam(bam_path=bam_path)
             crai_path = self.crunchy_api.get_index_path(cram_path)
             if self.crunchy_api.cram_compression_done(bam_path=bam_path):
                 LOG.info("%s -> %s, with tags %s", bam_path, cram_path, cram_tags)

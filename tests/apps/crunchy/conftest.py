@@ -13,9 +13,13 @@ def crunchy_test_dir(tmpdir_factory):
 
 @pytest.fixture(scope="function")
 def mock_bam_to_cram():
-    def _mock_bam_to_cram_func(bam_path: Path, dry_run: bool = False):
+    def _mock_bam_to_cram_func(
+        bam_path: Path, ntasks: int, mem: int, dry_run: bool = False
+    ):
 
         _ = dry_run
+        _ = ntasks
+        _ = mem
 
         cram_path = bam_path.with_suffix(".cram")
         crai_path = bam_path.with_suffix(".cram.crai")
