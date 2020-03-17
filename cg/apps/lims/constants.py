@@ -64,6 +64,10 @@ MASTER_STEPS_UDFS = {
             "method_number": "Method document",
             "method_version": "Method document version",
         },
+        "End repair Size selection A-tailing and Adapter ligation (TruSeq PCR-free DNA)": {
+            "method_number": "Method document",
+            "method_version": "Method document version",
+        },
         "obsolete_CG002 - Hybridize Library  (SS XT)": {
             "method_number": "Method document",
             "method_version": "Method document versio",
