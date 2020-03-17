@@ -40,9 +40,17 @@ class CompressAPI:
         if not last_version:
             LOG.warning("No bundle found for %s in housekeeper", case_id)
             return None
-        hk_files = self.hk_api.get_files(
-            bundle=case_id, tags=["bam", "bai", "bam-index"], version=last_version.id
-        )
+        hk_tags = ["bam", "bai", "bam-index"]
+        hk_files = []
+        for tag in hk_tags:
+            hk_files.extend(
+                self.hk_api.get_files(
+                    bundle=case_id, tags=[tag], version=last_version.id
+                )
+            )
+        if not hk_files:
+            LOG.warning("No files found in latest housekeeper version for %s", case_id)
+            return None
         hk_files_dict = {Path(file.full_path): file for file in hk_files}
         bam_dict = {}
         for sample in scout_case["individuals"]:
