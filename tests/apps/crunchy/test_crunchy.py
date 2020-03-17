@@ -17,13 +17,15 @@ from cg.apps.constants import (
 
 
 def test_bam_to_cram(crunchy_config_dict, mocker):
-    """test bam_to_cram method"""
+    """Test bam_to_cram method"""
     # GIVEN a crunchy-api, and a bam_path
     mocker_submit_sbatch = mocker.patch.object(CrunchyAPI, "_submit_sbatch")
     crunchy_api = CrunchyAPI(crunchy_config_dict)
     bam_path = Path("/path/to/bam.bam")
+
     # WHEN calling bam_to_cram method on bam-path
     crunchy_api.bam_to_cram(bam_path=bam_path, dry_run=False, ntasks=1, mem=2)
+
     # THEN _submit_sbatch method is called with correct sbatch-content
     sbatch_header = SBATCH_HEADER_TEMPLATE.format(
         job_name=bam_path.name + "_bam_to_cram",
@@ -49,7 +51,7 @@ def test_bam_to_cram(crunchy_config_dict, mocker):
 
 
 def test_cram_compression_done_no_cram(crunchy_config_dict):
-    """test cram_compression_done without created cram file"""
+    """test cram_compression_done without created CRAM file"""
     # GIVEN a crunchy-api, and a bam_path
     crunchy_api = CrunchyAPI(crunchy_config_dict)
     bam_path = Path("/path/to/bam.bam")
@@ -62,7 +64,7 @@ def test_cram_compression_done_no_cram(crunchy_config_dict):
 
 
 def test_cram_compression_done_no_crai(crunchy_config_dict, crunchy_test_dir):
-    """test cram_compression_done without created crai file"""
+    """test cram_compression_done without created CRAI file"""
     # GIVEN a crunchy-api, and a bam_path
     crunchy_api = CrunchyAPI(crunchy_config_dict)
     bam_path = crunchy_test_dir / "file.bam"
@@ -74,6 +76,7 @@ def test_cram_compression_done_no_crai(crunchy_config_dict, crunchy_test_dir):
     assert bam_path.exists()
     assert cram_path.exists()
     assert flag_path.exists()
+
     # WHEN checking if cram compression is done
     result = crunchy_api.cram_compression_done(bam_path=bam_path)
 
@@ -94,6 +97,7 @@ def test_cram_compression_done_no_flag(crunchy_config_dict, crunchy_test_dir):
     assert bam_path.exists()
     assert cram_path.exists()
     assert crai_path.exists()
+
     # WHEN checking if cram compression is done
     result = crunchy_api.cram_compression_done(bam_path=bam_path)
 
@@ -102,7 +106,7 @@ def test_cram_compression_done_no_flag(crunchy_config_dict, crunchy_test_dir):
 
 
 def test_cram_compression_done(crunchy_config_dict, crunchy_test_dir):
-    """test cram_compression_done with created cram, crai, and flag files"""
+    """Test cram_compression_done with created CRAM, CRAI, and flag files"""
     # GIVEN a crunchy-api, and a bam_path, cram_path, crai_path, and flag_path
     crunchy_api = CrunchyAPI(crunchy_config_dict)
     bam_path = crunchy_test_dir / "file.bam"
@@ -117,6 +121,7 @@ def test_cram_compression_done(crunchy_config_dict, crunchy_test_dir):
     assert cram_path.exists()
     assert crai_path.exists()
     assert flag_path.exists()
+
     # WHEN checking if cram compression is done
     result = crunchy_api.cram_compression_done(bam_path=bam_path)
 
@@ -127,25 +132,30 @@ def test_cram_compression_done(crunchy_config_dict, crunchy_test_dir):
 def test_cram_compression_before_after(
     crunchy_config_dict, crunchy_test_dir, mock_bam_to_cram, mocker
 ):
-    """test cram_compression_done without before and after creating files"""
+    """Test cram_compression_done without before and after creating files"""
     # GIVEN a crunchy-api, and a bam_path
     bam_path = Path(crunchy_test_dir / "file.bam")
     mocker.patch.object(CrunchyAPI, "bam_to_cram", side_effect=mock_bam_to_cram)
     crunchy_api = CrunchyAPI(crunchy_config_dict)
+
     # WHEN calling cram_compression_done on bam_path
     result = crunchy_api.cram_compression_done(bam_path=bam_path)
+
     # Cram compression is not done
     assert not result
+
     # GIVEN created cram, crai, and flag paths
     crunchy_api.bam_to_cram(bam_path=bam_path, dry_run=False, ntasks=1, mem=2)
+
     # WHEN calling cram_compression_done on bam_path
     result = crunchy_api.cram_compression_done(bam_path=bam_path)
+
     # THEN compression is marked as done
     assert result
 
 
 def test_bam_compression_possible_no_bam(crunchy_config_dict, crunchy_test_dir):
-    """test bam_compression_possible for non-existing bam"""
+    """Test bam_compression_possible for non-existing BAM"""
     # GIVEN a bam path to non existing file and a crunchy api
     crunchy_api = CrunchyAPI(crunchy_config_dict)
     bam_path = crunchy_test_dir / "file.bam"
@@ -160,7 +170,7 @@ def test_bam_compression_possible_no_bam(crunchy_config_dict, crunchy_test_dir):
 def test_bam_compression_possible_cram_done(
     crunchy_config_dict, crunchy_test_dir, mock_bam_to_cram, mocker
 ):
-    """test bam_compression_possible for existing compression"""
+    """Test bam_compression_possible for existing compression"""
     # GIVEN a bam path to a existing file and a crunchy api
     mocker.patch.object(CrunchyAPI, "bam_to_cram", side_effect=mock_bam_to_cram)
     crunchy_api = CrunchyAPI(crunchy_config_dict)
@@ -176,7 +186,7 @@ def test_bam_compression_possible_cram_done(
 
 
 def test_bam_compression_possible(crunchy_config_dict, crunchy_test_dir):
-    """test bam_compression_possible compressable bam"""
+    """Test bam_compression_possible compressable BAM"""
     # GIVEN a bam path to existing file and a crunchy api
     crunchy_api = CrunchyAPI(crunchy_config_dict)
     bam_path = crunchy_test_dir / "file.bam"
@@ -190,7 +200,7 @@ def test_bam_compression_possible(crunchy_config_dict, crunchy_test_dir):
 
 
 def test_get_flag_path(crunchy_config_dict, crunchy_test_dir):
-    """test get_flag_path"""
+    """Test get_flag_path"""
 
     # GIVEM a bam_path
     crunchy_api = CrunchyAPI(crunchy_config_dict)
@@ -204,7 +214,7 @@ def test_get_flag_path(crunchy_config_dict, crunchy_test_dir):
 
 
 def test_get_index_path(crunchy_config_dict, crunchy_test_dir):
-    """test get_index_path"""
+    """Test get_index_path"""
 
     # GIVEM a bam_path
     crunchy_api = CrunchyAPI(crunchy_config_dict)
@@ -227,8 +237,8 @@ def test_get_index_path(crunchy_config_dict, crunchy_test_dir):
 
 
 def test_get_cram_path_from_bam(crunchy_config_dict, crunchy_test_dir):
-    """test change_suffic_bam_to_cram"""
-    # GIVEM a bam_path
+    """Test change_suffic_bam_to_cram"""
+    # GIVEN a bam_path
     crunchy_api = CrunchyAPI(crunchy_config_dict)
     bam_path = crunchy_test_dir / "file.bam"
 

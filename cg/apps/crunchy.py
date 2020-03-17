@@ -60,7 +60,7 @@ error() {{
 
 trap error ERR
 
-crunchy --reference {reference_path} compress bam --bam-path {bam_path} --cram-path {cram_path}
+crunchy -r {reference_path} -t 12 compress bam -b {bam_path} -c {cram_path}
 samtools quickcheck {cram_path}
 touch {flag_path}
 """
