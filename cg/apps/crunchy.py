@@ -20,8 +20,7 @@ from .constants import (
 LOG = logging.getLogger(__name__)
 
 
-SBATCH_HEADER_TEMPLATE = """
-#!/bin/bash
+SBATCH_HEADER_TEMPLATE = """#!/bin/bash
 #SBATCH --job-name={job_name}
 #SBATCH --account={account}
 #SBATCH --ntasks={ntasks}
