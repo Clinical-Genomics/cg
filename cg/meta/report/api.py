@@ -176,8 +176,7 @@ class ReportAPI:
             if prep_category == 'rml' and status == 'prep_date':
                 continue
             if not delivery_data_sample[status] or delivery_data_sample[status]=='N/A':
-                self.LOG.error(f"Date missimg for sample {sample.internal_id}: {status}")
-                raise DeliveryReportError()
+                raise DeliveryReportError(f"Date missimg for sample {sample.internal_id}: {status}")
 
     def _fetch_family_samples_from_status_db(self, family_id: str) -> list:
         """Incorporate data from the status database for each sample ."""
