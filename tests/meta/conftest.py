@@ -226,7 +226,7 @@ class MockHouseKeeper(HousekeeperAPI):
         """Mock the get_files method to return a list of files"""
         return self._files
 
-    def add_file(self, file, version_obj, tag_name, to_archive=False):
+    def add_file(self, file, version_obj, tags, to_archive=False):
         """Mock the add_files method to add a MockFile to the list of files"""
         self._file_added = True
         self._file = MockFile(path=file)
@@ -424,7 +424,7 @@ def deliver_api(analysis_store):
     """Fixture for deliver_api"""
     lims_mock = MockLims()
     hk_mock = MockHouseKeeper()
-    hk_mock.add_file(file="/mock/path", version_obj="", tag_name="")
+    hk_mock.add_file(file="/mock/path", version_obj="", tags=[])
     hk_mock._files = MockFiles(
         [MockFile(tags=["case-tag"]), MockFile(tags=["sample-tag", "ADM1"])]
     )

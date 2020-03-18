@@ -66,7 +66,7 @@ class MockHouseKeeper(HousekeeperAPI):
         """Mock the get_files method to return a list of files"""
         return self._files
 
-    def add_file(self, file, version_obj, tag_name, to_archive=False):
+    def add_file(self, file, version_obj, tags, to_archive=False):
         """Mock the add_files method to add a MockFile to the list of files"""
         self._file_added = True
         self._file = MockFile(path=file)
@@ -207,7 +207,7 @@ def upload_observations_api(analysis_store):
 
     loqus_mock = MockLoqusAPI()
     hk_mock = MockHouseKeeper()
-    hk_mock.add_file(file=".", version_obj="", tag_name="")
+    hk_mock.add_file(file=".", version_obj="", tags=[])
 
     _api = UploadObservationsAPI(
         status_api=analysis_store, hk_api=hk_mock, loqus_api=loqus_mock
@@ -222,7 +222,7 @@ def upload_observations_api_wes(analysis_store):
 
     loqus_mock = MockLoqusAPI(analysis_type="wes")
     hk_mock = MockHouseKeeper()
-    hk_mock.add_file(file=".", version_obj="", tag_name="")
+    hk_mock.add_file(file=".", version_obj="", tags=[])
 
     _api = UploadObservationsAPI(
         status_api=analysis_store, hk_api=hk_mock, loqus_api=loqus_mock
@@ -235,7 +235,7 @@ def upload_observations_api_wes(analysis_store):
 def upload_scout_api(scout_store, madeline_api):
     """Fixture for upload_scout_api"""
     hk_mock = MockHouseKeeper()
-    hk_mock.add_file(file="/mock/path", version_obj="", tag_name="")
+    hk_mock.add_file(file="/mock/path", version_obj="", tags=[])
     analysis_mock = MockAnalysis()
 
     _api = UploadScoutAPI(
@@ -266,7 +266,7 @@ def mutacc_upload_api():
 def coverage_upload_api(chanjo_config_dict):
     """Fixture for coverage upload API"""
     hk_api = MockHouseKeeper()
-    hk_api.add_file(file="path", version_obj="", tag_name="")
+    hk_api.add_file(file="path", version_obj="", tags=[])
     status_api = None
     coverage_api = MockCoverage(chanjo_config_dict)
     _api = UploadCoverageApi(

@@ -61,7 +61,7 @@ class HousekeeperAPI(Store):
         """
         return self.files(bundle=bundle, tags=tags, version=version)
 
-    def add_file(self, file, version_obj: models.Version, tags, to_archive=False):
+    def add_file(self, file, version_obj: models.Version, tags: list, to_archive=False):
         """Add a file to housekeeper."""
 
         new_file = self.new_file(
