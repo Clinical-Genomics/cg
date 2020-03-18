@@ -104,6 +104,7 @@ class CompressAPI:
             bam_path = Path(bam_files["bam"].full_path)
             if self.crunchy_api.is_cram_compression_done(bam_path=bam_path):
                 cram_path = self.crunchy_api.get_cram_path_from_bam(bam_path=bam_path)
+                LOG.info("Scout update for %s:", sample_id)
                 LOG.info("%s -> %s", bam_path, cram_path)
                 if not dry_run:
                     LOG.info("updating alignment-file for %s in scout...", sample_id)
@@ -122,8 +123,9 @@ class CompressAPI:
             cram_path = self.crunchy_api.get_cram_path_from_bam(bam_path=bam_path)
             crai_path = self.crunchy_api.get_index_path(cram_path)["double_suffix"]
             if self.crunchy_api.is_cram_compression_done(bam_path=bam_path):
+                LOG.info("HouseKeeper update for %s:", sample_id)
                 LOG.info("%s -> %s, with tags %s", bam_path, cram_path, cram_tags)
-                LOG.info("%s -> %s, with tags %s", bai_path, crai_tags, crai_tags)
+                LOG.info("%s -> %s, with tags %s", bai_path, crai_path, crai_tags)
                 if not dry_run:
                     LOG.info("updating files in housekeeper...")
                     self.hk_api.add_file(
