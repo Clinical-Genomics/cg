@@ -9,7 +9,6 @@ from datetime import datetime
 from pathlib import Path
 
 from cg.apps import crunchy, tb, hk, scoutapi, beacon as beacon_app
-from cg.meta.compress import CompressAPI
 from cg.meta.upload.beacon import UploadBeaconApi
 from cg.store import Store
 
@@ -187,25 +186,3 @@ def mipauto(
                 ),
                 case_id,
             )
-
-
-@clean.command()
-@click.option("-c", "--case-id", type=str)
-@click.option("-d", "--dry-run", is_flag=True)
-def bam(context, case_id, dry_run):
-    """Remove compressed BAM files, and update links in scout and housekeeper
-       to CRAM files"""
-    compress_api = CompressAPI(
-        hk_api=context.obj["hk"],
-        crunchy_api=context.obj["crunchy"],
-        scout_api=context.obj["scout"],
-    )
-    if case_id:
-        cases = [context.obj["db"].family(case_id)]
-    else:
-        cases = context.obj["db"].families()
-    for case in cases:
-        case_id = case.internal_id
-        compress_api.update_scout(case_id, dry_run=dry_run)
-        compress_api.update_hk(case_id, dry_run=dry_run)
-        compress_api.remove_bams(case_id, dry_run=dry_run)

@@ -65,8 +65,7 @@ touch {pending_path}
 crunchy -r {reference_path} -t 12 compress bam -b {bam_path} -c {cram_path}
 samtools quickcheck {cram_path}
 touch {flag_path}
-rm {pending_path}
-"""
+rm {pending_path}"""
 
 FLAG_PATH_SUFFIX = ".crunchy.txt"
 PENDING_PATH_SUFFIX = ".crunchy.pending.txt"
