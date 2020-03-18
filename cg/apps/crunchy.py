@@ -37,12 +37,9 @@ set -e
 echo "Running on: $(hostname)"
 
 source activate {conda_env}
-
-
 """
 
 SBATCH_BAM_TO_CRAM = """
-
 error() {{
     if [[ -e {cram_path} ]]
     then
@@ -54,14 +51,21 @@ error() {{
         rm {cram_path}.crai
     fi
 
+    if [[ -e {pending_path} ]]
+    then
+        rm {pending_path}
+    fi
+
     exit 1
 }}
 
 trap error ERR
 
+touch {pending_path}
 crunchy -r {reference_path} -t 12 compress bam -b {bam_path} -c {cram_path}
 samtools quickcheck {cram_path}
 touch {flag_path}
+rm {pending_path}
 """
 
 # SBATCH_SPRING = """
@@ -76,6 +80,7 @@ touch {flag_path}
 # """
 
 FLAG_PATH_SUFFIX = ".crunchy.txt"
+PENDING_PATH_SUFFIX = ".crunchy.pending.txt"
 
 
 class CrunchyAPI:
@@ -98,6 +103,7 @@ class CrunchyAPI:
         cram_path = self.get_cram_path_from_bam(bam_path)
         job_name = bam_path.name + "_bam_to_cram"
         flag_path = self.get_flag_path(file_path=cram_path)
+        pending_path = self.get_pending_path(file_path=bam_path)
         log_dir = bam_path.parent
 
         sbatch_header = self._get_slurm_header(
@@ -114,6 +120,7 @@ class CrunchyAPI:
             bam_path=bam_path,
             cram_path=cram_path,
             flag_path=flag_path,
+            pending_path=pending_path,
             reference_path=self.reference_path,
         )
 
@@ -180,6 +187,14 @@ class CrunchyAPI:
             return False
         return True
 
+    def cram_compression_pending(self, bam_path: Path) -> bool:
+        """Check if cram compression has started, but not yet finished"""
+        pending_path = self.get_pending_path(file_path=bam_path)
+        if pending_path.exists():
+            LOG.info("Cram compression is pending for %s", bam_path)
+            return True
+        return False
+
     def bam_compression_possible(self, bam_path: Path) -> bool:
         """Check if it CRAM compression for BAM file is possible"""
         if bam_path is None or not bam_path.exists():
@@ -229,6 +244,10 @@ class CrunchyAPI:
     @staticmethod
     def get_flag_path(file_path):
         return file_path.with_suffix(FLAG_PATH_SUFFIX)
+
+    @staticmethod
+    def get_pending_path(file_path):
+        return file_path.with_suffix(PENDING_PATH_SUFFIX)
 
     @staticmethod
     def get_index_path(file_path):
@@ -295,12 +314,17 @@ class CrunchyAPI:
 
     @staticmethod
     def _get_slurm_bam_to_cram(
-        bam_path: str, cram_path: str, flag_path: str, reference_path: str
+        bam_path: str,
+        cram_path: str,
+        flag_path: str,
+        pending_path: str,
+        reference_path: str,
     ) -> str:
         sbatch_body = SBATCH_BAM_TO_CRAM.format(
             bam_path=bam_path,
             cram_path=cram_path,
             flag_path=flag_path,
+            pending_path=pending_path,
             reference_path=reference_path,
         )
         return sbatch_body
