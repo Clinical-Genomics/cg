@@ -187,19 +187,23 @@ def test_get_index_path(crunchy_config_dict, crunchy_test_dir):
     bam_path = crunchy_test_dir / "file.bam"
 
     # WHEN creating bam path
-    bai_path = crunchy_api.get_index_path(file_path=bam_path)
+    bai_paths = crunchy_api.get_index_path(file_path=bam_path)
 
-    # THEN this should replace current suffix with .bam.bai
-    assert bai_path.suffixes == [".bam", ".bai"]
+    # THEN this should replace current suffix with .bam.bai for double suffix
+    # type and .bai for single suffix type
+    assert bai_paths["double_suffix"].suffixes == [".bam", ".bai"]
+    assert bai_paths["single_suffix"].suffixes == [".bai"]
 
-    # GIVEM a bam_path
+    # GIVEN a bam_path
     cram_path = crunchy_test_dir / "file.cram"
 
     # WHEN creating flag path
-    crai_path = crunchy_api.get_index_path(file_path=cram_path)
+    crai_paths = crunchy_api.get_index_path(file_path=cram_path)
 
-    # THEN this should replace current suffix with .cram.crai
-    assert crai_path.suffixes == [".cram", ".crai"]
+    # THEN this should replace current suffix with .cram.crai for double suffix
+    # type, and .crai for single suffix type
+    assert crai_paths["double_suffix"].suffixes == [".cram", ".crai"]
+    assert crai_paths["single_suffix"].suffixes == [".crai"]
 
 
 def test_get_cram_path_from_bam(crunchy_config_dict, crunchy_test_dir):

@@ -137,7 +137,10 @@ class CrunchyAPI:
         if not cram_path.exists():
             LOG.info("No cram-file for %s", bam_path)
             return False
-        if not self.get_index_path(cram_path).exists():
+        index_paths = self.get_index_path(cram_path)
+        index_single_suffix = index_paths["single_suffix"]
+        index_double_suffix = index_paths["double_suffix"]
+        if (not index_single_suffix.exists()) and (not index_double_suffix.exists()):
             LOG.info("No index-file for %s", cram_path)
             return False
         if not flag_path.exists():
@@ -176,7 +179,12 @@ class CrunchyAPI:
         index_type = CRAM_INDEX_SUFFIX
         if file_path.suffix == BAM_SUFFIX:
             index_type = BAM_INDEX_SUFFIX
-        return file_path.with_suffix(file_path.suffix + index_type)
+        with_single_suffix = file_path.with_suffix(index_type)
+        with_double_suffix = file_path.with_suffix(file_path.suffix + index_type)
+        return {
+            "single_suffix": with_single_suffix,
+            "double_suffix": with_double_suffix,
+        }
 
     @staticmethod
     def get_cram_path_from_bam(bam_path: Path) -> Path:

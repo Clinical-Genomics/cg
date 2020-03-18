@@ -60,7 +60,9 @@ class CompressAPI:
                 LOG.warning("No bam file found for sample %s in scout", sample_id)
                 return None
             bam_path = Path(bam_file)
-            bai_path = self.crunchy_api.get_index_path(bam_path)
+            bai_paths = self.crunchy_api.get_index_path(bam_path)
+            bai_single_suffix = bai_paths["single_suffix"]
+            bai_double_suffix = bai_paths["double_suffix"]
             if not bam_path.exists():
                 LOG.warning("%s does not exist", bam_path)
                 return None
@@ -70,9 +72,15 @@ class CompressAPI:
             if bam_path not in hk_files_dict.keys():
                 LOG.warning("%s not in latest version of housekeeper bundle", bam_path)
                 return None
-            if bai_path not in hk_files_dict.keys():
+            if (bai_single_suffix not in hk_files_dict.keys()) and (
+                bai_double_suffix not in hk_files_dict.keys()
+            ):
                 LOG.warning("%s has no index-file", bam_path)
                 return None
+            bai_path = bai_single_suffix
+            if bai_double_suffix.exists():
+                bai_path = bai_double_suffix
+
             bam_dict[sample_id] = {
                 "bam": hk_files_dict[bam_path],
                 "bai": hk_files_dict[bai_path],
@@ -112,7 +120,7 @@ class CompressAPI:
             bam_path = Path(bam_files["bam"].full_path)
             bai_path = Path(bam_files["bai"].full_path)
             cram_path = self.crunchy_api.get_cram_path_from_bam(bam_path=bam_path)
-            crai_path = self.crunchy_api.get_index_path(cram_path)
+            crai_path = self.crunchy_api.get_index_path(cram_path)["double_suffix"]
             if self.crunchy_api.is_cram_compression_done(bam_path=bam_path):
                 LOG.info("%s -> %s, with tags %s", bam_path, cram_path, cram_tags)
                 LOG.info("%s -> %s, with tags %s", bai_path, crai_tags, crai_tags)
