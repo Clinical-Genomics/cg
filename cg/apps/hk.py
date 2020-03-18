@@ -63,7 +63,8 @@ class HousekeeperAPI(Store):
 
     def add_file(self, file, version_obj: models.Version, tags, to_archive=False):
         """Add a file to housekeeper."""
-
+if isinstance(tags, str):
+    tags = [tags]
         new_file = self.new_file(
             path=str(Path(file).absolute()),
             to_archive=to_archive,
