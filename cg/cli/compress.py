@@ -82,6 +82,7 @@ def clean(context):
 @clean.command("bam")
 @click.option("-c", "--case-id", type=str)
 @click.option("-d", "--dry-run", is_flag=True)
+@click.pass_context
 def clean_bam(context, case_id, dry_run):
     """Remove compressed BAM files, and update links in scout and housekeeper
        to CRAM files"""
