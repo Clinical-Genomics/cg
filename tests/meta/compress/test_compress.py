@@ -71,15 +71,12 @@ def test_compress_case_bams(compress_api, bam_dict, mocker):
 def test_update_scout(compress_api, bam_dict, mock_compress_func, mocker):
     """ Test update_hk method"""
     mock_compress_func(bam_dict)
-    mock_get_bam_files = mocker.patch.object(
-        CompressAPI, "get_bam_files", return_value=bam_dict
-    )
     mock_update_alignment_file = mocker.patch.object(ScoutAPI, "update_alignment_file")
     # GIVEN a case-id
     case_id = "test_case"
 
     # WHEN updating scout
-    compress_api.update_scout(case_id=case_id)
+    compress_api.update_scout(case_id=case_id, bam_dict=bam_dict)
 
     # THEN update_alignment_file should have been callen three times
     assert mock_update_alignment_file.call_count == len(bam_dict)
@@ -88,15 +85,12 @@ def test_update_scout(compress_api, bam_dict, mock_compress_func, mocker):
 def test_update_hk(compress_api, bam_dict, mock_compress_func, mocker):
     """ Test update_hk method"""
     mock_compress_func(bam_dict)
-    mock_get_bam_files = mocker.patch.object(
-        CompressAPI, "get_bam_files", return_value=bam_dict
-    )
     mock_add_file = mocker.patch.object(HousekeeperAPI, "add_file")
     # GIVEN a case-id and a compress api
     case_id = "test-case"
 
     # WHEN updating hk
-    compress_api.update_hk(case_id=case_id)
+    compress_api.update_hk(case_id=case_id, bam_dict=bam_dict)
 
     # THEN add_file should have been called 6 times (two for every case)
     assert mock_add_file.call_count == 6
@@ -114,12 +108,8 @@ def test_remove_bams(compress_api, bam_dict, mock_compress_func, mocker):
         assert Path(files["crai"].full_path).exists()
         assert Path(files["flag"].full_path).exists()
 
-    mock_get_bam_files = mocker.patch.object(
-        CompressAPI, "get_bam_files", return_value=bam_dict
-    )
-
     # WHEN calling remove_bams
-    compress_api.remove_bams(case_id="test-case")
+    compress_api.remove_bams(bam_dict=bam_dict)
 
     # THEN the bam-files and flag-file should not exist
 

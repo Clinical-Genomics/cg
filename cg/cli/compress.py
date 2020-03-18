@@ -97,6 +97,4 @@ def clean_bam(context, case_id, dry_run):
         cases = context.obj["db"].families()
     for case in cases:
         case_id = case.internal_id
-        compress_api.update_scout(case_id, dry_run=dry_run)
-        compress_api.update_hk(case_id, dry_run=dry_run)
-        compress_api.remove_bams(case_id, dry_run=dry_run)
+        compress_api.clean_bams(case_id, dry_run=dry_run)

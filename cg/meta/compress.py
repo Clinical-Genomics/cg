@@ -97,9 +97,16 @@ class CompressAPI:
                 bam_path=bam_path, ntasks=ntasks, mem=mem, dry_run=dry_run
             )
 
-    def update_scout(self, case_id: str, dry_run: bool = False):
-
+    def clean_bams(self, case_id: str, dry_run: bool = False):
+        """Update databases and remove uncompressed BAM files for case if
+        compression is done"""
         bam_dict = self.get_bam_files(case_id=case_id)
+        self.update_scout(case_id=case_id, bam_dict=bam_dict, dry_run=dry_run)
+        self.update_hk(case_id=case_id, bam_dict=bam_dict, dry_run=dry_run)
+        self.remove_bams(bam_dict=bam_dict, dry_run=dry_run)
+
+    def update_scout(self, case_id: str, bam_dict: dict, dry_run: bool = False):
+        """Update scout with compressed alignment file if present"""
         for sample_id, bam_files in bam_dict.items():
             bam_path = Path(bam_files["bam"].full_path)
             if self.crunchy_api.is_cram_compression_done(bam_path=bam_path):
@@ -112,8 +119,8 @@ class CompressAPI:
                         case_id=case_id, sample_id=sample_id, alignment_path=cram_path
                     )
 
-    def update_hk(self, case_id: str, dry_run: bool = False):
-        bam_dict = self.get_bam_files(case_id=case_id)
+    def update_hk(self, case_id: str, bam_dict: dict, dry_run: bool = False):
+        """Update Housekeeper with compressed alignment file if present"""
         latest_hk_version = self.hk_api.last_version(bundle=case_id)
         for sample_id, bam_files in bam_dict.items():
             cram_tags = [sample_id, "cram"]
@@ -138,9 +145,9 @@ class CompressAPI:
                     bam_files["bai"].delete()
                     self.hk_api.commit()
 
-    def remove_bams(self, case_id: str, dry_run: bool = False):
-        bam_files = self.get_bam_files(case_id=case_id)
-        for sample_id, bam_files in bam_files.items():
+    def remove_bams(self, bam_dict: dict, dry_run: bool = False):
+        """Remove uncompressed alignment files if compression exists"""
+        for sample_id, bam_files in bam_dict.items():
             bam_path = Path(bam_files["bam"].full_path)
             bai_path = Path(bam_files["bai"].full_path)
             flag_path = self.crunchy_api.get_flag_path(file_path=bam_path)
