@@ -13,7 +13,7 @@ from cg.meta.report.presenter import Presenter
 from cg.meta.report.sample_calculator import SampleCalculator
 from cg.meta.report.status_helper import StatusHelper
 from cg.store import Store, models
-from cg.ext import DeliveryReportError
+from cg.exc import DeliveryReportError
 from jinja2 import Environment, PackageLoader, select_autoescape
 
 
