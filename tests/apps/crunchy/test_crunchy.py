@@ -10,7 +10,7 @@ from cg.apps.crunchy import (
     FLAG_PATH_SUFFIX,
     PENDING_PATH_SUFFIX,
 )
-from cg.apps.constants import (
+from cg.constants import (
     BAM_SUFFIX,
     BAM_INDEX_SUFFIX,
     CRAM_SUFFIX,
@@ -56,20 +56,20 @@ def test_bam_to_cram(crunchy_config_dict, mocker):
     )
 
 
-def test_cram_compression_done_no_cram(crunchy_config_dict):
+def test_is_cram_compression_done_no_cram(crunchy_config_dict):
     """test cram_compression_done without created CRAM file"""
     # GIVEN a crunchy-api, and a bam_path
     crunchy_api = CrunchyAPI(crunchy_config_dict)
     bam_path = Path("/path/to/bam.bam")
 
     # WHEN checking if cram compression is done
-    result = crunchy_api.cram_compression_done(bam_path=bam_path)
+    result = crunchy_api.is_cram_compression_done(bam_path=bam_path)
 
     # THEN result should be false
     assert not result
 
 
-def test_cram_compression_done_no_crai(crunchy_config_dict, crunchy_test_dir):
+def test_is_cram_compression_done_no_crai(crunchy_config_dict, crunchy_test_dir):
     """test cram_compression_done without created CRAI file"""
     # GIVEN a crunchy-api, and a bam_path
     crunchy_api = CrunchyAPI(crunchy_config_dict)
@@ -84,13 +84,13 @@ def test_cram_compression_done_no_crai(crunchy_config_dict, crunchy_test_dir):
     assert flag_path.exists()
 
     # WHEN checking if cram compression is done
-    result = crunchy_api.cram_compression_done(bam_path=bam_path)
+    result = crunchy_api.is_cram_compression_done(bam_path=bam_path)
 
     # THEN result should be false
     assert not result
 
 
-def test_cram_compression_done_no_flag(crunchy_config_dict, crunchy_test_dir):
+def test_is_cram_compression_done_no_flag(crunchy_config_dict, crunchy_test_dir):
     """test cram_compression_done without created flag file"""
     # GIVEN a crunchy-api, and a bam_path, cram_path, crai_path
     crunchy_api = CrunchyAPI(crunchy_config_dict)
@@ -105,13 +105,13 @@ def test_cram_compression_done_no_flag(crunchy_config_dict, crunchy_test_dir):
     assert crai_path.exists()
 
     # WHEN checking if cram compression is done
-    result = crunchy_api.cram_compression_done(bam_path=bam_path)
+    result = crunchy_api.is_cram_compression_done(bam_path=bam_path)
 
     # THEN result should be False
     assert not result
 
 
-def test_cram_compression_done(crunchy_config_dict, crunchy_test_dir):
+def test_is_cram_compression_done(crunchy_config_dict, crunchy_test_dir):
     """Test cram_compression_done with created CRAM, CRAI, and flag files"""
     # GIVEN a crunchy-api, and a bam_path, cram_path, crai_path, and flag_path
     crunchy_api = CrunchyAPI(crunchy_config_dict)
@@ -129,7 +129,7 @@ def test_cram_compression_done(crunchy_config_dict, crunchy_test_dir):
     assert flag_path.exists()
 
     # WHEN checking if cram compression is done
-    result = crunchy_api.cram_compression_done(bam_path=bam_path)
+    result = crunchy_api.is_cram_compression_done(bam_path=bam_path)
 
     # THEN result should be True
     assert result
@@ -145,7 +145,7 @@ def test_cram_compression_before_after(
     crunchy_api = CrunchyAPI(crunchy_config_dict)
 
     # WHEN calling cram_compression_done on bam_path
-    result = crunchy_api.cram_compression_done(bam_path=bam_path)
+    result = crunchy_api.is_cram_compression_done(bam_path=bam_path)
 
     # Cram compression is not done
     assert not result
@@ -154,26 +154,26 @@ def test_cram_compression_before_after(
     crunchy_api.bam_to_cram(bam_path=bam_path, dry_run=False, ntasks=1, mem=2)
 
     # WHEN calling cram_compression_done on bam_path
-    result = crunchy_api.cram_compression_done(bam_path=bam_path)
+    result = crunchy_api.is_cram_compression_done(bam_path=bam_path)
 
     # THEN compression is marked as done
     assert result
 
 
-def test_bam_compression_possible_no_bam(crunchy_config_dict, crunchy_test_dir):
+def test_is_bam_compression_possible_no_bam(crunchy_config_dict, crunchy_test_dir):
     """Test bam_compression_possible for non-existing BAM"""
     # GIVEN a bam path to non existing file and a crunchy api
     crunchy_api = CrunchyAPI(crunchy_config_dict)
     bam_path = crunchy_test_dir / "file.bam"
 
     # WHEN calling test_bam_compression_possible
-    result = crunchy_api.bam_compression_possible(bam_path=bam_path)
+    result = crunchy_api.is_bam_compression_possible(bam_path=bam_path)
 
     # THEN this should return False
     assert not result
 
 
-def test_bam_compression_possible_cram_done(
+def test_is_bam_compression_possible_cram_done(
     crunchy_config_dict, crunchy_test_dir, mock_bam_to_cram, mocker
 ):
     """Test bam_compression_possible for existing compression"""
@@ -185,13 +185,13 @@ def test_bam_compression_possible_cram_done(
 
     # WHEN calling test_bam_compression_possible when cram_compression is done
     crunchy_api.bam_to_cram(bam_path=bam_path, dry_run=False, ntasks=1, mem=2)
-    result = crunchy_api.bam_compression_possible(bam_path=bam_path)
+    result = crunchy_api.is_bam_compression_possible(bam_path=bam_path)
 
     # THEN this should return False
     assert not result
 
 
-def test_bam_compression_possible(crunchy_config_dict, crunchy_test_dir):
+def test_is_bam_compression_possible(crunchy_config_dict, crunchy_test_dir):
     """Test bam_compression_possible compressable BAM"""
     # GIVEN a bam path to existing file and a crunchy api
     crunchy_api = CrunchyAPI(crunchy_config_dict)
@@ -199,7 +199,7 @@ def test_bam_compression_possible(crunchy_config_dict, crunchy_test_dir):
     bam_path.touch()
 
     # WHEN calling test_bam_compression_possible
-    result = crunchy_api.bam_compression_possible(bam_path=bam_path)
+    result = crunchy_api.is_bam_compression_possible(bam_path=bam_path)
 
     # THEN this will return True
     assert result

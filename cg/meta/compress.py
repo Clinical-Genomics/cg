@@ -8,7 +8,7 @@ import logging
 from copy import deepcopy
 
 from cg.apps import hk, crunchy, scoutapi
-from cg.apps.constants import FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX
+from cg.constants import FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX
 
 LOG = logging.getLogger(__name__)
 
@@ -94,7 +94,7 @@ class CompressAPI:
         bam_dict = self.get_bam_files(case_id=case_id)
         for sample_id, bam_files in bam_dict.items():
             bam_path = Path(bam_files["bam"].full_path)
-            if self.crunchy_api.cram_compression_done(bam_path=bam_path):
+            if self.crunchy_api.is_cram_compression_done(bam_path=bam_path):
                 cram_path = self.crunchy_api.get_cram_path_from_bam(bam_path=bam_path)
                 LOG.info("%s -> %s", bam_path, cram_path)
                 if not dry_run:
@@ -113,7 +113,7 @@ class CompressAPI:
             bai_path = Path(bam_files["bai"].full_path)
             cram_path = self.crunchy_api.get_cram_path_from_bam(bam_path=bam_path)
             crai_path = self.crunchy_api.get_index_path(cram_path)
-            if self.crunchy_api.cram_compression_done(bam_path=bam_path):
+            if self.crunchy_api.is_cram_compression_done(bam_path=bam_path):
                 LOG.info("%s -> %s, with tags %s", bam_path, cram_path, cram_tags)
                 LOG.info("%s -> %s, with tags %s", bai_path, crai_tags, crai_tags)
                 if not dry_run:
@@ -134,7 +134,7 @@ class CompressAPI:
             bam_path = Path(bam_files["bam"].full_path)
             bai_path = Path(bam_files["bai"].full_path)
             flag_path = self.crunchy_api.get_flag_path(file_path=bam_path)
-            if self.crunchy_api.cram_compression_done(bam_path=bam_path):
+            if self.crunchy_api.is_cram_compression_done(bam_path=bam_path):
                 LOG.info("Will remove %s, %s, and %s", bam_path, bai_path, flag_path)
                 if not dry_run:
                     LOG.info("deleting files...")
