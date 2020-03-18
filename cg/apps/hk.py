@@ -61,27 +61,15 @@ class HousekeeperAPI(Store):
         """
         return self.files(bundle=bundle, tags=tags, version=version)
 
-    def add_file(self, file, version_obj: models.Version, tag_name, to_archive=False):
+    def add_file(self, file, version_obj: models.Version, tags, to_archive=False):
         """Add a file to housekeeper."""
-        new_file = self.new_file(
-            path=str(Path(file).absolute()),
-            to_archive=to_archive,
-            tags=[self.tag(tag_name)],
-        )
-        new_file.version = version_obj
-        self.add_commit(new_file)
-        return new_file
-
-    def add_file_with_tags(
-        self, file, version_obj: models.Version, tags, to_archive=False
-    ):
-        """Add a file with tags to housekeeper"""
 
         new_file = self.new_file(
             path=str(Path(file).absolute()),
             to_archive=to_archive,
             tags=[self.tag(tag_name) for tag_name in tags],
         )
+
         new_file.version = version_obj
         self.add_commit(new_file)
         return new_file

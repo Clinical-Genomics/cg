@@ -118,10 +118,10 @@ class CompressAPI:
                 LOG.info("%s -> %s, with tags %s", bai_path, crai_tags, crai_tags)
                 if not dry_run:
                     LOG.info("updating files in housekeeper...")
-                    self.hk_api.add_file_with_tags(
+                    self.hk_api.add_file(
                         file=cram_path, version_obj=latest_hk_version, tags=cram_tags
                     )
-                    self.hk_api.add_file_with_tags(
+                    self.hk_api.add_file(
                         file=crai_path, version_obj=latest_hk_version, tags=crai_tags
                     )
                     bam_files["bam"].delete()

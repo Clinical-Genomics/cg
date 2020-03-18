@@ -91,15 +91,15 @@ def test_update_hk(compress_api, bam_dict, mock_compress_func, mocker):
     mock_get_bam_files = mocker.patch.object(
         CompressAPI, "get_bam_files", return_value=bam_dict
     )
-    mock_add_file_with_tags = mocker.patch.object(HousekeeperAPI, "add_file_with_tags")
+    mock_add_file = mocker.patch.object(HousekeeperAPI, "add_file")
     # GIVEN a case-id and a compress api
     case_id = "test-case"
 
     # WHEN updating hk
     compress_api.update_hk(case_id=case_id)
 
-    # THEN add_file_with_tags should have been called 6 times (two for every case)
-    assert mock_add_file_with_tags.call_count == 6
+    # THEN add_file should have been called 6 times (two for every case)
+    assert mock_add_file.call_count == 6
 
 
 def test_remove_bams(compress_api, bam_dict, mock_compress_func, mocker):
