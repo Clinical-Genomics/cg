@@ -4,7 +4,12 @@ import pytest
 from pathlib import Path
 
 from cg.apps.crunchy import CrunchyAPI
-from cg.apps.crunchy import SBATCH_HEADER_TEMPLATE, SBATCH_BAM_TO_CRAM, FLAG_PATH_SUFFIX
+from cg.apps.crunchy import (
+    SBATCH_HEADER_TEMPLATE,
+    SBATCH_BAM_TO_CRAM,
+    FLAG_PATH_SUFFIX,
+    PENDING_PATH_SUFFIX,
+)
 from cg.apps.constants import (
     BAM_SUFFIX,
     BAM_INDEX_SUFFIX,
@@ -41,6 +46,7 @@ def test_bam_to_cram(crunchy_config_dict, mocker):
         reference_path=crunchy_config_dict["crunchy"]["cram_reference"],
         bam_path=bam_path,
         cram_path=bam_path.with_suffix(".cram"),
+        pending_path=bam_path.with_suffix(PENDING_PATH_SUFFIX),
         flag_path=bam_path.with_suffix(FLAG_PATH_SUFFIX),
     )
 
