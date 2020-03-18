@@ -101,9 +101,10 @@ class CompressAPI:
         """Update databases and remove uncompressed BAM files for case if
         compression is done"""
         bam_dict = self.get_bam_files(case_id=case_id)
-        self.update_scout(case_id=case_id, bam_dict=bam_dict, dry_run=dry_run)
-        self.update_hk(case_id=case_id, bam_dict=bam_dict, dry_run=dry_run)
-        self.remove_bams(bam_dict=bam_dict, dry_run=dry_run)
+        if bam_dict:
+            self.update_scout(case_id=case_id, bam_dict=bam_dict, dry_run=dry_run)
+            self.update_hk(case_id=case_id, bam_dict=bam_dict, dry_run=dry_run)
+            self.remove_bams(bam_dict=bam_dict, dry_run=dry_run)
 
     def update_scout(self, case_id: str, bam_dict: dict, dry_run: bool = False):
         """Update scout with compressed alignment file if present"""
