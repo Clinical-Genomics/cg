@@ -47,7 +47,7 @@ def test_upload(chanjo_config_dict, housekeeper_api, analysis_store, mocker):
     mock_sample = mocker.patch.object(ChanjoAPI, "sample")
     mock_remove = mocker.patch.object(ChanjoAPI, "delete_sample")
     hk_api = housekeeper_api
-    hk_api.add_file(file="path", version_obj="", tags=[])
+    hk_api.add_file(file="path", version_obj="", tag_name="")
     chanjo_api = ChanjoAPI(config=chanjo_config_dict)
     coverage_api = UploadCoverageApi(
         status_api=None, hk_api=hk_api, chanjo_api=chanjo_api

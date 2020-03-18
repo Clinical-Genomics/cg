@@ -137,7 +137,7 @@ class UploadScoutAPI:
         if bundle_config_exists:
             raise FileExistsError("Upload config already exists")
 
-        file_obj = hk_api.add_file(str(config_file_path), version_obj, [tag_name])
+        file_obj = hk_api.add_file(str(config_file_path), version_obj, tag_name)
         hk_api.include_file(file_obj, version_obj)
         hk_api.add_commit(file_obj)
 
