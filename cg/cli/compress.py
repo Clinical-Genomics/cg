@@ -77,7 +77,6 @@ def bam(context, case_id, number_of_conversions, ntasks, mem, dry_run):
 @click.pass_context
 def clean(context):
     """Clean uncompressed files"""
-    pass
 
 
 @clean.command("bam")
