@@ -172,11 +172,16 @@ class ReportAPI:
 
     def _check_sample_dates(self, sample, delivery_data_sample):
         prep_category = sample.application_version.application.prep_category
-        for status in ['received', 'prep_date', 'sequencing_date', 'delivery_date']:
-            if prep_category == 'rml' and status == 'prep_date':
+        for status in ["received", "prep_date", "sequencing_date", "delivery_date"]:
+            if prep_category == "rml" and status == "prep_date":
                 continue
-            if not delivery_data_sample[status] or delivery_data_sample[status]=='N/A':
-                raise DeliveryReportError(f"Date missimg for sample {sample.internal_id}: {status}")
+            if (
+                not delivery_data_sample[status]
+                or delivery_data_sample[status] == "N/A"
+            ):
+                raise DeliveryReportError(
+                    f"Date missimg for sample {sample.internal_id}: {status}"
+                )
 
     def _fetch_family_samples_from_status_db(self, family_id: str) -> list:
         """Incorporate data from the status database for each sample ."""

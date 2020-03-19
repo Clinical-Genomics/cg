@@ -427,18 +427,15 @@ class LimsAPI(Lims, OrderHandler):
                 parent_process = artifact.parent_process
                 if parent_process and parent_process.udf.get(udf_key):
                     dates.append(
-                        (
-                            parent_process.date_run,
-                            parent_process.udf.get(udf_key),
-                        )
+                        (parent_process.date_run, parent_process.udf.get(udf_key),)
                     )
                 processes.append(parent_process.id)
                 all_artifacts.append(artifact)
 
         if all_artifacts and not dates:
-            udfs = ' ,'.join(set(step_names_udfs.values())) 
-            process_ids = ' ,'.join(set(processes))
-            msg = f'Did not find date for sample {lims_id}. Searced for udfs: {udfs}. Searched in processes: {process_ids}.'
+            udfs = " ,".join(set(step_names_udfs.values()))
+            process_ids = " ,".join(set(processes))
+            msg = f"Did not find date for sample {lims_id}. Searced for udfs: {udfs}. Searched in processes: {process_ids}."
             log.error(msg)
         return dates
 
