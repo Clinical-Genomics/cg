@@ -3,7 +3,7 @@ import tempfile
 from datetime import date
 
 from flask import flash, Blueprint, render_template, request, redirect, url_for, \
-    send_from_directory, session
+    send_from_directory, session, current_app
 from flask_dance.contrib.google import google
 
 from cg.apps.invoice.render import render_xlsx
@@ -126,13 +126,13 @@ def new(record_type):
         records, customers_to_invoice = db.pools_to_invoice(customer=customer_obj)
     elif record_type == 'Microbial':
         records, customers_to_invoice = db.microbial_samples_to_invoice(customer=customer_obj)
-
     return render_template(
         'invoices/new.html',
         customers_to_invoice=customers_to_invoice,
         count=count,
         records=records,
         record_type=record_type,
+        total_price_treshold=current_app.config['TOTAL_PRICE_TRESHOLD'],
         args={'customer': customer_id})
 
 
