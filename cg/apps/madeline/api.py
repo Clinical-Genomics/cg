@@ -44,7 +44,7 @@ class MadelineAPI:
                 sample.get("mother") or ".",
                 "Y" if sample.get("deceased") else ".",
                 "Y" if sample.get("proband") else ".",
-                status_affected.get(sample.get("status") or "."),
+                status_affected.get(sample.get("status")) or ".",
             ]
             yield "\t".join(row)
 
