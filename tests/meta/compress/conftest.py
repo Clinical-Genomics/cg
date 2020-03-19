@@ -35,13 +35,10 @@ class MockHousekeeper(HousekeeperAPI):
 
     def commit(self):
         """mock commit method"""
-        pass
 
 
 class MockCrunchy(CrunchyAPI):
     """Mock crunchy api"""
-
-    pass
 
 
 class MockFile:
@@ -62,7 +59,6 @@ class MockFile:
 
     def delete(self):
         """mock delete method"""
-        pass
 
 
 @pytest.yield_fixture(scope="function")
