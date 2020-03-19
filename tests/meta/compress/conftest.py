@@ -16,6 +16,8 @@ class MockScout(ScoutAPI):
 
 
 class MockVersion:
+    """Mock hk version"""
+
     def __init__(self):
         self.id = 1
 
@@ -27,14 +29,17 @@ class MockHousekeeper(HousekeeperAPI):
         pass
 
     def last_version(self, bundle):
+        """mock last_version method"""
         _ = bundle
         return MockVersion()
 
     def commit(self):
+        """mock commit method"""
         pass
 
 
 class MockCrunchy(CrunchyAPI):
+    """Mock crunchy api"""
 
     pass
 
@@ -48,25 +53,28 @@ class MockFile:
 
     @property
     def full_path(self):
+        """Mock full_path property"""
         return str(self.path)
 
     def is_included(self):
+        """Mock is_included method"""
         return False
 
     def delete(self):
+        """mock delete method"""
         pass
 
 
 @pytest.yield_fixture(scope="function")
 def crunchy_api(crunchy_config_dict):
-
+    """crunchy api fixture"""
     _api = MockCrunchy(crunchy_config_dict)
     yield _api
 
 
 @pytest.yield_fixture(scope="function")
 def compress_api(crunchy_api):
-
+    """compress api fixture"""
     hk_api = MockHousekeeper()
     scout_api = MockScout()
     _api = CompressAPI(crunchy_api=crunchy_api, hk_api=hk_api, scout_api=scout_api)
@@ -112,7 +120,7 @@ def bam_files(compress_test_dir):
 
 @pytest.fixture(scope="function")
 def bam_files_hk_list(bam_files):
-
+    """hk file list fixture"""
     _hk_bam_list = []
 
     for _, files in bam_files.items():
@@ -136,7 +144,7 @@ def compress_scout_case(bam_files):
 
 @pytest.fixture(scope="function")
 def bam_dict(bam_files):
-
+    """bam_dict fixture"""
     _bam_dict = {}
     for sample, files in bam_files.items():
         _bam_dict[sample] = {
@@ -148,7 +156,10 @@ def bam_dict(bam_files):
 
 @pytest.fixture(scope="function")
 def mock_compress_func():
+    """fixture with function that mocks a CRAM compression of bam_dict"""
+
     def _mock_compress_func(bam_dict: dict):
+        """Creates corresponding .cram, .crai and flag path for BAM files"""
         _bam_dict = {}
         for sample, files in bam_dict.items():
             bam_path = Path(files["bam"].full_path)

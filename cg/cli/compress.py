@@ -1,3 +1,4 @@
+"""Commands for compressing files, and cleaning uncompressed files"""
 import logging
 from pathlib import Path
 

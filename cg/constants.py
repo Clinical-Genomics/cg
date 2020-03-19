@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+"""Constans for cg"""
 
 PRIORITY_MAP = {
     "research": 0,

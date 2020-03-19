@@ -1,5 +1,7 @@
-import pytest
+"""Fixtures for crunchy api"""
+
 import shutil
+import pytest
 from pathlib import Path
 
 

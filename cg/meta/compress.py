@@ -14,6 +14,8 @@ LOG = logging.getLogger(__name__)
 
 
 class CompressAPI:
+    """API for compressing BAM and FASTQ files"""
+
     def __init__(
         self,
         hk_api: hk.HousekeeperAPI,
@@ -27,9 +29,14 @@ class CompressAPI:
 
     @staticmethod
     def get_nlinks(file_link: Path):
+        """Get number of links to path"""
         return os.stat(file_link).st_nlink
 
     def get_bam_files(self, case_id: str):
+        """Get bam-files that can be compressed for a case
+            Returns:
+                bam_dict (dict): for each sample in case, give file-object
+                    for .bam and .bai files"""
 
         scout_cases = self.scout_api.get_cases(case_id=case_id)
         if not scout_cases:
@@ -92,6 +99,7 @@ class CompressAPI:
     def compress_case_bams(
         self, bam_dict: dict, ntasks: int, mem: int, dry_run: bool = False
     ):
+        """Compress bam-files in given dictionary"""
         for sample, bam_files in bam_dict.items():
             bam_path = Path(bam_files["bam"].full_path)
             LOG.info("Compressing %s for sample %s", bam_path, sample)
@@ -150,7 +158,7 @@ class CompressAPI:
 
     def remove_bams(self, bam_dict: dict, dry_run: bool = False):
         """Remove uncompressed alignment files if compression exists"""
-        for sample_id, bam_files in bam_dict.items():
+        for _, bam_files in bam_dict.items():
             bam_path = Path(bam_files["bam"].full_path)
             bai_path = Path(bam_files["bai"].full_path)
             flag_path = self.crunchy_api.get_flag_path(file_path=bam_path)

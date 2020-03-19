@@ -7,15 +7,7 @@ import tempfile
 from pathlib import Path
 
 from cg.utils import Process
-from cg.constants import (
-    BAM_SUFFIX,
-    BAM_INDEX_SUFFIX,
-    CRAM_SUFFIX,
-    CRAM_INDEX_SUFFIX,
-    FASTQ_FIRST_READ_SUFFIX,
-    FASTQ_SECOND_READ_SUFFIX,
-    SPRING_SUFFIX,
-)
+from cg.constants import BAM_SUFFIX, BAM_INDEX_SUFFIX, CRAM_SUFFIX, CRAM_INDEX_SUFFIX
 
 LOG = logging.getLogger(__name__)
 
@@ -168,14 +160,22 @@ class CrunchyAPI:
 
     @staticmethod
     def get_flag_path(file_path):
+        """Get path to 'finished' flag"""
         return file_path.with_suffix(FLAG_PATH_SUFFIX)
 
     @staticmethod
     def get_pending_path(file_path):
+        """Gives path to pending-flag path"""
         return file_path.with_suffix(PENDING_PATH_SUFFIX)
 
     @staticmethod
     def get_index_path(file_path):
+        """Get possible paths for index
+            Args:
+                file_path (Path): path to BAM or CRAM
+            Returns (dict): path with single_suffix, e.g. .bai
+                and path with double_suffix, e.g. .bam.bai
+        """
         index_type = CRAM_INDEX_SUFFIX
         if file_path.suffix == BAM_SUFFIX:
             index_type = BAM_INDEX_SUFFIX

@@ -1,24 +1,9 @@
 """Tests for CrunchyAPI"""
 
-import pytest
 from pathlib import Path
 
 from cg.apps.crunchy import CrunchyAPI
-from cg.apps.crunchy import (
-    SBATCH_HEADER_TEMPLATE,
-    SBATCH_BAM_TO_CRAM,
-    FLAG_PATH_SUFFIX,
-    PENDING_PATH_SUFFIX,
-)
-from cg.constants import (
-    BAM_SUFFIX,
-    BAM_INDEX_SUFFIX,
-    CRAM_SUFFIX,
-    CRAM_INDEX_SUFFIX,
-    FASTQ_FIRST_READ_SUFFIX,
-    FASTQ_SECOND_READ_SUFFIX,
-    SPRING_SUFFIX,
-)
+from cg.constants import CRAM_SUFFIX
 
 
 def test_bam_to_cram(crunchy_config_dict, sbatch_content, bam_path, mocker):
@@ -50,7 +35,7 @@ def test_is_cram_compression_done_no_cram(crunchy_config_dict, bam_path):
 
 
 def test_is_cram_compression_done_no_crai(
-    crunchy_config_dict, crunchy_test_dir, compressed_bam_without_crai
+    crunchy_config_dict, compressed_bam_without_crai
 ):
     """test cram_compression_done without created CRAI file"""
     # GIVEN a crunchy-api, and a bam_path
@@ -65,7 +50,7 @@ def test_is_cram_compression_done_no_crai(
 
 
 def test_is_cram_compression_done_no_flag(
-    crunchy_config_dict, crunchy_test_dir, compressed_bam_without_flag
+    crunchy_config_dict, compressed_bam_without_flag
 ):
     """test cram_compression_done without created flag file"""
     # GIVEN a crunchy-api, and a bam_path, cram_path, crai_path
@@ -79,9 +64,7 @@ def test_is_cram_compression_done_no_flag(
     assert not result
 
 
-def test_is_cram_compression_done(
-    crunchy_config_dict, crunchy_test_dir, compressed_bam
-):
+def test_is_cram_compression_done(crunchy_config_dict, compressed_bam):
     """Test cram_compression_done with created CRAM, CRAI, and flag files"""
     # GIVEN a crunchy-api, and a bam_path, cram_path, crai_path, and flag_path
     crunchy_api = CrunchyAPI(crunchy_config_dict)
@@ -119,9 +102,7 @@ def test_cram_compression_before_after(
     assert result
 
 
-def test_is_bam_compression_possible_no_bam(
-    crunchy_config_dict, crunchy_test_dir, bam_path
-):
+def test_is_bam_compression_possible_no_bam(crunchy_config_dict, bam_path):
     """Test bam_compression_possible for non-existing BAM"""
     # GIVEN a bam path to non existing file and a crunchy api
     crunchy_api = CrunchyAPI(crunchy_config_dict)

@@ -1,11 +1,11 @@
-import pytest
+""" Tests for compress API """
+
 import os
 from pathlib import Path
 
 from cg.apps.scoutapi import ScoutAPI
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.crunchy import CrunchyAPI
-from cg.meta.compress import CompressAPI
 
 
 def test_get_nlinks(compress_api, compress_test_dir):
@@ -42,12 +42,8 @@ def test_get_bam_files(compress_api, compress_scout_case, bam_files_hk_list, moc
 
     # GIVEN a case id
     case_id = "test_case"
-    mock_get_cases = mocker.patch.object(
-        ScoutAPI, "get_cases", return_value=[compress_scout_case]
-    )
-    mock_get_files = mocker.patch.object(
-        HousekeeperAPI, "get_files", return_value=bam_files_hk_list
-    )
+    mocker.patch.object(ScoutAPI, "get_cases", return_value=[compress_scout_case])
+    mocker.patch.object(HousekeeperAPI, "get_files", return_value=bam_files_hk_list)
 
     # WHEN getting bam-files
     bam_dict = compress_api.get_bam_files(case_id=case_id)
@@ -96,12 +92,12 @@ def test_update_hk(compress_api, bam_dict, mock_compress_func, mocker):
     assert mock_add_file.call_count == 6
 
 
-def test_remove_bams(compress_api, bam_dict, mock_compress_func, mocker):
+def test_remove_bams(compress_api, bam_dict, mock_compress_func):
     """ Test remove_bams method"""
     # GIVEN a bam-dict and a compress api
     compressed_dict = mock_compress_func(bam_dict)
 
-    for sample, files in compressed_dict.items():
+    for _, files in compressed_dict.items():
         assert Path(files["bam"].full_path).exists()
         assert Path(files["bai"].full_path).exists()
         assert Path(files["cram"].full_path).exists()
