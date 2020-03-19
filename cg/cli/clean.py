@@ -48,16 +48,16 @@ def beacon(context: click.Context, item_type, item_id):
     api.remove_vars(item_type=item_type, item_id=item_id)
 
 
-@clean.command()
-@click.option("-y", "--yes", is_flag=True, help="skip confirmation")
+@clean.command("mip-run-dir")
+@click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
 @click.option(
     "-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned"
 )
 @click.argument("case_id")
 @click.argument("sample_info", type=click.File("r"))
 @click.pass_context
-def mip(context, yes, case_id, sample_info, dry_run: bool = False):
-    """Remove analysis output."""
+def mip_run_dir(context, yes, case_id, sample_info, dry_run: bool = False):
+    """Remove MIP run directory"""
 
     raw_data = ruamel.yaml.safe_load(sample_info)
     date = context.obj["tb"].get_sampleinfo_date(raw_data)
@@ -136,17 +136,17 @@ def scoutauto(context, days_old: int, yes: bool = False, dry_run: bool = False):
         context.invoke(scout, bundle=bundle, yes=yes, dry_run=dry_run)
 
 
-@clean.command()
+@clean.command("mip-run-dir-auto")
 @click.option("-y", "--yes", is_flag=True, help="skip confirmation")
 @click.option(
     "-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned"
 )
 @click.argument("before_str")
 @click.pass_context
-def mipauto(
+def mip_run_dir_auto(
     context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
-    """Automatically clean up "old" analyses."""
+    """Auto clean up of "old" MIP case run dirs"""
     before = parse_date(before_str)
     old_analyses = context.obj["db"].analyses(before=before)
     for status_analysis in old_analyses:
@@ -171,7 +171,7 @@ def mipauto(
             LOG.info("%s: cleaning MIP output", case_id)
             with open(sampleinfo_path, "r") as sampleinfo_file:
                 context.invoke(
-                    mip,
+                    mip_run_dir,
                     yes=yes,
                     case_id=case_id,
                     sample_info=sampleinfo_file,
