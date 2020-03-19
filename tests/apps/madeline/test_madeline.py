@@ -67,11 +67,10 @@ def test_generate_madeline_input(madeline_columns, proband):
     inds = [proband]
     # WHEN generating madeline formated lines
     madeline_lines = MadelineAPI.make_ped(family_id, inds)
-    i = 0
-    for i, line in enumerate(madeline_lines, 1):
-        if i == 1:
-            continue
-        ind_info = get_ind_info(madeline_columns.keys(), line)
+    # Skip the header line
+    next(madeline_lines)
+    # Convert line to dict
+    ind_info = get_ind_info(madeline_columns.keys(), next(madeline_lines))
 
     # THEN assert that the family id is included
     assert ind_info["family"] == family_id
@@ -79,6 +78,44 @@ def test_generate_madeline_input(madeline_columns, proband):
     assert ind_info["sample"] == proband["sample"]
     # THEN assert that the is converted to madeline format
     assert ind_info["sex"] == "F"
+
+
+def test_generate_madeline_input_none_status(madeline_columns, proband):
+    """Test generate input for madeline"""
+
+    # GIVEN a family id and a list of ind dicts
+    proband["status"] = None
+    family_id = "test"
+    inds = [proband]
+    # WHEN generating madeline formated lines
+    madeline_lines = MadelineAPI.make_ped(family_id, inds)
+    # Skip the header line
+    next(madeline_lines)
+    # Convert line to dict
+    ind_info = get_ind_info(madeline_columns.keys(), next(madeline_lines))
+
+    # THEN assert that the status is "."
+    assert ind_info["status"] == "."
+
+
+def test_generate_madeline_input_non_existing_status(madeline_columns, proband):
+    """Test generate input for madeline"""
+
+    # GIVEN an individual without status
+    proband.pop("status")
+    assert "status" not in proband
+    family_id = "test"
+    # GIVEN a family id and a list of ind dicts
+    inds = [proband]
+    # WHEN generating madeline formated lines
+    madeline_lines = MadelineAPI.make_ped(family_id, inds)
+    # Skip the header line
+    next(madeline_lines)
+    # Convert line to dict
+    ind_info = get_ind_info(madeline_columns.keys(), next(madeline_lines))
+
+    # THEN assert that the status is "."
+    assert ind_info["status"] == "."
 
 
 def test_generate_madeline_input_no_inds(madeline_columns):
