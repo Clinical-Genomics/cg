@@ -8,7 +8,7 @@ import logging
 from copy import deepcopy
 
 from cg.apps import hk, crunchy, scoutapi
-from cg.constants import FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX
+from cg.constants import FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX, BAM_SUFFIX
 
 LOG = logging.getLogger(__name__)
 
@@ -60,6 +60,8 @@ class CompressAPI:
                 LOG.warning("No bam file found for sample %s in scout", sample_id)
                 return None
             bam_path = Path(bam_file)
+            if bam_path.suffix != BAM_SUFFIX:
+                LOG.info("Alignment file does not have suffix %s", BAM_SUFFIX)
             bai_paths = self.crunchy_api.get_index_path(bam_path)
             bai_single_suffix = bai_paths["single_suffix"]
             bai_double_suffix = bai_paths["double_suffix"]
