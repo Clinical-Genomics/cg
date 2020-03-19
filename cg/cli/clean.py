@@ -138,14 +138,14 @@ def scout_finished_cases(
         context.invoke(hk_alignment_files, bundle=bundle, yes=yes, dry_run=dry_run)
 
 
-@clean.command("mip-past-run-dir")
+@clean.command("mip-past-run-dirs")
 @click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
 @click.option(
     "-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned"
 )
 @click.argument("before_str")
 @click.pass_context
-def mip_past_run_dir(
+def mip_past_run_dirs(
     context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
     """Clean up of "old" MIP case run dirs"""
