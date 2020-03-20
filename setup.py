@@ -10,7 +10,7 @@ if sys.argv[-1] == "publish":
     sys.exit()
 
 
-def parse_reqs(req_path="./requirements.txt"):
+def parse_requirements(req_path="./requirements.txt"):
     """Recursively parse requirements from nested pip files."""
     install_requires = []
     with open(req_path, "r") as handle:
@@ -22,7 +22,7 @@ def parse_reqs(req_path="./requirements.txt"):
             # check for nested requirements files
             if line.startswith("-r"):
                 # recursively call this function
-                install_requires += parse_reqs(req_path=line[3:])
+                install_requires += parse_requirements(req_path=line[3:])
             else:
                 # add the line as a new requirement
                 install_requires.append(line)
@@ -55,7 +55,7 @@ class PyTest(TestCommand):
 
 setup(
     name="cg",
-    version="5.3.1",
+    version="7.11.4",
     description="Clinical Genomics command center.",
     author="Patrik Grenfeldt",
     author_email="patrik.grenfeldt@scilifelab.se",
@@ -64,10 +64,8 @@ setup(
     zip_safe=False,
     packages=find_packages(exclude=("tests*", "docs", "examples")),
     entry_points={"console_scripts": ["cg=cg.cli:base"]},
-    # install requirements loaded from "./requirements.txt"
-    # Install requirements loaded from ``requirements.txt``
-    install_requires=parse_reqs(),
-    tests_require=["pytest", "pytest-mock"],
+    install_requires=parse_requirements(),
+    tests_require=parse_requirements("requirements-dev.txt"),
     cmdclass=dict(test=PyTest),
     classifiers=[
         "Programming Language :: Python",

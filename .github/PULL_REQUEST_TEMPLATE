@@ -1,14 +1,18 @@
-This PR adds a fix for the leaking coffee machine.
+This PR adds/fixes ...
 
 **How to prepare for test**:
-- [ ] install on stage of the coffee machine: `bash servers/resources/coffee.scilifelab.se/update-cg-stage.sh [BRANCHNAME]`
-- [ ] activate stage: `us`
+- [ ] ssh to hasta/clinical-db depending on type of change
+- [ ] install on stage:
+`bash servers/resources/hasta.scilifelab.se/update-cg-stage.sh [THIS-BRANCH-NAME]`
+- [ ] install on stage:
+`bash servers/resources/clinical-db.scilifelab.se/update-clinical-api-stage.sh [THIS-BRANCH-NAME]`
 
 **How to test**:
-- [ ] run following command: `cg get coffee`
+- [ ] login to ...
+- [ ] do ...
 
 **Expected test outcome**:
-- [ ] `cg` should be providing you with a progress report of your coffee making. The coffee machine should not be leaking.
+- [ ] check that ...
 - [ ] Take a screenshot and attach or copy/paste the output.
 
 **Review:**
@@ -17,4 +21,7 @@ This PR adds a fix for the leaking coffee machine.
 - [ ] "Merge and deploy" approved by
 Thanks for filling in who performed the code review and the test!
 
-This is patch|minor|major **version bump** because ...
+This [version](https://semver.org/) is a:
+- [ ] **MAJOR** - when you make incompatible API changes
+- [ ] **MINOR** - when you add functionality in a backwards compatible manner
+- [ ] **PATCH** - when you make backwards compatible bug fixes or documentation/instructions

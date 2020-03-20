@@ -8,6 +8,17 @@ from cg.apps.hk import HousekeeperAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
 from cg.store import Store
 
+CASE_FILE_PATHS = ["multiqc"]
+
+RESULT_KEYS = [
+    "family",
+    "human_genome_build",
+    "rank_model_version",
+    "sv_rank_model_version",
+]
+
+SAMPLE_FILE_PATHS = ["alignment_path", "chromograph", "vcf2cytosure"]
+
 
 def test_unlinked_family_is_linked(upload_scout_api):
     """Test that is_family check fails when samples are not linked"""
@@ -40,23 +51,22 @@ def test_family_is_linked(upload_scout_api):
     assert res is True
 
 
-def test_generate_config_adds_rank_model_version(
-    analysis: Store.Analysis, upload_scout_api: UploadScoutAPI
+@pytest.mark.parametrize("result_key", RESULT_KEYS)
+def test_generate_config_adds_meta_result_key(
+    result_key, analysis: Store.Analysis, upload_scout_api: UploadScoutAPI
 ):
     """Test that generate config adds rank model version"""
     # GIVEN a status db and hk with an analysis
-    assert analysis
-
-    # WHEN generating the scout config for the analysis
-    result_data = upload_scout_api.generate_config(analysis)
-
-    # THEN the config should contain the rank model version used
-    assert result_data["human_genome_build"]
-    assert result_data["rank_model_version"]
+    assert analysis  # WHEN generating the scout config for the analysis
+    result_data = upload_scout_api.generate_config(
+        analysis
+    )  # THEN the config should contain the rank model version used
+    assert result_data[result_key]
 
 
-def test_generate_config_adds_vcf2cytosure(
-    analysis: Store.Analysis, upload_scout_api: UploadScoutAPI
+@pytest.mark.parametrize("file_path", SAMPLE_FILE_PATHS)
+def test_generate_config_adds_sample_paths(
+    file_path, analysis: Store.Analysis, upload_scout_api: UploadScoutAPI
 ):
     """Test that generate config adds vcf2cytosure file"""
     # GIVEN a status db and hk with an analysis
@@ -65,9 +75,24 @@ def test_generate_config_adds_vcf2cytosure(
     # WHEN generating the scout config for the analysis
     result_data = upload_scout_api.generate_config(analysis)
 
-    # THEN the config should contain the vcf2cytosure cgh file path on each sample
+    # THEN the config should contain the sample file path for each sample
     for sample in result_data["samples"]:
-        assert sample["vcf2cytosure"]
+        assert sample[file_path]
+
+
+@pytest.mark.parametrize("file_path", CASE_FILE_PATHS)
+def test_generate_config_adds_sample_paths(
+    file_path, analysis: Store.Analysis, upload_scout_api: UploadScoutAPI
+):
+    """Test that generate config adds case file paths"""
+    # GIVEN a status db and hk with an analysis
+    assert analysis
+
+    # WHEN generating the scout config for the analysis
+    result_data = upload_scout_api.generate_config(analysis)
+
+    # THEN the config should contain the case file path
+    assert result_data[file_path]
 
 
 def _file_exists_on_disk(file_path: Path):

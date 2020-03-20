@@ -11,10 +11,14 @@ import click
 from cg.apps import hk, scoutapi, lims, tb
 from cg.apps.balsamic.fastq import FastqHandler
 from cg.cli.workflow.balsamic.store import store as store_cmd
-from cg.cli.workflow.balsamic.deliver import deliver as deliver_cmd
+from cg.cli.workflow.balsamic.deliver import (
+    deliver as deliver_cmd,
+    CASE_TAGS,
+    SAMPLE_TAGS,
+)
 from cg.cli.workflow.get_links import get_links
-from cg.exc import LimsDataError, BalsamicStartError
-from cg.meta.deliver.balsamic import DeliverAPI
+from cg.exc import LimsDataError, BalsamicStartError, CgError
+from cg.meta.deliver import DeliverAPI
 from cg.meta.workflow.balsamic import AnalysisAPI
 from cg.store import Store
 
@@ -41,17 +45,23 @@ def balsamic(context, case_id, priority, email, target_bed):
     context.obj["hk_api"] = hk.HousekeeperAPI(context.obj)
     context.obj["fastq_handler"] = FastqHandler
     context.obj["gzipper"] = gzip
+    context.obj["lims_api"] = lims.LimsAPI(context.obj)
     scout_api = scoutapi.ScoutAPI(context.obj)
-    lims_api = lims.LimsAPI(context.obj)
     tb_api = tb.TrailblazerAPI(context.obj)
-    deliver = DeliverAPI(context.obj, hk_api=context.obj["hk_api"], lims_api=lims_api)
+    deliver = DeliverAPI(
+        context.obj,
+        hk_api=context.obj["hk_api"],
+        lims_api=context.obj["lims_api"],
+        case_tags=CASE_TAGS,
+        sample_tags=SAMPLE_TAGS,
+    )
 
     context.obj["analysis_api"] = AnalysisAPI(
         db=context.obj["db"],
         hk_api=context.obj["hk_api"],
         tb_api=tb_api,
         scout_api=scout_api,
-        lims_api=lims_api,
+        lims_api=context.obj["lims_api"],
         deliver_api=deliver,
     )
 
@@ -133,7 +143,20 @@ def config_case(
     conda_env = context.obj["balsamic"]["conda_env"]
     root_dir = context.obj["balsamic"]["root"]
     wrk_dir = Path(f"{root_dir}/{case_id}/fastq")
+    application_types = set()
+    acceptable_applications = {"wgs", "wes", "tgs"}
+    applications_requiring_bed = {"wes", "tgs"}
+
     for link_obj in link_objs:
+        LOG.info(
+            "%s application type is %s",
+            link_obj.sample.internal_id,
+            link_obj.sample.application_version.application.prep_category,
+        )
+        application_types.add(
+            link_obj.sample.application_version.application.prep_category
+        )
+
         LOG.info("%s: config FASTQ file", link_obj.sample.internal_id)
 
         linked_reads_paths = {1: [], 2: []}
@@ -191,25 +214,62 @@ def config_case(
         else:
             normal_paths.add(concatenated_paths[1])
 
-        if link_obj.sample.bed_version:
-            target_beds.add(link_obj.sample.bed_version.filename)
+        if not target_bed:
+            target_bed_shortname = context.obj["lims_api"].capture_kit(
+                link_obj.sample.internal_id
+            )
+
+            if target_bed_shortname:
+                bed_version_obj = context.obj["db"].bed_version(target_bed_shortname)
+
+                if not bed_version_obj:
+                    raise CgError(
+                        "Bed-version %s does not exist" % target_bed_shortname
+                    )
+
+                target_beds.add(bed_version_obj.filename)
+
+    if len(application_types) != 1:
+        raise BalsamicStartError(
+            "More than one application found for this case: %s"
+            % ", ".join(application_types)
+        )
+
+    if not application_types.issubset(acceptable_applications):
+        raise BalsamicStartError(
+            "Improper application for this case: %s" % application_types
+        )
 
     nr_paths = len(tumor_paths) if tumor_paths else 0
     if nr_paths != 1:
-        click.echo(
-            f"Must have exactly one tumor sample! Found {nr_paths} samples.",
-            color="red",
+        raise BalsamicStartError(
+            "Must have exactly one tumor sample! Found %s samples." % nr_paths
         )
-        context.abort()
+
     tumor_path = tumor_paths.pop()
 
     normal_path = None
     nr_normal_paths = len(normal_paths) if normal_paths else 0
-    if nr_normal_paths > 1:
-        click.echo(f"Too many normal samples found: {nr_normal_paths}", color="red")
-        context.abort()
-    elif nr_normal_paths == 1:
+
+    if nr_normal_paths == 1:
         normal_path = normal_paths.pop()
+    elif nr_normal_paths > 1:
+        raise BalsamicStartError("Too many normal samples found: %s" % nr_normal_paths)
+
+    if target_bed and not application_types.issubset(applications_requiring_bed):
+        raise BalsamicStartError(
+            "--target_bed is in compatible with %s" % " ".join(application_types)
+        )
+
+    if not target_bed and application_types.issubset(applications_requiring_bed):
+        if len(target_beds) == 1:
+            target_bed = Path(context.obj["bed_path"]) / target_beds.pop()
+        elif len(target_beds) > 1:
+            raise BalsamicStartError(
+                "To many target beds specified: %s" % ", ".join(target_beds)
+            )
+        else:
+            raise BalsamicStartError("No target bed specified!")
 
     # Call Balsamic
     command_str = (
@@ -222,14 +282,9 @@ def config_case(
         f" --analysis-dir {root_dir}"
         f" --umi-trim-length {umi_trim_length}"
     )
+
     if target_bed:
         command_str += f" -p {target_bed}"
-    elif len(target_beds) == 1:
-        bed_path = Path(context.obj["bed_path"])
-        command_str += f" -p {bed_path / target_beds.pop()}"
-    else:
-        raise BalsamicStartError("No target bed specified!")
-
     if normal_path:
         command_str += f" --normal {normal_path}"
     if umi:
@@ -241,12 +296,13 @@ def config_case(
     command = [f"bash -c 'source activate {conda_env}; balsamic"]
     command_str += "'"  # add ending quote from above line
     command.extend(command_str.split(" "))
+
     if dry:
         click.echo(" ".join(command))
         return SUCCESS
-    else:
-        process = subprocess.run(" ".join(command), shell=True)
-        return process
+
+    process = subprocess.run(" ".join(command), shell=True)
+    return process
 
 
 @balsamic.command()
@@ -291,9 +347,10 @@ def run(context, dry, run_analysis, config_path, priority, email, case_id):
 
     if dry:
         click.echo(" ".join(command))
-    else:
-        process = subprocess.run(" ".join(command), shell=True)
-        return process
+        return SUCCESS
+
+    process = subprocess.run(" ".join(command), shell=True)
+    return process
 
 
 @balsamic.command()

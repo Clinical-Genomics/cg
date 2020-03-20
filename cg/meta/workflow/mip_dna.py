@@ -9,7 +9,7 @@ from ruamel.yaml import safe_load
 from requests.exceptions import HTTPError
 
 from cg.apps import tb, hk, scoutapi, lims
-from cg.meta.deliver.mip_dna import DeliverAPI
+from cg.meta.deliver import DeliverAPI
 from cg.apps.pipelines.fastqhandler import BaseFastqHandler
 from cg.store import models, Store
 
@@ -33,6 +33,7 @@ MASTER_LIST = (
     "NEURODEG",
     "mcarta",
     "Cardiology",
+    "BRAIN",
 )
 COMBOS = {
     "DSD": ("DSD", "HYP", "SEXDIF", "SEXDET"),
@@ -80,13 +81,13 @@ class AnalysisAPI:
         flowcells = self.db.flowcells(family=family_obj)
         statuses = []
         for flowcell_obj in flowcells:
-            self.LOG.debug(f"{flowcell_obj.name}: checking flowcell")
+            self.LOG.debug("%s: checking flowcell", flowcell_obj.name)
             statuses.append(flowcell_obj.status)
             if flowcell_obj.status == "removed":
-                self.LOG.info(f"{flowcell_obj.name}: requesting removed flowcell")
+                self.LOG.info("%s: requesting removed flowcell", flowcell_obj.name)
                 flowcell_obj.status = "requested"
             elif flowcell_obj.status != "ondisk":
-                self.LOG.warning(f"{flowcell_obj.name}: {flowcell_obj.status}")
+                self.LOG.warning("%s: {flowcell_obj.status}", flowcell_obj.name)
         return all(status == "ondisk" for status in statuses)
 
     def run(self, family_obj: models.Family, **kwargs):
@@ -143,13 +144,7 @@ class AnalysisAPI:
             "samples": [],
         }
         for link in family_obj.links:
-            sample_data = {
-                "sample_id": link.sample.internal_id,
-                "analysis_type": link.sample.application_version.application.analysis_type,
-                "sex": link.sample.sex,
-                "phenotype": link.status,
-                "expected_coverage": link.sample.application_version.application.sequencing_depth,
-            }
+            sample_data = self._get_sample_data(link)
             if sample_data["analysis_type"] in ("tgs", "wes"):
                 if link.sample.capture_kit:
                     # set the capture kit from status: key or custom file name
@@ -160,21 +155,21 @@ class AnalysisAPI:
                 else:
                     if link.sample.downsampled_to:
                         self.LOG.debug(
-                            f"{link.sample.name}: downsampled sample, skipping"
+                            "%s: downsampled sample, skipping", link.sample.name
                         )
                     else:
                         try:
                             capture_kit = self.lims.capture_kit(link.sample.internal_id)
                             if capture_kit is None or capture_kit == "NA":
                                 self.LOG.warning(
-                                    f"%s: capture kit not found",
+                                    "%s: capture kit not found",
                                     link.sample.internal_id,
                                 )
                             else:
                                 sample_data["capture_kit"] = CAPTUREKIT_MAP[capture_kit]
                         except HTTPError:
                             self.LOG.warning(
-                                f"{link.sample.internal_id}: not found (LIMS)"
+                                "%s: not found (LIMS)", link.sample.internal_id
                             )
             if link.mother:
                 sample_data["mother"] = link.mother.internal_id
@@ -182,6 +177,19 @@ class AnalysisAPI:
                 sample_data["father"] = link.father.internal_id
             data["samples"].append(sample_data)
         return data
+
+    @staticmethod
+    def _get_sample_data(link: models.FamilySample) -> dict:
+        """Build sample data for MIP config file"""
+
+        return {
+            "sample_id": link.sample.internal_id,
+            "sample_display_name": link.sample.name,
+            "analysis_type": link.sample.application_version.application.analysis_type,
+            "sex": link.sample.sex,
+            "phenotype": link.status,
+            "expected_coverage": link.sample.application_version.application.min_sequencing_depth,
+        }
 
     @staticmethod
     def fastq_header(line):
@@ -300,7 +308,7 @@ class AnalysisAPI:
         """Get a python object file for a tag and a family ."""
 
         analysis_files = self.deliver.get_post_analysis_files(
-            family=family_id, version=False, tags=[tag]
+            case=family_id, version=False, tags=[tag]
         )
         if analysis_files:
             analysis_file_raw = self._open_bundle_file(analysis_files[0].path)

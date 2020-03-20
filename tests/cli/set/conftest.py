@@ -22,6 +22,7 @@ class MockLims(LimsAPI):
 
     _project_name = None
     _sample_sex = None
+    _sample_name = None
 
     def update_project(self, lims_id: str, name=None):
         """Mock lims update_project"""
@@ -38,10 +39,16 @@ class MockLims(LimsAPI):
         application: str = None,
         target_reads: int = None,
         priority=None,
+        name=None,
     ):
         """Mock lims update_sample"""
         self._sample_sex = sex
+        self._sample_name = name
 
     def get_updated_sample_sex(self) -> str:
         """Method to be used to test that update_sample was called with sex parameter"""
         return self._sample_sex
+
+    def get_updated_sample_name(self) -> str:
+        """Method to be used to test that update_sample was called with name parameter"""
+        return self._sample_name

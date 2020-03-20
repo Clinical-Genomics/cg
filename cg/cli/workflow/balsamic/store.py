@@ -1,8 +1,8 @@
-"""Click commands to store balsamic analyses"""
+""" CLI for storing information and data """
 import datetime as dt
 import logging
 from pathlib import Path
-
+import sys
 import click
 
 from cg.apps import hk, tb
@@ -10,6 +10,8 @@ from cg.exc import AnalysisNotFinishedError, AnalysisDuplicationError
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
+FAIL = 1
+SUCCESS = 0
 
 
 @click.group()
@@ -32,9 +34,7 @@ def analysis(context, config_stream):
 
     if not config_stream:
         LOG.error("provide a config, suggestions:")
-        for analysis_obj in tb_api.analyses(
-            status="completed", deleted=False
-        )[:25]:
+        for analysis_obj in tb_api.analyses(status="completed", deleted=False)[:25]:
             click.echo(analysis_obj.config_path)
         context.abort()
 
@@ -92,7 +92,7 @@ def _include_files_in_housekeeper(bundle_obj, context, hk_api, version_obj):
 def _add_new_complete_analysis_record(bundle_data, family_obj, status, version_obj):
     """Function to create and return a new analysis database record"""
     pipeline = family_obj.links[0].sample.data_analysis
-    pipeline = pipeline if pipeline else "mip"  # TODO remove this default from here
+    pipeline = pipeline if pipeline else "balsamic"
 
     if status.analysis(family=family_obj, started_at=version_obj.created_at):
         raise AnalysisDuplicationError(
@@ -124,6 +124,8 @@ def _add_new_analysis_to_the_status_api(bundle_obj, status):
 def completed(context):
     """Store all completed analyses."""
     hk_api = context.obj["hk_api"]
+
+    exit_code = SUCCESS
     for analysis_obj in context.obj["tb_api"].analyses(
         status="completed", deleted=False
     ):
@@ -135,4 +137,10 @@ def completed(context):
             continue
         click.echo(click.style(f"storing family: {analysis_obj.family}", fg="blue"))
         with Path(analysis_obj.config_path).open() as config_stream:
-            context.invoke(analysis, config_stream=config_stream)
+            try:
+                context.invoke(analysis, config_stream=config_stream)
+            except Exception:
+                LOG.error("case storage failed: %s", analysis_obj.family, exc_info=True)
+                exit_code = FAIL
+
+    sys.exit(exit_code)

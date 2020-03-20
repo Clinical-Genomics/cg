@@ -3,7 +3,9 @@
 import json
 import pytest
 
+from cg.apps.coverage.api import ChanjoAPI
 from cg.apps.hk import HousekeeperAPI
+from cg.meta.upload.coverage import UploadCoverageApi
 from cg.meta.upload.mutacc import UploadToMutaccAPI
 from cg.meta.upload.observations import UploadObservationsAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
@@ -89,20 +91,6 @@ class MockHouseKeeper(HousekeeperAPI):
         return file_obj
 
 
-class MockMadeline:
-    """Mock the madeline module methods"""
-
-    @staticmethod
-    def make_ped(name, samples):
-        """Mock the make ped function"""
-        return ""
-
-    @staticmethod
-    def run(arg1: str, arg2: str):
-        """Fetch version from the database."""
-        return MockVersion()
-
-
 class MockAnalysis:
     """Mock an analysis object"""
 
@@ -120,6 +108,7 @@ class MockAnalysis:
             "mapped_reads": {"ADM1": 98.8, "ADM2": 99.8, "ADM3": 97.8},
             "mip_version": "v4.0.20",
             "sample_ids": ["2018-20203", "2018-20204"],
+            "sv_rank_model_version": "1.08",
         }
         return outdata
 
@@ -127,6 +116,12 @@ class MockAnalysis:
     def convert_panels(customer_id, panels):
         """Mock convert_panels"""
         return ""
+
+
+class MockCoverage(ChanjoAPI):
+    """Mock chanjo coverage api"""
+
+    pass
 
 
 class MockMutaccAuto:
@@ -267,26 +262,23 @@ def upload_observations_api_wes(analysis_store):
 
 
 @pytest.yield_fixture(scope="function")
-def upload_scout_api(analysis_store, scout_store, lims_samples):
+def upload_scout_api(scout_store, madeline_api, lims_samples):
     """Fixture for upload_scout_api"""
-    madeline_mock = MockMadeline()
     hk_mock = MockHouseKeeper()
     hk_mock.add_file(file="/mock/path", version_obj="", tag_name="")
     analysis_mock = MockAnalysis()
     lims_api = MockLims(lims_samples)
 
     _api = UploadScoutAPI(
-        status_api=analysis_store,
         hk_api=hk_mock,
         scout_api=scout_store,
-        madeline_exe="",
-        madeline=madeline_mock,
+        madeline_api=madeline_api,
         analysis_api=analysis_mock,
         lims_api=lims_api,
     )
 
     yield _api
-
+   
 
 @pytest.yield_fixture(scope="function")
 def mutacc_upload_api():
@@ -299,6 +291,19 @@ def mutacc_upload_api():
 
     _api = UploadToMutaccAPI(scout_api=scout_api, mutacc_auto_api=mutacc_auto_api)
 
+    return _api
+
+
+@pytest.yield_fixture(scope="function")
+def coverage_upload_api(chanjo_config_dict):
+    """Fixture for coverage upload API"""
+    hk_api = MockHouseKeeper()
+    hk_api.add_file(file="path", version_obj="", tag_name="")
+    status_api = None
+    coverage_api = MockCoverage(chanjo_config_dict)
+    _api = UploadCoverageApi(
+        status_api=status_api, hk_api=hk_api, chanjo_api=coverage_api
+    )
     return _api
 
 

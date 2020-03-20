@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+"""Module for Flask-Admin views"""
 from flask import redirect, url_for, request, session
 from flask_admin.contrib.sqla import ModelView
 from flask_dance.contrib.google import google
@@ -8,9 +8,11 @@ from cg.server.ext import db
 
 
 class BaseView(ModelView):
+    """Base for the specific views."""
+
     def is_accessible(self):
         user_obj = db.user(session.get("user_email"))
-        return True if (google.authorized and user_obj and user_obj.is_admin) else False
+        return bool(google.authorized and user_obj and user_obj.is_admin)
 
     def inaccessible_callback(self, name, **kwargs):
         # redirect to login page if user doesn't have access
@@ -57,6 +59,7 @@ class ApplicationView(BaseView):
         "comment",
         "prep_category",
         "sequencing_depth",
+        "min_sequencing_depth",
         "is_external",
         "turnaround_time",
         "sample_concentration",
@@ -135,13 +138,7 @@ class BedVersionView(BaseView):
     """Admin view for Model.BedVersion"""
 
     column_default_sort = ("updated_at", True)
-    column_editable_list = [
-        "description",
-        "filename",
-        "comment",
-        "designer",
-        "checksum",
-    ]
+    column_editable_list = ["shortname", "filename", "comment", "designer", "checksum"]
     column_exclude_list = ["created_at"]
     form_excluded_columns = ["created_at", "updated_at", "samples"]
     column_filters = []

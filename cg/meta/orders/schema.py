@@ -166,7 +166,26 @@ BALSAMIC_SAMPLE = {
 MIP_BALSAMIC_SAMPLE = {**BALSAMIC_SAMPLE, **MIP_SAMPLE}
 
 MIP_RNA_SAMPLE = {
-    **MIP_SAMPLE,
+    "internal_id": OptionalNone(TypeValidatorNone(str)),
+    # "required for new samples"
+    "name": validators.RegexValidator(NAME_PATTERN),
+    # customer
+    "data_analysis": str,
+    "application": str,
+    "family_name": validators.RegexValidator(NAME_PATTERN),
+    "sex": OptionalNone(validators.Any(SEX_OPTIONS)),
+    "source": OptionalNone(TypeValidatorNone(str)),
+    "priority": OptionalNone(validators.Any(PRIORITY_OPTIONS)),
+    "container": OptionalNone(validators.Any(CONTAINER_OPTIONS)),
+    # "required if plate for new samples"
+    "container_name": OptionalNone(TypeValidatorNone(str)),
+    "well_position": OptionalNone(TypeValidatorNone(str)),
+    "formalin_fixation_time": OptionalNone(TypeValidatorNone(str)),
+    "post_formalin_fixation_time": OptionalNone(TypeValidatorNone(str)),
+    "tissue_block_size": OptionalNone(TypeValidatorNone(str)),
+    # # "Not Required"
+    "quantity": OptionalNone(TypeValidatorNone(str)),
+    "comment": OptionalNone(TypeValidatorNone(str)),
     # Orderform 1508:19
     "from_sample": validators.RegexValidator(NAME_PATTERN),
     "time_point": TypeValidatorNone(str),

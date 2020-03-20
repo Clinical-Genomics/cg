@@ -41,3 +41,13 @@ class UploadVogueAPI:
             )
 
         self.vogue_api.load_apptags(apptags_for_vogue)
+
+    def load_samples(self, days):
+        """Loading samples from lims into the trending database"""
+
+        self.vogue_api.load_samples(days=days)
+
+    def load_flowcells(self, days):
+        """Loading flowcells from lims into the trending database"""
+
+        self.vogue_api.load_flowcells(days=days)

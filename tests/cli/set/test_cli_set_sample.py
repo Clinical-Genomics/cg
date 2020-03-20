@@ -18,6 +18,24 @@ def test_set_sample_invalid_sample(cli_runner, base_context):
     assert result.exit_code != SUCCESS
 
 
+def test_set_sample_name(cli_runner, base_context, base_store: Store):
+    # GIVEN a database with a female sample
+
+    sample_id = add_sample(base_store, sex="female").internal_id
+    new_name = "urban"
+    assert base_store.Sample.query.first().name != new_name
+
+    # WHEN setting sex on sample to 'urban'
+    result = cli_runner.invoke(
+        sample, [sample_id, "--name", new_name], obj=base_context
+    )
+
+    # THEN then it should have 'urban' as name
+    assert result.exit_code == SUCCESS
+    assert base_store.Sample.query.first().name == new_name
+    assert base_context["lims"].get_updated_sample_name() == new_name
+
+
 def test_set_sample_sex(cli_runner, base_context, base_store: Store):
     # GIVEN a database with a female sample
 
