@@ -3,13 +3,14 @@
 from pathlib import Path
 
 import pytest
+
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
-from cg.store import Store
 from cg.meta.workflow.mip_dna import AnalysisAPI
+from cg.store import Store
 
 
 @pytest.fixture(scope="function", name="base_context")
@@ -96,12 +97,17 @@ def fixture_analysis_store_single(base_store, analysis_family_single_case):
     yield base_store
 
 
+@pytest.fixture
+def hk_mock():
+    """docstring for hk_mock"""
+    return MockHK()
+
+
 class MockTB(TrailblazerAPI):
     """Mock of trailblazer """
 
     def __init__(self):
         """Mock the init"""
-        pass
 
     def get_family_root_dir(self, case_id):
         """docstring for get_family_root_dir"""
@@ -119,12 +125,15 @@ class MockVersion:
 class MockFile:
     """Mock a file object"""
 
-    def __init__(self, path="", to_archive=False, tags=None):
+    def __init__(self, path="", to_archive=False, tags=None, **kwargs):
         self.path = path
         self.to_archive = to_archive
         self.tags = tags or []
+        self._empty_first = kwargs.get("empty_first", False)
 
     def first(self):
+        if self._empty_first:
+            return None
         return MockFile()
 
     def full_path(self):
@@ -139,10 +148,18 @@ class MockHK(HousekeeperAPI):
 
     def __init__(self):
         """Mock the init"""
-        pass
+        self.delivery_report = True
+        self.missing_mandatory = False
 
     def files(self, **kwargs):
         """docstring for file"""
+        tags = set(kwargs.get("tags", []))
+        delivery = set(["delivery-report"])
+        mandatory = set(["vcf-snv-clinical"])
+        if tags.intersection(delivery) and self.delivery_report is False:
+            return MockFile(empty_first=True)
+        if tags.intersection(mandatory) and self.missing_mandatory is True:
+            return MockFile(empty_first=True)
         return MockFile()
 
     def version(self, arg1: str, arg2: str):
@@ -179,7 +196,7 @@ class MockAnalysisApi(AnalysisAPI):
 
 
 class MockScoutUploadApi(UploadScoutAPI):
-    def __init__(self):
+    def __init__(self, **kwargs):
         """docstring for __init__"""
         self.mock_generate_config = True
         self.housekeeper = MockHK()
@@ -206,7 +223,6 @@ class MockScoutUploadApi(UploadScoutAPI):
         """docstring for add_scout_config_to_hk"""
         if self.file_exists:
             raise FileExistsError("Scout config already exists")
-        pass
 
 
 class MockLims(LimsAPI):

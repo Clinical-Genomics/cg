@@ -59,6 +59,7 @@ class ApplicationView(BaseView):
         "comment",
         "prep_category",
         "sequencing_depth",
+        "min_sequencing_depth",
         "is_external",
         "turnaround_time",
         "sample_concentration",

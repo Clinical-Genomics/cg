@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import gzip
 import logging
 import re
@@ -80,13 +81,13 @@ class AnalysisAPI:
         flowcells = self.db.flowcells(family=family_obj)
         statuses = []
         for flowcell_obj in flowcells:
-            self.LOG.debug(f"{flowcell_obj.name}: checking flowcell")
+            self.LOG.debug("%s: checking flowcell", flowcell_obj.name)
             statuses.append(flowcell_obj.status)
             if flowcell_obj.status == "removed":
-                self.LOG.info(f"{flowcell_obj.name}: requesting removed flowcell")
+                self.LOG.info("%s: requesting removed flowcell", flowcell_obj.name)
                 flowcell_obj.status = "requested"
             elif flowcell_obj.status != "ondisk":
-                self.LOG.warning(f"{flowcell_obj.name}: {flowcell_obj.status}")
+                self.LOG.warning("%s: {flowcell_obj.status}", flowcell_obj.name)
         return all(status == "ondisk" for status in statuses)
 
     def run(self, family_obj: models.Family, **kwargs):
@@ -105,7 +106,8 @@ class AnalysisAPI:
             external = link_obj.sample.application_version.application.is_external
             if downsampled or external:
                 self.LOG.info(
-                    "%s: downsampled/external - skip evaluation", link_obj.sample.internal_id
+                    "%s: downsampled/external - skip evaluation",
+                    link_obj.sample.internal_id,
                 )
                 kwargs["skip_evaluation"] = True
                 break
@@ -142,39 +144,52 @@ class AnalysisAPI:
             "samples": [],
         }
         for link in family_obj.links:
-            sample_data = {
-                "sample_id": link.sample.internal_id,
-                "sample_display_name": link.sample.name,
-                "analysis_type": link.sample.application_version.application.analysis_type,
-                "sex": link.sample.sex,
-                "phenotype": link.status,
-                "expected_coverage": link.sample.application_version.application.sequencing_depth,
-            }
+            sample_data = self._get_sample_data(link)
             if sample_data["analysis_type"] in ("tgs", "wes"):
                 if link.sample.capture_kit:
                     # set the capture kit from status: key or custom file name
                     mip_capturekit = CAPTUREKIT_MAP.get(link.sample.capture_kit)
-                    sample_data["capture_kit"] = mip_capturekit or link.sample.capture_kit
+                    sample_data["capture_kit"] = (
+                        mip_capturekit or link.sample.capture_kit
+                    )
                 else:
                     if link.sample.downsampled_to:
-                        self.LOG.debug(f"{link.sample.name}: downsampled sample, skipping")
+                        self.LOG.debug(
+                            "%s: downsampled sample, skipping", link.sample.name
+                        )
                     else:
                         try:
                             capture_kit = self.lims.capture_kit(link.sample.internal_id)
                             if capture_kit is None or capture_kit == "NA":
                                 self.LOG.warning(
-                                    f"%s: capture kit not found", link.sample.internal_id
+                                    "%s: capture kit not found",
+                                    link.sample.internal_id,
                                 )
                             else:
                                 sample_data["capture_kit"] = CAPTUREKIT_MAP[capture_kit]
                         except HTTPError:
-                            self.LOG.warning(f"{link.sample.internal_id}: not found (LIMS)")
+                            self.LOG.warning(
+                                "%s: not found (LIMS)", link.sample.internal_id
+                            )
             if link.mother:
                 sample_data["mother"] = link.mother.internal_id
             if link.father:
                 sample_data["father"] = link.father.internal_id
             data["samples"].append(sample_data)
         return data
+
+    @staticmethod
+    def _get_sample_data(link: models.FamilySample) -> dict:
+        """Build sample data for MIP config file"""
+
+        return {
+            "sample_id": link.sample.internal_id,
+            "sample_display_name": link.sample.name,
+            "analysis_type": link.sample.application_version.application.analysis_type,
+            "sex": link.sample.sex,
+            "phenotype": link.status,
+            "expected_coverage": link.sample.application_version.application.min_sequencing_depth,
+        }
 
     @staticmethod
     def fastq_header(line):
@@ -261,7 +276,9 @@ class AnalysisAPI:
 
     def panel(self, family_obj: models.Family) -> List[str]:
         """Create the aggregated panel file."""
-        all_panels = self.convert_panels(family_obj.customer.internal_id, family_obj.panels)
+        all_panels = self.convert_panels(
+            family_obj.customer.internal_id, family_obj.panels
+        )
         bed_lines = self.scout.export_panels(all_panels)
         return bed_lines
 
@@ -305,20 +322,24 @@ class AnalysisAPI:
     def _open_bundle_file(self, relative_file_path: str) -> Any:
         """Open a bundle file and return it as an Python object."""
 
-        full_file_path = self.pather(self.deliver.get_post_analysis_files_root_dir()).joinpath(
-            relative_file_path
-        )
+        full_file_path = self.pather(
+            self.deliver.get_post_analysis_files_root_dir()
+        ).joinpath(relative_file_path)
         open_file = self.yaml_loader(self.pather(full_file_path).open())
         return open_file
 
     def get_latest_metadata(self, family_id: str) -> dict:
         """Get the latest trending data for a family."""
 
-        mip_config_raw = self._get_latest_raw_file(family_id=family_id, tag="mip-config")
+        mip_config_raw = self._get_latest_raw_file(
+            family_id=family_id, tag="mip-config"
+        )
 
         qcmetrics_raw = self._get_latest_raw_file(family_id=family_id, tag="qcmetrics")
 
-        sampleinfo_raw = self._get_latest_raw_file(family_id=family_id, tag="sampleinfo")
+        sampleinfo_raw = self._get_latest_raw_file(
+            family_id=family_id, tag="sampleinfo"
+        )
 
         trending = dict()
 

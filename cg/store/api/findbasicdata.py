@@ -37,6 +37,10 @@ class FindBasicDataHandler(BaseHandler):
         """Find a bed by name."""
         return self.Bed.query.filter_by(name=name).first()
 
+    def bed_version(self, shortname):
+        """Find a bed version by shortname."""
+        return self.BedVersion.query.filter_by(shortname=shortname).first()
+
     def beds(self, hide_archived: bool = False):
         """Returns all beds."""
         bed_q = self.Bed.query

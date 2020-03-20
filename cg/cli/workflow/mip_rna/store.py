@@ -2,7 +2,7 @@
 import datetime as dt
 import logging
 from pathlib import Path
-
+import sys
 import click
 
 from cg.apps import hk, tb
@@ -10,6 +10,8 @@ from cg.exc import AnalysisNotFinishedError, AnalysisDuplicationError
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
+FAIL = 1
+SUCCESS = 0
 
 
 @click.group()
@@ -32,7 +34,9 @@ def analysis(context, config_stream):
 
     if not config_stream:
         LOG.error("provide a config, suggestions:")
-        for analysis_obj in context.obj["tb_api"].analyses(status="completed", deleted=False)[:25]:
+        for analysis_obj in context.obj["tb_api"].analyses(
+            status="completed", deleted=False
+        )[:25]:
             click.echo(analysis_obj.config_path)
         context.abort()
 
@@ -44,7 +48,9 @@ def analysis(context, config_stream):
     click.echo(click.style("included files in Housekeeper", fg="green"))
 
 
-def _gather_files_and_bundle_in_housekeeper(config_stream, context, hk_api, status, tb_api):
+def _gather_files_and_bundle_in_housekeeper(
+    config_stream, context, hk_api, status, tb_api
+):
     """Function to gather files and bundle in housekeeper"""
     try:
         bundle_data = tb_api.add_analysis(config_stream)
@@ -64,7 +70,9 @@ def _gather_files_and_bundle_in_housekeeper(config_stream, context, hk_api, stat
 
     family_obj = _add_new_analysis_to_the_status_api(bundle_obj, status)
     _reset_action_from_running_on_family(family_obj)
-    new_analysis = _add_new_complete_analysis_record(bundle_data, family_obj, status, version_obj)
+    new_analysis = _add_new_complete_analysis_record(
+        bundle_data, family_obj, status, version_obj
+    )
     version_date = version_obj.created_at.date()
     click.echo(f"new bundle added: {bundle_obj.name}, version {version_date}")
     _include_files_in_housekeeper(bundle_obj, context, hk_api, version_obj)
@@ -85,7 +93,7 @@ def _include_files_in_housekeeper(bundle_obj, context, hk_api, version_obj):
 def _add_new_complete_analysis_record(bundle_data, family_obj, status, version_obj):
     """Function to create and return a new analysis database record"""
     pipeline = family_obj.links[0].sample.data_analysis
-    pipeline = pipeline if pipeline else "mip"  # TODO remove this default from here
+    pipeline = pipeline if pipeline else "mip-rna"
 
     if status.analysis(family=family_obj, started_at=version_obj.created_at):
         raise AnalysisDuplicationError(
@@ -117,11 +125,23 @@ def _add_new_analysis_to_the_status_api(bundle_obj, status):
 def completed(context):
     """Store all completed analyses."""
     hk_api = context.obj["hk_api"]
-    for analysis_obj in context.obj["tb_api"].analyses(status="completed", deleted=False):
+
+    exit_code = SUCCESS
+    for analysis_obj in context.obj["tb_api"].analyses(
+        status="completed", deleted=False
+    ):
         existing_record = hk_api.version(analysis_obj.family, analysis_obj.started_at)
         if existing_record:
-            LOG.debug("analysis stored: %s - %s", analysis_obj.family, analysis_obj.started_at)
+            LOG.debug(
+                "analysis stored: %s - %s", analysis_obj.family, analysis_obj.started_at
+            )
             continue
         click.echo(click.style(f"storing family: {analysis_obj.family}", fg="blue"))
         with Path(analysis_obj.config_path).open() as config_stream:
-            context.invoke(analysis, config_stream=config_stream)
+            try:
+                context.invoke(analysis, config_stream=config_stream)
+            except Exception:
+                LOG.error("case storage failed: %s", analysis_obj.family, exc_info=True)
+                exit_code = FAIL
+
+    sys.exit(exit_code)

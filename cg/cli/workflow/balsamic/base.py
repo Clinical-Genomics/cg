@@ -11,7 +11,11 @@ import click
 from cg.apps import hk, scoutapi, lims, tb
 from cg.apps.balsamic.fastq import FastqHandler
 from cg.cli.workflow.balsamic.store import store as store_cmd
-from cg.cli.workflow.balsamic.deliver import deliver as deliver_cmd, CASE_TAGS, SAMPLE_TAGS
+from cg.cli.workflow.balsamic.deliver import (
+    deliver as deliver_cmd,
+    CASE_TAGS,
+    SAMPLE_TAGS,
+)
 from cg.cli.workflow.get_links import get_links
 from cg.exc import LimsDataError, BalsamicStartError, CgError
 from cg.meta.deliver import DeliverAPI
@@ -19,7 +23,9 @@ from cg.meta.workflow.balsamic import AnalysisAPI
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
-PRIORITY_OPTION = click.option("-p", "--priority", type=click.Choice(["low", "normal", "high"]))
+PRIORITY_OPTION = click.option(
+    "-p", "--priority", type=click.Choice(["low", "normal", "high"])
+)
 EMAIL_OPTION = click.option("-e", "--email", help="email to send errors to")
 SUCCESS = 0
 FAIL = 1
@@ -28,7 +34,9 @@ FAIL = 1
 @click.group(invoke_without_command=True)
 @PRIORITY_OPTION
 @EMAIL_OPTION
-@click.option("-c", "--case-id", "case_id", help="case to prepare and start an analysis for")
+@click.option(
+    "-c", "--case-id", "case_id", help="case to prepare and start an analysis for"
+)
 @click.option("--target-bed", required=False, help="Optional")
 @click.pass_context
 def balsamic(context, case_id, priority, email, target_bed):
@@ -65,7 +73,9 @@ def balsamic(context, case_id, priority, email, target_bed):
         # execute the analysis!
         context.invoke(link, case_id=case_id)
         context.invoke(config_case, case_id=case_id, target_bed=target_bed)
-        context.invoke(run, run_analysis=True, case_id=case_id, priority=priority, email=email)
+        context.invoke(
+            run, run_analysis=True, case_id=case_id, priority=priority, email=email
+        )
 
 
 @balsamic.command()
@@ -79,10 +89,18 @@ def link(context, case_id, sample_id):
 
     for link_obj in link_objs:
         LOG.info(
-            "%s: %s link FASTQ files", link_obj.sample.internal_id, link_obj.sample.data_analysis
+            "%s: %s link FASTQ files",
+            link_obj.sample.internal_id,
+            link_obj.sample.data_analysis,
         )
-        if link_obj.sample.data_analysis and "balsamic" in link_obj.sample.data_analysis.lower():
-            LOG.info("%s has balsamic as data analysis, linking.", link_obj.sample.internal_id)
+        if (
+            link_obj.sample.data_analysis
+            and "balsamic" in link_obj.sample.data_analysis.lower()
+        ):
+            LOG.info(
+                "%s has balsamic as data analysis, linking.",
+                link_obj.sample.internal_id,
+            )
             context.obj["analysis_api"].link_sample(
                 fastq_handler=FastqHandler(context.obj),
                 case=link_obj.family.internal_id,
@@ -90,7 +108,8 @@ def link(context, case_id, sample_id):
             )
         else:
             LOG.warning(
-                "%s does not have blasamic as data analysis, skipping.", link_obj.sample.internal_id
+                "%s does not have blasamic as data analysis, skipping.",
+                link_obj.sample.internal_id,
             )
 
 
@@ -124,7 +143,20 @@ def config_case(
     conda_env = context.obj["balsamic"]["conda_env"]
     root_dir = context.obj["balsamic"]["root"]
     wrk_dir = Path(f"{root_dir}/{case_id}/fastq")
+    application_types = set()
+    acceptable_applications = {"wgs", "wes", "tgs"}
+    applications_requiring_bed = {"wes", "tgs"}
+
     for link_obj in link_objs:
+        LOG.info(
+            "%s application type is %s",
+            link_obj.sample.internal_id,
+            link_obj.sample.application_version.application.prep_category,
+        )
+        application_types.add(
+            link_obj.sample.application_version.application.prep_category
+        )
+
         LOG.info("%s: config FASTQ file", link_obj.sample.internal_id)
 
         linked_reads_paths = {1: [], 2: []}
@@ -154,7 +186,9 @@ def config_case(
 
         for fastq_data in sorted_files:
             original_fastq_path = Path(fastq_data["path"])
-            linked_fastq_name = context.obj["fastq_handler"].FastqFileNameCreator.create(
+            linked_fastq_name = context.obj[
+                "fastq_handler"
+            ].FastqFileNameCreator.create(
                 lane=fastq_data["lane"],
                 flowcell=fastq_data["flowcell"],
                 sample=link_obj.sample.internal_id,
@@ -166,7 +200,9 @@ def config_case(
             ].FastqFileNameCreator.get_concatenated_name(linked_fastq_name)
             linked_fastq_path = wrk_dir / linked_fastq_name
             linked_reads_paths[fastq_data["read"]].append(linked_fastq_path)
-            concatenated_paths[fastq_data["read"]] = f"{wrk_dir}/{concatenated_fastq_name}"
+            concatenated_paths[
+                fastq_data["read"]
+            ] = f"{wrk_dir}/{concatenated_fastq_name}"
 
             if linked_fastq_path.exists():
                 LOG.info("found: %s -> %s", original_fastq_path, linked_fastq_path)
@@ -178,18 +214,37 @@ def config_case(
         else:
             normal_paths.add(concatenated_paths[1])
 
-        target_bed_shortname = context.obj["lims_api"].capture_kit(link_obj.sample.internal_id)
-        if target_bed_shortname:
-            target_bed_obj = context.obj["db"].latest_bed_version(target_bed_shortname)
+        if not target_bed:
+            target_bed_shortname = context.obj["lims_api"].capture_kit(
+                link_obj.sample.internal_id
+            )
 
-            if not target_bed_obj:
-                raise CgError("Bed-version %s does not exist" % target_bed_shortname)
+            if target_bed_shortname:
+                bed_version_obj = context.obj["db"].bed_version(target_bed_shortname)
 
-            target_beds.add(target_bed_obj.filename)
+                if not bed_version_obj:
+                    raise CgError(
+                        "Bed-version %s does not exist" % target_bed_shortname
+                    )
+
+                target_beds.add(bed_version_obj.filename)
+
+    if len(application_types) != 1:
+        raise BalsamicStartError(
+            "More than one application found for this case: %s"
+            % ", ".join(application_types)
+        )
+
+    if not application_types.issubset(acceptable_applications):
+        raise BalsamicStartError(
+            "Improper application for this case: %s" % application_types
+        )
 
     nr_paths = len(tumor_paths) if tumor_paths else 0
     if nr_paths != 1:
-        raise BalsamicStartError("Must have exactly one tumor sample! Found %s samples." % nr_paths)
+        raise BalsamicStartError(
+            "Must have exactly one tumor sample! Found %s samples." % nr_paths
+        )
 
     tumor_path = tumor_paths.pop()
 
@@ -201,11 +256,18 @@ def config_case(
     elif nr_normal_paths > 1:
         raise BalsamicStartError("Too many normal samples found: %s" % nr_normal_paths)
 
-    if not target_bed:
+    if target_bed and not application_types.issubset(applications_requiring_bed):
+        raise BalsamicStartError(
+            "--target_bed is in compatible with %s" % " ".join(application_types)
+        )
+
+    if not target_bed and application_types.issubset(applications_requiring_bed):
         if len(target_beds) == 1:
             target_bed = Path(context.obj["bed_path"]) / target_beds.pop()
         elif len(target_beds) > 1:
-            raise BalsamicStartError("To many target beds specified: %s" % ", ".join(target_beds))
+            raise BalsamicStartError(
+                "To many target beds specified: %s" % ", ".join(target_beds)
+            )
         else:
             raise BalsamicStartError("No target bed specified!")
 
@@ -219,9 +281,10 @@ def config_case(
         f" --output-config {case_id}.json"
         f" --analysis-dir {root_dir}"
         f" --umi-trim-length {umi_trim_length}"
-        f" -p {target_bed}"
     )
 
+    if target_bed:
+        command_str += f" -p {target_bed}"
     if normal_path:
         command_str += f" --normal {normal_path}"
     if umi:
@@ -245,7 +308,12 @@ def config_case(
 @balsamic.command()
 @click.option("-d", "--dry-run", "dry", is_flag=True, help="print command to console")
 @click.option(
-    "-r", "--run-analysis", "run_analysis", is_flag=True, default=False, help="start analysis"
+    "-r",
+    "--run-analysis",
+    "run_analysis",
+    is_flag=True,
+    default=False,
+    help="start " "analysis",
 )
 @click.option("--config", "config_path", required=False, help="Optional")
 @PRIORITY_OPTION
@@ -287,7 +355,11 @@ def run(context, dry, run_analysis, config_path, priority, email, case_id):
 
 @balsamic.command()
 @click.option(
-    "-d", "--dry-run", "dry_run", is_flag=True, help="print to console, " "without actualising"
+    "-d",
+    "--dry-run",
+    "dry_run",
+    is_flag=True,
+    help="print to console, " "without actualising",
 )
 @click.pass_context
 def start(context: click.Context, dry_run):
@@ -298,7 +370,9 @@ def start(context: click.Context, dry_run):
         LOG.info("%s: start analysis", case_obj.internal_id)
 
         priority = (
-            "high" if case_obj.high_priority else ("low" if case_obj.low_priority else "normal")
+            "high"
+            if case_obj.high_priority
+            else ("low" if case_obj.low_priority else "normal")
         )
 
         if dry_run:

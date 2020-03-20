@@ -1,12 +1,12 @@
 """Fixtures for meta/upload tests"""
 import pytest
 
-from cg.apps.hk import HousekeeperAPI
 from cg.apps.coverage.api import ChanjoAPI
+from cg.apps.hk import HousekeeperAPI
+from cg.meta.upload.coverage import UploadCoverageApi
 from cg.meta.upload.mutacc import UploadToMutaccAPI
 from cg.meta.upload.observations import UploadObservationsAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
-from cg.meta.upload.coverage import UploadCoverageApi
 
 
 class MockVersion:
@@ -87,20 +87,6 @@ class MockHouseKeeper(HousekeeperAPI):
     def add_commit(self, file_obj):
         """Overrides sqlalchemy method"""
         return file_obj
-
-
-class MockMadeline:
-    """Mock the madeline module methods"""
-
-    @staticmethod
-    def make_ped(name, samples):
-        """Mock the make ped function"""
-        return ""
-
-    @staticmethod
-    def run(arg1: str, arg2: str):
-        """Fetch version from the database."""
-        return MockVersion()
 
 
 class MockAnalysis:
@@ -246,19 +232,16 @@ def upload_observations_api_wes(analysis_store):
 
 
 @pytest.yield_fixture(scope="function")
-def upload_scout_api(analysis_store, scout_store):
+def upload_scout_api(scout_store, madeline_api):
     """Fixture for upload_scout_api"""
-    madeline_mock = MockMadeline()
     hk_mock = MockHouseKeeper()
     hk_mock.add_file(file="/mock/path", version_obj="", tag_name="")
     analysis_mock = MockAnalysis()
 
     _api = UploadScoutAPI(
-        status_api=analysis_store,
         hk_api=hk_mock,
         scout_api=scout_store,
-        madeline_exe="",
-        madeline=madeline_mock,
+        madeline_api=madeline_api,
         analysis_api=analysis_mock,
     )
 
