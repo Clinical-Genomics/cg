@@ -247,4 +247,3 @@ class MockLims:
             if sample["id"] == sample_id:
                 return sample
         return None
-
