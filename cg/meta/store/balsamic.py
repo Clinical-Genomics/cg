@@ -2,8 +2,12 @@
 import datetime
 import datetime as dt
 import logging
+import os
+import shutil
+
 import ruamel.yaml
 from cg.exc import AnalysisDuplicationError
+from pathlib import Path
 
 LOG = logging.getLogger(__name__)
 
@@ -59,7 +63,8 @@ def _reset_analysis_action(case_obj):
 
 def _add_analysis(config_stream, case_obj):
     """Gather information from balsamic analysis to store."""
-    meta_raw = ruamel.yaml.safe_load(config_stream)
+    with Path(config_stream).open() as in_stream:
+        meta_raw = ruamel.yaml.safe_load(in_stream)
     new_bundle = _build_bundle(
         meta_raw, name=case_obj.internal_id, created=datetime.datetime.now(), version="1"
     )
@@ -80,10 +85,24 @@ def _build_bundle(meta_data: dict, name: str, created: datetime, version: str) -
 def _get_files(meta_data: dict) -> list:
     """Get all the files from the balsamic files."""
 
-    data = []
+    tags = {}
     for tag in meta_data["files"]:
-        paths = meta_data["files"][tag]
-        for path in paths:
-            data.append({"path": path, "tags": [tag], "archive": False})
+        for path_str in meta_data["files"][tag]:
+            path = Path(path_str)
+            if path.name in tags.keys():
+                tags[path.name].append(tag)
+            else:
+                tags[path.name] = [tag]
 
+    data = []
+    for path, tags_list in tags.items():
+        if os.path.isdir(path):
+            path = compress_directory(path)
+
+        data.append({"path": path, "tags": tags_list, "archive": False})
     return data
+
+
+def compress_directory(path):
+    shutil.make_archive(path, "gztar", path)
+    return f"{path}.tgz"

@@ -15,6 +15,7 @@ def balsamic_store_context(balsamic_store, balsamic_case) -> dict:
         "hk_api": MockHouseKeeper(balsamic_case.internal_id),
         "db": balsamic_store,
         "tb_api": MockTB(),
+        "balsamic": {"root": "root", "conda_env": "conda_env"},
     }
 
 
@@ -49,6 +50,7 @@ class MockHouseKeeper(HousekeeperAPI):
         self.store = MockHousekeeperStore()
         self.bundle_name = bundle_name
         self.bundle_data = None
+        self.root_dir = "root_dir"
 
     def get_files(self, bundle: str, tags: list, version: int = None):
         """return a list of mocked files"""
@@ -127,9 +129,21 @@ def balsamic_store(base_store: Store) -> Store:
 
 
 @pytest.fixture(scope="function")
-def meta_file():
-    """Return a balsamic metadata yaml file"""
+def deliverables_file():
+    """Return a balsamic deliverables file"""
     return "tests/fixtures/apps/balsamic/case/metadata.yml"
+
+
+@pytest.fixture(scope="function")
+def deliverables_file_directory():
+    """Return a balsamic deliverables file containing a directory"""
+    return "tests/fixtures/apps/balsamic/case/metadata_directory.yml"
+
+
+@pytest.fixture(scope="function")
+def deliverables_file_tags():
+    """Return a balsamic deliverables file containing one file with two tags"""
+    return "tests/fixtures/apps/balsamic/case/metadata_file_tags.yml"
 
 
 @pytest.fixture(scope="function")
