@@ -278,7 +278,7 @@ def upload_scout_api(scout_store, madeline_api, lims_samples):
     )
 
     yield _api
-   
+
 
 @pytest.yield_fixture(scope="function")
 def mutacc_upload_api():
