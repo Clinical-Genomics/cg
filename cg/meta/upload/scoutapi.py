@@ -44,9 +44,8 @@ class UploadScoutAPI:
 
     def build_samples(self, analysis_obj: models.Analysis, hk_version_id: int = None):
         """Loop over the samples in an analysis and build dicts from them"""
-        
-        
-         for link_obj in analysis_obj.family.links:
+
+        for link_obj in analysis_obj.family.links:
             sample_id = link_obj.sample.internal_id
             bam_path = self.fetch_file_path("bam", sample_id, hk_version_id)
             alignment_file_path = self.fetch_file_path("cram", sample_id, hk_version_id)
@@ -57,7 +56,7 @@ class UploadScoutAPI:
             vcf2cytosure_path = self.fetch_file_path(
                 "vcf2cytosure", sample_id, hk_version_id
             )
-            
+
             lims_sample = dict()
             try:
                 lims_sample = self.lims.sample(sample_id)
@@ -78,11 +77,10 @@ class UploadScoutAPI:
                 "sample_name": link_obj.sample.name,
                 "sex": link_obj.sample.sex,
                 "tissue_type": lims_sample.get("source", "unknown"),
-                "vcf2cytosure": vcf2cytosure_path, 
+                "vcf2cytosure": vcf2cytosure_path,
             }
             yield sample
-            
-            
+
     def generate_config(self, analysis_obj: models.Analysis) -> dict:
         """Fetch data about an analysis to load Scout."""
         analysis_date = analysis_obj.started_at or analysis_obj.completed_at
