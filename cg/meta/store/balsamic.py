@@ -1,5 +1,4 @@
 """Builds balsamic bundle for linking in Housekeeper"""
-import datetime
 import datetime as dt
 import logging
 import os
@@ -66,12 +65,12 @@ def _add_analysis(config_stream, case_obj):
     with Path(config_stream).open() as in_stream:
         meta_raw = ruamel.yaml.safe_load(in_stream)
     new_bundle = _build_bundle(
-        meta_raw, name=case_obj.internal_id, created=datetime.datetime.now(), version="1"
+        meta_raw, name=case_obj.internal_id, created=dt.datetime.now(), version="1"
     )
     return new_bundle
 
 
-def _build_bundle(meta_data: dict, name: str, created: datetime, version: str) -> dict:
+def _build_bundle(meta_data: dict, name: str, created: dt.datetime, version: str) -> dict:
     """Create a new bundle."""
     data = {
         "name": name,
