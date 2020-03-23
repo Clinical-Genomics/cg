@@ -1,18 +1,18 @@
 """Click commands to store balsamic analyses"""
 
 import logging
+import os
 import subprocess
+from pathlib import Path
 
 import click
+from housekeeper.exc import VersionIncludedError
 
 from cg.apps import hk, tb
 from cg.meta.store.balsamic import gather_files_and_bundle_in_housekeeper
-
 from cg.store import Store
-
 from cg.exc import AnalysisNotFinishedError, AnalysisDuplicationError
-from housekeeper.exc import VersionIncludedError
-from pathlib import Path
+
 
 LOG = logging.getLogger(__name__)
 SUCCESS = 0
@@ -45,7 +45,7 @@ def analysis(context, case_id, deliverables_file_path):
     if not deliverables_file_path:
         root_dir = Path(context.obj["balsamic"]["root"])
         deliverables_file_path = Path.joinpath(root_dir, case_id, case_id + ".hk")
-        if not deliverables_file_path.exists():
+        if not os.path.isfile(deliverables_file_path):
             context.invoke(generate_deliverables_file, case_id=case_id)
 
     hk_api = context.obj["hk_api"]
