@@ -1,12 +1,17 @@
 # -*- coding: utf-8 -*-
 """Test MIP RNA get files and build bundle"""
-from snapshottest import Snapshot
+import datetime
 import mock
 import pytest
 
-import cg.meta.store.mip_rna as mip_rna
+from snapshottest import Snapshot
 
-from cg.exc import AnalysisNotFinishedError, BundleAlreadyAddedError
+import cg.meta.store.mip_rna as mip_rna
+from cg.exc import (
+    AnalysisNotFinishedError,
+    BundleAlreadyAddedError,
+    AnalysisDuplicationError,
+)
 
 
 @mock.patch("cg.store.Store")
@@ -38,7 +43,7 @@ def test_gather_files_and_bundle_in_hk_bundle_already_added(
 @mock.patch("housekeeper.store.models")
 @mock.patch("cg.apps.hk.HousekeeperAPI")
 @mock.patch("cg.meta.store.mip_rna.include_files_in_housekeeper")
-@mock.patch("cg.meta.store.mip_rna.add_new_complete_analysis_record")
+@mock.patch("cg.meta.store.mip_rna.add_new_analysis")
 @mock.patch("cg.meta.store.mip_rna.get_case")
 @mock.patch("cg.meta.store.mip_rna.add_analysis")
 def test_gather_files_and_bundle_in_hk_bundle_new_analysis(

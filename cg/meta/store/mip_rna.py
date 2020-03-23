@@ -25,7 +25,7 @@ def gather_files_and_bundle_in_housekeeper(config_stream, hk_api, status):
 
     case_obj = get_case(bundle_obj, status)
     reset_case_action(case_obj)
-    new_analysis = add_new_complete_analysis_record(
+    new_analysis = add_new_analysis(
         bundle_data, case_obj, status, version_obj
     )
     version_date = version_obj.created_at.date()
@@ -149,7 +149,7 @@ def reset_case_action(case_obj):
     case_obj.action = None
 
 
-def add_new_complete_analysis_record(bundle_data, case_obj, status, version_obj):
+def add_new_analysis(bundle_data, case_obj, status, version_obj):
     """Function to create and return a new analysis database record"""
     pipeline = case_obj.links[0].sample.data_analysis
     pipeline = pipeline if pipeline else "mip"
