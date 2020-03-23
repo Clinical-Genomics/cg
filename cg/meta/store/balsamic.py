@@ -87,10 +87,10 @@ def _get_files(meta_data: dict) -> list:
     tags = {}
     for tag in meta_data["files"]:
         for path in meta_data["files"][tag]:
-            if path.name in tags.keys():
-                tags[path.name].append(tag)
+            if path in tags.keys():
+                tags[path].append(tag)
             else:
-                tags[path.name] = [tag]
+                tags[path] = [tag]
 
     data = []
     for path, tags_list in tags.items():
