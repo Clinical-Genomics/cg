@@ -324,9 +324,7 @@ def start(context: click.Context, dry_run):
 
         LOG.info("%s: start analysis", case_obj.internal_id)
 
-        priority = (
-            "high" if case_obj.high_priority else ("low" if case_obj.low_priority else "normal")
-        )
+        priority = get_priority_as_text(case_obj)
 
         if dry_run:
             continue
@@ -338,6 +336,16 @@ def start(context: click.Context, dry_run):
             exit_code = FAIL
 
     sys.exit(exit_code)
+
+
+def get_priority_as_text(case_obj):
+
+    if case_obj.high_priority:
+        return "high"
+    elif case_obj.low_priority:
+        return "low"
+
+    return "normal"
 
 
 @balsamic.command("remove-fastq")
