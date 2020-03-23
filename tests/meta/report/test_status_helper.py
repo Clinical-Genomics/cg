@@ -2,7 +2,7 @@
 from datetime import datetime, timedelta
 
 from cg.meta.report.status_helper import StatusHelper
-from cg.tests.store_helpers import add_analysis
+from tests.store_helpers import add_analysis
 
 
 def test_get_previous_report_version_when_only_one(store):

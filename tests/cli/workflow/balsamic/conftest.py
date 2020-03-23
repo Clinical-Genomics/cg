@@ -7,7 +7,7 @@ from cg.apps.lims import LimsAPI
 from cg.meta.workflow.balsamic import AnalysisAPI
 from cg.store import Store, models
 
-from cg.tests.store_helpers import ensure_bed_version, ensure_customer, add_sample, \
+from tests.store_helpers import ensure_bed_version, ensure_customer, add_sample, \
     add_family
 
 

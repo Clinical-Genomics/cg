@@ -6,7 +6,7 @@ from cg.apps.hk import HousekeeperAPI
 from cg.store import Store, models
 from cg.apps.tb import TrailblazerAPI
 
-from cg.tests.store_helpers import ensure_customer, add_family, add_sample
+from tests.store_helpers import ensure_customer, add_family, add_sample
 
 
 @pytest.fixture
