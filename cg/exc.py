@@ -35,12 +35,6 @@ class LimsDataError(CgError):
     """
 
 
-# class MissingCustomerError(CgError):
-#     """
-#         Exception related to missing customer
-#     """
-
-
 class DuplicateRecordError(CgError):
     """
         Exception related to duplicate records in LoqusDB.
