@@ -55,17 +55,6 @@ def test_store_analysis_generates_file_from_directory(
 ):
     """Test store with analysis with meta data with one directory"""
 
-    def search(values, search_for):
-        for k in values:
-            if isinstance(values[k], Iterable):
-                if search_for in values[k]:
-                    return values[k]
-                for v in values[k]:
-                    print(v)
-                    if search_for in v:
-                        return k
-        return None
-
     # GIVEN a meta file for a balsamic analysis containing directory that should be included
     mocked_is_dir = mocker.patch("os.path.isdir")
     mocked_is_dir.return_value = True
@@ -80,7 +69,7 @@ def test_store_analysis_generates_file_from_directory(
 
     # THEN we there should be a file representing the directory in the included bundle
     assert result.exit_code == EXIT_SUCCESS
-    assert search(balsamic_store_context["hk_api"].bundle_data["files"][0], "tgz")
+    assert "tgz" in balsamic_store_context["hk_api"].bundle_data["files"][0]["path"]
 
 
 def test_store_analysis_includes_file_once(
