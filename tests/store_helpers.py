@@ -61,6 +61,22 @@ def ensure_customer(disk_store, customer_id="cust_test"):
     return customer
 
 
+def add_analysis(store, family=None, completed_at=None):
+    """Utility function to add an analysis for tests"""
+
+    if not family:
+        family = add_family(store)
+
+    analysis = store.add_analysis(pipeline="", version="")
+
+    if completed_at:
+        analysis.completed_at = completed_at
+
+    analysis.family = family
+    store.add_commit(analysis)
+    return analysis
+
+
 def add_sample(
     store,
     sample_id="sample_test",
