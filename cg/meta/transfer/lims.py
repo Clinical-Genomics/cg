@@ -126,7 +126,10 @@ class TransferLims(object):
                     status_date = self._date_functions[status_type](sample_obj.id)
                     if sample_obj.udf["pool name"] == pool_obj.name and status_date is not None:
                         LOG.info(
-                            f"Found {status_type.value} date for pool id {pool_obj.id}: {status_date}."
+                            "Found %s date for pool id %: %s",
+                            status_type.value,
+                            pool_obj.id,
+                            status_date,
                         )
                         setattr(pool_obj, f"{status_type.value}_at", status_date)
                         self.status.commit()

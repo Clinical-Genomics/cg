@@ -1,5 +1,4 @@
-# """Tests for cg.cli.store.balsamic"""
-from collections import Iterable
+"""Tests for cg.cli.store.balsamic"""
 
 from cg.cli.workflow.balsamic.store import analysis
 

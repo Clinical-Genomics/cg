@@ -1,9 +1,7 @@
 from datetime import datetime
 
 
-def ensure_application_version(
-    disk_store, application_tag="dummy_tag", application_type="tgs"
-):
+def ensure_application_version(disk_store, application_tag="dummy_tag", application_type="tgs"):
     """utility function to return existing or create application version for tests"""
     application = disk_store.application(tag=application_tag)
     if not application:
@@ -18,9 +16,7 @@ def ensure_application_version(
     prices = {"standard": 10, "priority": 20, "express": 30, "research": 5}
     version = disk_store.application_version(application, 1)
     if not version:
-        version = disk_store.add_version(
-            application, 1, valid_from=datetime.now(), prices=prices
-        )
+        version = disk_store.add_version(application, 1, valid_from=datetime.now(), prices=prices)
 
         disk_store.add_commit(version)
     return version
@@ -35,9 +31,7 @@ def ensure_bed_version(disk_store, bed_name="dummy_bed"):
 
     version = disk_store.latest_bed_version(bed_name)
     if not version:
-        version = disk_store.add_bed_version(
-            bed, 1, "dummy_filename", shortname=bed_name
-        )
+        version = disk_store.add_bed_version(bed, 1, "dummy_filename", shortname=bed_name)
         disk_store.add_commit(version)
     return version
 
