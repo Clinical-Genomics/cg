@@ -88,7 +88,6 @@ def test_store_analysis_includes_file_once(
 
     # THEN we there should be one file with two tags in the included bundle
     assert result.exit_code == EXIT_SUCCESS
-    print(result.output)
     assert len(balsamic_store_context["hk_api"].bundle_data["files"]) == 1
     assert set(balsamic_store_context["hk_api"].bundle_data["files"][0]["tags"]) == set(
         ["vcf", "vep"]
