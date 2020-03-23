@@ -1,3 +1,5 @@
+"""Utility functions to simply add test data in a cg store"""
+
 from datetime import datetime
 
 

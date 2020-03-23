@@ -1,8 +1,5 @@
 """This script tests the cli methods to create the case config for balsamic"""
-import logging
-from pathlib import Path
 
-import pytest
 from cg.cli.workflow.balsamic.store import generate_deliverables_file
 
 EXIT_SUCCESS = 0
@@ -55,7 +52,7 @@ def test_without_file(cli_runner, balsamic_context, balsamic_case):
     assert ".json" in result.output
 
 
-def test_with_missing_case(cli_runner, balsamic_context, caplog):
+def test_with_missing_case(cli_runner, balsamic_context):
     """Test command with case to start with"""
 
     # GIVEN case-id not in database
