@@ -83,6 +83,7 @@ def family(context, action, priority, panels, family_id):
 @click.option("-k", "--capture-kit", help="sets capture kit.")
 @click.option("--data-analysis", help="sets data-analysis.")
 @click.option("-n", "--name", help="sets name.")
+@click.option("--skip-lims", is_flag=True, help="Skip setting value in LIMS")
 @click.argument("sample_id")
 @click.pass_context
 def sample(
@@ -96,6 +97,7 @@ def sample(
     data_analysis,
     name,
     sample_id,
+    skip_lims,
 ):
     """Update information about a sample."""
     sample_obj = context.obj["status"].sample(sample_id)
@@ -125,8 +127,9 @@ def sample(
                 f"\nSample name already: {sample_obj.name}", fg="yellow"
             )
 
-        context.obj["lims"].update_sample(sample_id, name=name)
-        click.echo(click.style(f"Set LIMS/Name to {name}", fg="blue"))
+        if not skip_lims:
+            context.obj["lims"].update_sample(sample_id, name=name)
+            click.echo(click.style(f"Set LIMS/Name to {name}", fg="blue"))
 
     if sex:
         if sample_obj.sex != sex:
@@ -140,8 +143,9 @@ def sample(
                 f"\nSample sex already: {sample_obj.sex}", fg="yellow"
             )
 
-        context.obj["lims"].update_sample(sample_id, sex=sex)
-        click.echo(click.style(f"Set LIMS/Gender to {sex}", fg="blue"))
+        if not skip_lims:
+            context.obj["lims"].update_sample(sample_id, sex=sex)
+            click.echo(click.style(f"Set LIMS/Gender to {sex}", fg="blue"))
 
     if customer:
         customer_obj = context.obj["status"].customer(customer)
@@ -236,8 +240,9 @@ def sample(
                         fg="green",
                     )
 
-        context.obj["lims"].update_sample(sample_id, application=apptag)
-        click.echo(click.style(f"Set LIMS/application to {apptag}", fg="blue"))
+        if not skip_lims:
+            context.obj["lims"].update_sample(sample_id, application=apptag)
+            click.echo(click.style(f"Set LIMS/application to {apptag}", fg="blue"))
 
     if capture_kit:
         if sample_obj.capture_kit != capture_kit:
@@ -264,8 +269,11 @@ def sample(
                 fg="yellow",
             )
 
-        context.obj["lims"].update_sample(sample_id, data_analysis=data_analysis)
-        click.echo(click.style(f"Set LIMS/data_analysis to {data_analysis}", fg="blue"))
+        if not skip_lims:
+            context.obj["lims"].update_sample(sample_id, data_analysis=data_analysis)
+            click.echo(
+                click.style(f"Set LIMS/data_analysis to {data_analysis}", fg="blue")
+            )
 
     _update_comment(comment, sample_obj)
     context.obj["status"].commit()
