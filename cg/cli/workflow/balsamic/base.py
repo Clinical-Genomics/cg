@@ -339,6 +339,7 @@ def start(context: click.Context, dry_run):
 
 
 def get_priority_as_text(case_obj):
+    """Get priority as text for a case"""
 
     if case_obj.high_priority:
         return "high"
