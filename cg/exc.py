@@ -17,13 +17,15 @@ class CgError(Exception):
 
 class AnalysisNotFinishedError(CgError):
     """
-        Exception raised when an analysis is not finished
+        Exception raised when an adding a MIP analysis to Housekeeper, but the analysis is not
+        finished in MIP, as indicated in the qc sample info file.
+
     """
 
 
 class AnalysisDuplicationError(CgError):
     """
-        Error related to trying to create duplicate analysis object
+        Error related to trying to create analysis object that already exists in status-db.
     """
 
 
@@ -33,15 +35,15 @@ class LimsDataError(CgError):
     """
 
 
-class MissingCustomerError(CgError):
-    """
-        Exception related to missing customer
-    """
+# class MissingCustomerError(CgError):
+#     """
+#         Exception related to missing customer
+#     """
 
 
 class DuplicateRecordError(CgError):
     """
-        Exception related to duplicate records
+        Exception related to duplicate records in LoqusDB.
     """
 
 
