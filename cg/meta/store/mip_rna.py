@@ -1,14 +1,16 @@
 """Builds MIP RNA bundle for linking in Housekeeper"""
-import datetime as dt
 import logging
 from pathlib import Path
 
 import ruamel.yaml
 
-from cg.exc import (
-    AnalysisNotFinishedError,
-    AnalysisDuplicationError,
-    BundleAlreadyAddedError,
+from cg.exc import AnalysisNotFinishedError, BundleAlreadyAddedError
+
+from cg.meta.store.base import (
+    get_case,
+    reset_case_action,
+    add_new_analysis,
+    include_files_in_housekeeper,
 )
 
 LOG = logging.getLogger(__name__)
@@ -25,9 +27,7 @@ def gather_files_and_bundle_in_housekeeper(config_stream, hk_api, status):
 
     case_obj = get_case(bundle_obj, status)
     reset_case_action(case_obj)
-    new_analysis = add_new_analysis(
-        bundle_data, case_obj, status, version_obj
-    )
+    new_analysis = add_new_analysis(bundle_data, case_obj, status, version_obj)
     version_date = version_obj.created_at.date()
     LOG.info("new bundle added: %s, version %s", bundle_obj.name, version_date)
     include_files_in_housekeeper(bundle_obj, hk_api, version_obj)
@@ -45,11 +45,7 @@ def add_analysis(config_stream):
     if sampleinfo_data["is_finished"] is False:
         raise AnalysisNotFinishedError("analysis not finished")
 
-    deliverables_raw = ruamel.yaml.safe_load(
-        Path(
-            config_data["store_file"]
-        ).open()
-    )
+    deliverables_raw = ruamel.yaml.safe_load(Path(config_data["store_file"]).open())
     new_bundle = build_bundle(config_data, sampleinfo_data, deliverables_raw)
 
     return new_bundle
@@ -143,41 +139,3 @@ def parse_sampleinfo(data: dict) -> dict:
     }
 
     return sampleinfo_data
-
-
-def get_case(bundle_obj, status):
-    """ Get a case from the status database """
-    case_obj = status.family(bundle_obj.name)
-    return case_obj
-
-
-def reset_case_action(case_obj):
-    """ Resets action on case """
-    case_obj.action = None
-
-
-def add_new_analysis(bundle_data, case_obj, status, version_obj):
-    """Function to create and return a new analysis database record"""
-    pipeline = case_obj.links[0].sample.data_analysis
-    pipeline = pipeline if pipeline else "mip-rna"
-
-    if status.analysis(family=case_obj, started_at=version_obj.created_at):
-        raise AnalysisDuplicationError(
-            f"Analysis object already exists for {case_obj.internal_id} {version_obj.created_at}"
-        )
-
-    new_analysis = status.add_analysis(
-        pipeline=pipeline,
-        version=bundle_data["pipeline_version"],
-        started_at=version_obj.created_at,
-        completed_at=dt.datetime.now(),
-        primary=(len(case_obj.analyses) == 0),
-    )
-    new_analysis.family = case_obj
-    return new_analysis
-
-
-def include_files_in_housekeeper(bundle_obj, hk_api, version_obj):
-    """Function to include files in housekeeper"""
-    hk_api.include(version_obj)
-    hk_api.add_commit(bundle_obj, version_obj)
