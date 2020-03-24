@@ -45,7 +45,7 @@ def analysis(context, case_id, deliverables_file_path):
     if not deliverables_file_path:
         root_dir = Path(context.obj["balsamic"]["root"])
         deliverables_file_path = Path.joinpath(
-            root_dir, "delivery_report", case_id, case_id + ".hk"
+            root_dir, "analysis/delivery_report", case_id, case_id + ".hk"
         )
         if not os.path.isfile(deliverables_file_path):
             context.invoke(generate_deliverables_file, case_id=case_id)
