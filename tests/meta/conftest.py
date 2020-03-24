@@ -5,6 +5,9 @@ from cg.apps.usalt.fastq import FastqHandler as MicrosaltFastqHandler
 
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.tb import TrailblazerAPI
+from cg.apps.crunchy import CrunchyAPI
+from cg.apps.scoutapi import ScoutAPI
+from cg.meta.compress import CompressAPI
 from cg.meta.deliver import DeliverAPI
 from cg.meta.workflow.mip_dna import AnalysisAPI
 
@@ -137,6 +140,11 @@ def analysis_store(base_store, analysis_family):
     yield base_store
 
 
+class MockCrunchy(CrunchyAPI):
+
+    pass
+
+
 class MockVersion:
     """Mock a version object"""
 
@@ -243,6 +251,13 @@ class MockHouseKeeper(HousekeeperAPI):
     def get_root_dir(self):
         """Overrides sqlalchemy method"""
         return self._file
+
+
+class MockScoutAPI(ScoutAPI):
+    """Mock class for Scout api"""
+
+    def __init__(self):
+        pass
 
 
 class MockLims:
