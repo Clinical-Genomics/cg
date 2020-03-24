@@ -72,5 +72,3 @@ def test_second_analysis_when_two(store):
 
     # THEN the version should be 1
     assert report_version == 1
-
-

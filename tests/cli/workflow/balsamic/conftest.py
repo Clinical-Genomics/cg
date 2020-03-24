@@ -7,8 +7,7 @@ from cg.apps.lims import LimsAPI
 from cg.meta.workflow.balsamic import AnalysisAPI
 from cg.store import Store, models
 
-from tests.store_helpers import ensure_bed_version, ensure_customer, add_sample, \
-    add_family
+from tests.store_helpers import ensure_bed_version, ensure_customer, add_sample, add_family
 
 
 @pytest.fixture
@@ -126,19 +125,13 @@ def balsamic_store(base_store: Store, lims_api) -> Store:
     _store = base_store
 
     case = add_family(_store, "balsamic_case")
-    tumour_sample = add_sample(
-        _store, "tumour_sample", is_tumour=True, application_type="tgs"
-    )
-    normal_sample = add_sample(
-        _store, "normal_sample", is_tumour=False, application_type="tgs"
-    )
+    tumour_sample = add_sample(_store, "tumour_sample", is_tumour=True, application_type="tgs")
+    normal_sample = add_sample(_store, "normal_sample", is_tumour=False, application_type="tgs")
     _store.relate_sample(case, tumour_sample, status="unknown")
     _store.relate_sample(case, normal_sample, status="unknown")
 
     case = add_family(_store, "mip_case")
-    normal_sample = add_sample(
-        _store, "normal_sample", is_tumour=False, data_analysis="mip"
-    )
+    normal_sample = add_sample(_store, "normal_sample", is_tumour=False, data_analysis="mip")
     _store.relate_sample(case, normal_sample, status="unknown")
 
     bed_name = lims_api.capture_kit(tumour_sample.internal_id)
@@ -176,9 +169,7 @@ def balsamic_case(analysis_store) -> models.Family:
 @pytest.fixture(scope="function")
 def balsamic_case_wgs(analysis_store) -> models.Family:
     """case with balsamic data_type"""
-    return analysis_store.find_family(
-        ensure_customer(analysis_store), "balsamic_case_wgs"
-    )
+    return analysis_store.find_family(ensure_customer(analysis_store), "balsamic_case_wgs")
 
 
 @pytest.fixture(scope="function")
