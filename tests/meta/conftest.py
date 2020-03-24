@@ -128,12 +128,8 @@ def analysis_store(base_store, analysis_family):
             family=family,
             sample=sample_obj,
             status=sample_data["status"],
-            father=base_store.sample(sample_data["father"])
-            if sample_data.get("father")
-            else None,
-            mother=base_store.sample(sample_data["mother"])
-            if sample_data.get("mother")
-            else None,
+            father=base_store.sample(sample_data["father"]) if sample_data.get("father") else None,
+            mother=base_store.sample(sample_data["mother"]) if sample_data.get("mother") else None,
         )
         base_store.add(link)
     base_store.commit()
@@ -277,13 +273,7 @@ class MockDeliver(DeliverAPI):
     def get_post_analysis_files(self, case: str, version, tags):
 
         if tags[0] == "mip-config":
-            path = (
-                "/mnt/hds/proj/bioinfo/bundles/"
-                + case
-                + "/2018-01-30/"
-                + case
-                + "_config.yaml"
-            )
+            path = "/mnt/hds/proj/bioinfo/bundles/" + case + "/2018-01-30/" + case + "_config.yaml"
         elif tags[0] == "sampleinfo":
             path = (
                 "/mnt/hds/proj/bioinfo/bundles/"
@@ -294,11 +284,7 @@ class MockDeliver(DeliverAPI):
             )
         if tags[0] == "qcmetrics":
             path = (
-                "/mnt/hds/proj/bioinfo/bundles/"
-                + case
-                + "/2018-01-30/"
-                + case
-                + "_qc_metrics.yaml"
+                "/mnt/hds/proj/bioinfo/bundles/" + case + "/2018-01-30/" + case + "_qc_metrics.yaml"
             )
 
         return [MockFile(path=path)]
@@ -341,9 +327,7 @@ class MockTB:
         """Needed to initialise mock variables"""
         self._make_config_was_called = False
 
-    def get_trending(
-        self, mip_config_raw: dict, qcmetrics_raw: dict, sampleinfo_raw: dict
-    ) -> dict:
+    def get_trending(self, mip_config_raw: dict, qcmetrics_raw: dict, sampleinfo_raw: dict) -> dict:
         if self._get_trending_raises_keyerror:
             raise KeyError("mockmessage")
 
@@ -425,9 +409,7 @@ def deliver_api(analysis_store):
     lims_mock = MockLims()
     hk_mock = MockHouseKeeper()
     hk_mock.add_file(file="/mock/path", version_obj="", tag_name="")
-    hk_mock._files = MockFiles(
-        [MockFile(tags=["case-tag"]), MockFile(tags=["sample-tag", "ADM1"])]
-    )
+    hk_mock._files = MockFiles([MockFile(tags=["case-tag"]), MockFile(tags=["sample-tag", "ADM1"])])
 
     _api = DeliverAPI(
         db=analysis_store,

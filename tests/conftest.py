@@ -33,11 +33,7 @@ CHANJO_CONFIG = {"chanjo": {"config_path": "chanjo_config", "binary_path": "chan
 CRUNCHY_CONFIG = {
     "crunchy": {
         "cram_reference": "/path/to/fasta",
-        "slurm": {
-            "account": "mock_account",
-            "mail_user": "mock_mail",
-            "conda_env": "mock_env",
-        },
+        "slurm": {"account": "mock_account", "mail_user": "mock_mail", "conda_env": "mock_env"},
     }
 }
 
