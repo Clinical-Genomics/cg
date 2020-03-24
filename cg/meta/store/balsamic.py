@@ -84,20 +84,23 @@ def _build_bundle(meta_data: dict, name: str, created: dt.datetime, version: str
 def _get_files(meta_data: dict) -> list:
     """Get all the files from the balsamic files."""
 
-    tags = {}
+    paths = {}
     for tag in meta_data["files"]:
-        for path in meta_data["files"][tag]:
-            if path in tags.keys():
-                tags[path].append(tag)
+        for path_str in meta_data["files"][tag]:
+            path = Path(path_str).name
+            if path in paths.keys():
+                paths[path]["tags"].append(tag)
             else:
-                tags[path] = [tag]
+                paths[path] = {"tags": [tag], "full_path": path_str}
 
     data = []
-    for path, tags_list in tags.items():
+    for path_item in paths.values():
+        path = path_item["full_path"]
+        tags = path_item["tags"]
         if os.path.isdir(path):
             path = compress_directory(path)
 
-        data.append({"path": path, "tags": tags_list, "archive": False})
+        data.append({"path": path, "tags": tags, "archive": False})
     return data
 
 

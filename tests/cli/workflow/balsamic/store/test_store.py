@@ -17,7 +17,6 @@ def test_store_analysis_with_file_parameter(
         analysis,
         [balsamic_case.internal_id, "--deliverables-file", deliverables_file],
         obj=balsamic_store_context,
-        catch_exceptions=False,
     )
 
     # THEN we should not get a message that the analysis has been stored
