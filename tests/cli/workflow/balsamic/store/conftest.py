@@ -25,7 +25,6 @@ class MockTB(TrailblazerAPI):
 
     def __init__(self):
         """Override TrailblazerAPI __init__ to avoid default behaviour"""
-        pass
 
     def analyses(
         self,
@@ -77,7 +76,6 @@ class MockHousekeeperStore:
 
     def add_commit(self, *pargs, **kwargs):
         """Implements add_commit to allow it to be used in HousekeeperAPI"""
-        pass
 
 
 class MockBundle:
