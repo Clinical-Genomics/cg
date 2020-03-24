@@ -79,7 +79,7 @@ class TransferFlowcell:
             self.hk.commit()
             LOG.info(f"added new Housekeeper bundle: {hk_bundle.name}")
 
-        with self.hk.session.no_autoflush:
+        with self.hk.session_no_autoflush():
             hk_version = hk_bundle.versions[0]
             for fastq_file in fastq_files:
                 if self.hk.files(path=fastq_file).first() is None:

@@ -41,12 +41,10 @@ def trailblazer_api(tmpdir):
 def store_housekeeper(tmpdir):
     """Setup Housekeeper store."""
     root_path = tmpdir.mkdir("bundles")
-    _store = HousekeeperAPI(
-        {"housekeeper": {"database": "sqlite://", "root": str(root_path)}}
-    ).store
-    _store.create_all()
-    yield _store
-    _store.drop_all()
+    _api = HousekeeperAPI({"housekeeper": {"database": "sqlite://", "root": str(root_path)}})
+    _api.initialise_db()
+    yield _api
+    _api.destroy_db()
 
 
 @pytest.fixture

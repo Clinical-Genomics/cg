@@ -3,6 +3,7 @@ import datetime as dt
 import logging
 import os
 from pathlib import Path
+from typing import List
 
 from housekeeper.include import include_version, checksum as hk_checksum
 from housekeeper.store import Store, models
@@ -14,12 +15,66 @@ class HousekeeperAPI:
     """ API to decouple cg code from Housekeeper """
 
     def __init__(self, config):
-        self.store = Store(config["housekeeper"]["database"], config["housekeeper"]["root"])
+        self._store = Store(config["housekeeper"]["database"], config["housekeeper"]["root"])
         self.root_dir = config["housekeeper"]["root"]
 
+    def __getattr__(self, name):
+        LOG.warning(
+            "Called undefined method %s on %s, please implement", name, self.__class__.__name__
+        )
+        return getattr(self._store, name)
+
     def add_bundle(self, bundle_data):
+        """ Build a new bundle version of files """
+        return self._store.add_bundle(bundle_data)
+
+    def new_file(
+        self, path: str, checksum: str = None, to_archive: bool = False, tags: list = None
+    ):
+        """ Create a new file """
+        return self._store.new_file(path, checksum, to_archive, tags)
+
+    def tag(self, name: str):
+        """ Fetch a tag """
+        return self._store.tag(name)
+
+    def bundle(self, name: str):
+        """ Fetch a bundle """
+        return self._store.bundle(name)
+
+    def bundles(self):
+        """ Fetch bundles """
+        return self._store.bundles()
+
+    def files(
+        self, *, bundle: str = None, tags: List[str] = None, version: int = None, path: str = None
+    ):
+        """ Fetch files """
+        return self._store.files(bundle=bundle, tags=tags, version=version, path=path)
+
+    def new_tag(self, name: str, category: str = None):
+        """ Create a new tag """
+        return self._store.new_tag(name, category)
+
+    def new_bundle(self, name: str, created_at: dt.datetime = None):
+        """ Create a new file bundle """
+        return self._store.new_bundle(name, created_at)
+
+    def new_version(self, created_at: dt.datetime, expires_at: dt.datetime = None):
+        """ Create a new bundle version """
+        return self._store.new_version(created_at, expires_at)
+
+    def add_commit(self, db_obj):
         """ Wrap method in Housekeeper Store """
-        return self.store.add_bundle(bundle_data)
+        return self._store.add_commit(db_obj)
+
+    def commit(self):
+        """ Wrap method in Housekeeper Store """
+        return self._store.commit()
+
+    def session_no_autoflush(self):
+        """ Wrap property in Housekeeper Store """
+        return self._store.session.no_autoflush
 
     def include(self, version_obj: models.Version):
         """Call the include version function to import related assets."""
@@ -47,7 +102,7 @@ class HousekeeperAPI:
     def last_version(self, bundle: str) -> models.Version:
         """Gets the latest version of a bundle"""
         return (
-            self.store.Version.query.join(models.Version.bundle)
+            self._store.Version.query.join(models.Version.bundle)
             .filter(models.Bundle.name == bundle)
             .order_by(models.Version.created_at.desc())
             .first()
@@ -64,7 +119,7 @@ class HousekeeperAPI:
         Returns:
             iterable(hk.Models.File)
         """
-        return self.store.files(bundle=bundle, tags=tags, version=version)
+        return self._store.files(bundle=bundle, tags=tags, version=version)
 
     def add_file(self, file, version_obj: models.Version, tags, to_archive=False):
         """Add a file to housekeeper."""
@@ -77,9 +132,18 @@ class HousekeeperAPI:
         )
 
         new_file.version = version_obj
-        self.store.add_commit(new_file)
+        self.add_commit(new_file)
         return new_file
 
     @staticmethod
     def checksum(path):
+        """Calculate the checksum"""
         return hk_checksum(path)
+
+    def initialise_db(self):
+        """Create all tables in the store."""
+        self._store.create_all()
+
+    def destroy_db(self):
+        """Drop all tables in the store"""
+        self._store.drop_all()
