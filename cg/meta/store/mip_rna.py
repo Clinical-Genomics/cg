@@ -106,15 +106,22 @@ def parse_config(data: dict) -> dict:
     return {
         "email": data.get("email"),
         "case": data["case_id"],
-        "samples": [
-            {"id": sample_id, "type": analysis_type}
-            for sample_id, analysis_type in data["analysis_type"].items()
-        ],
+        "samples": _get_sample_analysis_type(data),
         "is_dryrun": bool("dry_run_all" in data),
         "out_dir": data["outdata_dir"],
         "priority": data["slurm_quality_of_service"],
         "sampleinfo_path": data["sample_info_file"],
     }
+
+
+def _get_sample_analysis_type(data: dict) -> list:
+    """
+        get analysis type for all samples in the MIP config file
+    """
+    return [
+        {"id": sample_id, "type": analysis_type}
+        for sample_id, analysis_type in data["analysis_type"].items()
+    ]
 
 
 def parse_sampleinfo(data: dict) -> dict:
