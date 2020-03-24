@@ -343,7 +343,8 @@ def get_priority_as_text(case_obj):
 
     if case_obj.high_priority:
         return "high"
-    elif case_obj.low_priority:
+
+    if case_obj.low_priority:
         return "low"
 
     return "normal"
