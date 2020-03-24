@@ -56,7 +56,8 @@ def test_store_analysis_generates_file_from_directory(
     # GIVEN a meta file for a balsamic analysis containing directory that should be included
     mocked_is_dir = mocker.patch("os.path.isdir")
     mocked_is_dir.return_value = True
-    mocker.patch("shutil.make_archive")
+    mock_make_archive = mocker.patch("shutil.make_archive")
+    mock_make_archive.return_value = "file.tar.gz"
 
     # WHEN calling store with meta file
     result = cli_runner.invoke(
@@ -67,7 +68,10 @@ def test_store_analysis_generates_file_from_directory(
 
     # THEN we there should be a file representing the directory in the included bundle
     assert result.exit_code == EXIT_SUCCESS
-    assert "tgz" in balsamic_store_context["hk_api"].bundle_data["files"][0]["path"]
+    assert (
+        mock_make_archive.return_value
+        in balsamic_store_context["hk_api"].bundle_data["files"][0]["path"]
+    )
 
 
 def test_store_analysis_includes_file_once(
