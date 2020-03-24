@@ -105,5 +105,4 @@ def _get_files(meta_data: dict) -> list:
 
 
 def compress_directory(path):
-    shutil.make_archive(path, "gztar", path)
-    return f"{path}.tgz"
+    return shutil.make_archive(path, "gztar", path, logger=LOG)
