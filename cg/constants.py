@@ -1,4 +1,12 @@
-PRIORITY_MAP = {"research": 0, "standard": 1, "priority": 2, "express": 3, "clinical trials": 4}
+"""Constans for cg"""
+
+PRIORITY_MAP = {
+    "research": 0,
+    "standard": 1,
+    "priority": 2,
+    "express": 3,
+    "clinical trials": 4,
+}
 REV_PRIORITY_MAP = {value: key for key, value in PRIORITY_MAP.items()}
 PRIORITY_OPTIONS = list(PRIORITY_MAP.keys())
 FAMILY_ACTIONS = ("analyze", "running", "hold")
@@ -48,3 +56,12 @@ ANALYSIS_SOURCES = (
     "bone marrow",
     "other",
 )
+
+# Constants for crunchy
+BAM_SUFFIX = ".bam"
+BAM_INDEX_SUFFIX = ".bai"
+CRAM_SUFFIX = ".cram"
+CRAM_INDEX_SUFFIX = ".crai"
+FASTQ_FIRST_READ_SUFFIX = "R1_001.fastq.gz"
+FASTQ_SECOND_READ_SUFFIX = "R2_001.fastq.gz"
+SPRING_SUFFIX = ".spring"

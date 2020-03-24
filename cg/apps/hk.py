@@ -60,17 +60,22 @@ class HousekeeperAPI:
     def get_files(self, bundle: str, tags: list, version: int = None):
         """Fetch all the files in housekeeper, optionally filtered by bundle and/or tags and/or
         version
-        
+
         Returns:
             iterable(hk.Models.File)
         """
         return self.store.files(bundle=bundle, tags=tags, version=version)
 
-    def add_file(self, file, version_obj: models.Version, tag_name, to_archive=False):
+    def add_file(self, file, version_obj: models.Version, tags, to_archive=False):
         """Add a file to housekeeper."""
-        new_file = self.store.new_file(
-            path=str(Path(file).absolute()), to_archive=to_archive, tags=[self.store.tag(tag_name)]
+        if isinstance(tags, str):
+            tags = [tags]
+        new_file = self.new_file(
+            path=str(Path(file).absolute()),
+            to_archive=to_archive,
+            tags=[self.tag(tag_name) for tag_name in tags],
         )
+
         new_file.version = version_obj
         self.store.add_commit(new_file)
         return new_file
