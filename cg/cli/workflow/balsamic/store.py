@@ -44,7 +44,9 @@ def analysis(context, case_id, deliverables_file_path):
 
     if not deliverables_file_path:
         root_dir = Path(context.obj["balsamic"]["root"])
-        deliverables_file_path = get_deliverables_file_path(case_id, root_dir)
+        deliverables_file_path = Path.joinpath(
+            root_dir, case_id, "analysis/delivery_report", case_id + ".hk"
+        )
         if not os.path.isfile(deliverables_file_path):
             context.invoke(generate_deliverables_file, case_id=case_id)
 
@@ -71,10 +73,6 @@ def analysis(context, case_id, deliverables_file_path):
     click.echo(click.style("included files in Housekeeper", fg="green"))
 
 
-def get_deliverables_file_path(case_id, root_dir):
-    return Path.joinpath(root_dir, case_id, "analysis/delivery_report", case_id + ".hk")
-
-
 @store.command("generate-deliverables-file")
 @click.option("-d", "--dry-run", "dry", is_flag=True, help="print command to console")
 @click.option("--config", "config_path", required=False, help="Optional")
@@ -92,17 +90,19 @@ def generate_deliverables_file(context, dry, config_path, case_id):
         click.echo(click.style(f"Case {case_id} not found", fg="yellow"))
 
     if not config_path:
-        config_path = get_deliverables_file_path(case_id, root_dir)
+        config_path = Path.joinpath(root_dir, case_id, case_id + ".json")
 
     # Call Balsamic
+    command_str = f" plugins deliver" f" --sample-config {config_path}'"
 
     command = [f"bash -c 'source activate {conda_env}; balsamic"]
+    command.extend(command_str.split(" "))
 
     if dry:
         click.echo(" ".join(command))
         return SUCCESS
 
-    process = subprocess.run(" ".join(command))
+    process = subprocess.run(" ".join(command), shell=True)
 
     if process == SUCCESS:
         click.echo(click.style("created deliverables file", fg="green"))
