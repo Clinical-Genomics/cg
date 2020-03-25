@@ -45,7 +45,8 @@ def add_analysis(config_stream):
     if sampleinfo_data["is_finished"] is False:
         raise AnalysisNotFinishedError("analysis not finished")
 
-    deliverables_raw = ruamel.yaml.safe_load(Path(config_data["store_file"]).open())
+    breakpoint()
+    deliverables_raw = ruamel.yaml.safe_load(Path(config_raw["store_file"]).open())
     new_bundle = build_bundle(config_data, sampleinfo_data, deliverables_raw)
 
     return new_bundle
@@ -66,28 +67,23 @@ def get_files(deliverables: dict) -> dict:
     """Get all the files from the MIP RNA files."""
 
     data = [
-        {
-            "path": file["path"],
-            "tags": sorted(
-                list(
-                    set(
-                        [
-                            file["format"],
-                            file["id"],
-                            file["step"],
-                            file["tag"],
-                            "rd-rna",
-                        ]
-                    )
-                    - set([None])
-                )
-            ),
-            "archive": False,
-        }
+        {"path": file["path"], "tags": get_tags(file), "archive": False,}
         for file in deliverables["files"]
     ]
 
     return data
+
+
+def get_tags(file: dict) -> list:
+    """Get all tags for a file"""
+    breakpoint()
+
+    all_tags = [file["format"], file["id"], file["step"], file["tag"], "rd-rna"]
+    unique_tags = set(all_tags)
+    only_existing_tags = unique_tags - set([None])
+    sorted_tags = sorted(list(only_existing_tags))
+
+    return sorted_tags
 
 
 def parse_config(data: dict) -> dict:
