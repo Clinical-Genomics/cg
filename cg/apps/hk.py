@@ -19,9 +19,7 @@ class HousekeeperAPI:
         self.root_dir = config["housekeeper"]["root"]
 
     def __getattr__(self, name):
-        LOG.warning(
-            "Called undefined method %s on %s, please implement", name, self.__class__.__name__
-        )
+        LOG.warning("Called undefined %s on %s, please wrap", name, self.__class__.__name__)
         return getattr(self._store, name)
 
     def add_bundle(self, bundle_data):
