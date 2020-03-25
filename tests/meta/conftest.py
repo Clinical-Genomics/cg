@@ -38,7 +38,7 @@ def trailblazer_api(tmpdir):
 
 
 @pytest.yield_fixture(scope="function")
-def store_housekeeper(tmpdir):
+def housekeeper_api(tmpdir):
     """Setup Housekeeper store."""
     root_path = tmpdir.mkdir("bundles")
     _api = HousekeeperAPI({"housekeeper": {"database": "sqlite://", "root": str(root_path)}})
@@ -382,14 +382,14 @@ def safe_loader(path):
 
 
 @pytest.yield_fixture(scope="function")
-def analysis_api(analysis_store, store_housekeeper, scout_store):
+def analysis_api(analysis_store, housekeeper_api, scout_store):
     """Setup an analysis API."""
     Path_mock = MockPath("")
     tb_mock = MockTB()
 
     _analysis_api = AnalysisAPI(
         db=analysis_store,
-        hk_api=store_housekeeper,
+        hk_api=housekeeper_api,
         scout_api=scout_store,
         tb_api=tb_mock,
         lims_api=None,

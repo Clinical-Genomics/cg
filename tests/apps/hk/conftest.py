@@ -6,7 +6,7 @@ from cg.apps.hk import HousekeeperAPI
 
 
 @pytest.yield_fixture(scope="function")
-def store_housekeeper(tmpdir):
+def housekeeper_api(tmpdir):
     """Setup Housekeeper store."""
     root_path = tmpdir.mkdir("bundles")
     _api = HousekeeperAPI({"housekeeper": {"database": "sqlite://", "root": str(root_path)}})
@@ -53,6 +53,6 @@ def ensure_version(store: HousekeeperAPI, bundle_data):
 
 
 @pytest.yield_fixture(scope="function")
-def version_obj(store_housekeeper, bundle_data):
-    _version = ensure_version(store_housekeeper, bundle_data)
+def version_obj(housekeeper_api, bundle_data):
+    _version = ensure_version(housekeeper_api, bundle_data)
     return _version.ver

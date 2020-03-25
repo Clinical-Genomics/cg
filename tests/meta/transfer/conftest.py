@@ -12,12 +12,7 @@ from cg.meta.transfer.flowcell import TransferFlowcell
 def data():
     return {
         "samples": [
-            {
-                "name": "ADM1136A3",
-                "index": "ACGTACAT",
-                "flowcell": "HJKMYBCXX",
-                "type": "hiseqx",
-            }
+            {"name": "ADM1136A3", "index": "ACGTACAT", "flowcell": "HJKMYBCXX", "type": "hiseqx"}
         ]
     }
 
@@ -25,9 +20,7 @@ def data():
 @pytest.yield_fixture(scope="function")
 def store_stats():
     """Setup base CGStats store."""
-    _store = StatsAPI(
-        {"cgstats": {"database": "sqlite://", "root": "tests/fixtures/DEMUX"}}
-    )
+    _store = StatsAPI({"cgstats": {"database": "sqlite://", "root": "tests/fixtures/DEMUX"}})
     _store.create_all()
     yield _store
     _store.drop_all()
@@ -40,9 +33,7 @@ def base_store_stats(store_stats, data):
     for sample_data in data["samples"]:
         project = store_stats.Project(projectname="test", time=dt.datetime.now())
         sample = store_stats.Sample(
-            samplename=sample_data["name"],
-            barcode=sample_data["index"],
-            limsid=sample_data["name"],
+            samplename=sample_data["name"], barcode=sample_data["index"], limsid=sample_data["name"]
         )
         sample.project = project
         unaligned = store_stats.Unaligned(readcounts=300000000, q30_bases_pct=85)
@@ -58,9 +49,7 @@ def base_store_stats(store_stats, data):
                 time=dt.datetime.now(),
             )
             supportparams = store_stats.Supportparams(document_path="NA", idstring="NA")
-            datasource = store_stats.Datasource(
-                document_path="NA", document_type="html"
-            )
+            datasource = store_stats.Datasource(document_path="NA", document_type="html")
             datasource.supportparams = supportparams
             demux = store_stats.Demux()
             demux.flowcell = flowcell
@@ -79,9 +68,7 @@ def flowcell_store(base_store, data):
     for sample_data in data["samples"]:
         customer_obj = base_store.customers().first()
         application_version = base_store.application("WGTPCFC030").versions[0]
-        sample = base_store.add_sample(
-            name="NA", sex="male", internal_id=sample_data["name"]
-        )
+        sample = base_store.add_sample(name="NA", sex="male", internal_id=sample_data["name"])
         sample.customer = customer_obj
         sample.application_version = application_version
         sample.received_at = dt.datetime.now()
@@ -91,9 +78,9 @@ def flowcell_store(base_store, data):
 
 
 @pytest.yield_fixture(scope="function")
-def transfer_flowcell_api(flowcell_store, store_housekeeper, base_store_stats):
+def transfer_flowcell_api(flowcell_store, housekeeper_api, base_store_stats):
     """Setup flowcell transfer API."""
-    transfer_api = TransferFlowcell(flowcell_store, base_store_stats, store_housekeeper)
+    transfer_api = TransferFlowcell(flowcell_store, base_store_stats, housekeeper_api)
     yield transfer_api
 
 
