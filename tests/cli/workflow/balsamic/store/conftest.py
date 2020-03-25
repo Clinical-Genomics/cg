@@ -47,7 +47,7 @@ class MockHouseKeeper(HousekeeperAPI):
 
     def __init__(self, bundle_name):
         """Override HousekeeperAPI method to avoid default behaviour"""
-        self.store = MockHousekeeperStore()
+        self._store = MockHousekeeperStore()
         self.bundle_name = bundle_name
         self.bundle_data = None
         self.root_dir = "root_dir"
