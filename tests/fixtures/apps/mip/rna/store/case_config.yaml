@@ -274,7 +274,7 @@ star_fusion: '1'
 star_fusion_genome_lib_dir: /path/to/rare-disease/references/rna_references_8.1/GRCh37_gencode_v19_CTAT_lib_Oct012019.plug-n-play/ctat_genome_lib_build_dir
 star_fusion_reference_genome: /path/to/rare-disease/references/rna_references_8.1/grch37_homo_sapiens_-d5-.fasta
 star_ulimit_n: '4096'
-store_file: /path/to/rare-disease/cases/case_id/analysis/case_id_deliverables.yaml
+store_file: tests/fixtures/apps/mip/rna/store/case_id_deliverables.yaml
 stringtie_ar: '1'
 stringtie_junction_reads: '2'
 stringtie_minimum_coverage: '5'
