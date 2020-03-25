@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 These are independent interfaces to tools outside the package.
 

@@ -1,0 +1,5 @@
+files:
+  vcf:
+    - /path_to/tinywhale/analysis/vcf/SV.somatic.tinywhale.manta.vcf.gz
+  vep:
+    - /path_to/tinywhale/analysis/vep/SV.somatic.tinywhale.manta.vcf.gz

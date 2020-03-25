@@ -60,7 +60,7 @@ jobs:
     - name: "Code formatting"
       if: type = pull_request
       install: pip install black
-      script: git --no-pager diff --name-only --diff-filter=AM $TRAVIS_COMMIT_RANGE | grep -F ".py" | xargs black --check --diff
+      script: git --no-pager diff --name-only --diff-filter=AM $TRAVIS_COMMIT_RANGE | grep -F ".py" | xargs black --check -l 100
 
     - name: "Pylint score"
       if: type = pull_request

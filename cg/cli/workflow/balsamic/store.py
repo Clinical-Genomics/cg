@@ -1,17 +1,22 @@
-""" CLI for storing information and data """
-import datetime as dt
+"""Click commands to store balsamic analyses"""
+
 import logging
+import os
+import subprocess
 from pathlib import Path
-import sys
+
 import click
+from housekeeper.exc import VersionIncludedError
 
 from cg.apps import hk, tb
-from cg.exc import AnalysisNotFinishedError, AnalysisDuplicationError
+from cg.meta.store.balsamic import gather_files_and_bundle_in_housekeeper
 from cg.store import Store
+from cg.exc import AnalysisNotFinishedError, AnalysisDuplicationError
+
 
 LOG = logging.getLogger(__name__)
-FAIL = 1
 SUCCESS = 0
+FAIL = 1
 
 
 @click.group()
@@ -24,123 +29,82 @@ def store(context):
 
 
 @store.command()
-@click.argument("config-stream", type=click.File("r"), required=False)
+@click.argument("case_id")
+@click.option("--deliverables-file", "deliverables_file_path", required=False, help="Optional")
 @click.pass_context
-def analysis(context, config_stream):
+def analysis(context, case_id, deliverables_file_path):
     """Store a finished analysis in Housekeeper."""
-    status = context.obj["db"]
-    tb_api = context.obj["tb_api"]
-    hk_api = context.obj["hk_api"]
 
-    if not config_stream:
-        LOG.error("provide a config, suggestions:")
-        for analysis_obj in tb_api.analyses(status="completed", deleted=False)[:25]:
-            click.echo(analysis_obj.config_path)
+    status = context.obj["db"]
+    case_obj = status.family(case_id)
+
+    if not case_obj:
+        click.echo(click.style(f"Case {case_id} not found", fg="red"))
         context.abort()
 
-    new_analysis = _gather_files_and_bundle_in_housekeeper(
-        config_stream, context, hk_api, status, tb_api
-    )
+    if not deliverables_file_path:
+        root_dir = Path(context.obj["balsamic"]["root"])
+        deliverables_file_path = Path.joinpath(
+            root_dir, case_id, "analysis/delivery_report", case_id + ".hk"
+        )
+        if not os.path.isfile(deliverables_file_path):
+            context.invoke(generate_deliverables_file, case_id=case_id)
+
+    hk_api = context.obj["hk_api"]
+
+    try:
+        new_analysis = gather_files_and_bundle_in_housekeeper(
+            deliverables_file_path, hk_api, status, case_obj
+        )
+    except AnalysisNotFinishedError as error:
+        click.echo(click.style(error.message, fg="red"))
+        context.abort()
+    except FileNotFoundError as error:
+        click.echo(click.style(f"missing file: {error.filename}", fg="red"))
+        context.abort()
+    except AnalysisDuplicationError:
+        click.echo(click.style("analysis version already added", fg="yellow"))
+        context.abort()
+    except VersionIncludedError as error:
+        click.echo(click.style(error.message, fg="red"))
+        context.abort()
 
     status.add_commit(new_analysis)
     click.echo(click.style("included files in Housekeeper", fg="green"))
 
 
-def _gather_files_and_bundle_in_housekeeper(
-    config_stream, context, hk_api, status, tb_api
-):
-    """Function to gather files and bundle in housekeeper"""
-
-    try:
-        bundle_data = tb_api.add_analysis(config_stream)
-    except AnalysisNotFinishedError as error:
-        click.echo(click.style(error.message, fg="red"))
-        context.abort()
-
-    try:
-        results = hk_api.add_bundle(bundle_data)
-        if results is None:
-            print(click.style("analysis version already added", fg="yellow"))
-            context.abort()
-        bundle_obj, version_obj = results
-    except FileNotFoundError as error:
-        click.echo(click.style(f"missing file: {error.args[0]}", fg="red"))
-        context.abort()
-
-    family_obj = _add_new_analysis_to_the_status_api(bundle_obj, status)
-    _reset_action_from_running_on_family(family_obj)
-    new_analysis = _add_new_complete_analysis_record(
-        bundle_data, family_obj, status, version_obj
-    )
-    version_date = version_obj.created_at.date()
-    click.echo(f"new bundle added: {bundle_obj.name}, version {version_date}")
-    _include_files_in_housekeeper(bundle_obj, context, hk_api, version_obj)
-
-    return new_analysis
-
-
-def _include_files_in_housekeeper(bundle_obj, context, hk_api, version_obj):
-    """Function to include files in housekeeper"""
-    try:
-        hk_api.include(version_obj)
-    except hk.VersionIncludedError as error:
-        click.echo(click.style(error.message, fg="red"))
-        context.abort()
-    hk_api.add_commit(bundle_obj, version_obj)
-
-
-def _add_new_complete_analysis_record(bundle_data, family_obj, status, version_obj):
-    """Function to create and return a new analysis database record"""
-    pipeline = family_obj.links[0].sample.data_analysis
-    pipeline = pipeline if pipeline else "balsamic"
-
-    if status.analysis(family=family_obj, started_at=version_obj.created_at):
-        raise AnalysisDuplicationError(
-            f"Analysis object already exists for {family_obj.internal_id}{version_obj.created_at}"
-        )
-
-    new_analysis = status.add_analysis(
-        pipeline=pipeline,
-        version=bundle_data["pipeline_version"],
-        started_at=version_obj.created_at,
-        completed_at=dt.datetime.now(),
-        primary=(len(family_obj.analyses) == 0),
-    )
-    new_analysis.family = family_obj
-    return new_analysis
-
-
-def _reset_action_from_running_on_family(family_obj):
-    family_obj.action = None
-
-
-def _add_new_analysis_to_the_status_api(bundle_obj, status):
-    family_obj = status.family(bundle_obj.name)
-    return family_obj
-
-
-@store.command()
+@store.command("generate-deliverables-file")
+@click.option("-d", "--dry-run", "dry", is_flag=True, help="print command to console")
+@click.option("--config", "config_path", required=False, help="Optional")
+@click.argument("case_id")
 @click.pass_context
-def completed(context):
-    """Store all completed analyses."""
-    hk_api = context.obj["hk_api"]
+def generate_deliverables_file(context, dry, config_path, case_id):
+    """Generate a deliverables file for the case_id."""
 
-    exit_code = SUCCESS
-    for analysis_obj in context.obj["tb_api"].analyses(
-        status="completed", deleted=False
-    ):
-        existing_record = hk_api.version(analysis_obj.family, analysis_obj.started_at)
-        if existing_record:
-            LOG.debug(
-                "analysis stored: %s - %s", analysis_obj.family, analysis_obj.started_at
-            )
-            continue
-        click.echo(click.style(f"storing family: {analysis_obj.family}", fg="blue"))
-        with Path(analysis_obj.config_path).open() as config_stream:
-            try:
-                context.invoke(analysis, config_stream=config_stream)
-            except Exception:
-                LOG.error("case storage failed: %s", analysis_obj.family, exc_info=True)
-                exit_code = FAIL
+    conda_env = context.obj["balsamic"]["conda_env"]
+    root_dir = Path(context.obj["balsamic"]["root"])
 
-    sys.exit(exit_code)
+    case_obj = context.obj["db"].family(case_id)
+
+    if not case_obj:
+        click.echo(click.style(f"Case {case_id} not found", fg="yellow"))
+
+    if not config_path:
+        config_path = Path.joinpath(root_dir, case_id, case_id + ".json")
+
+    # Call Balsamic
+    command_str = f" plugins deliver" f" --sample-config {config_path}'"
+
+    command = [f"bash -c 'source activate {conda_env}; balsamic"]
+    command.extend(command_str.split(" "))
+
+    if dry:
+        click.echo(" ".join(command))
+        return SUCCESS
+
+    process = subprocess.run(" ".join(command), shell=True)
+
+    if process == SUCCESS:
+        click.echo(click.style("created deliverables file", fg="green"))
+
+    return process
