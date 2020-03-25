@@ -32,7 +32,7 @@ def gather_files_and_bundle_in_housekeeper(config_stream, hk_api, status, case_o
 def _include_files_in_housekeeper(bundle_obj, hk_api, version_obj):
     """Function to include files in housekeeper"""
     hk_api.include(version_obj)
-    hk_api.store.add_commit(bundle_obj, version_obj)
+    hk_api.add_commit(bundle_obj, version_obj)
 
 
 def _create_analysis(bundle_data, case_obj, status, version_obj):
