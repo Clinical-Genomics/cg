@@ -113,6 +113,7 @@ def upload(context, family_id, force_restart):
         scout_api=context.obj["scout_api"],
         madeline_api=context.obj["madeline_api"],
         analysis_api=context.obj["analysis_api"],
+        lims_api=context.obj["lims_api"],
     )
 
     if context.invoked_subcommand is not None:

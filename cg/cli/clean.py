@@ -8,7 +8,7 @@ from datetime import datetime
 
 from pathlib import Path
 
-from cg.apps import tb, hk, scoutapi, beacon as beacon_app
+from cg.apps import crunchy, tb, hk, scoutapi, beacon as beacon_app
 from cg.meta.upload.beacon import UploadBeaconApi
 from cg.store import Store
 
@@ -24,6 +24,7 @@ def clean(context):
     context.obj["hk"] = hk.HousekeeperAPI(context.obj)
     context.obj["scout"] = scoutapi.ScoutAPI(context.obj)
     context.obj["beacon"] = beacon_app.BeaconApi(context.obj)
+    context.obj["crunchy"] = crunchy.CrunchyAPI(context.obj)
 
 
 @clean.command()
