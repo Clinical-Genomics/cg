@@ -45,7 +45,6 @@ def add_analysis(config_stream):
     if sampleinfo_data["is_finished"] is False:
         raise AnalysisNotFinishedError("analysis not finished")
 
-    breakpoint()
     deliverables_raw = ruamel.yaml.safe_load(Path(config_raw["store_file"]).open())
     new_bundle = build_bundle(config_data, sampleinfo_data, deliverables_raw)
 
@@ -76,7 +75,6 @@ def get_files(deliverables: dict) -> dict:
 
 def get_tags(file: dict) -> list:
     """Get all tags for a file"""
-    breakpoint()
 
     all_tags = [file["format"], file["id"], file["step"], file["tag"], "rd-rna"]
     unique_tags = set(all_tags)
