@@ -44,6 +44,10 @@ class HousekeeperAPI:
         """ Fetch bundles """
         return self._store.bundles()
 
+    def version(self, bundle: str, date: dt.datetime):
+        """ Fetch a version """
+        return self._store.version(bundle, date)
+
     def files(
         self, *, bundle: str = None, tags: List[str] = None, version: int = None, path: str = None
     ):
