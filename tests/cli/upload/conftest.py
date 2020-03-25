@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+import json
 import pytest
 
 from cg.apps.hk import HousekeeperAPI
@@ -203,6 +204,7 @@ class MockScoutUploadApi(UploadScoutAPI):
         self.analysis = MockAnalysisApi()
         self.config = {}
         self.file_exists = False
+        self.lims = MockLims()
 
     @pytest.fixture(autouse=True)
     def _request_analysis(self, analysis_store_single_case):
@@ -225,7 +227,7 @@ class MockScoutUploadApi(UploadScoutAPI):
             raise FileExistsError("Scout config already exists")
 
 
-class MockLims(LimsAPI):
+class MockLims:
     """Mock lims fixture"""
 
     lims = None
@@ -233,28 +235,15 @@ class MockLims(LimsAPI):
     def __init__(self):
         self.lims = self
 
-    _project_name = None
-    _sample_sex = None
+    @staticmethod
+    def lims_samples():
+        """ Return LIMS-like family samples """
+        lims_family = json.load(open("tests/fixtures/report/lims_family.json"))
+        return lims_family["samples"]
 
-    def update_project(self, lims_id: str, name=None):
-        """Mock lims update_project"""
-        self._project_name = name
-
-    def get_updated_project_name(self) -> str:
-        """Method to test that update project was called with name parameter"""
-        return self._project_name
-
-    def update_sample(
-        self,
-        lims_id: str,
-        sex=None,
-        application: str = None,
-        target_reads: int = None,
-        priority=None,
-    ):
-        """Mock lims update_sample"""
-        self._sample_sex = sex
-
-    def get_updated_sample_sex(self) -> str:
-        """Method to be used to test that update_sample was called with sex parameter"""
-        return self._sample_sex
+    def sample(self, sample_id):
+        """ Returns a lims sample matching the provided sample_id """
+        for sample in self.lims_samples():
+            if sample["id"] == sample_id:
+                return sample
+        return None
