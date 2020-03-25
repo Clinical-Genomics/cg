@@ -74,7 +74,7 @@ def fixture_madeline_output():
 
 @pytest.yield_fixture(scope="function")
 def madeline_api(madeline_output):
-    """housekeeper_api fixture"""
+    """madeline_api fixture"""
     _api = MockMadelineAPI()
     _api._madeline_outpath = madeline_output
 
