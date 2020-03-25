@@ -314,7 +314,7 @@ def run(context, dry, run_analysis, config_path, priority, email, case_id):
 
 @balsamic.command()
 @click.option(
-    "-d", "--dry-run", "dry_run", is_flag=True, help="print to console, " "without actualising"
+    "-d", "--dry-run", "dry_run", is_flag=True, help="print to console without actualising"
 )
 @click.pass_context
 def start(context: click.Context, dry_run):
