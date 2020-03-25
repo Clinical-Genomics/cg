@@ -160,20 +160,21 @@ def prune_hk(context, case_id, tags, yes, dry_run):
             hk_files.extend(context.obj["hk"].get_files(bundle=case_id, tags=[tag]))
         for hk_file in hk_files:
             file_path = Path(hk_file.full_path)
-            if hk_file.version_id != last_version.id:
-                if os.stat(file_path).st_nlink > 1:
-                    LOG.info(
-                        "%s has more than one link to same inode, and is not safe to remove",
-                        file_path,
-                    )
-                    continue
-                LOG.info("Will remove %s", file_path)
-                if yes or click.confirm("Do you want to remove this file?"):
-                    if not dry_run:
-                        hk_file.delete()
-                        context.obj["hk"].commit()
-                        file_path.unlink()
-                        LOG.info("File removed")
+            if hk_file.version_id == last_version.id:
+                continue
+            if os.stat(file_path).st_nlink > 1:
+                LOG.info(
+                    "%s has more than one link to same inode, and is not safe to remove",
+                    file_path,
+                )
+                continue
+            LOG.info("Will remove %s", file_path)
+            if yes or click.confirm("Do you want to remove this file?"):
+                if not dry_run:
+                    hk_file.delete()
+                    context.obj["hk"].commit()
+                    file_path.unlink()
+                    LOG.info("File removed")
 
 
 @clean.command()
