@@ -93,10 +93,9 @@ def generate_deliverables_file(context, dry, config_path, case_id):
         config_path = Path.joinpath(root_dir, case_id, case_id + ".json")
 
     # Call Balsamic
-    command_str = f" plugins deliver" f" --sample-config {config_path}"
+    command_str = f" plugins deliver" f" --sample-config {config_path}'"
 
     command = [f"bash -c 'source activate {conda_env}; balsamic"]
-    command_str += "'"
     command.extend(command_str.split(" "))
 
     if dry:
