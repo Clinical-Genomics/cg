@@ -5,7 +5,37 @@ from cg.cli.workflow.balsamic.store import analysis
 EXIT_SUCCESS = 0
 
 
-def test_store_analysis_with_file_parameter(
+def test_without_options(cli_runner, balsamic_context):
+    """Test command with dry option"""
+
+    # GIVEN
+
+    # WHEN dry running without anything specified
+    result = cli_runner.invoke(analysis, obj=balsamic_context)
+
+    # THEN command should mention argument
+    assert result.exit_code != EXIT_SUCCESS
+    assert "Missing argument" in result.output
+
+
+def test_store_analysis_with_empty_file_parameter(
+    cli_runner, balsamic_store_context, balsamic_case
+):
+    """Test store with analysis file"""
+
+    # GIVEN
+
+    # WHEN calling store with empty string for meta file path
+    result = cli_runner.invoke(
+        analysis, [balsamic_case.internal_id, "--deliverables-file", ""], obj=balsamic_store_context
+    )
+
+    # THEN the process should not exit ok
+    assert result.exit_code != EXIT_SUCCESS
+    assert "missing file" in result.output
+
+
+def test_store_analysis_with_ok_file_parameter(
     cli_runner, balsamic_store_context, balsamic_case, deliverables_file
 ):
     """Test store with analysis file"""
