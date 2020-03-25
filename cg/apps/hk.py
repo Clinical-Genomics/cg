@@ -62,9 +62,9 @@ class HousekeeperAPI:
         """ Create a new bundle version """
         return self._store.new_version(created_at, expires_at)
 
-    def add_commit(self, db_obj):
+    def add_commit(self, *args, **kwargs):
         """ Wrap method in Housekeeper Store """
-        return self._store.add_commit(db_obj)
+        return self._store.add_commit(*args, **kwargs)
 
     def commit(self):
         """ Wrap method in Housekeeper Store """
