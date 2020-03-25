@@ -1,7 +1,7 @@
 """ Base module for building MIP bundles for linking in Housekeeper"""
 import datetime as dt
 
-from cg.exc import AnalysisDuplicationError
+from cg.exc import AnalysisDuplicationError, BundleAlreadyAddedError
 
 
 def add_new_analysis(bundle_data, case_obj, status, version_obj):
@@ -40,3 +40,13 @@ def get_case(bundle_obj, status):
 def reset_case_action(case_obj):
     """ Resets action on case """
     case_obj.action = None
+
+
+def add_bundle(hk_api, bundle):
+    """ Adds bundle to Housekeeper, raises an exception if it is already present. """
+
+    results = hk_api.add_bundle(bundle)
+    if results is None:
+        raise BundleAlreadyAddedError("bundle already added")
+
+    return results

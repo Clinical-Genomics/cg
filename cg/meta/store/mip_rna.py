@@ -4,13 +4,13 @@ from pathlib import Path
 
 import ruamel.yaml
 
-from cg.exc import AnalysisNotFinishedError, BundleAlreadyAddedError
-
+from cg.exc import AnalysisNotFinishedError
 from cg.meta.store.base import (
     get_case,
     reset_case_action,
     add_new_analysis,
     include_files_in_housekeeper,
+    add_bundle,
 )
 
 LOG = logging.getLogger(__name__)
@@ -20,9 +20,7 @@ def gather_files_and_bundle_in_housekeeper(config_stream, hk_api, status):
     """Function to gather files and bundle in housekeeper"""
     bundle_data = add_analysis(config_stream)
 
-    results = hk_api.add_bundle(bundle_data)
-    if results is None:
-        raise BundleAlreadyAddedError("bundle already added")
+    results = add_bundle(hk_api, bundle_data)
     bundle_obj, version_obj = results
 
     case_obj = get_case(bundle_obj, status)
@@ -66,7 +64,7 @@ def get_files(deliverables: dict) -> dict:
     """Get all the files from the MIP RNA files."""
 
     data = [
-        {"path": file["path"], "tags": get_tags(file), "archive": False,}
+        {"path": file["path"], "tags": get_tags(file), "archive": False}
         for file in deliverables["files"]
     ]
 
