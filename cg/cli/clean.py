@@ -160,11 +160,9 @@ def hk_past_files(context, case_id, tags, yes, dry_run):
                 if not dry_run:
                     hk_file.delete()
                     context.obj["hk"].commit()
-                    LOG.info("File removed from housekeeper database")
-                    if not file_path.exists():
-                        continue
-                    file_path.unlink()
-                    LOG.info("File removed from disk")
+                    if file_path.exists():
+                        file_path.unlink()
+                    LOG.info("File removed")
 
 
 @clean.command()
