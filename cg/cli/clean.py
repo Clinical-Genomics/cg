@@ -5,7 +5,6 @@ import ruamel.yaml
 import click
 from dateutil.parser import parse as parse_date
 from datetime import datetime
-import os
 from pathlib import Path
 
 from cg.apps import crunchy, tb, hk, scoutapi, beacon as beacon_app
@@ -137,7 +136,7 @@ def scoutauto(context, days_old: int, yes: bool = False, dry_run: bool = False):
         context.invoke(scout, bundle=bundle, yes=yes, dry_run=dry_run)
 
 
-@clean.command("prune-hk")
+@clean.command("hk-past-files")
 @click.option("-c", "--case-id", type=str)
 @click.option("-t", "--tags", multiple=True)
 @click.option("-y", "--yes", is_flag=True, help="skip checks")
@@ -145,7 +144,7 @@ def scoutauto(context, days_old: int, yes: bool = False, dry_run: bool = False):
     "-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned"
 )
 @click.pass_context
-def prune_hk(context, case_id, tags, yes, dry_run):
+def hk_past_files(context, case_id, tags, yes, dry_run):
     """ Remove files found in older housekeeper bundles """
     if case_id:
         cases = [context.obj["db"].family(case_id)]
@@ -161,12 +160,6 @@ def prune_hk(context, case_id, tags, yes, dry_run):
         for hk_file in hk_files:
             file_path = Path(hk_file.full_path)
             if hk_file.version_id == last_version.id:
-                continue
-            if os.stat(file_path).st_nlink > 1:
-                LOG.info(
-                    "%s has more than one link to same inode, and is not safe to remove",
-                    file_path,
-                )
                 continue
             LOG.info("Will remove %s", file_path)
             if yes or click.confirm("Do you want to remove this file?"):
