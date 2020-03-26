@@ -136,9 +136,7 @@ def scoutauto(context, days_old: int, yes: bool = False, dry_run: bool = False):
 @click.option("-c", "--case-id", type=str)
 @click.option("-t", "--tags", multiple=True)
 @click.option("-y", "--yes", is_flag=True, help="skip checks")
-@click.option(
-    "-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned"
-)
+@click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
 @click.pass_context
 def hk_past_files(context, case_id, tags, yes, dry_run):
     """ Remove files found in older housekeeper bundles """
@@ -162,8 +160,11 @@ def hk_past_files(context, case_id, tags, yes, dry_run):
                 if not dry_run:
                     hk_file.delete()
                     context.obj["hk"].commit()
+                    LOG.info("File removed from housekeeper database")
+                    if not file_path.exists():
+                        continue
                     file_path.unlink()
-                    LOG.info("File removed")
+                    LOG.info("File removed from disk")
 
 
 @clean.command()
