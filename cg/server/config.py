@@ -11,9 +11,7 @@ SQLALCHEMY_POOL_RECYCLE = 7200
 SQLALCHEMY_TRACK_MODIFICATIONS = "FLASK_DEBUG" in os.environ
 
 # server
-CG_ENABLE_ADMIN = ("FLASK_DEBUG" in os.environ) or (
-    os.environ.get("CG_ENABLE_ADMIN") == "1"
-)
+CG_ENABLE_ADMIN = ("FLASK_DEBUG" in os.environ) or (os.environ.get("CG_ENABLE_ADMIN") == "1")
 
 # lims
 LIMS_HOST = os.environ["LIMS_HOST"]

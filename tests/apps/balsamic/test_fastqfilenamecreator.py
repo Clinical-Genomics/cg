@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Test FastqHandlerBalsamic"""
 import datetime as dt
 import re
@@ -17,11 +16,7 @@ def test_create(valid_fastq_filename_pattern) -> dict:
     undetermined = "u"
     optional_date = dt.datetime.now()
     optional_index = "abcdef"
-    more = {
-        "undetermined": undetermined,
-        "date": optional_date,
-        "index": optional_index,
-    }
+    more = {"undetermined": undetermined, "date": optional_date, "index": optional_index}
 
     # when calling the method to create a valid filename
     result_filename = FastqHandler.FastqFileNameCreator.create(

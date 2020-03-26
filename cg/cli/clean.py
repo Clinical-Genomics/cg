@@ -50,9 +50,7 @@ def beacon(context: click.Context, item_type, item_id):
 
 @clean.command()
 @click.option("-y", "--yes", is_flag=True, help="skip confirmation")
-@click.option(
-    "-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned"
-)
+@click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
 @click.argument("case_id")
 @click.argument("sample_info", type=click.File("r"))
 @click.pass_context
@@ -115,9 +113,7 @@ def scout(context, bundle, yes: bool = False, dry_run: bool = False):
     help="Clean alignment files with analysis dates oldar then given number of days",
 )
 @click.option("-y", "--yes", is_flag=True, help="skip checks")
-@click.option(
-    "-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned"
-)
+@click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
 @click.pass_context
 def scoutauto(context, days_old: int, yes: bool = False, dry_run: bool = False):
     """Automatically clean up solved and archived scout cases"""
@@ -172,14 +168,10 @@ def hk_past_files(context, case_id, tags, yes, dry_run):
 
 @clean.command()
 @click.option("-y", "--yes", is_flag=True, help="skip confirmation")
-@click.option(
-    "-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned"
-)
+@click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
 @click.argument("before_str")
 @click.pass_context
-def mipauto(
-    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
-):
+def mipauto(context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False):
     """Automatically clean up "old" analyses."""
     before = parse_date(before_str)
     old_analyses = context.obj["db"].analyses(before=before)
@@ -205,11 +197,7 @@ def mipauto(
             LOG.info("%s: cleaning MIP output", case_id)
             with open(sampleinfo_path, "r") as sampleinfo_file:
                 context.invoke(
-                    mip,
-                    yes=yes,
-                    case_id=case_id,
-                    sample_info=sampleinfo_file,
-                    dry_run=dry_run,
+                    mip, yes=yes, case_id=case_id, sample_info=sampleinfo_file, dry_run=dry_run
                 )
         except FileNotFoundError:
             LOG.error(

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
     Module for loqusdb API
 """
@@ -35,12 +33,7 @@ class LoqusdbAPI:
         self.process = Process(self.loqusdb_binary, self.loqusdb_config)
 
     def load(
-        self,
-        family_id: str,
-        ped_path: str,
-        vcf_path: str,
-        gbcf_path: str,
-        vcf_sv_path: str = None,
+        self, family_id: str, ped_path: str, vcf_path: str, gbcf_path: str, vcf_sv_path: str = None
     ) -> dict:
         """Add observations from a VCF."""
         load_call_parameters = [
@@ -90,13 +83,7 @@ class LoqusdbAPI:
     def get_duplicate(self, vcf_file: str) -> dict:
         """Find matching profiles in loqusdb"""
         ind_obj = {}
-        duplicates_params = [
-            "profile",
-            "--check-vcf",
-            vcf_file,
-            "--profile-threshold",
-            "0.95",
-        ]
+        duplicates_params = ["profile", "--check-vcf", vcf_file, "--profile-threshold", "0.95"]
 
         try:
             self.process.run_command(duplicates_params)
@@ -117,6 +104,4 @@ class LoqusdbAPI:
 
     def __repr__(self):
 
-        return (
-            f"LoqusdbAPI(binary={self.loqusdb_binary}," f"config={self.loqusdb_config})"
-        )
+        return f"LoqusdbAPI(binary={self.loqusdb_binary}," f"config={self.loqusdb_config})"
