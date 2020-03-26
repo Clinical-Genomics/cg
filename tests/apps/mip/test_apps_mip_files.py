@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Test MIP RNA files"""
 
 from snapshottest import Snapshot

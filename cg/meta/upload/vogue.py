@@ -1,5 +1,5 @@
 """API to run Vogue"""
-# -*- coding: utf-8 -*-
+
 import json
 
 from cg.apps.gt import GenotypeAPI
@@ -10,9 +10,7 @@ from cg.store import Store
 class UploadVogueAPI:
     """API to load data into Vogue"""
 
-    def __init__(
-        self, genotype_api: GenotypeAPI, vogue_api: VogueAPI, store: Store,
-    ):
+    def __init__(self, genotype_api: GenotypeAPI, vogue_api: VogueAPI, store: Store):
         self.genotype_api = genotype_api
         self.vogue_api = vogue_api
         self.store = store
@@ -36,9 +34,7 @@ class UploadVogueAPI:
         apptags = self.store.applications()
         apptags_for_vogue = []
         for tag in apptags.all():
-            apptags_for_vogue.append(
-                {"tag": tag.tag, "prep_category": tag.prep_category}
-            )
+            apptags_for_vogue.append({"tag": tag.tag, "prep_category": tag.prep_category})
 
         self.vogue_api.load_apptags(apptags_for_vogue)
 

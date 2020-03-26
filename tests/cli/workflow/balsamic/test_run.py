@@ -59,9 +59,7 @@ def test_run_analysis(cli_runner, balsamic_context):
     context = balsamic_context
 
     # WHEN dry running with option specified
-    result = cli_runner.invoke(
-        run, [case_id, "--dry-run", "--run-analysis"], obj=context
-    )
+    result = cli_runner.invoke(run, [case_id, "--dry-run", "--run-analysis"], obj=context)
 
     # THEN dry-print should include the option
     assert result.exit_code == EXIT_SUCCESS
@@ -79,9 +77,7 @@ def test_config(cli_runner, balsamic_context):
     context = balsamic_context
 
     # WHEN dry running with option specified
-    result = cli_runner.invoke(
-        run, [case_id, "--dry-run", option_key, option_value], obj=context
-    )
+    result = cli_runner.invoke(run, [case_id, "--dry-run", option_key, option_value], obj=context)
 
     # THEN dry-print should include the the option-value but not the case-id
     assert result.exit_code == EXIT_SUCCESS
@@ -100,9 +96,7 @@ def test_email(cli_runner, balsamic_context):
     context = balsamic_context
 
     # WHEN dry running with option specified
-    result = cli_runner.invoke(
-        run, [case_id, "--dry-run", option_key, option_value], obj=context
-    )
+    result = cli_runner.invoke(run, [case_id, "--dry-run", option_key, option_value], obj=context)
 
     # THEN dry-print should include the the option-value but not the case-id
     assert result.exit_code == EXIT_SUCCESS
@@ -121,9 +115,7 @@ def test_priority(cli_runner, balsamic_context):
     context = balsamic_context
 
     # WHEN dry running with option specified
-    result = cli_runner.invoke(
-        run, [case_id, "--dry-run", option_key, option_value], obj=context
-    )
+    result = cli_runner.invoke(run, [case_id, "--dry-run", option_key, option_value], obj=context)
 
     # THEN dry-print should include the the option-value
     assert result.exit_code == EXIT_SUCCESS

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # snapshottest: v1 - https://goo.gl/zC4yUc
 from __future__ import unicode_literals
 
@@ -98,9 +97,7 @@ snapshots["test_build_bundle_rna_no_missing_vpstderr 1"] = {
         },
         {
             "archive": False,
-            "path": [
-                "/path/to/stuff/rare-disease/cases/case_id/analysis/files/quant.sf"
-            ],
+            "path": ["/path/to/stuff/rare-disease/cases/case_id/analysis/files/quant.sf"],
             "tags": ["salmon-quant", "sample_id_1", "rd-rna"],
         },
         {
@@ -317,9 +314,7 @@ snapshots["test_build_bundle_rna 1"] = {
         },
         {
             "archive": False,
-            "path": [
-                "/path/to/stuff/rare-disease/cases/case_id/analysis/files/quant.sf"
-            ],
+            "path": ["/path/to/stuff/rare-disease/cases/case_id/analysis/files/quant.sf"],
             "tags": ["salmon-quant", "sample_id_1", "rd-rna"],
         },
         {

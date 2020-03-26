@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from cg.apps import lims
 from cg.server.ext import lims as genologics_lims
 from cg.store import Store, models
@@ -38,11 +36,7 @@ class InvoiceAPI:
             f"customer {self.customer_obj.internal_id}. See log files."
         )
 
-        customer = (
-            self.db.customer("cust999")
-            if costcenter.lower() == "kth"
-            else self.customer_obj
-        )
+        customer = self.db.customer("cust999") if costcenter.lower() == "kth" else self.customer_obj
         user = customer.invoice_contact
 
         if not user:
@@ -75,9 +69,7 @@ class InvoiceAPI:
                     raw_record.name, raw_record.ticket_number
                 )
             record = self.prepare_record(
-                costcenter=costcenter.lower(),
-                discount=self.invoice_obj.discount,
-                record=raw_record,
+                costcenter=costcenter.lower(), discount=self.invoice_obj.discount, record=raw_record
             )
             if record:
                 records.append(record)
@@ -90,9 +82,7 @@ class InvoiceAPI:
             return None
         return {
             "costcenter": costcenter,
-            "project_number": getattr(
-                customer_obj, f"project_account_{costcenter.lower()}"
-            ),
+            "project_number": getattr(customer_obj, f"project_account_{costcenter.lower()}"),
             "customer_id": customer_obj.internal_id,
             "customer_name": customer_obj.name,
             "agreement": customer_obj.agreement_registration,
@@ -149,20 +139,14 @@ class InvoiceAPI:
             percent_kth = record.application_version.application.percent_kth
             discounted_price = self._discount_price(record, discount)
         except ValueError:
-            self.log.append(
-                f"Application tag/version seems to be missing for sample {record.id}."
-            )
+            self.log.append(f"Application tag/version seems to be missing for sample {record.id}.")
             return None
 
         split_discounted_price = self._cost_center_split_factor(
             discounted_price, costcenter, percent_kth, tag, version
         )
 
-        order = (
-            record.microbial_order.id
-            if self.record_type == "Microbial"
-            else record.order
-        )
+        order = record.microbial_order.id if self.record_type == "Microbial" else record.order
         ticket_number = (
             record.microbial_order.ticket_number
             if self.record_type == "Microbial"

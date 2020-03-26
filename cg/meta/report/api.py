@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import logging
 from datetime import datetime
 from pathlib import Path
@@ -140,12 +139,8 @@ class ReportAPI:
             duplicates = duplicates_all_samples.get(lims_id)
             sample["duplicates"] = Presenter.process_float_string(duplicates, 1)
 
-        report_data["genome_build"] = Presenter.process_string(
-            trending_data.get("genome_build")
-        )
-        report_data["mip_version"] = Presenter.process_string(
-            trending_data.get("mip_version")
-        )
+        report_data["genome_build"] = Presenter.process_string(trending_data.get("genome_build"))
+        report_data["mip_version"] = Presenter.process_string(trending_data.get("mip_version"))
 
     def _incorporate_coverage_data(self, samples: list, panels: list):
         """Incorporate coverage data from Chanjo for each sample ."""
@@ -159,9 +154,7 @@ class ReportAPI:
 
             if sample_coverage:
                 target_coverage = sample_coverage.get("mean_coverage")
-                sample["target_coverage"] = Presenter.process_float_string(
-                    target_coverage, 1
-                )
+                sample["target_coverage"] = Presenter.process_float_string(target_coverage, 1)
                 target_completeness = sample_coverage.get("mean_completeness")
                 sample["target_completeness"] = Presenter.process_float_string(
                     target_completeness, 2
@@ -180,35 +173,23 @@ class ReportAPI:
             delivery_data_sample = dict()
             delivery_data_sample["id"] = sample.internal_id
             delivery_data_sample["ticket"] = Presenter.process_int(sample.ticket_number)
-            delivery_data_sample["status"] = Presenter.process_string(
-                family_sample.status
-            )
-            delivery_data_sample["received"] = Presenter.process_datetime(
-                sample.received_at
-            )
-            delivery_data_sample["prep_date"] = Presenter.process_datetime(
-                sample.prepared_at
-            )
+            delivery_data_sample["status"] = Presenter.process_string(family_sample.status)
+            delivery_data_sample["received"] = Presenter.process_datetime(sample.received_at)
+            delivery_data_sample["prep_date"] = Presenter.process_datetime(sample.prepared_at)
             delivery_data_sample["sequencing_date"] = Presenter.process_datetime(
                 sample.sequenced_at
             )
-            delivery_data_sample["delivery_date"] = Presenter.process_datetime(
-                sample.delivered_at
-            )
+            delivery_data_sample["delivery_date"] = Presenter.process_datetime(sample.delivered_at)
             delivery_data_sample["processing_time"] = Presenter.process_int(
                 SampleCalculator.calculate_processing_days(sample)
             )
-            delivery_data_sample["order_date"] = Presenter.process_datetime(
-                sample.ordered_at
-            )
+            delivery_data_sample["order_date"] = Presenter.process_datetime(sample.ordered_at)
 
             delivery_data_sample["million_read_pairs"] = Presenter.process_int(
                 round(sample.reads / 2000000, 1) if sample.reads else None
             )
 
-            delivery_data_sample["capture_kit"] = Presenter.process_string(
-                sample.capture_kit
-            )
+            delivery_data_sample["capture_kit"] = Presenter.process_string(sample.capture_kit)
             delivery_data_sample["bioinformatic_analysis"] = Presenter.process_string(
                 sample.data_analysis
             )
@@ -223,9 +204,7 @@ class ReportAPI:
         used_applications = set()
 
         for sample in samples:
-            used_applications.add(
-                (sample["application"], sample["application_version"])
-            )
+            used_applications.add((sample["application"], sample["application_version"]))
 
         applications = []
         accreditations = []
@@ -265,9 +244,7 @@ class ReportAPI:
             sample["name"] = Presenter.process_string(lims_sample.get("name"))
             sample["sex"] = Presenter.process_string(lims_sample.get("sex"))
             sample["source"] = Presenter.process_string(lims_sample.get("source"))
-            sample["application"] = Presenter.process_string(
-                lims_sample.get("application")
-            )
+            sample["application"] = Presenter.process_string(lims_sample.get("application"))
             sample["application_version"] = lims_sample.get("application_version")
 
     def _get_genes_from_scout(self, panels: list) -> list:
