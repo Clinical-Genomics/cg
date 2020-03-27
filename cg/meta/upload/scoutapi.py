@@ -1,12 +1,15 @@
 """File includes api to uploading data into Scout"""
 
 import logging
+import requests
 from pathlib import Path
 
 from ruamel import yaml
 
+from cg.apps.lims import LimsAPI
 from cg.apps import hk, scoutapi
 from cg.apps.madeline.api import MadelineAPI
+
 from cg.meta.workflow.mip_dna import AnalysisAPI
 from cg.store import models
 
@@ -20,6 +23,7 @@ class UploadScoutAPI:
         self,
         hk_api: hk.HousekeeperAPI,
         scout_api: scoutapi.ScoutAPI,
+        lims_api: LimsAPI,
         analysis_api: AnalysisAPI,
         madeline_api: MadelineAPI,
     ):
@@ -27,6 +31,7 @@ class UploadScoutAPI:
         self.scout = scout_api
         self.madeline_api = madeline_api
         self.analysis = analysis_api
+        self.lims = lims_api
 
     def fetch_file_path(self, tag: str, sample_id: str, hk_version_id: int = None):
         """"Fetch files from housekeeper"""
@@ -44,13 +49,15 @@ class UploadScoutAPI:
             sample_id = link_obj.sample.internal_id
             bam_path = self.fetch_file_path("bam", sample_id, hk_version_id)
             alignment_file_path = self.fetch_file_path("cram", sample_id, hk_version_id)
-            chromograph_path = self.fetch_file_path(
-                "chromograph", sample_id, hk_version_id
-            )
+            chromograph_path = self.fetch_file_path("chromograph", sample_id, hk_version_id)
             mt_bam_path = self.fetch_file_path("bam-mt", sample_id, hk_version_id)
-            vcf2cytosure_path = self.fetch_file_path(
-                "vcf2cytosure", sample_id, hk_version_id
-            )
+            vcf2cytosure_path = self.fetch_file_path("vcf2cytosure", sample_id, hk_version_id)
+
+            lims_sample = dict()
+            try:
+                lims_sample = self.lims.sample(sample_id)
+            except requests.exceptions.HTTPError as ex:
+                LOG.info("Could not fetch sample %s from LIMS: %s", sample_id, ex)
 
             sample = {
                 "analysis_type": link_obj.sample.application_version.application.analysis_type,
@@ -65,6 +72,7 @@ class UploadScoutAPI:
                 "sample_id": sample_id,
                 "sample_name": link_obj.sample.name,
                 "sex": link_obj.sample.sex,
+                "tissue_type": lims_sample.get("source", "unknown"),
                 "vcf2cytosure": vcf2cytosure_path,
             }
             yield sample
@@ -72,12 +80,8 @@ class UploadScoutAPI:
     def generate_config(self, analysis_obj: models.Analysis) -> dict:
         """Fetch data about an analysis to load Scout."""
         analysis_date = analysis_obj.started_at or analysis_obj.completed_at
-        hk_version = self.housekeeper.version(
-            analysis_obj.family.internal_id, analysis_date
-        )
-        analysis_data = self.analysis.get_latest_metadata(
-            analysis_obj.family.internal_id
-        )
+        hk_version = self.housekeeper.version(analysis_obj.family.internal_id, analysis_date)
+        analysis_data = self.analysis.get_latest_metadata(analysis_obj.family.internal_id)
 
         data = {
             "analysis_date": analysis_obj.completed_at,
@@ -121,9 +125,7 @@ class UploadScoutAPI:
         yml.dump(upload_config, file_path)
 
     @staticmethod
-    def add_scout_config_to_hk(
-        config_file_path: Path, hk_api: hk.HousekeeperAPI, case_id: str
-    ):
+    def add_scout_config_to_hk(config_file_path: Path, hk_api: hk.HousekeeperAPI, case_id: str):
         """Add scout load config to hk bundle"""
         tag_name = "scout-load-config"
         version_obj = hk_api.last_version(bundle=case_id)

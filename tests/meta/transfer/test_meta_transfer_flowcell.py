@@ -3,13 +3,13 @@ import warnings
 from sqlalchemy import exc as sa_exc
 
 
-def test_transfer_flowcell(flowcell_store, store_housekeeper, transfer_flowcell_api):
+def test_transfer_flowcell(flowcell_store, housekeeper_api, transfer_flowcell_api):
 
     # GIVEN a store with a received but not sequenced sample
     flowcell_id = "HJKMYBCXX"
     assert flowcell_store.samples().count() == 1
     assert flowcell_store.flowcells().count() == 0
-    assert store_housekeeper.bundles().count() == 0
+    assert housekeeper_api.bundles().count() == 0
 
     # WHEN transferring the flowcell containing the sample
     with warnings.catch_warnings():
@@ -24,7 +24,7 @@ def test_transfer_flowcell(flowcell_store, store_housekeeper, transfer_flowcell_
     assert isinstance(status_sample.sequenced_at, dt.datetime)
 
     # ... and it should store the fastq files for the sample in housekeeper
-    hk_bundle = store_housekeeper.bundle(status_sample.internal_id)
+    hk_bundle = housekeeper_api.bundle(status_sample.internal_id)
 
     assert len(hk_bundle.versions[0].files) > 0
 

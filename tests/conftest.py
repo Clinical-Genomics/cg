@@ -15,9 +15,11 @@ from cg.store import Store
 pytest_plugins = [
     "tests.apps.lims.conftest",
     "tests.apps.loqus.conftest",
+    "tests.apps.crunchy.conftest",
     "tests.cli.conftest",
     "tests.delivery.conftest",
     "tests.delivery.conftest",
+    "tests.meta.compress.conftest",
     "tests.meta.conftest",
     "tests.meta.orders.conftest",
     "tests.meta.report.conftest",
@@ -28,6 +30,12 @@ pytest_plugins = [
 ]
 
 CHANJO_CONFIG = {"chanjo": {"config_path": "chanjo_config", "binary_path": "chanjo"}}
+CRUNCHY_CONFIG = {
+    "crunchy": {
+        "cram_reference": "/path/to/fasta",
+        "slurm": {"account": "mock_account", "mail_user": "mock_mail", "conda_env": "mock_env"},
+    }
+}
 
 
 @pytest.fixture
@@ -35,6 +43,14 @@ def chanjo_config_dict():
     """Chanjo configs"""
     _config = dict()
     _config.update(CHANJO_CONFIG)
+    return _config
+
+
+@pytest.fixture
+def crunchy_config_dict():
+    """Crunchy configs"""
+    _config = dict()
+    _config.update(CRUNCHY_CONFIG)
     return _config
 
 
@@ -58,7 +74,7 @@ def fixture_madeline_output():
 
 @pytest.yield_fixture(scope="function")
 def madeline_api(madeline_output):
-    """housekeeper_api fixture"""
+    """madeline_api fixture"""
     _api = MockMadelineAPI()
     _api._madeline_outpath = madeline_output
 
@@ -157,9 +173,7 @@ def files_data(files_raw):
         "sampleinfo": mip_dna_files_api.parse_sampleinfo(files_raw["sampleinfo"]),
         "qcmetrics": mip_dna_files_api.parse_qcmetrics(files_raw["qcmetrics"]),
         "rna_config": mip_dna_files_api.parse_config(files_raw["rna_config"]),
-        "rna_sampleinfo": mip_rna_files_api.parse_sampleinfo_rna(
-            files_raw["rna_sampleinfo"]
-        ),
+        "rna_sampleinfo": mip_rna_files_api.parse_sampleinfo_rna(files_raw["rna_sampleinfo"]),
     }
 
 
@@ -345,9 +359,7 @@ def sample_store(base_store) -> Store:
     wgs_app = base_store.application("WGTPCFC030").versions[0]
     for sample in new_samples:
         sample.customer = customer
-        sample.application_version = (
-            external_app if "external" in sample.name else wgs_app
-        )
+        sample.application_version = external_app if "external" in sample.name else wgs_app
     base_store.add_commit(new_samples)
     return base_store
 

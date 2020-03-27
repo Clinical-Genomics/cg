@@ -1,4 +1,6 @@
 """Fixtures for meta/upload tests"""
+
+import json
 import pytest
 
 from cg.apps.coverage.api import ChanjoAPI
@@ -108,7 +110,6 @@ class MockAnalysis:
             "sample_ids": ["2018-20203", "2018-20204"],
             "sv_rank_model_version": "1.08",
         }
-
         return outdata
 
     @staticmethod
@@ -193,6 +194,35 @@ class MockLoqusAPI:
         return {"case_id": "case_id"}
 
 
+class MockLims:
+    """ Mock Lims API """
+
+    lims = None
+
+    def __init__(self, samples):
+        self.lims = self
+        self._samples = samples
+
+    def sample(self, sample_id):
+        """ Returns a lims sample matching the provided sample_id """
+        for sample in self._samples:
+            if sample["id"] == sample_id:
+                return sample
+        return None
+
+
+@pytest.fixture(name="lims_family")
+def fixture_lims_family():
+    """ Returns a lims-like family of samples """
+    return json.load(open("tests/fixtures/report/lims_family.json"))
+
+
+@pytest.fixture(name="lims_samples")
+def fixture_lims_samples(lims_family):
+    """ Returns the samples of a lims family """
+    return lims_family["samples"]
+
+
 @pytest.yield_fixture(scope="function")
 def housekeeper_api():
     """housekeeper_api fixture"""
@@ -232,17 +262,19 @@ def upload_observations_api_wes(analysis_store):
 
 
 @pytest.yield_fixture(scope="function")
-def upload_scout_api(scout_store, madeline_api):
+def upload_scout_api(scout_store, madeline_api, lims_samples):
     """Fixture for upload_scout_api"""
     hk_mock = MockHouseKeeper()
     hk_mock.add_file(file="/mock/path", version_obj="", tag_name="")
     analysis_mock = MockAnalysis()
+    lims_api = MockLims(lims_samples)
 
     _api = UploadScoutAPI(
         hk_api=hk_mock,
         scout_api=scout_store,
         madeline_api=madeline_api,
         analysis_api=analysis_mock,
+        lims_api=lims_api,
     )
 
     yield _api

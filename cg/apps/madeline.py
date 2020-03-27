@@ -64,10 +64,7 @@ def run(madeline_process: Process, ped_stream: List[str]):
         svg_content = output.read()
 
     # strip away the script tag
-    script_tag = (
-        '<script type="text/javascript" xlink:href='
-        '"javascript/madeline.js"></script>'
-    )
+    script_tag = '<script type="text/javascript" xlink:href=' '"javascript/madeline.js"></script>'
     svg_content.replace(script_tag, "")
 
     with open(out_path, "w") as out_handle:

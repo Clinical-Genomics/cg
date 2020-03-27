@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 This module handles concatenation of balsamic fastq files.
 
@@ -133,9 +132,7 @@ class FastqHandler(BaseFastqHandler):
             linked_fastq_path = wrk_dir / linked_fastq_name
 
             linked_reads_paths[fastq_data["read"]].append(linked_fastq_path)
-            concatenated_paths[
-                fastq_data["read"]
-            ] = f"{wrk_dir}/{concatenated_fastq_name}"
+            concatenated_paths[fastq_data["read"]] = f"{wrk_dir}/{concatenated_fastq_name}"
 
             if not linked_fastq_path.exists():
                 LOGGER.info("linking: %s -> %s", original_fastq_path, linked_fastq_path)
@@ -145,9 +142,7 @@ class FastqHandler(BaseFastqHandler):
 
         LOGGER.info("Concatenation in progress for sample %s.", sample)
         for read in linked_reads_paths:
-            FastqFileConcatenator().concatenate(
-                linked_reads_paths[read], concatenated_paths[read]
-            )
+            FastqFileConcatenator().concatenate(linked_reads_paths[read], concatenated_paths[read])
             self._remove_files(linked_reads_paths[read])
 
     @staticmethod
