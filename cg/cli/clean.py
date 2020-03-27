@@ -5,7 +5,6 @@ import ruamel.yaml
 import click
 from dateutil.parser import parse as parse_date
 from datetime import datetime
-
 from pathlib import Path
 
 from cg.apps import crunchy, tb, hk, scoutapi, beacon as beacon_app
@@ -131,6 +130,43 @@ def scoutauto(context, days_old: int, yes: bool = False, dry_run: bool = False):
 
     for bundle in bundles:
         context.invoke(scout, bundle=bundle, yes=yes, dry_run=dry_run)
+
+
+@clean.command("hk-past-files")
+@click.option("-c", "--case-id", type=str)
+@click.option("-t", "--tags", multiple=True)
+@click.option("-y", "--yes", is_flag=True, help="skip checks")
+@click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
+@click.pass_context
+def hk_past_files(context, case_id, tags, yes, dry_run):
+    """ Remove files found in older housekeeper bundles """
+    if case_id:
+        cases = [context.obj["db"].family(case_id)]
+    else:
+        cases = context.obj["db"].families()
+    for case in cases:
+        case_id = case.internal_id
+        last_version = context.obj["hk"].last_version(bundle=case_id)
+        last_version_file_paths = [
+            Path(hk_file.full_path)
+            for hk_file in context.obj["hk"].get_files(bundle=case_id, version=last_version.id)
+        ]
+        LOG.info("Searching %s bundle for outdated files", case_id)
+        hk_files = []
+        for tag in tags:
+            hk_files.extend(context.obj["hk"].get_files(bundle=case_id, tags=[tag]))
+        for hk_file in hk_files:
+            file_path = Path(hk_file.full_path)
+            if file_path in last_version_file_paths:
+                continue
+            LOG.info("Will remove %s", file_path)
+            if yes or click.confirm("Do you want to remove this file?"):
+                if not dry_run:
+                    hk_file.delete()
+                    context.obj["hk"].commit()
+                    if file_path.exists():
+                        file_path.unlink()
+                    LOG.info("File removed")
 
 
 @clean.command()
