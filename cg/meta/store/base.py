@@ -1,4 +1,4 @@
-""" Base module for building MIP bundles for linking in Housekeeper"""
+""" Base module for building bioinfo workflow bundles for linking in Housekeeper"""
 import datetime as dt
 
 from cg.exc import AnalysisDuplicationError, BundleAlreadyAddedError
