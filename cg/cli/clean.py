@@ -147,13 +147,17 @@ def hk_past_files(context, case_id, tags, yes, dry_run):
     for case in cases:
         case_id = case.internal_id
         last_version = context.obj["hk"].last_version(bundle=case_id)
+        last_version_file_paths = [
+            Path(hk_file.full_path)
+            for hk_file in context.obj["hk"].get_files(bundle=case_id, version=last_version.id)
+        ]
         LOG.info("Searching %s bundle for outdated files", case_id)
         hk_files = []
         for tag in tags:
             hk_files.extend(context.obj["hk"].get_files(bundle=case_id, tags=[tag]))
         for hk_file in hk_files:
             file_path = Path(hk_file.full_path)
-            if hk_file.version_id == last_version.id:
+            if file_path in last_version_file_paths:
                 continue
             LOG.info("Will remove %s", file_path)
             if yes or click.confirm("Do you want to remove this file?"):
