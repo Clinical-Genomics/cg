@@ -146,10 +146,15 @@ def hk_past_files(context, case_id, tags, yes, dry_run):
         cases = context.obj["db"].families()
     for case in cases:
         case_id = case.internal_id
+        bundle = context.obj["hk"].bundle(case_id)
+        if not bundle:
+            continue
         last_version = context.obj["hk"].last_version(bundle=case_id)
         last_version_file_paths = [
             Path(hk_file.full_path)
-            for hk_file in context.obj["hk"].get_files(bundle=case_id, version=last_version.id)
+            for hk_file in context.obj["hk"].get_files(
+                bundle=case_id, tags=None, version=last_version.id
+            )
         ]
         LOG.info("Searching %s bundle for outdated files", case_id)
         hk_files = []
