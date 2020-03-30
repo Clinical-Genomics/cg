@@ -4,13 +4,12 @@ from pathlib import Path
 
 import ruamel.yaml
 
-from cg.exc import AnalysisNotFinishedError
+from cg.constants import TAGS
+from cg.exc import AnalysisNotFinishedError, BundleAlreadyAddedError
 from cg.meta.store.base import (
-    get_case,
     reset_case_action,
     add_new_analysis,
-    include_files_in_housekeeper,
-    add_bundle,
+    get_files,
 )
 
 LOG = logging.getLogger(__name__)
@@ -20,15 +19,21 @@ def gather_files_and_bundle_in_housekeeper(config_stream, hk_api, status):
     """Function to gather files and bundle in housekeeper"""
     bundle_data = add_analysis(config_stream)
 
-    results = add_bundle(hk_api, bundle_data)
+    results = hk_api.add_bundle(bundle_data)
+    if results is None:
+        raise BundleAlreadyAddedError("bundle already added")
+
     bundle_obj, version_obj = results
 
-    case_obj = get_case(bundle_obj, status)
+    case_obj = status.family(bundle_obj.name)
+
     reset_case_action(case_obj)
     new_analysis = add_new_analysis(bundle_data, case_obj, status, version_obj)
     version_date = version_obj.created_at.date()
+
     LOG.info("new bundle added: %s, version %s", bundle_obj.name, version_date)
-    include_files_in_housekeeper(bundle_obj, hk_api, version_obj)
+    hk_api.include(version_obj)
+    hk_api.add_commit(bundle_obj, version_obj)
 
     return new_analysis
 
@@ -51,35 +56,17 @@ def add_analysis(config_stream):
 
 def build_bundle(config_data: dict, sampleinfo_data: dict, deliverables: dict) -> dict:
     """Create a new bundle for RNA."""
+
+    pipeline = config_data["samples"][0]["type"]
+    pipeline_tag = TAGS[pipeline]
+
     data = {
         "name": config_data["case"],
         "created": sampleinfo_data["date"],
         "pipeline_version": sampleinfo_data["version"],
-        "files": get_files(deliverables),
+        "files": get_files(deliverables, pipeline_tag),
     }
     return data
-
-
-def get_files(deliverables: dict) -> dict:
-    """Get all the files from the MIP RNA files."""
-
-    data = [
-        {"path": file["path"], "tags": get_tags(file), "archive": False}
-        for file in deliverables["files"]
-    ]
-
-    return data
-
-
-def get_tags(file: dict) -> list:
-    """Get all tags for a file"""
-
-    all_tags = [file["format"], file["id"], file["step"], file["tag"], "rd-rna"]
-    unique_tags = set(all_tags)
-    only_existing_tags = unique_tags - set([None])
-    sorted_tags = sorted(list(only_existing_tags))
-
-    return sorted_tags
 
 
 def parse_config(data: dict) -> dict:

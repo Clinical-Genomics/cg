@@ -1,13 +1,15 @@
 """ Base module for building bioinfo workflow bundles for linking in Housekeeper"""
 import datetime as dt
 
-from cg.exc import AnalysisDuplicationError, BundleAlreadyAddedError
+from cg.exc import AnalysisDuplicationError, PipelineUnknownError
 
 
 def add_new_analysis(bundle_data, case_obj, status, version_obj):
     """Function to create and return a new analysis database record"""
     pipeline = case_obj.links[0].sample.data_analysis
-    pipeline = pipeline if pipeline else "mip-rna"
+
+    if not pipeline:
+        raise PipelineUnknownError(f"No pipeline specified in {case_obj}")
 
     if status.analysis(family=case_obj, started_at=version_obj.created_at):
         raise AnalysisDuplicationError(
@@ -25,28 +27,28 @@ def add_new_analysis(bundle_data, case_obj, status, version_obj):
     return new_analysis
 
 
-def include_files_in_housekeeper(bundle_obj, hk_api, version_obj):
-    """Function to include files in housekeeper"""
-    hk_api.include(version_obj)
-    hk_api.add_commit(bundle_obj, version_obj)
-
-
-def get_case(bundle_obj, status):
-    """ Get a case from the status database """
-    case_obj = status.family(bundle_obj.name)
-    return case_obj
-
-
 def reset_case_action(case_obj):
     """ Resets action on case """
     case_obj.action = None
 
 
-def add_bundle(hk_api, bundle):
-    """ Adds bundle to Housekeeper, raises an exception if it is already present. """
+def get_files(deliverables: dict, pipeline: str) -> dict:
+    """Get all the files from the MIP RNA files."""
 
-    results = hk_api.add_bundle(bundle)
-    if results is None:
-        raise BundleAlreadyAddedError("bundle already added")
+    data = [
+        {"path": file["path"], "tags": get_tags(file, pipeline), "archive": False}
+        for file in deliverables["files"]
+    ]
 
-    return results
+    return data
+
+
+def get_tags(file: dict, pipeline: str) -> list:
+    """Get all tags for a file"""
+
+    all_tags = [file["format"], file["id"], file["step"], file["tag"], pipeline]
+    unique_tags = set(all_tags)
+    only_existing_tags = unique_tags - set([None])
+    sorted_tags = sorted(list(only_existing_tags))
+
+    return sorted_tags
