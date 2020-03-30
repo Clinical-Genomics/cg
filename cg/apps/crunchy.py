@@ -6,8 +6,10 @@ import logging
 import tempfile
 from pathlib import Path
 
+from cg.constants import (BAM_INDEX_SUFFIX, BAM_SUFFIX, CRAM_INDEX_SUFFIX,
+                          CRAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX,
+                          FASTQ_SECOND_READ_SUFFIX, SPRING_SUFFIX)
 from cg.utils import Process
-from cg.constants import BAM_SUFFIX, BAM_INDEX_SUFFIX, CRAM_SUFFIX, CRAM_INDEX_SUFFIX
 
 LOG = logging.getLogger(__name__)
 
@@ -56,6 +58,28 @@ trap error ERR
 touch {pending_path}
 crunchy -r {reference_path} -t 12 compress bam -b {bam_path} -c {cram_path}
 samtools quickcheck {cram_path}
+touch {flag_path}
+rm {pending_path}"""
+
+SBATCH_SPRING = """
+error() {{
+    if [[ -e {spring_path} ]]
+    then
+        rm {spring_path}
+    fi
+
+    if [[ -e {pending_path} ]]
+    then
+        rm {pending_path}
+    fi
+
+    exit 1
+}}
+
+trap error ERR
+
+touch {pending_path}
+crunchy -t 12 compress fastq -f {fastq_first_path} -f2 {fastq_second_path} -s {spring_path}
 touch {flag_path}
 rm {pending_path}"""
 
@@ -196,6 +220,26 @@ class CrunchyAPI:
         return cram_path
 
     @staticmethod
+    def get_spring_path_from_fastqs(
+        fastq_first_path: Path, fastq_second_path: Path
+    ) -> Path:
+        """ GET corresponding SPRING file path from paired FASTQ file paths"""
+        if not str(fastq_first_path).endswith(FASTQ_FIRST_READ_SUFFIX):
+            LOG.error(
+                "%s does not end with %s", fastq_first_path, FASTQ_FIRST_READ_SUFFIX
+            )
+            raise ValueError
+        if not str(fastq_second_path).endswith(FASTQ_SECOND_READ_SUFFIX):
+            LOG.error(
+                "%s does not end with %s", fastq_second_path, FASTQ_SECOND_READ_SUFFIX
+            )
+            raise ValueError
+        spring_path = Path(
+            str(fastq_first_path).replace(FASTQ_FIRST_READ_SUFFIX, SPRING_SUFFIX)
+        )
+        return spring_path
+
+    @staticmethod
     def _get_slurm_header(
         job_name: str,
         log_dir: str,
@@ -218,7 +262,11 @@ class CrunchyAPI:
 
     @staticmethod
     def _get_slurm_bam_to_cram(
-        bam_path: str, cram_path: str, flag_path: str, pending_path: str, reference_path: str,
+        bam_path: str,
+        cram_path: str,
+        flag_path: str,
+        pending_path: str,
+        reference_path: str,
     ) -> str:
         sbatch_body = SBATCH_BAM_TO_CRAM.format(
             bam_path=bam_path,
