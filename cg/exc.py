@@ -79,5 +79,11 @@ class BalsamicStartError(CgError):
 
 class BundleAlreadyAddedError(CgError):
     """
-        Exception rasied when a bundle has already been added to Housekeeper
+        Exception raised when a bundle has already been added to Housekeeper
+    """
+
+
+class PipelineUnknownError(CgError):
+    """
+        Exception raised when a sample in a case has no data anlysis type
     """
