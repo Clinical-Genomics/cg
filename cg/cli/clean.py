@@ -17,7 +17,7 @@ LOG = logging.getLogger(__name__)
 @click.group()
 @click.pass_context
 def clean(context):
-    """Remove stuff."""
+    """Clean up processes"""
     context.obj["db"] = Store(context.obj["database"])
     context.obj["tb"] = tb.TrailblazerAPI(context.obj)
     context.obj["hk"] = hk.HousekeeperAPI(context.obj)
@@ -48,14 +48,16 @@ def beacon(context: click.Context, item_type, item_id):
     api.remove_vars(item_type=item_type, item_id=item_id)
 
 
-@clean.command()
-@click.option("-y", "--yes", is_flag=True, help="skip confirmation")
-@click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
+@clean.command("mip-run-dir")
+@click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
+@click.option(
+    "-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned"
+)
 @click.argument("case_id")
 @click.argument("sample_info", type=click.File("r"))
 @click.pass_context
-def mip(context, yes, case_id, sample_info, dry_run: bool = False):
-    """Remove analysis output."""
+def mip_run_dir(context, yes, case_id, sample_info, dry_run: bool = False):
+    """Remove MIP run directory"""
 
     raw_data = ruamel.yaml.safe_load(sample_info)
     date = context.obj["tb"].get_sampleinfo_date(raw_data)
@@ -77,13 +79,13 @@ def mip(context, yes, case_id, sample_info, dry_run: bool = False):
         context.abort()
 
 
-@clean.command()
+@clean.command("hk-alignment-files")
 @click.argument("bundle")
-@click.option("-y", "--yes", is_flag=True, help="skip checks")
-@click.option("-d", "--dry-run", is_flag=True, help="show files that would be cleaned")
+@click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
+@click.option("-d", "--dry-run", is_flag=True, help="Show files that would be cleaned")
 @click.pass_context
-def scout(context, bundle, yes: bool = False, dry_run: bool = False):
-    """Clean alignment related files for a bundle in Housekeeper"""
+def hk_alignment_files(context, bundle, yes: bool = False, dry_run: bool = False):
+    """Clean up alignment files in Housekeeper bundle"""
     files = []
     for tag in ["bam", "bai", "bam-index", "cram", "crai", "cram-index"]:
         files.extend(context.obj["hk"].get_files(bundle=bundle, tags=[tag]))
@@ -105,18 +107,22 @@ def scout(context, bundle, yes: bool = False, dry_run: bool = False):
                 click.echo(f"{file_name} deleted")
 
 
-@clean.command()
+@clean.command("scout-finished-cases")
 @click.option(
     "--days-old",
     type=int,
     default=300,
     help="Clean alignment files with analysis dates oldar then given number of days",
 )
-@click.option("-y", "--yes", is_flag=True, help="skip checks")
-@click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
+@click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
+@click.option(
+    "-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned"
+)
 @click.pass_context
-def scoutauto(context, days_old: int, yes: bool = False, dry_run: bool = False):
-    """Automatically clean up solved and archived scout cases"""
+def scout_finished_cases(
+    context, days_old: int, yes: bool = False, dry_run: bool = False
+):
+    """Clean up of solved and archived scout cases"""
     bundles = []
     for status in "archived", "solved":
         cases = context.obj["scout"].get_cases(status=status, reruns=False)
@@ -129,7 +135,7 @@ def scoutauto(context, days_old: int, yes: bool = False, dry_run: bool = False):
         LOG.info("%s cases marked for bam removal :)", cases_added)
 
     for bundle in bundles:
-        context.invoke(scout, bundle=bundle, yes=yes, dry_run=dry_run)
+        context.invoke(hk_alignment_files, bundle=bundle, yes=yes, dry_run=dry_run)
 
 
 @clean.command("hk-past-files")
@@ -173,13 +179,17 @@ def hk_past_files(context, case_id, tags, yes, dry_run):
                     LOG.info("File removed")
 
 
-@clean.command()
-@click.option("-y", "--yes", is_flag=True, help="skip confirmation")
-@click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
+@clean.command("mip-past-run-dirs")
+@click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
+@click.option(
+    "-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned"
+)
 @click.argument("before_str")
 @click.pass_context
-def mipauto(context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False):
-    """Automatically clean up "old" analyses."""
+def mip_past_run_dirs(
+    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
+):
+    """Clean up of "old" MIP case run dirs"""
     before = parse_date(before_str)
     old_analyses = context.obj["db"].analyses(before=before)
     for status_analysis in old_analyses:
@@ -204,7 +214,11 @@ def mipauto(context: click.Context, before_str: str, yes: bool = False, dry_run:
             LOG.info("%s: cleaning MIP output", case_id)
             with open(sampleinfo_path, "r") as sampleinfo_file:
                 context.invoke(
-                    mip, yes=yes, case_id=case_id, sample_info=sampleinfo_file, dry_run=dry_run
+                    mip_run_dir,
+                    yes=yes,
+                    case_id=case_id,
+                    sample_info=sampleinfo_file,
+                    dry_run=dry_run,
                 )
         except FileNotFoundError:
             LOG.error(
