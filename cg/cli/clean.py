@@ -150,6 +150,8 @@ def hk_past_files(context, case_id, tags, yes, dry_run):
         if not bundle:
             continue
         last_version = context.obj["hk"].last_version(bundle=case_id)
+        if not last_version:
+            continue
         last_version_file_paths = [
             Path(hk_file.full_path)
             for hk_file in context.obj["hk"].get_files(
