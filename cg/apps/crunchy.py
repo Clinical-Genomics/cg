@@ -131,6 +131,46 @@ class CrunchyAPI:
         sbatch_content = sbatch_header + "\n" + sbatch_body
         self._submit_sbatch(sbatch_content=sbatch_content, dry_run=dry_run)
 
+    def fastq_to_spring(
+        self,
+        fastq_first_path: Path,
+        fastq_second_path,
+        ntasks: int,
+        mem: int,
+        dry_run: bool = False,
+    ):
+        """
+            Compress FASTQ files into SPRING
+        """
+        spring_path = self.get_spring_path_from_fastqs(
+            fastq_first_path=fastq_first_path, fastq_second_path=fastq_second_path
+        )
+        job_name = str(fastq_first_path.name).replace(FASTQ_FIRST_READ_SUFFIX, "_fastq_to_spring")
+        flag_path = self.get_flag_path(file_path=fastq_first_path)
+        pending_path = self.get_pending_path(file_path=fastq_first_path)
+        log_dir = spring_path.parent
+
+        sbatch_header = self._get_slurm_header(
+            job_name=job_name,
+            account=self.slurm_account,
+            log_dir=log_dir,
+            mail_user=self.mail_user,
+            conda_env=self.crunchy_env,
+            ntasks=ntasks,
+            mem=mem,
+        )
+
+        sbatch_body = self._get_slurm_fastq_to_spring(
+            fastq_first_path=fastq_first_path,
+            fastq_second_path=fastq_second_path,
+            spring_path=spring_path,
+            flag_path=flag_path,
+            pending_path=pending_path,
+        )
+
+        sbatch_content = sbatch_header + "\n" + sbatch_body
+        self._submit_sbatch(sbatch_content=sbatch_content, dry_run=dry_run)
+
     def _submit_sbatch(self, sbatch_content: str, dry_run: bool = False):
         """Submit slurm job"""
         if not dry_run:
@@ -182,15 +222,75 @@ class CrunchyAPI:
             return False
         return True
 
+    def is_spring_compression_done(self, fastq_first_path: Path, fastq_second_path: Path) -> bool:
+        """Check if CRAM compression already done for BAM file"""
+        spring_path = self.get_spring_path_from_fastqs(
+            fastq_first_path=fastq_first_path, fastq_second_path=fastq_second_path
+        )
+        flag_path = self.get_flag_path(file_path=fastq_first_path)
+
+        if not spring_path.exists():
+            LOG.info("No SPRING file for %s and %s", fastq_first_path, fastq_second_path)
+            return False
+        if not flag_path.exists():
+            LOG.info(
+                "No %s file for %s and %s", FLAG_PATH_SUFFIX, fastq_first_path, fastq_second_path
+            )
+            return False
+        return True
+
+    def is_spring_compression_pending(
+        self, fastq_first_path: Path, fastq_second_path: Path
+    ) -> bool:
+        """Check if cram compression has started, but not yet finished"""
+        pending_path = self.get_pending_path(file_path=fastq_first_path)
+        if pending_path.exists():
+            LOG.info(
+                "SPRING compression is pending for %s and %s", fastq_first_path, fastq_second_path
+            )
+            return True
+        return False
+
+    def is_fastq_compression_possible(
+        self, fastq_first_path: Path, fastq_second_path: Path
+    ) -> bool:
+        """Check if it CRAM compression for BAM file is possible"""
+        if fastq_first_path is None or not fastq_first_path.exists():
+            LOG.warning("Could not find fastq %s", fastq_first_path)
+            return False
+        if fastq_second_path is None or not fastq_second_path.exists():
+            LOG.warning("Could not find fastq %s", fastq_second_path)
+            return False
+        if self.is_spring_compression_done(
+            fastq_first_path=fastq_first_path, fastq_second_path=fastq_second_path
+        ):
+            LOG.info(
+                "SPRING compression already exists for %s and %s",
+                fastq_first_path,
+                fastq_second_path,
+            )
+            return False
+        return True
+
     @staticmethod
     def get_flag_path(file_path):
         """Get path to 'finished' flag"""
+
+        if str(file_path).endswith(FASTQ_FIRST_READ_SUFFIX):
+            return str(file_path).replace(FASTQ_FIRST_READ_SUFFIX, FLAG_PATH_SUFFIX)
+        elif str(file_path).endswith(FASTQ_SECOND_READ_SUFFIX):
+            return str(file_path).replace(FASTQ_SECOND_READ_SUFFIX, FLAG_PATH_SUFFIX)
         return file_path.with_suffix(FLAG_PATH_SUFFIX)
 
     @staticmethod
     def get_pending_path(file_path):
         """Gives path to pending-flag path"""
-        return file_path.with_suffix(PENDING_PATH_SUFFIX)
+        if str(file_path).endswith(FASTQ_FIRST_READ_SUFFIX):
+            return str(file_path).replace(FASTQ_FIRST_READ_SUFFIX, FLAG_PATH_SUFFIX)
+        elif str(file_path).endswith(FASTQ_SECOND_READ_SUFFIX):
+            return str(file_path).replace(FASTQ_SECOND_READ_SUFFIX, FLAG_PATH_SUFFIX)
+        else:
+            return file_path.with_suffix(FLAG_PATH_SUFFIX)
 
     @staticmethod
     def get_index_path(file_path):
@@ -275,4 +375,22 @@ class CrunchyAPI:
             pending_path=pending_path,
             reference_path=reference_path,
         )
+        return sbatch_body
+
+    @staticmethod
+    def _get_slurm_fastq_to_spring(
+        fastq_first_path: str,
+        fastq_second_path: str,
+        spring_path: str,
+        flag_path: flag_path,
+        pending_path: str,
+    ) -> str:
+        sbatch_body = SBATCH_SPRING.format(
+            fastq_first_path=fastq_first_path,
+            fastq_second_path=fastq_second_path,
+            spring_path=spring_path,
+            flag_path=flag_path,
+            pending_path=pending_path,
+        )
+
         return sbatch_body
