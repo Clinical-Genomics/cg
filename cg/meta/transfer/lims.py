@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from enum import Enum
 import logging
 
@@ -9,31 +8,30 @@ LOG = logging.getLogger(__name__)
 
 
 class SampleState(Enum):
-    RECEIVED = 'received'
-    PREPARED = 'prepared'
-    DELIVERED = 'delivered'
+    RECEIVED = "received"
+    PREPARED = "prepared"
+    DELIVERED = "delivered"
 
 
 class PoolState(Enum):
-    RECEIVED = 'received'
-    DELIVERED = 'delivered'
+    RECEIVED = "received"
+    DELIVERED = "delivered"
 
 
 class MicrobialState(Enum):
-    RECEIVED = 'received'
-    PREPARED = 'prepared'
-    SEQUENCED = 'sequenced'
-    DELIVERED = 'delivered'
+    RECEIVED = "received"
+    PREPARED = "prepared"
+    SEQUENCED = "sequenced"
+    DELIVERED = "delivered"
 
 
 class IncludeOptions(Enum):
-    UNSET = 'unset'
-    NOTINVOICED = 'not-invoiced'
-    ALL = 'all'
+    UNSET = "unset"
+    NOTINVOICED = "not-invoiced"
+    ALL = "all"
 
 
 class TransferLims(object):
-
     def __init__(self, status: Store, lims: LimsAPI):
         self.status = status
         self.lims = lims
@@ -71,7 +69,7 @@ class TransferLims(object):
     def _get_all_samples_not_yet_delivered(self):
         return self.status.samples_not_delivered()
 
-    def transfer_samples(self, status_type: SampleState, include='unset'):
+    def transfer_samples(self, status_type: SampleState, include="unset"):
         """Transfer information about samples."""
 
         samples = self._get_samples_to_include(include, status_type)
@@ -84,14 +82,16 @@ class TransferLims(object):
 
         for sample_obj in samples:
             lims_date = self._date_functions[status_type](sample_obj.internal_id)
-            statusdb_date = getattr(sample_obj, f'{status_type.value}_at')
+            statusdb_date = getattr(sample_obj, f"{status_type.value}_at")
             if lims_date:
 
                 if statusdb_date and statusdb_date.date() == lims_date:
                     continue
 
-                LOG.info(f"Found new {status_type.value} date for {sample_obj.internal_id}: " \
-                              f"{lims_date}, old value: {statusdb_date} ")
+                LOG.info(
+                    f"Found new {status_type.value} date for {sample_obj.internal_id}: "
+                    f"{lims_date}, old value: {statusdb_date} "
+                )
 
                 setattr(sample_obj, f"{status_type.value}_at", lims_date)
                 self.status.commit()
@@ -124,8 +124,13 @@ class TransferLims(object):
                 samples_in_pool = self.lims.get_samples(projectname=ticket_number)
                 for sample_obj in samples_in_pool:
                     status_date = self._date_functions[status_type](sample_obj.id)
-                    if sample_obj.udf['pool name'] == pool_obj.name and status_date is not None:
-                        LOG.info(f"Found {status_type.value} date for pool id {pool_obj.id}: {status_date}.")
+                    if sample_obj.udf["pool name"] == pool_obj.name and status_date is not None:
+                        LOG.info(
+                            "Found %s date for pool id %s: %s",
+                            status_type.value,
+                            pool_obj.id,
+                            status_date,
+                        )
                         setattr(pool_obj, f"{status_type.value}_at", status_date)
                         self.status.commit()
                         break
@@ -136,7 +141,7 @@ class TransferLims(object):
         """Transfer information about microbial samples."""
 
         microbial_samples = self._microbial_samples_functions[status_type]()
-        
+
         if microbial_samples is None:
             LOG.info(f"No microbial samples found with {status_type.value}")
             return
@@ -147,20 +152,26 @@ class TransferLims(object):
             internal_id = microbial_sample_obj.internal_id
 
             lims_date = self._date_functions[status_type](microbial_sample_obj.internal_id)
-            statusdb_date = getattr(microbial_sample_obj, f'{status_type.value}_at')
+            statusdb_date = getattr(microbial_sample_obj, f"{status_type.value}_at")
             if lims_date:
 
                 if statusdb_date and statusdb_date.date() == lims_date:
                     continue
 
-                LOG.info(f"Found new {status_type.value} date for {microbial_sample_obj.internal_id}: " \
-                         f"{lims_date}, old value: {statusdb_date} ")
+                LOG.info(
+                    f"Found new {status_type.value} date for {microbial_sample_obj.internal_id}: "
+                    f"{lims_date}, old value: {statusdb_date} "
+                )
 
                 setattr(microbial_sample_obj, f"{status_type.value}_at", lims_date)
                 self.status.commit()
             else:
-                LOG.debug(f"no {status_type.value} date found for {microbial_sample_obj.internal_id}")
-                LOG.info(f"no {status_type.value} date found for {microbial_sample_obj.internal_id}")
+                LOG.debug(
+                    f"no {status_type.value} date found for {microbial_sample_obj.internal_id}"
+                )
+                LOG.info(
+                    f"no {status_type.value} date found for {microbial_sample_obj.internal_id}"
+                )
 
     def _get_samples_in_step(self, status_type):
         return self._sample_functions[status_type]()

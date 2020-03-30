@@ -34,11 +34,7 @@ CHANJO_CONFIG = {"chanjo": {"config_path": "chanjo_config", "binary_path": "chan
 CRUNCHY_CONFIG = {
     "crunchy": {
         "cram_reference": "/path/to/fasta",
-        "slurm": {
-            "account": "mock_account",
-            "mail_user": "mock_mail",
-            "conda_env": "mock_env",
-        },
+        "slurm": {"account": "mock_account", "mail_user": "mock_mail", "conda_env": "mock_env"},
     }
 }
 
@@ -79,7 +75,7 @@ def fixture_madeline_output():
 
 @pytest.yield_fixture(scope="function")
 def madeline_api(madeline_output):
-    """housekeeper_api fixture"""
+    """madeline_api fixture"""
     _api = MockMadelineAPI()
     _api._madeline_outpath = madeline_output
 
@@ -192,6 +188,7 @@ def files_data(files_raw):
         "rna_sampleinfo_store": store_mip_rna.parse_sampleinfo(
             files_raw["rna_sampleinfo_store"]
         ),
+        "rna_sampleinfo": mip_rna_files_api.parse_sampleinfo_rna(files_raw["rna_sampleinfo"]),
     }
 
 
@@ -377,9 +374,7 @@ def sample_store(base_store) -> Store:
     wgs_app = base_store.application("WGTPCFC030").versions[0]
     for sample in new_samples:
         sample.customer = customer
-        sample.application_version = (
-            external_app if "external" in sample.name else wgs_app
-        )
+        sample.application_version = external_app if "external" in sample.name else wgs_app
     base_store.add_commit(new_samples)
     return base_store
 

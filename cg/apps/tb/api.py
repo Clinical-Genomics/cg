@@ -21,12 +21,9 @@ class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
 
     def __init__(self, config: dict):
         super(TrailblazerAPI, self).__init__(
-            config["trailblazer"]["database"],
-            families_dir=config["trailblazer"]["root"],
+            config["trailblazer"]["database"], families_dir=config["trailblazer"]["root"]
         )
-        self.mip_cli = MipCli(
-            config["trailblazer"]["script"], config["trailblazer"]["pipeline"]
-        )
+        self.mip_cli = MipCli(config["trailblazer"]["script"], config["trailblazer"]["pipeline"])
         self.mip_config = config["trailblazer"]["mip_config"]
 
     def run(
@@ -99,9 +96,7 @@ class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
                 self.commit()
 
     @staticmethod
-    def get_trending(
-        mip_config_raw: str, qcmetrics_raw: str, sampleinfo_raw: dict
-    ) -> dict:
+    def get_trending(mip_config_raw: str, qcmetrics_raw: str, sampleinfo_raw: dict) -> dict:
         """Get trending data for a MIP analysis"""
         return trending.parse_mip_analysis(
             mip_config_raw=mip_config_raw,

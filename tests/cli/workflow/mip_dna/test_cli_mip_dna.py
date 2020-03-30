@@ -1,4 +1,4 @@
-"""Tests for cg.cli.store._add_new_complete_analysis_record"""
+"""Tests for cg.cli.store._create_analysis"""
 from datetime import datetime
 
 import pytest
@@ -25,9 +25,7 @@ def test_add_new_complete_analysis_record(analysis_store: Store, hk_version_obj)
     assert new_analysis["pipeline"] == pipeline
 
 
-def test_duplicate_add_new_complete_analysis_record_raises(
-    analysis_store: Store, hk_version_obj
-):
+def test_duplicate_add_new_complete_analysis_record_raises(analysis_store: Store, hk_version_obj):
 
     # GIVEN A family has samples with data_analysis on them
     pipeline = "test-pipeline"

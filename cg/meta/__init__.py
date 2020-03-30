@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 These are wrapper interfaces the link outside apps and/or the main package
 together.

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Test MIP RNA get files and build bundle"""
 import datetime
 import mock
