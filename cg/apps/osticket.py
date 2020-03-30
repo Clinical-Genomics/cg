@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import logging
 import os.path
 
@@ -20,9 +19,7 @@ class OsTicket(object):
 
     def init_app(self, app: Flask):
         """Initialize the API in Flask."""
-        self.setup(
-            api_key=app.config["OSTICKET_API_KEY"], domain=app.config["OSTICKET_DOMAIN"]
-        )
+        self.setup(api_key=app.config["OSTICKET_API_KEY"], domain=app.config["OSTICKET_DOMAIN"])
 
     def setup(self, api_key: str = None, domain: str = None):
         """Initialize the API."""

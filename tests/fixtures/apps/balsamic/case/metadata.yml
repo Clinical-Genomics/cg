@@ -1,0 +1,50 @@
+files:
+  bam:
+    - /path_to/tinywhale/analysis/bam/tumor.sorted.mrkdup.ralgn.bsrcl.merged.bam
+    - /path_to/tinywhale/analysis/bam/tumor.merged.bam
+    - /path_to/tinywhale/analysis/bam/concatenated_ACC1234A1_XXXXXX_R.sorted.mrkdup.exon.cov.bed
+    - /path_to/tinywhale/analysis/bam/concatenated_ACC1234A1_XXXXXX_R.sorted.mrkdup.cov.bed
+  cnv:
+    - /path_to/tinywhale/analysis/cnv/tumor.merged-scatter.pdf
+    - /path_to/tinywhale/analysis/cnv/tumor.merged-diagram.pdf
+    - /path_to/tinywhale/analysis/cnv/tumor.merged.cnr
+    - /path_to/tinywhale/analysis/cnv/tumor.merged.cns
+  qc:
+    - /path_to/tinywhale/analysis/qc/multiqc_data
+    - /path_to/tinywhale/analysis/qc/multiqc_report.html
+  scout:
+    - /path_to/tinywhale/analysis/scout/tinywhale.scout.yaml
+  vcf:
+    - /path_to/tinywhale/analysis/vcf/SV.somatic.tinywhale.manta.vcf.gz
+    - /path_to/tinywhale/analysis/vcf/SNV.somatic.tinywhale.vcfmerge.vcf.gz
+    - /path_to/tinywhale/analysis/vcf/SNV.somatic.tinywhale.vardict.vcf.gz
+    - /path_to/tinywhale/analysis/vcf/SNV.germline.concatenated_ACC1234A1_XXXXXX_R.haplotypecaller.vcf.gz
+    - /path_to/tinywhale/analysis/vcf/SNV.germline.concatenated_ACC1234A1_XXXXXX_R.strelka_germline.vcf.gz
+    - /path_to/tinywhale/analysis/vcf/SNV.somatic.tinywhale.mutect.vcf.gz
+    - /path_to/tinywhale/analysis/vcf/SV.germline.concatenated_ACC1234A1_XXXXXX_R.manta_germline.vcf.gz
+  vep:
+    - /path_to/tinywhale/analysis/vep/SV.somatic.tinywhale.manta.vcf.gz
+    - /path_to/tinywhale/analysis/vep/SNV.somatic.tinywhale.vcfmerge.vcf.gz
+    - /path_to/tinywhale/analysis/vep/SNV.somatic.tinywhale.vardict.vcf.gz
+    - /path_to/tinywhale/analysis/vep/SNV.germline.concatenated_ACC1234A1_XXXXXX_R.haplotypecaller.vcf.gz
+    - /path_to/tinywhale/analysis/vep/SNV.somatic.tinywhale.vardict.filterd.vcf.gz
+    - /path_to/tinywhale/analysis/vep/SNV.germline.concatenated_ACC1234A1_XXXXXX_R.strelka_germline.vcf.gz
+    - /path_to/tinywhale/analysis/vep/SNV.somatic.tinywhale.mutect.vcf.gz
+    - /path_to/tinywhale/analysis/vep/SV.germline.concatenated_ACC1234A1_XXXXXX_R.manta_germline.vcf.gz
+    - /path_to/tinywhale/analysis/vep/SV.somatic.tinywhale.manta.tsv
+    - /path_to/tinywhale/analysis/vep/SV.germline.concatenated_ACC1234A1_XXXXXX_R.manta_germline.tsv
+    - /path_to/tinywhale/analysis/vep/SNV.germline.concatenated_ACC1234A1_XXXXXX_R.strelka_germline.tsv
+    - /path_to/tinywhale/analysis/vep/SNV.somatic.tinywhale.vardict.tsv
+    - /path_to/tinywhale/analysis/vep/SNV.germline.concatenated_ACC1234A1_XXXXXX_R.haplotypecaller.tsv
+    - /path_to/tinywhale/analysis/vep/SNV.somatic.tinywhale.mutect.tsv
+    - /path_to/tinywhale/analysis/vep/SNV.somatic.tinywhale.vcfmerge.tsv
+    - /path_to/tinywhale/analysis/vep/SNV.somatic.tinywhale.vcfmerge.tsv_summary.html
+    - /path_to/tinywhale/analysis/vep/SNV.somatic.tinywhale.vardict.tsv_summary.html
+    - /path_to/tinywhale/analysis/vep/SNV.germline.concatenated_ACC1234A1_XXXXXX_R.strelka_germline.tsv_summary.html
+    - /path_to/tinywhale/analysis/vep/SV.somatic.tinywhale.manta.tsv_summary.html
+    - /path_to/tinywhale/analysis/vep/SV.germline.concatenated_ACC1234A1_XXXXXX_R.manta_germline.tsv_summary.html
+    - /path_to/tinywhale/analysis/vep/SNV.germline.concatenated_ACC1234A1_XXXXXX_R.haplotypecaller.tsv_summary.html
+    - /path_to/tinywhale/analysis/vep/SNV.somatic.tinywhale.mutect.tsv_summary.html
+    - /path_to/tinywhale/analysis/vep/SNV.somatic.tinywhale.vcfmerge.balsamic_stat
+meta:
+  tmb: 0

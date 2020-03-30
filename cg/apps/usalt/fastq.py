@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 This module handles concatenation of usalt fastq files.
 
@@ -23,9 +22,7 @@ class FastqHandler(BaseFastqHandler):
         """Creates valid usalt filename from the parameters"""
 
         @staticmethod
-        def create(
-            lane: str, flowcell: str, sample: str, read: str, more: dict = None
-        ) -> str:
+        def create(lane: str, flowcell: str, sample: str, read: str, more: dict = None) -> str:
             """Name a FASTQ file following usalt conventions. Naming must be
             xxx_R_1.fastq.gz and xxx_R_2.fastq.gz"""
 

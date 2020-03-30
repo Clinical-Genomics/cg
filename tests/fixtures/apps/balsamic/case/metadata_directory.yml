@@ -1,0 +1,3 @@
+files:
+  qc:
+    - /path_to/tinywhale/analysis/qc/multiqc_data
