@@ -98,8 +98,8 @@ class CompressAPI:
         return bam_dict
 
     def get_fastq_files(self, sample_id: str) -> dict:
-
-        last_version = self.hk_api.last_version(bundle=case_id)
+        """Get FASTQ files for sample"""
+        last_version = self.hk_api.last_version(bundle=sample_id)
         hk_files = (
             hk_file
             for hk_file in self.hk_api.get_files(
@@ -115,10 +115,10 @@ class CompressAPI:
             return None
         return fastq_dict
 
-    def _sort_fastqs(fastq_files: list) -> dict:
+    def _sort_fastqs(self, fastq_files: list) -> dict:
         """ Sort list of FASTQ files into correct read pair"""
-        FIRST_KEY = "fastq_first_file"
-        SECOND_KEY = "fastq_second_file"
+        first_fastq_key = "fastq_first_file"
+        second_fastq_key = "fastq_second_file"
         fastq_dict = dict()
         for fastq_file in fastq_files:
             fastq_path = Path(fastq_file.full_path)
@@ -128,10 +128,10 @@ class CompressAPI:
                 LOG.info("More than 1 inode to same file for %s", fastq_path)
                 return None
             if fastq_file.full_path.endswith(FASTQ_FIRST_READ_SUFFIX):
-                fastq_dict[FIRST_KEY] = fastq_file
+                fastq_dict[first_fastq_key] = fastq_file
             if fastq_file.full_path.endswith(FASTQ_SECOND_READ_SUFFIX):
-                fastq_dict[SECOND_KEY] = fastq_file
-        if set(fastq_dict.keys()) != {FIRST_KEY, SECOND_KEY}:
+                fastq_dict[second_fastq_key] = fastq_file
+        if set(fastq_dict.keys()) != {first_fastq_key, second_fastq_key}:
             LOG.info("Could not find pared fastq files")
             return None
 
@@ -146,6 +146,25 @@ class CompressAPI:
             LOG.info("Compressing %s for sample %s", bam_path, sample)
             self.crunchy_api.bam_to_cram(
                 bam_path=bam_path, ntasks=ntasks, mem=mem, dry_run=dry_run
+            )
+
+    def compress_case_fastqs(self, fastq_dict: dict, ntasks: int, mem: int, dry_run: bool = False):
+        """Compress fastq-files in given dictionary"""
+        for sample_id, fastq_files in fastq_dict.items():
+            fastq_first_path = Path(fastq_files["fastq_first_file"].full_path)
+            fastq_second_path = Path(fastq_files["fastq_second_file"].full_path)
+            LOG.info(
+                "Compressing %s and %s for sample %s into SPRING fornat",
+                fastq_first_path,
+                fastq_second_path,
+                sample_id,
+            )
+            self.crunchy_api.fastq_to_spring(
+                fastq_first_path=fastq_first_path,
+                fastq_second_path=fastq_second_path,
+                ntasks=ntasks,
+                mem=mem,
+                dry_run=dry_run,
             )
 
     def clean_bams(self, case_id: str, dry_run: bool = False):

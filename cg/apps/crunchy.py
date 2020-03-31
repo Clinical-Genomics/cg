@@ -134,7 +134,7 @@ class CrunchyAPI:
     def fastq_to_spring(
         self,
         fastq_first_path: Path,
-        fastq_second_path,
+        fastq_second_path: Path,
         ntasks: int,
         mem: int,
         dry_run: bool = False,
