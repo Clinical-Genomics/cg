@@ -15,7 +15,7 @@ from cg.exc import (
 @mock.patch("cg.apps.hk.HousekeeperAPI")
 @mock.patch("cg.meta.store.mip_rna.add_analysis")
 def test_gather_files_and_bundle_in_hk_bundle_already_added(
-        mock_add_analysis, mock_housekeeper, mock_store, config_stream, bundle_data
+    mock_add_analysis, mock_housekeeper, mock_store, config_stream, bundle_data
 ):
     """
     tests the function gather_files_and_bundle_in_housekeeper
@@ -43,14 +43,14 @@ def test_gather_files_and_bundle_in_hk_bundle_already_added(
 @mock.patch("cg.meta.store.mip_rna.add_new_analysis")
 @mock.patch("cg.meta.store.mip_rna.add_analysis")
 def test_gather_files_and_bundle_in_hk_bundle_new_analysis(
-        mock_add_analysis,
-        mock_add_new_analysis,
-        mock_reset_case_action,
-        mock_housekeeper_api,
-        mock_housekeeper_store,
-        mock_cg_store,
-        config_stream,
-        bundle_data,
+    mock_add_analysis,
+    mock_add_new_analysis,
+    mock_reset_case_action,
+    mock_housekeeper_api,
+    mock_housekeeper_store,
+    mock_cg_store,
+    config_stream,
+    bundle_data,
 ):
     """
     tests the function gather_files_and_bundle_in_housekeeper
@@ -82,13 +82,13 @@ def test_gather_files_and_bundle_in_hk_bundle_new_analysis(
 @mock.patch("cg.meta.store.mip_rna.parse_sampleinfo")
 @mock.patch("cg.meta.store.mip_rna.parse_config")
 def test_add_analysis_finished(
-        mock_parse_config,
-        mock_parse_sample,
-        mock_build_bundle,
-        config_stream,
-        config_data,
-        sampleinfo_data,
-        deliverables_raw,
+    mock_parse_config,
+    mock_parse_sample,
+    mock_build_bundle,
+    config_stream,
+    config_data,
+    sampleinfo_data,
+    deliverables_raw,
 ):
     """
     tests the function add_analysis when passing a config file of a finished RNA analysis
@@ -157,7 +157,7 @@ def test_get_files(snapshot: Snapshot, deliverables_raw: dict):
         tests the function get_files against a snapshot
     """
     # GIVEN the MIP RNA analysis deliverables file
-    pipeline = 'wts'
+    pipeline = "wts"
 
     # WHEN getting the files used to build the bundle
     mip_rna_files = mip_rna.get_files(deliverables_raw, pipeline)
@@ -187,4 +187,3 @@ def test_parse_sampleinfo_data(snapshot: Snapshot, files_raw):
     mip_rna_parse_sampleinfo = mip_rna.parse_sampleinfo(rna_sampleinfo)
 
     snapshot.assert_match(mip_rna_parse_sampleinfo)
-
