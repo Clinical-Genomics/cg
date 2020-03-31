@@ -1,5 +1,4 @@
 """Test MIP RNA get files and build bundle"""
-import datetime
 import mock
 import pytest
 
@@ -9,7 +8,6 @@ import cg.meta.store.mip_rna as mip_rna
 from cg.exc import (
     AnalysisNotFinishedError,
     BundleAlreadyAddedError,
-    AnalysisDuplicationError,
 )
 
 
@@ -17,7 +15,7 @@ from cg.exc import (
 @mock.patch("cg.apps.hk.HousekeeperAPI")
 @mock.patch("cg.meta.store.mip_rna.add_analysis")
 def test_gather_files_and_bundle_in_hk_bundle_already_added(
-    mock_add_analysis, mock_housekeeper, mock_store, config_stream, bundle_data
+        mock_add_analysis, mock_housekeeper, mock_store, config_stream, bundle_data
 ):
     """
     tests the function gather_files_and_bundle_in_housekeeper
@@ -41,20 +39,18 @@ def test_gather_files_and_bundle_in_hk_bundle_already_added(
 @mock.patch("cg.store.Store")
 @mock.patch("housekeeper.store.models")
 @mock.patch("cg.apps.hk.HousekeeperAPI")
-@mock.patch("cg.meta.store.mip_rna.include_files_in_housekeeper")
+@mock.patch("cg.meta.store.base.reset_case_action")
 @mock.patch("cg.meta.store.mip_rna.add_new_analysis")
-@mock.patch("cg.meta.store.mip_rna.get_case")
 @mock.patch("cg.meta.store.mip_rna.add_analysis")
 def test_gather_files_and_bundle_in_hk_bundle_new_analysis(
-    mock_add_analysis,
-    mock_get_case,
-    mock_add_new_analysis,
-    mock_include_files_in_housekeeper,
-    mock_housekeeper_api,
-    mock_housekeeper_store,
-    mock_cg_store,
-    config_stream,
-    bundle_data,
+        mock_add_analysis,
+        mock_add_new_analysis,
+        mock_reset_case_action,
+        mock_housekeeper_api,
+        mock_housekeeper_store,
+        mock_cg_store,
+        config_stream,
+        bundle_data,
 ):
     """
     tests the function gather_files_and_bundle_in_housekeeper
@@ -67,7 +63,8 @@ def test_gather_files_and_bundle_in_hk_bundle_new_analysis(
     mock_bundle = mock_housekeeper_store.Bundle.return_value
     mock_version = mock_housekeeper_store.Version.return_value
     mock_housekeeper_api.add_bundle.return_value = (mock_bundle, mock_version)
-    mock_get_case.return_value = mock_cg_store.Family.return_value
+    mock_case_obj = mock_cg_store.Family.return_value
+    mock_reset_case_action(mock_case_obj)
     mock_add_new_analysis.return_value = mock_cg_store.Analysis.return_value
 
     mip_rna.gather_files_and_bundle_in_housekeeper(
@@ -75,23 +72,23 @@ def test_gather_files_and_bundle_in_hk_bundle_new_analysis(
     )
 
     # THEN the bundle and version should be added to Housekeeper
-    mock_include_files_in_housekeeper.assert_called()
-    mock_include_files_in_housekeeper.assert_called_with(
-        mock_bundle, mock_housekeeper_api, mock_version
-    )
+    mock_housekeeper_api.include.assert_called()
+    mock_housekeeper_api.include.assert_called_with(mock_version)
+    mock_housekeeper_api.add_commit.assert_called()
+    mock_housekeeper_api.add_commit.assert_called_with(mock_bundle, mock_version)
 
 
 @mock.patch("cg.meta.store.mip_rna.build_bundle")
 @mock.patch("cg.meta.store.mip_rna.parse_sampleinfo")
 @mock.patch("cg.meta.store.mip_rna.parse_config")
 def test_add_analysis_finished(
-    mock_parse_config,
-    mock_parse_sample,
-    mock_build_bundle,
-    config_stream,
-    config_data,
-    sampleinfo_data,
-    deliverables_raw,
+        mock_parse_config,
+        mock_parse_sample,
+        mock_build_bundle,
+        config_stream,
+        config_data,
+        sampleinfo_data,
+        deliverables_raw,
 ):
     """
     tests the function add_analysis when passing a config file of a finished RNA analysis
@@ -159,10 +156,11 @@ def test_get_files(snapshot: Snapshot, deliverables_raw: dict):
     """
         tests the function get_files against a snapshot
     """
-    # GIVEN the MIP analysis deliverables file
+    # GIVEN the MIP RNA analysis deliverables file
+    pipeline = 'wts'
 
     # WHEN getting the files used to build the bundle
-    mip_rna_files = mip_rna.get_files(deliverables_raw)
+    mip_rna_files = mip_rna.get_files(deliverables_raw, pipeline)
 
     # THEN the result should contain the data to be stored in Housekeeper
     snapshot.assert_match(mip_rna_files)
@@ -181,32 +179,12 @@ def test_parse_config(snapshot: Snapshot, config_raw: dict):
     snapshot.assert_match(mip_rna_parse_config)
 
 
-@mock.patch("cg.store.Store")
-@mock.patch("cg.apps.hk.HousekeeperAPI.Bundle")
-def test_get_case(mock_housekeeper_bundle, mock_store):
+def test_parse_sampleinfo_data(snapshot: Snapshot, files_raw):
     """
-        tests fetching a family from status-db using Store
+
     """
-    # GIVEN the bundle object has been created
-    mock_bundle = mock_housekeeper_bundle.return_value
+    rna_sampleinfo = files_raw["rna_sampleinfo"]
+    mip_rna_parse_sampleinfo = mip_rna.parse_sampleinfo(rna_sampleinfo)
 
-    # WHEN fetching a case from status-db
-    mip_rna.get_case(mock_bundle, mock_store)
+    snapshot.assert_match(mip_rna_parse_sampleinfo)
 
-    # THEN a case should be fetched from the status-db
-    mock_store.family.assert_called()
-
-
-@mock.patch("cg.store.models.Family")
-def test_reset_case_action(mock_case_obj):
-    """
-        test resetting case attribute
-    """
-    # GIVEN a case obj with an action attribute not None
-    mock_case_obj.action = "analyze"
-
-    # WHEN resetting the action attribute
-    mip_rna.reset_case_action(mock_case_obj)
-
-    # THEN the resulting case should have its action attribute set to None
-    assert mock_case_obj.action is None
