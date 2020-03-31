@@ -40,6 +40,8 @@ class ReportAPI:
     def create_delivery_report(self, family_id: str) -> str:
         """Generate the html contents of a delivery report."""
         delivery_data = self._get_delivery_data(family_id)
+        if not self._has_required_data(delivery_data):
+            raise DeliveryReportError(f"Could not generate report for {family_id}, missing data")
         rendered_report = self._render_delivery_report(delivery_data)
         return rendered_report
 
@@ -149,6 +151,24 @@ class ReportAPI:
             else:
                 self.LOG.warning(f"No coverage could be calculated for: {lims_id}")
 
+    def _has_required_data(self, delivery_data):
+
+        for sample in delivery_data["samples"]:
+
+            if self._is_not_prep_sample(sample["id"]) and not self._has_all_values(sample,
+                                                                                   ["prep_date"]):
+                return False
+
+            if self._is_sequenced_sample(sample["id"]):
+                if not self._has_all_values(sample, ["received", "prep_date", "sequencing_date"]):
+                    return False
+
+            if not self._has_all_values(sample, ["delivery_date"]):
+                return False
+        return True
+
+    def get_prep_category(self, internal_id):
+        return self.db.sample(internal_id).application_version.application.prep_category
 
     def _fetch_family_samples_from_status_db(self, family_id: str) -> list:
         """Incorporate data from the status database for each sample ."""
@@ -236,3 +256,14 @@ class ReportAPI:
         panel_gene_ids = [gene.get("hgnc_id") for gene in panel_genes]
 
         return panel_gene_ids
+
+    def _is_not_prep_sample(self, internal_id):
+        self.db.sample(internal_id).application.prep_category == "rml"
+
+    @staticmethod
+    def _has_all_values(sample, keys):
+        for key in keys:
+            if not sample[key]:
+                return False
+
+        return True
