@@ -289,8 +289,7 @@ class CrunchyAPI:
             return str(file_path).replace(FASTQ_FIRST_READ_SUFFIX, FLAG_PATH_SUFFIX)
         if str(file_path).endswith(FASTQ_SECOND_READ_SUFFIX):
             return str(file_path).replace(FASTQ_SECOND_READ_SUFFIX, FLAG_PATH_SUFFIX)
-        else:
-            return file_path.with_suffix(FLAG_PATH_SUFFIX)
+        return file_path.with_suffix(FLAG_PATH_SUFFIX)
 
     @staticmethod
     def get_index_path(file_path):
