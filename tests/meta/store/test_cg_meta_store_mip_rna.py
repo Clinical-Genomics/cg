@@ -29,9 +29,7 @@ def test_gather_files_and_bundle_in_hk_bundle_already_added(
 
     # THEN the BundleAlreadyAddedError exception should be raised
     with pytest.raises(BundleAlreadyAddedError) as exc_info:
-        mip_rna.gather_files_and_bundle_in_housekeeper(
-            mip_rna_config, mock_housekeeper, mock_store
-        )
+        mip_rna.gather_files_and_bundle_in_housekeeper(mip_rna_config, mock_housekeeper, mock_store)
 
     assert exc_info.value.message == "bundle already added"
 
@@ -144,9 +142,7 @@ def test_build_bundle(
     # GIVEN the MIP analysis config data, the sampleinfo data and the deliverables file
 
     # WHEN building the bundle
-    mip_rna_bundle = mip_rna.build_bundle(
-        config_data, sampleinfo_data, deliverables_raw
-    )
+    mip_rna_bundle = mip_rna.build_bundle(config_data, sampleinfo_data, deliverables_raw)
 
     # THEN the result should contain the data to be stored in Housekeeper
     snapshot.assert_match(mip_rna_bundle)
