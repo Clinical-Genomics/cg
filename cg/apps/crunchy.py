@@ -278,7 +278,7 @@ class CrunchyAPI:
 
         if str(file_path).endswith(FASTQ_FIRST_READ_SUFFIX):
             return str(file_path).replace(FASTQ_FIRST_READ_SUFFIX, FLAG_PATH_SUFFIX)
-        elif str(file_path).endswith(FASTQ_SECOND_READ_SUFFIX):
+        if str(file_path).endswith(FASTQ_SECOND_READ_SUFFIX):
             return str(file_path).replace(FASTQ_SECOND_READ_SUFFIX, FLAG_PATH_SUFFIX)
         return file_path.with_suffix(FLAG_PATH_SUFFIX)
 
@@ -287,7 +287,7 @@ class CrunchyAPI:
         """Gives path to pending-flag path"""
         if str(file_path).endswith(FASTQ_FIRST_READ_SUFFIX):
             return str(file_path).replace(FASTQ_FIRST_READ_SUFFIX, FLAG_PATH_SUFFIX)
-        elif str(file_path).endswith(FASTQ_SECOND_READ_SUFFIX):
+        if str(file_path).endswith(FASTQ_SECOND_READ_SUFFIX):
             return str(file_path).replace(FASTQ_SECOND_READ_SUFFIX, FLAG_PATH_SUFFIX)
         else:
             return file_path.with_suffix(FLAG_PATH_SUFFIX)
