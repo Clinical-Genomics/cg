@@ -177,9 +177,14 @@ def test_parse_config(snapshot: Snapshot, config_raw: dict):
 
 def test_parse_sampleinfo_data(snapshot: Snapshot, files_raw):
     """
-
+        tests the function parse_sampleinfo_data against a snapshot
     """
+    # GIVEN the raw MIP sample info file
+
     rna_sampleinfo = files_raw["rna_sampleinfo"]
+
+    # WHEN getting the smaple info used to build the bundle
     mip_rna_parse_sampleinfo = mip_rna.parse_sampleinfo(rna_sampleinfo)
 
+    # THEN the result should contain the data to be stored in Housekeeper
     snapshot.assert_match(mip_rna_parse_sampleinfo)
