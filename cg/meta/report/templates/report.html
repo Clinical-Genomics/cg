@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <title>Clinical Genomics Report - {{ family }}</title>
+    <title>Clinical Genomics Report - {{ Presenter.process_string(family) }}</title>
 
     {{ css() }}
     {{ custom_css() }}
@@ -20,9 +20,9 @@
 
         <ul class="list-group list-group-flush">
           <li class="list-group-item">
-            Leveransrapport {{ customer_obj.name }}, familj {{ family }} : {{ report_version }}
-            {% if previous_report_version != 'N/A' %}
-              ersätter rapport version: {{ previous_report_version }}
+            Leveransrapport {{ customer_obj.name }}, familj {{ Presenter.process_string(family) }} : {{ Presenter.process_int(report_version) }}
+            {% if Presenter.process_int(previous_report_version) != 'N/A' %}
+              ersätter rapport version: {{ Presenter.process_int(previous_report_version) }}
             {% endif %}
             <br>
             Skapad: {{ today.date() }}
@@ -73,23 +73,23 @@
             <tbody>
               {% for sample in samples %}
                 <tr>
-                <td>{{ sample.name }}* ({{ sample.id }})</td>
-                  <td>{{ sample.order_date }}</td>
-                  <td>{{ family }}*</td>
+                <td>{{ Presenter.process_string(sample.name) }}* ({{ sample.id }})</td>
+                  <td>{{ Presenter.process_datetime(sample.ordered_at) }}</td>
+                  <td>{{ Presenter.process_string(family) }}*</td>
                   <td>
-                    {{ sample.sex }}*
+                    {{ Presenter.process_string(sample.sex) }}*
                     ( analys:
-                      {% if sample.sex != sample.analysis_sex %}
-                        <span class="text-danger">{{ sample.analysis_sex }}</span>
+                      {% if Presenter.process_string(sample.sex) != Presenter.process_string(sample.analysis_sex) %}
+                        <span class="text-danger">{{ Presenter.process_string(sample.analysis_sex) }}</span>
                       {% else %}
-                        <span class="text-success">{{ sample.analysis_sex }}</span>
+                        <span class="text-success">{{ Presenter.process_string(sample.analysis_sex) }}</span>
                       {% endif %})
                   </td>
-                  <td>{{ sample.status }}*</td>
-                  <td>{{ sample.source }}*</td>
-                  <td>{{ sample.ticket }}</td>
-                  <td>{{ sample.application }}*</td>
-                  <td>{{ sample.bioinformatic_analysis }}*</td>
+                  <td>{{ Presenter.process_string(sample.status) }}*</td>
+                  <td>{{ Presenter.process_string(sample.source) }}*</td>
+                  <td>{{ Presenter.process_int(sample.ticket) }}</td>
+                  <td>{{ Presenter.process_string(sample.application) }}*</td>
+                  <td>{{ Presenter.process_string(sample.data_analysis) }}*</td>
                 </tr>
               {% endfor %}
             </tbody>
@@ -114,18 +114,18 @@
             <tbody>
               {% for sample in samples %}
                 <tr>
-                  <td>{{ sample.name }}*</td>
-                  <td>{{ sample.received }}</td>
-                  <td>{{ sample.prep_method }}</td>
-                  <td>{{ sample.prep_date }}</td>
-                  <td>{{ sample.capture_kit }}</td>
-                  <td>{{ sample.sequencing_method }}</td>
-                  <td>{{ sample.sequencing_date }}</td>
-                  <td>{{ sample.delivery_method }}</td>
+                  <td>{{ Presenter.process_string(sample.name) }}*</td>
+                  <td>{{ Presenter.process_datetime(sample.received_at) }}</td>
+                  <td>{{ Presenter.process_string(sample.prep_method) }}</td>
+                  <td>{{ Presenter.process_datetime(sample.prepared_at) }}</td>
+                  <td>{{ Presenter.process_string(sample.capture_kit) }}</td>
+                  <td>{{ Presenter.process_string(sample.sequencing_method) }}</td>
+                  <td>{{ Presenter.process_datetime(sample.sequenced_at) }}</td>
+                  <td>{{ Presenter.process_string(sample.data_analysis) }}</td>
                   <td>
-                    {{ sample.delivery_date }}
-                    {% if sample.processing_time != 'N/A' %}
-                      ({{ sample.processing_time }} dagar)
+                    {{ Presenter.process_datetime(sample.delivered_at) }}
+                    {% if Presenter.process_int(sample.processing_time) != 'N/A' %}
+                      ({{ Presenter.process_int(sample.processing_time) }} dagar)
                     {% endif %}
                   </td>
                 </tr>
@@ -146,10 +146,10 @@
             </thead>
             <tbody>
               <tr>
-                <td>{{ family }}*</td>
-                <td>{{ mip_version }}</td>
-                <td>{{ panels }}</td>
-                <td>{{ genome_build }}</td>
+                <td>{{ Presenter.process_string(family) }}*</td>
+                <td>{{ Presenter.process_string(mip_version) }}</td>
+                <td>{{ Presenter.process_list(panels) }}</td>
+                <td>{{ Presenter.process_string(genome_build) }}</td>
               </tr>
             </tbody>
           </table>
@@ -157,7 +157,7 @@
 
         <div class="card-block">
           <table class="table table-bordered">
-            <caption>Resultat baserade på valda genpaneler - {{ panels }}.</caption>
+            <caption>Resultat baserade på valda genpaneler - {{ Presenter.process_list(panels) }}.</caption>
             <thead>
               <tr>
                 <th>Prov</th>
@@ -171,12 +171,12 @@
             <tbody>
               {% for sample in samples %}
                 <tr>
-                  <td>{{ sample.name }}*</td>
-                  <td>{{ (sample.million_read_pairs) }}</td>
-                  <td>{{ sample.mapped_reads }}</td>
-                  <td>{{ sample.target_coverage }}</td>
-                  <td>{{ sample.target_completeness }}</td>
-                  <td>{{ (sample.duplicates) }}</td>
+                  <td>{{ Presenter.process_string(sample.name) }}*</td>
+                  <td>{{ (Presenter.process_int(sample.million_read_pairs)) }}</td>
+                  <td>{{ Presenter.process_float_string(sample.mapped_reads, 2) }}</td>
+                  <td>{{ Presenter.process_float_string(sample.target_coverage, 1) }}</td>
+                  <td>{{ Presenter.process_float_string(sample.target_completeness, 2) }}</td>
+                  <td>{{ (Presenter.process_float_string(sample.duplicates, 1)) }}</td>
                 </tr>
               {% endfor %}
             </tbody>
@@ -189,7 +189,7 @@
         {% if customer_obj.scout_access %}
           <p class="card-block">
             Varianter finns uppladdade i Scout:
-            <a href="https://scout.scilifelab.se/{{ customer_obj.internal_id }}/{{ family }}">https://scout.scilifelab.se/{{ customer_obj.internal_id }}/{{ family }}</a>
+            <a href="https://scout.scilifelab.se/{{ customer_obj.internal_id }}/{{ Presenter.process_string(family) }}">https://scout.scilifelab.se/{{ customer_obj.internal_id }}/{{ Presenter.process_string(family) }}</a>
           </p>
         {% endif %}
 

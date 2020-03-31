@@ -8,7 +8,6 @@ from cg.apps.coverage import ChanjoAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.scoutapi import ScoutAPI
 from cg.meta.workflow.mip_dna import AnalysisAPI
-from cg.meta.report.presenter import Presenter
 from cg.meta.report.sample_calculator import SampleCalculator
 from cg.meta.report.status_helper import StatusHelper
 from cg.store import Store, models
@@ -50,7 +49,8 @@ class ReportAPI:
         delivery_report = self.create_delivery_report(family_id=family_id)
 
         file_path.mkdir(parents=True, exist_ok=True)
-        delivery_report_file = open(file_path / "delivery-report.html", "w")
+        report_file_path = Path(file_path / "delivery-report.html")
+        delivery_report_file = open(report_file_path, "w")
         delivery_report_file.write(delivery_report)
         delivery_report_file.close()
 
@@ -60,37 +60,31 @@ class ReportAPI:
         """Fetch all data needed to render a delivery report."""
 
         report_data = dict()
-        family_obj = self._get_family_from_status(family_id)
+        family_obj = self._get_case_from_statusdb(family_id)
         analysis_obj = family_obj.analyses[0] if family_obj.analyses else None
 
-        report_data["family"] = Presenter.process_string(family_obj.name)
+        report_data["family"] = family_obj.name
         report_data["customer"] = family_obj.customer_id
-
-        report_data["report_version"] = Presenter.process_int(
-            StatusHelper.get_report_version(analysis_obj)
-        )
-        report_data["previous_report_version"] = Presenter.process_int(
-            StatusHelper.get_previous_report_version(analysis_obj)
-        )
+        report_data["report_version"] = StatusHelper.get_report_version(analysis_obj)
+        report_data["previous_report_version"] = StatusHelper.get_previous_report_version(
+            analysis_obj)
 
         report_data["customer_obj"] = family_obj.customer
-        report_samples = self._fetch_family_samples_from_status_db(family_id)
-        report_data["samples"] = report_samples
-        panels = self._fetch_panels_from_status_db(family_id)
-        report_data["panels"] = Presenter.process_list(panels)
+        report_data["samples"] = self._fetch_family_samples_from_status_db(family_id)
+        report_data["panels"] = self._fetch_panels_from_status_db(family_id)
         self._incorporate_lims_data(report_data)
-        self._incorporate_lims_methods(report_samples)
-        self._incorporate_coverage_data(report_samples, panels)
+        self._incorporate_lims_methods(report_data["samples"])
+        self._incorporate_coverage_data(report_data["samples"], report_data["panels"])
         self._incorporate_trending_data(report_data, family_id)
 
         report_data["today"] = datetime.today()
-        application_data = self._get_application_data_from_status_db(report_samples)
+        application_data = self._get_application_data_from_status_db(report_data["samples"])
         report_data.update(application_data)
         return report_data
 
-    def _get_family_from_status(self, family_id: str) -> models.Family:
-        """Fetch a family object from the status database."""
-        return self.db.family(family_id)
+    def _get_case_from_statusdb(self, case_id: str) -> models.Family:
+        """Fetch a case object from the status database."""
+        return self.db.family(case_id)
 
     def _incorporate_lims_methods(self, samples: list):
         """Fetch the methods used for preparation, sequencing and delivery of the samples."""
@@ -101,7 +95,7 @@ class ReportAPI:
             for method_type in method_types:
                 get_method = getattr(self.lims, f"get_{method_type}")
                 method_name = get_method(lims_id)
-                sample[method_type] = Presenter.process_string(method_name)
+                sample[method_type] = method_name
 
     @staticmethod
     def _render_delivery_report(report_data: dict) -> str:
@@ -130,18 +124,12 @@ class ReportAPI:
 
         for sample in report_data["samples"]:
             lims_id = sample["id"]
+            sample["analysis_sex"] = analysis_sex_all_samples.get(lims_id)
+            sample["mapped_reads"] = mapped_reads_all_samples.get(lims_id)
+            sample["duplicates"] = duplicates_all_samples.get(lims_id)
 
-            analysis_sex = analysis_sex_all_samples.get(lims_id)
-            sample["analysis_sex"] = Presenter.process_string(analysis_sex)
-
-            mapped_reads = mapped_reads_all_samples.get(lims_id)
-            sample["mapped_reads"] = Presenter.process_float_string(mapped_reads, 2)
-
-            duplicates = duplicates_all_samples.get(lims_id)
-            sample["duplicates"] = Presenter.process_float_string(duplicates, 1)
-
-        report_data["genome_build"] = Presenter.process_string(trending_data.get("genome_build"))
-        report_data["mip_version"] = Presenter.process_string(trending_data.get("mip_version"))
+        report_data["genome_build"] = trending_data.get("genome_build")
+        report_data["mip_version"] = trending_data.get("mip_version")
 
     def _incorporate_coverage_data(self, samples: list, panels: list):
         """Incorporate coverage data from Chanjo for each sample ."""
@@ -155,26 +143,12 @@ class ReportAPI:
 
             if sample_coverage:
                 target_coverage = sample_coverage.get("mean_coverage")
-                sample["target_coverage"] = Presenter.process_float_string(target_coverage, 1)
+                sample["target_coverage"] = target_coverage
                 target_completeness = sample_coverage.get("mean_completeness")
-                sample["target_completeness"] = Presenter.process_float_string(
-                    target_completeness, 2
-                )
+                sample["target_completeness"] = target_completeness
             else:
                 self.LOG.warning(f"No coverage could be calculated for: {lims_id}")
 
-    def _check_sample_dates(self, sample, delivery_data_sample):
-        prep_category = sample.application_version.application.prep_category
-        for status in ["received", "prep_date", "sequencing_date", "delivery_date"]:
-            if prep_category == "rml" and status == "prep_date":
-                continue
-            if (
-                not delivery_data_sample[status]
-                or delivery_data_sample[status] == "N/A"
-            ):
-                raise DeliveryReportError(
-                    f"Date missimg for sample {sample.internal_id}: {status}"
-                )
 
     def _fetch_family_samples_from_status_db(self, family_id: str) -> list:
         """Incorporate data from the status database for each sample ."""
@@ -186,28 +160,20 @@ class ReportAPI:
             sample = family_sample.sample
             delivery_data_sample = dict()
             delivery_data_sample["id"] = sample.internal_id
-            delivery_data_sample["ticket"] = Presenter.process_int(sample.ticket_number)
-            delivery_data_sample["status"] = Presenter.process_string(family_sample.status)
-            delivery_data_sample["received"] = Presenter.process_datetime(sample.received_at)
-            delivery_data_sample["prep_date"] = Presenter.process_datetime(sample.prepared_at)
-            delivery_data_sample["sequencing_date"] = Presenter.process_datetime(
-                sample.sequenced_at
-            )
-            delivery_data_sample["delivery_date"] = Presenter.process_datetime(sample.delivered_at)
-            delivery_data_sample["processing_time"] = Presenter.process_int(
-                SampleCalculator.calculate_processing_days(sample)
-            )
-            delivery_data_sample["order_date"] = Presenter.process_datetime(sample.ordered_at)
+            delivery_data_sample["ticket"] = sample.ticket_number
+            delivery_data_sample["status"] = family_sample.status
+            delivery_data_sample["received_at"] = sample.received_at
+            delivery_data_sample["prepared_at"] = sample.prepared_at
+            delivery_data_sample["sequenced_at"] = sample.sequenced_at
+            delivery_data_sample["delivered_at"] = sample.delivered_at
+            delivery_data_sample["processing_time"] = SampleCalculator.calculate_processing_days(
+                sample)
+            delivery_data_sample["ordered_at"] = sample.ordered_at
+            delivery_data_sample["million_read_pairs"] = round(sample.reads / 2000000,
+                                                               1) if sample.reads else None
 
-            delivery_data_sample["million_read_pairs"] = Presenter.process_int(
-                round(sample.reads / 2000000, 1) if sample.reads else None
-            )
-
-            delivery_data_sample["capture_kit"] = Presenter.process_string(sample.capture_kit)
-            delivery_data_sample["bioinformatic_analysis"] = Presenter.process_string(
-                sample.data_analysis
-            )
-            self._check_sample_dates(sample, delivery_data_sample)
+            delivery_data_sample["capture_kit"] = sample.capture_kit
+            delivery_data_sample["data_analysis"] = sample.data_analysis
             delivery_data_samples.append(delivery_data_sample)
 
         return delivery_data_samples
@@ -255,10 +221,10 @@ class ReportAPI:
                 lims_sample = dict()
                 self.LOG.info(f"could not fetch sample {lims_id} from LIMS: {e}")
 
-            sample["name"] = Presenter.process_string(lims_sample.get("name"))
-            sample["sex"] = Presenter.process_string(lims_sample.get("sex"))
-            sample["source"] = Presenter.process_string(lims_sample.get("source"))
-            sample["application"] = Presenter.process_string(lims_sample.get("application"))
+            sample["name"] = lims_sample.get("name")
+            sample["sex"] = lims_sample.get("sex")
+            sample["source"] = lims_sample.get("source")
+            sample["application"] = lims_sample.get("application")
             sample["application_version"] = lims_sample.get("application_version")
 
     def _get_genes_from_scout(self, panels: list) -> list:
