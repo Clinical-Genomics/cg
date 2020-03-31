@@ -108,12 +108,11 @@ def parse_sampleinfo(data: dict) -> dict:
     Returns:
         dict: parsed data
     """
-    case = data["case"]
 
     sampleinfo_data = {
         "date": data["analysis_date"],
         "is_finished": data["analysisrunstatus"] == "finished",
-        "case": case,
+        "case": data["case"],
         "version": data["mip_version"],
     }
 
