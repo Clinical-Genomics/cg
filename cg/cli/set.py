@@ -244,7 +244,7 @@ def sample(
             context.obj["lims"].update_sample(sample_id, application=apptag)
             click.echo(click.style(f"Set LIMS/application to {apptag}", fg="blue"))
 
-    if capture_kit:
+    if capture_kit is not None:
         if sample_obj.capture_kit != capture_kit:
             comment += _generate_comment(
                 "Capture kit", sample_obj.capture_kit, capture_kit
