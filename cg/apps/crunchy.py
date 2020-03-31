@@ -381,7 +381,7 @@ class CrunchyAPI:
         fastq_first_path: str,
         fastq_second_path: str,
         spring_path: str,
-        flag_path: flag_path,
+        flag_path: str,
         pending_path: str,
     ) -> str:
         sbatch_body = SBATCH_SPRING.format(
