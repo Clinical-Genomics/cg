@@ -8,7 +8,8 @@ from copy import deepcopy
 from pathlib import Path
 
 from cg.apps import crunchy, hk, scoutapi
-from cg.constants import BAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX
+from cg.constants import (BAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX,
+                          FASTQ_SECOND_READ_SUFFIX)
 
 LOG = logging.getLogger(__name__)
 
@@ -51,7 +52,9 @@ class CompressAPI:
         hk_files = []
         for tag in hk_tags:
             hk_files.extend(
-                self.hk_api.get_files(bundle=case_id, tags=[tag], version=last_version.id)
+                self.hk_api.get_files(
+                    bundle=case_id, tags=[tag], version=last_version.id
+                )
             )
         if not hk_files:
             LOG.warning("No files found in latest housekeeper version for %s", case_id)
@@ -94,12 +97,56 @@ class CompressAPI:
             }
         return bam_dict
 
-    def compress_case_bams(self, bam_dict: dict, ntasks: int, mem: int, dry_run: bool = False):
+    def get_fastq_files(self, sample_id: str) -> dict:
+
+        last_version = self.hk_api.last_version(bundle=case_id)
+        hk_files = (
+            hk_file
+            for hk_file in self.hk_api.get_files(
+                bundle=sample_id, tags=["fastq"], version=last_version.id
+            )
+        )
+        if len(hk_files) != 2:
+            LOG.info("Must be two fastq files")
+            return None
+        fastq_dict = self._sort_fastqs(fastq_files=hk_files)
+        if not fastq_dict:
+            LOG.info("Could not sort FASTQ files for %s", sample_id)
+            return None
+        return fastq_dict
+
+    def _sort_fastqs(fastq_files: list) -> dict:
+        """ Sort list of FASTQ files into correct read pair"""
+        FIRST_KEY = "fastq_first_file"
+        SECOND_KEY = "fastq_second_file"
+        fastq_dict = dict()
+        for fastq_file in fastq_files:
+            fastq_path = Path(fastq_file.full_path)
+            if not fastq_path.exists():
+                LOG.info("%s does not exist", fastq_path)
+            if self.get_nlinks > 1:
+                LOG.info("More than 1 inode to same file for %s", fastq_path)
+                return None
+            if fastq_file.full_path.endswith(FASTQ_FIRST_READ_SUFFIX):
+                fastq_dict[FIRST_KEY] = fastq_file
+            if fastq_file.full_path.endswith(FASTQ_SECOND_READ_SUFFIX):
+                fastq_dict[SECOND_KEY] = fastq_file
+        if set(fastq_dict.keys()) != {FIRST_KEY, SECOND_KEY}:
+            LOG.info("Could not find pared fastq files")
+            return None
+
+        return fastq_dict
+
+    def compress_case_bams(
+        self, bam_dict: dict, ntasks: int, mem: int, dry_run: bool = False
+    ):
         """Compress bam-files in given dictionary"""
         for sample, bam_files in bam_dict.items():
             bam_path = Path(bam_files["bam"].full_path)
             LOG.info("Compressing %s for sample %s", bam_path, sample)
-            self.crunchy_api.bam_to_cram(bam_path=bam_path, ntasks=ntasks, mem=mem, dry_run=dry_run)
+            self.crunchy_api.bam_to_cram(
+                bam_path=bam_path, ntasks=ntasks, mem=mem, dry_run=dry_run
+            )
 
     def clean_bams(self, case_id: str, dry_run: bool = False):
         """Update databases and remove uncompressed BAM files for case if
@@ -163,3 +210,11 @@ class CompressAPI:
                     bam_path.unlink()
                     bai_path.unlink()
                     flag_path.unlink()
+
+    def _is_valid_fastq_suffix(self, fastq_path: Path):
+        """ Check that fastq has correct suffix"""
+        if str(fastq_path).endswith(FASTQ_FIRST_READ_SUFFIX) or str(
+            fastq_path
+        ).endswith(FASTQ_SECOND_READ_SUFFIX):
+            return True
+        return False
