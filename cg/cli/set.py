@@ -20,12 +20,8 @@ def set_cmd(context):
 
 
 @set_cmd.command()
-@click.option(
-    "-a", "--action", type=click.Choice(FAMILY_ACTIONS), help="update family action"
-)
-@click.option(
-    "-p", "--priority", type=click.Choice(PRIORITY_OPTIONS), help="update priority"
-)
+@click.option("-a", "--action", type=click.Choice(FAMILY_ACTIONS), help="update family action")
+@click.option("-p", "--priority", type=click.Choice(PRIORITY_OPTIONS), help="update priority")
 @click.option("-g", "--panel", "panels", multiple=True, help="update gene panels")
 @click.argument("family_id")
 @click.pass_context
@@ -51,9 +47,7 @@ def family(context, action, priority, panels, family_id):
             if panel_obj is None:
                 print(click.style(f"unknown gene panel: {panel_id}", fg="red"))
                 context.abort()
-        message = (
-            f"update panels: {', '.join(family_obj.panels)} -> {', '.join(panels)}"
-        )
+        message = f"update panels: {', '.join(family_obj.panels)} -> {', '.join(panels)}"
         print(click.style(message, fg="blue"))
         family_obj.panels = panels
     context.obj["status"].commit()
@@ -123,9 +117,7 @@ def sample(
             comment += _generate_comment("Name", sample_obj.name, name)
             sample_obj.name = name
         else:
-            echo_msg += click.style(
-                f"\nSample name already: {sample_obj.name}", fg="yellow"
-            )
+            echo_msg += click.style(f"\nSample name already: {sample_obj.name}", fg="yellow")
 
         if not skip_lims:
             context.obj["lims"].update_sample(sample_id, name=name)
@@ -133,15 +125,11 @@ def sample(
 
     if sex:
         if sample_obj.sex != sex:
-            echo_msg += click.style(
-                f"\nUpdate sample sex: {sample_obj.sex} -> {sex}", fg="green"
-            )
+            echo_msg += click.style(f"\nUpdate sample sex: {sample_obj.sex} -> {sex}", fg="green")
             comment += _generate_comment("Gender", sample_obj.sex, sex)
             sample_obj.sex = sex
         else:
-            echo_msg += click.style(
-                f"\nSample sex already: {sample_obj.sex}", fg="yellow"
-            )
+            echo_msg += click.style(f"\nSample sex already: {sample_obj.sex}", fg="yellow")
 
         if not skip_lims:
             context.obj["lims"].update_sample(sample_id, sex=sex)
@@ -152,47 +140,36 @@ def sample(
         if customer_obj is None:
             echo_msg += click.style(f"\nCan't find customer {customer}", fg="red")
         else:
-            previous_customer_obj = context.obj["status"].customer_by_id(
-                sample_obj.customer_id
-            )
+            previous_customer_obj = context.obj["status"].customer_by_id(sample_obj.customer_id)
             previous_customer = (
-                f"{previous_customer_obj.internal_id} "
-                f"({previous_customer_obj.name})"
+                f"{previous_customer_obj.internal_id} " f"({previous_customer_obj.name})"
             )
             new_customer = f"{customer_obj.internal_id} ({customer_obj.name})"
 
             if customer_obj.id == sample_obj.customer_id:
                 echo_msg += click.style(
-                    f"\nSample already belongs to customer " f"{previous_customer}",
-                    fg="yellow",
+                    f"\nSample already belongs to customer " f"{previous_customer}", fg="yellow"
                 )
             else:
                 echo_msg += click.style(
-                    f"\nUpdate sample customer: {previous_customer} ->"
-                    f" {new_customer})",
+                    f"\nUpdate sample customer: {previous_customer} ->" f" {new_customer})",
                     fg="green",
                 )
                 comment += _generate_comment(
-                    "Customer",
-                    sample_obj.customer.internal_id,
-                    customer_obj.internal_id,
+                    "Customer", sample_obj.customer.internal_id, customer_obj.internal_id
                 )
                 sample_obj.customer_id = customer_obj.id
 
     if downsampled_to:
         if downsampled_to != sample_obj.downsampled_to:
-            comment += _generate_comment(
-                "Total reads", sample_obj.downsampled_to, downsampled_to
-            )
+            comment += _generate_comment("Total reads", sample_obj.downsampled_to, downsampled_to)
             sample_obj.downsampled_to = downsampled_to
             echo_msg += click.style(
-                f"\nNumber of downsampled total reads set to {downsampled_to}.",
-                fg="green",
+                f"\nNumber of downsampled total reads set to {downsampled_to}.", fg="green"
             )
         else:
             echo_msg += click.style(
-                f"\nSample downsampled already: {sample_obj.downsampled_to}",
-                fg="yellow",
+                f"\nSample downsampled already: {sample_obj.downsampled_to}", fg="yellow"
             )
 
     if downsampled_to == 0:
@@ -202,24 +179,17 @@ def sample(
             echo_msg += click.style(f"\nResetting downsampled total reads.", fg="green")
         else:
             echo_msg += click.style(
-                f"\nSample downsampled already: {sample_obj.downsampled_to}",
-                fg="yellow",
+                f"\nSample downsampled already: {sample_obj.downsampled_to}", fg="yellow"
             )
 
     if apptag:
         apptags = [app.tag for app in context.obj["status"].applications()]
         if apptag not in apptags:
-            echo_msg += click.style(
-                f"\nApplication tag {apptag} does not exist.", fg="red"
-            )
+            echo_msg += click.style(f"\nApplication tag {apptag} does not exist.", fg="red")
         else:
-            application_version = context.obj["status"].current_application_version(
-                apptag
-            )
+            application_version = context.obj["status"].current_application_version(apptag)
             if application_version is None:
-                echo_msg += click.style(
-                    f"\nNo valid current application version found!", fg="red"
-                )
+                echo_msg += click.style(f"\nNo valid current application version found!", fg="red")
             else:
                 application_version_id = application_version.id
 
@@ -230,25 +200,20 @@ def sample(
                     )
                 else:
                     comment += _generate_comment(
-                        "Application tag",
-                        sample_obj.application_version_id,
-                        application_version_id,
+                        "Application tag", sample_obj.application_version_id, application_version_id
                     )
                     sample_obj.application_version_id = application_version_id
                     echo_msg += click.style(
-                        f"\nApplication tag set to {str(application_version)}.",
-                        fg="green",
+                        f"\nApplication tag set to {str(application_version)}.", fg="green"
                     )
 
         if not skip_lims:
             context.obj["lims"].update_sample(sample_id, application=apptag)
             click.echo(click.style(f"Set LIMS/application to {apptag}", fg="blue"))
 
-    if capture_kit:
+    if capture_kit is not None:
         if sample_obj.capture_kit != capture_kit:
-            comment += _generate_comment(
-                "Capture kit", sample_obj.capture_kit, capture_kit
-            )
+            comment += _generate_comment("Capture kit", sample_obj.capture_kit, capture_kit)
             sample_obj.capture_kit = capture_kit
             echo_msg += click.style(f"\nCapture kit {capture_kit} set", fg="green")
         else:
@@ -258,22 +223,17 @@ def sample(
 
     if data_analysis:
         if data_analysis != sample_obj.data_analysis:
-            comment += _generate_comment(
-                "Data-analysis", sample_obj.data_analysis, data_analysis
-            )
+            comment += _generate_comment("Data-analysis", sample_obj.data_analysis, data_analysis)
             sample_obj.data_analysis = data_analysis
             echo_msg += click.style(f"\nData analysis {data_analysis} set", fg="green")
         else:
             echo_msg += click.style(
-                f"\nSample data analysis already: {sample_obj.data_analysis}",
-                fg="yellow",
+                f"\nSample data analysis already: {sample_obj.data_analysis}", fg="yellow"
             )
 
         if not skip_lims:
             context.obj["lims"].update_sample(sample_id, data_analysis=data_analysis)
-            click.echo(
-                click.style(f"Set LIMS/data_analysis to {data_analysis}", fg="blue")
-            )
+            click.echo(click.style(f"Set LIMS/data_analysis to {data_analysis}", fg="blue"))
 
     _update_comment(comment, sample_obj)
     context.obj["status"].commit()
@@ -291,9 +251,7 @@ def _update_comment(comment, obj):
         if obj.comment is None:
             obj.comment = f"{timestamp}-{getpass.getuser()}: {comment}"
         else:
-            obj.comment = (
-                f"{timestamp}-{getpass.getuser()}: {comment}" + "\n" + obj.comment
-            )
+            obj.comment = f"{timestamp}-{getpass.getuser()}: {comment}" + "\n" + obj.comment
 
 
 @set_cmd.command()
@@ -322,13 +280,9 @@ def flowcell(context, flowcell_name, status):
     help="sets application tag on all samples in " "order.",
     type=str,
 )
-@click.option(
-    "-p", "--priority", type=click.Choice(PRIORITY_OPTIONS), help="update priority"
-)
+@click.option("-p", "--priority", type=click.Choice(PRIORITY_OPTIONS), help="update priority")
 @click.option("-t", "--ticket", "ticket", help="sets ticket number.", type=str)
-@click.option(
-    "-n", "--name", "name", help="sets name both in status-db and LIMS.", type=str
-)
+@click.option("-n", "--name", "name", help="sets name both in status-db and LIMS.", type=str)
 @click.argument("order_id")
 @click.argument("user_signature")
 @click.pass_context
@@ -360,8 +314,7 @@ def microbial_order(context, apptag, priority, ticket, name, order_id, user_sign
         if microbial_order_obj.ticket_number == ticket:
             click.echo(
                 click.style(
-                    f"Order {microbial_order_obj.internal_id} already has the "
-                    f"ticket {ticket}",
+                    f"Order {microbial_order_obj.internal_id} already has the " f"ticket {ticket}",
                     fg="yellow",
                 )
             )
@@ -389,17 +342,14 @@ def microbial_order(context, apptag, priority, ticket, name, order_id, user_sign
         if microbial_order_obj.name == name:
             click.echo(
                 click.style(
-                    f"Order {microbial_order_obj.internal_id} already has the "
-                    f"name {name}",
+                    f"Order {microbial_order_obj.internal_id} already has the " f"name {name}",
                     fg="yellow",
                 )
             )
             return
 
         comment = (
-            f"Name changed from"
-            f" {microbial_order_obj.name} to "
-            f"{name} by {user_signature}"
+            f"Name changed from" f" {microbial_order_obj.name} to " f"{name} by {user_signature}"
         )
         microbial_order_obj.name = name
         echo_msg += click.style(
@@ -414,9 +364,7 @@ def microbial_order(context, apptag, priority, ticket, name, order_id, user_sign
         )
 
         lims_name = f"{name} ({microbial_order_obj.internal_id})"
-        context.obj["lims"].update_project(
-            microbial_order_obj.internal_id, name=lims_name
-        )
+        context.obj["lims"].update_project(microbial_order_obj.internal_id, name=lims_name)
         click.echo(click.style(f"updated LIMS/Project-name to {lims_name}", fg="blue"))
 
     context.obj["status"].commit()
@@ -424,12 +372,8 @@ def microbial_order(context, apptag, priority, ticket, name, order_id, user_sign
 
 
 @set_cmd.command("microbial-sample")
-@click.option(
-    "-a", "--application-tag", "apptag", help="sets application tag.", type=str
-)
-@click.option(
-    "-p", "--priority", type=click.Choice(PRIORITY_OPTIONS), help="update priority"
-)
+@click.option("-a", "--application-tag", "apptag", help="sets application tag.", type=str)
+@click.option("-p", "--priority", type=click.Choice(PRIORITY_OPTIONS), help="update priority")
 @click.argument("sample_id")
 @click.argument("user_signature")
 @click.pass_context
@@ -449,16 +393,12 @@ def microbial_sample(context, apptag, priority, sample_id, user_signature):
     if apptag:
         apptags = [app.tag for app in context.obj["status"].applications()]
         if apptag not in apptags:
-            click.echo(
-                click.style(f"Application tag {apptag} does not exist.", fg="red")
-            )
+            click.echo(click.style(f"Application tag {apptag} does not exist.", fg="red"))
             context.abort()
 
         application_version = context.obj["status"].current_application_version(apptag)
         if application_version is None:
-            click.echo(
-                click.style(f"No valid current application version found!", fg="red")
-            )
+            click.echo(click.style(f"No valid current application version found!", fg="red"))
             context.abort()
 
         application_version_id = application_version.id
@@ -492,9 +432,7 @@ def microbial_sample(context, apptag, priority, sample_id, user_signature):
             sample_obj.comment = f"{timestamp}: {comment}"
         else:
             sample_obj.comment += "\n" + f"{timestamp}: {comment}"
-        click.echo(
-            click.style(f"Comment added to sample {sample_obj.internal_id}", fg="green")
-        )
+        click.echo(click.style(f"Comment added to sample {sample_obj.internal_id}", fg="green"))
         context.obj["status"].commit()
 
         context.obj["lims"].update_sample(sample_id, application=apptag)
@@ -509,8 +447,7 @@ def microbial_sample(context, apptag, priority, sample_id, user_signature):
         sample_obj.priority_human = priority
         click.echo(
             click.style(
-                f"priority for sample {sample_obj.internal_id} set to "
-                f"{str(priority)}.",
+                f"priority for sample {sample_obj.internal_id} set to " f"{str(priority)}.",
                 fg="green",
             )
         )
@@ -520,9 +457,7 @@ def microbial_sample(context, apptag, priority, sample_id, user_signature):
             sample_obj.comment = f"{timestamp}: {comment}"
         else:
             sample_obj.comment += "\n" + f"{timestamp}: {comment}"
-        click.echo(
-            click.style(f"Comment added to sample {sample_obj.internal_id}", fg="green")
-        )
+        click.echo(click.style(f"Comment added to sample {sample_obj.internal_id}", fg="green"))
 
         context.obj["status"].commit()
 
