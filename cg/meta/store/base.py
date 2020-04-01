@@ -33,7 +33,7 @@ def reset_case_action(case_obj):
 
 
 def get_files(deliverables: dict, pipeline: str) -> dict:
-    """Get all the files from the MIP RNA files."""
+    """Get all deliverable files from the pipeline"""
 
     data = [
         {"path": file["path"], "tags": get_tags(file, pipeline), "archive": False}
