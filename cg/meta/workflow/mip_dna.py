@@ -11,6 +11,7 @@ from cg.apps.pipelines.fastqhandler import BaseFastqHandler
 from cg.exc import CgError, LimsDataError
 from cg.meta.deliver import DeliverAPI
 from cg.store import models, Store
+from cg.meta.workflow.base import get_target_bed_from_lims
 
 COLLABORATORS = ("cust000", "cust002", "cust003", "cust004", "cust042")
 MASTER_LIST = (

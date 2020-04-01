@@ -7,7 +7,7 @@ from cg.store import Store
 
 def get_target_bed_from_lims(lims: LimsAPI, status_db: Store, target_bed):
     """Get target bed filename from lims"""
-    target_bed_short_name = lims.capture_kit(target_bed)
+    target_bed_shortname = lims.capture_kit(target_bed)
     if not target_bed_shortname:
         raise LimsDataError("Target bed %s not found in LIMS" % target_bed_shortname)
     else:

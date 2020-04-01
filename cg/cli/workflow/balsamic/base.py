@@ -15,6 +15,7 @@ from cg.cli.workflow.balsamic.deliver import deliver as deliver_cmd, CASE_TAGS, 
 from cg.cli.workflow.get_links import get_links
 from cg.exc import LimsDataError, BalsamicStartError, CgError
 from cg.meta.deliver import DeliverAPI
+from cg.meta.workflow.base import get_target_bed_from_lims
 from cg.meta.workflow.balsamic import AnalysisAPI
 from cg.store import Store
 
@@ -189,16 +190,10 @@ def config_case(
         else:
             normal_paths.add(concatenated_paths[1])
 
-        if not target_bed:
-            target_bed_shortname = context.obj["lims_api"].capture_kit(link_obj.sample.internal_id)
-
-            if target_bed_shortname:
-                bed_version_obj = context.obj["db"].bed_version(target_bed_shortname)
-
-                if not bed_version_obj:
-                    raise CgError("Bed-version %s does not exist" % target_bed_shortname)
-
-                target_beds.add(bed_version_obj.filename)
+        target_bed_filename = get_target_bed_from_lims(
+            context.obj["lims_api"], context.obj["db"], link_obj.sample.internal_id
+        )
+        target_beds.add(target_bed_filename)
 
     if len(application_types) != 1:
         raise BalsamicStartError(
