@@ -231,7 +231,7 @@ def test_is_compression_done_no_spring(crunchy_config_dict, existing_fastq_paths
     assert not result
 
 
-def test_is_compression_done_no_flag(crunchy_config_dict, compressed_fastqs_without_flag):
+def test_is_compression_done_no_flag_spring(crunchy_config_dict, compressed_fastqs_without_flag):
     """test cram_compression_done without created CRAM file"""
     # GIVEN a crunchy-api, and fastq paths
     crunchy_api = CrunchyAPI(crunchy_config_dict)
