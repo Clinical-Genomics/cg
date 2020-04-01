@@ -192,3 +192,104 @@ def test_get_cram_path_from_bam(crunchy_config_dict, crunchy_test_dir):
 
     # THEN suffix should be .cram
     assert cram_path.suffix == CRAM_SUFFIX
+
+
+def test_fastq_to_spring(crunchy_config_dict, sbatch_content_spring, fastq_paths, mocker):
+    """Test bam_to_cram method"""
+    # GIVEN a crunchy-api, and fastq paths
+    mocker_submit_sbatch = mocker.patch.object(CrunchyAPI, "_submit_sbatch")
+    crunchy_api = CrunchyAPI(crunchy_config_dict)
+
+    # WHEN calling fastq_to_spring on fastq files
+    fastq_first_path = fastq_paths["fastq_first_path"]
+    fastq_second_path = fastq_paths["fastq_second_path"]
+    crunchy_api.fastq_to_spring(
+        fastq_first_path=fastq_first_path,
+        fastq_second_path=fastq_second_path,
+        dry_run=False,
+        ntasks=1,
+        mem=2,
+    )
+
+    # THEN _submit_sbatch method is called with expected sbatch-content
+    mocker_submit_sbatch.assert_called_with(sbatch_content=sbatch_content_spring, dry_run=False)
+
+
+def test_is_compression_done_no_spring(crunchy_config_dict, existing_fastq_paths):
+    """test cram_compression_done without created CRAM file"""
+    # GIVEN a crunchy-api, and fastq paths
+    crunchy_api = CrunchyAPI(crunchy_config_dict)
+
+    # WHEN checking if spring compression is done
+    fastq_first_path = existing_fastq_paths["fastq_first_path"]
+    fastq_second_path = existing_fastq_paths["fastq_second_path"]
+    result = crunchy_api.is_spring_compression_done(
+        fastq_first_path=fastq_first_path, fastq_second_path=fastq_second_path
+    )
+
+    # THEN result should be false
+    assert not result
+
+
+def test_is_compression_done_no_flag(crunchy_config_dict, compressed_fastqs_without_flag):
+    """test cram_compression_done without created CRAM file"""
+    # GIVEN a crunchy-api, and fastq paths
+    crunchy_api = CrunchyAPI(crunchy_config_dict)
+
+    # WHEN checking if spring compression is done
+    fastq_first_path = compressed_fastqs_without_flag["fastq_first_path"]
+    fastq_second_path = compressed_fastqs_without_flag["fastq_second_path"]
+    result = crunchy_api.is_spring_compression_done(
+        fastq_first_path=fastq_first_path, fastq_second_path=fastq_second_path
+    )
+
+    # THEN result should be false
+    assert not result
+
+
+def test_is_compression_done_spring(crunchy_config_dict, compressed_fastqs):
+    """test cram_compression_done without created CRAM file"""
+    # GIVEN a crunchy-api, and fastq paths
+    crunchy_api = CrunchyAPI(crunchy_config_dict)
+
+    # WHEN checking if spring compression is done
+    fastq_first_path = compressed_fastqs["fastq_first_path"]
+    fastq_second_path = compressed_fastqs["fastq_second_path"]
+    result = crunchy_api.is_spring_compression_done(
+        fastq_first_path=fastq_first_path, fastq_second_path=fastq_second_path
+    )
+
+    # THEN result should be True
+    assert result
+
+
+def test_is_not_pending(crunchy_config_dict, fastq_paths):
+    """test cram_compression_done without created CRAM file"""
+    # GIVEN a crunchy-api, and fastq files
+    crunchy_api = CrunchyAPI(crunchy_config_dict)
+
+    # WHEN checking if spring compression is done
+    fastq_first_path = fastq_paths["fastq_first_path"]
+    fastq_second_path = fastq_paths["fastq_second_path"]
+    result = crunchy_api.is_spring_compression_pending(
+        fastq_first_path=fastq_first_path, fastq_second_path=fastq_second_path
+    )
+
+    # THEN result should be False
+    assert not result
+
+
+def test_is_pending(crunchy_config_dict, compressed_fastqs_pending):
+    """test cram_compression_done without created CRAM file"""
+    # GIVEN a crunchy-api, and fastq files
+    crunchy_api = CrunchyAPI(crunchy_config_dict)
+
+    # WHEN checking if spring compression is done
+    fastq_first_path = compressed_fastqs_pending["fastq_first_path"]
+    fastq_second_path = compressed_fastqs_pending["fastq_second_path"]
+    result = crunchy_api.is_spring_compression_pending(
+        fastq_first_path=fastq_first_path, fastq_second_path=fastq_second_path
+    )
+
+    # THEN result should be True
+    assert result
