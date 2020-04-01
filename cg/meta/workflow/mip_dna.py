@@ -6,13 +6,11 @@ from pathlib import Path
 from typing import List, Any
 from ruamel.yaml import safe_load
 
-from requests.exceptions import HTTPError
-
 from cg.apps import tb, hk, scoutapi, lims
-from cg.meta.deliver import DeliverAPI
 from cg.apps.pipelines.fastqhandler import BaseFastqHandler
+from cg.exc import CgError, LimsDataError
+from cg.meta.deliver import DeliverAPI
 from cg.store import models, Store
-
 
 COLLABORATORS = ("cust000", "cust002", "cust003", "cust004", "cust042")
 MASTER_LIST = (
@@ -146,23 +144,12 @@ class AnalysisAPI:
             sample_data = self._get_sample_data(link)
             if sample_data["analysis_type"] in ("tgs", "wes"):
                 if link.sample.capture_kit:
-                    # set the capture kit from status: key or custom file name
-                    mip_capturekit = CAPTUREKIT_MAP.get(link.sample.capture_kit)
-                    sample_data["capture_kit"] = mip_capturekit or link.sample.capture_kit
+                    sample_data["capture_kit"] = get_target_bed_from_lims(
+                        self.lims, self.db, link.sample.internal_id
+                    )
                 else:
                     if link.sample.downsampled_to:
                         self.LOG.debug("%s: downsampled sample, skipping", link.sample.name)
-                    else:
-                        try:
-                            capture_kit = self.lims.capture_kit(link.sample.internal_id)
-                            if capture_kit is None or capture_kit == "NA":
-                                self.LOG.warning(
-                                    "%s: capture kit not found", link.sample.internal_id
-                                )
-                            else:
-                                sample_data["capture_kit"] = CAPTUREKIT_MAP[capture_kit]
-                        except HTTPError:
-                            self.LOG.warning("%s: not found (LIMS)", link.sample.internal_id)
             if link.mother:
                 sample_data["mother"] = link.mother.internal_id
             if link.father:
