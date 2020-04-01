@@ -79,7 +79,7 @@ error() {{
 trap error ERR
 
 touch {pending_path}
-crunchy -t 12 compress fastq -f {fastq_first_path} -f2 {fastq_second_path} -s {spring_path}
+crunchy -t 12 compress fastq -f {fastq_first_path} -s {fastq_second_path} -o {spring_path} --check-integrity
 touch {flag_path}
 rm {pending_path}"""
 
@@ -286,9 +286,9 @@ class CrunchyAPI:
     def get_pending_path(file_path):
         """Gives path to pending-flag path"""
         if str(file_path).endswith(FASTQ_FIRST_READ_SUFFIX):
-            return str(file_path).replace(FASTQ_FIRST_READ_SUFFIX, PENDING_PATH_SUFFIX)
+            return Path(str(file_path).replace(FASTQ_FIRST_READ_SUFFIX, PENDING_PATH_SUFFIX))
         if str(file_path).endswith(FASTQ_SECOND_READ_SUFFIX):
-            return str(file_path).replace(FASTQ_SECOND_READ_SUFFIX, PENDING_PATH_SUFFIX)
+            return Path(str(file_path).replace(FASTQ_SECOND_READ_SUFFIX, PENDING_PATH_SUFFIX))
         return file_path.with_suffix(PENDING_PATH_SUFFIX)
 
     @staticmethod

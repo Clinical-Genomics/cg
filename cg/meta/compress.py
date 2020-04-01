@@ -100,12 +100,14 @@ class CompressAPI:
     def get_fastq_files(self, sample_id: str) -> dict:
         """Get FASTQ files for sample"""
         last_version = self.hk_api.last_version(bundle=sample_id)
-        hk_files = (
+        if not last_version:
+            return None
+        hk_files = [
             hk_file
             for hk_file in self.hk_api.get_files(
                 bundle=sample_id, tags=["fastq"], version=last_version.id
             )
-        )
+        ]
         if len(hk_files) != 2:
             LOG.info("Must be two fastq files")
             return None
@@ -124,7 +126,8 @@ class CompressAPI:
             fastq_path = Path(fastq_file.full_path)
             if not fastq_path.exists():
                 LOG.info("%s does not exist", fastq_path)
-            if self.get_nlinks > 1:
+                return None
+            if self.get_nlinks(file_link=fastq_path) > 1:
                 LOG.info("More than 1 inode to same file for %s", fastq_path)
                 return None
             if fastq_file.full_path.endswith(FASTQ_FIRST_READ_SUFFIX):
@@ -134,7 +137,6 @@ class CompressAPI:
         if set(fastq_dict.keys()) != {first_fastq_key, second_fastq_key}:
             LOG.info("Could not find pared fastq files")
             return None
-
         return fastq_dict
 
     def compress_case_bams(
@@ -154,7 +156,7 @@ class CompressAPI:
             fastq_first_path = Path(fastq_files["fastq_first_file"].full_path)
             fastq_second_path = Path(fastq_files["fastq_second_file"].full_path)
             LOG.info(
-                "Compressing %s and %s for sample %s into SPRING fornat",
+                "Compressing %s and %s for sample %s into SPRING format",
                 fastq_first_path,
                 fastq_second_path,
                 sample_id,

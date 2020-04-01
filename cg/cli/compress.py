@@ -89,9 +89,10 @@ def fastq(context, case_id, number_of_conversions, ntasks, mem, dry_run):
         cases = context.obj["db"].families()
     for case in cases:
         if conversion_count == number_of_conversions:
-            LOG.info("compressed bam-files for %s cases", conversion_count)
+            LOG.info("compressed FASTQ files for %s cases", conversion_count)
             break
         case_id = case.internal_id
+        LOG.info("Searching for FASTQ files in %s", case_id)
         case_fastq_dict = dict()
         case_has_fastq_files = True
         compression_is_pending = False
@@ -116,10 +117,10 @@ def fastq(context, case_id, number_of_conversions, ntasks, mem, dry_run):
                 LOG.info("FASTQ to SPRING compression pending for %s", sample_id)
                 compression_is_pending = True
                 break
-            case_fastq_dict["sample_id"] = sample_fastq_dict
+            case_fastq_dict[sample_id] = sample_fastq_dict
 
             if case_has_fastq_files and not compression_is_pending:
-                LOG.info("Compressing bam-files for %s", case_id)
+                LOG.info("Compressing FASTQ files for %s", case_id)
                 compress_api.compress_case_fastqs(
                     fastq_dict=case_fastq_dict, ntasks=ntasks, mem=mem, dry_run=dry_run
                 )
