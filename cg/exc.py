@@ -1,6 +1,14 @@
+# -*- coding: utf-8 -*-
+"""
+    Cg Exceptions
+"""
+
+
 class CgError(Exception):
 
-    """Base exception for the package."""
+    """
+        Base exception for the package
+    """
 
     def __init__(self, message):
         super(CgError, self).__init__()
@@ -8,25 +16,29 @@ class CgError(Exception):
 
 
 class AnalysisNotFinishedError(CgError):
-    pass
+    """
+        Exception raised when an adding a MIP analysis to Housekeeper, but the analysis is not
+        finished in MIP, as indicated in the qc sample info file.
+
+    """
 
 
 class AnalysisDuplicationError(CgError):
-    """Error related to trying to create duplicate analysis objects"""
+    """
+        Error related to trying to create analysis object that already exists in status-db.
+    """
 
 
 class LimsDataError(CgError):
-    """Error related to missing/incomplete data in LIMS."""
-
-    pass
-
-
-class MissingCustomerError(CgError):
-    pass
+    """
+        Error related to missing/incomplete data in LIMS
+    """
 
 
 class DuplicateRecordError(CgError):
-    pass
+    """
+        Exception related to duplicate records in LoqusDB.
+    """
 
 
 class DuplicateSampleError(CgError):
@@ -42,18 +54,36 @@ class CaseNotFoundError(CgError):
 
 
 class OrderFormError(CgError):
-    pass
+    """
+        Exception related to the order form
+    """
 
 
 class OrderError(CgError):
-    pass
+    """
+        Exception related to orders
+    """
 
 
 class TicketCreationError(CgError):
-    pass
+    """
+        Exception related to ticket creation
+    """
 
 
 class BalsamicStartError(CgError):
     """
         Exception raised when Balsamic fails to start
+    """
+
+
+class BundleAlreadyAddedError(CgError):
+    """
+        Exception raised when a bundle has already been added to Housekeeper
+    """
+
+
+class PipelineUnknownError(CgError):
+    """
+        Exception raised when a sample in a case has no data anlysis type
     """

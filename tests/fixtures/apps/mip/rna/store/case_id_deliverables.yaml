@@ -1,0 +1,129 @@
+---
+files:
+  - format: meta
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/salmon_quant/quant.sf
+    path_index: ~
+    step: salmon_quant
+    tag: ~
+  - format: meta
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/star_fusion/star-fusion.fusion_predictions.abridged.tsv
+    path_index: ~
+    step: star_fusion
+    tag: ~
+  - format: meta
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/arriba_ar/sample_id_lanes_1234_trim_arriba.pdf
+    path_index: ~
+    step: arriba_ar
+    tag: arriba_report
+  - format: meta
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/arriba_ar/sample_id_lanes_1234_trim_arriba.tsv
+    path_index: ~
+    step: arriba_ar
+    tag: arriba_ar
+  - format: meta
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/stringtie_ar/sample_id_lanes_1234_trim_star_sorted_merged_strg.gtf
+    path_index: ~
+    step: stringtie_ar
+    tag: ~
+  - format: meta
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/gffcompare_ar/sample_id_lanes_1234_trim_star_sorted_merged_strg_gffcmp.gtf
+    path_index: ~
+    step: gffcompare_ar
+    tag: ~
+  - format: cram
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/markduplicates/sample_id_lanes_1234_trim_star_sorted_merged_md.cram
+    path_index: /path/to/rare-disease/cases/case_id/analysis/sample_id/markduplicates/sample_id_lanes_1234_trim_star_sorted_merged_md.cram.crai
+    step: markduplicates
+    tag: ~
+  - format: meta
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/gatk_asereadcounter/sample_id_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal_haptc_filtered_ase.csv
+    path_index: ~
+    step: gatk_asereadcounter
+    tag: ~
+  - format: vcf
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/bootstrapann/sample_id_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal_haptc_filtered_ase_bootstr.vcf
+    path_index: ~
+    step: bootstrapann
+    tag: ~
+  - format: vcf
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/bcftools_merge/case_id_comb.vcf
+    path_index: ~
+    step: bcftools_merge
+    tag: ~
+  - format: vcf
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/varianteffectpredictor/case_id_comb_vep.vcf
+    path_index: ~
+    step: varianteffectpredictor
+    tag: ~
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/version_collect_ar/case_id_vcol.yaml
+    path_index: ~
+    step: version_collect_ar
+    tag: ~
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/multiqc_ar/multiqc_data/multiqc_data.json
+    path_index: ~
+    step: multiqc_ar
+    tag: json
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/multiqc_ar/multiqc_report.html
+    path_index: ~
+    step: multiqc_ar
+    tag: html
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id_qc_sample_info.yaml
+    path_index: ~
+    step: mip_analyse
+    tag: sample_info
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/reference_info.yaml
+    path_index: ~
+    step: mip_analyse
+    tag: references_info
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/mip_log/2020-02-28/mip_2020-02-28T10:22:26.log
+    path_index: ~
+    step: mip_analyse
+    tag: log
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id_config.yaml
+    path_index: ~
+    step: mip_analyse
+    tag: config_analysis
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/pedigree.yaml
+    path_index: ~
+    step: mip_analyse
+    tag: pedigree
+  - format: meta
+    id: case_id
+    path: /path/to/servers/config/cluster.ourplace.se/mip8.2-rna-stage.yaml
+    path_index: ~
+    step: mip_analyse
+    tag: config
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/case_id.fam
+    path_index: ~
+    step: mip_analyse
+    tag: pedigree_fam
+
