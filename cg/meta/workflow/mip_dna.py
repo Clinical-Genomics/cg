@@ -281,8 +281,9 @@ class AnalysisAPI:
         if analysis_files:
             analysis_file_raw = self._open_bundle_file(analysis_files[0].path)
         else:
-            raise self.log.warning("No post analysis files received from DeliverAPI for '%s'",
-                                   family_id)
+            raise self.log.warning(
+                "No post analysis files received from DeliverAPI for '%s'", family_id
+            )
 
         return analysis_file_raw
 
@@ -314,8 +315,9 @@ class AnalysisAPI:
                     sampleinfo_raw=sampleinfo_raw,
                 )
             except KeyError as error:
-                self.log.warning("get_latest_metadata failed for '%s', missing key: %s",
-                                 family_id, error.args[0])
+                self.log.warning(
+                    "get_latest_metadata failed for '%s', missing key: %s", family_id, error.args[0]
+                )
                 trending = dict()
 
         return trending
