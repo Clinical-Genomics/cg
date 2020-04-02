@@ -39,7 +39,7 @@ COMBOS = {
     "CM": ("CNM", "CM"),
     "Horsel": ("Horsel", "141217", "141201"),
 }
-CAPTUREKIT_MAP = {"wgs": "twistexomerefseq_9.1_hg19_design.bed"}
+WGS_CAPTURE_KIT = "twistexomerefseq_9.1_hg19_design.bed"
 
 
 class AnalysisAPI:
@@ -136,13 +136,12 @@ class AnalysisAPI:
         }
         for link in family_obj.links:
             sample_data = self._get_sample_data(link)
-            if sample_data["analysis_type"] in ("tgs", "wes"):
-
+            if sample_data["analysis_type"] == "wgs":
+                sample_data["capture_kit"] = WGS_CAPTURE_KIT
+            else:
                 sample_data["capture_kit"] = get_target_bed_from_lims(
                     self.lims, self.db, link.sample.internal_id
                 )
-            else:
-                sample_data["capture_kit"] = CAPTUREKIT_MAP[sample_data["analysis_type"]]
             if link.mother:
                 sample_data["mother"] = link.mother.internal_id
             if link.father:
