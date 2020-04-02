@@ -1,0 +1,325 @@
+---
+analysis_constant_path: case_id/analysis
+analysis_type:
+  sample_id: wts
+analysisrunstatus: '1'
+arriba_ar: '1'
+arriba_blacklist_path: /arriba_v1.1.0/database/blacklist_hg19_hs37d5_GRCh37_2018-11-04.tsv.gz
+arriba_cytoband_path: /arriba_v1.1.0/database/cytobands_hg19_hs37d5_GRCh37_2018-02-23.tsv
+arriba_proteindomain_path: /arriba_v1.1.0/database/protein_domains_hg19_hs37d5_GRCh37_2018-03-06.gff3
+bash_set_errexit: '1'
+bash_set_nounset: '0'
+bash_set_pipefail: '1'
+bcftools_merge: '1'
+binary_path:
+  BlobFish.py: BlobFish.py
+  BootstrapAnn.py: BootstrapAnn.py
+  STAR: STAR
+  STAR-Fusion: STAR-Fusion
+  arriba: arriba
+  bam2wig.py: bam2wig.py
+  bam_stat.py: bam_stat.py
+  bcftools: bcftools
+  draw_fusions.R: draw_fusions.R
+  fastqc: fastqc
+  gatk: gatk
+  geneBody_coverage2.py: geneBody_coverage2.py
+  gffcompare: gffcompare
+  gtf_file_to_feature_seqs.pl: gtf_file_to_feature_seqs.pl
+  gzip: gzip
+  infer_experiment.py: infer_experiment.py
+  inner_distance.py: inner_distance.py
+  junction_annotation.py: junction_annotation.py
+  junction_saturation.py: junction_saturation.py
+  multiqc: multiqc
+  picard: picard
+  prep_genome_lib.pl: prep_genome_lib.pl
+  preseq: preseq
+  read_distribution.py: read_distribution.py
+  read_duplication.py: read_duplication.py
+  salmon: salmon
+  sambamba: sambamba
+  samtools: samtools
+  stringtie: stringtie
+  trim_galore: trim_galore
+  vep: vep
+  wigToBigWig: wigToBigWig
+blobfish: 0
+bootstrapann: '1'
+case_id: case_id
+chim_junction_overhang_min: '12'
+chim_out_type: WithinBAM SoftClip
+chim_segment_min: '12'
+cluster_constant_path: /path/to/rare-disease/cases
+conda_path: ~
+config_file: /path/to/servers/config/cluster.ourplace.se/mip8.2-rna-stage.yaml
+config_file_analysis: /path/to/rare-disease/cases/case_id/analysis/case_id_config.yaml
+core_ram_memory: '5'
+custom_default_parameters:
+  - analysis_type
+  - gatk_path
+  - infile_dirs
+  - pedigree_fam_file
+  - picardtools_path
+  - reference_dir
+  - reference_info_file
+  - salmon_quant_reference_genome
+  - sample_info_file
+  - star_aln_reference_genome
+  - star_fusion_reference_genome
+  - store_file
+  - temp_directory
+decompose_normalize_references: []
+dna_vcf_reformat: 0
+email_types:
+  - FAIL
+expected_coverage:
+  sample_id: '1'
+fastqc_ar: '1'
+force_dna_ase: '0'
+found_female: 0
+found_male: 1
+found_other: 1
+gatk_asereadcounter: '1'
+gatk_baserecalibration: '1'
+gatk_baserecalibration_known_sites:
+  - /path/to/rare-disease/references/rna_references_8.1/grch37_1000g_indels_-phase1-.vcf
+  - /path/to/rare-disease/references/rna_references_8.1/grch37_dbsnp_-138-.vcf
+  - /path/to/rare-disease/references/rna_references_8.1/grch37_mills_and_1000g_-gold_standard_indels-.vcf
+gatk_baserecalibration_read_filters:
+  - OverclippedReadFilter
+gatk_baserecalibration_static_quantized_quals:
+  - '10'
+  - '20'
+  - '30'
+  - '40'
+gatk_haplotypecaller: '1'
+gatk_haplotypecaller_annotation:
+  - BaseQualityRankSumTest
+  - ChromosomeCounts
+  - Coverage
+  - DepthPerAlleleBySample
+  - FisherStrand
+  - MappingQualityRankSumTest
+  - QualByDepth
+  - RMSMappingQuality
+  - ReadPosRankSumTest
+  - StrandOddsRatio
+gatk_haplotypecaller_emit_ref_confidence: NONE
+gatk_haplotypecaller_no_soft_clipped_bases: '0'
+gatk_haplotypecaller_pcr_indel_model: CONSERVATIVE
+gatk_haplotypecaller_snp_known_set: /path/to/rare-disease/references/rna_references_8.1/grch37_dbsnp_-138-.vcf
+gatk_logging_level: INFO
+gatk_splitncigarreads: '1'
+gatk_use_new_qual_calculator: '1'
+gatk_variantfiltration: '1'
+gatk_variantfiltration_cluster_size: '3'
+gatk_variantfiltration_cluster_window_size: '35'
+gatk_variantfiltration_filter:
+  FS: FS > 30.0
+  QD: QD < 2.0
+gender:
+  others:
+    - sample_id
+genebody_coverage: '1'
+gffcompare_ar: '1'
+gzip_fastq: '1'
+human_genome_reference: /path/to/rare-disease/references/rna_references_8.1/grch37_homo_sapiens_-d5-.fasta
+infile_dirs:
+  /path/to/rare-disease/cases/case_id/wts/sample_id/fastq: sample_id
+java_use_large_pages: '1'
+library_type: reverse_stranded
+load_env:
+  S_mip8.2_rd-rna:
+    method: conda
+    mip: ~
+log_file: /path/to/rare-disease/cases/case_id/analysis/mip_log/2020-02-28/mip_2020-02-28T10:22:26.log
+markduplicates: '1'
+markduplicates_picardtools_opt_dup_dist: '2500'
+max_cores_per_node: '36'
+mip: 1
+multiqc_ar: '1'
+multiqc_per_sample: '0'
+node_ram_memory: '192'
+#outdata_dir: /path/to/rare-disease/cases/case_id/analysis
+outdata_dir: tests/fixtures/apps/mip/rna/store/
+outscript_dir: /path/to/rare-disease/cases/case_id/analysis/scripts
+pe_overlap_nbases_min: '10'
+pedigree_fam_file: /path/to/rare-disease/cases/case_id/analysis/case_id/case_id.fam
+pedigree_file: /path/to/rare-disease/cases/case_id/pedigree.yaml
+picardtools_mergesamfiles: '1'
+picardtools_path: /usr/picard
+platform: ILLUMINA
+preseq_ar: '1'
+print_recipe: '0'
+print_recipe_mode: '2'
+project_id: development
+recipe_core_number:
+  analysisrunstatus: 1
+  arriba_ar: 24
+  bcftools_merge: 1
+  blobfish: 1
+  bootstrapann: 1
+  dna_vcf_reformat: 1
+  fastqc_ar: 0
+  gatk_asereadcounter: 1
+  gatk_baserecalibration: 13
+  gatk_haplotypecaller: 13
+  gatk_splitncigarreads: 12
+  gatk_variantfiltration: 1
+  genebody_coverage: 1
+  gffcompare_ar: 1
+  gzip_fastq: 0
+  markduplicates: 16
+  multiqc_ar: 1
+  picardtools_mergesamfiles: 13
+  preseq_ar: 1
+  rseqc: 1
+  sacct: 1
+  salmon_quant: 20
+  star_aln: 36
+  star_fusion: 24
+  stringtie_ar: 36
+  varianteffectpredictor: 1
+  version_collect_ar: 1
+recipe_memory:
+  analysisrunstatus: 1
+  arriba_ar: 3
+  dna_vcf_reformat: 2
+  gatk_asereadcounter: 25
+  gatk_variantfiltration: 8
+  genebody_coverage: 8
+  multiqc_ar: 10
+  picardtools_mergesamfiles: 5
+  preseq_ar: 8
+  rseqc: 25
+  salmon_quant: 2
+  star_aln: 3
+  star_fusion: 3
+  stringtie_ar: 2
+  trim_galore_ar: 5
+  varianteffectpredictor: 12
+  version_collect_ar: 8
+recipe_time:
+  analysisrunstatus: '1'
+  arriba_ar: '1'
+  bcftools_merge: '1'
+  blobfish: '1'
+  bootstrapann: '2'
+  dna_vcf_reformat: '1'
+  fastqc_ar: '1'
+  gatk_asereadcounter: '2'
+  gatk_baserecalibration: '5'
+  gatk_haplotypecaller: '4'
+  gatk_splitncigarreads: '8'
+  gatk_variantfiltration: '1'
+  genebody_coverage: '3'
+  gffcompare_ar: '1'
+  gzip_fastq: '2'
+  markduplicates: '8'
+  multiqc_ar: '1'
+  picardtools_mergesamfiles: '2'
+  preseq_ar: '2'
+  rseqc: '3'
+  sacct: '1'
+  salmon_quant: '5'
+  star_aln: '6'
+  star_fusion: '8'
+  stringtie_ar: '2'
+  trim_galore_ar: '6'
+  varianteffectpredictor: '2'
+  version_collect_ar: '1'
+reference_dir: /path/to/rare-disease/references/rna_references_8.1
+reference_info_file: /path/to/rare-disease/cases/case_id/analysis/reference_info.yaml
+rseqc: '1'
+rseqc_transcripts_file: /path/to/rare-disease/references/rna_references_8.1/grch37_gencode_annotation_reformated_-v31-.bed
+sacct: '1'
+sacct_format_fields:
+  - jobid
+  - jobname%50
+  - account
+  - partition
+  - alloccpus
+  - TotalCPU
+  - elapsed
+  - start
+  - end
+  - state
+  - exitcode
+salmon_quant: '1'
+salmon_quant_reference_genome: /path/to/rare-disease/references/rna_references_8.1/grch37_homo_sapiens_-d5-.fasta
+sample_ids:
+  - sample_id
+sample_info_file: tests/fixtures/apps/mip/rna/store/case_qc_sample_info.yaml
+set_recipe_core_number: {}
+set_recipe_memory: {}
+set_recipe_time: {}
+singularity_recipe_bind_path:
+  fastqc_ar:
+    - /path/to/rare-disease/
+    - /path/to/housekeeper-bundles
+    - /path/to/demultiplexed-runs
+  star_aln:
+    - /path/to/rare-disease/
+    - /path/to/housekeeper-bundles
+    - /path/to/demultiplexed-runs
+  trim_galore_ar:
+    - /path/to/rare-disease/
+    - /path/to/housekeeper-bundles
+    - /path/to/demultiplexed-runs
+slurm_quality_of_service: low
+star_aln: '1'
+star_aln_reference_genome: /path/to/rare-disease/references/rna_references_8.1/grch37_homo_sapiens_-d5-.fasta
+star_fusion: '1'
+star_fusion_genome_lib_dir: /path/to/rare-disease/references/rna_references_8.1/GRCh37_gencode_v19_CTAT_lib_Oct012019.plug-n-play/ctat_genome_lib_build_dir
+star_fusion_reference_genome: /path/to/rare-disease/references/rna_references_8.1/grch37_homo_sapiens_-d5-.fasta
+star_ulimit_n: '4096'
+store_file: tests/fixtures/apps/mip/rna/store/case_id_deliverables.yaml
+stringtie_ar: '1'
+stringtie_junction_reads: '2'
+stringtie_minimum_coverage: '5'
+submission_profile: slurm
+supported_capture_kit:
+  agilent_sureselect.v2: genome_reference_source_version_agilent_sureselect_targets_-v2-.bed
+  agilent_sureselect.v3: genome_reference_source_version_agilent_sureselect_targets_-v3-.bed
+  agilent_sureselect.v4: genome_reference_source_version_agilent_sureselect_targets_-v4-.bed
+  agilent_sureselect.v5: genome_reference_source_version_agilent_sureselect_targets_-v5-.bed
+  agilent_sureselect_cre.v1: genome_reference_source_version_agilent_sureselect_targets_cre_-v1-.bed
+  agilent_sureselect_focusedexome.v1: genome_reference_source_version_agilent_sureselect_targets_focusedexome_-v1-.bed
+  latest: genome_reference_source_version_twist_target_-1-.bed
+  nimblegen_seqcapezexome.v2: genome_reference_source_version_nimblegen_seqcapezexome_targets_-v2-.bed
+  nimblegen_seqcapezexome.v3: genome_reference_source_version_nimblegen_seqcapezexome_targets_-v3-.bed
+  twist_wes.v1: genome_reference_source_version_twist_target_-1-.bed
+temp_directory: /path/to/rare-disease/temp-dir/$SLURM_JOB_ID
+transcript_annotation: /path/to/rare-disease/references/rna_references_8.1/grch37_gencode_annotation_reformated_-v31-.gtf
+trim_galore_ar: '1'
+two_pass_mode: Basic
+varianteffectpredictor: '1'
+vep_directory_cache: /path/to/rare-disease/references/rna_references_8.1/ensembl-tools-release-97/cache
+vep_features:
+  - appris
+  - biotype
+  - cache
+  - canonical
+  - ccds
+  - domains
+  - exclude_predicted
+  - force_overwrite
+  - hgvs
+  - humdiv
+  - no_progress
+  - no_stats
+  - numbers
+  - merged
+  - polyphen p
+  - protein
+  - offline
+  - regulatory
+  - sift p
+  - symbol
+  - tsl
+  - uniprot
+verbose: '0'
+version_collect_ar: '1'
+with_singularity: '1'
+
