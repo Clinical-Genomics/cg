@@ -137,6 +137,11 @@ class CompressAPI:
         if set(fastq_dict.keys()) != {first_fastq_key, second_fastq_key}:
             LOG.info("Could not find pared fastq files")
             return None
+        first_prefix = fastq_dict[first_fastq_key].full_path.replace(FASTQ_FIRST_READ_SUFFIX, "")
+        second_prefix = fastq_dict[second_fastq_key].full_path.replace(FASTQ_SECOND_READ_SUFFIX, "")
+        if first_prefix != second_prefix:
+            LOG.info("FASTQ files does not have matching preffix")
+            return None
         return fastq_dict
 
     def compress_case_bams(

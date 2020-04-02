@@ -293,3 +293,35 @@ def test_is_pending(crunchy_config_dict, compressed_fastqs_pending):
 
     # THEN result should be True
     assert result
+
+
+def test_is_fastq_compression_possible(crunchy_config_dict, existing_fastq_paths):
+    """Test is_fastq_compression_possible with existing fastq files"""
+    # GIVEN existing fastq files
+    crunchy_api = CrunchyAPI(crunchy_config_dict)
+
+    # WHEN calling test_fastq_compression_possible
+    fastq_first_path = existing_fastq_paths["fastq_first_path"]
+    fastq_second_path = existing_fastq_paths["fastq_second_path"]
+    result = crunchy_api.is_fastq_compression_possible(
+        fastq_first_path=fastq_first_path, fastq_second_path=fastq_second_path
+    )
+
+    # THEN this will return True
+    assert result
+
+
+def test_is_fastq_compression_not_possible(crunchy_config_dict, fastq_paths):
+    """Test is_fastq_compression_possible without existing fastq files"""
+    # GIVEN existing fastq files
+    crunchy_api = CrunchyAPI(crunchy_config_dict)
+
+    # WHEN calling test_fastq_compression_possible
+    fastq_first_path = fastq_paths["fastq_first_path"]
+    fastq_second_path = fastq_paths["fastq_second_path"]
+    result = crunchy_api.is_fastq_compression_possible(
+        fastq_first_path=fastq_first_path, fastq_second_path=fastq_second_path
+    )
+
+    # THEN this will return True
+    assert not result
