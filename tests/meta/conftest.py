@@ -311,8 +311,9 @@ class MockPath:
 class MockLogger:
     warnings = []
 
-    def warning(self, text: str):
-        self.warnings.append(text)
+    def warning(self, text, *interpolations):
+
+        self.warnings.append(text % interpolations)
 
     def get_warnings(self) -> list:
         return self.warnings
