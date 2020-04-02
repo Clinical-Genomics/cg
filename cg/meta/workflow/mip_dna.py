@@ -39,14 +39,7 @@ COMBOS = {
     "CM": ("CNM", "CM"),
     "Horsel": ("Horsel", "141217", "141201"),
 }
-CAPTUREKIT_MAP = {
-    "Agilent Sureselect CRE": "agilent_sureselect_cre.v1",
-    "SureSelect CRE": "agilent_sureselect_cre.v1",
-    "Agilent Sureselect V5": "agilent_sureselect.v5",
-    "SureSelect Focused Exome": "agilent_sureselect_focusedexome.v1",
-    "Twist Human core exome v1.3 + Twist Human RefSeq Panel": "Twist_Target_hg19_RefSeq.bed",
-    "other": "agilent_sureselect_cre.v1",
-}
+CAPTUREKIT_MAP = {"wgs": "twistexomerefseq_9.1_hg19_design.bed"}
 
 
 class AnalysisAPI:
@@ -144,13 +137,12 @@ class AnalysisAPI:
         for link in family_obj.links:
             sample_data = self._get_sample_data(link)
             if sample_data["analysis_type"] in ("tgs", "wes"):
-                if link.sample.capture_kit:
-                    sample_data["capture_kit"] = get_target_bed_from_lims(
-                        self.lims, self.db, link.sample.internal_id
-                    )
-                else:
-                    if link.sample.downsampled_to:
-                        self.LOG.debug("%s: downsampled sample, skipping", link.sample.name)
+
+                sample_data["capture_kit"] = get_target_bed_from_lims(
+                    self.lims, self.db, link.sample.internal_id
+                )
+            else:
+                sample_data["capture_kit"] = CAPTUREKIT_MAP[sample_data["analysis_type"]]
             if link.mother:
                 sample_data["mother"] = link.mother.internal_id
             if link.father:
