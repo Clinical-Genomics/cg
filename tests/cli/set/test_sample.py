@@ -1,6 +1,4 @@
 """Test methods for cg/cli/set/sample"""
-from datetime import datetime
-
 import pytest
 from cg.cli.set import sample
 from cg.store import Store
