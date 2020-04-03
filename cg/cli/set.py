@@ -8,6 +8,8 @@ from cg.apps.lims import LimsAPI
 from cg.constants import FAMILY_ACTIONS, PRIORITY_OPTIONS, FLOWCELL_STATUS
 from cg.store import Store
 
+CONFIRM = "Continue?"
+
 LOG = logging.getLogger(__name__)
 
 
@@ -54,8 +56,10 @@ def family(context, action, priority, panels, family_id):
 
 
 @set_cmd.command()
-@click.option('-id', '--identifier', 'identifiers', nargs=2, type=click.Tuple([str, str]), multiple=True)
-@click.option('-kv', '--key-value', 'kwargs', nargs=2, type=click.Tuple([str, str]), multiple=True)
+@click.option(
+    "-id", "--identifier", "identifiers", nargs=2, type=click.Tuple([str, str]), multiple=True
+)
+@click.option("-kv", "--key-value", "kwargs", nargs=2, type=click.Tuple([str, str]), multiple=True)
 @click.option("--skip-lims", is_flag=True, help="Skip setting value in LIMS")
 @click.option("-y", "--yes", is_flag=True, help="Answer yes on all confirmations")
 @click.pass_context
@@ -72,17 +76,18 @@ def samples(context, identifiers, kwargs, skip_lims, yes):
     for sample_obj in samples_objs:
         click.echo(f"{sample_obj}")
 
-    if not (yes or click.confirm("Continue?")):
+    if not (yes or click.confirm(CONFIRM)):
         context.abort()
 
     for sample_obj in samples_objs:
-        context.invoke(sample, sample_id=sample_obj.internal_id, kwargs=kwargs, yes=yes,
-                       skip_lims=skip_lims)
+        context.invoke(
+            sample, sample_id=sample_obj.internal_id, kwargs=kwargs, yes=yes, skip_lims=skip_lims
+        )
 
 
 @set_cmd.command()
 @click.argument("sample_id")
-@click.option('-kv', '--key-value', 'kwargs', nargs=2, type=click.Tuple([str, str]), multiple=True)
+@click.option("-kv", "--key-value", "kwargs", nargs=2, type=click.Tuple([str, str]), multiple=True)
 @click.option("--skip-lims", is_flag=True, help="Skip setting value in LIMS")
 @click.option("-y", "--yes", is_flag=True, help="Answer yes on all confirmations")
 @click.pass_context
@@ -122,7 +127,7 @@ def sample(context, sample_id, kwargs, skip_lims, yes):
 
         click.echo(f"Would change from {key}={old_value} to {key}={new_value} on {sample_obj}")
 
-        if not (yes or click.confirm("Continue?")):
+        if not (yes or click.confirm(CONFIRM)):
             context.abort()
 
         setattr(sample_obj, key, new_value)
@@ -134,7 +139,7 @@ def sample(context, sample_id, kwargs, skip_lims, yes):
         for key, value in kwargs:
             click.echo(f"Would set {key} to {value} for {sample_obj.internal_id} in LIMS")
 
-            if not (yes or click.confirm("Continue?")):
+            if not (yes or click.confirm(CONFIRM)):
                 context.abort()
 
             context.obj["lims"].update_sample(lims_id=sample_id, **{key: value})
