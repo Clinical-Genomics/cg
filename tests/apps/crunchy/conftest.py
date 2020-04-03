@@ -242,11 +242,11 @@ def sbatch_content_spring(fastq_paths, crunchy_config_dict):
     mem = 2
     mail_user = crunchy_config_dict["crunchy"]["slurm"]["mail_user"]
     conda_env = crunchy_config_dict["crunchy"]["slurm"]["conda_env"]
-    fastq_first_path = str(fastq_paths["fastq_first_path"])
-    fastq_second_path = str(fastq_paths["fastq_second_path"])
-    spring_path = fastq_first_path.replace(FASTQ_FIRST_READ_SUFFIX, ".spring")
-    flag_path = fastq_first_path.replace(FASTQ_FIRST_READ_SUFFIX, ".crunchy.txt")
-    pending_path = fastq_first_path.replace(FASTQ_FIRST_READ_SUFFIX, ".crunchy.pending.txt")
+    fastq_first = str(fastq_paths["fastq_first_path"])
+    fastq_second = str(fastq_paths["fastq_second_path"])
+    spring_path = fastq_first.replace(FASTQ_FIRST_READ_SUFFIX, ".spring")
+    flag_path = fastq_first.replace(FASTQ_FIRST_READ_SUFFIX, ".crunchy.txt")
+    pending_path = fastq_first.replace(FASTQ_FIRST_READ_SUFFIX, ".crunchy.pending.txt")
     log_dir = fastq_paths["fastq_first_path"].parent
 
     _content = f"""#!/bin/bash
@@ -285,7 +285,7 @@ error() {{
 trap error ERR
 
 touch {pending_path}
-crunchy -t 12 compress fastq -f {fastq_first_path} -s {fastq_second_path} -o {spring_path} --check-integrity
+crunchy -t 12 compress fastq -f {fastq_first} -s {fastq_second} -o {spring_path} --check-integrity
 touch {flag_path}
 rm {pending_path}"""
 
