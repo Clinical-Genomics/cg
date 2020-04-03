@@ -79,7 +79,7 @@ error() {{
 trap error ERR
 
 touch {pending_path}
-crunchy -t 12 compress fastq -f {fastq_first_path} -s {fastq_second_path} -o {spring_path} --check-integrity
+crunchy -t 12 compress fastq -f {fastq_first} -s {fastq_second} -o {spring_path} --check-integrity
 touch {flag_path}
 rm {pending_path}"""
 
@@ -385,8 +385,8 @@ class CrunchyAPI:
         pending_path: str,
     ) -> str:
         sbatch_body = SBATCH_SPRING.format(
-            fastq_first_path=fastq_first_path,
-            fastq_second_path=fastq_second_path,
+            fastq_first=fastq_first_path,
+            fastq_second=fastq_second_path,
             spring_path=spring_path,
             flag_path=flag_path,
             pending_path=pending_path,

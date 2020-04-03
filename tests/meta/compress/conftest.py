@@ -6,6 +6,7 @@ import pytest
 
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.scoutapi import ScoutAPI
+from cg.constants import FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX
 from cg.meta.compress import CompressAPI
 from tests.mocks.hk_mock import MockFile
 
@@ -75,6 +76,22 @@ def fixture_bam_files(compress_test_dir):
 
 
 @pytest.fixture(scope="function")
+def fastq_files(compress_test_dir):
+    """Fixture for temporary fastq-files"""
+    sample_1_dir = compress_test_dir / "sample_1"
+    sample_1_dir.mkdir()
+    fastq_first_file = sample_1_dir / f"sample{FASTQ_FIRST_READ_SUFFIX}"
+    fastq_second_file = sample_1_dir / f"sample{FASTQ_SECOND_READ_SUFFIX}"
+    fastq_first_file.touch()
+    fastq_second_file.touch()
+
+    return {
+        "fastq_first_path": fastq_first_file,
+        "fastq_second_path": fastq_second_file,
+    }
+
+
+@pytest.fixture(scope="function")
 def compress_hk_bundle(bam_files, case_id, timestamp):
     """hk file list fixture"""
     hk_bundle_data = {
@@ -96,6 +113,17 @@ def compress_hk_bundle(bam_files, case_id, timestamp):
         hk_bundle_data["files"].append(bai_file_info)
 
     return hk_bundle_data
+
+
+@pytest.fixture(scope="function")
+def fastq_files_hk_list(fastq_files):
+    """hk file list fixture"""
+    _hk_fastq_list = []
+
+    for _, fastq_file in fastq_files.items():
+        _hk_fastq_list.append(MockFile(path=fastq_file))
+
+    return _hk_fastq_list
 
 
 @pytest.fixture(scope="function")

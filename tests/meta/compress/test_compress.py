@@ -120,3 +120,20 @@ def test_remove_bams(compress_api, bam_dict, mock_compress_func):
         assert Path(files["cram"].full_path).exists()
         assert Path(files["crai"].full_path).exists()
         assert not Path(files["flag"].full_path).exists()
+
+
+#######
+
+
+def test_get_fastq_files(compress_api, fastq_files_hk_list, mocker):
+    """test get_bam_files method"""
+
+    # GIVEN a case id
+    sample_id = "test_sample"
+    mocker.patch.object(HousekeeperAPI, "get_files", return_value=fastq_files_hk_list)
+
+    # WHEN getting bam-files
+    fastq_dict = compress_api.get_fastq_files(sample_id=sample_id)
+
+    # THEN the bam-files for the samples will be in the dictionary
+    assert set(fastq_dict.keys()) == set(["fastq_first_file", "fastq_second_file"])
