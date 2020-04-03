@@ -112,7 +112,7 @@ def test_customer(cli_runner, base_context, base_store: Store):
     assert base_store.Sample.query.first().customer.internal_id == customer_id
 
 
-def test_invalid_downsampled_to(cli_runner, base_context, base_store: Store):
+def test_invalid_downsampled_to(cli_runner, base_context):
     # GIVEN a database with a sample
     downsampled_to = "downsampled_to"
 
