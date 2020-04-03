@@ -3,7 +3,7 @@ from datetime import datetime
 
 from cg.cli.set import family
 from cg.store import Store
-from tests.store_helpers import ensure_customer, add_family, ensure_panel
+from tests.store_helpers import add_family, ensure_panel
 
 SUCCESS = 0
 
