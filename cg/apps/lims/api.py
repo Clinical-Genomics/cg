@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+"""Contains API to communicate with LIMS"""
 import datetime as dt
 import logging
 
@@ -6,12 +6,12 @@ from genologics.entities import Sample, Process, Project
 from genologics.lims import Lims
 from dateutil.parser import parse as parse_date
 
+# fixes https://github.com/Clinical-Genomics/servers/issues/30
+import requests_cache
+
 from cg.exc import LimsDataError
 from .constants import PROP2UDF, MASTER_STEPS_UDFS, PROCESSES
 from .order import OrderHandler
-
-# fixes https://github.com/Clinical-Genomics/servers/issues/30
-import requests_cache
 
 requests_cache.install_cache(backend="memory")
 
@@ -32,10 +32,12 @@ AM_METHODS = {
 }
 METHOD_INDEX, METHOD_NUMBER_INDEX, METHOD_VERSION_INDEX = 0, 1, 2
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 class LimsAPI(Lims, OrderHandler):
+    """API to communicate with LIMS"""
+
     def __init__(self, config):
         lconf = config["lims"]
         super(LimsAPI, self).__init__(lconf["host"], lconf["username"], lconf["password"])
@@ -93,7 +95,7 @@ class LimsAPI(Lims, OrderHandler):
         try:
             input_artifact = Sample(self, id=lims_id).artifact
         except OSError as err:
-            log.warning(err)
+            LOG.warning(err)
             return None
 
         step_names_udfs = MASTER_STEPS_UDFS["received_step"]
@@ -130,7 +132,7 @@ class LimsAPI(Lims, OrderHandler):
         )
 
         if len(delivered_dates) > 1:
-            log.warning("multiple delivery artifacts found for: %s", lims_id)
+            LOG.warning("multiple delivery artifacts found for: %s", lims_id)
 
         delivered_date = self._most_recent_date(delivered_dates)
 
@@ -155,7 +157,7 @@ class LimsAPI(Lims, OrderHandler):
             )
 
         if len(sequenced_dates) > 1:
-            log.warning("multiple sequence artifacts found for: %s", lims_id)
+            LOG.warning("multiple sequence artifacts found for: %s", lims_id)
 
         sequenced_date = self._most_recent_date(sequenced_dates)
 
@@ -169,18 +171,19 @@ class LimsAPI(Lims, OrderHandler):
 
         lims_sample = Sample(self, id=lims_id)
         capture_kit = lims_sample.udf.get("Capture Library version")
+
         if capture_kit and capture_kit != "NA":
             return capture_kit
-        else:
-            for process_type in step_names_udfs:
-                artifacts = self.get_artifacts(
-                    samplelimsid=lims_id, process_type=process_type, type="Analyte"
-                )
-                udf_key = step_names_udfs[process_type]
-                capture_kits = capture_kits.union(
-                    self._find_capture_kits(artifacts, udf_key)
-                    or self._find_twist_capture_kits(artifacts, udf_key)
-                )
+
+        for process_type in step_names_udfs:
+            artifacts = self.get_artifacts(
+                samplelimsid=lims_id, process_type=process_type, type="Analyte"
+            )
+            udf_key = step_names_udfs[process_type]
+            capture_kits = capture_kits.union(
+                self._find_capture_kits(artifacts, udf_key)
+                or self._find_twist_capture_kits(artifacts, udf_key)
+            )
 
         if len(capture_kits) > 1:
             message = f"Capture kit error: {lims_sample.id} | {capture_kits}"
