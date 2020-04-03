@@ -38,22 +38,25 @@ def ensure_bed_version(disk_store, bed_name="dummy_bed"):
     return version
 
 
-def ensure_customer(disk_store, customer_id="cust_test"):
+def ensure_customer(store, customer_id="cust_test"):
     """utility function to return existing or create customer for tests"""
-    customer_group = disk_store.customer_group("dummy_group")
+    customer_group_id = customer_id + "_group"
+    customer_group = store.customer_group(customer_group_id)
     if not customer_group:
-        customer_group = disk_store.add_customer_group("dummy_group", "dummy group")
+        customer_group = store.add_customer_group(customer_group_id, customer_group_id)
 
-        customer = disk_store.add_customer(
+    customer = store.customer(customer_id)
+
+    if not customer:
+        customer = store.add_customer(
             internal_id=customer_id,
-            name="Test Customer",
+            name=customer_id + "_name",
             scout_access=False,
             customer_group=customer_group,
             invoice_address="dummy_address",
             invoice_reference="dummy_reference",
         )
-        disk_store.add_commit(customer)
-    customer = disk_store.customer(customer_id)
+        store.add_commit(customer)
     return customer
 
 
