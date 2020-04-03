@@ -39,16 +39,16 @@ def family(context, action, priority, panels, family_id):
         family_obj.action = action
     if priority:
         message = f"update priority: {family_obj.priority_human} -> {priority}"
-        print(click.style(message, fg="blue"))
+        click.echo(click.style(message, fg="blue"))
         family_obj.priority_human = priority
     if panels:
         for panel_id in panels:
             panel_obj = context.obj["status"].panel(panel_id)
             if panel_obj is None:
-                print(click.style(f"unknown gene panel: {panel_id}", fg="red"))
+                click.echo(click.style(f"unknown gene panel: {panel_id}", fg="red"))
                 context.abort()
         message = f"update panels: {', '.join(family_obj.panels)} -> {', '.join(panels)}"
-        print(click.style(message, fg="blue"))
+        click.echo(click.style(message, fg="blue"))
         family_obj.panels = panels
     context.obj["status"].commit()
 
@@ -355,13 +355,13 @@ def flowcell(context, flowcell_name, status):
     flowcell_obj = context.obj["status"].flowcell(flowcell_name)
 
     if flowcell_obj is None:
-        print(click.style(f"flowcell not found: {flowcell_name}", fg="yellow"))
+        click.echo(click.style(f"flowcell not found: {flowcell_name}", fg="yellow"))
         context.abort()
     prev_status = flowcell_obj.status
     flowcell_obj.status = status
 
     context.obj["status"].commit()
-    print(click.style(f"{flowcell_name} set: {prev_status} -> {status}", fg="green"))
+    click.echo(click.style(f"{flowcell_name} set: {prev_status} -> {status}", fg="green"))
 
 
 @set_cmd.command("microbial-order")
