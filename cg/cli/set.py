@@ -59,7 +59,7 @@ def family(context, action, priority, panels, family_id):
 @click.option("--skip-lims", is_flag=True, help="Skip setting value in LIMS")
 @click.option("-y", "--yes", is_flag=True, help="Answer yes on all confirmations")
 @click.pass_context
-def samples(context, identifiers, kwargs, kip_lims, yes):
+def samples(context, identifiers, kwargs, skip_lims, yes):
 
     identifier_args = {}
     for identifier_name, identifier_value in identifiers:
@@ -76,7 +76,8 @@ def samples(context, identifiers, kwargs, kip_lims, yes):
         context.abort()
 
     for sample_obj in samples_objs:
-        context.invoke(sample, sample_id=sample_obj.internal_id, kwargs=kwargs)
+        context.invoke(sample, sample_id=sample_obj.internal_id, kwargs=kwargs, yes=yes,
+                       skip_lims=skip_lims)
 
 
 @set_cmd.command()
@@ -101,30 +102,31 @@ def sample(context, sample_id, kwargs, skip_lims, yes):
 
     for key, value in kwargs:
 
+        new_value = None
         if not hasattr(sample_obj, key):
             click.echo(click.style(f"{key} is not a property of sample", fg="yellow"))
             continue
-        elif key in ["customer", "application"]:
-            if key == ["customer"]:
+        elif key in ["customer", "application_version"]:
+            if key == "customer":
                 new_value = context.obj["status"].customer(value)
-            elif key == ["application"]:
+            elif key == "application_version":
                 new_value = context.obj["status"].current_application_version(value)
 
             if not new_value:
                 click.echo(click.style(f"{key} {value} not found, aborting", fg="red"))
-                continue
+                context.abort()
         else:
             new_value = value
 
         old_value = getattr(sample_obj, key)
 
-        click.echo(f"Would change from {key}={old_value} to {key}={value} on {sample_obj}")
+        click.echo(f"Would change from {key}={old_value} to {key}={new_value} on {sample_obj}")
 
         if not (yes or click.confirm("Continue?")):
             context.abort()
 
         setattr(sample_obj, key, new_value)
-        _update_comment(_generate_comment(key, old_value, value), sample_obj)
+        _update_comment(_generate_comment(key, old_value, new_value), sample_obj)
         context.obj["status"].commit()
 
     if not skip_lims:
