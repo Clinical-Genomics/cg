@@ -111,7 +111,7 @@ def sample(context, sample_id, kwargs, skip_lims, yes):
         if not hasattr(sample_obj, key):
             click.echo(click.style(f"{key} is not a property of sample", fg="yellow"))
             continue
-        elif key in ["customer", "application_version"]:
+        if key in ["customer", "application_version"]:
             if key == "customer":
                 new_value = context.obj["status"].customer(value)
             elif key == "application_version":
