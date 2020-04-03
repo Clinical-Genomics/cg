@@ -1,7 +1,6 @@
 """Set data in the status database and LIMS"""
 import datetime
 import getpass
-import logging
 
 import click
 from cg.apps.lims import LimsAPI
@@ -9,8 +8,6 @@ from cg.constants import FAMILY_ACTIONS, PRIORITY_OPTIONS, FLOWCELL_STATUS
 from cg.store import Store
 
 CONFIRM = "Continue?"
-
-LOG = logging.getLogger(__name__)
 
 
 @click.group("set")
@@ -31,13 +28,15 @@ def family(context, action, priority, panels, family_id):
     """Update information about a family."""
     family_obj = context.obj["status"].family(family_id)
     if family_obj is None:
-        LOG.error(f"{family_id}: family not found")
+        click.echo(click.style(f"Can't find family {family_id}", fg="red"))
         context.abort()
     if not (action or priority or panels):
-        LOG.error(f"nothing to change")
+        click.echo(click.style(f"Nothing to change", fg="yellow"))
         context.abort()
     if action:
-        LOG.info(f"update action: {family_obj.action or 'NA'} -> {action}")
+        click.echo(
+            click.style(f"Update action: {family_obj.action or 'NA'} -> {action}", fg="green")
+        )
         family_obj.action = action
     if priority:
         message = f"update priority: {family_obj.priority_human} -> {priority}"
