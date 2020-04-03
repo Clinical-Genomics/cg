@@ -32,11 +32,7 @@ class MockLims(LimsAPI):
         """Method to help test that update project was called with name parameter"""
         return self._project_name
 
-    def update_sample(
-        self,
-        lims_id: str,
-        **kwargs
-    ):
+    def update_sample(self, lims_id: str, **kwargs):
         """Mock lims update_sample"""
         for key, value in kwargs.items():
             # n.b. only works when len(kwargs)==1
