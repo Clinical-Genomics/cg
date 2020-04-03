@@ -56,9 +56,23 @@ def family(context, action, priority, panels, family_id):
 
 @set_cmd.command()
 @click.option(
-    "-id", "--identifier", "identifiers", nargs=2, type=click.Tuple([str, str]), multiple=True
+    "-id",
+    "--identifier",
+    "identifiers",
+    nargs=2,
+    type=click.Tuple([str, str]),
+    multiple=True,
+    help="Give an identifier on sample and the value to use it with, e.g. -id name Prov52",
 )
-@click.option("-kv", "--key-value", "kwargs", nargs=2, type=click.Tuple([str, str]), multiple=True)
+@click.option(
+    "-kv",
+    "--key-value",
+    "kwargs",
+    nargs=2,
+    type=click.Tuple([str, str]),
+    multiple=True,
+    help="Give a property on sample and the value to set it to, e.g. -kv name Prov52",
+)
 @click.option("--skip-lims", is_flag=True, help="Skip setting value in LIMS")
 @click.option("-y", "--yes", is_flag=True, help="Answer yes on all confirmations")
 @click.pass_context
@@ -86,7 +100,15 @@ def samples(context, identifiers, kwargs, skip_lims, yes):
 
 @set_cmd.command()
 @click.argument("sample_id")
-@click.option("-kv", "--key-value", "kwargs", nargs=2, type=click.Tuple([str, str]), multiple=True)
+@click.option(
+    "-kv",
+    "--key-value",
+    "kwargs",
+    nargs=2,
+    type=click.Tuple([str, str]),
+    multiple=True,
+    help="Give a property on sample and the value to set it to, e.g. -kv name Prov52",
+)
 @click.option("--skip-lims", is_flag=True, help="Skip setting value in LIMS")
 @click.option("-y", "--yes", is_flag=True, help="Answer yes on all confirmations")
 @click.pass_context
