@@ -1,6 +1,7 @@
 """Test methods for cg/cli/set/sample"""
 from datetime import datetime
 
+import pytest
 from cg.cli.set import sample
 from cg.store import Store
 
@@ -18,38 +19,68 @@ def test_set_sample_invalid_sample(cli_runner, base_context):
     assert result.exit_code != SUCCESS
 
 
-def test_set_sample_name(cli_runner, base_context, base_store: Store):
-    # GIVEN a database with a female sample
+def test_skip_lims(cli_runner, base_context, base_store: Store):
+    # GIVEN a database with a sample
 
-    sample_id = add_sample(base_store, sex="female").internal_id
-    new_name = "urban"
-    assert base_store.Sample.query.first().name != new_name
+    sample_obj = add_sample(base_store, sex="female")
+    key = "name"
+    new_value = "new_value"
 
-    # WHEN setting sex on sample to 'urban'
+    # WHEN setting sample but skipping lims
     result = cli_runner.invoke(
-        sample, [sample_id, "--name", new_name], obj=base_context
+        sample, [sample_obj.internal_id, "-kv", 'name', 'dummu_value', "-y", "--skip-lims"],
+        obj=base_context
     )
 
-    # THEN then it should have 'urban' as name
+    # THEN update sample should have no recorded update key and value
     assert result.exit_code == SUCCESS
-    assert base_store.Sample.query.first().name == new_name
-    assert base_context["lims"].get_updated_sample_name() == new_name
+    assert base_context["lims"].get_updated_sample_key() != key
+    assert base_context["lims"].get_updated_sample_value() != new_value
+
+
+@pytest.mark.parametrize(
+    "key",
+    ["name", "capture_kit"],
+)
+def test_set_sample(cli_runner, base_context, base_store: Store, key):
+    # GIVEN a database with a sample
+
+    sample_obj = add_sample(base_store, sex="female")
+    new_value = "new_value"
+    assert getattr(sample_obj, key) != new_value
+
+    # WHEN setting key on sample to new_value
+    result = cli_runner.invoke(
+        sample, [sample_obj.internal_id, "-kv", key, new_value, "-y"],
+        obj=base_context, catch_exceptions=False
+    )
+
+    # THEN then it should have new_value as attribute key on the sample and in LIMS
+    assert result.exit_code == SUCCESS
+    assert getattr(sample_obj, key) == new_value
+    assert base_context["lims"].get_updated_sample_key() == key
+    assert base_context["lims"].get_updated_sample_value() == new_value
 
 
 def test_set_sample_sex(cli_runner, base_context, base_store: Store):
-    # GIVEN a database with a female sample
+    # GIVEN a database with a sample
 
-    sample_id = add_sample(base_store, sex="female").internal_id
-    new_sex = "male"
-    assert base_store.Sample.query.first().sex != new_sex
+    sample_obj = add_sample(base_store, sex="female")
+    key = "sex"
+    new_value = "male"
+    assert getattr(sample_obj, key) != new_value
 
-    # WHEN setting sex on sample to male
-    result = cli_runner.invoke(sample, [sample_id, "--sex", new_sex], obj=base_context)
+    # WHEN setting key on sample to new_value
+    result = cli_runner.invoke(
+        sample, [sample_obj.internal_id, "-kv", key, new_value, "-y"],
+        obj=base_context
+    )
 
-    # THEN then it should have 'male' as sex
+    # THEN then it should have new_value as attribute key on the sample and in LIMS
     assert result.exit_code == SUCCESS
-    assert base_store.Sample.query.first().sex == new_sex
-    assert base_context["lims"].get_updated_sample_sex() == new_sex
+    assert getattr(sample_obj, key) == new_value
+    assert base_context["lims"].get_updated_sample_key() == key
+    assert base_context["lims"].get_updated_sample_value() == new_value
 
 
 def test_set_sample_invalid_customer(cli_runner, base_context, base_store: Store):
@@ -59,7 +90,9 @@ def test_set_sample_invalid_customer(cli_runner, base_context, base_store: Store
     assert base_store.Sample.query.first().customer.internal_id != customer_id
 
     # WHEN calling set sample with an invalid customer
-    result = cli_runner.invoke(sample, [sample_id, "-c", customer_id], obj=base_context)
+    result = cli_runner.invoke(sample, [sample_id, "-kv", "customer", customer_id, "-y",
+                                        "--skip-lims"],
+                               obj=base_context, catch_exceptions=False)
 
     # THEN then it should warn about missing customer instead of setting the value
     assert result.exit_code == SUCCESS
@@ -73,46 +106,13 @@ def test_set_sample_customer(cli_runner, base_context, base_store: Store):
     assert base_store.Sample.query.first().customer.internal_id != customer_id
 
     # WHEN calling set sample with a valid customer
-    result = cli_runner.invoke(sample, [sample_id, "-c", customer_id], obj=base_context)
+    result = cli_runner.invoke(sample, [sample_id, "-kv", "customer", customer_id, "-y",
+                                        "--skip-lims"],
+                               obj=base_context, catch_exceptions=False)
 
     # THEN then it should set the customer of the sample
     assert result.exit_code == SUCCESS
     assert base_store.Sample.query.first().customer.internal_id == customer_id
-
-
-def test_set_sample_comment(cli_runner, base_context, base_store: Store):
-    # GIVEN a database with a sample without a comment
-    sample_id = add_sample(base_store).internal_id
-    comment = "comment"
-    assert comment not in (base_store.Sample.query.first().comment or [])
-
-    # WHEN calling set sample with a valid comment
-    result = cli_runner.invoke(sample, [sample_id, "-C", comment], obj=base_context)
-
-    # THEN then it should add the comment to the sample
-    assert result.exit_code == SUCCESS
-    assert comment in base_store.Sample.query.first().comment
-
-
-def test_set_sample_second_comment(cli_runner, base_context, base_store: Store):
-    # GIVEN a database with a sample that has a comment
-    sample_id = add_sample(base_store).internal_id
-    comment = "comment"
-    second_comment = "comment2"
-    cli_runner.invoke(sample, [sample_id, "-C", comment], obj=base_context)
-
-    assert comment in base_store.Sample.query.first().comment
-    assert second_comment not in base_store.Sample.query.first().comment
-
-    # WHEN calling set sample with second comment
-    result = cli_runner.invoke(
-        sample, [sample_id, "-C", second_comment], obj=base_context
-    )
-
-    # THEN then it should add the second comment to the samples comments
-    assert result.exit_code == SUCCESS
-    assert comment in base_store.Sample.query.first().comment
-    assert second_comment in base_store.Sample.query.first().comment
 
 
 def test_set_sample_invalid_downsampled_to(cli_runner, base_context, base_store: Store):
@@ -121,7 +121,7 @@ def test_set_sample_invalid_downsampled_to(cli_runner, base_context, base_store:
 
     # WHEN calling set sample with an invalid value of downsampled to
     result = cli_runner.invoke(
-        sample, ["dummy_sample_id", "-d", downsampled_to], obj=base_context
+        sample, ["dummy_sample_id", "-kv", "downsampled_to", downsampled_to, "-y"], obj=base_context
     )
 
     # THEN wrong data type
@@ -136,7 +136,7 @@ def test_set_sample_downsampled_to(cli_runner, base_context, base_store: Store):
 
     # WHEN calling set sample with a valid value of downsampled to
     result = cli_runner.invoke(
-        sample, [sample_id, "-d", downsampled_to], obj=base_context
+        sample, [sample_id, "-kv", "downsampled_to", downsampled_to, "-y"], obj=base_context
     )
 
     # THEN then the value should have been set on the sample
@@ -152,7 +152,7 @@ def test_set_sample_reset_downsampled_to(cli_runner, base_context, base_store: S
 
     # WHEN calling set sample with a valid reset value of downsampled to
     result = cli_runner.invoke(
-        sample, [sample_id, "-d", downsampled_to], obj=base_context
+        sample, [sample_id, "-kv", "downsampled_to", "", "-y"], obj=base_context
     )
 
     # THEN then the value should have been set on the sample
@@ -171,7 +171,7 @@ def test_set_sample_invalid_application(cli_runner, base_context, base_store: St
 
     # WHEN calling set sample with an invalid application
     result = cli_runner.invoke(
-        sample, [sample_id, "-a", application_tag], obj=base_context
+        sample, [sample_id, "-kv", "application", application_tag, "-y", "--skip-lims"], obj=base_context
     )
 
     # THEN then it should warn about missing application instead of setting the value
@@ -195,7 +195,8 @@ def test_set_sample_application(cli_runner, base_context, base_store: Store):
 
     # WHEN calling set sample with an invalid application
     result = cli_runner.invoke(
-        sample, [sample_id, "-a", application_tag], obj=base_context
+        sample, [sample_id, "-kv", "application", application_tag, "-y", "--skip-lims"],
+        obj=base_context, catch_exceptions=False
     )
 
     # THEN then the application should have been set
@@ -204,20 +205,6 @@ def test_set_sample_application(cli_runner, base_context, base_store: Store):
         base_store.Sample.query.first().application_version.application.tag
         == application_tag
     )
-
-
-def test_set_sample_capture_kit(cli_runner, base_context, base_store: Store):
-    # GIVEN a database with a sample
-    sample_id = add_sample(base_store).internal_id
-    capture_kit = "capture_kit"
-    assert base_store.Sample.query.first().capture_kit != capture_kit
-
-    # WHEN calling set sample with a valid capture_kit
-    result = cli_runner.invoke(sample, [sample_id, "-k", capture_kit], obj=base_context)
-
-    # THEN then it should be added
-    assert result.exit_code == SUCCESS
-    assert base_store.Sample.query.first().capture_kit == capture_kit
 
 
 def ensure_application_version(store, application_tag="dummy_tag"):

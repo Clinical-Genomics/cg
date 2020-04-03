@@ -265,28 +265,27 @@ class LimsAPI(Lims, OrderHandler):
         self,
         lims_id: str,
         sex=None,
-        application: str = None,
         target_reads: int = None,
-        priority=None,
-        data_analysis=None,
         name: str = None,
+        **kwargs
     ):
         """Update information about a sample."""
         lims_sample = Sample(self, id=lims_id)
+
         if sex:
             lims_gender = REV_SEX_MAP.get(sex)
             if lims_gender:
                 lims_sample.udf[PROP2UDF["sex"]] = lims_gender
-        if application:
-            lims_sample.udf[PROP2UDF["application"]] = application
-        if isinstance(target_reads, int):
-            lims_sample.udf[PROP2UDF["target_reads"]] = target_reads
-        if priority:
-            lims_sample.udf[PROP2UDF["priority"]] = priority
-        if data_analysis:
-            lims_sample.udf[PROP2UDF["data_analysis"]] = data_analysis
         if name:
             lims_sample.name = name
+        if isinstance(target_reads, int):
+            lims_sample.udf[PROP2UDF["target_reads"]] = target_reads
+
+        for key, value in kwargs.items():
+            if not PROP2UDF.get(key):
+                raise LimsDataError(f"Unknown how to set {key} in LIMS since it is not defined in"
+                                    f" {PROP2UDF}")
+            lims_sample.udf[PROP2UDF[key]] = value
 
         lims_sample.put()
 

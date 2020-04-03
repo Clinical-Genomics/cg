@@ -21,34 +21,32 @@ class MockLims(LimsAPI):
         self.lims = self
 
     _project_name = None
-    _sample_sex = None
-    _sample_name = None
+    _updated_key = None
+    _updated_value = None
 
     def update_project(self, lims_id: str, name=None):
         """Mock lims update_project"""
         self._project_name = name
 
     def get_updated_project_name(self) -> str:
-        """Method to test that update project was called with name parameter"""
+        """Method to help test that update project was called with name parameter"""
         return self._project_name
 
     def update_sample(
         self,
         lims_id: str,
-        sex=None,
-        application: str = None,
-        target_reads: int = None,
-        priority=None,
-        name=None,
+        **kwargs
     ):
         """Mock lims update_sample"""
-        self._sample_sex = sex
-        self._sample_name = name
+        for key, value in kwargs.items():
+            # n.b. only works when len(kwargs)==1
+            self._updated_key = key
+            self._updated_value = value
 
-    def get_updated_sample_sex(self) -> str:
-        """Method to be used to test that update_sample was called with sex parameter"""
-        return self._sample_sex
+    def get_updated_sample_key(self) -> str:
+        """Method to help test that update sample was called with key parameter"""
+        return self._updated_key
 
-    def get_updated_sample_name(self) -> str:
-        """Method to be used to test that update_sample was called with name parameter"""
-        return self._sample_name
+    def get_updated_sample_value(self) -> str:
+        """Method to help test that update sample was called with value"""
+        return self._updated_value

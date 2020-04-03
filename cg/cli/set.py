@@ -54,191 +54,281 @@ def family(context, action, priority, panels, family_id):
 
 
 @set_cmd.command()
-@click.option("-s", "--sex", type=click.Choice(["male", "female", "unknown"]))
-@click.option("-c", "--customer", help="updates customer, input format custXXX.")
-@click.option(
-    "-C",
-    "--add-comment",
-    "comment",
-    type=str,
-    help="adds a note/comment to a sample, "
-    "put text between quotation marks! "
-    "This will not overwrite the "
-    "current comment.",
-)
-@click.option(
-    "-d",
-    "--downsampled-to",
-    type=int,
-    help="sets number of downsampled \
-              total reads. Enter 0 to reset.",
-)
-@click.option("-a", "--application-tag", "apptag", help="sets application tag.")
-@click.option("-k", "--capture-kit", help="sets capture kit.")
-@click.option("--data-analysis", help="sets data-analysis.")
-@click.option("-n", "--name", help="sets name.")
+@click.option('-id', '--identifier', 'identifiers', nargs=2, type=click.Tuple([str, str]), multiple=True)
+@click.option('-kv', '--key-value', 'kwargs', nargs=2, type=click.Tuple([str, str]), multiple=True)
 @click.option("--skip-lims", is_flag=True, help="Skip setting value in LIMS")
-@click.argument("sample_id")
+@click.option("-y", "--yes", is_flag=True, help="Answer yes on all confirmations")
 @click.pass_context
-def sample(
-    context,
-    sex,
-    customer,
-    comment,
-    downsampled_to,
-    apptag,
-    capture_kit,
-    data_analysis,
-    name,
-    sample_id,
-    skip_lims,
-):
-    """Update information about a sample."""
-    sample_obj = context.obj["status"].sample(sample_id)
+def samples(context, identifiers, kwargs, kip_lims, yes):
+
+    identifier_args = {}
+    for identifier_name, identifier_value in identifiers:
+        identifier_args[identifier_name] = identifier_value
+
+    samples_objs = context.obj["status"].samples_by_ids(**identifier_args)
+
+    click.echo("Would alter samples:")
+
+    for sample_obj in samples_objs:
+        click.echo(f"{sample_obj}")
+
+    if not (yes or click.confirm("Continue?")):
+        context.abort()
+
+    for sample_obj in samples_objs:
+        context.invoke(sample, sample_id=sample_obj.internal_id, kwargs=kwargs)
+
+
+@set_cmd.command()
+@click.argument("sample_id")
+@click.option('-kv', '--key-value', 'kwargs', nargs=2, type=click.Tuple([str, str]), multiple=True)
+@click.option("--skip-lims", is_flag=True, help="Skip setting value in LIMS")
+@click.option("-y", "--yes", is_flag=True, help="Answer yes on all confirmations")
+@click.pass_context
+def sample(context, sample_id, kwargs, skip_lims, yes):
+
+    sample_obj = context.obj["status"].sample(internal_id=sample_id)
 
     if sample_obj is None:
         click.echo(click.style(f"Can't find sample {sample_id}", fg="red"))
         context.abort()
-    else:
-        click.echo(click.style(f"Found sample {sample_obj.internal_id}", fg="green"))
 
-    echo_msg = ""
+    for key, _ in kwargs:
 
-    if comment:
-        echo_msg += click.style(f"\nComment added to sample", fg="green")
-    else:
-        comment = ""
+        if key in ["id", "internal_id"]:
+            click.echo(click.style(f"{key} not a changeable attribute", fg="red"))
+            context.abort()
 
-    if name:
-        if sample_obj.name != name:
-            echo_msg += click.style(
-                f"\nUpdate sample name: {sample_obj.name} -> {name}", fg="green"
-            )
-            comment += _generate_comment("Name", sample_obj.name, name)
-            sample_obj.name = name
+    for key, value in kwargs:
+
+        if not hasattr(sample_obj, key):
+            click.echo(click.style(f"{key} is not a property of sample", fg="yellow"))
+            continue
+        elif key in ["customer", "application"]:
+            if key == ["customer"]:
+                new_value = context.obj["status"].customer(value)
+            elif key == ["application"]:
+                new_value = context.obj["status"].current_application_version(value)
+
+            if not new_value:
+                click.echo(click.style(f"{key} {value} not found, aborting", fg="red"))
+                continue
         else:
-            echo_msg += click.style(f"\nSample name already: {sample_obj.name}", fg="yellow")
+            new_value = value
 
-        if not skip_lims:
-            context.obj["lims"].update_sample(sample_id, name=name)
-            click.echo(click.style(f"Set LIMS/Name to {name}", fg="blue"))
+        old_value = getattr(sample_obj, key)
 
-    if sex:
-        if sample_obj.sex != sex:
-            echo_msg += click.style(f"\nUpdate sample sex: {sample_obj.sex} -> {sex}", fg="green")
-            comment += _generate_comment("Gender", sample_obj.sex, sex)
-            sample_obj.sex = sex
-        else:
-            echo_msg += click.style(f"\nSample sex already: {sample_obj.sex}", fg="yellow")
+        click.echo(f"Would change from {key}={old_value} to {key}={value} on {sample_obj}")
 
-        if not skip_lims:
-            context.obj["lims"].update_sample(sample_id, sex=sex)
-            click.echo(click.style(f"Set LIMS/Gender to {sex}", fg="blue"))
+        if not (yes or click.confirm("Continue?")):
+            context.abort()
 
-    if customer:
-        customer_obj = context.obj["status"].customer(customer)
-        if customer_obj is None:
-            echo_msg += click.style(f"\nCan't find customer {customer}", fg="red")
-        else:
-            previous_customer_obj = context.obj["status"].customer_by_id(sample_obj.customer_id)
-            previous_customer = (
-                f"{previous_customer_obj.internal_id} " f"({previous_customer_obj.name})"
-            )
-            new_customer = f"{customer_obj.internal_id} ({customer_obj.name})"
+        setattr(sample_obj, key, new_value)
+        _update_comment(_generate_comment(key, old_value, value), sample_obj)
+        context.obj["status"].commit()
 
-            if customer_obj.id == sample_obj.customer_id:
-                echo_msg += click.style(
-                    f"\nSample already belongs to customer " f"{previous_customer}", fg="yellow"
-                )
-            else:
-                echo_msg += click.style(
-                    f"\nUpdate sample customer: {previous_customer} ->" f" {new_customer})",
-                    fg="green",
-                )
-                comment += _generate_comment(
-                    "Customer", sample_obj.customer.internal_id, customer_obj.internal_id
-                )
-                sample_obj.customer_id = customer_obj.id
+    if not skip_lims:
 
-    if downsampled_to:
-        if downsampled_to != sample_obj.downsampled_to:
-            comment += _generate_comment("Total reads", sample_obj.downsampled_to, downsampled_to)
-            sample_obj.downsampled_to = downsampled_to
-            echo_msg += click.style(
-                f"\nNumber of downsampled total reads set to {downsampled_to}.", fg="green"
-            )
-        else:
-            echo_msg += click.style(
-                f"\nSample downsampled already: {sample_obj.downsampled_to}", fg="yellow"
-            )
+        for key, value in kwargs:
+            click.echo(f"Would set {key} to {value} for {sample_obj.internal_id} in LIMS")
 
-    if downsampled_to == 0:
-        if sample_obj.downsampled_to:
-            comment += _generate_comment("Total reads", sample_obj.downsampled_to, None)
-            sample_obj.downsampled_to = None
-            echo_msg += click.style(f"\nResetting downsampled total reads.", fg="green")
-        else:
-            echo_msg += click.style(
-                f"\nSample downsampled already: {sample_obj.downsampled_to}", fg="yellow"
-            )
+            if not (yes or click.confirm("Continue?")):
+                context.abort()
 
-    if apptag:
-        apptags = [app.tag for app in context.obj["status"].applications()]
-        if apptag not in apptags:
-            echo_msg += click.style(f"\nApplication tag {apptag} does not exist.", fg="red")
-        else:
-            application_version = context.obj["status"].current_application_version(apptag)
-            if application_version is None:
-                echo_msg += click.style(f"\nNo valid current application version found!", fg="red")
-            else:
-                application_version_id = application_version.id
+            context.obj["lims"].update_sample(lims_id=sample_id, **{key: value})
+            click.echo(click.style(f"Set LIMS/{key} to {value}", fg="blue"))
 
-                if sample_obj.application_version_id == application_version_id:
-                    echo_msg += click.style(
-                        f"\nSample already has the application tag {str(application_version)}.",
-                        fg="yellow",
-                    )
-                else:
-                    comment += _generate_comment(
-                        "Application tag", sample_obj.application_version_id, application_version_id
-                    )
-                    sample_obj.application_version_id = application_version_id
-                    echo_msg += click.style(
-                        f"\nApplication tag set to {str(application_version)}.", fg="green"
-                    )
 
-        if not skip_lims:
-            context.obj["lims"].update_sample(sample_id, application=apptag)
-            click.echo(click.style(f"Set LIMS/application to {apptag}", fg="blue"))
-
-    if capture_kit is not None:
-        if sample_obj.capture_kit != capture_kit:
-            comment += _generate_comment("Capture kit", sample_obj.capture_kit, capture_kit)
-            sample_obj.capture_kit = capture_kit
-            echo_msg += click.style(f"\nCapture kit {capture_kit} set", fg="green")
-        else:
-            echo_msg += click.style(
-                f"\nSample capture kit already: {sample_obj.capture_kit}", fg="yellow"
-            )
-
-    if data_analysis:
-        if data_analysis != sample_obj.data_analysis:
-            comment += _generate_comment("Data-analysis", sample_obj.data_analysis, data_analysis)
-            sample_obj.data_analysis = data_analysis
-            echo_msg += click.style(f"\nData analysis {data_analysis} set", fg="green")
-        else:
-            echo_msg += click.style(
-                f"\nSample data analysis already: {sample_obj.data_analysis}", fg="yellow"
-            )
-
-        if not skip_lims:
-            context.obj["lims"].update_sample(sample_id, data_analysis=data_analysis)
-            click.echo(click.style(f"Set LIMS/data_analysis to {data_analysis}", fg="blue"))
-
-    _update_comment(comment, sample_obj)
-    context.obj["status"].commit()
-    click.echo(echo_msg)
-
+# @set_cmd.command()
+# @click.option("-s", "--sex", type=click.Choice(["male", "female", "unknown"]))
+# @click.option("-c", "--customer", help="updates customer, input format custXXX.")
+# @click.option(
+#     "-C",
+#     "--add-comment",
+#     "comment",
+#     type=str,
+#     help="adds a note/comment to a sample, "
+#     "put text between quotation marks! "
+#     "This will not overwrite the "
+#     "current comment.",
+# )
+# @click.option(
+#     "-d",
+#     "--downsampled-to",
+#     type=int,
+#     help="sets number of downsampled \
+#               total reads. Enter 0 to reset.",
+# )
+# @click.option("-a", "--application-tag", "apptag", help="sets application tag.")
+# @click.option("-k", "--capture-kit", help="sets capture kit.")
+# @click.option("--data-analysis", help="sets data-analysis.")
+# @click.option("-n", "--name", help="sets name.")
+# @click.option("--skip-lims", is_flag=True, help="Skip setting value in LIMS")
+# @click.argument("sample_id")
+# @click.pass_context
+# def sample(
+#     context,
+#     sex,
+#     customer,
+#     comment,
+#     downsampled_to,
+#     apptag,
+#     capture_kit,
+#     data_analysis,
+#     name,
+#     sample_id,
+#     skip_lims,
+# ):
+#     """Update information about a sample."""
+#     sample_obj = context.obj["status"].sample(sample_id)
+#
+#     if sample_obj is None:
+#         click.echo(click.style(f"Can't find sample {sample_id}", fg="red"))
+#         context.abort()
+#     else:
+#         click.echo(click.style(f"Found sample {sample_obj.internal_id}", fg="green"))
+#
+#     echo_msg = ""
+#
+#     if comment:
+#         echo_msg += click.style(f"\nComment added to sample", fg="green")
+#     else:
+#         comment = ""
+#
+#     if name:
+#         if sample_obj.name != name:
+#             echo_msg += click.style(
+#                 f"\nUpdate sample name: {sample_obj.name} -> {name}", fg="green"
+#             )
+#             comment += _generate_comment("Name", sample_obj.name, name)
+#             sample_obj.name = name
+#         else:
+#             echo_msg += click.style(f"\nSample name already: {sample_obj.name}", fg="yellow")
+#
+#         if not skip_lims:
+#             context.obj["lims"].update_sample(sample_id, name=name)
+#             click.echo(click.style(f"Set LIMS/Name to {name}", fg="blue"))
+#
+#     if sex:
+#         if sample_obj.sex != sex:
+#             echo_msg += click.style(f"\nUpdate sample sex: {sample_obj.sex} -> {sex}", fg="green")
+#             comment += _generate_comment("Gender", sample_obj.sex, sex)
+#             sample_obj.sex = sex
+#         else:
+#             echo_msg += click.style(f"\nSample sex already: {sample_obj.sex}", fg="yellow")
+#
+#         if not skip_lims:
+#             context.obj["lims"].update_sample(sample_id, sex=sex)
+#             click.echo(click.style(f"Set LIMS/Gender to {sex}", fg="blue"))
+#
+#     if customer:
+#         customer_obj = context.obj["status"].customer(customer)
+#         if customer_obj is None:
+#             echo_msg += click.style(f"\nCan't find customer {customer}", fg="red")
+#         else:
+#             previous_customer_obj = context.obj["status"].customer_by_id(sample_obj.customer_id)
+#             previous_customer = (
+#                 f"{previous_customer_obj.internal_id} " f"({previous_customer_obj.name})"
+#             )
+#             new_customer = f"{customer_obj.internal_id} ({customer_obj.name})"
+#
+#             if customer_obj.id == sample_obj.customer_id:
+#                 echo_msg += click.style(
+#                     f"\nSample already belongs to customer " f"{previous_customer}", fg="yellow"
+#                 )
+#             else:
+#                 echo_msg += click.style(
+#                     f"\nUpdate sample customer: {previous_customer} ->" f" {new_customer})",
+#                     fg="green",
+#                 )
+#                 comment += _generate_comment(
+#                     "Customer", sample_obj.customer.internal_id, customer_obj.internal_id
+#                 )
+#                 sample_obj.customer_id = customer_obj.id
+#
+#     if downsampled_to:
+#         if downsampled_to != sample_obj.downsampled_to:
+#             comment += _generate_comment("Total reads", sample_obj.downsampled_to, downsampled_to)
+#             sample_obj.downsampled_to = downsampled_to
+#             echo_msg += click.style(
+#                 f"\nNumber of downsampled total reads set to {downsampled_to}.", fg="green"
+#             )
+#         else:
+#             echo_msg += click.style(
+#                 f"\nSample downsampled already: {sample_obj.downsampled_to}", fg="yellow"
+#             )
+#
+#     if downsampled_to == 0:
+#         if sample_obj.downsampled_to:
+#             comment += _generate_comment("Total reads", sample_obj.downsampled_to, None)
+#             sample_obj.downsampled_to = None
+#             echo_msg += click.style(f"\nResetting downsampled total reads.", fg="green")
+#         else:
+#             echo_msg += click.style(
+#                 f"\nSample downsampled already: {sample_obj.downsampled_to}", fg="yellow"
+#             )
+#
+#     if apptag:
+#         apptags = [app.tag for app in context.obj["status"].applications()]
+#         if apptag not in apptags:
+#             echo_msg += click.style(f"\nApplication tag {apptag} does not exist.", fg="red")
+#         else:
+#             application_version = context.obj["status"].current_application_version(apptag)
+#             if application_version is None:
+#                 echo_msg += click.style(f"\nNo valid current application version found!", fg="red")
+#             else:
+#                 application_version_id = application_version.id
+#
+#                 if sample_obj.application_version_id == application_version_id:
+#                     echo_msg += click.style(
+#                         f"\nSample already has the application tag {str(application_version)}.",
+#                         fg="yellow",
+#                     )
+#                 else:
+#                     comment += _generate_comment(
+#                         "Application tag", sample_obj.application_version_id, application_version_id
+#                     )
+#                     sample_obj.application_version_id = application_version_id
+#                     echo_msg += click.style(
+#                         f"\nApplication tag set to {str(application_version)}.", fg="green"
+#                     )
+#
+#         if not skip_lims:
+#             context.obj["lims"].update_sample(sample_id, application=apptag)
+#             click.echo(click.style(f"Set LIMS/application to {apptag}", fg="blue"))
+#
+#     if capture_kit is not None:
+#         if sample_obj.capture_kit != capture_kit:
+#             comment += _generate_comment("Capture kit", sample_obj.capture_kit, capture_kit)
+#             sample_obj.capture_kit = capture_kit
+#             echo_msg += click.style(f"\nCapture kit {capture_kit} set", fg="green")
+#         else:
+#             echo_msg += click.style(
+#                 f"\nSample capture kit already: {sample_obj.capture_kit}", fg="yellow"
+#             )
+#
+#         if not skip_lims:
+#             context.obj["lims"].update_sample(sample_id, capture_kit=capture_kit)
+#             click.echo(click.style(f"Set LIMS/capture_kit to {capture_kit}", fg="blue"))
+#
+#     if data_analysis:
+#         if data_analysis != sample_obj.data_analysis:
+#             comment += _generate_comment("Data-analysis", sample_obj.data_analysis, data_analysis)
+#             sample_obj.data_analysis = data_analysis
+#             echo_msg += click.style(f"\nData analysis {data_analysis} set", fg="green")
+#         else:
+#             echo_msg += click.style(
+#                 f"\nSample data analysis already: {sample_obj.data_analysis}", fg="yellow"
+#             )
+#
+#         if not skip_lims:
+#             context.obj["lims"].update_sample(sample_id, data_analysis=data_analysis)
+#             click.echo(click.style(f"Set LIMS/data_analysis to {data_analysis}", fg="blue"))
+#
+#     _update_comment(comment, sample_obj)
+#     context.obj["status"].commit()
+#     click.echo(echo_msg)
+#
 
 def _generate_comment(what, old_value, new_value):
     return f"\n{what} changed from " f"{str(old_value)} to " f"{str(new_value)}."

@@ -228,6 +228,17 @@ class FindBusinessDataHandler(BaseHandler):
         )) if enquiry else records
         return records.order_by(models.Sample.created_at.desc())
 
+    def samples_by_ids(self, **identifiers) -> List[models.Sample]:
+        records = self.Sample.query
+
+        print(type(identifiers), identifiers)
+
+        for identifier_name, identifier_value in identifiers.items():
+            identifier = getattr(models.Sample, identifier_name)
+            records = records.filter(identifier.contains(identifier_value))
+
+        return records.order_by(models.Sample.internal_id.asc())
+
     def samples_in_customer_group(self, *, customer: models.Customer = None, enquiry: str = None) \
             -> List[models.Sample]:
         """Fetch all samples including those from collaborating customers."""
