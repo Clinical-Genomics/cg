@@ -126,3 +126,46 @@ def add_family(disk_store, family_id="family_test", customer_id="cust_test"):
     family.customer = customer
     disk_store.add_commit(family)
     return family
+
+
+def add_organism(store):
+    """utility function to add an organism to use in tests"""
+    organism = store.add_organism(internal_id="organism_id", name="organism_name")
+    return organism
+
+
+def add_microbial_sample(store, sample_id="sample_test"):
+    """utility function to add a sample to use in tests"""
+    customer = ensure_customer(store)
+    application_version = ensure_application_version(store)
+    organism = add_organism(store)
+    sample = store.add_microbial_sample(
+        name=sample_id,
+        organism=organism,
+        internal_id=sample_id,
+        reference_genome="test",
+        application_version=application_version,
+    )
+    sample.customer = customer
+    return sample
+
+
+def add_microbial_sample_and_order(store, order_id="sample_test", customer_id="cust_test"):
+    """utility function to set a family to use in tests"""
+    customer = ensure_customer(store, customer_id)
+    with store.session.no_autoflush:
+        order = store.add_microbial_order(name=order_id, customer=customer, ordered=datetime.now())
+        order.customer = customer
+        sample = add_microbial_sample(store)
+        order.microbial_samples.append(sample)
+    store.add_commit(sample)
+    return sample
+
+
+def add_flowcell(store, flowcell_id="flowcell_test"):
+    """utility function to set a flowcell to use in tests"""
+    flowcell_obj = store.add_flowcell(
+        name=flowcell_id, sequencer="dummy_sequencer", sequencer_type="hiseqx", date=datetime.now()
+    )
+    store.add_commit(flowcell_obj)
+    return flowcell_obj
