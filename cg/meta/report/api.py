@@ -44,12 +44,14 @@ class ReportAPI:
         """Generate the html contents of a delivery report."""
         delivery_data = self._get_delivery_data(family_id)
         if not self.report_validator.has_required_data(delivery_data):
-            raise DeliveryReportError(f"Could not generate report data for {family_id}, "
-                                      f"missing data")
+            raise DeliveryReportError(
+                f"Could not generate report data for {family_id}, " f"missing data"
+            )
         report_data = self._make_data_presentable(delivery_data)
         if not self.report_validator.has_required_data(report_data):
-            raise DeliveryReportError(f"Could not present report data for {family_id}, "
-                                      f"missing data")
+            raise DeliveryReportError(
+                f"Could not present report data for {family_id}, " f"missing data"
+            )
         rendered_report = self._render_delivery_report(report_data)
         return rendered_report
 
@@ -80,7 +82,8 @@ class ReportAPI:
         report_data["scout_access"] = family_obj.customer.scout_access
         report_data["report_version"] = ReportHelper.get_report_version(analysis_obj)
         report_data["previous_report_version"] = ReportHelper.get_previous_report_version(
-            analysis_obj)
+            analysis_obj
+        )
 
         report_data["samples"] = self._fetch_family_samples_from_status_db(family_id)
         report_data["panels"] = self._fetch_panels_from_status_db(family_id)
@@ -102,7 +105,6 @@ class ReportAPI:
         """Fetch the methods used for preparation, sequencing and delivery of the samples."""
 
         for sample in samples:
-            print(sample)
             lims_id = sample["internal_id"]
             method_types = ["prep_method", "sequencing_method", "delivery_method"]
             for method_type in method_types:
@@ -179,10 +181,12 @@ class ReportAPI:
             delivery_data_sample["sequenced_at"] = sample.sequenced_at
             delivery_data_sample["delivered_at"] = sample.delivered_at
             delivery_data_sample["processing_time"] = SampleCalculator.calculate_processing_days(
-                sample)
+                sample
+            )
             delivery_data_sample["ordered_at"] = sample.ordered_at
-            delivery_data_sample["million_read_pairs"] = round(sample.reads / 2000000,
-                                                               1) if sample.reads else None
+            delivery_data_sample["million_read_pairs"] = (
+                round(sample.reads / 2000000, 1) if sample.reads else None
+            )
 
             delivery_data_sample["capture_kit"] = sample.capture_kit
             delivery_data_sample["data_analysis"] = sample.data_analysis
@@ -260,8 +264,9 @@ class ReportAPI:
         for sample in delivery_data["samples"]:
             sample["mapped_reads"] = presenter.process_float_string(sample["mapped_reads"], 2)
             sample["target_coverage"] = presenter.process_float_string(sample["target_coverage"], 1)
-            sample["target_completeness"] = presenter.process_float_string(sample[
-                                                                        "target_completeness"], 2)
+            sample["target_completeness"] = presenter.process_float_string(
+                sample["target_completeness"], 2
+            )
             sample["duplicates"] = presenter.process_float_string(sample["duplicates"], 1)
 
         return _presentable_dict

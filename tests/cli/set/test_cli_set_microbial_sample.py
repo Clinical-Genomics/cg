@@ -54,9 +54,7 @@ def test_invalid_application(cli_runner, base_context, base_store: Store):
 
     # WHEN calling set sample with an invalid application
     result = cli_runner.invoke(
-        microbial_sample,
-        [sample.internal_id, "sign", "-a", application_tag],
-        obj=base_context,
+        microbial_sample, [sample.internal_id, "sign", "-a", application_tag], obj=base_context
     )
 
     # THEN then it should complain about missing application instead of setting the value
@@ -70,9 +68,7 @@ def test_invalid_application(cli_runner, base_context, base_store: Store):
 def test_valid_application(cli_runner, base_context, base_store: Store):
     # GIVEN a database with a sample and two applications
     sample = add_microbial_sample_and_order(base_store)
-    application_tag = ensure_application_version(
-        base_store, "another_application"
-    ).application.tag
+    application_tag = ensure_application_version(base_store, "another_application").application.tag
     assert (
         base_store.MicrobialSample.query.first().application_version.application.tag
         != application_tag
@@ -81,14 +77,10 @@ def test_valid_application(cli_runner, base_context, base_store: Store):
     # WHEN calling set sample with an valid application
     signature = "sign"
     result = cli_runner.invoke(
-        microbial_sample,
-        [sample.internal_id, "sign", "-a", application_tag],
-        obj=base_context,
+        microbial_sample, [sample.internal_id, "sign", "-a", application_tag], obj=base_context
     )
 
     # THEN then the application should have been set
-    print(result.exception)
-    print(result.output)
     assert result.exit_code == SUCCESS
     assert (
         base_store.MicrobialSample.query.first().application_version.application.tag
@@ -137,19 +129,14 @@ def ensure_application_version(store, application_tag="dummy_tag"):
     application = store.application(tag=application_tag)
     if not application:
         application = store.add_application(
-            tag=application_tag,
-            category="wgs",
-            description="dummy_description",
-            percent_kth=80,
+            tag=application_tag, category="wgs", description="dummy_description", percent_kth=80
         )
         store.add_commit(application)
 
     prices = {"standard": 10, "priority": 20, "express": 30, "research": 5}
     version = store.application_version(application, 1)
     if not version:
-        version = store.add_version(
-            application, 1, valid_from=datetime.now(), prices=prices
-        )
+        version = store.add_version(application, 1, valid_from=datetime.now(), prices=prices)
         store.add_commit(version)
     return version
 
@@ -196,15 +183,11 @@ def add_microbial_sample(store, sample_id="sample_test"):
     return sample
 
 
-def add_microbial_sample_and_order(
-    store, order_id="sample_test", customer_id="cust_test"
-):
+def add_microbial_sample_and_order(store, order_id="sample_test", customer_id="cust_test"):
     """utility function to set a family to use in tests"""
     customer = ensure_customer(store, customer_id)
     with store.session.no_autoflush:
-        order = store.add_microbial_order(
-            name=order_id, customer=customer, ordered=datetime.now()
-        )
+        order = store.add_microbial_order(name=order_id, customer=customer, ordered=datetime.now())
         order.customer = customer
         sample = add_microbial_sample(store)
         order.microbial_samples.append(sample)
