@@ -14,7 +14,7 @@ from cg.cli.workflow.mip_dna.deliver import (
     SAMPLE_TAGS,
 )
 from cg.cli.workflow.get_links import get_links
-from cg.exc import LimsDataError, CgDataError, CgError
+from cg.exc import CgError
 from cg.meta.workflow.mip_dna import AnalysisAPI
 from cg.meta.deliver import DeliverAPI
 from cg.store import Store
