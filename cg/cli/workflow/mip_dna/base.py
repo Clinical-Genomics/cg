@@ -14,7 +14,7 @@ from cg.cli.workflow.mip_dna.deliver import (
     SAMPLE_TAGS,
 )
 from cg.cli.workflow.get_links import get_links
-from cg.exc import LimsDataError
+from cg.exc import LimsDataError, CgDataError, CgError
 from cg.meta.workflow.mip_dna import AnalysisAPI
 from cg.meta.deliver import DeliverAPI
 from cg.store import Store
@@ -240,9 +240,9 @@ def start(context: click.Context, dry_run: bool = False):
         except tb.MipStartError as error:
             LOG.exception(error.message)
             exit_code = 1
-        except LimsDataError as error:
+        except CgError as error:
             LOG.exception(error.message)
-            exit_code = 1
+            exit_code = 11
     sys.exit(exit_code)
 
 
