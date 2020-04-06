@@ -29,6 +29,12 @@ class AnalysisDuplicationError(CgError):
     """
 
 
+class CgDataError(CgError):
+    """
+        Error related to missing/incomplete data in Status DB
+    """
+
+
 class LimsDataError(CgError):
     """
         Error related to missing/incomplete data in LIMS
