@@ -219,14 +219,14 @@ def config_case(
 
     if target_bed and not application_types.issubset(applications_requiring_bed):
         raise BalsamicStartError(
-            "--target_bed is in compatible with %s" % " ".join(application_types)
+            "--target_bed is incompatible with %s" % " ".join(application_types)
         )
 
     if not target_bed and application_types.issubset(applications_requiring_bed):
         if len(target_beds) == 1:
             target_bed = Path(context.obj["bed_path"]) / target_beds.pop()
         elif len(target_beds) > 1:
-            raise BalsamicStartError("To many target beds specified: %s" % ", ".join(target_beds))
+            raise BalsamicStartError("Too many target beds specified: %s" % ", ".join(target_beds))
         else:
             raise BalsamicStartError("No target bed specified!")
 
