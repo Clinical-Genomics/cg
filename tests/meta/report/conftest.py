@@ -7,6 +7,7 @@ from cg.apps.lims import LimsAPI
 from cg.meta.report.api import ReportAPI
 
 from cg.store import Store
+from tests.store_helpers import add_analysis
 
 
 @pytest.fixture
@@ -16,6 +17,14 @@ def lims_family():
 
 @pytest.fixture
 def lims_samples(lims_family):
+    return lims_family["samples"]
+
+
+@pytest.fixture
+def report_samples(lims_family):
+    for sample in lims_family["samples"]:
+        sample["internal_id"] = sample["id"]
+
     return lims_family["samples"]
 
 
@@ -49,45 +58,6 @@ class MockLims(LimsAPI):
 class MockFile:
     def __init__(self, path):
         self.path = path
-
-
-class MockDeliver:
-    _get_post_analysis_files_returns_none = False
-
-    def get_post_analysis_files(self, family: str, version, tags: [str]):
-
-        if self._get_post_analysis_files_returns_none:
-            return None
-
-        if tags[0] == "mip-config":
-            path = (
-                "/mnt/hds/proj/bioinfo/bundles/"
-                + family
-                + "/2018-01-30/"
-                + family
-                + "_config.yaml"
-            )
-        elif tags[0] == "sampleinfo":
-            path = (
-                "/mnt/hds/proj/bioinfo/bundles/"
-                + family
-                + "/2018-01-30/"
-                + family
-                + "_qc_sample_info.yaml"
-            )
-        elif tags[0] == "qcmetrics":
-            path = (
-                "/mnt/hds/proj/bioinfo/bundles/"
-                + family
-                + "/2018-01-30/"
-                + family
-                + "_qc_metrics.yaml"
-            )
-
-        return [MockFile(path=path)]
-
-    def get_post_analysis_files_root_dir(self):
-        return ""
 
 
 class MockChanjo:
@@ -134,8 +104,8 @@ class MockAnalysis:
 
     def get_latest_metadata(self, family_id):
         # Returns: dict: parsed data
-        ### Define output dict
-        outdata = {
+        # Define output dict
+        out_data = {
             "analysis_sex": {"ADM1": "female", "ADM2": "female", "ADM3": "female"},
             "family": "yellowhog",
             "duplicates": {"ADM1": 13.525, "ADM2": 12.525, "ADM3": 14.525},
@@ -145,7 +115,7 @@ class MockAnalysis:
             "sample_ids": ["2018-20203", "2018-20204"],
         }
 
-        return outdata
+        return out_data
 
 
 class MockLogger:
@@ -199,6 +169,8 @@ class MockDB(Store):
         yesterday = datetime.now() - timedelta(days=1)
         for family_sample in family_samples:
             family_sample.sample.received_at = yesterday
+            family_sample.sample.prepared_at = yesterday
+            family_sample.sample.sequenced_at = yesterday
             family_sample.sample.delivered_at = datetime.now()
 
         return family_samples
@@ -218,45 +190,19 @@ class MockScout:
         return []
 
 
-class MockReport(ReportAPI):
-    def __init__(
-        self,
-        db,
-        lims_api,
-        deliver_api,
-        chanjo_api,
-        analysis_api,
-        scout_api,
-        logger,
-        yaml_loader,
-        path_tool,
-    ):
-        self.db = db
-        self.lims = lims_api
-        self.deliver = deliver_api
-        self.chanjo = chanjo_api
-        self.analysis = analysis_api
-        self.scout = scout_api
-        self.LOG = logger
-        self.yaml_loader = yaml_loader
-        self.path_tool = path_tool
-
-
 @pytest.fixture(scope="function")
-def report_api(analysis_store, lims_samples):
-    db = MockDB(analysis_store)
+def report_api(report_store, lims_samples):
+    db = MockDB(report_store)
     lims = MockLims(lims_samples)
-    deliver = MockDeliver()
     chanjo = MockChanjo()
     analysis = MockAnalysis()
     scout = MockScout()
     logger = MockLogger()
     yaml_loader = MockYamlLoader()
     path_tool = MockPath()
-    _report_api = MockReport(
+    _report_api = ReportAPI(
         lims_api=lims,
-        db=db,
-        deliver_api=deliver,
+        store=db,
         chanjo_api=chanjo,
         analysis_api=analysis,
         scout_api=scout,
@@ -265,3 +211,11 @@ def report_api(analysis_store, lims_samples):
         path_tool=path_tool,
     )
     return _report_api
+
+
+@pytest.fixture(scope="function")
+def report_store(analysis_store):
+    family = analysis_store.families()[0]
+    add_analysis(analysis_store, family)
+    add_analysis(analysis_store, family)
+    return analysis_store

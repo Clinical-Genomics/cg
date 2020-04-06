@@ -7,9 +7,11 @@ import ruamel.yaml
 from cg.apps.coverage import ChanjoAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.scoutapi import ScoutAPI
+from cg.meta.report.report_validator import ReportValidator
 from cg.meta.workflow.mip_dna import AnalysisAPI
 from cg.meta.report.sample_calculator import SampleCalculator
-from cg.meta.report.status_helper import StatusHelper
+from cg.meta.report.report_helper import ReportHelper
+from cg.meta.report.presenter import Presenter
 from cg.store import Store, models
 from cg.exc import DeliveryReportError
 from jinja2 import Environment, PackageLoader, select_autoescape
@@ -18,7 +20,7 @@ from jinja2 import Environment, PackageLoader, select_autoescape
 class ReportAPI:
     def __init__(
         self,
-        db: Store,
+        store: Store,
         lims_api: LimsAPI,
         chanjo_api: ChanjoAPI,
         analysis_api: AnalysisAPI,
@@ -28,7 +30,7 @@ class ReportAPI:
         path_tool=Path,
     ):
 
-        self.db = db
+        self.store = store
         self.lims = lims_api
         self.chanjo = chanjo_api
         self.analysis = analysis_api
@@ -36,13 +38,19 @@ class ReportAPI:
         self.yaml_loader = yaml_loader
         self.path_tool = path_tool
         self.scout = scout_api
+        self.report_validator = ReportValidator(store)
 
     def create_delivery_report(self, family_id: str) -> str:
         """Generate the html contents of a delivery report."""
         delivery_data = self._get_delivery_data(family_id)
-        if not self._has_required_data(delivery_data):
-            raise DeliveryReportError(f"Could not generate report for {family_id}, missing data")
-        rendered_report = self._render_delivery_report(delivery_data)
+        if not self.report_validator.has_required_data(delivery_data):
+            raise DeliveryReportError(f"Could not generate report data for {family_id}, "
+                                      f"missing data")
+        report_data = self._make_data_presentable(delivery_data)
+        if not self.report_validator.has_required_data(report_data):
+            raise DeliveryReportError(f"Could not present report data for {family_id}, "
+                                      f"missing data")
+        rendered_report = self._render_delivery_report(report_data)
         return rendered_report
 
     def create_delivery_report_file(self, family_id: str, file_path: Path):
@@ -66,12 +74,14 @@ class ReportAPI:
         analysis_obj = family_obj.analyses[0] if family_obj.analyses else None
 
         report_data["family"] = family_obj.name
-        report_data["customer"] = family_obj.customer_id
-        report_data["report_version"] = StatusHelper.get_report_version(analysis_obj)
-        report_data["previous_report_version"] = StatusHelper.get_previous_report_version(
+        report_data["customer_name"] = family_obj.customer.name
+        report_data["customer_internal_id"] = family_obj.customer.internal_id
+        report_data["customer_invoice_address"] = family_obj.customer.invoice_address
+        report_data["scout_access"] = family_obj.customer.scout_access
+        report_data["report_version"] = ReportHelper.get_report_version(analysis_obj)
+        report_data["previous_report_version"] = ReportHelper.get_previous_report_version(
             analysis_obj)
 
-        report_data["customer_obj"] = family_obj.customer
         report_data["samples"] = self._fetch_family_samples_from_status_db(family_id)
         report_data["panels"] = self._fetch_panels_from_status_db(family_id)
         self._incorporate_lims_data(report_data)
@@ -86,13 +96,14 @@ class ReportAPI:
 
     def _get_case_from_statusdb(self, case_id: str) -> models.Family:
         """Fetch a case object from the status database."""
-        return self.db.family(case_id)
+        return self.store.family(case_id)
 
     def _incorporate_lims_methods(self, samples: list):
         """Fetch the methods used for preparation, sequencing and delivery of the samples."""
 
         for sample in samples:
-            lims_id = sample["id"]
+            print(sample)
+            lims_id = sample["internal_id"]
             method_types = ["prep_method", "sequencing_method", "delivery_method"]
             for method_type in method_types:
                 get_method = getattr(self.lims, f"get_{method_type}")
@@ -125,13 +136,13 @@ class ReportAPI:
         analysis_sex_all_samples = trending_data.get("analysis_sex", {})
 
         for sample in report_data["samples"]:
-            lims_id = sample["id"]
+            lims_id = sample["internal_id"]
             sample["analysis_sex"] = analysis_sex_all_samples.get(lims_id)
             sample["mapped_reads"] = mapped_reads_all_samples.get(lims_id)
             sample["duplicates"] = duplicates_all_samples.get(lims_id)
 
         report_data["genome_build"] = trending_data.get("genome_build")
-        report_data["mip_version"] = trending_data.get("mip_version")
+        report_data["pipeline_version"] = trending_data.get("mip_version")
 
     def _incorporate_coverage_data(self, samples: list, panels: list):
         """Incorporate coverage data from Chanjo for each sample ."""
@@ -139,7 +150,7 @@ class ReportAPI:
         genes = self._get_genes_from_scout(panels)
 
         for sample in samples:
-            lims_id = sample["id"]
+            lims_id = sample["internal_id"]
 
             sample_coverage = self._get_sample_coverage_from_chanjo(lims_id, genes)
 
@@ -151,35 +162,16 @@ class ReportAPI:
             else:
                 self.LOG.warning(f"No coverage could be calculated for: {lims_id}")
 
-    def _has_required_data(self, delivery_data):
-
-        for sample in delivery_data["samples"]:
-
-            if self._is_not_prep_sample(sample["id"]) and not self._has_all_values(sample,
-                                                                                   ["prep_date"]):
-                return False
-
-            if self._is_sequenced_sample(sample["id"]):
-                if not self._has_all_values(sample, ["received", "prep_date", "sequencing_date"]):
-                    return False
-
-            if not self._has_all_values(sample, ["delivery_date"]):
-                return False
-        return True
-
-    def get_prep_category(self, internal_id):
-        return self.db.sample(internal_id).application_version.application.prep_category
-
     def _fetch_family_samples_from_status_db(self, family_id: str) -> list:
         """Incorporate data from the status database for each sample ."""
 
         delivery_data_samples = list()
-        family_samples = self.db.family_samples(family_id)
+        family_samples = self.store.family_samples(family_id)
 
         for family_sample in family_samples:
             sample = family_sample.sample
             delivery_data_sample = dict()
-            delivery_data_sample["id"] = sample.internal_id
+            delivery_data_sample["internal_id"] = sample.internal_id
             delivery_data_sample["ticket"] = sample.ticket_number
             delivery_data_sample["status"] = family_sample.status
             delivery_data_sample["received_at"] = sample.received_at
@@ -212,7 +204,7 @@ class ReportAPI:
 
             application_is_accredited = False
 
-            application = self.db.application(tag=apptag_id)
+            application = self.store.application(tag=apptag_id)
 
             if application:
                 application_is_accredited = application.is_accredited
@@ -220,20 +212,20 @@ class ReportAPI:
 
             accreditations.append(application_is_accredited)
 
-        application_data["application_objs"] = applications
+        application_data["applications"] = applications
         application_data["accredited"] = all(accreditations)
         return application_data
 
     def _fetch_panels_from_status_db(self, family_id: str) -> list:
         """fetch data from the status database for each panels ."""
-        family = self.db.family(family_id)
+        family = self.store.family(family_id)
         panels = family.panels
         return panels
 
     def _incorporate_lims_data(self, report_data: dict):
         """Incorporate data from LIMS for each sample ."""
         for sample in report_data.get("samples"):
-            lims_id = sample["id"]
+            lims_id = sample["internal_id"]
 
             try:
                 lims_sample = self.lims.sample(lims_id)
@@ -257,13 +249,21 @@ class ReportAPI:
 
         return panel_gene_ids
 
-    def _is_not_prep_sample(self, internal_id):
-        self.db.sample(internal_id).application.prep_category == "rml"
-
     @staticmethod
-    def _has_all_values(sample, keys):
-        for key in keys:
-            if not sample[key]:
-                return False
+    def _make_data_presentable(delivery_data: dict) -> dict:
+        """Replace db values with what a human might expect"""
 
-        return True
+        presenter = Presenter(precision=2)
+
+        _presentable_dict = presenter.process_dict(delivery_data)
+
+        for sample in delivery_data["samples"]:
+            sample["mapped_reads"] = presenter.process_float_string(sample["mapped_reads"], 2)
+            sample["target_coverage"] = presenter.process_float_string(sample["target_coverage"], 1)
+            sample["target_completeness"] = presenter.process_float_string(sample[
+                                                                        "target_completeness"], 2)
+            sample["duplicates"] = presenter.process_float_string(sample["duplicates"], 1)
+
+        return _presentable_dict
+
+        # TODO: remove unnecessary parenteses in template

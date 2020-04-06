@@ -101,7 +101,7 @@ def upload(context, family_id, force_restart):
         deliver_api=context.obj["deliver_api"],
     )
     context.obj["report_api"] = ReportAPI(
-        db=context.obj["status"],
+        store=context.obj["status"],
         lims_api=context.obj["lims_api"],
         chanjo_api=context.obj["chanjo_api"],
         analysis_api=context.obj["analysis_api"],
