@@ -170,7 +170,7 @@ class LimsAPI(Lims, OrderHandler):
         capture_kits = set()
 
         lims_sample = Sample(self, id=lims_id)
-        capture_kit = lims_sample.udf.get("Capture Library version")
+        capture_kit = lims_sample.udf.get("Bait Set")
 
         if capture_kit and capture_kit != "NA":
             return capture_kit
