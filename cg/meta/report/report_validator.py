@@ -6,23 +6,9 @@ class ReportValidator:
     def __init__(self, store: Store):
         self._sample_helper = SampleHelper(store)
 
-    def has_required_data(self, report_data: dict):
+    def has_required_data(self, report_data: dict) -> bool:
 
-        if not self._has_all_values(
-            report_data,
-            [
-                "report_version",
-                "family",
-                "customer_name",
-                "today",
-                "panels",
-                "customer_invoice_address",
-                "scout_access",
-                "accredited",
-                "pipeline_version",
-                "genome_build",
-            ],
-        ):
+        if not self._required_general_report_data(report_data):
             return False
 
         for sample in report_data["samples"]:
@@ -39,14 +25,14 @@ class ReportValidator:
         return True
 
     @staticmethod
-    def _has_all_values(subscriptable, keys):
+    def _has_all_values(subscriptable, keys) -> bool:
         for key in keys:
             if not subscriptable[key]:
                 return False
 
         return True
 
-    def _has_required_values_for_all_samples(self, sample):
+    def _has_required_values_for_all_samples(self, sample) -> bool:
         return self._has_all_values(
             sample,
             [
@@ -65,7 +51,7 @@ class ReportValidator:
             ],
         )
 
-    def _has_required_sample_values(self, sample):
+    def _has_required_sample_values(self, sample) -> bool:
         if not self._has_required_values_for_all_samples(sample):
             return False
 
@@ -93,3 +79,20 @@ class ReportValidator:
                 return False
 
         return True
+
+    def _required_general_report_data(self, report_data) -> bool:
+        return self._has_all_values(
+            report_data,
+            [
+                "report_version",
+                "family",
+                "customer_name",
+                "today",
+                "panels",
+                "customer_invoice_address",
+                "scout_access",
+                "accredited",
+                "pipeline_version",
+                "genome_build",
+            ],
+        )
