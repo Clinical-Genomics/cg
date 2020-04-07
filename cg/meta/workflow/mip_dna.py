@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+"""Contains MIP DNA workflow AnalysisAPI"""
 import gzip
 import logging
 import re
@@ -6,13 +6,11 @@ from pathlib import Path
 from typing import List, Any
 from ruamel.yaml import safe_load
 
-from requests.exceptions import HTTPError
-
 from cg.apps import tb, hk, scoutapi, lims
-from cg.meta.deliver import DeliverAPI
 from cg.apps.pipelines.fastqhandler import BaseFastqHandler
+from cg.meta.deliver import DeliverAPI
 from cg.store import models, Store
-
+from cg.meta.workflow.base import get_target_bed_from_lims
 
 COLLABORATORS = ("cust000", "cust002", "cust003", "cust004", "cust042")
 MASTER_LIST = (
@@ -40,14 +38,7 @@ COMBOS = {
     "CM": ("CNM", "CM"),
     "Horsel": ("Horsel", "141217", "141201"),
 }
-CAPTUREKIT_MAP = {
-    "Agilent Sureselect CRE": "agilent_sureselect_cre.v1",
-    "SureSelect CRE": "agilent_sureselect_cre.v1",
-    "Agilent Sureselect V5": "agilent_sureselect.v5",
-    "SureSelect Focused Exome": "agilent_sureselect_focusedexome.v1",
-    "Twist Human core exome v1.3 + Twist Human RefSeq Panel": "Twist_Target_hg19_RefSeq.bed",
-    "other": "agilent_sureselect_cre.v1",
-}
+WGS_CAPTURE_KIT = "twistexomerefseq_9.1_hg19_design.bed"
 
 
 class AnalysisAPI:
@@ -74,20 +65,20 @@ class AnalysisAPI:
         self.deliver = deliver_api
         self.yaml_loader = yaml_loader
         self.pather = path_api
-        self.LOG = logger
+        self.log = logger
 
     def check(self, family_obj: models.Family):
         """Check stuff before starting the analysis."""
         flowcells = self.db.flowcells(family=family_obj)
         statuses = []
         for flowcell_obj in flowcells:
-            self.LOG.debug("%s: checking flowcell", flowcell_obj.name)
+            self.log.debug("%s: checking flowcell", flowcell_obj.name)
             statuses.append(flowcell_obj.status)
             if flowcell_obj.status == "removed":
-                self.LOG.info("%s: requesting removed flowcell", flowcell_obj.name)
+                self.log.info("%s: requesting removed flowcell", flowcell_obj.name)
                 flowcell_obj.status = "requested"
             elif flowcell_obj.status != "ondisk":
-                self.LOG.warning("%s: {flowcell_obj.status}", flowcell_obj.name)
+                self.log.warning("%s: {flowcell_obj.status}", flowcell_obj.name)
         return all(status == "ondisk" for status in statuses)
 
     def run(self, family_obj: models.Family, **kwargs):
@@ -105,7 +96,7 @@ class AnalysisAPI:
             downsampled = isinstance(link_obj.sample.downsampled_to, int)
             external = link_obj.sample.application_version.application.is_external
             if downsampled or external:
-                self.LOG.info(
+                self.log.info(
                     "%s: downsampled/external - skip evaluation", link_obj.sample.internal_id
                 )
                 kwargs["skip_evaluation"] = True
@@ -144,25 +135,12 @@ class AnalysisAPI:
         }
         for link in family_obj.links:
             sample_data = self._get_sample_data(link)
-            if sample_data["analysis_type"] in ("tgs", "wes"):
-                if link.sample.capture_kit:
-                    # set the capture kit from status: key or custom file name
-                    mip_capturekit = CAPTUREKIT_MAP.get(link.sample.capture_kit)
-                    sample_data["capture_kit"] = mip_capturekit or link.sample.capture_kit
-                else:
-                    if link.sample.downsampled_to:
-                        self.LOG.debug("%s: downsampled sample, skipping", link.sample.name)
-                    else:
-                        try:
-                            capture_kit = self.lims.capture_kit(link.sample.internal_id)
-                            if capture_kit is None or capture_kit == "NA":
-                                self.LOG.warning(
-                                    "%s: capture kit not found", link.sample.internal_id
-                                )
-                            else:
-                                sample_data["capture_kit"] = CAPTUREKIT_MAP[capture_kit]
-                        except HTTPError:
-                            self.LOG.warning("%s: not found (LIMS)", link.sample.internal_id)
+            if sample_data["analysis_type"] == "wgs":
+                sample_data["capture_kit"] = WGS_CAPTURE_KIT
+            else:
+                sample_data["capture_kit"] = get_target_bed_from_lims(
+                    self.lims, self.db, link.sample.internal_id
+                )
             if link.mother:
                 sample_data["mother"] = link.mother.internal_id
             if link.father:
@@ -303,8 +281,8 @@ class AnalysisAPI:
         if analysis_files:
             analysis_file_raw = self._open_bundle_file(analysis_files[0].path)
         else:
-            raise self.LOG.warning(
-                f"No post analysis files received from DeliverAPI for '{family_id}'"
+            raise self.log.warning(
+                "No post analysis files received from DeliverAPI for '%s'", family_id
             )
 
         return analysis_file_raw
@@ -337,13 +315,9 @@ class AnalysisAPI:
                     sampleinfo_raw=sampleinfo_raw,
                 )
             except KeyError as error:
-                self.LOG.warning(
-                    f"get_latest_metadata failed for '{family_id}'"
-                    f", missing key: {error.args[0]} "
+                self.log.warning(
+                    "get_latest_metadata failed for '%s', missing key: %s", family_id, error.args[0]
                 )
-                import traceback
-
-                self.LOG.warning(traceback.format_exc())
                 trending = dict()
 
         return trending

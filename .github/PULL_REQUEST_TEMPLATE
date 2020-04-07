@@ -1,9 +1,10 @@
 This PR adds/fixes ...
 
 **How to prepare for test**:
-- [ ] ssh to hasta/clinical-db depending on type of change
+- [ ] ssh to hasta (depending on type of change)
 - [ ] install on stage:
 `bash servers/resources/hasta.scilifelab.se/update-cg-stage.sh [THIS-BRANCH-NAME]`
+- [ ] ssh to clinical-db (depending on type of change)
 - [ ] install on stage:
 `bash servers/resources/clinical-db.scilifelab.se/update-clinical-api-stage.sh [THIS-BRANCH-NAME]`
 

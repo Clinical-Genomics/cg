@@ -4,6 +4,7 @@ from datetime import datetime
 from cg.cli.set import flowcell
 from cg.constants import FLOWCELL_STATUS
 from cg.store import Store
+from tests.store_helpers import add_flowcell
 
 SUCCESS = 0
 
@@ -41,23 +42,9 @@ def test_set_flowcell_status(cli_runner, base_context, base_store: Store):
     assert base_store.Flowcell.query.first().status != status
 
     # WHEN setting a flowcell
-    result = cli_runner.invoke(
-        flowcell, ["--status", status, flowcell_name], obj=base_context
-    )
+    result = cli_runner.invoke(flowcell, ["--status", status, flowcell_name], obj=base_context)
 
     # THEN then it should have been set
     assert result.exit_code == SUCCESS
     assert base_store.Flowcell.query.count() == 1
     assert base_store.Flowcell.query.first().status == status
-
-
-def add_flowcell(store, flowcell_id="flowcell_test"):
-    """utility function to set a flowcell to use in tests"""
-    flowcell_obj = store.add_flowcell(
-        name=flowcell_id,
-        sequencer="dummy_sequencer",
-        sequencer_type="hiseqx",
-        date=datetime.now(),
-    )
-    store.add_commit(flowcell_obj)
-    return flowcell_obj

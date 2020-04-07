@@ -59,3 +59,9 @@ CRAM_INDEX_SUFFIX = ".crai"
 FASTQ_FIRST_READ_SUFFIX = "R1_001.fastq.gz"
 FASTQ_SECOND_READ_SUFFIX = "R2_001.fastq.gz"
 SPRING_SUFFIX = ".spring"
+
+# tags for storing analyses in Housekeeper
+TAGS = {
+    "wgs": "mip-dna",
+    "wts": "mip-rna",
+}

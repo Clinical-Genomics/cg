@@ -10,6 +10,7 @@ from trailblazer.mip import files as mip_dna_files_api
 
 from cg.apps.madeline.api import MadelineAPI
 from cg.apps.mip_rna import files as mip_rna_files_api
+from cg.meta.store import mip_rna as store_mip_rna
 from cg.store import Store
 
 pytest_plugins = [
@@ -33,7 +34,7 @@ CHANJO_CONFIG = {"chanjo": {"config_path": "chanjo_config", "binary_path": "chan
 CRUNCHY_CONFIG = {
     "crunchy": {
         "cram_reference": "/path/to/fasta",
-        "slurm": {"account": "mock_account", "mail_user": "mock_mail", "conda_env": "mock_env"},
+        "slurm": {"account": "mock_account", "mail_user": "mock_mail", "conda_env": "mock_env",},
     }
 }
 
@@ -144,6 +145,9 @@ def fixture_files():
         "qcmetrics": "tests/fixtures/apps/tb/case/case_qc_metrics.yaml",
         "rna_config": "tests/fixtures/apps/mip/rna/case_config.yaml",
         "rna_sampleinfo": "tests/fixtures/apps/mip/rna/case_qc_sampleinfo.yaml",
+        "rna_config_store": "tests/fixtures/apps/mip/rna/store/case_config.yaml",
+        "rna_sampleinfo_store": "tests/fixtures/apps/mip/rna/store/case_qc_sample_info.yaml",
+        "mip_rna_deliverables": "test/fixtures/apps/mip/rna/store/case_deliverables.yaml",
     }
 
 
@@ -162,6 +166,8 @@ def fixture_files_raw(files):
         "qcmetrics": ruamel.yaml.safe_load(open(files["qcmetrics"])),
         "rna_config": ruamel.yaml.safe_load(open(files["rna_config"])),
         "rna_sampleinfo": ruamel.yaml.safe_load(open(files["rna_sampleinfo"])),
+        "rna_config_store": ruamel.yaml.safe_load(open(files["rna_config_store"])),
+        "rna_sampleinfo_store": ruamel.yaml.safe_load(open(files["rna_sampleinfo_store"])),
     }
 
 
@@ -173,6 +179,9 @@ def files_data(files_raw):
         "sampleinfo": mip_dna_files_api.parse_sampleinfo(files_raw["sampleinfo"]),
         "qcmetrics": mip_dna_files_api.parse_qcmetrics(files_raw["qcmetrics"]),
         "rna_config": mip_dna_files_api.parse_config(files_raw["rna_config"]),
+        "rna_sampleinfo": mip_rna_files_api.parse_sampleinfo_rna(files_raw["rna_sampleinfo"]),
+        "rna_config_store": store_mip_rna.parse_config(files_raw["rna_config_store"]),
+        "rna_sampleinfo_store": store_mip_rna.parse_sampleinfo(files_raw["rna_sampleinfo_store"]),
         "rna_sampleinfo": mip_rna_files_api.parse_sampleinfo_rna(files_raw["rna_sampleinfo"]),
     }
 
