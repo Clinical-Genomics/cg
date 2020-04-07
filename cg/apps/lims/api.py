@@ -399,9 +399,7 @@ class LimsAPI(Lims, OrderHandler):
                 udf_key = step_names_udfs[process_type]
                 parent_process = artifact.parent_process
                 if parent_process and parent_process.udf.get(udf_key):
-                    dates.append(
-                        (parent_process.date_run, parent_process.udf.get(udf_key),)
-                    )
+                    dates.append((parent_process.date_run, parent_process.udf.get(udf_key)))
                 processes.append(parent_process.id)
                 all_artifacts.append(artifact)
 
