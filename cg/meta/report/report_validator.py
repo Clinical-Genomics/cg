@@ -60,23 +60,24 @@ class ReportValidator:
         ) and not self._has_all_values(sample, ["prepared_at", "prep_method"]):
             return False
 
-        if self._sample_helper.is_sequence_sample(sample["internal_id"]):
-            if not self._has_all_values(
-                sample,
-                [
-                    "received_at",
-                    "prep_method",
-                    "prepared_at",
-                    "sequencing_method",
-                    "sequenced_at",
-                    "million_read_pairs",
-                    "mapped_reads",
-                    "target_coverage",
-                    "target_completeness",
-                    "duplicates",
-                ],
-            ):
-                return False
+        if self._sample_helper.is_sequence_sample(
+            sample["internal_id"]
+        ) and not self._has_all_values(
+            sample,
+            [
+                "received_at",
+                "prep_method",
+                "prepared_at",
+                "sequencing_method",
+                "sequenced_at",
+                "million_read_pairs",
+                "mapped_reads",
+                "target_coverage",
+                "target_completeness",
+                "duplicates",
+            ],
+        ):
+            return False
 
         return True
 
