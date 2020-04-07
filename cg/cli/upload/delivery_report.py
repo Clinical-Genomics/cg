@@ -5,7 +5,7 @@ import logging
 import click
 
 from cg.apps import hk, scoutapi
-from cg.exc import DeliveryReportError
+from cg.exc import DeliveryReportError, CgError
 
 from .utils import _suggest_cases_delivery_report
 
@@ -16,7 +16,7 @@ LOG = logging.getLogger(__name__)
 @click.option("-p", "--print", "print_console", is_flag=True, help="print list to console")
 @click.pass_context
 def delivery_reports(context, print_console):
-    """Generate a delivery reports for all cases that need one"""
+    """Generate delivery reports for all cases that need one"""
 
     click.echo(click.style("----------------- DELIVERY REPORTS ------------------------"))
 
@@ -28,7 +28,7 @@ def delivery_reports(context, print_console):
                 family_id=analysis_obj.family.internal_id,
                 print_console=print_console,
             )
-        except Exception:
+        except CgError:
             LOG.error(
                 "uploading delivery report failed for family: %s", analysis_obj.family.internal_id
             )
@@ -50,14 +50,14 @@ def delivery_report(context, family_id, print_console):
         accredited
         panels
         samples
-        sample.id
+        sample.internal_id
         sample.status
         sample.ticket
         sample.million_read_pairs
-        sample.prep_date
-        sample.received
-        sample.sequencing_date
-        sample.delivery_date
+        sample.prepared_at
+        sample.received_at
+        sample.sequenced_at
+        sample.delivered_at
 
     lims:
         sample.name
