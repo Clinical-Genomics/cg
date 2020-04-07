@@ -21,17 +21,22 @@ def delivery_reports(context, print_console):
     click.echo(click.style("----------------- DELIVERY REPORTS ------------------------"))
 
     for analysis_obj in context.obj["status"].analyses_to_delivery_report():
-        LOG.info("uploading delivery report for family: %s", analysis_obj.family.internal_id)
+        case_id = analysis_obj.family.internal_id
+        LOG.info("uploading delivery report for case: %s", case_id)
         try:
             context.invoke(
                 delivery_report,
                 family_id=analysis_obj.family.internal_id,
                 print_console=print_console,
             )
-        except CgError:
+        except FileNotFoundError as error:
             LOG.error(
-                "uploading delivery report failed for family: %s", analysis_obj.family.internal_id
+                "Missing file for delivery report creation for case: %s, %s", case_id, error.message
             )
+        except DeliveryReportError as error:
+            LOG.error("Creation of delivery report failed for case: %s, %s", case_id, error.message)
+        except CgError as error:
+            LOG.error("Uploading delivery report failed for case: %s, %s", case_id, error.message)
 
 
 @click.command("delivery-report")
