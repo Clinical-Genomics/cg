@@ -17,7 +17,7 @@ from cg.store import Store
 
 from .beacon import beacon
 from .coverage import coverage
-from .delivery import delivery_report, delivery_report_to_scout, delivery_reports
+from .delivery_report import delivery_report, delivery_report_to_scout, delivery_reports
 from .genotype import genotypes
 from .mutacc import process_solved, processed_solved
 from .observations import observations
@@ -65,9 +65,7 @@ def upload(context, family_id, force_restart):
             context.abort()
 
         if not force_restart and analysis_obj.upload_started_at is not None:
-            if dt.datetime.now() - analysis_obj.upload_started_at > dt.timedelta(
-                hours=24
-            ):
+            if dt.datetime.now() - analysis_obj.upload_started_at > dt.timedelta(hours=24):
                 raise Exception(
                     f"The upload started at {analysis_obj.upload_started_at} "
                     f"something went wrong, restart it with the --restart flag"
@@ -153,8 +151,7 @@ def auto(context):
 
         if analysis_obj.family.analyses[0].uploaded_at is not None:
             LOG.warning(
-                "Newer analysis already uploaded for %s, skipping",
-                analysis_obj.family.internal_id,
+                "Newer analysis already uploaded for %s, skipping", analysis_obj.family.internal_id
             )
             continue
 

@@ -5,8 +5,8 @@ from datetime import datetime
 class Presenter:
     """Contains methods for presentation of different data types"""
 
-    DEFAULT_NA = 'N/A'
-    DEFAULT_PRECISION = 'N/A'
+    DEFAULT_NA = "N/A"
+    DEFAULT_PRECISION = "N/A"
 
     def __init__(self, precision: int = DEFAULT_PRECISION, default_na: str = DEFAULT_NA):
         self._precision = precision
@@ -35,12 +35,12 @@ class Presenter:
     def process_set(self, raw_set: set) -> str:
         """Make a set presentable"""
 
-        return ', '.join(str(s) for s in raw_set) if raw_set else self._default_na
+        return ", ".join(str(s) for s in raw_set) if raw_set else self._default_na
 
     def process_list(self, raw_list: list):
         """Make a list presentable"""
 
-        return ', '.join(str(s) for s in raw_list) if raw_list else self._default_na
+        return ", ".join(str(s) for s in raw_list) if raw_list else self._default_na
 
     def process_dict(self, raw_dict: dict):
         """Make a dict presentable"""

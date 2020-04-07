@@ -5,11 +5,13 @@ from cg.store import Store
 class ReportValidator:
     def __init__(self, store: Store):
         self._sample_helper = SampleHelper(store)
+        self._attributes_missing_values = []
 
     def has_required_data(self, report_data: dict) -> bool:
 
-        if not self._required_general_report_data(report_data):
-            return False
+        self._attributes_missing_values = []
+
+        self._check_required_general_report_data(report_data)
 
         for sample in report_data["samples"]:
 
@@ -19,21 +21,17 @@ class ReportValidator:
                 print(sample)
                 continue
 
-            if not self._has_required_sample_values(sample):
-                return False
+            self._check_required_sample_attributes(sample)
 
-        return True
+        return self.get_missing_attributes() == []
 
-    @staticmethod
-    def _has_all_values(subscriptable, keys) -> bool:
+    def _collect_missing_attributes(self, subscriptable, keys):
         for key in keys:
             if not subscriptable[key]:
-                return False
+                self._attributes_missing_values.append(key)
 
-        return True
-
-    def _has_required_values_for_all_samples(self, sample) -> bool:
-        return self._has_all_values(
+    def _check_required_sample_attributes_for_all(self, sample):
+        self._collect_missing_attributes(
             sample,
             [
                 "name",
@@ -51,38 +49,35 @@ class ReportValidator:
             ],
         )
 
-    def _has_required_sample_values(self, sample) -> bool:
-        if not self._has_required_values_for_all_samples(sample):
-            return False
+    def _check_required_sample_attributes(self, sample):
+        self._check_required_sample_attributes_for_all(sample)
 
-        if not self._sample_helper.is_ready_made_sample(
+        if sample.get("internal_id") and not self._sample_helper.is_ready_made_sample(
             sample["internal_id"]
-        ) and not self._has_all_values(sample, ["prepared_at", "prep_method"]):
-            return False
-
-        if self._sample_helper.is_sequence_sample(
-            sample["internal_id"]
-        ) and not self._has_all_values(
-            sample,
-            [
-                "received_at",
-                "prep_method",
-                "prepared_at",
-                "sequencing_method",
-                "sequenced_at",
-                "million_read_pairs",
-                "mapped_reads",
-                "target_coverage",
-                "target_completeness",
-                "duplicates",
-            ],
         ):
-            return False
+            self._collect_missing_attributes(sample, ["prepared_at", "prep_method"])
 
-        return True
+        if sample.get("internal_id") and self._sample_helper.is_sequence_sample(
+            sample["internal_id"]
+        ):
+            self._collect_missing_attributes(
+                sample,
+                [
+                    "received_at",
+                    "prep_method",
+                    "prepared_at",
+                    "sequencing_method",
+                    "sequenced_at",
+                    "million_read_pairs",
+                    "mapped_reads",
+                    "target_coverage",
+                    "target_completeness",
+                    "duplicates",
+                ],
+            )
 
-    def _required_general_report_data(self, report_data) -> bool:
-        return self._has_all_values(
+    def _check_required_general_report_data(self, report_data):
+        self._collect_missing_attributes(
             report_data,
             [
                 "report_version",
@@ -97,3 +92,6 @@ class ReportValidator:
                 "genome_build",
             ],
         )
+
+    def get_missing_attributes(self) -> [str]:
+        return self._attributes_missing_values

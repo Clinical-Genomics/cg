@@ -2,7 +2,6 @@ from cg.store import Store
 
 
 class SampleHelper:
-
     def __init__(self, store: Store):
         self._store = store
 

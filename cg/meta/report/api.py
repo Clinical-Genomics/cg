@@ -45,12 +45,16 @@ class ReportAPI:
         delivery_data = self._get_delivery_data(family_id)
         if not self.report_validator.has_required_data(delivery_data):
             raise DeliveryReportError(
-                f"Could not generate report data for {family_id}, " f"missing data"
+                f"Could not generate report data for {family_id}, "
+                f"missing data:"
+                f" {self.report_validator.get_missing_attributes()}"
             )
         report_data = self._make_data_presentable(delivery_data)
         if not self.report_validator.has_required_data(report_data):
             raise DeliveryReportError(
-                f"Could not present report data for {family_id}, " f"missing data"
+                f"Could not present report data for {family_id}, "
+                f"missing data:"
+                f" {self.report_validator.get_missing_attributes()}"
             )
         rendered_report = self._render_delivery_report(report_data)
         return rendered_report
@@ -270,5 +274,3 @@ class ReportAPI:
             sample["duplicates"] = presenter.process_float_string(sample["duplicates"], 1)
 
         return _presentable_dict
-
-        # TODO: remove unnecessary parenteses in template

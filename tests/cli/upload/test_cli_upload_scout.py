@@ -1,7 +1,7 @@
 """Test the cli for uploading to scout"""
 import logging
 
-from cg.cli.upload.upload import scout
+from cg.cli.upload.base import scout
 
 
 def test_produce_load_config(base_context, cli_runner, analysis_family_single_case):
@@ -103,9 +103,7 @@ def test_upload_scout_cli(base_context, cli_runner, analysis_family_single_case)
     assert result.exit_code == 0
 
 
-def test_upload_scout_cli_print_console(
-    base_context, cli_runner, analysis_family_single_case
-):
+def test_upload_scout_cli_print_console(base_context, cli_runner, analysis_family_single_case):
     # GIVEN a case_id where the case exists in status db with at least one analysis
     # GIVEN that the analysis is done and exists in tb
     config = {"dummy": "data"}

@@ -5,6 +5,7 @@ import logging
 import click
 
 from cg.apps import hk, scoutapi
+from cg.exc import DeliveryReportError
 
 from .utils import _suggest_cases_delivery_report
 
@@ -12,21 +13,15 @@ LOG = logging.getLogger(__name__)
 
 
 @click.command("delivery-reports")
-@click.option(
-    "-p", "--print", "print_console", is_flag=True, help="print list to console"
-)
+@click.option("-p", "--print", "print_console", is_flag=True, help="print list to console")
 @click.pass_context
 def delivery_reports(context, print_console):
     """Generate a delivery reports for all cases that need one"""
 
-    click.echo(
-        click.style("----------------- DELIVERY REPORTS ------------------------")
-    )
+    click.echo(click.style("----------------- DELIVERY REPORTS ------------------------"))
 
     for analysis_obj in context.obj["status"].analyses_to_delivery_report():
-        LOG.info(
-            "uploading delivery report for family: %s", analysis_obj.family.internal_id
-        )
+        LOG.info("uploading delivery report for family: %s", analysis_obj.family.internal_id)
         try:
             context.invoke(
                 delivery_report,
@@ -35,16 +30,13 @@ def delivery_reports(context, print_console):
             )
         except Exception:
             LOG.error(
-                "uploading delivery report failed for family: %s",
-                analysis_obj.family.internal_id,
+                "uploading delivery report failed for family: %s", analysis_obj.family.internal_id
             )
 
 
 @click.command("delivery-report")
 @click.argument("family_id", required=False)
-@click.option(
-    "-p", "--print", "print_console", is_flag=True, help="print report to console"
-)
+@click.option("-p", "--print", "print_console", is_flag=True, help="print report to console")
 @click.pass_context
 def delivery_report(context, family_id, print_console):
     """Generates a delivery report for a case and uploads it to housekeeper and scout
@@ -99,9 +91,7 @@ def delivery_report(context, family_id, print_console):
 
     click.echo(click.style("----------------- DELIVERY_REPORT -------------"))
 
-    def _add_delivery_report_to_hk(
-        delivery_report_file, hk_api: hk.HousekeeperAPI, family_id
-    ):
+    def _add_delivery_report_to_hk(delivery_report_file, hk_api: hk.HousekeeperAPI, family_id):
         delivery_report_tag_name = "delivery-report"
         version_obj = hk_api.last_version(family_id)
         uploaded_delivery_report_files = hk_api.get_files(
@@ -139,16 +129,22 @@ def delivery_report(context, family_id, print_console):
 
     tb_api = context.obj["tb_api"]
     status_api = context.obj["status"]
-    delivery_report_file = report_api.create_delivery_report_file(
-        family_id, file_path=tb_api.get_family_root_dir(family_id)
-    )
+
+    try:
+        delivery_report_file = report_api.create_delivery_report_file(
+            family_id, file_path=tb_api.get_family_root_dir(family_id)
+        )
+    except DeliveryReportError as error:
+        click.echo(click.style(f"Could not create delivery report: {error.message}", fg="red"))
+        context.abort()
+
     hk_api = context.obj["housekeeper_api"]
     added_file = _add_delivery_report_to_hk(delivery_report_file, hk_api, family_id)
 
     if added_file:
         click.echo(click.style("uploaded to housekeeper", fg="green"))
     else:
-        click.echo(click.style("already uploaded to housekeeper, skipping"))
+        click.echo(click.style("already uploaded to housekeeper, skipping", fg="yellow"))
 
     context.invoke(delivery_report_to_scout, case_id=family_id)
     _update_delivery_report_date(status_api, family_id)
@@ -157,11 +153,7 @@ def delivery_report(context, family_id, print_console):
 @click.command("delivery-report-to-scout")
 @click.argument("case_id", required=False)
 @click.option(
-    "-d",
-    "--dry-run",
-    "dry_run",
-    is_flag=True,
-    help="run command without uploading to " "scout",
+    "-d", "--dry-run", "dry_run", is_flag=True, help="run command without uploading to " "scout"
 )
 @click.pass_context
 def delivery_report_to_scout(context, case_id, dry_run):
@@ -179,9 +171,7 @@ def delivery_report_to_scout(context, case_id, dry_run):
         )
 
         if uploaded_delivery_report_files.count() == 0:
-            raise FileNotFoundError(
-                f"No delivery report was found in housekeeper for {family_id}"
-            )
+            raise FileNotFoundError(f"No delivery report was found in housekeeper for {family_id}")
 
         return uploaded_delivery_report_files[0].full_path
 

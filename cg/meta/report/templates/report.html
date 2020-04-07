@@ -172,11 +172,11 @@
               {% for sample in samples %}
                 <tr>
                   <td>{{ sample.name }}*</td>
-                  <td>{{ (sample.million_read_pairs) }}</td>
+                  <td>{{ sample.million_read_pairs }}</td>
                   <td>{{ sample.mapped_reads }}</td>
                   <td>{{ sample.target_coverage }}</td>
                   <td>{{ sample.target_completeness }}</td>
-                  <td>{{ (sample.duplicates) }}</td>
+                  <td>{{ sample.duplicates }}</td>
                 </tr>
               {% endfor %}
             </tbody>
@@ -189,7 +189,7 @@
         {% if scout_access %}
           <p class="card-block">
             Varianter finns uppladdade i Scout:
-            <a href="https://scout.scilifelab.se/{{ customer_internal_id }}/{{ family }}">https://scout.scilifelab.se/{{ customer_internal_id }}/{{ family }}</a>
+            <a href="scout.scilifelab.se/{{ customer_internal_id }}/{{ family }}">scout.scilifelab.se/{{ customer_internal_id }}/{{ family }}</a>
           </p>
         {% endif %}
 
