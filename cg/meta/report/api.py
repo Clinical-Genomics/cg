@@ -160,13 +160,17 @@ class ReportAPI:
 
             sample_coverage = self._get_sample_coverage_from_chanjo(lims_id, genes)
 
+            target_coverage = None
+            target_completeness = None
+
             if sample_coverage:
                 target_coverage = sample_coverage.get("mean_coverage")
-                sample["target_coverage"] = target_coverage
                 target_completeness = sample_coverage.get("mean_completeness")
-                sample["target_completeness"] = target_completeness
             else:
                 self.LOG.warning(f"No coverage could be calculated for: {lims_id}")
+
+            sample["target_coverage"] = target_coverage
+            sample["target_completeness"] = target_completeness
 
     def _fetch_family_samples_from_status_db(self, family_id: str) -> list:
         """Incorporate data from the status database for each sample ."""
