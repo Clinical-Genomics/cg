@@ -30,9 +30,7 @@ def delivery_reports(context, print_console):
                 print_console=print_console,
             )
         except FileNotFoundError as error:
-            LOG.error(
-                "Missing file for delivery report creation for case: %s, %s", case_id, error.message
-            )
+            LOG.error("Missing file for delivery report creation for case: %s, %s", case_id, error)
         except DeliveryReportError as error:
             LOG.error("Creation of delivery report failed for case: %s, %s", case_id, error.message)
         except CgError as error:
