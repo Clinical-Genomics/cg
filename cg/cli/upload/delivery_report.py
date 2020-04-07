@@ -126,9 +126,13 @@ def delivery_report(context, family_id, print_console):
         context.abort()
 
     if print_console:
-        delivery_report_html = report_api.create_delivery_report(family_id)
-        click.echo(delivery_report_html)
-        return
+        try:
+            delivery_report_html = report_api.create_delivery_report(family_id)
+            click.echo(delivery_report_html)
+            return
+        except DeliveryReportError as error:
+            click.echo(click.style(f"Could not create delivery report: {error.message}", fg="red"))
+            context.abort()
 
     tb_api = context.obj["tb_api"]
     status_api = context.obj["status"]
@@ -138,7 +142,7 @@ def delivery_report(context, family_id, print_console):
             family_id, file_path=tb_api.get_family_root_dir(family_id)
         )
     except DeliveryReportError as error:
-        click.echo(click.style(f"Could not create delivery report: {error.message}", fg="red"))
+        click.echo(click.style(f"Could not create delivery report file: {error.message}", fg="red"))
         context.abort()
 
     hk_api = context.obj["housekeeper_api"]
