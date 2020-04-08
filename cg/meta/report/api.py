@@ -57,10 +57,10 @@ class ReportAPI:
                     f"missing data:"
                     f" {self.report_validator.get_missing_attributes()}"
                 )
-            else:
-                self.log.warning(
-                    "missing data: %s", ", ".join(self.report_validator.get_missing_attributes())
-                )
+
+            self.log.warning(
+                "missing data: %s", ", ".join(self.report_validator.get_missing_attributes())
+            )
 
     def create_delivery_report_file(
         self, family_id: str, file_path: Path, accept_missing_data: bool = False
