@@ -9,6 +9,7 @@ import click
 from cg.apps import coverage as coverage_app
 from cg.apps import gt, hk, lims, madeline, scoutapi, tb
 from cg.cli.workflow.mip_dna.deliver import CASE_TAGS, SAMPLE_TAGS
+from cg.exc import AnalysisUploadError
 from cg.meta.deliver import DeliverAPI
 from cg.meta.report.api import ReportAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
@@ -66,7 +67,7 @@ def upload(context, family_id, force_restart):
 
         if not force_restart and analysis_obj.upload_started_at is not None:
             if dt.datetime.now() - analysis_obj.upload_started_at > dt.timedelta(hours=24):
-                raise Exception(
+                raise AnalysisUploadError(
                     f"The upload started at {analysis_obj.upload_started_at} "
                     f"something went wrong, restart it with the --restart flag"
                 )

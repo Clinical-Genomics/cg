@@ -28,6 +28,12 @@ class AnalysisDuplicationError(CgError):
     """
 
 
+class AnalysisUploadError(CgError):
+    """
+        Error related to trying to upload analysis data.
+    """
+
+
 class CgDataError(CgError):
     """
         Error related to missing/incomplete data in Status DB
