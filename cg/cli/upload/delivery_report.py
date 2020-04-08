@@ -16,7 +16,7 @@ LOG = logging.getLogger(__name__)
 @click.option("-p", "--print", "print_console", is_flag=True, help="print list to console")
 @click.option("-f", "--force", "force_report", is_flag=True, help="overrule report validation")
 @click.pass_context
-def delivery_reports(context, print_console, force):
+def delivery_reports(context, print_console, force_report):
     """Generate delivery reports for all cases that need one"""
 
     click.echo(click.style("----------------- DELIVERY REPORTS ------------------------"))
@@ -29,7 +29,7 @@ def delivery_reports(context, print_console, force):
                 delivery_report,
                 family_id=analysis_obj.family.internal_id,
                 print_console=print_console,
-                force=force,
+                force_report=force_report,
             )
         except FileNotFoundError as error:
             LOG.error("Missing file for delivery report creation for case: %s, %s", case_id, error)
@@ -44,7 +44,7 @@ def delivery_reports(context, print_console, force):
 @click.option("-p", "--print", "print_console", is_flag=True, help="print report to console")
 @click.option("-f", "--force", "force_report", is_flag=True, help="overrule report validation")
 @click.pass_context
-def delivery_report(context, family_id, print_console, force):
+def delivery_report(context, family_id, print_console, force_report):
     """Generates a delivery report for a case and uploads it to housekeeper and scout
 
     The report contains data from several sources:
@@ -132,7 +132,7 @@ def delivery_report(context, family_id, print_console, force):
 
     if print_console:
         try:
-            delivery_report_html = report_api.create_delivery_report(family_id, force)
+            delivery_report_html = report_api.create_delivery_report(family_id, force_report)
             click.echo(delivery_report_html)
             return
         except DeliveryReportError as error:
@@ -144,7 +144,7 @@ def delivery_report(context, family_id, print_console, force):
 
     try:
         delivery_report_file = report_api.create_delivery_report_file(
-            family_id, file_path=tb_api.get_family_root_dir(family_id)
+            family_id, file_path=tb_api.get_family_root_dir(family_id), acc=force_report
         )
     except DeliveryReportError as error:
         click.echo(click.style(f"Could not create delivery report file: {error.message}", fg="red"))

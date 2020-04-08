@@ -62,10 +62,14 @@ class ReportAPI:
                     "missing data: %s", ", ".join(self.report_validator.get_missing_attributes())
                 )
 
-    def create_delivery_report_file(self, family_id: str, file_path: Path):
+    def create_delivery_report_file(
+        self, family_id: str, file_path: Path, accept_missing_data: bool = False
+    ):
         """Generate a temporary file containing a delivery report."""
 
-        delivery_report = self.create_delivery_report(family_id=family_id)
+        delivery_report = self.create_delivery_report(
+            family_id=family_id, accept_missing_data=accept_missing_data
+        )
 
         file_path.mkdir(parents=True, exist_ok=True)
         report_file_path = Path(file_path / "delivery-report.html")
