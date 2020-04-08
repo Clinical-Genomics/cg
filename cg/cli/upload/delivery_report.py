@@ -14,8 +14,9 @@ LOG = logging.getLogger(__name__)
 
 @click.command("delivery-reports")
 @click.option("-p", "--print", "print_console", is_flag=True, help="print list to console")
+@click.option("-f", "--force", "force_report", is_flag=True, help="overrule report validation")
 @click.pass_context
-def delivery_reports(context, print_console):
+def delivery_reports(context, print_console, force):
     """Generate delivery reports for all cases that need one"""
 
     click.echo(click.style("----------------- DELIVERY REPORTS ------------------------"))
@@ -28,6 +29,7 @@ def delivery_reports(context, print_console):
                 delivery_report,
                 family_id=analysis_obj.family.internal_id,
                 print_console=print_console,
+                force=force,
             )
         except FileNotFoundError as error:
             LOG.error("Missing file for delivery report creation for case: %s, %s", case_id, error)
@@ -40,35 +42,37 @@ def delivery_reports(context, print_console):
 @click.command("delivery-report")
 @click.argument("family_id", required=False)
 @click.option("-p", "--print", "print_console", is_flag=True, help="print report to console")
+@click.option("-f", "--force", "force_report", is_flag=True, help="overrule report validation")
 @click.pass_context
-def delivery_report(context, family_id, print_console):
+def delivery_report(context, family_id, print_console, force):
     """Generates a delivery report for a case and uploads it to housekeeper and scout
 
     The report contains data from several sources:
 
     status-db:
         family
-        customer_obj
-        application_objs
+        customer_name
+        applications
         accredited
         panels
         samples
         sample.internal_id
         sample.status
         sample.ticket
-        sample.million_read_pairs
-        sample.prepared_at
+        sample.million_read_pairs   for sequenced samples, from demux + rml, not for external
+        sample.prepared_at          not for rml and external
         sample.received_at
-        sample.sequenced_at
+        sample.sequenced_at         for rml and in-house sequenced samples
         sample.delivered_at
+        sample.data_analysis        missing on most re-runs
 
     lims:
         sample.name
         sample.sex
-        sample.source
+        sample.source               missing on most re-runs
         sample.application
-        sample.prep_method
-        sample.sequencing_method
+        sample.prep_method          not for rml or external
+        sample.sequencing_method    for sequenced samples
         sample.delivery_method
 
 
@@ -76,7 +80,7 @@ def delivery_report(context, family_id, print_console):
         sample.mapped_reads
         sample.duplicates
         sample.analysis_sex
-        mip_version
+        pipeline_version
         genome_build
 
     chanjo:
@@ -89,6 +93,7 @@ def delivery_report(context, family_id, print_console):
     calculated:
         today
         sample.processing_time
+        report_version
 
     """
 
@@ -127,7 +132,7 @@ def delivery_report(context, family_id, print_console):
 
     if print_console:
         try:
-            delivery_report_html = report_api.create_delivery_report(family_id)
+            delivery_report_html = report_api.create_delivery_report(family_id, force)
             click.echo(delivery_report_html)
             return
         except DeliveryReportError as error:

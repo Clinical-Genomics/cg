@@ -34,30 +34,33 @@ class ReportAPI:
         self.lims = lims_api
         self.chanjo = chanjo_api
         self.analysis = analysis_api
-        self.LOG = logger
+        self.log = logger
         self.yaml_loader = yaml_loader
         self.path_tool = path_tool
         self.scout = scout_api
         self.report_validator = ReportValidator(store)
 
-    def create_delivery_report(self, family_id: str) -> str:
+    def create_delivery_report(self, family_id: str, accept_missing_data: bool = False) -> str:
         """Generate the html contents of a delivery report."""
         delivery_data = self._get_delivery_data(family_id)
-        if not self.report_validator.has_required_data(delivery_data):
-            raise DeliveryReportError(
-                f"Could not generate report data for {family_id}, "
-                f"missing data:"
-                f" {self.report_validator.get_missing_attributes()}"
-            )
+        self._handle_missing_report_data(accept_missing_data, delivery_data, family_id)
         report_data = self._make_data_presentable(delivery_data)
-        if not self.report_validator.has_required_data(report_data):
-            raise DeliveryReportError(
-                f"Could not present report data for {family_id}, "
-                f"missing data:"
-                f" {self.report_validator.get_missing_attributes()}"
-            )
+        self._handle_missing_report_data(accept_missing_data, report_data, family_id)
         rendered_report = self._render_delivery_report(report_data)
         return rendered_report
+
+    def _handle_missing_report_data(self, accept_missing_data, delivery_data, family_id):
+        if not self.report_validator.has_required_data(delivery_data):
+            if accept_missing_data:
+                raise DeliveryReportError(
+                    f"Could not generate report data for {family_id}, "
+                    f"missing data:"
+                    f" {self.report_validator.get_missing_attributes()}"
+                )
+            else:
+                self.log.warning(
+                    "missing data: %s", ", ".join(self.report_validator.get_missing_attributes())
+                )
 
     def create_delivery_report_file(self, family_id: str, file_path: Path):
         """Generate a temporary file containing a delivery report."""
@@ -80,6 +83,8 @@ class ReportAPI:
         analysis_obj = family_obj.analyses[0] if family_obj.analyses else None
 
         report_data["family"] = family_obj.name
+        report_data["pipeline"] = analysis_obj.pipeline
+        report_data["pipeline_version"] = analysis_obj.pipeline_version
         report_data["customer_name"] = family_obj.customer.name
         report_data["customer_internal_id"] = family_obj.customer.internal_id
         report_data["customer_invoice_address"] = family_obj.customer.invoice_address
@@ -148,7 +153,6 @@ class ReportAPI:
             sample["duplicates"] = duplicates_all_samples.get(lims_id)
 
         report_data["genome_build"] = trending_data.get("genome_build")
-        report_data["pipeline_version"] = trending_data.get("mip_version")
 
     def _incorporate_coverage_data(self, samples: list, panels: list):
         """Incorporate coverage data from Chanjo for each sample ."""
@@ -167,7 +171,7 @@ class ReportAPI:
                 target_coverage = sample_coverage.get("mean_coverage")
                 target_completeness = sample_coverage.get("mean_completeness")
             else:
-                self.LOG.warning(f"No coverage could be calculated for: {lims_id}")
+                self.log.warning(f"No coverage could be calculated for: {lims_id}")
 
             sample["target_coverage"] = target_coverage
             sample["target_completeness"] = target_completeness
@@ -243,7 +247,7 @@ class ReportAPI:
                 lims_sample = self.lims.sample(lims_id)
             except requests.exceptions.HTTPError as e:
                 lims_sample = dict()
-                self.LOG.info(f"could not fetch sample {lims_id} from LIMS: {e}")
+                self.log.info(f"could not fetch sample {lims_id} from LIMS: {e}")
 
             sample["name"] = lims_sample.get("name")
             sample["sex"] = lims_sample.get("sex")

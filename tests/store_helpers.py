@@ -60,13 +60,15 @@ def ensure_customer(store, customer_id="cust_test"):
     return customer
 
 
-def add_analysis(store, family=None, completed_at=None):
+def add_analysis(
+    store, family=None, completed_at=None, pipeline="dummy_pipeline", pipeline_version="1.0"
+):
     """Utility function to add an analysis for tests"""
 
     if not family:
         family = add_family(store)
 
-    analysis = store.add_analysis(pipeline="", version="")
+    analysis = store.add_analysis(pipeline=pipeline, version=pipeline_version)
 
     if completed_at:
         analysis.completed_at = completed_at

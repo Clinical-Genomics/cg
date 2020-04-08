@@ -160,7 +160,7 @@ def test_incorporate_coverage_data(report_api, report_samples):
         assert not sample.get("target_coverage")
         assert not sample.get("target_completeness")
         lims_id_found_in_warnings = False
-        for warning in report_api.LOG.get_warnings():
+        for warning in report_api.log.get_warnings():
             lims_id_found_in_warnings = lims_id in warning or lims_id_found_in_warnings
         assert lims_id_found_in_warnings
 
