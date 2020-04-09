@@ -15,4 +15,7 @@ class SampleHelper:
         return self._store.sample(internal_id).application_version.application.prep_category
 
     def is_analysis_sample(self, internal_id):
-        return "fastq" not in self._store.sample(internal_id).data_analysis
+        return (
+            not self._store.sample(internal_id).data_analysis
+            or "fastq" not in self._store.sample(internal_id).data_analysis
+        )
