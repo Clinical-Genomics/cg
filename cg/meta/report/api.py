@@ -229,7 +229,13 @@ class ReportAPI:
 
             if application:
                 application_is_accredited = application.is_accredited
-                applications.append(application)
+                applications.append(
+                    {
+                        "tag": application.tag,
+                        "description": application.description,
+                        "limitations": application.limitations,
+                    }
+                )
 
             accreditations.append(application_is_accredited)
 
