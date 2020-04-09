@@ -62,7 +62,6 @@ def test_collect_delivery_data(report_api, report_store):
         assert sample["capture_kit"]
         assert sample["sequencing_method"]
         assert sample["sequenced_at"]
-        assert sample["delivery_method"]
         assert sample["delivered_at"]
 
         assert sample["million_read_pairs"]
@@ -106,10 +105,6 @@ def test_incorporate_lims_methods(report_samples, report_api):
     # each sample has a property sequencing_method with a value
     for sample in samples:
         assert sample["sequencing_method"]
-
-    # each sample has a property delivery_method with a value
-    for sample in samples:
-        assert sample["delivery_method"]
 
 
 def test_render_delivery_report(report_api):

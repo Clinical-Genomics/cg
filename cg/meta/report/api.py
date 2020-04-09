@@ -119,7 +119,7 @@ class ReportAPI:
 
         for sample in samples:
             lims_id = sample["internal_id"]
-            method_types = ["prep_method", "sequencing_method", "delivery_method"]
+            method_types = ["prep_method", "sequencing_method"]
             for method_type in method_types:
                 get_method = getattr(self.lims, f"get_{method_type}")
                 method_name = get_method(lims_id)

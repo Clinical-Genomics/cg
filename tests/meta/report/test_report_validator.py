@@ -59,7 +59,6 @@ REQUIRED_GENERIC_SAMPLE_FIELDS = [
     "application",
     "ordered_at",
     "received_at",
-    "delivery_method",
     "delivered_at",
     "processing_time",
     "analysis_sex",

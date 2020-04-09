@@ -73,7 +73,6 @@ def delivery_report(context, family_id, print_console, force_report):
         sample.application
         sample.prep_method          not for rml or external
         sample.sequencing_method    for sequenced samples
-        sample.delivery_method
 
 
     trailblazer:
