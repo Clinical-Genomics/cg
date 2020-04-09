@@ -73,6 +73,7 @@ def test_collect_delivery_data(report_api, report_store):
         assert sample["data_analysis"]
         assert sample["analysis_sex"]
 
+    assert delivery_data["pipeline"]
     assert delivery_data["pipeline_version"]
     assert delivery_data["genome_build"]
 
@@ -83,8 +84,7 @@ def test_get_status_from_status_db(report_api):
     # WHEN fetch_application_data_from_status_db
     samples = report_api._fetch_family_samples_from_status_db("yellowhog")
 
-    # THEN
-    # the samples contain a status
+    # THEN the samples contain a status
     for sample in samples:
         assert sample["status"]
 
@@ -96,8 +96,7 @@ def test_incorporate_lims_methods(report_samples, report_api):
     samples = report_samples
     report_api._incorporate_lims_methods(samples)
 
-    # THEN certain metrics should have been calculated
-
+    # THEN
     # each sample has a property library_prep_method with a value
     for sample in samples:
         assert sample["prep_method"]
@@ -161,7 +160,6 @@ def test_incorporate_coverage_data(report_api, report_samples):
 
 
 def test_fetch_capture_kit_from_status_db(report_api):
-
     # GIVEN an initialised report_api and the db returns samples with capture kit
 
     # WHEN fetching status data
@@ -174,7 +172,6 @@ def test_fetch_capture_kit_from_status_db(report_api):
 
 
 def test_data_analysis_kit_from_status_db(report_api):
-
     # GIVEN an initialised report_api and the db returns samples with data_analysis
 
     # WHEN fetching status data
