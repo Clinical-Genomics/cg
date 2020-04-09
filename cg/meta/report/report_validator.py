@@ -51,13 +51,6 @@ class ReportValidator:
         self._check_required_general_report_data(report_data)
 
         for sample in report_data["samples"]:
-
-            if isinstance(sample, str):
-                print(report_data)
-                print("t(s)", type(sample))
-                print(sample)
-                continue
-
             self._check_required_sample_attributes(sample)
 
         return self.get_missing_attributes() == []
