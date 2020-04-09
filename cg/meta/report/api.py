@@ -42,6 +42,7 @@ class ReportAPI:
 
     def create_delivery_report(self, family_id: str, accept_missing_data: bool = False) -> str:
         """Generate the html contents of a delivery report."""
+
         delivery_data = self._get_delivery_data(family_id)
         self._handle_missing_report_data(accept_missing_data, delivery_data, family_id)
         report_data = self._make_data_presentable(delivery_data)
@@ -51,7 +52,7 @@ class ReportAPI:
 
     def _handle_missing_report_data(self, accept_missing_data, delivery_data, family_id):
         if not self.report_validator.has_required_data(delivery_data):
-            if accept_missing_data:
+            if not accept_missing_data:
                 raise DeliveryReportError(
                     f"Could not generate report data for {family_id}, "
                     f"missing data:"
