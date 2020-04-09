@@ -17,6 +17,11 @@ class Presenter:
 
         return str(round(float(raw_float_str), precision)) if raw_float_str else self._default_na
 
+    def process_float(self, raw_float: float, precision: int = 2) -> str:
+        """Make a float value presentable"""
+
+        return str(round(raw_float, precision)) if raw_float else self._default_na
+
     def process_string(self, raw_string: str) -> str:
         """Make a string value presentable"""
 
@@ -40,7 +45,10 @@ class Presenter:
     def process_list(self, raw_list: list):
         """Make a list presentable"""
 
-        return ", ".join(str(s) for s in raw_list) if raw_list else self._default_na
+        if raw_list and isinstance(raw_list[0], str):
+            return ", ".join(str(s) for s in raw_list) if raw_list else self._default_na
+
+        return [self.process_obj(o) for o in raw_list]
 
     def process_dict(self, raw_dict: dict):
         """Make a dict presentable"""
@@ -54,7 +62,14 @@ class Presenter:
     def process_obj(self, obj):
         """Make supported types presentable"""
 
-        if isinstance(obj, dict):
+        if obj is None:
+            presentable_value = self._default_na
+        elif isinstance(obj, str):
+            if self._is_float(obj):
+                presentable_value = self.process_float_string(obj)
+            else:
+                presentable_value = self.process_string(obj)
+        elif isinstance(obj, dict):
             presentable_value = self.process_dict(obj)
         elif isinstance(obj, set):
             presentable_value = self.process_set(obj)
@@ -64,12 +79,17 @@ class Presenter:
             presentable_value = self.process_datetime(obj)
         elif isinstance(obj, int):
             presentable_value = self.process_int(obj)
-        elif isinstance(obj, str):
-            if str.isdecimal(obj):
-                presentable_value = self.process_float_string(obj)
-            else:
-                presentable_value = self.process_string(obj)
+        elif isinstance(obj, float):
+            presentable_value = self.process_float(obj)
         else:
             raise TypeError(f"Unsupported {obj} of type {type(obj)} in {self.__class__.__name__}")
 
         return presentable_value
+
+    @staticmethod
+    def _is_float(value):
+        try:
+            float(value)
+            return True
+        except ValueError:
+            return False

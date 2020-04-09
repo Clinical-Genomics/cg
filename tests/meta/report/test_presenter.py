@@ -50,3 +50,18 @@ def test_present_set():
 
     # THEN we should get 'N/A' back
     assert presentable_string == "N/A"
+
+
+def test_present_dict():
+    # GIVEN a dict to present
+    dict_to_present = {
+        "nested_dict": {"string_key": "string_value", "none_key": None, "empty_key": ""}
+    }
+
+    # WHEN formatting dict
+    presentable_dict = Presenter().process_dict(dict_to_present)
+
+    # THEN we should get 'N/A' back
+    assert presentable_dict["nested_dict"]["string_key"] == "string_value"
+    assert presentable_dict["nested_dict"]["none_key"] == Presenter().DEFAULT_NA
+    assert presentable_dict["nested_dict"]["empty_key"] == Presenter().DEFAULT_NA
