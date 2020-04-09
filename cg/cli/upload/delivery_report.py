@@ -1,6 +1,7 @@
 """Code for uploading delivery report from the CLI"""
 import datetime as dt
 import logging
+import sys
 
 import click
 
@@ -10,6 +11,8 @@ from cg.exc import DeliveryReportError, CgError
 from .utils import _suggest_cases_delivery_report
 
 LOG = logging.getLogger(__name__)
+SUCCESS = 0
+FAIL = 1
 
 
 @click.command("delivery-reports")
@@ -21,10 +24,12 @@ def delivery_reports(context, print_console, force_report):
 
     click.echo(click.style("----------------- DELIVERY REPORTS ------------------------"))
 
+    exit_code = SUCCESS
     for analysis_obj in context.obj["status"].analyses_to_delivery_report():
         case_id = analysis_obj.family.internal_id
         LOG.info("uploading delivery report for case: %s", case_id)
         try:
+
             context.invoke(
                 delivery_report,
                 family_id=analysis_obj.family.internal_id,
@@ -33,10 +38,14 @@ def delivery_reports(context, print_console, force_report):
             )
         except FileNotFoundError as error:
             LOG.error("Missing file for delivery report creation for case: %s, %s", case_id, error)
+            exit_code = FAIL
         except DeliveryReportError as error:
             LOG.error("Creation of delivery report failed for case: %s, %s", case_id, error.message)
+            exit_code = FAIL
         except CgError as error:
             LOG.error("Uploading delivery report failed for case: %s, %s", case_id, error.message)
+            exit_code = FAIL
+    sys.exit(exit_code)
 
 
 @click.command("delivery-report")
@@ -130,24 +139,16 @@ def delivery_report(context, family_id, print_console, force_report):
         context.abort()
 
     if print_console:
-        try:
-            delivery_report_html = report_api.create_delivery_report(family_id, force_report)
-            click.echo(delivery_report_html)
-            return
-        except DeliveryReportError as error:
-            click.echo(click.style(f"Could not create delivery report: {error.message}", fg="red"))
-            context.abort()
+        delivery_report_html = report_api.create_delivery_report(family_id, force_report)
+        click.echo(delivery_report_html)
+        return
 
     tb_api = context.obj["tb_api"]
     status_api = context.obj["status"]
 
-    try:
-        delivery_report_file = report_api.create_delivery_report_file(
-            family_id, file_path=tb_api.get_family_root_dir(family_id), acc=force_report
-        )
-    except DeliveryReportError as error:
-        click.echo(click.style(f"Could not create delivery report file: {error.message}", fg="red"))
-        context.abort()
+    delivery_report_file = report_api.create_delivery_report_file(
+        family_id, file_path=tb_api.get_family_root_dir(family_id), acc=force_report
+    )
 
     hk_api = context.obj["housekeeper_api"]
     added_file = _add_delivery_report_to_hk(delivery_report_file, hk_api, family_id)
