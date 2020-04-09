@@ -240,7 +240,7 @@ class ReportAPI:
             accreditations.append(application_is_accredited)
 
         application_data["applications"] = applications
-        application_data["accredited"] = all(accreditations)
+        application_data["accredited"] = bool(all(accreditations))
         return application_data
 
     def _fetch_panels_from_status_db(self, family_id: str) -> list:
