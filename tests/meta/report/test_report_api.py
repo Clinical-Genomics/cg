@@ -1,4 +1,5 @@
 import os
+import datetime
 from pathlib import Path
 
 import pytest
@@ -76,6 +77,125 @@ def test_collect_delivery_data(report_api, report_store):
     assert delivery_data["pipeline"]
     assert delivery_data["pipeline_version"]
     assert delivery_data["genome_build"]
+
+
+def is_similar_dicts(dict1, dict2):
+    _is_similar = True
+
+    for key, value in dict1.items():
+        _is_similar = _is_similar and is_similar_values(dict1.get(key), dict2.get(key))
+
+    return _is_similar
+
+
+def is_similar_lists(list1, list2):
+    _is_similar = True
+
+    if isinstance(list2, list):
+        for value1, value2 in zip(list1, list2):
+            _is_similar = _is_similar and is_similar_values(value1, value2)
+    else:
+        for value1 in list1:
+            _is_similar = _is_similar and value1 in list2
+
+    return _is_similar
+
+
+def is_similar_values(value1, value2):
+
+    if str(value1) == str(value2):
+        return True
+
+    if isinstance(value1, dict):
+        return is_similar_dicts(value1, value2)
+
+    if isinstance(value1, list):
+        return is_similar_lists(value1, value2)
+
+    if isinstance(value1, datetime.datetime):
+        print(str(value1.date()), str(value1.date()) == value2)
+        return str(value1.date()) == value2
+
+    if is_float(value1):
+        return round(float(value1), 1) == round(float(value2), 1)
+
+    return False
+
+
+def is_float(value):
+    try:
+        float(value)
+        return True
+    except ValueError:
+        return False
+
+
+def test_presentable_delivery_report_contains_delivery_data(report_api):
+    # GIVEN data from an analysed case and an initialised report_api
+    case_id = "yellowhog"
+    delivery_data = report_api._get_delivery_data(family_id=case_id)
+
+    # WHEN creating delivery report
+    presentable_data = report_api._make_data_presentable(delivery_data)
+
+    # THEN
+    # the delivery_report contains the delivery_data
+    assert is_similar_dicts(delivery_data, presentable_data)
+
+
+def dict_values_exists_in(a_dict: dict, a_target: str):
+
+    all_exists = True
+
+    for value in a_dict.values():
+        all_exists = all_exists and value_exists_in(value, a_target)
+    return all_exists
+
+
+def value_exists_in(value, a_target: str):
+
+    print(type(value), value)
+
+    if isinstance(value, str):
+        return value in a_target
+    if isinstance(value, float):
+        return str(round(value, 2)) in a_target or str(round(value, 1)) in a_target
+    if isinstance(value, dict):
+        return dict_values_exists_in(value, a_target)
+    if isinstance(value, list):
+        return list_values_exists_in(value, a_target)
+    if isinstance(value, datetime.datetime):
+        return str(value.date()) in a_target
+
+    if str(value) in a_target:
+        return True
+
+    if isinstance(value, bool):
+        return True
+
+    return False
+
+
+def list_values_exists_in(a_list: list, a_target: str):
+
+    all_exists = True
+
+    for value in a_list:
+        all_exists = all_exists and value_exists_in(value, a_target)
+    return all_exists
+
+
+def test_create_delivery_report_contains_delivery_data(report_api):
+    # GIVEN data from an analysed case and an initialised report_api
+    case_id = "yellowhog"
+    delivery_data = report_api._get_delivery_data(family_id=case_id)
+
+    # WHEN creating delivery report
+    delivery_report = report_api.create_delivery_report(case_id)
+
+    # THEN
+    # the delivery_report contains the delivery_data
+    assert dict_values_exists_in(delivery_data, delivery_report)
 
 
 def test_get_status_from_status_db(report_api):
