@@ -85,7 +85,7 @@ class ReportAPI:
 
         report_data = dict()
         family_obj = self._get_case_from_statusdb(family_id)
-        analysis_obj = family_obj.analyses[0] if family_obj.analyses else None
+        analysis_obj = family_obj.analyses[0]
 
         report_data["family"] = family_obj.name
         report_data["pipeline"] = analysis_obj.pipeline
@@ -93,7 +93,7 @@ class ReportAPI:
         report_data["customer_name"] = family_obj.customer.name
         report_data["customer_internal_id"] = family_obj.customer.internal_id
         report_data["customer_invoice_address"] = family_obj.customer.invoice_address
-        report_data["scout_access"] = family_obj.customer.scout_access
+        report_data["scout_access"] = bool(family_obj.customer.scout_access)
         report_data["report_version"] = ReportHelper.get_report_version(analysis_obj)
         report_data["previous_report_version"] = ReportHelper.get_previous_report_version(
             analysis_obj
