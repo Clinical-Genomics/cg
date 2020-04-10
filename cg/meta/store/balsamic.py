@@ -62,8 +62,13 @@ def _reset_analysis_action(case_obj):
     case_obj.action = None
 
 
-def parse_created(config_data):
-    return config_data["analysis"]["config_creation_date"]
+def parse_created(config_data: dict) -> dt.datetime:
+    datetime_str = config_data["analysis"]["config_creation_date"]
+    return dt.datetime.strptime(datetime_str, "%Y-%m-%d %H:%M")
+
+
+def parse_version(config_data: dict) -> dt.datetime:
+    return config_data["analysis"]["BALSAMIC_version"]
 
 
 def _add_analysis(config_path, deliverables_file, case_obj):
@@ -72,33 +77,34 @@ def _add_analysis(config_path, deliverables_file, case_obj):
     with Path(config_path).open() as config_stream:
         config_raw = ruamel.yaml.safe_load(config_stream)
         created = parse_created(config_raw)
+        version = parse_version(config_raw)
 
     with Path(deliverables_file).open() as in_stream:
         deliverables_raw = ruamel.yaml.safe_load(in_stream)
 
     new_bundle = _build_bundle(
-        deliverables_raw, name=case_obj.internal_id, created=created, version="1"
+        deliverables_raw, name=case_obj.internal_id, created=created, version=version
     )
     return new_bundle
 
 
-def _build_bundle(meta_data: dict, name: str, created: dt.datetime, version: str) -> dict:
+def _build_bundle(deliverables_data: dict, name: str, created: dt.datetime, version: str) -> dict:
     """Create a new bundle."""
     data = {
         "name": name,
         "created": created,
         "pipeline_version": version,
-        "files": _get_files(meta_data),
+        "files": _get_files(deliverables_data),
     }
     return data
 
 
-def _get_files(meta_data: dict) -> list:
+def _get_files(deliverables_data: dict) -> list:
     """Get all the files from the balsamic files."""
 
     paths = {}
-    for tag in meta_data["files"]:
-        for path_str in meta_data["files"][tag]:
+    for tag in deliverables_data["files"]:
+        for path_str in deliverables_data["files"][tag]:
             path = Path(path_str).name
             if path in paths.keys():
                 paths[path]["tags"].append(tag)
