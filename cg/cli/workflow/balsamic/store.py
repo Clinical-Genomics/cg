@@ -30,9 +30,12 @@ def store(context):
 
 @store.command()
 @click.argument("case_id")
-@click.option("--deliverables-file", "deliverables_file_path", required=False, help="Optional")
+@click.option(
+    "-d", "--deliverables-file", "deliverables_file_path", required=False, help="Optional"
+)
+@click.option("-c", "--config", "config_path", required=False, help="Optional")
 @click.pass_context
-def analysis(context, case_id, deliverables_file_path):
+def analysis(context, case_id, deliverables_file_path, config_path):
     """Store a finished analysis in Housekeeper."""
 
     status = context.obj["db"]
@@ -45,16 +48,19 @@ def analysis(context, case_id, deliverables_file_path):
     if not deliverables_file_path:
         root_dir = Path(context.obj["balsamic"]["root"])
         deliverables_file_path = Path.joinpath(
-            root_dir, case_id, "analysis/delivery_report", case_id + ".hk"
+            root_dir, case_id, "delivery_report", case_id + ".hk"
         )
         if not os.path.isfile(deliverables_file_path):
             context.invoke(generate_deliverables_file, case_id=case_id)
+
+    if not config_path:
+        config_path = get_config_path(root_dir, case_id)
 
     hk_api = context.obj["hk_api"]
 
     try:
         new_analysis = gather_files_and_bundle_in_housekeeper(
-            deliverables_file_path, hk_api, status, case_obj
+            config_path, deliverables_file_path, hk_api, status, case_obj
         )
     except AnalysisNotFinishedError as error:
         click.echo(click.style(error.message, fg="red"))
@@ -71,6 +77,16 @@ def analysis(context, case_id, deliverables_file_path):
 
     status.add_commit(new_analysis)
     click.echo(click.style("included files in Housekeeper", fg="green"))
+
+
+@store.command()
+@click.pass_context
+def all_cases(context):
+
+    store = context.obj["db"]
+
+    for case in store.families():
+        context.invoke(analysis, case_id=case.internal_id)
 
 
 @store.command("generate-deliverables-file")
@@ -90,7 +106,7 @@ def generate_deliverables_file(context, dry, config_path, case_id):
         click.echo(click.style(f"Case {case_id} not found", fg="yellow"))
 
     if not config_path:
-        config_path = Path.joinpath(root_dir, case_id, case_id + ".json")
+        config_path = get_config_path(root_dir, case_id)
 
     # Call Balsamic
     command_str = f" plugins deliver" f" --sample-config {config_path}'"
@@ -108,3 +124,7 @@ def generate_deliverables_file(context, dry, config_path, case_id):
         click.echo(click.style("created deliverables file", fg="green"))
 
     return process
+
+
+def get_config_path(root_dir, case_id):
+    return Path.joinpath(root_dir, case_id, case_id + ".json")

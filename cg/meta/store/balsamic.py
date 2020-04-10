@@ -11,10 +11,12 @@ from pathlib import Path
 LOG = logging.getLogger(__name__)
 
 
-def gather_files_and_bundle_in_housekeeper(config_stream, hk_api, status, case_obj):
+def gather_files_and_bundle_in_housekeeper(
+    config_path, deliverables_file, hk_api, status, case_obj
+):
     """Function to gather files and bundle in housekeeper"""
 
-    bundle_data = _add_analysis(config_stream, case_obj)
+    bundle_data = _add_analysis(config_path, deliverables_file, case_obj)
 
     results = hk_api.add_bundle(bundle_data)
     if not results:
@@ -60,12 +62,22 @@ def _reset_analysis_action(case_obj):
     case_obj.action = None
 
 
-def _add_analysis(config_stream, case_obj):
+def parse_created(config_data):
+    return config_data["analysis"]["config_creation_date"]
+
+
+def _add_analysis(config_path, deliverables_file, case_obj):
     """Gather information from balsamic analysis to store."""
-    with Path(config_stream).open() as in_stream:
-        meta_raw = ruamel.yaml.safe_load(in_stream)
+
+    with Path(config_path).open() as config_stream:
+        config_raw = ruamel.yaml.safe_load(config_stream)
+        created = parse_created(config_raw)
+
+    with Path(deliverables_file).open() as in_stream:
+        deliverables_raw = ruamel.yaml.safe_load(in_stream)
+
     new_bundle = _build_bundle(
-        meta_raw, name=case_obj.internal_id, created=dt.datetime.now(), version="1"
+        deliverables_raw, name=case_obj.internal_id, created=created, version="1"
     )
     return new_bundle
 
