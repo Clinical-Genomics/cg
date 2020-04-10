@@ -40,13 +40,13 @@ def analysis(context, case_id, deliverables_file_path, config_path):
 
     status = context.obj["db"]
     case_obj = status.family(case_id)
+    root_dir = Path(context.obj["balsamic"]["root"])
 
     if not case_obj:
         click.echo(click.style(f"Case {case_id} not found", fg="red"))
         context.abort()
 
     if not deliverables_file_path:
-        root_dir = Path(context.obj["balsamic"]["root"])
         deliverables_file_path = Path.joinpath(
             root_dir, case_id, "delivery_report", case_id + ".hk"
         )
