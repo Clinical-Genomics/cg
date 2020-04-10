@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 
 import click
+
 from cg.apps import hk
 from cg.exc import CgError, StoreError
 from cg.meta.store.balsamic import gather_files_and_bundle_in_housekeeper
@@ -61,12 +62,14 @@ def analysis(context, case_id, deliverables_file_path, config_path):
         raise CgError(f"Case {case_id} not found")
 
     if not deliverables_file_path:
-        deliverables_file_path = analysis_api.get_deliverables_file_path(case_id, root_dir)
+        deliverables_file_path = analysis_api.get_deliverables_file_path(
+            case_id, root_dir
+        )
         if not os.path.isfile(deliverables_file_path):
             context.invoke(generate_deliverables_file, case_id=case_id)
 
     if not config_path:
-        config_path = analysis_api.get_config_path(root_dir, case_id)
+        config_path = get_config_path(root_dir, case_id)
 
     hk_api = context.obj["hk_api"]
 
@@ -83,6 +86,16 @@ def analysis(context, case_id, deliverables_file_path, config_path):
     LOG.info("Included files in Housekeeper")
 
 
+@store.command()
+@click.pass_context
+def all_cases(context):
+
+    store = context.obj["db"]
+
+    for case in store.families():
+        context.invoke(analysis, case_id=case.internal_id)
+
+
 @store.command("generate-deliverables-file")
 @click.option("-d", "--dry-run", "dry", is_flag=True, help="print command to console")
 @click.option("-c", "--config", "config_path", required=False, help="Optional")
@@ -93,16 +106,13 @@ def generate_deliverables_file(context, dry, config_path, case_id):
 
     conda_env = context.obj["balsamic"]["conda_env"]
     root_dir = Path(context.obj["balsamic"]["root"])
-    analysis_api = context.obj["analysis_api"]
     case_obj = context.obj["db"].family(case_id)
 
     if not case_obj:
         raise CgError(f"Case {case_id} not found")
 
     if not config_path:
-        config_path = analysis_api.get_config_path(root_dir, case_id)
-        if not config_path.is_file():
-            raise FileNotFoundError(f"Missing the sample-config file for {case_id}: {config_path}")
+        config_path = get_config_path(root_dir, case_id)
 
     command_str = f" report deliver" f" --sample-config {config_path}'"
     command = [f"bash -c 'source activate {conda_env}; balsamic"]
@@ -141,3 +151,7 @@ def completed(context):
     click.echo(click.style(f"Done storing cases. Exit code: {exit_code}", fg="blue"))
 
     sys.exit(exit_code)
+
+
+def get_config_path(root_dir, case_id):
+    return Path.joinpath(root_dir, case_id, case_id + ".json")
