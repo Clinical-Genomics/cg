@@ -1,3 +1,4 @@
+"""Module to create MIP analysis delivery reports"""
 import logging
 from datetime import datetime
 from pathlib import Path
@@ -18,6 +19,8 @@ from jinja2 import Environment, PackageLoader, select_autoescape
 
 
 class ReportAPI:
+    """API to create MIP analysis delivery reports"""
+
     def __init__(
         self,
         store: Store,
@@ -51,6 +54,7 @@ class ReportAPI:
         return rendered_report
 
     def _handle_missing_report_data(self, accept_missing_data, delivery_data, family_id):
+        """Handle when some crucial data is missing in the report"""
         if not self.report_validator.has_required_data(delivery_data):
             if not accept_missing_data:
                 raise DeliveryReportError(
@@ -176,7 +180,7 @@ class ReportAPI:
                 target_coverage = sample_coverage.get("mean_coverage")
                 target_completeness = sample_coverage.get("mean_completeness")
             else:
-                self.log.warning(f"No coverage could be calculated for: {lims_id}")
+                self.log.warning(f"No coverage could be calculated for: %s", lims_id)
 
             sample["target_coverage"] = target_coverage
             sample["target_completeness"] = target_completeness
