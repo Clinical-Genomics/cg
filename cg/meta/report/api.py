@@ -180,7 +180,7 @@ class ReportAPI:
                 target_coverage = sample_coverage.get("mean_coverage")
                 target_completeness = sample_coverage.get("mean_completeness")
             else:
-                self.log.warning(f"No coverage could be calculated for: %s", lims_id)
+                self.log.warning("No coverage could be calculated for: %s", lims_id)
 
             sample["target_coverage"] = target_coverage
             sample["target_completeness"] = target_completeness
@@ -262,7 +262,7 @@ class ReportAPI:
                 lims_sample = self.lims.sample(lims_id)
             except requests.exceptions.HTTPError as e:
                 lims_sample = dict()
-                self.log.info(f"could not fetch sample {lims_id} from LIMS: {e}")
+                self.log.info("could not fetch sample %s from LIMS: %s", lims_id, e)
 
             sample["name"] = lims_sample.get("name")
             sample["sex"] = lims_sample.get("sex")
