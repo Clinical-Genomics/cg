@@ -122,9 +122,10 @@ class MockLogger:
     last_warning = None
     warnings = []
 
-    def warning(self, text: str):
-        self.last_warning = text
-        self.warnings.append(text)
+    def warning(self, text, *interpolations):
+
+        self.warnings.append(text % interpolations)
+        self.last_warning = text % interpolations
 
     def get_last_warning(self) -> str:
         return self.last_warning
