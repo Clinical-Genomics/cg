@@ -147,7 +147,7 @@ def delivery_report(context, family_id, print_console, force_report):
     status_api = context.obj["status"]
 
     delivery_report_file = report_api.create_delivery_report_file(
-        family_id, file_path=tb_api.get_family_root_dir(family_id), acc=force_report
+        family_id, file_path=tb_api.get_family_root_dir(family_id), accept_missing_data=force_report
     )
 
     hk_api = context.obj["housekeeper_api"]
