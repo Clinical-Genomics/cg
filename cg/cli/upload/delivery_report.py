@@ -68,7 +68,7 @@ def delivery_report(context, family_id, print_console, force_report):
         sample.internal_id
         sample.status
         sample.ticket
-        sample.million_read_pairs   for sequenced samples, from demux + rml, not for external
+        sample.million_read_pairs   for sequenced samples, from demux + ready made libraries (rml), not for external
         sample.prepared_at          not for rml and external
         sample.received_at
         sample.sequenced_at         for rml and in-house sequenced samples
