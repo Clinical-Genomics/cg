@@ -5,6 +5,7 @@ from pathlib import Path
 
 import requests
 import ruamel.yaml
+from jinja2 import Environment, PackageLoader, select_autoescape
 from cg.apps.coverage import ChanjoAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.scoutapi import ScoutAPI
@@ -15,7 +16,6 @@ from cg.meta.report.report_helper import ReportHelper
 from cg.meta.report.presenter import Presenter
 from cg.store import Store, models
 from cg.exc import DeliveryReportError
-from jinja2 import Environment, PackageLoader, select_autoescape
 
 
 class ReportAPI:
