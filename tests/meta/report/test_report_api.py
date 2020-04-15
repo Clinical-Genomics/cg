@@ -82,7 +82,7 @@ def test_collect_delivery_data(report_api, report_store):
 def is_similar_dicts(dict1, dict2):
     _is_similar = True
 
-    for key, value in dict1.items():
+    for key in dict1.keys():
         _is_similar = _is_similar and is_similar_values(dict1.get(key), dict2.get(key))
 
     return _is_similar
