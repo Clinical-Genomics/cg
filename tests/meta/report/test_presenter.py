@@ -9,7 +9,7 @@ def test_present_float_string():
     presentable_string = Presenter().process_float_string(None, 0)
 
     # THEN we should get 'N/A' back
-    assert presentable_string == "N/A"
+    assert presentable_string == Presenter().DEFAULT_NA
 
 
 def test_present_date():
@@ -19,7 +19,7 @@ def test_present_date():
     presentable_string = Presenter().process_datetime(None)
 
     # THEN we should get 'N/A' back
-    assert presentable_string == "N/A"
+    assert presentable_string == Presenter().DEFAULT_NA
 
 
 def test_present_string():
@@ -29,7 +29,7 @@ def test_present_string():
     presentable_string = Presenter().process_string(None)
 
     # THEN we should get 'N/A' back
-    assert presentable_string == "N/A"
+    assert presentable_string == Presenter().DEFAULT_NA
 
 
 def test_present_int():
@@ -39,7 +39,7 @@ def test_present_int():
     presentable_string = Presenter().process_int(None)
 
     # THEN we should get 'N/A' back
-    assert presentable_string == "N/A"
+    assert presentable_string == Presenter().DEFAULT_NA
 
 
 def test_present_set():
@@ -49,7 +49,7 @@ def test_present_set():
     presentable_string = Presenter().process_set(None)
 
     # THEN we should get 'N/A' back
-    assert presentable_string == "N/A"
+    assert presentable_string == Presenter().DEFAULT_NA
 
 
 def test_present_dict():
