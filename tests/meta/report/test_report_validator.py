@@ -1,7 +1,6 @@
 """Tests the Validator class"""
 import pytest
 from cg.meta.report.report_validator import ReportValidator
-from cg.meta.report.sample_helper import SampleHelper
 
 NON_REQUIRED_FIELDS_ON_ALL_SAMPLES = ["source", "data_analysis"]
 
