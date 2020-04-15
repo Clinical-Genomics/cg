@@ -84,7 +84,7 @@ def test_upload_scout_cli_file_exists(
 
     # THEN assert that a warning is logged
     warned = False
-    for _, level, message in caplog.record_tuples:
+    for _, level, _ in caplog.record_tuples:
         if level == logging.WARNING:
             warned = True
     assert warned
