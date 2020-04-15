@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
     Cg Exceptions
 """
@@ -26,6 +25,12 @@ class AnalysisNotFinishedError(CgError):
 class AnalysisDuplicationError(CgError):
     """
         Error related to trying to create analysis object that already exists in status-db.
+    """
+
+
+class AnalysisUploadError(CgError):
+    """
+        Error related to trying to upload analysis data.
     """
 
 
@@ -92,4 +97,16 @@ class BundleAlreadyAddedError(CgError):
 class PipelineUnknownError(CgError):
     """
         Exception raised when a sample in a case has no data anlysis type
+    """
+
+
+class DeliveryReportError(CgError):
+    """
+        Exception related to delivery report creation
+    """
+
+
+class ValidationError(CgError):
+    """
+        Exception related to delivery report validation
     """

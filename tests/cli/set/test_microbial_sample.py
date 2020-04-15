@@ -81,8 +81,6 @@ def test_valid_application(cli_runner, base_context, base_store: Store):
     )
 
     # THEN then the application should have been set
-    print(result.exception)
-    print(result.output)
     assert result.exit_code == SUCCESS
     assert (
         base_store.MicrobialSample.query.first().application_version.application.tag
