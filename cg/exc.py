@@ -104,3 +104,9 @@ class DeliveryReportError(CgError):
     """
         Exception related to delivery report creation
     """
+
+
+class ValidationError(CgError):
+    """
+        Exception related to delivery report validation
+    """

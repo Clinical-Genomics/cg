@@ -69,6 +69,9 @@ class ReportValidator:
         if not sample.get("internal_id"):
             return
 
+        if self._sample_helper.is_ready_made_sample(sample["internal_id"]):
+            raise ValidationError("Can't handle RML samples")
+
         if not self._sample_helper.is_externally_sequenced(sample["internal_id"]):
             self._collect_missing_attributes(
                 sample,
