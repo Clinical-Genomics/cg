@@ -19,7 +19,7 @@ def test_init():
 def test_collect_delivery_data(report_api, report_store):
     # GIVEN an initialised report_api and a case ready for delivery report creation
 
-    # WHEN collecting delivery data for a certain
+    # WHEN collecting delivery data for a certain case
     case_id = "yellowhog"
     case = report_store.family(case_id)
     assert case
