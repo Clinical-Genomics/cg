@@ -4,7 +4,7 @@ from cg.store import Store
 
 REQUIRED_REPORT_FIELDS = [
     "report_version",
-    "family",
+    "case",
     "customer_name",
     "today",
     "panels",
@@ -73,6 +73,8 @@ class ReportValidator:
             self._collect_missing_attributes(
                 sample,
                 [
+                    "prepared_at",
+                    "prep_method",
                     "sequencing_method",
                     "sequenced_at",
                     "million_read_pairs",
@@ -80,11 +82,6 @@ class ReportValidator:
                     "duplicates",
                 ],
             )
-
-        if not self._sample_helper.is_ready_made_sample(
-            sample["internal_id"]
-        ) and not self._sample_helper.is_externally_sequenced(sample["internal_id"]):
-            self._collect_missing_attributes(sample, ["prepared_at", "prep_method"])
 
         if self._sample_helper.is_analysis_sample(sample["internal_id"]):
             self._collect_missing_attributes(sample, REQUIRED_ANALYSIS_SAMPLE_FIELDS)

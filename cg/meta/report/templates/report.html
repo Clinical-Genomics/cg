@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <title>Clinical Genomics Report - {{ family }}</title>
+    <title>Clinical Genomics Report - {{ case }}</title>
 
     {{ css() }}
     {{ custom_css() }}
@@ -20,7 +20,7 @@
 
         <ul class="list-group list-group-flush">
           <li class="list-group-item">
-            Leveransrapport {{ customer_name }}, familj {{ family }} : {{ report_version }}
+            Leveransrapport {{ customer_name }}, familj {{ case }} : {{ report_version }}
             {% if previous_report_version != 'N/A' %}
               ersätter rapport version: {{ previous_report_version }}
             {% endif %}
@@ -75,7 +75,7 @@
                 <tr>
                 <td>{{ sample.name }}* ({{ sample.internal_id }})</td>
                   <td>{{ sample.ordered_at }}</td>
-                  <td>{{ family }}*</td>
+                  <td>{{ case }}*</td>
                   <td>
                     {{ sample.sex }}*
                     ( analys:
@@ -146,7 +146,7 @@
             </thead>
             <tbody>
               <tr>
-                <td>{{ family }}*</td>
+                <td>{{ case }}*</td>
                 <td>{{ pipeline_version }}</td>
                 <td>{{ panels }}</td>
                 <td>{{ genome_build }}</td>
@@ -189,7 +189,7 @@
         {% if scout_access %}
           <p class="card-block">
             Varianter finns uppladdade i Scout:
-            <a href="scout.scilifelab.se/{{ customer_internal_id }}/{{ family }}">scout.scilifelab.se/{{ customer_internal_id }}/{{ family }}</a>
+            <a href="scout.scilifelab.se/{{ customer_internal_id }}/{{ case }}">scout.scilifelab.se/{{ customer_internal_id }}/{{ case }}</a>
           </p>
         {% endif %}
 

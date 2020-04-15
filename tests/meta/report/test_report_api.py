@@ -17,20 +17,20 @@ def test_init():
 
 
 def test_collect_delivery_data(report_api, report_store):
-    # GIVEN an initialised report_api and a family ready for delivery report creation
+    # GIVEN an initialised report_api and a case ready for delivery report creation
 
     # WHEN collecting delivery data for a certain
-    family_id = "yellowhog"
-    family = report_store.family(family_id)
-    assert family
-    assert family.links
-    assert family.analyses
-    delivery_data = report_api._get_delivery_data(family_id=family_id)
+    case_id = "yellowhog"
+    case = report_store.family(case_id)
+    assert case
+    assert case.links
+    assert case.analyses
+    delivery_data = report_api._get_delivery_data(case_id=case_id)
 
     # THEN all data for the delivery report should have been collected
     assert delivery_data["report_version"]
     assert delivery_data["previous_report_version"]
-    assert delivery_data["family"]
+    assert delivery_data["case"]
     assert delivery_data["customer_name"]
     assert delivery_data["today"]
     assert delivery_data["panels"]
@@ -133,7 +133,7 @@ def is_float(value):
 def test_presentable_delivery_report_contains_delivery_data(report_api):
     # GIVEN data from an analysed case and an initialised report_api
     case_id = "yellowhog"
-    delivery_data = report_api._get_delivery_data(family_id=case_id)
+    delivery_data = report_api._get_delivery_data(case_id=case_id)
 
     # WHEN creating delivery report
     presentable_data = report_api._make_data_presentable(delivery_data)
@@ -188,7 +188,7 @@ def list_values_exists_in(a_list: list, a_target: str):
 def test_create_delivery_report_contains_delivery_data(report_api):
     # GIVEN data from an analysed case and an initialised report_api
     case_id = "yellowhog"
-    delivery_data = report_api._get_delivery_data(family_id=case_id)
+    delivery_data = report_api._get_delivery_data(case_id=case_id)
 
     # WHEN creating delivery report
     delivery_report = report_api.create_delivery_report(case_id)
@@ -202,7 +202,7 @@ def test_get_status_from_status_db(report_api):
     # GIVEN data from an analysed case and an initialised report_api
 
     # WHEN fetch_application_data_from_status_db
-    samples = report_api._fetch_family_samples_from_status_db("yellowhog")
+    samples = report_api._fetch_case_samples_from_status_db("yellowhog")
 
     # THEN the samples contain a status
     for sample in samples:
@@ -228,7 +228,7 @@ def test_incorporate_lims_methods(report_samples, report_api):
 
 def test_render_delivery_report(report_api):
     # GIVEN proper qc data from an analysis exist
-    report_data = report_api._get_delivery_data(family_id="yellowhog")
+    report_data = report_api._get_delivery_data(case_id="yellowhog")
 
     # WHEN rendering a report from that data
     rendered_report = ReportAPI._render_delivery_report(report_data)
@@ -241,7 +241,7 @@ def test_create_delivery_report(report_api):
     # GIVEN initialized ReportAPI
 
     # WHEN rendering a report from that data
-    created_report = report_api.create_delivery_report(family_id="yellowhog")
+    created_report = report_api.create_delivery_report(case_id="yellowhog")
 
     # THEN a html report with certain data should have been rendered
     assert len(created_report) > 0
@@ -252,7 +252,7 @@ def test_create_delivery_report_file(report_api: ReportAPI):
 
     # WHEN rendering a report from that data
     created_report_file = report_api.create_delivery_report_file(
-        family_id="yellowhog", file_path=Path(".")
+        case_id="yellowhog", file_path=Path(".")
     )
 
     # THEN a html report with certain data should have been created on disk
@@ -265,7 +265,7 @@ def test_incorporate_coverage_data(report_api, report_samples):
     report_api.chanjo._sample_coverage_returns_none = True
     samples = report_samples
 
-    # WHEN failing to get latest trending data for a family
+    # WHEN failing to get latest trending data for a case
     report_api._incorporate_coverage_data(samples=samples, panels="dummyPanel")
 
     # THEN there should be a log entry about this
@@ -283,7 +283,7 @@ def test_fetch_capture_kit_from_status_db(report_api):
     # GIVEN an initialised report_api and the db returns samples with capture kit
 
     # WHEN fetching status data
-    samples = report_api._fetch_family_samples_from_status_db(family_id="yellowhog")
+    samples = report_api._fetch_case_samples_from_status_db(case_id="yellowhog")
 
     # THEN the report data should have capture kit
     assert samples
@@ -295,7 +295,7 @@ def test_data_analysis_kit_from_status_db(report_api):
     # GIVEN an initialised report_api and the db returns samples with data_analysis
 
     # WHEN fetching status data
-    samples = report_api._fetch_family_samples_from_status_db(family_id="yellowhog")
+    samples = report_api._fetch_case_samples_from_status_db(case_id="yellowhog")
 
     # THEN the report data should have capture kit
     assert samples
