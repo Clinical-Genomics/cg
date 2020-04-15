@@ -27,7 +27,7 @@ def delivery_reports(context, print_console, force_report):
     exit_code = SUCCESS
     for analysis_obj in context.obj["status"].analyses_to_delivery_report():
         case_id = analysis_obj.family.internal_id
-        LOG.info("uploading delivery report for case: %s", case_id)
+        LOG.info("Uploading delivery report for case: %s", case_id)
         try:
 
             context.invoke(
