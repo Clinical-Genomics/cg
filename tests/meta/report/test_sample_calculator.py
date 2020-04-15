@@ -2,7 +2,7 @@
 from datetime import timedelta, datetime
 
 from cg.meta.report.sample_calculator import SampleCalculator
-from tests.store_helpers import ensure_customer, ensure_application_version, add_sample
+from tests.store_helpers import add_sample
 
 
 def test_calculate_processing_days_invalid_delivered(sample_store):
