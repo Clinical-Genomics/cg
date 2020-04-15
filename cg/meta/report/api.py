@@ -260,9 +260,9 @@ class ReportAPI:
 
             try:
                 lims_sample = self.lims.sample(lims_id)
-            except requests.exceptions.HTTPError as e:
+            except requests.exceptions.HTTPError as error:
                 lims_sample = dict()
-                self.log.info("could not fetch sample %s from LIMS: %s", lims_id, e)
+                self.log.info("could not fetch sample %s from LIMS: %s", lims_id, error)
 
             sample["name"] = lims_sample.get("name")
             sample["sex"] = lims_sample.get("sex")
