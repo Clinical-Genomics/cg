@@ -2,7 +2,6 @@ import os
 import datetime
 from pathlib import Path
 
-import pytest
 from cg.meta.report.api import ReportAPI
 
 
