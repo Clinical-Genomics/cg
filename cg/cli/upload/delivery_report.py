@@ -68,7 +68,7 @@ def delivery_report(context, family_id, print_console, force_report):
         sample.internal_id
         sample.status
         sample.ticket
-        sample.million_read_pairs   for sequenced samples, from demux + rml, not for external
+        sample.million_read_pairs   for sequenced samples, from demux + ready made libraries (rml), not for external
         sample.prepared_at          not for rml and external
         sample.received_at
         sample.sequenced_at         for rml and in-house sequenced samples
@@ -147,7 +147,7 @@ def delivery_report(context, family_id, print_console, force_report):
     status_api = context.obj["status"]
 
     delivery_report_file = report_api.create_delivery_report_file(
-        family_id, file_path=tb_api.get_family_root_dir(family_id), acc=force_report
+        family_id, file_path=tb_api.get_family_root_dir(family_id), accept_missing_data=force_report
     )
 
     hk_api = context.obj["housekeeper_api"]
