@@ -200,8 +200,8 @@ class LimsAPI(Lims, OrderHandler):
         if map_ids:
             lims_map = {lims_sample.name: lims_sample.id for lims_sample in lims_samples}
             return lims_map
-        else:
-            return lims_samples
+
+        return lims_samples
 
     def family(self, customer: str, family: str):
         """Fetch information about a family of samples."""
