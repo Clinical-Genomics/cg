@@ -1,3 +1,4 @@
+from cg.exc import ValidationError
 from cg.meta.report.sample_helper import SampleHelper
 from cg.store import Store
 
