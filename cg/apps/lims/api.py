@@ -406,11 +406,13 @@ class LimsAPI(Lims, OrderHandler):
         if all_artifacts and not dates:
             udfs = " ,".join(set(step_names_udfs.values()))
             process_ids = " ,".join(set(processes))
-            msg = (
-                f"Did not find date for sample {lims_id}. Searched for udfs: {udfs}. Searched "
-                f"in processes: {process_ids}."
+            LOG.warning(
+                "Did not find date for sample %s. Searched for udfs: %s. Searched in "
+                "processes: %s.",
+                lims_id,
+                udfs,
+                process_ids,
             )
-            LOG.error(msg)
         return dates
 
     @staticmethod
