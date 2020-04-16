@@ -404,14 +404,9 @@ class LimsAPI(Lims, OrderHandler):
                 all_artifacts.append(artifact)
 
         if all_artifacts and not dates:
-            udfs = " ,".join(set(step_names_udfs.values()))
-            process_ids = " ,".join(set(processes))
             LOG.warning(
-                "Did not find date for sample %s. Searched for udfs: %s. Searched in "
-                "processes: %s.",
-                lims_id,
-                udfs,
-                process_ids,
+                "Did not find expected date for sample: %s",
+                lims_id
             )
         return dates
 
