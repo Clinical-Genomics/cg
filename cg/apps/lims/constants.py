@@ -1,5 +1,6 @@
 PROP2UDF = {
     "application": "Sequencing Analysis",
+    "bait_set": "Bait Set",
     "capture_kit": "Capture Library version",
     "comment": "Comment",
     "concentration": "Concentration (nM)",
