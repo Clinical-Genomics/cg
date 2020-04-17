@@ -1,12 +1,17 @@
 """Click commands to store mip-dna analyses"""
-import datetime as dt
 import logging
 from pathlib import Path
 import sys
 import click
 
 from cg.apps import hk, tb
-from cg.exc import AnalysisNotFinishedError, AnalysisDuplicationError
+from cg.exc import (
+    AnalysisNotFinishedError,
+    AnalysisDuplicationError,
+    BundleAlreadyAddedError,
+    PipelineUnknownError,
+)
+from cg.meta.store.mip_dna import gather_files_and_bundle_in_housekeeper
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -34,82 +39,33 @@ def analysis(context, config_stream):
 
     if not config_stream:
         LOG.error("provide a config, suggestions:")
-        for analysis_obj in context.obj["tb_api"].analyses(status="completed", deleted=False)[:25]:
-            click.echo(analysis_obj.config_path)
+        suggested_wgs_analyses = tb_api.analyses(status="completed", type='wgs', deleted=False)[:25]
+        suggested_wes_analyses = tb_api.analyses(status="completed", type='wes', deleted=False)[:25]
+        for suggested_analyses in (suggested_wgs_analyses, suggested_wes_analyses):
+            for analysis_obj in suggested_analyses:
+                click.echo(analysis_obj.config_path)
         context.abort()
 
-    new_analysis = _gather_files_and_bundle_in_housekeeper(
-        config_stream, context, hk_api, status, tb_api
-    )
-    status.add_commit(new_analysis)
-    click.echo(click.style("included files in Housekeeper", fg="green"))
-
-
-def _gather_files_and_bundle_in_housekeeper(config_stream, context, hk_api, status, tb_api):
-    """Function to gather files and bundle in housekeeper"""
     try:
-        bundle_data = tb_api.add_analysis(config_stream)
+        new_analysis = gather_files_and_bundle_in_housekeeper(config_stream, hk_api, status,)
     except AnalysisNotFinishedError as error:
         click.echo(click.style(error.message, fg="red"))
         context.abort()
-    try:
-        results = hk_api.add_bundle(bundle_data)
-        if results is None:
-            click.echo(click.style("analysis version already added", fg="yellow"))
-            context.abort()
-        bundle_obj, version_obj = results
+    except AnalysisDuplicationError as error:
+        click.echo(click.style(error.message, fg="red"))
+        context.abort()
+    except BundleAlreadyAddedError as error:
+        click.echo(click.style(error.message, fg="red"))
+        context.abort()
+    except PipelineUnknownError as error:
+        click.echo(click.style(error.message, fg="red"))
+        context.abort()
     except FileNotFoundError as error:
         click.echo(click.style(f"missing file: {error.args[0]}", fg="red"))
         context.abort()
 
-    family_obj = _add_new_analysis_to_the_status_api(bundle_obj, status)
-    _reset_action_from_running_on_family(family_obj)
-    new_analysis = _add_new_complete_analysis_record(bundle_data, family_obj, status, version_obj)
-    version_date = version_obj.created_at.date()
-    click.echo(f"new bundle added: {bundle_obj.name}, version {version_date}")
-    _include_files_in_housekeeper(bundle_obj, context, hk_api, version_obj)
-
-    return new_analysis
-
-
-def _include_files_in_housekeeper(bundle_obj, context, hk_api, version_obj):
-    """Function to include files in housekeeper"""
-    try:
-        hk_api.include(version_obj)
-    except hk.VersionIncludedError as error:
-        click.echo(click.style(error.message, fg="red"))
-        context.abort()
-    hk_api.add_commit(bundle_obj, version_obj)
-
-
-def _add_new_complete_analysis_record(bundle_data, family_obj, status, version_obj):
-    """Function to create and return a new analysis database record"""
-    pipeline = family_obj.links[0].sample.data_analysis
-    pipeline = pipeline if pipeline else "mip"
-
-    if status.analysis(family=family_obj, started_at=version_obj.created_at):
-        raise AnalysisDuplicationError(
-            f"Analysis object already exists for {family_obj.internal_id}{version_obj.created_at}"
-        )
-
-    new_analysis = status.add_analysis(
-        pipeline=pipeline,
-        version=bundle_data["pipeline_version"],
-        started_at=version_obj.created_at,
-        completed_at=dt.datetime.now(),
-        primary=(len(family_obj.analyses) == 0),
-    )
-    new_analysis.family = family_obj
-    return new_analysis
-
-
-def _reset_action_from_running_on_family(family_obj):
-    family_obj.action = None
-
-
-def _add_new_analysis_to_the_status_api(bundle_obj, status):
-    family_obj = status.family(bundle_obj.name)
-    return family_obj
+    status.add_commit(new_analysis)
+    click.echo(click.style("included files in Housekeeper", fg="green"))
 
 
 @store.command()
