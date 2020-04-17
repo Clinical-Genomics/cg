@@ -117,8 +117,8 @@ def delivery_report(context, family_id, print_console, force_report):
         is_bundle_missing_delivery_report = number_of_delivery_reports == 0
 
         if is_bundle_missing_delivery_report:
-            file_obj = hk_api.add_file(
-                delivery_report_file.name, version_obj, delivery_report_tag_name
+            file_obj = hk_api.new_file(
+                delivery_report_file.name, tags=[delivery_report_tag_name]
             )
             hk_api.include_file(file_obj, version_obj)
             hk_api.add_commit(file_obj)
