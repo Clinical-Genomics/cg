@@ -39,8 +39,8 @@ def analysis(context, config_stream):
 
     if not config_stream:
         LOG.error("provide a config, suggestions:")
-        suggested_wgs_analyses = tb_api.analyses(status="completed", type='wgs', deleted=False)[:25]
-        suggested_wes_analyses = tb_api.analyses(status="completed", type='wes', deleted=False)[:25]
+        suggested_wgs_analyses = tb_api.analyses(status="completed", type="wgs", deleted=False)[:25]
+        suggested_wes_analyses = tb_api.analyses(status="completed", type="wes", deleted=False)[:25]
         for suggested_analyses in (suggested_wgs_analyses, suggested_wes_analyses):
             for analysis_obj in suggested_analyses:
                 click.echo(analysis_obj.config_path)
