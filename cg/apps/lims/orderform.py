@@ -2,8 +2,9 @@ from typing import List
 
 import xlrd
 from cg.constants import METAGENOME_SOURCES, ANALYSIS_SOURCES
-
 from cg.exc import OrderFormError
+from cg.server.ext import db
+
 
 SEX_MAP = {"male": "M", "female": "F", "unknown": "unknown"}
 REV_SEX_MAP = {value: key for key, value in SEX_MAP.items()}
@@ -191,6 +192,7 @@ def parse_sample(raw_sample):
     sample = {
         "application": raw_sample["UDF/Sequencing Analysis"],
         "capture_kit": raw_sample.get("UDF/Capture Library version"),
+        "bait_set": db.latest_bed_version(raw_sample.get("UDF/Capture Library version")).shortname,
         "case": raw_sample.get("UDF/familyID"),
         "comment": raw_sample.get("UDF/Comment"),
         "container": raw_sample.get("Container/Type"),
