@@ -47,10 +47,7 @@ MASTER_STEPS_UDFS = {
         "Aggregate QC (Library Validation) (RNA) v2",
         "Aggregate QC (Library Validation)",
     },
-    "delivery_step": {
-        "CG002 - Delivery": "Date delivered",
-        "Delivery v1": "Date delivered",
-    },
+    "delivery_step": {"CG002 - Delivery": "Date delivered", "Delivery v1": "Date delivered"},
     "sequenced_step": {
         "CG002 - Illumina Sequencing (HiSeq X)": "Finish Date",
         "CG002 - Illumina Sequencing (Illumina SBS)": "Finish Date",
@@ -101,13 +98,8 @@ MASTER_STEPS_UDFS = {
             "method_number": "Method Document",
             "method_version": "Method Version",
         },
-        "Delivery v1": {
-            "method_number": "Method Document",
-            "method_version": "Method Version",
-        },
+        "Delivery v1": {"method_number": "Method Document", "method_version": "Method Version"},
     },
 }
 
-PROCESSES = {
-    "sequenced_date": "AUTOMATED - NovaSeq Run",
-}
+PROCESSES = {"sequenced_date": "AUTOMATED - NovaSeq Run"}
