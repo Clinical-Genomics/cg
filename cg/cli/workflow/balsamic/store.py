@@ -35,6 +35,7 @@ def store(context):
 
 @store.command()
 @click.argument("case_id")
+@click.option("-c", "--config", "config_path", required=False, help="Optional")
 @click.option(
     "-c",
     "--config",
@@ -90,9 +91,9 @@ def analysis(context, case_id, deliverables_file_path, config_path):
 @click.pass_context
 def all_cases(context):
 
-    store = context.obj["db"]
+    _store = context.obj["db"]
 
-    for case in store.families():
+    for case in _store.families():
         context.invoke(analysis, case_id=case.internal_id)
 
 

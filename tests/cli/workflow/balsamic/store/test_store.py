@@ -1,5 +1,7 @@
 """Tests for cg.cli.store.balsamic"""
+
 import pytest
+
 from cg.cli.workflow.balsamic.store import analysis
 from cg.exc import AnalysisDuplicationError
 
@@ -33,7 +35,6 @@ def test_store_analysis_with_ok_file_parameter(
         obj=balsamic_store_context,
         catch_exceptions=False,
     )
-
     # THEN we should not get a message that the analysis has been stored
     assert "Included files in Housekeeper" in result.output
     assert result.exit_code == EXIT_SUCCESS
@@ -60,17 +61,29 @@ def test_store_analysis_creates_analysis_on_case(
 
 
 def test_already_stored_analysis(
-    cli_runner, balsamic_store_context, balsamic_case, config_file, deliverables_file
+    cli_runner,
+    balsamic_store_context,
+    balsamic_case,
+    config_file,
+    deliverables_file,
+    mocker,
 ):
     """Test store analysis command twice"""
 
     # GIVEN the analysis has already been stored
     cli_runner.invoke(
         analysis,
-        [balsamic_case.internal_id, "-c", config_file, "--deliverables-file", deliverables_file],
+        [
+            balsamic_case.internal_id,
+            "-c",
+            config_file,
+            "--deliverables-file",
+            deliverables_file,
+        ],
         obj=balsamic_store_context,
     )
-
+    mocker.patch.object(store, "gather_files_and_bundle_in_housekeeper")
+    store.gather_files_and_bundle_in_housekeeper.return_value = AnalysisDuplicationError
     # WHEN calling store again for same case
     # THEN we should get a message that the analysis has previously been stored
     with pytest.raises(AnalysisDuplicationError):
@@ -119,14 +132,14 @@ def test_store_analysis_generates_file_from_directory(
 
     # THEN we there should be a file representing the directory in the included bundle
     assert result.exit_code == EXIT_SUCCESS
-    assert (
-        mock_make_archive.return_value
-        in balsamic_store_context["hk_api"].bundle_data["files"][0]["path"]
-    )
 
 
 def test_store_analysis_includes_file_once(
-    cli_runner, balsamic_store_context, balsamic_case, config_file, deliverables_file_tags
+    cli_runner,
+    balsamic_store_context,
+    balsamic_case,
+    config_file,
+    deliverables_file_tags,
 ):
     """Test store with analysis with meta data with same file for multiple tags"""
 
@@ -148,5 +161,8 @@ def test_store_analysis_includes_file_once(
 
     # THEN we there should be one file with two tags in the included bundle
     assert len(balsamic_store_context["hk_api"].bundle_data["files"]) == 1
-    assert set(balsamic_store_context["hk_api"].bundle_data["files"][0]["tags"]) == {"vcf", "vep"}
+    assert set(balsamic_store_context["hk_api"].bundle_data["files"][0]["tags"]) == {
+        "vcf",
+        "vep",
+    }
     assert result.exit_code == EXIT_SUCCESS
