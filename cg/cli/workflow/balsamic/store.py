@@ -79,7 +79,7 @@ def analysis(context, case_id, deliverables_file_path, config_path):
     click.echo(click.style("included files in Housekeeper", fg="green"))
 
 
-@store.command()
+@store.command('all-cases')
 @click.pass_context
 def all_cases(context):
 
