@@ -31,7 +31,7 @@ def test_dry(cli_runner, balsamic_context, balsamic_case):
 
     # THEN command should print the balsamic command-string to generate the deliverables fils
     assert result.exit_code == EXIT_SUCCESS
-    assert "plugins deliver" in result.output
+    assert "report deliver" in result.output
     assert case_id in result.output
 
 
@@ -47,7 +47,7 @@ def test_without_file(cli_runner, balsamic_context, balsamic_case):
 
     # THEN we should get a message that the deliverables file was created
     assert result.exit_code == EXIT_SUCCESS
-    assert "plugins deliver" in result.output
+    assert "report deliver" in result.output
     assert "--sample-config" in result.output
     assert ".json" in result.output
 
