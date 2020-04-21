@@ -59,16 +59,7 @@ class VogueAPI:
         for line in self.process.stderr_lines():
             LOG.info("vogue output: %s", line)
 
-    def load_bioinfo_raw(
-        self,
-        samples,
-        analysis_result_file,
-        analysis_type,
-        analysis_case_name,
-        analysis_workflow_version,
-        case_analysis_type,
-        analysis_workflow_name,
-    ):
+    def load_bioinfo_raw(self, load_bioinfo_raw_inputs):
         """Running vogue load bioinfo raw."""
 
         load_bioinfo_raw_call = [
@@ -76,32 +67,24 @@ class VogueAPI:
             "bioinfo",
             "raw",
             "--sample-list",
-            samples,
+            load_bioinfo_raw_inputs["samples"],
             "--analysis-result",
-            analysis_result_file,
+            load_bioinfo_raw_inputs["analysis_result_file"],
             "--analysis-type",
-            analysis_type,
+            load_bioinfo_raw_inputs["analysis_type"],
             "--analysis-case",
-            analysis_case_name,
+            load_bioinfo_raw_inputs["analysis_case_name"],
             "--workflow-version",
-            analysis_workflow_version,
+            load_bioinfo_raw_inputs["analysis_workflow_version"],
             "--case-analysis-type",
-            case_analysis_type,
+            load_bioinfo_raw_inputs["case_analysis_type"],
             "--analysis-workflow",
-            analysis_workflow_name,
+            load_bioinfo_raw_inputs["analysis_workflow_name"],
         ]
 
         self.process.run_command(load_bioinfo_raw_call)
 
-    def load_bioinfo_process(
-        self,
-        analysis_type,
-        analysis_case_name,
-        analysis_workflow_version,
-        analysis_workflow_name,
-        cleanup_flag,
-        case_analysis_type,
-    ):
+    def load_bioinfo_process(self, load_bioinfo_process_inputs, cleanup_flag):
         """Running load bioinfo process."""
 
         load_bioinfo_process_call = [
@@ -109,15 +92,15 @@ class VogueAPI:
             "bioinfo",
             "process",
             "--analysis-type",
-            analysis_type,
+            load_bioinfo_process_inputs["analysis_type"],
             "--analysis-case",
-            analysis_case_name,
+            load_bioinfo_process_inputs["analysis_case_name"],
             "--analysis-workflow",
-            analysis_workflow_name,
+            load_bioinfo_process_inputs["analysis_workflow_name"],
             "--workflow-version",
-            analysis_workflow_version,
+            load_bioinfo_process_inputs["analysis_workflow_version"],
             "--case-analysis-type",
-            case_analysis_type,
+            load_bioinfo_process_inputs["scase_analysis_type"],
         ]
 
         if cleanup_flag:
@@ -125,7 +108,7 @@ class VogueAPI:
 
         self.process.run_command(load_bioinfo_process_call)
 
-    def load_bioinfo_sample(self, analysis_case_name):
+    def load_bioinfo_sample(self, load_bioinfo_sample_inputs):
         """Running load bioinfo sample."""
 
         load_bioinfo_sample_call = [
@@ -133,7 +116,7 @@ class VogueAPI:
             "bioinfo",
             "sample",
             "--analysis-case",
-            analysis_case_name,
+            load_bioinfo_sample_inputs["analysis_case_name"],
         ]
 
         self.process.run_command(load_bioinfo_sample_call)
