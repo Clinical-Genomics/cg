@@ -1,87 +1,94 @@
 """Code for uploading delivery report from the CLI"""
 import datetime as dt
 import logging
+import sys
 
 import click
 
 from cg.apps import hk, scoutapi
+from cg.exc import DeliveryReportError, CgError
 
 from .utils import _suggest_cases_delivery_report
 
 LOG = logging.getLogger(__name__)
+SUCCESS = 0
+FAIL = 1
 
 
 @click.command("delivery-reports")
-@click.option(
-    "-p", "--print", "print_console", is_flag=True, help="print list to console"
-)
+@click.option("-p", "--print", "print_console", is_flag=True, help="print list to console")
+@click.option("-f", "--force", "force_report", is_flag=True, help="overrule report validation")
 @click.pass_context
-def delivery_reports(context, print_console):
-    """Generate a delivery reports for all cases that need one"""
+def delivery_reports(context, print_console, force_report):
+    """Generate delivery reports for all cases that need one"""
 
-    click.echo(
-        click.style("----------------- DELIVERY REPORTS ------------------------")
-    )
+    click.echo(click.style("----------------- DELIVERY REPORTS ------------------------"))
 
+    exit_code = SUCCESS
     for analysis_obj in context.obj["status"].analyses_to_delivery_report():
-        LOG.info(
-            "uploading delivery report for family: %s", analysis_obj.family.internal_id
-        )
+        case_id = analysis_obj.family.internal_id
+        LOG.info("Uploading delivery report for case: %s", case_id)
         try:
+
             context.invoke(
                 delivery_report,
                 family_id=analysis_obj.family.internal_id,
                 print_console=print_console,
+                force_report=force_report,
             )
-        except Exception:
-            LOG.error(
-                "uploading delivery report failed for family: %s",
-                analysis_obj.family.internal_id,
-            )
+        except FileNotFoundError as error:
+            LOG.error("Missing file for delivery report creation for case: %s, %s", case_id, error)
+            exit_code = FAIL
+        except DeliveryReportError as error:
+            LOG.error("Creation of delivery report failed for case: %s, %s", case_id, error.message)
+            exit_code = FAIL
+        except CgError as error:
+            LOG.error("Uploading delivery report failed for case: %s, %s", case_id, error.message)
+            exit_code = FAIL
+    sys.exit(exit_code)
 
 
 @click.command("delivery-report")
 @click.argument("family_id", required=False)
-@click.option(
-    "-p", "--print", "print_console", is_flag=True, help="print report to console"
-)
+@click.option("-p", "--print", "print_console", is_flag=True, help="print report to console")
+@click.option("-f", "--force", "force_report", is_flag=True, help="overrule report validation")
 @click.pass_context
-def delivery_report(context, family_id, print_console):
+def delivery_report(context, family_id, print_console, force_report):
     """Generates a delivery report for a case and uploads it to housekeeper and scout
 
     The report contains data from several sources:
 
     status-db:
         family
-        customer_obj
-        application_objs
+        customer_name
+        applications
         accredited
         panels
         samples
-        sample.id
+        sample.internal_id
         sample.status
         sample.ticket
-        sample.million_read_pairs
-        sample.prep_date
-        sample.received
-        sample.sequencing_date
-        sample.delivery_date
+        sample.million_read_pairs   for sequenced samples, from demux + ready made libraries (rml), not for external
+        sample.prepared_at          not for rml and external
+        sample.received_at
+        sample.sequenced_at         for rml and in-house sequenced samples
+        sample.delivered_at
+        sample.data_analysis        missing on most re-runs
 
     lims:
         sample.name
         sample.sex
-        sample.source
+        sample.source               missing on most re-runs
         sample.application
-        sample.prep_method
-        sample.sequencing_method
-        sample.delivery_method
+        sample.prep_method          not for rml or external
+        sample.sequencing_method    for sequenced samples
 
 
     trailblazer:
         sample.mapped_reads
         sample.duplicates
         sample.analysis_sex
-        mip_version
+        pipeline_version
         genome_build
 
     chanjo:
@@ -94,14 +101,13 @@ def delivery_report(context, family_id, print_console):
     calculated:
         today
         sample.processing_time
+        report_version
 
     """
 
     click.echo(click.style("----------------- DELIVERY_REPORT -------------"))
 
-    def _add_delivery_report_to_hk(
-        delivery_report_file, hk_api: hk.HousekeeperAPI, family_id
-    ):
+    def _add_delivery_report_to_hk(delivery_report_file, hk_api: hk.HousekeeperAPI, family_id):
         delivery_report_tag_name = "delivery-report"
         version_obj = hk_api.last_version(family_id)
         uploaded_delivery_report_files = hk_api.get_files(
@@ -133,22 +139,24 @@ def delivery_report(context, family_id, print_console):
         context.abort()
 
     if print_console:
-        delivery_report_html = report_api.create_delivery_report(family_id)
+        delivery_report_html = report_api.create_delivery_report(family_id, force_report)
         click.echo(delivery_report_html)
         return
 
     tb_api = context.obj["tb_api"]
     status_api = context.obj["status"]
+
     delivery_report_file = report_api.create_delivery_report_file(
-        family_id, file_path=tb_api.get_family_root_dir(family_id)
+        family_id, file_path=tb_api.get_family_root_dir(family_id), accept_missing_data=force_report
     )
+
     hk_api = context.obj["housekeeper_api"]
     added_file = _add_delivery_report_to_hk(delivery_report_file, hk_api, family_id)
 
     if added_file:
         click.echo(click.style("uploaded to housekeeper", fg="green"))
     else:
-        click.echo(click.style("already uploaded to housekeeper, skipping"))
+        click.echo(click.style("already uploaded to housekeeper, skipping", fg="yellow"))
 
     context.invoke(delivery_report_to_scout, case_id=family_id)
     _update_delivery_report_date(status_api, family_id)
@@ -157,11 +165,7 @@ def delivery_report(context, family_id, print_console):
 @click.command("delivery-report-to-scout")
 @click.argument("case_id", required=False)
 @click.option(
-    "-d",
-    "--dry-run",
-    "dry_run",
-    is_flag=True,
-    help="run command without uploading to " "scout",
+    "-d", "--dry-run", "dry_run", is_flag=True, help="run command without uploading to " "scout"
 )
 @click.pass_context
 def delivery_report_to_scout(context, case_id, dry_run):
@@ -179,9 +183,7 @@ def delivery_report_to_scout(context, case_id, dry_run):
         )
 
         if uploaded_delivery_report_files.count() == 0:
-            raise FileNotFoundError(
-                f"No delivery report was found in housekeeper for {family_id}"
-            )
+            raise FileNotFoundError(f"No delivery report was found in housekeeper for {family_id}")
 
         return uploaded_delivery_report_files[0].full_path
 

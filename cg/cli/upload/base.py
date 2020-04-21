@@ -9,6 +9,7 @@ import click
 from cg.apps import coverage as coverage_app
 from cg.apps import gt, hk, lims, madeline, scoutapi, tb
 from cg.cli.workflow.mip_dna.deliver import CASE_TAGS, SAMPLE_TAGS
+from cg.exc import AnalysisUploadError
 from cg.meta.deliver import DeliverAPI
 from cg.meta.report.api import ReportAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
@@ -17,7 +18,7 @@ from cg.store import Store
 
 from .beacon import beacon
 from .coverage import coverage
-from .delivery import delivery_report, delivery_report_to_scout, delivery_reports
+from .delivery_report import delivery_report, delivery_report_to_scout, delivery_reports
 from .genotype import genotypes
 from .mutacc import process_solved, processed_solved
 from .observations import observations
@@ -65,10 +66,8 @@ def upload(context, family_id, force_restart):
             context.abort()
 
         if not force_restart and analysis_obj.upload_started_at is not None:
-            if dt.datetime.now() - analysis_obj.upload_started_at > dt.timedelta(
-                hours=24
-            ):
-                raise Exception(
+            if dt.datetime.now() - analysis_obj.upload_started_at > dt.timedelta(hours=24):
+                raise AnalysisUploadError(
                     f"The upload started at {analysis_obj.upload_started_at} "
                     f"something went wrong, restart it with the --restart flag"
                 )
@@ -101,7 +100,7 @@ def upload(context, family_id, force_restart):
         deliver_api=context.obj["deliver_api"],
     )
     context.obj["report_api"] = ReportAPI(
-        db=context.obj["status"],
+        store=context.obj["status"],
         lims_api=context.obj["lims_api"],
         chanjo_api=context.obj["chanjo_api"],
         analysis_api=context.obj["analysis_api"],
@@ -153,8 +152,7 @@ def auto(context):
 
         if analysis_obj.family.analyses[0].uploaded_at is not None:
             LOG.warning(
-                "Newer analysis already uploaded for %s, skipping",
-                analysis_obj.family.internal_id,
+                "Newer analysis already uploaded for %s, skipping", analysis_obj.family.internal_id
             )
             continue
 

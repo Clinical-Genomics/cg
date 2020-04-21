@@ -200,8 +200,8 @@ class LimsAPI(Lims, OrderHandler):
         if map_ids:
             lims_map = {lims_sample.name: lims_sample.id for lims_sample in lims_samples}
             return lims_map
-        else:
-            return lims_samples
+
+        return lims_samples
 
     def family(self, customer: str, family: str):
         """Fetch information about a family of samples."""
@@ -388,7 +388,8 @@ class LimsAPI(Lims, OrderHandler):
         and optionally the type
         """
         dates = []
-
+        all_artifacts = []
+        processes = []
         for process_type in step_names_udfs:
             artifacts = self.get_artifacts(
                 process_type=process_type, samplelimsid=lims_id, type=artifact_type
@@ -396,11 +397,17 @@ class LimsAPI(Lims, OrderHandler):
 
             for artifact in artifacts:
                 udf_key = step_names_udfs[process_type]
-                if artifact.parent_process and artifact.parent_process.udf.get(udf_key):
-                    dates.append(
-                        (artifact.parent_process.date_run, artifact.parent_process.udf.get(udf_key))
-                    )
+                parent_process = artifact.parent_process
+                if parent_process and parent_process.udf.get(udf_key):
+                    dates.append((parent_process.date_run, parent_process.udf.get(udf_key)))
+                processes.append(parent_process.id)
+                all_artifacts.append(artifact)
 
+        if all_artifacts and not dates:
+            LOG.warning(
+                "Did not find expected date for sample: %s",
+                lims_id
+            )
         return dates
 
     @staticmethod
