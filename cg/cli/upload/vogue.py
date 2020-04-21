@@ -112,7 +112,3 @@ def bioinfo(context, case_name, cleanup, target_load):
 
     click.echo(click.style("----------------- BIOINFO -----------------------"))
 
-    # conditions and auto
-    #context.obj["vogue_load_api"].load_bioinfo_raw
-    #context.obj["vogue_load_api"].load_bioinfo_process
-    #context.obj["vogue_load_api"].load_bioinfo_sample
