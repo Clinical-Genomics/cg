@@ -89,9 +89,12 @@ def all_cases(context):
         try:
             click.echo(click.style(f"storing case: {case}", fg="blue"))
             context.invoke(analysis, case_id=case.internal_id)
-        except CgError as error:
+        except FileNotFoundError as error:
             LOG.error(error.message)
             exit_code = 1
+        except CgError as error:
+            LOG.error(error.message)
+            exit_code = 11
 
     sys.exit(exit_code)
 
