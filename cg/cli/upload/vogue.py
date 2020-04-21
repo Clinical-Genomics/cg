@@ -111,4 +111,3 @@ def bioinfo(context, case_name, cleanup, target_load):
     """Load bioinfo case results to the trending database"""
 
     click.echo(click.style("----------------- BIOINFO -----------------------"))
-
