@@ -80,3 +80,39 @@ def samples(context, days: int):
     click.echo(click.style("----------------- SAMPLES -----------------------"))
 
     context.obj["vogue_upload_api"].load_samples(days=days)
+
+
+@vogue.command("bioinfo", short_help="Load bioinfo results to vogue")
+@click.option(
+    "-c",
+    "--case-name",
+    required=True,
+    help="Case name or project name for which the analysis results will load",
+)
+@click.option(
+    "--cleanup", default=False, help="Cleanup processed case data while loading"
+)
+@click.option(
+    "-t",
+    "--target-load",
+    default="all",
+    type=click.Choice(["all", "raw", "process"]),
+    show_default=True,
+    help=(
+        "Final target to load bioinfo data."
+        "Target orders are: all, raw, process."
+        "Selecting all, will load raw, process, and sample."
+        "Selecting process, will upload raw and process."
+        "Selecting raw, will only load raw data."
+    ),
+)
+@click.pass_context
+def bioinfo(context, case_name, cleanup, target_load):
+    """Load bioinfo case results to the trending database"""
+
+    click.echo(click.style("----------------- BIOINFO -----------------------"))
+
+    # conditions and auto
+    #context.obj["vogue_load_api"].load_bioinfo_raw
+    #context.obj["vogue_load_api"].load_bioinfo_process
+    #context.obj["vogue_load_api"].load_bioinfo_sample
