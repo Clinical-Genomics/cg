@@ -28,7 +28,7 @@ def test_load_bioinfo_sample(vogue_config, caplog):
     # GIVEN a vogue api wit a config
     dummy_stdout = "dummy_stdout"
     dummy_stderr = "dummy_stderr"
-    dummy_returncode_sucess = 0
+    dummy_returncode_success = 0
     test_load_bioinfo_sample_inputs = {"analysis_case_name": "dummy_case"}
     load_bioinfo_sample_call = [
         "load",
@@ -43,9 +43,9 @@ def test_load_bioinfo_sample(vogue_config, caplog):
     # WHEN instantiating a vogue api and input data
     vogue_api = VogueAPI(vogue_config)
     with mock.patch.object(subprocess, "run") as mocked:
-        mocked.return_value.stdout = "vogue".encode("utf-8")
-        mocked.return_value.stderr = "vogue".encode("utf-8")
-        mocked.return_value.returncode = 0
+        mocked.return_value.stdout = dummy_stdout.encode("utf-8")
+        mocked.return_value.stderr = dummy_stderr.encode("utf-8")
+        mocked.return_value.returncode = dummy_returncode_success
         vogue_api.load_bioinfo_sample(
             load_bioinfo_sample_inputs=test_load_bioinfo_sample_inputs
         )
@@ -61,7 +61,7 @@ def test_load_bioinfo_raw(vogue_config, caplog):
     # GIVEN a vogue api wit a config
     dummy_stdout = "dummy_stdout"
     dummy_stderr = "dummy_stderr"
-    dummy_returncode_sucess = 0
+    dummy_returncode_success = 0
     test_load_bioinfo_raw_inputs = {
         "samples": "dummy_sample",
         "analysis_result_file": "dummy_file_name",
@@ -97,9 +97,9 @@ def test_load_bioinfo_raw(vogue_config, caplog):
     # WHEN instantiating a vogue api and input data
     vogue_api = VogueAPI(vogue_config)
     with mock.patch.object(subprocess, "run") as mocked:
-        mocked.return_value.stdout = "vogue".encode("utf-8")
-        mocked.return_value.stderr = "vogue".encode("utf-8")
-        mocked.return_value.returncode = 0
+        mocked.return_value.stdout = dummy_stdout.encode("utf-8")
+        mocked.return_value.stderr = dummy_stderr.encode("utf-8")
+        mocked.return_value.returncode = dummy_returncode_success
         vogue_api.load_bioinfo_raw(load_bioinfo_raw_inputs=test_load_bioinfo_raw_inputs)
 
         # THEN assert that output config
@@ -113,7 +113,7 @@ def test_load_bioinfo_process(vogue_config, caplog):
     # GIVEN a vogue api wit a config
     dummy_stdout = "dummy_stdout"
     dummy_stderr = "dummy_stderr"
-    dummy_returncode_sucess = 0
+    dummy_returncode_success = 0
     test_load_bioinfo_process_inputs = {
         "analysis_type": "dummy_analysis_type",
         "analysis_case_name": "dummy_analysis_case_name",
@@ -144,9 +144,9 @@ def test_load_bioinfo_process(vogue_config, caplog):
     # WHEN instantiating a vogue api and input data
     vogue_api = VogueAPI(vogue_config)
     with mock.patch.object(subprocess, "run") as mocked:
-        mocked.return_value.stdout = "vogue".encode("utf-8")
-        mocked.return_value.stderr = "vogue".encode("utf-8")
-        mocked.return_value.returncode = 0
+        mocked.return_value.stdout = dummy_stdout.encode("utf-8")
+        mocked.return_value.stderr = dummy_stderr.encode("utf-8")
+        mocked.return_value.returncode = dummy_returncode_success
         vogue_api.load_bioinfo_process(
             load_bioinfo_process_inputs=test_load_bioinfo_process_inputs,
             cleanup_flag=True,
