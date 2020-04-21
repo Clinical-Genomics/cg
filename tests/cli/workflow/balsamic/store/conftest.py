@@ -128,6 +128,12 @@ def balsamic_store(base_store: Store) -> Store:
 
 
 @pytest.fixture(scope="function")
+def config_file():
+    """Get the path to a balsamic case config file"""
+    return "tests/fixtures/apps/balsamic/case/config.json"
+
+
+@pytest.fixture(scope="function")
 def deliverables_file():
     """Return a balsamic deliverables file"""
     return "tests/fixtures/apps/balsamic/case/metadata.yml"
