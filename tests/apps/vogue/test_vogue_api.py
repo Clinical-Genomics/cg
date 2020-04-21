@@ -46,9 +46,7 @@ def test_load_bioinfo_sample(vogue_config, caplog):
         mocked.return_value.stdout = dummy_stdout.encode("utf-8")
         mocked.return_value.stderr = dummy_stderr.encode("utf-8")
         mocked.return_value.returncode = dummy_returncode_success
-        vogue_api.load_bioinfo_sample(
-            load_bioinfo_sample_inputs=test_load_bioinfo_sample_inputs
-        )
+        vogue_api.load_bioinfo_sample(load_bioinfo_sample_inputs=test_load_bioinfo_sample_inputs)
 
         # THEN assert that output config
         assert load_bioinfo_sample_call_command in caplog.text
@@ -148,8 +146,7 @@ def test_load_bioinfo_process(vogue_config, caplog):
         mocked.return_value.stderr = dummy_stderr.encode("utf-8")
         mocked.return_value.returncode = dummy_returncode_success
         vogue_api.load_bioinfo_process(
-            load_bioinfo_process_inputs=test_load_bioinfo_process_inputs,
-            cleanup_flag=True,
+            load_bioinfo_process_inputs=test_load_bioinfo_process_inputs, cleanup_flag=True,
         )
 
         # THEN assert that output config

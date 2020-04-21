@@ -24,14 +24,9 @@ def vogue(context):
     )
 
 
-@vogue.command(
-    "genotype", short_help="Getting genotype data from the genotype database."
-)
+@vogue.command("genotype", short_help="Getting genotype data from the genotype database.")
 @click.option(
-    "-d",
-    "--days",
-    required="True",
-    help="load X days old sampels from genotype to vogue",
+    "-d", "--days", required="True", help="load X days old sampels from genotype to vogue",
 )
 @click.pass_context
 def genotype(context, days: int):
@@ -42,16 +37,12 @@ def genotype(context, days: int):
     context.obj["vogue_upload_api"].load_genotype(days=days)
 
 
-@vogue.command(
-    "apptags", short_help="Getting application tags to the trending database."
-)
+@vogue.command("apptags", short_help="Getting application tags to the trending database.")
 @click.pass_context
 def apptags(context):
     """Loading apptags from status db to the trending database"""
 
-    click.echo(
-        click.style("----------------- APPLICATION TAGS -----------------------")
-    )
+    click.echo(click.style("----------------- APPLICATION TAGS -----------------------"))
 
     context.obj["vogue_upload_api"].load_apptags()
 
@@ -89,9 +80,7 @@ def samples(context, days: int):
     required=True,
     help="Case name or project name for which the analysis results will load",
 )
-@click.option(
-    "--cleanup", default=False, help="Cleanup processed case data while loading"
-)
+@click.option("--cleanup", default=False, help="Cleanup processed case data while loading")
 @click.option(
     "-t",
     "--target-load",
