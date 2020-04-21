@@ -100,7 +100,7 @@ class VogueAPI:
             "--workflow-version",
             load_bioinfo_process_inputs["analysis_workflow_version"],
             "--case-analysis-type",
-            load_bioinfo_process_inputs["scase_analysis_type"],
+            load_bioinfo_process_inputs["case_analysis_type"],
         ]
 
         if cleanup_flag:
