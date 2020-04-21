@@ -3,6 +3,7 @@
 import logging
 import os
 import subprocess
+import sys
 from pathlib import Path
 
 import click
@@ -11,8 +12,7 @@ from housekeeper.exc import VersionIncludedError
 from cg.apps import hk, tb
 from cg.meta.store.balsamic import gather_files_and_bundle_in_housekeeper
 from cg.store import Store
-from cg.exc import AnalysisNotFinishedError, AnalysisDuplicationError
-
+from cg.exc import AnalysisNotFinishedError, AnalysisDuplicationError, CgError
 
 LOG = logging.getLogger(__name__)
 SUCCESS = 0
@@ -86,7 +86,14 @@ def all_cases(context):
     _store = context.obj["db"]
 
     for case in _store.families():
-        context.invoke(analysis, case_id=case.internal_id)
+        try:
+            click.echo(click.style(f"storing case: {case}", fg="blue"))
+            context.invoke(analysis, case_id=case.internal_id)
+        except CgError as error:
+            LOG.error(error.message)
+            exit_code = 1
+
+    sys.exit(exit_code)
 
 
 @store.command("generate-deliverables-file")
