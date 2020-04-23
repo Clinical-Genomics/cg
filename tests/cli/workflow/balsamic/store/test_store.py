@@ -30,7 +30,8 @@ def test_store_analysis_with_ok_file_parameter(
     result = cli_runner.invoke(
         analysis,
         [balsamic_case.internal_id, "-c", config_file, "-d", deliverables_file],
-        obj=balsamic_store_context, catch_exceptions=False
+        obj=balsamic_store_context,
+        catch_exceptions=False,
     )
 
     # THEN we should not get a message that the analysis has been stored
@@ -54,8 +55,15 @@ def test_already_stored_analysis(
     with pytest.raises(AnalysisDuplicationError):
         result = cli_runner.invoke(
             analysis,
-            [balsamic_case.internal_id, "-c", config_file, "--deliverables-file",
-             deliverables_file], obj=balsamic_store_context, catch_exceptions=False
+            [
+                balsamic_case.internal_id,
+                "-c",
+                config_file,
+                "--deliverables-file",
+                deliverables_file,
+            ],
+            obj=balsamic_store_context,
+            catch_exceptions=False,
         )
 
         # THEN we should get a message that the analysis has previously been stored
@@ -64,8 +72,12 @@ def test_already_stored_analysis(
 
 
 def test_store_analysis_generates_file_from_directory(
-    cli_runner, balsamic_store_context, balsamic_case, config_file, deliverables_file_directory,
-        mocker
+    cli_runner,
+    balsamic_store_context,
+    balsamic_case,
+    config_file,
+    deliverables_file_directory,
+    mocker,
 ):
     """Test store with analysis with meta data with one directory"""
 
@@ -78,9 +90,15 @@ def test_store_analysis_generates_file_from_directory(
     # WHEN calling store with meta file
     result = cli_runner.invoke(
         analysis,
-        [balsamic_case.internal_id, "-c", config_file, "--deliverables-file",
-         deliverables_file_directory],
-        obj=balsamic_store_context, catch_exceptions=False
+        [
+            balsamic_case.internal_id,
+            "-c",
+            config_file,
+            "--deliverables-file",
+            deliverables_file_directory,
+        ],
+        obj=balsamic_store_context,
+        catch_exceptions=False,
     )
 
     # THEN we there should be a file representing the directory in the included bundle
@@ -101,9 +119,15 @@ def test_store_analysis_includes_file_once(
     # WHEN calling store with meta file
     result = cli_runner.invoke(
         analysis,
-        [balsamic_case.internal_id, "-c", config_file, "--deliverables-file",
-         deliverables_file_tags],
-        obj=balsamic_store_context, catch_exceptions=False
+        [
+            balsamic_case.internal_id,
+            "-c",
+            config_file,
+            "--deliverables-file",
+            deliverables_file_tags,
+        ],
+        obj=balsamic_store_context,
+        catch_exceptions=False,
     )
 
     # THEN we there should be one file with two tags in the included bundle
