@@ -99,10 +99,10 @@ def parse_config(data: dict) -> dict:
 
 
 def parse_sampleinfo(data: dict) -> dict:
-    """Parse MIP sample info file (DNA).
+    """Parse MIP sample info file.
 
     Args:
-        data (dict): raw YAML input from MIP qc sample info file (DNA)
+        data (dict): raw YAML input from MIP qc sample info file
 
     Returns:
         dict: parsed data
@@ -119,7 +119,7 @@ def parse_sampleinfo(data: dict) -> dict:
 
 
 def build_bundle(config_data: dict, sampleinfo_data: dict, deliverables: dict) -> dict:
-    """Create a new bundle for DNA."""
+    """Create a new bundle for."""
 
     pipeline = config_data["samples"][0]["type"]
     pipeline_tag = TAGS[pipeline]
