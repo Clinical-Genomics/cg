@@ -46,7 +46,6 @@ def get_files(deliverables: dict, pipeline: list) -> dict:
 def get_tags(file: dict, pipeline_tags: list) -> list:
     """Get all tags for a file"""
 
-    breakpoint()
     all_tags = [file["format"], file["id"], file["step"], file["tag"]]
     all_tags.extend(pipeline_tags)
     unique_tags = set(all_tags)
