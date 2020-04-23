@@ -32,7 +32,7 @@ def reset_case_action(case_obj):
     case_obj.action = None
 
 
-def get_files(deliverables: dict, pipeline: str) -> dict:
+def get_files(deliverables: dict, pipeline: list) -> dict:
     """Get all deliverable files from the pipeline"""
 
     data = [
@@ -43,10 +43,12 @@ def get_files(deliverables: dict, pipeline: str) -> dict:
     return data
 
 
-def get_tags(file: dict, pipeline: str) -> list:
+def get_tags(file: dict, pipeline_tags: list) -> list:
     """Get all tags for a file"""
 
-    all_tags = [file["format"], file["id"], file["step"], file["tag"], pipeline]
+    breakpoint()
+    all_tags = [file["format"], file["id"], file["step"], file["tag"]]
+    all_tags.extend(pipeline_tags)
     unique_tags = set(all_tags)
     only_existing_tags = unique_tags - set([None])
     sorted_tags = sorted(list(only_existing_tags))

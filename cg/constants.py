@@ -62,7 +62,7 @@ SPRING_SUFFIX = ".spring"
 
 # tags for storing analyses in Housekeeper
 TAGS = {
-    "wes": "mip-dna",
-    "wgs": "mip-dna",
-    "wts": "mip-rna",
+    "wes": ["mip-dna", "wes"],
+    "wgs": ["mip-dna", "wgs"],
+    "wts": ["mip-rna"],
 }
