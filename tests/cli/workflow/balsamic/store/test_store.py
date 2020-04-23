@@ -1,6 +1,7 @@
 """Tests for cg.cli.store.balsamic"""
-
+import pytest
 from cg.cli.workflow.balsamic.store import analysis
+from cg.exc import AnalysisDuplicationError
 
 EXIT_SUCCESS = 0
 
@@ -50,15 +51,16 @@ def test_already_stored_analysis(
     )
 
     # WHEN calling store again for same case
-    result = cli_runner.invoke(
-        analysis,
-        [balsamic_case.internal_id, "-c", config_file, "--deliverables-file", deliverables_file],
-        obj=balsamic_store_context, catch_exceptions=False
-    )
+    with pytest.raises(AnalysisDuplicationError):
+        result = cli_runner.invoke(
+            analysis,
+            [balsamic_case.internal_id, "-c", config_file, "--deliverables-file",
+             deliverables_file], obj=balsamic_store_context, catch_exceptions=False
+        )
 
-    # THEN we should get a message that the analysis has previously been stored
-    assert "analysis version already added" in result.output
-    assert result.exit_code != EXIT_SUCCESS
+        # THEN we should get a message that the analysis has previously been stored
+        assert "analysis version already added" in result.output
+        assert result.exit_code != EXIT_SUCCESS
 
 
 def test_store_analysis_generates_file_from_directory(
