@@ -58,45 +58,12 @@ def analysis(context, case_id, deliverables_file_path, config_path):
 
     hk_api = context.obj["hk_api"]
 
-    try:
-        new_analysis = gather_files_and_bundle_in_housekeeper(
-            config_path, deliverables_file_path, hk_api, status, case_obj
-        )
-    except AnalysisNotFinishedError as error:
-        click.echo(click.style(error.message, fg="red"))
-        context.abort()
-    except FileNotFoundError as error:
-        click.echo(click.style(f"missing file: {error.filename}", fg="red"))
-        context.abort()
-    except AnalysisDuplicationError:
-        click.echo(click.style("analysis version already added", fg="yellow"))
-        context.abort()
-    except VersionIncludedError as error:
-        click.echo(click.style(error.message, fg="red"))
-        context.abort()
+    new_analysis = gather_files_and_bundle_in_housekeeper(
+        config_path, deliverables_file_path, hk_api, status, case_obj
+    )
 
     status.add_commit(new_analysis)
     click.echo(click.style("included files in Housekeeper", fg="green"))
-
-
-@store.command('all-cases')
-@click.pass_context
-def all_cases(context):
-
-    _store = context.obj["db"]
-
-    for case in _store.families():
-        try:
-            click.echo(click.style(f"storing case: {case}", fg="blue"))
-            context.invoke(analysis, case_id=case.internal_id)
-        except FileNotFoundError as error:
-            LOG.error(error.message)
-            exit_code = 1
-        except CgError as error:
-            LOG.error(error.message)
-            exit_code = 11
-
-    sys.exit(exit_code)
 
 
 @store.command("generate-deliverables-file")
@@ -138,3 +105,28 @@ def generate_deliverables_file(context, dry, config_path, case_id):
 
 def get_config_path(root_dir, case_id):
     return Path.joinpath(root_dir, case_id, case_id + ".json")
+
+
+@store.command()
+@click.pass_context
+def completed(context):
+    """Store all completed analyses."""
+    _store = context.obj["db"]
+
+    exit_code = SUCCESS
+    for case in _store.families():
+        click.echo(click.style(f"storing case: {case}", fg="blue"))
+        try:
+            context.invoke(analysis, case_id=case.internal_id)
+        except AnalysisNotFinishedError as error:
+            click.echo(click.style(error.message, fg="yellow"))
+        except FileNotFoundError as error:
+            click.echo(click.style(f"missing file: {error.filename}", fg="red"))
+            exit_code = FAIL
+        except AnalysisDuplicationError:
+            click.echo(click.style("analysis version already added", fg="yellow"))
+        except VersionIncludedError as error:
+            click.echo(click.style(error.message, fg="red"))
+            exit_code = FAIL
+
+    sys.exit(exit_code)
