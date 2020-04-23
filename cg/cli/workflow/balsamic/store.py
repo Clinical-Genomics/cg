@@ -114,7 +114,7 @@ def completed(context):
     _store = context.obj["db"]
 
     exit_code = SUCCESS
-    for case in _store.families():
+    for case in _store.cases_to_balsamic_analyze():
         click.echo(click.style(f"storing case: {case}", fg="blue"))
         try:
             context.invoke(analysis, case_id=case.internal_id)
