@@ -80,7 +80,9 @@ def samples(context, days: int):
     required=True,
     help="Case name or project name for which the analysis results will load",
 )
-@click.option("--cleanup", default=False, help="Cleanup processed case data while loading")
+@click.option(
+    "--cleanup/--no-cleanup", default=False, help="Cleanup processed case data while loading",
+)
 @click.option(
     "-t",
     "--target-load",
@@ -100,3 +102,5 @@ def bioinfo(context, case_name, cleanup, target_load):
     """Load bioinfo case results to the trending database"""
 
     click.echo(click.style("----------------- BIOINFO -----------------------"))
+    if context.obj["vogue_upload_api"]:
+        click.echo(f"Options provided: {case_name}, {cleanup}, {target_load}")
