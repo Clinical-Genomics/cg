@@ -73,7 +73,7 @@ def samples(context, days: int):
     context.obj["vogue_upload_api"].load_samples(days=days)
 
 
-@vogue.command("bioinfo", short_help="Load bioinfo results to vogue")
+@vogue.command("bioinfo", short_help="Load bioinfo results into vogue")
 @click.option(
     "-c",
     "--case-name",

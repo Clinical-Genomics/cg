@@ -48,7 +48,7 @@ def test_load_bioinfo_sample(vogue_config, caplog):
         mocked.return_value.returncode = dummy_returncode_success
         vogue_api.load_bioinfo_sample(load_bioinfo_sample_inputs=test_load_bioinfo_sample_inputs)
 
-        # THEN assert that output config
+        # THEN assert that command is in log output
         assert load_bioinfo_sample_call_command in caplog.text
 
 
@@ -56,7 +56,7 @@ def test_load_bioinfo_raw(vogue_config, caplog):
 
     """Test load bioinfo raw upload in vogue api"""
 
-    # GIVEN a vogue api wit a config
+    # GIVEN a vogue api with a config
     dummy_stdout = "dummy_stdout"
     dummy_stderr = "dummy_stderr"
     dummy_returncode_success = 0
@@ -100,7 +100,7 @@ def test_load_bioinfo_raw(vogue_config, caplog):
         mocked.return_value.returncode = dummy_returncode_success
         vogue_api.load_bioinfo_raw(load_bioinfo_raw_inputs=test_load_bioinfo_raw_inputs)
 
-        # THEN assert that output config
+        # THEN assert that command is in log output
         assert load_bioinfo_raw_call_command in caplog.text
 
 
@@ -108,7 +108,7 @@ def test_load_bioinfo_process(vogue_config, caplog):
 
     """Test load bioinfo process upload in vogue api"""
 
-    # GIVEN a vogue api wit a config
+    # GIVEN a vogue api with a config
     dummy_stdout = "dummy_stdout"
     dummy_stderr = "dummy_stderr"
     dummy_returncode_success = 0
@@ -149,5 +149,5 @@ def test_load_bioinfo_process(vogue_config, caplog):
             load_bioinfo_process_inputs=test_load_bioinfo_process_inputs, cleanup_flag=True,
         )
 
-        # THEN assert that output config
+        # THEN assert that command is in log output
         assert load_bioinfo_process_call_command in caplog.text
