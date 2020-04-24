@@ -190,10 +190,11 @@ def config_case(
         else:
             normal_paths.add(concatenated_paths[1])
 
-        target_bed_filename = get_target_bed_from_lims(
-            context.obj["lims_api"], context.obj["db"], link_obj.sample.internal_id
-        )
-        target_beds.add(target_bed_filename)
+        if not target_bed:
+            target_bed_filename = get_target_bed_from_lims(
+                context.obj["lims_api"], context.obj["db"], link_obj.sample.internal_id
+            )
+            target_beds.add(target_bed_filename)
 
     if len(application_types) != 1:
         raise BalsamicStartError(
