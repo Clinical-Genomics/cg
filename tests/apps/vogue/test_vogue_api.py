@@ -25,7 +25,8 @@ def test_load_bioinfo_sample(vogue_config, caplog):
 
     """Test load bioinfo sample upload in vogue api"""
 
-    # GIVEN a vogue api wit a config
+    # GIVEN a vogue api and a vogue config
+    vogue_api = VogueAPI(vogue_config)
     dummy_stdout = "dummy_stdout"
     dummy_stderr = "dummy_stderr"
     dummy_returncode_success = 0
@@ -41,7 +42,6 @@ def test_load_bioinfo_sample(vogue_config, caplog):
     caplog.set_level(logging.INFO)
 
     # WHEN instantiating a vogue api and input data
-    vogue_api = VogueAPI(vogue_config)
     with mock.patch.object(subprocess, "run") as mocked:
         mocked.return_value.stdout = dummy_stdout.encode("utf-8")
         mocked.return_value.stderr = dummy_stderr.encode("utf-8")
@@ -56,7 +56,8 @@ def test_load_bioinfo_raw(vogue_config, caplog):
 
     """Test load bioinfo raw upload in vogue api"""
 
-    # GIVEN a vogue api with a config
+    # GIVEN a vogue api and a vogue config
+    vogue_api = VogueAPI(vogue_config)
     dummy_stdout = "dummy_stdout"
     dummy_stderr = "dummy_stderr"
     dummy_returncode_success = 0
@@ -93,7 +94,6 @@ def test_load_bioinfo_raw(vogue_config, caplog):
     caplog.set_level(logging.INFO)
 
     # WHEN instantiating a vogue api and input data
-    vogue_api = VogueAPI(vogue_config)
     with mock.patch.object(subprocess, "run") as mocked:
         mocked.return_value.stdout = dummy_stdout.encode("utf-8")
         mocked.return_value.stderr = dummy_stderr.encode("utf-8")
@@ -108,7 +108,8 @@ def test_load_bioinfo_process(vogue_config, caplog):
 
     """Test load bioinfo process upload in vogue api"""
 
-    # GIVEN a vogue api with a config
+    # GIVEN a vogue api and a vogue config
+    vogue_api = VogueAPI(vogue_config)
     dummy_stdout = "dummy_stdout"
     dummy_stderr = "dummy_stderr"
     dummy_returncode_success = 0
@@ -140,7 +141,6 @@ def test_load_bioinfo_process(vogue_config, caplog):
     caplog.set_level(logging.INFO)
 
     # WHEN instantiating a vogue api and input data
-    vogue_api = VogueAPI(vogue_config)
     with mock.patch.object(subprocess, "run") as mocked:
         mocked.return_value.stdout = dummy_stdout.encode("utf-8")
         mocked.return_value.stderr = dummy_stderr.encode("utf-8")
