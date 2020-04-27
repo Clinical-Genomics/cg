@@ -61,7 +61,7 @@ FASTQ_SECOND_READ_SUFFIX = "R2_001.fastq.gz"
 SPRING_SUFFIX = ".spring"
 
 # tags for storing analyses in Housekeeper
-TAGS = {
+HK_TAGS = {
     "wes": ["mip-dna", "wes"],
     "wgs": ["mip-dna", "wgs"],
     "wts": ["mip-rna"],
