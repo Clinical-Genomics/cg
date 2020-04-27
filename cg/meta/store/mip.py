@@ -5,7 +5,7 @@ import ruamel.yaml
 from cg.exc import (
     AnalysisNotFinishedError,
 )
-from cg.meta.store.base import parse_config, parse_sampleinfo, build_bundle
+from cg.meta.store.base import build_bundle
 
 
 def add_analysis(config_stream):
@@ -22,3 +22,53 @@ def add_analysis(config_stream):
     new_bundle = build_bundle(config_data, sampleinfo_data, deliverables_raw)
 
     return new_bundle
+
+
+def parse_config(data: dict) -> dict:
+    """Parse MIP config file.
+
+    Args:
+        data (dict): raw YAML input from MIP analysis config file
+
+    Returns:
+        dict: parsed data
+    """
+    return {
+        "email": data.get("email"),
+        "case": data["case_id"],
+        "samples": _get_sample_analysis_type(data),
+        "is_dryrun": bool("dry_run_all" in data),
+        "out_dir": data["outdata_dir"],
+        "priority": data["slurm_quality_of_service"],
+        "sampleinfo_path": data["sample_info_file"],
+    }
+
+
+def parse_sampleinfo(data: dict) -> dict:
+    """Parse MIP sample info file.
+
+    Args:
+        data (dict): raw YAML input from MIP qc sample info file
+
+    Returns:
+        dict: parsed data
+    """
+
+    sampleinfo_data = {
+        "date": data["analysis_date"],
+        "is_finished": data["analysisrunstatus"] == "finished",
+        "case": data["case"],
+        "version": data["mip_version"],
+    }
+
+    return sampleinfo_data
+
+
+def _get_sample_analysis_type(data: dict) -> list:
+    """
+        Get analysis type for all samples in the MIP config file
+    """
+    return [
+        {"id": sample_id, "type": analysis_type}
+        for sample_id, analysis_type in data["analysis_type"].items()
+    ]

@@ -59,46 +59,6 @@ def add_new_analysis(bundle_data, case_obj, status, version_obj):
     return new_analysis
 
 
-def parse_config(data: dict) -> dict:
-    """Parse MIP config file.
-
-    Args:
-        data (dict): raw YAML input from MIP analysis config file
-
-    Returns:
-        dict: parsed data
-    """
-    return {
-        "email": data.get("email"),
-        "case": data["case_id"],
-        "samples": _get_sample_analysis_type(data),
-        "is_dryrun": bool("dry_run_all" in data),
-        "out_dir": data["outdata_dir"],
-        "priority": data["slurm_quality_of_service"],
-        "sampleinfo_path": data["sample_info_file"],
-    }
-
-
-def parse_sampleinfo(data: dict) -> dict:
-    """Parse MIP sample info file.
-
-    Args:
-        data (dict): raw YAML input from MIP qc sample info file
-
-    Returns:
-        dict: parsed data
-    """
-
-    sampleinfo_data = {
-        "date": data["analysis_date"],
-        "is_finished": data["analysisrunstatus"] == "finished",
-        "case": data["case"],
-        "version": data["mip_version"],
-    }
-
-    return sampleinfo_data
-
-
 def build_bundle(config_data: dict, sampleinfo_data: dict, deliverables: dict) -> dict:
     """Create a new bundle for."""
 
@@ -114,22 +74,12 @@ def build_bundle(config_data: dict, sampleinfo_data: dict, deliverables: dict) -
     return data
 
 
-def _get_sample_analysis_type(data: dict) -> list:
-    """
-        get analysis type for all samples in the MIP config file
-    """
-    return [
-        {"id": sample_id, "type": analysis_type}
-        for sample_id, analysis_type in data["analysis_type"].items()
-    ]
-
-
 def reset_case_action(case_obj):
     """ Resets action on case """
     case_obj.action = None
 
 
-def get_files(deliverables: dict, pipeline: list) -> dict:
+def get_files(deliverables: dict, pipeline: list) -> list:
     """Get all deliverable files from the pipeline"""
 
     data = [
