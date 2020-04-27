@@ -1,0 +1,50 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+
+[packages]
+alchy = "*"
+click = "<7.0"
+google-auth = "*"
+requests = {extras = ["security"],version = "*"}
+requests-oauthlib = "<1.2.0"
+oauthlib = "<3.0.0"
+requests-cache = "*"
+coloredlogs = "*"
+petname = "*"
+marshmallow = "*"
+pyschemes = "*"
+xlrd = "*"
+openpyxl = "*"
+tabulate = "*"
+lxml = "*"
+python-dateutil = "*"
+cyvcf2 = "<0.10.0"
+pymongo = "<3.7"
+colorclass = "*"
+cairocffi = "==0.9.0"
+pysam = "==0.15.2"
+genologics = "*"
+trailblazer = ">=4.0.0"
+housekeeper = ">=2.0.0b2"
+genotype = ">=2.2.0"
+scout-browser = ">=4.4.1"
+cgstats = ">=1.1.2"
+cgbeacon = "*"
+Cython = "*"
+SQLAlchemy = "*"
+Flask = ">=1.1.1"
+Flask-Admin = "*"
+Flask-Alchy = "*"
+Flask-SQLAlchemy = "==2.1"
+Flask-Cors = "*"
+Flask-Dance = "*"
+Werkzeug = "<1.0.0"
+"ruamel.yaml" = "*"
+cg = {editable = true,path = "."}
+
+[requires]
+python_version = "3.7"
