@@ -1,17 +1,14 @@
 """ Base module for building bioinfo workflow bundles for linking in Housekeeper"""
 import datetime as dt
 import logging
-from pathlib import Path
-
-import ruamel.yaml
 
 from cg.constants import HK_TAGS
 from cg.exc import (
     AnalysisDuplicationError,
     PipelineUnknownError,
     BundleAlreadyAddedError,
-    AnalysisNotFinishedError,
 )
+from cg.meta.store.mip import add_analysis
 
 LOG = logging.getLogger(__name__)
 
@@ -37,22 +34,6 @@ def gather_files_and_bundle_in_housekeeper(config_stream, hk_api, status):
     hk_api.add_commit(bundle_obj, version_obj)
 
     return new_analysis
-
-
-def add_analysis(config_stream):
-    """Gather information from MIP analysis to store."""
-    config_raw = ruamel.yaml.safe_load(config_stream)
-    config_data = parse_config(config_raw)
-    sampleinfo_raw = ruamel.yaml.safe_load(Path(config_data["sampleinfo_path"]).open())
-    sampleinfo_data = parse_sampleinfo(sampleinfo_raw)
-
-    if sampleinfo_data["is_finished"] is False:
-        raise AnalysisNotFinishedError("analysis not finished")
-
-    deliverables_raw = ruamel.yaml.safe_load(Path(config_raw["store_file"]).open())
-    new_bundle = build_bundle(config_data, sampleinfo_data, deliverables_raw)
-
-    return new_bundle
 
 
 def add_new_analysis(bundle_data, case_obj, status, version_obj):
