@@ -9,6 +9,22 @@ mock = "*"
 ipdb = "*"
 pytest-mock = "*"
 snapshottest = "*"
+coverage = "<5"
+pytest-cov = "*"
+coveralls = "*"
+python-coveralls = "*"     # due to conflict on coverage package
+# linting
+git-lint = "*"
+pylint = "*"
+six = "~=1.12"               # due to astroid
+pycodestyle = "*"
+yamllint = "*"
+docutils = "*"
+html-linter = "*"
+tidy = "*"
+# black
+black = "*"
+pre-commit = "*"
 
 [packages]
 alchy = "*"
@@ -30,26 +46,29 @@ python-dateutil = "*"
 cyvcf2 = "<0.10.0"
 pymongo = "<3.7"
 colorclass = "*"
-cairocffi = "==0.9.0"
-pysam = "==0.15.2"
+cairocffi = "*"
+pysam = "*"
 genologics = "*"
-trailblazer = ">=4.0.0"
-housekeeper = ">=2.0.0b2"
-genotype = ">=2.2.0"
-scout-browser = ">=4.4.1"
-cgstats = ">=1.1.2"
+trailblazer = "*"
+housekeeper = "*"
+genotype = "*"
+scout-browser = "*"
+cgstats = "*"
 cgbeacon = "*"
 Cython = "*"
 SQLAlchemy = "*"
-Flask = ">=1.1.1"
+Flask = "*"
 Flask-Admin = "*"
 Flask-Alchy = "*"
 Flask-SQLAlchemy = "==2.1"
 Flask-Cors = "*"
 Flask-Dance = "*"
-Werkzeug = "<1.0.0"
+Werkzeug = "<1.0"
 "ruamel.yaml" = "*"
 cg = {editable = true,path = "."}
 
 [requires]
 python_version = "3.7"
+
+[pipenv]
+allow_prereleases = true
