@@ -5,7 +5,7 @@ from pathlib import Path
 
 import ruamel.yaml
 
-from cg.constants import TAGS
+from cg.constants import HK_TAGS
 from cg.exc import (
     AnalysisDuplicationError,
     PipelineUnknownError,
@@ -122,7 +122,7 @@ def build_bundle(config_data: dict, sampleinfo_data: dict, deliverables: dict) -
     """Create a new bundle for."""
 
     pipeline = config_data["samples"][0]["type"]
-    pipeline_tag = TAGS[pipeline]
+    pipeline_tag = HK_TAGS[pipeline]
 
     data = {
         "name": config_data["case"],
