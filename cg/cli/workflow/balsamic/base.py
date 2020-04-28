@@ -49,14 +49,7 @@ def balsamic(context, case_id, priority, email, target_bed):
         sample_tags=SAMPLE_TAGS,
     )
 
-    context.obj["analysis_api"] = AnalysisAPI(
-        db=context.obj["db"],
-        hk_api=context.obj["hk_api"],
-        tb_api=tb_api,
-        scout_api=scout_api,
-        lims_api=context.obj["lims_api"],
-        deliver_api=deliver,
-    )
+    context.obj["analysis_api"] = AnalysisAPI()
 
     if context.invoked_subcommand is None:
         if case_id is None:
