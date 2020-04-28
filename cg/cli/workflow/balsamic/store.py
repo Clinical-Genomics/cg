@@ -7,13 +7,12 @@ import sys
 from pathlib import Path
 
 import click
-from cg.meta.workflow.balsamic import AnalysisAPI
-from housekeeper.exc import VersionIncludedError
-
 from cg.apps import hk, tb
-from cg.meta.store.balsamic import gather_files_and_bundle_in_housekeeper
-from cg.store import Store
 from cg.exc import AnalysisNotFinishedError, AnalysisDuplicationError, CgError
+from cg.meta.store.balsamic import gather_files_and_bundle_in_housekeeper
+from cg.meta.workflow.balsamic import AnalysisAPI
+from cg.store import Store
+from housekeeper.exc import VersionIncludedError
 
 LOG = logging.getLogger(__name__)
 SUCCESS = 0
