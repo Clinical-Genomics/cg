@@ -5,6 +5,7 @@ import click
 import yaml
 
 from cg.apps import hk
+from cg.meta.upload.scoutapi import UploadScoutAPI
 
 from .utils import _suggest_cases_to_upload
 
@@ -72,7 +73,7 @@ def upload_case_to_scout(context, re_upload, dry_run, case_id):
     click.echo(click.style("----------------- CONFIG -----------------------"))
 
     def _get_load_config_from_hk(hk_api: hk.HousekeeperAPI, case_id):
-        tag_name = "scout-load-config"
+        tag_name = UploadScoutAPI.get_load_config_tag()
         version_obj = hk_api.last_version(case_id)
         scout_config_files = hk_api.get_files(
             bundle=case_id, tags=[tag_name], version=version_obj.id
