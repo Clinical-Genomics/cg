@@ -3,10 +3,10 @@ import datetime as dt
 import logging
 import os
 import shutil
+from pathlib import Path
 
 import ruamel.yaml
 from cg.exc import AnalysisDuplicationError
-from pathlib import Path
 
 LOG = logging.getLogger(__name__)
 
@@ -26,7 +26,7 @@ def gather_files_and_bundle_in_housekeeper(
     _reset_analysis_action(case_obj)
     new_analysis = _create_analysis(bundle_data, case_obj, status, version_obj)
     version_date = version_obj.created_at.date()
-    LOG.info(f"new bundle added: {bundle_obj.name}, version {version_date}")
+    LOG.info("new bundle added: %s, version %s", bundle_obj.name, version_date)
     _include_files_in_housekeeper(bundle_obj, hk_api, version_obj)
     return new_analysis
 
@@ -63,11 +63,13 @@ def _reset_analysis_action(case_obj):
 
 
 def parse_created(config_data: dict) -> dt.datetime:
+    """Parse out analysis creation data from analysis"""
     datetime_str = config_data["analysis"]["config_creation_date"]
     return dt.datetime.strptime(datetime_str, "%Y-%m-%d %H:%M")
 
 
 def parse_version(config_data: dict) -> dt.datetime:
+    """Parse out analysis pipeline version from analysis"""
     return config_data["analysis"]["BALSAMIC_version"]
 
 
