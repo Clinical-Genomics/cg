@@ -1,6 +1,7 @@
 """ Base module for building bioinfo workflow bundles for linking in Housekeeper"""
 import datetime as dt
 
+from cg.constants import HK_TAGS
 from cg.exc import (
     AnalysisDuplicationError,
     PipelineUnknownError,
@@ -56,3 +57,18 @@ def get_tags(file: dict, pipeline_tags: list) -> list:
     sorted_tags = sorted(list(only_existing_tags))
 
     return sorted_tags
+
+
+def build_bundle(config_data: dict, sampleinfo_data: dict, deliverables: dict) -> dict:
+    """Create a new bundle to store in Housekeeper"""
+
+    pipeline = config_data["samples"][0]["type"]
+    pipeline_tag = HK_TAGS[pipeline]
+
+    data = {
+        "name": config_data["case"],
+        "created": sampleinfo_data["date"],
+        "pipeline_version": sampleinfo_data["version"],
+        "files": get_files(deliverables, pipeline_tag),
+    }
+    return data

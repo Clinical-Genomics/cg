@@ -3,13 +3,12 @@ import logging
 from pathlib import Path
 import ruamel.yaml
 
-from cg.constants import HK_TAGS
 from cg.exc import (
     AnalysisNotFinishedError,
     BundleAlreadyAddedError,
 )
 from cg.meta.store.base import (
-    get_files,
+    build_bundle,
     add_new_analysis,
     reset_case_action,
 )
@@ -105,18 +104,3 @@ def _get_sample_analysis_type(data: dict) -> list:
         {"id": sample_id, "type": analysis_type}
         for sample_id, analysis_type in data["analysis_type"].items()
     ]
-
-
-def build_bundle(config_data: dict, sampleinfo_data: dict, deliverables: dict) -> dict:
-    """Create a new bundle for."""
-
-    pipeline = config_data["samples"][0]["type"]
-    pipeline_tag = HK_TAGS[pipeline]
-
-    data = {
-        "name": config_data["case"],
-        "created": sampleinfo_data["date"],
-        "pipeline_version": sampleinfo_data["version"],
-        "files": get_files(deliverables, pipeline_tag),
-    }
-    return data
