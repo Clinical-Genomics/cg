@@ -2,14 +2,16 @@
 
 from pathlib import Path
 
+import json
 import pytest
+
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
-from cg.store import Store
 from cg.meta.workflow.mip_dna import AnalysisAPI
+from cg.store import Store
 
 
 @pytest.fixture(scope="function", name="base_context")
@@ -96,12 +98,17 @@ def fixture_analysis_store_single(base_store, analysis_family_single_case):
     yield base_store
 
 
+@pytest.fixture
+def hk_mock():
+    """docstring for hk_mock"""
+    return MockHK()
+
+
 class MockTB(TrailblazerAPI):
     """Mock of trailblazer """
 
     def __init__(self):
         """Mock the init"""
-        pass
 
     def get_family_root_dir(self, case_id):
         """docstring for get_family_root_dir"""
@@ -119,12 +126,15 @@ class MockVersion:
 class MockFile:
     """Mock a file object"""
 
-    def __init__(self, path="", to_archive=False, tags=None):
+    def __init__(self, path="", to_archive=False, tags=None, **kwargs):
         self.path = path
         self.to_archive = to_archive
         self.tags = tags or []
+        self._empty_first = kwargs.get("empty_first", False)
 
     def first(self):
+        if self._empty_first:
+            return None
         return MockFile()
 
     def full_path(self):
@@ -139,10 +149,18 @@ class MockHK(HousekeeperAPI):
 
     def __init__(self):
         """Mock the init"""
-        pass
+        self.delivery_report = True
+        self.missing_mandatory = False
 
     def files(self, **kwargs):
         """docstring for file"""
+        tags = set(kwargs.get("tags", []))
+        delivery = set(["delivery-report"])
+        mandatory = set(["vcf-snv-clinical"])
+        if tags.intersection(delivery) and self.delivery_report is False:
+            return MockFile(empty_first=True)
+        if tags.intersection(mandatory) and self.missing_mandatory is True:
+            return MockFile(empty_first=True)
         return MockFile()
 
     def version(self, arg1: str, arg2: str):
@@ -179,13 +197,14 @@ class MockAnalysisApi(AnalysisAPI):
 
 
 class MockScoutUploadApi(UploadScoutAPI):
-    def __init__(self):
+    def __init__(self, **kwargs):
         """docstring for __init__"""
         self.mock_generate_config = True
         self.housekeeper = MockHK()
         self.analysis = MockAnalysisApi()
         self.config = {}
         self.file_exists = False
+        self.lims = MockLims()
 
     @pytest.fixture(autouse=True)
     def _request_analysis(self, analysis_store_single_case):
@@ -206,10 +225,9 @@ class MockScoutUploadApi(UploadScoutAPI):
         """docstring for add_scout_config_to_hk"""
         if self.file_exists:
             raise FileExistsError("Scout config already exists")
-        pass
 
 
-class MockLims(LimsAPI):
+class MockLims:
     """Mock lims fixture"""
 
     lims = None
@@ -217,28 +235,15 @@ class MockLims(LimsAPI):
     def __init__(self):
         self.lims = self
 
-    _project_name = None
-    _sample_sex = None
+    @staticmethod
+    def lims_samples():
+        """ Return LIMS-like family samples """
+        lims_family = json.load(open("tests/fixtures/report/lims_family.json"))
+        return lims_family["samples"]
 
-    def update_project(self, lims_id: str, name=None):
-        """Mock lims update_project"""
-        self._project_name = name
-
-    def get_updated_project_name(self) -> str:
-        """Method to test that update project was called with name parameter"""
-        return self._project_name
-
-    def update_sample(
-        self,
-        lims_id: str,
-        sex=None,
-        application: str = None,
-        target_reads: int = None,
-        priority=None,
-    ):
-        """Mock lims update_sample"""
-        self._sample_sex = sex
-
-    def get_updated_sample_sex(self) -> str:
-        """Method to be used to test that update_sample was called with sex parameter"""
-        return self._sample_sex
+    def sample(self, sample_id):
+        """ Returns a lims sample matching the provided sample_id """
+        for sample in self.lims_samples():
+            if sample["id"] == sample_id:
+                return sample
+        return None

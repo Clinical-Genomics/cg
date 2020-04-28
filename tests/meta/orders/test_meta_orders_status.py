@@ -378,66 +378,6 @@ def test_store_families_bad_apptag(orders_api, base_store, mip_status_data):
         )
 
 
-def test_store_case_invalid_bed(orders_api, base_store, balsamic_status_data):
-
-    status_data = balsamic_status_data
-
-    # GIVEN some cases ready to be stored but with invalid beds/capture-kits
-    assert base_store.samples().first() is None
-    assert base_store.families().first() is None
-    bed_name = "non-existing capture kit"
-    assert base_store.bed(bed_name) is None
-
-    for family in status_data["families"]:
-        for sample in family["samples"]:
-            sample["capture_kit"] = bed_name
-
-        # WHEN storing the order
-        cases = orders_api.store_cases(
-            customer=status_data["customer"],
-            order=status_data["order"],
-            ordered=dt.datetime.now(),
-            ticket=123456,
-            cases=status_data["families"],
-        )
-
-    # THEN it should not have connected any bed to the case
-    assert cases
-    for case in cases:
-        assert case.links
-        for link in case.links:
-            assert not link.sample.bed_version
-
-
-def test_store_case_valid_bed(orders_api, base_store, balsamic_status_data):
-    status_data = balsamic_status_data
-
-    # GIVEN some cases ready to be stored with valid beds/capture-kits
-    assert base_store.samples().first() is None
-    assert base_store.families().first() is None
-    bed_name = base_store.beds().first().name
-
-    for family in status_data["families"]:
-        for sample in family["samples"]:
-            sample["capture_kit"] = bed_name
-
-        # WHEN storing the order
-        cases = orders_api.store_cases(
-            customer=status_data["customer"],
-            order=status_data["order"],
-            ordered=dt.datetime.now(),
-            ticket=123456,
-            cases=status_data["families"],
-        )
-
-    # THEN it should have connected beds to the case
-    assert cases
-    for case in cases:
-        assert case.links
-        for link in case.links:
-            assert link.sample.bed_version
-
-
 def test_store_external(orders_api, base_store, external_status_data):
 
     # GIVEN a basic store with no samples or nothing in it + external order

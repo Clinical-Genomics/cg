@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <title>Clinical Genomics Report - {{ family }}</title>
+    <title>Clinical Genomics Report - {{ case }}</title>
 
     {{ css() }}
     {{ custom_css() }}
@@ -20,12 +20,12 @@
 
         <ul class="list-group list-group-flush">
           <li class="list-group-item">
-            Leveransrapport {{ customer_obj.name }}, familj {{ family }} : {{ report_version }}
+            Leveransrapport {{ customer_name }}, familj {{ case }} : {{ report_version }}
             {% if previous_report_version != 'N/A' %}
               ersätter rapport version: {{ previous_report_version }}
             {% endif %}
             <br>
-            Skapad: {{ today.date() }}
+            Skapad: {{ today }}
           </li>
         </ul>
 
@@ -44,7 +44,7 @@
             <div class="col">
               <h4>Kundinformation</h4>
               <address>
-                {{ customer_obj.invoice_address|replace('\n', '<br>')|safe }}
+                {{ customer_invoice_address|replace('\n', '<br>')|safe }}
               </address>
             </div>
             {% if accredited %}
@@ -73,9 +73,9 @@
             <tbody>
               {% for sample in samples %}
                 <tr>
-                <td>{{ sample.name }}* ({{ sample.id }})</td>
-                  <td>{{ sample.order_date }}</td>
-                  <td>{{ family }}*</td>
+                <td>{{ sample.name }}* ({{ sample.internal_id }})</td>
+                  <td>{{ sample.ordered_at }}</td>
+                  <td>{{ case }}*</td>
                   <td>
                     {{ sample.sex }}*
                     ( analys:
@@ -89,7 +89,7 @@
                   <td>{{ sample.source }}*</td>
                   <td>{{ sample.ticket }}</td>
                   <td>{{ sample.application }}*</td>
-                  <td>{{ sample.bioinformatic_analysis }}*</td>
+                  <td>{{ sample.data_analysis }}*</td>
                 </tr>
               {% endfor %}
             </tbody>
@@ -115,15 +115,15 @@
               {% for sample in samples %}
                 <tr>
                   <td>{{ sample.name }}*</td>
-                  <td>{{ sample.received }}</td>
+                  <td>{{ sample.received_at }}</td>
                   <td>{{ sample.prep_method }}</td>
-                  <td>{{ sample.prep_date }}</td>
+                  <td>{{ sample.prepared_at }}</td>
                   <td>{{ sample.capture_kit }}</td>
                   <td>{{ sample.sequencing_method }}</td>
-                  <td>{{ sample.sequencing_date }}</td>
-                  <td>{{ sample.delivery_method }}</td>
+                  <td>{{ sample.sequenced_at }}</td>
+                  <td>{{ pipeline }}</td>
                   <td>
-                    {{ sample.delivery_date }}
+                    {{ sample.delivered_at }}
                     {% if sample.processing_time != 'N/A' %}
                       ({{ sample.processing_time }} dagar)
                     {% endif %}
@@ -146,8 +146,8 @@
             </thead>
             <tbody>
               <tr>
-                <td>{{ family }}*</td>
-                <td>{{ mip_version }}</td>
+                <td>{{ case }}*</td>
+                <td>{{ pipeline_version }}</td>
                 <td>{{ panels }}</td>
                 <td>{{ genome_build }}</td>
               </tr>
@@ -172,11 +172,11 @@
               {% for sample in samples %}
                 <tr>
                   <td>{{ sample.name }}*</td>
-                  <td>{{ (sample.million_read_pairs) }}</td>
+                  <td>{{ sample.million_read_pairs }}</td>
                   <td>{{ sample.mapped_reads }}</td>
                   <td>{{ sample.target_coverage }}</td>
                   <td>{{ sample.target_completeness }}</td>
-                  <td>{{ (sample.duplicates) }}</td>
+                  <td>{{ sample.duplicates }}</td>
                 </tr>
               {% endfor %}
             </tbody>
@@ -186,14 +186,14 @@
 
         </div>
 
-        {% if customer_obj.scout_access %}
+        {% if scout_access %}
           <p class="card-block">
             Varianter finns uppladdade i Scout:
-            <a href="https://scout.scilifelab.se/{{ customer_obj.internal_id }}/{{ family }}">https://scout.scilifelab.se/{{ customer_obj.internal_id }}/{{ family }}</a>
+            <a href="scout.scilifelab.se/{{ customer_internal_id }}/{{ case }}">scout.scilifelab.se/{{ customer_internal_id }}/{{ case }}</a>
           </p>
         {% endif %}
 
-        {% for application in application_objs %}
+        {% for application in applications %}
           <div class="card-block">
             <h4 class="card-title">
               Teknisk beskrivning av analysen: {{ application.tag }}

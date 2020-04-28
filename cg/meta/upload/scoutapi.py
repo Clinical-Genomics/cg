@@ -1,12 +1,17 @@
 """File includes api to uploading data into Scout"""
-# -*- coding: utf-8 -*-
+
 import logging
+import requests
 from pathlib import Path
+
 from ruamel import yaml
 
-from cg.apps import hk, madeline, scoutapi
+from cg.apps.lims import LimsAPI
+from cg.apps import hk, scoutapi
+from cg.apps.madeline.api import MadelineAPI
+
 from cg.meta.workflow.mip_dna import AnalysisAPI
-from cg.store import models, Store
+from cg.store import models
 
 LOG = logging.getLogger(__name__)
 
@@ -16,53 +21,58 @@ class UploadScoutAPI:
 
     def __init__(
         self,
-        status_api: Store,
         hk_api: hk.HousekeeperAPI,
         scout_api: scoutapi.ScoutAPI,
+        lims_api: LimsAPI,
         analysis_api: AnalysisAPI,
-        madeline_exe: str,
-        madeline=madeline,
+        madeline_api: MadelineAPI,
     ):
-        self.status = status_api
         self.housekeeper = hk_api
         self.scout = scout_api
-        self.madeline_exe = madeline_exe
-        self.madeline = madeline
+        self.madeline_api = madeline_api
         self.analysis = analysis_api
+        self.lims = lims_api
+
+    def fetch_file_path(self, tag: str, sample_id: str, hk_version_id: int = None):
+        """"Fetch files from housekeeper"""
+        tags = [tag, sample_id]
+        hk_file = self.housekeeper.files(version=hk_version_id, tags=tags).first()
+        file_path = None
+        if hk_file:
+            file_path = hk_file.full_path
+        return file_path
 
     def build_samples(self, analysis_obj: models.Analysis, hk_version_id: int = None):
         """Loop over the samples in an analysis and build dicts from them"""
 
         for link_obj in analysis_obj.family.links:
             sample_id = link_obj.sample.internal_id
-            bam_tags = ["bam", sample_id]
-            bam_file = self.housekeeper.files(
-                version=hk_version_id, tags=bam_tags
-            ).first()
-            bam_path = bam_file.full_path if bam_file else None
-            mt_bam_tags = ["bam-mt", sample_id]
-            mt_bam_file = self.housekeeper.files(
-                version=hk_version_id, tags=mt_bam_tags
-            ).first()
-            mt_bam_path = mt_bam_file.full_path if mt_bam_file else None
-            vcf2cytosure_tags = ["vcf2cytosure", sample_id]
-            vcf2cytosure_file = self.housekeeper.files(
-                version=hk_version_id, tags=vcf2cytosure_tags
-            ).first()
-            vcf2cytosure_path = (
-                vcf2cytosure_file.full_path if vcf2cytosure_file else None
-            )
+            bam_path = self.fetch_file_path("bam", sample_id, hk_version_id)
+            alignment_file_path = self.fetch_file_path("cram", sample_id, hk_version_id)
+            chromograph_path = self.fetch_file_path("chromograph", sample_id, hk_version_id)
+            mt_bam_path = self.fetch_file_path("bam-mt", sample_id, hk_version_id)
+            vcf2cytosure_path = self.fetch_file_path("vcf2cytosure", sample_id, hk_version_id)
+
+            lims_sample = dict()
+            try:
+                lims_sample = self.lims.sample(sample_id)
+            except requests.exceptions.HTTPError as ex:
+                LOG.info("Could not fetch sample %s from LIMS: %s", sample_id, ex)
+
             sample = {
                 "analysis_type": link_obj.sample.application_version.application.analysis_type,
-                "sample_id": sample_id,
+                "bam_path": bam_path,
                 "capture_kit": None,
+                "alignment_path": alignment_file_path,
+                "chromograph": chromograph_path,
                 "father": link_obj.father.internal_id if link_obj.father else "0",
                 "mother": link_obj.mother.internal_id if link_obj.mother else "0",
-                "sample_name": link_obj.sample.name,
-                "phenotype": link_obj.status,
-                "sex": link_obj.sample.sex,
-                "bam_path": bam_path,
                 "mt_bam": mt_bam_path,
+                "phenotype": link_obj.status,
+                "sample_id": sample_id,
+                "sample_name": link_obj.sample.name,
+                "sex": link_obj.sample.sex,
+                "tissue_type": lims_sample.get("source", "unknown"),
                 "vcf2cytosure": vcf2cytosure_path,
             }
             yield sample
@@ -70,25 +80,21 @@ class UploadScoutAPI:
     def generate_config(self, analysis_obj: models.Analysis) -> dict:
         """Fetch data about an analysis to load Scout."""
         analysis_date = analysis_obj.started_at or analysis_obj.completed_at
-        hk_version = self.housekeeper.version(
-            analysis_obj.family.internal_id, analysis_date
-        )
-        analysis_data = self.analysis.get_latest_metadata(
-            analysis_obj.family.internal_id
-        )
+        hk_version = self.housekeeper.version(analysis_obj.family.internal_id, analysis_date)
+        analysis_data = self.analysis.get_latest_metadata(analysis_obj.family.internal_id)
 
         data = {
-            "owner": analysis_obj.family.customer.internal_id,
+            "analysis_date": analysis_obj.completed_at,
+            "default_gene_panels": analysis_obj.family.panels,
             "family": analysis_obj.family.internal_id,
             "family_name": analysis_obj.family.name,
-            "samples": list(),
-            "analysis_date": analysis_obj.completed_at,
             "gene_panels": self.analysis.convert_panels(
                 analysis_obj.family.customer.internal_id, analysis_obj.family.panels
             ),
-            "default_gene_panels": analysis_obj.family.panels,
             "human_genome_build": analysis_data.get("genome_build"),
+            "owner": analysis_obj.family.customer.internal_id,
             "rank_model_version": analysis_data.get("rank_model_version"),
+            "samples": list(),
             "sv_rank_model_version": analysis_data.get("sv_rank_model_version"),
         }
 
@@ -119,9 +125,7 @@ class UploadScoutAPI:
         yml.dump(upload_config, file_path)
 
     @staticmethod
-    def add_scout_config_to_hk(
-        config_file_path: Path, hk_api: hk.HousekeeperAPI, case_id: str
-    ):
+    def add_scout_config_to_hk(config_file_path: Path, hk_api: hk.HousekeeperAPI, case_id: str):
         """Add scout load config to hk bundle"""
         tag_name = "scout-load-config"
         version_obj = hk_api.last_version(bundle=case_id)
@@ -143,7 +147,11 @@ class UploadScoutAPI:
         return file_obj
 
     def _include_optional_files(self, data, hk_version):
-        scout_hk_map = [("delivery_report", "delivery-report"), ("vcf_str", "vcf-str")]
+        scout_hk_map = [
+            ("delivery_report", "delivery-report"),
+            ("multiqc", "multiqc-html"),
+            ("vcf_str", "vcf-str"),
+        ]
         self._include_files(data, hk_version, scout_hk_map)
 
     def _include_peddy_files(self, data, hk_version):
@@ -152,7 +160,7 @@ class UploadScoutAPI:
             ("peddy_sex", "sex-check"),
             ("peddy_check", "ped-check"),
         ]
-        self._include_files(data, hk_version, scout_hk_map, "peddy")
+        self._include_files(data, hk_version, scout_hk_map, extra_tag="peddy")
 
     def _include_mandatory_files(self, data, hk_version):
         scout_hk_map = {
@@ -163,9 +171,9 @@ class UploadScoutAPI:
         }
         self._include_files(data, hk_version, scout_hk_map, skip_missing=False)
 
-    def _include_files(
-        self, data, hk_version, scout_hk_map, extra_tag=None, skip_missing=True
-    ):
+    def _include_files(self, data, hk_version, scout_hk_map, **kwargs):
+        extra_tag = kwargs.get("extra_tag")
+        skip_missing = kwargs.get("skip_missing", True)
         for scout_key, hk_tag in scout_hk_map:
 
             if extra_tag:
@@ -208,6 +216,5 @@ class UploadScoutAPI:
             }
             for link_obj in family_obj.links
         ]
-        ped_stream = self.madeline.make_ped(family_obj.name, samples=samples)
-        svg_path = self.madeline.run(self.madeline_exe, ped_stream)
+        svg_path = self.madeline_api.run(family_id=family_obj.name, samples=samples)
         return svg_path

@@ -5,6 +5,10 @@ from cg.apps.usalt.fastq import FastqHandler as MicrosaltFastqHandler
 
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.tb import TrailblazerAPI
+from cg.apps.crunchy import CrunchyAPI
+from cg.apps.scoutapi import ScoutAPI
+from cg.meta.compress import CompressAPI
+from cg.meta.deliver import DeliverAPI
 from cg.meta.workflow.mip_dna import AnalysisAPI
 
 
@@ -34,15 +38,13 @@ def trailblazer_api(tmpdir):
 
 
 @pytest.yield_fixture(scope="function")
-def store_housekeeper(tmpdir):
+def housekeeper_api(tmpdir):
     """Setup Housekeeper store."""
     root_path = tmpdir.mkdir("bundles")
-    _store = HousekeeperAPI(
-        {"housekeeper": {"database": "sqlite://", "root": str(root_path)}}
-    )
-    _store.create_all()
-    yield _store
-    _store.drop_all()
+    _api = HousekeeperAPI({"housekeeper": {"database": "sqlite://", "root": str(root_path)}})
+    _api.initialise_db()
+    yield _api
+    _api.destroy_db()
 
 
 @pytest.fixture
@@ -124,58 +126,169 @@ def analysis_store(base_store, analysis_family):
             family=family,
             sample=sample_obj,
             status=sample_data["status"],
-            father=base_store.sample(sample_data["father"])
-            if sample_data.get("father")
-            else None,
-            mother=base_store.sample(sample_data["mother"])
-            if sample_data.get("mother")
-            else None,
+            father=base_store.sample(sample_data["father"]) if sample_data.get("father") else None,
+            mother=base_store.sample(sample_data["mother"]) if sample_data.get("mother") else None,
         )
         base_store.add(link)
     base_store.commit()
     yield base_store
 
 
-class MockFile:
-    def __init__(self, path):
-        self.path = path
+class MockCrunchy(CrunchyAPI):
 
-    def first(self):
-        return MockFile()
+    pass
+
+
+class MockVersion:
+    """Mock a version object"""
+
+    @property
+    def id(self):
+        return ""
+
+
+class MockFile:
+    """Mock a file object"""
+
+    def __init__(self, path="", to_archive=False, tags=None):
+        self.path = path
+        self.to_archive = to_archive
+        self._tags = []
+        if tags:
+            for tag in tags:
+                self._tags.append(MockTag(tag))
 
     def full_path(self):
         return ""
 
+    def is_included(self):
+        return False
 
-class MockDeliver:
-    def get_post_analysis_files(self, family: str, version, tags):
+    @property
+    def tags(self):
+        return self._tags
+
+
+class MockFiles:
+    """Mock file objects"""
+
+    def __init__(self, files):
+        self._files = files
+
+    def all(self):
+        return self._files
+
+    def first(self):
+        return self._files[0]
+
+
+class MockTag:
+    """Mock a file object"""
+
+    def __init__(self, name):
+        self._name = name
+
+    @property
+    def name(self):
+        return self._name
+
+
+class MockHouseKeeper(HousekeeperAPI):
+    """Mock the housekeeper API"""
+
+    # In this mock we want to override __init__ so disable here
+    def __init__(self, files: MockFiles = None):
+        self._file_added = False
+        self._file_included = False
+        self._files = MockFiles([])
+        if files:
+            self._files = files
+        self._file = MockFile()
+
+    # This is overriding a housekeeper object so ok to not include all arguments
+    def files(self, bundle, version, tags):
+        """Mock the files method to return a list of files"""
+        files = []
+
+        for file in self._files.all():
+            if any(tag.name in tags for tag in file.tags):
+                files.append(file)
+
+        return MockFiles(files)
+
+    def get_files(self, bundle, tags, version="1.0"):
+        """Mock the get_files method to return a list of files"""
+        return self._files
+
+    def add_file(self, file, version_obj, tag_name, to_archive=False):
+        """Mock the add_files method to add a MockFile to the list of files"""
+        self._file_added = True
+        self._file = MockFile(path=file)
+        return self._file
+
+    def version(self, bundle: str, date: str):
+        """Fetch version from the database."""
+        return MockVersion()
+
+    def last_version(self, bundle: str):
+        """docstring for last_version"""
+        return MockVersion()
+
+    def include_file(self, file_obj, version_obj):
+        """docstring for include_file"""
+        self._file_included = True
+
+    def add_commit(self, file_obj):
+        """Overrides sqlalchemy method"""
+        return file_obj
+
+    def get_root_dir(self):
+        """Overrides sqlalchemy method"""
+        return self._file
+
+
+class MockScoutAPI(ScoutAPI):
+    """Mock class for Scout api"""
+
+    def __init__(self):
+        pass
+
+
+class MockLims:
+    """Mock lims fixture"""
+
+    lims = None
+
+    def __init__(self):
+        self.lims = self
+
+
+class MockDeliver(DeliverAPI):
+    def __init__(self):
+        self.housekeeper = MockHouseKeeper()
+        self.lims = MockLims()
+
+    def get_post_analysis_files(self, case: str, version, tags):
 
         if tags[0] == "mip-config":
-            path = (
-                "/mnt/hds/proj/bioinfo/bundles/"
-                + family
-                + "/2018-01-30/"
-                + family
-                + "_config.yaml"
-            )
+            path = "/mnt/hds/proj/bioinfo/bundles/" + case + "/2018-01-30/" + case + "_config.yaml"
         elif tags[0] == "sampleinfo":
             path = (
                 "/mnt/hds/proj/bioinfo/bundles/"
-                + family
+                + case
                 + "/2018-01-30/"
-                + family
+                + case
                 + "_qc_sample_info.yaml"
             )
         if tags[0] == "qcmetrics":
             path = (
-                "/mnt/hds/proj/bioinfo/bundles/"
-                + family
-                + "/2018-01-30/"
-                + family
-                + "_qc_metrics.yaml"
+                "/mnt/hds/proj/bioinfo/bundles/" + case + "/2018-01-30/" + case + "_qc_metrics.yaml"
             )
 
         return [MockFile(path=path)]
+
+    def get_post_analysis_case_files(self, case: str, version, tags):
+        return ""
 
     def get_post_analysis_files_root_dir(self):
         return ""
@@ -198,8 +311,9 @@ class MockPath:
 class MockLogger:
     warnings = []
 
-    def warning(self, text: str):
-        self.warnings.append(text)
+    def warning(self, text, *interpolations):
+
+        self.warnings.append(text % interpolations)
 
     def get_warnings(self) -> list:
         return self.warnings
@@ -212,9 +326,7 @@ class MockTB:
         """Needed to initialise mock variables"""
         self._make_config_was_called = False
 
-    def get_trending(
-        self, mip_config_raw: dict, qcmetrics_raw: dict, sampleinfo_raw: dict
-    ) -> dict:
+    def get_trending(self, mip_config_raw: dict, qcmetrics_raw: dict, sampleinfo_raw: dict) -> dict:
         if self._get_trending_raises_keyerror:
             raise KeyError("mockmessage")
 
@@ -271,14 +383,14 @@ def safe_loader(path):
 
 
 @pytest.yield_fixture(scope="function")
-def analysis_api(analysis_store, store_housekeeper, scout_store):
+def analysis_api(analysis_store, housekeeper_api, scout_store):
     """Setup an analysis API."""
     Path_mock = MockPath("")
     tb_mock = MockTB()
 
     _analysis_api = AnalysisAPI(
         db=analysis_store,
-        hk_api=store_housekeeper,
+        hk_api=housekeeper_api,
         scout_api=scout_store,
         tb_api=tb_mock,
         lims_api=None,
@@ -288,3 +400,22 @@ def analysis_api(analysis_store, store_housekeeper, scout_store):
         logger=MockLogger(),
     )
     yield _analysis_api
+
+
+@pytest.yield_fixture(scope="function")
+def deliver_api(analysis_store):
+    """Fixture for deliver_api"""
+    lims_mock = MockLims()
+    hk_mock = MockHouseKeeper()
+    hk_mock.add_file(file="/mock/path", version_obj="", tag_name="")
+    hk_mock._files = MockFiles([MockFile(tags=["case-tag"]), MockFile(tags=["sample-tag", "ADM1"])])
+
+    _api = DeliverAPI(
+        db=analysis_store,
+        hk_api=hk_mock,
+        lims_api=lims_mock,
+        case_tags=["case-tag"],
+        sample_tags=["sample-tag"],
+    )
+
+    yield _api

@@ -1,13 +1,12 @@
-# -*- coding: utf-8 -*-
 import gzip
 import logging
 import re
 from pathlib import Path
-from typing import List, Any
+from typing import Any
 from ruamel.yaml import safe_load
 
 from cg.apps import tb, hk, lims
-from cg.meta.deliver.mip_dna import DeliverAPI
+from cg.meta.deliver import DeliverAPI
 from cg.apps.pipelines.fastqhandler import BaseFastqHandler
 from cg.store import models, Store
 
@@ -41,13 +40,13 @@ class AnalysisAPI:
         flowcells = self.db.flowcells(family=family_obj)
         statuses = []
         for flowcell_obj in flowcells:
-            self.LOG.debug(f"{flowcell_obj.name}: checking flowcell")
+            self.LOG.debug("%s: checking flowcell", flowcell_obj.name)
             statuses.append(flowcell_obj.status)
             if flowcell_obj.status == "removed":
-                self.LOG.info(f"{flowcell_obj.name}: requesting removed flowcell")
+                self.LOG.info("%s: requesting removed flowcell", flowcell_obj.name)
                 flowcell_obj.status = "requested"
             elif flowcell_obj.status != "ondisk":
-                self.LOG.warning(f"{flowcell_obj.name}: {flowcell_obj.status}")
+                self.LOG.warning("%s: %s", flowcell_obj.name, flowcell_obj.status)
         return all(status == "ondisk" for status in statuses)
 
     def run(self, family_obj: models.Family, **kwargs):
@@ -66,8 +65,7 @@ class AnalysisAPI:
             external = link_obj.sample.application_version.application.is_external
             if downsampled or external:
                 self.LOG.info(
-                    "%s: downsampled/external - skip evaluation",
-                    link_obj.sample.internal_id,
+                    "%s: downsampled/external - skip evaluation", link_obj.sample.internal_id
                 )
                 kwargs["skip_evaluation"] = True
                 break
@@ -104,19 +102,26 @@ class AnalysisAPI:
             "samples": [],
         }
         for link in family_obj.links:
-            sample_data = {
-                "sample_id": link.sample.internal_id,
-                "analysis_type": link.sample.application_version.application.analysis_type,
-                "sex": link.sample.sex,
-                "phenotype": link.status,
-                "expected_coverage": link.sample.application_version.application.sequencing_depth,
-            }
+            sample_data = self._get_sample_data(link)
             if link.mother:
                 sample_data["mother"] = link.mother.internal_id
             if link.father:
                 sample_data["father"] = link.father.internal_id
             data["samples"].append(sample_data)
         return data
+
+    @staticmethod
+    def _get_sample_data(link: models.FamilySample) -> dict:
+        """Build sample data for MIP sample file"""
+
+        return {
+            "sample_id": link.sample.internal_id,
+            "sample_display_name": link.sample.name,
+            "analysis_type": link.sample.application_version.application.analysis_type,
+            "sex": link.sample.sex,
+            "phenotype": link.status,
+            "expected_coverage": link.sample.application_version.application.min_sequencing_depth,
+        }
 
     @staticmethod
     def fastq_header(line):
@@ -205,7 +210,7 @@ class AnalysisAPI:
         """Get a python object file for a tag and a family ."""
 
         analysis_files = self.deliver.get_post_analysis_files(
-            family=family_id, version=False, tags=[tag]
+            case=family_id, version=False, tags=[tag]
         )
         if analysis_files:
             analysis_file_raw = self._open_bundle_file(analysis_files[0].path)
@@ -219,24 +224,20 @@ class AnalysisAPI:
     def _open_bundle_file(self, relative_file_path: str) -> Any:
         """Open a bundle file and return it as an Python object."""
 
-        full_file_path = self.pather(
-            self.deliver.get_post_analysis_files_root_dir()
-        ).joinpath(relative_file_path)
+        full_file_path = self.pather(self.deliver.get_post_analysis_files_root_dir()).joinpath(
+            relative_file_path
+        )
         open_file = self.yaml_loader(self.pather(full_file_path).open())
         return open_file
 
     def get_latest_metadata(self, family_id: str) -> dict:
         """Get the latest trending data for a family."""
 
-        mip_config_raw = self._get_latest_raw_file(
-            family_id=family_id, tag="mip-config"
-        )
+        mip_config_raw = self._get_latest_raw_file(family_id=family_id, tag="mip-config")
 
         qcmetrics_raw = self._get_latest_raw_file(family_id=family_id, tag="qcmetrics")
 
-        sampleinfo_raw = self._get_latest_raw_file(
-            family_id=family_id, tag="sampleinfo"
-        )
+        sampleinfo_raw = self._get_latest_raw_file(family_id=family_id, tag="sampleinfo")
 
         trending = dict()
 

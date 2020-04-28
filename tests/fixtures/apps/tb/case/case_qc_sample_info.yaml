@@ -127,6 +127,8 @@ recipe:
       path: /path_to/case/case/varianteffectpredictor/info/varianteffectpredictor_case.1.stderr.txt
   vcfparser_ar:
     path: /path_to/case/case/vcfparser_ar/case_gatkcomb_rhocall_vt_frqf_cadd_vep_parsed.3.vcf
+  version_collect_ar:
+    path: /path_to/case/case/version_collect_ar/case_vcol.yaml
   vt_ar:
     path: /path_to/case/case/vt_ar/info/vt_ar_case.0.0.1.stderr.txt
 sample:

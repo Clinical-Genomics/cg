@@ -54,3 +54,29 @@ def apptags(context):
     )
 
     context.obj["vogue_upload_api"].load_apptags()
+
+
+@vogue.command("flowcells", short_help="Getting flowcell data from the lims.")
+@click.option(
+    "-d", "--days", required="True", help="load X days old runs from lims to vogue",
+)
+@click.pass_context
+def flowcells(context, days: int):
+    """Loading runs from lims to the trending database"""
+
+    click.echo(click.style("----------------- FLOWCELLS -----------------------"))
+
+    context.obj["vogue_upload_api"].load_flowcells(days=days)
+
+
+@vogue.command("samples", short_help="Getting sample data from lims.")
+@click.option(
+    "-d", "--days", required="True", help="load X days old sampels from lims to vogue",
+)
+@click.pass_context
+def samples(context, days: int):
+    """Loading samples from lims to the trending database"""
+
+    click.echo(click.style("----------------- SAMPLES -----------------------"))
+
+    context.obj["vogue_upload_api"].load_samples(days=days)

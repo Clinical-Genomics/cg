@@ -99,18 +99,22 @@ def get_beds_path(balsamic_context) -> Path:
     return Path(balsamic_context.get("bed_path"))
 
 
-def test_target_bed_from_case(cli_runner, balsamic_context, balsamic_case):
-    """Test command with --target-bed option"""
+def test_target_bed_from_lims(
+    cli_runner, balsamic_context, balsamic_case, lims_api, balsamic_store
+):
+    """Test command without --target-bed option"""
 
-    # GIVEN case with bed-version with filename set on a case
+    # GIVEN case that bed-version set in lims with same version existing in status db
+
     for link in balsamic_case.links:
-        assert link.sample.bed_version.filename
+        lims_capture_kit = lims_api.capture_kit(link.sample.internal_id)
+        assert lims_capture_kit
+        bed_version = balsamic_store.latest_bed_version(lims_capture_kit)
+        assert bed_version
+        assert bed_version.filename
 
     bed_key = "-p"
-    bed_path = (
-        get_beds_path(balsamic_context)
-        / balsamic_case.links[0].sample.bed_version.filename
-    )
+    bed_path = get_beds_path(balsamic_context) / bed_version.filename
     case_id = balsamic_case.internal_id
 
     # WHEN dry running
@@ -122,6 +126,25 @@ def test_target_bed_from_case(cli_runner, balsamic_context, balsamic_case):
     assert result.exit_code == EXIT_SUCCESS
     assert bed_key in result.output
     assert str(bed_path) in result.output
+
+
+def test_wgs_excludes_bed_for_balsamic(
+    cli_runner, balsamic_context, balsamic_case_wgs, lims_api, balsamic_store
+):
+    """Test command without --target-bed option"""
+
+    # GIVEN case with wgs tag
+    bed_key = "-p"
+    case_id = balsamic_case_wgs.internal_id
+
+    # WHEN dry running
+    result = cli_runner.invoke(
+        config_case, [case_id, "--dry-run"], obj=balsamic_context
+    )
+
+    # THEN dry-print should NOT include the bed_key
+    assert result.exit_code == EXIT_SUCCESS
+    assert bed_key not in result.output
 
 
 def test_umi_trim_length(cli_runner, balsamic_context, balsamic_case):

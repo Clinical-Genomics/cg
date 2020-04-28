@@ -9,7 +9,7 @@ from cg.store import Store, models
 LOG = logging.getLogger(__name__)
 
 
-class BackupApi():
+class BackupApi:
     """ Class for retrieving FCs from backup """
 
     def __init__(self, status: Store, pdc_api: PdcApi, max_flowcells: int):
@@ -19,13 +19,13 @@ class BackupApi():
 
     def maximum_flowcells_ondisk(self) -> bool:
         """Check if there's too many flowcells already "ondisk"."""
-        ondisk_flowcells = self.status.flowcells(status='ondisk').count()
+        ondisk_flowcells = self.status.flowcells(status="ondisk").count()
         LOG.debug("ondisk flowcells: %s", ondisk_flowcells)
         return ondisk_flowcells > self.max_flowcells
 
     def check_processing(self, max_flowcells: int = 1) -> bool:
         """Check if the processing queue for flowcells is not full."""
-        processing_flowcells = self.status.flowcells(status='processing').count()
+        processing_flowcells = self.status.flowcells(status="processing").count()
         LOG.debug("processing flowcells: %s", processing_flowcells)
         return processing_flowcells < max_flowcells
 
@@ -34,9 +34,9 @@ class BackupApi():
         Get the top flowcell from the requested queue and update status to
         "processing".
         """
-        flowcell_obj = self.status.flowcells(status='requested').first()
+        flowcell_obj = self.status.flowcells(status="requested").first()
         if flowcell_obj is not None:
-            flowcell_obj.status = 'processing'
+            flowcell_obj.status = "processing"
             self.status.commit()
         return flowcell_obj
 
@@ -48,17 +48,17 @@ class BackupApi():
         2. The requested queue is not emtpy
         """
         if self.check_processing() is False:
-            LOG.info('processing queue is full')
+            LOG.info("processing queue is full")
             return None
 
         if self.maximum_flowcells_ondisk() is True:
-            LOG.info('maximum flowcells ondisk reached')
+            LOG.info("maximum flowcells ondisk reached")
             return None
 
         if not dry_run and flowcell_obj is None:
             flowcell_obj = self.pop_flowcell()
             if flowcell_obj is None:
-                LOG.info('no flowcells requested')
+                LOG.info("no flowcells requested")
                 return None
 
         if not dry_run:
@@ -67,13 +67,13 @@ class BackupApi():
         tic = time.time()
 
         try:
-            if not dry_run:
-                self.pdc.retrieve_flowcell(flowcell_obj.name,
-                                           flowcell_obj.sequencer_type)
+            self.pdc.retrieve_flowcell(flowcell_obj.name,
+                                       flowcell_obj.sequencer_type, dry_run)
         except subprocess.CalledProcessError as error:
             LOG.error("%s: retrieval failed", flowcell_obj.name)
-            flowcell_obj.status = 'requested'
-            self.status.commit()
+            if not dry_run:
+                flowcell_obj.status = "requested"
+                self.status.commit()
             raise error
         toc = time.time()
         return toc - tic

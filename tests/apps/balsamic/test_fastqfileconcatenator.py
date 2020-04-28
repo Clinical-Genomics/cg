@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Test FastqFileConcatenator"""
 from cg.apps.balsamic.fastq import FastqFileConcatenator
 

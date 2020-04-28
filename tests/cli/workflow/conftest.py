@@ -4,6 +4,7 @@ from datetime import datetime
 import pytest
 
 from cg.store import Store, models
+from tests.store_helpers import ensure_customer, ensure_panel
 
 
 @pytest.fixture
@@ -57,41 +58,17 @@ def ensure_application_version(store, is_rna=False):
     application = store.application(tag=application_tag)
     if not application:
         application = store.add_application(
-            tag=application_tag,
-            category=category,
-            description="dummy_description",
-            percent_kth=80,
+            tag=application_tag, category=category, description="dummy_description", percent_kth=80
         )
         store.add_commit(application)
 
     prices = {"standard": 10, "priority": 20, "express": 30, "research": 5}
     version = store.application_version(application, 1)
     if not version:
-        version = store.add_version(
-            application, 1, valid_from=datetime.now(), prices=prices
-        )
+        version = store.add_version(application, 1, valid_from=datetime.now(), prices=prices)
 
         store.add_commit(version)
     return version
-
-
-def ensure_customer(store, customer_id="cust_test"):
-    """utility function to return existing or create customer for tests"""
-    customer_group = store.customer_group("dummy_group")
-    if not customer_group:
-        customer_group = store.add_customer_group("dummy_group", "dummy group")
-
-        customer = store.add_customer(
-            internal_id=customer_id,
-            name="Test Customer",
-            scout_access=False,
-            customer_group=customer_group,
-            invoice_address="dummy_address",
-            invoice_reference="dummy_reference",
-        )
-        store.add_commit(customer)
-    customer = store.customer(customer_id)
-    return customer
 
 
 def add_sample(store, sample_id="sample_test", gender="female", is_rna=False):
@@ -105,23 +82,6 @@ def add_sample(store, sample_id="sample_test", gender="female", is_rna=False):
     sample.customer = customer
     store.add_commit(sample)
     return sample
-
-
-def ensure_panel(disk_store, panel_id="panel_test", customer_id="cust_test"):
-    """utility function to add a panel to use in tests"""
-    customer = ensure_customer(disk_store, customer_id)
-    panel = disk_store.panel(panel_id)
-    if not panel:
-        panel = disk_store.add_panel(
-            customer=customer,
-            name=panel_id,
-            abbrev=panel_id,
-            version=1.0,
-            date=datetime.now(),
-            genes=1,
-        )
-        disk_store.add_commit(panel)
-    return panel
 
 
 def add_case(store, case_name="case_test", customer_id="cust_test"):

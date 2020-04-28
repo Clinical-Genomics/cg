@@ -10,10 +10,14 @@ import click
 from cg.apps import hk, lims
 from cg.apps.usalt.fastq import FastqHandler
 from cg.cli.workflow.microsalt.store import store as store_cmd
-from cg.cli.workflow.microsalt.deliver import deliver as deliver_cmd
+from cg.cli.workflow.microsalt.deliver import (
+    deliver as deliver_cmd,
+    PROJECT_TAGS,
+    SAMPLE_TAGS,
+)
 from cg.meta.microsalt.lims import LimsMicrosaltAPI
 from cg.meta.workflow.microsalt import AnalysisAPI
-from cg.meta.deliver.microsalt import DeliverAPI
+from cg.meta.deliver import DeliverAPI
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -29,7 +33,13 @@ def microsalt(context: click.Context, order_id):
     context.obj["db"] = Store(context.obj["database"])
     hk_api = hk.HousekeeperAPI(context.obj)
     lims_api = lims.LimsAPI(context.obj)
-    deliver = DeliverAPI(context.obj, hk_api=hk_api, lims_api=lims_api)
+    deliver = DeliverAPI(
+        context.obj,
+        hk_api=hk_api,
+        lims_api=lims_api,
+        case_tags=PROJECT_TAGS,
+        sample_tags=SAMPLE_TAGS,
+    )
     context.obj["api"] = AnalysisAPI(
         db=context.obj["db"], hk_api=hk_api, lims_api=lims_api
     )
