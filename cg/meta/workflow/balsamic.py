@@ -1,20 +1,25 @@
+"""Module for Balsamic Analyses"""
 from pathlib import Path
 
 
 class AnalysisAPI:
-    """"""
+    """Methods relevant for Balsamic Analyses"""
 
     @staticmethod
     def get_deliverables_file_path(case_id, root_dir):
+        """Generates a path where the Balsamic deliverables file for the case_id should be
+        located"""
         return Path.joinpath(root_dir, case_id, "delivery_report", case_id + ".hk")
 
     @staticmethod
     def get_config_path(root_dir, case_id: str) -> Path:
+        """Generates a path where the Balsamic config for the case_id should be located"""
         return Path.joinpath(root_dir, case_id, case_id + ".json")
 
     @staticmethod
     def fastq_header(line):
-        """handle illumina's two different header formats
+        """Generates a dict with parsed lanes, flowcells and read numbers
+        Handle illumina's two different header formats
         @see https://en.wikipedia.org/wiki/FASTQ_format
 
         @HWUSI-EAS100R:6:73:941:1973#0/1
@@ -46,25 +51,22 @@ class AnalysisAPI:
             Y   Y if the read is filtered, N otherwise
             18  0 when none of the control bits are on, otherwise it is an even number
             ATCACG  index sequence
-
-
-        TODO: add unit test
         """
 
-        rs = {"lane": None, "flowcell": None, "readnumber": None}
+        fastq_meta = {"lane": None, "flowcell": None, "readnumber": None}
 
         parts = line.split(":")
         if len(parts) == 5:  # @HWUSI-EAS100R:6:73:941:1973#0/1
-            rs["lane"] = parts[1]
-            rs["flowcell"] = "XXXXXX"
-            rs["readnumber"] = parts[-1].split("/")[-1]
+            fastq_meta["lane"] = parts[1]
+            fastq_meta["flowcell"] = "XXXXXX"
+            fastq_meta["readnumber"] = parts[-1].split("/")[-1]
         if len(parts) == 10:  # @EAS139:136:FC706VJ:2:2104:15343:197393 1:Y:18:ATCACG
-            rs["lane"] = parts[3]
-            rs["flowcell"] = parts[2]
-            rs["readnumber"] = parts[6].split(" ")[-1]
+            fastq_meta["lane"] = parts[3]
+            fastq_meta["flowcell"] = parts[2]
+            fastq_meta["readnumber"] = parts[6].split(" ")[-1]
         if len(parts) == 7:  # @ST-E00201:173:HCLCGALXX:1:2106:22516:34834/1
-            rs["lane"] = parts[3]
-            rs["flowcell"] = parts[2]
-            rs["readnumber"] = parts[-1].split("/")[-1]
+            fastq_meta["lane"] = parts[3]
+            fastq_meta["flowcell"] = parts[2]
+            fastq_meta["readnumber"] = parts[-1].split("/")[-1]
 
-        return rs
+        return fastq_meta
