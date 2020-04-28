@@ -242,7 +242,7 @@ class MockHK(HousekeeperAPI):
         return MockFile()
 
     def get_files(self, bundle, tags, version="1.0"):
-        """docstring for get_files"""
+        """Mock get files sub from Housekeeper"""
         return self._files
 
     def add_file(self, file, version_obj, tag_name, to_archive=False):
