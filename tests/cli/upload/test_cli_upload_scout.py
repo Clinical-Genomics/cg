@@ -8,13 +8,11 @@ def check_log(caplog, string=None, warning=None):
     """Parse the log output"""
     found = False
     for _, level, message in caplog.record_tuples:
-        print(message)
         if warning:
             if level == logging.WARNING:
                 found = True
-        if string:
-            if string in message:
-                found = True
+        if string and string in message:
+            found = True
     return found
 
 
