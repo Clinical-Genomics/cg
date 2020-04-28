@@ -52,6 +52,7 @@ def test_already_stored_analysis(
     )
 
     # WHEN calling store again for same case
+    # THEN we should get a message that the analysis has previously been stored
     with pytest.raises(AnalysisDuplicationError):
         result = cli_runner.invoke(
             analysis,
@@ -66,7 +67,6 @@ def test_already_stored_analysis(
             catch_exceptions=False,
         )
 
-        # THEN we should get a message that the analysis has previously been stored
         assert "analysis version already added" in result.output
         assert result.exit_code != EXIT_SUCCESS
 

@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 
 import click
+from cg.meta.workflow.balsamic import AnalysisAPI
 from housekeeper.exc import VersionIncludedError
 
 from cg.apps import hk, tb
@@ -26,6 +27,7 @@ def store(context):
     context.obj["db"] = Store(context.obj["database"])
     context.obj["tb_api"] = tb.TrailblazerAPI(context.obj)
     context.obj["hk_api"] = hk.HousekeeperAPI(context.obj)
+    context.obj["analysis_api"] = AnalysisAPI(context.obj)
 
 
 @store.command()
@@ -51,18 +53,19 @@ def analysis(context, case_id, deliverables_file_path, config_path):
     status = context.obj["db"]
     case_obj = status.family(case_id)
     root_dir = Path(context.obj["balsamic"]["root"])
+    analysis_api = context.obj["analysis_api"]
 
     if not case_obj:
         click.echo(click.style(f"Case {case_id} not found", fg="red"))
         context.abort()
 
     if not deliverables_file_path:
-        deliverables_file_path = get_deliverables_file_path(case_id, root_dir)
+        deliverables_file_path = analysis_api.get_deliverables_file_path(case_id, root_dir)
         if not os.path.isfile(deliverables_file_path):
             context.invoke(generate_deliverables_file, case_id=case_id)
 
     if not config_path:
-        config_path = get_config_path(root_dir, case_id)
+        config_path = analysis_api.get_config_path(root_dir, case_id)
 
     hk_api = context.obj["hk_api"]
 
@@ -74,13 +77,9 @@ def analysis(context, case_id, deliverables_file_path, config_path):
     click.echo(click.style("included files in Housekeeper", fg="green"))
 
 
-def get_deliverables_file_path(case_id, root_dir):
-    return Path.joinpath(root_dir, case_id, "delivery_report", case_id + ".hk")
-
-
 @store.command("generate-deliverables-file")
 @click.option("-d", "--dry-run", "dry", is_flag=True, help="print command to console")
-@click.option("--config", "config_path", required=False, help="Optional")
+@click.option("-c", "--config", "config_path", required=False, help="Optional")
 @click.argument("case_id")
 @click.pass_context
 def generate_deliverables_file(context, dry, config_path, case_id):
@@ -88,15 +87,15 @@ def generate_deliverables_file(context, dry, config_path, case_id):
 
     conda_env = context.obj["balsamic"]["conda_env"]
     root_dir = Path(context.obj["balsamic"]["root"])
-
+    analysis_api = context.obj["analysis_api"]
     case_obj = context.obj["db"].family(case_id)
 
     if not case_obj:
         raise CgError(f"Case {case_id} not found")
 
     if not config_path:
-        config_path = get_config_path(root_dir, case_id)
-        if not os.path.isfile(config_path):
+        config_path = analysis_api.get_config_path(root_dir, case_id)
+        if not config_path.is_file():
             raise FileNotFoundError(f"Missing the sample-config file for {case_id}")
 
     command_str = f" report deliver" f" --sample-config {config_path}'"
@@ -113,10 +112,6 @@ def generate_deliverables_file(context, dry, config_path, case_id):
         click.echo(click.style("created deliverables file", fg="green"))
 
     return process
-
-
-def get_config_path(root_dir, case_id):
-    return Path.joinpath(root_dir, case_id, case_id + ".json")
 
 
 @store.command()
