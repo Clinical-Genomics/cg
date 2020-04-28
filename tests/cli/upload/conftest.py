@@ -246,7 +246,7 @@ class MockHK(HousekeeperAPI):
         return self._files
 
     def add_file(self, file, version_obj, tag_name, to_archive=False):
-        """docstring for add_file"""
+        """Mock add file to the HK database"""
         self._file_added = True
         new_file = MockFile(path=file)
         self._files.append(new_file)
