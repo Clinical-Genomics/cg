@@ -28,18 +28,7 @@ class MockTB(TrailblazerAPI):
     def __init__(self):
         """Override TrailblazerAPI __init__ to avoid default behaviour"""
 
-    def analyses(
-        self,
-        *,
-        family: str = None,
-        query: str = None,
-        status: str = None,
-        deleted: bool = None,
-        temp: bool = False,
-        before: datetime = None,
-        is_visible: bool = None,
-        workflow=None
-    ):
+    def analyses(self, *_):
         """Override TrailblazerAPI analyses method to avoid default behaviour"""
         return []
 
