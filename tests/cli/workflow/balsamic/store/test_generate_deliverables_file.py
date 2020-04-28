@@ -1,5 +1,4 @@
 """This script tests the cli methods to create the case config for balsamic"""
-import pytest
 
 from cg.cli.workflow.balsamic.store import generate_deliverables_file
 from cg.exc import CgError
@@ -53,7 +52,7 @@ def test_without_config_file(cli_runner, balsamic_store_context, balsamic_case):
     )
 
     # THEN the result of the call should be a non SUCCESS
-    assert result.exception
+    assert isinstance(result.exception, FileNotFoundError)
     assert result.exit_code != EXIT_SUCCESS
 
 
@@ -68,9 +67,7 @@ def test_with_missing_case(cli_runner, balsamic_store_context):
         generate_deliverables_file, [case_id, "--dry-run"], obj=balsamic_store_context
     )
 
-    print(result.output)
-
     # THEN the command should fail and mention the case id in the fail message
-    assert result.exception
+    assert isinstance(result.exception, CgError)
     assert f"Case {case_id} not found" in result.exception.message
     assert result.exit_code != EXIT_SUCCESS
