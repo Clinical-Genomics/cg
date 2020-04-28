@@ -3,6 +3,7 @@ from datetime import datetime
 import pytest
 
 from cg.apps.hk import HousekeeperAPI
+from cg.meta.workflow.balsamic import AnalysisAPI
 from cg.store import Store, models
 from cg.apps.tb import TrailblazerAPI
 
@@ -17,6 +18,7 @@ def balsamic_store_context(balsamic_store, balsamic_case) -> dict:
         "db": balsamic_store,
         "tb_api": MockTB(),
         "balsamic": {"root": "root", "conda_env": "conda_env"},
+        "analysis_api": AnalysisAPI(),
     }
 
 

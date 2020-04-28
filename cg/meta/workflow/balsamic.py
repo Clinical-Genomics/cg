@@ -3,10 +3,10 @@ import gzip
 import re
 from pathlib import Path
 
-from cg.utils.fastq import FastqAPI
 from cg.apps import hk
 from cg.apps.pipelines.fastqhandler import BaseFastqHandler
 from cg.store import Store
+from cg.utils.fastq import FastqAPI
 
 
 class AnalysisAPI:
