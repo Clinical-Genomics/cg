@@ -72,12 +72,7 @@ def test_already_stored_analysis(
 
 
 def test_store_analysis_generates_file_from_directory(
-    cli_runner,
-    balsamic_store_context,
-    balsamic_case,
-    config_file,
-    deliverables_file_directory,
-    mocker,
+    cli_runner, balsamic_store_context, config_file, deliverables_file_directory, mocker
 ):
     """Test store with analysis with meta data with one directory"""
 
@@ -86,6 +81,7 @@ def test_store_analysis_generates_file_from_directory(
     mocked_is_dir.return_value = True
     mock_make_archive = mocker.patch("shutil.make_archive")
     mock_make_archive.return_value = "file.tar.gz"
+    balsamic_case = balsamic_store_context["db"].families().first()
 
     # WHEN calling store with meta file
     result = cli_runner.invoke(

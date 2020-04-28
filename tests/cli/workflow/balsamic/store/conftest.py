@@ -48,12 +48,12 @@ class MockHouseKeeper(HousekeeperAPI):
         del tags, bundle, version
         return [MockFile()]
 
-    def add_bundle(self, data: dict):
+    def add_bundle(self, bundle_data: dict):
         """fake adding a bundle in housekeeper"""
 
-        if not self.bundle_data or self.bundle_data["name"] != data["name"]:
-            self.bundle_data = data
-            return MockBundle(data=data, name=self.bundle_name), MockVersion()
+        if not self.bundle_data or self.bundle_data["name"] != bundle_data["name"]:
+            self.bundle_data = bundle_data
+            return MockBundle(data=bundle_data, name=self.bundle_name), MockVersion()
 
         return None
 
@@ -98,8 +98,8 @@ class MockFile:
         self.full_path = path
 
 
-@pytest.fixture(scope="function")
-def balsamic_store(base_store: Store) -> Store:
+@pytest.fixture(scope="function", name="balsamic_store")
+def fixture_balsamic_store(base_store: Store) -> Store:
     """real store to be used in tests"""
     _store = base_store
 
@@ -142,8 +142,8 @@ def deliverables_file_tags():
     return "tests/fixtures/apps/balsamic/case/metadata_file_tags.yml"
 
 
-@pytest.fixture(scope="function")
-def balsamic_case(analysis_store) -> models.Family:
+@pytest.fixture(scope="function", name="balsamic_case")
+def fixture_balsamic_case(analysis_store) -> models.Family:
     """case with balsamic data_type"""
     return analysis_store.find_family(ensure_customer(analysis_store), "balsamic_case")
 
