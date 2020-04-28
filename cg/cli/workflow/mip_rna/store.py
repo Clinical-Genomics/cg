@@ -11,7 +11,7 @@ from cg.exc import (
     BundleAlreadyAddedError,
     PipelineUnknownError,
 )
-from cg.meta.store.base import gather_files_and_bundle_in_housekeeper
+from cg.meta.store.mip import gather_files_and_bundle_in_housekeeper
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
