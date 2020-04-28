@@ -26,11 +26,7 @@ def store(context):
     """Store results from MIP in housekeeper."""
     context.obj["db"] = Store(context.obj["database"])
     context.obj["hk_api"] = hk.HousekeeperAPI(context.obj)
-    context.obj["analysis_api"] = AnalysisAPI(
-        db=Store(context.obj["database"]),
-        hk_api=hk.HousekeeperAPI(context.obj),
-        fastq_api=fastq.FastqAPI(),
-    )
+    context.obj["analysis_api"] = AnalysisAPI()
 
 
 @store.command()
