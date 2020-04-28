@@ -10,7 +10,7 @@ from trailblazer.mip import files as mip_dna_files_api
 
 from cg.apps.madeline.api import MadelineAPI
 from cg.apps.mip_rna import files as mip_rna_files_api
-from cg.meta.store import mip_rna as store_mip_rna
+from cg.meta.store import mip as store_mip
 from cg.store import Store
 
 pytest_plugins = [
@@ -180,9 +180,8 @@ def files_data(files_raw):
         "qcmetrics": mip_dna_files_api.parse_qcmetrics(files_raw["qcmetrics"]),
         "rna_config": mip_dna_files_api.parse_config(files_raw["rna_config"]),
         "rna_sampleinfo": mip_rna_files_api.parse_sampleinfo_rna(files_raw["rna_sampleinfo"]),
-        "rna_config_store": store_mip_rna.parse_config(files_raw["rna_config_store"]),
-        "rna_sampleinfo_store": store_mip_rna.parse_sampleinfo(files_raw["rna_sampleinfo_store"]),
-        "rna_sampleinfo": mip_rna_files_api.parse_sampleinfo_rna(files_raw["rna_sampleinfo"]),
+        "rna_config_store": store_mip.parse_config(files_raw["rna_config_store"]),
+        "rna_sampleinfo_store": store_mip.parse_sampleinfo(files_raw["rna_sampleinfo_store"]),
     }
 
 
