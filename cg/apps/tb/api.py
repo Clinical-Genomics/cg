@@ -11,10 +11,8 @@ from trailblazer.store import Store, models
 from trailblazer.cli.utils import environ_email
 from trailblazer.mip import files, fastq, trending
 
-from .add import AddHandler
 
-
-class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
+class TrailblazerAPI(Store, fastq.FastqHandler):
     """Interface to Trailblazer for `cg`."""
 
     parse_sampleinfo = staticmethod(files.parse_sampleinfo)
