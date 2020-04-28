@@ -26,7 +26,7 @@ def store(context):
     context.obj["db"] = Store(context.obj["database"])
     context.obj["tb_api"] = tb.TrailblazerAPI(context.obj)
     context.obj["hk_api"] = hk.HousekeeperAPI(context.obj)
-    context.obj["analysis_api"] = AnalysisAPI(context.obj)
+    context.obj["analysis_api"] = AnalysisAPI()
 
 
 @store.command()
