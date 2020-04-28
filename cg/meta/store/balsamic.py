@@ -14,7 +14,7 @@ LOG = logging.getLogger(__name__)
 def gather_files_and_bundle_in_housekeeper(
     config_path, deliverables_file, hk_api, status, case_obj
 ):
-    """Function to gather files and bundle in housekeeper"""
+    """Function to create a bundle for an analysis in housekeeper"""
 
     bundle_data = _add_analysis(config_path, deliverables_file, case_obj)
 
@@ -59,6 +59,7 @@ def _create_analysis(bundle_data, case_obj, status, version_obj):
 
 
 def _reset_analysis_action(case_obj):
+    """Resets desired action on the case"""
     case_obj.action = None
 
 
@@ -125,4 +126,5 @@ def _get_files(deliverables_data: dict) -> list:
 
 
 def compress_directory(path):
+    """Compresses a directory and returns its compressed name"""
     return shutil.make_archive(path, "gztar", path, logger=LOG)
