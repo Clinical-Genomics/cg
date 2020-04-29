@@ -147,10 +147,10 @@ def test_is_bam_compression_possible(crunchy_config_dict, crunchy_test_dir):
     assert result
 
 
-def test_get_flag_path(crunchy_config_dict, crunchy_test_dir):
-    """Test get_flag_path"""
+def test_get_flag_path_bam(crunchy_config_dict, crunchy_test_dir):
+    """Test get_flag_path for a bam file"""
 
-    # GIVEM a bam_path
+    # GIVEN a bam_path
     crunchy_api = CrunchyAPI(crunchy_config_dict)
     bam_path = crunchy_test_dir / "file.bam"
 
@@ -159,6 +159,20 @@ def test_get_flag_path(crunchy_config_dict, crunchy_test_dir):
 
     # THEN this should replace current suffix with FLAG_PATH_SUFFIX
     assert flag_path.suffixes == [".crunchy", ".txt"]
+
+
+def test_get_flag_path_spring(crunchy_config_dict, crunchy_test_dir):
+    """Test get_flag_path for a spring file"""
+
+    # GIVEN a spring path
+    crunchy_api = CrunchyAPI(crunchy_config_dict)
+    spring_path = crunchy_test_dir / "file.spring"
+
+    # WHEN creating flag path
+    flag_path = crunchy_api.get_flag_path(file_path=spring_path)
+
+    # THEN this file should have a json prefix
+    assert flag_path.suffixes == [".json"]
 
 
 def test_get_index_path(crunchy_config_dict, crunchy_test_dir):
@@ -257,7 +271,7 @@ def test_is_compression_done_no_flag_spring(
     spring_file = CrunchyAPI.get_spring_path_from_fastq(fastq=fastq_first)
     assert spring_file.exists()
     # GIVEN a non existing flag file
-    flag_file = CrunchyAPI.get_flag_path(file_path=fastq_first)
+    flag_file = CrunchyAPI.get_flag_path(file_path=spring_file)
     assert not flag_file.exists()
 
     # WHEN checking if spring compression is done
@@ -279,7 +293,7 @@ def test_is_compression_done_spring(crunchy_config_dict, compressed_fastqs):
     spring_file = CrunchyAPI.get_spring_path_from_fastq(fastq=fastq_first)
     assert spring_file.exists()
     # GIVEN a existing flag file
-    flag_file = CrunchyAPI.get_flag_path(file_path=fastq_first)
+    flag_file = CrunchyAPI.get_flag_path(file_path=spring_file)
     assert flag_file.exists()
 
     # WHEN checking if spring compression is done

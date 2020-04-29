@@ -183,17 +183,17 @@ class CompressAPI:
     ):
         """Compress fastq-files in given dictionary"""
         for sample_id, fastq_files in fastq_dict.items():
-            fastq_first_path = Path(fastq_files["fastq_first_file"].full_path)
-            fastq_second_path = Path(fastq_files["fastq_second_file"].full_path)
+            fastq_first = fastq_files["fastq_first_file"]
+            fastq_second = fastq_files["fastq_second_file"]
             LOG.info(
                 "Compressing %s and %s for sample %s into SPRING format",
-                fastq_first_path,
-                fastq_second_path,
+                fastq_first,
+                fastq_second,
                 sample_id,
             )
             self.crunchy_api.fastq_to_spring(
-                fastq_first_path=fastq_first_path,
-                fastq_second_path=fastq_second_path,
+                fastq_first=fastq_first,
+                fastq_second=fastq_second,
                 ntasks=ntasks,
                 mem=mem,
                 dry_run=dry_run,

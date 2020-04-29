@@ -112,7 +112,7 @@ def fastq(context, case_id, number_of_conversions, ntasks, mem, dry_run):
             first_fastq = sample_fastq_dict["fastq_first_file"]
             second_fastq = sample_fastq_dict["fastq_second_file"]
             spring_compression_done = crunchy_api.is_spring_compression_done(
-                fastq=first_fastq
+                first_fastq
             )
             if spring_compression_done:
                 LOG.warning(
@@ -122,7 +122,7 @@ def fastq(context, case_id, number_of_conversions, ntasks, mem, dry_run):
                 break
 
             spring_compression_pending = crunchy_api.is_spring_compression_pending(
-                fastq_first=first_fastq, fastq_second_path=second_fastq
+                first_fastq, second_fastq
             )
             if spring_compression_pending:
                 LOG.info("FASTQ to SPRING compression pending for %s", sample_id)

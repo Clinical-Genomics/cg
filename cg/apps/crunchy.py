@@ -61,6 +61,8 @@ samtools quickcheck {cram_path}
 touch {flag_path}
 rm {pending_path}"""
 
+######################################################################
+
 SBATCH_SPRING = """
 error() {{
     if [[ -e {spring_path} ]]
@@ -79,8 +81,7 @@ error() {{
 trap error ERR
 
 touch {pending_path}
-crunchy -t 12 compress fastq -f {fastq_first} -s {fastq_second} -o {spring_path} --check-integrity
-touch {flag_path}
+crunchy -t 12 compress fastq -f {fastq_first} -s {fastq_second} -o {spring_path} --check-integrity --metadata-file
 rm {pending_path}"""
 
 FLAG_PATH_SUFFIX = ".crunchy.txt"
@@ -146,7 +147,7 @@ class CrunchyAPI:
         job_name = str(fastq_first.name).replace(
             FASTQ_FIRST_READ_SUFFIX, "_fastq_to_spring"
         )
-        flag_path = self.get_flag_path(file_path=fastq_first)
+        flag_path = self.get_flag_path(file_path=spring_path)
         pending_path = self.get_pending_path(file_path=fastq_first)
         log_dir = spring_path.parent
 
@@ -231,7 +232,7 @@ class CrunchyAPI:
             LOG.info("No SPRING file for %s and %s", fastq_first, fastq_second)
             return False
 
-        flag_path = self.get_flag_path(file_path=fastq_first)
+        flag_path = self.get_flag_path(file_path=spring_path)
         if not flag_path.exists():
             LOG.info(
                 "No %s file for %s and %s", FLAG_PATH_SUFFIX, fastq_first, fastq_second,
@@ -249,16 +250,12 @@ class CrunchyAPI:
 
     @staticmethod
     def get_flag_path(file_path):
-        """Get path to 'finished' flag"""
+        """Get path to 'finished' flag.
+        When compressing fastq this means that a .json metadata file has been created
+        """
+        if file_path.suffix == ".spring":
+            return file_path.with_suffix("").with_suffix(".json")
 
-        if str(file_path).endswith(FASTQ_FIRST_READ_SUFFIX):
-            return Path(
-                str(file_path).replace(FASTQ_FIRST_READ_SUFFIX, FLAG_PATH_SUFFIX)
-            )
-        if str(file_path).endswith(FASTQ_SECOND_READ_SUFFIX):
-            return Path(
-                str(file_path).replace(FASTQ_SECOND_READ_SUFFIX, FLAG_PATH_SUFFIX)
-            )
         return file_path.with_suffix(FLAG_PATH_SUFFIX)
 
     @staticmethod
