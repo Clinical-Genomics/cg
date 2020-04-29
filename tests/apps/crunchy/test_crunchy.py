@@ -17,7 +17,9 @@ def test_bam_to_cram(crunchy_config_dict, sbatch_content, bam_path, mocker):
 
     # THEN _submit_sbatch method is called with expected sbatch-content
 
-    mocker_submit_sbatch.assert_called_with(sbatch_content=sbatch_content, dry_run=False)
+    mocker_submit_sbatch.assert_called_with(
+        sbatch_content=sbatch_content, dry_run=False
+    )
 
 
 def test_is_cram_compression_done_no_cram(crunchy_config_dict, bam_path):
@@ -32,7 +34,9 @@ def test_is_cram_compression_done_no_cram(crunchy_config_dict, bam_path):
     assert not result
 
 
-def test_is_cram_compression_done_no_crai(crunchy_config_dict, compressed_bam_without_crai):
+def test_is_cram_compression_done_no_crai(
+    crunchy_config_dict, compressed_bam_without_crai
+):
     """test cram_compression_done without created CRAI file"""
     # GIVEN a crunchy-api, and a bam_path
     crunchy_api = CrunchyAPI(crunchy_config_dict)
@@ -45,7 +49,9 @@ def test_is_cram_compression_done_no_crai(crunchy_config_dict, compressed_bam_wi
     assert not result
 
 
-def test_is_cram_compression_done_no_flag(crunchy_config_dict, compressed_bam_without_flag):
+def test_is_cram_compression_done_no_flag(
+    crunchy_config_dict, compressed_bam_without_flag
+):
     """test cram_compression_done without created flag file"""
     # GIVEN a crunchy-api, and a bam_path, cram_path, crai_path
     crunchy_api = CrunchyAPI(crunchy_config_dict)
@@ -194,7 +200,9 @@ def test_get_cram_path_from_bam(crunchy_config_dict, crunchy_test_dir):
     assert cram_path.suffix == CRAM_SUFFIX
 
 
-def test_fastq_to_spring(crunchy_config_dict, sbatch_content_spring, fastq_paths, mocker):
+def test_fastq_to_spring(
+    crunchy_config_dict, sbatch_content_spring, fastq_paths, mocker
+):
     """Test bam_to_cram method"""
     # GIVEN a crunchy-api, and fastq paths
     mocker_submit_sbatch = mocker.patch.object(CrunchyAPI, "_submit_sbatch")
@@ -212,7 +220,9 @@ def test_fastq_to_spring(crunchy_config_dict, sbatch_content_spring, fastq_paths
     )
 
     # THEN _submit_sbatch method is called with expected sbatch-content
-    mocker_submit_sbatch.assert_called_with(sbatch_content=sbatch_content_spring, dry_run=False)
+    mocker_submit_sbatch.assert_called_with(
+        sbatch_content=sbatch_content_spring, dry_run=False
+    )
 
 
 def test_is_compression_done_no_spring(crunchy_config_dict, existing_fastq_paths):
@@ -231,7 +241,9 @@ def test_is_compression_done_no_spring(crunchy_config_dict, existing_fastq_paths
     assert not result
 
 
-def test_is_compression_done_no_flag_spring(crunchy_config_dict, compressed_fastqs_without_flag):
+def test_is_compression_done_no_flag_spring(
+    crunchy_config_dict, compressed_fastqs_without_flag
+):
     """test cram_compression_done without created CRAM file"""
     # GIVEN a crunchy-api, and fastq paths
     crunchy_api = CrunchyAPI(crunchy_config_dict)
@@ -309,19 +321,3 @@ def test_is_fastq_compression_possible(crunchy_config_dict, existing_fastq_paths
 
     # THEN this will return True
     assert result
-
-
-def test_is_fastq_compression_not_possible(crunchy_config_dict, fastq_paths):
-    """Test is_fastq_compression_possible without existing fastq files"""
-    # GIVEN existing fastq files
-    crunchy_api = CrunchyAPI(crunchy_config_dict)
-
-    # WHEN calling test_fastq_compression_possible
-    fastq_first_path = fastq_paths["fastq_first_path"]
-    fastq_second_path = fastq_paths["fastq_second_path"]
-    result = crunchy_api.is_fastq_compression_possible(
-        fastq_first_path=fastq_first_path, fastq_second_path=fastq_second_path
-    )
-
-    # THEN this will return True
-    assert not result

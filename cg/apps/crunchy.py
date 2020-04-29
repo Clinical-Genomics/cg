@@ -89,7 +89,7 @@ PENDING_PATH_SUFFIX = ".crunchy.pending.txt"
 
 class CrunchyAPI:
     """
-        API for samtools
+        API for crunchy
     """
 
     def __init__(self, config: dict):
@@ -145,7 +145,9 @@ class CrunchyAPI:
         spring_path = self.get_spring_path_from_fastqs(
             fastq_first_path=fastq_first_path, fastq_second_path=fastq_second_path
         )
-        job_name = str(fastq_first_path.name).replace(FASTQ_FIRST_READ_SUFFIX, "_fastq_to_spring")
+        job_name = str(fastq_first_path.name).replace(
+            FASTQ_FIRST_READ_SUFFIX, "_fastq_to_spring"
+        )
         flag_path = self.get_flag_path(file_path=fastq_first_path)
         pending_path = self.get_pending_path(file_path=fastq_first_path)
         log_dir = spring_path.parent
@@ -222,7 +224,9 @@ class CrunchyAPI:
             return False
         return True
 
-    def is_spring_compression_done(self, fastq_first_path: Path, fastq_second_path: Path) -> bool:
+    def is_spring_compression_done(
+        self, fastq_first_path: Path, fastq_second_path: Path
+    ) -> bool:
         """Check if CRAM compression already done for BAM file"""
         spring_path = self.get_spring_path_from_fastqs(
             fastq_first_path=fastq_first_path, fastq_second_path=fastq_second_path
@@ -230,11 +234,16 @@ class CrunchyAPI:
         flag_path = self.get_flag_path(file_path=fastq_first_path)
 
         if not spring_path.exists():
-            LOG.info("No SPRING file for %s and %s", fastq_first_path, fastq_second_path)
+            LOG.info(
+                "No SPRING file for %s and %s", fastq_first_path, fastq_second_path
+            )
             return False
         if not flag_path.exists():
             LOG.info(
-                "No %s file for %s and %s", FLAG_PATH_SUFFIX, fastq_first_path, fastq_second_path
+                "No %s file for %s and %s",
+                FLAG_PATH_SUFFIX,
+                fastq_first_path,
+                fastq_second_path,
             )
             return False
         return True
@@ -246,7 +255,9 @@ class CrunchyAPI:
         pending_path = self.get_pending_path(file_path=fastq_first_path)
         if pending_path.exists():
             LOG.info(
-                "SPRING compression is pending for %s and %s", fastq_first_path, fastq_second_path
+                "SPRING compression is pending for %s and %s",
+                fastq_first_path,
+                fastq_second_path,
             )
             return True
         return False
@@ -255,12 +266,6 @@ class CrunchyAPI:
         self, fastq_first_path: Path, fastq_second_path: Path
     ) -> bool:
         """Check if it CRAM compression for BAM file is possible"""
-        if fastq_first_path is None or not fastq_first_path.exists():
-            LOG.warning("Could not find fastq %s", fastq_first_path)
-            return False
-        if fastq_second_path is None or not fastq_second_path.exists():
-            LOG.warning("Could not find fastq %s", fastq_second_path)
-            return False
         if self.is_spring_compression_done(
             fastq_first_path=fastq_first_path, fastq_second_path=fastq_second_path
         ):
@@ -277,18 +282,26 @@ class CrunchyAPI:
         """Get path to 'finished' flag"""
 
         if str(file_path).endswith(FASTQ_FIRST_READ_SUFFIX):
-            return Path(str(file_path).replace(FASTQ_FIRST_READ_SUFFIX, FLAG_PATH_SUFFIX))
+            return Path(
+                str(file_path).replace(FASTQ_FIRST_READ_SUFFIX, FLAG_PATH_SUFFIX)
+            )
         if str(file_path).endswith(FASTQ_SECOND_READ_SUFFIX):
-            return Path(str(file_path).replace(FASTQ_SECOND_READ_SUFFIX, FLAG_PATH_SUFFIX))
+            return Path(
+                str(file_path).replace(FASTQ_SECOND_READ_SUFFIX, FLAG_PATH_SUFFIX)
+            )
         return file_path.with_suffix(FLAG_PATH_SUFFIX)
 
     @staticmethod
     def get_pending_path(file_path):
         """Gives path to pending-flag path"""
         if str(file_path).endswith(FASTQ_FIRST_READ_SUFFIX):
-            return Path(str(file_path).replace(FASTQ_FIRST_READ_SUFFIX, PENDING_PATH_SUFFIX))
+            return Path(
+                str(file_path).replace(FASTQ_FIRST_READ_SUFFIX, PENDING_PATH_SUFFIX)
+            )
         if str(file_path).endswith(FASTQ_SECOND_READ_SUFFIX):
-            return Path(str(file_path).replace(FASTQ_SECOND_READ_SUFFIX, PENDING_PATH_SUFFIX))
+            return Path(
+                str(file_path).replace(FASTQ_SECOND_READ_SUFFIX, PENDING_PATH_SUFFIX)
+            )
         return file_path.with_suffix(PENDING_PATH_SUFFIX)
 
     @staticmethod
