@@ -125,15 +125,45 @@ def test_remove_bams(compress_api, bam_dict, mock_compress_func):
 #######
 
 
-def test_get_fastq_files(compress_api, fastq_files_hk_list, mocker):
-    """test get_bam_files method"""
+def test_get_fastq_files_no_version(compress_api):
+    """test get_fastq_files method when no version is found in hk"""
 
-    # GIVEN a case id
+    # GIVEN a sample id
+    sample_id = "test_sample"
+    # GIVEN a hk_api that returns None for final version
+    compress_api.hk_api._last_version = None
+
+    # WHEN fetching fastq files
+    fastq_dict = compress_api.get_fastq_files(sample_id=sample_id)
+
+    # THEN assert that None was returned since there was no version object found
+    assert fastq_dict is None
+
+
+def test_get_fastq_files_no_files(compress_api, mocker):
+    """test get_fastq_files method when no files are found"""
+
+    # GIVEN a sample_id
+    sample_id = "test_sample"
+    # GIVEN a hk that returns an empty list of files
+    mocker.patch.object(HousekeeperAPI, "get_files", return_value=[])
+
+    # WHEN fetching the fastq files
+    fastq_dict = compress_api.get_fastq_files(sample_id=sample_id)
+
+    # THEN assert that None is returned since there where not two files
+    assert fastq_dict is None
+
+
+def test_get_fastq_files(compress_api, fastq_files_hk_list, mocker):
+    """test get_fastq_files method"""
+
+    # GIVEN a sample_id
     sample_id = "test_sample"
     mocker.patch.object(HousekeeperAPI, "get_files", return_value=fastq_files_hk_list)
 
-    # WHEN getting bam-files
+    # WHEN fetching the fastq files
     fastq_dict = compress_api.get_fastq_files(sample_id=sample_id)
 
-    # THEN the bam-files for the samples will be in the dictionary
+    # THEN the fastq files will be in the dictionary
     assert set(fastq_dict.keys()) == set(["fastq_first_file", "fastq_second_file"])
