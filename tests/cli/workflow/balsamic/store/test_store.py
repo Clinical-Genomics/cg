@@ -39,6 +39,26 @@ def test_store_analysis_with_ok_file_parameter(
     assert result.exit_code == EXIT_SUCCESS
 
 
+def test_store_analysis_creates_analysis_on_case(
+    cli_runner, balsamic_store_context, balsamic_case, config_file, deliverables_file
+):
+    """Test store with analysis file on a case creates analysis on that case"""
+
+    # GIVEN a meta file for a balsamic analysis and a cases lacking analysis
+    assert not balsamic_case.analyses
+
+    # WHEN calling store with meta file
+    result = cli_runner.invoke(
+        analysis,
+        [balsamic_case.internal_id, "-c", config_file, "-d", deliverables_file],
+        obj=balsamic_store_context,
+        catch_exceptions=False,
+    )
+
+    # THEN an analysis should have been created on that case
+    assert balsamic_case.analyses
+
+
 def test_already_stored_analysis(
     cli_runner, balsamic_store_context, balsamic_case, config_file, deliverables_file
 ):
