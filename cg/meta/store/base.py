@@ -39,17 +39,36 @@ def reset_case_action(case_obj):
 def get_files(deliverables: dict, pipeline: list) -> list:
     """Get all deliverable files from the pipeline"""
 
-    data = [
+    data = _get_files_non_index(deliverables, pipeline)
+    data_index = _get_files_index(deliverables, pipeline)
+
+    data.extend(data_index)
+
+    return data
+
+
+def _get_files_non_index(deliverables: dict, pipeline: list) -> list:
+    """ Get all files that are not index files from the deliverables file """
+    return [
         {
             "path": file["path"],
-            "path_index": file["path_index"],
             "tags": get_tags(file, pipeline),
             "archive": False,
         }
         for file in deliverables["files"]
     ]
 
-    return data
+
+def _get_files_index(deliverables: dict, pipeline: list) -> list:
+    """ Get all index files from the deliverables file """
+    return [
+        {
+            "path": file["path_index"],
+            "tags": get_tags(file, pipeline),
+            "archive": False,
+        }
+        for file in deliverables["files"] if file["path_index"]
+    ]
 
 
 def get_tags(file: dict, pipeline_tags: list) -> list:
