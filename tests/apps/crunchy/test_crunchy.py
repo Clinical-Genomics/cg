@@ -3,7 +3,8 @@
 from pathlib import Path
 
 from cg.apps.crunchy import CrunchyAPI
-from cg.constants import CRAM_SUFFIX
+from cg.constants import (CRAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX,
+                          FASTQ_SECOND_READ_SUFFIX)
 
 
 def test_bam_to_cram(crunchy_config_dict, sbatch_content, bam_path, mocker):
@@ -275,6 +276,32 @@ def test_is_compression_done_spring(crunchy_config_dict, compressed_fastqs):
     assert result
 
 
+def test_get_spring_path_from_fastq():
+    """Test to get a spring path"""
+    # GIVEN a fastq path for a read 1 in pair
+    ind_id = "ind1"
+    fastq = Path("".join([ind_id, FASTQ_FIRST_READ_SUFFIX]))
+
+    # WHEN fetching the spring path
+    spring_path = CrunchyAPI.get_spring_path_from_fastq(fastq)
+
+    # THEN check that the correct path was returned
+    assert spring_path == Path(ind_id).with_suffix(".spring")
+
+
+def test_get_spring_path_from_second_fastq():
+    """Test to get a spring path"""
+    # GIVEN a fastq path for a read 2 in pair
+    ind_id = "ind1"
+    fastq = Path("".join([ind_id, FASTQ_SECOND_READ_SUFFIX]))
+
+    # WHEN fetching the spring path
+    spring_path = CrunchyAPI.get_spring_path_from_fastq(fastq)
+
+    # THEN check that the correct path was returned
+    assert spring_path == Path(ind_id).with_suffix(".spring")
+
+
 def test_is_not_pending(crunchy_config_dict, fastq_paths):
     """test cram_compression_done without created CRAM file"""
     # GIVEN a crunchy-api, and fastq files
@@ -304,20 +331,4 @@ def test_is_pending(crunchy_config_dict, compressed_fastqs_pending):
     )
 
     # THEN result should be True
-    assert result
-
-
-def test_is_fastq_compression_possible(crunchy_config_dict, existing_fastq_paths):
-    """Test is_fastq_compression_possible with existing fastq files"""
-    # GIVEN existing fastq files
-    crunchy_api = CrunchyAPI(crunchy_config_dict)
-
-    # WHEN calling test_fastq_compression_possible
-    fastq_first_path = existing_fastq_paths["fastq_first_path"]
-    fastq_second_path = existing_fastq_paths["fastq_second_path"]
-    result = crunchy_api.is_fastq_compression_possible(
-        fastq_first_path=fastq_first_path, fastq_second_path=fastq_second_path
-    )
-
-    # THEN this will return True
     assert result

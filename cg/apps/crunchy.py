@@ -224,26 +224,18 @@ class CrunchyAPI:
             return False
         return True
 
-    def is_spring_compression_done(
-        self, fastq_first_path: Path, fastq_second_path: Path
-    ) -> bool:
-        """Check if CRAM compression already done for BAM file"""
-        spring_path = self.get_spring_path_from_fastqs(
-            fastq_first_path=fastq_first_path, fastq_second_path=fastq_second_path
-        )
-        flag_path = self.get_flag_path(file_path=fastq_first_path)
+    def is_spring_compression_done(self, fastq_first: Path, fastq_second: Path) -> bool:
+        """Check if spring compression if finished"""
+        spring_path = self.get_spring_path_from_fastq(fastq=fastq_first)
 
         if not spring_path.exists():
-            LOG.info(
-                "No SPRING file for %s and %s", fastq_first_path, fastq_second_path
-            )
+            LOG.info("No SPRING file for %s and %s", fastq_first, fastq_second)
             return False
+
+        flag_path = self.get_flag_path(file_path=fastq_first)
         if not flag_path.exists():
             LOG.info(
-                "No %s file for %s and %s",
-                FLAG_PATH_SUFFIX,
-                fastq_first_path,
-                fastq_second_path,
+                "No %s file for %s and %s", FLAG_PATH_SUFFIX, fastq_first, fastq_second,
             )
             return False
         return True
@@ -261,21 +253,6 @@ class CrunchyAPI:
             )
             return True
         return False
-
-    def is_fastq_compression_possible(
-        self, fastq_first_path: Path, fastq_second_path: Path
-    ) -> bool:
-        """Check if it CRAM compression for BAM file is possible"""
-        if self.is_spring_compression_done(
-            fastq_first_path=fastq_first_path, fastq_second_path=fastq_second_path
-        ):
-            LOG.info(
-                "SPRING compression already exists for %s and %s",
-                fastq_first_path,
-                fastq_second_path,
-            )
-            return False
-        return True
 
     @staticmethod
     def get_flag_path(file_path):
@@ -332,23 +309,13 @@ class CrunchyAPI:
         return cram_path
 
     @staticmethod
-    def get_spring_path_from_fastqs(
-        fastq_first_path: Path, fastq_second_path: Path
-    ) -> Path:
-        """ GET corresponding SPRING file path from paired FASTQ file paths"""
-        if not str(fastq_first_path).endswith(FASTQ_FIRST_READ_SUFFIX):
-            LOG.error(
-                "%s does not end with %s", fastq_first_path, FASTQ_FIRST_READ_SUFFIX
-            )
-            raise ValueError
-        if not str(fastq_second_path).endswith(FASTQ_SECOND_READ_SUFFIX):
-            LOG.error(
-                "%s does not end with %s", fastq_second_path, FASTQ_SECOND_READ_SUFFIX
-            )
-            raise ValueError
-        spring_path = Path(
-            str(fastq_first_path).replace(FASTQ_FIRST_READ_SUFFIX, SPRING_SUFFIX)
-        )
+    def get_spring_path_from_fastq(fastq: Path) -> Path:
+        """ GET corresponding SPRING file path from a FASTQ file"""
+        suffix = FASTQ_FIRST_READ_SUFFIX
+        if FASTQ_SECOND_READ_SUFFIX in str(fastq):
+            suffix = FASTQ_SECOND_READ_SUFFIX
+
+        spring_path = Path(str(fastq).replace(suffix, "")).with_suffix(SPRING_SUFFIX)
         return spring_path
 
     @staticmethod

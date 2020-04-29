@@ -4,7 +4,6 @@
 
 import logging
 import os
-from copy import deepcopy
 from pathlib import Path
 
 from cg.apps import crunchy, hk, scoutapi
@@ -33,11 +32,13 @@ class CompressAPI:
         """Get number of links to path"""
         return os.stat(file_link).st_nlink
 
-    def get_bam_files(self, case_id: str):
-        """Get bam-files that can be compressed for a case
-            Returns:
-                bam_dict (dict): for each sample in case, give file-object
-                    for .bam and .bai files"""
+    def get_bam_files(self, case_id: str) -> dict:
+        """
+        Get bam-files that can be compressed for a case
+
+        Returns:
+            bam_dict (dict): for each sample in case, give file-object for .bam and .bai files
+        """
 
         scout_cases = self.scout_api.get_cases(case_id=case_id)
         if not scout_cases:
@@ -99,50 +100,72 @@ class CompressAPI:
 
     def get_fastq_files(self, sample_id: str) -> dict:
         """Get FASTQ files for sample"""
-        last_version = self.hk_api.last_version(bundle=sample_id)
-        if not last_version:
+        hk_version = self.hk_api.last_version(bundle=sample_id)
+        if not hk_version:
+            LOG.warning("No bundle found for sample %s in housekeeper", sample_id)
             return None
-        hk_files = [
-            hk_file
-            for hk_file in self.hk_api.get_files(
-                bundle=sample_id, tags=["fastq"], version=last_version.id
-            )
-        ]
+
+        # hk api returns an iterable of file objects
+        _hk_files = self.hk_api.get_files(
+            bundle=sample_id, tags=["fastq"], version=hk_version.id
+        )
+        hk_files = [Path(fastq_file.full_path) for fastq_file in _hk_files]
         if len(hk_files) != 2:
-            LOG.info("Must be two fastq files")
+            LOG.warning("There has to be a pair of fastq files")
             return None
+
         fastq_dict = self._sort_fastqs(fastq_files=hk_files)
         if not fastq_dict:
             LOG.info("Could not sort FASTQ files for %s", sample_id)
             return None
+
         return fastq_dict
 
     def _sort_fastqs(self, fastq_files: list) -> dict:
-        """ Sort list of FASTQ files into correct read pair"""
+        """ Sort list of FASTQ files into correct read pair
+
+        Args:
+            fastq_files(list(Path))
+
+        Returns:
+            fastq_dict(dict): {"fastq_first_file": Path(file), "fastq_second_file": Path(file)}
+        """
         first_fastq_key = "fastq_first_file"
         second_fastq_key = "fastq_second_file"
         fastq_dict = dict()
         for fastq_file in fastq_files:
-            fastq_path = Path(fastq_file.full_path)
-            if not fastq_path.exists():
-                LOG.info("%s does not exist", fastq_path)
+            if not fastq_file.exists():
+                LOG.info("%s does not exist", fastq_file)
                 return None
-            if self.get_nlinks(file_link=fastq_path) > 1:
-                LOG.info("More than 1 inode to same file for %s", fastq_path)
+            if self.get_nlinks(file_link=fastq_file) > 1:
+                LOG.info("More than 1 inode to same file for %s", fastq_file)
                 return None
-            if fastq_file.full_path.endswith(FASTQ_FIRST_READ_SUFFIX):
+
+            if str(fastq_file).endswith(FASTQ_FIRST_READ_SUFFIX):
                 fastq_dict[first_fastq_key] = fastq_file
-            if fastq_file.full_path.endswith(FASTQ_SECOND_READ_SUFFIX):
+            if str(fastq_file).endswith(FASTQ_SECOND_READ_SUFFIX):
                 fastq_dict[second_fastq_key] = fastq_file
-        if set(fastq_dict.keys()) != {first_fastq_key, second_fastq_key}:
-            LOG.info("Could not find pared fastq files")
+
+        if len(fastq_dict) != 2:
+            LOG.warning("Could not find paired fastq files")
             return None
-        first_prefix = fastq_dict[first_fastq_key].full_path.replace(FASTQ_FIRST_READ_SUFFIX, "")
-        second_prefix = fastq_dict[second_fastq_key].full_path.replace(FASTQ_SECOND_READ_SUFFIX, "")
-        if first_prefix != second_prefix:
-            LOG.info("FASTQ files does not have matching preffix")
+
+        if not self.check_prefixes(
+            fastq_dict[first_fastq_key], fastq_dict[second_fastq_key]
+        ):
+            LOG.info("FASTQ files does not have matching prefix")
             return None
+
         return fastq_dict
+
+    @staticmethod
+    def check_prefixes(first_fastq: Path, second_fastq: Path) -> bool:
+        """Check if two files belong to the same read pair"""
+        first_prefix = str(first_fastq.absolute()).replace(FASTQ_FIRST_READ_SUFFIX, "")
+        second_prefix = str(second_fastq.absolute()).replace(
+            FASTQ_SECOND_READ_SUFFIX, ""
+        )
+        return first_prefix == second_prefix
 
     def compress_case_bams(
         self, bam_dict: dict, ntasks: int, mem: int, dry_run: bool = False
@@ -155,7 +178,9 @@ class CompressAPI:
                 bam_path=bam_path, ntasks=ntasks, mem=mem, dry_run=dry_run
             )
 
-    def compress_case_fastqs(self, fastq_dict: dict, ntasks: int, mem: int, dry_run: bool = False):
+    def compress_case_fastqs(
+        self, fastq_dict: dict, ntasks: int, mem: int, dry_run: bool = False
+    ):
         """Compress fastq-files in given dictionary"""
         for sample_id, fastq_files in fastq_dict.items():
             fastq_first_path = Path(fastq_files["fastq_first_file"].full_path)

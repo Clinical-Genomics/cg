@@ -4,10 +4,9 @@ from pathlib import Path
 
 import click
 
-from cg.apps import hk, scoutapi, crunchy
+from cg.apps import crunchy, hk, scoutapi
 from cg.meta.compress import CompressAPI
 from cg.store import Store
-
 
 LOG = logging.getLogger(__name__)
 
@@ -17,9 +16,16 @@ LOG = logging.getLogger(__name__)
 def compress(context):
     """Compress files"""
     context.obj["db"] = Store(context.obj["database"])
-    context.obj["hk"] = hk.HousekeeperAPI(context.obj)
-    context.obj["scout"] = scoutapi.ScoutAPI(context.obj)
-    context.obj["crunchy"] = crunchy.CrunchyAPI(context.obj)
+    hk_api = hk.HousekeeperAPI(context.obj)
+    context.obj["hk"] = hk_api
+    scout_api = scoutapi.ScoutAPI(context.obj)
+    context.obj["scout"] = scout_api
+    crunchy_api = crunchy.CrunchyAPI(context.obj)
+    context.obj["crunchy"] = crunchy_api
+    compress_api = CompressAPI(
+        hk_api=hk_api, crunchy_api=crunchy_api, scout_api=scout_api
+    )
+    context.obj["compress"] = compress_api
 
 
 @compress.command()
@@ -32,9 +38,7 @@ def compress(context):
 def bam(context, case_id, number_of_conversions, ntasks, mem, dry_run):
     """Find cases with BAM files and compress into CRAM"""
 
-    compress_api = CompressAPI(
-        hk_api=context.obj["hk"], crunchy_api=context.obj["crunchy"], scout_api=context.obj["scout"]
-    )
+    compress_api = context.obj["compress"]
     conversion_count = 0
     if case_id:
         cases = [context.obj["db"].family(case_id)]
@@ -53,7 +57,9 @@ def bam(context, case_id, number_of_conversions, ntasks, mem, dry_run):
         compression_is_pending = False
         for sample, bam_files in bam_dict.items():
             bam_path = Path(bam_files["bam"].full_path)
-            if not context.obj["crunchy"].is_bam_compression_possible(bam_path=bam_path):
+            if not context.obj["crunchy"].is_bam_compression_possible(
+                bam_path=bam_path
+            ):
                 LOG.info("BAM to CRAM compression not possible for %s", sample)
                 case_has_bam_file = False
                 break
@@ -79,9 +85,7 @@ def bam(context, case_id, number_of_conversions, ntasks, mem, dry_run):
 @click.pass_context
 def fastq(context, case_id, number_of_conversions, ntasks, mem, dry_run):
     """ Find cases with FASTQ files and compress into SPRING """
-    compress_api = CompressAPI(
-        hk_api=context.obj["hk"], crunchy_api=context.obj["crunchy"], scout_api=context.obj["scout"]
-    )
+    compress_api = context.obj["compress"]
     conversion_count = 0
     if case_id:
         cases = [context.obj["db"].family(case_id)]
@@ -103,16 +107,21 @@ def fastq(context, case_id, number_of_conversions, ntasks, mem, dry_run):
                 LOG.info("Could not find FASTQ files for %s", sample_id)
                 case_has_fastq_files = False
                 break
-            if not context.obj["crunchy"].is_fastq_compression_possible(
-                fastq_first_path=Path(sample_fastq_dict["fastq_first_file"].full_path),
-                fastq_second_path=Path(sample_fastq_dict["fastq_second_file"].full_path),
-            ):
-                LOG.info("FASTQ to SPRING compression not possible for %s", sample_id)
+
+            spring_compression_done = context.obj["crunchy"].is_spring_compression_done(
+                fastq_first=sample_fastq_dict["fastq_first_file"]),
+                fastq_second=sample_fastq_dict["fastq_second_file"]
+                )
+            if spring_compression_done:
+                LOG.warning("FASTQ to SPRING compression already done for %s", sample_id)
                 case_has_fastq_files = False
                 break
+
             if context.obj["crunchy"].is_spring_compression_pending(
                 fastq_first_path=Path(sample_fastq_dict["fastq_first_file"].full_path),
-                fastq_second_path=Path(sample_fastq_dict["fastq_second_file"].full_path),
+                fastq_second_path=Path(
+                    sample_fastq_dict["fastq_second_file"].full_path
+                ),
             ):
                 LOG.info("FASTQ to SPRING compression pending for %s", sample_id)
                 compression_is_pending = True
@@ -141,7 +150,9 @@ def clean_bam(context, case_id, dry_run):
     """Remove compressed BAM files, and update links in scout and housekeeper
        to CRAM files"""
     compress_api = CompressAPI(
-        hk_api=context.obj["hk"], crunchy_api=context.obj["crunchy"], scout_api=context.obj["scout"]
+        hk_api=context.obj["hk"],
+        crunchy_api=context.obj["crunchy"],
+        scout_api=context.obj["scout"],
     )
     if case_id:
         cases = [context.obj["db"].family(case_id)]
