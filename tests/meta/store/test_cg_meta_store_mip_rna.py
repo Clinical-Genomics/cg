@@ -4,7 +4,7 @@ import pytest
 
 from snapshottest import Snapshot
 
-import cg.meta.store.mip_rna as mip_rna
+import cg.meta.store.mip as store_mip
 from cg.exc import (
     AnalysisNotFinishedError,
     BundleAlreadyAddedError,
@@ -13,7 +13,7 @@ from cg.exc import (
 
 @mock.patch("cg.store.Store")
 @mock.patch("cg.apps.hk.HousekeeperAPI")
-@mock.patch("cg.meta.store.mip_rna.add_analysis")
+@mock.patch("cg.meta.store.mip.add_analysis")
 def test_gather_files_and_bundle_in_hk_bundle_already_added(
     mock_add_analysis, mock_housekeeper, mock_store, config_stream, bundle_data
 ):
@@ -29,7 +29,9 @@ def test_gather_files_and_bundle_in_hk_bundle_already_added(
 
     # THEN the BundleAlreadyAddedError exception should be raised
     with pytest.raises(BundleAlreadyAddedError) as exc_info:
-        mip_rna.gather_files_and_bundle_in_housekeeper(mip_rna_config, mock_housekeeper, mock_store)
+        store_mip.gather_files_and_bundle_in_housekeeper(
+            mip_rna_config, mock_housekeeper, mock_store
+        )
 
     assert exc_info.value.message == "bundle already added"
 
@@ -38,8 +40,8 @@ def test_gather_files_and_bundle_in_hk_bundle_already_added(
 @mock.patch("housekeeper.store.models")
 @mock.patch("cg.apps.hk.HousekeeperAPI")
 @mock.patch("cg.meta.store.base.reset_case_action")
-@mock.patch("cg.meta.store.mip_rna.add_new_analysis")
-@mock.patch("cg.meta.store.mip_rna.add_analysis")
+@mock.patch("cg.meta.store.base.add_new_analysis")
+@mock.patch("cg.meta.store.mip.add_analysis")
 def test_gather_files_and_bundle_in_hk_bundle_new_analysis(
     mock_add_analysis,
     mock_add_new_analysis,
@@ -65,7 +67,7 @@ def test_gather_files_and_bundle_in_hk_bundle_new_analysis(
     mock_reset_case_action(mock_case_obj)
     mock_add_new_analysis.return_value = mock_cg_store.Analysis.return_value
 
-    mip_rna.gather_files_and_bundle_in_housekeeper(
+    store_mip.gather_files_and_bundle_in_housekeeper(
         mip_rna_config, mock_housekeeper_api, mock_cg_store
     )
 
@@ -76,9 +78,9 @@ def test_gather_files_and_bundle_in_hk_bundle_new_analysis(
     mock_housekeeper_api.add_commit.assert_called_with(mock_bundle, mock_version)
 
 
-@mock.patch("cg.meta.store.mip_rna.build_bundle")
-@mock.patch("cg.meta.store.mip_rna.parse_sampleinfo")
-@mock.patch("cg.meta.store.mip_rna.parse_config")
+@mock.patch("cg.meta.store.base.build_bundle")
+@mock.patch("cg.meta.store.mip.parse_sampleinfo")
+@mock.patch("cg.meta.store.mip.parse_config")
 def test_add_analysis_finished(
     mock_parse_config,
     mock_parse_sample,
@@ -99,7 +101,7 @@ def test_add_analysis_finished(
     mock_parse_config.return_value = config_data
     mock_parse_sample.return_value = sampleinfo_data
 
-    result = mip_rna.add_analysis(mip_rna_config)
+    result = store_mip.add_analysis(mip_rna_config)
 
     # THEN the function add_analysis should call the function build_bundle with the correct
     # parameters and return a new bundle
@@ -108,8 +110,8 @@ def test_add_analysis_finished(
     assert result == mock_build_bundle(config_data, sampleinfo_data, deliverables_raw)
 
 
-@mock.patch("cg.meta.store.mip_rna.parse_sampleinfo")
-@mock.patch("cg.meta.store.mip_rna.parse_config")
+@mock.patch("cg.meta.store.mip.parse_sampleinfo")
+@mock.patch("cg.meta.store.mip.parse_config")
 def test_add_analysis_not_finished(
     mock_parse_config, mock_parse_sample, config_stream, config_data, sampleinfo_data
 ):
@@ -127,39 +129,10 @@ def test_add_analysis_not_finished(
     # finished
 
     with pytest.raises(AnalysisNotFinishedError) as exc_info:
-        mip_rna.add_analysis(mip_rna_config)
+        store_mip.add_analysis(mip_rna_config)
 
     # THEN the correct exception should be raised
     assert exc_info.value.message == "analysis not finished"
-
-
-def test_build_bundle(
-    snapshot: Snapshot, config_data: dict, sampleinfo_data: dict, deliverables_raw: dict
-):
-    """
-        tests the function_build bundle against a snapshot
-    """
-    # GIVEN the MIP analysis config data, the sampleinfo data and the deliverables file
-
-    # WHEN building the bundle
-    mip_rna_bundle = mip_rna.build_bundle(config_data, sampleinfo_data, deliverables_raw)
-
-    # THEN the result should contain the data to be stored in Housekeeper
-    snapshot.assert_match(mip_rna_bundle)
-
-
-def test_get_files(snapshot: Snapshot, deliverables_raw: dict):
-    """
-        tests the function get_files against a snapshot
-    """
-    # GIVEN the MIP RNA analysis deliverables file
-    pipeline = "wts"
-
-    # WHEN getting the files used to build the bundle
-    mip_rna_files = mip_rna.get_files(deliverables_raw, pipeline)
-
-    # THEN the result should contain the data to be stored in Housekeeper
-    snapshot.assert_match(mip_rna_files)
 
 
 def test_parse_config(snapshot: Snapshot, config_raw: dict):
@@ -169,7 +142,7 @@ def test_parse_config(snapshot: Snapshot, config_raw: dict):
     # GIVEN the raw MIP analysis config file
 
     # WHEN getting the files used to build the bundle
-    mip_rna_parse_config = mip_rna.parse_config(config_raw)
+    mip_rna_parse_config = store_mip.parse_config(config_raw)
 
     # THEN the result should contain the data to be stored in Housekeeper
     snapshot.assert_match(mip_rna_parse_config)
@@ -184,7 +157,7 @@ def test_parse_sampleinfo_data(snapshot: Snapshot, files_raw):
     rna_sampleinfo = files_raw["rna_sampleinfo"]
 
     # WHEN getting the smaple info used to build the bundle
-    mip_rna_parse_sampleinfo = mip_rna.parse_sampleinfo(rna_sampleinfo)
+    mip_rna_parse_sampleinfo = store_mip.parse_sampleinfo(rna_sampleinfo)
 
     # THEN the result should contain the data to be stored in Housekeeper
     snapshot.assert_match(mip_rna_parse_sampleinfo)
