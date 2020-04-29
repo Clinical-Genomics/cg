@@ -40,7 +40,12 @@ def get_files(deliverables: dict, pipeline: list) -> list:
     """Get all deliverable files from the pipeline"""
 
     data = [
-        {"path": file["path"], "tags": get_tags(file, pipeline), "archive": False}
+        {
+            "path": file["path"],
+            "path_index": file["path_index"],
+            "tags": get_tags(file, pipeline),
+            "archive": False,
+        }
         for file in deliverables["files"]
     ]
 
