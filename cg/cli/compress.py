@@ -86,6 +86,7 @@ def bam(context, case_id, number_of_conversions, ntasks, mem, dry_run):
 def fastq(context, case_id, number_of_conversions, ntasks, mem, dry_run):
     """ Find cases with FASTQ files and compress into SPRING """
     compress_api = context.obj["compress"]
+    crunchy_api = context.obj["crunchy"]
     conversion_count = 0
     if case_id:
         cases = [context.obj["db"].family(case_id)]
@@ -108,21 +109,22 @@ def fastq(context, case_id, number_of_conversions, ntasks, mem, dry_run):
                 case_has_fastq_files = False
                 break
 
-            spring_compression_done = context.obj["crunchy"].is_spring_compression_done(
-                fastq_first=sample_fastq_dict["fastq_first_file"]),
-                fastq_second=sample_fastq_dict["fastq_second_file"]
-                )
+            first_fastq = sample_fastq_dict["fastq_first_file"]
+            second_fastq = sample_fastq_dict["fastq_second_file"]
+            spring_compression_done = crunchy_api.is_spring_compression_done(
+                fastq=first_fastq
+            )
             if spring_compression_done:
-                LOG.warning("FASTQ to SPRING compression already done for %s", sample_id)
+                LOG.warning(
+                    "FASTQ to SPRING compression already done for %s", sample_id
+                )
                 case_has_fastq_files = False
                 break
 
-            if context.obj["crunchy"].is_spring_compression_pending(
-                fastq_first_path=Path(sample_fastq_dict["fastq_first_file"].full_path),
-                fastq_second_path=Path(
-                    sample_fastq_dict["fastq_second_file"].full_path
-                ),
-            ):
+            spring_compression_pending = crunchy_api.is_spring_compression_pending(
+                fastq_first=first_fastq, fastq_second_path=second_fastq
+            )
+            if spring_compression_pending:
                 LOG.info("FASTQ to SPRING compression pending for %s", sample_id)
                 compression_is_pending = True
                 break

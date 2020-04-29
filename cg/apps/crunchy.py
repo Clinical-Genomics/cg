@@ -133,23 +133,21 @@ class CrunchyAPI:
 
     def fastq_to_spring(
         self,
-        fastq_first_path: Path,
-        fastq_second_path: Path,
+        fastq_first: Path,
+        fastq_second: Path,
         ntasks: int,
         mem: int,
         dry_run: bool = False,
     ):
         """
-            Compress FASTQ files into SPRING
+            Compress FASTQ files into SPRING by sending to sbatch SLURM
         """
-        spring_path = self.get_spring_path_from_fastqs(
-            fastq_first_path=fastq_first_path, fastq_second_path=fastq_second_path
-        )
-        job_name = str(fastq_first_path.name).replace(
+        spring_path = self.get_spring_path_from_fastq(fastq=fastq_first)
+        job_name = str(fastq_first.name).replace(
             FASTQ_FIRST_READ_SUFFIX, "_fastq_to_spring"
         )
-        flag_path = self.get_flag_path(file_path=fastq_first_path)
-        pending_path = self.get_pending_path(file_path=fastq_first_path)
+        flag_path = self.get_flag_path(file_path=fastq_first)
+        pending_path = self.get_pending_path(file_path=fastq_first)
         log_dir = spring_path.parent
 
         sbatch_header = self._get_slurm_header(
@@ -163,8 +161,8 @@ class CrunchyAPI:
         )
 
         sbatch_body = self._get_slurm_fastq_to_spring(
-            fastq_first_path=fastq_first_path,
-            fastq_second_path=fastq_second_path,
+            fastq_first_path=fastq_first,
+            fastq_second_path=fastq_second,
             spring_path=spring_path,
             flag_path=flag_path,
             pending_path=pending_path,
@@ -175,17 +173,17 @@ class CrunchyAPI:
 
     def _submit_sbatch(self, sbatch_content: str, dry_run: bool = False):
         """Submit slurm job"""
-        if not dry_run:
-            with tempfile.NamedTemporaryFile(mode="w+t") as sbatch_file:
-
-                sbatch_file.write(sbatch_content)
-                sbatch_file.flush()
-                sbatch_parameters = [sbatch_file.name]
-                self.process.run_command(sbatch_parameters)
-                LOG.info(self.process.stderr)
-                LOG.info(self.process.stdout)
-        else:
+        if dry_run:
             LOG.info("Would submit following to slurm:\n\n%s", sbatch_content)
+            return
+        with tempfile.NamedTemporaryFile(mode="w+t") as sbatch_file:
+
+            sbatch_file.write(sbatch_content)
+            sbatch_file.flush()
+            sbatch_parameters = [sbatch_file.name]
+            self.process.run_command(sbatch_parameters)
+            LOG.info(self.process.stderr)
+            LOG.info(self.process.stdout)
 
     def is_cram_compression_done(self, bam_path: Path) -> bool:
         """Check if CRAM compression already done for BAM file"""
@@ -227,6 +225,7 @@ class CrunchyAPI:
     def is_spring_compression_done(self, fastq_first: Path, fastq_second: Path) -> bool:
         """Check if spring compression if finished"""
         spring_path = self.get_spring_path_from_fastq(fastq=fastq_first)
+        LOG.info("Check is spring file %s exists", spring_path)
 
         if not spring_path.exists():
             LOG.info("No SPRING file for %s and %s", fastq_first, fastq_second)
@@ -240,17 +239,11 @@ class CrunchyAPI:
             return False
         return True
 
-    def is_spring_compression_pending(
-        self, fastq_first_path: Path, fastq_second_path: Path
-    ) -> bool:
-        """Check if cram compression has started, but not yet finished"""
-        pending_path = self.get_pending_path(file_path=fastq_first_path)
+    def is_spring_compression_pending(self, fastq: Path) -> bool:
+        """Check if spring compression has started, but not yet finished"""
+        pending_path = self.get_pending_path(file_path=fastq)
         if pending_path.exists():
-            LOG.info(
-                "SPRING compression is pending for %s and %s",
-                fastq_first_path,
-                fastq_second_path,
-            )
+            LOG.info("SPRING compression is pending for %s", fastq)
             return True
         return False
 
@@ -269,7 +262,7 @@ class CrunchyAPI:
         return file_path.with_suffix(FLAG_PATH_SUFFIX)
 
     @staticmethod
-    def get_pending_path(file_path):
+    def get_pending_path(file_path: Path) -> Path:
         """Gives path to pending-flag path"""
         if str(file_path).endswith(FASTQ_FIRST_READ_SUFFIX):
             return Path(

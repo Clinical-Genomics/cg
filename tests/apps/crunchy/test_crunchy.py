@@ -204,17 +204,17 @@ def test_get_cram_path_from_bam(crunchy_config_dict, crunchy_test_dir):
 def test_fastq_to_spring(
     crunchy_config_dict, sbatch_content_spring, fastq_paths, mocker
 ):
-    """Test bam_to_cram method"""
+    """Test fastq_to_spring method"""
     # GIVEN a crunchy-api, and fastq paths
     mocker_submit_sbatch = mocker.patch.object(CrunchyAPI, "_submit_sbatch")
     crunchy_api = CrunchyAPI(crunchy_config_dict)
 
     # WHEN calling fastq_to_spring on fastq files
-    fastq_first_path = fastq_paths["fastq_first_path"]
-    fastq_second_path = fastq_paths["fastq_second_path"]
+    fastq_first = fastq_paths["fastq_first_path"]
+    fastq_second = fastq_paths["fastq_second_path"]
     crunchy_api.fastq_to_spring(
-        fastq_first_path=fastq_first_path,
-        fastq_second_path=fastq_second_path,
+        fastq_first=fastq_first,
+        fastq_second=fastq_second,
         dry_run=False,
         ntasks=1,
         mem=2,
@@ -227,15 +227,18 @@ def test_fastq_to_spring(
 
 
 def test_is_compression_done_no_spring(crunchy_config_dict, existing_fastq_paths):
-    """test cram_compression_done without created CRAM file"""
+    """test if compression is done when no spring file"""
     # GIVEN a crunchy-api, and fastq paths
     crunchy_api = CrunchyAPI(crunchy_config_dict)
+    fastq_first = existing_fastq_paths["fastq_first_path"]
+    fastq_second = existing_fastq_paths["fastq_second_path"]
+    # GIVEN no spring file exists
+    spring_file = CrunchyAPI.get_spring_path_from_fastq(fastq=fastq_first)
+    assert not spring_file.exists()
 
     # WHEN checking if spring compression is done
-    fastq_first_path = existing_fastq_paths["fastq_first_path"]
-    fastq_second_path = existing_fastq_paths["fastq_second_path"]
     result = crunchy_api.is_spring_compression_done(
-        fastq_first_path=fastq_first_path, fastq_second_path=fastq_second_path
+        fastq_first=fastq_first, fastq_second=fastq_second
     )
 
     # THEN result should be false
@@ -245,15 +248,21 @@ def test_is_compression_done_no_spring(crunchy_config_dict, existing_fastq_paths
 def test_is_compression_done_no_flag_spring(
     crunchy_config_dict, compressed_fastqs_without_flag
 ):
-    """test cram_compression_done without created CRAM file"""
+    """test if spring compression is done when no flag"""
     # GIVEN a crunchy-api, and fastq paths
     crunchy_api = CrunchyAPI(crunchy_config_dict)
+    fastq_first = compressed_fastqs_without_flag["fastq_first_path"]
+    fastq_second = compressed_fastqs_without_flag["fastq_second_path"]
+    # GIVEN a existing spring file
+    spring_file = CrunchyAPI.get_spring_path_from_fastq(fastq=fastq_first)
+    assert spring_file.exists()
+    # GIVEN a non existing flag file
+    flag_file = CrunchyAPI.get_flag_path(file_path=fastq_first)
+    assert not flag_file.exists()
 
     # WHEN checking if spring compression is done
-    fastq_first_path = compressed_fastqs_without_flag["fastq_first_path"]
-    fastq_second_path = compressed_fastqs_without_flag["fastq_second_path"]
     result = crunchy_api.is_spring_compression_done(
-        fastq_first_path=fastq_first_path, fastq_second_path=fastq_second_path
+        fastq_first=fastq_first, fastq_second=fastq_second
     )
 
     # THEN result should be false
@@ -261,15 +270,21 @@ def test_is_compression_done_no_flag_spring(
 
 
 def test_is_compression_done_spring(crunchy_config_dict, compressed_fastqs):
-    """test cram_compression_done without created CRAM file"""
+    """test if compression is done when spring file exists"""
     # GIVEN a crunchy-api, and fastq paths
     crunchy_api = CrunchyAPI(crunchy_config_dict)
+    fastq_first = compressed_fastqs["fastq_first_path"]
+    fastq_second = compressed_fastqs["fastq_second_path"]
+    # GIVEN a existing spring file
+    spring_file = CrunchyAPI.get_spring_path_from_fastq(fastq=fastq_first)
+    assert spring_file.exists()
+    # GIVEN a existing flag file
+    flag_file = CrunchyAPI.get_flag_path(file_path=fastq_first)
+    assert flag_file.exists()
 
     # WHEN checking if spring compression is done
-    fastq_first_path = compressed_fastqs["fastq_first_path"]
-    fastq_second_path = compressed_fastqs["fastq_second_path"]
     result = crunchy_api.is_spring_compression_done(
-        fastq_first_path=fastq_first_path, fastq_second_path=fastq_second_path
+        fastq_first=fastq_first, fastq_second=fastq_second
     )
 
     # THEN result should be True
@@ -290,7 +305,7 @@ def test_get_spring_path_from_fastq():
 
 
 def test_get_spring_path_from_second_fastq():
-    """Test to get a spring path"""
+    """Test to get a spring path from second read in pair"""
     # GIVEN a fastq path for a read 2 in pair
     ind_id = "ind1"
     fastq = Path("".join([ind_id, FASTQ_SECOND_READ_SUFFIX]))
@@ -303,32 +318,32 @@ def test_get_spring_path_from_second_fastq():
 
 
 def test_is_not_pending(crunchy_config_dict, fastq_paths):
-    """test cram_compression_done without created CRAM file"""
-    # GIVEN a crunchy-api, and fastq files
+    """test if spring compression is pending"""
+    # GIVEN a crunchy-api, and a fastq file
     crunchy_api = CrunchyAPI(crunchy_config_dict)
+    fastq_first = fastq_paths["fastq_first_path"]
+    # GIVEN a non existing pending flag
+    pending_path = crunchy_api.get_pending_path(file_path=fastq_first)
+    assert not pending_path.exists()
 
     # WHEN checking if spring compression is done
-    fastq_first_path = fastq_paths["fastq_first_path"]
-    fastq_second_path = fastq_paths["fastq_second_path"]
-    result = crunchy_api.is_spring_compression_pending(
-        fastq_first_path=fastq_first_path, fastq_second_path=fastq_second_path
-    )
+    result = crunchy_api.is_spring_compression_pending(fastq=fastq_first)
 
-    # THEN result should be False
-    assert not result
+    # THEN result should be False since the pending flag is not there
+    assert result is False
 
 
 def test_is_pending(crunchy_config_dict, compressed_fastqs_pending):
-    """test cram_compression_done without created CRAM file"""
+    """test if spring compression is pending"""
     # GIVEN a crunchy-api, and fastq files
     crunchy_api = CrunchyAPI(crunchy_config_dict)
+    fastq_first = compressed_fastqs_pending["fastq_first_path"]
+    # GIVEN a existing pending flag
+    pending_path = crunchy_api.get_pending_path(file_path=fastq_first)
+    assert pending_path.exists()
 
-    # WHEN checking if spring compression is done
-    fastq_first_path = compressed_fastqs_pending["fastq_first_path"]
-    fastq_second_path = compressed_fastqs_pending["fastq_second_path"]
-    result = crunchy_api.is_spring_compression_pending(
-        fastq_first_path=fastq_first_path, fastq_second_path=fastq_second_path
-    )
+    # WHEN checking if spring compression is pending
+    result = crunchy_api.is_spring_compression_pending(fastq=fastq_first)
 
-    # THEN result should be True
-    assert result
+    # THEN result should be True since the pending_path exists
+    assert result is True
