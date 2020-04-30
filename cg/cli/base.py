@@ -12,7 +12,7 @@ from cg.store import Store
 from .add import add
 from .backup import backup
 from .clean import clean
-from .compress import compress
+from .compress.base import compress
 from .export import export
 from .get import get
 from .import_cmd import import_cmd
@@ -20,8 +20,8 @@ from .reset import reset_cmd
 from .set import set_cmd
 from .status import status
 from .transfer import transfer
-from .upload.base import upload
 from .upload import vogue as vogue_command
+from .upload.base import upload
 from .workflow.base import workflow as workflow_cmd
 
 LOG = logging.getLogger(__name__)
@@ -32,7 +32,11 @@ LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR"]
 @click.option("-c", "--config", type=click.File(), help="path to config file")
 @click.option("-d", "--database", help="path/URI of the SQL database")
 @click.option(
-    "-l", "--log-level", type=click.Choice(LEVELS), default="INFO", help="lowest level to log at"
+    "-l",
+    "--log-level",
+    type=click.Choice(LEVELS),
+    default="INFO",
+    help="lowest level to log at",
 )
 @click.version_option(cg.__version__, prog_name=cg.__title__)
 @click.pass_context
