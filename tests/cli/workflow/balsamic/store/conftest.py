@@ -5,7 +5,7 @@ import pytest
 from cg.apps.hk import HousekeeperAPI
 from cg.meta.workflow.balsamic import AnalysisAPI
 from cg.store import Store, models
-from cg.apps.tb import TrailblazerAPI
+from cg.utils.fastq import FastqAPI
 
 from tests.store_helpers import ensure_customer, add_family, add_sample
 
@@ -16,21 +16,18 @@ def balsamic_store_context(balsamic_store, balsamic_case) -> dict:
     return {
         "hk_api": MockHouseKeeper(balsamic_case.internal_id),
         "db": balsamic_store,
-        "tb_api": MockTB(),
         "balsamic": {"root": "root", "conda_env": "conda_env"},
-        "analysis_api": AnalysisAPI(),
+        "analysis_api": AnalysisAPI(
+            db=balsamic_store,
+            hk_api=MockHouseKeeper(balsamic_case.internal_id),
+            fastq_api=MockFastqAPI(),
+        ),
     }
 
 
-class MockTB(TrailblazerAPI):
-    """Mock of trailblazer """
-
-    def __init__(self):
-        """Override TrailblazerAPI __init__ to avoid default behaviour"""
-
-    def analyses(self, *_):
-        """Override TrailblazerAPI analyses method to avoid default behaviour"""
-        return []
+class MockFastqAPI(FastqAPI):
+    def parse_header(*_):
+        return {"lane": "1", "flowcell": "ABC123", "readnumber": "1"}
 
 
 class MockHouseKeeper(HousekeeperAPI):

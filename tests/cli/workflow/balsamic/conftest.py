@@ -6,6 +6,7 @@ from cg.apps.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.meta.workflow.balsamic import AnalysisAPI
 from cg.store import Store, models
+from cg.utils.fastq import FastqAPI
 
 from tests.store_helpers import ensure_bed_version, ensure_customer, add_sample, add_family
 
@@ -16,8 +17,11 @@ def balsamic_context(balsamic_store) -> dict:
     return {
         "hk_api": MockHouseKeeper(),
         "db": balsamic_store,
-        "analysis_api": MockAnalysis,
+        "analysis_api": AnalysisAPI(
+            db=balsamic_store, hk_api=MockHouseKeeper, fastq_api=MockFastqAPI
+        ),
         "fastq_handler": MockFastq,
+        "fastq_api": MockFastqAPI,
         "gzipper": MockGzip(),
         "lims_api": MockLims(),
         "bed_path": "bed_path",
@@ -99,17 +103,13 @@ class MockLine:
         return "headerline"
 
 
+class MockFastqAPI(FastqAPI):
+    def parse_header(*_):
+        return {"lane": "1", "flowcell": "ABC123", "readnumber": "1"}
+
+
 class MockAnalysis(AnalysisAPI):
     """Mock AnalysisAPI"""
-
-    @staticmethod
-    def fastq_header(line):
-        """Mock AnalysisAPI.fastq_header"""
-        del line
-
-        _header = {"lane": "1", "flowcell": "ABC123", "readnumber": "1"}
-
-        return _header
 
 
 class MockFastq(FastqHandler):

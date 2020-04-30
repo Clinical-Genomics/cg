@@ -265,8 +265,6 @@ class FindBusinessDataHandler(BaseHandler):
     def samples_by_ids(self, **identifiers) -> List[models.Sample]:
         records = self.Sample.query
 
-        print(type(identifiers), identifiers)
-
         for identifier_name, identifier_value in identifiers.items():
             identifier = getattr(models.Sample, identifier_name)
             records = records.filter(identifier.contains(identifier_value))

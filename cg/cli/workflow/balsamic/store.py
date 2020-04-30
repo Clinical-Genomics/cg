@@ -12,6 +12,7 @@ from cg.exc import AnalysisNotFinishedError, AnalysisDuplicationError, CgError
 from cg.meta.store.balsamic import gather_files_and_bundle_in_housekeeper
 from cg.meta.workflow.balsamic import AnalysisAPI
 from cg.store import Store
+from cg.utils import fastq
 from housekeeper.exc import VersionIncludedError
 
 LOG = logging.getLogger(__name__)
@@ -24,9 +25,12 @@ FAIL = 1
 def store(context):
     """Store results from MIP in housekeeper."""
     context.obj["db"] = Store(context.obj["database"])
-    context.obj["tb_api"] = tb.TrailblazerAPI(context.obj)
     context.obj["hk_api"] = hk.HousekeeperAPI(context.obj)
-    context.obj["analysis_api"] = AnalysisAPI()
+    context.obj["analysis_api"] = AnalysisAPI(
+        db=Store(context.obj["database"]),
+        hk_api=hk.HousekeeperAPI(context.obj),
+        fastq_api=fastq.FastqAPI,
+    )
 
 
 @store.command()
@@ -108,7 +112,7 @@ def generate_deliverables_file(context, dry, config_path, case_id):
     process = subprocess.run(" ".join(command), shell=True)
 
     if process == SUCCESS:
-        click.echo(click.style("created deliverables file", fg="green"))
+        click.echo(click.style("Created deliverables file", fg="green"))
 
     return process
 
@@ -121,18 +125,18 @@ def completed(context):
 
     exit_code = SUCCESS
     for case in _store.cases_to_balsamic_analyze():
-        click.echo(click.style(f"storing case: {case}", fg="blue"))
+        click.echo(click.style(f"Storing case: {case}", fg="blue"))
         try:
             exit_code = exit_code and context.invoke(analysis, case_id=case.internal_id)
         except AnalysisNotFinishedError as error:
-            click.echo(click.style(error.message, fg="yellow"))
+            LOG.warning("Analysis not finished")
         except FileNotFoundError as error:
-            click.echo(click.style(f"missing file: {error.filename}", fg="red"))
+            LOG.error("Missing file: %s", error.filename)
             exit_code = FAIL
         except AnalysisDuplicationError:
-            click.echo(click.style("analysis version already added", fg="yellow"))
+            LOG.warning("Analysis version already added")
         except VersionIncludedError as error:
-            click.echo(click.style(error.message, fg="red"))
+            LOG.error("Could not include in HK: %s", error.message)
             exit_code = FAIL
 
     sys.exit(exit_code)

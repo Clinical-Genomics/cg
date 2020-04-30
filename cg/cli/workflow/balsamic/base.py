@@ -8,13 +8,13 @@ import shutil
 from pathlib import Path
 
 import click
-from cg.apps import hk, scoutapi, lims, tb
+from cg.apps import hk, lims
 from cg.apps.balsamic.fastq import FastqHandler
+from cg.utils.fastq import FastqAPI
 from cg.cli.workflow.balsamic.store import store as store_cmd
 from cg.cli.workflow.balsamic.deliver import deliver as deliver_cmd, CASE_TAGS, SAMPLE_TAGS
 from cg.cli.workflow.get_links import get_links
 from cg.exc import LimsDataError, BalsamicStartError
-from cg.meta.deliver import DeliverAPI
 from cg.meta.workflow.base import get_target_bed_from_lims
 from cg.meta.workflow.balsamic import AnalysisAPI
 from cg.store import Store
@@ -39,17 +39,11 @@ def balsamic(context, case_id, priority, email, target_bed):
     context.obj["fastq_handler"] = FastqHandler
     context.obj["gzipper"] = gzip
     context.obj["lims_api"] = lims.LimsAPI(context.obj)
-    scout_api = scoutapi.ScoutAPI(context.obj)
-    tb_api = tb.TrailblazerAPI(context.obj)
-    deliver = DeliverAPI(
-        context.obj,
-        hk_api=context.obj["hk_api"],
-        lims_api=context.obj["lims_api"],
-        case_tags=CASE_TAGS,
-        sample_tags=SAMPLE_TAGS,
-    )
+    context.obj["fastq_api"] = FastqAPI
 
-    context.obj["analysis_api"] = AnalysisAPI()
+    context.obj["analysis_api"] = AnalysisAPI(
+        db=context.obj["db"], hk_api=context.obj["hk_api"], fastq_api=context.obj["fastq_api"]
+    )
 
     if context.invoked_subcommand is None:
         if case_id is None:
@@ -142,7 +136,7 @@ def config_case(
             # figure out flowcell name from header
             with context.obj["gzipper"].open(file_obj.full_path) as handle:
                 header_line = handle.readline().decode()
-                header_info = context.obj["analysis_api"].fastq_header(header_line)
+                header_info = context.obj["fastq_api"].parse_header(header_line)
             data = {
                 "path": file_obj.full_path,
                 "lane": int(header_info["lane"]),

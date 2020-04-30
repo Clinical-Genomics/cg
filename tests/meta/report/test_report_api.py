@@ -112,7 +112,6 @@ def is_similar_values(value1, value2):
         return is_similar_lists(value1, value2)
 
     if isinstance(value1, datetime.datetime):
-        print(str(value1.date()), str(value1.date()) == value2)
         return str(value1.date()) == value2
 
     if is_float(value1):
@@ -152,8 +151,6 @@ def dict_values_exists_in(a_dict: dict, a_target: str):
 
 
 def value_exists_in(value, a_target: str):
-
-    print(type(value), value)
 
     if isinstance(value, str):
         return value in a_target
