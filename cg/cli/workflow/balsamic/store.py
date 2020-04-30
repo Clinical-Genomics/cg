@@ -132,6 +132,9 @@ def completed(context):
         except FileNotFoundError as error:
             LOG.error("Missing file: %s", error)
             exit_code = FAIL
+        except FileExistsError as error:
+            LOG.error("File already exists: %s", error)
+            exit_code = FAIL
         except AnalysisDuplicationError as error:
             LOG.warning("Analysis version already added: %s", error.message)
         except VersionIncludedError as error:
