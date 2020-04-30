@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 
 import click
-from cg.apps import hk, tb
+from cg.apps import hk
 from cg.exc import AnalysisNotFinishedError, AnalysisDuplicationError, CgError
 from cg.meta.store.balsamic import gather_files_and_bundle_in_housekeeper
 from cg.meta.workflow.balsamic import AnalysisAPI
@@ -59,8 +59,7 @@ def analysis(context, case_id, deliverables_file_path, config_path):
     analysis_api = context.obj["analysis_api"]
 
     if not case_obj:
-        click.echo(click.style(f"Case {case_id} not found", fg="red"))
-        context.abort()
+        raise CgError(f"Case {case_id} not found")
 
     if not deliverables_file_path:
         deliverables_file_path = analysis_api.get_deliverables_file_path(case_id, root_dir)
@@ -77,7 +76,7 @@ def analysis(context, case_id, deliverables_file_path, config_path):
     )
 
     status.add_commit(new_analysis)
-    click.echo(click.style("included files in Housekeeper", fg="green"))
+    click.echo(click.style("Included files in Housekeeper", fg="green"))
 
 
 @store.command("generate-deliverables-file")
@@ -99,7 +98,7 @@ def generate_deliverables_file(context, dry, config_path, case_id):
     if not config_path:
         config_path = analysis_api.get_config_path(root_dir, case_id)
         if not config_path.is_file():
-            raise FileNotFoundError(f"Missing the sample-config file for {case_id}")
+            raise FileNotFoundError(f"Missing the sample-config file for {case_id}: {config_path}")
 
     command_str = f" report deliver" f" --sample-config {config_path}'"
     command = [f"bash -c 'source activate {conda_env}; balsamic"]
@@ -124,17 +123,17 @@ def completed(context):
     _store = context.obj["db"]
 
     exit_code = SUCCESS
-    for case in _store.cases_to_balsamic_analyze():
+    for case in _store.cases_to_balsamic_analyze(limit=None):
         click.echo(click.style(f"Storing case: {case}", fg="blue"))
         try:
-            exit_code = exit_code and context.invoke(analysis, case_id=case.internal_id)
+            exit_code = context.invoke(analysis, case_id=case.internal_id) and exit_code
         except AnalysisNotFinishedError as error:
-            LOG.warning("Analysis not finished")
+            LOG.warning("Analysis not finished: %s", error.message)
         except FileNotFoundError as error:
-            LOG.error("Missing file: %s", error.filename)
+            LOG.error("Missing file: %s", error)
             exit_code = FAIL
-        except AnalysisDuplicationError:
-            LOG.warning("Analysis version already added")
+        except AnalysisDuplicationError as error:
+            LOG.warning("Analysis version already added: %s", error.message)
         except VersionIncludedError as error:
             LOG.error("Could not include in HK: %s", error.message)
             exit_code = FAIL
