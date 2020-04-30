@@ -26,7 +26,11 @@ def store(context):
     """Store results from MIP in housekeeper."""
     context.obj["db"] = Store(context.obj["database"])
     context.obj["hk_api"] = hk.HousekeeperAPI(context.obj)
-    context.obj["analysis_api"] = AnalysisAPI()
+    context.obj["analysis_api"] = AnalysisAPI(
+        db=Store(context.obj["database"]),
+        hk_api=hk.HousekeeperAPI(context.obj),
+        fastq_api=fastq.FastqAPI,
+    )
 
 
 @store.command()
@@ -141,15 +145,19 @@ def completed(context):
     _store = context.obj["db"]
 
     exit_code = SUCCESS
-    for case in _store.cases_to_balsamic_analyze(limit=None):
+    for case in _store.cases_to_balsamic_analyze():
         click.echo(click.style(f"Storing case: {case}", fg="blue"))
         try:
-            exit_code = context.invoke(analysis, case_id=case.internal_id) and exit_code
-        except StoreError as error:
-            LOG.error("Analysis storage failed: %s", error.message)
-            exit_code = FAIL
+            exit_code = exit_code and context.invoke(analysis, case_id=case.internal_id)
+        except AnalysisNotFinishedError as error:
+            LOG.warning("Analysis not finished")
         except FileNotFoundError as error:
-            LOG.error("Analysis storage failed, missing file: %s", error.args[0])
+            LOG.error("Missing file: %s", error.filename)
+            exit_code = FAIL
+        except AnalysisDuplicationError:
+            LOG.warning("Analysis version already added")
+        except VersionIncludedError as error:
+            LOG.error("Could not include in HK: %s", error.message)
             exit_code = FAIL
 
     click.echo(click.style(f"Done storing cases. Exit code: {exit_code}", fg="blue"))

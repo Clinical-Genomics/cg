@@ -1,13 +1,13 @@
 """Fixtures for cli balsamic tests"""
 from datetime import datetime
+
 import pytest
 
 from cg.apps.hk import HousekeeperAPI
 from cg.meta.workflow.balsamic import AnalysisAPI
 from cg.store import Store, models
-from cg.apps.tb import TrailblazerAPI
-
-from tests.store_helpers import ensure_customer, add_family, add_sample
+from cg.utils.fastq import FastqAPI
+from tests.store_helpers import add_family, add_sample, ensure_customer
 
 
 @pytest.fixture
@@ -16,32 +16,18 @@ def balsamic_store_context(balsamic_store, balsamic_case) -> dict:
     return {
         "hk_api": MockHouseKeeper(balsamic_case.internal_id),
         "db": balsamic_store,
-        "tb_api": MockTB(),
         "balsamic": {"root": "root", "conda_env": "conda_env"},
-        "analysis_api": AnalysisAPI(),
+        "analysis_api": AnalysisAPI(
+            db=balsamic_store,
+            hk_api=MockHouseKeeper(balsamic_case.internal_id),
+            fastq_api=MockFastqAPI(),
+        ),
     }
 
 
-class MockTB(TrailblazerAPI):
-    """Mock of trailblazer """
-
-    def __init__(self):
-        """Override TrailblazerAPI __init__ to avoid default behaviour"""
-
-    def analyses(
-        self,
-        *,
-        family: str = None,
-        query: str = None,
-        status: str = None,
-        deleted: bool = None,
-        temp: bool = False,
-        before: datetime = None,
-        is_visible: bool = None,
-        workflow=None
-    ):
-        """Override TrailblazerAPI analyses method to avoid default behaviour"""
-        return []
+class MockFastqAPI(FastqAPI):
+    def parse_header(*_):
+        return {"lane": "1", "flowcell": "ABC123", "readnumber": "1"}
 
 
 class MockHouseKeeper(HousekeeperAPI):
@@ -121,7 +107,9 @@ def balsamic_store(base_store: Store) -> Store:
     _store.relate_sample(case, normal_sample, status="unknown")
 
     case = add_family(_store, "mip_case")
-    normal_sample = add_sample(_store, "normal_sample", is_tumour=False, data_analysis="mip")
+    normal_sample = add_sample(
+        _store, "normal_sample", is_tumour=False, data_analysis="mip"
+    )
     _store.relate_sample(case, normal_sample, status="unknown")
 
     _store.commit()
