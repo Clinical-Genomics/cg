@@ -18,15 +18,19 @@ def gather_files_and_bundle_in_housekeeper(
 
     bundle_data = _parse_bundle_data(config_path, deliverables_file, case_obj)
     LOG.info("Session1: ", hk_api._store.session)
-    results = hk_api.add_bundle(bundle_data)
+    try:
+        results = hk_api.add_bundle(bundle_data)
 
-    if not results:
-        raise AnalysisDuplicationError("Analysis version already added")
-    bundle_obj, version_obj = results
+        if not results:
+            raise AnalysisDuplicationError("Analysis version already added")
+        bundle_obj, version_obj = results
 
-    _reset_analysis_action(case_obj)
-    new_analysis = _create_analysis(bundle_data, case_obj, status, version_obj)
-    _include_files_in_housekeeper(bundle_obj, hk_api, version_obj)
+        _reset_analysis_action(case_obj)
+        new_analysis = _create_analysis(bundle_data, case_obj, status, version_obj)
+        _include_files_in_housekeeper(bundle_obj, hk_api, version_obj)
+    except Exception:
+        hk_api.rollback()
+
     return new_analysis
 
 
