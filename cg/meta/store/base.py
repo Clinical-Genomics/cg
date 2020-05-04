@@ -83,7 +83,7 @@ def get_tags(file: dict, pipeline_tags: list) -> list:
     return sorted_tags
 
 
-def build_bundle(config_data: dict, sampleinfo_data: dict, deliverables: dict) -> dict:
+def build_bundle(config_data: dict, analysisinfo_data: dict, deliverables: dict) -> dict:
     """Create a new bundle to store in Housekeeper"""
 
     pipeline = config_data["samples"][0]["type"]
