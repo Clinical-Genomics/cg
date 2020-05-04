@@ -17,7 +17,7 @@ def gather_files_and_bundle_in_housekeeper(
     """Function to create a bundle for an analysis in housekeeper"""
 
     bundle_data = _parse_bundle_data(config_path, deliverables_file, case_obj)
-    LOG.debug("Session1: ", hk_api._store.session.hash_key)
+    LOG.info("Session1: ", hk_api._store.session)
     results = hk_api.add_bundle(bundle_data)
 
     if not results:
@@ -32,7 +32,7 @@ def gather_files_and_bundle_in_housekeeper(
 
 def _include_files_in_housekeeper(bundle_obj, hk_api, version_obj):
     """Function to include files in housekeeper"""
-    LOG.debug("Session2: ", hk_api._store.session.hash_key)
+    LOG.info("Session2: ", hk_api._store.session)
     hk_api.include(version_obj)
     hk_api.add_commit(bundle_obj, version_obj)
     LOG.info("New bundle included: %s, version %s", bundle_obj.name, version_obj.created_at.date())
