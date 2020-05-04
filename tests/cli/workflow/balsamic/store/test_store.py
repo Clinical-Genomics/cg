@@ -35,7 +35,7 @@ def test_store_analysis_with_ok_file_parameter(
     )
 
     # THEN we should not get a message that the analysis has been stored
-    assert "included files in Housekeeper" in result.output
+    assert "Included files in Housekeeper" in result.output
     assert result.exit_code == EXIT_SUCCESS
 
 

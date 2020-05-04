@@ -78,7 +78,7 @@ def link(context, case_id, sample_id):
             )
         else:
             LOG.warning(
-                "%s does not have blasamic as data analysis, skipping.", link_obj.sample.internal_id
+                "%s does not have balsamic as data analysis, skipping.", link_obj.sample.internal_id
             )
 
 
