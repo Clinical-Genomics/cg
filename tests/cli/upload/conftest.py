@@ -100,12 +100,8 @@ def load_family(store, family):
             family=family,
             sample=sample_obj,
             status=sample_data["status"],
-            father=base_store.sample(sample_data["father"])
-            if sample_data.get("father")
-            else None,
-            mother=base_store.sample(sample_data["mother"])
-            if sample_data.get("mother")
-            else None,
+            father=base_store.sample(sample_data["father"]) if sample_data.get("father") else None,
+            mother=base_store.sample(sample_data["mother"]) if sample_data.get("mother") else None,
         )
         base_store.add(link)
 

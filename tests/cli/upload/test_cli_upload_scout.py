@@ -139,9 +139,7 @@ def test_upload_scout_cli_file_exists(
     assert warned
 
 
-def test_upload_scout_cli(
-    base_context, cli_runner, analysis_family_single_case, scout_load_config
-):
+def test_upload_scout_cli(base_context, cli_runner, analysis_family_single_case, scout_load_config):
     """Test to upload a case to scout using cg upload scout command"""
     # GIVEN a case_id where the case exists in status db with at least one analysis
     # GIVEN that the analysis is done and exists in tb
@@ -156,9 +154,7 @@ def test_upload_scout_cli(
     assert result.exit_code == 0
 
 
-def test_upload_scout_cli_print_console(
-    base_context, cli_runner, analysis_family_single_case
-):
+def test_upload_scout_cli_print_console(base_context, cli_runner, analysis_family_single_case):
     """Test to dry run a case upload"""
     # GIVEN a case_id where the case exists in status db with at least one analysis
     # GIVEN that the analysis is done and exists in tb
