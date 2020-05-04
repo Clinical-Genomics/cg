@@ -66,3 +66,29 @@ HK_TAGS = {
     "wgs": ["mip-dna", "wgs"],
     "wts": ["mip-rna"],
 }
+
+# used to convert MIP tags derived from the deliverables to standard MIP tags.
+MIP_TAGS = {
+    tuple(["config"]): ["mip-config"],
+    tuple(["sampleinfo"]): ["sampleinfo"],
+    tuple(["multiqc_ar", "html"]): ["multiqc-html"],
+    tuple(["multiqc_ar", "json"]): ["multiqc-json"],
+    tuple(["pedigree"]): ["pedigree-yaml"],
+    tuple(["pedigree_fam"]): ["pedigree"],
+    tuple(["log"]): ["mip-log"],
+    tuple(["qccollect_ar"]): ["qcmetrics"],
+    tuple(["gatk_combinevariantcallsets", "bcf"]): ["snv-gbcf", "snv-bcf"],
+    tuple(["sv_combinevariantcallsets", "bcf"]): ["sv-bcf"],
+    tuple(["peddy_ar", "ped_check"]): ["peddy", "ped-check"],
+    tuple(["peddy_ar", "peddy"]): ["peddy", "ped"],
+    tuple(["peddy_ar", "sex_check"]): ["peddy", "sex-check"],
+    tuple(["version_collect_ar"]): ["exe-ver"],
+    tuple(["sv_str"]): ["vcf-str"],
+    tuple(["clinical", "endvariantannotationblock"]): ["vcf-snv-clinical"],
+    tuple(["research", "endvariantannotationblock"]): ["vcf-snv-research"],
+    tuple(["clinical", "sv_reformat"]): ["vcf-sv-clinical"],
+    tuple(["research", "sv_reformat"]): ["vcf-sv-research"],
+    tuple(["samtools_subsample_mt", "bam"]): ["bam-mt"],
+    tuple(["chromograph_ar"]): ["chromograph"],
+    tuple(["vcf2cytosure_ar"]): ["vcf2cytosure"],
+}

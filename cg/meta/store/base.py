@@ -1,7 +1,7 @@
 """ Base module for building bioinfo workflow bundles for linking in Housekeeper"""
 import datetime as dt
 
-from cg.constants import HK_TAGS
+from cg.constants import HK_TAGS, MIP_TAGS
 from cg.exc import (
     AnalysisDuplicationError,
     PipelineUnknownError,
@@ -44,6 +44,11 @@ def get_files(deliverables: dict, pipeline: list) -> list:
 
     data.extend(data_index)
 
+    # TODO: check mandatory tags
+    _check_mandatory_tags(data)
+
+    _convert_tags(data)
+
     return data
 
 
@@ -83,7 +88,7 @@ def get_tags(file: dict, pipeline_tags: list) -> list:
     return sorted_tags
 
 
-def build_bundle(config_data: dict, sampleinfo_data: dict, deliverables: dict) -> dict:
+def build_bundle(config_data: dict, analysisinfo_data: dict, deliverables: dict) -> dict:
     """Create a new bundle to store in Housekeeper"""
 
     pipeline = config_data["samples"][0]["type"]
@@ -91,8 +96,22 @@ def build_bundle(config_data: dict, sampleinfo_data: dict, deliverables: dict) -
 
     data = {
         "name": config_data["case"],
-        "created": sampleinfo_data["date"],
-        "pipeline_version": sampleinfo_data["version"],
+        "created": analysisinfo_data["date"],
+        "pipeline_version": analysisinfo_data["version"],
         "files": get_files(deliverables, pipeline_tag),
     }
     return data
+
+
+def _convert_tags(data):
+    """ Convert tags from deliverables tags to MIP standard tags """
+    for deliverables_tags, mip_tags in MIP_TAGS.items():
+        for file in data:
+            if all(tag in file["tags"] for tag in deliverables_tags):
+                tags_filtered = list(filter(lambda x: x not in deliverables_tags, file["tags"]))
+                converted_tags = tags_filtered + mip_tags
+                file["tags"] = converted_tags
+
+
+def _check_mandatory_tags(data):
+    """ Check if all the mandatory tags are present. Raise an exception if not. """
