@@ -16,25 +16,26 @@ def gather_files_and_bundle_in_housekeeper(
 ):
     """Function to create a bundle for an analysis in housekeeper"""
 
-    bundle_data = _add_analysis(config_path, deliverables_file, case_obj)
-
+    bundle_data = _parse_bundle_data(config_path, deliverables_file, case_obj)
+    LOG.debug("Session1: ", hk_api._store.session)
     results = hk_api.add_bundle(bundle_data)
+
     if not results:
-        raise AnalysisDuplicationError("analysis version already added")
+        raise AnalysisDuplicationError("Analysis version already added")
     bundle_obj, version_obj = results
 
     _reset_analysis_action(case_obj)
     new_analysis = _create_analysis(bundle_data, case_obj, status, version_obj)
-    version_date = version_obj.created_at.date()
-    LOG.info("new bundle added: %s, version %s", bundle_obj.name, version_date)
     _include_files_in_housekeeper(bundle_obj, hk_api, version_obj)
     return new_analysis
 
 
 def _include_files_in_housekeeper(bundle_obj, hk_api, version_obj):
     """Function to include files in housekeeper"""
+    LOG.debug("Session2: ", hk_api._store.session)
     hk_api.include(version_obj)
     hk_api.add_commit(bundle_obj, version_obj)
+    LOG.info("New bundle included: %s, version %s", bundle_obj.name, version_obj.created_at.date())
 
 
 def _create_analysis(bundle_data, case_obj, status, version_obj):
@@ -74,7 +75,7 @@ def parse_version(config_data: dict) -> dt.datetime:
     return config_data["analysis"]["BALSAMIC_version"]
 
 
-def _add_analysis(config_path, deliverables_file, case_obj):
+def _parse_bundle_data(config_path, deliverables_file, case_obj):
     """Gather information from balsamic analysis to store."""
 
     with Path(config_path).open() as config_stream:
