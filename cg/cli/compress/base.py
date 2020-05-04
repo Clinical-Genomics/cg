@@ -17,7 +17,7 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def compress(context):
     """Compress files"""
-    context.obj["db"] = Store(context.obj.get["database"])
+    context.obj["db"] = Store(context.obj.get("database"))
     hk_api = hk.HousekeeperAPI(context.obj)
     context.obj["hk"] = hk_api
     scout_api = scoutapi.ScoutAPI(context.obj)
