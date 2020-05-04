@@ -1,8 +1,8 @@
 """Fixtures for cli balsamic tests"""
+import json
 import logging
 from pathlib import Path
 
-import json
 import pytest
 
 from cg.apps.hk import HousekeeperAPI
@@ -45,48 +45,6 @@ def fixture_analysis_family_single():
                 "ticket_number": 123456,
                 "reads": 5000000,
             }
-        ],
-    }
-    return family
-
-
-@pytest.fixture
-def analysis_family_trio():
-    """Build an example family."""
-    family = {
-        "name": "trio",
-        "internal_id": "yellowtrio",
-        "panels": ["IEM", "EP"],
-        "samples": [
-            {
-                "name": "son",
-                "sex": "male",
-                "internal_id": "ADM1",
-                "data_analysis": "mip",
-                "father": "ADM2",
-                "mother": "ADM3",
-                "status": "affected",
-                "ticket_number": 123456,
-                "reads": 5000000,
-            },
-            {
-                "name": "father",
-                "sex": "male",
-                "internal_id": "ADM2",
-                "data_analysis": "mip",
-                "status": "unaffected",
-                "ticket_number": 123456,
-                "reads": 6000000,
-            },
-            {
-                "name": "mother",
-                "sex": "female",
-                "internal_id": "ADM3",
-                "data_analysis": "mip",
-                "status": "unaffected",
-                "ticket_number": 123456,
-                "reads": 7000000,
-            },
         ],
     }
     return family
@@ -159,9 +117,9 @@ def load_family(store, family):
 
 
 @pytest.yield_fixture(scope="function", name="analysis_store_trio")
-def fixture_analysis_store_trio(base_store, analysis_family_trio):
+def fixture_analysis_store_trio(base_store, analysis_family):
     """Setup a store instance for testing analysis API."""
-    load_family(base_store, analysis_family_trio)
+    load_family(base_store, analysis_family)
 
     yield base_store
 

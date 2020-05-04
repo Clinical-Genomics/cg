@@ -8,9 +8,8 @@ def check_log(caplog, string=None, warning=None):
     """Parse the log output"""
     found = False
     for _, level, message in caplog.record_tuples:
-        if warning:
-            if level == logging.WARNING:
-                found = True
+        if level == logging.WARNING and warning:
+            found = True
         if string and string in message:
             found = True
     return found
@@ -71,6 +70,7 @@ def test_produce_load_config(base_context, cli_runner, analysis_family_single_ca
 def test_produce_load_config_no_delivery(
     base_context, cli_runner, analysis_family_single_case, hk_mock
 ):
+    """Test to produce a load config without a delivery report"""
     # GIVEN a singleton WGS case
 
     base_context["scout_upload_api"].mock_generate_config = False
@@ -96,6 +96,7 @@ def test_produce_load_config_no_delivery(
 def test_produce_load_config_missing_mandatory_file(
     base_context, cli_runner, analysis_family_single_case, hk_mock
 ):
+    """Test to produce a load config when mandatory files are missing"""
     # GIVEN a singleton WGS case
     base_context["scout_upload_api"].mock_generate_config = False
 
