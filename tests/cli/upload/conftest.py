@@ -118,18 +118,20 @@ def load_family(store, family):
 
 @pytest.yield_fixture(scope="function", name="analysis_store_trio")
 def fixture_analysis_store_trio(base_store, analysis_family):
-    """Setup a store instance for testing analysis API."""
-    load_family(base_store, analysis_family)
+    """Setup a store instance with a trion loaded for testing analysis API."""
+    _store = base_store
+    load_family(_store, analysis_family)
 
-    yield base_store
+    yield _store
 
 
 @pytest.yield_fixture(scope="function", name="analysis_store_single_case")
 def fixture_analysis_store_single(base_store, analysis_family_single_case):
-    """Setup a store instance for testing analysis API."""
-    load_family(base_store, analysis_family_single_case)
+    """Setup a store instance with a single ind case for testing analysis API."""
+    _store = base_store
+    load_family(_store, analysis_family_single_case)
 
-    yield base_store
+    yield _store
 
 
 @pytest.fixture
