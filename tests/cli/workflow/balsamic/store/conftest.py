@@ -26,6 +26,7 @@ def balsamic_store_context(balsamic_store, balsamic_case) -> dict:
 
 
 class MockFastqAPI(FastqAPI):
+    @staticmethod
     def parse_header(*_):
         return {"lane": "1", "flowcell": "ABC123", "readnumber": "1"}
 

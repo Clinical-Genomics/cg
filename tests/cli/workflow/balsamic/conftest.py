@@ -104,6 +104,7 @@ class MockLine:
 
 
 class MockFastqAPI(FastqAPI):
+    @staticmethod
     def parse_header(*_):
         return {"lane": "1", "flowcell": "ABC123", "readnumber": "1"}
 
