@@ -107,37 +107,44 @@ def bioinfo(context, case_name, cleanup, target_load):
     click.echo(click.style("----------------- BIOINFO -----------------------"))
 
     load_bioinfo_raw_inputs = dict()
-    
+
     # Probably get samples for a case_name through statusdb api
     load_bioinfo_raw_inputs["samples"] = _get_samples(context, case_name)
 
     # Probably get analysis result file through housekeeper ai
     load_bioinfo_raw_inputs["analysis_result_file"] = _get_multiqc_latest_file(context, case_name)
-    
+
     # Probably get analysis_type [multiqc or microsalt or all] from cli
     # This might automated to some extend by checking if input multiqc json.
-    # This tells us how the result was generated. If it is multiqc it will try to validate keys with 
+    # This tells us how the result was generated. If it is multiqc it will try to validate keys with
     # an actual model.
-    load_bioinfo_raw_inputs["analysis_type"] = 'multiqc' 
+    load_bioinfo_raw_inputs["analysis_type"] = "multiqc"
 
     # case_name is the input
     load_bioinfo_raw_inputs["analysis_case_name"] = case_name
 
     # Get case_analysis_type from cli a free text for an entry in trending database
-    load_bioinfo_raw_inputs["case_analysis_type"] = 'multiqc' 
-   
-    # Get workflow_name and workflow_version
-    load_bioinfo_raw_inputs["analysis_workflow_name"],load_bioinfo_raw_inputs["analysis_workflow_version"] = _get_analysis_workflow_details(context, case_name)
+    load_bioinfo_raw_inputs["case_analysis_type"] = "multiqc"
 
-    click.echo(click.style("----------------- UPLOAD UNPROCESSED -----------------------"))
-    context.obj["vogue_upload_api"].load_bioinfo_raw(load_bioinfo_raw_inputs)
-    click.echo(click.style("----------------- PROCESS CASE -----------------------"))
-    context.obj["vogue_upload_api"].load_bioinfo_process(load_bioinfo_raw_inputs, cleanup)
-    click.echo(click.style("----------------- PROCESS SAMPLE -----------------------"))
-    context.obj["vogue_upload_api"].load_bioinfo_sample(load_bioinfo_raw_inputs)
+    # Get workflow_name and workflow_version
+    (
+        load_bioinfo_raw_inputs["analysis_workflow_name"],
+        load_bioinfo_raw_inputs["analysis_workflow_version"],
+    ) = _get_analysis_workflow_details(context, case_name)
+
+    if target_load in ("raw", "all"):
+        click.echo(click.style("----------------- UPLOAD UNPROCESSED -----------------------"))
+        context.obj["vogue_upload_api"].load_bioinfo_raw(load_bioinfo_raw_inputs)
+
+    if target_load in ("process", "all"):
+        click.echo(click.style("----------------- PROCESS CASE -----------------------"))
+        context.obj["vogue_upload_api"].load_bioinfo_process(load_bioinfo_raw_inputs, cleanup)
+        click.echo(click.style("----------------- PROCESS SAMPLE -----------------------"))
+        context.obj["vogue_upload_api"].load_bioinfo_sample(load_bioinfo_raw_inputs)
+
 
 def _get_multiqc_latest_file(context, case_name):
-    """Get latest multiqc_data.json path for a case_name 
+    """Get latest multiqc_data.json path for a case_name
        Args:
            case_name(str): onemite
        Returns:
@@ -145,7 +152,9 @@ def _get_multiqc_latest_file(context, case_name):
     """
     hk_api = context.obj["housekeeper_api"]
     version_obj = hk_api.last_version(case_name)
-    multiqc_json_file = hk_api.get_files(bundle=case_name, tags=['multiqc-json'], version=version_obj.id)
+    multiqc_json_file = hk_api.get_files(
+        bundle=case_name, tags=["multiqc-json"], version=version_obj.id
+    )
 
     return multiqc_json_file[0].full_path
 
@@ -157,7 +166,7 @@ def _get_samples(context, case_name):
        Returns:
            sample_names(str): ACC12345,ACC45679
     """
-    
+
     link_objs = get_links(context, case_name, sample_id=False)
     sample_ids = set()
     for link_obj in link_objs:
@@ -170,8 +179,8 @@ def _get_analysis_workflow_details(context, case_name):
        Args:
            case_name(str): onemite
        Returns:
-           workflow_name(str): balsamic 
-           workflow_version(str): v3.14.15 
+           workflow_name(str): balsamic
+           workflow_version(str): v3.14.15
     """
     # Workflow that generated these results
     status_api = context.obj["status"]
@@ -182,5 +191,5 @@ def _get_analysis_workflow_details(context, case_name):
     if family_obj.analyses:
         workflow_name = family_obj.analyses[0].pipeline
         workflow_version = family_obj.analyses[0].pipeline_version
- 
-    return workflow_name, workflow_version  
+
+    return workflow_name, workflow_version
