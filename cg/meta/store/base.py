@@ -124,7 +124,6 @@ def _check_mandatory_tags(files: list):
         Raise an exception if not.
     """
 
-    breakpoint()
     all_deliverable_tags = [file["tags"] for file in files]
     all_mandatory_tags = [tag for tag in MIP_TAGS if MIP_TAGS[tag]["is_mandatory"]]
     deliverable_tags = _flatten(all_deliverable_tags)
