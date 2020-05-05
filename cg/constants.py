@@ -78,7 +78,7 @@ HK_TAGS = {
 # mandatory flag
 MIP_TAGS = {
     tuple(["config"]): {"tags": ["mip-config"], "is_mandatory": True,},
-    tuple(["sampleinfo"]): {"tags": ["sampleinfo"], "is_mandatory": True,},
+    tuple(["sample_info"]): {"tags": ["sampleinfo"], "is_mandatory": True,},
     tuple(["multiqc_ar", "html"]): {"tags": ["multiqc-html"], "is_mandatory": True,},
     tuple(["multiqc_ar", "json"]): {"tags": ["multiqc-json"], "is_mandatory": True,},
     tuple(["pedigree"]): {"tags": ["pedigree-yaml"], "is_mandatory": True,},
