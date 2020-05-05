@@ -81,7 +81,7 @@ def analysis(context, case_id, deliverables_file_path, config_path):
     except Exception:
         hk_api.rollback()
         status.rollback()
-        raise StoreError(sys.exc_info()[0])
+        raise StoreError(Exception)
 
     status.add_commit(new_analysis)
     LOG.info("Included files in Housekeeper")
@@ -153,6 +153,7 @@ def completed(context):
         click.echo(click.style(f"Storing case: {case}", fg="blue"))
         try:
             exit_code = context.invoke(analysis, case_id=case.internal_id) and exit_code
+<<<<<<< HEAD
         except AnalysisNotFinishedError as error:
             LOG.warning("Analysis not finished: %s", error.message)
         except FileNotFoundError as error:
@@ -162,6 +163,10 @@ def completed(context):
             LOG.warning("Analysis version already added: %s", error.message)
         except VersionIncludedError as error:
             LOG.error("Could not include in HK: %s", error.message)
+=======
+        except StoreError as error:
+            LOG.warning("Analysis could not be stored: %s", error.message)
+>>>>>>> move excpetion handling
             exit_code = FAIL
 
     click.echo(click.style(f"Done storing cases. Exit code: {exit_code}", fg="blue"))
