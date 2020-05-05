@@ -14,15 +14,13 @@ GTCONFIG = {
         "binary_path": "/path/to/genotype_path",
     }
 }
-VOGUECONFIG = {"vogue": {"binary_path": "/path/to/vogue_path", "config_path": "/path/to/vogue_config.json"}}
+VOGUECONFIG = {
+    "vogue": {"binary_path": "/path/to/vogue_path", "config_path": "/path/to/vogue_config.json"}
+}
 
-GENOTYPE_RETURN_SAMPLE = (
-    b'{"ACC5346A3": {"status":"pass"}, "SIB903A19": {"status":"pass"}}'
-)
+GENOTYPE_RETURN_SAMPLE = b'{"ACC5346A3": {"status":"pass"}, "SIB903A19": {"status":"pass"}}'
 
-GENOTYPE_RETURN_SAMPLE_ANALYSIS = (
-    b'{"ACC5346A3": {"snp": {}}, "SIB903A19": {"snp": {}}}'
-)
+GENOTYPE_RETURN_SAMPLE_ANALYSIS = b'{"ACC5346A3": {"snp": {}}, "SIB903A19": {"snp": {}}}'
 
 
 @pytest.fixture(scope="function")
