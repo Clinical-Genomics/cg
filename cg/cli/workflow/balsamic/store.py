@@ -8,12 +8,11 @@ from pathlib import Path
 
 import click
 from cg.apps import hk
-from cg.exc import AnalysisNotFinishedError, AnalysisDuplicationError, CgError, StoreError
+from cg.exc import CgError, StoreError
 from cg.meta.store.balsamic import gather_files_and_bundle_in_housekeeper
 from cg.meta.workflow.balsamic import AnalysisAPI
 from cg.store import Store
 from cg.utils import fastq
-from housekeeper.exc import VersionIncludedError
 
 LOG = logging.getLogger(__name__)
 SUCCESS = 0
@@ -132,8 +131,8 @@ def completed(context):
         click.echo(click.style(f"Storing case: {case}", fg="blue"))
         try:
             exit_code = context.invoke(analysis, case_id=case.internal_id) and exit_code
-        except StoreError as error:
-            LOG.warning("Analysis could not be stored: %s", error.message)
+        except StoreError:
+            LOG.error("Analysis storage failed: ", exc_info=True)
             exit_code = FAIL
 
     sys.exit(exit_code)
