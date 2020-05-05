@@ -77,9 +77,7 @@ def analysis(context, case_id, deliverables_file_path, config_path):
     except Exception as error:
         hk_api.rollback()
         status.rollback()
-        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
-        message = template.format(type(error).__name__, error.args)
-        raise StoreError(message)
+        raise StoreError(error.__str__)
 
     status.add_commit(new_analysis)
     click.echo(click.style("Included files in Housekeeper", fg="green"))
