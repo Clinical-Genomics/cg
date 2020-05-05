@@ -110,3 +110,9 @@ class ValidationError(CgError):
     """
         Exception related to delivery report validation
     """
+
+
+class StoreError(CgError):
+    """
+        Exception related to storing an analysis
+    """

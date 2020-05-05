@@ -8,7 +8,7 @@ from pathlib import Path
 
 import click
 from cg.apps import hk
-from cg.exc import AnalysisNotFinishedError, AnalysisDuplicationError, CgError
+from cg.exc import AnalysisNotFinishedError, AnalysisDuplicationError, CgError, StoreError
 from cg.meta.store.balsamic import gather_files_and_bundle_in_housekeeper
 from cg.meta.workflow.balsamic import AnalysisAPI
 from cg.store import Store
@@ -71,9 +71,14 @@ def analysis(context, case_id, deliverables_file_path, config_path):
 
     hk_api = context.obj["hk_api"]
 
-    new_analysis = gather_files_and_bundle_in_housekeeper(
-        config_path, deliverables_file_path, hk_api, status, case_obj
-    )
+    try:
+        new_analysis = gather_files_and_bundle_in_housekeeper(
+            config_path, deliverables_file_path, hk_api, status, case_obj
+        )
+    except Exception:
+        hk_api.rollback()
+        status.rollback()
+        raise StoreError(Exception)
 
     status.add_commit(new_analysis)
     click.echo(click.style("Included files in Housekeeper", fg="green"))
@@ -127,18 +132,8 @@ def completed(context):
         click.echo(click.style(f"Storing case: {case}", fg="blue"))
         try:
             exit_code = context.invoke(analysis, case_id=case.internal_id) and exit_code
-        except AnalysisNotFinishedError as error:
-            LOG.warning("Analysis not finished: %s", error.message)
-        except FileNotFoundError as error:
-            LOG.error("Missing file: %s", error)
-            exit_code = FAIL
-        except FileExistsError as error:
-            LOG.error("File already exists: %s", error)
-            exit_code = FAIL
-        except AnalysisDuplicationError as error:
-            LOG.warning("Analysis version already added: %s", error.message)
-        except VersionIncludedError as error:
-            LOG.error("Could not include in HK: %s", error.message)
+        except StoreError as error:
+            LOG.warning("Analysis could not be stored: %s", error.message)
             exit_code = FAIL
 
     sys.exit(exit_code)
