@@ -153,20 +153,8 @@ def completed(context):
         click.echo(click.style(f"Storing case: {case}", fg="blue"))
         try:
             exit_code = context.invoke(analysis, case_id=case.internal_id) and exit_code
-<<<<<<< HEAD
-        except AnalysisNotFinishedError as error:
-            LOG.warning("Analysis not finished: %s", error.message)
-        except FileNotFoundError as error:
-            LOG.error("Missing file: %s", error)
-            exit_code = FAIL
-        except AnalysisDuplicationError as error:
-            LOG.warning("Analysis version already added: %s", error.message)
-        except VersionIncludedError as error:
-            LOG.error("Could not include in HK: %s", error.message)
-=======
         except StoreError as error:
             LOG.warning("Analysis could not be stored: %s", error.message)
->>>>>>> move excpetion handling
             exit_code = FAIL
 
     click.echo(click.style(f"Done storing cases. Exit code: {exit_code}", fg="blue"))
