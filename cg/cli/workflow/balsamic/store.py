@@ -74,10 +74,12 @@ def analysis(context, case_id, deliverables_file_path, config_path):
         new_analysis = gather_files_and_bundle_in_housekeeper(
             config_path, deliverables_file_path, hk_api, status, case_obj
         )
-    except Exception:
+    except Exception as error:
         hk_api.rollback()
         status.rollback()
-        raise StoreError(Exception)
+        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+        message = template.format(type(error).__name__, error.args)
+        raise StoreError(message)
 
     status.add_commit(new_analysis)
     click.echo(click.style("Included files in Housekeeper", fg="green"))
@@ -131,8 +133,8 @@ def completed(context):
         click.echo(click.style(f"Storing case: {case}", fg="blue"))
         try:
             exit_code = context.invoke(analysis, case_id=case.internal_id) and exit_code
-        except StoreError:
-            LOG.error("Analysis storage failed: ", exc_info=True)
+        except StoreError as error:
+            LOG.error("Analysis storage failed: ", error.message)
             exit_code = FAIL
 
     sys.exit(exit_code)
