@@ -5,11 +5,13 @@ from cg.constants import HK_TAGS, MIP_TAGS
 from cg.exc import (
     AnalysisDuplicationError,
     PipelineUnknownError,
+    MandatoryFilesMissing,
 )
 
 
 def add_new_analysis(bundle_data, case_obj, status, version_obj):
     """Function to create and return a new analysis database record"""
+
     pipeline = case_obj.links[0].sample.data_analysis
 
     if not pipeline:
@@ -33,46 +35,44 @@ def add_new_analysis(bundle_data, case_obj, status, version_obj):
 
 def reset_case_action(case_obj):
     """ Resets action on case """
+
     case_obj.action = None
 
 
 def get_files(deliverables: dict, pipeline: list) -> list:
     """Get all deliverable files from the pipeline"""
 
-    data = _get_files_non_index(deliverables, pipeline)
-    data_index = _get_files_index(deliverables, pipeline)
+    files = _get_files_non_index(deliverables, pipeline)
+    index_files = _get_files_index(deliverables, pipeline)
 
-    data.extend(data_index)
+    files.extend(index_files)
 
-    # TODO: check mandatory tags
-    _check_mandatory_tags(data)
+    _check_mandatory_tags(files)
+    _convert_tags(files)
 
-    _convert_tags(data)
-
-    return data
+    return files
 
 
 def _get_files_non_index(deliverables: dict, pipeline: list) -> list:
     """ Get all files that are not index files from the deliverables file """
+
     return [
-        {
-            "path": file["path"],
-            "tags": get_tags(file, pipeline),
-            "archive": False,
-        }
+        {"path": file["path"], "tags": get_tags(file, pipeline), "archive": False}
         for file in deliverables["files"]
     ]
 
 
 def _get_files_index(deliverables: dict, pipeline: list) -> list:
     """ Get all index files from the deliverables file """
+
     return [
         {
             "path": file["path_index"],
             "tags": get_tags(file, pipeline),
             "archive": False,
         }
-        for file in deliverables["files"] if file["path_index"]
+        for file in deliverables["files"]
+        if file["path_index"]
     ]
 
 
@@ -88,7 +88,9 @@ def get_tags(file: dict, pipeline_tags: list) -> list:
     return sorted_tags
 
 
-def build_bundle(config_data: dict, analysisinfo_data: dict, deliverables: dict) -> dict:
+def build_bundle(
+    config_data: dict, analysisinfo_data: dict, deliverables: dict
+) -> dict:
     """Create a new bundle to store in Housekeeper"""
 
     pipeline = config_data["samples"][0]["type"]
@@ -103,15 +105,51 @@ def build_bundle(config_data: dict, analysisinfo_data: dict, deliverables: dict)
     return data
 
 
-def _convert_tags(data):
+def _convert_tags(data: list):
     """ Convert tags from deliverables tags to MIP standard tags """
+
     for deliverables_tags, mip_tags in MIP_TAGS.items():
         for file in data:
             if all(tag in file["tags"] for tag in deliverables_tags):
-                tags_filtered = list(filter(lambda x: x not in deliverables_tags, file["tags"]))
-                converted_tags = tags_filtered + mip_tags
+                tags_filtered = list(
+                    filter(lambda x: x not in deliverables_tags, file["tags"])
+                )
+                converted_tags = tags_filtered + mip_tags["tags"]
                 file["tags"] = converted_tags
 
 
-def _check_mandatory_tags(data):
-    """ Check if all the mandatory tags are present. Raise an exception if not. """
+def _check_mandatory_tags(files: list):
+    """
+        Check if all the mandatory tags are present for the files to be added to Housekeeper.
+        Raise an exception if not.
+    """
+
+    breakpoint()
+    all_deliverable_tags = [file["tags"] for file in files]
+    all_mandatory_tags = [tag for tag in MIP_TAGS if MIP_TAGS[tag]["is_mandatory"]]
+    deliverable_tags = _flatten(all_deliverable_tags)
+    mandatory_tags = _flatten(all_mandatory_tags)
+
+    tags_are_missing, missing_tags = _determine_missing_files(
+        mandatory_tags, deliverable_tags
+    )
+
+    if tags_are_missing:
+        raise MandatoryFilesMissing(
+            f"Mandatory files are missing! These are the missing tags: {missing_tags}."
+        )
+
+
+def _determine_missing_files(mandatory_tags: set, found_tags: set) -> tuple:
+    """Determines if mandatory are missing, and which ones"""
+
+    missing_tags = mandatory_tags.difference(found_tags)
+    are_tags_missing = bool(len(missing_tags) > 0)
+
+    return are_tags_missing, missing_tags
+
+
+def _flatten(nested_list: list) -> set:
+    """ Flattens a nested tag list and returns all unique tags"""
+
+    return {tag for tag_list in nested_list for tag in tag_list}
