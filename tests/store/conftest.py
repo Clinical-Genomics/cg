@@ -3,6 +3,22 @@ import datetime as dt
 
 import pytest
 
+# Files fixtures
+
+
+@pytest.fixture
+def application_versions_file(fixtures_dir):
+    """"application version import file"""
+    _file = fixtures_dir / "store/api/application_versions.xlsx"
+    return str(_file)
+
+
+@pytest.fixture
+def applications_file(fixtures_dir):
+    """"application import file"""
+    _file = fixtures_dir / "store/api/applications.xlsx"
+    return str(_file)
+
 
 @pytest.fixture(name="microbial_submitted_order")
 def fixture_microbial_submitted_order():

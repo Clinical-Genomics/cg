@@ -239,10 +239,10 @@ def files_data(files_raw):
         "rna_sampleinfo_store": store_mip_rna.parse_sampleinfo(
             files_raw["rna_sampleinfo_store"]
         ),
-        "rna_sampleinfo": mip_rna_files_api.parse_sampleinfo_rna(
-            files_raw["rna_sampleinfo"]
-        ),
     }
+
+
+# Store fixtures
 
 
 @pytest.yield_fixture(scope="function", name="store")
@@ -260,6 +260,7 @@ def fixture_base_store(store) -> Store:
     customer_group = store.add_customer_group("all_customers", "all customers")
 
     store.add_commit(customer_group)
+
     customers = [
         store.add_customer(
             "cust000",
