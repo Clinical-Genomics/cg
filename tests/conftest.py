@@ -13,30 +13,62 @@ from cg.apps.mip_rna import files as mip_rna_files_api
 from cg.meta.store import mip_rna as store_mip_rna
 from cg.store import Store
 
-pytest_plugins = [
-    "tests.apps.lims.conftest",
-    "tests.apps.loqus.conftest",
-    "tests.apps.crunchy.conftest",
-    "tests.cli.conftest",
-    "tests.delivery.conftest",
-    "tests.delivery.conftest",
-    "tests.meta.compress.conftest",
-    "tests.meta.conftest",
-    "tests.meta.orders.conftest",
-    "tests.meta.report.conftest",
-    "tests.meta.transfer.conftest",
-    "tests.meta.upload.conftest",
-    "tests.store.conftest",
-    "tests.apps.mutacc_auto.conftest",
-]
-
 CHANJO_CONFIG = {"chanjo": {"config_path": "chanjo_config", "binary_path": "chanjo"}}
 CRUNCHY_CONFIG = {
     "crunchy": {
         "cram_reference": "/path/to/fasta",
-        "slurm": {"account": "mock_account", "mail_user": "mock_mail", "conda_env": "mock_env",},
+        "slurm": {
+            "account": "mock_account",
+            "mail_user": "mock_mail",
+            "conda_env": "mock_env",
+        },
     }
 }
+
+
+@pytest.fixture(name="case_id")
+def fixture_case_id():
+    """Return a case id"""
+    return "yellowhog"
+
+
+@pytest.fixture(name="family_info")
+def fixture_family_info(case_id):
+    """Get family information in a dictionary."""
+    family = {
+        "name": "family",
+        "internal_id": case_id,
+        "panels": ["IEM", "EP"],
+        "samples": [
+            {
+                "name": "son",
+                "sex": "male",
+                "internal_id": "ADM1",
+                "father": "ADM2",
+                "mother": "ADM3",
+                "status": "affected",
+                "ticket_number": 123456,
+                "reads": 5000000,
+            },
+            {
+                "name": "father",
+                "sex": "male",
+                "internal_id": "ADM2",
+                "status": "unaffected",
+                "ticket_number": 123456,
+                "reads": 6000000,
+            },
+            {
+                "name": "mother",
+                "sex": "female",
+                "internal_id": "ADM3",
+                "status": "unaffected",
+                "ticket_number": 123456,
+                "reads": 7000000,
+            },
+        ],
+    }
+    return family
 
 
 @pytest.fixture
@@ -173,7 +205,9 @@ def fixture_files_raw(files):
         "rna_config": ruamel.yaml.safe_load(open(files["rna_config"])),
         "rna_sampleinfo": ruamel.yaml.safe_load(open(files["rna_sampleinfo"])),
         "rna_config_store": ruamel.yaml.safe_load(open(files["rna_config_store"])),
-        "rna_sampleinfo_store": ruamel.yaml.safe_load(open(files["rna_sampleinfo_store"])),
+        "rna_sampleinfo_store": ruamel.yaml.safe_load(
+            open(files["rna_sampleinfo_store"])
+        ),
     }
 
 
@@ -185,10 +219,16 @@ def files_data(files_raw):
         "sampleinfo": mip_dna_files_api.parse_sampleinfo(files_raw["sampleinfo"]),
         "qcmetrics": mip_dna_files_api.parse_qcmetrics(files_raw["qcmetrics"]),
         "rna_config": mip_dna_files_api.parse_config(files_raw["rna_config"]),
-        "rna_sampleinfo": mip_rna_files_api.parse_sampleinfo_rna(files_raw["rna_sampleinfo"]),
+        "rna_sampleinfo": mip_rna_files_api.parse_sampleinfo_rna(
+            files_raw["rna_sampleinfo"]
+        ),
         "rna_config_store": store_mip_rna.parse_config(files_raw["rna_config_store"]),
-        "rna_sampleinfo_store": store_mip_rna.parse_sampleinfo(files_raw["rna_sampleinfo_store"]),
-        "rna_sampleinfo": mip_rna_files_api.parse_sampleinfo_rna(files_raw["rna_sampleinfo"]),
+        "rna_sampleinfo_store": store_mip_rna.parse_sampleinfo(
+            files_raw["rna_sampleinfo_store"]
+        ),
+        "rna_sampleinfo": mip_rna_files_api.parse_sampleinfo_rna(
+            files_raw["rna_sampleinfo"]
+        ),
     }
 
 
@@ -374,7 +414,9 @@ def sample_store(base_store) -> Store:
     wgs_app = base_store.application("WGTPCFC030").versions[0]
     for sample in new_samples:
         sample.customer = customer
-        sample.application_version = external_app if "external" in sample.name else wgs_app
+        sample.application_version = (
+            external_app if "external" in sample.name else wgs_app
+        )
     base_store.add_commit(new_samples)
     return base_store
 

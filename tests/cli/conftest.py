@@ -1,16 +1,15 @@
 """Fixtures for cli tests"""
 from functools import partial
 
-from cg.store import Store
-from click.testing import CliRunner
 import pytest
+from click.testing import CliRunner
 
-from cg.apps import hk
 from cg.cli import base
+from cg.store import Store
 
 
-@pytest.fixture
-def cli_runner():
+@pytest.fixture(name="cli_runner")
+def fixture_cli_runner():
     """Create a CliRunner"""
     runner = CliRunner()
     return runner
@@ -152,16 +151,6 @@ def analysis_store_wes(base_store, analysis_family):
         base_store.add(link)
     base_store.commit()
     yield base_store
-
-
-class MockHkVersion(hk.models.Version):
-    """Mocked Housekeeper.Model.Version object"""
-
-
-@pytest.yield_fixture(scope="function")
-def hk_version_obj():
-    """class fixtures are not supported, so make a function out of a class"""
-    return MockHkVersion
 
 
 @pytest.fixture
