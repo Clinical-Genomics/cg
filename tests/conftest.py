@@ -8,10 +8,12 @@ import pytest
 import ruamel.yaml
 from trailblazer.mip import files as mip_dna_files_api
 
-from cg.apps.madeline.api import MadelineAPI
 from cg.apps.mip_rna import files as mip_rna_files_api
 from cg.meta.store import mip_rna as store_mip_rna
 from cg.store import Store
+
+from .mocks.hk_mock import MockHK, MockVersion
+from .mocks.madeline import MockMadelineAPI
 
 CHANJO_CONFIG = {"chanjo": {"config_path": "chanjo_config", "binary_path": "chanjo"}}
 CRUNCHY_CONFIG = {
@@ -24,6 +26,8 @@ CRUNCHY_CONFIG = {
         },
     }
 }
+
+# Case fixtures
 
 
 @pytest.fixture(name="case_id")
@@ -71,10 +75,7 @@ def fixture_family_info(case_id):
     return family
 
 
-@pytest.fixture
-def scout_load_config():
-    """Yaml file with load information from scout"""
-    return "tests/fixtures/apps/scout/643594.config.yaml"
+# Config fixtures
 
 
 @pytest.fixture
@@ -93,22 +94,16 @@ def crunchy_config_dict():
     return _config
 
 
-class MockMadelineAPI(MadelineAPI):
-    """Mock the madeline api methods"""
-
-    def __init__(self):
-        """Init mock"""
-        self._madeline_outpath = None
-
-    def run(self, family_id, samples, out_path=None):
-        """Fetch version from the database."""
-        return self._madeline_outpath
+# Object fixtures
 
 
-@pytest.fixture(name="madeline_output")
-def fixture_madeline_output():
-    """File with madeline output"""
-    return "tests/fixtures/apps/madeline/madeline.xml"
+@pytest.yield_fixture(scope="function", name="hk_version_obj")
+def fixture_hk_version_obj():
+    """class fixtures are not supported, so make a function out of a class"""
+    return MockVersion()
+
+
+# Api fixtures
 
 
 @pytest.yield_fixture(scope="function")
@@ -138,16 +133,27 @@ def fastq_orderform():
     return "tests/fixtures/orderforms/1508.20.fastq.xlsx"
 
 
-@pytest.fixture
-def metagenome_orderform():
-    """Orderform fixture for metagenome samples"""
-    return "tests/fixtures/orderforms/1605.8.metagenome.xlsx"
+# Files fixtures
+
+
+@pytest.fixture(name="fixtures_dir")
+def fixture_fixtures_dir() -> Path:
+    """Return the path to the fixtures dir"""
+    return Path("tests/fixtures")
+
+
+@pytest.fixture(name="orderforms")
+def fixture_orderform(fixtures_dir: Path) -> Path:
+    """Return the path to the directory with orderforms"""
+    _path = fixtures_dir / "orderforms"
+    return _path
 
 
 @pytest.fixture
-def microbial_orderform():
+def microbial_orderform(orderforms: Path) -> str:
     """Orderform fixture for microbial samples"""
-    return "tests/fixtures/orderforms/1603.9.microbial.xlsx"
+    _file = orderforms / "1603.9.microbial.xlsx"
+    return str(_file)
 
 
 @pytest.fixture
@@ -172,6 +178,13 @@ def mip_rna_orderform():
 def rml_orderform():
     """Orderform fixture for RML samples"""
     return "tests/fixtures/orderforms/1604.9.rml.xlsx"
+
+
+@pytest.fixture(name="madeline_output")
+def fixture_madeline_output(fixtures_dir: Path) -> str:
+    """File with madeline output"""
+    _file = fixtures_dir / "apps/madeline/madeline.xml"
+    return str(_file)
 
 
 @pytest.fixture(scope="session", name="files")

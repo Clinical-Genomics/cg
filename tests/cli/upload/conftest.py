@@ -16,6 +16,12 @@ from cg.store import Store
 LOG = logging.getLogger(__name__)
 
 
+@pytest.fixture(name="scout_load_config")
+def fixture_scout_load_config():
+    """Yaml file with load information from scout"""
+    return "tests/fixtures/apps/scout/643594.config.yaml"
+
+
 @pytest.fixture(scope="function", name="base_context")
 def fixture_base_context(analysis_store_single_case: Store) -> dict:
     """context to use in cli"""
@@ -100,8 +106,12 @@ def load_family(store, family):
             family=family,
             sample=sample_obj,
             status=sample_data["status"],
-            father=base_store.sample(sample_data["father"]) if sample_data.get("father") else None,
-            mother=base_store.sample(sample_data["mother"]) if sample_data.get("mother") else None,
+            father=base_store.sample(sample_data["father"])
+            if sample_data.get("father")
+            else None,
+            mother=base_store.sample(sample_data["mother"])
+            if sample_data.get("mother")
+            else None,
         )
         base_store.add(link)
 
