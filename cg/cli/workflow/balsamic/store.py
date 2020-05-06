@@ -77,7 +77,7 @@ def analysis(context, case_id, deliverables_file_path, config_path):
     except Exception as error:
         hk_api.rollback()
         status.rollback()
-        raise StoreError(error.__str__)
+        raise StoreError(str(error))
 
     status.add_commit(new_analysis)
     click.echo(click.style("Included files in Housekeeper", fg="green"))
