@@ -14,6 +14,7 @@ from cg.store import Store
 
 from .mocks.hk_mock import MockHK, MockVersion
 from .mocks.madeline import MockMadelineAPI
+from .store_helpers import Helpers
 
 CHANJO_CONFIG = {"chanjo": {"config_path": "chanjo_config", "binary_path": "chanjo"}}
 CRUNCHY_CONFIG = {
@@ -240,6 +241,15 @@ def files_data(files_raw):
             files_raw["rna_sampleinfo_store"]
         ),
     }
+
+
+# Helper fixtures
+
+
+@pytest.fixture(name="helpers")
+def fixture_helpers():
+    """Return a class with helper functions"""
+    return Helpers()
 
 
 # Store fixtures
