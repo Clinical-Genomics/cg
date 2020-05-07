@@ -8,20 +8,19 @@ from cg.store import Store, models
 class Helpers:
     """Class to hold helper functions that needs to be used all over"""
 
-    @staticmethod
     def ensure_application_version(
-        store: Store, application_tag: str = "dummy_tag", application_type: str = "tgs"
+        self,
+        store: Store,
+        application_tag: str = "dummy_tag",
+        application_type: str = "wgs",
+        is_external: bool = False,
     ) -> models.ApplicationVersion:
         """utility function to return existing or create application version for tests"""
         application = store.application(tag=application_tag)
         if not application:
-            application = store.add_application(
-                tag=application_tag,
-                category=application_type,
-                percent_kth=80,
-                description="dummy_description",
+            application = self.add_application(
+                store, application_tag, application_type, is_external=is_external
             )
-            store.add_commit(application)
 
         prices = {"standard": 10, "priority": 20, "express": 30, "research": 5}
         version = store.application_version(application, 1)
@@ -32,6 +31,24 @@ class Helpers:
 
             store.add_commit(version)
         return version
+
+    @staticmethod
+    def add_application(
+        store: Store,
+        application_tag: str = "dummy_tag",
+        application_type: str = "wgs",
+        is_external: bool = False,
+    ) -> models.Application:
+        """utility function to add a application to a store"""
+        application = store.add_application(
+            tag=application_tag,
+            category=application_type,
+            is_external=is_external,
+            percent_kth=80,
+            description="dummy_description",
+        )
+        store.add_commit(application)
+        return application
 
     @staticmethod
     def ensure_bed_version(
@@ -112,14 +129,19 @@ class Helpers:
         gender: str = "female",
         delivered_at: datetime = None,
         is_tumour: bool = False,
+        is_external: bool = False,
         data_analysis: str = "balsamic",
         application_tag: str = "dummy_tag",
         application_type: str = "tgs",
+        flowcell: models.Flowcell = None,
     ) -> models.Sample:
         """utility function to add a sample to use in tests"""
         customer = self.ensure_customer(store)
         application_version_id = self.ensure_application_version(
-            store, application_tag=application_tag, application_type=application_type
+            store,
+            application_tag=application_tag,
+            application_type=application_type,
+            is_external=is_external,
         ).id
         sample = store.add_sample(
             name=sample_id,
@@ -131,8 +153,14 @@ class Helpers:
 
         sample.application_version_id = application_version_id
         sample.customer = customer
+        sample.is_external = is_external
+
         if delivered_at:
             sample.delivered_at = delivered_at
+
+        if flowcell:
+            sample.flowcells.append(flowcell)
+
         store.add_commit(sample)
         return sample
 
@@ -240,3 +268,12 @@ class Helpers:
 
         store.add_commit(flowcell_obj)
         return flowcell_obj
+
+    @staticmethod
+    def add_relationship(
+        store: Store, sample: models.Sample, family: models.Family
+    ) -> models.FamilySample:
+        """utility function to link a sample to a family"""
+        link = store.relate_sample(sample=sample, family=family, status="unknown")
+        store.add_commit(link)
+        return link
