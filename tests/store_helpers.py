@@ -115,7 +115,7 @@ class Helpers:
         data_analysis: str = "balsamic",
         application_tag: str = "dummy_tag",
         application_type: str = "tgs",
-    ):
+    ) -> models.Sample:
         """utility function to add a sample to use in tests"""
         customer = self.ensure_customer(store)
         application_version_id = self.ensure_application_version(
@@ -136,12 +136,14 @@ class Helpers:
         store.add_commit(sample)
         return sample
 
-    def ensure_panel(self, disk_store, panel_id="panel_test", customer_id="cust_test"):
+    def ensure_panel(
+        self, store: Store, panel_id: str = "panel_test", customer_id: str = "cust_test"
+    ) -> models.Panel:
         """utility function to add a panel to use in tests"""
-        customer = self.ensure_customer(disk_store, customer_id)
-        panel = disk_store.panel(panel_id)
+        customer = self.ensure_customer(store, customer_id)
+        panel = store.panel(panel_id)
         if not panel:
-            panel = disk_store.add_panel(
+            panel = store.add_panel(
                 customer=customer,
                 name=panel_id,
                 abbrev=panel_id,
@@ -149,25 +151,34 @@ class Helpers:
                 date=datetime.now(),
                 genes=1,
             )
-            disk_store.add_commit(panel)
+            store.add_commit(panel)
         return panel
 
-    def add_family(self, disk_store, family_id="family_test", customer_id="cust_test"):
+    def add_family(
+        self,
+        store: Store,
+        family_id: str = "family_test",
+        customer_id: str = "cust_test",
+    ) -> models.Family:
         """utility function to add a family to use in tests"""
-        panel = self.ensure_panel(disk_store)
-        customer = self.ensure_customer(disk_store, customer_id)
-        family = disk_store.add_family(name=family_id, panels=panel.name)
+        panel = self.ensure_panel(store)
+        customer = self.ensure_customer(store, customer_id)
+        family = store.add_family(name=family_id, panels=panel.name)
         family.customer = customer
-        disk_store.add_commit(family)
+        store.add_commit(family)
         return family
 
     @staticmethod
-    def add_organism(store):
+    def add_organism(
+        store: Store, internal_id: str = "organism_id", name: str = "organism_name"
+    ) -> models.Organism:
         """utility function to add an organism to use in tests"""
-        organism = store.add_organism(internal_id="organism_id", name="organism_name")
+        organism = store.add_organism(internal_id=internal_id, name=name)
         return organism
 
-    def add_microbial_sample(self, store, sample_id="sample_test"):
+    def add_microbial_sample(
+        self, store: Store, sample_id: str = "sample_test"
+    ) -> models.MicrobialSample:
         """utility function to add a sample to use in tests"""
         customer = self.ensure_customer(store)
         application_version = self.ensure_application_version(store)
@@ -183,8 +194,11 @@ class Helpers:
         return sample
 
     def add_microbial_sample_and_order(
-        self, store, order_id="sample_test", customer_id="cust_test"
-    ):
+        self,
+        store: Store,
+        order_id: str = "sample_test",
+        customer_id: str = "cust_test",
+    ) -> models.MicrobialSample:
         """utility function to set a family to use in tests"""
         customer = self.ensure_customer(store, customer_id)
         with store.session.no_autoflush:
@@ -197,8 +211,22 @@ class Helpers:
         store.add_commit(sample)
         return sample
 
+    def add_samples(self, store: Store, nr_samples: int = 5) -> list:
+        """utility function to add a number of samples to use in tests"""
+        samples = []
+        if nr_samples < 2:
+            nr_samples = 2
+        for sample_id in range(1, nr_samples):
+            samples.append(self.add_sample(store, str(sample_id)))
+        return samples
+
     @staticmethod
-    def add_flowcell(store, flowcell_id="flowcell_test"):
+    def add_flowcell(
+        store: Store,
+        flowcell_id: str = "flowcell_test",
+        archived_at: datetime = None,
+        samples: list = None,
+    ) -> models.Flowcell:
         """utility function to set a flowcell to use in tests"""
         flowcell_obj = store.add_flowcell(
             name=flowcell_id,
@@ -206,5 +234,9 @@ class Helpers:
             sequencer_type="hiseqx",
             date=datetime.now(),
         )
+        flowcell_obj.archived_at = archived_at
+        if samples:
+            flowcell_obj.samples = samples
+
         store.add_commit(flowcell_obj)
         return flowcell_obj
