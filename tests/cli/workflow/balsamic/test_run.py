@@ -18,11 +18,11 @@ def test_without_options(cli_runner):
     assert "Missing argument" in result.output
 
 
-def test_with_case(cli_runner, balsamic_context):
+def test_with_case(cli_runner, balsamic_context, balsamic_case):
     """Test command with case to start with"""
 
     # GIVEN case-id, and malconfigured pipeline
-    case_id = "soberelephant"
+    case_id = balsamic_case.internal_id
 
     context = balsamic_context
 
@@ -33,11 +33,11 @@ def test_with_case(cli_runner, balsamic_context):
     assert result.exit_code == EXIT_SUCCESS
 
 
-def test_dry(cli_runner, balsamic_context):
+def test_dry(cli_runner, balsamic_context, balsamic_case):
     """Test command with dry option"""
 
     # GIVEN case-id
-    case_id = "sillyshark"
+    case_id = balsamic_case.internal_id
 
     context = balsamic_context
 
@@ -50,11 +50,11 @@ def test_dry(cli_runner, balsamic_context):
     assert case_id in result.output
 
 
-def test_run_analysis(cli_runner, balsamic_context):
+def test_run_analysis(cli_runner, balsamic_context, balsamic_case):
     """Test command with run-analysis option"""
 
     # GIVEN case-id
-    case_id = "slimwhale"
+    case_id = balsamic_case.internal_id
 
     context = balsamic_context
 
@@ -66,11 +66,12 @@ def test_run_analysis(cli_runner, balsamic_context):
     assert "--run-analysis" in result.output
 
 
-def test_config(cli_runner, balsamic_context):
+def test_config(cli_runner, balsamic_context, balsamic_case):
+
     """Test command with config option"""
 
     # GIVEN case-id
-    case_id = "analogeel"
+    case_id = balsamic_case.internal_id
     option_key = "--config"
     option_value = "config-path"
 
@@ -85,11 +86,11 @@ def test_config(cli_runner, balsamic_context):
     assert case_id not in result.output
 
 
-def test_email(cli_runner, balsamic_context):
+def test_email(cli_runner, balsamic_context, balsamic_case):
     """Test command with config option"""
 
     # GIVEN case-id
-    case_id = "mightymonkey"
+    case_id = balsamic_case.internal_id
     option_key = "--email"
     option_value = "salmon.moose@test.com"
 
@@ -104,11 +105,11 @@ def test_email(cli_runner, balsamic_context):
     assert option_value in result.output
 
 
-def test_priority(cli_runner, balsamic_context):
+def test_priority(cli_runner, balsamic_context, balsamic_case):
     """Test command with priority option"""
 
     # GIVEN case-id
-    case_id = "weakgorilla"
+    case_id = balsamic_case.internal_id
     option_key = "--priority"
     option_value = "high"
 
