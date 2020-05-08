@@ -21,18 +21,12 @@ def base_context(microsalt_store, lims_api, tmpdir, queries_path):
     return {
         "db": microsalt_store,
         "lims_microsalt_api": microsalt_api,
-        "usalt": {
-            "root": tmpdir,
-            "queries_path": queries_path,
-            "binary_path": "/bin/true",
-        },
+        "usalt": {"root": tmpdir, "queries_path": queries_path, "binary_path": "/bin/true"},
     }
 
 
 @pytest.fixture(scope="function")
-def microsalt_store(
-    base_store: Store, microbial_sample_id, microbial_order_id
-) -> Store:
+def microsalt_store(base_store: Store, microbial_sample_id, microbial_order_id) -> Store:
     """ Filled in store to be used in the tests """
     _store = base_store
 
@@ -108,19 +102,14 @@ def ensure_application_version(
     application = disk_store.application(tag=application_tag)
     if not application:
         application = disk_store.add_application(
-            tag=application_tag,
-            category="wgs",
-            description="dummy_description",
-            percent_kth=0,
+            tag=application_tag, category="wgs", description="dummy_description", percent_kth=0
         )
         disk_store.add_commit(application)
 
     prices = {"standard": 10, "priority": 20, "express": 30, "research": 5}
     version = disk_store.application_version(application, 1)
     if not version:
-        version = disk_store.add_version(
-            application, 1, valid_from=datetime.now(), prices=prices
-        )
+        version = disk_store.add_version(application, 1, valid_from=datetime.now(), prices=prices)
 
         disk_store.add_commit(version)
     return version
@@ -147,7 +136,11 @@ def ensure_microbial_order(
     """utility function to return an existing or create a microbial order for tests"""
     customer = ensure_customer(disk_store, customer_id)
     order = disk_store.add_microbial_order(
-        customer=customer, internal_id=internal_id, name=name, ordered=datetime.now(), ticket_number=123456
+        customer=customer,
+        internal_id=internal_id,
+        name=name,
+        ordered=datetime.now(),
+        ticket_number=123456,
     )
     disk_store.add_commit(order)
 
