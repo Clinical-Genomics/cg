@@ -147,7 +147,7 @@ def ensure_microbial_order(
     """utility function to return an existing or create a microbial order for tests"""
     customer = ensure_customer(disk_store, customer_id)
     order = disk_store.add_microbial_order(
-        customer=customer, internal_id=internal_id, name=name, ordered=datetime.now()
+        customer=customer, internal_id=internal_id, name=name, ordered=datetime.now(), ticket_number=123456
     )
     disk_store.add_commit(order)
 

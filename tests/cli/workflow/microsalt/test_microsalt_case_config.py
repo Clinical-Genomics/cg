@@ -81,7 +81,6 @@ def test_no_sample_order_found(cli_runner, base_context, caplog):
 
 def test_dry_sample(cli_runner, base_context, microbial_sample_id, snapshot: Snapshot):
     """Test working dry command for sample"""
-
     # GIVEN
 
     # WHEN dry running a sample name
