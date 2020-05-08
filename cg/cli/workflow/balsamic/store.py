@@ -74,10 +74,10 @@ def analysis(context, case_id, deliverables_file_path, config_path):
         new_analysis = gather_files_and_bundle_in_housekeeper(
             config_path, deliverables_file_path, hk_api, status, case_obj
         )
-    except Exception as error:
+    except Exception:
         hk_api.rollback()
         status.rollback()
-        raise StoreError(str(error))
+        raise StoreError(sys.exc_info()[0])
 
     status.add_commit(new_analysis)
     click.echo(click.style("Included files in Housekeeper", fg="green"))

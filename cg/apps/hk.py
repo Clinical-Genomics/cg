@@ -74,6 +74,10 @@ class HousekeeperAPI:
         """ Wrap method in Housekeeper Store """
         return self._store.commit()
 
+    def rollback(self):
+        """ Wrap method in Housekeeper Store """
+        return self._store.rollback()
+
     def session_no_autoflush(self):
         """ Wrap property in Housekeeper Store """
         return self._store.session.no_autoflush
