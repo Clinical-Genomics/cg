@@ -100,8 +100,13 @@ def samples(context, days: int):
         "Selecting raw, will only load raw data."
     ),
 )
+@click.option(
+        "--dry/--no-dry",
+        default=False,
+        help="Dry run..."
+        )
 @click.pass_context
-def bioinfo(context, case_name, cleanup, target_load):
+def bioinfo(context, case_name, cleanup, target_load, dry):
     """Load bioinfo case results to the trending database"""
 
     click.echo(click.style("----------------- BIOINFO -----------------------"))
@@ -132,15 +137,21 @@ def bioinfo(context, case_name, cleanup, target_load):
         load_bioinfo_raw_inputs["analysis_workflow_version"],
     ) = _get_analysis_workflow_details(context, case_name)
 
+    if dry:
+        click.echo(click.style("----------------- DRY RUN -----------------------"))
+
     if target_load in ("raw", "all"):
         click.echo(click.style("----------------- UPLOAD UNPROCESSED -----------------------"))
-        context.obj["vogue_upload_api"].load_bioinfo_raw(load_bioinfo_raw_inputs)
+        if not dry:
+            context.obj["vogue_upload_api"].load_bioinfo_raw(load_bioinfo_raw_inputs)
 
     if target_load in ("process", "all"):
         click.echo(click.style("----------------- PROCESS CASE -----------------------"))
-        context.obj["vogue_upload_api"].load_bioinfo_process(load_bioinfo_raw_inputs, cleanup)
+        if not dry:
+            context.obj["vogue_upload_api"].load_bioinfo_process(load_bioinfo_raw_inputs, cleanup)
         click.echo(click.style("----------------- PROCESS SAMPLE -----------------------"))
-        context.obj["vogue_upload_api"].load_bioinfo_sample(load_bioinfo_raw_inputs)
+        if not dry:
+            context.obj["vogue_upload_api"].load_bioinfo_sample(load_bioinfo_raw_inputs)
 
 
 def _get_multiqc_latest_file(context, case_name):
