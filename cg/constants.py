@@ -89,19 +89,10 @@ MIP_TAGS = {
         "tags": ["snv-gbcf", "snv-bcf"],
         "is_mandatory": True,
     },
-    tuple(["sv_combinevariantcallsets", "bcf"]): {
-        "tags": ["sv-bcf"],
-        "is_mandatory": True,
-    },
-    tuple(["peddy_ar", "ped_check"]): {
-        "tags": ["peddy", "ped-check"],
-        "is_mandatory": True,
-    },
+    tuple(["sv_combinevariantcallsets", "bcf"]): {"tags": ["sv-bcf"], "is_mandatory": True,},
+    tuple(["peddy_ar", "ped_check"]): {"tags": ["peddy", "ped-check"], "is_mandatory": True,},
     tuple(["peddy_ar", "peddy"]): {"tags": ["peddy", "ped"], "is_mandatory": True,},
-    tuple(["peddy_ar", "sex_check"]): {
-        "tags": ["peddy", "sex-check"],
-        "is_mandatory": True,
-    },
+    tuple(["peddy_ar", "sex_check"]): {"tags": ["peddy", "sex-check"], "is_mandatory": True,},
     tuple(["version_collect_ar"]): {"tags": ["exe-ver"], "is_mandatory": True,},
     tuple(["sv_str"]): {"tags": ["vcf-str"], "is_mandatory": True,},
     tuple(["clinical", "endvariantannotationblock"]): {
@@ -112,18 +103,9 @@ MIP_TAGS = {
         "tags": ["vcf-snv-research"],
         "is_mandatory": True,
     },
-    tuple(["clinical", "sv_reformat"]): {
-        "tags": ["vcf-sv-clinical"],
-        "is_mandatory": False,
-    },
-    tuple(["research", "sv_reformat"]): {
-        "tags": ["vcf-sv-research"],
-        "is_mandatory": False,
-    },
-    tuple(["samtools_subsample_mt", "bam"]): {
-        "tags": ["bam-mt"],
-        "is_mandatory": False,
-    },
+    tuple(["clinical", "sv_reformat"]): {"tags": ["vcf-sv-clinical"], "is_mandatory": False,},
+    tuple(["research", "sv_reformat"]): {"tags": ["vcf-sv-research"], "is_mandatory": False,},
+    tuple(["samtools_subsample_mt", "bam"]): {"tags": ["bam-mt"], "is_mandatory": False,},
     tuple(["chromograph_ar"]): {"tags": ["chromograph"], "is_mandatory": False,},
     tuple(["vcf2cytosure_ar"]): {"tags": ["vcf2cytosure"], "is_mandatory": False,},
 }

@@ -40,21 +40,15 @@ def analysis(context, config_stream):
 
     if not config_stream:
         LOG.error("provide a config, suggestions:")
-        suggested_wgs_analyses = tb_api.analyses(
-            status="completed", type="wgs", deleted=False
-        )[:25]
-        suggested_wes_analyses = tb_api.analyses(
-            status="completed", type="wes", deleted=False
-        )[:25]
+        suggested_wgs_analyses = tb_api.analyses(status="completed", type="wgs", deleted=False)[:25]
+        suggested_wes_analyses = tb_api.analyses(status="completed", type="wes", deleted=False)[:25]
         for suggested_analyses in (suggested_wgs_analyses, suggested_wes_analyses):
             for analysis_obj in suggested_analyses:
                 click.echo(analysis_obj.config_path)
         context.abort()
 
     try:
-        new_analysis = gather_files_and_bundle_in_housekeeper(
-            config_stream, hk_api, status,
-        )
+        new_analysis = gather_files_and_bundle_in_housekeeper(config_stream, hk_api, status,)
     except AnalysisNotFinishedError as error:
         click.echo(click.style(error.message, fg="red"))
         context.abort()
@@ -85,14 +79,10 @@ def completed(context):
     hk_api = context.obj["hk_api"]
 
     exit_code = SUCCESS
-    for analysis_obj in context.obj["tb_api"].analyses(
-        status="completed", deleted=False
-    ):
+    for analysis_obj in context.obj["tb_api"].analyses(status="completed", deleted=False):
         existing_record = hk_api.version(analysis_obj.family, analysis_obj.started_at)
         if existing_record:
-            LOG.debug(
-                "analysis stored: %s - %s", analysis_obj.family, analysis_obj.started_at
-            )
+            LOG.debug("analysis stored: %s - %s", analysis_obj.family, analysis_obj.started_at)
             continue
         click.echo(click.style(f"storing family: {analysis_obj.family}", fg="blue"))
         with Path(analysis_obj.config_path).open() as config_stream:

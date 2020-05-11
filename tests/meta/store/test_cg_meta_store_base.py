@@ -20,9 +20,7 @@ def test_build_bundle(
 
     # WHEN building the bundle
     mock_missing.return_value = False, []
-    mip_rna_bundle = store_base.build_bundle(
-        config_data, sampleinfo_data, deliverables_raw
-    )
+    mip_rna_bundle = store_base.build_bundle(config_data, sampleinfo_data, deliverables_raw)
 
     # THEN the result should contain the data to be stored in Housekeeper
     snapshot.assert_match(mip_rna_bundle)
