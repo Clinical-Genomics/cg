@@ -1,4 +1,4 @@
-"""Test MIP RNA get files and build bundle"""
+"""Test MIP get files and build bundle"""
 import mock
 import pytest
 
@@ -39,8 +39,8 @@ def test_gather_files_and_bundle_in_hk_bundle_already_added(
 @mock.patch("cg.store.Store")
 @mock.patch("housekeeper.store.models")
 @mock.patch("cg.apps.hk.HousekeeperAPI")
-@mock.patch("cg.meta.store.base.reset_case_action")
-@mock.patch("cg.meta.store.base.add_new_analysis")
+@mock.patch("cg.meta.store.mip.reset_case_action")
+@mock.patch("cg.meta.store.mip.add_new_analysis")
 @mock.patch("cg.meta.store.mip.add_analysis")
 def test_gather_files_and_bundle_in_hk_bundle_new_analysis(
     mock_add_analysis,
@@ -78,7 +78,7 @@ def test_gather_files_and_bundle_in_hk_bundle_new_analysis(
     mock_housekeeper_api.add_commit.assert_called_with(mock_bundle, mock_version)
 
 
-@mock.patch("cg.meta.store.base.build_bundle")
+@mock.patch("cg.meta.store.mip.build_bundle")
 @mock.patch("cg.meta.store.mip.parse_sampleinfo")
 @mock.patch("cg.meta.store.mip.parse_config")
 def test_add_analysis_finished(
