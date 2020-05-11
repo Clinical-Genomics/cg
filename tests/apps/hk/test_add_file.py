@@ -1,11 +1,7 @@
-""" Test the osticket app """
+""" Test adding files with housekeeper api """
 
-import logging
-
-import pytest
 
 from cg.apps.hk import HousekeeperAPI
-from cg.exc import TicketCreationError
 
 
 def test_add_file_with_flat_tag(housekeeper_api, mocker):
