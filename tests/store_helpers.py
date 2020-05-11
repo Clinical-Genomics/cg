@@ -138,6 +138,7 @@ class Helpers:
         gender: str = "female",
         delivered_at: datetime = None,
         is_tumour: bool = False,
+        is_rna: bool = False,
         is_external: bool = False,
         data_analysis: str = "balsamic",
         application_tag: str = "dummy_tag",
@@ -151,6 +152,7 @@ class Helpers:
             application_tag=application_tag,
             application_type=application_type,
             is_external=is_external,
+            is_rna=is_rna,
         ).id
         sample = store.add_sample(
             name=sample_id,
@@ -298,9 +300,12 @@ class Helpers:
 
     @staticmethod
     def add_relationship(
-        store: Store, sample: models.Sample, family: models.Family
+        store: Store,
+        sample: models.Sample,
+        family: models.Family,
+        status: str = "unknown",
     ) -> models.FamilySample:
         """utility function to link a sample to a family"""
-        link = store.relate_sample(sample=sample, family=family, status="unknown")
+        link = store.relate_sample(sample=sample, family=family, status=status)
         store.add_commit(link)
         return link

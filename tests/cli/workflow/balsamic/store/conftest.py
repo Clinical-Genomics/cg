@@ -1,12 +1,11 @@
 """Fixtures for cli balsamic tests"""
 from datetime import datetime
+
 import pytest
 
 from cg.apps.hk import HousekeeperAPI
-from cg.store import Store, models
 from cg.apps.tb import TrailblazerAPI
-
-from tests.store_helpers import ensure_customer, add_family, add_sample
+from cg.store import Store, models
 
 
 @pytest.fixture
@@ -107,22 +106,22 @@ class MockFile:
         self.full_path = path
 
 
-@pytest.fixture(scope="function")
-def balsamic_store(base_store: Store) -> Store:
+@pytest.fixture(scope="function", name="balsamic_store")
+def fixture_balsamic_store(base_store: Store, helpers) -> Store:
     """real store to be used in tests"""
     _store = base_store
 
-    case = add_family(_store, "balsamic_case")
-    tumour_sample = add_sample(_store, "tumour_sample", is_tumour=True)
-    normal_sample = add_sample(_store, "normal_sample", is_tumour=False)
-    _store.relate_sample(case, tumour_sample, status="unknown")
-    _store.relate_sample(case, normal_sample, status="unknown")
+    case = helpers.add_family(_store, "balsamic_case")
+    tumour_sample = helpers.add_sample(_store, "tumour_sample", is_tumour=True)
+    normal_sample = helpers.add_sample(_store, "normal_sample", is_tumour=False)
+    helpers.add_relationship(_store, family=case, sample=tumour_sample)
+    helpers.add_relationship(_store, family=case, sample=normal_sample)
 
-    case = add_family(_store, "mip_case")
-    normal_sample = add_sample(_store, "normal_sample", is_tumour=False, data_analysis="mip")
-    _store.relate_sample(case, normal_sample, status="unknown")
-
-    _store.commit()
+    case = helpers.add_family(_store, "mip_case")
+    normal_sample = helpers.add_sample(
+        _store, "normal_sample", is_tumour=False, data_analysis="mip"
+    )
+    helpers.add_relationship(_store, family=case, sample=normal_sample)
 
     return _store
 
@@ -146,12 +145,16 @@ def deliverables_file_tags():
 
 
 @pytest.fixture(scope="function")
-def balsamic_case(analysis_store) -> models.Family:
+def balsamic_case(analysis_store, helpers) -> models.Family:
     """case with balsamic data_type"""
-    return analysis_store.find_family(ensure_customer(analysis_store), "balsamic_case")
+    return analysis_store.find_family(
+        helpers.ensure_customer(analysis_store), "balsamic_case"
+    )
 
 
 @pytest.fixture(scope="function")
-def mip_case(analysis_store) -> models.Family:
+def mip_case(analysis_store, helpers) -> models.Family:
     """case with balsamic data_type"""
-    return analysis_store.find_family(ensure_customer(analysis_store), "mip_case")
+    return analysis_store.find_family(
+        helpers.ensure_customer(analysis_store), "mip_case"
+    )

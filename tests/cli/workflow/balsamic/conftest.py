@@ -1,13 +1,12 @@
 """Fixtures for cli balsamic tests"""
 
 import pytest
+
 from cg.apps.balsamic.fastq import FastqHandler
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.meta.workflow.balsamic import AnalysisAPI
 from cg.store import Store, models
-
-from tests.store_helpers import ensure_bed_version, ensure_customer, add_sample, add_family
 
 
 @pytest.fixture
@@ -119,60 +118,70 @@ class MockFastq(FastqHandler):
         pass
 
 
-@pytest.fixture(scope="function")
-def balsamic_store(base_store: Store, lims_api) -> Store:
+@pytest.fixture(scope="function", name="balsamic_store")
+def fixture_balsamic_store(base_store: Store, lims_api, helpers) -> Store:
     """real store to be used in tests"""
     _store = base_store
 
-    case = add_family(_store, "balsamic_case")
-    tumour_sample = add_sample(_store, "tumour_sample", is_tumour=True, application_type="tgs")
-    normal_sample = add_sample(_store, "normal_sample", is_tumour=False, application_type="tgs")
-    _store.relate_sample(case, tumour_sample, status="unknown")
-    _store.relate_sample(case, normal_sample, status="unknown")
+    case = helpers.add_family(_store, "balsamic_case")
+    tumour_sample = helpers.add_sample(
+        _store, "tumour_sample", is_tumour=True, application_type="tgs"
+    )
+    normal_sample = helpers.add_sample(
+        _store, "normal_sample", is_tumour=False, application_type="tgs"
+    )
+    helpers.add_relationship(_store, family=case, sample=tumour_sample)
+    helpers.add_relationship(_store, family=case, sample=normal_sample)
 
-    case = add_family(_store, "mip_case")
-    normal_sample = add_sample(_store, "normal_sample", is_tumour=False, data_analysis="mip")
-    _store.relate_sample(case, normal_sample, status="unknown")
+    case = helpers.add_family(_store, "mip_case")
+    normal_sample = helpers.add_sample(
+        _store, "normal_sample", is_tumour=False, data_analysis="mip"
+    )
+    helpers.add_relationship(_store, family=case, sample=normal_sample)
 
     bed_name = lims_api.capture_kit(tumour_sample.internal_id)
-    ensure_bed_version(_store, bed_name)
+    helpers.ensure_bed_version(_store, bed_name)
 
-    case_wgs = add_family(_store, "balsamic_case_wgs")
-    tumour_sample_wgs = add_sample(
+    case_wgs = helpers.add_family(_store, "balsamic_case_wgs")
+    tumour_sample_wgs = helpers.add_sample(
         _store,
         "tumour_sample_wgs",
         is_tumour=True,
         application_tag="dummy_tag_wgs",
         application_type="wgs",
     )
-    normal_sample_wgs = add_sample(
+    normal_sample_wgs = helpers.add_sample(
         _store,
         "normal_sample_wgs",
         is_tumour=False,
         application_tag="dummy_tag_wgs",
         application_type="wgs",
     )
-    _store.relate_sample(case_wgs, tumour_sample_wgs, status="unknown")
-    _store.relate_sample(case_wgs, normal_sample_wgs, status="unknown")
-
-    _store.commit()
+    helpers.add_relationship(_store, family=case_wgs, sample=tumour_sample_wgs)
+    helpers.add_relationship(_store, family=case_wgs, sample=normal_sample_wgs)
 
     return _store
 
 
 @pytest.fixture(scope="function")
-def balsamic_case(analysis_store) -> models.Family:
+def balsamic_case(analysis_store, helpers) -> models.Family:
     """case with balsamic data_type"""
-    return analysis_store.find_family(ensure_customer(analysis_store), "balsamic_case")
+    return analysis_store.find_family(
+        helpers.ensure_customer(analysis_store), "balsamic_case"
+    )
 
 
 @pytest.fixture(scope="function")
-def balsamic_case_wgs(analysis_store) -> models.Family:
+def balsamic_case_wgs(analysis_store, helpers) -> models.Family:
     """case with balsamic data_type"""
-    return analysis_store.find_family(ensure_customer(analysis_store), "balsamic_case_wgs")
+    return analysis_store.find_family(
+        helpers.ensure_customer(analysis_store), "balsamic_case_wgs"
+    )
 
 
 @pytest.fixture(scope="function")
-def mip_case(analysis_store) -> models.Family:
+def mip_case(analysis_store, helpers) -> models.Family:
     """case with balsamic data_type"""
-    return analysis_store.find_family(ensure_customer(analysis_store), "mip_case")
+    return analysis_store.find_family(
+        helpers.ensure_customer(analysis_store), "mip_case"
+    )
