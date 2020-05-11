@@ -14,8 +14,13 @@ class Helpers:
         application_tag: str = "dummy_tag",
         application_type: str = "wgs",
         is_external: bool = False,
+        is_rna: bool = False,
     ) -> models.ApplicationVersion:
         """utility function to return existing or create application version for tests"""
+        if is_rna:
+            application_tag = "rna_tag"
+            application_type = "wts"
+
         application = store.application(tag=application_tag)
         if not application:
             application = self.add_application(
@@ -100,9 +105,11 @@ class Helpers:
         family: models.Family = None,
         completed_at: datetime = None,
         uploaded_at: datetime = None,
+        upload_started: datetime = None,
         delivery_reported_at: datetime = None,
         pipeline: str = "dummy_pipeline",
         pipeline_version: str = "1.0",
+        uploading: bool = False,
     ) -> models.Analysis:
         """Utility function to add an analysis for tests"""
 
@@ -114,9 +121,11 @@ class Helpers:
         if completed_at:
             analysis.completed_at = completed_at
         if uploaded_at:
-            analysis.uploaded_at = completed_at
+            analysis.uploaded_at = uploaded_at
         if delivery_reported_at:
             analysis.delivery_report_created_at = delivery_reported_at
+        if uploading:
+            analysis.upload_started_at = upload_started or datetime.now()
 
         analysis.family = family
         store.add_commit(analysis)
@@ -189,8 +198,8 @@ class Helpers:
         customer_id: str = "cust_test",
     ) -> models.Family:
         """utility function to add a family to use in tests"""
-        panel = self.ensure_panel(store)
         customer = self.ensure_customer(store, customer_id)
+        panel = self.ensure_panel(store)
         family = store.add_family(name=family_id, panels=panel.name)
         family.customer = customer
         store.add_commit(family)
@@ -220,6 +229,24 @@ class Helpers:
         )
         sample.customer = customer
         return sample
+
+    def add_microbial_order(
+        self, store: Store, order_id: str = "order_test", customer_id: str = "cust_test"
+    ) -> models.MicrobialOrder:
+        """utility function add a microbial order and sample"""
+        customer = self.ensure_customer(store, customer_id)
+        with store.session.no_autoflush:
+            order = store.add_microbial_order(
+                name=order_id,
+                internal_id=order_id,
+                customer=customer,
+                ordered=datetime.now(),
+            )
+            order.customer = customer
+            sample = self.add_microbial_sample(store)
+            order.microbial_samples.append(sample)
+        store.add_commit(sample)
+        return order
 
     def add_microbial_sample_and_order(
         self,
