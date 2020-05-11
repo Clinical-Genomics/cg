@@ -2,17 +2,18 @@
     Conftest file for pytest fixtures
 """
 import datetime as dt
+import shutil
 from pathlib import Path
 
 import pytest
 import ruamel.yaml
 from trailblazer.mip import files as mip_dna_files_api
 
+from cg.apps.hk import HousekeeperAPI
 from cg.apps.mip_rna import files as mip_rna_files_api
 from cg.meta.store import mip_rna as store_mip_rna
 from cg.store import Store
 
-from .mocks.hk_mock import MockHK, MockVersion
 from .mocks.madeline import MockMadelineAPI
 from .store_helpers import Helpers
 
@@ -95,15 +96,6 @@ def crunchy_config_dict():
     return _config
 
 
-# Object fixtures
-
-
-@pytest.yield_fixture(scope="function", name="hk_version_obj")
-def fixture_hk_version_obj():
-    """class fixtures are not supported, so make a function out of a class"""
-    return MockVersion()
-
-
 # Api fixtures
 
 
@@ -141,6 +133,18 @@ def fastq_orderform():
 def fixture_fixtures_dir() -> Path:
     """Return the path to the fixtures dir"""
     return Path("tests/fixtures")
+
+
+@pytest.fixture(name="analysis_dir")
+def fixture_analysis_dir(fixtures_dir) -> Path:
+    """Return the path to the analysis dir"""
+    return fixtures_dir / "analysis"
+
+
+@pytest.fixture(name="apps_dir")
+def fixture_apps_dir(fixtures_dir: Path) -> Path:
+    """Return the path to the apps dir"""
+    return fixtures_dir / "apps"
 
 
 @pytest.fixture(name="orderforms")
@@ -182,9 +186,9 @@ def rml_orderform():
 
 
 @pytest.fixture(name="madeline_output")
-def fixture_madeline_output(fixtures_dir: Path) -> str:
+def fixture_madeline_output(apps_dir: Path) -> str:
     """File with madeline output"""
-    _file = fixtures_dir / "apps/madeline/madeline.xml"
+    _file = apps_dir / "madeline/madeline.xml"
     return str(_file)
 
 
@@ -203,10 +207,24 @@ def fixture_files():
     }
 
 
+@pytest.fixture(scope="function", name="project_dir")
+def fixture_project_dir(tmpdir_factory):
+    """Path to a temporary directory where intermediate files can be stored"""
+    my_tmpdir = Path(tmpdir_factory.mktemp("data"))
+    yield my_tmpdir
+    shutil.rmtree(str(my_tmpdir))
+
+
 @pytest.fixture(scope="function")
-def tmp_file(tmp_path):
+def tmp_file(project_dir):
     """Get a temp file"""
-    return tmp_path / "test"
+    return project_dir / "test"
+
+
+@pytest.fixture(scope="function", name="bed_file")
+def fixture_bed_file(analysis_dir) -> str:
+    """Get the path to a bed file file"""
+    return str(analysis_dir / "sample_coverage.bed")
 
 
 @pytest.fixture(scope="session", name="files_raw")
@@ -250,6 +268,47 @@ def files_data(files_raw):
 def fixture_helpers():
     """Return a class with helper functions"""
     return Helpers()
+
+
+# HK fixtures
+
+
+@pytest.fixture(name="root_path")
+def fixture_root_path(project_dir: Path) -> Path:
+    """Return the path to a hk bundles dir"""
+    _root_path = project_dir / "bundles"
+    _root_path.mkdir(parents=True, exist_ok=True)
+    return _root_path
+
+
+@pytest.fixture(scope="function", name="hk_bundle_data")
+def fixture_hk_bundle_data(case_id, bed_file):
+    """Get some bundle data for housekeeper"""
+    data = {
+        "name": case_id,
+        "created": dt.datetime.now(),
+        "expires": dt.datetime.now(),
+        "files": [{"path": bed_file, "archive": False, "tags": ["bed", "sample"]}],
+    }
+    return data
+
+
+@pytest.yield_fixture(scope="function", name="housekeeper_api")
+def fixture_housekeeper_api(root_path):
+    """Setup Housekeeper store."""
+    _api = HousekeeperAPI(
+        {"housekeeper": {"database": "sqlite:///:memory:", "root": str(root_path)}}
+    )
+    _api.initialise_db()
+    yield _api
+    _api.destroy_db()
+
+
+@pytest.yield_fixture(scope="function", name="hk_version_obj")
+def fixture_hk_version_obj(housekeeper_api, bundle_data, helpers):
+    """Get a housekeeper version object"""
+    _version = helpers.ensure_version(housekeeper_api, bundle_data)
+    return _version
 
 
 # Store fixtures
@@ -403,7 +462,7 @@ def fixture_base_store(store) -> Store:
 
 @pytest.fixture(scope="function")
 def sample_store(base_store) -> Store:
-    """Populate store with samples."""
+    """Get a populated store with samples."""
     new_samples = [
         base_store.add_sample("ordered", sex="male"),
         base_store.add_sample("received", sex="unknown", received=dt.datetime.now()),

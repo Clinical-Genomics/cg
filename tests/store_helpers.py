@@ -2,11 +2,31 @@
 
 from datetime import datetime
 
+from housekeeper.store import models as hk_models
+
+from cg.apps.hk import HousekeeperAPI
 from cg.store import Store, models
 
 
 class Helpers:
     """Class to hold helper functions that needs to be used all over"""
+
+    @staticmethod
+    def ensure_bundle(store: HousekeeperAPI, bundle_data: dict) -> hk_models.Bundle:
+        """utility function to add a bundle of information to a housekeeper api"""
+        _bundle = store.bundle(bundle_data["name"])
+        if not _bundle:
+            _bundle, _version = store.add_bundle(bundle_data)
+            store.add_commit(_bundle, _version)
+        return _bundle
+
+    def ensure_version(
+        self, store: HousekeeperAPI, bundle_data: dict
+    ) -> hk_models.Version:
+        """utility function to return existing or create an version for tests"""
+        _bundle = self.ensure_bundle(store, bundle_data)
+        _version = store.last_version(_bundle)
+        return _version
 
     def ensure_application_version(
         self,
