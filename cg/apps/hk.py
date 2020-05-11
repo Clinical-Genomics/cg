@@ -5,7 +5,8 @@ import os
 from pathlib import Path
 from typing import List
 
-from housekeeper.include import include_version, checksum as hk_checksum
+from housekeeper.include import checksum as hk_checksum
+from housekeeper.include import include_version
 from housekeeper.store import Store, models
 
 LOG = logging.getLogger(__name__)
@@ -15,11 +16,15 @@ class HousekeeperAPI:
     """ API to decouple cg code from Housekeeper """
 
     def __init__(self, config):
-        self._store = Store(config["housekeeper"]["database"], config["housekeeper"]["root"])
+        self._store = Store(
+            config["housekeeper"]["database"], config["housekeeper"]["root"]
+        )
         self.root_dir = config["housekeeper"]["root"]
 
     def __getattr__(self, name):
-        LOG.warning("Called undefined %s on %s, please wrap", name, self.__class__.__name__)
+        LOG.warning(
+            "Called undefined %s on %s, please wrap", name, self.__class__.__name__
+        )
         return getattr(self._store, name)
 
     def add_bundle(self, bundle_data):
@@ -27,7 +32,11 @@ class HousekeeperAPI:
         return self._store.add_bundle(bundle_data)
 
     def new_file(
-        self, path: str, checksum: str = None, to_archive: bool = False, tags: list = None
+        self,
+        path: str,
+        checksum: str = None,
+        to_archive: bool = False,
+        tags: list = None,
     ):
         """ Create a new file """
         return self._store.new_file(path, checksum, to_archive, tags)
@@ -49,7 +58,12 @@ class HousekeeperAPI:
         return self._store.version(bundle, date)
 
     def files(
-        self, *, bundle: str = None, tags: List[str] = None, version: int = None, path: str = None
+        self,
+        *,
+        bundle: str = None,
+        tags: List[str] = None,
+        version: int = None,
+        path: str = None,
     ):
         """ Fetch files """
         return self._store.files(bundle=bundle, tags=tags, version=version, path=path)
@@ -57,6 +71,12 @@ class HousekeeperAPI:
     def new_tag(self, name: str, category: str = None):
         """ Create a new tag """
         return self._store.new_tag(name, category)
+
+    def add_tag(self, name: str, category: str = None):
+        """ Add a tag to the database """
+        tag_obj = self._store.new_tag(name, category)
+        self.add_commit(tag_obj)
+        return tag_obj
 
     def new_bundle(self, name: str, created_at: dt.datetime = None):
         """ Create a new file bundle """
@@ -127,6 +147,10 @@ class HousekeeperAPI:
         """Add a file to housekeeper."""
         if isinstance(tags, str):
             tags = [tags]
+        for tag_name in tags:
+            if not self.tag(tag_name):
+                self.add_tag(tag_name)
+
         new_file = self.new_file(
             path=str(Path(file).absolute()),
             to_archive=to_archive,
@@ -134,7 +158,6 @@ class HousekeeperAPI:
         )
 
         new_file.version = version_obj
-        self.add_commit(new_file)
         return new_file
 
     @staticmethod
