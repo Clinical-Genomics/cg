@@ -117,6 +117,11 @@ class UploadScoutAPI:
         return data
 
     @staticmethod
+    def get_load_config_tag() -> str:
+        """Get the hk tag for a scout load config"""
+        return "scout-load-config"
+
+    @staticmethod
     def save_config_file(upload_config: dict, file_path: Path):
         """Save a scout load config file to <file_path>"""
 
@@ -127,7 +132,7 @@ class UploadScoutAPI:
     @staticmethod
     def add_scout_config_to_hk(config_file_path: Path, hk_api: hk.HousekeeperAPI, case_id: str):
         """Add scout load config to hk bundle"""
-        tag_name = "scout-load-config"
+        tag_name = UploadScoutAPI.get_load_config_tag()
         version_obj = hk_api.last_version(bundle=case_id)
         uploaded_config_files = hk_api.get_files(
             bundle=case_id, tags=[tag_name], version=version_obj.id

@@ -22,7 +22,7 @@ from .delivery_report import delivery_report, delivery_report_to_scout, delivery
 from .genotype import genotypes
 from .mutacc import process_solved, processed_solved
 from .observations import observations
-from .scout import scout
+from .scout import scout, upload_case_to_scout
 from .utils import _suggest_cases_to_upload
 from .validate import validate
 
@@ -174,6 +174,7 @@ upload.add_command(processed_solved)
 upload.add_command(validate)
 upload.add_command(beacon)
 upload.add_command(scout)
+upload.add_command(upload_case_to_scout)
 upload.add_command(observations)
 upload.add_command(genotypes)
 upload.add_command(coverage)

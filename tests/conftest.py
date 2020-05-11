@@ -40,6 +40,12 @@ CRUNCHY_CONFIG = {
 
 
 @pytest.fixture
+def scout_load_config():
+    """Yaml file with load information from scout"""
+    return "tests/fixtures/apps/scout/643594.config.yaml"
+
+
+@pytest.fixture
 def chanjo_config_dict():
     """Chanjo configs"""
     _config = dict()
