@@ -27,7 +27,9 @@ def test_store_analysis_with_empty_file_parameter(
 
     # WHEN calling store with empty string for meta file path
     result = cli_runner.invoke(
-        analysis, [balsamic_case.internal_id, "--deliverables-file", ""], obj=balsamic_store_context
+        analysis,
+        [balsamic_case.internal_id, "--deliverables-file", ""],
+        obj=balsamic_store_context,
     )
 
     # THEN the process should not exit ok
@@ -79,7 +81,11 @@ def test_already_stored_analysis(
 
 
 def test_store_analysis_generates_file_from_directory(
-    cli_runner, balsamic_store_context, balsamic_case, deliverables_file_directory, mocker
+    cli_runner,
+    balsamic_store_context,
+    balsamic_case,
+    deliverables_file_directory,
+    mocker,
 ):
     """Test store with analysis with meta data with one directory"""
 

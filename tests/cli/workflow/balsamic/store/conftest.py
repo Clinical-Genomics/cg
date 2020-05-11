@@ -142,19 +142,3 @@ def deliverables_file_directory():
 def deliverables_file_tags():
     """Return a balsamic deliverables file containing one file with two tags"""
     return "tests/fixtures/apps/balsamic/case/metadata_file_tags.yml"
-
-
-@pytest.fixture(scope="function")
-def balsamic_case(analysis_store, helpers) -> models.Family:
-    """case with balsamic data_type"""
-    return analysis_store.find_family(
-        helpers.ensure_customer(analysis_store), "balsamic_case"
-    )
-
-
-@pytest.fixture(scope="function")
-def mip_case(analysis_store, helpers) -> models.Family:
-    """case with balsamic data_type"""
-    return analysis_store.find_family(
-        helpers.ensure_customer(analysis_store), "mip_case"
-    )
