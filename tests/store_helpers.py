@@ -12,7 +12,7 @@ class Helpers:
     """Class to hold helper functions that needs to be used all over"""
 
     @staticmethod
-    def ensure_bundle(store: HousekeeperAPI, bundle_data: dict) -> hk_models.Bundle:
+    def ensure_hk_bundle(store: HousekeeperAPI, bundle_data: dict) -> hk_models.Bundle:
         """utility function to add a bundle of information to a housekeeper api"""
         _bundle = store.bundle(bundle_data["name"])
         if not _bundle:
@@ -20,12 +20,12 @@ class Helpers:
             store.add_commit(_bundle, _version)
         return _bundle
 
-    def ensure_version(
+    def ensure_hk_version(
         self, store: HousekeeperAPI, bundle_data: dict
     ) -> hk_models.Version:
         """utility function to return existing or create an version for tests"""
-        _bundle = self.ensure_bundle(store, bundle_data)
-        _version = store.last_version(_bundle)
+        _bundle = self.ensure_hk_bundle(store, bundle_data)
+        _version = store.last_version(_bundle.name)
         return _version
 
     def ensure_application_version(

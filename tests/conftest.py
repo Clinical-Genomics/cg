@@ -281,13 +281,19 @@ def fixture_root_path(project_dir: Path) -> Path:
     return _root_path
 
 
+@pytest.fixture(scope="function", name="timestamp")
+def fixture_timestamp() -> dt.datetime:
+    """Return a time stamp in date time format"""
+    return dt.datetime(2020, 5, 1)
+
+
 @pytest.fixture(scope="function", name="hk_bundle_data")
-def fixture_hk_bundle_data(case_id, bed_file):
+def fixture_hk_bundle_data(case_id, bed_file, timestamp):
     """Get some bundle data for housekeeper"""
     data = {
         "name": case_id,
-        "created": dt.datetime.now(),
-        "expires": dt.datetime.now(),
+        "created": timestamp,
+        "expires": timestamp,
         "files": [{"path": bed_file, "archive": False, "tags": ["bed", "sample"]}],
     }
     return data
@@ -307,7 +313,7 @@ def fixture_housekeeper_api(root_path):
 @pytest.yield_fixture(scope="function", name="hk_version_obj")
 def fixture_hk_version_obj(housekeeper_api, bundle_data, helpers):
     """Get a housekeeper version object"""
-    _version = helpers.ensure_version(housekeeper_api, bundle_data)
+    _version = helpers.ensure_hk_version(housekeeper_api, bundle_data)
     return _version
 
 
