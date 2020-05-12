@@ -8,7 +8,7 @@ from typing import List
 
 from cg.apps.hk import HousekeeperAPI
 
-ROOT_PATH = tempfile.TemporaryDirectory()
+ROOT_PATH = tempfile.TemporaryDirectory().name
 
 LOG = logging.getLogger(__name__)
 
@@ -48,19 +48,19 @@ class MockFile:
         self.version_id = kwargs.get("version_id", 1)
         self.tags = kwargs.get("tags", [MockTag()])
 
-        self.app_root = kwargs.get("root_path")
+        self.app_root = Path(kwargs.get("root_path", ROOT_PATH))
 
-        @property
-        def full_path(self):
-            """Return the full path to the file."""
-            if Path(self.path).is_absolute():
-                return self.path
-            return str(self.app_root / self.path)
+    @property
+    def full_path(self):
+        """Return the full path to the file."""
+        if Path(self.path).is_absolute():
+            return self.path
+        return str(self.app_root / self.path)
 
-        @property
-        def is_included(self):
-            """Check if the file is included in Housekeeper."""
-            return str(self.app_root) in self.full_path
+    @property
+    def is_included(self):
+        """Check if the file is included in Housekeeper."""
+        return str(self.app_root) in self.full_path
 
     def __repr__(self):
         return f"MockFile:id={self.id},path={self.path},to_archive={self.to_archive}"
@@ -336,3 +336,6 @@ if __name__ == "__main__":
     hk_api.add_bundle(data)
     print(hk_api)
     print(hk_api.last_version())
+    for file_obj in hk_api._files:
+        print(file_obj)
+        print(file_obj.full_path)

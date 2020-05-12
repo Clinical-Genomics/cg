@@ -1,19 +1,27 @@
 """Fixtures for cli balsamic tests"""
 
+from pathlib import Path
+
 import pytest
 
 from cg.apps.balsamic.fastq import FastqHandler
-from cg.apps.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
+from cg.apps.tb import TrailblazerAPI
 from cg.meta.workflow.balsamic import AnalysisAPI
 from cg.store import Store, models
 
 
 @pytest.fixture
-def balsamic_context(balsamic_store, populated_housekeeper_api) -> dict:
+def balsamic_context(
+    balsamic_store, balsamic_case, housekeeper_api, hk_bundle_data, helpers
+) -> dict:
     """context to use in cli"""
+    hk_bundle_data["name"] = balsamic_case.internal_id
+    helpers.ensure_hk_bundle(housekeeper_api, hk_bundle_data)
+
     return {
-        "hk_api": populated_housekeeper_api,
+        "hk_api": housekeeper_api,
+        "tb_api": MockTB(),
         "db": balsamic_store,
         "analysis_api": MockAnalysis,
         "fastq_handler": MockFastq,
@@ -143,24 +151,65 @@ def fixture_balsamic_store(base_store: Store, lims_api, helpers) -> Store:
     return _store
 
 
+class MockTB(TrailblazerAPI):
+    """Mock of trailblazer """
+
+    def __init__(self):
+        """Override TrailblazerAPI __init__ to avoid default behaviour"""
+
+    def analyses(self, *args, **kwargs):
+        """Override TrailblazerAPI analyses method to avoid default behaviour"""
+        return []
+
+
+@pytest.fixture(name="balsamic_dir")
+def fixture_balsamic_dir(apps_dir: Path) -> Path:
+    """Return the path to the balsamic apps dir"""
+    return apps_dir / "balsamic"
+
+
+@pytest.fixture(name="balsamic_case_dir")
+def fixture_balsamic_case_dir(balsamic_dir: Path) -> Path:
+    """Return the path to the balsamic apps case dir"""
+    return balsamic_dir / "case"
+
+
 @pytest.fixture(scope="function")
-def balsamic_case(balsamic_store, helpers) -> models.Family:
+def deliverables_file(balsamic_case_dir):
+    """Return a balsamic deliverables file"""
+    return str(balsamic_case_dir / "metadata.yml")
+
+
+@pytest.fixture(scope="function")
+def deliverables_file_directory(balsamic_case_dir):
+    """Return a balsamic deliverables file containing a directory"""
+    return str(balsamic_case_dir / "metadata_directory.yml")
+
+
+@pytest.fixture(scope="function")
+def deliverables_file_tags(balsamic_case_dir):
+    """Return a balsamic deliverables file containing one file with two tags"""
+    return str(balsamic_case_dir / "metadata_file_tags.yml")
+
+
+@pytest.fixture(scope="function", name="balsamic_case")
+def fixture_balsamic_case(balsamic_store, helpers) -> models.Family:
     """case with balsamic data_type"""
     return balsamic_store.find_family(
         helpers.ensure_customer(balsamic_store), "balsamic_case"
     )
 
 
-@pytest.fixture(scope="function")
-def balsamic_case_wgs(balsamic_store, helpers) -> models.Family:
+@pytest.fixture(scope="function", name="balsamic_case_wgs")
+def fixture_balsamic_case_wgs(balsamic_store, helpers) -> models.Family:
     """case with balsamic data_type"""
     return balsamic_store.find_family(
         helpers.ensure_customer(balsamic_store), "balsamic_case_wgs"
     )
 
 
-@pytest.fixture(scope="function")
-def mip_case(balsamic_store, helpers) -> models.Family:
+@pytest.fixture(scope="function", name="mip_case")
+def fixture_mip_case(balsamic_store, helpers) -> models.Family:
     """case with balsamic data_type"""
     return balsamic_store.find_family(
         helpers.ensure_customer(balsamic_store), "mip_case"
