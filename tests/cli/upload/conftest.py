@@ -17,19 +17,19 @@ LOG = logging.getLogger(__name__)
 
 
 @pytest.fixture(name="scout_load_config")
-def fixture_scout_load_config():
+def fixture_scout_load_config(apps_dir):
     """Yaml file with load information from scout"""
-    return "tests/fixtures/apps/scout/643594.config.yaml"
+    return str(apps_dir / "scout/643594.config.yaml")
 
 
 @pytest.fixture(scope="function", name="base_context")
-def fixture_base_context(analysis_store_single_case: Store) -> dict:
+def fixture_base_context(analysis_store_single_case: Store, housekeeper_api) -> dict:
     """context to use in cli"""
 
     return {
         "scout_api": MockScoutApi(),
         "scout_upload_api": MockScoutUploadApi(),
-        "housekeeper_api": MockHK(),
+        "housekeeper_api": housekeeper_api,
         "tb_api": MockTB(),
         "status": analysis_store_single_case,
     }

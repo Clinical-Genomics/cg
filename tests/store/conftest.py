@@ -147,7 +147,7 @@ def family_obj(analysis_obj):
 
 
 @pytest.yield_fixture(scope="function", name="analysis_store")
-def fixture_analysis_store(base_store, family_info):
+def fixture_analysis_store(base_store, analysis_family):
     """Setup a store instance for testing analysis API."""
     analysis_family = family_info
     customer = base_store.customer("cust000")

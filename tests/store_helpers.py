@@ -1,6 +1,7 @@
 """Utility functions to simply add test data in a cg store"""
 
 from datetime import datetime
+from typing import List
 
 from housekeeper.store import models as hk_models
 
@@ -62,15 +63,18 @@ class Helpers:
         store: Store,
         application_tag: str = "dummy_tag",
         application_type: str = "wgs",
-        is_external: bool = False,
+        description: str = "dummy_description",
+        is_accredited: bool = False,
+        **kwargs
     ) -> models.Application:
         """utility function to add a application to a store"""
         application = store.add_application(
             tag=application_tag,
             category=application_type,
-            is_external=is_external,
+            description=description,
             percent_kth=80,
-            description="dummy_description",
+            is_accredited=is_accredited,
+            **kwargs
         )
         store.add_commit(application)
         return application
@@ -95,7 +99,11 @@ class Helpers:
 
     @staticmethod
     def ensure_customer(
-        store: Store, customer_id: str = "cust_test"
+        store: Store,
+        customer_id: str = "cust000",
+        name: str = "Production",
+        scout_access: bool = False,
+        customer_group: str = "all_customers",
     ) -> models.Customer:
         """utility function to return existing or create customer for tests"""
         customer_group_id = customer_id + "_group"
@@ -110,11 +118,11 @@ class Helpers:
         if not customer:
             customer = store.add_customer(
                 internal_id=customer_id,
-                name=customer_id + "_name",
-                scout_access=False,
+                name=name,
+                scout_access=scout_access,
                 customer_group=customer_group,
-                invoice_address="dummy_address",
-                invoice_reference="dummy_reference",
+                invoice_address="Test street",
+                invoice_reference="ABCDEF",
             )
             store.add_commit(customer)
         return customer
@@ -156,17 +164,18 @@ class Helpers:
         store: Store,
         sample_id: str = "sample_test",
         gender: str = "female",
-        delivered_at: datetime = None,
         is_tumour: bool = False,
         is_rna: bool = False,
         is_external: bool = False,
         data_analysis: str = "balsamic",
         application_tag: str = "dummy_tag",
         application_type: str = "tgs",
-        flowcell: models.Flowcell = None,
+        customer_name: str = None,
+        **kwargs
     ) -> models.Sample:
         """utility function to add a sample to use in tests"""
-        customer = self.ensure_customer(store)
+        customer_name = customer_name or "cust000"
+        customer = self.ensure_customer(store, customer_name)
         application_version_id = self.ensure_application_version(
             store,
             application_tag=application_tag,
@@ -180,23 +189,30 @@ class Helpers:
             tumour=is_tumour,
             sequenced_at=datetime.now(),
             data_analysis=data_analysis,
+            **kwargs
         )
 
         sample.application_version_id = application_version_id
         sample.customer = customer
         sample.is_external = is_external
 
-        if delivered_at:
-            sample.delivered_at = delivered_at
+        if kwargs.get("delivered_at"):
+            sample.delivered_at = kwargs["delivered_at"]
 
-        if flowcell:
-            sample.flowcells.append(flowcell)
+        if kwargs.get("received_at"):
+            sample.received_at = kwargs["received_at"]
+
+        if kwargs.get("received_at"):
+            sample.received_at = kwargs["received_at"]
+
+        if kwargs.get("flowcell"):
+            sample.flowcells.append(kwargs["flowcell"])
 
         store.add_commit(sample)
         return sample
 
     def ensure_panel(
-        self, store: Store, panel_id: str = "panel_test", customer_id: str = "cust_test"
+        self, store: Store, panel_id: str = "panel_test", customer_id: str = "cust000"
     ) -> models.Panel:
         """utility function to add a panel to use in tests"""
         customer = self.ensure_customer(store, customer_id)
@@ -217,12 +233,17 @@ class Helpers:
         self,
         store: Store,
         family_id: str = "family_test",
-        customer_id: str = "cust_test",
+        customer_id: str = "cust000",
+        panels: List = None,
     ) -> models.Family:
         """utility function to add a family to use in tests"""
         customer = self.ensure_customer(store, customer_id)
-        panel = self.ensure_panel(store)
-        family = store.add_family(name=family_id, panels=panel.name)
+        if not panels:
+            panels = ["panel_test"]
+        for panel_name in panels:
+            self.ensure_panel(store, panel_id=panel_name, customer_id=customer_id)
+
+        family = store.add_family(name=family_id, panels=panels)
         family.customer = customer
         store.add_commit(family)
         return family
@@ -233,6 +254,7 @@ class Helpers:
     ) -> models.Organism:
         """utility function to add an organism to use in tests"""
         organism = store.add_organism(internal_id=internal_id, name=name)
+        store.add_commit(organism)
         return organism
 
     def add_microbial_sample(
