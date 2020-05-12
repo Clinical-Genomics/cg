@@ -2,6 +2,7 @@
 
 import logging
 from pathlib import Path
+
 from snapshottest import Snapshot
 
 from cg.cli.workflow.microsalt.base import config_case
@@ -81,6 +82,9 @@ def test_dry_sample(cli_runner, base_context, microbial_sample_id, snapshot: Sna
 
     # THEN command should give us a json dump
     assert result.exit_code == EXIT_SUCCESS
+    from pprint import pprint as pp
+
+    pp(result.output)
     snapshot.assert_match(result.output)
 
 

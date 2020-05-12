@@ -250,63 +250,86 @@ class Helpers:
 
     @staticmethod
     def add_organism(
-        store: Store, internal_id: str = "organism_id", name: str = "organism_name"
+        store: Store,
+        internal_id: str = "organism_test",
+        name: str = "organism_name",
+        reference_genome: str = "reference_genome_test",
     ) -> models.Organism:
         """utility function to add an organism to use in tests"""
-        organism = store.add_organism(internal_id=internal_id, name=name)
+        organism = store.add_organism(
+            internal_id=internal_id, name=name, reference_genome=reference_genome
+        )
+        return organism
+
+    def ensure_organism(
+        self,
+        store: Store,
+        organism_id: str = "organism_test",
+        name: str = "organism_name",
+        reference_genome: str = "reference_genome_test",
+    ) -> models.Organism:
+        """utility function to add an organism to use in tests"""
+        organism = self.add_organism(
+            store, internal_id=organism_id, name=name, reference_genome=reference_genome
+        )
         store.add_commit(organism)
         return organism
 
     def add_microbial_sample(
-        self, store: Store, sample_id: str = "sample_test"
+        self,
+        store: Store,
+        sample_id: str = "microbial_sample_test",
+        priority: str = "research",
+        name: str = "microbial_name_test",
+        organism: models.Organism = None,
     ) -> models.MicrobialSample:
         """utility function to add a sample to use in tests"""
         customer = self.ensure_customer(store)
         application_version = self.ensure_application_version(store)
-        organism = self.add_organism(store)
+        if not organism:
+            organism = self.ensure_organism(store)
+
         sample = store.add_microbial_sample(
-            name=sample_id,
+            name=name,
+            priority=priority,
             organism=organism,
             internal_id=sample_id,
-            reference_genome="test",
+            reference_genome=organism.reference_genome,
             application_version=application_version,
         )
         sample.customer = customer
         return sample
 
-    def add_microbial_order(
-        self, store: Store, order_id: str = "order_test", customer_id: str = "cust_test"
+    def ensure_microbial_order(
+        self,
+        store: Store,
+        order_id: str = "microbial_order_test",
+        name: str = "microbial_name_test",
+        customer_id: str = "cust_test",
     ) -> models.MicrobialOrder:
         """utility function add a microbial order and sample"""
         customer = self.ensure_customer(store, customer_id)
-        with store.session.no_autoflush:
-            order = store.add_microbial_order(
-                name=order_id,
-                internal_id=order_id,
-                customer=customer,
-                ordered=datetime.now(),
-            )
-            order.customer = customer
-            sample = self.add_microbial_sample(store)
-            order.microbial_samples.append(sample)
-        store.add_commit(sample)
+        order = store.add_microbial_order(
+            customer=customer, internal_id=order_id, name=name, ordered=datetime.now()
+        )
+        store.add_commit(order)
+
         return order
 
     def add_microbial_sample_and_order(
         self,
         store: Store,
-        order_id: str = "sample_test",
+        order_id: str = "microbial_order_test",
+        sample_id: str = "microbial_sample_test",
         customer_id: str = "cust_test",
     ) -> models.MicrobialSample:
         """utility function to set a family to use in tests"""
-        customer = self.ensure_customer(store, customer_id)
-        with store.session.no_autoflush:
-            order = store.add_microbial_order(
-                name=order_id, customer=customer, ordered=datetime.now()
-            )
-            order.customer = customer
-            sample = self.add_microbial_sample(store)
-            order.microbial_samples.append(sample)
+        self.ensure_application_version(store)
+        self.ensure_customer(store, customer_id)
+        organism = self.ensure_organism(store)
+        order = self.ensure_microbial_order(store)
+        sample = self.add_microbial_sample(store, organism=organism)
+        sample.microbial_order_id = order.id
         store.add_commit(sample)
         return sample
 
