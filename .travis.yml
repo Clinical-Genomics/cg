@@ -70,7 +70,7 @@ jobs:
     - name: "Linting"
       if: type = pull_request
       install:
-        - pip install . -r requirements-dev.txt git-lint html-linter yamllint pycodestyle
+        - pip install . -r requirements-dev.txt pylint git-lint html-linter yamllint pycodestyle
         - sudo apt-get install -y tidy
       script: git reset --soft ${TRAVIS_COMMIT_RANGE%...*} && git lint
 
