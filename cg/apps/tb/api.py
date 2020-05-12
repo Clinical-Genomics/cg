@@ -24,9 +24,9 @@ class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
             config["trailblazer"]["database"], families_dir=config["trailblazer"]["root"]
         )
         self.mip_cli = MipCli(
-            config["trailblazer"]["script"],
-            config["trailblazer"]["pipeline"],
-            config["trailblazer"]["conda_env"],
+            script=config["trailblazer"]["script"],
+            pipeline=config["trailblazer"]["pipeline"],
+            conda_env=config["trailblazer"]["conda_env"],
         )
         self.mip_config = config["trailblazer"]["mip_config"]
 
