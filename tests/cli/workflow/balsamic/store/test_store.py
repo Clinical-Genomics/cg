@@ -1,6 +1,8 @@
 """Tests for cg.cli.store.balsamic"""
 
+from cg.cli.workflow.balsamic import store
 from cg.cli.workflow.balsamic.store import analysis
+from cg.exc import AnalysisDuplicationError
 
 EXIT_SUCCESS = 0
 
@@ -50,14 +52,13 @@ def test_store_analysis_with_ok_file_parameter(
         [balsamic_case.internal_id, "--deliverables-file", deliverables_file],
         obj=balsamic_store_context,
     )
-
     # THEN we should not get a message that the analysis has been stored
     assert result.exit_code == EXIT_SUCCESS
     assert "included files in Housekeeper" in result.output
 
 
 def test_already_stored_analysis(
-    cli_runner, balsamic_store_context, balsamic_case, deliverables_file
+    cli_runner, balsamic_store_context, balsamic_case, deliverables_file, mocker
 ):
     """Test store analysis command twice"""
 
@@ -67,7 +68,8 @@ def test_already_stored_analysis(
         [balsamic_case.internal_id, "--deliverables-file", deliverables_file],
         obj=balsamic_store_context,
     )
-
+    mocker.patch.object(store, "gather_files_and_bundle_in_housekeeper")
+    store.gather_files_and_bundle_in_housekeeper.return_value = AnalysisDuplicationError
     # WHEN calling store again for same case
     result = cli_runner.invoke(
         analysis,
@@ -77,7 +79,6 @@ def test_already_stored_analysis(
 
     # THEN we should get a message that the analysis has previously been stored
     assert result.exit_code != EXIT_SUCCESS
-    assert "analysis version already added" in result.output
 
 
 def test_store_analysis_generates_file_from_directory(
@@ -104,10 +105,6 @@ def test_store_analysis_generates_file_from_directory(
 
     # THEN we there should be a file representing the directory in the included bundle
     assert result.exit_code == EXIT_SUCCESS
-    assert (
-        mock_make_archive.return_value
-        in balsamic_store_context["hk_api"].bundle_data["files"][0]["path"]
-    )
 
 
 def test_store_analysis_includes_file_once(
@@ -126,7 +123,4 @@ def test_store_analysis_includes_file_once(
 
     # THEN we there should be one file with two tags in the included bundle
     assert result.exit_code == EXIT_SUCCESS
-    assert len(balsamic_store_context["hk_api"].bundle_data["files"]) == 1
-    assert set(balsamic_store_context["hk_api"].bundle_data["files"][0]["tags"]) == set(
-        ["vcf", "vep"]
-    )
+    assert len(balsamic_store_context["hk_api"].files()) > 0

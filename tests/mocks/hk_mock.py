@@ -6,6 +6,8 @@ import tempfile
 from pathlib import Path
 from typing import List
 
+from cg.apps.hk import HousekeeperAPI
+
 ROOT_PATH = tempfile.TemporaryDirectory()
 
 LOG = logging.getLogger(__name__)
@@ -46,7 +48,7 @@ class MockFile:
         self.version_id = kwargs.get("version_id", 1)
         self.tags = kwargs.get("tags", [MockTag()])
 
-        self.app_root = kwargs.get("root_path", ROOT_PATH)
+        self.app_root = kwargs.get("root_path")
 
         @property
         def full_path(self):
@@ -59,6 +61,9 @@ class MockFile:
         def is_included(self):
             """Check if the file is included in Housekeeper."""
             return str(self.app_root) in self.full_path
+
+    def __repr__(self):
+        return f"MockFile:id={self.id},path={self.path},to_archive={self.to_archive}"
 
 
 class MockVersion:
@@ -94,6 +99,11 @@ class MockVersion:
         """Returns the full path of the bundle"""
         return Path(self.app_root) / self.bundle.name / str(self.created_at.date())
 
+    def __repr__(self):
+        return (
+            f"MockVersion:id={self.id},created_at={self.created_at},files={self.files}"
+        )
+
 
 class MockBundle:
     """Mocks a hk bundle object"""
@@ -105,174 +115,224 @@ class MockBundle:
         self.created_at = kwargs.get("created_at", datetime.datetime.now())
         self.versions = kwargs.get("versions", [MockVersion(bundle=self)])
 
+    def __repr__(self):
+        return f"MockBundle:id={self.id},name={self.name},versions={self.versions}"
 
-class MockHK:
+
+class MockHousekeeperAPI:
     """Mocks all the behaviour of the housekeeper API"""
 
-    def __init__(self, config):
-        """Initialize a mock"""
-        self.root_dir = config.get("housekeeper", {}).get("root",)
-        # MOCK SPECIFIC HELPERS
-        self._file_added = False
-        self._file_included = False
-        self._file = None
+    def __init__(self, config=None):
+        self._version_obj = None
+        self._bundle_obj = None
         self._files = []
-
-        self._version = None
-        self._versions = []
-
-        self._tag = None
         self._tags = []
+        self._id_counter = 1
+        if not config:
+            config = {
+                "housekeeper": {
+                    "database": "sqlite:///:memory:",
+                    "root": str(ROOT_PATH),
+                }
+            }
+        self._database = config.get("housekeeper", {}).get("database")
+        self.root_path = config.get("housekeeper", {}).get("root", str(ROOT_PATH))
 
-        self._bundle = None
-        self._bundles = []
+    def add_bundle(self, bundle_data):
+        """ Build a new bundle version of files """
+        bundle_obj = self.new_bundle(
+            name=bundle_data["name"], created_at=bundle_data["created"]
+        )
 
-        self._store = {
-            "files": self._files,
-            "tags": self._tags,
-            "bundles": self._bundles,
-            "versions": self._versions,
-        }
+        version_obj = self.new_version(
+            created_at=bundle_data["created"], expires_at=bundle_data.get("expires")
+        )
 
-    def files(
-        self,
-        *,
-        bundle: str = None,
-        tags: List[str] = None,
-        version: int = None,
-        path: str = None,
-    ):
+        tag_names = set(
+            tag_name
+            for file_data in bundle_data["files"]
+            for tag_name in file_data["tags"]
+        )
+        tag_map = self._build_tags(tag_names)
+
+        for file_data in bundle_data["files"]:
+            if isinstance(file_data["path"], str):
+                paths = [file_data["path"]]
+            else:
+                paths = file_data["path"]
+            for path in paths:
+                tags = [tag_map[tag_name] for tag_name in file_data["tags"]]
+
+                new_file = self.new_file(
+                    path, to_archive=file_data["archive"], tags=tags
+                )
+                self._files.append(new_file)
+                version_obj.files.append(new_file)
+
+        version_obj.bundle_obj = bundle_obj
+
+        self._bundle_obj = bundle_obj
+        self._version_obj = version_obj
+
+        return bundle_obj, version_obj
+
+    def _build_tags(self, tag_names: List[str]) -> dict:
+        """Build a list of tag objects."""
+        tags = {}
+        for tag_name in tag_names:
+            tag_obj = self.tag(tag_name)
+            if tag_obj is None:
+                tag_obj = self.new_tag(tag_name)
+                self._tags.append(tag_obj)
+            tags[tag_name] = tag_obj
+        return tags
+
+    def tag(self, name: str):
+        """ Fetch a tag """
+        for tag_obj in self._tags:
+            if tag_obj.name == name:
+                return tag_obj
+        return None
+
+    def bundle(self, *args, **kwargs):
+        """ Fetch a bundle """
+        return self._bundle_obj
+
+    def bundles(self):
+        """ Fetch bundles """
+        return [self._bundle_obj]
+
+    def version(self, *args, **kwargs):
+        """ Fetch a version """
+        return self._version_obj
+
+    def files(self, *args, **kwargs):
         """ Fetch files """
         return self._files
+
+    def update_id_counter(self):
+        """Increment id counter"""
+        self._id_counter += 1
+
+    def new_tag(self, name: str, category: str = None):
+        """ Create a new tag """
+        self.update_id_counter()
+        return MockTag(id=self._id_counter, name=name, category=category)
+
+    def add_tag(self, name: str, category: str = None):
+        """ Add a tag to the database """
+        tag_obj = self.new_tag(name, category)
+        self._tags.append(tag_obj)
+        return tag_obj
+
+    def new_bundle(self, name: str, created_at: datetime.datetime = None):
+        """ Create a new file bundle """
+        self.update_id_counter()
+        return MockBundle(id=self._id_counter, name=name, created_at=created_at)
+
+    def new_version(
+        self, created_at: datetime.datetime, expires_at: datetime.datetime = None
+    ):
+        """ Create a new bundle version """
+        self.update_id_counter()
+        return MockVersion(
+            id=self._id_counter, created_at=created_at, expires_at=expires_at
+        )
 
     def new_file(
         self,
         path: str,
         checksum: str = None,
         to_archive: bool = False,
-        tags: list = None,
+        tags: list = [],
     ):
         """ Create a new file """
-        file_obj = MockFile(path=path, to_archive=to_archive, tags=tags)
-        self._files.append(file_obj)
-        return file_obj
+        self.update_id_counter()
+        return MockFile(
+            id=self._id_counter,
+            path=path,
+            checksum=checksum,
+            to_archive=to_archive,
+            tags=tags,
+        )
 
-    def tag(self, name: str):
-        """ Fetch a tag """
-        tag_found = self._tag
-        for tag in self._store["tags"]:
-            if tag.name == name:
-                tag_found = tag
-        return tag_found
-
-    def new_tag(self, name: str, category: str = None):
-        """ Create a new tag """
-        tag_obj = MockTag(name=name, category=category)
-        self._tag = tag_obj
-        self._tags.append(tag_obj)
-        return tag_obj
-
-    def bundle(self, name: str):
-        """ Fetch a bundle """
-        bundle_found = self._bundle
-        for bundle in self._store["bundles"]:
-            if bundle.name == name:
-                bundle_found = bundle
-        return bundle_found
-
-    def add_bundle(self, bundle_data: dict):
-        """ Build a new bundle version of files """
-        return self._bundles.append(MockBundle(**bundle_data))
-
-    def bundles(self):
-        """ Fetch bundles """
-        return self._bundles
-
-    @staticmethod
-    def new_bundle(name: str, created_at: datetime.datetime = None):
-        """ Create a new file bundle """
-        return MockBundle(name=name, created_at=created_at)
-
-    def version(self, bundle: str, date: datetime.datetime):
-        """ Fetch a version """
-        return self._version
-
-    def last_version(self, bundle: str) -> MockVersion:
-        """Gets the latest version of a bundle"""
-        return self._version
-
-    @staticmethod
-    def new_version(
-        created_at: datetime.datetime, expires_at: datetime.datetime = None
-    ):
-        """ Create a new bundle version """
-        version_obj = MockVersion(created_at=created_at, expires_at=expires_at)
-        self._version = version_obj
-        self._versions.append(version_obj)
-        return version_obj
-
-    @staticmethod
-    def add_commit(*args, **kwargs):
+    def add_commit(self, *args, **kwargs):
         """ Wrap method in Housekeeper Store """
         return True
 
-    @staticmethod
-    def commit():
+    def commit(self):
         """ Wrap method in Housekeeper Store """
         return True
 
-    @staticmethod
-    def session_no_autoflush():
+    def session_no_autoflush(self):
         """ Wrap property in Housekeeper Store """
         return True
 
-    @staticmethod
-    def include(version_obj: MockVersion):
+    def include(self, *args, **kwargs):
         """Call the include version function to import related assets."""
-        version_obj.included_at = datetime.datetime.now()
 
-    @staticmethod
-    def include_file(file_obj: MockFile, version_obj: MockVersion):
+    def include_file(self, *args, **kwargs):
         """Call the include version function to import related assets."""
-        return True
+
+    def last_version(self, *args, **kwargs):
+        """Gets the latest version of a bundle"""
+        return self._version_obj
 
     def get_root_dir(self):
         """Returns the root dir of Housekeeper"""
         return self.root_dir
 
-    def get_files(self, bundle: str, tags: list, version: int = None):
+    def get_files(self, *args, **kwargs):
         """Fetch all the files in housekeeper, optionally filtered by bundle and/or tags and/or
         version
 
         Returns:
-            iterable(MockFile)
+            iterable(hk.Models.File)
         """
         return self._files
 
-    def add_file(self, file, version_obj: MockVersion, tags, to_archive=False):
+    def add_file(self, file, version_obj, tags, to_archive=False):
         """Add a file to housekeeper."""
-        self._file_added = True
-        file_obj = MockFile(path=file)
-        self._file = file_obj
-        self._files.append(file_obj)
+        if isinstance(tags, str):
+            tags = [tags]
+        for tag_name in tags:
+            if not self.tag(tag_name):
+                self.add_tag(tag_name)
 
-        return file_obj
+        new_file = self.new_file(
+            path=str(Path(file).absolute()),
+            to_archive=to_archive,
+            tags=[self.tag(tag_name) for tag_name in tags],
+        )
+
+        new_file.version = version_obj
+        self._files.append(new_file)
+        return new_file
 
     @staticmethod
     def checksum(path):
         """Calculate the checksum"""
-        return calculate_checksum(path)
+        return hk_checksum(path)
 
-    @staticmethod
-    def initialise_db():
+    def initialise_db(self):
         """Create all tables in the store."""
-        return True
 
     def destroy_db(self):
         """Drop all tables in the store"""
-        self._store = {}
+
+    def __repr__(self):
+        return f"HousekeeperMockAPI:version_obj={self._version_obj}"
 
 
 if __name__ == "__main__":
-    hk_api = MockHK(config={})
+    hk_api = MockHousekeeperAPI(config={})
+    data = {
+        "name": "hej",
+        "created": datetime.datetime.now(),
+        "expires": datetime.datetime.now(),
+        "files": [{"path": "a file", "archive": False, "tags": ["bed", "sample"]}],
+    }
     print(hk_api)
+    hk_api.add_bundle(data)
+    print(hk_api)
+    print(hk_api.last_version())

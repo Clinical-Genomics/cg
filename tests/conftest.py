@@ -10,11 +10,12 @@ import pytest
 import ruamel.yaml
 from trailblazer.mip import files as mip_dna_files_api
 
-from cg.apps.hk import HousekeeperAPI
+# from cg.apps.hk import HousekeeperAPI
 from cg.apps.mip_rna import files as mip_rna_files_api
 from cg.meta.store import mip_rna as store_mip_rna
 from cg.store import Store
 
+from .mocks.hk_mock import MockHousekeeperAPI
 from .mocks.madeline import MockMadelineAPI
 from .store_helpers import Helpers
 
@@ -316,12 +317,18 @@ def fixture_hk_bundle_data(case_id, bed_file, timestamp):
 @pytest.yield_fixture(scope="function", name="housekeeper_api")
 def fixture_housekeeper_api(root_path):
     """Setup Housekeeper store."""
-    _api = HousekeeperAPI(
+    _api = MockHousekeeperAPI(
         {"housekeeper": {"database": "sqlite:///:memory:", "root": str(root_path)}}
     )
-    _api.initialise_db()
-    yield _api
-    _api.destroy_db()
+    return _api
+
+
+@pytest.yield_fixture(scope="function", name="populated_housekeeper_api")
+def fixture_populated_housekeeper_api(housekeeper_api, hk_bundle_data, helpers):
+    """Setup a Housekeeper store with some data."""
+    hk_api = housekeeper_api
+    helpers.ensure_hk_bundle(hk_api, hk_bundle_data)
+    return hk_api
 
 
 @pytest.yield_fixture(scope="function", name="hk_version_obj")

@@ -10,10 +10,10 @@ from cg.store import Store, models
 
 
 @pytest.fixture
-def balsamic_context(balsamic_store) -> dict:
+def balsamic_context(balsamic_store, populated_housekeeper_api) -> dict:
     """context to use in cli"""
     return {
-        "hk_api": MockHouseKeeper(),
+        "hk_api": populated_housekeeper_api,
         "db": balsamic_store,
         "analysis_api": MockAnalysis,
         "fastq_handler": MockFastq,
@@ -28,18 +28,6 @@ def balsamic_context(balsamic_store) -> dict:
             "reference_config": "reference_config",
         },
     }
-
-
-class MockHouseKeeper(HousekeeperAPI):
-    """Mock HousekeeperAPI"""
-
-    def __init__(self):
-        pass
-
-    def get_files(self, bundle: str, tags: list, version: int = None):
-        """Mock get_files of HousekeeperAPI"""
-        del tags, bundle, version
-        return [MockFile()]
 
 
 class MockLims(LimsAPI):
@@ -61,14 +49,6 @@ def lims_api():
 
     _lims_api = MockLims()
     return _lims_api
-
-
-class MockFile:
-    """Mock File"""
-
-    def __init__(self, path=""):
-        self.path = path
-        self.full_path = path
 
 
 class MockGzip:
@@ -164,24 +144,24 @@ def fixture_balsamic_store(base_store: Store, lims_api, helpers) -> Store:
 
 
 @pytest.fixture(scope="function")
-def balsamic_case(analysis_store, helpers) -> models.Family:
+def balsamic_case(balsamic_store, helpers) -> models.Family:
     """case with balsamic data_type"""
-    return analysis_store.find_family(
-        helpers.ensure_customer(analysis_store), "balsamic_case"
+    return balsamic_store.find_family(
+        helpers.ensure_customer(balsamic_store), "balsamic_case"
     )
 
 
 @pytest.fixture(scope="function")
-def balsamic_case_wgs(analysis_store, helpers) -> models.Family:
+def balsamic_case_wgs(balsamic_store, helpers) -> models.Family:
     """case with balsamic data_type"""
-    return analysis_store.find_family(
-        helpers.ensure_customer(analysis_store), "balsamic_case_wgs"
+    return balsamic_store.find_family(
+        helpers.ensure_customer(balsamic_store), "balsamic_case_wgs"
     )
 
 
 @pytest.fixture(scope="function")
-def mip_case(analysis_store, helpers) -> models.Family:
+def mip_case(balsamic_store, helpers) -> models.Family:
     """case with balsamic data_type"""
-    return analysis_store.find_family(
-        helpers.ensure_customer(analysis_store), "mip_case"
+    return balsamic_store.find_family(
+        helpers.ensure_customer(balsamic_store), "mip_case"
     )

@@ -1,5 +1,6 @@
 """Fixtures for cli balsamic tests"""
 from datetime import datetime
+from pathlib import Path
 
 import pytest
 
@@ -9,10 +10,19 @@ from cg.store import Store, models
 
 
 @pytest.fixture
-def balsamic_store_context(balsamic_store, balsamic_case) -> dict:
+def balsamic_store_context(
+    balsamic_store, balsamic_case, housekeeper_api, hk_bundle_data, helpers
+) -> dict:
     """context to use in cli"""
+
+    hk_bundle_data["name"] = balsamic_case.internal_id
+    print("Here", balsamic_case.internal_id)
+    print(hk_bundle_data)
+    bundle = helpers.ensure_hk_bundle(housekeeper_api, hk_bundle_data)
+    print(bundle)
+    print(bundle.__dict__)
     return {
-        "hk_api": MockHouseKeeper(balsamic_case.internal_id),
+        "hk_api": housekeeper_api,
         "db": balsamic_store,
         "tb_api": MockTB(),
         "balsamic": {"root": "root", "conda_env": "conda_env"},
@@ -106,39 +116,31 @@ class MockFile:
         self.full_path = path
 
 
-@pytest.fixture(scope="function", name="balsamic_store")
-def fixture_balsamic_store(base_store: Store, helpers) -> Store:
-    """real store to be used in tests"""
-    _store = base_store
+@pytest.fixture(name="balsamic_dir")
+def fixture_balsamic_dir(apps_dir: Path) -> Path:
+    """Return the path to the balsamic apps dir"""
+    return apps_dir / "balsamic"
 
-    case = helpers.add_family(_store, "balsamic_case")
-    tumour_sample = helpers.add_sample(_store, "tumour_sample", is_tumour=True)
-    normal_sample = helpers.add_sample(_store, "normal_sample", is_tumour=False)
-    helpers.add_relationship(_store, family=case, sample=tumour_sample)
-    helpers.add_relationship(_store, family=case, sample=normal_sample)
 
-    case = helpers.add_family(_store, "mip_case")
-    normal_sample = helpers.add_sample(
-        _store, "normal_sample", is_tumour=False, data_analysis="mip"
-    )
-    helpers.add_relationship(_store, family=case, sample=normal_sample)
-
-    return _store
+@pytest.fixture(name="balsamic_case_dir")
+def fixture_balsamic_case_dir(balsamic_dir: Path) -> Path:
+    """Return the path to the balsamic apps case dir"""
+    return balsamic_dir / "case"
 
 
 @pytest.fixture(scope="function")
-def deliverables_file():
+def deliverables_file(balsamic_case_dir):
     """Return a balsamic deliverables file"""
-    return "tests/fixtures/apps/balsamic/case/metadata.yml"
+    return str(balsamic_case_dir / "metadata.yml")
 
 
 @pytest.fixture(scope="function")
-def deliverables_file_directory():
+def deliverables_file_directory(balsamic_case_dir):
     """Return a balsamic deliverables file containing a directory"""
-    return "tests/fixtures/apps/balsamic/case/metadata_directory.yml"
+    return str(balsamic_case_dir / "metadata_directory.yml")
 
 
 @pytest.fixture(scope="function")
-def deliverables_file_tags():
+def deliverables_file_tags(balsamic_case_dir):
     """Return a balsamic deliverables file containing one file with two tags"""
-    return "tests/fixtures/apps/balsamic/case/metadata_file_tags.yml"
+    return str(balsamic_case_dir / "metadata_file_tags.yml")
