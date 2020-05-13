@@ -12,6 +12,7 @@ from cg.exc import (
 def add_new_analysis(bundle_data, case_obj, status, version_obj):
     """Function to create and return a new analysis database record"""
 
+    breakpoint()
     pipeline = case_obj.links[0].sample.data_analysis
 
     if not pipeline:
@@ -66,7 +67,7 @@ def _get_files_index(deliverables: dict, pipeline: list) -> list:
     """ Get all index files from the deliverables file """
 
     return [
-        {"path": file["path_index"], "tags": get_tags(file, pipeline), "archive": False,}
+        {"path": file["path_index"], "tags": get_tags(file, pipeline), "archive": False}
         for file in deliverables["files"]
         if file["path_index"]
     ]
