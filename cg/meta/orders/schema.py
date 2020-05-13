@@ -249,7 +249,7 @@ FASTQ_SAMPLE = {
 }
 
 RML_SAMPLE = {
-    # 1604:9 Orderform Ready made libraries (RML)
+    # 1604:10 Orderform Ready made libraries (RML)
     # Order portal specific
     "priority": str,
     # "This information is required"

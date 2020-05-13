@@ -139,7 +139,7 @@ def mip_rna_orderform():
 @pytest.fixture
 def rml_orderform():
     """Orderform fixture for RML samples"""
-    return "tests/fixtures/orderforms/1604.9.rml.xlsx"
+    return "tests/fixtures/orderforms/1604.10.rml.xlsx"
 
 
 @pytest.fixture(scope="session", name="files")
