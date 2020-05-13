@@ -35,27 +35,6 @@ def fixture_base_context(analysis_store_single_case: Store, housekeeper_api) -> 
     }
 
 
-@pytest.fixture(scope="function", name="analysis_family_single_case")
-def fixture_analysis_family_single():
-    """Build an example family."""
-    family = {
-        "name": "family",
-        "internal_id": "yellowhog",
-        "panels": ["IEM", "EP"],
-        "samples": [
-            {
-                "name": "proband",
-                "sex": "male",
-                "internal_id": "ADM1",
-                "status": "affected",
-                "ticket_number": 123456,
-                "reads": 5000000,
-            }
-        ],
-    }
-    return family
-
-
 @pytest.fixture(scope="function")
 def hk_api(scout_load_config):
     """Return a hkapi"""
@@ -71,73 +50,6 @@ def upload_scout_api():
     api = MockScoutUploadApi()
 
     return api
-
-
-def load_family(store, family):
-    """Load a family into a status database"""
-    analysis_family = family
-    base_store = store
-    customer = base_store.customer("cust000")
-    family = base_store.Family(
-        name=analysis_family["name"],
-        panels=analysis_family["panels"],
-        internal_id=analysis_family["internal_id"],
-        priority="standard",
-    )
-    family.customer = customer
-    base_store.add(family)
-    application_version = base_store.application("WGTPCFC030").versions[0]
-    for sample_data in analysis_family["samples"]:
-        sample = base_store.add_sample(
-            name=sample_data["name"],
-            sex=sample_data["sex"],
-            internal_id=sample_data["internal_id"],
-            ticket=sample_data["ticket_number"],
-            reads=sample_data["reads"],
-        )
-        sample.family = family
-        sample.application_version = application_version
-        sample.customer = customer
-        base_store.add(sample)
-    base_store.commit()
-    for sample_data in analysis_family["samples"]:
-        sample_obj = base_store.sample(sample_data["internal_id"])
-        link = base_store.relate_sample(
-            family=family,
-            sample=sample_obj,
-            status=sample_data["status"],
-            father=base_store.sample(sample_data["father"])
-            if sample_data.get("father")
-            else None,
-            mother=base_store.sample(sample_data["mother"])
-            if sample_data.get("mother")
-            else None,
-        )
-        base_store.add(link)
-
-    _analysis = base_store.add_analysis(pipeline="pipeline", version="version")
-    _analysis.family = family
-    _analysis.config_path = "dummy_path"
-
-    base_store.commit()
-
-
-@pytest.yield_fixture(scope="function", name="analysis_store_trio")
-def fixture_analysis_store_trio(base_store, analysis_family):
-    """Setup a store instance with a trion loaded for testing analysis API."""
-    _store = base_store
-    load_family(_store, analysis_family)
-
-    yield _store
-
-
-@pytest.yield_fixture(scope="function", name="analysis_store_single_case")
-def fixture_analysis_store_single(base_store, analysis_family_single_case):
-    """Setup a store instance with a single ind case for testing analysis API."""
-    _store = base_store
-    load_family(_store, analysis_family_single_case)
-
-    yield _store
 
 
 @pytest.fixture

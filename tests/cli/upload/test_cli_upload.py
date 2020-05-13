@@ -5,25 +5,25 @@ from cg.cli.upload.utils import LinkHelper
 from cg.store import Store
 
 
-def test_all_samples_are_non_tumor(analysis_store):
+def test_all_samples_are_non_tumor(analysis_store, case_id):
     """Test that all samples are non tumor"""
 
-    family_obj = analysis_store.family("yellowhog")
+    family_obj = analysis_store.family(case_id)
     assert LinkHelper.all_samples_are_non_tumour(family_obj.links)
 
 
-def test_all_samples_data_analysis(analysis_store):
+def test_all_samples_data_analysis(analysis_store, case_id):
     """Test that all samples have data analysis"""
 
-    family_obj = analysis_store.family("yellowhog")
+    family_obj = analysis_store.family(case_id)
     assert LinkHelper.all_samples_data_analysis(family_obj.links, ["mip"])
 
 
-def test_all_samples_list_analyses(analysis_store):
+def test_all_samples_list_analyses(analysis_store, case_id):
     """Test that all samples have an analysis type"""
 
     # GIVEN family obj where each sample is wgs analysis
-    family_obj = analysis_store.family("yellowhog")
+    family_obj = analysis_store.family(case_id)
 
     # WHEN looking up the analysis type for the samples in the family
     analysis_types = LinkHelper.all_samples_list_analyses(family_obj.links)

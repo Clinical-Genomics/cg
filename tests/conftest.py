@@ -49,12 +49,37 @@ def fixture_family_name() -> str:
     return "family"
 
 
+@pytest.fixture(scope="function", name="analysis_family_single_case")
+def fixture_analysis_family_single(case_id, family_name):
+    """Build an example family."""
+    family = {
+        "name": family_name,
+        "internal_id": case_id,
+        "data_analysis": "mip",
+        "application_type": "wgs",
+        "panels": ["IEM", "EP"],
+        "samples": [
+            {
+                "name": "proband",
+                "sex": "male",
+                "internal_id": "ADM1",
+                "status": "affected",
+                "ticket_number": 123456,
+                "reads": 5000000,
+            }
+        ],
+    }
+    return family
+
+
 @pytest.yield_fixture(scope="function", name="analysis_family")
 def fixture_analysis_family(case_id, family_name) -> dict:
     """Return a dictionary with information from a analysis family"""
     family = {
         "name": family_name,
         "internal_id": case_id,
+        "data_analysis": "mip",
+        "application_type": "wgs",
         "panels": ["IEM", "EP"],
         "samples": [
             {
@@ -339,6 +364,31 @@ def fixture_hk_version_obj(housekeeper_api, hk_bundle_data, helpers):
 
 
 # Store fixtures
+
+
+@pytest.yield_fixture(scope="function", name="analysis_store")
+def fixture_analysis_store(base_store, analysis_family, wgs_application_tag, helpers):
+    """Setup a store instance for testing analysis API."""
+    helpers.ensure_family(
+        base_store, family_info=analysis_family, app_tag=wgs_application_tag
+    )
+
+    yield base_store
+
+
+@pytest.yield_fixture(scope="function", name="analysis_store_trio")
+def fixture_analysis_store_trio(analysis_store):
+    """Setup a store instance with a trion loaded for testing analysis API."""
+
+    yield analysis_store
+
+
+@pytest.yield_fixture(scope="function", name="analysis_store_single_case")
+def fixture_analysis_store_single(base_store, analysis_family_single_case, helpers):
+    """Setup a store instance with a single ind case for testing analysis API."""
+    helpers.ensure_family(base_store, family_info=analysis_family_single_case)
+
+    yield base_store
 
 
 @pytest.yield_fixture(scope="function", name="customer_group")
