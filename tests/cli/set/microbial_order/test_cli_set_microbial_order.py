@@ -8,7 +8,8 @@ from cg.store import Store
 SUCCESS = 0
 
 
-def test_invalid_order_empty_db(cli_runner, base_context, base_store: Store):
+def test_invalid_order_empty_db(cli_runner, base_context):
+    """Test to create an order in a empty database"""
     # GIVEN an empty database
 
     # WHEN running set with an order that does not exist
@@ -25,14 +26,19 @@ def test_invalid_order_empty_db(cli_runner, base_context, base_store: Store):
 def test_invalid_order_non_empty_db(
     cli_runner, base_context, base_store: Store, helpers
 ):
+    """Test to create an non existing order in a populated database"""
     # GIVEN a non empty database
-    helpers.add_microbial_order(base_store)
+    order_id = "dummy_order_id"
+    helpers.ensure_microbial_order(base_store, order_id=order_id)
+
+    non_existing_order_id = "another_order_id"
 
     # WHEN running set with an order that does not exist
-    order_id = "dummy_order_id"
     application_tag = "dummy_application"
     result = cli_runner.invoke(
-        microbial_order, [order_id, "sign", "-a", application_tag], obj=base_context
+        microbial_order,
+        [non_existing_order_id, "sign", "-a", application_tag],
+        obj=base_context,
     )
 
     # THEN then it should complain on invalid order
@@ -42,8 +48,9 @@ def test_invalid_order_non_empty_db(
 def test_valid_order_no_apptag_option(
     cli_runner, base_context, base_store: Store, helpers
 ):
+    """Test to create an order without an apptag"""
     # GIVEN a non empty database
-    order = helpers.add_microbial_order(base_store)
+    order = helpers.ensure_microbial_order(base_store)
 
     # WHEN running set with an order that does not exist
     order_id = order.internal_id
@@ -55,9 +62,10 @@ def test_valid_order_no_apptag_option(
 
 @pytest.mark.parametrize("option_key", ["--name", "--ticket"])
 def test_set_option(cli_runner, base_context, base_store: Store, option_key, helpers):
+    """Test to set an order with a option"""
 
     # GIVEN a database with an order
-    order = helpers.add_microbial_order(base_store)
+    order = helpers.ensure_microbial_order(base_store)
     option_value = "option_value"
 
     # WHEN calling set_microbial_order with option
@@ -77,9 +85,10 @@ def test_set_option(cli_runner, base_context, base_store: Store, option_key, hel
 
 
 def test_set_project_name_in_lims(cli_runner, base_context, base_store, helpers):
+    """Test to set an order with a option so that LIMS info is outputed"""
 
     # GIVEN a database with an order
-    order = helpers.add_microbial_order(base_store)
+    order = helpers.ensure_microbial_order(base_store)
     name = "a_name"
 
     # WHEN calling set_microbial_order with option
@@ -101,9 +110,10 @@ def test_set_project_name_in_lims(cli_runner, base_context, base_store, helpers)
 def test_set_option_with_same_value(
     cli_runner, base_context, base_store: Store, option_key, helpers
 ):
+    """Test to set an order with a option same values twice"""
 
     # GIVEN a database with an order
-    order = helpers.add_microbial_order(base_store)
+    order = helpers.ensure_microbial_order(base_store)
     option_value = "option_value"
     first_sign = "first_sign"
     second_sign = "second_sign"
@@ -130,9 +140,10 @@ def test_set_option_with_same_value(
 
 
 def test_old_comment_preserved(cli_runner, base_context, base_store: Store, helpers):
+    """Test to set an order and check if old comment is preserved"""
 
     # GIVEN a database with an order
-    order = helpers.add_microbial_order(base_store)
+    order = helpers.ensure_microbial_order(base_store)
     first_sign = "first_sign"
     second_sign = "second_sign"
 
