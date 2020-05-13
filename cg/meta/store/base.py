@@ -1,7 +1,7 @@
 """ Base module for building bioinfo workflow bundles for linking in Housekeeper"""
 import datetime as dt
 
-from cg.constants import HK_TAGS, MIP_TAGS
+from cg.constants import HK_TAGS, MIP_DNA_TAGS
 from cg.exc import (
     AnalysisDuplicationError,
     PipelineUnknownError,
