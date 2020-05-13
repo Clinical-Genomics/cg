@@ -1,5 +1,5 @@
 """Utility functions to simply add test data in a cg store"""
-
+import logging
 from datetime import datetime
 from typing import List
 
@@ -7,6 +7,8 @@ from housekeeper.store import models as hk_models
 
 from cg.apps.hk import HousekeeperAPI
 from cg.store import Store, models
+
+LOG = logging.getLogger(__name__)
 
 
 class Helpers:
@@ -17,6 +19,7 @@ class Helpers:
         """utility function to add a bundle of information to a housekeeper api"""
         _bundle = store.bundle(bundle_data["name"])
         if not _bundle:
+            LOG.info("No bundle found")
             _bundle, _version = store.add_bundle(bundle_data)
             store.add_commit(_bundle, _version)
         return _bundle

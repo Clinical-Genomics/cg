@@ -22,40 +22,41 @@ def fixture_scout_load_config(apps_dir):
     return str(apps_dir / "scout/643594.config.yaml")
 
 
-@pytest.fixture(scope="function", name="base_context")
-def fixture_base_context(analysis_store_single_case: Store, housekeeper_api) -> dict:
-    """context to use in cli"""
+@pytest.fixture(scope="function", name="scout_hk_bundle_data")
+def fixture_scout_hk_bundle_data(case_id, scout_load_config, timestamp):
+    """Get some bundle data for housekeeper"""
+    tag_name = UploadScoutAPI.get_load_config_tag()
 
+    data = {
+        "name": case_id,
+        "created": timestamp,
+        "expires": timestamp,
+        "files": [{"path": scout_load_config, "archive": False, "tags": [tag_name]}],
+    }
+    return data
+
+
+@pytest.fixture(scope="function", name="base_context")
+def fixture_base_context(
+    analysis_store_single_case: Store, housekeeper_api, upload_scout_api
+) -> dict:
+    """context to use in cli"""
     return {
         "scout_api": MockScoutApi(),
-        "scout_upload_api": MockScoutUploadApi(),
+        "scout_upload_api": upload_scout_api,
         "housekeeper_api": housekeeper_api,
         "tb_api": MockTB(),
         "status": analysis_store_single_case,
     }
 
 
-@pytest.fixture(scope="function")
-def hk_api(scout_load_config):
-    """Return a hkapi"""
-    api = MockHK()
-    api.add_file(scout_load_config, None, None)
-
-    return api
-
-
-@pytest.fixture(scope="function")
-def upload_scout_api():
+@pytest.fixture(scope="function", name="upload_scout_api")
+def fixture_upload_scout_api(housekeeper_api):
     """Return a upload scout api"""
     api = MockScoutUploadApi()
+    api.housekeeper = housekeeper_api
 
     return api
-
-
-@pytest.fixture
-def hk_mock():
-    """docstring for hk_mock"""
-    return MockHK()
 
 
 class MockTB(TrailblazerAPI):
@@ -67,92 +68,6 @@ class MockTB(TrailblazerAPI):
     def get_family_root_dir(self, case_id):
         """docstring for get_family_root_dir"""
         return Path("hej")
-
-
-class MockVersion:
-    """Mock a version object"""
-
-    @property
-    def id(self):
-        return ""
-
-
-class MockFile:
-    """Mock a file object"""
-
-    def __init__(self, path="", to_archive=False, tags=None, **kwargs):
-        self.path = path
-        self.to_archive = to_archive
-        self.tags = tags or []
-        self._empty_first = kwargs.get("empty_first", False)
-
-    def first(self):
-        if self._empty_first:
-            return None
-        return MockFile()
-
-    @property
-    def full_path(self):
-        return str(self.path)
-
-    def is_included(self):
-        return False
-
-
-class MockHK(HousekeeperAPI):
-    def __init__(self):
-        """Mock the init"""
-        self.delivery_report = True
-        self.missing_mandatory = False
-        self._file_added = False
-        self._file_included = False
-        self._files = []
-
-    def files(self, **kwargs):
-        """docstring for file"""
-        tags = set(kwargs.get("tags", []))
-        delivery = set(["delivery-report"])
-        mandatory = set(["vcf-snv-clinical"])
-        if tags.intersection(delivery) and self.delivery_report is False:
-            return MockFile(empty_first=True)
-        if tags.intersection(mandatory) and self.missing_mandatory is True:
-            return MockFile(empty_first=True)
-        return MockFile()
-
-    def get_files(self, bundle, tags, version="1.0"):
-        """Mock get files sub from Housekeeper"""
-        return self._files
-
-    def add_file(self, file, version_obj, tag_name, to_archive=False):
-        """Mock add file to the HK database"""
-        self._file_added = True
-        new_file = MockFile(path=file)
-        self._files.append(new_file)
-        return new_file
-
-    def version(self, arg1: str, arg2: str):
-        """Fetch version from the database."""
-        return MockVersion()
-
-    def last_version(self, bundle: str):
-        """docstring for last_version"""
-        return MockVersion()
-
-    def include_file(self, file_obj, version_obj):
-        """docstring for include_file"""
-        self._file_included = True
-
-    def add_commit(self, file_obj):
-        """docstring for include_file"""
-        pass
-
-
-class MockFamily(object):
-    """Mock of family used in store """
-
-    def __init__(self):
-        """Mock the init"""
-        self.analyses = ["analysis_obj"]
 
 
 class MockScoutApi(ScoutAPI):
@@ -179,7 +94,7 @@ class MockScoutUploadApi(UploadScoutAPI):
     def __init__(self, **kwargs):
         """docstring for __init__"""
         self.mock_generate_config = True
-        self.housekeeper = MockHK()
+        self.housekeeper = None
         self.analysis = MockAnalysisApi()
         self.config = {}
         self.file_exists = False
