@@ -138,8 +138,8 @@ class MockHousekeeperAPI:
         self._files = EnhancedList()
         self._tags = EnhancedList()
         self._id_counter = 1
-        print("Set file added to false")
         self._file_added = False
+        self._file_included = False
         # Add tags here if there should be missing files
         self._missing_tags = set()
         if not config:
@@ -157,6 +157,15 @@ class MockHousekeeperAPI:
         """add a missing tag"""
         self._missing_tags.add(tag_name)
 
+    def is_file_included(self) -> bool:
+        """Return true if any file has been included"""
+        return self._file_included
+
+    def is_file_added(self) -> bool:
+        """Return true if any file has been added"""
+        return self._file_added
+
+    # Mocked functions from original API
     def add_bundle(self, bundle_data):
         """ Build a new bundle version of files """
         bundle_obj = self.new_bundle(
@@ -185,7 +194,6 @@ class MockHousekeeperAPI:
                     path, to_archive=file_data["archive"], tags=tags
                 )
                 self._files.append(new_file)
-                print("add_bundle: adding file")
                 self._file_added = True
                 version_obj.files.append(new_file)
         version_obj.bundle_obj = bundle_obj
@@ -306,9 +314,11 @@ class MockHousekeeperAPI:
 
     def include(self, *args, **kwargs):
         """Call the include version function to import related assets."""
+        self._file_included = True
 
     def include_file(self, *args, **kwargs):
         """Call the include version function to import related assets."""
+        self._file_included = True
 
     def last_version(self, *args, **kwargs):
         """Gets the latest version of a bundle"""
@@ -325,7 +335,7 @@ class MockHousekeeperAPI:
         Returns:
             iterable(hk.Models.File)
         """
-        return self._files
+        return self.files(*args, **kwargs)
 
     def add_file(self, file, version_obj, tags, to_archive=False):
         """Add a file to housekeeper."""

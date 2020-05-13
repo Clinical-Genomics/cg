@@ -224,14 +224,6 @@ def fixture_lims_samples(lims_family):
     return lims_family["samples"]
 
 
-# @pytest.yield_fixture(scope="function")
-# def housekeeper_api():
-#     """housekeeper_api fixture"""
-#     _api = MockHouseKeeper()
-#
-#     yield _api
-
-
 @pytest.yield_fixture(scope="function")
 def upload_observations_api(analysis_store, populated_housekeeper_api):
     """ Create mocked UploadObservationsAPI object"""
