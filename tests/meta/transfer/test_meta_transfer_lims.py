@@ -1,5 +1,6 @@
 import datetime as dt
-from cg.meta.transfer.lims import SampleState, IncludeOptions
+
+from cg.meta.transfer.lims import IncludeOptions, SampleState
 
 
 def has_same_received_at(lims, sample_obj):
