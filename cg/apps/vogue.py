@@ -17,8 +17,9 @@ class VogueAPI:
 
     def __init__(self, config: dict):
         super(VogueAPI, self).__init__()
+        self.vogue_config = config["vogue"]["config_path"]
         self.vogue_binary = config["vogue"]["binary_path"]
-        self.process = Process(binary=self.vogue_binary)
+        self.process = Process(binary=self.vogue_binary, config=self.vogue_config)
 
     def load_genotype_data(self, genotype_dict: dict):
         """Load genotype data from a dict."""
