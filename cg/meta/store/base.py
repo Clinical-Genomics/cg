@@ -66,7 +66,7 @@ def _get_files_index(deliverables: dict, pipeline: list) -> list:
     """ Get all index files from the deliverables file """
 
     return [
-        {"path": file["path_index"], "tags": get_tags(file, pipeline), "archive": False,}
+        {"path": file["path_index"], "tags": get_tags(file, pipeline_tags), "archive": False,}
         for file in deliverables["files"]
         if file["path_index"]
     ]
