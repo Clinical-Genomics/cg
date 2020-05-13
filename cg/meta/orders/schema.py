@@ -86,11 +86,7 @@ class OptionalNone(validators.Optional):
 
 NAME_PATTERN = r"^[A-Za-z0-9-]*$"
 
-BASE_PROJECT = {
-    "name": str,
-    "customer": str,
-    "comment": OptionalNone(TypeValidatorNone(str)),
-}
+BASE_PROJECT = {"name": str, "customer": str, "comment": OptionalNone(TypeValidatorNone(str))}
 
 MIP_SAMPLE = {
     # Orderform 1508:18
@@ -320,9 +316,7 @@ ORDER_SCHEMES = {
     OrderType.EXTERNAL: Scheme(
         {**BASE_PROJECT, "samples": ListValidator(EXTERNAL_SAMPLE, min_items=1)}
     ),
-    OrderType.MIP: Scheme(
-        {**BASE_PROJECT, "samples": ListValidator(MIP_SAMPLE, min_items=1)}
-    ),
+    OrderType.MIP: Scheme({**BASE_PROJECT, "samples": ListValidator(MIP_SAMPLE, min_items=1)}),
     OrderType.BALSAMIC: Scheme(
         {**BASE_PROJECT, "samples": ListValidator(BALSAMIC_SAMPLE, min_items=1)}
     ),
@@ -332,12 +326,8 @@ ORDER_SCHEMES = {
     OrderType.MIP_RNA: Scheme(
         {**BASE_PROJECT, "samples": ListValidator(MIP_RNA_SAMPLE, min_items=1)}
     ),
-    OrderType.FASTQ: Scheme(
-        {**BASE_PROJECT, "samples": ListValidator(FASTQ_SAMPLE, min_items=1)}
-    ),
-    OrderType.RML: Scheme(
-        {**BASE_PROJECT, "samples": ListValidator(RML_SAMPLE, min_items=1)}
-    ),
+    OrderType.FASTQ: Scheme({**BASE_PROJECT, "samples": ListValidator(FASTQ_SAMPLE, min_items=1)}),
+    OrderType.RML: Scheme({**BASE_PROJECT, "samples": ListValidator(RML_SAMPLE, min_items=1)}),
     OrderType.MICROBIAL: Scheme(
         {**BASE_PROJECT, "samples": ListValidator(MICROBIAL_SAMPLE, min_items=1)}
     ),
