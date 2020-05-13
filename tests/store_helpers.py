@@ -39,6 +39,9 @@ class Helpers:
         application_type: str = "wgs",
         is_external: bool = False,
         is_rna: bool = False,
+        description: str = None,
+        sequencing_depth: int = None,
+        is_accredited: bool = False,
     ) -> models.ApplicationVersion:
         """utility function to return existing or create application version for tests"""
         if is_rna:
@@ -48,7 +51,13 @@ class Helpers:
         application = store.application(tag=application_tag)
         if not application:
             application = self.add_application(
-                store, application_tag, application_type, is_external=is_external
+                store,
+                application_tag,
+                application_type,
+                is_external=is_external,
+                description=description,
+                is_accredited=is_accredited,
+                sequencing_depth=sequencing_depth,
             )
 
         prices = {"standard": 10, "priority": 20, "express": 30, "research": 5}
@@ -66,18 +75,23 @@ class Helpers:
         store: Store,
         application_tag: str = "dummy_tag",
         application_type: str = "wgs",
-        description: str = "dummy_description",
+        description: str = None,
         is_accredited: bool = False,
         **kwargs
     ) -> models.Application:
         """utility function to add a application to a store"""
+        application = store.application(tag=application_tag)
+        if application:
+            return application
+
+        if not description:
+            description = "dummy_description"
         application = store.add_application(
             tag=application_tag,
             category=application_type,
             description=description,
             percent_kth=80,
             is_accredited=is_accredited,
-            **kwargs
         )
         store.add_commit(application)
         return application
@@ -177,6 +191,7 @@ class Helpers:
         application_tag: str = "dummy_tag",
         application_type: str = "tgs",
         customer_name: str = None,
+        reads: int = None,
         **kwargs
     ) -> models.Sample:
         """utility function to add a sample to use in tests"""
@@ -195,7 +210,7 @@ class Helpers:
             tumour=is_tumour,
             sequenced_at=datetime.now(),
             data_analysis=data_analysis,
-            **kwargs
+            reads=reads,
         )
 
         sample.application_version_id = application_version_id
