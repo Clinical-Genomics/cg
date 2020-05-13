@@ -76,7 +76,7 @@ HK_TAGS = {
 # used to convert MIP tags derived from the deliverables to MIP standard tags and to check for
 # presence of mandatory files. Keys = tags found in deliverables, values = MIP standard tags and
 # mandatory flag
-MIP_TAGS = {
+MIP_DNA_TAGS = {
     tuple(["config"]): {"tags": ["mip-config"], "is_mandatory": True,},
     tuple(["sample_info"]): {"tags": ["sampleinfo"], "is_mandatory": True,},
     tuple(["multiqc_ar", "html"]): {"tags": ["multiqc-html"], "is_mandatory": True,},
