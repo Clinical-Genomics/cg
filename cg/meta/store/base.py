@@ -106,7 +106,7 @@ def _convert_tags(data: list):
         for file in data:
             if all(tag in file["tags"] for tag in deliverables_tags):
                 tags_filtered = list(filter(lambda x: x not in deliverables_tags, file["tags"]))
-                converted_tags = tags_filtered + mip_tags["tags"]
+                converted_tags = tags_filtered + pipeline_tags["tags"]
                 file["tags"] = converted_tags
 
 
