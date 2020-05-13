@@ -6,8 +6,6 @@ import tempfile
 from pathlib import Path
 from typing import List
 
-from cg.apps.hk import HousekeeperAPI
-
 ROOT_PATH = tempfile.TemporaryDirectory().name
 
 LOG = logging.getLogger(__name__)
@@ -15,6 +13,7 @@ LOG = logging.getLogger(__name__)
 
 def calculate_checksum(path):
     """Calculate the checksum for a file"""
+    _ = path
     return "asdjkfghasdkfj"
 
 
@@ -53,9 +52,7 @@ class MockFile:
     @property
     def full_path(self):
         """Return the full path to the file."""
-        if Path(self.path).is_absolute():
-            return self.path
-        return str(self.app_root / self.path)
+        return str(self.path)
 
     @property
     def is_included(self):
@@ -141,6 +138,8 @@ class MockHousekeeperAPI:
         self._files = EnhancedList()
         self._tags = EnhancedList()
         self._id_counter = 1
+        print("Set file added to false")
+        self._file_added = False
         # Add tags here if there should be missing files
         self._missing_tags = set()
         if not config:
@@ -186,6 +185,8 @@ class MockHousekeeperAPI:
                     path, to_archive=file_data["archive"], tags=tags
                 )
                 self._files.append(new_file)
+                print("add_bundle: adding file")
+                self._file_added = True
                 version_obj.files.append(new_file)
         version_obj.bundle_obj = bundle_obj
 
@@ -342,9 +343,9 @@ class MockHousekeeperAPI:
         )
         if not version_obj:
             version_obj = self.new_version(created_at=datetime.datetime.now())
-        self.add_version(version_obj)
         new_file.version = version_obj
         self._files.append(new_file)
+        self._file_added = True
         return new_file
 
     @staticmethod

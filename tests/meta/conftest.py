@@ -37,18 +37,6 @@ def trailblazer_api(tmpdir):
     _store.drop_all()
 
 
-@pytest.yield_fixture(scope="function")
-def housekeeper_api(tmpdir):
-    """Setup Housekeeper store."""
-    root_path = tmpdir.mkdir("bundles")
-    _api = HousekeeperAPI(
-        {"housekeeper": {"database": "sqlite://", "root": str(root_path)}}
-    )
-    _api.initialise_db()
-    yield _api
-    _api.destroy_db()
-
-
 @pytest.fixture
 def analysis_family():
     """Build an example family."""

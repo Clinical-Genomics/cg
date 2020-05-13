@@ -607,7 +607,6 @@ def sample_store(
     helpers.ensure_customer(store, **customer_production)
     helpers.ensure_application_version(store, **external_wgs_info)
     external_tag = external_wgs_info["application_tag"]
-    print(wgs_application_info)
     helpers.ensure_application_version(store, **wgs_application_info)
     wgs_tag = wgs_application_info["application_tag"]
     helpers.add_sample(

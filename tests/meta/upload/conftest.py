@@ -1,6 +1,7 @@
 """Fixtures for meta/upload tests"""
 
 import json
+
 import pytest
 
 from cg.apps.coverage.api import ChanjoAPI
@@ -223,54 +224,54 @@ def fixture_lims_samples(lims_family):
     return lims_family["samples"]
 
 
+# @pytest.yield_fixture(scope="function")
+# def housekeeper_api():
+#     """housekeeper_api fixture"""
+#     _api = MockHouseKeeper()
+#
+#     yield _api
+
+
 @pytest.yield_fixture(scope="function")
-def housekeeper_api():
-    """housekeeper_api fixture"""
-    _api = MockHouseKeeper()
-
-    yield _api
-
-
-@pytest.yield_fixture(scope="function")
-def upload_observations_api(analysis_store):
+def upload_observations_api(analysis_store, populated_housekeeper_api):
     """ Create mocked UploadObservationsAPI object"""
 
     loqus_mock = MockLoqusAPI()
-    hk_mock = MockHouseKeeper()
-    hk_mock.add_file(file=".", version_obj="", tag_name="")
 
     _api = UploadObservationsAPI(
-        status_api=analysis_store, hk_api=hk_mock, loqus_api=loqus_mock
+        status_api=analysis_store,
+        hk_api=populated_housekeeper_api,
+        loqus_api=loqus_mock,
     )
 
     yield _api
 
 
 @pytest.yield_fixture(scope="function")
-def upload_observations_api_wes(analysis_store):
+def upload_observations_api_wes(analysis_store, populated_housekeeper_api):
     """ Create mocked UploadObservationsAPI object"""
 
     loqus_mock = MockLoqusAPI(analysis_type="wes")
-    hk_mock = MockHouseKeeper()
-    hk_mock.add_file(file=".", version_obj="", tag_name="")
 
     _api = UploadObservationsAPI(
-        status_api=analysis_store, hk_api=hk_mock, loqus_api=loqus_mock
+        status_api=analysis_store,
+        hk_api=populated_housekeeper_api,
+        loqus_api=loqus_mock,
     )
 
     yield _api
 
 
 @pytest.yield_fixture(scope="function")
-def upload_scout_api(scout_store, madeline_api, lims_samples):
+def upload_scout_api(
+    scout_store, madeline_api, lims_samples, populated_housekeeper_api
+):
     """Fixture for upload_scout_api"""
-    hk_mock = MockHouseKeeper()
-    hk_mock.add_file(file="/mock/path", version_obj="", tag_name="")
     analysis_mock = MockAnalysis()
     lims_api = MockLims(lims_samples)
 
     _api = UploadScoutAPI(
-        hk_api=hk_mock,
+        hk_api=populated_housekeeper_api,
         scout_api=scout_store,
         madeline_api=madeline_api,
         analysis_api=analysis_mock,
@@ -295,10 +296,9 @@ def mutacc_upload_api():
 
 
 @pytest.yield_fixture(scope="function")
-def coverage_upload_api(chanjo_config_dict):
+def coverage_upload_api(chanjo_config_dict, populated_housekeeper_api):
     """Fixture for coverage upload API"""
-    hk_api = MockHouseKeeper()
-    hk_api.add_file(file="path", version_obj="", tag_name="")
+    hk_api = populated_housekeeper_api
     status_api = None
     coverage_api = MockCoverage(chanjo_config_dict)
     _api = UploadCoverageApi(
@@ -308,9 +308,9 @@ def coverage_upload_api(chanjo_config_dict):
 
 
 @pytest.yield_fixture(scope="function")
-def analysis(analysis_store):
+def analysis(analysis_store, case_id):
     """Fixture to mock an analysis"""
     _analysis = analysis_store.add_analysis(pipeline="pipeline", version="version")
-    _analysis.family = analysis_store.family("yellowhog")
+    _analysis.family = analysis_store.family(case_id)
     _analysis.config_path = "dummy_path"
     yield _analysis
