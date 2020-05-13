@@ -1,7 +1,7 @@
 """ Base module for building bioinfo workflow bundles for linking in Housekeeper"""
 import datetime as dt
 
-from cg.constants import HK_TAGS, MIP_TAGS
+from cg.constants import HK_TAGS, MIP_DNA_TAGS
 from cg.exc import (
     AnalysisDuplicationError,
     PipelineUnknownError,
@@ -67,7 +67,7 @@ def _get_files_index(deliverables: dict, pipeline: list) -> list:
     """ Get all index files from the deliverables file """
 
     return [
-        {"path": file["path_index"], "tags": get_tags(file, pipeline), "archive": False}
+        {"path": file["path_index"], "tags": get_tags(file, pipeline_tags), "archive": False,}
         for file in deliverables["files"]
         if file["path_index"]
     ]
@@ -107,7 +107,7 @@ def _convert_tags(data: list):
         for file in data:
             if all(tag in file["tags"] for tag in deliverables_tags):
                 tags_filtered = list(filter(lambda x: x not in deliverables_tags, file["tags"]))
-                converted_tags = tags_filtered + mip_tags["tags"]
+                converted_tags = tags_filtered + pipeline_tags["tags"]
                 file["tags"] = converted_tags
 
 
