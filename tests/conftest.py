@@ -66,6 +66,8 @@ def fixture_analysis_family_single(case_id, family_name):
                 "status": "affected",
                 "ticket_number": 123456,
                 "reads": 5000000,
+                "capture_kit": "GMSmyeloid",
+                "data_analysis": "PIM",
             }
         ],
     }
@@ -92,6 +94,7 @@ def fixture_analysis_family(case_id, family_name) -> dict:
                 "status": "affected",
                 "ticket_number": 123456,
                 "reads": 5000000,
+                "capture_kit": "GMSmyeloid",
             },
             {
                 "name": "father",
@@ -101,6 +104,7 @@ def fixture_analysis_family(case_id, family_name) -> dict:
                 "status": "unaffected",
                 "ticket_number": 123456,
                 "reads": 6000000,
+                "capture_kit": "GMSmyeloid",
             },
             {
                 "name": "mother",
@@ -110,6 +114,7 @@ def fixture_analysis_family(case_id, family_name) -> dict:
                 "status": "unaffected",
                 "ticket_number": 123456,
                 "reads": 7000000,
+                "capture_kit": "GMSmyeloid",
             },
         ],
     }

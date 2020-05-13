@@ -3,9 +3,9 @@
 import os
 from pathlib import Path
 
-from cg.apps.scoutapi import ScoutAPI
-from cg.apps.hk import HousekeeperAPI
 from cg.apps.crunchy import CrunchyAPI
+from cg.apps.hk import HousekeeperAPI
+from cg.apps.scoutapi import ScoutAPI
 
 
 def test_get_nlinks(compress_api, compress_test_dir):
@@ -37,13 +37,16 @@ def test_get_nlinks(compress_api, compress_test_dir):
     assert nlinks == 3
 
 
-def test_get_bam_files(compress_api, compress_scout_case, bam_files_hk_list, mocker):
+def test_get_bam_files(
+    compress_api, compress_scout_case, compress_hk_bundle, case_id, mocker, helpers
+):
     """test get_bam_files method"""
 
     # GIVEN a case id
-    case_id = "test_case"
     mocker.patch.object(ScoutAPI, "get_cases", return_value=[compress_scout_case])
-    mocker.patch.object(HousekeeperAPI, "get_files", return_value=bam_files_hk_list)
+
+    hk_api = compress_api.hk_api
+    helpers.ensure_hk_bundle(hk_api, compress_hk_bundle)
 
     # WHEN getting bam-files
     bam_dict = compress_api.get_bam_files(case_id=case_id)
