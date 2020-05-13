@@ -5,7 +5,7 @@
 import pytest
 from cg.apps.vogue import VogueAPI
 
-CONFIG = {"vogue": {"binary_path": "gtdb", "config_path": "lonely_path.yaml"}}
+CONFIG = {"vogue": {"binary_path": "/path/to/vogue", "config_path": "vogue_config"}}
 
 
 @pytest.fixture(scope="function")

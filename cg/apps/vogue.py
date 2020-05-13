@@ -17,9 +17,9 @@ class VogueAPI:
 
     def __init__(self, config: dict):
         super(VogueAPI, self).__init__()
-        self.vogue_binary = config["vogue"]["binary_path"]
         self.vogue_config = config["vogue"]["config_path"]
-        self.process = Process(binary=self.vogue_binary)
+        self.vogue_binary = config["vogue"]["binary_path"]
+        self.process = Process(binary=self.vogue_binary, config=self.vogue_config)
 
     def load_genotype_data(self, genotype_dict: dict):
         """Load genotype data from a dict."""
@@ -64,8 +64,6 @@ class VogueAPI:
         """Running vogue load bioinfo raw."""
 
         load_bioinfo_raw_call = [
-            "--config",
-            self.vogue_config,
             "load",
             "bioinfo",
             "raw",
@@ -91,8 +89,6 @@ class VogueAPI:
         """Running load bioinfo process."""
 
         load_bioinfo_process_call = [
-            "--config",
-            self.vogue_config,
             "load",
             "bioinfo",
             "process",
@@ -117,8 +113,6 @@ class VogueAPI:
         """Running load bioinfo sample."""
 
         load_bioinfo_sample_call = [
-            "--config",
-            self.vogue_config,
             "load",
             "bioinfo",
             "sample",
