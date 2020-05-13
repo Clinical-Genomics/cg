@@ -92,6 +92,7 @@ class Helpers:
             description=description,
             percent_kth=80,
             is_accredited=is_accredited,
+            limitations="A limitation",
         )
         store.add_commit(application)
         return application
@@ -175,6 +176,7 @@ class Helpers:
         if config_path:
             analysis.config_path = config_path
 
+        analysis.limitations = "A limitation"
         analysis.family = family
         store.add_commit(analysis)
         return analysis
