@@ -402,7 +402,11 @@ class Helpers:
         """utility function add a microbial order and sample"""
         customer = self.ensure_customer(store, customer_id)
         order = store.add_microbial_order(
-            customer=customer, internal_id=order_id, name=name, ordered=datetime.now()
+            customer=customer,
+            internal_id=order_id,
+            name=name,
+            ordered=datetime.now(),
+            ticket_number=123456,
         )
         store.add_commit(order)
 
