@@ -68,6 +68,7 @@ class LimsMicrosaltAPI:
 
         parameter_dict = {
             "CG_ID_project": sample_obj.microbial_order.internal_id,
+            "Customer_ID_project": sample_obj.microbial_order.ticket_number,
             "CG_ID_sample": sample_obj.internal_id,
             "Customer_ID_sample": sample_obj.name,
             "organism": organism,
