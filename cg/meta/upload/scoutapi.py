@@ -58,10 +58,9 @@ class UploadScoutAPI:
 
             lims_sample = dict()
             try:
-                lims_sample = self.lims.sample(sample_id)
+                lims_sample = self.lims.sample(sample_id) or {}
             except requests.exceptions.HTTPError as ex:
                 LOG.info("Could not fetch sample %s from LIMS: %s", sample_id, ex)
-
             sample = {
                 "analysis_type": link_obj.sample.application_version.application.analysis_type,
                 "bam_path": bam_path,
@@ -103,7 +102,6 @@ class UploadScoutAPI:
             "samples": list(),
             "sv_rank_model_version": analysis_data.get("sv_rank_model_version"),
         }
-
         for sample in self.build_samples(analysis_obj, hk_version.id):
             data["samples"].append(sample)
 

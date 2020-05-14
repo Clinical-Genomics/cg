@@ -12,6 +12,7 @@ from cg.apps.tb import TrailblazerAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
 from cg.meta.workflow.mip_dna import AnalysisAPI
 from cg.store import Store
+from tests.mocks.madeline import MockMadelineAPI
 
 LOG = logging.getLogger(__name__)
 
@@ -38,7 +39,7 @@ def fixture_scout_hk_bundle_data(case_id, scout_load_config, timestamp):
 
 @pytest.fixture(scope="function", name="base_context")
 def fixture_base_context(
-    analysis_store_single_case: Store, housekeeper_api, upload_scout_api
+    analysis_store: Store, housekeeper_api, upload_scout_api
 ) -> dict:
     """context to use in cli"""
     return {
@@ -46,7 +47,7 @@ def fixture_base_context(
         "scout_upload_api": upload_scout_api,
         "housekeeper_api": housekeeper_api,
         "tb_api": MockTB(),
-        "status": analysis_store_single_case,
+        "status": analysis_store,
     }
 
 
@@ -95,6 +96,7 @@ class MockScoutUploadApi(UploadScoutAPI):
         """docstring for __init__"""
         self.mock_generate_config = True
         self.housekeeper = None
+        self.madeline_api = MockMadelineAPI()
         self.analysis = MockAnalysisApi()
         self.config = {}
         self.file_exists = False

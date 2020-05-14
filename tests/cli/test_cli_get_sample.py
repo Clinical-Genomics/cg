@@ -102,10 +102,13 @@ def test_get_sample_external_false(invoke_cli, disk_store: Store, helpers):
 def test_get_sample_external_true(invoke_cli, disk_store: Store, helpers):
     """Test that the output has the external-value of the sample"""
     # GIVEN a database with a sample with data
+    # sample_id = add_sample(disk_store, is_external=True).internal_id
     sample = helpers.add_sample(disk_store, is_external=True)
     sample_id = sample.internal_id
     is_external_false = "No"
     is_external_true = "Yes"
+
+    sample_obj = disk_store.sample(sample_id)
 
     # WHEN getting a sample
     db_uri = disk_store.uri

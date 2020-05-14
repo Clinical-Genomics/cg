@@ -77,7 +77,8 @@ class Helpers:
         application_type: str = "wgs",
         description: str = None,
         is_accredited: bool = False,
-        **kwargs
+        is_external: bool = False,
+        **kwargs,
     ) -> models.Application:
         """utility function to add a application to a store"""
         application = store.application(tag=application_tag)
@@ -93,6 +94,7 @@ class Helpers:
             percent_kth=80,
             is_accredited=is_accredited,
             limitations="A limitation",
+            is_external=is_external,
         )
         store.add_commit(application)
         return application
@@ -194,18 +196,20 @@ class Helpers:
         application_type: str = "tgs",
         customer_name: str = None,
         reads: int = None,
-        **kwargs
+        **kwargs,
     ) -> models.Sample:
         """utility function to add a sample to use in tests"""
         customer_name = customer_name or "cust000"
         customer = self.ensure_customer(store, customer_name)
-        application_version_id = self.ensure_application_version(
+        application_version = self.ensure_application_version(
             store,
             application_tag=application_tag,
             application_type=application_type,
             is_external=is_external,
             is_rna=is_rna,
-        ).id
+        )
+        print(repr(application_version))
+        application_version_id = application_version.id
         sample = store.add_sample(
             name=sample_id,
             sex=gender,
@@ -217,6 +221,7 @@ class Helpers:
 
         sample.application_version_id = application_version_id
         sample.customer = customer
+        print("Set is external to %s", is_external)
         sample.is_external = is_external
 
         if kwargs.get("delivered_at"):

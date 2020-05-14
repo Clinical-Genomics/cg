@@ -67,6 +67,7 @@ def test_produce_load_config(
 
     # WHEN running cg upload scout -p <caseid>
     result = cli_runner.invoke(scout, [case_id, "--print"], obj=base_context)
+    print(result.output)
     # THEN assert mother: '0' and father: '0'
     assert "'mother': '0'" in result.output
     assert "'father': '0'" in result.output
