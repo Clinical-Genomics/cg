@@ -123,6 +123,10 @@ class EnhancedList(list):
         """Mock the count method"""
         return len(self)
 
+    def all(self):
+        """Mock the all method"""
+        return self
+
 
 class MockBundle:
     """Mocks a hk bundle object"""
@@ -150,6 +154,7 @@ class MockHousekeeperAPI:
         self._id_counter = 1
         self._file_added = False
         self._file_included = False
+        self._tags_matter = False
         # Add tags here if there should be missing files
         self._missing_tags = set()
         if not config:
@@ -366,7 +371,7 @@ class MockHousekeeperAPI:
 
     def get_root_dir(self):
         """Returns the root dir of Housekeeper"""
-        return self.root_dir
+        return self.root_path
 
     def get_files(self, *args, **kwargs):
         """Fetch all the files in housekeeper, optionally filtered by bundle and/or tags and/or
