@@ -1,14 +1,18 @@
+"""API for transfer a flowcell"""
+
 import logging
 from typing import List
 
-from cg.store import models, Store
-from cg.apps.stats import StatsAPI
 from cg.apps.hk import HousekeeperAPI
+from cg.apps.stats import StatsAPI
+from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
 
 
 class TransferFlowcell:
+    """Transfer flowcell API"""
+
     def __init__(self, db: Store, stats_api: StatsAPI, hk_api: HousekeeperAPI = None):
         self.db = db
         self.stats = stats_api
@@ -32,9 +36,9 @@ class TransferFlowcell:
         flowcell_obj.status = "ondisk"
         for sample_data in stats_data["samples"]:
             LOG.debug(f"adding reads/fastqs to sample: {sample_data['name']}")
-            sample_obj = self.db.sample(sample_data["name"]) or self.db.microbial_sample(
+            sample_obj = self.db.sample(
                 sample_data["name"]
-            )
+            ) or self.db.microbial_sample(sample_data["name"])
             if sample_obj is None:
                 LOG.warning(f"unable to find sample: {sample_data['name']}")
                 continue
@@ -48,7 +52,8 @@ class TransferFlowcell:
 
             sample_obj.reads = sample_data["reads"]
             enough_reads = (
-                sample_obj.reads > sample_obj.application_version.application.expected_reads
+                sample_obj.reads
+                > sample_obj.application_version.application.expected_reads
             )
             newest_date = (sample_obj.sequenced_at is None) or (
                 flowcell_obj.sequenced_at > sample_obj.sequenced_at

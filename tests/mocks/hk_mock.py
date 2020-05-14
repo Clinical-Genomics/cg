@@ -3,6 +3,7 @@
 import datetime
 import logging
 import tempfile
+from contextlib import contextmanager
 from pathlib import Path
 from typing import List
 
@@ -107,16 +108,20 @@ class MockVersion:
 
 
 class EnhancedList(list):
-    """Create a list with a first method"""
+    """Create a list that mocks the behaviour of a query result"""
 
     def __init__(self):
         super(EnhancedList, self).__init__()
 
     def first(self):
-        """docstring for first"""
+        """Mock the first method """
         if len(self) == 0:
             return None
         return self[0]
+
+    def count(self):
+        """Mock the count method"""
+        return len(self)
 
 
 class MockBundle:
@@ -141,6 +146,7 @@ class MockHousekeeperAPI:
         self._bundle_obj = None
         self._files = EnhancedList()
         self._tags = EnhancedList()
+        self._bundles = EnhancedList()
         self._id_counter = 1
         self._file_added = False
         self._file_included = False
@@ -168,6 +174,24 @@ class MockHousekeeperAPI:
     def is_file_added(self) -> bool:
         """Return true if any file has been added"""
         return self._file_added
+
+    def tag_exists(self, tag_name) -> bool:
+        """Return true if a tag has been added"""
+        for tag_obj in self._tags:
+            if tag_obj.name == tag_name:
+                return True
+        return False
+
+    def file_exists(self, file_path) -> bool:
+        """Return true if a file has been added"""
+        for file_obj in self._files:
+            if file_obj.path == file_path:
+                return True
+        return False
+
+    def update_id_counter(self):
+        """Increment id counter"""
+        self._id_counter += 1
 
     # Mocked functions from original API
     def add_bundle(self, bundle_data):
@@ -203,6 +227,7 @@ class MockHousekeeperAPI:
         version_obj.bundle_obj = bundle_obj
 
         self._bundle_obj = bundle_obj
+        self._bundles.append(bundle_obj)
         self._version_obj = version_obj
 
         return bundle_obj, version_obj
@@ -211,8 +236,9 @@ class MockHousekeeperAPI:
         """Build a list of tag objects."""
         tags = {}
         for tag_name in tag_names:
-            tag_obj = self.tag(tag_name)
-            if tag_obj is None:
+            if self.tag_exists(tag_name):
+                tag_obj = self.tag(tag_name)
+            else:
                 tag_obj = self.new_tag(tag_name)
                 self._tags.append(tag_obj)
             tags[tag_name] = tag_obj
@@ -231,37 +257,44 @@ class MockHousekeeperAPI:
 
     def bundles(self):
         """ Fetch bundles """
-        return [self._bundle_obj]
+        return self._bundles
 
     def new_bundle(self, name: str, created_at: datetime.datetime = None):
         """ Create a new file bundle """
         self.update_id_counter()
-        return MockBundle(id=self._id_counter, name=name, created_at=created_at)
+        bundle_obj = MockBundle(id=self._id_counter, name=name, created_at=created_at)
+        self._bundle_obj = bundle_obj
+        self._bundles.append(bundle_obj)
+        return bundle_obj
 
     def version(self, *args, **kwargs):
         """ Fetch a version """
         return self._version_obj
 
     def files(self, *args, **kwargs):
-        """ Fetch files """
+        """
+        Fetch files.
+        If it has been specified that some files should be missing return empty list
+        """
         tags = set(kwargs.get("tags", []))
         if tags.intersection(self._missing_tags):
             return EnhancedList()
         return self._files
 
-    def update_id_counter(self):
-        """Increment id counter"""
-        self._id_counter += 1
-
     def new_tag(self, name: str, category: str = None):
         """ Create a new tag """
         self.update_id_counter()
-        return MockTag(id=self._id_counter, name=name, category=category)
+        tag_obj = MockTag(id=self._id_counter, name=name, category=category)
+        if not self.tag_exists(name):
+            self._tags.append(tag_obj)
+
+        return tag_obj
 
     def add_tag(self, name: str, category: str = None):
         """ Add a tag to the database """
         tag_obj = self.new_tag(name, category)
-        self._tags.append(tag_obj)
+        if not self.tag_exists(name):
+            self._tags.append(tag_obj)
         return tag_obj
 
     def new_version(
@@ -271,9 +304,11 @@ class MockHousekeeperAPI:
         self.update_id_counter()
         created_at = created_at or datetime.datetime.now()
         expires_at = expires_at or datetime.datetime.now()
-        return MockVersion(
+        version_obj = MockVersion(
             id=self._id_counter, created_at=created_at, expires_at=expires_at
         )
+        self._version_obj = version_obj
+        return version_obj
 
     def add_version(
         self,
@@ -296,13 +331,17 @@ class MockHousekeeperAPI:
     ):
         """ Create a new file """
         self.update_id_counter()
-        return MockFile(
+        mocked_file = MockFile(
             id=self._id_counter,
             path=path,
             checksum=checksum,
             to_archive=to_archive,
             tags=tags,
         )
+        if not self.file_exists(path):
+            self._files.append(mocked_file)
+        self._file_added = True
+        return mocked_file
 
     def add_commit(self, *args, **kwargs):
         """ Wrap method in Housekeeper Store """
@@ -310,10 +349,6 @@ class MockHousekeeperAPI:
 
     def commit(self):
         """ Wrap method in Housekeeper Store """
-        return True
-
-    def session_no_autoflush(self):
-        """ Wrap property in Housekeeper Store """
         return True
 
     def include(self, *args, **kwargs):
@@ -358,7 +393,8 @@ class MockHousekeeperAPI:
         if not version_obj:
             version_obj = self.new_version(created_at=datetime.datetime.now())
         new_file.version = version_obj
-        self._files.append(new_file)
+        if not self.file_exists(file):
+            self._files.append(new_file)
         self._file_added = True
         return new_file
 
@@ -372,6 +408,11 @@ class MockHousekeeperAPI:
 
     def destroy_db(self):
         """Drop all tables in the store"""
+
+    @contextmanager
+    def session_no_autoflush(self):
+        """ Wrap property in Housekeeper Store """
+        yield True
 
     def __repr__(self):
         return f"HousekeeperMockAPI:version_obj={self._version_obj}"
