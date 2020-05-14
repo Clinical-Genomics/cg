@@ -407,7 +407,7 @@ class MockHousekeeperAPI:
     @staticmethod
     def checksum(path):
         """Calculate the checksum"""
-        return hk_checksum(path)
+        return calculate_checksum(path)
 
     def initialise_db(self):
         """Create all tables in the store."""
