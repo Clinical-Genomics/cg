@@ -59,3 +59,65 @@ class VogueAPI:
         # Execute command and print its stdout+stderr as it executes
         for line in self.process.stderr_lines():
             LOG.info("vogue output: %s", line)
+
+    def load_bioinfo_raw(self, load_bioinfo_inputs):
+        """Running vogue load bioinfo raw."""
+
+        load_bioinfo_raw_call = [
+            "load",
+            "bioinfo",
+            "raw",
+            "--sample-list",
+            load_bioinfo_inputs["samples"],
+            "--analysis-result",
+            load_bioinfo_inputs["analysis_result_file"],
+            "--analysis-type",
+            load_bioinfo_inputs["analysis_type"],
+            "--analysis-case",
+            load_bioinfo_inputs["analysis_case_name"],
+            "--workflow-version",
+            load_bioinfo_inputs["analysis_workflow_version"],
+            "--case-analysis-type",
+            load_bioinfo_inputs["case_analysis_type"],
+            "--analysis-workflow",
+            load_bioinfo_inputs["analysis_workflow_name"],
+        ]
+
+        self.process.run_command(load_bioinfo_raw_call)
+
+    def load_bioinfo_process(self, load_bioinfo_inputs, cleanup_flag):
+        """Running load bioinfo process."""
+
+        load_bioinfo_process_call = [
+            "load",
+            "bioinfo",
+            "process",
+            "--analysis-type",
+            load_bioinfo_inputs["analysis_type"],
+            "--analysis-case",
+            load_bioinfo_inputs["analysis_case_name"],
+            "--analysis-workflow",
+            load_bioinfo_inputs["analysis_workflow_name"],
+            "--workflow-version",
+            load_bioinfo_inputs["analysis_workflow_version"],
+            "--case-analysis-type",
+            load_bioinfo_inputs["case_analysis_type"],
+        ]
+
+        if cleanup_flag:
+            load_bioinfo_process_call.append("--cleanup")
+
+        self.process.run_command(load_bioinfo_process_call)
+
+    def load_bioinfo_sample(self, load_bioinfo_inputs):
+        """Running load bioinfo sample."""
+
+        load_bioinfo_sample_call = [
+            "load",
+            "bioinfo",
+            "sample",
+            "--analysis-case",
+            load_bioinfo_inputs["analysis_case_name"],
+        ]
+
+        self.process.run_command(load_bioinfo_sample_call)
