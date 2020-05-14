@@ -5,91 +5,10 @@ import json
 import pytest
 
 from cg.apps.coverage.api import ChanjoAPI
-from cg.apps.hk import HousekeeperAPI
 from cg.meta.upload.coverage import UploadCoverageApi
 from cg.meta.upload.mutacc import UploadToMutaccAPI
 from cg.meta.upload.observations import UploadObservationsAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
-
-
-class MockVersion:
-    """Mock a version object"""
-
-    # In this case we need to disable since this needsto be mocked
-    @property
-    def id(self):
-        """Mock out the id"""
-        return ""
-
-    @property
-    def app_root(self):
-        """Mock out the app_root"""
-        return None
-
-
-class MockFile:
-    """Mock the housekeeper File class"""
-
-    def __init__(self, path="", to_archive=False, tags=None):
-        self.path = path
-        self.to_archive = to_archive
-        self.tags = tags or []
-
-    def first(self):
-        """Mock the first method"""
-        return MockFile(path=self.path)
-
-    @property
-    def full_path(self):
-        """Mock the full path attribute"""
-        return self.path
-
-    @staticmethod
-    def is_included():
-        """Mock the is_included method to always return False"""
-        return False
-
-
-class MockHouseKeeper(HousekeeperAPI):
-    """Mock the housekeeper API"""
-
-    # In this mock we want to override __init__ so disable here
-    def __init__(self):
-        self._file_added = False
-        self._file_included = False
-        self._files = []
-        self._file = MockFile()
-
-    # This is overriding a housekeeper object so ok to not include all arguments
-    def files(self, version, tags):
-        """Mock the files method to return a list of files"""
-        return self._file
-
-    def get_files(self, bundle, tags, version="1.0"):
-        """Mock the get_files method to return a list of files"""
-        return self._files
-
-    def add_file(self, file, version_obj, tag_name, to_archive=False):
-        """Mock the add_files method to add a MockFile to the list of files"""
-        self._file_added = True
-        self._file = MockFile(path=file)
-        return self._file
-
-    def version(self, bundle: str, date: str):
-        """Fetch version from the database."""
-        return MockVersion()
-
-    def last_version(self, bundle: str):
-        """docstring for last_version"""
-        return MockVersion()
-
-    def include_file(self, file_obj, version_obj):
-        """docstring for include_file"""
-        self._file_included = True
-
-    def add_commit(self, file_obj):
-        """Overrides sqlalchemy method"""
-        return file_obj
 
 
 class MockAnalysis:
@@ -116,13 +35,12 @@ class MockAnalysis:
     @staticmethod
     def convert_panels(customer_id, panels):
         """Mock convert_panels"""
+        _ = customer_id, panels
         return ""
 
 
 class MockCoverage(ChanjoAPI):
     """Mock chanjo coverage api"""
-
-    pass
 
 
 class MockMutaccAuto:

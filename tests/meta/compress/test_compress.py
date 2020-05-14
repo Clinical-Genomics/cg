@@ -4,7 +4,6 @@ import os
 from pathlib import Path
 
 from cg.apps.crunchy import CrunchyAPI
-from cg.apps.hk import HousekeeperAPI
 from cg.apps.scoutapi import ScoutAPI
 
 
@@ -81,10 +80,12 @@ def test_update_scout(compress_api, bam_dict, mock_compress_func, mocker):
     assert mock_update_alignment_file.call_count == len(bam_dict)
 
 
-def test_update_hk(compress_api, bam_dict, mock_compress_func, mocker):
+def test_update_hk(compress_api, bam_dict, mock_compress_func):
     """ Test update_hk method"""
     mock_compress_func(bam_dict)
-    mock_add_file = mocker.patch.object(HousekeeperAPI, "add_file")
+    hk_api = compress_api.hk_api
+    # GIVEN a empty hk api
+    assert len(hk_api.files()) == 0
     # GIVEN a case-id and a compress api
     case_id = "test-case"
 
@@ -92,7 +93,7 @@ def test_update_hk(compress_api, bam_dict, mock_compress_func, mocker):
     compress_api.update_hk(case_id=case_id, bam_dict=bam_dict)
 
     # THEN add_file should have been called 6 times (two for every case)
-    assert mock_add_file.call_count == 6
+    assert len(hk_api.files()) == 6
 
 
 def test_remove_bams(compress_api, bam_dict, mock_compress_func):
@@ -112,7 +113,8 @@ def test_remove_bams(compress_api, bam_dict, mock_compress_func):
 
     # THEN the bam-files and flag-file should not exist
 
-    for sample, files in compressed_dict.items():
+    for sample_id in compressed_dict:
+        files = compressed_dict[sample_id]
         assert not Path(files["bam"].full_path).exists()
         assert not Path(files["bai"].full_path).exists()
         assert Path(files["cram"].full_path).exists()

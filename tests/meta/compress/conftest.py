@@ -7,6 +7,7 @@ import pytest
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.scoutapi import ScoutAPI
 from cg.meta.compress import CompressAPI
+from tests.mocks.hk_mock import MockFile
 
 
 class MockScout(ScoutAPI):
@@ -18,27 +19,6 @@ class MockScout(ScoutAPI):
 
 class MockCrunchy(CrunchyAPI):
     """Mock crunchy api"""
-
-
-class MockFile:
-    """Mock a file object"""
-
-    def __init__(self, path="", to_archive=False):
-        self.path = path
-        self.to_archive = to_archive
-
-    @property
-    def full_path(self):
-        """Mock full_path property"""
-        return str(self.path)
-
-    @staticmethod
-    def is_included():
-        """Mock is_included method"""
-        return False
-
-    def delete(self):
-        """mock delete method"""
 
 
 @pytest.yield_fixture(scope="function", name="crunchy_api")

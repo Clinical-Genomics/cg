@@ -59,6 +59,10 @@ class MockFile:
         """Check if the file is included in Housekeeper."""
         return str(self.app_root) in self.full_path
 
+    def delete(self):
+        """Mock delete functions"""
+        return True
+
     def __repr__(self):
         return f"MockFile:id={self.id},path={self.path},to_archive={self.to_archive}"
 
