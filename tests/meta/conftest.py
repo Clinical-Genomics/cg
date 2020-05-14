@@ -37,51 +37,6 @@ def trailblazer_api(tmpdir):
     _store.drop_all()
 
 
-@pytest.fixture
-def analysis_family():
-    """Build an example family."""
-    family = {
-        "name": "family",
-        "internal_id": "yellowhog",
-        "panels": ["IEM", "EP"],
-        "samples": [
-            {
-                "name": "son",
-                "sex": "male",
-                "internal_id": "ADM1",
-                "father": "ADM2",
-                "mother": "ADM3",
-                "status": "affected",
-                "ticket_number": 123456,
-                "reads": 5000000,
-                "capture_kit": "GMSmyeloid",
-                "data_analysis": "PIM",
-            },
-            {
-                "name": "father",
-                "sex": "male",
-                "internal_id": "ADM2",
-                "status": "unaffected",
-                "ticket_number": 123456,
-                "reads": 6000000,
-                "capture_kit": "GMSmyeloid",
-                "data_analysis": "PIM",
-            },
-            {
-                "name": "mother",
-                "sex": "female",
-                "internal_id": "ADM3",
-                "status": "unaffected",
-                "ticket_number": 123456,
-                "reads": 7000000,
-                "capture_kit": "GMSmyeloid",
-                "data_analysis": "PIM",
-            },
-        ],
-    }
-    return family
-
-
 @pytest.yield_fixture(scope="function")
 def analysis_store(base_store, analysis_family):
     """Setup a store instance for testing analysis API."""

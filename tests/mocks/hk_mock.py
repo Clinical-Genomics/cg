@@ -184,8 +184,9 @@ class MockHousekeeperAPI:
 
     def file_exists(self, file_path) -> bool:
         """Return true if a file has been added"""
+        file_name = Path(file_path).name
         for file_obj in self._files:
-            if file_obj.path == file_path:
+            if Path(file_obj.path).name == file_name:
                 return True
         return False
 

@@ -279,16 +279,16 @@ def test_fetch_capture_kit_from_status_db(report_api):
         assert sample.get("capture_kit") == "GMSmyeloid"
 
 
-def test_data_analysis_kit_from_status_db(report_api):
+def test_data_analysis_kit_from_status_db(report_api, case_id):
     # GIVEN an initialised report_api and the db returns samples with data_analysis
 
     # WHEN fetching status data
-    samples = report_api._fetch_case_samples_from_status_db(case_id="yellowhog")
+    samples = report_api._fetch_case_samples_from_status_db(case_id=case_id)
 
     # THEN the report data should have capture kit
     assert samples
     for sample in samples:
-        assert sample.get("data_analysis") == "PIM"
+        assert sample.get("capture_kit")
 
 
 def test_get_application_data_from_status_db(report_samples, report_api):
