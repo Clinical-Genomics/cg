@@ -144,5 +144,9 @@ def _determine_missing_files(mandatory_tags: set, found_tags: set) -> tuple:
 
 def _flatten(nested_list: list) -> set:
     """ Flattens a nested tag list and returns all unique tags"""
+    flat = set()
+    for tag_list in nested_list:
+        for tag in tag_list:
+            flat.add(tag)
 
-    return {tag for tag_list in nested_list for tag in tag_list}
+    return flat
