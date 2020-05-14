@@ -2,16 +2,22 @@
 from datetime import datetime
 
 
-def test_samples_to_receive_external(sample_store):
-    # GIVEN a store with samples in a mix of states
-    assert sample_store.samples().count() > 1
-    assert len([sample for sample in sample_store.samples() if sample.received_at]) > 1
+def test_samples_to_receive_external(sample_store, helpers):
+    """Test fetching external sample"""
+    store = sample_store
+    # GIVEN a store with a mixture of samples
+    assert store.samples().count() > 1
 
     # WHEN finding external samples to receive
-    external_query = sample_store.samples_to_recieve(external=True)
+    external_query = store.samples_to_recieve(external=True)
+
+    # THEN assert that only the external sample is returned
     assert external_query.count() == 1
+
     first_sample = external_query.first()
+    # THEN assert that the sample is external in database
     assert first_sample.application_version.application.is_external is True
+    # THEN assert that the sample is does not have a received at stamp
     assert first_sample.received_at is None
 
 

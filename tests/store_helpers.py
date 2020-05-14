@@ -220,15 +220,19 @@ class Helpers:
         sample.is_external = is_external
 
         if kwargs.get("delivered_at"):
+            print("Adding delivered")
             sample.delivered_at = kwargs["delivered_at"]
 
         if kwargs.get("received_at"):
+            print("Adding received_at")
             sample.received_at = kwargs["received_at"]
 
-        if kwargs.get("received_at"):
-            sample.received_at = kwargs["received_at"]
+        if kwargs.get("prepared_at"):
+            print("Adding prepared")
+            sample.received_at = kwargs["prepared_at"]
 
         if kwargs.get("flowcell"):
+            print("Adding flowcell")
             sample.flowcells.append(kwargs["flowcell"])
 
         store.add_commit(sample)
