@@ -74,8 +74,6 @@ class TransferLims(object):
 
         if sample_id:
             samples = self.status.Sample.query.filter_by(internal_id=sample_id)
-            print('hej')
-            print(samples.first())
         else:
             samples = self._get_samples_to_include(include, status_type)
 
