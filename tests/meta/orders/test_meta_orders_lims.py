@@ -124,7 +124,7 @@ def test_to_lims_balsamic(balsamic_order_to_submit):
 
     assert first_sample["udfs"]["tumour"] is True
     assert first_sample["udfs"]["capture_kit"] == "LymphoMATIC"
-    assert "tumour_purity" not in first_sample["udfs"]
+    assert first_sample["udfs"]["tumour_purity"] == '75'
 
     assert first_sample["udfs"]["formalin_fixation_time"] == "1"
     assert first_sample["udfs"]["post_formalin_fixation_time"] == "2"
@@ -164,7 +164,7 @@ def test_to_lims_mip_balsamic(mip_balsamic_order_to_submit):
 
     assert first_sample["udfs"]["tumour"] is True
     assert first_sample["udfs"]["capture_kit"] == "LymphoMATIC"
-    assert "tumour_purity" not in first_sample["udfs"]
+    assert first_sample["udfs"]["tumour_purity"] == '75'
 
     assert first_sample["udfs"]["formalin_fixation_time"] == "1"
     assert first_sample["udfs"]["post_formalin_fixation_time"] == "2"
