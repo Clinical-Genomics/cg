@@ -46,29 +46,33 @@ def reset_case_action(case_obj):
 def get_files(deliverables: dict, pipeline: str) -> list:
     """Get all deliverable files from the pipeline"""
 
-    pipeline_tag = HK_TAGS[pipeline]
-    files = _get_files_non_index(deliverables, pipeline_tag)
-    index_files = _get_files_index(deliverables, pipeline_tag)
+    pipeline_tags = HK_TAGS[pipeline]
+    files = _get_files_non_index(deliverables, pipeline_tags)
+    _check_mandatory_tags(files, PIPELINE_TAGS[pipeline])
+    _convert_tags(files, PIPELINE_TAGS[pipeline], "tags")
+    index_files = _get_files_index(deliverables, pipeline_tags)
+    _convert_tags(index_files, PIPELINE_TAGS[pipeline], "index_tags")
 
     files.extend(index_files)
 
-    _check_mandatory_tags(files, PIPELINE_TAGS[pipeline])
-    _convert_tags(files, PIPELINE_TAGS[pipeline])
+    # _check_mandatory_tags(files, PIPELINE_TAGS[pipeline])
+    # _convert_tags(files, PIPELINE_TAGS[pipeline])
 
     return files
 
 
-def _get_files_non_index(deliverables: dict, pipeline: list) -> list:
+def _get_files_non_index(deliverables: dict, pipeline_tags: list) -> list:
     """ Get all files that are not index files from the deliverables file """
 
     return [
-        {"path": file["path"], "tags": get_tags(file, pipeline), "archive": False}
+        {"path": file["path"], "tags": get_tags(file, pipeline_tags), "archive": False}
         for file in deliverables["files"]
     ]
 
 
 def _get_files_index(deliverables: dict, pipeline_tags: list) -> list:
     """ Get all index files from the deliverables file """
+    breakpoint()
 
     return [
         {"path": file["path_index"], "tags": get_tags(file, pipeline_tags), "archive": False}
@@ -103,14 +107,36 @@ def build_bundle(config_data: dict, analysisinfo_data: dict, deliverables: dict)
     return data
 
 
-def _convert_tags(data: list, standard_tags: dict):
+# def _convert_tags(data: list, standard_tags: dict):
+#     """ Convert tags from deliverables tags to standard tags """
+
+#     for deliverables_tags, pipeline_tags in standard_tags.items():
+#         for file in data:
+#             if all(tag in file["tags"] for tag in deliverables_tags):
+#                 tags_filtered = list(filter(lambda x: x not in deliverables_tags, file["tags"]))
+#                 converted_tags = tags_filtered + pipeline_tags["tags"]
+#                 file["tags"] = converted_tags
+
+
+# def _convert_index_tags(data: list, standard_tags: dict):
+#     """ Convert tags from deliverables tags to standard tags """
+
+#     for deliverables_tags, pipeline_tags in standard_tags.items():
+#         for file in data:
+#             if all(tag in file["tags"] for tag in deliverables_tags):
+#                 tags_filtered = list(filter(lambda x: x not in deliverables_tags, file["tags"]))
+#                 converted_tags = tags_filtered + pipeline_tags["index_tags"]
+#                 file["tags"] = converted_tags
+
+
+def _convert_tags(data: list, standard_tags: dict, tag_type: str):
     """ Convert tags from deliverables tags to standard tags """
 
     for deliverables_tags, pipeline_tags in standard_tags.items():
         for file in data:
             if all(tag in file["tags"] for tag in deliverables_tags):
                 tags_filtered = list(filter(lambda x: x not in deliverables_tags, file["tags"]))
-                converted_tags = tags_filtered + pipeline_tags["tags"]
+                converted_tags = list(set(tags_filtered + pipeline_tags[tag_type]))
                 file["tags"] = converted_tags
 
 
@@ -119,6 +145,7 @@ def _check_mandatory_tags(files: list, pipeline_tags: dict):
         Check if all the mandatory tags are present for the files to be added to Housekeeper.
         Raise an exception if not.
     """
+    breakpoint()
 
     all_deliverable_tags = [file["tags"] for file in files]
     all_mandatory_tags = [tag for tag in pipeline_tags if pipeline_tags[tag]["is_mandatory"]]

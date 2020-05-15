@@ -77,35 +77,105 @@ HK_TAGS = {
 # presence of mandatory files. Keys = tags found in deliverables, values = MIP standard tags and
 # mandatory flag
 MIP_DNA_TAGS = {
-    tuple(["config"]): {"tags": ["mip-config"], "is_mandatory": True,},
-    tuple(["sample_info"]): {"tags": ["sampleinfo"], "is_mandatory": True,},
-    tuple(["multiqc_ar", "html"]): {"tags": ["multiqc-html"], "is_mandatory": True,},
-    tuple(["multiqc_ar", "json"]): {"tags": ["multiqc-json"], "is_mandatory": True,},
-    tuple(["pedigree"]): {"tags": ["pedigree-yaml"], "is_mandatory": True,},
-    tuple(["pedigree_fam"]): {"tags": ["pedigree"], "is_mandatory": True,},
-    tuple(["log"]): {"tags": ["mip-log"], "is_mandatory": True,},
-    tuple(["qccollect_ar"]): {"tags": ["qcmetrics"], "is_mandatory": True,},
+    tuple(["gatk_baserecalibration"]): {
+        "tags": ["cram"],
+        "index_tags": ["cram-index"],
+        "is_mandatory": False,
+    },
+    tuple(["config"]): {
+        "tags": ["mip-config"],
+        "is_mandatory": True
+    },
+    tuple(["sample_info"]): {
+        "tags": ["sampleinfo"],
+        "is_mandatory": True
+    },
+    tuple(["multiqc_ar", "html"]): {
+        "tags": ["multiqc-html"],
+        "is_mandatory": True
+    },
+    tuple(["multiqc_ar", "json"]): {
+        "tags": ["multiqc-json"],
+        "is_mandatory": True
+    },
+    tuple(["pedigree"]): {
+        "tags": ["pedigree-yaml"],
+        "is_mandatory": True
+    },
+    tuple(["pedigree_fam"]): {
+        "tags": ["pedigree"],
+        "is_mandatory": True
+    },
+    tuple(["log"]): {
+        "tags": ["mip-log"],
+        "is_mandatory": True
+    },
+    tuple(["qccollect_ar"]): {
+        "tags": ["qcmetrics"],
+        "is_mandatory": True
+    },
     tuple(["gatk_combinevariantcallsets", "bcf"]): {
         "tags": ["snv-gbcf", "snv-bcf"],
+        "index_tags": ["gbcf-index"],
         "is_mandatory": True,
     },
-    tuple(["sv_combinevariantcallsets", "bcf"]): {"tags": ["sv-bcf"], "is_mandatory": True,},
-    tuple(["peddy_ar", "ped_check"]): {"tags": ["peddy", "ped-check"], "is_mandatory": True,},
-    tuple(["peddy_ar", "peddy"]): {"tags": ["peddy", "ped"], "is_mandatory": True,},
-    tuple(["peddy_ar", "sex_check"]): {"tags": ["peddy", "sex-check"], "is_mandatory": True,},
-    tuple(["version_collect_ar"]): {"tags": ["exe-ver"], "is_mandatory": True,},
-    tuple(["sv_str"]): {"tags": ["vcf-str"], "is_mandatory": True,},
+    tuple(["sv_combinevariantcallsets", "bcf"]): {
+        "tags": ["sv-bcf"],
+        "index_tags": ["sv-bcf-index"],
+        "is_mandatory": True
+    },
+    tuple(["peddy_ar", "ped_check"]): {
+        "tags": ["peddy", "ped-check"],
+        "is_mandatory": True
+    },
+    tuple(["peddy_ar", "peddy"]): {
+        "tags": ["peddy", "ped"],
+        "is_mandatory": True
+    },
+    tuple(["peddy_ar", "sex_check"]): {
+        "tags": ["peddy", "sex-check"],
+        "is_mandatory": True
+    },
+    tuple(["version_collect_ar"]): {
+        "tags": ["exe-ver"],
+        "is_mandatory": True
+    },
+    tuple(["sv_str"]): {
+        "tags": ["vcf-str"],
+        "index_tags": ["vcf-str-index"],
+        "is_mandatory": True,
+    },
     tuple(["clinical", "endvariantannotationblock"]): {
         "tags": ["vcf-snv-clinical"],
+        "index_tags": ["vcf-snv-clinical-index"],
         "is_mandatory": True,
     },
     tuple(["research", "endvariantannotationblock"]): {
         "tags": ["vcf-snv-research"],
+        "index_tags": ["vcf-snv-research-index"],
         "is_mandatory": True,
     },
-    tuple(["clinical", "sv_reformat"]): {"tags": ["vcf-sv-clinical"], "is_mandatory": False,},
-    tuple(["research", "sv_reformat"]): {"tags": ["vcf-sv-research"], "is_mandatory": False,},
-    tuple(["samtools_subsample_mt", "bam"]): {"tags": ["bam-mt"], "is_mandatory": False,},
-    tuple(["chromograph_ar"]): {"tags": ["chromograph"], "is_mandatory": False,},
-    tuple(["vcf2cytosure_ar"]): {"tags": ["vcf2cytosure"], "is_mandatory": False,},
+    tuple(["clinical", "sv_reformat"]): {
+        "tags": ["vcf-sv-clinical"],
+        "index_tags": ["vcf-sv-clinical-index"],
+        "is_mandatory": False
+    },
+    tuple(["research", "sv_reformat"]): {
+        "tags": ["vcf-sv-research"],
+        "index_tags": ["vcf-sv-research-index"],
+        "is_mandatory": False
+    },
+    tuple(["samtools_subsample_mt", "bam"]): {
+        "tags": ["bam-mt"],
+        "index_tags": ["bam-mt-index"],
+        "is_mandatory": False
+    },
+    tuple(["chromograph_ar"]): {
+        "tags": ["chromograph"],
+        "is_mandatory": False
+    },
+    tuple(["vcf2cytosure_ar"]): {
+        "tags": ["vcf2cytosure"],
+        "is_mandatory": False
+    },
 }
