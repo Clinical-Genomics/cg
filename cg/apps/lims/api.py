@@ -110,11 +110,9 @@ class LimsAPI(Lims, OrderHandler):
         step_names_udfs = MASTER_STEPS_UDFS["prepared_step"]
         prepared_dates = []
 
-        for process_type in step_names_udfs:
-            artifacts = self.get_artifacts(process_type=process_type, samplelimsid=lims_id)
-
-            for artifact in artifacts:
-                prepared_dates.append(parse_date(artifact.parent_process.date_run))
+        artifacts = self.get_artifacts(process_type=step_names_udfs, samplelimsid=lims_id)
+        for artifact in artifacts:
+            prepared_dates.append(parse_date(artifact.parent_process.date_run))
 
         if prepared_dates:
             sorted_dates = sorted(prepared_dates, reverse=True)
