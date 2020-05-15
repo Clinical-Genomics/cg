@@ -46,6 +46,7 @@ class LimsHandler:
                     'source': sample.get('source') or 'NA',
                     'tissue_block_size': sample.get('tissue_block_size'),
                     'tumour': sample.get('tumour') or False,
+                    'tumour_purity': sample.get('tumour_purity'),
                     'volume': sample.get('volume'),
                     'well_position_rml': sample.get('well_position_rml'),
                     'verified_organism': sample.get('verified_organism'),
