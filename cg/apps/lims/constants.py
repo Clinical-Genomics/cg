@@ -33,26 +33,6 @@ PROP2UDF = {
 }
 
 MASTER_STEPS_UDFS = {
-    "received_step": {
-        "CG002 - Reception Control (Dev)": "date arrived at clinical genomics",
-        "CG002 - Reception Control": "date arrived at clinical genomics",
-        "Reception Control TWIST v1": "date arrived at clinical genomics",
-        "Reception Control no placement v1": "date arrived at clinical genomics",
-        "Reception Control (RNA) v1": "date arrived at clinical genomics",
-    },
-    "prepared_step": {
-        "CG002 - Aggregate QC (Library Validation) (Dev)",
-        "CG002 - Aggregate QC (Library Validation)",
-        "Aggregate QC (Library Validation) TWIST v1",
-        "Aggregate QC (Library Validation) (RNA) v2",
-        "Aggregate QC (Library Validation)",
-    },
-    "delivery_step": {"CG002 - Delivery": "Date delivered", "Delivery v1": "Date delivered"},
-    "sequenced_step": {
-        "CG002 - Illumina Sequencing (HiSeq X)": "Finish Date",
-        "CG002 - Illumina Sequencing (Illumina SBS)": "Finish Date",
-        "AUTOMATED - NovaSeq Run": None,
-    },
     "capture_kit_step": {
         "obsolete_CG002 - Hybridize Library  (SS XT)": "SureSelect capture library/libraries used",
         "Hybridize Library TWIST v1": "Bait Set",
