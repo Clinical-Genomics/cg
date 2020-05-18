@@ -56,9 +56,9 @@ class HousekeeperAPI:
         return self._store.new_file(path, checksum, to_archive, tags)
 
     def add_file(
-        self, file, version_obj: models.Version, tags, to_archive=False
+        self, path, version_obj: models.Version, tags, to_archive=False
     ) -> models.File:
-        """Create a new file object that includes a version and tags."""
+        """Add a file to the database"""
         if isinstance(tags, str):
             tags = [tags]
         for tag_name in tags:
@@ -66,7 +66,7 @@ class HousekeeperAPI:
                 self.add_tag(tag_name)
 
         new_file = self.new_file(
-            path=str(Path(file).absolute()),
+            path=str(Path(path).absolute()),
             to_archive=to_archive,
             tags=[self.tag(tag_name) for tag_name in tags],
         )

@@ -2,13 +2,14 @@
     API for compressing files
 """
 
-from pathlib import Path
-import os
 import logging
+import os
 from copy import deepcopy
+from pathlib import Path
 
-from cg.apps import hk, crunchy, scoutapi
-from cg.constants import FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX, BAM_SUFFIX
+from cg.apps import crunchy, hk, scoutapi
+from cg.constants import (BAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX,
+                          FASTQ_SECOND_READ_SUFFIX)
 
 LOG = logging.getLogger(__name__)
 
@@ -147,10 +148,10 @@ class CompressAPI:
                 if not dry_run:
                     LOG.info("updating files in housekeeper...")
                     self.hk_api.add_file(
-                        file=cram_path, version_obj=latest_hk_version, tags=cram_tags
+                        path=cram_path, version_obj=latest_hk_version, tags=cram_tags
                     )
                     self.hk_api.add_file(
-                        file=crai_path, version_obj=latest_hk_version, tags=crai_tags
+                        path=crai_path, version_obj=latest_hk_version, tags=crai_tags
                     )
                     bam_files["bam"].delete()
                     bam_files["bai"].delete()
