@@ -26,11 +26,27 @@ def fixture_housekeeper_api(hk_config):
     _api.destroy_db()
 
 
+@pytest.yield_fixture(scope="function", name="populated_housekeeper_api")
+def fixture_populated_housekeeper_api(housekeeper_api, bundle_data):
+    """Setup Housekeeper store."""
+    _api = housekeeper_api
+    bundle_obj, version_obj = _api.add_bundle(bundle_data)
+    _api.add_commit(bundle_obj, version_obj)
+    return _api
+
+
 @pytest.fixture(name="a_date")
 def fixture_a_date() -> datetime.datetime:
     """Return a datetime object with a date"""
 
     return datetime.datetime(2020, 5, 1)
+
+
+@pytest.fixture(name="later_date")
+def fixture_later_date() -> datetime.datetime:
+    """Return a datetime object with a date later than a_date"""
+
+    return datetime.datetime(2020, 5, 3)
 
 
 @pytest.fixture(name="empty_bundle_obj")

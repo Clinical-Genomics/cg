@@ -3,7 +3,7 @@ import datetime as dt
 import logging
 import os
 from pathlib import Path
-from typing import List
+from typing import List, Tuple
 
 from housekeeper.include import checksum as hk_checksum
 from housekeeper.include import include_version
@@ -31,7 +31,7 @@ class HousekeeperAPI:
         """ Create a new file bundle """
         return self._store.new_bundle(name, created_at)
 
-    def add_bundle(self, bundle_data) -> models.Bundle:
+    def add_bundle(self, bundle_data) -> Tuple[models.Bundle, models.Version]:
         """ Build a new bundle version of files """
         return self._store.add_bundle(bundle_data)
 
@@ -39,7 +39,7 @@ class HousekeeperAPI:
         """ Fetch a bundle """
         return self._store.bundle(name)
 
-    def bundles(self) -> List:
+    def bundles(self) -> List[models.Bundle]:
         """ Fetch bundles """
         return self._store.bundles()
 
@@ -49,12 +49,14 @@ class HousekeeperAPI:
         checksum: str = None,
         to_archive: bool = False,
         tags: list = None,
-    ):
+    ) -> models.File:
         """ Create a new file """
         return self._store.new_file(path, checksum, to_archive, tags)
 
-    def add_file(self, file, version_obj: models.Version, tags, to_archive=False):
-        """Add a file to housekeeper."""
+    def add_file(
+        self, file, version_obj: models.Version, tags, to_archive=False
+    ) -> models.File:
+        """Create a new file object that includes a version and tags."""
         if isinstance(tags, str):
             tags = [tags]
         for tag_name in tags:
