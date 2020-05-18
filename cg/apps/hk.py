@@ -15,7 +15,7 @@ LOG = logging.getLogger(__name__)
 class HousekeeperAPI:
     """ API to decouple cg code from Housekeeper """
 
-    def __init__(self, config):
+    def __init__(self, config: dict) -> None:
         self._store = Store(
             config["housekeeper"]["database"], config["housekeeper"]["root"]
         )
@@ -81,7 +81,7 @@ class HousekeeperAPI:
         tags: List[str] = None,
         version: int = None,
         path: str = None,
-    ):
+    ) -> List[models.File]:
         """ Fetch files """
         return self._store.files(bundle=bundle, tags=tags, version=version, path=path)
 
@@ -94,23 +94,34 @@ class HousekeeperAPI:
         """
         return self._store.files(bundle=bundle, tags=tags, version=version)
 
-    def include_file(self, file_obj: models.File, version_obj: models.Version):
+    @staticmethod
+    def get_included_path(
+        root_dir: Path, version_obj: models.Version, file_obj: models.File
+    ) -> Path:
+        """Generate the path to a file that should be included.
+           If the version dir does not exist, create a new version dir in root dir
+        """
+        # generate root directory
+        version_root_dir = root_dir / version_obj.relative_root_dir
+        version_root_dir.mkdir(parents=True, exist_ok=True)
+        LOG.info("Created new bundle version dir: %s", version_root_dir)
+        return version_root_dir / Path(file_obj.path).name
+
+    def include_file(
+        self, file_obj: models.File, version_obj: models.Version
+    ) -> models.File:
         """Call the include version function to import related assets."""
         global_root_dir = Path(self.get_root_dir())
 
-        # generate root directory
-        version_root_dir = global_root_dir / version_obj.relative_root_dir
-        version_root_dir.mkdir(parents=True, exist_ok=True)
-        LOG.info("Created new bundle version dir: %s", version_root_dir)
-
+        new_path = self.get_included_path(global_root_dir, version_obj, file_obj)
         if file_obj.to_archive:
             # calculate sha1 checksum if file is to be archived
             file_obj.checksum = HousekeeperAPI.checksum(file_obj.path)
         # hardlink file to the internal structure
-        new_path = version_root_dir / Path(file_obj.path).name
         os.link(file_obj.path, new_path)
         LOG.info("Linked file: %s -> %s", file_obj.path, new_path)
         file_obj.path = str(new_path).replace(f"{global_root_dir}/", "", 1)
+        return file_obj
 
     def new_version(
         self, created_at: dt.datetime, expires_at: dt.datetime = None

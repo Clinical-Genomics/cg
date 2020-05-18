@@ -57,3 +57,56 @@ def test_add_new_file(populated_housekeeper_api, case_id, madeline_output):
         len(list(file_obj for file_obj in populated_housekeeper_api.files()))
         == nr_files_in_db + 1
     )
+
+
+def test_get_files(populated_housekeeper_api, case_id, tags):
+    """Test to fetch files with the get files method"""
+    # GIVEN a populated housekeeper api with some files
+    nr_files = len(list(file_obj for file_obj in populated_housekeeper_api.files()))
+    assert nr_files > 0
+    # WHEN fetching all files
+    files = populated_housekeeper_api.get_files(bundle=case_id, tags=tags)
+    # THEN assert all files where fetched
+    assert len(list(file_obj for file_obj in files)) == nr_files
+
+
+def test_get_included_path(populated_housekeeper_api, case_id):
+    """Test to get the included path for a file"""
+    # GIVEN a populated housekeeper api and the root dir
+    root_dir = Path(populated_housekeeper_api.get_root_dir())
+    # GIVEN a version and a file object
+    version_obj = populated_housekeeper_api.last_version(case_id)
+    file_obj = version_obj.files[0]
+
+    # WHEN fetching the included path
+    included_path = populated_housekeeper_api.get_included_path(
+        root_dir=root_dir, version_obj=version_obj, file_obj=file_obj
+    )
+
+    # THEN assert that there is no file existing in the included path
+    assert included_path.exists() is False
+    # THEN assert that the correct path was created
+    assert (
+        included_path
+        == root_dir / version_obj.relative_root_dir / Path(file_obj.path).name
+    )
+
+
+def test_get_include_file(populated_housekeeper_api, case_id):
+    """Test to get the included path for a file"""
+    # GIVEN a populated housekeeper api and the root dir
+    root_dir = Path(populated_housekeeper_api.get_root_dir())
+    version_obj = populated_housekeeper_api.last_version(case_id)
+    file_obj = version_obj.files[0]
+    original_path = Path(file_obj.path)
+    included_path = root_dir / version_obj.relative_root_dir / original_path.name
+    # GIVEN that the included file does not exist
+    assert included_path.exists() is False
+
+    # WHEN including the file
+    included_file = populated_housekeeper_api.include_file(file_obj, version_obj)
+
+    # THEN assert that the file has been linked to the included place
+    assert included_path.exists() is True
+    # THEN assert that the file path has been updated
+    assert included_file.path != original_path
