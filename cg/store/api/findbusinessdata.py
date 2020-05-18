@@ -18,7 +18,8 @@ class FindBusinessDataHandler(BaseHandler):
         """Fetch multiple analyses."""
         records = self.Analysis.query
         if family:
-            records = records.filter(models.Analysis.family == family)
+            query_family = family
+            records = records.filter(models.Analysis.family == query_family)
         if before:
             subq = (
                 self.Analysis.query.join(models.Analysis.family)
