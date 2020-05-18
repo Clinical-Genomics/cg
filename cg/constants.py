@@ -143,7 +143,7 @@ MIP_DNA_TAGS = {
     tuple(["sv_str"]): {
         "tags": ["vcf-str"],
         "index_tags": ["vcf-str-index"],
-        "is_mandatory": True,
+        "is_mandatory": False,
     },
     tuple(["clinical", "endvariantannotationblock"]): {
         "tags": ["vcf-snv-clinical"],
