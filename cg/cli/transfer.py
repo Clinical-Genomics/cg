@@ -37,7 +37,7 @@ def flowcell(context, flowcell_name):
     "-i", "--include", type=click.Choice(["unset", "not-invoiced", "all"]), default="unset"
 )
 @click.option(
-    "-id", "--sample-id", type=str, default=None, 
+    "--sample-id" 
     help='Lims Submitted Sample id. use together with status.'
 )
 
