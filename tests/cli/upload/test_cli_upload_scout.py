@@ -24,7 +24,7 @@ def test_upload_with_load_config(
     tag_name = upload_scout_api.get_load_config_tag()
 
     base_context["housekeeper_api"].add_file(
-        file=scout_load_config, version_obj=None, tags=tag_name
+        path=scout_load_config, version_obj=None, tags=tag_name
     )
     load_config_file = base_context["housekeeper_api"].get_files(case_id, [tag_name])[0]
     assert load_config_file
@@ -67,7 +67,6 @@ def test_produce_load_config(
 
     # WHEN running cg upload scout -p <caseid>
     result = cli_runner.invoke(scout, [case_id, "--print"], obj=base_context)
-    print(result.output)
     # THEN assert mother: '0' and father: '0'
     assert "'mother': '0'" in result.output
     assert "'father': '0'" in result.output
@@ -154,7 +153,7 @@ def test_upload_scout_cli(base_context, cli_runner, case_id, scout_load_config):
     tag_name = base_context["scout_upload_api"].get_load_config_tag()
     base_context["scout_upload_api"].config = config
     base_context["housekeeper_api"].add_file(
-        file=scout_load_config, version_obj=None, tags=tag_name
+        path=scout_load_config, version_obj=None, tags=tag_name
     )
     # WHEN uploading a case with the cli and printing the upload config
     result = cli_runner.invoke(scout, [case_id], obj=base_context)
