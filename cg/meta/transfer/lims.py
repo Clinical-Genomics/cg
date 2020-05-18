@@ -69,7 +69,7 @@ class TransferLims(object):
     def _get_all_samples_not_yet_delivered(self):
         return self.status.samples_not_delivered()
 
-    def transfer_samples(self, status_type: SampleState, include="unset", sample_id=None):
+    def transfer_samples(self, status_type: SampleState, include:str = "unset", sample_id: str=None):
         """Transfer information about samples."""
 
         if sample_id:
