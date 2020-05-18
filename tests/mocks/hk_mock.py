@@ -382,7 +382,7 @@ class MockHousekeeperAPI:
         """
         return self.files(*args, **kwargs)
 
-    def add_file(self, file, version_obj, tags, to_archive=False):
+    def add_file(self, path, version_obj, tags, to_archive=False):
         """Add a file to housekeeper."""
         tags = tags or []
         if isinstance(tags, str):
@@ -392,14 +392,14 @@ class MockHousekeeperAPI:
                 self.add_tag(tag_name)
 
         new_file = self.new_file(
-            path=str(Path(file).absolute()),
+            path=str(Path(path).absolute()),
             to_archive=to_archive,
             tags=[self.tag(tag_name) for tag_name in tags],
         )
         if not version_obj:
             version_obj = self.new_version(created_at=datetime.datetime.now())
         new_file.version = version_obj
-        if not self.file_exists(file):
+        if not self.file_exists(path):
             self._files.append(new_file)
         self._file_added = True
         return new_file
