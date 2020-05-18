@@ -25,9 +25,7 @@ def test_add_new_analysis_pipeline_exception(mock_housekeeper_store, mock_status
     mock_case.links[0].sample.data_analysis = None
 
     with pytest.raises(PipelineUnknownError) as exc_info:
-        store_base.add_new_analysis(
-           mock_bundle, mock_case, mock_status, mock_version
-        )
+        store_base.add_new_analysis(mock_bundle, mock_case, mock_status, mock_version)
 
     assert exc_info.value.message == f"No pipeline specified in {mock_case}"
 
@@ -44,11 +42,12 @@ def test_add_new_analysis_duplicate_analysis_exception(mock_housekeeper_store, m
     mock_status.analysis = mock_status.analysis.return_value
 
     with pytest.raises(AnalysisDuplicationError) as exc_info:
-        store_base.add_new_analysis(
-           mock_bundle, mock_case, mock_status, mock_version
-        )
+        store_base.add_new_analysis(mock_bundle, mock_case, mock_status, mock_version)
 
-    assert exc_info.value.message == f"Analysis object already exists for {mock_case.internal_id} {mock_version.created_at}"
+    assert (
+        exc_info.value.message
+        == f"Analysis object already exists for {mock_case.internal_id} {mock_version.created_at}"
+    )
 
 
 @mock.patch("cg.store.Store")
