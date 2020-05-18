@@ -179,3 +179,106 @@ MIP_DNA_TAGS = {
         "is_mandatory": False
     },
 }
+
+
+MIP_RNA_TAGS = {
+    tuple(["salmon_quant"]): {
+        "tags": ["salmon-quant"],
+        "is_mandatory": True,
+    },
+    tuple(["star_fusion"]): {
+        "tags": ["star-fusion"],
+        "is_mandatory": True,
+    },
+    tuple(["arriba_ar, arriba_report"]): {
+        "tags": ["arriba-ar", "arriba-report"],
+        "is_mandatory": True,
+    },
+    tuple(["arriba_ar", "arriba_ar"]): {
+        "tags": ["arriba-ar"],
+        "is_mandatory": True,
+    },
+    tuple(["stringtie_ar"]): {
+        "tags": ["stringtie-ar"],
+        "is_mandatory": True,
+    },
+    tuple(["gffcompare_ar"]): {
+        "tags": ["gffcompare-ar"],
+        "is_mandatory": True,
+    },
+    tuple(["markduplicates"]): {
+        "tags": ["markduplicates"],
+        "index_tags": ["markduplicates-index"],
+        "is_mandatory": True,
+    },
+    tuple(["gatk_asereadcounter"]): {
+        "tags": ["gatk-asereadcounter"],
+        "is_mandatory": True,
+    },
+    tuple(["bootstrapann"]): {
+        "tags": ["bootstrapann"],
+        "is_mandatory": True,
+    },
+    tuple(["bcftools_merge"]): {
+        "tags": ["bcftools-merge"],
+        "is_mandatory": True,
+    },
+    tuple(["varianteffectpredictor"]): {
+        "tags": ["varianteffectpredictor"],
+        "is_mandatory": True,
+    },
+    tuple(["version_collect_ar"]): {
+        "tags": ["version-collect-ar"],
+        "is_mandatory": True,
+    },
+    tuple(["multiqc_ar", "html"]): {
+        "tags": ["multiqc-html"],
+        "is_mandatory": True,
+    },
+    tuple(["multiqc_ar", "json"]): {
+        "tags": ["multiqc-json"],
+        "is_mandatory": True,
+    },
+    tuple(["mip_analyse", "sample_info"]): {
+        "tags": ["mip-analyse", "sample-info"],
+        "is_mandatory": True,
+    },
+    tuple(["mip_analyse", "reference_info"]): {
+        "tags": ["mip-analyse", "reference-info"],
+        "is_mandatory": True,
+    },
+    tuple(["mip_analyse", "log"]): {
+        "tags": ["mip-analyse", "log"],
+        "is_mandatory": True,
+    },
+    tuple(["mip_analyse", "config_analysis"]): {
+        "tags": ["mip-analyse", "config-analysis"],
+        "is_mandatory": True,
+    },
+    tuple(["mip_analyse", "pedigree"]): {
+        "tags": ["mip-analyse", "pedigree"],
+        "is_mandatory": True,
+    },
+    tuple(["mip_analyse", "config"]): {
+        "tags": ["mip-analyse", "config"],
+        "is_mandatory": True,
+    },
+    tuple(["mip_analyse", "pedigree_fam"]): {
+        "tags": ["mip-analyse", "pedigree-fam"],
+        "is_mandatory": True,
+    },
+    tuple(["blobfish"]): {
+        "tags": ["blobfish"],
+        "is_mandatory": False,
+    },
+    tuple([""]): {
+        "tags": [""],
+        "index_tags": [""],
+        "is_mandatory": True,
+    },
+    tuple([""]): {
+        "tags": [""],
+        "index_tags": [""],
+        "is_mandatory": True,
+    },
+}
