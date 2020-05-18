@@ -190,7 +190,7 @@ MIP_RNA_TAGS = {
         "tags": ["star-fusion"],
         "is_mandatory": True,
     },
-    tuple(["arriba_ar, arriba_report"]): {
+    tuple(["arriba_ar", "arriba_report"]): {
         "tags": ["arriba-ar", "arriba-report"],
         "is_mandatory": True,
     },
@@ -243,7 +243,7 @@ MIP_RNA_TAGS = {
         "tags": ["mip-analyse", "sample-info"],
         "is_mandatory": True,
     },
-    tuple(["mip_analyse", "reference_info"]): {
+    tuple(["mip_analyse", "references_info"]): {
         "tags": ["mip-analyse", "reference-info"],
         "is_mandatory": True,
     },
@@ -270,15 +270,5 @@ MIP_RNA_TAGS = {
     tuple(["blobfish"]): {
         "tags": ["blobfish"],
         "is_mandatory": False,
-    },
-    tuple([""]): {
-        "tags": [""],
-        "index_tags": [""],
-        "is_mandatory": True,
-    },
-    tuple([""]): {
-        "tags": [""],
-        "index_tags": [""],
-        "is_mandatory": True,
     },
 }
