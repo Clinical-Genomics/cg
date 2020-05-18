@@ -15,7 +15,7 @@ from cg.exc import (
 @mock.patch("cg.apps.hk.HousekeeperAPI")
 @mock.patch("cg.meta.store.mip.add_analysis")
 def test_gather_files_and_bundle_in_hk_bundle_already_added(
-    mock_add_analysis, mock_housekeeper, mock_store, config_stream, bundle_data
+    mock_add_analysis, mock_housekeeper, mock_cg_store, config_stream, bundle_data
 ):
     """
     tests the function gather_files_and_bundle_in_housekeeper
@@ -30,7 +30,7 @@ def test_gather_files_and_bundle_in_hk_bundle_already_added(
     # THEN the BundleAlreadyAddedError exception should be raised
     with pytest.raises(BundleAlreadyAddedError) as exc_info:
         store_mip.gather_files_and_bundle_in_housekeeper(
-            mip_rna_config, mock_housekeeper, mock_store
+            mip_rna_config, mock_housekeeper, mock_cg_store
         )
 
     assert exc_info.value.message == "bundle already added"
@@ -63,8 +63,8 @@ def test_gather_files_and_bundle_in_hk_bundle_new_analysis(
     mock_bundle = mock_housekeeper_store.Bundle.return_value
     mock_version = mock_housekeeper_store.Version.return_value
     mock_housekeeper_api.add_bundle.return_value = (mock_bundle, mock_version)
-    mock_case_obj = mock_cg_store.Family.return_value
-    mock_reset_case_action(mock_case_obj)
+    mock_case = mock_cg_store.Family.return_value
+    mock_reset_case_action(mock_case)
     mock_add_new_analysis.return_value = mock_cg_store.Analysis.return_value
 
     store_mip.gather_files_and_bundle_in_housekeeper(
