@@ -11,6 +11,7 @@ from cg.exc import (
 
 PIPELINE_TAGS = {
     "wgs": MIP_DNA_TAGS,
+    "wes": MIP_DNA_TAGS,
     "wts": MIP_RNA_TAGS,
 }
 
