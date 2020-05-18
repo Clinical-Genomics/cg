@@ -27,19 +27,19 @@ class HousekeeperAPI:
         )
         return getattr(self._store, name)
 
-    def new_bundle(self, name: str, created_at: dt.datetime = None):
+    def new_bundle(self, name: str, created_at: dt.datetime = None) -> models.Bundle:
         """ Create a new file bundle """
         return self._store.new_bundle(name, created_at)
 
-    def add_bundle(self, bundle_data):
+    def add_bundle(self, bundle_data) -> models.Bundle:
         """ Build a new bundle version of files """
         return self._store.add_bundle(bundle_data)
 
-    def bundle(self, name: str):
+    def bundle(self, name: str) -> models.Bundle:
         """ Fetch a bundle """
         return self._store.bundle(name)
 
-    def bundles(self):
+    def bundles(self) -> List:
         """ Fetch bundles """
         return self._store.bundles()
 
@@ -108,11 +108,13 @@ class HousekeeperAPI:
         LOG.info("Linked file: %s -> %s", file_obj.path, new_path)
         file_obj.path = str(new_path).replace(f"{global_root_dir}/", "", 1)
 
-    def new_version(self, created_at: dt.datetime, expires_at: dt.datetime = None):
+    def new_version(
+        self, created_at: dt.datetime, expires_at: dt.datetime = None
+    ) -> models.Version:
         """ Create a new bundle version """
         return self._store.new_version(created_at, expires_at)
 
-    def version(self, bundle: str, date: dt.datetime):
+    def version(self, bundle: str, date: dt.datetime) -> models.Version:
         """ Fetch a version """
         return self._store.version(bundle, date)
 
