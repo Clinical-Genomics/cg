@@ -51,6 +51,8 @@ class HousekeeperAPI:
         tags: list = None,
     ) -> models.File:
         """ Create a new file """
+        if tags is None:
+            tags = []
         return self._store.new_file(path, checksum, to_archive, tags)
 
     def add_file(
