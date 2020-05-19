@@ -10,7 +10,7 @@ from dateutil.parser import parse as parse_date
 import requests_cache
 
 from cg.exc import LimsDataError
-from .constants import PROP2UDF, MASTER_STEPS_UDFS, PROCESSES
+from .constants import PROP2UDF, MASTER_STEPS_UDFS
 from .order import OrderHandler
 
 requests_cache.install_cache(backend="memory")
