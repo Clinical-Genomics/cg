@@ -101,9 +101,7 @@ class TransferLims(object):
                 setattr(sample_obj, f"{status_type.value}_at", lims_date)
                 self.status.commit()
             else:
-                LOG.debug(
-                    f"no {status_type.value} date found for {sample_obj.internal_id}"
-                )
+                LOG.debug(f"no {status_type.value} date found for {sample_obj.internal_id}")
 
     def _get_samples_to_include(self, include, status_type):
         samples = None
@@ -124,21 +122,14 @@ class TransferLims(object):
             number_of_samples = self.lims.get_sample_number(projectname=ticket_number)
 
             if ticket_number is None:
-                LOG.warning(
-                    f"No ticket number found for pool with order number {pool_obj.order}."
-                )
+                LOG.warning(f"No ticket number found for pool with order number {pool_obj.order}.")
             elif number_of_samples == 0:
-                LOG.warning(
-                    f"No samples found for pool with ticket number {ticket_number}."
-                )
+                LOG.warning(f"No samples found for pool with ticket number {ticket_number}.")
             else:
                 samples_in_pool = self.lims.get_samples(projectname=ticket_number)
                 for sample_obj in samples_in_pool:
                     status_date = self._date_functions[status_type](sample_obj.id)
-                    if (
-                        sample_obj.udf["pool name"] == pool_obj.name
-                        and status_date is not None
-                    ):
+                    if sample_obj.udf["pool name"] == pool_obj.name and status_date is not None:
                         LOG.info(
                             "Found %s date for pool id %s: %s",
                             status_type.value,
@@ -165,9 +156,7 @@ class TransferLims(object):
         for microbial_sample_obj in microbial_samples:
             internal_id = microbial_sample_obj.internal_id
 
-            lims_date = self._date_functions[status_type](
-                microbial_sample_obj.internal_id
-            )
+            lims_date = self._date_functions[status_type](microbial_sample_obj.internal_id)
             statusdb_date = getattr(microbial_sample_obj, f"{status_type.value}_at")
             if lims_date:
 

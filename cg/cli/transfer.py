@@ -31,16 +31,10 @@ def flowcell(context, flowcell_name):
 
 @transfer.command()
 @click.option(
-    "-s",
-    "--status",
-    type=click.Choice(["received", "prepared", "delivered"]),
-    default="received",
+    "-s", "--status", type=click.Choice(["received", "prepared", "delivered"]), default="received",
 )
 @click.option(
-    "-i",
-    "--include",
-    type=click.Choice(["unset", "not-invoiced", "all"]),
-    default="unset",
+    "-i", "--include", type=click.Choice(["unset", "not-invoiced", "all"]), default="unset",
 )
 @click.option("--sample-id", help="Lims Submitted Sample id. use together with status.")
 @click.pass_context
@@ -48,15 +42,11 @@ def lims(context, status, include, sample_id):
     """Check if samples have been updated in LIMS."""
     lims_api = lims_app.LimsAPI(context.obj)
     transfer_api = transfer_app.TransferLims(context.obj["db"], lims_api)
-    transfer_api.transfer_samples(
-        transfer_app.SampleState[status.upper()], include, sample_id
-    )
+    transfer_api.transfer_samples(transfer_app.SampleState[status.upper()], include, sample_id)
 
 
 @transfer.command()
-@click.option(
-    "-s", "--status", type=click.Choice(["received", "delivered"]), default="delivered"
-)
+@click.option("-s", "--status", type=click.Choice(["received", "delivered"]), default="delivered")
 @click.pass_context
 def pools(context, status):
     """
