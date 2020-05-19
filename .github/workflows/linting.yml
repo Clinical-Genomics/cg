@@ -24,7 +24,7 @@ jobs:
     - name: Production Dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -e .
+        pip install .
         pip check
 
     - name: Development Dependencies
@@ -32,6 +32,12 @@ jobs:
         pip install -r requirements-dev.txt
         pip install flake8
         pip install black
+        pip check
+
+    - name: Package install 
+      run: |
+        python -m pip install --upgrade pip
+        pip install .
         pip check
 
     - name: Run linters
