@@ -27,6 +27,7 @@ PROP2UDF = {
     "tissue_block_size": "Tissue Block Size",
     "target_reads": "Reads missing (M)",
     "tumour": "tumor",
+    "tumour_purity": "tumour purity",
     "volume": "Volume (uL)",
     "well_position_rml": "RML well position",
     "verified_organism": "Verified organism",
