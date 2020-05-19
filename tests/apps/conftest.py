@@ -13,7 +13,7 @@ from cg.utils.commands import Process
 @pytest.fixture
 def balsamic_orderform(orderforms: Path) -> str:
     """Orderform fixture for Balsamic samples"""
-    _file = orderforms / "1508.19.balsamic.xlsx"
+    _file = orderforms / "1508.20.balsamic.xlsx"
     return str(_file)
 
 
@@ -27,7 +27,7 @@ def external_orderform(orderforms: Path) -> str:
 @pytest.fixture
 def fastq_orderform(orderforms: Path):
     """Orderform fixture for fastq samples"""
-    _file = orderforms / "1508.19.fastq.xlsx"
+    _file = orderforms / "1508.20.fastq.xlsx"
     return str(_file)
 
 

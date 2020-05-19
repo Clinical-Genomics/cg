@@ -148,27 +148,9 @@ def crunchy_config_dict():
 def madeline_api(madeline_output):
     """madeline_api fixture"""
     _api = MockMadelineAPI()
-    _api._madeline_outpath = madeline_output
+    _api.set_outpath(madeline_output)
 
     yield _api
-
-
-@pytest.fixture
-def balsamic_orderform():
-    """Orderform fixture for Balsamic samples"""
-    return "tests/fixtures/orderforms/1508.20.balsamic.xlsx"
-
-
-@pytest.fixture
-def external_orderform():
-    """Orderform fixture for external samples"""
-    return "tests/fixtures/orderforms/1541.6.external.xlsx"
-
-
-@pytest.fixture
-def fastq_orderform():
-    """Orderform fixture for fastq samples"""
-    return "tests/fixtures/orderforms/1508.20.fastq.xlsx"
 
 
 # Files fixtures
