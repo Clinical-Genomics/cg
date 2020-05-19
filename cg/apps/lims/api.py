@@ -93,26 +93,25 @@ class LimsAPI(Lims, OrderHandler):
         """Get the date when a sample was received."""
 
         sample = Sample(self, id=lims_id)
-        return sample.udf.get('Received at') if sample else None
-        
+        return sample.udf.get("Received at") if sample else None
 
     def get_prepared_date(self, lims_id: str) -> dt.datetime:
         """Get the date when a sample was prepared in the lab."""
 
         sample = Sample(self, id=lims_id)
-        return sample.udf.get('Library Prep Finished') if sample else None
+        return sample.udf.get("Library Prep Finished") if sample else None
 
     def get_delivery_date(self, lims_id: str) -> dt.date:
         """Get delivery date for a sample."""
 
         sample = Sample(self, id=lims_id)
-        return sample.udf.get('Delivered at') if sample else None
+        return sample.udf.get("Delivered at") if sample else None
 
     def get_sequenced_date(self, lims_id: str) -> dt.date:
         """Get the date when a sample was sequenced."""
-        
+
         sample = Sample(self, id=lims_id)
-        return sample.udf.get('Sequencing Finished') if sample else None
+        return sample.udf.get("Sequencing Finished") if sample else None
 
     def capture_kit(self, lims_id: str) -> str:
         """Get capture kit for a LIMS sample."""
@@ -355,10 +354,7 @@ class LimsAPI(Lims, OrderHandler):
                 all_artifacts.append(artifact)
 
         if all_artifacts and not dates:
-            LOG.warning(
-                "Did not find expected date for sample: %s",
-                lims_id
-            )
+            LOG.warning("Did not find expected date for sample: %s", lims_id)
         return dates
 
     @staticmethod
