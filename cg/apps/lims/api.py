@@ -93,7 +93,7 @@ class LimsAPI(Lims, OrderHandler):
         """Get the date when a sample was received."""
 
         sample = Sample(self, id=lims_id)
-        return sample.udf.get('Recieved at') if sample else None
+        return sample.udf.get('Received at') if sample else None
         
 
     def get_prepared_date(self, lims_id: str) -> dt.datetime:
