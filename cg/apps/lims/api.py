@@ -314,49 +314,6 @@ class LimsAPI(Lims, OrderHandler):
 
         return None
 
-    def _get_all_step_dates_from_input(self, step_names_udfs, input_artifact_id):
-        """
-        Gets all the dates from a process based on input artifact and process type.
-        """
-
-        dates = []
-        for process_type in step_names_udfs:
-            processes = self.get_processes(type=process_type, inputartifactlimsid=input_artifact_id)
-            if not processes:
-                continue
-            udf_key = step_names_udfs[process_type]
-            for process in processes:
-                date_arrived = process.udf.get(udf_key)
-                if date_arrived:
-                    dates.append((process.date_run, date_arrived))
-
-        return dates
-
-    def _get_all_step_dates(self, step_names_udfs, lims_id, artifact_type=None):
-        """
-        Gets all the dates from artifact bases on process type and associated udfs, sample lims id
-        and optionally the type
-        """
-        dates = []
-        all_artifacts = []
-        processes = []
-        for process_type in step_names_udfs:
-            artifacts = self.get_artifacts(
-                process_type=process_type, samplelimsid=lims_id, type=artifact_type
-            )
-
-            for artifact in artifacts:
-                udf_key = step_names_udfs[process_type]
-                parent_process = artifact.parent_process
-                if parent_process and parent_process.udf.get(udf_key):
-                    dates.append((parent_process.date_run, parent_process.udf.get(udf_key)))
-                processes.append(parent_process.id)
-                all_artifacts.append(artifact)
-
-        if all_artifacts and not dates:
-            LOG.warning("Did not find expected date for sample: %s", lims_id)
-        return dates
-
     @staticmethod
     def get_method_number(artifact, udf_key_number):
         """
