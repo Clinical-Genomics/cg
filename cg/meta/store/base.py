@@ -110,7 +110,7 @@ def _convert_tags(data: list, tag_map: dict, tag_type: str):
     """ Convert tags from external deliverables tags to standard internal housekeeper tags """
 
     for deliverables_tags, hk_tags in tag_map.items():
-        for file in data:
+        for file in files:
             if all(tag in file["tags"] for tag in deliverables_tags):
                 tags_filtered = list(filter(lambda x: x not in deliverables_tags, file["tags"]))
                 converted_tags = list(set(tags_filtered + hk_tags[tag_type]))
