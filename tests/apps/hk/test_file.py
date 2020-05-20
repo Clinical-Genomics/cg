@@ -45,9 +45,8 @@ def test_add_new_file(
     # GIVEN a tag that does not exist
     tag = "madeline"
     assert populated_housekeeper_api.tag(name=tag) is None
-    # THEN assert that no file is added to the database
+    # GIVEN a known number of files in the db
     nr_files_in_db = small_helpers.length_of_iterable(populated_housekeeper_api.files())
-    assert nr_files_in_db == 0
 
     # WHEN creating a new file
     new_file_obj = populated_housekeeper_api.add_file(

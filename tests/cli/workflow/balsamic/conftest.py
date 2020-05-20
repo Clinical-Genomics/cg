@@ -182,7 +182,7 @@ def deliverables_file(balsamic_case_dir):
 
 @pytest.fixture(scope="function")
 def deliverables_file_directory(balsamic_case_dir):
-    """Return a balsamic deliverables file containing a directory"""
+    """Return a balsamic deliverables file that specifies a directory"""
     return str(balsamic_case_dir / "metadata_directory.yml")
 
 
