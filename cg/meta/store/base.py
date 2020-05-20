@@ -9,7 +9,7 @@ from cg.exc import (
     MandatoryFilesMissing,
 )
 
-PIPELINE_TAGS = {
+ANALYSIS_TYPE_TAGS = {
     "wgs": MIP_DNA_TAGS,
     "wes": MIP_DNA_TAGS,
     "wts": MIP_RNA_TAGS,
@@ -46,15 +46,15 @@ def reset_case_action(case_obj):
     case_obj.action = None
 
 
-def parse_files(deliverables: dict, pipeline: str) -> list:
+def parse_files(deliverables: dict, analysis_type: str) -> list:
     """Get all deliverable files from the pipeline"""
 
-    pipeline_tags = HK_TAGS[pipeline]
+    pipeline_tags = HK_TAGS[analysis_type]
     files = _parse_files_non_index(deliverables, pipeline_tags)
-    _check_mandatory_tags(files, PIPELINE_TAGS[pipeline])
-    _convert_tags(files, PIPELINE_TAGS[pipeline], "tags")
+    _check_mandatory_tags(files, ANALYSIS_TYPE_TAGS[analysis_type])
+    _convert_tags(files, ANALYSIS_TYPE_TAGS[analysis_type], "tags")
     index_files = _parse_files_index(deliverables, pipeline_tags)
-    _convert_tags(index_files, PIPELINE_TAGS[pipeline], "index_tags")
+    _convert_tags(index_files, ANALYSIS_TYPE_TAGS[analysis_type], "index_tags")
 
     files.extend(index_files)
 
