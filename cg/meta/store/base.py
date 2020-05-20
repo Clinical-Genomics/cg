@@ -113,7 +113,7 @@ def _convert_tags(data: list, standard_tags: dict, tag_type: str):
         for file in data:
             if all(tag in file["tags"] for tag in deliverables_tags):
                 tags_filtered = list(filter(lambda x: x not in deliverables_tags, file["tags"]))
-                converted_tags = list(set(tags_filtered + pipeline_tags[tag_type]))
+                converted_tags = list(set(tags_filtered + hk_tags[tag_type]))
                 file["tags"] = sorted(converted_tags)
 
 
