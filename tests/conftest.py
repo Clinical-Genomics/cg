@@ -10,7 +10,6 @@ import pytest
 import ruamel.yaml
 from trailblazer.mip import files as mip_dna_files_api
 
-# from cg.apps.hk import HousekeeperAPI
 from cg.apps.mip_rna import files as mip_rna_files_api
 from cg.meta.store import mip_rna as store_mip_rna
 from cg.store import Store
