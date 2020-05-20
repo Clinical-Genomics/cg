@@ -114,7 +114,7 @@ def _convert_tags(data: list, standard_tags: dict, tag_type: str):
             if all(tag in file["tags"] for tag in deliverables_tags):
                 tags_filtered = list(filter(lambda x: x not in deliverables_tags, file["tags"]))
                 converted_tags = list(set(tags_filtered + pipeline_tags[tag_type]))
-                file["tags"] = converted_tags
+                file["tags"] = sorted(converted_tags)
 
 
 def _check_mandatory_tags(files: list, pipeline_tags: dict):
