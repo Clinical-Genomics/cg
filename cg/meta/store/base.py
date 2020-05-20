@@ -95,13 +95,13 @@ def get_tags(file: dict, pipeline_tags: list) -> list:
 def build_bundle(config_data: dict, analysisinfo_data: dict, deliverables: dict) -> dict:
     """Create a new bundle to store in Housekeeper"""
 
-    pipeline = config_data["samples"][0]["type"]
+    analysis_type = config_data["samples"][0]["type"]
 
     data = {
         "name": config_data["case"],
         "created": analysisinfo_data["date"],
         "pipeline_version": analysisinfo_data["version"],
-        "files": parse_files(deliverables, pipeline),
+        "files": parse_files(deliverables, analysis_type),
     }
     return data
 
