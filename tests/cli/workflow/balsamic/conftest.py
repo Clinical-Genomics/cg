@@ -194,7 +194,7 @@ def deliverables_file_tags(balsamic_case_dir):
 
 @pytest.fixture(scope="function", name="balsamic_case")
 def fixture_balsamic_case(balsamic_store, helpers) -> models.Family:
-    """case with balsamic data_type"""
+    """Case with balsamic data_type"""
     return balsamic_store.find_family(
         helpers.ensure_customer(balsamic_store), "balsamic_case"
     )
@@ -202,7 +202,7 @@ def fixture_balsamic_case(balsamic_store, helpers) -> models.Family:
 
 @pytest.fixture(scope="function", name="balsamic_case_wgs")
 def fixture_balsamic_case_wgs(balsamic_store, helpers) -> models.Family:
-    """case with balsamic data_type"""
+    """Case with balsamic data_type"""
     return balsamic_store.find_family(
         helpers.ensure_customer(balsamic_store), "balsamic_case_wgs"
     )
@@ -210,7 +210,7 @@ def fixture_balsamic_case_wgs(balsamic_store, helpers) -> models.Family:
 
 @pytest.fixture(scope="function", name="mip_case")
 def fixture_mip_case(balsamic_store, helpers) -> models.Family:
-    """case with balsamic data_type"""
+    """Case with balsamic data_type"""
     return balsamic_store.find_family(
         helpers.ensure_customer(balsamic_store), "mip_case"
     )

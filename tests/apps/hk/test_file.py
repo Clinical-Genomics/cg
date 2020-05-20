@@ -2,9 +2,9 @@
 from pathlib import Path
 
 
-def test_new_file(housekeeper_api, bed_file):
+def test_new_file(housekeeper_api, bed_file_path):
     """Test to create a new file with the housekeeper api"""
-    # GIVEN a housekeeper api wihtout files and the path to an existing file
+    # GIVEN a housekeeper api without files and the path to an existing file
     assert len(list(file_obj for file_obj in housekeeper_api.files())) == 0
     assert Path(bed_file).exists() is True
     # WHEN creating a new file
@@ -19,7 +19,7 @@ def test_new_file(housekeeper_api, bed_file):
 
 def test_new_file_non_existing_path(housekeeper_api):
     """Test to create a new file with the housekeeper api"""
-    # GIVEN a housekeeper api wihtout files and the path to an existing file
+    # GIVEN a housekeeper api without files and the path to a not existing file
     file_name = "a_file.hello"
     assert Path(file_name).exists() is False
     # WHEN creating a new file

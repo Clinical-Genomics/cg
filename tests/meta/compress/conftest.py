@@ -77,7 +77,7 @@ def fixture_bam_files(compress_test_dir):
 @pytest.fixture(scope="function")
 def compress_hk_bundle(bam_files, case_id, timestamp):
     """hk file list fixture"""
-    data = {
+    hk_bundle_data = {
         "name": case_id,
         "created": timestamp,
         "expires": timestamp,
@@ -92,10 +92,10 @@ def compress_hk_bundle(bam_files, case_id, timestamp):
             "archive": False,
             "tags": ["bai", "bam-index"],
         }
-        data["files"].append(bam_file_info)
-        data["files"].append(bai_file_info)
+        hk_bundle_data["files"].append(bam_file_info)
+        hk_bundle_data["files"].append(bai_file_info)
 
-    return data
+    return hk_bundle_data
 
 
 @pytest.fixture(scope="function")

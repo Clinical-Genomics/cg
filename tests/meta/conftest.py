@@ -246,7 +246,7 @@ def deliver_api(analysis_store, housekeeper_api, case_id, timestamp, helpers):
     lims_mock = MockLims()
     hk_mock = housekeeper_api
 
-    deliver_bundle_data = {
+    deliver_hk_bundle_data = {
         "name": case_id,
         "created": timestamp,
         "expires": timestamp,
@@ -255,7 +255,7 @@ def deliver_api(analysis_store, housekeeper_api, case_id, timestamp, helpers):
             {"path": "/mock/path", "archive": False, "tags": ["sample-tag", "ADM1"]},
         ],
     }
-    helpers.ensure_hk_bundle(hk_mock, deliver_bundle_data)
+    helpers.ensure_hk_bundle(hk_mock, deliver_hk_bundle_data)
 
     _api = DeliverAPI(
         db=analysis_store,

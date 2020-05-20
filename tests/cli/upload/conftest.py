@@ -28,17 +28,17 @@ def fixture_scout_hk_bundle_data(case_id, scout_load_config, timestamp):
     """Get some bundle data for housekeeper"""
     tag_name = UploadScoutAPI.get_load_config_tag()
 
-    data = {
+    hk_bundle_data = {
         "name": case_id,
         "created": timestamp,
         "expires": timestamp,
         "files": [{"path": scout_load_config, "archive": False, "tags": [tag_name]}],
     }
-    return data
+    return hk_bundle_data
 
 
 @pytest.fixture(scope="function", name="base_context")
-def fixture_base_context(
+def fixture_base_cli_context(
     analysis_store: Store, housekeeper_api, upload_scout_api
 ) -> dict:
     """context to use in cli"""

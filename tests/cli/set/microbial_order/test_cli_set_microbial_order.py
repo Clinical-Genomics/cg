@@ -62,7 +62,7 @@ def test_valid_order_no_apptag_option(
 
 @pytest.mark.parametrize("option_key", ["--name", "--ticket"])
 def test_set_option(cli_runner, base_context, base_store: Store, option_key, helpers):
-    """Test to set an order with a option"""
+    """Test to set an order with an option"""
 
     # GIVEN a database with an order
     order = helpers.ensure_microbial_order(base_store)
@@ -110,7 +110,7 @@ def test_set_project_name_in_lims(cli_runner, base_context, base_store, helpers)
 def test_set_option_with_same_value(
     cli_runner, base_context, base_store: Store, option_key, helpers
 ):
-    """Test to set an order with a option same values twice"""
+    """Test to set an order with the same option_value twice"""
 
     # GIVEN a database with an order
     order = helpers.ensure_microbial_order(base_store)

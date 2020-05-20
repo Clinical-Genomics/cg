@@ -51,7 +51,7 @@ def test_add_bundle_and_commit(housekeeper_api, empty_bundle_obj):
 
 
 def test_get_bundle(housekeeper_api, empty_bundle_obj):
-    """Test to add a housekeeper bundle and make it persistent"""
+    """Test to add a housekeeper bundle and fetch it back"""
     # GIVEN a housekeeper api with a bundle object
     bundle_name = empty_bundle_obj.name
     assert housekeeper_api.bundle(bundle_name) is None

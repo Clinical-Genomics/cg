@@ -29,19 +29,19 @@ def test_get_version_non_existing(housekeeper_api, a_date):
 
 
 def test_get_version_existing(housekeeper_api, a_date, bundle_data):
-    """Test to get a version when there a bundle and a version"""
+    """Test to get a version when there is a bundle and a version"""
     # GIVEN a populated housekeeper_api
     bundle_obj, version_obj = housekeeper_api.add_bundle(bundle_data)
     housekeeper_api.add_commit(bundle_obj, version_obj)
     # WHEN fetching a version
     fetched_version = housekeeper_api.version(bundle=bundle_obj.name, date=a_date)
-    # THEN assert that the function returns None
+    # THEN assert that the function returns True and that version has a bundle_id attribute
     assert fetched_version
     assert fetched_version.bundle_id == bundle_obj.id
 
 
 def test_add_version_existing_bundle(populated_housekeeper_api, later_date, case_id):
-    """Test to get a version when there a bundle and a version"""
+    """Test to get a version when there is a bundle and a version"""
     # GIVEN a populated housekeeper_api and a bundle with one version
     bundle_obj = populated_housekeeper_api.bundle(name=case_id)
     assert bundle_obj
@@ -57,7 +57,7 @@ def test_add_version_existing_bundle(populated_housekeeper_api, later_date, case
 
 
 def test_get_last_version(populated_housekeeper_api, later_date, case_id):
-    """Test to get a version when there a bundle and a version"""
+    """Test to get a version when there is a bundle and a version"""
     # GIVEN a populated housekeeper_api and a bundle with two versions
     bundle_obj = populated_housekeeper_api.bundle(name=case_id)
     new_version = populated_housekeeper_api.new_version(created_at=later_date)
@@ -67,5 +67,5 @@ def test_get_last_version(populated_housekeeper_api, later_date, case_id):
     # WHEN fetching the last version of a bundle
     fetched_version = populated_housekeeper_api.last_version(bundle=case_id)
 
-    # THEN assert that the correct version is fetched
+    # THEN assert that the later_date version is fetched
     assert fetched_version.created_at == later_date
