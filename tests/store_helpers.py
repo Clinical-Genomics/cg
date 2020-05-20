@@ -430,7 +430,7 @@ class StoreHelpers:
         return sample
 
     def add_samples(self, store: Store, nr_samples: int = 5) -> list:
-        """utility function to add a number of samples to use in tests"""
+        """Utility function to add a number of samples to use in tests"""
         samples = []
         if nr_samples < 2:
             nr_samples = 2
