@@ -154,6 +154,12 @@ def bioinfo(context, case_name, cleanup, target_load, dry):
             context.obj["vogue_upload_api"].load_bioinfo_sample(load_bioinfo_raw_inputs)
 
 @vogue.command("bioinfo-all", short_help="Load all mip bioinfo results into vogue")
+@click.option(
+        "--dry/--no-dry",
+        default=False,
+        help="Dry run..."
+        )
+@click.pass_context
 def bioinfo_all(context, dry):
     """Load all cases with recent analysis and a multiqc-json to the trending database."""
     
