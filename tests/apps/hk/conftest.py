@@ -47,8 +47,8 @@ def fixture_later_date() -> datetime.datetime:
     return datetime.datetime(2020, 5, 3)
 
 
-@pytest.fixture(name="empty_bundle_obj")
-def fixture_empty_bundle_obj(a_date, case_id, housekeeper_api) -> models.Bundle:
+@pytest.fixture(name="minimal_bundle_obj")
+def fixture_minimal_bundle_obj(a_date, case_id, housekeeper_api) -> models.Bundle:
     """Return a bundle object with minimal information (name and created_at)"""
     _bundle_obj = housekeeper_api.new_bundle(name=case_id, created_at=a_date)
 
