@@ -94,7 +94,7 @@ def test_build_bundle(
 
     # WHEN building the bundle
     mock_missing.return_value = False, []
-    mock_parse_files.return_value = ['mock of parsed files']
+    mock_parse_files.return_value = ["mock of parsed files"]
     mip_rna_bundle = store_base.build_bundle(config_data, sampleinfo_data, deliverables_raw)
 
     # THEN the result should contain the data to be stored in Housekeeper
