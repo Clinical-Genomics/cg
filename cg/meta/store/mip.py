@@ -10,9 +10,8 @@ from cg.exc import (
 from cg.meta.store.base import (
     build_bundle,
     add_new_analysis,
-    reset_case_action,
 )
-
+from cg.store.utils import reset_case_action
 
 LOG = logging.getLogger(__name__)
 

@@ -40,12 +40,6 @@ def add_new_analysis(bundle_data, case_obj, status, version_obj):
     return new_analysis
 
 
-def reset_case_action(case_obj):
-    """ Resets action on case """
-
-    case_obj.action = None
-
-
 def parse_files(deliverables: dict, analysis_type: str) -> list:
     """Get all deliverable files from the pipeline"""
 
@@ -106,7 +100,7 @@ def build_bundle(config_data: dict, analysisinfo_data: dict, deliverables: dict)
     return data
 
 
-def _convert_tags(data: list, tag_map: dict, tag_type: str):
+def _convert_tags(files: list, tag_map: dict, tag_type: str):
     """ Convert tags from external deliverables tags to standard internal housekeeper tags """
 
     for deliverables_tags, hk_tags in tag_map.items():
