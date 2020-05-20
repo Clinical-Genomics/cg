@@ -10,6 +10,7 @@ from cg.exc import (
     AnalysisDuplicationError,
     BundleAlreadyAddedError,
     PipelineUnknownError,
+    MandatoryFilesMissing,
 )
 from cg.meta.store.mip import gather_files_and_bundle_in_housekeeper
 from cg.store import Store
@@ -55,6 +56,9 @@ def analysis(context, config_stream):
         click.echo(click.style(error.message, fg="red"))
         context.abort()
     except PipelineUnknownError as error:
+        click.echo(click.style(error.message, fg="red"))
+        context.abort()
+    except MandatoryFilesMissing as error:
         click.echo(click.style(error.message, fg="red"))
         context.abort()
     except FileNotFoundError as error:
