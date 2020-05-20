@@ -150,8 +150,8 @@ MIP_RNA_TAGS = {
     tuple(["stringtie_ar"]): {"tags": ["stringtie-ar"], "is_mandatory": True,},
     tuple(["gffcompare_ar"]): {"tags": ["gffcompare-ar"], "is_mandatory": True,},
     tuple(["markduplicates"]): {
-        "tags": ["markduplicates"],
-        "index_tags": ["markduplicates-index"],
+        "tags": ["cram"],
+        "index_tags": ["cram-index"],
         "is_mandatory": True,
     },
     tuple(["gatk_asereadcounter"]): {"tags": ["gatk-asereadcounter"], "is_mandatory": True,},
