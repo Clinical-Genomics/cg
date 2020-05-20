@@ -153,6 +153,23 @@ def bioinfo(context, case_name, cleanup, target_load, dry):
         if not dry:
             context.obj["vogue_upload_api"].load_bioinfo_sample(load_bioinfo_raw_inputs)
 
+@vogue.command("bioinfo-all", short_help="Load all mip bioinfo results into vogue")
+def bioinfo_all(context, dry):
+    """Load all cases with recent analysis and a multiqc-json to the trending database."""
+    
+#    for case_obj in context.obj["housekeeper_api"]:
+#      print(dir(case_obj))
+#      break
+    hk_api = context.obj["hk_api"]
+
+    exit_code = SUCCESS
+    for analysis_obj in context.obj["tb_api"].analyses(status="completed", deleted=False):
+        existing_record = hk_api.version(analysis_obj.family, analysis_obj.started_at)
+        if existing_record:
+            existing_multiqc = _get_multiqc_latest_file(context, analysis_obj.family) 
+            LOG.debug("analysis stored: %s - %s - %s", analysis_obj.family, analysis_obj.started_at, existing_multiqc)
+            continue
+#        click.echo(click.style(f"storing family: {analysis_obj.family}", fg="blue"))
 
 def _get_multiqc_latest_file(context, case_name):
     """Get latest multiqc_data.json path for a case_name
