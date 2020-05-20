@@ -20,7 +20,7 @@ def test_list_samples_to_deliver(base_store, helpers):
 
 
 def test_list_samples_to_deliver_multiple_samples(base_store, helpers):
-    """Test to fetch samples ready for delivery and avoid the ones that are no"""
+    """Test to fetch samples ready for delivery and avoid the ones that are not"""
     store = base_store
     # GIVEN a populated store with two samples where one is scheduled for delivery
     helpers.add_sample(store, sequenced_at=dt.datetime.now())
