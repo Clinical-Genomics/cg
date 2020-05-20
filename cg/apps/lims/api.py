@@ -10,7 +10,7 @@ from dateutil.parser import parse as parse_date
 import requests_cache
 
 from cg.exc import LimsDataError
-from .constants import PROP2UDF, MASTER_STEPS_UDFS, PROCESSES
+from .constants import PROP2UDF, MASTER_STEPS_UDFS
 from .order import OrderHandler
 
 requests_cache.install_cache(backend="memory")
@@ -92,76 +92,26 @@ class LimsAPI(Lims, OrderHandler):
     def get_received_date(self, lims_id: str) -> str:
         """Get the date when a sample was received."""
 
-        try:
-            input_artifact = Sample(self, id=lims_id).artifact
-        except OSError as err:
-            LOG.warning(err)
-            return None
-
-        step_names_udfs = MASTER_STEPS_UDFS["received_step"]
-        received_dates = self._get_all_step_dates_from_input(step_names_udfs, input_artifact.id)
-        received_date = self._most_recent_date(received_dates)
-
-        return received_date
+        sample = Sample(self, id=lims_id)
+        return sample.udf.get("Received at") if sample else None
 
     def get_prepared_date(self, lims_id: str) -> dt.datetime:
         """Get the date when a sample was prepared in the lab."""
 
-        step_names_udfs = MASTER_STEPS_UDFS["prepared_step"]
-        prepared_dates = []
-
-        for process_type in step_names_udfs:
-            artifacts = self.get_artifacts(process_type=process_type, samplelimsid=lims_id)
-
-            for artifact in artifacts:
-                prepared_dates.append(parse_date(artifact.parent_process.date_run))
-
-        if prepared_dates:
-            sorted_dates = sorted(prepared_dates, reverse=True)
-            prepared_date = sorted_dates[0]
-
-        return prepared_date if prepared_dates else None
+        sample = Sample(self, id=lims_id)
+        return sample.udf.get("Library Prep Finished") if sample else None
 
     def get_delivery_date(self, lims_id: str) -> dt.date:
         """Get delivery date for a sample."""
 
-        step_names_udfs = MASTER_STEPS_UDFS["delivery_step"]
-
-        delivered_dates = self._get_all_step_dates(
-            step_names_udfs, lims_id, artifact_type="Analyte"
-        )
-
-        if len(delivered_dates) > 1:
-            LOG.warning("multiple delivery artifacts found for: %s", lims_id)
-
-        delivered_date = self._most_recent_date(delivered_dates)
-
-        return delivered_date
+        sample = Sample(self, id=lims_id)
+        return sample.udf.get("Delivered at") if sample else None
 
     def get_sequenced_date(self, lims_id: str) -> dt.date:
         """Get the date when a sample was sequenced."""
-        novaseq_process = PROCESSES["sequenced_date"]
 
-        step_names_udfs = MASTER_STEPS_UDFS["sequenced_step"]
-
-        sequenced_dates = self._get_all_step_dates(step_names_udfs, lims_id)
-
-        novaseq_artifacts = self.get_artifacts(process_type=novaseq_process, samplelimsid=lims_id)
-
-        if novaseq_artifacts and novaseq_artifacts[0].parent_process.date_run:
-            sequenced_dates.append(
-                (
-                    novaseq_artifacts[0].parent_process.date_run,
-                    parse_date(novaseq_artifacts[0].parent_process.date_run),
-                )
-            )
-
-        if len(sequenced_dates) > 1:
-            LOG.warning("multiple sequence artifacts found for: %s", lims_id)
-
-        sequenced_date = self._most_recent_date(sequenced_dates)
-
-        return sequenced_date
+        sample = Sample(self, id=lims_id)
+        return sample.udf.get("Sequencing Finished") if sample else None
 
     def capture_kit(self, lims_id: str) -> str:
         """Get capture kit for a LIMS sample."""
@@ -363,52 +313,6 @@ class LimsAPI(Lims, OrderHandler):
                 )
 
         return None
-
-    def _get_all_step_dates_from_input(self, step_names_udfs, input_artifact_id):
-        """
-        Gets all the dates from a process based on input artifact and process type.
-        """
-
-        dates = []
-        for process_type in step_names_udfs:
-            processes = self.get_processes(type=process_type, inputartifactlimsid=input_artifact_id)
-            if not processes:
-                continue
-            udf_key = step_names_udfs[process_type]
-            for process in processes:
-                date_arrived = process.udf.get(udf_key)
-                if date_arrived:
-                    dates.append((process.date_run, date_arrived))
-
-        return dates
-
-    def _get_all_step_dates(self, step_names_udfs, lims_id, artifact_type=None):
-        """
-        Gets all the dates from artifact bases on process type and associated udfs, sample lims id
-        and optionally the type
-        """
-        dates = []
-        all_artifacts = []
-        processes = []
-        for process_type in step_names_udfs:
-            artifacts = self.get_artifacts(
-                process_type=process_type, samplelimsid=lims_id, type=artifact_type
-            )
-
-            for artifact in artifacts:
-                udf_key = step_names_udfs[process_type]
-                parent_process = artifact.parent_process
-                if parent_process and parent_process.udf.get(udf_key):
-                    dates.append((parent_process.date_run, parent_process.udf.get(udf_key)))
-                processes.append(parent_process.id)
-                all_artifacts.append(artifact)
-
-        if all_artifacts and not dates:
-            LOG.warning(
-                "Did not find expected date for sample: %s",
-                lims_id
-            )
-        return dates
 
     @staticmethod
     def get_method_number(artifact, udf_key_number):
