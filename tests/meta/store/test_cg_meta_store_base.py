@@ -99,16 +99,16 @@ def test_build_bundle(
 
 
 @mock.patch("cg.meta.store.base._determine_missing_files")
-def test_get_files(mock_missing, snapshot: Snapshot, deliverables_raw: dict):
+def test_parse_files(mock_missing, snapshot: Snapshot, deliverables_raw: dict):
     """
-        tests the function get_files against a snapshot
+        tests the function parse_files against a snapshot
     """
     # GIVEN the a MIP analysis deliverables file
     mock_missing.return_value = False, []
     pipeline = "wts"
 
     # WHEN getting the files used to build the bundle
-    mip_rna_files = store_base.get_files(deliverables_raw, pipeline)
+    mip_files = store_base.parse_files(deliverables_raw, pipeline)
 
     # THEN the result should contain the data to be stored in Housekeeper
-    snapshot.assert_match(mip_rna_files)
+    snapshot.assert_match(mip_files)

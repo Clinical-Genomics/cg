@@ -46,14 +46,14 @@ def reset_case_action(case_obj):
     case_obj.action = None
 
 
-def get_files(deliverables: dict, pipeline: str) -> list:
+def parse_files(deliverables: dict, pipeline: str) -> list:
     """Get all deliverable files from the pipeline"""
 
     pipeline_tags = HK_TAGS[pipeline]
-    files = _get_files_non_index(deliverables, pipeline_tags)
+    files = _parse_files_non_index(deliverables, pipeline_tags)
     _check_mandatory_tags(files, PIPELINE_TAGS[pipeline])
     _convert_tags(files, PIPELINE_TAGS[pipeline], "tags")
-    index_files = _get_files_index(deliverables, pipeline_tags)
+    index_files = _parse_files_index(deliverables, pipeline_tags)
     _convert_tags(index_files, PIPELINE_TAGS[pipeline], "index_tags")
 
     files.extend(index_files)
@@ -61,7 +61,7 @@ def get_files(deliverables: dict, pipeline: str) -> list:
     return files
 
 
-def _get_files_non_index(deliverables: dict, pipeline_tags: list) -> list:
+def _parse_files_non_index(deliverables: dict, pipeline_tags: list) -> list:
     """ Get all files that are not index files from the deliverables file """
 
     return [
@@ -70,7 +70,7 @@ def _get_files_non_index(deliverables: dict, pipeline_tags: list) -> list:
     ]
 
 
-def _get_files_index(deliverables: dict, pipeline_tags: list) -> list:
+def _parse_files_index(deliverables: dict, pipeline_tags: list) -> list:
     """ Get all index files from the deliverables file """
 
     return [
@@ -101,7 +101,7 @@ def build_bundle(config_data: dict, analysisinfo_data: dict, deliverables: dict)
         "name": config_data["case"],
         "created": analysisinfo_data["date"],
         "pipeline_version": analysisinfo_data["version"],
-        "files": get_files(deliverables, pipeline),
+        "files": parse_files(deliverables, pipeline),
     }
     return data
 
