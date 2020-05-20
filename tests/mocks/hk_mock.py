@@ -169,7 +169,7 @@ class MockHousekeeperAPI:
 
     # Mock specific functions
     def add_missing_tag(self, tag_name: str):
-        """add a missing tag"""
+        """Add a missing tag"""
         self._missing_tags.add(tag_name)
 
     def is_file_included(self) -> bool:
