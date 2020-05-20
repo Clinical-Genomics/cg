@@ -77,9 +77,11 @@ def test_add_new_analysis(mock_housekeeper_store, mock_status):
     assert new_analysis.family == mock_case
 
 
+@mock.patch("cg.meta.store.base.parse_files")
 @mock.patch("cg.meta.store.base._determine_missing_files")
 def test_build_bundle(
     mock_missing,
+    mock_parse_files,
     snapshot: Snapshot,
     config_data: dict,
     sampleinfo_data: dict,
@@ -92,6 +94,7 @@ def test_build_bundle(
 
     # WHEN building the bundle
     mock_missing.return_value = False, []
+    mock_parse_files.return_value = ['mock of parsed files']
     mip_rna_bundle = store_base.build_bundle(config_data, sampleinfo_data, deliverables_raw)
 
     # THEN the result should contain the data to be stored in Housekeeper
