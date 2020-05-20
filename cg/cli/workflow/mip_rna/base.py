@@ -8,7 +8,7 @@ from cg.apps import hk, tb, lims
 from cg.apps.environ import environ_email
 from cg.apps.mip import MipAPI
 from cg.apps.mip.fastq import FastqHandler
-from cg.cli.workflow.mip_rna.store import store as store_cmd
+from cg.cli.workflow.mip.store import store as store_cmd
 from cg.cli.workflow.mip_rna.deliver import (
     deliver as deliver_cmd,
     CASE_TAGS,

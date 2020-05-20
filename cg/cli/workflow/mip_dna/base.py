@@ -7,7 +7,7 @@ import click
 
 from cg.apps import hk, tb, scoutapi, lims
 from cg.apps.mip.fastq import FastqHandler
-from cg.cli.workflow.mip_dna.store import store as store_cmd
+from cg.cli.workflow.mip.store import store as store_cmd
 from cg.cli.workflow.mip_dna.deliver import deliver as deliver_cmd, CASE_TAGS, SAMPLE_TAGS
 from cg.cli.workflow.get_links import get_links
 from cg.exc import CgError
