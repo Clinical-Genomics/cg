@@ -106,7 +106,7 @@ def build_bundle(config_data: dict, analysisinfo_data: dict, deliverables: dict)
     return data
 
 
-def _convert_tags(data: list, standard_tags: dict, tag_type: str):
+def _convert_tags(data: list, tag_map: dict, tag_type: str):
     """ Convert tags from external deliverables tags to standard internal housekeeper tags """
 
     for deliverables_tags, hk_tags in tag_map.items():
