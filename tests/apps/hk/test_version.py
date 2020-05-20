@@ -40,12 +40,14 @@ def test_get_version_existing(housekeeper_api, a_date, bundle_data):
     assert fetched_version.bundle_id == bundle_obj.id
 
 
-def test_add_version_existing_bundle(populated_housekeeper_api, later_date, case_id):
+def test_add_version_existing_bundle(
+    populated_housekeeper_api, later_date, case_id, small_helpers
+):
     """Test to get a version when there is a bundle and a version"""
     # GIVEN a populated housekeeper_api and a bundle with one version
     bundle_obj = populated_housekeeper_api.bundle(name=case_id)
     assert bundle_obj
-    assert len(list(version for version in bundle_obj.versions)) == 1
+    assert small_helpers.length_of_iterable(bundle_obj.versions) == 1
     # WHEN creating a newer version and adding it to the bundle
     new_version = populated_housekeeper_api.new_version(created_at=later_date)
     new_version.bundle = bundle_obj
@@ -53,7 +55,7 @@ def test_add_version_existing_bundle(populated_housekeeper_api, later_date, case
 
     # THEN assert that the bundle has two versions
     bundle_obj = populated_housekeeper_api.bundle(name=case_id)
-    assert len(list(version for version in bundle_obj.versions)) == 2
+    assert small_helpers.length_of_iterable(bundle_obj.versions) == 2
 
 
 def test_get_last_version(populated_housekeeper_api, later_date, case_id):

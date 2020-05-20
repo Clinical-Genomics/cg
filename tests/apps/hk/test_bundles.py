@@ -2,10 +2,10 @@
 from datetime import datetime
 
 
-def test_new_bundle(housekeeper_api):
+def test_new_bundle(housekeeper_api, small_helpers):
     """Test to create a bundle with the housekeeper api"""
     # GIVEN a housekeeper api without bundles
-    assert len(list(bundle for bundle in housekeeper_api.bundles())) == 0
+    assert small_helpers.length_of_iterable(housekeeper_api.bundles()) == 0
     # GIVEN some bundle information
     bundle_name = "a bundle"
     created = datetime.now()
@@ -15,13 +15,13 @@ def test_new_bundle(housekeeper_api):
     # THEN assert that the bundle object got the correct name
     assert bundle_obj.name == bundle_name
     # THEN assert that no bundle was added to the database
-    assert len(list(bundle for bundle in housekeeper_api.bundles())) == 0
+    assert small_helpers.length_of_iterable(housekeeper_api.bundles()) == 0
 
 
-def test_add_bundle(housekeeper_api, bed_file):
+def test_add_bundle(housekeeper_api, bed_file, small_helpers):
     """Test to add a housekeeper bundle"""
     # GIVEN a empty housekeeper api
-    assert len(list(bundle for bundle in housekeeper_api.bundles())) == 0
+    assert small_helpers.length_of_iterable(housekeeper_api.bundles()) == 0
     # GIVEN some bundle information
     bundle_name = "a bundle"
     created = datetime.now()
@@ -34,20 +34,21 @@ def test_add_bundle(housekeeper_api, bed_file):
     bundle_obj, _ = housekeeper_api.add_bundle(bundle_data)
 
     # THEN assert that no bundle was added to the database
-    assert len(list(bundle for bundle in housekeeper_api.bundles())) == 0
+    assert small_helpers.length_of_iterable(housekeeper_api.bundles()) == 0
     # THEN assert that the bundle object got the correct name
     assert bundle_obj.name == bundle_name
 
 
-def test_add_bundle_and_commit(housekeeper_api, empty_bundle_obj):
+def test_add_bundle_and_commit(housekeeper_api, empty_bundle_obj, small_helpers):
     """Test to add a housekeeper bundle and make it persistent"""
     # GIVEN a empty housekeeper api and a bundle object
-    assert len(list(bundle for bundle in housekeeper_api.bundles())) == 0
+    assert small_helpers.length_of_iterable(housekeeper_api.bundles()) == 0
+
     # WHEN commiting the bundle
     housekeeper_api.add_commit(empty_bundle_obj)
 
     # THEN assert that a bundle was added to the database
-    assert len(list(bundle for bundle in housekeeper_api.bundles())) == 1
+    assert small_helpers.length_of_iterable(housekeeper_api.bundles()) == 1
 
 
 def test_get_bundle(housekeeper_api, empty_bundle_obj):
@@ -56,6 +57,7 @@ def test_get_bundle(housekeeper_api, empty_bundle_obj):
     bundle_name = empty_bundle_obj.name
     assert housekeeper_api.bundle(bundle_name) is None
     housekeeper_api.add_commit(empty_bundle_obj)
+
     # WHEN fetching the bundle
     bundle_obj = housekeeper_api.bundle(bundle_name)
 

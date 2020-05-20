@@ -11,10 +11,8 @@ from cg.apps.hk import HousekeeperAPI
 @pytest.fixture(name="hk_config")
 def fixture_hk_config(root_path) -> dict:
     """Return a dictionary with housekeeper api configs for testing"""
-    configs = {
-        "housekeeper": {"database": "sqlite:///:memory:", "root": str(root_path)}
-    }
-    return configs
+    config = {"housekeeper": {"database": "sqlite:///:memory:", "root": str(root_path)}}
+    return config
 
 
 @pytest.yield_fixture(scope="function", name="housekeeper_api")

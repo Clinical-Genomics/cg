@@ -17,7 +17,8 @@ from cg.store import Store
 
 from .mocks.hk_mock import MockHousekeeperAPI
 from .mocks.madeline import MockMadelineAPI
-from .store_helpers import Helpers
+from .small_helpers import SmallHelpers
+from .store_helpers import StoreHelpers
 
 CHANJO_CONFIG = {"chanjo": {"config_path": "chanjo_config", "binary_path": "chanjo"}}
 CRUNCHY_CONFIG = {
@@ -293,8 +294,14 @@ def files_data(files_raw):
 
 @pytest.fixture(name="helpers")
 def fixture_helpers():
-    """Return a class with helper functions"""
-    return Helpers()
+    """Return a class with helper functions for the stores"""
+    return StoreHelpers()
+
+
+@pytest.fixture(name="small_helpers")
+def fixture_small_helpers():
+    """Return a class with small helper functions"""
+    return SmallHelpers()
 
 
 # HK fixtures

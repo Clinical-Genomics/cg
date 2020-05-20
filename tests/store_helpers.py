@@ -11,7 +11,7 @@ from cg.store import Store, models
 LOG = logging.getLogger(__name__)
 
 
-class Helpers:
+class StoreHelpers:
     """Class to hold helper functions that needs to be used all over"""
 
     @staticmethod

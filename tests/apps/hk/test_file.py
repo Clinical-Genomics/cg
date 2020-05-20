@@ -2,19 +2,21 @@
 from pathlib import Path
 
 
-def test_new_file(housekeeper_api, bed_file_path):
+def test_new_file(housekeeper_api, bed_file, small_helpers):
     """Test to create a new file with the housekeeper api"""
     # GIVEN a housekeeper api without files and the path to an existing file
-    assert len(list(file_obj for file_obj in housekeeper_api.files())) == 0
+    assert small_helpers.length_of_iterable(housekeeper_api.files()) == 0
     assert Path(bed_file).exists() is True
+
     # WHEN creating a new file
     new_file_obj = housekeeper_api.new_file(path=bed_file)
+
     # THEN assert a file object was created
     assert new_file_obj
     # THEN assert that the path is correct
     assert new_file_obj.path == bed_file
     # THEN assert that no file is added to the database
-    assert len(list(file_obj for file_obj in housekeeper_api.files())) == 0
+    assert small_helpers.length_of_iterable(housekeeper_api.files()) == 0
 
 
 def test_new_file_non_existing_path(housekeeper_api):
@@ -22,15 +24,19 @@ def test_new_file_non_existing_path(housekeeper_api):
     # GIVEN a housekeeper api without files and the path to a not existing file
     file_name = "a_file.hello"
     assert Path(file_name).exists() is False
+
     # WHEN creating a new file
     new_file_obj = housekeeper_api.new_file(path=file_name)
+
     # THEN assert a file object was created
     assert new_file_obj
     # THEN assert that the path is correct
     assert new_file_obj.path == file_name
 
 
-def test_add_new_file(populated_housekeeper_api, case_id, madeline_output):
+def test_add_new_file(
+    populated_housekeeper_api, case_id, madeline_output, small_helpers
+):
     """Test to create a new file with the housekeeper api"""
     # GIVEN a populated housekeeper api and the existing version of a bundle
     version_obj = populated_housekeeper_api.last_version(bundle=case_id)
@@ -40,34 +46,34 @@ def test_add_new_file(populated_housekeeper_api, case_id, madeline_output):
     tag = "madeline"
     assert populated_housekeeper_api.tag(name=tag) is None
     # THEN assert that no file is added to the database
-    nr_files_in_db = len(
-        list(file_obj for file_obj in populated_housekeeper_api.files())
-    )
+    nr_files_in_db = small_helpers.length_of_iterable(populated_housekeeper_api.files())
+    assert nr_files_in_db == 0
 
     # WHEN creating a new file
     new_file_obj = populated_housekeeper_api.add_file(
         path=madeline_output, version_obj=version_obj, tags=tag
     )
+
     # THEN assert a file object was created
     assert new_file_obj
     # THEN assert that the path is correct
     assert new_file_obj.path == str(Path(madeline_output).resolve())
     # THEN assert that the file was not added to the database
-    assert (
-        len(list(file_obj for file_obj in populated_housekeeper_api.files()))
-        == nr_files_in_db + 1
-    )
+    new_nr_files = small_helpers.length_of_iterable(populated_housekeeper_api.files())
+    assert new_nr_files == nr_files_in_db + 1
 
 
-def test_get_files(populated_housekeeper_api, case_id, tags):
+def test_get_files(populated_housekeeper_api, case_id, tags, small_helpers):
     """Test to fetch files with the get files method"""
     # GIVEN a populated housekeeper api with some files
-    nr_files = len(list(file_obj for file_obj in populated_housekeeper_api.files()))
+    nr_files = small_helpers.length_of_iterable(populated_housekeeper_api.files())
     assert nr_files > 0
+
     # WHEN fetching all files
     files = populated_housekeeper_api.get_files(bundle=case_id, tags=tags)
+
     # THEN assert all files where fetched
-    assert len(list(file_obj for file_obj in files)) == nr_files
+    assert small_helpers.length_of_iterable(files) == nr_files
 
 
 def test_get_included_path(populated_housekeeper_api, case_id):
