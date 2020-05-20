@@ -468,7 +468,7 @@ class StoreHelpers:
         father: models.Sample = None,
         mother: models.Sample = None,
     ) -> models.FamilySample:
-        """utility function to link a sample to a family"""
+        """Utility function to link a sample to a family"""
         link = store.relate_sample(
             sample=sample, family=family, status=status, father=father, mother=mother
         )
