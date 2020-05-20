@@ -109,7 +109,7 @@ def build_bundle(config_data: dict, analysisinfo_data: dict, deliverables: dict)
 def _convert_tags(data: list, standard_tags: dict, tag_type: str):
     """ Convert tags from deliverables tags to standard tags """
 
-    for deliverables_tags, pipeline_tags in standard_tags.items():
+    for deliverables_tags, hk_tags in tag_map.items():
         for file in data:
             if all(tag in file["tags"] for tag in deliverables_tags):
                 tags_filtered = list(filter(lambda x: x not in deliverables_tags, file["tags"]))
