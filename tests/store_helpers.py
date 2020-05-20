@@ -419,7 +419,7 @@ class StoreHelpers:
         sample_id: str = "microbial_sample_test",
         customer_id: str = "cust_test",
     ) -> models.MicrobialSample:
-        """utility add a order and a sample to use in tests"""
+        """Utility add a order and a sample to use in tests"""
         self.ensure_application_version(store)
         self.ensure_customer(store, customer_id)
         organism = self.ensure_organism(store)
