@@ -41,21 +41,21 @@ def metagenome_orderform(orderforms: Path) -> str:
 @pytest.fixture
 def mip_orderform(orderforms: Path) -> str:
     """Orderform fixture for MIP samples"""
-    _file = orderforms / "1508.19.mip.xlsx"
+    _file = orderforms / "1508.20.mip.xlsx"
     return str(_file)
 
 
 @pytest.fixture
 def mip_balsamic_orderform(orderforms: Path) -> str:
     """Orderform fixture for MIP and Balsamic samples"""
-    _file = orderforms / "1508.19.mip_balsamic.xlsx"
+    _file = orderforms / "1508.20.mip_balsamic.xlsx"
     return str(_file)
 
 
 @pytest.fixture
 def mip_rna_orderform(orderforms: Path) -> str:
     """Orderform fixture for MIP RNA samples"""
-    _file = orderforms / "1508.19.mip_rna.xlsx"
+    _file = orderforms / "1508.20.mip_rna.xlsx"
     return str(_file)
 
 

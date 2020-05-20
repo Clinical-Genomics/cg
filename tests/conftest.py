@@ -188,30 +188,6 @@ def microbial_orderform(orderforms: Path) -> str:
     return str(_file)
 
 
-@pytest.fixture
-def mip_orderform():
-    """Orderform fixture for MIP samples"""
-    return "tests/fixtures/orderforms/1508.20.mip.xlsx"
-
-
-@pytest.fixture
-def mip_balsamic_orderform():
-    """Orderform fixture for MIP and Balsamic samples"""
-    return "tests/fixtures/orderforms/1508.20.mip_balsamic.xlsx"
-
-
-@pytest.fixture
-def mip_rna_orderform():
-    """Orderform fixture for MIP RNA samples"""
-    return "tests/fixtures/orderforms/1508.20.mip_rna.xlsx"
-
-
-@pytest.fixture
-def rml_orderform():
-    """Orderform fixture for RML samples"""
-    return "tests/fixtures/orderforms/1604.9.rml.xlsx"
-
-
 @pytest.fixture(name="madeline_output")
 def fixture_madeline_output(apps_dir: Path) -> str:
     """File with madeline output"""
