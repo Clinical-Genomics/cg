@@ -103,11 +103,7 @@ def samples(context, days: int):
         "Selecting raw, will only load raw data."
     ),
 )
-@click.option(
-        "--dry/--no-dry",
-        default=False,
-        help="Dry run..."
-        )
+@click.option("--dry/--no-dry", default=False, help="Dry run...")
 @click.pass_context
 def bioinfo(context, case_name, cleanup, target_load, dry):
     """Load bioinfo case results to the trending database"""
@@ -156,12 +152,9 @@ def bioinfo(context, case_name, cleanup, target_load, dry):
         if not dry:
             context.obj["vogue_upload_api"].load_bioinfo_sample(load_bioinfo_raw_inputs)
 
+
 @vogue.command("bioinfo-all", short_help="Load all mip bioinfo results into vogue")
-@click.option(
-        "--dry/--no-dry",
-        default=False,
-        help="Dry run..."
-        )
+@click.option("--dry/--no-dry", default=False, help="Dry run...")
 @click.pass_context
 def bioinfo_all(context, dry):
     """Load all cases with recent analysis and a multiqc-json to the trending database."""
@@ -184,11 +177,14 @@ def bioinfo_all(context, dry):
             continue
 
         existing_multiqc_file = multiqc_file_obj[0].full_path
-        click.echo(click.style(f"Found multiqc for {case_name}, {existing_multiqc_file}", fg="blue"))
+        click.echo(
+            click.style(f"Found multiqc for {case_name}, {existing_multiqc_file}", fg="blue")
+        )
         try:
             context.invoke(bioinfo, case_name=case_name, cleanup=True, target_load="all", dry=dry)
         except AnalysisUploadError:
             LOG.error("Case upload failed: %s", case_name, exc_info=True)
+
 
 def _get_multiqc_latest_file(context, case_name):
     """Get latest multiqc_data.json path for a case_name
