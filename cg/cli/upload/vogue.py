@@ -1,5 +1,7 @@
 """Base command for trending"""
 
+from pathlib import Path
+
 import logging
 import click
 
@@ -7,6 +9,7 @@ from cg.meta.upload.vogue import UploadVogueAPI
 from cg.apps import vogue as vogue_api, gt
 from cg.cli.workflow.get_links import get_links
 from cg.store import Store
+from cg.exc import AnalysisUploadError
 
 LOG = logging.getLogger(__name__)
 
@@ -162,20 +165,30 @@ def bioinfo(context, case_name, cleanup, target_load, dry):
 @click.pass_context
 def bioinfo_all(context, dry):
     """Load all cases with recent analysis and a multiqc-json to the trending database."""
-    
-#    for case_obj in context.obj["housekeeper_api"]:
-#      print(dir(case_obj))
-#      break
-    hk_api = context.obj["hk_api"]
 
-    exit_code = SUCCESS
-    for analysis_obj in context.obj["tb_api"].analyses(status="completed", deleted=False):
-        existing_record = hk_api.version(analysis_obj.family, analysis_obj.started_at)
-        if existing_record:
-            existing_multiqc = _get_multiqc_latest_file(context, analysis_obj.family) 
-            LOG.debug("analysis stored: %s - %s - %s", analysis_obj.family, analysis_obj.started_at, existing_multiqc)
+    hk_api = context.obj["housekeeper_api"]
+    cases = context.obj["db"].families()
+    for case in cases:
+        case_name = case.internal_id
+        version_obj = hk_api.last_version(case_name)
+        if not version_obj:
             continue
-#        click.echo(click.style(f"storing family: {analysis_obj.family}", fg="blue"))
+
+        multiqc_file_obj = hk_api.get_files(
+            bundle=case_name, tags=["multiqc-json"], version=version_obj.id
+        )
+        if len(list(multiqc_file_obj)) == 0:
+            continue
+
+        if not Path(multiqc_file_obj[0].full_path).exists():
+            continue
+
+        existing_multiqc_file = multiqc_file_obj[0].full_path
+        click.echo(click.style(f"Found multiqc for {case_name}, {existing_multiqc_file}", fg="blue"))
+        try:
+            context.invoke(bioinfo, case_name=case_name, cleanup=True, target_load="all", dry=dry)
+        except AnalysisUploadError:
+            LOG.error("Case upload failed: %s", case_name, exc_info=True)
 
 def _get_multiqc_latest_file(context, case_name):
     """Get latest multiqc_data.json path for a case_name
@@ -189,6 +202,9 @@ def _get_multiqc_latest_file(context, case_name):
     multiqc_json_file = hk_api.get_files(
         bundle=case_name, tags=["multiqc-json"], version=version_obj.id
     )
+
+    if len(list(multiqc_json_file)) == 0:
+        raise FileNotFoundError(f"No multiqc.json was found in housekeeper for {case_name}")
 
     return multiqc_json_file[0].full_path
 
