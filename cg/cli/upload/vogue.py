@@ -173,10 +173,10 @@ def bioinfo_all(context, dry):
         if len(list(multiqc_file_obj)) == 0:
             continue
 
-        if not Path(multiqc_file_obj[0].full_path).exists():
+        existing_multiqc_file = multiqc_file_obj[0].full_path
+        if not Path(existing_multiqc_file).exists():
             continue
 
-        existing_multiqc_file = multiqc_file_obj[0].full_path
         click.echo(
             click.style(f"Found multiqc for {case_name}, {existing_multiqc_file}", fg="blue")
         )
