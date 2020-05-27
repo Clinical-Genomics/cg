@@ -1,5 +1,0 @@
-name: CG installation checks
-
-on: push
-
-jobs:
