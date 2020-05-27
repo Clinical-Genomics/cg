@@ -28,7 +28,7 @@ jobs:
       with:
         python-version: ${{ matrix.python-version}}
 
-    - name: Production Dependencies 
+    - name: Production Dependencies
       # [0|0|436] [mans.magnusson@hasta:~] [P_main] $ pip --version
       # pip 18.1
       run: |
