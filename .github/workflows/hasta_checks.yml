@@ -1,0 +1,36 @@
+name: CG installation on hasta
+
+on: push
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+    # Check out cg code
+    - uses: actions/checkout@v2
+
+    # Set up python
+    - name: Set up hasta Python 3.7
+      uses: actions/setup-python@v2
+      # [0|0|436] [mans.magnusson@hasta:~] [S_main] 3s $ date
+      # Wed May 27 16:44:09 CEST 2020
+      # [0|0|436] [mans.magnusson@hasta:~] [P_main] $ python --version
+      # Python 3.7.1
+      with:
+        python-version: 3.7
+
+    - name: Check production dependency graph
+      # [0|0|436] [mans.magnusson@hasta:~] [P_main] $ pip --version
+      # pip 18.1
+      run: |
+        python -m pip install --upgrade pip==18.1
+        pip install .
+        pip check
+
+    - name: Check development dependency graph
+      run: |
+        pip install -r requirements-dev.txt
+        pip check
