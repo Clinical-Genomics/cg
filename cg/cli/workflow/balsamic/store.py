@@ -9,10 +9,9 @@ import click
 from housekeeper.exc import VersionIncludedError
 
 from cg.apps import hk, tb
+from cg.exc import AnalysisDuplicationError, AnalysisNotFinishedError
 from cg.meta.store.balsamic import gather_files_and_bundle_in_housekeeper
 from cg.store import Store
-from cg.exc import AnalysisNotFinishedError, AnalysisDuplicationError
-
 
 LOG = logging.getLogger(__name__)
 SUCCESS = 0
@@ -30,7 +29,9 @@ def store(context):
 
 @store.command()
 @click.argument("case_id")
-@click.option("--deliverables-file", "deliverables_file_path", required=False, help="Optional")
+@click.option(
+    "--deliverables-file", "deliverables_file_path", required=False, help="Optional"
+)
 @click.pass_context
 def analysis(context, case_id, deliverables_file_path):
     """Store a finished analysis in Housekeeper."""

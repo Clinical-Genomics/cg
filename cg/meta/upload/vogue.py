@@ -47,3 +47,18 @@ class UploadVogueAPI:
         """Loading flowcells from lims into the trending database"""
 
         self.vogue_api.load_flowcells(days=days)
+
+    def load_bioinfo_raw(self, load_bioinfo_inputs):
+        """Running vogue load bioinfo raw."""
+
+        self.vogue_api.load_bioinfo_raw(load_bioinfo_inputs)
+
+    def load_bioinfo_process(self, load_bioinfo_inputs, cleanup):
+        """Running vogue load bioinfo process."""
+
+        self.vogue_api.load_bioinfo_process(load_bioinfo_inputs, cleanup)
+
+    def load_bioinfo_sample(self, load_bioinfo_inputs):
+        """Running vogue load bioinfo sample."""
+
+        self.vogue_api.load_bioinfo_sample(load_bioinfo_inputs)
