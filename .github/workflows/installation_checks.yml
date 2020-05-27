@@ -34,7 +34,7 @@ jobs:
 
     - name: Intall pip
       run: |
-        if ["$PYTHON_VERSION" = "3.6"]; then
+        if ["$PYTHON_VERSION" = "$OLD_VERSION"]; then
           python -m pip install --upgrade pip==9.0.1
         else
           python -m pip install --upgrade pip==18.1
@@ -43,6 +43,7 @@ jobs:
         pip --version
       env:
         PYTHON_VERSION: ${{ matrix.python-version}}
+        OLD_VERSION: 3.6
 
   #   - name: Production Dependencies
   #     # [0|0|436] [mans.magnusson@hasta:~] [P_main] $ pip --version
