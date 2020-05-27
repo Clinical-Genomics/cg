@@ -1,5 +1,0 @@
-name: CG installation on clinical-db
-
-on: push
-
-jobs:
