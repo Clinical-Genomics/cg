@@ -3,10 +3,11 @@ import datetime as dt
 import logging
 import os
 import shutil
+from pathlib import Path
 
 import ruamel.yaml
+
 from cg.exc import AnalysisDuplicationError
-from pathlib import Path
 
 LOG = logging.getLogger(__name__)
 
@@ -70,7 +71,9 @@ def _add_analysis(config_stream, case_obj):
     return new_bundle
 
 
-def _build_bundle(meta_data: dict, name: str, created: dt.datetime, version: str) -> dict:
+def _build_bundle(
+    meta_data: dict, name: str, created: dt.datetime, version: str
+) -> dict:
     """Create a new bundle."""
     data = {
         "name": name,

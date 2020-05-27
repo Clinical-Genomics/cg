@@ -2,7 +2,7 @@
 import datetime as dt
 from typing import List
 
-from sqlalchemy import or_, and_, func
+from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Query
 
 from cg.store import models
@@ -12,11 +12,14 @@ from cg.store.api.base import BaseHandler
 class FindBusinessDataHandler(BaseHandler):
     """Contains methods to find business data model instances"""
 
-    def analyses(self, *, family: models.Family = None, before: dt.datetime = None) -> Query:
+    def analyses(
+        self, *, family: models.Family = None, before: dt.datetime = None
+    ) -> Query:
         """Fetch multiple analyses."""
         records = self.Analysis.query
         if family:
-            records = records.filter(models.Analysis.family == family)
+            query_family = family
+            records = records.filter(models.Analysis.family == query_family)
         if before:
             subq = (
                 self.Analysis.query.join(models.Analysis.family)
@@ -37,9 +40,13 @@ class FindBusinessDataHandler(BaseHandler):
             ).filter(models.Analysis.started_at < before)
         return records
 
-    def analysis(self, family: models.Family, started_at: dt.datetime) -> models.Analysis:
+    def analysis(
+        self, family: models.Family, started_at: dt.datetime
+    ) -> models.Analysis:
         """Fetch an analysis."""
-        return self.Analysis.query.filter_by(family=family, started_at=started_at).first()
+        return self.Analysis.query.filter_by(
+            family=family, started_at=started_at
+        ).first()
 
     def deliveries(self) -> Query:
         """Fetch all deliveries."""
@@ -47,7 +54,11 @@ class FindBusinessDataHandler(BaseHandler):
         return query
 
     def families(
-        self, *, customer: models.Customer = None, enquiry: str = None, action: str = None
+        self,
+        *,
+        customer: models.Customer = None,
+        enquiry: str = None,
+        action: str = None,
     ) -> List[models.Family]:
         """Fetch families."""
         records = self.Family.query
@@ -72,10 +83,14 @@ class FindBusinessDataHandler(BaseHandler):
         self, *, customer: models.Customer = None, enquiry: str = None
     ) -> List[models.Family]:
         """Fetch all families including those from collaborating customers."""
-        records = self.Family.query.join(models.Family.customer, models.Customer.customer_group)
+        records = self.Family.query.join(
+            models.Family.customer, models.Customer.customer_group
+        )
 
         if customer:
-            records = records.filter(models.CustomerGroup.id == customer.customer_group_id)
+            records = records.filter(
+                models.CustomerGroup.id == customer.customer_group_id
+            )
 
         records = (
             records.filter(
@@ -97,7 +112,9 @@ class FindBusinessDataHandler(BaseHandler):
     def family_samples(self, family_id: str) -> List[models.FamilySample]:
         """Find the samples of a family."""
         return (
-            self.FamilySample.query.join(models.FamilySample.family, models.FamilySample.sample)
+            self.FamilySample.query.join(
+                models.FamilySample.family, models.FamilySample.sample
+            )
             .filter(models.Family.internal_id == family_id)
             .all()
         )
@@ -115,7 +132,8 @@ class FindBusinessDataHandler(BaseHandler):
     ) -> List[models.Sample]:
         """Find samples within the customer group."""
         return self.Sample.query.filter(
-            models.Sample.customer.customer_group == customer.customer_group, name == name
+            models.Sample.customer.customer_group == customer.customer_group,
+            name == name,
         )
 
     def flowcell(self, name: str) -> models.Flowcell:
@@ -159,8 +177,13 @@ class FindBusinessDataHandler(BaseHandler):
     def link(self, family_id: str, sample_id: str) -> models.FamilySample:
         """Find a link between a family and a sample."""
         return (
-            self.FamilySample.query.join(models.FamilySample.family, models.FamilySample.sample)
-            .filter(models.Family.internal_id == family_id, models.Sample.internal_id == sample_id)
+            self.FamilySample.query.join(
+                models.FamilySample.family, models.FamilySample.sample
+            )
+            .filter(
+                models.Family.internal_id == family_id,
+                models.Sample.internal_id == sample_id,
+            )
             .first()
         )
 
@@ -229,7 +252,10 @@ class FindBusinessDataHandler(BaseHandler):
 
         records = (
             records.filter(
-                or_(models.Pool.name.like(f"%{enquiry}%"), models.Pool.order.like(f"%{enquiry}%"))
+                or_(
+                    models.Pool.name.like(f"%{enquiry}%"),
+                    models.Pool.order.like(f"%{enquiry}%"),
+                )
             )
             if enquiry
             else records
@@ -265,8 +291,6 @@ class FindBusinessDataHandler(BaseHandler):
     def samples_by_ids(self, **identifiers) -> List[models.Sample]:
         records = self.Sample.query
 
-        print(type(identifiers), identifiers)
-
         for identifier_name, identifier_value in identifiers.items():
             identifier = getattr(models.Sample, identifier_name)
             records = records.filter(identifier.contains(identifier_value))
@@ -278,10 +302,14 @@ class FindBusinessDataHandler(BaseHandler):
     ) -> List[models.Sample]:
         """Fetch all samples including those from collaborating customers."""
 
-        records = self.Sample.query.join(models.Sample.customer, models.Customer.customer_group)
+        records = self.Sample.query.join(
+            models.Sample.customer, models.Customer.customer_group
+        )
 
         if customer:
-            records = records.filter(models.CustomerGroup.id == customer.customer_group_id)
+            records = records.filter(
+                models.CustomerGroup.id == customer.customer_group_id
+            )
 
         records = (
             records.filter(

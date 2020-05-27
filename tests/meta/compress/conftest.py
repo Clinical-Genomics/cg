@@ -1,11 +1,13 @@
-import pytest
+"""Fixtures for compress api tests"""
 import shutil
 from pathlib import Path
 
-from cg.apps.scoutapi import ScoutAPI
-from cg.apps.hk import HousekeeperAPI
+import pytest
+
 from cg.apps.crunchy import CrunchyAPI
+from cg.apps.scoutapi import ScoutAPI
 from cg.meta.compress import CompressAPI
+from tests.mocks.hk_mock import MockFile
 
 
 class MockScout(ScoutAPI):
@@ -15,63 +17,21 @@ class MockScout(ScoutAPI):
         pass
 
 
-class MockVersion:
-    """Mock hk version"""
-
-    def __init__(self):
-        self.id = 1
-
-
-class MockHousekeeper(HousekeeperAPI):
-    """mock hk api"""
-
-    def __init__(self):
-        pass
-
-    def last_version(self, bundle):
-        """mock last_version method"""
-        _ = bundle
-        return MockVersion()
-
-    def commit(self):
-        """mock commit method"""
-
-
 class MockCrunchy(CrunchyAPI):
     """Mock crunchy api"""
 
 
-class MockFile:
-    """Mock a file object"""
-
-    def __init__(self, path="", to_archive=False):
-        self.path = path
-        self.to_archive = to_archive
-
-    @property
-    def full_path(self):
-        """Mock full_path property"""
-        return str(self.path)
-
-    def is_included(self):
-        """Mock is_included method"""
-        return False
-
-    def delete(self):
-        """mock delete method"""
-
-
-@pytest.yield_fixture(scope="function")
-def crunchy_api(crunchy_config_dict):
+@pytest.yield_fixture(scope="function", name="crunchy_api")
+def fixture_crunchy_api(crunchy_config_dict):
     """crunchy api fixture"""
     _api = MockCrunchy(crunchy_config_dict)
     yield _api
 
 
 @pytest.yield_fixture(scope="function")
-def compress_api(crunchy_api):
+def compress_api(crunchy_api, housekeeper_api):
     """compress api fixture"""
-    hk_api = MockHousekeeper()
+    hk_api = housekeeper_api
     scout_api = MockScout()
     _api = CompressAPI(crunchy_api=crunchy_api, hk_api=hk_api, scout_api=scout_api)
     yield _api
@@ -85,8 +45,8 @@ def compress_test_dir(tmpdir_factory):
     shutil.rmtree(str(my_tmpdir))
 
 
-@pytest.fixture(scope="function")
-def bam_files(compress_test_dir):
+@pytest.fixture(scope="function", name="bam_files")
+def fixture_bam_files(compress_test_dir):
     """Fixture for temporary bam-files"""
     sample_1_dir = compress_test_dir / "sample_1"
     sample_1_dir.mkdir()
@@ -115,22 +75,34 @@ def bam_files(compress_test_dir):
 
 
 @pytest.fixture(scope="function")
-def bam_files_hk_list(bam_files):
+def compress_hk_bundle(bam_files, case_id, timestamp):
     """hk file list fixture"""
-    _hk_bam_list = []
+    hk_bundle_data = {
+        "name": case_id,
+        "created": timestamp,
+        "expires": timestamp,
+        "files": [],
+    }
+    for sample_id in bam_files:
+        bam_file = bam_files[sample_id]["bam_file"]
+        bai_file = bam_files[sample_id]["bai_file"]
+        bam_file_info = {"path": str(bam_file), "archive": False, "tags": ["bam"]}
+        bai_file_info = {
+            "path": str(bai_file),
+            "archive": False,
+            "tags": ["bai", "bam-index"],
+        }
+        hk_bundle_data["files"].append(bam_file_info)
+        hk_bundle_data["files"].append(bai_file_info)
 
-    for _, files in bam_files.items():
-        _hk_bam_list.append(MockFile(path=files["bam_file"]))
-        _hk_bam_list.append(MockFile(path=files["bai_file"]))
-
-    return _hk_bam_list
+    return hk_bundle_data
 
 
 @pytest.fixture(scope="function")
-def compress_scout_case(bam_files):
+def compress_scout_case(bam_files, case_id):
     """Fixture for scout case with bam-files"""
     return {
-        "_id": "test_case",
+        "_id": case_id,
         "individuals": [
             {"individual_id": sample, "bam_file": str(files["bam_file"])}
             for sample, files in bam_files.items()
