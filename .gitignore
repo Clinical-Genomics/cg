@@ -100,5 +100,6 @@ DEVELOP/
 # Editor specific files
 .tm_properties
 
-# Local linting stuff
+# Local stuff
 .flake8
+local/
