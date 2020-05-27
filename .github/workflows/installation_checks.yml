@@ -1,10 +1,9 @@
-name: CG installation checks on hasta and clinical-db
+name: CG installation checks
 
 on: push
 
 jobs:
-  hasta:
-    name: installation-checks
+  build:
 
     runs-on: ubuntu-latest
     strategy:
