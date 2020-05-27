@@ -11,10 +11,7 @@ class UploadCoverageApi:
     """Upload coverage API"""
 
     def __init__(
-        self,
-        status_api: Store,
-        hk_api: hk.HousekeeperAPI,
-        chanjo_api: coverage.ChanjoAPI,
+        self, status_api: Store, hk_api: hk.HousekeeperAPI, chanjo_api: coverage.ChanjoAPI,
     ):
         self.status_api = status_api
         self.hk_api = hk_api
@@ -50,9 +47,7 @@ class UploadCoverageApi:
             if chanjo_sample and replace:
                 self.chanjo_api.delete_sample(sample_data["sample"])
             elif chanjo_sample:
-                LOG.warning(
-                    "sample already loaded, skipping: %s", sample_data["sample"]
-                )
+                LOG.warning("sample already loaded, skipping: %s", sample_data["sample"])
                 continue
 
             LOG.debug("upload coverage for sample: %s", sample_data["sample"])

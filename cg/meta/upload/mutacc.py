@@ -15,9 +15,7 @@ class UploadToMutaccAPI:
 
     """API to upload finished cases to mutacc"""
 
-    def __init__(
-        self, scout_api: scoutapi.ScoutAPI, mutacc_auto_api: mutacc_auto.MutaccAutoAPI
-    ):
+    def __init__(self, scout_api: scoutapi.ScoutAPI, mutacc_auto_api: mutacc_auto.MutaccAutoAPI):
 
         self.scout = scout_api
         self.mutacc_auto = mutacc_auto_api
@@ -27,9 +25,7 @@ class UploadToMutaccAPI:
         data = self.data(case)
         if data:
             LOG.info("Extracting reads from case %s", case["_id"])
-            self.mutacc_auto.extract_reads(
-                case=data["case"], variants=data["causatives"]
-            )
+            self.mutacc_auto.extract_reads(case=data["case"], variants=data["causatives"])
 
     def import_cases(self):
         """Use mutacc API to import cases to database"""
@@ -50,9 +46,7 @@ class UploadToMutaccAPI:
         if all([self._has_bam(case), self._has_causatives(case)]):
             causatives = self.scout.get_causative_variants(case_id=case["_id"])
             mutacc_case = remap(case, SCOUT_TO_MUTACC_CASE)
-            mutacc_variants = [
-                remap(variant, SCOUT_TO_MUTACC_VARIANTS) for variant in causatives
-            ]
+            mutacc_variants = [remap(variant, SCOUT_TO_MUTACC_VARIANTS) for variant in causatives]
             return {"case": mutacc_case, "causatives": mutacc_variants}
         return {}
 
@@ -180,9 +174,7 @@ def get_gene_string(genes):
 
     gene_annotation_info = []
     for gene in genes:
-        gene_info = "|".join(
-            [gene[ann_id] if gene.get(ann_id) else "" for ann_id in gene_fields]
-        )
+        gene_info = "|".join([gene[ann_id] if gene.get(ann_id) else "" for ann_id in gene_fields])
         gene_annotation_info.append(gene_info)
     gene_annotation_info = ",".join(gene_annotation_info)
 
@@ -202,9 +194,7 @@ SCOUT_TO_MUTACC_SAMPLE = (
 SCOUT_TO_MUTACC_CASE = (
     MAPPER("_id", "case_id", str),
     MAPPER("genome_build", "genome_build", str),
-    MAPPER(
-        "panels", "panels", lambda panels: [panel["panel_name"] for panel in panels]
-    ),
+    MAPPER("panels", "panels", lambda panels: [panel["panel_name"] for panel in panels]),
     MAPPER("rank_model_version", "rank_model_version", str),
     MAPPER("sv_rank_model_version", "sv_rank_model_version", str),
     MAPPER("rank_score_threshold", "rank_score_threshold", int),
@@ -221,9 +211,7 @@ SCOUT_TO_MUTACC_CASE = (
 
 SCOUT_TO_MUTACC_FORMAT = (
     MAPPER("genotype_call", "GT", str),
-    MAPPER(
-        "allele_depths", "AD", lambda AD: ",".join([str(element) for element in AD])
-    ),
+    MAPPER("allele_depths", "AD", lambda AD: ",".join([str(element) for element in AD])),
     MAPPER("read_depth", "DP", int),
     MAPPER("genotype_quality", "GQ", int),
     MAPPER("sample_id", "sample_id", str),
@@ -237,11 +225,7 @@ SCOUT_TO_MUTACC_VARIANTS = (
     MAPPER("reference", "REF", str),
     MAPPER("alternative", "ALT", str),
     MAPPER("quality", "QUAL", float),
-    MAPPER(
-        "filters",
-        "FILTER",
-        lambda filters: ",".join([str(filter) for filter in filters]),
-    ),
+    MAPPER("filters", "FILTER", lambda filters: ",".join([str(filter) for filter in filters]),),
     MAPPER("end", "END", int),
     MAPPER("rank_score", "RankScore", int),
     MAPPER("category", "category", str),

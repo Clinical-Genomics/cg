@@ -20,9 +20,7 @@ class Analysis:
         return self.family_obj
 
 
-def test_upload_observations_get_input(
-    upload_observations_api, analysis_store, case_id
-):
+def test_upload_observations_get_input(upload_observations_api, analysis_store, case_id):
 
     # GIVEN an upload_observations_api and a mocked analysis_obj
     family_obj = analysis_store.family(case_id)

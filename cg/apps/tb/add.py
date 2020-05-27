@@ -18,9 +18,7 @@ class AddHandler:
         """Gather information from MIP analysis to store."""
         config_raw = ruamel.yaml.safe_load(config_stream)
         config_data = mip_dna_files.parse_config(config_raw)
-        sampleinfo_raw = ruamel.yaml.safe_load(
-            Path(config_data["sampleinfo_path"]).open()
-        )
+        sampleinfo_raw = ruamel.yaml.safe_load(Path(config_data["sampleinfo_path"]).open())
         rna_analysis = cls._is_rna_analysis(sampleinfo_raw)
         if rna_analysis:
             sampleinfo_data = mip_rna_files.parse_sampleinfo_rna(sampleinfo_raw)
@@ -50,51 +48,21 @@ class AddHandler:
     @staticmethod
     def _is_rna_analysis(sampleinfo_raw: dict) -> bool:
         """checks if all samples are RNA samples based on analysis type """
-        return all(
-            [analysis == "wts" for analysis in sampleinfo_raw["analysis_type"].values()]
-        )
+        return all([analysis == "wts" for analysis in sampleinfo_raw["analysis_type"].values()])
 
     @staticmethod
     def _get_files(config_data: dict, sampleinfo_data: dict) -> dict:
         """Get all the files from the MIP files."""
 
         data = [
-            {
-                "path": config_data["config_path"],
-                "tags": ["mip-config"],
-                "archive": True,
-            },
-            {
-                "path": config_data["sampleinfo_path"],
-                "tags": ["sampleinfo"],
-                "archive": True,
-            },
-            {
-                "path": sampleinfo_data["multiqc_html"],
-                "tags": ["multiqc-html"],
-                "archive": False,
-            },
-            {
-                "path": sampleinfo_data["multiqc_json"],
-                "tags": ["multiqc-json"],
-                "archive": False,
-            },
-            {
-                "path": sampleinfo_data["pedigree"],
-                "tags": ["pedigree-yaml"],
-                "archive": False,
-            },
-            {
-                "path": sampleinfo_data["pedigree_path"],
-                "tags": ["pedigree"],
-                "archive": False,
-            },
+            {"path": config_data["config_path"], "tags": ["mip-config"], "archive": True,},
+            {"path": config_data["sampleinfo_path"], "tags": ["sampleinfo"], "archive": True,},
+            {"path": sampleinfo_data["multiqc_html"], "tags": ["multiqc-html"], "archive": False,},
+            {"path": sampleinfo_data["multiqc_json"], "tags": ["multiqc-json"], "archive": False,},
+            {"path": sampleinfo_data["pedigree"], "tags": ["pedigree-yaml"], "archive": False,},
+            {"path": sampleinfo_data["pedigree_path"], "tags": ["pedigree"], "archive": False,},
             {"path": config_data["log_path"], "tags": ["mip-log"], "archive": True},
-            {
-                "path": sampleinfo_data["qcmetrics_path"],
-                "tags": ["qcmetrics"],
-                "archive": True,
-            },
+            {"path": sampleinfo_data["qcmetrics_path"], "tags": ["qcmetrics"], "archive": True,},
             {
                 "path": sampleinfo_data["snv"]["bcf"],
                 "tags": ["snv-bcf", "snv-gbcf"],
@@ -116,31 +84,19 @@ class AddHandler:
                 "tags": ["peddy", "ped-check"],
                 "archive": False,
             },
-            {
-                "path": sampleinfo_data["peddy"]["ped"],
-                "tags": ["peddy", "ped"],
-                "archive": False,
-            },
+            {"path": sampleinfo_data["peddy"]["ped"], "tags": ["peddy", "ped"], "archive": False,},
             {
                 "path": sampleinfo_data["peddy"]["sex_check"],
                 "tags": ["peddy", "sex-check"],
                 "archive": False,
             },
-            {
-                "path": sampleinfo_data["version_collect"],
-                "tags": ["exe-ver"],
-                "archive": False,
-            },
+            {"path": sampleinfo_data["version_collect"], "tags": ["exe-ver"], "archive": False,},
         ]
 
         # this key exists only for wgs
         if sampleinfo_data["str_vcf"]:
             data.append(
-                {
-                    "path": sampleinfo_data["str_vcf"],
-                    "tags": ["vcf-str"],
-                    "archive": True,
-                }
+                {"path": sampleinfo_data["str_vcf"], "tags": ["vcf-str"], "archive": True,}
             )
 
         for variant_type in ["snv", "sv"]:
@@ -153,9 +109,7 @@ class AddHandler:
                 data.append({"path": vcf_path, "tags": [vcf_tag], "archive": True})
                 data.append(
                     {
-                        "path": f"{vcf_path}.tbi"
-                        if variant_type == "snv"
-                        else f"{vcf_path}.csi",
+                        "path": f"{vcf_path}.tbi" if variant_type == "snv" else f"{vcf_path}.csi",
                         "tags": [f"{vcf_tag}-index"],
                         "archive": True,
                     }
@@ -177,18 +131,10 @@ class AddHandler:
                 crai_path = cram_path.replace(".cram", ".crai")
 
             data.append(
-                {
-                    "path": cram_path,
-                    "tags": ["cram", sample_data["id"]],
-                    "archive": False,
-                }
+                {"path": cram_path, "tags": ["cram", sample_data["id"]], "archive": False,}
             )
             data.append(
-                {
-                    "path": crai_path,
-                    "tags": ["cram-index", sample_data["id"]],
-                    "archive": False,
-                }
+                {"path": crai_path, "tags": ["cram-index", sample_data["id"]], "archive": False,}
             )
 
             # Only for wgs data
@@ -199,11 +145,7 @@ class AddHandler:
                 if not Path(mt_bai_path).exists():
                     mt_bai_path = mt_bam_path.replace(".bam", ".bai")
                 data.append(
-                    {
-                        "path": mt_bam_path,
-                        "tags": ["bam-mt", sample_data["id"]],
-                        "archive": False,
-                    }
+                    {"path": mt_bam_path, "tags": ["bam-mt", sample_data["id"]], "archive": False,}
                 )
                 data.append(
                     {

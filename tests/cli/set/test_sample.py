@@ -86,9 +86,7 @@ def test_invalid_customer(cli_runner, base_context, base_store: Store, helpers):
 
     # WHEN calling set sample with an invalid customer
     result = cli_runner.invoke(
-        sample,
-        [sample_id, "-kv", "customer", customer_id, "-y", "--skip-lims"],
-        obj=base_context,
+        sample, [sample_id, "-kv", "customer", customer_id, "-y", "--skip-lims"], obj=base_context,
     )
 
     # THEN then it should error about missing customer instead of setting the value
@@ -104,9 +102,7 @@ def test_customer(cli_runner, base_context, base_store: Store, helpers):
 
     # WHEN calling set sample with a valid customer
     result = cli_runner.invoke(
-        sample,
-        [sample_id, "-kv", "customer", customer_id, "-y", "--skip-lims"],
-        obj=base_context,
+        sample, [sample_id, "-kv", "customer", customer_id, "-y", "--skip-lims"], obj=base_context,
     )
 
     # THEN then it should set the customer of the sample
@@ -137,9 +133,7 @@ def test_downsampled_to(cli_runner, base_context, base_store: Store, helpers):
 
     # WHEN calling set sample with a valid value of downsampled to
     result = cli_runner.invoke(
-        sample,
-        [sample_id, "-kv", "downsampled_to", downsampled_to, "-y"],
-        obj=base_context,
+        sample, [sample_id, "-kv", "downsampled_to", downsampled_to, "-y"], obj=base_context,
     )
 
     # THEN then the value should have been set on the sample
@@ -167,10 +161,7 @@ def test_invalid_application(cli_runner, base_context, base_store: Store, helper
     # GIVEN a database with a sample
     sample_id = helpers.add_sample(base_store).internal_id
     application_tag = "dummy_application"
-    assert (
-        base_store.Sample.query.first().application_version.application.tag
-        != application_tag
-    )
+    assert base_store.Sample.query.first().application_version.application.tag != application_tag
 
     # WHEN calling set sample with an invalid application
     result = cli_runner.invoke(
@@ -181,10 +172,7 @@ def test_invalid_application(cli_runner, base_context, base_store: Store, helper
 
     # THEN then it should error about missing application instead of setting the value
     assert result.exit_code != SUCCESS
-    assert (
-        base_store.Sample.query.first().application_version.application.tag
-        != application_tag
-    )
+    assert base_store.Sample.query.first().application_version.application.tag != application_tag
 
 
 def test_application(cli_runner, base_context, base_store: Store, helpers):
@@ -193,10 +181,7 @@ def test_application(cli_runner, base_context, base_store: Store, helpers):
     application_tag = helpers.ensure_application_version(
         base_store, "another_application"
     ).application.tag
-    assert (
-        base_store.Sample.query.first().application_version.application.tag
-        != application_tag
-    )
+    assert base_store.Sample.query.first().application_version.application.tag != application_tag
 
     # WHEN calling set sample with an invalid application
     result = cli_runner.invoke(

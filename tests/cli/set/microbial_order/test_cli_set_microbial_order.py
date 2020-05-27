@@ -23,9 +23,7 @@ def test_invalid_order_empty_db(cli_runner, base_context):
     assert result.exit_code != SUCCESS
 
 
-def test_invalid_order_non_empty_db(
-    cli_runner, base_context, base_store: Store, helpers
-):
+def test_invalid_order_non_empty_db(cli_runner, base_context, base_store: Store, helpers):
     """Test to create an non existing order in a populated database"""
     # GIVEN a non empty database
     order_id = "dummy_order_id"
@@ -36,18 +34,14 @@ def test_invalid_order_non_empty_db(
     # WHEN running set with an order that does not exist
     application_tag = "dummy_application"
     result = cli_runner.invoke(
-        microbial_order,
-        [non_existing_order_id, "sign", "-a", application_tag],
-        obj=base_context,
+        microbial_order, [non_existing_order_id, "sign", "-a", application_tag], obj=base_context,
     )
 
     # THEN then it should complain on invalid order
     assert result.exit_code != SUCCESS
 
 
-def test_valid_order_no_apptag_option(
-    cli_runner, base_context, base_store: Store, helpers
-):
+def test_valid_order_no_apptag_option(cli_runner, base_context, base_store: Store, helpers):
     """Test to create an order without an apptag"""
     # GIVEN a non empty database
     order = helpers.ensure_microbial_order(base_store)
@@ -71,9 +65,7 @@ def test_set_option(cli_runner, base_context, base_store: Store, option_key, hel
     # WHEN calling set_microbial_order with option
     signature = "sign"
     result = cli_runner.invoke(
-        microbial_order,
-        [order.internal_id, signature, option_key, option_value],
-        obj=base_context,
+        microbial_order, [order.internal_id, signature, option_key, option_value], obj=base_context,
     )
 
     # THEN then the option should have been set on the object and the user been informed
@@ -94,9 +86,7 @@ def test_set_project_name_in_lims(cli_runner, base_context, base_store, helpers)
     # WHEN calling set_microbial_order with option
     signature = "sign"
     result = cli_runner.invoke(
-        microbial_order,
-        [order.internal_id, signature, "--name", name],
-        obj=base_context,
+        microbial_order, [order.internal_id, signature, "--name", name], obj=base_context,
     )
 
     # THEN then the option should have been set on the object and the user been informed
@@ -149,9 +139,7 @@ def test_old_comment_preserved(cli_runner, base_context, base_store: Store, help
 
     # WHEN calling set_microbial_order twice with different signatures
     cli_runner.invoke(
-        microbial_order,
-        [order.internal_id, first_sign, "--name", "dummy_name1"],
-        obj=base_context,
+        microbial_order, [order.internal_id, first_sign, "--name", "dummy_name1"], obj=base_context,
     )
     result = cli_runner.invoke(
         microbial_order,

@@ -10,10 +10,7 @@ from cg.utils import Process
 
 CONFIG = {
     "loqusdb": {"config_path": "loqusdb_config_wes", "binary_path": "loqus_binary"},
-    "loqusdb-wes": {
-        "config_path": "loqusdb_config_wes",
-        "binary_path": "loqusdb_wes_binary",
-    },
+    "loqusdb-wes": {"config_path": "loqusdb_config_wes", "binary_path": "loqusdb_wes_binary",},
 }
 
 LOQUSDB_OUTPUT = (
@@ -52,12 +49,7 @@ class ProcessMock(Process):
     """Mock a process object"""
 
     def __init__(
-        self,
-        binary,
-        config=None,
-        config_parameter="--config",
-        base_call=None,
-        error=False,
+        self, binary, config=None, config_parameter="--config", base_call=None, error=False,
     ):
         self.binary = binary
         self.config = config

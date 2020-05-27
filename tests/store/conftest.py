@@ -24,9 +24,7 @@ def applications_file(fixtures_dir):
 def fixture_microbial_submitted_order():
     """Build an example order as it looks after submission to ."""
 
-    def _get_item(
-        name: str, internal_id: str, well_position: str, organism: str
-    ) -> dict:
+    def _get_item(name: str, internal_id: str, well_position: str, organism: str) -> dict:
         """Return a item"""
         ref_genomes = {
             "C. Jejuni": "NC_111",
@@ -60,8 +58,7 @@ def fixture_microbial_submitted_order():
             elution_buffer="Nuclease-free water",
             organism=organism,
             reference_genome=ref_genomes[organism],
-            extraction_method="MagNaPure 96 (contact Clinical Genomics before "
-            "submission)",
+            extraction_method="MagNaPure 96 (contact Clinical Genomics before " "submission)",
             analysis="fastq",
             concentration_weight="1",
             mother=None,
@@ -104,9 +101,7 @@ def microbial_store(base_store, microbial_submitted_order):
     base_store.add(order)
 
     for sample_data in microbial_submitted_order["items"]:
-        application_version = base_store.application(
-            sample_data["application"]
-        ).versions[0]
+        application_version = base_store.application(sample_data["application"]).versions[0]
         organism = base_store.Organism(
             internal_id=sample_data["organism"], name=sample_data["organism"]
         )

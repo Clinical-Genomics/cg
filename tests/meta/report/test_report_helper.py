@@ -48,9 +48,7 @@ def test_first_analysis_when_two(store, helpers):
     # GIVEN two analyses for the given family
     yesterday = datetime.now() - timedelta(days=1)
     first_analysis = helpers.add_analysis(store, completed_at=datetime.now())
-    second_analysis = helpers.add_analysis(
-        store, first_analysis.family, completed_at=yesterday
-    )
+    second_analysis = helpers.add_analysis(store, first_analysis.family, completed_at=yesterday)
 
     # WHEN fetching report_version
     report_version = ReportHelper.get_report_version(second_analysis)
@@ -64,9 +62,7 @@ def test_second_analysis_when_two(store, helpers):
     # GIVEN two analyses for the given family
     yesterday = datetime.now() - timedelta(days=1)
     first_analysis = helpers.add_analysis(store, completed_at=datetime.now())
-    second_analysis = helpers.add_analysis(
-        store, first_analysis.family, completed_at=yesterday
-    )
+    second_analysis = helpers.add_analysis(store, first_analysis.family, completed_at=yesterday)
     assert first_analysis.family.analyses.index(second_analysis) == 1
     assert first_analysis.family.analyses.index(first_analysis) == 0
 

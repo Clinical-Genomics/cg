@@ -20,18 +20,14 @@ def test_without_options(cli_runner, balsamic_context):
     assert "Missing argument" in result.output
 
 
-def test_store_analysis_with_empty_file_parameter(
-    cli_runner, balsamic_context, balsamic_case
-):
+def test_store_analysis_with_empty_file_parameter(cli_runner, balsamic_context, balsamic_case):
     """Test store with analysis file"""
 
     # GIVEN
 
     # WHEN calling store with empty string for meta file path
     result = cli_runner.invoke(
-        analysis,
-        [balsamic_case.internal_id, "--deliverables-file", ""],
-        obj=balsamic_context,
+        analysis, [balsamic_case.internal_id, "--deliverables-file", ""], obj=balsamic_context,
     )
 
     # THEN the process should not exit ok

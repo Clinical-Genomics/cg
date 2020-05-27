@@ -24,9 +24,7 @@ def process_solved(context, case_id, days_ago, customers, dry_run):
     scout_api = context.obj["scout_api"]
     mutacc_auto_api = mutacc_auto.MutaccAutoAPI(context.obj)
 
-    mutacc_upload = UploadToMutaccAPI(
-        scout_api=scout_api, mutacc_auto_api=mutacc_auto_api
-    )
+    mutacc_upload = UploadToMutaccAPI(scout_api=scout_api, mutacc_auto_api=mutacc_auto_api)
 
     # Get cases to upload into mutacc from scout
     if case_id is not None:
@@ -42,9 +40,7 @@ def process_solved(context, case_id, days_ago, customers, dry_run):
         number_processed += 1
         if customers:
             if case["owner"] not in customers:
-                LOG.info(
-                    "skipping %s: Not valid customer %s", case["_id"], case["owner"]
-                )
+                LOG.info("skipping %s: Not valid customer %s", case["_id"], case["owner"])
                 continue
         if dry_run:
             LOG.info("Would process case %s with mutacc", case["_id"])

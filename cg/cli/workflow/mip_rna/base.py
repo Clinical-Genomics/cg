@@ -31,11 +31,7 @@ def mip_rna(context: click.Context):
     lims_api = lims.LimsAPI(context.obj)
     context.obj["tb"] = tb.TrailblazerAPI(context.obj)
     deliver = DeliverAPI(
-        context.obj,
-        hk_api=hk_api,
-        lims_api=lims_api,
-        case_tags=CASE_TAGS,
-        sample_tags=SAMPLE_TAGS,
+        context.obj, hk_api=hk_api, lims_api=lims_api, case_tags=CASE_TAGS, sample_tags=SAMPLE_TAGS,
     )
     context.obj["api"] = AnalysisAPI(
         db=context.obj["db"],
@@ -59,15 +55,11 @@ def link(context: click.Context, case_id: str, sample_id: str):
 
     for link_obj in link_objs:
         LOG.info(
-            "%s: %s link FASTQ files",
-            link_obj.sample.internal_id,
-            link_obj.sample.data_analysis,
+            "%s: %s link FASTQ files", link_obj.sample.internal_id, link_obj.sample.data_analysis,
         )
 
         if "mip + rna" in link_obj.sample.data_analysis.lower():
-            mip_fastq_handler = FastqHandler(
-                context.obj, context.obj["db"], context.obj["tb"]
-            )
+            mip_fastq_handler = FastqHandler(context.obj, context.obj["db"], context.obj["tb"])
             context.obj["api"].link_sample(
                 mip_fastq_handler,
                 case=link_obj.family.internal_id,

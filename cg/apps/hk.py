@@ -15,15 +15,11 @@ class HousekeeperAPI:
     """ API to decouple cg code from Housekeeper """
 
     def __init__(self, config: dict) -> None:
-        self._store = Store(
-            config["housekeeper"]["database"], config["housekeeper"]["root"]
-        )
+        self._store = Store(config["housekeeper"]["database"], config["housekeeper"]["root"])
         self.root_dir = config["housekeeper"]["root"]
 
     def __getattr__(self, name):
-        LOG.warning(
-            "Called undefined %s on %s, please wrap", name, self.__class__.__name__
-        )
+        LOG.warning("Called undefined %s on %s, please wrap", name, self.__class__.__name__)
         return getattr(self._store, name)
 
     def new_bundle(self, name: str, created_at: dt.datetime = None) -> models.Bundle:
@@ -43,20 +39,14 @@ class HousekeeperAPI:
         return self._store.bundles()
 
     def new_file(
-        self,
-        path: str,
-        checksum: str = None,
-        to_archive: bool = False,
-        tags: list = None,
+        self, path: str, checksum: str = None, to_archive: bool = False, tags: list = None,
     ) -> models.File:
         """ Create a new file """
         if tags is None:
             tags = []
         return self._store.new_file(path, checksum, to_archive, tags)
 
-    def add_file(
-        self, path, version_obj: models.Version, tags, to_archive=False
-    ) -> models.File:
+    def add_file(self, path, version_obj: models.Version, tags, to_archive=False) -> models.File:
         """Add a file to the database"""
         if isinstance(tags, str):
             tags = [tags]
@@ -74,12 +64,7 @@ class HousekeeperAPI:
         return new_file
 
     def files(
-        self,
-        *,
-        bundle: str = None,
-        tags: List[str] = None,
-        version: int = None,
-        path: str = None,
+        self, *, bundle: str = None, tags: List[str] = None, version: int = None, path: str = None,
     ) -> List[models.File]:
         """ Fetch files """
         return self._store.files(bundle=bundle, tags=tags, version=version, path=path)
@@ -106,9 +91,7 @@ class HousekeeperAPI:
         LOG.info("Created new bundle version dir: %s", version_root_dir)
         return version_root_dir / Path(file_obj.path).name
 
-    def include_file(
-        self, file_obj: models.File, version_obj: models.Version
-    ) -> models.File:
+    def include_file(self, file_obj: models.File, version_obj: models.Version) -> models.File:
         """Call the include version function to import related assets."""
         global_root_dir = Path(self.get_root_dir())
 

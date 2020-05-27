@@ -4,9 +4,7 @@ from cg.cli.status import cases
 from cg.store import Store
 
 
-def test_lists_sample_in_unreceived_samples(
-    cli_runner, base_context, base_store: Store, helpers
-):
+def test_lists_sample_in_unreceived_samples(cli_runner, base_context, base_store: Store, helpers):
     """Test to that cases displays family in database"""
 
     # GIVEN a database with a family
@@ -23,9 +21,7 @@ def test_lists_sample_in_unreceived_samples(
     assert "0/1" in result.output
 
 
-def test_lists_samples_in_unreceived_samples(
-    cli_runner, base_context, base_store: Store, helpers
-):
+def test_lists_samples_in_unreceived_samples(cli_runner, base_context, base_store: Store, helpers):
     """Test to that cases displays family in database"""
 
     # GIVEN a database with a family

@@ -40,9 +40,7 @@ def test_set_flowcell_status(cli_runner, base_context, base_store: Store, helper
     assert base_store.Flowcell.query.first().status != status
 
     # WHEN setting a flowcell
-    result = cli_runner.invoke(
-        flowcell, ["--status", status, flowcell_name], obj=base_context
-    )
+    result = cli_runner.invoke(flowcell, ["--status", status, flowcell_name], obj=base_context)
 
     # THEN then it should have been set
     assert result.exit_code == SUCCESS

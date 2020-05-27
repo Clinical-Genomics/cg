@@ -17,9 +17,7 @@ def test_bam_to_cram(crunchy_config_dict, sbatch_content, bam_path, mocker):
 
     # THEN _submit_sbatch method is called with expected sbatch-content
 
-    mocker_submit_sbatch.assert_called_with(
-        sbatch_content=sbatch_content, dry_run=False
-    )
+    mocker_submit_sbatch.assert_called_with(sbatch_content=sbatch_content, dry_run=False)
 
 
 def test_is_cram_compression_done_no_cram(crunchy_config_dict, bam_path):
@@ -34,9 +32,7 @@ def test_is_cram_compression_done_no_cram(crunchy_config_dict, bam_path):
     assert not result
 
 
-def test_is_cram_compression_done_no_crai(
-    crunchy_config_dict, compressed_bam_without_crai
-):
+def test_is_cram_compression_done_no_crai(crunchy_config_dict, compressed_bam_without_crai):
     """test cram_compression_done without created CRAI file"""
     # GIVEN a crunchy-api, and a bam_path
     crunchy_api = CrunchyAPI(crunchy_config_dict)
@@ -49,9 +45,7 @@ def test_is_cram_compression_done_no_crai(
     assert not result
 
 
-def test_is_cram_compression_done_no_flag(
-    crunchy_config_dict, compressed_bam_without_flag
-):
+def test_is_cram_compression_done_no_flag(crunchy_config_dict, compressed_bam_without_flag):
     """test cram_compression_done without created flag file"""
     # GIVEN a crunchy-api, and a bam_path, cram_path, crai_path
     crunchy_api = CrunchyAPI(crunchy_config_dict)

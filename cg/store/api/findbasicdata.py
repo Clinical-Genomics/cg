@@ -28,9 +28,7 @@ class FindBasicDataHandler(BaseHandler):
         self, application: models.Application, version: int
     ) -> models.ApplicationVersion:
         """Fetch an application version."""
-        query = self.ApplicationVersion.query.filter_by(
-            application=application, version=version
-        )
+        query = self.ApplicationVersion.query.filter_by(application=application, version=version)
         return query.first()
 
     def bed(self, name):
@@ -86,9 +84,7 @@ class FindBasicDataHandler(BaseHandler):
         """Fetch the latest application version for an application tag."""
         application_obj = self.Application.query.filter_by(tag=tag).first()
         return (
-            application_obj.versions[-1]
-            if application_obj and application_obj.versions
-            else None
+            application_obj.versions[-1] if application_obj and application_obj.versions else None
         )
 
     def organism(self, internal_id: str) -> models.Organism:
