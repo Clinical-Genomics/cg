@@ -30,9 +30,12 @@ jobs:
     - name: Intall pip
       run: |
         echo YAY
+        echo $PYTHON_VERSION
         if ["$PYTHON_VERSION" == "3.6"]; then
           echo YES
         fi
+      env:
+        PYTHON_VERSION: ${{ matrix.python-version}}
 
   #   - name: Production Dependencies
   #     # [0|0|436] [mans.magnusson@hasta:~] [P_main] $ pip --version
