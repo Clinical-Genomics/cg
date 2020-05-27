@@ -61,7 +61,7 @@ class BackupApi:
                 return None
 
         if not dry_run:
-            LOG.info(f"{flowcell_obj.name}: retreiving from PDC")
+            LOG.info(f"{flowcell_obj.name}: retrieving from PDC")
 
         tic = time.time()
 
