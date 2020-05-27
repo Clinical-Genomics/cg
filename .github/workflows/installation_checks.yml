@@ -34,7 +34,7 @@ jobs:
 
     - name: Intall pip
       run: |
-        if ["$PYTHON_VERSION" = "$OLD_VERSION"]; then
+        if [ "$PYTHON_VERSION" = "$OLD_VERSION" ]; then
           python -m pip install --upgrade pip==9.0.1
         else
           python -m pip install --upgrade pip==18.1

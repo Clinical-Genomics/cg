@@ -1,4 +1,4 @@
-name: Linting code
+name: Lint checks
 
 on: push
 
@@ -26,10 +26,10 @@ jobs:
 
     - name: Run linters
       uses: samuelmeuli/lint-action@v1
-      # Let linters fix problems if they can
+      # Do not let linters change files
       with:
         github_token: ${{ secrets.github_token }}
-        auto_fix: true
+        auto_fix: false
         # Enable linters
         black: true
         black_args: "--check -l 100"
