@@ -18,13 +18,14 @@ def backup(context: click.Context):
 
 @backup.command("fetch-flowcell")
 @click.option("-f", "--flowcell", help="Retreive a specific flowcell")
-@click.option("--dry-run", "dry_run", is_flag=True, 
-              help="Don't retrieve from PDC or set flowcell's status")
+@click.option(
+    "--dry-run", "dry_run", is_flag=True, help="Don't retrieve from PDC or set flowcell's status"
+)
 @click.pass_context
 def fetch_flowcell(context: click.Context, dry_run: bool, flowcell: str):
     """Fetch the first flowcell in the requested queue from backup."""
     status_api = Store(context.obj["database"])
-    max_flowcells = context.obj.get('max_flowcells', 1250)
+    max_flowcells = context.obj.get("max_flowcells", 1250)
     pdc_api = PdcApi()
     backup_api = BackupApi(status=status_api, pdc_api=pdc_api, max_flowcells=max_flowcells)
     if flowcell:
