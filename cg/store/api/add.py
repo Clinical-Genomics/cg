@@ -1,5 +1,5 @@
-import logging
 import datetime as dt
+import logging
 from typing import List
 
 import petname
@@ -22,6 +22,7 @@ class AddHandler(BaseHandler):
         invoice_address: str,
         invoice_reference: str,
         scout_access: bool = False,
+        *args,
         **kwargs,
     ) -> models.Customer:
         """Build a new customer record."""
@@ -37,10 +38,14 @@ class AddHandler(BaseHandler):
         )
         return new_customer
 
-    def add_customer_group(self, internal_id: str, name: str, **kwargs) -> models.CustomerGroup:
+    def add_customer_group(
+        self, internal_id: str, name: str, **kwargs
+    ) -> models.CustomerGroup:
         """Build a new customer group record."""
 
-        new_customer_group = self.CustomerGroup(internal_id=internal_id, name=name, **kwargs)
+        new_customer_group = self.CustomerGroup(
+            internal_id=internal_id, name=name, **kwargs
+        )
         return new_customer_group
 
     def add_user(
@@ -83,7 +88,9 @@ class AddHandler(BaseHandler):
     ) -> models.ApplicationVersion:
         """Build a new application version record."""
 
-        new_record = self.ApplicationVersion(version=version, valid_from=valid_from, **kwargs)
+        new_record = self.ApplicationVersion(
+            version=version, valid_from=valid_from, **kwargs
+        )
         for price_key in ["standard", "priority", "express", "research"]:
             setattr(new_record, f"price_{price_key}", prices[price_key])
         new_record.application = application
@@ -140,7 +147,9 @@ class AddHandler(BaseHandler):
         )
         return new_sample
 
-    def add_family(self, name: str, panels: List[str], priority: str = "standard") -> models.Family:
+    def add_family(
+        self, name: str, panels: List[str], priority: str = "standard"
+    ) -> models.Family:
         """Build a new Family record."""
 
         # generate a unique family id
@@ -152,7 +161,9 @@ class AddHandler(BaseHandler):
                 LOG.debug(f"{internal_id} already used - trying another id")
 
         priority_db = PRIORITY_MAP[priority]
-        new_family = self.Family(internal_id=internal_id, name=name, priority=priority_db)
+        new_family = self.Family(
+            internal_id=internal_id, name=name, priority=priority_db
+        )
         new_family.panels = panels
         return new_family
 
@@ -179,7 +190,10 @@ class AddHandler(BaseHandler):
         """Build a new Flowcell record."""
 
         new_record = self.Flowcell(
-            name=name, sequencer_name=sequencer, sequencer_type=sequencer_type, sequenced_at=date
+            name=name,
+            sequencer_name=sequencer,
+            sequencer_type=sequencer_type,
+            sequenced_at=date,
         )
         return new_record
 
@@ -218,7 +232,11 @@ class AddHandler(BaseHandler):
         """Build a new panel record."""
 
         new_record = self.Panel(
-            name=name, abbrev=abbrev, current_version=version, date=date, gene_count=genes
+            name=name,
+            abbrev=abbrev,
+            current_version=version,
+            date=date,
+            gene_count=genes,
         )
         new_record.customer = customer
         return new_record
@@ -326,7 +344,7 @@ class AddHandler(BaseHandler):
         **kwargs,
     ) -> models.MicrobialSample:
         """Build a new MicrobialSample record.
-        
+
         To commit you also need to assign the sample to an Order.
         """
         internal_id = internal_id or utils.get_unique_id(self.sample)
