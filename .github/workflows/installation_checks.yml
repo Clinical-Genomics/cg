@@ -28,8 +28,8 @@ jobs:
         python-version: ${{ matrix.python-version}}
 
     - name: Intall pip
-      run: echo YAY
       run: |
+        echo YAY
         if ["$PYTHON_VERSION" == "3.6"]; then
           echo YES
         fi
