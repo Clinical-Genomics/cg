@@ -1,4 +1,4 @@
-name: Linting and installation
+name: CG CI
 
 on: ["push", "pull_request"]
 
