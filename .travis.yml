@@ -7,7 +7,7 @@ jobs:
     - name: "Coverage"
       install:
         - pip install cython
-        - pip install . -r requirements-dev.txt
+        - pip install . -r requirements-dev.txt coveralls pytest-cov "coverage<5" "python-coveralls>=2.9.3"
       script: coverage run --branch --omit="*.html" --source "$(basename "$PWD")" setup.py test
       after_success: coveralls
 
@@ -69,7 +69,9 @@ jobs:
 
     - name: "Linting"
       if: type = pull_request
-      install: pip install . -r requirements-dev.txt
+      install:
+        - pip install . -r requirements-dev.txt pylint git-lint html-linter yamllint pycodestyle
+        - sudo apt-get install -y tidy
       script: git reset --soft ${TRAVIS_COMMIT_RANGE%...*} && git lint
 
 notifications:

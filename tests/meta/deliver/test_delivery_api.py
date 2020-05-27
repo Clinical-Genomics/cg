@@ -57,6 +57,8 @@ def test_get_post_analysis_case_files_only_sample_tags(analysis_family, deliver_
     # GIVEN corresponding sample id houskeeper tags for those files
     case = analysis_family["internal_id"]
     deliver_tags = ["sample-tag"]
+    hk_api = deliver_api.hk_api
+    hk_api.add_missing_tag(deliver_tags[0])
 
     # WHEN we call get_post_analysis_case_files with matching case and sample file-tags and version
     version = None
@@ -91,6 +93,8 @@ def test_get_post_analysis_sample_files_only_case_tags(analysis_family, deliver_
     case = analysis_family["internal_id"]
     sample = analysis_family["samples"][0]["internal_id"]
     deliver_tags = ["case-tag"]
+    hk_api = deliver_api.hk_api
+    hk_api.add_missing_tag(deliver_tags[0])
 
     # WHEN we call get_post_analysis_sample_files with matching case and file-tags and version
     version = None
