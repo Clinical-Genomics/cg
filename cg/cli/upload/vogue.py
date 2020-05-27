@@ -139,18 +139,21 @@ def bioinfo(context, case_name, cleanup, target_load, dry):
     if dry:
         click.echo(click.style("----------------- DRY RUN -----------------------"))
 
-    if target_load in ("raw", "all"):
-        click.echo(click.style("----------------- UPLOAD UNPROCESSED -----------------------"))
-        if not dry:
-            context.obj["vogue_upload_api"].load_bioinfo_raw(load_bioinfo_raw_inputs)
+    try:
+        if target_load in ("raw", "all"):
+            click.echo(click.style("----------------- UPLOAD UNPROCESSED -----------------------"))
+            if not dry:
+                    context.obj["vogue_upload_api"].load_bioinfo_raw(load_bioinfo_raw_inputs)
 
-    if target_load in ("process", "all"):
-        click.echo(click.style("----------------- PROCESS CASE -----------------------"))
-        if not dry:
-            context.obj["vogue_upload_api"].load_bioinfo_process(load_bioinfo_raw_inputs, cleanup)
-        click.echo(click.style("----------------- PROCESS SAMPLE -----------------------"))
-        if not dry:
-            context.obj["vogue_upload_api"].load_bioinfo_sample(load_bioinfo_raw_inputs)
+        if target_load in ("process", "all"):
+            click.echo(click.style("----------------- PROCESS CASE -----------------------"))
+            if not dry:
+                context.obj["vogue_upload_api"].load_bioinfo_process(load_bioinfo_raw_inputs, cleanup)
+            click.echo(click.style("----------------- PROCESS SAMPLE -----------------------"))
+            if not dry:
+                context.obj["vogue_upload_api"].load_bioinfo_sample(load_bioinfo_raw_inputs)
+    except AnalysisUploadError:
+        LOG.error("Case upload failed: %s", case_name, exc_info=True)
 
 
 @vogue.command("bioinfo-all", short_help="Load all mip bioinfo results into vogue")
