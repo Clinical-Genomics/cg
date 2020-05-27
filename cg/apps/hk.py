@@ -5,8 +5,7 @@ import os
 from pathlib import Path
 from typing import List, Tuple
 
-from housekeeper.include import checksum as hk_checksum
-from housekeeper.include import include_version
+from housekeeper.include import include_version, checksum as hk_checksum
 from housekeeper.store import Store, models
 
 LOG = logging.getLogger(__name__)
