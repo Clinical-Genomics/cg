@@ -95,7 +95,7 @@ class LimsAPI(Lims, OrderHandler):
         sample = Sample(self, id=lims_id)
         try:
             return sample.udf.get("Received at")
-        except:
+        except HTTPError:
             return None
 
     def get_prepared_date(self, lims_id: str) -> dt.datetime:
