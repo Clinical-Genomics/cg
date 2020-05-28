@@ -102,9 +102,7 @@ class MockVersion:
         return Path(self.app_root) / self.bundle.name / str(self.created_at.date())
 
     def __repr__(self):
-        return (
-            f"MockVersion:id={self.id},created_at={self.created_at},files={self.files}"
-        )
+        return f"MockVersion:id={self.id},created_at={self.created_at},files={self.files}"
 
 
 class EnhancedList(list):
@@ -158,12 +156,7 @@ class MockHousekeeperAPI:
         # Add tags here if there should be missing files
         self._missing_tags = set()
         if not config:
-            config = {
-                "housekeeper": {
-                    "database": "sqlite:///:memory:",
-                    "root": str(ROOT_PATH),
-                }
-            }
+            config = {"housekeeper": {"database": "sqlite:///:memory:", "root": str(ROOT_PATH),}}
         self._database = config.get("housekeeper", {}).get("database")
         self.root_path = config.get("housekeeper", {}).get("root", str(ROOT_PATH))
 
@@ -202,18 +195,14 @@ class MockHousekeeperAPI:
     # Mocked functions from original API
     def add_bundle(self, bundle_data):
         """ Build a new bundle version of files """
-        bundle_obj = self.new_bundle(
-            name=bundle_data["name"], created_at=bundle_data["created"]
-        )
+        bundle_obj = self.new_bundle(name=bundle_data["name"], created_at=bundle_data["created"])
 
         version_obj = self.new_version(
             created_at=bundle_data["created"], expires_at=bundle_data.get("expires")
         )
 
         tag_names = set(
-            tag_name
-            for file_data in bundle_data["files"]
-            for tag_name in file_data["tags"]
+            tag_name for file_data in bundle_data["files"] for tag_name in file_data["tags"]
         )
         tag_map = self._build_tags(tag_names)
         for file_data in bundle_data["files"]:
@@ -224,9 +213,7 @@ class MockHousekeeperAPI:
             for path in paths:
                 tags = [tag_map[tag_name] for tag_name in file_data["tags"]]
 
-                new_file = self.new_file(
-                    path, to_archive=file_data["archive"], tags=tags
-                )
+                new_file = self.new_file(path, to_archive=file_data["archive"], tags=tags)
                 self._files.append(new_file)
                 self._file_added = True
                 version_obj.files.append(new_file)
@@ -303,16 +290,12 @@ class MockHousekeeperAPI:
             self._tags.append(tag_obj)
         return tag_obj
 
-    def new_version(
-        self, created_at: datetime.datetime, expires_at: datetime.datetime = None
-    ):
+    def new_version(self, created_at: datetime.datetime, expires_at: datetime.datetime = None):
         """ Create a new bundle version """
         self.update_id_counter()
         created_at = created_at or datetime.datetime.now()
         expires_at = expires_at or datetime.datetime.now()
-        version_obj = MockVersion(
-            id=self._id_counter, created_at=created_at, expires_at=expires_at
-        )
+        version_obj = MockVersion(id=self._id_counter, created_at=created_at, expires_at=expires_at)
         self._version_obj = version_obj
         return version_obj
 
@@ -329,20 +312,12 @@ class MockHousekeeperAPI:
         return version_obj
 
     def new_file(
-        self,
-        path: str,
-        checksum: str = None,
-        to_archive: bool = False,
-        tags: list = [],
+        self, path: str, checksum: str = None, to_archive: bool = False, tags: list = [],
     ):
         """ Create a new file """
         self.update_id_counter()
         mocked_file = MockFile(
-            id=self._id_counter,
-            path=path,
-            checksum=checksum,
-            to_archive=to_archive,
-            tags=tags,
+            id=self._id_counter, path=path, checksum=checksum, to_archive=to_archive, tags=tags,
         )
         if not self.file_exists(path):
             self._files.append(mocked_file)

@@ -108,7 +108,6 @@ def test_get_sample_external_true(invoke_cli, disk_store: Store, helpers):
     is_external_false = "No"
     is_external_true = "Yes"
 
-
     # WHEN getting a sample
     db_uri = disk_store.uri
 
@@ -129,9 +128,7 @@ def test_get_sample_no_families_without_family(invoke_cli, disk_store: Store, he
     # WHEN getting a sample with the --no-families flag
     db_uri = disk_store.uri
 
-    result = invoke_cli(
-        ["--database", db_uri, "get", "sample", sample_id, "--no-families"]
-    )
+    result = invoke_cli(["--database", db_uri, "get", "sample", sample_id, "--no-families"])
 
     # THEN everything is fine
     assert result.exit_code == 0
@@ -149,9 +146,7 @@ def test_get_sample_no_families_with_family(invoke_cli, disk_store: Store, helpe
     # WHEN getting a sample with the --no-families flag
     db_uri = disk_store.uri
 
-    result = invoke_cli(
-        ["--database", db_uri, "get", "sample", sample_id, "--no-families"]
-    )
+    result = invoke_cli(["--database", db_uri, "get", "sample", sample_id, "--no-families"])
 
     # THEN all related families should be listed in the output
     assert result.exit_code == 0
@@ -169,9 +164,7 @@ def test_get_sample_families_without_family(invoke_cli, disk_store: Store, helpe
     # WHEN getting a sample with the --families flag
     db_uri = disk_store.uri
 
-    result = invoke_cli(
-        ["--database", db_uri, "get", "sample", sample_id, "--families"]
-    )
+    result = invoke_cli(["--database", db_uri, "get", "sample", sample_id, "--families"])
 
     # THEN everything is fine
     assert result.exit_code == 0
@@ -189,9 +182,7 @@ def test_get_sample_families_with_family(invoke_cli, disk_store: Store, helpers)
     # WHEN getting a sample with the --families flag
     db_uri = disk_store.uri
 
-    result = invoke_cli(
-        ["--database", db_uri, "get", "sample", sample_id, "--families"]
-    )
+    result = invoke_cli(["--database", db_uri, "get", "sample", sample_id, "--families"])
 
     # THEN all related families should be listed in the output
     assert result.exit_code == 0
@@ -208,9 +199,7 @@ def test_get_sample_flowcells_without_flowcell(invoke_cli, disk_store: Store, he
 
     # WHEN getting a sample with the --flowcells flag
     db_uri = disk_store.uri
-    result = invoke_cli(
-        ["--database", db_uri, "get", "sample", sample_id, "--flowcells"]
-    )
+    result = invoke_cli(["--database", db_uri, "get", "sample", sample_id, "--flowcells"])
 
     # THEN everything is fine
     assert result.exit_code == 0
@@ -227,9 +216,7 @@ def test_get_sample_flowcells_with_flowcell(invoke_cli, disk_store: Store, helpe
     # WHEN getting a sample with the --flowcells flag
     db_uri = disk_store.uri
 
-    result = invoke_cli(
-        ["--database", db_uri, "get", "sample", sample_id, "--flowcells"]
-    )
+    result = invoke_cli(["--database", db_uri, "get", "sample", sample_id, "--flowcells"])
 
     # THEN the related flowcell should be listed in the output
     assert result.exit_code == 0

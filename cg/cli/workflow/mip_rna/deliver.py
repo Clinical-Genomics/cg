@@ -62,9 +62,7 @@ def inbox(context, case, version, tag, inbox_path):
 
     for file_obj in files:
         out_dir = Path(
-            inbox_path.format(
-                case=case_obj.name, customer=case_obj.customer.internal_id
-            )
+            inbox_path.format(case=case_obj.name, customer=case_obj.customer.internal_id)
         )
         out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -92,9 +90,7 @@ def inbox(context, case, version, tag, inbox_path):
 
         for file_obj in files:
             out_dir = Path(
-                inbox_path.format(
-                    case=case_obj.name, customer=case_obj.customer.internal_id
-                )
+                inbox_path.format(case=case_obj.name, customer=case_obj.customer.internal_id)
             )
             out_dir = out_dir.joinpath(sample_obj.name)
             out_dir.mkdir(parents=True, exist_ok=True)

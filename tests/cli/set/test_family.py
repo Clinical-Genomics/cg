@@ -6,9 +6,7 @@ from cg.store import Store
 SUCCESS = 0
 
 
-def test_set_family_without_options(
-    cli_runner, base_context, base_store: Store, helpers
-):
+def test_set_family_without_options(cli_runner, base_context, base_store: Store, helpers):
     """Test to set a family using only the required arguments"""
     # GIVEN a database with a family
     family_id = helpers.add_family(base_store).internal_id
@@ -40,9 +38,7 @@ def test_set_family_bad_panel(cli_runner, base_context, base_store: Store, helpe
     # WHEN setting a family
     panel_id = "dummy_panel"
     family_id = helpers.add_family(base_store).internal_id
-    result = cli_runner.invoke(
-        family, [family_id, "--panel", panel_id], obj=base_context
-    )
+    result = cli_runner.invoke(family, [family_id, "--panel", panel_id], obj=base_context)
 
     # THEN then it should complain in missing panel instead of setting a value
     assert result.exit_code != SUCCESS
@@ -57,9 +53,7 @@ def test_set_family_panel(cli_runner, base_context, base_store: Store, helpers):
     assert panel_id not in base_store.Family.query.first().panels
 
     # WHEN setting a panel of a family
-    result = cli_runner.invoke(
-        family, [family_id, "--panel", panel_id], obj=base_context
-    )
+    result = cli_runner.invoke(family, [family_id, "--panel", panel_id], obj=base_context)
 
     # THEN then it should set panel on the family
     assert result.exit_code == SUCCESS
@@ -75,9 +69,7 @@ def test_set_family_priority(cli_runner, base_context, base_store: Store, helper
 
     # WHEN setting a family
 
-    result = cli_runner.invoke(
-        family, [family_id, "--priority", priority], obj=base_context
-    )
+    result = cli_runner.invoke(family, [family_id, "--priority", priority], obj=base_context)
 
     # THEN then it should have been set
     assert result.exit_code == SUCCESS

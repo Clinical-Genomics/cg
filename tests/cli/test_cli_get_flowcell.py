@@ -102,9 +102,7 @@ def test_get_flowcell_samples_without_samples(invoke_cli, disk_store: Store, hel
     # WHEN getting a flowcell with the --samples flag
     db_uri = disk_store.uri
 
-    result = invoke_cli(
-        ["--database", db_uri, "get", "flowcell", flowcell_name, "--samples"]
-    )
+    result = invoke_cli(["--database", db_uri, "get", "flowcell", flowcell_name, "--samples"])
 
     # THEN a message about no samples should have been displayed
     assert result.exit_code == 0
@@ -122,9 +120,7 @@ def test_get_flowcell_samples(invoke_cli, disk_store: Store, helpers):
     # WHEN getting a flowcell with the --samples flag
     db_uri = disk_store.uri
 
-    result = invoke_cli(
-        ["--database", db_uri, "get", "flowcell", flowcell_name, "--samples"]
-    )
+    result = invoke_cli(["--database", db_uri, "get", "flowcell", flowcell_name, "--samples"])
 
     # THEN all related samples should be listed in the output
     assert result.exit_code == 0
@@ -132,9 +128,7 @@ def test_get_flowcell_samples(invoke_cli, disk_store: Store, helpers):
         assert sample.internal_id in result.output
 
 
-def test_get_flowcell_no_samples_without_samples(
-    invoke_cli, disk_store: Store, helpers
-):
+def test_get_flowcell_no_samples_without_samples(invoke_cli, disk_store: Store, helpers):
     """Test that the output has the data of the flowcell"""
     # GIVEN a database with a flowcell without related samples
     flowcell = helpers.add_flowcell(disk_store)
@@ -144,9 +138,7 @@ def test_get_flowcell_no_samples_without_samples(
     # WHEN getting a flowcell with the --no-samples flag
     db_uri = disk_store.uri
 
-    result = invoke_cli(
-        ["--database", db_uri, "get", "flowcell", flowcell_name, "--no-samples"]
-    )
+    result = invoke_cli(["--database", db_uri, "get", "flowcell", flowcell_name, "--no-samples"])
 
     # THEN there are no samples to display but everything is OK
     assert result.exit_code == 0
@@ -163,9 +155,7 @@ def test_get_flowcell_no_samples_with_samples(invoke_cli, disk_store: Store, hel
     # WHEN getting a flowcell with the --no-samples flag
     db_uri = disk_store.uri
 
-    result = invoke_cli(
-        ["--database", db_uri, "get", "flowcell", flowcell_name, "--no-samples"]
-    )
+    result = invoke_cli(["--database", db_uri, "get", "flowcell", flowcell_name, "--no-samples"])
 
     # THEN no related samples should be listed in the output
     assert result.exit_code == 0

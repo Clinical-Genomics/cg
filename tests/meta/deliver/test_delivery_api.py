@@ -10,9 +10,7 @@ def test_get_post_analysis_files(analysis_family, deliver_api):
 
     # WHEN we call get_post_analysis_files with matching case and file-tags and version is no version
     version = None
-    bundle_latest_files = deliver_api.get_post_analysis_files(
-        case, version, deliver_tags
-    )
+    bundle_latest_files = deliver_api.get_post_analysis_files(case, version, deliver_tags)
 
     ## THEN housekeeper files should be returned
     assert bundle_latest_files
@@ -28,9 +26,7 @@ def test_get_post_analysis_files_version(analysis_family, deliver_api):
     # WHEN we call get_post_analysis_files with matching case and file-tags and version is supplied
     version = "a_date"
 
-    bundle_version_files = deliver_api.get_post_analysis_files(
-        case, version, deliver_tags
-    )
+    bundle_version_files = deliver_api.get_post_analysis_files(case, version, deliver_tags)
 
     # THEN housekeeper files for those tags with the version should be returned
     assert bundle_version_files
@@ -78,9 +74,7 @@ def test_get_post_analysis_sample_files(analysis_family, deliver_api):
 
     # WHEN we call get_post_analysis_sample_files with matching case and file-tags and version
     version = None
-    sample_files = deliver_api.get_post_analysis_sample_files(
-        case, sample, version, deliver_tags
-    )
+    sample_files = deliver_api.get_post_analysis_sample_files(case, sample, version, deliver_tags)
 
     # THEN we should get those matching files back
     assert sample_files
@@ -98,9 +92,7 @@ def test_get_post_analysis_sample_files_only_case_tags(analysis_family, deliver_
 
     # WHEN we call get_post_analysis_sample_files with matching case and file-tags and version
     version = None
-    sample_files = deliver_api.get_post_analysis_sample_files(
-        case, sample, version, deliver_tags
-    )
+    sample_files = deliver_api.get_post_analysis_sample_files(case, sample, version, deliver_tags)
 
     # THEN we should get those matching files back
     assert not sample_files

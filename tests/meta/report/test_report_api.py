@@ -315,9 +315,7 @@ def test_get_application_data_from_status_db_all_accredited(report_samples, repo
     assert application_data["accredited"] is True
 
 
-def test_get_application_data_from_status_db_none_accredited(
-    report_samples, report_api
-):
+def test_get_application_data_from_status_db_none_accredited(report_samples, report_api):
     # GIVEN data from an analysed case and an initialised report_api
     report_api.store._application_accreditation = False
 

@@ -14,9 +14,7 @@ LOG = logging.getLogger(__name__)
 
 @click.command()
 @click.option("-r", "--re-upload", is_flag=True, help="re-upload existing analysis")
-@click.option(
-    "-p", "--print", "print_console", is_flag=True, help="print config values"
-)
+@click.option("-p", "--print", "print_console", is_flag=True, help="print config values")
 @click.argument("case_id", required=False)
 @click.pass_context
 def scout(context, re_upload, print_console, case_id):
@@ -54,9 +52,7 @@ def scout(context, re_upload, print_console, case_id):
         LOG.info("Upload file to housekeeper: %s", file_path)
         scout_upload_api.add_scout_config_to_hk(file_path, hk_api, case_id)
     except FileExistsError as err:
-        LOG.warning(
-            "%s, consider removing the file from housekeeper and try again", str(err)
-        )
+        LOG.warning("%s, consider removing the file from housekeeper and try again", str(err))
         context.abort()
 
     context.invoke(upload_case_to_scout, case_id=case_id, re_upload=re_upload)
@@ -79,9 +75,7 @@ def upload_case_to_scout(context, re_upload, dry_run, case_id):
             bundle=case_id, tags=[tag_name], version=version_obj.id
         )
         if len(list(scout_config_files)) == 0:
-            raise FileNotFoundError(
-                f"No scout load config was found in housekeeper for {case_id}"
-            )
+            raise FileNotFoundError(f"No scout load config was found in housekeeper for {case_id}")
 
         return scout_config_files[0].full_path
 
@@ -98,7 +92,5 @@ def upload_case_to_scout(context, re_upload, dry_run, case_id):
         scout_api.upload(scout_configs, force=re_upload)
 
     click.echo(
-        click.style(
-            "uploaded to scout using load config {}".format(load_config), fg="green"
-        )
+        click.style("uploaded to scout using load config {}".format(load_config), fg="green")
     )

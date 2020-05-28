@@ -62,9 +62,7 @@ class BackupApi:
         LOG.info("%s: retreiving from PDC", flowcell_obj.name)
         tic = time.time()
         try:
-            self.pdc.retrieve_flowcell(
-                flowcell_obj.name, flowcell_obj.sequencer_type, dry
-            )
+            self.pdc.retrieve_flowcell(flowcell_obj.name, flowcell_obj.sequencer_type, dry)
         except subprocess.CalledProcessError as error:
             LOG.error("%s: retrieval failed", flowcell_obj.name)
             if not dry:

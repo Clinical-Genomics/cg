@@ -45,9 +45,7 @@ def test_dry(cli_runner, balsamic_context, balsamic_case):
     case_id = balsamic_case.internal_id
 
     # WHEN dry running with dry specified
-    result = cli_runner.invoke(
-        config_case, [case_id, "--dry-run"], obj=balsamic_context
-    )
+    result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
     # THEN command should print the balsamic command-string
     assert result.exit_code == EXIT_SUCCESS
     assert "balsamic" in result.output
@@ -83,9 +81,7 @@ def test_target_bed(cli_runner, balsamic_context, balsamic_case):
 
     # WHEN dry running with option specified
     result = cli_runner.invoke(
-        config_case,
-        [case_id, "--dry-run", option_key, option_value],
-        obj=balsamic_context,
+        config_case, [case_id, "--dry-run", option_key, option_value], obj=balsamic_context,
     )
 
     # THEN dry-print should include the the option-value
@@ -118,9 +114,7 @@ def test_target_bed_from_lims(
     case_id = balsamic_case.internal_id
 
     # WHEN dry running
-    result = cli_runner.invoke(
-        config_case, [case_id, "--dry-run"], obj=balsamic_context
-    )
+    result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
 
     # THEN dry-print should include the bed_key and the bed_value including path
     assert result.exit_code == EXIT_SUCCESS
@@ -138,9 +132,7 @@ def test_wgs_excludes_bed_for_balsamic(
     case_id = balsamic_case_wgs.internal_id
 
     # WHEN dry running
-    result = cli_runner.invoke(
-        config_case, [case_id, "--dry-run"], obj=balsamic_context
-    )
+    result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
 
     # THEN dry-print should NOT include the bed_key
     assert result.exit_code == EXIT_SUCCESS
@@ -160,9 +152,7 @@ def test_umi_trim_length(cli_runner, balsamic_context, balsamic_case):
 
     # WHEN dry running with option specified
     result = cli_runner.invoke(
-        config_case,
-        [case_id, "--dry-run", option_key, option_value],
-        obj=balsamic_context,
+        config_case, [case_id, "--dry-run", option_key, option_value], obj=balsamic_context,
     )
 
     # THEN dry-print should include the the option-value

@@ -18,18 +18,14 @@ class LinkHelper:
         return all(not link.sample.is_tumour for link in links)
 
     @staticmethod
-    def all_samples_data_analysis(
-        links: List[models.FamilySample], data_anlysis
-    ) -> bool:
+    def all_samples_data_analysis(links: List[models.FamilySample], data_anlysis) -> bool:
         """Return True if all samples has the given data_analysis."""
         return all(link.sample.data_analysis in data_anlysis for link in links)
 
     @staticmethod
     def all_samples_list_analyses(links: List[models.FamilySample]) -> list:
         """Return analysis type for each sample in case"""
-        return [
-            link.sample.application_version.application.analysis_type for link in links
-        ]
+        return [link.sample.application_version.application.analysis_type for link in links]
 
 
 def _suggest_cases_to_upload(context):

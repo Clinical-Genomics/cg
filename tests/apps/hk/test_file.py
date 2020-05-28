@@ -34,9 +34,7 @@ def test_new_file_non_existing_path(housekeeper_api):
     assert new_file_obj.path == file_name
 
 
-def test_add_new_file(
-    populated_housekeeper_api, case_id, madeline_output, small_helpers
-):
+def test_add_new_file(populated_housekeeper_api, case_id, madeline_output, small_helpers):
     """Test to create a new file with the housekeeper api"""
     # GIVEN a populated housekeeper api and the existing version of a bundle
     version_obj = populated_housekeeper_api.last_version(bundle=case_id)
@@ -91,10 +89,7 @@ def test_get_included_path(populated_housekeeper_api, case_id):
     # THEN assert that there is no file existing in the included path
     assert included_path.exists() is False
     # THEN assert that the correct path was created
-    assert (
-        included_path
-        == root_dir / version_obj.relative_root_dir / Path(file_obj.path).name
-    )
+    assert included_path == root_dir / version_obj.relative_root_dir / Path(file_obj.path).name
 
 
 def test_get_include_file(populated_housekeeper_api, case_id):

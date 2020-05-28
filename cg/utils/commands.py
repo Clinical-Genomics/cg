@@ -44,9 +44,7 @@ class Process:
             command.extend(parameters)
 
         LOG.info("Running command %s", " ".join(command))
-        res = subprocess.run(
-            command, check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-        )
+        res = subprocess.run(command, check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         self.stdout = res.stdout.decode("utf-8").rstrip()
         self.stderr = res.stderr.decode("utf-8").rstrip()

@@ -52,8 +52,7 @@ class MadelineAPI:
     def strip_script_tag(content: str):
         """Strip away a script tag from a string"""
         script_tag = (
-            '<script type="text/javascript" xlink:href='
-            '"javascript/madeline.js"></script>'
+            '<script type="text/javascript" xlink:href=' '"javascript/madeline.js"></script>'
         )
         return content.replace(script_tag, "")
 

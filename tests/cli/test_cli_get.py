@@ -18,16 +18,7 @@ def test_get_family_by_name(invoke_cli, disk_store: Store):
     # WHEN trying to get a non-existing family by name
     db_uri = disk_store.uri
     result = invoke_cli(
-        [
-            "--database",
-            db_uri,
-            "get",
-            "family",
-            "-c",
-            customer_id,
-            "-n",
-            "dummy-family-name",
-        ]
+        ["--database", db_uri, "get", "family", "-c", customer_id, "-n", "dummy-family-name",]
     )
 
     # THEN it should not crash

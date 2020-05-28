@@ -76,9 +76,7 @@ def test_versions_are_same(store: Store, application_versions_file):
     application_obj = store.application(tag)
     sign = "DummySign"
     workbook = XlFileHelper.get_workbook_from_xl(application_versions_file)
-    db_version = add_version_from_raw(
-        application_obj, None, raw_version, sign, store, workbook
-    )
+    db_version = add_version_from_raw(application_obj, None, raw_version, sign, store, workbook)
     datemode = XlFileHelper.get_datemode_from_xl(application_versions_file)
 
     # WHEN calling versions are same
@@ -97,13 +95,9 @@ def test_versions_are_not_same(store, application_versions_file):
     application_obj = store.application(tag)
     sign = "DummySign"
     workbook = XlFileHelper.get_workbook_from_xl(application_versions_file)
-    db_version = add_version_from_raw(
-        application_obj, None, raw_version, sign, store, workbook
-    )
+    db_version = add_version_from_raw(application_obj, None, raw_version, sign, store, workbook)
     datemode = XlFileHelper.get_datemode_from_xl(application_versions_file)
-    another_raw_version = XlFileHelper.get_raw_dicts_from_xl(application_versions_file)[
-        1
-    ]
+    another_raw_version = XlFileHelper.get_raw_dicts_from_xl(application_versions_file)[1]
 
     # WHEN calling versions are same
     should_not_be_same = versions_are_same(db_version, another_raw_version, datemode)
@@ -158,9 +152,7 @@ def test_application_sheet_name(applications_file, store: Store):
     sign = "TestSign"
 
     # WHEN calling import_applications
-    import_applications(
-        store, applications_file, sign, dry_run=False, sheet_name="application"
-    )
+    import_applications(store, applications_file, sign, dry_run=False, sheet_name="application")
 
     # THEN applications should have been created in the store
     assert all_applications_exists(store, applications_file)
@@ -303,9 +295,7 @@ def test_sync_microbial_orderform_inactivate(base_store: Store, microbial_orderf
     assert inactive_mic_apps_from_start < inactive_mic_apps_after_when
 
 
-def ensure_applications(
-    base_store: Store, active_applications: list, inactive_applications: list
-):
+def ensure_applications(base_store: Store, active_applications: list, inactive_applications: list):
     """Create some requested applications for the tests """
     for active_application in active_applications:
         if not base_store.application(active_application):

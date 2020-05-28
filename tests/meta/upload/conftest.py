@@ -149,9 +149,7 @@ def upload_observations_api(analysis_store, populated_housekeeper_api):
     loqus_mock = MockLoqusAPI()
 
     _api = UploadObservationsAPI(
-        status_api=analysis_store,
-        hk_api=populated_housekeeper_api,
-        loqus_api=loqus_mock,
+        status_api=analysis_store, hk_api=populated_housekeeper_api, loqus_api=loqus_mock,
     )
 
     yield _api
@@ -164,18 +162,14 @@ def upload_observations_api_wes(analysis_store, populated_housekeeper_api):
     loqus_mock = MockLoqusAPI(analysis_type="wes")
 
     _api = UploadObservationsAPI(
-        status_api=analysis_store,
-        hk_api=populated_housekeeper_api,
-        loqus_api=loqus_mock,
+        status_api=analysis_store, hk_api=populated_housekeeper_api, loqus_api=loqus_mock,
     )
 
     yield _api
 
 
 @pytest.yield_fixture(scope="function")
-def upload_scout_api(
-    scout_store, madeline_api, lims_samples, populated_housekeeper_api
-):
+def upload_scout_api(scout_store, madeline_api, lims_samples, populated_housekeeper_api):
     """Fixture for upload_scout_api"""
     analysis_mock = MockAnalysis()
     lims_api = MockLims(lims_samples)
@@ -211,9 +205,7 @@ def coverage_upload_api(chanjo_config_dict, populated_housekeeper_api):
     hk_api = populated_housekeeper_api
     status_api = None
     coverage_api = MockCoverage(chanjo_config_dict)
-    _api = UploadCoverageApi(
-        status_api=status_api, hk_api=hk_api, chanjo_api=coverage_api
-    )
+    _api = UploadCoverageApi(status_api=status_api, hk_api=hk_api, chanjo_api=coverage_api)
     return _api
 
 

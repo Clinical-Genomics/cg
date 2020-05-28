@@ -100,11 +100,7 @@ def samples(context, days: int):
         "Selecting raw, will only load raw data."
     ),
 )
-@click.option(
-        "--dry/--no-dry",
-        default=False,
-        help="Dry run..."
-        )
+@click.option("--dry/--no-dry", default=False, help="Dry run...")
 @click.pass_context
 def bioinfo(context, case_name, cleanup, target_load, dry):
     """Load bioinfo case results to the trending database"""

@@ -1,9 +1,7 @@
 """ Test adding files with housekeeper api """
 
 
-def test_add_file_with_flat_tag(
-    housekeeper_api, helpers, hk_bundle_data, microbial_orderform
-):
+def test_add_file_with_flat_tag(housekeeper_api, helpers, hk_bundle_data, microbial_orderform):
     """Test that we can call hk with one existing tag"""
 
     # GIVEN an hk api populated with a version obj
@@ -19,9 +17,7 @@ def test_add_file_with_flat_tag(
     assert new_file
 
 
-def test_add_file_with_list_of_tags(
-    housekeeper_api, helpers, hk_bundle_data, microbial_orderform
-):
+def test_add_file_with_list_of_tags(housekeeper_api, helpers, hk_bundle_data, microbial_orderform):
     """Test that we can call hk with more than one tags"""
 
     # GIVEN an hk api populated with a version obj

@@ -8,8 +8,7 @@ from copy import deepcopy
 from pathlib import Path
 
 from cg.apps import crunchy, hk, scoutapi
-from cg.constants import (BAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX,
-                          FASTQ_SECOND_READ_SUFFIX)
+from cg.constants import BAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX
 
 LOG = logging.getLogger(__name__)
 
@@ -52,9 +51,7 @@ class CompressAPI:
         hk_files = []
         for tag in hk_tags:
             hk_files.extend(
-                self.hk_api.get_files(
-                    bundle=case_id, tags=[tag], version=last_version.id
-                )
+                self.hk_api.get_files(bundle=case_id, tags=[tag], version=last_version.id)
             )
         if not hk_files:
             LOG.warning("No files found in latest housekeeper version for %s", case_id)
@@ -97,16 +94,12 @@ class CompressAPI:
             }
         return bam_dict
 
-    def compress_case_bams(
-        self, bam_dict: dict, ntasks: int, mem: int, dry_run: bool = False
-    ):
+    def compress_case_bams(self, bam_dict: dict, ntasks: int, mem: int, dry_run: bool = False):
         """Compress bam-files in given dictionary"""
         for sample, bam_files in bam_dict.items():
             bam_path = Path(bam_files["bam"].full_path)
             LOG.info("Compressing %s for sample %s", bam_path, sample)
-            self.crunchy_api.bam_to_cram(
-                bam_path=bam_path, ntasks=ntasks, mem=mem, dry_run=dry_run
-            )
+            self.crunchy_api.bam_to_cram(bam_path=bam_path, ntasks=ntasks, mem=mem, dry_run=dry_run)
 
     def clean_bams(self, case_id: str, dry_run: bool = False):
         """Update databases and remove uncompressed BAM files for case if
