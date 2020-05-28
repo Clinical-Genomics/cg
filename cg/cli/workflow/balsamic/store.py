@@ -9,10 +9,9 @@ import click
 from housekeeper.exc import VersionIncludedError
 
 from cg.apps import hk, tb
+from cg.exc import AnalysisDuplicationError, AnalysisNotFinishedError
 from cg.meta.store.balsamic import gather_files_and_bundle_in_housekeeper
 from cg.store import Store
-from cg.exc import AnalysisNotFinishedError, AnalysisDuplicationError
-
 
 LOG = logging.getLogger(__name__)
 SUCCESS = 0

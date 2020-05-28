@@ -1,20 +1,27 @@
 """Fixtures for cli balsamic tests"""
 
+from pathlib import Path
+
 import pytest
+
 from cg.apps.balsamic.fastq import FastqHandler
-from cg.apps.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
+from cg.apps.tb import TrailblazerAPI
 from cg.meta.workflow.balsamic import AnalysisAPI
 from cg.store import Store, models
 
-from tests.store_helpers import ensure_bed_version, ensure_customer, add_sample, add_family
-
 
 @pytest.fixture
-def balsamic_context(balsamic_store) -> dict:
+def balsamic_context(
+    balsamic_store, balsamic_case, housekeeper_api, hk_bundle_data, helpers
+) -> dict:
     """context to use in cli"""
+    hk_bundle_data["name"] = balsamic_case.internal_id
+    helpers.ensure_hk_bundle(housekeeper_api, hk_bundle_data)
+
     return {
-        "hk_api": MockHouseKeeper(),
+        "hk_api": housekeeper_api,
+        "tb_api": MockTB(),
         "db": balsamic_store,
         "analysis_api": MockAnalysis,
         "fastq_handler": MockFastq,
@@ -29,18 +36,6 @@ def balsamic_context(balsamic_store) -> dict:
             "reference_config": "reference_config",
         },
     }
-
-
-class MockHouseKeeper(HousekeeperAPI):
-    """Mock HousekeeperAPI"""
-
-    def __init__(self):
-        pass
-
-    def get_files(self, bundle: str, tags: list, version: int = None):
-        """Mock get_files of HousekeeperAPI"""
-        del tags, bundle, version
-        return [MockFile()]
 
 
 class MockLims(LimsAPI):
@@ -62,14 +57,6 @@ def lims_api():
 
     _lims_api = MockLims()
     return _lims_api
-
-
-class MockFile:
-    """Mock File"""
-
-    def __init__(self, path=""):
-        self.path = path
-        self.full_path = path
 
 
 class MockGzip:
@@ -119,60 +106,105 @@ class MockFastq(FastqHandler):
         pass
 
 
-@pytest.fixture(scope="function")
-def balsamic_store(base_store: Store, lims_api) -> Store:
+@pytest.fixture(scope="function", name="balsamic_store")
+def fixture_balsamic_store(base_store: Store, lims_api, helpers) -> Store:
     """real store to be used in tests"""
     _store = base_store
 
-    case = add_family(_store, "balsamic_case")
-    tumour_sample = add_sample(_store, "tumour_sample", is_tumour=True, application_type="tgs")
-    normal_sample = add_sample(_store, "normal_sample", is_tumour=False, application_type="tgs")
-    _store.relate_sample(case, tumour_sample, status="unknown")
-    _store.relate_sample(case, normal_sample, status="unknown")
+    case = helpers.add_family(_store, "balsamic_case")
+    tumour_sample = helpers.add_sample(
+        _store, "tumour_sample", is_tumour=True, application_type="tgs"
+    )
+    normal_sample = helpers.add_sample(
+        _store, "normal_sample", is_tumour=False, application_type="tgs"
+    )
+    helpers.add_relationship(_store, family=case, sample=tumour_sample)
+    helpers.add_relationship(_store, family=case, sample=normal_sample)
 
-    case = add_family(_store, "mip_case")
-    normal_sample = add_sample(_store, "normal_sample", is_tumour=False, data_analysis="mip")
-    _store.relate_sample(case, normal_sample, status="unknown")
+    case = helpers.add_family(_store, "mip_case")
+    normal_sample = helpers.add_sample(
+        _store, "normal_sample", is_tumour=False, data_analysis="mip"
+    )
+    helpers.add_relationship(_store, family=case, sample=normal_sample)
 
     bed_name = lims_api.capture_kit(tumour_sample.internal_id)
-    ensure_bed_version(_store, bed_name)
+    helpers.ensure_bed_version(_store, bed_name)
 
-    case_wgs = add_family(_store, "balsamic_case_wgs")
-    tumour_sample_wgs = add_sample(
+    case_wgs = helpers.add_family(_store, "balsamic_case_wgs")
+    tumour_sample_wgs = helpers.add_sample(
         _store,
         "tumour_sample_wgs",
         is_tumour=True,
         application_tag="dummy_tag_wgs",
         application_type="wgs",
     )
-    normal_sample_wgs = add_sample(
+    normal_sample_wgs = helpers.add_sample(
         _store,
         "normal_sample_wgs",
         is_tumour=False,
         application_tag="dummy_tag_wgs",
         application_type="wgs",
     )
-    _store.relate_sample(case_wgs, tumour_sample_wgs, status="unknown")
-    _store.relate_sample(case_wgs, normal_sample_wgs, status="unknown")
-
-    _store.commit()
+    helpers.add_relationship(_store, family=case_wgs, sample=tumour_sample_wgs)
+    helpers.add_relationship(_store, family=case_wgs, sample=normal_sample_wgs)
 
     return _store
 
 
-@pytest.fixture(scope="function")
-def balsamic_case(analysis_store) -> models.Family:
-    """case with balsamic data_type"""
-    return analysis_store.find_family(ensure_customer(analysis_store), "balsamic_case")
+class MockTB(TrailblazerAPI):
+    """Mock of trailblazer """
+
+    def __init__(self):
+        """Override TrailblazerAPI __init__ to avoid default behaviour"""
+
+    def analyses(self, *args, **kwargs):
+        """Override TrailblazerAPI analyses method to avoid default behaviour"""
+        return []
+
+
+@pytest.fixture(name="balsamic_dir")
+def fixture_balsamic_dir(apps_dir: Path) -> Path:
+    """Return the path to the balsamic apps dir"""
+    return apps_dir / "balsamic"
+
+
+@pytest.fixture(name="balsamic_case_dir")
+def fixture_balsamic_case_dir(balsamic_dir: Path) -> Path:
+    """Return the path to the balsamic apps case dir"""
+    return balsamic_dir / "case"
 
 
 @pytest.fixture(scope="function")
-def balsamic_case_wgs(analysis_store) -> models.Family:
-    """case with balsamic data_type"""
-    return analysis_store.find_family(ensure_customer(analysis_store), "balsamic_case_wgs")
+def deliverables_file(balsamic_case_dir):
+    """Return a balsamic deliverables file"""
+    return str(balsamic_case_dir / "metadata.yml")
 
 
 @pytest.fixture(scope="function")
-def mip_case(analysis_store) -> models.Family:
-    """case with balsamic data_type"""
-    return analysis_store.find_family(ensure_customer(analysis_store), "mip_case")
+def deliverables_file_directory(balsamic_case_dir):
+    """Return a balsamic deliverables file that specifies a directory"""
+    return str(balsamic_case_dir / "metadata_directory.yml")
+
+
+@pytest.fixture(scope="function")
+def deliverables_file_tags(balsamic_case_dir):
+    """Return a balsamic deliverables file containing one file with two tags"""
+    return str(balsamic_case_dir / "metadata_file_tags.yml")
+
+
+@pytest.fixture(scope="function", name="balsamic_case")
+def fixture_balsamic_case(balsamic_store, helpers) -> models.Family:
+    """Case with balsamic data_type"""
+    return balsamic_store.find_family(helpers.ensure_customer(balsamic_store), "balsamic_case")
+
+
+@pytest.fixture(scope="function", name="balsamic_case_wgs")
+def fixture_balsamic_case_wgs(balsamic_store, helpers) -> models.Family:
+    """Case with balsamic data_type"""
+    return balsamic_store.find_family(helpers.ensure_customer(balsamic_store), "balsamic_case_wgs")
+
+
+@pytest.fixture(scope="function", name="mip_case")
+def fixture_mip_case(balsamic_store, helpers) -> models.Family:
+    """Case with balsamic data_type"""
+    return balsamic_store.find_family(helpers.ensure_customer(balsamic_store), "mip_case")

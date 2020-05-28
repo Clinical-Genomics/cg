@@ -1,14 +1,18 @@
+"""API for transfer a flowcell"""
+
 import logging
 from typing import List
 
-from cg.store import models, Store
-from cg.apps.stats import StatsAPI
 from cg.apps.hk import HousekeeperAPI
+from cg.apps.stats import StatsAPI
+from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
 
 
 class TransferFlowcell:
+    """Transfer flowcell API"""
+
     def __init__(self, db: Store, stats_api: StatsAPI, hk_api: HousekeeperAPI = None):
         self.db = db
         self.stats = stats_api

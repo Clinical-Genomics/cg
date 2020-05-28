@@ -3,10 +3,11 @@ import datetime as dt
 import logging
 import os
 import shutil
+from pathlib import Path
 
 import ruamel.yaml
+
 from cg.exc import AnalysisDuplicationError
-from pathlib import Path
 
 LOG = logging.getLogger(__name__)
 

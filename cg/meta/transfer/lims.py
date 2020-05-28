@@ -69,10 +69,15 @@ class TransferLims(object):
     def _get_all_samples_not_yet_delivered(self):
         return self.status.samples_not_delivered()
 
-    def transfer_samples(self, status_type: SampleState, include="unset"):
+    def transfer_samples(
+        self, status_type: SampleState, include: str = "unset", sample_id: str = None
+    ):
         """Transfer information about samples."""
 
-        samples = self._get_samples_to_include(include, status_type)
+        if sample_id:
+            samples = self.status.Sample.query.filter_by(internal_id=sample_id)
+        else:
+            samples = self._get_samples_to_include(include, status_type)
 
         if samples is None:
             LOG.info(f"No samples to process found with {include} {status_type.value}")

@@ -9,17 +9,12 @@ from cg.meta.upload.beacon import UploadBeaconApi
 
 @click.command()
 @click.argument("family_id")
-@click.option(
-    "-p", "--panel", help="Gene panel to filter VCF by", required=True, multiple=True
-)
+@click.option("-p", "--panel", help="Gene panel to filter VCF by", required=True, multiple=True)
 @click.option("-out", "--outfile", help="Name of pdf outfile", default=None)
 @click.option("-cust", "--customer", help="Name of customer", default="")
 @click.option("-qual", "--quality", help="Variant quality threshold", default=20)
 @click.option(
-    "-ref",
-    "--genome_reference",
-    help="Chromosome build (default=grch37)",
-    default="grch37",
+    "-ref", "--genome_reference", help="Chromosome build (default=grch37)", default="grch37",
 )
 @click.pass_context
 def beacon(

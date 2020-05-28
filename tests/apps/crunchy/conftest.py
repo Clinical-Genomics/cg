@@ -77,9 +77,7 @@ def mock_bam_to_cram():
     """ This fixture returns a mocked bam_to_cram method. this mock_method
         Will create files with suffixes .cram and .crai for a given BAM path"""
 
-    def _mock_bam_to_cram_func(
-        bam_path: Path, ntasks: int, mem: int, dry_run: bool = False
-    ):
+    def _mock_bam_to_cram_func(bam_path: Path, ntasks: int, mem: int, dry_run: bool = False):
 
         _ = dry_run
         _ = ntasks
