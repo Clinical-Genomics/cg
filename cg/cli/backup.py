@@ -19,7 +19,7 @@ def backup(context: click.Context):
 @backup.command("fetch-flowcell")
 @click.option("-f", "--flowcell", help="Retreive a specific flowcell")
 @click.option(
-    "--dry-run", "dry_run", is_flag=True, help="Don't retrieve from PDC or set flowcell's status"
+    "--dry-run", is_flag=True, help="Don't retrieve from PDC or set flowcell's status"
 )
 @click.pass_context
 def fetch_flowcell(context: click.Context, dry_run: bool, flowcell: str):
