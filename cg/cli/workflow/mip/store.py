@@ -1,4 +1,4 @@
-"""Click commands to store mip-rna analyses"""
+"""Click commands to store mip analyses"""
 import logging
 from pathlib import Path
 import sys
@@ -10,8 +10,9 @@ from cg.exc import (
     AnalysisDuplicationError,
     BundleAlreadyAddedError,
     PipelineUnknownError,
+    MandatoryFilesMissing,
 )
-from cg.meta.store.mip_rna import gather_files_and_bundle_in_housekeeper
+from cg.meta.store.mip import gather_files_and_bundle_in_housekeeper
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -34,13 +35,10 @@ def store(context):
 def analysis(context, config_stream):
     """Store a finished analysis in Housekeeper."""
     status = context.obj["db"]
-    tb_api = context.obj["tb_api"]
     hk_api = context.obj["hk_api"]
 
     if not config_stream:
-        LOG.error("provide a config, suggestions:")
-        for analysis_obj in tb_api.analyses(status="completed", type="rna", deleted=False)[:25]:
-            click.echo(analysis_obj.config_path)
+        LOG.error("Provide a config file.")
         context.abort()
 
     try:
@@ -57,6 +55,9 @@ def analysis(context, config_stream):
     except PipelineUnknownError as error:
         click.echo(click.style(error.message, fg="red"))
         context.abort()
+    except MandatoryFilesMissing as error:
+        click.echo(click.style(error.message, fg="red"))
+        context.abort()
     except FileNotFoundError as error:
         click.echo(click.style(f"missing file: {error.args[0]}", fg="red"))
         context.abort()
@@ -70,9 +71,10 @@ def analysis(context, config_stream):
 def completed(context):
     """Store all completed analyses."""
     hk_api = context.obj["hk_api"]
+    tb_api = context.obj["tb_api"]
 
     exit_code = SUCCESS
-    for analysis_obj in context.obj["tb_api"].analyses(status="completed", deleted=False):
+    for analysis_obj in tb_api.analyses(status="completed", deleted=False):
         existing_record = hk_api.version(analysis_obj.family, analysis_obj.started_at)
         if existing_record:
             LOG.debug("analysis stored: %s - %s", analysis_obj.family, analysis_obj.started_at)
