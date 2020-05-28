@@ -108,6 +108,8 @@ def samples(context, days: int):
 def bioinfo(context, case_name, cleanup, target_load, dry):
     """Load bioinfo case results to the trending database"""
 
+    valid_workflows = ["mip"]
+
     click.echo(click.style("----------------- BIOINFO -----------------------"))
 
     load_bioinfo_raw_inputs = dict()
@@ -135,27 +137,27 @@ def bioinfo(context, case_name, cleanup, target_load, dry):
         load_bioinfo_raw_inputs["analysis_workflow_name"],
         load_bioinfo_raw_inputs["analysis_workflow_version"],
     ) = _get_analysis_workflow_details(context, case_name)
+    if load_bioinfo_raw_inputs["analysis_workflow_name"].lower() not in valid_workflows:
+        raise AnalysisUploadError(f"Case upload failed: {case_name}. Reason: Bad workflow name.")
+
 
     if dry:
         click.echo(click.style("----------------- DRY RUN -----------------------"))
 
-    try:
-        if target_load in ("raw", "all"):
-            click.echo(click.style("----------------- UPLOAD UNPROCESSED -----------------------"))
-            if not dry:
-                context.obj["vogue_upload_api"].load_bioinfo_raw(load_bioinfo_raw_inputs)
+    if target_load in ("raw", "all"):
+        click.echo(click.style("----------------- UPLOAD UNPROCESSED -----------------------"))
+        if not dry:
+            context.obj["vogue_upload_api"].load_bioinfo_raw(load_bioinfo_raw_inputs)
 
-        if target_load in ("process", "all"):
-            click.echo(click.style("----------------- PROCESS CASE -----------------------"))
-            if not dry:
-                context.obj["vogue_upload_api"].load_bioinfo_process(
-                    load_bioinfo_raw_inputs, cleanup
-                )
-            click.echo(click.style("----------------- PROCESS SAMPLE -----------------------"))
-            if not dry:
-                context.obj["vogue_upload_api"].load_bioinfo_sample(load_bioinfo_raw_inputs)
-    except AnalysisUploadError:
-        LOG.error("Case upload failed: %s", case_name, exc_info=True)
+    if target_load in ("process", "all"):
+        click.echo(click.style("----------------- PROCESS CASE -----------------------"))
+        if not dry:
+            context.obj["vogue_upload_api"].load_bioinfo_process(
+                load_bioinfo_raw_inputs, cleanup
+            )
+        click.echo(click.style("----------------- PROCESS SAMPLE -----------------------"))
+        if not dry:
+            context.obj["vogue_upload_api"].load_bioinfo_sample(load_bioinfo_raw_inputs)
 
 
 @vogue.command("bioinfo-all", short_help="Load all mip bioinfo results into vogue")
@@ -172,15 +174,18 @@ def bioinfo_all(context, dry):
         if not version_obj:
             continue
 
+        # confirm multiqc.json exists
         multiqc_file_obj = hk_api.get_files(
             bundle=case_name, tags=["multiqc-json"], version=version_obj.id
         )
         if len(list(multiqc_file_obj)) == 0:
             continue
 
+        # confirm that file exists
         existing_multiqc_file = multiqc_file_obj[0].full_path
         if not Path(existing_multiqc_file).exists():
             continue
+
 
         click.echo(
             click.style(f"Found multiqc for {case_name}, {existing_multiqc_file}", fg="blue")
