@@ -104,7 +104,7 @@ class LimsAPI(Lims, OrderHandler):
         sample = Sample(self, id=lims_id)
         try:
             return sample.udf.get("Library Prep Finished")
-        except:
+        except HTTPError:
             return None
 
     def get_delivery_date(self, lims_id: str) -> dt.date:
@@ -113,7 +113,7 @@ class LimsAPI(Lims, OrderHandler):
         sample = Sample(self, id=lims_id)
         try:
             return sample.udf.get("Delivered at")
-        except:
+        except HTTPError:
             return None
 
     def get_sequenced_date(self, lims_id: str) -> dt.date:
@@ -122,7 +122,7 @@ class LimsAPI(Lims, OrderHandler):
         sample = Sample(self, id=lims_id)
         try:
             return sample.udf.get("Sequencing Finished")
-        except:
+        except HTTPError:
             return None
 
     def capture_kit(self, lims_id: str) -> str:
