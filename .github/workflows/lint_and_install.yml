@@ -52,21 +52,12 @@ jobs:
     # Set up python
     - name: Set up Python ${{ matrix.python-version}}
       uses: actions/setup-python@v2
-      # [0|0|436] [mans.magnusson@hasta:~] [P_main] 3s $ date
-      # Wed May 27 16:44:09 CEST 2020
-      # [0|0|436] [mans.magnusson@hasta:~] [P_main] $ python --version
-      # Python 3.7.1
-      # (prod170926) [hiseq.clinical@hippocampus ~]$ date
-      # Wed May 27 16:44:09 CEST 2020
-      # (prod170926) [hiseq.clinical@hippocampus ~]$ python --version
-      # Python 3.6.2 :: Continuum Analytics, Inc.
-      # (prod170926) [hiseq.clinical@hippocampus ~]$ pip --version
-      # pip 9.0.1
       with:
         python-version: ${{ matrix.python-version}}
 
     - name: Intall pip
       # Make sure that we have correct python version and pip version
+      # For details see .github/workflows/server_info.md
       run: |
         if [ "$PYTHON_VERSION" = "$OLD_VERSION" ]; then
           python -m pip install --upgrade pip==9.0.1
