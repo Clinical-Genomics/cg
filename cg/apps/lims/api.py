@@ -1,16 +1,18 @@
 """Contains API to communicate with LIMS"""
 import datetime as dt
 import logging
-
-from genologics.entities import Sample, Process, Project
-from genologics.lims import Lims
-from dateutil.parser import parse as parse_date
+from typing import Generator
 
 # fixes https://github.com/Clinical-Genomics/servers/issues/30
 import requests_cache
+from dateutil.parser import parse as parse_date
+from genologics.entities import Process, Project, Sample
+from genologics.lims import Lims
+from requests.exceptions import HTTPError
 
 from cg.exc import LimsDataError
-from .constants import PROP2UDF, MASTER_STEPS_UDFS
+
+from .constants import MASTER_STEPS_UDFS, PROP2UDF
 from .order import OrderHandler
 
 requests_cache.install_cache(backend="memory")
@@ -49,9 +51,12 @@ class LimsAPI(Lims, OrderHandler):
         return data
 
     def samples_in_pools(self, pool_name, projectname):
+        """Fetch all samples from a pool"""
         return self.get_samples(udf={"pool name": str(pool_name)}, projectname=projectname)
 
-    def _export_project(self, lims_project):
+    @staticmethod
+    def _export_project(lims_project) -> dict:
+        """Fetch relevant information from a lims project object"""
         return {
             "id": lims_project.id,
             "name": lims_project.name,
@@ -85,33 +90,50 @@ class LimsAPI(Lims, OrderHandler):
         }
         return data
 
-    def _export_artifact(self, lims_artifact):
+    @staticmethod
+    def _export_artifact(lims_artifact):
         """Get data from a LIMS artifact."""
         return {"id": lims_artifact.id, "name": lims_artifact.name}
 
-    def get_received_date(self, lims_id: str) -> str:
+    def get_received_date(self, lims_id: str) -> dt.date:
         """Get the date when a sample was received."""
 
         sample = Sample(self, id=lims_id)
-        return sample.udf.get("Received at") if sample else None
+        try:
+            date = sample.udf.get("Received at")
+        except HTTPError:
+            date = None
+        return date
 
-    def get_prepared_date(self, lims_id: str) -> dt.datetime:
+    def get_prepared_date(self, lims_id: str) -> dt.date:
         """Get the date when a sample was prepared in the lab."""
 
         sample = Sample(self, id=lims_id)
-        return sample.udf.get("Library Prep Finished") if sample else None
+        try:
+            date = sample.udf.get("Library Prep Finished")
+        except HTTPError:
+            date = None
+        return date
 
     def get_delivery_date(self, lims_id: str) -> dt.date:
         """Get delivery date for a sample."""
 
         sample = Sample(self, id=lims_id)
-        return sample.udf.get("Delivered at") if sample else None
+        try:
+            date = sample.udf.get("Delivered at")
+        except HTTPError:
+            date = None
+        return date
 
     def get_sequenced_date(self, lims_id: str) -> dt.date:
         """Get the date when a sample was sequenced."""
 
         sample = Sample(self, id=lims_id)
-        return sample.udf.get("Sequencing Finished") if sample else None
+        try:
+            date = sample.udf.get("Sequencing Finished")
+        except HTTPError:
+            date = None
+        return date
 
     def capture_kit(self, lims_id: str) -> str:
         """Get capture kit for a LIMS sample."""
@@ -187,14 +209,15 @@ class LimsAPI(Lims, OrderHandler):
         """Get LIMS process."""
         return Process(self, id=process_id)
 
-    def process_samples(self, lims_process: Process):
+    @staticmethod
+    def process_samples(lims_process: Process) -> Generator[str, None, None]:
         """Retrieve LIMS input samples from a process."""
         for lims_artifact in lims_process.all_inputs():
             for lims_sample in lims_artifact.samples:
                 yield lims_sample.id
 
     def update_sample(
-        self, lims_id: str, sex=None, target_reads: int = None, name: str = None, **kwargs
+        self, lims_id: str, sex=None, target_reads: int = None, name: str = None, **kwargs,
     ):
         """Update information about a sample."""
         lims_sample = Sample(self, id=lims_id)
@@ -245,11 +268,13 @@ class LimsAPI(Lims, OrderHandler):
 
         return self._get_methods(step_names_udfs, lims_id)
 
-    def get_processing_time(self, lims_id):
+    def get_processing_time(self, lims_id: str) -> dt.datetime:
+        """Get the time it takes to process a sample"""
         received_at = self.get_received_date(lims_id)
         delivery_date = self.get_delivery_date(lims_id)
         if received_at and delivery_date:
             return delivery_date - received_at
+        return None
 
     @staticmethod
     def _sort_by_date_run(sort_list: list):
