@@ -1,49 +1,39 @@
+"""Fixtures for lims tests"""
+
 import pytest
+
 from cg.apps.lims.api import LimsAPI
 
 
 class MockLims(LimsAPI):
+    """Mock parts of the lims api"""
 
     lims = None
 
     def __init__(self):
+        """Mock the init method"""
         self.lims = self
-        pass
-
-    _received_at = None
-    _delivered_at = None
 
     def get_prepmethod(self, lims_id: str) -> str:
-        pass
+        """Override the get_prepmethod"""
 
     def get_sequencingmethod(self, lims_id: str) -> str:
-        pass
+        """Override the get_sequencingmethod"""
 
     def get_deliverymethod(self, lims_id: str) -> str:
-        pass
-
-    def set_received_date(self, date):
-        self._received_at = date
-
-    def get_received_date(self, lims_id: str):
-        return self._received_at
-
-    def set_delivery_date(self, date):
-        self._delivered_at = date
-
-    def get_delivery_date(self, lims_id: str):
-        return self._delivered_at
+        """Override the get_deliverymethod"""
 
 
 @pytest.fixture(scope="function")
 def lims_api():
-
+    """Returns a Lims api mock"""
     _lims_api = MockLims()
     return _lims_api
 
 
 @pytest.fixture
 def skeleton_orderform_sample():
+    """Get the skeleton for a orderform"""
     return {
         "UDF/priority": "",
         "UDF/Sequencing Analysis": "",
