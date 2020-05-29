@@ -29,7 +29,7 @@ class BackupApi:
         LOG.debug("processing flowcells: %s", processing_flowcells)
         return processing_flowcells < max_processing_flowcells
 
-    def pop_flowcell(self) -> models.Flowcell:
+    def pop_flowcell(self, dry_run) -> models.Flowcell:
         """
         Get the top flowcell from the requested queue and update status to
         "processing".
@@ -37,7 +37,8 @@ class BackupApi:
         flowcell_obj = self.status.flowcells(status="requested").first()
         if flowcell_obj is not None:
             flowcell_obj.status = "processing"
-            self.status.commit()
+            if not dry_run:
+                self.status.commit()
         return flowcell_obj
 
     def fetch_flowcell(self, flowcell_obj: models.Flowcell = None, dry_run: bool = False) -> float:
@@ -54,8 +55,8 @@ class BackupApi:
             LOG.info("maximum flowcells ondisk reached")
             return None
 
-        if not dry_run and flowcell_obj is None:
-            flowcell_obj = self.pop_flowcell()
+        if not flowcell_obj:
+            flowcell_obj = self.pop_flowcell(dry_run)
             if flowcell_obj is None:
                 LOG.info("no flowcells requested")
                 return None
