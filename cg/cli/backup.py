@@ -47,8 +47,7 @@ def fetch_flowcell(context: click.Context, dry_run: bool, flowcell: str):
     if not flowcell:
         return
 
-    LOG.info(f"{flowcell}: updating flowcell status to requested")
-
     if not dry_run:
+        LOG.info(f"{flowcell}: updating flowcell status to requested")
         flowcell_obj.status = "requested"
         status_api.commit()
