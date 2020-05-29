@@ -40,7 +40,7 @@ class BackupApi:
             self.status.commit()
         return flowcell_obj
 
-    def fetch_flowcell(self, flowcell_obj: models.Flowcell = None, dry_run: bool = False):
+    def fetch_flowcell(self, flowcell_obj: models.Flowcell = None, dry_run: bool = False) -> float:
         """Start fetching a flowcell from backup if possible.
 
         1. The processing queue is not full
