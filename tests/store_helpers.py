@@ -141,6 +141,7 @@ class StoreHelpers:
         self,
         store: Store,
         family: models.Family = None,
+        started_at: datetime = None,
         completed_at: datetime = None,
         uploaded_at: datetime = None,
         upload_started: datetime = None,
@@ -157,6 +158,8 @@ class StoreHelpers:
 
         analysis = store.add_analysis(pipeline=pipeline, version=pipeline_version)
 
+        if started_at:
+            analysis.started_at = started_at
         if completed_at:
             analysis.completed_at = completed_at
         if uploaded_at:
