@@ -23,7 +23,6 @@ def backup(context: click.Context):
 @click.pass_context
 def fetch_flowcell(context: click.Context, dry_run: bool, flowcell: str):
     """Fetch the first flowcell in the requested queue from backup."""
-    breakpoint()
     status_api = Store(context.obj["database"])
     max_flowcells_on_disk = context.obj.get("max_flowcells", MAX_FLOWCELLS_ON_DISK)
     pdc_api = PdcApi()
