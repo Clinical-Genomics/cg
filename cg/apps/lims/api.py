@@ -42,9 +42,7 @@ class LimsAPI(Lims, OrderHandler):
 
     def __init__(self, config):
         lconf = config["lims"]
-        super(LimsAPI, self).__init__(
-            lconf["host"], lconf["username"], lconf["password"]
-        )
+        super(LimsAPI, self).__init__(lconf["host"], lconf["username"], lconf["password"])
 
     def sample(self, lims_id: str):
         """Fetch a sample from the LIMS database."""
@@ -54,9 +52,7 @@ class LimsAPI(Lims, OrderHandler):
 
     def samples_in_pools(self, pool_name, projectname):
         """Fetch all samples from a pool"""
-        return self.get_samples(
-            udf={"pool name": str(pool_name)}, projectname=projectname
-        )
+        return self.get_samples(udf={"pool name": str(pool_name)}, projectname=projectname)
 
     @staticmethod
     def _export_project(lims_project) -> dict:
@@ -64,9 +60,7 @@ class LimsAPI(Lims, OrderHandler):
         return {
             "id": lims_project.id,
             "name": lims_project.name,
-            "date": parse_date(lims_project.open_date)
-            if lims_project.open_date
-            else None,
+            "date": parse_date(lims_project.open_date) if lims_project.open_date else None,
         }
 
     def _export_sample(self, lims_sample):
@@ -83,9 +77,7 @@ class LimsAPI(Lims, OrderHandler):
             "mother": udfs.get("motherID"),
             "source": udfs.get("Source"),
             "status": udfs.get("Status"),
-            "panels": udfs.get("Gene List").split(";")
-            if udfs.get("Gene List")
-            else None,
+            "panels": udfs.get("Gene List").split(";") if udfs.get("Gene List") else None,
             "priority": udfs.get("priority"),
             "received": self.get_received_date(lims_sample.id),
             "application": udfs.get("Sequencing Analysis"),
@@ -178,9 +170,7 @@ class LimsAPI(Lims, OrderHandler):
         """Bypass to original method."""
         lims_samples = super(LimsAPI, self).get_samples(*args, **kwargs)
         if map_ids:
-            lims_map = {
-                lims_sample.name: lims_sample.id for lims_sample in lims_samples
-            }
+            lims_map = {lims_sample.name: lims_sample.id for lims_sample in lims_samples}
             return lims_map
 
         return lims_samples
@@ -189,9 +179,7 @@ class LimsAPI(Lims, OrderHandler):
         """Fetch information about a family of samples."""
         filters = {"customer": customer, "familyID": family}
         lims_samples = self.get_samples(udf=filters)
-        samples_data = [
-            self._export_sample(lims_sample) for lims_sample in lims_samples
-        ]
+        samples_data = [self._export_sample(lims_sample) for lims_sample in lims_samples]
         # get family level data
         family_data = {"family": family, "customer": customer, "samples": []}
         priorities = set()
@@ -229,12 +217,7 @@ class LimsAPI(Lims, OrderHandler):
                 yield lims_sample.id
 
     def update_sample(
-        self,
-        lims_id: str,
-        sex=None,
-        target_reads: int = None,
-        name: str = None,
-        **kwargs,
+        self, lims_id: str, sex=None, target_reads: int = None, name: str = None, **kwargs,
     ):
         """Update information about a sample."""
         lims_sample = Sample(self, id=lims_id)
@@ -251,8 +234,7 @@ class LimsAPI(Lims, OrderHandler):
         for key, value in kwargs.items():
             if not PROP2UDF.get(key):
                 raise LimsDataError(
-                    f"Unknown how to set {key} in LIMS since it is not defined in"
-                    f" {PROP2UDF}"
+                    f"Unknown how to set {key} in LIMS since it is not defined in" f" {PROP2UDF}"
                 )
             lims_sample.udf[PROP2UDF[key]] = value
 
@@ -331,9 +313,7 @@ class LimsAPI(Lims, OrderHandler):
         methods = []
 
         for process_name in step_names_udfs:
-            artifacts = self.get_artifacts(
-                process_type=process_name, samplelimsid=lims_id
-            )
+            artifacts = self.get_artifacts(process_type=process_name, samplelimsid=lims_id)
             if artifacts:
                 udf_key_number = step_names_udfs[process_name]["method_number"]
                 udf_key_version = step_names_udfs[process_name]["method_version"]
