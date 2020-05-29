@@ -1,16 +1,18 @@
 """Contains API to communicate with LIMS"""
 import datetime as dt
 import logging
-
-from genologics.entities import Sample, Process, Project
-from genologics.lims import Lims
-from dateutil.parser import parse as parse_date
+from typing import Generator
 
 # fixes https://github.com/Clinical-Genomics/servers/issues/30
 import requests_cache
+from dateutil.parser import parse as parse_date
+from genologics.entities import Process, Project, Sample
+from genologics.lims import Lims
+from requests.exceptions import HTTPError
 
 from cg.exc import LimsDataError
-from .constants import PROP2UDF, MASTER_STEPS_UDFS
+
+from .constants import MASTER_STEPS_UDFS, PROP2UDF
 from .order import OrderHandler
 
 requests_cache.install_cache(backend="memory")
@@ -40,7 +42,9 @@ class LimsAPI(Lims, OrderHandler):
 
     def __init__(self, config):
         lconf = config["lims"]
-        super(LimsAPI, self).__init__(lconf["host"], lconf["username"], lconf["password"])
+        super(LimsAPI, self).__init__(
+            lconf["host"], lconf["username"], lconf["password"]
+        )
 
     def sample(self, lims_id: str):
         """Fetch a sample from the LIMS database."""
@@ -49,13 +53,20 @@ class LimsAPI(Lims, OrderHandler):
         return data
 
     def samples_in_pools(self, pool_name, projectname):
-        return self.get_samples(udf={"pool name": str(pool_name)}, projectname=projectname)
+        """Fetch all samples from a pool"""
+        return self.get_samples(
+            udf={"pool name": str(pool_name)}, projectname=projectname
+        )
 
-    def _export_project(self, lims_project):
+    @staticmethod
+    def _export_project(lims_project) -> dict:
+        """Fetch relevant information from a lims project object"""
         return {
             "id": lims_project.id,
             "name": lims_project.name,
-            "date": parse_date(lims_project.open_date) if lims_project.open_date else None,
+            "date": parse_date(lims_project.open_date)
+            if lims_project.open_date
+            else None,
         }
 
     def _export_sample(self, lims_sample):
@@ -72,7 +83,9 @@ class LimsAPI(Lims, OrderHandler):
             "mother": udfs.get("motherID"),
             "source": udfs.get("Source"),
             "status": udfs.get("Status"),
-            "panels": udfs.get("Gene List").split(";") if udfs.get("Gene List") else None,
+            "panels": udfs.get("Gene List").split(";")
+            if udfs.get("Gene List")
+            else None,
             "priority": udfs.get("priority"),
             "received": self.get_received_date(lims_sample.id),
             "application": udfs.get("Sequencing Analysis"),
@@ -85,7 +98,8 @@ class LimsAPI(Lims, OrderHandler):
         }
         return data
 
-    def _export_artifact(self, lims_artifact):
+    @staticmethod
+    def _export_artifact(lims_artifact):
         """Get data from a LIMS artifact."""
         return {"id": lims_artifact.id, "name": lims_artifact.name}
 
@@ -160,7 +174,9 @@ class LimsAPI(Lims, OrderHandler):
         """Bypass to original method."""
         lims_samples = super(LimsAPI, self).get_samples(*args, **kwargs)
         if map_ids:
-            lims_map = {lims_sample.name: lims_sample.id for lims_sample in lims_samples}
+            lims_map = {
+                lims_sample.name: lims_sample.id for lims_sample in lims_samples
+            }
             return lims_map
 
         return lims_samples
@@ -169,7 +185,9 @@ class LimsAPI(Lims, OrderHandler):
         """Fetch information about a family of samples."""
         filters = {"customer": customer, "familyID": family}
         lims_samples = self.get_samples(udf=filters)
-        samples_data = [self._export_sample(lims_sample) for lims_sample in lims_samples]
+        samples_data = [
+            self._export_sample(lims_sample) for lims_sample in lims_samples
+        ]
         # get family level data
         family_data = {"family": family, "customer": customer, "samples": []}
         priorities = set()
@@ -199,14 +217,20 @@ class LimsAPI(Lims, OrderHandler):
         """Get LIMS process."""
         return Process(self, id=process_id)
 
-    def process_samples(self, lims_process: Process):
+    @staticmethod
+    def process_samples(lims_process: Process) -> Generator[str]:
         """Retrieve LIMS input samples from a process."""
         for lims_artifact in lims_process.all_inputs():
             for lims_sample in lims_artifact.samples:
                 yield lims_sample.id
 
     def update_sample(
-        self, lims_id: str, sex=None, target_reads: int = None, name: str = None, **kwargs
+        self,
+        lims_id: str,
+        sex=None,
+        target_reads: int = None,
+        name: str = None,
+        **kwargs,
     ):
         """Update information about a sample."""
         lims_sample = Sample(self, id=lims_id)
@@ -223,7 +247,8 @@ class LimsAPI(Lims, OrderHandler):
         for key, value in kwargs.items():
             if not PROP2UDF.get(key):
                 raise LimsDataError(
-                    f"Unknown how to set {key} in LIMS since it is not defined in" f" {PROP2UDF}"
+                    f"Unknown how to set {key} in LIMS since it is not defined in"
+                    f" {PROP2UDF}"
                 )
             lims_sample.udf[PROP2UDF[key]] = value
 
@@ -257,11 +282,13 @@ class LimsAPI(Lims, OrderHandler):
 
         return self._get_methods(step_names_udfs, lims_id)
 
-    def get_processing_time(self, lims_id):
+    def get_processing_time(self, lims_id: str) -> dt.datetime:
+        """Get the time it takes to process a sample"""
         received_at = self.get_received_date(lims_id)
         delivery_date = self.get_delivery_date(lims_id)
         if received_at and delivery_date:
             return delivery_date - received_at
+        return None
 
     @staticmethod
     def _sort_by_date_run(sort_list: list):
@@ -300,7 +327,9 @@ class LimsAPI(Lims, OrderHandler):
         methods = []
 
         for process_name in step_names_udfs:
-            artifacts = self.get_artifacts(process_type=process_name, samplelimsid=lims_id)
+            artifacts = self.get_artifacts(
+                process_type=process_name, samplelimsid=lims_id
+            )
             if artifacts:
                 udf_key_number = step_names_udfs[process_name]["method_number"]
                 udf_key_version = step_names_udfs[process_name]["method_version"]
