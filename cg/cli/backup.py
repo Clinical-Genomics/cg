@@ -7,7 +7,7 @@ from cg.store import Store
 from cg.meta.backup import BackupApi
 
 LOG = logging.getLogger(__name__)
-MAX_FLOWCELLS = 1250  # Increased by 250 when we hit the previous limit of 1000...
+MAX_FLOWCELLS_ON_DISK = 1250  # Increased by 250 when the previous limit of 1000 was reached
 
 
 @click.group()
@@ -25,10 +25,12 @@ def backup(context: click.Context):
 @click.pass_context
 def fetch_flowcell(context: click.Context, dry_run: bool, flowcell: str):
     """Fetch the first flowcell in the requested queue from backup."""
+    breakpoint()
     status_api = Store(context.obj["database"])
-    max_flowcells = context.obj.get("max_flowcells", MAX_FLOWCELLS)
+    max_flowcells_on_disk = context.obj.get("max_flowcells", MAX_FLOWCELLS_ON_DISK)
     pdc_api = PdcApi()
-    backup_api = BackupApi(status=status_api, pdc_api=pdc_api, max_flowcells=max_flowcells)
+    backup_api = BackupApi(status=status_api, pdc_api=pdc_api,
+                           max_flowcells_on_disk=max_flowcells_on_disk)
     if flowcell:
         flowcell_obj = status_api.flowcell(flowcell)
         if flowcell_obj is None:

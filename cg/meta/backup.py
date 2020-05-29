@@ -12,22 +12,22 @@ LOG = logging.getLogger(__name__)
 class BackupApi:
     """ Class for retrieving FCs from backup """
 
-    def __init__(self, status: Store, pdc_api: PdcApi, max_flowcells: int):
+    def __init__(self, status: Store, pdc_api: PdcApi, max_flowcells_on_disk: int):
         self.status = status
         self.pdc = pdc_api
-        self.max_flowcells = max_flowcells
+        self.max_flowcells_on_disk = max_flowcells_on_disk
 
     def maximum_flowcells_ondisk(self) -> bool:
         """Check if there's too many flowcells already "ondisk"."""
         ondisk_flowcells = self.status.flowcells(status="ondisk").count()
         LOG.debug("ondisk flowcells: %s", ondisk_flowcells)
-        return ondisk_flowcells > self.max_flowcells
+        return ondisk_flowcells > self.max_flowcells_on_disk
 
-    def check_processing(self, max_flowcells: int = 1) -> bool:
+    def check_processing(self, max_processing_flowcells: int = 1) -> bool:
         """Check if the processing queue for flowcells is not full."""
         processing_flowcells = self.status.flowcells(status="processing").count()
         LOG.debug("processing flowcells: %s", processing_flowcells)
-        return processing_flowcells < max_flowcells
+        return processing_flowcells < max_processing_flowcells
 
     def pop_flowcell(self) -> models.Flowcell:
         """
