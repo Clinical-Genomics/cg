@@ -9,6 +9,7 @@ When all tests done and successful and PR is approved, follow these steps:
 1. Log into relevant serves with `ssh <hasta/clinical-db>`
 1. Deploy master to stage
     1.`us`
+    1. Request stage environment `paxa` and follow instructions
     1. `bash update-cg-stage.sh master`
     1. make sure that installation was successful
 1. Deploy master to stage
