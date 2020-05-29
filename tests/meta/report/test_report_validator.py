@@ -65,7 +65,9 @@ REQUIRED_GENERIC_SAMPLE_FIELDS = [
 @pytest.mark.parametrize("required_report_value_key", REQUIRED_REPORT_FIELDS)
 def test_has_required_data_w_report_fields(report_api, required_report_value_key, report_store):
     # GIVEN complete delivery data missing only the data we check for value
-    delivery_data = report_api._get_delivery_data(case_id="yellowhog")
+    case_id = "yellowhog"
+    anlysis_started_at = report_store.family(case_id).analyses[0].started_at
+    delivery_data = report_api._get_delivery_data(case_id=case_id, analysis_date=anlysis_started_at)
     validator = ReportValidator(report_store)
     validator.has_required_data(delivery_data)
     assert not validator.get_missing_attributes()
@@ -82,7 +84,9 @@ def test_has_required_data_w_report_fields(report_api, required_report_value_key
 @pytest.mark.parametrize("required_report_value_key", REQUIRED_REPORT_FIELDS)
 def test_get_missing_data_w_report_fields(report_api, required_report_value_key, report_store):
     # GIVEN complete delivery data missing only the data we check for value
-    delivery_data = report_api._get_delivery_data(case_id="yellowhog")
+    case_id = "yellowhog"
+    anlysis_started_at = report_store.family(case_id).analyses[0].started_at
+    delivery_data = report_api._get_delivery_data(case_id=case_id, analysis_date=anlysis_started_at)
     validator = ReportValidator(report_store)
     assert validator.has_required_data(delivery_data)
     assert required_report_value_key not in validator.get_missing_attributes()
@@ -102,7 +106,9 @@ def test_has_required_data_w_normal_sample_fields(
     report_api, report_store, required_sample_value_key
 ):
     # GIVEN complete delivery data missing only the data we check for value on each sample
-    delivery_data = report_api._get_delivery_data(case_id="yellowhog")
+    case_id = "yellowhog"
+    anlysis_started_at = report_store.family(case_id).analyses[0].started_at
+    delivery_data = report_api._get_delivery_data(case_id=case_id, analysis_date=anlysis_started_at)
     validator = ReportValidator(report_store)
     assert validator.has_required_data(delivery_data)
     assert required_sample_value_key not in validator.get_missing_attributes()
@@ -123,7 +129,9 @@ def test_has_required_data_w_sequence_sample_fields(
 ):
     # GIVEN complete delivery data missing only the data we check for value on each non external
     # sample
-    delivery_data = report_api._get_delivery_data(case_id="yellowhog")
+    case_id = "yellowhog"
+    anlysis_started_at = report_store.family(case_id).analyses[0].started_at
+    delivery_data = report_api._get_delivery_data(case_id=case_id, analysis_date=anlysis_started_at)
 
     for sample in delivery_data["samples"]:
         assert not report_store.sample(
@@ -151,7 +159,8 @@ def test_has_required_data_w_analysis_sample_fields(
     # GIVEN complete delivery data missing only the data we check for value on each non external
     # sample
     case_id = "yellowhog"
-    delivery_data = report_api._get_delivery_data(case_id=case_id)
+    anlysis_started_at = report_store.family(case_id).analyses[0].started_at
+    delivery_data = report_api._get_delivery_data(case_id=case_id, analysis_date=anlysis_started_at)
     for sample in delivery_data["samples"]:
         report_store.sample(sample["internal_id"]).data_analysis = "MIP"
     report_store.commit()
@@ -175,7 +184,9 @@ def test_has_required_data_all_samples_non_required_fields(
     report_api, report_store, required_sample_value_key
 ):
     # GIVEN complete delivery data missing only the data we check for value on each sample
-    delivery_data = report_api._get_delivery_data(case_id="yellowhog")
+    case_id = "yellowhog"
+    anlysis_started_at = report_store.family(case_id).analyses[0].started_at
+    delivery_data = report_api._get_delivery_data(case_id=case_id, analysis_date=anlysis_started_at)
 
     validator = ReportValidator(report_store)
     assert validator.has_required_data(delivery_data)
@@ -198,7 +209,8 @@ def test_has_required_data_external_samples_non_required_fields(
 ):
     # GIVEN complete delivery data missing only the data we check for value on each external sample
     case_id = "yellowhog"
-    delivery_data = report_api._get_delivery_data(case_id=case_id)
+    anlysis_started_at = report_store.family(case_id).analyses[0].started_at
+    delivery_data = report_api._get_delivery_data(case_id=case_id, analysis_date=anlysis_started_at)
     for sample in delivery_data["samples"]:
         report_store.sample(
             sample["internal_id"]

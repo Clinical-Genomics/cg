@@ -13,7 +13,9 @@ def test_collect_delivery_data(report_api, report_store, case_id):
     assert case
     assert case.links
     assert case.analyses
-    delivery_data = report_api._get_delivery_data(case_id=case_id)
+    delivery_data = report_api._get_delivery_data(
+        case_id=case_id, analysis_date=case.analyses[0].started_at
+    )
 
     # THEN all data for the delivery report should have been collected
     assert delivery_data["report_version"]
@@ -118,10 +120,13 @@ def is_float(value):
         return False
 
 
-def test_presentable_delivery_report_contains_delivery_data(report_api):
+def test_presentable_delivery_report_contains_delivery_data(report_store, report_api):
     # GIVEN data from an analysed case and an initialised report_api
     case_id = "yellowhog"
-    delivery_data = report_api._get_delivery_data(case_id=case_id)
+    case = report_store.family(case_id)
+    delivery_data = report_api._get_delivery_data(
+        case_id=case_id, analysis_date=case.analyses[0].started_at
+    )
 
     # WHEN creating delivery report
     presentable_data = report_api._make_data_presentable(delivery_data)
@@ -173,13 +178,18 @@ def list_values_exists_in(a_list: list, a_target: str):
     return all_exists
 
 
-def test_create_delivery_report_contains_delivery_data(report_api):
+def test_create_delivery_report_contains_delivery_data(report_store, report_api):
     # GIVEN data from an analysed case and an initialised report_api
     case_id = "yellowhog"
-    delivery_data = report_api._get_delivery_data(case_id=case_id)
+    case = report_store.family(case_id)
+    delivery_data = report_api._get_delivery_data(
+        case_id=case_id, analysis_date=case.analyses[0].started_at
+    )
 
     # WHEN creating delivery report
-    delivery_report = report_api.create_delivery_report(case_id)
+    delivery_report = report_api.create_delivery_report(
+        case_id, analysis_date=case.analyses[0].started_at
+    )
 
     # THEN
     # the delivery_report contains the delivery_data
@@ -214,9 +224,13 @@ def test_incorporate_lims_methods(report_samples, report_api):
         assert sample["sequencing_method"]
 
 
-def test_render_delivery_report(report_api):
+def test_render_delivery_report(report_store, report_api):
     # GIVEN proper qc data from an analysis exist
-    report_data = report_api._get_delivery_data(case_id="yellowhog")
+    case_id = "yellowhog"
+    case = report_store.family(case_id)
+    report_data = report_api._get_delivery_data(
+        case_id=case_id, analysis_date=case.analyses[0].started_at
+    )
 
     # WHEN rendering a report from that data
     rendered_report = ReportAPI._render_delivery_report(report_data)
@@ -225,22 +239,28 @@ def test_render_delivery_report(report_api):
     assert len(rendered_report) > 0
 
 
-def test_create_delivery_report(report_api):
+def test_create_delivery_report(report_store, report_api):
     # GIVEN initialized ReportAPI
+    case_id = "yellowhog"
+    anlysis_started_at = report_store.family(case_id).analyses[0].started_at
 
     # WHEN rendering a report from that data
-    created_report = report_api.create_delivery_report(case_id="yellowhog")
+    created_report = report_api.create_delivery_report(
+        case_id="yellowhog", analysis_date=anlysis_started_at
+    )
 
     # THEN a html report with certain data should have been rendered
     assert len(created_report) > 0
 
 
-def test_create_delivery_report_file(report_api: ReportAPI):
+def test_create_delivery_report_file(report_store, report_api: ReportAPI):
     # GIVEN initialized ReportAPI
+    case_id = "yellowhog"
+    anlysis_started_at = report_store.family(case_id).analyses[0].started_at
 
     # WHEN rendering a report from that data
     created_report_file = report_api.create_delivery_report_file(
-        case_id="yellowhog", file_path=Path(".")
+        case_id="yellowhog", analysis_date=anlysis_started_at, file_path=Path(".")
     )
 
     # THEN a html report with certain data should have been created on disk

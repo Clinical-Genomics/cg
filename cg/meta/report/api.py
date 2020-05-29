@@ -43,10 +43,12 @@ class ReportAPI:
         self.scout = scout_api
         self.report_validator = ReportValidator(store)
 
-    def create_delivery_report(self, case_id: str, accept_missing_data: bool = False) -> str:
+    def create_delivery_report(
+        self, case_id: str, analysis_date, accept_missing_data: bool = False
+    ) -> str:
         """Generate the html contents of a delivery report."""
 
-        delivery_data = self._get_delivery_data(case_id)
+        delivery_data = self._get_delivery_data(case_id, analysis_date)
         self._handle_missing_report_data(accept_missing_data, delivery_data, case_id)
         report_data = self._make_data_presentable(delivery_data)
         self._handle_missing_report_data(accept_missing_data, report_data, case_id)
@@ -68,12 +70,12 @@ class ReportAPI:
             )
 
     def create_delivery_report_file(
-        self, case_id: str, file_path: Path, accept_missing_data: bool = False
+        self, case_id: str, file_path: Path, analysis_date, accept_missing_data: bool = False
     ):
         """Generate a temporary file containing a delivery report."""
 
         delivery_report = self.create_delivery_report(
-            case_id=case_id, accept_missing_data=accept_missing_data
+            case_id=case_id, accept_missing_data=accept_missing_data, analysis_date=analysis_date
         )
 
         file_path.mkdir(parents=True, exist_ok=True)
@@ -84,12 +86,12 @@ class ReportAPI:
 
         return delivery_report_file
 
-    def _get_delivery_data(self, case_id: str) -> dict:
+    def _get_delivery_data(self, case_id: str, analysis_date) -> dict:
         """Fetch all data needed to render a delivery report."""
 
         report_data = dict()
         case_obj = self._get_case_from_statusdb(case_id)
-        analysis_obj = case_obj.analyses[0]
+        analysis_obj = self._get_analysis_from_statusdb(case_obj, analysis_date)
 
         report_data["case"] = case_obj.name
         report_data["pipeline"] = analysis_obj.pipeline
@@ -118,6 +120,10 @@ class ReportAPI:
     def _get_case_from_statusdb(self, case_id: str) -> models.Family:
         """Fetch a case object from the status database."""
         return self.store.family(case_id)
+
+    def _get_analysis_from_statusdb(self, case: models.Family, analysis_date) -> models.Analysis:
+        """Fetch an analysis object from the status database."""
+        return self.store.analysis(case, analysis_date)
 
     def _incorporate_lims_methods(self, samples: list):
         """Fetch the methods used for preparation, sequencing and delivery of the samples."""

@@ -7,6 +7,7 @@ import click
 
 from cg.apps import hk, scoutapi
 from cg.exc import DeliveryReportError, CgError
+from cg.store import Store
 
 from .utils import _suggest_cases_delivery_report
 
@@ -50,10 +51,13 @@ def delivery_reports(context, print_console, force_report):
 
 @click.command("delivery-report")
 @click.argument("family_id", required=False)
-@click.option("-p", "--print", "print_console", is_flag=True, help="print report to console")
-@click.option("-f", "--force", "force_report", is_flag=True, help="overrule report validation")
+@click.option("-p", "--print", "print_console", is_flag=True, help="Print report to console")
+@click.option("-f", "--force", "force_report", is_flag=True, help="Overrule report validation")
+@click.option(
+    "--analysis-started-at", help="Use the analysis started at (i.e. 2020-05-28 " "12:00:46)"
+)
 @click.pass_context
-def delivery_report(context, family_id, print_console, force_report):
+def delivery_report(context, family_id, print_console, force_report, analysis_started_at=None):
     """Generates a delivery report for a case and uploads it to housekeeper and scout
 
     The report contains data from several sources:
@@ -107,9 +111,13 @@ def delivery_report(context, family_id, print_console, force_report):
 
     click.echo(click.style("----------------- DELIVERY_REPORT -------------"))
 
-    def _add_delivery_report_to_hk(delivery_report_file, hk_api: hk.HousekeeperAPI, family_id):
+    def _add_delivery_report_to_hk(
+        delivery_report_file, hk_api: hk.HousekeeperAPI, family_id, analysis_date
+    ):
         delivery_report_tag_name = "delivery-report"
-        version_obj = hk_api.last_version(family_id)
+
+        version_obj = hk_api.version(family_id, analysis_date)
+
         uploaded_delivery_report_files = hk_api.get_files(
             bundle=family_id, tags=[delivery_report_tag_name], version=version_obj.id
         )
@@ -126,9 +134,9 @@ def delivery_report(context, family_id, print_console, force_report):
 
         return None
 
-    def _update_delivery_report_date(status_api, case_id):
-        family_obj = status_api.family(case_id)
-        analysis_obj = family_obj.analyses[0]
+    def _update_delivery_report_date(status_api: Store, case_id, analysis_date):
+
+        analysis_obj = status_api.analysis(case_id, analysis_date)
         analysis_obj.delivery_report_created_at = dt.datetime.now()
         status_api.commit()
 
@@ -138,20 +146,33 @@ def delivery_report(context, family_id, print_console, force_report):
         _suggest_cases_delivery_report(context)
         context.abort()
 
+    status_api = context.obj["status"]
+
+    if not analysis_started_at:
+        analysis_started_at = status_api.family(family_id).analyses[0].started_at
+        LOG.debug("using analysis date: %s", analysis_started_at)
+
     if print_console:
-        delivery_report_html = report_api.create_delivery_report(family_id, force_report)
+        delivery_report_html = report_api.create_delivery_report(
+            family_id, analysis_started_at, force_report
+        )
         click.echo(delivery_report_html)
         return
 
     tb_api = context.obj["tb_api"]
-    status_api = context.obj["status"]
 
     delivery_report_file = report_api.create_delivery_report_file(
-        family_id, file_path=tb_api.get_family_root_dir(family_id), accept_missing_data=force_report
+        family_id,
+        file_path=tb_api.get_family_root_dir(family_id),
+        accept_missing_data=force_report,
+        analysis_date=analysis_started_at,
     )
 
     hk_api = context.obj["housekeeper_api"]
-    added_file = _add_delivery_report_to_hk(delivery_report_file, hk_api, family_id)
+
+    added_file = _add_delivery_report_to_hk(
+        delivery_report_file, hk_api, family_id, analysis_started_at
+    )
 
     if added_file:
         click.echo(click.style("uploaded to housekeeper", fg="green"))
