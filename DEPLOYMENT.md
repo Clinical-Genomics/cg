@@ -1,6 +1,6 @@
 # Steps
 
-When all tests are ready and PR is approved follow these steps
+When all tests done and successful and PR is approved, follow these steps:
 
 1. Merge branch to master
 1. Bumpversion according to specifications, eg. `bumpversion <patch/minor/major>`
@@ -15,5 +15,5 @@ When all tests are ready and PR is approved follow these steps
     1.`up`
     1. `bash update-cg-prod.sh`
     1. make sure that installation was successful
-1. Take a screenshot and post as a comment on the PR. Screenshot should include environment and that it succeded
+1. Take a screenshot and post as a comment on the PR. Screenshot should include environment and that it succeeded
 
