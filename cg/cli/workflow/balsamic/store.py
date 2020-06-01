@@ -77,7 +77,7 @@ def analysis(context, case_id, deliverables_file_path, config_path):
     except Exception:
         hk_api.rollback()
         status.rollback()
-        raise StoreError(f"Could not store case: {case_id}")
+        raise StoreError(sys.exc_info()[0])
 
     status.add_commit(new_analysis)
     click.echo(click.style("Included files in Housekeeper", fg="green"))
@@ -132,7 +132,7 @@ def completed(context):
         try:
             exit_code = context.invoke(analysis, case_id=case.internal_id) and exit_code
         except StoreError as error:
-            LOG.error("Analysis storage failed: ", error.message)
+            LOG.error("Analysis storage failed: %s", error.message)
             exit_code = FAIL
         except FileNotFoundError as error:
             LOG.error("Analysis storage failed, missing file: %s", error.args[0])
