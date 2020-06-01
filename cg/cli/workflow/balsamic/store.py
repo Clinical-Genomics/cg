@@ -134,5 +134,10 @@ def completed(context):
         except StoreError as error:
             LOG.error("Analysis storage failed: ", error.message)
             exit_code = FAIL
+        except FileNotFoundError as error:
+            LOG.error("Analysis storage failed, missing file: %s", error.args[0])
+            exit_code = FAIL
+
+    click.echo(click.style(f"Done storing cases. Exit code: {exit_code}", fg="blue"))
 
     sys.exit(exit_code)
