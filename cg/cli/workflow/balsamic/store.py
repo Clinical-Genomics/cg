@@ -154,7 +154,7 @@ def completed(context):
         try:
             exit_code = context.invoke(analysis, case_id=case.internal_id) and exit_code
         except StoreError as error:
-            LOG.warning("Analysis could not be stored: %s", error.message)
+            LOG.error("Analysis storage failed: %s", error.message)
             exit_code = FAIL
         except FileNotFoundError as error:
             LOG.error("Analysis storage failed, missing file: %s", error.args[0])
