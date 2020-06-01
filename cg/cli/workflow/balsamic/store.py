@@ -28,7 +28,7 @@ def store(context):
     context.obj["analysis_api"] = AnalysisAPI(
         db=Store(context.obj["database"]),
         hk_api=hk.HousekeeperAPI(context.obj),
-        fastq_api=fastq.FastqAPI,
+        fastq_api=fastq.FastqAPI(),
     )
 
 
