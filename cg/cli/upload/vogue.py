@@ -227,7 +227,7 @@ def _get_samples(context, case_name: str) -> str:
     return ",".join(sample_ids)
 
 
-def _get_analysis_workflow_details(status_api, case_name: str) -> str:
+def _get_analysis_workflow_details(status_api: Store, case_name: str) -> str:
     """Get lowercase workflow name for a case_name
        Args:
            case_name(str): onemite
