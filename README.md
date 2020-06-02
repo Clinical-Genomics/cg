@@ -21,6 +21,10 @@ In this context, `cg` provides the interface between these tools to facilitate a
 - HTTP REST for powering the web portal: [clinical.scilifelab.se][portal]
 - CLI for interactions on the command line
 
+### Contributing
+
+Please check out our [guide for contributing to cg](CONTRIBUTING.md)
+
 ## Installation
 
 Cg written in Python 3.6+ and is available on the [Python Package Index][pypi] (PyPI).
@@ -43,9 +47,6 @@ If you would like to automatically [Black][black] format your commits:
 pre-commit install
 ```
 
-## Contributing
-
-Cg is using github flow branching model as described in our [development manual][development manual].
 
 
 ## This package
@@ -357,7 +358,6 @@ Some unit tests make use of [snapshottest][snapshottest]. To update existing sna
 [cgweb]: https://github.com/Clinical-Genomics/cgweb
 [servers]: https://github.com/Clinical-Genomics/servers
 [pypi]: https://pypi.org/
-[development manual]: http://www.clinicalgenomics.se/development/dev/githubflow/
 
 [travis-url]: https://travis-ci.org/Clinical-Genomics/cg
 [travis-image]: https://img.shields.io/travis/Clinical-Genomics/cg.svg?style=flat-square
