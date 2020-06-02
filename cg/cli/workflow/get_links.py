@@ -7,9 +7,7 @@ from cg.store import models
 LOG = logging.getLogger(__name__)
 
 
-def get_links(
-    context: click.Context, case_id: str, sample_id: str
-) -> [models.FamilySample]:
+def get_links(context: click.Context, case_id: str, sample_id: str) -> [models.FamilySample]:
     """Get link objects for a SAMPLE_ID
        Args:
            case_id(str): petname
@@ -32,9 +30,7 @@ def get_links(
 
         if not sample_obj:
             LOG.error(
-                "Could not find sample %s. Did you intend %s as a case-id?",
-                sample_id,
-                sample_id,
+                "Could not find sample %s. Did you intend %s as a case-id?", sample_id, sample_id,
             )
             context.abort()
 

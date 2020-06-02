@@ -112,6 +112,13 @@ class ValidationError(CgError):
     """
 
 
+class MandatoryFilesMissing(CgError):
+    """
+        Exception raised when mandatory files are missing from the deliverables when storing an
+        analysis in Housekeeper.
+    """
+
+
 class StoreError(CgError):
     """
         Exception related to storing an analysis

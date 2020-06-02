@@ -50,9 +50,7 @@ def beacon(context: click.Context, item_type, item_id):
 
 @clean.command("mip-run-dir")
 @click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
-@click.option(
-    "-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned"
-)
+@click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
 @click.argument("case_id")
 @click.argument("sample_info", type=click.File("r"))
 @click.pass_context
@@ -115,13 +113,9 @@ def hk_alignment_files(context, bundle, yes: bool = False, dry_run: bool = False
     help="Clean alignment files with analysis dates oldar then given number of days",
 )
 @click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
-@click.option(
-    "-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned"
-)
+@click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
 @click.pass_context
-def scout_finished_cases(
-    context, days_old: int, yes: bool = False, dry_run: bool = False
-):
+def scout_finished_cases(context, days_old: int, yes: bool = False, dry_run: bool = False):
     """Clean up of solved and archived scout cases"""
     bundles = []
     for status in "archived", "solved":
@@ -181,9 +175,7 @@ def hk_past_files(context, case_id, tags, yes, dry_run):
 
 @clean.command("mip-past-run-dirs")
 @click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
-@click.option(
-    "-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned"
-)
+@click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
 @click.argument("before_str")
 @click.pass_context
 def mip_past_run_dirs(

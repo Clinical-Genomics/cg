@@ -54,9 +54,7 @@ class StatusHandler:
             applications = pool["applications"]
             pool_name = pool["name"]
             if len(applications) != 1:
-                raise OrderError(
-                    f"different application in pool: {pool_name} - {applications}"
-                )
+                raise OrderError(f"different application in pool: {pool_name} - {applications}")
 
         # each pool must only have one capture kit
         for pool in pools.values():
@@ -65,9 +63,7 @@ class StatusHandler:
             pool_name = pool["name"]
 
             if len(capture_kits) > 1:
-                raise OrderError(
-                    f"different capture kits in pool: {pool_name} - {capture_kits}"
-                )
+                raise OrderError(f"different capture kits in pool: {pool_name} - {capture_kits}")
 
         for pool in pools.values():
 
@@ -151,11 +147,7 @@ class StatusHandler:
             if len(values) > 1:
                 raise ValueError(f"different 'priority' values: {case_name} - {values}")
             priority = values.pop()
-            panels = set(
-                panel
-                for sample in case_samples
-                for panel in sample.get("panels", set())
-            )
+            panels = set(panel for sample in case_samples for panel in sample.get("panels", set()))
             case = {
                 "name": case_name,
                 "priority": priority,
@@ -184,12 +176,7 @@ class StatusHandler:
         return status_data
 
     def store_cases(
-        self,
-        customer: str,
-        order: str,
-        ordered: dt.datetime,
-        ticket: int,
-        cases: List[dict],
+        self, customer: str, order: str, ordered: dt.datetime, ticket: int, cases: List[dict],
     ) -> List[models.Family]:
         """Store cases and samples in the status database."""
         customer_obj = self.status.customer(customer)
@@ -235,28 +222,18 @@ class StatusHandler:
                             application_tag
                         )
                     if new_sample.application_version is None:
-                        raise OrderError(
-                            f"Invalid application: {sample['application']}"
-                        )
+                        raise OrderError(f"Invalid application: {sample['application']}")
 
                     family_samples[new_sample.name] = new_sample
                     self.status.add(new_sample)
-                    new_delivery = self.status.add_delivery(
-                        destination="caesar", sample=new_sample
-                    )
+                    new_delivery = self.status.add_delivery(destination="caesar", sample=new_sample)
                     self.status.add(new_delivery)
 
             for sample in case["samples"]:
-                mother_obj = (
-                    family_samples[sample["mother"]] if sample.get("mother") else None
-                )
-                father_obj = (
-                    family_samples[sample["father"]] if sample.get("father") else None
-                )
+                mother_obj = family_samples[sample["mother"]] if sample.get("mother") else None
+                father_obj = family_samples[sample["father"]] if sample.get("father") else None
                 with self.status.session.no_autoflush:
-                    link_obj = self.status.link(
-                        case_obj.internal_id, sample["internal_id"]
-                    )
+                    link_obj = self.status.link(case_obj.internal_id, sample["internal_id"])
                 if link_obj:
                     link_obj.status = sample["status"] or link_obj.status
                     link_obj.mother = mother_obj or link_obj.mother
@@ -274,12 +251,7 @@ class StatusHandler:
         return new_families
 
     def store_samples(
-        self,
-        customer: str,
-        order: str,
-        ordered: dt.datetime,
-        ticket: int,
-        samples: List[dict],
+        self, customer: str, order: str, ordered: dt.datetime, ticket: int, samples: List[dict],
     ) -> List[models.Sample]:
         """Store samples in the status database."""
         customer_obj = self.status.customer(customer)
@@ -303,9 +275,7 @@ class StatusHandler:
                 )
                 new_sample.customer = customer_obj
                 application_tag = sample["application"]
-                application_version = self.status.current_application_version(
-                    application_tag
-                )
+                application_version = self.status.current_application_version(application_tag)
                 if application_version is None:
                     raise OrderError(f"Invalid application: {sample['application']}")
                 new_sample.application_version = application_version
@@ -315,12 +285,7 @@ class StatusHandler:
         return new_samples
 
     def store_fastq_samples(
-        self,
-        customer: str,
-        order: str,
-        ordered: dt.datetime,
-        ticket: int,
-        samples: List[dict],
+        self, customer: str, order: str, ordered: dt.datetime, ticket: int, samples: List[dict],
     ) -> List[models.Sample]:
         """Store fast samples in the status database including family connection and delivery."""
         production_customer = self.status.customer("cust000")
@@ -346,9 +311,7 @@ class StatusHandler:
                 new_sample.customer = customer_obj
 
                 application_tag = sample["application"]
-                application_version = self.status.current_application_version(
-                    application_tag
-                )
+                application_version = self.status.current_application_version(application_tag)
                 if application_version is None:
                     raise OrderError(f"Invalid application: {sample['application']}")
                 new_sample.application_version = application_version
@@ -362,15 +325,11 @@ class StatusHandler:
                     self.status.add(new_family)
 
                     new_relationship = self.status.relate_sample(
-                        family=new_family,
-                        sample=new_sample,
-                        status=sample["status"] or "unknown",
+                        family=new_family, sample=new_sample, status=sample["status"] or "unknown",
                     )
                     self.status.add(new_relationship)
 
-                new_delivery = self.status.add_delivery(
-                    destination="caesar", sample=new_sample
-                )
+                new_delivery = self.status.add_delivery(destination="caesar", sample=new_sample)
                 self.status.add(new_delivery)
 
         self.status.add_commit(new_samples)
@@ -401,13 +360,9 @@ class StatusHandler:
             )
             for sample_data in samples:
                 application_tag = sample_data["application"]
-                application_version = self.status.current_application_version(
-                    application_tag
-                )
+                application_version = self.status.current_application_version(application_tag)
                 if application_version is None:
-                    raise OrderError(
-                        f"Invalid application: {sample_data['application']}"
-                    )
+                    raise OrderError(f"Invalid application: {sample_data['application']}")
 
                 organism = self.status.organism(sample_data["organism_id"])
 
@@ -435,12 +390,7 @@ class StatusHandler:
         return new_order
 
     def store_pools(
-        self,
-        customer: str,
-        order: str,
-        ordered: dt.datetime,
-        ticket: int,
-        pools: List[dict],
+        self, customer: str, order: str, ordered: dt.datetime, ticket: int, pools: List[dict],
     ) -> List[models.Pool]:
         """Store pools in the status database."""
         customer_obj = self.status.customer(customer)
@@ -449,9 +399,7 @@ class StatusHandler:
         new_pools = []
         for pool in pools:
             with self.status.session.no_autoflush:
-                application_version = self.status.current_application_version(
-                    pool["application"]
-                )
+                application_version = self.status.current_application_version(pool["application"])
                 if application_version is None:
                     raise OrderError(f"Invalid application: {pool['application']}")
             new_pool = self.status.add_pool(

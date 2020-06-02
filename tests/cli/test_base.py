@@ -55,9 +55,7 @@ def test_cli_init(cli_runner, invoke_cli):
 
         # GIVEN the database already exists
         # WHEN calling "init" with "--reset"
-        result = invoke_cli(
-            ["--database", database_uri, "init", "--reset"], input="Yes"
-        )
+        result = invoke_cli(["--database", database_uri, "init", "--reset"], input="Yes")
 
         # THEN it should re-setup the tables and print new tables
         assert result.exit_code == 0

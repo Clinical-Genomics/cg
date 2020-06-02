@@ -20,23 +20,16 @@ from cg.meta.orders import OrdersAPI, OrderType
         OrderType.MIP_BALSAMIC,
     ],
 )
-def test_submit(
-    base_store, orders_api: OrdersAPI, all_orders_to_submit, monkeypatch, order_type
-):
+def test_submit(base_store, orders_api: OrdersAPI, all_orders_to_submit, monkeypatch, order_type):
     ticket_number = 123456
-    monkeypatch.setattr(
-        orders_api.osticket, "open_ticket", lambda *args, **kwargs: ticket_number
-    )
+    monkeypatch.setattr(orders_api.osticket, "open_ticket", lambda *args, **kwargs: ticket_number)
 
     order_data = all_orders_to_submit[order_type]
     lims_project_data = {"id": "ADM1234", "date": dt.datetime.now()}
     lims_map = {
-        sample["name"]: f"ELH123A{index}"
-        for index, sample in enumerate(order_data["samples"])
+        sample["name"]: f"ELH123A{index}" for index, sample in enumerate(order_data["samples"])
     }
-    monkeypatch.setattr(
-        orders_api, "process_lims", lambda *args: (lims_project_data, lims_map)
-    )
+    monkeypatch.setattr(orders_api, "process_lims", lambda *args: (lims_project_data, lims_map))
 
     # GIVEN an order and an empty store
     assert base_store.samples().first() is None
@@ -55,33 +48,25 @@ def test_submit(
 
 
 @pytest.mark.parametrize(
-    "order_type",
-    [OrderType.MIP, OrderType.EXTERNAL, OrderType.BALSAMIC, OrderType.MIP_BALSAMIC],
+    "order_type", [OrderType.MIP, OrderType.EXTERNAL, OrderType.BALSAMIC, OrderType.MIP_BALSAMIC],
 )
 def test_submit_illegal_sample_customer(
     sample_store, orders_api, all_orders_to_submit, monkeypatch, order_type
 ):
     ticket_number = 123456
-    monkeypatch.setattr(
-        orders_api.osticket, "open_ticket", lambda *args, **kwargs: ticket_number
-    )
+    monkeypatch.setattr(orders_api.osticket, "open_ticket", lambda *args, **kwargs: ticket_number)
 
     order_data = all_orders_to_submit[order_type]
     lims_project_data = {"id": "ADM1234", "date": dt.datetime.now()}
     lims_map = {
-        sample["name"]: f"ELH123A{index}"
-        for index, sample in enumerate(order_data["samples"])
+        sample["name"]: f"ELH123A{index}" for index, sample in enumerate(order_data["samples"])
     }
-    monkeypatch.setattr(
-        orders_api, "process_lims", lambda *args: (lims_project_data, lims_map)
-    )
+    monkeypatch.setattr(orders_api, "process_lims", lambda *args: (lims_project_data, lims_map))
     order_ticket = {"name": "Paul Anderson", "email": "paul@magnolia.com"}
 
     # GIVEN we have an order with a customer that is not in the same customer group as customer
     # that the samples originate from
-    customer_group = sample_store.add_customer_group(
-        "customer999only", "customer 999 only group"
-    )
+    customer_group = sample_store.add_customer_group("customer999only", "customer 999 only group")
     sample_store.add_commit(customer_group)
     new_customer = sample_store.add_customer(
         "customer999",
@@ -106,33 +91,25 @@ def test_submit_illegal_sample_customer(
 
 
 @pytest.mark.parametrize(
-    "order_type",
-    [OrderType.MIP, OrderType.EXTERNAL, OrderType.BALSAMIC, OrderType.MIP_BALSAMIC],
+    "order_type", [OrderType.MIP, OrderType.EXTERNAL, OrderType.BALSAMIC, OrderType.MIP_BALSAMIC],
 )
 def test_submit_scout_legal_sample_customer(
     sample_store, orders_api, all_orders_to_submit, monkeypatch, order_type
 ):
     ticket_number = 123456
-    monkeypatch.setattr(
-        orders_api.osticket, "open_ticket", lambda *args, **kwargs: ticket_number
-    )
+    monkeypatch.setattr(orders_api.osticket, "open_ticket", lambda *args, **kwargs: ticket_number)
 
     order_data = all_orders_to_submit[order_type]
     lims_project_data = {"id": "ADM1234", "date": dt.datetime.now()}
     lims_map = {
-        sample["name"]: f"ELH123A{index}"
-        for index, sample in enumerate(order_data["samples"])
+        sample["name"]: f"ELH123A{index}" for index, sample in enumerate(order_data["samples"])
     }
-    monkeypatch.setattr(
-        orders_api, "process_lims", lambda *args: (lims_project_data, lims_map)
-    )
+    monkeypatch.setattr(orders_api, "process_lims", lambda *args: (lims_project_data, lims_map))
     order_ticket = {"name": "Paul Anderson", "email": "paul@magnolia.com"}
 
     # GIVEN we have an order with a customer that is in the same customer group as customer
     # that the samples originate from
-    customer_group = sample_store.add_customer_group(
-        "customer999only", "customer 999 only group"
-    )
+    customer_group = sample_store.add_customer_group("customer999only", "customer 999 only group")
     sample_store.add_commit(customer_group)
     sample_customer = sample_store.add_customer(
         "customer1",
@@ -169,33 +146,25 @@ def test_submit_scout_legal_sample_customer(
 
 
 @pytest.mark.parametrize(
-    "order_type",
-    [OrderType.RML, OrderType.FASTQ, OrderType.MICROBIAL, OrderType.METAGENOME],
+    "order_type", [OrderType.RML, OrderType.FASTQ, OrderType.MICROBIAL, OrderType.METAGENOME],
 )
 def test_submit_non_scout_legal_sample_customer(
     sample_store, orders_api, all_orders_to_submit, monkeypatch, order_type
 ):
     ticket_number = 123456
-    monkeypatch.setattr(
-        orders_api.osticket, "open_ticket", lambda *args, **kwargs: ticket_number
-    )
+    monkeypatch.setattr(orders_api.osticket, "open_ticket", lambda *args, **kwargs: ticket_number)
 
     order_data = all_orders_to_submit[order_type]
     lims_project_data = {"id": "ADM1234", "date": dt.datetime.now()}
     lims_map = {
-        sample["name"]: f"ELH123A{index}"
-        for index, sample in enumerate(order_data["samples"])
+        sample["name"]: f"ELH123A{index}" for index, sample in enumerate(order_data["samples"])
     }
-    monkeypatch.setattr(
-        orders_api, "process_lims", lambda *args: (lims_project_data, lims_map)
-    )
+    monkeypatch.setattr(orders_api, "process_lims", lambda *args: (lims_project_data, lims_map))
     order_ticket = {"name": "Paul Anderson", "email": "paul@magnolia.com"}
 
     # GIVEN we have an order with a customer that is in the same customer group as customer
     # that the samples originate from but on order types where this is dis-allowed
-    customer_group = sample_store.add_customer_group(
-        "customer999only", "customer 999 only group"
-    )
+    customer_group = sample_store.add_customer_group("customer999only", "customer 999 only group")
     sample_store.add_commit(customer_group)
     sample_customer = sample_store.add_customer(
         "customer1",

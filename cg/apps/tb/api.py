@@ -11,10 +11,8 @@ from trailblazer.store import Store, models
 from trailblazer.cli.utils import environ_email
 from trailblazer.mip import files, fastq, trending
 
-from .add import AddHandler
 
-
-class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
+class TrailblazerAPI(Store, fastq.FastqHandler):
     """Interface to Trailblazer for `cg`."""
 
     parse_sampleinfo = staticmethod(files.parse_sampleinfo)
@@ -23,7 +21,11 @@ class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
         super(TrailblazerAPI, self).__init__(
             config["trailblazer"]["database"], families_dir=config["trailblazer"]["root"]
         )
-        self.mip_cli = MipCli(config["trailblazer"]["script"], config["trailblazer"]["pipeline"])
+        self.mip_cli = MipCli(
+            script=config["trailblazer"]["script"],
+            pipeline=config["trailblazer"]["pipeline"],
+            conda_env=config["trailblazer"]["conda_env"],
+        )
         self.mip_config = config["trailblazer"]["mip_config"]
 
     def run(

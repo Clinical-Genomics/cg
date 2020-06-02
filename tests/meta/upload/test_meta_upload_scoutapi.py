@@ -4,7 +4,6 @@ from pathlib import Path
 import pytest
 import yaml
 
-from cg.apps.hk import HousekeeperAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
 from cg.store import Store
 
@@ -137,35 +136,33 @@ def test_save_config_creates_yaml(upload_scout_api: UploadScoutAPI, tmp_file):
     assert _file_is_yaml(tmp_file)
 
 
-def test_add_scout_config_to_hk(
-    upload_scout_api: UploadScoutAPI, housekeeper_api: HousekeeperAPI, tmp_file
-):
+def test_add_scout_config_to_hk(upload_scout_api: UploadScoutAPI, tmp_file):
     """Test that scout load config is added to housekeeper"""
     # GIVEN a hk_mock and a file path to scout load config
+    tag_name = UploadScoutAPI.get_load_config_tag()
+    housekeeper_api = upload_scout_api.housekeeper
+    # GIVEN a hk mock that does not return a config file
+    housekeeper_api.add_missing_tag(tag_name)
     # WHEN adding the file path to hk_api
+
     upload_scout_api.add_scout_config_to_hk(
         config_file_path=tmp_file, hk_api=housekeeper_api, case_id="dummy"
     )
     # THEN assert that the file path is added to hk
     # file added to hk-db
-    assert housekeeper_api._file_added is True
-    # file linked to hk-disk
-    assert housekeeper_api._file_included is True
+    assert housekeeper_api.is_file_added() is True
+    assert housekeeper_api.is_file_included() is True
 
 
-def test_add_scout_config_to_hk_existing_files(
-    upload_scout_api: UploadScoutAPI, housekeeper_api: HousekeeperAPI, tmp_file
-):
+def test_add_scout_config_to_hk_existing_files(upload_scout_api: UploadScoutAPI, tmp_file):
     """Test that scout config is not updated in housekeeper if it already exists"""
     # GIVEN a hk_mock with an scout upload file and a file path to scout load config
-    housekeeper_api._files = ["a file path"]
+    housekeeper_api = upload_scout_api.housekeeper
+    # GIVEN that there are files in the hk mock
+    assert housekeeper_api.files
     # WHEN adding the file path to hk_api
     with pytest.raises(FileExistsError):
         # THEN assert File exists exception is raised
         upload_scout_api.add_scout_config_to_hk(
             config_file_path=tmp_file, hk_api=housekeeper_api, case_id="dummy"
         )
-    # THEN assert file is not added to hk-db
-    assert housekeeper_api._file_added is False
-    # THEN assert file is not included in hk-db
-    assert housekeeper_api._file_included is False

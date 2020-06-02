@@ -22,12 +22,7 @@ class ChanjoAPI:
         self.process = Process(self.chanjo_binary, self.chanjo_config)
 
     def upload(
-        self,
-        sample_id: str,
-        sample_name: str,
-        group_id: str,
-        group_name: str,
-        bed_file: str,
+        self, sample_id: str, sample_name: str, group_id: str, group_name: str, bed_file: str,
     ):
         """Upload coverage for a sample."""
 

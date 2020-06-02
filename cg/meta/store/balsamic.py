@@ -6,6 +6,7 @@ import shutil
 from pathlib import Path
 
 import ruamel.yaml
+
 from cg.exc import AnalysisDuplicationError
 
 LOG = logging.getLogger(__name__)

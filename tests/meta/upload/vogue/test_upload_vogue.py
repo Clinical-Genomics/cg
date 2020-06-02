@@ -17,12 +17,8 @@ def test_load_genotype(genotype_api, vogue_api, genotype_return, mocker, store):
     mocker.patch.object(genotype_api, "export_sample_analysis")
 
     genotype_api.export_sample.return_value = genotype_return["sample"]
-    genotype_api.export_sample_analysis.return_value = genotype_return[
-        "sample_analysis"
-    ]
-    upload_vogue_api = UploadVogueAPI(
-        genotype_api=genotype_api, vogue_api=vogue_api, store=store
-    )
+    genotype_api.export_sample_analysis.return_value = genotype_return["sample_analysis"]
+    upload_vogue_api = UploadVogueAPI(genotype_api=genotype_api, vogue_api=vogue_api, store=store)
     upload_vogue_api.load_genotype(days="1")
 
     # THEN vogueapi.load_genotype will be called once for each sample in genotype_return_value
@@ -41,9 +37,7 @@ def test_load_apptags(vogue_api, genotype_api, store, mocker):
     apptags = store.applications().apptag_list
 
     mocker.patch.object(vogue_api, "load_apptags")
-    upload_vogue_api = UploadVogueAPI(
-        genotype_api=genotype_api, vogue_api=vogue_api, store=store
-    )
+    upload_vogue_api = UploadVogueAPI(genotype_api=genotype_api, vogue_api=vogue_api, store=store)
 
     # WHEN running load_apptags
     upload_vogue_api.load_apptags()

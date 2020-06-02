@@ -15,9 +15,7 @@ def parse_requirements(req_path="./requirements.txt"):
     install_requires = []
     with open(req_path, "r") as handle:
         # remove comments and empty lines
-        lines = (
-            line.strip() for line in handle if line.strip() and not line.startswith("#")
-        )
+        lines = (line.strip() for line in handle if line.strip() and not line.startswith("#"))
         for line in lines:
             # check for nested requirements files
             if line.startswith("-r"):
@@ -55,7 +53,7 @@ class PyTest(TestCommand):
 
 setup(
     name="cg",
-    version="9.7.1",
+    version="9.16.2",
     description="Clinical Genomics command center.",
     author="Patrik Grenfeldt",
     author_email="patrik.grenfeldt@scilifelab.se",

@@ -1,6 +1,14 @@
-# cg [![Build Status][travis-image]][travis-url] [![Coverage Status][coveralls-image]][coveralls-url]
+# cg
+![Build Status - Github][gh-actions-badge]
+[![Coverage Status][coveralls-image]][coveralls-url]
+[![GitHub issues-closed][closed-issues-img]][closed-issues-url]
+[![Average time to resolve an issue][ismaintained-resolve-img]][ismaintained-resolve-url]
+[![Percentage of issues still open][ismaintained-open-rate-img]][ismaintained-open-rate-url]
+[![CodeFactor][codefactor-badge]][codefactor-url]
+[![Code style: black][black-image]][black-url]
 
-`cg` stands for _Clinical Genomics_; a clinical sequencing platform under [SciLifeLab][scilife] 
+
+`cg` stands for _Clinical Genomics_; a clinical sequencing platform under [SciLifeLab][scilife]
 
 This is our main package for interacting with data and samples that flow through our pipeline. We rely on a set of specialized "apps" to deal with a lot of complexity like:
 
@@ -29,7 +37,7 @@ cd cg
 pip install -r requirements-dev.txt --editable .
 ```
 
-If you would like to automatically [Black][black] format your commits: 
+If you would like to automatically [Black][black] format your commits:
 
 ```
 pre-commit install
@@ -358,4 +366,16 @@ Some unit tests make use of [snapshottest][snapshottest]. To update existing sna
 [coveralls-image]: https://coveralls.io/repos/github/Clinical-Genomics/cg/badge.svg?branch=master
 
 [black]: https://black.readthedocs.io/en/stable/
-[snapshottest]: https://github.com/syrusakbary/snapshottest 
+[snapshottest]: https://github.com/syrusakbary/snapshottest
+
+[gh-actions-badge]: https://github.com/Clinical-Genomics/cg/workflows/Tests%20and%20coveralls/badge.svg
+[closed-issues-img]: https://img.shields.io/github/issues-closed/Clinical-Genomics/cg.svg
+[closed-issues-url]: https://GitHub.com/Clinical-Genomics/cg/issues?q=is%3Aissue+is%3Aclosed
+[ismaintained-resolve-img]: http://isitmaintained.com/badge/resolution/Clinical-Genomics/cg.svg
+[ismaintained-resolve-url]: http://isitmaintained.com/project/Clinical-Genomics/cg
+[ismaintained-open-rate-img]: http://isitmaintained.com/badge/open/Clinical-Genomics/cg.svg
+[ismaintained-open-rate-url]: http://isitmaintained.com/project/Clinical-Genomics/cg
+[codefactor-badge]: https://www.codefactor.io/repository/github/clinical-genomics/cg/badge
+[codefactor-url]: https://www.codefactor.io/repository/github/clinical-genomics/cg
+[black-image]: https://img.shields.io/badge/code%20style-black-000000.svg
+[black-url]: https://github.com/psf/black

@@ -18,9 +18,7 @@ def test_run_dry(cli_runner, tb_api, mock_store, caplog):
     # WHEN we run a case in dry run mode
     caplog.set_level(logging.INFO)
     cli_runner.invoke(
-        run,
-        ["--dry", "--email", "james.holden@scilifelab.se", "angrybird"],
-        obj=context,
+        run, ["--dry", "--email", "james.holden@scilifelab.se", "angrybird"], obj=context,
     )
 
     # THEN the command should be printed
@@ -49,9 +47,7 @@ def test_run(cli_runner, tb_api, mock_store, caplog, monkeypatch):
 
     # WHEN we run a case
     caplog.set_level(logging.INFO)
-    cli_runner.invoke(
-        run, ["--email", "james.holden@scilifelab.se", "angrybird"], obj=context
-    )
+    cli_runner.invoke(run, ["--email", "james.holden@scilifelab.se", "angrybird"], obj=context)
 
     # THEN we should get to the end of the function
     with caplog.at_level(logging.INFO):

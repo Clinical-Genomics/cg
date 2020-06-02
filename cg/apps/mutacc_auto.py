@@ -10,7 +10,7 @@ import json
 LOG = logging.getLogger(__name__)
 
 
-class MutaccAutoAPI():
+class MutaccAutoAPI:
 
     """
         API for mutacc-auto
@@ -18,10 +18,10 @@ class MutaccAutoAPI():
 
     def __init__(self, config: dict):
 
-        self.mutacc_auto_config = config['mutacc-auto']['config_path']
-        self.mutacc_auto_binary = config['mutacc-auto']['binary_path']
-        self.mutacc_padding = config['mutacc-auto']['padding']
-        self.base_call = [self.mutacc_auto_binary, '--config-file', self.mutacc_auto_config]
+        self.mutacc_auto_config = config["mutacc-auto"]["config_path"]
+        self.mutacc_auto_binary = config["mutacc-auto"]["binary_path"]
+        self.mutacc_padding = config["mutacc-auto"]["padding"]
+        self.base_call = [self.mutacc_auto_binary, "--config-file", self.mutacc_auto_config]
 
     def extract_reads(self, case: dict, variants: dict):
         """
@@ -41,12 +41,17 @@ class MutaccAutoAPI():
             """ decode to str if object is not serializable"""
             return str(obj)
 
-        extract_call.extend([
-            'extract',
-            '--variants', json.dumps(variants, default=json_default_decoder),
-            '--case', json.dumps(case, default=json_default_decoder),
-            '--padding', str(self.mutacc_padding)
-        ])
+        extract_call.extend(
+            [
+                "extract",
+                "--variants",
+                json.dumps(variants, default=json_default_decoder),
+                "--case",
+                json.dumps(case, default=json_default_decoder),
+                "--padding",
+                str(self.mutacc_padding),
+            ]
+        )
 
         run_command(extract_call)
 
@@ -57,9 +62,7 @@ class MutaccAutoAPI():
         """
 
         import_call = copy.deepcopy(self.base_call)
-        import_call.extend([
-            'import'
-        ])
+        import_call.extend(["import"])
 
         run_command(import_call)
 
@@ -76,5 +79,5 @@ def run_command(command: list):
     completed_process = subprocess.run(args=command, check=False)
     returncode = completed_process.returncode
     if returncode != 0:
-        LOG.warning("process %s ended with exitcode %d", ' '.join(command), returncode)
+        LOG.warning("process %s ended with exitcode %d", " ".join(command), returncode)
         raise subprocess.CalledProcessError(returncode=returncode, cmd=command)
