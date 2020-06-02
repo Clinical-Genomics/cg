@@ -1,16 +1,17 @@
-"""Builds MIP RNA bundle for linking in Housekeeper"""
+""" MIP specific functionality for storing files in Houskeeper """
 import logging
 from pathlib import Path
-
 import ruamel.yaml
 
-from cg.constants import TAGS
-from cg.exc import AnalysisNotFinishedError, BundleAlreadyAddedError
-from cg.meta.store.base import (
-    reset_case_action,
-    add_new_analysis,
-    get_files,
+from cg.exc import (
+    AnalysisNotFinishedError,
+    BundleAlreadyAddedError,
 )
+from cg.meta.store.base import (
+    build_bundle,
+    add_new_analysis,
+)
+from cg.store.utils import reset_case_action
 
 LOG = logging.getLogger(__name__)
 
@@ -54,21 +55,6 @@ def add_analysis(config_stream):
     return new_bundle
 
 
-def build_bundle(config_data: dict, sampleinfo_data: dict, deliverables: dict) -> dict:
-    """Create a new bundle for RNA."""
-
-    pipeline = config_data["samples"][0]["type"]
-    pipeline_tag = TAGS[pipeline]
-
-    data = {
-        "name": config_data["case"],
-        "created": sampleinfo_data["date"],
-        "pipeline_version": sampleinfo_data["version"],
-        "files": get_files(deliverables, pipeline_tag),
-    }
-    return data
-
-
 def parse_config(data: dict) -> dict:
     """Parse MIP config file.
 
@@ -89,21 +75,11 @@ def parse_config(data: dict) -> dict:
     }
 
 
-def _get_sample_analysis_type(data: dict) -> list:
-    """
-        get analysis type for all samples in the MIP config file
-    """
-    return [
-        {"id": sample_id, "type": analysis_type}
-        for sample_id, analysis_type in data["analysis_type"].items()
-    ]
-
-
 def parse_sampleinfo(data: dict) -> dict:
-    """Parse MIP sample info file (RNA).
+    """Parse MIP sample info file.
 
     Args:
-        data (dict): raw YAML input from MIP qc sample info file (RNA)
+        data (dict): raw YAML input from MIP qc sample info file
 
     Returns:
         dict: parsed data
@@ -117,3 +93,13 @@ def parse_sampleinfo(data: dict) -> dict:
     }
 
     return sampleinfo_data
+
+
+def _get_sample_analysis_type(data: dict) -> list:
+    """
+        Get analysis type for all samples in the MIP config file
+    """
+    return [
+        {"id": sample_id, "type": analysis_type}
+        for sample_id, analysis_type in data["analysis_type"].items()
+    ]

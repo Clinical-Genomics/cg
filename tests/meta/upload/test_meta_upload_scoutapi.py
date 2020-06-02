@@ -154,9 +154,7 @@ def test_add_scout_config_to_hk(upload_scout_api: UploadScoutAPI, tmp_file):
     assert housekeeper_api.is_file_included() is True
 
 
-def test_add_scout_config_to_hk_existing_files(
-    upload_scout_api: UploadScoutAPI, tmp_file
-):
+def test_add_scout_config_to_hk_existing_files(upload_scout_api: UploadScoutAPI, tmp_file):
     """Test that scout config is not updated in housekeeper if it already exists"""
     # GIVEN a hk_mock with an scout upload file and a file path to scout load config
     housekeeper_api = upload_scout_api.housekeeper

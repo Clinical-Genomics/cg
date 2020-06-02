@@ -72,7 +72,7 @@ class ReportValidator:
     def _collect_missing_attributes(self, subscriptable, keys):
         """Gathers all attributes that should exist"""
         for key in keys:
-            if not subscriptable[key]:
+            if subscriptable.get(key) is None:
                 self._attributes_missing_values.append(key)
 
     def _check_required_sample_attributes_for_all(self, sample):

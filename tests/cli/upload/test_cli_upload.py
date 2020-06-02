@@ -62,9 +62,7 @@ def test_upload_fails_hard_on_faulty_analysis(invoke_cli, disk_store: Store, hel
     assert "no analysis exists" in result.output
 
 
-def test_upload_doesnt_invoke_dually_for_same_case(
-    invoke_cli, disk_store: Store, helpers
-):
+def test_upload_doesnt_invoke_dually_for_same_case(invoke_cli, disk_store: Store, helpers):
     """Test that a case that is already uploading can't be uploaded at the same time"""
 
     # GIVEN an analysis that is already uploading
@@ -81,9 +79,7 @@ def test_upload_doesnt_invoke_dually_for_same_case(
     assert "already started" in result.output
 
 
-def test_upload_started_long_time_ago_raises_exception(
-    invoke_cli, disk_store: Store, helpers
-):
+def test_upload_started_long_time_ago_raises_exception(invoke_cli, disk_store: Store, helpers):
     """Test that an upload for a missing family does fail hard """
 
     # GIVEN an analysis that is already uploading since a week ago
@@ -91,9 +87,7 @@ def test_upload_started_long_time_ago_raises_exception(
     family_id = family.internal_id
     today = datetime.now()
     upload_started = today - timedelta(hours=100)
-    helpers.add_analysis(
-        disk_store, family=family, uploading=True, upload_started=upload_started
-    )
+    helpers.add_analysis(disk_store, family=family, uploading=True, upload_started=upload_started)
 
     # WHEN trying to upload an analysis that was started a long time ago
     result = invoke_cli(["--database", disk_store.uri, "upload", "-f", family_id])

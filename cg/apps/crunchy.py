@@ -218,11 +218,7 @@ class CrunchyAPI:
 
     @staticmethod
     def _get_slurm_bam_to_cram(
-        bam_path: str,
-        cram_path: str,
-        flag_path: str,
-        pending_path: str,
-        reference_path: str,
+        bam_path: str, cram_path: str, flag_path: str, pending_path: str, reference_path: str,
     ) -> str:
         sbatch_body = SBATCH_BAM_TO_CRAM.format(
             bam_path=bam_path,

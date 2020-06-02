@@ -40,9 +40,7 @@ def test_get_version_existing(housekeeper_api, a_date, bundle_data):
     assert fetched_version.bundle_id == bundle_obj.id
 
 
-def test_add_version_existing_bundle(
-    populated_housekeeper_api, later_date, case_id, small_helpers
-):
+def test_add_version_existing_bundle(populated_housekeeper_api, later_date, case_id, small_helpers):
     """Test to get a version when there is a bundle and a version"""
     # GIVEN a populated housekeeper_api and a bundle with one version
     bundle_obj = populated_housekeeper_api.bundle(name=case_id)

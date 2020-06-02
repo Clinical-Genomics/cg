@@ -11,7 +11,7 @@ import ruamel.yaml
 from trailblazer.mip import files as mip_dna_files_api
 
 from cg.apps.mip_rna import files as mip_rna_files_api
-from cg.meta.store import mip_rna as store_mip_rna
+from cg.meta.store import mip as store_mip
 from cg.store import Store
 
 from .mocks.hk_mock import MockHousekeeperAPI
@@ -23,11 +23,7 @@ CHANJO_CONFIG = {"chanjo": {"config_path": "chanjo_config", "binary_path": "chan
 CRUNCHY_CONFIG = {
     "crunchy": {
         "cram_reference": "/path/to/fasta",
-        "slurm": {
-            "account": "mock_account",
-            "mail_user": "mock_mail",
-            "conda_env": "mock_env",
-        },
+        "slurm": {"account": "mock_account", "mail_user": "mock_mail", "conda_env": "mock_env",},
     }
 }
 
@@ -240,9 +236,7 @@ def fixture_files_raw(files):
         "rna_config": ruamel.yaml.safe_load(open(files["rna_config"])),
         "rna_sampleinfo": ruamel.yaml.safe_load(open(files["rna_sampleinfo"])),
         "rna_config_store": ruamel.yaml.safe_load(open(files["rna_config_store"])),
-        "rna_sampleinfo_store": ruamel.yaml.safe_load(
-            open(files["rna_sampleinfo_store"])
-        ),
+        "rna_sampleinfo_store": ruamel.yaml.safe_load(open(files["rna_sampleinfo_store"])),
     }
 
 
@@ -254,13 +248,9 @@ def files_data(files_raw):
         "sampleinfo": mip_dna_files_api.parse_sampleinfo(files_raw["sampleinfo"]),
         "qcmetrics": mip_dna_files_api.parse_qcmetrics(files_raw["qcmetrics"]),
         "rna_config": mip_dna_files_api.parse_config(files_raw["rna_config"]),
-        "rna_sampleinfo": mip_rna_files_api.parse_sampleinfo_rna(
-            files_raw["rna_sampleinfo"]
-        ),
-        "rna_config_store": store_mip_rna.parse_config(files_raw["rna_config_store"]),
-        "rna_sampleinfo_store": store_mip_rna.parse_sampleinfo(
-            files_raw["rna_sampleinfo_store"]
-        ),
+        "rna_sampleinfo": mip_rna_files_api.parse_sampleinfo_rna(files_raw["rna_sampleinfo"]),
+        "rna_config_store": store_mip.parse_config(files_raw["rna_config_store"]),
+        "rna_sampleinfo_store": store_mip.parse_sampleinfo(files_raw["rna_sampleinfo_store"]),
     }
 
 
@@ -338,9 +328,7 @@ def fixture_hk_version_obj(housekeeper_api, hk_bundle_data, helpers):
 @pytest.yield_fixture(scope="function", name="analysis_store")
 def fixture_analysis_store(base_store, analysis_family, wgs_application_tag, helpers):
     """Setup a store instance for testing analysis API."""
-    helpers.ensure_family(
-        base_store, family_info=analysis_family, app_tag=wgs_application_tag
-    )
+    helpers.ensure_family(base_store, family_info=analysis_family, app_tag=wgs_application_tag)
 
     yield base_store
 
@@ -370,10 +358,7 @@ def fixture_customer_group() -> str:
 def fixture_customer_production(customer_group) -> dict:
     """Return a dictionary with infomation about the prod customer"""
     _cust = dict(
-        customer_id="cust000",
-        name="Production",
-        scout_access=True,
-        customer_group=customer_group,
+        customer_id="cust000", name="Production", scout_access=True, customer_group=customer_group,
     )
     return _cust
 
@@ -616,9 +601,7 @@ def sample_store(base_store) -> Store:
     wgs_app = base_store.application("WGTPCFC030").versions[0]
     for sample in new_samples:
         sample.customer = customer
-        sample.application_version = (
-            external_app if "external" in sample.name else wgs_app
-        )
+        sample.application_version = external_app if "external" in sample.name else wgs_app
     base_store.add_commit(new_samples)
     return base_store
 

@@ -29,9 +29,7 @@ def store(context):
 
 @store.command()
 @click.argument("case_id")
-@click.option(
-    "--deliverables-file", "deliverables_file_path", required=False, help="Optional"
-)
+@click.option("--deliverables-file", "deliverables_file_path", required=False, help="Optional")
 @click.pass_context
 def analysis(context, case_id, deliverables_file_path):
     """Store a finished analysis in Housekeeper."""

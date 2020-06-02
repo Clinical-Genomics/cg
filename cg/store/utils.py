@@ -30,3 +30,9 @@ def get_unique_id(availability_func: Callable) -> str:
             return random_id
         else:
             LOG.debug(f"{random_id} already used - trying another id")
+
+
+def reset_case_action(case_obj):
+    """ Resets action on case """
+
+    case_obj.action = None

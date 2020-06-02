@@ -43,9 +43,7 @@ def test_add_user(invoke_cli, disk_store: Store):
     # WHEN adding a new user
     name, email = "Paul T. Anderson", "paul.anderson@magnolia.com"
     db_uri = disk_store.uri
-    result = invoke_cli(
-        ["--database", db_uri, "add", "user", "-c", customer_id, email, name]
-    )
+    result = invoke_cli(["--database", db_uri, "add", "user", "-c", customer_id, email, name])
 
     # THEN it should be stored in the database
     assert result.exit_code == 0

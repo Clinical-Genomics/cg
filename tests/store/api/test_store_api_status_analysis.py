@@ -10,9 +10,7 @@ def test_that_many_families_can_have_one_sample_each(base_store: Store):
     # GIVEN a database with two families one with 50 sequenced samples
     # the other family with one
     n_test_families = 50
-    test_families = add_families_with_samples(
-        base_store, n_test_families, sequenced=True
-    )
+    test_families = add_families_with_samples(base_store, n_test_families, sequenced=True)
 
     # WHEN getting families to analyse
     families = base_store.cases_to_mip_analyze()
@@ -182,19 +180,14 @@ def ensure_application_version(disk_store, application_tag="dummy_tag"):
     application = disk_store.application(tag=application_tag)
     if not application:
         application = disk_store.add_application(
-            tag=application_tag,
-            category="wgs",
-            description="dummy_description",
-            percent_kth=80,
+            tag=application_tag, category="wgs", description="dummy_description", percent_kth=80,
         )
         disk_store.add_commit(application)
 
     prices = {"standard": 10, "priority": 20, "express": 30, "research": 5}
     version = disk_store.application_version(application, 1)
     if not version:
-        version = disk_store.add_version(
-            application, 1, valid_from=datetime.now(), prices=prices
-        )
+        version = disk_store.add_version(application, 1, valid_from=datetime.now(), prices=prices)
         disk_store.add_commit(version)
     return version
 
@@ -328,9 +321,7 @@ def add_family(
     return family
 
 
-def add_analysis(
-    store, completed=False, uploaded=False, pipeline=None, reanalyse=False
-):
+def add_analysis(store, completed=False, uploaded=False, pipeline=None, reanalyse=False):
     """Utility function to add an analysis for tests"""
     analysis = store.add_analysis(pipeline="", version="")
     if completed:

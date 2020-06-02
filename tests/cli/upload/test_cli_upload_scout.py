@@ -54,9 +54,7 @@ def test_upload_with_load_config(
     assert load_file_mentioned_in_result(result, load_config_file.full_path)
 
 
-def test_produce_load_config(
-    base_context, cli_runner, case_id, scout_hk_bundle_data, helpers
-):
+def test_produce_load_config(base_context, cli_runner, case_id, scout_hk_bundle_data, helpers):
     """Test create a scout load config with the scout upload api"""
     # GIVEN a singleton WGS case
 

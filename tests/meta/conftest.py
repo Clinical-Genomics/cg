@@ -72,12 +72,8 @@ def analysis_store(base_store, analysis_family):
             family=family,
             sample=sample_obj,
             status=sample_data["status"],
-            father=base_store.sample(sample_data["father"])
-            if sample_data.get("father")
-            else None,
-            mother=base_store.sample(sample_data["mother"])
-            if sample_data.get("mother")
-            else None,
+            father=base_store.sample(sample_data["father"]) if sample_data.get("father") else None,
+            mother=base_store.sample(sample_data["mother"]) if sample_data.get("mother") else None,
         )
         base_store.add(link)
     base_store.commit()
@@ -160,9 +156,7 @@ class MockTB:
         """Needed to initialise mock variables"""
         self._make_config_was_called = False
 
-    def get_trending(
-        self, mip_config_raw: dict, qcmetrics_raw: dict, sampleinfo_raw: dict
-    ) -> dict:
+    def get_trending(self, mip_config_raw: dict, qcmetrics_raw: dict, sampleinfo_raw: dict) -> dict:
         if self._get_trending_raises_keyerror:
             raise KeyError("mockmessage")
 
