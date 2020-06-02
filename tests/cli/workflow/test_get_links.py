@@ -13,9 +13,7 @@ def test_get_links_case_id(analysis_store):
     assert case_obj.links
 
     # WHEN fetching the links for the case
-    link_objs = get_links(
-        store=analysis_store, case_id=case_obj.internal_id, sample_id=None
-    )
+    link_objs = get_links(store=analysis_store, case_id=case_obj.internal_id, sample_id=None)
 
     # THEN assert that the correct links where found
     assert link_objs == case_obj.links
@@ -48,9 +46,7 @@ def test_get_links_sample_id_and_case_id(analysis_store):
     assert sample_obj.links
 
     # WHEN fetching the links for the sample
-    link_objs = get_links(
-        store=analysis_store, case_id=None, sample_id=sample_obj.internal_id
-    )
+    link_objs = get_links(store=analysis_store, case_id=None, sample_id=sample_obj.internal_id)
     # THEN assert that the correct links where found
     assert link_objs == sample_obj.links
 
