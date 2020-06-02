@@ -140,7 +140,6 @@ def bioinfo(context, case_name, cleanup, target_load, dry):
     if load_bioinfo_raw_inputs["analysis_workflow_name"] not in valid_workflows:
         raise AnalysisUploadError(f"Case upload failed: {case_name}. Reason: Bad workflow name.")
 
-
     if dry:
         click.echo(click.style("----------------- DRY RUN -----------------------"))
 
@@ -152,9 +151,7 @@ def bioinfo(context, case_name, cleanup, target_load, dry):
     if target_load in ("process", "all"):
         click.echo(click.style("----------------- PROCESS CASE -----------------------"))
         if not dry:
-            context.obj["vogue_upload_api"].load_bioinfo_process(
-                load_bioinfo_raw_inputs, cleanup
-            )
+            context.obj["vogue_upload_api"].load_bioinfo_process(load_bioinfo_raw_inputs, cleanup)
         click.echo(click.style("----------------- PROCESS SAMPLE -----------------------"))
         if not dry:
             context.obj["vogue_upload_api"].load_bioinfo_sample(load_bioinfo_raw_inputs)
@@ -185,7 +182,6 @@ def bioinfo_all(context, dry):
         existing_multiqc_file = multiqc_file_obj[0].full_path
         if not Path(existing_multiqc_file).exists():
             continue
-
 
         click.echo(
             click.style(f"Found multiqc for {case_name}, {existing_multiqc_file}", fg="blue")
