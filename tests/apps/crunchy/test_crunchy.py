@@ -2,9 +2,65 @@
 
 from pathlib import Path
 
+import pytest
+
 from cg.apps.crunchy import CrunchyAPI
 from cg.constants import (CRAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX,
                           FASTQ_SECOND_READ_SUFFIX)
+
+
+def test_bamcompression_pending_with_flag(crunchy_config_dict, bam_path):
+    """Test the method that checks if cram compression is pending.
+
+    In this case there WILL be a flag (pending_path) so the method should return True.
+    This means that the compression is not ready
+    """
+    # GIVEN a crunchy-api, and a bam_path
+    crunchy_api = CrunchyAPI(crunchy_config_dict)
+    # GIVEN that the flag exists
+    flag_path = crunchy_api.get_pending_path(file_path=bam_path)
+    flag_path.touch()
+    assert flag_path.exists()
+
+    # WHEN calling the function to check if compression is pending
+    result = crunchy_api.is_cram_compression_pending(bam_path=bam_path)
+
+    # THEN the function should return True since the flag exists
+    assert result is True
+
+
+def test_bamcompression_pending_no_flag(crunchy_config_dict, bam_path):
+    """Test the method that checks if cram compression is pending.
+
+    In this case there will not be a flag (pending_path) so the method should return False
+    """
+    # GIVEN a crunchy-api, and a bam_path
+    crunchy_api = CrunchyAPI(crunchy_config_dict)
+    # GIVEN that the flag does not exist
+    flag_path = crunchy_api.get_pending_path(file_path=bam_path)
+    assert flag_path.exists() is False
+
+    # WHEN calling the function to check if compression is pending
+    result = crunchy_api.is_cram_compression_pending(bam_path=bam_path)
+
+    # THEN the function should return False
+
+    assert result is False
+
+
+def test_get_crampath_from_cram_wrong_suffix(crunchy_config_dict, bam_path):
+    """Test to build a cream path from a bam path when the suffix is wron
+
+    Since the method will realise this is not a bam path a ValueError will be raised
+    """
+    # GIVEN a crunchy-api, and a bam_path with wrong suffix
+    crunchy_api = CrunchyAPI(crunchy_config_dict)
+    new_file = bam_path.with_suffix(".fastq")
+
+    # WHEN calling the method to create a bam path
+    with pytest.raises(ValueError):
+        # THEN a ValueError should be raised since the file does not have a valid bam file suffix
+        crunchy_api.get_cram_path_from_bam(bam_path=new_file)
 
 
 def test_bam_to_cram(crunchy_config_dict, sbatch_content, bam_path, mocker):
