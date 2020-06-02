@@ -22,9 +22,7 @@ from cg.meta.workflow.base import get_target_bed_from_lims
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
-PRIORITY_OPTION = click.option(
-    "-p", "--priority", type=click.Choice(["low", "normal", "high"])
-)
+PRIORITY_OPTION = click.option("-p", "--priority", type=click.Choice(["low", "normal", "high"]))
 EMAIL_OPTION = click.option("-e", "--email", help="email to send errors to")
 SUCCESS = 0
 FAIL = 1
@@ -33,9 +31,7 @@ FAIL = 1
 @click.group(invoke_without_command=True)
 @PRIORITY_OPTION
 @EMAIL_OPTION
-@click.option(
-    "-c", "--case-id", "case_id", help="case to prepare and start an analysis for"
-)
+@click.option("-c", "--case-id", "case_id", help="case to prepare and start an analysis for")
 @click.option("--target-bed", required=False, help="Optional")
 @click.pass_context
 def balsamic(context, case_id, priority, email, target_bed):
@@ -72,9 +68,7 @@ def balsamic(context, case_id, priority, email, target_bed):
         # execute the analysis!
         context.invoke(link, case_id=case_id)
         context.invoke(config_case, case_id=case_id, target_bed=target_bed)
-        context.invoke(
-            run, run_analysis=True, case_id=case_id, priority=priority, email=email
-        )
+        context.invoke(run, run_analysis=True, case_id=case_id, priority=priority, email=email)
 
 
 @balsamic.command()
@@ -88,17 +82,11 @@ def link(context, case_id, sample_id):
 
     for link_obj in link_objs:
         LOG.info(
-            "%s: %s link FASTQ files",
-            link_obj.sample.internal_id,
-            link_obj.sample.data_analysis,
+            "%s: %s link FASTQ files", link_obj.sample.internal_id, link_obj.sample.data_analysis,
         )
-        if (
-            link_obj.sample.data_analysis
-            and "balsamic" in link_obj.sample.data_analysis.lower()
-        ):
+        if link_obj.sample.data_analysis and "balsamic" in link_obj.sample.data_analysis.lower():
             LOG.info(
-                "%s has balsamic as data analysis, linking.",
-                link_obj.sample.internal_id,
+                "%s has balsamic as data analysis, linking.", link_obj.sample.internal_id,
             )
             context.obj["analysis_api"].link_sample(
                 fastq_handler=FastqHandler(context.obj),
@@ -152,9 +140,7 @@ def config_case(
             link_obj.sample.internal_id,
             link_obj.sample.application_version.application.prep_category,
         )
-        application_types.add(
-            link_obj.sample.application_version.application.prep_category
-        )
+        application_types.add(link_obj.sample.application_version.application.prep_category)
 
         LOG.info("%s: config FASTQ file", link_obj.sample.internal_id)
 
@@ -185,9 +171,7 @@ def config_case(
 
         for fastq_data in sorted_files:
             original_fastq_path = Path(fastq_data["path"])
-            linked_fastq_name = context.obj[
-                "fastq_handler"
-            ].FastqFileNameCreator.create(
+            linked_fastq_name = context.obj["fastq_handler"].FastqFileNameCreator.create(
                 lane=fastq_data["lane"],
                 flowcell=fastq_data["flowcell"],
                 sample=link_obj.sample.internal_id,
@@ -199,9 +183,7 @@ def config_case(
             ].FastqFileNameCreator.get_concatenated_name(linked_fastq_name)
             linked_fastq_path = wrk_dir / linked_fastq_name
             linked_reads_paths[fastq_data["read"]].append(linked_fastq_path)
-            concatenated_paths[
-                fastq_data["read"]
-            ] = f"{wrk_dir}/{concatenated_fastq_name}"
+            concatenated_paths[fastq_data["read"]] = f"{wrk_dir}/{concatenated_fastq_name}"
 
             if linked_fastq_path.exists():
                 LOG.info("found: %s -> %s", original_fastq_path, linked_fastq_path)
@@ -221,20 +203,15 @@ def config_case(
 
     if len(application_types) != 1:
         raise BalsamicStartError(
-            "More than one application found for this case: %s"
-            % ", ".join(application_types)
+            "More than one application found for this case: %s" % ", ".join(application_types)
         )
 
     if not application_types.issubset(acceptable_applications):
-        raise BalsamicStartError(
-            "Improper application for this case: %s" % application_types
-        )
+        raise BalsamicStartError("Improper application for this case: %s" % application_types)
 
     nr_paths = len(tumor_paths) if tumor_paths else 0
     if nr_paths != 1:
-        raise BalsamicStartError(
-            "Must have exactly one tumor sample! Found %s samples." % nr_paths
-        )
+        raise BalsamicStartError("Must have exactly one tumor sample! Found %s samples." % nr_paths)
 
     tumor_path = tumor_paths.pop()
 
@@ -255,9 +232,7 @@ def config_case(
         if len(target_beds) == 1:
             target_bed = Path(context.obj["bed_path"]) / target_beds.pop()
         elif len(target_beds) > 1:
-            raise BalsamicStartError(
-                "Too many target beds specified: %s" % ", ".join(target_beds)
-            )
+            raise BalsamicStartError("Too many target beds specified: %s" % ", ".join(target_beds))
         else:
             raise BalsamicStartError("No target bed specified!")
 
@@ -298,12 +273,7 @@ def config_case(
 @balsamic.command()
 @click.option("-d", "--dry-run", "dry", is_flag=True, help="print command to console")
 @click.option(
-    "-r",
-    "--run-analysis",
-    "run_analysis",
-    is_flag=True,
-    default=False,
-    help="start " "analysis",
+    "-r", "--run-analysis", "run_analysis", is_flag=True, default=False, help="start " "analysis",
 )
 @click.option("--config", "config_path", required=False, help="Optional")
 @PRIORITY_OPTION
@@ -345,11 +315,7 @@ def run(context, dry, run_analysis, config_path, priority, email, case_id):
 
 @balsamic.command()
 @click.option(
-    "-d",
-    "--dry-run",
-    "dry_run",
-    is_flag=True,
-    help="print to console without actualising",
+    "-d", "--dry-run", "dry_run", is_flag=True, help="print to console without actualising",
 )
 @click.pass_context
 def start(context: click.Context, dry_run):
