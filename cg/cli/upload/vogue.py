@@ -167,7 +167,7 @@ def bioinfo_all(context, dry):
     """Load all cases with recent analysis and a multiqc-json to the trending database."""
 
     hk_api = context.obj["housekeeper_api"]
-    
+
     cases = store.families()
     for case in cases:
         case_name = case.internal_id
