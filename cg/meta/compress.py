@@ -7,8 +7,7 @@ import os
 from pathlib import Path
 
 from cg.apps import crunchy, hk, scoutapi
-from cg.constants import (BAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX,
-                          FASTQ_SECOND_READ_SUFFIX)
+from cg.constants import BAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX
 
 LOG = logging.getLogger(__name__)
 
@@ -53,9 +52,7 @@ class CompressAPI:
         hk_files = []
         for tag in hk_tags:
             hk_files.extend(
-                self.hk_api.get_files(
-                    bundle=case_id, tags=[tag], version=last_version.id
-                )
+                self.hk_api.get_files(bundle=case_id, tags=[tag], version=last_version.id)
             )
         if not hk_files:
             LOG.warning("No files found in latest housekeeper version for %s", case_id)
@@ -106,9 +103,7 @@ class CompressAPI:
             return None
 
         # hk api returns an iterable of file objects
-        _hk_files = self.hk_api.get_files(
-            bundle=sample_id, tags=["fastq"], version=hk_version.id
-        )
+        _hk_files = self.hk_api.get_files(bundle=sample_id, tags=["fastq"], version=hk_version.id)
         hk_files = [Path(fastq_file.full_path) for fastq_file in _hk_files]
         if len(hk_files) != 2:
             LOG.warning("There has to be a pair of fastq files")
@@ -150,9 +145,7 @@ class CompressAPI:
             LOG.warning("Could not find paired fastq files")
             return None
 
-        if not self.check_prefixes(
-            fastq_dict[first_fastq_key], fastq_dict[second_fastq_key]
-        ):
+        if not self.check_prefixes(fastq_dict[first_fastq_key], fastq_dict[second_fastq_key]):
             LOG.info("FASTQ files does not have matching prefix")
             return None
 
@@ -162,25 +155,17 @@ class CompressAPI:
     def check_prefixes(first_fastq: Path, second_fastq: Path) -> bool:
         """Check if two files belong to the same read pair"""
         first_prefix = str(first_fastq.absolute()).replace(FASTQ_FIRST_READ_SUFFIX, "")
-        second_prefix = str(second_fastq.absolute()).replace(
-            FASTQ_SECOND_READ_SUFFIX, ""
-        )
+        second_prefix = str(second_fastq.absolute()).replace(FASTQ_SECOND_READ_SUFFIX, "")
         return first_prefix == second_prefix
 
-    def compress_case_bams(
-        self, bam_dict: dict, ntasks: int, mem: int, dry_run: bool = False
-    ):
+    def compress_case_bams(self, bam_dict: dict, ntasks: int, mem: int, dry_run: bool = False):
         """Compress bam-files in given dictionary"""
         for sample, bam_files in bam_dict.items():
             bam_path = Path(bam_files["bam"].full_path)
             LOG.info("Compressing %s for sample %s", bam_path, sample)
-            self.crunchy_api.bam_to_cram(
-                bam_path=bam_path, ntasks=ntasks, mem=mem, dry_run=dry_run
-            )
+            self.crunchy_api.bam_to_cram(bam_path=bam_path, ntasks=ntasks, mem=mem, dry_run=dry_run)
 
-    def compress_case_fastqs(
-        self, fastq_dict: dict, ntasks: int, mem: int, dry_run: bool = False
-    ):
+    def compress_case_fastqs(self, fastq_dict: dict, ntasks: int, mem: int, dry_run: bool = False):
         """Compress fastq-files in given dictionary"""
         for sample_id, fastq_files in fastq_dict.items():
             fastq_first = fastq_files["fastq_first_file"]
@@ -264,8 +249,8 @@ class CompressAPI:
 
     def _is_valid_fastq_suffix(self, fastq_path: Path):
         """ Check that fastq has correct suffix"""
-        if str(fastq_path).endswith(FASTQ_FIRST_READ_SUFFIX) or str(
-            fastq_path
-        ).endswith(FASTQ_SECOND_READ_SUFFIX):
+        if str(fastq_path).endswith(FASTQ_FIRST_READ_SUFFIX) or str(fastq_path).endswith(
+            FASTQ_SECOND_READ_SUFFIX
+        ):
             return True
         return False

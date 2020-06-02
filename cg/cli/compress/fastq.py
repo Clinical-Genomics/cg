@@ -42,13 +42,9 @@ def fastq(context, case_id, number_of_conversions, ntasks, mem, dry_run):
 
             first_fastq = sample_fastq_dict["fastq_first_file"]
             second_fastq = sample_fastq_dict["fastq_second_file"]
-            spring_compression_done = crunchy_api.is_spring_compression_done(
-                first_fastq
-            )
+            spring_compression_done = crunchy_api.is_spring_compression_done(first_fastq)
             if spring_compression_done:
-                LOG.warning(
-                    "FASTQ to SPRING compression already done for %s", sample_id
-                )
+                LOG.warning("FASTQ to SPRING compression already done for %s", sample_id)
                 case_has_fastq_files = False
                 break
 

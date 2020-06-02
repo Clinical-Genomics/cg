@@ -36,9 +36,7 @@ def bam(context, case_id, number_of_conversions, ntasks, mem, dry_run):
         compression_is_pending = False
         for sample, bam_files in bam_dict.items():
             bam_path = Path(bam_files["bam"].full_path)
-            if not context.obj["crunchy"].is_bam_compression_possible(
-                bam_path=bam_path
-            ):
+            if not context.obj["crunchy"].is_bam_compression_possible(bam_path=bam_path):
                 LOG.info("BAM to CRAM compression not possible for %s", sample)
                 case_has_bam_file = False
                 break

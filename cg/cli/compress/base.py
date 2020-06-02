@@ -24,9 +24,7 @@ def compress(context):
     context.obj["scout"] = scout_api
     crunchy_api = crunchy.CrunchyAPI(context.obj)
     context.obj["crunchy"] = crunchy_api
-    compress_api = CompressAPI(
-        hk_api=hk_api, crunchy_api=crunchy_api, scout_api=scout_api
-    )
+    compress_api = CompressAPI(hk_api=hk_api, crunchy_api=crunchy_api, scout_api=scout_api)
     context.obj["compress"] = compress_api
 
 

@@ -32,11 +32,7 @@ LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR"]
 @click.option("-c", "--config", type=click.File(), help="path to config file")
 @click.option("-d", "--database", help="path/URI of the SQL database")
 @click.option(
-    "-l",
-    "--log-level",
-    type=click.Choice(LEVELS),
-    default="INFO",
-    help="lowest level to log at",
+    "-l", "--log-level", type=click.Choice(LEVELS), default="INFO", help="lowest level to log at",
 )
 @click.version_option(cg.__version__, prog_name=cg.__title__)
 @click.pass_context
