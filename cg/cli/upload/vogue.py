@@ -6,7 +6,7 @@ import logging
 import click
 
 from cg.meta.upload.vogue import UploadVogueAPI
-from cg.apps import vogue as vogue_api, gt
+from cg.apps import vogue as vogue_api, gt, hk
 from cg.cli.workflow.get_links import get_links
 from cg.store import Store
 from cg.exc import AnalysisUploadError
@@ -194,7 +194,7 @@ def bioinfo_all(context, dry):
             LOG.error("Case upload failed: %s", case_name, exc_info=True)
 
 
-def _get_multiqc_latest_file(hk_api: HousekeeperAPI, case_name: str) -> str:
+def _get_multiqc_latest_file(hk_api: hk.HousekeeperAPI, case_name: str) -> str:
     """Get latest multiqc_data.json path for a case_name
        Args:
            case_name(str): onemite
