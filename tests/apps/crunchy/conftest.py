@@ -1,6 +1,5 @@
 """Fixtures for crunchy api"""
 
-import shutil
 from pathlib import Path
 
 import pytest
@@ -9,18 +8,10 @@ from cg.apps.crunchy import CrunchyAPI
 from cg.constants import FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX
 
 
-@pytest.fixture(scope="function", name="crunchy_test_dir")
-def fixture_crunchy_test_dir(tmpdir_factory):
-    """Path to a temporary directory"""
-    my_tmpdir = Path(tmpdir_factory.mktemp("data"))
-    yield my_tmpdir
-    shutil.rmtree(str(my_tmpdir))
-
-
 @pytest.fixture(scope="function", name="bam_path")
-def fixture_bam_path(crunchy_test_dir):
+def fixture_bam_path(project_dir):
     """Creates a BAM path"""
-    _bam_path = crunchy_test_dir / "file.bam"
+    _bam_path = project_dir / "file.bam"
     return _bam_path
 
 
@@ -77,10 +68,10 @@ def fixture_compressed_bam_without_flag(existing_bam_path):
 
 
 @pytest.fixture(scope="function", name="fastq_paths")
-def fixture_fastq_paths(crunchy_test_dir):
+def fixture_fastq_paths(project_dir):
     """Creates fastq paths"""
-    _fastq_first_path = crunchy_test_dir / ("file" + FASTQ_FIRST_READ_SUFFIX)
-    _fastq_second_path = crunchy_test_dir / ("file" + FASTQ_SECOND_READ_SUFFIX)
+    _fastq_first_path = project_dir / ("file" + FASTQ_FIRST_READ_SUFFIX)
+    _fastq_second_path = project_dir / ("file" + FASTQ_SECOND_READ_SUFFIX)
     return {
         "fastq_first_path": _fastq_first_path,
         "fastq_second_path": _fastq_second_path,
@@ -117,7 +108,9 @@ def fixture_compressed_fastqs_without_spring(existing_fastq_paths):
     """Creates fastqs with corresponding FLAG"""
     fastq_paths = existing_fastq_paths
     flag_path = Path(
-        str(fastq_paths["fastq_first_path"]).replace(FASTQ_FIRST_READ_SUFFIX, ".crunchy.txt")
+        str(fastq_paths["fastq_first_path"]).replace(
+            FASTQ_FIRST_READ_SUFFIX, ".crunchy.txt"
+        )
     )
     flag_path.touch()
     assert flag_path.exists()
@@ -155,7 +148,9 @@ def mock_bam_to_cram():
     """ This fixture returns a mocked bam_to_cram method. this mock_method
         Will create files with suffixes .cram and .crai for a given BAM path"""
 
-    def _mock_bam_to_cram_func(bam_path: Path, ntasks: int, mem: int, dry_run: bool = False):
+    def _mock_bam_to_cram_func(
+        bam_path: Path, ntasks: int, mem: int, dry_run: bool = False
+    ):
 
         _ = dry_run
         _ = ntasks
