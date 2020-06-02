@@ -15,6 +15,7 @@ LOG = logging.getLogger(__name__)
 
 VOGUE_VALID_BIOINFO = ["mip"]
 
+
 @click.group()
 @click.pass_context
 def vogue(context):
@@ -109,10 +110,9 @@ def samples(context, days: int):
 def bioinfo(context, case_name, cleanup, target_load, dry):
     """Load bioinfo case results to the trending database"""
 
-
-    hk_api = context.obj['housekeeper_api']
-    store = context.obj['db']
-    status_api = context.obj['status_api']
+    hk_api = context.obj["housekeeper_api"]
+    store = context.obj["db"]
+    status_api = context.obj["status_api"]
 
     click.echo(click.style("----------------- BIOINFO -----------------------"))
 
@@ -212,7 +212,7 @@ def _get_multiqc_latest_file(hk_api: HousekeeperAPI, case_name: str) -> str:
     return multiqc_json_file[0].full_path
 
 
-def _get_samples(store_api: Store, case_name:str ) -> str:
+def _get_samples(store_api: Store, case_name: str) -> str:
     """Get a sample string for case_name
        Args:
            case_name(str): onemite
