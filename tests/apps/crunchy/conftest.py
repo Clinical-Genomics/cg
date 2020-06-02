@@ -108,9 +108,7 @@ def fixture_compressed_fastqs_without_spring(existing_fastq_paths):
     """Creates fastqs with corresponding FLAG"""
     fastq_paths = existing_fastq_paths
     flag_path = Path(
-        str(fastq_paths["fastq_first_path"]).replace(
-            FASTQ_FIRST_READ_SUFFIX, ".crunchy.txt"
-        )
+        str(fastq_paths["fastq_first_path"]).replace(FASTQ_FIRST_READ_SUFFIX, ".crunchy.txt")
     )
     flag_path.touch()
     assert flag_path.exists()
@@ -148,9 +146,7 @@ def mock_bam_to_cram():
     """ This fixture returns a mocked bam_to_cram method. this mock_method
         Will create files with suffixes .cram and .crai for a given BAM path"""
 
-    def _mock_bam_to_cram_func(
-        bam_path: Path, ntasks: int, mem: int, dry_run: bool = False
-    ):
+    def _mock_bam_to_cram_func(bam_path: Path, ntasks: int, mem: int, dry_run: bool = False):
 
         _ = dry_run
         _ = ntasks
