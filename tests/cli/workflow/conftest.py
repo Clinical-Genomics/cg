@@ -11,12 +11,19 @@ def base_context(analysis_store) -> dict:
     return {"db": analysis_store}
 
 
+@pytest.fixture(name="workflow_case_id")
+def fixture_workflow_case_id() -> dict:
+    """Return a special case id"""
+    return "dna_case"
+
+
 @pytest.fixture(scope="function", name="analysis_store")
-def fixture_analysis_store(base_store: Store, helpers) -> Store:
+def fixture_analysis_store(base_store: Store, workflow_case_id, helpers) -> Store:
     """Store to be used in tests"""
     _store = base_store
 
-    case = helpers.add_family(_store, "dna_case")
+    case = helpers.add_family(_store, workflow_case_id)
+
     sample = helpers.add_sample(_store, "dna_sample", is_rna=False)
     helpers.add_relationship(_store, sample=sample, family=case)
 

@@ -24,7 +24,9 @@ class StoreHelpers:
             store.add_commit(_bundle, _version)
         return _bundle
 
-    def ensure_hk_version(self, store: HousekeeperAPI, bundle_data: dict) -> hk_models.Version:
+    def ensure_hk_version(
+        self, store: HousekeeperAPI, bundle_data: dict
+    ) -> hk_models.Version:
         """Utility function to return existing or create an version for tests"""
         _bundle = self.ensure_hk_bundle(store, bundle_data)
         _version = store.last_version(_bundle.name)
@@ -61,7 +63,9 @@ class StoreHelpers:
         prices = {"standard": 10, "priority": 20, "express": 30, "research": 5}
         version = store.application_version(application, 1)
         if not version:
-            version = store.add_version(application, 1, valid_from=datetime.now(), prices=prices)
+            version = store.add_version(
+                application, 1, valid_from=datetime.now(), prices=prices
+            )
 
             store.add_commit(version)
         return version
@@ -96,7 +100,9 @@ class StoreHelpers:
         return application
 
     @staticmethod
-    def ensure_bed_version(store: Store, bed_name: str = "dummy_bed") -> models.ApplicationVersion:
+    def ensure_bed_version(
+        store: Store, bed_name: str = "dummy_bed"
+    ) -> models.ApplicationVersion:
         """Utility function to return existing or create bed version for tests"""
         bed = store.bed(name=bed_name)
         if not bed:
@@ -105,7 +111,9 @@ class StoreHelpers:
 
         version = store.latest_bed_version(bed_name)
         if not version:
-            version = store.add_bed_version(bed, 1, "dummy_filename", shortname=bed_name)
+            version = store.add_bed_version(
+                bed, 1, "dummy_filename", shortname=bed_name
+            )
             store.add_commit(version)
         return version
 
@@ -121,7 +129,9 @@ class StoreHelpers:
         customer_group_id = customer_group or customer_id + "_group"
         customer_group = store.customer_group(customer_group_id)
         if not customer_group:
-            customer_group = store.add_customer_group(customer_group_id, customer_group_id)
+            customer_group = store.add_customer_group(
+                customer_group_id, customer_group_id
+            )
 
         customer = store.customer(customer_id)
 
@@ -273,6 +283,11 @@ class StoreHelpers:
 
         if not family_obj:
             family_obj = store.add_family(name=family_id, panels=panels)
+
+        print(
+            "Adding family with name %s (%s)"
+            % (family_obj.name, family_obj.internal_id)
+        )
         family_obj.customer = customer
         store.add_commit(family_obj)
         return family_obj
