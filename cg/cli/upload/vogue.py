@@ -119,7 +119,7 @@ def bioinfo(context, case_name, cleanup, target_load, dry):
     load_bioinfo_raw_inputs = dict()
 
     # Probably get samples for a case_name through statusdb api
-    load_bioinfo_raw_inputs["samples"] = _get_samples(store, case_name)
+    load_bioinfo_raw_inputs["samples"] = _get_samples(context, case_name)
 
     # Probably get analysis result file through housekeeper ai
     load_bioinfo_raw_inputs["analysis_result_file"] = _get_multiqc_latest_file(hk_api, case_name)
@@ -212,7 +212,7 @@ def _get_multiqc_latest_file(hk_api: hk.HousekeeperAPI, case_name: str) -> str:
     return multiqc_json_file[0].full_path
 
 
-def _get_samples(store_api: Store, case_name: str) -> str:
+def _get_samples(context, case_name: str) -> str:
     """Get a sample string for case_name
        Args:
            case_name(str): onemite
@@ -220,7 +220,7 @@ def _get_samples(store_api: Store, case_name: str) -> str:
            sample_names(str): ACC12345,ACC45679
     """
 
-    link_objs = get_links(store_api, case_name, sample_id=False)
+    link_objs = get_links(context, case_name, sample_id=False)
     sample_ids = set()
     for link_obj in link_objs:
         sample_ids.add(link_obj.sample.internal_id)
