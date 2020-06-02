@@ -6,9 +6,15 @@ import logging
 import tempfile
 from pathlib import Path
 
-from cg.constants import (BAM_INDEX_SUFFIX, BAM_SUFFIX, CRAM_INDEX_SUFFIX,
-                          CRAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX,
-                          FASTQ_SECOND_READ_SUFFIX, SPRING_SUFFIX)
+from cg.constants import (
+    BAM_INDEX_SUFFIX,
+    BAM_SUFFIX,
+    CRAM_INDEX_SUFFIX,
+    CRAM_SUFFIX,
+    FASTQ_FIRST_READ_SUFFIX,
+    FASTQ_SECOND_READ_SUFFIX,
+    SPRING_SUFFIX,
+)
 from cg.utils import Process
 
 from .sbatch import SBATCH_BAM_TO_CRAM, SBATCH_HEADER_TEMPLATE, SBATCH_SPRING
@@ -59,20 +65,13 @@ class CrunchyAPI:
         self._submit_sbatch(sbatch_content=sbatch_content, dry_run=dry_run)
 
     def fastq_to_spring(
-        self,
-        fastq_first: Path,
-        fastq_second: Path,
-        ntasks: int,
-        mem: int,
-        dry_run: bool = False,
+        self, fastq_first: Path, fastq_second: Path, ntasks: int, mem: int, dry_run: bool = False,
     ):
         """
             Compress FASTQ files into SPRING by sending to sbatch SLURM
         """
         spring_path = self.get_spring_path_from_fastq(fastq=fastq_first)
-        job_name = str(fastq_first.name).replace(
-            FASTQ_FIRST_READ_SUFFIX, "_fastq_to_spring"
-        )
+        job_name = str(fastq_first.name).replace(FASTQ_FIRST_READ_SUFFIX, "_fastq_to_spring")
         flag_path = self.get_flag_path(file_path=spring_path)
         pending_path = self.get_pending_path(file_path=fastq_first)
         log_dir = spring_path.parent
@@ -186,13 +185,9 @@ class CrunchyAPI:
         There are two cases, either fastq or bam. They are treated as shown below
         """
         if str(file_path).endswith(FASTQ_FIRST_READ_SUFFIX):
-            return Path(
-                str(file_path).replace(FASTQ_FIRST_READ_SUFFIX, PENDING_PATH_SUFFIX)
-            )
+            return Path(str(file_path).replace(FASTQ_FIRST_READ_SUFFIX, PENDING_PATH_SUFFIX))
         if str(file_path).endswith(FASTQ_SECOND_READ_SUFFIX):
-            return Path(
-                str(file_path).replace(FASTQ_SECOND_READ_SUFFIX, PENDING_PATH_SUFFIX)
-            )
+            return Path(str(file_path).replace(FASTQ_SECOND_READ_SUFFIX, PENDING_PATH_SUFFIX))
         return file_path.with_suffix(PENDING_PATH_SUFFIX)
 
     @staticmethod
@@ -231,9 +226,7 @@ class CrunchyAPI:
         spring_path = Path(str(fastq).replace(suffix, "")).with_suffix(SPRING_SUFFIX)
         return spring_path
 
-    def _get_slurm_header(
-        self, job_name: str, log_dir: str, ntasks: int, mem: int,
-    ) -> str:
+    def _get_slurm_header(self, job_name: str, log_dir: str, ntasks: int, mem: int,) -> str:
         """Create and return a header for a sbatch script"""
         sbatch_header = SBATCH_HEADER_TEMPLATE.format(
             job_name=job_name,
@@ -248,11 +241,7 @@ class CrunchyAPI:
 
     @staticmethod
     def _get_slurm_bam_to_cram(
-        bam_path: str,
-        cram_path: str,
-        flag_path: str,
-        pending_path: str,
-        reference_path: str,
+        bam_path: str, cram_path: str, flag_path: str, pending_path: str, reference_path: str,
     ) -> str:
         """Create and return the body of a sbatch script that runs bam to cram"""
         sbatch_body = SBATCH_BAM_TO_CRAM.format(
