@@ -1,6 +1,12 @@
 """Constans for cg"""
 
-PRIORITY_MAP = {"research": 0, "standard": 1, "priority": 2, "express": 3, "clinical trials": 4}
+PRIORITY_MAP = {
+    "research": 0,
+    "standard": 1,
+    "priority": 2,
+    "express": 3,
+    "clinical trials": 4,
+}
 REV_PRIORITY_MAP = {value: key for key, value in PRIORITY_MAP.items()}
 PRIORITY_OPTIONS = list(PRIORITY_MAP.keys())
 FAMILY_ACTIONS = ("analyze", "running", "hold")
@@ -62,6 +68,8 @@ SPRING_SUFFIX = ".spring"
 
 # tags for storing analyses in Housekeeper
 HK_TAGS = {"wes": ["mip-dna", "wes"], "wgs": ["mip-dna", "wgs"], "wts": ["mip-rna"]}
+HK_BAM_TAGS = ["bam", "bai", "bam-index"]
+HK_FASTQ_TAGS = ["fastq"]
 
 # used to convert MIP tags derived from the deliverables to MIP standard tags and to check for
 # presence of mandatory files. Keys = tags found in deliverables, values = MIP standard tags and
@@ -90,9 +98,15 @@ MIP_DNA_TAGS = {
         "index_tags": ["sv-bcf-index"],
         "is_mandatory": True,
     },
-    tuple(["peddy_ar", "ped_check"]): {"tags": ["peddy", "ped-check"], "is_mandatory": True},
+    tuple(["peddy_ar", "ped_check"]): {
+        "tags": ["peddy", "ped-check"],
+        "is_mandatory": True,
+    },
     tuple(["peddy_ar", "peddy"]): {"tags": ["peddy", "ped"], "is_mandatory": True},
-    tuple(["peddy_ar", "sex_check"]): {"tags": ["peddy", "sex-check"], "is_mandatory": True},
+    tuple(["peddy_ar", "sex_check"]): {
+        "tags": ["peddy", "sex-check"],
+        "is_mandatory": True,
+    },
     tuple(["version_collect_ar"]): {"tags": ["exe-ver"], "is_mandatory": True},
     tuple(["sv_str"]): {
         "tags": ["vcf-str"],
@@ -144,11 +158,20 @@ MIP_RNA_TAGS = {
         "index_tags": ["cram-index"],
         "is_mandatory": True,
     },
-    tuple(["gatk_asereadcounter"]): {"tags": ["gatk-asereadcounter"], "is_mandatory": True},
+    tuple(["gatk_asereadcounter"]): {
+        "tags": ["gatk-asereadcounter"],
+        "is_mandatory": True,
+    },
     tuple(["bootstrapann"]): {"tags": ["bootstrapann"], "is_mandatory": True},
     tuple(["bcftools_merge"]): {"tags": ["bcftools-merge"], "is_mandatory": True},
-    tuple(["varianteffectpredictor"]): {"tags": ["varianteffectpredictor"], "is_mandatory": True},
-    tuple(["version_collect_ar"]): {"tags": ["version-collect-ar"], "is_mandatory": True},
+    tuple(["varianteffectpredictor"]): {
+        "tags": ["varianteffectpredictor"],
+        "is_mandatory": True,
+    },
+    tuple(["version_collect_ar"]): {
+        "tags": ["version-collect-ar"],
+        "is_mandatory": True,
+    },
     tuple(["multiqc_ar", "html"]): {"tags": ["multiqc-html"], "is_mandatory": True},
     tuple(["multiqc_ar", "json"]): {"tags": ["multiqc-json"], "is_mandatory": True},
     tuple(["mip_analyse", "sample_info"]): {
@@ -159,13 +182,22 @@ MIP_RNA_TAGS = {
         "tags": ["mip-analyse", "reference-info"],
         "is_mandatory": True,
     },
-    tuple(["mip_analyse", "log"]): {"tags": ["mip-analyse", "log"], "is_mandatory": True},
+    tuple(["mip_analyse", "log"]): {
+        "tags": ["mip-analyse", "log"],
+        "is_mandatory": True,
+    },
     tuple(["mip_analyse", "config_analysis"]): {
         "tags": ["mip-analyse", "config-analysis"],
         "is_mandatory": True,
     },
-    tuple(["mip_analyse", "pedigree"]): {"tags": ["mip-analyse", "pedigree"], "is_mandatory": True},
-    tuple(["mip_analyse", "config"]): {"tags": ["mip-analyse", "config"], "is_mandatory": True},
+    tuple(["mip_analyse", "pedigree"]): {
+        "tags": ["mip-analyse", "pedigree"],
+        "is_mandatory": True,
+    },
+    tuple(["mip_analyse", "config"]): {
+        "tags": ["mip-analyse", "config"],
+        "is_mandatory": True,
+    },
     tuple(["mip_analyse", "pedigree_fam"]): {
         "tags": ["mip-analyse", "pedigree-fam"],
         "is_mandatory": True,

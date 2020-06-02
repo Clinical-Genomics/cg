@@ -5,9 +5,11 @@
 import logging
 import os
 from pathlib import Path
+from typing import List
 
 from cg.apps import crunchy, hk, scoutapi
-from cg.constants import BAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX
+from cg.constants import (BAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX,
+                          FASTQ_SECOND_READ_SUFFIX, HK_BAM_TAGS, HK_FASTQ_TAGS)
 
 LOG = logging.getLogger(__name__)
 
@@ -43,73 +45,101 @@ class CompressAPI:
         if not scout_cases:
             LOG.warning("%s not found in scout", case_id)
             return None
-        scout_case = scout_cases[0]
-        last_version = self.hk_api.last_version(bundle=case_id)
-        if not last_version:
-            LOG.warning("No bundle found for %s in housekeeper", case_id)
-            return None
-        hk_tags = ["bam", "bai", "bam-index"]
-        hk_files = []
-        for tag in hk_tags:
-            hk_files.extend(
-                self.hk_api.get_files(bundle=case_id, tags=[tag], version=last_version.id)
-            )
-        if not hk_files:
+
+        hk_files_dict = self.get_hk_files_dict(bundle_name=case_id, tags=HK_BAM_TAGS)
+        if not hk_files_dict:
             LOG.warning("No files found in latest housekeeper version for %s", case_id)
             return None
-        hk_files_dict = {Path(file.full_path): file for file in hk_files}
+        hk_file_paths = set(hk_files_dict.keys())
+
         bam_dict = {}
-        for sample in scout_case["individuals"]:
+        for sample in scout_cases[0]["individuals"]:
             sample_id = sample["individual_id"]
+            LOG.info("Check bam file for sample %s in scout", sample_id)
             bam_file = sample.get("bam_file")
-            if not bam_file:
-                LOG.warning("No bam file found for sample %s in scout", sample_id)
+
+            bam_path = self.check_bam_file(bam_file, hk_file_paths)
+            if not bam_path:
                 return None
-            bam_path = Path(bam_file)
-            if bam_path.suffix != BAM_SUFFIX:
-                LOG.info("Alignment file does not have suffix %s", BAM_SUFFIX)
-            bai_paths = self.crunchy_api.get_index_path(bam_path)
-            bai_single_suffix = bai_paths["single_suffix"]
-            bai_double_suffix = bai_paths["double_suffix"]
-            if not bam_path.exists():
-                LOG.warning("%s does not exist", bam_path)
+
+            bai_path = self.check_bam_index(bam_path, hk_file_paths)
+            if not bai_path:
                 return None
-            if self.get_nlinks(bam_path) > 1:
-                LOG.warning("%s has more than 1 links to same inode", bam_path)
-                return None
-            if bam_path not in hk_files_dict.keys():
-                LOG.warning("%s not in latest version of housekeeper bundle", bam_path)
-                return None
-            if (bai_single_suffix not in hk_files_dict.keys()) and (
-                bai_double_suffix not in hk_files_dict.keys()
-            ):
-                LOG.warning("%s has no index-file", bam_path)
-                return None
-            bai_path = bai_single_suffix
-            if bai_double_suffix.exists():
-                bai_path = bai_double_suffix
 
             bam_dict[sample_id] = {
                 "bam": hk_files_dict[bam_path],
                 "bai": hk_files_dict[bai_path],
             }
+
         return bam_dict
+
+    def check_bam_file(self, bam_file: str, hk_files: set) -> Path:
+        """Check that everything is in place for a bam file and return it as a path object"""
+        if not bam_file:
+            LOG.warning("No bam file found")
+            return None
+
+        bam_path = Path(bam_file)
+        # Check the bam file
+        if bam_path.suffix != BAM_SUFFIX:
+            LOG.info("Alignment file does not have correct suffix %s", BAM_SUFFIX)
+            return None
+
+        if not bam_path.exists():
+            LOG.warning("%s does not exist", bam_path)
+            return None
+
+        if bam_path not in hk_files:
+            LOG.warning("%s not in latest version of housekeeper bundle", bam_path)
+            return None
+
+        if self.get_nlinks(bam_path) > 1:
+            LOG.warning("%s has more than 1 links to same inode", bam_path)
+            return None
+
+        return bam_path
+
+    def check_bam_index(self, bam_path: Path, hk_files: set) -> Path:
+        """Check if a bam has a index file and return it as a path"""
+
+        # Check the index file
+        bai_paths = self.crunchy_api.get_index_path(bam_path)
+        bai_single_suffix = bai_paths["single_suffix"]
+        bai_double_suffix = bai_paths["double_suffix"]
+
+        if (bai_single_suffix not in hk_files) and (bai_double_suffix not in hk_files):
+            LOG.warning("%s has no index-file", bam_path)
+            return False
+
+        bai_path = bai_single_suffix
+        if bai_double_suffix.exists():
+            bai_path = bai_double_suffix
+
+        return bai_path
+
+    def get_hk_files_dict(self, bundle_name: str, tags: List[str]) -> dict:
+        """Fetch files from latest version in HK and create a dict with Path object as keys"""
+        last_version = self.hk_api.last_version(bundle=bundle_name)
+        if not last_version:
+            LOG.warning("No bundle found for %s in housekeeper", bundle_name)
+            return None
+        hk_files = self.hk_api.get_files(
+            bundle=bundle_name, tags=tags, version=last_version.id
+        )
+        hk_files_dict = {Path(file_obj.full_path): file_obj for file_obj in hk_files}
+
+        return hk_files_dict
 
     def get_fastq_files(self, sample_id: str) -> dict:
         """Get FASTQ files for sample"""
-        hk_version = self.hk_api.last_version(bundle=sample_id)
-        if not hk_version:
-            LOG.warning("No bundle found for sample %s in housekeeper", sample_id)
-            return None
-
-        # hk api returns an iterable of file objects
-        _hk_files = self.hk_api.get_files(bundle=sample_id, tags=["fastq"], version=hk_version.id)
-        hk_files = [Path(fastq_file.full_path) for fastq_file in _hk_files]
-        if len(hk_files) != 2:
+        hk_files_dict = self.get_hk_files_dict(
+            bundle_name=sample_id, tags=HK_FASTQ_TAGS
+        )
+        if len(hk_files_dict) != 2:
             LOG.warning("There has to be a pair of fastq files")
             return None
 
-        fastq_dict = self._sort_fastqs(fastq_files=hk_files)
+        fastq_dict = self._sort_fastqs(fastq_files=list(hk_files_dict.keys()))
         if not fastq_dict:
             LOG.info("Could not sort FASTQ files for %s", sample_id)
             return None
@@ -145,7 +175,9 @@ class CompressAPI:
             LOG.warning("Could not find paired fastq files")
             return None
 
-        if not self.check_prefixes(fastq_dict[first_fastq_key], fastq_dict[second_fastq_key]):
+        if not self.check_prefixes(
+            fastq_dict[first_fastq_key], fastq_dict[second_fastq_key]
+        ):
             LOG.info("FASTQ files does not have matching prefix")
             return None
 
@@ -155,17 +187,25 @@ class CompressAPI:
     def check_prefixes(first_fastq: Path, second_fastq: Path) -> bool:
         """Check if two files belong to the same read pair"""
         first_prefix = str(first_fastq.absolute()).replace(FASTQ_FIRST_READ_SUFFIX, "")
-        second_prefix = str(second_fastq.absolute()).replace(FASTQ_SECOND_READ_SUFFIX, "")
+        second_prefix = str(second_fastq.absolute()).replace(
+            FASTQ_SECOND_READ_SUFFIX, ""
+        )
         return first_prefix == second_prefix
 
-    def compress_case_bams(self, bam_dict: dict, ntasks: int, mem: int, dry_run: bool = False):
+    def compress_case_bams(
+        self, bam_dict: dict, ntasks: int, mem: int, dry_run: bool = False
+    ):
         """Compress bam-files in given dictionary"""
         for sample, bam_files in bam_dict.items():
             bam_path = Path(bam_files["bam"].full_path)
             LOG.info("Compressing %s for sample %s", bam_path, sample)
-            self.crunchy_api.bam_to_cram(bam_path=bam_path, ntasks=ntasks, mem=mem, dry_run=dry_run)
+            self.crunchy_api.bam_to_cram(
+                bam_path=bam_path, ntasks=ntasks, mem=mem, dry_run=dry_run
+            )
 
-    def compress_case_fastqs(self, fastq_dict: dict, ntasks: int, mem: int, dry_run: bool = False):
+    def compress_case_fastqs(
+        self, fastq_dict: dict, ntasks: int, mem: int, dry_run: bool = False
+    ):
         """Compress fastq-files in given dictionary"""
         for sample_id, fastq_files in fastq_dict.items():
             fastq_first = fastq_files["fastq_first_file"]
@@ -247,10 +287,11 @@ class CompressAPI:
                     bai_path.unlink()
                     flag_path.unlink()
 
-    def _is_valid_fastq_suffix(self, fastq_path: Path):
+    @staticmethod
+    def _is_valid_fastq_suffix(fastq_path: Path):
         """ Check that fastq has correct suffix"""
-        if str(fastq_path).endswith(FASTQ_FIRST_READ_SUFFIX) or str(fastq_path).endswith(
-            FASTQ_SECOND_READ_SUFFIX
-        ):
+        if str(fastq_path).endswith(FASTQ_FIRST_READ_SUFFIX) or str(
+            fastq_path
+        ).endswith(FASTQ_SECOND_READ_SUFFIX):
             return True
         return False
