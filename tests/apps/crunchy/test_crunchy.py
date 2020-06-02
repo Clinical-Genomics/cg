@@ -5,7 +5,8 @@ from pathlib import Path
 import pytest
 
 from cg.apps.crunchy import CrunchyAPI
-from cg.constants import CRAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX
+from cg.constants import (CRAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX,
+                          FASTQ_SECOND_READ_SUFFIX)
 
 
 def test_bamcompression_pending_with_flag(crunchy_config_dict, bam_path):
@@ -73,7 +74,9 @@ def test_bam_to_cram(crunchy_config_dict, sbatch_content, bam_path, mocker):
 
     # THEN _submit_sbatch method is called with expected sbatch-content
 
-    mocker_submit_sbatch.assert_called_with(sbatch_content=sbatch_content, dry_run=False)
+    mocker_submit_sbatch.assert_called_with(
+        sbatch_content=sbatch_content, dry_run=False
+    )
 
 
 def test_is_cram_compression_done_no_cram(crunchy_config_dict, bam_path):
@@ -88,7 +91,9 @@ def test_is_cram_compression_done_no_cram(crunchy_config_dict, bam_path):
     assert not result
 
 
-def test_is_cram_compression_done_no_crai(crunchy_config_dict, compressed_bam_without_crai):
+def test_is_cram_compression_done_no_crai(
+    crunchy_config_dict, compressed_bam_without_crai
+):
     """test cram_compression_done without created CRAI file"""
     # GIVEN a crunchy-api, and a bam_path
     crunchy_api = CrunchyAPI(crunchy_config_dict)
@@ -101,7 +106,9 @@ def test_is_cram_compression_done_no_crai(crunchy_config_dict, compressed_bam_wi
     assert not result
 
 
-def test_is_cram_compression_done_no_flag(crunchy_config_dict, compressed_bam_without_flag):
+def test_is_cram_compression_done_no_flag(
+    crunchy_config_dict, compressed_bam_without_flag
+):
     """test cram_compression_done without created flag file"""
     # GIVEN a crunchy-api, and a bam_path, cram_path, crai_path
     crunchy_api = CrunchyAPI(crunchy_config_dict)
@@ -127,10 +134,11 @@ def test_is_cram_compression_done(crunchy_config_dict, compressed_bam):
     assert result
 
 
-def test_cram_compression_before_after(crunchy_config_dict, project_dir, mock_bam_to_cram, mocker):
+def test_cram_compression_before_after(
+    crunchy_config_dict, mock_bam_to_cram, mocker, bam_path
+):
     """Test cram_compression_done without before and after creating files"""
     # GIVEN a crunchy-api, and a bam_path
-    bam_path = Path(project_dir / "file.bam")
     mocker.patch.object(CrunchyAPI, "bam_to_cram", side_effect=mock_bam_to_cram)
     crunchy_api = CrunchyAPI(crunchy_config_dict)
 
@@ -163,13 +171,12 @@ def test_is_bam_compression_possible_no_bam(crunchy_config_dict, bam_path):
 
 
 def test_is_bam_compression_possible_cram_done(
-    crunchy_config_dict, project_dir, mock_bam_to_cram, mocker
+    crunchy_config_dict, mock_bam_to_cram, mocker, bam_path
 ):
     """Test bam_compression_possible for existing compression"""
     # GIVEN a bam path to a existing file and a crunchy api
     mocker.patch.object(CrunchyAPI, "bam_to_cram", side_effect=mock_bam_to_cram)
     crunchy_api = CrunchyAPI(crunchy_config_dict)
-    bam_path = project_dir / "file.bam"
     bam_path.touch()
 
     # WHEN calling test_bam_compression_possible when cram_compression is done
@@ -180,11 +187,10 @@ def test_is_bam_compression_possible_cram_done(
     assert not result
 
 
-def test_is_bam_compression_possible(crunchy_config_dict, project_dir):
+def test_is_bam_compression_possible(crunchy_config_dict, bam_path):
     """Test bam_compression_possible compressable BAM"""
     # GIVEN a bam path to existing file and a crunchy api
     crunchy_api = CrunchyAPI(crunchy_config_dict)
-    bam_path = project_dir / "file.bam"
     bam_path.touch()
 
     # WHEN calling test_bam_compression_possible
@@ -194,12 +200,11 @@ def test_is_bam_compression_possible(crunchy_config_dict, project_dir):
     assert result
 
 
-def test_get_flag_path_bam(crunchy_config_dict, project_dir):
+def test_get_flag_path_bam(crunchy_config_dict, bam_path):
     """Test get_flag_path for a bam file"""
 
     # GIVEN a bam_path
     crunchy_api = CrunchyAPI(crunchy_config_dict)
-    bam_path = project_dir / "file.bam"
 
     # WHEN creating flag path
     flag_path = crunchy_api.get_flag_path(file_path=bam_path)
@@ -222,12 +227,11 @@ def test_get_flag_path_spring(crunchy_config_dict, project_dir):
     assert flag_path.suffixes == [".json"]
 
 
-def test_get_index_path(crunchy_config_dict, project_dir):
+def test_get_index_path(crunchy_config_dict, project_dir, bam_path):
     """Test get_index_path"""
 
     # GIVEM a bam_path
     crunchy_api = CrunchyAPI(crunchy_config_dict)
-    bam_path = project_dir / "file.bam"
 
     # WHEN creating bam path
     bai_paths = crunchy_api.get_index_path(file_path=bam_path)
@@ -249,11 +253,10 @@ def test_get_index_path(crunchy_config_dict, project_dir):
     assert crai_paths["single_suffix"].suffixes == [".crai"]
 
 
-def test_get_cram_path_from_bam(crunchy_config_dict, project_dir):
+def test_get_cram_path_from_bam(crunchy_config_dict, bam_path):
     """Test change_suffic_bam_to_cram"""
     # GIVEN a bam_path
     crunchy_api = CrunchyAPI(crunchy_config_dict)
-    bam_path = project_dir / "file.bam"
 
     # WHEN changing suffix to cram
     cram_path = crunchy_api.get_cram_path_from_bam(bam_path=bam_path)
@@ -262,7 +265,9 @@ def test_get_cram_path_from_bam(crunchy_config_dict, project_dir):
     assert cram_path.suffix == CRAM_SUFFIX
 
 
-def test_fastq_to_spring(crunchy_config_dict, sbatch_content_spring, fastq_paths, mocker):
+def test_fastq_to_spring(
+    crunchy_config_dict, sbatch_content_spring, fastq_paths, mocker
+):
     """Test fastq_to_spring method"""
     # GIVEN a crunchy-api, and fastq paths
     mocker_submit_sbatch = mocker.patch.object(CrunchyAPI, "_submit_sbatch")
@@ -272,11 +277,17 @@ def test_fastq_to_spring(crunchy_config_dict, sbatch_content_spring, fastq_paths
     fastq_first = fastq_paths["fastq_first_path"]
     fastq_second = fastq_paths["fastq_second_path"]
     crunchy_api.fastq_to_spring(
-        fastq_first=fastq_first, fastq_second=fastq_second, dry_run=False, ntasks=1, mem=2,
+        fastq_first=fastq_first,
+        fastq_second=fastq_second,
+        dry_run=False,
+        ntasks=1,
+        mem=2,
     )
 
     # THEN _submit_sbatch method is called with expected sbatch-content
-    mocker_submit_sbatch.assert_called_with(sbatch_content=sbatch_content_spring, dry_run=False)
+    mocker_submit_sbatch.assert_called_with(
+        sbatch_content=sbatch_content_spring, dry_run=False
+    )
 
 
 def test_is_compression_done_no_spring(crunchy_config_dict, existing_fastq_paths):
@@ -298,7 +309,9 @@ def test_is_compression_done_no_spring(crunchy_config_dict, existing_fastq_paths
     assert not result
 
 
-def test_is_compression_done_no_flag_spring(crunchy_config_dict, compressed_fastqs_without_flag):
+def test_is_compression_done_no_flag_spring(
+    crunchy_config_dict, compressed_fastqs_without_flag
+):
     """test if spring compression is done when no flag"""
     # GIVEN a crunchy-api, and fastq paths
     crunchy_api = CrunchyAPI(crunchy_config_dict)
