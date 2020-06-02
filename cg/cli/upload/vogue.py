@@ -112,7 +112,7 @@ def bioinfo(context, case_name, cleanup, target_load, dry):
 
     hk_api = context.obj["housekeeper_api"]
     store = context.obj["db"]
-    status_api = context.obj["status_api"]
+    status_api = context.obj["status"]
 
     click.echo(click.style("----------------- BIOINFO -----------------------"))
 
