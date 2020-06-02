@@ -9,7 +9,9 @@ from cg.store import Store, models
 LOG = logging.getLogger(__name__)
 
 
-def get_links(store: Store, case_id: str, sample_id: str) -> List[models.FamilySample]:
+def get_links(
+    store: Store, case_id: str = None, sample_id: str = None
+) -> List[models.FamilySample]:
     """Get link objects for a SAMPLE_ID
        Args:
            case_id(str): petname
