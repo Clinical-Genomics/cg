@@ -1,5 +1,4 @@
 """Fixtures for compress api tests"""
-import shutil
 from pathlib import Path
 
 import pytest
@@ -38,22 +37,35 @@ def compress_api(crunchy_api, housekeeper_api):
     yield _api
 
 
-@pytest.fixture(scope="function")
-def compress_test_dir(tmpdir_factory):
-    """Path to a temporary directory"""
-    my_tmpdir = Path(tmpdir_factory.mktemp("data"))
-    yield my_tmpdir
-    shutil.rmtree(str(my_tmpdir))
+@pytest.fixture(scope="function", name="sample")
+def fixture_sample_one():
+    """Return the sample id for first sample"""
+    return "sample_1"
+
+
+@pytest.fixture(scope="function", name="sample_two")
+def fixture_sample_two():
+    """Return the sample id for second sample"""
+    return "sample_2"
+
+
+@pytest.fixture(scope="function", name="sample_three")
+def fixture_sample_three():
+    """Return the sample id for third sample"""
+    return "sample_3"
 
 
 @pytest.fixture(scope="function", name="bam_files")
-def fixture_bam_files(compress_test_dir):
-    """Fixture for temporary bam-files"""
-    sample_1_dir = compress_test_dir / "sample_1"
+def fixture_bam_files(project_dir, sample, sample_two, sample_three):
+    """Fixture for temporary bam-files
+
+    Creates files and return a dict will all files
+    """
+    sample_1_dir = project_dir / sample
     sample_1_dir.mkdir()
-    sample_2_dir = compress_test_dir / "sample_2"
+    sample_2_dir = project_dir / sample_two
     sample_2_dir.mkdir()
-    sample_3_dir = compress_test_dir / "sample_3"
+    sample_3_dir = project_dir / sample_three
     sample_3_dir.mkdir()
     bam_file_1 = sample_1_dir / "bam_1.bam"
     bai_file_1 = sample_1_dir / "bam_1.bam.bai"
@@ -69,16 +81,19 @@ def fixture_bam_files(compress_test_dir):
     bai_file_3.touch()
 
     return {
-        "sample_1": {"bam_file": bam_file_1, "bai_file": bai_file_1},
-        "sample_2": {"bam_file": bam_file_2, "bai_file": bai_file_2},
-        "sample_3": {"bam_file": bam_file_3, "bai_file": bai_file_3},
+        sample: {"bam_file": bam_file_1, "bai_file": bai_file_1},
+        sample_two: {"bam_file": bam_file_2, "bai_file": bai_file_2},
+        sample_three: {"bam_file": bam_file_3, "bai_file": bai_file_3},
     }
 
 
-@pytest.fixture(scope="function")
-def fastq_files(compress_test_dir):
-    """Fixture for temporary fastq-files"""
-    sample_1_dir = compress_test_dir / "sample_1"
+@pytest.fixture(scope="function", name="fastq_files")
+def fixture_fastq_files(project_dir, sample_1):
+    """Fixture for temporary fastq-files
+
+    Create fastq files and return a dictionary with them
+    """
+    sample_1_dir = project_dir / sample_1
     sample_1_dir.mkdir()
     fastq_first_file = sample_1_dir / f"sample{FASTQ_FIRST_READ_SUFFIX}"
     fastq_second_file = sample_1_dir / f"sample{FASTQ_SECOND_READ_SUFFIX}"
@@ -92,8 +107,8 @@ def fastq_files(compress_test_dir):
 
 
 @pytest.fixture(scope="function")
-def compress_hk_bundle(bam_files, case_id, timestamp):
-    """hk file list fixture"""
+def compress_hk_bam_bundle(bam_files, case_id, timestamp):
+    """Create a complete bundle mock for testing compression"""
     hk_bundle_data = {
         "name": case_id,
         "created": timestamp,
@@ -115,6 +130,26 @@ def compress_hk_bundle(bam_files, case_id, timestamp):
     return hk_bundle_data
 
 
+@pytest.fixture(scope="function", name="compress_hk_fastq_bundle")
+def fixture_compress_hk_fastq_bundle(fastq_files, sample_1, timestamp):
+    """Create a complete bundle mock for testing compression"""
+    hk_bundle_data = {
+        "name": sample_1,
+        "created": timestamp,
+        "expires": timestamp,
+        "files": [],
+    }
+
+    first_fastq = fastq_files["fastq_first_path"]
+    second_fastq = fastq_files["fastq_second_path"]
+    for fastq_file in [first_fastq, second_fastq]:
+        fastq_file_info = {"path": str(fastq_file), "archive": False, "tags": ["fastq"]}
+
+        hk_bundle_data["files"].append(fastq_file_info)
+
+    return hk_bundle_data
+
+
 @pytest.fixture(scope="function")
 def fastq_files_hk_list(fastq_files):
     """hk file list fixture"""
@@ -129,17 +164,18 @@ def fastq_files_hk_list(fastq_files):
 @pytest.fixture(scope="function")
 def compress_scout_case(bam_files, case_id):
     """Fixture for scout case with bam-files"""
-    return {
+    case_data = {
         "_id": case_id,
         "individuals": [
             {"individual_id": sample, "bam_file": str(files["bam_file"])}
             for sample, files in bam_files.items()
         ],
     }
+    return case_data
 
 
-@pytest.fixture(scope="function")
-def bam_dict(bam_files):
+@pytest.fixture(scope="function", name="bam_dict")
+def fixture_bam_dict(bam_files):
     """bam_dict fixture"""
     _bam_dict = {}
     for sample, files in bam_files.items():

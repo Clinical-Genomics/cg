@@ -46,7 +46,9 @@ class ApplicationImporter(Store):
         """Transfer application tag info from cgadmin."""
         query = self.admin.ApplicationTag
         count = query.count()
-        with click.progressbar(query, length=count, label="applications") as progressbar:
+        with click.progressbar(
+            query, length=count, label="applications"
+        ) as progressbar:
             for admin_record in progressbar:
                 data = self.extract(admin_record)
                 if not self.application(data["tag"]):
@@ -87,8 +89,12 @@ class ApplicationImporter(Store):
             "turnaround_time": record.turnaround_time,
             "updated_at": record.last_updated,
             "comment": record.comment,
-            "description": record.versions[0].description if record.versions else "MISSING",
-            "is_accredited": record.versions[0].is_accredited if record.versions else False,
+            "description": record.versions[0].description
+            if record.versions
+            else "MISSING",
+            "is_accredited": record.versions[0].is_accredited
+            if record.versions
+            else False,
             "percent_kth": record.versions[0].percent_kth if record.versions else None,
             "details": record.versions[0].description if record.versions else None,
             "limitations": record.versions[0].limitations if record.versions else None,
@@ -193,11 +199,15 @@ class CustomerImporter(Store):
             "project_account_ki": record.project_account_ki,
             "project_account_kth": record.project_account_kth,
             "uppmax_account": record.uppmax_account,
-            "primary_contact": (record.primary_contact.email if record.primary_contact else None),
+            "primary_contact": (
+                record.primary_contact.email if record.primary_contact else None
+            ),
             "delivery_contact": (
                 record.delivery_contact.email if record.delivery_contact else None
             ),
-            "invoice_contact": (record.invoice_contact.email if record.invoice_contact else None),
+            "invoice_contact": (
+                record.invoice_contact.email if record.invoice_contact else None
+            ),
         }
         return data
 
@@ -251,7 +261,9 @@ class UserImporter(Store):
             "name": record.name,
             "email": record.email,
             "is_admin": record.is_admin,
-            "customer": record.customers[0].customer_id if record.customers else "cust999",
+            "customer": record.customers[0].customer_id
+            if record.customers
+            else "cust999",
         }
         return data
 
@@ -279,11 +291,13 @@ class PanelImporter(Store):
         """Transfer scout info to store."""
         panel_names = self.scout.panel_collection.find().distinct("panel_name")
         count = len(panel_names)
-        with click.progressbar(panel_names, length=count, label="panels") as progressbar:
+        with click.progressbar(
+            panel_names, length=count, label="panels"
+        ) as progressbar:
             for panel_name in progressbar:
-                scout_record = self.scout.panel_collection.find({"panel_name": panel_name}).sort(
-                    "version", pymongo.DESCENDING
-                )[0]
+                scout_record = self.scout.panel_collection.find(
+                    {"panel_name": panel_name}
+                ).sort("version", pymongo.DESCENDING)[0]
                 data = self.extract(scout_record)
                 if self.panel(data["abbrev"]) is None:
                     new_record = self.build(data)
@@ -380,16 +394,22 @@ class SampleImporter(Store):
             data["priority"] = sample["priority"]
 
         capture_kit = lims_sample.udf.get("Capture Library version")
-        data["capture_kit"] = capture_kit if capture_kit and capture_kit != "NA" else None
+        data["capture_kit"] = (
+            capture_kit if capture_kit and capture_kit != "NA" else None
+        )
         return data
 
     def build(self, customer_obj, data):
         """Build a record."""
         application_obj = self.application(data["application"])
         if application_obj is None:
-            LOG.warning(f"unknown application tag: {data['internal_id']} - {data['application']}")
+            LOG.warning(
+                f"unknown application tag: {data['internal_id']} - {data['application']}"
+            )
             return None
-        version_obj = self.application_version(application_obj, data["application_version"])
+        version_obj = self.application_version(
+            application_obj, data["application_version"]
+        )
         version_obj = version_obj if version_obj else application_obj.versions[-1]
         kwargs = dict(capture_kit=data["capture_kit"])
         new_record = self.add_sample(
@@ -426,7 +446,9 @@ class FamilyImporter(Store):
             #     continue
             query = self.samples(customer=customer_obj)
             label = f"families | {customer_obj.internal_id}"
-            with click.progressbar(query, length=query.count(), label=label) as progressbar:
+            with click.progressbar(
+                query, length=query.count(), label=label
+            ) as progressbar:
                 for sample_obj in progressbar:
                     sample = self.lims.sample(sample_obj.internal_id)
                     if sample["family"] is None:
@@ -436,7 +458,10 @@ class FamilyImporter(Store):
                     samples = [
                         self.lims.sample(family_sample.id)
                         for family_sample in self.lims.get_samples(
-                            udf={"customer": sample["customer"], "familyID": sample["family"],}
+                            udf={
+                                "customer": sample["customer"],
+                                "familyID": sample["family"],
+                            }
                         )
                     ]
                     samples = [
@@ -476,7 +501,9 @@ class FamilyImporter(Store):
                 else:
                     if sample[parent_key] is None:
                         sample_data[parent_key] = None
-                    elif re.match("^[A-Z]{3}[1-9]{3,4}A[1-9]{1,2}$", sample[parent_key]):
+                    elif re.match(
+                        "^[A-Z]{3}[1-9]{3,4}A[1-9]{1,2}$", sample[parent_key]
+                    ):
                         sample_data[parent_key] = sample[parent_key]
                     else:
                         sample_data[parent_key] = None
@@ -503,7 +530,9 @@ class FamilyImporter(Store):
             else:
                 priority = "standard"
 
-        new_record = self.add_family(name=data["name"], priority=priority, panels=data["panels"])
+        new_record = self.add_family(
+            name=data["name"], priority=priority, panels=data["panels"]
+        )
         new_record.customer = customer_obj
         yield new_record
 
@@ -513,8 +542,12 @@ class FamilyImporter(Store):
                     family=new_record,
                     sample=samples[link_data["sample"]],
                     status=link_data["status"],
-                    father=(samples[link_data["father"]] if link_data["father"] else None),
-                    mother=(samples[link_data["mother"]] if link_data["mother"] else None),
+                    father=(
+                        samples[link_data["father"]] if link_data["father"] else None
+                    ),
+                    mother=(
+                        samples[link_data["mother"]] if link_data["mother"] else None
+                    ),
                 )
                 yield link_obj
             except Exception:
@@ -543,14 +576,18 @@ class AnalysisImporter(Store):
     def process(self):
         """Transfer housekeeeper info to store."""
         query = self.hk.runs()
-        with click.progressbar(query, length=query.count(), label="analyses") as progressbar:
+        with click.progressbar(
+            query, length=query.count(), label="analyses"
+        ) as progressbar:
             for hk_record in progressbar:
                 data = self.extract(hk_record)
 
                 customer_obj = self.customer(data["customer"])
                 family_obj = self.find_family(customer_obj, data["family"])
                 if family_obj is None:
-                    LOG.error(f"family not found: {data['customer']} | {data['family']}")
+                    LOG.error(
+                        f"family not found: {data['customer']} | {data['family']}"
+                    )
                     continue
 
                 if not self.analysis(family_obj, data["analyzed"]):
