@@ -111,7 +111,6 @@ def bioinfo(context, case_name, cleanup, target_load, dry):
     """Load bioinfo case results to the trending database"""
 
     hk_api = context.obj["housekeeper_api"]
-    store = context.obj["db"]
     status_api = context.obj["status"]
 
     click.echo(click.style("----------------- BIOINFO -----------------------"))
@@ -167,7 +166,7 @@ def bioinfo_all(context, dry):
     """Load all cases with recent analysis and a multiqc-json to the trending database."""
 
     hk_api = context.obj["housekeeper_api"]
-    
+    store = context.obj["db"] 
     cases = store.families()
     for case in cases:
         case_name = case.internal_id
