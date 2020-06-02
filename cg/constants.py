@@ -161,7 +161,7 @@ MIP_RNA_TAGS = {
     },
     tuple(["mip_analyse", "log"]): {"tags": ["mip-analyse", "log"], "is_mandatory": True},
     tuple(["mip_analyse", "config_analysis"]): {
-        "tags": ["mip-analyse", "mip-config"],
+        "tags": ["mip-analyse", "config-analysis"],
         "is_mandatory": True,
     },
     tuple(["mip_analyse", "pedigree"]): {"tags": ["mip-analyse", "pedigree"], "is_mandatory": True},
