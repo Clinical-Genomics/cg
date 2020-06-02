@@ -13,6 +13,7 @@ from cg.exc import AnalysisUploadError
 
 LOG = logging.getLogger(__name__)
 
+VOGUE_VALID_BIOINFO = ["mip"]
 
 @click.group()
 @click.pass_context
@@ -108,17 +109,20 @@ def samples(context, days: int):
 def bioinfo(context, case_name, cleanup, target_load, dry):
     """Load bioinfo case results to the trending database"""
 
-    valid_workflows = ["mip"]
+
+    hk_api = context.obj['housekeeper_api']
+    store = context.obj['db']
+    status_api = context.obj['status_api']
 
     click.echo(click.style("----------------- BIOINFO -----------------------"))
 
     load_bioinfo_raw_inputs = dict()
 
     # Probably get samples for a case_name through statusdb api
-    load_bioinfo_raw_inputs["samples"] = _get_samples(context, case_name)
+    load_bioinfo_raw_inputs["samples"] = _get_samples(store, case_name)
 
     # Probably get analysis result file through housekeeper ai
-    load_bioinfo_raw_inputs["analysis_result_file"] = _get_multiqc_latest_file(context, case_name)
+    load_bioinfo_raw_inputs["analysis_result_file"] = _get_multiqc_latest_file(hk_api, case_name)
 
     # Probably get analysis_type [multiqc or microsalt or all] from cli
     # This might automated to some extend by checking if input multiqc json.
@@ -133,12 +137,11 @@ def bioinfo(context, case_name, cleanup, target_load, dry):
     load_bioinfo_raw_inputs["case_analysis_type"] = "multiqc"
 
     # Get workflow_name and workflow_version
-    (
-        load_bioinfo_raw_inputs["analysis_workflow_name"],
-        load_bioinfo_raw_inputs["analysis_workflow_version"],
-    ) = _get_analysis_workflow_details(context, case_name)
-    if load_bioinfo_raw_inputs["analysis_workflow_name"] not in valid_workflows:
+    workflow_name, workflow_version = _get_analysis_workflow_details(status_api, case_name)
+    if workflow_name not in VOGUE_VALID_BIOINFO:
         raise AnalysisUploadError(f"Case upload failed: {case_name}. Reason: Bad workflow name.")
+    load_bioinfo_raw_inputs["analysis_workflow_name"] = workflow_name
+    load_bioinfo_raw_inputs["analysis_workflow_version"] = workflow_version
 
     if dry:
         click.echo(click.style("----------------- DRY RUN -----------------------"))
@@ -157,14 +160,15 @@ def bioinfo(context, case_name, cleanup, target_load, dry):
             context.obj["vogue_upload_api"].load_bioinfo_sample(load_bioinfo_raw_inputs)
 
 
-@vogue.command("bioinfo-all", short_help="Load all mip bioinfo results into vogue")
-@click.option("--dry/--no-dry", default=False, help="Dry run...")
+@vogue.command("bioinfo-all", short_help="Load all bioinfo results into vogue")
+@click.option("--dry/--no-dry", is_flag=True, help="Dry run...")
 @click.pass_context
 def bioinfo_all(context, dry):
     """Load all cases with recent analysis and a multiqc-json to the trending database."""
 
     hk_api = context.obj["housekeeper_api"]
-    cases = context.obj["db"].families()
+    store = context.obj["db"]
+    cases = store.families()
     for case in cases:
         case_name = case.internal_id
         version_obj = hk_api.last_version(case_name)
@@ -183,23 +187,20 @@ def bioinfo_all(context, dry):
         if not Path(existing_multiqc_file).exists():
             continue
 
-        click.echo(
-            click.style(f"Found multiqc for {case_name}, {existing_multiqc_file}", fg="blue")
-        )
+        LOG.info("Found multiqc for %s, %s", case_name, existing_multiqc_file)
         try:
             context.invoke(bioinfo, case_name=case_name, cleanup=True, target_load="all", dry=dry)
         except AnalysisUploadError:
             LOG.error("Case upload failed: %s", case_name, exc_info=True)
 
 
-def _get_multiqc_latest_file(context, case_name):
+def _get_multiqc_latest_file(hk_api: HousekeeperAPI, case_name: str) -> str:
     """Get latest multiqc_data.json path for a case_name
        Args:
            case_name(str): onemite
        Returns:
            multiqc_data_path(str): /path/to/multiqc.json
     """
-    hk_api = context.obj["housekeeper_api"]
     version_obj = hk_api.last_version(case_name)
     multiqc_json_file = hk_api.get_files(
         bundle=case_name, tags=["multiqc-json"], version=version_obj.id
@@ -211,7 +212,7 @@ def _get_multiqc_latest_file(context, case_name):
     return multiqc_json_file[0].full_path
 
 
-def _get_samples(context, case_name):
+def _get_samples(store_api: Store, case_name:str ) -> str:
     """Get a sample string for case_name
        Args:
            case_name(str): onemite
@@ -219,14 +220,14 @@ def _get_samples(context, case_name):
            sample_names(str): ACC12345,ACC45679
     """
 
-    link_objs = get_links(context, case_name, sample_id=False)
+    link_objs = get_links(store_api, case_name, sample_id=False)
     sample_ids = set()
     for link_obj in link_objs:
         sample_ids.add(link_obj.sample.internal_id)
     return ",".join(sample_ids)
 
 
-def _get_analysis_workflow_details(context, case_name):
+def _get_analysis_workflow_details(status_api, case_name: str) -> str:
     """Get lowercase workflow name for a case_name
        Args:
            case_name(str): onemite
@@ -235,8 +236,6 @@ def _get_analysis_workflow_details(context, case_name):
            workflow_version(str): v3.14.15
     """
     # Workflow that generated these results
-    status_api = context.obj["status"]
-
     family_obj = status_api.family(case_name)
     workflow_name = None
     workflow_version = None
