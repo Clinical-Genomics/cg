@@ -5,29 +5,38 @@ import sys
 
 import click
 
-from cg.apps import hk, tb, scoutapi, lims
+from cg.apps import hk, lims, scoutapi, tb
 from cg.apps.mip.fastq import FastqHandler
-from cg.cli.workflow.mip.store import store as store_cmd
-from cg.cli.workflow.mip_dna.deliver import deliver as deliver_cmd, CASE_TAGS, SAMPLE_TAGS
 from cg.cli.workflow.get_links import get_links
+from cg.cli.workflow.mip.store import store as store_cmd
+from cg.cli.workflow.mip_dna.deliver import CASE_TAGS, SAMPLE_TAGS
+from cg.cli.workflow.mip_dna.deliver import deliver as deliver_cmd
 from cg.exc import CgError
-from cg.meta.workflow.mip_dna import AnalysisAPI
 from cg.meta.deliver import DeliverAPI
+from cg.meta.workflow.mip_dna import AnalysisAPI
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
 EMAIL_OPTION = click.option("-e", "--email", help="email to send errors to")
-PRIORITY_OPTION = click.option("-p", "--priority", type=click.Choice(["low", "normal", "high"]))
-START_WITH_PROGRAM = click.option("-sw", "--start-with", help="start mip from this program.")
+PRIORITY_OPTION = click.option(
+    "-p", "--priority", type=click.Choice(["low", "normal", "high"])
+)
+START_WITH_PROGRAM = click.option(
+    "-sw", "--start-with", help="start mip from this program."
+)
 
 
 @click.group("mip-dna", invoke_without_command=True)
 @EMAIL_OPTION
 @PRIORITY_OPTION
 @START_WITH_PROGRAM
-@click.option("-c", "--case", "case_id", help="case to prepare and start an analysis for")
+@click.option(
+    "-c", "--case", "case_id", help="case to prepare and start an analysis for"
+)
 @click.pass_context
-def mip_dna(context: click.Context, case_id: str, email: str, priority: str, start_with: str):
+def mip_dna(
+    context: click.Context, case_id: str, email: str, priority: str, start_with: str
+):
     """Rare disease DNA workflow"""
     context.obj["db"] = Store(context.obj["database"])
     hk_api = hk.HousekeeperAPI(context.obj)
@@ -35,7 +44,11 @@ def mip_dna(context: click.Context, case_id: str, email: str, priority: str, sta
     lims_api = lims.LimsAPI(context.obj)
     context.obj["tb"] = tb.TrailblazerAPI(context.obj)
     deliver = DeliverAPI(
-        context.obj, hk_api=hk_api, lims_api=lims_api, case_tags=CASE_TAGS, sample_tags=SAMPLE_TAGS
+        context.obj,
+        hk_api=hk_api,
+        lims_api=lims_api,
+        case_tags=CASE_TAGS,
+        sample_tags=SAMPLE_TAGS,
     )
     context.obj["api"] = AnalysisAPI(
         db=context.obj["db"],
@@ -67,7 +80,11 @@ def mip_dna(context: click.Context, case_id: str, email: str, priority: str, sta
             context.invoke(link, case_id=case_id)
             context.invoke(panel, case_id=case_id)
             context.invoke(
-                run, case_id=case_id, priority=priority, email=email, start_with=start_with
+                run,
+                case_id=case_id,
+                priority=priority,
+                email=email,
+                start_with=start_with,
             )
 
 
@@ -77,15 +94,23 @@ def mip_dna(context: click.Context, case_id: str, email: str, priority: str, sta
 @click.pass_context
 def link(context: click.Context, case_id: str, sample_id: str):
     """Link FASTQ files for a SAMPLE_ID"""
+    store = context.obj["db"]
 
-    link_objs = get_links(context, case_id, sample_id)
+    link_objs = get_links(store, case_id, sample_id)
 
     for link_obj in link_objs:
         LOG.info(
-            "%s: %s link FASTQ files", link_obj.sample.internal_id, link_obj.sample.data_analysis
+            "%s: %s link FASTQ files",
+            link_obj.sample.internal_id,
+            link_obj.sample.data_analysis,
         )
-        if not link_obj.sample.data_analysis or "mip" in link_obj.sample.data_analysis.lower():
-            mip_fastq_handler = FastqHandler(context.obj, context.obj["db"], context.obj["tb"])
+        if (
+            not link_obj.sample.data_analysis
+            or "mip" in link_obj.sample.data_analysis.lower()
+        ):
+            mip_fastq_handler = FastqHandler(
+                context.obj, context.obj["db"], context.obj["tb"]
+            )
             context.obj["api"].link_sample(
                 mip_fastq_handler,
                 case=link_obj.family.internal_id,
@@ -167,19 +192,27 @@ def run(
     if context.obj["tb"].analyses(family=case_obj.internal_id, temp=True).first():
         LOG.warning("%s: analysis already running", {case_obj.internal_id})
     else:
-        context.obj["api"].run(case_obj, priority=priority, email=email, start_with=start_with)
+        context.obj["api"].run(
+            case_obj, priority=priority, email=email, start_with=start_with
+        )
 
 
 @mip_dna.command()
 @click.option(
-    "-d", "--dry-run", "dry_run", is_flag=True, help="print to console, " "without actualising"
+    "-d",
+    "--dry-run",
+    "dry_run",
+    is_flag=True,
+    help="print to console, " "without actualising",
 )
 @click.pass_context
 def start(context: click.Context, dry_run: bool = False):
     """Start all cases that are ready for analysis"""
     exit_code = 0
 
-    cases = [case_obj.internal_id for case_obj in context.obj["db"].cases_to_mip_analyze()]
+    cases = [
+        case_obj.internal_id for case_obj in context.obj["db"].cases_to_mip_analyze()
+    ]
 
     for case_id in cases:
 
@@ -192,7 +225,9 @@ def start(context: click.Context, dry_run: bool = False):
             continue
 
         priority = (
-            "high" if case_obj.high_priority else ("low" if case_obj.low_priority else "normal")
+            "high"
+            if case_obj.high_priority
+            else ("low" if case_obj.low_priority else "normal")
         )
 
         if dry_run:

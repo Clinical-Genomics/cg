@@ -1,15 +1,16 @@
 """Base command for trending"""
 
+import logging
 from pathlib import Path
 
-import logging
 import click
 
-from cg.meta.upload.vogue import UploadVogueAPI
-from cg.apps import vogue as vogue_api, gt, hk
+from cg.apps import gt, hk
+from cg.apps import vogue as vogue_api
 from cg.cli.workflow.get_links import get_links
-from cg.store import Store
 from cg.exc import AnalysisUploadError
+from cg.meta.upload.vogue import UploadVogueAPI
+from cg.store import Store
 
 LOG = logging.getLogger(__name__)
 
@@ -32,9 +33,14 @@ def vogue(context):
     )
 
 
-@vogue.command("genotype", short_help="Getting genotype data from the genotype database.")
+@vogue.command(
+    "genotype", short_help="Getting genotype data from the genotype database."
+)
 @click.option(
-    "-d", "--days", required="True", help="load X days old sampels from genotype to vogue",
+    "-d",
+    "--days",
+    required="True",
+    help="load X days old sampels from genotype to vogue",
 )
 @click.pass_context
 def genotype(context, days: int):
@@ -45,12 +51,16 @@ def genotype(context, days: int):
     context.obj["vogue_upload_api"].load_genotype(days=days)
 
 
-@vogue.command("apptags", short_help="Getting application tags to the trending database.")
+@vogue.command(
+    "apptags", short_help="Getting application tags to the trending database."
+)
 @click.pass_context
 def apptags(context):
     """Loading apptags from status db to the trending database"""
 
-    click.echo(click.style("----------------- APPLICATION TAGS -----------------------"))
+    click.echo(
+        click.style("----------------- APPLICATION TAGS -----------------------")
+    )
 
     context.obj["vogue_upload_api"].load_apptags()
 
@@ -89,7 +99,9 @@ def samples(context, days: int):
     help="Case name or project name for which the analysis results will load",
 )
 @click.option(
-    "--cleanup/--no-cleanup", default=False, help="Cleanup processed case data while loading",
+    "--cleanup/--no-cleanup",
+    default=False,
+    help="Cleanup processed case data while loading",
 )
 @click.option(
     "-t",
@@ -112,16 +124,19 @@ def bioinfo(context, case_name, cleanup, target_load, dry):
 
     hk_api = context.obj["housekeeper_api"]
     status_api = context.obj["status"]
+    store = context.obj["db"]
 
     click.echo(click.style("----------------- BIOINFO -----------------------"))
 
     load_bioinfo_raw_inputs = dict()
 
     # Probably get samples for a case_name through statusdb api
-    load_bioinfo_raw_inputs["samples"] = _get_samples(context, case_name)
+    load_bioinfo_raw_inputs["samples"] = _get_samples(store, case_name)
 
     # Probably get analysis result file through housekeeper ai
-    load_bioinfo_raw_inputs["analysis_result_file"] = _get_multiqc_latest_file(hk_api, case_name)
+    load_bioinfo_raw_inputs["analysis_result_file"] = _get_multiqc_latest_file(
+        hk_api, case_name
+    )
 
     # Probably get analysis_type [multiqc or microsalt or all] from cli
     # This might automated to some extend by checking if input multiqc json.
@@ -136,9 +151,13 @@ def bioinfo(context, case_name, cleanup, target_load, dry):
     load_bioinfo_raw_inputs["case_analysis_type"] = "multiqc"
 
     # Get workflow_name and workflow_version
-    workflow_name, workflow_version = _get_analysis_workflow_details(status_api, case_name)
+    workflow_name, workflow_version = _get_analysis_workflow_details(
+        status_api, case_name
+    )
     if workflow_name not in VOGUE_VALID_BIOINFO:
-        raise AnalysisUploadError(f"Case upload failed: {case_name}. Reason: Bad workflow name.")
+        raise AnalysisUploadError(
+            f"Case upload failed: {case_name}. Reason: Bad workflow name."
+        )
     load_bioinfo_raw_inputs["analysis_workflow_name"] = workflow_name
     load_bioinfo_raw_inputs["analysis_workflow_version"] = workflow_version
 
@@ -146,15 +165,23 @@ def bioinfo(context, case_name, cleanup, target_load, dry):
         click.echo(click.style("----------------- DRY RUN -----------------------"))
 
     if target_load in ("raw", "all"):
-        click.echo(click.style("----------------- UPLOAD UNPROCESSED -----------------------"))
+        click.echo(
+            click.style("----------------- UPLOAD UNPROCESSED -----------------------")
+        )
         if not dry:
             context.obj["vogue_upload_api"].load_bioinfo_raw(load_bioinfo_raw_inputs)
 
     if target_load in ("process", "all"):
-        click.echo(click.style("----------------- PROCESS CASE -----------------------"))
+        click.echo(
+            click.style("----------------- PROCESS CASE -----------------------")
+        )
         if not dry:
-            context.obj["vogue_upload_api"].load_bioinfo_process(load_bioinfo_raw_inputs, cleanup)
-        click.echo(click.style("----------------- PROCESS SAMPLE -----------------------"))
+            context.obj["vogue_upload_api"].load_bioinfo_process(
+                load_bioinfo_raw_inputs, cleanup
+            )
+        click.echo(
+            click.style("----------------- PROCESS SAMPLE -----------------------")
+        )
         if not dry:
             context.obj["vogue_upload_api"].load_bioinfo_sample(load_bioinfo_raw_inputs)
 
@@ -188,7 +215,9 @@ def bioinfo_all(context, dry):
 
         LOG.info("Found multiqc for %s, %s", case_name, existing_multiqc_file)
         try:
-            context.invoke(bioinfo, case_name=case_name, cleanup=True, target_load="all", dry=dry)
+            context.invoke(
+                bioinfo, case_name=case_name, cleanup=True, target_load="all", dry=dry
+            )
         except AnalysisUploadError:
             LOG.error("Case upload failed: %s", case_name, exc_info=True)
 
@@ -206,12 +235,14 @@ def _get_multiqc_latest_file(hk_api: hk.HousekeeperAPI, case_name: str) -> str:
     )
 
     if len(list(multiqc_json_file)) == 0:
-        raise FileNotFoundError(f"No multiqc.json was found in housekeeper for {case_name}")
+        raise FileNotFoundError(
+            f"No multiqc.json was found in housekeeper for {case_name}"
+        )
 
     return multiqc_json_file[0].full_path
 
 
-def _get_samples(context, case_name: str) -> str:
+def _get_samples(store: Store, case_name: str) -> str:
     """Get a sample string for case_name
        Args:
            case_name(str): onemite
@@ -219,7 +250,7 @@ def _get_samples(context, case_name: str) -> str:
            sample_names(str): ACC12345,ACC45679
     """
 
-    link_objs = get_links(context, case_name, sample_id=False)
+    link_objs = get_links(store, case_name, sample_id=False)
     sample_ids = set()
     for link_obj in link_objs:
         sample_ids.add(link_obj.sample.internal_id)

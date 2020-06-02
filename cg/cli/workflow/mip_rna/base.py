@@ -4,19 +4,16 @@ import logging
 
 import click
 
-from cg.apps import hk, tb, lims
+from cg.apps import hk, lims, tb
 from cg.apps.environ import environ_email
 from cg.apps.mip import MipAPI
 from cg.apps.mip.fastq import FastqHandler
-from cg.cli.workflow.mip.store import store as store_cmd
-from cg.cli.workflow.mip_rna.deliver import (
-    deliver as deliver_cmd,
-    CASE_TAGS,
-    SAMPLE_TAGS,
-)
 from cg.cli.workflow.get_links import get_links
-from cg.meta.workflow.mip_rna import AnalysisAPI
+from cg.cli.workflow.mip.store import store as store_cmd
+from cg.cli.workflow.mip_rna.deliver import CASE_TAGS, SAMPLE_TAGS
+from cg.cli.workflow.mip_rna.deliver import deliver as deliver_cmd
 from cg.meta.deliver import DeliverAPI
+from cg.meta.workflow.mip_rna import AnalysisAPI
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -31,7 +28,11 @@ def mip_rna(context: click.Context):
     lims_api = lims.LimsAPI(context.obj)
     context.obj["tb"] = tb.TrailblazerAPI(context.obj)
     deliver = DeliverAPI(
-        context.obj, hk_api=hk_api, lims_api=lims_api, case_tags=CASE_TAGS, sample_tags=SAMPLE_TAGS,
+        context.obj,
+        hk_api=hk_api,
+        lims_api=lims_api,
+        case_tags=CASE_TAGS,
+        sample_tags=SAMPLE_TAGS,
     )
     context.obj["api"] = AnalysisAPI(
         db=context.obj["db"],
@@ -51,15 +52,20 @@ def mip_rna(context: click.Context):
 @click.pass_context
 def link(context: click.Context, case_id: str, sample_id: str):
     """Link FASTQ files for a SAMPLE_ID"""
-    link_objs = get_links(context, case_id, sample_id)
+    store = context.obj["db"]
+    link_objs = get_links(store, case_id, sample_id)
 
     for link_obj in link_objs:
         LOG.info(
-            "%s: %s link FASTQ files", link_obj.sample.internal_id, link_obj.sample.data_analysis,
+            "%s: %s link FASTQ files",
+            link_obj.sample.internal_id,
+            link_obj.sample.data_analysis,
         )
 
         if "mip + rna" in link_obj.sample.data_analysis.lower():
-            mip_fastq_handler = FastqHandler(context.obj, context.obj["db"], context.obj["tb"])
+            mip_fastq_handler = FastqHandler(
+                context.obj, context.obj["db"], context.obj["tb"]
+            )
             context.obj["api"].link_sample(
                 mip_fastq_handler,
                 case=link_obj.family.internal_id,
