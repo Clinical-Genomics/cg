@@ -6,22 +6,11 @@ verify_ssl = true
 [dev-packages]
 pytest = "*"
 mock = "*"
-ipdb = "*"
 pytest-mock = "*"
 snapshottest = "*"
-coverage = "<5"
 pytest-cov = "*"
-coveralls = "*"
-python-coveralls = "*"     # due to conflict on coverage package
 # linting
-git-lint = "*"
-pylint = "*"
-six = "~=1.12"               # due to astroid
-pycodestyle = "*"
-yamllint = "*"
 docutils = "*"
-html-linter = "*"
-tidy = "*"
 # black
 black = "*"
 pre-commit = "*"
