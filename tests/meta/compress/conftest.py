@@ -1,5 +1,6 @@
 """Fixtures for compress api tests"""
 import copy
+import os
 from pathlib import Path
 
 import pytest
@@ -39,7 +40,7 @@ def compress_api(crunchy_api, housekeeper_api):
 
 
 @pytest.fixture(scope="function", name="sample")
-def fixture_sample_one():
+def fixture_sample():
     """Return the sample id for first sample"""
     return "sample_1"
 
@@ -54,6 +55,49 @@ def fixture_sample_two():
 def fixture_sample_three():
     """Return the sample id for third sample"""
     return "sample_3"
+
+
+@pytest.fixture(scope="function", name="sample_dir")
+def fixture_sample_dir(project_dir, sample) -> Path:
+    """Return the path to a sample directory"""
+    _dir = project_dir / sample
+    _dir.mkdir()
+    return _dir
+
+
+@pytest.fixture(scope="function", name="bam_path")
+def fixture_bam_path(sample_dir) -> Path:
+    """Return the path to a non existing bam file"""
+    return sample_dir / "bam_1.bam"
+
+
+@pytest.fixture(scope="function", name="bai_path")
+def fixture_bai_path(sample_dir) -> Path:
+    """Return the path to a non existing bam index file file"""
+    return sample_dir / "bam_1.bam.bai"
+
+
+@pytest.fixture(scope="function", name="bam_file")
+def fixture_bam_file(bam_path) -> Path:
+    """Return the path to an existing bam file"""
+    bam_path.touch()
+    return bam_path
+
+
+@pytest.fixture(scope="function", name="multi_linked_file")
+def fixture_multi_linked_file(bam_file, project_dir) -> Path:
+    """Return the path to an existing file with two links"""
+    first_link = project_dir / "link-1"
+    os.link(bam_file, first_link)
+
+    return bam_file
+
+
+@pytest.fixture(scope="function", name="bai_file")
+def fixture_bai_file(bai_path) -> Path:
+    """Return the path to an existing bam index file"""
+    bai_path.touch()
+    return bai_path
 
 
 @pytest.fixture(scope="function", name="bam_files")

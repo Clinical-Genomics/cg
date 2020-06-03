@@ -63,7 +63,7 @@ class CompressAPI:
             LOG.info("Check bam file for sample %s in scout", sample_id)
             bam_file = sample.get("bam_file")
 
-            bam_path = self.check_bam_file(bam_file, hk_file_paths)
+            bam_path = self.get_bam_path(bam_file, hk_file_paths)
             if not bam_path:
                 return None
 
@@ -78,8 +78,11 @@ class CompressAPI:
 
         return bam_dict
 
-    def check_bam_file(self, bam_file: str, hk_files: set) -> Path:
-        """Check that everything is in place for a bam file and return it as a path object"""
+    def get_bam_path(self, bam_file: str, hk_files: set) -> Path:
+        """Take a the path to a file in string format and return a path object
+
+        Check if everything is as expected with the bam file
+        """
         if not bam_file:
             LOG.warning("No bam file found")
             return None
@@ -87,7 +90,7 @@ class CompressAPI:
         bam_path = Path(bam_file)
         # Check the bam file
         if bam_path.suffix != BAM_SUFFIX:
-            LOG.info("Alignment file does not have correct suffix %s", BAM_SUFFIX)
+            LOG.warning("Alignment file does not have correct suffix %s", BAM_SUFFIX)
             return None
 
         if not bam_path.exists():
