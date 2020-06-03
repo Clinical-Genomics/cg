@@ -6,14 +6,13 @@ from cg.apps.crunchy import CrunchyAPI
 from cg.apps.scoutapi import ScoutAPI
 
 
-def test_get_bam_files(
-    compress_api, compress_scout_case, compress_hk_bam_bundle, case_id, mocker, helpers
-):
+def test_get_bam_files(compress_api, compress_scout_case, compress_hk_bam_bundle, case_id, helpers):
     """test get_bam_files method"""
 
-    # GIVEN a case id
-    mocker.patch.object(ScoutAPI, "get_cases", return_value=[compress_scout_case])
-
+    # GIVEN a scout api that returns some case info
+    scout_api = compress_api.scout_api
+    scout_api.add_mock_case(compress_scout_case)
+    # GIVEN a hk api that returns some data
     hk_api = compress_api.hk_api
     helpers.ensure_hk_bundle(hk_api, compress_hk_bam_bundle)
 
@@ -24,11 +23,10 @@ def test_get_bam_files(
     assert set(bam_dict.keys()) == set(["sample_1", "sample_2", "sample_3"])
 
 
-def test_get_bam_files_no_scout_case(compress_api, case_id, mocker, caplog):
+def test_get_bam_files_no_scout_case(compress_api, case_id, caplog):
     """test get_bam_files method when there is not case in scout"""
 
     # GIVEN a case id
-    mocker.patch.object(ScoutAPI, "get_cases", return_value=[])
 
     # WHEN getting bam-files
     bam_dict = compress_api.get_bam_files(case_id=case_id)
@@ -39,12 +37,14 @@ def test_get_bam_files_no_scout_case(compress_api, case_id, mocker, caplog):
     assert f"{case_id} not found in scout" in caplog.text
 
 
-def test_get_bam_files_no_housekeeper_files(compress_api, compress_scout_case, mocker, caplog):
+def test_get_bam_files_no_housekeeper_files(compress_api, compress_scout_case, caplog):
     """test get_bam_files method when there is not case in scout"""
 
     case_id = compress_scout_case
+    # GIVEN a scout api that returns some case info
+    scout_api = compress_api.scout_api
+    scout_api.add_mock_case(case_id)
     # GIVEN a case id
-    mocker.patch.object(ScoutAPI, "get_cases", return_value=[case_id])
 
     # WHEN getting bam-files
     bam_dict = compress_api.get_bam_files(case_id=case_id)
@@ -140,7 +140,7 @@ def test_compress_case_bams(compress_api, bam_dict, mocker):
     mock_bam_to_cram = mocker.patch.object(CrunchyAPI, "bam_to_cram")
 
     # WHEN compressing the case
-    compress_api.compress_case_bams(bam_dict=bam_dict, ntasks=1, mem=2)
+    compress_api.compress_case_bams(bam_dict=bam_dict)
 
     # THEN all samples in bam-files will have been compressed
     assert mock_bam_to_cram.call_count == len(bam_dict)

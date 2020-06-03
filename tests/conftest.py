@@ -16,6 +16,7 @@ from cg.store import Store
 
 from .mocks.hk_mock import MockHousekeeperAPI
 from .mocks.madeline import MockMadelineAPI
+from .mocks.scout import MockScoutAPI
 from .small_helpers import SmallHelpers
 from .store_helpers import StoreHelpers
 
@@ -23,7 +24,7 @@ CHANJO_CONFIG = {"chanjo": {"config_path": "chanjo_config", "binary_path": "chan
 CRUNCHY_CONFIG = {
     "crunchy": {
         "cram_reference": "/path/to/fasta",
-        "slurm": {"account": "mock_account", "mail_user": "mock_mail", "conda_env": "mock_env",},
+        "slurm": {"account": "mock_account", "mail_user": "mock_mail", "conda_env": "mock_env"},
     }
 }
 
@@ -320,6 +321,16 @@ def fixture_hk_version_obj(housekeeper_api, hk_bundle_data, helpers):
     """Get a housekeeper version object"""
     _version = helpers.ensure_hk_version(housekeeper_api, hk_bundle_data)
     return _version
+
+
+# Scout fixtures
+
+
+@pytest.yield_fixture(scope="function", name="scout_api")
+def fixture_scout_api():
+    """Setup Scout api."""
+    _api = MockScoutAPI()
+    return _api
 
 
 # Store fixtures

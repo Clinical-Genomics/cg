@@ -12,13 +12,6 @@ from cg.meta.compress import CompressAPI
 from tests.mocks.hk_mock import MockFile
 
 
-class MockScout(ScoutAPI):
-    """Mock class for Scout api"""
-
-    def __init__(self):
-        pass
-
-
 class MockCrunchy(CrunchyAPI):
     """Mock crunchy api"""
 
@@ -31,10 +24,9 @@ def fixture_crunchy_api(crunchy_config_dict):
 
 
 @pytest.yield_fixture(scope="function")
-def compress_api(crunchy_api, housekeeper_api):
+def compress_api(crunchy_api, housekeeper_api, scout_api):
     """compress api fixture"""
     hk_api = housekeeper_api
-    scout_api = MockScout()
     _api = CompressAPI(crunchy_api=crunchy_api, hk_api=hk_api, scout_api=scout_api)
     yield _api
 

@@ -2,8 +2,6 @@
 
 import os
 
-from cg.apps.scoutapi import ScoutAPI
-
 
 def test_get_nlinks_one_link(compress_api, project_dir):
     """Test get_nlinks when there is one link to a file"""
@@ -61,10 +59,10 @@ def test_get_nlinks_three_links(compress_api, project_dir):
     assert nlinks == 3
 
 
-def test_update_scout(compress_api, bam_dict, mock_compress_func, mocker):
+def test_update_scout(compress_api, bam_dict, mock_compress_func):
     """ Test to update the bam paths in scout"""
     mock_compress_func(bam_dict)
-    mock_update_alignment_file = mocker.patch.object(ScoutAPI, "update_alignment_file")
+    scout_api = compress_api.scout_api
     # GIVEN a case-id
     case_id = "test_case"
 
@@ -72,7 +70,7 @@ def test_update_scout(compress_api, bam_dict, mock_compress_func, mocker):
     compress_api.update_scout(case_id=case_id, bam_dict=bam_dict)
 
     # THEN update_alignment_file should have been callen three times
-    assert mock_update_alignment_file.call_count == len(bam_dict)
+    assert scout_api.nr_alignment_updates() == len(bam_dict)
 
 
 def test_update_hk(compress_api, bam_dict, mock_compress_func):

@@ -18,15 +18,18 @@ def fastq(context, case_id, number_of_conversions, ntasks, mem, dry_run):
     """ Find cases with FASTQ files and compress into SPRING """
     compress_api = context.obj["compress"]
     crunchy_api = context.obj["crunchy"]
+    store = context.obj["db"]
     conversion_count = 0
+    cases = store.families()
     if case_id:
         cases = [context.obj["db"].family(case_id)]
-    else:
-        cases = context.obj["db"].families()
+
     for case in cases:
         if conversion_count == number_of_conversions:
             LOG.info("compressed FASTQ files for %s cases", conversion_count)
-            break
+            return
+
+        res = compress_api.compress_case_fastq(case=case)
         case_id = case.internal_id
         LOG.info("Searching for FASTQ files in %s", case_id)
         case_fastq_dict = dict()

@@ -1,6 +1,5 @@
 """CLI for compressing bam files"""
 import logging
-from pathlib import Path
 
 import click
 
@@ -18,36 +17,19 @@ def bam(context, case_id, number_of_conversions, ntasks, mem, dry_run):
     """Find cases with BAM files and compress into CRAM"""
 
     compress_api = context.obj["compress"]
-    conversion_count = 0
+    store = context.obj["db"]
+    cases = store.families()
     if case_id:
-        cases = [context.obj["db"].family(case_id)]
-    else:
-        cases = context.obj["db"].families()
+        cases = [store.family(case_id)]
+
+    conversion_count = 0
     for case in cases:
         if conversion_count == number_of_conversions:
             LOG.info("compressed bam-files for %s cases", conversion_count)
-            break
+            return
         case_id = case.internal_id
-        bam_dict = compress_api.get_bam_files(case_id=case_id)
-        if not bam_dict:
+        res = compress_api.compress_case(case_id, ntasks=ntasks, mem=mem, dry_run=dry_run)
+        if res is False:
             LOG.info("skipping %s", case_id)
             continue
-        case_has_bam_file = True
-        compression_is_pending = False
-        for sample, bam_files in bam_dict.items():
-            bam_path = Path(bam_files["bam"].full_path)
-            if not context.obj["crunchy"].is_bam_compression_possible(bam_path=bam_path):
-                LOG.info("BAM to CRAM compression not possible for %s", sample)
-                case_has_bam_file = False
-                break
-            if context.obj["crunchy"].is_cram_compression_pending(bam_path=bam_path):
-                LOG.info("BAM to CRAM compression pending for %s", sample)
-                compression_is_pending = True
-                break
-
-        if case_has_bam_file and not compression_is_pending:
-            LOG.info("Compressing bam-files for %s", case_id)
-            compress_api.compress_case_bams(
-                bam_dict=bam_dict, ntasks=ntasks, mem=mem, dry_run=dry_run
-            )
-            conversion_count += 1
+        conversion_count += 1
