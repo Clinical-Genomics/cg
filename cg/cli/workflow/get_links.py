@@ -22,7 +22,7 @@ def get_links(
     link_objs = []
 
     if case_id and sample_id:
-        LOG.info("link only one sample in a case")
+        LOG.info("Link only one sample in a case")
         link_obj = store.link(family_id=case_id, sample_id=sample_id)
         if not link_obj:
             LOG.error("Could not create link for case %s and sample %s", case_id, sample_id)
@@ -30,8 +30,12 @@ def get_links(
         link_objs = [link_obj]
 
     elif case_id:
-        LOG.info("link all samples in a case")
+        LOG.info("Link all samples in a case")
         case_obj = store.family(case_id)
+        if not case_obj:
+            LOG.error("Could not find case %s", case_id)
+            raise click.Abort
+
         if not case_obj.links:
             LOG.error("Could not find links for case %s", case_id)
             raise click.Abort
@@ -39,7 +43,7 @@ def get_links(
         link_objs = case_obj.links
 
     elif sample_id:
-        LOG.info("link sample %s in all its families", sample_id)
+        LOG.info("Link sample %s in all its families", sample_id)
         sample_obj = store.sample(sample_id)
 
         if not sample_obj:
@@ -55,7 +59,7 @@ def get_links(
         link_objs = sample_obj.links
 
     else:
-        LOG.error("provide case and/or sample")
+        LOG.error("Please provide case and/or sample")
         raise click.Abort
 
     return link_objs

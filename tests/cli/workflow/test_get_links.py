@@ -19,6 +19,21 @@ def test_get_links_case_id(analysis_store):
     assert link_objs == case_obj.links
 
 
+def test_get_links_non_existing_case_id(analysis_store, caplog):
+    """Test to get links for a case id in a populated store with linked samples"""
+    # GIVEN a populated store with linked samples and a non existing case id
+    case_id = "hello"
+    case_obj = analysis_store.family(case_id)
+    assert not case_obj
+
+    # WHEN fetching the links for the case
+    with pytest.raises(click.Abort):
+        # THEN assert that it was aborted
+        link_objs = get_links(store=analysis_store, case_id=case_id)
+        # THEN assert it communicates that the case_id could not be found
+        assert f"could not find case {case_id}" in caplog.text
+
+
 def test_get_links_sample_id_and_case_id(analysis_store):
     """Test to get links for a sample id in a populated store with linked samples"""
     # GIVEN a populated store with linked samples
