@@ -19,8 +19,9 @@ class StoreHelpers:
         """Utility function to add a bundle of information to a housekeeper api"""
         _bundle = store.bundle(bundle_data["name"])
         if not _bundle:
-            LOG.info("No bundle found")
+            print("No bundle found")
             _bundle, _version = store.add_bundle(bundle_data)
+            print("Add bundle with name %s" % bundle_data["name"])
             store.add_commit(_bundle, _version)
         return _bundle
 

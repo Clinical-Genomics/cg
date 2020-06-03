@@ -153,6 +153,7 @@ class MockHousekeeperAPI:
         self._file_added = False
         self._file_included = False
         self._tags_matter = False
+        self._last_version = True
         # Add tags here if there should be missing files
         self._missing_tags = set()
         if not config:
@@ -164,6 +165,10 @@ class MockHousekeeperAPI:
     def add_missing_tag(self, tag_name: str):
         """Add a missing tag"""
         self._missing_tags.add(tag_name)
+
+    def set_missing_last_version(self):
+        """Make sure that no version is returned"""
+        self._last_version = False
 
     def is_file_included(self) -> bool:
         """Return true if any file has been included"""
@@ -342,6 +347,8 @@ class MockHousekeeperAPI:
 
     def last_version(self, *args, **kwargs):
         """Gets the latest version of a bundle"""
+        if self._last_version is False:
+            return None
         return self._version_obj
 
     def get_root_dir(self):

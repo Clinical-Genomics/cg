@@ -8,13 +8,8 @@ from pathlib import Path
 from typing import List
 
 from cg.apps import crunchy, hk, scoutapi
-from cg.constants import (
-    BAM_SUFFIX,
-    FASTQ_FIRST_READ_SUFFIX,
-    FASTQ_SECOND_READ_SUFFIX,
-    HK_BAM_TAGS,
-    HK_FASTQ_TAGS,
-)
+from cg.constants import (BAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX,
+                          FASTQ_SECOND_READ_SUFFIX, HK_BAM_TAGS, HK_FASTQ_TAGS)
 
 LOG = logging.getLogger(__name__)
 
@@ -130,12 +125,14 @@ class CompressAPI:
             return None
         hk_files = self.hk_api.get_files(bundle=bundle_name, tags=tags, version=last_version.id)
         hk_files_dict = {Path(file_obj.full_path): file_obj for file_obj in hk_files}
-
         return hk_files_dict
 
     def get_fastq_files(self, sample_id: str) -> dict:
         """Get FASTQ files for sample"""
         hk_files_dict = self.get_hk_files_dict(bundle_name=sample_id, tags=HK_FASTQ_TAGS)
+        if hk_files_dict is None:
+            return None
+
         if len(hk_files_dict) != 2:
             LOG.warning("There has to be a pair of fastq files")
             return None

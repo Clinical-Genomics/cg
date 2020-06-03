@@ -1,4 +1,5 @@
 """Fixtures for compress api tests"""
+import copy
 from pathlib import Path
 
 import pytest
@@ -88,12 +89,12 @@ def fixture_bam_files(project_dir, sample, sample_two, sample_three):
 
 
 @pytest.fixture(scope="function", name="fastq_files")
-def fixture_fastq_files(project_dir, sample_1):
+def fixture_fastq_files(project_dir, sample):
     """Fixture for temporary fastq-files
 
     Create fastq files and return a dictionary with them
     """
-    sample_1_dir = project_dir / sample_1
+    sample_1_dir = project_dir / sample
     sample_1_dir.mkdir()
     fastq_first_file = sample_1_dir / f"sample{FASTQ_FIRST_READ_SUFFIX}"
     fastq_second_file = sample_1_dir / f"sample{FASTQ_SECOND_READ_SUFFIX}"
@@ -106,8 +107,21 @@ def fixture_fastq_files(project_dir, sample_1):
     }
 
 
-@pytest.fixture(scope="function")
-def compress_hk_bam_bundle(bam_files, case_id, timestamp):
+@pytest.fixture(scope="function", name="sample_hk_bundle_no_files")
+def fixture_sample_hk_bundle_no_files(sample, timestamp):
+    """Create a complete bundle mock for testing compression"""
+    hk_bundle_data = {
+        "name": sample,
+        "created": timestamp,
+        "expires": timestamp,
+        "files": [],
+    }
+
+    return hk_bundle_data
+
+
+@pytest.fixture(scope="function", name="case_hk_bundle_no_files")
+def fixture_case_hk_bundle_no_files(case_id, timestamp):
     """Create a complete bundle mock for testing compression"""
     hk_bundle_data = {
         "name": case_id,
@@ -115,6 +129,15 @@ def compress_hk_bam_bundle(bam_files, case_id, timestamp):
         "expires": timestamp,
         "files": [],
     }
+
+    return hk_bundle_data
+
+
+@pytest.fixture(scope="function")
+def compress_hk_bam_bundle(bam_files, case_hk_bundle_no_files):
+    """Create a complete bundle mock for testing compression"""
+    hk_bundle_data = copy.deepcopy(case_hk_bundle_no_files)
+
     for sample_id in bam_files:
         bam_file = bam_files[sample_id]["bam_file"]
         bai_file = bam_files[sample_id]["bai_file"]
@@ -131,14 +154,9 @@ def compress_hk_bam_bundle(bam_files, case_id, timestamp):
 
 
 @pytest.fixture(scope="function", name="compress_hk_fastq_bundle")
-def fixture_compress_hk_fastq_bundle(fastq_files, sample_1, timestamp):
+def fixture_compress_hk_fastq_bundle(fastq_files, sample_hk_bundle_no_files):
     """Create a complete bundle mock for testing compression"""
-    hk_bundle_data = {
-        "name": sample_1,
-        "created": timestamp,
-        "expires": timestamp,
-        "files": [],
-    }
+    hk_bundle_data = copy.deepcopy(sample_hk_bundle_no_files)
 
     first_fastq = fastq_files["fastq_first_path"]
     second_fastq = fastq_files["fastq_second_path"]
