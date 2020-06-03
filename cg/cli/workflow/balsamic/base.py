@@ -270,12 +270,13 @@ def config_case(
 @click.option(
     "-r", "--run-analysis", "run_analysis", is_flag=True, default=False, help="start " "analysis"
 )
+@click.option("-a","--analysis-type", "analysis_type", type=click.Choice(['qc', 'paired', 'single']), required=False)
 @click.option("--config", "config_path", required=False, help="Optional")
 @PRIORITY_OPTION
 @EMAIL_OPTION
 @click.argument("case_id")
 @click.pass_context
-def run(context, dry, run_analysis, config_path, priority, email, case_id):
+def run(context, dry, run_analysis, config_path, priority, email, case_id, analysis_type):
     """Generate a config for the case_id."""
 
     conda_env = context.obj["balsamic"]["conda_env"]
@@ -286,7 +287,7 @@ def run(context, dry, run_analysis, config_path, priority, email, case_id):
         config_path = Path.joinpath(root_dir, case_id, case_id + ".json")
 
     # Call Balsamic
-    command_str = f" run analysis" f" --account {slurm_account}" f" -s {config_path}"
+    command_str = ""
 
     if run_analysis:
         command_str += " --run-analysis"
@@ -294,17 +295,18 @@ def run(context, dry, run_analysis, config_path, priority, email, case_id):
     if email:
         command_str += f" --mail-user {email}"
 
+    if analysis_type:
+        command_str += f" -a {analysis_type}"
+
     command_str += f" --qos {priority}"
 
-    command = [f"bash -c 'source activate {conda_env}; balsamic"]
-    command_str += "'"
-    command.extend(command_str.split(" "))
+    command = f"bash -c 'source activate {conda_env}; balsamic run analysis --account {slurm_account} -s {config_path}{command_str}'"
 
     if dry:
-        click.echo(" ".join(command))
+        click.echo(command)
         return SUCCESS
 
-    process = subprocess.run(" ".join(command), shell=True)
+    process = subprocess.run(command, shell=True)
     return process
 
 
