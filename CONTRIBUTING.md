@@ -45,7 +45,7 @@ CG is using github flow branching model as described in our [development manual]
 
 ### Reporting Bugs
 
-This section guides you through submitting a bug report for CG. Following these guidelines helps other developers and contributors understand your report :pencil:, reproduce the behavior :computer: :computer:, and find related reports :mag_right:
+This section guides you through submitting a bug report to CG. Following these guidelines helps other developers and contributors understand your report :pencil:, reproduce the behavior :computer: :computer:, and find related issues and reports :mag_right:
 
 Before creating bug reports, please try to search the issues (opened and closed) if the problem has been described before, there might be no reason to create one. When creating a bug report, please [include as many details as possible](#how-do-i-submit-a-good-bug-report).
 
@@ -163,6 +163,7 @@ We convert all the info that we get from LIMS/`genologics` to dictionaries befor
 Interface to Trailblazer.
 
 - Starts the MIP dna pipeline
+- Monitor analysis pipeline status
 
 #### Genotype (gt)
 
@@ -191,7 +192,7 @@ Interface to CGStats. Used to handle things related to flowcells:
 - this is where we find out how many reads a sample have been sequened
 - getting paths to FASTQ files for samples/flowcells
 
-### `Cli`
+### Cli
 
 The command line code is written in the [Click][click] framework.
 
@@ -260,7 +261,11 @@ cg workflow mip-dna store completed
 
 #### Transfer
 
-Some information will always exist across multiple database and requires some continous syncing to keep up-to-date. This is the case for information primarily entered through LIMS. To automatically fill-in the date of sample reception for all samples that are waiting in the queue:
+##### Lims
+
+Includes: `status`, `lims`
+
+Some info if primarily stored in LIMS and needs to be syncronized over to `status`. This is the case for both the date when a samples was received and when it was finally delivered. This interface is intended to run continuously as part of a crontab job.
 
 ```bash
 cg transfer lims --status received
@@ -268,9 +273,21 @@ cg transfer lims --status received
 
 And similarly for filling in the delivery date:
 
+
 ```bash
 cg transfer lims --status delivered
 ```
+
+##### Flowcell
+
+Includes: `stats`, `hk`, `status`
+
+The API accepts the name of a flowcell which will be looked up in `stats`. For all samples on the flowcell it will:
+
+1. Check if the quality (Q30) is good enough to include the sequencing results
+1. update the number of reads that the sample has been sequenced _overall_ and match this with the requirement given by the application.
+1. accordingly, the interface will look up FASTQ files and store them using `hk`.
+1. if a sample has sufficient number of reads, the `sequenced_at` date will be filled in (`status`) according to the sequencing date of the most recent flowcell.
 
 Another common task is to transfer data and FASTQ files from the demux/cgstats interface when a demultiplexing task completes. This is as easy as determining the flowcell of interest and running:
 
@@ -300,7 +317,7 @@ You can of course specify which upload you want to do yourself as well:
 cg upload [coverage|genotypes|observations|scout|beacon] raredragon
 ```
 
-### `Meta`
+### Meta
 
 This is the interface that bridge various apps. An example is the "orders" module. When placing orders we need to coordinate information/actions between the apps: `lims`, `status`, and `osticket`. It also provides some additional functionality such as setting up the basis for the orders API and which fields are required for different order types.
 
@@ -320,26 +337,6 @@ The interface supports:
 
 It opens a ticket using the `osticket` API for each order which it links with the ticket number. It stores information in both LIMS and `status` for samples and pools linked by LIMS id. It stores only a minimum of information about each sample in LIMS. Most of the critial information is stored in `status` and this is also the primary place to go if we need to update e.g. application tag for a sample.
 
-#### transfer
-
-This interface has a few related roles:
-
-##### Flowcell
-
-Includes: `stats`, `hk`, `status`
-
-The API accepts the name of a flowcell which will be looked up in `stats`. For all samples on the flowcell it will:
-
-1. Check if the quality (Q30) is good enough to include the sequencing results
-1. update the number of reads that the sample has been sequenced _overall_ and match this with the requirement given by the application.
-1. accordingly, the interface will look up FASTQ files and store them using `hk`.
-1. if a sample has sufficient number of reads, the `sequenced_at` date will be filled in (`status`) according to the sequencing date of the most recent flowcell.
-
-##### Lims
-
-Includes: `status`, `lims`
-
-Some info if primarily stored in LIMS and needs to be syncronized over to `status`. This is the case for both the date when a samples was received and when it was finally delivered. This interface is intended to run continously as part of a crontab job.
 
 #### Upload
 
@@ -406,7 +403,7 @@ The creation of an invoice is initiated in LIMS. You then use the process ID to 
 
 The invoice itself will be stored in an intermediate state in `status` while links will be created in LIMS to be able to keep track of which samples was part of which invoice.
 
-### `Server`
+### Server
 
 The REST API server handles a number of actions. It's written in [Flask][flask] and exposes an admin interface for quickly editing information in the backend MySQL database. The admin interface is served under a hidden route but the plan is to move it to Google OAuth.
 
@@ -416,7 +413,7 @@ The API is protected by JSON Web Tokens generated by Google OAuth. It authorizes
 
 The `/order/<type>` endpoint accepts orders for new samples. If you supply a JSON document on the expected format, a new order is opened in `status` and LIMS.
 
-### `Store`
+### Store
 
 This really is the `status` app more or less. It's the interface to the central database that keeps track of samples and it which state they are currently in. All records that enters the database go through this API. Simple updates to properies on records are handled directly on the model instances followed by a manual commit.
 
