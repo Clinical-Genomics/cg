@@ -270,7 +270,13 @@ def config_case(
 @click.option(
     "-r", "--run-analysis", "run_analysis", is_flag=True, default=False, help="start " "analysis"
 )
-@click.option("-a","--analysis-type", "analysis_type", type=click.Choice(['qc', 'paired', 'single']), required=False)
+@click.option(
+    "-a",
+    "--analysis-type",
+    "analysis_type",
+    type=click.Choice(["qc", "paired", "single"]),
+    required=False,
+)
 @click.option("--config", "config_path", required=False, help="Optional")
 @PRIORITY_OPTION
 @EMAIL_OPTION
