@@ -12,9 +12,21 @@ def base_context(analysis_store) -> dict:
 
 
 @pytest.fixture(name="workflow_case_id")
-def fixture_workflow_case_id() -> dict:
+def fixture_workflow_case_id() -> str:
     """Return a special case id"""
     return "dna_case"
+
+
+@pytest.fixture(name="dna_sample_id")
+def fixture_dna_sample_id() -> str:
+    """Return a special sample id"""
+    return "dna_sample"
+
+
+@pytest.fixture(name="rna_sample_id")
+def fixture_rna_sample_id() -> str:
+    """Return a special sample id"""
+    return "rna_sample"
 
 
 @pytest.fixture(scope="function", name="analysis_store")
