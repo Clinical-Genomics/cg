@@ -33,7 +33,7 @@ This is a guide for contributing to the CG package. Please check here first if y
 
 ## Code of Conduct
 
-Communicating around code can be a sensitive thing so please do your best to keep a positive tone. Remember that people are putting significant amount of work behind a PR or a review, stay humble :star:.
+Communicating around code can be a sensitive thing so please do your best to keep a positive tone. Remember that people are putting significant amount of work behind a PR or a review, stay humble :star:
 
 
 ## Branch model
@@ -45,7 +45,7 @@ Cg is using github flow branching model as described in our [development manual]
 
 ### Reporting Bugs
 
-This section guides you through submitting a bug report for CG. Following these guidelines helps other developers and contributors understand your report :pencil:, reproduce the behavior :computer: :computer:, and find related reports :mag_right:.
+This section guides you through submitting a bug report for CG. Following these guidelines helps other developers and contributors understand your report :pencil:, reproduce the behavior :computer: :computer:, and find related reports :mag_right:
 
 Before creating bug reports, please try to search the issues (opened and closed) if the problem has been described before, as you might find out that you don't need to create one. When you are creating a bug report, please [include as many details as possible](#how-do-i-submit-a-good-bug-report).
 
@@ -77,7 +77,7 @@ Include details about your configuration and environment:
 
 ### Suggesting Enhancements
 
-This section guides you through submitting an enhancement suggestion for CG, including completely new features and minor improvements to existing functionality. Following these guidelines helps maintainers and the community understand your suggestion :pencil: and find related suggestions :mag_right:.
+This section guides you through submitting an enhancement suggestion for CG, including completely new features and minor improvements to existing functionality. Following these guidelines helps maintainers and the community understand your suggestion :pencil: and find related suggestions :mag_right:
 
 
 #### How Do I Submit A (Good) Enhancement Suggestion?
