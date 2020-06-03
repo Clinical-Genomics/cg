@@ -36,9 +36,9 @@ This is a guide for contributing to the CG package. Please check here first if y
 Communicating around code can be a sensitive thing so please do your best to keep a positive tone. Remember that people are putting significant amount of work behind a PR or a review, stay humble :star:
 
 
-## Branch model
+## Branch Model
 
-Cg is using github flow branching model as described in our [development manual][development-branch-model].
+CG is using github flow branching model as described in our [development manual][development-branch-model].
 
 
 ## How Can I Contribute?
@@ -47,7 +47,7 @@ Cg is using github flow branching model as described in our [development manual]
 
 This section guides you through submitting a bug report for CG. Following these guidelines helps other developers and contributors understand your report :pencil:, reproduce the behavior :computer: :computer:, and find related reports :mag_right:
 
-Before creating bug reports, please try to search the issues (opened and closed) if the problem has been described before, as you might find out that you don't need to create one. When you are creating a bug report, please [include as many details as possible](#how-do-i-submit-a-good-bug-report).
+Before creating bug reports, please try to search the issues (opened and closed) if the problem has been described before, there might be no reason to create one. When creating a bug report, please [include as many details as possible](#how-do-i-submit-a-good-bug-report).
 
 > **Note:** If you find a **Closed** issue that seems like it is the same thing that you're experiencing, open a new issue and include a link to the original issue in the body of your new one.
 
@@ -60,7 +60,7 @@ Explain the problem and include additional details to help maintainers reproduce
 
 * **Use a clear and descriptive title** for the issue to identify the problem.
 * **Describe the exact steps which reproduce the problem** in as many details as possible. For example, start by explaining where CG was run and how it was used, e.g. which command exactly you used in the terminal.
-* **Provide specific examples to demonstrate the steps**. Include links to files or case ids, or copy/pasteable snippets, which you use in those examples. If you're providing snippets in the issue, use [Markdown code blocks](https://help.github.com/articles/markdown-basics/#multiple-lines).
+* **Provide specific examples to demonstrate the steps**. Include links to files or case IDs, or copy/pasteable snippets, which you use in those examples. If you're providing snippets in the issue, use [Markdown code blocks](https://help.github.com/articles/markdown-basics/#multiple-lines).
 * **Describe the behavior you observed after following the steps** and point out what exactly is the problem with that behavior.
 * **Explain which behavior you expected to see instead and why.**
 
@@ -91,7 +91,7 @@ Enhancement suggestions are tracked as [GitHub issues](https://guides.github.com
 * **Explain why this enhancement would be useful**
 
 
-#### Local development
+#### Local Development
 
 **NEVER USE PREINSTALLED PYTHON**
 
@@ -138,65 +138,64 @@ We use black to format all files, this is done automatically with each push on G
 
 This package is a little special. Essentially it should include all the "Clinical"-specific code that has to be integrated across multiple tools such as LIMS, Trailblazer, Scout etc. However, we still aim to structure it in such a way as to make maintainance as smooth as possible!
 
-### apps
+### Apps
 
 This part of the package contains connectors to the various tools that we integrate with. An app interface can be a wrapper for an external tool like Trailblazer (`tb`) or be implemented completely in `cg` like `lims`. It's very important that the code stays confined to each individual tool. The Housekeeper connector _cannot_ directly talk to Trailblazer for example - such communication has to go through a `meta` module.
 
 We also try to group all app-related imports and functionality in these interfaces. You shouldn't import e.g. a function from Scout from any other place than its app interface. This way, it's easier to overview if an update to an external package will affect the rest of the system.
 
-#### coverage
+#### Coverage
 
 Interface to [Chanjo][chanjo]. It's used to load coverage information from Sambamba output.
 
-#### invoice
+#### Invoice
 
 Internal app for working with invoices of groups of samples or pools.
 
-#### lims
+#### Lims
 
-Internal app for interfacing with the Clarity LIMS API. We use the `genologics` Python API as far as possible. Some actions are not supported, however, and then we fall back to using the official XML-based REST API directly.
+Internal app for interfacing with the Clarity LIMS API. We use the `genologics` Python API as much as possible. Some actions are not supported, however, and then we fall back to using the official XML-based REST API directly.
 
 We convert all the info that we get from LIMS/`genologics` to dictionaries before passing it along to other tools. We don't pass around objects that have some implicit connection to update things in LIMS - such actions needs to go through the `lims` app interface _explicitly_.
 
-#### tb
+#### Trailblazer (tb)
 
 Interface to Trailblazer.
 
-- One responsibility is to define the set of files from MIP to store (in Housekeeper)
-- Also used to interact with the pipeline for starting it
+- Starts the MIP dna pipeline
 
-#### gt
+#### Genotype (gt)
 
 Interface to Genotype. For uploading results from the pipeline about genotypes to compare and validate that we are clear of sample mix-ups.
 
-#### hk
+#### Housekeeper (hk)
 
 Interface to Housekeeper. For storing files from analysis runs and FASTQ files from demultiplexing.
 
-#### loqus
+#### Loqus
 
 Interface to LoqusDB. For loading observation counts from the analysis output.
 
-#### osticket
+#### Osticket
 
 Internal app for opening tickets in SupportSystems. We use this mainly to link a ticket with the opening of an order for new samples/analyses.
 
-#### scoutapi
+#### Scout (scoutapi)
 
 Interface to Scout. For uploading analysis results to Scout. It's also used to access the generation of gene panels files used in the analysis pipeline.
 
-#### stats
+#### CGStats (stats)
 
 Interface to CGStats. Used to handle things related to flowcells:
 
 - this is where we find out how many reads a sample have been sequened
 - getting paths to FASTQ files for samples/flowcells
 
-### `cli`
+### `Cli`
 
 The command line code is written in the [Click][click] framework.
 
-#### add
+#### Add
 
 This set of commands let's you quite easily _add things to the status database_. For example when a new customer is signed you could run:
 
@@ -206,29 +205,29 @@ cg add customer cust101 "Massachusetts Institute of Technology"
 
 You can also accomplish simliar tasks through the admin interface of the REST server.
 
-#### analysis
+#### Workflow (Analysis)
 
 The MIP pipeline is accessed through Trailblazer but `cg` provides additional conventions and hooks into the status database that makes managing analyses simpler.
 
 You can start the analysis of a single family "raredragon" by just running:
 
 ```bash
-cg analysis --family raredragon
+cg workflow mip-dna -c raredragon
 ```
 
 This command will create the MIP config in the correct location, link and rename FASTQ files from Housekeeper, and write an aggregated gene panel file. Then it will start the pipeline. All these 4 actions can be issued individually as well:
 
 ```bash
-cg analysis [config|link|panel|start] raredragon
+cg workflow mip-dna [config-case|link|panel|run] raredragon
 ```
 
 The final command is intended to run in a crontab and will continously check for families where all samples have been sequenced and start them automatically.
 
 ```bash
-cg analysis auto
+cg workflow mip-dna start
 ```
 
-#### status
+#### Status (cgweb)
 
 The main interface for getting an overview of data in the system is provided through the [web interface][cgweb], however, it's possible to use the same database APIs to get an idea of the status of things from the command line.
 
@@ -245,21 +244,21 @@ cg status samples ADM4565A1
 ADM4565A1 (17101-1-1A) [SEQUENCED: 2017-09-02]
 ```
 
-#### store
+#### Store
 
 This group of commands facilitate the Housekeeper integration. For example, when an analysis finishes and you want to store important files and update the status database accordingly, you run:
 
 ```bash
-cg store analysis /path/to/families/raredragon/analysis/raredragon_config.yaml
+cg workflow mip-dna store analysis /path/to/cases/raredragon/analysis/raredragon_config.yaml
 ```
 
 ... or just wait for the crontab process to pick up the analysis automatically:
 
 ```bash
-cg store completed
+cg workflow mip-dna store completed
 ```
 
-#### transfer
+#### Transfer
 
 Some information will always exist across multiple database and requires some continous syncing to keep up-to-date. This is the case for information primarily entered through LIMS. To automatically fill-in the date of sample reception for all samples that are waiting in the queue:
 
@@ -281,7 +280,7 @@ cg transfer flowcell HGF2KBCXX
 
 The command will update the _total_ read counts of each sample and check against the application for the sample if it has been fully sequenced. It will also make sure to link the related FASTQ files to Housekeeper. You can run the command over and over - only additional information will be updated.
 
-#### upload
+#### Upload
 
 Much like the group of analysis subcommands you can perform an upload of analysis results (stored in Housekeeper) all at once by running:
 
@@ -301,11 +300,11 @@ You can of course specify which upload you want to do yourself as well:
 cg upload [coverage|genotypes|observations|scout|beacon] raredragon
 ```
 
-### `meta`
+### `Meta`
 
-This is the interfaces that bridge various apps. An example would be the "orders" module. When placing orders we need to coordinate information/actions between the apps: `lims`, `status`, and `osticket`. It also provides some additional functionality such as setting up the basis for the orders API and which fields are required for different order types.
+This is the interface that bridge various apps. An example is the "orders" module. When placing orders we need to coordinate information/actions between the apps: `lims`, `status`, and `osticket`. It also provides some additional functionality such as setting up the basis for the orders API and which fields are required for different order types.
 
-#### orders
+#### Orders
 
 Includes: `lims`, `status`, `osticket`
 
@@ -325,66 +324,66 @@ It opens a ticket using the `osticket` API for each order which it links with th
 
 This interface has a few related roles:
 
-##### flowcell
+##### Flowcell
 
 Includes: `stats`, `hk`, `status`
 
 The API accepts the name of a flowcell which will be looked up in `stats`. For all samples on the flowcell it will:
 
-1. check if the quality (Q30) is good enough to include the sequencing results.
+1. Check if the quality (Q30) is good enough to include the sequencing results
 1. update the number of reads that the sample has been sequenced _overall_ and match this with the requirement given by the application.
 1. accordingly, the interface will look up FASTQ files and store them using `hk`.
 1. if a sample has sufficient number of reads, the `sequenced_at` date will be filled in (`status`) according to the sequencing date of the most recent flowcell.
 
-##### lims
+##### Lims
 
 Includes: `status`, `lims`
 
 Some info if primarily stored in LIMS and needs to be syncronized over to `status`. This is the case for both the date when a samples was received and when it was finally delivered. This interface is intended to run continously as part of a crontab job.
 
-#### upload
+#### Upload
 
-##### beacon
+##### Beacon
 
 Includes: `beacon`, `hk`, `scout`, `status`
 
 This command is used to upload variants from affected subject/s of a family to a beacon of genetic variants.
-The API will first use `status` to fetch the id of any affected subject from a given family. It will then use `hk` to retrieve a VCF file from the analyses. A temporary VCF file is then created by filtering for variants present in desired gene panel(s) (retrieved using `scout`). The `beacon` app will finally handle the upload to beacon.
+The API will first use `status` to fetch the ID of any affected subject from a given family. It will then use `hk` to retrieve a VCF file from the analyses. A temporary VCF file is then created by filtering for variants present in desired gene panel(s) (retrieved using `scout`). The `beacon` app will finally handle the upload to beacon.
 The required parameters for the upload are:
 - gene panel to use
-- id of the family
+- family ID
 
-##### coverage
+##### Coverage
 
 Includes: `status`, `hk`, `coverage`
 
-The API will fetch information about an analysis like name and id of the family and related samples from `status`. It will get the Sambamba output from `hk` and use the `coverage` app interface to upload the data to Chanjo for each individual sample.
+The API will fetch information about an analysis like name and family ID and related samples from `status`. It will get the Sambamba output from `hk` and use the `coverage` app interface to upload the data to Chanjo for each individual sample.
 
-##### gt
+##### Gt
 
 Includes: `status`, `hk`, `tb`, `gt`
 
 Given an analysis, the API will fetch information about the family. It will fetch the gBCF + qcmetrics files from `hk`. It will parse the qcmetrics file using `tb` to find out the predicted sex of each sample. It will then upload the results to Genotype. Subsequent upload of the same samples will overwrite existing information while logging the event.
 
-##### observations
+##### Observations
 
 Includes: `status`, `hk`, `loqus`
 
 Given an analysis record, it will fetch required files from `hk` and upload the variants to the observation cound database using `loqus`. This only works for families with at least one affected individual.
 
-##### scoutapi
+##### Scoutapi
 
 Includes: `status`, `hk`, `scoutapi`
 
 Given the analysis record it will generate a Scout config file using information from `status`. It will use the "meta/analysis" API to convert the default panels for the family to the corresponding set of panels used to run the analysis. It will fetch all related VCF files and others from `hk`. Finally it will use the config to upload the resuls to Scout. The `scoutapi` interface will figure out if there's an existing analysis that needs to be replaced.
 
-#### analysis
+#### Analysis
 
 Includes: `status`, `tb`, `hk`, `scoutapi`, `lims`
 
 Starting an analysis requires complex interactions of many individual tools:
 
-- the config/pedigree is almost entirely generated from info in `status`
+- The config/pedigree is almost entirely generated from info in `status`
 - the only exception is the bait kit for targetted sequencing samples which is fetched using `lims`
 - the gene panel file that determines the "clinical" variants is generated from the panels assigned to the family in `status` by using `scoutapi`
 - the FASTQ files are fetched for each sample in the family from `hk` and renamed and placed in the correct location using `tb`
@@ -399,15 +398,15 @@ We need to keep track of running analyses so we don't start the same family twic
 
 You update the status via the admin interface of the server.
 
-#### invoice
+#### Invoice
 
 Includes: `status`, `lims`
 
-The creation of an invoice is initiated in LIMS. You then use the process id to parse out which samples should be part of the invoice. This process is setup to be run when a button is clicked in LIMS but can be run externally from any server with access to LIMS.
+The creation of an invoice is initiated in LIMS. You then use the process ID to parse out which samples should be part of the invoice. This process is setup to be run when a button is clicked in LIMS but can be run externally from any server with access to LIMS.
 
 The invoice itself will be stored in an intermediate state in `status` while links will be created in LIMS to be able to keep track of which samples was part of which invoice.
 
-### `server`
+### `Server`
 
 The REST API server handles a number of actions. It's written in [Flask][flask] and exposes an admin interface for quickly editing information in the backend MySQL database. The admin interface is served under a hidden route but the plan is to move it to Google OAuth.
 
@@ -417,7 +416,7 @@ The API is protected by JSON Web Tokens generated by Google OAuth. It authorizes
 
 The `/order/<type>` endpoint accepts orders for new samples. If you supply a JSON document on the expected format, a new order is opened in `status` and LIMS.
 
-### `store`
+### `Store`
 
 This really is the `status` app more or less. It's the interface to the central database that keeps track of samples and it which state they are currently in. All records that enters the database go through this API. Simple updates to properies on records are handled directly on the model instances followed by a manual commit.
 
