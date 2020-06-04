@@ -90,7 +90,7 @@ def analysis(context, case_id, deliverables_file_path, config_path):
 @store.command("all-cases")
 @click.pass_context
 def all_cases(context):
-
+    """Fetch all cases"""
     _store = context.obj["db"]
 
     for case in _store.families():
@@ -104,6 +104,11 @@ def all_cases(context):
     sys.exit(exit_code)
 
 
+def get_deliverables_file_path(case_id, root_dir):
+    """Return path to deliverables file"""
+    return Path.joinpath(root_dir, case_id, "delivery_report", case_id + ".hk")
+
+
 @store.command("generate-deliverables-file")
 @click.option("-d", "--dry-run", "dry", is_flag=True, help="print command to console")
 @click.option("-c", "--config", "config_path", required=False, help="Optional")
@@ -114,6 +119,8 @@ def generate_deliverables_file(context, dry, config_path, case_id):
 
     conda_env = context.obj["balsamic"]["conda_env"]
     root_dir = Path(context.obj["balsamic"]["root"])
+    analysis_api = context.obj["analysis_api"]
+
     case_obj = context.obj["db"].family(case_id)
 
     if not case_obj:
@@ -140,6 +147,11 @@ def generate_deliverables_file(context, dry, config_path, case_id):
         LOG.info("Created deliverables file")
 
     return process
+
+
+def get_config_path(root_dir, case_id):
+    """Return the path to a config"""
+    return Path.joinpath(root_dir, case_id, case_id + ".json")
 
 
 @store.command()
