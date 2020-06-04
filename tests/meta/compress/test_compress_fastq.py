@@ -1,5 +1,9 @@
 """Tests for fastq part of meta compress api"""
 import logging
+from pathlib import Path
+
+from cg.constants import FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX
+from cg.meta.compress import CompressAPI
 
 
 def test_get_fastq_files_no_version(compress_api, sample, caplog):
@@ -50,3 +54,17 @@ def test_get_fastq_files(compress_api, compress_hk_fastq_bundle, sample, helpers
 
     # THEN the fastq files will be in the dictionary
     assert set(fastq_dict.keys()) == set(["fastq_first_file", "fastq_second_file"])
+
+
+def test_check_prefixes(sample):
+    """test to check if two fastq files belong to the same readpair when they do"""
+
+    # GIVEN two fatq files from the same readpair
+    first_fastq = Path(sample) / FASTQ_FIRST_READ_SUFFIX
+    second_fastq = Path(sample) / FASTQ_SECOND_READ_SUFFIX
+
+    # WHEN checking if they belong to the same sample
+    res = CompressAPI.check_prefixes(first_fastq, second_fastq)
+
+    # THEN assert that the result is true
+    assert res is True

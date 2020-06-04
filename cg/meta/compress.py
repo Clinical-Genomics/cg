@@ -272,57 +272,67 @@ class CompressAPI:
 
     def update_scout(self, case_id: str, bam_dict: dict, dry_run: bool = False):
         """Update scout with compressed alignment file if present"""
-        for sample_id, bam_files in bam_dict.items():
+        for sample_id in bam_dict:
+            bam_files = bam_dict[sample_id]
             bam_path = Path(bam_files["bam"].full_path)
-            if self.crunchy_api.is_cram_compression_done(bam_path=bam_path):
-                cram_path = self.crunchy_api.get_cram_path_from_bam(bam_path=bam_path)
-                LOG.info("Scout update for %s:", sample_id)
-                LOG.info("%s -> %s", bam_path, cram_path)
-                if not dry_run:
-                    LOG.info("updating alignment-file for %s in scout...", sample_id)
-                    self.scout_api.update_alignment_file(
-                        case_id=case_id, sample_id=sample_id, alignment_path=cram_path
-                    )
+            if not self.crunchy_api.is_cram_compression_done(bam_path=bam_path):
+                LOG.info("Cram compression pending for: %s", sample_id)
+                continue
+
+            cram_path = self.crunchy_api.get_cram_path_from_bam(bam_path=bam_path)
+            LOG.info("Scout update for %s:", sample_id)
+            LOG.info("%s -> %s", bam_path, cram_path)
+            if dry_run:
+                continue
+            LOG.info("updating alignment-file for %s in scout...", sample_id)
+            self.scout_api.update_alignment_file(
+                case_id=case_id, sample_id=sample_id, alignment_path=cram_path
+            )
 
     def update_hk(self, case_id: str, bam_dict: dict, dry_run: bool = False):
         """Update Housekeeper with compressed alignment file if present"""
         latest_hk_version = self.hk_api.last_version(bundle=case_id)
-        for sample_id, bam_files in bam_dict.items():
+        for sample_id in bam_dict:
+            bam_files = bam_dict[sample_id]
             cram_tags = [sample_id, "cram"]
             crai_tags = [sample_id, "cram-index"]
             bam_path = Path(bam_files["bam"].full_path)
             bai_path = Path(bam_files["bai"].full_path)
             cram_path = self.crunchy_api.get_cram_path_from_bam(bam_path=bam_path)
             crai_path = self.crunchy_api.get_index_path(cram_path)["double_suffix"]
-            if self.crunchy_api.is_cram_compression_done(bam_path=bam_path):
-                LOG.info("HouseKeeper update for %s:", sample_id)
-                LOG.info("%s -> %s, with tags %s", bam_path, cram_path, cram_tags)
-                LOG.info("%s -> %s, with tags %s", bai_path, crai_path, crai_tags)
-                if not dry_run:
-                    LOG.info("updating files in housekeeper...")
-                    self.hk_api.add_file(
-                        path=cram_path, version_obj=latest_hk_version, tags=cram_tags
-                    )
-                    self.hk_api.add_file(
-                        path=crai_path, version_obj=latest_hk_version, tags=crai_tags
-                    )
-                    bam_files["bam"].delete()
-                    bam_files["bai"].delete()
-                    self.hk_api.commit()
+            if not self.crunchy_api.is_cram_compression_done(bam_path=bam_path):
+                LOG.info("Cram compression pending for %s:", sample_id)
+                continue
+            LOG.info("HouseKeeper update for %s:", sample_id)
+            LOG.info("%s -> %s, with tags %s", bam_path, cram_path, cram_tags)
+            LOG.info("%s -> %s, with tags %s", bai_path, crai_path, crai_tags)
+            if dry_run:
+                continue
+
+            LOG.info("updating files in housekeeper...")
+            self.hk_api.add_file(path=cram_path, version_obj=latest_hk_version, tags=cram_tags)
+            self.hk_api.add_file(path=crai_path, version_obj=latest_hk_version, tags=crai_tags)
+            bam_files["bam"].delete()
+            bam_files["bai"].delete()
+            self.hk_api.commit()
 
     def remove_bams(self, bam_dict: dict, dry_run: bool = False):
         """Remove uncompressed alignment files if compression exists"""
-        for _, bam_files in bam_dict.items():
+        for sample_id in bam_dict:
+            bam_files = bam_dict[sample_id]
             bam_path = Path(bam_files["bam"].full_path)
             bai_path = Path(bam_files["bai"].full_path)
             flag_path = self.crunchy_api.get_flag_path(file_path=bam_path)
-            if self.crunchy_api.is_cram_compression_done(bam_path=bam_path):
-                LOG.info("Will remove %s, %s, and %s", bam_path, bai_path, flag_path)
-                if not dry_run:
-                    LOG.info("deleting files...")
-                    bam_path.unlink()
-                    bai_path.unlink()
-                    flag_path.unlink()
+            if not self.crunchy_api.is_cram_compression_done(bam_path=bam_path):
+                LOG.info("Cram compression pending for %s:", sample_id)
+                continue
+            LOG.info("Will remove %s, %s, and %s", bam_path, bai_path, flag_path)
+            if dry_run:
+                continue
+            LOG.info("deleting files...")
+            bam_path.unlink()
+            bai_path.unlink()
+            flag_path.unlink()
 
     @staticmethod
     def _is_valid_fastq_suffix(fastq_path: Path):

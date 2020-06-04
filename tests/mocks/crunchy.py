@@ -75,9 +75,10 @@ class MockCrunchyAPI:
 
     def is_cram_compression_done(self, bam_path: Path) -> bool:
         """Check if CRAM compression already done for BAM file"""
-        if bam_path in self._bam_compression_done:
-            return self._bam_compression_done[bam_path]
-        return self._bam_compression_done_all
+        if self._bam_compression_done_all:
+            return True
+
+        return self._bam_compression_done.get(bam_path, False)
 
     def is_cram_compression_pending(self, bam_path: Path) -> bool:
         """Check if cram compression has started, but not yet finished"""
