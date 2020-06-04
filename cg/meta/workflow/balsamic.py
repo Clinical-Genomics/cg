@@ -24,7 +24,7 @@ class AnalysisAPI:
         return Path.joinpath(root_dir, case_id, "delivery_report", case_id + ".hk")
 
     @staticmethod
-    def get_config_path(root_dir, case_id: str) -> Path:
+    def get_config_path(root_dir: Path, case_id: str) -> Path:
         """Generates a path where the Balsamic config for the case_id should be located"""
         return Path.joinpath(root_dir, case_id, case_id + ".json")
 
