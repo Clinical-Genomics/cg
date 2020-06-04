@@ -101,7 +101,7 @@ jobs:
     - name: Install from lockfile
       run: |
         # Make sure the packages are properly locked in Pipfile.lock, and abort if the lock file is out-of-date
-        pipenv --deploy install
+        pipenv install --deploy
         pipenv check
         pipenv graph
       env:
