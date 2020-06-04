@@ -107,9 +107,7 @@ def balsamic_store(base_store: Store) -> Store:
     _store.relate_sample(case, normal_sample, status="unknown")
 
     case = add_family(_store, "mip_case")
-    normal_sample = add_sample(
-        _store, "normal_sample", is_tumour=False, data_analysis="mip"
-    )
+    normal_sample = add_sample(_store, "normal_sample", is_tumour=False, data_analysis="mip")
     _store.relate_sample(case, normal_sample, status="unknown")
 
     _store.commit()

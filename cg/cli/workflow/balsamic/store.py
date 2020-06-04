@@ -63,9 +63,7 @@ def analysis(context, case_id, deliverables_file_path, config_path):
         raise CgError(f"Case {case_id} not found")
 
     if not deliverables_file_path:
-        deliverables_file_path = analysis_api.get_deliverables_file_path(
-            case_id, root_dir
-        )
+        deliverables_file_path = analysis_api.get_deliverables_file_path(case_id, root_dir)
         if not os.path.isfile(deliverables_file_path):
             context.invoke(generate_deliverables_file, case_id=case_id)
 
@@ -129,9 +127,7 @@ def generate_deliverables_file(context, dry, config_path, case_id):
     if not config_path:
         config_path = analysis_api.get_config_path(root_dir, case_id)
         if not config_path.is_file():
-            raise FileNotFoundError(
-                f"Missing the sample-config file for {case_id}: {config_path}"
-            )
+            raise FileNotFoundError(f"Missing the sample-config file for {case_id}: {config_path}")
 
     command_str = f" report deliver" f" --sample-config {config_path}'"
     command = [f"bash -c 'source activate {conda_env}; balsamic"]
