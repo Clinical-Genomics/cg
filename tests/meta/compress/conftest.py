@@ -5,30 +5,28 @@ from pathlib import Path
 
 import pytest
 
-from cg.apps.crunchy import CrunchyAPI
-from cg.apps.scoutapi import ScoutAPI
 from cg.constants import FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX
 from cg.meta.compress import CompressAPI
 from tests.mocks.hk_mock import MockFile
 
 
-class MockCrunchy(CrunchyAPI):
-    """Mock crunchy api"""
-
-
-@pytest.yield_fixture(scope="function", name="crunchy_api")
-def fixture_crunchy_api(crunchy_config_dict):
-    """crunchy api fixture"""
-    _api = MockCrunchy(crunchy_config_dict)
-    yield _api
-
-
-@pytest.yield_fixture(scope="function")
-def compress_api(crunchy_api, housekeeper_api, scout_api):
+@pytest.yield_fixture(scope="function", name="compress_api")
+def fixture_compress_api(crunchy_api, housekeeper_api, scout_api):
     """compress api fixture"""
     hk_api = housekeeper_api
     _api = CompressAPI(crunchy_api=crunchy_api, hk_api=hk_api, scout_api=scout_api)
     yield _api
+
+
+@pytest.fixture(scope="function", name="populated_compress_api")
+def fixture_populated_compress_api(
+    compress_api, compress_scout_case, compress_hk_bam_bundle, helpers
+):
+    """Populated compress api fixture"""
+    compress_api.scout_api.add_mock_case(compress_scout_case)
+    helpers.ensure_hk_bundle(compress_api.hk_api, compress_hk_bam_bundle)
+
+    return compress_api
 
 
 @pytest.fixture(scope="function", name="sample")
@@ -169,8 +167,8 @@ def fixture_case_hk_bundle_no_files(case_id, timestamp):
     return hk_bundle_data
 
 
-@pytest.fixture(scope="function")
-def compress_hk_bam_bundle(bam_files, case_hk_bundle_no_files):
+@pytest.fixture(scope="function", name="compress_hk_bam_bundle")
+def fixture_compress_hk_bam_bundle(bam_files, case_hk_bundle_no_files):
     """Create a complete bundle mock for testing compression"""
     hk_bundle_data = copy.deepcopy(case_hk_bundle_no_files)
 
@@ -215,8 +213,8 @@ def fastq_files_hk_list(fastq_files):
     return _hk_fastq_list
 
 
-@pytest.fixture(scope="function")
-def compress_scout_case(bam_files, case_id):
+@pytest.fixture(scope="function", name="compress_scout_case")
+def fixture_compress_scout_case(bam_files, case_id):
     """Fixture for scout case with bam-files"""
     case_data = {
         "_id": case_id,

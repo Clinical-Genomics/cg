@@ -28,15 +28,15 @@ class CompressAPI:
         self.hk_api = hk_api
         self.crunchy_api = crunchy_api
         self.scout_api = scout_api
-        self.ntasks = 4
-        self.mem = 40
+        self.ntasks = 12
+        self.mem = 50
 
     @staticmethod
     def get_nlinks(file_link: Path):
         """Get number of links to path"""
         return os.stat(file_link).st_nlink
 
-    def compress_case_bam(self, case_id: str, ntasks: int, mem: int, dry_run: bool = False) -> bool:
+    def compress_case_bam(self, case_id: str, dry_run: bool = False) -> bool:
         """Compress the bam files for all individuals of a case"""
         bam_dict = self.get_bam_files(case_id=case_id)
         if not bam_dict:
@@ -44,7 +44,7 @@ class CompressAPI:
 
         for sample_id in bam_dict:
             bam_files = bam_dict[sample_id]
-            bam_path = bam_files["bam_path"].full_path
+            bam_path = bam_files["bam_path"].resolve()
 
             if not self.crunchy_api.is_bam_compression_possible(bam_path):
                 LOG.info("BAM to CRAM compression not possible for %s", sample_id)
@@ -54,18 +54,12 @@ class CompressAPI:
                 LOG.info("BAM to CRAM compression pending for %s", sample_id)
                 return False
 
-        LOG.info("Compressing bam-files for %s", case_id)
-        self.compress_case_bams(bam_dict=bam_dict, dry_run=dry_run)
-        return True
-
-    def compress_case_bams(self, bam_dict: dict, dry_run: bool = False):
-        """Compress bam-files in given dictionary"""
-        for sample, bam_files in bam_dict.items():
-            bam_path = Path(bam_files["bam"].full_path)
-            LOG.info("Compressing %s for sample %s", bam_path, sample)
+            LOG.info("Compressing %s for sample %s", bam_path, sample_id)
             self.crunchy_api.bam_to_cram(
                 bam_path=bam_path, ntasks=self.ntasks, mem=self.mem, dry_run=dry_run
             )
+
+        return True
 
     def get_bam_files(self, case_id: str) -> dict:
         """
@@ -166,11 +160,8 @@ class CompressAPI:
         hk_files_dict = {Path(file_obj.full_path): file_obj for file_obj in hk_files}
         return hk_files_dict
 
-    def compress_case_fastq(
-        self, case: models.Family, ntasks: int, mem: int, dry_run: bool = False
-    ) -> bool:
+    def compress_case_fastq(self, case: models.Family, dry_run: bool = False) -> bool:
         """Compress the fastq files for all individuals of a case"""
-        case_fastq_dict = {}
 
         for link_obj in case.links:
             sample_id = link_obj.sample.internal_id
@@ -179,23 +170,31 @@ class CompressAPI:
                 LOG.info("Could not find FASTQ files for %s", sample_id)
                 return False
 
-            first_fastq = sample_fastq_dict["fastq_first_file"]
-            second_fastq = sample_fastq_dict["fastq_second_file"]
+            fastq_first = sample_fastq_dict["fastq_first_file"]
+            fastq_second = sample_fastq_dict["fastq_second_file"]
 
-            if self.crunchy_api.is_spring_compression_done(first_fastq):
+            if self.crunchy_api.is_spring_compression_done(fastq_first):
                 LOG.warning("FASTQ to SPRING compression already done for %s", sample_id)
                 return False
 
-            if self.crunchy_api.is_spring_compression_pending(first_fastq, second_fastq):
+            if self.crunchy_api.is_spring_compression_pending(fastq_first, fastq_second):
                 LOG.info("FASTQ to SPRING compression pending for %s", sample_id)
                 return False
 
-            case_fastq_dict[sample_id] = sample_fastq_dict
+            LOG.info(
+                "Compressing %s and %s for sample %s into SPRING format",
+                fastq_first,
+                fastq_second,
+                sample_id,
+            )
+            self.crunchy_api.fastq_to_spring(
+                fastq_first=fastq_first,
+                fastq_second=fastq_second,
+                ntasks=self.ntasks,
+                mem=self.mem,
+                dry_run=dry_run,
+            )
 
-        LOG.info("Compressing FASTQ files")
-        self.compress_case_fastqs(
-            fastq_dict=case_fastq_dict, ntasks=ntasks, mem=mem, dry_run=dry_run
-        )
         return True
 
     def get_fastq_files(self, sample_id: str) -> dict:
@@ -256,27 +255,6 @@ class CompressAPI:
         first_prefix = str(first_fastq.absolute()).replace(FASTQ_FIRST_READ_SUFFIX, "")
         second_prefix = str(second_fastq.absolute()).replace(FASTQ_SECOND_READ_SUFFIX, "")
         return first_prefix == second_prefix
-
-    def compress_fastqs(
-        self, fastq_first: str, fastq_second: str, ntasks: int, mem: int, dry_run: bool = False
-    ):
-        """Compress fastq-files"""
-        for sample_id, fastq_files in fastq_dict.items():
-            fastq_first = fastq_files["fastq_first_file"]
-            fastq_second = fastq_files["fastq_second_file"]
-            LOG.info(
-                "Compressing %s and %s for sample %s into SPRING format",
-                fastq_first,
-                fastq_second,
-                sample_id,
-            )
-            self.crunchy_api.fastq_to_spring(
-                fastq_first=fastq_first,
-                fastq_second=fastq_second,
-                ntasks=ntasks,
-                mem=mem,
-                dry_run=dry_run,
-            )
 
     def clean_bams(self, case_id: str, dry_run: bool = False):
         """Update databases and remove uncompressed BAM files for case if

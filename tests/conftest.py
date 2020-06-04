@@ -14,6 +14,7 @@ from cg.apps.mip_rna import files as mip_rna_files_api
 from cg.meta.store import mip as store_mip
 from cg.store import Store
 
+from .mocks.crunchy import MockCrunchyAPI
 from .mocks.hk_mock import MockHousekeeperAPI
 from .mocks.madeline import MockMadelineAPI
 from .mocks.scout import MockScoutAPI
@@ -330,6 +331,16 @@ def fixture_hk_version_obj(housekeeper_api, hk_bundle_data, helpers):
 def fixture_scout_api():
     """Setup Scout api."""
     _api = MockScoutAPI()
+    return _api
+
+
+# Crunchy fixtures
+
+
+@pytest.yield_fixture(scope="function", name="crunchy_api")
+def fixture_crunchy_api():
+    """Setup Crunchy api."""
+    _api = MockCrunchyAPI()
     return _api
 
 
