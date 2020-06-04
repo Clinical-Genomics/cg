@@ -115,7 +115,7 @@ def generate_deliverables_file(context, dry, config_path, case_id):
     process = subprocess.run(" ".join(command), shell=True)
 
     if process == SUCCESS:
-        click.echo(click.style("Created deliverables file", fg="green"))
+        LOG.info("Created deliverables file")
 
     return process
 
