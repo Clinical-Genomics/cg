@@ -98,7 +98,7 @@ jobs:
     - name: Install pipenv
       uses: dschep/install-pipenv-action@v1
 
-    - name: Install from lockfile
+    - name: Check pipenv lockfile
       run: |
         # Make sure the packages are properly locked in Pipfile.lock, and abort if the lock file is out-of-date
         pipenv check
