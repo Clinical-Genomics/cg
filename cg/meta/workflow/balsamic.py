@@ -21,7 +21,7 @@ class AnalysisAPI:
     def get_deliverables_file_path(case_id, root_dir):
         """Generates a path where the Balsamic deliverables file for the case_id should be
         located"""
-        return Path.joinpath(root_dir, case_id, "delivery_report", case_id + ".hk")
+        return root_dir / case_id / "delivery_report" / (case_id + ".hk")
 
     @staticmethod
     def get_config_path(root_dir: Path, case_id: str) -> Path:
