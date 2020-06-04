@@ -8,8 +8,13 @@ from pathlib import Path
 from typing import List
 
 from cg.apps import crunchy, hk, scoutapi
-from cg.constants import (BAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX,
-                          FASTQ_SECOND_READ_SUFFIX, HK_BAM_TAGS, HK_FASTQ_TAGS)
+from cg.constants import (
+    BAM_SUFFIX,
+    FASTQ_FIRST_READ_SUFFIX,
+    FASTQ_SECOND_READ_SUFFIX,
+    HK_BAM_TAGS,
+    HK_FASTQ_TAGS,
+)
 from cg.store import models
 
 LOG = logging.getLogger(__name__)
