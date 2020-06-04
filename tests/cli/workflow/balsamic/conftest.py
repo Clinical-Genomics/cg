@@ -25,7 +25,7 @@ def balsamic_context(
         "tb_api": MockTB(),
         "db": balsamic_store,
         "analysis_api": AnalysisAPI(
-            db=balsamic_store, hk_api=MockHouseKeeper, fastq_api=MockFastqAPI
+            db=balsamic_store, hk_api=housekeeper_api, fastq_api=MockFastqAPI
         ),
         "fastq_handler": MockFastq,
         "fastq_api": MockFastqAPI,
@@ -196,16 +196,22 @@ def deliverables_file_tags(balsamic_case_dir):
 @pytest.fixture(scope="function", name="balsamic_case")
 def fixture_balsamic_case(balsamic_store, helpers) -> models.Family:
     """Case with balsamic data_type"""
-    return balsamic_store.find_family(helpers.ensure_customer(balsamic_store), "balsamic_case")
+    return balsamic_store.find_family(
+        helpers.ensure_customer(balsamic_store), "balsamic_case"
+    )
 
 
 @pytest.fixture(scope="function", name="balsamic_case_wgs")
 def fixture_balsamic_case_wgs(balsamic_store, helpers) -> models.Family:
     """Case with balsamic data_type"""
-    return balsamic_store.find_family(helpers.ensure_customer(balsamic_store), "balsamic_case_wgs")
+    return balsamic_store.find_family(
+        helpers.ensure_customer(balsamic_store), "balsamic_case_wgs"
+    )
 
 
 @pytest.fixture(scope="function", name="mip_case")
 def fixture_mip_case(balsamic_store, helpers) -> models.Family:
     """Case with balsamic data_type"""
-    return balsamic_store.find_family(helpers.ensure_customer(balsamic_store), "mip_case")
+    return balsamic_store.find_family(
+        helpers.ensure_customer(balsamic_store), "mip_case"
+    )
