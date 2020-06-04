@@ -80,7 +80,7 @@ def analysis(context, case_id, deliverables_file_path, config_path):
         raise StoreError(sys.exc_info()[0])
 
     status.add_commit(new_analysis)
-    click.echo(click.style("Included files in Housekeeper", fg="green"))
+    LOG.info("Included files in Housekeeper")
 
 
 @store.command("generate-deliverables-file")
