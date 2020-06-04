@@ -19,14 +19,15 @@ import logging
 import re
 
 import click
-from cgadmin.store.api import AdminDatabase
-from housekeeper.store import api as housekeeeper_api
 import pymongo
 import ruamel.yaml
+from housekeeper.store import api as housekeeeper_api
 
+from cg.apps import lims as lims_app
+from cg.apps import scoutapi, stats
 from cg.constants import PRIORITY_MAP
-from cg.apps import lims as lims_app, scoutapi, stats
 from cg.store import Store, models
+from cgadmin.store.api import AdminDatabase
 
 # from cg.meta.transfer.flowcell import TransferFlowcell
 
@@ -517,9 +518,7 @@ class FamilyImporter(Store):
                 )
                 yield link_obj
             except Exception:
-                import ipdb
-
-                ipdb.set_trace()
+                LOG.warning("Missing link")
 
 
 # class FlowcellImporter(TransferFlowcell):
