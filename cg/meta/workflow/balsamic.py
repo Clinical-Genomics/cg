@@ -26,7 +26,7 @@ class AnalysisAPI:
     @staticmethod
     def get_config_path(root_dir: Path, case_id: str) -> Path:
         """Generates a path where the Balsamic config for the case_id should be located"""
-        return Path.joinpath(root_dir, case_id, case_id + ".json")
+        return root_dir / case_id / (case_id + ".json")
 
     def link_sample(self, fastq_handler: BaseFastqHandler, sample: str, case: str):
         """Link FASTQ files for a sample."""
