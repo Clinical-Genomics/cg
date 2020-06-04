@@ -69,17 +69,20 @@ def link(context, case_id, sample_id):
         LOG.info(
             "%s: %s link FASTQ files", link_obj.sample.internal_id, link_obj.sample.data_analysis
         )
-        if link_obj.sample.data_analysis and "balsamic" in link_obj.sample.data_analysis.lower():
-            LOG.info("%s has balsamic as data analysis, linking.", link_obj.sample.internal_id)
-            context.obj["analysis_api"].link_sample(
-                fastq_handler=FastqHandler(context.obj),
-                case=link_obj.family.internal_id,
-                sample=link_obj.sample.internal_id,
-            )
-        else:
+
+        if not link_obj.sample.data_analysis and "balsamic" in \
+                link_obj.sample.data_analysis.lower():
             LOG.warning(
                 "%s does not have balsamic as data analysis, skipping.", link_obj.sample.internal_id
             )
+            continue
+
+        LOG.info("%s has balsamic as data analysis, linking.", link_obj.sample.internal_id)
+        context.obj["analysis_api"].link_sample(
+            fastq_handler=FastqHandler(context.obj),
+            case=link_obj.family.internal_id,
+            sample=link_obj.sample.internal_id,
+        )
 
 
 @balsamic.command(name="config-case")
