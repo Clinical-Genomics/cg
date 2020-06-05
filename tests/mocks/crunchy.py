@@ -3,15 +3,9 @@
 import logging
 from pathlib import Path
 
-from cg.constants import (
-    BAM_INDEX_SUFFIX,
-    BAM_SUFFIX,
-    CRAM_INDEX_SUFFIX,
-    CRAM_SUFFIX,
-    FASTQ_FIRST_READ_SUFFIX,
-    FASTQ_SECOND_READ_SUFFIX,
-    SPRING_SUFFIX,
-)
+from cg.constants import (BAM_INDEX_SUFFIX, BAM_SUFFIX, CRAM_INDEX_SUFFIX,
+                          CRAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX,
+                          FASTQ_SECOND_READ_SUFFIX, SPRING_SUFFIX)
 
 FLAG_PATH_SUFFIX = ".crunchy.txt"
 PENDING_PATH_SUFFIX = ".crunchy.pending.txt"
@@ -36,6 +30,8 @@ class MockCrunchyAPI:
         self._spring_compression_possible = True
         self._spring_compression_done = False
 
+        self._nr_fastq_compressions = 0
+
     # Mock specific methods
     def set_cram_compression_pending(self, bam_path):
         """Set that the cram compression for a file is pending"""
@@ -55,8 +51,16 @@ class MockCrunchyAPI:
         self._bam_compression_possible[bam_path] = False
 
     def set_spring_compression_pending(self):
-        """Create a pending path"""
+        """Set if spring compression should be in pending state"""
         self._spring_compression_pending = True
+
+    def set_spring_compression_done(self):
+        """Set if spring compression should be in done state"""
+        self._spring_compression_done = True
+
+    def nr_fastq_compressions(self):
+        """Return the number of times that fastq compression was called"""
+        return self._nr_fastq_compressions
 
     # Mocked methods
     def bam_to_cram(self, bam_path: Path, ntasks: int, mem: int, dry_run: bool = False):
@@ -71,6 +75,7 @@ class MockCrunchyAPI:
         """
             Compress FASTQ files into SPRING by sending to sbatch SLURM
         """
+        self._nr_fastq_compressions += 1
         self.set_spring_compression_pending()
 
     def is_cram_compression_done(self, bam_path: Path) -> bool:
@@ -94,7 +99,7 @@ class MockCrunchyAPI:
 
     def is_spring_compression_pending(self, fastq: Path) -> bool:
         """Check if spring compression has started, but not yet finished"""
-        return self._spring_compression_done
+        return self._spring_compression_pending
 
     @staticmethod
     def get_flag_path(file_path):
