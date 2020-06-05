@@ -3,9 +3,15 @@
 import logging
 from pathlib import Path
 
-from cg.constants import (BAM_INDEX_SUFFIX, BAM_SUFFIX, CRAM_INDEX_SUFFIX,
-                          CRAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX,
-                          FASTQ_SECOND_READ_SUFFIX, SPRING_SUFFIX)
+from cg.constants import (
+    BAM_INDEX_SUFFIX,
+    BAM_SUFFIX,
+    CRAM_INDEX_SUFFIX,
+    CRAM_SUFFIX,
+    FASTQ_FIRST_READ_SUFFIX,
+    FASTQ_SECOND_READ_SUFFIX,
+    SPRING_SUFFIX,
+)
 
 FLAG_PATH_SUFFIX = ".crunchy.txt"
 PENDING_PATH_SUFFIX = ".crunchy.pending.txt"
