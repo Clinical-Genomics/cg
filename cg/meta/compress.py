@@ -159,47 +159,37 @@ class CompressAPI:
         hk_files_dict = {Path(file_obj.full_path): file_obj for file_obj in hk_files}
         return hk_files_dict
 
-    def compress_fastq(self, sample_ids: List[str], dry_run: bool = False) -> bool:
-        """Compress the fastq files for all individuals in a case
+    def compress_fastq(self, sample_id: str, dry_run: bool = False) -> bool:
+        """Compress the fastq files for a individual"""
+        sample_fastq_dict = self.get_fastq_files(sample_id=sample_id)
+        if not sample_fastq_dict:
+            LOG.info("Could not find FASTQ files for %s", sample_id)
+            return False
 
-        If one or more individuals fails, skip the case
-        """
-        case_fastqs = {}
-        for sample_id in sample_ids:
-            sample_fastq_dict = self.get_fastq_files(sample_id=sample_id)
-            if not sample_fastq_dict:
-                LOG.info("Could not find FASTQ files for %s", sample_id)
-                return False
+        fastq_first = sample_fastq_dict["fastq_first_file"]
+        fastq_second = sample_fastq_dict["fastq_second_file"]
 
-            fastq_first = sample_fastq_dict["fastq_first_file"]
-            fastq_second = sample_fastq_dict["fastq_second_file"]
+        if self.crunchy_api.is_spring_compression_done(fastq_first, fastq_second):
+            LOG.warning("FASTQ to SPRING compression already done for %s", sample_id)
+            return False
 
-            if self.crunchy_api.is_spring_compression_done(fastq_first, fastq_second):
-                LOG.warning("FASTQ to SPRING compression already done for %s", sample_id)
-                return False
+        if self.crunchy_api.is_spring_compression_pending(fastq=fastq_first):
+            LOG.info("FASTQ to SPRING compression pending for %s", sample_id)
+            return False
 
-            if self.crunchy_api.is_spring_compression_pending(fastq=fastq_first):
-                LOG.info("FASTQ to SPRING compression pending for %s", sample_id)
-                return False
-
-            case_fastqs[sample_id] = [fastq_first, fastq_second]
-
-        for sample_id in case_fastqs:
-            fastq_first = case_fastqs[sample_id][0]
-            fastq_second = case_fastqs[sample_id][1]
-            LOG.info(
-                "Compressing %s and %s for sample %s into SPRING format",
-                fastq_first,
-                fastq_second,
-                sample_id,
-            )
-            self.crunchy_api.fastq_to_spring(
-                fastq_first=fastq_first,
-                fastq_second=fastq_second,
-                ntasks=self.ntasks,
-                mem=self.mem,
-                dry_run=dry_run,
-            )
+        LOG.info(
+            "Compressing %s and %s for sample %s into SPRING format",
+            fastq_first,
+            fastq_second,
+            sample_id,
+        )
+        self.crunchy_api.fastq_to_spring(
+            fastq_first=fastq_first,
+            fastq_second=fastq_second,
+            ntasks=self.ntasks,
+            mem=self.mem,
+            dry_run=dry_run,
+        )
 
         return True
 
