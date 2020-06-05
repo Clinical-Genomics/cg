@@ -10,18 +10,15 @@ LOG = logging.getLogger(__name__)
 @click.command("fastq")
 @click.option("-c", "--case-id", type=str)
 @click.option("-n", "--number-of-conversions", default=10, type=int, show_default=True)
-@click.option("-t", "--ntasks", type=int, help="Number of tasks for slurm job")
-@click.option("-m", "--mem", type=int, help="Memory for slurm job")
+@click.option("-t", "--ntasks", default=12, show_default=True, help="Number of tasks for slurm job")
+@click.option("-m", "--mem", default=50, show_default=True, help="Memory for slurm job")
 @click.option("-d", "--dry-run", is_flag=True)
 @click.pass_context
 def fastq_cmd(context, case_id, number_of_conversions, ntasks, mem, dry_run):
     """ Find cases with FASTQ files and compress into SPRING """
     compress_api = context.obj["compress"]
-
-    if ntasks:
-        compress_api.ntasks = ntasks
-    if mem:
-        compress_api.mem = mem
+    compress_api.ntasks = ntasks
+    compress_api.mem = mem
 
     cases = context.obj["db"].families()
     if case_id:

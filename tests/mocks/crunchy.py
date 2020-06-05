@@ -3,23 +3,12 @@
 import logging
 from pathlib import Path
 
-from cg.constants import (
-    BAM_INDEX_SUFFIX,
-    BAM_SUFFIX,
-    CRAM_INDEX_SUFFIX,
-    CRAM_SUFFIX,
-    FASTQ_FIRST_READ_SUFFIX,
-    FASTQ_SECOND_READ_SUFFIX,
-    SPRING_SUFFIX,
-)
-
-FLAG_PATH_SUFFIX = ".crunchy.txt"
-PENDING_PATH_SUFFIX = ".crunchy.pending.txt"
+from cg.apps.crunchy.crunchy import CrunchyAPI
 
 LOG = logging.getLogger(__name__)
 
 
-class MockCrunchyAPI:
+class MockCrunchyAPI(CrunchyAPI):
     """
         Mock for the crunchy API
     """
@@ -106,62 +95,3 @@ class MockCrunchyAPI:
     def is_spring_compression_pending(self, fastq: Path) -> bool:
         """Check if spring compression has started, but not yet finished"""
         return self._spring_compression_pending
-
-    @staticmethod
-    def get_flag_path(file_path):
-        """Get path to 'finished' flag.
-        When compressing fastq this means that a .json metadata file has been created
-        Otherwise, for bam compression, a regular flag path is returned.
-        """
-        if file_path.suffix == ".spring":
-            return file_path.with_suffix("").with_suffix(".json")
-
-        return file_path.with_suffix(FLAG_PATH_SUFFIX)
-
-    @staticmethod
-    def get_pending_path(file_path: Path) -> Path:
-        """Gives path to pending-flag path
-
-        There are two cases, either fastq or bam. They are treated as shown below
-        """
-        if str(file_path).endswith(FASTQ_FIRST_READ_SUFFIX):
-            return Path(str(file_path).replace(FASTQ_FIRST_READ_SUFFIX, PENDING_PATH_SUFFIX))
-        if str(file_path).endswith(FASTQ_SECOND_READ_SUFFIX):
-            return Path(str(file_path).replace(FASTQ_SECOND_READ_SUFFIX, PENDING_PATH_SUFFIX))
-        return file_path.with_suffix(PENDING_PATH_SUFFIX)
-
-    @staticmethod
-    def get_index_path(file_path: Path) -> dict:
-        """Get possible paths for index
-
-        Returns:
-            dict: path with single_suffix, e.g. .bai and path with double_suffix, e.g. .bam.bai
-        """
-        index_type = CRAM_INDEX_SUFFIX
-        if file_path.suffix == BAM_SUFFIX:
-            index_type = BAM_INDEX_SUFFIX
-        with_single_suffix = file_path.with_suffix(index_type)
-        with_double_suffix = file_path.with_suffix(file_path.suffix + index_type)
-        return {
-            "single_suffix": with_single_suffix,
-            "double_suffix": with_double_suffix,
-        }
-
-    @staticmethod
-    def get_cram_path_from_bam(bam_path: Path) -> Path:
-        """ Get corresponding CRAM file path from bam file path """
-        if not bam_path.suffix == BAM_SUFFIX:
-            LOG.error("%s does not end with %s", bam_path, BAM_SUFFIX)
-            raise ValueError
-        cram_path = bam_path.with_suffix(CRAM_SUFFIX)
-        return cram_path
-
-    @staticmethod
-    def get_spring_path_from_fastq(fastq: Path) -> Path:
-        """ GET corresponding SPRING file path from a FASTQ file"""
-        suffix = FASTQ_FIRST_READ_SUFFIX
-        if FASTQ_SECOND_READ_SUFFIX in str(fastq):
-            suffix = FASTQ_SECOND_READ_SUFFIX
-
-        spring_path = Path(str(fastq).replace(suffix, "")).with_suffix(SPRING_SUFFIX)
-        return spring_path
