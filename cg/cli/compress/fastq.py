@@ -35,9 +35,8 @@ def fastq_cmd(context, case_id, number_of_conversions, ntasks, mem, dry_run):
     nr_cases = 0
     for nr_cases, case in enumerate(cases, 1):
         case_converted = True
-        if conversion_count == number_of_conversions:
-            LOG.info("compressed FASTQ files for %s cases", conversion_count)
-            return
+        if conversion_count >= number_of_conversions:
+            continue
 
         LOG.info("Searching for FASTQ files in %s", case.internal_id)
         for link_obj in case.links:

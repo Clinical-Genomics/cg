@@ -84,6 +84,16 @@ def fixture_populated_compress_store(case_id, samples):
     return MockCompressStore(cases)
 
 
+@pytest.fixture(name="populated_multiple_compress_store")
+def fixture_populated_multiple_compress_store(case_id, samples):
+    """Return a populated compress store"""
+    cases = {}
+    for number in range(10):
+        case = "_".join([str(number), case_id])
+        cases[case] = samples
+    return MockCompressStore(cases)
+
+
 @pytest.fixture(name="samples")
 def fixture_samples():
     """Return a list of sample ids"""
@@ -101,4 +111,11 @@ def fixture_base_compress_context(compress_api, compress_store):
 def fixture_populated_compress_context(compress_api, populated_compress_store):
     """Return a compress context"""
     ctx = {"compress": compress_api, "db": populated_compress_store}
+    return ctx
+
+
+@pytest.fixture(name="populated_multiple_compress_context")
+def fixture_populated_multiple_compress_context(compress_api, populated_multiple_compress_store):
+    """Return a compress context"""
+    ctx = {"compress": compress_api, "db": populated_multiple_compress_store}
     return ctx
