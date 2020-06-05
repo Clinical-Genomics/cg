@@ -59,17 +59,7 @@ class MockScoutAPI:
         """
         return self._gene_panel.get("genes")
 
-    def get_cases(
-        self,
-        case_id=None,
-        institute=None,
-        reruns=None,
-        finished=None,
-        causatives=None,
-        research_requested=None,
-        is_research=None,
-        status=None,
-    ):
+    def get_cases(self, *args, **kwargs):
         """Interact with cases existing in the database."""
 
         return self._cases
