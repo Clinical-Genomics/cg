@@ -225,10 +225,6 @@ class MockHousekeeperAPI:
         version_obj.bundle_obj = bundle_obj
         bundle_obj.versions = version_obj
 
-        self._bundle_obj = bundle_obj
-        self._bundles.append(bundle_obj)
-        self._version_obj = version_obj
-
         return bundle_obj, version_obj
 
     def _build_tags(self, tag_names: List[str]) -> dict:
@@ -268,6 +264,8 @@ class MockHousekeeperAPI:
         """ Create a new file bundle """
         self.update_id_counter()
         bundle_obj = MockBundle(id=self._id_counter, name=name, created_at=created_at)
+        self._bundle_obj = bundle_obj
+        self._bundles.append(bundle_obj)
         print("Create new bundle %s (%s)" % (name, bundle_obj.id))
         return bundle_obj
 
@@ -307,6 +305,7 @@ class MockHousekeeperAPI:
         created_at = created_at or datetime.datetime.now()
         expires_at = expires_at or datetime.datetime.now()
         version_obj = MockVersion(id=self._id_counter, created_at=created_at, expires_at=expires_at)
+        self._version_obj = version_obj
         print("Create new version with id %s" % version_obj.id)
         return version_obj
 
