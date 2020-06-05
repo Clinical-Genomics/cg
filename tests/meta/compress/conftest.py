@@ -29,6 +29,17 @@ def fixture_populated_compress_api(
     return compress_api
 
 
+@pytest.fixture(scope="function", name="populated_compress_fastq_api")
+def fixture_populated_compress_fastq_api(
+    compress_api, compress_scout_case, compress_hk_fastq_bundle, helpers
+):
+    """Populated compress api fixture"""
+    compress_api.scout_api.add_mock_case(compress_scout_case)
+    helpers.ensure_hk_bundle(compress_api.hk_api, compress_hk_fastq_bundle)
+
+    return compress_api
+
+
 @pytest.fixture(scope="function", name="sample")
 def fixture_sample():
     """Return the sample id for first sample"""
@@ -51,7 +62,7 @@ def fixture_sample_three():
 def fixture_sample_dir(project_dir, sample) -> Path:
     """Return the path to a sample directory"""
     _dir = project_dir / sample
-    _dir.mkdir()
+    _dir.mkdir(parents=True, exist_ok=True)
     return _dir
 
 
@@ -97,11 +108,11 @@ def fixture_bam_files(project_dir, sample, sample_two, sample_three):
     Creates files and return a dict will all files
     """
     sample_1_dir = project_dir / sample
-    sample_1_dir.mkdir()
+    sample_1_dir.mkdir(parents=True, exist_ok=True)
     sample_2_dir = project_dir / sample_two
-    sample_2_dir.mkdir()
+    sample_2_dir.mkdir(parents=True, exist_ok=True)
     sample_3_dir = project_dir / sample_three
-    sample_3_dir.mkdir()
+    sample_3_dir.mkdir(parents=True, exist_ok=True)
     bam_file_1 = sample_1_dir / "bam_1.bam"
     bai_file_1 = sample_1_dir / "bam_1.bam.bai"
     bam_file_2 = sample_2_dir / "bam_2.bam"
@@ -129,7 +140,7 @@ def fixture_fastq_files(project_dir, sample):
     Create fastq files and return a dictionary with them
     """
     sample_1_dir = project_dir / sample
-    sample_1_dir.mkdir()
+    sample_1_dir.mkdir(parents=True, exist_ok=True)
     fastq_first_file = sample_1_dir / f"sample{FASTQ_FIRST_READ_SUFFIX}"
     fastq_second_file = sample_1_dir / f"sample{FASTQ_SECOND_READ_SUFFIX}"
     fastq_first_file.touch()

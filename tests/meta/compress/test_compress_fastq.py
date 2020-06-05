@@ -42,12 +42,10 @@ def test_get_fastq_files_no_files(compress_api, sample_hk_bundle_no_files, sampl
     assert "There has to be a pair of fastq files" in caplog.text
 
 
-def test_get_fastq_files(compress_api, compress_hk_fastq_bundle, sample, helpers):
+def test_get_fastq_files(populated_compress_fastq_api, sample):
     """test get_fastq_files method when there are fastq files"""
-
+    compress_api = populated_compress_fastq_api
     # GIVEN a sample_id and a hk api populated with fastq bundle
-    hk_api = compress_api.hk_api
-    helpers.ensure_hk_bundle(hk_api, compress_hk_fastq_bundle)
 
     # WHEN fetching the fastq files
     fastq_dict = compress_api.get_fastq_files(sample_id=sample)
@@ -68,3 +66,20 @@ def test_check_prefixes(sample):
 
     # THEN assert that the result is true
     assert res is True
+
+
+def test_compress_case_fastq(populated_compress_fastq_api, sample, caplog):
+    """Test to compress all fastq files for a sample"""
+    caplog.set_level(logging.DEBUG)
+    compress_api = populated_compress_fastq_api
+    # GIVEN a populated compress api
+
+    # WHEN Compressing the bam files for the case
+    res = compress_api.compress_fastq([sample])
+
+    # THEN assert compression succeded
+    assert res is True
+    # THEN assert that the correct information is communicated
+    assert "Compressing" in caplog.text
+    # THEN assert that the correct information is communicated
+    assert "to SPRING format" in caplog.text

@@ -8,14 +8,8 @@ from pathlib import Path
 from typing import List
 
 from cg.apps import crunchy, hk, scoutapi
-from cg.constants import (
-    BAM_SUFFIX,
-    FASTQ_FIRST_READ_SUFFIX,
-    FASTQ_SECOND_READ_SUFFIX,
-    HK_BAM_TAGS,
-    HK_FASTQ_TAGS,
-)
-from cg.store import models
+from cg.constants import (BAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX,
+                          FASTQ_SECOND_READ_SUFFIX, HK_BAM_TAGS, HK_FASTQ_TAGS)
 
 LOG = logging.getLogger(__name__)
 
@@ -165,11 +159,13 @@ class CompressAPI:
         hk_files_dict = {Path(file_obj.full_path): file_obj for file_obj in hk_files}
         return hk_files_dict
 
-    def compress_case_fastq(self, case: models.Family, dry_run: bool = False) -> bool:
-        """Compress the fastq files for all individuals of a case"""
+    def compress_fastq(self, sample_ids: List[str], dry_run: bool = False) -> bool:
+        """Compress the fastq files for all individuals in a case
 
-        for link_obj in case.links:
-            sample_id = link_obj.sample.internal_id
+        If one or more individuals fails, skip the case
+        """
+        case_fastqs = {}
+        for sample_id in sample_ids:
             sample_fastq_dict = self.get_fastq_files(sample_id=sample_id)
             if not sample_fastq_dict:
                 LOG.info("Could not find FASTQ files for %s", sample_id)
@@ -178,14 +174,19 @@ class CompressAPI:
             fastq_first = sample_fastq_dict["fastq_first_file"]
             fastq_second = sample_fastq_dict["fastq_second_file"]
 
-            if self.crunchy_api.is_spring_compression_done(fastq_first):
+            if self.crunchy_api.is_spring_compression_done(fastq_first, fastq_second):
                 LOG.warning("FASTQ to SPRING compression already done for %s", sample_id)
                 return False
 
-            if self.crunchy_api.is_spring_compression_pending(fastq_first, fastq_second):
+            if self.crunchy_api.is_spring_compression_pending(fastq=fastq_first):
                 LOG.info("FASTQ to SPRING compression pending for %s", sample_id)
                 return False
 
+            case_fastqs[sample_id] = [fastq_first, fastq_second]
+
+        for sample_id in case_fastqs:
+            fastq_first = case_fastqs[sample_id][0]
+            fastq_second = case_fastqs[sample_id][1]
             LOG.info(
                 "Compressing %s and %s for sample %s into SPRING format",
                 fastq_first,
