@@ -319,7 +319,7 @@ def fixture_housekeeper_api(hk_config_dict):
 def fixture_real_housekeeper_api(hk_config_dict):
     """Setup a real Housekeeper store."""
     _api = HousekeeperAPI(hk_config_dict)
-    _api.create_all()
+    _api.initialise_db()
     yield _api
 
 

@@ -83,11 +83,14 @@ class CompressAPI:
         if not scout_cases:
             LOG.warning("%s not found in scout", case_id)
             return None
+        LOG.debug("Found scout case %s", case_id)
 
         hk_files_dict = self.get_hk_files_dict(bundle_name=case_id, tags=HK_BAM_TAGS)
         if not hk_files_dict:
             LOG.warning("No files found in latest housekeeper version for %s", case_id)
             return None
+        LOG.debug("hk files dict found %s", hk_files_dict)
+
         hk_file_paths = set(hk_files_dict.keys())
 
         bam_dict = {}
@@ -98,11 +101,11 @@ class CompressAPI:
 
             bam_path = self.get_bam_path(bam_file, hk_file_paths)
             if not bam_path:
-                return None
+                continue
 
             bai_path = self.get_bam_index_path(bam_path, hk_file_paths)
             if not bai_path:
-                return None
+                continue
 
             bam_dict[sample_id] = {
                 "bam": hk_files_dict[bam_path],
@@ -166,8 +169,16 @@ class CompressAPI:
         if not last_version:
             LOG.warning("No bundle found for %s in housekeeper", bundle_name)
             return None
-        hk_files = self.hk_api.get_files(bundle=bundle_name, tags=tags, version=last_version.id)
-        hk_files_dict = {Path(file_obj.full_path).resolve(): file_obj for file_obj in hk_files}
+        LOG.debug("Found version obj for %s: %s", bundle_name, repr(last_version))
+        hk_files_dict = {}
+        tags = set(tags)
+        for file_obj in last_version.files:
+            file_tags = set([tag.name for tag in file_obj.tags])
+            if not file_tags.intersection(tags):
+                continue
+            LOG.debug("Found file %s", file_obj)
+            path_obj = Path(file_obj.full_path)
+            hk_files_dict[path_obj.resolve()] = file_obj
         return hk_files_dict
 
     def compress_fastq(self, sample_id: str, dry_run: bool = False) -> bool:
