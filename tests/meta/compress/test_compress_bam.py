@@ -208,32 +208,3 @@ def test_compress_case_bam_no_scout_case(compress_api, compress_hk_bam_bundle, h
     assert res is False
     # THEN assert that the correct information is communicated
     assert f"{case_id} not found in scout" in caplog.text
-
-
-def test_remove_bams(compress_api, bam_dict, mock_compress_func):
-    """ Test remove_bams method"""
-    # GIVEN a bam-dict and a compress api
-    compressed_dict = mock_compress_func(bam_dict)
-    # GIVEN a crunchy api where bam compression is done
-    crunchy_api = compress_api.crunchy_api
-    crunchy_api.set_bam_compression_done_all()
-
-    for _, files in compressed_dict.items():
-        assert Path(files["bam"].full_path).exists()
-        assert Path(files["bai"].full_path).exists()
-        assert Path(files["cram"].full_path).exists()
-        assert Path(files["crai"].full_path).exists()
-        assert Path(files["flag"].full_path).exists()
-
-    # WHEN calling remove_bams
-    compress_api.remove_bams(bam_dict=bam_dict)
-
-    # THEN the bam-files and flag-file should not exist
-
-    for sample_id in compressed_dict:
-        files = compressed_dict[sample_id]
-        assert not Path(files["bam"].full_path).exists()
-        assert not Path(files["bai"].full_path).exists()
-        assert Path(files["cram"].full_path).exists()
-        assert Path(files["crai"].full_path).exists()
-        assert not Path(files["flag"].full_path).exists()

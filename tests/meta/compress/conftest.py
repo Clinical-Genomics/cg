@@ -5,6 +5,7 @@ from pathlib import Path
 
 import pytest
 
+from cg.apps.crunchy import CrunchyAPI
 from cg.constants import FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX
 from cg.meta.compress import CompressAPI
 from tests.mocks.hk_mock import MockFile
@@ -74,8 +75,26 @@ def fixture_bam_path(sample_dir) -> Path:
 
 @pytest.fixture(scope="function", name="bai_path")
 def fixture_bai_path(sample_dir) -> Path:
-    """Return the path to a non existing bam index file file"""
+    """Return the path to a non existing bam index file"""
     return sample_dir / "bam_1.bam.bai"
+
+
+@pytest.fixture(scope="function", name="cram_path")
+def fixture_cram_path(bam_path) -> Path:
+    """Return the path to a non existing cram file"""
+    return CrunchyAPI.get_cram_path_from_bam(bam_path=bam_path)
+
+
+@pytest.fixture(scope="function", name="crai_path")
+def fixture_crai_path(cram_path) -> Path:
+    """Return the path to a non existing cram index file"""
+    return CrunchyAPI.get_index_path(cram_path)["double_suffix"]
+
+
+@pytest.fixture(scope="function", name="bam_flag_path")
+def fixture_bam_flag_path(bam_path) -> Path:
+    """Return the path to a non existing bam flag file"""
+    return CrunchyAPI.get_flag_path(file_path=bam_path)
 
 
 @pytest.fixture(scope="function", name="bam_file")
@@ -85,6 +104,46 @@ def fixture_bam_file(bam_path) -> Path:
     return bam_path
 
 
+@pytest.fixture(scope="function", name="bai_file")
+def fixture_bai_file(bai_path) -> Path:
+    """Return the path to an existing bam index file"""
+    bai_path.touch()
+    return bai_path
+
+
+@pytest.fixture(scope="function", name="cram_file")
+def fixture_cram_file(cram_path) -> Path:
+    """Return the path to an existing cram file"""
+    cram_path.touch()
+    return cram_path
+
+
+@pytest.fixture(scope="function", name="crai_file")
+def fixture_crai_file(crai_path) -> Path:
+    """Return the path to an existing cram index file"""
+    crai_path.touch()
+    return crai_path
+
+
+@pytest.fixture(scope="function", name="hk_bam_file")
+def fixture_hk_bam_file(bam_file) -> Path:
+    """Return a housekeeper file object"""
+    return MockFile(path=str(bam_file))
+
+
+@pytest.fixture(scope="function", name="hk_bai_file")
+def fixture_hk_bai_file(bai_file) -> Path:
+    """Return a housekeeper file object"""
+    return MockFile(path=str(bai_file))
+
+
+@pytest.fixture(scope="function", name="bam_flag_file")
+def fixture_bam_flag_file(bam_flag_path) -> Path:
+    """Return the path to an existing bam flag file"""
+    bam_flag_path.touch()
+    return bam_flag_path
+
+
 @pytest.fixture(scope="function", name="multi_linked_file")
 def fixture_multi_linked_file(bam_file, project_dir) -> Path:
     """Return the path to an existing file with two links"""
@@ -92,13 +151,6 @@ def fixture_multi_linked_file(bam_file, project_dir) -> Path:
     os.link(bam_file, first_link)
 
     return bam_file
-
-
-@pytest.fixture(scope="function", name="bai_file")
-def fixture_bai_file(bai_path) -> Path:
-    """Return the path to an existing bam index file"""
-    bai_path.touch()
-    return bai_path
 
 
 @pytest.fixture(scope="function", name="bam_files")
@@ -194,6 +246,23 @@ def fixture_compress_hk_bam_bundle(bam_files, case_hk_bundle_no_files):
         }
         hk_bundle_data["files"].append(bam_file_info)
         hk_bundle_data["files"].append(bai_file_info)
+
+    return hk_bundle_data
+
+
+@pytest.fixture(scope="function", name="compress_hk_bam_single_bundle")
+def fixture_compress_hk_bam_single_bundle(bam_file, bai_file, case_hk_bundle_no_files):
+    """Create a complete bundle mock for testing compression"""
+    hk_bundle_data = copy.deepcopy(case_hk_bundle_no_files)
+
+    bam_file_info = {"path": str(bam_file), "archive": False, "tags": ["bam"]}
+    bai_file_info = {
+        "path": str(bai_file),
+        "archive": False,
+        "tags": ["bai", "bam-index"],
+    }
+    hk_bundle_data["files"].append(bam_file_info)
+    hk_bundle_data["files"].append(bai_file_info)
 
     return hk_bundle_data
 

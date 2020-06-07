@@ -56,35 +56,3 @@ def test_get_nlinks_three_links(compress_api, project_dir):
 
     # THEN number of links should be three
     assert nlinks == 3
-
-
-def test_update_scout(compress_api, bam_dict, mock_compress_func, case_id):
-    """ Test to update the bam paths in scout"""
-    mock_compress_func(bam_dict)
-    # GIVEN that the compression is done
-    compress_api.crunchy_api.set_bam_compression_done_all()
-    assert compress_api.crunchy_api.is_cram_compression_done(bam_path=None) is True
-    scout_api = compress_api.scout_api
-    # GIVEN a case-id
-
-    # WHEN updating the bam paths in scout
-    compress_api.update_scout(case_id=case_id, bam_dict=bam_dict)
-    # THEN update_alignment_file should have been callen three times
-    assert scout_api.nr_alignment_updates() == len(bam_dict)
-
-
-def test_update_hk(compress_api, bam_dict, mock_compress_func):
-    """ Test to update the bam paths in housekeeper"""
-    mock_compress_func(bam_dict)
-    hk_api = compress_api.hk_api
-    compress_api.crunchy_api.set_bam_compression_done_all()
-    # GIVEN a empty hk api
-    assert len(hk_api.files()) == 0
-    # GIVEN a case-id and a compress api
-    case_id = "test-case"
-
-    # WHEN updating hk
-    compress_api.update_hk(case_id=case_id, bam_dict=bam_dict)
-
-    # THEN add_file should have been called 6 times (two for every case)
-    assert len(hk_api.files()) == 6

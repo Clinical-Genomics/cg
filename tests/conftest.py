@@ -10,6 +10,7 @@ import pytest
 import ruamel.yaml
 from trailblazer.mip import files as mip_dna_files_api
 
+from cg.apps.hk import HousekeeperAPI
 from cg.apps.mip_rna import files as mip_rna_files_api
 from cg.meta.store import mip as store_mip
 from cg.store import Store
@@ -136,6 +137,13 @@ def crunchy_config_dict():
     """Crunchy configs"""
     _config = dict()
     _config.update(CRUNCHY_CONFIG)
+    return _config
+
+
+@pytest.fixture(name="hk_config_dict")
+def fixture_hk_config_dict(root_path):
+    """Crunchy configs"""
+    _config = {"housekeeper": {"database": "sqlite:///:memory:", "root": str(root_path)}}
     return _config
 
 
@@ -301,12 +309,18 @@ def fixture_hk_bundle_data(case_id, bed_file, timestamp):
 
 
 @pytest.yield_fixture(scope="function", name="housekeeper_api")
-def fixture_housekeeper_api(root_path):
+def fixture_housekeeper_api(hk_config_dict):
     """Setup Housekeeper store."""
-    _api = MockHousekeeperAPI(
-        {"housekeeper": {"database": "sqlite:///:memory:", "root": str(root_path)}}
-    )
-    return _api
+    _api = MockHousekeeperAPI(hk_config_dict)
+    yield _api
+
+
+@pytest.yield_fixture(scope="function", name="real_housekeeper_api")
+def fixture_real_housekeeper_api(hk_config_dict):
+    """Setup a real Housekeeper store."""
+    _api = HousekeeperAPI(hk_config_dict)
+    _api.create_all()
+    yield _api
 
 
 @pytest.yield_fixture(scope="function", name="populated_housekeeper_api")
