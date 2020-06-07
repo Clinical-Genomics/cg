@@ -185,16 +185,16 @@ def fixture_bam_files(project_dir, sample, sample_two, sample_three):
     }
 
 
-@pytest.fixture(scope="function", name="fastq_files")
-def fixture_fastq_files(project_dir, sample):
+@pytest.fixture(scope="function", name="fastq_paths")
+def fixture_fastq_paths(project_dir, sample):
     """Fixture for temporary fastq-files
 
-    Create fastq files and return a dictionary with them
+    Create fastq paths and return a dictionary with them
     """
-    sample_1_dir = project_dir / sample
-    sample_1_dir.mkdir(parents=True, exist_ok=True)
-    fastq_first_file = sample_1_dir / f"sample{FASTQ_FIRST_READ_SUFFIX}"
-    fastq_second_file = sample_1_dir / f"sample{FASTQ_SECOND_READ_SUFFIX}"
+    sample_dir = project_dir / sample
+    sample_dir.mkdir(parents=True, exist_ok=True)
+    fastq_first_file = sample_dir / f"{sample}{FASTQ_FIRST_READ_SUFFIX}"
+    fastq_second_file = sample_dir / f"{sample}{FASTQ_SECOND_READ_SUFFIX}"
     fastq_first_file.touch()
     fastq_second_file.touch()
 
@@ -202,6 +202,20 @@ def fixture_fastq_files(project_dir, sample):
         "fastq_first_path": fastq_first_file,
         "fastq_second_path": fastq_second_file,
     }
+
+
+@pytest.fixture(scope="function", name="fastq_files")
+def fixture_fastq_files(fastq_paths):
+    """Fixture for temporary fastq-files
+
+    Create fastq files and return a dictionary with them
+    """
+    fastq_first_file = fastq_paths["fastq_first_path"]
+    fastq_second_file = fastq_paths["fastq_second_path"]
+    fastq_first_file.touch()
+    fastq_second_file.touch()
+
+    return fastq_paths
 
 
 @pytest.fixture(scope="function", name="sample_hk_bundle_no_files")
