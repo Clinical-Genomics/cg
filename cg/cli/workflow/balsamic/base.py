@@ -22,6 +22,7 @@ from cg.store import Store
 LOG = logging.getLogger(__name__)
 PRIORITY_OPTION = click.option("-p", "--priority", type=click.Choice(["low", "normal", "high"]))
 EMAIL_OPTION = click.option("-e", "--email", help="email to send errors to")
+ANALYSIS_TYPE_OPTION = click.option("-a","--analysis-type", "analysis_type", type=click.Choice(['qc', 'paired', 'single']), required=False)
 SUCCESS = 0
 FAIL = 1
 
@@ -270,8 +271,9 @@ def config_case(
 @click.option(
     "-r", "--run-analysis", "run_analysis", is_flag=True, default=False, help="start " "analysis"
 )
-@click.option("-a","--analysis-type", "analysis_type", type=click.Choice(['qc', 'paired', 'single']), required=False)
+
 @click.option("--config", "config_path", required=False, help="Optional")
+@ANALYSIS_TYPE_OPTION
 @PRIORITY_OPTION
 @EMAIL_OPTION
 @click.argument("case_id")
