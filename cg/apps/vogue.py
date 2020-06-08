@@ -60,7 +60,7 @@ class VogueAPI:
         for line in self.process.stderr_lines():
             LOG.info("vogue output: %s", line)
 
-    def load_reagent_labels(self, days):
+    def load_reagent_labels(self, days: int) -> None:
         """Running vogue load reagent_labels."""
 
         load_call = ["load", "reagent_labels", "-d", days]
