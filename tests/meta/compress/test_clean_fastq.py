@@ -13,15 +13,16 @@ def test_remove_fastqs(compress_api, fastq_files, fastq_flag_file, caplog):
     assert fastq_flag_file.exists()
     # GIVEN a crunchy api where fastq compression is done
     crunchy_api = compress_api.crunchy_api
-    crunchy_api.set_fastq_compression_done_all()
+    crunchy_api.set_spring_compression_done()
 
     # WHEN calling remove_fastq
     compress_api.remove_fastq(fastq_first=fastq_first_file, fastq_second=fastq_second_file)
 
-    # THEN the assert that the fastq-files and flag-file should not exist
+    # THEN the assert that the fastq-files are deleted
     assert not fastq_first_file.exists()
     assert not fastq_second_file.exists()
-    assert not fastq_flag_file.exists()
+    # THEN assert that the flag file is still there since this holds important information
+    assert fastq_flag_file.exists()
     expected_output = f"Will remove {fastq_first_file}, {fastq_second_file}, and {fastq_flag_file}"
     assert expected_output in caplog.text
     assert f"Fastq files removed" in caplog.text

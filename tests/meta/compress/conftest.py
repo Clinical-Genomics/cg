@@ -97,6 +97,18 @@ def fixture_bam_flag_path(bam_path) -> Path:
     return CrunchyAPI.get_flag_path(file_path=bam_path)
 
 
+@pytest.fixture(scope="function", name="spring_path")
+def fixture_spring_path(fastq_paths) -> Path:
+    """Return the path to a non existing spring file"""
+    return CrunchyAPI.get_spring_path_from_fastq(fastq=fastq_paths["fastq_first_path"])
+
+
+@pytest.fixture(scope="function", name="fastq_flag_path")
+def fixture_fastq_flag_path(spring_path) -> Path:
+    """Return the path to a non existing fastq flag file"""
+    return CrunchyAPI.get_flag_path(file_path=spring_path)
+
+
 @pytest.fixture(scope="function", name="bam_file")
 def fixture_bam_file(bam_path) -> Path:
     """Return the path to an existing bam file"""
@@ -142,6 +154,13 @@ def fixture_bam_flag_file(bam_flag_path) -> Path:
     """Return the path to an existing bam flag file"""
     bam_flag_path.touch()
     return bam_flag_path
+
+
+@pytest.fixture(scope="function", name="fastq_flag_file")
+def fixture_fastq_flag_file(fastq_flag_path) -> Path:
+    """Return the path to an existing fastq flag file"""
+    fastq_flag_path.touch()
+    return fastq_flag_path
 
 
 @pytest.fixture(scope="function", name="multi_linked_file")
@@ -216,6 +235,9 @@ def fixture_fastq_files(fastq_paths):
     fastq_second_file.touch()
 
     return fastq_paths
+
+
+# Bundle fixtures
 
 
 @pytest.fixture(scope="function", name="sample_hk_bundle_no_files")
@@ -296,17 +318,6 @@ def fixture_compress_hk_fastq_bundle(fastq_files, sample_hk_bundle_no_files):
     return hk_bundle_data
 
 
-@pytest.fixture(scope="function")
-def fastq_files_hk_list(fastq_files):
-    """hk file list fixture"""
-    _hk_fastq_list = []
-
-    for _, fastq_file in fastq_files.items():
-        _hk_fastq_list.append(MockFile(path=fastq_file))
-
-    return _hk_fastq_list
-
-
 @pytest.fixture(scope="function", name="compress_scout_case")
 def fixture_compress_scout_case(bam_files, case_id):
     """Fixture for scout case with bam-files"""
@@ -318,44 +329,3 @@ def fixture_compress_scout_case(bam_files, case_id):
         ],
     }
     return case_data
-
-
-@pytest.fixture(scope="function", name="bam_dict")
-def fixture_bam_dict(bam_files):
-    """bam_dict fixture"""
-    _bam_dict = {}
-    for sample, files in bam_files.items():
-        _bam_dict[sample] = {
-            "bam": MockFile(path=files["bam_file"]),
-            "bai": MockFile(path=files["bai_file"]),
-        }
-    return _bam_dict
-
-
-@pytest.fixture(scope="function")
-def mock_compress_func():
-    """fixture with function that mocks a CRAM compression of bam_dict"""
-
-    def _mock_compress_func(bam_dict: dict):
-        """Creates corresponding .cram, .crai and flag path for BAM files"""
-        _bam_dict = {}
-        for sample, files in bam_dict.items():
-            bam_path = Path(files["bam"].full_path)
-            cram_path = bam_path.with_suffix(".cram")
-            crai_path = bam_path.with_suffix(".cram.crai")
-            flag_path = bam_path.with_suffix(".crunchy.txt")
-            cram_path.touch()
-            crai_path.touch()
-            flag_path.touch()
-
-            _bam_dict[sample] = {
-                "bam": files["bam"],
-                "bai": files["bai"],
-                "cram": MockFile(path=str(cram_path)),
-                "crai": MockFile(path=str(crai_path)),
-                "flag": MockFile(path=str(flag_path)),
-            }
-
-        return _bam_dict
-
-    return _mock_compress_func
