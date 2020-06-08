@@ -39,7 +39,7 @@ def test_get_fastq_files_no_files(compress_api, sample_hk_bundle_no_files, sampl
     # THEN assert that None is returned since there where not two files
     assert fastq_dict is None
     # THEN assert that the correct information is returned
-    assert "There has to be a pair of fastq files" in caplog.text
+    assert "Could not find paired fastq files" in caplog.text
 
 
 def test_get_fastq_files(populated_compress_fastq_api, sample):
