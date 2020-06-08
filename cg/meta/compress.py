@@ -169,7 +169,15 @@ class CompressAPI:
         return bai_path
 
     def get_hk_files_dict(self, bundle_name: str, tags: List[str]) -> dict:
-        """Fetch files from latest version in HK and create a dict with Path object as keys"""
+        """Fetch files from latest version in HK
+            Return a dict with Path object as keys and hk file objects as values
+
+        Returns:
+            {
+                Path(file): hk.File(file)
+            }
+
+        """
         last_version = self.hk_api.last_version(bundle=bundle_name)
         if not last_version:
             LOG.warning("No bundle found for %s in housekeeper", bundle_name)
@@ -178,7 +186,7 @@ class CompressAPI:
         hk_files_dict = {}
         tags = set(tags)
         for file_obj in last_version.files:
-            file_tags = set([tag.name for tag in file_obj.tags])
+            file_tags = {tag.name for tag in file_obj.tags}
             if not file_tags.intersection(tags):
                 continue
             LOG.debug("Found file %s", file_obj)
@@ -193,8 +201,8 @@ class CompressAPI:
             LOG.info("Could not find FASTQ files for %s", sample_id)
             return False
 
-        fastq_first = sample_fastq_dict["fastq_first_file"]
-        fastq_second = sample_fastq_dict["fastq_second_file"]
+        fastq_first = sample_fastq_dict["fastq_first_file"]["path"]
+        fastq_second = sample_fastq_dict["fastq_second_file"]["path"]
 
         if self.crunchy_api.is_spring_compression_done(fastq_first, fastq_second):
             LOG.warning("FASTQ to SPRING compression already done for %s", sample_id)
@@ -226,51 +234,57 @@ class CompressAPI:
         if hk_files_dict is None:
             return None
 
-        if len(hk_files_dict) != 2:
-            LOG.warning("There has to be a pair of fastq files")
-            return None
-
-        fastq_dict = self._sort_fastqs(fastq_files=list(hk_files_dict.keys()))
-        if not fastq_dict:
+        sorted_fastqs = self.sort_fastqs(fastq_files=list(hk_files_dict.keys()))
+        if not sorted_fastqs:
             LOG.info("Could not sort FASTQ files for %s", sample_id)
             return None
-
+        fastq_dict = {
+            "fastq_first_file": {
+                "path": sorted_fastqs[0],
+                "hk_file": hk_files_dict[sorted_fastqs[0]],
+            },
+            "fastq_second_file": {
+                "path": sorted_fastqs[1],
+                "hk_file": hk_files_dict[sorted_fastqs[1]],
+            },
+        }
         return fastq_dict
 
-    def _sort_fastqs(self, fastq_files: list) -> dict:
+    def sort_fastqs(self, fastq_files: list) -> tuple:
         """ Sort list of FASTQ files into correct read pair
+
+        Check that the files exists and are correct
 
         Args:
             fastq_files(list(Path))
 
         Returns:
-            fastq_dict(dict): {"fastq_first_file": Path(file), "fastq_second_file": Path(file)}
+            sorted_fastqs(tuple): (fastq_first, fastq_second)
         """
-        first_fastq_key = "fastq_first_file"
-        second_fastq_key = "fastq_second_file"
-        fastq_dict = dict()
+        first_fastq = second_fastq = None
         for fastq_file in fastq_files:
             if not fastq_file.exists():
                 LOG.info("%s does not exist", fastq_file)
                 return None
+
             if self.get_nlinks(file_link=fastq_file) > 1:
                 LOG.info("More than 1 inode to same file for %s", fastq_file)
                 return None
 
             if str(fastq_file).endswith(FASTQ_FIRST_READ_SUFFIX):
-                fastq_dict[first_fastq_key] = fastq_file
+                first_fastq = fastq_file
             if str(fastq_file).endswith(FASTQ_SECOND_READ_SUFFIX):
-                fastq_dict[second_fastq_key] = fastq_file
+                second_fastq = fastq_file
 
-        if len(fastq_dict) != 2:
+        if not (first_fastq and second_fastq):
             LOG.warning("Could not find paired fastq files")
             return None
 
-        if not self.check_prefixes(fastq_dict[first_fastq_key], fastq_dict[second_fastq_key]):
+        if not self.check_prefixes(first_fastq, second_fastq):
             LOG.info("FASTQ files does not have matching prefix")
             return None
 
-        return fastq_dict
+        return (first_fastq, second_fastq)
 
     @staticmethod
     def check_prefixes(first_fastq: Path, second_fastq: Path) -> bool:
@@ -280,8 +294,10 @@ class CompressAPI:
         return first_prefix == second_prefix
 
     def clean_bams(self, case_id: str, dry_run: bool = False):
-        """Update databases and remove uncompressed BAM files for case if
-        compression is done"""
+        """Update databases and remove uncompressed BAM files for case if compression is done
+
+        Should only clean all files if all bams are compressed for a case
+        """
         bam_dict = self.get_bam_files(case_id=case_id)
         if not bam_dict:
             return
@@ -289,12 +305,15 @@ class CompressAPI:
         latest_hk_version = self.hk_api.last_version(bundle=case_id)
 
         for sample_id in bam_dict:
+            if not self.crunchy_api.is_cram_compression_done(bam_dict[sample_id]["bam_path"]):
+                LOG.info("Cram compression pending for: %s", sample_id)
+                LOG.info("Skip cleaning")
+                return
+
+        for sample_id in bam_dict:
             bam_files = bam_dict[sample_id]
             bam_path = bam_files["bam_path"]
             bai_path = bam_files["bai_path"]
-            if not self.crunchy_api.is_cram_compression_done(bam_path=bam_path):
-                LOG.info("Cram compression pending for: %s", sample_id)
-                continue
 
             hk_bam_file = bam_files["bam"]
             hk_bai_file = bam_files["bai"]
@@ -310,6 +329,22 @@ class CompressAPI:
                 hk_version=latest_hk_version,
                 dry_run=dry_run,
             )
+
+    def clean_fastq(self, sample_id: str, dry_run: bool = False) -> bool:
+        """Check that fastq compression is completed for a case and clean
+
+        This means removing compressed fastq files and update housekeeper to point to the new spring
+        file and its metadata file
+        """
+        sample_fastq_dict = self.get_fastq_files(sample_id=sample_id)
+        if not sample_fastq_dict:
+            LOG.info("Could not find FASTQ files for %s", sample_id)
+            return False
+        fastq_first = sample_fastq_dict["fastq_first_file"]
+        fastq_second = sample_fastq_dict["fastq_second_file"]
+        spring_path = self.crunchy_api.get_spring_path_from_fastq(fastq=fastq_first)
+        flag_path = self.crunchy_api.get_flag_path(file_path=spring_path)
+        return True
 
     def update_scout(self, case_id: str, sample_id: str, bam_path: Path, dry_run: bool = False):
         """Update scout with compressed alignment file if present"""
@@ -352,8 +387,45 @@ class CompressAPI:
         hk_bai_file.delete()
         self.hk_api.commit()
 
+    def update_fastq_hk(
+        self,
+        sample_id: str,
+        hk_fastq_first: hk_models.File,
+        hk_fastq_second: hk_models.File,
+        dry_run: bool = False,
+    ):
+        """Update Housekeeper with compressed fastq file"""
+        version_obj = self.hk_api.last_version(sample_id)
+        fastq_first_path = Path(hk_fastq_first.full_path)
+        fastq_second_path = Path(hk_fastq_second.full_path)
+
+        spring_tags = [sample_id, "spring"]
+        spring_metadata_tags = [sample_id, "spring-metadata"]
+        spring_path = self.crunchy_api.get_spring_path_from_fastq(fastq=fastq_first_path)
+        spring_metadata_path = self.crunchy_api.get_flag_path(spring_path)
+        LOG.info("Housekeeper update for %s:", sample_id)
+        LOG.info(
+            "%s, %s -> %s, with tags %s",
+            fastq_first_path,
+            fastq_second_path,
+            spring_path,
+            spring_tags,
+        )
+        LOG.info("Adds %s, with tags %s", spring_metadata_path, spring_metadata_tags)
+        if dry_run:
+            return
+
+        LOG.info("updating files in housekeeper...")
+        self.hk_api.add_file(path=spring_path, version_obj=version_obj, tags=spring_tags)
+        self.hk_api.add_file(
+            path=spring_metadata_path, version_obj=version_obj, tags=spring_metadata_tags
+        )
+        hk_fastq_first.delete()
+        hk_fastq_second.delete()
+        self.hk_api.commit()
+
     def remove_bam(self, bam_path: Path, bai_path: Path, dry_run: bool = False):
-        """Remove uncompressed alignment files if compression exists"""
+        """Remove bam files and flag that cram compression is completed"""
         flag_path = self.crunchy_api.get_flag_path(file_path=bam_path)
         LOG.info("Will remove %s, %s, and %s", bam_path, bai_path, flag_path)
         if dry_run:
@@ -364,6 +436,18 @@ class CompressAPI:
         LOG.info("BAM file index %s removed", bai_path)
         flag_path.unlink()
         LOG.info("Flag file %s removed", flag_path)
+
+    @staticmethod
+    def remove_fastq(fastq_first: Path, fastq_second: Path, dry_run: bool = False):
+        """Remove fastq files"""
+        LOG.info("Will remove %s and %s", fastq_first, fastq_second)
+        if dry_run:
+            return
+        fastq_first.unlink()
+        LOG.debug("First fastq in pair %s removed", fastq_first)
+        fastq_second.unlink()
+        LOG.debug("Second fastq in pair %s removed", fastq_second)
+        LOG.info("Fastq files removed")
 
     @staticmethod
     def _is_valid_fastq_suffix(fastq_path: Path):

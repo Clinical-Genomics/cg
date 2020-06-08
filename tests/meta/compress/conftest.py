@@ -163,6 +163,13 @@ def fixture_fastq_flag_file(fastq_flag_path) -> Path:
     return fastq_flag_path
 
 
+@pytest.fixture(scope="function", name="spring_file")
+def fixture_spring_file(spring_path) -> Path:
+    """Return the path to an existing spring file"""
+    spring_path.touch()
+    return spring_path
+
+
 @pytest.fixture(scope="function", name="multi_linked_file")
 def fixture_multi_linked_file(bam_file, project_dir) -> Path:
     """Return the path to an existing file with two links"""
