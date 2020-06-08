@@ -107,7 +107,7 @@ class CrunchyAPI:
         with open(sbatch_path, mode="w+t") as sbatch_file:
             sbatch_file.write(sbatch_content)
 
-        sbatch_parameters = [sbatch_path.name]
+        sbatch_parameters = [str(sbatch_path.resolve())]
         self.process.run_command(sbatch_parameters)
         LOG.info(self.process.stderr)
         LOG.info(self.process.stdout)

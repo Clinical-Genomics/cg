@@ -1,11 +1,40 @@
 """Fixtures for crunchy api"""
-
+import copy
+import logging
 from pathlib import Path
+from typing import List
 
 import pytest
 
 from cg.apps.crunchy import CrunchyAPI
 from cg.constants import FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX
+
+LOG = logging.getLogger(__name__)
+
+
+class MockProcess:
+    """Mock a process"""
+
+    def __init__(self, process_name: str):
+        """Inititalise mock"""
+        self.stderr = ""
+        self.stdout = ""
+        self.base_call = [process_name]
+        self.process_name = process_name
+
+    def run_command(self, parameters: List):
+        """Mock the run process method"""
+        command = copy.deepcopy(self.base_call)
+        if parameters:
+            command.extend(parameters)
+
+        LOG.info("Running command %s", " ".join(command))
+
+
+@pytest.fixture(scope="function", name="sbatch_process")
+def fixture_sbatch_process():
+    """Return a mocked process object"""
+    return MockProcess("sbatch")
 
 
 @pytest.fixture(scope="function", name="bam_path")
