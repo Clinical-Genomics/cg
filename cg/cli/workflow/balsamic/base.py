@@ -20,6 +20,7 @@ from cg.meta.deliver import DeliverAPI
 from cg.meta.workflow.balsamic import AnalysisAPI
 from cg.meta.workflow.base import get_target_bed_from_lims
 from cg.store import Store
+from cg.utils.commands import Process
 
 LOG = logging.getLogger(__name__)
 PRIORITY_OPTION = click.option("-p", "--priority", type=click.Choice(["low", "normal", "high"]))
@@ -323,7 +324,7 @@ def run(context, dry, run_analysis, config_path, priority, email, case_id, analy
         click.echo(command)
         return SUCCESS
 
-    process = subprocess.run(command, shell=True)
+    process = Process(command).run_command()
     return process
 
 
