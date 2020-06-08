@@ -60,6 +60,16 @@ class VogueAPI:
         for line in self.process.stderr_lines():
             LOG.info("vogue output: %s", line)
 
+    def load_reagent_labels(self, days):
+        """Running vogue load reagent_labels."""
+
+        load_call = ["load", "reagent_labels", "-d", days]
+        self.process.run_command(load_call)
+
+        # Execute command and print its stdout+stderr as it executes
+        for line in self.process.stderr_lines():
+            LOG.info("vogue output: %s", line)
+
     def load_bioinfo_raw(self, load_bioinfo_inputs):
         """Running vogue load bioinfo raw."""
 

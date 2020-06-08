@@ -48,6 +48,11 @@ class UploadVogueAPI:
 
         self.vogue_api.load_flowcells(days=days)
 
+    def load_reagent_labels(self, days):
+        """Loading reagent_labels from lims into the trending database"""
+
+        self.vogue_api.load_reagent_labels(days=days)
+
     def load_bioinfo_raw(self, load_bioinfo_inputs):
         """Running vogue load bioinfo raw."""
 

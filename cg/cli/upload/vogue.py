@@ -82,6 +82,19 @@ def samples(context, days: int):
     context.obj["vogue_upload_api"].load_samples(days=days)
 
 
+@vogue.command("reagent-labels", short_help="Getting reagent_label data from lims.")
+@click.option(
+    "-d", "--days", required="True", help="load X days old sampels from lims to vogue",
+)
+@click.pass_context
+def reagent_labels(context, days: int):
+    """Loading reagent_labels from lims to the trending database"""
+
+    click.echo(click.style("----------------- SAMPLES -----------------------"))
+
+    context.obj["vogue_upload_api"].load_reagent_labels(days=days)
+
+
 @vogue.command("bioinfo", short_help="Load bioinfo results into vogue")
 @click.option(
     "-c",
