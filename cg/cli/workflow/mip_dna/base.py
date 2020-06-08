@@ -5,14 +5,15 @@ import sys
 
 import click
 
-from cg.apps import hk, tb, scoutapi, lims
+from cg.apps import hk, lims, scoutapi, tb
 from cg.apps.mip.fastq import FastqHandler
-from cg.cli.workflow.mip.store import store as store_cmd
-from cg.cli.workflow.mip_dna.deliver import deliver as deliver_cmd, CASE_TAGS, SAMPLE_TAGS
 from cg.cli.workflow.get_links import get_links
+from cg.cli.workflow.mip.store import store as store_cmd
+from cg.cli.workflow.mip_dna.deliver import CASE_TAGS, SAMPLE_TAGS
+from cg.cli.workflow.mip_dna.deliver import deliver as deliver_cmd
 from cg.exc import CgError
-from cg.meta.workflow.mip_dna import AnalysisAPI
 from cg.meta.deliver import DeliverAPI
+from cg.meta.workflow.mip_dna import AnalysisAPI
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -35,7 +36,7 @@ def mip_dna(context: click.Context, case_id: str, email: str, priority: str, sta
     lims_api = lims.LimsAPI(context.obj)
     context.obj["tb"] = tb.TrailblazerAPI(context.obj)
     deliver = DeliverAPI(
-        context.obj, hk_api=hk_api, lims_api=lims_api, case_tags=CASE_TAGS, sample_tags=SAMPLE_TAGS
+        context.obj, hk_api=hk_api, lims_api=lims_api, case_tags=CASE_TAGS, sample_tags=SAMPLE_TAGS,
     )
     context.obj["api"] = AnalysisAPI(
         db=context.obj["db"],
@@ -67,7 +68,7 @@ def mip_dna(context: click.Context, case_id: str, email: str, priority: str, sta
             context.invoke(link, case_id=case_id)
             context.invoke(panel, case_id=case_id)
             context.invoke(
-                run, case_id=case_id, priority=priority, email=email, start_with=start_with
+                run, case_id=case_id, priority=priority, email=email, start_with=start_with,
             )
 
 
@@ -77,12 +78,13 @@ def mip_dna(context: click.Context, case_id: str, email: str, priority: str, sta
 @click.pass_context
 def link(context: click.Context, case_id: str, sample_id: str):
     """Link FASTQ files for a SAMPLE_ID"""
+    store = context.obj["db"]
 
-    link_objs = get_links(context, case_id, sample_id)
+    link_objs = get_links(store, case_id, sample_id)
 
     for link_obj in link_objs:
         LOG.info(
-            "%s: %s link FASTQ files", link_obj.sample.internal_id, link_obj.sample.data_analysis
+            "%s: %s link FASTQ files", link_obj.sample.internal_id, link_obj.sample.data_analysis,
         )
         if not link_obj.sample.data_analysis or "mip" in link_obj.sample.data_analysis.lower():
             mip_fastq_handler = FastqHandler(context.obj, context.obj["db"], context.obj["tb"])
@@ -172,7 +174,7 @@ def run(
 
 @mip_dna.command()
 @click.option(
-    "-d", "--dry-run", "dry_run", is_flag=True, help="print to console, " "without actualising"
+    "-d", "--dry-run", "dry_run", is_flag=True, help="print to console, " "without actualising",
 )
 @click.pass_context
 def start(context: click.Context, dry_run: bool = False):
