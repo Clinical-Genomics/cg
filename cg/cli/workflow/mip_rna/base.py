@@ -4,19 +4,16 @@ import logging
 
 import click
 
-from cg.apps import hk, tb, lims
+from cg.apps import hk, lims, tb
 from cg.apps.environ import environ_email
 from cg.apps.mip import MipAPI
 from cg.apps.mip.fastq import FastqHandler
-from cg.cli.workflow.mip.store import store as store_cmd
-from cg.cli.workflow.mip_rna.deliver import (
-    deliver as deliver_cmd,
-    CASE_TAGS,
-    SAMPLE_TAGS,
-)
 from cg.cli.workflow.get_links import get_links
-from cg.meta.workflow.mip_rna import AnalysisAPI
+from cg.cli.workflow.mip.store import store as store_cmd
+from cg.cli.workflow.mip_rna.deliver import CASE_TAGS, SAMPLE_TAGS
+from cg.cli.workflow.mip_rna.deliver import deliver as deliver_cmd
 from cg.meta.deliver import DeliverAPI
+from cg.meta.workflow.mip_rna import AnalysisAPI
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -51,7 +48,8 @@ def mip_rna(context: click.Context):
 @click.pass_context
 def link(context: click.Context, case_id: str, sample_id: str):
     """Link FASTQ files for a SAMPLE_ID"""
-    link_objs = get_links(context, case_id, sample_id)
+    store = context.obj["db"]
+    link_objs = get_links(store, case_id, sample_id)
 
     for link_obj in link_objs:
         LOG.info(

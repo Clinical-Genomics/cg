@@ -2,21 +2,23 @@
 import gzip
 import logging
 import re
+import shutil
 import subprocess
 import sys
-import shutil
 from pathlib import Path
 
 import click
-from cg.apps import hk, scoutapi, lims, tb
+
+from cg.apps import hk, lims, scoutapi, tb
 from cg.apps.balsamic.fastq import FastqHandler
+from cg.cli.workflow.balsamic.deliver import CASE_TAGS, SAMPLE_TAGS
+from cg.cli.workflow.balsamic.deliver import deliver as deliver_cmd
 from cg.cli.workflow.balsamic.store import store as store_cmd
-from cg.cli.workflow.balsamic.deliver import deliver as deliver_cmd, CASE_TAGS, SAMPLE_TAGS
 from cg.cli.workflow.get_links import get_links
-from cg.exc import LimsDataError, BalsamicStartError
+from cg.exc import BalsamicStartError, LimsDataError
 from cg.meta.deliver import DeliverAPI
-from cg.meta.workflow.base import get_target_bed_from_lims
 from cg.meta.workflow.balsamic import AnalysisAPI
+from cg.meta.workflow.base import get_target_bed_from_lims
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -76,15 +78,17 @@ def balsamic(context, case_id, priority, email, target_bed):
 @click.pass_context
 def link(context, case_id, sample_id):
     """Link FASTQ files for a SAMPLE_ID."""
-
-    link_objs = get_links(context, case_id, sample_id)
+    store = context.obj["db"]
+    link_objs = get_links(store, case_id, sample_id)
 
     for link_obj in link_objs:
         LOG.info(
-            "%s: %s link FASTQ files", link_obj.sample.internal_id, link_obj.sample.data_analysis
+            "%s: %s link FASTQ files", link_obj.sample.internal_id, link_obj.sample.data_analysis,
         )
         if link_obj.sample.data_analysis and "balsamic" in link_obj.sample.data_analysis.lower():
-            LOG.info("%s has balsamic as data analysis, linking.", link_obj.sample.internal_id)
+            LOG.info(
+                "%s has balsamic as data analysis, linking.", link_obj.sample.internal_id,
+            )
             context.obj["analysis_api"].link_sample(
                 fastq_handler=FastqHandler(context.obj),
                 case=link_obj.family.internal_id,
@@ -92,7 +96,8 @@ def link(context, case_id, sample_id):
             )
         else:
             LOG.warning(
-                "%s does not have blasamic as data analysis, skipping.", link_obj.sample.internal_id
+                "%s does not have blasamic as data analysis, skipping.",
+                link_obj.sample.internal_id,
             )
 
 
@@ -269,9 +274,19 @@ def config_case(
 @balsamic.command()
 @click.option("-d", "--dry-run", "dry", is_flag=True, help="print command to console")
 @click.option(
-    "-r", "--run-analysis", "run_analysis", is_flag=True, default=False, help="start " "analysis"
+    "-r", "--run-analysis", "run_analysis", is_flag=True, default=False, help="start " "analysis",
 )
+@click.option(
+    "-a",
+    "--analysis-type",
+    "analysis_type",
+    type=click.Choice(["qc", "paired", "single"]),
+    required=False,
+)
+<<<<<<< HEAD
 
+=======
+>>>>>>> 38016ea1d24eb3ad0711f62d130364d3198d324b
 @click.option("--config", "config_path", required=False, help="Optional")
 @ANALYSIS_TYPE_OPTION
 @PRIORITY_OPTION
@@ -314,7 +329,7 @@ def run(context, dry, run_analysis, config_path, priority, email, case_id, analy
 
 @balsamic.command()
 @click.option(
-    "-d", "--dry-run", "dry_run", is_flag=True, help="print to console without actualising"
+    "-d", "--dry-run", "dry_run", is_flag=True, help="print to console without actualising",
 )
 @click.pass_context
 def start(context: click.Context, dry_run):
