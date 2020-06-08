@@ -253,7 +253,7 @@ def fixture_sbatch_content_spring(fastq_paths, crunchy_config_dict):
 #SBATCH --output={log_dir}/{job_name}.stdout
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user={mail_user}
-#SBATCH --time=4:00:00
+#SBATCH --time=24:00:00
 #SBATCH --qos=low
 
 set -e

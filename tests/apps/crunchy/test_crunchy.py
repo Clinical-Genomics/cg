@@ -5,7 +5,8 @@ from pathlib import Path
 import pytest
 
 from cg.apps.crunchy import CrunchyAPI
-from cg.constants import CRAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX
+from cg.constants import (CRAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX,
+                          FASTQ_SECOND_READ_SUFFIX)
 
 
 def test_bamcompression_pending_with_flag(crunchy_config_dict, bam_path):
@@ -67,13 +68,15 @@ def test_bam_to_cram(crunchy_config_dict, sbatch_content, bam_path, mocker):
     # GIVEN a crunchy-api, and a bam_path
     mocker_submit_sbatch = mocker.patch.object(CrunchyAPI, "_submit_sbatch")
     crunchy_api = CrunchyAPI(crunchy_config_dict)
+    log_path = crunchy_api.get_log_dir(bam_path)
+    sbatch_path = crunchy_api.get_sbatch_path(log_path, "bam")
 
     # WHEN calling bam_to_cram method on bam-path
-    crunchy_api.bam_to_cram(bam_path=bam_path, dry_run=False, ntasks=1, mem=2)
+    crunchy_api.bam_to_cram(bam_path=bam_path, ntasks=1, mem=2)
 
     # THEN _submit_sbatch method is called with expected sbatch-content
 
-    mocker_submit_sbatch.assert_called_with(sbatch_content=sbatch_content, dry_run=False)
+    mocker_submit_sbatch.assert_called_with(sbatch_content=sbatch_content, sbatch_path=sbatch_path)
 
 
 def test_is_cram_compression_done_no_cram(crunchy_config_dict, bam_path):
@@ -140,7 +143,7 @@ def test_cram_compression_before_after(crunchy_config_dict, mock_bam_to_cram, mo
     assert not result
 
     # GIVEN created cram, crai, and flag paths
-    crunchy_api.bam_to_cram(bam_path=bam_path, dry_run=False, ntasks=1, mem=2)
+    crunchy_api.bam_to_cram(bam_path=bam_path, ntasks=1, mem=2)
 
     # WHEN calling cram_compression_done on bam_path
     result = crunchy_api.is_cram_compression_done(bam_path=bam_path)
@@ -171,7 +174,7 @@ def test_is_bam_compression_possible_cram_done(
     bam_path.touch()
 
     # WHEN calling test_bam_compression_possible when cram_compression is done
-    crunchy_api.bam_to_cram(bam_path=bam_path, dry_run=False, ntasks=1, mem=2)
+    crunchy_api.bam_to_cram(bam_path=bam_path, ntasks=1, mem=2)
     result = crunchy_api.is_bam_compression_possible(bam_path=bam_path)
 
     # THEN this should return False
@@ -261,16 +264,21 @@ def test_fastq_to_spring(crunchy_config_dict, sbatch_content_spring, fastq_paths
     # GIVEN a crunchy-api, and fastq paths
     mocker_submit_sbatch = mocker.patch.object(CrunchyAPI, "_submit_sbatch")
     crunchy_api = CrunchyAPI(crunchy_config_dict)
-
-    # WHEN calling fastq_to_spring on fastq files
     fastq_first = fastq_paths["fastq_first_path"]
     fastq_second = fastq_paths["fastq_second_path"]
+    spring_path = crunchy_api.get_spring_path_from_fastq(fastq_first)
+    log_path = crunchy_api.get_log_dir(spring_path)
+    sbatch_path = crunchy_api.get_sbatch_path(log_path, "fastq")
+
+    # WHEN calling fastq_to_spring on fastq files
     crunchy_api.fastq_to_spring(
-        fastq_first=fastq_first, fastq_second=fastq_second, dry_run=False, ntasks=1, mem=2,
+        fastq_first=fastq_first, fastq_second=fastq_second, ntasks=1, mem=2,
     )
 
     # THEN _submit_sbatch method is called with expected sbatch-content
-    mocker_submit_sbatch.assert_called_with(sbatch_content=sbatch_content_spring, dry_run=False)
+    mocker_submit_sbatch.assert_called_with(
+        sbatch_content=sbatch_content_spring, sbatch_path=sbatch_path
+    )
 
 
 def test_is_compression_done_no_spring(crunchy_config_dict, existing_fastq_paths):

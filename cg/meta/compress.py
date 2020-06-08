@@ -39,6 +39,11 @@ class CompressAPI:
         self.mem = 50
         self.dry_run = dry_run
 
+    def set_dry_run(self, dry_run: bool):
+        """Update dry run"""
+        self.dry_run = dry_run
+        self.crunchy_api.set_dry_run(dry_run)
+
     @staticmethod
     def get_nlinks(file_link: Path):
         """Get number of links to path"""
@@ -63,9 +68,7 @@ class CompressAPI:
                 return False
 
             LOG.info("Compressing %s for sample %s", bam_path, sample_id)
-            self.crunchy_api.bam_to_cram(
-                bam_path=bam_path, ntasks=self.ntasks, mem=self.mem, dry_run=self.dry_run
-            )
+            self.crunchy_api.bam_to_cram(bam_path=bam_path, ntasks=self.ntasks, mem=self.mem)
 
         return True
 
@@ -221,11 +224,7 @@ class CompressAPI:
             sample_id,
         )
         self.crunchy_api.fastq_to_spring(
-            fastq_first=fastq_first,
-            fastq_second=fastq_second,
-            ntasks=self.ntasks,
-            mem=self.mem,
-            dry_run=self.dry_run,
+            fastq_first=fastq_first, fastq_second=fastq_second, ntasks=self.ntasks, mem=self.mem,
         )
 
         return True

@@ -16,6 +16,7 @@ class MockCrunchyAPI(CrunchyAPI):
     def __init__(self, config: dict = None):
 
         self.config = config
+        self.dry_run = False
         self._cram_compression_pending = {}
         self._bam_compression_possible = {}
         self._bam_compression_done = {}
@@ -26,6 +27,10 @@ class MockCrunchyAPI(CrunchyAPI):
         self._spring_compression_done = False
 
         self._nr_fastq_compressions = 0
+
+    def set_dry_run(self, dry_run: bool):
+        """Update dry run"""
+        self.dry_run = dry_run
 
     # Mock specific methods
     def set_cram_compression_pending(self, bam_path):

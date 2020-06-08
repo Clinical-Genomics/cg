@@ -9,7 +9,7 @@ SBATCH_HEADER_TEMPLATE = """#!/bin/bash
 #SBATCH --output={log_dir}/{job_name}.stdout
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user={mail_user}
-#SBATCH --time=4:00:00
+#SBATCH --time={time}:00:00
 #SBATCH --qos=low
 
 set -e

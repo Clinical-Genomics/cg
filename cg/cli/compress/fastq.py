@@ -19,7 +19,7 @@ def fastq_cmd(context, case_id, number_of_conversions, ntasks, mem, dry_run):
     compress_api = context.obj["compress"]
     compress_api.ntasks = ntasks
     compress_api.mem = mem
-    compress_api.dry_run = dry_run
+    compress_api.set_dry_run(dry_run)
 
     cases = context.obj["db"].families()
     if case_id:

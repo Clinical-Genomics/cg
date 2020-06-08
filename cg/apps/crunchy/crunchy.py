@@ -3,18 +3,11 @@
 """
 
 import logging
-import tempfile
 from pathlib import Path
 
-from cg.constants import (
-    BAM_INDEX_SUFFIX,
-    BAM_SUFFIX,
-    CRAM_INDEX_SUFFIX,
-    CRAM_SUFFIX,
-    FASTQ_FIRST_READ_SUFFIX,
-    FASTQ_SECOND_READ_SUFFIX,
-    SPRING_SUFFIX,
-)
+from cg.constants import (BAM_INDEX_SUFFIX, BAM_SUFFIX, CRAM_INDEX_SUFFIX,
+                          CRAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX,
+                          FASTQ_SECOND_READ_SUFFIX, SPRING_SUFFIX)
 from cg.utils import Process
 
 from .sbatch import SBATCH_BAM_TO_CRAM, SBATCH_HEADER_TEMPLATE, SBATCH_SPRING
@@ -38,8 +31,13 @@ class CrunchyAPI:
         self.crunchy_env = config["crunchy"]["slurm"]["conda_env"]
         self.mail_user = config["crunchy"]["slurm"]["mail_user"]
         self.reference_path = config["crunchy"]["cram_reference"]
+        self.dry_run = False
 
-    def bam_to_cram(self, bam_path: Path, ntasks: int, mem: int, dry_run: bool = False):
+    def set_dry_run(self, dry_run: bool):
+        """Update dry run"""
+        self.dry_run = dry_run
+
+    def bam_to_cram(self, bam_path: Path, ntasks: int, mem: int):
         """
             Compress BAM file into CRAM
         """
@@ -47,7 +45,7 @@ class CrunchyAPI:
         job_name = bam_path.name + "_bam_to_cram"
         flag_path = self.get_flag_path(file_path=cram_path)
         pending_path = self.get_pending_path(file_path=bam_path)
-        log_dir = bam_path.parent
+        log_dir = self.get_log_dir(bam_path)
 
         sbatch_header = self._get_slurm_header(
             job_name=job_name, log_dir=log_dir, ntasks=ntasks, mem=mem,
@@ -62,10 +60,11 @@ class CrunchyAPI:
         )
 
         sbatch_content = sbatch_header + "\n" + sbatch_body
-        self._submit_sbatch(sbatch_content=sbatch_content, dry_run=dry_run)
+        sbatch_path = self.get_sbatch_path(log_dir, "bam")
+        self._submit_sbatch(sbatch_content=sbatch_content, sbatch_path=sbatch_path)
 
     def fastq_to_spring(
-        self, fastq_first: Path, fastq_second: Path, ntasks: int, mem: int, dry_run: bool = False,
+        self, fastq_first: Path, fastq_second: Path, ntasks: int, mem: int,
     ):
         """
             Compress FASTQ files into SPRING by sending to sbatch SLURM
@@ -74,10 +73,12 @@ class CrunchyAPI:
         job_name = str(fastq_first.name).replace(FASTQ_FIRST_READ_SUFFIX, "_fastq_to_spring")
         flag_path = self.get_flag_path(file_path=spring_path)
         pending_path = self.get_pending_path(file_path=fastq_first)
-        log_dir = spring_path.parent
+        log_dir = self.get_log_dir(spring_path)
+        # Time to complete job
+        time = 24
 
         sbatch_header = self._get_slurm_header(
-            job_name=job_name, log_dir=log_dir, ntasks=ntasks, mem=mem,
+            job_name=job_name, log_dir=log_dir, ntasks=ntasks, mem=mem, time=time
         )
 
         sbatch_body = self._get_slurm_fastq_to_spring(
@@ -88,22 +89,34 @@ class CrunchyAPI:
             pending_path=pending_path,
         )
 
+        sbatch_path = self.get_sbatch_path(log_dir, "fastq")
         sbatch_content = sbatch_header + "\n" + sbatch_body
-        self._submit_sbatch(sbatch_content=sbatch_content, dry_run=dry_run)
+        self._submit_sbatch(sbatch_content=sbatch_content, sbatch_path=sbatch_path)
 
-    def _submit_sbatch(self, sbatch_content: str, dry_run: bool = False):
+    def _submit_sbatch(self, sbatch_content: str, sbatch_path: Path):
         """Submit slurm job"""
-        if dry_run:
+        if self.dry_run:
             LOG.info("Would submit following to slurm:\n\n%s", sbatch_content)
             return
-        with tempfile.NamedTemporaryFile(mode="w+t") as sbatch_file:
-
+        with open(sbatch_path, mode="w+t") as sbatch_file:
             sbatch_file.write(sbatch_content)
-            sbatch_file.flush()
-            sbatch_parameters = [sbatch_file.name]
-            self.process.run_command(sbatch_parameters)
-            LOG.info(self.process.stderr)
-            LOG.info(self.process.stdout)
+
+        sbatch_parameters = [sbatch_path.name]
+        self.process.run_command(sbatch_parameters)
+        LOG.info(self.process.stderr)
+        LOG.info(self.process.stdout)
+
+    @staticmethod
+    def get_log_dir(file_path: Path) -> Path:
+        """Return the path to where logs should be stored"""
+        return file_path.parent
+
+    @staticmethod
+    def get_sbatch_path(log_dir: Path, compression: str) -> Path:
+        """Return the path to where sbatch should be printed"""
+        if compression == "fastq":
+            return log_dir / "compress_fastq.sh"
+        return log_dir / "compress_bam.sh"
 
     def is_cram_compression_done(self, bam_path: Path) -> bool:
         """Check if CRAM compression already done for BAM file"""
@@ -226,7 +239,9 @@ class CrunchyAPI:
         spring_path = Path(str(fastq).replace(suffix, "")).with_suffix(SPRING_SUFFIX)
         return spring_path
 
-    def _get_slurm_header(self, job_name: str, log_dir: str, ntasks: int, mem: int,) -> str:
+    def _get_slurm_header(
+        self, job_name: str, log_dir: str, ntasks: int, mem: int, time: int = 4
+    ) -> str:
         """Create and return a header for a sbatch script"""
         sbatch_header = SBATCH_HEADER_TEMPLATE.format(
             job_name=job_name,
@@ -235,6 +250,7 @@ class CrunchyAPI:
             conda_env=self.crunchy_env,
             mail_user=self.mail_user,
             ntasks=ntasks,
+            time=time,
             mem=mem,
         )
         return sbatch_header

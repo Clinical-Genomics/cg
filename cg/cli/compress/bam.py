@@ -17,7 +17,7 @@ def bam(context, case_id, number_of_conversions, ntasks, mem, dry_run):
     """Find cases with BAM files and compress into CRAM"""
 
     compress_api = context.obj["compress"]
-    compress_api.dry_run = dry_run
+    compress_api.set_dry_run(dry_run)
     if ntasks:
         compress_api.ntasks = ntasks
     if mem:
