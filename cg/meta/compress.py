@@ -29,6 +29,7 @@ class CompressAPI:
         hk_api: hk.HousekeeperAPI,
         crunchy_api: crunchy.CrunchyAPI,
         scout_api: scoutapi.ScoutAPI,
+        dry_run: bool = False,
     ):
 
         self.hk_api = hk_api
@@ -36,13 +37,14 @@ class CompressAPI:
         self.scout_api = scout_api
         self.ntasks = 12
         self.mem = 50
+        self.dry_run = dry_run
 
     @staticmethod
     def get_nlinks(file_link: Path):
         """Get number of links to path"""
         return os.stat(file_link).st_nlink
 
-    def compress_case_bam(self, case_id: str, dry_run: bool = False) -> bool:
+    def compress_case_bam(self, case_id: str) -> bool:
         """Compress the bam files for all individuals of a case"""
         bam_dict = self.get_bam_files(case_id=case_id)
         if not bam_dict:
@@ -62,7 +64,7 @@ class CompressAPI:
 
             LOG.info("Compressing %s for sample %s", bam_path, sample_id)
             self.crunchy_api.bam_to_cram(
-                bam_path=bam_path, ntasks=self.ntasks, mem=self.mem, dry_run=dry_run
+                bam_path=bam_path, ntasks=self.ntasks, mem=self.mem, dry_run=self.dry_run
             )
 
         return True
@@ -194,7 +196,7 @@ class CompressAPI:
             hk_files_dict[path_obj.resolve()] = file_obj
         return hk_files_dict
 
-    def compress_fastq(self, sample_id: str, dry_run: bool = False) -> bool:
+    def compress_fastq(self, sample_id: str) -> bool:
         """Compress the fastq files for a individual"""
         sample_fastq_dict = self.get_fastq_files(sample_id=sample_id)
         if not sample_fastq_dict:
@@ -223,7 +225,7 @@ class CompressAPI:
             fastq_second=fastq_second,
             ntasks=self.ntasks,
             mem=self.mem,
-            dry_run=dry_run,
+            dry_run=self.dry_run,
         )
 
         return True
@@ -293,7 +295,7 @@ class CompressAPI:
         second_prefix = str(second_fastq.absolute()).replace(FASTQ_SECOND_READ_SUFFIX, "")
         return first_prefix == second_prefix
 
-    def clean_bams(self, case_id: str, dry_run: bool = False):
+    def clean_bams(self, case_id: str):
         """Update databases and remove uncompressed BAM files for case if compression is done
 
         Should only clean all files if all bams are compressed for a case
@@ -317,20 +319,17 @@ class CompressAPI:
 
             hk_bam_file = bam_files["bam"]
             hk_bai_file = bam_files["bai"]
-            self.remove_bam(bam_path=bam_path, bai_path=bai_path, dry_run=dry_run)
-            self.update_scout(
-                case_id=case_id, sample_id=sample_id, bam_path=bam_path, dry_run=dry_run
-            )
+            self.remove_bam(bam_path=bam_path, bai_path=bai_path)
+            self.update_scout(case_id=case_id, sample_id=sample_id, bam_path=bam_path)
 
             self.update_bam_hk(
                 sample_id=sample_id,
                 hk_bam_file=hk_bam_file,
                 hk_bai_file=hk_bai_file,
                 hk_version=latest_hk_version,
-                dry_run=dry_run,
             )
 
-    def clean_fastq(self, sample_id: str, dry_run: bool = False) -> bool:
+    def clean_fastq(self, sample_id: str) -> bool:
         """Check that fastq compression is completed for a case and clean
 
         This means removing compressed fastq files and update housekeeper to point to the new spring
@@ -346,12 +345,12 @@ class CompressAPI:
         flag_path = self.crunchy_api.get_flag_path(file_path=spring_path)
         return True
 
-    def update_scout(self, case_id: str, sample_id: str, bam_path: Path, dry_run: bool = False):
+    def update_scout(self, case_id: str, sample_id: str, bam_path: Path):
         """Update scout with compressed alignment file if present"""
 
         cram_path = self.crunchy_api.get_cram_path_from_bam(bam_path=bam_path)
         LOG.info("Updating %s -> %s in Scout", bam_path, cram_path)
-        if dry_run:
+        if self.dry_run:
             return
         LOG.info("Updating alignment-file for %s in scout...", sample_id)
         self.scout_api.update_alignment_file(
@@ -364,7 +363,6 @@ class CompressAPI:
         hk_bam_file: hk_models.File,
         hk_bai_file: hk_models.File,
         hk_version: hk_models.Version,
-        dry_run: bool = False,
     ):
         """Update Housekeeper with compressed alignment file if present"""
         bam_path = Path(hk_bam_file.full_path)
@@ -377,7 +375,7 @@ class CompressAPI:
         LOG.info("HouseKeeper update for %s:", sample_id)
         LOG.info("%s -> %s, with tags %s", bam_path, cram_path, cram_tags)
         LOG.info("%s -> %s, with tags %s", bai_path, crai_path, crai_tags)
-        if dry_run:
+        if self.dry_run:
             return
 
         LOG.info("updating files in housekeeper...")
@@ -388,11 +386,7 @@ class CompressAPI:
         self.hk_api.commit()
 
     def update_fastq_hk(
-        self,
-        sample_id: str,
-        hk_fastq_first: hk_models.File,
-        hk_fastq_second: hk_models.File,
-        dry_run: bool = False,
+        self, sample_id: str, hk_fastq_first: hk_models.File, hk_fastq_second: hk_models.File,
     ):
         """Update Housekeeper with compressed fastq file"""
         version_obj = self.hk_api.last_version(sample_id)
@@ -412,7 +406,7 @@ class CompressAPI:
             spring_tags,
         )
         LOG.info("Adds %s, with tags %s", spring_metadata_path, spring_metadata_tags)
-        if dry_run:
+        if self.dry_run:
             return
 
         LOG.info("updating files in housekeeper...")
@@ -424,11 +418,11 @@ class CompressAPI:
         hk_fastq_second.delete()
         self.hk_api.commit()
 
-    def remove_bam(self, bam_path: Path, bai_path: Path, dry_run: bool = False):
+    def remove_bam(self, bam_path: Path, bai_path: Path):
         """Remove bam files and flag that cram compression is completed"""
         flag_path = self.crunchy_api.get_flag_path(file_path=bam_path)
         LOG.info("Will remove %s, %s, and %s", bam_path, bai_path, flag_path)
-        if dry_run:
+        if self.dry_run:
             return
         bam_path.unlink()
         LOG.info("BAM file %s removed", bam_path)
@@ -437,11 +431,10 @@ class CompressAPI:
         flag_path.unlink()
         LOG.info("Flag file %s removed", flag_path)
 
-    @staticmethod
-    def remove_fastq(fastq_first: Path, fastq_second: Path, dry_run: bool = False):
+    def remove_fastq(self, fastq_first: Path, fastq_second: Path):
         """Remove fastq files"""
         LOG.info("Will remove %s and %s", fastq_first, fastq_second)
-        if dry_run:
+        if self.dry_run:
             return
         fastq_first.unlink()
         LOG.debug("First fastq in pair %s removed", fastq_first)

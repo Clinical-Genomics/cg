@@ -19,6 +19,7 @@ def fastq_cmd(context, case_id, number_of_conversions, ntasks, mem, dry_run):
     compress_api = context.obj["compress"]
     compress_api.ntasks = ntasks
     compress_api.mem = mem
+    compress_api.dry_run = dry_run
 
     cases = context.obj["db"].families()
     if case_id:
@@ -38,7 +39,7 @@ def fastq_cmd(context, case_id, number_of_conversions, ntasks, mem, dry_run):
         LOG.info("Searching for FASTQ files in %s", case.internal_id)
         for link_obj in case.links:
             sample_id = link_obj.sample.internal_id
-            res = compress_api.compress_fastq(sample_id, dry_run=dry_run)
+            res = compress_api.compress_fastq(sample_id)
             if res is False:
                 LOG.info("skipping individual %s", sample_id)
                 continue

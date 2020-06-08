@@ -32,12 +32,14 @@ def test_remove_bams_dry_run(compress_api, bam_file, bai_file, bam_flag_file, ca
     assert bam_file.exists()
     assert bai_file.exists()
     assert bam_flag_file.exists()
+    # GIVEN a compress api with dry run enabled
+    compress_api.dry_run = True
     # GIVEN a crunchy api where bam compression is done
     crunchy_api = compress_api.crunchy_api
     crunchy_api.set_bam_compression_done_all()
 
     # WHEN calling remove_bams with dry run flag
-    compress_api.remove_bam(bam_path=bam_file, bai_path=bai_file, dry_run=True)
+    compress_api.remove_bam(bam_path=bam_file, bai_path=bai_file)
 
     # THEN the assert that the bam-files and flag-file still exists
     assert bam_file.exists()
@@ -70,9 +72,10 @@ def test_update_scout(compress_api, case_id, sample, bam_path, caplog):
 
 def test_update_scout_dry_run(compress_api, case_id, sample, bam_path, caplog):
     """ Test to update the bam paths in scout"""
-    # GIVEN that the compression is done
+    # GIVEN that the compression is done and dry run enabled
     caplog.set_level(logging.DEBUG)
     compress_api.crunchy_api.set_bam_compression_done_all()
+    compress_api.dry_run = True
     assert compress_api.crunchy_api.is_cram_compression_done(bam_path=None) is True
     scout_api = compress_api.scout_api
     assert scout_api.nr_alignment_updates() == 0
@@ -80,7 +83,7 @@ def test_update_scout_dry_run(compress_api, case_id, sample, bam_path, caplog):
     cram_path = compress_api.crunchy_api.get_cram_path_from_bam(bam_path=bam_path)
 
     # WHEN updating the bam paths in scout
-    compress_api.update_scout(case_id=case_id, sample_id=sample, bam_path=bam_path, dry_run=True)
+    compress_api.update_scout(case_id=case_id, sample_id=sample, bam_path=bam_path)
     # THEN update_alignment_file should not have been called
     assert scout_api.nr_alignment_updates() == 0
     # THEN assert that the correct information is communicated
@@ -186,14 +189,13 @@ def test_clean_bam(
     case_id = hk_bundle["name"]
     helpers.ensure_hk_bundle(real_housekeeper_api, hk_bundle)
     compress_api.hk_api = real_housekeeper_api
-    res = real_housekeeper_api.get_files(case_id, tags=["bam", "bai", "bam-index"])
+    real_housekeeper_api.get_files(case_id, tags=["bam", "bai", "bam-index"])
     # GIVEN that the cram compression is done
     compress_api.crunchy_api.set_bam_compression_done_all()
     assert compress_api.crunchy_api.is_cram_compression_done(bam_path=None) is True
 
     # WHEN updating housekeeper with compress api after compression is done
     compress_api.clean_bams(case_id=case_id)
-    print(caplog.text)
     # THEN assert that the bam files are removed from hk
     assert len(list(real_housekeeper_api.files(tags=["bam"]))) == 0
     assert len(list(real_housekeeper_api.files(tags=["bai"]))) == 0

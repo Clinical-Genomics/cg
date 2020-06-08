@@ -36,7 +36,7 @@ def clean():
     """Clean uncompressed files"""
 
 
-@clean.command("bam")
+@click.command("bam")
 @click.option("-c", "--case-id", type=str)
 @click.option("-d", "--dry-run", is_flag=True)
 @click.pass_context
@@ -44,11 +44,16 @@ def clean_bam(context, case_id, dry_run):
     """Remove compressed BAM files, and update links in scout and housekeeper
        to CRAM files"""
     compress_api = context.obj["compress"]
+    compress_api.dry_run = dry_run
     store = context.obj["db"]
+
     cases = store.families()
     if case_id:
         cases = [context.obj["db"].family(case_id)]
 
     for case in cases:
         case_id = case.internal_id
-        compress_api.clean_bams(case_id, dry_run=dry_run)
+        compress_api.clean_bams(case_id)
+
+
+clean.add_command(clean_bam)

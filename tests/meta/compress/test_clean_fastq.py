@@ -67,3 +67,11 @@ def test_update_hk_fastq(real_housekeeper_api, compress_hk_fastq_bundle, compres
     assert hk_spring_file
     hk_fastq_flag_file = list(real_housekeeper_api.files(tags=["spring-metadata"]))
     assert hk_fastq_flag_file
+
+
+def test_clean_fastq():
+    """Test the clean fastq functionality of the compress api
+
+    The function should check if compression is done and after that cleanup the files that have
+    been compressed.
+    """
