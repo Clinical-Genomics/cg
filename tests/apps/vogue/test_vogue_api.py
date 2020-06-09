@@ -155,33 +155,33 @@ def test_load_bioinfo_process(vogue_config, caplog):
 
 def test_vogue_load_reagent_labels(vogue_api, caplog):
     caplog.set_level(logging.DEBUG)
-    #GIVEN a vogue api 
+    # GIVEN a vogue api
 
-    #WHEN running vogue load reagent_label with some days as argument
-    vogue_api.load_reagent_labels(days = 1)
-    
-    #THEN assert vogue output is comunicated
-    assert 'vogue output' in caplog.text
+    # WHEN running vogue load reagent_label with some days as argument
+    vogue_api.load_reagent_labels(days=1)
+
+    # THEN assert vogue output is comunicated
+    assert "vogue output" in caplog.text
 
 
 def test_vogue_load_samples(vogue_api, caplog):
     caplog.set_level(logging.DEBUG)
-    
-    #GIVEN a vogue api 
 
-    #WHEN running vogue load samples with some days as argument
-    vogue_api.load_samples(days = 1)
-    
-    #THEN assert vogue output is comunicated
-    assert 'vogue output' in caplog.text
+    # GIVEN a vogue api
+
+    # WHEN running vogue load samples with some days as argument
+    vogue_api.load_samples(days=1)
+
+    # THEN assert vogue output is comunicated
+    assert "vogue output" in caplog.text
+
 
 def test_vogue_load_flowcells(vogue_api, caplog):
     caplog.set_level(logging.DEBUG)
-    #GIVEN a vogue api 
+    # GIVEN a vogue api
 
-    #WHEN running vogue load flowcells with some days as argument
-    vogue_api.load_flowcells(days = 1)
-    
-    #THEN assert vogue output is comunicated
-    assert 'vogue output' in caplog.text
+    # WHEN running vogue load flowcells with some days as argument
+    vogue_api.load_flowcells(days=1)
 
+    # THEN assert vogue output is comunicated
+    assert "vogue output" in caplog.text

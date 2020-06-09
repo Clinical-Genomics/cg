@@ -19,7 +19,7 @@ def vogue_config():
     return _config
 
 
-@pytest.fixture(scope="function", name='vogue_api')
+@pytest.fixture(scope="function", name="vogue_api")
 def fixture_vogue_api(process):
     """
         vogue API fixture
@@ -39,7 +39,7 @@ def genotype_dict():
     return "{}"
 
 
-@pytest.fixture(scope="function", name='process')
+@pytest.fixture(scope="function", name="process")
 def fixture_process():
     """"""
 
@@ -47,12 +47,11 @@ def fixture_process():
 
 
 class MockProcess:
-
     def __init__(self):
-        self._stderr = ''
+        self._stderr = ""
 
     def run_command(self, command: list):
-        self._stderr = ' '.join([str(item) for item in command])
+        self._stderr = " ".join([str(item) for item in command])
 
     def stderr_lines(self):
-        return self._stderr.split('\n')
+        return self._stderr.split("\n")
