@@ -84,7 +84,7 @@ def samples(context, days: int):
 
 @vogue.command("reagent-labels", short_help="Getting reagent_label data from lims.")
 @click.option(
-    "-d", "--days", required=True, type=int, help="load X days old sampels from lims to vogue",
+    "-d", "--days", required=True, help="load X days old sampels from lims to vogue",
 )
 @click.pass_context
 def reagent_labels(context, days: int):
