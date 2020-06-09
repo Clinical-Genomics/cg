@@ -18,7 +18,7 @@ def get_cases(store: Store, case_id: str = None) -> List[models.Family]:
         case_obj = store.family(case_id)
         if not case_obj:
             LOG.warning("Could not find case %s", case_id)
-            raise CaseNotFoundError
+            raise CaseNotFoundError("")
         return [case_obj]
     return store.families()
 

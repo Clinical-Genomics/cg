@@ -27,7 +27,7 @@ def fastq_cmd(context, case_id, number_of_conversions, ntasks, mem, dry_run):
     try:
         cases = get_cases(store, case_id)
     except CaseNotFoundError:
-        raise click.Abort
+        return
 
     conversion_count = 0
     for case in cases:
@@ -63,7 +63,7 @@ def clean_fastq(context, case_id, dry_run):
     try:
         cases = get_cases(store, case_id)
     except CaseNotFoundError:
-        raise click.Abort
+        return
 
     for case in cases:
         case_id = case.internal_id

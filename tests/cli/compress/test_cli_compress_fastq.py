@@ -16,7 +16,7 @@ def test_compress_fastq_cli_no_family(compress_context, cli_runner, caplog):
     # THEN assert the program exits since no cases where found
     assert res.exit_code == 0
     # THEN assert it was communicated that no families where found
-    assert "No cases found" in caplog.text
+    assert "Individuals in 0 cases where compressed" in caplog.text
 
 
 def test_compress_fastq_cli_case_id_no_family(compress_context, cli_runner, case_id, caplog):
@@ -30,6 +30,7 @@ def test_compress_fastq_cli_case_id_no_family(compress_context, cli_runner, case
     # THEN assert the program exits since no cases where found
     assert res.exit_code == 0
     # THEN assert it was communicated that no families where found
+    print(caplog.text)
     assert f"Could not find case {case_id}" in caplog.text
 
 
@@ -73,7 +74,7 @@ def test_compress_fastq_cli_multiple_family(
     # GIVEN a context with a family
 
     # WHEN running the compress command
-    res = cli_runner.invoke(fastq_cmd, [], obj=compress_context)
+    res = cli_runner.invoke(fastq_cmd, ["--number-of-conversions", nr_cases], obj=compress_context)
 
     # THEN assert the program exits since no cases where found
     assert res.exit_code == 0

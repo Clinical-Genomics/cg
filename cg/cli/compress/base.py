@@ -27,7 +27,7 @@ def compress(context):
     context.obj["compress"] = compress_api
 
 
-compress.add_command(bam_command)
+compress.add_command(bam_cmd)
 compress.add_command(fastq_cmd)
 
 
