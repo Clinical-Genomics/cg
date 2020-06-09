@@ -56,6 +56,7 @@ def fastq_cmd(context, case_id, number_of_conversions, ntasks, mem, dry_run):
 @click.pass_context
 def clean_fastq(context, case_id, dry_run):
     """Remove compressed FASTQ files, and update links in housekeeper to SPRING files"""
+    LOG.info("Running compress fastq")
     compress_api = context.obj["compress"]
     update_compress_api(compress_api, dry_run=dry_run)
 
@@ -67,7 +68,7 @@ def clean_fastq(context, case_id, dry_run):
 
     cleaned_inds = 0
     for sample_id in samples:
-        res = compress_api.compress_fastq(sample_id)
+        res = compress_api.clean_fastq(sample_id)
         if res is False:
             LOG.info("skipping individual %s", sample_id)
             continue

@@ -35,7 +35,7 @@ def update_compress_api(
 ) -> None:
     """Update parameters in compress api"""
 
-    LOG.info("Update compress api %s", ntasks)
+    LOG.info("Update compress api")
     compress_api.set_dry_run(dry_run)
     if ntasks:
         LOG.info("Set ntasks to %s", ntasks)
