@@ -51,7 +51,7 @@ class MockProcess:
         self._stderr = ""
 
     def run_command(self, command: list):
-        self._stderr = " ".join([str(item) for item in command])
+        self._stderr = " ".join(command)
 
     def stderr_lines(self):
         return self._stderr.split("\n")
