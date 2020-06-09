@@ -7,8 +7,8 @@ from cg.apps import crunchy, hk, scoutapi
 from cg.meta.compress import CompressAPI
 from cg.store import Store
 
-from .bam import bam as bam_command
-from .fastq import fastq_cmd
+from .bam import bam_cmd, clean_bam
+from .fastq import clean_fastq, fastq_cmd
 
 LOG = logging.getLogger(__name__)
 
@@ -36,24 +36,5 @@ def clean():
     """Clean uncompressed files"""
 
 
-@click.command("bam")
-@click.option("-c", "--case-id", type=str)
-@click.option("-d", "--dry-run", is_flag=True)
-@click.pass_context
-def clean_bam(context, case_id, dry_run):
-    """Remove compressed BAM files, and update links in scout and housekeeper
-       to CRAM files"""
-    compress_api = context.obj["compress"]
-    compress_api.dry_run = dry_run
-    store = context.obj["db"]
-
-    cases = store.families()
-    if case_id:
-        cases = [context.obj["db"].family(case_id)]
-
-    for case in cases:
-        case_id = case.internal_id
-        compress_api.clean_bams(case_id)
-
-
 clean.add_command(clean_bam)
+clean.add_command(clean_fastq)

@@ -3,29 +3,31 @@ import logging
 
 import click
 
+from cg.exc import CaseNotFoundError
+
+from .helpers import get_cases, update_compress_api
+
 LOG = logging.getLogger(__name__)
 
 
-@click.command()
+@click.command("bam")
 @click.option("-c", "--case-id", type=str)
 @click.option("-n", "--number-of-conversions", default=10, type=int, show_default=True)
 @click.option("-t", "--ntasks", type=int, help="Number of tasks for slurm job")
 @click.option("-m", "--mem", type=int, help="Memory for slurm job")
 @click.option("-d", "--dry-run", is_flag=True)
 @click.pass_context
-def bam(context, case_id, number_of_conversions, ntasks, mem, dry_run):
+def bam_cmd(context, case_id, number_of_conversions, ntasks, mem, dry_run):
     """Find cases with BAM files and compress into CRAM"""
 
     compress_api = context.obj["compress"]
-    compress_api.set_dry_run(dry_run)
-    if ntasks:
-        compress_api.ntasks = ntasks
-    if mem:
-        compress_api.mem = mem
+    update_compress_api(compress_api, dry_run=dry_run, ntasks=ntasks, mem=mem)
+
     store = context.obj["db"]
-    cases = store.families()
-    if case_id:
-        cases = [store.family(case_id)]
+    try:
+        cases = get_cases(store, case_id)
+    except CaseNotFoundError:
+        raise click.Abort
 
     conversion_count = 0
     for case in cases:
@@ -38,3 +40,24 @@ def bam(context, case_id, number_of_conversions, ntasks, mem, dry_run):
             LOG.info("skipping %s", case_id)
             continue
         conversion_count += 1
+
+
+@click.command("bam")
+@click.option("-c", "--case-id", type=str)
+@click.option("-d", "--dry-run", is_flag=True)
+@click.pass_context
+def clean_bam(context, case_id, dry_run):
+    """Remove compressed BAM files, and update links in scout and housekeeper
+       to CRAM files"""
+    compress_api = context.obj["compress"]
+    update_compress_api(compress_api, dry_run=dry_run)
+    store = context.obj["db"]
+
+    try:
+        cases = get_cases(store, case_id)
+    except CaseNotFoundError:
+        raise click.Abort
+
+    for case in cases:
+        case_id = case.internal_id
+        compress_api.clean_bams(case_id)

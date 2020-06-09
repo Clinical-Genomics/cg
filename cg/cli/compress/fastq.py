@@ -4,12 +4,16 @@ import logging
 
 import click
 
+from cg.exc import CaseNotFoundError
+
+from .helpers import get_cases, update_compress_api
+
 LOG = logging.getLogger(__name__)
 
 
 @click.command("fastq")
 @click.option("-c", "--case-id", type=str)
-@click.option("-n", "--number-of-conversions", default=10, type=int, show_default=True)
+@click.option("-n", "--number-of-conversions", default=5, type=int, show_default=True)
 @click.option("-t", "--ntasks", default=12, show_default=True, help="Number of tasks for slurm job")
 @click.option("-m", "--mem", default=50, show_default=True, help="Memory for slurm job")
 @click.option("-d", "--dry-run", is_flag=True)
@@ -17,21 +21,17 @@ LOG = logging.getLogger(__name__)
 def fastq_cmd(context, case_id, number_of_conversions, ntasks, mem, dry_run):
     """ Find cases with FASTQ files and compress into SPRING """
     compress_api = context.obj["compress"]
-    compress_api.ntasks = ntasks
-    compress_api.mem = mem
-    compress_api.set_dry_run(dry_run)
+    update_compress_api(compress_api, dry_run=dry_run, ntasks=ntasks, mem=mem)
 
-    cases = context.obj["db"].families()
-    if case_id:
-        case_obj = context.obj["db"].family(case_id)
-        if not case_obj:
-            LOG.warning("Could not find case %s", case_id)
-            return
-        cases = [case_obj]
+    store = context.obj["db"]
+    try:
+        cases = get_cases(store, case_id)
+    except CaseNotFoundError:
+        raise click.Abort
 
     conversion_count = 0
-    nr_cases = 0
-    for nr_cases, case in enumerate(cases, 1):
+    for case in cases:
+        # Keeps track on if all samples in a case have been converted
         case_converted = True
         if conversion_count >= number_of_conversions:
             continue
@@ -47,7 +47,24 @@ def fastq_cmd(context, case_id, number_of_conversions, ntasks, mem, dry_run):
         if not case_converted:
             conversion_count += 1
 
-    if nr_cases == 0:
-        LOG.warning("No cases found")
-        return
     LOG.info("Individuals in %s cases where compressed", conversion_count)
+
+
+@click.command("fastq")
+@click.option("-c", "--case-id", type=str)
+@click.option("-d", "--dry-run", is_flag=True)
+@click.pass_context
+def clean_fastq(context, case_id, dry_run):
+    """Remove compressed FASTQ files, and update links in housekeeper to SPRING files"""
+    compress_api = context.obj["compress"]
+    update_compress_api(compress_api, dry_run=dry_run)
+
+    store = context.obj["db"]
+    try:
+        cases = get_cases(store, case_id)
+    except CaseNotFoundError:
+        raise click.Abort
+
+    for case in cases:
+        case_id = case.internal_id
+        compress_api.clean_fastqs(case_id)
