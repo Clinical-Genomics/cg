@@ -49,7 +49,7 @@ rm {pending_path}"""
 
 ######################################################################
 
-SBATCH_SPRING = """
+SBATCH_FASTQ_TO_SPRING = """
 error() {{
     if [[ -e {spring_path} ]]
     then
@@ -67,5 +67,33 @@ error() {{
 trap error ERR
 
 touch {pending_path}
-crunchy -t 12 compress fastq -f {fastq_first} -s {fastq_second} -o {spring_path} --check-integrity --metadata-file
+crunchy -t 12 compress fastq -f {fastq_first} -s {fastq_second} -o {spring_path} --check-integrity \
+--metadata-file
+rm {pending_path}"""
+
+SBATCH_SPRING_TO_FASTQ = """
+error() {{
+    if [[ -e {fastq_first} ]]
+    then
+        rm {fastq_first}
+    fi
+
+    if [[ -e {fastq_second} ]]
+    then
+        rm {fastq_second}
+    fi
+
+    if [[ -e {pending_path} ]]
+    then
+        rm {pending_path}
+    fi
+
+    exit 1
+}}
+
+trap error ERR
+
+touch {pending_path}
+crunchy -t 12 decompress spring {spring_path} -f {fastq_first} -s {fastq_second} \
+--first-checksum {checksum_first} --second-checksum {checksum_second}
 rm {pending_path}"""

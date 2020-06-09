@@ -8,7 +8,7 @@ from cg.meta.compress import CompressAPI
 from cg.store import Store
 
 from .bam import bam_cmd, clean_bam
-from .fastq import clean_fastq, fastq_cmd
+from .fastq import clean_fastq, decompress_spring, fastq_cmd
 
 LOG = logging.getLogger(__name__)
 
@@ -38,3 +38,11 @@ def clean():
 
 clean.add_command(clean_bam)
 clean.add_command(clean_fastq)
+
+
+@compress.group()
+def decompress():
+    """Decompress files"""
+
+
+decompress.add_command(decompress_spring)

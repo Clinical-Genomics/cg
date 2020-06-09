@@ -51,7 +51,7 @@ def fastq_cmd(context, case_id, number_of_conversions, ntasks, mem, dry_run):
 
 
 @click.command("fastq")
-@click.option("-c", "--case-id", type=str)
+@click.option("-c", "--case-id")
 @click.option("-d", "--dry-run", is_flag=True)
 @click.pass_context
 def clean_fastq(context, case_id, dry_run):
@@ -75,3 +75,30 @@ def clean_fastq(context, case_id, dry_run):
         cleaned_inds += 1
 
     LOG.info("Cleaned fastqs in %s individuals", cleaned_inds)
+
+
+@click.command("spring")
+@click.argument("-c", "--case-id")
+@click.option("-d", "--dry-run", is_flag=True)
+@click.pass_context
+def decompress_spring(context, case_id, dry_run):
+    """Remove compressed FASTQ files, and update links in housekeeper to SPRING files"""
+    LOG.info("Running compress fastq")
+    compress_api = context.obj["compress"]
+    update_compress_api(compress_api, dry_run=dry_run)
+
+    store = context.obj["db"]
+    try:
+        samples = get_individuals(store, case_id)
+    except CaseNotFoundError:
+        return
+
+    decompressed_inds = 0
+    for sample_id in samples:
+        res = compress_api.decompress_spring(sample_id)
+        if res is False:
+            LOG.info("skipping individual %s", sample_id)
+            continue
+        decompressed_inds += 1
+
+    LOG.info("Decompressed spring archives in %s individuals", decompressed_inds)
