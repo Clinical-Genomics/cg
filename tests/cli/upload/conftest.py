@@ -53,7 +53,8 @@ def fixture_base_cli_context(analysis_store: Store, housekeeper_api, upload_scou
 def fixture_vogue_cli_context(vogue_api) -> dict:
     """context to use in cli"""
 
-    return {'vogue_api' : vogue_api}
+    return {"vogue_api": vogue_api}
+
 
 @pytest.fixture(scope="function", name="upload_scout_api")
 def fixture_upload_scout_api(housekeeper_api):
@@ -69,7 +70,6 @@ def fixture_vogue_api():
     """Return a MockVogueApi"""
 
     return MockVogueApi()
-
 
 
 class MockTB(TrailblazerAPI):
@@ -164,4 +164,3 @@ class MockLims:
             if sample["id"] == sample_id:
                 return sample
         return None
-
