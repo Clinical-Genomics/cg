@@ -1,12 +1,19 @@
 """Helper functions for compress cli"""
 import logging
-from typing import List
+from typing import Iterator, List
 
 from cg.exc import CaseNotFoundError
 from cg.meta.compress import CompressAPI
 from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
+
+
+def get_individuals(store: Store, case_id: str = None) -> Iterator[str]:
+    """Fetch individual ids from cases"""
+    for case in get_cases(store, case_id):
+        for link_obj in case.links:
+            yield link_obj.sample.internal_id
 
 
 def get_cases(store: Store, case_id: str = None) -> List[models.Family]:

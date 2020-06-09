@@ -6,7 +6,7 @@ import click
 
 from cg.exc import CaseNotFoundError
 
-from .helpers import get_cases, update_compress_api
+from .helpers import get_cases, get_individuals, update_compress_api
 
 LOG = logging.getLogger(__name__)
 
@@ -61,10 +61,16 @@ def clean_fastq(context, case_id, dry_run):
 
     store = context.obj["db"]
     try:
-        cases = get_cases(store, case_id)
+        samples = get_individuals(store, case_id)
     except CaseNotFoundError:
         return
 
-    for case in cases:
-        case_id = case.internal_id
-        compress_api.clean_fastqs(case_id)
+    cleaned_inds = 0
+    for sample_id in samples:
+        res = compress_api.compress_fastq(sample_id)
+        if res is False:
+            LOG.info("skipping individual %s", sample_id)
+            continue
+        cleaned_inds += 1
+
+    LOG.info("Cleaned fastqs in %s individuals", cleaned_inds)

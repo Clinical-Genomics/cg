@@ -10,13 +10,8 @@ from typing import List
 from housekeeper.store import models as hk_models
 
 from cg.apps import crunchy, hk, scoutapi
-from cg.constants import (
-    BAM_SUFFIX,
-    FASTQ_FIRST_READ_SUFFIX,
-    FASTQ_SECOND_READ_SUFFIX,
-    HK_BAM_TAGS,
-    HK_FASTQ_TAGS,
-)
+from cg.constants import (BAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX,
+                          FASTQ_SECOND_READ_SUFFIX, HK_BAM_TAGS, HK_FASTQ_TAGS)
 
 LOG = logging.getLogger(__name__)
 
@@ -334,14 +329,26 @@ class CompressAPI:
         This means removing compressed fastq files and update housekeeper to point to the new spring
         file and its metadata file
         """
+        LOG.info("Clean FASTQ files for %s", sample_id)
         sample_fastq_dict = self.get_fastq_files(sample_id=sample_id)
         if not sample_fastq_dict:
             LOG.info("Could not find FASTQ files for %s", sample_id)
             return False
-        fastq_first = sample_fastq_dict["fastq_first_file"]
-        fastq_second = sample_fastq_dict["fastq_second_file"]
-        spring_path = self.crunchy_api.get_spring_path_from_fastq(fastq=fastq_first)
-        flag_path = self.crunchy_api.get_flag_path(file_path=spring_path)
+        fastq_first = sample_fastq_dict["fastq_first_file"]["path"]
+        fastq_second = sample_fastq_dict["fastq_second_file"]["path"]
+
+        if not self.crunchy_api.is_spring_compression_done(fastq_first, fastq_second):
+            LOG.info("Cram compression pending for: %s", sample_id)
+            return False
+
+        fastq_first_hk = sample_fastq_dict["fastq_first_file"]["hk_file"]
+        fastq_second_hk = sample_fastq_dict["fastq_second_file"]["hk_file"]
+
+        self.update_fastq_hk(
+            sample_id=sample_id, hk_fastq_first=fastq_first_hk, hk_fastq_second=fastq_second_hk
+        )
+
+        self.remove_fastq(fastq_first=fastq_first, fastq_second=fastq_second)
         return True
 
     def update_scout(self, case_id: str, sample_id: str, bam_path: Path):
