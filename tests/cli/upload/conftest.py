@@ -101,6 +101,12 @@ class MockVogueApi:
     def load_reagent_labels(self, days: int):
         """docstring for upload"""
 
+    def load_samples(self, days: int):
+        """docstring for upload"""
+
+    def load_flowcells(self, days: int):
+        """docstring for upload"""
+
 
 class MockAnalysisApi(AnalysisAPI):
     def __init__(self):

@@ -64,9 +64,9 @@ def apptags(context):
 def flowcells(context, days: int):
     """Loading runs from lims to the trending database"""
 
-    click.echo(click.style("----------------- FLOWCELLS -----------------------"))
+    LOG.info("----------------- FLOWCELLS -----------------------")
 
-    context.obj["vogue_upload_api"].load_flowcells(days=days)
+    context.obj["vogue_api"].load_flowcells(days=days)
 
 
 @vogue.command("samples", short_help="Getting sample data from lims.")
@@ -77,9 +77,9 @@ def flowcells(context, days: int):
 def samples(context, days: int):
     """Loading samples from lims to the trending database"""
 
-    click.echo(click.style("----------------- SAMPLES -----------------------"))
+    LOG.info("----------------- SAMPLES -----------------------")
 
-    context.obj["vogue_upload_api"].load_samples(days=days)
+    context.obj["vogue_api"].load_samples(days=days)
 
 
 @vogue.command("reagent-labels", short_help="Getting reagent_label data from lims.")

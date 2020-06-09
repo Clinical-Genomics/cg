@@ -151,3 +151,16 @@ def test_load_bioinfo_process(vogue_config, caplog):
 
         # THEN assert that command is in log output
         assert load_bioinfo_process_call_command in caplog.text
+
+
+def test_vogue_load_reagent_labels(vogue_api, caplog):
+    caplog.set_level(logging.DEBUG)
+    #GIVEN a vogue api 
+
+    
+    #WHEN running vogue load reagent_label with some days as argument
+    vogue_api.load_reagent_labels(days = 1)
+    
+    #THEN assert vogue output is comunicated
+    assert 'vogue output' in caplog.text
+
