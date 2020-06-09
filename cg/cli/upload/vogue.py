@@ -35,7 +35,11 @@ def vogue(context):
 
 @vogue.command("genotype", short_help="Getting genotype data from the genotype database.")
 @click.option(
-    "-d", "--days", type=int, required="True", help="load X days old sampels from genotype to vogue",
+    "-d",
+    "--days",
+    type=int,
+    required="True",
+    help="load X days old sampels from genotype to vogue",
 )
 @click.pass_context
 def genotype(context, days: int):
