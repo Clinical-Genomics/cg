@@ -111,7 +111,6 @@ class MockVogueApi:
 class MockAnalysisApi(AnalysisAPI):
     def __init__(self):
         """docstring for __init__"""
-        pass
 
     def get_latest_metadata(self, internal_id):
         """docstring for upload"""
