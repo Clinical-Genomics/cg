@@ -35,7 +35,7 @@ def vogue(context):
 
 @vogue.command("genotype", short_help="Getting genotype data from the genotype database.")
 @click.option(
-    "-d", "--days", required="True", help="load X days old sampels from genotype to vogue",
+    "-d", "--days", type=int, required="True", help="load X days old sampels from genotype to vogue",
 )
 @click.pass_context
 def genotype(context, days: int):
@@ -58,7 +58,7 @@ def apptags(context):
 
 @vogue.command("flowcells", short_help="Getting flowcell data from the lims.")
 @click.option(
-    "-d", "--days", required="True", help="load X days old runs from lims to vogue",
+    "-d", "--days", type=int, required="True", help="load X days old runs from lims to vogue",
 )
 @click.pass_context
 def flowcells(context, days: int):
@@ -71,7 +71,7 @@ def flowcells(context, days: int):
 
 @vogue.command("samples", short_help="Getting sample data from lims.")
 @click.option(
-    "-d", "--days", required="True", help="load X days old sampels from lims to vogue",
+    "-d", "--days", type=int, required="True", help="load X days old sampels from lims to vogue",
 )
 @click.pass_context
 def samples(context, days: int):
@@ -84,7 +84,7 @@ def samples(context, days: int):
 
 @vogue.command("reagent-labels", short_help="Getting reagent_label data from lims.")
 @click.option(
-    "-d", "--days", required=True, help="load X days old sampels from lims to vogue",
+    "-d", "--days", type=int, required=True, help="load X days old sampels from lims to vogue",
 )
 @click.pass_context
 def reagent_labels(context, days: int):

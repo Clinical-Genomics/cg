@@ -15,7 +15,7 @@ class UploadVogueAPI:
         self.vogue_api = vogue_api
         self.store = store
 
-    def load_genotype(self, days) -> None:
+    def load_genotype(self, days: int) -> None:
         """Loading genotype data from the genotype database into the trending database"""
         samples = self.genotype_api.export_sample(days=days)
         samples = json.loads(samples)

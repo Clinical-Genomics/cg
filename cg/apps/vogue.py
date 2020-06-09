@@ -40,30 +40,30 @@ class VogueAPI:
         for line in self.process.stderr_lines():
             LOG.info("vogue output: %s", line)
 
-    def load_samples(self, days):
+    def load_samples(self, days: int) -> None:
         """Running vogue load samples."""
 
-        load_call = ["load", "sample", "-d", days]
+        load_call = ["load", "sample", "-d", str(days)]
         self.process.run_command(load_call)
 
         # Execute command and print its stdout+stderr as it executes
         for line in self.process.stderr_lines():
             LOG.info("vogue output: %s", line)
 
-    def load_flowcells(self, days):
+    def load_flowcells(self, days: int) -> None:
         """Running vogue load flowcells."""
 
-        load_call = ["load", "flowcell", "-d", days]
+        load_call = ["load", "flowcell", "-d", str(days)]
         self.process.run_command(load_call)
 
         # Execute command and print its stdout+stderr as it executes
         for line in self.process.stderr_lines():
             LOG.info("vogue output: %s", line)
 
-    def load_reagent_labels(self, days) -> None:
+    def load_reagent_labels(self, days: int) -> None:
         """Running vogue load reagent_labels."""
 
-        load_call = ["load", "reagent_labels", "-d", days]
+        load_call = ["load", "reagent_labels", "-d", str(days)]
         self.process.run_command(load_call)
 
         # Execute command and print its stdout+stderr as it executes
