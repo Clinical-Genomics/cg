@@ -23,9 +23,8 @@ LOG = logging.getLogger(__name__)
 PRIORITY_OPTION = click.option("-p", "--priority", type=click.Choice(["low", "normal", "high"]))
 EMAIL_OPTION = click.option("-e", "--email", help="email to send errors to")
 ANALYSIS_TYPE_OPTION = click.option(
-    "-a",
-    "--analysis-type",
-    type=click.Choice(["qc", "paired", "single"]))
+    "-a", "--analysis-type", type=click.Choice(["qc", "paired", "single"])
+)
 
 SUCCESS = 0
 FAIL = 1
