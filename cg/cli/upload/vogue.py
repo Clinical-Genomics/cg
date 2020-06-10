@@ -35,7 +35,11 @@ def vogue(context):
 
 @vogue.command("genotype", short_help="Getting genotype data from the genotype database.")
 @click.option(
-    "-d", "--days", required="True", help="load X days old sampels from genotype to vogue",
+    "-d",
+    "--days",
+    type=int,
+    required="True",
+    help="load X days old sampels from genotype to vogue",
 )
 @click.pass_context
 def genotype(context, days: int):
@@ -58,28 +62,41 @@ def apptags(context):
 
 @vogue.command("flowcells", short_help="Getting flowcell data from the lims.")
 @click.option(
-    "-d", "--days", required="True", help="load X days old runs from lims to vogue",
+    "-d", "--days", type=int, required="True", help="load X days old runs from lims to vogue",
 )
 @click.pass_context
 def flowcells(context, days: int):
     """Loading runs from lims to the trending database"""
 
-    click.echo(click.style("----------------- FLOWCELLS -----------------------"))
+    LOG.info("----------------- FLOWCELLS -----------------------")
 
-    context.obj["vogue_upload_api"].load_flowcells(days=days)
+    context.obj["vogue_api"].load_flowcells(days=days)
 
 
 @vogue.command("samples", short_help="Getting sample data from lims.")
 @click.option(
-    "-d", "--days", required="True", help="load X days old sampels from lims to vogue",
+    "-d", "--days", type=int, required="True", help="load X days old sampels from lims to vogue",
 )
 @click.pass_context
 def samples(context, days: int):
     """Loading samples from lims to the trending database"""
 
-    click.echo(click.style("----------------- SAMPLES -----------------------"))
+    LOG.info("----------------- SAMPLES -----------------------")
 
-    context.obj["vogue_upload_api"].load_samples(days=days)
+    context.obj["vogue_api"].load_samples(days=days)
+
+
+@vogue.command("reagent-labels", short_help="Getting reagent_label data from lims.")
+@click.option(
+    "-d", "--days", type=int, required=True, help="load X days old sampels from lims to vogue",
+)
+@click.pass_context
+def reagent_labels(context, days: int):
+    """Loading reagent_labels from lims to the trending database"""
+
+    LOG.info("----------------- REAGENT LABELS -----------------------")
+
+    context.obj["vogue_api"].load_reagent_labels(days=days)
 
 
 @vogue.command("bioinfo", short_help="Load bioinfo results into vogue")

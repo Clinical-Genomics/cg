@@ -277,7 +277,6 @@ def config_case(
 @click.option(
     "-r", "--run-analysis", is_flag=True, default=False, help="start " "analysis",
 )
-
 @click.option("--config", "config_path", required=False, help="Optional")
 @ANALYSIS_TYPE_OPTION
 @PRIORITY_OPTION
