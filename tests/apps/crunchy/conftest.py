@@ -237,11 +237,9 @@ def mock_bam_to_cram():
     """ This fixture returns a mocked bam_to_cram method. this mock_method
         Will create files with suffixes .cram and .crai for a given BAM path"""
 
-    def _mock_bam_to_cram_func(bam_path: Path, ntasks: int, mem: int, dry_run: bool = False):
+    def _mock_bam_to_cram_func(bam_path: Path, dry_run: bool = False):
 
         _ = dry_run
-        _ = ntasks
-        _ = mem
 
         cram_path = bam_path.with_suffix(".cram")
         crai_path = bam_path.with_suffix(".cram.crai")
@@ -259,8 +257,9 @@ def fixture_sbatch_content(bam_path, crunchy_config_dict):
     """Return expected sbatch content"""
     job_name = bam_path.name + "_bam_to_cram"
     account = crunchy_config_dict["crunchy"]["slurm"]["account"]
-    ntasks = 1
-    mem = 2
+    ntasks = 12
+    mem = 50
+    time = 24
     mail_user = crunchy_config_dict["crunchy"]["slurm"]["mail_user"]
     conda_env = crunchy_config_dict["crunchy"]["slurm"]["conda_env"]
     reference_path = crunchy_config_dict["crunchy"]["cram_reference"]
@@ -278,7 +277,7 @@ def fixture_sbatch_content(bam_path, crunchy_config_dict):
 #SBATCH --output={log_dir}/{job_name}.stdout
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user={mail_user}
-#SBATCH --time=4:00:00
+#SBATCH --time={time}:00:00
 #SBATCH --qos=low
 
 set -e
@@ -325,8 +324,9 @@ def fixture_sbatch_content_spring(fastq_paths, crunchy_config_dict):
         FASTQ_FIRST_READ_SUFFIX, "_fastq_to_spring"
     )
     account = crunchy_config_dict["crunchy"]["slurm"]["account"]
-    ntasks = 1
-    mem = 2
+    ntasks = 12
+    mem = 50
+    time = 24
     mail_user = crunchy_config_dict["crunchy"]["slurm"]["mail_user"]
     conda_env = crunchy_config_dict["crunchy"]["slurm"]["conda_env"]
     fastq_first = fastq_paths["fastq_first_path"]
@@ -344,7 +344,7 @@ def fixture_sbatch_content_spring(fastq_paths, crunchy_config_dict):
 #SBATCH --output={log_dir}/{job_name}.stdout
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user={mail_user}
-#SBATCH --time=24:00:00
+#SBATCH --time={time}:00:00
 #SBATCH --qos=low
 
 set -e

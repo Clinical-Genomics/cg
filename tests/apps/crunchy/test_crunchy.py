@@ -5,7 +5,8 @@ from pathlib import Path
 import pytest
 
 from cg.apps.crunchy import CrunchyAPI
-from cg.constants import CRAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX
+from cg.constants import (CRAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX,
+                          FASTQ_SECOND_READ_SUFFIX)
 
 
 def test_bamcompression_pending_with_flag(crunchy_config_dict, bam_path):
@@ -71,7 +72,7 @@ def test_bam_to_cram(crunchy_config_dict, sbatch_content, bam_path, mocker):
     sbatch_path = crunchy_api.get_sbatch_path(log_path, "bam")
 
     # WHEN calling bam_to_cram method on bam-path
-    crunchy_api.bam_to_cram(bam_path=bam_path, ntasks=1, mem=2)
+    crunchy_api.bam_to_cram(bam_path=bam_path)
 
     # THEN _submit_sbatch method is called with expected sbatch-content
 
@@ -142,7 +143,7 @@ def test_cram_compression_before_after(crunchy_config_dict, mock_bam_to_cram, mo
     assert not result
 
     # GIVEN created cram, crai, and flag paths
-    crunchy_api.bam_to_cram(bam_path=bam_path, ntasks=1, mem=2)
+    crunchy_api.bam_to_cram(bam_path=bam_path)
 
     # WHEN calling cram_compression_done on bam_path
     result = crunchy_api.is_cram_compression_done(bam_path=bam_path)
@@ -173,7 +174,7 @@ def test_is_bam_compression_possible_cram_done(
     bam_path.touch()
 
     # WHEN calling test_bam_compression_possible when cram_compression is done
-    crunchy_api.bam_to_cram(bam_path=bam_path, ntasks=1, mem=2)
+    crunchy_api.bam_to_cram(bam_path=bam_path)
     result = crunchy_api.is_bam_compression_possible(bam_path=bam_path)
 
     # THEN this should return False
@@ -273,7 +274,7 @@ def test_fastq_to_spring(crunchy_config_dict, sbatch_content_spring, fastq_paths
 
     # WHEN calling fastq_to_spring on fastq files
     crunchy_api.fastq_to_spring(
-        fastq_first=fastq_first, fastq_second=fastq_second, ntasks=1, mem=2,
+        fastq_first=fastq_first, fastq_second=fastq_second,
     )
 
     # THEN _submit_sbatch method is called with expected sbatch-content
@@ -299,7 +300,7 @@ def test_fastq_to_spring_sbatch(crunchy_config_dict, fastq_paths, sbatch_process
 
     # WHEN calling fastq_to_spring on fastq files
     crunchy_api.fastq_to_spring(
-        fastq_first=fastq_first, fastq_second=fastq_second, ntasks=1, mem=2,
+        fastq_first=fastq_first, fastq_second=fastq_second,
     )
 
     # THEN assert that the sbatch file was created
