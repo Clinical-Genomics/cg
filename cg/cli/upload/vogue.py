@@ -152,7 +152,7 @@ def bioinfo(context, case_name, cleanup, target_load, dry):
     # This might automated to some extend by checking if input multiqc json.
     # This tells us how the result was generated. If it is multiqc it will try to validate keys with
     # an actual model.
-    if workflow_name is in VOGUE_VALID_BIOINFO_MULTIQC:
+    if workflow_name in VOGUE_VALID_BIOINFO_MULTIQC:
         # get analysis result file through housekeeper api
         load_bioinfo_raw_inputs["analysis_type"] = "multiqc"
         load_bioinfo_raw_inputs["case_analysis_type"] = "multiqc"
