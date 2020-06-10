@@ -19,9 +19,7 @@ def test_without_options(cli_runner, balsamic_store_context):
     assert "Missing argument" in result.output
 
 
-def test_dry_with_config_file(
-    cli_runner, balsamic_store_context, balsamic_case, config_file
-):
+def test_dry_with_config_file(cli_runner, balsamic_store_context, balsamic_case, config_file):
     """Test command with --dry option"""
 
     # GIVEN case-id
