@@ -115,6 +115,7 @@ def generate_deliverables_file(context, dry, config_path, case_id):
     conda_env = context.obj["balsamic"]["conda_env"]
     root_dir = Path(context.obj["balsamic"]["root"])
     case_obj = context.obj["db"].family(case_id)
+    analysis_api = context.obj["analysis_api"]
 
     if not case_obj:
         raise CgError(f"Case {case_id} not found")
