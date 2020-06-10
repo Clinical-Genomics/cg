@@ -25,10 +25,8 @@ EMAIL_OPTION = click.option("-e", "--email", help="email to send errors to")
 ANALYSIS_TYPE_OPTION = click.option(
     "-a",
     "--analysis-type",
-    "analysis_type",
-    type=click.Choice(["qc", "paired", "single"]),
-    required=False,
-)
+    type=click.Choice(["qc", "paired", "single"]))
+
 SUCCESS = 0
 FAIL = 1
 
@@ -277,7 +275,7 @@ def config_case(
 @balsamic.command()
 @click.option("-d", "--dry-run", "dry", is_flag=True, help="print command to console")
 @click.option(
-    "-r", "--run-analysis", "run_analysis", is_flag=True, default=False, help="start " "analysis",
+    "-r", "--run-analysis", is_flag=True, default=False, help="start " "analysis",
 )
 
 @click.option("--config", "config_path", required=False, help="Optional")
@@ -306,7 +304,7 @@ def run(context, dry, run_analysis, config_path, priority, email, case_id, analy
         command_str += f" --mail-user {email}"
 
     if analysis_type:
-        command_str += f" -a {analysis_type}"
+        command_str += f" --analysis-type {analysis_type}"
 
     command_str += f" --qos {priority}"
 
@@ -322,7 +320,7 @@ def run(context, dry, run_analysis, config_path, priority, email, case_id, analy
 
 @balsamic.command()
 @click.option(
-    "-d", "--dry-run", "dry_run", is_flag=True, help="print to console without actualising",
+    "-d", "--dry-run", is_flag=True, help="print to console without actualising",
 )
 @click.pass_context
 def start(context: click.Context, dry_run):
