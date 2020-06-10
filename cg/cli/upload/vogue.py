@@ -14,7 +14,8 @@ from cg.store import Store
 
 LOG = logging.getLogger(__name__)
 
-VOGUE_VALID_BIOINFO = ["mip"]
+VOGUE_VALID_BIOINFO = ["mip", "microsalt"]
+VOGUE_VALID_BIOINFO_MULTIQC  = ["mip"]
 
 
 @click.group()
@@ -139,20 +140,6 @@ def bioinfo(context, case_name, cleanup, target_load, dry):
     # Probably get samples for a case_name through statusdb api
     load_bioinfo_raw_inputs["samples"] = _get_samples(store, case_name)
 
-    # Probably get analysis result file through housekeeper ai
-    load_bioinfo_raw_inputs["analysis_result_file"] = _get_multiqc_latest_file(hk_api, case_name)
-
-    # Probably get analysis_type [multiqc or microsalt or all] from cli
-    # This might automated to some extend by checking if input multiqc json.
-    # This tells us how the result was generated. If it is multiqc it will try to validate keys with
-    # an actual model.
-    load_bioinfo_raw_inputs["analysis_type"] = "multiqc"
-
-    # case_name is the input
-    load_bioinfo_raw_inputs["analysis_case_name"] = case_name
-
-    # Get case_analysis_type from cli a free text for an entry in trending database
-    load_bioinfo_raw_inputs["case_analysis_type"] = "multiqc"
 
     # Get workflow_name and workflow_version
     workflow_name, workflow_version = _get_analysis_workflow_details(status_api, case_name)
@@ -160,6 +147,23 @@ def bioinfo(context, case_name, cleanup, target_load, dry):
         raise AnalysisUploadError(f"Case upload failed: {case_name}. Reason: Bad workflow name.")
     load_bioinfo_raw_inputs["analysis_workflow_name"] = workflow_name
     load_bioinfo_raw_inputs["analysis_workflow_version"] = workflow_version
+
+    # Probably get analysis_type [multiqc or microsalt or all] from cli
+    # This might automated to some extend by checking if input multiqc json.
+    # This tells us how the result was generated. If it is multiqc it will try to validate keys with
+    # an actual model.
+    if workflow_name is in VOGUE_VALID_BIOINFO_MULTIQC:
+        # get analysis result file through housekeeper api
+        load_bioinfo_raw_inputs["analysis_type"] = "multiqc"
+        load_bioinfo_raw_inputs["case_analysis_type"] = "multiqc"
+        load_bioinfo_raw_inputs["analysis_result_file"] = _get_latest_qc_file(hk_api, case_name, "multiqc")
+    else:
+        load_bioinfo_raw_inputs["analysis_type"] = "microsalt"
+        load_bioinfo_raw_inputs["case_analysis_type"] = "microsalt"
+        load_bioinfo_raw_inputs["analysis_result_file"] = _get_latest_qc_file(hk_api, case_name, "qc")
+
+    # case_name is the input
+    load_bioinfo_raw_inputs["analysis_case_name"] = case_name
 
     if dry:
         click.echo(click.style("----------------- DRY RUN -----------------------"))
@@ -212,7 +216,7 @@ def bioinfo_all(context, dry):
             LOG.error("Case upload failed: %s", case_name, exc_info=True)
 
 
-def _get_multiqc_latest_file(hk_api: hk.HousekeeperAPI, case_name: str) -> str:
+def _get_latest_qc_file(hk_api: hk.HousekeeperAPI, case_name: str, tag: str) -> str:
     """Get latest multiqc_data.json path for a case_name
        Args:
            case_name(str): onemite
@@ -220,14 +224,14 @@ def _get_multiqc_latest_file(hk_api: hk.HousekeeperAPI, case_name: str) -> str:
            multiqc_data_path(str): /path/to/multiqc.json
     """
     version_obj = hk_api.last_version(case_name)
-    multiqc_json_file = hk_api.get_files(
-        bundle=case_name, tags=["multiqc-json"], version=version_obj.id
+    qc_json_file = hk_api.get_files(
+        bundle=case_name, tags=tag, version=version_obj.id
     )
 
-    if len(list(multiqc_json_file)) == 0:
-        raise FileNotFoundError(f"No multiqc.json was found in housekeeper for {case_name}")
+    if len(list(qc_json_file)) == 0:
+        raise FileNotFoundError(f"No QC json was found in housekeeper for {case_name}")
 
-    return multiqc_json_file[0].full_path
+    return qc_json_file[0].full_path
 
 
 def _get_samples(store: Store, case_name: str) -> str:
