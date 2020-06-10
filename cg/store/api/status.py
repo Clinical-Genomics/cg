@@ -569,8 +569,25 @@ class StatusHandler(BaseHandler):
 
     def analyses_to_delivery_report(self):
         """Fetch analyses that needs the delivery report to be regenerated."""
+
+        records = self.Analysis.query
+        sub_query = (
+            self.Analysis.query.join(models.Analysis.family)
+            .group_by(models.Family.id)
+            .with_entities(
+                models.Analysis.family_id, func.max(models.Analysis.started_at).label("started_at")
+            )
+            .subquery()
+        )
+        records = records.join(
+            sub_query,
+            and_(
+                self.Analysis.family_id == sub_query.c.family_id,
+                self.Analysis.started_at == sub_query.c.started_at,
+            ),
+        )
         records = (
-            self.Analysis.query.filter(models.Analysis.uploaded_at)
+            records.filter(models.Analysis.uploaded_at)
             .join(models.Family, models.Family.links, models.FamilySample.sample)
             .filter(
                 or_(
