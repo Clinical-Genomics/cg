@@ -7,6 +7,7 @@ from typing import List
 import pytest
 
 from cg.apps.crunchy import CrunchyAPI
+from cg.apps.crunchy.models import CrunchyFileSchema
 from cg.constants import FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX
 
 LOG = logging.getLogger(__name__)
@@ -31,6 +32,35 @@ class MockProcess:
         LOG.info("Running command %s", " ".join(command))
 
 
+@pytest.fixture(scope="function", name="file_schema")
+def fixture_file_schema():
+    """Return a instance of the file schema that describes content of spring metadata"""
+    return CrunchyFileSchema()
+
+
+@pytest.fixture(name="spring_metadata")
+def fixture_spring_metadata(fastq_paths, spring_path):
+    """Return metada information"""
+    first_read = fastq_paths["fastq_first_path"]
+    second_read = fastq_paths["fastq_second_path"]
+    metadata = [
+        {
+            "path": str(first_read.resolve()),
+            "file": "first_read",
+            "checksum": "checksum_first_read",
+            "algorithm": "sha256",
+        },
+        {
+            "path": str(second_read.resolve()),
+            "file": "second_read",
+            "checksum": "checksum_second_read",
+            "algorithm": "sha256",
+        },
+        {"path": str(spring_path.resolve()), "file": "spring"},
+    ]
+    return metadata
+
+
 @pytest.fixture(scope="function", name="sbatch_process")
 def fixture_sbatch_process():
     """Return a mocked process object"""
@@ -44,11 +74,53 @@ def fixture_bam_path(project_dir):
     return _bam_path
 
 
+@pytest.fixture(scope="function", name="fastq_first_path")
+def fixture_fastq_first_path(project_dir):
+    """Creates a FASTQ path to first read in pair"""
+    _path = project_dir / ("file" + FASTQ_FIRST_READ_SUFFIX)
+    return _path
+
+
+@pytest.fixture(scope="function", name="fastq_second_path")
+def fixture_fastq_second_path(project_dir):
+    """Creates a FASTQ path to second read in pair"""
+    _path = project_dir / ("file" + FASTQ_SECOND_READ_SUFFIX)
+    return _path
+
+
+@pytest.fixture(scope="function", name="spring_path")
+def fixture_spring_path(fastq_first_path):
+    """Creates a SPRING path"""
+    _path = CrunchyAPI.get_spring_path_from_fastq(fastq_first_path)
+    return _path
+
+
 @pytest.fixture(scope="function", name="existing_bam_path")
 def fixture_existing_bam_path(bam_path):
     """Creates an existing BAM path"""
     bam_path.touch()
     return bam_path
+
+
+@pytest.fixture(scope="function", name="fastq_first_file")
+def fixture_fastq_first_file(fastq_first_path):
+    """Creates an existing FASTQ path"""
+    fastq_first_path.touch()
+    return fastq_first_path
+
+
+@pytest.fixture(scope="function", name="fastq_second_file")
+def fixture_fastq_second_file(fastq_second_path):
+    """Creates an existing FASTQ path"""
+    fastq_second_path.touch()
+    return fastq_second_path
+
+
+@pytest.fixture(scope="function", name="spring_file")
+def fixture_spring_file(spring_path):
+    """Creates an existing SPRING file"""
+    spring_path.touch()
+    return spring_path
 
 
 @pytest.fixture(scope="function", name="compressed_bam")
@@ -97,37 +169,31 @@ def fixture_compressed_bam_without_flag(existing_bam_path):
 
 
 @pytest.fixture(scope="function", name="fastq_paths")
-def fixture_fastq_paths(project_dir):
+def fixture_fastq_paths(fastq_first_path, fastq_second_path):
     """Creates fastq paths"""
-    _fastq_first_path = project_dir / ("file" + FASTQ_FIRST_READ_SUFFIX)
-    _fastq_second_path = project_dir / ("file" + FASTQ_SECOND_READ_SUFFIX)
     return {
-        "fastq_first_path": _fastq_first_path,
-        "fastq_second_path": _fastq_second_path,
+        "fastq_first_path": fastq_first_path,
+        "fastq_second_path": fastq_second_path,
     }
 
 
 @pytest.fixture(scope="function", name="existing_fastq_paths")
-def fixture_existing_fastq_paths(fastq_paths):
+def fixture_existing_fastq_paths(fastq_first_file, fastq_second_file):
     """Creates existing FASTQ paths"""
-    for _, fastq_path in fastq_paths.items():
-        fastq_path.touch()
-        assert fastq_path.exists()
-    return fastq_paths
+    return {
+        "fastq_first_path": fastq_first_file,
+        "fastq_second_path": fastq_second_file,
+    }
 
 
 @pytest.fixture(scope="function", name="compressed_fastqs")
-def fixture_compressed_fastqs(existing_fastq_paths):
+def fixture_compressed_fastqs(existing_fastq_paths, spring_file):
     """Creates fastqs with corresponding SPRING and FLAG"""
     fastq_paths = existing_fastq_paths
-    spring_path = Path(
-        str(fastq_paths["fastq_first_path"]).replace(FASTQ_FIRST_READ_SUFFIX, ".spring")
-    )
-    flag_path = spring_path.with_suffix("").with_suffix(".json")
+    flag_path = spring_file.with_suffix("").with_suffix(".json")
 
-    spring_path.touch()
     flag_path.touch()
-    assert spring_path.exists()
+    assert spring_file.exists()
     assert flag_path.exists()
     return fastq_paths
 
@@ -145,14 +211,10 @@ def fixture_compressed_fastqs_without_spring(existing_fastq_paths):
 
 
 @pytest.fixture(scope="function", name="compressed_fastqs_without_flag")
-def fixture_compressed_fastqs_without_flag(existing_fastq_paths):
+def fixture_compressed_fastqs_without_flag(existing_fastq_paths, spring_file):
     """Creates fastqs with corresponding SPRING"""
     fastq_paths = existing_fastq_paths
-    spring_path = Path(
-        str(fastq_paths["fastq_first_path"]).replace(FASTQ_FIRST_READ_SUFFIX, ".spring")
-    )
-    spring_path.touch()
-    assert spring_path.exists()
+    assert spring_file.exists()
     return fastq_paths
 
 
@@ -309,7 +371,8 @@ error() {{
 trap error ERR
 
 touch {pending_path}
-crunchy -t 12 compress fastq -f {fastq_first} -s {fastq_second} -o {spring_path} --check-integrity --metadata-file
+crunchy -t 12 compress fastq -f {fastq_first} -s {fastq_second} -o {spring_path} --check-integrity \
+--metadata-file
 rm {pending_path}"""
 
     return _content

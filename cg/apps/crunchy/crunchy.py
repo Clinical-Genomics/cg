@@ -313,8 +313,8 @@ class CrunchyAPI:
         spring_path: str,
         flag_path: str,
         pending_path: str,
-        checksum_first: str
-        checksum_second: str
+        checksum_first: str,
+        checksum_second: str,
     ) -> str:
         """Create and return the body of a sbatch script that runs bam to cram"""
         sbatch_body = SBATCH_SPRING_TO_FASTQ.format(
