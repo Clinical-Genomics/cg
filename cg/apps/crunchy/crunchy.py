@@ -5,13 +5,23 @@
 import logging
 from pathlib import Path
 
-from cg.constants import (BAM_INDEX_SUFFIX, BAM_SUFFIX, CRAM_INDEX_SUFFIX,
-                          CRAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX,
-                          FASTQ_SECOND_READ_SUFFIX, SPRING_SUFFIX)
+from cg.constants import (
+    BAM_INDEX_SUFFIX,
+    BAM_SUFFIX,
+    CRAM_INDEX_SUFFIX,
+    CRAM_SUFFIX,
+    FASTQ_FIRST_READ_SUFFIX,
+    FASTQ_SECOND_READ_SUFFIX,
+    SPRING_SUFFIX,
+)
 from cg.utils import Process
 
-from .sbatch import (SBATCH_BAM_TO_CRAM, SBATCH_FASTQ_TO_SPRING,
-                     SBATCH_HEADER_TEMPLATE, SBATCH_SPRING_TO_FASTQ)
+from .sbatch import (
+    SBATCH_BAM_TO_CRAM,
+    SBATCH_FASTQ_TO_SPRING,
+    SBATCH_HEADER_TEMPLATE,
+    SBATCH_SPRING_TO_FASTQ,
+)
 
 LOG = logging.getLogger(__name__)
 
