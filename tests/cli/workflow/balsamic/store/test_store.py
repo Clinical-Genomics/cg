@@ -1,9 +1,10 @@
 """Tests for cg.cli.store.balsamic"""
+import logging
 
 import pytest
 
 from cg.cli.workflow.balsamic.store import analysis
-from cg.exc import AnalysisDuplicationError
+from cg.exc import AnalysisDuplicationError, StoreError
 
 EXIT_SUCCESS = 0
 
@@ -22,21 +23,23 @@ def test_without_options(cli_runner, balsamic_context):
 
 
 def test_store_analysis_with_ok_file_parameter(
-    cli_runner, balsamic_store_context, balsamic_case, config_file, deliverables_file
+    cli_runner, balsamic_store_context, balsamic_case, config_file, deliverables_file, caplog
 ):
     """Test store with analysis file"""
 
     # GIVEN a meta file for a balsamic analysis
+    caplog.set_level(logging.INFO)
 
     # WHEN calling store with meta file
     result = cli_runner.invoke(
         analysis,
         [balsamic_case.internal_id, "-c", config_file, "-d", deliverables_file],
         obj=balsamic_store_context,
-        catch_exceptions=False,
     )
+
     # THEN we should not get a message that the analysis has been stored
-    assert "Included files in Housekeeper" in result.output
+    with caplog.at_level(logging.INFO):
+        assert "Included files in Housekeeper" in caplog.text
     assert result.exit_code == EXIT_SUCCESS
 
 
@@ -53,11 +56,11 @@ def test_store_analysis_creates_analysis_on_case(
         analysis,
         [balsamic_case.internal_id, "-c", config_file, "-d", deliverables_file],
         obj=balsamic_store_context,
-        catch_exceptions=False,
     )
 
     # THEN an analysis should have been created on that case
     assert balsamic_case.analyses
+    assert result.exit_code == EXIT_SUCCESS
 
 
 def test_already_stored_analysis(
@@ -66,7 +69,6 @@ def test_already_stored_analysis(
     balsamic_case,
     config_file,
     deliverables_file,
-    mocker,
 ):
     """Test store analysis command twice"""
 
@@ -82,11 +84,10 @@ def test_already_stored_analysis(
         ],
         obj=balsamic_store_context,
     )
-    mocker.patch.object(store, "gather_files_and_bundle_in_housekeeper")
-    store.gather_files_and_bundle_in_housekeeper.return_value = AnalysisDuplicationError
+
     # WHEN calling store again for same case
     # THEN we should get a message that the analysis has previously been stored
-    with pytest.raises(AnalysisDuplicationError):
+    with pytest.raises(StoreError):
         result = cli_runner.invoke(
             analysis,
             [
