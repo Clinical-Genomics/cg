@@ -15,7 +15,7 @@ from cg.store import Store
 LOG = logging.getLogger(__name__)
 
 VOGUE_VALID_BIOINFO = ["mip", "microsalt"]
-VOGUE_VALID_BIOINFO_MULTIQC  = ["mip"]
+VOGUE_VALID_BIOINFO_MULTIQC = ["mip"]
 
 
 @click.group()
@@ -140,7 +140,6 @@ def bioinfo(context, case_name, cleanup, target_load, dry):
     # Probably get samples for a case_name through statusdb api
     load_bioinfo_raw_inputs["samples"] = _get_samples(store, case_name)
 
-
     # Get workflow_name and workflow_version
     workflow_name, workflow_version = _get_analysis_workflow_details(status_api, case_name)
     if workflow_name not in VOGUE_VALID_BIOINFO:
@@ -156,11 +155,15 @@ def bioinfo(context, case_name, cleanup, target_load, dry):
         # get analysis result file through housekeeper api
         load_bioinfo_raw_inputs["analysis_type"] = "multiqc"
         load_bioinfo_raw_inputs["case_analysis_type"] = "multiqc"
-        load_bioinfo_raw_inputs["analysis_result_file"] = _get_latest_qc_file(hk_api, case_name, "multiqc")
+        load_bioinfo_raw_inputs["analysis_result_file"] = _get_latest_qc_file(
+            hk_api, case_name, "multiqc"
+        )
     else:
         load_bioinfo_raw_inputs["analysis_type"] = "microsalt"
         load_bioinfo_raw_inputs["case_analysis_type"] = "microsalt"
-        load_bioinfo_raw_inputs["analysis_result_file"] = _get_latest_qc_file(hk_api, case_name, "qc")
+        load_bioinfo_raw_inputs["analysis_result_file"] = _get_latest_qc_file(
+            hk_api, case_name, "qc"
+        )
 
     # case_name is the input
     load_bioinfo_raw_inputs["analysis_case_name"] = case_name
@@ -224,9 +227,7 @@ def _get_latest_qc_file(hk_api: hk.HousekeeperAPI, case_name: str, tag: str) -> 
            multiqc_data_path(str): /path/to/multiqc.json
     """
     version_obj = hk_api.last_version(case_name)
-    qc_json_file = hk_api.get_files(
-        bundle=case_name, tags=tag, version=version_obj.id
-    )
+    qc_json_file = hk_api.get_files(bundle=case_name, tags=tag, version=version_obj.id)
 
     if len(list(qc_json_file)) == 0:
         raise FileNotFoundError(f"No QC json was found in housekeeper for {case_name}")
