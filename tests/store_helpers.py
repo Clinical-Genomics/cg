@@ -273,6 +273,8 @@ class StoreHelpers:
 
         if not family_obj:
             family_obj = store.add_family(name=family_id, panels=panels)
+
+        print("Adding family with name %s (%s)" % (family_obj.name, family_obj.internal_id))
         family_obj.customer = customer
         store.add_commit(family_obj)
         return family_obj
