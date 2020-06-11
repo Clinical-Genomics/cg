@@ -95,7 +95,7 @@ class StatusHandler(BaseHandler):
             # the samples must external or be sequenced to be analysed
             .filter(or_(models.Sample.is_external, models.Sample.sequenced_at.isnot(None)))
             # The data_analysis is includes Balsamic
-            .filter(models.Sample.data_analysis.like("%Balsamic%"))
+            .filter(models.Sample.data_analysis.ilike("%Balsamic%"))
             # 1. family that has been analysed but now is requested for re-analysing
             # 2. new family that hasn't been analysed yet
             .filter(
