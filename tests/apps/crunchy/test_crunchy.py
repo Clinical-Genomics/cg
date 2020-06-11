@@ -8,6 +8,19 @@ from cg.apps.crunchy import CrunchyAPI
 from cg.constants import CRAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX
 
 
+def test_set_dry_run(crunchy_config_dict):
+    """Test to set the dry run of the api"""
+    # GIVEN a crunchy API where dry run is False
+    crunchy_api = CrunchyAPI(crunchy_config_dict)
+    assert crunchy_api.dry_run is False
+
+    # WHEN updating the dry run
+    crunchy_api.set_dry_run(True)
+
+    # THEN assert that the api has true dry run
+    assert crunchy_api.dry_run is True
+
+
 def test_bamcompression_pending_with_flag(crunchy_config_dict, bam_path):
     """Test the method that checks if cram compression is pending.
 
@@ -43,12 +56,11 @@ def test_bamcompression_pending_no_flag(crunchy_config_dict, bam_path):
     result = crunchy_api.is_cram_compression_pending(bam_path=bam_path)
 
     # THEN the function should return False
-
     assert result is False
 
 
 def test_get_crampath_from_cram_wrong_suffix(crunchy_config_dict, bam_path):
-    """Test to build a cream path from a bam path when the suffix is wron
+    """Test to build a cream path from a bam path when the suffix is wrong
 
     Since the method will realise this is not a bam path a ValueError will be raised
     """
@@ -63,7 +75,11 @@ def test_get_crampath_from_cram_wrong_suffix(crunchy_config_dict, bam_path):
 
 
 def test_bam_to_cram(crunchy_config_dict, sbatch_content, bam_path, mocker):
-    """Test bam_to_cram method"""
+    """Test bam_to_cram method
+
+    Test to compress bam to cram method. This test will make sure that the correct sbatch content
+    was submitted to the Process api
+    """
     # GIVEN a crunchy-api, and a bam_path
     mocker_submit_sbatch = mocker.patch.object(CrunchyAPI, "_submit_sbatch")
     crunchy_api = CrunchyAPI(crunchy_config_dict)
@@ -76,6 +92,46 @@ def test_bam_to_cram(crunchy_config_dict, sbatch_content, bam_path, mocker):
     # THEN _submit_sbatch method is called with expected sbatch-content
 
     mocker_submit_sbatch.assert_called_with(sbatch_content=sbatch_content, sbatch_path=sbatch_path)
+
+
+def test_get_spring_metadata(spring_path, spring_metadata_file, crunchy_config_dict):
+    """Test the method that fetches the spring metadata from a file"""
+    # GIVEN a spring path and the path to a populated spring metadata file
+    assert spring_metadata_file.is_file()
+    assert spring_metadata_file.exists()
+    # GIVEN a crunchy API
+    crunchy_api = CrunchyAPI(crunchy_config_dict)
+
+    # WHEN fetching the content of the file
+    parsed_content = crunchy_api.get_spring_metadata(spring_path)
+
+    # THEN assert information about the three files is there
+    assert len(parsed_content) == 3
+    # THEN assert a dictionary with the files is returned
+    assert isinstance(parsed_content, dict)
+
+
+def test_spring_to_fastq(
+    spring_file, spring_metadata_file, sbatch_content_spring_to_fastq, crunchy_config_dict, mocker
+):
+    """Test spring to fastq method
+
+    Test to decompress spring to fastq. This test will make sure that the correct sbatch content
+    was submitted to the Process api
+    """
+    # GIVEN a crunchy-api, and a bam_path
+    mocker_submit_sbatch = mocker.patch.object(CrunchyAPI, "_submit_sbatch")
+    crunchy_api = CrunchyAPI(crunchy_config_dict)
+    log_path = crunchy_api.get_log_dir(spring_file)
+    sbatch_path = crunchy_api.get_sbatch_path(log_path, "spring")
+
+    # WHEN calling bam_to_cram method on bam-path
+    crunchy_api.spring_to_fastq(spring_path=spring_file)
+
+    # THEN _submit_sbatch method is called with expected sbatch-content
+    mocker_submit_sbatch.assert_called_with(
+        sbatch_content=sbatch_content_spring_to_fastq, sbatch_path=sbatch_path
+    )
 
 
 def test_is_cram_compression_done_no_cram(crunchy_config_dict, bam_path):
@@ -393,6 +449,19 @@ def test_get_spring_path_from_second_fastq():
 
     # THEN check that the correct path was returned
     assert spring_path == Path(ind_id).with_suffix(".spring")
+
+
+def test_get_pending_path_from_second_fastq():
+    """Test to get a spring path from second read in pair"""
+    # GIVEN a fastq path for a read 2 in pair
+    ind_id = "ind1"
+    fastq = Path("".join([ind_id, FASTQ_SECOND_READ_SUFFIX]))
+
+    # WHEN fetching the spring path
+    pending_path = CrunchyAPI.get_pending_path(fastq)
+
+    # THEN check that the correct path was returned
+    assert pending_path == Path(ind_id).with_suffix(".crunchy.pending.txt")
 
 
 def test_is_not_pending(crunchy_config_dict, fastq_paths):

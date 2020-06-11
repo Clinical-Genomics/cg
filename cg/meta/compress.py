@@ -10,13 +10,8 @@ from typing import List
 from housekeeper.store import models as hk_models
 
 from cg.apps import crunchy, hk, scoutapi
-from cg.constants import (
-    BAM_SUFFIX,
-    FASTQ_FIRST_READ_SUFFIX,
-    FASTQ_SECOND_READ_SUFFIX,
-    HK_BAM_TAGS,
-    HK_FASTQ_TAGS,
-)
+from cg.constants import (BAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX,
+                          FASTQ_SECOND_READ_SUFFIX, HK_BAM_TAGS, HK_FASTQ_TAGS)
 
 LOG = logging.getLogger(__name__)
 
@@ -355,6 +350,10 @@ class CompressAPI:
 
         self.remove_fastq(fastq_first=fastq_first, fastq_second=fastq_second)
         return True
+
+    def decompress_spring(self, sample_id: str):
+        """Decompress SPRING archive for a sample"""
+        pass
 
     def update_scout(self, case_id: str, sample_id: str, bam_path: Path):
         """Update scout with compressed alignment file if present"""

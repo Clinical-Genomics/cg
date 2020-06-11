@@ -2,26 +2,21 @@
     Module for compressing BAM to CRAM
 """
 
+import json
 import logging
 from pathlib import Path
+from typing import List
 
-from cg.constants import (
-    BAM_INDEX_SUFFIX,
-    BAM_SUFFIX,
-    CRAM_INDEX_SUFFIX,
-    CRAM_SUFFIX,
-    FASTQ_FIRST_READ_SUFFIX,
-    FASTQ_SECOND_READ_SUFFIX,
-    SPRING_SUFFIX,
-)
+from marshmallow import ValidationError
+
+from cg.constants import (BAM_INDEX_SUFFIX, BAM_SUFFIX, CRAM_INDEX_SUFFIX,
+                          CRAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX,
+                          FASTQ_SECOND_READ_SUFFIX, SPRING_SUFFIX)
 from cg.utils import Process
 
-from .sbatch import (
-    SBATCH_BAM_TO_CRAM,
-    SBATCH_FASTQ_TO_SPRING,
-    SBATCH_HEADER_TEMPLATE,
-    SBATCH_SPRING_TO_FASTQ,
-)
+from .models import CrunchyFileSchema
+from .sbatch import (SBATCH_BAM_TO_CRAM, SBATCH_FASTQ_TO_SPRING,
+                     SBATCH_HEADER_TEMPLATE, SBATCH_SPRING_TO_FASTQ)
 
 LOG = logging.getLogger(__name__)
 
@@ -99,29 +94,62 @@ class CrunchyAPI:
         sbatch_content = sbatch_header + "\n" + sbatch_body
         self._submit_sbatch(sbatch_content=sbatch_content, sbatch_path=sbatch_path)
 
-    def spring_to_fastq(self, spring_path: Path, fastq_first: Path, fastq_second=Path):
+    def spring_to_fastq(self, spring_path: Path):
         """
             Decompress SPRING into fastq by sending to sbatch SLURM
         """
-        spring_path = self.get_spring_path_from_fastq(fastq=fastq_first)
-        job_name = str(fastq_first.name).replace(FASTQ_FIRST_READ_SUFFIX, "_fastq_to_spring")
-        flag_path = self.get_flag_path(file_path=spring_path)
-        pending_path = self.get_pending_path(file_path=fastq_first)
+        files_info = self.get_spring_metadata(spring_path)
+
+        fastq_first_path = Path(files_info["fastq_first"]["path"])
+
+        job_name = str(fastq_first_path.name).replace(FASTQ_FIRST_READ_SUFFIX, "_spring_to_fastq")
+        pending_path = self.get_pending_path(file_path=fastq_first_path)
         log_dir = self.get_log_dir(spring_path)
 
         sbatch_header = self._get_slurm_header(job_name=job_name, log_dir=log_dir)
 
-        sbatch_body = self._get_slurm_fastq_to_spring(
-            fastq_first_path=fastq_first,
-            fastq_second_path=fastq_second,
+        sbatch_body = self._get_slurm_spring_to_fastq(
+            fastq_first_path=str(fastq_first_path),
+            fastq_second_path=files_info["fastq_second"]["path"],
             spring_path=spring_path,
-            flag_path=flag_path,
             pending_path=pending_path,
+            checksum_first=files_info["fastq_first"]["checksum"],
+            checksum_second=files_info["fastq_second"]["checksum"],
         )
 
-        sbatch_path = self.get_sbatch_path(log_dir, "fastq")
-        sbatch_content = sbatch_header + "\n" + sbatch_body
+        sbatch_path = self.get_sbatch_path(log_dir, "spring")
+        sbatch_content = "\n".join([sbatch_header, sbatch_body])
         self._submit_sbatch(sbatch_content=sbatch_content, sbatch_path=sbatch_path)
+
+    @staticmethod
+    def get_spring_archive_files(spring_metadata: List[dict]) -> dict:
+        """Map the files in spring metadata to a dictionary
+
+        Returns: {
+                    "fastq_first" : {file_info},
+                    "fastq_second" : {file_info},
+                    "spring" : {file_info},
+                  }
+        """
+        names_map = {"first_read": "fastq_first", "second_read": "fastq_second", "spring": "spring"}
+        return {names_map[file_info["file"]]: file_info for file_info in spring_metadata}
+
+    def get_spring_metadata(self, spring_path: Path) -> dict:
+        """Read a spring metadata file and return the content"""
+        spring_config_path = self.get_flag_path(spring_path)
+        with open(spring_config_path, "r") as infile:
+            spring_metadata = json.load(infile)
+        file_schema = CrunchyFileSchema(many=True)
+        try:
+            file_schema.load(spring_metadata)
+        except ValidationError as err:
+            LOG.warning(err.messages)
+            return None
+        if len(spring_metadata) != 3:
+            LOG.warning("Wrong number of files in spring metada file: %s", spring_path)
+            return None
+
+        return self.get_spring_archive_files(spring_metadata)
 
     def _submit_sbatch(self, sbatch_content: str, sbatch_path: Path):
         """Submit slurm job"""
@@ -146,6 +174,8 @@ class CrunchyAPI:
         """Return the path to where sbatch should be printed"""
         if compression == "fastq":
             return log_dir / "compress_fastq.sh"
+        if compression == "spring":
+            return log_dir / "decompress_spring.sh"
         return log_dir / "compress_bam.sh"
 
     def is_cram_compression_done(self, bam_path: Path) -> bool:
@@ -271,6 +301,7 @@ class CrunchyAPI:
 
     def _get_slurm_header(self, job_name: str, log_dir: str) -> str:
         """Create and return a header for a sbatch script"""
+        LOG.info("Generating sbatch header")
         sbatch_header = SBATCH_HEADER_TEMPLATE.format(
             job_name=job_name,
             account=self.slurm_account,
@@ -288,6 +319,7 @@ class CrunchyAPI:
         bam_path: str, cram_path: str, flag_path: str, pending_path: str, reference_path: str,
     ) -> str:
         """Create and return the body of a sbatch script that runs bam to cram"""
+        LOG.info("Generating bam to fastq sbatch body")
         sbatch_body = SBATCH_BAM_TO_CRAM.format(
             bam_path=bam_path,
             cram_path=cram_path,
@@ -306,6 +338,7 @@ class CrunchyAPI:
         pending_path: str,
     ) -> str:
         """Create and return the body of a sbatch script that runs bam to cram"""
+        LOG.info("Generating fastq to spring sbatch body")
         sbatch_body = SBATCH_FASTQ_TO_SPRING.format(
             fastq_first=fastq_first_path,
             fastq_second=fastq_second_path,
@@ -321,17 +354,16 @@ class CrunchyAPI:
         fastq_first_path: str,
         fastq_second_path: str,
         spring_path: str,
-        flag_path: str,
         pending_path: str,
         checksum_first: str,
         checksum_second: str,
     ) -> str:
         """Create and return the body of a sbatch script that runs bam to cram"""
+        LOG.info("Generating spring to fastq sbatch body")
         sbatch_body = SBATCH_SPRING_TO_FASTQ.format(
             spring_path=spring_path,
             fastq_first=fastq_first_path,
             fastq_second=fastq_second_path,
-            flag_path=flag_path,
             pending_path=pending_path,
             checksum_first=checksum_first,
             checksum_second=checksum_second,

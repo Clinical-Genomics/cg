@@ -1,5 +1,6 @@
 """Fixtures for crunchy api"""
 import copy
+import json
 import logging
 from pathlib import Path
 from typing import List
@@ -59,6 +60,15 @@ def fixture_spring_metadata(fastq_paths, spring_path):
         {"path": str(spring_path.resolve()), "file": "spring"},
     ]
     return metadata
+
+
+@pytest.fixture(scope="function", name="spring_metadata_file")
+def fixture_spring_metadata_file(spring_path, spring_metadata):
+    """Return the path to a populated spring metadata file"""
+    metadata_path = CrunchyAPI.get_flag_path(spring_path)
+    with open(metadata_path, "w") as outfile:
+        outfile.write(json.dumps(spring_metadata))
+    return metadata_path
 
 
 @pytest.fixture(scope="function", name="sbatch_process")
@@ -252,6 +262,9 @@ def mock_bam_to_cram():
     return _mock_bam_to_cram_func
 
 
+# SBATCH Fixtures
+
+
 @pytest.fixture(scope="function", name="sbatch_content")
 def fixture_sbatch_content(bam_path, crunchy_config_dict):
     """Return expected sbatch content"""
@@ -373,6 +386,77 @@ trap error ERR
 touch {pending_path}
 crunchy -t 12 compress fastq -f {fastq_first} -s {fastq_second} -o {spring_path} --check-integrity \
 --metadata-file
+rm {pending_path}"""
+
+    return _content
+
+
+@pytest.fixture(scope="function", name="sbatch_content_spring_to_fastq")
+def fixture_sbatch_content_spring_to_fastq(spring_metadata, crunchy_config_dict):
+    """Return expected sbatch content for spring to fastq job"""
+    account = crunchy_config_dict["crunchy"]["slurm"]["account"]
+    ntasks = 12
+    mem = 50
+    time = 24
+    mail_user = crunchy_config_dict["crunchy"]["slurm"]["mail_user"]
+    conda_env = crunchy_config_dict["crunchy"]["slurm"]["conda_env"]
+    for file_info in spring_metadata:
+        if file_info["file"] == "first_read":
+            fastq_first = Path(file_info["path"])
+            checksum_first = file_info["checksum"]
+        if file_info["file"] == "second_read":
+            fastq_second = Path(file_info["path"])
+            checksum_second = file_info["checksum"]
+        if file_info["file"] == "spring":
+            spring_path = Path(file_info["path"])
+
+    job_name = str(fastq_first.name).replace(FASTQ_FIRST_READ_SUFFIX, "_spring_to_fastq")
+    pending_path = CrunchyAPI.get_pending_path(fastq_first)
+    log_dir = fastq_first.parent
+
+    _content = f"""#!/bin/bash
+#SBATCH --job-name={job_name}
+#SBATCH --account={account}
+#SBATCH --ntasks={ntasks}
+#SBATCH --mem={mem}G
+#SBATCH --error={log_dir}/{job_name}.stderr
+#SBATCH --output={log_dir}/{job_name}.stdout
+#SBATCH --mail-type=FAIL
+#SBATCH --mail-user={mail_user}
+#SBATCH --time={time}:00:00
+#SBATCH --qos=low
+
+set -e
+
+echo "Running on: $(hostname)"
+
+source activate {conda_env}
+
+
+error() {{
+    if [[ -e {fastq_first} ]]
+    then
+        rm {fastq_first}
+    fi
+
+    if [[ -e {fastq_second} ]]
+    then
+        rm {fastq_second}
+    fi
+
+    if [[ -e {pending_path} ]]
+    then
+        rm {pending_path}
+    fi
+
+    exit 1
+}}
+
+trap error ERR
+
+touch {pending_path}
+crunchy -t 12 decompress spring {spring_path} -f {fastq_first} -s {fastq_second} \
+--first-checksum {checksum_first} --second-checksum {checksum_second}
 rm {pending_path}"""
 
     return _content
