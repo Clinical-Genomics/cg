@@ -1,11 +1,13 @@
 """Tests for CrunchyAPI"""
+import json
 import logging
 from pathlib import Path
 
 import pytest
 
 from cg.apps.crunchy import CrunchyAPI
-from cg.constants import CRAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX
+from cg.constants import (CRAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX,
+                          FASTQ_SECOND_READ_SUFFIX)
 
 
 def test_set_dry_run(crunchy_config_dict):
@@ -109,6 +111,44 @@ def test_get_spring_metadata(spring_path, spring_metadata_file, crunchy_config_d
     assert len(parsed_content) == 3
     # THEN assert a dictionary with the files is returned
     assert isinstance(parsed_content, dict)
+
+
+def test_get_spring_metadata_malformed_info(
+    spring_path, spring_metadata_file, spring_metadata, crunchy_config_dict
+):
+    """Test the method that fetches the spring metadata from a file when file is malformed"""
+    # GIVEN a spring metadata file with missing information
+    spring_metadata[0].pop("path")
+    with open(spring_metadata_file, "w") as outfile:
+        outfile.write(json.dumps(spring_metadata))
+
+    # GIVEN a crunchy API
+    crunchy_api = CrunchyAPI(crunchy_config_dict)
+
+    # WHEN fetching the content of the file
+    parsed_content = crunchy_api.get_spring_metadata(spring_path)
+
+    # THEN assert that None is returned to indicate failure
+    assert parsed_content is None
+
+
+def test_get_spring_metadata_wrong_number_files(
+    spring_path, spring_metadata_file, spring_metadata, crunchy_config_dict
+):
+    """Test the method that fetches the spring metadata from a file when a file is missing"""
+    # GIVEN a spring metadata file with missing file
+    spring_metadata = spring_metadata[1:]
+    with open(spring_metadata_file, "w") as outfile:
+        outfile.write(json.dumps(spring_metadata))
+
+    # GIVEN a crunchy API
+    crunchy_api = CrunchyAPI(crunchy_config_dict)
+
+    # WHEN fetching the content of the file
+    parsed_content = crunchy_api.get_spring_metadata(spring_path)
+
+    # THEN assert that None is returned to indicate failure
+    assert parsed_content is None
 
 
 def test_spring_to_fastq(
