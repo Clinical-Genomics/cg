@@ -152,7 +152,6 @@ def test_multiple_analyses(analysis_store, helpers):
     assert analysis_oldest not in analyses
 
 
-
 def ensure_customer(store, customer_id="cust_test"):
     """utility function to return existing or create customer for tests"""
     customer_group = store.customer_group("dummy_group")
