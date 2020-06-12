@@ -28,7 +28,7 @@ def test_export_sample(genotypeapi, mocker):
     """Test that get_trending calls the genotype API with correct command."""
 
     # GIVEN a genotypeapi api and argument days
-    days = "20"
+    days = 20
 
     # WHEN running get_trending
     mocker.patch.object(subprocess, "check_output")
@@ -52,3 +52,5 @@ def test_export_sample_no_output(genotypeapi, mocker):
     # THEN assert CaseNotFoundError
     with pytest.raises(CaseNotFoundError):
         genotypeapi.export_sample(days="")
+
+
