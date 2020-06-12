@@ -52,5 +52,3 @@ def test_export_sample_no_output(genotypeapi, mocker):
     # THEN assert CaseNotFoundError
     with pytest.raises(CaseNotFoundError):
         genotypeapi.export_sample(days="")
-
-
