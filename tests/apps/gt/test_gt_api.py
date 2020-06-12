@@ -35,7 +35,7 @@ def test_export_sample(genotypeapi, mocker):
     genotypeapi.export_sample(days=days)
 
     # THEN assert subprocess is running the GenotypeAPI with correct command
-    call = ["gtdb", "--config", "config/path", "export-sample", "-d", days]
+    call = ["gtdb", "--config", "config/path", "export-sample", "-d", str(days)]
     subprocess.check_output.assert_called_with(call)
 
 
