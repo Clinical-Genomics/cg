@@ -9,24 +9,14 @@ from typing import List
 
 from marshmallow import ValidationError
 
-from cg.constants import (
-    BAM_INDEX_SUFFIX,
-    BAM_SUFFIX,
-    CRAM_INDEX_SUFFIX,
-    CRAM_SUFFIX,
-    FASTQ_FIRST_READ_SUFFIX,
-    FASTQ_SECOND_READ_SUFFIX,
-    SPRING_SUFFIX,
-)
+from cg.constants import (BAM_INDEX_SUFFIX, BAM_SUFFIX, CRAM_INDEX_SUFFIX,
+                          CRAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX,
+                          FASTQ_SECOND_READ_SUFFIX, SPRING_SUFFIX)
 from cg.utils import Process
 
 from .models import CrunchyFileSchema
-from .sbatch import (
-    SBATCH_BAM_TO_CRAM,
-    SBATCH_FASTQ_TO_SPRING,
-    SBATCH_HEADER_TEMPLATE,
-    SBATCH_SPRING_TO_FASTQ,
-)
+from .sbatch import (SBATCH_BAM_TO_CRAM, SBATCH_FASTQ_TO_SPRING,
+                     SBATCH_HEADER_TEMPLATE, SBATCH_SPRING_TO_FASTQ)
 
 LOG = logging.getLogger(__name__)
 
@@ -207,6 +197,14 @@ class CrunchyAPI:
             return False
         return True
 
+    def is_compression_pending(self, file_path: Path) -> bool:
+        """Check if compression/decompression has started but not finished"""
+        pending_path = self.get_pending_path(file_path)
+        if pending_path.exists():
+            LOG.info("Compression/decompression is pending for %s", file_path)
+            return True
+        return False
+
     def is_cram_compression_pending(self, bam_path: Path) -> bool:
         """Check if cram compression has started, but not yet finished"""
         pending_path = self.get_pending_path(file_path=bam_path)
@@ -243,7 +241,7 @@ class CrunchyAPI:
         return True
 
     def is_spring_compression_pending(self, fastq: Path) -> bool:
-        """Check if spring compression has started, but not yet finished"""
+        """Check if spring compression/decompression has started, but not yet finished"""
         pending_path = self.get_pending_path(file_path=fastq)
         if pending_path.exists():
             LOG.info("SPRING compression is pending for %s", fastq)
@@ -265,8 +263,10 @@ class CrunchyAPI:
     def get_pending_path(file_path: Path) -> Path:
         """Gives path to pending-flag path
 
-        There are two cases, either fastq or bam. They are treated as shown below
+        The file ending can be either fastq, spring or bam. They are treated as shown below
         """
+        if str(file_path).endswith(SPRING_SUFFIX):
+            return Path(str(file_path).replace(SPRING_SUFFIX, PENDING_PATH_SUFFIX))
         if str(file_path).endswith(FASTQ_FIRST_READ_SUFFIX):
             return Path(str(file_path).replace(FASTQ_FIRST_READ_SUFFIX, PENDING_PATH_SUFFIX))
         if str(file_path).endswith(FASTQ_SECOND_READ_SUFFIX):

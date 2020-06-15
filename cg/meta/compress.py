@@ -10,13 +10,8 @@ from typing import List
 from housekeeper.store import models as hk_models
 
 from cg.apps import crunchy, hk, scoutapi
-from cg.constants import (
-    BAM_SUFFIX,
-    FASTQ_FIRST_READ_SUFFIX,
-    FASTQ_SECOND_READ_SUFFIX,
-    HK_BAM_TAGS,
-    HK_FASTQ_TAGS,
-)
+from cg.constants import (BAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX,
+                          FASTQ_SECOND_READ_SUFFIX, HK_BAM_TAGS, HK_FASTQ_TAGS)
 
 LOG = logging.getLogger(__name__)
 
@@ -63,7 +58,7 @@ class CompressAPI:
                 LOG.info("BAM to CRAM compression not possible for %s", sample_id)
                 return False
 
-            if self.crunchy_api.is_cram_compression_pending(bam_path):
+            if self.crunchy_api.is_compression_pending(bam_path):
                 LOG.info("BAM to CRAM compression pending for %s", sample_id)
                 return False
 
@@ -213,7 +208,7 @@ class CompressAPI:
             LOG.warning("FASTQ to SPRING compression already done for %s", sample_id)
             return False
 
-        if self.crunchy_api.is_spring_compression_pending(fastq=fastq_first):
+        if self.crunchy_api.is_compression_pending(fastq_first):
             LOG.info("FASTQ to SPRING compression pending for %s", sample_id)
             return False
 
@@ -228,6 +223,49 @@ class CompressAPI:
         )
 
         return True
+
+    def decompress_spring(self, sample_id: str):
+        """Decompress SPRING archive for a sample
+
+        This function will make sure that everything is ready for decompression. If so the spring
+        archive will be decompressed into the two fastq files. Housekeeper will be updated to
+        include fastq files as well as the spring metadata file will be updated to include date for
+        decompression.
+        """
+        spring_path = self.get_spring_path(sample_id)
+        if not self.crunchy_api.is_spring_decompression_possible(spring_path):
+            LOG.info("SPRING to FASTQ decompression not possible for %s", sample_id)
+            return False
+
+        if self.crunchy_api.is_compression_pending(spring_path):
+            LOG.info("SPRING to FASTQ decompression pending for %s", sample_id)
+            return False
+
+        LOG.info(
+            "De compressing %s to FASTQ format for sample %s ", spring_path, sample_id,
+        )
+
+    def get_spring_path(self, sample_id: str) -> dict:
+        """Get FASTQ files for sample"""
+        hk_files_dict = self.get_hk_files_dict(bundle_name=sample_id, tags=HK_FASTQ_TAGS)
+        if hk_files_dict is None:
+            return None
+
+        sorted_fastqs = self.sort_fastqs(fastq_files=list(hk_files_dict.keys()))
+        if not sorted_fastqs:
+            LOG.info("Could not sort FASTQ files for %s", sample_id)
+            return None
+        fastq_dict = {
+            "fastq_first_file": {
+                "path": sorted_fastqs[0],
+                "hk_file": hk_files_dict[sorted_fastqs[0]],
+            },
+            "fastq_second_file": {
+                "path": sorted_fastqs[1],
+                "hk_file": hk_files_dict[sorted_fastqs[1]],
+            },
+        }
+        return fastq_dict
 
     def get_fastq_files(self, sample_id: str) -> dict:
         """Get FASTQ files for sample"""
@@ -355,10 +393,6 @@ class CompressAPI:
 
         self.remove_fastq(fastq_first=fastq_first, fastq_second=fastq_second)
         return True
-
-    def decompress_spring(self, sample_id: str):
-        """Decompress SPRING archive for a sample"""
-        pass
 
     def update_scout(self, case_id: str, sample_id: str, bam_path: Path):
         """Update scout with compressed alignment file if present"""

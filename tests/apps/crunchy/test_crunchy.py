@@ -6,7 +6,8 @@ from pathlib import Path
 import pytest
 
 from cg.apps.crunchy import CrunchyAPI
-from cg.constants import CRAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX
+from cg.constants import (CRAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX,
+                          FASTQ_SECOND_READ_SUFFIX, SPRING_SUFFIX)
 
 
 def test_set_dry_run(crunchy_config_dict):
@@ -491,13 +492,26 @@ def test_get_spring_path_from_second_fastq():
 
 
 def test_get_pending_path_from_second_fastq():
-    """Test to get a spring path from second read in pair"""
+    """Test to get a pending path from second read in pair"""
     # GIVEN a fastq path for a read 2 in pair
     ind_id = "ind1"
     fastq = Path("".join([ind_id, FASTQ_SECOND_READ_SUFFIX]))
 
     # WHEN fetching the spring path
     pending_path = CrunchyAPI.get_pending_path(fastq)
+
+    # THEN check that the correct path was returned
+    assert pending_path == Path(ind_id).with_suffix(".crunchy.pending.txt")
+
+
+def test_get_pending_path_from_spring():
+    """Test to get a pending path from a spring path"""
+    # GIVEN a spring path
+    ind_id = "ind1"
+    spring = Path("".join([ind_id, SPRING_SUFFIX]))
+
+    # WHEN fetching the spring path
+    pending_path = CrunchyAPI.get_pending_path(spring)
 
     # THEN check that the correct path was returned
     assert pending_path == Path(ind_id).with_suffix(".crunchy.pending.txt")
