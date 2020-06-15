@@ -142,7 +142,6 @@ def completed(context):
 
     click.echo(click.style(f"Done storing cases. Exit code: {exit_code}", fg="blue"))
 
-
     sys.exit(exit_code)
 
 
