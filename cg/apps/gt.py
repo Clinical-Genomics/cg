@@ -48,7 +48,7 @@ class GenotypeAPI(Manager):
     def export_sample(self, days: int = 0) -> str:
         """Export sample info."""
         trending_call = self.base_call[:]
-        trending_call.extend(["export-sample", "-d", days])
+        trending_call.extend(["export-sample", "-d", str(days)])
         try:
             LOG.info("Running Genotype API to get data.")
             LOG.debug(trending_call)
@@ -65,7 +65,7 @@ class GenotypeAPI(Manager):
     def export_sample_analysis(self, days: int = 0) -> str:
         """Export analysis."""
         trending_call = self.base_call[:]
-        trending_call.extend(["export-sample-analysis", "-d", days])
+        trending_call.extend(["export-sample-analysis", "-d", str(days)])
         try:
             LOG.info("Running Genotype API to get data.")
             LOG.debug(trending_call)
