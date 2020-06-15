@@ -42,35 +42,3 @@ def test_outdated(analysis_store, helpers):
 
     # THEN this analyse should be returned
     assert analysis in analyses
-
-
-def test_multiple_analyses(analysis_store, helpers):
-    """Tests that analyses that are not latest are not returned"""
-
-    # GIVEN an analysis that is not delivery reported but there exists a newer analysis
-    timestamp = datetime.now()
-    family = helpers.add_family(analysis_store)
-    analysis_oldest = helpers.add_analysis(
-        analysis_store,
-        family=family,
-        started_at=timestamp - timedelta(days=1),
-        uploaded_at=timestamp - timedelta(days=1),
-        delivery_reported_at=None,
-    )
-    analysis_store.add_commit(analysis_oldest)
-    analysis_newest = helpers.add_analysis(
-        analysis_store,
-        family=family,
-        started_at=timestamp,
-        uploaded_at=timestamp,
-        delivery_reported_at=None,
-    )
-    sample = helpers.add_sample(analysis_store, delivered_at=timestamp)
-    analysis_store.relate_sample(family=analysis_oldest.family, sample=sample, status="unknown")
-
-    # WHEN calling the analyses_to_delivery_report
-    analyses = analysis_store.analyses_to_delivery_report().all()
-
-    # THEN only the newest analysis should be returned
-    assert analysis_newest in analyses
-    assert analysis_oldest not in analyses
