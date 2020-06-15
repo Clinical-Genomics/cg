@@ -132,7 +132,7 @@ def completed(context):
     for case in _store.cases_to_balsamic_analyze(limit=None):
         click.echo(click.style(f"Storing case: {case}", fg="blue"))
         try:
-            exit_code = context.invoke(analysis, case_id=case.internal_id) and exit_code
+            exit_code = context.invoke(analysis, case_id=case.internal_id) or exit_code
         except StoreError as error:
             LOG.error("Analysis storage failed: %s", error.message)
             exit_code = FAIL
