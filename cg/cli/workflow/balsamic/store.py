@@ -23,7 +23,7 @@ FAIL = 1
 @click.group()
 @click.pass_context
 def store(context):
-    """Store results from MIP in housekeeper."""
+    """Store results from Balsamic in housekeeper."""
     context.obj["db"] = Store(context.obj["database"])
     context.obj["hk_api"] = hk.HousekeeperAPI(context.obj)
     context.obj["analysis_api"] = AnalysisAPI(
