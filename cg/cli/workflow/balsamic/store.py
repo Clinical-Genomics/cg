@@ -85,23 +85,6 @@ def analysis(context, case_id, deliverables_file_path, config_path):
     LOG.info("Included files in Housekeeper")
 
 
-@store.command("all-cases")
-@click.pass_context
-def all_cases(context):
-
-    _store = context.obj["db"]
-
-    for case in _store.families():
-        try:
-            click.echo(click.style(f"storing case: {case}", fg="blue"))
-            context.invoke(analysis, case_id=case.internal_id)
-        except CgError as error:
-            LOG.error(error.message)
-            exit_code = 1
-
-    sys.exit(exit_code)
-
-
 @store.command("generate-deliverables-file")
 @click.option("-d", "--dry-run", "dry", is_flag=True, help="print command to console")
 @click.option("-c", "--config", "config_path", required=False, help="Optional")
