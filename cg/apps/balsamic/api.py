@@ -1,19 +1,33 @@
+import gzip
+import logging
+import re
+import subprocess
+import sys
+import shutil
+import click
+
+from pathlib import Path
+from cg.apps import hk, scoutapi, lims, tb
+from cg.apps.balsamic.fastq import FastqHandler
+from cg.cli.workflow.balsamic.store import store as store_cmd
+from cg.cli.workflow.balsamic.deliver import deliver as deliver_cmd, CASE_TAGS, SAMPLE_TAGS
+from cg.cli.workflow.get_links import get_links
+from cg.exc import LimsDataError, BalsamicStartError
+from cg.meta.deliver import DeliverAPI
+from cg.meta.workflow.base import get_panel_bed_from_lims
+from cg.meta.workflow.balsamic import AnalysisAPI
+from cg.store import Store
+from cg.utils.commands import Process
 from cg.utils import Process
 from cg.store import Store
 from cg.apps.hk import HousekeeperAPI
 
 
 
-LOG = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)   
 
-
-        
-ARGUMENT_CASE_ID = click.argument("case_id")
-
-
+ARGUMENT_CASE_ID = click.argument("case_id", required=True)
 OPTION_DRY = click.option("-d", "--dry-run", "dry", help="Print command to console without executing")
-OPTION_PRIORITY = click.option("-p", "--priority", type=click.Choice(["low", "normal", "high"]))
-
 
 
 class BalsamicAPI:
@@ -31,33 +45,27 @@ class BalsamicAPI:
         self.process = Process(self.binary)
 
 
-    def config_case(self, dry, arguments: dict):
+    def config_case(self, arguments: dict):
         """Create config file for BALSAMIC analysis"""
 
-        command = [
-            "config", 
-            "case",
-            "--adapter-trim", arguments["adapter_trim"], 
-            "--analysis-dir", arguments["analysis_dir"],
+        command = ["config", "case"]
+
+        opts = [
+            "--analysis-dir", self.root_dir,
+            "--singularity", self.singularity,
+            "--reference-config", self.reference_config,
+
             "--case-id", arguments["case_id"],
-            "--umi", arguments["umi"],
-            "--umi-trim-length", arguments["umi_trim_length"],
             "--normal", arguments["normal"],
             "--output-config", arguments["output_config"],
             "--panel-bed", arguments["panel_bed"],
-            "--quality-trim", arguments["quality_trim"],
-            "--reference-config", arguments["reference_config"],
-            "--singularity", arguments["singularity"],
             "--tumor", arguments["tumor"],
             ]
 
-        if dry:
-            click.echo(command)
-        else:
-            self.process.run_command(command)
+        self.process.run_command(command)
 
 
-    def run_analysis(self, dry, arguments: dict):
+    def run_analysis(self, arguments: dict):
         """Execute BALSAMIC"""
 
         command = [
@@ -71,10 +79,8 @@ class BalsamicAPI:
             "--qos", arguments["qos"],
             ]
 
-        if dry:
-            click.echo(command)
-        else:
-            self.process.run_command(command)
+
+        self.process.run_command(command)
 
 
 
@@ -108,32 +114,59 @@ class MetaBalsamicAPI:
                                     lims_api = self.lims_api,
                                     deliver_api = self.deliver_api,
                                     )
-        
+
+    def lookup_samples(self, case_id):
+        """Look up case ID in StoreDB and return result"""
+
+        case_object = self.store.family(case_id)
+        return case_object
+
+
+    def link_samples(self, case_object_links):
+
+        for link_object in case_object_links:
+            LOG.info(
+                "%s: %s link FASTQ files",
+                link_object.sample.internal_id,
+                link_object.sample.data_analysis,
+                )
+
+            if link_object.sample.data_analysis and "balsamic" in link_object.sample.data_analysis.lower():
+                LOG.info(
+                    "%s has balsamic as data analysis, linking.",
+                    link_object.sample.internal_id
+                    )
+
+                self.analysis_api.link_sample(
+                                            fastq_handler=self.fastq_handler,
+                                            case=link_object.family.internal_id,
+                                            sample=link_object.sample.internal_id
+                                            )
+            else:
+                LOG.warning(
+                    "%s does not have blasamic as data analysis, skipping.",
+                    link_object.sample.internal_id
+                    )
+
+        LOG.info("Linking completed")
 
 
 
 
-
-    def link_samples(self, case_id):
-        """Links Sample ID and Case ID """
-        pass
-
-    def get_case_config_params(self, case_id) -> dict:
+    def get_case_config_params(self, panel_bed, case_id) -> dict:
         """Determines correct config params and returns them in a dict"""
 
 
-        arguments = {
-            
-            #hardcoded
-            "analysis_dir": self.root_dir,
-            "case_id": case_id,
-            "singularity": self.singularity,
-            "reference_config": self.reference_config,
-            "output_config": f'{case_id}.json',
 
+
+        arguments = {
+
+            #argument
+            "--case-id": case_id,
+            "--output_config": f'{case_id}.json',
 
             #command line or API logic
-            "--panel-bed", arguments["panel_bed"],
+            "panel_bed": panel_bed ,
 
             #API-only logic
             "--normal", arguments["normal"],
@@ -142,7 +175,17 @@ class MetaBalsamicAPI:
         return arguments
 
 
-    def get_run_params(self):
+    def get_panel_bed_param(self, case_object_links) -> dict:
+        pass
+
+    def get_tumor_param(self, case_object_links) -> dict:
+        pass
+
+    def get_normal_param(self, case_object_links) -> dict:
+        pass
+
+
+    def get_run_params(self) -> dict:
         """Determines correct config params and returns them in a dict"""
         pass
 
@@ -156,74 +199,97 @@ def balsamic(context):
     context.obj["MetaBalsamicAPI"] = MetaBalsamicAPI(context.obj)
 
 
+
 @balsamic.command
 @ARGUMENT_CASE_ID
 @click.pass_context
 def link(context, case_id):
-    #only case id
-    if input_type == "case_id":
-        #Link by case id
-        continue
-    elif input_type == "sample_id":
-        #Link by sample id
-        continue
+    """"Link samples to case ID"""
+
+    LOG.info(f"Link all samples in case {case_id}")
+    case_object = context.obj["MetaBalsamicAPI"].lookup_samples(case_id)
+    if case_object:
+        if case_object.links:
+            context.obj["MetaBalsamicAPI"].link_samples(case_object.links)
+        else:
+            LOG.warning(f"{case_id} has no linked samples")
+            click.Abort()
+    else:
+        LOG.warning(f"{case_id} is not present in database")
+        click.Abort()
 
 
-    pass
 
 
 @balsamic.command
 @ARGUMENT_CASE_ID
 @OPTION_DRY
-@click.option("--target-bed", required=False, help="Optional")
+@click.option("--panel-bed", required=False, help="Optional")
 @click.pass_context
-def config_case(context, adapter_trim, quality_trim, target_bed, umi, umi_trim_length, case_id):
+def config_case(context, panel_bed, case_id, dry):
+    """Create config file for BALSAMIC analysis of a case"""
+
+    LOG.info(f"Creating config for {case_id}")
+    case_object = context.obj["MetaBalsamicAPI"].lookup_samples(case_id)
+    if case_object:
+        if case_object.links:
+            #can run config
+
+
+
+
+
+
+            
+        else:
+            LOG.warning(f"{case_id} has no linked samples")
+            click.Abort()
+    else:
+        LOG.warning(f"{case_id} is not present in database")
+        click.Abort()
+
+
+    arguments = context.obj["MetaBalsamicAPI"].get_case_config_params(panel_bed, case_id)
+
+
+
+@balsamic.command
+@ARGUMENT_CASE_ID
+@OPTION_DRY
+@click.option("-p","--priority", type=click.Choice(["low", "normal", "high"]))
+@click.option("-a","--analysis-type", type=click.Choice["qc", "paired", "single"])
+@click.option("-r","--run-analysis", is_flag=True, default=False, help="Execute in non-dry mode")
+@click.pass_context
+def run(context, analysis_type, run_analysis, priority, case_id, dry):
     arguments = context.obj["MetaBalsamicAPI"].get_run_params()
     context.obj["MetaBalsamicAPI"].balsamic_api.run_analysis(arguments)
-    pass
-
-
-@balsamic.command
-@ARGUMENT_CASE_ID
-@OPTION_DRY
-@OPTION_PRIORITY
-@click.option("-a","--analysis-type", type=click.Choice["qc", "paired", "single"])
-@click.option("-r","--run-analysis", is_flag=True, default=False, help="start analysis")
-@click.pass_context
-def run(context, analysis_type, run_analysis, priority, case_id):
-
-    arguments = context.obj["MetaBalsamicAPI"].get_case_config_params()
-    context.obj["MetaBalsamicAPI"].balsamic_api.run_analysis(arguments)
-
-    pass
 
 
 @balsamic.command
 @ARGUMENT_CASE_ID
 @click.pass_context
-def remove_fastq(context, case_id):
+def remove_fastq(context, case_id):    
     """Remove stored FASTQ files"""
 
     work_dir = Path(f'{context.obj['balsamic']['root']}/{case_id}/fastq')
-
     if work_dir.exists():
         shutil.rmtree(work_dir)
-        LOG.info("Removed successfully")
+        LOG.info(f"Path {work_dir} removed successfully")
     else:
-        LOG.info("Does not exist")
+        LOG.info(f"Path {work_dir} does not exist")
 
 
 
 @balsamic.command
 @ARGUMENT_CASE_ID
-@OPTION_DRY
 @click.pass_context
-def start(context, dry, case_id):
+def start(context, case_id):
+    """Invoke all commands"""
+
     context.invoke(link)
-
-    """Invoke link, config_case and run commands"""
-    pass
-
+    context.invoke(config_case)
+    context.invoke(run)
+    context.invoke(remove_fastq)
 
 
 
