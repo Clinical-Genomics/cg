@@ -17,8 +17,7 @@ def balsamic_store_context(balsamic_store, balsamic_case) -> dict:
         "store_api": balsamic_store,
         "balsamic": {"root": "root", "conda_env": "conda_env"},
         "analysis_api": AnalysisAPI(
-            hk_api=MockHouseKeeper(balsamic_case.internal_id),
-            fastq_api=MockFastqAPI(),
+            hk_api=MockHouseKeeper(balsamic_case.internal_id), fastq_api=MockFastqAPI(),
         ),
     }
 
