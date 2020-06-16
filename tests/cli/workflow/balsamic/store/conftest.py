@@ -14,10 +14,9 @@ def balsamic_store_context(balsamic_store, balsamic_case) -> dict:
     """context to use in cli"""
     return {
         "hk_api": MockHouseKeeper(balsamic_case.internal_id),
-        "db": balsamic_store,
+        "store_api": balsamic_store,
         "balsamic": {"root": "root", "conda_env": "conda_env"},
         "analysis_api": AnalysisAPI(
-            db=balsamic_store,
             hk_api=MockHouseKeeper(balsamic_case.internal_id),
             fastq_api=MockFastqAPI(),
         ),

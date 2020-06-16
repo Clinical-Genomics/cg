@@ -24,11 +24,10 @@ FAIL = 1
 @click.pass_context
 def store(context):
     """Store results from Balsamic in housekeeper."""
-    context.obj["db"] = Store(context.obj["database"])
-    context.obj["hk_api"] = hk.HousekeeperAPI(context.obj)
-    context.obj["analysis_api"] = AnalysisAPI(
-        db=Store(context.obj["database"]),
-        hk_api=hk.HousekeeperAPI(context.obj),
+    context.obj["store_api"] = context.obj.get("store_api") or Store(context.obj["database"])
+    context.obj["hk_api"] = context.obj.get("hk_api") or hk.HousekeeperAPI(context.obj)
+    context.obj["analysis_api"] = context.obj.get("analysis_api") or AnalysisAPI(
+        hk_api=context.obj["hk_api"],
         fastq_api=fastq.FastqAPI,
     )
 
@@ -54,7 +53,7 @@ def store(context):
 def analysis(context, case_id, deliverables_file_path, config_path):
     """Store a finished analysis in Housekeeper."""
 
-    status = context.obj["db"]
+    status = context.obj["store_api"]
     case_obj = status.family(case_id)
     root_dir = Path(context.obj["balsamic"]["root"])
     analysis_api = context.obj["analysis_api"]
@@ -95,7 +94,7 @@ def generate_deliverables_file(context, dry, config_path, case_id):
 
     conda_env = context.obj["balsamic"]["conda_env"]
     root_dir = Path(context.obj["balsamic"]["root"])
-    case_obj = context.obj["db"].family(case_id)
+    case_obj = context.obj["store_api"].family(case_id)
     analysis_api = context.obj["analysis_api"]
 
     if not case_obj:
@@ -126,7 +125,7 @@ def generate_deliverables_file(context, dry, config_path, case_id):
 @click.pass_context
 def completed(context):
     """Store all completed analyses."""
-    _store = context.obj["db"]
+    _store = context.obj["store_api"]
 
     exit_code = SUCCESS
     for case in _store.cases_to_balsamic_analyze(limit=None):

@@ -23,9 +23,9 @@ def balsamic_context(
     return {
         "hk_api": housekeeper_api,
         "tb_api": MockTB(),
-        "db": balsamic_store,
+        "store_api": balsamic_store,
         "analysis_api": AnalysisAPI(
-            db=balsamic_store, hk_api=housekeeper_api, fastq_api=MockFastqAPI
+            hk_api=housekeeper_api, fastq_api=MockFastqAPI
         ),
         "fastq_handler": MockFastq,
         "fastq_api": MockFastqAPI,

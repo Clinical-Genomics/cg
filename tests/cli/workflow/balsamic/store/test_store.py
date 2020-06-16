@@ -105,7 +105,7 @@ def test_store_analysis_generates_file_from_directory(
     mocked_is_dir.return_value = True
     mock_make_archive = mocker.patch("shutil.make_archive")
     mock_make_archive.return_value = "file.tar.gz"
-    balsamic_case = balsamic_store_context["db"].families().first()
+    balsamic_case = balsamic_store_context["store_api"].families().first()
 
     # WHEN calling store with meta file
     result = cli_runner.invoke(

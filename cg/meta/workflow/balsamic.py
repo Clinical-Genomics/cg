@@ -12,8 +12,7 @@ from cg.utils.fastq import FastqAPI
 class AnalysisAPI:
     """Methods relevant for Balsamic Analyses"""
 
-    def __init__(self, db: Store, hk_api: hk.HousekeeperAPI, fastq_api: FastqAPI):
-        self.db = db
+    def __init__(self, hk_api: hk.HousekeeperAPI, fastq_api: FastqAPI):
         self.hk = hk_api
         self.fastq = fastq_api
 

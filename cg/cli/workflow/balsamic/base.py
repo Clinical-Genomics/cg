@@ -34,7 +34,7 @@ FAIL = 1
 @click.pass_context
 def balsamic(context, case_id, priority, email, target_bed):
     """Cancer workflow """
-    context.obj["db"] = Store(context.obj["database"])
+    context.obj["store_api"] = Store(context.obj["database"])
     context.obj["hk_api"] = hk.HousekeeperAPI(context.obj)
     context.obj["fastq_handler"] = FastqHandler
     context.obj["gzipper"] = gzip
@@ -42,7 +42,7 @@ def balsamic(context, case_id, priority, email, target_bed):
     context.obj["fastq_api"] = FastqAPI
 
     context.obj["analysis_api"] = AnalysisAPI(
-        db=context.obj["db"], hk_api=context.obj["hk_api"], fastq_api=context.obj["fastq_api"]
+        hk_api=context.obj["hk_api"], fastq_api=context.obj["fastq_api"]
     )
 
     if context.invoked_subcommand is None:
@@ -62,7 +62,7 @@ def balsamic(context, case_id, priority, email, target_bed):
 @click.pass_context
 def link(context, case_id, sample_id):
     """Link FASTQ files for a SAMPLE_ID."""
-    store = context.obj["db"]
+    store = context.obj["store_api"]
     link_objs = get_links(store, case_id, sample_id)
 
     for link_obj in link_objs:
@@ -100,7 +100,7 @@ def config_case(
     """ Generate a config for the case_id. """
 
     # missing sample_id and files
-    case_obj = context.obj["db"].family(case_id)
+    case_obj = context.obj["store_api"].family(case_id)
 
     if not case_obj:
         LOG.error("Could not find case: %s", case_id)
@@ -182,7 +182,7 @@ def config_case(
 
         if not target_bed:
             target_bed_filename = get_target_bed_from_lims(
-                context.obj["lims_api"], context.obj["db"], link_obj.sample.internal_id
+                context.obj["lims_api"], context.obj["store_api"], link_obj.sample.internal_id
             )
             target_beds.add(target_bed_filename)
 
@@ -306,7 +306,7 @@ def run(context, dry, run_analysis, config_path, priority, email, case_id):
 def start(context: click.Context, dry_run):
     """Start all analyses that are ready for analysis."""
     exit_code = SUCCESS
-    for case_obj in context.obj["db"].cases_to_balsamic_analyze():
+    for case_obj in context.obj["store_api"].cases_to_balsamic_analyze():
 
         LOG.info("%s: start analysis", case_obj.internal_id)
 
