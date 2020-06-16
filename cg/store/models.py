@@ -394,8 +394,9 @@ class MicrobialOrder(Model):
     microbial_samples = orm.relationship(
         "MicrobialSample", backref="microbial_order", order_by="-MicrobialSample.delivered_at",
     )
-    analyses = orm.relationship("Analysis", backref="microbial_order",
-                                order_by="-Analysis.completed_at")
+    analyses = orm.relationship(
+        "Analysis", backref="microbial_order", order_by="-Analysis.completed_at"
+    )
 
     def __str__(self):
         return f"{self.internal_id} ({self.name})"

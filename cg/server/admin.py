@@ -264,8 +264,10 @@ class MicrobialOrderView(BaseView):
         return (
             Markup(
                 u"<a href='%s'>%s</a>"
-                % (url_for("microbialorder.index_view", search=model.microbial_order.internal_id),
-                   model.microbial_order,)
+                % (
+                    url_for("microbialorder.index_view", search=model.microbial_order.internal_id),
+                    model.microbial_order,
+                )
             )
             if model.microbial_order
             else u""
@@ -282,8 +284,12 @@ class AnalysisView(BaseView):
         "family": FamilyView.view_family_link,
         "microbial_order": MicrobialOrderView.view_link,
     }
-    column_searchable_list = ["family.internal_id", "family.name", "microbial_order.internal_id",
-                              "microbial_order.name"]
+    column_searchable_list = [
+        "family.internal_id",
+        "family.name",
+        "microbial_order.internal_id",
+        "microbial_order.name",
+    ]
 
 
 class MicrobialSampleView(BaseView):
