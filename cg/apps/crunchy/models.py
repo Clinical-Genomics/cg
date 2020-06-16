@@ -2,6 +2,8 @@
 
 import marshmallow as ma
 
+from cg.utils.date import SIMPLE_DATE_FORMAT
+
 
 class CrunchyFileSchema(ma.Schema):
     """Schema with information from spring metadata info"""
@@ -14,4 +16,4 @@ class CrunchyFileSchema(ma.Schema):
     )
     checksum = ma.fields.Str()
     algorithm = ma.fields.Str()
-    updated = ma.fields.DateTime()
+    updated = ma.fields.DateTime(SIMPLE_DATE_FORMAT)

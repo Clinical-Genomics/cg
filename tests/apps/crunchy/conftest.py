@@ -66,8 +66,13 @@ def fixture_spring_metadata(fastq_paths, spring_path):
 def fixture_spring_metadata_file(spring_path, spring_metadata):
     """Return the path to a populated spring metadata file"""
     metadata_path = CrunchyAPI.get_flag_path(spring_path)
+    print("spring_path", spring_path)
     with open(metadata_path, "w") as outfile:
         outfile.write(json.dumps(spring_metadata))
+
+    with open(metadata_path, "r") as outfile:
+        print(json.loads(outfile.read()))
+
     return metadata_path
 
 

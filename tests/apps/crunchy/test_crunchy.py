@@ -1,9 +1,6 @@
 """Tests for CrunchyAPI"""
-import json
 import logging
 from pathlib import Path
-
-import pytest
 
 from cg.apps.crunchy import CrunchyAPI
 from cg.constants import (CRAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX,
@@ -21,157 +18,6 @@ def test_set_dry_run(crunchy_config_dict):
 
     # THEN assert that the api has true dry run
     assert crunchy_api.dry_run is True
-
-
-def test_bamcompression_pending_with_flag(crunchy_config_dict, bam_path):
-    """Test the method that checks if cram compression is pending.
-
-    In this case there WILL be a flag (pending_path) so the method should return True.
-    This means that the compression is not ready
-    """
-    # GIVEN a crunchy-api, and a bam_path
-    crunchy_api = CrunchyAPI(crunchy_config_dict)
-    # GIVEN that the flag exists
-    flag_path = crunchy_api.get_pending_path(file_path=bam_path)
-    flag_path.touch()
-    assert flag_path.exists()
-
-    # WHEN calling the function to check if compression is pending
-    result = crunchy_api.is_cram_compression_pending(bam_path=bam_path)
-
-    # THEN the function should return True since the flag exists
-    assert result is True
-
-
-def test_bamcompression_pending_no_flag(crunchy_config_dict, bam_path):
-    """Test the method that checks if cram compression is pending.
-
-    In this case there will not be a flag (pending_path) so the method should return False
-    """
-    # GIVEN a crunchy-api, and a bam_path
-    crunchy_api = CrunchyAPI(crunchy_config_dict)
-    # GIVEN that the flag does not exist
-    flag_path = crunchy_api.get_pending_path(file_path=bam_path)
-    assert flag_path.exists() is False
-
-    # WHEN calling the function to check if compression is pending
-    result = crunchy_api.is_cram_compression_pending(bam_path=bam_path)
-
-    # THEN the function should return False
-    assert result is False
-
-
-def test_get_crampath_from_cram_wrong_suffix(crunchy_config_dict, bam_path):
-    """Test to build a cream path from a bam path when the suffix is wrong
-
-    Since the method will realise this is not a bam path a ValueError will be raised
-    """
-    # GIVEN a crunchy-api, and a bam_path with wrong suffix
-    crunchy_api = CrunchyAPI(crunchy_config_dict)
-    new_file = bam_path.with_suffix(".fastq")
-
-    # WHEN calling the method to create a bam path
-    with pytest.raises(ValueError):
-        # THEN a ValueError should be raised since the file does not have a valid bam file suffix
-        crunchy_api.get_cram_path_from_bam(bam_path=new_file)
-
-
-def test_bam_to_cram(crunchy_config_dict, sbatch_content, bam_path, mocker):
-    """Test bam_to_cram method
-
-    Test to compress bam to cram method. This test will make sure that the correct sbatch content
-    was submitted to the Process api
-    """
-    # GIVEN a crunchy-api, and a bam_path
-    mocker_submit_sbatch = mocker.patch.object(CrunchyAPI, "_submit_sbatch")
-    crunchy_api = CrunchyAPI(crunchy_config_dict)
-    log_path = crunchy_api.get_log_dir(bam_path)
-    sbatch_path = crunchy_api.get_sbatch_path(log_path, "bam")
-
-    # WHEN calling bam_to_cram method on bam-path
-    crunchy_api.bam_to_cram(bam_path=bam_path)
-
-    # THEN _submit_sbatch method is called with expected sbatch-content
-
-    mocker_submit_sbatch.assert_called_with(sbatch_content=sbatch_content, sbatch_path=sbatch_path)
-
-
-def test_get_spring_metadata(spring_path, spring_metadata_file, crunchy_config_dict):
-    """Test the method that fetches the spring metadata from a file"""
-    # GIVEN a spring path and the path to a populated spring metadata file
-    assert spring_metadata_file.is_file()
-    assert spring_metadata_file.exists()
-    # GIVEN a crunchy API
-    crunchy_api = CrunchyAPI(crunchy_config_dict)
-
-    # WHEN fetching the content of the file
-    parsed_content = crunchy_api.get_spring_metadata(spring_path)
-
-    # THEN assert information about the three files is there
-    assert len(parsed_content) == 3
-    # THEN assert a dictionary with the files is returned
-    assert isinstance(parsed_content, dict)
-
-
-def test_get_spring_metadata_malformed_info(
-    spring_path, spring_metadata_file, spring_metadata, crunchy_config_dict
-):
-    """Test the method that fetches the spring metadata from a file when file is malformed"""
-    # GIVEN a spring metadata file with missing information
-    spring_metadata[0].pop("path")
-    with open(spring_metadata_file, "w") as outfile:
-        outfile.write(json.dumps(spring_metadata))
-
-    # GIVEN a crunchy API
-    crunchy_api = CrunchyAPI(crunchy_config_dict)
-
-    # WHEN fetching the content of the file
-    parsed_content = crunchy_api.get_spring_metadata(spring_path)
-
-    # THEN assert that None is returned to indicate failure
-    assert parsed_content is None
-
-
-def test_get_spring_metadata_wrong_number_files(
-    spring_path, spring_metadata_file, spring_metadata, crunchy_config_dict
-):
-    """Test the method that fetches the spring metadata from a file when a file is missing"""
-    # GIVEN a spring metadata file with missing file
-    spring_metadata = spring_metadata[1:]
-    with open(spring_metadata_file, "w") as outfile:
-        outfile.write(json.dumps(spring_metadata))
-
-    # GIVEN a crunchy API
-    crunchy_api = CrunchyAPI(crunchy_config_dict)
-
-    # WHEN fetching the content of the file
-    parsed_content = crunchy_api.get_spring_metadata(spring_path)
-
-    # THEN assert that None is returned to indicate failure
-    assert parsed_content is None
-
-
-def test_spring_to_fastq(
-    spring_file, spring_metadata_file, sbatch_content_spring_to_fastq, crunchy_config_dict, mocker
-):
-    """Test spring to fastq method
-
-    Test to decompress spring to fastq. This test will make sure that the correct sbatch content
-    was submitted to the Process api
-    """
-    # GIVEN a crunchy-api, and a bam_path
-    mocker_submit_sbatch = mocker.patch.object(CrunchyAPI, "_submit_sbatch")
-    crunchy_api = CrunchyAPI(crunchy_config_dict)
-    log_path = crunchy_api.get_log_dir(spring_file)
-    sbatch_path = crunchy_api.get_sbatch_path(log_path, "spring")
-
-    # WHEN calling bam_to_cram method on bam-path
-    crunchy_api.spring_to_fastq(spring_path=spring_file)
-
-    # THEN _submit_sbatch method is called with expected sbatch-content
-    mocker_submit_sbatch.assert_called_with(
-        sbatch_content=sbatch_content_spring_to_fastq, sbatch_path=sbatch_path
-    )
 
 
 def test_is_cram_compression_done_no_cram(crunchy_config_dict, bam_path):
@@ -253,7 +99,7 @@ def test_is_bam_compression_possible_no_bam(crunchy_config_dict, bam_path):
     crunchy_api = CrunchyAPI(crunchy_config_dict)
 
     # WHEN calling test_bam_compression_possible
-    result = crunchy_api.is_bam_compression_possible(bam_path=bam_path)
+    result = crunchy_api.is_compression_possible(bam_path)
 
     # THEN this should return False
     assert not result
@@ -270,7 +116,7 @@ def test_is_bam_compression_possible_cram_done(
 
     # WHEN calling test_bam_compression_possible when cram_compression is done
     crunchy_api.bam_to_cram(bam_path=bam_path)
-    result = crunchy_api.is_bam_compression_possible(bam_path=bam_path)
+    result = crunchy_api.is_compression_possible(bam_path)
 
     # THEN this should return False
     assert not result
@@ -283,7 +129,7 @@ def test_is_bam_compression_possible(crunchy_config_dict, bam_path):
     bam_path.touch()
 
     # WHEN calling test_bam_compression_possible
-    result = crunchy_api.is_bam_compression_possible(bam_path=bam_path)
+    result = crunchy_api.is_compression_possible(bam_path)
 
     # THEN this will return True
     assert result
@@ -413,9 +259,7 @@ def test_is_compression_done_no_spring(crunchy_config_dict, existing_fastq_paths
     assert not spring_file.exists()
 
     # WHEN checking if spring compression is done
-    result = crunchy_api.is_spring_compression_done(
-        fastq_first=fastq_first, fastq_second=fastq_second
-    )
+    result = crunchy_api.is_spring_compression_done(fastq_first)
 
     # THEN result should be false
     assert not result
@@ -435,9 +279,7 @@ def test_is_compression_done_no_flag_spring(crunchy_config_dict, compressed_fast
     assert not flag_file.exists()
 
     # WHEN checking if spring compression is done
-    result = crunchy_api.is_spring_compression_done(
-        fastq_first=fastq_first, fastq_second=fastq_second
-    )
+    result = crunchy_api.is_spring_compression_done(fastq_first)
 
     # THEN result should be false
     assert not result
@@ -457,9 +299,7 @@ def test_is_compression_done_spring(crunchy_config_dict, compressed_fastqs):
     assert flag_file.exists()
 
     # WHEN checking if spring compression is done
-    result = crunchy_api.is_spring_compression_done(
-        fastq_first=fastq_first, fastq_second=fastq_second
-    )
+    result = crunchy_api.is_spring_compression_done(fastq_first)
 
     # THEN result should be True
     assert result
@@ -527,7 +367,7 @@ def test_is_not_pending(crunchy_config_dict, fastq_paths):
     assert not pending_path.exists()
 
     # WHEN checking if spring compression is done
-    result = crunchy_api.is_spring_compression_pending(fastq=fastq_first)
+    result = crunchy_api.is_compression_pending(fastq_first)
 
     # THEN result should be False since the pending flag is not there
     assert result is False
@@ -543,7 +383,7 @@ def test_is_pending(crunchy_config_dict, compressed_fastqs_pending):
     assert pending_path.exists()
 
     # WHEN checking if spring compression is pending
-    result = crunchy_api.is_spring_compression_pending(fastq=fastq_first)
+    result = crunchy_api.is_compression_pending(fastq_first)
 
     # THEN result should be True since the pending_path exists
     assert result is True

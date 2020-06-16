@@ -39,11 +39,7 @@ class CompressAPI:
         self.dry_run = dry_run
         self.crunchy_api.set_dry_run(dry_run)
 
-    @staticmethod
-    def get_nlinks(file_link: Path):
-        """Get number of links to path"""
-        return os.stat(file_link).st_nlink
-
+    # Compression methods
     def compress_case_bam(self, case_id: str) -> bool:
         """Compress the bam files for all individuals of a case"""
         bam_dict = self.get_bam_files(case_id=case_id)
@@ -54,18 +50,69 @@ class CompressAPI:
             bam_files = bam_dict[sample_id]
             bam_path = bam_files["bam_path"].resolve()
 
-            if not self.crunchy_api.is_bam_compression_possible(bam_path):
+            if not self.crunchy_api.is_compression_possible(bam_path):
                 LOG.info("BAM to CRAM compression not possible for %s", sample_id)
-                return False
-
-            if self.crunchy_api.is_compression_pending(bam_path):
-                LOG.info("BAM to CRAM compression pending for %s", sample_id)
                 return False
 
             LOG.info("Compressing %s for sample %s", bam_path, sample_id)
             self.crunchy_api.bam_to_cram(bam_path=bam_path, ntasks=self.ntasks, mem=self.mem)
 
         return True
+
+    def compress_fastq(self, sample_id: str) -> bool:
+        """Compress the fastq files for a individual"""
+        sample_fastq_dict = self.get_fastq_files(sample_id=sample_id)
+        if not sample_fastq_dict:
+            LOG.info("Could not find FASTQ files for %s", sample_id)
+            return False
+
+        fastq_first = sample_fastq_dict["fastq_first_file"]["path"]
+        fastq_second = sample_fastq_dict["fastq_second_file"]["path"]
+
+        if self.crunchy_api.is_compression_possible(fastq_first):
+            LOG.warning("FASTQ to SPRING compression already done for %s", sample_id)
+            return False
+
+        LOG.info(
+            "Compressing %s and %s for sample %s into SPRING format",
+            fastq_first,
+            fastq_second,
+            sample_id,
+        )
+        self.crunchy_api.fastq_to_spring(
+            fastq_first=fastq_first, fastq_second=fastq_second, ntasks=self.ntasks, mem=self.mem,
+        )
+
+        return True
+
+    def decompress_spring(self, sample_id: str):
+        """Decompress SPRING archive for a sample
+
+        This function will make sure that everything is ready for decompression. If so the spring
+        archive will be decompressed into the two fastq files. Housekeeper will be updated to
+        include fastq files as well as the spring metadata file will be updated to include date for
+        decompression.
+        """
+        spring_path = self.get_spring_path(sample_id)
+        if not self.crunchy_api.is_compression_possible(spring_path):
+            LOG.info("SPRING to FASTQ decompression not possible for %s", sample_id)
+            return False
+
+        LOG.info(
+            "Decompressing %s to FASTQ format for sample %s ", spring_path, sample_id,
+        )
+
+        self.crunchy_api.spring_to_fastq(spring_path)
+        spring_metadata_path = self.crunchy_api.get_flag_path(spring_path)
+        self.crunchy_api.update_metadata_date(spring_metadata_path)
+
+        return True
+
+    # Files methods
+    @staticmethod
+    def get_nlinks(file_link: Path):
+        """Get number of links to path"""
+        return os.stat(file_link).st_nlink
 
     def get_bam_files(self, case_id: str) -> dict:
         """
@@ -194,78 +241,16 @@ class CompressAPI:
             hk_files_dict[path_obj.resolve()] = file_obj
         return hk_files_dict
 
-    def compress_fastq(self, sample_id: str) -> bool:
-        """Compress the fastq files for a individual"""
-        sample_fastq_dict = self.get_fastq_files(sample_id=sample_id)
-        if not sample_fastq_dict:
-            LOG.info("Could not find FASTQ files for %s", sample_id)
-            return False
-
-        fastq_first = sample_fastq_dict["fastq_first_file"]["path"]
-        fastq_second = sample_fastq_dict["fastq_second_file"]["path"]
-
-        if self.crunchy_api.is_spring_compression_done(fastq_first, fastq_second):
-            LOG.warning("FASTQ to SPRING compression already done for %s", sample_id)
-            return False
-
-        if self.crunchy_api.is_compression_pending(fastq_first):
-            LOG.info("FASTQ to SPRING compression pending for %s", sample_id)
-            return False
-
-        LOG.info(
-            "Compressing %s and %s for sample %s into SPRING format",
-            fastq_first,
-            fastq_second,
-            sample_id,
-        )
-        self.crunchy_api.fastq_to_spring(
-            fastq_first=fastq_first, fastq_second=fastq_second, ntasks=self.ntasks, mem=self.mem,
-        )
-
-        return True
-
-    def decompress_spring(self, sample_id: str):
-        """Decompress SPRING archive for a sample
-
-        This function will make sure that everything is ready for decompression. If so the spring
-        archive will be decompressed into the two fastq files. Housekeeper will be updated to
-        include fastq files as well as the spring metadata file will be updated to include date for
-        decompression.
-        """
-        spring_path = self.get_spring_path(sample_id)
-        if not self.crunchy_api.is_spring_decompression_possible(spring_path):
-            LOG.info("SPRING to FASTQ decompression not possible for %s", sample_id)
-            return False
-
-        if self.crunchy_api.is_compression_pending(spring_path):
-            LOG.info("SPRING to FASTQ decompression pending for %s", sample_id)
-            return False
-
-        LOG.info(
-            "De compressing %s to FASTQ format for sample %s ", spring_path, sample_id,
-        )
-
     def get_spring_path(self, sample_id: str) -> dict:
-        """Get FASTQ files for sample"""
-        hk_files_dict = self.get_hk_files_dict(bundle_name=sample_id, tags=HK_FASTQ_TAGS)
+        """Get spring path for a sample"""
+        hk_files_dict = self.get_hk_files_dict(bundle_name=sample_id, tags=["spring"])
         if hk_files_dict is None:
             return None
 
-        sorted_fastqs = self.sort_fastqs(fastq_files=list(hk_files_dict.keys()))
-        if not sorted_fastqs:
-            LOG.info("Could not sort FASTQ files for %s", sample_id)
-            return None
-        fastq_dict = {
-            "fastq_first_file": {
-                "path": sorted_fastqs[0],
-                "hk_file": hk_files_dict[sorted_fastqs[0]],
-            },
-            "fastq_second_file": {
-                "path": sorted_fastqs[1],
-                "hk_file": hk_files_dict[sorted_fastqs[1]],
-            },
-        }
-        return fastq_dict
+        for file_path in hk_files_dict:
+            if file_path.suffix == ".spring":
+                return file_path
+        return None
 
     def get_fastq_files(self, sample_id: str) -> dict:
         """Get FASTQ files for sample"""
@@ -381,7 +366,7 @@ class CompressAPI:
         fastq_second = sample_fastq_dict["fastq_second_file"]["path"]
 
         if not self.crunchy_api.is_spring_compression_done(fastq_first, fastq_second):
-            LOG.info("Cram compression pending for: %s", sample_id)
+            LOG.info("Fastq compression pending for: %s", sample_id)
             return False
 
         fastq_first_hk = sample_fastq_dict["fastq_first_file"]["hk_file"]
@@ -394,6 +379,7 @@ class CompressAPI:
         self.remove_fastq(fastq_first=fastq_first, fastq_second=fastq_second)
         return True
 
+    # Methods to update scout
     def update_scout(self, case_id: str, sample_id: str, bam_path: Path):
         """Update scout with compressed alignment file if present"""
 
@@ -406,6 +392,7 @@ class CompressAPI:
             case_id=case_id, sample_id=sample_id, alignment_path=cram_path
         )
 
+    # Methods to update housekeeper
     def update_bam_hk(
         self,
         sample_id: str,
@@ -467,6 +454,7 @@ class CompressAPI:
         hk_fastq_second.delete()
         self.hk_api.commit()
 
+    # Methods to remove files from disc
     def remove_bam(self, bam_path: Path, bai_path: Path):
         """Remove bam files and flag that cram compression is completed"""
         flag_path = self.crunchy_api.get_flag_path(file_path=bam_path)
