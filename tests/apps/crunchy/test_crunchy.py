@@ -3,8 +3,12 @@ import logging
 from pathlib import Path
 
 from cg.apps.crunchy import CrunchyAPI
-from cg.constants import (CRAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX,
-                          FASTQ_SECOND_READ_SUFFIX, SPRING_SUFFIX)
+from cg.constants import (
+    CRAM_SUFFIX,
+    FASTQ_FIRST_READ_SUFFIX,
+    FASTQ_SECOND_READ_SUFFIX,
+    SPRING_SUFFIX,
+)
 
 
 def test_set_dry_run(crunchy_config_dict):
