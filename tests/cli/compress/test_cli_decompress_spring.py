@@ -14,7 +14,7 @@ def test_decompress_spring_cli_no_family(compress_context, case_id, cli_runner, 
     res = cli_runner.invoke(decompress_spring, [case_id], obj=compress_context)
 
     # THEN assert the program exits since no cases where found
-    assert res.exit_code != 0
+    assert res.exit_code == 0
     # THEN assert it was communicated that no families where found
     assert "Could not find case" in caplog.text
 

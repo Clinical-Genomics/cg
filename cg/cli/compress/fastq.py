@@ -88,7 +88,7 @@ def decompress_spring(context, case_id, dry_run):
     update_compress_api(compress_api, dry_run=dry_run)
 
     store = context.obj["db"]
-        samples = get_individuals(store, case_id)
+    samples = get_individuals(store, case_id)
 
     decompressed_inds = 0
     try:
