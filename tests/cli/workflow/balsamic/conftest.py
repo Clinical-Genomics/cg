@@ -9,6 +9,7 @@ from cg.apps.lims import LimsAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.meta.workflow.balsamic import AnalysisAPI
 from cg.store import Store, models
+from cg.utils.fastq import FastqAPI
 
 
 @pytest.fixture
@@ -22,9 +23,10 @@ def balsamic_context(
     return {
         "hk_api": housekeeper_api,
         "tb_api": MockTB(),
-        "db": balsamic_store,
-        "analysis_api": MockAnalysis,
+        "store_api": balsamic_store,
+        "analysis_api": AnalysisAPI(hk_api=housekeeper_api, fastq_api=MockFastqAPI),
         "fastq_handler": MockFastq,
+        "fastq_api": MockFastqAPI,
         "gzipper": MockGzip(),
         "lims_api": MockLims(),
         "bed_path": "bed_path",
@@ -86,17 +88,14 @@ class MockLine:
         return "headerline"
 
 
+class MockFastqAPI(FastqAPI):
+    @staticmethod
+    def parse_header(*_):
+        return {"lane": "1", "flowcell": "ABC123", "readnumber": "1"}
+
+
 class MockAnalysis(AnalysisAPI):
     """Mock AnalysisAPI"""
-
-    @staticmethod
-    def fastq_header(line):
-        """Mock AnalysisAPI.fastq_header"""
-        del line
-
-        _header = {"lane": "1", "flowcell": "ABC123", "readnumber": "1"}
-
-        return _header
 
 
 class MockFastq(FastqHandler):

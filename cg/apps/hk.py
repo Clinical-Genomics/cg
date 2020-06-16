@@ -5,7 +5,8 @@ import os
 from pathlib import Path
 from typing import List, Tuple
 
-from housekeeper.include import include_version, checksum as hk_checksum
+from housekeeper.include import checksum as hk_checksum
+from housekeeper.include import include_version
 from housekeeper.store import Store, models
 
 LOG = logging.getLogger(__name__)
@@ -68,6 +69,14 @@ class HousekeeperAPI:
     ) -> List[models.File]:
         """ Fetch files """
         return self._store.files(bundle=bundle, tags=tags, version=version, path=path)
+
+    def rollback(self):
+        """ Wrap method in Housekeeper Store """
+        return self._store.rollback()
+
+    def session_no_autoflush(self):
+        """ Wrap property in Housekeeper Store """
+        return self._store.session.no_autoflush
 
     def get_files(self, bundle: str, tags: list, version: int = None):
         """Fetch all the files in housekeeper, optionally filtered by bundle and/or tags and/or
