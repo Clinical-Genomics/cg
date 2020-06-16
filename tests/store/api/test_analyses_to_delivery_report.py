@@ -4,12 +4,12 @@ from datetime import datetime, timedelta
 from cg.store import Store
 
 
-def test_analyses_to_delivery_report_missing(analysis_store: Store, helpers):
+def test_missing(analysis_store: Store, helpers):
     """Tests that analyses that are completed but lacks delivery report are returned"""
 
     # GIVEN an analysis that is delivered but has no delivery report
     timestamp = datetime.now()
-    analysis = helpers.add_analysis(analysis_store, completed_at=timestamp, uploaded_at=timestamp)
+    analysis = helpers.add_analysis(analysis_store, started_at=timestamp, uploaded_at=timestamp)
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp)
     analysis_store.relate_sample(family=analysis.family, sample=sample, status="unknown")
     assert sample.delivered_at is not None
@@ -22,7 +22,7 @@ def test_analyses_to_delivery_report_missing(analysis_store: Store, helpers):
     assert analysis in analyses
 
 
-def test_analyses_to_delivery_report_outdated(analysis_store, helpers):
+def test_outdated(analysis_store, helpers):
     """Tests that analyses that have a delivery report but is older than the delivery are
     returned"""
 
@@ -31,7 +31,7 @@ def test_analyses_to_delivery_report_outdated(analysis_store, helpers):
     delivery_timestamp = timestamp - timedelta(days=1)
     analysis = helpers.add_analysis(
         analysis_store,
-        completed_at=timestamp,
+        started_at=timestamp,
         uploaded_at=timestamp,
         delivery_reported_at=delivery_timestamp,
     )

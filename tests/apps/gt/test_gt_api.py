@@ -28,14 +28,14 @@ def test_export_sample(genotypeapi, mocker):
     """Test that get_trending calls the genotype API with correct command."""
 
     # GIVEN a genotypeapi api and argument days
-    days = "20"
+    days = 20
 
     # WHEN running get_trending
     mocker.patch.object(subprocess, "check_output")
     genotypeapi.export_sample(days=days)
 
     # THEN assert subprocess is running the GenotypeAPI with correct command
-    call = ["gtdb", "--config", "config/path", "export-sample", "-d", days]
+    call = ["gtdb", "--config", "config/path", "export-sample", "-d", str(days)]
     subprocess.check_output.assert_called_with(call)
 
 

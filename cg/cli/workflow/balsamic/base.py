@@ -6,15 +6,13 @@ import subprocess
 import sys
 import shutil
 import click
-
-from pathlib import Path
-from cg.apps import hk, scoutapi, lims, tb
+from cg.apps import hk, lims
 from cg.apps.balsamic.fastq import FastqHandler
+from cg.utils.fastq import FastqAPI
 from cg.cli.workflow.balsamic.store import store as store_cmd
-from cg.cli.workflow.balsamic.deliver import deliver as deliver_cmd, CASE_TAGS, SAMPLE_TAGS
+from cg.cli.workflow.balsamic.deliver import deliver as deliver_cmd
 from cg.cli.workflow.get_links import get_links
 from cg.exc import LimsDataError, BalsamicStartError
-from cg.meta.deliver import DeliverAPI
 from cg.meta.workflow.base import get_target_bed_from_lims
 from cg.meta.workflow.balsamic import AnalysisAPI
 from cg.store import Store
@@ -42,28 +40,15 @@ FAIL = 1
 @click.pass_context
 def balsamic(context, case_id, priority, target_bed, analysis_type):
     """Cancer workflow """
-    context.obj["db"] = Store(context.obj["database"])
+    context.obj["store_api"] = Store(context.obj["database"])
     context.obj["hk_api"] = hk.HousekeeperAPI(context.obj)
     context.obj["fastq_handler"] = FastqHandler
     context.obj["gzipper"] = gzip
     context.obj["lims_api"] = lims.LimsAPI(context.obj)
-    scout_api = scoutapi.ScoutAPI(context.obj)
-    tb_api = tb.TrailblazerAPI(context.obj)
-    deliver = DeliverAPI(
-        context.obj,
-        hk_api=context.obj["hk_api"],
-        lims_api=context.obj["lims_api"],
-        case_tags=CASE_TAGS,
-        sample_tags=SAMPLE_TAGS,
-    )
+    context.obj["fastq_api"] = FastqAPI
 
     context.obj["analysis_api"] = AnalysisAPI(
-        db=context.obj["db"],
-        hk_api=context.obj["hk_api"],
-        tb_api=tb_api,
-        scout_api=scout_api,
-        lims_api=context.obj["lims_api"],
-        deliver_api=deliver,
+        hk_api=context.obj["hk_api"], fastq_api=context.obj["fastq_api"]
     )
 
     if context.invoked_subcommand is None:
@@ -90,8 +75,8 @@ def balsamic(context, case_id, priority, target_bed, analysis_type):
 @click.pass_context
 def link(context, case_id, sample_id):
     """Link FASTQ files for a SAMPLE_ID."""
-
-    link_objs = get_links(context, case_id, sample_id)
+    store = context.obj["store_api"]
+    link_objs = get_links(store, case_id, sample_id)
 
     for link_obj in link_objs:
         LOG.info(
@@ -126,7 +111,7 @@ def config_case(
     """ Generate a config for the case_id. """
 
     # missing sample_id and files
-    case_obj = context.obj["db"].family(case_id)
+    case_obj = context.obj["store_api"].family(case_id)
 
     if not case_obj:
         LOG.error("Could not find case: %s", case_id)
@@ -165,7 +150,7 @@ def config_case(
             # figure out flowcell name from header
             with context.obj["gzipper"].open(file_obj.full_path) as handle:
                 header_line = handle.readline().decode()
-                header_info = context.obj["analysis_api"].fastq_header(header_line)
+                header_info = context.obj["fastq_api"].parse_header(header_line)
             data = {
                 "path": file_obj.full_path,
                 "lane": int(header_info["lane"]),
@@ -208,7 +193,7 @@ def config_case(
 
         if not target_bed:
             target_bed_filename = get_target_bed_from_lims(
-                context.obj["lims_api"], context.obj["db"], link_obj.sample.internal_id
+                context.obj["lims_api"], context.obj["store_api"], link_obj.sample.internal_id
             )
             target_beds.add(target_bed_filename)
 
@@ -274,7 +259,7 @@ def config_case(
     command.extend(command_str.split(" "))
 
     if dry:
-        click.echo(" ".join(command))
+        LOG.info(" ".join(command))
         return SUCCESS
 
     process = subprocess.run(" ".join(command), shell=True)
@@ -311,7 +296,7 @@ def run(context, dry, run_analysis, priority, case_id, analysis_type):
         command_arguments += ["--qos", context.obj["balsamic"]["slurm"]["qos"]]
 
     if dry:
-        click.echo(" ".join(command_arguments))
+        LOG.info(" ".join(command))
         return SUCCESS
 
     process = Process(balsamic_bin).run_command(command_arguments)
@@ -326,7 +311,7 @@ def run(context, dry, run_analysis, priority, case_id, analysis_type):
 def start(context: click.Context, dry_run):
     """Start all analyses that are ready for analysis."""
     exit_code = SUCCESS
-    for case_obj in context.obj["db"].cases_to_balsamic_analyze():
+    for case_obj in context.obj["store_api"].cases_to_balsamic_analyze():
 
         LOG.info("%s: start analysis", case_obj.internal_id)
 

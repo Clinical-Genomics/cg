@@ -1,10 +1,11 @@
 from datetime import datetime, timedelta
 from typing import List
-from sqlalchemy import or_, and_
 
 from cg.constants import PRIORITY_MAP
 from cg.store import models
 from cg.store.api.base import BaseHandler
+from sqlalchemy import or_, and_, func
+from sqlalchemy.orm import Query
 
 
 class StatusHandler(BaseHandler):
@@ -95,7 +96,7 @@ class StatusHandler(BaseHandler):
             # the samples must external or be sequenced to be analysed
             .filter(or_(models.Sample.is_external, models.Sample.sequenced_at.isnot(None)))
             # The data_analysis is includes Balsamic
-            .filter(models.Sample.data_analysis.like("%Balsamic%"))
+            .filter(models.Sample.data_analysis.ilike("%Balsamic%"))
             # 1. family that has been analysed but now is requested for re-analysing
             # 2. new family that hasn't been analysed yet
             .filter(
@@ -567,10 +568,13 @@ class StatusHandler(BaseHandler):
 
         return records
 
-    def analyses_to_delivery_report(self):
+    def analyses_to_delivery_report(self) -> Query:
         """Fetch analyses that needs the delivery report to be regenerated."""
-        records = (
-            self.Analysis.query.filter(models.Analysis.uploaded_at)
+
+        analyses_query = self.latest_analyses()
+
+        analyses_query = (
+            analyses_query.filter(models.Analysis.uploaded_at)
             .join(models.Family, models.Family.links, models.FamilySample.sample)
             .filter(
                 or_(
@@ -589,7 +593,7 @@ class StatusHandler(BaseHandler):
             )
             .order_by(models.Analysis.uploaded_at.desc())
         )
-        return records
+        return analyses_query
 
     def samples_to_deliver(self):
         """Fetch samples that have been sequenced but not delivered."""

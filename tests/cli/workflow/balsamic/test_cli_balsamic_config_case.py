@@ -27,6 +27,7 @@ def test_with_missing_case(cli_runner, balsamic_context, caplog):
 
     # GIVEN case-id not in database
     case_id = "soberelephant"
+    caplog.set_level(logging.ERROR)
 
     # WHEN running
     result = cli_runner.invoke(config_case, [case_id], obj=balsamic_context)
