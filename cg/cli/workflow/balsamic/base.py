@@ -248,7 +248,7 @@ def config_case(
     command.extend(command_str.split(" "))
 
     if dry:
-        click.echo(" ".join(command))
+        LOG.info(" ".join(command))
         return SUCCESS
 
     process = subprocess.run(" ".join(command), shell=True)
@@ -291,7 +291,7 @@ def run(context, dry, run_analysis, config_path, priority, email, case_id):
     command.extend(command_str.split(" "))
 
     if dry:
-        click.echo(" ".join(command))
+        LOG.info(" ".join(command))
         return SUCCESS
 
     process = subprocess.run(" ".join(command), shell=True)
