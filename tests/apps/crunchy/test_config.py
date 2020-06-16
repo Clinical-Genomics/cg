@@ -3,6 +3,7 @@
 import pytest
 from marshmallow import ValidationError
 
+from cg.apps.crunchy import CrunchyAPI
 from cg.apps.crunchy.models import CrunchyFileSchema
 
 
@@ -71,9 +72,10 @@ def test_map_multiple_files_at_once(spring_metadata):
     assert len(result) == len(spring_metadata)
 
 
-def test_update_date(spring_metadata_file, crunchy_api):
+def test_update_date(spring_metadata_file, crunchy_config_dict):
     """Test to update the date in a spring metadata file"""
     # GIVEN the path to a metadata file without any "updated" information and a crunchy api
+    crunchy_api = CrunchyAPI(crunchy_config_dict)
     spring_metadata = crunchy_api.get_spring_metadata(spring_metadata_file)
     for file_info in spring_metadata:
         assert "updated" not in file_info
