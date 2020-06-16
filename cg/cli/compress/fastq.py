@@ -78,7 +78,7 @@ def clean_fastq(context, case_id, dry_run):
 
 
 @click.command("spring")
-@click.argument("-c", "--case-id")
+@click.argument("case-id")
 @click.option("-d", "--dry-run", is_flag=True)
 @click.pass_context
 def decompress_spring(context, case_id, dry_run):

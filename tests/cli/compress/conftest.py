@@ -13,6 +13,7 @@ class MockCompressAPI:
         self.ntasks = 12
         self.mem = 50
         self.fastq_compression_success = True
+        self.spring_decompression_success = True
         self.dry_run = False
 
     def set_dry_run(self, dry_run: bool):
@@ -22,6 +23,10 @@ class MockCompressAPI:
     def compress_fastq(self, sample_id: str, dry_run: bool = False):
         """Return if compression was succesfull"""
         return self.fastq_compression_success
+
+    def decompress_spring(self, sample_id: str, dry_run: bool = False):
+        """Return if decompression was succesfull"""
+        return self.spring_decompression_success
 
 
 class MockLink:
