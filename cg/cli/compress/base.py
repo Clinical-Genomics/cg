@@ -41,8 +41,17 @@ clean.add_command(clean_fastq)
 
 
 @compress.group()
-def decompress():
+@click.pass_context
+def decompress(context):
     """Decompress files"""
+    context.obj["db"] = Store(context.obj.get("database"))
+
+    hk_api = hk.HousekeeperAPI(context.obj)
+    scout_api = scoutapi.ScoutAPI(context.obj)
+    crunchy_api = crunchy.CrunchyAPI(context.obj)
+
+    compress_api = CompressAPI(hk_api=hk_api, crunchy_api=crunchy_api, scout_api=scout_api)
+    context.obj["compress"] = compress_api
 
 
 decompress.add_command(decompress_spring)

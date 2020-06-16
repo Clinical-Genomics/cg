@@ -83,7 +83,7 @@ def clean_fastq(context, case_id, dry_run):
 @click.pass_context
 def decompress_spring(context, case_id, dry_run):
     """Remove compressed FASTQ files, and update links in housekeeper to SPRING files"""
-    LOG.info("Running compress fastq")
+    LOG.info("Running decompress spring")
     compress_api = context.obj["compress"]
     update_compress_api(compress_api, dry_run=dry_run)
 
