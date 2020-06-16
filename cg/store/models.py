@@ -152,7 +152,8 @@ class Analysis(Model):
     is_primary = Column(types.Boolean, default=False)
 
     created_at = Column(types.DateTime, default=dt.datetime.now, nullable=False)
-    family_id = Column(ForeignKey("family.id", ondelete="CASCADE"), nullable=False)
+    family_id = Column(ForeignKey("family.id", ondelete="CASCADE"))
+    microbial_order_id = Column(ForeignKey("microbial_order.id", ondelete="CASCADE"))
 
     def __str__(self):
         return f"{self.family.internal_id} | {self.completed_at.date()}"
