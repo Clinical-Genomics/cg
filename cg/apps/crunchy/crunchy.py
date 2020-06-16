@@ -9,25 +9,15 @@ from typing import List
 
 from marshmallow import ValidationError
 
-from cg.constants import (
-    BAM_INDEX_SUFFIX,
-    BAM_SUFFIX,
-    CRAM_INDEX_SUFFIX,
-    CRAM_SUFFIX,
-    FASTQ_FIRST_READ_SUFFIX,
-    FASTQ_SECOND_READ_SUFFIX,
-    SPRING_SUFFIX,
-)
+from cg.constants import (BAM_INDEX_SUFFIX, BAM_SUFFIX, CRAM_INDEX_SUFFIX,
+                          CRAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX,
+                          FASTQ_SECOND_READ_SUFFIX, SPRING_SUFFIX)
 from cg.utils import Process
 from cg.utils.date import get_date_str
 
 from .models import CrunchyFileSchema
-from .sbatch import (
-    SBATCH_BAM_TO_CRAM,
-    SBATCH_FASTQ_TO_SPRING,
-    SBATCH_HEADER_TEMPLATE,
-    SBATCH_SPRING_TO_FASTQ,
-)
+from .sbatch import (SBATCH_BAM_TO_CRAM, SBATCH_FASTQ_TO_SPRING,
+                     SBATCH_HEADER_TEMPLATE, SBATCH_SPRING_TO_FASTQ)
 
 LOG = logging.getLogger(__name__)
 
@@ -138,14 +128,19 @@ class CrunchyAPI:
     # Spring metadata methods
     def get_spring_metadata(self, metadata_path: Path) -> List[dict]:
         """Validate content of metadata file and return mapped content"""
+        LOG.info("Fetch spring metadata from %s", metadata_path)
         with open(metadata_path, "r") as infile:
-            metadata = self.mapped_spring_metadata(json.load(infile))
+            content = json.load(infile)
+            assert isinstance(content, list)
+            metadata = self.mapped_spring_metadata(content)
 
         if not metadata:
+            LOG.warning("Could not find any content in file %s", metadata_path)
             return None
 
         if len(metadata) != 3:
             LOG.warning("Wrong number of files in spring metada file: %s", metadata_path)
+            LOG.info("Found %s files, should always be 3 files", len(metadata))
             return None
 
         return metadata
@@ -269,13 +264,15 @@ class CrunchyAPI:
         This means that all three files specified in spring metadata should exist
         """
         spring_metadata_path = self.get_flag_path(spring_path)
-        LOG.info("Check is spring metadata file %s exists", spring_metadata_path)
+        LOG.info("Check if spring metadata file %s exists", spring_metadata_path)
 
         if not spring_metadata_path.exists():
             LOG.info("No SPRING metadata file for %s", spring_path)
             return False
 
         spring_metadata = self.get_spring_metadata(spring_metadata_path)
+        if not spring_metadata:
+            return False
 
         for file_info in spring_metadata:
             if not Path(file_info["path"]).exists():

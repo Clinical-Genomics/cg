@@ -1,4 +1,5 @@
 """Tests for the config part of Crunchy"""
+import json
 
 import pytest
 from marshmallow import ValidationError
@@ -70,6 +71,20 @@ def test_map_multiple_files_at_once(spring_metadata):
     assert isinstance(result, list)
     # THEN assert that all files exists after dumping
     assert len(result) == len(spring_metadata)
+
+
+def test_get_spring_metadata_real_file(real_spring_metadata_path, crunchy_config_dict):
+    """Test to parse the content of a real spring metadata file"""
+    # GIVEN the path to a file with spring metadata content
+    crunchy_api = CrunchyAPI(crunchy_config_dict)
+    with open(real_spring_metadata_path, "r") as infile:
+        content = json.load(infile)
+
+    # WHEN parsing the content
+    parsed_content = crunchy_api.get_spring_metadata(real_spring_metadata_path)
+
+    # THEN assert the content is the same
+    assert len(content) == len(parsed_content)
 
 
 def test_update_date(spring_metadata_file, crunchy_config_dict):

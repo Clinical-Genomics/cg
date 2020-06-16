@@ -61,18 +61,18 @@ def clean_fastq(context, case_id, dry_run):
     update_compress_api(compress_api, dry_run=dry_run)
 
     store = context.obj["db"]
-    try:
-        samples = get_individuals(store, case_id)
-    except CaseNotFoundError:
-        return
+    samples = get_individuals(store, case_id)
 
     cleaned_inds = 0
-    for sample_id in samples:
-        res = compress_api.clean_fastq(sample_id)
-        if res is False:
-            LOG.info("skipping individual %s", sample_id)
-            continue
-        cleaned_inds += 1
+    try:
+        for sample_id in samples:
+            res = compress_api.clean_fastq(sample_id)
+            if res is False:
+                LOG.info("skipping individual %s", sample_id)
+                continue
+            cleaned_inds += 1
+    except CaseNotFoundError:
+        return
 
     LOG.info("Cleaned fastqs in %s individuals", cleaned_inds)
 
@@ -88,17 +88,17 @@ def decompress_spring(context, case_id, dry_run):
     update_compress_api(compress_api, dry_run=dry_run)
 
     store = context.obj["db"]
-    try:
         samples = get_individuals(store, case_id)
-    except CaseNotFoundError:
-        return
 
     decompressed_inds = 0
-    for sample_id in samples:
-        res = compress_api.decompress_spring(sample_id)
-        if res is False:
-            LOG.info("skipping individual %s", sample_id)
-            continue
-        decompressed_inds += 1
+    try:
+        for sample_id in samples:
+            res = compress_api.decompress_spring(sample_id)
+            if res is False:
+                LOG.info("skipping individual %s", sample_id)
+                continue
+            decompressed_inds += 1
+    except CaseNotFoundError:
+        return
 
     LOG.info("Decompressed spring archives in %s individuals", decompressed_inds)

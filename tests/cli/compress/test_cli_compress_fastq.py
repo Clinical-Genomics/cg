@@ -30,7 +30,6 @@ def test_compress_fastq_cli_case_id_no_family(compress_context, cli_runner, case
     # THEN assert the program exits since no cases where found
     assert res.exit_code == 0
     # THEN assert it was communicated that no families where found
-    print(caplog.text)
     assert f"Could not find case {case_id}" in caplog.text
 
 

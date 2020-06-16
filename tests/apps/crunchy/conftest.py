@@ -39,6 +39,12 @@ def fixture_file_schema():
     return CrunchyFileSchema()
 
 
+@pytest.fixture(name="real_spring_metadata_path")
+def fixture_real_spring_metadata_path(fixtures_dir):
+    """Return the path to a spring metadata file"""
+    return fixtures_dir / "apps" / "crunchy" / "spring_metadata.json"
+
+
 @pytest.fixture(name="spring_metadata")
 def fixture_spring_metadata(fastq_paths, spring_path):
     """Return metada information"""

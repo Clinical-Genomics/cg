@@ -11,11 +11,7 @@ LOG = logging.getLogger(__name__)
 
 def get_individuals(store: Store, case_id: str = None) -> Iterator[str]:
     """Fetch individual ids from cases"""
-    cases = get_cases(store, case_id)
-    if cases is None:
-        raise CaseNotFoundError("Could not find case {}".format(case_id))
-
-    for case in cases:
+    for case in get_cases(store, case_id):
         for link_obj in case.links:
             yield link_obj.sample.internal_id
 
@@ -29,7 +25,7 @@ def get_cases(store: Store, case_id: str = None) -> List[models.Family]:
         case_obj = store.family(case_id)
         if not case_obj:
             LOG.warning("Could not find case %s", case_id)
-            return None
+            raise CaseNotFoundError("Could not find case {}".format(case_id))
         return [case_obj]
     return store.families()
 
