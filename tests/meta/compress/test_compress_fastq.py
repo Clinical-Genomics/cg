@@ -104,7 +104,7 @@ def test_compress_fastq_compression_done(populated_compress_fastq_api, sample, c
     # THEN assert compression succeded
     assert res is False
     # THEN assert that the correct information is communicated
-    assert f"FASTQ to SPRING compression already done for {sample}" in caplog.text
+    assert f"FASTQ to SPRING not possible for {sample}" in caplog.text
     # THEN assert that the fastq compression was never called
     assert compress_api.crunchy_api.nr_fastq_compressions() == 0
 
@@ -117,7 +117,7 @@ def test_compress_case_fastq_compression_pending(populated_compress_fastq_api, s
     caplog.set_level(logging.DEBUG)
     compress_api = populated_compress_fastq_api
     # GIVEN that the compression is done
-    compress_api.crunchy_api.set_spring_compression_pending()
+    compress_api.crunchy_api.set_compression_pending_all()
     # GIVEN a populated compress api
 
     # WHEN Compressing the bam files for the case
@@ -126,6 +126,6 @@ def test_compress_case_fastq_compression_pending(populated_compress_fastq_api, s
     # THEN assert compression returns False
     assert res is False
     # THEN assert that the correct information is communicated
-    assert f"FASTQ to SPRING compression pending for {sample}" in caplog.text
+    assert f"FASTQ to SPRING not possible for {sample}" in caplog.text
     # THEN assert that the fastq compression was never called
     assert compress_api.crunchy_api.nr_fastq_compressions() == 0

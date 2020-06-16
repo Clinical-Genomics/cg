@@ -157,7 +157,7 @@ def test_compress_case_bam_compression_not_possible(
             bam_path = Path(file_info["path"])
     assert bam_path.exists()
     # GIVEN a that compression is not possible for one sample
-    populated_compress_api.crunchy_api.set_bam_compression_not_possible(bam_path)
+    populated_compress_api.crunchy_api.set_compression_not_possible(bam_path)
 
     # WHEN Compressing the bam files for the case
     res = populated_compress_api.compress_case_bam(case_id)
@@ -166,28 +166,6 @@ def test_compress_case_bam_compression_not_possible(
     assert res is False
     # THEN assert that the correct information is communicated
     assert "BAM to CRAM compression not possible" in caplog.text
-
-
-def test_compress_case_bam_compression_pending(
-    populated_compress_api, compress_hk_bam_bundle, case_id, caplog
-):
-    """Test to compress all bam files for a case when compression is pending for one sample"""
-    caplog.set_level(logging.DEBUG)
-    # GIVEN an existing bam file
-    for file_info in compress_hk_bam_bundle["files"]:
-        if "bam" in file_info["tags"]:
-            bam_path = Path(file_info["path"])
-    assert bam_path.exists()
-    # GIVEN a that compression is not possible for one sample
-    populated_compress_api.crunchy_api.set_cram_compression_pending(bam_path)
-
-    # WHEN Compressing the bam files for the case
-    res = populated_compress_api.compress_case_bam(case_id)
-
-    # THEN assert compression succeded
-    assert res is False
-    # THEN assert that the correct information is communicated
-    assert "BAM to CRAM compression pending" in caplog.text
 
 
 def test_compress_case_bam_no_scout_case(compress_api, compress_hk_bam_bundle, helpers, caplog):

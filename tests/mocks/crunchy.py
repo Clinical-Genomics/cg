@@ -17,13 +17,14 @@ class MockCrunchyAPI(CrunchyAPI):
 
         self.config = config
         self.dry_run = False
-        self._cram_compression_pending = {}
-        self._bam_compression_possible = {}
+        self._compression_pending_files = {}
+        self._compression_possible_files = {}
         self._bam_compression_done = {}
         self._bam_compression_done_all = False
 
-        self._spring_compression_pending = False
-        self._spring_compression_possible = True
+        self._compression_pending = False
+        self._compression_possible = True
+        self._compression_done_all = False
         self._spring_compression_done = False
 
         self._nr_fastq_compressions = 0
@@ -33,9 +34,13 @@ class MockCrunchyAPI(CrunchyAPI):
         self.dry_run = dry_run
 
     # Mock specific methods
-    def set_cram_compression_pending(self, bam_path):
-        """Set that the cram compression for a file is pending"""
-        self._cram_compression_pending[bam_path] = True
+    def set_compression_pending(self, file_path: Path):
+        """Set that the compression for a file is pending"""
+        self._compression_pending_files[file_path] = True
+
+    def set_compression_pending_all(self,):
+        """Set that the compression for a file is pending"""
+        self._compression_pending = True
 
     def set_bam_compression_done(self, bam_path):
         """Set the variable so that bam/cram compression is done"""
@@ -43,20 +48,16 @@ class MockCrunchyAPI(CrunchyAPI):
 
     def set_bam_compression_done_all(self):
         """Set so that bam compression is done for all"""
-        self._bam_compression_done_all = True
+        self._compression_done_all = True
 
-    def set_bam_compression_not_possible(self, bam_path):
+    def set_compression_not_possible(self, file_path: Path):
         """Set the variable so that bam/cram compression is not possible"""
-        print("Setting bam compression to not possible for %s", bam_path)
-        self._bam_compression_possible[bam_path] = False
-
-    def set_spring_compression_pending(self):
-        """Set if spring compression should be in pending state"""
-        self._spring_compression_pending = True
+        print("Setting compression to not possible for %s" % file_path)
+        self._compression_possible_files[file_path] = False
 
     def set_spring_compression_done(self):
         """Set if spring compression should be in done state"""
-        self._spring_compression_done = True
+        self._compression_done_all = True
 
     def nr_fastq_compressions(self):
         """Return the number of times that fastq compression was called"""
@@ -67,7 +68,7 @@ class MockCrunchyAPI(CrunchyAPI):
         """
             Compress BAM file into CRAM
         """
-        self._cram_compression_pending[bam_path] = True
+        self._compression_pending_files[bam_path] = True
 
     def fastq_to_spring(
         self, fastq_first: Path, fastq_second: Path, ntasks: int, mem: int, dry_run: bool = False,
@@ -76,27 +77,42 @@ class MockCrunchyAPI(CrunchyAPI):
             Compress FASTQ files into SPRING by sending to sbatch SLURM
         """
         self._nr_fastq_compressions += 1
-        self.set_spring_compression_pending()
+        self.set_compression_pending_all()
+
+    def is_compression_possible(self, file_path: Path) -> bool:
+        """Check if it compression/decompression is possible"""
+        if self._compression_pending:
+            print("Compression pending")
+            return False
+
+        if self._compression_pending_files.get(file_path):
+            print(f"Compression pending for file {file_path}")
+            return False
+
+        if self._compression_done_all:
+            print(f"Compression done")
+            return False
+
+        compression_possible = self._compression_possible_files.get(
+            file_path, self._compression_possible
+        )
+        print(f"Compression possible {compression_possible}")
+        return compression_possible
 
     def is_cram_compression_done(self, bam_path: Path) -> bool:
         """Check if CRAM compression already done for BAM file"""
-        if self._bam_compression_done_all:
-            return True
+        if self._compression_pending:
+            return False
 
-        return self._bam_compression_done.get(bam_path, False)
+        if self._compression_pending_files.get(bam_path):
+            return False
 
-    def is_cram_compression_pending(self, bam_path: Path) -> bool:
-        """Check if cram compression has started, but not yet finished"""
-        return self._cram_compression_pending.get(bam_path, False)
-
-    def is_bam_compression_possible(self, bam_path: Path) -> bool:
-        """Check if it CRAM compression for BAM file is possible"""
-        return self._bam_compression_possible.get(bam_path, True)
+        return self._bam_compression_done.get(bam_path, self._compression_done_all)
 
     def is_spring_compression_done(self, fastq_first: Path, fastq_second: Path) -> bool:
         """Check if spring compression if finished"""
-        return self._spring_compression_done
+        return self._compression_done_all
 
-    def is_spring_compression_pending(self, fastq: Path) -> bool:
-        """Check if spring compression has started, but not yet finished"""
-        return self._spring_compression_pending
+    def is_compression_pending(self, file_path: Path) -> bool:
+        """Check if compression has started, but not yet finished"""
+        return self._compression_pending

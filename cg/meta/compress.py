@@ -69,8 +69,8 @@ class CompressAPI:
         fastq_first = sample_fastq_dict["fastq_first_file"]["path"]
         fastq_second = sample_fastq_dict["fastq_second_file"]["path"]
 
-        if self.crunchy_api.is_compression_possible(fastq_first):
-            LOG.warning("FASTQ to SPRING compression already done for %s", sample_id)
+        if not self.crunchy_api.is_compression_possible(fastq_first):
+            LOG.warning("FASTQ to SPRING not possible for %s", sample_id)
             return False
 
         LOG.info(
