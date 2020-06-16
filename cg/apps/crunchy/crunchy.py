@@ -214,20 +214,17 @@ class CrunchyAPI:
             return False
 
         file_type = self.get_file_type(file_path)
-        if file_type == "bam":
-            if self.is_cram_compression_done(file_path):
-                LOG.info("cram compression already exists for %s", file_path)
-                return False
+        if file_type == "bam" and self.is_cram_compression_done(file_path):
+            LOG.info("cram compression already exists for %s", file_path)
+            return False
 
-        if file_type == "fastq":
-            if self.is_spring_compression_done(file_path):
-                LOG.info("SPRING compression already exists for %s", file_path)
-                return False
+        if file_type == "fastq" and self.is_spring_compression_done(file_path):
+            LOG.info("SPRING compression already exists for %s", file_path)
+            return False
 
-        if file_type == "spring":
-            if self.is_spring_decompression_done(file_path):
-                LOG.info("Decompressed SPRING already exists for %s", file_path)
-                return False
+        if file_type == "spring" and self.is_spring_decompression_done(file_path):
+            LOG.info("Decompressed SPRING already exists for %s", file_path)
+            return False
 
         return True
 
@@ -263,8 +260,6 @@ class CrunchyAPI:
         if not flag_path.exists():
             LOG.info("No %s file for %s", FLAG_PATH_SUFFIX, fastq_file)
             return False
-
-        # spring_metadata = self.get_spring_metadata(flag_path)
 
         return True
 
