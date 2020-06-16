@@ -79,6 +79,14 @@ class MockCrunchyAPI(CrunchyAPI):
         self._nr_fastq_compressions += 1
         self.set_compression_pending_all()
 
+    def spring_to_fastq(self, spring_path: Path):
+        """Mock method that compress spring to fastq"""
+        self._nr_fastq_compressions += 1
+        self.set_compression_pending_all()
+
+    def update_metadata_date(self, spring_metadata_path):
+        print(f"Updates {spring_metadata_path}")
+
     def is_compression_possible(self, file_path: Path) -> bool:
         """Check if it compression/decompression is possible"""
         if self._compression_pending:

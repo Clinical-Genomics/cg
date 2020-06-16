@@ -41,6 +41,14 @@ def fixture_populated_compress_fastq_api(
     return compress_api
 
 
+@pytest.fixture(scope="function", name="populated_decompress_spring_api")
+def fixture_populated_decompress_spring_api(compress_api, decompress_hk_spring_bundle, helpers):
+    """Populated compress api fixture"""
+    helpers.ensure_hk_bundle(compress_api.hk_api, decompress_hk_spring_bundle)
+
+    return compress_api
+
+
 @pytest.fixture(scope="function", name="sample")
 def fixture_sample():
     """Return the sample id for first sample"""
@@ -321,6 +329,26 @@ def fixture_compress_hk_fastq_bundle(fastq_files, sample_hk_bundle_no_files):
         fastq_file_info = {"path": str(fastq_file), "archive": False, "tags": ["fastq"]}
 
         hk_bundle_data["files"].append(fastq_file_info)
+
+    return hk_bundle_data
+
+
+@pytest.fixture(scope="function", name="decompress_hk_spring_bundle")
+def fixture_decompress_hk_spring_bundle(
+    sample_hk_bundle_no_files, spring_file, fastq_flag_file, sample
+):
+    """Create a complete bundle mock for testing decompression"""
+    hk_bundle_data = copy.deepcopy(sample_hk_bundle_no_files)
+
+    spring_file_info = {"path": str(spring_file), "archive": False, "tags": [sample, "spring"]}
+    spring_meta_info = {
+        "path": str(fastq_flag_file),
+        "archive": False,
+        "tags": [sample, "spring-metadata"],
+    }
+
+    hk_bundle_data["files"].append(spring_file_info)
+    hk_bundle_data["files"].append(spring_meta_info)
 
     return hk_bundle_data
 
