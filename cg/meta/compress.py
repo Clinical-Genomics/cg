@@ -10,13 +10,8 @@ from typing import List
 from housekeeper.store import models as hk_models
 
 from cg.apps import crunchy, hk, scoutapi
-from cg.constants import (
-    BAM_SUFFIX,
-    FASTQ_FIRST_READ_SUFFIX,
-    FASTQ_SECOND_READ_SUFFIX,
-    HK_BAM_TAGS,
-    HK_FASTQ_TAGS,
-)
+from cg.constants import (BAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX,
+                          FASTQ_SECOND_READ_SUFFIX, HK_BAM_TAGS, HK_FASTQ_TAGS)
 
 LOG = logging.getLogger(__name__)
 
@@ -370,7 +365,7 @@ class CompressAPI:
         fastq_first = sample_fastq_dict["fastq_first_file"]["path"]
         fastq_second = sample_fastq_dict["fastq_second_file"]["path"]
 
-        if not self.crunchy_api.is_spring_compression_done(fastq_first, fastq_second):
+        if not self.crunchy_api.is_spring_compression_done(fastq_first):
             LOG.info("Fastq compression pending for: %s", sample_id)
             return False
 
@@ -391,6 +386,12 @@ class CompressAPI:
         if not self.crunchy_api.is_spring_decompression_done(spring_path):
             LOG.info("SPRING to FASTQ decompression not finished %s", sample_id)
             return False
+
+        last_version = self.hk_api.last_version(bundle=sample_id)
+        for file_obj in last_version.files:
+            if "fastq" in file_obj.tags:
+                LOG.warning("Fastq files already exists in housekeeper")
+                return False
 
         LOG.info(
             "Decompressing %s to FASTQ format for sample %s ", spring_path, sample_id,
