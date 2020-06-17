@@ -10,13 +10,8 @@ from typing import List
 from housekeeper.store import models as hk_models
 
 from cg.apps import crunchy, hk, scoutapi
-from cg.constants import (
-    BAM_SUFFIX,
-    FASTQ_FIRST_READ_SUFFIX,
-    FASTQ_SECOND_READ_SUFFIX,
-    HK_BAM_TAGS,
-    HK_FASTQ_TAGS,
-)
+from cg.constants import (BAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX,
+                          FASTQ_SECOND_READ_SUFFIX, HK_BAM_TAGS, HK_FASTQ_TAGS)
 
 LOG = logging.getLogger(__name__)
 
@@ -384,6 +379,32 @@ class CompressAPI:
         self.remove_fastq(fastq_first=fastq_first, fastq_second=fastq_second)
         return True
 
+    def add_decompressed_fastq(self, sample_id) -> bool:
+        """Adds unpacked fastq files to housekeeper"""
+        LOG.info("Adds FASTQ to housekeeper for %s", sample_id)
+        spring_path = self.get_spring_path(sample_id)
+        if not self.crunchy_api.is_spring_decompression_done(spring_path):
+            LOG.info("SPRING to FASTQ decompression not finished %s", sample_id)
+            return False
+
+        LOG.info(
+            "Decompressing %s to FASTQ format for sample %s ", spring_path, sample_id,
+        )
+
+        spring_metadata_path = self.crunchy_api.get_flag_path(spring_path)
+        spring_metadata = self.crunchy_api.get_spring_metadata(spring_metadata_path)
+        for file_info in spring_metadata:
+            if file_info["file"] == "first_read":
+                fastq_first_path = file_info["path"]
+            if file_info["file"] == "second_read":
+                fastq_second_path = file_info["path"]
+
+        self.add_fastq_hk(
+            sample_id=sample_id, fastq_first=fastq_first_path, fastq_second=fastq_second_path
+        )
+
+        return True
+
     # Methods to update scout
     def update_scout(self, case_id: str, sample_id: str, bam_path: Path):
         """Update scout with compressed alignment file if present"""
@@ -457,6 +478,25 @@ class CompressAPI:
         )
         hk_fastq_first.delete()
         hk_fastq_second.delete()
+        self.hk_api.commit()
+
+    def add_fastq_hk(self, sample_id: str, fastq_first: Path, fastq_second: Path) -> None:
+        """Add fastq files to housekeeper"""
+        fastq_tags = [sample_id, "fastq"]
+        last_version = self.hk_api.last_version(bundle=sample_id)
+        LOG.info(
+            "Adds %s, %s to bundle %s with tags %s",
+            fastq_first,
+            fastq_second,
+            sample_id,
+            fastq_tags,
+        )
+        if self.dry_run:
+            return
+
+        LOG.info("updating files in housekeeper...")
+        self.hk_api.add_file(path=fastq_first, version_obj=last_version, tags=fastq_tags)
+        self.hk_api.add_file(path=fastq_second, version_obj=last_version, tags=fastq_tags)
         self.hk_api.commit()
 
     # Methods to remove files from disc

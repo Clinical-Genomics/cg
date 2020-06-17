@@ -19,6 +19,7 @@ from .import_cmd import import_cmd
 from .reset import reset_cmd
 from .set import set_cmd
 from .status import status
+from .store import store as store_cmd
 from .transfer import transfer
 from .upload import vogue as vogue_command
 from .upload.base import upload
@@ -81,3 +82,4 @@ base.add_command(transfer)
 base.add_command(upload)
 base.add_command(workflow_cmd)
 upload.add_command(vogue_command)
+upload.add_command(store_cmd)
