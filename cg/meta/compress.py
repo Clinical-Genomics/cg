@@ -8,15 +8,11 @@ from pathlib import Path
 from typing import List
 
 from housekeeper.store import models as hk_models
+from sqlalchemy.exc import IntegrityError
 
 from cg.apps import crunchy, hk, scoutapi
-from cg.constants import (
-    BAM_SUFFIX,
-    FASTQ_FIRST_READ_SUFFIX,
-    FASTQ_SECOND_READ_SUFFIX,
-    HK_BAM_TAGS,
-    HK_FASTQ_TAGS,
-)
+from cg.constants import (BAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX,
+                          FASTQ_SECOND_READ_SUFFIX, HK_BAM_TAGS, HK_FASTQ_TAGS)
 
 LOG = logging.getLogger(__name__)
 
@@ -483,10 +479,16 @@ class CompressAPI:
             return
 
         LOG.info("updating files in housekeeper...")
+        LOG.info("Adding spring file to housekeeper")
         self.hk_api.add_file(path=spring_path, version_obj=version_obj, tags=spring_tags)
         self.hk_api.add_file(
             path=spring_metadata_path, version_obj=version_obj, tags=spring_metadata_tags
         )
+        try:
+            self.hk_api.commit()
+        except IntegrityError:
+            LOG.info("Spring file already exists")
+
         hk_fastq_first.delete()
         hk_fastq_second.delete()
         self.hk_api.commit()
