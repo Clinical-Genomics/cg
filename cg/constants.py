@@ -65,6 +65,8 @@ CRAM_INDEX_SUFFIX = ".crai"
 FASTQ_FIRST_READ_SUFFIX = "_R1_001.fastq.gz"
 FASTQ_SECOND_READ_SUFFIX = "_R2_001.fastq.gz"
 SPRING_SUFFIX = ".spring"
+# Number of days until fastqs counts as old
+FASTQ_DELTA = 21
 
 # tags for storing analyses in Housekeeper
 HK_TAGS = {"wes": ["mip-dna", "wes"], "wgs": ["mip-dna", "wgs"], "wts": ["mip-rna"]}
@@ -98,9 +100,9 @@ MIP_DNA_TAGS = {
         "index_tags": ["sv-bcf-index"],
         "is_mandatory": True,
     },
-    tuple(["peddy_ar", "ped_check"]): {"tags": ["peddy", "ped-check"], "is_mandatory": True,},
+    tuple(["peddy_ar", "ped_check"]): {"tags": ["peddy", "ped-check"], "is_mandatory": True},
     tuple(["peddy_ar", "peddy"]): {"tags": ["peddy", "ped"], "is_mandatory": True},
-    tuple(["peddy_ar", "sex_check"]): {"tags": ["peddy", "sex-check"], "is_mandatory": True,},
+    tuple(["peddy_ar", "sex_check"]): {"tags": ["peddy", "sex-check"], "is_mandatory": True},
     tuple(["version_collect_ar"]): {"tags": ["exe-ver"], "is_mandatory": True},
     tuple(["sv_str"]): {
         "tags": ["vcf-str"],
@@ -152,11 +154,11 @@ MIP_RNA_TAGS = {
         "index_tags": ["cram-index"],
         "is_mandatory": True,
     },
-    tuple(["gatk_asereadcounter"]): {"tags": ["gatk-asereadcounter"], "is_mandatory": True,},
+    tuple(["gatk_asereadcounter"]): {"tags": ["gatk-asereadcounter"], "is_mandatory": True},
     tuple(["bootstrapann"]): {"tags": ["bootstrapann"], "is_mandatory": True},
     tuple(["bcftools_merge"]): {"tags": ["bcftools-merge"], "is_mandatory": True},
-    tuple(["varianteffectpredictor"]): {"tags": ["varianteffectpredictor"], "is_mandatory": True,},
-    tuple(["version_collect_ar"]): {"tags": ["version-collect-ar"], "is_mandatory": True,},
+    tuple(["varianteffectpredictor"]): {"tags": ["varianteffectpredictor"], "is_mandatory": True},
+    tuple(["version_collect_ar"]): {"tags": ["version-collect-ar"], "is_mandatory": True},
     tuple(["multiqc_ar", "html"]): {"tags": ["multiqc-html"], "is_mandatory": True},
     tuple(["multiqc_ar", "json"]): {"tags": ["multiqc-json"], "is_mandatory": True},
     tuple(["mip_analyse", "sample_info"]): {
@@ -167,7 +169,7 @@ MIP_RNA_TAGS = {
         "tags": ["mip-analyse", "reference-info"],
         "is_mandatory": True,
     },
-    tuple(["mip_analyse", "log"]): {"tags": ["mip-analyse", "log"], "is_mandatory": True,},
+    tuple(["mip_analyse", "log"]): {"tags": ["mip-analyse", "log"], "is_mandatory": True},
     tuple(["mip_analyse", "config_analysis"]): {
         "tags": ["mip-analyse", "config-analysis"],
         "is_mandatory": True,
@@ -176,7 +178,7 @@ MIP_RNA_TAGS = {
         "tags": ["mip-analyse", "pedigree"],
         "is_mandatory": True,
     },
-    tuple(["mip_analyse", "config"]): {"tags": ["mip-analyse", "config"], "is_mandatory": True,},
+    tuple(["mip_analyse", "config"]): {"tags": ["mip-analyse", "config"], "is_mandatory": True},
     tuple(["mip_analyse", "pedigree_fam"]): {
         "tags": ["mip-analyse", "pedigree-fam"],
         "is_mandatory": True,

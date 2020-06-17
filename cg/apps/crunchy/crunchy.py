@@ -2,33 +2,23 @@
     Module for compressing BAM to CRAM
 """
 
+import datetime
 import json
 import logging
 from pathlib import Path
-from pprint import pprint as pp
 from typing import List
 
 from marshmallow import ValidationError
 
-from cg.constants import (
-    BAM_INDEX_SUFFIX,
-    BAM_SUFFIX,
-    CRAM_INDEX_SUFFIX,
-    CRAM_SUFFIX,
-    FASTQ_FIRST_READ_SUFFIX,
-    FASTQ_SECOND_READ_SUFFIX,
-    SPRING_SUFFIX,
-)
+from cg.constants import (BAM_INDEX_SUFFIX, BAM_SUFFIX, CRAM_INDEX_SUFFIX,
+                          CRAM_SUFFIX, FASTQ_DELTA, FASTQ_FIRST_READ_SUFFIX,
+                          FASTQ_SECOND_READ_SUFFIX, SPRING_SUFFIX)
 from cg.utils import Process
 from cg.utils.date import get_date_str
 
 from .models import CrunchyFileSchema
-from .sbatch import (
-    SBATCH_BAM_TO_CRAM,
-    SBATCH_FASTQ_TO_SPRING,
-    SBATCH_HEADER_TEMPLATE,
-    SBATCH_SPRING_TO_FASTQ,
-)
+from .sbatch import (SBATCH_BAM_TO_CRAM, SBATCH_FASTQ_TO_SPRING,
+                     SBATCH_HEADER_TEMPLATE, SBATCH_SPRING_TO_FASTQ)
 
 LOG = logging.getLogger(__name__)
 
@@ -261,6 +251,13 @@ class CrunchyAPI:
         if not flag_path.exists():
             LOG.info("No %s file for %s", FLAG_PATH_SUFFIX, fastq_file)
             return False
+        spring_metadata = self.get_spring_metadata(flag_path)
+        if "updated" in spring_metadata[0]:
+            updated_at = spring_metadata[0]["updated"]
+            delta = datetime.timedelta(days=FASTQ_DELTA)
+            if (updated_at + delta) < datetime.datetime.now():
+                LOG.info("Fastq files are not old enough")
+                return False
 
         return True
 
