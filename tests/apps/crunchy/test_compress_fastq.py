@@ -1,6 +1,6 @@
 """Test methods for compressing fastq"""
-
 import json
+import logging
 
 from cg.apps.crunchy import CrunchyAPI
 
