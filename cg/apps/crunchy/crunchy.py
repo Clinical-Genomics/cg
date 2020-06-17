@@ -10,25 +10,15 @@ from typing import List
 
 from marshmallow import ValidationError
 
-from cg.constants import (
-    BAM_INDEX_SUFFIX,
-    BAM_SUFFIX,
-    CRAM_INDEX_SUFFIX,
-    CRAM_SUFFIX,
-    FASTQ_FIRST_READ_SUFFIX,
-    FASTQ_SECOND_READ_SUFFIX,
-    SPRING_SUFFIX,
-)
+from cg.constants import (BAM_INDEX_SUFFIX, BAM_SUFFIX, CRAM_INDEX_SUFFIX,
+                          CRAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX,
+                          FASTQ_SECOND_READ_SUFFIX, SPRING_SUFFIX)
 from cg.utils import Process
 from cg.utils.date import get_date_str
 
 from .models import CrunchyFileSchema
-from .sbatch import (
-    SBATCH_BAM_TO_CRAM,
-    SBATCH_FASTQ_TO_SPRING,
-    SBATCH_HEADER_TEMPLATE,
-    SBATCH_SPRING_TO_FASTQ,
-)
+from .sbatch import (SBATCH_BAM_TO_CRAM, SBATCH_FASTQ_TO_SPRING,
+                     SBATCH_HEADER_TEMPLATE, SBATCH_SPRING_TO_FASTQ)
 
 LOG = logging.getLogger(__name__)
 
@@ -142,12 +132,8 @@ class CrunchyAPI:
         LOG.info("Fetch spring metadata from %s", metadata_path)
         with open(metadata_path, "r") as infile:
             content = json.load(infile)
-            print("content")
-            pp(content)
             assert isinstance(content, list)
             metadata = self.mapped_spring_metadata(content)
-            print("metadata")
-            pp(metadata)
 
         if not metadata:
             LOG.warning("Could not find any content in file %s", metadata_path)
