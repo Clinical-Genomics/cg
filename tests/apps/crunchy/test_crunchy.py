@@ -230,7 +230,6 @@ def test_is_compression_done_no_spring(crunchy_config_dict, existing_fastq_paths
     # GIVEN a crunchy-api, and fastq paths
     crunchy_api = CrunchyAPI(crunchy_config_dict)
     fastq_first = existing_fastq_paths["fastq_first_path"]
-    fastq_second = existing_fastq_paths["fastq_second_path"]
     # GIVEN no spring file exists
     spring_file = CrunchyAPI.get_spring_path_from_fastq(fastq=fastq_first)
     assert not spring_file.exists()
@@ -247,7 +246,6 @@ def test_is_compression_done_no_flag_spring(crunchy_config_dict, compressed_fast
     # GIVEN a crunchy-api, and fastq paths
     crunchy_api = CrunchyAPI(crunchy_config_dict)
     fastq_first = compressed_fastqs_without_flag["fastq_first_path"]
-    fastq_second = compressed_fastqs_without_flag["fastq_second_path"]
     # GIVEN a existing spring file
     spring_file = CrunchyAPI.get_spring_path_from_fastq(fastq=fastq_first)
     assert spring_file.exists()
@@ -267,7 +265,6 @@ def test_is_compression_done_spring(crunchy_config_dict, compressed_fastqs):
     # GIVEN a crunchy-api, and fastq paths
     crunchy_api = CrunchyAPI(crunchy_config_dict)
     fastq_first = compressed_fastqs["fastq_first_path"]
-    fastq_second = compressed_fastqs["fastq_second_path"]
     # GIVEN a existing spring file
     spring_file = CrunchyAPI.get_spring_path_from_fastq(fastq=fastq_first)
     assert spring_file.exists()
@@ -291,10 +288,8 @@ def test_is_compression_done_spring_new_files(crunchy_config_dict, compressed_fa
     # GIVEN a crunchy-api, and fastq paths
     crunchy_api = CrunchyAPI(crunchy_config_dict)
     fastq_first = compressed_fastqs["fastq_first_path"]
-    fastq_second = compressed_fastqs["fastq_second_path"]
     # GIVEN a existing spring file
     spring_file = CrunchyAPI.get_spring_path_from_fastq(fastq=fastq_first)
-    assert spring_file.exists()
     # GIVEN a existing flag file
     flag_file = CrunchyAPI.get_flag_path(file_path=spring_file)
     assert flag_file.exists()
@@ -313,6 +308,36 @@ def test_is_compression_done_spring_new_files(crunchy_config_dict, compressed_fa
     assert result is False
     # THEN assert that correct information is logged
     assert "Fastq files are not old enough" in caplog.text
+
+
+def test_is_compression_done_spring_old_files(crunchy_config_dict, compressed_fastqs, caplog):
+    """Test if compression is done when fastq files are updated bu old
+
+    The function should return true since the files are older than 3 weeks
+    """
+    caplog.set_level(logging.DEBUG)
+    # GIVEN a crunchy-api, and fastq paths
+    crunchy_api = CrunchyAPI(crunchy_config_dict)
+    fastq_first = compressed_fastqs["fastq_first_path"]
+    # GIVEN a existing spring file
+    spring_file = CrunchyAPI.get_spring_path_from_fastq(fastq=fastq_first)
+    # GIVEN a existing flag file
+    flag_file = CrunchyAPI.get_flag_path(file_path=spring_file)
+    # GIVEN a date older than three weeks
+    old_date = "2019-01-01"
+    with open(flag_file, "r") as infile:
+        content = json.load(infile)
+    # GIVEN that the files where updated more than three weeks ago
+    for file_info in content:
+        file_info["updated"] = old_date
+    with open(flag_file, "w") as outfile:
+        outfile.write(json.dumps(content))
+
+    # WHEN checking if spring compression is done
+    result = crunchy_api.is_spring_compression_done(fastq_first)
+
+    # THEN result should be True since the files are older than 3 weeks
+    assert result is True
 
 
 def test_get_spring_path_from_fastq():
