@@ -74,6 +74,30 @@ def test_get_spring_metadata_wrong_number_files(
     assert parsed_content is None
 
 
+def test_fastq_to_spring_sbatch(crunchy_config_dict, fastq_paths, sbatch_process, caplog):
+    """Test fastq_to_spring method"""
+    caplog.set_level(logging.DEBUG)
+    # GIVEN a crunchy-api, and fastq paths
+
+    crunchy_api = CrunchyAPI(crunchy_config_dict)
+    crunchy_api.process = sbatch_process
+    fastq_first = fastq_paths["fastq_first_path"]
+    fastq_second = fastq_paths["fastq_second_path"]
+    spring_path = crunchy_api.get_spring_path_from_fastq(fastq_first)
+    log_path = crunchy_api.get_log_dir(spring_path)
+    sbatch_path = crunchy_api.get_sbatch_path(log_path, "fastq")
+
+    assert not sbatch_path.is_file()
+
+    # WHEN calling fastq_to_spring on fastq files
+    crunchy_api.fastq_to_spring(
+        fastq_first=fastq_first, fastq_second=fastq_second,
+    )
+
+    # THEN assert that the sbatch file was created
+    assert sbatch_path.is_file()
+
+
 def test_spring_to_fastq(
     spring_file, spring_metadata_file, sbatch_content_spring_to_fastq, crunchy_config_dict, mocker
 ):

@@ -208,12 +208,11 @@ def fixture_existing_fastq_paths(fastq_first_file, fastq_second_file):
 
 
 @pytest.fixture(scope="function", name="compressed_fastqs")
-def fixture_compressed_fastqs(existing_fastq_paths, spring_file):
+def fixture_compressed_fastqs(existing_fastq_paths, spring_file, spring_metadata_file):
     """Creates fastqs with corresponding SPRING and FLAG"""
     fastq_paths = existing_fastq_paths
-    flag_path = spring_file.with_suffix("").with_suffix(".json")
+    flag_path = spring_metadata_file
 
-    flag_path.touch()
     assert spring_file.exists()
     assert flag_path.exists()
     return fastq_paths

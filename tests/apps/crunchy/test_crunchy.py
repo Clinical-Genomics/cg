@@ -1,14 +1,11 @@
 """Tests for CrunchyAPI"""
+import json
 import logging
 from pathlib import Path
 
 from cg.apps.crunchy import CrunchyAPI
-from cg.constants import (
-    CRAM_SUFFIX,
-    FASTQ_FIRST_READ_SUFFIX,
-    FASTQ_SECOND_READ_SUFFIX,
-    SPRING_SUFFIX,
-)
+from cg.constants import (CRAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX,
+                          FASTQ_SECOND_READ_SUFFIX, SPRING_SUFFIX)
 
 
 def test_set_dry_run(crunchy_config_dict):
@@ -228,30 +225,6 @@ def test_fastq_to_spring(crunchy_config_dict, sbatch_content_spring, fastq_paths
     )
 
 
-def test_fastq_to_spring_sbatch(crunchy_config_dict, fastq_paths, sbatch_process, caplog):
-    """Test fastq_to_spring method"""
-    caplog.set_level(logging.DEBUG)
-    # GIVEN a crunchy-api, and fastq paths
-
-    crunchy_api = CrunchyAPI(crunchy_config_dict)
-    crunchy_api.process = sbatch_process
-    fastq_first = fastq_paths["fastq_first_path"]
-    fastq_second = fastq_paths["fastq_second_path"]
-    spring_path = crunchy_api.get_spring_path_from_fastq(fastq_first)
-    log_path = crunchy_api.get_log_dir(spring_path)
-    sbatch_path = crunchy_api.get_sbatch_path(log_path, "fastq")
-
-    assert not sbatch_path.is_file()
-
-    # WHEN calling fastq_to_spring on fastq files
-    crunchy_api.fastq_to_spring(
-        fastq_first=fastq_first, fastq_second=fastq_second,
-    )
-
-    # THEN assert that the sbatch file was created
-    assert sbatch_path.is_file()
-
-
 def test_is_compression_done_no_spring(crunchy_config_dict, existing_fastq_paths):
     """test if compression is done when no spring file"""
     # GIVEN a crunchy-api, and fastq paths
@@ -307,6 +280,39 @@ def test_is_compression_done_spring(crunchy_config_dict, compressed_fastqs):
 
     # THEN result should be True
     assert result
+
+
+def test_is_compression_done_spring_new_files(crunchy_config_dict, compressed_fastqs, caplog):
+    """Test if compression is done when fastq files are updated
+
+    This test should fail since the fastq files are new
+    """
+    caplog.set_level(logging.DEBUG)
+    # GIVEN a crunchy-api, and fastq paths
+    crunchy_api = CrunchyAPI(crunchy_config_dict)
+    fastq_first = compressed_fastqs["fastq_first_path"]
+    fastq_second = compressed_fastqs["fastq_second_path"]
+    # GIVEN a existing spring file
+    spring_file = CrunchyAPI.get_spring_path_from_fastq(fastq=fastq_first)
+    assert spring_file.exists()
+    # GIVEN a existing flag file
+    flag_file = CrunchyAPI.get_flag_path(file_path=spring_file)
+    assert flag_file.exists()
+
+    # GIVEN that the files where updated less than three weeks ago
+    crunchy_api.update_metadata_date(flag_file)
+    with open(flag_file, "r") as infile:
+        content = json.load(infile)
+    for file_info in content:
+        assert "updated" in file_info
+
+    # WHEN checking if spring compression is done
+    result = crunchy_api.is_spring_compression_done(fastq_first)
+
+    # THEN result should be False sinvce the updated date < 3 weeks
+    assert result is False
+    # THEN assert that correct information is logged
+    assert "Fastq files are not old enough" in caplog.text
 
 
 def test_get_spring_path_from_fastq():
