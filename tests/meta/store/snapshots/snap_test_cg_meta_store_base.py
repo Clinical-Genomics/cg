@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # snapshottest: v1 - https://goo.gl/zC4yUc
 from __future__ import unicode_literals
 
@@ -27,7 +28,7 @@ snapshots["test_parse_files 1"] = [
     {
         "archive": False,
         "path": "/path/to/rare-disease/cases/case_id/analysis/sample_id/arriba_ar/sample_id_lanes_1234_trim_arriba.pdf",
-        "tags": ["arriba-ar", "arriba-report", "meta", "mip-rna", "sample_id"],
+        "tags": ["arriba-ar", "arriba_report", "meta", "mip-rna", "sample_id"],
     },
     {
         "archive": False,
