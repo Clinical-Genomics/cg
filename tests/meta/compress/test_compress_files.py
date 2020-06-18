@@ -7,6 +7,32 @@ from cg.constants import FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX
 from cg.meta.compress import files
 
 
+def test_get_fastq_run_name():
+    """Test to parse the run name of a fastq file"""
+    # GIVEN a run name and a fastq file
+    run = "run"
+    fastq = Path(run + FASTQ_FIRST_READ_SUFFIX)
+
+    # WHEN parsing the run name
+    res = files.get_run_name(fastq)
+
+    # THEN assert the name is the expected
+    assert res == run
+
+
+def test_get_fastq_run_name_real_file(fastq_files, sample):
+    """Test to parse the run name of some existing fastq files"""
+    # GIVEN a run name and a fastq file
+    fastq_file = fastq_files["fastq_first_path"]
+    assert fastq_file.exists()
+
+    # WHEN parsing the run name
+    res = files.get_run_name(fastq_file)
+
+    # THEN assert the name is the expected
+    assert res == sample
+
+
 def test_get_individual_fastqs_one_run():
     """Test to get fastq files when there is one run"""
     # GIVEN a run with two fastqs
@@ -53,9 +79,10 @@ def test_get_fastq_files(populated_compress_fastq_api, sample):
     # WHEN fetching the fastq files
     version_obj = compress_api.get_latest_version(sample)
     fastq_dict = files.get_fastq_files(sample_id=sample, version_obj=version_obj)
+    run = list(fastq_dict.keys())[0]
 
     # THEN the fastq files will be in the dictionary
-    assert set(fastq_dict.keys()) == set(["fastq_first_file", "fastq_second_file"])
+    assert set(fastq_dict[run].keys()) == set(["fastq_first_file", "fastq_second_file"])
 
 
 def test_check_prefixes(sample):
@@ -89,7 +116,7 @@ def test_get_fastq_files_no_files(compress_api, sample_hk_bundle_no_files, sampl
     # THEN assert that None is returned since there where not two files
     assert fastq_dict is None
     # THEN assert that the correct information is returned
-    assert "Could not find paired fastq files" in caplog.text
+    assert f"Could not find fastq files for {sample}" in caplog.text
 
 
 def test_check_bam_path(bam_file):

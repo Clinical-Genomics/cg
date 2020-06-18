@@ -10,26 +10,15 @@ from typing import List
 
 from marshmallow import ValidationError
 
-from cg.constants import (
-    BAM_INDEX_SUFFIX,
-    BAM_SUFFIX,
-    CRAM_INDEX_SUFFIX,
-    CRAM_SUFFIX,
-    FASTQ_DELTA,
-    FASTQ_FIRST_READ_SUFFIX,
-    FASTQ_SECOND_READ_SUFFIX,
-    SPRING_SUFFIX,
-)
+from cg.constants import (BAM_INDEX_SUFFIX, BAM_SUFFIX, CRAM_INDEX_SUFFIX,
+                          CRAM_SUFFIX, FASTQ_DELTA, FASTQ_FIRST_READ_SUFFIX,
+                          FASTQ_SECOND_READ_SUFFIX, SPRING_SUFFIX)
 from cg.utils import Process
 from cg.utils.date import get_date_str
 
 from .models import CrunchyFileSchema
-from .sbatch import (
-    SBATCH_BAM_TO_CRAM,
-    SBATCH_FASTQ_TO_SPRING,
-    SBATCH_HEADER_TEMPLATE,
-    SBATCH_SPRING_TO_FASTQ,
-)
+from .sbatch import (SBATCH_BAM_TO_CRAM, SBATCH_FASTQ_TO_SPRING,
+                     SBATCH_HEADER_TEMPLATE, SBATCH_SPRING_TO_FASTQ)
 
 LOG = logging.getLogger(__name__)
 
@@ -104,7 +93,7 @@ class CrunchyAPI:
             pending_path=pending_path,
         )
 
-        sbatch_path = self.get_sbatch_path(log_dir, "fastq")
+        sbatch_path = self.get_sbatch_path(log_dir, "fastq", self.get_run_name(fastq_first))
         sbatch_content = sbatch_header + "\n" + sbatch_body
         self._submit_sbatch(sbatch_content=sbatch_content, sbatch_path=sbatch_path)
 
@@ -133,7 +122,7 @@ class CrunchyAPI:
             checksum_second=files_info["fastq_second"]["checksum"],
         )
 
-        sbatch_path = self.get_sbatch_path(log_dir, "spring")
+        sbatch_path = self.get_sbatch_path(log_dir, "spring", self.get_run_name(spring_path))
         sbatch_content = "\n".join([sbatch_header, sbatch_body])
         self._submit_sbatch(sbatch_content=sbatch_content, sbatch_path=sbatch_path)
 
@@ -304,12 +293,23 @@ class CrunchyAPI:
         return file_path.parent
 
     @staticmethod
-    def get_sbatch_path(log_dir: Path, compression: str) -> Path:
+    def get_run_name(file_path: Path) -> Path:
+        """Return the first part of file name that is unique to sequencing run"""
+        if str(file_path).endswith(FASTQ_FIRST_READ_SUFFIX):
+            return file_path.name.replace(FASTQ_FIRST_READ_SUFFIX, "")
+        if str(file_path).endswith(FASTQ_SECOND_READ_SUFFIX):
+            return file_path.name.replace(FASTQ_SECOND_READ_SUFFIX, "")
+        if str(file_path).endswith(SPRING_SUFFIX):
+            return file_path.name.replace(SPRING_SUFFIX, "")
+        return file_path.name.replace(BAM_SUFFIX, "")
+
+    @staticmethod
+    def get_sbatch_path(log_dir: Path, compression: str, run_name: str = None) -> Path:
         """Return the path to where sbatch should be printed"""
         if compression == "fastq":
-            return log_dir / "compress_fastq.sh"
+            return log_dir / "_".join([run_name, "compress_fastq.sh"])
         if compression == "spring":
-            return log_dir / "decompress_spring.sh"
+            return log_dir / "_".join([run_name, "decompress_spring.sh"])
         return log_dir / "compress_bam.sh"
 
     @staticmethod

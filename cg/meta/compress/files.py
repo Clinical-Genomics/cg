@@ -147,22 +147,41 @@ def get_bam_path(bam_file: str, hk_files: List[Path]) -> Path:
 # Functions to get fastq like files
 
 
-def get_spring_path(version_obj: hk_models.Version) -> Path:
-    """Get spring path for a sample"""
+def get_spring_paths(version_obj: hk_models.Version) -> List[Path]:
+    """Get all spring paths for a sample"""
     hk_files_dict = get_hk_files_dict(tags=["spring"], version_obj=version_obj)
     if hk_files_dict is None:
         return None
 
+    spring_paths = []
     for file_path in hk_files_dict:
         if file_path.suffix == ".spring":
-            return file_path
+            spring_paths.append(file_path)
 
-    return None
+    return spring_paths
 
 
-def get_fastq_runs(hk_files: List[Path]) -> Dict[str, list]:
+def get_run_name(fastq_path: Path) -> str:
+    """Remove the suffix of a fastq file and return the base name"""
+    if not is_valid_fastq_suffix(fastq_path):
+        return None
+
+    if str(fastq_path).endswith(FASTQ_FIRST_READ_SUFFIX):
+        return fastq_path.name.replace(FASTQ_FIRST_READ_SUFFIX, "")
+    return fastq_path.name.replace(FASTQ_SECOND_READ_SUFFIX, "")
+
+
+def get_fastq_runs(fastq_files: List[Path]) -> Dict[str, list]:
     """Return a dictionary with all individual runs and the files belonging to that run as values"""
     fastq_runs = {}
+    for fastq_file in fastq_files:
+        run_name = get_run_name(fastq_file)
+        if not run_name:
+            continue
+        if run_name not in fastq_runs:
+            fastq_runs[run_name] = []
+        fastq_runs[run_name].append(fastq_file)
+
     return fastq_runs
 
 
@@ -172,18 +191,23 @@ def get_fastq_files(sample_id: str, version_obj: hk_models.Version) -> Dict[str,
     if hk_files_dict is None:
         return None
 
-    sorted_fastqs = sort_fastqs(fastq_files=list(hk_files_dict.keys()))
-    if not sorted_fastqs:
-        LOG.info("Could not sort FASTQ files for %s", sample_id)
+    fastq_dict = {}
+    fastq_runs = get_fastq_runs(list(hk_files_dict.keys()))
+    if not fastq_runs:
+        LOG.info("Could not find fastq files for %s", sample_id)
         return None
 
-    fastq_dict = {
-        "fastq_first_file": {"path": sorted_fastqs[0], "hk_file": hk_files_dict[sorted_fastqs[0]]},
-        "fastq_second_file": {
-            "path": sorted_fastqs[1],
-            "hk_file": hk_files_dict[sorted_fastqs[1]],
-        },
-    }
+    for run in fastq_runs:
+
+        sorted_fastqs = sort_fastqs(fastq_files=fastq_runs[run])
+        if not sorted_fastqs:
+            LOG.info("Could not sort FASTQ files for %s", sample_id)
+        fastq_first = {"path": sorted_fastqs[0], "hk_file": hk_files_dict[sorted_fastqs[0]]}
+        fastq_second = {"path": sorted_fastqs[1], "hk_file": hk_files_dict[sorted_fastqs[1]]}
+        fastq_dict[run] = {
+            "fastq_first_file": fastq_first,
+            "fastq_second_file": fastq_second,
+        }
     return fastq_dict
 
 

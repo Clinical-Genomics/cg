@@ -83,7 +83,7 @@ class CompressAPI:
                 return False
 
             LOG.info("Compressing %s for sample %s", bam_path, sample_id)
-            self.crunchy_api.bam_to_cram(bam_path=bam_path, ntasks=self.ntasks, mem=self.mem)
+            self.crunchy_api.bam_to_cram(bam_path=bam_path)
 
         return True
 
@@ -99,22 +99,21 @@ class CompressAPI:
             LOG.info("Could not find FASTQ files for %s", sample_id)
             return False
 
-        fastq_first = sample_fastq_dict["fastq_first_file"]["path"]
-        fastq_second = sample_fastq_dict["fastq_second_file"]["path"]
+        for run in sample_fastq_dict:
+            fastq_first = sample_fastq_dict[run]["fastq_first_file"]["path"]
+            fastq_second = sample_fastq_dict[run]["fastq_second_file"]["path"]
 
-        if not self.crunchy_api.is_compression_possible(fastq_first):
-            LOG.warning("FASTQ to SPRING not possible for %s", sample_id)
-            return False
+            if not self.crunchy_api.is_compression_possible(fastq_first):
+                LOG.warning("FASTQ to SPRING not possible for %s", sample_id)
+                return False
 
-        LOG.info(
-            "Compressing %s and %s for sample %s into SPRING format",
-            fastq_first,
-            fastq_second,
-            sample_id,
-        )
-        self.crunchy_api.fastq_to_spring(
-            fastq_first=fastq_first, fastq_second=fastq_second, ntasks=self.ntasks, mem=self.mem,
-        )
+            LOG.info(
+                "Compressing %s and %s for sample %s into SPRING format",
+                fastq_first,
+                fastq_second,
+                sample_id,
+            )
+            self.crunchy_api.fastq_to_spring(fastq_first=fastq_first, fastq_second=fastq_second)
 
         return True
 
@@ -129,18 +128,19 @@ class CompressAPI:
         version_obj = self.get_latest_version(sample_id)
         if not version_obj:
             return False
-        spring_path = files.get_spring_path(version_obj)
-        if not self.crunchy_api.is_compression_possible(spring_path):
-            LOG.info("SPRING to FASTQ decompression not possible for %s", sample_id)
-            return False
+        spring_paths = files.get_spring_paths(version_obj)
+        for spring_path in spring_paths:
+            if not self.crunchy_api.is_compression_possible(spring_path):
+                LOG.info("SPRING to FASTQ decompression not possible for %s", sample_id)
+                return False
 
-        LOG.info(
-            "Decompressing %s to FASTQ format for sample %s ", spring_path, sample_id,
-        )
+            LOG.info(
+                "Decompressing %s to FASTQ format for sample %s ", spring_path, sample_id,
+            )
 
-        self.crunchy_api.spring_to_fastq(spring_path)
-        spring_metadata_path = self.crunchy_api.get_flag_path(spring_path)
-        self.crunchy_api.update_metadata_date(spring_metadata_path)
+            self.crunchy_api.spring_to_fastq(spring_path)
+            spring_metadata_path = self.crunchy_api.get_flag_path(spring_path)
+            self.crunchy_api.update_metadata_date(spring_metadata_path)
 
         return True
 
@@ -203,21 +203,22 @@ class CompressAPI:
             LOG.info("Could not find FASTQ files for %s", sample_id)
             return False
 
-        fastq_first = sample_fastq_dict["fastq_first_file"]["path"]
-        fastq_second = sample_fastq_dict["fastq_second_file"]["path"]
+        for run in sample_fastq_dict:
+            fastq_first = sample_fastq_dict[run]["fastq_first_file"]["path"]
+            fastq_second = sample_fastq_dict[run]["fastq_second_file"]["path"]
 
-        if not self.crunchy_api.is_spring_compression_done(fastq_first):
-            LOG.info("Fastq compression pending for: %s", sample_id)
-            return False
+            if not self.crunchy_api.is_spring_compression_done(fastq_first):
+                LOG.info("Fastq compression pending for: %s", sample_id)
+                return False
 
-        fastq_first_hk = sample_fastq_dict["fastq_first_file"]["hk_file"]
-        fastq_second_hk = sample_fastq_dict["fastq_second_file"]["hk_file"]
+            fastq_first_hk = sample_fastq_dict[run]["fastq_first_file"]["hk_file"]
+            fastq_second_hk = sample_fastq_dict[run]["fastq_second_file"]["hk_file"]
 
-        self.update_fastq_hk(
-            sample_id=sample_id, hk_fastq_first=fastq_first_hk, hk_fastq_second=fastq_second_hk
-        )
+            self.update_fastq_hk(
+                sample_id=sample_id, hk_fastq_first=fastq_first_hk, hk_fastq_second=fastq_second_hk
+            )
 
-        self.remove_fastq(fastq_first=fastq_first, fastq_second=fastq_second)
+            self.remove_fastq(fastq_first=fastq_first, fastq_second=fastq_second)
         return True
 
     def add_decompressed_fastq(self, sample_id) -> bool:
@@ -227,31 +228,32 @@ class CompressAPI:
         if not version_obj:
             return False
 
-        spring_path = files.get_spring_path(version_obj)
-        if not self.crunchy_api.is_spring_decompression_done(spring_path):
-            LOG.info("SPRING to FASTQ decompression not finished %s", sample_id)
-            return False
-
-        for file_obj in version_obj.files:
-            if "fastq" in file_obj.tags:
-                LOG.warning("Fastq files already exists in housekeeper")
+        spring_paths = files.get_spring_paths(version_obj)
+        for spring_path in spring_paths:
+            if not self.crunchy_api.is_spring_decompression_done(spring_path):
+                LOG.info("SPRING to FASTQ decompression not finished %s", sample_id)
                 return False
 
-        LOG.info(
-            "Decompressing %s to FASTQ format for sample %s ", spring_path, sample_id,
-        )
+            for file_obj in version_obj.files:
+                if "fastq" in file_obj.tags:
+                    LOG.warning("Fastq files already exists in housekeeper")
+                    return False
 
-        spring_metadata_path = self.crunchy_api.get_flag_path(spring_path)
-        spring_metadata = self.crunchy_api.get_spring_metadata(spring_metadata_path)
-        for file_info in spring_metadata:
-            if file_info["file"] == "first_read":
-                fastq_first_path = file_info["path"]
-            if file_info["file"] == "second_read":
-                fastq_second_path = file_info["path"]
+            LOG.info(
+                "Decompressing %s to FASTQ format for sample %s ", spring_path, sample_id,
+            )
 
-        self.add_fastq_hk(
-            sample_id=sample_id, fastq_first=fastq_first_path, fastq_second=fastq_second_path
-        )
+            spring_metadata_path = self.crunchy_api.get_flag_path(spring_path)
+            spring_metadata = self.crunchy_api.get_spring_metadata(spring_metadata_path)
+            for file_info in spring_metadata:
+                if file_info["file"] == "first_read":
+                    fastq_first_path = file_info["path"]
+                if file_info["file"] == "second_read":
+                    fastq_second_path = file_info["path"]
+
+            self.add_fastq_hk(
+                sample_id=sample_id, fastq_first=fastq_first_path, fastq_second=fastq_second_path
+            )
 
         return True
 

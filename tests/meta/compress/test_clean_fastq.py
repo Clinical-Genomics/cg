@@ -54,8 +54,9 @@ def test_update_hk_fastq(real_housekeeper_api, compress_hk_fastq_bundle, compres
     # GIVEN a housekeeper version
     version_obj = compress_api.get_latest_version(sample_id)
     fastq_dict = files.get_fastq_files(sample_id=sample_id, version_obj=version_obj)
-    hk_fastq_first = fastq_dict["fastq_first_file"]["hk_file"]
-    hk_fastq_second = fastq_dict["fastq_second_file"]["hk_file"]
+    run = list(fastq_dict.keys())[0]
+    hk_fastq_first = fastq_dict[run]["fastq_first_file"]["hk_file"]
+    hk_fastq_second = fastq_dict[run]["fastq_second_file"]["hk_file"]
 
     # WHEN updating hk
     compress_api.update_fastq_hk(

@@ -10,7 +10,7 @@ def test_decompress_spring(populated_decompress_spring_api, sample, caplog):
     compress_api = populated_decompress_spring_api
     # GIVEN a populated compress api
     version_obj = compress_api.get_latest_version(sample)
-    spring_path = files.get_spring_path(version_obj)
+    spring_path = files.get_spring_paths(version_obj)[0]
     assert spring_path.exists()
     spring_metadata_path = compress_api.crunchy_api.get_flag_path(spring_path)
     assert spring_metadata_path.exists()

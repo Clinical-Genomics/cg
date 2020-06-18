@@ -64,14 +64,14 @@ class MockCrunchyAPI(CrunchyAPI):
         return self._nr_fastq_compressions
 
     # Mocked methods
-    def bam_to_cram(self, bam_path: Path, ntasks: int, mem: int, dry_run: bool = False):
+    def bam_to_cram(self, bam_path: Path):
         """
             Compress BAM file into CRAM
         """
         self._compression_pending_files[bam_path] = True
 
     def fastq_to_spring(
-        self, fastq_first: Path, fastq_second: Path, ntasks: int, mem: int, dry_run: bool = False,
+        self, fastq_first: Path, fastq_second: Path,
     ):
         """
             Compress FASTQ files into SPRING by sending to sbatch SLURM
