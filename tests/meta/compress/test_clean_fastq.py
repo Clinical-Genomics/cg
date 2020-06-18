@@ -1,6 +1,8 @@
 """Tests for cleaning fastq files"""
 import logging
 
+from cg.meta.compress import files
+
 
 def test_remove_fastqs(compress_api, fastq_files, fastq_flag_file, caplog):
     """ Test remove_fastq method
@@ -50,7 +52,8 @@ def test_update_hk_fastq(real_housekeeper_api, compress_hk_fastq_bundle, compres
     hk_fastq_flag_file = list(hk_api.files(tags=["spring-metadata"]))
     assert not hk_fastq_flag_file
     # GIVEN a housekeeper version
-    fastq_dict = compress_api.get_fastq_files(sample_id=sample_id)
+    version_obj = compress_api.get_latest_version(sample_id)
+    fastq_dict = files.get_fastq_files(sample_id=sample_id, version_obj=version_obj)
     hk_fastq_first = fastq_dict["fastq_first_file"]["hk_file"]
     hk_fastq_second = fastq_dict["fastq_second_file"]["hk_file"]
 

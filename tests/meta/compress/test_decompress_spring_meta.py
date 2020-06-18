@@ -1,13 +1,16 @@
 """Test do decompress a spring archive"""
 import logging
 
+from cg.meta.compress import files
+
 
 def test_decompress_spring(populated_decompress_spring_api, sample, caplog):
     """Test to compress all fastq files for a sample"""
     caplog.set_level(logging.DEBUG)
     compress_api = populated_decompress_spring_api
     # GIVEN a populated compress api
-    spring_path = compress_api.get_spring_path(sample)
+    version_obj = compress_api.get_latest_version(sample)
+    spring_path = files.get_spring_path(version_obj)
     assert spring_path.exists()
     spring_metadata_path = compress_api.crunchy_api.get_flag_path(spring_path)
     assert spring_metadata_path.exists()
