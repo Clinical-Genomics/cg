@@ -13,10 +13,37 @@ from cg.constants import (BAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX,
 
 LOG = logging.getLogger(__name__)
 
+# Functions to get common files
+
+
+def get_hk_files_dict(tags: List[str], version_obj: hk_models.Version) -> dict:
+    """Fetch files from a version in HK
+        Return a dict with Path object as keys and hk file objects as values
+
+    Returns:
+        {
+            Path(file): hk.File(file)
+        }
+
+    """
+    hk_files_dict = {}
+    tags = set(tags)
+    for file_obj in version_obj.files:
+        file_tags = {tag.name for tag in file_obj.tags}
+        if not file_tags.intersection(tags):
+            continue
+        LOG.debug("Found file %s", file_obj)
+        path_obj = Path(file_obj.full_path)
+        hk_files_dict[path_obj.resolve()] = file_obj
+    return hk_files_dict
+
 
 def get_nlinks(file_link: Path) -> int:
     """Get number of links to path"""
     return os.stat(file_link).st_nlink
+
+
+# Functions to get bam like files
 
 
 def get_bam_files(case_id: str, version_obj: hk_models.Version, scout_case: dict) -> dict:
@@ -117,26 +144,7 @@ def get_bam_path(bam_file: str, hk_files: List[Path]) -> Path:
     return bam_path
 
 
-def get_hk_files_dict(tags: List[str], version_obj: hk_models.Version) -> dict:
-    """Fetch files from a version in HK
-        Return a dict with Path object as keys and hk file objects as values
-
-    Returns:
-        {
-            Path(file): hk.File(file)
-        }
-
-    """
-    hk_files_dict = {}
-    tags = set(tags)
-    for file_obj in version_obj.files:
-        file_tags = {tag.name for tag in file_obj.tags}
-        if not file_tags.intersection(tags):
-            continue
-        LOG.debug("Found file %s", file_obj)
-        path_obj = Path(file_obj.full_path)
-        hk_files_dict[path_obj.resolve()] = file_obj
-    return hk_files_dict
+# Functions to get fastq like files
 
 
 def get_spring_path(version_obj: hk_models.Version) -> Path:
@@ -150,6 +158,12 @@ def get_spring_path(version_obj: hk_models.Version) -> Path:
             return file_path
 
     return None
+
+
+def get_fastq_runs(hk_files: List[Path]) -> Dict[str, list]:
+    """Return a dictionary with all individual runs and the files belonging to that run as values"""
+    fastq_runs = {}
+    return fastq_runs
 
 
 def get_fastq_files(sample_id: str, version_obj: hk_models.Version) -> Dict[str, dict]:

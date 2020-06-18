@@ -7,6 +7,44 @@ from cg.constants import FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX
 from cg.meta.compress import files
 
 
+def test_get_individual_fastqs_one_run():
+    """Test to get fastq files when there is one run"""
+    # GIVEN a run with two fastqs
+    run = "run"
+    fastqs = [Path(run + FASTQ_FIRST_READ_SUFFIX), Path(run + FASTQ_SECOND_READ_SUFFIX)]
+
+    # WHEN parsing the files
+    individual_fastqs = files.get_fastq_runs(fastqs)
+
+    # THEN assert that the run is returned
+    assert run in individual_fastqs
+    # THEN assert that the files are grouped under the run
+    assert set(individual_fastqs[run]) == set(fastqs)
+
+
+def test_get_individual_fastqs_multiple_runs():
+    """Test to get fastq files when there are two runs"""
+    # GIVEN a run with two fastqs
+    run = "run"
+    run_2 = "run_2"
+    fastqs = [
+        Path(run + FASTQ_FIRST_READ_SUFFIX),
+        Path(run + FASTQ_SECOND_READ_SUFFIX),
+        Path(run_2 + FASTQ_FIRST_READ_SUFFIX),
+        Path(run_2 + FASTQ_SECOND_READ_SUFFIX),
+    ]
+
+    # WHEN parsing the files
+    individual_fastqs = files.get_fastq_runs(fastqs)
+
+    # THEN assert that both runs are returned
+    assert run in individual_fastqs
+    assert run_2 in individual_fastqs
+    # THEN assert that the files are grouped under the run
+    assert set(individual_fastqs[run]) == set(fastqs[:2])
+    assert set(individual_fastqs[run_2]) == set(fastqs[2:])
+
+
 def test_get_fastq_files(populated_compress_fastq_api, sample):
     """test get_fastq_files method when there are fastq files"""
     compress_api = populated_compress_fastq_api
