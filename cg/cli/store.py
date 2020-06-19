@@ -5,7 +5,7 @@ import logging
 import click
 
 from cg.apps import crunchy, hk, scoutapi
-from cg.cli.compress.helpers import get_individuals, update_compress_api
+from cg.cli.compress.helpers import get_fastq_individuals, update_compress_api
 from cg.exc import CaseNotFoundError
 from cg.meta.compress import CompressAPI
 from cg.store import Store
@@ -34,7 +34,7 @@ def fastq_cmd(context, case_id, dry_run):
     compress_api = CompressAPI(hk_api=hk_api, crunchy_api=crunchy_api, scout_api=scout_api)
     update_compress_api(compress_api, dry_run=dry_run)
 
-    samples = get_individuals(cg_store, case_id)
+    samples = get_fastq_individuals(cg_store, case_id)
 
     stored_inds = 0
     try:
