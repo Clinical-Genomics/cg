@@ -6,7 +6,8 @@ import click
 
 from cg.exc import CaseNotFoundError
 
-from .helpers import get_cases, get_individuals, update_compress_api
+from .helpers import (get_fastq_cases, get_fastq_individuals,
+                      update_compress_api)
 
 LOG = logging.getLogger(__name__)
 
@@ -25,7 +26,7 @@ def fastq_cmd(context, case_id, number_of_conversions, ntasks, mem, dry_run):
 
     store = context.obj["db"]
     try:
-        cases = get_cases(store, case_id)
+        cases = get_fastq_cases(store, case_id)
     except CaseNotFoundError:
         return
 
@@ -61,7 +62,7 @@ def clean_fastq(context, case_id, dry_run):
     update_compress_api(compress_api, dry_run=dry_run)
 
     store = context.obj["db"]
-    samples = get_individuals(store, case_id)
+    samples = get_fastq_individuals(store, case_id)
 
     cleaned_inds = 0
     try:
@@ -88,7 +89,7 @@ def decompress_spring(context, case_id, dry_run):
     update_compress_api(compress_api, dry_run=dry_run)
 
     store = context.obj["db"]
-    samples = get_individuals(store, case_id)
+    samples = get_fastq_individuals(store, case_id)
 
     decompressed_inds = 0
     try:

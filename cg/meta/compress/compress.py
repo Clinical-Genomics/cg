@@ -311,7 +311,7 @@ class CompressAPI:
         spring_metadata_tags = [sample_id, "spring-metadata"]
         spring_path = self.crunchy_api.get_spring_path_from_fastq(fastq=fastq_first_path)
         spring_metadata_path = self.crunchy_api.get_flag_path(spring_path)
-        LOG.info("Housekeeper update for %s:", sample_id)
+        LOG.info("Updating fastq files in housekeeper update for %s:", sample_id)
         LOG.info(
             "%s, %s -> %s, with tags %s",
             fastq_first_path,
@@ -325,11 +325,11 @@ class CompressAPI:
 
         LOG.info("updating files in housekeeper...")
         LOG.info("Adding spring file to housekeeper")
-        self.hk_api.add_file(path=spring_path, version_obj=version_obj, tags=spring_tags)
-        self.hk_api.add_file(
-            path=spring_metadata_path, version_obj=version_obj, tags=spring_metadata_tags
-        )
         try:
+            self.hk_api.add_file(path=spring_path, version_obj=version_obj, tags=spring_tags)
+            self.hk_api.add_file(
+                path=spring_metadata_path, version_obj=version_obj, tags=spring_metadata_tags
+            )
             self.hk_api.commit()
         except IntegrityError:
             LOG.info("Spring file already exists")
