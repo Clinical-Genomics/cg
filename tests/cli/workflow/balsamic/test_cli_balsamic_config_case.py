@@ -39,25 +39,28 @@ def test_with_missing_case(cli_runner, balsamic_context, caplog):
         assert case_id in caplog.text
 
 
-def test_dry(cli_runner, balsamic_context, balsamic_case):
+def test_dry(cli_runner, balsamic_context, balsamic_case, caplog):
     """Test command with --dry option"""
 
     # GIVEN case-id
     case_id = balsamic_case.internal_id
+    caplog.set_level(logging.INFO)
 
     # WHEN dry running with dry specified
     result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
     # THEN command should print the balsamic command-string
     assert result.exit_code == EXIT_SUCCESS
-    assert "balsamic" in result.output
-    assert case_id in result.output
+    with caplog.at_level(logging.INFO):
+        assert "balsamic" in caplog.text
+        assert case_id in caplog.text
 
 
 @pytest.mark.parametrize("option_key", ["--quality-trim", "--adapter-trim", "--umi"])
-def test_passed_option(cli_runner, balsamic_context, option_key, balsamic_case):
+def test_passed_option(cli_runner, balsamic_context, option_key, balsamic_case, caplog):
     """Test command with option"""
 
     # GIVEN case-id
+    caplog.set_level(logging.INFO)
     case_id = balsamic_case.internal_id
     balsamic_key = option_key
 
@@ -68,13 +71,15 @@ def test_passed_option(cli_runner, balsamic_context, option_key, balsamic_case):
 
     # THEN dry-print should include the the balsamic option key
     assert result.exit_code == EXIT_SUCCESS
-    assert balsamic_key in result.output
+    with caplog.at_level(logging.INFO):
+        assert balsamic_key in result.output
 
 
-def test_target_bed(cli_runner, balsamic_context, balsamic_case):
+def test_target_bed(cli_runner, balsamic_context, balsamic_case, caplog):
     """Test command with --target-bed option"""
 
     # GIVEN case-id
+    caplog.set_level(logging.INFO)
     case_id = balsamic_case.internal_id
     option_key = "--target-bed"
     option_value = "target_bed"
@@ -87,8 +92,9 @@ def test_target_bed(cli_runner, balsamic_context, balsamic_case):
 
     # THEN dry-print should include the the option-value
     assert result.exit_code == EXIT_SUCCESS
-    assert balsamic_key in result.output
-    assert option_value in result.output
+    with caplog.at_level(logging.INFO):
+        assert balsamic_key in result.output
+        assert option_value in result.output
 
 
 def get_beds_path(balsamic_context) -> Path:

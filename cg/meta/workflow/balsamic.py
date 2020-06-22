@@ -9,23 +9,26 @@ from cg.store import Store
 from cg.utils.fastq import FastqAPI
 
 
-class AnalysisAPI:
+class BalsamicAnalysisAPI:
     """Methods relevant for Balsamic Analyses"""
 
-    def __init__(self, hk_api: hk.HousekeeperAPI, fastq_api: FastqAPI):
+    def __init__(self, config: dict, hk_api: hk.HousekeeperAPI, fastq_api: FastqAPI):
+        self.root_dir = Path(config["balsamic"]["root"])
         self.hk = hk_api
         self.fastq = fastq_api
 
-    @staticmethod
-    def get_deliverables_file_path(case_id, root_dir):
+    def get_deliverables_file_path(self, case_id):
         """Generates a path where the Balsamic deliverables file for the case_id should be
         located"""
-        return root_dir / case_id / "delivery_report" / (case_id + ".hk")
+        return self.get_case_path(case_id) / "delivery_report" / (case_id + ".hk")
 
-    @staticmethod
-    def get_config_path(root_dir: Path, case_id: str) -> Path:
+    def get_config_path(self, case_id: str) -> Path:
         """Generates a path where the Balsamic config for the case_id should be located"""
-        return root_dir / case_id / (case_id + ".json")
+        return self.get_case_path(case_id) / (case_id + ".json")
+
+    def get_case_path(self, case_id: str) -> Path:
+        """Generates a path where the Balsamic case for the case_id should be located"""
+        return self.root_dir / case_id
 
     def link_sample(self, fastq_handler: BaseFastqHandler, sample: str, case: str):
         """Link FASTQ files for a sample."""

@@ -11,7 +11,7 @@ import click
 from cg.apps import hk
 from cg.exc import CgError, StoreError
 from cg.meta.store.balsamic import gather_files_and_bundle_in_housekeeper
-from cg.meta.workflow.balsamic import AnalysisAPI
+from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.store import Store
 from cg.utils import fastq
 
@@ -26,7 +26,7 @@ def store(context):
     """Store results from Balsamic in housekeeper."""
     context.obj["store_api"] = context.obj.get("store_api") or Store(context.obj["database"])
     context.obj["hk_api"] = context.obj.get("hk_api") or hk.HousekeeperAPI(context.obj)
-    context.obj["analysis_api"] = context.obj.get("analysis_api") or AnalysisAPI(
+    context.obj["analysis_api"] = context.obj.get("analysis_api") or BalsamicAnalysisAPI(
         hk_api=context.obj["hk_api"], fastq_api=fastq.FastqAPI,
     )
 
@@ -66,7 +66,7 @@ def analysis(context, case_id, deliverables_file_path, config_path):
             context.invoke(generate_deliverables_file, case_id=case_id)
 
     if not config_path:
-        config_path = get_config_path(root_dir, case_id)
+        config_path = analysis_api.get_config_path(case_id)
 
     hk_api = context.obj["hk_api"]
 
@@ -100,7 +100,7 @@ def generate_deliverables_file(context, dry, config_path, case_id):
         raise CgError(f"Case {case_id} not found")
 
     if not config_path:
-        config_path = analysis_api.get_config_path(root_dir, case_id)
+        config_path = analysis_api.get_config_path(case_id)
         if not config_path.is_file():
             raise FileNotFoundError(f"Missing the sample-config file for {case_id}: {config_path}")
 

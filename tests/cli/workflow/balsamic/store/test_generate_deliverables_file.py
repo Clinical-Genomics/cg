@@ -46,7 +46,7 @@ def test_without_config_file(cli_runner, balsamic_store_context, balsamic_case):
     result = cli_runner.invoke(
         generate_deliverables_file,
         [balsamic_case.internal_id, "--dry-run"],
-        obj=balsamic_store_context,
+        obj=balsamic_store_context
     )
 
     # THEN the result of the call should be a non SUCCESS

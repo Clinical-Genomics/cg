@@ -16,7 +16,7 @@ from cg.cli.workflow.balsamic.deliver import deliver as deliver_cmd
 from cg.cli.workflow.get_links import get_links
 from cg.exc import LimsDataError, BalsamicStartError
 from cg.meta.workflow.base import get_target_bed_from_lims
-from cg.meta.workflow.balsamic import AnalysisAPI
+from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -41,8 +41,10 @@ def balsamic(context, case_id, priority, email, target_bed):
     context.obj["lims_api"] = lims.LimsAPI(context.obj)
     context.obj["fastq_api"] = FastqAPI
 
-    context.obj["analysis_api"] = AnalysisAPI(
-        hk_api=context.obj["hk_api"], fastq_api=context.obj["fastq_api"]
+    context.obj["analysis_api"] = BalsamicAnalysisAPI(
+        config=context.obj,
+        hk_api=context.obj["hk_api"],
+        fastq_api=context.obj["fastq_api"]
     )
 
     if context.invoked_subcommand is None:

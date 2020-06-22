@@ -1,8 +1,11 @@
 """cg module for cleaning databases and files"""
 import logging
+import shutil
 
 import ruamel.yaml
 import click
+from cg.apps.balsamic.fastq import FastqHandler
+from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from dateutil.parser import parse as parse_date
 from datetime import datetime
 from pathlib import Path
@@ -12,6 +15,8 @@ from cg.meta.upload.beacon import UploadBeaconApi
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
+SUCCESS = 0
+FAIL = 1
 
 
 @click.group()
@@ -46,6 +51,47 @@ def beacon(context: click.Context, item_type, item_id):
         beacon_api=context.obj["beacon"],
     )
     api.remove_vars(item_type=item_type, item_id=item_id)
+
+
+@clean.command("balsamic-run-dir")
+@click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
+@click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
+@click.argument("case_id")
+@click.pass_context
+def balsamic_run_dir(context, yes, case_id, dry_run: bool = False):
+    """Remove Balsamic run directory"""
+
+    store = context.obj["db"]
+    balsamic = BalsamicAnalysisAPI(config=context.obj, hk_api=context.obj["hk"],
+                                   fastq_api=FastqHandler)
+    case_obj = store.family(case_id)
+
+    if case_obj is None:
+        LOG.error("%s: case not found", case_id)
+        context.abort()
+
+    analysis_obj = case_obj.analyses[0] if case_obj.analyses else None
+    if analysis_obj is None:
+        LOG.error("%s: analysis not found", case_id)
+        context.abort()
+
+    analysis_path = balsamic.get_case_path(case_id)
+
+    if yes or click.confirm(f"Do you want to remove {analysis_path}?"):
+
+        if not analysis_path.exists():
+            LOG.warning("could not find: %s", analysis_path)
+            return FAIL
+
+        if analysis_path.is_symlink():
+            LOG.warning("will not automatically delete symlink: %s", analysis_path)
+            return FAIL
+
+        if dry_run:
+            LOG.info("Would have deleted: %s", analysis_path)
+            return SUCCESS
+
+        shutil.rmtree(analysis_path)
 
 
 @clean.command("mip-run-dir")
@@ -171,6 +217,34 @@ def hk_past_files(context, case_id, tags, yes, dry_run):
                     if file_path.exists():
                         file_path.unlink()
                     LOG.info("File removed")
+
+
+@clean.command("balsamic-past-run-dirs")
+@click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
+@click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
+@click.argument("before_str")
+@click.pass_context
+def balsamic_past_run_dirs(
+    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
+):
+    """Clean up of "old" Balsamic case run dirs"""
+
+    before = parse_date(before_str)
+    store = context.obj["db"]
+
+    # for all analyses
+    for analysis in store.analyses(before=before):
+        if analysis in store.latest_analyses():
+            case_id = analysis.family.internal_id
+
+        # call clean
+        LOG.info("%s: cleaning Balsamic output", case_id)
+        context.invoke(
+            balsamic_run_dir,
+            yes=yes,
+            case_id=case_id,
+            dry_run=dry_run,
+        )
 
 
 @clean.command("mip-past-run-dirs")
