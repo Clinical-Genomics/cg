@@ -62,8 +62,9 @@ def balsamic_run_dir(context, yes, case_id, dry_run: bool = False):
     """Remove Balsamic run directory"""
 
     store = context.obj["db"]
-    balsamic = BalsamicAnalysisAPI(config=context.obj, hk_api=context.obj["hk"],
-                                   fastq_api=FastqHandler)
+    balsamic = BalsamicAnalysisAPI(
+        config=context.obj, hk_api=context.obj["hk"], fastq_api=FastqHandler
+    )
     case_obj = store.family(case_id)
 
     if case_obj is None:
@@ -240,10 +241,7 @@ def balsamic_past_run_dirs(
         # call clean
         LOG.info("%s: cleaning Balsamic output", case_id)
         context.invoke(
-            balsamic_run_dir,
-            yes=yes,
-            case_id=case_id,
-            dry_run=dry_run,
+            balsamic_run_dir, yes=yes, case_id=case_id, dry_run=dry_run,
         )
 
 

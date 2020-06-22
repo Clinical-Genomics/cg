@@ -24,15 +24,19 @@ def balsamic_context(
         "hk_api": housekeeper_api,
         "tb_api": MockTB(),
         "store_api": balsamic_store,
-        "analysis_api": BalsamicAnalysisAPI(hk_api=housekeeper_api,
-                                            fastq_api=MockFastqAPI,
-                                            config={"balsamic": {
-                                                        "conda_env": "conda_env",
-                                                        "root": "root",
-                                                        "slurm": {"account": "account", "qos": "qos"},
-                                                        "singularity": "singularity",
-                                                        "reference_config": "reference_config",
-                                                    },}),
+        "analysis_api": BalsamicAnalysisAPI(
+            hk_api=housekeeper_api,
+            fastq_api=MockFastqAPI,
+            config={
+                "balsamic": {
+                    "conda_env": "conda_env",
+                    "root": "root",
+                    "slurm": {"account": "account", "qos": "qos"},
+                    "singularity": "singularity",
+                    "reference_config": "reference_config",
+                },
+            },
+        ),
         "fastq_handler": MockFastq,
         "fastq_api": MockFastqAPI,
         "gzipper": MockGzip(),

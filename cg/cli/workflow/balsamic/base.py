@@ -42,9 +42,7 @@ def balsamic(context, case_id, priority, email, target_bed):
     context.obj["fastq_api"] = FastqAPI
 
     context.obj["analysis_api"] = BalsamicAnalysisAPI(
-        config=context.obj,
-        hk_api=context.obj["hk_api"],
-        fastq_api=context.obj["fastq_api"]
+        config=context.obj, hk_api=context.obj["hk_api"], fastq_api=context.obj["fastq_api"]
     )
 
     if context.invoked_subcommand is None:
