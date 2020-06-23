@@ -52,7 +52,7 @@ def link(context, case_id):
         click.Abort()
 
 
-@balsamic.command()
+@balsamic.command("config-case")
 @ARGUMENT_CASE_ID
 @OPTION_DRY
 @click.option("--panel-bed", required=False, help="Optional")
@@ -151,7 +151,7 @@ def config_case(context, panel_bed, case_id, dry):
         LOG.warning(f"{case_id} is not present in database")
         click.Abort()
 
-    context.obj["MetaBalsamicAPI"].balsamic_api.co
+    context.obj["MetaBalsamicAPI"].balsamic_api.config_case(arguments)
 
 
 @balsamic.command()
