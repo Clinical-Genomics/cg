@@ -26,6 +26,7 @@ LOG = logging.getLogger(__name__)
 
 class BalsamicAPI:
     """Handles execution of BALSAMIC"""
+
     def __init__(self, config):
         self.binary = config["balsamic"]["executable"]
         self.singularity = config["balsamic"]["singularity"]
