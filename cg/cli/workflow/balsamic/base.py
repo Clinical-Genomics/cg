@@ -80,7 +80,9 @@ def config_case(context, panel_bed, case_id, dry):
 
             # Can be handled with pandas eloquently in future
             normal_paths = [
-                v["concatenated_path"] for k, v in setup_data.items() if v["tissue_type"] == "normal"
+                v["concatenated_path"]
+                for k, v in setup_data.items()
+                if v["tissue_type"] == "normal"
             ]
             tumor_paths = [
                 v["concatenated_path"] for k, v in setup_data.items() if v["tissue_type"] == "tumor"
