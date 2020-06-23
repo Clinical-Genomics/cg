@@ -201,4 +201,3 @@ def start(context, case_id):
     context.invoke(config_case)
     context.invoke(run)
     context.invoke(remove_fastq)
-
