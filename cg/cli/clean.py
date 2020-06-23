@@ -85,7 +85,7 @@ def balsamic_run_dir(context, yes, case_id, dry_run: bool = False):
             return FAIL
 
         if analysis_path.is_symlink():
-            LOG.warning("Will not automatically delete symlink: %s, delete if manually",
+            LOG.warning("Will not automatically delete symlink: %s, delete it manually",
                         analysis_path)
             return FAIL
 
