@@ -104,7 +104,7 @@ def generate_deliverables_file(context, dry, config_path, case_id):
         if not config_path.is_file():
             raise FileNotFoundError(f"Missing the sample-config file for {case_id}: {config_path}")
 
-    command_str = f" report deliver" f" --sample-config {config_path}'"
+    command_str = f" report deliver --sample-config {config_path}'"
     command = [f"bash -c 'source activate {conda_env}; balsamic"]
     command.extend(command_str.split(" "))
 

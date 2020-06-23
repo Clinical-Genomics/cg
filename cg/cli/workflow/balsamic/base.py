@@ -258,7 +258,7 @@ def config_case(
 @balsamic.command()
 @click.option("-d", "--dry-run", "dry", is_flag=True, help="print command to console")
 @click.option(
-    "-r", "--run-analysis", "run_analysis", is_flag=True, default=False, help="start " "analysis",
+    "-r", "--run-analysis", "run_analysis", is_flag=True, default=False, help="start analysis",
 )
 @click.option("--config", "config_path", required=False, help="Optional")
 @PRIORITY_OPTION
@@ -276,7 +276,7 @@ def run(context, dry, run_analysis, config_path, priority, email, case_id):
         config_path = Path.joinpath(root_dir, case_id, case_id + ".json")
 
     # Call Balsamic
-    command_str = f" run analysis" f" --account {slurm_account}" f" -s {config_path}"
+    command_str = f" run analysis --account {slurm_account} -s {config_path}"
 
     if run_analysis:
         command_str += " --run-analysis"
