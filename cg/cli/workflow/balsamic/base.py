@@ -33,7 +33,7 @@ def balsamic(context):
     context.obj["MetaBalsamicAPI"] = MetaBalsamicAPI(context.obj)
 
 
-@balsamic.command
+@balsamic.command()
 @ARGUMENT_CASE_ID
 @click.pass_context
 def link(context, case_id):
@@ -52,7 +52,7 @@ def link(context, case_id):
         click.Abort()
 
 
-@balsamic.command
+@balsamic.command()
 @ARGUMENT_CASE_ID
 @OPTION_DRY
 @click.option("--panel-bed", required=False, help="Optional")
@@ -152,7 +152,7 @@ def config_case(context, panel_bed, case_id, dry):
     context.obj["MetaBalsamicAPI"].balsamic_api.co
 
 
-@balsamic.command
+@balsamic.command()
 @ARGUMENT_CASE_ID
 @OPTION_DRY
 @click.option("-p", "--priority", type=click.Choice(["low", "normal", "high"]))
@@ -177,7 +177,7 @@ def run(context, analysis_type, run_analysis, priority, case_id, dry):
     context.obj["MetaBalsamicAPI"].balsamic_api.run_analysis(arguments)
 
 
-@balsamic.command
+@balsamic.command()
 @ARGUMENT_CASE_ID
 @click.pass_context
 def remove_fastq(context, case_id):
@@ -191,7 +191,7 @@ def remove_fastq(context, case_id):
         LOG.info(f"Path {work_dir} does not exist")
 
 
-@balsamic.command
+@balsamic.command()
 @ARGUMENT_CASE_ID
 @click.pass_context
 def start(context, case_id):
