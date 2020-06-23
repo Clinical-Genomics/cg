@@ -17,6 +17,7 @@ class BalsamicAPI:
         self.root_dir = config["balsamic"]["root"]
         self.slurm = config["balsamic"]["slurm"]["account"]
         self.qos = config["balsamic"]["slurm"]["qos"]
+        self.bed_path = config["bed_path"]
         self.process = Process(self.binary)
 
     def config_case(self, arguments: dict):
