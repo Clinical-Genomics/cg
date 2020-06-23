@@ -24,14 +24,14 @@ from cg.meta.deliver import DeliverAPI
 LOG = logging.getLogger(__name__)
 
 ARGUMENT_CASE_ID = click.argument("case_id", required=True)
-OPTION_DRY = click.option("-d",
-                          "--dry-run",
-                          "dry",
-                          help="Print command to console without executing")
+OPTION_DRY = click.option(
+    "-d", "--dry-run", "dry", help="Print command to console without executing"
+)
 
 
 class BalsamicAPI:
     """Handles execution of BALSAMIC"""
+
     def __init__(self, config):
         self.binary = config["balsamic"]["executable"]
         self.singularity = config["balsamic"]["singularity"]
@@ -82,6 +82,7 @@ class BalsamicAPI:
 class MetaBalsamicAPI:
     """Handles communication between BALASMIC processes 
     and the rest of CG infrastructure"""
+
     def __init__(self, config):
 
         self.balsamic_api = BalsamicAPI(config)
@@ -94,8 +95,7 @@ class MetaBalsamicAPI:
     def get_deliverables_file_path(self, case_id):
         """Generates a path where the Balsamic deliverables file for the case_id should be
         located"""
-        return Path(self.balsamic_api.root_dir / case_id / "delivery_report" /
-                    (case_id + ".hk"))
+        return Path(self.balsamic_api.root_dir / case_id / "delivery_report" / (case_id + ".hk"))
 
     def get_config_path(self, case_id):
         """Generates a path where the Balsamic config for the case_id should be located"""
@@ -141,21 +141,26 @@ class MetaBalsamicAPI:
                 link_object.sample.data_analysis,
             )
 
-            if link_object.sample.data_analysis and "balsamic" in link_object.sample.data_analysis.lower(
+            if (
+                link_object.sample.data_analysis
+                and "balsamic" in link_object.sample.data_analysis.lower()
             ):
-                LOG.info("%s has balsamic as data analysis, linking.",
-                         link_object.sample.internal_id)
+                LOG.info(
+                    "%s has balsamic as data analysis, linking.", link_object.sample.internal_id
+                )
 
-                file_collection = self.get_file_collection(
-                    sample=link_object.sample.internal_id)
-                self.fastq_handler.link(case=link_object.family.internal_id,
-                                        sample=link_object.sample.internal_id,
-                                        files=file_collection)
+                file_collection = self.get_file_collection(sample=link_object.sample.internal_id)
+                self.fastq_handler.link(
+                    case=link_object.family.internal_id,
+                    sample=link_object.sample.internal_id,
+                    files=file_collection,
+                )
 
             else:
                 LOG.info(
                     "%s does not have blasamic as data analysis, skipping.",
-                    link_object.sample.internal_id)
+                    link_object.sample.internal_id,
+                )
 
         LOG.info("Linking completed")
 
@@ -163,36 +168,42 @@ class MetaBalsamicAPI:
         """Determines correct config params and returns them in a dict"""
 
         setup_data = {}
-        #Iterate over all links
+        # Iterate over all links
         for link_object in case_object_links:
-            #Check of Balsamic as analysis type
-            if link_object.sample.data_analysis and "balsamic" in link_object.sample.data_analysis.lower(
+            # Check of Balsamic as analysis type
+            if (
+                link_object.sample.data_analysis
+                and "balsamic" in link_object.sample.data_analysis.lower()
             ):
 
-                #Get file collection for sample id
-                file_collection = self.get_file_collection(
-                    sample=link_object.sample.internal_id)
+                # Get file collection for sample id
+                file_collection = self.get_file_collection(sample=link_object.sample.internal_id)
                 fastq_data = file_collection[0]
                 linked_fastq_name = self.fastq_handler.FastqFileNameCreator.create(
                     lane=fastq_data["lane"],
                     flowcell=fastq_data["flowcell"],
                     sample=link_object.sample.internal_id,
                     read=fastq_data["read"],
-                    more={"undetermined": fastq_data["undetermined"]})
+                    more={"undetermined": fastq_data["undetermined"]},
+                )
                 concatenated_fastq_name = self.fastq_handler.FastqFileNameCreator.get_concatenated_name(
-                    linked_fastq_name)
-                concatenated_path = f"{self.balsamic_api.root_dir}/{case_id}/{concatenated_fastq_name}"
+                    linked_fastq_name
+                )
+                concatenated_path = (
+                    f"{self.balsamic_api.root_dir}/{case_id}/{concatenated_fastq_name}"
+                )
 
-                #Block to get application type
+                # Block to get application type
                 application_type = link_object.sample.application_version.application.prep_category
 
-                #Block to get panel BED
+                # Block to get panel BED
                 target_bed_filename = get_target_bed_from_lims(
                     lims=self.lims_api,
                     status_db=self.store,
-                    target_bed=link_object.sample.internal_id)
+                    target_bed=link_object.sample.internal_id,
+                )
 
-                #Check if tumor
+                # Check if tumor
                 if link_object.sample.is_tumour:
                     tissue_type = "tumor"
                 else:
@@ -254,84 +265,74 @@ def config_case(context, panel_bed, case_id, dry):
                 "normal": "",
                 "tumor": "",
                 "panel_bed": "",
-                "output_config": f"{case_id}.json"
+                "output_config": f"{case_id}.json",
             }
 
             acceptable_applications = {"wgs", "wes", "tgs"}
             applications_requiring_bed = {"wes", "tgs"}
             setup_data = context.obj["MetaBalsamicAPI"].get_case_config_params(
-                case_id, case_object.links)
+                case_id, case_object.links
+            )
 
-            #Can be handled with pandas eloquently in future
+            # Can be handled with pandas eloquently in future
             normal_paths = [
-                v["concatenated_path"] for k, v in setup_data
-                if v["tissue_type"] == "normal"
+                v["concatenated_path"] for k, v in setup_data if v["tissue_type"] == "normal"
             ]
             tumor_paths = [
-                v["concatenated_path"] for k, v in setup_data
-                if v["tissue_type"] == "tumor"
+                v["concatenated_path"] for k, v in setup_data if v["tissue_type"] == "tumor"
             ]
-            application_types = set(
-                [v["application_type"] for k, v in setup_data])
+            application_types = set([v["application_type"] for k, v in setup_data])
             target_beds = set([v["target_bed"] for k, v in setup_data])
 
-            #Check if normal samples are 1
+            # Check if normal samples are 1
             if len(normal_paths) == 1:
                 arguments["normal"] = normal_paths[0]
             elif len(normal_paths) == 0:
                 arguments["normal"] = None
             elif len(normal_paths) > 1:
-                LOG.warning(
-                    f"Too many normal samples found: {len(normal_paths)}")
+                LOG.warning(f"Too many normal samples found: {len(normal_paths)}")
                 click.Abort()
 
-            #Check if tumor samples are 1
+            # Check if tumor samples are 1
             if len(tumor_paths) == 1:
                 arguments["tumor"] = normal_paths[0]
             elif len(tumor_paths) == 0:
                 LOG.warning(f"No tumor samples found for {case_id}")
                 click.Abort()
             elif len(tumor_paths) > 1:
-                LOG.warning(
-                    f"Too many tumor samples found: {len(tumor_paths)}")
+                LOG.warning(f"Too many tumor samples found: {len(tumor_paths)}")
                 click.Abort()
 
-            #Check application type is only one
+            # Check application type is only one
             if len(application_types) > 1:
-                LOG.warning(
-                    f"More than one application found for case {case_id}")
+                LOG.warning(f"More than one application found for case {case_id}")
                 click.Abort()
             elif len(application_types) == 0:
                 LOG.warning(f"No application found for case {case_id}")
                 click.Abort()
 
-            #Check if application type is suitable for BALSAMIC
+            # Check if application type is suitable for BALSAMIC
             if application_types.issubset(acceptable_applications):
                 LOG.info(f"Application type {application_types}")
             else:
                 LOG.warning(f"Improper application type for case {case_id}")
                 click.Abort()
 
-            #If panel BED is provided, check if panel BED is compatible with application type
+            # If panel BED is provided, check if panel BED is compatible with application type
             if panel_bed:
                 if application_types.issubset(applications_requiring_bed):
                     arguments["panel_bed"] = panel_bed
                 else:
-                    LOG.warning(
-                        f"Panel BED {panel_bed} incompatible with application type"
-                    )
+                    LOG.warning(f"Panel BED {panel_bed} incompatible with application type")
                     click.Abort()
-            #If panel BED is not provided, it should be inferred.
+            # If panel BED is not provided, it should be inferred.
             else:
                 if application_types.issubset(applications_requiring_bed):
                     if len(target_beds) == 0:
-                        LOG.warning(
-                            f"Panel BED cannot be found for sample {case_id}")
+                        LOG.warning(f"Panel BED cannot be found for sample {case_id}")
                         click.Abort()
                     elif len(target_beds) > 1:
-                        LOG.warning(
-                            f"Multiple Panel BED indicated for sample {case_id}"
-                        )
+                        LOG.warning(f"Multiple Panel BED indicated for sample {case_id}")
                         click.Abort()
                     else:
                         arguments["panel_bed"] = target_beds.pop()
@@ -349,22 +350,12 @@ def config_case(context, panel_bed, case_id, dry):
 @ARGUMENT_CASE_ID
 @OPTION_DRY
 @click.option("-p", "--priority", type=click.Choice(["low", "normal", "high"]))
-@click.option("-a",
-              "--analysis-type",
-              type=click.Choice(["qc", "paired", "single"]))
-@click.option("-r",
-              "--run-analysis",
-              is_flag=True,
-              default=False,
-              help="Execute in non-dry mode")
+@click.option("-a", "--analysis-type", type=click.Choice(["qc", "paired", "single"]))
+@click.option("-r", "--run-analysis", is_flag=True, default=False, help="Execute in non-dry mode")
 @click.pass_context
 def run(context, analysis_type, run_analysis, priority, case_id, dry):
 
-    arguments = {
-        "priority": None,
-        "analysis_type": None,
-        "run_analysis": False
-    }
+    arguments = {"priority": None, "analysis_type": None, "run_analysis": False}
     if priority:
         arguments["priority"] = priority
     if analysis_type:
