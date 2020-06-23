@@ -99,7 +99,7 @@ def config_case(context, panel_bed, case_id, dry):
 
             # Check if tumor samples are 1
             if len(tumor_paths) == 1:
-                arguments["tumor"] = normal_paths[0]
+                arguments["tumor"] = tumor_paths[0]
             elif len(tumor_paths) == 0:
                 LOG.warning(f"No tumor samples found for {case_id}")
                 click.Abort()
