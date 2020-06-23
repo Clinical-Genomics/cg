@@ -123,6 +123,7 @@ def mip_run_dir(context, yes, case_id, sample_info, dry_run: bool = False):
 
     try:
         context.obj["tb_api"].delete_analysis(case_id, date, yes=yes, dry_run=dry_run)
+        analysis_obj.cleaned_at = datetime.now()
     except ValueError as error:
         LOG.error(f"{case_id}: {error.args[0]}")
         context.abort()
