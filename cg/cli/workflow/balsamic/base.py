@@ -9,8 +9,6 @@ import click
 from cg.apps import hk, lims
 from cg.apps.balsamic.fastq import FastqHandler
 from cg.utils.fastq import FastqAPI
-from cg.cli.workflow.balsamic.store import store as store_cmd
-from cg.cli.workflow.balsamic.deliver import deliver as deliver_cmd
 from cg.cli.workflow.get_links import get_links
 from cg.exc import LimsDataError, BalsamicStartError
 from cg.meta.workflow.base import get_target_bed_from_lims
@@ -221,7 +219,3 @@ def start(context, case_id):
     context.invoke(run)
     context.invoke(remove_fastq)
 
-
-
-balsamic.add_command(store_cmd)
-balsamic.add_command(deliver_cmd)
