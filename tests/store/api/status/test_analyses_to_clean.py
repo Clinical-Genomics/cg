@@ -9,8 +9,9 @@ def test_analysis_included(analysis_store: Store, helpers):
 
     # GIVEN an analysis that is uploaded
     timestamp = datetime.now()
-    analysis = helpers.add_analysis(analysis_store, started_at=timestamp, uploaded_at=timestamp,
-                                    cleaned_at=None)
+    analysis = helpers.add_analysis(
+        analysis_store, started_at=timestamp, uploaded_at=timestamp, cleaned_at=None
+    )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp)
     analysis_store.relate_sample(family=analysis.family, sample=sample, status="unknown")
 
@@ -26,8 +27,9 @@ def test_analysis_excluded(analysis_store: Store, helpers):
 
     # GIVEN an analysis that is not uploaded
     timestamp = datetime.now()
-    analysis = helpers.add_analysis(analysis_store, started_at=timestamp, uploaded_at=None,
-                                    cleaned_at=None)
+    analysis = helpers.add_analysis(
+        analysis_store, started_at=timestamp, uploaded_at=None, cleaned_at=None
+    )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp)
     analysis_store.relate_sample(family=analysis.family, sample=sample, status="unknown")
 
@@ -44,9 +46,13 @@ def test_pipeline_included(analysis_store: Store, helpers):
     # GIVEN an analysis that is uploaded and pipeline is specified
     timestamp = datetime.now()
     pipeline = "pipeline"
-    analysis = helpers.add_analysis(analysis_store, pipeline=pipeline, started_at=timestamp,
-                                    uploaded_at=timestamp,
-                                    cleaned_at=None)
+    analysis = helpers.add_analysis(
+        analysis_store,
+        pipeline=pipeline,
+        started_at=timestamp,
+        uploaded_at=timestamp,
+        cleaned_at=None,
+    )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp)
     analysis_store.relate_sample(family=analysis.family, sample=sample, status="unknown")
 
@@ -64,8 +70,13 @@ def test_pipeline_excluded(analysis_store: Store, helpers):
     timestamp = datetime.now()
     used_pipeline = "pipeline"
     wrong_pipeline = "wrong_pipeline"
-    analysis = helpers.add_analysis(analysis_store, pipeline=used_pipeline, started_at=timestamp,
-                                    uploaded_at=timestamp, cleaned_at=None)
+    analysis = helpers.add_analysis(
+        analysis_store,
+        pipeline=used_pipeline,
+        started_at=timestamp,
+        uploaded_at=timestamp,
+        cleaned_at=None,
+    )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp)
     analysis_store.relate_sample(family=analysis.family, sample=sample, status="unknown")
 
@@ -81,8 +92,9 @@ def test_non_cleaned_included(analysis_store: Store, helpers):
 
     # GIVEN an analysis that is uploaded but not cleaned
     timestamp = datetime.now()
-    analysis = helpers.add_analysis(analysis_store, started_at=timestamp, uploaded_at=timestamp,
-                                    cleaned_at=None)
+    analysis = helpers.add_analysis(
+        analysis_store, started_at=timestamp, uploaded_at=timestamp, cleaned_at=None
+    )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp)
     analysis_store.relate_sample(family=analysis.family, sample=sample, status="unknown")
 
@@ -98,8 +110,9 @@ def test_cleaned_excluded(analysis_store: Store, helpers):
 
     # GIVEN an analysis that is cleaned
     timestamp = datetime.now()
-    analysis = helpers.add_analysis(analysis_store, started_at=timestamp,
-                                    uploaded_at=timestamp, cleaned_at=timestamp)
+    analysis = helpers.add_analysis(
+        analysis_store, started_at=timestamp, uploaded_at=timestamp, cleaned_at=timestamp
+    )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp)
     analysis_store.relate_sample(family=analysis.family, sample=sample, status="unknown")
 

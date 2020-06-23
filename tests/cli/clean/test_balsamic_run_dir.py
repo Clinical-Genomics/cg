@@ -23,9 +23,9 @@ def test_without_options(cli_runner, clean_context):
 
 def ensure_balsamic_analysis(store: Store, helpers):
     timestamp = datetime.now()
-    return helpers.add_analysis(store, pipeline="Balsamic", started_at=timestamp,
-                                uploaded_at=timestamp,
-                                cleaned_at=None)
+    return helpers.add_analysis(
+        store, pipeline="Balsamic", started_at=timestamp, uploaded_at=timestamp, cleaned_at=None
+    )
 
 
 def ensure_balsamic_directory(tmpdir, case_id):
@@ -43,7 +43,7 @@ def test_dry_run(cli_runner, clean_context, base_store, helpers, caplog, tmpdir)
     ensure_balsamic_directory(tmpdir, case_id)
 
     # WHEN dry running with dry run specified
-    result = cli_runner.invoke(balsamic_run_dir, [case_id, '-d', '-y'], obj=clean_context)
+    result = cli_runner.invoke(balsamic_run_dir, [case_id, "-d", "-y"], obj=clean_context)
 
     # THEN command should say it would have deleted
     assert result.exit_code == EXIT_SUCCESS
@@ -63,7 +63,7 @@ def test_cleaned_at(cli_runner, clean_context, base_store, helpers, caplog, tmpd
     ensure_balsamic_directory(tmpdir, case_id)
 
     # WHEN dry running with dry run specified
-    result = cli_runner.invoke(balsamic_run_dir, [case_id, '-y'], obj=clean_context)
+    result = cli_runner.invoke(balsamic_run_dir, [case_id, "-y"], obj=clean_context)
 
     # THEN command should say it would have deleted
     assert result.exit_code == EXIT_SUCCESS
