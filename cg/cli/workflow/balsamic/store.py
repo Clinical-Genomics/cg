@@ -14,6 +14,7 @@ from cg.meta.store.balsamic import gather_files_and_bundle_in_housekeeper
 from cg.meta.workflow.balsamic import AnalysisAPI
 from cg.store import Store
 from cg.utils import fastq
+from cg.apps.balsamic.fastq import FastqHandler
 
 LOG = logging.getLogger(__name__)
 SUCCESS = 0
@@ -27,7 +28,7 @@ def store(context):
     context.obj["store_api"] = context.obj.get("store_api") or Store(context.obj["database"])
     context.obj["hk_api"] = context.obj.get("hk_api") or hk.HousekeeperAPI(context.obj)
     context.obj["analysis_api"] = context.obj.get("analysis_api") or AnalysisAPI(
-        hk_api=context.obj["hk_api"], fastq_api=fastq.FastqAPI,
+        hk_api=context.obj["hk_api"], fastq_api=fastq.FastqAPI, fastq_handler=FastqHandler,
     )
 
 
