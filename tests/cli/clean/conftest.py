@@ -13,7 +13,7 @@ from cg.utils.fastq import FastqAPI
 
 
 @pytest.fixture
-def balsamic_context(
+def clean_context(
     balsamic_store, balsamic_case, housekeeper_api, hk_bundle_data, helpers, tmpdir
 ) -> dict:
     """context to use in cli"""
@@ -24,24 +24,6 @@ def balsamic_context(
         "hk_api": housekeeper_api,
         "tb_api": MockTB(),
         "store_api": balsamic_store,
-        "analysis_api": BalsamicAnalysisAPI(
-            hk_api=housekeeper_api,
-            fastq_api=MockFastqAPI,
-            config={
-                "balsamic": {
-                    "conda_env": "conda_env",
-                    "root": "root",
-                    "slurm": {"account": "account", "qos": "qos"},
-                    "singularity": "singularity",
-                    "reference_config": "reference_config",
-                },
-            },
-        ),
-        "fastq_handler": MockFastq,
-        "fastq_api": MockFastqAPI,
-        "gzipper": MockGzip(),
-        "lims_api": MockLims(),
-        "bed_path": "bed_path",
         "balsamic": {
             "conda_env": "conda_env",
             "root": tmpdir,

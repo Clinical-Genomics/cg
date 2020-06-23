@@ -540,6 +540,18 @@ class StatusHandler(BaseHandler):
         )
         return records
 
+    def analyses_to_clean(self, pipeline: str = None):
+        """Fetch analyses that haven't been cleaned."""
+        records = self.latest_analyses()
+        records = records.filter(
+            models.Analysis.uploaded_at.isnot(None), models.Analysis.cleaned_at.is_(None)
+        )
+
+        if pipeline:
+            records = records.filter(models.Analysis.pipeline.contains(pipeline))
+
+        return records
+
     def observations_to_upload(self):
         """Fetch observations that haven't been uploaded."""
 

@@ -146,6 +146,7 @@ class StoreHelpers:
         uploaded_at: datetime = None,
         upload_started: datetime = None,
         delivery_reported_at: datetime = None,
+        cleaned_at: datetime = None,
         pipeline: str = "dummy_pipeline",
         pipeline_version: str = "1.0",
         uploading: bool = False,
@@ -166,6 +167,8 @@ class StoreHelpers:
             analysis.uploaded_at = uploaded_at
         if delivery_reported_at:
             analysis.delivery_report_created_at = delivery_reported_at
+        if cleaned_at:
+            analysis.cleaned_at = cleaned_at
         if uploading:
             analysis.upload_started_at = upload_started or datetime.now()
         if config_path:
@@ -201,7 +204,7 @@ class StoreHelpers:
             is_external=is_external,
             is_rna=is_rna,
         )
-        print(repr(application_version))
+        # print(repr(application_version))
         application_version_id = application_version.id
         sample = store.add_sample(
             name=sample_id,
@@ -214,23 +217,23 @@ class StoreHelpers:
 
         sample.application_version_id = application_version_id
         sample.customer = customer
-        print("Set is external to %s", is_external)
+        # print("is_external: %s" % is_external)
         sample.is_external = is_external
 
         if kwargs.get("delivered_at"):
-            print("Adding delivered")
+            # print("Adding delivered_at")
             sample.delivered_at = kwargs["delivered_at"]
 
         if kwargs.get("received_at"):
-            print("Adding received_at")
+            # print("Adding received_at")
             sample.received_at = kwargs["received_at"]
 
         if kwargs.get("prepared_at"):
-            print("Adding prepared")
+            # print("Adding prepared")
             sample.received_at = kwargs["prepared_at"]
 
         if kwargs.get("flowcell"):
-            print("Adding flowcell")
+            # print("Adding flowcell")
             sample.flowcells.append(kwargs["flowcell"])
 
         store.add_commit(sample)
@@ -277,7 +280,7 @@ class StoreHelpers:
         if not family_obj:
             family_obj = store.add_family(name=family_id, panels=panels)
 
-        print("Adding family with name %s (%s)" % (family_obj.name, family_obj.internal_id))
+        # print("Adding family with name %s (%s)" % (family_obj.name, family_obj.internal_id))
         family_obj.customer = customer
         store.add_commit(family_obj)
         return family_obj
