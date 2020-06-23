@@ -35,7 +35,7 @@ class BalsamicAPI:
             "--tumor": arguments["tumor"],
         }
 
-        opts = sum([(k, v) for k, v in opts if v], ())
+        opts = sum([(k, v) for k, v in opts.items() if v], ())
         self.process.run_command(command + opts)
 
     def run_analysis(self, arguments: dict):
@@ -53,5 +53,5 @@ class BalsamicAPI:
             "--run-analysis": arguments["run_analysis"],
         }
 
-        opts = sum([(k, v) for k, v in opts if v], ())
-        self.process.run_command(command)
+        opts = sum([(k, v) for k, v in opts.items() if v], ())
+        self.process.run_command(command+opts)
