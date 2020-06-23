@@ -1,4 +1,3 @@
-
 import logging
 from cg.utils.commands import Process
 from pathlib import Path
