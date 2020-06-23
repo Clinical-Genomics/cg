@@ -65,11 +65,11 @@ class BalsamicAPI:
             "--account": self.slurm,
             "--mail-user": self.email,
             "--qos": self.qos,
-            "--sample-config": Path(self.root_dir) / arguments["case_id"] / arguments["case_id"]+".json",
+            "--sample-config": Path(self.root_dir) / arguments["case_id"] / arguments["case_id"]
+            + ".json",
             "--analysis-type": arguments["analysis_type"],
             "--run-analysis": arguments["run_analysis"],
         }
 
         opts = sum([(k, v) for k, v in opts if v], ())
         self.process.run_command(command)
-
