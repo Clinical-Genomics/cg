@@ -14,344 +14,213 @@ from cg.cli.workflow.balsamic.deliver import deliver as deliver_cmd
 from cg.cli.workflow.get_links import get_links
 from cg.exc import LimsDataError, BalsamicStartError
 from cg.meta.workflow.base import get_target_bed_from_lims
-from cg.meta.workflow.balsamic import AnalysisAPI
 from cg.store import Store
 from cg.utils.commands import Process
 from pathlib import Path
+from cg.meta.workflow.balsamic import MetaBalsamicAPI, AnalysisAPI
 
 LOG = logging.getLogger(__name__)
 
 
-ARGUMENT_CASE_ID = click.argument("case_id")
-
-
-OPTION_DRY = click.option(
-    "-d", "--dry-run", "dry", help="Print command to console without executing"
-)
-OPTION_PRIORITY = click.option("-p", "--priority", type=click.Choice(["low", "normal", "high"]))
-
-OPTION_SAMPLE = click.option("-s", "type", flag_value="sample_id")
-OPTION_CASE = click.option("-c", "type", flag_value="case_id")
-
-SUCCESS = 0
-FAIL = 1
+ARGUMENT_CASE_ID = click.argument("case_id", required=True)
+OPTION_DRY = click.option("-d",
+                          "--dry-run",
+                          "dry",
+                          help="Print command to console without executing")
 
 
 @click.group(invoke_without_command=True)
 @click.pass_context
-def balsamic(context, case_id, priority, target_bed, analysis_type):
-    """Cancer workflow """
-    context.obj["store_api"] = Store(context.obj["database"])
-    context.obj["hk_api"] = hk.HousekeeperAPI(context.obj)
-    context.obj["fastq_handler"] = FastqHandler
-    context.obj["gzipper"] = gzip
-    context.obj["lims_api"] = lims.LimsAPI(context.obj)
-    context.obj["fastq_api"] = FastqAPI
-
-    context.obj["analysis_api"] = AnalysisAPI(
-        hk_api=context.obj["hk_api"], fastq_api=context.obj["fastq_api"]
-    )
-
-    if context.invoked_subcommand is None:
-        if case_id is None:
-            LOG.error("provide a case")
-            context.abort()
-
-        # execute the analysis!
-        context.invoke(link, case_id=case_id)
-        context.invoke(config_case, case_id=case_id, target_bed=target_bed)
-        context.invoke(
-            run,
-            run_analysis=True,
-            case_id=case_id,
-            priority=priority,
-            email=email,
-            analysis_type=analysis_type,
-        )
+def balsamic(context):
+    """Initialize MetaBalsamicAPI"""
+    context.obj["MetaBalsamicAPI"] = MetaBalsamicAPI(context.obj)
 
 
-@balsamic.command()
-@click.option("-c", "--case", "case_id", help="link all samples for a case")
-@click.argument("sample_id", required=False)
+@balsamic.command
+@ARGUMENT_CASE_ID
 @click.pass_context
-def link(context, case_id, sample_id):
-    """Link FASTQ files for a SAMPLE_ID."""
-    store = context.obj["store_api"]
-    link_objs = get_links(store, case_id, sample_id)
+def link(context, case_id):
+    """"Link samples to case ID"""
 
-    for link_obj in link_objs:
-        LOG.info(
-            "%s: %s link FASTQ files", link_obj.sample.internal_id, link_obj.sample.data_analysis,
-        )
-        if link_obj.sample.data_analysis and "balsamic" in link_obj.sample.data_analysis.lower():
-            LOG.info("%s has balsamic as data analysis, linking.", link_obj.sample.internal_id)
-
-            context.obj["analysis_api"].link_sample(
-                fastq_handler=FastqHandler(context.obj),
-                case=link_obj.family.internal_id,
-                sample=link_obj.sample.internal_id,
-            )
+    LOG.info(f"Link all samples in case {case_id}")
+    case_object = context.obj["MetaBalsamicAPI"].lookup_samples(case_id)
+    if case_object:
+        if case_object.links:
+            context.obj["MetaBalsamicAPI"].link_samples(case_object.links)
         else:
-            LOG.warning(
-                "%s does not have blasamic as data analysis, skipping.", link_obj.sample.internal_id
-            )
-
-
-@balsamic.command(name="config-case")
-@click.option("-d", "--dry-run", "dry", is_flag=True, help="print config to console")
-@click.option("--target-bed", required=False, help="Optional")
-@click.option("--umi-trim-length", default=5, required=False, help="Default 5")
-@click.option("--quality-trim", is_flag=True, required=False, help="Optional")
-@click.option("--adapter-trim", is_flag=True, required=False, help="Optional")
-@click.option("--umi", is_flag=True, required=False, help="Optional")
-@click.argument("case_id")
-@click.pass_context
-def config_case(
-    context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim, umi, case_id
-):
-    """ Generate a config for the case_id. """
-
-    # missing sample_id and files
-    case_obj = context.obj["store_api"].family(case_id)
-
-    if not case_obj:
-        LOG.error("Could not find case: %s", case_id)
-        context.abort()
-
-    link_objs = case_obj.links
-    tumor_paths = set()
-    normal_paths = set()
-    target_beds = set()
-    singularity = context.obj["balsamic"]["singularity"]
-    reference_config = context.obj["balsamic"]["reference_config"]
-    conda_env = context.obj["balsamic"]["conda_env"]
-    root_dir = context.obj["balsamic"]["root"]
-    wrk_dir = Path(f"{root_dir}/{case_id}/fastq")
-    application_types = set()
-    acceptable_applications = {"wgs", "wes", "tgs"}
-    applications_requiring_bed = {"wes", "tgs"}
-
-    for link_obj in link_objs:
-        LOG.info(
-            "%s application type is %s",
-            link_obj.sample.internal_id,
-            link_obj.sample.application_version.application.prep_category,
-        )
-        application_types.add(link_obj.sample.application_version.application.prep_category)
-
-        LOG.info("%s: config FASTQ file", link_obj.sample.internal_id)
-
-        linked_reads_paths = {1: [], 2: []}
-        concatenated_paths = {1: "", 2: ""}
-        file_objs = context.obj["hk_api"].get_files(
-            bundle=link_obj.sample.internal_id, tags=["fastq"]
-        )
-        files = []
-        for file_obj in file_objs:
-            # figure out flowcell name from header
-            with context.obj["gzipper"].open(file_obj.full_path) as handle:
-                header_line = handle.readline().decode()
-                header_info = context.obj["fastq_api"].parse_header(header_line)
-            data = {
-                "path": file_obj.full_path,
-                "lane": int(header_info["lane"]),
-                "flowcell": header_info["flowcell"],
-                "read": int(header_info["readnumber"]),
-                "undetermined": ("_Undetermined_" in file_obj.path),
-            }
-            # look for tile identifier (HiSeq X runs)
-            matches = re.findall(r"-l[1-9]t([1-9]{2})_", file_obj.path)
-            if len(matches) > 0:
-                data["flowcell"] = f"{data['flowcell']}-{matches[0]}"
-            files.append(data)
-        sorted_files = sorted(files, key=lambda k: k["path"])
-
-        for fastq_data in sorted_files:
-            original_fastq_path = Path(fastq_data["path"])
-            linked_fastq_name = context.obj["fastq_handler"].FastqFileNameCreator.create(
-                lane=fastq_data["lane"],
-                flowcell=fastq_data["flowcell"],
-                sample=link_obj.sample.internal_id,
-                read=fastq_data["read"],
-                more={"undetermined": fastq_data["undetermined"]},
-            )
-            concatenated_fastq_name = context.obj[
-                "fastq_handler"
-            ].FastqFileNameCreator.get_concatenated_name(linked_fastq_name)
-            linked_fastq_path = wrk_dir / linked_fastq_name
-            linked_reads_paths[fastq_data["read"]].append(linked_fastq_path)
-            concatenated_paths[fastq_data["read"]] = f"{wrk_dir}/{concatenated_fastq_name}"
-
-            if linked_fastq_path.exists():
-                LOG.info("found: %s -> %s", original_fastq_path, linked_fastq_path)
-            else:
-                LOG.debug("destination path already exists: %s", linked_fastq_path)
-
-        if link_obj.sample.is_tumour:
-            tumor_paths.add(concatenated_paths[1])
-        else:
-            normal_paths.add(concatenated_paths[1])
-
-        if not target_bed:
-            target_bed_filename = get_target_bed_from_lims(
-                context.obj["lims_api"], context.obj["store_api"], link_obj.sample.internal_id
-            )
-            target_beds.add(target_bed_filename)
-
-    if len(application_types) != 1:
-        raise BalsamicStartError(
-            "More than one application found for this case: %s" % ", ".join(application_types)
-        )
-
-    if not application_types.issubset(acceptable_applications):
-        raise BalsamicStartError("Improper application for this case: %s" % application_types)
-
-    nr_paths = len(tumor_paths) if tumor_paths else 0
-    if nr_paths != 1:
-        raise BalsamicStartError("Must have exactly one tumor sample! Found %s samples." % nr_paths)
-
-    tumor_path = tumor_paths.pop()
-
-    normal_path = None
-    nr_normal_paths = len(normal_paths) if normal_paths else 0
-
-    if nr_normal_paths == 1:
-        normal_path = normal_paths.pop()
-    elif nr_normal_paths > 1:
-        raise BalsamicStartError("Too many normal samples found: %s" % nr_normal_paths)
-
-    if target_bed and not application_types.issubset(applications_requiring_bed):
-        raise BalsamicStartError(
-            "--target_bed is incompatible with %s" % " ".join(application_types)
-        )
-
-    if not target_bed and application_types.issubset(applications_requiring_bed):
-        if len(target_beds) == 1:
-            target_bed = Path(context.obj["bed_path"]) / target_beds.pop()
-        elif len(target_beds) > 1:
-            raise BalsamicStartError("Too many target beds specified: %s" % ", ".join(target_beds))
-        else:
-            raise BalsamicStartError("No target bed specified!")
-
-    # Call Balsamic
-    command_str = (
-        f" config case"
-        f" --reference-config {reference_config}"
-        f" --singularity {singularity}"
-        f" --tumor {tumor_path}"
-        f" --case-id {case_id}"
-        f" --output-config {case_id}.json"
-        f" --analysis-dir {root_dir}"
-        f" --umi-trim-length {umi_trim_length}"
-    )
-
-    if target_bed:
-        command_str += f" --panel-bed {target_bed}"
-    if normal_path:
-        command_str += f" --normal {normal_path}"
-    if umi:
-        command_str += f" --umi"
-    if quality_trim:
-        command_str += f" --quality-trim"
-    if adapter_trim:
-        command_str += f" --adapter-trim"
-    command = [f"bash -c 'source activate {conda_env}; balsamic"]
-    command_str += "'"  # add ending quote from above line
-    command.extend(command_str.split(" "))
-
-    if dry:
-        LOG.info(" ".join(command))
-        return SUCCESS
-
-    process = subprocess.run(" ".join(command), shell=True)
-    return process
-
-
-@balsamic.command()
-@click.option("-d", "--dry-run", "dry", is_flag=True, help="print command to console")
-@click.option("-r", "--run-analysis", is_flag=True, default=False, help="start analysis")
-@click.argument("case_id")
-@click.pass_context
-def run(context, dry, run_analysis, priority, case_id, analysis_type):
-    """Generate a config for the case_id."""
-
-    balsamic_bin = context.obj["balsamic"]["executable"]
-    command_arguments = ["run", "analysis"]
-
-    slurm_account = context.obj["balsamic"]["slurm"]["account"]
-    command_arguments += ["--account", slurm_account]
-    command_arguments += ["-s", Path.joinpath(root_dir, case_id, case_id + ".json")]
-
-    if run_analysis:
-        command_arguments += ["--run-analysis"]
-
-    if email:
-        command_arguments += ["--mail-user", email]
-
-    if analysis_type:
-        command_arguments += ["--analysis-type", analysis_type]
-
-    if priority:
-        command_arguments += ["--qos", priority]
+            LOG.warning(f"{case_id} has no linked samples")
+            click.Abort()
     else:
-        command_arguments += ["--qos", context.obj["balsamic"]["slurm"]["qos"]]
-
-    if dry:
-        LOG.info(" ".join(command))
-        return SUCCESS
-
-    process = Process(balsamic_bin).run_command(command_arguments)
-    return process
+        LOG.warning(f"{case_id} is not present in database")
+        click.Abort()
 
 
-@balsamic.command()
-@click.option(
-    "-d", "--dry-run", is_flag=True, help="print to console without actualising",
-)
+@balsamic.command
+@ARGUMENT_CASE_ID
+@OPTION_DRY
+@click.option("--panel-bed", required=False, help="Optional")
 @click.pass_context
-def start(context: click.Context, dry_run):
-    """Start all analyses that are ready for analysis."""
-    exit_code = SUCCESS
-    for case_obj in context.obj["store_api"].cases_to_balsamic_analyze():
+def config_case(context, panel_bed, case_id, dry):
+    """Create config file for BALSAMIC analysis of a case"""
 
-        LOG.info("%s: start analysis", case_obj.internal_id)
+    LOG.info(f"Creating config for {case_id}")
+    case_object = context.obj["MetaBalsamicAPI"].lookup_samples(case_id)
+    if case_object:
+        if case_object.links:
+            arguments = {
+                "case_id": case_id,
+                "normal": "",
+                "tumor": "",
+                "panel_bed": "",
+                "output_config": f"{case_id}.json"
+            }
 
-        priority = get_priority_as_text(case_obj)
+            acceptable_applications = {"wgs", "wes", "tgs"}
+            applications_requiring_bed = {"wes", "tgs"}
+            setup_data = context.obj["MetaBalsamicAPI"].get_case_config_params(
+                case_id, case_object.links)
 
-        if dry_run:
-            continue
+            #Can be handled with pandas eloquently in future
+            normal_paths = [
+                v["concatenated_path"] for k, v in setup_data
+                if v["tissue_type"] == "normal"
+            ]
+            tumor_paths = [
+                v["concatenated_path"] for k, v in setup_data
+                if v["tissue_type"] == "tumor"
+            ]
+            application_types = set(
+                [v["application_type"] for k, v in setup_data])
+            target_beds = set([v["target_bed"] for k, v in setup_data])
 
-        try:
-            context.invoke(balsamic, priority=priority, case_id=case_obj.internal_id)
-        except LimsDataError as error:
-            LOG.exception(error.message)
-            exit_code = FAIL
+            #Check if normal samples are 1
+            if len(normal_paths) == 1:
+                arguments["normal"] = normal_paths[0]
+            elif len(normal_paths) == 0:
+                arguments["normal"] = None
+            elif len(normal_paths) > 1:
+                LOG.warning(
+                    f"Too many normal samples found: {len(normal_paths)}")
+                click.Abort()
 
-    sys.exit(exit_code)
+            #Check if tumor samples are 1
+            if len(tumor_paths) == 1:
+                arguments["tumor"] = normal_paths[0]
+            elif len(tumor_paths) == 0:
+                LOG.warning(f"No tumor samples found for {case_id}")
+                click.Abort()
+            elif len(tumor_paths) > 1:
+                LOG.warning(
+                    f"Too many tumor samples found: {len(tumor_paths)}")
+                click.Abort()
+
+            #Check application type is only one
+            if len(application_types) > 1:
+                LOG.warning(
+                    f"More than one application found for case {case_id}")
+                click.Abort()
+            elif len(application_types) == 0:
+                LOG.warning(f"No application found for case {case_id}")
+                click.Abort()
+
+            #Check if application type is suitable for BALSAMIC
+            if application_types.issubset(acceptable_applications):
+                LOG.info(f"Application type {application_types}")
+            else:
+                LOG.warning(f"Improper application type for case {case_id}")
+                click.Abort()
+
+            #If panel BED is provided, check if panel BED is compatible with application type
+            if panel_bed:
+                if application_types.issubset(applications_requiring_bed):
+                    arguments["panel_bed"] = panel_bed
+                else:
+                    LOG.warning(
+                        f"Panel BED {panel_bed} incompatible with application type"
+                    )
+                    click.Abort()
+            #If panel BED is not provided, it should be inferred.
+            else:
+                if application_types.issubset(applications_requiring_bed):
+                    if len(target_beds) == 0:
+                        LOG.warning(
+                            f"Panel BED cannot be found for sample {case_id}")
+                        click.Abort()
+                    elif len(target_beds) > 1:
+                        LOG.warning(
+                            f"Multiple Panel BED indicated for sample {case_id}"
+                        )
+                        click.Abort()
+                    else:
+                        arguments["panel_bed"] = target_beds.pop()
+                else:
+                    arguments["panel_bed"] = None
+        else:
+            LOG.warning(f"{case_id} has no linked samples")
+            click.Abort()
+    else:
+        LOG.warning(f"{case_id} is not present in database")
+        click.Abort()
+
+    context.obj["MetaBalsamicAPI"].balsamic_api.co
 
 
-def get_priority_as_text(case_obj):
-    """Get priority as text for a case"""
+@balsamic.command
+@ARGUMENT_CASE_ID
+@OPTION_DRY
+@click.option("-p", "--priority", type=click.Choice(["low", "normal", "high"]))
+@click.option("-a",
+              "--analysis-type",
+              type=click.Choice(["qc", "paired", "single"]))
+@click.option("-r",
+              "--run-analysis",
+              is_flag=True,
+              default=False,
+              help="Execute in non-dry mode")
+@click.pass_context
+def run(context, analysis_type, run_analysis, priority, case_id, dry):
 
-    if case_obj.high_priority:
-        return "high"
+    arguments = {
+        "priority": None,
+        "analysis_type": None,
+        "run_analysis": False,
+        "case_id": case_id,
+    }
+    if priority:
+        arguments["priority"] = priority
+    if analysis_type:
+        arguments["analysis_type"] = analysis_type
+    if run_analysis:
+        arguments["run_analysis"] = run_analysis
 
-    if case_obj.low_priority:
-        return "low"
-
-    return "normal"
+    context.obj["MetaBalsamicAPI"].balsamic_api.run_analysis(arguments)
 
 
-@balsamic.command("remove-fastq")
-@click.option("-c", "--case", "case_id", help="remove fastq folder for a case")
+@balsamic.command
+@ARGUMENT_CASE_ID
 @click.pass_context
 def remove_fastq(context, case_id):
-    """Remove case fastq folder"""
+    """Remove stored FASTQ files"""
 
-    wrk_dir = Path(f"{context.obj['balsamic']['root']}/{case_id}/fastq")
+    work_dir = Path(f"{context.obj['balsamic']['root']}/{case_id}/fastq")
+    if work_dir.exists():
+        shutil.rmtree(work_dir)
+        LOG.info(f"Path {work_dir} removed successfully")
+    else:
+        LOG.info(f"Path {work_dir} does not exist")
 
-    if wrk_dir.exists():
-        shutil.rmtree(wrk_dir)
+
+@balsamic.command
+@ARGUMENT_CASE_ID
+@click.pass_context
+def start(context, case_id):
+    """Invoke all commands"""
+
+    context.invoke(link)
+    context.invoke(config_case)
+    context.invoke(run)
+    context.invoke(remove_fastq)
+
 
 
 balsamic.add_command(store_cmd)
