@@ -141,7 +141,10 @@ def config_case(context, panel_bed, case_id, dry):
                         LOG.warning(f"Multiple Panel BED indicated for sample {case_id}")
                         click.Abort()
                     else:
-                        arguments["panel_bed"] = context.obj["MetaBalsamicAPI"].balsamic_api.bed_path +"/"+ target_beds.pop()
+                        arguments["panel_bed"] = (
+                            Path(context.obj["MetaBalsamicAPI"].balsamic_api.bed_path)
+                            / target_beds.pop()
+                        )
                 else:
                     arguments["panel_bed"] = None
         else:
