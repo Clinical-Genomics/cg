@@ -19,13 +19,11 @@ import logging
 
 LOG = logging.getLogger(__name__)
 
+
 class AnalysisAPI:
     """Methods relevant for Balsamic Analyses"""
 
-    def __init__(self, 
-                hk_api: hk.HousekeeperAPI, 
-                fastq_api: FastqAPI,
-                fastq_handler:FastqHandler):
+    def __init__(self, hk_api: hk.HousekeeperAPI, fastq_api: FastqAPI, fastq_handler: FastqHandler):
         self.hk = hk_api
         self.fastq = fastq_api
 
@@ -67,10 +65,10 @@ class AnalysisAPI:
         fastq_handler.link(case=case, sample=sample, files=files)
 
 
-
 class MetaBalsamicAPI:
     """Handles communication between BALASMIC processes 
     and the rest of CG infrastructure"""
+
     def __init__(self, config):
 
         self.balsamic_api = BalsamicAPI(config)
@@ -83,8 +81,7 @@ class MetaBalsamicAPI:
     def get_deliverables_file_path(self, case_id):
         """Generates a path where the Balsamic deliverables file for the case_id should be
         located"""
-        return Path(self.balsamic_api.root_dir / case_id / "delivery_report" /
-                    (case_id + ".hk"))
+        return Path(self.balsamic_api.root_dir / case_id / "delivery_report" / (case_id + ".hk"))
 
     def get_config_path(self, case_id):
         """Generates a path where the Balsamic config for the case_id should be located"""
@@ -130,21 +127,26 @@ class MetaBalsamicAPI:
                 link_object.sample.data_analysis,
             )
 
-            if link_object.sample.data_analysis and "balsamic" in link_object.sample.data_analysis.lower(
+            if (
+                link_object.sample.data_analysis
+                and "balsamic" in link_object.sample.data_analysis.lower()
             ):
-                LOG.info("%s has balsamic as data analysis, linking.",
-                         link_object.sample.internal_id)
+                LOG.info(
+                    "%s has balsamic as data analysis, linking.", link_object.sample.internal_id
+                )
 
-                file_collection = self.get_file_collection(
-                    sample=link_object.sample.internal_id)
-                self.fastq_handler.link(case=link_object.family.internal_id,
-                                        sample=link_object.sample.internal_id,
-                                        files=file_collection)
+                file_collection = self.get_file_collection(sample=link_object.sample.internal_id)
+                self.fastq_handler.link(
+                    case=link_object.family.internal_id,
+                    sample=link_object.sample.internal_id,
+                    files=file_collection,
+                )
 
             else:
                 LOG.info(
                     "%s does not have blasamic as data analysis, skipping.",
-                    link_object.sample.internal_id)
+                    link_object.sample.internal_id,
+                )
 
         LOG.info("Linking completed")
 
@@ -152,36 +154,42 @@ class MetaBalsamicAPI:
         """Determines correct config params and returns them in a dict"""
 
         setup_data = {}
-        #Iterate over all links
+        # Iterate over all links
         for link_object in case_object_links:
-            #Check of Balsamic as analysis type
-            if link_object.sample.data_analysis and "balsamic" in link_object.sample.data_analysis.lower(
+            # Check of Balsamic as analysis type
+            if (
+                link_object.sample.data_analysis
+                and "balsamic" in link_object.sample.data_analysis.lower()
             ):
 
-                #Get file collection for sample id
-                file_collection = self.get_file_collection(
-                    sample=link_object.sample.internal_id)
+                # Get file collection for sample id
+                file_collection = self.get_file_collection(sample=link_object.sample.internal_id)
                 fastq_data = file_collection[0]
                 linked_fastq_name = self.fastq_handler.FastqFileNameCreator.create(
                     lane=fastq_data["lane"],
                     flowcell=fastq_data["flowcell"],
                     sample=link_object.sample.internal_id,
                     read=fastq_data["read"],
-                    more={"undetermined": fastq_data["undetermined"]})
+                    more={"undetermined": fastq_data["undetermined"]},
+                )
                 concatenated_fastq_name = self.fastq_handler.FastqFileNameCreator.get_concatenated_name(
-                    linked_fastq_name)
-                concatenated_path = f"{self.balsamic_api.root_dir}/{case_id}/{concatenated_fastq_name}"
+                    linked_fastq_name
+                )
+                concatenated_path = (
+                    f"{self.balsamic_api.root_dir}/{case_id}/{concatenated_fastq_name}"
+                )
 
-                #Block to get application type
+                # Block to get application type
                 application_type = link_object.sample.application_version.application.prep_category
 
-                #Block to get panel BED
+                # Block to get panel BED
                 target_bed_filename = get_target_bed_from_lims(
                     lims=self.lims_api,
                     status_db=self.store,
-                    target_bed=link_object.sample.internal_id)
+                    target_bed=link_object.sample.internal_id,
+                )
 
-                #Check if tumor
+                # Check if tumor
                 if link_object.sample.is_tumour:
                     tissue_type = "tumor"
                 else:
