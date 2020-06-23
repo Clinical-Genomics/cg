@@ -54,4 +54,4 @@ class BalsamicAPI:
         }
 
         opts = sum([(k, v) for k, v in opts.items() if v], ())
-        self.process.run_command(command+opts)
+        self.process.run_command(command + opts)
