@@ -176,7 +176,7 @@ class MetaBalsamicAPI:
                     linked_fastq_name
                 )
                 concatenated_path = (
-                    f"{self.balsamic_api.root_dir}/{case_id}/{concatenated_fastq_name}"
+                    f"{self.balsamic_api.root_dir}/{case_id}/fastq/{concatenated_fastq_name}"
                 )
 
                 # Block to get application type
