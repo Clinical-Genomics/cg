@@ -14,7 +14,7 @@ class BalsamicAPI:
         self.binary = config["balsamic"]["executable"]
         self.singularity = config["balsamic"]["singularity"]
         self.reference_config = config["balsamic"]["reference_config"]
-        self.email = config["balsamic"]["email"]
+        self.email = config["balsamic"]["slurm"]["mail_user"]
         self.root_dir = config["balsamic"]["root"]
         self.slurm = config["balsamic"]["slurm"]["account"]
         self.qos = config["balsamic"]["slurm"]["qos"]
