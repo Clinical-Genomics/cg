@@ -11,7 +11,6 @@ import click
 from cg.apps import hk
 from cg.exc import CgError, StoreError
 from cg.meta.store.balsamic import gather_files_and_bundle_in_housekeeper
-from cg.meta.workflow.balsamic import AnalysisAPI
 from cg.store import Store
 from cg.utils import fastq
 from cg.apps.balsamic.fastq import FastqHandler
