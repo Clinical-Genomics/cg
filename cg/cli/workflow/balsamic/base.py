@@ -15,7 +15,7 @@ from cg.meta.workflow.base import get_target_bed_from_lims
 from cg.store import Store
 from cg.utils.commands import Process
 from pathlib import Path
-from cg.meta.workflow.balsamic import MetaBalsamicAPI, AnalysisAPI
+from cg.meta.workflow.balsamic import MetaBalsamicAPI
 
 LOG = logging.getLogger(__name__)
 
