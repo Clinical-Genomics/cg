@@ -548,7 +548,7 @@ class StatusHandler(BaseHandler):
         )
 
         if pipeline:
-            records = records.filter(models.Analysis.pipeline.contains(pipeline))
+            records = records.filter(models.Analysis.pipeline.ilike(f"%{pipeline}%"))
 
         return records
 

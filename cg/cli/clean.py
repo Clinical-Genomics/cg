@@ -235,11 +235,15 @@ def balsamic_past_run_dirs(
 
     before = parse_date(before_str)
     store = context.obj["store_api"]
+    possible_cleanups = store.analyses_to_clean(pipeline="Balsamic")
+    old_enough_analyses = store.analyses(before=before)
 
     # for all analyses
-    for analysis in store.analyses(before=before):
-        if analysis in store.latest_analyses():
-            case_id = analysis.family.internal_id
+    for analysis in possible_cleanups:
+        if analysis not in old_enough_analyses:
+            continue
+
+        case_id = analysis.family.internal_id
 
         # call clean
         LOG.info("%s: cleaning Balsamic output", case_id)
