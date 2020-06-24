@@ -10,6 +10,7 @@ from cg.apps.tb import TrailblazerAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.store import Store, models
 from cg.utils.fastq import FastqAPI
+from cg.apps.balsamic.api import BalsamicAPI
 
 
 @pytest.fixture
@@ -37,12 +38,21 @@ def balsamic_context(
                 },
             },
         ),
+        "balsamic_api": BalsamicAPI(config={"balsamic": {
+                "binary_path" : "/home/proj/bin/conda/envs/S_BALSAMIC-base_4.2.2/bin/balsamic",
+                "conda_env": "conda_env",
+                "root": tmpdir,
+                "slurm": {"account": "account", "qos": "qos"},
+                "singularity": "singularity",
+                "reference_config": "reference_config"}})
+
         "fastq_handler": MockFastq,
         "fastq_api": MockFastqAPI,
         "gzipper": MockGzip(),
         "lims_api": MockLims(),
         "bed_path": "bed_path",
         "balsamic": {
+            "binary_path" : "/home/proj/bin/conda/envs/S_BALSAMIC-base_4.2.2/bin/balsamic",
             "conda_env": "conda_env",
             "root": tmpdir,
             "slurm": {"account": "account", "qos": "qos"},
