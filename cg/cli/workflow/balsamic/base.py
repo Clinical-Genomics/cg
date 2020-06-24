@@ -255,7 +255,7 @@ def run(context, dry, run_analysis, case_id, analysis_type, config_path, email, 
     if not config_path:
         config_path = f'{context.obj["balsamic"]["root"]}/{case_id}/{case_id}.json'
     if run_analysis:
-        run_analysis = ""
+        run_analysis = " "
 
     # Call Balsamic
     arguments = {
