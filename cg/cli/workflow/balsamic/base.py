@@ -44,7 +44,7 @@ def balsamic(context, case_id, priority, email, target_bed):
     context.obj["gzipper"] = gzip
     context.obj["lims_api"] = lims.LimsAPI(context.obj)
     context.obj["fastq_api"] = FastqAPI
-    context.obj["balsamic_api"] = BalsamicAPI
+    context.obj["balsamic_api"] = BalsamicAPI(context.obj)
     context.obj["analysis_api"] = BalsamicAnalysisAPI(
         config=context.obj, hk_api=context.obj["hk_api"], fastq_api=context.obj["fastq_api"]
     )
@@ -233,7 +233,7 @@ def config_case(
         "panel_bed": target_bed,
     }
 
-    process = context.obj["balsamic_api"].config_case(arguments, dry_run)
+    process = context.obj["balsamic_api"].config_case(arguments=arguments, dry=dry_run)
     return process
 
 
@@ -255,7 +255,7 @@ def run(context, dry_run, run_analysis, case_id, analysis_type, config_path):
         "analysis_type" : analysis_type,
         "run_analysis": run_analysis
     }
-    process = context.obj["balsamic_api"].run_analysis(arguments, dry_run)
+    process = context.obj["balsamic_api"].run_analysis(arguments=arguments, dry=dry_run)
     return process
 
 
