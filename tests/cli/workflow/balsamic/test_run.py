@@ -48,7 +48,6 @@ def test_dry(cli_runner, balsamic_context, caplog):
     # THEN command should print the balsamic command-string
     assert result.exit_code == EXIT_SUCCESS
     with caplog.at_level(logging.INFO):
-        assert "balsamic" in caplog.text
         assert case_id in caplog.text
 
 
