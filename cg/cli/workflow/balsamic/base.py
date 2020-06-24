@@ -98,7 +98,8 @@ def link(context, case_id, sample_id):
 @click.argument("case_id")
 @click.pass_context
 def config_case(
-    context, dry_run, target_bed, umi_trim_length, quality_trim, adapter_trim, umi, case_id):
+    context, dry_run, target_bed, umi_trim_length, quality_trim, adapter_trim, umi, case_id
+):
     """ Generate a config for the case_id. """
 
     # missing sample_id and files
@@ -250,11 +251,7 @@ def run(context, dry_run, run_analysis, case_id, analysis_type, config_path):
     """Generate a config for the case_id."""
 
     # Call Balsamic
-    arguments = {
-        "case_id": case_id,
-        "analysis_type" : analysis_type,
-        "run_analysis": run_analysis
-    }
+    arguments = {"case_id": case_id, "analysis_type": analysis_type, "run_analysis": run_analysis}
     process = context.obj["balsamic_api"].run_analysis(arguments, dry_run)
     return process
 
