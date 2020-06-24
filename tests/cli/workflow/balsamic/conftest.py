@@ -38,8 +38,10 @@ def balsamic_context(
                 },
             },
         ),
-        "balsamic_api": BalsamicAPI(config={"balsamic": {
-                "binary_path" : "/home/proj/bin/conda/envs/S_BALSAMIC-base_4.2.2/bin/balsamic",
+        "balsamic_api": BalsamicAPI(config={
+            "bed_path": "bed_path",
+            "balsamic": {
+                "binary_path" : "balsamic",
                 "conda_env": "conda_env",
                 "root": tmpdir,
                 "slurm": {"account": "account", "qos": "qos", "mail_user": "mail_user"},
@@ -54,7 +56,7 @@ def balsamic_context(
         "lims_api": MockLims(),
         "bed_path": "bed_path",
         "balsamic": {
-            "binary_path": "/home/proj/bin/conda/envs/S_BALSAMIC-base_4.2.2/bin/balsamic",
+            "binary_path": "balsamic",
             "conda_env": "conda_env",
             "root": tmpdir,
             "slurm": {"account": "account", "qos": "qos", "mail_user": "mail_user"},
