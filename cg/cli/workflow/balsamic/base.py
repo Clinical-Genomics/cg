@@ -95,9 +95,7 @@ def link(context, case_id, sample_id):
 @click.option("--target-bed", required=False, help="Optional")
 @click.argument("case_id")
 @click.pass_context
-def config_case(
-    context, dry, target_bed, case_id
-):
+def config_case(context, dry, target_bed, case_id):
     """ Generate a config for the case_id. """
 
     # missing sample_id and files
@@ -224,9 +222,9 @@ def config_case(
 
     # Call Balsamic
     arguments = {
-        "tumor" : tumor_path, 
-        "case_id" : case_id,
-        "output_config":  f'{case_id}.json',
+        "tumor": tumor_path,
+        "case_id": case_id,
+        "output_config": f"{case_id}.json",
     }
 
     if target_bed:
@@ -240,7 +238,8 @@ def config_case(
 @balsamic.command()
 @click.option("-d", "--dry-run", "dry", is_flag=True, help="print command to console")
 @click.option(
-    "-r", "--run-analysis", "run_analysis", is_flag=True, default=False, help="start analysis")
+    "-r", "--run-analysis", "run_analysis", is_flag=True, default=False, help="start analysis"
+)
 @ANALYSIS_TYPE_OPTION
 @click.argument("case_id")
 @click.pass_context
@@ -259,7 +258,6 @@ def run(context, dry, run_analysis, case_id, analysis_type):
         arguments["analysis_type"] = analysis_type
 
     context.obj["balsamic_api"].run_analysis(arguments, dry)
-
 
 
 @balsamic.command()
