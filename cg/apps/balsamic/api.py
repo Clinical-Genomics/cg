@@ -33,11 +33,10 @@ class BalsamicAPI:
             "--output-config": arguments.get("output_config"),
             "--panel-bed": arguments.get("panel_bed"),
             "--tumor": arguments.get("tumor"),
-            "--adapter-trim" : arguments.get("adapter_trim"),
-            "--quality-trim" : arguments.get("quality_trim"),
+            "--adapter-trim": arguments.get("adapter_trim"),
+            "--quality-trim": arguments.get("quality_trim"),
             "--umi": arguments.get("umi"),
-            "--umi-trim-length" : arguments.get("umi_trim_length"),
-
+            "--umi-trim-length": arguments.get("umi_trim_length"),
         }
 
         opts = sum([(k, str(v)) for k, v in opts.items() if v], ())
@@ -48,7 +47,6 @@ class BalsamicAPI:
         else:
             retcode = self.process.run_command(command + opts)
             return retcode
-            
 
     def run_analysis(self, arguments: dict, dry: bool):
         """Execute BALSAMIC"""
