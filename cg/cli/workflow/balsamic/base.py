@@ -44,6 +44,7 @@ def balsamic(context, case_id, priority, email, target_bed):
     context.obj["gzipper"] = gzip
     context.obj["lims_api"] = lims.LimsAPI(context.obj)
     context.obj["fastq_api"] = FastqAPI
+    context.obj["balsamic_api"] = BalsamicAPI
 
     context.obj["analysis_api"] = BalsamicAnalysisAPI(
         config=context.obj, hk_api=context.obj["hk_api"], fastq_api=context.obj["fastq_api"]
