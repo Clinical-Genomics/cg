@@ -21,8 +21,6 @@ from cg.apps.balsamic.api import BalsamicAPI
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
-PRIORITY_OPTION = click.option("-p", "--priority", type=click.Choice(["low", "normal", "high"]))
-EMAIL_OPTION = click.option("-e", "--email", help="email to send errors to")
 ANALYSIS_TYPE_OPTION = click.option(
     "-a", "--analysis-type", type=click.Choice(["qc", "paired", "single"])
 )
@@ -32,12 +30,10 @@ FAIL = 1
 
 
 @click.group(invoke_without_command=True)
-@PRIORITY_OPTION
-@EMAIL_OPTION
 @click.option("-c", "--case-id", "case_id", help="case to prepare and start an analysis for")
 @click.option("--target-bed", required=False, help="Optional")
 @click.pass_context
-def balsamic(context, case_id, priority, email, target_bed):
+def balsamic(context, case_id, target_bed):
     """Cancer workflow """
     context.obj["store_api"] = Store(context.obj["database"])
     context.obj["hk_api"] = hk.HousekeeperAPI(context.obj)
@@ -59,7 +55,7 @@ def balsamic(context, case_id, priority, email, target_bed):
         # execute the analysis!
         context.invoke(link, case_id=case_id)
         context.invoke(config_case, case_id=case_id, target_bed=target_bed)
-        context.invoke(run, run_analysis=True, case_id=case_id, priority=priority, email=email)
+        context.invoke(run, run_analysis=True, case_id=case_id)
 
 
 @balsamic.command()
@@ -95,9 +91,7 @@ def link(context, case_id, sample_id):
 @click.option("--target-bed", required=False, help="Optional")
 @click.argument("case_id")
 @click.pass_context
-def config_case(
-    context, dry, target_bed, case_id
-):
+def config_case(context, dry, target_bed, case_id):
     """ Generate a config for the case_id. """
 
     # missing sample_id and files
