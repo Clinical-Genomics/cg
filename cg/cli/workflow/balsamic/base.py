@@ -98,7 +98,8 @@ def link(context, case_id, sample_id):
 @click.argument("case_id")
 @click.pass_context
 def config_case(
-    context, dry_run, target_bed, umi_trim_length, quality_trim, adapter_trim, umi, case_id):
+    context, dry_run, target_bed, umi_trim_length, quality_trim, adapter_trim, umi, case_id
+):
     """ Generate a config for the case_id. """
 
     # missing sample_id and files
