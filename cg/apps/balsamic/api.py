@@ -47,24 +47,23 @@ class BalsamicAPI:
             retcode = self.process.run_command(command + opts)
             return retcode
 
-    def run_analysis(self, arguments: dict, dry: bool):
+    def run_analysis(self, arguments: dict, run_analysis : bool, dry: bool):
         """Execute BALSAMIC"""
 
-        command = ("run", "analysis")
+        command = ("run", "analysis",)
+        run_analysis = ("--run-analysis",) if run_analysis else ()
         opts = {
             "--account": self.account,
             "--mail-user": arguments.get("email") or self.email,
             "--qos": arguments.get("priority") or self.qos,
             "--sample-config": arguments.get("sample_config"),
             "--analysis-type": arguments.get("analysis_type"),
-            "--run-analysis": arguments.get("run_analysis"),
         }
-
         opts = sum([(k, str(v)) for k, v in opts.items() if v], ())
 
         if dry:
-            LOG.info(f'Executing command {" ".join(command + opts)}')
+            LOG.info(f'Executing command {" ".join(command + opts + run_analysis)}')
             return 0
         else:
-            retcode = self.process.run_command(command + opts)
+            retcode = self.process.run_command(command + opts + run_analysis)
             return retcode
