@@ -38,13 +38,15 @@ def balsamic_context(
                 },
             },
         ),
-        "balsamic_api": BalsamicAPI(config={"balsamic": {
-                "binary_path" : "/home/proj/bin/conda/envs/S_BALSAMIC-base_4.2.2/bin/balsamic",
-                "conda_env": "conda_env",
-                "root": tmpdir,
-                "slurm": {"account": "account", "qos": "qos", "mail_user": "mail_user"},
-                "singularity": "singularity",
-                "reference_config": "reference_config",
+        "balsamic_api": BalsamicAPI(
+            config={
+                "balsamic": {
+                    "binary_path": "/home/proj/bin/conda/envs/S_BALSAMIC-base_4.2.2/bin/balsamic",
+                    "conda_env": "conda_env",
+                    "root": tmpdir,
+                    "slurm": {"account": "account", "qos": "qos", "mail_user": "mail_user"},
+                    "singularity": "singularity",
+                    "reference_config": "reference_config",
                 },
             },
         ),
