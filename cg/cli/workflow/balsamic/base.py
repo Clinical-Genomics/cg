@@ -261,7 +261,7 @@ def run(context, dry, run_analysis, case_id, analysis_type, config_path, email, 
         "analysis_type": analysis_type,
         "run_analysis": run_analysis,
         "sample_config": config_path,
-        "email" : email,
+        "email": email,
         "priority": priority,
     }
     process = context.obj["balsamic_api"].run_analysis(arguments=arguments, dry=dry)
