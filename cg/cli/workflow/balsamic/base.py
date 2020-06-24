@@ -245,9 +245,11 @@ def config_case(
 )
 @click.option("--config", "config_path", required=False, help="Optional")
 @ANALYSIS_TYPE_OPTION
+@EMAIL_OPTION
+@PRIORITY_OPTION
 @click.argument("case_id")
 @click.pass_context
-def run(context, dry, run_analysis, case_id, analysis_type, config_path):
+def run(context, dry, run_analysis, case_id, analysis_type, config_path, email, priority):
     """Generate a config for the case_id."""
 
     if not config_path:
@@ -259,6 +261,8 @@ def run(context, dry, run_analysis, case_id, analysis_type, config_path):
         "analysis_type": analysis_type,
         "run_analysis": run_analysis,
         "sample_config": config_path,
+        "email" : email,
+        "priority": priority,
     }
     process = context.obj["balsamic_api"].run_analysis(arguments=arguments, dry=dry)
     return process

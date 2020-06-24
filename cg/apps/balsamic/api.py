@@ -49,12 +49,12 @@ class BalsamicAPI:
 
     def run_analysis(self, arguments: dict, dry: bool):
         """Execute BALSAMIC"""
-        command = ("run", "analysis")
 
+        command = ("run", "analysis")
         opts = {
             "--account": self.account,
-            "--mail-user": self.email,
-            "--qos": self.qos,
+            "--mail-user": arguments.get("email") or self.email,
+            "--qos": arguments.get("priority") or self.qos,
             "--sample-config": arguments.get("sample_config"),
             "--analysis-type": arguments.get("analysis_type"),
             "--run-analysis": arguments.get("run_analysis"),
