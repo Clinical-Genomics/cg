@@ -44,7 +44,10 @@ def balsamic_context(
                 "root": tmpdir,
                 "slurm": {"account": "account", "qos": "qos"},
                 "singularity": "singularity",
-                "reference_config": "reference_config"}})
+                "reference_config": "reference_config",
+                },
+            },
+        ),
 
         "fastq_handler": MockFastq,
         "fastq_api": MockFastqAPI,
