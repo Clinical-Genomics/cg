@@ -65,8 +65,9 @@ def config_case(context, panel_bed, case_id, dry):
     if case_object:
         if case_object.links:
             setup_data = context.obj["MetaBalsamicAPI"].get_case_config_params(
-                case_id, case_object.links)
-                
+                case_id, case_object.links
+            )
+
             normal_paths = [
                 v["concatenated_path"]
                 for k, v in setup_data.items()
