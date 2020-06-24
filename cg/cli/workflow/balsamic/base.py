@@ -22,18 +22,19 @@ from cg.store import Store
 
 LOG = logging.getLogger(__name__)
 ANALYSIS_TYPE_OPTION = click.option(
-    "-a", "--analysis-type", type=click.Choice(["qc", "paired", "single"])
-)
-
+    "-a", "--analysis-type", type=click.Choice(["qc", "paired", "single"]))
+PRIORITY_OPTION = click.option("-p", "--priority", type=click.Choice(["low", "normal", "high"]))
+EMAIL_OPTION = click.option("-e", "--email", help="email to send errors to")
 SUCCESS = 0
 FAIL = 1
 
-
 @click.group(invoke_without_command=True)
+@PRIORITY_OPTION
+@EMAIL_OPTION
 @click.option("-c", "--case-id", "case_id", help="case to prepare and start an analysis for")
 @click.option("--target-bed", required=False, help="Optional")
 @click.pass_context
-def balsamic(context, case_id, target_bed):
+def balsamic(context, case_id, priority, email, target_bed):
     """Cancer workflow """
     context.obj["store_api"] = Store(context.obj["database"])
     context.obj["hk_api"] = hk.HousekeeperAPI(context.obj)
@@ -42,10 +43,8 @@ def balsamic(context, case_id, target_bed):
     context.obj["lims_api"] = lims.LimsAPI(context.obj)
     context.obj["fastq_api"] = FastqAPI
     context.obj["balsamic_api"] = BalsamicAPI
-
     context.obj["analysis_api"] = BalsamicAnalysisAPI(
-        config=context.obj, hk_api=context.obj["hk_api"], fastq_api=context.obj["fastq_api"]
-    )
+        config=context.obj, hk_api=context.obj["hk_api"], fastq_api=context.obj["fastq_api"])
 
     if context.invoked_subcommand is None:
         if case_id is None:
@@ -55,8 +54,7 @@ def balsamic(context, case_id, target_bed):
         # execute the analysis!
         context.invoke(link, case_id=case_id)
         context.invoke(config_case, case_id=case_id, target_bed=target_bed)
-        context.invoke(run, run_analysis=True, case_id=case_id)
-
+        context.invoke(run, run_analysis=True, case_id=case_id, priority=priority, email=email)
 
 @balsamic.command()
 @click.option("-c", "--case", "case_id", help="link all samples for a case")
@@ -86,12 +84,18 @@ def link(context, case_id, sample_id):
             )
 
 
+
 @balsamic.command(name="config-case")
 @click.option("-d", "--dry-run", "dry", is_flag=True, help="print config to console")
 @click.option("--target-bed", required=False, help="Optional")
+@click.option("--umi-trim-length", default=5, required=False, help="Default 5")
+@click.option("--quality-trim", is_flag=True, required=False, help="Optional")
+@click.option("--adapter-trim", is_flag=True, required=False, help="Optional")
+@click.option("--umi", is_flag=True, required=False, help="Optional")
 @click.argument("case_id")
 @click.pass_context
-def config_case(context, dry, target_bed, case_id):
+def config_case(
+    context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim, umi, case_id):
     """ Generate a config for the case_id. """
 
     # missing sample_id and files
@@ -105,9 +109,6 @@ def config_case(context, dry, target_bed, case_id):
     tumor_paths = set()
     normal_paths = set()
     target_beds = set()
-    singularity = context.obj["balsamic"]["singularity"]
-    reference_config = context.obj["balsamic"]["reference_config"]
-    conda_env = context.obj["balsamic"]["conda_env"]
     root_dir = context.obj["balsamic"]["root"]
     wrk_dir = Path(f"{root_dir}/{case_id}/fastq")
     application_types = set()
@@ -219,16 +220,18 @@ def config_case(context, dry, target_bed, case_id):
     # Call Balsamic
     arguments = {
         "tumor": tumor_path,
+        "normal": normal_path,
         "case_id": case_id,
         "output_config": f"{case_id}.json",
+        "quality_trim": quality_trim, 
+        "adapter_trim": adapter_trim,
+        "umi": umi,
+        "umi_trim_length": umi_trim_length,
+        "panel_bed" : target_bed,
     }
 
-    if target_bed:
-        arguments["target_bed"] = target_bed
-    if normal_path:
-        arguments["normal"] = normal_path
-
-    context.obj["balsamic_api"].config_case(arguments, dry)
+    process = context.obj["balsamic_api"].config_case(arguments, dry)
+    return process
 
 
 @balsamic.command()
@@ -236,24 +239,33 @@ def config_case(context, dry, target_bed, case_id):
 @click.option(
     "-r", "--run-analysis", "run_analysis", is_flag=True, default=False, help="start analysis"
 )
+@click.option("--config", "config_path", required=False, help="Optional")
 @ANALYSIS_TYPE_OPTION
 @click.argument("case_id")
 @click.pass_context
-def run(context, dry, run_analysis, case_id, analysis_type):
+def run(context, dry, run_analysis, case_id, analysis_type, config_path):
     """Generate a config for the case_id."""
 
     # Call Balsamic
     arguments = {
         "case_id": case_id,
+        "analysis_type" : analysis_type,
+        "run_analysis": run_analysis
     }
+    process = context.obj["balsamic_api"].run_analysis(arguments, dry)
+    return process
 
-    if run_analysis:
-        arguments["run_analysis"] = True
 
-    if analysis_type:
-        arguments["analysis_type"] = analysis_type
+def get_priority_as_text(case_obj):
+    """Get priority as text for a case"""
 
-    context.obj["balsamic_api"].run_analysis(arguments, dry)
+    if case_obj.high_priority:
+        return "high"
+
+    if case_obj.low_priority:
+        return "low"
+
+    return "normal"
 
 
 @balsamic.command()
@@ -281,17 +293,6 @@ def start(context: click.Context, dry_run):
 
     sys.exit(exit_code)
 
-
-def get_priority_as_text(case_obj):
-    """Get priority as text for a case"""
-
-    if case_obj.high_priority:
-        return "high"
-
-    if case_obj.low_priority:
-        return "low"
-
-    return "normal"
 
 
 @balsamic.command("remove-fastq")
