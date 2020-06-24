@@ -9,10 +9,9 @@ from cg.meta.workflow.balsamic import MetaBalsamicAPI
 LOG = logging.getLogger(__name__)
 
 ARGUMENT_CASE_ID = click.argument("case_id", required=True)
-OPTION_DRY = click.option("-d",
-                          "--dry-run",
-                          "dry",
-                          help="Print command to console without executing")
+OPTION_DRY = click.option(
+    "-d", "--dry-run", "dry", help="Print command to console without executing"
+)
 
 
 @click.group(invoke_without_command=True)
@@ -69,15 +68,14 @@ def config_case(context, panel_bed, case_id, dry):
                 case_id, case_object.links)
                 
             normal_paths = [
-                v["concatenated_path"] for k, v in setup_data.items()
+                v["concatenated_path"]
+                for k, v in setup_data.items()
                 if v["tissue_type"] == "normal"
             ]
             tumor_paths = [
-                v["concatenated_path"] for k, v in setup_data.items()
-                if v["tissue_type"] == "tumor"
+                v["concatenated_path"] for k, v in setup_data.items() if v["tissue_type"] == "tumor"
             ]
-            application_types = set(
-                [v["application_type"] for k, v in setup_data.items()])
+            application_types = set([v["application_type"] for k, v in setup_data.items()])
             target_beds = set([v["target_bed"] for k, v in setup_data.items()])
 
             # Check if normal samples are 1 or 0
@@ -86,8 +84,7 @@ def config_case(context, panel_bed, case_id, dry):
             elif len(normal_paths) == 0:
                 arguments["normal"] = None
             elif len(normal_paths) > 1:
-                LOG.warning(
-                    f"Too many normal samples found: {len(normal_paths)}")
+                LOG.warning(f"Too many normal samples found: {len(normal_paths)}")
                 click.Abort()
 
             # Check if tumor samples are 1
@@ -97,14 +94,12 @@ def config_case(context, panel_bed, case_id, dry):
                 LOG.warning(f"No tumor samples found for {case_id}")
                 click.Abort()
             elif len(tumor_paths) > 1:
-                LOG.warning(
-                    f"Too many tumor samples found: {len(tumor_paths)}")
+                LOG.warning(f"Too many tumor samples found: {len(tumor_paths)}")
                 click.Abort()
 
             # Check application type is only one
             if len(application_types) > 1:
-                LOG.warning(
-                    f"More than one application found for case {case_id}")
+                LOG.warning(f"More than one application found for case {case_id}")
                 click.Abort()
             elif len(application_types) == 0:
                 LOG.warning(f"No application found for case {case_id}")
@@ -122,25 +117,23 @@ def config_case(context, panel_bed, case_id, dry):
                 if application_types.issubset(applications_requiring_bed):
                     arguments["panel_bed"] = panel_bed
                 else:
-                    LOG.warning(
-                        f"Panel BED {panel_bed} incompatible with application type"
-                    )
+                    LOG.warning(f"Panel BED {panel_bed} incompatible with application type")
                     click.Abort()
             # If panel BED is not provided, it should be inferred.
             else:
                 if application_types.issubset(applications_requiring_bed):
                     if len(target_beds) == 0:
-                        LOG.warning(
-                            f"Panel BED cannot be found for sample {case_id}")
+                        LOG.warning(f"Panel BED cannot be found for sample {case_id}")
                         click.Abort()
                     elif len(target_beds) > 1:
-                        LOG.warning(
-                            f"Multiple Panel BED indicated for sample {case_id}"
-                        )
+                        LOG.warning(f"Multiple Panel BED indicated for sample {case_id}")
                         click.Abort()
                     else:
-                        arguments["panel_bed"] = context.obj[
-                            "MetaBalsamicAPI"].balsamic_api.bed_path + "/" + target_beds.pop()
+                        arguments["panel_bed"] = (
+                            context.obj["MetaBalsamicAPI"].balsamic_api.bed_path
+                            + "/"
+                            + target_beds.pop()
+                        )
                 else:
                     arguments["panel_bed"] = None
         else:
@@ -157,14 +150,8 @@ def config_case(context, panel_bed, case_id, dry):
 @ARGUMENT_CASE_ID
 @OPTION_DRY
 @click.option("-p", "--priority", type=click.Choice(["low", "normal", "high"]))
-@click.option("-a",
-              "--analysis-type",
-              type=click.Choice(["qc", "paired", "single"]))
-@click.option("-r",
-              "--run-analysis",
-              is_flag=True,
-              default=False,
-              help="Execute in non-dry mode")
+@click.option("-a", "--analysis-type", type=click.Choice(["qc", "paired", "single"]))
+@click.option("-r", "--run-analysis", is_flag=True, default=False, help="Execute in non-dry mode")
 @click.pass_context
 def run(context, analysis_type, run_analysis, priority, case_id, dry):
 
