@@ -7,13 +7,14 @@ import pytest
 from cg.apps.balsamic.fastq import FastqHandler
 from cg.apps.lims import LimsAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.meta.workflow.balsamic import AnalysisAPI
+from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.store import Store, models
+from cg.utils.fastq import FastqAPI
 
 
 @pytest.fixture
 def balsamic_context(
-    balsamic_store, balsamic_case, housekeeper_api, hk_bundle_data, helpers
+    balsamic_store, balsamic_case, housekeeper_api, hk_bundle_data, helpers, tmpdir
 ) -> dict:
     """context to use in cli"""
     hk_bundle_data["name"] = balsamic_case.internal_id
@@ -22,15 +23,28 @@ def balsamic_context(
     return {
         "hk_api": housekeeper_api,
         "tb_api": MockTB(),
-        "db": balsamic_store,
-        "analysis_api": MockAnalysis,
+        "store_api": balsamic_store,
+        "analysis_api": BalsamicAnalysisAPI(
+            hk_api=housekeeper_api,
+            fastq_api=MockFastqAPI,
+            config={
+                "balsamic": {
+                    "conda_env": "conda_env",
+                    "root": "root",
+                    "slurm": {"account": "account", "qos": "qos"},
+                    "singularity": "singularity",
+                    "reference_config": "reference_config",
+                },
+            },
+        ),
         "fastq_handler": MockFastq,
+        "fastq_api": MockFastqAPI,
         "gzipper": MockGzip(),
         "lims_api": MockLims(),
         "bed_path": "bed_path",
         "balsamic": {
             "conda_env": "conda_env",
-            "root": "root",
+            "root": tmpdir,
             "slurm": {"account": "account", "qos": "qos"},
             "singularity": "singularity",
             "reference_config": "reference_config",
@@ -86,17 +100,14 @@ class MockLine:
         return "headerline"
 
 
-class MockAnalysis(AnalysisAPI):
-    """Mock AnalysisAPI"""
-
+class MockFastqAPI(FastqAPI):
     @staticmethod
-    def fastq_header(line):
-        """Mock AnalysisAPI.fastq_header"""
-        del line
+    def parse_header(*_):
+        return {"lane": "1", "flowcell": "ABC123", "readnumber": "1"}
 
-        _header = {"lane": "1", "flowcell": "ABC123", "readnumber": "1"}
 
-        return _header
+class MockBalsamicAnalysis(BalsamicAnalysisAPI):
+    """Mock AnalysisAPI"""
 
 
 class MockFastq(FastqHandler):
