@@ -256,10 +256,9 @@ def run(context, dry, run_analysis, case_id, analysis_type, config_path):
     # Call Balsamic
     arguments = {
         "case_id": case_id,
-        "analysis_type" : analysis_type,
+        "analysis_type": analysis_type,
         "run_analysis": run_analysis,
-        "sample_config" : config_path
-
+        "sample_config": config_path,
     }
     process = context.obj["balsamic_api"].run_analysis(arguments=arguments, dry=dry)
     return process
