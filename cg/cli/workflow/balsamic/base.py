@@ -89,7 +89,7 @@ def link(context, case_id, sample_id):
 
 
 @balsamic.command(name="config-case")
-@click.option("--dry-run", is_flag=True, help="print config to console")
+@click.option("--dry-run", "dry", is_flag=True, help="print config to console")
 @click.option("--target-bed", required=False, help="Optional")
 @click.option("--umi-trim-length", default=5, required=False, help="Default 5")
 @click.option("--quality-trim", is_flag=True, required=False, help="Optional")
@@ -98,7 +98,7 @@ def link(context, case_id, sample_id):
 @click.argument("case_id")
 @click.pass_context
 def config_case(
-    context, dry_run, target_bed, umi_trim_length, quality_trim, adapter_trim, umi, case_id
+    context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim, umi, case_id
 ):
     """ Generate a config for the case_id. """
 
@@ -234,12 +234,12 @@ def config_case(
         "panel_bed": target_bed,
     }
 
-    process = context.obj["balsamic_api"].config_case(arguments=arguments, dry=dry_run)
+    process = context.obj["balsamic_api"].config_case(arguments=arguments, dry=dry)
     return process
 
 
 @balsamic.command()
-@click.option("--dry-run", is_flag=True, help="print command to console")
+@click.option("--dry-run", "dry", is_flag=True, help="print command to console")
 @click.option(
     "-r", "--run-analysis", "run_analysis", is_flag=True, default=False, help="start analysis"
 )
@@ -247,7 +247,7 @@ def config_case(
 @ANALYSIS_TYPE_OPTION
 @click.argument("case_id")
 @click.pass_context
-def run(context, dry_run, run_analysis, case_id, analysis_type, config_path):
+def run(context, dry, run_analysis, case_id, analysis_type, config_path):
     """Generate a config for the case_id."""
 
     # Call Balsamic
@@ -256,7 +256,7 @@ def run(context, dry_run, run_analysis, case_id, analysis_type, config_path):
         "analysis_type" : analysis_type,
         "run_analysis": run_analysis
     }
-    process = context.obj["balsamic_api"].run_analysis(arguments=arguments, dry=dry_run)
+    process = context.obj["balsamic_api"].run_analysis(arguments=arguments, dry=dry)
     return process
 
 
