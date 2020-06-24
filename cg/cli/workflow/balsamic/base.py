@@ -17,6 +17,7 @@ from cg.cli.workflow.get_links import get_links
 from cg.exc import LimsDataError, BalsamicStartError
 from cg.meta.workflow.base import get_target_bed_from_lims
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
+from cg.apps.balsamic.api import BalsamicAPI
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -92,14 +93,10 @@ def link(context, case_id, sample_id):
 @balsamic.command(name="config-case")
 @click.option("-d", "--dry-run", "dry", is_flag=True, help="print config to console")
 @click.option("--target-bed", required=False, help="Optional")
-@click.option("--umi-trim-length", default=5, required=False, help="Default 5")
-@click.option("--quality-trim", is_flag=True, required=False, help="Optional")
-@click.option("--adapter-trim", is_flag=True, required=False, help="Optional")
-@click.option("--umi", is_flag=True, required=False, help="Optional")
 @click.argument("case_id")
 @click.pass_context
 def config_case(
-    context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim, umi, case_id
+    context, dry, target_bed, case_id
 ):
     """ Generate a config for the case_id. """
 
@@ -226,82 +223,43 @@ def config_case(
             raise BalsamicStartError("No target bed specified!")
 
     # Call Balsamic
-    command_str = (
-        f" config case"
-        f" --reference-config {reference_config}"
-        f" --singularity {singularity}"
-        f" --tumor {tumor_path}"
-        f" --case-id {case_id}"
-        f" --output-config {case_id}.json"
-        f" --analysis-dir {root_dir}"
-        f" --umi-trim-length {umi_trim_length}"
-    )
+    arguments = {
+        "tumor" : tumor_path, 
+        "case_id" : case_id,
+        "output_config":  f'{case_id}.json',
+    }
 
     if target_bed:
-        command_str += f" -p {target_bed}"
+        arguments["target_bed"] = target_bed
     if normal_path:
-        command_str += f" --normal {normal_path}"
-    if umi:
-        command_str += f" --umi"
-    if quality_trim:
-        command_str += f" --quality-trim"
-    if adapter_trim:
-        command_str += f" --adapter-trim"
-    command = [f"bash -c 'source activate {conda_env}; balsamic"]
-    command_str += "'"  # add ending quote from above line
-    command.extend(command_str.split(" "))
+        arguments["normal"] = normal_path
 
-    if dry:
-        LOG.info(" ".join(command))
-        return SUCCESS
-
-    process = subprocess.run(" ".join(command), shell=True)
-    return process
+    context.obj["balsamic_api"].config_case(arguments, dry)
 
 
 @balsamic.command()
 @click.option("-d", "--dry-run", "dry", is_flag=True, help="print command to console")
 @click.option(
-    "-r", "--run-analysis", "run_analysis", is_flag=True, default=False, help="start analysis",
-)
-@click.option("--config", "config_path", required=False, help="Optional")
+    "-r", "--run-analysis", "run_analysis", is_flag=True, default=False, help="start analysis")
 @ANALYSIS_TYPE_OPTION
-@PRIORITY_OPTION
-@EMAIL_OPTION
 @click.argument("case_id")
 @click.pass_context
-def run(context, dry, run_analysis, config_path, priority, email, case_id, analysis_type):
+def run(context, dry, run_analysis, case_id, analysis_type):
     """Generate a config for the case_id."""
 
-    conda_env = context.obj["balsamic"]["conda_env"]
-    slurm_account = context.obj["balsamic"]["slurm"]["account"]
-    priority = priority if priority else context.obj["balsamic"]["slurm"]["qos"]
-    root_dir = Path(context.obj["balsamic"]["root"])
-    if not config_path:
-        config_path = Path.joinpath(root_dir, case_id, case_id + ".json")
-
     # Call Balsamic
-    command_str = f" run analysis --account {slurm_account} -s {config_path}"
+    arguments = {
+        "case_id": case_id,
+    }
 
     if run_analysis:
-        command_str += " --run-analysis"
-
-    if email:
-        command_str += f" --mail-user {email}"
+        arguments["run_analysis"] = True
 
     if analysis_type:
-        command_str += f" --analysis-type {analysis_type}"
+        arguments["analysis_type"] = analysis_type
 
-    command_str += f" --qos {priority}"
+    context.obj["balsamic_api"].run_analysis(arguments, dry)
 
-    command = f"bash -c 'source activate {conda_env}; balsamic run analysis --account {slurm_account} -s {config_path}{command_str}'"
-
-    if dry:
-        LOG.info(" ".join(command))
-        return SUCCESS
-
-    process = subprocess.run(command, shell=True)
-    return process
 
 
 @balsamic.command()
