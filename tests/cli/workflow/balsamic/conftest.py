@@ -48,14 +48,13 @@ def balsamic_context(
                 },
             },
         ),
-
         "fastq_handler": MockFastq,
         "fastq_api": MockFastqAPI,
         "gzipper": MockGzip(),
         "lims_api": MockLims(),
         "bed_path": "bed_path",
         "balsamic": {
-            "binary_path" : "/home/proj/bin/conda/envs/S_BALSAMIC-base_4.2.2/bin/balsamic",
+            "binary_path": "/home/proj/bin/conda/envs/S_BALSAMIC-base_4.2.2/bin/balsamic",
             "conda_env": "conda_env",
             "root": tmpdir,
             "slurm": {"account": "account", "qos": "qos", "mail_user": "mail_user"},
