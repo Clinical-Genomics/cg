@@ -22,11 +22,13 @@ from cg.store import Store
 
 LOG = logging.getLogger(__name__)
 ANALYSIS_TYPE_OPTION = click.option(
-    "-a", "--analysis-type", type=click.Choice(["qc", "paired", "single"]))
+    "-a", "--analysis-type", type=click.Choice(["qc", "paired", "single"])
+)
 PRIORITY_OPTION = click.option("-p", "--priority", type=click.Choice(["low", "normal", "high"]))
 EMAIL_OPTION = click.option("-e", "--email", help="email to send errors to")
 SUCCESS = 0
 FAIL = 1
+
 
 @click.group(invoke_without_command=True)
 @PRIORITY_OPTION
@@ -44,7 +46,8 @@ def balsamic(context, case_id, priority, email, target_bed):
     context.obj["fastq_api"] = FastqAPI
     context.obj["balsamic_api"] = BalsamicAPI
     context.obj["analysis_api"] = BalsamicAnalysisAPI(
-        config=context.obj, hk_api=context.obj["hk_api"], fastq_api=context.obj["fastq_api"])
+        config=context.obj, hk_api=context.obj["hk_api"], fastq_api=context.obj["fastq_api"]
+    )
 
     if context.invoked_subcommand is None:
         if case_id is None:
@@ -55,6 +58,7 @@ def balsamic(context, case_id, priority, email, target_bed):
         context.invoke(link, case_id=case_id)
         context.invoke(config_case, case_id=case_id, target_bed=target_bed)
         context.invoke(run, run_analysis=True, case_id=case_id, priority=priority, email=email)
+
 
 @balsamic.command()
 @click.option("-c", "--case", "case_id", help="link all samples for a case")
@@ -82,7 +86,6 @@ def link(context, case_id, sample_id):
             LOG.warning(
                 "%s does not have blasamic as data analysis, skipping.", link_obj.sample.internal_id
             )
-
 
 
 @balsamic.command(name="config-case")
@@ -223,11 +226,11 @@ def config_case(
         "normal": normal_path,
         "case_id": case_id,
         "output_config": f"{case_id}.json",
-        "quality_trim": quality_trim, 
+        "quality_trim": quality_trim,
         "adapter_trim": adapter_trim,
         "umi": umi,
         "umi_trim_length": umi_trim_length,
-        "panel_bed" : target_bed,
+        "panel_bed": target_bed,
     }
 
     process = context.obj["balsamic_api"].config_case(arguments, dry_run)
@@ -292,7 +295,6 @@ def start(context: click.Context, dry_run):
             exit_code = FAIL
 
     sys.exit(exit_code)
-
 
 
 @balsamic.command("remove-fastq")
