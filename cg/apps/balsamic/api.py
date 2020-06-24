@@ -15,7 +15,7 @@ class BalsamicAPI:
         self.reference_config = config["balsamic"]["reference_config"]
         self.email = config["balsamic"]["slurm"]["mail_user"]
         self.root_dir = config["balsamic"]["root"]
-        self.slurm = config["balsamic"]["slurm"]["account"]
+        self.account = config["balsamic"]["slurm"]["account"]
         self.qos = config["balsamic"]["slurm"]["qos"]
         self.bed_path = config["bed_path"]
         self.process = Process(self.binary)
@@ -24,7 +24,6 @@ class BalsamicAPI:
         """Create config file for BALSAMIC analysis"""
 
         command = ("config", "case")
-
         opts = {
             "--analysis-dir": self.root_dir,
             "--singularity": self.singularity,
@@ -41,15 +40,13 @@ class BalsamicAPI:
 
     def run_analysis(self, arguments: dict):
         """Execute BALSAMIC"""
-
         command = ("run", "analysis")
 
         opts = {
-            "--account": self.slurm,
+            "--account": self.account,
             "--mail-user": self.email,
             "--qos": self.qos,
-            "--sample-config": Path(self.root_dir) / arguments["case_id"] / arguments["case_id"]
-            + ".json",
+            "--sample-config": Path(self.root_dir) / arguments["case_id"] / arguments["case_id"] + ".json",
             "--analysis-type": arguments["analysis_type"],
             "--run-analysis": arguments["run_analysis"],
         }

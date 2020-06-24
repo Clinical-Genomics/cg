@@ -1,21 +1,10 @@
 """ Add CLI support to create config and/or start BALSAMIC """
-import gzip
 import logging
-import re
-import subprocess
-import sys
 import shutil
 import click
-from cg.apps import hk, lims
-from cg.apps.balsamic.fastq import FastqHandler
-from cg.utils.fastq import FastqAPI
-from cg.cli.workflow.get_links import get_links
-from cg.exc import LimsDataError, BalsamicStartError
-from cg.meta.workflow.base import get_target_bed_from_lims
-from cg.store import Store
-from cg.utils.commands import Process
+
 from pathlib import Path
-from cg.meta.workflow.balsamic import MetaBalsamicAPI, AnalysisAPI
+from cg.meta.workflow.balsamic import MetaBalsamicAPI
 
 LOG = logging.getLogger(__name__)
 
@@ -29,7 +18,8 @@ OPTION_DRY = click.option("-d",
 @click.group(invoke_without_command=True)
 @click.pass_context
 def balsamic(context):
-    """Initialize MetaBalsamicAPI"""
+    """Run BALSAMIC"""
+
     context.obj["MetaBalsamicAPI"] = MetaBalsamicAPI(context.obj)
 
 
@@ -58,26 +48,26 @@ def link(context, case_id):
 @click.option("--panel-bed", required=False, help="Optional")
 @click.pass_context
 def config_case(context, panel_bed, case_id, dry):
-    """Create config file for BALSAMIC analysis of a case"""
+    """Create config file for BALSAMIC analysis for a case"""
 
     LOG.info(f"Creating config for {case_id}")
+
+    arguments = {
+        "case_id": case_id,
+        "normal": None,
+        "tumor": None,
+        "panel_bed": None,
+        "output_config": f"{case_id}.json",
+    }
+    acceptable_applications = {"wgs", "wes", "tgs"}
+    applications_requiring_bed = {"wes", "tgs"}
+
     case_object = context.obj["MetaBalsamicAPI"].lookup_samples(case_id)
     if case_object:
         if case_object.links:
-            arguments = {
-                "case_id": case_id,
-                "normal": "",
-                "tumor": "",
-                "panel_bed": "",
-                "output_config": f"{case_id}.json",
-            }
-
-            acceptable_applications = {"wgs", "wes", "tgs"}
-            applications_requiring_bed = {"wes", "tgs"}
             setup_data = context.obj["MetaBalsamicAPI"].get_case_config_params(
                 case_id, case_object.links)
-
-            # Can be handled with pandas eloquently in future
+                
             normal_paths = [
                 v["concatenated_path"] for k, v in setup_data.items()
                 if v["tissue_type"] == "normal"
@@ -90,7 +80,7 @@ def config_case(context, panel_bed, case_id, dry):
                 [v["application_type"] for k, v in setup_data.items()])
             target_beds = set([v["target_bed"] for k, v in setup_data.items()])
 
-            # Check if normal samples are 1
+            # Check if normal samples are 1 or 0
             if len(normal_paths) == 1:
                 arguments["normal"] = normal_paths[0]
             elif len(normal_paths) == 0:
@@ -200,7 +190,7 @@ def run(context, analysis_type, run_analysis, priority, case_id, dry):
 def remove_fastq(context, case_id):
     """Remove stored FASTQ files"""
 
-    work_dir = Path(f"{context.obj['balsamic']['root']}/{case_id}/fastq")
+    work_dir = Path(f"{context.obj['MetaBalsamicAPI'].balsamic_api.root_dir}/{case_id}/fastq")
     if work_dir.exists():
         shutil.rmtree(work_dir)
         LOG.info(f"Path {work_dir} removed successfully")
