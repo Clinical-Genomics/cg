@@ -2,13 +2,11 @@ import logging
 from cg.utils.commands import Process
 from pathlib import Path
 
-
 LOG = logging.getLogger(__name__)
 
 
 class BalsamicAPI:
     """Handles execution of BALSAMIC"""
-
     def __init__(self, config):
         self.binary = config["balsamic"]["binary_path"]
         self.singularity = config["balsamic"]["singularity"]
@@ -56,10 +54,7 @@ class BalsamicAPI:
             "--account": self.account,
             "--mail-user": self.email,
             "--qos": self.qos,
-            "--sample-config": Path(self.root_dir)
-            / arguments.get("case_id")
-            / arguments.get("case_id")
-            + ".json",
+            "--sample-config": arguments.get("sample_config"),
             "--analysis-type": arguments.get("analysis_type"),
             "--run-analysis": arguments.get("run_analysis"),
         }
