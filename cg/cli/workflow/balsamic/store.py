@@ -54,7 +54,6 @@ def analysis(context, case_id, deliverables_file_path, config_path):
 
     status = context.obj["store_api"]
     case_obj = status.family(case_id)
-    root_dir = Path(context.obj["balsamic"]["root"])
     analysis_api = context.obj["analysis_api"]
 
     if not case_obj:
