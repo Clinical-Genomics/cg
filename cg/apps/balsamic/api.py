@@ -50,7 +50,9 @@ class BalsamicAPI:
             "--account": self.account,
             "--mail-user": self.email,
             "--qos": self.qos,
-            "--sample-config": Path(self.root_dir) / arguments.get("case_id") / arguments.get("case_id")
+            "--sample-config": Path(self.root_dir)
+            / arguments.get("case_id")
+            / arguments.get("case_id")
             + ".json",
             "--analysis-type": arguments.get("analysis_type"),
             "--run-analysis": arguments.get("run_analysis"),
