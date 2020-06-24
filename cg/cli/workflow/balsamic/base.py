@@ -259,7 +259,7 @@ def run(context, dry, run_analysis, case_id, analysis_type, config_path, email, 
     arguments = {
         "case_id": case_id,
         "analysis_type": analysis_type,
-        "run_analysis": run_analysis,
+        "run_analysis": run_analysis or "",
         "sample_config": config_path,
         "email" : email,
         "priority": priority,
