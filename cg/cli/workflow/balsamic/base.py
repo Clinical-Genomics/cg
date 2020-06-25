@@ -16,7 +16,7 @@ from cg.cli.workflow.balsamic.deliver import deliver as deliver_cmd
 from cg.cli.workflow.get_links import get_links
 from cg.exc import LimsDataError, BalsamicStartError
 from cg.meta.workflow.base import get_target_bed_from_lims
-from cg.meta.workflow.balsamic import AnalysisAPI
+from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -41,8 +41,8 @@ def balsamic(context, case_id, priority, email, target_bed):
     context.obj["lims_api"] = lims.LimsAPI(context.obj)
     context.obj["fastq_api"] = FastqAPI
 
-    context.obj["analysis_api"] = AnalysisAPI(
-        hk_api=context.obj["hk_api"], fastq_api=context.obj["fastq_api"]
+    context.obj["analysis_api"] = BalsamicAnalysisAPI(
+        config=context.obj, hk_api=context.obj["hk_api"], fastq_api=context.obj["fastq_api"]
     )
 
     if context.invoked_subcommand is None:
@@ -258,7 +258,7 @@ def config_case(
 @balsamic.command()
 @click.option("-d", "--dry-run", "dry", is_flag=True, help="print command to console")
 @click.option(
-    "-r", "--run-analysis", "run_analysis", is_flag=True, default=False, help="start " "analysis",
+    "-r", "--run-analysis", "run_analysis", is_flag=True, default=False, help="start analysis",
 )
 @click.option("--config", "config_path", required=False, help="Optional")
 @PRIORITY_OPTION
@@ -276,7 +276,7 @@ def run(context, dry, run_analysis, config_path, priority, email, case_id):
         config_path = Path.joinpath(root_dir, case_id, case_id + ".json")
 
     # Call Balsamic
-    command_str = f" run analysis" f" --account {slurm_account}" f" -s {config_path}"
+    command_str = f" run analysis --account {slurm_account} -s {config_path}"
 
     if run_analysis:
         command_str += " --run-analysis"
