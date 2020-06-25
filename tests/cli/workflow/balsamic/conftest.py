@@ -200,6 +200,12 @@ def fixture_balsamic_case_dir(balsamic_dir: Path) -> Path:
     return balsamic_dir / "case"
 
 
+@pytest.fixture(name="balsamic_case_dir")
+def fixture_balsamic_case_config(balsamic_dir: Path) -> Path:
+    """Return the path to the balsamic apps case dir"""
+    return balsamic_dir / "case" / "case.json"
+
+
 @pytest.fixture(scope="function")
 def deliverables_file(balsamic_case_dir):
     """Return a balsamic deliverables file"""
