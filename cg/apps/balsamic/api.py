@@ -41,7 +41,7 @@ class BalsamicAPI:
         opts = sum([(k, str(v)) for k, v in opts.items() if v], ())
 
         if dry:
-            LOG.info(f'Executing command {" ".join(command + opts)}')
+            LOG.info(f'Executing command balsamic{" ".join(command + opts)}')
             return 0
         else:
             retcode = self.process.run_command(command + opts)
@@ -50,10 +50,7 @@ class BalsamicAPI:
     def run_analysis(self, arguments: dict, run_analysis: bool, dry: bool):
         """Execute BALSAMIC"""
 
-        command = (
-            "run",
-            "analysis",
-        )
+        command = ("run", "analysis")
         run_analysis = ("--run-analysis",) if run_analysis else ()
         opts = {
             "--account": self.account,
@@ -65,7 +62,7 @@ class BalsamicAPI:
         opts = sum([(k, str(v)) for k, v in opts.items() if v], ())
 
         if dry:
-            LOG.info(f'Executing command {" ".join(command + opts + run_analysis)}')
+            LOG.info(f'Executing command balsamic{" ".join(command + opts + run_analysis)}')
             return 0
         else:
             retcode = self.process.run_command(command + opts + run_analysis)
