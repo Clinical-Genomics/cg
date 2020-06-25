@@ -250,7 +250,7 @@ def config_case(
 @click.argument("case_id")
 @click.pass_context
 def run(context, dry, run_analysis, case_id, analysis_type, config_path, email, priority):
-    """Generate a config for the case_id."""
+    """Run BALSAMIC analysis for case_id."""
 
     if not config_path:
         config_path = f'{context.obj["balsamic"]["root"]}/{case_id}/{case_id}.json'
