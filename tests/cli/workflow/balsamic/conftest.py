@@ -194,16 +194,21 @@ def fixture_balsamic_dir(apps_dir: Path) -> Path:
     return apps_dir / "balsamic"
 
 
-@pytest.fixture(name="balsamic_case_dir")
-def fixture_balsamic_case_dir(balsamic_dir: Path) -> Path:
-    """Return the path to the balsamic apps case dir"""
-    return balsamic_dir / "case"
+@pytest.fixture(name="balsamic_dummy_case")
+def fixture_balsamic_case_name():
+    return "balsamic_dummy_case"
 
 
 @pytest.fixture(name="balsamic_case_dir")
-def fixture_balsamic_case_config(balsamic_dir: Path) -> Path:
+def fixture_balsamic_case_dir(balsamic_dir: Path, balsamic_dummy_case) -> Path:
     """Return the path to the balsamic apps case dir"""
-    return balsamic_dir / "case" / "case.json"
+    return balsamic_dir / balsamic_dummy_case
+
+
+@pytest.fixture(name="balsamic_case_dir")
+def fixture_balsamic_case_config(balsamic_dir: Path, balsamic_dummy_case) -> Path:
+    """Return the path to the balsamic apps case dir"""
+    return balsamic_dir / balsamic_dummy_case / balsamic_dummy_case + ".json"
 
 
 @pytest.fixture(scope="function")
