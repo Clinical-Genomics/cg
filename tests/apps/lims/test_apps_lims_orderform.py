@@ -89,9 +89,7 @@ def test_parsing_mip_orderform(mip_orderform):
     assert len(trio_family["samples"]) == 3
     assert trio_family["name"] == "family"
     assert trio_family["priority"] == "research"
-    assert set(trio_family["panels"]) == set(
-        ["AD-HSP", "Ataxi", "ATX"]
-    )
+    assert set(trio_family["panels"]) == set(["AD-HSP", "Ataxi", "ATX"])
     assert trio_family["require_qcok"] is True
     # ... and collect relevant info about the samples
 
@@ -308,9 +306,7 @@ def test_parsing_mip_balsamic_orderform(mip_balsamic_orderform):
     assert len(trio_family["samples"]) == 3
     assert trio_family["name"] == "family"
     assert trio_family["priority"] == "research"
-    assert set(trio_family["panels"]) == set(
-        ["AD-HSP", "Ataxi", "ATX"]
-    )
+    assert set(trio_family["panels"]) == set(["AD-HSP", "Ataxi", "ATX"])
     assert trio_family["require_qcok"] is True
     # ... and collect relevant info about the samples
 
@@ -369,9 +365,7 @@ def test_parsing_mip_rna_orderform(mip_rna_orderform):
     assert len(first_case["samples"]) == 3
     assert first_case["name"] == "family"
     assert first_case["priority"] == "research"
-    assert set(first_case["panels"]) == set(
-        ["AD-HSP", "Ataxi", "ATX"]
-    )
+    assert set(first_case["panels"]) == set(["AD-HSP", "Ataxi", "ATX"])
     assert first_case["require_qcok"] is True
     # ... and collect relevant info about the samples
 
