@@ -34,7 +34,7 @@ def test_with_case(cli_runner, balsamic_context, caplog, balsamic_dummy_case):
     caplog.set_level(logging.INFO)
 
     context = balsamic_context
-    
+
     # WHEN running balsamic on "case"
     with mock.patch.object(subprocess, "run") as mocked:
         mocked.return_value.stdout = dummy_stdout.encode("utf-8")
