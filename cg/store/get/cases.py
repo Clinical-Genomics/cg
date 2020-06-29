@@ -11,7 +11,7 @@ from cg.store.api import Store
 def analysis_completed(store: Store) -> Query:
     """Return cases where analysis is finished"""
     cases = store.Family.query.join(models.Analysis)
-    return cases.filter_by(models.Analysis.completed_at.isnot(None))
+    return cases.filter(models.Analysis.completed_at.isnot(None))
 
 
 def ready_for_spring_compresssion(store: Store) -> Iterator[models.Family]:

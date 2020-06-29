@@ -296,6 +296,12 @@ def fixture_timestamp() -> dt.datetime:
     return dt.datetime(2020, 5, 1)
 
 
+@pytest.fixture(scope="function", name="later_timestamp")
+def fixture_later_timestamp() -> dt.datetime:
+    """Return a time stamp in date time format"""
+    return dt.datetime(2020, 6, 1)
+
+
 @pytest.fixture(scope="function", name="hk_bundle_data")
 def fixture_hk_bundle_data(case_id, bed_file, timestamp):
     """Get some bundle data for housekeeper"""
