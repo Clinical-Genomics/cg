@@ -61,8 +61,6 @@ def analysis(context, case_id, deliverables_file_path, config_path):
 
     if not deliverables_file_path:
         deliverables_file_path = analysis_api.get_deliverables_file_path(case_id)
-        if not os.path.isfile(deliverables_file_path):
-            context.invoke(generate_deliverables_file, case_id=case_id)
 
     if not config_path:
         config_path = analysis_api.get_config_path(case_id)
