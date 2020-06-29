@@ -1,6 +1,6 @@
 """Hold sbatch templates in global variables"""
 
-SBATCH_HEADER_TEMPLATE = """#!/bin/bash
+SBATCH_HEADER_TEMPLATE = """#! /bin/bash
 #SBATCH --job-name={job_name}
 #SBATCH --account={account}
 #SBATCH --ntasks={ntasks}
