@@ -116,7 +116,7 @@ def test_get_fastq_files_no_files(compress_api, sample_hk_bundle_no_files, sampl
     # THEN assert that None is returned since there where not two files
     assert fastq_dict is None
     # THEN assert that the correct information is returned
-    assert f"Could not find fastq files for {sample}" in caplog.text
+    assert f"Could not find FASTQ files for {sample}" in caplog.text
 
 
 def test_check_bam_path(bam_file):

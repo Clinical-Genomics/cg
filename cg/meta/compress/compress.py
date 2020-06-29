@@ -199,7 +199,6 @@ class CompressAPI:
 
         sample_fastq_dict = files.get_fastq_files(sample_id=sample_id, version_obj=version_obj)
         if not sample_fastq_dict:
-            LOG.info("Could not find FASTQ files for %s", sample_id)
             return False
 
         for run in sample_fastq_dict:
