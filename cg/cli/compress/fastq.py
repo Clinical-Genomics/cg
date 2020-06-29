@@ -30,12 +30,13 @@ def fastq_cmd(context, case_id, number_of_conversions, ntasks, mem, dry_run):
     except CaseNotFoundError:
         return
 
-    conversion_count = 0
+    case_conversion_count = 0
+    ind_conversion_count = 0
     for case in cases:
         # Keeps track on if all samples in a case have been converted
         case_converted = True
         if conversion_count >= number_of_conversions:
-            continue
+            break
 
         LOG.info("\n\nSearching for FASTQ files in %s", case.internal_id)
         for link_obj in case.links:
@@ -44,11 +45,14 @@ def fastq_cmd(context, case_id, number_of_conversions, ntasks, mem, dry_run):
             if res is False:
                 LOG.info("skipping individual %s", sample_id)
                 continue
+            ind_conversion_count += 1
             case_converted = False
         if not case_converted:
             conversion_count += 1
 
-    LOG.info("Individuals in %s cases where compressed", conversion_count)
+    LOG.info(
+        "%s Individuals in %s cases where compressed", ind_conversion_count, case_conversion_count
+    )
 
 
 @click.command("fastq")
