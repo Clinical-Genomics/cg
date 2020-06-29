@@ -8,13 +8,8 @@ from typing import Dict, List, Tuple
 from housekeeper.store import models as hk_models
 
 from cg.apps.crunchy import CrunchyAPI
-from cg.constants import (
-    BAM_SUFFIX,
-    FASTQ_FIRST_READ_SUFFIX,
-    FASTQ_SECOND_READ_SUFFIX,
-    HK_BAM_TAGS,
-    HK_FASTQ_TAGS,
-)
+from cg.constants import (BAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX,
+                          FASTQ_SECOND_READ_SUFFIX, HK_BAM_TAGS, HK_FASTQ_TAGS)
 
 LOG = logging.getLogger(__name__)
 
@@ -266,4 +261,15 @@ def is_valid_fastq_suffix(fastq_path: Path) -> bool:
         FASTQ_SECOND_READ_SUFFIX
     ):
         return True
+    return False
+
+
+# Functions to check for files in housekeeper
+
+
+def is_file_in_version(version_obj: hk_models.Version, path: Path) -> bool:
+    """Check if a file is in a certain version"""
+    for file_obj in version_obj.files:
+        if file_obj.path == str(path):
+            return True
     return False
