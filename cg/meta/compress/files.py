@@ -207,6 +207,7 @@ def get_fastq_files(sample_id: str, version_obj: hk_models.Version) -> Dict[str,
         sorted_fastqs = sort_fastqs(fastq_files=fastq_runs[run])
         if not sorted_fastqs:
             LOG.info("Could not sort FASTQ files for %s", sample_id)
+            continue
         fastq_first = {"path": sorted_fastqs[0], "hk_file": hk_files_dict[sorted_fastqs[0]]}
         fastq_second = {"path": sorted_fastqs[1], "hk_file": hk_files_dict[sorted_fastqs[1]]}
         fastq_dict[run] = {
@@ -247,7 +248,7 @@ def sort_fastqs(fastq_files: List[Path]) -> Tuple[Path, Path]:
         return None
 
     if not check_prefixes(first_fastq, second_fastq):
-        LOG.info("FASTQ files does not have matching prefix")
+        LOG.info("FASTQ files does not have matching prefix: %s, %s", first_fastq, second_fastq)
         return None
 
     return (first_fastq, second_fastq)
