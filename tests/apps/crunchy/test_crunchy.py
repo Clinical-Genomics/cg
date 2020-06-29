@@ -4,12 +4,8 @@ import logging
 from pathlib import Path
 
 from cg.apps.crunchy import CrunchyAPI
-from cg.constants import (
-    CRAM_SUFFIX,
-    FASTQ_FIRST_READ_SUFFIX,
-    FASTQ_SECOND_READ_SUFFIX,
-    SPRING_SUFFIX,
-)
+from cg.constants import (CRAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX,
+                          FASTQ_SECOND_READ_SUFFIX, SPRING_SUFFIX)
 
 
 def test_set_dry_run(crunchy_config_dict):
@@ -216,7 +212,8 @@ def test_fastq_to_spring(crunchy_config_dict, sbatch_content_spring, fastq_paths
     fastq_second = fastq_paths["fastq_second_path"]
     spring_path = crunchy_api.get_spring_path_from_fastq(fastq_first)
     log_path = crunchy_api.get_log_dir(spring_path)
-    sbatch_path = crunchy_api.get_sbatch_path(log_path, "fastq")
+    run_name = crunchy_api.get_run_name(spring_path)
+    sbatch_path = crunchy_api.get_sbatch_path(log_path, "fastq", run_name)
 
     # WHEN calling fastq_to_spring on fastq files
     crunchy_api.fastq_to_spring(

@@ -85,7 +85,8 @@ def test_fastq_to_spring_sbatch(crunchy_config_dict, fastq_paths, sbatch_process
     fastq_second = fastq_paths["fastq_second_path"]
     spring_path = crunchy_api.get_spring_path_from_fastq(fastq_first)
     log_path = crunchy_api.get_log_dir(spring_path)
-    sbatch_path = crunchy_api.get_sbatch_path(log_path, "fastq")
+    run_name = crunchy_api.get_run_name(spring_path)
+    sbatch_path = crunchy_api.get_sbatch_path(log_path, "fastq", run_name)
 
     assert not sbatch_path.is_file()
 
@@ -111,7 +112,8 @@ def test_spring_to_fastq(
     mocker_submit_sbatch = mocker.patch.object(CrunchyAPI, "_submit_sbatch")
     crunchy_api = CrunchyAPI(crunchy_config_dict)
     log_path = crunchy_api.get_log_dir(spring_file)
-    sbatch_path = crunchy_api.get_sbatch_path(log_path, "spring")
+    run_name = crunchy_api.get_run_name(spring_file)
+    sbatch_path = crunchy_api.get_sbatch_path(log_path, "spring", run_name)
 
     # WHEN calling bam_to_cram method on bam-path
     crunchy_api.spring_to_fastq(spring_path=spring_file)
