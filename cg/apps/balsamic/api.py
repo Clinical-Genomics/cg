@@ -4,6 +4,7 @@ from pathlib import Path
 
 LOG = logging.getLogger(__name__)
 
+
 class BalsamicAPI:
     """Handles execution of BALSAMIC"""
 
@@ -27,7 +28,6 @@ class BalsamicAPI:
                 formatted_options.append(str(key))
                 formatted_options.append(str(val))
         return formatted_options
-
 
     def config_case(self, arguments: dict, dry: bool):
         """Create config file for BALSAMIC analysis"""
