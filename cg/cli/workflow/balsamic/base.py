@@ -75,7 +75,7 @@ def link(context, case_id, sample_id):
         )
         if link_obj.sample.data_analysis and "balsamic" in link_obj.sample.data_analysis.lower():
             LOG.info(
-                "%s has balsamic as data analysis, linking.", link_obj.sample.internal_id,
+                "%s has BALSAMIC as data analysis, linking.", link_obj.sample.internal_id,
             )
             context.obj["analysis_api"].link_sample(
                 fastq_handler=FastqHandler(context.obj),
@@ -84,7 +84,7 @@ def link(context, case_id, sample_id):
             )
         else:
             LOG.warning(
-                "%s does not have balsamic as data analysis, skipping.", link_obj.sample.internal_id
+                "%s does not have BALSAMIC as data analysis, skipping.", link_obj.sample.internal_id
             )
 
 
@@ -100,7 +100,7 @@ def link(context, case_id, sample_id):
 def config_case(
     context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim, umi, case_id
 ):
-    """ Generate a config for the case_id. """
+    """ Generate a config file for the case_id. """
 
     # missing sample_id and files
     case_obj = context.obj["store_api"].family(case_id)
