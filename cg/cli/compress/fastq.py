@@ -35,7 +35,7 @@ def fastq_cmd(context, case_id, number_of_conversions, ntasks, mem, dry_run):
     for case in cases:
         # Keeps track on if all samples in a case have been converted
         case_converted = True
-        if conversion_count >= number_of_conversions:
+        if case_conversion_count >= number_of_conversions:
             break
 
         LOG.info("\n\nSearching for FASTQ files in %s", case.internal_id)
@@ -48,7 +48,7 @@ def fastq_cmd(context, case_id, number_of_conversions, ntasks, mem, dry_run):
             ind_conversion_count += 1
             case_converted = False
         if not case_converted:
-            conversion_count += 1
+            case_conversion_count += 1
 
     LOG.info(
         "%s Individuals in %s cases where compressed", ind_conversion_count, case_conversion_count
