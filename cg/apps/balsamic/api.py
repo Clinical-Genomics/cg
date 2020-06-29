@@ -30,7 +30,7 @@ class BalsamicAPI:
         return formatted_options
 
     def config_case(self, arguments: dict, dry: bool):
-        """Create config file for BALSAMIC analysis"""
+        """Create config file for BALSAMIC analysis """
 
         command = ["config", "case"]
         options = {
