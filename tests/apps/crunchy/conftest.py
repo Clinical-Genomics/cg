@@ -291,7 +291,7 @@ def fixture_sbatch_content(bam_path, crunchy_config_dict):
     flag_path = bam_path.with_suffix(".crunchy.txt")
     log_dir = bam_path.parent
 
-    _content = f"""#!/bin/bash
+    _content = f"""#! /bin/bash
 #SBATCH --job-name={job_name}
 #SBATCH --account={account}
 #SBATCH --ntasks={ntasks}
@@ -358,7 +358,7 @@ def fixture_sbatch_content_spring(fastq_paths, crunchy_config_dict):
     pending_path = CrunchyAPI.get_pending_path(fastq_first)
     log_dir = fastq_paths["fastq_first_path"].parent
 
-    _content = f"""#!/bin/bash
+    _content = f"""#! /bin/bash
 #SBATCH --job-name={job_name}
 #SBATCH --account={account}
 #SBATCH --ntasks={ntasks}
@@ -424,7 +424,7 @@ def fixture_sbatch_content_spring_to_fastq(spring_metadata, crunchy_config_dict)
     pending_path = CrunchyAPI.get_pending_path(fastq_first)
     log_dir = fastq_first.parent
 
-    _content = f"""#!/bin/bash
+    _content = f"""#! /bin/bash
 #SBATCH --job-name={job_name}
 #SBATCH --account={account}
 #SBATCH --ntasks={ntasks}
