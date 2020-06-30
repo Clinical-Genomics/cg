@@ -18,7 +18,7 @@ from cg.exc import LimsDataError, BalsamicStartError
 from cg.meta.workflow.base import get_target_bed_from_lims
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.apps.balsamic.api import BalsamicAPI
-from cg.store import Store
+from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
 ANALYSIS_TYPE_OPTION = click.option(
