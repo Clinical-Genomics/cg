@@ -1,12 +1,12 @@
 """Fixtures for cli balsamic tests"""
 from datetime import datetime
+
 import pytest
 
 from cg.apps.hk import HousekeeperAPI
+from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.store import Store, models
-from cg.apps.tb import TrailblazerAPI
-
-from tests.store_helpers import ensure_customer, add_family, add_sample
+from cg.utils.fastq import FastqAPI
 
 
 @pytest.fixture
@@ -14,32 +14,19 @@ def balsamic_store_context(balsamic_store, balsamic_case) -> dict:
     """context to use in cli"""
     return {
         "hk_api": MockHouseKeeper(balsamic_case.internal_id),
-        "db": balsamic_store,
-        "tb_api": MockTB(),
+        "store_api": balsamic_store,
         "balsamic": {"root": "root", "conda_env": "conda_env"},
+        "analysis_api": BalsamicAnalysisAPI(
+            config={"balsamic": {"root": "root", "conda_env": "conda_env"}},
+            hk_api=MockHouseKeeper(balsamic_case.internal_id),
+            fastq_api=MockFastqAPI(),
+        ),
     }
 
 
-class MockTB(TrailblazerAPI):
-    """Mock of trailblazer """
-
-    def __init__(self):
-        """Override TrailblazerAPI __init__ to avoid default behaviour"""
-
-    def analyses(
-        self,
-        *,
-        family: str = None,
-        query: str = None,
-        status: str = None,
-        deleted: bool = None,
-        temp: bool = False,
-        before: datetime = None,
-        is_visible: bool = None,
-        workflow=None
-    ):
-        """Override TrailblazerAPI analyses method to avoid default behaviour"""
-        return []
+class MockFastqAPI(FastqAPI):
+    def parse_header(*_):
+        return {"lane": "1", "flowcell": "ABC123", "readnumber": "1"}
 
 
 class MockHouseKeeper(HousekeeperAPI):
@@ -77,6 +64,9 @@ class MockHousekeeperStore:
     def add_commit(self, *pargs, **kwargs):
         """Implements add_commit to allow it to be used in HousekeeperAPI"""
 
+    def rollback(self, *pargs, **kwargs):
+        """Implements rollback to allow it to be used in HousekeeperAPI"""
+
 
 class MockBundle:
     """Mock Bundle"""
@@ -108,23 +98,31 @@ class MockFile:
 
 
 @pytest.fixture(scope="function")
-def balsamic_store(base_store: Store) -> Store:
+def balsamic_store(base_store: Store, helpers) -> Store:
     """real store to be used in tests"""
     _store = base_store
 
-    case = add_family(_store, "balsamic_case")
-    tumour_sample = add_sample(_store, "tumour_sample", is_tumour=True)
-    normal_sample = add_sample(_store, "normal_sample", is_tumour=False)
+    case = helpers.add_family(_store, "balsamic_case")
+    tumour_sample = helpers.add_sample(_store, "tumour_sample", is_tumour=True)
+    normal_sample = helpers.add_sample(_store, "normal_sample", is_tumour=False)
     _store.relate_sample(case, tumour_sample, status="unknown")
     _store.relate_sample(case, normal_sample, status="unknown")
 
-    case = add_family(_store, "mip_case")
-    normal_sample = add_sample(_store, "normal_sample", is_tumour=False, data_analysis="mip")
+    case = helpers.add_family(_store, "mip_case")
+    normal_sample = helpers.add_sample(
+        _store, "normal_sample", is_tumour=False, data_analysis="mip"
+    )
     _store.relate_sample(case, normal_sample, status="unknown")
 
     _store.commit()
 
     return _store
+
+
+@pytest.fixture(scope="function")
+def config_file():
+    """Get the path to a balsamic case config file"""
+    return "tests/fixtures/apps/balsamic/case/config.json"
 
 
 @pytest.fixture(scope="function")
@@ -146,12 +144,12 @@ def deliverables_file_tags():
 
 
 @pytest.fixture(scope="function")
-def balsamic_case(analysis_store) -> models.Family:
+def balsamic_case(analysis_store, helpers) -> models.Family:
     """case with balsamic data_type"""
-    return analysis_store.find_family(ensure_customer(analysis_store), "balsamic_case")
+    return analysis_store.find_family(helpers.ensure_customer(analysis_store), "balsamic_case")
 
 
 @pytest.fixture(scope="function")
-def mip_case(analysis_store) -> models.Family:
+def mip_case(analysis_store, helpers) -> models.Family:
     """case with balsamic data_type"""
-    return analysis_store.find_family(ensure_customer(analysis_store), "mip_case")
+    return analysis_store.find_family(helpers.ensure_customer(analysis_store), "mip_case")

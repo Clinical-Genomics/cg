@@ -246,10 +246,7 @@ def add_customer(disk_store, customer_id="cust_test"):
 def add_application(disk_store, application_tag="dummy_tag"):
 
     application = disk_store.add_application(
-        tag=application_tag,
-        category="wgs",
-        description="dummy_description",
-        percent_kth=80,
+        tag=application_tag, category="wgs", description="dummy_description", percent_kth=80,
     )
     disk_store.add_commit(application)
     prices = {"standard": 10, "priority": 20, "express": 30, "research": 5}

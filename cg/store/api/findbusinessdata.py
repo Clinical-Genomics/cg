@@ -2,7 +2,7 @@
 import datetime as dt
 from typing import List
 
-from sqlalchemy import or_, and_, func
+from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Query
 
 from cg.store import models
@@ -16,7 +16,8 @@ class FindBusinessDataHandler(BaseHandler):
         """Fetch multiple analyses."""
         records = self.Analysis.query
         if family:
-            records = records.filter(models.Analysis.family == family)
+            query_family = family
+            records = records.filter(models.Analysis.family == query_family)
         if before:
             subq = (
                 self.Analysis.query.join(models.Analysis.family)
@@ -37,6 +38,27 @@ class FindBusinessDataHandler(BaseHandler):
             ).filter(models.Analysis.started_at < before)
         return records
 
+    def latest_analyses(self) -> Query:
+        """Fetch latest analysis for all cases."""
+
+        records = self.Analysis.query
+        sub_query = (
+            self.Analysis.query.join(models.Analysis.family)
+            .group_by(models.Family.id)
+            .with_entities(
+                models.Analysis.family_id, func.max(models.Analysis.started_at).label("started_at")
+            )
+            .subquery()
+        )
+        records = records.join(
+            sub_query,
+            and_(
+                self.Analysis.family_id == sub_query.c.family_id,
+                self.Analysis.started_at == sub_query.c.started_at,
+            ),
+        )
+        return records
+
     def analysis(self, family: models.Family, started_at: dt.datetime) -> models.Analysis:
         """Fetch an analysis."""
         return self.Analysis.query.filter_by(family=family, started_at=started_at).first()
@@ -47,7 +69,7 @@ class FindBusinessDataHandler(BaseHandler):
         return query
 
     def families(
-        self, *, customer: models.Customer = None, enquiry: str = None, action: str = None
+        self, *, customer: models.Customer = None, enquiry: str = None, action: str = None,
     ) -> List[models.Family]:
         """Fetch families."""
         records = self.Family.query
@@ -115,7 +137,7 @@ class FindBusinessDataHandler(BaseHandler):
     ) -> List[models.Sample]:
         """Find samples within the customer group."""
         return self.Sample.query.filter(
-            models.Sample.customer.customer_group == customer.customer_group, name == name
+            models.Sample.customer.customer_group == customer.customer_group, name == name,
         )
 
     def flowcell(self, name: str) -> models.Flowcell:
@@ -160,7 +182,7 @@ class FindBusinessDataHandler(BaseHandler):
         """Find a link between a family and a sample."""
         return (
             self.FamilySample.query.join(models.FamilySample.family, models.FamilySample.sample)
-            .filter(models.Family.internal_id == family_id, models.Sample.internal_id == sample_id)
+            .filter(models.Family.internal_id == family_id, models.Sample.internal_id == sample_id,)
             .first()
         )
 
@@ -229,7 +251,7 @@ class FindBusinessDataHandler(BaseHandler):
 
         records = (
             records.filter(
-                or_(models.Pool.name.like(f"%{enquiry}%"), models.Pool.order.like(f"%{enquiry}%"))
+                or_(models.Pool.name.like(f"%{enquiry}%"), models.Pool.order.like(f"%{enquiry}%"),)
             )
             if enquiry
             else records
@@ -264,8 +286,6 @@ class FindBusinessDataHandler(BaseHandler):
 
     def samples_by_ids(self, **identifiers) -> List[models.Sample]:
         records = self.Sample.query
-
-        print(type(identifiers), identifiers)
 
         for identifier_name, identifier_value in identifiers.items():
             identifier = getattr(models.Sample, identifier_name)

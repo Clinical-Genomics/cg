@@ -1,17 +1,15 @@
 """This script tests the cli methods to set families to status-db"""
-from datetime import datetime
 
 from cg.cli.set import family
 from cg.store import Store
-from tests.store_helpers import add_family, ensure_panel
 
 SUCCESS = 0
 
 
-def test_set_family_without_options(cli_runner, base_context, base_store: Store):
+def test_set_family_without_options(cli_runner, base_context, base_store: Store, helpers):
     """Test to set a family using only the required arguments"""
     # GIVEN a database with a family
-    family_id = add_family(base_store).internal_id
+    family_id = helpers.add_family(base_store).internal_id
     assert base_store.Family.query.count() == 1
 
     # WHEN setting a family
@@ -33,13 +31,13 @@ def test_set_family_bad_family(cli_runner, base_context):
     assert result.exit_code != SUCCESS
 
 
-def test_set_family_bad_panel(cli_runner, base_context, base_store: Store):
+def test_set_family_bad_panel(cli_runner, base_context, base_store: Store, helpers):
     """Test to set a family using a non-existing panel"""
     # GIVEN a database with a family
 
     # WHEN setting a family
     panel_id = "dummy_panel"
-    family_id = add_family(base_store).internal_id
+    family_id = helpers.add_family(base_store).internal_id
     result = cli_runner.invoke(family, [family_id, "--panel", panel_id], obj=base_context)
 
     # THEN then it should complain in missing panel instead of setting a value
@@ -47,11 +45,11 @@ def test_set_family_bad_panel(cli_runner, base_context, base_store: Store):
     assert panel_id not in base_store.Family.query.first().panels
 
 
-def test_set_family_panel(cli_runner, base_context, base_store: Store):
+def test_set_family_panel(cli_runner, base_context, base_store: Store, helpers):
     """Test to set a family using an existing panel"""
     # GIVEN a database with a family and a panel not yet added to the family
-    panel_id = ensure_panel(base_store, "a_panel").name
-    family_id = add_family(base_store).internal_id
+    panel_id = helpers.ensure_panel(base_store, "a_panel").name
+    family_id = helpers.add_family(base_store).internal_id
     assert panel_id not in base_store.Family.query.first().panels
 
     # WHEN setting a panel of a family
@@ -62,10 +60,10 @@ def test_set_family_panel(cli_runner, base_context, base_store: Store):
     assert panel_id in base_store.Family.query.first().panels
 
 
-def test_set_family_priority(cli_runner, base_context, base_store: Store):
+def test_set_family_priority(cli_runner, base_context, base_store: Store, helpers):
     """Test that the added family gets the priority we send in"""
     # GIVEN a database with a family
-    family_id = add_family(base_store).internal_id
+    family_id = helpers.add_family(base_store).internal_id
     priority = "priority"
     assert base_store.Family.query.first().priority_human != priority
 

@@ -141,9 +141,7 @@ def new(record_type):
     elif record_type == "Pool":
         records, customers_to_invoice = db.pools_to_invoice(customer=customer_obj)
     elif record_type == "Microbial":
-        records, customers_to_invoice = db.microbial_samples_to_invoice(
-            customer=customer_obj
-        )
+        records, customers_to_invoice = db.microbial_samples_to_invoice(customer=customer_obj)
     return render_template(
         "invoices/new.html",
         customers_to_invoice=customers_to_invoice,
@@ -225,6 +223,4 @@ def modified_invoice(invoice_id, cost_center):
         elif cost_center == "KI":
             file_object.write(invoice_obj.excel_ki)
         pass
-    return send_from_directory(
-        directory=temp_dir, filename=file_name, as_attachment=True
-    )
+    return send_from_directory(directory=temp_dir, filename=file_name, as_attachment=True)

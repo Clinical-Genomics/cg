@@ -1,58 +1,73 @@
-"""Fixtures for testing apps"""
-from datetime import datetime
+"""Fixtures for the housekeeper tests"""
+
+import datetime
 
 import pytest
+from housekeeper.store import models
+
 from cg.apps.hk import HousekeeperAPI
 
 
-@pytest.yield_fixture(scope="function")
-def housekeeper_api(tmpdir):
+@pytest.fixture(name="hk_config")
+def fixture_hk_config(root_path) -> dict:
+    """Return a dictionary with housekeeper api configs for testing"""
+    config = {"housekeeper": {"database": "sqlite:///:memory:", "root": str(root_path)}}
+    return config
+
+
+@pytest.yield_fixture(scope="function", name="housekeeper_api")
+def fixture_housekeeper_api(hk_config):
     """Setup Housekeeper store."""
-    root_path = tmpdir.mkdir("bundles")
-    _api = HousekeeperAPI({"housekeeper": {"database": "sqlite://", "root": str(root_path)}})
+    _api = HousekeeperAPI(hk_config)
     _api.initialise_db()
     yield _api
     _api.destroy_db()
 
 
-@pytest.yield_fixture(scope="function")
-def file(bundle_data):
-    return bundle_data["files"][0]["path"]
+@pytest.yield_fixture(scope="function", name="populated_housekeeper_api")
+def fixture_populated_housekeeper_api(housekeeper_api, bundle_data):
+    """Setup Housekeeper store."""
+    _api = housekeeper_api
+    bundle_obj, version_obj = _api.add_bundle(bundle_data)
+    _api.add_commit(bundle_obj, version_obj)
+    return _api
 
 
-@pytest.fixture(scope="function")
-def bundle_data():
-    data = {
-        "name": "sillyfish",
-        "created": datetime.now(),
-        "expires": datetime.now(),
-        "files": [
-            {
-                "path": "tests/fixtures/analysis/sample_coverage.bed",
-                "archive": False,
-                "tags": ["bed", "sample"],
-            }
-        ],
+@pytest.fixture(name="a_date")
+def fixture_a_date() -> datetime.datetime:
+    """Return a datetime object with a date"""
+
+    return datetime.datetime(2020, 5, 1)
+
+
+@pytest.fixture(name="later_date")
+def fixture_later_date() -> datetime.datetime:
+    """Return a datetime object with a date later than a_date"""
+
+    return datetime.datetime(2020, 5, 3)
+
+
+@pytest.fixture(name="minimal_bundle_obj")
+def fixture_minimal_bundle_obj(a_date, case_id, housekeeper_api) -> models.Bundle:
+    """Return a bundle object with minimal information (name and created_at)"""
+    _bundle_obj = housekeeper_api.new_bundle(name=case_id, created_at=a_date)
+
+    return _bundle_obj
+
+
+@pytest.fixture(name="tags")
+def fixture_tags() -> list:
+    """Return a list of housekeeper tags"""
+    return ["bed"]
+
+
+@pytest.fixture(name="bundle_data")
+def fixture_bundle_data(a_date, case_id, bed_file, tags) -> dict:
+    """Return a dictionary with bundle info in the correct format"""
+    _bundle_data = {
+        "name": case_id,
+        "created": a_date,
+        "files": [{"path": bed_file, "archive": False, "tags": tags}],
     }
-    return data
 
-
-def ensure_bundle(store, bundle_data):
-    _bundle = store.bundle(bundle_data["name"])
-    if not _bundle:
-        _bundle, _version = store.add_bundle(bundle_data)
-        store.add_commit(_bundle, _version)
-    return _bundle
-
-
-def ensure_version(store: HousekeeperAPI, bundle_data):
-    """utility function to return existing or create an version for tests"""
-    _bundle = ensure_bundle(store, bundle_data)
-    _version = store.last_version(_bundle)
-    return _version
-
-
-@pytest.yield_fixture(scope="function")
-def version_obj(housekeeper_api, bundle_data):
-    _version = ensure_version(housekeeper_api, bundle_data)
-    return _version.ver
+    return _bundle_data

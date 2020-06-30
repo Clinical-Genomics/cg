@@ -1,17 +1,23 @@
 """Tests the status part of the cg.store.api"""
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
-def test_samples_to_receive_external(sample_store):
-    # GIVEN a store with samples in a mix of states
-    assert sample_store.samples().count() > 1
-    assert len([sample for sample in sample_store.samples() if sample.received_at]) > 1
+def test_samples_to_receive_external(sample_store, helpers):
+    """Test fetching external sample"""
+    store = sample_store
+    # GIVEN a store with a mixture of samples
+    assert store.samples().count() > 1
 
     # WHEN finding external samples to receive
-    external_query = sample_store.samples_to_recieve(external=True)
+    external_query = store.samples_to_recieve(external=True)
+
+    # THEN assert that only the external sample is returned
     assert external_query.count() == 1
+
     first_sample = external_query.first()
+    # THEN assert that the sample is external in database
     assert first_sample.application_version.application.is_external is True
+    # THEN assert that the sample is does not have a received at stamp
     assert first_sample.received_at is None
 
 
@@ -30,9 +36,7 @@ def test_samples_to_receive_internal(sample_store):
 def test_samples_to_sequence(sample_store):
     # GIVEN a store with sample in a mix of states
     assert sample_store.samples().count() > 1
-    assert (
-        len([sample for sample in sample_store.samples() if sample.sequenced_at]) >= 1
-    )
+    assert len([sample for sample in sample_store.samples() if sample.sequenced_at]) >= 1
 
     # WHEN finding which samples are in queue to be sequenced
     sequence_samples = sample_store.samples_to_sequence()
@@ -116,6 +120,38 @@ def test_case_not_in_observations_to_upload(sample_store):
     assert analysis.family not in observations_to_upload
 
 
+def test_multiple_analyses(analysis_store, helpers):
+    """Tests that analyses that are not latest are not returned"""
+
+    # GIVEN an analysis that is not delivery reported but there exists a newer analysis
+    timestamp = datetime.now()
+    family = helpers.add_family(analysis_store)
+    analysis_oldest = helpers.add_analysis(
+        analysis_store,
+        family=family,
+        started_at=timestamp - timedelta(days=1),
+        uploaded_at=timestamp - timedelta(days=1),
+        delivery_reported_at=None,
+    )
+    analysis_store.add_commit(analysis_oldest)
+    analysis_newest = helpers.add_analysis(
+        analysis_store,
+        family=family,
+        started_at=timestamp,
+        uploaded_at=timestamp,
+        delivery_reported_at=None,
+    )
+    sample = helpers.add_sample(analysis_store, delivered_at=timestamp)
+    analysis_store.relate_sample(family=analysis_oldest.family, sample=sample, status="unknown")
+
+    # WHEN calling the analyses_to_delivery_report
+    analyses = analysis_store.latest_analyses().all()
+
+    # THEN only the newest analysis should be returned
+    assert analysis_newest in analyses
+    assert analysis_oldest not in analyses
+
+
 def ensure_customer(store, customer_id="cust_test"):
     """utility function to return existing or create customer for tests"""
     customer_group = store.customer_group("dummy_group")
@@ -183,19 +219,14 @@ def ensure_application_version(disk_store, application_tag="dummy_tag"):
     application = disk_store.application(tag=application_tag)
     if not application:
         application = disk_store.add_application(
-            tag=application_tag,
-            category="wgs",
-            description="dummy_description",
-            percent_kth=80,
+            tag=application_tag, category="wgs", description="dummy_description", percent_kth=80,
         )
         disk_store.add_commit(application)
 
     prices = {"standard": 10, "priority": 20, "express": 30, "research": 5}
     version = disk_store.application_version(application, 1)
     if not version:
-        version = disk_store.add_version(
-            application, 1, valid_from=datetime.now(), prices=prices
-        )
+        version = disk_store.add_version(application, 1, valid_from=datetime.now(), prices=prices)
 
         disk_store.add_commit(version)
     return version

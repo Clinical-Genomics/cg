@@ -39,9 +39,7 @@ def observations(context, case_id, case_limit, dry_run):
 
         if case_limit is not None:
             if nr_uploaded >= case_limit:
-                LOG.info(
-                    "Uploaded %d cases, observations upload will now stop", nr_uploaded
-                )
+                LOG.info("Uploaded %d cases, observations upload will now stop", nr_uploaded)
                 return
 
         if not family_obj.customer.loqus_upload:
@@ -52,9 +50,7 @@ def observations(context, case_id, case_limit, dry_run):
             )
             continue
 
-        if not LinkHelper.all_samples_data_analysis(
-            family_obj.links, ["MIP", "", None]
-        ):
+        if not LinkHelper.all_samples_data_analysis(family_obj.links, ["MIP", "", None]):
             LOG.info("%s: has non-MIP data_analysis. Skipping!", family_obj.internal_id)
             continue
 
@@ -84,11 +80,7 @@ def observations(context, case_id, case_limit, dry_run):
             nr_uploaded += 1
         except (DuplicateRecordError, DuplicateSampleError) as error:
             LOG.info(
-                "%s: skipping observations upload: %s",
-                family_obj.internal_id,
-                error.message,
+                "%s: skipping observations upload: %s", family_obj.internal_id, error.message,
             )
         except FileNotFoundError as error:
-            LOG.info(
-                "%s: skipping observations upload: %s", family_obj.internal_id, error
-            )
+            LOG.info("%s: skipping observations upload: %s", family_obj.internal_id, error)

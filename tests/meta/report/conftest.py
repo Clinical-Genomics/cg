@@ -2,12 +2,10 @@ import json
 from datetime import datetime, timedelta
 
 import pytest
+
 from cg.apps.lims import LimsAPI
-
 from cg.meta.report.api import ReportAPI
-
 from cg.store import Store
-from tests.store_helpers import add_analysis
 
 
 @pytest.fixture
@@ -215,8 +213,8 @@ def report_api(report_store, lims_samples):
 
 
 @pytest.fixture(scope="function")
-def report_store(analysis_store):
+def report_store(analysis_store, helpers):
     family = analysis_store.families()[0]
-    add_analysis(analysis_store, family)
-    add_analysis(analysis_store, family)
+    helpers.add_analysis(analysis_store, family)
+    helpers.add_analysis(analysis_store, family)
     return analysis_store

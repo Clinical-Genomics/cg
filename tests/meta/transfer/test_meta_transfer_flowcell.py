@@ -1,12 +1,15 @@
+"""Tests for transfer flowcell data"""
 import datetime as dt
 import warnings
+
 from sqlalchemy import exc as sa_exc
 
 
-def test_transfer_flowcell(flowcell_store, housekeeper_api, transfer_flowcell_api):
+def test_transfer_flowcell(flowcell_store, transfer_flowcell_api):
 
     # GIVEN a store with a received but not sequenced sample
     flowcell_id = "HJKMYBCXX"
+    housekeeper_api = transfer_flowcell_api.hk
     assert flowcell_store.samples().count() == 1
     assert flowcell_store.flowcells().count() == 0
     assert housekeeper_api.bundles().count() == 0
