@@ -253,7 +253,7 @@ def run(context, dry, run_analysis, case_id, analysis_type, config_path, email, 
     """Run BALSAMIC analysis for case_id."""
 
     if not config_path:
-        config_path = f'{context.obj["balsamic"]["root"]}/{case_id}/{case_id}.json'
+        config_path = Path(context.obj["balsamic"]["root"]) / case_id / (case_id + ".json")
 
     # Call Balsamic
     arguments = {
@@ -269,7 +269,7 @@ def run(context, dry, run_analysis, case_id, analysis_type, config_path, email, 
     return process
 
 
-def get_priority_as_text(case_obj):
+def get_priority_as_text(case_obj: models.Family) -> str:
     """Get priority as text for a case"""
 
     if case_obj.high_priority:

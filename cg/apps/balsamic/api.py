@@ -1,6 +1,7 @@
 import logging
 from cg.utils.commands import Process
 from pathlib import Path
+from typing import List, Dict
 
 LOG = logging.getLogger(__name__)
 
@@ -10,7 +11,7 @@ class BalsamicAPI:
 
     EXIT_SUCCESS = 0
 
-    def __init__(self, config):
+    def __init__(self, config: dict):
         self.binary = config["balsamic"]["binary_path"]
         self.singularity = config["balsamic"]["singularity"]
         self.reference_config = config["balsamic"]["reference_config"]
@@ -21,7 +22,7 @@ class BalsamicAPI:
         self.bed_path = config["bed_path"]
         self.process = Process(self.binary)
 
-    def __build_command_str(self, options) -> list:
+    def __build_command_str(self, options: dict) -> List[str]:
         formatted_options = []
         for key, val in options.items():
             if val:
@@ -29,7 +30,7 @@ class BalsamicAPI:
                 formatted_options.append(str(val))
         return formatted_options
 
-    def config_case(self, arguments: dict, dry: bool):
+    def config_case(self, arguments: dict, dry: bool=False) -> int:
         """Create config file for BALSAMIC analysis """
 
         command = ["config", "case"]
@@ -57,7 +58,7 @@ class BalsamicAPI:
             retcode = self.process.run_command(command + options)
         return retcode
 
-    def run_analysis(self, arguments: dict, run_analysis: bool, dry: bool):
+    def run_analysis(self, arguments: dict, run_analysis: bool, dry: bool = False) -> int:
         """Execute BALSAMIC"""
 
         command = ["run", "analysis"]
