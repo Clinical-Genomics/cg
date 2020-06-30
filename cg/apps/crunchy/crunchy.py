@@ -1,5 +1,7 @@
 """
-    Module for compressing BAM to CRAM
+    Module for:
+        1. Compressing: BAM to CRAM; FASTQ to SPRING
+        2. Decompressing: SPRING to FASTQ
 """
 
 import datetime
@@ -10,26 +12,15 @@ from typing import List
 
 from marshmallow import ValidationError
 
-from cg.constants import (
-    BAM_INDEX_SUFFIX,
-    BAM_SUFFIX,
-    CRAM_INDEX_SUFFIX,
-    CRAM_SUFFIX,
-    FASTQ_DELTA,
-    FASTQ_FIRST_READ_SUFFIX,
-    FASTQ_SECOND_READ_SUFFIX,
-    SPRING_SUFFIX,
-)
+from cg.constants import (BAM_INDEX_SUFFIX, BAM_SUFFIX, CRAM_INDEX_SUFFIX,
+                          CRAM_SUFFIX, FASTQ_DELTA, FASTQ_FIRST_READ_SUFFIX,
+                          FASTQ_SECOND_READ_SUFFIX, SPRING_SUFFIX)
 from cg.utils import Process
 from cg.utils.date import get_date_str
 
 from .models import CrunchyFileSchema
-from .sbatch import (
-    SBATCH_BAM_TO_CRAM,
-    SBATCH_FASTQ_TO_SPRING,
-    SBATCH_HEADER_TEMPLATE,
-    SBATCH_SPRING_TO_FASTQ,
-)
+from .sbatch import (SBATCH_BAM_TO_CRAM, SBATCH_FASTQ_TO_SPRING,
+                     SBATCH_HEADER_TEMPLATE, SBATCH_SPRING_TO_FASTQ)
 
 LOG = logging.getLogger(__name__)
 
@@ -80,7 +71,7 @@ class CrunchyAPI:
             reference_path=self.reference_path,
         )
 
-        sbatch_content = sbatch_header + "\n" + sbatch_body
+        sbatch_content = "\n".join([sbatch_header, sbatch_body])
         sbatch_path = self.get_sbatch_path(log_dir, "bam", self.get_run_name(bam_path))
         self._submit_sbatch(sbatch_content=sbatch_content, sbatch_path=sbatch_path)
 
@@ -105,7 +96,7 @@ class CrunchyAPI:
         )
 
         sbatch_path = self.get_sbatch_path(log_dir, "fastq", self.get_run_name(fastq_first))
-        sbatch_content = sbatch_header + "\n" + sbatch_body
+        sbatch_content = "\n".join([sbatch_header, sbatch_body])
         self._submit_sbatch(sbatch_content=sbatch_content, sbatch_path=sbatch_path)
 
     def spring_to_fastq(self, spring_path: Path):
@@ -158,7 +149,7 @@ class CrunchyAPI:
         return metadata
 
     def update_metadata_date(self, spring_metadata_path: Path) -> None:
-        """Set date to today in the spring metadata file"""
+        """Update date in the spring metadata file to todays date"""
 
         today_str = get_date_str(None)
         spring_metadata = self.get_spring_metadata(spring_metadata_path)
@@ -195,7 +186,11 @@ class CrunchyAPI:
                   }
         """
         names_map = {"first_read": "fastq_first", "second_read": "fastq_second", "spring": "spring"}
-        return {names_map[file_info["file"]]: file_info for file_info in spring_metadata}
+        archive_files = {}
+        for file_info in spring_metadata:
+            file_name = names_map[file_info["file"]]
+            archive_files[file_name] = file_info
+        return archive_files
 
     # Methods to check compression status
     def is_compression_pending(self, file_path: Path) -> bool:
@@ -249,29 +244,48 @@ class CrunchyAPI:
             return False
         return True
 
+    @staticmethod
+    def get_file_updated_at(spring_metadata: List[dict]) -> datetime.datetime:
+        """Check if a spring metadata file has been updated and return the date when updated"""
+        if "updated" not in spring_metadata[0]:
+            return None
+        return spring_metadata[0]["updated"]
+
+    @staticmethod
+    def check_if_update_spring(file_date: datetime.datetime) -> bool:
+        """Check if date is older than FASTQ_DELTA (21 days)"""
+        delta = file_date + datetime.timedelta(days=FASTQ_DELTA)
+        now = datetime.datetime.now()
+        if delta > now:
+            LOG.info("Fastq files are not old enough")
+            return False
+        return True
+
     def is_spring_compression_done(self, fastq_file: Path) -> bool:
-        """Check if spring compression if finished"""
+        """Check if spring compression is finished"""
         spring_path = self.get_spring_path_from_fastq(fastq_file)
-        LOG.info("Check is spring file %s exists", spring_path)
+        LOG.info("Check if SPRING file %s exists", spring_path)
 
         if not spring_path.exists():
             LOG.info("No SPRING file for %s", fastq_file)
             return False
 
         flag_path = self.get_flag_path(file_path=spring_path)
+        LOG.info("Check if SPRING metadata file %s exists", flag_path)
         if not flag_path.exists():
             LOG.info("No %s file for %s", FLAG_PATH_SUFFIX, fastq_file)
             return False
         spring_metadata = self.get_spring_metadata(flag_path)
 
-        if "updated" in spring_metadata[0]:
-            updated_at = spring_metadata[0]["updated"]
-            LOG.info("Files where updated %s", updated_at)
-            delta = updated_at + datetime.timedelta(days=FASTQ_DELTA)
-            now = datetime.datetime.now()
-            if delta > now:
-                LOG.info("Fastq files are not old enough")
-                return False
+        updated_at = self.get_file_updated_at(spring_metadata)
+
+        if updated_at is None:
+            return True
+
+        LOG.info("Files where updated %s", updated_at)
+
+        if not self.check_if_update_spring(updated_at):
+            return False
 
         return True
 
@@ -326,16 +340,17 @@ class CrunchyAPI:
     @staticmethod
     def get_file_type(file_path: Path) -> str:
         """Check what file type a file is depending on the file ending"""
-        if str(file_path).endswith(SPRING_SUFFIX):
-            return "spring"
-        if str(file_path).endswith(FASTQ_FIRST_READ_SUFFIX):
-            return "fastq"
-        if str(file_path).endswith(FASTQ_SECOND_READ_SUFFIX):
-            return "fastq"
-        if file_path.suffix == BAM_SUFFIX:
-            return "bam"
-        if file_path.suffix == CRAM_SUFFIX:
-            return "cram"
+        file_types = {
+            SPRING_SUFFIX: "spring",
+            FASTQ_FIRST_READ_SUFFIX: "fastq",
+            FASTQ_SECOND_READ_SUFFIX: "fastq",
+            BAM_SUFFIX: "bam",
+            CRAM_SUFFIX: "cram",
+        }
+        for suffix in file_types:
+            if not str(file_path).endswith(suffix):
+                continue
+            return file_types[suffix]
         LOG.warning("Unknown file type")
         return None
 
