@@ -1,22 +1,15 @@
+"""Fixtures for the meta tests"""
+
 import pytest
 from _pytest import tmpdir
 
 from cg.apps.balsamic.fastq import FastqHandler as BalsamicFastqHandler
 from cg.apps.crunchy import CrunchyAPI
-from cg.apps.hk import HousekeeperAPI
-from cg.apps.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.usalt.fastq import FastqHandler as MicrosaltFastqHandler
-from cg.meta.compress import CompressAPI
 from cg.meta.deliver import DeliverAPI
 from cg.meta.workflow.mip_dna import AnalysisAPI
 from tests.mocks.hk_mock import MockFile
-
-
-@pytest.yield_fixture(scope="function")
-def scout_store():
-    """Setup Scout adapter."""
-    yield None
 
 
 @pytest.yield_fixture(scope="function")
@@ -83,13 +76,6 @@ def analysis_store(base_store, analysis_family):
 class MockCrunchy(CrunchyAPI):
 
     pass
-
-
-class MockScoutAPI(ScoutAPI):
-    """Mock class for Scout api"""
-
-    def __init__(self):
-        pass
 
 
 class MockLims:
@@ -213,7 +199,7 @@ def safe_loader(path):
 
 
 @pytest.yield_fixture(scope="function")
-def analysis_api(analysis_store, housekeeper_api, scout_store):
+def analysis_api(analysis_store, housekeeper_api, scout_api):
     """Setup an analysis API."""
     Path_mock = MockPath("")
     tb_mock = MockTB()
@@ -223,7 +209,7 @@ def analysis_api(analysis_store, housekeeper_api, scout_store):
     _analysis_api = AnalysisAPI(
         db=analysis_store,
         hk_api=housekeeper_api,
-        scout_api=scout_store,
+        scout_api=scout_api,
         tb_api=tb_mock,
         lims_api=None,
         deliver_api=deliver_mock,
