@@ -60,13 +60,6 @@ def mip_rna_orderform(orderforms: Path) -> str:
 
 
 @pytest.fixture
-def rml_orderform(orderforms: Path) -> str:
-    """Orderform fixture for RML samples"""
-    _file = orderforms / "1604.9.rml.xlsx"
-    return str(_file)
-
-
-@pytest.fixture
 def response():
     """Mock a requests.response object"""
 
