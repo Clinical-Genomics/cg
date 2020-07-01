@@ -8,13 +8,8 @@ from typing import Dict, List, Tuple
 from housekeeper.store import models as hk_models
 
 from cg.apps.crunchy import CrunchyAPI
-from cg.constants import (
-    BAM_SUFFIX,
-    FASTQ_FIRST_READ_SUFFIX,
-    FASTQ_SECOND_READ_SUFFIX,
-    HK_BAM_TAGS,
-    HK_FASTQ_TAGS,
-)
+from cg.constants import (BAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX,
+                          FASTQ_SECOND_READ_SUFFIX, HK_BAM_TAGS, HK_FASTQ_TAGS)
 
 LOG = logging.getLogger(__name__)
 
@@ -37,9 +32,11 @@ def get_hk_files_dict(tags: List[str], version_obj: hk_models.Version) -> dict:
         file_tags = {tag.name for tag in file_obj.tags}
         if not file_tags.intersection(tags):
             continue
-        LOG.debug("Found file %s", file_obj)
+        LOG.info("Found file %s", file_obj.path)
         path_obj = Path(file_obj.full_path)
-        hk_files_dict[path_obj.resolve()] = file_obj
+        new_path = path_obj.resolve()
+        LOG.info("Expanding file path to %s", new_path)
+        hk_files_dict[new_path] = file_obj
     return hk_files_dict
 
 

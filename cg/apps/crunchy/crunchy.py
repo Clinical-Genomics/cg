@@ -59,6 +59,7 @@ class CrunchyAPI:
         job_name = bam_path.name + "_bam_to_cram"
         flag_path = self.get_flag_path(file_path=cram_path)
         pending_path = self.get_pending_path(file_path=bam_path)
+        LOG.info("Use pending path: %s", pending_path)
         log_dir = self.get_log_dir(bam_path)
 
         sbatch_header = self._get_slurm_header(job_name=job_name, log_dir=log_dir)
@@ -83,6 +84,7 @@ class CrunchyAPI:
         job_name = str(fastq_first.name).replace(FASTQ_FIRST_READ_SUFFIX, "_fastq_to_spring")
         flag_path = self.get_flag_path(file_path=spring_path)
         pending_path = self.get_pending_path(file_path=fastq_first)
+        LOG.info("Use pending path: %s", pending_path)
         log_dir = self.get_log_dir(spring_path)
 
         sbatch_header = self._get_slurm_header(job_name=job_name, log_dir=log_dir)
@@ -111,6 +113,7 @@ class CrunchyAPI:
 
         job_name = str(fastq_first_path.name).replace(FASTQ_FIRST_READ_SUFFIX, "_spring_to_fastq")
         pending_path = self.get_pending_path(file_path=fastq_first_path)
+        LOG.info("Use pending path: %s", pending_path)
         log_dir = self.get_log_dir(spring_path)
 
         sbatch_header = self._get_slurm_header(job_name=job_name, log_dir=log_dir)
@@ -273,7 +276,7 @@ class CrunchyAPI:
         flag_path = self.get_flag_path(file_path=spring_path)
         LOG.info("Check if SPRING metadata file %s exists", flag_path)
         if not flag_path.exists():
-            LOG.info("No %s file for %s", FLAG_PATH_SUFFIX, fastq_file)
+            LOG.info("No %s file for %s. Compression not ready", FLAG_PATH_SUFFIX, fastq_file)
             return False
         spring_metadata = self.get_spring_metadata(flag_path)
 
@@ -357,8 +360,8 @@ class CrunchyAPI:
     @staticmethod
     def get_flag_path(file_path):
         """Get path to 'finished' flag.
-        When compressing fastq this means that a .json metadata file has been created
-        Otherwise, for bam compression, a regular flag path is returned.
+        When compressing FASTQ this means that a .json metadata file has been created
+        When compressing BAM, a regular flag path is returned.
         """
         if str(file_path).endswith(SPRING_SUFFIX):
             return file_path.with_suffix("").with_suffix(".json")
@@ -371,12 +374,10 @@ class CrunchyAPI:
 
         The file ending can be either fastq, spring or bam. They are treated as shown below
         """
-        if str(file_path).endswith(SPRING_SUFFIX):
-            return Path(str(file_path).replace(SPRING_SUFFIX, PENDING_PATH_SUFFIX))
-        if str(file_path).endswith(FASTQ_FIRST_READ_SUFFIX):
-            return Path(str(file_path).replace(FASTQ_FIRST_READ_SUFFIX, PENDING_PATH_SUFFIX))
-        if str(file_path).endswith(FASTQ_SECOND_READ_SUFFIX):
-            return Path(str(file_path).replace(FASTQ_SECOND_READ_SUFFIX, PENDING_PATH_SUFFIX))
+        file_type_suffixes = [SPRING_SUFFIX, FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX]
+        for file_type_suffix in file_type_suffixes:
+            if str(file_path).endswith(file_type_suffix):
+                return Path(str(file_path).replace(file_type_suffix, PENDING_PATH_SUFFIX))
         return file_path.with_suffix(PENDING_PATH_SUFFIX)
 
     @staticmethod
@@ -407,7 +408,7 @@ class CrunchyAPI:
 
     @staticmethod
     def get_spring_path_from_fastq(fastq: Path) -> Path:
-        """ GET corresponding SPRING file path from a FASTQ file"""
+        """ Get corresponding SPRING file path from a FASTQ file"""
         suffix = FASTQ_FIRST_READ_SUFFIX
         if FASTQ_SECOND_READ_SUFFIX in str(fastq):
             suffix = FASTQ_SECOND_READ_SUFFIX
@@ -416,7 +417,7 @@ class CrunchyAPI:
         return spring_path
 
     def _submit_sbatch(self, sbatch_content: str, sbatch_path: Path):
-        """Submit slurm job"""
+        """Submit SLURM job"""
         if self.dry_run:
             LOG.info("Would submit sbatch %s to slurm", sbatch_path)
             return
@@ -447,7 +448,7 @@ class CrunchyAPI:
     def _get_slurm_bam_to_cram(
         bam_path: str, cram_path: str, flag_path: str, pending_path: str, reference_path: str,
     ) -> str:
-        """Create and return the body of a sbatch script that runs bam to cram"""
+        """Create and return the body of a sbatch script that runs BAM to CRAM"""
         LOG.info("Generating bam to fastq sbatch body")
         sbatch_body = SBATCH_BAM_TO_CRAM.format(
             bam_path=bam_path,
@@ -466,7 +467,7 @@ class CrunchyAPI:
         flag_path: str,
         pending_path: str,
     ) -> str:
-        """Create and return the body of a sbatch script that runs bam to cram"""
+        """Create and return the body of a sbatch script that runs FASTQ to SPRING"""
         LOG.info("Generating fastq to spring sbatch body")
         sbatch_body = SBATCH_FASTQ_TO_SPRING.format(
             fastq_first=fastq_first_path,
@@ -487,7 +488,7 @@ class CrunchyAPI:
         checksum_first: str,
         checksum_second: str,
     ) -> str:
-        """Create and return the body of a sbatch script that runs bam to cram"""
+        """Create and return the body of a sbatch script that runs SPRING to FASTQ"""
         LOG.info("Generating spring to fastq sbatch body")
         sbatch_body = SBATCH_SPRING_TO_FASTQ.format(
             spring_path=spring_path,
