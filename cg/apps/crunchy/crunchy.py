@@ -12,26 +12,15 @@ from typing import List
 
 from marshmallow import ValidationError
 
-from cg.constants import (
-    BAM_INDEX_SUFFIX,
-    BAM_SUFFIX,
-    CRAM_INDEX_SUFFIX,
-    CRAM_SUFFIX,
-    FASTQ_DELTA,
-    FASTQ_FIRST_READ_SUFFIX,
-    FASTQ_SECOND_READ_SUFFIX,
-    SPRING_SUFFIX,
-)
+from cg.constants import (BAM_INDEX_SUFFIX, BAM_SUFFIX, CRAM_INDEX_SUFFIX,
+                          CRAM_SUFFIX, FASTQ_DELTA, FASTQ_FIRST_READ_SUFFIX,
+                          FASTQ_SECOND_READ_SUFFIX, SPRING_SUFFIX)
 from cg.utils import Process
 from cg.utils.date import get_date_str
 
 from .models import CrunchyFileSchema
-from .sbatch import (
-    SBATCH_BAM_TO_CRAM,
-    SBATCH_FASTQ_TO_SPRING,
-    SBATCH_HEADER_TEMPLATE,
-    SBATCH_SPRING_TO_FASTQ,
-)
+from .sbatch import (SBATCH_BAM_TO_CRAM, SBATCH_FASTQ_TO_SPRING,
+                     SBATCH_HEADER_TEMPLATE, SBATCH_SPRING_TO_FASTQ)
 
 LOG = logging.getLogger(__name__)
 
@@ -94,7 +83,7 @@ class CrunchyAPI:
         spring_path = self.get_spring_path_from_fastq(fastq=fastq_first)
         job_name = str(fastq_first.name).replace(FASTQ_FIRST_READ_SUFFIX, "_fastq_to_spring")
         flag_path = self.get_flag_path(file_path=spring_path)
-        pending_path = self.get_pending_path(file_path=fastq_first)
+        pending_path = self.get_pending_path(file_path=spring_path)
         LOG.info("Use pending path: %s", pending_path)
         log_dir = self.get_log_dir(spring_path)
 
@@ -123,7 +112,7 @@ class CrunchyAPI:
         fastq_first_path = Path(files_info["fastq_first"]["path"])
 
         job_name = str(fastq_first_path.name).replace(FASTQ_FIRST_READ_SUFFIX, "_spring_to_fastq")
-        pending_path = self.get_pending_path(file_path=fastq_first_path)
+        pending_path = self.get_pending_path(file_path=spring_path)
         LOG.info("Use pending path: %s", pending_path)
         log_dir = self.get_log_dir(spring_path)
 
@@ -289,6 +278,10 @@ class CrunchyAPI:
         if not flag_path.exists():
             LOG.info("No %s file for %s. Compression not ready", FLAG_PATH_SUFFIX, fastq_file)
             return False
+
+        if self.is_compression_pending(spring_path):
+            return False
+
         spring_metadata = self.get_spring_metadata(flag_path)
 
         updated_at = self.get_file_updated_at(spring_metadata)
