@@ -11,14 +11,14 @@ LOG = logging.getLogger(__name__)
 
 
 def get_fastq_individuals(store: Store, case_id: str = None) -> Iterator[str]:
-    """Fetch individual ids from cases that are ready for fastq compression"""
+    """Fetch individual ids from cases that are ready for SPRING compression"""
     for case in get_fastq_cases(store, case_id):
         for link_obj in case.links:
             yield link_obj.sample.internal_id
 
 
 def get_fastq_cases(store: Store, case_id: str = None):
-    """Return cases ready for fastq compression"""
+    """Return cases ready for SPRING compression"""
     if case_id:
         return get_cases(store, case_id)
     return ready_for_spring_compresssion(store)
@@ -27,7 +27,7 @@ def get_fastq_cases(store: Store, case_id: str = None):
 def get_cases(store: Store, case_id: str = None) -> List[models.Family]:
     """Fetch cases from store
 
-    I case_id return one case (if existing) otherwise return all
+    If case_id return one case (if existing) otherwise return all
     """
     if case_id:
         case_obj = store.family(case_id)

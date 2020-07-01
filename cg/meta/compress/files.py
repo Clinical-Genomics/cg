@@ -164,7 +164,7 @@ def get_spring_paths(version_obj: hk_models.Version) -> List[Path]:
 
 
 def get_run_name(fastq_path: Path) -> str:
-    """Remove the suffix of a fastq file and return the base name"""
+    """Remove the suffix of a fastq file and return the sequencing run base name"""
     if not is_valid_fastq_suffix(fastq_path):
         return None
 

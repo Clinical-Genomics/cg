@@ -55,7 +55,8 @@ class CompressAPI:
         return scout_cases[0]
 
     def get_bam_dict(self, case_id: str, version_obj: hk_models.Version = None) -> dict:
-        """Fetch the relevant information and return a dictionary with bam files"""
+        """Fetch the version obj and scout case for case_id and return a dictionary with bam files
+        """
         version_obj = version_obj or self.get_latest_version(case_id)
         if not version_obj:
             return None
