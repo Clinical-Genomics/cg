@@ -194,6 +194,12 @@ def microbial_orderform(orderforms: Path) -> str:
     return str(_file)
 
 
+@pytest.fixture
+def rml_orderform():
+    """Orderform fixture for RML samples"""
+    return "tests/fixtures/orderforms/1604.10.rml.xlsx"
+
+
 @pytest.fixture(name="madeline_output")
 def fixture_madeline_output(apps_dir: Path) -> str:
     """File with madeline output"""
