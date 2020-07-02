@@ -153,6 +153,7 @@ class MockHousekeeperAPI:
         self._file_added = False
         self._file_included = False
         self._tags_matter = False
+        self._last_version = True
         # Add tags here if there should be missing files
         self._missing_tags = set()
         if not config:
@@ -164,6 +165,10 @@ class MockHousekeeperAPI:
     def add_missing_tag(self, tag_name: str):
         """Add a missing tag"""
         self._missing_tags.add(tag_name)
+
+    def set_missing_last_version(self):
+        """Make sure that no version is returned"""
+        self._last_version = False
 
     def is_file_included(self) -> bool:
         """Return true if any file has been included"""
@@ -218,10 +223,7 @@ class MockHousekeeperAPI:
                 self._file_added = True
                 version_obj.files.append(new_file)
         version_obj.bundle_obj = bundle_obj
-
-        self._bundle_obj = bundle_obj
-        self._bundles.append(bundle_obj)
-        self._version_obj = version_obj
+        bundle_obj.versions = version_obj
 
         return bundle_obj, version_obj
 
@@ -244,8 +246,14 @@ class MockHousekeeperAPI:
                 return tag_obj
         return None
 
-    def bundle(self, *args, **kwargs):
+    def bundle(self, name: str) -> MockBundle:
         """ Fetch a bundle """
+        print("Fetching bundle %s" % name)
+        if name:
+            for bundle_obj in self.bundles():
+                if bundle_obj.name == name:
+                    print("Bundle %s found" % name)
+                    return bundle_obj
         return self._bundle_obj
 
     def bundles(self):
@@ -258,6 +266,7 @@ class MockHousekeeperAPI:
         bundle_obj = MockBundle(id=self._id_counter, name=name, created_at=created_at)
         self._bundle_obj = bundle_obj
         self._bundles.append(bundle_obj)
+        print("Create new bundle %s (%s)" % (name, bundle_obj.id))
         return bundle_obj
 
     def version(self, *args, **kwargs):
@@ -297,6 +306,7 @@ class MockHousekeeperAPI:
         expires_at = expires_at or datetime.datetime.now()
         version_obj = MockVersion(id=self._id_counter, created_at=created_at, expires_at=expires_at)
         self._version_obj = version_obj
+        print("Create new version with id %s" % version_obj.id)
         return version_obj
 
     def add_version(
@@ -342,6 +352,8 @@ class MockHousekeeperAPI:
 
     def last_version(self, *args, **kwargs):
         """Gets the latest version of a bundle"""
+        if self._last_version is False:
+            return None
         return self._version_obj
 
     def get_root_dir(self):

@@ -27,7 +27,7 @@ requests[security]
 ruamel.yaml
 coloredlogs
 petname
-marshmallow
+marshmallow>3               # due to code expects behaviour from >3
 pyschemes
 xlrd
 openpyxl
