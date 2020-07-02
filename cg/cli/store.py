@@ -39,8 +39,8 @@ def fastq_cmd(context, case_id, dry_run):
     stored_inds = 0
     try:
         for sample_id in samples:
-            res = compress_api.add_decompressed_fastq(sample_id)
-            if res is False:
+            was_added = compress_api.add_decompressed_fastq(sample_id)
+            if was_added is False:
                 LOG.info("skipping individual %s", sample_id)
                 continue
             stored_inds += 1

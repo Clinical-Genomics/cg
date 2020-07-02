@@ -44,7 +44,6 @@ def test_compress_fastq_cli_one_family(populated_compress_context, cli_runner, c
     # THEN assert the program exits since no cases where found
     assert res.exit_code == 0
     # THEN assert it was communicated that no families where found
-    assert f"Searching for FASTQ files in {case_id}" in caplog.text
     assert f"Individuals in 1 cases where compressed" in caplog.text
 
 
@@ -59,7 +58,6 @@ def test_compress_fastq_cli_case_id(populated_compress_context, cli_runner, case
     # THEN assert the program exits since no cases where found
     assert res.exit_code == 0
     # THEN assert it was communicated that no families where found
-    assert f"Searching for FASTQ files in {case_id}" in caplog.text
     assert f"Individuals in 1 cases where compressed" in caplog.text
 
 

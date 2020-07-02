@@ -37,9 +37,11 @@ def get_hk_files_dict(tags: List[str], version_obj: hk_models.Version) -> dict:
         file_tags = {tag.name for tag in file_obj.tags}
         if not file_tags.intersection(tags):
             continue
-        LOG.debug("Found file %s", file_obj)
+        LOG.info("Found file %s", file_obj.path)
         path_obj = Path(file_obj.full_path)
-        hk_files_dict[path_obj.resolve()] = file_obj
+        new_path = path_obj.resolve()
+        LOG.info("Expanding file path to %s", new_path)
+        hk_files_dict[new_path] = file_obj
     return hk_files_dict
 
 
@@ -167,7 +169,7 @@ def get_spring_paths(version_obj: hk_models.Version) -> List[Path]:
 
 
 def get_run_name(fastq_path: Path) -> str:
-    """Remove the suffix of a fastq file and return the base name"""
+    """Remove the suffix of a fastq file and return the sequencing run base name"""
     if not is_valid_fastq_suffix(fastq_path):
         return None
 

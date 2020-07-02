@@ -1,4 +1,4 @@
-"""CLI to compress fastq"""
+"""CLI to compress FASTQ"""
 
 import logging
 
@@ -37,16 +37,15 @@ def fastq_cmd(context, case_id, number_of_conversions, ntasks, mem, dry_run):
         if case_conversion_count >= number_of_conversions:
             break
 
-        LOG.info("\n\nSearching for FASTQ files in %s", case.internal_id)
+        LOG.info("\n\nSearching for FASTQ files in case %s", case.internal_id)
         for link_obj in case.links:
             sample_id = link_obj.sample.internal_id
-            res = compress_api.compress_fastq(sample_id)
-            if res is False:
+            case_converted = compress_api.compress_fastq(sample_id)
+            if case_converted is False:
                 LOG.info("skipping individual %s", sample_id)
                 continue
             ind_conversion_count += 1
-            case_converted = False
-        if not case_converted:
+        if case_converted:
             case_conversion_count += 1
 
     LOG.info(
@@ -86,7 +85,7 @@ def clean_fastq(context, case_id, dry_run):
 @click.option("-d", "--dry-run", is_flag=True)
 @click.pass_context
 def decompress_spring(context, case_id, dry_run):
-    """Remove compressed FASTQ files, and update links in housekeeper to SPRING files"""
+    """Decompress SPRING file, and include links to FASTQ files in housekeeper"""
     LOG.info("Running decompress spring")
     compress_api = context.obj["compress"]
     update_compress_api(compress_api, dry_run=dry_run)
@@ -97,8 +96,8 @@ def decompress_spring(context, case_id, dry_run):
     decompressed_inds = 0
     try:
         for sample_id in samples:
-            res = compress_api.decompress_spring(sample_id)
-            if res is False:
+            was_decompressed = compress_api.decompress_spring(sample_id)
+            if was_decompressed is False:
                 LOG.info("skipping individual %s", sample_id)
                 continue
             decompressed_inds += 1
