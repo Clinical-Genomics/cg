@@ -117,7 +117,7 @@ class MockCrunchyAPI(CrunchyAPI):
 
         return self._bam_compression_done.get(bam_path, self._compression_done_all)
 
-    def is_spring_compression_done(self, fastq_first: Path, fastq_second: Path) -> bool:
+    def is_spring_compression_done(self, fastq_file: Path) -> bool:
         """Check if spring compression if finished"""
         return self._compression_done_all
 
