@@ -1,6 +1,7 @@
 """Tests for cleaning fastq files"""
 import logging
 
+from cg.apps.crunchy import CrunchyAPI
 from cg.meta.compress import files
 
 
@@ -73,9 +74,89 @@ def test_update_hk_fastq(real_housekeeper_api, compress_hk_fastq_bundle, compres
     assert hk_fastq_flag_file
 
 
-def test_clean_fastq():
-    """Test the clean fastq functionality of the compress api
+def test_cli_clean_fastqs_removed(
+    populated_compress_fastq_api, compression_files, sample, real_crunchy_api
+):
+    """Test to clean fastqs after a succesfull FASTQ compression
 
-    The function should check if compression is done and after that cleanup the files that have
-    been compressed.
+    Files should be cleaned since the compression is completed
     """
+    populated_compress_fastq_api.crunchy_api = real_crunchy_api
+    compress_api = populated_compress_fastq_api
+    spring_file = compression_files.spring_file
+    spring_metadata_file = compression_files.spring_metadata_file
+    fastq_first = compression_files.fastq_first_file
+    fastq_second = compression_files.fastq_second_file
+    # GIVEN that the SPRING compression files exist
+    assert spring_file.exists()
+    assert spring_metadata_file.exists()
+    # GIVEN that the fastq files exists
+    assert fastq_first.exists()
+    assert fastq_second.exists()
+
+    # WHEN running the clean command
+    compress_api.clean_fastq(sample)
+    # THEN assert spring files exists
+    assert spring_file.exists()
+    assert spring_metadata_file.exists()
+    # THEN assert that the fastq files are removed
+    assert not fastq_first.exists()
+    assert not fastq_second.exists()
+
+
+def test_cli_clean_fastqs_no_spring_metadata(
+    populated_compress_fastq_api, sample, compression_files, real_crunchy_api
+):
+    """Test to clean fastqs when spring compression is not finished
+
+    No files should be cleaned since compression is not completed
+    """
+    populated_compress_fastq_api.crunchy_api = real_crunchy_api
+    compress_api = populated_compress_fastq_api
+    spring_file = compression_files.spring_file
+    spring_metadata_file = compression_files.spring_metadata_path
+    fastq_first = compression_files.fastq_first_file
+    fastq_second = compression_files.fastq_second_file
+    # GIVEN that the SPRING compression file exist
+    assert spring_file.exists()
+    # GIVEN that the SPRING metadata file does not exist
+    assert not spring_metadata_file.exists()
+
+    # WHEN running the clean command
+    compress_api.clean_fastq(sample)
+
+    # THEN assert spring file exists
+    assert spring_file.exists()
+    # THEN assert that the fastq files are NOT removed
+    assert fastq_first.exists()
+    assert fastq_second.exists()
+
+
+def test_cli_clean_fastqs_pending_compression_metadata(
+    populated_compress_fastq_api, sample, compression_files, real_crunchy_api
+):
+    """Test to clean fastqs when spring compression is pending
+
+    No files should be cleaned since compression is not completed
+    """
+    populated_compress_fastq_api.crunchy_api = real_crunchy_api
+    compress_api = populated_compress_fastq_api
+    spring_file = compression_files.spring_file
+    spring_metadata_file = compression_files.spring_metadata_file
+    fastq_first = compression_files.fastq_first_file
+    fastq_second = compression_files.fastq_second_file
+
+    # GIVEN that the SPRING compression file exist
+    assert spring_file.exists()
+    crunchy_flag_file = CrunchyAPI.get_pending_path(spring_file)
+    crunchy_flag_file.touch()
+    assert crunchy_flag_file.exists()
+
+    # WHEN running the clean command
+    compress_api.clean_fastq(sample)
+
+    # THEN assert spring file exists
+    assert spring_file.exists()
+    # THEN assert that the fastq files are NOT removed
+    assert fastq_first.exists()
+    assert fastq_second.exists()
