@@ -7,6 +7,7 @@
 import datetime
 import json
 import logging
+import os
 import tempfile
 from pathlib import Path
 from typing import List
@@ -470,19 +471,22 @@ class CrunchyAPI:
     @staticmethod
     def _get_tmp_dir(prefix: str, suffix: str, base: str) -> str:
         """Create a temporary directory and return the path to it"""
-        try:
-            if base:
-                tmp_dir = tempfile.TemporaryDirectory(dir=TMP_DIR, prefix=prefix, suffix=suffix)
-            else:
-                tmp_dir = tempfile.TemporaryDirectory(prefix=prefix, suffix=suffix)
-        except PermissionError:
+
+        if not os.path.exists(base):
             LOG.warning("Not allowed to create tmp dir")
-            tmp_dir = tempfile.TemporaryDirectory(prefix=prefix, suffix=suffix)
-        except FileNotFoundError:
+            base = None
+        if not os.access(base, os.W_OK):
             LOG.warning("Could not find temp path")
-            tmp_dir = tempfile.TemporaryDirectory(prefix=prefix, suffix=suffix)
-        LOG.info("Created temporary dir %s", tmp_dir.name)
-        return tmp_dir.name
+            base = None
+        if base:
+            with tempfile.TemporaryDirectory(dir=TMP_DIR, prefix=prefix, suffix=suffix) as dir_name:
+                tmp_dir_path = dir_name
+        else:
+            with tempfile.TemporaryDirectory(prefix=prefix, suffix=suffix) as dir_name:
+                tmp_dir_path = dir_name
+
+        LOG.info("Created temporary dir %s", tmp_dir_path)
+        return tmp_dir_path
 
     @staticmethod
     def _get_slurm_bam_to_cram(
