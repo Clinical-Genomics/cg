@@ -99,9 +99,7 @@ def test_fastq_to_spring_sbatch(crunchy_config_dict, fastq_paths, sbatch_process
     assert sbatch_path.is_file()
 
 
-def test_spring_to_fastq(
-    spring_file, spring_metadata_file, sbatch_content_spring_to_fastq, crunchy_config_dict, mocker
-):
+def test_spring_to_fastq(spring_file, spring_metadata_file, crunchy_config_dict, mocker):
     """Test spring to fastq method
 
     Test to decompress spring to fastq. This test will make sure that the correct sbatch content
@@ -111,14 +109,9 @@ def test_spring_to_fastq(
     assert spring_metadata_file.exists()
     mocker_submit_sbatch = mocker.patch.object(CrunchyAPI, "_submit_sbatch")
     crunchy_api = CrunchyAPI(crunchy_config_dict)
-    log_path = crunchy_api.get_log_dir(spring_file)
-    run_name = crunchy_api.get_run_name(spring_file)
-    sbatch_path = crunchy_api.get_sbatch_path(log_path, "spring", run_name)
 
     # WHEN calling bam_to_cram method on bam-path
     crunchy_api.spring_to_fastq(spring_path=spring_file)
 
-    # THEN _submit_sbatch method is called with expected sbatch-content
-    mocker_submit_sbatch.assert_called_with(
-        sbatch_content=sbatch_content_spring_to_fastq, sbatch_path=sbatch_path
-    )
+    # THEN _submit_sbatch method is called
+    mocker_submit_sbatch.assert_called()

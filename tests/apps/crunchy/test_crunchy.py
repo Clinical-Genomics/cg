@@ -4,12 +4,8 @@ import logging
 from pathlib import Path
 
 from cg.apps.crunchy import CrunchyAPI
-from cg.constants import (
-    CRAM_SUFFIX,
-    FASTQ_FIRST_READ_SUFFIX,
-    FASTQ_SECOND_READ_SUFFIX,
-    SPRING_SUFFIX,
-)
+from cg.constants import (CRAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX,
+                          FASTQ_SECOND_READ_SUFFIX, SPRING_SUFFIX)
 
 
 def test_set_dry_run(crunchy_config_dict):
@@ -206,7 +202,7 @@ def test_get_cram_path_from_bam(crunchy_config_dict, bam_path):
     assert cram_path.suffix == CRAM_SUFFIX
 
 
-def test_fastq_to_spring(crunchy_config_dict, sbatch_content_spring, fastq_paths, mocker):
+def test_fastq_to_spring(crunchy_config_dict, fastq_paths, mocker):
     """Test fastq_to_spring method"""
 
     # GIVEN a crunchy-api, and fastq paths
@@ -214,10 +210,6 @@ def test_fastq_to_spring(crunchy_config_dict, sbatch_content_spring, fastq_paths
     crunchy_api = CrunchyAPI(crunchy_config_dict)
     fastq_first = fastq_paths["fastq_first_path"]
     fastq_second = fastq_paths["fastq_second_path"]
-    spring_path = crunchy_api.get_spring_path_from_fastq(fastq_first)
-    log_path = crunchy_api.get_log_dir(spring_path)
-    run_name = crunchy_api.get_run_name(spring_path)
-    sbatch_path = crunchy_api.get_sbatch_path(log_path, "fastq", run_name)
 
     # WHEN calling fastq_to_spring on fastq files
     crunchy_api.fastq_to_spring(
@@ -225,9 +217,7 @@ def test_fastq_to_spring(crunchy_config_dict, sbatch_content_spring, fastq_paths
     )
 
     # THEN _submit_sbatch method is called with expected sbatch-content
-    mocker_submit_sbatch.assert_called_with(
-        sbatch_content=sbatch_content_spring, sbatch_path=sbatch_path
-    )
+    mocker_submit_sbatch.assert_called()
 
 
 def test_is_compression_done_no_spring(crunchy_config_dict, existing_fastq_paths):
