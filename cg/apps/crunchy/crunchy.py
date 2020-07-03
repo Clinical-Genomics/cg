@@ -435,8 +435,10 @@ class CrunchyAPI:
 
         sbatch_parameters = [str(sbatch_path.resolve())]
         self.process.run_command(sbatch_parameters)
-        LOG.info(self.process.stderr)
-        LOG.info(self.process.stdout)
+        if self.process.stderr:
+            LOG.info(self.process.stderr)
+        if self.process.stdout:
+            LOG.info(self.process.stdout)
 
     def _get_slurm_header(self, job_name: str, log_dir: str) -> str:
         """Create and return a header for a sbatch script"""
