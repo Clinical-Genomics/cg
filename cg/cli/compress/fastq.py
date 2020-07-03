@@ -20,6 +20,7 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def fastq_cmd(context, case_id, number_of_conversions, ntasks, mem, dry_run):
     """ Find cases with FASTQ files and compress into SPRING """
+    LOG.info("Running compress FASTQ")
     compress_api = context.obj["compress"]
     update_compress_api(compress_api, dry_run=dry_run, ntasks=ntasks, mem=mem)
 
@@ -59,7 +60,7 @@ def fastq_cmd(context, case_id, number_of_conversions, ntasks, mem, dry_run):
 @click.pass_context
 def clean_fastq(context, case_id, dry_run):
     """Remove compressed FASTQ files, and update links in housekeeper to SPRING files"""
-    LOG.info("Running compress fastq")
+    LOG.info("Running compress clean FASTQ")
     compress_api = context.obj["compress"]
     update_compress_api(compress_api, dry_run=dry_run)
 

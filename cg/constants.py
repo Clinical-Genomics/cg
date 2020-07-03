@@ -1,5 +1,7 @@
 """Constans for cg"""
 
+TMP_DIR = "/home/proj/production/rare-disease/temp-dir/"
+
 PRIORITY_MAP = {
     "research": 0,
     "standard": 1,

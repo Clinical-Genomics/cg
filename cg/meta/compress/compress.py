@@ -89,17 +89,17 @@ class CompressAPI:
 
     def compress_fastq(self, sample_id: str) -> bool:
         """Compress the fastq files for a individual"""
-
+        LOG.info("\nCheck if FASTQ compression is possible for %s", sample_id)
         version_obj = self.get_latest_version(sample_id)
         if not version_obj:
             return False
 
         sample_fastq_dict = files.get_fastq_files(sample_id=sample_id, version_obj=version_obj)
         if not sample_fastq_dict:
-            LOG.info("Could not find FASTQ files for %s", sample_id)
             return False
 
         for run in sample_fastq_dict:
+            LOG.info("\nCheck if compression possible for run %s", run)
             fastq_first = sample_fastq_dict[run]["fastq_first_file"]["path"]
             fastq_second = sample_fastq_dict[run]["fastq_second_file"]["path"]
 

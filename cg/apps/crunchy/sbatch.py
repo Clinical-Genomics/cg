@@ -67,9 +67,13 @@ error() {{
 trap error ERR
 
 touch {pending_path}
-crunchy -t 12 compress fastq -f {fastq_first} -s {fastq_second} -o {spring_path} --check-integrity \
---metadata-file
-rm {pending_path}"""
+mkdir -p {tmp_dir}
+crunchy -t 12 --tmp-dir {tmp_dir} compress fastq -f {fastq_first} -s {fastq_second} \
+-o {spring_path} --check-integrity --metadata-file
+rm {pending_path}
+rm -r {tmp_dir}"""
+
+######################################################################
 
 SBATCH_SPRING_TO_FASTQ = """
 error() {{
@@ -94,6 +98,8 @@ error() {{
 trap error ERR
 
 touch {pending_path}
-crunchy -t 12 decompress spring {spring_path} -f {fastq_first} -s {fastq_second} \
---first-checksum {checksum_first} --second-checksum {checksum_second}
-rm {pending_path}"""
+mkdir -p {tmp_dir}
+crunchy -t 12 --tmp-dir {tmp_dir} decompress spring {spring_path} -f {fastq_first} -s \
+{fastq_second} --first-checksum {checksum_first} --second-checksum {checksum_second}
+rm {pending_path}
+rm -r {tmp_dir}"""
