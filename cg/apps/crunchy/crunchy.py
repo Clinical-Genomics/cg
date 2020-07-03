@@ -14,27 +14,15 @@ from typing import List
 
 from marshmallow import ValidationError
 
-from cg.constants import (
-    BAM_INDEX_SUFFIX,
-    BAM_SUFFIX,
-    CRAM_INDEX_SUFFIX,
-    CRAM_SUFFIX,
-    FASTQ_DELTA,
-    FASTQ_FIRST_READ_SUFFIX,
-    FASTQ_SECOND_READ_SUFFIX,
-    SPRING_SUFFIX,
-    TMP_DIR,
-)
+from cg.constants import (BAM_INDEX_SUFFIX, BAM_SUFFIX, CRAM_INDEX_SUFFIX,
+                          CRAM_SUFFIX, FASTQ_DELTA, FASTQ_FIRST_READ_SUFFIX,
+                          FASTQ_SECOND_READ_SUFFIX, SPRING_SUFFIX, TMP_DIR)
 from cg.utils import Process
 from cg.utils.date import get_date_str
 
 from .models import CrunchyFileSchema
-from .sbatch import (
-    SBATCH_BAM_TO_CRAM,
-    SBATCH_FASTQ_TO_SPRING,
-    SBATCH_HEADER_TEMPLATE,
-    SBATCH_SPRING_TO_FASTQ,
-)
+from .sbatch import (SBATCH_BAM_TO_CRAM, SBATCH_FASTQ_TO_SPRING,
+                     SBATCH_HEADER_TEMPLATE, SBATCH_SPRING_TO_FASTQ)
 
 LOG = logging.getLogger(__name__)
 
@@ -472,14 +460,15 @@ class CrunchyAPI:
     def _get_tmp_dir(prefix: str, suffix: str, base: str) -> str:
         """Create a temporary directory and return the path to it"""
 
+        LOG.info("Check if possible to create tmp dir with base %s", base)
         if not os.path.exists(base):
             LOG.warning("Not allowed to create tmp dir")
             base = None
-        if not os.access(base, os.W_OK):
+        elif not os.access(base, os.W_OK):
             LOG.warning("Could not find temp path")
             base = None
         if base:
-            with tempfile.TemporaryDirectory(dir=TMP_DIR, prefix=prefix, suffix=suffix) as dir_name:
+            with tempfile.TemporaryDirectory(dir=base, prefix=prefix, suffix=suffix) as dir_name:
                 tmp_dir_path = dir_name
         else:
             with tempfile.TemporaryDirectory(prefix=prefix, suffix=suffix) as dir_name:
