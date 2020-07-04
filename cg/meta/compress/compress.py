@@ -115,7 +115,9 @@ class CompressAPI:
                 fastq_second,
                 sample_id,
             )
-            self.crunchy_api.fastq_to_spring(fastq_first=fastq_first, fastq_second=fastq_second)
+            self.crunchy_api.fastq_to_spring(
+                fastq_first=fastq_first, fastq_second=fastq_second, sample_id=sample_id
+            )
 
         return all_ok
 
@@ -140,7 +142,7 @@ class CompressAPI:
                 "Decompressing %s to FASTQ format for sample %s ", spring_path, sample_id,
             )
 
-            self.crunchy_api.spring_to_fastq(spring_path)
+            self.crunchy_api.spring_to_fastq(spring_path, sample_id=sample_id)
             spring_metadata_path = self.crunchy_api.get_flag_path(spring_path)
             self.crunchy_api.update_metadata_date(spring_metadata_path)
 

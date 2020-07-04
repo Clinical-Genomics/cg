@@ -88,12 +88,14 @@ class CrunchyAPI:
         sbatch_path = self.get_sbatch_path(log_dir, "bam", self.get_run_name(bam_path))
         self._submit_sbatch(sbatch_content=sbatch_content, sbatch_path=sbatch_path)
 
-    def fastq_to_spring(self, fastq_first: Path, fastq_second: Path):
+    def fastq_to_spring(self, fastq_first: Path, fastq_second: Path, sample_id: str = ""):
         """
             Compress FASTQ files into SPRING by sending to sbatch SLURM
         """
         spring_path = self.get_spring_path_from_fastq(fastq=fastq_first)
-        job_name = str(fastq_first.name).replace(FASTQ_FIRST_READ_SUFFIX, "_fastq_to_spring")
+        job_name = "_".join(
+            [sample_id, str(fastq_first.name).replace(FASTQ_FIRST_READ_SUFFIX, "_fastq_to_spring")]
+        )
         flag_path = self.get_flag_path(file_path=spring_path)
         pending_path = self.get_pending_path(file_path=spring_path)
         LOG.info("Use pending path: %s", pending_path)
@@ -113,7 +115,7 @@ class CrunchyAPI:
         sbatch_content = "\n".join([sbatch_header, sbatch_body])
         self._submit_sbatch(sbatch_content=sbatch_content, sbatch_path=sbatch_path)
 
-    def spring_to_fastq(self, spring_path: Path):
+    def spring_to_fastq(self, spring_path: Path, sample_id: str = ""):
         """
             Decompress SPRING into fastq by sending to sbatch SLURM
         """
@@ -123,7 +125,12 @@ class CrunchyAPI:
 
         fastq_first_path = Path(files_info["fastq_first"]["path"])
 
-        job_name = str(fastq_first_path.name).replace(FASTQ_FIRST_READ_SUFFIX, "_spring_to_fastq")
+        job_name = "_".join(
+            [
+                sample_id,
+                str(fastq_first_path.name).replace(FASTQ_FIRST_READ_SUFFIX, "_spring_to_fastq"),
+            ]
+        )
         pending_path = self.get_pending_path(file_path=spring_path)
         LOG.info("Use pending path: %s", pending_path)
         log_dir = self.get_log_dir(spring_path)
