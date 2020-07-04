@@ -7,34 +7,21 @@
 import datetime
 import json
 import logging
-import os
 import tempfile
 from pathlib import Path
 from typing import List
 
 from marshmallow import ValidationError
 
-from cg.constants import (
-    BAM_INDEX_SUFFIX,
-    BAM_SUFFIX,
-    CRAM_INDEX_SUFFIX,
-    CRAM_SUFFIX,
-    FASTQ_DELTA,
-    FASTQ_FIRST_READ_SUFFIX,
-    FASTQ_SECOND_READ_SUFFIX,
-    SPRING_SUFFIX,
-    TMP_DIR,
-)
+from cg.constants import (BAM_INDEX_SUFFIX, BAM_SUFFIX, CRAM_INDEX_SUFFIX,
+                          CRAM_SUFFIX, FASTQ_DELTA, FASTQ_FIRST_READ_SUFFIX,
+                          FASTQ_SECOND_READ_SUFFIX, SPRING_SUFFIX)
 from cg.utils import Process
 from cg.utils.date import get_date_str
 
 from .models import CrunchyFileSchema
-from .sbatch import (
-    SBATCH_BAM_TO_CRAM,
-    SBATCH_FASTQ_TO_SPRING,
-    SBATCH_HEADER_TEMPLATE,
-    SBATCH_SPRING_TO_FASTQ,
-)
+from .sbatch import (SBATCH_BAM_TO_CRAM, SBATCH_FASTQ_TO_SPRING,
+                     SBATCH_HEADER_TEMPLATE, SBATCH_SPRING_TO_FASTQ)
 
 LOG = logging.getLogger(__name__)
 
@@ -469,22 +456,11 @@ class CrunchyAPI:
         return sbatch_header
 
     @staticmethod
-    def _get_tmp_dir(prefix: str, suffix: str, base: str) -> str:
+    def _get_tmp_dir(prefix: str, suffix: str) -> str:
         """Create a temporary directory and return the path to it"""
 
-        LOG.info("Check if possible to create tmp dir with base %s", base)
-        if not os.path.exists(base):
-            LOG.warning("Not allowed to create tmp dir")
-            base = None
-        elif not os.access(base, os.W_OK):
-            LOG.warning("Could not find temp path")
-            base = None
-        if base:
-            with tempfile.TemporaryDirectory(dir=base, prefix=prefix, suffix=suffix) as dir_name:
-                tmp_dir_path = dir_name
-        else:
-            with tempfile.TemporaryDirectory(prefix=prefix, suffix=suffix) as dir_name:
-                tmp_dir_path = dir_name
+        with tempfile.TemporaryDirectory(prefix=prefix, suffix=suffix) as dir_name:
+            tmp_dir_path = dir_name
 
         LOG.info("Created temporary dir %s", tmp_dir_path)
         return tmp_dir_path
@@ -514,7 +490,7 @@ class CrunchyAPI:
     ) -> str:
         """Create and return the body of a sbatch script that runs FASTQ to SPRING"""
         LOG.info("Generating fastq to spring sbatch body")
-        tmp_dir_path = CrunchyAPI._get_tmp_dir(prefix="spring_", suffix="_compress", base=TMP_DIR)
+        tmp_dir_path = CrunchyAPI._get_tmp_dir(prefix="spring_", suffix="_compress")
         sbatch_body = SBATCH_FASTQ_TO_SPRING.format(
             fastq_first=fastq_first_path,
             fastq_second=fastq_second_path,
@@ -537,7 +513,7 @@ class CrunchyAPI:
     ) -> str:
         """Create and return the body of a sbatch script that runs SPRING to FASTQ"""
         LOG.info("Generating spring to fastq sbatch body")
-        tmp_dir_path = CrunchyAPI._get_tmp_dir(prefix="spring_", suffix="_decompress", base=TMP_DIR)
+        tmp_dir_path = CrunchyAPI._get_tmp_dir(prefix="spring_", suffix="_decompress")
         sbatch_body = SBATCH_SPRING_TO_FASTQ.format(
             spring_path=spring_path,
             fastq_first=fastq_first_path,
