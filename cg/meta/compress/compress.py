@@ -195,7 +195,7 @@ class CompressAPI:
         This means removing compressed fastq files and update housekeeper to point to the new spring
         file and its metadata file
         """
-        LOG.info("\nClean FASTQ files for %s", sample_id)
+        LOG.info("Clean FASTQ files for %s", sample_id)
         version_obj = self.get_latest_version(sample_id)
         if not version_obj:
             return False
@@ -204,15 +204,17 @@ class CompressAPI:
         if not sample_fastq_dict:
             return False
 
+        all_cleaned = True
         for run in sample_fastq_dict:
             fastq_first = sample_fastq_dict[run]["fastq_first_file"]["path"]
             fastq_second = sample_fastq_dict[run]["fastq_second_file"]["path"]
 
             if not self.crunchy_api.is_spring_compression_done(fastq_first):
-                LOG.info("Fastq compression not done: %s", sample_id)
-                return False
+                LOG.info("Fastq compression not done for sample %s, run %s", sample_id, run)
+                all_cleaned = False
+                continue
 
-            LOG.info("Fastq compression done for: %s!!", sample_id)
+            LOG.info("FASTQ compression done for sample %s, run %s!!", sample_id, run)
 
             fastq_first_hk = sample_fastq_dict[run]["fastq_first_file"]["hk_file"]
             fastq_second_hk = sample_fastq_dict[run]["fastq_second_file"]["hk_file"]
@@ -223,8 +225,9 @@ class CompressAPI:
 
             self.remove_fastq(fastq_first=fastq_first, fastq_second=fastq_second)
 
-        LOG.info("\nFASTQ files cleaned for %s!!", sample_id)
-        return True
+        if all_cleaned:
+            LOG.info("All FASTQ files cleaned for %s!!", sample_id)
+        return all_cleaned
 
     def add_decompressed_fastq(self, sample_id) -> bool:
         """Adds unpacked fastq files to housekeeper"""
