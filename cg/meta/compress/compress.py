@@ -98,14 +98,16 @@ class CompressAPI:
         if not sample_fastq_dict:
             return False
 
+        all_ok = True
         for run in sample_fastq_dict:
             LOG.info("Check if compression possible for run %s", run)
             fastq_first = sample_fastq_dict[run]["fastq_first_file"]["path"]
             fastq_second = sample_fastq_dict[run]["fastq_second_file"]["path"]
 
             if not self.crunchy_api.is_compression_possible(fastq_first):
-                LOG.warning("FASTQ to SPRING not possible for %s", sample_id)
-                return False
+                LOG.warning("FASTQ to SPRING not possible for %s, run %s", sample_id, run)
+                all_ok = False
+                continue
 
             LOG.info(
                 "Compressing %s and %s for sample %s into SPRING format",
@@ -115,7 +117,7 @@ class CompressAPI:
             )
             self.crunchy_api.fastq_to_spring(fastq_first=fastq_first, fastq_second=fastq_second)
 
-        return True
+        return all_ok
 
     def decompress_spring(self, sample_id: str):
         """Decompress SPRING archive for a sample
