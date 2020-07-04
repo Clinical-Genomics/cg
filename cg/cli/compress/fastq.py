@@ -38,7 +38,7 @@ def fastq_cmd(context, case_id, number_of_conversions, ntasks, mem, dry_run):
         if case_conversion_count >= number_of_conversions:
             break
 
-        LOG.info("\n\nSearching for FASTQ files in case %s", case.internal_id)
+        LOG.info("Searching for FASTQ files in case %s", case.internal_id)
         for link_obj in case.links:
             sample_id = link_obj.sample.internal_id
             case_converted = compress_api.compress_fastq(sample_id)
@@ -50,7 +50,9 @@ def fastq_cmd(context, case_id, number_of_conversions, ntasks, mem, dry_run):
             case_conversion_count += 1
 
     LOG.info(
-        "%s Individuals in %s cases where compressed", ind_conversion_count, case_conversion_count
+        "%s Individuals in %s (completed) cases where compressed",
+        ind_conversion_count,
+        case_conversion_count,
     )
 
 

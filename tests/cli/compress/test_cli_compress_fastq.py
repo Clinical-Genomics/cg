@@ -16,7 +16,7 @@ def test_compress_fastq_cli_no_family(compress_context, cli_runner, caplog):
     # THEN assert the program exits since no cases where found
     assert res.exit_code == 0
     # THEN assert it was communicated that no families where found
-    assert "Individuals in 0 cases where compressed" in caplog.text
+    assert "Individuals in 0 (completed) cases where compressed" in caplog.text
 
 
 def test_compress_fastq_cli_case_id_no_family(compress_context, cli_runner, case_id, caplog):
@@ -44,7 +44,7 @@ def test_compress_fastq_cli_one_family(populated_compress_context, cli_runner, c
     # THEN assert the program exits since no cases where found
     assert res.exit_code == 0
     # THEN assert it was communicated that no families where found
-    assert f"Individuals in 1 cases where compressed" in caplog.text
+    assert f"Individuals in 1 (completed) cases where compressed" in caplog.text
 
 
 def test_compress_fastq_cli_case_id(populated_compress_context, cli_runner, case_id, caplog):
@@ -58,7 +58,7 @@ def test_compress_fastq_cli_case_id(populated_compress_context, cli_runner, case
     # THEN assert the program exits since no cases where found
     assert res.exit_code == 0
     # THEN assert it was communicated that no families where found
-    assert f"Individuals in 1 cases where compressed" in caplog.text
+    assert f"Individuals in 1 (completed) cases where compressed" in caplog.text
 
 
 def test_compress_fastq_cli_multiple_family(
@@ -77,7 +77,7 @@ def test_compress_fastq_cli_multiple_family(
     # THEN assert the program exits since no cases where found
     assert res.exit_code == 0
     # THEN assert it was communicated that no families where found
-    assert f"Individuals in {nr_cases} cases where compressed" in caplog.text
+    assert f"Individuals in {nr_cases} (completed) cases where compressed" in caplog.text
 
 
 def test_compress_fastq_cli_multiple_set_limit(
@@ -97,4 +97,4 @@ def test_compress_fastq_cli_multiple_set_limit(
     # THEN assert the program exits since no cases where found
     assert res.exit_code == 0
     # THEN assert it was communicated no more than the limited number of cases was compressed
-    assert f"Individuals in {limit} cases where compressed" in caplog.text
+    assert f"Individuals in {limit} (completed) cases where compressed" in caplog.text

@@ -7,7 +7,6 @@
 import datetime
 import json
 import logging
-import os
 import tempfile
 from pathlib import Path
 from typing import List
@@ -23,7 +22,6 @@ from cg.constants import (
     FASTQ_FIRST_READ_SUFFIX,
     FASTQ_SECOND_READ_SUFFIX,
     SPRING_SUFFIX,
-    TMP_DIR,
 )
 from cg.utils import Process
 from cg.utils.date import get_date_str
@@ -90,12 +88,14 @@ class CrunchyAPI:
         sbatch_path = self.get_sbatch_path(log_dir, "bam", self.get_run_name(bam_path))
         self._submit_sbatch(sbatch_content=sbatch_content, sbatch_path=sbatch_path)
 
-    def fastq_to_spring(self, fastq_first: Path, fastq_second: Path):
+    def fastq_to_spring(self, fastq_first: Path, fastq_second: Path, sample_id: str = ""):
         """
             Compress FASTQ files into SPRING by sending to sbatch SLURM
         """
         spring_path = self.get_spring_path_from_fastq(fastq=fastq_first)
-        job_name = str(fastq_first.name).replace(FASTQ_FIRST_READ_SUFFIX, "_fastq_to_spring")
+        job_name = "_".join(
+            [sample_id, str(fastq_first.name).replace(FASTQ_FIRST_READ_SUFFIX, "_fastq_to_spring")]
+        )
         flag_path = self.get_flag_path(file_path=spring_path)
         pending_path = self.get_pending_path(file_path=spring_path)
         LOG.info("Use pending path: %s", pending_path)
@@ -115,7 +115,7 @@ class CrunchyAPI:
         sbatch_content = "\n".join([sbatch_header, sbatch_body])
         self._submit_sbatch(sbatch_content=sbatch_content, sbatch_path=sbatch_path)
 
-    def spring_to_fastq(self, spring_path: Path):
+    def spring_to_fastq(self, spring_path: Path, sample_id: str = ""):
         """
             Decompress SPRING into fastq by sending to sbatch SLURM
         """
@@ -125,7 +125,12 @@ class CrunchyAPI:
 
         fastq_first_path = Path(files_info["fastq_first"]["path"])
 
-        job_name = str(fastq_first_path.name).replace(FASTQ_FIRST_READ_SUFFIX, "_spring_to_fastq")
+        job_name = "_".join(
+            [
+                sample_id,
+                str(fastq_first_path.name).replace(FASTQ_FIRST_READ_SUFFIX, "_spring_to_fastq"),
+            ]
+        )
         pending_path = self.get_pending_path(file_path=spring_path)
         LOG.info("Use pending path: %s", pending_path)
         log_dir = self.get_log_dir(spring_path)
@@ -469,22 +474,11 @@ class CrunchyAPI:
         return sbatch_header
 
     @staticmethod
-    def _get_tmp_dir(prefix: str, suffix: str, base: str) -> str:
+    def _get_tmp_dir(prefix: str, suffix: str) -> str:
         """Create a temporary directory and return the path to it"""
 
-        LOG.info("Check if possible to create tmp dir with base %s", base)
-        if not os.path.exists(base):
-            LOG.warning("Not allowed to create tmp dir")
-            base = None
-        elif not os.access(base, os.W_OK):
-            LOG.warning("Could not find temp path")
-            base = None
-        if base:
-            with tempfile.TemporaryDirectory(dir=base, prefix=prefix, suffix=suffix) as dir_name:
-                tmp_dir_path = dir_name
-        else:
-            with tempfile.TemporaryDirectory(prefix=prefix, suffix=suffix) as dir_name:
-                tmp_dir_path = dir_name
+        with tempfile.TemporaryDirectory(prefix=prefix, suffix=suffix) as dir_name:
+            tmp_dir_path = dir_name
 
         LOG.info("Created temporary dir %s", tmp_dir_path)
         return tmp_dir_path
@@ -514,7 +508,7 @@ class CrunchyAPI:
     ) -> str:
         """Create and return the body of a sbatch script that runs FASTQ to SPRING"""
         LOG.info("Generating fastq to spring sbatch body")
-        tmp_dir_path = CrunchyAPI._get_tmp_dir(prefix="spring_", suffix="_compress", base=TMP_DIR)
+        tmp_dir_path = CrunchyAPI._get_tmp_dir(prefix="spring_", suffix="_compress")
         sbatch_body = SBATCH_FASTQ_TO_SPRING.format(
             fastq_first=fastq_first_path,
             fastq_second=fastq_second_path,
@@ -537,7 +531,7 @@ class CrunchyAPI:
     ) -> str:
         """Create and return the body of a sbatch script that runs SPRING to FASTQ"""
         LOG.info("Generating spring to fastq sbatch body")
-        tmp_dir_path = CrunchyAPI._get_tmp_dir(prefix="spring_", suffix="_decompress", base=TMP_DIR)
+        tmp_dir_path = CrunchyAPI._get_tmp_dir(prefix="spring_", suffix="_decompress")
         sbatch_body = SBATCH_SPRING_TO_FASTQ.format(
             spring_path=spring_path,
             fastq_first=fastq_first_path,

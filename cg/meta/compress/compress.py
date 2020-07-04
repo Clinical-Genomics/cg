@@ -89,7 +89,7 @@ class CompressAPI:
 
     def compress_fastq(self, sample_id: str) -> bool:
         """Compress the fastq files for a individual"""
-        LOG.info("\nCheck if FASTQ compression is possible for %s", sample_id)
+        LOG.info("Check if FASTQ compression is possible for %s", sample_id)
         version_obj = self.get_latest_version(sample_id)
         if not version_obj:
             return False
@@ -98,14 +98,16 @@ class CompressAPI:
         if not sample_fastq_dict:
             return False
 
+        all_ok = True
         for run in sample_fastq_dict:
-            LOG.info("\nCheck if compression possible for run %s", run)
+            LOG.info("Check if compression possible for run %s", run)
             fastq_first = sample_fastq_dict[run]["fastq_first_file"]["path"]
             fastq_second = sample_fastq_dict[run]["fastq_second_file"]["path"]
 
             if not self.crunchy_api.is_compression_possible(fastq_first):
-                LOG.warning("FASTQ to SPRING not possible for %s", sample_id)
-                return False
+                LOG.warning("FASTQ to SPRING not possible for %s, run %s", sample_id, run)
+                all_ok = False
+                continue
 
             LOG.info(
                 "Compressing %s and %s for sample %s into SPRING format",
@@ -113,9 +115,11 @@ class CompressAPI:
                 fastq_second,
                 sample_id,
             )
-            self.crunchy_api.fastq_to_spring(fastq_first=fastq_first, fastq_second=fastq_second)
+            self.crunchy_api.fastq_to_spring(
+                fastq_first=fastq_first, fastq_second=fastq_second, sample_id=sample_id
+            )
 
-        return True
+        return all_ok
 
     def decompress_spring(self, sample_id: str):
         """Decompress SPRING archive for a sample
@@ -138,7 +142,7 @@ class CompressAPI:
                 "Decompressing %s to FASTQ format for sample %s ", spring_path, sample_id,
             )
 
-            self.crunchy_api.spring_to_fastq(spring_path)
+            self.crunchy_api.spring_to_fastq(spring_path, sample_id=sample_id)
             spring_metadata_path = self.crunchy_api.get_flag_path(spring_path)
             self.crunchy_api.update_metadata_date(spring_metadata_path)
 
@@ -193,7 +197,7 @@ class CompressAPI:
         This means removing compressed fastq files and update housekeeper to point to the new spring
         file and its metadata file
         """
-        LOG.info("\nClean FASTQ files for %s", sample_id)
+        LOG.info("Clean FASTQ files for %s", sample_id)
         version_obj = self.get_latest_version(sample_id)
         if not version_obj:
             return False
@@ -202,15 +206,17 @@ class CompressAPI:
         if not sample_fastq_dict:
             return False
 
+        all_cleaned = True
         for run in sample_fastq_dict:
             fastq_first = sample_fastq_dict[run]["fastq_first_file"]["path"]
             fastq_second = sample_fastq_dict[run]["fastq_second_file"]["path"]
 
             if not self.crunchy_api.is_spring_compression_done(fastq_first):
-                LOG.info("Fastq compression not done: %s", sample_id)
-                return False
+                LOG.info("Fastq compression not done for sample %s, run %s", sample_id, run)
+                all_cleaned = False
+                continue
 
-            LOG.info("Fastq compression done for: %s!!", sample_id)
+            LOG.info("FASTQ compression done for sample %s, run %s!!", sample_id, run)
 
             fastq_first_hk = sample_fastq_dict[run]["fastq_first_file"]["hk_file"]
             fastq_second_hk = sample_fastq_dict[run]["fastq_second_file"]["hk_file"]
@@ -221,8 +227,9 @@ class CompressAPI:
 
             self.remove_fastq(fastq_first=fastq_first, fastq_second=fastq_second)
 
-        LOG.info("\nFASTQ files cleaned for %s!!", sample_id)
-        return True
+        if all_cleaned:
+            LOG.info("All FASTQ files cleaned for %s!!", sample_id)
+        return all_cleaned
 
     def add_decompressed_fastq(self, sample_id) -> bool:
         """Adds unpacked fastq files to housekeeper"""
