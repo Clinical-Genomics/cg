@@ -8,13 +8,8 @@ from typing import Dict, List, Tuple
 from housekeeper.store import models as hk_models
 
 from cg.apps.crunchy import CrunchyAPI
-from cg.constants import (
-    BAM_SUFFIX,
-    FASTQ_FIRST_READ_SUFFIX,
-    FASTQ_SECOND_READ_SUFFIX,
-    HK_BAM_TAGS,
-    HK_FASTQ_TAGS,
-)
+from cg.constants import (BAM_SUFFIX, FASTQ_FIRST_READ_SUFFIX,
+                          FASTQ_SECOND_READ_SUFFIX, HK_BAM_TAGS, HK_FASTQ_TAGS)
 
 LOG = logging.getLogger(__name__)
 
@@ -186,6 +181,7 @@ def get_fastq_runs(fastq_files: List[Path]) -> Dict[str, list]:
         if not run_name:
             continue
         if run_name not in fastq_runs:
+            LOG.info("Found run %s", run_name)
             fastq_runs[run_name] = []
         fastq_runs[run_name].append(fastq_file)
 
@@ -208,14 +204,16 @@ def get_fastq_files(sample_id: str, version_obj: hk_models.Version) -> Dict[str,
 
         sorted_fastqs = sort_fastqs(fastq_files=fastq_runs[run])
         if not sorted_fastqs:
-            LOG.info("Could not sort FASTQ files for %s", sample_id)
+            LOG.info("Skipping run %s", run)
             continue
+
         fastq_first = {"path": sorted_fastqs[0], "hk_file": hk_files_dict[sorted_fastqs[0]]}
         fastq_second = {"path": sorted_fastqs[1], "hk_file": hk_files_dict[sorted_fastqs[1]]}
         fastq_dict[run] = {
             "fastq_first_file": fastq_first,
             "fastq_second_file": fastq_second,
         }
+
     return fastq_dict
 
 
