@@ -6,7 +6,8 @@ import click
 
 from cg.exc import CaseNotFoundError
 
-from .helpers import get_fastq_cases, get_fastq_individuals, update_compress_api
+from .helpers import (get_fastq_cases, get_fastq_individuals,
+                      update_compress_api)
 
 LOG = logging.getLogger(__name__)
 
@@ -50,7 +51,9 @@ def fastq_cmd(context, case_id, number_of_conversions, ntasks, mem, dry_run):
             case_conversion_count += 1
 
     LOG.info(
-        "%s Individuals in %s cases where compressed", ind_conversion_count, case_conversion_count
+        "%s Individuals in %s (completed) cases where compressed",
+        ind_conversion_count,
+        case_conversion_count,
     )
 
 
