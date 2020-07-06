@@ -10,6 +10,7 @@ from cg.apps.tb import TrailblazerAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.store import Store, models
 from cg.utils.fastq import FastqAPI
+from cg.apps.balsamic.api import BalsamicAPI
 
 
 @pytest.fixture
@@ -31,7 +32,20 @@ def balsamic_context(
                 "balsamic": {
                     "conda_env": "conda_env",
                     "root": "root",
-                    "slurm": {"account": "account", "qos": "qos"},
+                    "slurm": {"account": "account", "qos": "low"},
+                    "singularity": "singularity",
+                    "reference_config": "reference_config",
+                },
+            },
+        ),
+        "balsamic_api": BalsamicAPI(
+            config={
+                "bed_path": "bed_path",
+                "balsamic": {
+                    "binary_path": "/home/proj/bin/conda/envs/S_BALSAMIC-base_4.2.2/bin/balsamic",
+                    "conda_env": "conda_env",
+                    "root": tmpdir,
+                    "slurm": {"account": "account", "qos": "low", "mail_user": "mail_user"},
                     "singularity": "singularity",
                     "reference_config": "reference_config",
                 },
@@ -43,9 +57,10 @@ def balsamic_context(
         "lims_api": MockLims(),
         "bed_path": "bed_path",
         "balsamic": {
+            "binary_path": "/home/proj/bin/conda/envs/S_BALSAMIC-base_4.2.2/bin/balsamic",
             "conda_env": "conda_env",
             "root": tmpdir,
-            "slurm": {"account": "account", "qos": "qos"},
+            "slurm": {"account": "account", "qos": "low", "mail_user": "mail_user"},
             "singularity": "singularity",
             "reference_config": "reference_config",
         },
@@ -179,10 +194,21 @@ def fixture_balsamic_dir(apps_dir: Path) -> Path:
     return apps_dir / "balsamic"
 
 
+@pytest.fixture(name="balsamic_dummy_case")
+def fixture_balsamic_case_name():
+    return "balsamic_dummy_case"
+
+
 @pytest.fixture(name="balsamic_case_dir")
-def fixture_balsamic_case_dir(balsamic_dir: Path) -> Path:
+def fixture_balsamic_case_dir(balsamic_dir: Path, balsamic_dummy_case) -> Path:
     """Return the path to the balsamic apps case dir"""
-    return balsamic_dir / "case"
+    return balsamic_dir / balsamic_dummy_case
+
+
+@pytest.fixture(name="balsamic_case_dir")
+def fixture_balsamic_case_config(balsamic_dir: Path, balsamic_dummy_case) -> Path:
+    """Return the path to the balsamic apps case dir"""
+    return balsamic_dir / balsamic_dummy_case / balsamic_dummy_case + ".json"
 
 
 @pytest.fixture(scope="function")

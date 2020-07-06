@@ -17,10 +17,15 @@ class StoreHelpers:
     @staticmethod
     def ensure_hk_bundle(store: HousekeeperAPI, bundle_data: dict) -> hk_models.Bundle:
         """Utility function to add a bundle of information to a housekeeper api"""
-        _bundle = store.bundle(bundle_data["name"])
-        if not _bundle:
-            LOG.info("No bundle found")
+        bundle_exists = False
+        for bundle in store.bundles():
+            if bundle.name != bundle_data["name"]:
+                continue
+            bundle_exists = True
+        if not bundle_exists:
+            print("No bundle found")
             _bundle, _version = store.add_bundle(bundle_data)
+            print("Add bundle with name %s" % bundle_data["name"])
             store.add_commit(_bundle, _version)
         return _bundle
 
@@ -204,7 +209,6 @@ class StoreHelpers:
             is_external=is_external,
             is_rna=is_rna,
         )
-        # print(repr(application_version))
         application_version_id = application_version.id
         sample = store.add_sample(
             name=sample_id,
@@ -285,7 +289,14 @@ class StoreHelpers:
         store.add_commit(family_obj)
         return family_obj
 
-    def ensure_family(self, store: Store, family_info: dict, app_tag: str = None):
+    def ensure_family(
+        self,
+        store: Store,
+        family_info: dict,
+        app_tag: str = None,
+        ordered_at: datetime = None,
+        completed_at: datetime = None,
+    ):
         """Load a family with samples and link relations"""
         customer_obj = self.ensure_customer(store)
         family_obj = store.Family(
@@ -293,6 +304,7 @@ class StoreHelpers:
             panels=family_info["panels"],
             internal_id=family_info["internal_id"],
             priority="standard",
+            ordered_at=ordered_at,
         )
 
         family_obj = self.add_family(
@@ -335,7 +347,7 @@ class StoreHelpers:
                 mother=mother,
             )
 
-        self.add_analysis(store, pipeline="pipeline", family=family_obj)
+        self.add_analysis(store, pipeline="pipeline", family=family_obj, completed_at=completed_at)
         return family_obj
 
     @staticmethod

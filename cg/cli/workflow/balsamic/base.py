@@ -16,8 +16,23 @@ OPTION_DRY = click.option(
 
 @click.group(invoke_without_command=True)
 @click.pass_context
-def balsamic(context):
-    """Run BALSAMIC"""
+def balsamic(context, case_id, priority, email, target_bed):
+    """Cancer workflow """
+    context.obj["store_api"] = Store(context.obj["database"])
+    context.obj["hk_api"] = hk.HousekeeperAPI(context.obj)
+    context.obj["fastq_handler"] = FastqHandler
+    context.obj["gzipper"] = gzip
+    context.obj["lims_api"] = lims.LimsAPI(context.obj)
+    context.obj["fastq_api"] = FastqAPI
+    context.obj["balsamic_api"] = BalsamicAPI(context.obj)
+    context.obj["analysis_api"] = BalsamicAnalysisAPI(
+        config=context.obj, hk_api=context.obj["hk_api"], fastq_api=context.obj["fastq_api"]
+    )
+
+    if context.invoked_subcommand is None:
+        if case_id is None:
+            LOG.error("provide a case")
+            context.abort()
 
     context.obj["MetaBalsamicAPI"] = MetaBalsamicAPI(context.obj)
 
