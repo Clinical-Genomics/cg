@@ -4,37 +4,37 @@ import shutil
 import click
 
 from pathlib import Path
-from cg.meta.workflow.balsamic import MetaBalsamicAPI
+from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
+from cg.apps.balsamic.api import BalsamicAPI
 
 LOG = logging.getLogger(__name__)
 
 ARGUMENT_CASE_ID = click.argument("case_id", required=True)
-OPTION_DRY = click.option(
-    "-d", "--dry-run", "dry", help="Print command to console without executing"
-)
+OPTION_DRY = click.option("-d", "--dry-run", "dry", help="Print command to console without executing")
+OPTION_PANEL_BED = click.option("--panel-bed", required=False, help="Optional")
+OPTION_ANALYSIS_TYPE = click.option("-a", "--analysis-type", type=click.Choice(["qc", "paired", "single"]))
+OPTION_RUN_ANALYSIS = click.option("-r", "--run-analysis", is_flag=True, default=False, help="Execute in non-dry mode")
+OPTION_PRIORITY = click.option("-p", "--priority", type=click.Choice(["low", "normal", "high"]))
 
 
 @click.group(invoke_without_command=True)
+@ARGUMENT_CASE_ID
+@OPTION_DRY
+@OPTION_PANEL_BED
+@OPTION_ANALYSIS_TYPE
+@OPTION_RUN_ANALYSIS
+@OPTION_PRIORITY
 @click.pass_context
-def balsamic(context, case_id, priority, email, target_bed):
+def balsamic(context, case_id, priority, panel_bed, analysis_type, run_analysis, dry):
     """Cancer workflow """
-    context.obj["store_api"] = Store(context.obj["database"])
-    context.obj["hk_api"] = hk.HousekeeperAPI(context.obj)
-    context.obj["fastq_handler"] = FastqHandler
-    context.obj["gzipper"] = gzip
-    context.obj["lims_api"] = lims.LimsAPI(context.obj)
-    context.obj["fastq_api"] = FastqAPI
-    context.obj["balsamic_api"] = BalsamicAPI(context.obj)
-    context.obj["analysis_api"] = BalsamicAnalysisAPI(
-        config=context.obj, hk_api=context.obj["hk_api"], fastq_api=context.obj["fastq_api"]
-    )
-
+    context.obj["BalsamicAnalysisAPI"] = BalsamicAnalysisAPI(context.obj)
     if context.invoked_subcommand is None:
         if case_id is None:
-            LOG.error("provide a case")
-            context.abort()
-
-    context.obj["MetaBalsamicAPI"] = MetaBalsamicAPI(context.obj)
+            LOG.error("Provide a case!")
+            click.Abort()
+        else:
+            context.invoke(link, case_id=case_id)
+            context.invoke(config_case, case_id=case_id, panel_bed=panel_bed)
 
 
 @balsamic.command()
@@ -44,10 +44,10 @@ def link(context, case_id):
     """"Link samples to case ID"""
 
     LOG.info(f"Link all samples in case {case_id}")
-    case_object = context.obj["MetaBalsamicAPI"].lookup_samples(case_id)
+    case_object = context.obj["BalsamicAnalysisAPI"].lookup_samples(case_id)
     if case_object:
         if case_object.links:
-            context.obj["MetaBalsamicAPI"].link_samples(case_object.links)
+            context.obj["BalsamicAnalysisAPI"].link_samples(case_object.links)
         else:
             LOG.warning(f"{case_id} has no linked samples")
             click.Abort()
@@ -70,18 +70,17 @@ def config_case(context, panel_bed, case_id, dry):
         "case_id": case_id,
         "normal": None,
         "tumor": None,
-        "panel_bed": None,
+        "panel_bed": panel_bed,
         "output_config": f"{case_id}.json",
     }
     acceptable_applications = {"wgs", "wes", "tgs"}
     applications_requiring_bed = {"wes", "tgs"}
 
-    case_object = context.obj["MetaBalsamicAPI"].lookup_samples(case_id)
+    case_object = context.obj["BalsamicAnalysisAPI"].lookup_samples(case_id)
     if case_object:
         if case_object.links:
-            setup_data = context.obj["MetaBalsamicAPI"].get_case_config_params(
-                case_id, case_object.links
-            )
+            setup_data = context.obj["BalsamicAnalysisAPI"].get_case_config_params(
+                case_id, case_object)
 
             normal_paths = [
                 v["concatenated_path"]
@@ -99,9 +98,6 @@ def config_case(context, panel_bed, case_id, dry):
                 arguments["normal"] = normal_paths[0]
             elif len(normal_paths) == 0:
                 arguments["normal"] = None
-            elif len(normal_paths) > 1:
-                LOG.warning(f"Too many normal samples found: {len(normal_paths)}")
-                click.Abort()
 
             # Check if tumor samples are 1
             if len(tumor_paths) == 1:
@@ -146,7 +142,7 @@ def config_case(context, panel_bed, case_id, dry):
                         click.Abort()
                     else:
                         arguments["panel_bed"] = (
-                            context.obj["MetaBalsamicAPI"].balsamic_api.bed_path
+                            context.obj["BalsamicAnalysisAPI"].balsamic_api.bed_path
                             + "/"
                             + target_beds.pop()
                         )
@@ -159,7 +155,7 @@ def config_case(context, panel_bed, case_id, dry):
         LOG.warning(f"{case_id} is not present in database")
         click.Abort()
 
-    context.obj["MetaBalsamicAPI"].balsamic_api.config_case(arguments)
+    context.obj["BalsamicAnalysisAPI"].balsamic_api.config_case(arguments)
 
 
 @balsamic.command()
@@ -172,19 +168,12 @@ def config_case(context, panel_bed, case_id, dry):
 def run(context, analysis_type, run_analysis, priority, case_id, dry):
 
     arguments = {
-        "priority": None,
-        "analysis_type": None,
-        "run_analysis": False,
-        "case_id": case_id,
-    }
-    if priority:
-        arguments["priority"] = priority
-    if analysis_type:
-        arguments["analysis_type"] = analysis_type
-    if run_analysis:
-        arguments["run_analysis"] = run_analysis
+        "priority": priority,
+        "analysis_type": analysis_type,
+        "run_analysis": run_analysis,
+        "case_id": case_id}
 
-    context.obj["MetaBalsamicAPI"].balsamic_api.run_analysis(arguments)
+    context.obj["BalsamicAnalysisAPI"].balsamic_api.run_analysis(arguments)
 
 
 @balsamic.command()
@@ -192,8 +181,7 @@ def run(context, analysis_type, run_analysis, priority, case_id, dry):
 @click.pass_context
 def remove_fastq(context, case_id):
     """Remove stored FASTQ files"""
-
-    work_dir = Path(f"{context.obj['MetaBalsamicAPI'].balsamic_api.root_dir}/{case_id}/fastq")
+    work_dir = Path(context.obj['BalsamicAnalysisAPI'].balsamic_api.root_dir / case_id / "fastq")
     if work_dir.exists():
         shutil.rmtree(work_dir)
         LOG.info(f"Path {work_dir} removed successfully")
