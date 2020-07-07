@@ -10,10 +10,16 @@ from cg.apps.balsamic.api import BalsamicAPI
 LOG = logging.getLogger(__name__)
 
 ARGUMENT_CASE_ID = click.argument("case_id", required=True)
-OPTION_DRY = click.option("-d", "--dry-run", "dry", help="Print command to console without executing")
+OPTION_DRY = click.option(
+    "-d", "--dry-run", "dry", help="Print command to console without executing"
+)
 OPTION_PANEL_BED = click.option("--panel-bed", required=False, help="Optional")
-OPTION_ANALYSIS_TYPE = click.option("-a", "--analysis-type", type=click.Choice(["qc", "paired", "single"]))
-OPTION_RUN_ANALYSIS = click.option("-r", "--run-analysis", is_flag=True, default=False, help="Execute in non-dry mode")
+OPTION_ANALYSIS_TYPE = click.option(
+    "-a", "--analysis-type", type=click.Choice(["qc", "paired", "single"])
+)
+OPTION_RUN_ANALYSIS = click.option(
+    "-r", "--run-analysis", is_flag=True, default=False, help="Execute in non-dry mode"
+)
 OPTION_PRIORITY = click.option("-p", "--priority", type=click.Choice(["low", "normal", "high"]))
 
 
@@ -80,7 +86,8 @@ def config_case(context, panel_bed, case_id, dry):
     if case_object:
         if case_object.links:
             setup_data = context.obj["BalsamicAnalysisAPI"].get_case_config_params(
-                case_id, case_object)
+                case_id, case_object
+            )
 
             normal_paths = [
                 v["concatenated_path"]
@@ -171,7 +178,8 @@ def run(context, analysis_type, run_analysis, priority, case_id, dry):
         "priority": priority,
         "analysis_type": analysis_type,
         "run_analysis": run_analysis,
-        "case_id": case_id}
+        "case_id": case_id,
+    }
 
     context.obj["BalsamicAnalysisAPI"].balsamic_api.run_analysis(arguments)
 
@@ -181,7 +189,7 @@ def run(context, analysis_type, run_analysis, priority, case_id, dry):
 @click.pass_context
 def remove_fastq(context, case_id):
     """Remove stored FASTQ files"""
-    work_dir = Path(context.obj['BalsamicAnalysisAPI'].balsamic_api.root_dir / case_id / "fastq")
+    work_dir = Path(context.obj["BalsamicAnalysisAPI"].balsamic_api.root_dir / case_id / "fastq")
     if work_dir.exists():
         shutil.rmtree(work_dir)
         LOG.info(f"Path {work_dir} removed successfully")
