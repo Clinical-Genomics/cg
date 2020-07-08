@@ -5,7 +5,6 @@ import click
 
 from pathlib import Path
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
-from cg.apps.balsamic.api import BalsamicAPI
 
 LOG = logging.getLogger(__name__)
 
@@ -180,9 +179,9 @@ def config_case(context, panel_bed, case_id, dry):
 @balsamic.command()
 @ARGUMENT_CASE_ID
 @OPTION_DRY
-@click.option("-p", "--priority", type=click.Choice(["low", "normal", "high"]))
-@click.option("-a", "--analysis-type", type=click.Choice(["qc", "paired", "single"]))
-@click.option("-r", "--run-analysis", is_flag=True, default=False, help="Execute in non-dry mode")
+@OPTION_PRIORITY
+@OPTION_ANALYSIS_TYPE
+@OPTION_RUN_ANALYSIS
 @click.pass_context
 def run(context, analysis_type, run_analysis, priority, case_id, dry):
 
