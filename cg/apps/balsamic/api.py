@@ -1,6 +1,5 @@
 import logging
 from cg.utils.commands import Process
-from pathlib import Path
 from typing import List, Dict
 
 LOG = logging.getLogger(__name__)
@@ -52,7 +51,7 @@ class BalsamicAPI:
         options = self.__build_command_str(options)
 
         if dry:
-            LOG.info(f'Executing command balsamic{" ".join(command + options)}')
+            LOG.info(f'Dry run command balsamic{" ".join(command + options)}')
             retcode = self.EXIT_SUCCESS
         else:
             retcode = self.process.run_command(command + options)
@@ -72,7 +71,7 @@ class BalsamicAPI:
         }
         options = self.__build_command_str(options)
         if dry:
-            LOG.info(f'Executing command balsamic{" ".join(command + options + run_analysis)}')
+            LOG.info(f'Dry run command balsamic{" ".join(command + options + run_analysis)}')
             retcode = self.EXIT_SUCCESS
         else:
             retcode = self.process.run_command(command + options + run_analysis)
