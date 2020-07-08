@@ -115,32 +115,32 @@ def config_case(context, panel_bed, case_id, dry):
                 LOG.warning(
                     f"{case_id} has {len(normal_paths)} normal samples, while only 1 is permitted"
                 )
-                click.Abort()
+                raise click.Abort()
 
             # Check if tumor samples are at least 1
             if len(tumor_paths) == 1:
                 arguments["tumor"] = tumor_paths[0]
             elif len(tumor_paths) == 0:
                 LOG.warning(f"No tumor samples found for {case_id}")
-                click.Abort()
+                raise click.Abort()
             elif len(tumor_paths) > 1:
                 LOG.warning(f"Too many tumor samples found: {len(tumor_paths)} samples")
-                click.Abort()
+                raise click.Abort()
 
             # Check application type is only one
             if len(application_types) > 1:
                 LOG.warning(f"More than one application found for case {case_id}")
-                click.Abort()
+                raise click.Abort()
             elif len(application_types) == 0:
                 LOG.warning(f"No application found for case {case_id}")
-                click.Abort()
+                raise click.Abort()
 
             # Check if application type is suitable for BALSAMIC
             if application_types.issubset(acceptable_applications):
                 LOG.info(f"Application type {application_types}")
             else:
                 LOG.warning(f"Improper application type for case {case_id}")
-                click.Abort()
+                raise click.Abort()
 
             # If panel BED is provided, check if panel BED is compatible with application type
             if panel_bed:
@@ -148,16 +148,16 @@ def config_case(context, panel_bed, case_id, dry):
                     arguments["panel_bed"] = panel_bed
                 else:
                     LOG.warning(f"Panel BED {panel_bed} incompatible with application type")
-                    click.Abort()
+                    raise click.Abort()
             # If panel BED is not provided, it should be inferred.
             else:
                 if application_types.issubset(applications_requiring_bed):
                     if len(target_beds) == 0:
                         LOG.warning(f"Panel BED cannot be found for sample {case_id}")
-                        click.Abort()
+                        raise click.Abort()
                     elif len(target_beds) > 1:
                         LOG.warning(f"Multiple Panel BED indicated for sample {case_id}")
-                        click.Abort()
+                        raise click.Abort()
                     else:
                         arguments["panel_bed"] = (
                             context.obj["BalsamicAnalysisAPI"].balsamic_api.bed_path
@@ -168,10 +168,10 @@ def config_case(context, panel_bed, case_id, dry):
                     arguments["panel_bed"] = None
         else:
             LOG.warning(f"{case_id} has no linked samples")
-            click.Abort()
+            raise click.Abort()
     else:
         LOG.warning(f"{case_id} is not present in database")
-        click.Abort()
+        raise click.Abort()
 
     context.obj["BalsamicAnalysisAPI"].balsamic_api.config_case(arguments)
 
