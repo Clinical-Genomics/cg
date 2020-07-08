@@ -71,7 +71,7 @@ def parse_files(deliverables: dict, pipeline_tags: list, analysis_type_tags: dic
 
     parsed_files = []
     for file_ in deliverables["files"]:
-        tag_map_key = (file_['step'],) if file_['tag'] is None else (file_['step'], file_['tag'])
+        tag_map_key = (file_["step"],) if file_["tag"] is None else (file_["step"], file_["tag"])
         parsed_file = {
             "path": file_["path"],
             "tags": get_tags(file_, pipeline_tags, analysis_type_tags, tag_map_key),
@@ -83,7 +83,9 @@ def parse_files(deliverables: dict, pipeline_tags: list, analysis_type_tags: dic
         if file_["path_index"]:
             parsed_index_file = {
                 "path": file_["path_index"],
-                "tags": get_tags(file_, pipeline_tags, analysis_type_tags, tag_map_key, is_index=True),
+                "tags": get_tags(
+                    file_, pipeline_tags, analysis_type_tags, tag_map_key, is_index=True
+                ),
                 "archive": False,
                 "tag_map_key": tag_map_key,
             }
@@ -92,7 +94,9 @@ def parse_files(deliverables: dict, pipeline_tags: list, analysis_type_tags: dic
     return parsed_files
 
 
-def get_tags(file: dict, pipeline_tags: list, tag_map: dict, tag_map_key: tuple, is_index: bool = False) -> list:
+def get_tags(
+    file: dict, pipeline_tags: list, tag_map: dict, tag_map_key: tuple, is_index: bool = False
+) -> list:
     """Get all tags for a file"""
 
     tags = {
@@ -129,7 +133,6 @@ def _convert_tags(tags: dict, tag_map: dict, tag_map_key: tuple, is_index: bool 
         converted_tags.append(tag)
 
     return list(set(converted_tags))
-
 
 
 def _check_mandatory_tags(files: list, pipeline_tags: dict):
