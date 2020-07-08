@@ -11,7 +11,7 @@ import click
 from cg.apps import hk
 from cg.exc import CgError, StoreError
 from cg.meta.store.balsamic import gather_files_and_bundle_in_housekeeper
-from cg.meta.workflow.balsamic import AnalysisAPI
+from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.store import Store
 from cg.utils import fastq
 
@@ -26,7 +26,7 @@ def store(context):
     """Store results from Balsamic in housekeeper."""
     context.obj["store_api"] = context.obj.get("store_api") or Store(context.obj["database"])
     context.obj["hk_api"] = context.obj.get("hk_api") or hk.HousekeeperAPI(context.obj)
-    context.obj["analysis_api"] = context.obj.get("analysis_api") or AnalysisAPI(
+    context.obj["analysis_api"] = context.obj.get("analysis_api") or BalsamicAnalysisAPI(
         hk_api=context.obj["hk_api"], fastq_api=fastq.FastqAPI,
     )
 
@@ -54,19 +54,18 @@ def analysis(context, case_id, deliverables_file_path, config_path):
 
     status = context.obj["store_api"]
     case_obj = status.family(case_id)
-    root_dir = Path(context.obj["balsamic"]["root"])
     analysis_api = context.obj["analysis_api"]
 
     if not case_obj:
         raise CgError(f"Case {case_id} not found")
 
     if not deliverables_file_path:
-        deliverables_file_path = analysis_api.get_deliverables_file_path(case_id, root_dir)
+        deliverables_file_path = analysis_api.get_deliverables_file_path(case_id)
         if not os.path.isfile(deliverables_file_path):
             context.invoke(generate_deliverables_file, case_id=case_id)
 
     if not config_path:
-        config_path = get_config_path(root_dir, case_id)
+        config_path = analysis_api.get_config_path(case_id)
 
     hk_api = context.obj["hk_api"]
 
@@ -92,7 +91,6 @@ def generate_deliverables_file(context, dry, config_path, case_id):
     """Generate a deliverables file for the case_id."""
 
     conda_env = context.obj["balsamic"]["conda_env"]
-    root_dir = Path(context.obj["balsamic"]["root"])
     case_obj = context.obj["store_api"].family(case_id)
     analysis_api = context.obj["analysis_api"]
 
@@ -100,11 +98,11 @@ def generate_deliverables_file(context, dry, config_path, case_id):
         raise CgError(f"Case {case_id} not found")
 
     if not config_path:
-        config_path = analysis_api.get_config_path(root_dir, case_id)
+        config_path = analysis_api.get_config_path(case_id)
         if not config_path.is_file():
             raise FileNotFoundError(f"Missing the sample-config file for {case_id}: {config_path}")
 
-    command_str = f" report deliver" f" --sample-config {config_path}'"
+    command_str = f" report deliver --sample-config {config_path}'"
     command = [f"bash -c 'source activate {conda_env}; balsamic"]
     command.extend(command_str.split(" "))
 

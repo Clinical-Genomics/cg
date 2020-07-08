@@ -13,7 +13,7 @@ from cg.utils.commands import Process
 @pytest.fixture
 def balsamic_orderform(orderforms: Path) -> str:
     """Orderform fixture for Balsamic samples"""
-    _file = orderforms / "1508.20.balsamic.xlsx"
+    _file = orderforms / "1508.21.balsamic.xlsx"
     return str(_file)
 
 
@@ -27,7 +27,7 @@ def external_orderform(orderforms: Path) -> str:
 @pytest.fixture
 def fastq_orderform(orderforms: Path):
     """Orderform fixture for fastq samples"""
-    _file = orderforms / "1508.20.fastq.xlsx"
+    _file = orderforms / "1508.21.fastq.xlsx"
     return str(_file)
 
 
@@ -41,28 +41,21 @@ def metagenome_orderform(orderforms: Path) -> str:
 @pytest.fixture
 def mip_orderform(orderforms: Path) -> str:
     """Orderform fixture for MIP samples"""
-    _file = orderforms / "1508.20.mip.xlsx"
+    _file = orderforms / "1508.21.mip.xlsx"
     return str(_file)
 
 
 @pytest.fixture
 def mip_balsamic_orderform(orderforms: Path) -> str:
     """Orderform fixture for MIP and Balsamic samples"""
-    _file = orderforms / "1508.20.mip_balsamic.xlsx"
+    _file = orderforms / "1508.21.mip_balsamic.xlsx"
     return str(_file)
 
 
 @pytest.fixture
 def mip_rna_orderform(orderforms: Path) -> str:
     """Orderform fixture for MIP RNA samples"""
-    _file = orderforms / "1508.20.mip_rna.xlsx"
-    return str(_file)
-
-
-@pytest.fixture
-def rml_orderform(orderforms: Path) -> str:
-    """Orderform fixture for RML samples"""
-    _file = orderforms / "1604.9.rml.xlsx"
+    _file = orderforms / "1508.21.mip_rna.xlsx"
     return str(_file)
 
 

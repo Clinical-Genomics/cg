@@ -10,12 +10,15 @@ import pytest
 import ruamel.yaml
 from trailblazer.mip import files as mip_dna_files_api
 
+from cg.apps.hk import HousekeeperAPI
 from cg.apps.mip_rna import files as mip_rna_files_api
 from cg.meta.store import mip as store_mip
 from cg.store import Store
 
+from .mocks.crunchy import MockCrunchyAPI
 from .mocks.hk_mock import MockHousekeeperAPI
 from .mocks.madeline import MockMadelineAPI
+from .mocks.scout import MockScoutAPI
 from .small_helpers import SmallHelpers
 from .store_helpers import StoreHelpers
 
@@ -23,7 +26,7 @@ CHANJO_CONFIG = {"chanjo": {"config_path": "chanjo_config", "binary_path": "chan
 CRUNCHY_CONFIG = {
     "crunchy": {
         "cram_reference": "/path/to/fasta",
-        "slurm": {"account": "mock_account", "mail_user": "mock_mail", "conda_env": "mock_env",},
+        "slurm": {"account": "mock_account", "mail_user": "mock_mail", "conda_env": "mock_env"},
     }
 }
 
@@ -137,6 +140,13 @@ def crunchy_config_dict():
     return _config
 
 
+@pytest.fixture(name="hk_config_dict")
+def fixture_hk_config_dict(root_path):
+    """Crunchy configs"""
+    _config = {"housekeeper": {"database": "sqlite:///:memory:", "root": str(root_path)}}
+    return _config
+
+
 # Api fixtures
 
 
@@ -182,6 +192,12 @@ def microbial_orderform(orderforms: Path) -> str:
     """Orderform fixture for microbial samples"""
     _file = orderforms / "1603.9.microbial.xlsx"
     return str(_file)
+
+
+@pytest.fixture
+def rml_orderform():
+    """Orderform fixture for RML samples"""
+    return "tests/fixtures/orderforms/1604.10.rml.xlsx"
 
 
 @pytest.fixture(name="madeline_output")
@@ -286,6 +302,12 @@ def fixture_timestamp() -> dt.datetime:
     return dt.datetime(2020, 5, 1)
 
 
+@pytest.fixture(scope="function", name="later_timestamp")
+def fixture_later_timestamp() -> dt.datetime:
+    """Return a time stamp in date time format"""
+    return dt.datetime(2020, 6, 1)
+
+
 @pytest.fixture(scope="function", name="hk_bundle_data")
 def fixture_hk_bundle_data(case_id, bed_file, timestamp):
     """Get some bundle data for housekeeper"""
@@ -299,12 +321,18 @@ def fixture_hk_bundle_data(case_id, bed_file, timestamp):
 
 
 @pytest.yield_fixture(scope="function", name="housekeeper_api")
-def fixture_housekeeper_api(root_path):
+def fixture_housekeeper_api(hk_config_dict):
     """Setup Housekeeper store."""
-    _api = MockHousekeeperAPI(
-        {"housekeeper": {"database": "sqlite:///:memory:", "root": str(root_path)}}
-    )
-    return _api
+    _api = MockHousekeeperAPI(hk_config_dict)
+    yield _api
+
+
+@pytest.yield_fixture(scope="function", name="real_housekeeper_api")
+def fixture_real_housekeeper_api(hk_config_dict):
+    """Setup a real Housekeeper store."""
+    _api = HousekeeperAPI(hk_config_dict)
+    _api.initialise_db()
+    yield _api
 
 
 @pytest.yield_fixture(scope="function", name="populated_housekeeper_api")
@@ -320,6 +348,26 @@ def fixture_hk_version_obj(housekeeper_api, hk_bundle_data, helpers):
     """Get a housekeeper version object"""
     _version = helpers.ensure_hk_version(housekeeper_api, hk_bundle_data)
     return _version
+
+
+# Scout fixtures
+
+
+@pytest.yield_fixture(scope="function", name="scout_api")
+def fixture_scout_api():
+    """Setup Scout api."""
+    _api = MockScoutAPI()
+    return _api
+
+
+# Crunchy fixtures
+
+
+@pytest.yield_fixture(scope="function", name="crunchy_api")
+def fixture_crunchy_api():
+    """Setup Crunchy api."""
+    _api = MockCrunchyAPI()
+    return _api
 
 
 # Store fixtures

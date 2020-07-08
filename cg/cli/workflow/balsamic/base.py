@@ -2,9 +2,9 @@
 import gzip
 import logging
 import re
-import shutil
 import subprocess
 import sys
+import shutil
 from pathlib import Path
 
 import click
@@ -16,10 +16,14 @@ from cg.cli.workflow.balsamic.deliver import deliver as deliver_cmd
 from cg.cli.workflow.get_links import get_links
 from cg.exc import LimsDataError, BalsamicStartError
 from cg.meta.workflow.base import get_target_bed_from_lims
-from cg.meta.workflow.balsamic import AnalysisAPI
-from cg.store import Store
+from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
+from cg.apps.balsamic.api import BalsamicAPI
+from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
+ANALYSIS_TYPE_OPTION = click.option(
+    "-a", "--analysis-type", type=click.Choice(["qc", "paired", "single"])
+)
 PRIORITY_OPTION = click.option("-p", "--priority", type=click.Choice(["low", "normal", "high"]))
 EMAIL_OPTION = click.option("-e", "--email", help="email to send errors to")
 SUCCESS = 0
@@ -40,9 +44,9 @@ def balsamic(context, case_id, priority, email, target_bed):
     context.obj["gzipper"] = gzip
     context.obj["lims_api"] = lims.LimsAPI(context.obj)
     context.obj["fastq_api"] = FastqAPI
-
-    context.obj["analysis_api"] = AnalysisAPI(
-        hk_api=context.obj["hk_api"], fastq_api=context.obj["fastq_api"]
+    context.obj["balsamic_api"] = BalsamicAPI(context.obj)
+    context.obj["analysis_api"] = BalsamicAnalysisAPI(
+        config=context.obj, hk_api=context.obj["hk_api"], fastq_api=context.obj["fastq_api"]
     )
 
     if context.invoked_subcommand is None:
@@ -71,7 +75,7 @@ def link(context, case_id, sample_id):
         )
         if link_obj.sample.data_analysis and "balsamic" in link_obj.sample.data_analysis.lower():
             LOG.info(
-                "%s has balsamic as data analysis, linking.", link_obj.sample.internal_id,
+                "%s has BALSAMIC as data analysis, linking.", link_obj.sample.internal_id,
             )
             context.obj["analysis_api"].link_sample(
                 fastq_handler=FastqHandler(context.obj),
@@ -80,13 +84,12 @@ def link(context, case_id, sample_id):
             )
         else:
             LOG.warning(
-                "%s does not have blasamic as data analysis, skipping.",
-                link_obj.sample.internal_id,
+                "%s does not have BALSAMIC as data analysis, skipping.", link_obj.sample.internal_id
             )
 
 
 @balsamic.command(name="config-case")
-@click.option("-d", "--dry-run", "dry", is_flag=True, help="print config to console")
+@click.option("--dry-run", "dry", is_flag=True, help="print config to console")
 @click.option("--target-bed", required=False, help="Optional")
 @click.option("--umi-trim-length", default=5, required=False, help="Default 5")
 @click.option("--quality-trim", is_flag=True, required=False, help="Optional")
@@ -97,7 +100,7 @@ def link(context, case_id, sample_id):
 def config_case(
     context, dry, target_bed, umi_trim_length, quality_trim, adapter_trim, umi, case_id
 ):
-    """ Generate a config for the case_id. """
+    """ Generate a config file for the case_id. """
 
     # missing sample_id and files
     case_obj = context.obj["store_api"].family(case_id)
@@ -110,9 +113,6 @@ def config_case(
     tumor_paths = set()
     normal_paths = set()
     target_beds = set()
-    singularity = context.obj["balsamic"]["singularity"]
-    reference_config = context.obj["balsamic"]["reference_config"]
-    conda_env = context.obj["balsamic"]["conda_env"]
     root_dir = context.obj["balsamic"]["root"]
     wrk_dir = Path(f"{root_dir}/{case_id}/fastq")
     application_types = set()
@@ -222,85 +222,68 @@ def config_case(
             raise BalsamicStartError("No target bed specified!")
 
     # Call Balsamic
-    command_str = (
-        f" config case"
-        f" --reference-config {reference_config}"
-        f" --singularity {singularity}"
-        f" --tumor {tumor_path}"
-        f" --case-id {case_id}"
-        f" --output-config {case_id}.json"
-        f" --analysis-dir {root_dir}"
-        f" --umi-trim-length {umi_trim_length}"
-    )
+    arguments = {
+        "tumor": tumor_path,
+        "normal": normal_path,
+        "case_id": case_id,
+        "output_config": f"{case_id}.json",
+        "quality_trim": quality_trim,
+        "adapter_trim": adapter_trim,
+        "umi": umi,
+        "umi_trim_length": umi_trim_length,
+        "panel_bed": target_bed,
+    }
 
-    if target_bed:
-        command_str += f" -p {target_bed}"
-    if normal_path:
-        command_str += f" --normal {normal_path}"
-    if umi:
-        command_str += f" --umi"
-    if quality_trim:
-        command_str += f" --quality-trim"
-    if adapter_trim:
-        command_str += f" --adapter-trim"
-    command = [f"bash -c 'source activate {conda_env}; balsamic"]
-    command_str += "'"  # add ending quote from above line
-    command.extend(command_str.split(" "))
-
-    if dry:
-        LOG.info(" ".join(command))
-        return SUCCESS
-
-    process = subprocess.run(" ".join(command), shell=True)
+    process = context.obj["balsamic_api"].config_case(arguments=arguments, dry=dry)
     return process
 
 
 @balsamic.command()
-@click.option("-d", "--dry-run", "dry", is_flag=True, help="print command to console")
+@click.option("--dry-run", "dry", is_flag=True, help="print command to console")
 @click.option(
-    "-r", "--run-analysis", "run_analysis", is_flag=True, default=False, help="start " "analysis",
+    "-r", "--run-analysis", "run_analysis", is_flag=True, default=False, help="start analysis"
 )
 @click.option("--config", "config_path", required=False, help="Optional")
-@PRIORITY_OPTION
+@ANALYSIS_TYPE_OPTION
 @EMAIL_OPTION
+@PRIORITY_OPTION
 @click.argument("case_id")
 @click.pass_context
-def run(context, dry, run_analysis, config_path, priority, email, case_id):
-    """Generate a config for the case_id."""
+def run(context, dry, run_analysis, case_id, analysis_type, config_path, email, priority):
+    """Run BALSAMIC analysis for case_id."""
 
-    conda_env = context.obj["balsamic"]["conda_env"]
-    slurm_account = context.obj["balsamic"]["slurm"]["account"]
-    priority = priority if priority else context.obj["balsamic"]["slurm"]["qos"]
-    root_dir = Path(context.obj["balsamic"]["root"])
     if not config_path:
-        config_path = Path.joinpath(root_dir, case_id, case_id + ".json")
+        config_path = Path(context.obj["balsamic"]["root"]) / case_id / (case_id + ".json")
 
     # Call Balsamic
-    command_str = f" run analysis" f" --account {slurm_account}" f" -s {config_path}"
-
-    if run_analysis:
-        command_str += " --run-analysis"
-
-    if email:
-        command_str += f" --mail-user {email}"
-
-    command_str += f" --qos {priority}"
-
-    command = [f"bash -c 'source activate {conda_env}; balsamic"]
-    command_str += "'"
-    command.extend(command_str.split(" "))
-
-    if dry:
-        LOG.info(" ".join(command))
-        return SUCCESS
-
-    process = subprocess.run(" ".join(command), shell=True)
+    arguments = {
+        "case_id": case_id,
+        "analysis_type": analysis_type,
+        "sample_config": config_path,
+        "email": email,
+        "priority": priority,
+    }
+    process = context.obj["balsamic_api"].run_analysis(
+        arguments=arguments, run_analysis=run_analysis, dry=dry
+    )
     return process
+
+
+def get_priority_as_text(case_obj: models.Family) -> str:
+    """Get priority as text for a case"""
+
+    if case_obj.high_priority:
+        return "high"
+
+    if case_obj.low_priority:
+        return "low"
+
+    return "normal"
 
 
 @balsamic.command()
 @click.option(
-    "-d", "--dry-run", "dry_run", is_flag=True, help="print to console without actualising",
+    "-d", "--dry-run", is_flag=True, help="print to console without actualising",
 )
 @click.pass_context
 def start(context: click.Context, dry_run):
@@ -322,18 +305,6 @@ def start(context: click.Context, dry_run):
             exit_code = FAIL
 
     sys.exit(exit_code)
-
-
-def get_priority_as_text(case_obj):
-    """Get priority as text for a case"""
-
-    if case_obj.high_priority:
-        return "high"
-
-    if case_obj.low_priority:
-        return "low"
-
-    return "normal"
 
 
 @balsamic.command("remove-fastq")
