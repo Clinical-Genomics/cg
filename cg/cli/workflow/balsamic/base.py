@@ -21,7 +21,7 @@ OPTION_DRY = click.option(
 OPTION_PANEL_BED = click.option(
     "--panel-bed", 
     required=False, 
-    help=help="Panel BED is determined based on capture kit \
+    help="Panel BED is determined based on capture kit \
     used for library prep. Set this option to override the default"
     )
 OPTION_ANALYSIS_TYPE = click.option(
