@@ -136,7 +136,6 @@ def config_case(context, panel_bed, case_id, dry):
         arguments=arguments, 
         dry=dry)
 
-
 @balsamic.command()
 @ARGUMENT_CASE_ID
 @OPTION_DRY
