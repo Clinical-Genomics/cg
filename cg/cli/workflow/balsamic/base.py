@@ -36,7 +36,7 @@ def balsamic(context, case_id, priority, panel_bed, analysis_type, run_analysis,
     if context.invoked_subcommand is None:
         if case_id is None:
             LOG.error("Provide a case!")
-            click.Abort()
+            raise click.Abort()
         else:
             context.invoke(link, case_id=case_id)
             context.invoke(config_case, case_id=case_id, panel_bed=panel_bed, dry=dry)
@@ -63,10 +63,10 @@ def link(context, case_id):
             context.obj["BalsamicAnalysisAPI"].link_samples(case_object.links)
         else:
             LOG.warning(f"{case_id} has no linked samples")
-            click.Abort()
+            raise click.Abort()
     else:
         LOG.warning(f"{case_id} is not present in database")
-        click.Abort()
+        raise click.Abort()
 
 
 @balsamic.command("config-case")
