@@ -33,16 +33,16 @@ class BalsamicAnalysisAPI:
         self.lims_api = lims.LimsAPI(config)
         self.fastq_api = FastqAPI
 
-    def get_deliverables_file_path(self, case_id : str) -> Path:
+    def get_deliverables_file_path(self, case_id: str) -> Path:
         """Generates a path where the Balsamic deliverables file for the case_id should be
         located"""
         return Path(self.balsamic_api.root_dir / case_id / "delivery_report" / (case_id + ".hk"))
 
-    def get_config_path(self, case_id : str) -> Path:
+    def get_config_path(self, case_id: str) -> Path:
         """Generates a path where the Balsamic config for the case_id should be located"""
         return Path(self.balsamic_api.root_dir / case_id / (case_id + ".json")).as_posix()
 
-    def get_case_path(self, case_id : str) -> Path:
+    def get_case_path(self, case_id: str) -> Path:
         """Generates a path where the Balsamic case for the case_id should be located"""
         return Path(self.balsamic_api.root_dir / case_id).as_posix()
 
@@ -129,7 +129,6 @@ class BalsamicAnalysisAPI:
         ).as_posix()
         return concatenated_path
 
-
     def get_sample_type(self, link_object) -> str:
         if link_object.sample.is_tumour:
             return "tumor"
@@ -142,7 +141,6 @@ class BalsamicAnalysisAPI:
     def get_priority(self, case_object) -> str:
 
         pass
-
 
     def get_case_config_params(self, case_object) -> dict:
         """Fetches config params for each sample and returns them in a dict"""
@@ -157,11 +155,9 @@ class BalsamicAnalysisAPI:
                 }
         return sample_data
 
-    def get_verified_bed(self, sample_data : dict) -> Optional[str]:
-        application_types = set(
-            [v["application_type"] for k, v in setup_data.items()])
-        target_beds = set(
-            [v["target_bed"] for k, v in setup_data.items()])
+    def get_verified_bed(self, sample_data: dict) -> Optional[str]:
+        application_types = set([v["application_type"] for k, v in setup_data.items()])
+        target_beds = set([v["target_bed"] for k, v in setup_data.items()])
 
         if not application_types.issubset(self.__BALSAMIC_APPLICATIONS):
             raise ValueError
@@ -171,25 +167,29 @@ class BalsamicAnalysisAPI:
             return None
         return target_beds.pop()
 
-    def get_verified_tumor_path(self, sample_data : dict) -> str(Path):
+    def get_verified_tumor_path(self, sample_data: dict) -> str(Path):
         tumor_paths = [
-            val["concatenated_path"] for key, val in setup_data.items()
-            if val["tissue_type"] == "tumor"]
+            val["concatenated_path"]
+            for key, val in setup_data.items()
+            if val["tissue_type"] == "tumor"
+        ]
         if len(tumor_paths) != 1:
             raise ValueError
         return tumor_paths[0]
 
-    def get_verified_normal_path(self, sample_data : dict) -> Optional[str]:
+    def get_verified_normal_path(self, sample_data: dict) -> Optional[str]:
         normal_paths = [
-            val["concatenated_path"] for key, val in setup_data.items()
-            if val["tissue_type"] == "normal"]
+            val["concatenated_path"]
+            for key, val in setup_data.items()
+            if val["tissue_type"] == "normal"
+        ]
         if len(normal_paths) > 1:
             raise ValueError
         elif len(normal_paths) == 0:
             return None
         return normal_paths[0]
 
-    def get_verified_config_params(self, case_id : str, panel_bed : str, sample_data: dict) -> dict:
+    def get_verified_config_params(self, case_id: str, panel_bed: str, sample_data: dict) -> dict:
         arguments = {
             "case_id": case_id,
             "normal": self.get_verified_normal_path(sample_data),
@@ -198,8 +198,3 @@ class BalsamicAnalysisAPI:
             "output_config": f"{case_id}.json",
         }
         return arguments
-
-
-        
-        
-
