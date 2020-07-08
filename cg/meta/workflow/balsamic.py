@@ -31,12 +31,12 @@ class BalsamicAnalysisAPI:
         self.lims_api = lims.LimsAPI(config)
         self.fastq_api = FastqAPI
 
-    def get_deliverables_file_path(self, case_id):
+    def get_deliverables_file_path(self, case_id) -> Path:
         """Generates a path where the Balsamic deliverables file for the case_id should be
         located"""
         return Path(self.balsamic_api.root_dir / case_id / "delivery_report" / (case_id + ".hk"))
 
-    def get_config_path(self, case_id):
+    def get_config_path(self, case_id) -> Path:
         """Generates a path where the Balsamic config for the case_id should be located"""
         return Path(self.balsamic_api.root_dir / case_id / (case_id + ".json"))
 
@@ -71,7 +71,6 @@ class BalsamicAnalysisAPI:
 
     def lookup_samples(self, case_id):
         """Look up case ID in StoreDB and return result"""
-
         case_object = self.store.family(case_id)
         return case_object
 
@@ -96,55 +95,47 @@ class BalsamicAnalysisAPI:
                 LOG.info(f"{link_object.sample.internal_id} does not have balsamic as data analysis, skipping.")
         LOG.info("Linking completed")
 
-    def get_target_bed_from_lims(self, sample_id):
+
+    def get_target_bed_from_lims(self, link_object) -> str(Path):
         """Get target bed filename from lims"""
-        capture_kit = self.lims_api.capture_kit(sample_id)
+        capture_kit = self.lims_api.capture_kit(link_object.sample.internal_id)
         if capture_kit:
             panel_bed = self.store.bed_version(capture_kit).filename
-        return panel_bed
+            return panel_bed
+
+    def get_fastq_path(self, link_object) -> str(Path):
+        file_collection = self.get_file_collection(sample=link_object.sample.internal_id)
+        fastq_data = file_collection[0]
+        linked_fastq_name = self.fastq_handler.FastqFileNameCreator.create(
+            lane=fastq_data["lane"],
+            flowcell=fastq_data["flowcell"],
+            sample=link_object.sample.internal_id,
+            read=fastq_data["read"],
+            more={"undetermined": fastq_data["undetermined"]},
+        )
+        concatenated_fastq_name = self.fastq_handler.FastqFileNameCreator.get_concatenated_name(linked_fastq_name)
+        concatenated_path = Path(self.balsamic_api.root_dir / link_object.family.internal_id / "fastq" / concatenated_fastq_name).as_posix()
+        return concatenated_path
+
+    def get_sample_type(self, link_object) -> str:
+        if link_object.sample.is_tumour:
+            return "tumor"
+        return "normal"
+
+    def get_application_type(self, link_object) -> str:
+        application_type = link_object.sample.application_version.application.prep_category
+        return application_type
 
 
-    def get_case_config_params(self, case_id, case_object) -> dict:
-        """Determines correct config params and returns them in a dict"""
-
+    def get_case_config_params(self, case_object) -> dict:
+        """Fetches config params for each sample and returns them in a dict"""
         setup_data = {}
-        # Iterate over all links
         for link_object in case_object.links:
-            # Check if Balsamic as analysis type
             if "balsamic" in link_object.sample.data_analysis.lower():
-                # Get file collection for sample id
-                file_collection = self.get_file_collection(sample=link_object.sample.internal_id)
-                fastq_data = file_collection[0]
-                linked_fastq_name = self.fastq_handler.FastqFileNameCreator.create(
-                    lane=fastq_data["lane"],
-                    flowcell=fastq_data["flowcell"],
-                    sample=link_object.sample.internal_id,
-                    read=fastq_data["read"],
-                    more={"undetermined": fastq_data["undetermined"]},
-                )
-                concatenated_fastq_name = self.fastq_handler.FastqFileNameCreator.get_concatenated_name(linked_fastq_name)
-                concatenated_path = Path(self.balsamic_api.root_dir / case_id / "fastq" / concatenated_fastq_name).as_posix()
-
-                # Block to get application type
-                application_type = 
-
-                # Block to get panel BED
-                target_bed_filename = get_target_bed_from_lims(
-                    lims=self.lims_api,
-                    status_db=self.store,
-                    target_bed=link_object.sample.internal_id,
-                )
-
-                # Check if tumor
-                if link_object.sample.is_tumour:
-                    tissue_type = "tumor"
-                else:
-                    tissue_type = "normal"
                 setup_data[link_object.sample.internal_id] = {
-                    "tissue_type": tissue_type,
-                    "concatenated_path": concatenated_path,
-                    "application_type": link_object.sample.application_version.application.prep_category,
-                    "target_bed": target_bed_filename,
+                    "tissue_type": self.get_sample_type(link_object),
+                    "concatenated_path": self.get_fastq_path(link_object),
+                    "application_type": self.get_application_type(link_object),
+                    "target_bed": self.get_target_bed_from_lims(link_object),
                 }
-
         return setup_data

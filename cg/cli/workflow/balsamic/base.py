@@ -33,8 +33,18 @@ def balsamic(context, case_id, priority, panel_bed, analysis_type, run_analysis,
             LOG.error("Provide a case!")
             click.Abort()
         else:
-            context.invoke(link, case_id=case_id)
-            context.invoke(config_case, case_id=case_id, panel_bed=panel_bed)
+            context.invoke(link, 
+                            case_id=case_id)
+            context.invoke(config_case, 
+                            case_id=case_id, 
+                            panel_bed=panel_bed, 
+                            dry=dry)
+            context.invoke(run, 
+                            case_id=case_id, 
+                            priority=priority, 
+                            analysis_type=analysis_type, 
+                            run_analysis=run_analysis,
+                            dry=dry)
 
 
 @balsamic.command()
@@ -79,17 +89,17 @@ def config_case(context, panel_bed, case_id, dry):
     case_object = context.obj["BalsamicAnalysisAPI"].lookup_samples(case_id)
     if case_object:
         if case_object.links:
-            setup_data = context.obj["BalsamicAnalysisAPI"].get_case_config_params(
-                case_id, case_object)
+            setup_data = context.obj["BalsamicAnalysisAPI"].get_case_config_params(case_object)
 
             normal_paths = [
                 v["concatenated_path"]
                 for k, v in setup_data.items()
-                if v["tissue_type"] == "normal"
-            ]
+                if v["tissue_type"] == "normal"]
             tumor_paths = [
-                v["concatenated_path"] for k, v in setup_data.items() if v["tissue_type"] == "tumor"
-            ]
+                v["concatenated_path"]
+                for k, v in setup_data.items() 
+                if v["tissue_type"] == "tumor"]
+
             application_types = set([v["application_type"] for k, v in setup_data.items()])
             target_beds = set([v["target_bed"] for k, v in setup_data.items()])
 
@@ -98,15 +108,18 @@ def config_case(context, panel_bed, case_id, dry):
                 arguments["normal"] = normal_paths[0]
             elif len(normal_paths) == 0:
                 arguments["normal"] = None
+            else:
+                LOG.warning(f"{case_id} has {len(normal_paths)} normal samples, while only 1 is permitted")
+                click.Abort()
 
-            # Check if tumor samples are 1
+            # Check if tumor samples are at least 1
             if len(tumor_paths) == 1:
                 arguments["tumor"] = tumor_paths[0]
             elif len(tumor_paths) == 0:
                 LOG.warning(f"No tumor samples found for {case_id}")
                 click.Abort()
             elif len(tumor_paths) > 1:
-                LOG.warning(f"Too many tumor samples found: {len(tumor_paths)}")
+                LOG.warning(f"Too many tumor samples found: {len(tumor_paths)} samples")
                 click.Abort()
 
             # Check application type is only one
@@ -187,15 +200,3 @@ def remove_fastq(context, case_id):
         LOG.info(f"Path {work_dir} removed successfully")
     else:
         LOG.info(f"Path {work_dir} does not exist")
-
-
-@balsamic.command()
-@ARGUMENT_CASE_ID
-@click.pass_context
-def start(context, case_id):
-    """Invoke all commands"""
-
-    context.invoke(link)
-    context.invoke(config_case)
-    context.invoke(run)
-    context.invoke(remove_fastq)
