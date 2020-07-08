@@ -166,6 +166,8 @@ def config_case(context, panel_bed, case_id, dry):
                         )
                 else:
                     arguments["panel_bed"] = None
+                    
+            context.obj["BalsamicAnalysisAPI"].balsamic_api.config_case(arguments)
         else:
             LOG.warning(f"{case_id} has no linked samples")
             raise click.Abort()
@@ -173,7 +175,6 @@ def config_case(context, panel_bed, case_id, dry):
         LOG.warning(f"{case_id} is not present in database")
         raise click.Abort()
 
-    context.obj["BalsamicAnalysisAPI"].balsamic_api.config_case(arguments)
 
 
 @balsamic.command()
@@ -184,14 +185,12 @@ def config_case(context, panel_bed, case_id, dry):
 @OPTION_RUN_ANALYSIS
 @click.pass_context
 def run(context, analysis_type, run_analysis, priority, case_id, dry):
-
     arguments = {
         "priority": priority,
         "analysis_type": analysis_type,
         "run_analysis": run_analysis,
         "case_id": case_id,
     }
-
     context.obj["BalsamicAnalysisAPI"].balsamic_api.run_analysis(arguments)
 
 
