@@ -132,8 +132,8 @@ MIP_DNA_TAGS = {
 
 
 MIP_RNA_TAGS = {
-    ("arriba_ar", "arriba_report"): {"tags": ["arriba-ar", "arriba-report"], "is_mandatory": True},
     ("arriba_ar", "arriba_ar"): {"tags": ["arriba-ar"], "is_mandatory": True},
+    ("arriba_ar", "arriba_report"): {"tags": ["arriba-ar", "arriba-report"], "is_mandatory": True},
     ("bcftools_merge",): {"tags": ["bcftools-merge"], "is_mandatory": True},
     ("blobfish",): {"tags": ["blobfish"], "is_mandatory": False},
     ("bootstrapann",): {"tags": ["bootstrapann"], "is_mandatory": True},
