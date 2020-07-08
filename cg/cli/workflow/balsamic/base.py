@@ -39,18 +39,16 @@ def balsamic(context, case_id, priority, panel_bed, analysis_type, run_analysis,
             LOG.error("Provide a case!")
             click.Abort()
         else:
-            context.invoke(link, 
-                            case_id=case_id)
-            context.invoke(config_case, 
-                            case_id=case_id, 
-                            panel_bed=panel_bed, 
-                            dry=dry)
-            context.invoke(run, 
-                            case_id=case_id, 
-                            priority=priority, 
-                            analysis_type=analysis_type, 
-                            run_analysis=run_analysis,
-                            dry=dry)
+            context.invoke(link, case_id=case_id)
+            context.invoke(config_case, case_id=case_id, panel_bed=panel_bed, dry=dry)
+            context.invoke(
+                run,
+                case_id=case_id,
+                priority=priority,
+                analysis_type=analysis_type,
+                run_analysis=run_analysis,
+                dry=dry,
+            )
 
 
 @balsamic.command()
@@ -100,11 +98,11 @@ def config_case(context, panel_bed, case_id, dry):
             normal_paths = [
                 v["concatenated_path"]
                 for k, v in setup_data.items()
-                if v["tissue_type"] == "normal"]
+                if v["tissue_type"] == "normal"
+            ]
             tumor_paths = [
-                v["concatenated_path"]
-                for k, v in setup_data.items() 
-                if v["tissue_type"] == "tumor"]
+                v["concatenated_path"] for k, v in setup_data.items() if v["tissue_type"] == "tumor"
+            ]
 
             application_types = set([v["application_type"] for k, v in setup_data.items()])
             target_beds = set([v["target_bed"] for k, v in setup_data.items()])
@@ -115,7 +113,9 @@ def config_case(context, panel_bed, case_id, dry):
             elif len(normal_paths) == 0:
                 arguments["normal"] = None
             else:
-                LOG.warning(f"{case_id} has {len(normal_paths)} normal samples, while only 1 is permitted")
+                LOG.warning(
+                    f"{case_id} has {len(normal_paths)} normal samples, while only 1 is permitted"
+                )
                 click.Abort()
 
             # Check if tumor samples are at least 1
