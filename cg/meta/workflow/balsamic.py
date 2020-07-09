@@ -99,7 +99,9 @@ class BalsamicAnalysisAPI:
         LOG.info("Linking completed")
 
     def get_target_bed_from_lims(self, link_object) -> str(Path):
-        """Get target bed filename from lims"""
+        """Get target bed filename from lims
+        Raises LimsDataError if target_bed cannot be retrieved.
+        """
         capture_kit = self.lims_api.capture_kit(link_object.sample.internal_id)
         if capture_kit:
             panel_bed = self.store.bed_version(capture_kit).filename
@@ -143,18 +145,36 @@ class BalsamicAnalysisAPI:
         return "normal"
 
     def get_verified_bed(self, sample_data: dict) -> Optional[str]:
+        """"Takes a dict with samples and attributes.
+        - Retrieves unique attributes for application type and target_bed. 
+        - Verifies that those attributes are the same across multiple samples, 
+        where applicable.
+        - Verifies that the attributes are valid BALSAMIC attributes
+        - If application type requires bed, returns path to bed.
+        
+        Raises BalsamicStartError:
+        - When application type invalid for balsamic 
+        - When multiple samples have different parameters
+        - When bed file required for analysis, but is not set.
+        """
         application_types = set([v["application_type"] for k, v in sample_data.items()])
         target_beds = set([v["target_bed"] for k, v in sample_data.items()])
 
         if not application_types.issubset(self.__BALSAMIC_APPLICATIONS):
             raise BalsamicStartError
-        if len(application_types) != 1 or len(target_beds) != 1:
+        if len(application_types) != 1 or len(target_beds) > 1:
             raise BalsamicStartError
         if not application_types.issubset(self.__BALSAMIC_BED_APPLICATIONS):
             return None
-        return Path(self.balsamic_api.bed_path, target_beds.pop()).as_posix()
+        if len(target_beds) == 1:
+            return Path(self.balsamic_api.bed_path, target_beds.pop()).as_posix()
+        raise BalsamicStartError
 
     def get_verified_tumor_path(self, sample_data: dict) -> str(Path):
+        """Takes a dict with samples and attributes, and retrieves the paths
+        of tumor samples. If the number of paths is exactly 1, the path is returned.
+        If there are no paths, or more than one path, raise BalsamicStartError.
+        """
         tumor_paths = [
             val["concatenated_path"]
             for key, val in sample_data.items()
@@ -165,6 +185,11 @@ class BalsamicAnalysisAPI:
         return tumor_paths[0]
 
     def get_verified_normal_path(self, sample_data: dict) -> Optional[str]:
+        """Takes a dict with samples and attributes, and retrieves the paths
+        of normal samples. If the number of paths is exactly 1, the path is returned.
+        If there are no paths, then the sample is not paired, and None is returned.
+        Otherwise, raise BalsamicStartError.
+        """
         normal_paths = [
             val["concatenated_path"]
             for key, val in sample_data.items()
