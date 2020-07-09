@@ -29,6 +29,7 @@ class BalsamicAnalysisAPI:
         self.fastq_handler = FastqHandler(config)
         self.lims_api = lims.LimsAPI(config)
         self.fastq_api = FastqAPI
+        self.bed_path = config["bed_path"]
 
     def get_deliverables_file_path(self, case_id: str) -> Path:
         """Generates a path where the Balsamic deliverables file for the case_id should be
@@ -152,7 +153,7 @@ class BalsamicAnalysisAPI:
             raise BalsamicStartError
         if not application_types.issubset(self.__BALSAMIC_BED_APPLICATIONS):
             return None
-        return target_beds.pop()
+        return Path(self.bed_path, target_beds.pop()).as_posix()
 
     def get_verified_tumor_path(self, sample_data: dict) -> str(Path):
         tumor_paths = [
