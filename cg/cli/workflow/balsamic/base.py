@@ -102,7 +102,7 @@ def run(context, analysis_type, run_analysis, priority, case_id, dry):
         "priority": priority or context.obj["BalsamicAnalysisAPI"].get_priority(case_id),
         "analysis_type": analysis_type,
         "run_analysis": run_analysis,
-        "case_id": case_id,
+        "sample_config": context.obj["BalsamicAnalysisAPI"].get_config_path(case_id),
     }
 
     context.obj["BalsamicAnalysisAPI"].balsamic_api.run_analysis(
