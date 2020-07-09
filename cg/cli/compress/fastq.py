@@ -10,6 +10,18 @@ from .helpers import get_fastq_cases, get_fastq_individuals, update_compress_api
 
 LOG = logging.getLogger(__name__)
 
+# There is a list of problematic cases that we should skip
+PROBLEMATIC_CASES = [
+    "modernbee",
+    "suremako",
+    "expertalien",
+    "wisestork",
+    "richalien",
+    "deepcub",
+    "causalmite",
+    "proudcollie",
+]
+
 
 @click.command("fastq")
 @click.option("-c", "--case-id", type=str)
@@ -21,8 +33,7 @@ LOG = logging.getLogger(__name__)
 def fastq_cmd(context, case_id, number_of_conversions, ntasks, mem, dry_run):
     """ Find cases with FASTQ files and compress into SPRING """
     LOG.info("Running compress FASTQ")
-    compress_api = context.obj["compress"]
-    update_compress_api(compress_api, dry_run=dry_run, ntasks=ntasks, mem=mem)
+    update_compress_api(context.obj["compress"], dry_run=dry_run, ntasks=ntasks, mem=mem)
 
     store = context.obj["db"]
     try:
@@ -37,11 +48,15 @@ def fastq_cmd(context, case_id, number_of_conversions, ntasks, mem, dry_run):
         case_converted = True
         if case_conversion_count >= number_of_conversions:
             break
+        internal_id = case.internal_id
+        if internal_id in PROBLEMATIC_CASES:
+            LOG.info("Skipping problematic case %s", internal_id)
+            continue
 
-        LOG.info("Searching for FASTQ files in case %s", case.internal_id)
+        LOG.info("Searching for FASTQ files in case %s", internal_id)
         for link_obj in case.links:
             sample_id = link_obj.sample.internal_id
-            case_converted = compress_api.compress_fastq(sample_id)
+            case_converted = context.obj["compress"].compress_fastq(sample_id)
             if case_converted is False:
                 LOG.info("skipping individual %s", sample_id)
                 continue
