@@ -55,7 +55,7 @@ def balsamic(context, case_id, priority, panel_bed, analysis_type, run_analysis,
         )
 
 
-@balsamic.command()
+@balsamic.command("link")
 @ARGUMENT_CASE_ID
 @click.pass_context
 def link(context, case_id):
