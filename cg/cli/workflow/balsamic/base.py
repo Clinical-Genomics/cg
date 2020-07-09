@@ -28,7 +28,6 @@ OPTION_PRIORITY = click.option("-p", "--priority", type=click.Choice(["low", "no
 
 
 @click.group(invoke_without_command=True)
-@ARGUMENT_CASE_ID
 @OPTION_DRY
 @OPTION_PANEL_BED
 @OPTION_ANALYSIS_TYPE
@@ -38,21 +37,6 @@ OPTION_PRIORITY = click.option("-p", "--priority", type=click.Choice(["low", "no
 def balsamic(context, case_id, priority, panel_bed, analysis_type, run_analysis, dry):
     """Cancer workflow """
     context.obj["BalsamicAnalysisAPI"] = BalsamicAnalysisAPI(context.obj)
-    if context.invoked_subcommand is None:
-        if case_id is None:
-            LOG.error("Provide a case!")
-            raise click.Abort()
-
-        context.invoked_subcommand(link, case_id=case_id)
-        context.invoked_subcommand(config_case, case_id=case_id, panel_bed=panel_bed, dry=dry)
-        context.invoked_subcommand(
-            run,
-            case_id=case_id,
-            priority=priority,
-            analysis_type=analysis_type,
-            run_analysis=run_analysis,
-            dry=dry,
-        )
 
 
 @balsamic.command("link")
