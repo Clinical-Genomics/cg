@@ -142,7 +142,6 @@ class BalsamicAnalysisAPI:
             return "low"
         return "normal"
 
-
     def get_verified_bed(self, sample_data: dict) -> Optional[str]:
         application_types = set([v["application_type"] for k, v in sample_data.items()])
         target_beds = set([v["target_bed"] for k, v in sample_data.items()])
@@ -177,8 +176,7 @@ class BalsamicAnalysisAPI:
             return None
         return normal_paths[0]
 
-    def get_verified_config_params(self, case_id: str, panel_bed: str,
-                                   sample_data: dict) -> dict:
+    def get_verified_config_params(self, case_id: str, panel_bed: str, sample_data: dict) -> dict:
         """Takes a dictionary with per-sample parameters, 
         verifies their structure, and transforms into command line arguments
         """
