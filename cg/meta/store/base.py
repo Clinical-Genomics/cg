@@ -66,7 +66,7 @@ def deliverables_files(deliverables: dict, analysis_type: str) -> list:
     return files
 
 
-def parse_files(deliverables: dict, pipeline_tags: list, analysis_type_tags: dict) -> list:
+def parse_files(deliverables: dict, pipeline_tags: list, analysis_type_tags: dict) -> dict:
     """ Get all files and their tags from the deliverables file """
 
     parsed_files = []
