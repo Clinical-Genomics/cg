@@ -161,14 +161,14 @@ class BalsamicAnalysisAPI:
         target_beds = set([v["target_bed"] for k, v in sample_data.items()])
 
         if not application_types.issubset(self.__BALSAMIC_APPLICATIONS):
-            raise BalsamicStartError
+            raise BalsamicStartError("Case application not compatible with BALSAMIC")
         if len(application_types) != 1 or len(target_beds) > 1:
-            raise BalsamicStartError
+            raise BalsamicStartError("Case samples tagged with contradictory BED version")
         if not application_types.issubset(self.__BALSAMIC_BED_APPLICATIONS):
             return None
         if len(target_beds) == 1:
             return Path(self.balsamic_api.bed_path, target_beds.pop()).as_posix()
-        raise BalsamicStartError
+        raise BalsamicStartError("No bed version could be retrieved from LIMS")
 
     def get_verified_tumor_path(self, sample_data: dict) -> str(Path):
         """Takes a dict with samples and attributes, and retrieves the paths
@@ -181,7 +181,7 @@ class BalsamicAnalysisAPI:
             if val["tissue_type"] == "tumor"
         ]
         if len(tumor_paths) != 1:
-            raise BalsamicStartError
+            raise BalsamicStartError("No tumor samples found!")
         return tumor_paths[0]
 
     def get_verified_normal_path(self, sample_data: dict) -> Optional[str]:
@@ -196,7 +196,7 @@ class BalsamicAnalysisAPI:
             if val["tissue_type"] == "normal"
         ]
         if len(normal_paths) > 1:
-            raise BalsamicStartError
+            raise BalsamicStartError("Too many normal samples in case!")
         if len(normal_paths) == 0:
             return None
         return normal_paths[0]
