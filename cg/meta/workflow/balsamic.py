@@ -7,8 +7,6 @@ from cg.apps import hk, lims
 from cg.apps.balsamic.api import BalsamicAPI
 from cg.apps.balsamic.fastq import FastqHandler
 from cg.utils.fastq import FastqAPI
-from cg.cli.workflow.balsamic.store import store as store_cmd
-from cg.cli.workflow.balsamic.deliver import deliver as deliver_cmd
 from cg.exc import LimsDataError, BalsamicStartError
 from cg.store import Store
 from pathlib import Path
@@ -70,7 +68,7 @@ class BalsamicAnalysisAPI:
 
         return files
 
-    def lookup_samples(self, case_id: str):
+    def get_case_object(self, case_id: str):
         """Look up case ID in StoreDB and return result"""
         case_object = self.store.family(case_id)
         return case_object
@@ -138,9 +136,9 @@ class BalsamicAnalysisAPI:
         return application_type
 
     def get_priority(self, case_id) -> str:
-        if self.lookup_samples(case_id).high_priority:
+        if self.get_case_object(case_id).high_priority:
             return "high"
-        if self.lookup_samples(case_id).low_priority:
+        if self.get_case_object(case_id).low_priority:
             return "low"
         return "normal"
 

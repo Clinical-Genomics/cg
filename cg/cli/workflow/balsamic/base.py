@@ -42,17 +42,17 @@ def balsamic(context, case_id, priority, panel_bed, analysis_type, run_analysis,
         if case_id is None:
             LOG.error("Provide a case!")
             raise click.Abort()
-        else:
-            context.invoke(link, case_id=case_id)
-            context.invoke(config_case, case_id=case_id, panel_bed=panel_bed, dry=dry)
-            context.invoke(
-                run,
-                case_id=case_id,
-                priority=priority,
-                analysis_type=analysis_type,
-                run_analysis=run_analysis,
-                dry=dry,
-            )
+
+        context.invoke(link, case_id=case_id)
+        context.invoke(config_case, case_id=case_id, panel_bed=panel_bed, dry=dry)
+        context.invoke(
+            run,
+            case_id=case_id,
+            priority=priority,
+            analysis_type=analysis_type,
+            run_analysis=run_analysis,
+            dry=dry,
+        )
 
 
 @balsamic.command()
@@ -64,7 +64,7 @@ def link(context, case_id):
     The files are renamed, concatenated, and saved in BALSAMIC working directory
     """
     LOG.info(f"Linking samples in case {case_id}")
-    case_object = context.obj["BalsamicAnalysisAPI"].lookup_samples(case_id)
+    case_object = context.obj["BalsamicAnalysisAPI"].get_case_object(case_id)
     if not case_object and case_object.links:
         LOG.warning(f"{case_id} invalid!")
         raise click.Abort()
@@ -82,7 +82,7 @@ def config_case(context, panel_bed, case_id, dry):
 
     LOG.info(f"Creating config file for {case_id}")
 
-    case_object = context.obj["BalsamicAnalysisAPI"].lookup_samples(case_id)
+    case_object = context.obj["BalsamicAnalysisAPI"].get_case_object(case_id)
 
     if not case_object and case_object.links:
         LOG.warning(f"{case_id} invalid!")
