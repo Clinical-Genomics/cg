@@ -5,6 +5,7 @@ import click
 
 from pathlib import Path
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
+from cg.exc import LimsDataError, BalsamicStartError
 
 LOG = logging.getLogger(__name__)
 
@@ -72,17 +73,17 @@ def config_case(context, panel_bed, case_id, dry):
         LOG.warning(f"{case_id} invalid!")
         raise click.Abort()
 
-    setup_data = context.obj["BalsamicAnalysisAPI"].get_case_config_params(case_object)
+    setup_data = context.obj["BalsamicAnalysisAPI"].get_sample_params(case_object)
 
     if len(setup_data) == 0:
         LOG.warning(f"{case_id} has no samples tagged for BALSAMIC analysis!")
         raise click.Abort()
 
     try:
-        arguments = context.obj["BalsamicAnalysisAPI"].get_verified_case_config_params(
+        arguments = context.obj["BalsamicAnalysisAPI"].get_verified_config_params(
             case_id=case_id, panel_bed=panel_bed, setup_data=setup_data,
         )
-    except ValueError as e:
+    except (BalsamicStartError, LimsDataError) as e:
         LOG.warning(f"warning text : {e}")
         raise click.Abort()
 

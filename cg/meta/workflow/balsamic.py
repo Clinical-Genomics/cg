@@ -143,18 +143,6 @@ class BalsamicAnalysisAPI:
             return "low"
         return "normal"
 
-    def get_case_config_params(self, case_object) -> dict:
-        """Fetches config params for each sample and returns them in a dict"""
-        sample_data = {}
-        for link_object in case_object.links:
-            if "balsamic" in link_object.sample.data_analysis.lower():
-                sample_data[link_object.sample.internal_id] = {
-                    "tissue_type": self.get_sample_type(link_object),
-                    "concatenated_path": self.get_fastq_path(link_object),
-                    "application_type": self.get_application_type(link_object),
-                    "target_bed": self.get_target_bed_from_lims(link_object),
-                }
-        return sample_data
 
     def get_verified_bed(self, sample_data: dict) -> Optional[str]:
         application_types = set(
@@ -162,9 +150,9 @@ class BalsamicAnalysisAPI:
         target_beds = set([v["target_bed"] for k, v in sample_data.items()])
 
         if not application_types.issubset(self.__BALSAMIC_APPLICATIONS):
-            raise ValueError
+            raise BalsamicStartError
         if len(application_types) != 1 or len(target_beds) != 1:
-            raise ValueError
+            raise BalsamicStartError
         if not application_types.issubset(self.__BALSAMIC_BED_APPLICATIONS):
             return None
         return target_beds.pop()
@@ -175,7 +163,7 @@ class BalsamicAnalysisAPI:
             if val["tissue_type"] == "tumor"
         ]
         if len(tumor_paths) != 1:
-            raise ValueError
+            raise BalsamicStartError
         return tumor_paths[0]
 
     def get_verified_normal_path(self, sample_data: dict) -> Optional[str]:
@@ -184,13 +172,17 @@ class BalsamicAnalysisAPI:
             if val["tissue_type"] == "normal"
         ]
         if len(normal_paths) > 1:
-            raise ValueError
+            raise BalsamicStartError
         if len(normal_paths) == 0:
             return None
         return normal_paths[0]
 
     def get_verified_config_params(self, case_id: str, panel_bed: str,
                                    sample_data: dict) -> dict:
+        """Takes a dictionary with per-sample parameters, 
+        verifies their structure, and transforms into command line arguments
+        """
+
         arguments = {
             "case_id": case_id,
             "normal": self.get_verified_normal_path(sample_data),
@@ -199,3 +191,18 @@ class BalsamicAnalysisAPI:
             "output_config": f"{case_id}.json",
         }
         return arguments
+
+    def get_sample_params(self, case_object) -> dict:
+        """Fetches attributes for each sample in given family, 
+        and returns them as a dictionary where SAMPLE ID is key"""
+
+        sample_data = {}
+        for link_object in case_object.links:
+            if "balsamic" in link_object.sample.data_analysis.lower():
+                sample_data[link_object.sample.internal_id] = {
+                    "tissue_type": self.get_sample_type(link_object),
+                    "concatenated_path": self.get_fastq_path(link_object),
+                    "application_type": self.get_application_type(link_object),
+                    "target_bed": self.get_target_bed_from_lims(link_object),
+                }
+        return sample_data
