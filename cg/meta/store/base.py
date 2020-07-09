@@ -143,7 +143,6 @@ def _check_mandatory_tags(files: list, pipeline_tags: dict):
     deliverable_tags = [file_["tag_map_key"] for file_ in files]
     mandatory_tags = [tag for tag in pipeline_tags if pipeline_tags[tag]["is_mandatory"]]
 
-    breakpoint()
     tags_are_missing, missing_tags = _determine_missing_files(mandatory_tags, deliverable_tags)
 
     if tags_are_missing:
