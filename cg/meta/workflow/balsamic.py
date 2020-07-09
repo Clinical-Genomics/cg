@@ -45,7 +45,7 @@ class BalsamicAnalysisAPI:
         """Generates a path where the Balsamic case for the case_id should be located"""
         return Path(self.balsamic_api.root_dir / case_id).as_posix()
 
-    def get_file_collection(self, sample_id : str) -> dict:
+    def get_file_collection(self, sample_id: str) -> dict:
         file_objs = self.housekeeper_api.files(bundle=sample_id, tags=["fastq"])
         files = []
 
@@ -70,7 +70,7 @@ class BalsamicAnalysisAPI:
 
         return files
 
-    def lookup_samples(self, case_id : str):
+    def lookup_samples(self, case_id: str):
         """Look up case ID in StoreDB and return result"""
         case_object = self.store.family(case_id)
         return case_object
