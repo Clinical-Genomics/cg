@@ -75,7 +75,7 @@ def config_case(context, panel_bed, case_id, dry):
 
     sample_data = context.obj["BalsamicAnalysisAPI"].get_sample_params(case_object)
 
-    if len(setup_data) == 0:
+    if len(sample_data) == 0:
         LOG.warning(f"{case_id} has no samples tagged for BALSAMIC analysis!")
         raise click.Abort()
 
