@@ -53,7 +53,7 @@ def link(context, case_id):
         LOG.warning(f"{case_id} invalid!")
         raise click.Abort()
 
-    context.obj["BalsamicAnalysisAPI"].link_samples(case_object.links)
+    context.obj["BalsamicAnalysisAPI"].link_samples(case_object)
 
 
 @balsamic.command("config-case")
