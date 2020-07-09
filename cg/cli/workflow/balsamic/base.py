@@ -99,7 +99,7 @@ def config_case(context, panel_bed, case_id, dry):
             case_id=case_id, panel_bed=panel_bed, setup_data=setup_data,
         )
     except ValueError as e:
-        LOG.warning("warning text")
+        LOG.warning(f"warning text : {e}")
         raise click.Abort()
 
     context.obj["BalsamicAnalysisAPI"].balsamic_api.config_case(arguments=arguments, dry=dry)
@@ -114,7 +114,7 @@ def config_case(context, panel_bed, case_id, dry):
 @click.pass_context
 def run(context, analysis_type, run_analysis, priority, case_id, dry):
     arguments = {
-        "priority": priority,
+        "priority": priority or context.obj["BalsamicAnalysisAPI"].get_priority(case_id),
         "analysis_type": analysis_type,
         "run_analysis": run_analysis,
         "case_id": case_id,

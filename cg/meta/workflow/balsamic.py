@@ -25,7 +25,6 @@ class BalsamicAnalysisAPI:
     __BALSAMIC_BED_APPLICATIONS = {"wes", "tgs"}
 
     def __init__(self, config):
-
         self.balsamic_api = BalsamicAPI(config)
         self.store = Store(config["database"])
         self.housekeeper_api = hk.HousekeeperAPI(config)
@@ -46,8 +45,8 @@ class BalsamicAnalysisAPI:
         """Generates a path where the Balsamic case for the case_id should be located"""
         return Path(self.balsamic_api.root_dir / case_id).as_posix()
 
-    def get_file_collection(self, sample) -> dict:
-        file_objs = self.housekeeper_api.files(bundle=sample, tags=["fastq"])
+    def get_file_collection(self, sample_id : str) -> dict:
+        file_objs = self.housekeeper_api.files(bundle=sample_id, tags=["fastq"])
         files = []
 
         for file_obj in file_objs:
@@ -71,7 +70,7 @@ class BalsamicAnalysisAPI:
 
         return files
 
-    def lookup_samples(self, case_id):
+    def lookup_samples(self, case_id : str):
         """Look up case ID in StoreDB and return result"""
         case_object = self.store.family(case_id)
         return case_object
@@ -89,7 +88,7 @@ class BalsamicAnalysisAPI:
                     f"{link_object.sample.internal_id} has balsamic as data analysis, linking."
                 )
 
-                file_collection = self.get_file_collection(sample=link_object.sample.internal_id)
+                file_collection = self.get_file_collection(sample_id=link_object.sample.internal_id)
                 self.fastq_handler.link(
                     case=link_object.family.internal_id,
                     sample=link_object.sample.internal_id,
@@ -109,7 +108,7 @@ class BalsamicAnalysisAPI:
             return panel_bed
 
     def get_fastq_path(self, link_object) -> str(Path):
-        file_collection = self.get_file_collection(sample=link_object.sample.internal_id)
+        file_collection = self.get_file_collection(sample_id=link_object.sample.internal_id)
         fastq_data = file_collection[0]
         linked_fastq_name = self.fastq_handler.FastqFileNameCreator.create(
             lane=fastq_data["lane"],
@@ -138,8 +137,12 @@ class BalsamicAnalysisAPI:
         application_type = link_object.sample.application_version.application.prep_category
         return application_type
 
-    def get_priority(self, case_object) -> str:
-        pass
+    def get_priority(self, case_id) -> str:
+        if self.lookup_samples(case_id).high_priority:
+            return "high"
+        if self.lookup_samples(case_id).low_priority:
+            return "low"
+        return "normal"
 
     def get_case_config_params(self, case_object) -> dict:
         """Fetches config params for each sample and returns them in a dict"""
