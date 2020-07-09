@@ -76,8 +76,9 @@ def config_case(context, panel_bed, case_id, dry):
     sample_data = context.obj["BalsamicAnalysisAPI"].get_sample_params(case_object)
     LOG.info(f"Case {case_id} has following BALSAMIC samples:")
     for key in sample_data:
-        LOG.info(f'{key}    {sample_data[key]["tissue_type"]}   {sample_data[key]["application_type"]}  {sample_data[key]["target_bed"]}')
-
+        LOG.info(
+            f'{key}    {sample_data[key]["tissue_type"]}   {sample_data[key]["application_type"]}  {sample_data[key]["target_bed"]}'
+        )
 
     if len(sample_data) == 0:
         LOG.warning(f"{case_id} has no samples tagged for BALSAMIC analysis!")
