@@ -43,9 +43,9 @@ def balsamic(context, case_id, priority, panel_bed, analysis_type, run_analysis,
             LOG.error("Provide a case!")
             raise click.Abort()
 
-        context.invoke(link, case_id=case_id)
-        context.invoke(config_case, case_id=case_id, panel_bed=panel_bed, dry=dry)
-        context.invoke(
+        context.invoked_subcommand(link, case_id=case_id)
+        context.invoked_subcommand(config_case, case_id=case_id, panel_bed=panel_bed, dry=dry)
+        context.invoked_subcommand(
             run,
             case_id=case_id,
             priority=priority,
