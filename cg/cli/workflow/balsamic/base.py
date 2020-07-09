@@ -84,7 +84,7 @@ def config_case(context, panel_bed, case_id, dry):
             case_id=case_id, panel_bed=panel_bed, sample_data=sample_data,
         )
     except (BalsamicStartError, LimsDataError) as e:
-        LOG.warning(f"Error retrieving settings : {e}")
+        LOG.warning(f"Error retrieving settings : {e.message}")
         raise click.Abort()
 
     context.obj["BalsamicAnalysisAPI"].balsamic_api.config_case(arguments=arguments, dry=dry)
