@@ -73,7 +73,7 @@ def config_case(context, panel_bed, case_id, dry):
         LOG.warning(f"{case_id} invalid!")
         raise click.Abort()
 
-    setup_data = context.obj["BalsamicAnalysisAPI"].get_sample_params(case_object)
+    sample_data = context.obj["BalsamicAnalysisAPI"].get_sample_params(case_object)
 
     if len(setup_data) == 0:
         LOG.warning(f"{case_id} has no samples tagged for BALSAMIC analysis!")
@@ -81,7 +81,7 @@ def config_case(context, panel_bed, case_id, dry):
 
     try:
         arguments = context.obj["BalsamicAnalysisAPI"].get_verified_config_params(
-            case_id=case_id, panel_bed=panel_bed, setup_data=setup_data,
+            case_id=case_id, panel_bed=panel_bed, sample_data=sample_data,
         )
     except (BalsamicStartError, LimsDataError) as e:
         LOG.warning(f"warning text : {e}")
