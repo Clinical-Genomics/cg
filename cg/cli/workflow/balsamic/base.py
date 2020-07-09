@@ -65,18 +65,21 @@ def link(context, case_id):
 def config_case(context, panel_bed, case_id, dry):
     """Create config file for BALSAMIC analysis for a case"""
 
-    LOG.info(f"Creating config file for {case_id}")
-
+    LOG.info(f"Creating config file for {case_id}.")
     case_object = context.obj["BalsamicAnalysisAPI"].get_case_object(case_id)
 
     if not case_object and case_object.links:
-        LOG.warning(f"{case_id} invalid!")
+        LOG.warning(f"{case_id} not found!")
         raise click.Abort()
 
     sample_data = context.obj["BalsamicAnalysisAPI"].get_sample_params(case_object)
-    LOG.info(f"Case {case_id} has following BALSAMIC samples:")
+    LOG.info(
+        f""
+        f"Case {case_id} has following BALSAMIC samples:"
+        f"SAMPLE ID     TISSUE TYPE     APPLICATION     BED VERSION")
     for key in sample_data:
         LOG.info(f'{key}    {sample_data[key]["tissue_type"]}   {sample_data[key]["application_type"]}  {sample_data[key]["target_bed"]}')
+    LOG.info("")
 
 
     if len(sample_data) == 0:
@@ -88,7 +91,7 @@ def config_case(context, panel_bed, case_id, dry):
             case_id=case_id, panel_bed=panel_bed, sample_data=sample_data,
         )
     except (BalsamicStartError, LimsDataError) as e:
-        LOG.warning(f"Error retrieving settings : {e.message}")
+        LOG.warning(f"Could not create config : {e.message}")
         raise click.Abort()
 
     context.obj["BalsamicAnalysisAPI"].balsamic_api.config_case(arguments=arguments, dry=dry)

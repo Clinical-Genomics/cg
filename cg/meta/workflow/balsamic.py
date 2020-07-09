@@ -46,9 +46,7 @@ class BalsamicAnalysisAPI:
     def get_file_collection(self, sample_id: str) -> dict:
         file_objs = self.housekeeper_api.files(bundle=sample_id, tags=["fastq"])
         files = []
-
         for file_obj in file_objs:
-            # figure out flowcell name from header
             with gzip.open(file_obj.full_path) as handle:
                 header_line = handle.readline().decode()
                 header_info = self.fastq_api.parse_header(header_line)
@@ -60,12 +58,10 @@ class BalsamicAnalysisAPI:
                 "read": int(header_info["readnumber"]),
                 "undetermined": ("_Undetermined_" in file_obj.path),
             }
-            # look for tile identifier (HiSeq X runs)
             matches = re.findall(r"-l[1-9]t([1-9]{2})_", file_obj.path)
             if len(matches) > 0:
                 data["flowcell"] = f"{data['flowcell']}-{matches[0]}"
             files.append(data)
-
         return files
 
     def get_case_object(self, case_id: str):
@@ -163,12 +159,12 @@ class BalsamicAnalysisAPI:
         if not application_types.issubset(self.__BALSAMIC_APPLICATIONS):
             raise BalsamicStartError("Case application not compatible with BALSAMIC")
         if len(application_types) != 1 or len(target_beds) > 1:
-            raise BalsamicStartError("Case samples tagged with contradictory BED version")
+            raise BalsamicStartError("Multiple application types or BED versions")
         if not application_types.issubset(self.__BALSAMIC_BED_APPLICATIONS):
             return None
         if len(target_beds) == 1:
             return Path(self.balsamic_api.bed_path, target_beds.pop()).as_posix()
-        raise BalsamicStartError("No bed version could be retrieved from LIMS")
+        raise BalsamicStartError("No BED version could be retrieved from LIMS")
 
     def get_verified_tumor_path(self, sample_data: dict) -> str(Path):
         """Takes a dict with samples and attributes, and retrieves the paths
@@ -181,7 +177,7 @@ class BalsamicAnalysisAPI:
             if val["tissue_type"] == "tumor"
         ]
         if len(tumor_paths) != 1:
-            raise BalsamicStartError("No tumor samples found!")
+            raise BalsamicStartError(f"Invalid number of tumor samples: {len(tumor_paths)}!")
         return tumor_paths[0]
 
     def get_verified_normal_path(self, sample_data: dict) -> Optional[str]:
@@ -196,7 +192,7 @@ class BalsamicAnalysisAPI:
             if val["tissue_type"] == "normal"
         ]
         if len(normal_paths) > 1:
-            raise BalsamicStartError("Too many normal samples in case!")
+            raise BalsamicStartError(f"Invalid number of normal samples: {len(normal_paths)}!")
         if len(normal_paths) == 0:
             return None
         return normal_paths[0]
@@ -218,7 +214,6 @@ class BalsamicAnalysisAPI:
     def get_sample_params(self, case_object) -> dict:
         """Fetches attributes for each sample in given family, 
         and returns them as a dictionary where SAMPLE ID is key"""
-
         sample_data = {}
         for link_object in case_object.links:
             if "balsamic" in link_object.sample.data_analysis.lower():
