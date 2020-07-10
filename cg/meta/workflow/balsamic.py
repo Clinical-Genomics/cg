@@ -168,7 +168,8 @@ class BalsamicAnalysisAPI:
 
     def get_verified_tumor_path(self, sample_data: dict) -> str(Path):
         """Takes a dict with samples and attributes, and retrieves the paths
-        of tumor samples. If the number of paths is exactly 1, the path is returned.
+        of tumor samples. 
+        If the number of paths is exactly 1, the path is returned.
         If there are no paths, or more than one path, raise BalsamicStartError.
         """
         tumor_paths = [
@@ -201,6 +202,9 @@ class BalsamicAnalysisAPI:
         """Takes a dictionary with per-sample parameters, 
         verifies their structure, and transforms into command line arguments
         """
+
+        if len(sample_data) == 0:
+            raise BalsamicStartError(f"{case_id} has no samples tagged for BALSAMIC analysis!")
 
         arguments = {
             "case_id": case_id,
