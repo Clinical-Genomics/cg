@@ -11,6 +11,10 @@ from cg.exc import LimsDataError, BalsamicStartError
 LOG = logging.getLogger(__name__)
 
 ARGUMENT_CASE_ID = click.argument("case_id", required=True)
+<<<<<<< HEAD
+=======
+
+>>>>>>> 1a0517d94382304bf25382b98bad32bbb89c5095
 OPTION_DRY = click.option(
     "-d", "--dry-run", "dry", help="Print command to console without executing"
 )
