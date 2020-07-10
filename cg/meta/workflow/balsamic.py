@@ -1,16 +1,18 @@
 """Module for Balsamic Analyses"""
+import logging
 import gzip
 import re
 
+from pathlib import Path
 from typing import Optional
-from cg.apps import hk, lims
+
+from cg.apps.hk import HousekeeperAPI
+from cg.apps.lims import LimsAPI
 from cg.apps.balsamic.api import BalsamicAPI
 from cg.apps.balsamic.fastq import FastqHandler
 from cg.utils.fastq import FastqAPI
 from cg.exc import LimsDataError, BalsamicStartError
 from cg.store import Store
-from pathlib import Path
-import logging
 
 LOG = logging.getLogger(__name__)
 
@@ -25,15 +27,17 @@ class BalsamicAnalysisAPI:
     def __init__(self, config):
         self.balsamic_api = BalsamicAPI(config)
         self.store = Store(config["database"])
-        self.housekeeper_api = hk.HousekeeperAPI(config)
+        self.housekeeper_api = HousekeeperAPI(config)
         self.fastq_handler = FastqHandler(config)
-        self.lims_api = lims.LimsAPI(config)
+        self.lims_api = LimsAPI(config)
         self.fastq_api = FastqAPI
 
     def get_deliverables_file_path(self, case_id: str) -> Path:
         """Generates a path where the Balsamic deliverables file for the case_id should be
         located"""
-        return Path(self.balsamic_api.root_dir, case_id, "delivery_report", case_id + ".hk")
+        return Path(
+            self.balsamic_api.root_dir, case_id, "delivery_report", case_id + ".hk"
+        ).as_posix()
 
     def get_config_path(self, case_id: str) -> Path:
         """Generates a path where the Balsamic config for the case_id should be located"""
@@ -104,6 +108,7 @@ class BalsamicAnalysisAPI:
             return panel_bed
 
     def get_fastq_path(self, link_object) -> str(Path):
+        """Returns path to the FASTQ file for a sample"""
         file_collection = self.get_file_collection(sample_id=link_object.sample.internal_id)
         fastq_data = file_collection[0]
         linked_fastq_name = self.fastq_handler.FastqFileNameCreator.create(
@@ -125,18 +130,21 @@ class BalsamicAnalysisAPI:
         return concatenated_path
 
     def get_sample_type(self, link_object) -> str:
+        """Returns tissue type of a sample"""
         if link_object.sample.is_tumour:
             return "tumor"
         return "normal"
 
     def get_application_type(self, link_object) -> str:
+        """Returns application type of a sample"""
         application_type = link_object.sample.application_version.application.prep_category
         return application_type
 
-    def get_priority(self, case_id) -> str:
-        if self.get_case_object(case_id).high_priority:
+    def get_priority(self, case_object) -> str:
+        """Finds priority for the case in clinical-db, and returns it as text"""
+        if case_object.high_priority:
             return "high"
-        if self.get_case_object(case_id).low_priority:
+        if case_object.low_priority:
             return "low"
         return "normal"
 
@@ -228,3 +236,27 @@ class BalsamicAnalysisAPI:
                     "target_bed": self.get_target_bed_from_lims(link_object),
                 }
         return sample_data
+
+    def report_sample_table(self, case_id: str, sample_data: dict):
+        """Outputs a table of samples to be processed in log"""
+
+        LOG.info(f"Case {case_id} has following BALSAMIC samples:")
+        LOG.info(
+            "{:<10} {:<10} {:<10} {:<10}".format(
+                "SAMPLE ID", "TISSUE TYPE", "APPLICATION", "BED VERSION"
+            )
+        )
+        for key in sample_data:
+            LOG.info(
+                "{:<10} {:<10} {:<10} {:<10}".format(
+                    key,
+                    sample_data[key]["tissue_type"],
+                    sample_data[key]["application_type"],
+                    sample_data[key]["target_bed"],
+                )
+            )
+        LOG.info("")
+
+    def update_housekeeper(self, sample_config, deliverable_report_path):
+        """wip"""
+        pass

@@ -1,6 +1,8 @@
 import logging
-from cg.utils.commands import Process
+
 from typing import List, Dict
+
+from cg.utils.commands import Process
 
 LOG = logging.getLogger(__name__)
 
@@ -8,7 +10,7 @@ LOG = logging.getLogger(__name__)
 class BalsamicAPI:
     """Handles execution of BALSAMIC"""
 
-    EXIT_SUCCESS = 0
+    __EXIT_SUCCESS = 0
 
     def __init__(self, config: dict):
         self.binary = config["balsamic"]["binary_path"]
@@ -33,7 +35,7 @@ class BalsamicAPI:
         """Create config file for BALSAMIC analysis """
 
         command = ["config", "case"]
-        options = {
+        options = self.__build_command_str({
             "--analysis-dir": self.root_dir,
             "--singularity": self.singularity,
             "--reference-config": self.reference_config,
@@ -46,33 +48,47 @@ class BalsamicAPI:
             "--quality-trim": arguments.get("quality_trim"),
             "--umi": arguments.get("umi"),
             "--umi-trim-length": arguments.get("umi_trim_length"),
-        }
-
-        options = self.__build_command_str(options)
+        })
 
         if dry:
             LOG.info(f'Dry run command balsamic{" ".join(command + options)}')
-            retcode = self.EXIT_SUCCESS
+            retcode = self.__EXIT_SUCCESS
         else:
             retcode = self.process.run_command(command + options)
         return retcode
 
     def run_analysis(self, arguments: dict, run_analysis: bool, dry: bool = False) -> int:
-        """Execute BALSAMIC"""
+        """Execute BALSAMIC run analysis with given options"""
 
         command = ["run", "analysis"]
         run_analysis = ["--run-analysis"] if run_analysis else []
-        options = {
+        options = self.__build_command_str({
             "--account": self.account,
             "--mail-user": arguments.get("email") or self.email,
             "--qos": arguments.get("priority") or self.qos,
             "--sample-config": arguments.get("sample_config"),
             "--analysis-type": arguments.get("analysis_type"),
-        }
-        options = self.__build_command_str(options)
+        })
         if dry:
             LOG.info(f'Dry run command balsamic{" ".join(command + options + run_analysis)}')
-            retcode = self.EXIT_SUCCESS
+            retcode = self.__EXIT_SUCCESS
         else:
             retcode = self.process.run_command(command + options + run_analysis)
         return retcode
+
+
+    def report_deliver(self, arguments: dict, dry: bool = False) -> int:
+        """Execute BALSAMIC report deliver with given options"""
+
+        command = ["report", "deliver"]
+        options = self.__build_command_str(
+            {"--sample_config": arguments.get("sample_config")}
+        )
+        if dry:
+            LOG.info(f'Dry run command balsamic{" ".join(command + options)}')
+            retcode = self.__EXIT_SUCCESS
+        else:
+            retcode = self.process.run_command(command + options)
+        return retcode
+
+
