@@ -35,20 +35,22 @@ class BalsamicAPI:
         """Create config file for BALSAMIC analysis """
 
         command = ["config", "case"]
-        options = self.__build_command_str({
-            "--analysis-dir": self.root_dir,
-            "--singularity": self.singularity,
-            "--reference-config": self.reference_config,
-            "--case-id": arguments.get("case_id"),
-            "--normal": arguments.get("normal"),
-            "--tumor": arguments.get("tumor"),
-            "--output-config": arguments.get("output_config"),
-            "--panel-bed": arguments.get("panel_bed"),
-            "--adapter-trim": arguments.get("adapter_trim"),
-            "--quality-trim": arguments.get("quality_trim"),
-            "--umi": arguments.get("umi"),
-            "--umi-trim-length": arguments.get("umi_trim_length"),
-        })
+        options = self.__build_command_str(
+            {
+                "--analysis-dir": self.root_dir,
+                "--singularity": self.singularity,
+                "--reference-config": self.reference_config,
+                "--case-id": arguments.get("case_id"),
+                "--normal": arguments.get("normal"),
+                "--tumor": arguments.get("tumor"),
+                "--output-config": arguments.get("output_config"),
+                "--panel-bed": arguments.get("panel_bed"),
+                "--adapter-trim": arguments.get("adapter_trim"),
+                "--quality-trim": arguments.get("quality_trim"),
+                "--umi": arguments.get("umi"),
+                "--umi-trim-length": arguments.get("umi_trim_length"),
+            }
+        )
 
         if dry:
             LOG.info(f'Dry run command balsamic{" ".join(command + options)}')
@@ -62,13 +64,15 @@ class BalsamicAPI:
 
         command = ["run", "analysis"]
         run_analysis = ["--run-analysis"] if run_analysis else []
-        options = self.__build_command_str({
-            "--account": self.account,
-            "--mail-user": arguments.get("email") or self.email,
-            "--qos": arguments.get("priority") or self.qos,
-            "--sample-config": arguments.get("sample_config"),
-            "--analysis-type": arguments.get("analysis_type"),
-        })
+        options = self.__build_command_str(
+            {
+                "--account": self.account,
+                "--mail-user": arguments.get("email") or self.email,
+                "--qos": arguments.get("priority") or self.qos,
+                "--sample-config": arguments.get("sample_config"),
+                "--analysis-type": arguments.get("analysis_type"),
+            }
+        )
         if dry:
             LOG.info(f'Dry run command balsamic{" ".join(command + options + run_analysis)}')
             retcode = self.__EXIT_SUCCESS
@@ -76,19 +80,14 @@ class BalsamicAPI:
             retcode = self.process.run_command(command + options + run_analysis)
         return retcode
 
-
     def report_deliver(self, arguments: dict, dry: bool = False) -> int:
         """Execute BALSAMIC report deliver with given options"""
 
         command = ["report", "deliver"]
-        options = self.__build_command_str(
-            {"--sample_config": arguments.get("sample_config")}
-        )
+        options = self.__build_command_str({"--sample_config": arguments.get("sample_config")})
         if dry:
             LOG.info(f'Dry run command balsamic{" ".join(command + options)}')
             retcode = self.__EXIT_SUCCESS
         else:
             retcode = self.process.run_command(command + options)
         return retcode
-
-
