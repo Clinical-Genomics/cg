@@ -172,8 +172,8 @@ def update_housekeeper(context, case_id, dry):
 
     context.obj["BalsamicAnalysisAPI"].update_housekeeper(sample_config, deliverable_report_path)
 
-
     pass
+
 
 @balsamic.command("deliver-files")
 @ARGUMENT_CASE_ID
