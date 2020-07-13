@@ -2,6 +2,8 @@
 import logging
 import gzip
 import re
+import json
+import datetime as dt
 
 from pathlib import Path
 from typing import Optional
@@ -257,6 +259,71 @@ class BalsamicAnalysisAPI:
             )
         LOG.info("")
 
-    def update_housekeeper(self, sample_config, deliverable_report_path):
-        """wip"""
-        pass
+    def update_housekeeper(self, case_object, sample_config, deliverable_report_path):
+        """ WIP
+        Store case files in Housekeeper
+
+        name: case_obj.internal_id
+        created: dt.datetime.strptime(config["analysis"]["timestamp"], "%Y-%m-%d %H:%M")
+        version: config["analysis"]["BALSAMIC_version"]
+        files: List[{
+            path: Path
+            tags: List[]
+            archive: Bool = False
+        }]
+
+        bundle_obj, bundle_version = hkAPI.add_bundle(bundle_data)
+        hkAPI.include(bundle_version)
+        hkAPI.add_commit(bundle_obj, bundle_version)
+
+        """
+
+        config_data = dict(json.load(open(sample_config, "r")))
+        bundle_data = {
+            "name": case_object.internal_id,
+            "created": dt.datetime.strptime(
+                config_data["analysis"]["config_creation_date"], "%Y-%m-%d %H:%M"
+            ),
+            "version": config_data["analysis"]["BALSAMIC_version"],
+            "files": list(),
+        }
+        bundle_object, bundle_version = self.housekeeper_api.add_bundle(bundle_data=bundle_data)
+        if not bundle_object and bundle_version:
+            raise Exception
+        self.housekeeper_api.include(bundle_version)
+        self.housekeeper_api.add_commit(bundle_object, bundle_version)
+
+    def update_statusdb(self, case_object, sample_config):
+        """ WIP
+        Update StatusDB
+        
+        new_analysis = StoreAPI.add_analysis({
+            pipeline="balsamic",
+            version=config["BALSAMIC_version"],
+            started_at=dt.datetime.strptime(config["analysis"]["timestamp"], "%Y-%m-%d %H:%M"),
+            completed_at=dt.datetime.now(),
+            primary=(len(case_obj.analyses) == 0)
+            })
+        new_analysis.family = case_obj
+
+        StoreAPI.add_commit(new_analysis)
+        case_obj.actions = None
+
+        """
+
+        config_data = dict(json.load(open(sample_config, "r")))
+        new_analysis = self.store.add_analysis(
+            {
+                "pipeline": "balsamic",
+                "version": config_data["analysis"]["BALSAMIC_version"],
+                "started_at": dt.datetime.strptime(
+                    config_data["analysis"]["config_creation_date"], "%Y-%m-%d %H:%M"
+                ),
+                "completed_at": dt.datetime.now(),
+                "primary": (len(case_object.analyses) == 0),
+            }
+        )
+        case_object.actions = None
+        new_analysis.family = case_object
+        self.store.add_commit(new_analysis)
+

@@ -132,7 +132,7 @@ def remove_fastq(context, case_id):
 @OPTION_DRY
 @click.pass_context
 def report_deliver(context, case_id, dry):
-    """Create a YAML file with output from variant caller and alignment"""
+    """Create a *.hk file with a report for housekeeper"""
     case_object = context.obj["BalsamicAnalysisAPI"].get_case_object(case_id)
     if not case_object and case_object.links:
         LOG.warning(f"{case_id} invalid!")
@@ -147,7 +147,7 @@ def report_deliver(context, case_id, dry):
     context.obj["BalsamicAnalysisAPI"].balsamic_api.report_deliver(arguments=arguments, dry=dry)
 
 
-@balsamic.command("update-hk")
+@balsamic.command("store-complete")
 @ARGUMENT_CASE_ID
 @OPTION_DRY
 @click.pass_context
@@ -170,17 +170,15 @@ def update_housekeeper(context, case_id, dry):
         LOG.warning(f"No hk report file found for {case_id}")
         raise click.Abort()
 
-    context.obj["BalsamicAnalysisAPI"].update_housekeeper(sample_config, deliverable_report_path)
+    context.obj["BalsamicAnalysisAPI"].update_housekeeper(case_object, sample_config, deliverable_report_path)
+    context.obj["BalsamicAnalysisAPI"].update_statusdb(case_object, sample_config)
 
 
-    pass
-
-@balsamic.command("deliver-files")
+@balsamic.command("deliver-complete")
 @ARGUMENT_CASE_ID
 @click.pass_context
 def deliver_files(context, case_id):
-    """Move deliverable files to customer inbox
-    update case as delivered """
+    """Link deliverable files to customer inbox"""
     pass
 
 
@@ -198,20 +196,6 @@ def autorun(context, case_id):
 def find_cases(context):
     """Find cases to analyze
     autorun case_id
-
-    """
-    pass
-
-
-@balsamic.command("find-complete")
-@click.pass_context
-def find_complete(context):
-    """Find cases to analyze
-    Check if complete
-
-    invoke report-deliver
-    invoke updake-hk
-    invoke deliver-files
 
     """
     pass
