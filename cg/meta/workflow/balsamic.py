@@ -326,4 +326,3 @@ class BalsamicAnalysisAPI:
         case_object.actions = None
         new_analysis.family = case_object
         self.store.add_commit(new_analysis)
-

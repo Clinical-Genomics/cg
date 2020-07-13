@@ -170,7 +170,9 @@ def update_housekeeper(context, case_id, dry):
         LOG.warning(f"No hk report file found for {case_id}")
         raise click.Abort()
 
-    context.obj["BalsamicAnalysisAPI"].update_housekeeper(case_object, sample_config, deliverable_report_path)
+    context.obj["BalsamicAnalysisAPI"].update_housekeeper(
+        case_object, sample_config, deliverable_report_path
+    )
     context.obj["BalsamicAnalysisAPI"].update_statusdb(case_object, sample_config)
 
 
