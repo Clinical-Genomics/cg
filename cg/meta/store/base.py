@@ -132,7 +132,7 @@ def _convert_tags(tags: dict, tag_map: dict, tag_map_key: tuple, is_index: bool 
     for tag in mapped_tags:
         converted_tags.append(tag)
 
-    return list(set(converted_tags)).sort()
+    return sorted(list(set(converted_tags)))
 
 
 def _check_mandatory_tags(files: list, pipeline_tags: dict):
