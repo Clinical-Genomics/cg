@@ -109,7 +109,7 @@ def test_parse_files(mock_missing, snapshot: Snapshot, deliverables_raw: dict):
     """
     # GIVEN the a MIP analysis deliverables file
     mock_missing.return_value = False, []
-    pipeline = ['mip-rna']
+    pipeline = ["mip-rna"]
     analysis_type_tags = MIP_RNA_TAGS
 
     # WHEN getting the files used to build the bundle
