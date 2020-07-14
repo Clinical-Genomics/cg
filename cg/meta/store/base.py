@@ -66,7 +66,7 @@ def deliverables_files(deliverables: dict, analysis_type: str) -> list:
     return files
 
 
-def parse_files(deliverables: dict, pipeline_tags: list, analysis_type_tags: dict) -> dict:
+def parse_files(deliverables: dict, pipeline_tags: list, analysis_type_tags: dict) -> list:
     """ Get all files and their tags from the deliverables file """
 
     parsed_files = []
@@ -151,7 +151,7 @@ def _check_mandatory_tags(files: list, pipeline_tags: dict):
         )
 
 
-def _determine_missing_files(mandatory_tags: set, found_tags: set) -> tuple:
+def _determine_missing_files(mandatory_tags: list, found_tags: list) -> tuple:
     """Determines if mandatory are files missing in the deliverables, and which ones"""
 
     missing_tags = set(mandatory_tags) - set(found_tags)
