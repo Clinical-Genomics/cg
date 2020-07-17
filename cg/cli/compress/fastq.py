@@ -6,7 +6,8 @@ import click
 
 from cg.exc import CaseNotFoundError
 
-from .helpers import get_fastq_cases, get_fastq_individuals, update_compress_api
+from .helpers import (get_fastq_cases, get_fastq_individuals,
+                      update_compress_api)
 
 LOG = logging.getLogger(__name__)
 
@@ -20,6 +21,7 @@ PROBLEMATIC_CASES = [
     "deepcub",
     "causalmite",
     "proudcollie",
+    "loyalegret",
 ]
 
 
