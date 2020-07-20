@@ -147,6 +147,26 @@ def report_deliver(context, case_id, dry):
     context.obj["BalsamicAnalysisAPI"].balsamic_api.report_deliver(arguments=arguments, dry=dry)
 
 
+@balsamic.command("report-status")
+@ARGUMENT_CASE_ID
+@OPTION_DRY
+@click.pass_context
+def report_status(context, case_id, dry):
+    """Report status of the analysis"""
+    case_object = context.obj["BalsamicAnalysisAPI"].get_case_object(case_id)
+    if not case_object and case_object.links:
+        LOG.warning(f"{case_id} invalid!")
+        raise click.Abort()
+
+    sample_config = context.obj["BalsamicAnalysisAPI"].get_config_path(case_id)
+    if not Path(sample_config).exists():
+        LOG.warning(f"No config file found for {case_id}!")
+        raise click.Abort()
+
+    arguments = {"sample_config": sample_config}
+    context.obj["BalsamicAnalysisAPI"].balsamic_api.report_status(arguments=arguments, dry=dry)
+
+
 @balsamic.command("update-housekeeper")
 @ARGUMENT_CASE_ID
 @OPTION_DRY
