@@ -150,7 +150,7 @@ class BalsamicAnalysisAPI:
             return "low"
         return "normal"
 
-    def get_verified_bed(self, sample_data: dict) -> Optional[str]:
+    def get_verified_bed(self, sample_data: dict, panel_bed: Path) -> Optional[str]:
         """"Takes a dict with samples and attributes.
         - Retrieves unique attributes for application type and target_bed. 
         - Verifies that those attributes are the same across multiple samples, 
@@ -171,10 +171,14 @@ class BalsamicAnalysisAPI:
         if len(application_types) != 1 or len(target_beds) > 1:
             raise BalsamicStartError("Multiple application types or BED versions")
         if not application_types.issubset(self.__BALSAMIC_BED_APPLICATIONS):
+            if panel_bed:
+                raise BalsamicStartError("Cannot set panel_bed for WGS sample!")
             return None
         if len(target_beds) == 1:
+            if panel_bed:
+                return Path(self.balsamic_api.bed_path, panel_bed).as_posix()
             return Path(self.balsamic_api.bed_path, target_beds.pop()).as_posix()
-        raise BalsamicStartError("No BED version could be retrieved from LIMS")
+        raise BalsamicStartError("No consensus BED version could be retrieved from LIMS")
 
     def get_verified_tumor_path(self, sample_data: dict) -> str(Path):
         """Takes a dict with samples and attributes, and retrieves the paths
@@ -218,10 +222,9 @@ class BalsamicAnalysisAPI:
 
         arguments = {
             "case_id": case_id,
-            "normal": self.get_verified_normal_path(sample_data),
-            "tumor": self.get_verified_tumor_path(sample_data),
-            "panel_bed": panel_bed or self.get_verified_bed(sample_data),
-            "output_config": f"{case_id}.json",
+            "normal": self.get_verified_normal_path(sample_data=sample_data),
+            "tumor": self.get_verified_tumor_path(sample_data=sample_data),
+            "panel_bed": self.get_verified_bed(sample_data=sample_data, panel_bed=panel_bed),
         }
         return arguments
 
@@ -296,7 +299,7 @@ class BalsamicAnalysisAPI:
     def update_statusdb(self, case_object, sample_config):
         """ WIP
         Update StatusDB
-        
+
         new_analysis = StoreAPI.add_analysis({
             pipeline="balsamic",
             version=config["BALSAMIC_version"],
@@ -323,7 +326,6 @@ class BalsamicAnalysisAPI:
                 "primary": (len(case_object.analyses) == 0),
             }
         )
-        case_object.actions = None
         new_analysis.family = case_object
         self.store.add_commit(new_analysis)
 

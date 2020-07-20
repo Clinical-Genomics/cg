@@ -43,11 +43,7 @@ class BalsamicAPI:
                 "--case-id": arguments.get("case_id"),
                 "--normal": arguments.get("normal"),
                 "--tumor": arguments.get("tumor"),
-                "--output-config": arguments.get("output_config"),
                 "--panel-bed": arguments.get("panel_bed"),
-                "--adapter-trim": arguments.get("adapter_trim"),
-                "--quality-trim": arguments.get("quality_trim"),
-                "--umi": arguments.get("umi"),
                 "--umi-trim-length": arguments.get("umi_trim_length"),
             }
         )

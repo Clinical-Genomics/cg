@@ -147,7 +147,7 @@ def report_deliver(context, case_id, dry):
     context.obj["BalsamicAnalysisAPI"].balsamic_api.report_deliver(arguments=arguments, dry=dry)
 
 
-@balsamic.command("store-complete")
+@balsamic.command("update-housekeeper")
 @ARGUMENT_CASE_ID
 @OPTION_DRY
 @click.pass_context
@@ -170,15 +170,26 @@ def update_housekeeper(context, case_id, dry):
         LOG.warning(f"No hk report file found for {case_id}")
         raise click.Abort()
 
+    #Do stuff
+
     context.obj["BalsamicAnalysisAPI"].update_housekeeper(case_object, sample_config, deliverable_report_path)
     context.obj["BalsamicAnalysisAPI"].update_statusdb(case_object, sample_config)
 
 
-@balsamic.command("deliver-complete")
+@balsamic.command("store-complete")
 @ARGUMENT_CASE_ID
 @click.pass_context
 def deliver_files(context, case_id):
-    """Link deliverable files to customer inbox"""
+    """
+    WIP
+    Figure out the mode of delivery:
+
+        Copy to customer inbox
+        Generate Scout report
+        Upload to Scout
+
+    """
+
     pass
 
 
