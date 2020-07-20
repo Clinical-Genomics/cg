@@ -247,17 +247,17 @@ class BalsamicAnalysisAPI:
 
         LOG.info(f"Case {case_id} has following BALSAMIC samples:")
         LOG.info(
-            "{:<10} {:<10} {:<10} {:<10}".format(
+            "{:<15} {:<15} {:<15} {:<15}".format(
                 "SAMPLE ID", "TISSUE TYPE", "APPLICATION", "BED VERSION"
             )
         )
         for key in sample_data:
             LOG.info(
-                "{:<10} {:<10} {:<10} {:<10}".format(
+                "{:<15} {:<15} {:<15} {:<15}".format(
                     key,
                     sample_data[key]["tissue_type"],
                     sample_data[key]["application_type"],
-                    sample_data[key]["target_bed"],
+                    str(sample_data[key]["target_bed"]),
                 )
             )
         LOG.info("")
