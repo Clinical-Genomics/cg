@@ -203,16 +203,14 @@ def update_housekeeper(context, case_id, dry):
 @click.pass_context
 def deliver_files(context, case_id):
     """
-    WIP
-    Figure out the mode of delivery:
+    WIP"""
+    """Figure out the mode of delivery:
 
         Copy to customer inbox
         Generate Scout report
         Upload to Scout
 
     """
-
-    pass
 
 
 @balsamic.command("autorun")
@@ -221,7 +219,6 @@ def deliver_files(context, case_id):
 def autorun(context, case_id):
     """Invoke link, config, and run for case
     """
-    pass
 
 
 @balsamic.command("find-cases")
@@ -231,4 +228,3 @@ def find_cases(context):
     autorun case_id
 
     """
-    pass
