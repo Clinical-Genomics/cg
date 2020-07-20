@@ -88,13 +88,12 @@ class BalsamicAPI:
             retcode = self.process.run_command(command + options)
         return retcode
 
-
     def report_status(self, arguments: dict, dry: bool = False) -> int:
         """Report status of balsamic analysis"""
 
         command = ["report", "status"]
         options = self.__build_command_str({"--sample_config": arguments.get("sample_config")})
-        
+
         if dry:
             LOG.info(f'Dry run command balsamic{" ".join(command + options)}')
             retcode = self.__EXIT_SUCCESS
