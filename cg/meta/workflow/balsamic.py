@@ -175,9 +175,9 @@ class BalsamicAnalysisAPI:
                 raise BalsamicStartError("Cannot set panel_bed for WGS sample!")
             return None
         if len(target_beds) == 1:
-            if panel_bed:
-                return Path(self.balsamic_api.bed_path, panel_bed).as_posix()
             return Path(self.balsamic_api.bed_path, target_beds.pop()).as_posix()
+        elif panel_bed:
+            return Path(self.balsamic_api.bed_path, panel_bed).as_posix()
         raise BalsamicStartError("No consensus BED version could be retrieved from LIMS")
 
     def get_verified_tumor_path(self, sample_data: dict) -> str(Path):
@@ -255,8 +255,8 @@ class BalsamicAnalysisAPI:
             LOG.info(
                 "{:<15} {:<15} {:<15} {:<15}".format(
                     key,
-                    sample_data[key]["tissue_type"],
-                    sample_data[key]["application_type"],
+                    str(sample_data[key]["tissue_type"]),
+                    str(sample_data[key]["application_type"]),
                     str(sample_data[key]["target_bed"]),
                 )
             )
