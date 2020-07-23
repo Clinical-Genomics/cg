@@ -20,6 +20,7 @@ PROBLEMATIC_CASES = [
     "deepcub",
     "causalmite",
     "proudcollie",
+    "loyalegret",
 ]
 
 
