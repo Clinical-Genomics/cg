@@ -188,4 +188,3 @@ def remove_fastq(context, case_id):
         LOG.info(f"Path {work_dir} removed successfully")
     else:
         LOG.info(f"Path {work_dir} does not exist")
-

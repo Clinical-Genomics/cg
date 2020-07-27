@@ -80,14 +80,15 @@ class BalsamicAPI:
         """Execute BALSAMIC report deliver with given options"""
 
         command = ["report", "deliver"]
-        options = self.__build_command_str({
+        options = self.__build_command_str(
+            {
                 "--sample-config": arguments.get("sample_config"),
                 "--analysis-type": arguments.get("analysis_type"),
-            })
+            }
+        )
         if dry:
             LOG.info(f'Dry run command balsamic{" ".join(command + options)}')
             retcode = self.__EXIT_SUCCESS
         else:
             retcode = self.process.run_command(command + options)
         return retcode
-
