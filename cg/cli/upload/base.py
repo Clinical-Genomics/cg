@@ -136,6 +136,7 @@ def upload(context, family_id, force_restart):
         context.invoke(observations, case_id=family_id)
         context.invoke(scout, case_id=family_id)
         analysis_obj.uploaded_at = dt.datetime.now()
+        analysis_obj.uploaded_started_at = None
         context.obj["status"].commit()
         click.echo(click.style(f"{family_id}: analysis uploaded!", fg="green"))
 
