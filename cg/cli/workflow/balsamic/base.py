@@ -38,6 +38,9 @@ OPTION_PRIORITY = click.option("-p", "--priority", type=click.Choice(["low", "no
 @click.pass_context
 def balsamic(context, priority, panel_bed, analysis_type, run_analysis, dry):
     """Cancer analysis workflow """
+    if context.invoked_subcommand is None:
+        click.echo(context.get_help())
+        raise click.Abort()
     context.obj["BalsamicAnalysisAPI"] = BalsamicAnalysisAPI(context.obj)
 
 
