@@ -37,7 +37,7 @@ OPTION_PRIORITY = click.option("-p", "--priority", type=click.Choice(["low", "no
 @OPTION_PRIORITY
 @click.pass_context
 def balsamic(context, priority, panel_bed, analysis_type, run_analysis, dry):
-    """Cancer workflow """
+    """Cancer analysis workflow """
     context.obj["BalsamicAnalysisAPI"] = BalsamicAnalysisAPI(context.obj)
 
 
@@ -114,25 +114,13 @@ def run(context, analysis_type, run_analysis, priority, case_id, dry):
     )
 
 
-@balsamic.command()
-@ARGUMENT_CASE_ID
-@click.pass_context
-def remove_fastq(context, case_id):
-    """Remove stored FASTQ files from working directory"""
-    work_dir = Path(context.obj["BalsamicAnalysisAPI"].balsamic_api.root_dir, case_id, "fastq")
-    if work_dir.exists():
-        shutil.rmtree(work_dir)
-        LOG.info(f"Path {work_dir} removed successfully")
-    else:
-        LOG.info(f"Path {work_dir} does not exist")
-
-
 @balsamic.command("report-deliver")
 @ARGUMENT_CASE_ID
 @OPTION_DRY
+@OPTION_ANALYSIS_TYPE
 @click.pass_context
-def report_deliver(context, case_id, dry):
-    """Create a *.hk file with a report for housekeeper"""
+def report_deliver(context, case_id, analysis_type, dry):
+    """Create a housekeeper deliverables file for BALSAMIC analysis"""
     case_object = context.obj["BalsamicAnalysisAPI"].get_case_object(case_id)
     if not case_object and case_object.links:
         LOG.warning(f"{case_id} invalid!")
@@ -143,28 +131,13 @@ def report_deliver(context, case_id, dry):
         LOG.warning(f"No config file found for {case_id}!")
         raise click.Abort()
 
-    arguments = {"sample_config": sample_config}
+    analysis_finish = context.obj["BalsamicAnalysisAPI"].get_analysis_finish_path(case_id)
+    if not Path(analysis_finish).exists():
+        LOG.warning(f"Analysis incomplete for {case_id}, deliverables file will not be created!")
+        raise click.Abort()
+
+    arguments = {"sample_config": sample_config, "analysis_type": analysis_type}
     context.obj["BalsamicAnalysisAPI"].balsamic_api.report_deliver(arguments=arguments, dry=dry)
-
-
-@balsamic.command("report-status")
-@ARGUMENT_CASE_ID
-@OPTION_DRY
-@click.pass_context
-def report_status(context, case_id, dry):
-    """Report status of the analysis"""
-    case_object = context.obj["BalsamicAnalysisAPI"].get_case_object(case_id)
-    if not case_object and case_object.links:
-        LOG.warning(f"{case_id} invalid!")
-        raise click.Abort()
-
-    sample_config = context.obj["BalsamicAnalysisAPI"].get_config_path(case_id)
-    if not Path(sample_config).exists():
-        LOG.warning(f"No config file found for {case_id}!")
-        raise click.Abort()
-
-    arguments = {"sample_config": sample_config}
-    context.obj["BalsamicAnalysisAPI"].balsamic_api.report_status(arguments=arguments, dry=dry)
 
 
 @balsamic.command("update-housekeeper")
@@ -185,46 +158,34 @@ def update_housekeeper(context, case_id, dry):
         LOG.warning(f"No config file found for {case_id}!")
         raise click.Abort()
 
-    deliverable_report_path = context.obj["BalsamicAnalysisAPI"].get_deliverables_file_path(case_id)
-    if not Path(deliverable_report_path).exists():
-        LOG.warning(f"No hk report file found for {case_id}")
+    deliverables_file_path = context.obj["BalsamicAnalysisAPI"].get_deliverables_file_path(case_id)
+    if not Path(deliverables_file_path).exists():
+        LOG.warning(f"No deliverables file found for {case_id}")
         raise click.Abort()
 
-    # Do stuff
+    try:
+        context.obj["BalsamicAnalysisAPI"].update_housekeeper(
+            case_object=case_object,
+            sample_config=sample_config,
+            deliverables_file_path=deliverables_file_path,
+        )
+        context.obj["BalsamicAnalysisAPI"].update_statusdb(
+            case_object=case_object, sample_config=sample_config,
+        )
+    except Exception:
+        LOG.warning("Could not store bundle in Housekeeper and Statusdb!")
+        raise click.Abort()
 
-    context.obj["BalsamicAnalysisAPI"].update_housekeeper(
-        case_object, sample_config, deliverable_report_path
-    )
-    context.obj["BalsamicAnalysisAPI"].update_statusdb(case_object, sample_config)
 
-
-@balsamic.command("store-complete")
+@balsamic.command()
 @ARGUMENT_CASE_ID
 @click.pass_context
-def deliver_files(context, case_id):
-    """
-    WIP"""
-    """Figure out the mode of delivery:
+def remove_fastq(context, case_id):
+    """Remove stored FASTQ files from working directory"""
+    work_dir = Path(context.obj["BalsamicAnalysisAPI"].balsamic_api.root_dir, case_id, "fastq")
+    if work_dir.exists():
+        shutil.rmtree(work_dir)
+        LOG.info(f"Path {work_dir} removed successfully")
+    else:
+        LOG.info(f"Path {work_dir} does not exist")
 
-        Copy to customer inbox
-        Generate Scout report
-        Upload to Scout
-
-    """
-
-
-@balsamic.command("autorun")
-@ARGUMENT_CASE_ID
-@click.pass_context
-def autorun(context, case_id):
-    """Invoke link, config, and run for case
-    """
-
-
-@balsamic.command("find-cases")
-@click.pass_context
-def find_cases(context):
-    """Find cases to analyze
-    autorun case_id
-
-    """

@@ -49,6 +49,9 @@ class BalsamicAnalysisAPI:
         """Generates a path where the Balsamic case for the case_id should be located"""
         return Path(self.balsamic_api.root_dir, case_id).as_posix()
 
+    def get_analysis_finish_path(self, case_id: str) -> Path:
+        return Path(self.balsamic_api.root_dir, case_id, "analysis", "analysis_finish").as_posix()
+
     def get_file_collection(self, sample_id: str) -> dict:
         file_objs = self.housekeeper_api.files(bundle=sample_id, tags=["fastq"])
         files = []
@@ -192,7 +195,7 @@ class BalsamicAnalysisAPI:
             if val["tissue_type"] == "tumor"
         ]
         if len(tumor_paths) != 1:
-            raise BalsamicStartError(f"Invalid number of tumor samples: {len(tumor_paths)}!")
+            raise BalsamicStartError(f"Invalid number of tumor samples: {len(tumor_paths)}, required to be 1!")
         return tumor_paths[0]
 
     def get_verified_normal_path(self, sample_data: dict) -> Optional[str]:
@@ -207,7 +210,7 @@ class BalsamicAnalysisAPI:
             if val["tissue_type"] == "normal"
         ]
         if len(normal_paths) > 1:
-            raise BalsamicStartError(f"Invalid number of normal samples: {len(normal_paths)}!")
+            raise BalsamicStartError(f"Invalid number of normal samples: {len(normal_paths)}, only up to 1 allowed!!")
         if len(normal_paths) == 0:
             return None
         return normal_paths[0]
@@ -262,25 +265,18 @@ class BalsamicAnalysisAPI:
             )
         LOG.info("")
 
-    def update_housekeeper(self, case_object, sample_config, deliverable_report_path):
+    def update_housekeeper(self, case_object, sample_config, deliverables_file_path):
         """ WIP
-        Store case files in Housekeeper
-
-        name: case_obj.internal_id
-        created: dt.datetime.strptime(config["analysis"]["timestamp"], "%Y-%m-%d %H:%M")
-        version: config["analysis"]["BALSAMIC_version"]
-        files: List[{
-            path: Path
-            tags: List[]
-            archive: Bool = False
-        }]
-
-        bundle_obj, bundle_version = hkAPI.add_bundle(bundle_data)
-        hkAPI.include(bundle_version)
-        hkAPI.add_commit(bundle_obj, bundle_version)
-
+        Housekeeper bundle contents:
+            name: case_obj.internal_id
+            created: dt.datetime.strptime(config["analysis"]["timestamp"], "%Y-%m-%d %H:%M")
+            version: config["analysis"]["BALSAMIC_version"]
+            files: List[{
+                path: Path
+                tags: list
+                archive: bool=False
+            }]
         """
-
         config_data = dict(json.load(open(sample_config, "r")))
         bundle_data = {
             "name": case_object.internal_id,
@@ -288,7 +284,7 @@ class BalsamicAnalysisAPI:
                 config_data["analysis"]["config_creation_date"], "%Y-%m-%d %H:%M"
             ),
             "version": config_data["analysis"]["BALSAMIC_version"],
-            "files": list(),
+            "files": dict(json.load(open(deliverables_file_path, "r")))["files"],
         }
         bundle_object, bundle_version = self.housekeeper_api.add_bundle(bundle_data=bundle_data)
         if not bundle_object and bundle_version:
@@ -298,23 +294,16 @@ class BalsamicAnalysisAPI:
 
     def update_statusdb(self, case_object, sample_config):
         """ WIP
-        Update StatusDB
-
-        new_analysis = StoreAPI.add_analysis({
+        StatusDB bundle contents:
             pipeline="balsamic",
             version=config["BALSAMIC_version"],
             started_at=dt.datetime.strptime(config["analysis"]["timestamp"], "%Y-%m-%d %H:%M"),
             completed_at=dt.datetime.now(),
-            primary=(len(case_obj.analyses) == 0)
-            })
-        new_analysis.family = case_obj
-
-        StoreAPI.add_commit(new_analysis)
-        case_obj.actions = None
+            primary=bool
 
         """
-
         config_data = dict(json.load(open(sample_config, "r")))
+        case_object.action = None
         new_analysis = self.store.add_analysis(
             {
                 "pipeline": "balsamic",
