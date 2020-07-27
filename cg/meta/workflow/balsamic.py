@@ -172,16 +172,16 @@ class BalsamicAnalysisAPI:
         if not application_types.issubset(self.__BALSAMIC_APPLICATIONS):
             raise BalsamicStartError("Case application not compatible with BALSAMIC")
         if len(application_types) != 1 or len(target_beds) > 1:
-            raise BalsamicStartError("Multiple application types or BED versions")
+            raise BalsamicStartError("Multiple application types or BED versions found in LIMS")
         if not application_types.issubset(self.__BALSAMIC_BED_APPLICATIONS):
             if panel_bed:
                 raise BalsamicStartError("Cannot set panel_bed for WGS sample!")
             return None
+        if panel_bed:
+            return Path(self.balsamic_api.bed_path, panel_bed).as_posix()
         if len(target_beds) == 1:
             return Path(self.balsamic_api.bed_path, target_beds.pop()).as_posix()
-        elif panel_bed:
-            return Path(self.balsamic_api.bed_path, panel_bed).as_posix()
-        raise BalsamicStartError("No consensus BED version could be retrieved from LIMS")
+        raise BalsamicStartError("No BED version could be retrieved from LIMS")
 
     def get_verified_tumor_path(self, sample_data: dict) -> str(Path):
         """Takes a dict with samples and attributes, and retrieves the paths
