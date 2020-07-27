@@ -250,7 +250,7 @@ class BalsamicAnalysisAPI:
         return sample_data
 
     def report_sample_table(self, case_id: str, sample_data: dict):
-        """Outputs a table of samples to be processed in log"""
+        """Outputs a table of samples to be displayed in log"""
 
         LOG.info(f"Case {case_id} has following BALSAMIC samples:")
         LOG.info(
