@@ -195,7 +195,9 @@ class BalsamicAnalysisAPI:
             if val["tissue_type"] == "tumor"
         ]
         if len(tumor_paths) != 1:
-            raise BalsamicStartError(f"Invalid number of tumor samples: {len(tumor_paths)}, required to be 1!")
+            raise BalsamicStartError(
+                f"Invalid number of tumor samples: {len(tumor_paths)}, required to be 1!"
+            )
         return tumor_paths[0]
 
     def get_verified_normal_path(self, sample_data: dict) -> Optional[str]:
@@ -210,7 +212,9 @@ class BalsamicAnalysisAPI:
             if val["tissue_type"] == "normal"
         ]
         if len(normal_paths) > 1:
-            raise BalsamicStartError(f"Invalid number of normal samples: {len(normal_paths)}, only up to 1 allowed!!")
+            raise BalsamicStartError(
+                f"Invalid number of normal samples: {len(normal_paths)}, only up to 1 allowed!!"
+            )
         if len(normal_paths) == 0:
             return None
         return normal_paths[0]
