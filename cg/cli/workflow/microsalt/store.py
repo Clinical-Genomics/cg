@@ -13,7 +13,7 @@ from cg.exc import (
     PipelineUnknownError,
     MandatoryFilesMissing,
 )
-from cg.meta.store.mip import gather_files_and_bundle_in_housekeeper  # TODO: Placeholder
+from cg.meta.store.microsalt import gather_files_and_bundle_in_housekeeper  # TODO: Placeholder
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
