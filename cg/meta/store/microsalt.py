@@ -1,5 +1,6 @@
 """ MIP specific functionality for storing files in Houskeeper """
 import logging
+
 # from pathlib import Path
 import ruamel.yaml
 
@@ -70,7 +71,9 @@ def microbial_deliverables_files(deliverables: dict) -> list:
     return files
 
 
-def parse_microbial_files(deliverables: dict, pipeline_tags: list, analysis_type_tags: dict) -> list:
+def parse_microbial_files(
+    deliverables: dict, pipeline_tags: list, analysis_type_tags: dict
+) -> list:
     """Get all files and their tags from the deliverables files"""
 
     parsed_files = []
@@ -87,7 +90,9 @@ def parse_microbial_files(deliverables: dict, pipeline_tags: list, analysis_type
         if file_["path_index"]:
             parsed_index_file = {
                 "path": file_["path_index"],
-                "tags": get_tags(file_, pipeline_tags, analysis_type_tags, tag_map_key, is_index=True),
+                "tags": get_tags(
+                    file_, pipeline_tags, analysis_type_tags, tag_map_key, is_index=True
+                ),
                 "archive": False,
                 "tag_map_key": tag_map_key,
             }
@@ -96,7 +101,9 @@ def parse_microbial_files(deliverables: dict, pipeline_tags: list, analysis_type
     return parsed_files
 
 
-def get_tags(file: dict, pipeline_tags: list, tag_map: dict, tag_map_key: tuple, is_index: bool = False) -> list:
+def get_tags(
+    file: dict, pipeline_tags: list, tag_map: dict, tag_map_key: tuple, is_index: bool = False
+) -> list:
     """Get all tags for a file"""
 
     tags = {
