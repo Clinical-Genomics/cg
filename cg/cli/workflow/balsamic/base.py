@@ -180,7 +180,7 @@ def config_case(
         else:
             normal_paths.add(concatenated_paths[1])
 
-        if not target_bed and application_types.issubset(applications_requiring_bed): 
+        if not target_bed and application_types.issubset(applications_requiring_bed):
             target_bed_filename = get_target_bed_from_lims(
                 context.obj["lims_api"], context.obj["store_api"], link_obj.sample.internal_id
             )
