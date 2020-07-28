@@ -49,3 +49,6 @@ genotype>=2.2.0
 scout-browser>=4.4.1
 cgstats>=1.1.2
 cgbeacon
+
+# Github Actions
+aws-sam-cli <= 0.15
