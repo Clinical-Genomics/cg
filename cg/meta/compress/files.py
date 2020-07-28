@@ -224,11 +224,16 @@ def check_file_status(file_path: Path) -> bool:
     """Check if a file has the correct status
 
     More specific this means to check
+        - Did we get the full path of the file?
         - Does the file exist?
         - Do we have permissions?
         - Is the file actually a symlink?
         - Is the file hardlinked?
     """
+    if not file_path.is_absolute():
+        LOG.info("Could not resolve full path from HK to %s", file_path)
+        return False
+
     try:
         if not file_path.exists():
             LOG.info("%s does not exist", file_path)
