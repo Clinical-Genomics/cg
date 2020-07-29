@@ -12,7 +12,7 @@ When all tests done and successful and PR is approved, follow these steps:
     1. Request stage environment `paxa` and follow instructions
     1. `bash update-cg-stage.sh master`
     1. make sure that installation was successful
-1. Deploy master to stage
+1. Deploy master to production
     1.`up`
     1. `bash update-cg-prod.sh`
     1. make sure that installation was successful
