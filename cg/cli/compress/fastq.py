@@ -6,12 +6,8 @@ import click
 
 from cg.exc import CaseNotFoundError
 
-from .helpers import (
-    correct_spring_paths,
-    get_fastq_cases,
-    get_fastq_individuals,
-    update_compress_api,
-)
+from .helpers import (correct_spring_paths, get_fastq_cases,
+                      get_fastq_individuals, update_compress_api)
 
 LOG = logging.getLogger(__name__)
 
@@ -114,7 +110,7 @@ def fix_spring(context, bundle_name, dry_run):
     compress_api = context.obj["compress"]
     update_compress_api(compress_api, dry_run=dry_run)
     hk_api = compress_api.hk_api
-    correct_spring_paths(hk_api, bundle_name, dry_run)
+    correct_spring_paths(hk_api=hk_api, bundle_name=bundle_name, dry_run=dry_run)
 
 
 @click.command("spring")

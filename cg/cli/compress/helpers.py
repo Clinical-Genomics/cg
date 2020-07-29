@@ -63,22 +63,22 @@ def update_compress_api(
 # Functions to fix problematic spring files
 
 
-def get_versions(
-    self, hk_api: HousekeeperAPI, bundle_name: str = None
-) -> Iterator[hk_models.Version]:
+def get_versions(hk_api: HousekeeperAPI, bundle_name: str = None) -> Iterator[hk_models.Version]:
     """Generates versions from hk bundles
 
     If no bundle name is given generate latest version for every bundle
     """
-    bundles = hk_api.bundles()
     if bundle_name:
         bundle = hk_api.bundle(bundle_name)
         if not bundle:
             LOG.info("Could not find bundle %s", bundle_name)
             return
         bundles = [bundle]
+    else:
+        bundles = hk_api.bundles()
+
     for bundle in bundles:
-        last_version = self.hk_api.last_version(bundle.name)
+        last_version = hk_api.last_version(bundle.name)
         if not last_version:
             LOG.warning("No bundle found for %s in housekeeper", bundle.name)
             return
@@ -109,7 +109,8 @@ def correct_spring_paths(
     pointing to. This function will find those cases and move the spring archives to the correct
     place as specified in housekeeper.
     """
-    for version_obj in get_versions(hk_api, bundle_name):
+    versions = get_versions(hk_api=hk_api, bundle_name=bundle_name)
+    for version_obj in versions:
         spring_paths = get_spring_paths(version_obj)
         for spring_path in spring_paths:
             # We are interested in fixing the cases where spring paths are in wrong location
