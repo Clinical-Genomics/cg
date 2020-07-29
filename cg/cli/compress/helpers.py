@@ -78,6 +78,7 @@ def get_versions(hk_api: HousekeeperAPI, bundle_name: str = None) -> Iterator[hk
         bundles = hk_api.bundles()
 
     for bundle in bundles:
+        LOG.debug("Check for versions in %s", bundle.name)
         last_version = hk_api.last_version(bundle.name)
         if not last_version:
             LOG.warning("No bundle found for %s in housekeeper", bundle.name)
@@ -112,7 +113,8 @@ def correct_spring_paths(
     versions = get_versions(hk_api=hk_api, bundle_name=bundle_name)
     for version_obj in versions:
         spring_paths = get_spring_paths(version_obj)
-        for spring_path in spring_paths:
+        i = 0
+        for i, spring_path in enumerate(spring_paths, 1):
             # We are interested in fixing the cases where spring paths are in wrong location
             if spring_path.exists():
                 continue
@@ -142,3 +144,5 @@ def correct_spring_paths(
                 # We know from above that the spring path does not exist
                 true_spring_path.replace(spring_path)
                 true_spring_config_path.replace(spring_config_path)
+        if i == 0:
+            LOG.debug("Could not find any spring files")
