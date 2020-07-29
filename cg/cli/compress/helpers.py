@@ -85,6 +85,20 @@ def get_versions(
         yield last_version
 
 
+def get_true_dir(dir_path: Path) -> Path:
+    """Loop over the files in a directory, if any symlinks are found return the parent dir of the
+    origin file"""
+    # Check if there are any links to fastq files in the directory
+    for fastq_path in dir_path.rglob("*"):
+        # Check if there are fastq symlinks that points to the directory where the spring
+        # path is located
+        if fastq_path.is_symlink():
+            true_dir = Path(os.readlink(fastq_path)).parent
+            return true_dir
+
+    return None
+
+
 def correct_spring_paths(
     hk_api: HousekeeperAPI, bundle_name: str = None, dry_run: bool = False
 ) -> None:
@@ -107,18 +121,8 @@ def correct_spring_paths(
                 continue
 
             spring_config_path = spring_path.with_suffix("").with_suffix(".json")
-            # Parent gives a path object
-            dir_path = spring_path.parent()
             # true_dir is where the spring paths actually exists
-            true_dir = None
-            # Check if there are any links to fastq files in the directory
-            for fastq_path in dir_path.rglob("*"):
-                # Check if there are fastq symlinks that points to the directory where the spring
-                # path is located
-                if fastq_path.is_symlink():
-                    true_dir = Path(os.readlink(fastq_path)).parent
-                    break
-
+            true_dir = get_true_dir(spring_path.parent())
             if not true_dir:
                 LOG.info("Could not find location of spring files")
                 continue
