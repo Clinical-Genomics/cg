@@ -1,0 +1,74 @@
+name: CG Installation tests
+
+on: ["push", "pull_request"]
+
+jobs:
+
+  installations:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.6, 3.7]
+
+    steps:
+
+    # Check out cg code
+    - name: Check out git repository
+      uses: actions/checkout@v2
+
+    # Set up python
+    - name: Set up Python ${{ matrix.python-version}}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version}}
+
+    - name: Intall pip
+      # Make sure that we have correct python version and pip version
+      # For details see .github/workflows/server_info.md
+      run: |
+        if [ "$PYTHON_VERSION" = "$OLD_VERSION" ]; then
+          python -m pip install --upgrade pip==9.0.1
+        else
+          python -m pip install --upgrade pip==18.1
+        fi
+        echo $PYTHON_VERSION
+        pip --version
+      env:
+        PYTHON_VERSION: ${{ matrix.python-version}}
+        OLD_VERSION: 3.6
+
+    - name: Production Dependencies
+      run: |
+        pip install .
+        pip check
+
+    - name: Development Dependencies
+      run: |
+        pip install -r requirements-dev.txt
+        pip check
+
+  install-with-pipenv:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - uses: actions/checkout@v2
+
+    # Set up python
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.7
+
+    - name: Install pipenv
+      uses: dschep/install-pipenv-action@v1
+
+    - name: Check pipenv lockfile
+      run: |
+        # Make sure the packages are properly locked in Pipfile.lock, and abort if the lock file is out-of-date
+        pipenv check
+        pipenv graph
+      env:
+        PIPENV_PYUP_API_KEY: ""
