@@ -309,4 +309,3 @@ def fixture_balsamic_store(base_store: Store, lims_api, helpers) -> Store:
     )
 
     return _store
-
