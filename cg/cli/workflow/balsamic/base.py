@@ -7,6 +7,7 @@ from pathlib import Path
 
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.exc import LimsDataError, BalsamicStartError
+from cg.cli.workflow.balsamic.deliver import deliver as deliver_cmd
 
 LOG = logging.getLogger(__name__)
 
@@ -27,6 +28,7 @@ OPTION_RUN_ANALYSIS = click.option(
     "-r", "--run-analysis", is_flag=True, default=False, help="Execute in non-dry mode"
 )
 OPTION_PRIORITY = click.option("-p", "--priority", type=click.Choice(["low", "normal", "high"]))
+OPTION_CUSTOMER_ID = click.option("--customer-id")
 
 
 @click.group(invoke_without_command=True)
@@ -36,12 +38,12 @@ OPTION_PRIORITY = click.option("-p", "--priority", type=click.Choice(["low", "no
 @OPTION_RUN_ANALYSIS
 @OPTION_PRIORITY
 @click.pass_context
-def balsamic(context, priority, panel_bed, analysis_type, run_analysis, dry):
+def balsamic(context, priority, panel_bed, analysis_type, run_analysis, customer_id, dry):
     """Cancer analysis workflow """
     if context.invoked_subcommand is None:
         click.echo(context.get_help())
         raise click.Abort()
-    context.obj["BalsamicAnalysisAPI"] = BalsamicAnalysisAPI(context.obj)
+    context.obj["BalsamicAnalysisAPI"] = BalsamicAnalysisAPI(config=context.obj)
 
 
 @balsamic.command("link")
@@ -148,8 +150,8 @@ def report_deliver(context, case_id, analysis_type, dry):
 @OPTION_DRY
 @click.pass_context
 def update_housekeeper(context, case_id, dry):
-    """!!!!!WIP!!!!!!"""
-    """Store a finished analysis in Housekeeper."""
+    """!!!!!WIP!!!!!!
+    Store a finished analysis in Housekeeper."""
 
     case_object = context.obj["BalsamicAnalysisAPI"].get_case_object(case_id)
     if not case_object and case_object.links:
@@ -180,6 +182,7 @@ def update_housekeeper(context, case_id, dry):
         raise click.Abort()
 
 
+
 @balsamic.command()
 @ARGUMENT_CASE_ID
 @click.pass_context
@@ -191,3 +194,5 @@ def remove_fastq(context, case_id):
         LOG.info(f"Path {work_dir} removed successfully")
     else:
         LOG.info(f"Path {work_dir} does not exist")
+
+balsamic.add_command(deliver_cmd)
