@@ -23,7 +23,7 @@ class MockLimsAPI:
     def add_sample(self, internal_id: str):
         self.sample_vars[internal_id] = {}
 
-    def add_capture_kit(self, internal_id: str, capture_kit: str):
+    def add_capture_kit(self, internal_id: str, capture_kit):
         if not internal_id in self.sample_vars:
             self.add_sample(internal_id)
         self.sample_vars[internal_id]["capture_kit"] = capture_kit
@@ -156,10 +156,8 @@ def fastq_file_l_4_r_2(balsamic_housekeeper_dir):
     return fastq_filename
 
 
-@pytest.fixture(scope="function", name="balsamic_housekeeper")
-def balsamic_housekeeper(
-    housekeeper_api,
-    helpers,
+@pytest.fixture
+def balsamic_mock_fastq_files(
     fastq_file_l_1_r_1,
     fastq_file_l_1_r_2,
     fastq_file_l_2_r_1,
@@ -169,6 +167,20 @@ def balsamic_housekeeper(
     fastq_file_l_4_r_1,
     fastq_file_l_4_r_2,
 ):
+    return [
+        fastq_file_l_1_r_1,
+        fastq_file_l_1_r_2,
+        fastq_file_l_2_r_1,
+        fastq_file_l_2_r_2,
+        fastq_file_l_3_r_1,
+        fastq_file_l_3_r_2,
+        fastq_file_l_4_r_1,
+        fastq_file_l_4_r_2,
+    ]
+
+
+@pytest.fixture(scope="function", name="balsamic_housekeeper")
+def balsamic_housekeeper(housekeeper_api, helpers, balsamic_mock_fastq_files):
 
     samples = [
         "sample_case_wgs_paired_tumor",
@@ -188,23 +200,14 @@ def balsamic_housekeeper(
         "mip_sample_case_wgs_single_tumor",
     ]
 
-    files = [
-        fastq_file_l_1_r_1,
-        fastq_file_l_1_r_2,
-        fastq_file_l_2_r_1,
-        fastq_file_l_2_r_2,
-        fastq_file_l_3_r_1,
-        fastq_file_l_3_r_2,
-        fastq_file_l_4_r_1,
-        fastq_file_l_4_r_2,
-    ]
-
     for sample in samples:
         bundle_data = {
             "name": sample,
             "created": dt.datetime.now(),
             "version": "1.0",
-            "files": [{"path": f, "tags": ["fastq"], "archive": False} for f in files],
+            "files": [
+                {"path": f, "tags": ["fastq"], "archive": False} for f in balsamic_mock_fastq_files
+            ],
         }
         helpers.ensure_hk_bundle(store=housekeeper_api, bundle_data=bundle_data)
 
@@ -213,7 +216,6 @@ def balsamic_housekeeper(
 
 @pytest.fixture
 def server_config(
-    tmpdir_factory,
     balsamic_dir,
     balsamic_housekeeper_dir,
     balsamic_singularity_path,
