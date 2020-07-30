@@ -396,4 +396,3 @@ def fixture_balsamic_store(base_store: Store, helpers) -> Store:
     _store.add_commit(version2)
 
     return _store
-
