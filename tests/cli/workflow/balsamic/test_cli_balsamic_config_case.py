@@ -5,9 +5,9 @@ from pathlib import Path
 import pytest
 
 from cg.cli.workflow.balsamic.base import config_case
+from tests.cli.workflow.balsamic.conftest import balsamic_context
 
 EXIT_SUCCESS = 0
-
 
 def test_without_options(cli_runner, balsamic_context):
     """Test command with dry option"""
@@ -27,23 +27,25 @@ def test_with_missing_case(cli_runner, balsamic_context, caplog):
 
     # GIVEN case-id not in database
     case_id = "soberelephant"
+
+    assert not balsamic_context["BalsamicAnalysisAPI"].store.family(case_id)
     caplog.set_level(logging.WARNING)
 
     # WHEN running
-    result = cli_runner.invoke(config_case, case_id=case_id, obj=balsamic_context)
+    result = cli_runner.invoke(config_case, [case_id], obj=balsamic_context)
 
     # THEN command should successfully call the command it creates
     assert result.exit_code != EXIT_SUCCESS
-
     with caplog.at_level(logging.WARNING):
         assert case_id in caplog.text
 
 
-def test_dry(cli_runner, balsamic_context, balsamic_case, caplog):
+
+def test_dry(cli_runner, balsamic_context, caplog):
     """Test command with --dry option"""
 
     # GIVEN case-id
-    case_id = balsamic_case.internal_id
+    case_id = "balsamic_case_wgs_paired"
     caplog.set_level(logging.INFO)
 
     # WHEN dry running with dry specified

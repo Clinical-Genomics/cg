@@ -3,13 +3,13 @@
 from pathlib import Path
 
 import pytest
+import datetime as dt
 
-from cg.apps.balsamic.fastq import FastqHandler
-from cg.apps.lims import LimsAPI
-from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
-from cg.store import Store, models
-from cg.utils.fastq import FastqAPI
+import gzip
 from cg.apps.balsamic.api import BalsamicAPI
+from cg.apps.balsamic.fastq import FastqHandler
+from cg.utils.fastq import FastqAPI
+from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
 
 
@@ -34,46 +34,180 @@ class MockLimsAPI:
         return None
 
 
-@pytest.fixture(scope="function", name="balsamic_dir")
+@pytest.fixture(name="balsamic_dir")
 def fixture_balsamic_dir(tmpdir_factory, apps_dir: Path) -> Path:
     """Return the path to the balsamic apps dir"""
     balsamic_dir = tmpdir_factory.mktemp("balsamic")
     return Path(balsamic_dir).absolute().as_posix()
 
 
-@pytest.fixture(scope="function", name="balsamic_housekeeper_dir")
+@pytest.fixture(name="balsamic_housekeeper_dir")
 def fixture_balsamic_housekeeeper_dir(tmpdir_factory, balsamic_dir: Path) -> Path:
     """Return the path to the balsamic housekeeper dir"""
     balsamic_housekeeper_dir = tmpdir_factory.mktemp("bundles")
     return balsamic_housekeeper_dir
 
 
-@pytest.fixture(scope="function", name="balsamic_singularity_path")
+@pytest.fixture(name="balsamic_singularity_path")
 def fixture_balsamic_singularity_path(balsamic_dir) -> Path:
     balsamic_singularity_path = Path(balsamic_dir, "singularity.sif")
     balsamic_singularity_path.touch(exist_ok=True)
     return balsamic_singularity_path.as_posix()
 
 
-@pytest.fixture(scope="function", name="balsamic_reference_path")
+@pytest.fixture(name="balsamic_reference_path")
 def fixture_balsamic_reference_path(balsamic_dir) -> Path:
     balsamic_reference_path = Path(balsamic_dir, "reference.json")
     balsamic_reference_path.touch(exist_ok=True)
     return balsamic_reference_path.as_posix()
 
 
-@pytest.fixture(scope="function", name="balsamic_bed_1_path")
+@pytest.fixture(name="balsamic_bed_1_path")
 def fixture_balsamic_bed_1_path(balsamic_dir):
     balsamic_bed_1_path = Path(balsamic_dir, "balsamic_bed_1.bed")
     balsamic_bed_1_path.touch(exist_ok=True)
     return balsamic_bed_1_path.as_posix()
 
 
-@pytest.fixture(scope="function", name="balsamic_bed_2_path")
+@pytest.fixture(name="balsamic_bed_2_path")
 def fixture_balsamic_bed_2_path(balsamic_dir):
     balsamic_bed_2_path = Path(balsamic_dir, "balsamic_bed_2.bed")
     balsamic_bed_2_path.touch(exist_ok=True)
     return balsamic_bed_2_path.as_posix()
+
+
+@pytest.fixture
+def fastq_file_l_1_r_1(balsamic_housekeeper_dir):
+    fastq_filename = Path(
+        balsamic_housekeeper_dir, "XXXXXXXXX_000000_S000_L001_R1_001.fastq.gz"
+    ).as_posix()
+    with gzip.open(fastq_filename, "wb") as wh:
+        wh.write(b"@A00689:73:XXXXXXXXX:1:1101:4806:1047 1:N:0:TCCTGGAACA+ACAACCAGTA")
+    return fastq_filename
+
+
+@pytest.fixture
+def fastq_file_l_2_r_1(balsamic_housekeeper_dir):
+    fastq_filename = Path(
+        balsamic_housekeeper_dir, "XXXXXXXXX_000000_S000_L002_R1_001.fastq.gz"
+    ).as_posix()
+    with gzip.open(fastq_filename, "wb") as wh:
+        wh.write(b"@A00689:73:XXXXXXXXX:2:1101:4806:1047 1:N:0:TCCTGGAACA+ACAACCAGTA")
+    return fastq_filename
+
+
+@pytest.fixture
+def fastq_file_l_3_r_1(balsamic_housekeeper_dir):
+    fastq_filename = Path(
+        balsamic_housekeeper_dir, "XXXXXXXXX_000000_S000_L003_R1_001.fastq.gz"
+    ).as_posix()
+    with gzip.open(fastq_filename, "wb") as wh:
+        wh.write(b"@A00689:73:XXXXXXXXX:3:1101:4806:1047 1:N:0:TCCTGGAACA+ACAACCAGTA")
+    return fastq_filename
+
+
+@pytest.fixture
+def fastq_file_l_4_r_1(balsamic_housekeeper_dir):
+    fastq_filename = Path(
+        balsamic_housekeeper_dir, "XXXXXXXXX_000000_S000_L004_R1_001.fastq.gz"
+    ).as_posix()
+    with gzip.open(fastq_filename, "wb") as wh:
+        wh.write(b"@A00689:73:XXXXXXXXX:4:1101:4806:1047 1:N:0:TCCTGGAACA+ACAACCAGTA")
+    return fastq_filename
+
+
+@pytest.fixture
+def fastq_file_l_1_r_2(balsamic_housekeeper_dir):
+    fastq_filename = Path(
+        balsamic_housekeeper_dir, "XXXXXXXXX_000000_S000_L001_R2_001.fastq.gz"
+    ).as_posix()
+    with gzip.open(fastq_filename, "wb") as wh:
+        wh.write(b"@A00689:73:XXXXXXXXX:1:1101:4806:1047 2:N:0:TCCTGGAACA+ACAACCAGTA")
+    return fastq_filename
+
+
+@pytest.fixture
+def fastq_file_l_2_r_2(balsamic_housekeeper_dir):
+    fastq_filename = Path(
+        balsamic_housekeeper_dir, "XXXXXXXXX_000000_S000_L002_R2_001.fastq.gz"
+    ).as_posix()
+    with gzip.open(fastq_filename, "wb") as wh:
+        wh.write(b"@A00689:73:XXXXXXXXX:2:1101:4806:1047 2:N:0:TCCTGGAACA+ACAACCAGTA")
+    return fastq_filename
+
+
+@pytest.fixture
+def fastq_file_l_3_r_2(balsamic_housekeeper_dir):
+    fastq_filename = Path(
+        balsamic_housekeeper_dir, "XXXXXXXXX_000000_S000_L003_R2_001.fastq.gz"
+    ).as_posix()
+    with gzip.open(fastq_filename, "wb") as wh:
+        wh.write(b"@A00689:73:XXXXXXXXX:3:1101:4806:1047 2:N:0:TCCTGGAACA+ACAACCAGTA")
+    return fastq_filename
+
+
+@pytest.fixture
+def fastq_file_l_4_r_2(balsamic_housekeeper_dir):
+    fastq_filename = Path(
+        balsamic_housekeeper_dir, "XXXXXXXXX_000000_S000_L004_R2_001.fastq.gz"
+    ).as_posix()
+    with gzip.open(fastq_filename, "wb") as wh:
+        wh.write(b"@A00689:73:XXXXXXXXX:4:1101:4806:1047 2:N:0:TCCTGGAACA+ACAACCAGTA")
+    return fastq_filename
+
+
+@pytest.fixture(scope="function", name="balsamic_housekeeper")
+def balsamic_housekeeper(
+    housekeeper_api,
+    helpers,
+    fastq_file_l_1_r_1,
+    fastq_file_l_1_r_2,
+    fastq_file_l_2_r_1,
+    fastq_file_l_2_r_2,
+    fastq_file_l_3_r_1,
+    fastq_file_l_3_r_2,
+    fastq_file_l_4_r_1,
+    fastq_file_l_4_r_2,
+):
+
+    samples = [
+        "sample_case_wgs_paired_tumor",
+        "sample_case_wgs_paired_normal",
+        "sample_case_tgs_paired_tumor",
+        "sample_case_tgs_paired_normal",
+        "sample_case_wgs_single_tumor",
+        "sample_case_tgs_single_tumor",
+        "sample_case_tgs_single_normal_error",
+        "sample_case_tgs_paired_tumor_error",
+        "sample_case_tgs_paired_tumor2_error",
+        "sample_case_tgs_paired_normal_error",
+        "mixed_sample_case_wgs_paired_tumor_error",
+        "mixed_sample_case_tgs_paired_normal_error",
+        "mixed_sample_case_mixed_bed_paired_tumor_error",
+        "mixed_sample_case_mixed_bed_paired_normal_error",
+        "mip_sample_case_wgs_single_tumor",
+    ]
+
+    files = [
+        fastq_file_l_1_r_1,
+        fastq_file_l_1_r_2,
+        fastq_file_l_2_r_1,
+        fastq_file_l_2_r_2,
+        fastq_file_l_3_r_1,
+        fastq_file_l_3_r_2,
+        fastq_file_l_4_r_1,
+        fastq_file_l_4_r_2,
+    ]
+
+    for sample in samples:
+        bundle_data = {
+            "name": sample,
+            "created": dt.datetime.now(),
+            "version": "1.0",
+            "files": [{"path": f, "tags": ["fastq"], "archive": False} for f in files]}
+        helpers.ensure_hk_bundle(store=housekeeper_api, bundle_data=bundle_data)
+
+    return housekeeper_api
 
 
 @pytest.fixture
@@ -86,7 +220,7 @@ def server_config(
 ) -> dict:
     # Dummy server config
     return {
-        "database": "sqlite:///:memory:",
+        "database": "database",
         "bed_path": balsamic_dir,
         "balsamic": {
             "root": balsamic_dir,
@@ -100,26 +234,12 @@ def server_config(
                 "qos": "low",
             },
         },
-        "housekeeper": {"database": "sqlite:///:memory:", "root": balsamic_housekeeper_dir,},
+        "housekeeper": {"database": "database", "root": balsamic_housekeeper_dir,},
         "lims": {"host": "example.db", "username": "testuser", "password": "testpassword",},
     }
 
 
-@pytest.fixture
-def balsamic_context(server_config, balsamic_store, balsamic_lims, housekeeper_api) -> dict:
-    """context to use in cli"""
-    balsamic_analysis_api = BalsamicAnalysisAPI(
-        config=server_config, housekeeper_api=MockHousekeeperAPI, lims_api=MockLimsAPI,
-    )
-    balsamic_analysis_api.store = balsamic_store
-    balsamic_analysis_api.lims_api = balsamic_lims
-    balsamic_analysis_api.housekeeper_api = housekeeper_api
-    return {
-        "BalsamicAnalysisAPI": balsamic_analysis_api,
-    }
-
-
-@pytest.fixture(scope="function", name="balsamic_lims")
+@pytest.fixture(name="balsamic_lims")
 def fixture_balsamic_lims():
     balsamic_lims = MockLimsAPI(server_config)
 
@@ -172,23 +292,25 @@ def fixture_balsamic_lims():
     return balsamic_lims
 
 
-@pytest.fixture(scope="function", name="balsamic_store")
-def fixture_balsamic_store(base_store: Store, helpers) -> Store:
+@pytest.fixture(name="balsamic_store")
+def fixture_balsamic_store(base_store, helpers):
     """real store to be used in tests"""
     _store = base_store
 
     # Create textbook case for WGS PAIRED
-    case_wgs_paired = helpers.add_family(_store, "balsamic_case_wgs_paired")
+    case_wgs_paired = helpers.add_family(
+        store=_store, internal_id="balsamic_case_wgs_paired", family_id="balsamic_case_wgs_paired"
+    )
     sample_case_wgs_paired_tumor = helpers.add_sample(
         _store,
-        "sample_case_wgs_paired_tumor",
+        internal_id="sample_case_wgs_paired_tumor",
         is_tumour=True,
         application_type="wgs",
         data_analysis="balsamic",
     )
     sample_case_wgs_paired_normal = helpers.add_sample(
         _store,
-        "sample_case_wgs_paired_normal",
+        internal_id="sample_case_wgs_paired_normal",
         is_tumour=False,
         application_type="wgs",
         data_analysis="balsamic",
@@ -197,17 +319,19 @@ def fixture_balsamic_store(base_store: Store, helpers) -> Store:
     helpers.add_relationship(_store, family=case_wgs_paired, sample=sample_case_wgs_paired_normal)
 
     # Create textbook case for TGS PAIRED
-    case_tgs_paired = helpers.add_family(_store, "balsamic_case_tgs_paired")
+    case_tgs_paired = helpers.add_family(
+        _store, internal_id="balsamic_case_tgs_paired", family_id="balsamic_case_tgs_paired"
+    )
     sample_case_tgs_paired_tumor = helpers.add_sample(
         _store,
-        "sample_case_tgs_paired_tumor",
+        internal_id="sample_case_tgs_paired_tumor",
         is_tumour=True,
         application_type="tgs",
         data_analysis="balsamic",
     )
     sample_case_tgs_paired_normal = helpers.add_sample(
         _store,
-        "sample_case_tgs_paired_normal",
+        internal_id="sample_case_tgs_paired_normal",
         is_tumour=False,
         application_type="tgs",
         data_analysis="balsamic",
@@ -216,10 +340,12 @@ def fixture_balsamic_store(base_store: Store, helpers) -> Store:
     helpers.add_relationship(_store, family=case_tgs_paired, sample=sample_case_tgs_paired_normal)
 
     # Create textbook case for WGS TUMOR ONLY
-    case_wgs_single = helpers.add_family(_store, "balsamic_case_wgs_single")
+    case_wgs_single = helpers.add_family(
+        _store, internal_id="balsamic_case_wgs_single", family_id="balsamic_case_wgs_single"
+    )
     sample_case_wgs_single_tumor = helpers.add_sample(
         _store,
-        "sample_case_wgs_single_tumor",
+        internal_id="sample_case_wgs_single_tumor",
         is_tumour=True,
         application_type="wgs",
         data_analysis="balsamic",
@@ -227,10 +353,12 @@ def fixture_balsamic_store(base_store: Store, helpers) -> Store:
     helpers.add_relationship(_store, family=case_wgs_single, sample=sample_case_wgs_single_tumor)
 
     # Create textbook case for TGS TUMOR ONLY
-    case_tgs_single = helpers.add_family(_store, "balsamic_case_tgs_single")
+    case_tgs_single = helpers.add_family(
+        _store, internal_id="balsamic_case_tgs_single", family_id="balsamic_case_tgs_single"
+    )
     sample_case_tgs_single_tumor = helpers.add_sample(
         _store,
-        "sample_case_tgs_single_tumor",
+        internal_id="sample_case_tgs_single_tumor",
         is_tumour=True,
         application_type="tgs",
         data_analysis="balsamic",
@@ -238,10 +366,14 @@ def fixture_balsamic_store(base_store: Store, helpers) -> Store:
     helpers.add_relationship(_store, family=case_tgs_single, sample=sample_case_tgs_single_tumor)
 
     # Create ERROR case for TGS NORMAL ONLY
-    case_tgs_single_error = helpers.add_family(_store, "balsamic_case_tgs_single_error")
+    case_tgs_single_error = helpers.add_family(
+        _store,
+        internal_id="balsamic_case_tgs_single_error",
+        family_id="balsamic_case_tgs_single_error",
+    )
     sample_case_tgs_single_normal_error = helpers.add_sample(
         _store,
-        "sample_case_tgs_single_normal_error",
+        internal_id="sample_case_tgs_single_normal_error",
         is_tumour=False,
         application_type="tgs",
         data_analysis="balsamic",
@@ -251,24 +383,28 @@ def fixture_balsamic_store(base_store: Store, helpers) -> Store:
     )
 
     # Create ERROR case for TGS TWO TUMOR ONE NORMAL
-    case_tgs_paired_error = helpers.add_family(_store, "balsamic_case_tgs_paired_error")
+    case_tgs_paired_error = helpers.add_family(
+        _store,
+        internal_id="balsamic_case_tgs_paired_error",
+        family_id="balsamic_case_tgs_paired_error",
+    )
     sample_case_tgs_paired_tumor_error = helpers.add_sample(
         _store,
-        "sample_case_tgs_paired_tumor_error",
+        internal_id="sample_case_tgs_paired_tumor_error",
         is_tumour=True,
         application_type="tgs",
         data_analysis="balsamic",
     )
     sample_case_tgs_paired_tumor2_error = helpers.add_sample(
         _store,
-        "sample_case_tgs_paired_tumor2_error",
+        internal_id="sample_case_tgs_paired_tumor2_error",
         is_tumour=True,
         application_type="tgs",
         data_analysis="balsamic",
     )
     sample_case_tgs_paired_normal_error = helpers.add_sample(
         _store,
-        "sample_case_tgs_paired_normal_error",
+        internal_id="sample_case_tgs_paired_normal_error",
         is_tumour=False,
         application_type="tgs",
         data_analysis="balsamic",
@@ -284,17 +420,21 @@ def fixture_balsamic_store(base_store: Store, helpers) -> Store:
     )
 
     # Create ERROR case for MIXED application type
-    case_mixed_paired_error = helpers.add_family(_store, "balsamic_case_mixed_paired_error")
+    case_mixed_paired_error = helpers.add_family(
+        _store,
+        internal_id="balsamic_case_mixed_paired_error",
+        family_id="balsamic_case_mixed_paired_error",
+    )
     mixed_sample_case_wgs_paired_tumor_error = helpers.add_sample(
         _store,
-        "mixed_sample_case_wgs_paired_tumor_error",
+        internal_id="mixed_sample_case_wgs_paired_tumor_error",
         is_tumour=True,
         application_type="wgs",
         data_analysis="balsamic",
     )
     mixed_sample_case_tgs_paired_normal_error = helpers.add_sample(
         _store,
-        "mixed_sample_case_tgs_paired_normal_error",
+        internal_id="mixed_sample_case_tgs_paired_normal_error",
         is_tumour=False,
         application_type="tgs",
         data_analysis="balsamic",
@@ -308,18 +448,20 @@ def fixture_balsamic_store(base_store: Store, helpers) -> Store:
 
     # Create ERROR case for MIXED application type NOT BALSAMIC APPLICATION
     case_mixed_wgs_mic_paired_error = helpers.add_family(
-        _store, "balsamic_case_mixed_wgs_mic_paired_error"
+        _store,
+        internal_id="balsamic_case_mixed_wgs_mic_paired_error",
+        family_id="balsamic_case_mixed_wgs_mic_paired_error",
     )
     mixed_sample_case_wgs_mic_paired_tumor_error = helpers.add_sample(
         _store,
-        "mixed_sample_case_wgs_mic_paired_tumor_error",
+        internal_id="mixed_sample_case_wgs_mic_paired_tumor_error",
         is_tumour=True,
         application_type="wgs",
         data_analysis="balsamic",
     )
     mixed_sample_case_wgs_mic_paired_normal_error = helpers.add_sample(
         _store,
-        "mixed_sample_case_wgs_mic_paired_normal_error",
+        internal_id="mixed_sample_case_wgs_mic_paired_normal_error",
         is_tumour=False,
         application_type="mic",
         data_analysis="balsamic",
@@ -336,17 +478,21 @@ def fixture_balsamic_store(base_store: Store, helpers) -> Store:
     )
 
     # Create ERROR case for MIXED TARGET BED
-    case_mixed_bed_paired_error = helpers.add_family(_store, "balsamic_case_mixed_bed_paired_error")
+    case_mixed_bed_paired_error = helpers.add_family(
+        _store,
+        internal_id="balsamic_case_mixed_bed_paired_error",
+        family_id="balsamic_case_mixed_bed_paired_error",
+    )
     mixed_sample_case_mixed_bed_paired_tumor_error = helpers.add_sample(
         _store,
-        "mixed_sample_case_mixed_bed_paired_tumor_error",
+        internal_id="mixed_sample_case_mixed_bed_paired_tumor_error",
         is_tumour=True,
         application_type="tgs",
         data_analysis="balsamic",
     )
     mixed_sample_case_mixed_bed_paired_normal_error = helpers.add_sample(
         _store,
-        "mixed_sample_case_mixed_bed_paired_normal_error",
+        internal_id="mixed_sample_case_mixed_bed_paired_normal_error",
         is_tumour=False,
         application_type="tgs",
         data_analysis="balsamic",
@@ -363,10 +509,12 @@ def fixture_balsamic_store(base_store: Store, helpers) -> Store:
     )
 
     # Create ERROR case for WGS TUMOR ONLY MIP ANALYSIS ONLY
-    mip_case_wgs_single = helpers.add_family(_store, "mip_case_wgs_single")
+    mip_case_wgs_single = helpers.add_family(
+        _store, internal_id="mip_case_wgs_single", family_id="mip_case_wgs_single"
+    )
     mip_sample_case_wgs_single_tumor = helpers.add_sample(
         _store,
-        "mip_sample_case_wgs_single_tumor",
+        internal_id="mip_sample_case_wgs_single_tumor",
         is_tumour=True,
         application_type="wgs",
         data_analysis="mip",
@@ -396,3 +544,19 @@ def fixture_balsamic_store(base_store: Store, helpers) -> Store:
     _store.add_commit(version2)
 
     return _store
+
+
+@pytest.fixture
+def balsamic_context(server_config, balsamic_store, balsamic_lims, balsamic_housekeeper) -> dict:
+    """context to use in cli"""
+    balsamic_analysis_api = BalsamicAnalysisAPI(
+        balsamic_api=BalsamicAPI(server_config),
+        store=balsamic_store,
+        housekeeper_api=balsamic_housekeeper,
+        fastq_handler=FastqHandler,
+        lims_api=balsamic_lims,
+        fastq_api=FastqAPI,
+    )
+    return {
+        "BalsamicAnalysisAPI": balsamic_analysis_api,
+    }

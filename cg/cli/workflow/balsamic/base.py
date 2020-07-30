@@ -5,6 +5,13 @@ import click
 
 from pathlib import Path
 
+from cg.apps.hk import HousekeeperAPI
+from cg.apps.lims import LimsAPI
+from cg.apps.balsamic.api import BalsamicAPI
+from cg.apps.balsamic.fastq import FastqHandler
+from cg.utils.fastq import FastqAPI
+from cg.store import Store
+
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.exc import LimsDataError, BalsamicStartError
 from cg.cli.workflow.balsamic.deliver import deliver as deliver_cmd
@@ -13,7 +20,8 @@ LOG = logging.getLogger(__name__)
 
 ARGUMENT_CASE_ID = click.argument("case_id", required=True)
 OPTION_DRY = click.option(
-    "-d", "--dry-run", "dry", help="Print command to console without executing"
+    "-d", "--dry-run", "dry", help="Print command to console without executing",
+    is_flag=True,
 )
 OPTION_PANEL_BED = click.option(
     "--panel-bed",
@@ -43,7 +51,15 @@ def balsamic(context, priority, panel_bed, analysis_type, run_analysis, customer
     if context.invoked_subcommand is None:
         click.echo(context.get_help())
         raise click.Abort()
-    context.obj["BalsamicAnalysisAPI"] = BalsamicAnalysisAPI(config=context.obj)
+    config = context.obj
+    context.obj["BalsamicAnalysisAPI"] = BalsamicAnalysisAPI(
+        balsamic_api=BalsamicAPI(config),
+        store=Store(config["database"]),
+        housekeeper_api=HousekeeperAPI(config),
+        fastq_handler=FastqHandler(config),
+        lims_api=LimsAPI(config),
+        fastq_api=FastqAPI,
+    )
 
 
 @balsamic.command("link")
@@ -72,7 +88,7 @@ def config_case(context, panel_bed, case_id, dry):
 
     LOG.info(f"Creating config file for {case_id}.")
     case_object = context.obj["BalsamicAnalysisAPI"].get_case_object(case_id)
-    if not case_object and case_object.links:
+    if not case_object or not case_object.links:
         LOG.warning(f"{case_id} not found!")
         raise click.Abort()
     sample_data = context.obj["BalsamicAnalysisAPI"].get_sample_params(case_object)

@@ -8,13 +8,8 @@ import datetime as dt
 from pathlib import Path
 from typing import Optional
 
-from cg.apps.hk import HousekeeperAPI
-from cg.apps.lims import LimsAPI
-from cg.apps.balsamic.api import BalsamicAPI
-from cg.apps.balsamic.fastq import FastqHandler
-from cg.utils.fastq import FastqAPI
+
 from cg.exc import LimsDataError, BalsamicStartError
-from cg.store import Store
 
 LOG = logging.getLogger(__name__)
 
@@ -27,20 +22,13 @@ class BalsamicAnalysisAPI:
     __BALSAMIC_BED_APPLICATIONS = {"wes", "tgs"}
 
     def __init__(
-        self,
-        config,
-        balsamic_api=BalsamicAPI,
-        store=Store,
-        housekeeper_api=HousekeeperAPI,
-        fastq_handler=FastqHandler,
-        lims_api=LimsAPI,
-        fastq_api=FastqAPI,
+        self, balsamic_api, store, housekeeper_api, fastq_handler, lims_api, fastq_api,
     ):
-        self.balsamic_api = balsamic_api(config)
-        self.store = store(config["database"])
-        self.housekeeper_api = housekeeper_api(config)
-        self.fastq_handler = fastq_handler(config)
-        self.lims_api = lims_api(config)
+        self.balsamic_api = balsamic_api
+        self.store = store
+        self.housekeeper_api = housekeeper_api
+        self.fastq_handler = fastq_handler
+        self.lims_api = lims_api
         self.fastq_api = fastq_api
 
     def get_deliverables_file_path(self, case_id: str) -> Path:
