@@ -216,10 +216,7 @@ def balsamic_housekeeper(housekeeper_api, helpers, balsamic_mock_fastq_files):
 
 @pytest.fixture
 def server_config(
-    balsamic_dir,
-    balsamic_housekeeper_dir,
-    balsamic_singularity_path,
-    balsamic_reference_path,
+    balsamic_dir, balsamic_housekeeper_dir, balsamic_singularity_path, balsamic_reference_path,
 ) -> dict:
     # Dummy server config
     return {
