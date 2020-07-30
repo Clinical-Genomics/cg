@@ -7,7 +7,6 @@ import ruamel.yaml
 from cg.constants import HK_TAGS, MICROSALT_TAGS
 from cg.exc import (
     BundleAlreadyAddedError,
-    PipelineUnknownError,
     AnalysisDuplicationError,
 )
 
@@ -145,9 +144,6 @@ def add_new_analysis(bundle_data, microbial_order_obj, status, version_obj):
     """Function to create and return a new analysis database record"""
 
     pipeline = HK_TAGS["microsalt"]
-
-    if not pipeline:
-        raise PipelineUnknownError(f"No pipeline specified in {microbial_order_obj}")
 
     if status.microbial_analysis(
         microbial_order_id=microbial_order_obj.id, started_at=version_obj.created_at

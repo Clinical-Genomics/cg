@@ -7,13 +7,11 @@ import click
 
 from cg.apps import hk, tb
 from cg.exc import (
-    AnalysisNotFinishedError,
     AnalysisDuplicationError,
     BundleAlreadyAddedError,
-    PipelineUnknownError,
     MandatoryFilesMissing,
 )
-from cg.meta.store.microsalt import gather_files_and_bundle_in_housekeeper  # TODO: Placeholder
+from cg.meta.store.microsalt import gather_files_and_bundle_in_housekeeper
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -44,16 +42,10 @@ def analysis(context, config_stream):
 
     try:
         new_analysis = gather_files_and_bundle_in_housekeeper(config_stream, hk_api, status,)
-    except AnalysisNotFinishedError as error:
-        click.echo(click.style(error.message, fg="red"))
-        context.abort()
     except AnalysisDuplicationError as error:
         click.echo(click.style(error.message, fg="red"))
         context.abort()
     except BundleAlreadyAddedError as error:
-        click.echo(click.style(error.message, fg="red"))
-        context.abort()
-    except PipelineUnknownError as error:
         click.echo(click.style(error.message, fg="red"))
         context.abort()
     except MandatoryFilesMissing as error:
