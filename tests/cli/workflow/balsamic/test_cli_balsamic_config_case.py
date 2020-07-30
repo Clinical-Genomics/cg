@@ -97,29 +97,38 @@ def test_target_bed_from_lims(cli_runner, balsamic_context, caplog):
 def test_paired_wgs():
     pass
 
+
 def test_paired_panel():
     pass
+
 
 def test_single_wgs():
     pass
 
+
 def test_single_panel():
     pass
+
 
 def test_error_normal_only():
     pass
 
+
 def test_error_two_tumor():
     pass
+
 
 def test_error_mixed_application():
     pass
 
+
 def test_error_not_balsamic_application():
     pass
 
+
 def test_error_mixed_panel_bed():
     pass
+
 
 def test_error_only_mip_tumor():
     pass
