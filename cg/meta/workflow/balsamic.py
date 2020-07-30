@@ -168,8 +168,8 @@ class BalsamicAnalysisAPI:
 
         if not application_types.issubset(self.__BALSAMIC_APPLICATIONS):
             raise BalsamicStartError("Case application not compatible with BALSAMIC")
-        if len(application_types) != 1 or len(target_beds) > 1:
-            raise BalsamicStartError("Multiple application types or BED versions found in LIMS")
+        if len(application_types) != 1:
+            raise BalsamicStartError("Multiple application types found in LIMS")
         if not application_types.issubset(self.__BALSAMIC_BED_APPLICATIONS):
             if panel_bed:
                 raise BalsamicStartError("Cannot set panel_bed for WGS sample!")
@@ -178,7 +178,7 @@ class BalsamicAnalysisAPI:
             return Path(self.balsamic_api.bed_path, panel_bed).as_posix()
         if len(target_beds) == 1:
             return Path(self.balsamic_api.bed_path, target_beds.pop()).as_posix()
-        raise BalsamicStartError("No BED version could be retrieved from LIMS")
+        raise BalsamicStartError(f"Too many BED versions in LIMS: {len(target_beds)}")
 
     def get_verified_tumor_path(self, sample_data: dict) -> str(Path):
         """Takes a dict with samples and attributes, and retrieves the paths
@@ -251,13 +251,13 @@ class BalsamicAnalysisAPI:
 
         LOG.info(f"Case {case_id} has following BALSAMIC samples:")
         LOG.info(
-            "{:<15} {:<15} {:<15} {:<15}".format(
+            "{:<20} {:<20} {:<20} {:<20}".format(
                 "SAMPLE ID", "TISSUE TYPE", "APPLICATION", "BED VERSION"
             )
         )
         for key in sample_data:
             LOG.info(
-                "{:<15} {:<15} {:<15} {:<15}".format(
+                "{:<20} {:<20} {:<20} {:<20}".format(
                     key,
                     str(sample_data[key]["tissue_type"]),
                     str(sample_data[key]["application_type"]),

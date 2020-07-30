@@ -297,6 +297,9 @@ def fixture_balsamic_store(base_store, helpers):
     """real store to be used in tests"""
     _store = base_store
 
+    # Create tgs application version
+    helpers.ensure_application_version(store=_store, application_tag="TGSA", application_type="tgs")
+
     # Create textbook case for WGS PAIRED
     case_wgs_paired = helpers.add_family(
         store=_store, internal_id="balsamic_case_wgs_paired", family_id="balsamic_case_wgs_paired"
@@ -326,6 +329,7 @@ def fixture_balsamic_store(base_store, helpers):
         _store,
         internal_id="sample_case_tgs_paired_tumor",
         is_tumour=True,
+        application_tag="TGSA",
         application_type="tgs",
         data_analysis="balsamic",
     )
@@ -333,6 +337,7 @@ def fixture_balsamic_store(base_store, helpers):
         _store,
         internal_id="sample_case_tgs_paired_normal",
         is_tumour=False,
+        application_tag="TGSA",
         application_type="tgs",
         data_analysis="balsamic",
     )
@@ -360,6 +365,7 @@ def fixture_balsamic_store(base_store, helpers):
         _store,
         internal_id="sample_case_tgs_single_tumor",
         is_tumour=True,
+        application_tag="TGSA",
         application_type="tgs",
         data_analysis="balsamic",
     )
@@ -375,6 +381,7 @@ def fixture_balsamic_store(base_store, helpers):
         _store,
         internal_id="sample_case_tgs_single_normal_error",
         is_tumour=False,
+        application_tag="TGSA",
         application_type="tgs",
         data_analysis="balsamic",
     )
@@ -392,6 +399,7 @@ def fixture_balsamic_store(base_store, helpers):
         _store,
         internal_id="sample_case_tgs_paired_tumor_error",
         is_tumour=True,
+        application_tag="TGSA",
         application_type="tgs",
         data_analysis="balsamic",
     )
@@ -399,6 +407,7 @@ def fixture_balsamic_store(base_store, helpers):
         _store,
         internal_id="sample_case_tgs_paired_tumor2_error",
         is_tumour=True,
+        application_tag="TGSA",
         application_type="tgs",
         data_analysis="balsamic",
     )
@@ -406,6 +415,7 @@ def fixture_balsamic_store(base_store, helpers):
         _store,
         internal_id="sample_case_tgs_paired_normal_error",
         is_tumour=False,
+        application_tag="TGSA",
         application_type="tgs",
         data_analysis="balsamic",
     )
@@ -436,6 +446,7 @@ def fixture_balsamic_store(base_store, helpers):
         _store,
         internal_id="mixed_sample_case_tgs_paired_normal_error",
         is_tumour=False,
+        application_tag="TGSA",
         application_type="tgs",
         data_analysis="balsamic",
     )
@@ -463,6 +474,7 @@ def fixture_balsamic_store(base_store, helpers):
         _store,
         internal_id="mixed_sample_case_wgs_mic_paired_normal_error",
         is_tumour=False,
+        application_tag="MICA",
         application_type="mic",
         data_analysis="balsamic",
     )
@@ -487,6 +499,7 @@ def fixture_balsamic_store(base_store, helpers):
         _store,
         internal_id="mixed_sample_case_mixed_bed_paired_tumor_error",
         is_tumour=True,
+        application_tag="TGSA",
         application_type="tgs",
         data_analysis="balsamic",
     )
@@ -494,6 +507,7 @@ def fixture_balsamic_store(base_store, helpers):
         _store,
         internal_id="mixed_sample_case_mixed_bed_paired_normal_error",
         is_tumour=False,
+        application_tag="TGSA",
         application_type="tgs",
         data_analysis="balsamic",
     )
