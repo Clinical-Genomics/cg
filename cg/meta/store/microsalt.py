@@ -1,4 +1,5 @@
 """ MIP specific functionality for storing files in Houskeeper """
+import datetime as dt
 import logging
 
 # from pathlib import Path
@@ -8,13 +9,16 @@ from cg.constants import HK_TAGS, MICROSALT_TAGS
 from cg.exc import (
     AnalysisNotFinishedError,
     BundleAlreadyAddedError,
+    PipelineUnknownError,
+    AnalysisDuplicationError,
 )
 from cg.meta.store.base import (
     build_bundle,
-    add_new_analysis,
+    # add_new_analysis,
 )
 from cg.store.utils import reset_case_action
 
+DUMMY_MICROSALT_CASE = "dummymicrobe"
 LOG = logging.getLogger(__name__)
 
 
@@ -28,10 +32,9 @@ def gather_files_and_bundle_in_housekeeper(config_stream, hk_api, status):
 
     bundle_obj, version_obj = results
 
-    case_obj = status.family(bundle_obj.name)
+    microbial_order_obj = status.microbial_order(bundle_obj.name)
 
-    reset_case_action(case_obj)
-    new_analysis = add_new_analysis(bundle_data, case_obj, status, version_obj)
+    new_analysis = add_new_analysis(bundle_data, microbial_order_obj, status, version_obj)
     version_date = version_obj.created_at.date()
 
     LOG.info("new bundle added: %s, version %s", bundle_obj.name, version_date)
@@ -43,8 +46,8 @@ def gather_files_and_bundle_in_housekeeper(config_stream, hk_api, status):
 
 def add_microbial_analysis(config_stream):
     """Gather information from microSALT analysis to store."""
-    deliverables = ruamel.yaml.safe_load(config_stream)
 
+    deliverables = ruamel.yaml.safe_load(config_stream)
     new_bundle = build_microbial_bundle(deliverables)
 
     return new_bundle
@@ -53,10 +56,13 @@ def add_microbial_analysis(config_stream):
 def build_microbial_bundle(deliverables: dict) -> dict:
     """Create a new bundle to store in Housekeeper"""
 
+    project_name = _get_microbial_name(deliverables)
+    files = microbial_deliverables_files(deliverables)
+
     data = {
-        "name": "name_stub",
-        "created": "date_stub",
-        "files": microbial_deliverables_files(deliverables),
+        "name": project_name,
+        "created": _get_date_from_results_path(deliverables, project_name),
+        "files": files,
     }
     return data
 
@@ -140,3 +146,50 @@ def _convert_tags(tags: dict, tag_map: dict, tag_map_key: tuple, is_index: bool 
         converted_tags.append(tag)
 
     return sorted(list(set(converted_tags)))
+
+
+def add_new_analysis(bundle_data, microbial_order_obj, status, version_obj):
+    """Function to create and return a new analysis database record"""
+
+    pipeline = HK_TAGS["microsalt"]
+
+    if not pipeline:
+        raise PipelineUnknownError(f"No pipeline specified in {microbial_order_obj}")
+
+    if status.microbial_analysis(
+        microbial_order_id=microbial_order_obj.id, started_at=version_obj.created_at
+    ):
+        raise AnalysisDuplicationError(
+            f"Analysis object already exists for {microbial_order_obj.internal_id} {version_obj.created_at}"
+        )
+
+    new_analysis = status.add_analysis(
+        pipeline=pipeline,
+        started_at=version_obj.created_at,
+        completed_at=dt.datetime.now(),
+        primary=(len(microbial_order_obj.analyses) == 0),
+    )
+    case_obj = status.family(DUMMY_MICROSALT_CASE)
+    new_analysis.family = case_obj
+    new_analysis.microbial_order = microbial_order_obj
+    return new_analysis
+
+
+def _get_microbial_name(deliverables: dict) -> str:
+    """ Get microbial id from deliverables """
+    for file_ in deliverables["files"]:
+        if file_["tag"] == "sampleinfo":
+            return file_["id"]
+
+
+def _get_date_from_results_path(deliverables: dict, project_name: str) -> dt.datetime:
+    """ Get date from results path """
+    for file_ in deliverables["files"]:
+        if file_["tag"] != "sampleinfo":
+            results_path = file_["path"]
+            [_, partial_path] = results_path.split(f"{project_name}_")
+            [date_in_path, _] = partial_path.split("/")
+            [date, time] = date_in_path.split("_")
+            [year, month, day] = list(map(int, date.split(".")))
+            [hour, minutes, seconds] = list(map(int, time.split(".")))
+            return dt.datetime(year, month, day, hour, minutes, seconds)
