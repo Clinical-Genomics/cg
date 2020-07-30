@@ -240,9 +240,9 @@ class StoreHelpers:
         if kwargs.get("flowcell"):
             # print("Adding flowcell")
             sample.flowcells.append(kwargs["flowcell"])
-        
+
         if internal_id:
-            sample.internal_id=internal_id
+            sample.internal_id = internal_id
 
         store.add_commit(sample)
         return sample

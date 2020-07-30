@@ -9,6 +9,7 @@ from tests.cli.workflow.balsamic.conftest import balsamic_context
 
 EXIT_SUCCESS = 0
 
+
 def test_without_options(cli_runner, balsamic_context):
     """Test command with dry option"""
 
@@ -38,7 +39,6 @@ def test_with_missing_case(cli_runner, balsamic_context, caplog):
     assert result.exit_code != EXIT_SUCCESS
     with caplog.at_level(logging.WARNING):
         assert case_id in caplog.text
-
 
 
 def test_dry(cli_runner, balsamic_context, caplog):
