@@ -96,7 +96,7 @@ def get_true_dir(dir_path: Path) -> Path:
         if fastq_path.is_symlink():
             true_dir = Path(os.readlink(fastq_path)).parent
             return true_dir
-
+    LOG.info("Could not find any symlinked files")
     return None
 
 
@@ -125,7 +125,7 @@ def correct_spring_paths(
 
             spring_config_path = spring_path.with_suffix("").with_suffix(".json")
             # true_dir is where the spring paths actually exists
-            true_dir = get_true_dir(spring_path.parent())
+            true_dir = get_true_dir(spring_path.parent)
             if not true_dir:
                 LOG.info("Could not find location of spring files")
                 continue
