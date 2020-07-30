@@ -20,8 +20,7 @@ LOG = logging.getLogger(__name__)
 
 ARGUMENT_CASE_ID = click.argument("case_id", required=True)
 OPTION_DRY = click.option(
-    "-d", "--dry-run", "dry", help="Print command to console without executing",
-    is_flag=True,
+    "-d", "--dry-run", "dry", help="Print command to console without executing", is_flag=True,
 )
 OPTION_PANEL_BED = click.option(
     "--panel-bed",

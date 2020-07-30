@@ -204,7 +204,8 @@ def balsamic_housekeeper(
             "name": sample,
             "created": dt.datetime.now(),
             "version": "1.0",
-            "files": [{"path": f, "tags": ["fastq"], "archive": False} for f in files]}
+            "files": [{"path": f, "tags": ["fastq"], "archive": False} for f in files],
+        }
         helpers.ensure_hk_bundle(store=housekeeper_api, bundle_data=bundle_data)
 
     return housekeeper_api
