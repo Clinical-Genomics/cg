@@ -538,10 +538,7 @@ def fixture_balsamic_store(base_store, helpers):
     )
 
     # Create ERROR case with NO SAMPLES
-    helpers.add_family(
-        _store, internal_id="no_sample_case", family_id="no_sample_case"
-    )
-
+    helpers.add_family(_store, internal_id="no_sample_case", family_id="no_sample_case")
 
     # Create BED1 version 1
     bed1_name = "BalsamicBed1"
