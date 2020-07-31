@@ -144,6 +144,7 @@ def test_single_wgs(balsamic_context, cli_runner, caplog):
     # THEN normal option should NOT be included in command
     assert "--normal" not in caplog.text
 
+
 def test_single_panel(balsamic_context, cli_runner, caplog):
     """Test with case_id that requires SINGLE TGS analysis"""
     caplog.set_level(logging.INFO)
@@ -159,6 +160,7 @@ def test_single_panel(balsamic_context, cli_runner, caplog):
     assert "--tumor" in caplog.text
     # THEN normal option should NOT be included in command
     assert "--normal" not in caplog.text
+
 
 def test_error_single_wgs_panel_arg(balsamic_context, cli_runner, caplog):
     """Test with case_id that requires SINGLE WGS analysis and --panel-bed argument"""
