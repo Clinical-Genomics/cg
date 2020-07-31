@@ -50,7 +50,9 @@ def test_priority(cli_runner, balsamic_context, caplog):
     option_key = "--priority"
     option_value = "high"
     # WHEN dry running with option specified
-    result = cli_runner.invoke(run, [case_id, "--dry-run", option_key, option_value], obj=balsamic_context)
+    result = cli_runner.invoke(
+        run, [case_id, "--dry-run", option_key, option_value], obj=balsamic_context
+    )
     # THEN dry-print should include the the option-value
     assert result.exit_code == EXIT_SUCCESS
     assert "--qos" in caplog.text
