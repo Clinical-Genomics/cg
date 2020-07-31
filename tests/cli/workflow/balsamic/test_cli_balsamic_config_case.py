@@ -34,6 +34,20 @@ def test_with_missing_case(cli_runner, balsamic_context, caplog):
     assert case_id in caplog.text
 
 
+def test_without_samples(cli_runner, balsamic_context, caplog):
+    """Test command with case_id and no samples"""
+    caplog.set_level(logging.WARNING)
+    # GIVEN case-id
+    case_id = "no_sample_case"
+    # WHEN dry running with dry specified
+    result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
+    # THEN command should print the balsamic command-string
+    assert result.exit_code != EXIT_SUCCESS
+    # THEN warning should be printed that no config file is found
+    assert "not found" in caplog.text
+    assert "0" in caplog.text
+
+
 def test_dry(cli_runner, balsamic_context, caplog):
     """Test command with --dry option"""
     caplog.set_level(logging.INFO)

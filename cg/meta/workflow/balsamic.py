@@ -142,8 +142,9 @@ class BalsamicAnalysisAPI:
         application_type = link_object.sample.application_version.application.prep_category
         return application_type
 
-    def get_priority(self, case_object) -> str:
+    def get_priority(self, case_id) -> str:
         """Finds priority for the case in clinical-db, and returns it as text"""
+        case_object = self.get_case_object(case_id)
         if case_object.high_priority:
             return "high"
         if case_object.low_priority:

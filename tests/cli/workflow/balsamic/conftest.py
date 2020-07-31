@@ -537,6 +537,12 @@ def fixture_balsamic_store(base_store, helpers):
         _store, family=mip_case_wgs_single, sample=mip_sample_case_wgs_single_tumor
     )
 
+    # Create ERROR case with NO SAMPLES
+    helpers.add_family(
+        _store, internal_id="no_sample_case", family_id="no_sample_case"
+    )
+
+
     # Create BED1 version 1
     bed1_name = "BalsamicBed1"
     bed1_filename = "balsamic_bed_1.bed"

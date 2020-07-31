@@ -88,7 +88,7 @@ def config_case(context, panel_bed, case_id, dry):
     LOG.info(f"Creating config file for {case_id}.")
     case_object = context.obj["BalsamicAnalysisAPI"].get_case_object(case_id)
     if not case_object or not case_object.links:
-        LOG.warning(f"{case_id} not found!")
+        LOG.warning(f"{case_id} not found or number of samples is {len(case_object.links)}!")
         raise click.Abort()
     sample_data = context.obj["BalsamicAnalysisAPI"].get_sample_params(case_object)
     context.obj["BalsamicAnalysisAPI"].report_sample_table(case_id=case_id, sample_data=sample_data)
@@ -115,7 +115,7 @@ def run(context, analysis_type, run_analysis, priority, case_id, dry):
 
     case_object = context.obj["BalsamicAnalysisAPI"].get_case_object(case_id)
     if not case_object or not case_object.links:
-        LOG.warning(f"{case_id} invalid!")
+        LOG.warning(f"{case_id} not found or number of samples is {len(case_object.links)}!")
         raise click.Abort()
 
     sample_config = context.obj["BalsamicAnalysisAPI"].get_config_path(case_id)
@@ -124,7 +124,7 @@ def run(context, analysis_type, run_analysis, priority, case_id, dry):
         raise click.Abort()
 
     arguments = {
-        "priority": priority or context.obj["BalsamicAnalysisAPI"].get_priority(case_object),
+        "priority": priority or context.obj["BalsamicAnalysisAPI"].get_priority(case_id),
         "analysis_type": analysis_type,
         "run_analysis": run_analysis,
         "sample_config": sample_config,
@@ -143,7 +143,7 @@ def report_deliver(context, case_id, analysis_type, dry):
     """Create a housekeeper deliverables file for BALSAMIC analysis"""
     case_object = context.obj["BalsamicAnalysisAPI"].get_case_object(case_id)
     if not case_object or not case_object.links:
-        LOG.warning(f"{case_id} invalid!")
+        LOG.warning(f"{case_id} not found or number of samples is {len(case_object.links)}!")
         raise click.Abort()
 
     sample_config = context.obj["BalsamicAnalysisAPI"].get_config_path(case_id)
@@ -170,7 +170,7 @@ def update_housekeeper(context, case_id, dry):
 
     case_object = context.obj["BalsamicAnalysisAPI"].get_case_object(case_id)
     if not case_object or not case_object.links:
-        LOG.warning(f"{case_id} invalid!")
+        LOG.warning(f"{case_id} not found or number of samples is {len(case_object.links)}!")
         raise click.Abort()
 
     sample_config = context.obj["BalsamicAnalysisAPI"].get_config_path(case_id)
