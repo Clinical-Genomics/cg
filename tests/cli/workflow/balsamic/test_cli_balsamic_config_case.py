@@ -250,4 +250,3 @@ def test_error_only_mip_tumor(balsamic_context, cli_runner, caplog):
     with caplog.at_level(logging.WARNING):
         assert "Could not create config" in caplog.text
         assert "no samples tagged for BALSAMIC analysis" in caplog.text
-
