@@ -106,7 +106,6 @@ def fixture_populated_compress_multiple_store(
                 analysis_family["samples"][ind]["mother"] = "_".join(
                     [str(number), analysis_family["samples"][ind]["mother"]]
                 )
-
         helpers.ensure_family(
             store,
             family_info=analysis_family,
@@ -114,13 +113,10 @@ def fixture_populated_compress_multiple_store(
             ordered_at=compress_case_info.timestamp,
             completed_at=compress_case_info.later_timestamp,
         )
-
     return store
 
 
 # Context fixtures
-
-
 @pytest.fixture(name="compress_context")
 def fixture_base_compress_context(compress_api, store):
     """Return a compress context"""
