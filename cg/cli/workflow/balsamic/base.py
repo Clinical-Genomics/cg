@@ -211,7 +211,4 @@ def update_housekeeper(context, case_id, dry):
         raise click.Abort()
 
 
-
-
-
 balsamic.add_command(deliver_cmd)

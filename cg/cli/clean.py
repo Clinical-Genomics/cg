@@ -34,13 +34,14 @@ def clean(context):
     context.obj["scout_api"] = scoutapi.ScoutAPI(context.obj)
     context.obj["beacon_api"] = beacon_app.BeaconApi(context.obj)
     context.obj["crunchy_api"] = crunchy.CrunchyAPI(context.obj)
-    context.obj["BalsamicAnalysisAPI"] =  BalsamicAnalysisAPI(
+    context.obj["BalsamicAnalysisAPI"] = BalsamicAnalysisAPI(
         balsamic_api=BalsamicAPI(context.obj),
         store=Store(context.obj["database"]),
         housekeeper_api=HousekeeperAPI(context.obj),
         fastq_handler=FastqHandler(context.obj),
         lims_api=LimsAPI(context.obj),
-        fastq_api=FastqAPI)
+        fastq_api=FastqAPI,
+    )
 
 
 @clean.command()
@@ -231,9 +232,7 @@ def hk_past_files(context, case_id, tags, yes, dry_run):
 @click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
 @click.argument("before_str")
 @click.pass_context
-def balsamic_past_run_dirs(
-    context, before_str: str, yes: bool = False, dry_run: bool = False
-):
+def balsamic_past_run_dirs(context, before_str: str, yes: bool = False, dry_run: bool = False):
     """Clean up of "old" Balsamic case run dirs"""
 
     before = parse_date(before_str)
