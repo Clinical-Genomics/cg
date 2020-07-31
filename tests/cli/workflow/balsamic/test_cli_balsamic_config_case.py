@@ -11,7 +11,7 @@ EXIT_SUCCESS = 0
 
 
 def test_without_options(cli_runner, balsamic_context):
-    """Test command with dry option"""
+    """Test command without case_id"""
     # GIVEN NO case_id
     # WHEN dry running without anything specified
     result = cli_runner.invoke(config_case, obj=balsamic_context)
@@ -21,17 +21,17 @@ def test_without_options(cli_runner, balsamic_context):
 
 
 def test_with_missing_case(cli_runner, balsamic_context, caplog):
-    """Test command with case to start with"""
+    """Test command with invalid case to start with"""
     caplog.set_level(logging.WARNING)
     # GIVEN case_id not in database
     case_id = "soberelephant"
     assert not balsamic_context["BalsamicAnalysisAPI"].store.family(case_id)
     # WHEN running
     result = cli_runner.invoke(config_case, [case_id], obj=balsamic_context)
-    # THEN command should successfully call the command it creates
+    # THEN command should NOT successfully call the command it creates
     assert result.exit_code != EXIT_SUCCESS
-    with caplog.at_level(logging.WARNING):
-        assert case_id in caplog.text
+    # THEN ERROR log should be printed containing invalid case_id
+    assert case_id in caplog.text
 
 
 def test_dry(cli_runner, balsamic_context, caplog):
@@ -39,48 +39,51 @@ def test_dry(cli_runner, balsamic_context, caplog):
     caplog.set_level(logging.INFO)
     # GIVEN a VALID case_id
     case_id = "balsamic_case_wgs_paired"
-    # WHEN dry running with dry specified
+    # WHEN dry running with dry option specified
     result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
-    # THEN command should print the balsamic command-string
+    # THEN command should print the balsamic command string
     assert result.exit_code == EXIT_SUCCESS
-    with caplog.at_level(logging.INFO):
-        assert "balsamic" in caplog.text
-        assert case_id in caplog.text
+    # THEN gry run, balsamic and case_id should be in log
+    assert "Dry run" in caplog.text
+    assert "balsamic" in caplog.text
+    assert case_id in caplog.text
 
 
 def test_target_bed(cli_runner, balsamic_context, balsamic_bed_2_path, caplog):
-    """Test command with --target-bed option"""
+    """Test command with --panel-bed option"""
     caplog.set_level(logging.INFO)
     # GIVEN VALID case_id of application type that requires BED
     case_id = "balsamic_case_tgs_single"
     option_key = "--panel-bed"
     option_value = balsamic_bed_2_path
-    # WHEN dry running with option specified
+    # WHEN dry running with PANEL BED option specified
     result = cli_runner.invoke(
         config_case, [case_id, "--dry-run", option_key, option_value], obj=balsamic_context,
     )
-    # THEN dry-print should include the the option-value
+    # THEN command should be generated successfully
     assert result.exit_code == EXIT_SUCCESS
+    # THEN dry-print should include the the option key and value
     with caplog.at_level(logging.INFO):
         assert option_key in caplog.text
         assert option_value in caplog.text
 
 
 def test_target_bed_from_lims(cli_runner, balsamic_context, caplog):
-    """Test command without --target-bed option"""
+    """Test command without --target-bed option when BED can be retrieved from LIMS"""
     caplog.set_level(logging.INFO)
     # GIVEN case that bed-version set in lims with same version existing in status db
     case_id = "balsamic_case_tgs_single"
     # WHEN dry running
     result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
-    # THEN dry-print should include the bed_key and the bed_value including path
+    # THEN command should be generated successfully
     assert result.exit_code == EXIT_SUCCESS
-    with caplog.at_level(logging.INFO):
-        assert "--panel-bed" in caplog.text
-        assert ".bed" in caplog.text
+    # THEN dry-print should include the bed_key and the bed_value including path
+    assert "--panel-bed" in caplog.text
+    assert ".bed" in caplog.text
 
 
 def test_paired_wgs(balsamic_context, cli_runner, caplog):
+    """Test with case_id that requires PAIRED WGS analysis"""
     caplog.set_level(logging.INFO)
     # GIVEN case_id containing ONE tumor, ONE normal, WGS application
     case_id = "balsamic_case_wgs_paired"
@@ -88,15 +91,15 @@ def test_paired_wgs(balsamic_context, cli_runner, caplog):
     result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
     # THEN command is generated successfully
     assert result.exit_code == EXIT_SUCCESS
-    with caplog.at_level(logging.INFO):
-        # THEN dry-print should not include panel bed
-        assert "--panel-bed" not in caplog.text
-        # THEN tumor and normal options should be included in command
-        assert "--tumor" in caplog.text
-        assert "--normal" in caplog.text
+    # THEN dry-print should not include panel bed
+    assert "--panel-bed" not in caplog.text
+    # THEN tumor and normal options should be included in command
+    assert "--tumor" in caplog.text
+    assert "--normal" in caplog.text
 
 
 def test_paired_panel(balsamic_context, cli_runner, caplog):
+    """Test with case_id that requires PAIRED TGS analysis"""
     caplog.set_level(logging.INFO)
     # GIVEN case_id containing ONE tumor, ONE normal, TGS application
     case_id = "balsamic_case_tgs_paired"
@@ -104,15 +107,15 @@ def test_paired_panel(balsamic_context, cli_runner, caplog):
     result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
     # THEN command is generated successfully
     assert result.exit_code == EXIT_SUCCESS
-    with caplog.at_level(logging.INFO):
-        # THEN dry-print should include panel bed
-        assert "--panel-bed" in caplog.text
-        # THEN tumor and normal options should be included in command
-        assert "--tumor" in caplog.text
-        assert "--normal" in caplog.text
+    # THEN dry-print should include panel bed
+    assert "--panel-bed" in caplog.text
+    # THEN tumor and normal options should be included in command
+    assert "--tumor" in caplog.text
+    assert "--normal" in caplog.text
 
 
 def test_single_wgs(balsamic_context, cli_runner, caplog):
+    """Test with case_id that requires SINGLE WGS analysis"""
     caplog.set_level(logging.INFO)
     # GIVEN case_id containing ONE tumor, WGS application
     case_id = "balsamic_case_wgs_single"
@@ -120,15 +123,31 @@ def test_single_wgs(balsamic_context, cli_runner, caplog):
     result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
     # THEN command is generated successfully
     assert result.exit_code == EXIT_SUCCESS
-    with caplog.at_level(logging.INFO):
-        # THEN dry-print should not include panel bed
-        assert "--panel-bed" not in caplog.text
-        # THEN tumor and normal options should be included in command
-        assert "--tumor" in caplog.text
-        assert "--normal" not in caplog.text
+    # THEN dry-print should NOT include panel bed
+    assert "--panel-bed" not in caplog.text
+    # THEN tumor option should be included in command
+    assert "--tumor" in caplog.text
+    # THEN normal option should NOT be included in command
+    assert "--normal" not in caplog.text
 
+def test_single_panel(balsamic_context, cli_runner, caplog):
+    """Test with case_id that requires SINGLE TGS analysis"""
+    caplog.set_level(logging.INFO)
+    # GIVEN case_id containing ONE tumor, TGS application
+    case_id = "balsamic_case_tgs_single"
+    # WHEN dry running
+    result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
+    # THEN command is generated successfully
+    assert result.exit_code == EXIT_SUCCESS
+    # THEN dry-print should include panel bed
+    assert "--panel-bed" in caplog.text
+    # THEN tumor option should be included in command
+    assert "--tumor" in caplog.text
+    # THEN normal option should NOT be included in command
+    assert "--normal" not in caplog.text
 
-def test_single_wgs_panel_arg(balsamic_context, cli_runner, caplog):
+def test_error_single_wgs_panel_arg(balsamic_context, cli_runner, caplog):
+    """Test with case_id that requires SINGLE WGS analysis and --panel-bed argument"""
     caplog.set_level(logging.WARNING)
     # GIVEN case_id containing ONE tumor, WGS application and panel bed argument
     case_id = "balsamic_case_wgs_single"
@@ -139,28 +158,12 @@ def test_single_wgs_panel_arg(balsamic_context, cli_runner, caplog):
     )
     # THEN command is NOT generated successfully
     assert result.exit_code != EXIT_SUCCESS
-    # THEN log warning should be printed
-    with caplog.at_level(logging.WARNING):
-        assert "Could not create config" in caplog.text
-
-
-def test_single_panel(balsamic_context, cli_runner, caplog):
-    caplog.set_level(logging.INFO)
-    # GIVEN case_id containing ONE tumor, TGS application
-    case_id = "balsamic_case_tgs_single"
-    # WHEN dry running
-    result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
-    # THEN command is generated successfully
-    assert result.exit_code == EXIT_SUCCESS
-    with caplog.at_level(logging.INFO):
-        # THEN dry-print should include panel bed
-        assert "--panel-bed" in caplog.text
-        # THEN tumor and normal options should be included in command
-        assert "--tumor" in caplog.text
-        assert "--normal" not in caplog.text
+    # THEN log warning not to set panel for WGS should be printed
+    assert "Could not create config" in caplog.text
 
 
 def test_error_normal_only(balsamic_context, cli_runner, caplog):
+    """Test with case_id that requires WGS analysis but only has one NORMAL sample"""
     caplog.set_level(logging.WARNING)
     # GIVEN case_id containing ONE normal, WGS application
     case_id = "balsamic_case_tgs_single_error"
@@ -169,11 +172,11 @@ def test_error_normal_only(balsamic_context, cli_runner, caplog):
     # THEN command is NOT generated successfully
     assert result.exit_code != EXIT_SUCCESS
     # THEN log warning should be printed
-    with caplog.at_level(logging.WARNING):
-        assert "Could not create config" in caplog.text
+    assert "Could not create config" in caplog.text
 
 
 def test_error_two_tumor(balsamic_context, cli_runner, caplog):
+    """Test with case_id that requires WGS analysis but has TWO tumor ONE normal samples"""
     caplog.set_level(logging.WARNING)
     # GIVEN case_id containing TWO tumor, ONE normal, TGS application
     case_id = "balsamic_case_tgs_paired_error"
@@ -182,23 +185,22 @@ def test_error_two_tumor(balsamic_context, cli_runner, caplog):
     # THEN command is NOT generated successfully
     assert result.exit_code != EXIT_SUCCESS
     # THEN log warning should be printed
-    with caplog.at_level(logging.WARNING):
-        assert "Could not create config" in caplog.text
+    assert "Could not create config" in caplog.text
 
 
 def test_error_mixed_application(balsamic_context, cli_runner, caplog):
-    caplog.set_level(logging.WARNING)
+    """Test with case_id that has ONE tumor ONE normal samples marked for WGS and TGS analysis"""
     case_id = "balsamic_case_mixed_paired_error"
     # WHEN dry running
     result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
     # THEN command is NOT generated successfully
     assert result.exit_code != EXIT_SUCCESS
     # THEN log warning should be printed
-    with caplog.at_level(logging.WARNING):
-        assert "Could not create config" in caplog.text
+    assert "Could not create config" in caplog.text
 
 
 def test_error_not_balsamic_application(balsamic_context, cli_runner, caplog):
+    """Test with case_id that has PAIRED samples marked for WGS and MIC analysis"""
     caplog.set_level(logging.WARNING)
     case_id = "balsamic_case_mixed_wgs_mic_paired_error"
     # WHEN dry running
@@ -206,11 +208,11 @@ def test_error_not_balsamic_application(balsamic_context, cli_runner, caplog):
     # THEN command is NOT generated successfully
     assert result.exit_code != EXIT_SUCCESS
     # THEN log warning should be printed
-    with caplog.at_level(logging.WARNING):
-        assert "Could not create config" in caplog.text
+    assert "Could not create config" in caplog.text
 
 
 def test_error_mixed_panel_bed(balsamic_context, cli_runner, caplog):
+    """Test with case_id marked for PAIRED TGS analysis but different BED files in LIMS"""
     caplog.set_level(logging.WARNING)
     case_id = "balsamic_case_mixed_bed_paired_error"
     # WHEN dry running
@@ -218,11 +220,12 @@ def test_error_mixed_panel_bed(balsamic_context, cli_runner, caplog):
     # THEN command is NOT generated successfully
     assert result.exit_code != EXIT_SUCCESS
     # THEN log warning should be printed
-    with caplog.at_level(logging.WARNING):
-        assert "Could not create config" in caplog.text
+    assert "Could not create config" in caplog.text
 
 
 def test_error_mixed_panel_bed_resque(balsamic_context, cli_runner, caplog):
+    """Test with case_id marked for PAIRED TGS analysis but different BED files in LIMS
+    AND supplying --panel-bed option should prevent error"""
     caplog.set_level(logging.INFO)
     # GIVEN case_id with mixed panel_bed in LIMS and a panel bed argument
     case_id = "balsamic_case_mixed_bed_paired_error"
@@ -233,13 +236,13 @@ def test_error_mixed_panel_bed_resque(balsamic_context, cli_runner, caplog):
     )
     # THEN command is generated successfully
     assert result.exit_code == EXIT_SUCCESS
-    # THEN panel bed should be present in command
-    with caplog.at_level(logging.INFO):
-        assert "--panel-bed" in caplog.text
-        assert panel_bed in caplog.text
+    # THEN panel bed should override LIMS data and be present in command
+    assert "--panel-bed" in caplog.text
+    assert panel_bed in caplog.text
 
 
 def test_error_only_mip_tumor(balsamic_context, cli_runner, caplog):
+    """Test with case_id containing ONE tumor sample marked for MIP analysis"""
     caplog.set_level(logging.WARNING)
     case_id = "mip_case_wgs_single"
     # WHEN dry running
@@ -247,6 +250,5 @@ def test_error_only_mip_tumor(balsamic_context, cli_runner, caplog):
     # THEN command is NOT generated successfully
     assert result.exit_code != EXIT_SUCCESS
     # THEN log warning should be printed
-    with caplog.at_level(logging.WARNING):
-        assert "Could not create config" in caplog.text
-        assert "no samples tagged for BALSAMIC analysis" in caplog.text
+    assert "Could not create config" in caplog.text
+    assert "no samples tagged for BALSAMIC analysis" in caplog.text

@@ -331,7 +331,7 @@ def fixture_balsamic_store(base_store, helpers):
         is_tumour=True,
         application_tag="TGSA",
         application_type="tgs",
-        data_analysis="balsamic",
+        data_analysis="BALSAMIC",
     )
     sample_case_tgs_paired_normal = helpers.add_sample(
         _store,
@@ -339,7 +339,7 @@ def fixture_balsamic_store(base_store, helpers):
         is_tumour=False,
         application_tag="TGSA",
         application_type="tgs",
-        data_analysis="balsamic",
+        data_analysis="MIP+BALSAMIC",
     )
     helpers.add_relationship(_store, family=case_tgs_paired, sample=sample_case_tgs_paired_tumor)
     helpers.add_relationship(_store, family=case_tgs_paired, sample=sample_case_tgs_paired_normal)
