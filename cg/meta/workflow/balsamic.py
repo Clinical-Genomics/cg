@@ -90,9 +90,7 @@ class BalsamicAnalysisAPI:
                 link_object.sample.internal_id,
                 link_object.sample.data_analysis,
             )
-            LOG.info(
-                f"{link_object.sample.internal_id} has balsamic as data analysis, linking."
-                )
+            LOG.info(f"{link_object.sample.internal_id} has balsamic as data analysis, linking.")
 
             file_collection = self.get_file_collection(sample_id=link_object.sample.internal_id)
             self.fastq_handler.link(
@@ -268,7 +266,6 @@ class BalsamicAnalysisAPI:
             )
         LOG.info("")
 
-
     def parse_deliverables_report(self, deliverables_file_path, case_object) -> list:
         sample_names = [x.sample.internal_id for x in self.get_balsamic_sample_objects(case_object)]
         report_entries = dict(json.load(open(deliverables_file_path, "r")))["files"]
@@ -287,7 +284,6 @@ class BalsamicAnalysisAPI:
             }
             bundle_files.append(bundle_file)
         return bundle_files
-
 
     def update_housekeeper(self, case_object, sample_config, deliverables_file_path):
         """ WIP

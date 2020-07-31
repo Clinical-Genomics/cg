@@ -17,6 +17,7 @@ def test_without_options(cli_runner, balsamic_context):
     # THEN command should mention argument
     assert "Missing argument" in result.output
 
+
 def test_with_missing_case(cli_runner, balsamic_context, caplog):
     """Test command with invalid case to start with"""
     caplog.set_level(logging.WARNING)
