@@ -114,7 +114,7 @@ def run(context, analysis_type, run_analysis, priority, case_id, dry):
     """Run balsamic analysis"""
 
     case_object = context.obj["BalsamicAnalysisAPI"].get_case_object(case_id)
-    if not case_object and case_object.links:
+    if not case_object or not case_object.links:
         LOG.warning(f"{case_id} invalid!")
         raise click.Abort()
 
@@ -142,7 +142,7 @@ def run(context, analysis_type, run_analysis, priority, case_id, dry):
 def report_deliver(context, case_id, analysis_type, dry):
     """Create a housekeeper deliverables file for BALSAMIC analysis"""
     case_object = context.obj["BalsamicAnalysisAPI"].get_case_object(case_id)
-    if not case_object and case_object.links:
+    if not case_object or not case_object.links:
         LOG.warning(f"{case_id} invalid!")
         raise click.Abort()
 
@@ -169,7 +169,7 @@ def update_housekeeper(context, case_id, dry):
     Store a finished analysis in Housekeeper."""
 
     case_object = context.obj["BalsamicAnalysisAPI"].get_case_object(case_id)
-    if not case_object and case_object.links:
+    if not case_object or not case_object.links:
         LOG.warning(f"{case_id} invalid!")
         raise click.Abort()
 
