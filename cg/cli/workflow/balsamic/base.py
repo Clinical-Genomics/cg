@@ -13,7 +13,7 @@ from cg.utils.fastq import FastqAPI
 from cg.store import Store
 
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
-from cg.exc import LimsDataError, BalsamicStartError
+from cg.exc import LimsDataError, BalsamicStartError, BundleAlreadyAddedError
 from cg.cli.workflow.balsamic.deliver import deliver as deliver_cmd
 
 LOG = logging.getLogger(__name__)
@@ -69,11 +69,14 @@ def link(context, case_id):
     Locates FASTQ files for given CASE_ID.
     The files are renamed, concatenated, and saved in BALSAMIC working directory
     """
-    LOG.info(f"Linking samples in case {case_id}")
     case_object = context.obj["BalsamicAnalysisAPI"].get_case_object(case_id)
-    if not case_object and case_object.links:
-        LOG.warning(f"{case_id} invalid!")
+    if not case_object:
+        LOG.warning(f"{case_id} not found!")
         raise click.Abort()
+    elif not case_object.links:
+        LOG.warning(f"{case_id} number of samples is {len(case_object.links)}!")
+        raise click.Abort()
+    LOG.info(f"Linking samples in case {case_id}")
     context.obj["BalsamicAnalysisAPI"].link_samples(case_object)
 
 
@@ -87,8 +90,11 @@ def config_case(context, panel_bed, case_id, dry):
 
     LOG.info(f"Creating config file for {case_id}.")
     case_object = context.obj["BalsamicAnalysisAPI"].get_case_object(case_id)
-    if not case_object or not case_object.links:
-        LOG.warning(f"{case_id} not found or number of samples is {len(case_object.links)}!")
+    if not case_object:
+        LOG.warning(f"{case_id} not found!")
+        raise click.Abort()
+    elif not case_object.links:
+        LOG.warning(f"{case_id} number of samples is {len(case_object.links)}!")
         raise click.Abort()
     sample_data = context.obj["BalsamicAnalysisAPI"].get_sample_params(case_object)
     context.obj["BalsamicAnalysisAPI"].report_sample_table(case_id=case_id, sample_data=sample_data)
@@ -114,8 +120,11 @@ def run(context, analysis_type, run_analysis, priority, case_id, dry):
     """Run balsamic analysis"""
 
     case_object = context.obj["BalsamicAnalysisAPI"].get_case_object(case_id)
-    if not case_object or not case_object.links:
-        LOG.warning(f"{case_id} not found or number of samples is {len(case_object.links)}!")
+    if not case_object:
+        LOG.warning(f"{case_id} not found!")
+        raise click.Abort()
+    elif not case_object.links:
+        LOG.warning(f"{case_id} number of samples is {len(case_object.links)}!")
         raise click.Abort()
 
     sample_config = context.obj["BalsamicAnalysisAPI"].get_config_path(case_id)
@@ -142,8 +151,11 @@ def run(context, analysis_type, run_analysis, priority, case_id, dry):
 def report_deliver(context, case_id, analysis_type, dry):
     """Create a housekeeper deliverables file for BALSAMIC analysis"""
     case_object = context.obj["BalsamicAnalysisAPI"].get_case_object(case_id)
-    if not case_object or not case_object.links:
-        LOG.warning(f"{case_id} not found or number of samples is {len(case_object.links)}!")
+    if not case_object:
+        LOG.warning(f"{case_id} not found!")
+        raise click.Abort()
+    elif not case_object.links:
+        LOG.warning(f"{case_id} number of samples is {len(case_object.links)}!")
         raise click.Abort()
 
     sample_config = context.obj["BalsamicAnalysisAPI"].get_config_path(case_id)
@@ -165,12 +177,14 @@ def report_deliver(context, case_id, analysis_type, dry):
 @OPTION_DRY
 @click.pass_context
 def update_housekeeper(context, case_id, dry):
-    """!!!!!WIP!!!!!!
-    Store a finished analysis in Housekeeper."""
+    """Store a finished analysis in Housekeeper and StatusDB."""
 
     case_object = context.obj["BalsamicAnalysisAPI"].get_case_object(case_id)
-    if not case_object or not case_object.links:
-        LOG.warning(f"{case_id} not found or number of samples is {len(case_object.links)}!")
+    if not case_object:
+        LOG.warning(f"{case_id} not found!")
+        raise click.Abort()
+    elif not case_object.links:
+        LOG.warning(f"{case_id} number of samples is {len(case_object.links)}!")
         raise click.Abort()
 
     sample_config = context.obj["BalsamicAnalysisAPI"].get_config_path(case_id)
@@ -192,8 +206,8 @@ def update_housekeeper(context, case_id, dry):
         context.obj["BalsamicAnalysisAPI"].update_statusdb(
             case_object=case_object, sample_config=sample_config,
         )
-    except Exception:
-        LOG.warning("Could not store bundle in Housekeeper and Statusdb!")
+    except BundleAlreadyAddedError as e:
+        LOG.warning(f"Could not store bundle in Housekeeper and StatusDB: {e.message}!")
         raise click.Abort()
 
 

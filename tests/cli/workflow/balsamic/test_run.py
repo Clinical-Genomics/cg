@@ -1,23 +1,35 @@
-"""This script tests the cli methods to run balsamic"""
-import subprocess
+"""This script tests the run cli command"""
 import logging
 from pathlib import Path
-from unittest import mock
 
 from cg.cli.workflow.balsamic.base import run
 
 EXIT_SUCCESS = 0
 
 
-def test_without_options(cli_runner):
+def test_without_options(cli_runner, balsamic_context):
     """Test command without case_id argument"""
     # GIVEN no case_id
     # WHEN dry running without anything specified
-    result = cli_runner.invoke(run)
+    result = cli_runner.invoke(run, obj=balsamic_context)
     # THEN command should NOT execute successfully
     assert result.exit_code != EXIT_SUCCESS
     # THEN command should mention argument
     assert "Missing argument" in result.output
+
+def test_with_missing_case(cli_runner, balsamic_context, caplog):
+    """Test command with invalid case to start with"""
+    caplog.set_level(logging.WARNING)
+    # GIVEN case_id not in database
+    case_id = "soberelephant"
+    assert not balsamic_context["BalsamicAnalysisAPI"].store.family(case_id)
+    # WHEN running
+    result = cli_runner.invoke(run, [case_id], obj=balsamic_context)
+    # THEN command should NOT successfully call the command it creates
+    assert result.exit_code != EXIT_SUCCESS
+    # THEN ERROR log should be printed containing invalid case_id
+    assert case_id in caplog.text
+    assert "not found" in caplog.text
 
 
 def test_without_samples(cli_runner, balsamic_context, caplog):
@@ -27,10 +39,10 @@ def test_without_samples(cli_runner, balsamic_context, caplog):
     case_id = "no_sample_case"
     # WHEN dry running with dry specified
     result = cli_runner.invoke(run, [case_id, "--dry-run"], obj=balsamic_context)
-    # THEN command should execute successfully
+    # THEN command should NOT execute successfully
     assert result.exit_code != EXIT_SUCCESS
     # THEN warning should be printed that no config file is found
-    assert "not found" in caplog.text
+    assert case_id in caplog.text
     assert "0" in caplog.text
 
 
@@ -41,7 +53,7 @@ def test_without_config(cli_runner, balsamic_context, caplog):
     case_id = "balsamic_case_wgs_single"
     # WHEN dry running with dry specified
     result = cli_runner.invoke(run, [case_id, "--dry-run"], obj=balsamic_context)
-    # THEN command should execute successfully
+    # THEN command should NOT execute successfully
     assert result.exit_code != EXIT_SUCCESS
     # THEN warning should be printed that no config file is found
     assert "No config file found" in caplog.text
@@ -59,7 +71,7 @@ def test_with_config(tmpdir_factory, cli_runner, balsamic_context, caplog):
     Path(balsamic_context["BalsamicAnalysisAPI"].get_config_path(case_id)).touch(exist_ok=True)
     # WHEN dry running with dry specified
     result = cli_runner.invoke(run, [case_id, "--dry-run"], obj=balsamic_context)
-    # THEN command should execute successfully
+    # THEN command should NOT execute successfully
     assert result.exit_code == EXIT_SUCCESS
     # THEN warning should be printed that no config file is found
     assert "balsamic" in caplog.text

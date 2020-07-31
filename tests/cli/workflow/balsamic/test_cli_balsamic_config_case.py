@@ -2,10 +2,7 @@
 import logging
 from pathlib import Path
 
-import pytest
-
 from cg.cli.workflow.balsamic.base import config_case
-from tests.cli.workflow.balsamic.conftest import balsamic_context
 
 EXIT_SUCCESS = 0
 
@@ -44,7 +41,7 @@ def test_without_samples(cli_runner, balsamic_context, caplog):
     # THEN command should print the balsamic command-string
     assert result.exit_code != EXIT_SUCCESS
     # THEN warning should be printed that no config file is found
-    assert "not found" in caplog.text
+    assert case_id in caplog.text
     assert "0" in caplog.text
 
 

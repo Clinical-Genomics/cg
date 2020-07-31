@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Optional
 
 
-from cg.exc import LimsDataError, BalsamicStartError
+from cg.exc import LimsDataError, BalsamicStartError, BundleAlreadyAddedError
 
 LOG = logging.getLogger(__name__)
 
@@ -75,29 +75,31 @@ class BalsamicAnalysisAPI:
         case_object = self.store.family(case_id)
         return case_object
 
+    def get_balsamic_sample_objects(self, case_object) -> list:
+        valid_sample_list = []
+        for link in case_object.links:
+            if "balsamic" in link.sample.data_analysis.lower():
+                valid_sample_list.append(link)
+        return valid_sample_list
+
     def link_samples(self, case_object) -> None:
         """Links and copies files to working directory"""
-        for link_object in case_object.links:
+        for link_object in self.get_balsamic_sample_objects(case_object):
             LOG.info(
                 "%s: %s link FASTQ files",
                 link_object.sample.internal_id,
                 link_object.sample.data_analysis,
             )
-            if "balsamic" in link_object.sample.data_analysis.lower():
-                LOG.info(
-                    f"{link_object.sample.internal_id} has balsamic as data analysis, linking."
+            LOG.info(
+                f"{link_object.sample.internal_id} has balsamic as data analysis, linking."
                 )
 
-                file_collection = self.get_file_collection(sample_id=link_object.sample.internal_id)
-                self.fastq_handler.link(
-                    case=link_object.family.internal_id,
-                    sample=link_object.sample.internal_id,
-                    files=file_collection,
-                )
-            else:
-                LOG.info(
-                    f"{link_object.sample.internal_id} does not have balsamic as data analysis, skipping."
-                )
+            file_collection = self.get_file_collection(sample_id=link_object.sample.internal_id)
+            self.fastq_handler.link(
+                case=link_object.family.internal_id,
+                sample=link_object.sample.internal_id,
+                files=file_collection,
+            )
         LOG.info("Linking completed")
 
     def get_target_bed_from_lims(self, link_object) -> str(Path):
@@ -237,14 +239,13 @@ class BalsamicAnalysisAPI:
         """Fetches attributes for each sample in given family, 
         and returns them as a dictionary where SAMPLE ID is key"""
         sample_data = {}
-        for link_object in case_object.links:
-            if "balsamic" in link_object.sample.data_analysis.lower():
-                sample_data[link_object.sample.internal_id] = {
-                    "tissue_type": self.get_sample_type(link_object),
-                    "concatenated_path": self.get_fastq_path(link_object),
-                    "application_type": self.get_application_type(link_object),
-                    "target_bed": self.get_target_bed_from_lims(link_object),
-                }
+        for link_object in self.get_balsamic_sample_objects(case_object):
+            sample_data[link_object.sample.internal_id] = {
+                "tissue_type": self.get_sample_type(link_object),
+                "concatenated_path": self.get_fastq_path(link_object),
+                "application_type": self.get_application_type(link_object),
+                "target_bed": self.get_target_bed_from_lims(link_object),
+            }
         return sample_data
 
     def report_sample_table(self, case_id: str, sample_data: dict):
@@ -267,6 +268,27 @@ class BalsamicAnalysisAPI:
             )
         LOG.info("")
 
+
+    def parse_deliverables_report(self, deliverables_file_path, case_object) -> list:
+        sample_names = [x.sample.internal_id for x in self.get_balsamic_sample_objects(case_object)]
+        report_entries = dict(json.load(open(deliverables_file_path, "r")))["files"]
+        bundle_files = []
+        for entry in report_entries:
+            tags = entry["tags"].split(",")
+            for ind, tag in enumerate(tags):
+                for sample_name in sample_names:
+                    if sample_name in tag:
+                        tags[ind] = sample_name
+
+            bundle_file = {
+                "path": entry["path"],
+                "tags": tags,
+                "archive": False,
+            }
+            bundle_files.append(bundle_file)
+        return bundle_files
+
+
     def update_housekeeper(self, case_object, sample_config, deliverables_file_path):
         """ WIP
         Housekeeper bundle contents:
@@ -286,11 +308,13 @@ class BalsamicAnalysisAPI:
                 config_data["analysis"]["config_creation_date"], "%Y-%m-%d %H:%M"
             ),
             "version": config_data["analysis"]["BALSAMIC_version"],
-            "files": dict(json.load(open(deliverables_file_path, "r")))["files"],
+            "files": self.parse_deliverables_report(
+                deliverables_file_path=deliverables_file_path, case_object=case_object
+            ),
         }
         bundle_object, bundle_version = self.housekeeper_api.add_bundle(bundle_data=bundle_data)
         if not bundle_object and bundle_version:
-            raise Exception
+            raise BundleAlreadyAddedError("Bundle already added to Housekeeper!")
         self.housekeeper_api.include(bundle_version)
         self.housekeeper_api.add_commit(bundle_object, bundle_version)
 
