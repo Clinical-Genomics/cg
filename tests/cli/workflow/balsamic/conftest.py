@@ -35,42 +35,42 @@ class MockLimsAPI:
 
 
 @pytest.fixture(name="balsamic_dir")
-def fixture_balsamic_dir(tmpdir_factory, apps_dir: Path) -> Path:
+def balsamic_dir(tmpdir_factory, apps_dir: Path) -> Path:
     """Return the path to the balsamic apps dir"""
     balsamic_dir = tmpdir_factory.mktemp("balsamic")
     return Path(balsamic_dir).absolute().as_posix()
 
 
 @pytest.fixture(name="balsamic_housekeeper_dir")
-def fixture_balsamic_housekeeeper_dir(tmpdir_factory, balsamic_dir: Path) -> Path:
+def balsamic_housekeeeper_dir(tmpdir_factory, balsamic_dir: Path) -> Path:
     """Return the path to the balsamic housekeeper dir"""
     balsamic_housekeeper_dir = tmpdir_factory.mktemp("bundles")
     return balsamic_housekeeper_dir
 
 
 @pytest.fixture(name="balsamic_singularity_path")
-def fixture_balsamic_singularity_path(balsamic_dir) -> Path:
+def balsamic_singularity_path(balsamic_dir) -> Path:
     balsamic_singularity_path = Path(balsamic_dir, "singularity.sif")
     balsamic_singularity_path.touch(exist_ok=True)
     return balsamic_singularity_path.as_posix()
 
 
 @pytest.fixture(name="balsamic_reference_path")
-def fixture_balsamic_reference_path(balsamic_dir) -> Path:
+def balsamic_reference_path(balsamic_dir) -> Path:
     balsamic_reference_path = Path(balsamic_dir, "reference.json")
     balsamic_reference_path.touch(exist_ok=True)
     return balsamic_reference_path.as_posix()
 
 
 @pytest.fixture(name="balsamic_bed_1_path")
-def fixture_balsamic_bed_1_path(balsamic_dir):
+def balsamic_bed_1_path(balsamic_dir):
     balsamic_bed_1_path = Path(balsamic_dir, "balsamic_bed_1.bed")
     balsamic_bed_1_path.touch(exist_ok=True)
     return balsamic_bed_1_path.as_posix()
 
 
 @pytest.fixture(name="balsamic_bed_2_path")
-def fixture_balsamic_bed_2_path(balsamic_dir):
+def balsamic_bed_2_path(balsamic_dir):
     balsamic_bed_2_path = Path(balsamic_dir, "balsamic_bed_2.bed")
     balsamic_bed_2_path.touch(exist_ok=True)
     return balsamic_bed_2_path.as_posix()
@@ -240,7 +240,7 @@ def server_config(
 
 
 @pytest.fixture(name="balsamic_lims")
-def fixture_balsamic_lims():
+def balsamic_lims(server_config):
     balsamic_lims = MockLimsAPI(server_config)
 
     balsamic_lims.add_capture_kit(
@@ -293,7 +293,7 @@ def fixture_balsamic_lims():
 
 
 @pytest.fixture(name="balsamic_store")
-def fixture_balsamic_store(base_store, helpers):
+def balsamic_store(base_store, helpers):
     """real store to be used in tests"""
     _store = base_store
 
@@ -563,7 +563,7 @@ def fixture_balsamic_store(base_store, helpers):
     return _store
 
 
-@pytest.fixture
+@pytest.fixture(scope="function", name="balsamic_context")
 def balsamic_context(server_config, balsamic_store, balsamic_lims, balsamic_housekeeper) -> dict:
     """context to use in cli"""
     balsamic_analysis_api = BalsamicAnalysisAPI(
@@ -576,4 +576,4 @@ def balsamic_context(server_config, balsamic_store, balsamic_lims, balsamic_hous
     )
     return {
         "BalsamicAnalysisAPI": balsamic_analysis_api,
-    }
+        }

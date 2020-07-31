@@ -211,17 +211,7 @@ def update_housekeeper(context, case_id, dry):
         raise click.Abort()
 
 
-@balsamic.command()
-@ARGUMENT_CASE_ID
-@click.pass_context
-def remove_fastq(context, case_id):
-    """Remove stored FASTQ files from working directory"""
-    work_dir = Path(context.obj["BalsamicAnalysisAPI"].balsamic_api.root_dir, case_id, "fastq")
-    if work_dir.exists():
-        shutil.rmtree(work_dir)
-        LOG.info(f"Path {work_dir} removed successfully")
-    else:
-        LOG.info(f"Path {work_dir} does not exist")
+
 
 
 balsamic.add_command(deliver_cmd)
