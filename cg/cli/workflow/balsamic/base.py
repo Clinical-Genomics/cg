@@ -87,7 +87,7 @@ def link(context, case_id):
 @OPTION_DRY
 @click.pass_context
 def config_case(context, panel_bed, case_id, dry):
-    """Create config file for BALSAMIC analysis for a case"""
+    """Create config file for BALSAMIC analysis for a given CASE_ID"""
 
     LOG.info(f"Creating config file for {case_id}.")
     case_object = context.obj["BalsamicAnalysisAPI"].get_case_object(case_id)
@@ -137,6 +137,7 @@ def run(context, analysis_type, run_analysis, priority, case_id, dry):
         "priority": priority or context.obj["BalsamicAnalysisAPI"].get_priority(case_id),
         "analysis_type": analysis_type,
         "run_analysis": run_analysis,
+        "sample_config": context.obj["BalsamicAnalysisAPI"].get_config_path(case_id),
     }
     context.obj["BalsamicAnalysisAPI"].balsamic_api.run_analysis(
         arguments=arguments, run_analysis=run_analysis, dry=dry
@@ -247,7 +248,7 @@ def start_available(context, dry):
 @balsamic.command("deliver-available")
 @OPTION_DRY
 def deliver_available(context, dry):
-    """Start full workflow for all available cases"""
+    """Deliver bundle data for all available cases"""
     for case_object in context.obj["BalsamicAnalysisAPI"].store.analyses_to_deliver():
         case_id = case_object.internal_id
         LOG.info(f"Storing analysis for {case_id}")
