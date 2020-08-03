@@ -198,6 +198,9 @@ def balsamic_housekeeper(housekeeper_api, helpers, balsamic_mock_fastq_files):
         "mixed_sample_case_mixed_bed_paired_tumor_error",
         "mixed_sample_case_mixed_bed_paired_normal_error",
         "mip_sample_case_wgs_single_tumor",
+        "sample_case_wgs_paired_two_normal_tumor_error",
+        "sample_case_wgs_paired_two_normal_normal1_error",
+        "sample_case_wgs_paired_two_normal_normal2_error",
     ]
 
     for sample in samples:
@@ -287,6 +290,15 @@ def balsamic_lims(server_config):
     )
     balsamic_lims.add_capture_kit(
         internal_id="mip_sample_case_wgs_single_tumor", capture_kit=None,
+    )
+    balsamic_lims.add_capture_kit(
+        internal_id="sample_case_wgs_paired_two_normal_tumor_error", capture_kit=None,
+    )
+    balsamic_lims.add_capture_kit(
+        internal_id="sample_case_wgs_paired_two_normal_normal1_error", capture_kit=None,
+    )
+    balsamic_lims.add_capture_kit(
+        internal_id="sample_case_wgs_paired_two_normal_normal2_error", capture_kit=None,
     )
 
     return balsamic_lims
@@ -535,6 +547,46 @@ def balsamic_store(base_store, helpers):
     )
     helpers.add_relationship(
         _store, family=mip_case_wgs_single, sample=mip_sample_case_wgs_single_tumor
+    )
+
+    # Create ERROR case for WGS ONE TUMOR TWO NORMAL
+    case_wgs_paired_two_normal_error = helpers.add_family(
+        _store,
+        internal_id="balsamic_case_wgs_paired_two_normal_error",
+        family_id="balsamic_case_wgs_paired_two_normal_error",
+    )
+    sample_case_wgs_paired_two_normal_tumor_error = helpers.add_sample(
+        _store,
+        internal_id="sample_case_wgs_paired_two_normal_tumor_error",
+        is_tumour=True,
+        application_tag="WGSA",
+        application_type="wgs",
+        data_analysis="balsamic",
+    )
+    sample_case_wgs_paired_two_normal_normal1_error = helpers.add_sample(
+        _store,
+        internal_id="sample_case_wgs_paired_two_normal_normal1_error",
+        is_tumour=False,
+        application_tag="WGSA",
+        application_type="wgs",
+        data_analysis="balsamic",
+    )
+    sample_case_wgs_paired_two_normal_normal2_error = helpers.add_sample(
+        _store,
+        internal_id="sample_case_wgs_paired_two_normal_normal2_error",
+        is_tumour=False,
+        application_tag="WGSA",
+        application_type="wgs",
+        data_analysis="balsamic",
+    )
+    helpers.add_relationship(
+        _store, family=case_wgs_paired_two_normal_error, sample=sample_case_wgs_paired_two_normal_tumor_error
+    )
+    helpers.add_relationship(
+        _store, family=case_wgs_paired_two_normal_error, sample=sample_case_wgs_paired_two_normal_normal1_error
+    )
+    helpers.add_relationship(
+        _store, family=case_wgs_paired_two_normal_error, sample=sample_case_wgs_paired_two_normal_normal2_error
     )
 
     # Create ERROR case with NO SAMPLES

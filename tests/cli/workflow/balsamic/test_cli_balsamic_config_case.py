@@ -265,3 +265,16 @@ def test_error_only_mip_tumor(balsamic_context, cli_runner, caplog):
     # THEN log warning should be printed
     assert "Could not create config" in caplog.text
     assert "no samples tagged for BALSAMIC analysis" in caplog.text
+
+
+
+def test_error_two_normal(balsamic_context, cli_runner, caplog):
+    """Test with case_id containing ONE tumor and TWO normal samples"""
+    caplog.set_level(logging.WARNING)
+    case_id = "balsamic_case_wgs_paired_two_normal_error"
+    # WHEN dry running
+    result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
+    # THEN command is NOT generated successfully
+    assert result.exit_code != EXIT_SUCCESS
+    # THEN log warning should be printed
+    assert "Could not create config" in caplog.text

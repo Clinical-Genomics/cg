@@ -35,7 +35,7 @@ class BalsamicAnalysisAPI:
         """Generates a path where the Balsamic deliverables file for the case_id should be
         located"""
         return Path(
-            self.balsamic_api.root_dir, case_id, "delivery_report", case_id + ".hk"
+            self.balsamic_api.root_dir, case_id, "analysis", "delivery_report", case_id + ".hk"
         ).as_posix()
 
     def get_config_path(self, case_id: str) -> Path:
@@ -267,6 +267,7 @@ class BalsamicAnalysisAPI:
         LOG.info("")
 
     def parse_deliverables_report(self, deliverables_file_path, case_object) -> list:
+        """Parse BALSAMIC deliverables report, and return a list of files and their respective tags in bundle"""
         sample_names = [x.sample.internal_id for x in self.get_balsamic_sample_objects(case_object)]
         report_entries = dict(json.load(open(deliverables_file_path, "r")))["files"]
         bundle_files = []
@@ -286,17 +287,7 @@ class BalsamicAnalysisAPI:
         return bundle_files
 
     def update_housekeeper(self, case_object, sample_config, deliverables_file_path):
-        """ WIP
-        Housekeeper bundle contents:
-            name: case_obj.internal_id
-            created: dt.datetime.strptime(config["analysis"]["timestamp"], "%Y-%m-%d %H:%M")
-            version: config["analysis"]["BALSAMIC_version"]
-            files: List[{
-                path: Path
-                tags: list
-                archive: bool=False
-            }]
-        """
+        """ Add analysis bundle to Housekeeper """
         config_data = dict(json.load(open(sample_config, "r")))
         bundle_data = {
             "name": case_object.internal_id,
@@ -308,34 +299,33 @@ class BalsamicAnalysisAPI:
                 deliverables_file_path=deliverables_file_path, case_object=case_object
             ),
         }
-        bundle_object, bundle_version = self.housekeeper_api.add_bundle(bundle_data=bundle_data)
-        if not bundle_object and bundle_version:
+        bundle_result = self.housekeeper_api.add_bundle(bundle_data=bundle_data)
+        if not bundle_result:
             raise BundleAlreadyAddedError("Bundle already added to Housekeeper!")
+        bundle_object, bundle_version = bundle_result
         self.housekeeper_api.include(bundle_version)
         self.housekeeper_api.add_commit(bundle_object, bundle_version)
+        LOG.info(
+            f"Analysis successfully stored in Housekeeper: {case_object.internal_id} : {bundle_version.created_at}"
+        )
 
     def update_statusdb(self, case_object, sample_config):
-        """ WIP
-        StatusDB bundle contents:
-            pipeline="balsamic",
-            version=config["BALSAMIC_version"],
-            started_at=dt.datetime.strptime(config["analysis"]["timestamp"], "%Y-%m-%d %H:%M"),
-            completed_at=dt.datetime.now(),
-            primary=bool
-
-        """
+        """ Add Analysis bundle to StatusDB """
         config_data = dict(json.load(open(sample_config, "r")))
+        analysis_start = dt.datetime.strptime(
+                config_data["analysis"]["config_creation_date"], "%Y-%m-%d %H:%M"
+            )
         case_object.action = None
         new_analysis = self.store.add_analysis(
-            {
-                "pipeline": "balsamic",
-                "version": config_data["analysis"]["BALSAMIC_version"],
-                "started_at": dt.datetime.strptime(
-                    config_data["analysis"]["config_creation_date"], "%Y-%m-%d %H:%M"
-                ),
-                "completed_at": dt.datetime.now(),
-                "primary": (len(case_object.analyses) == 0),
-            }
+            pipeline="balsamic",
+            version=config_data["analysis"]["BALSAMIC_version"],
+            started_at=analysis_start,
+            completed_at=dt.datetime.now(),
+            primary=(len(case_object.analyses) == 0),
+            family=case_object,
         )
-        new_analysis.family = case_object
         self.store.add_commit(new_analysis)
+        LOG.info(
+            f"Analysis successfully stored in ClinicalDB: {case_object.internal_id} : {analysis_start}"
+        )
+

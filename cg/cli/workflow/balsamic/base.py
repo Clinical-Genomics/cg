@@ -73,7 +73,7 @@ def link(context, case_id):
     if not case_object:
         LOG.warning(f"{case_id} not found!")
         raise click.Abort()
-    elif not case_object.links:
+    if not case_object.links:
         LOG.warning(f"{case_id} number of samples is {len(case_object.links)}!")
         raise click.Abort()
     LOG.info(f"Linking samples in case {case_id}")
@@ -93,7 +93,7 @@ def config_case(context, panel_bed, case_id, dry):
     if not case_object:
         LOG.warning(f"{case_id} not found!")
         raise click.Abort()
-    elif not case_object.links:
+    if not case_object.links:
         LOG.warning(f"{case_id} number of samples is {len(case_object.links)}!")
         raise click.Abort()
     sample_data = context.obj["BalsamicAnalysisAPI"].get_sample_params(case_object)
@@ -123,7 +123,7 @@ def run(context, analysis_type, run_analysis, priority, case_id, dry):
     if not case_object:
         LOG.warning(f"{case_id} not found!")
         raise click.Abort()
-    elif not case_object.links:
+    if not case_object.links:
         LOG.warning(f"{case_id} number of samples is {len(case_object.links)}!")
         raise click.Abort()
 
@@ -154,7 +154,7 @@ def report_deliver(context, case_id, analysis_type, dry):
     if not case_object:
         LOG.warning(f"{case_id} not found!")
         raise click.Abort()
-    elif not case_object.links:
+    if not case_object.links:
         LOG.warning(f"{case_id} number of samples is {len(case_object.links)}!")
         raise click.Abort()
 
@@ -183,7 +183,7 @@ def update_housekeeper(context, case_id, dry):
     if not case_object:
         LOG.warning(f"{case_id} not found!")
         raise click.Abort()
-    elif not case_object.links:
+    if not case_object.links:
         LOG.warning(f"{case_id} number of samples is {len(case_object.links)}!")
         raise click.Abort()
 
@@ -209,9 +209,6 @@ def update_housekeeper(context, case_id, dry):
     except BundleAlreadyAddedError as e:
         LOG.warning(f"Could not store bundle in Housekeeper and StatusDB: {e.message}!")
         raise click.Abort()
-
-
-
 
 
 balsamic.add_command(deliver_cmd)

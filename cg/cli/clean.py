@@ -1,21 +1,19 @@
 """cg module for cleaning databases and files"""
 import logging
 import shutil
-
-import ruamel.yaml
-import click
-from cg.apps.balsamic.fastq import FastqHandler
-from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
-from dateutil.parser import parse as parse_date
 from datetime import datetime
 from pathlib import Path
+import ruamel.yaml
+import click
+from dateutil.parser import parse as parse_date
 
+from cg.apps.balsamic.fastq import FastqHandler
+from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.apps import crunchy, tb, hk, scoutapi, beacon as beacon_app
 from cg.meta.upload.beacon import UploadBeaconApi
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.balsamic.api import BalsamicAPI
-from cg.apps.balsamic.fastq import FastqHandler
 from cg.utils.fastq import FastqAPI
 from cg.store import Store
 
@@ -97,7 +95,7 @@ def balsamic_run_dir(context, yes, case_id, dry_run: bool = False):
             return SUCCESS
         shutil.rmtree(analysis_path)
         analysis_obj.cleaned_at = datetime.now()
-        balsamic_analysis_api.store.commit()
+        #balsamic_analysis_api.store.commit()
 
 
 @clean.command("mip-run-dir")
