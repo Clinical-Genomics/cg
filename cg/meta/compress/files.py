@@ -39,9 +39,7 @@ def get_hk_files_dict(tags: List[str], version_obj: hk_models.Version) -> dict:
             continue
         LOG.info("Found file %s", file_obj.path)
         path_obj = Path(file_obj.full_path)
-        new_path = path_obj.resolve()
-        LOG.info("Expanding file path to %s", new_path)
-        hk_files_dict[new_path] = file_obj
+        hk_files_dict[path_obj] = file_obj
     return hk_files_dict
 
 
@@ -222,10 +220,54 @@ def get_fastq_files(sample_id: str, version_obj: hk_models.Version) -> Dict[str,
     return fastq_dict
 
 
+def check_file_status(file_path: Path) -> bool:
+    """Check if a file has the correct status
+
+    More specific this means to check
+        - Did we get the full path of the file?
+        - Does the file exist?
+        - Do we have permissions?
+        - Is the file actually a symlink?
+        - Is the file hardlinked?
+    """
+    if not file_path.is_absolute():
+        LOG.info("Could not resolve full path from HK to %s", file_path)
+        return False
+
+    try:
+        if not file_path.exists():
+            LOG.info("%s does not exist", file_path)
+            return False
+    except PermissionError:
+        LOG.warning("Not permitted to access %s. Skipping", file_path)
+        return False
+
+    # Check if file is hardlinked multiple times
+    if get_nlinks(file_link=file_path) > 1:
+        LOG.info("More than 1 inode to same file for %s", file_path)
+        return False
+
+    # Check if the fastq file is a symlinc (soft link)
+    if file_path.is_symlink():
+        LOG.info("File %s is a symbolic link, skipping file", file_path)
+        return False
+
+    return True
+
+
 def sort_fastqs(fastq_files: List[Path]) -> Tuple[Path, Path]:
     """ Sort list of FASTQ files into correct read pair
 
     Check that the files exists and are correct
+
+    More specific we will do the following checks, if one is failing we skip the files:
+
+        1. Does the file exist?
+        2. Do we have permission to read the file?
+        3. Are there more than one inode to the file (hardlinked)
+        4. Is the file actually a soft link?
+        5. Are there two correct files in the pair?
+        6. Do they have the same prefix?
 
     Args:
         fastq_files(list(Path))
@@ -235,16 +277,8 @@ def sort_fastqs(fastq_files: List[Path]) -> Tuple[Path, Path]:
     """
     first_fastq = second_fastq = None
     for fastq_file in fastq_files:
-        try:
-            if not fastq_file.exists():
-                LOG.info("%s does not exist", fastq_file)
-                return None
-        except PermissionError:
-            LOG.warning("Not permitted to access %s. Skipping", fastq_file)
-            return None
 
-        if get_nlinks(file_link=fastq_file) > 1:
-            LOG.info("More than 1 inode to same file for %s", fastq_file)
+        if not check_file_status(fastq_file):
             return None
 
         if str(fastq_file).endswith(FASTQ_FIRST_READ_SUFFIX):

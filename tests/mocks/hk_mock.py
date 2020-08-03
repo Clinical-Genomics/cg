@@ -30,7 +30,7 @@ class MockTag:
 
     def __repr__(self):
         return (
-            f"MockTag:id={self.id},name={self.name},category={self.category},"
+            f"MockTag:id={self.id}, name={self.name}, category={self.category},"
             f"created_at={self.created_at}"
         )
 
@@ -65,7 +65,7 @@ class MockFile:
         return True
 
     def __repr__(self):
-        return f"MockFile:id={self.id},path={self.path},to_archive={self.to_archive}"
+        return f"MockFile:id={self.id}, path={self.path}, to_archive={self.to_archive}"
 
 
 class MockVersion:
@@ -102,7 +102,7 @@ class MockVersion:
         return Path(self.app_root) / self.bundle.name / str(self.created_at.date())
 
     def __repr__(self):
-        return f"MockVersion:id={self.id},created_at={self.created_at},files={self.files}"
+        return f"MockVersion:id={self.id}, created_at={self.created_at}, files={self.files}"
 
 
 class EnhancedList(list):
@@ -137,7 +137,7 @@ class MockBundle:
         self.versions = kwargs.get("versions", [MockVersion(bundle=self)])
 
     def __repr__(self):
-        return f"MockBundle:id={self.id},name={self.name},versions={self.versions}"
+        return f"MockBundle:id={self.id}, name={self.name}, versions={self.versions}"
 
 
 class MockHousekeeperAPI:
