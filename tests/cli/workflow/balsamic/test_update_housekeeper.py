@@ -150,7 +150,9 @@ def test_case_without_deliverables_file(cli_runner, balsamic_context, caplog):
     assert "No deliverables file found" in caplog.text
 
 
-def test_valid_case(cli_runner, balsamic_context, caplog, real_housekeeper_api, balsamic_housekeeper):
+def test_valid_case(
+    cli_runner, balsamic_context, caplog, real_housekeeper_api, balsamic_housekeeper
+):
     caplog.set_level(logging.INFO)
     # GIVEN case-id
     case_id = "balsamic_case_wgs_single"
@@ -183,11 +185,13 @@ def test_valid_case(cli_runner, balsamic_context, caplog, real_housekeeper_api, 
     assert balsamic_context["BalsamicAnalysisAPI"].store.family(case_id).analyses
     assert balsamic_context["BalsamicAnalysisAPI"].housekeeper_api.bundle(case_id)
 
-    #TEARDOWN change real housekeeper back to balsamic fixture
+    # TEARDOWN change real housekeeper back to balsamic fixture
     balsamic_context["BalsamicAnalysisAPI"].housekeeper_api = balsamic_housekeeper
 
 
-def test_valid_case_already_added(cli_runner, balsamic_context, caplog, real_housekeeper_api, balsamic_housekeeper):
+def test_valid_case_already_added(
+    cli_runner, balsamic_context, caplog, real_housekeeper_api, balsamic_housekeeper
+):
     caplog.set_level(logging.WARNING)
     # GIVEN case-id
     case_id = "balsamic_case_tgs_single"
@@ -217,5 +221,5 @@ def test_valid_case_already_added(cli_runner, balsamic_context, caplog, real_hou
     # THEN user should be informed that bundle was already added
     assert "Bundle already added" in caplog.text
 
-    #TEARDOWN change real housekeeper back to balsamic fixture
+    # TEARDOWN change real housekeeper back to balsamic fixture
     balsamic_context["BalsamicAnalysisAPI"].housekeeper_api = balsamic_housekeeper
