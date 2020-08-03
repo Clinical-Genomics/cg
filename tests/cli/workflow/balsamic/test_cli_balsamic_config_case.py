@@ -267,7 +267,6 @@ def test_error_only_mip_tumor(balsamic_context, cli_runner, caplog):
     assert "no samples tagged for BALSAMIC analysis" in caplog.text
 
 
-
 def test_error_two_normal(balsamic_context, cli_runner, caplog):
     """Test with case_id containing ONE tumor and TWO normal samples"""
     caplog.set_level(logging.WARNING)

@@ -96,7 +96,7 @@ def balsamic_run_dir(context, yes, case_id, dry_run: bool = False):
             return SUCCESS
         shutil.rmtree(analysis_path)
         analysis_obj.cleaned_at = datetime.now()
-        #balsamic_analysis_api.store.commit()
+        # balsamic_analysis_api.store.commit()
 
 
 @clean.command("mip-run-dir")
