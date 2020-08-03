@@ -2,6 +2,7 @@
 import logging
 import shutil
 import click
+import time
 
 from pathlib import Path
 
@@ -136,7 +137,6 @@ def run(context, analysis_type, run_analysis, priority, case_id, dry):
         "priority": priority or context.obj["BalsamicAnalysisAPI"].get_priority(case_id),
         "analysis_type": analysis_type,
         "run_analysis": run_analysis,
-        "sample_config": sample_config,
     }
     context.obj["BalsamicAnalysisAPI"].balsamic_api.run_analysis(
         arguments=arguments, run_analysis=run_analysis, dry=dry
@@ -176,7 +176,7 @@ def report_deliver(context, case_id, analysis_type, dry):
 @ARGUMENT_CASE_ID
 @OPTION_DRY
 @click.pass_context
-def update_housekeeper(context, case_id, dry):
+def update_housekeeper(context, case_id):
     """Store a finished analysis in Housekeeper and StatusDB."""
 
     case_object = context.obj["BalsamicAnalysisAPI"].get_case_object(case_id)
@@ -210,5 +210,53 @@ def update_housekeeper(context, case_id, dry):
         LOG.warning(f"Could not store bundle in Housekeeper and StatusDB: {e.message}!")
         raise click.Abort()
 
+
+@balsamic.command("start")
+@ARGUMENT_CASE_ID
+@OPTION_ANALYSIS_TYPE
+@OPTION_PRIORITY
+@OPTION_RUN_ANALYSIS
+@OPTION_DRY
+def start(context, case_id, analysis_type, priority, run_analysis, dry):
+    """Start full workflow for CASE ID"""
+    context.invoke(link, case_id=case_id)
+    context.invoke(config_case, case_id=case_id, dry=dry)
+    time.sleep(10)
+    context.invoke(
+        run,
+        case_id=case_id,
+        analysis_type=analysis_type,
+        priority=priority,
+        run_analysis=run_analysis,
+        dry=dry,
+    )
+
+
+@balsamic.command("start-available")
+@OPTION_DRY
+def start_available(context, dry):
+    """Start full workflow for all available cases"""
+    for case_object in context.obj["BalsamicAnalysisAPI"].store.cases_to_balsamic_analyze():
+        case_id = case_object.internal_id
+        LOG.info(f"Starting analysis for {case_id}")
+        try:
+            context.invoke(start, case_id=case_id, dry=dry, run_analysis="--run-analysis")
+        except click.Abort():
+            continue
+
+
+@balsamic.command("deliver-available")
+@OPTION_DRY
+def deliver_available(context, dry):
+    """Start full workflow for all available cases"""
+    for case_object in context.obj["BalsamicAnalysisAPI"].store.analyses_to_deliver():
+        case_id = case_object.internal_id
+        LOG.info(f"Storing analysis for {case_id}")
+        try:
+            context.invoke(report_deliver, case_id=case_id, dry=dry)
+            time.sleep(10)
+            context.invoke(update_housekeeper, case_id=case_id)
+        except click.Abort():
+            continue
 
 balsamic.add_command(deliver_cmd)
