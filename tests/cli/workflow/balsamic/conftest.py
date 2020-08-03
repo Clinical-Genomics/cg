@@ -628,4 +628,4 @@ def balsamic_context(server_config, balsamic_store, balsamic_lims, balsamic_hous
     )
     return {
         "BalsamicAnalysisAPI": balsamic_analysis_api,
-        }
+    }
