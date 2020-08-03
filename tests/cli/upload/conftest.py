@@ -49,6 +49,13 @@ def fixture_base_cli_context(analysis_store: Store, housekeeper_api, upload_scou
     }
 
 
+@pytest.fixture(scope="function", name="vogue_context")
+def fixture_vogue_cli_context(vogue_api) -> dict:
+    """context to use in cli"""
+
+    return {"vogue_api": vogue_api}
+
+
 @pytest.fixture(scope="function", name="upload_scout_api")
 def fixture_upload_scout_api(housekeeper_api):
     """Return a upload scout api"""
@@ -56,6 +63,13 @@ def fixture_upload_scout_api(housekeeper_api):
     api.housekeeper = housekeeper_api
 
     return api
+
+
+@pytest.fixture(scope="function", name="vogue_api")
+def fixture_vogue_api():
+    """Return a MockVogueApi"""
+
+    return MockVogueApi()
 
 
 class MockTB(TrailblazerAPI):
@@ -79,10 +93,24 @@ class MockScoutApi(ScoutAPI):
         LOG.info("Case loaded successfully to Scout")
 
 
-class MockAnalysisApi(AnalysisAPI):
+class MockVogueApi:
     def __init__(self):
         """docstring for __init__"""
         pass
+
+    def load_reagent_labels(self, days: int):
+        """docstring for upload"""
+
+    def load_samples(self, days: int):
+        """docstring for upload"""
+
+    def load_flowcells(self, days: int):
+        """docstring for upload"""
+
+
+class MockAnalysisApi(AnalysisAPI):
+    def __init__(self):
+        """docstring for __init__"""
 
     def get_latest_metadata(self, internal_id):
         """docstring for upload"""

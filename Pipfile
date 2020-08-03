@@ -1,0 +1,63 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+pytest = "*"
+mock = "*"
+pytest-mock = "*"
+snapshottest = "*"
+pytest-cov = "*"
+# linting
+docutils = "*"
+# black
+black = "*"
+pre-commit = "*"
+
+[packages]
+alchy = "*"
+click = "*"
+google-auth = "*"
+requests = {extras = ["security"],version = "*"}
+requests-oauthlib = "<1.2.0"
+oauthlib = "<3.0.0"
+requests-cache = "*"
+coloredlogs = "*"
+petname = "*"
+marshmallow = "*"
+pyschemes = "*"
+xlrd = "*"
+openpyxl = "*"
+tabulate = "*"
+lxml = "*"
+python-dateutil = "*"
+cyvcf2 = "<0.10.0"
+pymongo = "<3.7"
+colorclass = "*"
+cairocffi = "*"
+pysam = "*"
+genologics = "*"
+trailblazer = "*"
+housekeeper = "*"
+genotype = "*"
+scout-browser = "*"
+cgstats = "*"
+cgbeacon = "*"
+Cython = "*"
+SQLAlchemy = "*"
+Flask = "*"
+Flask-Admin = "*"
+Flask-Alchy = "*"
+Flask-SQLAlchemy = "*"
+Flask-Cors = "*"
+Flask-Dance = "*"
+Werkzeug = "<1.0"
+"ruamel.yaml" = "*"
+cg = {editable = true,path = "."}
+
+[requires]
+python_version = "3.7"
+
+[pipenv]
+allow_prereleases = true

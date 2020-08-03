@@ -7,13 +7,15 @@ import pytest
 from cg.apps.balsamic.fastq import FastqHandler
 from cg.apps.lims import LimsAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.meta.workflow.balsamic import AnalysisAPI
+from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.store import Store, models
+from cg.utils.fastq import FastqAPI
+from cg.apps.balsamic.api import BalsamicAPI
 
 
 @pytest.fixture
 def balsamic_context(
-    balsamic_store, balsamic_case, housekeeper_api, hk_bundle_data, helpers
+    balsamic_store, balsamic_case, housekeeper_api, hk_bundle_data, helpers, tmpdir
 ) -> dict:
     """context to use in cli"""
     hk_bundle_data["name"] = balsamic_case.internal_id
@@ -22,16 +24,43 @@ def balsamic_context(
     return {
         "hk_api": housekeeper_api,
         "tb_api": MockTB(),
-        "db": balsamic_store,
-        "analysis_api": MockAnalysis,
+        "store_api": balsamic_store,
+        "analysis_api": BalsamicAnalysisAPI(
+            hk_api=housekeeper_api,
+            fastq_api=MockFastqAPI,
+            config={
+                "balsamic": {
+                    "conda_env": "conda_env",
+                    "root": "root",
+                    "slurm": {"account": "account", "qos": "low"},
+                    "singularity": "singularity",
+                    "reference_config": "reference_config",
+                },
+            },
+        ),
+        "balsamic_api": BalsamicAPI(
+            config={
+                "bed_path": "bed_path",
+                "balsamic": {
+                    "binary_path": "/home/proj/bin/conda/envs/S_BALSAMIC-base_4.2.2/bin/balsamic",
+                    "conda_env": "conda_env",
+                    "root": tmpdir,
+                    "slurm": {"account": "account", "qos": "low", "mail_user": "mail_user"},
+                    "singularity": "singularity",
+                    "reference_config": "reference_config",
+                },
+            },
+        ),
         "fastq_handler": MockFastq,
+        "fastq_api": MockFastqAPI,
         "gzipper": MockGzip(),
         "lims_api": MockLims(),
         "bed_path": "bed_path",
         "balsamic": {
+            "binary_path": "/home/proj/bin/conda/envs/S_BALSAMIC-base_4.2.2/bin/balsamic",
             "conda_env": "conda_env",
-            "root": "root",
-            "slurm": {"account": "account", "qos": "qos"},
+            "root": tmpdir,
+            "slurm": {"account": "account", "qos": "low", "mail_user": "mail_user"},
             "singularity": "singularity",
             "reference_config": "reference_config",
         },
@@ -86,17 +115,14 @@ class MockLine:
         return "headerline"
 
 
-class MockAnalysis(AnalysisAPI):
-    """Mock AnalysisAPI"""
-
+class MockFastqAPI(FastqAPI):
     @staticmethod
-    def fastq_header(line):
-        """Mock AnalysisAPI.fastq_header"""
-        del line
+    def parse_header(*_):
+        return {"lane": "1", "flowcell": "ABC123", "readnumber": "1"}
 
-        _header = {"lane": "1", "flowcell": "ABC123", "readnumber": "1"}
 
-        return _header
+class MockBalsamicAnalysis(BalsamicAnalysisAPI):
+    """Mock AnalysisAPI"""
 
 
 class MockFastq(FastqHandler):
@@ -168,10 +194,21 @@ def fixture_balsamic_dir(apps_dir: Path) -> Path:
     return apps_dir / "balsamic"
 
 
+@pytest.fixture(name="balsamic_dummy_case")
+def fixture_balsamic_case_name():
+    return "balsamic_dummy_case"
+
+
 @pytest.fixture(name="balsamic_case_dir")
-def fixture_balsamic_case_dir(balsamic_dir: Path) -> Path:
+def fixture_balsamic_case_dir(balsamic_dir: Path, balsamic_dummy_case) -> Path:
     """Return the path to the balsamic apps case dir"""
-    return balsamic_dir / "case"
+    return balsamic_dir / balsamic_dummy_case
+
+
+@pytest.fixture(name="balsamic_case_dir")
+def fixture_balsamic_case_config(balsamic_dir: Path, balsamic_dummy_case) -> Path:
+    """Return the path to the balsamic apps case dir"""
+    return balsamic_dir / balsamic_dummy_case / balsamic_dummy_case + ".json"
 
 
 @pytest.fixture(scope="function")

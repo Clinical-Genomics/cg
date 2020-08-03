@@ -86,11 +86,7 @@ class OptionalNone(validators.Optional):
 
 NAME_PATTERN = r"^[A-Za-z0-9-]*$"
 
-BASE_PROJECT = {
-    "name": str,
-    "customer": str,
-    "comment": OptionalNone(TypeValidatorNone(str)),
-}
+BASE_PROJECT = {"name": str, "customer": str, "comment": OptionalNone(TypeValidatorNone(str))}
 
 MIP_SAMPLE = {
     # Orderform 1508:18
@@ -249,7 +245,7 @@ FASTQ_SAMPLE = {
 }
 
 RML_SAMPLE = {
-    # 1604:9 Orderform Ready made libraries (RML)
+    # 1604:10 Orderform Ready made libraries (RML)
     # Order portal specific
     "priority": str,
     # "This information is required"

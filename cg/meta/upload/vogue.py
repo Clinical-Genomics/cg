@@ -15,7 +15,7 @@ class UploadVogueAPI:
         self.vogue_api = vogue_api
         self.store = store
 
-    def load_genotype(self, days):
+    def load_genotype(self, days: int) -> None:
         """Loading genotype data from the genotype database into the trending database"""
         samples = self.genotype_api.export_sample(days=days)
         samples = json.loads(samples)
@@ -29,7 +29,7 @@ class UploadVogueAPI:
             sample_dict["_id"] = sample_id
             self.vogue_api.load_genotype_data(sample_dict)
 
-    def load_apptags(self):
+    def load_apptags(self) -> None:
         """Loading application tags from statusdb into the trending database"""
         apptags = self.store.applications()
         apptags_for_vogue = []
@@ -37,16 +37,6 @@ class UploadVogueAPI:
             apptags_for_vogue.append({"tag": tag.tag, "prep_category": tag.prep_category})
 
         self.vogue_api.load_apptags(apptags_for_vogue)
-
-    def load_samples(self, days):
-        """Loading samples from lims into the trending database"""
-
-        self.vogue_api.load_samples(days=days)
-
-    def load_flowcells(self, days):
-        """Loading flowcells from lims into the trending database"""
-
-        self.vogue_api.load_flowcells(days=days)
 
     def load_bioinfo_raw(self, load_bioinfo_inputs):
         """Running vogue load bioinfo raw."""

@@ -1,5 +1,7 @@
 """Constans for cg"""
 
+TMP_DIR = "/home/proj/production/rare-disease/temp-dir/"
+
 PRIORITY_MAP = {
     "research": 0,
     "standard": 1,
@@ -62,16 +64,16 @@ BAM_SUFFIX = ".bam"
 BAM_INDEX_SUFFIX = ".bai"
 CRAM_SUFFIX = ".cram"
 CRAM_INDEX_SUFFIX = ".crai"
-FASTQ_FIRST_READ_SUFFIX = "R1_001.fastq.gz"
-FASTQ_SECOND_READ_SUFFIX = "R2_001.fastq.gz"
+FASTQ_FIRST_READ_SUFFIX = "_R1_001.fastq.gz"
+FASTQ_SECOND_READ_SUFFIX = "_R2_001.fastq.gz"
 SPRING_SUFFIX = ".spring"
+# Number of days until fastqs counts as old
+FASTQ_DELTA = 21
 
 # tags for storing analyses in Housekeeper
-HK_TAGS = {
-    "wes": ["mip-dna", "wes"],
-    "wgs": ["mip-dna", "wgs"],
-    "wts": ["mip-rna"],
-}
+HK_TAGS = {"wes": ["mip-dna", "wes"], "wgs": ["mip-dna", "wgs"], "wts": ["mip-rna"]}
+HK_BAM_TAGS = ["bam", "bai", "bam-index"]
+HK_FASTQ_TAGS = ["fastq"]
 
 # used to convert MIP tags derived from the deliverables to MIP standard tags and to check for
 # presence of mandatory files. Keys = tags found in deliverables, values = MIP standard tags and
@@ -82,7 +84,7 @@ MIP_DNA_TAGS = {
         "index_tags": ["cram-index"],
         "is_mandatory": False,
     },
-    tuple(["config"]): {"tags": ["mip-config"], "is_mandatory": True},
+    tuple(["config_analysis"]): {"tags": ["mip-config"], "is_mandatory": True},
     tuple(["sample_info"]): {"tags": ["sampleinfo"], "is_mandatory": True},
     tuple(["multiqc_ar", "html"]): {"tags": ["multiqc-html"], "is_mandatory": True},
     tuple(["multiqc_ar", "json"]): {"tags": ["multiqc-json"], "is_mandatory": True},
@@ -140,27 +142,27 @@ MIP_DNA_TAGS = {
 
 
 MIP_RNA_TAGS = {
-    tuple(["salmon_quant"]): {"tags": ["salmon-quant"], "is_mandatory": True,},
-    tuple(["star_fusion"]): {"tags": ["star-fusion"], "is_mandatory": True,},
+    tuple(["salmon_quant"]): {"tags": ["salmon-quant"], "is_mandatory": True},
+    tuple(["star_fusion"]): {"tags": ["star-fusion"], "is_mandatory": True},
     tuple(["arriba_ar", "arriba_report"]): {
         "tags": ["arriba-ar", "arriba-report"],
         "is_mandatory": True,
     },
-    tuple(["arriba_ar", "arriba_ar"]): {"tags": ["arriba-ar"], "is_mandatory": True,},
-    tuple(["stringtie_ar"]): {"tags": ["stringtie-ar"], "is_mandatory": True,},
-    tuple(["gffcompare_ar"]): {"tags": ["gffcompare-ar"], "is_mandatory": True,},
+    tuple(["arriba_ar", "arriba_ar"]): {"tags": ["arriba-ar"], "is_mandatory": True},
+    tuple(["stringtie_ar"]): {"tags": ["stringtie-ar"], "is_mandatory": True},
+    tuple(["gffcompare_ar"]): {"tags": ["gffcompare-ar"], "is_mandatory": True},
     tuple(["markduplicates"]): {
         "tags": ["cram"],
         "index_tags": ["cram-index"],
         "is_mandatory": True,
     },
-    tuple(["gatk_asereadcounter"]): {"tags": ["gatk-asereadcounter"], "is_mandatory": True,},
-    tuple(["bootstrapann"]): {"tags": ["bootstrapann"], "is_mandatory": True,},
-    tuple(["bcftools_merge"]): {"tags": ["bcftools-merge"], "is_mandatory": True,},
-    tuple(["varianteffectpredictor"]): {"tags": ["varianteffectpredictor"], "is_mandatory": True,},
-    tuple(["version_collect_ar"]): {"tags": ["version-collect-ar"], "is_mandatory": True,},
-    tuple(["multiqc_ar", "html"]): {"tags": ["multiqc-html"], "is_mandatory": True,},
-    tuple(["multiqc_ar", "json"]): {"tags": ["multiqc-json"], "is_mandatory": True,},
+    tuple(["gatk_asereadcounter"]): {"tags": ["gatk-asereadcounter"], "is_mandatory": True},
+    tuple(["bootstrapann"]): {"tags": ["bootstrapann"], "is_mandatory": True},
+    tuple(["bcftools_merge"]): {"tags": ["bcftools-merge"], "is_mandatory": True},
+    tuple(["varianteffectpredictor"]): {"tags": ["varianteffectpredictor"], "is_mandatory": True},
+    tuple(["version_collect_ar"]): {"tags": ["version-collect-ar"], "is_mandatory": True},
+    tuple(["multiqc_ar", "html"]): {"tags": ["multiqc-html"], "is_mandatory": True},
+    tuple(["multiqc_ar", "json"]): {"tags": ["multiqc-json"], "is_mandatory": True},
     tuple(["mip_analyse", "sample_info"]): {
         "tags": ["mip-analyse", "sample-info"],
         "is_mandatory": True,
@@ -169,7 +171,7 @@ MIP_RNA_TAGS = {
         "tags": ["mip-analyse", "reference-info"],
         "is_mandatory": True,
     },
-    tuple(["mip_analyse", "log"]): {"tags": ["mip-analyse", "log"], "is_mandatory": True,},
+    tuple(["mip_analyse", "log"]): {"tags": ["mip-analyse", "log"], "is_mandatory": True},
     tuple(["mip_analyse", "config_analysis"]): {
         "tags": ["mip-analyse", "config-analysis"],
         "is_mandatory": True,
@@ -178,10 +180,10 @@ MIP_RNA_TAGS = {
         "tags": ["mip-analyse", "pedigree"],
         "is_mandatory": True,
     },
-    tuple(["mip_analyse", "config"]): {"tags": ["mip-analyse", "config"], "is_mandatory": True,},
+    tuple(["mip_analyse", "config"]): {"tags": ["mip-analyse", "config"], "is_mandatory": True},
     tuple(["mip_analyse", "pedigree_fam"]): {
         "tags": ["mip-analyse", "pedigree-fam"],
         "is_mandatory": True,
     },
-    tuple(["blobfish"]): {"tags": ["blobfish"], "is_mandatory": False,},
+    tuple(["blobfish"]): {"tags": ["blobfish"], "is_mandatory": False},
 }

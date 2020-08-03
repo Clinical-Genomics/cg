@@ -169,14 +169,14 @@ def upload_observations_api_wes(analysis_store, populated_housekeeper_api):
 
 
 @pytest.yield_fixture(scope="function")
-def upload_scout_api(scout_store, madeline_api, lims_samples, populated_housekeeper_api):
+def upload_scout_api(scout_api, madeline_api, lims_samples, populated_housekeeper_api):
     """Fixture for upload_scout_api"""
     analysis_mock = MockAnalysis()
     lims_api = MockLims(lims_samples)
 
     _api = UploadScoutAPI(
         hk_api=populated_housekeeper_api,
-        scout_api=scout_store,
+        scout_api=scout_api,
         madeline_api=madeline_api,
         analysis_api=analysis_mock,
         lims_api=lims_api,
