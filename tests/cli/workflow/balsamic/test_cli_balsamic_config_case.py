@@ -172,7 +172,7 @@ def test_error_single_wgs_panel_arg(balsamic_context, cli_runner, caplog):
     # THEN command is NOT generated successfully
     assert result.exit_code != EXIT_SUCCESS
     # THEN log warning not to set panel for WGS should be printed
-    assert "Could not create config" in caplog.text
+    assert "Cannot set panel_bed for WGS sample" in caplog.text
 
 
 def test_error_normal_only(balsamic_context, cli_runner, caplog):
@@ -185,7 +185,7 @@ def test_error_normal_only(balsamic_context, cli_runner, caplog):
     # THEN command is NOT generated successfully
     assert result.exit_code != EXIT_SUCCESS
     # THEN log warning should be printed
-    assert "Could not create config" in caplog.text
+    assert "Invalid number of tumor samples" in caplog.text
 
 
 def test_error_two_tumor(balsamic_context, cli_runner, caplog):
@@ -198,7 +198,7 @@ def test_error_two_tumor(balsamic_context, cli_runner, caplog):
     # THEN command is NOT generated successfully
     assert result.exit_code != EXIT_SUCCESS
     # THEN log warning should be printed
-    assert "Could not create config" in caplog.text
+    assert "Invalid number of tumor samples" in caplog.text
 
 
 def test_error_mixed_application(balsamic_context, cli_runner, caplog):
@@ -209,7 +209,7 @@ def test_error_mixed_application(balsamic_context, cli_runner, caplog):
     # THEN command is NOT generated successfully
     assert result.exit_code != EXIT_SUCCESS
     # THEN log warning should be printed
-    assert "Could not create config" in caplog.text
+    assert "Multiple application types found" in caplog.text
 
 
 def test_error_not_balsamic_application(balsamic_context, cli_runner, caplog):
@@ -221,7 +221,7 @@ def test_error_not_balsamic_application(balsamic_context, cli_runner, caplog):
     # THEN command is NOT generated successfully
     assert result.exit_code != EXIT_SUCCESS
     # THEN log warning should be printed
-    assert "Could not create config" in caplog.text
+    assert "not compatible with BALSAMIC" in caplog.text
 
 
 def test_error_mixed_panel_bed(balsamic_context, cli_runner, caplog):
@@ -233,7 +233,7 @@ def test_error_mixed_panel_bed(balsamic_context, cli_runner, caplog):
     # THEN command is NOT generated successfully
     assert result.exit_code != EXIT_SUCCESS
     # THEN log warning should be printed
-    assert "Could not create config" in caplog.text
+    assert "Too many BED versions in LIMS" in caplog.text
 
 
 def test_error_mixed_panel_bed_resque(balsamic_context, cli_runner, caplog):
@@ -263,7 +263,6 @@ def test_error_only_mip_tumor(balsamic_context, cli_runner, caplog):
     # THEN command is NOT generated successfully
     assert result.exit_code != EXIT_SUCCESS
     # THEN log warning should be printed
-    assert "Could not create config" in caplog.text
     assert "no samples tagged for BALSAMIC analysis" in caplog.text
 
 
@@ -276,4 +275,4 @@ def test_error_two_normal(balsamic_context, cli_runner, caplog):
     # THEN command is NOT generated successfully
     assert result.exit_code != EXIT_SUCCESS
     # THEN log warning should be printed
-    assert "Could not create config" in caplog.text
+    assert "Invalid number of normal samples" in caplog.text

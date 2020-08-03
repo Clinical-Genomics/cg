@@ -6,6 +6,7 @@ import pytest
 from cg.cli.workflow.balsamic.base import update_housekeeper
 from tests.conftest import fixture_real_housekeeper_api
 from cg.exc import BalsamicStartError, BundleAlreadyAddedError
+from tests.cli.workflow.balsamic.conftest import balsamic_housekeeper
 
 EXIT_SUCCESS = 0
 
@@ -97,6 +98,7 @@ def test_with_missing_case(cli_runner, balsamic_context, caplog):
     assert not balsamic_context["BalsamicAnalysisAPI"].store.family(case_id)
     # WHEN running
     result = cli_runner.invoke(update_housekeeper, [case_id], obj=balsamic_context)
+    print(result)
     # THEN command should NOT successfully call the command it creates
     assert result.exit_code != EXIT_SUCCESS
     # THEN ERROR log should be printed containing invalid case_id
@@ -110,7 +112,7 @@ def test_without_samples(cli_runner, balsamic_context, caplog):
     # GIVEN case-id
     case_id = "no_sample_case"
     # WHEN dry running with dry specified
-    result = cli_runner.invoke(update_housekeeper, [case_id, "--dry-run"], obj=balsamic_context)
+    result = cli_runner.invoke(update_housekeeper, [case_id], obj=balsamic_context)
     # THEN command should NOT execute successfully
     assert result.exit_code != EXIT_SUCCESS
     # THEN warning should be printed that no config file is found
@@ -123,7 +125,7 @@ def test_without_config(cli_runner, balsamic_context, caplog):
     # GIVEN case-id
     case_id = "balsamic_case_wgs_single"
     # WHEN dry running with dry specified
-    result = cli_runner.invoke(update_housekeeper, [case_id, "--dry-run"], obj=balsamic_context)
+    result = cli_runner.invoke(update_housekeeper, [case_id], obj=balsamic_context)
     # THEN command should NOT execute successfully
     assert result.exit_code != EXIT_SUCCESS
     # THEN warning should be printed that no config file is found
@@ -141,14 +143,14 @@ def test_case_without_deliverables_file(cli_runner, balsamic_context, caplog):
     )
     Path(balsamic_context["BalsamicAnalysisAPI"].get_config_path(case_id)).touch(exist_ok=True)
     # WHEN dry running with dry specified
-    result = cli_runner.invoke(update_housekeeper, [case_id, "--dry-run"], obj=balsamic_context)
+    result = cli_runner.invoke(update_housekeeper, [case_id], obj=balsamic_context)
     # THEN command should NOT execute successfully
     assert result.exit_code != EXIT_SUCCESS
     # THEN warning should be printed that no analysis_finish is found
     assert "No deliverables file found" in caplog.text
 
 
-def test_valid_case(cli_runner, balsamic_context, caplog, real_housekeeper_api):
+def test_valid_case(cli_runner, balsamic_context, caplog, real_housekeeper_api, balsamic_housekeeper):
     caplog.set_level(logging.INFO)
     # GIVEN case-id
     case_id = "balsamic_case_wgs_single"
@@ -172,7 +174,7 @@ def test_valid_case(cli_runner, balsamic_context, caplog, real_housekeeper_api):
     assert not balsamic_context["BalsamicAnalysisAPI"].store.family(case_id).analyses
 
     # WHEN running command
-    result = cli_runner.invoke(update_housekeeper, [case_id, "--dry-run"], obj=balsamic_context)
+    result = cli_runner.invoke(update_housekeeper, [case_id], obj=balsamic_context)
 
     # THEN bundle should be successfully added to HK and STATUS
     assert result.exit_code == EXIT_SUCCESS
@@ -181,8 +183,11 @@ def test_valid_case(cli_runner, balsamic_context, caplog, real_housekeeper_api):
     assert balsamic_context["BalsamicAnalysisAPI"].store.family(case_id).analyses
     assert balsamic_context["BalsamicAnalysisAPI"].housekeeper_api.bundle(case_id)
 
+    #TEARDOWN change real housekeeper back to balsamic fixture
+    balsamic_context["BalsamicAnalysisAPI"].housekeeper_api = balsamic_housekeeper
 
-def test_valid_case_already_added(cli_runner, balsamic_context, caplog, real_housekeeper_api):
+
+def test_valid_case_already_added(cli_runner, balsamic_context, caplog, real_housekeeper_api, balsamic_housekeeper):
     caplog.set_level(logging.WARNING)
     # GIVEN case-id
     case_id = "balsamic_case_tgs_single"
@@ -204,10 +209,13 @@ def test_valid_case_already_added(cli_runner, balsamic_context, caplog, real_hou
     balsamic_context["BalsamicAnalysisAPI"].housekeeper_api = real_housekeeper_api
     assert not balsamic_context["BalsamicAnalysisAPI"].store.family(case_id).analyses
     # SETUP ensure bundles exist by creating them first
-    cli_runner.invoke(update_housekeeper, [case_id, "--dry-run"], obj=balsamic_context)
+    cli_runner.invoke(update_housekeeper, [case_id], obj=balsamic_context)
     # WHEN running command
-    result = cli_runner.invoke(update_housekeeper, [case_id, "--dry-run"], obj=balsamic_context)
+    result = cli_runner.invoke(update_housekeeper, [case_id], obj=balsamic_context)
     # THEN command should NOT execute successfully
     assert result.exit_code != EXIT_SUCCESS
     # THEN user should be informed that bundle was already added
     assert "Bundle already added" in caplog.text
+
+    #TEARDOWN change real housekeeper back to balsamic fixture
+    balsamic_context["BalsamicAnalysisAPI"].housekeeper_api = balsamic_housekeeper

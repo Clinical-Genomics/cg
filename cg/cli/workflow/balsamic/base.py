@@ -2,7 +2,7 @@
 import logging
 import shutil
 import click
-import time
+from time import sleep
 
 from pathlib import Path
 
@@ -174,7 +174,6 @@ def report_deliver(context, case_id, analysis_type, dry):
 
 @balsamic.command("update-housekeeper")
 @ARGUMENT_CASE_ID
-@OPTION_DRY
 @click.pass_context
 def update_housekeeper(context, case_id):
     """Store a finished analysis in Housekeeper and StatusDB."""
@@ -221,7 +220,7 @@ def start(context, case_id, analysis_type, priority, run_analysis, dry):
     """Start full workflow for CASE ID"""
     context.invoke(link, case_id=case_id)
     context.invoke(config_case, case_id=case_id, dry=dry)
-    time.sleep(10)
+    sleep(10)
     context.invoke(
         run,
         case_id=case_id,
@@ -254,7 +253,7 @@ def deliver_available(context, dry):
         LOG.info(f"Storing analysis for {case_id}")
         try:
             context.invoke(report_deliver, case_id=case_id, dry=dry)
-            time.sleep(10)
+            sleep(10)
             context.invoke(update_housekeeper, case_id=case_id)
         except click.Abort():
             continue
