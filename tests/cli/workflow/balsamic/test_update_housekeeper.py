@@ -211,4 +211,3 @@ def test_valid_case_already_added(cli_runner, balsamic_context, caplog, real_hou
     assert result.exit_code != EXIT_SUCCESS
     # THEN user should be informed that bundle was already added
     assert "Bundle already added" in caplog.text
-

@@ -580,13 +580,19 @@ def balsamic_store(base_store, helpers):
         data_analysis="balsamic",
     )
     helpers.add_relationship(
-        _store, family=case_wgs_paired_two_normal_error, sample=sample_case_wgs_paired_two_normal_tumor_error
+        _store,
+        family=case_wgs_paired_two_normal_error,
+        sample=sample_case_wgs_paired_two_normal_tumor_error,
     )
     helpers.add_relationship(
-        _store, family=case_wgs_paired_two_normal_error, sample=sample_case_wgs_paired_two_normal_normal1_error
+        _store,
+        family=case_wgs_paired_two_normal_error,
+        sample=sample_case_wgs_paired_two_normal_normal1_error,
     )
     helpers.add_relationship(
-        _store, family=case_wgs_paired_two_normal_error, sample=sample_case_wgs_paired_two_normal_normal2_error
+        _store,
+        family=case_wgs_paired_two_normal_error,
+        sample=sample_case_wgs_paired_two_normal_normal2_error,
     )
 
     # Create ERROR case with NO SAMPLES

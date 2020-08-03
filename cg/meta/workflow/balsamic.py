@@ -313,8 +313,8 @@ class BalsamicAnalysisAPI:
         """ Add Analysis bundle to StatusDB """
         config_data = dict(json.load(open(sample_config, "r")))
         analysis_start = dt.datetime.strptime(
-                config_data["analysis"]["config_creation_date"], "%Y-%m-%d %H:%M"
-            )
+            config_data["analysis"]["config_creation_date"], "%Y-%m-%d %H:%M"
+        )
         case_object.action = None
         new_analysis = self.store.add_analysis(
             pipeline="balsamic",
@@ -328,4 +328,3 @@ class BalsamicAnalysisAPI:
         LOG.info(
             f"Analysis successfully stored in ClinicalDB: {case_object.internal_id} : {analysis_start}"
         )
-
