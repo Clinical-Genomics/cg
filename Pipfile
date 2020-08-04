@@ -17,7 +17,7 @@ pre-commit = "*"
 
 [packages]
 alchy = "*"
-click = "<7.0"
+click = "*"
 google-auth = "*"
 requests = {extras = ["security"],version = "*"}
 requests-oauthlib = "<1.2.0"
@@ -49,7 +49,7 @@ SQLAlchemy = "*"
 Flask = "*"
 Flask-Admin = "*"
 Flask-Alchy = "*"
-Flask-SQLAlchemy = "==2.1"
+Flask-SQLAlchemy = "*"
 Flask-Cors = "*"
 Flask-Dance = "*"
 Werkzeug = "<1.0"
