@@ -67,7 +67,6 @@ class BalsamicAPI:
                 "--qos": arguments.get("priority") or self.qos,
                 "--sample-config": arguments.get("sample_config"),
                 "--analysis-type": arguments.get("analysis_type"),
-                
             }
         )
         if dry:
