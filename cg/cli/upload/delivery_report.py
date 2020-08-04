@@ -54,7 +54,7 @@ def delivery_reports(context, print_console, force_report):
 @click.option("-p", "--print", "print_console", is_flag=True, help="Print report to console")
 @click.option("-f", "--force", "force_report", is_flag=True, help="Overrule report validation")
 @click.option(
-    "--analysis-started-at", help="Use the analysis started at (i.e. 2020-05-28 " "12:00:46)"
+    "--analysis-started-at", help="Use the analysis started at (i.e.  '2020-05-28  12:00:46')"
 )
 @click.pass_context
 def delivery_report(context, family_id, print_console, force_report, analysis_started_at=None):
