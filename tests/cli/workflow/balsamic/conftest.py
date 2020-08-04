@@ -628,7 +628,7 @@ def balsamic_context(server_config, balsamic_store, balsamic_lims, balsamic_hous
         balsamic_api=BalsamicAPI(server_config),
         store=balsamic_store,
         housekeeper_api=balsamic_housekeeper,
-        fastq_handler=FastqHandler,
+        fastq_handler=FastqHandler(server_config),
         lims_api=balsamic_lims,
         fastq_api=FastqAPI,
     )
