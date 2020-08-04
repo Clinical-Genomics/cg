@@ -61,7 +61,7 @@ def deliverables_files(deliverables: dict, analysis_type: str) -> list:
     analysis_type_tags = ANALYSIS_TYPE_TAGS[analysis_type]
 
     files = parse_files(deliverables, pipeline_tags, analysis_type_tags)
-    _check_mandatory_tags(files, ANALYSIS_TYPE_TAGS[analysis_type])
+    _check_mandatory_tags(files, analysis_type_tags)
 
     return files
 
