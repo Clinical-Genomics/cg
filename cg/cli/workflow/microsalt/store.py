@@ -10,6 +10,7 @@ from cg.exc import (
     AnalysisDuplicationError,
     BundleAlreadyAddedError,
     MandatoryFilesMissing,
+    StoreError,
 )
 from cg.meta.store.microsalt import gather_files_and_bundle_in_housekeeper
 from cg.store import Store
@@ -63,21 +64,21 @@ def analysis(context, config_stream):
 @click.pass_context
 def completed(context):
     """Store all completed analyses."""
-    hk_api = context.obj["hk_api"]
-    tb_api = context.obj["tb_api"]
+    _store = context.obj["db"]
+    usalt = context.obj["usalt"]
 
     exit_code = SUCCESS
-    for analysis_obj in tb_api.analyses(status="completed", deleted=False):
-        existing_record = hk_api.version(analysis_obj.family, analysis_obj.started_at)
-        if existing_record:
-            LOG.debug("analysis stored: %s - %s", analysis_obj.family, analysis_obj.started_at)
-            continue
-        click.echo(click.style(f"storing family: {analysis_obj.family}", fg="blue"))
-        with Path(analysis_obj.config_path).open() as config_stream:
-            try:
-                context.invoke(analysis, config_stream=config_stream)
-            except Exception:
-                LOG.error("case storage failed: %s", analysis_obj.family, exc_info=True)
-                exit_code = FAIL
+    breakpoint()
+    for order in _store.orders_to_microsalt_analyze():
+        LOG.info("Storing microSALT order: %s", order)
+        try:
+            breakpoint()
+            microsalt_deliverables = Path(usalt["root"], "results", order.internal_id + ".yaml")
+            exit_code = context.invoke(analysis, config_stream=microsalt_deliverables) or exit_code
+        except StoreError as error:
+            LOG.error("Analysis storage failed: %s", error.message)
+            exit_code = FAIL
+
+    LOG.info("Done storing microbail orders. Exit code: %s", exit_code)
 
     sys.exit(exit_code)
