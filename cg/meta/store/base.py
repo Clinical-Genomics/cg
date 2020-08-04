@@ -71,7 +71,9 @@ def parse_files(deliverables: dict, pipeline_tags: list, analysis_type_tags: dic
 
     parsed_files = []
     for file_ in deliverables["files"]:
-        deliverables_tag_map = (file_["step"],) if file_["tag"] is None else (file_["step"], file_["tag"])
+        deliverables_tag_map = (
+            (file_["step"],) if file_["tag"] is None else (file_["step"], file_["tag"])
+        )
         parsed_file = {
             "path": file_["path"],
             "tags": get_tags(file_, pipeline_tags, analysis_type_tags, deliverables_tag_map),
@@ -95,7 +97,11 @@ def parse_files(deliverables: dict, pipeline_tags: list, analysis_type_tags: dic
 
 
 def get_tags(
-    file: dict, pipeline_tags: list, analysis_type_tags: dict, deliverables_tag_map: tuple, is_index: bool = False
+    file: dict,
+    pipeline_tags: list,
+    analysis_type_tags: dict,
+    deliverables_tag_map: tuple,
+    is_index: bool = False,
 ) -> list:
     """Get all tags for a file"""
 
@@ -108,12 +114,16 @@ def get_tags(
     tags["pipeline"] = pipeline_tags[0]
     tags["application"] = pipeline_tags[1] if len(pipeline_tags) > 1 else None
 
-    tags = _convert_deliverables_tags_to_hk_tags(tags, analysis_type_tags, deliverables_tag_map, is_index)
+    tags = _convert_deliverables_tags_to_hk_tags(
+        tags, analysis_type_tags, deliverables_tag_map, is_index
+    )
 
     return tags
 
 
-def _convert_deliverables_tags_to_hk_tags(tags: dict, tag_map: dict, deliverables_tag_map: tuple, is_index: bool = False) -> list:
+def _convert_deliverables_tags_to_hk_tags(
+    tags: dict, tag_map: dict, deliverables_tag_map: tuple, is_index: bool = False
+) -> list:
     """ Filter and convert tags from external deliverables tags to standard internal housekeeper tags """
 
     if is_index:
