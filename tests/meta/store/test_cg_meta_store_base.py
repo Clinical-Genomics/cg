@@ -79,7 +79,7 @@ def test_add_new_analysis(mock_housekeeper_store, mock_status):
 
 
 @mock.patch("cg.meta.store.base.deliverables_files")
-@mock.patch("cg.meta.store.base._determine_missing_files")
+@mock.patch("cg.meta.store.base._determine_missing_tags")
 def test_build_bundle(
     mock_missing,
     mock_deliverables_files,
@@ -102,7 +102,7 @@ def test_build_bundle(
     snapshot.assert_match(mip_rna_bundle)
 
 
-@mock.patch("cg.meta.store.base._determine_missing_files")
+@mock.patch("cg.meta.store.base._determine_missing_tags")
 def test_parse_files(mock_missing, snapshot: Snapshot, deliverables_raw: dict):
     """
         tests the function parse_files against a snapshot
