@@ -71,12 +71,12 @@ def parse_files(deliverables: dict, pipeline_tags: list, analysis_type_tags: dic
 
     parsed_files = []
     for file_ in deliverables["files"]:
-        tag_map_key = (file_["step"],) if file_["tag"] is None else (file_["step"], file_["tag"])
+        deliverables_tag_map = (file_["step"],) if file_["tag"] is None else (file_["step"], file_["tag"])
         parsed_file = {
             "path": file_["path"],
-            "tags": get_tags(file_, pipeline_tags, analysis_type_tags, tag_map_key),
+            "tags": get_tags(file_, pipeline_tags, analysis_type_tags, deliverables_tag_map),
             "archive": False,
-            "tag_map_key": tag_map_key,
+            "deliverables_tag_map": deliverables_tag_map,
         }
         parsed_files.append(parsed_file)
 
@@ -84,10 +84,10 @@ def parse_files(deliverables: dict, pipeline_tags: list, analysis_type_tags: dic
             parsed_index_file = {
                 "path": file_["path_index"],
                 "tags": get_tags(
-                    file_, pipeline_tags, analysis_type_tags, tag_map_key, is_index=True
+                    file_, pipeline_tags, analysis_type_tags, deliverables_tag_map, is_index=True
                 ),
                 "archive": False,
-                "tag_map_key": tag_map_key,
+                "deliverables_tag_map": deliverables_tag_map,
             }
             parsed_files.append(parsed_index_file)
 
@@ -95,7 +95,7 @@ def parse_files(deliverables: dict, pipeline_tags: list, analysis_type_tags: dic
 
 
 def get_tags(
-    file: dict, pipeline_tags: list, tag_map: dict, tag_map_key: tuple, is_index: bool = False
+    file: dict, pipeline_tags: list, analysis_type_tags: dict, deliverables_tag_map: tuple, is_index: bool = False
 ) -> list:
     """Get all tags for a file"""
 
@@ -108,18 +108,18 @@ def get_tags(
     tags["pipeline"] = pipeline_tags[0]
     tags["application"] = pipeline_tags[1] if len(pipeline_tags) > 1 else None
 
-    tags = _convert_tags(tags, tag_map, tag_map_key, is_index)
+    tags = _convert_deliverables_tags_to_hk_tags(tags, analysis_type_tags, deliverables_tag_map, is_index)
 
     return tags
 
 
-def _convert_tags(tags: dict, tag_map: dict, tag_map_key: tuple, is_index: bool = False) -> list:
+def _convert_deliverables_tags_to_hk_tags(tags: dict, tag_map: dict, deliverables_tag_map: tuple, is_index: bool = False) -> list:
     """ Filter and convert tags from external deliverables tags to standard internal housekeeper tags """
 
     if is_index:
-        mapped_tags = tag_map[tag_map_key]["index_tags"]
+        mapped_tags = tag_map[deliverables_tag_map]["index_tags"]
     else:
-        mapped_tags = tag_map[tag_map_key]["tags"]
+        mapped_tags = tag_map[deliverables_tag_map]["tags"]
     converted_tags = [
         tags["format"],
         tags["id"],
@@ -140,7 +140,7 @@ def _check_mandatory_tags(files: list, pipeline_tags: dict):
         Check if all the mandatory tags are present for the files to be added to Housekeeper.
         Raise an exception if not.
     """
-    deliverable_tags = [file_["tag_map_key"] for file_ in files]
+    deliverable_tags = [file_["deliverables_tag_map"] for file_ in files]
     mandatory_tags = [tag for tag in pipeline_tags if pipeline_tags[tag]["is_mandatory"]]
 
     tags_are_missing, missing_tags = _determine_missing_tags(mandatory_tags, deliverable_tags)
@@ -151,7 +151,7 @@ def _check_mandatory_tags(files: list, pipeline_tags: dict):
         )
 
 
-def _determine_missing_files(mandatory_tags: list, found_tags: list) -> tuple:
+def _determine_missing_tags(mandatory_tags: list, found_tags: list) -> tuple:
     """Determines if mandatory tags are missing and hence if files are missing in the deliverables, and returns any missing tags"""
 
     missing_tags = set(mandatory_tags) - set(found_tags)
