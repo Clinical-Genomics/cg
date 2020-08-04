@@ -114,6 +114,23 @@ class StatusHandler(BaseHandler):
 
         return families[:limit]
 
+    def orders_to_microsalt_analyze(self):
+        """Fetch microbial orders without analyses where all samples are sequenced."""
+
+        orders = (
+            self.MicrobialOrder.query.outerjoin(models.Analysis)
+            .filter(models.Analysis.created_at.is_(None))
+            .join(models.MicrobialSample)
+            .filter(models.MicrobialSample.sequenced_at.isnot(None))
+        )
+
+        orders_to_store = [
+            record for record in orders if
+            self._all_microbial_samples_have_sequence_data(record.microbial_samples)
+        ]
+
+        return orders_to_store
+
     def cases(
         self,
         progress_tracker=None,
@@ -532,6 +549,12 @@ class StatusHandler(BaseHandler):
     def _all_samples_have_sequence_data(links: List[models.FamilySample]) -> bool:
         """Return True if all samples are external or sequenced inhouse."""
         return all((link.sample.sequenced_at or link.sample.is_external) for link in links)
+
+    @staticmethod
+    def _all_microbial_samples_have_sequence_data(microbial_samples: List[models.MicrobialSample]) -> bool:
+        """Return True if all microbial samples are sequenced."""
+        return all((microbial_sample.sequenced_at) for microbial_sample in microbial_samples)
+
 
     def analyses_to_upload(self):
         """Fetch analyses that haven't been uploaded."""
