@@ -152,7 +152,7 @@ def _check_mandatory_tags(files: list, pipeline_tags: dict):
 
 
 def _determine_missing_files(mandatory_tags: list, found_tags: list) -> tuple:
-    """Determines if mandatory are files missing in the deliverables, and which ones"""
+    """Determines if mandatory tags are missing and hence if files are missing in the deliverables, and returns any missing tags"""
 
     missing_tags = set(mandatory_tags) - set(found_tags)
     are_tags_missing = bool(len(missing_tags) > 0)
