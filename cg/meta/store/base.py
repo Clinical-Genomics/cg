@@ -114,7 +114,7 @@ def get_tags(
 
 
 def _convert_tags(tags: dict, tag_map: dict, tag_map_key: tuple, is_index: bool = False) -> list:
-    """ Convert tags from external deliverables tags to standard internal housekeeper tags """
+    """ Filter and convert tags from external deliverables tags to standard internal housekeeper tags """
 
     if is_index:
         mapped_tags = tag_map[tag_map_key]["index_tags"]
