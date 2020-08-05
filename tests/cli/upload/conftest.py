@@ -5,12 +5,11 @@ from pathlib import Path
 
 import pytest
 
-from cg.apps.hk import HousekeeperAPI
-from cg.apps.lims import LimsAPI
 from cg.apps.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
 from cg.meta.workflow.mip_dna import AnalysisAPI
+from cg.meta.report.api import ReportAPI
 from cg.store import Store
 from tests.mocks.madeline import MockMadelineAPI
 
@@ -38,12 +37,14 @@ def fixture_scout_hk_bundle_data(case_id, scout_load_config, timestamp):
 
 
 @pytest.fixture(scope="function", name="base_context")
-def fixture_base_cli_context(analysis_store: Store, housekeeper_api, upload_scout_api) -> dict:
+def fixture_base_cli_context(analysis_store: Store, housekeeper_api, upload_scout_api) \
+        -> dict:
     """context to use in cli"""
     return {
         "scout_api": MockScoutApi(),
         "scout_upload_api": upload_scout_api,
         "housekeeper_api": housekeeper_api,
+        "report_api": MockReportApi(),
         "tb_api": MockTB(),
         "status": analysis_store,
     }
@@ -91,6 +92,21 @@ class MockScoutApi(ScoutAPI):
     def upload(self, scout_config, force=False):
         """docstring for upload"""
         LOG.info("Case loaded successfully to Scout")
+
+
+class MockReportApi(ReportAPI):
+    def __init__(self):
+        """docstring for __init__"""
+        pass
+
+    def create_delivery_report(self, *args, **kwargs):
+        """docstring for create_delivery_report"""
+
+        for arg in args:
+            LOG.info("create_delivery_report called with positional %s", arg)
+
+        for key, value in kwargs.items():
+            LOG.info("create_delivery_report called with key %s and value %s", key, value)
 
 
 class MockVogueApi:
