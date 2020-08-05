@@ -1,4 +1,4 @@
-""" Base module for building bioinfo workflow bundles for linking in Housekeeper"""
+"""Base module for building bioinfo workflow bundles for linking in Housekeeper"""
 import datetime as dt
 
 from cg.constants import HK_TAGS, MIP_DNA_TAGS, MIP_RNA_TAGS
