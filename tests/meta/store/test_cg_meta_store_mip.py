@@ -18,7 +18,7 @@ def test_gather_files_and_bundle_in_hk_bundle_already_added(
     mock_add_analysis, mock_housekeeper, mock_cg_store, config_stream, bundle_data
 ):
     """
-    tests the function gather_files_and_bundle_in_housekeeper
+        tests the function gather_files_and_bundle_in_housekeeper
     """
     # GIVEN a MIP RNA analysis config file
     mip_rna_config = config_stream["rna_config_store"]
@@ -53,7 +53,7 @@ def test_gather_files_and_bundle_in_hk_bundle_new_analysis(
     bundle_data,
 ):
     """
-    tests the function gather_files_and_bundle_in_housekeeper
+        tests the function gather_files_and_bundle_in_housekeeper
     """
     # GIVEN a MIP RNA analysis config file
     mip_rna_config = config_stream["rna_config_store"]
@@ -91,7 +91,7 @@ def test_add_analysis_finished(
     rna_deliverables_raw,
 ):
     """
-    tests the function add_analysis when passing a config file of a finished RNA analysis
+        tests the function add_analysis when passing a config file of a finished RNA analysis
     """
     # GIVEN a MIP RNA analysis configuration file
     mip_rna_config = config_stream["rna_config_store"]
@@ -116,7 +116,7 @@ def test_add_analysis_not_finished(
     mock_parse_config, mock_parse_sample, config_stream, config_data_rna, sampleinfo_data
 ):
     """
-    tests the function add_analysis when passing a config file of an unfinished RNA analysis
+        tests the function add_analysis when passing a config file of an unfinished RNA analysis
     """
     # GIVEN a MIP RNA analysis configuration file
 
