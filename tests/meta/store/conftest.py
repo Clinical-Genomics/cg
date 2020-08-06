@@ -62,13 +62,17 @@ def sampleinfo_data():
 @pytest.fixture(scope="function")
 def rna_deliverables_raw(config_data_rna):
     """ raw_deliverables fixture """
-    return ruamel.yaml.safe_load(Path(config_data_rna["out_dir"], "case_id_deliverables.yaml").open())
+    return ruamel.yaml.safe_load(
+        Path(config_data_rna["out_dir"], "case_id_deliverables.yaml").open()
+    )
 
 
 @pytest.fixture(scope="function")
 def dna_deliverables_raw(config_data_dna):
     """ raw_deliverables fixture """
-    return ruamel.yaml.safe_load(Path(config_data_dna["out_dir"], "case_id_deliverables.yaml").open())
+    return ruamel.yaml.safe_load(
+        Path(config_data_dna["out_dir"], "case_id_deliverables.yaml").open()
+    )
 
 
 @pytest.fixture(scope="function")
