@@ -1,0 +1,643 @@
+---
+analysis_constant_path: case_id/analysis
+analysis_type:
+  sample_id: wgs
+analysisrunstatus: 2
+bash_set_errexit: '1'
+bash_set_nounset: '0'
+bash_set_pipefail: '1'
+bcftools_mpileup: '0'
+bcftools_mpileup_filter_variant: '0'
+bcftools_mpileup_keep_unnormalised: '0'
+binary_path:
+  CADD.sh: /path/to/conda/envs/S_mip8.2_rd-dna/bin/CADD.sh
+  ExpansionHunter: /path/to/conda/envs/S_mip8.2_rd-dna/bin/ExpansionHunter
+  TIDDIT.py: /path/to/conda/envs/S_mip8.2_rd-dna/bin/TIDDIT.py
+  bcftools: /path/to/conda/envs/S_mip8.2_rd-dna/bin/bcftools
+  bedtools: /path/to/conda/envs/S_mip8.2_rd-dna/bin/bedtools
+  bgzip: /path/to/conda/envs/S_mip8.2_rd-dna/bin/bgzip
+  bwa: /path/to/conda/envs/S_mip8.2_rd-dna/bin/bwa
+  chanjo: /path/to/conda/envs/S_mip8.2_rd-dna/bin/chanjo
+  chromograph: /path/to/conda/envs/S_mip8.2_rd-dna/bin/chromograph
+  cnvnator: /path/to/conda/envs/S_mip8.2_rd-dna/bin/cnvnator
+  cnvnator2VCF.pl: /path/to/conda/envs/S_mip8.2_rd-dna/bin/cnvnator2VCF.pl
+  configManta.py: /path/to/conda/envs/S_mip8.2_rd-dna/bin/configManta.py
+  fastqc: /path/to/conda/envs/S_mip8.2_rd-dna/bin/fastqc
+  gatk: /path/to/conda/envs/S_mip8.2_rd-dna/bin/gatk
+  genmod: /path/to/conda/envs/S_mip8.2_rd-dna/bin/genmod
+  grep: grep
+  gzip: gzip
+  multiqc: /path/to/conda/envs/S_mip8.2_rd-dna/bin/multiqc
+  peddy: /path/to/conda/envs/S_mip8.2_rd-dna/bin/peddy
+  picard: /path/to/conda/envs/S_mip8.2_rd-dna/bin/picard
+  plink2: /path/to/conda/envs/S_mip8.2_rd-dna/bin/plink2
+  rhocall: /path/to/conda/envs/S_mip8.2_rd-dna/bin/rhocall
+  sambamba: /path/to/conda/envs/S_mip8.2_rd-dna/bin/sambamba
+  samtools: /path/to/conda/envs/S_mip8.2_rd-dna/bin/samtools
+  sed: sed
+  smn_caller.py: /path/to/conda/envs/S_mip8.2_rd-dna/bin/smn_caller.py
+  stranger: /path/to/conda/envs/S_mip8.2_rd-dna/bin/stranger
+  svdb: /path/to/conda/envs/S_mip8.2_rd-dna/bin/svdb
+  tabix: /path/to/conda/envs/S_mip8.2_rd-dna/bin/tabix
+  variant_integrity: /path/to/conda/envs/S_mip8.2_rd-dna/bin/variant_integrity
+  vcf2cytosure: /path/to/conda/envs/S_mip8.2_rd-dna/bin/vcf2cytosure
+  vcfanno: /path/to/conda/envs/S_mip8.2_rd-dna/bin/vcfanno
+  vep: /path/to/conda/envs/S_mip8.2_rd-dna/bin/vep
+  vt: /path/to/conda/envs/S_mip8.2_rd-dna/bin/vt
+bwa_build_reference: /path/to/rare-disease/references/references_8.0/grch37_homo_sapiens_-d5-.fasta
+bwa_mem: 2
+bwa_mem_bamstats: '1'
+bwa_mem_cram: '0'
+bwa_mem_hla: '0'
+bwa_sambamba_sort_memory_limit: 64G
+bwa_soft_clip_sup_align: '0'
+cadd_ar: 2
+cadd_column_names:
+  - Chrom
+  - Pos
+  - Ref
+  - Alt
+  - '-'
+  - CADD
+cadd_vcf_header_file: /path/to/rare-disease/references/references_8.0/cadd_to_vcf_header_-1.0-.txt
+case_id: case_id
+chanjo_sexcheck: 2
+chanjo_sexcheck_log_level: DEBUG
+chromograph_ar: 2
+chromograph_cytoband_file: /path/to/rare-disease/references/references_8.0/grch37_cytoband.bed
+cluster_constant_path: /path/to/rare-disease/cases
+cnv_bin_size: '1000'
+cnvnator_ar: 2
+conda_path: /home/proj/bin/conda
+config_file: /path/to/rare-disease/cases/case_id/analysis/case_id_config.yaml
+config_file_analysis: /path/to/rare-disease/cases/case_id/analysis/case_id_config.yaml
+core_ram_memory: '5'
+custom_default_parameters:
+  - analysis_type
+  - bwa_build_reference
+  - exome_target_bed
+  - gatk_path
+  - infile_dirs
+  - pedigree_fam_file
+  - picardtools_path
+  - reference_dir
+  - reference_info_file
+  - rtg_vcfeval_reference_genome
+  - sample_info_file
+  - store_file
+  - sv_vcfparser_select_file
+  - temp_directory
+  - vcfparser_select_file
+decompose_normalize_references:
+  - fqa_vcfanno_config
+  - gatk_baserecalibration_known_sites
+  - gatk_haplotypecaller_snp_known_set
+  - gatk_variantrecalibration_resource_indel
+  - gatk_varianteval_gold
+  - gatk_varianteval_dbsnp
+  - sv_fqa_vcfanno_config
+delly_call: '0'
+delly_exclude_file: hg19_human_excl_-20150227-.tsv
+delly_reformat: '0'
+delly_types:
+  - DEL
+  - DUP
+  - INV
+  - INS
+dry_run_all: 1
+email_types:
+  - FAIL
+endvariantannotationblock: 2
+exome_target_bed:
+  /path/to/rare-disease/references/references_8.0/grch37_agilent_sureselect_targets_cre_-v1-.bed: sample_id
+expansionhunter: 2
+expansionhunter_variant_catalog_file_path: /path/to/rare-disease/references/references_8.0/grch37_expansionhunter_variant_catalog_-3.1.2-.json
+expected_coverage:
+  sample_id: '30'
+fastqc_ar: 2
+found_female: 0
+found_male: 1
+found_other: 0
+fqa_vcfanno_config: /path/to/rare-disease/references/references_8.0/grch37_frequency_vcfanno_filter_config_-v1.3-.toml
+fqf_annotations:
+  - GNOMADAF
+  - GNOMADAF_popmax
+  - SWEGENAF
+fqf_bcftools_filter_threshold: '0.40'
+frequency_annotation: 2
+frequency_filter: 2
+gatk_baserecalibration: 2
+gatk_baserecalibration_known_sites:
+  - /path/to/rare-disease/references/references_8.0/grch37_dbsnp_-138-.vcf
+  - /path/to/rare-disease/references/references_8.0/grch37_1000g_indels_-phase1-.vcf
+  - /path/to/rare-disease/references/references_8.0/grch37_mills_and_1000g_-gold_standard_indels-.vcf
+gatk_baserecalibration_read_filters:
+  - OverclippedReadFilter
+gatk_baserecalibration_static_quantized_quals:
+  - '10'
+  - '20'
+  - '30'
+  - '40'
+gatk_calculate_genotype_call_set: /path/to/rare-disease/references/references_8.0/grch37_gnomad.genomes_-r2.0.1-.vcf.gz
+gatk_calculategenotypeposteriors: '0'
+gatk_cnnscorevariants: '0'
+gatk_combinevariantcallsets: 2
+gatk_combinevariantcallsets_bcf_file: '1'
+gatk_combinevariants_genotype_merge_option: PRIORITIZE
+gatk_combinevariants_prioritize_caller: gatk
+gatk_gathervcfs: 2
+gatk_gathervcfs_bcf_file: '0'
+gatk_genotypegvcfs: 2
+gatk_genotypegvcfs_all_sites: '0'
+gatk_genotypegvcfs_ref_gvcf: /path/to/rare-disease/references/references_8.0/grch37_gatk_merged_reference_samples.txt
+gatk_haplotypecaller: 2
+gatk_haplotypecaller_annotation:
+  - BaseQualityRankSumTest
+  - ChromosomeCounts
+  - Coverage
+  - DepthPerAlleleBySample
+  - FisherStrand
+  - MappingQualityRankSumTest
+  - QualByDepth
+  - RMSMappingQuality
+  - ReadPosRankSumTest
+  - StrandOddsRatio
+gatk_haplotypecaller_emit_ref_confidence: GVCF
+gatk_haplotypecaller_no_soft_clipped_bases: '1'
+gatk_haplotypecaller_pcr_indel_model: NONE
+gatk_haplotypecaller_snp_known_set: /path/to/rare-disease/references/references_8.0/grch37_dbsnp_-138-.vcf
+gatk_logging_level: INFO
+gatk_num_reference_samples_if_no_call: '7854'
+gatk_path: /opt/conda/opt/gatk-3.8
+gatk_use_new_qual_calculator: '1'
+gatk_varianteval_dbsnp: /path/to/rare-disease/references/references_8.0/grch37_dbsnp_-138_esa_129-.vcf
+gatk_varianteval_gold: /path/to/rare-disease/references/references_8.0/grch37_mills_and_1000g_-gold_standard_indels-.vcf
+gatk_variantevalall: 2
+gatk_variantevalexome: 2
+gatk_variantrecalibration: 2
+gatk_variantrecalibration_annotations:
+  - QD
+  - MQ
+  - MQRankSum
+  - ReadPosRankSum
+  - FS
+  - SOR
+  - DP
+gatk_variantrecalibration_dp_annotation: '1'
+gatk_variantrecalibration_indel_max_gaussians: '1'
+gatk_variantrecalibration_indel_tsfilter_level: '99.99'
+gatk_variantrecalibration_keep_unnormalised: '0'
+gatk_variantrecalibration_resource_indel:
+  /path/to/rare-disease/references/references_8.0/grch37_dbsnp_-138-.vcf: 'dbsnp,known=true,training=false,truth=false,prior=2.0'
+  /path/to/rare-disease/references/references_8.0/grch37_mills_and_1000g_-gold_standard_indels-.vcf: 'mills,known=false,training=true,truth=true,prior=12.0'
+gatk_variantrecalibration_resource_snv:
+  /path/to/rare-disease/references/references_8.0/grch37_1000g_omni_-2.5-.vcf: 'omni,known=false,training=true,truth=truth,prior=12.0'
+  /path/to/rare-disease/references/references_8.0/grch37_1000g_snps_high_confidence_-phase1-.vcf: '1000G,known=false,training=true,truth=false,prior=10.0'
+  /path/to/rare-disease/references/references_8.0/grch37_dbsnp_-138-.vcf: 'dbsnp,known=true,training=false,truth=false,prior=2.0'
+  /path/to/rare-disease/references/references_8.0/grch37_hapmap_-3.3-.vcf: 'hapmap,known=false,training=true,truth=true,prior=15.0'
+gatk_variantrecalibration_snv_max_gaussians: '0'
+gatk_variantrecalibration_snv_tsfilter_level: '99.99'
+gatk_variantrecalibration_trust_all_polymorphic: '0'
+gatk_variantrecalibration_ts_tranches:
+  - '100'
+  - '99.99'
+  - '99.9'
+  - '99.0'
+  - '90'
+gender:
+  males:
+    - sample_id
+genmod_annotate_cadd_files:
+  - /path/to/rare-disease/references/references_8.0/grch37_cadd_whole_genome_snvs_-v1.4-.tsv.gz
+  - /path/to/rare-disease/references/references_8.0/grch37_cadd_gnomad.genomes.r2.0.1_-v1.4-.tsv.gz
+genmod_annotate_regions: '1'
+genmod_annotate_spidex_file: /path/to/rare-disease/references/references_8.0/grch37_spidex_public_noncommercial_-v1_0-.tab.gz
+genmod_models_case_type: ped
+genmod_models_reduced_penetrance_file: /path/to/rare-disease/references/references_8.0/grch37_cust003-cmms-red-pen_-2017-.tsv
+genmod_models_whole_gene: '1'
+gzip_fastq: 2
+human_genome_reference: /path/to/rare-disease/references/references_8.0/grch37_homo_sapiens_-d5-.fasta
+infile_dirs:
+  /path/to/rare-disease/cases/case_id/wgs/sample_id/fastq: sample_id
+java_use_large_pages: '1'
+load_env:
+  S_mip8.2_rd-dna:
+    method: conda
+    mip: ~
+log_file: /path/to/rare-disease/cases/case_id/analysis/mip_log/2020-05-12/mip_2020-05-12T10:49:22.log
+manta: 2
+markduplicates: 2
+markduplicates_picardtools_markduplicates: '1'
+markduplicates_picardtools_opt_dup_dist: '2500'
+markduplicates_sambamba_markdup: '0'
+markduplicates_sambamba_markdup_hash_table_size: '262144'
+markduplicates_sambamba_markdup_io_buffer_size: '2048'
+markduplicates_sambamba_markdup_overflow_list_size: '200000'
+max_cores_per_node: '36'
+mip: 1
+multiqc_ar: 2
+multiqc_per_sample: '0'
+nist_call_set_bed:
+  '2.19':
+    NA12878: grch37_nist_hg001_-na12878_v2.19-.bed
+  3.3.2:
+    NA12878: grch37_nist_hg001_-na12878_v3.3.2-.bed
+    NA24143: grch37_nist_hg004_-na24143_v3.3.2-.bed
+    NA24385: grch37_nist_hg002_-na24385_v3.3.2-.bed
+nist_call_set_vcf:
+  '2.19':
+    NA12878: grch37_nist_hg001_-na12878_v2.19-.vcf
+  3.3.2:
+    NA12878: grch37_nist_hg001_-na12878_v3.3.2-.vcf
+    NA24143: grch37_nist_hg004_-na24143_v3.3.2-.vcf
+    NA24385: grch37_nist_hg002_-na24385_v3.3.2-.vcf
+nist_versions:
+  - '2.19'
+  - 3.3.2
+node_ram_memory: '192'
+outdata_dir: /path/to/rare-disease/cases/case_id/analysis
+outscript_dir: /path/to/rare-disease/cases/case_id/analysis/scripts
+peddy_ar: 2
+pedigree_fam_file: /path/to/rare-disease/cases/case_id/analysis/case_id/case_id.fam
+pedigree_file: /path/to/rare-disease/cases/case_id/pedigree.yaml
+picardtools_collecthsmetrics: 2
+picardtools_collectmultiplemetrics: 2
+picardtools_mergesamfiles: 2
+picardtools_path: /usr/picard/
+platform: ILLUMINA
+plink: 2
+prepareforvariantannotationblock: 2
+print_recipe: '0'
+print_recipe_mode: '2'
+project_id: development
+qccollect_ar: 2
+qccollect_regexp_file: /path/to/rare-disease/references/references_8.0/qc_regexp_-v1.24-.yaml
+qccollect_sampleinfo_file: /path/to/rare-disease/cases/case_id/analysis/case_id_qc_sample_info.yaml
+qccollect_skip_evaluation: '0'
+rank_model_file: /path/to/rare-disease/references/references_8.0/rank_model_cmms_-v1.28-.ini
+rankvariant: 2
+rankvariant_binary_file: '1'
+recipe_core_number:
+  analysisrunstatus: 1
+  bcftools_mpileup: 16
+  bwa_mem: 36
+  chanjo_sexcheck: 1
+  chromograph_ar: 1
+  cnvnator_ar: 13
+  delly_call: 36
+  delly_reformat: 13
+  endvariantannotationblock: 1
+  expansionhunter: 0
+  fastqc_ar: 0
+  frequency_annotation: 13
+  frequency_filter: 13
+  gatk_baserecalibration: 13
+  gatk_combinevariantcallsets: 1
+  gatk_gathervcfs: 1
+  gatk_genotypegvcfs: 1
+  gatk_haplotypecaller: 16
+  gatk_variantevalall: 1
+  gatk_variantevalexome: 1
+  gatk_variantrecalibration: 1
+  gzip_fastq: 0
+  manta: 36
+  markduplicates: 13
+  multiqc_ar: 1
+  peddy_ar: 4
+  picardtools_collecthsmetrics: 1
+  picardtools_collectmultiplemetrics: 1
+  picardtools_mergesamfiles: 13
+  plink: 1
+  qccollect_ar: 1
+  rhocall_ar: 13
+  rhocall_viz: 1
+  rtg_vcfeval: 36
+  sacct: 1
+  sambamba_depth: 1
+  samtools_subsample_mt: 1
+  smncopynumbercaller: 4
+  split_fastq_file: 4
+  sv_annotate: 1
+  sv_combinevariantcallsets: 1
+  sv_rankvariant: 16
+  sv_reformat: 1
+  sv_varianteffectpredictor: 0
+  sv_vcfparser: 13
+  tiddit_coverage: 1
+  upd_ar: 1
+  varg_ar: 1
+  variant_integrity_ar: 1
+  vcf2cytosure_ar: 0
+  version_collect_ar: 1
+  vt_ar: 13
+  vt_core: 1
+recipe_memory:
+  cadd_ar: 4
+  chanjo_sexcheck: 2
+  chromograph_ar: 5
+  delly_reformat: 3
+  endvariantannotationblock: 8
+  expansionhunter: 2
+  frequency_annotation: 3
+  gatk_baserecalibration: 10
+  gatk_gathervcfs: 7
+  gatk_genotypegvcfs: 12
+  gatk_variantrecalibration: 30
+  markduplicates: 10
+  picardtools_collecthsmetrics: 8
+  picardtools_collectmultiplemetrics: 8
+  plink: 10
+  rhocall_ar: 2
+  rhocall_viz: 2
+  sambamba_depth: 10
+  samtools_subsample_mt: 2
+  split_fastq_file: 2
+  sv_annotate: 7
+  sv_reformat: 24
+  sv_varianteffectpredictor: 9
+  tiddit: 8
+  upd_ar: 3
+  varianteffectpredictor: 7
+  vcf2cytosure_ar: 6
+recipe_time:
+  analysisrunstatus: '1'
+  bcftools_mpileup: '40'
+  bwa_mem: '30'
+  cadd_ar: '10'
+  chanjo_sexcheck: '2'
+  chromograph_ar: '1'
+  cnvnator_ar: '1'
+  delly_call: '20'
+  delly_reformat: '7'
+  endvariantannotationblock: '2'
+  expansionhunter: '2'
+  fastqc_ar: '10'
+  frequency_annotation: '1'
+  frequency_filter: '2'
+  gatk_baserecalibration: '20'
+  gatk_combinevariantcallsets: '2'
+  gatk_gathervcfs: '2'
+  gatk_genotypegvcfs: '10'
+  gatk_haplotypecaller: '30'
+  gatk_variantevalall: '2'
+  gatk_variantevalexome: '2'
+  gatk_variantrecalibration: '10'
+  gzip_fastq: '2'
+  manta: '30'
+  markduplicates: '20'
+  multiqc_ar: '5'
+  peddy_ar: '1'
+  picardtools_collecthsmetrics: '10'
+  picardtools_collectmultiplemetrics: '10'
+  picardtools_mergesamfiles: '20'
+  plink: '1'
+  prepareforvariantannotationblock: '5'
+  qccollect_ar: '1'
+  rankvariant: '10'
+  rhocall_ar: '5'
+  rhocall_viz: '1'
+  rtg_vcfeval: '1'
+  sacct: '1'
+  sambamba_depth: '10'
+  samtools_subsample_mt: '1'
+  smncopynumbercaller: '1'
+  split_fastq_file: '10'
+  sv_annotate: '2'
+  sv_combinevariantcallsets: '2'
+  sv_rankvariant: '10'
+  sv_reformat: '1'
+  sv_varianteffectpredictor: '10'
+  sv_vcfparser: '2'
+  tiddit: '20'
+  tiddit_coverage: '5'
+  upd_ar: '1'
+  varg_ar: '1'
+  variant_integrity_ar: '1'
+  varianteffectpredictor: '10'
+  vcf2cytosure_ar: '20'
+  vcfparser_ar: '5'
+  version_collect_ar: '1'
+  vt_ar: '10'
+  vt_core: '10'
+reference_dir: /path/to/rare-disease/references/references_8.0
+reference_info_file: /path/to/rare-disease/cases/case_id/analysis/reference_info.yaml
+replace_iupac: '0'
+rhocall_ar: 2
+rhocall_frequency_file: /path/to/rare-disease/references/references_8.0/grch37_gnomad.genomes_-r2.0.1-.tab.gz
+rhocall_viz: '0'
+rtg_vcfeval: '0'
+rtg_vcfeval_reference_genome: grch37_homo_sapiens_-d5-.fasta
+sacct: 2
+sacct_format_fields:
+  - jobid
+  - jobname%50
+  - account
+  - partition
+  - alloccpus
+  - TotalCPU
+  - elapsed
+  - start
+  - end
+  - state
+  - exitcode
+sambamba_depth: 2
+sambamba_depth_base_quality: '10'
+sambamba_depth_bed: /path/to/rare-disease/references/references_8.0/grch37_scout_exons_-2017-01-.bed
+sambamba_depth_cutoffs:
+  - '10'
+  - '15'
+  - '20'
+  - '50'
+  - '100'
+sambamba_depth_mapping_quality: '10'
+sambamba_depth_mode: region
+sambamba_depth_noduplicates: '1'
+sambamba_depth_quality_control: '1'
+sample_ids:
+  - sample_id
+sample_info_file: /path/to/rare-disease/cases/case_id/analysis/case_id_qc_sample_info.yaml
+samtools_subsample_mt: 2
+samtools_subsample_mt_depth: '150'
+set_recipe_core_number: {}
+set_recipe_memory: {}
+set_recipe_time: {}
+singularity_recipe_bind_path:
+  bwa_mem:
+    - /path/to/rare-disease/
+    - /path/to/housekeeper-bundles
+    - /path/to/demultiplexed-runs
+  fastqc_ar:
+    - /path/to/rare-disease/
+    - /path/to/housekeeper-bundles
+    - /path/to/demultiplexed-runs
+slurm_quality_of_service: normal
+smncopynumbercaller: 2
+split_fastq_file: '0'
+split_fastq_file_read_batch: '25000000'
+start_with_recipe: qccollect_ar
+store_file: /path/to/rare-disease/cases/case_id/analysis/case_id_deliverables.yaml
+submission_profile: slurm
+supported_capture_kit:
+  agilent_sureselect.v2: genome_reference_source_version_agilent_sureselect_targets_-v2-.bed
+  agilent_sureselect.v3: genome_reference_source_version_agilent_sureselect_targets_-v3-.bed
+  agilent_sureselect.v4: genome_reference_source_version_agilent_sureselect_targets_-v4-.bed
+  agilent_sureselect.v5: genome_reference_source_version_agilent_sureselect_targets_-v5-.bed
+  agilent_sureselect_cre.v1: genome_reference_source_version_agilent_sureselect_targets_cre_-v1-.bed
+  agilent_sureselect_focusedexome.v1: genome_reference_source_version_agilent_sureselect_targets_focusedexome_-v1-.bed
+  latest: genome_reference_source_version_twist_target_-1-.bed
+  nimblegen_seqcapezexome.v2: genome_reference_source_version_nimblegen_seqcapezexome_targets_-v2-.bed
+  nimblegen_seqcapezexome.v3: genome_reference_source_version_nimblegen_seqcapezexome_targets_-v3-.bed
+  twist_wes.v1: genome_reference_source_version_twist_target_-1-.bed
+sv_annotate: 2
+sv_bcftools_view_filter: '1'
+sv_combinevariantcallsets: 2
+sv_combinevariantcallsets_bcf_file: '1'
+sv_fqa_annotations:
+  - GNOMADAF
+  - GNOMADAF_POPMAX
+sv_fqa_vcfanno_config: /path/to/rare-disease/references/references_8.0/grch37_frequency_vcfanno_filter_config_-v1.1-.toml
+sv_frequency_filter: '1'
+sv_genmod_annotate_regions: '1'
+sv_genmod_models_case_type: cmms
+sv_genmod_models_reduced_penetrance_file: /path/to/rare-disease/references/references_8.0/grch37_cust003-cmms-red-pen_-2017-.tsv
+sv_genmod_models_whole_gene: '0'
+sv_rank_model_file: /path/to/rare-disease/references/references_8.0/svrank_model_cmms_-v1.8-.ini
+sv_rankvariant: 2
+sv_reformat: 2
+sv_svdb_merge_prioritize: 'tiddit,cnvnator,manta'
+sv_svdb_query: '1'
+sv_svdb_query_db_files:
+  /path/to/rare-disease/references/references_8.0/grch37_gnomad.genomes_-r2.1.1_sv-.vcf: gnomad_sv|AF|AC|AF|AC|1
+  /path/to/rare-disease/references/references_8.0/grch37_mip_sv_svdb_export_-2018-10-09-.vcf: clinical_genomics_mip|AF|OCC|FRQ|OCC|1
+  /path/to/rare-disease/references/references_8.0/grch37_svdb_query_clingen_cgh_benign_-v1.0.0-.vcf: clingen_cgh_benign
+  /path/to/rare-disease/references/references_8.0/grch37_svdb_query_clingen_cgh_pathogenic_-v1.0.0-.vcf: clingen_cgh_pathogenic
+  /path/to/rare-disease/references/references_8.0/grch37_svdb_query_clingen_ngi_-v1.0.0-.vcf: clingen_ngi|AF|OCC|FRQ|OCC|1
+  /path/to/rare-disease/references/references_8.0/grch37_svdb_query_decipher_-v1.0.0-.vcf: decipher|AF|OCC|FRQ|OCC
+  /path/to/rare-disease/references/references_8.0/grch37_swegen_concat_sort_-20170830-.vcf: swegen|AF|OCC|FRQ|OCC|1
+sv_varianteffectpredictor: 2
+sv_vcfparser: 2
+sv_vcfparser_add_all_mt_var: '1'
+sv_vcfparser_outfile_count: 2
+sv_vcfparser_per_gene: '1'
+sv_vcfparser_select_file: /path/to/rare-disease/cases/case_id/gene_panels.bed
+sv_vcfparser_select_file_matching_column: '3'
+sv_vcfparser_vep_transcripts: '1'
+sv_vep_features:
+  - appris
+  - biotype
+  - canonical
+  - cache
+  - ccds
+  - domains
+  - exclude_predicted
+  - force_overwrite
+  - hgvs
+  - humdiv
+  - no_progress
+  - no_stats
+  - numbers
+  - merged
+  - offline
+  - per_gene
+  - protein
+  - symbol
+  - tsl
+  - uniprot
+sv_vep_plugin:
+  ExACpLI:
+    path: /path/to/rare-disease/references/references_8.0/gnomad_pli_per_gene_-_r2.1.1-.txt
+sv_vt_decompose: '1'
+temp_directory: /path/to/rare-disease/temp-dir/$SLURM_JOB_ID
+tiddit: 2
+tiddit_coverage: 2
+tiddit_coverage_bin_size: '500'
+tiddit_minimum_number_supporting_pairs: '6'
+upd_ar: '0'
+varg_ar: '0'
+variant_integrity_ar: 2
+varianteffectpredictor: 2
+vcf2cytosure_ar: 2
+vcf2cytosure_blacklist: /path/to/rare-disease/references/references_8.0/grch37_cytosure_blacklist_-1.0-.bed
+vcf2cytosure_exclude_filter: "'clingen_ngiAF > 0.1 || swegenAF > 0.05 || clinical_genomics_mipAF > 0.05 || decipherAF > 0.1'"
+vcf2cytosure_freq: '0.01'
+vcf2cytosure_freq_tag: FRQ
+vcf2cytosure_maxbnd: '5000'
+vcf2cytosure_no_filter: '0'
+vcf2cytosure_use_sample_id_as_display_name: '0'
+vcf2cytosure_var_size: '5000'
+vcfparser_add_all_mt_var: '1'
+vcfparser_ar: 2
+vcfparser_outfile_count: 2
+vcfparser_select_file: /path/to/rare-disease/cases/case_id/gene_panels.bed
+vcfparser_select_file_matching_column: '3'
+vcfparser_vep_transcripts: '1'
+vep_custom_annotation:
+  clinvar:
+    annotation_type: exact
+    file_type: vcf
+    force_report_coordinates: '0'
+    key: CLINVAR
+    path: /path/to/rare-disease/references/references_8.0/grch37_clinvar_reformated_-20191013-.vcf.gz
+    vcf_fields: 'CLNSIG,CLNVID,CLNREVSTAT'
+  genomic_superdups_frac_match:
+    annotation_type: overlap
+    file_type: bed
+    force_report_coordinates: '0'
+    key: genomic_superdups_frac_match
+    path: /path/to/rare-disease/references/references_8.0/grch37_genomics_super_dups_-20181009.bed.gz
+vep_directory_cache: /path/to/rare-disease/references/references_8.0/ensembl-tools-release-97/cache
+vep_features:
+  - appris
+  - biotype
+  - cache
+  - canonical
+  - ccds
+  - domains
+  - exclude_predicted
+  - force_overwrite
+  - hgvs
+  - humdiv
+  - no_progress
+  - no_stats
+  - numbers
+  - merged
+  - polyphen p
+  - protein
+  - offline
+  - regulatory
+  - sift p
+  - symbol
+  - tsl
+  - uniprot
+vep_plugin:
+  ExACpLI:
+    exists_check: file
+    path: /path/to/rare-disease/references/references_8.0/gnomad_pli_per_gene_-_r2.1.1-.txt
+  LoFtool:
+    exists_check: file
+    path: /path/to/rare-disease/references/references_8.0/ensembl-tools-release-97/cache/Plugins/LoFtool_scores.txt
+  MaxEntScan:
+    exists_check: directory
+    parameters:
+      - SWA
+      - NCSS
+    path: /path/to/rare-disease/references/references_8.0/ensembl-tools-release-97/cache/Plugins/fordownload
+  dbNSFP:
+    exists_check: file
+    parameters:
+      - GERP++_RS
+      - GERP++_NR
+      - phyloP100way_vertebrate
+      - phastCons100way_vertebrate
+      - REVEL_rankscore
+    path: /path/to/rare-disease/references/references_8.0/grch37_dbnsfp_-v3.5a-.txt.gz
+vep_plugins_dir_path: /path/to/rare-disease/references/references_8.0/ensembl-tools-release-97/cache/Plugins
+verbose: '0'
+version_collect_ar: 2
+vt_ar: 2
+vt_core: 2
+vt_decompose: '1'
+vt_missing_alt_allele: '1'
+vt_normalize: '1'
+vt_uniq: '1'
+with_singularity: '1'

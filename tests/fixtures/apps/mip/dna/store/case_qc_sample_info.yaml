@@ -1,0 +1,889 @@
+---
+analysis_date: 2020-05-12T10:23:18
+analysis_type:
+  sample_id: wgs
+analysisrunstatus: finished
+case: case_id
+config_file_analysis: /path/to/rare-disease/cases/case_id/analysis/case_id_config.yaml
+default_gene_panels:
+  - OMIM-AUTO
+expected_coverage:
+  sample_id: '30'
+files:
+  - format: cram
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/gatk_baserecalibration/sample_id_lanes_5555_sorted_md_brecal.cram
+    path_index: /path/to/rare-disease/cases/case_id/analysis/sample_id/gatk_baserecalibration/sample_id_lanes_5555_sorted_md_brecal.cram.crai
+    step: gatk_baserecalibration
+    tag: ~
+  - format: meta
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chanjo_sexcheck/sample_id_lanes_5555_sorted_md_brecal_sex.tsv
+    path_index: ~
+    step: chanjo_sexcheck
+    tag: ~
+  - format: bam
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/samtools_subsample_mt/sample_id_lanes_5555_sorted_md_brecal_subsample_MT.bam
+    path_index: /path/to/rare-disease/cases/case_id/analysis/sample_id/samtools_subsample_mt/sample_id_lanes_5555_sorted_md_brecal_subsample_MT.bam.bai
+    step: samtools_subsample_mt
+    tag: ~
+  - format: meta
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/smncopynumbercaller/sample_id_lanes_5555_sorted_md_brecal_smn.tsv
+    path_index: ~
+    step: smncopynumbercaller
+    tag: ~
+  - format: vcf
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/expansionhunter/case_id_exphun.vcf.gz
+    path_index: /path/to/rare-disease/cases/case_id/analysis/case_id/expansionhunter/case_id_exphun.vcf.gz.csi
+    step: expansionhunter
+    tag: sv_str
+  - format: bcf
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/sv_combinevariantcallsets/case_id_comb.bcf
+    path_index: /path/to/rare-disease/cases/case_id/analysis/case_id/sv_combinevariantcallsets/case_id_comb.bcf.csi
+    step: sv_combinevariantcallsets
+    tag: ~
+  - format: vcf
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/sv_reformat/case_id_comb_ann_vep_parsed_ranked.vcf.gz
+    path_index: /path/to/rare-disease/cases/case_id/analysis/case_id/sv_reformat/case_id_comb_ann_vep_parsed_ranked.vcf.gz.csi
+    step: sv_reformat
+    tag: research
+  - format: vcf
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/sv_reformat/case_id_comb_ann_vep_parsed_ranked.selected.vcf.gz
+    path_index: /path/to/rare-disease/cases/case_id/analysis/case_id/sv_reformat/case_id_comb_ann_vep_parsed_ranked.selected.vcf.gz.csi
+    step: sv_reformat
+    tag: clinical
+  - format: meta
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/vcf2cytosure_ar/case_id_cyto.sample_id.cgh
+    path_index: ~
+    step: vcf2cytosure_ar
+    tag: ~
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/peddy_ar/case_id_gatkcomb.peddy.ped
+    path_index: ~
+    step: peddy_ar
+    tag: peddy
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/peddy_ar/case_id_gatkcomb.ped_check.csv
+    path_index: ~
+    step: peddy_ar
+    tag: ped_check
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/peddy_ar/case_id_gatkcomb.sex_check.csv
+    path_index: ~
+    step: peddy_ar
+    tag: sex_check
+  - format: vcf
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/endvariantannotationblock/case_id_gatkcomb_rhocall_vt_af_frqf_cadd_vep_parsed_ranked.vcf.gz
+    path_index: /path/to/rare-disease/cases/case_id/analysis/case_id/endvariantannotationblock/case_id_gatkcomb_rhocall_vt_af_frqf_cadd_vep_parsed_ranked.vcf.gz.tbi
+    step: endvariantannotationblock
+    tag: research
+  - format: vcf
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/endvariantannotationblock/case_id_gatkcomb_rhocall_vt_af_frqf_cadd_vep_parsed_ranked.selected.vcf.gz
+    path_index: /path/to/rare-disease/cases/case_id/analysis/case_id/endvariantannotationblock/case_id_gatkcomb_rhocall_vt_af_frqf_cadd_vep_parsed_ranked.selected.vcf.gz.tbi
+    step: endvariantannotationblock
+    tag: clinical
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/qccollect_ar/case_id_qc_metrics.yaml
+    path_index: ~
+    step: qccollect_ar
+    tag: ~
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/version_collect_ar/case_id_vcol.yaml
+    path_index: ~
+    step: version_collect_ar
+    tag: ~
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/multiqc_ar/multiqc_report.html
+    path_index: ~
+    step: multiqc_ar
+    tag: html
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/multiqc_ar/multiqc_data/multiqc_data.json
+    path_index: ~
+    step: multiqc_ar
+    tag: json
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/qccollect_ar/case_id_qc_metrics.yaml
+    path_index: ~
+    step: qccollect_ar
+    tag: ~
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/version_collect_ar/case_id_vcol.yaml
+    path_index: ~
+    step: version_collect_ar
+    tag: ~
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/multiqc_ar/multiqc_report.html
+    path_index: ~
+    step: multiqc_ar
+    tag: html
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/multiqc_ar/multiqc_data/multiqc_data.json
+    path_index: ~
+    step: multiqc_ar
+    tag: json
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/qccollect_ar/case_id_qc_metrics.yaml
+    path_index: ~
+    step: qccollect_ar
+    tag: ~
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/version_collect_ar/case_id_vcol.yaml
+    path_index: ~
+    step: version_collect_ar
+    tag: ~
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/multiqc_ar/multiqc_report.html
+    path_index: ~
+    step: multiqc_ar
+    tag: html
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/multiqc_ar/multiqc_data/multiqc_data.json
+    path_index: ~
+    step: multiqc_ar
+    tag: json
+  - format: bcf
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/gatk_combinevariantcallsets/case_id_gatkcomb.bcf
+    path_index: /path/to/rare-disease/cases/case_id/analysis/case_id/gatk_combinevariantcallsets/case_id_gatkcomb.bcf.csi
+    step: gatk_combinevariantcallsets
+    tag: ~
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/peddy_ar/case_id_gatkcomb.peddy.ped
+    path_index: ~
+    step: peddy_ar
+    tag: peddy
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/peddy_ar/case_id_gatkcomb.sex_check.csv
+    path_index: ~
+    step: peddy_ar
+    tag: sex_check
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/peddy_ar/case_id_gatkcomb.ped_check.csv
+    path_index: ~
+    step: peddy_ar
+    tag: ped_check
+  - format: tar
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_ar/sample_id_lanes_5555_sorted_md_brecal_tcov_chromograph.tar.gz
+    path_index: ~
+    step: chromograph_ar
+    tag: ~
+  - format: vcf
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/endvariantannotationblock/case_id_gatkcomb_rhocall_vt_af_frqf_cadd_vep_parsed_ranked.vcf.gz
+    path_index: /path/to/rare-disease/cases/case_id/analysis/case_id/endvariantannotationblock/case_id_gatkcomb_rhocall_vt_af_frqf_cadd_vep_parsed_ranked.vcf.gz.tbi
+    step: endvariantannotationblock
+    tag: research
+  - format: vcf
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/endvariantannotationblock/case_id_gatkcomb_rhocall_vt_af_frqf_cadd_vep_parsed_ranked.selected.vcf.gz
+    path_index: /path/to/rare-disease/cases/case_id/analysis/case_id/endvariantannotationblock/case_id_gatkcomb_rhocall_vt_af_frqf_cadd_vep_parsed_ranked.selected.vcf.gz.tbi
+    step: endvariantannotationblock
+    tag: clinical
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/qccollect_ar/case_id_qc_metrics.yaml
+    path_index: ~
+    step: qccollect_ar
+    tag: ~
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/version_collect_ar/case_id_vcol.yaml
+    path_index: ~
+    step: version_collect_ar
+    tag: ~
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/multiqc_ar/multiqc_report.html
+    path_index: ~
+    step: multiqc_ar
+    tag: html
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/multiqc_ar/multiqc_data/multiqc_data.json
+    path_index: ~
+    step: multiqc_ar
+    tag: json
+  - format: bed
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/sambamba_depth/sample_id_lanes_5555_sorted_md_brecal_coverage.bed
+    path_index: ~
+    step: sambamba_depth
+    tag: coverage
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/qccollect_ar/case_id_qc_metrics.yaml
+    path_index: ~
+    step: qccollect_ar
+    tag: ~
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/version_collect_ar/case_id_vcol.yaml
+    path_index: ~
+    step: version_collect_ar
+    tag: ~
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/multiqc_ar/multiqc_data/multiqc_data.json
+    path_index: ~
+    step: multiqc_ar
+    tag: json
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/multiqc_ar/multiqc_report.html
+    path_index: ~
+    step: multiqc_ar
+    tag: html
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/qccollect_ar/case_id_qc_metrics.yaml
+    path_index: ~
+    step: qccollect_ar
+    tag: ~
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/version_collect_ar/case_id_vcol.yaml
+    path_index: ~
+    step: version_collect_ar
+    tag: ~
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/multiqc_ar/multiqc_data/multiqc_data.json
+    path_index: ~
+    step: multiqc_ar
+    tag: json
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/multiqc_ar/multiqc_report.html
+    path_index: ~
+    step: multiqc_ar
+    tag: html
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/qccollect_ar/case_id_qc_metrics.yaml
+    path_index: ~
+    step: qccollect_ar
+    tag: ~
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/version_collect_ar/case_id_vcol.yaml
+    path_index: ~
+    step: version_collect_ar
+    tag: ~
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/multiqc_ar/multiqc_report.html
+    path_index: ~
+    step: multiqc_ar
+    tag: html
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/multiqc_ar/multiqc_data/multiqc_data.json
+    path_index: ~
+    step: multiqc_ar
+    tag: json
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/qccollect_ar/case_id_qc_metrics.yaml
+    path_index: ~
+    step: qccollect_ar
+    tag: ~
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/version_collect_ar/case_id_vcol.yaml
+    path_index: ~
+    step: version_collect_ar
+    tag: ~
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/multiqc_ar/multiqc_data/multiqc_data.json
+    path_index: ~
+    step: multiqc_ar
+    tag: json
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/multiqc_ar/multiqc_report.html
+    path_index: ~
+    step: multiqc_ar
+    tag: html
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/qccollect_ar/case_id_qc_metrics.yaml
+    path_index: ~
+    step: qccollect_ar
+    tag: ~
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/version_collect_ar/case_id_vcol.yaml
+    path_index: ~
+    step: version_collect_ar
+    tag: ~
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/multiqc_ar/multiqc_data/multiqc_data.json
+    path_index: ~
+    step: multiqc_ar
+    tag: json
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/multiqc_ar/multiqc_report.html
+    path_index: ~
+    step: multiqc_ar
+    tag: html
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/qccollect_ar/case_id_qc_metrics.yaml
+    path_index: ~
+    step: qccollect_ar
+    tag: ~
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/version_collect_ar/case_id_vcol.yaml
+    path_index: ~
+    step: version_collect_ar
+    tag: ~
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/multiqc_ar/multiqc_report.html
+    path_index: ~
+    step: multiqc_ar
+    tag: html
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/multiqc_ar/multiqc_data/multiqc_data.json
+    path_index: ~
+    step: multiqc_ar
+    tag: json
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/qccollect_ar/case_id_qc_metrics.yaml
+    path_index: ~
+    step: qccollect_ar
+    tag: ~
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/version_collect_ar/case_id_vcol.yaml
+    path_index: ~
+    step: version_collect_ar
+    tag: ~
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/multiqc_ar/multiqc_data/multiqc_data.json
+    path_index: ~
+    step: multiqc_ar
+    tag: json
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/multiqc_ar/multiqc_report.html
+    path_index: ~
+    step: multiqc_ar
+    tag: html
+has_trio: 0
+human_genome_build:
+  path: /path/to/rare-disease/references/references_8.0/grch37_homo_sapiens_-d5-.fasta
+  source: grch
+  version: '37'
+last_log_file_path: /path/to/rare-disease/cases/case_id/analysis/mip_log/2020-05-12/mip_2020-05-12T10:49:22.log
+log_file_dir: /path/to/rare-disease/cases/case_id/analysis/mip_log
+mip_version: v8.2.5
+most_complete_bcf:
+  path: /path/to/rare-disease/cases/case_id/analysis/case_id/gatk_combinevariantcallsets/case_id_gatkcomb.bcf
+most_complete_vcf:
+  path: /path/to/rare-disease/cases/case_id/analysis/case_id/gatk_combinevariantcallsets/case_id_gatkcomb.vcf
+pedigree_file:
+  path: /path/to/rare-disease/cases/case_id/pedigree.yaml
+pedigree_minimal: /path/to/rare-disease/cases/case_id/analysis/case_id/rankvariant/case_id.fam
+recipe:
+  cadd_ar:
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/cadd_ar/case_id_gatkcomb_rhocall_vt_af_frqf_cadd.1.vcf
+  cnvnator:
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/cnvnator_ar/sample_id_lanes_5555_sorted_md_brecal_cnvnator.vcf
+  endvariantannotationblock:
+    clinical:
+      path: /path/to/rare-disease/cases/case_id/analysis/case_id/endvariantannotationblock/case_id_gatkcomb_rhocall_vt_af_frqf_cadd_vep_parsed_ranked.selected.vcf
+    research:
+      path: /path/to/rare-disease/cases/case_id/analysis/case_id/endvariantannotationblock/case_id_gatkcomb_rhocall_vt_af_frqf_cadd_vep_parsed_ranked.vcf
+  expansionhunter:
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/expansionhunter/case_id_exphun.vcf.gz
+  frequency_annotation:
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/frequency_annotation/case_id_gatkcomb_rhocall_vt_af.vcf.gz
+  frequency_filter:
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/frequency_filter/case_id_gatkcomb_rhocall_vt_af_frqf.1.vcf
+  gatk_combinevariantcallsets:
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/gatk_combinevariantcallsets/case_id_gatkcomb.vcf
+  gatk_gathervcfs:
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/gatk_gathervcfs/case_id_gent.vcf
+  gatk_variantrecalibration:
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/gatk_variantrecalibration/case_id_gent_vrecal.vcf
+  genmod:
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/rankvariant/case_id_gatkcomb_rhocall_vt_af_frqf_cadd_vep_parsed_ranked.11.vcf
+    rank_model:
+      file: rank_model_cmms_-v1.28-.ini
+      path: /path/to/rare-disease/references/references_8.0/rank_model_cmms_-v1.28-.ini
+      version: '1.28'
+  manta:
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/manta/case_id_manta.vcf
+  multiqc:
+    case_id_html:
+      path: /path/to/rare-disease/cases/case_id/analysis/case_id/multiqc_ar/multiqc_report.html
+    case_id_json:
+      path: /path/to/rare-disease/cases/case_id/analysis/case_id/multiqc_ar/multiqc_data/multiqc_data.json
+  peddy_ar:
+    ped_check:
+      path: /path/to/rare-disease/cases/case_id/analysis/case_id/peddy_ar/case_id_gatkcomb.ped_check.csv
+    peddy:
+      path: /path/to/rare-disease/cases/case_id/analysis/case_id/peddy_ar/case_id_gatkcomb.peddy.ped
+    sex_check:
+      path: /path/to/rare-disease/cases/case_id/analysis/case_id/peddy_ar/case_id_gatkcomb.sex_check.csv
+    stderr: {}
+  pedigree_check:
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/gatk_variantrecalibration/case_id_gent_vrecal.vcf
+  plink_sexcheck:
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/plink/case_id_gatkcomb.plink_sexcheck.sexcheck
+  qccollect_ar:
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/qccollect_ar/case_id_qc_metrics.yaml
+  rhocall_ar:
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/rhocall_ar/case_id_gatkcomb_rhocall.1.vcf
+  sv_annotate:
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/sv_annotate/case_id_comb_ann.vcf
+  sv_combinevariantcallsets:
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/sv_combinevariantcallsets/case_id_comb.vcf
+    sv_bcf_file:
+      path: /path/to/rare-disease/cases/case_id/analysis/case_id/sv_combinevariantcallsets/case_id_comb.bcf
+  sv_genmod:
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/sv_rankvariant/case_id_comb_ann_vep_parsed_ranked.selected.vcf
+    sv_rank_model:
+      file: svrank_model_cmms_-v1.8-.ini
+      path: /path/to/rare-disease/references/references_8.0/svrank_model_cmms_-v1.8-.ini
+      version: '1.8'
+  sv_reformat:
+    clinical:
+      path: /path/to/rare-disease/cases/case_id/analysis/case_id/sv_reformat/case_id_comb_ann_vep_parsed_ranked.selected.vcf.gz
+    research:
+      path: /path/to/rare-disease/cases/case_id/analysis/case_id/sv_reformat/case_id_comb_ann_vep_parsed_ranked.vcf.gz
+  sv_varianteffectpredictor:
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/sv_varianteffectpredictor/case_id_comb_ann_vep.1.vcf
+  sv_vcfparser:
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/sv_vcfparser/case_id_comb_ann_vep_parsed.1.vcf
+  tiddit:
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/tiddit/case_id_tiddit.vcf
+  varianteffectpredictor:
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/varianteffectpredictor/case_id_gatkcomb_rhocall_vt_af_frqf_cadd_vep.1.vcf
+    stderrfile:
+      path: /path/to/rare-disease/cases/case_id/analysis/case_id/varianteffectpredictor/info/varianteffectpredictor_case_id.1.stderr.txt
+  vcfparser_ar:
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/vcfparser_ar/case_id_gatkcomb_rhocall_vt_af_frqf_cadd_vep_parsed.5.vcf
+  version_collect_ar:
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/version_collect_ar/case_id_vcol.yaml
+  vt_ar:
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/vt_ar/info/vt_ar_case_id.1.0.1.stderr.txt
+sample:
+  sample_id:
+    analysis_type: wgs
+    capture_kit: agilent_sureselect_cre.v1
+    expected_coverage: '30'
+    father: '0'
+    file:
+      sample_id_171015_HKG2VCCXX-11-undetermined_XXXXXX_lane5:
+        interleaved: ~
+        read_direction_file:
+          sample_id_171015_HKG2VCCXX-11-undetermined_XXXXXX_lane5_1:
+            date: 2017-10-15
+            flowcell: HKG2VCCXX-11-undetermined
+            lane: '5'
+            original_file_name: 5_171015_HKG2VCCXX-11-undetermined_sample_id_XXXXXX_1.fastq.gz
+            original_file_name_prefix: 5_171015_HKG2VCCXX-11-undetermined_sample_id_XXXXXX_1
+            read_direction: 1
+            run_barcode: 171015_HKG2VCCXX-11-undetermined_5_XXXXXX
+            sample_barcode: XXXXXX
+          sample_id_171015_HKG2VCCXX-11-undetermined_XXXXXX_lane5_2:
+            date: 2017-10-15
+            flowcell: HKG2VCCXX-11-undetermined
+            lane: '5'
+            original_file_name: 5_171015_HKG2VCCXX-11-undetermined_sample_id_XXXXXX_2.fastq.gz
+            original_file_name_prefix: 5_171015_HKG2VCCXX-11-undetermined_sample_id_XXXXXX_2
+            read_direction: 2
+            run_barcode: 171015_HKG2VCCXX-11-undetermined_5_XXXXXX
+            sample_barcode: XXXXXX
+        sequence_length: '151'
+        sequence_run_type: paired-end
+      sample_id_171015_HKG2VCCXX-11_XXXXXX_lane5:
+        interleaved: ~
+        read_direction_file:
+          sample_id_171015_HKG2VCCXX-11_XXXXXX_lane5_1:
+            date: 2017-10-15
+            flowcell: HKG2VCCXX-11
+            lane: '5'
+            original_file_name: 5_171015_HKG2VCCXX-11_sample_id_XXXXXX_1.fastq.gz
+            original_file_name_prefix: 5_171015_HKG2VCCXX-11_sample_id_XXXXXX_1
+            read_direction: 1
+            run_barcode: 171015_HKG2VCCXX-11_5_XXXXXX
+            sample_barcode: XXXXXX
+          sample_id_171015_HKG2VCCXX-11_XXXXXX_lane5_2:
+            date: 2017-10-15
+            flowcell: HKG2VCCXX-11
+            lane: '5'
+            original_file_name: 5_171015_HKG2VCCXX-11_sample_id_XXXXXX_2.fastq.gz
+            original_file_name_prefix: 5_171015_HKG2VCCXX-11_sample_id_XXXXXX_2
+            read_direction: 2
+            run_barcode: 171015_HKG2VCCXX-11_5_XXXXXX
+            sample_barcode: XXXXXX
+        sequence_length: '151'
+        sequence_run_type: paired-end
+      sample_id_171015_HKG2VCCXX-21-undetermined_XXXXXX_lane5:
+        interleaved: ~
+        read_direction_file:
+          sample_id_171015_HKG2VCCXX-21-undetermined_XXXXXX_lane5_1:
+            date: 2017-10-15
+            flowcell: HKG2VCCXX-21-undetermined
+            lane: '5'
+            original_file_name: 5_171015_HKG2VCCXX-21-undetermined_sample_id_XXXXXX_1.fastq.gz
+            original_file_name_prefix: 5_171015_HKG2VCCXX-21-undetermined_sample_id_XXXXXX_1
+            read_direction: 1
+            run_barcode: 171015_HKG2VCCXX-21-undetermined_5_XXXXXX
+            sample_barcode: XXXXXX
+          sample_id_171015_HKG2VCCXX-21-undetermined_XXXXXX_lane5_2:
+            date: 2017-10-15
+            flowcell: HKG2VCCXX-21-undetermined
+            lane: '5'
+            original_file_name: 5_171015_HKG2VCCXX-21-undetermined_sample_id_XXXXXX_2.fastq.gz
+            original_file_name_prefix: 5_171015_HKG2VCCXX-21-undetermined_sample_id_XXXXXX_2
+            read_direction: 2
+            run_barcode: 171015_HKG2VCCXX-21-undetermined_5_XXXXXX
+            sample_barcode: XXXXXX
+        sequence_length: '151'
+        sequence_run_type: paired-end
+      sample_id_171015_HKG2VCCXX-21_XXXXXX_lane5:
+        interleaved: ~
+        read_direction_file:
+          sample_id_171015_HKG2VCCXX-21_XXXXXX_lane5_1:
+            date: 2017-10-15
+            flowcell: HKG2VCCXX-21
+            lane: '5'
+            original_file_name: 5_171015_HKG2VCCXX-21_sample_id_XXXXXX_1.fastq.gz
+            original_file_name_prefix: 5_171015_HKG2VCCXX-21_sample_id_XXXXXX_1
+            read_direction: 1
+            run_barcode: 171015_HKG2VCCXX-21_5_XXXXXX
+            sample_barcode: XXXXXX
+          sample_id_171015_HKG2VCCXX-21_XXXXXX_lane5_2:
+            date: 2017-10-15
+            flowcell: HKG2VCCXX-21
+            lane: '5'
+            original_file_name: 5_171015_HKG2VCCXX-21_sample_id_XXXXXX_2.fastq.gz
+            original_file_name_prefix: 5_171015_HKG2VCCXX-21_sample_id_XXXXXX_2
+            read_direction: 2
+            run_barcode: 171015_HKG2VCCXX-21_5_XXXXXX
+            sample_barcode: XXXXXX
+        sequence_length: '151'
+        sequence_run_type: paired-end
+    most_complete_bam:
+      path: /path/to/rare-disease/cases/case_id/analysis/sample_id/gatk_baserecalibration/sample_id_lanes_5555_sorted_md_brecal.cram
+    mother: '0'
+    phenotype: affected
+    recipe:
+      bamstats:
+        sample_id_171015_HKG2VCCXX-11-undetermined_XXXXXX_lane5_sorted:
+          path: /path/to/rare-disease/cases/case_id/analysis/sample_id/bwa_mem/sample_id_171015_HKG2VCCXX-11-undetermined_XXXXXX_lane5_sorted.stats
+        sample_id_171015_HKG2VCCXX-11_XXXXXX_lane5_sorted:
+          path: /path/to/rare-disease/cases/case_id/analysis/sample_id/bwa_mem/sample_id_171015_HKG2VCCXX-11_XXXXXX_lane5_sorted.stats
+        sample_id_171015_HKG2VCCXX-21-undetermined_XXXXXX_lane5_sorted:
+          path: /path/to/rare-disease/cases/case_id/analysis/sample_id/bwa_mem/sample_id_171015_HKG2VCCXX-21-undetermined_XXXXXX_lane5_sorted.stats
+        sample_id_171015_HKG2VCCXX-21_XXXXXX_lane5_sorted:
+          path: /path/to/rare-disease/cases/case_id/analysis/sample_id/bwa_mem/sample_id_171015_HKG2VCCXX-21_XXXXXX_lane5_sorted.stats
+      bwa_mem:
+        sample_id_171015_HKG2VCCXX-11-undetermined_XXXXXX_lane5_sorted:
+          path: /path/to/rare-disease/cases/case_id/analysis/sample_id/bwa_mem/sample_id_171015_HKG2VCCXX-11-undetermined_XXXXXX_lane5_sorted.bam
+        sample_id_171015_HKG2VCCXX-11_XXXXXX_lane5_sorted:
+          path: /path/to/rare-disease/cases/case_id/analysis/sample_id/bwa_mem/sample_id_171015_HKG2VCCXX-11_XXXXXX_lane5_sorted.bam
+        sample_id_171015_HKG2VCCXX-21-undetermined_XXXXXX_lane5_sorted:
+          path: /path/to/rare-disease/cases/case_id/analysis/sample_id/bwa_mem/sample_id_171015_HKG2VCCXX-21-undetermined_XXXXXX_lane5_sorted.bam
+        sample_id_171015_HKG2VCCXX-21_XXXXXX_lane5_sorted:
+          path: /path/to/rare-disease/cases/case_id/analysis/sample_id/bwa_mem/sample_id_171015_HKG2VCCXX-21_XXXXXX_lane5_sorted.bam
+      chanjo_sexcheck:
+        sample_id_lanes_5555_sorted_md_brecal_sex:
+          log:
+            path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chanjo_sexcheck/sample_id_lanes_5555_sorted_md_brecal_sex_chanjo_sexcheck.log
+          path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chanjo_sexcheck/sample_id_lanes_5555_sorted_md_brecal_sex.tsv
+      chromograph_ar:
+        path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_ar/sample_id_lanes_5555_sorted_md_brecal_tcov_chromograph.tar.gz
+      collecthsmetrics:
+        sample_id_lanes_5555_sorted_md_brecal_collecthsmetrics:
+          path: /path/to/rare-disease/cases/case_id/analysis/sample_id/picardtools_collecthsmetrics/sample_id_lanes_5555_sorted_md_brecal_collecthsmetrics
+      collectmultiplemetrics:
+        sample_id_lanes_5555_sorted_md_brecal_collectmultiplemetrics:
+          path: /path/to/rare-disease/cases/case_id/analysis/sample_id/picardtools_collectmultiplemetrics/sample_id_lanes_5555_sorted_md_brecal_collectmultiplemetrics.alignment_summary_metrics
+      collectmultiplemetricsinsertsize:
+        sample_id_lanes_5555_sorted_md_brecal_collectmultiplemetrics:
+          path: /path/to/rare-disease/cases/case_id/analysis/sample_id/picardtools_collectmultiplemetrics/sample_id_lanes_5555_sorted_md_brecal_collectmultiplemetrics.insert_size_metrics
+      fastqc_ar:
+        fastqc_data:
+          outdirectory: /path/to/rare-disease/cases/case_id/analysis/sample_id/fastqc_ar
+          path: /path/to/rare-disease/cases/case_id/analysis/sample_id/fastqc_ar/5_171015_HKG2VCCXX-21_sample_id_XXXXXX_2_fastqc/fastqc_data.txt
+      gatk_baserecalibration:
+        sample_id_lanes_5555_sorted_md_brecal:
+          path: /path/to/rare-disease/cases/case_id/analysis/sample_id/gatk_baserecalibration/sample_id_lanes_5555_sorted_md_brecal.cram
+      gatk_haplotypecaller:
+        sample_id_lanes_5555_sorted_md_brecal_haptc.vcf:
+          path: /path/to/rare-disease/cases/case_id/analysis/sample_id/gatk_haplotypecaller/sample_id_lanes_5555_sorted_md_brecal_haptc.vcf
+      markduplicates:
+        sample_id_lanes_5555_sorted_md:
+          marking_duplicates:
+            processed_by: picardtools_markduplicates
+          path: /path/to/rare-disease/cases/case_id/analysis/sample_id/markduplicates/sample_id_lanes_5555_sorted_md_metric
+      markduplicates_alignment:
+        sample_id_lanes_5555_sorted_md.bam:
+          path: /path/to/rare-disease/cases/case_id/analysis/sample_id/markduplicates/sample_id_lanes_5555_sorted_md.bam
+      picardtools_mergesamfiles:
+        sample_id_lanes_5555:
+          path: /path/to/rare-disease/cases/case_id/analysis/sample_id/picardtools_mergesamfiles/sample_id_lanes_5555_sorted.1.bam
+      sambamba_depth:
+        sample_id_lanes_5555_sorted_md_brecal_coverage:
+          path: /path/to/rare-disease/cases/case_id/analysis/sample_id/sambamba_depth/sample_id_lanes_5555_sorted_md_brecal_coverage.bed
+      samtools_subsample_mt:
+        sample_id_lanes_5555_sorted_md_brecal_subsample_MT:
+          path: /path/to/rare-disease/cases/case_id/analysis/sample_id/samtools_subsample_mt/sample_id_lanes_5555_sorted_md_brecal_subsample_MT.bam
+      smncopynumbercaller:
+        sample_id_lanes_5555_sorted_md_brecal_smn:
+          path: /path/to/rare-disease/cases/case_id/analysis/sample_id/smncopynumbercaller/sample_id_lanes_5555_sorted_md_brecal_smn.tsv
+      tiddit_coverage:
+        sample_id_lanes_5555_sorted_md_brecal_tcov:
+          path: /path/to/rare-disease/cases/case_id/analysis/sample_id/tiddit_coverage/sample_id_lanes_5555_sorted_md_brecal_tcov.wig
+      variantevalall:
+        /path/to/rare-disease/cases/case_id/analysis/sample_id/gatk_variantevalall/case_id_gatkcomb_evalall:
+          path: /path/to/rare-disease/cases/case_id/analysis/sample_id/gatk_variantevalall/case_id_gatkcomb_evalall.sample_id.varianteval
+      variantevalexome:
+        /path/to/rare-disease/cases/case_id/analysis/sample_id/gatk_variantevalexome/sample_id_evalexome:
+          path: /path/to/rare-disease/cases/case_id/analysis/sample_id/gatk_variantevalexome/sample_id_evalexome.varianteval
+      vcf2cytosure:
+        case_id_cyto.sample_id.cgh:
+          path: /path/to/rare-disease/cases/case_id/analysis/case_id/vcf2cytosure_ar/case_id_cyto.sample_id.cgh
+    sample_id: sample_id
+    sex: male
+select_file:
+  path: /path/to/rare-disease/cases/case_id/gene_panels.bed
+sv_vcf_binary_file:
+  clinical:
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/sv_reformat/case_id_comb_ann_vep_parsed_ranked.selected.vcf.gz
+  research:
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/sv_reformat/case_id_comb_ann_vep_parsed_ranked.vcf.gz
+sv_vcf_file:
+  clinical:
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/sv_reformat/case_id_comb_ann_vep_parsed_ranked.selected.vcf
+  ready_vcf:
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/sv_combinevariantcallsets/case_id_comb.vcf
+  research:
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/sv_reformat/case_id_comb_ann_vep_parsed_ranked.vcf
+sv_vcfparser:
+  select_file:
+    gene_panel:
+      CTD:
+        display_name: Connective Tissue Diseases
+        gene_panel: CTD
+        updated_at: 2017-11-27
+        version: '55.0'
+      Cardiology:
+        display_name: Cardiology
+        gene_panel: Cardiology
+        updated_at: 2020-01-21
+        version: '1.0'
+      ENDO:
+        display_name: Endocrinology
+        gene_panel: ENDO
+        updated_at: 2018-02-05
+        version: '12.0'
+      EP:
+        display_name: Epilepsy
+        gene_panel: EP
+        updated_at: 2020-01-29
+        version: '14.0'
+      IBMFS:
+        display_name: Inherited Bone Marrow Failure Syndromes
+        gene_panel: IBMFS
+        updated_at: 2018-01-31
+        version: '13.0'
+      IEM:
+        display_name: Inborn Errors of Metabolism
+        gene_panel: IEM
+        updated_at: 2020-02-04
+        version: '14.0'
+      IF:
+        display_name: Intellektuell funktionsnedsättning
+        gene_panel: IF
+        updated_at: 2018-10-31
+        version: '1.0'
+      MIT:
+        display_name: Mitochondrial nuclear
+        gene_panel: MIT
+        updated_at: 2018-02-05
+        version: '12.0'
+      NEURODEG:
+        display_name: Neurodegeneration
+        gene_panel: NEURODEG
+        updated_at: 2019-05-27
+        version: '1.0'
+      NMD:
+        display_name: Neuromuscular diseases
+        gene_panel: NMD
+        updated_at: 2018-12-18
+        version: '66.0'
+      OMIM-AUTO:
+        display_name: OMIM-AUTO
+        gene_panel: OMIM-AUTO
+        updated_at: 2020-01-28
+        version: '4.0'
+      PEDHEP:
+        display_name: Pediatric Hepatology
+        gene_panel: PEDHEP
+        updated_at: 2018-02-16
+        version: '12.0'
+      PID:
+        display_name: Primary Immune Deficiency
+        gene_panel: PID
+        updated_at: 2018-01-02
+        version: '14.0'
+      PIDCAD:
+        display_name: PID Candidates
+        gene_panel: PIDCAD
+        updated_at: 2016-09-28
+        version: '11.1'
+      SKD:
+        display_name: Skeletal dysplasia
+        gene_panel: SKD
+        updated_at: 2018-05-07
+        version: '65.0'
+      mcarta:
+        display_name: Mitocarta
+        gene_panel: mcarta
+        updated_at: 2019-11-27
+        version: '1.0'
+      mtDNA:
+        display_name: Mitochondrial DNA
+        gene_panel: mtDNA
+        updated_at: 2015-11-30
+        version: '8.0'
+vcf_binary_file:
+  clinical:
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/endvariantannotationblock/case_id_gatkcomb_rhocall_vt_af_frqf_cadd_vep_parsed_ranked.selected.vcf.gz
+  research:
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/endvariantannotationblock/case_id_gatkcomb_rhocall_vt_af_frqf_cadd_vep_parsed_ranked.vcf.gz
+vcf_file:
+  clinical:
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/endvariantannotationblock/case_id_gatkcomb_rhocall_vt_af_frqf_cadd_vep_parsed_ranked.selected.vcf
+  research:
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/endvariantannotationblock/case_id_gatkcomb_rhocall_vt_af_frqf_cadd_vep_parsed_ranked.vcf
+vcfparser_ar:
+  select_file:
+    gene_panel:
+      CTD:
+        display_name: Connective Tissue Diseases
+        gene_panel: CTD
+        updated_at: 2017-11-27
+        version: '55.0'
+      Cardiology:
+        display_name: Cardiology
+        gene_panel: Cardiology
+        updated_at: 2020-01-21
+        version: '1.0'
+      ENDO:
+        display_name: Endocrinology
+        gene_panel: ENDO
+        updated_at: 2018-02-05
+        version: '12.0'
+      EP:
+        display_name: Epilepsy
+        gene_panel: EP
+        updated_at: 2020-01-29
+        version: '14.0'
+      IBMFS:
+        display_name: Inherited Bone Marrow Failure Syndromes
+        gene_panel: IBMFS
+        updated_at: 2018-01-31
+        version: '13.0'
+      IEM:
+        display_name: Inborn Errors of Metabolism
+        gene_panel: IEM
+        updated_at: 2020-02-04
+        version: '14.0'
+      IF:
+        display_name: Intellektuell funktionsnedsättning
+        gene_panel: IF
+        updated_at: 2018-10-31
+        version: '1.0'
+      MIT:
+        display_name: Mitochondrial nuclear
+        gene_panel: MIT
+        updated_at: 2018-02-05
+        version: '12.0'
+      NEURODEG:
+        display_name: Neurodegeneration
+        gene_panel: NEURODEG
+        updated_at: 2019-05-27
+        version: '1.0'
+      NMD:
+        display_name: Neuromuscular diseases
+        gene_panel: NMD
+        updated_at: 2018-12-18
+        version: '66.0'
+      OMIM-AUTO:
+        display_name: OMIM-AUTO
+        gene_panel: OMIM-AUTO
+        updated_at: 2020-01-28
+        version: '4.0'
+      PEDHEP:
+        display_name: Pediatric Hepatology
+        gene_panel: PEDHEP
+        updated_at: 2018-02-16
+        version: '12.0'
+      PID:
+        display_name: Primary Immune Deficiency
+        gene_panel: PID
+        updated_at: 2018-01-02
+        version: '14.0'
+      PIDCAD:
+        display_name: PID Candidates
+        gene_panel: PIDCAD
+        updated_at: 2016-09-28
+        version: '11.1'
+      SKD:
+        display_name: Skeletal dysplasia
+        gene_panel: SKD
+        updated_at: 2018-05-07
+        version: '65.0'
+      mcarta:
+        display_name: Mitocarta
+        gene_panel: mcarta
+        updated_at: 2019-11-27
+        version: '1.0'
+      mtDNA:
+        display_name: Mitochondrial DNA
+        gene_panel: mtDNA
+        updated_at: 2015-11-30
+        version: '8.0'
