@@ -141,7 +141,11 @@ MIP_DNA_TAGS = {
         "index_tags": ["sv-bcf-index"],
         "is_mandatory": True,
     },
-    ("expansionhunter", "sv_str",): {"tags": ["vcf-str"], "index_tags": ["vcf-str-index"], "is_mandatory": False},
+    ("expansionhunter", "sv_str",): {
+        "tags": ["vcf-str"],
+        "index_tags": ["vcf-str-index"],
+        "is_mandatory": False,
+    },
     ("version_collect_ar",): {"tags": ["exe-ver"], "is_mandatory": True},
     ("vcf2cytosure_ar",): {"tags": ["vcf2cytosure"], "is_mandatory": False},
 }
