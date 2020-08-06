@@ -350,30 +350,6 @@ snapshots["test_parse_files_dna 1"] = [
     },
     {
         "archive": False,
-        "deliverables_tag_map": ("endvariantannotationblock", "research"),
-        "path": "/path/to/rare-disease/cases/case_id/analysis/case_id/endvariantannotationblock/case_id_gatkcomb_rhocall_vt_af_frqf_cadd_vep_parsed_ranked.vcf.gz",
-        "tags": ["case_id", "mip-dna", "vcf", "vcf-snv-research"],
-    },
-    {
-        "archive": False,
-        "deliverables_tag_map": ("endvariantannotationblock", "research"),
-        "path": "/path/to/rare-disease/cases/case_id/analysis/case_id/endvariantannotationblock/case_id_gatkcomb_rhocall_vt_af_frqf_cadd_vep_parsed_ranked.vcf.gz.tbi",
-        "tags": ["case_id", "mip-dna", "vcf", "vcf-snv-research-index"],
-    },
-    {
-        "archive": False,
-        "deliverables_tag_map": ("endvariantannotationblock", "clinical"),
-        "path": "/path/to/rare-disease/cases/case_id/analysis/case_id/endvariantannotationblock/case_id_gatkcomb_rhocall_vt_af_frqf_cadd_vep_parsed_ranked.selected.vcf.gz",
-        "tags": ["case_id", "mip-dna", "vcf", "vcf-snv-clinical"],
-    },
-    {
-        "archive": False,
-        "deliverables_tag_map": ("endvariantannotationblock", "clinical"),
-        "path": "/path/to/rare-disease/cases/case_id/analysis/case_id/endvariantannotationblock/case_id_gatkcomb_rhocall_vt_af_frqf_cadd_vep_parsed_ranked.selected.vcf.gz.tbi",
-        "tags": ["case_id", "mip-dna", "vcf", "vcf-snv-clinical-index"],
-    },
-    {
-        "archive": False,
         "deliverables_tag_map": ("sambamba_depth", "coverage"),
         "path": "/path/to/rare-disease/cases/case_id/analysis/sample_id/sambamba_depth/sample_id_lanes_5555_sorted_md_brecal_coverage.bed",
         "tags": ["bed", "coverage", "mip-dna", "sambamba-depth", "sample_id"],

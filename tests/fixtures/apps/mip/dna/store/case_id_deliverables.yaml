@@ -148,18 +148,6 @@ files:
     path_index: ~
     step: chromograph_ar
     tag: ~
-  - format: vcf
-    id: case_id
-    path: /path/to/rare-disease/cases/case_id/analysis/case_id/endvariantannotationblock/case_id_gatkcomb_rhocall_vt_af_frqf_cadd_vep_parsed_ranked.vcf.gz
-    path_index: /path/to/rare-disease/cases/case_id/analysis/case_id/endvariantannotationblock/case_id_gatkcomb_rhocall_vt_af_frqf_cadd_vep_parsed_ranked.vcf.gz.tbi
-    step: endvariantannotationblock
-    tag: research
-  - format: vcf
-    id: case_id
-    path: /path/to/rare-disease/cases/case_id/analysis/case_id/endvariantannotationblock/case_id_gatkcomb_rhocall_vt_af_frqf_cadd_vep_parsed_ranked.selected.vcf.gz
-    path_index: /path/to/rare-disease/cases/case_id/analysis/case_id/endvariantannotationblock/case_id_gatkcomb_rhocall_vt_af_frqf_cadd_vep_parsed_ranked.selected.vcf.gz.tbi
-    step: endvariantannotationblock
-    tag: clinical
   - format: bed
     id: sample_id
     path: /path/to/rare-disease/cases/case_id/analysis/sample_id/sambamba_depth/sample_id_lanes_5555_sorted_md_brecal_coverage.bed
