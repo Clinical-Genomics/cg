@@ -156,13 +156,17 @@ def panel(context: click.Context, case_id: str, print_output: bool = False):
 @START_WITH_PROGRAM
 @click.argument("case_id", required=False)
 @click.option("-d", "--dry-run", "dry_run", is_flag=True, help="print command to console")
+@click.option(
+    "--skip-evaluation", "skip_evaluation", is_flag=True, help="Skip mip qccollect evaluation"
+)
 @click.pass_context
 def run(
     context: click.Context,
     case_id: str,
     dry_run: bool = False,
     email: str = None,
-    priority: str = None,
+    priority: str = "Normal",
+    skip_evaluation: bool = False,
     start_with: str = None,
 ):
     """Run the analysis for a case"""
@@ -175,6 +179,7 @@ def run(
         email=email,
         dryrun=dry_run,
         start_with=start_with,
+        skip_evaluation=skip_evaluation,
     )
     if case_id is None:
         _suggest_cases_to_analyze(context)
