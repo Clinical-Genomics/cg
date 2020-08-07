@@ -48,7 +48,9 @@ def mip_dna(context: click.Context, case_id: str, email: str, priority: str, sta
         deliver_api=deliver,
     )
     context.obj["dna_api"] = MipAPI(
-        context.obj["trailblazer"]["script"], context.obj["trailblazer"]["pipeline"]
+        context.obj["trailblazer"]["script"],
+        context.obj["trailblazer"]["pipeline"],
+        context.obj["trailblazer"]["conda_env"],
     )
 
     if context.invoked_subcommand is None:

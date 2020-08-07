@@ -38,10 +38,11 @@ class MipStartError(Exception):
 class MipAPI:
     """ Group MIP specific functionality """
 
-    def __init__(self, script, pipeline, logger=logging.getLogger(__name__)):
+    def __init__(self, script, pipeline, conda_env, logger=logging.getLogger(__name__)):
         """Initialize MIP command line interface."""
         self.script = script
         self.pipeline = pipeline
+        self.conda_env = conda_env
         self.logger = logger
 
     def run(self, config, case, **kwargs):
@@ -57,13 +58,7 @@ class MipAPI:
 
     def build_command(self, config, case, **kwargs):
         """Builds the command to execute MIP."""
-        command = [
-            self.script,
-            self.pipeline,
-            case,
-            CLI_OPTIONS["config"]["option"],
-            config,
-        ]
+        command = [self.script, self.pipeline, case, CLI_OPTIONS["config"]["option"], config]
         for key, value in kwargs.items():
             # enable passing in flags as "False" - shouldn't add command
             if value:
@@ -82,6 +77,8 @@ class MipAPI:
         Remove the default SIGPIPE handler
         https://blog.nelhage.com/2010/02/a-very-subtle-bug/
         """
+        command.insert(0, f"bash -c 'source activate {self.conda_env}; ")
+        command.append("'")
         process = subprocess.Popen(
             command, preexec_fn=lambda: signal.signal(signal.SIGPIPE, signal.SIG_DFL)
         )
