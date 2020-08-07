@@ -167,6 +167,7 @@ def run(
 ):
     """Run the analysis for a case"""
     dna_api = context.obj["dna_api"]
+    tb_api = context.obj["tb"]
     kwargs = dict(
         config=context.obj["trailblazer"]["mip_config"],
         case=case_id,
@@ -189,7 +190,10 @@ def run(
         command = dna_api.build_command(**kwargs)
         LOG.info(" ".join(command))
     else:
-        context.obj["api"].run(case_obj, priority=priority, email=email, start_with=start_with)
+        dna_api.run(**kwargs)
+        tb_api.mark_analyses_deleted(case_id=case_id)
+        tb_api.add_pending(case_id, email=email)
+        LOG.info("MIP run started!")
 
 
 @mip_dna.command()
