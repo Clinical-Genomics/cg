@@ -70,15 +70,13 @@ def link(context, case_id):
     Locates FASTQ files for given CASE_ID.
     The files are renamed, concatenated, and saved in BALSAMIC working directory
     """
-    case_object = context.obj["BalsamicAnalysisAPI"].get_case_object(case_id)
-    if not case_object:
-        LOG.warning(f"{case_id} not found!")
+    balsamic_analysis_api = context.obj["BalsamicAnalysisAPI"]
+    try:
+        LOG.info(f"Linking samples in case {case_id}")
+        balsamic_analysis_api.link_samples(case_id)
+    except BalsamicStartError as e:
+        LOG.error(f"Could not link samples: {e.message}")
         raise click.Abort()
-    if not case_object.links:
-        LOG.warning(f"{case_id} number of samples is {len(case_object.links)}!")
-        raise click.Abort()
-    LOG.info(f"Linking samples in case {case_id}")
-    context.obj["BalsamicAnalysisAPI"].link_samples(case_object)
 
 
 @balsamic.command("config-case")
@@ -89,25 +87,16 @@ def link(context, case_id):
 def config_case(context, panel_bed, case_id, dry):
     """Create config file for BALSAMIC analysis for a given CASE_ID"""
 
-    LOG.info(f"Creating config file for {case_id}.")
-    case_object = context.obj["BalsamicAnalysisAPI"].get_case_object(case_id)
-    if not case_object:
-        LOG.warning(f"{case_id} not found!")
-        raise click.Abort()
-    if not case_object.links:
-        LOG.warning(f"{case_id} number of samples is {len(case_object.links)}!")
-        raise click.Abort()
-    sample_data = context.obj["BalsamicAnalysisAPI"].get_sample_params(case_object)
-    context.obj["BalsamicAnalysisAPI"].report_sample_table(case_id=case_id, sample_data=sample_data)
-
+    balsamic_analysis_api = context.obj["BalsamicAnalysisAPI"]
     try:
-        arguments = context.obj["BalsamicAnalysisAPI"].get_verified_config_params(
-            case_id=case_id, panel_bed=panel_bed, sample_data=sample_data,
+        arguments = balsamic_analysis_api.get_verified_config_case_arguments(
+            case_id=case_id, panel_bed=panel_bed
         )
+        LOG.info(f"Creating config file for {case_id}.")
+        balsamic_analysis_api.balsamic_api.config_case(arguments=arguments, dry=dry)
     except (BalsamicStartError, LimsDataError) as e:
-        LOG.warning(f"Could not create config: {e.message}")
+        LOG.error(f"Could not create config: {e.message}")
         raise click.Abort()
-    context.obj["BalsamicAnalysisAPI"].balsamic_api.config_case(arguments=arguments, dry=dry)
 
 
 @balsamic.command()
@@ -120,28 +109,23 @@ def config_case(context, panel_bed, case_id, dry):
 def run(context, analysis_type, run_analysis, priority, case_id, dry):
     """Run balsamic analysis"""
 
-    case_object = context.obj["BalsamicAnalysisAPI"].get_case_object(case_id)
-    if not case_object:
-        LOG.warning(f"{case_id} not found!")
-        raise click.Abort()
-    if not case_object.links:
-        LOG.warning(f"{case_id} number of samples is {len(case_object.links)}!")
-        raise click.Abort()
+    balsamic_analysis_api = context.obj["BalsamicAnalysisAPI"]
 
-    sample_config = context.obj["BalsamicAnalysisAPI"].get_config_path(case_id)
-    if not Path(sample_config).exists():
-        LOG.warning(f"No config file found for {case_id}!")
+    try:
+        arguments = {
+            "priority": priority or balsamic_analysis_api.get_priority(case_id),
+            "analysis_type": analysis_type,
+            "run_analysis": run_analysis,
+            "sample_config": balsamic_analysis_api.get_config_path(
+                case_id=case_id, check_exists=True
+            ),
+        }
+        balsamic_analysis_api.balsamic_api.run_analysis(
+            arguments=arguments, run_analysis=run_analysis, dry=dry
+        )
+    except BalsamicStartError as e:
+        LOG.error(f"Could not run analysis: {e.message}")
         raise click.Abort()
-
-    arguments = {
-        "priority": priority or context.obj["BalsamicAnalysisAPI"].get_priority(case_id),
-        "analysis_type": analysis_type,
-        "run_analysis": run_analysis,
-        "sample_config": context.obj["BalsamicAnalysisAPI"].get_config_path(case_id),
-    }
-    context.obj["BalsamicAnalysisAPI"].balsamic_api.run_analysis(
-        arguments=arguments, run_analysis=run_analysis, dry=dry
-    )
 
 
 @balsamic.command("report-deliver")
@@ -151,26 +135,24 @@ def run(context, analysis_type, run_analysis, priority, case_id, dry):
 @click.pass_context
 def report_deliver(context, case_id, analysis_type, dry):
     """Create a housekeeper deliverables file for BALSAMIC analysis"""
-    case_object = context.obj["BalsamicAnalysisAPI"].get_case_object(case_id)
-    if not case_object:
-        LOG.warning(f"{case_id} not found!")
-        raise click.Abort()
-    if not case_object.links:
-        LOG.warning(f"{case_id} number of samples is {len(case_object.links)}!")
-        raise click.Abort()
+    balsamic_analysis_api = context.obj["BalsamicAnalysisAPI"]
 
-    sample_config = context.obj["BalsamicAnalysisAPI"].get_config_path(case_id)
-    if not Path(sample_config).exists():
-        LOG.warning(f"No config file found for {case_id}!")
+    try:
+        case_ibject = balsamic_analysis_api.get_case_object(case_id)
+        arguments = {
+            "sample_config": balsamic_analysis_api.get_config_path(
+                case_id=case_id, check_exists=True
+            ),
+            "analysis_type": analysis_type,
+        }
+        analysis_finish = balsamic_analysis_api.get_analysis_finish_path(
+            case_id, check_exists=True
+        )
+        LOG.info(f"Found analysis finish file: {analysis_finish}")
+        balsamic_analysis_api.balsamic_api.report_deliver(arguments=arguments, dry=dry)
+    except BalsamicStartError as e:
+        LOG.error(f"Could not create report file: {e.message}")
         raise click.Abort()
-
-    analysis_finish = context.obj["BalsamicAnalysisAPI"].get_analysis_finish_path(case_id)
-    if not Path(analysis_finish).exists():
-        LOG.warning(f"Analysis incomplete for {case_id}, deliverables file will not be created!")
-        raise click.Abort()
-
-    arguments = {"sample_config": sample_config, "analysis_type": analysis_type}
-    context.obj["BalsamicAnalysisAPI"].balsamic_api.report_deliver(arguments=arguments, dry=dry)
 
 
 @balsamic.command("update-housekeeper")
@@ -179,35 +161,12 @@ def report_deliver(context, case_id, analysis_type, dry):
 def update_housekeeper(context, case_id):
     """Store a finished analysis in Housekeeper and StatusDB."""
 
-    case_object = context.obj["BalsamicAnalysisAPI"].get_case_object(case_id)
-    if not case_object:
-        LOG.warning(f"{case_id} not found!")
-        raise click.Abort()
-    if not case_object.links:
-        LOG.warning(f"{case_id} number of samples is {len(case_object.links)}!")
-        raise click.Abort()
-
-    sample_config = context.obj["BalsamicAnalysisAPI"].get_config_path(case_id)
-    if not Path(sample_config).exists():
-        LOG.warning(f"No config file found for {case_id}!")
-        raise click.Abort()
-
-    deliverables_file_path = context.obj["BalsamicAnalysisAPI"].get_deliverables_file_path(case_id)
-    if not Path(deliverables_file_path).exists():
-        LOG.warning(f"No deliverables file found for {case_id}")
-        raise click.Abort()
-
+    balsamic_analysis_api = context.obj["BalsamicAnalysisAPI"]
     try:
-        context.obj["BalsamicAnalysisAPI"].update_housekeeper(
-            case_object=case_object,
-            sample_config=sample_config,
-            deliverables_file_path=deliverables_file_path,
-        )
-        context.obj["BalsamicAnalysisAPI"].update_statusdb(
-            case_object=case_object, sample_config=sample_config,
-        )
-    except BundleAlreadyAddedError as e:
-        LOG.warning(f"Could not store bundle in Housekeeper and StatusDB: {e.message}!")
+        balsamic_analysis_api.upload_bundle_housekeeper(case_id=case_id)
+        balsamic_analysis_api.upload_analysis_statusdb(case_id=case_id)
+    except (BalsamicStartError, BundleAlreadyAddedError) as e:
+        LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {e.message}!")
         raise click.Abort()
 
 
@@ -221,7 +180,6 @@ def start(context, case_id, analysis_type, priority, run_analysis, dry):
     """Start full workflow for CASE ID"""
     context.invoke(link, case_id=case_id)
     context.invoke(config_case, case_id=case_id, dry=dry)
-    sleep(10)
     context.invoke(
         run,
         case_id=case_id,
@@ -241,7 +199,7 @@ def start_available(context, dry):
         LOG.info(f"Starting analysis for {case_id}")
         try:
             context.invoke(start, case_id=case_id, dry=dry, run_analysis="--run-analysis")
-        except click.Abort():
+        except click.Abort:
             continue
 
 
@@ -254,7 +212,6 @@ def deliver_available(context, dry):
         LOG.info(f"Storing analysis for {case_id}")
         try:
             context.invoke(report_deliver, case_id=case_id, dry=dry)
-            sleep(10)
             context.invoke(update_housekeeper, case_id=case_id)
         except click.Abort():
             continue

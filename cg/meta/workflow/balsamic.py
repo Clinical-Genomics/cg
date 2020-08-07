@@ -31,23 +31,43 @@ class BalsamicAnalysisAPI:
         self.lims_api = lims_api
         self.fastq_api = fastq_api
 
-    def get_deliverables_file_path(self, case_id: str) -> Path:
-        """Generates a path where the Balsamic deliverables file for the case_id should be
-        located"""
-        return Path(
-            self.balsamic_api.root_dir, case_id, "analysis", "delivery_report", case_id + ".hk"
-        ).as_posix()
-
-    def get_config_path(self, case_id: str) -> Path:
-        """Generates a path where the Balsamic config for the case_id should be located"""
-        return Path(self.balsamic_api.root_dir, case_id, case_id + ".json").as_posix()
-
     def get_case_path(self, case_id: str) -> Path:
-        """Generates a path where the Balsamic case for the case_id should be located"""
+        """Returns a path where the Balsamic case for the case_id should be located"""
         return Path(self.balsamic_api.root_dir, case_id).as_posix()
 
-    def get_analysis_finish_path(self, case_id: str) -> Path:
-        return Path(self.balsamic_api.root_dir, case_id, "analysis", "analysis_finish").as_posix()
+    def get_deliverables_file_path(self, case_id: str, check_exists: bool = False) -> Path:
+        """Returns a path where the Balsamic deliverables file for the case_id should be
+        located"""
+        deliverables_file_path = Path(
+            self.balsamic_api.root_dir, case_id, "analysis", "delivery_report", case_id + ".hk"
+        )
+        if check_exists:
+            if not deliverables_file_path.exists():
+                raise BalsamicStartError(
+                    f"No deliverables file found for {case_id}. Make sure the deliverables file is generated, and try again!"
+                )
+        return deliverables_file_path.as_posix()
+
+    def get_config_path(self, case_id: str, check_exists: bool = False) -> Path:
+        """Generates a path where the Balsamic config for the case_id should be located"""
+        config_path = Path(self.balsamic_api.root_dir, case_id, case_id + ".json")
+        if check_exists:
+            if not config_path.exists():
+                raise BalsamicStartError(
+                    f"No config file found for {case_id}. Make sure the config file is generated, and try again!"
+                )
+        return config_path.as_posix()
+
+    def get_analysis_finish_path(self, case_id: str, check_exists: bool = False) -> Path:
+        analysis_finish_path = Path(
+            self.balsamic_api.root_dir, case_id, "analysis", "analysis_finish"
+        )
+        if check_exists:
+            if not analysis_finish_path.exists():
+                raise BalsamicStartError(
+                    f"Analysis incomplete for {case_id}, deliverables file will not be created. Please ensure all jobs have finished successfully!"
+                )
+        return analysis_finish_path.as_posix()
 
     def get_file_collection(self, sample_id: str) -> dict:
         file_objs = self.housekeeper_api.files(bundle=sample_id, tags=["fastq"])
@@ -73,18 +93,23 @@ class BalsamicAnalysisAPI:
     def get_case_object(self, case_id: str):
         """Look up case ID in StoreDB and return result"""
         case_object = self.store.family(case_id)
+        if not case_object:
+            raise BalsamicStartError(f"{case_id} not found in StatucDB!")
+        if not case_object.links:
+            raise BalsamicStartError(f"{case_id} number of samples is {len(case_object.links)}!")
         return case_object
 
-    def get_balsamic_sample_objects(self, case_object) -> list:
+    def get_balsamic_sample_objects(self, case_id: str) -> list:
+        case_object = self.get_case_object(case_id=case_id)
         valid_sample_list = []
         for link in case_object.links:
             if "balsamic" in link.sample.data_analysis.lower():
                 valid_sample_list.append(link)
         return valid_sample_list
 
-    def link_samples(self, case_object) -> None:
+    def link_samples(self, case_id: str) -> None:
         """Links and copies files to working directory"""
-        for link_object in self.get_balsamic_sample_objects(case_object):
+        for link_object in self.get_balsamic_sample_objects(case_id=case_id):
             LOG.info(
                 "%s: %s link FASTQ files",
                 link_object.sample.internal_id,
@@ -194,7 +219,7 @@ class BalsamicAnalysisAPI:
         ]
         if len(tumor_paths) != 1:
             raise BalsamicStartError(
-                f"Invalid number of tumor samples: {len(tumor_paths)}, required to be 1!"
+                f"Invalid number of tumor samples: {len(tumor_paths)}, BALSAMIC analysis requires exactly 1 tumor sample per case to run successfully!"
             )
         return tumor_paths[0]
 
@@ -217,11 +242,11 @@ class BalsamicAnalysisAPI:
             return None
         return normal_paths[0]
 
-    def get_verified_config_params(self, case_id: str, panel_bed: str, sample_data: dict) -> dict:
+    def get_verified_config_case_arguments(self, case_id: str, panel_bed: str) -> dict:
         """Takes a dictionary with per-sample parameters, 
         verifies their structure, and transforms into command line arguments
         """
-
+        sample_data = self.get_sample_params(case_id=case_id)
         if len(sample_data) == 0:
             raise BalsamicStartError(f"{case_id} has no samples tagged for BALSAMIC analysis!")
 
@@ -232,19 +257,6 @@ class BalsamicAnalysisAPI:
             "panel_bed": self.get_verified_bed(sample_data=sample_data, panel_bed=panel_bed),
         }
         return arguments
-
-    def get_sample_params(self, case_object) -> dict:
-        """Fetches attributes for each sample in given family, 
-        and returns them as a dictionary where SAMPLE ID is key"""
-        sample_data = {}
-        for link_object in self.get_balsamic_sample_objects(case_object):
-            sample_data[link_object.sample.internal_id] = {
-                "tissue_type": self.get_sample_type(link_object),
-                "concatenated_path": self.get_fastq_path(link_object),
-                "application_type": self.get_application_type(link_object),
-                "target_bed": self.get_target_bed_from_lims(link_object),
-            }
-        return sample_data
 
     def report_sample_table(self, case_id: str, sample_data: dict):
         """Outputs a table of samples to be displayed in log"""
@@ -266,9 +278,27 @@ class BalsamicAnalysisAPI:
             )
         LOG.info("")
 
-    def parse_deliverables_report(self, deliverables_file_path, case_object) -> list:
+    def get_sample_params(self, case_id: str) -> dict:
+        """Fetches attributes for each sample in given family, 
+        and returns them as a dictionary where SAMPLE ID is key"""
+        sample_data = {}
+        for link_object in self.get_balsamic_sample_objects(case_id=case_id):
+            sample_data[link_object.sample.internal_id] = {
+                "tissue_type": self.get_sample_type(link_object),
+                "concatenated_path": self.get_fastq_path(link_object),
+                "application_type": self.get_application_type(link_object),
+                "target_bed": self.get_target_bed_from_lims(link_object),
+            }
+        self.report_sample_table(case_id=case_id, sample_data=sample_data)
+        return sample_data
+
+    def parse_deliverables_report(self, case_id) -> list:
         """Parse BALSAMIC deliverables report, and return a list of files and their respective tags in bundle"""
-        sample_names = [x.sample.internal_id for x in self.get_balsamic_sample_objects(case_object)]
+        self.get_case_object(case_id=case_id)
+        deliverables_file_path = self.get_deliverables_file_path(case_id=case_id, check_exists=True)
+        sample_names = [
+            x.sample.internal_id for x in self.get_balsamic_sample_objects(case_id=case_id)
+        ]
         report_entries = dict(json.load(open(deliverables_file_path, "r")))["files"]
         bundle_files = []
         for entry in report_entries:
@@ -286,18 +316,18 @@ class BalsamicAnalysisAPI:
             bundle_files.append(bundle_file)
         return bundle_files
 
-    def update_housekeeper(self, case_object, sample_config, deliverables_file_path):
+    def upload_bundle_housekeeper(self, case_id):
         """ Add analysis bundle to Housekeeper """
+        self.get_case_object(case_id=case_id)
+        sample_config = self.get_config_path(case_id=case_id, check_exists=True)
         config_data = dict(json.load(open(sample_config, "r")))
         bundle_data = {
-            "name": case_object.internal_id,
+            "name": case_id,
             "created": dt.datetime.strptime(
                 config_data["analysis"]["config_creation_date"], "%Y-%m-%d %H:%M"
             ),
             "version": config_data["analysis"]["BALSAMIC_version"],
-            "files": self.parse_deliverables_report(
-                deliverables_file_path=deliverables_file_path, case_object=case_object
-            ),
+            "files": self.parse_deliverables_report(case_id=case_id),
         }
         bundle_result = self.housekeeper_api.add_bundle(bundle_data=bundle_data)
         if not bundle_result:
@@ -306,11 +336,13 @@ class BalsamicAnalysisAPI:
         self.housekeeper_api.include(bundle_version)
         self.housekeeper_api.add_commit(bundle_object, bundle_version)
         LOG.info(
-            f"Analysis successfully stored in Housekeeper: {case_object.internal_id} : {bundle_version.created_at}"
+            f"Analysis successfully stored in Housekeeper: {case_id} : {bundle_version.created_at}"
         )
 
-    def update_statusdb(self, case_object, sample_config):
+    def upload_analysis_statusdb(self, case_id):
         """ Add Analysis bundle to StatusDB """
+        case_object = self.get_case_object(case_id=case_id)
+        sample_config = self.get_config_path(case_id=case_id, check_exists=True)
         config_data = dict(json.load(open(sample_config, "r")))
         analysis_start = dt.datetime.strptime(
             config_data["analysis"]["config_creation_date"], "%Y-%m-%d %H:%M"
@@ -325,6 +357,5 @@ class BalsamicAnalysisAPI:
             family=case_object,
         )
         self.store.add_commit(new_analysis)
-        LOG.info(
-            f"Analysis successfully stored in ClinicalDB: {case_object.internal_id} : {analysis_start}"
-        )
+        LOG.info(f"Analysis successfully stored in ClinicalDB: {case_id} : {analysis_start}")
+

@@ -19,7 +19,7 @@ def test_without_options(cli_runner, balsamic_context):
 
 def test_with_missing_case(cli_runner, balsamic_context, caplog):
     """Test command with invalid case to start with"""
-    caplog.set_level(logging.WARNING)
+    caplog.set_level(logging.ERROR)
     # GIVEN case_id not in database
     case_id = "soberelephant"
     assert not balsamic_context["BalsamicAnalysisAPI"].store.family(case_id)
@@ -33,7 +33,7 @@ def test_with_missing_case(cli_runner, balsamic_context, caplog):
 
 def test_without_samples(cli_runner, balsamic_context, caplog):
     """Test command with case_id and no samples"""
-    caplog.set_level(logging.WARNING)
+    caplog.set_level(logging.ERROR)
     # GIVEN case-id
     case_id = "no_sample_case"
     # WHEN dry running with dry specified
@@ -74,9 +74,8 @@ def test_target_bed(cli_runner, balsamic_context, balsamic_bed_2_path, caplog):
     # THEN command should be generated successfully
     assert result.exit_code == EXIT_SUCCESS
     # THEN dry-print should include the the option key and value
-    with caplog.at_level(logging.INFO):
-        assert option_key in caplog.text
-        assert option_value in caplog.text
+    assert option_key in caplog.text
+    assert option_value in caplog.text
 
 
 def test_target_bed_from_lims(cli_runner, balsamic_context, caplog):
@@ -161,7 +160,7 @@ def test_single_panel(balsamic_context, cli_runner, caplog):
 
 def test_error_single_wgs_panel_arg(balsamic_context, cli_runner, caplog):
     """Test with case_id that requires SINGLE WGS analysis and --panel-bed argument"""
-    caplog.set_level(logging.WARNING)
+    caplog.set_level(logging.ERROR)
     # GIVEN case_id containing ONE tumor, WGS application and panel bed argument
     case_id = "balsamic_case_wgs_single"
     panel_bed = "balsamic_bed_1.bed"
@@ -177,7 +176,7 @@ def test_error_single_wgs_panel_arg(balsamic_context, cli_runner, caplog):
 
 def test_error_normal_only(balsamic_context, cli_runner, caplog):
     """Test with case_id that requires WGS analysis but only has one NORMAL sample"""
-    caplog.set_level(logging.WARNING)
+    caplog.set_level(logging.ERROR)
     # GIVEN case_id containing ONE normal, WGS application
     case_id = "balsamic_case_tgs_single_error"
     # WHEN dry running
@@ -190,7 +189,7 @@ def test_error_normal_only(balsamic_context, cli_runner, caplog):
 
 def test_error_two_tumor(balsamic_context, cli_runner, caplog):
     """Test with case_id that requires WGS analysis but has TWO tumor ONE normal samples"""
-    caplog.set_level(logging.WARNING)
+    caplog.set_level(logging.ERROR)
     # GIVEN case_id containing TWO tumor, ONE normal, TGS application
     case_id = "balsamic_case_tgs_paired_error"
     # WHEN dry running
@@ -203,6 +202,7 @@ def test_error_two_tumor(balsamic_context, cli_runner, caplog):
 
 def test_error_mixed_application(balsamic_context, cli_runner, caplog):
     """Test with case_id that has ONE tumor ONE normal samples marked for WGS and TGS analysis"""
+    caplog.set_level(logging.ERROR)
     case_id = "balsamic_case_mixed_paired_error"
     # WHEN dry running
     result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
@@ -214,7 +214,7 @@ def test_error_mixed_application(balsamic_context, cli_runner, caplog):
 
 def test_error_not_balsamic_application(balsamic_context, cli_runner, caplog):
     """Test with case_id that has PAIRED samples marked for WGS and MIC analysis"""
-    caplog.set_level(logging.WARNING)
+    caplog.set_level(logging.ERROR)
     case_id = "balsamic_case_mixed_wgs_mic_paired_error"
     # WHEN dry running
     result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
@@ -226,7 +226,7 @@ def test_error_not_balsamic_application(balsamic_context, cli_runner, caplog):
 
 def test_error_mixed_panel_bed(balsamic_context, cli_runner, caplog):
     """Test with case_id marked for PAIRED TGS analysis but different BED files in LIMS"""
-    caplog.set_level(logging.WARNING)
+    caplog.set_level(logging.ERROR)
     case_id = "balsamic_case_mixed_bed_paired_error"
     # WHEN dry running
     result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
@@ -256,7 +256,7 @@ def test_error_mixed_panel_bed_resque(balsamic_context, cli_runner, caplog):
 
 def test_error_only_mip_tumor(balsamic_context, cli_runner, caplog):
     """Test with case_id containing ONE tumor sample marked for MIP analysis"""
-    caplog.set_level(logging.WARNING)
+    caplog.set_level(logging.ERROR)
     case_id = "mip_case_wgs_single"
     # WHEN dry running
     result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
@@ -268,7 +268,7 @@ def test_error_only_mip_tumor(balsamic_context, cli_runner, caplog):
 
 def test_error_two_normal(balsamic_context, cli_runner, caplog):
     """Test with case_id containing ONE tumor and TWO normal samples"""
-    caplog.set_level(logging.WARNING)
+    caplog.set_level(logging.ERROR)
     case_id = "balsamic_case_wgs_paired_two_normal_error"
     # WHEN dry running
     result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)

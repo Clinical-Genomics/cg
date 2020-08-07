@@ -92,13 +92,12 @@ def test_without_options(cli_runner, balsamic_context):
 
 def test_with_missing_case(cli_runner, balsamic_context, caplog):
     """Test command with invalid case to start with"""
-    caplog.set_level(logging.WARNING)
+    caplog.set_level(logging.ERROR)
     # GIVEN case_id not in database
     case_id = "soberelephant"
     assert not balsamic_context["BalsamicAnalysisAPI"].store.family(case_id)
     # WHEN running
     result = cli_runner.invoke(update_housekeeper, [case_id], obj=balsamic_context)
-    print(result)
     # THEN command should NOT successfully call the command it creates
     assert result.exit_code != EXIT_SUCCESS
     # THEN ERROR log should be printed containing invalid case_id
@@ -108,7 +107,7 @@ def test_with_missing_case(cli_runner, balsamic_context, caplog):
 
 def test_without_samples(cli_runner, balsamic_context, caplog):
     """Test command with case_id and no samples"""
-    caplog.set_level(logging.WARNING)
+    caplog.set_level(logging.ERROR)
     # GIVEN case-id
     case_id = "no_sample_case"
     # WHEN dry running with dry specified
@@ -121,7 +120,7 @@ def test_without_samples(cli_runner, balsamic_context, caplog):
 
 def test_without_config(cli_runner, balsamic_context, caplog):
     """Test command with case_id and no config file"""
-    caplog.set_level(logging.WARNING)
+    caplog.set_level(logging.ERROR)
     # GIVEN case-id
     case_id = "balsamic_case_wgs_single"
     # WHEN dry running with dry specified
@@ -134,14 +133,16 @@ def test_without_config(cli_runner, balsamic_context, caplog):
 
 def test_case_without_deliverables_file(cli_runner, balsamic_context, caplog):
     """Test command with case_id and config file but no analysis_finish"""
-    caplog.set_level(logging.WARNING)
+    caplog.set_level(logging.ERROR)
     # GIVEN case-id
     case_id = "balsamic_case_wgs_single"
     # WHEN ensuring case config exists where it should be stored
     Path.mkdir(
         Path(balsamic_context["BalsamicAnalysisAPI"].get_config_path(case_id)).parent, exist_ok=True
     )
-    Path(balsamic_context["BalsamicAnalysisAPI"].get_config_path(case_id)).touch(exist_ok=True)
+    mock_config(
+        root_dir=balsamic_context["BalsamicAnalysisAPI"].balsamic_api.root_dir, case_id=case_id
+    )
     # WHEN dry running with dry specified
     result = cli_runner.invoke(update_housekeeper, [case_id], obj=balsamic_context)
     # THEN command should NOT execute successfully
@@ -192,7 +193,7 @@ def test_valid_case(
 def test_valid_case_already_added(
     cli_runner, balsamic_context, caplog, real_housekeeper_api, balsamic_housekeeper
 ):
-    caplog.set_level(logging.WARNING)
+    caplog.set_level(logging.ERROR)
     # GIVEN case-id
     case_id = "balsamic_case_tgs_single"
     # SETUP ensuring case config exists where it should be stored

@@ -18,7 +18,7 @@ def test_without_options(cli_runner, balsamic_context):
 
 def test_with_missing_case(cli_runner, balsamic_context, caplog):
     """Test command with invalid case to start with"""
-    caplog.set_level(logging.WARNING)
+    caplog.set_level(logging.ERROR)
     # GIVEN case_id not in database
     case_id = "soberelephant"
     assert not balsamic_context["BalsamicAnalysisAPI"].store.family(case_id)
@@ -32,7 +32,7 @@ def test_with_missing_case(cli_runner, balsamic_context, caplog):
 
 def test_without_samples(cli_runner, balsamic_context, caplog):
     """Test command with case_id and no samples"""
-    caplog.set_level(logging.WARNING)
+    caplog.set_level(logging.ERROR)
     # GIVEN case-id
     case_id = "no_sample_case"
     # WHEN dry running with dry specified
