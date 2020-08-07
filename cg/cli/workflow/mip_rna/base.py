@@ -15,6 +15,7 @@ from cg.cli.workflow.mip_rna.deliver import deliver as deliver_cmd
 from cg.meta.deliver import DeliverAPI
 from cg.meta.workflow.mip_rna import AnalysisAPI
 from cg.store import Store
+from cg.store.utils import case_exists
 
 LOG = logging.getLogger(__name__)
 
@@ -87,8 +88,7 @@ def run(
     rna_api = context.obj["rna_api"]
     case_obj = context.obj["db"].family(case_id)
 
-    if case_obj is None:
-        LOG.error("%s: case not found", case_id)
+    if not case_exists(case_obj, case_id):
         context.abort()
 
     if tb_api.analyses(family=case_obj.internal_id, temp=True).first():
@@ -122,8 +122,7 @@ def config_case(context: click.Context, case_id: str, dry: bool = False):
     """Generate a config for the case_id"""
     case_obj = context.obj["db"].family(case_id)
 
-    if not case_obj:
-        LOG.error("Case %s not found", case_id)
+    if not case_exists(case_obj, case_id):
         context.abort()
 
     # MIP formatted pedigree.yaml config

@@ -8,7 +8,6 @@ import click
 import ruamel.yaml
 from trailblazer.mip.start import MipCli
 from trailblazer.store import Store, models
-from trailblazer.cli.utils import environ_email
 from trailblazer.mip import files, fastq, trending
 
 

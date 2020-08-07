@@ -7,6 +7,16 @@ from cg.store import models
 LOG = logging.getLogger(__name__)
 
 
+def case_exists(case_obj, case_id: str):
+    """
+    Check that case exist in Store
+    """
+    if case_obj is None:
+        LOG.error("%s: case not found", case_id)
+        return None
+    return True
+
+
 def get_links(case: models.Family) -> models.Sample:
     """Return all samples from a family object"""
     for sample_obj in case.links:

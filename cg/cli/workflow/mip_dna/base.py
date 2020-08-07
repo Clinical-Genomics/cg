@@ -18,6 +18,7 @@ from cg.exc import CgError
 from cg.meta.deliver import DeliverAPI
 from cg.meta.workflow.mip_dna import AnalysisAPI
 from cg.store import Store
+from cg.store.utils import case_exists
 
 LOG = logging.getLogger(__name__)
 EMAIL_OPTION = click.option("-e", "--email", help="email to send errors to", type=str)
@@ -66,9 +67,9 @@ def mip_dna(context: click.Context, case_id: str, email: str, priority: str, sta
 
         # check everything is ok
         case_obj = context.obj["db"].family(case_id)
-        if case_obj is None:
-            LOG.error("%s: not found", case_id)
+        if not case_exists(case_obj, case_id):
             context.abort()
+
         is_ok = context.obj["api"].check(case_obj)
         if not is_ok:
             LOG.warning("%s: not ready to run", case_obj.internal_id)
@@ -119,11 +120,10 @@ def config_case(context: click.Context, case_id: str, dry_run: bool = False):
 
     case_obj = context.obj["db"].family(case_id)
 
-    if not case_obj:
-        LOG.error("Case %s not found", case_id)
+    if not case_exists(case_obj, case_id):
         context.abort()
 
-    # pipeline formatted pedigree.yaml config
+    # workflow formatted pedigree.yaml config
     config_data = context.obj["api"].config(case_obj)
 
     if dry_run:
@@ -195,8 +195,7 @@ def run(
         context.abort()
 
     case_obj = context.obj["db"].family(case_id)
-    if case_obj is None:
-        LOG.error("%s: case not found", case_id)
+    if not case_exists(case_obj, case_id):
         context.abort()
     if context.obj["tb"].analyses(family=case_obj.internal_id, temp=True).first():
         LOG.warning("%s: analysis already running", {case_obj.internal_id})
