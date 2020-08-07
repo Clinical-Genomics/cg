@@ -358,4 +358,3 @@ class BalsamicAnalysisAPI:
         )
         self.store.add_commit(new_analysis)
         LOG.info(f"Analysis successfully stored in ClinicalDB: {case_id} : {analysis_start}")
-
