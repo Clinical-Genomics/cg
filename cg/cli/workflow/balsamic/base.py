@@ -145,9 +145,7 @@ def report_deliver(context, case_id, analysis_type, dry):
             ),
             "analysis_type": analysis_type,
         }
-        analysis_finish = balsamic_analysis_api.get_analysis_finish_path(
-            case_id, check_exists=True
-        )
+        analysis_finish = balsamic_analysis_api.get_analysis_finish_path(case_id, check_exists=True)
         LOG.info(f"Found analysis finish file: {analysis_finish}")
         balsamic_analysis_api.balsamic_api.report_deliver(arguments=arguments, dry=dry)
     except BalsamicStartError as e:
