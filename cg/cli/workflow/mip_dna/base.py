@@ -36,7 +36,7 @@ def mip_dna(context: click.Context, case_id: str, email: str, priority: str, sta
     lims_api = lims.LimsAPI(context.obj)
     context.obj["tb"] = tb.TrailblazerAPI(context.obj)
     deliver = DeliverAPI(
-        context.obj, hk_api=hk_api, lims_api=lims_api, case_tags=CASE_TAGS, sample_tags=SAMPLE_TAGS,
+        context.obj, hk_api=hk_api, lims_api=lims_api, case_tags=CASE_TAGS, sample_tags=SAMPLE_TAGS
     )
     context.obj["api"] = AnalysisAPI(
         db=context.obj["db"],
@@ -45,6 +45,9 @@ def mip_dna(context: click.Context, case_id: str, email: str, priority: str, sta
         scout_api=scout_api,
         lims_api=lims_api,
         deliver_api=deliver,
+    )
+    context.obj["dna_api"] = MipAPI(
+        context.obj["trailblazer"]["script"], context.obj["trailblazer"]["pipeline"]
     )
 
     if context.invoked_subcommand is None:
@@ -68,7 +71,7 @@ def mip_dna(context: click.Context, case_id: str, email: str, priority: str, sta
             context.invoke(link, case_id=case_id)
             context.invoke(panel, case_id=case_id)
             context.invoke(
-                run, case_id=case_id, priority=priority, email=email, start_with=start_with,
+                run, case_id=case_id, priority=priority, email=email, start_with=start_with
             )
 
 
@@ -84,7 +87,7 @@ def link(context: click.Context, case_id: str, sample_id: str):
 
     for link_obj in link_objs:
         LOG.info(
-            "%s: %s link FASTQ files", link_obj.sample.internal_id, link_obj.sample.data_analysis,
+            "%s: %s link FASTQ files", link_obj.sample.internal_id, link_obj.sample.data_analysis
         )
         if not link_obj.sample.data_analysis or "mip" in link_obj.sample.data_analysis.lower():
             mip_fastq_handler = FastqHandler(context.obj, context.obj["db"], context.obj["tb"])
@@ -149,10 +152,12 @@ def panel(context: click.Context, case_id: str, print_output: bool = False):
 @EMAIL_OPTION
 @START_WITH_PROGRAM
 @click.argument("case_id", required=False)
+@click.option("-d", "--dry-run", "dry_run", is_flag=True, help="print command to console")
 @click.pass_context
 def run(
     context: click.Context,
     case_id: str,
+    dry: bool = False,
     email: str = None,
     priority: str = None,
     start_with: str = None,
@@ -168,13 +173,16 @@ def run(
         context.abort()
     if context.obj["tb"].analyses(family=case_obj.internal_id, temp=True).first():
         LOG.warning("%s: analysis already running", {case_obj.internal_id})
+    if dry:
+        command = dna_api.build_command(**kwargs)
+        LOG.info(" ".join(command))
     else:
         context.obj["api"].run(case_obj, priority=priority, email=email, start_with=start_with)
 
 
 @mip_dna.command()
 @click.option(
-    "-d", "--dry-run", "dry_run", is_flag=True, help="print to console, " "without actualising",
+    "-d", "--dry-run", "dry_run", is_flag=True, help="print to console, " "without actualising"
 )
 @click.pass_context
 def start(context: click.Context, dry_run: bool = False):
