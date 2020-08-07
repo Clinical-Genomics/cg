@@ -158,18 +158,19 @@ def panel(context: click.Context, case_id: str, print_output: bool = False):
 def run(
     context: click.Context,
     case_id: str,
-    dry: bool = False,
+    dry_run: bool = False,
     email: str = None,
     priority: str = None,
     start_with: str = None,
 ):
     """Run the analysis for a case"""
+    dna_api = context.obj["dna_api"]
     kwargs = dict(
         config=context.obj["trailblazer"]["mip_config"],
         case=case_id,
         priority=priority,
         email=email,
-        dryrun=dry,
+        dryrun=dry_run,
         start_with=start_with,
     )
     if case_id is None:
@@ -182,7 +183,7 @@ def run(
         context.abort()
     if context.obj["tb"].analyses(family=case_obj.internal_id, temp=True).first():
         LOG.warning("%s: analysis already running", {case_obj.internal_id})
-    if dry:
+    if dry_run:
         command = dna_api.build_command(**kwargs)
         LOG.info(" ".join(command))
     else:
