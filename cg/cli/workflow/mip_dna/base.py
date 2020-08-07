@@ -6,6 +6,7 @@ import sys
 import click
 
 from cg.apps import hk, lims, scoutapi, tb
+from cg.apps.environ import environ_email
 from cg.apps.mip.fastq import FastqHandler
 from cg.apps.mip import MipAPI
 from cg.cli.workflow.get_links import get_links
@@ -172,6 +173,9 @@ def run(
     """Run the analysis for a case"""
     dna_api = context.obj["dna_api"]
     tb_api = context.obj["tb"]
+
+    email = email or environ_email()
+
     kwargs = dict(
         config=context.obj["trailblazer"]["mip_config"],
         case=case_id,

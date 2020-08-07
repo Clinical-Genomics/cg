@@ -1,7 +1,8 @@
 """ Common MIP related functionality """
 import logging
-import signal
 import subprocess
+
+from cg.constants import SPACE
 
 """
 This dict is built like this:
@@ -48,7 +49,7 @@ class MipAPI:
     def run(self, config, case, **kwargs):
         """Execute the pipeline."""
         command = self.build_command(config, case, **kwargs)
-        self.logger.debug(" ".join(command))
+        self.logger.debug(SPACE.join(command))
         process = self.execute(command)
         success = 0
         if process.returncode != success:
@@ -72,12 +73,12 @@ class MipAPI:
                 # append value for non-flags
                 if value is not True:
                     command.append(value)
-        command.append("'")
+        command.append(SINGLE_QUOTE)
         return command
 
     @classmethod
     def execute(cls, command):
-        """Start a new MIP run."""
+        """Start a new MIP run"""
 
-        process = subprocess.run(" ".join(command), shell=True, check=True)
+        process = subprocess.run(SPACE.join(command), shell=True, check=True)
         return process

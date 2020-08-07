@@ -2,13 +2,7 @@
 
 TMP_DIR = "/home/proj/production/rare-disease/temp-dir/"
 
-PRIORITY_MAP = {
-    "research": 0,
-    "standard": 1,
-    "priority": 2,
-    "express": 3,
-    "clinical trials": 4,
-}
+PRIORITY_MAP = {"research": 0, "standard": 1, "priority": 2, "express": 3, "clinical trials": 4}
 REV_PRIORITY_MAP = {value: key for key, value in PRIORITY_MAP.items()}
 PRIORITY_OPTIONS = list(PRIORITY_MAP.keys())
 FAMILY_ACTIONS = ("analyze", "running", "hold")
@@ -79,7 +73,7 @@ HK_FASTQ_TAGS = ["fastq"]
 # presence of mandatory files. Keys = tags found in deliverables, values = MIP standard tags and
 # mandatory flag
 MIP_DNA_TAGS = {
-    ("mip_analyse", "config_analysis",): {"tags": ["mip-config"], "is_mandatory": True},
+    ("mip_analyse", "config_analysis"): {"tags": ["mip-config"], "is_mandatory": True},
     ("chanjo_sexcheck",): {"tags": ["chanjo", "sex-check"], "is_mandatory": False},
     ("chromograph_ar",): {"tags": ["chromograph"], "is_mandatory": False},
     ("endvariantannotationblock", "clinical"): {
@@ -102,10 +96,10 @@ MIP_DNA_TAGS = {
         "index_tags": ["gbcf-index"],
         "is_mandatory": True,
     },
-    ("mip_analyse", "log",): {"tags": ["mip-log"], "is_mandatory": True},
+    ("mip_analyse", "log"): {"tags": ["mip-log"], "is_mandatory": True},
     ("multiqc_ar", "html"): {"tags": ["multiqc-html"], "is_mandatory": True},
     ("multiqc_ar", "json"): {"tags": ["multiqc-json"], "is_mandatory": True},
-    ("mip_analyse", "pedigree",): {"tags": ["pedigree-yaml"], "is_mandatory": True},
+    ("mip_analyse", "pedigree"): {"tags": ["pedigree-yaml"], "is_mandatory": True},
     ("mip_analyse", "pedigree_fam"): {"tags": ["pedigree"], "is_mandatory": True},
     ("peddy_ar", "ped_check"): {"tags": ["peddy", "ped-check"], "is_mandatory": True},
     ("peddy_ar", "peddy"): {"tags": ["peddy", "ped"], "is_mandatory": True},
@@ -141,7 +135,7 @@ MIP_DNA_TAGS = {
         "index_tags": ["sv-bcf-index"],
         "is_mandatory": True,
     },
-    ("expansionhunter", "sv_str",): {
+    ("expansionhunter", "sv_str"): {
         "tags": ["vcf-str"],
         "index_tags": ["vcf-str-index"],
         "is_mandatory": False,
@@ -184,3 +178,7 @@ MIP_RNA_TAGS = {
     ("varianteffectpredictor",): {"tags": ["varianteffectpredictor"], "is_mandatory": True},
     ("version_collect_ar",): {"tags": ["version-collect-ar"], "is_mandatory": True},
 }
+
+# Symbols
+SINGLE_QUOTE = "'"
+SPACE = " "
