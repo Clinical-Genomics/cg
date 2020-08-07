@@ -63,21 +63,4 @@ def analysis(context, config_stream):
 @click.pass_context
 def completed(context):
     """Store all completed analyses."""
-    hk_api = context.obj["hk_api"]
-    tb_api = context.obj["tb_api"]
-
-    exit_code = SUCCESS
-    for analysis_obj in tb_api.analyses(status="completed", deleted=False):
-        existing_record = hk_api.version(analysis_obj.family, analysis_obj.started_at)
-        if existing_record:
-            LOG.debug("analysis stored: %s - %s", analysis_obj.family, analysis_obj.started_at)
-            continue
-        click.echo(click.style(f"storing family: {analysis_obj.family}", fg="blue"))
-        with Path(analysis_obj.config_path).open() as config_stream:
-            try:
-                context.invoke(analysis, config_stream=config_stream)
-            except Exception:
-                LOG.error("case storage failed: %s", analysis_obj.family, exc_info=True)
-                exit_code = FAIL
-
-    sys.exit(exit_code)
+    pass
