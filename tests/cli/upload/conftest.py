@@ -37,8 +37,7 @@ def fixture_scout_hk_bundle_data(case_id, scout_load_config, timestamp):
 
 
 @pytest.fixture(scope="function", name="base_context")
-def fixture_base_cli_context(analysis_store: Store, housekeeper_api, upload_scout_api) \
-        -> dict:
+def fixture_base_cli_context(analysis_store: Store, housekeeper_api, upload_scout_api) -> dict:
     """context to use in cli"""
     return {
         "scout_api": MockScoutApi(),
