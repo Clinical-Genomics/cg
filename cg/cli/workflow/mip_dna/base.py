@@ -197,9 +197,7 @@ def run(
 
 
 @mip_dna.command()
-@click.option(
-    "-d", "--dry-run", "dry_run", is_flag=True, help="print to console, " "without actualising"
-)
+@click.option("-d", "--dry-run", "dry_run", is_flag=True, help="print command to console")
 @click.pass_context
 def start(context: click.Context, dry_run: bool = False):
     """Start all cases that are ready for analysis"""
