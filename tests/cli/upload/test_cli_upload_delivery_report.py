@@ -18,7 +18,7 @@ def test_no_parameters(base_context, cli_runner, caplog):
         result = cli_runner.invoke(delivery_report, [], obj=base_context)
 
     # THEN it should fail on missing case_id
-    result.exit_code != EXIT_CODE_SUCCESS
+    assert result.exit_code != EXIT_CODE_SUCCESS
     assert "provide a case, suggestions:" in caplog.text
 
 
@@ -31,9 +31,10 @@ def test_analysis_started_at(base_context, cli_runner, caplog, helpers):
 
     # WHEN calling delivery_report with malformed date parameter
     with caplog.at_level(logging.INFO):
-        result = cli_runner.invoke(delivery_report, [case_id, '--analysis-started-at', a_date],
-                                   obj=base_context)
+        result = cli_runner.invoke(
+            delivery_report, [case_id, "--analysis-started-at", a_date], obj=base_context
+        )
 
     # THEN it should contain the date in the logged info
-    result.exit_code != EXIT_CODE_SUCCESS
+    assert result.exit_code != EXIT_CODE_SUCCESS
     assert str(a_date) in caplog.text
