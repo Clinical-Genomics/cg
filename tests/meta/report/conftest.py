@@ -215,6 +215,7 @@ def report_api(report_store, lims_samples):
 @pytest.fixture(scope="function")
 def report_store(analysis_store, helpers):
     family = analysis_store.families()[0]
-    helpers.add_analysis(analysis_store, family)
-    helpers.add_analysis(analysis_store, family)
+    yesterday = datetime.now() - timedelta(days=1)
+    helpers.add_analysis(analysis_store, family, started_at=yesterday)
+    helpers.add_analysis(analysis_store, family, started_at=datetime.now())
     return analysis_store
