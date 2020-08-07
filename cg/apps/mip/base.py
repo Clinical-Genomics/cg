@@ -50,7 +50,6 @@ class MipAPI:
         command = self.build_command(config, case, **kwargs)
         self.logger.debug(" ".join(command))
         process = self.execute(command)
-        process.wait()
         success = 0
         if process.returncode != success:
             raise MipStartError("error running analysis, check the output")
@@ -70,6 +69,9 @@ class MipAPI:
             if value:
                 # Cg to mip options mapping
                 command.append(CLI_OPTIONS[key]["option"])
+                # append value for non-flags
+                if value is not True:
+                    command.append(value)
         command.append("'")
         return command
 
@@ -77,11 +79,5 @@ class MipAPI:
     def execute(cls, command):
         """Start a new MIP run."""
 
-        """
-        Remove the default SIGPIPE handler
-        https://blog.nelhage.com/2010/02/a-very-subtle-bug/
-        """
-        process = subprocess.Popen(
-            command, preexec_fn=lambda: signal.signal(signal.SIGPIPE, signal.SIG_DFL)
-        )
+        process = subprocess.run(" ".join(command), shell=True, check=True)
         return process
