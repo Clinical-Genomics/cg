@@ -1,8 +1,13 @@
 from datetime import datetime
 
 import pytest
-from tests.meta.report.comparison import is_float, \
-    is_similar_values, is_similar_lists, value_exists_in, dict_values_exists_in
+from tests.meta.report.comparison import (
+    is_float,
+    is_similar_values,
+    is_similar_lists,
+    value_exists_in,
+    dict_values_exists_in,
+)
 
 
 @pytest.mark.parametrize("data", [0, "0", 0.1, "0.1", "1.0", "10", True, False])
@@ -27,9 +32,28 @@ def test_is_float_with_non_float(data):
     assert not is_a_float
 
 
-@pytest.mark.parametrize("data", [0, "0", 0.1, "0.1", "1.0", "10", True, False, None, "", (), [],
-                                  {}, ["a", "b", "c"], {"numbers": 123},
-                                  {"dict": {"text": "text"}}, datetime.now()])
+@pytest.mark.parametrize(
+    "data",
+    [
+        0,
+        "0",
+        0.1,
+        "0.1",
+        "1.0",
+        "10",
+        True,
+        False,
+        None,
+        "",
+        (),
+        [],
+        {},
+        ["a", "b", "c"],
+        {"numbers": 123},
+        {"dict": {"text": "text"}},
+        datetime.now(),
+    ],
+)
 def test_is_similar_values_data_compared_to_equal(data):
     # GIVEN data
 
@@ -40,10 +64,10 @@ def test_is_similar_values_data_compared_to_equal(data):
     assert is_similar
 
 
-@pytest.mark.parametrize("data_pair", [(0, "0"), (0.1, "0.1"), (1.33, "1.3"), (datetime.now(),
-                                                                            str(datetime.now().date(
-
-                                                                            )))])
+@pytest.mark.parametrize(
+    "data_pair",
+    [(0, "0"), (0.1, "0.1"), (1.33, "1.3"), (datetime.now(), str(datetime.now().date()))],
+)
 def test_is_similar_values_data_compared_to_similar(data_pair):
     # GIVEN data and similar data
     data, similar_data = data_pair
@@ -55,10 +79,10 @@ def test_is_similar_values_data_compared_to_similar(data_pair):
     assert is_similar
 
 
-@pytest.mark.parametrize("data_pair", [(0, "1"),
-                                       (0.1, None),
-                                       (None, "1.3"),
-                                       (str(datetime.now().date()), datetime.now())])
+@pytest.mark.parametrize(
+    "data_pair",
+    [(0, "1"), (0.1, None), (None, "1.3"), (str(datetime.now().date()), datetime.now())],
+)
 def test_is_similar_values_data_compared_to_non_similar(data_pair):
     # GIVEN data and similar data
     data, non_similar_data = data_pair
@@ -70,9 +94,10 @@ def test_is_similar_values_data_compared_to_non_similar(data_pair):
     assert not is_similar
 
 
-@pytest.mark.parametrize("data",
-                         [None, "abc", [1, 2, 3], ["a", "b", "c"], ["a", 1, "1", None, [], {},
-                                                                    (), {}, datetime.now()]])
+@pytest.mark.parametrize(
+    "data",
+    [None, "abc", [1, 2, 3], ["a", "b", "c"], ["a", 1, "1", None, [], {}, (), {}, datetime.now()]],
+)
 def test_is_similar_lists_compared_to_equal(data):
     # GIVEN data
 
@@ -107,9 +132,15 @@ def test_value_exists_not_in_text(data):
     assert not exists
 
 
-@pytest.mark.parametrize("data_pair", [({"text": "some_text", "dict": {"number": 1.3, "list": [
-    "abc", 123, True]}}, "Report containing some_text the number 1.3, the list abc "
-                                     "and 123")])
+@pytest.mark.parametrize(
+    "data_pair",
+    [
+        (
+            {"text": "some_text", "dict": {"number": 1.3, "list": ["abc", 123, True]}},
+            "Report containing some_text the number 1.3, the list abc " "and 123",
+        )
+    ],
+)
 def test_dict_values_exists_in_text(data_pair):
     # GIVEN data and a text containing that data
     data, data_in_text = data_pair
@@ -121,8 +152,18 @@ def test_dict_values_exists_in_text(data_pair):
     assert exists
 
 
-@pytest.mark.parametrize("data_pair", [({"text": "some_text", "dict": {"number": 1.3, "list": [
-    "abc", 123, datetime.now(), True]}}, "Report not containing data")])
+@pytest.mark.parametrize(
+    "data_pair",
+    [
+        (
+            {
+                "text": "some_text",
+                "dict": {"number": 1.3, "list": ["abc", 123, datetime.now(), True]},
+            },
+            "Report not containing data",
+        )
+    ],
+)
 def test_dict_values_not_existing_in_text(data_pair):
     # GIVEN data and a text not containing that data
     data, data_in_text = data_pair
