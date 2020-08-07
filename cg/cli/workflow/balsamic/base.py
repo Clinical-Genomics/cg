@@ -213,7 +213,7 @@ def deliver_available(context, dry):
         try:
             context.invoke(report_deliver, case_id=case_id, dry=dry)
             context.invoke(update_housekeeper, case_id=case_id)
-        except click.Abort():
+        except click.Abort:
             continue
 
 
