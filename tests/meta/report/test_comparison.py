@@ -137,7 +137,7 @@ def test_value_exists_not_in_text(data):
     [
         (
             {"text": "some_text", "dict": {"number": 1.3, "list": ["abc", 123, True]}},
-            "Report containing some_text the number 1.3, the list abc " "and 123",
+            "Report containing some_text the number 1.3, the list abc and 123",
         )
     ],
 )
