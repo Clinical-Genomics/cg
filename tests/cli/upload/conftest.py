@@ -111,7 +111,6 @@ class MockReportApi(ReportAPI):
 class MockVogueApi:
     def __init__(self):
         """docstring for __init__"""
-        pass
 
     def load_reagent_labels(self, days: int):
         """docstring for upload"""
