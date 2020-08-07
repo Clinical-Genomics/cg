@@ -2,7 +2,7 @@
 import logging
 import subprocess
 
-from cg.constants import SPACE
+from cg.constants import SINGLE_QUOTE, SPACE
 
 """
 This dict is built like this:
@@ -47,7 +47,7 @@ class MipAPI:
         self.logger = logger
 
     def run(self, config, case, **kwargs):
-        """Execute the pipeline."""
+        """Execute the workflow"""
         command = self.build_command(config, case, **kwargs)
         self.logger.debug(SPACE.join(command))
         process = self.execute(command)
@@ -57,9 +57,9 @@ class MipAPI:
         return process
 
     def build_command(self, config, case, **kwargs):
-        """Builds the command to execute MIP."""
+        """Builds the command to execute MIP"""
         command = [
-            f"bash -c 'source activate {self.conda_env}; ",
+            f"bash -c 'source activate {self.conda_env};",
             self.script,
             self.pipeline,
             case,
@@ -77,8 +77,11 @@ class MipAPI:
         return command
 
     @classmethod
-    def execute(cls, command):
-        """Start a new MIP run"""
+    def execute(cls, command: str):
+        """Start a new MIP run
+        Args:
+            command(str): Command to execute
+        """
 
         process = subprocess.run(SPACE.join(command), shell=True, check=True)
         return process

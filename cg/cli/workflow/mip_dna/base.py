@@ -13,22 +13,27 @@ from cg.cli.workflow.get_links import get_links
 from cg.cli.workflow.mip.store import store as store_cmd
 from cg.cli.workflow.mip_dna.deliver import CASE_TAGS, SAMPLE_TAGS
 from cg.cli.workflow.mip_dna.deliver import deliver as deliver_cmd
+from cg.constants import SPACE
 from cg.exc import CgError
 from cg.meta.deliver import DeliverAPI
 from cg.meta.workflow.mip_dna import AnalysisAPI
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
-EMAIL_OPTION = click.option("-e", "--email", help="email to send errors to")
-PRIORITY_OPTION = click.option("-p", "--priority", type=click.Choice(["low", "normal", "high"]))
-START_WITH_PROGRAM = click.option("-sw", "--start-with", help="start mip from this program.")
+EMAIL_OPTION = click.option("-e", "--email", help="email to send errors to", type=str)
+PRIORITY_OPTION = click.option(
+    "-p", "--priority", default="normal", type=click.Choice(["low", "normal", "high"])
+)
+START_WITH_PROGRAM = click.option(
+    "-sw", "--start-with", help="start mip from this program.", type=str
+)
 
 
 @click.group("mip-dna", invoke_without_command=True)
 @EMAIL_OPTION
 @PRIORITY_OPTION
 @START_WITH_PROGRAM
-@click.option("-c", "--case", "case_id", help="case to prepare and start an analysis for")
+@click.option("-c", "--case", "case_id", help="case to prepare and start an analysis for", type=str)
 @click.pass_context
 def mip_dna(context: click.Context, case_id: str, email: str, priority: str, start_with: str):
     """Rare disease DNA workflow"""
@@ -80,7 +85,7 @@ def mip_dna(context: click.Context, case_id: str, email: str, priority: str, sta
 
 
 @mip_dna.command()
-@click.option("-c", "--case", "case_id", help="link all samples for a case")
+@click.option("-c", "--case", "case_id", help="link all samples for a case", type=str)
 @click.argument("sample_id", required=False)
 @click.pass_context
 def link(context: click.Context, case_id: str, sample_id: str):
@@ -103,10 +108,10 @@ def link(context: click.Context, case_id: str, sample_id: str):
 
 
 @mip_dna.command("config-case")
-@click.option("-d", "--dry", is_flag=True, help="Print config to console")
-@click.argument("case_id", required=False)
+@click.option("-d", "--dry-run", "dry_run", is_flag=True, help="print command to console")
+@click.argument("case_id", required=False, type=str)
 @click.pass_context
-def config_case(context: click.Context, case_id: str, dry: bool = False):
+def config_case(context: click.Context, case_id: str, dry_run: bool = False):
     """Generate a config for the CASE_ID"""
     if case_id is None:
         _suggest_cases_to_analyze(context)
@@ -121,7 +126,7 @@ def config_case(context: click.Context, case_id: str, dry: bool = False):
     # pipeline formatted pedigree.yaml config
     config_data = context.obj["api"].config(case_obj)
 
-    if dry:
+    if dry_run:
         print(config_data)
     else:
         # Write to trailblazer root dir / case_id
@@ -133,10 +138,10 @@ mip_dna.add_command(config_case)
 
 
 @mip_dna.command()
-@click.option("-p", "--print", "print_output", is_flag=True, help="print to console")
-@click.argument("case_id", required=False)
+@click.option("-d", "--dry-run", "dry_run", is_flag=True, help="print command to console")
+@click.argument("case_id", required=False, type=str)
 @click.pass_context
-def panel(context: click.Context, case_id: str, print_output: bool = False):
+def panel(context: click.Context, case_id: str, dry_run: bool = False):
     """Write aggregated gene panel file"""
     if case_id is None:
         _suggest_cases_to_analyze(context)
@@ -144,7 +149,7 @@ def panel(context: click.Context, case_id: str, print_output: bool = False):
 
     case_obj = context.obj["db"].family(case_id)
     bed_lines = context.obj["api"].panel(case_obj)
-    if print_output:
+    if dry_run:
         for bed_line in bed_lines:
             print(bed_line)
     else:
@@ -155,7 +160,7 @@ def panel(context: click.Context, case_id: str, print_output: bool = False):
 @PRIORITY_OPTION
 @EMAIL_OPTION
 @START_WITH_PROGRAM
-@click.argument("case_id", required=False)
+@click.argument("case_id", required=False, type=str)
 @click.option("-d", "--dry-run", "dry_run", is_flag=True, help="print command to console")
 @click.option(
     "--skip-evaluation", "skip_evaluation", is_flag=True, help="Skip mip qccollect evaluation"
@@ -197,7 +202,7 @@ def run(
         LOG.warning("%s: analysis already running", {case_obj.internal_id})
     if dry_run:
         command = dna_api.build_command(**kwargs)
-        LOG.info(" ".join(command))
+        LOG.info(SPACE.join(command))
     else:
         dna_api.run(**kwargs)
         tb_api.mark_analyses_deleted(case_id=case_id)

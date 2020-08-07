@@ -31,7 +31,7 @@ class TrailblazerAPI(Store, fastq.FastqHandler):
     def run(
         self,
         case_id: str,
-        priority: str = "normal",
+        priority: str = None,
         email: str = None,
         skip_evaluation: bool = False,
         start_with=None,
