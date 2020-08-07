@@ -55,9 +55,9 @@ def mip_dna(context: click.Context, case_id: str, email: str, priority: str, sta
         deliver_api=deliver,
     )
     context.obj["dna_api"] = MipAPI(
-        context.obj["trailblazer"]["script"],
-        context.obj["trailblazer"]["pipeline"],
-        context.obj["trailblazer"]["conda_env"],
+        context.obj["mip-rd-dna"]["script"],
+        context.obj["mip-rd-dna"]["pipeline"],
+        context.obj["mip-rd-dna"]["conda_env"],
     )
 
     if context.invoked_subcommand is None:
@@ -182,7 +182,7 @@ def run(
     email = email or environ_email()
 
     kwargs = dict(
-        config=context.obj["trailblazer"]["mip_config"],
+        config=context.obj["mip-rd-dna"]["mip_config"],
         case=case_id,
         priority=priority,
         email=email,
