@@ -28,31 +28,6 @@ class TrailblazerAPI(Store, fastq.FastqHandler):
         )
         self.mip_config = config["trailblazer"]["mip_config"]
 
-    def run(
-        self,
-        case_id: str,
-        priority: str = None,
-        email: str = None,
-        skip_evaluation: bool = False,
-        start_with=None,
-    ):
-        """Start MIP."""
-        email = email or environ_email()
-        kwargs = dict(
-            config=self.mip_config,
-            case=case_id,
-            priority=priority,
-            email=email,
-            start_with=start_with,
-        )
-        if skip_evaluation:
-            kwargs["skip_evaluation"] = True
-        self.mip_cli(**kwargs)
-        for old_analysis in self.analyses(family=case_id):
-            old_analysis.is_deleted = True
-        self.commit()
-        self.add_pending(case_id, email=email)
-
     def mark_analyses_deleted(self, case_id: str):
         """ mark analyses connected to a case as deleted """
         for old_analysis in self.analyses(family=case_id):
