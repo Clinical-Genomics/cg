@@ -58,7 +58,14 @@ class MipAPI:
 
     def build_command(self, config, case, **kwargs):
         """Builds the command to execute MIP."""
-        command = [self.script, self.pipeline, case, CLI_OPTIONS["config"]["option"], config]
+        command = [
+            f"bash -c 'source activate {self.conda_env}; ",
+            self.script,
+            self.pipeline,
+            case,
+            CLI_OPTIONS["config"]["option"],
+            config,
+        ]
         for key, value in kwargs.items():
             # enable passing in flags as "False" - shouldn't add command
             if value:
@@ -67,6 +74,7 @@ class MipAPI:
                     command.append(CLI_OPTIONS[key].get("default", "1"))
                 else:
                     command.append(value)
+        command.append("'")
         return command
 
     @classmethod
@@ -77,8 +85,6 @@ class MipAPI:
         Remove the default SIGPIPE handler
         https://blog.nelhage.com/2010/02/a-very-subtle-bug/
         """
-        command.insert(0, f"bash -c 'source activate {self.conda_env}; ")
-        command.append("'")
         process = subprocess.Popen(
             command, preexec_fn=lambda: signal.signal(signal.SIGPIPE, signal.SIG_DFL)
         )
