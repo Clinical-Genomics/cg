@@ -163,6 +163,14 @@ def run(
     start_with: str = None,
 ):
     """Run the analysis for a case"""
+    kwargs = dict(
+        config=context.obj["trailblazer"]["mip_config"],
+        case=case_id,
+        priority=priority,
+        email=email,
+        dryrun=dry,
+        start_with=start_with,
+    )
     if case_id is None:
         _suggest_cases_to_analyze(context)
         context.abort()
