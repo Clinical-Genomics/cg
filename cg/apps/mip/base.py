@@ -67,13 +67,9 @@ class MipAPI:
             config,
         ]
         for key, value in kwargs.items():
-            # enable passing in flags as "False" - shouldn't add command
             if value:
+                # Cg to mip options mapping
                 command.append(CLI_OPTIONS[key]["option"])
-                if value is True:
-                    command.append(CLI_OPTIONS[key].get("default", "1"))
-                else:
-                    command.append(value)
         command.append("'")
         return command
 
