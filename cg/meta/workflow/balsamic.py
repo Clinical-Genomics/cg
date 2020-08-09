@@ -37,7 +37,9 @@ class BalsamicAnalysisAPI:
         if not case_object:
             raise BalsamicStartError(f"{case_id} not found in StatucDB!")
         if not case_object.links:
-            raise BalsamicStartError(f"{case_id} number of samples is {len(case_object.links)}, analysis will not be started!")
+            raise BalsamicStartError(
+                f"{case_id} number of samples is {len(case_object.links)}, analysis will not be started!"
+            )
         return case_object
 
     def get_case_path(self, case_id: str) -> Path:

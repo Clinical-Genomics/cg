@@ -139,9 +139,7 @@ def report_deliver(context, case_id, analysis_type, dry):
 
     try:
         case_object = balsamic_analysis_api.get_case_object(case_id)
-        sample_config = balsamic_analysis_api.get_config_path(
-                case_id=case_id, check_exists=True
-            )
+        sample_config = balsamic_analysis_api.get_config_path(case_id=case_id, check_exists=True)
         analysis_finish = balsamic_analysis_api.get_analysis_finish_path(case_id, check_exists=True)
         LOG.info(f"Found analysis finish file: {analysis_finish}")
         arguments = {
