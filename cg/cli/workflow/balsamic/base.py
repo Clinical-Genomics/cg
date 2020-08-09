@@ -175,6 +175,7 @@ def update_housekeeper(context, case_id):
 @OPTION_PRIORITY
 @OPTION_RUN_ANALYSIS
 @OPTION_DRY
+@click.pass_context
 def start(context, case_id, analysis_type, priority, run_analysis, dry):
     """Start full workflow for CASE ID"""
     context.invoke(link, case_id=case_id)
@@ -191,6 +192,7 @@ def start(context, case_id, analysis_type, priority, run_analysis, dry):
 
 @balsamic.command("start-available")
 @OPTION_DRY
+@click.pass_context
 def start_available(context, dry):
     """Start full workflow for all available cases"""
     for case_object in context.obj["BalsamicAnalysisAPI"].store.cases_to_balsamic_analyze():
@@ -204,6 +206,7 @@ def start_available(context, dry):
 
 @balsamic.command("deliver-available")
 @OPTION_DRY
+@click.pass_context
 def deliver_available(context, dry):
     """Deliver bundle data for all available cases"""
     for case_object in context.obj["BalsamicAnalysisAPI"].store.analyses_to_deliver():
