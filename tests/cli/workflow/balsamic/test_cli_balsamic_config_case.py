@@ -276,3 +276,16 @@ def test_error_two_normal(balsamic_context, cli_runner, caplog):
     assert result.exit_code != EXIT_SUCCESS
     # THEN log warning should be printed
     assert "Invalid number of normal samples" in caplog.text
+
+
+def test_error_wes_panel(balsamic_context, cli_runner, caplog):
+    """Test with case_id containing ONE tumor and TWO normal samples"""
+    caplog.set_level(logging.ERROR)
+    case_id = "balsamic_case_wes_panel_error"
+    # WHEN dry running
+    result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
+    # THEN command is NOT generated successfully
+    assert result.exit_code != EXIT_SUCCESS
+    # THEN log warning should be printed
+    print(caplog.text)
+    assert "requires a bed file" in caplog.text

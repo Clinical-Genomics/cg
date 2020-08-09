@@ -30,13 +30,15 @@ OPTION_PANEL_BED = click.option(
     used for library prep. Set this option to override the default",
 )
 OPTION_ANALYSIS_TYPE = click.option(
-    "-a", "--analysis-type", type=click.Choice(["qc", "paired", "single"])
+    "-a", "--analysis-type", type=click.Choice(["qc", "paired", "single"]),
+    help="Setting this option to qc ensures only QC analysis is performed"
 )
 OPTION_RUN_ANALYSIS = click.option(
-    "-r", "--run-analysis", is_flag=True, default=False, help="Execute in non-dry mode"
+    "-r", "--run-analysis", is_flag=True, default=False, help="Execute BALSAMIC in non-dry mode"
 )
-OPTION_PRIORITY = click.option("-p", "--priority", type=click.Choice(["low", "normal", "high"]))
-OPTION_CUSTOMER_ID = click.option("--customer-id")
+OPTION_PRIORITY = click.option("-p", "--priority", type=click.Choice(["low", "normal", "high"]),
+    help="Job priority in SLURM. Will be set automatically according to priority i ClinicalDB, \
+         this option can be used to override server setting")
 
 
 @click.group(invoke_without_command=True)
@@ -86,7 +88,6 @@ def link(context, case_id):
 @click.pass_context
 def config_case(context, panel_bed, case_id, dry):
     """Create config file for BALSAMIC analysis for a given CASE_ID"""
-
     balsamic_analysis_api = context.obj["BalsamicAnalysisAPI"]
     try:
         LOG.info(f"Creating config file for {case_id}.")
@@ -107,10 +108,8 @@ def config_case(context, panel_bed, case_id, dry):
 @OPTION_RUN_ANALYSIS
 @click.pass_context
 def run(context, analysis_type, run_analysis, priority, case_id, dry):
-    """Run balsamic analysis"""
-
+    """Run balsamic analysis for given CASE ID"""
     balsamic_analysis_api = context.obj["BalsamicAnalysisAPI"]
-
     try:
         LOG.info(f"Running analysis for {case_id}")
         arguments = {
@@ -135,9 +134,8 @@ def run(context, analysis_type, run_analysis, priority, case_id, dry):
 @OPTION_ANALYSIS_TYPE
 @click.pass_context
 def report_deliver(context, case_id, analysis_type, dry):
-    """Create a housekeeper deliverables file for BALSAMIC analysis"""
+    """Create a housekeeper deliverables file for given CASE ID"""
     balsamic_analysis_api = context.obj["BalsamicAnalysisAPI"]
-
     try:
         LOG.info(f"Creating delivery report for {case_id}")
         case_object = balsamic_analysis_api.get_case_object(case_id)
@@ -159,7 +157,6 @@ def report_deliver(context, case_id, analysis_type, dry):
 @click.pass_context
 def update_housekeeper(context, case_id):
     """Store a finished analysis in Housekeeper and StatusDB."""
-
     balsamic_analysis_api = context.obj["BalsamicAnalysisAPI"]
     try:
         LOG.info(f"Storing bundle data in Housekeeper for {case_id}")
@@ -198,7 +195,7 @@ def start(context, case_id, analysis_type, priority, run_analysis, dry):
 @OPTION_DRY
 @click.pass_context
 def start_available(context, dry):
-    """Start full workflow for all available cases"""
+    """Start full workflow for all available BALSAMIC cases"""
     for case_object in context.obj["BalsamicAnalysisAPI"].store.cases_to_balsamic_analyze():
         case_id = case_object.internal_id
         LOG.info(f"Starting analysis for {case_id}")
@@ -213,7 +210,7 @@ def start_available(context, dry):
 @click.pass_context
 def deliver_available(context, dry):
     """Deliver bundle data for all available cases"""
-    for case_object in context.obj["BalsamicAnalysisAPI"].store.analyses_to_deliver():
+    for case_object in context.obj["BalsamicAnalysisAPI"].store.cases_to_balsamic_analyze():
         case_id = case_object.internal_id
         LOG.info(f"Storing analysis for {case_id}")
         try:

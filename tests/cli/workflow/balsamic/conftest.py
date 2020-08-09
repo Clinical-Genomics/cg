@@ -201,6 +201,7 @@ def balsamic_housekeeper(housekeeper_api, helpers, balsamic_mock_fastq_files):
         "sample_case_wgs_paired_two_normal_tumor_error",
         "sample_case_wgs_paired_two_normal_normal1_error",
         "sample_case_wgs_paired_two_normal_normal2_error",
+        "sample_case_wes_panel_error",
     ]
 
     for sample in samples:
@@ -311,6 +312,9 @@ def balsamic_store(base_store, helpers):
 
     # Create tgs application version
     helpers.ensure_application_version(store=_store, application_tag="TGSA", application_type="tgs")
+
+    # Create wes application version
+    helpers.ensure_application_version(store=_store, application_tag="WESA", application_type="wes")
 
     # Create textbook case for WGS PAIRED
     case_wgs_paired = helpers.add_family(
@@ -593,6 +597,24 @@ def balsamic_store(base_store, helpers):
         _store,
         family=case_wgs_paired_two_normal_error,
         sample=sample_case_wgs_paired_two_normal_normal2_error,
+    )
+
+    # Create ERROR case for WES when no panel is found
+    case_wes_panel_error = helpers.add_family(
+        _store,
+        internal_id="balsamic_case_wes_panel_error",
+        family_id="balsamic_case_wes_panel_error",
+    )
+    sample_case_wes_panel_error = helpers.add_sample(
+        _store,
+        internal_id="sample_case_wes_panel_error",
+        is_tumour=True,
+        application_tag="WESA",
+        application_type="wes",
+        data_analysis="balsamic",
+    )
+    helpers.add_relationship(
+        _store, family=case_wes_panel_error, sample=sample_case_wes_panel_error
     )
 
     # Create ERROR case with NO SAMPLES
