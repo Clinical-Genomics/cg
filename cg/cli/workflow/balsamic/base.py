@@ -30,15 +30,21 @@ OPTION_PANEL_BED = click.option(
     used for library prep. Set this option to override the default",
 )
 OPTION_ANALYSIS_TYPE = click.option(
-    "-a", "--analysis-type", type=click.Choice(["qc", "paired", "single"]),
-    help="Setting this option to qc ensures only QC analysis is performed"
+    "-a",
+    "--analysis-type",
+    type=click.Choice(["qc", "paired", "single"]),
+    help="Setting this option to qc ensures only QC analysis is performed",
 )
 OPTION_RUN_ANALYSIS = click.option(
     "-r", "--run-analysis", is_flag=True, default=False, help="Execute BALSAMIC in non-dry mode"
 )
-OPTION_PRIORITY = click.option("-p", "--priority", type=click.Choice(["low", "normal", "high"]),
+OPTION_PRIORITY = click.option(
+    "-p",
+    "--priority",
+    type=click.Choice(["low", "normal", "high"]),
     help="Job priority in SLURM. Will be set automatically according to priority i ClinicalDB, \
-         this option can be used to override server setting")
+         this option can be used to override server setting",
+)
 
 
 @click.group(invoke_without_command=True)
