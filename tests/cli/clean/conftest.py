@@ -27,7 +27,7 @@ def balsamic_clean_store(base_store, helpers):
 
     helpers.add_analysis(
         store,
-        family = case_to_clean,
+        family=case_to_clean,
         pipeline="balsamic",
         started_at=timestamp_yesterday,
         uploaded_at=timestamp_yesterday,
@@ -36,12 +36,12 @@ def balsamic_clean_store(base_store, helpers):
     return store
 
 
-
 @pytest.fixture(name="balsamic_dir")
 def balsamic_dir(tmpdir_factory, apps_dir: Path) -> Path:
     """Return the path to the balsamic apps dir"""
     balsamic_dir = tmpdir_factory.mktemp("balsamic")
     return Path(balsamic_dir).absolute().as_posix()
+
 
 @pytest.fixture
 def server_config(balsamic_dir):
@@ -64,6 +64,7 @@ def server_config(balsamic_dir):
         "lims": {"host": "example.db", "username": "testuser", "password": "testpassword",},
     }
 
+
 @pytest.fixture
 def balsamic_analysis_api(server_config, balsamic_clean_store, housekeeper_api):
     return BalsamicAnalysisAPI(
@@ -80,6 +81,8 @@ def balsamic_analysis_api(server_config, balsamic_clean_store, housekeeper_api):
 def clean_context(base_store, housekeeper_api, balsamic_analysis_api, helpers, tmpdir) -> dict:
     """context to use in cli"""
 
-    return {"hk_api": housekeeper_api, "store_api": balsamic_clean_store, "BalsamicAnalysisAPI": balsamic_analysis_api}
-
-
+    return {
+        "hk_api": housekeeper_api,
+        "store_api": balsamic_clean_store,
+        "BalsamicAnalysisAPI": balsamic_analysis_api,
+    }
