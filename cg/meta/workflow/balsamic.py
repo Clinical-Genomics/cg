@@ -39,7 +39,7 @@ class BalsamicAnalysisAPI:
         if not case_object.links:
             raise BalsamicStartError(f"{case_id} number of samples is {len(case_object.links)}!")
         return case_object
-        
+
     def get_case_path(self, case_id: str) -> Path:
         """Returns a path where the Balsamic case for the case_id should be located"""
         return Path(self.balsamic_api.root_dir, case_id).as_posix()
@@ -98,7 +98,6 @@ class BalsamicAnalysisAPI:
                 data["flowcell"] = f"{data['flowcell']}-{matches[0]}"
             files.append(data)
         return files
-
 
     def get_balsamic_sample_objects(self, case_id: str) -> list:
         case_object = self.get_case_object(case_id=case_id)
