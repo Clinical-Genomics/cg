@@ -302,7 +302,7 @@ class BalsamicAnalysisAPI:
         report_entries = dict(json.load(open(deliverables_file_path, "r")))["files"]
         bundle_files = []
         for entry in report_entries:
-            tags = entry["tags"].split(",")
+            tags = entry["tag"].split(",")
             for ind, tag in enumerate(tags):
                 for sample_name in sample_names:
                     if sample_name in tag:
