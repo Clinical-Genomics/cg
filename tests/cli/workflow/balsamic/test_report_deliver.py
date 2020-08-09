@@ -102,6 +102,7 @@ def test_dry_run(cli_runner, balsamic_context, caplog):
     assert "balsamic" in caplog.text
     assert case_id + ".json" in caplog.text
 
+
 def test_qc_option(cli_runner, balsamic_context, caplog):
     """Test command with case_id and qc option + config and analysis_finish 
     which should execute successfully"""
