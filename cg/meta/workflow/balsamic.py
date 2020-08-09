@@ -354,7 +354,7 @@ class BalsamicAnalysisAPI:
             started_at=analysis_start,
             completed_at=dt.datetime.now(),
             primary=(len(case_object.analyses) == 0),
-            family=case_object,
         )
+        new_analysis.family=case_object
         self.store.add_commit(new_analysis)
         LOG.info(f"Analysis successfully stored in ClinicalDB: {case_id} : {analysis_start}")
