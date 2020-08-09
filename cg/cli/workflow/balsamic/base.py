@@ -89,10 +89,10 @@ def config_case(context, panel_bed, case_id, dry):
 
     balsamic_analysis_api = context.obj["BalsamicAnalysisAPI"]
     try:
+        LOG.info(f"Creating config file for {case_id}.")
         arguments = balsamic_analysis_api.get_verified_config_case_arguments(
             case_id=case_id, panel_bed=panel_bed
         )
-        LOG.info(f"Creating config file for {case_id}.")
         balsamic_analysis_api.balsamic_api.config_case(arguments=arguments, dry=dry)
     except (BalsamicStartError, LimsDataError) as e:
         LOG.error(f"Could not create config: {e.message}")
@@ -112,6 +112,7 @@ def run(context, analysis_type, run_analysis, priority, case_id, dry):
     balsamic_analysis_api = context.obj["BalsamicAnalysisAPI"]
 
     try:
+        LOG.info(f"Running analysis for {case_id}")
         arguments = {
             "priority": priority or balsamic_analysis_api.get_priority(case_id),
             "analysis_type": analysis_type,
@@ -138,6 +139,7 @@ def report_deliver(context, case_id, analysis_type, dry):
     balsamic_analysis_api = context.obj["BalsamicAnalysisAPI"]
 
     try:
+        LOG.info(f"Creating delivery report for {case_id}")
         case_object = balsamic_analysis_api.get_case_object(case_id)
         sample_config = balsamic_analysis_api.get_config_path(case_id=case_id, check_exists=True)
         analysis_finish = balsamic_analysis_api.get_analysis_finish_path(case_id, check_exists=True)
@@ -160,7 +162,9 @@ def update_housekeeper(context, case_id):
 
     balsamic_analysis_api = context.obj["BalsamicAnalysisAPI"]
     try:
+        LOG.info(f"Storing bundle data in Housekeeper for {case_id}")
         balsamic_analysis_api.upload_bundle_housekeeper(case_id=case_id)
+        LOG.info(f"Storing Analysis in ClinicalDB for {case_id}")
         balsamic_analysis_api.upload_analysis_statusdb(case_id=case_id)
     except (BalsamicStartError, BundleAlreadyAddedError, FileExistsError) as e:
         LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {e.message}!")
