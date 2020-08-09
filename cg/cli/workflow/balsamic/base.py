@@ -162,7 +162,7 @@ def update_housekeeper(context, case_id):
     try:
         balsamic_analysis_api.upload_bundle_housekeeper(case_id=case_id)
         balsamic_analysis_api.upload_analysis_statusdb(case_id=case_id)
-    except (BalsamicStartError, BundleAlreadyAddedError) as e:
+    except (BalsamicStartError, BundleAlreadyAddedError, FileExistsError) as e:
         LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {e.message}!")
         balsamic_analysis_api.housekeeper_api.rollback()
         balsamic_analysis_api.store.rollback()

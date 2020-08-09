@@ -198,7 +198,12 @@ class BalsamicAnalysisAPI:
         if panel_bed:
             return Path(self.balsamic_api.bed_path, panel_bed).as_posix()
         if len(target_beds) == 1:
-            return Path(self.balsamic_api.bed_path, target_beds.pop()).as_posix()
+            target_bed = target_beds.pop()
+            if not target_bed:
+                raise BalsamicStartError(
+                    f"Application type {application_types.pop()} requires a bed file to be analyzed!"
+                )
+            return Path(self.balsamic_api.bed_path, target_bed).as_posix()
         raise BalsamicStartError(f"Too many BED versions in LIMS: {len(target_beds)}")
 
     def get_verified_tumor_path(self, sample_data: dict) -> str(Path):
@@ -355,6 +360,6 @@ class BalsamicAnalysisAPI:
             completed_at=dt.datetime.now(),
             primary=(len(case_object.analyses) == 0),
         )
-        new_analysis.family=case_object
+        new_analysis.family = case_object
         self.store.add_commit(new_analysis)
         LOG.info(f"Analysis successfully stored in ClinicalDB: {case_id} : {analysis_start}")
