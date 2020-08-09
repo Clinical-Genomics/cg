@@ -178,6 +178,8 @@ class StoreHelpers:
             analysis.upload_started_at = upload_started or datetime.now()
         if config_path:
             analysis.config_path = config_path
+        if pipeline:
+            analysis.pipeline = pipeline
 
         analysis.limitations = "A limitation"
         analysis.family = family

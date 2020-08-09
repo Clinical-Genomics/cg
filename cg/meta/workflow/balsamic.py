@@ -31,6 +31,15 @@ class BalsamicAnalysisAPI:
         self.lims_api = lims_api
         self.fastq_api = fastq_api
 
+    def get_case_object(self, case_id: str):
+        """Look up case ID in StoreDB and return result"""
+        case_object = self.store.family(case_id)
+        if not case_object:
+            raise BalsamicStartError(f"{case_id} not found in StatucDB!")
+        if not case_object.links:
+            raise BalsamicStartError(f"{case_id} number of samples is {len(case_object.links)}!")
+        return case_object
+        
     def get_case_path(self, case_id: str) -> Path:
         """Returns a path where the Balsamic case for the case_id should be located"""
         return Path(self.balsamic_api.root_dir, case_id).as_posix()
@@ -90,14 +99,6 @@ class BalsamicAnalysisAPI:
             files.append(data)
         return files
 
-    def get_case_object(self, case_id: str):
-        """Look up case ID in StoreDB and return result"""
-        case_object = self.store.family(case_id)
-        if not case_object:
-            raise BalsamicStartError(f"{case_id} not found in StatucDB!")
-        if not case_object.links:
-            raise BalsamicStartError(f"{case_id} number of samples is {len(case_object.links)}!")
-        return case_object
 
     def get_balsamic_sample_objects(self, case_id: str) -> list:
         case_object = self.get_case_object(case_id=case_id)
@@ -258,7 +259,7 @@ class BalsamicAnalysisAPI:
         }
         return arguments
 
-    def report_sample_table(self, case_id: str, sample_data: dict):
+    def print_sample_params(self, case_id: str, sample_data: dict):
         """Outputs a table of samples to be displayed in log"""
 
         LOG.info(f"Case {case_id} has following BALSAMIC samples:")
@@ -289,7 +290,7 @@ class BalsamicAnalysisAPI:
                 "application_type": self.get_application_type(link_object),
                 "target_bed": self.get_target_bed_from_lims(link_object),
             }
-        self.report_sample_table(case_id=case_id, sample_data=sample_data)
+        self.print_sample_params(case_id=case_id, sample_data=sample_data)
         return sample_data
 
     def parse_deliverables_report(self, case_id) -> list:
