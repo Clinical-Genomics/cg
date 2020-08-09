@@ -138,15 +138,16 @@ def report_deliver(context, case_id, analysis_type, dry):
     balsamic_analysis_api = context.obj["BalsamicAnalysisAPI"]
 
     try:
-        case_ibject = balsamic_analysis_api.get_case_object(case_id)
-        arguments = {
-            "sample_config": balsamic_analysis_api.get_config_path(
+        case_object = balsamic_analysis_api.get_case_object(case_id)
+        sample_config = balsamic_analysis_api.get_config_path(
                 case_id=case_id, check_exists=True
-            ),
-            "analysis_type": analysis_type,
-        }
+            )
         analysis_finish = balsamic_analysis_api.get_analysis_finish_path(case_id, check_exists=True)
         LOG.info(f"Found analysis finish file: {analysis_finish}")
+        arguments = {
+            "sample_config": sample_config,
+            "analysis_type": analysis_type,
+        }
         balsamic_analysis_api.balsamic_api.report_deliver(arguments=arguments, dry=dry)
     except BalsamicStartError as e:
         LOG.error(f"Could not create report file: {e.message}")
@@ -165,6 +166,8 @@ def update_housekeeper(context, case_id):
         balsamic_analysis_api.upload_analysis_statusdb(case_id=case_id)
     except (BalsamicStartError, BundleAlreadyAddedError) as e:
         LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {e.message}!")
+        balsamic_analysis_api.housekeeper_api.rollback()
+        balsamic_analysis_api.store.rollback()
         raise click.Abort()
 
 

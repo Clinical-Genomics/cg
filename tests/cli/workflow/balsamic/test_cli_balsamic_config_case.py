@@ -42,7 +42,7 @@ def test_without_samples(cli_runner, balsamic_context, caplog):
     assert result.exit_code != EXIT_SUCCESS
     # THEN warning should be printed that no config file is found
     assert case_id in caplog.text
-    assert "0" in caplog.text
+    assert "analysis will not be started" in caplog.text
 
 
 def test_dry(cli_runner, balsamic_context, caplog):
