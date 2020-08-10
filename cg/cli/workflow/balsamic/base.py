@@ -58,7 +58,7 @@ def balsamic(context, priority, panel_bed, analysis_type, run_analysis, dry):
     """Cancer analysis workflow """
     if context.invoked_subcommand is None:
         click.echo(context.get_help())
-        raise click.Abort()
+        return None
     config = context.obj
     context.obj["BalsamicAnalysisAPI"] = BalsamicAnalysisAPI(
         balsamic_api=BalsamicAPI(config),
