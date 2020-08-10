@@ -162,6 +162,7 @@ def panel(context: click.Context, case_id: str, dry_run: bool = False):
 @START_WITH_PROGRAM
 @click.argument("case_id", required=False, type=str)
 @click.option("-d", "--dry-run", "dry_run", is_flag=True, help="print command to console")
+@click.option("--mip-dry-run", "mip_dry_run", is_flag=True, help="Run MIP in dry-run mode")
 @click.option(
     "--skip-evaluation", "skip_evaluation", is_flag=True, help="Skip mip qccollect evaluation"
 )
@@ -171,6 +172,7 @@ def run(
     case_id: str,
     dry_run: bool = False,
     email: str = None,
+    mip_dry_run: bool = False,
     priority: str = "Normal",
     skip_evaluation: bool = False,
     start_with: str = None,
@@ -186,7 +188,7 @@ def run(
         case=case_id,
         priority=priority,
         email=email,
-        dryrun=dry_run,
+        dryrun=mip_dry_run,
         start_with=start_with,
         skip_evaluation=skip_evaluation,
     )

@@ -69,8 +69,9 @@ def link(context: click.Context, case_id: str, sample_id: str):
 
 
 @mip_rna.command()
-@click.option("-d", "--dry", is_flag=True, help="print command to console")
+@click.option("-d", "--dry-run", "dry_run", is_flag=True, help="print command to console")
 @click.option("-e", "--email", help="email to send errors to")
+@click.option("--mip-dry-run", "mip_dry_run", is_flag=True, help="Run MIP in dry-run mode")
 @click.option("-p", "--priority", type=click.Choice(["low", "normal", "high"]))
 @click.option("-sw", "--start-with", help="start mip from this program.")
 @click.argument("case_id")
@@ -78,7 +79,8 @@ def link(context: click.Context, case_id: str, sample_id: str):
 def run(
     context: click.Context,
     case_id: str,
-    dry: bool = False,
+    dry_run: bool = False,
+    mip_dry_run: bool = False,
     priority: str = None,
     email: str = None,
     start_with: str = None,
@@ -101,10 +103,10 @@ def run(
         case=case_id,
         priority=priority,
         email=email,
-        dryrun=dry,
+        dryrun=mip_dry_run,
         start_with=start_with,
     )
-    if dry:
+    if dry_run:
         command = rna_api.build_command(**kwargs)
         LOG.info(" ".join(command))
     else:
