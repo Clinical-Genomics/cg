@@ -196,6 +196,18 @@ def start(context, case_id, analysis_type, priority, dry):
     )
 
 
+@balsamic.command("store")
+@ARGUMENT_CASE_ID
+@OPTION_DRY
+@OPTION_ANALYSIS_TYPE
+@click.pass_context
+def store(context, case_id, analysis_type, dry):
+    """Generate Housekeeper report for CASE ID and store in Housekeeper"""
+    LOG.info(f"Storing analysis for {case_id}")
+    context.invoke(report_deliver, case_id=case_id, analysis_type=analysis_type, dry=dry)
+    context.invoke(store_housekeeper, case_id=case_id)
+
+
 @balsamic.command("start-available")
 @OPTION_DRY
 @click.pass_context
@@ -217,10 +229,8 @@ def store_available(context, dry):
     """Store bundle data for all available Balsamic cases"""
     for case_object in context.obj["BalsamicAnalysisAPI"].store.cases_to_balsamic_analyze():
         case_id = case_object.internal_id
-        LOG.info(f"Storing analysis for {case_id}")
         try:
-            context.invoke(report_deliver, case_id=case_id, dry=dry)
-            context.invoke(store_housekeeper, case_id=case_id)
+            context.invoke(store, case_id=case_id, dry=dry)
         except click.Abort:
             continue
 
