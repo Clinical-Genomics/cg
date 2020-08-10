@@ -364,11 +364,8 @@ class BalsamicAnalysisAPI:
         self.store.add_commit(new_analysis)
         LOG.info(f"Analysis successfully stored in ClinicalDB: {case_id} : {analysis_start}")
 
-
     def get_analyses_to_clean(self, before_date: dt.datetime = dt.datetime.now()) -> list:
         """Retrieve a list of analyses for cleaning created before certain date"""
         analyses_before = self.store.analyses(before=before_date)
         analyses_to_clean = self.store.analyses_to_clean(pipeline="Balsamic")
         return [x for x in analyses_to_clean if x in analyses_before]
-
-
