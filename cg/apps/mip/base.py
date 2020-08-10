@@ -69,20 +69,28 @@ class MipAPI:
         ]
         for key, value in kwargs.items():
             if value:
-                # Cg to mip options mapping
-                command.append(CLI_OPTIONS[key]["option"])
-                # append value for non-flags
-                if value is not True:
-                    command.append(value)
+                _cg_to_mip_option_map(command, key)
+                _append_value_for_non_flags(command, value)
         command.append(SINGLE_QUOTE)
         return command
 
     @classmethod
-    def execute(cls, command: str):
+    def execute(cls, command: list):
         """Start a new MIP run
         Args:
-            command(str): Command to execute
+            command(list): Command to execute
         """
 
         process = subprocess.run(SPACE.join(command), shell=True, check=True)
         return process
+
+
+def _append_value_for_non_flags(command: list, value):
+    """Add the value of the non boolean options to the command"""
+    if value is not True:
+        command.append(value)
+
+
+def _cg_to_mip_option_map(command: list, mip_key):
+    """Map cg options to MIP option syntax"""
+    command.append(CLI_OPTIONS[mip_key]["option"])
