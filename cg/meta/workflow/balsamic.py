@@ -263,7 +263,7 @@ class BalsamicAnalysisAPI:
         }
         return arguments
 
-    def print_sample_params(self, case_id: str, sample_data: dict):
+    def print_sample_params(self, case_id: str, sample_data: dict) -> None:
         """Outputs a table of samples to be displayed in log"""
 
         LOG.info(f"Case {case_id} has following BALSAMIC samples:")
@@ -321,7 +321,7 @@ class BalsamicAnalysisAPI:
             bundle_files.append(bundle_file)
         return bundle_files
 
-    def upload_bundle_housekeeper(self, case_id):
+    def upload_bundle_housekeeper(self, case_id: str) -> None:
         """ Add analysis bundle to Housekeeper """
         self.get_case_object(case_id=case_id)
         sample_config = self.get_config_path(case_id=case_id, check_exists=True)
@@ -344,7 +344,7 @@ class BalsamicAnalysisAPI:
             f"Analysis successfully stored in Housekeeper: {case_id} : {bundle_version.created_at}"
         )
 
-    def upload_analysis_statusdb(self, case_id):
+    def upload_analysis_statusdb(self, case_id: str) -> None:
         """ Add Analysis bundle to StatusDB """
         case_object = self.get_case_object(case_id=case_id)
         sample_config = self.get_config_path(case_id=case_id, check_exists=True)
@@ -363,3 +363,12 @@ class BalsamicAnalysisAPI:
         new_analysis.family = case_object
         self.store.add_commit(new_analysis)
         LOG.info(f"Analysis successfully stored in ClinicalDB: {case_id} : {analysis_start}")
+
+
+    def get_analyses_to_clean(self, before_date: dt.datetime = dt.datetime.now()) -> list:
+        """Retrieve a list of analyses for cleaning created before certain date"""
+        analyses_before = self.store.analyses(before=before_date)
+        analyses_to_clean = self.store.analyses_to_clean(pipeline="Balsamic")
+        return [x for x in analyses_to_clean if x in analyses_before]
+
+

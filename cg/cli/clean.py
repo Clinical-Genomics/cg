@@ -96,7 +96,7 @@ def balsamic_run_dir(context, yes, case_id, dry_run: bool = False):
             return SUCCESS
         shutil.rmtree(analysis_path)
         analysis_obj.cleaned_at = datetime.now()
-        # balsamic_analysis_api.store.commit()
+        balsamic_analysis_api.store.commit()
 
 
 @clean.command("mip-run-dir")
@@ -235,14 +235,11 @@ def balsamic_past_run_dirs(context, before_str: str, yes: bool = False, dry_run:
 
     before = parse_date(before_str)
     balsamic_analysis_api = context.obj["BalsamicAnalysisAPI"]
-    possible_cleanups = balsamic_analysis_api.store.analyses_to_clean(pipeline="Balsamic")
-    old_enough_analyses = balsamic_analysis_api.store.analyses(before=before)
+    possible_cleanups = balsamic_analysis_api.get_analyses_to_clean(before_date=before)
+    LOG.info(f"Cleaning all analyses created before {before}")
 
     # for all analyses
     for analysis in possible_cleanups:
-        if analysis not in old_enough_analyses:
-            continue
-
         case_id = analysis.family.internal_id
 
         # call clean
