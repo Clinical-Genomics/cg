@@ -33,6 +33,10 @@ class TrailblazerAPI(Store, fastq.FastqHandler):
             old_analysis.is_deleted = True
         self.commit()
 
+    def add_pending_analysis(self, case_id: str, email: str = None) -> models.Analysis:
+        """ Add analysis as pending"""
+        self.add_pending(case_id, email)
+
     @staticmethod
     def get_sampleinfo(analysis: models.Analysis) -> str:
         """Get the sample info path for an analysis."""

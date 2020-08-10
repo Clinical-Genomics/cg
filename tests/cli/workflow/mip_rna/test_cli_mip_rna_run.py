@@ -51,4 +51,4 @@ def test_run(cli_runner, tb_api, mock_store, caplog, monkeypatch):
 
     # THEN we should get to the end of the function
     with caplog.at_level(logging.INFO):
-        assert "MIP run started!" in caplog.text
+        assert "MIP rd-rna run started!" in caplog.text

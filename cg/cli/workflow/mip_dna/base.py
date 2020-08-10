@@ -138,7 +138,7 @@ mip_dna.add_command(config_case)
 
 
 @mip_dna.command()
-@click.option("-d", "--dry-run", "dry_run", is_flag=True, help="print command to console")
+@click.option("-d", "--dry-run", "dry_run", is_flag=True, help="print output to console")
 @click.argument("case_id", required=False, type=str)
 @click.pass_context
 def panel(context: click.Context, case_id: str, dry_run: bool = False):
@@ -205,8 +205,8 @@ def run(
     else:
         dna_api.run(**kwargs)
         tb_api.mark_analyses_deleted(case_id=case_id)
-        tb_api.add_pending(case_id, email=email)
-        LOG.info("MIP run started!")
+        tb_api.add_pending_analysis(case_id=case_id, email=email)
+        LOG.info("MIP rd-dna run started!")
 
 
 @mip_dna.command()

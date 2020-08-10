@@ -10,6 +10,7 @@ class MockTB:
         self._link_was_called = False
         self._mark_analyses_deleted_called = False
         self._add_pending_was_called = False
+        self._add_pending_analysis_was_called = False
         self._family = None
         self._temp = None
         self._case_id = None
@@ -54,6 +55,12 @@ class MockTB:
         self._case_id = case_id
         self._email = email
         self._add_pending_was_called = True
+
+    def add_pending_analysis(self, case_id: str, email: str):
+        """Mock adding a pending analyses"""
+        self._case_id = case_id
+        self._email = email
+        self._add_pending_analysis_was_called = True
 
     def mark_analyses_deleted_called(self):
         """check if mark_analyses_deleted was called"""
