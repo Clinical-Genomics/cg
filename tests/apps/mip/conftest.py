@@ -134,7 +134,7 @@ def tb_api():
 def mip_api():
     """MipAPI fixture"""
     _mip_api = MipAPI(
-        script="test/fake_mip.pl", pipeline="analyse rd_dna", conda_env="S_mip8.2_rd-rna"
+        script="test/fake_mip.pl", pipeline="analyse rd_dna", conda_env="S_mip_rd-rna"
     )
     return _mip_api
 

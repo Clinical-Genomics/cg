@@ -12,7 +12,7 @@ def test_cg_dry_run(cli_runner, tb_api, mock_store, caplog):
     context = {}
     context["db"] = mock_store
     context["tb"] = tb_api
-    context["rna_api"] = MipAPI("${HOME}/bin/mip", "analyse rd_rna", "S_mip8.2_rd-rna")
+    context["rna_api"] = MipAPI("${HOME}/bin/mip", "analyse rd_rna", "S_mip_rd-rna")
     context["mip-rd-rna"] = {"mip_config": "config.yaml"}
 
     # WHEN we run a case in dry run mode
@@ -39,7 +39,7 @@ def test_run(cli_runner, tb_api, mock_store, caplog, monkeypatch):
     # GIVEN a cli function
     context = {}
     monkeypatch.setattr(MipAPI, "run", mip_run)
-    mip_api = MipAPI("${HOME}/bin/mip", "analyse rd_rna", "S_mip8.2_rd-rna")
+    mip_api = MipAPI("${HOME}/bin/mip", "analyse rd_rna", "S_mip_rd-rna")
     context["db"] = mock_store
     context["tb"] = tb_api
     context["rna_api"] = mip_api

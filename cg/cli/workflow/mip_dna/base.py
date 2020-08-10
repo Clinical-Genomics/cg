@@ -1,4 +1,4 @@
-"""Commands to start MIP rare disease dna workflow"""
+"""Commands to start MIP rare disease DNA workflow"""
 
 import logging
 import sys
