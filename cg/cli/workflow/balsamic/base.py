@@ -192,7 +192,7 @@ def start(context, case_id, analysis_type, priority, run_analysis, dry):
         case_id=case_id,
         analysis_type=analysis_type,
         priority=priority,
-        run_analysis=run_analysis,
+        run_analysis="--run-analysis",
         dry=dry,
     )
 
