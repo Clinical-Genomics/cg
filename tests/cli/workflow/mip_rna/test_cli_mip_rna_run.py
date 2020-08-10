@@ -5,8 +5,8 @@ from cg.cli.workflow.mip_rna.base import run
 from cg.apps.mip import MipAPI
 
 
-def test_run_dry(cli_runner, tb_api, mock_store, caplog):
-    """Test run MIP RNA analysis"""
+def test_cg_dry_run(cli_runner, tb_api, mock_store, caplog):
+    """Test print the MIP command to console"""
     # GIVEN a cli function
 
     context = {}
@@ -18,14 +18,14 @@ def test_run_dry(cli_runner, tb_api, mock_store, caplog):
     # WHEN we run a case in dry run mode
     caplog.set_level(logging.INFO)
     cli_runner.invoke(
-        run, ["--dry", "--email", "james.holden@scilifelab.se", "angrybird"], obj=context
+        run, ["--dry-run", "--email", "james.holden@scilifelab.se", "angrybird"], obj=context
     )
 
     # THEN the command should be printed
     with caplog.at_level(logging.INFO):
         assert (
             "${HOME}/bin/mip analyse rd_rna angrybird --config_file config.yaml "
-            "--email james.holden@scilifelab.se --dry_run_all" in caplog.text
+            "--email james.holden@scilifelab.se" in caplog.text
         )
 
 
@@ -48,6 +48,16 @@ def test_run(cli_runner, tb_api, mock_store, caplog, monkeypatch):
     # WHEN we run a case
     caplog.set_level(logging.INFO)
     cli_runner.invoke(run, ["--email", "james.holden@scilifelab.se", "angrybird"], obj=context)
+
+    # THEN we should get to the end of the function
+    with caplog.at_level(logging.INFO):
+        assert "MIP rd-rna run started!" in caplog.text
+
+    # WHEN we run a case in MIP dry mode
+    caplog.set_level(logging.INFO)
+    cli_runner.invoke(
+        run, ["--mip-dry-run", "--email", "james.holden@scilifelab.se", "angrybird"], obj=context
+    )
 
     # THEN we should get to the end of the function
     with caplog.at_level(logging.INFO):
