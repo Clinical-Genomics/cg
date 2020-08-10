@@ -217,7 +217,7 @@ def start_available(context, dry):
         case_id = case_object.internal_id
         LOG.info(f"Starting analysis for {case_id}")
         try:
-            context.invoke(start, case_id=case_id, dry=dry, run_analysis="--run-analysis")
+            context.invoke(start, case_id=case_id, dry=dry)
         except click.Abort:
             continue
 
