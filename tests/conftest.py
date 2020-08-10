@@ -219,6 +219,9 @@ def fixture_files():
         "rna_config_store": "tests/fixtures/apps/mip/rna/store/case_config.yaml",
         "rna_sampleinfo_store": "tests/fixtures/apps/mip/rna/store/case_qc_sample_info.yaml",
         "mip_rna_deliverables": "test/fixtures/apps/mip/rna/store/case_deliverables.yaml",
+        "dna_config_store": "tests/fixtures/apps/mip/dna/store/case_config.yaml",
+        "dna_sampleinfo_store": "tests/fixtures/apps/mip/dna/store/case_qc_sample_info.yaml",
+        "mip_dna_deliverables": "test/fixtures/apps/mip/dna/store/case_deliverables.yaml",
     }
 
 
@@ -253,6 +256,8 @@ def fixture_files_raw(files):
         "rna_sampleinfo": ruamel.yaml.safe_load(open(files["rna_sampleinfo"])),
         "rna_config_store": ruamel.yaml.safe_load(open(files["rna_config_store"])),
         "rna_sampleinfo_store": ruamel.yaml.safe_load(open(files["rna_sampleinfo_store"])),
+        "dna_config_store": ruamel.yaml.safe_load(open(files["dna_config_store"])),
+        "dna_sampleinfo_store": ruamel.yaml.safe_load(open(files["dna_sampleinfo_store"])),
     }
 
 
@@ -267,6 +272,8 @@ def files_data(files_raw):
         "rna_sampleinfo": mip_rna_files_api.parse_sampleinfo_rna(files_raw["rna_sampleinfo"]),
         "rna_config_store": store_mip.parse_config(files_raw["rna_config_store"]),
         "rna_sampleinfo_store": store_mip.parse_sampleinfo(files_raw["rna_sampleinfo_store"]),
+        "dna_config_store": store_mip.parse_config(files_raw["dna_config_store"]),
+        "dna_sampleinfo_store": store_mip.parse_sampleinfo(files_raw["dna_sampleinfo_store"]),
     }
 
 
