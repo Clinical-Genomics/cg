@@ -158,10 +158,10 @@ def report_deliver(context, case_id, analysis_type, dry):
         raise click.Abort()
 
 
-@balsamic.command("update-housekeeper")
+@balsamic.command("store-housekeeper")
 @ARGUMENT_CASE_ID
 @click.pass_context
-def update_housekeeper(context, case_id):
+def store_housekeeper(context, case_id):
     """Store a finished analysis in Housekeeper and StatusDB."""
     balsamic_analysis_api = context.obj["BalsamicAnalysisAPI"]
     try:
@@ -211,17 +211,17 @@ def start_available(context, dry):
             continue
 
 
-@balsamic.command("deliver-available")
+@balsamic.command("store-available")
 @OPTION_DRY
 @click.pass_context
-def deliver_available(context, dry):
-    """Deliver bundle data for all available cases"""
+def store_available(context, dry):
+    """Store bundle data for all available Balsamic cases"""
     for case_object in context.obj["BalsamicAnalysisAPI"].store.cases_to_balsamic_analyze():
         case_id = case_object.internal_id
         LOG.info(f"Storing analysis for {case_id}")
         try:
             context.invoke(report_deliver, case_id=case_id, dry=dry)
-            context.invoke(update_housekeeper, case_id=case_id)
+            context.invoke(store_housekeeper, case_id=case_id)
         except click.Abort:
             continue
 
