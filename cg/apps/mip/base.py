@@ -4,6 +4,8 @@ import subprocess
 
 from cg.constants import SINGLE_QUOTE, SPACE
 
+LOG = logging.getLogger(__name__)
+
 """
 This dict is built like this:
 'cg-option': {
@@ -39,24 +41,23 @@ class MipStartError(Exception):
 class MipAPI:
     """ Group MIP specific functionality """
 
-    def __init__(self, script, pipeline, conda_env, logger=logging.getLogger(__name__)):
+    def __init__(self, script: list, pipeline: list, conda_env: str):
         """Initialize MIP command line interface."""
         self.script = script
         self.pipeline = pipeline
         self.conda_env = conda_env
-        self.logger = logger
 
-    def run(self, config, case, **kwargs):
+    def run(self, config: str, case: str, **kwargs):
         """Execute the workflow"""
         command = self.build_command(config, case, **kwargs)
-        self.logger.debug(SPACE.join(command))
+        LOG.debug(SPACE.join(command))
         process = self.execute(command)
         success = 0
         if process.returncode != success:
             raise MipStartError("error running analysis, check the output")
         return process
 
-    def build_command(self, config, case, **kwargs):
+    def build_command(self, config: str, case: str, **kwargs):
         """Builds the command to execute MIP"""
         command = [
             f"bash -c 'source activate {self.conda_env};",

@@ -248,7 +248,7 @@ def start(context: click.Context, dry_run: bool = False):
     sys.exit(exit_code)
 
 
-def _suggest_cases_to_analyze(context, show_as_error: bool = False):
+def _suggest_cases_to_analyze(context: click.Context, show_as_error: bool = False):
     """Suggest cases to analyze"""
     if show_as_error:
         LOG.error("provide a case, suggestions:")
