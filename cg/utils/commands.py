@@ -17,27 +17,42 @@ class Process:
     called, that will be handled in this module.Output form stdout and stdin will be handeld here.
     """
 
-    def __init__(self, binary, config=None, config_parameter="--config"):
+    def __init__(
+        self,
+        binary: str,
+        config: str = None,
+        config_parameter: str = "--config",
+        environment: str = None,
+    ):
         """
         Args:
             binary(str): Path to binary for the process to use
             config(str): Path to config if used by process
+            environment(str): Activate conda environment before executing binary
         """
         super(Process, self).__init__()
         self.binary = binary
+        self.environment = environment
         LOG.debug("Initialising Process with binary: %s", self.binary)
         self.base_call = [self.binary]
+        if environment:
+            LOG.debug("Activating environment with: %s", self.environment)
+            self.base_call.insert(0, f"source activate {self.environment};")
         if config:
             self.base_call.extend([config_parameter, config])
+        if option:
+            self.base_call.extend([self.option])
         LOG.debug("Use base call %s", self.base_call)
         self._stdout = ""
         self._stderr = ""
 
-    def run_command(self, parameters=None):
+    def run_command(self, parameters: list = None) -> int:
         """Execute a command in the shell
 
         Args:
             parameters(list)
+        Return(int): Return code from called process
+
         """
         command = copy.deepcopy(self.base_call)
         if parameters:
