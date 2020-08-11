@@ -70,7 +70,6 @@ class MipAPI:
     def execute(self, command: dict, dry_run: bool = False) -> int:
         """Start a new MIP analysis
         Args:
-            mip_process(Process_obj):
             command(list): Command to execute
             dry_run: Print command instead of executing it
         """
@@ -78,7 +77,9 @@ class MipAPI:
             command["binary"], config=command["config"], environment=command["environment"]
         )
 
-        process_return_code = mip_process.run_command(dry_run, parameters=command["parameters"])
+        process_return_code = mip_process.run_command(
+            dry_run=dry_run, parameters=command["parameters"]
+        )
         success = 0
         if process_return_code != success:
             raise MipStartError("error running analysis, check the output")

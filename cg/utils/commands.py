@@ -44,7 +44,7 @@ class Process:
         self._stdout = ""
         self._stderr = ""
 
-    def run_command(self, dry_run: bool = False, parameters: list = None) -> int:
+    def run_command(self, parameters: list = None, dry_run: bool = False) -> int:
         """Execute a command in the shell
 
         Args:
