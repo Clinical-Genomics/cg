@@ -13,7 +13,7 @@ def test_process():
     binary = "ls"
     # WHEN instantiating a Process with the binary
     process = Process(binary=binary)
-    # THEN assert the instatiation worked as expected
+    # THEN assert the instantiation worked as expected
     assert process.binary == binary
     assert repr(process) == "Process:base_call:['ls']"
     assert process.stdout == ""
@@ -42,7 +42,7 @@ def test_process_run_command_with_params(ls_process):
     # GIVEN a proces with 'ls' as binary
     process = ls_process
     # WHEN running the command with parameters
-    process.run_command(["-l"])
+    process.run_command(parameters=["-l"])
     # THEN assert the output is valid
     i = 0
     for i, line in enumerate(process.stdout.split("\n"), 1):
@@ -57,7 +57,7 @@ def test_process_std_err(ls_process):
     # WHEN running the command with invalid parameters
     with pytest.raises(CalledProcessError):
         # THEN assert that a exception is raised
-        process.run_command(["-kffd4"])
+        process.run_command(parameters=["-kffd4"])
     # THEN assert that stderr was captured
     assert process.stderr
 

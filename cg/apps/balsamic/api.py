@@ -55,7 +55,7 @@ class BalsamicAPI:
             LOG.info(f'Executing command balsamic{" ".join(command + options)}')
             retcode = self.EXIT_SUCCESS
         else:
-            retcode = self.process.run_command(command + options)
+            retcode = self.process.run_command(parameters=command + options)
         return retcode
 
     def run_analysis(self, arguments: dict, run_analysis: bool, dry: bool = False) -> int:
@@ -75,5 +75,6 @@ class BalsamicAPI:
             LOG.info(f'Executing command balsamic{" ".join(command + options + run_analysis)}')
             retcode = self.EXIT_SUCCESS
         else:
-            retcode = self.process.run_command(command + options + run_analysis)
+            parameters = command + options + run_analysis
+            retcode = self.process.run_command(parameters=parameters)
         return retcode
