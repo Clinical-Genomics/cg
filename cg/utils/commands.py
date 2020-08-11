@@ -46,24 +46,28 @@ class Process:
         self._stdout = ""
         self._stderr = ""
 
-    def run_command(self, parameters: list = None) -> int:
+    def run_command(self, dry_run: bool = False, parameters: list = None) -> int:
         """Execute a command in the shell
 
         Args:
-            parameters(list)
+            parameters(list):
+            dry_run(bool): Print command instead of executing it
         Return(int): Return code from called process
 
         """
+        success = 0
         command = copy.deepcopy(self.base_call)
         if parameters:
             command.extend(parameters)
 
         LOG.info("Running command %s", " ".join(command))
+        if dry_run:
+            return success
         res = subprocess.run(command, check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         self.stdout = res.stdout.decode("utf-8").rstrip()
         self.stderr = res.stderr.decode("utf-8").rstrip()
-        if res.returncode != 0:
+        if res.returncode != success:
             LOG.critical("Call %s exit with a non zero exit code", command)
             LOG.critical(self.stderr)
             raise CalledProcessError(command, res.returncode)

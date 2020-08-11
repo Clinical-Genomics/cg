@@ -107,8 +107,7 @@ def run(
         start_with=start_with,
     )
     if dry_run:
-        command = rna_api.build_command(**kwargs)
-        LOG.info(" ".join(command))
+        rna_api.run(dry_run=dry_run, **kwargs)
     else:
         rna_api.run(**kwargs)
         tb_api.mark_analyses_deleted(case_id=case_id)

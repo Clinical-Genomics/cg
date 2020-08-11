@@ -13,7 +13,6 @@ from cg.cli.workflow.get_links import get_links
 from cg.cli.workflow.mip.store import store as store_cmd
 from cg.cli.workflow.mip_dna.deliver import CASE_TAGS, SAMPLE_TAGS
 from cg.cli.workflow.mip_dna.deliver import deliver as deliver_cmd
-from cg.constants import SPACE
 from cg.exc import CgError
 from cg.meta.deliver import DeliverAPI
 from cg.meta.workflow.mip_dna import AnalysisAPI
@@ -202,8 +201,7 @@ def run(
     if context.obj["tb"].analyses(family=case_obj.internal_id, temp=True).first():
         LOG.warning("%s: analysis already running", {case_obj.internal_id})
     if dry_run:
-        command = dna_api.build_command(**kwargs)
-        LOG.info(SPACE.join(command))
+        dna_api.run(dry_run=dry_run, **kwargs)
     else:
         dna_api.run(**kwargs)
         tb_api.mark_analyses_deleted(case_id=case_id)
