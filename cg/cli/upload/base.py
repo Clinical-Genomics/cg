@@ -141,14 +141,15 @@ def upload(context, family_id, force_restart):
 
 
 @upload.command()
+@click.option("--pipeline", type=str, help="Limit to specific pipeline")
 @click.pass_context
-def auto(context):
+def auto(context: click.Context, pipeline: str = None):
     """Upload all completed analyses."""
 
     click.echo(click.style("----------------- AUTO ------------------------"))
 
     exit_code = 0
-    for analysis_obj in context.obj["status"].analyses_to_upload():
+    for analysis_obj in context.obj["status"].analyses_to_upload(pipeline=pipeline):
 
         if analysis_obj.family.analyses[0].uploaded_at is not None:
             LOG.warning(
