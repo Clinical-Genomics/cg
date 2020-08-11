@@ -1,6 +1,6 @@
 """ Common MIP related functionality """
 
-from cg.constants import SINGLE_QUOTE, SPACE
+from cg.constants import SPACE
 from cg.utils import Process
 
 """
@@ -67,23 +67,22 @@ class MipAPI:
         return command
 
     @classmethod
-    def execute(self, mip_process: Process, command: dict, dry_run: bool = False) -> None:
+    def execute(self, command: dict, dry_run: bool = False) -> int:
         """Start a new MIP analysis
         Args:
+            mip_process(Process_obj):
             command(list): Command to execute
             dry_run: Print command instead of executing it
         """
-
-        process_returncode = mip_process.run_command(
-            dry_run,
-            binary=command[binary],
-            config=command[config],
-            environment=command[environment],
-            parameters=command[parameters],
+        mip_process = Process(
+            command["binary"], config=command["config"], environment=command["environment"]
         )
+
+        process_return_code = mip_process.run_command(dry_run, parameters=command["parameters"])
         success = 0
-        if process_returncode != success:
+        if process_return_code != success:
             raise MipStartError("error running analysis, check the output")
+        return success
 
 
 def _append_value_for_non_flags(parameters: list, value):

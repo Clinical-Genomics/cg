@@ -40,8 +40,6 @@ class Process:
             self.base_call.insert(0, f"source activate {self.environment};")
         if config:
             self.base_call.extend([config_parameter, config])
-        if option:
-            self.base_call.extend([self.option])
         LOG.debug("Use base call %s", self.base_call)
         self._stdout = ""
         self._stderr = ""

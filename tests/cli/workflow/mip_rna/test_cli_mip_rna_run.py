@@ -24,7 +24,7 @@ def test_cg_dry_run(cli_runner, tb_api, mock_store, caplog):
     # THEN the command should be printed
     with caplog.at_level(logging.INFO):
         assert (
-            "${HOME}/bin/mip analyse rd_rna angrybird --config_file config.yaml "
+            "${HOME}/bin/mip analyse rd_rna angrybird --config config.yaml "
             "--email james.holden@scilifelab.se" in caplog.text
         )
 
