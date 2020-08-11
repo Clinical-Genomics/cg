@@ -50,10 +50,7 @@ def test_analysis_without_started_at(base_context, cli_runner, caplog, helpers):
 
     # WHEN calling delivery_report without date parameter
     with caplog.at_level(logging.DEBUG):
-        result = cli_runner.invoke(
-            delivery_report, [case_id], obj=base_context
-        )
+        result = cli_runner.invoke(delivery_report, [case_id], obj=base_context)
 
     # THEN it should contain the date in the logged info
     assert "using analysis date: " in caplog.text
-
