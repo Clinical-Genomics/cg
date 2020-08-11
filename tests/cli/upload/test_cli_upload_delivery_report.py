@@ -28,13 +28,32 @@ def test_analysis_started_at(base_context, cli_runner, caplog, helpers):
     analysis = helpers.add_analysis(base_context["status"], started_at=datetime.now())
     case_id = analysis.family.internal_id
     a_date = analysis.started_at
+    assert a_date
 
-    # WHEN calling delivery_report with malformed date parameter
+    # WHEN calling delivery_report with ok date parameter
     with caplog.at_level(logging.INFO):
         result = cli_runner.invoke(
             delivery_report, [case_id, "--analysis-started-at", a_date], obj=base_context
         )
 
     # THEN it should contain the date in the logged info
-    assert result.exit_code != EXIT_CODE_SUCCESS
     assert str(a_date) in caplog.text
+
+
+def test_analysis_without_started_at(base_context, cli_runner, caplog, helpers):
+
+    # GIVEN a correct case_id and a correct date
+    analysis = helpers.add_analysis(base_context["status"], started_at=datetime.now())
+    case_id = analysis.family.internal_id
+    a_date = analysis.started_at
+    assert a_date
+
+    # WHEN calling delivery_report without date parameter
+    with caplog.at_level(logging.DEBUG):
+        result = cli_runner.invoke(
+            delivery_report, [case_id], obj=base_context
+        )
+
+    # THEN it should contain the date in the logged info
+    assert "using analysis date: " in caplog.text
+
