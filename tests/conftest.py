@@ -320,9 +320,9 @@ def fixture_timestamp_today() -> dt.datetime:
     return dt.datetime.now()
 
 @pytest.fixture(scope="function", name="timestamp_yesterday")
-def fixture_timestamp_yesterday(today) -> dt.datetime:
+def fixture_timestamp_yesterday(timestamp_today) -> dt.datetime:
     """Return a time stamp of yesterdays date in date time format"""
-    return today - dt.timedelta(days=-1)
+    return timestamp_today - dt.timedelta(days=1)
 
 @pytest.fixture(scope="function", name="hk_bundle_data")
 def fixture_hk_bundle_data(case_id, bed_file, timestamp):
