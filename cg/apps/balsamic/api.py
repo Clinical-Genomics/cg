@@ -64,7 +64,7 @@ class BalsamicAPI:
             {
                 "--account": self.account,
                 "--mail-user": arguments.get("email") or self.email,
-                "--qos": arguments.get("priority") or self.qos,
+                "--qos": arguments.get("priority", self.qos),
                 "--sample-config": arguments.get("sample_config"),
                 "--analysis-type": arguments.get("analysis_type"),
             }
