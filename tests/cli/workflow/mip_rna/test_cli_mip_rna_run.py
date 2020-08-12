@@ -4,6 +4,10 @@ import logging
 from cg.cli.workflow.mip_rna.base import run
 from cg.apps.mip import MipAPI
 
+CASE_ID = "angrybird"
+CONDA_ENV = "S_mip_rd-rna"
+EMAIL = "james.holden@scilifelab.se"
+
 
 def test_cg_dry_run(cli_runner, tb_api, mock_store, caplog):
     """Test print the MIP command to console"""
@@ -12,14 +16,12 @@ def test_cg_dry_run(cli_runner, tb_api, mock_store, caplog):
     context = {}
     context["db"] = mock_store
     context["tb"] = tb_api
-    context["rna_api"] = MipAPI("${HOME}/bin/mip", "analyse rd_rna", "S_mip_rd-rna")
+    context["rna_api"] = MipAPI("${HOME}/bin/mip", "analyse rd_rna", CONDA_ENV)
     context["mip-rd-rna"] = {"mip_config": "config.yaml"}
 
     # WHEN we run a case in dry run mode
     caplog.set_level(logging.INFO)
-    cli_runner.invoke(
-        run, ["--dry-run", "--email", "james.holden@scilifelab.se", "angrybird"], obj=context
-    )
+    cli_runner.invoke(run, ["--dry-run", "--email", EMAIL, CASE_ID], obj=context)
 
     # THEN the command should be printed
     with caplog.at_level(logging.INFO):
@@ -39,7 +41,7 @@ def test_run(cli_runner, tb_api, mock_store, caplog, monkeypatch):
     # GIVEN a cli function
     context = {}
     monkeypatch.setattr(MipAPI, "run", mip_run)
-    mip_api = MipAPI("${HOME}/bin/mip", "analyse rd_rna", "S_mip_rd-rna")
+    mip_api = MipAPI("${HOME}/bin/mip", "analyse rd_rna", CONDA_ENV)
     context["db"] = mock_store
     context["tb"] = tb_api
     context["rna_api"] = mip_api
@@ -47,7 +49,7 @@ def test_run(cli_runner, tb_api, mock_store, caplog, monkeypatch):
 
     # WHEN we run a case
     caplog.set_level(logging.INFO)
-    cli_runner.invoke(run, ["--email", "james.holden@scilifelab.se", "angrybird"], obj=context)
+    cli_runner.invoke(run, ["--email", EMAIL, CASE_ID], obj=context)
 
     # THEN we should get to the end of the function
     with caplog.at_level(logging.INFO):
@@ -55,9 +57,7 @@ def test_run(cli_runner, tb_api, mock_store, caplog, monkeypatch):
 
     # WHEN we run a case in MIP dry mode
     caplog.set_level(logging.INFO)
-    cli_runner.invoke(
-        run, ["--mip-dry-run", "--email", "james.holden@scilifelab.se", "angrybird"], obj=context
-    )
+    cli_runner.invoke(run, ["--mip-dry-run", "--email", EMAIL, CASE_ID], obj=context)
 
     # THEN we should get to the end of the function
     with caplog.at_level(logging.INFO):

@@ -31,10 +31,6 @@ CLI_OPTIONS = {
 }
 
 
-class MipStartError(Exception):
-    """ Catch this when MIP throws an error """
-
-
 class MipAPI:
     """ Group MIP specific functionality """
 
@@ -67,11 +63,11 @@ class MipAPI:
         return command
 
     @classmethod
-    def execute(self, command: dict, dry_run: bool = False) -> int:
+    def execute(cls, command: dict, dry_run: bool = False) -> int:
         """Start a new MIP analysis
         Args:
-            command(list): Command to execute
-            dry_run: Print command instead of executing it
+            command(dict): Command to execute
+            dry_run(bool): Print command instead of executing it
         """
         mip_process = Process(
             command["binary"], config=command["config"], environment=command["environment"]
@@ -80,10 +76,7 @@ class MipAPI:
         process_return_code = mip_process.run_command(
             dry_run=dry_run, parameters=command["parameters"]
         )
-        success = 0
-        if process_return_code != success:
-            raise MipStartError("error running analysis, check the output")
-        return success
+        return process_return_code
 
 
 def _append_value_for_non_flags(parameters: list, value):

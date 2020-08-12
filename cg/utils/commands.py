@@ -5,6 +5,8 @@ Code to handle communications to the shell from CG
 import copy
 import logging
 import subprocess
+
+from cg.constants import RETURN_SUCCESS
 from subprocess import CalledProcessError
 
 LOG = logging.getLogger(__name__)
@@ -53,19 +55,18 @@ class Process:
         Return(int): Return code from called process
 
         """
-        success = 0
         command = copy.deepcopy(self.base_call)
         if parameters:
             command.extend(parameters)
 
         LOG.info("Running command %s", " ".join(command))
         if dry_run:
-            return success
+            return RETURN_SUCCESS
         res = subprocess.run(command, check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         self.stdout = res.stdout.decode("utf-8").rstrip()
         self.stderr = res.stderr.decode("utf-8").rstrip()
-        if res.returncode != success:
+        if res.returncode != RETURN_SUCCESS:
             LOG.critical("Call %s exit with a non zero exit code", command)
             LOG.critical(self.stderr)
             raise CalledProcessError(command, res.returncode)

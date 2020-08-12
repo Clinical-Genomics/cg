@@ -100,7 +100,7 @@ MIP_DNA_TAGS = {
     ("multiqc_ar", "html"): {"tags": ["multiqc-html"], "is_mandatory": True},
     ("multiqc_ar", "json"): {"tags": ["multiqc-json"], "is_mandatory": True},
     ("mip_analyse", "config"): {"tags": ["mip-analyse", "config"], "is_mandatory": True},
-    ("mip_analyse", "pedigree",): {"tags": ["pedigree-yaml"], "is_mandatory": True},
+    ("mip_analyse", "pedigree"): {"tags": ["pedigree-yaml"], "is_mandatory": True},
     ("mip_analyse", "pedigree_fam"): {"tags": ["pedigree"], "is_mandatory": True},
     ("peddy_ar", "ped_check"): {"tags": ["peddy", "ped-check"], "is_mandatory": True},
     ("peddy_ar", "peddy"): {"tags": ["peddy", "ped"], "is_mandatory": True},
@@ -183,3 +183,7 @@ MIP_RNA_TAGS = {
 # Symbols
 SINGLE_QUOTE = "'"
 SPACE = " "
+
+# Processes
+RETURN_SUCCESS = 0
+EXIT_SUCCESS = 0

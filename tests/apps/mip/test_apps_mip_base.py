@@ -1,5 +1,9 @@
 """ Test MIP app functionality """
 
+from subprocess import CalledProcessError
+
+import pytest
+
 from cg.constants import SINGLE_QUOTE, SPACE
 
 
