@@ -6,10 +6,17 @@ import json
 import datetime as dt
 
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List
 
 
 from cg.exc import LimsDataError, BalsamicStartError, BundleAlreadyAddedError
+from cg.store import Store, models
+from cg.apps.hk import HousekeeperAPI
+from cg.apps.lims import LimsAPI
+from cg.apps.balsamic.api import BalsamicAPI
+from cg.apps.balsamic.fastq import FastqHandler
+from cg.utils.fastq import FastqAPI
+
 
 LOG = logging.getLogger(__name__)
 
@@ -22,7 +29,13 @@ class BalsamicAnalysisAPI:
     __BALSAMIC_BED_APPLICATIONS = {"wes", "tgs"}
 
     def __init__(
-        self, balsamic_api, store, housekeeper_api, fastq_handler, lims_api, fastq_api,
+        self,
+        balsamic_api: BalsamicAPI,
+        store: Store,
+        housekeeper_api: HousekeeperAPI,
+        fastq_handler: FastqHandler,
+        lims_api: LimsAPI,
+        fastq_api: FastqAPI,
     ):
         self.balsamic_api = balsamic_api
         self.store = store
@@ -48,7 +61,8 @@ class BalsamicAnalysisAPI:
 
     def get_deliverables_file_path(self, case_id: str, check_exists: bool = False) -> Path:
         """Returns a path where the Balsamic deliverables file for the case_id should be
-        located"""
+        located.
+        (Optional) Checks if deliverables file exists"""
         deliverables_file_path = Path(
             self.balsamic_api.root_dir, case_id, "analysis", "delivery_report", case_id + ".hk"
         )
@@ -59,7 +73,8 @@ class BalsamicAnalysisAPI:
         return deliverables_file_path.as_posix()
 
     def get_config_path(self, case_id: str, check_exists: bool = False) -> Path:
-        """Generates a path where the Balsamic config for the case_id should be located"""
+        """Generates a path where the Balsamic config for the case_id should be located.
+        (Optional) Checks if config file exists."""
         config_path = Path(self.balsamic_api.root_dir, case_id, case_id + ".json")
         if check_exists and not config_path.exists():
             raise BalsamicStartError(
@@ -68,6 +83,8 @@ class BalsamicAnalysisAPI:
         return config_path.as_posix()
 
     def get_analysis_finish_path(self, case_id: str, check_exists: bool = False) -> Path:
+        """Returns path to analysis_finish file. 
+        (Optional) Checks if analysis_finish file exists """
         analysis_finish_path = Path(
             self.balsamic_api.root_dir, case_id, "analysis", "analysis_finish"
         )
@@ -78,6 +95,7 @@ class BalsamicAnalysisAPI:
         return analysis_finish_path.as_posix()
 
     def get_file_collection(self, sample_id: str) -> dict:
+        """Retrieves sample data for naming"""
         file_objs = self.housekeeper_api.files(bundle=sample_id, tags=["fastq"])
         files = []
         for file_obj in file_objs:
@@ -98,7 +116,8 @@ class BalsamicAnalysisAPI:
             files.append(data)
         return files
 
-    def get_balsamic_sample_objects(self, case_id: str) -> list:
+    def get_balsamic_sample_objects(self, case_id: str) -> List[models.FamilySample]:
+        """Retrieves all links where analysis is set to Balsamic"""
         case_object = self.get_case_object(case_id=case_id)
         valid_sample_list = []
         for link in case_object.links:
@@ -120,7 +139,7 @@ class BalsamicAnalysisAPI:
             )
         LOG.info("Linking completed")
 
-    def get_target_bed_from_lims(self, link_object) -> str(Path):
+    def get_target_bed_from_lims(self, link_object: models.FamilySample) -> str(Path):
         """Get target bed filename from lims
         Raises LimsDataError if target_bed cannot be retrieved.
         """
@@ -129,7 +148,7 @@ class BalsamicAnalysisAPI:
             panel_bed = self.store.bed_version(capture_kit).filename
             return panel_bed
 
-    def get_fastq_path(self, link_object) -> str(Path):
+    def get_fastq_path(self, link_object: models.FamilySample) -> str(Path):
         """Returns path to the concatenated FASTQ file of a sample"""
         file_collection = self.get_file_collection(sample_id=link_object.sample.internal_id)
         fastq_data = file_collection[0]
@@ -151,13 +170,13 @@ class BalsamicAnalysisAPI:
         ).as_posix()
         return concatenated_path
 
-    def get_sample_type(self, link_object) -> str:
+    def get_sample_type(self, link_object: models.FamilySample) -> str:
         """Returns tissue type of a sample"""
         if link_object.sample.is_tumour:
             return "tumor"
         return "normal"
 
-    def get_application_type(self, link_object) -> str:
+    def get_application_type(self, link_object: models.FamilySample) -> str:
         """Returns application type of a sample"""
         application_type = link_object.sample.application_version.application.prep_category
         return application_type
