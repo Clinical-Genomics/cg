@@ -52,9 +52,9 @@ def test_samples_to_sequence(sample_store):
             assert sample.reads > 0
 
 
-def test_case_in_uploaded_observations(sample_store):
+def test_case_in_uploaded_observations(helpers, sample_store):
     # GIVEN a case with observations that has been uploaded to loqusdb
-    analysis = add_analysis(store=sample_store)
+    analysis = helpers.add_analysis(store=sample_store)
 
     sample = add_sample(sample_store, uploaded_to_loqus=True)
     sample_store.relate_sample(analysis.family, sample, "unknown")
@@ -69,9 +69,9 @@ def test_case_in_uploaded_observations(sample_store):
     assert analysis.family in uploaded_observations
 
 
-def test_case_not_in_uploaded_observations(sample_store):
+def test_case_not_in_uploaded_observations(helpers, sample_store):
     # GIVEN a case with observations that has not been uploaded to loqusdb
-    analysis = add_analysis(store=sample_store)
+    analysis = helpers.add_analysis(store=sample_store)
 
     sample = add_sample(sample_store)
     sample_store.relate_sample(analysis.family, sample, "unknown")
@@ -86,9 +86,9 @@ def test_case_not_in_uploaded_observations(sample_store):
     assert analysis.family not in uploaded_observations
 
 
-def test_case_in_observations_to_upload(sample_store):
+def test_case_in_observations_to_upload(helpers, sample_store):
     # GIVEN a case with completed analysis and samples w/o loqus_id
-    analysis = add_analysis(store=sample_store)
+    analysis = helpers.add_analysis(store=sample_store)
 
     sample = add_sample(sample_store)
     sample_store.relate_sample(analysis.family, sample, "unknown")
@@ -103,9 +103,9 @@ def test_case_in_observations_to_upload(sample_store):
     assert analysis.family in observations_to_upload
 
 
-def test_case_not_in_observations_to_upload(sample_store):
+def test_case_not_in_observations_to_upload(helpers, sample_store):
     # GIVEN a case with completed analysis and samples w loqus_id
-    analysis = add_analysis(store=sample_store)
+    analysis = helpers.add_analysis(store=sample_store)
 
     sample = add_sample(sample_store, uploaded_to_loqus=True)
     sample_store.relate_sample(analysis.family, sample, "unknown")
@@ -250,32 +250,6 @@ def ensure_panel(store, panel_id="panel_test", customer_id="cust_test"):
         )
         store.add_commit(panel)
     return panel
-
-
-def add_family(store, family_id="family_test", customer_id="cust_test"):
-    """utility function to add a family to use in tests"""
-    panel = ensure_panel(store)
-    customer = ensure_customer(store, customer_id)
-    family = store.add_family(name=family_id, panels=panel.name)
-    family.customer = customer
-    store.add_commit(family)
-    return family
-
-
-def add_analysis(store, family=None, completed_at=None):
-    """Utility function to add an analysis for tests"""
-
-    if not family:
-        family = add_family(store)
-
-    analysis = store.add_analysis(pipeline="", version="")
-
-    if completed_at:
-        analysis.completed_at = completed_at
-
-    analysis.family = family
-    store.add_commit(analysis)
-    return analysis
 
 
 def ensure_application_version(disk_store, application_tag="dummy_tag"):
