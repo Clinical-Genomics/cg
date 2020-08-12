@@ -63,7 +63,7 @@ class BalsamicAPI:
         options = self.__build_command_str(
             {
                 "--account": self.account,
-                "--mail-user": arguments.get("email") or self.email,
+                "--mail-user": arguments.get("email", self.email),
                 "--qos": arguments.get("priority", self.qos),
                 "--sample-config": arguments.get("sample_config"),
                 "--analysis-type": arguments.get("analysis_type"),
