@@ -2,13 +2,14 @@
 from datetime import datetime, timedelta
 from pathlib import Path
 import logging
+import datetime as dt
 
 from cg.cli.clean import balsamic_past_run_dirs, balsamic_run_dir
 
 EXIT_SUCCESS = 0
 
 
-def test_past_run_dirs_without_options(cli_runner, clean_context):
+def test_past_run_dirs_without_options(cli_runner, clean_context: dict):
     """Test command without options"""
     # GIVEN no case_id or options
     # WHEN dry running without anything specified
@@ -18,7 +19,7 @@ def test_past_run_dirs_without_options(cli_runner, clean_context):
     assert "Missing argument" in result.output
 
 
-def test_run_dir_without_options(cli_runner, clean_context):
+def test_run_dir_without_options(cli_runner, clean_context: dict):
     """Test command without options"""
     # GIVEN no case_id or options
     # WHEN dry running without anything specified
@@ -28,11 +29,11 @@ def test_run_dir_without_options(cli_runner, clean_context):
     assert "Missing argument" in result.output
 
 
-def test_with_yes(cli_runner, clean_context, helpers, caplog):
+def test_with_yes(cli_runner, clean_context: dict, timestamp_today: dt.datetime, helpers, caplog):
     """Test command with dry run options"""
     # GIVEN a case on disk that could be deleted
     store = clean_context["BalsamicAnalysisAPI"].store
-    timestamp_now = datetime.now()
+    timestamp_now = timestamp_today
 
     analysis_to_clean = store.analyses_to_clean(pipeline="balsamic").first()
     assert not analysis_to_clean.cleaned_at
@@ -51,12 +52,11 @@ def test_with_yes(cli_runner, clean_context, helpers, caplog):
     assert not Path(case_path).exists()
 
 
-def test_dry_run(cli_runner, clean_context, helpers, caplog):
+def test_dry_run(cli_runner, clean_context: dict, timestamp_yesterday: dt.datetime, helpers, caplog):
     """Test command with dry run options"""
 
     # GIVEN a case on disk that could be deleted
     caplog.set_level(logging.INFO)
-    timestamp_yesterday = datetime.now() - timedelta(days=1)
     base_store = clean_context["BalsamicAnalysisAPI"].store
     helpers.add_analysis(
         base_store,
@@ -79,7 +79,7 @@ def test_dry_run(cli_runner, clean_context, helpers, caplog):
     assert analysis_to_clean in base_store.analyses_to_clean(pipeline="Balsamic")
 
 
-def test_cleaned_at(cli_runner, clean_context, helpers, caplog):
+def test_cleaned_at(cli_runner, clean_context: dict, helpers, caplog):
     """Test command with dry run options"""
     # GIVEN a case on disk that could be deleted
     base_store = clean_context["BalsamicAnalysisAPI"].store

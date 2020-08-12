@@ -5,12 +5,13 @@ import datetime as dt
 
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.apps.balsamic.api import BalsamicAPI
+from cg.apps.hk import HousekeeperAPI
+from cg.store import Store
 
 
 @pytest.fixture
-def balsamic_clean_store(base_store, helpers):
+def balsamic_clean_store(base_store: Store, timestamp_yesterday: dt.datetime, helpers) -> Store:
     store = base_store
-    timestamp_yesterday = dt.datetime.now() - dt.timedelta(days=1)
 
     # Create textbook case for cleaning
     case_to_clean = helpers.add_family(
@@ -44,7 +45,7 @@ def balsamic_dir(tmpdir_factory, apps_dir: Path) -> Path:
 
 
 @pytest.fixture
-def server_config(balsamic_dir):
+def server_config(balsamic_dir: Path) -> dict:
     return {
         "database": "database",
         "bed_path": balsamic_dir,
@@ -66,7 +67,9 @@ def server_config(balsamic_dir):
 
 
 @pytest.fixture
-def balsamic_analysis_api(server_config, balsamic_clean_store, housekeeper_api):
+def balsamic_analysis_api(
+    server_config: dict, balsamic_clean_store: Store, housekeeper_api: HousekeeperAPI
+):
     return BalsamicAnalysisAPI(
         balsamic_api=BalsamicAPI(server_config),
         store=balsamic_clean_store,
@@ -78,7 +81,13 @@ def balsamic_analysis_api(server_config, balsamic_clean_store, housekeeper_api):
 
 
 @pytest.fixture
-def clean_context(base_store, housekeeper_api, balsamic_analysis_api, helpers, tmpdir) -> dict:
+def clean_context(
+    base_store: Store,
+    housekeeper_api: HousekeeperAPI,
+    balsamic_analysis_api: BalsamicAnalysisAPI,
+    helpers,
+    tmpdir,
+) -> dict:
     """context to use in cli"""
 
     return {
