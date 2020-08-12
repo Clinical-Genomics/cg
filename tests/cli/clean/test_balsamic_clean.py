@@ -52,7 +52,9 @@ def test_with_yes(cli_runner, clean_context: dict, timestamp_today: dt.datetime,
     assert not Path(case_path).exists()
 
 
-def test_dry_run(cli_runner, clean_context: dict, timestamp_yesterday: dt.datetime, helpers, caplog):
+def test_dry_run(
+    cli_runner, clean_context: dict, timestamp_yesterday: dt.datetime, helpers, caplog
+):
     """Test command with dry run options"""
 
     # GIVEN a case on disk that could be deleted
