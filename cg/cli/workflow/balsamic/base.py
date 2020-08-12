@@ -42,7 +42,7 @@ OPTION_PRIORITY = click.option(
     "-p",
     "--priority",
     type=click.Choice(["low", "normal", "high"]),
-    help="Job priority in SLURM. Will be set automatically according to priority i ClinicalDB, \
+    help="Job priority in SLURM. Will be set automatically according to priority in ClinicalDB, \
          this option can be used to override server setting",
 )
 
