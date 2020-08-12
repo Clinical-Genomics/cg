@@ -152,7 +152,7 @@ def test_analyses_to_upload_when_existing_pipeline(helpers, sample_store, timest
     # WHEN uploading without a pipeline specified
     records = [analysis_obj for analysis_obj in sample_store.analyses_to_upload(pipeline=None)]
 
-    # THEN at least one analysis object should be returned
+    # THEN one analysis object should be returned
     assert len(records) == 1
 
 
@@ -170,6 +170,18 @@ def test_analyses_to_upload_when_filtering_with_pipeline(helpers, sample_store, 
     for analysis_obj in records:
         # THEN pipeline should be MIP in the analysis object
         assert analysis_obj.pipeline == "MIP"
+
+
+def test_analyses_to_upload_with_pipeline_and_no_complete_at(helpers, sample_store, timestamp):
+    """Test analyses to upload to when exisiting pipeline and using it in filtering"""
+    # GIVEN a case with completed analysis
+    helpers.add_analysis(store=sample_store, pipeline="MIP")
+
+    # WHEN uploading without a pipeline specified
+    records = [analysis_obj for analysis_obj in sample_store.analyses_to_upload(pipeline="MIP")]
+
+    # THEN no analysis object should be returned
+    assert len(records) == 0
 
 
 def test_analyses_to_upload_when_filtering_with_missing_pipeline(helpers, sample_store, timestamp):
