@@ -184,6 +184,7 @@ def store_housekeeper(context, case_id):
 @click.pass_context
 def start(context, case_id, analysis_type, priority, dry):
     """Start full workflow for CASE ID"""
+    LOG.info(f"Starting analysis for {case_id}")
     context.invoke(link, case_id=case_id)
     context.invoke(config_case, case_id=case_id, dry=dry)
     context.invoke(
@@ -215,7 +216,6 @@ def start_available(context, dry):
     """Start full workflow for all available BALSAMIC cases"""
     for case_object in context.obj["BalsamicAnalysisAPI"].store.cases_to_balsamic_analyze():
         case_id = case_object.internal_id
-        LOG.info(f"Starting analysis for {case_id}")
         try:
             context.invoke(start, case_id=case_id, dry=dry)
         except click.Abort:
