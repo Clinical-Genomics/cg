@@ -533,7 +533,7 @@ class StatusHandler(BaseHandler):
         """Return True if all samples are external or sequenced inhouse."""
         return all((link.sample.sequenced_at or link.sample.is_external) for link in links)
 
-    def analyses_to_upload(self, pipeline: str = None):
+    def analyses_to_upload(self, pipeline: str = None) -> List[models.Analysis]:
         """Fetch analyses that haven't been uploaded."""
         records = self.Analysis.query.filter(
             models.Analysis.completed_at != None, models.Analysis.uploaded_at == None
