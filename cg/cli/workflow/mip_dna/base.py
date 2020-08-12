@@ -200,6 +200,7 @@ def run(
         context.abort()
     if context.obj["tb"].analyses(family=case_obj.internal_id, temp=True).first():
         LOG.warning("%s: analysis already running", {case_obj.internal_id})
+        return
     if dry_run:
         dna_api.run(dry_run=dry_run, **kwargs)
     else:
