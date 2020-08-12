@@ -1,7 +1,11 @@
 """ Common MIP related functionality """
 
+import logging
+
 from cg.constants import SPACE
 from cg.utils import Process
+
+LOG = logging.getLogger(__name__)
 
 """
 This dict is built like this:
@@ -76,6 +80,10 @@ class MipAPI:
         process_return_code = mip_process.run_command(
             dry_run=dry_run, parameters=command["parameters"]
         )
+        for line in mip_process.stdout_lines():
+            LOG.info(line)
+        for line in mip_process.stderr_lines():
+            LOG.info(line)
         return process_return_code
 
 

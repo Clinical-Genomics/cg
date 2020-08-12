@@ -47,7 +47,8 @@ class Process:
         self._stderr = ""
 
     def run_command(self, parameters: list = None, dry_run: bool = False) -> int:
-        """Execute a command in the shell
+        """Execute a command in the shell.
+        If environment is supplied - shell=True has to be supplied to enable passing as a string for executing multiple commands
 
         Args:
             parameters(list):
@@ -62,7 +63,19 @@ class Process:
         LOG.info("Running command %s", " ".join(command))
         if dry_run:
             return RETURN_SUCCESS
-        res = subprocess.run(command, check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+        if self.environment:
+            res = subprocess.run(
+                " ".join(command),
+                shell=True,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+        else:
+            res = subprocess.run(
+                command, check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            )
 
         self.stdout = res.stdout.decode("utf-8").rstrip()
         self.stderr = res.stderr.decode("utf-8").rstrip()
