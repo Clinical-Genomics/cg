@@ -47,12 +47,12 @@ class BalsamicAPI:
                 "--umi-trim-length": arguments.get("umi_trim_length"),
             }
         )
-
+        parameters = command + options
         if dry:
-            LOG.info(f'Dry run command balsamic{" ".join(command + options)}')
+            LOG.info(f'Dry run command balsamic{" ".join(parameters)}')
             retcode = self.__EXIT_SUCCESS
         else:
-            retcode = self.process.run_command(command + options)
+            retcode = self.process.run_command(parameters=parameters)
         return retcode
 
     def run_analysis(self, arguments: dict, run_analysis: bool, dry: bool = False) -> int:
@@ -69,11 +69,12 @@ class BalsamicAPI:
                 "--analysis-type": arguments.get("analysis_type"),
             }
         )
+        parameters = command + options + run_analysis
         if dry:
-            LOG.info(f'Dry run command balsamic{" ".join(command + options + run_analysis)}')
+            LOG.info(f'Dry run command balsamic{" ".join(parameters)}')
             retcode = self.__EXIT_SUCCESS
         else:
-            retcode = self.process.run_command(command + options + run_analysis)
+            retcode = self.process.run_command(parameters=parameters)
         return retcode
 
     def report_deliver(self, arguments: dict, dry: bool = False) -> int:
@@ -86,9 +87,10 @@ class BalsamicAPI:
                 "--analysis-type": arguments.get("analysis_type"),
             }
         )
+        parameters = command + options
         if dry:
-            LOG.info(f'Dry run command balsamic{" ".join(command + options)}')
+            LOG.info(f'Dry run command balsamic{" ".join(parameters)}')
             retcode = self.__EXIT_SUCCESS
         else:
-            retcode = self.process.run_command(command + options)
+            retcode = self.process.run_command(parameters=parameters)
         return retcode
