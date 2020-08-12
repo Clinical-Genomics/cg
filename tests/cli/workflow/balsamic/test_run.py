@@ -7,7 +7,7 @@ from cg.cli.workflow.balsamic.base import run
 EXIT_SUCCESS = 0
 
 
-def test_without_options(cli_runner, balsamic_context):
+def test_without_options(cli_runner, balsamic_context: dict):
     """Test command without case_id argument"""
     # GIVEN no case_id
     # WHEN dry running without anything specified
@@ -18,7 +18,7 @@ def test_without_options(cli_runner, balsamic_context):
     assert "Missing argument" in result.output
 
 
-def test_with_missing_case(cli_runner, balsamic_context, caplog):
+def test_with_missing_case(cli_runner, balsamic_context: dict, caplog):
     """Test command with invalid case to start with"""
     caplog.set_level(logging.ERROR)
     # GIVEN case_id not in database
@@ -33,7 +33,7 @@ def test_with_missing_case(cli_runner, balsamic_context, caplog):
     assert "not found" in caplog.text
 
 
-def test_without_samples(cli_runner, balsamic_context, caplog):
+def test_without_samples(cli_runner, balsamic_context: dict, caplog):
     """Test command with case_id and no samples"""
     caplog.set_level(logging.ERROR)
     # GIVEN case-id
@@ -47,7 +47,7 @@ def test_without_samples(cli_runner, balsamic_context, caplog):
     assert "0" in caplog.text
 
 
-def test_without_config(cli_runner, balsamic_context, caplog):
+def test_without_config(cli_runner, balsamic_context: dict, caplog):
     """Test command with case_id and no config file"""
     caplog.set_level(logging.ERROR)
     # GIVEN case-id
@@ -60,7 +60,7 @@ def test_without_config(cli_runner, balsamic_context, caplog):
     assert "No config file found" in caplog.text
 
 
-def test_with_config(tmpdir_factory, cli_runner, balsamic_context, caplog):
+def test_with_config(tmpdir_factory, cli_runner, balsamic_context: dict, caplog):
     """Test command with case_id and config file"""
     caplog.set_level(logging.INFO)
     # GIVEN case-id
@@ -78,7 +78,7 @@ def test_with_config(tmpdir_factory, cli_runner, balsamic_context, caplog):
     assert "balsamic" in caplog.text
 
 
-def test_run_analysis(cli_runner, balsamic_context, caplog):
+def test_run_analysis(cli_runner, balsamic_context: dict, caplog):
     """Test command with run-analysis option"""
     caplog.set_level(logging.INFO)
     # GIVEN case-id
@@ -96,7 +96,7 @@ def test_run_analysis(cli_runner, balsamic_context, caplog):
     assert "--run-analysis" in caplog.text
 
 
-def test_analysis_type_qc(cli_runner, balsamic_context, caplog):
+def test_analysis_type_qc(cli_runner, balsamic_context: dict, caplog):
     """Test command with analysis-type qc option"""
     caplog.set_level(logging.INFO)
     # GIVEN case-id
@@ -117,7 +117,7 @@ def test_analysis_type_qc(cli_runner, balsamic_context, caplog):
     assert "qc" in caplog.text
 
 
-def test_priority_custom(cli_runner, balsamic_context, caplog):
+def test_priority_custom(cli_runner, balsamic_context: dict, caplog):
     """Test command with priority option"""
     caplog.set_level(logging.INFO)
     # GIVEN valid case-id
@@ -140,7 +140,7 @@ def test_priority_custom(cli_runner, balsamic_context, caplog):
     assert option_value in caplog.text
 
 
-def test_priority_clinical(cli_runner, balsamic_context, caplog):
+def test_priority_clinical(cli_runner, balsamic_context: dict, caplog):
     """Test command with case_id set to default NORMAL priority, when priority is not set manually"""
     caplog.set_level(logging.INFO)
     # GIVEN valid case-id

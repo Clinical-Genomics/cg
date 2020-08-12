@@ -6,7 +6,7 @@ from cg.cli.workflow.balsamic.base import link
 EXIT_SUCCESS = 0
 
 
-def test_without_options(cli_runner, balsamic_context):
+def test_without_options(cli_runner, balsamic_context: dict):
     """Test command without case_id"""
     # GIVEN NO case_id
     # WHEN dry running without anything specified
@@ -16,7 +16,7 @@ def test_without_options(cli_runner, balsamic_context):
     assert "Missing argument" in result.output
 
 
-def test_with_missing_case(cli_runner, balsamic_context, caplog):
+def test_with_missing_case(cli_runner, balsamic_context: dict, caplog):
     """Test command with invalid case to start with"""
     caplog.set_level(logging.ERROR)
     # GIVEN case_id not in database
@@ -30,7 +30,7 @@ def test_with_missing_case(cli_runner, balsamic_context, caplog):
     assert case_id in caplog.text
 
 
-def test_without_samples(cli_runner, balsamic_context, caplog):
+def test_without_samples(cli_runner, balsamic_context: dict, caplog):
     """Test command with case_id and no samples"""
     caplog.set_level(logging.ERROR)
     # GIVEN case-id
@@ -44,7 +44,7 @@ def test_without_samples(cli_runner, balsamic_context, caplog):
     assert "0" in caplog.text
 
 
-def test_single_panel(balsamic_context, cli_runner, caplog):
+def test_single_panel(balsamic_context: dict, cli_runner, caplog):
     """Test with case_id that requires SINGLE TGS analysis"""
     caplog.set_level(logging.INFO)
     # GIVEN case_id containing ONE tumor, TGS application

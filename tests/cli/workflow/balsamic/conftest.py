@@ -4,19 +4,21 @@ from pathlib import Path
 
 import pytest
 import datetime as dt
+import json
 
 import gzip
 from cg.apps.balsamic.api import BalsamicAPI
 from cg.apps.balsamic.fastq import FastqHandler
 from cg.utils.fastq import FastqAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
-from tests.mocks.hk_mock import MockHousekeeperAPI
+from cg.store import Store
+from cg.apps.hk import HousekeeperAPI
 
 
 class MockLimsAPI:
     """Mock LIMS API to simulate LIMS behavior in BALSAMIC"""
 
-    def __init__(self, config=None):
+    def __init__(self, config: dict = None):
         self.config = config
         self.sample_vars = {}
 
@@ -49,35 +51,35 @@ def balsamic_housekeeeper_dir(tmpdir_factory, balsamic_dir: Path) -> Path:
 
 
 @pytest.fixture(name="balsamic_singularity_path")
-def balsamic_singularity_path(balsamic_dir) -> Path:
+def balsamic_singularity_path(balsamic_dir: Path) -> Path:
     balsamic_singularity_path = Path(balsamic_dir, "singularity.sif")
     balsamic_singularity_path.touch(exist_ok=True)
     return balsamic_singularity_path.as_posix()
 
 
 @pytest.fixture(name="balsamic_reference_path")
-def balsamic_reference_path(balsamic_dir) -> Path:
+def balsamic_reference_path(balsamic_dir: Path) -> Path:
     balsamic_reference_path = Path(balsamic_dir, "reference.json")
     balsamic_reference_path.touch(exist_ok=True)
     return balsamic_reference_path.as_posix()
 
 
 @pytest.fixture(name="balsamic_bed_1_path")
-def balsamic_bed_1_path(balsamic_dir):
+def balsamic_bed_1_path(balsamic_dir: Path) -> Path:
     balsamic_bed_1_path = Path(balsamic_dir, "balsamic_bed_1.bed")
     balsamic_bed_1_path.touch(exist_ok=True)
     return balsamic_bed_1_path.as_posix()
 
 
 @pytest.fixture(name="balsamic_bed_2_path")
-def balsamic_bed_2_path(balsamic_dir):
+def balsamic_bed_2_path(balsamic_dir: Path) -> Path:
     balsamic_bed_2_path = Path(balsamic_dir, "balsamic_bed_2.bed")
     balsamic_bed_2_path.touch(exist_ok=True)
     return balsamic_bed_2_path.as_posix()
 
 
 @pytest.fixture
-def fastq_file_l_1_r_1(balsamic_housekeeper_dir):
+def fastq_file_l_1_r_1(balsamic_housekeeper_dir: Path) -> Path:
     fastq_filename = Path(
         balsamic_housekeeper_dir, "XXXXXXXXX_000000_S000_L001_R1_001.fastq.gz"
     ).as_posix()
@@ -87,7 +89,7 @@ def fastq_file_l_1_r_1(balsamic_housekeeper_dir):
 
 
 @pytest.fixture
-def fastq_file_l_2_r_1(balsamic_housekeeper_dir):
+def fastq_file_l_2_r_1(balsamic_housekeeper_dir: Path) -> Path:
     fastq_filename = Path(
         balsamic_housekeeper_dir, "XXXXXXXXX_000000_S000_L002_R1_001.fastq.gz"
     ).as_posix()
@@ -97,7 +99,7 @@ def fastq_file_l_2_r_1(balsamic_housekeeper_dir):
 
 
 @pytest.fixture
-def fastq_file_l_3_r_1(balsamic_housekeeper_dir):
+def fastq_file_l_3_r_1(balsamic_housekeeper_dir: Path) -> Path:
     fastq_filename = Path(
         balsamic_housekeeper_dir, "XXXXXXXXX_000000_S000_L003_R1_001.fastq.gz"
     ).as_posix()
@@ -107,7 +109,7 @@ def fastq_file_l_3_r_1(balsamic_housekeeper_dir):
 
 
 @pytest.fixture
-def fastq_file_l_4_r_1(balsamic_housekeeper_dir):
+def fastq_file_l_4_r_1(balsamic_housekeeper_dir: Path) -> Path:
     fastq_filename = Path(
         balsamic_housekeeper_dir, "XXXXXXXXX_000000_S000_L004_R1_001.fastq.gz"
     ).as_posix()
@@ -117,7 +119,7 @@ def fastq_file_l_4_r_1(balsamic_housekeeper_dir):
 
 
 @pytest.fixture
-def fastq_file_l_1_r_2(balsamic_housekeeper_dir):
+def fastq_file_l_1_r_2(balsamic_housekeeper_dir: Path) -> Path:
     fastq_filename = Path(
         balsamic_housekeeper_dir, "XXXXXXXXX_000000_S000_L001_R2_001.fastq.gz"
     ).as_posix()
@@ -127,7 +129,7 @@ def fastq_file_l_1_r_2(balsamic_housekeeper_dir):
 
 
 @pytest.fixture
-def fastq_file_l_2_r_2(balsamic_housekeeper_dir):
+def fastq_file_l_2_r_2(balsamic_housekeeper_dir: Path) -> Path:
     fastq_filename = Path(
         balsamic_housekeeper_dir, "XXXXXXXXX_000000_S000_L002_R2_001.fastq.gz"
     ).as_posix()
@@ -137,7 +139,7 @@ def fastq_file_l_2_r_2(balsamic_housekeeper_dir):
 
 
 @pytest.fixture
-def fastq_file_l_3_r_2(balsamic_housekeeper_dir):
+def fastq_file_l_3_r_2(balsamic_housekeeper_dir: Path) -> Path:
     fastq_filename = Path(
         balsamic_housekeeper_dir, "XXXXXXXXX_000000_S000_L003_R2_001.fastq.gz"
     ).as_posix()
@@ -147,7 +149,7 @@ def fastq_file_l_3_r_2(balsamic_housekeeper_dir):
 
 
 @pytest.fixture
-def fastq_file_l_4_r_2(balsamic_housekeeper_dir):
+def fastq_file_l_4_r_2(balsamic_housekeeper_dir: Path) -> Path:
     fastq_filename = Path(
         balsamic_housekeeper_dir, "XXXXXXXXX_000000_S000_L004_R2_001.fastq.gz"
     ).as_posix()
@@ -158,15 +160,16 @@ def fastq_file_l_4_r_2(balsamic_housekeeper_dir):
 
 @pytest.fixture
 def balsamic_mock_fastq_files(
-    fastq_file_l_1_r_1,
-    fastq_file_l_1_r_2,
-    fastq_file_l_2_r_1,
-    fastq_file_l_2_r_2,
-    fastq_file_l_3_r_1,
-    fastq_file_l_3_r_2,
-    fastq_file_l_4_r_1,
-    fastq_file_l_4_r_2,
-):
+    fastq_file_l_1_r_1: Path,
+    fastq_file_l_1_r_2: Path,
+    fastq_file_l_2_r_1: Path,
+    fastq_file_l_2_r_2: Path,
+    fastq_file_l_3_r_1: Path,
+    fastq_file_l_3_r_2: Path,
+    fastq_file_l_4_r_1: Path,
+    fastq_file_l_4_r_2: Path,
+) -> list:
+    """Return list of all mock fastq files to commmit to mock housekeeper"""
     return [
         fastq_file_l_1_r_1,
         fastq_file_l_1_r_2,
@@ -180,7 +183,8 @@ def balsamic_mock_fastq_files(
 
 
 @pytest.fixture(scope="function", name="balsamic_housekeeper")
-def balsamic_housekeeper(housekeeper_api, helpers, balsamic_mock_fastq_files):
+def balsamic_housekeeper(housekeeper_api, helpers, balsamic_mock_fastq_files: list):
+    """Create populated housekeeper that holds files for all mock samples"""
 
     samples = [
         "sample_case_wgs_paired_tumor",
@@ -214,15 +218,18 @@ def balsamic_housekeeper(housekeeper_api, helpers, balsamic_mock_fastq_files):
             ],
         }
         helpers.ensure_hk_bundle(store=housekeeper_api, bundle_data=bundle_data)
-
     return housekeeper_api
 
 
 @pytest.fixture
 def server_config(
-    balsamic_dir, balsamic_housekeeper_dir, balsamic_singularity_path, balsamic_reference_path,
+    balsamic_dir: Path,
+    balsamic_housekeeper_dir: Path,
+    balsamic_singularity_path: Path,
+    balsamic_reference_path: Path,
 ) -> dict:
-    # Dummy server config
+    """Mimic dict normally found in cg context"""
+
     return {
         "database": "database",
         "bed_path": balsamic_dir,
@@ -244,9 +251,10 @@ def server_config(
 
 
 @pytest.fixture(name="balsamic_lims")
-def balsamic_lims(server_config):
-    balsamic_lims = MockLimsAPI(server_config)
+def balsamic_lims(server_config: dict) -> MockLimsAPI:
+    """Create populated mock LIMS api to mimic all functionality of LIMS used by BALSAMIC"""
 
+    balsamic_lims = MockLimsAPI(server_config)
     balsamic_lims.add_capture_kit(
         internal_id="sample_case_wgs_paired_tumor", capture_kit=None,
     )
@@ -306,7 +314,7 @@ def balsamic_lims(server_config):
 
 
 @pytest.fixture(name="balsamic_store")
-def balsamic_store(base_store, helpers):
+def balsamic_store(base_store: Store, helpers) -> Store:
     """real store to be used in tests"""
     _store = base_store
 
@@ -644,7 +652,12 @@ def balsamic_store(base_store, helpers):
 
 
 @pytest.fixture(scope="function", name="balsamic_context")
-def balsamic_context(server_config, balsamic_store, balsamic_lims, balsamic_housekeeper) -> dict:
+def balsamic_context(
+    server_config: dict,
+    balsamic_store: Store,
+    balsamic_lims: MockLimsAPI,
+    balsamic_housekeeper: HousekeeperAPI,
+) -> dict:
     """context to use in cli"""
     balsamic_analysis_api = BalsamicAnalysisAPI(
         balsamic_api=BalsamicAPI(server_config),
@@ -657,3 +670,83 @@ def balsamic_context(server_config, balsamic_store, balsamic_lims, balsamic_hous
     return {
         "BalsamicAnalysisAPI": balsamic_analysis_api,
     }
+
+
+@pytest.fixture
+def mock_config(balsamic_dir: Path) -> None:
+    """Create dummy config file at specified path"""
+
+    case_id = "balsamic_case_wgs_single"
+    config_data = {
+        "analysis": {
+            "case_id": f"{case_id}",
+            "analysis_type": "paired",
+            "sequencing_type": "targeted",
+            "analysis_dir": f"{balsamic_dir}",
+            "fastq_path": f"{balsamic_dir}/{case_id}/analysis/fastq/",
+            "script": f"{balsamic_dir}/{case_id}/scripts/",
+            "log": f"{balsamic_dir}/{case_id}/logs/",
+            "result": f"{balsamic_dir}/{case_id}/analysis",
+            "benchmark": f"{balsamic_dir}/{case_id}/benchmarks/",
+            "dag": f"{balsamic_dir}/{case_id}/{case_id}_BALSAMIC_4.4.0_graph.pdf",
+            "BALSAMIC_version": "4",
+            "config_creation_date": "2020-07-15 17:35",
+        }
+    }
+    Path.mkdir(Path(balsamic_dir, case_id), parents=True, exist_ok=True)
+    config_path = Path(balsamic_dir, case_id, case_id + ".json")
+    json.dump(config_data, open(config_path, "w"))
+
+
+@pytest.fixture
+def mock_deliverable(balsamic_dir: Path) -> None:
+    """Create deliverable file with dummy data and files to deliver"""
+
+    case_id = "balsamic_case_wgs_single"
+    samples = [
+        "sample_case_wgs_single_tumor",
+    ]
+
+    deliverable_data = {
+        "files": [
+            {
+                "path": f"{balsamic_dir}/{case_id}/multiqc_report.html",
+                "path_index": "",
+                "step": "multiqc",
+                "tag": "qc",
+                "id": "T_WGS",
+                "format": "html",
+            },
+            {
+                "path": f"{balsamic_dir}/{case_id}/concatenated_{samples[0]}_R_1.fp.fastq.gz",
+                "path_index": "",
+                "step": "fastp",
+                "tag": f"concatenated_{samples[0]}_R,qc",
+                "id": f"concatenated_{samples[0]}_R",
+                "format": "fastq.gz",
+            },
+            {
+                "path": f"{balsamic_dir}/{case_id}/CNV.somatic.{case_id}.cnvkit.pass.vcf.gz.tbi",
+                "path_index": "",
+                "step": "vep_somatic",
+                "format": "vcf.gz.tbi",
+                "tag": f"CNV,{case_id},cnvkit,annotation,somatic,index",
+                "id": f"{case_id}",
+            },
+        ]
+    }
+    Path.mkdir(
+        Path(balsamic_dir, case_id, "analysis", "delivery_report"), parents=True, exist_ok=True
+    )
+    for report_entry in deliverable_data["files"]:
+        Path(report_entry["path"]).touch(exist_ok=True)
+    hk_report_path = Path(balsamic_dir, case_id, "analysis", "delivery_report", case_id + ".hk")
+    json.dump(deliverable_data, open(hk_report_path, "w"))
+
+
+@pytest.fixture
+def mock_analysis_finish(balsamic_dir: Path) -> None:
+    """Create analysis_finish file for testing"""
+    case_id = "balsamic_case_wgs_single"
+    Path.mkdir(Path(balsamic_dir, case_id, "analysis"), parents=True, exist_ok=True)
+    Path(balsamic_dir, case_id, "analysis", "analysis_finish").touch(exist_ok=True)

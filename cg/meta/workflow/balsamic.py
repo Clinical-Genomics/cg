@@ -162,7 +162,7 @@ class BalsamicAnalysisAPI:
         application_type = link_object.sample.application_version.application.prep_category
         return application_type
 
-    def get_priority(self, case_id) -> str:
+    def get_priority(self, case_id:  str) -> str:
         """Returns priority for the case in clinical-db as text"""
         case_object = self.get_case_object(case_id)
         if case_object.high_priority:
@@ -297,7 +297,7 @@ class BalsamicAnalysisAPI:
         self.print_sample_params(case_id=case_id, sample_data=sample_data)
         return sample_data
 
-    def parse_deliverables_report(self, case_id) -> list:
+    def parse_deliverables_report(self, case_id: str) -> list:
         """Parse BALSAMIC deliverables report, and return a list of files and their respective tags in bundle"""
         self.get_case_object(case_id=case_id)
         deliverables_file_path = self.get_deliverables_file_path(case_id=case_id, check_exists=True)

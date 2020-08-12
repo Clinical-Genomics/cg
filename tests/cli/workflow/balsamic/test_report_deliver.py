@@ -7,7 +7,7 @@ from cg.cli.workflow.balsamic.base import report_deliver
 EXIT_SUCCESS = 0
 
 
-def test_without_options(cli_runner, balsamic_context):
+def test_without_options(cli_runner, balsamic_context: dict):
     """Test command without case_id argument"""
     # GIVEN no case_id
     # WHEN dry running without anything specified
@@ -18,7 +18,7 @@ def test_without_options(cli_runner, balsamic_context):
     assert "Missing argument" in result.output
 
 
-def test_with_missing_case(cli_runner, balsamic_context, caplog):
+def test_with_missing_case(cli_runner, balsamic_context: dict, caplog):
     """Test command with invalid case to start with"""
     caplog.set_level(logging.ERROR)
     # GIVEN case_id not in database
@@ -33,7 +33,7 @@ def test_with_missing_case(cli_runner, balsamic_context, caplog):
     assert "not found" in caplog.text
 
 
-def test_without_samples(cli_runner, balsamic_context, caplog):
+def test_without_samples(cli_runner, balsamic_context: dict, caplog):
     """Test command with case_id and no samples"""
     caplog.set_level(logging.ERROR)
     # GIVEN case-id
@@ -46,7 +46,7 @@ def test_without_samples(cli_runner, balsamic_context, caplog):
     assert "0" in caplog.text
 
 
-def test_without_config(cli_runner, balsamic_context, caplog):
+def test_without_config(cli_runner, balsamic_context: dict, caplog):
     """Test command with case_id and no config file"""
     caplog.set_level(logging.ERROR)
     # GIVEN case-id
@@ -59,7 +59,7 @@ def test_without_config(cli_runner, balsamic_context, caplog):
     assert "No config file found" in caplog.text
 
 
-def test_case_without_analysis_finish(cli_runner, balsamic_context, caplog):
+def test_case_without_analysis_finish(cli_runner, balsamic_context: dict, caplog):
     """Test command with case_id and config file but no analysis_finish"""
     caplog.set_level(logging.ERROR)
     # GIVEN case-id
@@ -77,7 +77,7 @@ def test_case_without_analysis_finish(cli_runner, balsamic_context, caplog):
     assert "deliverables file will not be created" in caplog.text
 
 
-def test_dry_run(cli_runner, balsamic_context, caplog):
+def test_dry_run(cli_runner, balsamic_context: dict, caplog):
     """Test command with case_id and analysis_finish which should execute successfully"""
     caplog.set_level(logging.INFO)
     # GIVEN case-id
@@ -103,7 +103,7 @@ def test_dry_run(cli_runner, balsamic_context, caplog):
     assert case_id + ".json" in caplog.text
 
 
-def test_qc_option(cli_runner, balsamic_context, caplog):
+def test_qc_option(cli_runner, balsamic_context: dict, caplog):
     """Test command with case_id and qc option + config and analysis_finish 
     which should execute successfully"""
     caplog.set_level(logging.INFO)

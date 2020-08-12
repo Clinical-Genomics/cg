@@ -7,7 +7,7 @@ from cg.cli.workflow.balsamic.base import config_case
 EXIT_SUCCESS = 0
 
 
-def test_without_options(cli_runner, balsamic_context):
+def test_without_options(cli_runner, balsamic_context: dict):
     """Test command without case_id"""
     # GIVEN NO case_id
     # WHEN dry running without anything specified
@@ -17,7 +17,7 @@ def test_without_options(cli_runner, balsamic_context):
     assert "Missing argument" in result.output
 
 
-def test_with_missing_case(cli_runner, balsamic_context, caplog):
+def test_with_missing_case(cli_runner, balsamic_context: dict, caplog):
     """Test command with invalid case to start with"""
     caplog.set_level(logging.ERROR)
     # GIVEN case_id not in database
@@ -31,7 +31,7 @@ def test_with_missing_case(cli_runner, balsamic_context, caplog):
     assert case_id in caplog.text
 
 
-def test_without_samples(cli_runner, balsamic_context, caplog):
+def test_without_samples(cli_runner, balsamic_context: dict, caplog):
     """Test command with case_id and no samples"""
     caplog.set_level(logging.ERROR)
     # GIVEN case-id
@@ -45,7 +45,7 @@ def test_without_samples(cli_runner, balsamic_context, caplog):
     assert "analysis will not be started" in caplog.text
 
 
-def test_dry(cli_runner, balsamic_context, caplog):
+def test_dry(cli_runner, balsamic_context: dict, caplog):
     """Test command with --dry option"""
     caplog.set_level(logging.INFO)
     # GIVEN a VALID case_id
@@ -60,7 +60,7 @@ def test_dry(cli_runner, balsamic_context, caplog):
     assert case_id in caplog.text
 
 
-def test_target_bed(cli_runner, balsamic_context, balsamic_bed_2_path, caplog):
+def test_target_bed(cli_runner, balsamic_context: dict, balsamic_bed_2_path: Path, caplog):
     """Test command with --panel-bed option"""
     caplog.set_level(logging.INFO)
     # GIVEN VALID case_id of application type that requires BED
@@ -78,7 +78,7 @@ def test_target_bed(cli_runner, balsamic_context, balsamic_bed_2_path, caplog):
     assert option_value in caplog.text
 
 
-def test_target_bed_from_lims(cli_runner, balsamic_context, caplog):
+def test_target_bed_from_lims(cli_runner, balsamic_context: dict, caplog):
     """Test command without --target-bed option when BED can be retrieved from LIMS"""
     caplog.set_level(logging.INFO)
     # GIVEN case that bed-version set in lims with same version existing in status db
@@ -92,7 +92,7 @@ def test_target_bed_from_lims(cli_runner, balsamic_context, caplog):
     assert ".bed" in caplog.text
 
 
-def test_paired_wgs(balsamic_context, cli_runner, caplog):
+def test_paired_wgs(balsamic_context: dict, cli_runner, caplog):
     """Test with case_id that requires PAIRED WGS analysis"""
     caplog.set_level(logging.INFO)
     # GIVEN case_id containing ONE tumor, ONE normal, WGS application
@@ -108,7 +108,7 @@ def test_paired_wgs(balsamic_context, cli_runner, caplog):
     assert "--normal" in caplog.text
 
 
-def test_paired_panel(balsamic_context, cli_runner, caplog):
+def test_paired_panel(balsamic_context: dict, cli_runner, caplog):
     """Test with case_id that requires PAIRED TGS analysis"""
     caplog.set_level(logging.INFO)
     # GIVEN case_id containing ONE tumor, ONE normal, TGS application
@@ -124,7 +124,7 @@ def test_paired_panel(balsamic_context, cli_runner, caplog):
     assert "--normal" in caplog.text
 
 
-def test_single_wgs(balsamic_context, cli_runner, caplog):
+def test_single_wgs(balsamic_context: dict, cli_runner, caplog):
     """Test with case_id that requires SINGLE WGS analysis"""
     caplog.set_level(logging.INFO)
     # GIVEN case_id containing ONE tumor, WGS application
@@ -141,7 +141,7 @@ def test_single_wgs(balsamic_context, cli_runner, caplog):
     assert "--normal" not in caplog.text
 
 
-def test_single_panel(balsamic_context, cli_runner, caplog):
+def test_single_panel(balsamic_context: dict, cli_runner, caplog):
     """Test with case_id that requires SINGLE TGS analysis"""
     caplog.set_level(logging.INFO)
     # GIVEN case_id containing ONE tumor, TGS application
@@ -158,7 +158,7 @@ def test_single_panel(balsamic_context, cli_runner, caplog):
     assert "--normal" not in caplog.text
 
 
-def test_error_single_wgs_panel_arg(balsamic_context, cli_runner, caplog):
+def test_error_single_wgs_panel_arg(balsamic_context: dict, cli_runner, caplog):
     """Test with case_id that requires SINGLE WGS analysis and --panel-bed argument"""
     caplog.set_level(logging.ERROR)
     # GIVEN case_id containing ONE tumor, WGS application and panel bed argument
@@ -174,7 +174,7 @@ def test_error_single_wgs_panel_arg(balsamic_context, cli_runner, caplog):
     assert "Cannot set panel_bed for WGS sample" in caplog.text
 
 
-def test_error_normal_only(balsamic_context, cli_runner, caplog):
+def test_error_normal_only(balsamic_context: dict, cli_runner, caplog):
     """Test with case_id that requires WGS analysis but only has one NORMAL sample"""
     caplog.set_level(logging.ERROR)
     # GIVEN case_id containing ONE normal, WGS application
@@ -187,7 +187,7 @@ def test_error_normal_only(balsamic_context, cli_runner, caplog):
     assert "Invalid number of tumor samples" in caplog.text
 
 
-def test_error_two_tumor(balsamic_context, cli_runner, caplog):
+def test_error_two_tumor(balsamic_context: dict, cli_runner, caplog):
     """Test with case_id that requires WGS analysis but has TWO tumor ONE normal samples"""
     caplog.set_level(logging.ERROR)
     # GIVEN case_id containing TWO tumor, ONE normal, TGS application
@@ -200,7 +200,7 @@ def test_error_two_tumor(balsamic_context, cli_runner, caplog):
     assert "Invalid number of tumor samples" in caplog.text
 
 
-def test_error_mixed_application(balsamic_context, cli_runner, caplog):
+def test_error_mixed_application(balsamic_context: dict, cli_runner, caplog):
     """Test with case_id that has ONE tumor ONE normal samples marked for WGS and TGS analysis"""
     caplog.set_level(logging.ERROR)
     case_id = "balsamic_case_mixed_paired_error"
@@ -212,7 +212,7 @@ def test_error_mixed_application(balsamic_context, cli_runner, caplog):
     assert "Multiple application types found" in caplog.text
 
 
-def test_error_not_balsamic_application(balsamic_context, cli_runner, caplog):
+def test_error_not_balsamic_application(balsamic_context: dict, cli_runner, caplog):
     """Test with case_id that has PAIRED samples marked for WGS and MIC analysis"""
     caplog.set_level(logging.ERROR)
     case_id = "balsamic_case_mixed_wgs_mic_paired_error"
@@ -224,7 +224,7 @@ def test_error_not_balsamic_application(balsamic_context, cli_runner, caplog):
     assert "not compatible with BALSAMIC" in caplog.text
 
 
-def test_error_mixed_panel_bed(balsamic_context, cli_runner, caplog):
+def test_error_mixed_panel_bed(balsamic_context: dict, cli_runner, caplog):
     """Test with case_id marked for PAIRED TGS analysis but different BED files in LIMS"""
     caplog.set_level(logging.ERROR)
     case_id = "balsamic_case_mixed_bed_paired_error"
@@ -236,7 +236,7 @@ def test_error_mixed_panel_bed(balsamic_context, cli_runner, caplog):
     assert "Too many BED versions in LIMS" in caplog.text
 
 
-def test_error_mixed_panel_bed_resque(balsamic_context, cli_runner, caplog):
+def test_error_mixed_panel_bed_resque(balsamic_context: dict, cli_runner, caplog):
     """Test with case_id marked for PAIRED TGS analysis but different BED files in LIMS
     AND supplying --panel-bed option should prevent error"""
     caplog.set_level(logging.INFO)
@@ -254,7 +254,7 @@ def test_error_mixed_panel_bed_resque(balsamic_context, cli_runner, caplog):
     assert panel_bed in caplog.text
 
 
-def test_error_only_mip_tumor(balsamic_context, cli_runner, caplog):
+def test_error_only_mip_tumor(balsamic_context: dict, cli_runner, caplog):
     """Test with case_id containing ONE tumor sample marked for MIP analysis"""
     caplog.set_level(logging.ERROR)
     case_id = "mip_case_wgs_single"
@@ -266,7 +266,7 @@ def test_error_only_mip_tumor(balsamic_context, cli_runner, caplog):
     assert "no samples tagged for BALSAMIC analysis" in caplog.text
 
 
-def test_error_two_normal(balsamic_context, cli_runner, caplog):
+def test_error_two_normal(balsamic_context: dict, cli_runner, caplog):
     """Test with case_id containing ONE tumor and TWO normal samples"""
     caplog.set_level(logging.ERROR)
     case_id = "balsamic_case_wgs_paired_two_normal_error"
@@ -278,7 +278,7 @@ def test_error_two_normal(balsamic_context, cli_runner, caplog):
     assert "Invalid number of normal samples" in caplog.text
 
 
-def test_error_wes_panel(balsamic_context, cli_runner, caplog):
+def test_error_wes_panel(balsamic_context: dict, cli_runner, caplog):
     """Test with case_id containing ONE tumor and TWO normal samples"""
     caplog.set_level(logging.ERROR)
     case_id = "balsamic_case_wes_panel_error"
