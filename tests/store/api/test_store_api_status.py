@@ -122,19 +122,19 @@ def test_case_not_in_observations_to_upload(helpers, sample_store):
 
 def test_analyses_to_upload_when_not_completed_at(helpers, sample_store):
     """Test analyses to upload with no completed_at date"""
-    # GIVEN a case with completed analysis
+    # GIVEN a store with an analysis without a completed_at date
     helpers.add_analysis(store=sample_store)
 
-    # WHEN no analyses are completed
+    # WHEN fetching all analyses that are ready for upload
     records = [analysis_obj for analysis_obj in sample_store.analyses_to_upload()]
 
-    # THEN no analysis object should be returned
+    # THEN no analysis object should be returned since they did not have a completed_at entry
     assert len(records) == 0
 
 
 def test_analyses_to_upload_when_no_pipeline(helpers, sample_store, timestamp):
     """Test analyses to upload with no pipeline specified"""
-    # GIVEN a case with completed analysis
+    # GIVEN a store with one analysis
     helpers.add_analysis(store=sample_store, completed_at=timestamp)
 
     # WHEN uploading without a pipeline specified
