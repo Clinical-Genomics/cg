@@ -174,22 +174,22 @@ def test_analyses_to_upload_with_pipeline_and_no_complete_at(helpers, sample_sto
     # GIVEN a store with an analysis that is analysed with MIP but does not have a completed_at entry
     helpers.add_analysis(store=sample_store, pipeline="MIP")
 
-    # WHEN uploading without a pipeline specified
+    # WHEN fetching all analyses that are ready for upload and analysed by MIP
     records = [analysis_obj for analysis_obj in sample_store.analyses_to_upload(pipeline="MIP")]
 
-    # THEN no analysis object should be returned
+    # THEN no analysis object should be returned since they where not completed
     assert len(records) == 0
 
 
 def test_analyses_to_upload_when_filtering_with_missing_pipeline(helpers, sample_store, timestamp):
     """Test analyses to upload to when missing pipeline and using it in filtering"""
-    # GIVEN a case with completed analysis
+    # GIVEN a store with an analysis that has been analysed with "missing_pipeline"
     helpers.add_analysis(store=sample_store, completed_at=timestamp, pipeline="missing_pipeline")
 
-    # WHEN uploading without a pipeline specified
+    # WHEN fetching all analyses that was analysed with MIP
     records = [analysis_obj for analysis_obj in sample_store.analyses_to_upload(pipeline="MIP")]
 
-    # THEN no analysis object should be returned
+    # THEN no analysis object should be returned since there where no MIP analyses
     assert len(records) == 0
 
 
