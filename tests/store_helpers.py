@@ -197,6 +197,7 @@ class StoreHelpers:
         application_type: str = "tgs",
         customer_name: str = None,
         reads: int = None,
+        loqus_id: str = None,
         **kwargs,
     ) -> models.Sample:
         """Utility function to add a sample to use in tests"""
@@ -224,20 +225,19 @@ class StoreHelpers:
         # print("is_external: %s" % is_external)
         sample.is_external = is_external
 
+        if loqus_id:
+            sample.loqusdb_id = loqus_id
+
         if kwargs.get("delivered_at"):
-            # print("Adding delivered_at")
             sample.delivered_at = kwargs["delivered_at"]
 
         if kwargs.get("received_at"):
-            # print("Adding received_at")
             sample.received_at = kwargs["received_at"]
 
         if kwargs.get("prepared_at"):
-            # print("Adding prepared")
             sample.received_at = kwargs["prepared_at"]
 
         if kwargs.get("flowcell"):
-            # print("Adding flowcell")
             sample.flowcells.append(kwargs["flowcell"])
 
         store.add_commit(sample)
