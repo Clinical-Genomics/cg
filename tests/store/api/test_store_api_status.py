@@ -137,7 +137,7 @@ def test_analyses_to_upload_when_no_pipeline(helpers, sample_store, timestamp):
     # GIVEN a store with one analysis
     helpers.add_analysis(store=sample_store, completed_at=timestamp)
 
-    # WHEN uploading without a pipeline specified
+    # WHEN fetching all analysis that are ready for upload without specifying pipeline
     records = [analysis_obj for analysis_obj in sample_store.analyses_to_upload(pipeline=None)]
 
     # THEN one analysis object should be returned
