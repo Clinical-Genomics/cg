@@ -146,10 +146,10 @@ def test_analyses_to_upload_when_no_pipeline(helpers, sample_store, timestamp):
 
 def test_analyses_to_upload_when_existing_pipeline(helpers, sample_store, timestamp):
     """Test analyses to upload to when exisiting pipeline"""
-    # GIVEN a case with completed analysis
+    # GIVEN a store with an analysis that has been run with MIP
     helpers.add_analysis(store=sample_store, completed_at=timestamp, pipeline="MIP")
 
-    # WHEN uploading without a pipeline specified
+    # WHEN fetching all analyses that are ready for upload and analysed with MIP
     records = [analysis_obj for analysis_obj in sample_store.analyses_to_upload(pipeline=None)]
 
     # THEN one analysis object should be returned
@@ -158,14 +158,11 @@ def test_analyses_to_upload_when_existing_pipeline(helpers, sample_store, timest
 
 def test_analyses_to_upload_when_filtering_with_pipeline(helpers, sample_store, timestamp):
     """Test analyses to upload to when exisiting pipeline and using it in filtering"""
-    # GIVEN a case with completed analysis
+    # GIVEN a store with an analysis that is analysed with MIP
     helpers.add_analysis(store=sample_store, completed_at=timestamp, pipeline="MIP")
 
-    # WHEN uploading without a pipeline specified
+    # WHEN fetching all pipelines that are analysed with MIP
     records = [analysis_obj for analysis_obj in sample_store.analyses_to_upload(pipeline="MIP")]
-
-    # THEN at least one analysis object should be returned
-    assert len(records) == 1
 
     for analysis_obj in records:
         # THEN pipeline should be MIP in the analysis object
@@ -174,7 +171,7 @@ def test_analyses_to_upload_when_filtering_with_pipeline(helpers, sample_store, 
 
 def test_analyses_to_upload_with_pipeline_and_no_complete_at(helpers, sample_store, timestamp):
     """Test analyses to upload to when exisiting pipeline and using it in filtering"""
-    # GIVEN a case with completed analysis
+    # GIVEN a store with an analysis that is analysed with MIP but does not have a completed_at entry
     helpers.add_analysis(store=sample_store, pipeline="MIP")
 
     # WHEN uploading without a pipeline specified
