@@ -4,7 +4,9 @@ import logging
 from cg.cli.upload.base import auto
 
 
-def test_upload_auto_with_pipeline_as_argument(base_context, cli_runner, caplog, helpers, sample_store, timestamp):
+def test_upload_auto_with_pipeline_as_argument(
+    base_context, cli_runner, caplog, helpers, sample_store, timestamp
+):
     """Test upload auto"""
     # GIVEN a store with a MIP analysis
     helpers.add_analysis(store=sample_store, completed_at=timestamp, pipeline="MIP")
