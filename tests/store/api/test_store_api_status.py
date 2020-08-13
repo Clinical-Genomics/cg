@@ -56,7 +56,7 @@ def test_case_in_uploaded_observations(helpers, sample_store):
     # GIVEN a case with observations that has been uploaded to loqusdb
     analysis = helpers.add_analysis(store=sample_store)
 
-    sample = add_sample(sample_store, uploaded_to_loqus=True)
+    sample = helpers.add_sample(sample_store, loqus_id="uploaded_to_loqus")
     sample_store.relate_sample(analysis.family, sample, "unknown")
     assert analysis.family.analyses
     for link in analysis.family.links:
@@ -73,7 +73,7 @@ def test_case_not_in_uploaded_observations(helpers, sample_store):
     # GIVEN a case with observations that has not been uploaded to loqusdb
     analysis = helpers.add_analysis(store=sample_store)
 
-    sample = add_sample(sample_store)
+    sample = helpers.add_sample(sample_store)
     sample_store.relate_sample(analysis.family, sample, "unknown")
     assert analysis.family.analyses
     for link in analysis.family.links:
@@ -90,7 +90,7 @@ def test_case_in_observations_to_upload(helpers, sample_store):
     # GIVEN a case with completed analysis and samples w/o loqus_id
     analysis = helpers.add_analysis(store=sample_store)
 
-    sample = add_sample(sample_store)
+    sample = helpers.add_sample(sample_store)
     sample_store.relate_sample(analysis.family, sample, "unknown")
     assert analysis.family.analyses
     for link in analysis.family.links:
@@ -107,7 +107,7 @@ def test_case_not_in_observations_to_upload(helpers, sample_store):
     # GIVEN a case with completed analysis and samples w loqus_id
     analysis = helpers.add_analysis(store=sample_store)
 
-    sample = add_sample(sample_store, uploaded_to_loqus=True)
+    sample = helpers.add_sample(sample_store, loqus_id="uploaded_to_loqus")
     sample_store.relate_sample(analysis.family, sample, "unknown")
     assert analysis.family.analyses
     for link in analysis.family.links:
@@ -226,70 +226,3 @@ def test_multiple_analyses(analysis_store, helpers):
     # THEN only the newest analysis should be returned
     assert analysis_newest in analyses
     assert analysis_oldest not in analyses
-
-
-def ensure_customer(store, customer_id="cust_test"):
-    """utility function to return existing or create customer for tests"""
-    customer_group = store.customer_group("dummy_group")
-    if not customer_group:
-        customer_group = store.add_customer_group("dummy_group", "dummy group")
-
-        customer = store.add_customer(
-            internal_id=customer_id,
-            name="Test Customer",
-            scout_access=False,
-            customer_group=customer_group,
-            invoice_address="dummy_address",
-            invoice_reference="dummy_reference",
-        )
-        store.add_commit(customer)
-    customer = store.customer(customer_id)
-    return customer
-
-
-def ensure_panel(store, panel_id="panel_test", customer_id="cust_test"):
-    """utility function to add a panel to use in tests"""
-    customer = ensure_customer(store, customer_id)
-    panel = store.panel(panel_id)
-    if not panel:
-        panel = store.add_panel(
-            customer=customer,
-            name=panel_id,
-            abbrev=panel_id,
-            version=1.0,
-            date=datetime.now(),
-            genes=1,
-        )
-        store.add_commit(panel)
-    return panel
-
-
-def ensure_application_version(disk_store, application_tag="dummy_tag"):
-    """utility function to return existing or create application version for tests"""
-    application = disk_store.application(tag=application_tag)
-    if not application:
-        application = disk_store.add_application(
-            tag=application_tag, category="wgs", description="dummy_description", percent_kth=80
-        )
-        disk_store.add_commit(application)
-
-    prices = {"standard": 10, "priority": 20, "express": 30, "research": 5}
-    version = disk_store.application_version(application, 1)
-    if not version:
-        version = disk_store.add_version(application, 1, valid_from=datetime.now(), prices=prices)
-
-        disk_store.add_commit(version)
-    return version
-
-
-def add_sample(store, sample_name="sample_test", uploaded_to_loqus=None):
-    """utility function to add a sample to use in tests"""
-    customer = ensure_customer(store)
-    application_version_id = ensure_application_version(store).id
-    sample = store.add_sample(name=sample_name, sex="unknown")
-    sample.application_version_id = application_version_id
-    sample.customer = customer
-    if uploaded_to_loqus:
-        sample.loqusdb_id = uploaded_to_loqus
-    store.add_commit(sample)
-    return sample
