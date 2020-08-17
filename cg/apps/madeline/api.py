@@ -82,7 +82,7 @@ class MadelineAPI:
                 output_prefix,
                 in_file.name,
             ]
-            self.process.run_command(madeline_call)
+            self.process.run_command(parameters=madeline_call)
 
         with open(out_path, "r") as output:
             svg_content = output.read()
