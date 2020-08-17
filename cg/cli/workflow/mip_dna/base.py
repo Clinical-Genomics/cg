@@ -238,9 +238,6 @@ def start(context: click.Context, dry_run: bool = False):
 
         try:
             context.invoke(mip_dna, priority=priority, case_id=case_obj.internal_id)
-        except tb.MipStartError as error:
-            LOG.error(error.message)
-            exit_code = 1
         except CgError as error:
             LOG.error(error.message)
             exit_code = 11

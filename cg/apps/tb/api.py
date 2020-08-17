@@ -6,7 +6,6 @@ from typing import List
 
 import click
 import ruamel.yaml
-from trailblazer.mip.start import MipCli
 from trailblazer.store import Store, models
 from trailblazer.mip import files, fastq, trending
 
@@ -19,11 +18,6 @@ class TrailblazerAPI(Store, fastq.FastqHandler):
     def __init__(self, config: dict):
         super(TrailblazerAPI, self).__init__(
             config["trailblazer"]["database"], families_dir=config["trailblazer"]["root"]
-        )
-        self.mip_cli = MipCli(
-            script=config["trailblazer"]["script"],
-            pipeline=config["trailblazer"]["pipeline"],
-            conda_env=config["trailblazer"]["conda_env"],
         )
         self.mip_config = config["trailblazer"]["mip_config"]
 
