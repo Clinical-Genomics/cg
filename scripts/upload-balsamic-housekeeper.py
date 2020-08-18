@@ -7,7 +7,6 @@ from ruamel import yaml
 import click
 
 
-
 @click.command()
 @click.option("--database", help="StatusDB address")
 @click.option("--housekeeper-root", help="Housekeeper root path")
@@ -25,7 +24,7 @@ def upload_cases(database, housekeeper_root, housekeeper_db, report_dir, case_di
         .join(models.Family.links, models.FamilySample.sample)
         .filter(models.Sample.data_analysis.ilike("%Balsamic%"))
     )
-    fam_names = {x.internal_id : None for x in balsamic_families}
+    fam_names = {x.internal_id: None for x in balsamic_families}
     for obj in Path(case_dir).iterdir():
         if obj.is_dir() and any(x in obj.name for x in fam_names):
             for obj2 in obj.iterdir():
@@ -45,16 +44,16 @@ def upload_cases(database, housekeeper_root, housekeeper_db, report_dir, case_di
                             continue
                     fam_names[case_id] = {
                         "bv": config_dict.get("analysis").get("BALSAMIC_version"),
-                        "config_name" : f"{case_dir}/{obj.name}/{obj2.name}",
-                        "date" : creation_date,
-                        "path" : obj.name,
-                        "hk" : Path(report_dir, obj.name + ".hk"),
-                        }
+                        "config_name": f"{case_dir}/{obj.name}/{obj2.name}",
+                        "date": creation_date,
+                        "path": obj.name,
+                        "hk": Path(report_dir, obj.name + ".hk"),
+                    }
     for case_id in fam_names:
         items = fam_names.get(case_id)
         if items:
             try:
-                #Add files to Housekeeper
+                # Add files to Housekeeper
                 config_data = dict(json.load(open(items["config_name"], "r")))
                 bundle_data = {
                     "name": case_id,
@@ -74,7 +73,7 @@ def upload_cases(database, housekeeper_root, housekeeper_db, report_dir, case_di
                 print(
                     f"Analysis successfully stored in Housekeeper: {case_id} : {bundle_version.created_at}"
                 )
-                #Add bundle to StatusDB
+                # Add bundle to StatusDB
                 case_object = store_api.family(case_id)
                 analysis_start = dt.datetime.strptime(
                     config_data["analysis"]["config_creation_date"], "%Y-%m-%d %H:%M"
