@@ -49,7 +49,7 @@ class BalsamicAPI:
         )
         parameters = command + options
         if dry:
-            LOG.info(f'Dry run command balsamic{" ".join(parameters)}')
+            LOG.info(f'Dry run command balsamic {" ".join(parameters)}')
             retcode = self.__EXIT_SUCCESS
         else:
             retcode = self.process.run_command(parameters=parameters)
@@ -71,7 +71,7 @@ class BalsamicAPI:
         )
         parameters = command + options + run_analysis
         if dry:
-            LOG.info(f'Dry run command balsamic{" ".join(parameters)}')
+            LOG.info(f'Dry run command balsamic {" ".join(parameters)}')
             retcode = self.__EXIT_SUCCESS
         else:
             retcode = self.process.run_command(parameters=parameters)
@@ -89,7 +89,7 @@ class BalsamicAPI:
         )
         parameters = command + options
         if dry:
-            LOG.info(f'Dry run command balsamic{" ".join(parameters)}')
+            LOG.info(f'Dry run command balsamic {" ".join(parameters)}')
             retcode = self.__EXIT_SUCCESS
         else:
             retcode = self.process.run_command(parameters=parameters)
