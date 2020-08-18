@@ -19,8 +19,6 @@ class MockCrunchyAPI(CrunchyAPI):
         self.dry_run = False
         self._compression_pending_files = {}
         self._compression_possible_files = {}
-        self._bam_compression_done = {}
-        self._bam_compression_done_all = False
 
         self._compression_pending = False
         self._compression_possible = True
@@ -42,14 +40,6 @@ class MockCrunchyAPI(CrunchyAPI):
         """Set that the compression for a file is pending"""
         self._compression_pending = True
 
-    def set_bam_compression_done(self, bam_path):
-        """Set the variable so that bam/cram compression is done"""
-        self._bam_compression_done[bam_path] = True
-
-    def set_bam_compression_done_all(self):
-        """Set so that bam compression is done for all"""
-        self._compression_done_all = True
-
     def set_compression_not_possible(self, file_path: Path):
         """Set the variable so that bam/cram compression is not possible"""
         print("Setting compression to not possible for %s" % file_path)
@@ -64,12 +54,6 @@ class MockCrunchyAPI(CrunchyAPI):
         return self._nr_fastq_compressions
 
     # Mocked methods
-    def bam_to_cram(self, bam_path: Path, **kwargs):
-        """
-            Compress BAM file into CRAM
-        """
-        self._compression_pending_files[bam_path] = True
-
     def fastq_to_spring(self, fastq_first: Path, fastq_second: Path, **kwargs):
         """
             Compress FASTQ files into SPRING by sending to sbatch SLURM
@@ -104,16 +88,6 @@ class MockCrunchyAPI(CrunchyAPI):
         )
         print(f"Compression possible {compression_possible}")
         return compression_possible
-
-    def is_cram_compression_done(self, bam_path: Path) -> bool:
-        """Check if CRAM compression already done for BAM file"""
-        if self._compression_pending:
-            return False
-
-        if self._compression_pending_files.get(bam_path):
-            return False
-
-        return self._bam_compression_done.get(bam_path, self._compression_done_all)
 
     def is_spring_compression_done(self, fastq_file: Path) -> bool:
         """Check if spring compression if finished"""

@@ -151,36 +151,6 @@ def fixture_sample_dir(project_dir, sample) -> Path:
     return _dir
 
 
-@pytest.fixture(scope="function", name="bam_path")
-def fixture_bam_path(sample_dir) -> Path:
-    """Return the path to a non existing bam file"""
-    return sample_dir / "bam_1.bam"
-
-
-@pytest.fixture(scope="function", name="bai_path")
-def fixture_bai_path(sample_dir) -> Path:
-    """Return the path to a non existing bam index file"""
-    return sample_dir / "bam_1.bam.bai"
-
-
-@pytest.fixture(scope="function", name="cram_path")
-def fixture_cram_path(bam_path) -> Path:
-    """Return the path to a non existing cram file"""
-    return CrunchyAPI.get_cram_path_from_bam(bam_path=bam_path)
-
-
-@pytest.fixture(scope="function", name="crai_path")
-def fixture_crai_path(cram_path) -> Path:
-    """Return the path to a non existing cram index file"""
-    return CrunchyAPI.get_index_path(cram_path)["double_suffix"]
-
-
-@pytest.fixture(scope="function", name="bam_flag_path")
-def fixture_bam_flag_path(bam_path) -> Path:
-    """Return the path to a non existing bam flag file"""
-    return CrunchyAPI.get_flag_path(file_path=bam_path)
-
-
 @pytest.fixture(scope="function", name="spring_path")
 def fixture_spring_path(fastq_paths) -> Path:
     """Return the path to a non existing spring file"""
@@ -197,53 +167,6 @@ def fixture_spring_metadata_path(spring_path) -> Path:
 def fixture_fastq_flag_path(spring_path) -> Path:
     """Return the path to a non existing fastq flag file"""
     return CrunchyAPI.get_flag_path(file_path=spring_path)
-
-
-@pytest.fixture(scope="function", name="bam_file")
-def fixture_bam_file(bam_path) -> Path:
-    """Return the path to an existing bam file"""
-    bam_path.touch()
-    return bam_path
-
-
-@pytest.fixture(scope="function", name="bai_file")
-def fixture_bai_file(bai_path) -> Path:
-    """Return the path to an existing bam index file"""
-    bai_path.touch()
-    return bai_path
-
-
-@pytest.fixture(scope="function", name="cram_file")
-def fixture_cram_file(cram_path) -> Path:
-    """Return the path to an existing cram file"""
-    cram_path.touch()
-    return cram_path
-
-
-@pytest.fixture(scope="function", name="crai_file")
-def fixture_crai_file(crai_path) -> Path:
-    """Return the path to an existing cram index file"""
-    crai_path.touch()
-    return crai_path
-
-
-@pytest.fixture(scope="function", name="hk_bam_file")
-def fixture_hk_bam_file(bam_file) -> Path:
-    """Return a housekeeper file object"""
-    return MockFile(path=str(bam_file))
-
-
-@pytest.fixture(scope="function", name="hk_bai_file")
-def fixture_hk_bai_file(bai_file) -> Path:
-    """Return a housekeeper file object"""
-    return MockFile(path=str(bai_file))
-
-
-@pytest.fixture(scope="function", name="bam_flag_file")
-def fixture_bam_flag_file(bam_flag_path) -> Path:
-    """Return the path to an existing bam flag file"""
-    bam_flag_path.touch()
-    return bam_flag_path
 
 
 @pytest.fixture(scope="function", name="fastq_flag_file")
@@ -267,38 +190,6 @@ def fixture_multi_linked_file(bam_file, project_dir) -> Path:
     os.link(bam_file, first_link)
 
     return bam_file
-
-
-@pytest.fixture(scope="function", name="bam_files")
-def fixture_bam_files(project_dir, sample, sample_two, sample_three):
-    """Fixture for temporary bam-files
-
-    Creates files and return a dict will all files
-    """
-    sample_1_dir = project_dir / sample
-    sample_1_dir.mkdir(parents=True, exist_ok=True)
-    sample_2_dir = project_dir / sample_two
-    sample_2_dir.mkdir(parents=True, exist_ok=True)
-    sample_3_dir = project_dir / sample_three
-    sample_3_dir.mkdir(parents=True, exist_ok=True)
-    bam_file_1 = sample_1_dir / "bam_1.bam"
-    bai_file_1 = sample_1_dir / "bam_1.bam.bai"
-    bam_file_2 = sample_2_dir / "bam_2.bam"
-    bai_file_2 = sample_2_dir / "bam_2.bam.bai"
-    bam_file_3 = sample_3_dir / "bam_3.bam"
-    bai_file_3 = sample_3_dir / "bam_3.bam.bai"
-    bam_file_1.touch()
-    bai_file_1.touch()
-    bam_file_2.touch()
-    bai_file_2.touch()
-    bam_file_3.touch()
-    bai_file_3.touch()
-
-    return {
-        sample: {"bam_file": bam_file_1, "bai_file": bai_file_1},
-        sample_two: {"bam_file": bam_file_2, "bai_file": bai_file_2},
-        sample_three: {"bam_file": bam_file_3, "bai_file": bai_file_3},
-    }
 
 
 @pytest.fixture(scope="function", name="fastq_paths")
@@ -363,43 +254,6 @@ def fixture_case_hk_bundle_no_files(case_id, timestamp):
     return hk_bundle_data
 
 
-@pytest.fixture(scope="function", name="compress_hk_bam_bundle")
-def fixture_compress_hk_bam_bundle(bam_files, case_hk_bundle_no_files):
-    """Create a complete bundle mock for testing compression"""
-    hk_bundle_data = copy.deepcopy(case_hk_bundle_no_files)
-
-    for sample_id in bam_files:
-        bam_file = bam_files[sample_id]["bam_file"]
-        bai_file = bam_files[sample_id]["bai_file"]
-        bam_file_info = {"path": str(bam_file), "archive": False, "tags": ["bam"]}
-        bai_file_info = {
-            "path": str(bai_file),
-            "archive": False,
-            "tags": ["bai", "bam-index"],
-        }
-        hk_bundle_data["files"].append(bam_file_info)
-        hk_bundle_data["files"].append(bai_file_info)
-
-    return hk_bundle_data
-
-
-@pytest.fixture(scope="function", name="compress_hk_bam_single_bundle")
-def fixture_compress_hk_bam_single_bundle(bam_file, bai_file, case_hk_bundle_no_files):
-    """Create a complete bundle mock for testing compression"""
-    hk_bundle_data = copy.deepcopy(case_hk_bundle_no_files)
-
-    bam_file_info = {"path": str(bam_file), "archive": False, "tags": ["bam"]}
-    bai_file_info = {
-        "path": str(bai_file),
-        "archive": False,
-        "tags": ["bai", "bam-index"],
-    }
-    hk_bundle_data["files"].append(bam_file_info)
-    hk_bundle_data["files"].append(bai_file_info)
-
-    return hk_bundle_data
-
-
 @pytest.fixture(scope="function", name="compress_hk_fastq_bundle")
 def fixture_compress_hk_fastq_bundle(fastq_files, sample_hk_bundle_no_files):
     """Create a complete bundle mock for testing compression"""
@@ -433,16 +287,3 @@ def fixture_decompress_hk_spring_bundle(
     hk_bundle_data["files"].append(spring_meta_info)
 
     return hk_bundle_data
-
-
-@pytest.fixture(scope="function", name="compress_scout_case")
-def fixture_compress_scout_case(bam_files, case_id):
-    """Fixture for scout case with bam-files"""
-    case_data = {
-        "_id": case_id,
-        "individuals": [
-            {"individual_id": sample, "bam_file": str(files["bam_file"])}
-            for sample, files in bam_files.items()
-        ],
-    }
-    return case_data

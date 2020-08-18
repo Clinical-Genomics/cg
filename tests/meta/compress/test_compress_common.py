@@ -60,20 +60,6 @@ def test_get_nlinks_three_links(project_dir):
     assert nlinks == 3
 
 
-def test_get_scout_case_no_scout_case(compress_api, case_id, caplog):
-    """test get_bam_dict method when there is not case in scout"""
-
-    # GIVEN a case id
-
-    # WHEN getting bam-files
-    res = compress_api.get_scout_case(case_id=case_id)
-
-    # THEN assert that None was returned since the case was not found in scout
-    assert res is None
-    # THEN assert that the correct information is being processed
-    assert f"{case_id} not found in scout" in caplog.text
-
-
 def test_get_latest_version_no_housekeeper_files(compress_api, compress_scout_case, caplog):
     """test get_bam_dict method when there is not case in scout"""
 

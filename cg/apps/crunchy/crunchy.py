@@ -1,6 +1,6 @@
 """
-    Module for:
-        1. Compressing: BAM to CRAM; FASTQ to SPRING
+    Module for interacting with crunchy to perform:
+        1. Compressing: FASTQ to SPRING
         2. Decompressing: SPRING to FASTQ
 """
 
@@ -13,26 +13,14 @@ from typing import List
 
 from marshmallow import ValidationError
 
-from cg.constants import (
-    BAM_INDEX_SUFFIX,
-    BAM_SUFFIX,
-    CRAM_INDEX_SUFFIX,
-    CRAM_SUFFIX,
-    FASTQ_DELTA,
-    FASTQ_FIRST_READ_SUFFIX,
-    FASTQ_SECOND_READ_SUFFIX,
-    SPRING_SUFFIX,
-)
+from cg.constants import (FASTQ_DELTA, FASTQ_FIRST_READ_SUFFIX,
+                          FASTQ_SECOND_READ_SUFFIX, SPRING_SUFFIX)
 from cg.utils import Process
 from cg.utils.date import get_date_str
 
 from .models import CrunchyFileSchema
-from .sbatch import (
-    SBATCH_BAM_TO_CRAM,
-    SBATCH_FASTQ_TO_SPRING,
-    SBATCH_HEADER_TEMPLATE,
-    SBATCH_SPRING_TO_FASTQ,
-)
+from .sbatch import (SBATCH_FASTQ_TO_SPRING, SBATCH_HEADER_TEMPLATE,
+                     SBATCH_SPRING_TO_FASTQ)
 
 LOG = logging.getLogger(__name__)
 
@@ -54,40 +42,12 @@ class CrunchyAPI:
         self.mail_user = config["crunchy"]["slurm"]["mail_user"]
         self.reference_path = config["crunchy"]["cram_reference"]
         self.dry_run = False
-        self.ntasks = 12
-        self.mem = 50
-        self.time = 24
 
     def set_dry_run(self, dry_run: bool):
         """Update dry run"""
         self.dry_run = dry_run
 
     # These are the compression/decompression methods
-    def bam_to_cram(self, bam_path: Path):
-        """
-            Compress BAM file into CRAM
-        """
-        cram_path = self.get_cram_path_from_bam(bam_path)
-        job_name = bam_path.name + "_bam_to_cram"
-        flag_path = self.get_flag_path(file_path=cram_path)
-        pending_path = self.get_pending_path(file_path=bam_path)
-        LOG.info("Use pending path: %s", pending_path)
-        log_dir = self.get_log_dir(bam_path)
-
-        sbatch_header = self._get_slurm_header(job_name=job_name, log_dir=log_dir)
-
-        sbatch_body = self._get_slurm_bam_to_cram(
-            bam_path=bam_path,
-            cram_path=cram_path,
-            flag_path=flag_path,
-            pending_path=pending_path,
-            reference_path=self.reference_path,
-        )
-
-        sbatch_content = "\n".join([sbatch_header, sbatch_body])
-        sbatch_path = self.get_sbatch_path(log_dir, "bam", self.get_run_name(bam_path))
-        self._submit_sbatch(sbatch_content=sbatch_content, sbatch_path=sbatch_path)
-
     def fastq_to_spring(self, fastq_first: Path, fastq_second: Path, sample_id: str = ""):
         """
             Compress FASTQ files into SPRING by sending to sbatch SLURM
@@ -235,10 +195,6 @@ class CrunchyAPI:
             return False
 
         file_type = self.get_file_type(file_path)
-        if file_type == "bam" and self.is_cram_compression_done(file_path):
-            LOG.info("cram compression already exists for %s", file_path)
-            return False
-
         if file_type == "fastq" and self.is_spring_compression_done(file_path):
             LOG.info("SPRING compression already exists for %s", file_path)
             return False
@@ -247,25 +203,6 @@ class CrunchyAPI:
             LOG.info("Decompressed SPRING already exists for %s", file_path)
             return False
 
-        return True
-
-    def is_cram_compression_done(self, bam_path: Path) -> bool:
-        """Check if CRAM compression already done for BAM file"""
-        cram_path = self.get_cram_path_from_bam(bam_path)
-        flag_path = self.get_flag_path(file_path=cram_path)
-
-        if not cram_path.exists():
-            LOG.info("No cram-file for %s", bam_path)
-            return False
-        index_paths = self.get_index_path(cram_path)
-        index_single_suffix = index_paths["single_suffix"]
-        index_double_suffix = index_paths["double_suffix"]
-        if (not index_single_suffix.exists()) and (not index_double_suffix.exists()):
-            LOG.info("No index-file for %s", cram_path)
-            return False
-        if not flag_path.exists():
-            LOG.info("No %s file for %s", FLAG_PATH_SUFFIX, cram_path)
-            return False
         return True
 
     @staticmethod
@@ -356,7 +293,7 @@ class CrunchyAPI:
             return file_path.name.replace(FASTQ_SECOND_READ_SUFFIX, "")
         if str(file_path).endswith(SPRING_SUFFIX):
             return file_path.name.replace(SPRING_SUFFIX, "")
-        return file_path.name.replace(BAM_SUFFIX, "")
+        return None
 
     @staticmethod
     def get_sbatch_path(log_dir: Path, compression: str, run_name: str = None) -> Path:
@@ -365,7 +302,7 @@ class CrunchyAPI:
             return log_dir / "_".join([run_name, "compress_fastq.sh"])
         if compression == "spring":
             return log_dir / "_".join([run_name, "decompress_spring.sh"])
-        return log_dir / "compress_bam.sh"
+        return None
 
     @staticmethod
     def get_file_type(file_path: Path) -> str:
@@ -374,8 +311,6 @@ class CrunchyAPI:
             SPRING_SUFFIX: "spring",
             FASTQ_FIRST_READ_SUFFIX: "fastq",
             FASTQ_SECOND_READ_SUFFIX: "fastq",
-            BAM_SUFFIX: "bam",
-            CRAM_SUFFIX: "cram",
         }
         for suffix in file_types:
             if not str(file_path).endswith(suffix):
@@ -385,50 +320,23 @@ class CrunchyAPI:
         return None
 
     @staticmethod
-    def get_flag_path(file_path):
+    def get_flag_path(file_path: Path):
         """Get path to 'finished' flag.
         When compressing FASTQ this means that a .json metadata file has been created
-        When compressing BAM, a regular flag path is returned.
         """
-        if str(file_path).endswith(SPRING_SUFFIX):
-            return file_path.with_suffix("").with_suffix(".json")
-
-        return file_path.with_suffix(FLAG_PATH_SUFFIX)
+        return file_path.with_suffix("").with_suffix(".json")
 
     @staticmethod
     def get_pending_path(file_path: Path) -> Path:
         """Gives path to pending-flag path
 
-        The file ending can be either fastq, spring or bam. They are treated as shown below
+        The file ending can be either fastq or spring. They are treated as shown below
         """
         file_type_suffixes = [SPRING_SUFFIX, FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX]
         for file_type_suffix in file_type_suffixes:
             if str(file_path).endswith(file_type_suffix):
                 return Path(str(file_path).replace(file_type_suffix, PENDING_PATH_SUFFIX))
         return file_path.with_suffix(PENDING_PATH_SUFFIX)
-
-    @staticmethod
-    def get_index_path(file_path: Path) -> dict:
-        """Get possible paths for index
-
-        Returns:
-            dict: path with single_suffix, e.g. .bai and path with double_suffix, e.g. .bam.bai
-        """
-        index_type = CRAM_INDEX_SUFFIX
-        if file_path.suffix == BAM_SUFFIX:
-            index_type = BAM_INDEX_SUFFIX
-        with_single_suffix = file_path.with_suffix(index_type)
-        with_double_suffix = file_path.with_suffix(file_path.suffix + index_type)
-        return {"single_suffix": with_single_suffix, "double_suffix": with_double_suffix}
-
-    @staticmethod
-    def get_cram_path_from_bam(bam_path: Path) -> Path:
-        """ Get corresponding CRAM file path from bam file path """
-        if not bam_path.suffix == BAM_SUFFIX:
-            LOG.error("%s does not end with %s", bam_path, BAM_SUFFIX)
-            raise ValueError
-        cram_path = bam_path.with_suffix(CRAM_SUFFIX)
-        return cram_path
 
     @staticmethod
     def get_spring_path_from_fastq(fastq: Path) -> Path:
@@ -458,15 +366,18 @@ class CrunchyAPI:
     def _get_slurm_header(self, job_name: str, log_dir: str) -> str:
         """Create and return a header for a sbatch script"""
         LOG.info("Generating sbatch header")
+        ntasks = 12
+        mem = 50
+        time = 24
         sbatch_header = SBATCH_HEADER_TEMPLATE.format(
             job_name=job_name,
             account=self.slurm_account,
             log_dir=log_dir,
             conda_env=self.crunchy_env,
             mail_user=self.mail_user,
-            ntasks=self.ntasks,
-            time=self.time,
-            mem=self.mem,
+            ntasks=ntasks,
+            time=time,
+            mem=mem,
         )
         return sbatch_header
 
@@ -479,21 +390,6 @@ class CrunchyAPI:
 
         LOG.info("Created temporary dir %s", tmp_dir_path)
         return tmp_dir_path
-
-    @staticmethod
-    def _get_slurm_bam_to_cram(
-        bam_path: str, cram_path: str, flag_path: str, pending_path: str, reference_path: str
-    ) -> str:
-        """Create and return the body of a sbatch script that runs BAM to CRAM"""
-        LOG.info("Generating bam to fastq sbatch body")
-        sbatch_body = SBATCH_BAM_TO_CRAM.format(
-            bam_path=bam_path,
-            cram_path=cram_path,
-            flag_path=flag_path,
-            pending_path=pending_path,
-            reference_path=reference_path,
-        )
-        return sbatch_body
 
     @staticmethod
     def _get_slurm_fastq_to_spring(
