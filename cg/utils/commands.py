@@ -5,6 +5,8 @@ Code to handle communications to the shell from CG
 import copy
 import logging
 import subprocess
+
+from cg.constants import RETURN_SUCCESS
 from subprocess import CalledProcessError
 
 LOG = logging.getLogger(__name__)
@@ -17,38 +19,67 @@ class Process:
     called, that will be handled in this module.Output form stdout and stdin will be handeld here.
     """
 
-    def __init__(self, binary, config=None, config_parameter="--config"):
+    def __init__(
+        self,
+        binary: str,
+        config: str = None,
+        config_parameter: str = "--config",
+        environment: str = None,
+    ):
         """
         Args:
             binary(str): Path to binary for the process to use
             config(str): Path to config if used by process
+            environment(str): Activate conda environment before executing binary
         """
         super(Process, self).__init__()
         self.binary = binary
+        self.environment = environment
         LOG.debug("Initialising Process with binary: %s", self.binary)
         self.base_call = [self.binary]
+        if environment:
+            LOG.debug("Activating environment with: %s", self.environment)
+            self.base_call.insert(0, f"source activate {self.environment};")
         if config:
             self.base_call.extend([config_parameter, config])
         LOG.debug("Use base call %s", self.base_call)
         self._stdout = ""
         self._stderr = ""
 
-    def run_command(self, parameters=None):
-        """Execute a command in the shell
+    def run_command(self, parameters: list = None, dry_run: bool = False) -> int:
+        """Execute a command in the shell.
+        If environment is supplied - shell=True has to be supplied to enable passing as a string for executing multiple commands
 
         Args:
-            parameters(list)
+            parameters(list):
+            dry_run(bool): Print command instead of executing it
+        Return(int): Return code from called process
+
         """
         command = copy.deepcopy(self.base_call)
         if parameters:
             command.extend(parameters)
 
         LOG.info("Running command %s", " ".join(command))
-        res = subprocess.run(command, check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if dry_run:
+            return RETURN_SUCCESS
+
+        if self.environment:
+            res = subprocess.run(
+                " ".join(command),
+                shell=True,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+        else:
+            res = subprocess.run(
+                command, check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            )
 
         self.stdout = res.stdout.decode("utf-8").rstrip()
         self.stderr = res.stderr.decode("utf-8").rstrip()
-        if res.returncode != 0:
+        if res.returncode != RETURN_SUCCESS:
             LOG.critical("Call %s exit with a non zero exit code", command)
             LOG.critical(self.stderr)
             raise CalledProcessError(command, res.returncode)

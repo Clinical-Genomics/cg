@@ -1,0 +1,18 @@
+[
+  {
+    "file": "first_read",
+    "checksum": "7e346857bb7b8f43cca8f1159278587ff3215a997de00ae1b4151d01612c9838",
+    "path": "/home/proj/stage/housekeeper-bundles/ADM1059A4/2019-05-08/H2TF5CCXX-l8t11_643594_CGCTCATT_L008_R1_001.fastq.gz",
+    "algorithm": "sha256"
+  },
+  {
+    "file": "second_read",
+    "checksum": "783331c40c1a9eb696e909d539ba2a3b1109ee66ca913f644a44b0669adc656f",
+    "path": "/home/proj/stage/housekeeper-bundles/ADM1059A4/2019-05-08/H2TF5CCXX-l8t11_643594_CGCTCATT_L008_R2_001.fastq.gz",
+    "algorithm": "sha256"
+  },
+  {
+    "path": "/home/proj/stage/housekeeper-bundles/ADM1059A4/2019-05-08/H2TF5CCXX-l8t11_643594_CGCTCATT_L008.spring",
+    "file": "spring"
+  }
+]

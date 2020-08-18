@@ -1,8 +1,8 @@
 """This script tests the cli methods to create prerequisites and start a mip-dna analysis"""
 import logging
-from cg.cli.workflow.mip_dna.base import start
 
-EXIT_SUCCESS = 0
+from cg.cli.workflow.mip_dna.base import start
+from cg.constants import EXIT_SUCCESS
 
 
 def test_dry(cli_runner, base_context):

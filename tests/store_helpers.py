@@ -17,10 +17,15 @@ class StoreHelpers:
     @staticmethod
     def ensure_hk_bundle(store: HousekeeperAPI, bundle_data: dict) -> hk_models.Bundle:
         """Utility function to add a bundle of information to a housekeeper api"""
-        _bundle = store.bundle(bundle_data["name"])
-        if not _bundle:
-            LOG.info("No bundle found")
+        bundle_exists = False
+        for bundle in store.bundles():
+            if bundle.name != bundle_data["name"]:
+                continue
+            bundle_exists = True
+        if not bundle_exists:
+            print("No bundle found")
             _bundle, _version = store.add_bundle(bundle_data)
+            print("Add bundle with name %s" % bundle_data["name"])
             store.add_commit(_bundle, _version)
         return _bundle
 
@@ -141,10 +146,12 @@ class StoreHelpers:
         self,
         store: Store,
         family: models.Family = None,
+        started_at: datetime = None,
         completed_at: datetime = None,
         uploaded_at: datetime = None,
         upload_started: datetime = None,
         delivery_reported_at: datetime = None,
+        cleaned_at: datetime = None,
         pipeline: str = "dummy_pipeline",
         pipeline_version: str = "1.0",
         uploading: bool = False,
@@ -157,12 +164,16 @@ class StoreHelpers:
 
         analysis = store.add_analysis(pipeline=pipeline, version=pipeline_version)
 
+        if started_at:
+            analysis.started_at = started_at
         if completed_at:
             analysis.completed_at = completed_at
         if uploaded_at:
             analysis.uploaded_at = uploaded_at
         if delivery_reported_at:
             analysis.delivery_report_created_at = delivery_reported_at
+        if cleaned_at:
+            analysis.cleaned_at = cleaned_at
         if uploading:
             analysis.upload_started_at = upload_started or datetime.now()
         if config_path:
@@ -186,6 +197,7 @@ class StoreHelpers:
         application_type: str = "tgs",
         customer_name: str = None,
         reads: int = None,
+        loqus_id: str = None,
         **kwargs,
     ) -> models.Sample:
         """Utility function to add a sample to use in tests"""
@@ -198,7 +210,6 @@ class StoreHelpers:
             is_external=is_external,
             is_rna=is_rna,
         )
-        print(repr(application_version))
         application_version_id = application_version.id
         sample = store.add_sample(
             name=sample_id,
@@ -211,23 +222,22 @@ class StoreHelpers:
 
         sample.application_version_id = application_version_id
         sample.customer = customer
-        print("Set is external to %s", is_external)
+        # print("is_external: %s" % is_external)
         sample.is_external = is_external
 
+        if loqus_id:
+            sample.loqusdb_id = loqus_id
+
         if kwargs.get("delivered_at"):
-            print("Adding delivered")
             sample.delivered_at = kwargs["delivered_at"]
 
         if kwargs.get("received_at"):
-            print("Adding received_at")
             sample.received_at = kwargs["received_at"]
 
         if kwargs.get("prepared_at"):
-            print("Adding prepared")
             sample.received_at = kwargs["prepared_at"]
 
         if kwargs.get("flowcell"):
-            print("Adding flowcell")
             sample.flowcells.append(kwargs["flowcell"])
 
         store.add_commit(sample)
@@ -274,12 +284,19 @@ class StoreHelpers:
         if not family_obj:
             family_obj = store.add_family(name=family_id, panels=panels)
 
-        print("Adding family with name %s (%s)" % (family_obj.name, family_obj.internal_id))
+        # print("Adding family with name %s (%s)" % (family_obj.name, family_obj.internal_id))
         family_obj.customer = customer
         store.add_commit(family_obj)
         return family_obj
 
-    def ensure_family(self, store: Store, family_info: dict, app_tag: str = None):
+    def ensure_family(
+        self,
+        store: Store,
+        family_info: dict,
+        app_tag: str = None,
+        ordered_at: datetime = None,
+        completed_at: datetime = None,
+    ):
         """Load a family with samples and link relations"""
         customer_obj = self.ensure_customer(store)
         family_obj = store.Family(
@@ -287,10 +304,11 @@ class StoreHelpers:
             panels=family_info["panels"],
             internal_id=family_info["internal_id"],
             priority="standard",
+            ordered_at=ordered_at,
         )
 
         family_obj = self.add_family(
-            store, family_obj=family_obj, customer_id=customer_obj.internal_id,
+            store, family_obj=family_obj, customer_id=customer_obj.internal_id
         )
 
         app_tag = app_tag or "WGTPCFC030"
@@ -329,7 +347,7 @@ class StoreHelpers:
                 mother=mother,
             )
 
-        self.add_analysis(store, pipeline="pipeline", family=family_obj)
+        self.add_analysis(store, pipeline="pipeline", family=family_obj, completed_at=completed_at)
         return family_obj
 
     @staticmethod

@@ -15,6 +15,7 @@ from cg.cli.workflow.mip_rna.deliver import deliver as deliver_cmd
 from cg.meta.deliver import DeliverAPI
 from cg.meta.workflow.mip_rna import AnalysisAPI
 from cg.store import Store
+from cg.store.utils import case_exists
 
 LOG = logging.getLogger(__name__)
 
@@ -28,7 +29,7 @@ def mip_rna(context: click.Context):
     lims_api = lims.LimsAPI(context.obj)
     context.obj["tb"] = tb.TrailblazerAPI(context.obj)
     deliver = DeliverAPI(
-        context.obj, hk_api=hk_api, lims_api=lims_api, case_tags=CASE_TAGS, sample_tags=SAMPLE_TAGS,
+        context.obj, hk_api=hk_api, lims_api=lims_api, case_tags=CASE_TAGS, sample_tags=SAMPLE_TAGS
     )
     context.obj["api"] = AnalysisAPI(
         db=context.obj["db"],
@@ -38,7 +39,9 @@ def mip_rna(context: click.Context):
         deliver_api=deliver,
     )
     context.obj["rna_api"] = MipAPI(
-        context.obj["mip-rd-rna"]["script"], context.obj["mip-rd-rna"]["pipeline"]
+        context.obj["mip-rd-rna"]["script"],
+        context.obj["mip-rd-rna"]["pipeline"],
+        context.obj["mip-rd-rna"]["conda_env"],
     )
 
 
@@ -53,7 +56,7 @@ def link(context: click.Context, case_id: str, sample_id: str):
 
     for link_obj in link_objs:
         LOG.info(
-            "%s: %s link FASTQ files", link_obj.sample.internal_id, link_obj.sample.data_analysis,
+            "%s: %s link FASTQ files", link_obj.sample.internal_id, link_obj.sample.data_analysis
         )
 
         if "mip + rna" in link_obj.sample.data_analysis.lower():
@@ -66,8 +69,9 @@ def link(context: click.Context, case_id: str, sample_id: str):
 
 
 @mip_rna.command()
-@click.option("-d", "--dry", is_flag=True, help="print command to console")
+@click.option("-d", "--dry-run", "dry_run", is_flag=True, help="print command to console")
 @click.option("-e", "--email", help="email to send errors to")
+@click.option("--mip-dry-run", "mip_dry_run", is_flag=True, help="Run MIP in dry-run mode")
 @click.option("-p", "--priority", type=click.Choice(["low", "normal", "high"]))
 @click.option("-sw", "--start-with", help="start mip from this program.")
 @click.argument("case_id")
@@ -75,7 +79,8 @@ def link(context: click.Context, case_id: str, sample_id: str):
 def run(
     context: click.Context,
     case_id: str,
-    dry: bool = False,
+    dry_run: bool = False,
+    mip_dry_run: bool = False,
     priority: str = None,
     email: str = None,
     start_with: str = None,
@@ -85,8 +90,7 @@ def run(
     rna_api = context.obj["rna_api"]
     case_obj = context.obj["db"].family(case_id)
 
-    if case_obj is None:
-        LOG.error("%s: case not found", case_id)
+    if not case_exists(case_obj, case_id):
         context.abort()
 
     if tb_api.analyses(family=case_obj.internal_id, temp=True).first():
@@ -99,17 +103,16 @@ def run(
         case=case_id,
         priority=priority,
         email=email,
-        dryrun=dry,
+        dryrun=mip_dry_run,
         start_with=start_with,
     )
-    if dry:
-        command = rna_api.build_command(**kwargs)
-        LOG.info(" ".join(command))
+    if dry_run:
+        rna_api.run(dry_run=dry_run, **kwargs)
     else:
         rna_api.run(**kwargs)
         tb_api.mark_analyses_deleted(case_id=case_id)
-        tb_api.add_pending(case_id, email=email)
-        LOG.info("MIP run started!")
+        tb_api.add_pending_analysis(case_id=case_id, email=email)
+        LOG.info("MIP rd-rna run started!")
 
 
 @mip_rna.command("config-case")
@@ -120,8 +123,7 @@ def config_case(context: click.Context, case_id: str, dry: bool = False):
     """Generate a config for the case_id"""
     case_obj = context.obj["db"].family(case_id)
 
-    if not case_obj:
-        LOG.error("Case %s not found", case_id)
+    if not case_exists(case_obj, case_id):
         context.abort()
 
     # MIP formatted pedigree.yaml config
