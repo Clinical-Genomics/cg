@@ -60,10 +60,10 @@ def test_get_nlinks_three_links(project_dir):
     assert nlinks == 3
 
 
-def test_get_latest_version_no_housekeeper_files(compress_api, compress_scout_case, caplog):
+def test_get_latest_version_no_housekeeper_files(compress_api, caplog):
     """test get_bam_dict method when there is not case in scout"""
 
-    case_id = compress_scout_case
+    case_id = "compress_case"
     # GIVEN a case id
 
     # WHEN getting the version_obj

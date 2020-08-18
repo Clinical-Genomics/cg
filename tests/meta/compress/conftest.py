@@ -88,30 +88,24 @@ def fixture_real_crunchy_api(crunchy_config_dict):
 
 
 @pytest.yield_fixture(scope="function", name="compress_api")
-def fixture_compress_api(crunchy_api, housekeeper_api, scout_api):
+def fixture_compress_api(crunchy_api, housekeeper_api):
     """compress api fixture"""
     hk_api = housekeeper_api
-    _api = CompressAPI(crunchy_api=crunchy_api, hk_api=hk_api, scout_api=scout_api)
+    _api = CompressAPI(crunchy_api=crunchy_api, hk_api=hk_api)
     yield _api
 
 
 @pytest.fixture(scope="function", name="populated_compress_api")
-def fixture_populated_compress_api(
-    compress_api, compress_scout_case, compress_hk_bam_bundle, helpers
-):
+def fixture_populated_compress_api(compress_api, compress_hk_bam_bundle, helpers):
     """Populated compress api fixture"""
-    compress_api.scout_api.add_mock_case(compress_scout_case)
     helpers.ensure_hk_bundle(compress_api.hk_api, compress_hk_bam_bundle)
 
     return compress_api
 
 
 @pytest.fixture(scope="function", name="populated_compress_fastq_api")
-def fixture_populated_compress_fastq_api(
-    compress_api, compress_scout_case, compress_hk_fastq_bundle, helpers
-):
+def fixture_populated_compress_fastq_api(compress_api, compress_hk_fastq_bundle, helpers):
     """Populated compress api fixture"""
-    compress_api.scout_api.add_mock_case(compress_scout_case)
     helpers.ensure_hk_bundle(compress_api.hk_api, compress_hk_fastq_bundle)
 
     return compress_api

@@ -7,7 +7,6 @@ from cg.apps import crunchy, hk, scoutapi
 from cg.meta.compress import CompressAPI
 from cg.store import Store
 
-from .bam import bam_cmd, clean_bam
 from .fastq import clean_fastq, decompress_spring, fastq_cmd, fix_spring
 
 LOG = logging.getLogger(__name__)
@@ -27,7 +26,6 @@ def compress(context):
     context.obj["compress"] = compress_api
 
 
-compress.add_command(bam_cmd)
 compress.add_command(fastq_cmd)
 
 
@@ -36,7 +34,6 @@ def clean():
     """Clean uncompressed files"""
 
 
-clean.add_command(clean_bam)
 clean.add_command(clean_fastq)
 clean.add_command(fix_spring)
 
