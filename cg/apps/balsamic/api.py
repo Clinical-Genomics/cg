@@ -51,11 +51,12 @@ class BalsamicAPI:
 
         options = self.__build_command_str(options)
 
+        parameters = command + options
         if dry:
-            LOG.info(f'Executing command balsamic{" ".join(command + options)}')
+            LOG.info(f'Executing command balsamic{" ".join(parameters)}')
             retcode = self.EXIT_SUCCESS
         else:
-            retcode = self.process.run_command(command + options)
+            retcode = self.process.run_command(parameters=parameters)
         return retcode
 
     def run_analysis(self, arguments: dict, run_analysis: bool, dry: bool = False) -> int:
@@ -71,9 +72,10 @@ class BalsamicAPI:
             "--analysis-type": arguments.get("analysis_type"),
         }
         options = self.__build_command_str(options)
+        parameters = command + options + run_analysis
         if dry:
-            LOG.info(f'Executing command balsamic{" ".join(command + options + run_analysis)}')
+            LOG.info(f'Executing command balsamic{" ".join(parameters)}')
             retcode = self.EXIT_SUCCESS
         else:
-            retcode = self.process.run_command(command + options + run_analysis)
+            retcode = self.process.run_command(parameters=parameters)
         return retcode

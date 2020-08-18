@@ -1,7 +1,11 @@
 """ Common MIP related functionality """
+
 import logging
-import signal
-import subprocess
+
+from cg.constants import SPACE
+from cg.utils import Process
+
+LOG = logging.getLogger(__name__)
 
 """
 This dict is built like this:
@@ -31,58 +35,64 @@ CLI_OPTIONS = {
 }
 
 
-class MipStartError(Exception):
-    """ Throw this when MIP is fussing """
-
-
 class MipAPI:
     """ Group MIP specific functionality """
 
-    def __init__(self, script, pipeline, logger=logging.getLogger(__name__)):
-        """Initialize MIP command line interface."""
+    def __init__(self, script: str, pipeline: str, conda_env: str):
+        """Initialize MIP command line interface"""
         self.script = script
         self.pipeline = pipeline
-        self.logger = logger
+        self.conda_env = conda_env
 
-    def run(self, config, case, **kwargs):
-        """Execute the pipeline."""
+    def run(self, config: str, case: str, dry_run: bool = False, **kwargs) -> None:
+        """Execute the workflow"""
         command = self.build_command(config, case, **kwargs)
-        self.logger.debug(" ".join(command))
-        process = self.execute(command)
-        process.wait()
-        success = 0
-        if process.returncode != success:
-            raise MipStartError("error running analysis, check the output")
-        return process
+        self.execute(command, dry_run)
 
-    def build_command(self, config, case, **kwargs):
-        """Builds the command to execute MIP."""
-        command = [
-            self.script,
-            self.pipeline,
-            case,
-            CLI_OPTIONS["config"]["option"],
-            config,
-        ]
+    def build_command(self, config: str, case: str, **kwargs) -> dict:
+        """Build the command dict to execute MIP"""
+        binary_command = [self.script, self.pipeline, case]
+        parameters = []
         for key, value in kwargs.items():
-            # enable passing in flags as "False" - shouldn't add command
             if value:
-                command.append(CLI_OPTIONS[key]["option"])
-                if value is True:
-                    command.append(CLI_OPTIONS[key].get("default", "1"))
-                else:
-                    command.append(value)
+                _cg_to_mip_option_map(parameters, key)
+                _append_value_for_non_flags(parameters, value)
+
+        command = {
+            "binary": SPACE.join(binary_command),
+            "config": config,
+            "environment": self.conda_env,
+            "parameters": parameters,
+        }
         return command
 
     @classmethod
-    def execute(cls, command):
-        """Start a new MIP run."""
-
+    def execute(cls, command: dict, dry_run: bool = False) -> int:
+        """Start a new MIP analysis
+        Args:
+            command(dict): Command to execute
+            dry_run(bool): Print command instead of executing it
         """
-        Remove the default SIGPIPE handler
-        https://blog.nelhage.com/2010/02/a-very-subtle-bug/
-        """
-        process = subprocess.Popen(
-            command, preexec_fn=lambda: signal.signal(signal.SIGPIPE, signal.SIG_DFL)
+        mip_process = Process(
+            command["binary"], config=command["config"], environment=command["environment"]
         )
-        return process
+
+        process_return_code = mip_process.run_command(
+            dry_run=dry_run, parameters=command["parameters"]
+        )
+        for line in mip_process.stdout_lines():
+            LOG.info(line)
+        for line in mip_process.stderr_lines():
+            LOG.info(line)
+        return process_return_code
+
+
+def _append_value_for_non_flags(parameters: list, value):
+    """Add the value of the non boolean options to the parameters"""
+    if value is not True:
+        parameters.append(value)
+
+
+def _cg_to_mip_option_map(parameters: list, mip_key):
+    """Map cg options to MIP option syntax"""
+    parameters.append(CLI_OPTIONS[mip_key]["option"])

@@ -42,7 +42,7 @@ def test_chanjo_api_upload(chanjo_config_dict, mocker):
     # ["load", "--sample", sample_id, "--name", sample_name, "--group", group_id,
     #  "--group_name", group_name, "--threshold", "10", bed_file]
     mocked_run_command.assert_called_once_with(
-        [
+        parameters=[
             "load",
             "--sample",
             sample_id,
@@ -114,7 +114,7 @@ def test_chanjo_api_delete_sample(chanjo_config_dict, mocker):
     api.delete_sample(sample_id=sample_id)
 
     # THEN run_command should be called once with list ["db", "remove", sample_id]
-    mocked_run_command.assert_called_once_with(["db", "remove", sample_id])
+    mocked_run_command.assert_called_once_with(parameters=["db", "remove", sample_id])
 
 
 def test_chanjo_api_omim_coverage(chanjo_config_dict, mocker, mock_process):
