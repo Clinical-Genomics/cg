@@ -14,15 +14,12 @@ LOG = logging.getLogger(__name__)
 # Functions to get common files
 
 
-def get_hk_files_dict(tags: List[str], version_obj: hk_models.Version) -> dict:
+def get_hk_files_dict(
+    tags: List[str], version_obj: hk_models.Version
+) -> Dict[Path, hk_models.File]:
     """Fetch files from a version in HK
-        Return a dict with Path object as keys and hk file objects as values
 
-    Returns:
-        {
-            Path(file): hk.File(file)
-        }
-
+    Return a dict with Path object as keys and hk file objects as values
     """
     hk_files_dict = {}
     tags = set(tags)
