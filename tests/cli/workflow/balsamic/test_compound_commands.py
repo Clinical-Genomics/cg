@@ -28,14 +28,16 @@ def test_start(tmpdir_factory, cli_runner, balsamic_context: dict, caplog):
     assert case_id in caplog.text
 
 
-def test_store(tmpdir_factory,
+def test_store(
+    tmpdir_factory,
     cli_runner,
     balsamic_context: dict,
     real_housekeeper_api,
     mock_config,
     mock_deliverable,
     mock_analysis_finish,
-    caplog):
+    caplog,
+):
     """Test to ensure all parts of compound store command are executed given ideal conditions"""
     caplog.set_level(logging.INFO)
     # GIVEN case-id
@@ -106,9 +108,7 @@ def test_store_available(
         Path(balsamic_context["BalsamicAnalysisAPI"].get_config_path(case_id_fail)).parent,
         exist_ok=True,
     )
-    Path(balsamic_context["BalsamicAnalysisAPI"].get_config_path(case_id_fail)).touch(
-        exist_ok=True
-    )
+    Path(balsamic_context["BalsamicAnalysisAPI"].get_config_path(case_id_fail)).touch(exist_ok=True)
     # Ensure case was successfully picked up by start-available and status set to running
     result = cli_runner.invoke(start_available, ["--dry-run"], obj=balsamic_context)
     assert result.exit_code == EXIT_SUCCESS
