@@ -225,7 +225,9 @@ def add_sample(
     """utility function to add a sample to use in tests"""
     customer = ensure_customer(store)
     application_version_id = ensure_application_version(store).id
-    sample = helpers.add_sample(store=store, name=sample_name, gender="unknown", data_analysis=data_analysis)
+    sample = helpers.add_sample(
+        store=store, name=sample_name, gender="unknown", data_analysis=data_analysis
+    )
     sample.application_version_id = application_version_id
     sample.customer = helpers.ensure_customer(store=store)
     if received:
