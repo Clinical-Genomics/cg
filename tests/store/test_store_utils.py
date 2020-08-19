@@ -1,6 +1,30 @@
 """Tests for utils in store"""
+
+import logging
+
 from cg.store.models import FamilySample
-from cg.store.utils import get_links, get_samples
+from cg.store.utils import case_exists, get_links, get_samples
+
+
+def test_case_exists_when_missing(case_id, caplog):
+    """Test function when a case object is missing """
+    caplog.set_level(logging.DEBUG)
+    # GIVEN a case_id
+    # WHEN case_obj is None
+    was_found = case_exists(None, case_id)
+    # THEN case_exists should return None
+    assert was_found is None
+    # THEN communicate case_id is missing
+    assert f"{case_id}: case not found" in caplog.text
+
+
+def test_case_exists_when_present(family_obj, case_id):
+    """Test function when a case object is found """
+    # GIVEN a case_id
+    # WHEN case_obj is True
+    was_found = case_exists(family_obj, case_id)
+    # THEN case_exists should return True
+    assert was_found
 
 
 def test_get_samples(analysis_obj):

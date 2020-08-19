@@ -26,6 +26,8 @@ PROBLEMATIC_CASES = [
     "causalmite",
     "proudcollie",
     "loyalegret",
+    "grandkoi",
+    "fluenteagle",
 ]
 
 
