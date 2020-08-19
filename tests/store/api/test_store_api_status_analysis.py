@@ -13,7 +13,7 @@ def test_that_many_families_can_have_one_sample_each(base_store: Store):
     test_families = add_families_with_samples(base_store, n_test_families, sequenced=True)
 
     # WHEN getting families to analyse
-    families = base_store.cases_to_mip_analyze()
+    families = base_store.cases_to_analyze(pipeline="mip")
 
     # THEN families should contain the test family
     assert len(families) == len(test_families)
@@ -219,15 +219,15 @@ def add_sample(
     sequenced=False,
     delivered=False,
     invoiced=False,
-    data_analysis=None,
+    data_analysis="MIP",
     external=None,
 ):
     """utility function to add a sample to use in tests"""
     customer = ensure_customer(store)
     application_version_id = ensure_application_version(store).id
-    sample = store.add_sample(name=sample_name, sex="unknown")
+    sample = helpers.add_sample(store=store, name=sample_name, gender="unknown", data_analysis=data_analysis)
     sample.application_version_id = application_version_id
-    sample.customer = customer
+    sample.customer = helpers.ensure_customer(store=store)
     if received:
         sample.received_at = datetime.now()
     if prepared:
@@ -239,8 +239,6 @@ def add_sample(
     if invoiced:
         invoice = store.add_invoice(customer)
         sample.invoice = invoice
-    if data_analysis:
-        sample.data_analysis = data_analysis
     if external:
         sample.is_external = external
 
@@ -252,7 +250,7 @@ def add_samples(base_store, n_samples, sequenced):
     """utility function to add many samples to use in tests"""
     samples = []
     for _ in range(n_samples):
-        samples.append(add_sample(base_store, sequenced=sequenced))
+        samples.append(add_sample(store=base_store, sequenced=sequenced))
     return samples
 
 

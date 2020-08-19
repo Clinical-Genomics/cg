@@ -315,6 +315,18 @@ def fixture_later_timestamp() -> dt.datetime:
     return dt.datetime(2020, 6, 1)
 
 
+@pytest.fixture(scope="function", name="timestamp_today")
+def fixture_timestamp_today() -> dt.datetime:
+    """Return a time stamp of todays date in date time format"""
+    return dt.datetime.now()
+
+
+@pytest.fixture(scope="function", name="timestamp_yesterday")
+def fixture_timestamp_yesterday(timestamp_today) -> dt.datetime:
+    """Return a time stamp of yesterdays date in date time format"""
+    return timestamp_today - dt.timedelta(days=1)
+
+
 @pytest.fixture(scope="function", name="hk_bundle_data")
 def fixture_hk_bundle_data(case_id, bed_file, timestamp):
     """Get some bundle data for housekeeper"""
