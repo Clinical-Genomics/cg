@@ -94,23 +94,21 @@ def get_tags(
     analysis_type_tags: dict,
     deliverables_tag_map: tuple,
     is_index: bool = False,
-) -> list:
+) -> List[str]:
     """Get all tags for a file"""
 
     tags = {"id": file["id"]}
     tags["pipeline"] = pipeline_tags[0]
     tags["application"] = pipeline_tags[1] if len(pipeline_tags) > 1 else None
 
-    tags = _convert_deliverables_tags_to_hk_tags(
+    return _convert_deliverables_tags_to_hk_tags(
         tags, analysis_type_tags, deliverables_tag_map, is_index
     )
-
-    return tags
 
 
 def _convert_deliverables_tags_to_hk_tags(
     tags: dict, analysis_type_tags: dict, deliverables_tag_map: tuple, is_index: bool = False
-) -> list:
+) -> List[str]:
     """
         Filter and convert tags from external deliverables tags to standard internal housekeeper
         tags
