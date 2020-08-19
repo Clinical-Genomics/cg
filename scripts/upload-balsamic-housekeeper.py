@@ -53,48 +53,48 @@ def upload_cases(database, housekeeper_root, housekeeper_db, report_dir, case_di
         items = fam_names.get(case_id)
         if not items:
             continue
-            try:
-                # Add files to Housekeeper
-                config_data = dict(json.load(open(items["config_name"], "r")))
-                bundle_data = {
-                    "name": case_id,
-                    "created": dt.datetime.strptime(
-                        config_data["analysis"]["config_creation_date"], "%Y-%m-%d %H:%M"
-                    ),
-                    "version": config_data["analysis"]["BALSAMIC_version"],
-                    "files": parse_deliverables_report(items["hk"]),
-                }
-                bundle_result = housekeeper_api.add_bundle(bundle_data=bundle_data)
-                if not bundle_result:
-                    print(f"{case_id} already stored!")
-                    continue
-                bundle_object, bundle_version = bundle_result
-                housekeeper_api.include(bundle_version)
-                housekeeper_api.add_commit(bundle_object, bundle_version)
-                print(
-                    f"Analysis successfully stored in Housekeeper: {case_id} : {bundle_version.created_at}"
-                )
-                # Add bundle to StatusDB
-                case_object = store_api.family(case_id)
-                analysis_start = dt.datetime.strptime(
+        try:
+            # Add files to Housekeeper
+            config_data = dict(json.load(open(items["config_name"], "r")))
+            bundle_data = {
+                "name": case_id,
+                "created": dt.datetime.strptime(
                     config_data["analysis"]["config_creation_date"], "%Y-%m-%d %H:%M"
-                )
-                case_object.action = None
-                new_analysis = store_api.add_analysis(
-                    pipeline="balsamic",
-                    version=config_data["analysis"]["BALSAMIC_version"],
-                    started_at=analysis_start,
-                    completed_at=dt.datetime.now(),
-                    primary=(len(case_object.analyses) == 0),
-                )
-                new_analysis.family = case_object
-                store_api.add_commit(new_analysis)
-                print(f"Analysis successfully stored in ClinicalDB: {case_id} : {analysis_start}")
-            except Exception as e:
-                print(f"Error uploading {case_id}, {e}")
-                housekeeper_api.rollback()
-                store_api.rollback()
+                ),
+                "version": config_data["analysis"]["BALSAMIC_version"],
+                "files": parse_deliverables_report(items["hk"]),
+            }
+            bundle_result = housekeeper_api.add_bundle(bundle_data=bundle_data)
+            if not bundle_result:
+                print(f"{case_id} already stored!")
                 continue
+            bundle_object, bundle_version = bundle_result
+            housekeeper_api.include(bundle_version)
+            housekeeper_api.add_commit(bundle_object, bundle_version)
+            print(
+                f"Analysis successfully stored in Housekeeper: {case_id} : {bundle_version.created_at}"
+            )
+            # Add bundle to StatusDB
+            case_object = store_api.family(case_id)
+            analysis_start = dt.datetime.strptime(
+                config_data["analysis"]["config_creation_date"], "%Y-%m-%d %H:%M"
+            )
+            case_object.action = None
+            new_analysis = store_api.add_analysis(
+                pipeline="balsamic",
+                version=config_data["analysis"]["BALSAMIC_version"],
+                started_at=analysis_start,
+                completed_at=dt.datetime.now(),
+                primary=(len(case_object.analyses) == 0),
+            )
+            new_analysis.family = case_object
+            store_api.add_commit(new_analysis)
+            print(f"Analysis successfully stored in ClinicalDB: {case_id} : {analysis_start}")
+        except Exception as e:
+            print(f"Error uploading {case_id}, {e}")
+            housekeeper_api.rollback()
+            store_api.rollback()
+            continue
 
 
 def parse_deliverables_report(report_path) -> list:
