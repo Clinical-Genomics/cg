@@ -3,10 +3,14 @@ import json
 import logging
 import pytest
 
-from cg.cli.workflow.balsamic.base import start, store, start_available, store_available
+from cg.cli.workflow.balsamic.base import balsamic, start, store, start_available, store_available
 
 EXIT_SUCCESS = 0
 
+def test_balsamic_no_args(cli_runner, balsamic_context: dict):
+    result = cli_runner.invoke(balsamic, [], obj=balsamic_context)
+    assert result.exit_code == EXIT_SUCCESS
+    assert "balsamic" in result.output
 
 def test_start(tmpdir_factory, cli_runner, balsamic_context: dict, caplog):
     caplog.set_level(logging.INFO)
@@ -19,7 +23,7 @@ def test_start(tmpdir_factory, cli_runner, balsamic_context: dict, caplog):
     Path(balsamic_context["BalsamicAnalysisAPI"].get_config_path(case_id)).touch(exist_ok=True)
     # WHEN dry running with dry specified
     result = cli_runner.invoke(start, [case_id, "--dry-run"], obj=balsamic_context)
-    # THEN command should NOT execute successfully
+    # THEN command should execute successfully
     assert result.exit_code == EXIT_SUCCESS
     assert case_id in caplog.text
 
