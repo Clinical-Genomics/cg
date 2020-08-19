@@ -334,6 +334,7 @@ def balsamic_store(base_store: Store, helpers) -> Store:
         is_tumour=True,
         application_type="wgs",
         data_analysis="balsamic",
+        reads=10,
     )
     sample_case_wgs_paired_normal = helpers.add_sample(
         _store,
@@ -341,6 +342,7 @@ def balsamic_store(base_store: Store, helpers) -> Store:
         is_tumour=False,
         application_type="wgs",
         data_analysis="balsamic",
+        reads=10,
     )
     helpers.add_relationship(_store, family=case_wgs_paired, sample=sample_case_wgs_paired_tumor)
     helpers.add_relationship(_store, family=case_wgs_paired, sample=sample_case_wgs_paired_normal)
@@ -356,6 +358,7 @@ def balsamic_store(base_store: Store, helpers) -> Store:
         application_tag="TGSA",
         application_type="tgs",
         data_analysis="BALSAMIC",
+        reads=10,
     )
     sample_case_tgs_paired_normal = helpers.add_sample(
         _store,
@@ -364,6 +367,8 @@ def balsamic_store(base_store: Store, helpers) -> Store:
         application_tag="TGSA",
         application_type="tgs",
         data_analysis="MIP+BALSAMIC",
+        reads=0,
+
     )
     helpers.add_relationship(_store, family=case_tgs_paired, sample=sample_case_tgs_paired_tumor)
     helpers.add_relationship(_store, family=case_tgs_paired, sample=sample_case_tgs_paired_normal)
@@ -378,6 +383,7 @@ def balsamic_store(base_store: Store, helpers) -> Store:
         is_tumour=True,
         application_type="wgs",
         data_analysis="balsamic",
+        reads = 100,
     )
     helpers.add_relationship(_store, family=case_wgs_single, sample=sample_case_wgs_single_tumor)
 
