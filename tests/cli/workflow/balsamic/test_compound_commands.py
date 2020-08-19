@@ -7,10 +7,12 @@ from cg.cli.workflow.balsamic.base import balsamic, start, store, start_availabl
 
 EXIT_SUCCESS = 0
 
+
 def test_balsamic_no_args(cli_runner, balsamic_context: dict):
     result = cli_runner.invoke(balsamic, [], obj=balsamic_context)
     assert result.exit_code == EXIT_SUCCESS
     assert "balsamic" in result.output
+
 
 def test_start(tmpdir_factory, cli_runner, balsamic_context: dict, caplog):
     caplog.set_level(logging.INFO)
