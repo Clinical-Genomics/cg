@@ -77,12 +77,11 @@ def test_store_available(
     Path(balsamic_context["BalsamicAnalysisAPI"].get_config_path(case_id_success)).touch(
         exist_ok=True
     )
-    #Ensure case was successfully picked up by start-available and status set to running
+    # Ensure case was successfully picked up by start-available and status set to running
     result = cli_runner.invoke(start_available, ["--dry-run"], obj=balsamic_context)
     assert result.exit_code == EXIT_SUCCESS
     assert case_id_success in caplog.text
     assert balsamic_context["BalsamicAnalysisAPI"].store.family(case_id_success).action == "running"
-
 
     balsamic_context["BalsamicAnalysisAPI"].housekeeper_api = real_housekeeper_api
     # WHEN running command
