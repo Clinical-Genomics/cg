@@ -95,6 +95,7 @@ def test_store_available(
     caplog.set_level(logging.INFO)
     # GIVEN CASE ID of sample where read counts pass threshold
     case_id_success = "balsamic_case_wgs_single"
+    # GIVEN CASE ID where analysis finish is not mocked
     case_id_fail = "balsamic_case_wgs_paired"
     # Ensure the config is mocked for fail case to run compound command
     Path.mkdir(
@@ -104,13 +105,12 @@ def test_store_available(
     Path(balsamic_context["BalsamicAnalysisAPI"].get_config_path(case_id_fail)).touch(
         exist_ok=True
     )
-    #Ensure case was successfully picked up by start-available and status set to running
+    # Ensure case was successfully picked up by start-available and status set to running
     result = cli_runner.invoke(start_available, ["--dry-run"], obj=balsamic_context)
     assert result.exit_code == EXIT_SUCCESS
     assert case_id_success in caplog.text
     assert balsamic_context["BalsamicAnalysisAPI"].store.family(case_id_success).action == "running"
 
-    #GIVEN CASE ID where analysis finish is not mocked
     balsamic_context["BalsamicAnalysisAPI"].housekeeper_api = real_housekeeper_api
     # WHEN running command
     result = cli_runner.invoke(store_available, ["--dry-run"], obj=balsamic_context)
