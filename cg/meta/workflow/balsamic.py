@@ -16,6 +16,7 @@ from cg.apps.lims import LimsAPI
 from cg.apps.balsamic.api import BalsamicAPI
 from cg.apps.balsamic.fastq import FastqHandler
 from cg.utils.fastq import FastqAPI
+from cg.constants import FAMILY_ACTIONS
 
 
 LOG = logging.getLogger(__name__)
@@ -54,6 +55,12 @@ class BalsamicAnalysisAPI:
                 f"{case_id} number of samples is {len(case_object.links)}, analysis will not be started!"
             )
         return case_object
+
+    def set_statusdb_action(self, case_id: str, action: str) -> None:
+        if action in [None, *FAMILY_ACTIONS]:
+            case_object = self.get_case_object(case_id=case_id)
+            case_object.action = action
+            self.store.commit()
 
     def get_case_path(self, case_id: str) -> Path:
         """Returns a path where the Balsamic case for the case_id should be located"""
@@ -388,3 +395,25 @@ class BalsamicAnalysisAPI:
         analyses_before = self.store.analyses(before=before_date)
         analyses_to_clean = self.store.analyses_to_clean(pipeline="Balsamic")
         return [x for x in analyses_to_clean if x in analyses_before]
+
+    def get_cases_to_analyze(self) -> list:
+        """Retrieve a list of balsamic cases without analysis, 
+        where samples have enough reads to be analyzed"""
+        cases_to_analyze = []
+        for case_object in self.store.cases_to_analyze(pipeline="balsamic", threshold=True):
+            cases_to_analyze.append(case_object.internal_id)
+        return cases_to_analyze
+
+    def get_cases_to_store(self) -> list:
+        """Retrieve a list of cases where analysis finished successfully, 
+        and is ready to be stored in Housekeeper"""
+        cases_to_store = []
+        for case_object in self.store.cases_to_store(pipeline="balsamic"):
+            case_id = case_object.internal_id
+            if Path(self.get_deliverables_file_path(case_id=case_id)).exists():
+                cases_to_store.append(case_id)
+        return cases_to_store
+
+
+
+    

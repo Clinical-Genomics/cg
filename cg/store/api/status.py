@@ -59,7 +59,9 @@ class StatusHandler(BaseHandler):
         )
         return records
 
-    def cases_to_analyze(self, pipeline: str, threshold: bool = False, limit: int = 100000) -> list:
+    def cases_to_analyze(
+        self, pipeline: str = "", threshold: bool = False, limit: int = 100000
+    ) -> list:
         """Returns a list if cases ready to be analyzed or set to be reanalyzed"""
         families_query = (
             self.Family.query.outerjoin(models.Analysis)
@@ -536,7 +538,7 @@ class StatusHandler(BaseHandler):
             for link in links
         )
 
-    def analyses_to_upload(self, pipeline: str = None) -> List[models.Analysis]:
+    def analyses_to_upload(self, pipeline: str = "") -> List[models.Analysis]:
         """Fetch analyses that haven't been uploaded."""
         records = self.Analysis.query.filter(
             models.Analysis.completed_at != None, models.Analysis.uploaded_at == None
@@ -547,16 +549,14 @@ class StatusHandler(BaseHandler):
 
         return records
 
-    def analyses_to_clean(self, pipeline: str = None):
+    def analyses_to_clean(self, pipeline: str = ""):
         """Fetch analyses that haven't been cleaned."""
         records = self.latest_analyses()
         records = records.filter(
-            models.Analysis.uploaded_at.isnot(None), models.Analysis.cleaned_at.is_(None)
+            models.Analysis.uploaded_at.isnot(None),
+            models.Analysis.cleaned_at.is_(None),
+            models.Analysis.pipeline.ilike(f"%{pipeline}%"),
         )
-
-        if pipeline:
-            records = records.filter(models.Analysis.pipeline.ilike(f"%{pipeline}%"))
-
         return records
 
     def observations_to_upload(self):
@@ -577,17 +577,21 @@ class StatusHandler(BaseHandler):
 
         return families_q
 
-    def analyses_to_deliver(self):
+    def analyses_to_deliver(self, pipeline: str = ""):
         """Fetch analyses that have been uploaded but not delivered."""
         records = (
             self.Analysis.query.join(models.Family, models.Family.links, models.FamilySample.sample)
-            .filter(models.Analysis.uploaded_at.isnot(None), models.Sample.delivered_at.is_(None))
+            .filter(
+                models.Analysis.uploaded_at.isnot(None),
+                models.Sample.delivered_at.is_(None),
+                models.Analysis.pipeline.ilike(f"%{pipeline}%"),
+            )
             .order_by(models.Analysis.uploaded_at.desc())
         )
 
         return records
 
-    def analyses_to_delivery_report(self, pipeline: str) -> Query:
+    def analyses_to_delivery_report(self, pipeline: str = "") -> Query:
         """Fetch analyses that needs the delivery report to be regenerated."""
 
         analyses_query = self.latest_analyses()
@@ -597,7 +601,8 @@ class StatusHandler(BaseHandler):
             .join(models.Family, models.Family.links, models.FamilySample.sample)
             .filter(
                 or_(
-                    models.Sample.data_analysis.is_(None), models.Sample.data_analysis != "Balsamic"
+                    models.Sample.data_analysis.is_(None),
+                    models.Sample.data_analysis.ilike(f"%{pipeline}%"),
                 )
             )
             .filter(

@@ -106,7 +106,7 @@ def config_case(context, panel_bed, case_id, dry):
         raise click.Abort()
 
 
-@balsamic.command()
+@balsamic.command("run")
 @ARGUMENT_CASE_ID
 @OPTION_DRY
 @OPTION_PRIORITY
@@ -129,6 +129,7 @@ def run(context, analysis_type, run_analysis, priority, case_id, dry):
         balsamic_analysis_api.balsamic_api.run_analysis(
             arguments=arguments, run_analysis=run_analysis, dry=dry
         )
+        balsamic_analysis_api.set_statusdb_action(case_id=case_id, action="running")
     except BalsamicStartError as e:
         LOG.error(f"Could not run analysis: {e.message}")
         raise click.Abort()
@@ -169,11 +170,16 @@ def store_housekeeper(context, case_id):
         balsamic_analysis_api.upload_bundle_housekeeper(case_id=case_id)
         LOG.info(f"Storing Analysis in ClinicalDB for {case_id}")
         balsamic_analysis_api.upload_analysis_statusdb(case_id=case_id)
-    except (BalsamicStartError, BundleAlreadyAddedError, FileExistsError) as e:
+    except (BundleAlreadyAddedError, FileExistsError) as e:
         LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {e.message}!")
         balsamic_analysis_api.housekeeper_api.rollback()
         balsamic_analysis_api.store.rollback()
+        balsamic_analysis_api.set_statusdb_action(case_id=case_id, action="hold")
         raise click.Abort()
+    except BalsamicStartError as e:
+        LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {e.message}!")
+        raise click.Abort()
+
 
 
 @balsamic.command("start")
@@ -214,8 +220,8 @@ def store(context, case_id, analysis_type, dry):
 @click.pass_context
 def start_available(context, dry):
     """Start full workflow for all available BALSAMIC cases"""
-    for case_object in context.obj["BalsamicAnalysisAPI"].store.cases_to_balsamic_analyze():
-        case_id = case_object.internal_id
+    balsamic_analysis_api = context.obj["BalsamicAnalysisAPI"]
+    for case_id in balsamic_analysis_api.get_cases_to_analyze():
         try:
             context.invoke(start, case_id=case_id, dry=dry)
         except click.Abort:
@@ -227,8 +233,8 @@ def start_available(context, dry):
 @click.pass_context
 def store_available(context, dry):
     """Store bundle data for all available Balsamic cases"""
-    for case_object in context.obj["BalsamicAnalysisAPI"].store.cases_to_balsamic_analyze():
-        case_id = case_object.internal_id
+    balsamic_analysis_api = context.obj["BalsamicAnalysisAPI"]
+    for case_id in balsamic_analysis_api.get_cases_to_store():
         try:
             context.invoke(store, case_id=case_id, dry=dry)
         except click.Abort:

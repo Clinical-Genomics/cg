@@ -13,7 +13,7 @@ def test_that_many_families_can_have_one_sample_each(base_store: Store):
     test_families = add_families_with_samples(base_store, n_test_families, sequenced=True)
 
     # WHEN getting families to analyse
-    families = base_store.cases_to_analyze(pipeline="mip")
+    families = base_store.cases_to_analyze(pipeline="MIP")
 
     # THEN families should contain the test family
     assert len(families) == len(test_families)
@@ -33,7 +33,7 @@ def test_that_families_can_have_many_samples(base_store: Store):
     base_store.relate_sample(test_family, test_sample, "unknown")
 
     # WHEN getting families to analyse
-    families = base_store.cases_to_mip_analyze()
+    families = base_store.cases_to_analyze(pipeline="MIP")
 
     # THEN families should contain the test family
     assert families
@@ -51,7 +51,7 @@ def test_external_sample_to_re_analyse(base_store: Store):
     base_store.relate_sample(test_analysis.family, test_sample, "unknown")
 
     # WHEN getting families to analyse
-    families = base_store.cases_to_mip_analyze()
+    families = base_store.cases_to_analyze(pipeline="MIP")
 
     # THEN families should contain the test family
     assert families
@@ -68,7 +68,7 @@ def test_family_to_re_analyse(base_store: Store):
     base_store.relate_sample(test_analysis.family, test_sample, "unknown")
 
     # WHEN getting families to analyse
-    families = base_store.cases_to_mip_analyze()
+    families = base_store.cases_to_analyze(pipeline="MIP")
 
     # THEN families should contain the test family
     assert families
@@ -85,7 +85,7 @@ def test_all_samples_and_analysis_completed(base_store: Store):
     base_store.relate_sample(test_analysis.family, test_sample, "unknown")
 
     # WHEN getting families to analyse
-    families = base_store.cases_to_mip_analyze()
+    families = base_store.cases_to_analyze(pipeline="MIP")
 
     # THEN families should not contain the test family
 
@@ -101,7 +101,7 @@ def test_balsamic_and_mip_analysis_in_result(base_store: Store):
     base_store.relate_sample(test_family, test_sample, "unknown")
 
     # WHEN getting families to analyse
-    families = base_store.cases_to_mip_analyze()
+    families = base_store.cases_to_analyze(pipeline="MIP")
 
     # THEN families should contain the test family
     assert families
@@ -117,7 +117,7 @@ def test_mip_analysis_in_result(base_store: Store):
     base_store.relate_sample(test_family, test_sample, "unknown")
 
     # WHEN getting families to analyse
-    families = base_store.cases_to_mip_analyze()
+    families = base_store.cases_to_analyze(pipeline="MIP")
 
     # THEN families should contain the test family
     assert families
@@ -133,7 +133,7 @@ def test_exclude_balsamic_only_analysis_from_result(base_store: Store):
     base_store.relate_sample(test_family, test_sample, "unknown")
 
     # WHEN getting families to analyse
-    families = base_store.cases_to_mip_analyze()
+    families = base_store.cases_to_analyze(pipeline="MIP")
 
     # THEN families should not contain the test family
     assert not families
@@ -151,7 +151,7 @@ def test_one_of_two_sequenced_samples(base_store: Store):
     base_store.relate_sample(test_family, test_sample2, "unknown")
 
     # WHEN getting families to analyse
-    families = base_store.cases_to_mip_analyze()
+    families = base_store.cases_to_analyze(pipeline="MIP")
 
     # THEN families should not contain the test family
     assert not families
@@ -168,7 +168,7 @@ def test_one_of_one_sequenced_samples(base_store: Store):
     assert test_sample.sequenced_at is not None
 
     # WHEN getting families to analyse
-    families = base_store.cases_to_mip_analyze()
+    families = base_store.cases_to_analyze(pipeline="MIP")
 
     # THEN families should contain the test family
     assert families
@@ -219,15 +219,15 @@ def add_sample(
     sequenced=False,
     delivered=False,
     invoiced=False,
-    data_analysis="MIP",
+    data_analysis=None,
     external=None,
 ):
     """utility function to add a sample to use in tests"""
     customer = ensure_customer(store)
     application_version_id = ensure_application_version(store).id
-    sample = helpers.add_sample(store=store, name=sample_name, gender="unknown", data_analysis=data_analysis)
+    sample = store.add_sample(name=sample_name, sex="unknown", data_analysis="mip")
     sample.application_version_id = application_version_id
-    sample.customer = helpers.ensure_customer(store=store)
+    sample.customer = customer
     if received:
         sample.received_at = datetime.now()
     if prepared:
@@ -239,6 +239,8 @@ def add_sample(
     if invoiced:
         invoice = store.add_invoice(customer)
         sample.invoice = invoice
+    if data_analysis:
+        sample.data_analysis = data_analysis
     if external:
         sample.is_external = external
 
@@ -250,7 +252,7 @@ def add_samples(base_store, n_samples, sequenced):
     """utility function to add many samples to use in tests"""
     samples = []
     for _ in range(n_samples):
-        samples.append(add_sample(store=base_store, sequenced=sequenced))
+        samples.append(add_sample(base_store, sequenced=sequenced))
     return samples
 
 
