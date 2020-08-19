@@ -181,7 +181,6 @@ def store_housekeeper(context, case_id):
         raise click.Abort()
 
 
-
 @balsamic.command("start")
 @ARGUMENT_CASE_ID
 @OPTION_ANALYSIS_TYPE

@@ -1,19 +1,13 @@
 """Base module for building bioinfo workflow bundles for linking in Housekeeper"""
 import datetime as dt
 
+from typing import List
+
 from cg.constants import HK_TAGS, MIP_DNA_TAGS, MIP_RNA_TAGS
 
-from cg.exc import (
-    AnalysisDuplicationError,
-    PipelineUnknownError,
-    MandatoryFilesMissing,
-)
+from cg.exc import AnalysisDuplicationError, PipelineUnknownError, MandatoryFilesMissing
 
-ANALYSIS_TYPE_TAGS = {
-    "wgs": MIP_DNA_TAGS,
-    "wes": MIP_DNA_TAGS,
-    "wts": MIP_RNA_TAGS,
-}
+ANALYSIS_TYPE_TAGS = {"wgs": MIP_DNA_TAGS, "wes": MIP_DNA_TAGS, "wts": MIP_RNA_TAGS}
 
 
 def build_bundle(config_data: dict, analysisinfo_data: dict, deliverables: dict) -> dict:
@@ -102,42 +96,31 @@ def get_tags(
     analysis_type_tags: dict,
     deliverables_tag_map: tuple,
     is_index: bool = False,
-) -> list:
+) -> List[str]:
     """Get all tags for a file"""
 
-    tags = {
-        "format": file["format"],
-        "id": file["id"],
-        "step": file["step"],
-        "tag": file["tag"],
-    }
+    tags = {"id": file["id"]}
     tags["pipeline"] = pipeline_tags[0]
     tags["application"] = pipeline_tags[1] if len(pipeline_tags) > 1 else None
 
-    tags = _convert_deliverables_tags_to_hk_tags(
+    return _convert_deliverables_tags_to_hk_tags(
         tags, analysis_type_tags, deliverables_tag_map, is_index
     )
 
-    return tags
-
 
 def _convert_deliverables_tags_to_hk_tags(
-    tags: dict, tag_map: dict, deliverables_tag_map: tuple, is_index: bool = False
-) -> list:
+    tags: dict, analysis_type_tags: dict, deliverables_tag_map: tuple, is_index: bool = False
+) -> List[str]:
     """
         Filter and convert tags from external deliverables tags to standard internal housekeeper
         tags
     """
 
     if is_index:
-        mapped_tags = tag_map[deliverables_tag_map]["index_tags"]
+        mapped_tags = analysis_type_tags[deliverables_tag_map]["index_tags"]
     else:
-        mapped_tags = tag_map[deliverables_tag_map]["tags"]
-    converted_tags = [
-        tags["format"],
-        tags["id"],
-        tags["pipeline"],
-    ]
+        mapped_tags = analysis_type_tags[deliverables_tag_map]["tags"]
+    converted_tags = [tags["id"], tags["pipeline"]]
 
     if tags["application"] is not None:
         converted_tags.append(tags["application"])
