@@ -413,7 +413,3 @@ class BalsamicAnalysisAPI:
             if Path(self.get_deliverables_file_path(case_id=case_id)).exists():
                 cases_to_store.append(case_id)
         return cases_to_store
-
-
-
-    
