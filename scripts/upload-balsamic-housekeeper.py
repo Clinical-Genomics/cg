@@ -51,7 +51,8 @@ def upload_cases(database, housekeeper_root, housekeeper_db, report_dir, case_di
                     }
     for case_id in fam_names:
         items = fam_names.get(case_id)
-        if items:
+        if not items:
+            continue
             try:
                 # Add files to Housekeeper
                 config_data = dict(json.load(open(items["config_name"], "r")))
