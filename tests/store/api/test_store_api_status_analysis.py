@@ -219,13 +219,13 @@ def add_sample(
     sequenced=False,
     delivered=False,
     invoiced=False,
-    data_analysis=None,
+    data_analysis="MIP",
     external=None,
 ):
     """utility function to add a sample to use in tests"""
     customer = ensure_customer(store)
     application_version_id = ensure_application_version(store).id
-    sample = store.add_sample(name=sample_name, sex="unknown", data_analysis="mip")
+    sample = store.add_sample(name=sample_name, sex="unknown", data_analysis=data_analysis)
     sample.application_version_id = application_version_id
     sample.customer = customer
     if received:
