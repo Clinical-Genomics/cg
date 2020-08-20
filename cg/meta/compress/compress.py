@@ -51,39 +51,39 @@ class CompressAPI:
             return False
 
         all_ok = True
-        for run in sample_fastq_dict:
-            LOG.info("Check if compression possible for run %s", run)
-            fastq_first = sample_fastq_dict[run]["fastq_first_file"]["path"]
-            fastq_second = sample_fastq_dict[run]["fastq_second_file"]["path"]
+        for run_name in sample_fastq_dict:
+            LOG.info("Check if compression possible for run %s", run_name)
+            compression_object = sample_fastq_dict[run_name]["compression_data"]
 
-            if not self.crunchy_api.is_compression_possible(fastq_first):
+            if not self.crunchy_api.is_fastq_compression_possible(compression_object):
                 LOG.warning("FASTQ to SPRING not possible for %s, run %s", sample_id, run)
                 all_ok = False
                 continue
 
             LOG.info(
                 "Compressing %s and %s for sample %s into SPRING format",
-                fastq_first,
-                fastq_second,
-                sample_id,
+                compression_object.fastq_first,
+                compression_object.fastq_second,
+                compression_object.sample_id,
             )
-            self.crunchy_api.fastq_to_spring(
-                fastq_first=fastq_first, fastq_second=fastq_second, sample_id=sample_id
-            )
+            self.crunchy_api.fastq_to_spring(compression_object, sample_id=sample_id)
 
         return all_ok
 
     def decompress_spring(self, sample_id: str):
         """Decompress SPRING archive for a sample
 
-        This function will make sure that everything is ready for decompression. If so the spring
-        archive will be decompressed into the two fastq files. Housekeeper will be updated to
-        include fastq files as well as the spring metadata file will be updated to include date for
-        decompression.
+        This function will make sure that everything is ready for decompression from spring archive
+        to fastq files.
+
+            - Housekeeper will be updated to include fastq files
+            - Housekeeper will still have the spring and spring metadata file
+            - The spring metadata file will be updated to include date for decompression
         """
         version_obj = self.get_latest_version(sample_id)
         if not version_obj:
             return False
+
         spring_paths = files.get_spring_paths(version_obj)
         for spring_path in spring_paths:
             if not self.crunchy_api.is_compression_possible(spring_path):
@@ -120,7 +120,7 @@ class CompressAPI:
             fastq_first = sample_fastq_dict[run]["fastq_first_file"]["path"]
             fastq_second = sample_fastq_dict[run]["fastq_second_file"]["path"]
 
-            if not self.crunchy_api.is_spring_compression_done(fastq_first):
+            if not self.crunchy_api.is_fastq_compression_done(fastq_first):
                 LOG.info("Fastq compression not done for sample %s, run %s", sample_id, run)
                 all_cleaned = False
                 continue

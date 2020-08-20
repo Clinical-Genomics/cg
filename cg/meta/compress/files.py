@@ -1,13 +1,14 @@
 """Code to handle files regarding compression and decompression"""
 
 import logging
-import os
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List
 
 from housekeeper.store import models as hk_models
 
-from cg.constants import FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX, HK_FASTQ_TAGS
+from cg.constants import (FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX,
+                          HK_FASTQ_TAGS)
+from cg.models import CompressionData
 
 LOG = logging.getLogger(__name__)
 
@@ -33,9 +34,12 @@ def get_hk_files_dict(
     return hk_files_dict
 
 
-def get_nlinks(file_link: Path) -> int:
-    """Get number of links to path"""
-    return os.stat(file_link).st_nlink
+def is_file_in_version(version_obj: hk_models.Version, path: Path) -> bool:
+    """Check if a file is in a certain version"""
+    for file_obj in version_obj.files:
+        if file_obj.path == str(path):
+            return True
+    return False
 
 
 # Functions to get fastq like files
@@ -55,29 +59,39 @@ def get_spring_paths(version_obj: hk_models.Version) -> List[Path]:
     return spring_paths
 
 
-def get_run_name(fastq_path: Path) -> str:
-    """Remove the suffix of a fastq file and return the sequencing run base name"""
-    if not is_valid_fastq_suffix(fastq_path):
-        return None
+def get_fastq_stub(fastq_path: Path) -> Path:
+    """Take a fastq file and return the stub (unique part)
 
-    if str(fastq_path).endswith(FASTQ_FIRST_READ_SUFFIX):
-        return fastq_path.name.replace(FASTQ_FIRST_READ_SUFFIX, "")
-    return fastq_path.name.replace(FASTQ_SECOND_READ_SUFFIX, "")
+    Example:
+        fastq_file = /home/fastq_files/A_sequencing_run_R1_001.fastq.gz
+        stub = /home/fastq_files/A_sequencing_run
+    """
+    fastq_string = str(fastq_path)
+    if FASTQ_FIRST_READ_SUFFIX in fastq_string:
+        return Path(fastq_string.rstrip(FASTQ_FIRST_READ_SUFFIX))
+    if FASTQ_SECOND_READ_SUFFIX in fastq_string:
+        return Path(fastq_string.rstrip(FASTQ_SECOND_READ_SUFFIX))
+    return None
 
 
-def get_fastq_runs(fastq_files: List[Path]) -> Dict[str, list]:
-    """Return a dictionary with all individual runs and the files belonging to that run as values"""
-    fastq_runs = {}
+def get_compression_data(fastq_files: List[Path]) -> List[CompressionData]:
+    """Return a list of compression data objects
+
+    Each object has information about a pair of fastq files from the same run
+    """
+    fastq_runs = set()
+    compression_objects = []
     for fastq_file in fastq_files:
-        run_name = get_run_name(fastq_file)
-        if not run_name:
+        # stub is the run name identifier
+        stub = get_fastq_stub(fastq_file)
+        if stub is None:
+            LOG.info("Invalid fastq name %s", fastq_file)
             continue
+        run_name = str(stub)
         if run_name not in fastq_runs:
-            LOG.info("Found run %s", run_name)
-            fastq_runs[run_name] = []
-        fastq_runs[run_name].append(fastq_file)
-
-    return fastq_runs
+            fastq_runs.add(run_name)
+            compression_objects.append(CompressionData(stub))
+    return compression_objects
 
 
 def get_fastq_files(sample_id: str, version_obj: hk_models.Version) -> Dict[str, dict]:
@@ -87,30 +101,28 @@ def get_fastq_files(sample_id: str, version_obj: hk_models.Version) -> Dict[str,
         return None
 
     fastq_dict = {}
-    fastq_runs = get_fastq_runs(list(hk_files_dict.keys()))
-    if not fastq_runs:
+    compression_objects = get_compression_data(list(hk_files_dict.keys()))
+    if not compression_objects:
         LOG.info("Could not find FASTQ files for %s", sample_id)
         return None
 
-    for run in fastq_runs:
+    for run in compression_objects:
 
-        sorted_fastqs = sort_fastqs(fastq_files=fastq_runs[run])
-        if not sorted_fastqs:
-            LOG.info("Skipping run %s", run)
+        if not check_fastqs(run):
+            LOG.info("Skipping run %s", run.run_name)
             continue
 
-        fastq_first = {"path": sorted_fastqs[0], "hk_file": hk_files_dict[sorted_fastqs[0]]}
-        fastq_second = {"path": sorted_fastqs[1], "hk_file": hk_files_dict[sorted_fastqs[1]]}
-        fastq_dict[run] = {
-            "fastq_first_file": fastq_first,
-            "fastq_second_file": fastq_second,
+        fastq_dict[run.run_name] = {
+            "compression_data": run,
+            "hk_first": hk_files_dict[run.fastq_first],
+            "hk_second": hk_files_dict[run.fastq_first],
         }
 
     return fastq_dict
 
 
-def check_file_status(file_path: Path) -> bool:
-    """Check if a file has the correct status
+def check_fastqs(run: CompressionData) -> bool:
+    """Check if fastq files has the correct status
 
     More specific this means to check
         - Did we get the full path of the file?
@@ -119,95 +131,20 @@ def check_file_status(file_path: Path) -> bool:
         - Is the file actually a symlink?
         - Is the file hardlinked?
     """
-    if not file_path.is_absolute():
-        LOG.info("Could not resolve full path from HK to %s", file_path)
+    if not (run.is_absolute(run.fastq_first) or run.is_absolute(run.fastq_first)):
         return False
 
-    try:
-        if not file_path.exists():
-            LOG.info("%s does not exist", file_path)
-            return False
-    except PermissionError:
-        LOG.warning("Not permitted to access %s. Skipping", file_path)
+    if not run.pair_exists():
         return False
 
     # Check if file is hardlinked multiple times
-    if get_nlinks(file_link=file_path) > 1:
-        LOG.info("More than 1 inode to same file for %s", file_path)
+    if run.get_nlinks(run.fastq_first) > 1 or run.get_nlinks(run.fastq_second) > 1:
+        LOG.info("More than 1 inode to same file for %s", run.run_name)
         return False
 
     # Check if the fastq file is a symlinc (soft link)
-    if file_path.is_symlink():
-        LOG.info("File %s is a symbolic link, skipping file", file_path)
+    if run.is_symlink(run.fastq_first) or run.is_symlink(run.fastq_second):
+        LOG.info("Run %s has symbolic link, skipping run", run.run_name)
         return False
 
     return True
-
-
-def sort_fastqs(fastq_files: List[Path]) -> Tuple[Path, Path]:
-    """ Sort list of FASTQ files into correct read pair
-
-    Check that the files exists and are correct
-
-    More specific we will do the following checks, if one is failing we skip the files:
-
-        1. Does the file exist?
-        2. Do we have permission to read the file?
-        3. Are there more than one inode to the file (hardlinked)
-        4. Is the file actually a soft link?
-        5. Are there two correct files in the pair?
-        6. Do they have the same prefix?
-
-    Args:
-        fastq_files(list(Path))
-
-    Returns:
-        sorted_fastqs(tuple): (fastq_first, fastq_second)
-    """
-    first_fastq = second_fastq = None
-    for fastq_file in fastq_files:
-
-        if not check_file_status(fastq_file):
-            return None
-
-        if str(fastq_file).endswith(FASTQ_FIRST_READ_SUFFIX):
-            first_fastq = fastq_file
-        if str(fastq_file).endswith(FASTQ_SECOND_READ_SUFFIX):
-            second_fastq = fastq_file
-
-    if not (first_fastq and second_fastq):
-        LOG.warning("Could not find paired fastq files")
-        return None
-
-    if not check_prefixes(first_fastq, second_fastq):
-        LOG.info("FASTQ files does not have matching prefix: %s, %s", first_fastq, second_fastq)
-        return None
-
-    return (first_fastq, second_fastq)
-
-
-def check_prefixes(first_fastq: Path, second_fastq: Path) -> bool:
-    """Check if two files belong to the same read pair"""
-    first_prefix = str(first_fastq.absolute()).replace(FASTQ_FIRST_READ_SUFFIX, "")
-    second_prefix = str(second_fastq.absolute()).replace(FASTQ_SECOND_READ_SUFFIX, "")
-    return first_prefix == second_prefix
-
-
-def is_valid_fastq_suffix(fastq_path: Path) -> bool:
-    """ Check that fastq has correct suffix"""
-    if str(fastq_path).endswith(FASTQ_FIRST_READ_SUFFIX) or str(fastq_path).endswith(
-        FASTQ_SECOND_READ_SUFFIX
-    ):
-        return True
-    return False
-
-
-# Functions to check for files in housekeeper
-
-
-def is_file_in_version(version_obj: hk_models.Version, path: Path) -> bool:
-    """Check if a file is in a certain version"""
-    for file_obj in version_obj.files:
-        if file_obj.path == str(path):
-            return True
-    return False

@@ -1,6 +1,5 @@
 """Tests for the compression files module"""
 import logging
-import os
 from pathlib import Path
 
 from cg.constants import FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX
@@ -9,8 +8,9 @@ from cg.meta.compress import files
 
 def test_get_fastq_run_name():
     """Test to parse the run name of a fastq file"""
-    # GIVEN a run name and a fastq file
-    run = "run"
+    # GIVEN a run name
+    run = "run_name"
+    # GIVEN a fastq file with correct naming
     fastq = Path(run + FASTQ_FIRST_READ_SUFFIX)
 
     # WHEN parsing the run name
@@ -82,7 +82,7 @@ def test_get_fastq_files(populated_compress_fastq_api, sample):
     run = list(fastq_dict.keys())[0]
 
     # THEN the fastq files will be in the dictionary
-    assert set(fastq_dict[run].keys()) == set(["fastq_first_file", "fastq_second_file"])
+    assert set(fastq_dict[run].keys()) == set(["compression_data", "hk_first", "hk_second"])
 
 
 def test_check_prefixes(sample):
