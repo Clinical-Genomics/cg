@@ -7,20 +7,23 @@ from cg.cli.workflow.balsamic.base import balsamic, start, store, start_availabl
 
 EXIT_SUCCESS = 0
 
+
 def test_balsamic_no_args(cli_runner, balsamic_context: dict):
+    """Test to see that running BALSAMIC without options prints help and doesn't result in an error"""
+    # GIVEN no arguments or options besides the command call
+    # WHEN running command
     result = cli_runner.invoke(balsamic, [], obj=balsamic_context)
+    # THEN command runs successfully
     assert result.exit_code == EXIT_SUCCESS
-    assert "balsamic" in result.output
+    # THEN help should be printed
+    assert "help" in result.output
 
-def test_start(tmpdir_factory, cli_runner, balsamic_context: dict, caplog):
+
+def test_start(cli_runner, balsamic_context: dict, mock_config, caplog):
+    """Test to ensure all parts of start command will run successfully given ideal conditions"""
     caplog.set_level(logging.INFO)
-
+    # GIVEN case id for which we created a config file
     case_id = "balsamic_case_wgs_single"
-    # WHEN ensuring case config exists where it should be stored
-    Path.mkdir(
-        Path(balsamic_context["BalsamicAnalysisAPI"].get_config_path(case_id)).parent, exist_ok=True
-    )
-    Path(balsamic_context["BalsamicAnalysisAPI"].get_config_path(case_id)).touch(exist_ok=True)
     # WHEN dry running with dry specified
     result = cli_runner.invoke(start, [case_id, "--dry-run"], obj=balsamic_context)
     # THEN command should execute successfully
@@ -29,7 +32,6 @@ def test_start(tmpdir_factory, cli_runner, balsamic_context: dict, caplog):
 
 
 def test_store(
-    tmpdir_factory,
     cli_runner,
     balsamic_context: dict,
     real_housekeeper_api,
@@ -38,9 +40,9 @@ def test_store(
     mock_analysis_finish,
     caplog,
 ):
-    """Test to ensure all parts of compound store command are executed given ideal conditions"""
+    """Test to ensure all parts of store command are run successfully given ideal conditions"""
     caplog.set_level(logging.INFO)
-    # GIVEN case-id
+    # GIVEN case-id for which we created a config file, deliverables file, and analysis_finish file
     case_id = "balsamic_case_wgs_single"
     # Make sure nothing is currently stored in Housekeeper
     balsamic_context["BalsamicAnalysisAPI"].housekeeper_api = real_housekeeper_api
