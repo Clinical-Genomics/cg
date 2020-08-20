@@ -419,10 +419,7 @@ class CrunchyAPI:
             index_type = BAM_INDEX_SUFFIX
         with_single_suffix = file_path.with_suffix(index_type)
         with_double_suffix = file_path.with_suffix(file_path.suffix + index_type)
-        return {
-            "single_suffix": with_single_suffix,
-            "double_suffix": with_double_suffix,
-        }
+        return {"single_suffix": with_single_suffix, "double_suffix": with_double_suffix}
 
     @staticmethod
     def get_cram_path_from_bam(bam_path: Path) -> Path:
@@ -452,7 +449,7 @@ class CrunchyAPI:
             sbatch_file.write(sbatch_content)
 
         sbatch_parameters = [str(sbatch_path.resolve())]
-        self.process.run_command(sbatch_parameters)
+        self.process.run_command(parameters=sbatch_parameters)
         if self.process.stderr:
             LOG.info(self.process.stderr)
         if self.process.stdout:
@@ -485,7 +482,7 @@ class CrunchyAPI:
 
     @staticmethod
     def _get_slurm_bam_to_cram(
-        bam_path: str, cram_path: str, flag_path: str, pending_path: str, reference_path: str,
+        bam_path: str, cram_path: str, flag_path: str, pending_path: str, reference_path: str
     ) -> str:
         """Create and return the body of a sbatch script that runs BAM to CRAM"""
         LOG.info("Generating bam to fastq sbatch body")
