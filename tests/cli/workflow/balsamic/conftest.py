@@ -9,7 +9,6 @@ import json
 import gzip
 from cg.apps.balsamic.api import BalsamicAPI
 from cg.apps.balsamic.fastq import FastqHandler
-from cg.utils.fastq import FastqAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.store import Store
 from cg.apps.hk import HousekeeperAPI
@@ -670,7 +669,6 @@ def balsamic_context(
         housekeeper_api=balsamic_housekeeper,
         fastq_handler=FastqHandler(server_config),
         lims_api=balsamic_lims,
-        fastq_api=FastqAPI,
     )
     return {
         "BalsamicAnalysisAPI": balsamic_analysis_api,

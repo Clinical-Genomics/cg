@@ -10,7 +10,6 @@ from cg.apps.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.balsamic.api import BalsamicAPI
 from cg.apps.balsamic.fastq import FastqHandler
-from cg.utils.fastq import FastqAPI
 from cg.store import Store
 
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
@@ -66,7 +65,6 @@ def balsamic(context, priority, panel_bed, analysis_type, run_analysis, dry):
         housekeeper_api=HousekeeperAPI(config),
         fastq_handler=FastqHandler(config),
         lims_api=LimsAPI(config),
-        fastq_api=FastqAPI,
     )
 
 

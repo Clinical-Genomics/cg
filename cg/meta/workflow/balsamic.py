@@ -15,7 +15,7 @@ from cg.apps.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.balsamic.api import BalsamicAPI
 from cg.apps.balsamic.fastq import FastqHandler
-from cg.utils.fastq import FastqAPI
+
 from cg.constants import FAMILY_ACTIONS
 
 
@@ -36,14 +36,12 @@ class BalsamicAnalysisAPI:
         housekeeper_api: HousekeeperAPI,
         fastq_handler: FastqHandler,
         lims_api: LimsAPI,
-        fastq_api: FastqAPI,
     ):
         self.balsamic_api = balsamic_api
         self.store = store
         self.housekeeper_api = housekeeper_api
         self.fastq_handler = fastq_handler
         self.lims_api = lims_api
-        self.fastq_api = fastq_api
 
     def get_case_object(self, case_id: str):
         """Look up case ID in StoreDB and return result"""
@@ -108,7 +106,7 @@ class BalsamicAnalysisAPI:
         for file_obj in file_objs:
             with gzip.open(file_obj.full_path) as handle:
                 header_line = handle.readline().decode()
-                header_info = self.fastq_api.parse_header(header_line)
+                header_info = self.fastq_handler.parse_header(header_line)
 
             data = {
                 "path": file_obj.full_path,

@@ -76,7 +76,6 @@ def balsamic_analysis_api(
         housekeeper_api=housekeeper_api,
         fastq_handler="FastqHandler",
         lims_api="LIMS",
-        fastq_api="FastqAPI",
     )
 
 

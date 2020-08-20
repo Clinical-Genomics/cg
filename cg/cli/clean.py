@@ -14,7 +14,6 @@ from cg.meta.upload.beacon import UploadBeaconApi
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.balsamic.api import BalsamicAPI
-from cg.utils.fastq import FastqAPI
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -38,7 +37,6 @@ def clean(context):
         housekeeper_api=HousekeeperAPI(context.obj),
         fastq_handler=FastqHandler(context.obj),
         lims_api=LimsAPI(context.obj),
-        fastq_api=FastqAPI,
     )
 
 
