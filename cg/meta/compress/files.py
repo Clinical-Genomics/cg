@@ -45,16 +45,17 @@ def is_file_in_version(version_obj: hk_models.Version, path: Path) -> bool:
 # Functions to get fastq like files
 
 
-def get_spring_paths(version_obj: hk_models.Version) -> List[Path]:
+def get_spring_paths(version_obj: hk_models.Version) -> List[CompressionData]:
     """Get all spring paths for a sample"""
     hk_files_dict = get_hk_files_dict(tags=["spring"], version_obj=version_obj)
-    if hk_files_dict is None:
-        return None
-
     spring_paths = []
+
+    if hk_files_dict is None:
+        return spring_paths
+
     for file_path in hk_files_dict:
         if file_path.suffix == ".spring":
-            spring_paths.append(file_path)
+            spring_paths.append(CompressionData(file_path.with_suffix("")))
 
     return spring_paths
 
@@ -68,9 +69,9 @@ def get_fastq_stub(fastq_path: Path) -> Path:
     """
     fastq_string = str(fastq_path)
     if FASTQ_FIRST_READ_SUFFIX in fastq_string:
-        return Path(fastq_string.rstrip(FASTQ_FIRST_READ_SUFFIX))
+        return Path(fastq_string.replace(FASTQ_FIRST_READ_SUFFIX, ""))
     if FASTQ_SECOND_READ_SUFFIX in fastq_string:
-        return Path(fastq_string.rstrip(FASTQ_SECOND_READ_SUFFIX))
+        return Path(fastq_string.replace(FASTQ_SECOND_READ_SUFFIX, ""))
     return None
 
 
@@ -106,22 +107,21 @@ def get_fastq_files(sample_id: str, version_obj: hk_models.Version) -> Dict[str,
         LOG.info("Could not find FASTQ files for %s", sample_id)
         return None
 
-    for run in compression_objects:
+    for compression_obj in compression_objects:
 
-        if not check_fastqs(run):
-            LOG.info("Skipping run %s", run.run_name)
+        if not check_fastqs(compression_obj):
+            LOG.info("Skipping run %s", compression_obj.run_name)
             continue
-
-        fastq_dict[run.run_name] = {
-            "compression_data": run,
-            "hk_first": hk_files_dict[run.fastq_first],
-            "hk_second": hk_files_dict[run.fastq_first],
+        fastq_dict[compression_obj.run_name] = {
+            "compression_data": compression_obj,
+            "hk_first": hk_files_dict[compression_obj.fastq_first],
+            "hk_second": hk_files_dict[compression_obj.fastq_first],
         }
 
     return fastq_dict
 
 
-def check_fastqs(run: CompressionData) -> bool:
+def check_fastqs(compression_obj: CompressionData) -> bool:
     """Check if fastq files has the correct status
 
     More specific this means to check
@@ -131,20 +131,28 @@ def check_fastqs(run: CompressionData) -> bool:
         - Is the file actually a symlink?
         - Is the file hardlinked?
     """
-    if not (run.is_absolute(run.fastq_first) or run.is_absolute(run.fastq_first)):
+    if not (
+        compression_obj.is_absolute(compression_obj.fastq_first)
+        or compression_obj.is_absolute(compression_obj.fastq_first)
+    ):
         return False
 
-    if not run.pair_exists():
+    if not compression_obj.pair_exists():
         return False
 
     # Check if file is hardlinked multiple times
-    if run.get_nlinks(run.fastq_first) > 1 or run.get_nlinks(run.fastq_second) > 1:
-        LOG.info("More than 1 inode to same file for %s", run.run_name)
+    if (
+        compression_obj.get_nlinks(compression_obj.fastq_first) > 1
+        or compression_obj.get_nlinks(compression_obj.fastq_second) > 1
+    ):
+        LOG.info("More than 1 inode to same file for %s", compression_obj.run_name)
         return False
 
     # Check if the fastq file is a symlinc (soft link)
-    if run.is_symlink(run.fastq_first) or run.is_symlink(run.fastq_second):
-        LOG.info("Run %s has symbolic link, skipping run", run.run_name)
+    if compression_obj.is_symlink(compression_obj.fastq_first) or compression_obj.is_symlink(
+        compression_obj.fastq_second
+    ):
+        LOG.info("Run %s has symbolic link, skipping run", compression_obj.run_name)
         return False
 
     return True

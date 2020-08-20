@@ -1,74 +1,8 @@
 """Tests for the compression files module"""
 import logging
-from pathlib import Path
 
-from cg.constants import FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX
 from cg.meta.compress import files
-
-
-def test_get_fastq_run_name():
-    """Test to parse the run name of a fastq file"""
-    # GIVEN a run name
-    run = "run_name"
-    # GIVEN a fastq file with correct naming
-    fastq = Path(run + FASTQ_FIRST_READ_SUFFIX)
-
-    # WHEN parsing the run name
-    res = files.get_run_name(fastq)
-
-    # THEN assert the name is the expected
-    assert res == run
-
-
-def test_get_fastq_run_name_real_file(fastq_files, sample):
-    """Test to parse the run name of some existing fastq files"""
-    # GIVEN a run name and a fastq file
-    fastq_file = fastq_files["fastq_first_path"]
-    assert fastq_file.exists()
-
-    # WHEN parsing the run name
-    res = files.get_run_name(fastq_file)
-
-    # THEN assert the name is the expected
-    assert res == sample
-
-
-def test_get_individual_fastqs_one_run():
-    """Test to get fastq files when there is one run"""
-    # GIVEN a run with two fastqs
-    run = "run"
-    fastqs = [Path(run + FASTQ_FIRST_READ_SUFFIX), Path(run + FASTQ_SECOND_READ_SUFFIX)]
-
-    # WHEN parsing the files
-    individual_fastqs = files.get_fastq_runs(fastqs)
-
-    # THEN assert that the run is returned
-    assert run in individual_fastqs
-    # THEN assert that the files are grouped under the run
-    assert set(individual_fastqs[run]) == set(fastqs)
-
-
-def test_get_individual_fastqs_multiple_runs():
-    """Test to get fastq files when there are two runs"""
-    # GIVEN a run with two fastqs
-    run = "run"
-    run_2 = "run_2"
-    fastqs = [
-        Path(run + FASTQ_FIRST_READ_SUFFIX),
-        Path(run + FASTQ_SECOND_READ_SUFFIX),
-        Path(run_2 + FASTQ_FIRST_READ_SUFFIX),
-        Path(run_2 + FASTQ_SECOND_READ_SUFFIX),
-    ]
-
-    # WHEN parsing the files
-    individual_fastqs = files.get_fastq_runs(fastqs)
-
-    # THEN assert that both runs are returned
-    assert run in individual_fastqs
-    assert run_2 in individual_fastqs
-    # THEN assert that the files are grouped under the run
-    assert set(individual_fastqs[run]) == set(fastqs[:2])
-    assert set(individual_fastqs[run_2]) == set(fastqs[2:])
+from cg.models import CompressionData
 
 
 def test_get_fastq_files(populated_compress_fastq_api, sample):
@@ -83,20 +17,8 @@ def test_get_fastq_files(populated_compress_fastq_api, sample):
 
     # THEN the fastq files will be in the dictionary
     assert set(fastq_dict[run].keys()) == set(["compression_data", "hk_first", "hk_second"])
-
-
-def test_check_prefixes(sample):
-    """test to check if two fastq files belong to the same readpair when they do"""
-
-    # GIVEN two fatq files from the same readpair
-    first_fastq = Path(sample) / FASTQ_FIRST_READ_SUFFIX
-    second_fastq = Path(sample) / FASTQ_SECOND_READ_SUFFIX
-
-    # WHEN checking if they belong to the same sample
-    res = files.check_prefixes(first_fastq, second_fastq)
-
-    # THEN assert that the result is true
-    assert res is True
+    # THEN assert that a CompressionData object was returned
+    assert isinstance(fastq_dict[run]["compression_data"], CompressionData)
 
 
 def test_get_fastq_files_no_files(compress_api, sample_hk_bundle_no_files, sample, helpers, caplog):

@@ -9,6 +9,7 @@ from housekeeper.store import models as hk_models
 
 from cg.apps import crunchy, hk
 from cg.meta.compress import files
+from cg.models import CompressionData
 
 LOG = logging.getLogger(__name__)
 
@@ -56,7 +57,7 @@ class CompressAPI:
             compression_object = sample_fastq_dict[run_name]["compression_data"]
 
             if not self.crunchy_api.is_fastq_compression_possible(compression_object):
-                LOG.warning("FASTQ to SPRING not possible for %s, run %s", sample_id, run)
+                LOG.warning("FASTQ to SPRING not possible for %s, run %s", sample_id, run_name)
                 all_ok = False
                 continue
 
@@ -70,7 +71,7 @@ class CompressAPI:
 
         return all_ok
 
-    def decompress_spring(self, sample_id: str):
+    def decompress_spring(self, sample_id: str) -> bool:
         """Decompress SPRING archive for a sample
 
         This function will make sure that everything is ready for decompression from spring archive
@@ -84,19 +85,20 @@ class CompressAPI:
         if not version_obj:
             return False
 
-        spring_paths = files.get_spring_paths(version_obj)
-        for spring_path in spring_paths:
-            if not self.crunchy_api.is_compression_possible(spring_path):
+        compression_objs = files.get_spring_paths(version_obj)
+        for compression_obj in compression_objs:
+            if not self.crunchy_api.is_spring_decompression_possible(compression_obj):
                 LOG.info("SPRING to FASTQ decompression not possible for %s", sample_id)
                 return False
 
             LOG.info(
-                "Decompressing %s to FASTQ format for sample %s ", spring_path, sample_id,
+                "Decompressing %s to FASTQ format for sample %s ",
+                compression_obj.spring_path,
+                sample_id,
             )
 
-            self.crunchy_api.spring_to_fastq(spring_path, sample_id=sample_id)
-            spring_metadata_path = self.crunchy_api.get_flag_path(spring_path)
-            self.crunchy_api.update_metadata_date(spring_metadata_path)
+            self.crunchy_api.spring_to_fastq(compression_obj, sample_id=sample_id)
+            self.crunchy_api.update_metadata_date(compression_obj.spring_metadata_path)
 
         return True
 
@@ -116,28 +118,35 @@ class CompressAPI:
             return False
 
         all_cleaned = True
-        for run in sample_fastq_dict:
-            fastq_first = sample_fastq_dict[run]["fastq_first_file"]["path"]
-            fastq_second = sample_fastq_dict[run]["fastq_second_file"]["path"]
+        for run_name in sample_fastq_dict:
 
-            if not self.crunchy_api.is_fastq_compression_done(fastq_first):
-                LOG.info("Fastq compression not done for sample %s, run %s", sample_id, run)
+            compression_object = sample_fastq_dict[run_name]["compression_data"]
+
+            if not self.crunchy_api.is_fastq_compression_done(compression_object):
+                LOG.info("Fastq compression not done for sample %s, run %s", sample_id, run_name)
                 all_cleaned = False
                 continue
 
-            LOG.info("FASTQ compression done for sample %s, run %s!!", sample_id, run)
+            LOG.info("FASTQ compression done for sample %s, run %s!!", sample_id, run_name)
 
-            fastq_first_hk = sample_fastq_dict[run]["fastq_first_file"]["hk_file"]
-            fastq_second_hk = sample_fastq_dict[run]["fastq_second_file"]["hk_file"]
+            fastq_first_hk = sample_fastq_dict[run_name]["fastq_first_file"]["hk_file"]
+            fastq_second_hk = sample_fastq_dict[run_name]["fastq_second_file"]["hk_file"]
 
             self.update_fastq_hk(
-                sample_id=sample_id, hk_fastq_first=fastq_first_hk, hk_fastq_second=fastq_second_hk
+                sample_id=sample_id,
+                compression_obj=compression_object,
+                hk_fastq_first=fastq_first_hk,
+                hk_fastq_second=fastq_second_hk,
             )
 
-            self.remove_fastq(fastq_first=fastq_first, fastq_second=fastq_second)
+            self.remove_fastq(
+                fastq_first=compression_object.fastq_first,
+                fastq_second=compression_object.fastq_second,
+            )
 
         if all_cleaned:
             LOG.info("All FASTQ files cleaned for %s!!", sample_id)
+
         return all_cleaned
 
     def add_decompressed_fastq(self, sample_id) -> bool:
@@ -178,39 +187,51 @@ class CompressAPI:
 
     # Methods to update housekeeper
     def update_fastq_hk(
-        self, sample_id: str, hk_fastq_first: hk_models.File, hk_fastq_second: hk_models.File,
+        self,
+        sample_id: str,
+        compression_obj: CompressionData,
+        hk_fastq_first: hk_models.File,
+        hk_fastq_second: hk_models.File,
     ):
         """Update Housekeeper with compressed fastq files and spring metadata file"""
         version_obj = self.hk_api.last_version(sample_id)
-        fastq_first_path = Path(hk_fastq_first.full_path)
-        fastq_second_path = Path(hk_fastq_second.full_path)
 
         spring_tags = [sample_id, "spring"]
         spring_metadata_tags = [sample_id, "spring-metadata"]
-        spring_path = self.crunchy_api.get_spring_path_from_fastq(fastq=fastq_first_path)
-        spring_metadata_path = self.crunchy_api.get_flag_path(spring_path)
         LOG.info("Updating fastq files in housekeeper update for %s:", sample_id)
         LOG.info(
             "%s, %s -> %s, with tags %s",
-            fastq_first_path,
-            fastq_second_path,
-            spring_path,
+            compression_obj.fastq_first,
+            compression_obj.fastq_second,
+            compression_obj.spring_path,
             spring_tags,
         )
-        LOG.info("Adds %s, with tags %s", spring_metadata_path, spring_metadata_tags)
+        LOG.info(
+            "Adds %s, with tags %s", compression_obj.spring_metadata_path, spring_metadata_tags
+        )
         if self.dry_run:
             return
 
         LOG.info("updating files in housekeeper...")
-        if files.is_file_in_version(version_obj, spring_path):
+        if files.is_file_in_version(version_obj, compression_obj.spring_path):
             LOG.info("Spring file is already in HK")
         else:
-            self.hk_api.add_file(path=spring_path, version_obj=version_obj, tags=spring_tags)
             self.hk_api.add_file(
-                path=spring_metadata_path, version_obj=version_obj, tags=spring_metadata_tags
+                path=compression_obj.spring_path, version_obj=version_obj, tags=spring_tags
             )
             self.hk_api.commit()
 
+        if files.is_file_in_version(version_obj, compression_obj.spring_metadata_path):
+            LOG.info("Spring metadata file is already in HK")
+        else:
+            self.hk_api.add_file(
+                path=compression_obj.spring_metadata_path,
+                version_obj=version_obj,
+                tags=spring_metadata_tags,
+            )
+            self.hk_api.commit()
+
+        LOG.info("Deleting fastq files from housekeeper")
         hk_fastq_first.delete()
         hk_fastq_second.delete()
         self.hk_api.commit()

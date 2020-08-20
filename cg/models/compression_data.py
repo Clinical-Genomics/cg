@@ -91,7 +91,7 @@ class CompressionData:
     def is_symlink(file_path: Path) -> bool:
         """Check if file path is symbolik link"""
         LOG.info("Check if %s is a symlink", file_path)
-        return os.stat(file_path).st_nlink
+        return os.path.islink(file_path)
 
     def spring_exists(self) -> bool:
         """Check if the spring file exists"""
