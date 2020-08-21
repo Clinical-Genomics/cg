@@ -226,15 +226,15 @@ def start(context: click.Context, dry_run: bool = False):
         if AnalysisAPI.is_dna_only_case(case_obj):
             LOG.info("%s: start analysis", case_obj.internal_id)
         else:
-            LOG.warning("%s: contains non-dna samples, skipping", case_obj.internal_id)
+            LOG.warning("%s: contains non-dna samples - skipping", case_obj.internal_id)
             continue
 
         if context.obj["tb"].analyses(family=case_obj.internal_id, temp=True).first():
-            LOG.warning("%s: analysis already started ", {case_obj.internal_id})
+            LOG.warning("%s: analysis already started - skipping", case_obj.internal_id)
             continue
 
         if context.obj["tb"].analyses(family=case_obj.internal_id, status="failed").first():
-            LOG.warning("%s: analysis failed ", {case_obj.internal_id})
+            LOG.warning("%s: analysis failed previously - skipping", case_obj.internal_id)
             continue
 
         priority = (
