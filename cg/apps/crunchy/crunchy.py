@@ -244,12 +244,15 @@ class CrunchyAPI:
         updated_at = self.get_file_updated_at(spring_metadata)
 
         if updated_at is None:
+            LOG.info("Fastq compression is done for %s", compression_obj.run_name)
             return True
 
         LOG.info("Files where updated %s", updated_at)
 
         if not self.check_if_update_spring(updated_at):
             return False
+
+        LOG.info("Fastq compression is done for %s", compression_obj.run_name)
 
         return True
 
