@@ -8,6 +8,7 @@ import datetime
 import json
 import logging
 import tempfile
+from json.decoder import JSONDecodeError
 from pathlib import Path
 from typing import List, Optional
 
@@ -82,7 +83,7 @@ class CrunchyAPI:
 
             - Compression/Decompression is running      -> Decompression is NOT possible
             - The fastq files are not compressed        -> Decompression is NOT possible
-            - Compression has been preformed            -> Decompression IS possible
+            - Compression has been performed            -> Decompression IS possible
 
         """
         if self.is_compression_pending(compression_obj):
@@ -90,6 +91,83 @@ class CrunchyAPI:
 
         if self.is_spring_decompression_done(compression_obj):
             return False
+
+        return True
+
+    def is_fastq_compression_done(self, compression_obj: CompressionData) -> bool:
+        """Check if fastq compression is finished
+
+        This is checked by controlling that the spring files that are produced after fastq
+        compression exists.
+
+        The following has to be fulfilled for fastq compression to be considered done:
+
+            - A SPRING archive file exists
+            - A SPRING archive metada file exists
+            - The spring archive has not been unpacked before fastq delta (21 days)
+
+        """
+        LOG.info("Check if Fastq compression is finished")
+        LOG.info("Check if SPRING file %s exists", compression_obj.spring_path)
+        if not compression_obj.spring_exists():
+            LOG.info("No SPRING file for %s", compression_obj.run_name)
+            return False
+        LOG.info("SPRING file found")
+
+        LOG.info("Check if SPRING metadata file %s exists", compression_obj.spring_metadata_path)
+        if not compression_obj.metadata_exists():
+            LOG.info("No metadata file found")
+            return False
+        LOG.info("SPRING metadata file found")
+
+        spring_metadata = self.get_spring_metadata(compression_obj.spring_metadata_path)
+        updated_at = self.get_file_updated_at(spring_metadata)
+
+        if updated_at is None:
+            LOG.info("Fastq compression is done for %s", compression_obj.run_name)
+            return True
+
+        LOG.info("Files where updated %s", updated_at)
+
+        if not self.check_if_update_spring(updated_at):
+            return False
+
+        LOG.info("Fastq compression is done for %s", compression_obj.run_name)
+
+        return True
+
+    def is_spring_decompression_done(self, compression_obj: CompressionData) -> bool:
+        """Check if spring decompression if finished.
+
+        This means that all three files specified in spring metadata should exist.
+        That is
+
+            - first read in fastq pair should exist
+            - second read in fastq pair should exist
+            - spring archive file should still exist
+        """
+
+        spring_metadata_path = compression_obj.spring_metadata_path
+        LOG.info("Check if spring metadata file %s exists", spring_metadata_path)
+
+        if not compression_obj.metadata_exists():
+            LOG.info("No SPRING metadata file found")
+            return False
+
+        spring_metadata = self.get_spring_metadata(spring_metadata_path)
+        if not spring_metadata:
+            LOG.info("Malformed metadata content")
+            return False
+
+        for file_info in spring_metadata:
+            if not Path(file_info["path"]).exists():
+                LOG.info("File %s does not exist", file_info["file"])
+                return False
+            if "updated" not in file_info:
+                LOG.info("Files have not been updated")
+                return False
+
+        LOG.info("Spring decompression is ready for run %s", compression_obj.run_name)
 
         return True
 
@@ -138,7 +216,11 @@ class CrunchyAPI:
         """Validate content of metadata file and return mapped content"""
         LOG.info("Fetch spring metadata from %s", metadata_path)
         with open(metadata_path, "r") as infile:
-            content = json.load(infile)
+            try:
+                content = json.load(infile)
+            except JSONDecodeError:
+                LOG.warning("No content in spring metadata file")
+                return None
             assert isinstance(content, list)
             metadata = self.mapped_spring_metadata(content)
 
@@ -212,76 +294,6 @@ class CrunchyAPI:
         if delta > now:
             LOG.info("Fastq files are not old enough")
             return False
-        return True
-
-    def is_fastq_compression_done(self, compression_obj: CompressionData) -> bool:
-        """Check if fastq compression is finished
-
-        This is checked by controlling that the spring files that are produced after fastq
-        compression exists.
-
-        The following has to be fulfilled for fastq compression to be considered done:
-
-            - A SPRING archive file exists
-            - A SPRING archive metada file exists
-            - The spring archive has not been unpacked before fastq delta (21 days)
-
-        """
-        LOG.info("Check if Fastq compression is finished")
-        LOG.info("Check if SPRING file %s exists", compression_obj.spring_path)
-        if not compression_obj.spring_exists():
-            LOG.info("No SPRING file for %s", compression_obj.run_name)
-            return False
-        LOG.info("SPRING file found")
-
-        LOG.info("Check if SPRING metadata file %s exists", compression_obj.spring_metadata_path)
-        if not compression_obj.metadata_exists():
-            LOG.info("No metadata file found")
-            return False
-        LOG.info("SPRING metadata file found")
-
-        spring_metadata = self.get_spring_metadata(compression_obj.spring_metadata_path)
-        updated_at = self.get_file_updated_at(spring_metadata)
-
-        if updated_at is None:
-            LOG.info("Fastq compression is done for %s", compression_obj.run_name)
-            return True
-
-        LOG.info("Files where updated %s", updated_at)
-
-        if not self.check_if_update_spring(updated_at):
-            return False
-
-        LOG.info("Fastq compression is done for %s", compression_obj.run_name)
-
-        return True
-
-    def is_spring_decompression_done(self, compression_obj: CompressionData) -> bool:
-        """Check if spring decompression if finished.
-
-        This means that all three files specified in spring metadata should exist.
-        That is
-
-            - first read in fastq pair should exist
-            - second read in fastq pair should exist
-            - spring archive file should still exist
-        """
-
-        spring_metadata_path = compression_obj.spring_metadata_path
-        LOG.info("Check if spring metadata file %s exists", spring_metadata_path)
-
-        if not compression_obj.metadata_exists():
-            LOG.info("No SPRING metadata file found")
-            return False
-
-        spring_metadata = self.get_spring_metadata(spring_metadata_path)
-        if not spring_metadata:
-            return False
-
-        for file_info in spring_metadata:
-            if not Path(file_info["path"]).exists():
-                return False
-
         return True
 
     # Methods to get file information

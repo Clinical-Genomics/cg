@@ -1,10 +1,8 @@
 """Tests for CrunchyAPI"""
 import json
 import logging
-from pathlib import Path
 
 from cg.apps.crunchy import CrunchyAPI
-from cg.constants import FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX, SPRING_SUFFIX
 
 
 def test_set_dry_run(crunchy_config_dict):
@@ -116,7 +114,7 @@ def test_is_compression_done_spring_new_files(
 def test_is_compression_done_spring_old_files(
     crunchy_config_dict, compression_object, spring_metadata_file, caplog
 ):
-    """Test if compression is done when fastq files are updated bu old
+    """Test if compression is done when fastq files are updated but old
 
     The function should return true since the files are older than 3 weeks
     """
