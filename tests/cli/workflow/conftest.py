@@ -72,11 +72,13 @@ class MockTB:
         self._temp = None
         self._case_id = None
         self._email = None
+        self._status = None
 
-    def analyses(self, family, temp):
+    def analyses(self, family, status, temp):
         """Mock TB analyses models"""
 
         self._family = family
+        self._status = status
         self._temp = temp
 
         class Row:
