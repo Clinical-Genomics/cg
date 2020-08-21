@@ -74,7 +74,7 @@ class MockTB:
         self._email = None
         self._status = None
 
-    def analyses(self, family, status, temp):
+    def analyses(self, family=None, status=None, temp=None):
         """Mock TB analyses models"""
 
         self._family = family
