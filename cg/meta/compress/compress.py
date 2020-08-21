@@ -65,7 +65,7 @@ class CompressAPI:
                 "Compressing %s and %s for sample %s into SPRING format",
                 compression_object.fastq_first,
                 compression_object.fastq_second,
-                compression_object.sample_id,
+                sample_id,
             )
             self.crunchy_api.fastq_to_spring(compression_object, sample_id=sample_id)
 

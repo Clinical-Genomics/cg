@@ -88,10 +88,10 @@ def fixture_real_crunchy_api(crunchy_config_dict):
 
 
 @pytest.yield_fixture(scope="function", name="compress_api")
-def fixture_compress_api(crunchy_api, housekeeper_api):
+def fixture_compress_api(real_crunchy_api, housekeeper_api):
     """compress api fixture"""
     hk_api = housekeeper_api
-    _api = CompressAPI(crunchy_api=crunchy_api, hk_api=hk_api)
+    _api = CompressAPI(crunchy_api=real_crunchy_api, hk_api=hk_api)
     yield _api
 
 

@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 
 from cg.apps.crunchy.crunchy import CrunchyAPI
+from cg.models import CompressionData
 
 LOG = logging.getLogger(__name__)
 
@@ -54,14 +55,14 @@ class MockCrunchyAPI(CrunchyAPI):
         return self._nr_fastq_compressions
 
     # Mocked methods
-    def fastq_to_spring(self, fastq_first: Path, fastq_second: Path, **kwargs):
+    def fastq_to_spring(self, compression_obj: CompressionData, sample_id: str = ""):
         """
             Compress FASTQ files into SPRING by sending to sbatch SLURM
         """
         self._nr_fastq_compressions += 1
         self.set_compression_pending_all()
 
-    def spring_to_fastq(self, spring_path: Path, **kwargs):
+    def spring_to_fastq(self, compression_obj: CompressionData, sample_id: str = ""):
         """Mock method that compress spring to fastq"""
         self._nr_fastq_compressions += 1
         self.set_compression_pending_all()
@@ -69,7 +70,7 @@ class MockCrunchyAPI(CrunchyAPI):
     def update_metadata_date(self, spring_metadata_path):
         print(f"Updates {spring_metadata_path}")
 
-    def is_compression_possible(self, file_path: Path) -> bool:
+    def is_fastq_compression_possible(self, compression_obj: CompressionData) -> bool:
         """Check if it compression/decompression is possible"""
         if self._compression_pending:
             print("Compression pending")
@@ -89,10 +90,10 @@ class MockCrunchyAPI(CrunchyAPI):
         print(f"Compression possible {compression_possible}")
         return compression_possible
 
-    def is_spring_compression_done(self, fastq_file: Path) -> bool:
+    def is_fastq_compression_done(self, compression_obj: CompressionData) -> bool:
         """Check if spring compression if finished"""
         return self._compression_done_all
 
-    def is_compression_pending(self, file_path: Path) -> bool:
+    def is_compression_pending(compression_obj: CompressionData) -> bool:
         """Check if compression has started, but not yet finished"""
         return self._compression_pending
