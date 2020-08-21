@@ -231,10 +231,18 @@ def start(context: click.Context, dry_run: bool = False):
 
         if (
             context.obj["tb"]
-            .analyses(family=case_obj.internal_id, status="failed", temp=True)
+            .analyses(family=case_obj.internal_id, temp=True)
             .first()
         ):
             LOG.warning("%s: analysis already started ", {case_obj.internal_id})
+            continue
+
+        if (
+            context.obj["tb"]
+            .analyses(family=case_obj.internal_id, status="failed")
+            .first()
+        ):
+            LOG.warning("%s: analysis failed ", {case_obj.internal_id})
             continue
 
         priority = (
