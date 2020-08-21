@@ -78,7 +78,7 @@ class AnalysisAPI:
                 self.log.info("%s: requesting removed flowcell", flowcell_obj.name)
                 flowcell_obj.status = "requested"
             elif flowcell_obj.status != "ondisk":
-                self.log.warning("%s: {flowcell_obj.status}", flowcell_obj.name)
+                self.log.warning("%s: %s", flowcell_obj.name, flowcell_obj.status)
         return all(status == "ondisk" for status in statuses)
 
     def run(self, family_obj: models.Family, **kwargs):
