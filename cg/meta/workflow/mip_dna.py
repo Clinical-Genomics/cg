@@ -32,6 +32,7 @@ MASTER_LIST = (
     "mcarta",
     "Cardiology",
     "BRAIN",
+    "MOVE",
 )
 COMBOS = {
     "DSD": ("DSD", "HYP", "SEXDIF", "SEXDET"),
