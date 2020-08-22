@@ -49,10 +49,9 @@ class TrailblazerAPI(Store, fastq.FastqHandler):
         """Call internal Trailblazer MIP API."""
         return files.parse_qcmetrics(data)
 
-    @staticmethod
-    def is_running(case_id: str) -> bool:
+    def is_analysis_running(self, case_id: str) -> bool:
         """Call internal Trailblazer API."""
-        return api.is_running(family=case_id)
+        return self.is_running(family=case_id)
 
     def write_panel(self, case_id: str, content: List[str]):
         """Write the gene panel to the defined location."""
