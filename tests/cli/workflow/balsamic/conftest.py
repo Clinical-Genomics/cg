@@ -35,7 +35,7 @@ def balsamic_context(
                     "slurm": {"account": "account", "qos": "low"},
                     "singularity": "singularity",
                     "reference_config": "reference_config",
-                },
+                }
             },
         ),
         "balsamic_api": BalsamicAPI(
@@ -49,7 +49,7 @@ def balsamic_context(
                     "singularity": "singularity",
                     "reference_config": "reference_config",
                 },
-            },
+            }
         ),
         "fastq_handler": MockFastq,
         "fastq_api": MockFastqAPI,

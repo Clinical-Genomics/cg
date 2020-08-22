@@ -7,7 +7,7 @@ from typing import List
 import click
 import ruamel.yaml
 from trailblazer.mip.start import MipCli
-from trailblazer.store import Store, models
+from trailblazer.store import api, models, Store
 from trailblazer.mip import files, fastq, trending
 
 
@@ -48,6 +48,11 @@ class TrailblazerAPI(Store, fastq.FastqHandler):
     def parse_qcmetrics(data: dict) -> dict:
         """Call internal Trailblazer MIP API."""
         return files.parse_qcmetrics(data)
+
+    @staticmethod
+    def is_running(case_id: str) -> bool:
+        """Call internal Trailblazer API."""
+        return api.is_running(family=case_id)
 
     def write_panel(self, case_id: str, content: List[str]):
         """Write the gene panel to the defined location."""

@@ -229,7 +229,7 @@ def start(context: click.Context, dry_run: bool = False):
             LOG.warning("%s: contains non-dna samples - skipping", case_obj.internal_id)
             continue
 
-        if context.obj["tb"].analyses(family=case_obj.internal_id, temp=True).first():
+        if context.obj["tb"].is_running(family=case_obj.internal_id):
             LOG.warning("%s: analysis already started - skipping", case_obj.internal_id)
             continue
 

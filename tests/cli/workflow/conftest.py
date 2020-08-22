@@ -129,6 +129,10 @@ class MockTB:
         """check if add_pending was called"""
         return self._add_pending_was_called
 
+    def is_running(self, family: str, is_running: bool = False):
+        """Override TrailblazerAPI is_running method to avoid default behaviour"""
+        return is_running
+
 
 @pytest.fixture(scope="function")
 def tb_api():
