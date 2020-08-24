@@ -9,6 +9,7 @@ from cg.apps import hk, lims, scoutapi, tb
 from cg.apps.environ import environ_email
 from cg.apps.mip.fastq import FastqHandler
 from cg.apps.mip import MipAPI
+from cg.constants import EXIT_SUCCESS
 from cg.cli.workflow.get_links import get_links
 from cg.cli.workflow.mip.store import store as store_cmd
 from cg.cli.workflow.mip_dna.deliver import CASE_TAGS, SAMPLE_TAGS
@@ -215,7 +216,7 @@ def run(
 @click.pass_context
 def start(context: click.Context, dry_run: bool = False):
     """Start all cases that are ready for analysis"""
-    exit_code = 0
+    exit_code = EXIT_SUCCESS
 
     cases = [case_obj.internal_id for case_obj in context.obj["db"].cases_to_mip_analyze()]
 
