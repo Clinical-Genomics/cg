@@ -53,6 +53,16 @@ class TrailblazerAPI(Store, fastq.FastqHandler):
         """Call internal Trailblazer API."""
         return self.is_running(family=case_id)
 
+    def has_analysis_started(self, case_id: str) -> bool:
+        """Check if analysis has already started"""
+        if self.is_analysis_running(case_id=case_id):
+            LOG.warning("%s: analysis already started - skipping", case_id)
+            return True
+
+        if self.tb.analyses(family=case_id, status="failed").first():
+            LOG.warning("%s: analysis failed previously - skipping", case_id)
+            return True
+
     def write_panel(self, case_id: str, content: List[str]):
         """Write the gene panel to the defined location."""
         out_dir = Path(self.families_dir) / case_id
