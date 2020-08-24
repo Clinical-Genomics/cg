@@ -198,7 +198,7 @@ def run(
     case_obj = context.obj["db"].family(case_id)
     if not case_exists(case_obj, case_id):
         context.abort()
-    if context.obj["tb"].analyses(family=case_obj.internal_id, temp=True).first():
+    if context.obj["tb"].is_analysis_ongoing(case_id=case_obj.internal_id):
         LOG.warning("%s: analysis already started ", {case_obj.internal_id})
         return
     if dry_run:
