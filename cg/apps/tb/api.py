@@ -49,17 +49,21 @@ class TrailblazerAPI(Store, fastq.FastqHandler):
         """Call internal Trailblazer MIP API."""
         return files.parse_qcmetrics(data)
 
-    def is_analysis_running(self, case_id: str) -> bool:
-        """Call internal Trailblazer API."""
-        return self.is_running(family=case_id)
+    def is_analysis_ongoing(self, case_id: str) -> bool:
+        """Call internal Trailblazer API"""
+        return self.is_ongoing(family=case_id)
+
+    def is_analysis_failed(self, case_id: str) -> bool:
+        """Call internal Trailblazer API"""
+        return self.is_failed(family=case_id)
 
     def has_analysis_started(self, case_id: str) -> bool:
-        """Check if analysis has already started"""
-        if self.is_analysis_running(case_id=case_id):
-            LOG.warning("%s: analysis already started - skipping", case_id)
+        """Check if analysis has started"""
+        if self.is_analysis_ongoing(case_id=case_id):
+            LOG.warning("%s: analysis is ongoing - skipping", case_id)
             return True
 
-        if self.tb.analyses(family=case_id, status="failed").first():
+        if self.is_analysis_failed(case_id=case_id):
             LOG.warning("%s: analysis failed previously - skipping", case_id)
             return True
 

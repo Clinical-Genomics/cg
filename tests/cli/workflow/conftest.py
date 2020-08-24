@@ -129,13 +129,17 @@ class MockTB:
         """check if add_pending was called"""
         return self._add_pending_was_called
 
-    def is_running(self, family: str, is_running: bool = False):
-        """Override TrailblazerAPI is_running method to avoid default behaviour"""
-        return is_running
+    def is_ongoing(self, family: str, is_ongoing: bool = False):
+        """Override TrailblazerAPI is_ongoing method to avoid default behaviour"""
+        return is_ongoing
 
-    def has_analysis_started(self, case_id: str, is_running: bool = False):
+    def is_failed(self, family: str, is_failed: bool = False):
+        """Override TrailblazerAPI is_failed method to avoid default behaviour"""
+        return is_failed
+
+    def has_analysis_started(self, case_id: str, has_started: bool = False):
         """Override TrailblazerAPI has_analysis_started method to avoid default behaviour"""
-        return is_running
+        return has_started
 
 
 @pytest.fixture(scope="function")
