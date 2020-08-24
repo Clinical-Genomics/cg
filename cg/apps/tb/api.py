@@ -1,5 +1,6 @@
 """ Trailblazer API for cg """ ""
 import datetime as dt
+import logging
 import shutil
 from pathlib import Path
 from typing import List
