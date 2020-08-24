@@ -10,6 +10,8 @@ from trailblazer.mip.start import MipCli
 from trailblazer.store import api, models, Store
 from trailblazer.mip import files, fastq, trending
 
+LOG = logging.getLogger(__name__)
+
 
 class TrailblazerAPI(Store, fastq.FastqHandler):
     """Interface to Trailblazer for `cg`."""
