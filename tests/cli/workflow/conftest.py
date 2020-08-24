@@ -129,11 +129,11 @@ class MockTB:
         """check if add_pending was called"""
         return self._add_pending_was_called
 
-    def is_ongoing(self, family: str, is_ongoing: bool = False):
+    def is_analysis_ongoing(self, case_id: str, is_ongoing: bool = False):
         """Override TrailblazerAPI is_ongoing method to avoid default behaviour"""
         return is_ongoing
 
-    def is_failed(self, family: str, is_failed: bool = False):
+    def is_analysis_failed(self, case_id: str, is_failed: bool = False):
         """Override TrailblazerAPI is_failed method to avoid default behaviour"""
         return is_failed
 
