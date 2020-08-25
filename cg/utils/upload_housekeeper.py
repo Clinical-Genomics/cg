@@ -67,12 +67,17 @@ def upload_cases(context, report_dir, case_dir):
             bundle_result = housekeeper_api.add_bundle(bundle_data=bundle_data)
             if not bundle_result:
                 print(f"{case_id} already stored, re-storing!!")
-                version_obj = housekeeper_api.Version.query(
-                    hkmodels.Version.created_at
-                    == dt.datetime.strptime(
-                        config_data["analysis"]["config_creation_date"], "%Y-%m-%d %H:%M"
+                version_obj = (
+                    housekeeper_api.Version.query.join(hkmodels.Bundle)
+                    .filter(
+                        hkmodels.Version.created_at
+                        == dt.datetime.strptime(
+                            config_data["analysis"]["config_creation_date"], "%Y-%m-%d %H:%M"
+                        )
                     )
-                ).first()
+                    .filter(hkmodels.Bundle.name == case_id)
+                    .first()
+                )
                 shutil.rmtree(version_obj.full_path, ignore_errors=True)
                 version_obj.delete()
                 housekeeper_api.commit()
@@ -88,7 +93,6 @@ def upload_cases(context, report_dir, case_dir):
         except FileExistsError:
             # If files exist but no bundle, clean up path and try again
             housekeeper_api.rollback()
-            store_api.rollback()
             print("Files found for non-existing bundle, cleaning up!")
             shutil.rmtree(bundle_version.full_path, ignore_errors=True)
             housekeeper_api.include(bundle_version)
@@ -100,7 +104,12 @@ def upload_cases(context, report_dir, case_dir):
             analysis_start = dt.datetime.strptime(
                 config_data["analysis"]["config_creation_date"], "%Y-%m-%d %H:%M"
             )
-            analysis = store_api.Analysis.query.join(models.Family).filter(models.Family.internal_id == case_object.internal_id).filter(models.Analysis.started_at == analysis_start).first()
+            analysis = (
+                store_api.Analysis.query.join(models.Family)
+                .filter(models.Family.internal_id == case_object.internal_id)
+                .filter(models.Analysis.started_at == analysis_start)
+                .first()
+            )
             if analysis:
                 print(
                     f"Analysis already stored in ClinicalDB: {case_id} : {analysis_start}, skipping Status"
