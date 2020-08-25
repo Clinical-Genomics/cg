@@ -230,7 +230,9 @@ def start(context: click.Context, dry_run: bool = False):
             LOG.warning("%s: contains non-dna samples - skipping", case_obj.internal_id)
             continue
 
-        if context.obj["tb"].has_analysis_started(case_id=case_obj.internal_id):
+        has_started, status = context.obj["tb"].has_analysis_started(case_id=case_obj.internal_id)
+        if has_started:
+            LOG.warning("%s: analysis is %s - skipping", case_id, status)
             continue
 
         priority = (

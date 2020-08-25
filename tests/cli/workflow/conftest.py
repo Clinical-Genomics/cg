@@ -143,7 +143,8 @@ class MockTB:
 
     def has_analysis_started(self, case_id: str, has_started: bool = False):
         """Override TrailblazerAPI has_analysis_started method to avoid default behaviour"""
-        return has_started
+        status = None
+        return has_started, status
 
 
 @pytest.fixture(scope="function")

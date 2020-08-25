@@ -66,17 +66,16 @@ class TrailblazerAPI(Store, fastq.FastqHandler):
 
     def has_analysis_started(self, case_id: str) -> bool:
         """Check if analysis has started"""
-        if self.is_analysis_ongoing(case_id=case_id):
-            LOG.warning("%s: analysis is ongoing - skipping", case_id)
-            return True
-
-        if self.is_analysis_failed(case_id=case_id):
-            LOG.warning("%s: analysis failed previously - skipping", case_id)
-            return True
-
-        if self.is_analysis_completed(case_id=case_id):
-            LOG.warning("%s: analysis completed - skipping", case_id)
-            return True
+        statuses = ("ongoing", "failed", "completed")
+        get_analysis_status = {
+            "ongoing": self.is_analysis_ongoing,
+            "failed": self.is_analysis_failed,
+            "completed": self.is_analysis_completed,
+        }
+        for status in statuses:
+            has_started = get_analysis_status[status](case_id=case_id)
+            if has_started:
+                return has_started, status
 
     def write_panel(self, case_id: str, content: List[str]):
         """Write the gene panel to the defined location."""
