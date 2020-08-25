@@ -60,6 +60,10 @@ class TrailblazerAPI(Store, fastq.FastqHandler):
         """Call internal Trailblazer API"""
         return self.is_failed(family=case_id)
 
+    def is_analysis_completed(self, case_id: str) -> bool:
+        """Call internal Trailblazer API"""
+        return self.is_completed(family=case_id)
+
     def has_analysis_started(self, case_id: str) -> bool:
         """Check if analysis has started"""
         if self.is_analysis_ongoing(case_id=case_id):
@@ -68,6 +72,10 @@ class TrailblazerAPI(Store, fastq.FastqHandler):
 
         if self.is_analysis_failed(case_id=case_id):
             LOG.warning("%s: analysis failed previously - skipping", case_id)
+            return True
+
+        if self.is_analysis_completed(case_id=case_id):
+            LOG.warning("%s: analysis completed - skipping", case_id)
             return True
 
     def write_panel(self, case_id: str, content: List[str]):

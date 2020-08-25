@@ -137,6 +137,10 @@ class MockTB:
         """Override TrailblazerAPI is_failed method to avoid default behaviour"""
         return is_failed
 
+    def is_analysis_comleted(self, case_id: str, is_completed: bool = False):
+        """Override TrailblazerAPI is_completed method to avoid default behaviour"""
+        return is_completed
+
     def has_analysis_started(self, case_id: str, has_started: bool = False):
         """Override TrailblazerAPI has_analysis_started method to avoid default behaviour"""
         return has_started
