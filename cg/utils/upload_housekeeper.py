@@ -97,7 +97,7 @@ def upload_cases(context, report_dir, case_dir):
             analysis_start = dt.datetime.strptime(
                 config_data["analysis"]["config_creation_date"], "%Y-%m-%d %H:%M"
             )
-            analysis = store_api.Analysis.query(models.Analysis.started_at == analysis_start, models.Analysis.family_id == case_object.id).first()
+            analysis = store_api.Analysis.query.join(models.Family).filter(models.Family.internal_id == case_object.internal_id).filter(models.Analysis.started_at == analysis_start).first()
             if analysis:
                 print(f"Analysis already stored in ClinicalDB: {case_id} : {analysis_start}, skipping Status")
             else:
