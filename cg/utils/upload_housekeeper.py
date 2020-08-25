@@ -42,13 +42,14 @@ def upload_cases(context, report_dir, case_dir):
                     if fam_names.get(case_id):
                         if fam_names.get(case_id).get("date") > creation_date:
                             continue
-                    fam_names[case_id] = {
-                        "bv": config_dict.get("analysis").get("BALSAMIC_version"),
-                        "config_name": f"{case_dir}/{obj.name}/{obj2.name}",
-                        "date": creation_date,
-                        "path": obj.name,
-                        "hk": Path(report_dir, obj.name + ".hk"),
-                    }
+                    if Path(report_dir, obj.name + ".hk").exists():
+                        fam_names[case_id] = {
+                            "bv": config_dict.get("analysis").get("BALSAMIC_version"),
+                            "config_name": f"{case_dir}/{obj.name}/{obj2.name}",
+                            "date": creation_date,
+                            "path": obj.name,
+                            "hk": Path(report_dir, obj.name + ".hk"),
+                        }
     for case_id in fam_names:
         items = fam_names.get(case_id)
         if not items:
