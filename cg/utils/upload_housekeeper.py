@@ -94,8 +94,6 @@ def upload_cases(context, report_dir, case_dir):
         except FileExistsError:
             # If files exist but no bundle, clean up path and try again
             try:
-
-                housekeeper_api.rollback()
                 print("Files found for non-existing bundle, cleaning up!")
                 shutil.rmtree(bundle_version.full_path, ignore_errors=True)
                 housekeeper_api.include(bundle_version)
