@@ -98,6 +98,12 @@ def upload_cases(context, report_dir, case_dir):
             housekeeper_api.include(bundle_version)
             housekeeper_api.add_commit(bundle_object, bundle_version)
 
+        except PermissionError:
+            housekeeper_api.rollback()
+            print(f"No permission to link files for {case_id}, skipping")
+            continue
+
+
         finally:
             # Add bundle to StatusDB
             case_object = store_api.family(case_id)
