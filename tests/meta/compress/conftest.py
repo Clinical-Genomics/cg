@@ -32,30 +32,48 @@ class CompressionData:
         self.pending_path.touch()
         return self.pending_path
 
+    @staticmethod
+    def _spring_metadata(fastq_first, fastq_second, spring_path, updated=False, date=None):
+        """Return metada information"""
+        metadata = [
+            {
+                "path": str(fastq_first.resolve()),
+                "file": "first_read",
+                "checksum": "checksum_first_read",
+                "algorithm": "sha256",
+            },
+            {
+                "path": str(fastq_second.resolve()),
+                "file": "second_read",
+                "checksum": "checksum_second_read",
+                "algorithm": "sha256",
+            },
+            {"path": str(spring_path.resolve()), "file": "spring"},
+        ]
+        if updated:
+            for file_info in metadata:
+                file_info["updated"] = date or "2020-01-21"
+        return metadata
+
     @property
     def spring_metadata_file(self):
         """Return the path to an existing spring metadata file"""
 
-        def _spring_metadata(fastq_first, fastq_second, spring_path):
-            """Return metada information"""
-            metadata = [
-                {
-                    "path": str(fastq_first.resolve()),
-                    "file": "first_read",
-                    "checksum": "checksum_first_read",
-                    "algorithm": "sha256",
-                },
-                {
-                    "path": str(fastq_second.resolve()),
-                    "file": "second_read",
-                    "checksum": "checksum_second_read",
-                    "algorithm": "sha256",
-                },
-                {"path": str(spring_path.resolve()), "file": "spring"},
-            ]
-            return metadata
+        spring_metadata = CompressionData._spring_metadata(
+            self.fastq_first, self.fastq_second, self.spring_path
+        )
+        with open(self.spring_metadata_path, "w") as outfile:
+            outfile.write(json.dumps(spring_metadata))
 
-        spring_metadata = _spring_metadata(self.fastq_first, self.fastq_second, self.spring_path)
+        return self.spring_metadata_path
+
+    @property
+    def updated_spring_metadata_file(self):
+        """Return the path to an existing spring metadata file"""
+
+        spring_metadata = CompressionData._spring_metadata(
+            self.fastq_first, self.fastq_second, self.spring_path, True
+        )
         with open(self.spring_metadata_path, "w") as outfile:
             outfile.write(json.dumps(spring_metadata))
 
@@ -249,7 +267,10 @@ def fixture_case_hk_bundle_no_files(case_id, timestamp):
 
 @pytest.fixture(scope="function", name="compress_hk_fastq_bundle")
 def fixture_compress_hk_fastq_bundle(compression_object, sample_hk_bundle_no_files):
-    """Create a complete bundle mock for testing compression"""
+    """Create a complete bundle mock for testing compression
+
+    This bundle contains a pair of fastq files.
+    """
     hk_bundle_data = copy.deepcopy(sample_hk_bundle_no_files)
 
     first_fastq = compression_object.fastq_first
@@ -267,7 +288,10 @@ def fixture_compress_hk_fastq_bundle(compression_object, sample_hk_bundle_no_fil
 def fixture_decompress_hk_spring_bundle(
     sample_hk_bundle_no_files, spring_file, fastq_flag_file, sample
 ):
-    """Create a complete bundle mock for testing decompression"""
+    """Create a complete bundle mock for testing decompression
+
+    This bundle contains a spring file and a spring metadata file
+    """
     hk_bundle_data = copy.deepcopy(sample_hk_bundle_no_files)
 
     spring_file_info = {"path": str(spring_file), "archive": False, "tags": [sample, "spring"]}

@@ -154,30 +154,25 @@ class CompressAPI:
             return False
 
         spring_paths = files.get_spring_paths(version_obj)
-        for spring_path in spring_paths:
-            if not self.crunchy_api.is_spring_decompression_done(spring_path):
+        for compression_object in spring_paths:
+            if not self.crunchy_api.is_spring_decompression_done(compression_object):
                 LOG.info("SPRING to FASTQ decompression not finished %s", sample_id)
                 return False
 
-            for file_obj in version_obj.files:
-                if "fastq" in file_obj.tags:
-                    LOG.warning("Fastq files already exists in housekeeper")
-                    return False
+            fastq_first = compression_object.fastq_first
+            fastq_second = compression_object.fastq_second
+            if files.is_file_in_version(
+                version_obj=version_obj, path=fastq_first
+            ) or files.is_file_in_version(version_obj=version_obj, path=fastq_first):
+                LOG.warning("Fastq files already exists in housekeeper")
+                continue
 
             LOG.info(
-                "Decompressing %s to FASTQ format for sample %s ", spring_path, sample_id,
+                "Adding decompressed FASTQ files to housekeeper for sample %s ", sample_id,
             )
 
-            spring_metadata_path = self.crunchy_api.get_flag_path(spring_path)
-            spring_metadata = self.crunchy_api.get_spring_metadata(spring_metadata_path)
-            for file_info in spring_metadata:
-                if file_info["file"] == "first_read":
-                    fastq_first_path = file_info["path"]
-                if file_info["file"] == "second_read":
-                    fastq_second_path = file_info["path"]
-
             self.add_fastq_hk(
-                sample_id=sample_id, fastq_first=fastq_first_path, fastq_second=fastq_second_path
+                sample_id=sample_id, fastq_first=fastq_first, fastq_second=fastq_second
             )
 
         return True
