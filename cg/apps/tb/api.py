@@ -76,6 +76,7 @@ class TrailblazerAPI(Store, fastq.FastqHandler):
             has_started = get_analysis_status[status](case_id=case_id)
             if has_started:
                 return has_started, status
+        return False, None
 
     def write_panel(self, case_id: str, content: List[str]):
         """Write the gene panel to the defined location."""
