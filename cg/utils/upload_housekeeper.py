@@ -83,7 +83,6 @@ def upload_cases(context, report_dir, case_dir):
                 version_obj.delete()
                 housekeeper_api.commit()
                 bundle_result = housekeeper_api.add_bundle(bundle_data=bundle_data)
-                continue
             bundle_object, bundle_version = bundle_result
             housekeeper_api.include(bundle_version)
             housekeeper_api.add_commit(bundle_object, bundle_version)
