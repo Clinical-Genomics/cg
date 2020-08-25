@@ -134,8 +134,10 @@ def upload_cases(context, report_dir, case_dir):
                 )
                 new_analysis.family = case_object
                 store_api.add_commit(new_analysis)
-                print(f"Analysis successfully stored in ClinicalDB: {case_id} : {analysis_start}"
-                f"")
+                print(
+                    f"Analysis successfully stored in ClinicalDB: {case_id} : {analysis_start}" f""
+                )
+
 
 def parse_deliverables_report(report_path) -> list:
     """Parse BALSAMIC deliverables report, and return a list of files and their respective tags in bundle"""
