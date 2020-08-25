@@ -76,8 +76,8 @@ class MockCrunchyAPI(CrunchyAPI):
             print("Compression pending")
             return False
 
-        if self._compression_pending_files.get(file_path):
-            print(f"Compression pending for file {file_path}")
+        if self._compression_pending_files.get(compression_obj.fastq_first):
+            print(f"Compression pending for file {compression_obj.fastq_first}")
             return False
 
         if self._compression_done_all:
@@ -85,7 +85,7 @@ class MockCrunchyAPI(CrunchyAPI):
             return False
 
         compression_possible = self._compression_possible_files.get(
-            file_path, self._compression_possible
+            compression_obj.fastq_first, self._compression_possible
         )
         print(f"Compression possible {compression_possible}")
         return compression_possible
@@ -94,6 +94,6 @@ class MockCrunchyAPI(CrunchyAPI):
         """Check if spring compression if finished"""
         return self._compression_done_all
 
-    def is_compression_pending(compression_obj: CompressionData) -> bool:
+    def is_compression_pending(self, compression_obj: CompressionData) -> bool:
         """Check if compression has started, but not yet finished"""
         return self._compression_pending
