@@ -67,9 +67,12 @@ def upload_cases(context, report_dir, case_dir):
             bundle_result = housekeeper_api.add_bundle(bundle_data=bundle_data)
             if not bundle_result:
                 print(f"{case_id} already stored, re-storing!!")
-                version_obj = housekeeper_api.Version.query(hkmodels.Version.created_at == dt.datetime.strptime(
-                    config_data["analysis"]["config_creation_date"], "%Y-%m-%d %H:%M"
-                )).first()
+                version_obj = housekeeper_api.Version.query(
+                    hkmodels.Version.created_at
+                    == dt.datetime.strptime(
+                        config_data["analysis"]["config_creation_date"], "%Y-%m-%d %H:%M"
+                    )
+                ).first()
                 shutil.rmtree(version_obj.full_path, ignore_errors=True)
                 version_obj.delete()
                 housekeeper_api.commit()
@@ -99,7 +102,9 @@ def upload_cases(context, report_dir, case_dir):
             )
             analysis = store_api.Analysis.query.join(models.Family).filter(models.Family.internal_id == case_object.internal_id).filter(models.Analysis.started_at == analysis_start).first()
             if analysis:
-                print(f"Analysis already stored in ClinicalDB: {case_id} : {analysis_start}, skipping Status")
+                print(
+                    f"Analysis already stored in ClinicalDB: {case_id} : {analysis_start}, skipping Status"
+                )
             else:
                 case_object.action = None
                 new_analysis = store_api.add_analysis(
@@ -127,4 +132,3 @@ def parse_deliverables_report(report_path) -> list:
         }
         bundle_files.append(bundle_file)
     return bundle_files
-
