@@ -100,7 +100,9 @@ def upload_cases(context, report_dir, case_dir):
                 shutil.rmtree(bundle_version.full_path, ignore_errors=True)
                 housekeeper_api.include(bundle_version)
                 housekeeper_api.add_commit(bundle_object, bundle_version)
-                print(f"Analysis successfully stored in Housekeeper: {case_id} : {bundle_version.created_at}")
+                print(
+                    f"Analysis successfully stored in Housekeeper: {case_id} : {bundle_version.created_at}"
+                )
 
             except PermissionError:
                 housekeeper_api.rollback()
