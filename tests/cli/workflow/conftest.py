@@ -129,6 +129,26 @@ class MockTB:
         """check if add_pending was called"""
         return self._add_pending_was_called
 
+    def is_analysis_ongoing(self, case_id: str):
+        """Override TrailblazerAPI is_ongoing method to avoid default behaviour"""
+        return False
+
+    def is_analysis_failed(self, case_id: str):
+        """Override TrailblazerAPI is_failed method to avoid default behaviour"""
+        return False
+
+    def is_analysis_completed(self, case_id: str):
+        """Override TrailblazerAPI is_completed method to avoid default behaviour"""
+        return False
+
+    def get_analysis_status(self, case_id: str):
+        """Override TrailblazerAPI get_analysis_status method to avoid default behaviour"""
+        return None
+
+    def has_analysis_started(self, case_id: str):
+        """Override TrailblazerAPI has_analysis_started method to avoid default behaviour"""
+        return False
+
 
 @pytest.fixture(scope="function")
 def tb_api():
