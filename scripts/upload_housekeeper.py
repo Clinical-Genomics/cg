@@ -13,7 +13,7 @@ from housekeeper.store import models as hkmodels
 @click.command("upload-old-cases")
 @click.option("--report-dir", help="Path where housekeeper reports were stored")
 @click.option("--case-dir", help="Path where all cancer cases are stored")
-@click.option("--config")
+@click.option("--config", type=click.File())
 def upload_cases(config, report_dir, case_dir):
     """One-time script to upload all BALSAMIC output files to Housekeeper and StatusDB"""
     config = yaml.safe_load(config)
