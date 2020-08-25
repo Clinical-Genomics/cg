@@ -1,23 +1,23 @@
-from pathlib import Path
 import json
-from cg.store import Store, models
-from cg.apps.hk import HousekeeperAPI
+from pathlib import Path
 import datetime as dt
 from ruamel import yaml
+import shutil
 import click
 
+from cg.store import Store, models
+from cg.apps.hk import HousekeeperAPI
+from housekeeper.store import models as hkmodels
 
-@click.command()
-@click.option("--database", help="StatusDB address")
-@click.option("--housekeeper-root", help="Housekeeper root path")
-@click.option("--housekeeper-db", help="Housekeeper database address")
+
+@click.command("upload-old-cases")
 @click.option("--report-dir", help="Path where housekeeper reports were stored")
 @click.option("--case-dir", help="Path where all cancer cases are stored")
-def upload_cases(database, housekeeper_root, housekeeper_db, report_dir, case_dir):
+@click.pass_context
+def upload_cases(context, report_dir, case_dir):
     """One-time script to upload all BALSAMIC output files to Housekeeper and StatusDB"""
-    store_api = Store(database)
-    housekeeper_config = {"housekeeper": {"root": housekeeper_root, "database": housekeeper_db}}
-    housekeeper_api = HousekeeperAPI(housekeeper_config)
+    store_api = Store(context.obj["database"])
+    housekeeper_api = HousekeeperAPI(context.obj)
 
     balsamic_families = (
         store_api.Family.query.outerjoin(models.Analysis)
@@ -66,7 +66,14 @@ def upload_cases(database, housekeeper_root, housekeeper_db, report_dir, case_di
             }
             bundle_result = housekeeper_api.add_bundle(bundle_data=bundle_data)
             if not bundle_result:
-                print(f"{case_id} already stored!")
+                print(f"{case_id} already stored, re-storing!!")
+                version_obj = housekeeper_api.Version.query(hkmodels.Version.created_at == dt.datetime.strptime(
+                    config_data["analysis"]["config_creation_date"], "%Y-%m-%d %H:%M"
+                )).first()
+                shutil.rmtree(version_obj.full_path, ignore_errors=True)
+                version_obj.delete()
+                housekeeper_api.commit()
+                bundle_result = housekeeper_api.add_bundle(bundle_data=bundle_data)
                 continue
             bundle_object, bundle_version = bundle_result
             housekeeper_api.include(bundle_version)
@@ -74,27 +81,37 @@ def upload_cases(database, housekeeper_root, housekeeper_db, report_dir, case_di
             print(
                 f"Analysis successfully stored in Housekeeper: {case_id} : {bundle_version.created_at}"
             )
+
+        except FileExistsError:
+            # If files exist but no bundle, clean up path and try again
+            housekeeper_api.rollback()
+            store_api.rollback()
+            print("Files found for non-existing bundle, cleaning up!")
+            shutil.rmtree(bundle_version.full_path, ignore_errors=True)
+            housekeeper_api.include(bundle_version)
+            housekeeper_api.add_commit(bundle_object, bundle_version)
+
+        finally:
             # Add bundle to StatusDB
             case_object = store_api.family(case_id)
             analysis_start = dt.datetime.strptime(
                 config_data["analysis"]["config_creation_date"], "%Y-%m-%d %H:%M"
             )
-            case_object.action = None
-            new_analysis = store_api.add_analysis(
-                pipeline="balsamic",
-                version=config_data["analysis"]["BALSAMIC_version"],
-                started_at=analysis_start,
-                completed_at=dt.datetime.now(),
-                primary=(len(case_object.analyses) == 0),
-            )
-            new_analysis.family = case_object
-            store_api.add_commit(new_analysis)
-            print(f"Analysis successfully stored in ClinicalDB: {case_id} : {analysis_start}")
-        except Exception as e:
-            print(f"Error uploading {case_id}, {e}")
-            housekeeper_api.rollback()
-            store_api.rollback()
-            continue
+            analysis = store_api.Analysis.query(models.Analysis.started_at == analysis_start, models.Analysis.family_id == case_object.id).first()
+            if analysis:
+                print(f"Analysis already stored in ClinicalDB: {case_id} : {analysis_start}, skipping Status")
+            else:
+                case_object.action = None
+                new_analysis = store_api.add_analysis(
+                    pipeline="balsamic",
+                    version=config_data["analysis"]["BALSAMIC_version"],
+                    started_at=analysis_start,
+                    completed_at=dt.datetime.now(),
+                    primary=(len(case_object.analyses) == 0),
+                )
+                new_analysis.family = case_object
+                store_api.add_commit(new_analysis)
+                print(f"Analysis successfully stored in ClinicalDB: {case_id} : {analysis_start}")
 
 
 def parse_deliverables_report(report_path) -> list:
@@ -111,6 +128,3 @@ def parse_deliverables_report(report_path) -> list:
         bundle_files.append(bundle_file)
     return bundle_files
 
-
-if __name__ == "__main__":
-    upload_cases()

@@ -19,6 +19,7 @@ from cg.meta.workflow.base import get_target_bed_from_lims
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.apps.balsamic.api import BalsamicAPI
 from cg.store import Store, models
+from cg.utils.upload_housekeeper import upload_cases
 
 LOG = logging.getLogger(__name__)
 ANALYSIS_TYPE_OPTION = click.option(
@@ -321,3 +322,4 @@ def remove_fastq(context, case_id):
 
 balsamic.add_command(store_cmd)
 balsamic.add_command(deliver_cmd)
+balsamic.add_command(upload_cases)
