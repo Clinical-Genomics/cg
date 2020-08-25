@@ -7,9 +7,7 @@ from pathlib import Path
 import pytest
 
 from cg.apps.crunchy import CrunchyAPI
-from cg.constants import FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX
 from cg.meta.compress import CompressAPI
-from tests.mocks.hk_mock import MockFile
 
 
 class CompressionData:
@@ -17,6 +15,7 @@ class CompressionData:
 
     def __init__(self, **kwargs):
         self.spring_path = kwargs["spring_path"]
+        self.pending_path = kwargs["pending_path"]
         self.spring_metadata_path = kwargs["spring_metadata_path"]
         self.fastq_first = kwargs["fastq_first"]
         self.fastq_second = kwargs["fastq_second"]
@@ -26,6 +25,12 @@ class CompressionData:
         """Return the path to an existing spring file"""
         self.spring_path.touch()
         return self.spring_path
+
+    @property
+    def pending_file(self):
+        """Return the path to an existing pending file"""
+        self.pending_path.touch()
+        return self.pending_path
 
     @property
     def spring_metadata_file(self):
@@ -70,13 +75,14 @@ class CompressionData:
 
 
 @pytest.yield_fixture(scope="function", name="compression_files")
-def fixture_compression_files(spring_path, spring_metadata_path, fastq_paths):
+def fixture_compression_files(compression_object):
     """Return a small class with compression files"""
     return CompressionData(
-        spring_path=spring_path,
-        spring_metadata_path=spring_metadata_path,
-        fastq_first=fastq_paths["fastq_first_path"],
-        fastq_second=fastq_paths["fastq_second_path"],
+        spring_path=compression_object.spring_path,
+        spring_metadata_path=compression_object.spring_metadata_path,
+        fastq_first=compression_object.fastq_first,
+        fastq_second=compression_object.fastq_second,
+        pending_path=compression_object.pending_path,
     )
 
 
@@ -146,28 +152,28 @@ def fixture_sample_dir(project_dir, sample) -> Path:
 
 
 @pytest.fixture(scope="function", name="spring_path")
-def fixture_spring_path(fastq_paths) -> Path:
+def fixture_spring_path(compression_object) -> Path:
     """Return the path to a non existing spring file"""
-    return CrunchyAPI.get_spring_path_from_fastq(fastq=fastq_paths["fastq_first_path"])
+    return compression_object.spring_path
 
 
 @pytest.fixture(scope="function", name="spring_metadata_path")
-def fixture_spring_metadata_path(spring_path) -> Path:
+def fixture_spring_metadata_path(compression_object) -> Path:
     """Return the path to a non existing spring metadata file"""
-    return CrunchyAPI.get_flag_path(file_path=spring_path)
+    return compression_object.spring_metadata_path
 
 
 @pytest.fixture(scope="function", name="fastq_flag_path")
-def fixture_fastq_flag_path(spring_path) -> Path:
+def fixture_fastq_flag_path(spring_metadata_path) -> Path:
     """Return the path to a non existing fastq flag file"""
-    return CrunchyAPI.get_flag_path(file_path=spring_path)
+    return spring_metadata_path
 
 
 @pytest.fixture(scope="function", name="fastq_flag_file")
-def fixture_fastq_flag_file(fastq_flag_path) -> Path:
+def fixture_fastq_flag_file(spring_metadata_path) -> Path:
     """Return the path to an existing fastq flag file"""
-    fastq_flag_path.touch()
-    return fastq_flag_path
+    spring_metadata_path.touch()
+    return spring_metadata_path
 
 
 @pytest.fixture(scope="function", name="spring_file")
@@ -178,30 +184,23 @@ def fixture_spring_file(spring_path) -> Path:
 
 
 @pytest.fixture(scope="function", name="multi_linked_file")
-def fixture_multi_linked_file(bam_file, project_dir) -> Path:
+def fixture_multi_linked_file(spring_path, project_dir) -> Path:
     """Return the path to an existing file with two links"""
     first_link = project_dir / "link-1"
-    os.link(bam_file, first_link)
+    os.link(spring_path, first_link)
 
-    return bam_file
+    return spring_path
 
 
 @pytest.fixture(scope="function", name="fastq_paths")
-def fixture_fastq_paths(project_dir, sample):
+def fixture_fastq_paths(compression_object):
     """Fixture for temporary fastq-files
 
     Create fastq paths and return a dictionary with them
     """
-    sample_dir = project_dir / sample
-    sample_dir.mkdir(parents=True, exist_ok=True)
-    fastq_first_file = sample_dir / f"{sample}{FASTQ_FIRST_READ_SUFFIX}"
-    fastq_second_file = sample_dir / f"{sample}{FASTQ_SECOND_READ_SUFFIX}"
-    fastq_first_file.touch()
-    fastq_second_file.touch()
-
     return {
-        "fastq_first_path": fastq_first_file,
-        "fastq_second_path": fastq_second_file,
+        "fastq_first_path": compression_object.fastq_first,
+        "fastq_second_path": compression_object.fastq_second,
     }
 
 
@@ -249,13 +248,14 @@ def fixture_case_hk_bundle_no_files(case_id, timestamp):
 
 
 @pytest.fixture(scope="function", name="compress_hk_fastq_bundle")
-def fixture_compress_hk_fastq_bundle(fastq_files, sample_hk_bundle_no_files):
+def fixture_compress_hk_fastq_bundle(compression_object, sample_hk_bundle_no_files):
     """Create a complete bundle mock for testing compression"""
     hk_bundle_data = copy.deepcopy(sample_hk_bundle_no_files)
 
-    first_fastq = fastq_files["fastq_first_path"]
-    second_fastq = fastq_files["fastq_second_path"]
+    first_fastq = compression_object.fastq_first
+    second_fastq = compression_object.fastq_second
     for fastq_file in [first_fastq, second_fastq]:
+        fastq_file.touch()
         fastq_file_info = {"path": str(fastq_file), "archive": False, "tags": ["fastq"]}
 
         hk_bundle_data["files"].append(fastq_file_info)

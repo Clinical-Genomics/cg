@@ -129,14 +129,11 @@ class CompressAPI:
 
             LOG.info("FASTQ compression done for sample %s, run %s!!", sample_id, run_name)
 
-            fastq_first_hk = sample_fastq_dict[run_name]["fastq_first_file"]["hk_file"]
-            fastq_second_hk = sample_fastq_dict[run_name]["fastq_second_file"]["hk_file"]
-
             self.update_fastq_hk(
                 sample_id=sample_id,
                 compression_obj=compression_object,
-                hk_fastq_first=fastq_first_hk,
-                hk_fastq_second=fastq_second_hk,
+                hk_fastq_first=sample_fastq_dict[run_name]["hk_first"],
+                hk_fastq_second=sample_fastq_dict[run_name]["hk_first"],
             )
 
             self.remove_fastq(
@@ -216,6 +213,7 @@ class CompressAPI:
         if files.is_file_in_version(version_obj, compression_obj.spring_path):
             LOG.info("Spring file is already in HK")
         else:
+            LOG.info("Adding spring file to housekeeper")
             self.hk_api.add_file(
                 path=compression_obj.spring_path, version_obj=version_obj, tags=spring_tags
             )

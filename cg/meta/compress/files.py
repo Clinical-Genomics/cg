@@ -6,7 +6,8 @@ from typing import Dict, List
 
 from housekeeper.store import models as hk_models
 
-from cg.constants import FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX, HK_FASTQ_TAGS
+from cg.constants import (FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX,
+                          HK_FASTQ_TAGS)
 from cg.models import CompressionData
 
 LOG = logging.getLogger(__name__)
@@ -114,7 +115,7 @@ def get_fastq_files(sample_id: str, version_obj: hk_models.Version) -> Dict[str,
         fastq_dict[compression_obj.run_name] = {
             "compression_data": compression_obj,
             "hk_first": hk_files_dict[compression_obj.fastq_first],
-            "hk_second": hk_files_dict[compression_obj.fastq_first],
+            "hk_second": hk_files_dict[compression_obj.fastq_second],
         }
 
     return fastq_dict

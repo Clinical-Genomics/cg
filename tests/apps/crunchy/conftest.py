@@ -35,24 +35,6 @@ class MockProcess:
 # File fixtures
 
 
-@pytest.fixture(scope="function", name="run_name")
-def fixture_run_name() -> str:
-    """Return the name of a fastq run"""
-    return "fastq_run"
-
-
-@pytest.fixture(scope="function", name="fastq_stub")
-def fixture_fastq_stub(project_dir: Path, run_name: str) -> Path:
-    """Creates a path to the base format of a fastq run"""
-    return project_dir / run_name
-
-
-@pytest.fixture(scope="function", name="compression_object")
-def fixture_compression_object(fastq_stub: Path) -> CompressionData:
-    """Creates compression data object with information about files used in fastq compression"""
-    return CompressionData(fastq_stub)
-
-
 @pytest.fixture(scope="function", name="file_schema")
 def fixture_file_schema():
     """Return a instance of the file schema that describes content of spring metadata"""
@@ -155,38 +137,4 @@ def fixture_compressed_fastqs(existing_fastq_paths, spring_file, spring_metadata
 
     assert spring_file.exists()
     assert flag_path.exists()
-    return fastq_paths
-
-
-@pytest.fixture(scope="function", name="compressed_fastqs_without_spring")
-def fixture_compressed_fastqs_without_spring(existing_fastq_paths):
-    """Creates fastqs with corresponding FLAG"""
-    fastq_paths = existing_fastq_paths
-    flag_path = Path(
-        str(fastq_paths["fastq_first_path"]).replace(FASTQ_FIRST_READ_SUFFIX, ".crunchy.txt")
-    )
-    flag_path.touch()
-    assert flag_path.exists()
-    return fastq_paths
-
-
-@pytest.fixture(scope="function", name="compressed_fastqs_without_flag")
-def fixture_compressed_fastqs_without_flag(existing_fastq_paths, spring_file):
-    """Creates fastqs with corresponding SPRING"""
-    fastq_paths = existing_fastq_paths
-    assert spring_file.exists()
-    return fastq_paths
-
-
-@pytest.fixture(scope="function", name="compressed_fastqs_pending")
-def fixture_compressed_fastqs_pending(existing_fastq_paths):
-    """Creates fastqs with corresponding PENDING"""
-    fastq_paths = existing_fastq_paths
-    pending_path = Path(
-        str(fastq_paths["fastq_first_path"]).replace(
-            FASTQ_FIRST_READ_SUFFIX, ".crunchy.pending.txt"
-        )
-    )
-    pending_path.touch()
-    assert pending_path.exists()
     return fastq_paths
