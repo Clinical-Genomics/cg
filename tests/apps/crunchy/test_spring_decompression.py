@@ -140,3 +140,80 @@ def test_is_spring_decompression_done_empty_metadata_file(
     assert result is False
     # THEN assert that it was communicated that the content is malformed
     assert "Malformed metadata content" in caplog.text
+
+
+def test_is_spring_decompression_possible(
+    crunchy_config_dict, compression_object, spring_metadata_file
+):
+    """Test if spring decompression is possible decompression is already done
+
+    The function should return False since decompression is already done
+    """
+    # GIVEN a crunchy-api
+    crunchy_api = CrunchyAPI(crunchy_config_dict)
+    # GIVEN that the fastq paths exists
+    compression_object.fastq_first.touch()
+    compression_object.fastq_second.touch()
+    # GIVEN a existing spring file
+    compression_object.spring_path.touch()
+
+    # GIVEN a existing flag file
+    # GIVEN that the files have an updated tag
+    old_date = "2019-01-01"
+    with open(spring_metadata_file, "r") as infile:
+        content = json.load(infile)
+    # GIVEN that the files where updated more than three weeks ago
+    for file_info in content:
+        file_info["updated"] = old_date
+    with open(spring_metadata_file, "w") as outfile:
+        outfile.write(json.dumps(content))
+
+    # WHEN checking if spring decompression is done
+    result = crunchy_api.is_spring_decompression_possible(compression_object)
+
+    # THEN result should be False since decompression is already done
+    assert result is False
+
+
+def test_is_spring_decompression_possible_decompression_pending(
+    crunchy_config_dict, compression_object, spring_metadata_file, caplog
+):
+    """Test if spring decompression is possible when decompression is pending
+
+    The function should return False since decompression is pending
+    """
+    caplog.set_level(logging.DEBUG)
+    # GIVEN a crunchy-api
+    crunchy_api = CrunchyAPI(crunchy_config_dict)
+    # GIVEN a existing pending file
+    compression_object.pending_path.touch()
+
+    # WHEN checking if spring decompression is done
+    result = crunchy_api.is_spring_decompression_possible(compression_object)
+
+    # THEN result should be False since decompression is pending
+    assert result is False
+    # THEN assert that it was communicated that compression is pending
+    assert "decompression is pending" in caplog.text
+
+
+def test_is_spring_decompression_possible(
+    crunchy_config_dict, compression_object, spring_metadata_file, caplog
+):
+    """Test if spring decompression is possible
+
+    The function should return True since there is a spring file and no fastq files
+    """
+    caplog.set_level(logging.DEBUG)
+    # GIVEN a crunchy-api
+    crunchy_api = CrunchyAPI(crunchy_config_dict)
+    # GIVEN a existing spring file
+    compression_object.spring_path.touch()
+
+    # WHEN checking if spring decompression is done
+    result = crunchy_api.is_spring_decompression_possible(compression_object)
+
+    # THEN result should be True since decompression is possible
+    assert result is True
+    # THEN assert that it was communicated that compression is pending
+    assert "Decompression is possible" in caplog.text

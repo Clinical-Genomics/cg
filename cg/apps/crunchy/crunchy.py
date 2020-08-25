@@ -63,19 +63,22 @@ class CrunchyAPI:
         There are three possible answers to this question:
 
          - Compression is running          -> Compression NOT possible
-         - Compression is already done     -> Compression NOT possible
+         - Spring archive exists           -> Compression NOT possible
          - Not compressed and not running  -> Compression IS possible
         """
         if self.is_compression_pending(compression_obj):
             return False
 
-        if self.is_fastq_compression_done(compression_obj):
-            LOG.info("Fastq compression already exists")
+        if compression_obj.spring_exists():
+            LOG.info("SPRING file found")
             return False
+
+        LOG.info("Fastq compression is possible")
 
         return True
 
-    def is_spring_decompression_possible(self, compression_obj: CompressionData) -> bool:
+    @staticmethod
+    def is_spring_decompression_possible(compression_obj: CompressionData) -> bool:
         """Check if spring decompression is possible
 
         There are three possible answers to this question:
@@ -85,11 +88,19 @@ class CrunchyAPI:
             - Compression has been performed            -> Decompression IS possible
 
         """
-        if self.is_compression_pending(compression_obj):
+        if compression_obj.pending_exists():
+            LOG.info("Compression/decompression is pending for %s", compression_obj.run_name)
             return False
 
-        if self.is_spring_decompression_done(compression_obj):
+        if not compression_obj.spring_exists():
+            LOG.info("No SPRING file found")
             return False
+
+        if compression_obj.pair_exists():
+            LOG.info("Fastq files already exists")
+            return False
+
+        LOG.info("Decompression is possible")
 
         return True
 
