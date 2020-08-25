@@ -103,7 +103,6 @@ def upload_cases(context, report_dir, case_dir):
             print(f"No permission to link files for {case_id}, skipping")
             continue
 
-
         finally:
             # Add bundle to StatusDB
             case_object = store_api.family(case_id)
