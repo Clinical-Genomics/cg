@@ -93,7 +93,7 @@ def upload_cases(context, report_dir, case_dir):
         except FileExistsError:
             # If files exist but no bundle, clean up path and try again
             try:
-                print("Files found for non-existing bundle, cleaning up!")
+                print(f"Files found for non-existing bundle for {case_id}, cleaning up!")
                 shutil.rmtree(bundle_version.full_path, ignore_errors=True)
                 housekeeper_api.include(bundle_version)
                 housekeeper_api.add_commit(bundle_object, bundle_version)
@@ -121,6 +121,7 @@ def upload_cases(context, report_dir, case_dir):
             if analysis:
                 print(
                     f"Analysis already stored in ClinicalDB: {case_id} : {analysis_start}, skipping Status"
+                    f""
                 )
             else:
                 case_object.action = None
@@ -133,8 +134,8 @@ def upload_cases(context, report_dir, case_dir):
                 )
                 new_analysis.family = case_object
                 store_api.add_commit(new_analysis)
-                print(f"Analysis successfully stored in ClinicalDB: {case_id} : {analysis_start}")
-
+                print(f"Analysis successfully stored in ClinicalDB: {case_id} : {analysis_start}"
+                f"")
 
 def parse_deliverables_report(report_path) -> list:
     """Parse BALSAMIC deliverables report, and return a list of files and their respective tags in bundle"""
