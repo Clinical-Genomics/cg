@@ -143,12 +143,12 @@ def upload_cases(config, report_dir, case_dir):
 def parse_deliverables_report(report_path) -> list:
     """Parse BALSAMIC deliverables report, and return a list of files and their respective tags in bundle"""
     deliverables = dict(yaml.load(open(report_path)))["files"]
-    deliverables = dict((k.replace("_", "-"), v) for k, v in deliverables.items() if v is not None)
+    deliverables = dict((v, k.split("_")) for k, v in deliverables.items() if v is not None)
     bundle_files = []
     for entry in deliverables:
         bundle_file = {
-            "path": deliverables[entry][0],
-            "tags": [entry],
+            "path": entry,
+            "tags": deliverables[entry],
             "archive": False,
         }
         bundle_files.append(bundle_file)
