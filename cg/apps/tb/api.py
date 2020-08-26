@@ -1,5 +1,6 @@
 """ Trailblazer API for cg """ ""
 import datetime as dt
+import logging
 import shutil
 from pathlib import Path
 from typing import List
@@ -7,8 +8,10 @@ from typing import List
 import click
 import ruamel.yaml
 from trailblazer.mip.start import MipCli
-from trailblazer.store import Store, models
+from trailblazer.store import api, models, Store
 from trailblazer.mip import files, fastq, trending
+
+LOG = logging.getLogger(__name__)
 
 
 class TrailblazerAPI(Store, fastq.FastqHandler):
@@ -48,6 +51,36 @@ class TrailblazerAPI(Store, fastq.FastqHandler):
     def parse_qcmetrics(data: dict) -> dict:
         """Call internal Trailblazer MIP API."""
         return files.parse_qcmetrics(data)
+
+    def is_analysis_ongoing(self, case_id: str) -> bool:
+        """Call internal Trailblazer API"""
+        return self.is_latest_analysis_ongoing(case_id=case_id)
+
+    def is_analysis_failed(self, case_id: str) -> bool:
+        """Call internal Trailblazer API"""
+        return self.is_latest_analysis_failed(case_id=case_id)
+
+    def is_analysis_completed(self, case_id: str) -> bool:
+        """Call internal Trailblazer API"""
+        return self.is_latest_analysis_completed(case_id=case_id)
+
+    def get_analysis_status(self, case_id: str) -> str:
+        """Call internal Trailblazer API"""
+        return self.get_latest_analysis_status(case_id=case_id)
+
+    def has_analysis_started(self, case_id: str) -> bool:
+        """Check if analysis has started"""
+        statuses = ("ongoing", "failed", "completed")
+        get_analysis_status = {
+            "ongoing": self.is_analysis_ongoing,
+            "failed": self.is_analysis_failed,
+            "completed": self.is_analysis_completed,
+        }
+        for status in statuses:
+            has_started = get_analysis_status[status](case_id=case_id)
+            if has_started:
+                return has_started
+        return False
 
     def write_panel(self, case_id: str, content: List[str]):
         """Write the gene panel to the defined location."""
