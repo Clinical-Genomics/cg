@@ -163,7 +163,7 @@ class CompressAPI:
             fastq_second = compression_object.fastq_second
             if files.is_file_in_version(
                 version_obj=version_obj, path=fastq_first
-            ) or files.is_file_in_version(version_obj=version_obj, path=fastq_first):
+            ) or files.is_file_in_version(version_obj=version_obj, path=fastq_second):
                 LOG.warning("Fastq files already exists in housekeeper")
                 continue
 
