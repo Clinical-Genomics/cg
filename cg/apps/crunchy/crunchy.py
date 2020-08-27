@@ -20,8 +20,7 @@ from cg.utils import Process
 from cg.utils.date import get_date_str
 
 from .models import CrunchyFileSchema
-from .sbatch import (SBATCH_FASTQ_TO_SPRING, SBATCH_HEADER_TEMPLATE,
-                     SBATCH_SPRING_TO_FASTQ)
+from .sbatch import SBATCH_FASTQ_TO_SPRING, SBATCH_HEADER_TEMPLATE, SBATCH_SPRING_TO_FASTQ
 
 LOG = logging.getLogger(__name__)
 
@@ -387,7 +386,9 @@ class CrunchyAPI:
 
     @staticmethod
     def _get_slurm_spring_to_fastq(
-        compression_obj: CompressionData, checksum_first: str, checksum_second: str,
+        compression_obj: CompressionData,
+        checksum_first: str,
+        checksum_second: str,
     ) -> str:
         """Create and return the body of a sbatch script that runs SPRING to FASTQ"""
         LOG.info("Generating SPRING to FASTQ sbatch body")
