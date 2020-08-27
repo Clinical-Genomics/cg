@@ -149,26 +149,6 @@ def fixture_sample():
     return "sample_1"
 
 
-@pytest.fixture(scope="function", name="sample_two")
-def fixture_sample_two():
-    """Return the sample id for second sample"""
-    return "sample_2"
-
-
-@pytest.fixture(scope="function", name="sample_three")
-def fixture_sample_three():
-    """Return the sample id for third sample"""
-    return "sample_3"
-
-
-@pytest.fixture(scope="function", name="sample_dir")
-def fixture_sample_dir(project_dir, sample) -> Path:
-    """Return the path to a sample directory"""
-    _dir = project_dir / sample
-    _dir.mkdir(parents=True, exist_ok=True)
-    return _dir
-
-
 @pytest.fixture(scope="function", name="spring_path")
 def fixture_spring_path(compression_object) -> Path:
     """Return the path to a non existing spring file"""
