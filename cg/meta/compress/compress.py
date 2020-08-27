@@ -18,10 +18,7 @@ class CompressAPI:
     """API for compressing BAM and FASTQ files"""
 
     def __init__(
-        self,
-        hk_api: hk.HousekeeperAPI,
-        crunchy_api: crunchy.CrunchyAPI,
-        dry_run: bool = False,
+        self, hk_api: hk.HousekeeperAPI, crunchy_api: crunchy.CrunchyAPI, dry_run: bool = False,
     ):
 
         self.hk_api = hk_api
@@ -171,8 +168,7 @@ class CompressAPI:
                 continue
 
             LOG.info(
-                "Adding decompressed FASTQ files to housekeeper for sample %s ",
-                sample_id,
+                "Adding decompressed FASTQ files to housekeeper for sample %s ", sample_id,
             )
 
             self.add_fastq_hk(
@@ -208,7 +204,7 @@ class CompressAPI:
         if self.dry_run:
             return
 
-        LOG.info("updating files in housekeeper...")
+        LOG.info("Updating files in housekeeper...")
         if files.is_file_in_version(version_obj, compression_obj.spring_path):
             LOG.info("Spring file is already in HK")
         else:
