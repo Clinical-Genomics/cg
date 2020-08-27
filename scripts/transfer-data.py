@@ -436,7 +436,10 @@ class FamilyImporter(Store):
                     samples = [
                         self.lims.sample(family_sample.id)
                         for family_sample in self.lims.get_samples(
-                            udf={"customer": sample["customer"], "familyID": sample["family"],}
+                            udf={
+                                "customer": sample["customer"],
+                                "familyID": sample["family"],
+                            }
                         )
                     ]
                     samples = [

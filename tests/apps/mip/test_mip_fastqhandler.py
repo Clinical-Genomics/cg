@@ -6,7 +6,12 @@ from cg.store import Store
 
 
 def test_link_file_count(
-    cg_config, link_family, simple_files_data, store: Store, tb_api: tb.TrailblazerAPI, helpers,
+    cg_config,
+    link_family,
+    simple_files_data,
+    store: Store,
+    tb_api: tb.TrailblazerAPI,
+    helpers,
 ):
     """Test method to test that the right number of files are created by linking"""
 

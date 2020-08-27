@@ -13,6 +13,7 @@ from trailblazer.mip import files as mip_dna_files_api
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.mip_rna import files as mip_rna_files_api
 from cg.meta.store import mip as store_mip
+from cg.models import CompressionData
 from cg.store import Store
 
 from .mocks.crunchy import MockCrunchyAPI
@@ -161,7 +162,7 @@ def madeline_api(madeline_output):
 
 # Files fixtures
 
-
+# Common file fixtures
 @pytest.fixture(name="fixtures_dir")
 def fixture_fixtures_dir() -> Path:
     """Return the path to the fixtures dir"""
@@ -180,11 +181,28 @@ def fixture_apps_dir(fixtures_dir: Path) -> Path:
     return fixtures_dir / "apps"
 
 
+@pytest.fixture(scope="function", name="project_dir")
+def fixture_project_dir(tmpdir_factory):
+    """Path to a temporary directory where intermediate files can be stored"""
+    my_tmpdir = Path(tmpdir_factory.mktemp("data"))
+    yield my_tmpdir
+    shutil.rmtree(str(my_tmpdir))
+
+
+@pytest.fixture(scope="function")
+def tmp_file(project_dir):
+    """Get a temp file"""
+    return project_dir / "test"
+
+
 @pytest.fixture(name="orderforms")
 def fixture_orderform(fixtures_dir: Path) -> Path:
     """Return the path to the directory with orderforms"""
     _path = fixtures_dir / "orderforms"
     return _path
+
+
+# Orderform fixtures
 
 
 @pytest.fixture
@@ -207,6 +225,30 @@ def fixture_madeline_output(apps_dir: Path) -> str:
     return str(_file)
 
 
+# Compression fixtures
+
+
+@pytest.fixture(scope="function", name="run_name")
+def fixture_run_name() -> str:
+    """Return the name of a fastq run"""
+    return "fastq_run"
+
+
+@pytest.fixture(scope="function", name="fastq_stub")
+def fixture_fastq_stub(project_dir: Path, run_name: str) -> Path:
+    """Creates a path to the base format of a fastq run"""
+    return project_dir / run_name
+
+
+@pytest.fixture(scope="function", name="compression_object")
+def fixture_compression_object(fastq_stub: Path) -> CompressionData:
+    """Creates compression data object with information about files used in fastq compression"""
+    return CompressionData(fastq_stub)
+
+
+# Unknown file fixtures
+
+
 @pytest.fixture(scope="session", name="files")
 def fixture_files():
     """Trailblazer api for mip files"""
@@ -223,20 +265,6 @@ def fixture_files():
         "dna_sampleinfo_store": "tests/fixtures/apps/mip/dna/store/case_qc_sample_info.yaml",
         "mip_dna_deliverables": "test/fixtures/apps/mip/dna/store/case_deliverables.yaml",
     }
-
-
-@pytest.fixture(scope="function", name="project_dir")
-def fixture_project_dir(tmpdir_factory):
-    """Path to a temporary directory where intermediate files can be stored"""
-    my_tmpdir = Path(tmpdir_factory.mktemp("data"))
-    yield my_tmpdir
-    shutil.rmtree(str(my_tmpdir))
-
-
-@pytest.fixture(scope="function")
-def tmp_file(project_dir):
-    """Get a temp file"""
-    return project_dir / "test"
 
 
 @pytest.fixture(scope="function", name="bed_file")
@@ -413,7 +441,10 @@ def fixture_customer_group() -> str:
 def fixture_customer_production(customer_group) -> dict:
     """Return a dictionary with infomation about the prod customer"""
     _cust = dict(
-        customer_id="cust000", name="Production", scout_access=True, customer_group=customer_group,
+        customer_id="cust000",
+        name="Production",
+        scout_access=True,
+        customer_group=customer_group,
     )
     return _cust
 

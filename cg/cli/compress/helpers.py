@@ -114,16 +114,13 @@ def correct_spring_paths(
     for version_obj in versions:
         spring_paths = get_spring_paths(version_obj)
         i = 0
-        for i, spring_path in enumerate(spring_paths, 1):
+        for i, compression_obj in enumerate(spring_paths, 1):
             # We are interested in fixing the cases where spring paths are in wrong location
+            spring_path = compression_obj.spring_path
             if spring_path.exists():
                 continue
 
-            if not spring_path.suffix == ".spring":
-                LOG.info("Not a valid spring file (%s)", spring_path)
-                continue
-
-            spring_config_path = spring_path.with_suffix("").with_suffix(".json")
+            spring_config_path = compression_obj.spring_metadata_path
             # true_dir is where the spring paths actually exists
             true_dir = get_true_dir(spring_path.parent)
             if not true_dir:
