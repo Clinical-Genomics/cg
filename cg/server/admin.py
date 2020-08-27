@@ -32,7 +32,10 @@ def view_family_sample_link(unused1, unused2, model, unused3):
 
     return Markup(
         u"<a href='%s'>%s</a>"
-        % (url_for("familysample.index_view", search=model.internal_id), model.internal_id,)
+        % (
+            url_for("familysample.index_view", search=model.internal_id),
+            model.internal_id,
+        )
     )
 
 
@@ -197,7 +200,10 @@ class FamilyView(BaseView):
         return (
             Markup(
                 u"<a href='%s'>%s</a>"
-                % (url_for("family.index_view", search=model.family.internal_id), model.family,)
+                % (
+                    url_for("family.index_view", search=model.family.internal_id),
+                    model.family,
+                )
             )
             if model.family
             else u""
@@ -368,7 +374,10 @@ class SampleView(BaseView):
         return (
             Markup(
                 u"<a href='%s'>%s</a>"
-                % (url_for("sample.index_view", search=model.sample.internal_id), model.sample,)
+                % (
+                    url_for("sample.index_view", search=model.sample.internal_id),
+                    model.sample,
+                )
             )
             if model.sample
             else u""

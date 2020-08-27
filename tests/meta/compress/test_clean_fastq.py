@@ -8,7 +8,7 @@ from cg.meta.compress import files
 
 @pytest.mark.compress_meta
 def test_remove_fastqs(compress_api, compression_object, caplog):
-    """ Test remove_fastq method
+    """Test remove_fastq method
 
     This method should remove fastq files since compression is completed
     """
@@ -35,7 +35,7 @@ def test_remove_fastqs(compress_api, compression_object, caplog):
 
 @pytest.mark.compress_meta
 def test_update_hk_fastq(real_housekeeper_api, compress_hk_fastq_bundle, compress_api, helpers):
-    """ Test to update the fastq paths after completed compression in housekeeper
+    """Test to update the fastq paths after completed compression in housekeeper
 
     This will test so that the fastq files are replaced by a spring file and a spring metadata file
     """

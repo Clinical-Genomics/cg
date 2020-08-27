@@ -42,7 +42,11 @@ def test_add_fastq_housekeeper(
 
 
 def test_add_decompressed_fastq(
-    compress_api, real_housekeeper_api, decompress_hk_spring_bundle, compression_files, helpers,
+    compress_api,
+    real_housekeeper_api,
+    decompress_hk_spring_bundle,
+    compression_files,
+    helpers,
 ):
     """Test functionality to add decompressed fastq files """
     # GIVEN real housekeeper api populated with a housekeeper bundle with spring info

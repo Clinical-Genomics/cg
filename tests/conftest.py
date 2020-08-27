@@ -441,7 +441,10 @@ def fixture_customer_group() -> str:
 def fixture_customer_production(customer_group) -> dict:
     """Return a dictionary with infomation about the prod customer"""
     _cust = dict(
-        customer_id="cust000", name="Production", scout_access=True, customer_group=customer_group,
+        customer_id="cust000",
+        name="Production",
+        scout_access=True,
+        customer_group=customer_group,
     )
     return _cust
 

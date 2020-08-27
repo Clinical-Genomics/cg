@@ -31,7 +31,7 @@ PENDING_PATH_SUFFIX = ".crunchy.pending.txt"
 
 class CrunchyAPI:
     """
-        API for crunchy
+    API for crunchy
     """
 
     def __init__(self, config: dict):
@@ -184,7 +184,7 @@ class CrunchyAPI:
     # These are the compression/decompression methods
     def fastq_to_spring(self, compression_obj: CompressionData, sample_id: str = "") -> None:
         """
-            Compress FASTQ files into SPRING by sending to sbatch SLURM
+        Compress FASTQ files into SPRING by sending to sbatch SLURM
 
         """
         job_name = "_".join([sample_id, compression_obj.run_name, "fastq_to_spring"])
@@ -199,7 +199,7 @@ class CrunchyAPI:
 
     def spring_to_fastq(self, compression_obj: CompressionData, sample_id: str = "") -> None:
         """
-            Decompress SPRING into fastq by sending to sbatch SLURM
+        Decompress SPRING into fastq by sending to sbatch SLURM
 
         """
         spring_metadata = self.get_spring_metadata(compression_obj.spring_metadata_path)
@@ -381,7 +381,9 @@ class CrunchyAPI:
 
     @staticmethod
     def _get_slurm_spring_to_fastq(
-        compression_obj: CompressionData, checksum_first: str, checksum_second: str,
+        compression_obj: CompressionData,
+        checksum_first: str,
+        checksum_second: str,
     ) -> str:
         """Create and return the body of a sbatch script that runs SPRING to FASTQ"""
         LOG.info("Generating spring to fastq sbatch body")
