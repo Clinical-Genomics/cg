@@ -18,10 +18,7 @@ class CompressAPI:
     """API for compressing BAM and FASTQ files"""
 
     def __init__(
-        self,
-        hk_api: hk.HousekeeperAPI,
-        crunchy_api: crunchy.CrunchyAPI,
-        dry_run: bool = False,
+        self, hk_api: hk.HousekeeperAPI, crunchy_api: crunchy.CrunchyAPI, dry_run: bool = False,
     ):
 
         self.hk_api = hk_api
@@ -44,7 +41,7 @@ class CompressAPI:
 
     # Compression methods
     def compress_fastq(self, sample_id: str) -> bool:
-        """Compress the fastq files for a individual"""
+        """Compress the FASTQ files for a individual"""
         LOG.info("Check if FASTQ compression is possible for %s", sample_id)
         version_obj = self.get_latest_version(sample_id)
         if not version_obj:
@@ -77,12 +74,12 @@ class CompressAPI:
     def decompress_spring(self, sample_id: str) -> bool:
         """Decompress SPRING archive for a sample
 
-        This function will make sure that everything is ready for decompression from spring archive
-        to fastq files.
+        This function will make sure that everything is ready for decompression from SPRING archive
+        to FASTQ files.
 
-            - Housekeeper will be updated to include fastq files
-            - Housekeeper will still have the spring and spring metadata file
-            - The spring metadata file will be updated to include date for decompression
+            - Housekeeper will be updated to include FASTQ files
+            - Housekeeper will still have the SPRING and SPRING metadata file
+            - The SPRING metadata file will be updated to include date for decompression
         """
         version_obj = self.get_latest_version(sample_id)
         if not version_obj:
@@ -106,9 +103,9 @@ class CompressAPI:
         return True
 
     def clean_fastq(self, sample_id: str) -> bool:
-        """Check that fastq compression is completed for a case and clean
+        """Check that FASTQ compression is completed for a case and clean
 
-        This means removing compressed fastq files and update housekeeper to point to the new spring
+        This means removing compressed FASTQ files and update housekeeper to point to the new SPRING
         file and its metadata file
         """
         LOG.info("Clean FASTQ files for %s", sample_id)
@@ -126,7 +123,7 @@ class CompressAPI:
             compression_object = sample_fastq_dict[run_name]["compression_data"]
 
             if not self.crunchy_api.is_fastq_compression_done(compression_object):
-                LOG.info("Fastq compression not done for sample %s, run %s", sample_id, run_name)
+                LOG.info("FASTQ compression not done for sample %s, run %s", sample_id, run_name)
                 all_cleaned = False
                 continue
 
@@ -136,7 +133,7 @@ class CompressAPI:
                 sample_id=sample_id,
                 compression_obj=compression_object,
                 hk_fastq_first=sample_fastq_dict[run_name]["hk_first"],
-                hk_fastq_second=sample_fastq_dict[run_name]["hk_first"],
+                hk_fastq_second=sample_fastq_dict[run_name]["hk_second"],
             )
 
             self.remove_fastq(
@@ -150,7 +147,7 @@ class CompressAPI:
         return all_cleaned
 
     def add_decompressed_fastq(self, sample_id) -> bool:
-        """Adds unpacked fastq files to housekeeper"""
+        """Adds unpacked FASTQ files to housekeeper"""
         LOG.info("Adds FASTQ to housekeeper for %s", sample_id)
         version_obj = self.get_latest_version(sample_id)
         if not version_obj:
@@ -167,12 +164,11 @@ class CompressAPI:
             if files.is_file_in_version(
                 version_obj=version_obj, path=fastq_first
             ) or files.is_file_in_version(version_obj=version_obj, path=fastq_second):
-                LOG.warning("Fastq files already exists in housekeeper")
+                LOG.warning("FASTQ files already exists in housekeeper")
                 continue
 
             LOG.info(
-                "Adding decompressed FASTQ files to housekeeper for sample %s ",
-                sample_id,
+                "Adding decompressed FASTQ files to housekeeper for sample %s ", sample_id,
             )
 
             self.add_fastq_hk(
@@ -189,12 +185,12 @@ class CompressAPI:
         hk_fastq_first: hk_models.File,
         hk_fastq_second: hk_models.File,
     ):
-        """Update Housekeeper with compressed fastq files and spring metadata file"""
+        """Update Housekeeper with compressed FASTQ files and SPRING metadata file"""
         version_obj = self.hk_api.last_version(sample_id)
 
         spring_tags = [sample_id, "spring"]
         spring_metadata_tags = [sample_id, "spring-metadata"]
-        LOG.info("Updating fastq files in housekeeper update for %s:", sample_id)
+        LOG.info("Updating FASTQ files in housekeeper update for %s:", sample_id)
         LOG.info(
             "%s, %s -> %s, with tags %s",
             compression_obj.fastq_first,
@@ -212,7 +208,7 @@ class CompressAPI:
         if files.is_file_in_version(version_obj, compression_obj.spring_path):
             LOG.info("Spring file is already in HK")
         else:
-            LOG.info("Adding spring file to housekeeper")
+            LOG.info("Adding SPRING file to housekeeper")
             self.hk_api.add_file(
                 path=compression_obj.spring_path, version_obj=version_obj, tags=spring_tags
             )
@@ -228,13 +224,13 @@ class CompressAPI:
             )
             self.hk_api.commit()
 
-        LOG.info("Deleting fastq files from housekeeper")
+        LOG.info("Deleting FASTQ files from housekeeper")
         hk_fastq_first.delete()
         hk_fastq_second.delete()
         self.hk_api.commit()
 
     def add_fastq_hk(self, sample_id: str, fastq_first: Path, fastq_second: Path) -> None:
-        """Add fastq files to housekeeper"""
+        """Add FASTQ files to housekeeper"""
         fastq_tags = [sample_id, "fastq"]
         last_version = self.hk_api.last_version(bundle=sample_id)
         LOG.info(
@@ -254,12 +250,12 @@ class CompressAPI:
 
     # Methods to remove files from disc
     def remove_fastq(self, fastq_first: Path, fastq_second: Path):
-        """Remove fastq files"""
+        """Remove FASTQ files"""
         LOG.info("Will remove %s and %s", fastq_first, fastq_second)
         if self.dry_run:
             return
         fastq_first.unlink()
-        LOG.debug("First fastq in pair %s removed", fastq_first)
+        LOG.debug("First FASTQ in pair %s removed", fastq_first)
         fastq_second.unlink()
-        LOG.debug("Second fastq in pair %s removed", fastq_second)
-        LOG.info("Fastq files removed")
+        LOG.debug("Second FASTQ in pair %s removed", fastq_second)
+        LOG.info("FASTQ files removed")

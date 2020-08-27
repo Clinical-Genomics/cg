@@ -6,7 +6,8 @@ from typing import Dict, List
 
 from housekeeper.store import models as hk_models
 
-from cg.constants import FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX, HK_FASTQ_TAGS
+from cg.constants import (FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX,
+                          HK_FASTQ_TAGS)
 from cg.models import CompressionData
 
 LOG = logging.getLogger(__name__)
@@ -41,11 +42,11 @@ def is_file_in_version(version_obj: hk_models.Version, path: Path) -> bool:
     return False
 
 
-# Functions to get fastq like files
+# Functions to get FASTQ like files
 
 
 def get_spring_paths(version_obj: hk_models.Version) -> List[CompressionData]:
-    """Get all spring paths for a sample"""
+    """Get all SPRING paths for a sample"""
     hk_files_dict = get_hk_files_dict(tags=["spring"], version_obj=version_obj)
     spring_paths = []
 
@@ -60,11 +61,11 @@ def get_spring_paths(version_obj: hk_models.Version) -> List[CompressionData]:
 
 
 def get_fastq_stub(fastq_path: Path) -> Path:
-    """Take a fastq file and return the stub (unique part)
+    """Take a FASTQ file and return the stub (unique part)
 
     Example:
         fastq_file = /home/fastq_files/A_sequencing_run_R1_001.fastq.gz
-        stub = /home/fastq_files/A_sequencing_run
+        file_prefix = /home/fastq_files/A_sequencing_run
     """
     fastq_string = str(fastq_path)
     if FASTQ_FIRST_READ_SUFFIX in fastq_string:
@@ -77,20 +78,20 @@ def get_fastq_stub(fastq_path: Path) -> Path:
 def get_compression_data(fastq_files: List[Path]) -> List[CompressionData]:
     """Return a list of compression data objects
 
-    Each object has information about a pair of fastq files from the same run
+    Each object has information about a pair of FASTQ files from the same run
     """
     fastq_runs = set()
     compression_objects = []
     for fastq_file in fastq_files:
-        # stub is the run name identifier
-        stub = get_fastq_stub(fastq_file)
-        if stub is None:
-            LOG.info("Invalid fastq name %s", fastq_file)
+        # file prefix is the run name identifier
+        file_prefix = get_fastq_stub(fastq_file)
+        if file_prefix is None:
+            LOG.info("Invalid FASTQ name %s", fastq_file)
             continue
-        run_name = str(stub)
+        run_name = str(file_prefix)
         if run_name not in fastq_runs:
             fastq_runs.add(run_name)
-            compression_objects.append(CompressionData(stub))
+            compression_objects.append(CompressionData(file_prefix))
     return compression_objects
 
 
@@ -121,7 +122,7 @@ def get_fastq_files(sample_id: str, version_obj: hk_models.Version) -> Dict[str,
 
 
 def check_fastqs(compression_obj: CompressionData) -> bool:
-    """Check if fastq files has the correct status
+    """Check if FASTQ files has the correct status
 
     More specific this means to check
         - Did we get the full path of the file?
@@ -147,7 +148,7 @@ def check_fastqs(compression_obj: CompressionData) -> bool:
         LOG.info("More than 1 inode to same file for %s", compression_obj.run_name)
         return False
 
-    # Check if the fastq file is a symlinc (soft link)
+    # Check if the FASTQ file is a symlinc (soft link)
     if compression_obj.is_symlink(compression_obj.fastq_first) or compression_obj.is_symlink(
         compression_obj.fastq_second
     ):

@@ -9,7 +9,7 @@ from cg.models import CompressionData
 
 @pytest.mark.compress_meta
 def test_get_fastq_files(populated_compress_fastq_api, sample):
-    """test get_fastq_files method when there are fastq files"""
+    """Test get_fastq_files method when there are FASTQ files"""
     compress_api = populated_compress_fastq_api
     # GIVEN a sample_id and a hk api populated with fastq bundle
 
@@ -26,7 +26,7 @@ def test_get_fastq_files(populated_compress_fastq_api, sample):
 
 @pytest.mark.compress_meta
 def test_get_fastq_files_no_files(compress_api, sample_hk_bundle_no_files, sample, helpers, caplog):
-    """test get_fastq_files method when no files are found"""
+    """Test get_fastq_files method when no FASTQ files are found"""
     caplog.set_level(logging.DEBUG)
     # GIVEN a sample_id
     sample_id = sample

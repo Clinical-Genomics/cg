@@ -3,7 +3,8 @@ import logging
 import os
 from pathlib import Path
 
-from cg.constants import FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX, SPRING_SUFFIX
+from cg.constants import (FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX,
+                          SPRING_SUFFIX)
 
 LOG = logging.getLogger(__name__)
 
@@ -28,12 +29,12 @@ class CompressionData:
 
     @property
     def spring_path(self) -> Path:
-        """Return the path to a spring file"""
+        """Return the path to a SPRING file"""
         return self.stub.with_suffix(SPRING_SUFFIX)
 
     @property
     def spring_metadata_path(self) -> Path:
-        """Return the path to a spring metadata file"""
+        """Return the path to a SPRING metadata file"""
         return self.stub.with_suffix(".json")
 
     @property
@@ -48,15 +49,15 @@ class CompressionData:
 
     @property
     def run_name(self) -> str:
-        """Return the name of the sequencing run"""
+        """Return the name of the sequencing run identifier"""
         return self.stub.name
 
     def pair_exists(self) -> bool:
-        """Check that both files in fastq pair exists"""
-        LOG.info("Check if fastq pair exists")
-        if not self.file_exists(self.fastq_first):
+        """Check that both files in FASTQ pair exists"""
+        LOG.info("Check if FASTQ pair exists")
+        if not self.file_exists_and_is_accesible(self.fastq_first):
             return False
-        if not self.file_exists(self.fastq_second):
+        if not self.file_exists_and_is_accesible(self.fastq_second):
             return False
         return True
 
@@ -69,8 +70,8 @@ class CompressionData:
         return True
 
     @staticmethod
-    def file_exists(file_path: Path) -> bool:
-        """Check if file exists"""
+    def file_exists_and_is_accesible(file_path: Path) -> bool:
+        """Check if file exists and is accesible"""
         try:
             if not file_path.exists():
                 LOG.info("%s does not exist", file_path)
@@ -93,19 +94,19 @@ class CompressionData:
         return os.path.islink(file_path)
 
     def spring_exists(self) -> bool:
-        """Check if the spring file exists"""
-        LOG.info("Check if spring archive file exists")
-        return self.file_exists(self.spring_path)
+        """Check if the SPRING file exists"""
+        LOG.info("Check if SPRING archive file exists")
+        return self.file_exists_and_is_accesible(self.spring_path)
 
     def metadata_exists(self) -> bool:
-        """Check if the spring metadata file exists"""
-        LOG.info("Check if spring metadata file exists")
-        return self.file_exists(self.spring_metadata_path)
+        """Check if the SPRING metadata file exists"""
+        LOG.info("Check if SPRING metadata file exists")
+        return self.file_exists_and_is_accesible(self.spring_metadata_path)
 
     def pending_exists(self) -> bool:
-        """Check if the spring pending flag file exists"""
+        """Check if the SPRING pending flag file exists"""
         LOG.info("Check if pending compression file exists")
-        return self.file_exists(self.pending_path)
+        return self.file_exists_and_is_accesible(self.pending_path)
 
     def __str__(self):
         return f"CompressionData(run:{self.run_name})"

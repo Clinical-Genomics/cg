@@ -1,4 +1,4 @@
-"""Test methods for compressing fastq"""
+"""Test methods for compressing FASTQ"""
 import json
 import logging
 
@@ -6,8 +6,8 @@ from cg.apps.crunchy import CrunchyAPI
 
 
 def test_get_spring_metadata(spring_metadata_file, crunchy_config_dict):
-    """Test the method that fetches the spring metadata from a file"""
-    # GIVEN a spring path and the path to a populated spring metadata file
+    """Test the method that fetches the SPRING metadata from a file"""
+    # GIVEN a SPRING path and the path to a populated SPRING metadata file
     assert spring_metadata_file.is_file()
     assert spring_metadata_file.exists()
     # GIVEN a crunchy API
@@ -23,8 +23,8 @@ def test_get_spring_metadata(spring_metadata_file, crunchy_config_dict):
 
 
 def test_get_spring_archive_files(spring_metadata):
-    """Test the method that sorts the spring metadata into a dictionary"""
-    # GIVEN a spring metadata content in its raw format
+    """Test the method that sorts the SPRING metadata into a dictionary"""
+    # GIVEN a SPRING metadata content in its raw format
     assert isinstance(spring_metadata, list)
 
     # WHEN fetching the content of the file
@@ -39,8 +39,8 @@ def test_get_spring_archive_files(spring_metadata):
 def test_get_spring_metadata_malformed_info(
     spring_metadata_file, spring_metadata, crunchy_config_dict
 ):
-    """Test the method that fetches the spring metadata from a file when file is malformed"""
-    # GIVEN a spring metadata file with missing information
+    """Test the method that fetches the SPRING metadata from a file when file is malformed"""
+    # GIVEN a SPRING metadata file with missing information
     spring_metadata[0].pop("path")
     with open(spring_metadata_file, "w") as outfile:
         outfile.write(json.dumps(spring_metadata))
@@ -58,8 +58,8 @@ def test_get_spring_metadata_malformed_info(
 def test_get_spring_metadata_wrong_number_files(
     spring_metadata_file, spring_metadata, crunchy_config_dict
 ):
-    """Test the method that fetches the spring metadata from a file when a file is missing"""
-    # GIVEN a spring metadata file with missing file
+    """Test the method that fetches the SPRING metadata from a file when a file is missing"""
+    # GIVEN a SPRING metadata file with missing file
     spring_metadata = spring_metadata[1:]
     with open(spring_metadata_file, "w") as outfile:
         outfile.write(json.dumps(spring_metadata))
@@ -77,7 +77,7 @@ def test_get_spring_metadata_wrong_number_files(
 def test_fastq_to_spring_sbatch(crunchy_config_dict, compression_object, sbatch_process, caplog):
     """Test fastq_to_spring method"""
     caplog.set_level(logging.DEBUG)
-    # GIVEN a crunchy-api, and fastq paths
+    # GIVEN a crunchy-api, and FASTQ paths
 
     crunchy_api = CrunchyAPI(crunchy_config_dict)
     crunchy_api.process = sbatch_process
@@ -89,7 +89,7 @@ def test_fastq_to_spring_sbatch(crunchy_config_dict, compression_object, sbatch_
     # GIVEN that the sbatch file does not exist
     assert not sbatch_path.is_file()
 
-    # WHEN calling fastq_to_spring on fastq files
+    # WHEN calling fastq_to_spring on FASTQ files
     crunchy_api.fastq_to_spring(compression_obj=compression_object)
 
     # THEN assert that the sbatch file was created
@@ -97,12 +97,12 @@ def test_fastq_to_spring_sbatch(crunchy_config_dict, compression_object, sbatch_
 
 
 def test_spring_to_fastq(compression_object, spring_metadata_file, crunchy_config_dict, mocker):
-    """Test spring to fastq method
+    """Test SPRING to FASTQ method
 
-    Test to decompress spring to fastq. This test will make sure that the correct sbatch content
+    Test to decompress SPRING to FASTQ. This test will make sure that the correct sbatch content
     was submitted to the Process api
     """
-    # GIVEN a crunchy-api given an existing spring metadata file
+    # GIVEN a crunchy-api given an existing SPRING metadata file
     assert spring_metadata_file.exists()
     mocker_submit_sbatch = mocker.patch.object(CrunchyAPI, "_submit_sbatch")
     crunchy_api = CrunchyAPI(crunchy_config_dict)

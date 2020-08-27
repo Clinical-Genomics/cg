@@ -1,4 +1,4 @@
-"""Tests for cleaning fastq files"""
+"""Tests for cleaning FASTQ files"""
 import logging
 
 import pytest
@@ -10,10 +10,10 @@ from cg.meta.compress import files
 def test_remove_fastqs(compress_api, compression_object, caplog):
     """Test remove_fastq method
 
-    This method should remove fastq files since compression is completed
+    This method should remove FASTQ files since compression is completed
     """
     caplog.set_level(logging.DEBUG)
-    # GIVEN existing fastq and flag file
+    # GIVEN existing FASTQ and flag file
     fastq_first = compression_object.fastq_first
     fastq_second = compression_object.fastq_second
     fastq_first.touch()
@@ -23,21 +23,21 @@ def test_remove_fastqs(compress_api, compression_object, caplog):
     # WHEN calling remove_fastq
     compress_api.remove_fastq(fastq_first=fastq_first, fastq_second=fastq_second)
 
-    # THEN the assert that the fastq-files are deleted
+    # THEN the assert that the FASTQ-files are deleted
     assert not fastq_first.exists()
     assert not fastq_second.exists()
     # THEN assert that the flag file is still there since this holds important information
     assert compression_object.spring_metadata_path.exists()
     expected_output = f"Will remove {fastq_first} and {fastq_second}"
     assert expected_output in caplog.text
-    assert "Fastq files removed" in caplog.text
+    assert "FASTQ files removed" in caplog.text
 
 
 @pytest.mark.compress_meta
 def test_update_hk_fastq(real_housekeeper_api, compress_hk_fastq_bundle, compress_api, helpers):
-    """Test to update the fastq paths after completed compression in housekeeper
+    """Test to update the FASTQ and SPRING paths in housekeeper after completed compression
 
-    This will test so that the fastq files are replaced by a spring file and a spring metadata file
+    This will test so that the FASTQ files are replaced by a SPRING file and a SPRING metadata file
     """
     # GIVEN real housekeeper api populated with a housekeeper bundle
     hk_bundle = compress_hk_fastq_bundle
@@ -46,10 +46,10 @@ def test_update_hk_fastq(real_housekeeper_api, compress_hk_fastq_bundle, compres
     helpers.ensure_hk_bundle(real_housekeeper_api, hk_bundle)
     compress_api.hk_api = hk_api
 
-    # GIVEN that there are some fastq files in housekeeper
+    # GIVEN that there are some FASTQ files in housekeeper
     hk_fastq_files = list(hk_api.files(tags=["fastq"]))
     assert hk_fastq_files
-    # GIVEN that there are no spring files in housekeeper
+    # GIVEN that there are no SPRING files in housekeeper
     hk_spring_file = list(hk_api.files(tags=["spring"]))
     assert not hk_spring_file
     hk_fastq_flag_file = list(hk_api.files(tags=["spring-metadata"]))
@@ -68,10 +68,10 @@ def test_update_hk_fastq(real_housekeeper_api, compress_hk_fastq_bundle, compres
         hk_fastq_second=fastq_dict[run]["hk_second"],
     )
 
-    # THEN assert that the fastq files are removed from housekeeper
+    # THEN assert that the FASTQ files are removed from housekeeper
     hk_fastq_files = list(hk_api.files(tags=["fastq"]))
     assert not hk_fastq_files
-    # THEN assert that the spring file and the metadata file is added to housekeeper
+    # THEN assert that the SPRING file and the metadata file is added to housekeeper
     hk_spring_file = list(real_housekeeper_api.files(tags=["spring"]))
     assert hk_spring_file
     hk_fastq_flag_file = list(real_housekeeper_api.files(tags=["spring-metadata"]))
@@ -81,7 +81,7 @@ def test_update_hk_fastq(real_housekeeper_api, compress_hk_fastq_bundle, compres
 @pytest.mark.compress_meta
 @pytest.mark.clean_fastq
 def test_cli_clean_fastqs_removed(populated_compress_fastq_api, compression_files, sample):
-    """Test to clean fastqs after a succesfull FASTQ compression
+    """Test to clean FASTQs after a succesfull FASTQ compression
 
     Files should be cleaned since the compression is completed
     """
@@ -93,16 +93,16 @@ def test_cli_clean_fastqs_removed(populated_compress_fastq_api, compression_file
     # GIVEN that the SPRING compression files exist
     assert spring_file.exists()
     assert spring_metadata_file.exists()
-    # GIVEN that the fastq files exists
+    # GIVEN that the FASTQ files exists
     assert fastq_first.exists()
     assert fastq_second.exists()
 
     # WHEN running the clean command
     compress_api.clean_fastq(sample)
-    # THEN assert spring files exists
+    # THEN assert SPRING files exists
     assert spring_file.exists()
     assert spring_metadata_file.exists()
-    # THEN assert that the fastq files are removed
+    # THEN assert that the FASTQ files are removed
     assert not fastq_first.exists()
     assert not fastq_second.exists()
 
@@ -112,7 +112,7 @@ def test_cli_clean_fastqs_removed(populated_compress_fastq_api, compression_file
 def test_cli_clean_fastqs_no_spring_metadata(
     populated_compress_fastq_api, sample, compression_files
 ):
-    """Test to clean fastqs when spring compression is not finished
+    """Test to clean FASTQs when SPRING compression is not finished
 
     No files should be cleaned since compression is not completed
     """
@@ -129,9 +129,9 @@ def test_cli_clean_fastqs_no_spring_metadata(
     # WHEN running the clean command
     compress_api.clean_fastq(sample)
 
-    # THEN assert spring file exists
+    # THEN assert SPRING file exists
     assert spring_file.exists()
-    # THEN assert that the fastq files are NOT removed
+    # THEN assert that the FASTQ files are NOT removed
     assert fastq_first.exists()
     assert fastq_second.exists()
 
@@ -141,7 +141,7 @@ def test_cli_clean_fastqs_no_spring_metadata(
 def test_cli_clean_fastqs_pending_compression_metadata(
     populated_compress_fastq_api, sample, compression_files
 ):
-    """Test to clean fastqs when spring compression is pending
+    """Test to clean FASTQs when SPRING compression is pending
 
     No files should be cleaned since compression is not completed
     """
@@ -158,8 +158,8 @@ def test_cli_clean_fastqs_pending_compression_metadata(
     # WHEN running the clean command
     compress_api.clean_fastq(sample)
 
-    # THEN assert spring file exists
+    # THEN assert SPRING file exists
     assert spring_file.exists()
-    # THEN assert that the fastq files are NOT removed
+    # THEN assert that the FASTQ files are NOT removed
     assert fastq_first.exists()
     assert fastq_second.exists()

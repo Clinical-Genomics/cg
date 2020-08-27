@@ -37,19 +37,19 @@ class MockProcess:
 
 @pytest.fixture(scope="function", name="file_schema")
 def fixture_file_schema():
-    """Return a instance of the file schema that describes content of spring metadata"""
+    """Return a instance of the file schema that describes content of SPRING metadata"""
     return CrunchyFileSchema()
 
 
 @pytest.fixture(name="real_spring_metadata_path")
 def fixture_real_spring_metadata_path(fixtures_dir):
-    """Return the path to a spring metadata file"""
+    """Return the path to a SPRING metadata file"""
     return fixtures_dir / "apps" / "crunchy" / "spring_metadata.json"
 
 
 @pytest.fixture(name="spring_metadata")
 def fixture_spring_metadata(compression_object: CompressionData) -> List[dict]:
-    """Return metada information"""
+    """Return meta data information"""
     first_read = compression_object.fastq_first
     second_read = compression_object.fastq_second
     spring_path = compression_object.spring_path
@@ -75,7 +75,7 @@ def fixture_spring_metadata(compression_object: CompressionData) -> List[dict]:
 def fixture_spring_metadata_file(
     compression_object: CompressionData, spring_metadata: List[dict]
 ) -> Path:
-    """Return the path to a populated spring metadata file"""
+    """Return the path to a populated SPRING metadata file"""
     metadata_path = compression_object.spring_metadata_path
 
     with open(metadata_path, "w") as outfile:
@@ -113,7 +113,7 @@ def fixture_spring_file(spring_path):
 
 @pytest.fixture(scope="function", name="fastq_paths")
 def fixture_fastq_paths(fastq_first_path, fastq_second_path):
-    """Creates fastq paths"""
+    """Creates FASTQ paths"""
     return {
         "fastq_first_path": fastq_first_path,
         "fastq_second_path": fastq_second_path,
@@ -131,7 +131,7 @@ def fixture_existing_fastq_paths(fastq_first_file, fastq_second_file):
 
 @pytest.fixture(scope="function", name="compressed_fastqs")
 def fixture_compressed_fastqs(existing_fastq_paths, spring_file, spring_metadata_file):
-    """Creates fastqs with corresponding SPRING and FLAG"""
+    """Creates FASTQs with corresponding SPRING and FLAG"""
     fastq_paths = existing_fastq_paths
     flag_path = spring_metadata_file
 

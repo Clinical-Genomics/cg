@@ -1,9 +1,9 @@
-"""Tests for fastq part of meta compress api"""
+"""Tests for FASTQ part of meta compress api"""
 import logging
 
 
 def test_compress_case_fastq_one_sample(populated_compress_fastq_api, sample, caplog):
-    """Test to compress all fastq files for a sample"""
+    """Test to compress all FASTQ files for a sample"""
     caplog.set_level(logging.DEBUG)
     compress_api = populated_compress_fastq_api
     compress_api.crunchy_api.set_dry_run(True)
@@ -23,7 +23,7 @@ def test_compress_case_fastq_one_sample(populated_compress_fastq_api, sample, ca
 def test_compress_fastq_compression_done(
     populated_compress_fastq_api, compression_object, sample, caplog
 ):
-    """Test to compress all fastq files for a sample when compression is already completed
+    """Test to compress all FASTQ files for a sample when compression is already completed
 
     The program should not compress any files since the compression is done for a sample
     """
@@ -32,7 +32,6 @@ def test_compress_fastq_compression_done(
     compress_api = populated_compress_fastq_api
     # GIVEN that the spring file exists (compression is done)
     compression_object.spring_path.touch()
-    print("spring_path", compression_object.spring_path)
 
     # WHEN Compressing the bam files for the case
     res = compress_api.compress_fastq(sample)
@@ -46,7 +45,7 @@ def test_compress_fastq_compression_done(
 def test_compress_case_fastq_compression_pending(
     populated_compress_fastq_api, sample, compression_object, caplog
 ):
-    """Test to compress all fastq files for a sample when compression is pending
+    """Test to compress all FASTQ files for a sample when compression is pending
 
     The program should not compress any files since the compression is pending for a sample
     """
@@ -55,7 +54,7 @@ def test_compress_case_fastq_compression_pending(
     # GIVEN that the pending flag exists
     compression_object.pending_path.touch()
 
-    # WHEN Compressing the fastq files for the case
+    # WHEN compressing the FASTQ files for the case
     res = compress_api.compress_fastq(sample)
 
     # THEN assert compression returns False
