@@ -45,6 +45,7 @@ class CrunchyAPI:
 
     def set_dry_run(self, dry_run: bool) -> None:
         """Update dry run"""
+        LOG.info("Set dry run to %s", dry_run)
         self.dry_run = dry_run
 
     # Methods to check compression status
@@ -327,6 +328,7 @@ class CrunchyAPI:
 
     def _submit_sbatch(self, sbatch_content: str, sbatch_path: Path):
         """Submit SLURM job"""
+        LOG.info("Submit sbatch")
         if self.dry_run:
             LOG.info("Would submit sbatch %s to slurm", sbatch_path)
             return

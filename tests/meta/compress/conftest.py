@@ -119,14 +119,6 @@ def fixture_compress_api(real_crunchy_api, housekeeper_api):
     yield _api
 
 
-@pytest.fixture(scope="function", name="populated_compress_api")
-def fixture_populated_compress_api(compress_api, compress_hk_bam_bundle, helpers):
-    """Populated compress api fixture"""
-    helpers.ensure_hk_bundle(compress_api.hk_api, compress_hk_bam_bundle)
-
-    return compress_api
-
-
 @pytest.fixture(scope="function", name="populated_compress_fastq_api")
 def fixture_populated_compress_fastq_api(compress_api, compress_hk_fastq_bundle, helpers):
     """Populated compress api fixture"""
@@ -217,51 +209,6 @@ def fixture_fastq_files(fastq_paths):
 
 
 # Bundle fixtures
-
-
-@pytest.fixture(scope="function", name="sample_hk_bundle_no_files")
-def fixture_sample_hk_bundle_no_files(sample, timestamp):
-    """Create a complete bundle mock for testing compression"""
-    hk_bundle_data = {
-        "name": sample,
-        "created": timestamp,
-        "expires": timestamp,
-        "files": [],
-    }
-
-    return hk_bundle_data
-
-
-@pytest.fixture(scope="function", name="case_hk_bundle_no_files")
-def fixture_case_hk_bundle_no_files(case_id, timestamp):
-    """Create a complete bundle mock for testing compression"""
-    hk_bundle_data = {
-        "name": case_id,
-        "created": timestamp,
-        "expires": timestamp,
-        "files": [],
-    }
-
-    return hk_bundle_data
-
-
-@pytest.fixture(scope="function", name="compress_hk_fastq_bundle")
-def fixture_compress_hk_fastq_bundle(compression_object, sample_hk_bundle_no_files):
-    """Create a complete bundle mock for testing compression
-
-    This bundle contains a pair of fastq files.
-    """
-    hk_bundle_data = copy.deepcopy(sample_hk_bundle_no_files)
-
-    first_fastq = compression_object.fastq_first
-    second_fastq = compression_object.fastq_second
-    for fastq_file in [first_fastq, second_fastq]:
-        fastq_file.touch()
-        fastq_file_info = {"path": str(fastq_file), "archive": False, "tags": ["fastq"]}
-
-        hk_bundle_data["files"].append(fastq_file_info)
-
-    return hk_bundle_data
 
 
 @pytest.fixture(scope="function", name="decompress_hk_spring_bundle")

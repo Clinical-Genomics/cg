@@ -1,6 +1,7 @@
 """
     Conftest file for pytest fixtures
 """
+import copy
 import datetime as dt
 import logging
 import shutil
@@ -353,6 +354,51 @@ def fixture_hk_bundle_data(case_id, bed_file, timestamp):
         "files": [{"path": bed_file, "archive": False, "tags": ["bed", "sample"]}],
     }
     return data
+
+
+@pytest.fixture(scope="function", name="sample_hk_bundle_no_files")
+def fixture_sample_hk_bundle_no_files(sample, timestamp):
+    """Create a complete bundle mock for testing compression"""
+    hk_bundle_data = {
+        "name": sample,
+        "created": timestamp,
+        "expires": timestamp,
+        "files": [],
+    }
+
+    return hk_bundle_data
+
+
+@pytest.fixture(scope="function", name="case_hk_bundle_no_files")
+def fixture_case_hk_bundle_no_files(case_id, timestamp):
+    """Create a complete bundle mock for testing compression"""
+    hk_bundle_data = {
+        "name": case_id,
+        "created": timestamp,
+        "expires": timestamp,
+        "files": [],
+    }
+
+    return hk_bundle_data
+
+
+@pytest.fixture(scope="function", name="compress_hk_fastq_bundle")
+def fixture_compress_hk_fastq_bundle(compression_object, sample_hk_bundle_no_files):
+    """Create a complete bundle mock for testing compression
+
+    This bundle contains a pair of fastq files.
+    """
+    hk_bundle_data = copy.deepcopy(sample_hk_bundle_no_files)
+
+    first_fastq = compression_object.fastq_first
+    second_fastq = compression_object.fastq_second
+    for fastq_file in [first_fastq, second_fastq]:
+        fastq_file.touch()
+        fastq_file_info = {"path": str(fastq_file), "archive": False, "tags": ["fastq"]}
+
+        hk_bundle_data["files"].append(fastq_file_info)
+
+    return hk_bundle_data
 
 
 @pytest.yield_fixture(scope="function", name="housekeeper_api")

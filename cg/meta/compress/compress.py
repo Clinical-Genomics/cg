@@ -31,7 +31,8 @@ class CompressAPI:
     def set_dry_run(self, dry_run: bool):
         """Update dry run"""
         self.dry_run = dry_run
-        self.crunchy_api.set_dry_run(dry_run)
+        if self.crunchy_api.dry_run is False:
+            self.crunchy_api.set_dry_run(dry_run)
 
     def get_latest_version(self, bundle_name: str) -> hk_models.Version:
         """Fetch the latest version of a hk bundle"""

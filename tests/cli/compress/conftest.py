@@ -2,6 +2,9 @@
 
 import pytest
 
+from cg.apps.crunchy import CrunchyAPI
+from cg.meta.compress import CompressAPI
+
 
 class MockCompressAPI:
     """Mock out necessary functions for running the compress CLI functions"""
@@ -33,6 +36,30 @@ class MockCompressAPI:
 def fixture_compress_api():
     """Return a compress context"""
     return MockCompressAPI()
+
+
+@pytest.yield_fixture(scope="function", name="real_crunchy_api")
+def fixture_real_crunchy_api(crunchy_config_dict):
+    """crunchy api fixture"""
+    _api = CrunchyAPI(crunchy_config_dict)
+    _api.set_dry_run(True)
+    yield _api
+
+
+@pytest.fixture(name="real_compress_api")
+def fixture_real_compress_api(housekeeper_api, real_crunchy_api):
+    """Return a compress context"""
+    hk_api = housekeeper_api
+    _api = CompressAPI(crunchy_api=real_crunchy_api, hk_api=hk_api)
+    yield _api
+
+
+@pytest.fixture(scope="function", name="real_populated_compress_fastq_api")
+def fixture_real_populated_compress_fastq_api(real_compress_api, compress_hk_fastq_bundle, helpers):
+    """Populated compress api fixture"""
+    helpers.ensure_hk_bundle(real_compress_api.hk_api, compress_hk_fastq_bundle)
+
+    return real_compress_api
 
 
 @pytest.fixture(name="samples")
@@ -133,8 +160,17 @@ def fixture_populated_multiple_compress_context(compress_api, populated_compress
 @pytest.fixture(name="populated_compress_context")
 def fixture_populated_compress_context(compress_api, populated_compress_store):
     """Return a compress context populated with a completed analysis"""
-    # Make sure that there is a family where anaylis is completer
+    # Make sure that there is a family where analysis is completed
     return {"compress": compress_api, "db": populated_compress_store}
+
+
+@pytest.fixture(name="real_populated_compress_context")
+def fixture_real_populated_compress_context(
+    real_populated_compress_fastq_api, populated_compress_store
+):
+    """Return a compress context populated with a completed analysis"""
+    # Make sure that there is a family where analysis is completed
+    return {"compress": real_populated_compress_fastq_api, "db": populated_compress_store}
 
 
 # Bundle fixtures
