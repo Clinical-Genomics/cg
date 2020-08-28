@@ -18,10 +18,7 @@ class CompressAPI:
     """API for compressing BAM and FASTQ files"""
 
     def __init__(
-        self,
-        hk_api: hk.HousekeeperAPI,
-        crunchy_api: crunchy.CrunchyAPI,
-        dry_run: bool = False,
+        self, hk_api: hk.HousekeeperAPI, crunchy_api: crunchy.CrunchyAPI, dry_run: bool = False,
     ):
 
         self.hk_api = hk_api
@@ -31,7 +28,8 @@ class CompressAPI:
     def set_dry_run(self, dry_run: bool):
         """Update dry run"""
         self.dry_run = dry_run
-        self.crunchy_api.set_dry_run(dry_run)
+        if self.crunchy_api.dry_run is False:
+            self.crunchy_api.set_dry_run(dry_run)
 
     def get_latest_version(self, bundle_name: str) -> hk_models.Version:
         """Fetch the latest version of a hk bundle"""
@@ -171,8 +169,7 @@ class CompressAPI:
                 continue
 
             LOG.info(
-                "Adding decompressed FASTQ files to housekeeper for sample %s ",
-                sample_id,
+                "Adding decompressed FASTQ files to housekeeper for sample %s ", sample_id,
             )
 
             self.add_fastq_hk(

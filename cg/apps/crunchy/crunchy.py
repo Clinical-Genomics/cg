@@ -20,7 +20,8 @@ from cg.utils import Process
 from cg.utils.date import get_date_str
 
 from .models import CrunchyFileSchema
-from .sbatch import SBATCH_FASTQ_TO_SPRING, SBATCH_HEADER_TEMPLATE, SBATCH_SPRING_TO_FASTQ
+from .sbatch import (SBATCH_FASTQ_TO_SPRING, SBATCH_HEADER_TEMPLATE,
+                     SBATCH_SPRING_TO_FASTQ)
 
 LOG = logging.getLogger(__name__)
 
@@ -45,6 +46,7 @@ class CrunchyAPI:
 
     def set_dry_run(self, dry_run: bool) -> None:
         """Update dry run"""
+        LOG.info("Set dry run to %s", dry_run)
         self.dry_run = dry_run
 
     # Methods to check compression status
@@ -327,9 +329,12 @@ class CrunchyAPI:
 
     def _submit_sbatch(self, sbatch_content: str, sbatch_path: Path):
         """Submit SLURM job"""
+        LOG.info("Submit sbatch")
         if self.dry_run:
+            LOG.warning("HEJ")
             LOG.info("Would submit sbatch %s to slurm", sbatch_path)
             return
+        LOG.warning("DU")
         with open(sbatch_path, mode="w+t") as sbatch_file:
             sbatch_file.write(sbatch_content)
 
@@ -386,9 +391,7 @@ class CrunchyAPI:
 
     @staticmethod
     def _get_slurm_spring_to_fastq(
-        compression_obj: CompressionData,
-        checksum_first: str,
-        checksum_second: str,
+        compression_obj: CompressionData, checksum_first: str, checksum_second: str,
     ) -> str:
         """Create and return the body of a sbatch script that runs SPRING to FASTQ"""
         LOG.info("Generating SPRING to FASTQ sbatch body")

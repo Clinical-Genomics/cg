@@ -3,7 +3,7 @@ import logging
 
 import click
 
-from cg.apps import crunchy, hk, scoutapi
+from cg.apps import crunchy, hk
 from cg.meta.compress import CompressAPI
 from cg.store import Store
 
@@ -19,10 +19,9 @@ def compress(context):
     context.obj["db"] = Store(context.obj.get("database"))
 
     hk_api = hk.HousekeeperAPI(context.obj)
-    scout_api = scoutapi.ScoutAPI(context.obj)
     crunchy_api = crunchy.CrunchyAPI(context.obj)
 
-    compress_api = CompressAPI(hk_api=hk_api, crunchy_api=crunchy_api, scout_api=scout_api)
+    compress_api = CompressAPI(hk_api=hk_api, crunchy_api=crunchy_api)
     context.obj["compress"] = compress_api
 
 
@@ -45,10 +44,9 @@ def decompress(context):
     context.obj["db"] = Store(context.obj.get("database"))
 
     hk_api = hk.HousekeeperAPI(context.obj)
-    scout_api = scoutapi.ScoutAPI(context.obj)
     crunchy_api = crunchy.CrunchyAPI(context.obj)
 
-    compress_api = CompressAPI(hk_api=hk_api, crunchy_api=crunchy_api, scout_api=scout_api)
+    compress_api = CompressAPI(hk_api=hk_api, crunchy_api=crunchy_api)
     context.obj["compress"] = compress_api
 
 
