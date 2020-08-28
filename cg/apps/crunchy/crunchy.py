@@ -330,10 +330,8 @@ class CrunchyAPI:
         """Submit SLURM job"""
         LOG.info("Submit sbatch")
         if self.dry_run:
-            LOG.warning("HEJ")
             LOG.info("Would submit sbatch %s to slurm", sbatch_path)
             return
-        LOG.warning("DU")
         with open(sbatch_path, mode="w+t") as sbatch_file:
             sbatch_file.write(sbatch_content)
 
