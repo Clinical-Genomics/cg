@@ -7,13 +7,13 @@ import click
 
 from cg.apps import hk, lims, scoutapi, tb
 from cg.apps.environ import environ_email
-from cg.apps.mip.fastq import FastqHandler
 from cg.apps.mip import MipAPI
-from cg.constants import EXIT_SUCCESS
+from cg.apps.mip.fastq import FastqHandler
 from cg.cli.workflow.get_links import get_links
 from cg.cli.workflow.mip.store import store as store_cmd
 from cg.cli.workflow.mip_dna.deliver import CASE_TAGS, SAMPLE_TAGS
 from cg.cli.workflow.mip_dna.deliver import deliver as deliver_cmd
+from cg.constants import EXIT_SUCCESS
 from cg.exc import CgError
 from cg.meta.deliver import DeliverAPI
 from cg.meta.workflow.mip_dna import AnalysisAPI

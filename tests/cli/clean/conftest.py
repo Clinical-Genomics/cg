@@ -10,5 +10,7 @@ def clean_context(base_store, housekeeper_api, helpers, tmpdir) -> dict:
     return {
         "hk_api": housekeeper_api,
         "store_api": base_store,
-        "balsamic": {"root": tmpdir,},
+        "balsamic": {
+            "root": tmpdir,
+        },
     }

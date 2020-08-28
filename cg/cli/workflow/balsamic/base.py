@@ -72,11 +72,14 @@ def link(context, case_id, sample_id):
 
     for link_obj in link_objs:
         LOG.info(
-            "%s: %s link FASTQ files", link_obj.sample.internal_id, link_obj.sample.data_analysis,
+            "%s: %s link FASTQ files",
+            link_obj.sample.internal_id,
+            link_obj.sample.data_analysis,
         )
         if link_obj.sample.data_analysis and "balsamic" in link_obj.sample.data_analysis.lower():
             LOG.info(
-                "%s has BALSAMIC as data analysis, linking.", link_obj.sample.internal_id,
+                "%s has BALSAMIC as data analysis, linking.",
+                link_obj.sample.internal_id,
             )
             context.obj["analysis_api"].link_sample(
                 fastq_handler=FastqHandler(context.obj),
@@ -284,7 +287,10 @@ def get_priority_as_text(case_obj: models.Family) -> str:
 
 @balsamic.command()
 @click.option(
-    "-d", "--dry-run", is_flag=True, help="print to console without actualising",
+    "-d",
+    "--dry-run",
+    is_flag=True,
+    help="print to console without actualising",
 )
 @click.pass_context
 def start(context: click.Context, dry_run):

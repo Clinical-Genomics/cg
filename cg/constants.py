@@ -54,10 +54,6 @@ ANALYSIS_SOURCES = (
 )
 
 # Constants for crunchy
-BAM_SUFFIX = ".bam"
-BAM_INDEX_SUFFIX = ".bai"
-CRAM_SUFFIX = ".cram"
-CRAM_INDEX_SUFFIX = ".crai"
 FASTQ_FIRST_READ_SUFFIX = "_R1_001.fastq.gz"
 FASTQ_SECOND_READ_SUFFIX = "_R2_001.fastq.gz"
 SPRING_SUFFIX = ".spring"
@@ -66,7 +62,6 @@ FASTQ_DELTA = 21
 
 # tags for storing analyses in Housekeeper
 HK_TAGS = {"wes": ["mip-dna", "wes"], "wgs": ["mip-dna", "wgs"], "wts": ["mip-rna"]}
-HK_BAM_TAGS = ["bam", "bai", "bam-index"]
 HK_FASTQ_TAGS = ["fastq"]
 
 # used to convert MIP tags derived from the deliverables to MIP standard tags and to check for

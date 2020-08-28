@@ -7,7 +7,7 @@ from cg.utils import Process
 @pytest.fixture(scope="function")
 def ls_process():
     """
-        list files process
+    list files process
     """
     binary = "ls"
     process = Process(binary=binary)
@@ -17,7 +17,7 @@ def ls_process():
 @pytest.fixture(scope="function")
 def echo_process():
     """
-        echo process
+    echo process
     """
     binary = "echo"
     process = Process(binary=binary)
@@ -27,7 +27,7 @@ def echo_process():
 @pytest.fixture(scope="function")
 def stderr_output():
     """
-        std err lines
+    std err lines
     """
     lines = (
         "2018-11-29 08:41:38 130-229-8-20-dhcp.local "

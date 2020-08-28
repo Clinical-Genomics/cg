@@ -73,19 +73,19 @@ class MockScoutAPI:
 
     def get_solved_cases(self, days_ago):
         """
-            Get cases solved within chosen timespan
+        Get cases solved within chosen timespan
 
-            Args:
-                days_ago (int): Maximum days ago a case has been solved
+        Args:
+            days_ago (int): Maximum days ago a case has been solved
 
-            Return:
-                cases (list): list of cases
+        Return:
+            cases (list): list of cases
         """
 
         return self._cases
 
     def upload_delivery_report(self, report_path: str, case_id: str, update: bool = False):
-        """ Load a delivery report into a case in the database
+        """Load a delivery report into a case in the database
 
         If the report already exists the function will exit.
         If the user want to load a report that is already in the database

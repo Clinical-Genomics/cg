@@ -14,7 +14,10 @@ from cg.meta.upload.beacon import UploadBeaconApi
 @click.option("-cust", "--customer", help="Name of customer", default="")
 @click.option("-qual", "--quality", help="Variant quality threshold", default=20)
 @click.option(
-    "-ref", "--genome_reference", help="Chromosome build (default=grch37)", default="grch37",
+    "-ref",
+    "--genome_reference",
+    help="Chromosome build (default=grch37)",
+    default="grch37",
 )
 @click.pass_context
 def beacon(
