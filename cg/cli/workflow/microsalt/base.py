@@ -24,9 +24,7 @@ LOG = logging.getLogger(__name__)
 
 
 @click.group("microsalt", invoke_without_command=True)
-@click.option(
-    "-o", "--order", "order_id", help="include all microbial samples for an order"
-)
+@click.option("-o", "--order", "order_id", help="include all microbial samples for an order")
 @click.pass_context
 def microsalt(context: click.Context, order_id):
     """Microbial workflow"""
@@ -40,9 +38,7 @@ def microsalt(context: click.Context, order_id):
         case_tags=PROJECT_TAGS,
         sample_tags=SAMPLE_TAGS,
     )
-    context.obj["api"] = AnalysisAPI(
-        db=context.obj["db"], hk_api=hk_api, lims_api=lims_api
-    )
+    context.obj["api"] = AnalysisAPI(db=context.obj["db"], hk_api=hk_api, lims_api=lims_api)
     context.obj["lims_microsalt_api"] = LimsMicrosaltAPI(lims=lims_api)
 
     if context.invoked_subcommand is None:
@@ -57,9 +53,7 @@ def microsalt(context: click.Context, order_id):
 
 
 @microsalt.command()
-@click.option(
-    "-o", "--order", "order_id", help="link all microbial samples for an order"
-)
+@click.option("-o", "--order", "order_id", help="link all microbial samples for an order")
 @click.argument("sample_id", required=False)
 @click.pass_context
 def link(context: click.Context, order_id: str, sample_id: str):
@@ -128,8 +122,7 @@ def config_case(context: click.Context, dry, order_id: str, sample_id: str):
         context.abort()
 
     parameters = [
-        context.obj["lims_microsalt_api"].get_parameters(sample_obj)
-        for sample_obj in sample_objs
+        context.obj["lims_microsalt_api"].get_parameters(sample_obj) for sample_obj in sample_objs
     ]
 
     filename = order_id if order_id else sample_id
@@ -144,9 +137,7 @@ def config_case(context: click.Context, dry, order_id: str, sample_id: str):
 
 @microsalt.command()
 @click.option("-d", "--dry", is_flag=True, help="print command to console")
-@click.option(
-    "-c", "--config-case", required=False, help="optionally change the config-case"
-)
+@click.option("-c", "--config-case", required=False, help="optionally change the config-case")
 @click.argument("order_id")
 @click.pass_context
 def run(context, dry, config_case, order_id):

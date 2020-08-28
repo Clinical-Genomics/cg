@@ -17,7 +17,7 @@ CONFIG = {
 @pytest.fixture(scope="function")
 def genotype_config():
     """
-        genotype config fixture
+    genotype config fixture
     """
 
     _config = CONFIG
@@ -28,7 +28,7 @@ def genotype_config():
 @pytest.fixture(scope="function")
 def genotypeapi():
     """
-        genotype API fixture
+    genotype API fixture
     """
 
     _genotype_api = GenotypeAPI(CONFIG)

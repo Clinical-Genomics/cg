@@ -15,9 +15,7 @@ class UploadToMutaccAPI:
 
     """API to upload finished cases to mutacc"""
 
-    def __init__(
-        self, scout_api: scoutapi.ScoutAPI, mutacc_auto_api: mutacc_auto.MutaccAutoAPI
-    ):
+    def __init__(self, scout_api: scoutapi.ScoutAPI, mutacc_auto_api: mutacc_auto.MutaccAutoAPI):
 
         self.scout = scout_api
         self.mutacc_auto = mutacc_auto_api
@@ -27,9 +25,7 @@ class UploadToMutaccAPI:
         data = self.data(case)
         if data:
             LOG.info("Extracting reads from case %s", case["_id"])
-            self.mutacc_auto.extract_reads(
-                case=data["case"], variants=data["causatives"]
-            )
+            self.mutacc_auto.extract_reads(case=data["case"], variants=data["causatives"])
 
     def import_cases(self):
         """Use mutacc API to import cases to database"""
@@ -38,21 +34,19 @@ class UploadToMutaccAPI:
 
     def data(self, case) -> dict:
         """
-            Find the necessary data for the case
+        Find the necessary data for the case
 
-            Args:
-                case (dict): case dictionary from scout
+        Args:
+            case (dict): case dictionary from scout
 
-            Returns:
-                data (dict): dictionary with case data, and data on causative variants
+        Returns:
+            data (dict): dictionary with case data, and data on causative variants
         """
 
         if all([self._has_bam(case), self._has_causatives(case)]):
             causatives = self.scout.get_causative_variants(case_id=case["_id"])
             mutacc_case = remap(case, SCOUT_TO_MUTACC_CASE)
-            mutacc_variants = [
-                remap(variant, SCOUT_TO_MUTACC_VARIANTS) for variant in causatives
-            ]
+            mutacc_variants = [remap(variant, SCOUT_TO_MUTACC_VARIANTS) for variant in causatives]
             return {"case": mutacc_case, "causatives": mutacc_variants}
         return {}
 
@@ -60,14 +54,14 @@ class UploadToMutaccAPI:
     def _has_bam(case: dict) -> bool:
 
         """
-            Check that all samples in case has a given path to a bam file,
-            and that the file exists
+        Check that all samples in case has a given path to a bam file,
+        and that the file exists
 
-            Args:
-                case (dict): case dictionary from scout
+        Args:
+            case (dict): case dictionary from scout
 
-            Returns:
-                (bool): True if all samples has valid paths to a bam-file
+        Returns:
+            (bool): True if all samples has valid paths to a bam-file
 
         """
         if case.get("individuals") is None:
@@ -97,13 +91,13 @@ class UploadToMutaccAPI:
     @staticmethod
     def _has_causatives(case: dict) -> bool:
         """
-            Check that the case has marked causative variants in scout
+        Check that the case has marked causative variants in scout
 
-            Args:
-                case (dict): case dictionary from scout
+        Args:
+            case (dict): case dictionary from scout
 
-            Returns:
-                (bool): True if case has marked causative variants in scout
+        Returns:
+            (bool): True if case has marked causative variants in scout
         """
         if case.get("causatives"):
             return True
@@ -119,14 +113,14 @@ MAPPER = namedtuple("mapper", ["field_name_1", "field_name_2", "conv"])
 
 def remap(input_dict: dict, mapper_list: list) -> dict:
     """
-        Reformat dict from one application to be used by another
+    Reformat dict from one application to be used by another
 
-        Args:
-            input_dict (dict): dictionary to be converted
-            mapper_list (list(MAPPER)): list of mapper objects
+    Args:
+        input_dict (dict): dictionary to be converted
+        mapper_list (list(MAPPER)): list of mapper objects
 
-        Returns:
-            output_dict (dict): conveted dictionary
+    Returns:
+        output_dict (dict): conveted dictionary
 
     """
     output_dict = {}
@@ -167,8 +161,8 @@ def resolve_phenotype(scout_phenotype):
 
 def get_gene_string(genes):
     """
-        Function to convert the 'genes' field in the scout variant document
-        to a string format that can be read by mutacc
+    Function to convert the 'genes' field in the scout variant document
+    to a string format that can be read by mutacc
     """
     gene_fields = (
         "hgnc_symbol",
@@ -180,9 +174,7 @@ def get_gene_string(genes):
 
     gene_annotation_info = []
     for gene in genes:
-        gene_info = "|".join(
-            [gene[ann_id] if gene.get(ann_id) else "" for ann_id in gene_fields]
-        )
+        gene_info = "|".join([gene[ann_id] if gene.get(ann_id) else "" for ann_id in gene_fields])
         gene_annotation_info.append(gene_info)
     gene_annotation_info = ",".join(gene_annotation_info)
 
@@ -202,9 +194,7 @@ SCOUT_TO_MUTACC_SAMPLE = (
 SCOUT_TO_MUTACC_CASE = (
     MAPPER("_id", "case_id", str),
     MAPPER("genome_build", "genome_build", str),
-    MAPPER(
-        "panels", "panels", lambda panels: [panel["panel_name"] for panel in panels]
-    ),
+    MAPPER("panels", "panels", lambda panels: [panel["panel_name"] for panel in panels]),
     MAPPER("rank_model_version", "rank_model_version", str),
     MAPPER("sv_rank_model_version", "sv_rank_model_version", str),
     MAPPER("rank_score_threshold", "rank_score_threshold", int),
@@ -221,9 +211,7 @@ SCOUT_TO_MUTACC_CASE = (
 
 SCOUT_TO_MUTACC_FORMAT = (
     MAPPER("genotype_call", "GT", str),
-    MAPPER(
-        "allele_depths", "AD", lambda AD: ",".join([str(element) for element in AD])
-    ),
+    MAPPER("allele_depths", "AD", lambda AD: ",".join([str(element) for element in AD])),
     MAPPER("read_depth", "DP", int),
     MAPPER("genotype_quality", "GQ", int),
     MAPPER("sample_id", "sample_id", str),

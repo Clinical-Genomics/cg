@@ -1,18 +1,23 @@
 import datetime as dt
 
 import pytest
-from cg.apps.lims import LimsAPI
 
+from cg.apps.lims import LimsAPI
 from cg.apps.stats import StatsAPI
 from cg.meta.transfer import TransferLims
 from cg.meta.transfer.flowcell import TransferFlowcell
 
 
-@pytest.fixture
-def data():
+@pytest.fixture(name="data")
+def fixture_data():
     return {
         "samples": [
-            {"name": "ADM1136A3", "index": "ACGTACAT", "flowcell": "HJKMYBCXX", "type": "hiseqx"}
+            {
+                "name": "ADM1136A3",
+                "index": "ACGTACAT",
+                "flowcell": "HJKMYBCXX",
+                "type": "hiseqx",
+            }
         ]
     }
 
@@ -33,7 +38,9 @@ def base_store_stats(store_stats, data):
     for sample_data in data["samples"]:
         project = store_stats.Project(projectname="test", time=dt.datetime.now())
         sample = store_stats.Sample(
-            samplename=sample_data["name"], barcode=sample_data["index"], limsid=sample_data["name"]
+            samplename=sample_data["name"],
+            barcode=sample_data["index"],
+            limsid=sample_data["name"],
         )
         sample.project = project
         unaligned = store_stats.Unaligned(readcounts=300000000, q30_bases_pct=85)

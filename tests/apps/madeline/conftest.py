@@ -95,9 +95,7 @@ def madeline_process(madeline_output):
 class MadelineProcessMock:
     """Class to mock simple madeline process calls"""
 
-    def __init__(
-        self, binary, config=None, config_parameter="--config", madeline_file=None
-    ):
+    def __init__(self, binary, config=None, config_parameter="--config", madeline_file=None):
         """Initialise mock"""
         self.binary = binary
         self.config = config

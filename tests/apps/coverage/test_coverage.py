@@ -42,7 +42,7 @@ def test_chanjo_api_upload(chanjo_config_dict, mocker):
     # ["load", "--sample", sample_id, "--name", sample_name, "--group", group_id,
     #  "--group_name", group_name, "--threshold", "10", bed_file]
     mocked_run_command.assert_called_once_with(
-        [
+        parameters=[
             "load",
             "--sample",
             sample_id,
@@ -68,9 +68,7 @@ def test_chanjo_api_sample_existing(chanjo_config_dict, mocker, mock_process):
     # WHEN fetching an existing sample from the api, with a mocked stdout
     mocked_stdout = '[{"id": "%s"}]' % sample_id
     mocked_stderr = ""
-    MockedProcess = mock_process(
-        result_stderr=mocked_stderr, result_stdout=mocked_stdout
-    )
+    MockedProcess = mock_process(result_stderr=mocked_stderr, result_stdout=mocked_stdout)
     mocked_process = mocker.patch("cg.apps.coverage.api.Process")
     mocked_process.return_value = MockedProcess(
         binary=chanjo_config_dict["chanjo"]["binary_path"],
@@ -92,9 +90,7 @@ def test_chanjo_api_sample_non_existing(chanjo_config_dict, mocker, mock_process
     # WHEN fetching a non existing sample from the api, with a mocked stdout
     mocked_stdout = "[]"
     mocked_stderr = ""
-    MockedProcess = mock_process(
-        result_stderr=mocked_stderr, result_stdout=mocked_stdout
-    )
+    MockedProcess = mock_process(result_stderr=mocked_stderr, result_stdout=mocked_stdout)
     mocked_process = mocker.patch("cg.apps.coverage.api.Process")
     mocked_process.return_value = MockedProcess(
         binary=chanjo_config_dict["chanjo"]["binary_path"],
@@ -118,7 +114,7 @@ def test_chanjo_api_delete_sample(chanjo_config_dict, mocker):
     api.delete_sample(sample_id=sample_id)
 
     # THEN run_command should be called once with list ["db", "remove", sample_id]
-    mocked_run_command.assert_called_once_with(["db", "remove", sample_id])
+    mocked_run_command.assert_called_once_with(parameters=["db", "remove", sample_id])
 
 
 def test_chanjo_api_omim_coverage(chanjo_config_dict, mocker, mock_process):
@@ -135,9 +131,7 @@ def test_chanjo_api_omim_coverage(chanjo_config_dict, mocker, mock_process):
         mean_completeness,
     )
     mocked_stderr = ""
-    MockedProcess = mock_process(
-        result_stderr=mocked_stderr, result_stdout=mocked_stdout
-    )
+    MockedProcess = mock_process(result_stderr=mocked_stderr, result_stdout=mocked_stdout)
     mocked_process = mocker.patch("cg.apps.coverage.api.Process")
     mocked_process.return_value = MockedProcess(
         binary=chanjo_config_dict["chanjo"]["binary_path"],
@@ -166,9 +160,7 @@ def test_chanjo_api_coverage(chanjo_config_dict, mocker, mock_process):
         mean_completeness,
     )
     mocked_stderr = ""
-    MockedProcess = mock_process(
-        result_stderr=mocked_stderr, result_stdout=mocked_stdout
-    )
+    MockedProcess = mock_process(result_stderr=mocked_stderr, result_stdout=mocked_stdout)
     mocked_process = mocker.patch("cg.apps.coverage.api.Process")
     mocked_process.return_value = MockedProcess(
         binary=chanjo_config_dict["chanjo"]["binary_path"],

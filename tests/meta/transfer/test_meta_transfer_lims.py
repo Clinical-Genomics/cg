@@ -1,5 +1,6 @@
 import datetime as dt
-from cg.meta.transfer.lims import SampleState, IncludeOptions
+
+from cg.meta.transfer.lims import IncludeOptions, SampleState
 
 
 def has_same_received_at(lims, sample_obj):
@@ -29,9 +30,7 @@ def test_transfer_samples_received_at_overwriteable(transfer_lims_api):
     assert not has_same_received_at(lims_api, sample)
 
     # WHEN transfer_samples has been called
-    transfer_lims_api.transfer_samples(
-        SampleState.RECEIVED, IncludeOptions.NOTINVOICED.value
-    )
+    transfer_lims_api.transfer_samples(SampleState.RECEIVED, IncludeOptions.NOTINVOICED.value)
 
     # THEN the samples should have the same received_at as in lims
     assert has_same_received_at(lims_api, sample)

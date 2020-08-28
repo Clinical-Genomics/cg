@@ -1,25 +1,14 @@
-import os
 import datetime
+import os
 from pathlib import Path
 
 from cg.meta.report.api import ReportAPI
 
 
-def test_init():
-    ReportAPI(
-        lims_api="lims",
-        store="analysis_store",
-        chanjo_api="chanjo",
-        analysis_api="analysis",
-        scout_api="scout",
-    )
-
-
-def test_collect_delivery_data(report_api, report_store):
+def test_collect_delivery_data(report_api, report_store, case_id):
     # GIVEN an initialised report_api and a case ready for delivery report creation
 
     # WHEN collecting delivery data for a certain case
-    case_id = "yellowhog"
     case = report_store.family(case_id)
     assert case
     assert case.links
@@ -112,7 +101,6 @@ def is_similar_values(value1, value2):
         return is_similar_lists(value1, value2)
 
     if isinstance(value1, datetime.datetime):
-        print(str(value1.date()), str(value1.date()) == value2)
         return str(value1.date()) == value2
 
     if is_float(value1):
@@ -152,8 +140,6 @@ def dict_values_exists_in(a_dict: dict, a_target: str):
 
 
 def value_exists_in(value, a_target: str):
-
-    print(type(value), value)
 
     if isinstance(value, str):
         return value in a_target
@@ -290,16 +276,16 @@ def test_fetch_capture_kit_from_status_db(report_api):
         assert sample.get("capture_kit") == "GMSmyeloid"
 
 
-def test_data_analysis_kit_from_status_db(report_api):
+def test_data_analysis_kit_from_status_db(report_api, case_id):
     # GIVEN an initialised report_api and the db returns samples with data_analysis
 
     # WHEN fetching status data
-    samples = report_api._fetch_case_samples_from_status_db(case_id="yellowhog")
+    samples = report_api._fetch_case_samples_from_status_db(case_id=case_id)
 
     # THEN the report data should have capture kit
     assert samples
     for sample in samples:
-        assert sample.get("data_analysis") == "PIM"
+        assert sample.get("capture_kit")
 
 
 def test_get_application_data_from_status_db(report_samples, report_api):

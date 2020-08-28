@@ -22,7 +22,7 @@ from .delivery_report import delivery_report, delivery_report_to_scout, delivery
 from .genotype import genotypes
 from .mutacc import process_solved, processed_solved
 from .observations import observations
-from .scout import scout
+from .scout import scout, upload_case_to_scout
 from .utils import _suggest_cases_to_upload
 from .validate import validate
 
@@ -141,14 +141,15 @@ def upload(context, family_id, force_restart):
 
 
 @upload.command()
+@click.option("--pipeline", type=str, help="Limit to specific pipeline")
 @click.pass_context
-def auto(context):
+def auto(context: click.Context, pipeline: str = None):
     """Upload all completed analyses."""
 
     click.echo(click.style("----------------- AUTO ------------------------"))
 
     exit_code = 0
-    for analysis_obj in context.obj["status"].analyses_to_upload():
+    for analysis_obj in context.obj["status"].analyses_to_upload(pipeline=pipeline):
 
         if analysis_obj.family.analyses[0].uploaded_at is not None:
             LOG.warning(
@@ -174,6 +175,7 @@ upload.add_command(processed_solved)
 upload.add_command(validate)
 upload.add_command(beacon)
 upload.add_command(scout)
+upload.add_command(upload_case_to_scout)
 upload.add_command(observations)
 upload.add_command(genotypes)
 upload.add_command(coverage)

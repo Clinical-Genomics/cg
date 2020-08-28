@@ -1,5 +1,5 @@
-import logging
 import datetime as dt
+import logging
 from typing import List
 
 import petname
@@ -22,6 +22,7 @@ class AddHandler(BaseHandler):
         invoice_address: str,
         invoice_reference: str,
         scout_access: bool = False,
+        *args,
         **kwargs,
     ) -> models.Customer:
         """Build a new customer record."""
@@ -179,7 +180,10 @@ class AddHandler(BaseHandler):
         """Build a new Flowcell record."""
 
         new_record = self.Flowcell(
-            name=name, sequencer_name=sequencer, sequencer_type=sequencer_type, sequenced_at=date
+            name=name,
+            sequencer_name=sequencer,
+            sequencer_type=sequencer_type,
+            sequenced_at=date,
         )
         return new_record
 
@@ -218,7 +222,11 @@ class AddHandler(BaseHandler):
         """Build a new panel record."""
 
         new_record = self.Panel(
-            name=name, abbrev=abbrev, current_version=version, date=date, gene_count=genes
+            name=name,
+            abbrev=abbrev,
+            current_version=version,
+            date=date,
+            gene_count=genes,
         )
         new_record.customer = customer
         return new_record
@@ -326,7 +334,7 @@ class AddHandler(BaseHandler):
         **kwargs,
     ) -> models.MicrobialSample:
         """Build a new MicrobialSample record.
-        
+
         To commit you also need to assign the sample to an Order.
         """
         internal_id = internal_id or utils.get_unique_id(self.sample)

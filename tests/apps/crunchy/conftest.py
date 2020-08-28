@@ -1,160 +1,140 @@
 """Fixtures for crunchy api"""
-
-import shutil
-import pytest
+import copy
+import json
+import logging
 from pathlib import Path
+from typing import List
+
+import pytest
+
+from cg.apps.crunchy.models import CrunchyFileSchema
+from cg.models import CompressionData
+
+LOG = logging.getLogger(__name__)
 
 
-@pytest.fixture(scope="function")
-def crunchy_test_dir(tmpdir_factory):
-    """Path to a temporary directory"""
-    my_tmpdir = Path(tmpdir_factory.mktemp("data"))
-    yield my_tmpdir
-    shutil.rmtree(str(my_tmpdir))
+class MockProcess:
+    """Mock a process"""
+
+    def __init__(self, process_name: str):
+        """Inititalise mock"""
+        self.stderr = ""
+        self.stdout = ""
+        self.base_call = [process_name]
+        self.process_name = process_name
+
+    def run_command(self, parameters: List):
+        """Mock the run process method"""
+        command = copy.deepcopy(self.base_call)
+        if parameters:
+            command.extend(parameters)
+
+        LOG.info("Running command %s", " ".join(command))
 
 
-@pytest.fixture(scope="function")
-def bam_path(crunchy_test_dir):
-    """Creates a BAM path"""
-    _bam_path = crunchy_test_dir / "file.bam"
-    return _bam_path
+# File fixtures
 
 
-@pytest.fixture(scope="function")
-def existing_bam_path(bam_path):
-    """Creates an existing BAM path"""
-    bam_path.touch()
-    return bam_path
+@pytest.fixture(scope="function", name="file_schema")
+def fixture_file_schema():
+    """Return a instance of the file schema that describes content of SPRING metadata"""
+    return CrunchyFileSchema()
 
 
-@pytest.fixture(scope="function")
-def compressed_bam(existing_bam_path):
-    """Creates BAM with corresponding CRAM, CRAI and FLAG"""
-    bam_path = existing_bam_path
-    cram_path = bam_path.with_suffix(".cram")
-    crai_path = bam_path.with_suffix(".cram.crai")
-    flag_path = bam_path.with_suffix(".crunchy.txt")
-    cram_path.touch()
-    crai_path.touch()
-    flag_path.touch()
-    assert bam_path.exists()
-    assert cram_path.exists()
-    assert crai_path.exists()
+@pytest.fixture(name="real_spring_metadata_path")
+def fixture_real_spring_metadata_path(fixtures_dir):
+    """Return the path to a SPRING metadata file"""
+    return fixtures_dir / "apps" / "crunchy" / "spring_metadata.json"
+
+
+@pytest.fixture(name="spring_metadata")
+def fixture_spring_metadata(compression_object: CompressionData) -> List[dict]:
+    """Return meta data information"""
+    first_read = compression_object.fastq_first
+    second_read = compression_object.fastq_second
+    spring_path = compression_object.spring_path
+    metadata = [
+        {
+            "path": str(first_read),
+            "file": "first_read",
+            "checksum": "checksum_first_read",
+            "algorithm": "sha256",
+        },
+        {
+            "path": str(second_read),
+            "file": "second_read",
+            "checksum": "checksum_second_read",
+            "algorithm": "sha256",
+        },
+        {"path": str(spring_path), "file": "spring"},
+    ]
+    return metadata
+
+
+@pytest.fixture(scope="function", name="spring_metadata_file")
+def fixture_spring_metadata_file(
+    compression_object: CompressionData, spring_metadata: List[dict]
+) -> Path:
+    """Return the path to a populated SPRING metadata file"""
+    metadata_path = compression_object.spring_metadata_path
+
+    with open(metadata_path, "w") as outfile:
+        outfile.write(json.dumps(spring_metadata))
+
+    return metadata_path
+
+
+@pytest.fixture(scope="function", name="sbatch_process")
+def fixture_sbatch_process():
+    """Return a mocked process object"""
+    return MockProcess("sbatch")
+
+
+@pytest.fixture(scope="function", name="fastq_first_file")
+def fixture_fastq_first_file(fastq_first_path):
+    """Creates an existing FASTQ path"""
+    fastq_first_path.touch()
+    return fastq_first_path
+
+
+@pytest.fixture(scope="function", name="fastq_second_file")
+def fixture_fastq_second_file(fastq_second_path):
+    """Creates an existing FASTQ path"""
+    fastq_second_path.touch()
+    return fastq_second_path
+
+
+@pytest.fixture(scope="function", name="spring_file")
+def fixture_spring_file(spring_path):
+    """Creates an existing SPRING file"""
+    spring_path.touch()
+    return spring_path
+
+
+@pytest.fixture(scope="function", name="fastq_paths")
+def fixture_fastq_paths(fastq_first_path, fastq_second_path):
+    """Creates FASTQ paths"""
+    return {
+        "fastq_first_path": fastq_first_path,
+        "fastq_second_path": fastq_second_path,
+    }
+
+
+@pytest.fixture(scope="function", name="existing_fastq_paths")
+def fixture_existing_fastq_paths(fastq_first_file, fastq_second_file):
+    """Creates existing FASTQ paths"""
+    return {
+        "fastq_first_path": fastq_first_file,
+        "fastq_second_path": fastq_second_file,
+    }
+
+
+@pytest.fixture(scope="function", name="compressed_fastqs")
+def fixture_compressed_fastqs(existing_fastq_paths, spring_file, spring_metadata_file):
+    """Creates FASTQs with corresponding SPRING and FLAG"""
+    fastq_paths = existing_fastq_paths
+    flag_path = spring_metadata_file
+
+    assert spring_file.exists()
     assert flag_path.exists()
-    return bam_path
-
-
-@pytest.fixture(scope="function")
-def compressed_bam_without_crai(existing_bam_path):
-    """Creates BAM with corresponding CRAM and FLAG, but no CRAI"""
-    bam_path = existing_bam_path
-    cram_path = bam_path.with_suffix(".cram")
-    flag_path = bam_path.with_suffix(".crunchy.txt")
-    cram_path.touch()
-    flag_path.touch()
-    assert bam_path.exists()
-    assert cram_path.exists()
-    assert flag_path.exists()
-    return bam_path
-
-
-@pytest.fixture(scope="function")
-def compressed_bam_without_flag(existing_bam_path):
-    """Creates BAM with corresponding CRAM and FLAG, but no CRAI"""
-    bam_path = existing_bam_path
-    cram_path = bam_path.with_suffix(".cram")
-    crai_path = bam_path.with_suffix(".cram.crai")
-    cram_path.touch()
-    crai_path.touch()
-    assert bam_path.exists()
-    assert cram_path.exists()
-    assert crai_path.exists()
-    return bam_path
-
-
-@pytest.fixture(scope="function")
-def mock_bam_to_cram():
-    """ This fixture returns a mocked bam_to_cram method. this mock_method
-        Will create files with suffixes .cram and .crai for a given BAM path"""
-
-    def _mock_bam_to_cram_func(
-        bam_path: Path, ntasks: int, mem: int, dry_run: bool = False
-    ):
-
-        _ = dry_run
-        _ = ntasks
-        _ = mem
-
-        cram_path = bam_path.with_suffix(".cram")
-        crai_path = bam_path.with_suffix(".cram.crai")
-        flag_path = bam_path.with_suffix(".crunchy.txt")
-
-        cram_path.touch()
-        crai_path.touch()
-        flag_path.touch()
-
-    return _mock_bam_to_cram_func
-
-
-@pytest.fixture(scope="function")
-def sbatch_content(bam_path, crunchy_config_dict):
-    """Return expected sbatch content"""
-    job_name = bam_path.name + "_bam_to_cram"
-    account = crunchy_config_dict["crunchy"]["slurm"]["account"]
-    ntasks = 1
-    mem = 2
-    mail_user = crunchy_config_dict["crunchy"]["slurm"]["mail_user"]
-    conda_env = crunchy_config_dict["crunchy"]["slurm"]["conda_env"]
-    reference_path = crunchy_config_dict["crunchy"]["cram_reference"]
-    cram_path = bam_path.with_suffix(".cram")
-    pending_path = bam_path.with_suffix(".crunchy.pending.txt")
-    flag_path = bam_path.with_suffix(".crunchy.txt")
-    log_dir = bam_path.parent
-
-    _content = f"""#!/bin/bash
-#SBATCH --job-name={job_name}
-#SBATCH --account={account}
-#SBATCH --ntasks={ntasks}
-#SBATCH --mem={mem}G
-#SBATCH --error={log_dir}/{job_name}.stderr
-#SBATCH --output={log_dir}/{job_name}.stdout
-#SBATCH --mail-type=FAIL
-#SBATCH --mail-user={mail_user}
-#SBATCH --time=4:00:00
-#SBATCH --qos=low
-
-set -e
-
-echo "Running on: $(hostname)"
-
-source activate {conda_env}
-
-
-error() {{
-    if [[ -e {cram_path} ]]
-    then
-        rm {cram_path}
-    fi
-
-    if [[ -e {cram_path}.crai ]]
-    then
-        rm {cram_path}.crai
-    fi
-
-    if [[ -e {pending_path} ]]
-    then
-        rm {pending_path}
-    fi
-
-    exit 1
-}}
-
-trap error ERR
-
-touch {pending_path}
-crunchy -r {reference_path} -t 12 compress bam -b {bam_path} -c {cram_path}
-samtools quickcheck {cram_path}
-touch {flag_path}
-rm {pending_path}"""
-
-    return _content
+    return fastq_paths

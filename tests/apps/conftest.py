@@ -1,9 +1,62 @@
 """Fixtures for testing apps"""
 
+from pathlib import Path
+
 import pytest
 import requests
 
 from cg.utils.commands import Process
+
+# File fixtures for the apps
+
+
+@pytest.fixture
+def balsamic_orderform(orderforms: Path) -> str:
+    """Orderform fixture for Balsamic samples"""
+    _file = orderforms / "1508.21.balsamic.xlsx"
+    return str(_file)
+
+
+@pytest.fixture
+def external_orderform(orderforms: Path) -> str:
+    """Orderform fixture for external samples"""
+    _file = orderforms / "1541.6.external.xlsx"
+    return str(_file)
+
+
+@pytest.fixture
+def fastq_orderform(orderforms: Path):
+    """Orderform fixture for fastq samples"""
+    _file = orderforms / "1508.21.fastq.xlsx"
+    return str(_file)
+
+
+@pytest.fixture
+def metagenome_orderform(orderforms: Path) -> str:
+    """Orderform fixture for metagenome samples"""
+    _file = orderforms / "1605.8.metagenome.xlsx"
+    return str(_file)
+
+
+@pytest.fixture
+def mip_orderform(orderforms: Path) -> str:
+    """Orderform fixture for MIP samples"""
+    _file = orderforms / "1508.21.mip.xlsx"
+    return str(_file)
+
+
+@pytest.fixture
+def mip_balsamic_orderform(orderforms: Path) -> str:
+    """Orderform fixture for MIP and Balsamic samples"""
+    _file = orderforms / "1508.21.mip_balsamic.xlsx"
+    return str(_file)
+
+
+@pytest.fixture
+def mip_rna_orderform(orderforms: Path) -> str:
+    """Orderform fixture for MIP RNA samples"""
+    _file = orderforms / "1508.21.mip_rna.xlsx"
+    return str(_file)
 
 
 @pytest.fixture

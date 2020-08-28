@@ -133,9 +133,7 @@ def add_application(disk_store, application_tag="dummy_tag"):
     )
     disk_store.add_commit(application)
     prices = {"standard": 10, "priority": 20, "express": 30, "research": 5}
-    version = disk_store.add_version(
-        application, 1, valid_from=datetime.now(), prices=prices
-    )
+    version = disk_store.add_version(application, 1, valid_from=datetime.now(), prices=prices)
 
     disk_store.add_commit(version)
     return application_tag

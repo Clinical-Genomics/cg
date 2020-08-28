@@ -58,7 +58,7 @@ def run(madeline_process: Process, ped_stream: List[str]):
             output_prefix,
             in_file.name,
         ]
-        madeline_process.run_command(madeline_call)
+        madeline_process.run_command(parameters=madeline_call)
 
     with open(out_path, "r") as output:
         svg_content = output.read()

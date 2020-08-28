@@ -50,15 +50,15 @@ def test_parsing_fastq_orderform(fastq_orderform):
     # ... and collect relevant sample info
     normal_sample = data["items"][1]
     tumour_sample = data["items"][0]
-    assert normal_sample["name"] == "whole-genome-2"
+    assert normal_sample["name"] == "s2"
     assert normal_sample["container"] == "Tube"
     assert normal_sample["data_analysis"] == "fastq"
     assert normal_sample["application"] == "WGSLIFC030"
     assert normal_sample["sex"] == "female"
-    assert normal_sample["case"] == "whole-genome"
+    assert normal_sample["case"] == "family"
     assert data["customer"] == "cust000"
     assert normal_sample["require_qcok"] is False
-    assert normal_sample["source"] == "saliva"
+    assert normal_sample["source"] == "blood"
     assert normal_sample["priority"] == "research"
 
     assert normal_sample["container_name"] == ""
@@ -67,10 +67,10 @@ def test_parsing_fastq_orderform(fastq_orderform):
     assert normal_sample["tumour"] is False
 
     assert tumour_sample["tumour"] is True
-    assert tumour_sample["source"] == "blood"
+    assert tumour_sample["source"] == "other"
 
     assert tumour_sample["quantity"] == "1"
-    assert tumour_sample["comment"] == "comment"
+    assert tumour_sample["comment"] == "other Elution buffer"
 
 
 def test_parsing_mip_orderform(mip_orderform):
@@ -83,20 +83,18 @@ def test_parsing_mip_orderform(mip_orderform):
     assert data["project_type"] == "mip"
     assert data["customer"] == "cust000"
     # ... and it should find and group all samples in families
-    assert len(data["items"]) == 5
+    assert len(data["items"]) == 36
     # ... and collect relevant data about the families
     trio_family = data["items"][0]
-    assert len(trio_family["samples"]) == 7
-    assert trio_family["name"] == "whole-genome"
+    assert len(trio_family["samples"]) == 3
+    assert trio_family["name"] == "family"
     assert trio_family["priority"] == "research"
-    assert set(trio_family["panels"]) == set(
-        ["AD-HSP", "CSAnemia", "CILM", "Ataxi", "ATX", "COCA", "bindevev"]
-    )
+    assert set(trio_family["panels"]) == set(["AD-HSP", "Ataxi", "ATX"])
     assert trio_family["require_qcok"] is True
     # ... and collect relevant info about the samples
 
     proband_sample = trio_family["samples"][0]
-    assert proband_sample["name"] == "whole-genome-1"
+    assert proband_sample["name"] == "s1"
     assert proband_sample["container"] == "96 well plate"
     assert proband_sample["data_analysis"] == "MIP"
     assert proband_sample["application"] == "WGSPCFC030"
@@ -104,7 +102,7 @@ def test_parsing_mip_orderform(mip_orderform):
     # family-id on the family
     # customer on the order (data)
     # require-qc-ok on the family
-    assert proband_sample["source"] == "blood"
+    assert proband_sample["source"] == "other"
     assert proband_sample["tumour"] is True
 
     assert proband_sample["container_name"] == "plate"
@@ -113,11 +111,11 @@ def test_parsing_mip_orderform(mip_orderform):
     # panels on the family
     assert proband_sample["status"] == "affected"
 
-    assert proband_sample["mother"] == "whole-genome-2"
-    assert proband_sample["father"] == "whole-genome-3"
+    assert proband_sample["mother"] == "s2"
+    assert proband_sample["father"] == "s3"
 
     assert proband_sample["quantity"] == "1"
-    assert proband_sample["comment"] == "comment"
+    assert proband_sample["comment"] == "other Elution buffer"
 
 
 def test_parsing_external_orderform(external_orderform):
@@ -249,26 +247,26 @@ def test_parsing_balsamic_orderform(balsamic_orderform):
     assert data["project_type"] == "balsamic"
 
     # ... and it should find and group all samples in case
-    assert len(data["items"]) == 5
+    assert len(data["items"]) == 36
 
     # ... and collect relevant data about the case
     # ... and collect relevant info about the samples
 
     case = data["items"][0]
     sample = case["samples"][0]
-    assert len(case["samples"]) == 7
+    assert len(case["samples"]) == 3
 
     # This information is required
 
-    assert sample["name"] == "whole-genome-1"
+    assert sample["name"] == "s1"
     assert sample["container"] == "96 well plate"
     assert sample["data_analysis"] == "Balsamic "
     assert sample["application"] == "WGSPCFC030"
     assert sample["sex"] == "male"
-    assert case["name"] == "whole-genome"
+    assert case["name"] == "family"
     assert data["customer"] == "cust000"
     assert case["require_qcok"] is True
-    assert sample["source"] == "blood"
+    assert sample["source"] == "other"
     assert case["priority"] == "research"
 
     # Required if Plate
@@ -276,7 +274,7 @@ def test_parsing_balsamic_orderform(balsamic_orderform):
     assert sample["well_position"] == "A:1"
 
     # This information is required for panel- or exome analysis
-    assert sample["elution_buffer"] == "Nuclease free water"
+    assert sample["elution_buffer"] == 'Other (specify in "Comments")'
 
     # This information is required for Balsamic analysis (cancer)
     assert sample["tumour"] is True
@@ -289,7 +287,7 @@ def test_parsing_balsamic_orderform(balsamic_orderform):
 
     # This information is optional
     assert sample["quantity"] == "1"
-    assert sample["comment"] == "comment"
+    assert sample["comment"] == "other Elution buffer"
 
 
 def test_parsing_mip_balsamic_orderform(mip_balsamic_orderform):
@@ -302,20 +300,18 @@ def test_parsing_mip_balsamic_orderform(mip_balsamic_orderform):
     assert data["project_type"] == "mip_balsamic"
     assert data["customer"] == "cust000"
     # ... and it should find and group all samples in families
-    assert len(data["items"]) == 5
+    assert len(data["items"]) == 36
     # ... and collect relevant data about the families
     trio_family = data["items"][0]
-    assert len(trio_family["samples"]) == 7
-    assert trio_family["name"] == "whole-genome"
+    assert len(trio_family["samples"]) == 3
+    assert trio_family["name"] == "family"
     assert trio_family["priority"] == "research"
-    assert set(trio_family["panels"]) == set(
-        ["AD-HSP", "CSAnemia", "CILM", "Ataxi", "ATX", "COCA", "bindevev"]
-    )
+    assert set(trio_family["panels"]) == set(["AD-HSP", "Ataxi", "ATX"])
     assert trio_family["require_qcok"] is True
     # ... and collect relevant info about the samples
 
     proband_sample = trio_family["samples"][0]
-    assert proband_sample["name"] == "whole-genome-1"
+    assert proband_sample["name"] == "s1"
     assert proband_sample["container"] == "96 well plate"
     assert proband_sample["data_analysis"] == "MIP + Balsamic"
     assert proband_sample["application"] == "WGSPCFC030"
@@ -323,19 +319,19 @@ def test_parsing_mip_balsamic_orderform(mip_balsamic_orderform):
     # family-id on the family
     # customer on the order (data)
     # require-qc-ok on the family
-    assert proband_sample["source"] == "blood"
+    assert proband_sample["source"] == "other"
 
     assert proband_sample["container_name"] == "plate"
     assert proband_sample["well_position"] == "A:1"
 
     # This information is required for panel- or exome analysis
-    assert proband_sample["elution_buffer"] == "Nuclease free water"
+    assert proband_sample["elution_buffer"] == 'Other (specify in "Comments")'
 
     # panels on the family
     assert proband_sample["status"] == "affected"
 
-    assert proband_sample["mother"] == "whole-genome-2"
-    assert proband_sample["father"] == "whole-genome-3"
+    assert proband_sample["mother"] == "s2"
+    assert proband_sample["father"] == "s3"
 
     # This information is required for Balsamic analysis (cancer)
     assert proband_sample["tumour"] is True
@@ -347,7 +343,7 @@ def test_parsing_mip_balsamic_orderform(mip_balsamic_orderform):
     assert proband_sample["tissue_block_size"] == "small"
 
     assert proband_sample["quantity"] == "1"
-    assert proband_sample["comment"] == "comment"
+    assert proband_sample["comment"] == "other Elution buffer"
 
     mother_sample = trio_family["samples"][1]
     assert mother_sample.get("mother") is None
@@ -363,59 +359,18 @@ def test_parsing_mip_rna_orderform(mip_rna_orderform):
     assert data["project_type"] == "mip_rna"
     assert data["customer"] == "cust000"
     # ... and it should find and group all samples in cases
-    assert len(data["items"]) == 1
+    assert len(data["items"]) == 36
     # ... and collect relevant data about the cases
     first_case = data["items"][0]
-    assert len(first_case["samples"]) == 38
-    assert first_case["name"] == "rna"
+    assert len(first_case["samples"]) == 3
+    assert first_case["name"] == "family"
     assert first_case["priority"] == "research"
-    assert set(first_case["panels"]) == set(
-        [
-            "AD-HSP",
-            "ATX",
-            "Ataxi",
-            "CILM",
-            "COCA",
-            "CSAnemia",
-            "CSP",
-            "CTD",
-            "DSD",
-            "ENDO",
-            "EP",
-            "ET",
-            "HYDRO",
-            "HYP",
-            "IBD-list",
-            "IBMFS",
-            "ID",
-            "IEM",
-            "IF",
-            "IMY",
-            "Inherited cancer",
-            "MIT",
-            "MSKI",
-            "ND",
-            "NJU",
-            "NMD",
-            "OMIM-AUTO",
-            "PEDHEP",
-            "PID",
-            "PIDCAD",
-            "PU",
-            "SEXDET",
-            "SEXDIF",
-            "SKD",
-            "SPG",
-            "bindevev",
-            "mtDNA",
-            "panel1",
-        ]
-    )
+    assert set(first_case["panels"]) == set(["AD-HSP", "Ataxi", "ATX"])
     assert first_case["require_qcok"] is True
     # ... and collect relevant info about the samples
 
     first_sample = first_case["samples"][0]
-    assert first_sample["name"] == "rna-1"
+    assert first_sample["name"] == "s1"
     assert first_sample["container"] == "96 well plate"
     assert first_sample["data_analysis"] == "MIP RNA"
     assert first_sample["application"] == "RNAPOAR025"
@@ -423,7 +378,7 @@ def test_parsing_mip_rna_orderform(mip_rna_orderform):
     # case-id on the case
     # customer on the order (data)
     # require-qc-ok on the family
-    assert first_sample["source"] == "blood"
+    assert first_sample["source"] == "other"
 
     assert first_sample["container_name"] == "plate"
     assert first_sample["well_position"] == "A:1"
@@ -431,17 +386,17 @@ def test_parsing_mip_rna_orderform(mip_rna_orderform):
     # panels on the family
     assert first_sample["status"] == "affected"
 
-    assert first_sample["mother"] == "rna-2"
-    assert first_sample["father"] == "rna-3"
+    assert first_sample["mother"] == "s2"
+    assert first_sample["father"] == "s3"
 
     assert first_sample["tumour"] is True
 
     assert first_sample["quantity"] == "1"
-    assert first_sample["comment"] == "comment"
+    assert first_sample["comment"] == "other Elution buffer"
 
     # required for RNA samples
-    assert first_sample["from_sample"] == "rna-1"
-    assert first_sample["time_point"] == "1"
+    assert first_sample["from_sample"] == "s1"
+    assert first_sample["time_point"] == "0"
 
 
 def test_parse_mip_rna(skeleton_orderform_sample: dict):

@@ -34,9 +34,7 @@ def ensure_application_version(disk_store, application_tag="dummy_tag"):
     prices = {"standard": 10, "priority": 20, "express": 30, "research": 5}
     version = disk_store.application_version(application, 1)
     if not version:
-        version = disk_store.add_version(
-            application, 1, valid_from=datetime.now(), prices=prices
-        )
+        version = disk_store.add_version(application, 1, valid_from=datetime.now(), prices=prices)
 
         disk_store.add_commit(version)
     return version

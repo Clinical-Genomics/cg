@@ -3,29 +3,31 @@ import datetime as dt
 import logging
 import os
 import shutil
+from pathlib import Path
 
 import ruamel.yaml
+
 from cg.exc import AnalysisDuplicationError
-from pathlib import Path
 
 LOG = logging.getLogger(__name__)
 
 
-def gather_files_and_bundle_in_housekeeper(config_stream, hk_api, status, case_obj):
-    """Function to gather files and bundle in housekeeper"""
+def gather_files_and_bundle_in_housekeeper(
+    config_path, deliverables_file, hk_api, status, case_obj
+):
+    """Function to create a bundle for an analysis in housekeeper"""
 
-    bundle_data = _add_analysis(config_stream, case_obj)
-
+    bundle_data = _parse_bundle_data(config_path, deliverables_file, case_obj)
     results = hk_api.add_bundle(bundle_data)
+
     if not results:
-        raise AnalysisDuplicationError("analysis version already added")
+        raise AnalysisDuplicationError("Analysis version already added")
     bundle_obj, version_obj = results
 
     _reset_analysis_action(case_obj)
     new_analysis = _create_analysis(bundle_data, case_obj, status, version_obj)
-    version_date = version_obj.created_at.date()
-    LOG.info(f"new bundle added: {bundle_obj.name}, version {version_date}")
     _include_files_in_housekeeper(bundle_obj, hk_api, version_obj)
+
     return new_analysis
 
 
@@ -33,6 +35,11 @@ def _include_files_in_housekeeper(bundle_obj, hk_api, version_obj):
     """Function to include files in housekeeper"""
     hk_api.include(version_obj)
     hk_api.add_commit(bundle_obj, version_obj)
+    LOG.info(
+        "New bundle included: %s, version %s",
+        bundle_obj.name,
+        version_obj.created_at.date(),
+    )
 
 
 def _create_analysis(bundle_data, case_obj, status, version_obj):
@@ -57,36 +64,55 @@ def _create_analysis(bundle_data, case_obj, status, version_obj):
 
 
 def _reset_analysis_action(case_obj):
+    """Resets desired action on the case"""
     case_obj.action = None
 
 
-def _add_analysis(config_stream, case_obj):
+def parse_created(config_data: dict) -> dt.datetime:
+    """Parse out analysis creation data from analysis"""
+    datetime_str = config_data["analysis"]["config_creation_date"]
+    return dt.datetime.strptime(datetime_str, "%Y-%m-%d %H:%M")
+
+
+def parse_version(config_data: dict) -> dt.datetime:
+    """Parse out analysis pipeline version from analysis"""
+    return config_data["analysis"]["BALSAMIC_version"]
+
+
+def _parse_bundle_data(config_path, deliverables_file, case_obj):
     """Gather information from balsamic analysis to store."""
-    with Path(config_stream).open() as in_stream:
-        meta_raw = ruamel.yaml.safe_load(in_stream)
+
+    with Path(config_path).open() as config_stream:
+        config_raw = ruamel.yaml.safe_load(config_stream)
+        created = parse_created(config_raw)
+        version = parse_version(config_raw)
+
+    with Path(deliverables_file).open() as in_stream:
+        deliverables_raw = ruamel.yaml.safe_load(in_stream)
+
     new_bundle = _build_bundle(
-        meta_raw, name=case_obj.internal_id, created=dt.datetime.now(), version="1"
+        deliverables_raw, name=case_obj.internal_id, created=created, version=version
     )
     return new_bundle
 
 
-def _build_bundle(meta_data: dict, name: str, created: dt.datetime, version: str) -> dict:
+def _build_bundle(deliverables_data: dict, name: str, created: dt.datetime, version: str) -> dict:
     """Create a new bundle."""
     data = {
         "name": name,
         "created": created,
         "pipeline_version": version,
-        "files": _get_files(meta_data),
+        "files": _get_files(deliverables_data),
     }
     return data
 
 
-def _get_files(meta_data: dict) -> list:
+def _get_files(deliverables_data: dict) -> list:
     """Get all the files from the balsamic files."""
 
     paths = {}
-    for tag in meta_data["files"]:
-        for path_str in meta_data["files"][tag]:
+    for tag in deliverables_data["files"]:
+        for path_str in deliverables_data["files"][tag]:
             path = Path(path_str).name
             if path in paths.keys():
                 paths[path]["tags"].append(tag)
@@ -105,4 +131,5 @@ def _get_files(meta_data: dict) -> list:
 
 
 def compress_directory(path):
+    """Compresses a directory and returns its compressed name"""
     return shutil.make_archive(path, "gztar", path, logger=LOG)

@@ -50,9 +50,7 @@ class UploadCoverageApi:
             if chanjo_sample and replace:
                 self.chanjo_api.delete_sample(sample_data["sample"])
             elif chanjo_sample:
-                LOG.warning(
-                    "sample already loaded, skipping: %s", sample_data["sample"]
-                )
+                LOG.warning("sample already loaded, skipping: %s", sample_data["sample"])
                 continue
 
             LOG.debug("upload coverage for sample: %s", sample_data["sample"])

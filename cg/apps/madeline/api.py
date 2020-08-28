@@ -52,8 +52,7 @@ class MadelineAPI:
     def strip_script_tag(content: str):
         """Strip away a script tag from a string"""
         script_tag = (
-            '<script type="text/javascript" xlink:href='
-            '"javascript/madeline.js"></script>'
+            '<script type="text/javascript" xlink:href=' '"javascript/madeline.js"></script>'
         )
         return content.replace(script_tag, "")
 
@@ -83,7 +82,7 @@ class MadelineAPI:
                 output_prefix,
                 in_file.name,
             ]
-            self.process.run_command(madeline_call)
+            self.process.run_command(parameters=madeline_call)
 
         with open(out_path, "r") as output:
             svg_content = output.read()

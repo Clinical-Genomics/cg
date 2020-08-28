@@ -15,7 +15,7 @@ LOG = logging.getLogger(__name__)
 class LoqusdbAPI:
 
     """
-        API for loqusdb
+    API for loqusdb
     """
 
     def __init__(self, config: dict, analysis_type: str = "wgs"):
@@ -55,7 +55,7 @@ class LoqusdbAPI:
             load_call_parameters.extend(["--sv-variants", vcf_sv_path])
 
         nr_variants = 0
-        self.process.run_command(load_call_parameters)
+        self.process.run_command(parameters=load_call_parameters)
         for line in self.process.stderr_lines():
             line_content = line.split("INFO")[-1].strip()
             if "inserted" in line_content:
@@ -68,7 +68,7 @@ class LoqusdbAPI:
         case_obj = None
         cases_parameters = ["cases", "-c", case_id, "--to-json"]
 
-        self.process.run_command(cases_parameters)
+        self.process.run_command(parameters=cases_parameters)
 
         output = self.process.stdout
 
@@ -86,7 +86,7 @@ class LoqusdbAPI:
         duplicates_params = ["profile", "--check-vcf", vcf_file, "--profile-threshold", "0.95"]
 
         try:
-            self.process.run_command(duplicates_params)
+            self.process.run_command(parameters=duplicates_params)
         except CalledProcessError:
             # If CalledProcessError is raised, log and raise error
             LOG.critical("Could not run profile command")

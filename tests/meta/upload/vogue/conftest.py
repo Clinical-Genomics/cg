@@ -14,21 +14,17 @@ GTCONFIG = {
         "binary_path": "/path/to/genotype_path",
     }
 }
-VOGUECONFIG = {"vogue": {"binary_path": "/path/to/vogue_path"}}
+VOGUECONFIG = {"vogue": {"binary_path": "/path/to/vogue_path", "config_path": "vogue_config"}}
 
-GENOTYPE_RETURN_SAMPLE = (
-    b'{"ACC5346A3": {"status":"pass"}, "SIB903A19": {"status":"pass"}}'
-)
+GENOTYPE_RETURN_SAMPLE = b'{"ACC5346A3": {"status":"pass"}, "SIB903A19": {"status":"pass"}}'
 
-GENOTYPE_RETURN_SAMPLE_ANALYSIS = (
-    b'{"ACC5346A3": {"snp": {}}, "SIB903A19": {"snp": {}}}'
-)
+GENOTYPE_RETURN_SAMPLE_ANALYSIS = b'{"ACC5346A3": {"snp": {}}, "SIB903A19": {"snp": {}}}'
 
 
 @pytest.fixture(scope="function")
 def genotype_return():
     """
-        genotype config fixture
+    genotype config fixture
     """
 
     _configs = {
@@ -55,7 +51,7 @@ class MockApplication:
 
 class MockApplications:
     """
-      Has function to return list of applications
+    Has function to return list of applications
     """
 
     def __init__(self):
@@ -72,7 +68,7 @@ class MockApplications:
 
 class MockStore:
     """
-        Mock for Store
+    Mock for Store
     """
 
     def __init__(self):
@@ -86,7 +82,7 @@ class MockStore:
 @pytest.fixture(scope="function")
 def genotype_api():
     """
-        genotype API fixture
+    genotype API fixture
     """
 
     _genotype_api = GenotypeAPI(GTCONFIG)
@@ -96,7 +92,7 @@ def genotype_api():
 @pytest.fixture(scope="function")
 def vogue_api():
     """
-        vogue API fixture
+    vogue API fixture
     """
 
     _vogue_api = VogueAPI(VOGUECONFIG)
@@ -106,7 +102,7 @@ def vogue_api():
 @pytest.fixture(scope="function")
 def store():
     """
-       returning MockStore instance
+    returning MockStore instance
     """
 
     _store = MockStore()

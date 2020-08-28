@@ -22,12 +22,7 @@ class ChanjoAPI:
         self.process = Process(self.chanjo_binary, self.chanjo_config)
 
     def upload(
-        self,
-        sample_id: str,
-        sample_name: str,
-        group_id: str,
-        group_name: str,
-        bed_file: str,
+        self, sample_id: str, sample_name: str, group_id: str, group_name: str, bed_file: str
     ):
         """Upload coverage for a sample."""
 
@@ -46,13 +41,13 @@ class ChanjoAPI:
             bed_file,
         ]
 
-        self.process.run_command(load_parameters)
+        self.process.run_command(parameters=load_parameters)
 
     def sample(self, sample_id: str) -> dict:
         """Fetch sample from the database."""
 
         sample_parameters = ["db", "samples", "-s", sample_id]
-        self.process.run_command(sample_parameters)
+        self.process.run_command(parameters=sample_parameters)
         samples = json.loads(self.process.stdout)
 
         for sample in samples:
@@ -64,7 +59,7 @@ class ChanjoAPI:
     def delete_sample(self, sample_id: str):
         """Delete sample from database."""
         delete_parameters = ["db", "remove", sample_id]
-        self.process.run_command(delete_parameters)
+        self.process.run_command(parameters=delete_parameters)
 
     def omim_coverage(self, samples: List[str]) -> dict:
         """Calculate omim coverage for samples"""
@@ -72,7 +67,7 @@ class ChanjoAPI:
         omim_parameters = ["calculate", "coverage", "--omim"]
         for sample in samples:
             omim_parameters.extend(["-s", sample["id"]])
-        self.process.run_command(omim_parameters)
+        self.process.run_command(parameters=omim_parameters)
         data = json.loads(self.process.stdout)
         return data
 
@@ -90,6 +85,6 @@ class ChanjoAPI:
                 "-f",
                 tmp_gene_file.name,
             ]
-            self.process.run_command(coverage_parameters)
+            self.process.run_command(parameters=coverage_parameters)
         data = json.loads(self.process.stdout).get(sample_id)
         return data

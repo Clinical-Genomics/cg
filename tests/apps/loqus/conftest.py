@@ -75,7 +75,7 @@ class ProcessMock(Process):
 @pytest.fixture(scope="function")
 def loqus_config():
     """
-        loqusdb config fixture
+    loqusdb config fixture
     """
 
     _config = CONFIG
@@ -86,7 +86,7 @@ def loqus_config():
 @pytest.fixture(scope="function")
 def loqus_binary_path(loqus_config):
     """
-        loqusdb binary fixture
+    loqusdb binary fixture
     """
 
     return loqus_config["loqusdb"]["binary_path"]
@@ -95,7 +95,7 @@ def loqus_binary_path(loqus_config):
 @pytest.fixture(scope="function")
 def loqus_config_path(loqus_config):
     """
-        loqusdb binary fixture
+    loqusdb binary fixture
     """
 
     return loqus_config["loqusdb"]["config_path"]
@@ -105,7 +105,7 @@ def loqus_config_path(loqus_config):
 def loqus_process(loqus_binary_path, loqus_config_path):
 
     """
-        Return mocked cg.utils.Process instance
+    Return mocked cg.utils.Process instance
     """
 
     return ProcessMock(binary=loqus_binary_path, config=loqus_config_path)
@@ -115,7 +115,7 @@ def loqus_process(loqus_binary_path, loqus_config_path):
 def loqus_process_exception(loqus_binary_path, loqus_config_path):
 
     """
-        Return mocked cg.utils.Process instance
+    Return mocked cg.utils.Process instance
     """
 
     return ProcessMock(binary=loqus_binary_path, config=loqus_config_path, error=True)
@@ -124,7 +124,7 @@ def loqus_process_exception(loqus_binary_path, loqus_config_path):
 @pytest.fixture(scope="function")
 def loqusdbapi(loqus_config, loqus_process):
     """
-        loqusdb API fixture
+    loqusdb API fixture
     """
 
     _loqus_api = LoqusdbAPI(loqus_config)
@@ -136,7 +136,7 @@ def loqusdbapi(loqus_config, loqus_process):
 @pytest.fixture(scope="function")
 def loqusdbapi_exception(loqus_config, loqus_process_exception):
     """
-        loqusdb API fixture
+    loqusdb API fixture
     """
 
     _loqus_api = LoqusdbAPI(loqus_config)
@@ -148,7 +148,7 @@ def loqusdbapi_exception(loqus_config, loqus_process_exception):
 @pytest.fixture(scope="function")
 def loqusdb_output():
     """
-        loqusdb stderr for a successful load
+    loqusdb stderr for a successful load
     """
     return LOQUSDB_OUTPUT
 
@@ -156,7 +156,7 @@ def loqusdb_output():
 @pytest.fixture(scope="function")
 def loqusdb_case_output():
     """
-        loqusdb output for a 'loqusdb cases -c <case_id> --to-json' command
+    loqusdb output for a 'loqusdb cases -c <case_id> --to-json' command
     """
 
     _output = (
@@ -213,7 +213,7 @@ def loqusdb_duplicate_output():
 def popen_obj_mock():
 
     """
-        Return mocked subprocess.Popen instance
+    Return mocked subprocess.Popen instance
     """
 
     return PopenMock(mock_stdout=LOQUSDB_OUTPUT.decode("utf-8").split("\n"))
@@ -221,7 +221,7 @@ def popen_obj_mock():
 
 class PopenMock:
     """
-        Mock subprocess.Popen class
+    Mock subprocess.Popen class
     """
 
     def __init__(self, mock_stdout):

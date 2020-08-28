@@ -1,5 +1,6 @@
 """ Trailblazer API for cg """ ""
 import datetime as dt
+import logging
 import shutil
 from pathlib import Path
 from typing import List
@@ -7,14 +8,13 @@ from typing import List
 import click
 import ruamel.yaml
 from trailblazer.mip.start import MipCli
-from trailblazer.store import Store, models
-from trailblazer.cli.utils import environ_email
+from trailblazer.store import api, models, Store
 from trailblazer.mip import files, fastq, trending
 
-from .add import AddHandler
+LOG = logging.getLogger(__name__)
 
 
-class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
+class TrailblazerAPI(Store, fastq.FastqHandler):
     """Interface to Trailblazer for `cg`."""
 
     parse_sampleinfo = staticmethod(files.parse_sampleinfo)
@@ -23,39 +23,22 @@ class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
         super(TrailblazerAPI, self).__init__(
             config["trailblazer"]["database"], families_dir=config["trailblazer"]["root"]
         )
-        self.mip_cli = MipCli(config["trailblazer"]["script"], config["trailblazer"]["pipeline"])
-        self.mip_config = config["trailblazer"]["mip_config"]
-
-    def run(
-        self,
-        case_id: str,
-        priority: str = "normal",
-        email: str = None,
-        skip_evaluation: bool = False,
-        start_with=None,
-    ):
-        """Start MIP."""
-        email = email or environ_email()
-        kwargs = dict(
-            config=self.mip_config,
-            case=case_id,
-            priority=priority,
-            email=email,
-            start_with=start_with,
+        self.mip_cli = MipCli(
+            script=config["trailblazer"]["script"],
+            pipeline=config["trailblazer"]["pipeline"],
+            conda_env=config["trailblazer"]["conda_env"],
         )
-        if skip_evaluation:
-            kwargs["skip_evaluation"] = True
-        self.mip_cli(**kwargs)
-        for old_analysis in self.analyses(family=case_id):
-            old_analysis.is_deleted = True
-        self.commit()
-        self.add_pending(case_id, email=email)
+        self.mip_config = config["trailblazer"]["mip_config"]
 
     def mark_analyses_deleted(self, case_id: str):
         """ mark analyses connected to a case as deleted """
         for old_analysis in self.analyses(family=case_id):
             old_analysis.is_deleted = True
         self.commit()
+
+    def add_pending_analysis(self, case_id: str, email: str = None) -> models.Analysis:
+        """ Add analysis as pending"""
+        self.add_pending(case_id, email)
 
     @staticmethod
     def get_sampleinfo(analysis: models.Analysis) -> str:
@@ -68,6 +51,36 @@ class TrailblazerAPI(Store, AddHandler, fastq.FastqHandler):
     def parse_qcmetrics(data: dict) -> dict:
         """Call internal Trailblazer MIP API."""
         return files.parse_qcmetrics(data)
+
+    def is_analysis_ongoing(self, case_id: str) -> bool:
+        """Call internal Trailblazer API"""
+        return self.is_latest_analysis_ongoing(case_id=case_id)
+
+    def is_analysis_failed(self, case_id: str) -> bool:
+        """Call internal Trailblazer API"""
+        return self.is_latest_analysis_failed(case_id=case_id)
+
+    def is_analysis_completed(self, case_id: str) -> bool:
+        """Call internal Trailblazer API"""
+        return self.is_latest_analysis_completed(case_id=case_id)
+
+    def get_analysis_status(self, case_id: str) -> str:
+        """Call internal Trailblazer API"""
+        return self.get_latest_analysis_status(case_id=case_id)
+
+    def has_analysis_started(self, case_id: str) -> bool:
+        """Check if analysis has started"""
+        statuses = ("ongoing", "failed", "completed")
+        get_analysis_status = {
+            "ongoing": self.is_analysis_ongoing,
+            "failed": self.is_analysis_failed,
+            "completed": self.is_analysis_completed,
+        }
+        for status in statuses:
+            has_started = get_analysis_status[status](case_id=case_id)
+            if has_started:
+                return has_started
+        return False
 
     def write_panel(self, case_id: str, content: List[str]):
         """Write the gene panel to the defined location."""

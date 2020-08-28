@@ -21,8 +21,8 @@ def config_raw(files_raw):
 
 
 @pytest.fixture(scope="function")
-def config_data():
-    """ config data fixture """
+def config_data_rna():
+    """ config data fixture for rna analyses"""
     return {
         "email": None,
         "case": "case_id",
@@ -31,6 +31,20 @@ def config_data():
         "out_dir": "tests/fixtures/apps/mip/rna/store",
         "priority": "low",
         "sampleinfo_path": "tests/fixtures/apps/mip/rna/store/case_qc_sample_info.yaml",
+    }
+
+
+@pytest.fixture(scope="function")
+def config_data_dna():
+    """ config data fixture for dna analyses"""
+    return {
+        "email": None,
+        "case": "case_id",
+        "samples": [{"id": "sample_id", "type": "wgs"}],
+        "is_dryrun": False,
+        "out_dir": "tests/fixtures/apps/mip/dna/store",
+        "priority": "low",
+        "sampleinfo_path": "tests/fixtures/apps/mip/dna/store/case_qc_sample_info.yaml",
     }
 
 
@@ -46,9 +60,19 @@ def sampleinfo_data():
 
 
 @pytest.fixture(scope="function")
-def deliverables_raw(config_data):
+def rna_deliverables_raw(config_data_rna):
     """ raw_deliverables fixture """
-    return ruamel.yaml.safe_load(Path(config_data["out_dir"], "case_id_deliverables.yaml").open())
+    return ruamel.yaml.safe_load(
+        Path(config_data_rna["out_dir"], "case_id_deliverables.yaml").open()
+    )
+
+
+@pytest.fixture(scope="function")
+def dna_deliverables_raw(config_data_dna):
+    """ raw_deliverables fixture """
+    return ruamel.yaml.safe_load(
+        Path(config_data_dna["out_dir"], "case_id_deliverables.yaml").open()
+    )
 
 
 @pytest.fixture(scope="function")

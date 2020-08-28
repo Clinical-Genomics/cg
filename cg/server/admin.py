@@ -42,11 +42,7 @@ def view_family_sample_link(unused1, unused2, model, unused3):
 def is_external_application(unused1, unused2, model, unused3):
     """column formatter to open this view"""
     del unused1, unused2, unused3
-    return (
-        model.application_version.application.is_external
-        if model.application_version
-        else u""
-    )
+    return model.application_version.application.is_external if model.application_version else u""
 
 
 class ApplicationView(BaseView):
@@ -214,16 +210,6 @@ class FamilyView(BaseView):
         )
 
 
-class AnalysisView(BaseView):
-    """Admin view for Model.Analysis"""
-
-    column_default_sort = ("created_at", True)
-    column_editable_list = ["is_primary"]
-    column_filters = ["pipeline", "pipeline_version", "is_primary"]
-    column_formatters = {"family": FamilyView.view_family_link}
-    column_searchable_list = ["family.internal_id", "family.name"]
-
-
 class FlowcellView(BaseView):
     """Admin view for Model.Flowcell"""
 
@@ -277,6 +263,40 @@ class MicrobialOrderView(BaseView):
     column_filters = ["customer.internal_id"]
     column_searchable_list = ["internal_id", "name", "ticket_number"]
 
+    @staticmethod
+    def view_link(unused1, unused2, model, unused3):
+        """column formatter to open this view"""
+        del unused1, unused2, unused3
+        return (
+            Markup(
+                u"<a href='%s'>%s</a>"
+                % (
+                    url_for("microbialorder.index_view", search=model.microbial_order.internal_id),
+                    model.microbial_order,
+                )
+            )
+            if model.microbial_order
+            else u""
+        )
+
+
+class AnalysisView(BaseView):
+    """Admin view for Model.Analysis"""
+
+    column_default_sort = ("created_at", True)
+    column_editable_list = ["is_primary"]
+    column_filters = ["pipeline", "pipeline_version", "is_primary"]
+    column_formatters = {
+        "family": FamilyView.view_family_link,
+        "microbial_order": MicrobialOrderView.view_link,
+    }
+    column_searchable_list = [
+        "family.internal_id",
+        "family.name",
+        "microbial_order.internal_id",
+        "microbial_order.name",
+    ]
+
 
 class MicrobialSampleView(BaseView):
     """Admin view for Model.MicrobialSample"""
@@ -287,6 +307,7 @@ class MicrobialSampleView(BaseView):
     column_formatters = {
         "invoice": InvoiceView.view_invoice_link,
         "priority": view_human_priority,
+        "microbial_order": MicrobialOrderView.view_link,
     }
     column_searchable_list = ["internal_id", "name", "microbial_order.ticket_number"]
 

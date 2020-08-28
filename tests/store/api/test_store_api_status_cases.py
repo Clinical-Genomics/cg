@@ -84,9 +84,7 @@ def test_received_at_affects_tat(base_store: Store):
     # GIVEN a database with a family and a samples received one week ago
     family = add_family(base_store, ordered_days_ago=7)
     yesterweek = datetime.now() - timedelta(days=7)
-    weekold_sample = add_sample(
-        base_store, ordered=True, received=True, date=yesterweek
-    )
+    weekold_sample = add_sample(base_store, ordered=True, received=True, date=yesterweek)
     base_store.relate_sample(family, weekold_sample, "unknown")
 
     # WHEN getting active cases
@@ -193,9 +191,7 @@ def test_received_at_is_newest_date(base_store: Store):
     # THEN cases should contain the date the samples were most recently received
     assert cases
     for case in cases:
-        assert (
-            case.get("samples_received_at").date() == newest_sample.received_at.date()
-        )
+        assert case.get("samples_received_at").date() == newest_sample.received_at.date()
 
 
 def test_prepared_at_is_newest_date(base_store: Store):
@@ -216,9 +212,7 @@ def test_prepared_at_is_newest_date(base_store: Store):
     # THEN cases should contain the date the samples were most recently prepared
     assert cases
     for case in cases:
-        assert (
-            case.get("samples_prepared_at").date() == newest_sample.prepared_at.date()
-        )
+        assert case.get("samples_prepared_at").date() == newest_sample.prepared_at.date()
 
 
 def test_sequenced_at_is_newest_date(base_store: Store):
@@ -239,9 +233,7 @@ def test_sequenced_at_is_newest_date(base_store: Store):
     # THEN cases should contain the date the samples were most recently sequenced
     assert cases
     for case in cases:
-        assert (
-            case.get("samples_sequenced_at").date() == newest_sample.sequenced_at.date()
-        )
+        assert case.get("samples_sequenced_at").date() == newest_sample.sequenced_at.date()
 
 
 def test_delivered_at_is_newest_date(base_store: Store):
@@ -262,9 +254,7 @@ def test_delivered_at_is_newest_date(base_store: Store):
     # THEN cases should contain the date the samples were most recently delivered
     assert cases
     for case in cases:
-        assert (
-            case.get("samples_delivered_at").date() == newest_sample.delivered_at.date()
-        )
+        assert case.get("samples_delivered_at").date() == newest_sample.delivered_at.date()
 
 
 def test_invoiced_at_is_newest_invoice_date(base_store: Store):
@@ -285,10 +275,7 @@ def test_invoiced_at_is_newest_invoice_date(base_store: Store):
     # THEN cases should contain the date the samples were most recently invoiced
     assert cases
     for case in cases:
-        assert (
-            case.get("samples_invoiced_at").date()
-            == newest_sample.invoice.invoiced_at.date()
-        )
+        assert case.get("samples_invoiced_at").date() == newest_sample.invoice.invoiced_at.date()
 
 
 def test_invoiced_at(base_store: Store):
@@ -558,9 +545,7 @@ def test_include_samples_with_different_data_analysis(base_store: Store):
 
     # GIVEN a database with a family with data analysis set
     family = add_family(base_store)
-    sample_with_data_analysis = add_sample(
-        base_store, data_analysis="data_analysis", invoiced=True
-    )
+    sample_with_data_analysis = add_sample(base_store, data_analysis="data_analysis", invoiced=True)
     sample_without_data_analysis = add_sample(base_store, invoiced=True)
     base_store.relate_sample(family, sample_with_data_analysis, "unknown")
     base_store.relate_sample(family, sample_without_data_analysis, "unknown")
@@ -1496,9 +1481,7 @@ def test_structure(base_store: Store):
         assert "samples_invoiced" in case.keys()
 
 
-def ensure_application_version(
-    disk_store, application_tag="dummy_tag", is_external=False
-):
+def ensure_application_version(disk_store, application_tag="dummy_tag", is_external=False):
     """utility function to return existing or create application version for tests"""
     application = disk_store.application(tag=application_tag)
     if not application:
@@ -1514,9 +1497,7 @@ def ensure_application_version(
     prices = {"standard": 10, "priority": 20, "express": 30, "research": 5}
     version = disk_store.application_version(application, 1)
     if not version:
-        version = disk_store.add_version(
-            application, 1, valid_from=datetime.now(), prices=prices
-        )
+        version = disk_store.add_version(application, 1, valid_from=datetime.now(), prices=prices)
 
         disk_store.add_commit(version)
     return version
@@ -1630,9 +1611,7 @@ def add_family(
     return family
 
 
-def add_analysis(
-    store, completed=False, uploaded=False, pipeline=None, delivery_reported=False
-):
+def add_analysis(store, completed=False, uploaded=False, pipeline=None, delivery_reported=False):
     """Utility function to add an analysis for tests"""
     family = add_family(store)
     analysis = store.add_analysis(pipeline="", version="")

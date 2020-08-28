@@ -1,15 +1,14 @@
 """Tests the class that performs calculations on samples"""
-from datetime import timedelta, datetime
+from datetime import datetime, timedelta
 
 from cg.meta.report.sample_calculator import SampleCalculator
-from tests.store_helpers import add_sample
 
 
-def test_calculate_processing_days_invalid_delivered(sample_store):
+def test_calculate_processing_days_invalid_delivered(sample_store, helpers):
     """Test calculate processing time when delivered_at is invalid"""
 
     # GIVEN sample with delivered_at None
-    sample = add_sample(sample_store)
+    sample = helpers.add_sample(sample_store)
     yesterday = datetime.now() - timedelta(days=1)
     sample.received_at = yesterday
     sample.delivered_at = None
@@ -21,11 +20,11 @@ def test_calculate_processing_days_invalid_delivered(sample_store):
     assert processing_days is None
 
 
-def test_calculate_processing_days_invalid_received(sample_store):
+def test_calculate_processing_days_invalid_received(sample_store, helpers):
     """Test calculate processing time when received_at is invalid"""
 
     # GIVEN sample with no received_at but with delivered_at
-    sample = add_sample(sample_store)
+    sample = helpers.add_sample(sample_store)
     today = datetime.now()
     sample.received_at = None
     sample.delivered_at = today
@@ -37,11 +36,11 @@ def test_calculate_processing_days_invalid_received(sample_store):
     assert processing_days is None
 
 
-def test_calculate_processing_days_valid_dates(sample_store):
+def test_calculate_processing_days_valid_dates(sample_store, helpers):
     """Test calculate processing time when all dates are present"""
 
     # GIVEN sample with received_at and delivered_at
-    sample = add_sample(sample_store)
+    sample = helpers.add_sample(sample_store)
     yesterday = datetime.now() - timedelta(days=1)
     today = datetime.now()
     sample.received_at = yesterday

@@ -9,8 +9,8 @@ LOG = logging.getLogger(__name__)
 
 class BeaconApi:
     """
-        Interface with Beacon importer (github.com/Clinical-Genomics/cgbeacon)
-        Inserts variants from a VCF file inside a Beacon server.
+    Interface with Beacon importer (github.com/Clinical-Genomics/cgbeacon)
+    Inserts variants from a VCF file inside a Beacon server.
     """
 
     def __init__(self, config: dict):
@@ -28,8 +28,8 @@ class BeaconApi:
         quality: int,
         genome_reference: str,
     ):
-        """ Uploads variants from a VCF file to a MySQL Beacon database
-            Returns: number of new variants in the Beacon
+        """Uploads variants from a VCF file to a MySQL Beacon database
+        Returns: number of new variants in the Beacon
         """
 
         LOG.info("Uploading variants to beacon db.")
@@ -47,8 +47,8 @@ class BeaconApi:
         LOG.info("Upload complete!")
 
     def remove_vars(self, sample, vcf_path, panel_path=None, qual=20):
-        """ Calls Utility app in beacon package to remove vars from beacon
-            Returns: number of new variants removed from the beacon
+        """Calls Utility app in beacon package to remove vars from beacon
+        Returns: number of new variants removed from the beacon
         """
         removed = Utility.beacon_clean(self.connection, sample, vcf_path, panel_path, qual)
         return removed

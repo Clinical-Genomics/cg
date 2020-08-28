@@ -43,13 +43,9 @@ def before_request():
         else:
             return abort(403, "no JWT token found on request")
         try:
-            user_data = jwt.decode(
-                jwt_token, certs=current_app.config["GOOGLE_OAUTH_CERTS"]
-            )
+            user_data = jwt.decode(jwt_token, certs=current_app.config["GOOGLE_OAUTH_CERTS"])
         except ValueError as error:
-            return abort(
-                make_response(jsonify(message="outdated login certificate"), 403)
-            )
+            return abort(make_response(jsonify(message="outdated login certificate"), 403))
         user_obj = db.user(user_data["email"])
         if user_obj is None:
             message = f"{user_data['email']} doesn't have access"
@@ -140,9 +136,7 @@ def family(family_id):
     family_obj = db.family(family_id)
     if family_obj is None:
         return abort(404)
-    elif not g.current_user.is_admin and (
-        g.current_user.customer != family_obj.customer
-    ):
+    elif not g.current_user.is_admin and (g.current_user.customer != family_obj.customer):
         return abort(401)
 
     data = family_obj.to_dict(links=True, analyses=True)
@@ -177,9 +171,7 @@ def samples():
         samples_q = db.samples_to_sequence()
     else:
         customer_obj = None if g.current_user.is_admin else g.current_user.customer
-        samples_q = db.samples(
-            enquiry=request.args.get("enquiry"), customer=customer_obj
-        )
+        samples_q = db.samples(enquiry=request.args.get("enquiry"), customer=customer_obj)
     limit = int(request.args.get("limit", 50))
     data = [sample_obj.to_dict() for sample_obj in samples_q.limit(limit)]
     return jsonify(samples=data, total=samples_q.count())
@@ -203,9 +195,7 @@ def sample(sample_id):
     sample_obj = db.sample(sample_id)
     if sample_obj is None:
         return abort(404)
-    elif not g.current_user.is_admin and (
-        g.current_user.customer != sample_obj.customer
-    ):
+    elif not g.current_user.is_admin and (g.current_user.customer != sample_obj.customer):
         return abort(401)
     data = sample_obj.to_dict(links=True, flowcells=True)
     return jsonify(**data)
@@ -229,9 +219,7 @@ def sample_in_customer_group(sample_id):
 def microbial_orders():
     """Fetch microbial orders."""
     customer_obj = None if g.current_user.is_admin else g.current_user.customer
-    orders_q = db.microbial_orders(
-        enquiry=request.args.get("enquiry"), customer=customer_obj
-    )
+    orders_q = db.microbial_orders(enquiry=request.args.get("enquiry"), customer=customer_obj)
     count = orders_q.count()
     records = orders_q.limit(30)
     data = [order_obj.to_dict(samples=True) for order_obj in records]
@@ -244,9 +232,7 @@ def microbial_order(order_id):
     order_obj = db.microbial_order(order_id)
     if order_obj is None:
         return abort(404)
-    elif not g.current_user.is_admin and (
-        g.current_user.customer != order_obj.customer
-    ):
+    elif not g.current_user.is_admin and (g.current_user.customer != order_obj.customer):
         return abort(401)
     data = order_obj.to_dict(samples=True)
     return jsonify(**data)
@@ -256,9 +242,7 @@ def microbial_order(order_id):
 def microbial_samples():
     """Fetch microbial samples."""
     customer_obj = None if g.current_user.is_admin else g.current_user.customer
-    samples_q = db.microbial_samples(
-        enquiry=request.args.get("enquiry"), customer=customer_obj
-    )
+    samples_q = db.microbial_samples(enquiry=request.args.get("enquiry"), customer=customer_obj)
     limit = int(request.args.get("limit", 50))
     data = [sample_obj.to_dict(order=True) for sample_obj in samples_q.limit(limit)]
     return jsonify(samples=data, total=samples_q.count())
@@ -301,9 +285,7 @@ def pool(pool_id):
 @BLUEPRINT.route("/flowcells")
 def flowcells():
     """Fetch flowcells."""
-    query = db.flowcells(
-        status=request.args.get("status"), enquiry=request.args.get("enquiry")
-    )
+    query = db.flowcells(status=request.args.get("status"), enquiry=request.args.get("enquiry"))
     data = [record.to_dict() for record in query.limit(50)]
     return jsonify(flowcells=data, total=query.count())
 
@@ -334,9 +316,7 @@ def analyses():
 def options():
     """Fetch various options."""
     customer_objs = (
-        db.Customer.query.all()
-        if g.current_user.is_admin
-        else [g.current_user.customer]
+        db.Customer.query.all() if g.current_user.is_admin else [g.current_user.customer]
     )
     apptag_groups = {"ext": []}
     for application_obj in db.applications(archived=False):
