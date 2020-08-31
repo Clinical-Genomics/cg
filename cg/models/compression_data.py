@@ -3,7 +3,8 @@ import logging
 import os
 from pathlib import Path
 
-from cg.constants import FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX, SPRING_SUFFIX
+from cg.constants import (FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX,
+                          SPRING_SUFFIX)
 
 LOG = logging.getLogger(__name__)
 
@@ -45,6 +46,11 @@ class CompressionData:
     def fastq_second(self) -> Path:
         """Return the path to the second read in pair"""
         return Path(self.stub_string + FASTQ_SECOND_READ_SUFFIX)
+
+    @property
+    def analysis_dir(self) -> Path:
+        """Return the path to folder where analysis is"""
+        return self.stub.resolve().parent
 
     @property
     def run_name(self) -> str:
