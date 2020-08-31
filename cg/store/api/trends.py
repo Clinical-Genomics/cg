@@ -73,10 +73,7 @@ class TrendsHandler(BaseHandler):
                 func.month(models.Sample.received_at).label("month_no"),
                 func.count(models.Sample.id).label("count"),
             )
-            .join(
-                models.Sample.application_version,
-                models.ApplicationVersion.application,
-            )
+            .join(models.Sample.application_version, models.ApplicationVersion.application,)
             .filter(
                 models.Sample.received_at > self.get_from_date(year),
                 models.Sample.received_at < self.get_until_date(year),
@@ -117,10 +114,7 @@ class TrendsHandler(BaseHandler):
                 models.Sample.received_at < self.get_until_date(year),
                 models.Sample.delivered_at is not None,
             )
-            .group_by(
-                models.Application.category,
-                func.month(models.Sample.received_at),
-            )
+            .group_by(models.Application.category, func.month(models.Sample.received_at),)
         )
         for category, results in groupby(query, key=lambda result: result.category):
             averages = {
@@ -154,10 +148,7 @@ class TrendsHandler(BaseHandler):
                 models.Sample.received_at > self.get_from_date(year),
                 models.Sample.received_at < self.get_until_date(year),
             )
-            .group_by(
-                models.Application.category,
-                func.month(models.Sample.received_at),
-            )
+            .group_by(models.Application.category, func.month(models.Sample.received_at),)
         )
         for category, results in groupby(query, key=lambda result: result.category):
             averages = {
@@ -189,10 +180,7 @@ class TrendsHandler(BaseHandler):
                 models.Sample.received_at > self.get_from_date(year),
                 models.Sample.received_at < self.get_until_date(year),
             )
-            .group_by(
-                models.Application.category,
-                func.month(models.Sample.received_at),
-            )
+            .group_by(models.Application.category, func.month(models.Sample.received_at),)
         )
         for category, results in groupby(query, key=lambda result: result.category):
             averages = {
@@ -225,10 +213,7 @@ class TrendsHandler(BaseHandler):
                 models.Sample.received_at < self.get_until_date(year),
                 models.Sample.delivered_at is not None,
             )
-            .group_by(
-                models.Application.category,
-                func.month(models.Sample.received_at),
-            )
+            .group_by(models.Application.category, func.month(models.Sample.received_at),)
         )
         for category, results in groupby(query, key=lambda result: result.category):
             averages = {
@@ -265,10 +250,7 @@ class TrendsHandler(BaseHandler):
                 models.Sample.invoice_id is not None,
                 models.Invoice.invoiced_at is not None,
             )
-            .group_by(
-                models.Application.category,
-                func.month(models.Sample.received_at),
-            )
+            .group_by(models.Application.category, func.month(models.Sample.received_at),)
         )
         for category, results in groupby(query, key=lambda result: result.category):
             averages = {

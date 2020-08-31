@@ -48,9 +48,7 @@ def get_links(
 
         if not sample_obj:
             LOG.error(
-                "Could not find sample %s. Did you intend %s as a case-id?",
-                sample_id,
-                sample_id,
+                "Could not find sample %s. Did you intend %s as a case-id?", sample_id, sample_id,
             )
             raise click.Abort
 

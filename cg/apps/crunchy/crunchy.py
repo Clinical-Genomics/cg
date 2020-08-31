@@ -26,7 +26,6 @@ from .sbatch import (SBATCH_FASTQ_TO_SPRING, SBATCH_HEADER_TEMPLATE,
 LOG = logging.getLogger(__name__)
 
 
-FLAG_PATH_SUFFIX = ".crunchy.txt"
 PENDING_PATH_SUFFIX = ".crunchy.pending.txt"
 
 
@@ -130,7 +129,9 @@ class CrunchyAPI:
             return False
         LOG.info("SPRING file found")
 
-        LOG.info("Check if SPRING metadata file %s exists", compression_obj.spring_metadata_path)
+        LOG.info(
+            "Check if SPRING metadata file %s exists", compression_obj.spring_metadata_path,
+        )
         if not compression_obj.metadata_exists():
             LOG.info("No metadata file found")
             return False
@@ -289,7 +290,11 @@ class CrunchyAPI:
                     "spring" : {file_info},
                   }
         """
-        names_map = {"first_read": "fastq_first", "second_read": "fastq_second", "spring": "spring"}
+        names_map = {
+            "first_read": "fastq_first",
+            "second_read": "fastq_second",
+            "spring": "spring",
+        }
         archive_files = {}
         for file_info in spring_metadata:
             file_name = names_map[file_info["file"]]

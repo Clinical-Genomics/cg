@@ -180,10 +180,7 @@ class AddHandler(BaseHandler):
         """Build a new Flowcell record."""
 
         new_record = self.Flowcell(
-            name=name,
-            sequencer_name=sequencer,
-            sequencer_type=sequencer_type,
-            sequenced_at=date,
+            name=name, sequencer_name=sequencer, sequencer_type=sequencer_type, sequenced_at=date,
         )
         return new_record
 
@@ -222,11 +219,7 @@ class AddHandler(BaseHandler):
         """Build a new panel record."""
 
         new_record = self.Panel(
-            name=name,
-            abbrev=abbrev,
-            current_version=version,
-            date=date,
-            gene_count=genes,
+            name=name, abbrev=abbrev, current_version=version, date=date, gene_count=genes,
         )
         new_record.customer = customer
         return new_record

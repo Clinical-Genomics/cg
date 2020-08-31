@@ -3,8 +3,7 @@ import logging
 import os
 from pathlib import Path
 
-from cg.constants import (FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX,
-                          SPRING_SUFFIX)
+from cg.constants import FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX, SPRING_SUFFIX
 
 LOG = logging.getLogger(__name__)
 

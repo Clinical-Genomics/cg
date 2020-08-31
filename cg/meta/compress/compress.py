@@ -18,10 +18,7 @@ class CompressAPI:
     """API for compressing BAM and FASTQ files"""
 
     def __init__(
-        self,
-        hk_api: hk.HousekeeperAPI,
-        crunchy_api: crunchy.CrunchyAPI,
-        dry_run: bool = False,
+        self, hk_api: hk.HousekeeperAPI, crunchy_api: crunchy.CrunchyAPI, dry_run: bool = False,
     ):
 
         self.hk_api = hk_api
@@ -172,8 +169,7 @@ class CompressAPI:
                 continue
 
             LOG.info(
-                "Adding decompressed FASTQ files to housekeeper for sample %s ",
-                sample_id,
+                "Adding decompressed FASTQ files to housekeeper for sample %s ", sample_id,
             )
 
             self.add_fastq_hk(

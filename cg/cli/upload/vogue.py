@@ -62,11 +62,7 @@ def apptags(context):
 
 @vogue.command("flowcells", short_help="Getting flowcell data from the lims.")
 @click.option(
-    "-d",
-    "--days",
-    type=int,
-    required="True",
-    help="load X days old runs from lims to vogue",
+    "-d", "--days", type=int, required="True", help="load X days old runs from lims to vogue",
 )
 @click.pass_context
 def flowcells(context, days: int):
@@ -79,11 +75,7 @@ def flowcells(context, days: int):
 
 @vogue.command("samples", short_help="Getting sample data from lims.")
 @click.option(
-    "-d",
-    "--days",
-    type=int,
-    required="True",
-    help="load X days old sampels from lims to vogue",
+    "-d", "--days", type=int, required="True", help="load X days old sampels from lims to vogue",
 )
 @click.pass_context
 def samples(context, days: int):
@@ -96,11 +88,7 @@ def samples(context, days: int):
 
 @vogue.command("reagent-labels", short_help="Getting reagent_label data from lims.")
 @click.option(
-    "-d",
-    "--days",
-    type=int,
-    required=True,
-    help="load X days old sampels from lims to vogue",
+    "-d", "--days", type=int, required=True, help="load X days old sampels from lims to vogue",
 )
 @click.pass_context
 def reagent_labels(context, days: int):
@@ -119,9 +107,7 @@ def reagent_labels(context, days: int):
     help="Case name or project name for which the analysis results will load",
 )
 @click.option(
-    "--cleanup/--no-cleanup",
-    default=False,
-    help="Cleanup processed case data while loading",
+    "--cleanup/--no-cleanup", default=False, help="Cleanup processed case data while loading",
 )
 @click.option(
     "-t",

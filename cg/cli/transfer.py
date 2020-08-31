@@ -31,16 +31,10 @@ def flowcell(context, flowcell_name):
 
 @transfer.command()
 @click.option(
-    "-s",
-    "--status",
-    type=click.Choice(["received", "prepared", "delivered"]),
-    default="received",
+    "-s", "--status", type=click.Choice(["received", "prepared", "delivered"]), default="received",
 )
 @click.option(
-    "-i",
-    "--include",
-    type=click.Choice(["unset", "not-invoiced", "all"]),
-    default="unset",
+    "-i", "--include", type=click.Choice(["unset", "not-invoiced", "all"]), default="unset",
 )
 @click.option("--sample-id", help="Lims Submitted Sample id. use together with status.")
 @click.pass_context
