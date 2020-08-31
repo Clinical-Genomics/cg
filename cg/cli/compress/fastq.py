@@ -6,12 +6,8 @@ import click
 
 from cg.exc import CaseNotFoundError
 
-from .helpers import (
-    correct_spring_paths,
-    get_fastq_cases,
-    get_fastq_individuals,
-    update_compress_api,
-)
+from .helpers import (correct_spring_paths, get_fastq_cases,
+                      get_fastq_individuals, update_compress_api)
 
 LOG = logging.getLogger(__name__)
 
@@ -28,6 +24,7 @@ PROBLEMATIC_CASES = [
     "loyalegret",
     "grandkoi",
     "fluenteagle",
+    "freetomcat",
 ]
 
 
