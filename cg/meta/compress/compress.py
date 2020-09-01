@@ -60,14 +60,12 @@ class CompressAPI:
             LOG.info("Check if compression possible for run %s", run_name)
             compression_object = sample_fastq_dict[run_name]["compression_data"]
             if FileData.is_empty(compression_object.fastq_first):
-                LOG.warning("Fastq files are empty")
+                LOG.warning(
+                    "Fastq files are empty for %s: %s", sample_id, compression_object.fastq_first
+                )
                 self.delete_fastq_housekeeper(
                     hk_fastq_first=sample_fastq_dict[run_name]["hk_first"],
                     hk_fastq_second=sample_fastq_dict[run_name]["hk_second"],
-                )
-                self.remove_fastq(
-                    fastq_first=compression_object.fastq_first,
-                    fastq_second=compression_object.fastq_second,
                 )
                 all_ok = False
                 continue
