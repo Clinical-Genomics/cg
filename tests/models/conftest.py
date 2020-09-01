@@ -40,9 +40,9 @@ def fixture_filled_file(non_existing_file_path: Path, content: str) -> Path:
 
 
 @pytest.fixture(name="filled_gzip_file")
-def fixture_filled_gzip_file(gzipped_file_path: Path, content: str) -> Path:
+def fixture_filled_gzip_file(non_existing_gzipped_file_path: Path, content: str) -> Path:
     """Return the path to a existing file with some content that is gzipped"""
-    with gzip.open(gzipped_file_path, "wb") as outfile:
+    with gzip.open(non_existing_gzipped_file_path, "wb") as outfile:
         with io.TextIOWrapper(outfile, encoding="utf-8") as enc:
             enc.write(content)
-    return gzipped_file_path
+    return non_existing_gzipped_file_path
