@@ -124,6 +124,7 @@ class StoreError(CgError):
     Exception related to storing an analysis
     """
 
+
 class ConfigError(CgError):
     """
     Raised when MIP config validation fails

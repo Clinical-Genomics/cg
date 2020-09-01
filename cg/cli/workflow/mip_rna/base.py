@@ -109,6 +109,8 @@ def run(
         rna_api.run_command(**kwargs)
         rna_api.tb.mark_analyses_deleted(case_id=case_id)
         rna_api.tb.add_pending_analysis(case_id=case_id, email=email)
+        case_obj.action = "running"
+        rna_api.db.commit()
         LOG.info("MIP rd-rna run started!")
 
 

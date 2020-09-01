@@ -91,31 +91,14 @@ class AnalysisAPI(ConfigHandler, MipAPI):
                 self.log.warning("%s: %s", flowcell_obj.name, flowcell_obj.status)
         return all(status == "ondisk" for status in statuses)
 
-    def run(self, family_obj: models.Family, **kwargs):
-        """Start the analysis."""
-        if kwargs.get("priority") is None:
-            if family_obj.priority == 0:
-                kwargs["priority"] = "low"
-            elif family_obj.priority > 1:
-                kwargs["priority"] = "high"
-            else:
-                kwargs["priority"] = "normal"
-
-        # skip MIP evaluation of QC criteria if any sample is downsampled/external
-        for link_obj in family_obj.links:
-            downsampled = isinstance(link_obj.sample.downsampled_to, int)
-            external = link_obj.sample.application_version.application.is_external
-            if downsampled or external:
-                self.log.info(
-                    "%s: downsampled/external - skip evaluation", link_obj.sample.internal_id
-                )
-                kwargs["skip_evaluation"] = True
-                break
-
-        self.tb.run(family_obj.internal_id, **kwargs)
-        # mark the family as running
-        family_obj.action = "running"
-        self.db.commit()
+    def get_priority(self, family_obj: models.Family) -> str:
+        """Fetch priority for case id"""
+        if family_obj.priority == 0:
+            return "low"
+        elif family_obj.priority > 1:
+            return "high"
+        else:
+            return "normal"
 
     def config(self, family_obj: models.Family, pipeline: str) -> dict:
         """Make the MIP config. Meta data for the family is taken from the family object
@@ -135,7 +118,7 @@ class AnalysisAPI(ConfigHandler, MipAPI):
         config_data = self.make_config(data, pipeline)
         return config_data
 
-    def get_target_bed_from_lims(self, sample_id):
+    def get_target_bed_from_lims(self, sample_id: str) -> str:
         """Get target bed filename from lims"""
         target_bed_shortname = self.lims.capture_kit(sample_id)
         if not target_bed_shortname:
