@@ -8,12 +8,12 @@ from cg.apps.mip_rna import files
 def test_parse_sampleinfo_rna_result_contents(snapshot: Snapshot, files_raw: dict):
     """test parse_sampleinfo_rna using snapshot
 
-       Note: to retake all snapshots run `pytest --snapshot-update`
+    Note: to retake all snapshots run `pytest --snapshot-update`
 
-       Args:
-           snapshot (Snapshot): a file with a snapshot of the correct test result, see
-           cg/cg/tests/snapshots/snap_test_apps_mip_files.py
-           files_raw (dict): dict of raw .yaml files
+    Args:
+        snapshot (Snapshot): a file with a snapshot of the correct test result, see
+        cg/cg/tests/snapshots/snap_test_apps_mip_files.py
+        files_raw (dict): dict of raw .yaml files
     """
     # GIVEN an RNA sample info file
     sampleinfo_raw = files_raw["rna_sampleinfo"]

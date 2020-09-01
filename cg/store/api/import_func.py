@@ -19,7 +19,7 @@ def import_application_versions(store, excel_path, sign, dry_run, skip_missing):
         :param sign:                Signature of user running the script
         :param dry_run:             Test run, no changes to the database
         :param skip_missing:        Continue despite missing applications
-        """
+    """
 
     workbook = XlFileHelper.get_workbook_from_xl(excel_path)
     raw_versions = XlFileHelper.get_raw_dicts_from_xl(excel_path)
@@ -71,7 +71,7 @@ def import_applications(store, excel_path, sign, dry_run, sheet_name=None):
                                     'Standard', 'Priority', 'Express', 'Research'
         :param sign:                Signature of user running the script
         :param dry_run:             Test run, no changes to the database
-        """
+    """
 
     raw_applications = XlFileHelper.get_raw_dicts_from_xl(excel_path, sheet_name)
 
