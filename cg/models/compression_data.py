@@ -37,6 +37,11 @@ class CompressionData:
         return self.stub.with_suffix(".json")
 
     @property
+    def analysis_dir(self) -> Path:
+        """Return the path to folder where analysis is"""
+        return self.stub.resolve().parent
+
+    @property
     def fastq_first(self) -> Path:
         """Return the path to the first read in pair"""
         return Path(self.stub_string + FASTQ_FIRST_READ_SUFFIX)
