@@ -48,8 +48,7 @@ def test_submit(base_store, orders_api: OrdersAPI, all_orders_to_submit, monkeyp
 
 
 @pytest.mark.parametrize(
-    "order_type",
-    [OrderType.MIP, OrderType.EXTERNAL, OrderType.BALSAMIC, OrderType.MIP_BALSAMIC],
+    "order_type", [OrderType.MIP, OrderType.EXTERNAL, OrderType.BALSAMIC, OrderType.MIP_BALSAMIC]
 )
 def test_submit_illegal_sample_customer(
     sample_store, orders_api, all_orders_to_submit, monkeypatch, order_type
@@ -92,8 +91,7 @@ def test_submit_illegal_sample_customer(
 
 
 @pytest.mark.parametrize(
-    "order_type",
-    [OrderType.MIP, OrderType.EXTERNAL, OrderType.BALSAMIC, OrderType.MIP_BALSAMIC],
+    "order_type", [OrderType.MIP, OrderType.EXTERNAL, OrderType.BALSAMIC, OrderType.MIP_BALSAMIC]
 )
 def test_submit_scout_legal_sample_customer(
     sample_store, orders_api, all_orders_to_submit, monkeypatch, order_type
@@ -148,8 +146,7 @@ def test_submit_scout_legal_sample_customer(
 
 
 @pytest.mark.parametrize(
-    "order_type",
-    [OrderType.RML, OrderType.FASTQ, OrderType.MICROBIAL, OrderType.METAGENOME],
+    "order_type", [OrderType.RML, OrderType.FASTQ, OrderType.MICROBIAL, OrderType.METAGENOME]
 )
 def test_submit_non_scout_legal_sample_customer(
     sample_store, orders_api, all_orders_to_submit, monkeypatch, order_type

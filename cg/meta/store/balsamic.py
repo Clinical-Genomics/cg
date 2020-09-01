@@ -35,11 +35,7 @@ def _include_files_in_housekeeper(bundle_obj, hk_api, version_obj):
     """Function to include files in housekeeper"""
     hk_api.include(version_obj)
     hk_api.add_commit(bundle_obj, version_obj)
-    LOG.info(
-        "New bundle included: %s, version %s",
-        bundle_obj.name,
-        version_obj.created_at.date(),
-    )
+    LOG.info("New bundle included: %s, version %s", bundle_obj.name, version_obj.created_at.date())
 
 
 def _create_analysis(bundle_data, case_obj, status, version_obj):

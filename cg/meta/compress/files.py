@@ -155,3 +155,75 @@ def check_fastqs(compression_obj: CompressionData) -> bool:
         return False
 
     return True
+<<<<<<< HEAD
+=======
+
+
+def sort_fastqs(fastq_files: List[Path]) -> Tuple[Path, Path]:
+    """Sort list of FASTQ files into correct read pair
+
+    Check that the files exists and are correct
+
+    More specific we will do the following checks, if one is failing we skip the files:
+
+        1. Does the file exist?
+        2. Do we have permission to read the file?
+        3. Are there more than one inode to the file (hardlinked)
+        4. Is the file actually a soft link?
+        5. Are there two correct files in the pair?
+        6. Do they have the same prefix?
+
+    Args:
+        fastq_files(list(Path))
+
+    Returns:
+        sorted_fastqs(tuple): (fastq_first, fastq_second)
+    """
+    first_fastq = second_fastq = None
+    for fastq_file in fastq_files:
+
+        if not check_file_status(fastq_file):
+            return None
+
+        if str(fastq_file).endswith(FASTQ_FIRST_READ_SUFFIX):
+            first_fastq = fastq_file
+        if str(fastq_file).endswith(FASTQ_SECOND_READ_SUFFIX):
+            second_fastq = fastq_file
+
+    if not (first_fastq and second_fastq):
+        LOG.warning("Could not find paired fastq files")
+        return None
+
+    if not check_prefixes(first_fastq, second_fastq):
+        LOG.info("FASTQ files does not have matching prefix: %s, %s", first_fastq, second_fastq)
+        return None
+
+    return (first_fastq, second_fastq)
+
+
+def check_prefixes(first_fastq: Path, second_fastq: Path) -> bool:
+    """Check if two files belong to the same read pair"""
+    first_prefix = str(first_fastq.absolute()).replace(FASTQ_FIRST_READ_SUFFIX, "")
+    second_prefix = str(second_fastq.absolute()).replace(FASTQ_SECOND_READ_SUFFIX, "")
+    return first_prefix == second_prefix
+
+
+def is_valid_fastq_suffix(fastq_path: Path) -> bool:
+    """ Check that fastq has correct suffix"""
+    if str(fastq_path).endswith(FASTQ_FIRST_READ_SUFFIX) or str(fastq_path).endswith(
+        FASTQ_SECOND_READ_SUFFIX
+    ):
+        return True
+    return False
+
+
+# Functions to check for files in housekeeper
+
+
+def is_file_in_version(version_obj: hk_models.Version, path: Path) -> bool:
+    """Check if a file is in a certain version"""
+    for file_obj in version_obj.files:
+        if file_obj.path == str(path):
+            return True
+    return False
+>>>>>>> 6c50b52a0dcde15b9c6fb2b946888f51690c2f58

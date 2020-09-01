@@ -84,11 +84,7 @@ class CaseInfo:
 
 @pytest.fixture(name="compress_case_info")
 def fixture_compress_case_info(
-    case_id,
-    family_name,
-    timestamp,
-    later_timestamp,
-    wgs_application_tag,
+    case_id, family_name, timestamp, later_timestamp, wgs_application_tag
 ):
     """Returns a object with information about a case"""
     return CaseInfo(
@@ -116,12 +112,7 @@ def fixture_populated_compress_store(store, helpers, compress_case_info, analysi
 
 
 @pytest.fixture(name="populated_compress_multiple_store")
-def fixture_populated_compress_multiple_store(
-    store,
-    helpers,
-    compress_case_info,
-    analysis_family,
-):
+def fixture_populated_compress_multiple_store(store, helpers, compress_case_info, analysis_family):
     """Return a store populated with multiple completed analysis"""
     case_id = compress_case_info.case_id
     family_name = compress_case_info.family_name

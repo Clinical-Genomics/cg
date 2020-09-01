@@ -64,9 +64,7 @@ def test_no_sample_order_found(cli_runner, base_context, caplog):
 
     # WHEN dry running a order name
     result = cli_runner.invoke(
-        config_case,
-        ["--order", microbial_order_id, microbial_sample_id],
-        obj=base_context,
+        config_case, ["--order", microbial_order_id, microbial_sample_id], obj=base_context
     )
 
     # THEN command should mention missing order
@@ -88,11 +86,7 @@ def test_dry_sample(cli_runner, base_context, microbial_sample_id, snapshot: Sna
 
 
 def test_dry_sample_order(
-    cli_runner,
-    base_context,
-    microbial_sample_id,
-    microbial_order_id,
-    snapshot: Snapshot,
+    cli_runner, base_context, microbial_sample_id, microbial_order_id, snapshot: Snapshot
 ):
     """Test working dry command for sample in a order"""
 
@@ -100,9 +94,7 @@ def test_dry_sample_order(
 
     # WHEN dry running a sample name
     result = cli_runner.invoke(
-        config_case,
-        ["--dry", "--order", microbial_order_id, microbial_sample_id],
-        obj=base_context,
+        config_case, ["--dry", "--order", microbial_order_id, microbial_sample_id], obj=base_context
     )
 
     # THEN command should give us a json dump

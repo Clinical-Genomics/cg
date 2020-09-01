@@ -43,6 +43,30 @@ class CompressAPI:
         LOG.debug("Found version obj for %s: %s", bundle_name, repr(last_version))
         return last_version
 
+<<<<<<< HEAD
+=======
+    def get_scout_case(self, case_id: str) -> dict:
+        """Fetch a case from scout"""
+        scout_cases = self.scout_api.get_cases(case_id=case_id)
+        if not scout_cases:
+            LOG.warning("%s not found in scout", case_id)
+            return None
+        LOG.debug("Found scout case %s", case_id)
+        return scout_cases[0]
+
+    def get_bam_dict(self, case_id: str, version_obj: hk_models.Version = None) -> dict:
+        """Fetch the version obj and scout case for case_id and return a dictionary with bam files"""
+        version_obj = version_obj or self.get_latest_version(case_id)
+        if not version_obj:
+            return None
+
+        scout_case = self.get_scout_case(case_id)
+        if not scout_case:
+            return None
+
+        return files.get_bam_files(case_id=case_id, version_obj=version_obj, scout_case=scout_case)
+
+>>>>>>> 6c50b52a0dcde15b9c6fb2b946888f51690c2f58
     # Compression methods
     def compress_fastq(self, sample_id: str) -> bool:
         """Compress the FASTQ files for a individual"""
@@ -97,7 +121,11 @@ class CompressAPI:
 
             LOG.info(
                 "Decompressing %s to FASTQ format for sample %s ",
+<<<<<<< HEAD
                 compression_obj.spring_path,
+=======
+                spring_path,
+>>>>>>> 6c50b52a0dcde15b9c6fb2b946888f51690c2f58
                 sample_id,
             )
 
@@ -172,7 +200,12 @@ class CompressAPI:
                 continue
 
             LOG.info(
+<<<<<<< HEAD
                 "Adding decompressed FASTQ files to housekeeper for sample %s ",
+=======
+                "Decompressing %s to FASTQ format for sample %s ",
+                spring_path,
+>>>>>>> 6c50b52a0dcde15b9c6fb2b946888f51690c2f58
                 sample_id,
             )
 
@@ -186,7 +219,38 @@ class CompressAPI:
     def update_fastq_hk(
         self,
         sample_id: str,
+<<<<<<< HEAD
         compression_obj: CompressionData,
+=======
+        hk_bam_file: hk_models.File,
+        hk_bai_file: hk_models.File,
+        hk_version: hk_models.Version,
+    ):
+        """Update Housekeeper with compressed alignment file if present"""
+        bam_path = Path(hk_bam_file.full_path)
+        bai_path = Path(hk_bai_file.full_path)
+
+        cram_tags = [sample_id, "cram"]
+        crai_tags = [sample_id, "cram-index"]
+        cram_path = self.crunchy_api.get_cram_path_from_bam(bam_path=bam_path)
+        crai_path = self.crunchy_api.get_index_path(cram_path)["double_suffix"]
+        LOG.info("HouseKeeper update for %s:", sample_id)
+        LOG.info("%s -> %s, with tags %s", bam_path, cram_path, cram_tags)
+        LOG.info("%s -> %s, with tags %s", bai_path, crai_path, crai_tags)
+        if self.dry_run:
+            return
+
+        LOG.info("updating files in housekeeper...")
+        self.hk_api.add_file(path=cram_path, version_obj=hk_version, tags=cram_tags)
+        self.hk_api.add_file(path=crai_path, version_obj=hk_version, tags=crai_tags)
+        hk_bam_file.delete()
+        hk_bai_file.delete()
+        self.hk_api.commit()
+
+    def update_fastq_hk(
+        self,
+        sample_id: str,
+>>>>>>> 6c50b52a0dcde15b9c6fb2b946888f51690c2f58
         hk_fastq_first: hk_models.File,
         hk_fastq_second: hk_models.File,
     ):

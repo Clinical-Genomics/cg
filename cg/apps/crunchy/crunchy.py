@@ -67,6 +67,7 @@ class CrunchyAPI:
          - SPRING archive exists           -> Compression NOT possible
          - Not compressed and not running  -> Compression IS possible
         """
+<<<<<<< HEAD
         if self.is_compression_pending(compression_obj):
             return False
 
@@ -88,6 +89,9 @@ class CrunchyAPI:
             - The FASTQ files are not compressed        -> Decompression is NOT possible
             - Compression has been performed            -> Decompression IS possible
 
+=======
+        Compress BAM file into CRAM
+>>>>>>> 6c50b52a0dcde15b9c6fb2b946888f51690c2f58
         """
         if compression_obj.pending_exists():
             LOG.info("Compression/decompression is pending for %s", compression_obj.run_name)
@@ -162,6 +166,7 @@ class CrunchyAPI:
             - Second read in FASTQ pair should exist
             - SPRING archive file should still exist
         """
+<<<<<<< HEAD
 
         spring_metadata_path = compression_obj.spring_metadata_path
         LOG.info("Check if SPRING metadata file %s exists", spring_metadata_path)
@@ -189,6 +194,9 @@ class CrunchyAPI:
 
     # These are the compression/decompression methods
     def fastq_to_spring(self, compression_obj: CompressionData, sample_id: str = "") -> None:
+=======
+        Compress FASTQ files into SPRING by sending to sbatch SLURM
+>>>>>>> 6c50b52a0dcde15b9c6fb2b946888f51690c2f58
         """
         Compress FASTQ files into SPRING by sending to sbatch SLURM
 
@@ -205,8 +213,12 @@ class CrunchyAPI:
 
     def spring_to_fastq(self, compression_obj: CompressionData, sample_id: str = "") -> None:
         """
+<<<<<<< HEAD
         Decompress SPRING into FASTQ by submitting sbatch script to SLURM
 
+=======
+        Decompress SPRING into fastq by sending to sbatch SLURM
+>>>>>>> 6c50b52a0dcde15b9c6fb2b946888f51690c2f58
         """
         spring_metadata = self.get_spring_metadata(compression_obj.spring_metadata_path)
 

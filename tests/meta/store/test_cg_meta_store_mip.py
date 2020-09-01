@@ -5,10 +5,7 @@ import pytest
 from snapshottest import Snapshot
 
 import cg.meta.store.mip as store_mip
-from cg.exc import (
-    AnalysisNotFinishedError,
-    BundleAlreadyAddedError,
-)
+from cg.exc import AnalysisNotFinishedError, BundleAlreadyAddedError
 
 
 @mock.patch("cg.store.Store")

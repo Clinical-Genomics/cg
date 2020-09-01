@@ -259,10 +259,7 @@ class UserImporter(Store):
         """Build a database record."""
         customer_obj = self.customer(data["customer"])
         new_record = self.add_user(
-            customer=customer_obj,
-            email=data["email"],
-            name=data["name"],
-            is_admin=data["is_admin"],
+            customer=customer_obj, email=data["email"], name=data["name"], is_admin=data["is_admin"]
         )
         return new_record
 
@@ -436,10 +433,7 @@ class FamilyImporter(Store):
                     samples = [
                         self.lims.sample(family_sample.id)
                         for family_sample in self.lims.get_samples(
-                            udf={
-                                "customer": sample["customer"],
-                                "familyID": sample["family"],
-                            }
+                            udf={"customer": sample["customer"], "familyID": sample["family"]}
                         )
                     ]
                     samples = [
@@ -468,10 +462,7 @@ class FamilyImporter(Store):
             "links": [],
         }
         for sample in samples:
-            sample_data = {
-                "sample": sample["id"],
-                "status": sample["status"] or "unknown",
-            }
+            sample_data = {"sample": sample["id"], "status": sample["status"] or "unknown"}
             for parent_key in ["mother", "father"]:
                 parent_name = sample_map.get(sample[parent_key])
                 if parent_name in sample_map:

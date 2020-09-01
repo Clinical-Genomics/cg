@@ -26,11 +26,7 @@ def fixture_microbial_submitted_order():
 
     def _get_item(name: str, internal_id: str, well_position: str, organism: str) -> dict:
         """Return a item"""
-        ref_genomes = {
-            "C. Jejuni": "NC_111",
-            "M. upium": "NC_222",
-            "C. difficile": "NC_333",
-        }
+        ref_genomes = {"C. Jejuni": "NC_111", "M. upium": "NC_222", "C. difficile": "NC_333"}
         item = dict(
             name=name,
             internal_id=internal_id,

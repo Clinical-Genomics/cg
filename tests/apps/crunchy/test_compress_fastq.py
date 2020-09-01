@@ -89,8 +89,16 @@ def test_fastq_to_spring_sbatch(crunchy_config_dict, compression_object, sbatch_
     # GIVEN that the sbatch file does not exist
     assert not sbatch_path.is_file()
 
+<<<<<<< HEAD
     # WHEN calling fastq_to_spring on FASTQ files
     crunchy_api.fastq_to_spring(compression_obj=compression_object)
+=======
+    # WHEN calling fastq_to_spring on fastq files
+    crunchy_api.fastq_to_spring(
+        fastq_first=fastq_first,
+        fastq_second=fastq_second,
+    )
+>>>>>>> 6c50b52a0dcde15b9c6fb2b946888f51690c2f58
 
     # THEN assert that the sbatch file was created
     assert sbatch_path.is_file()

@@ -27,8 +27,7 @@ def store(context):
     context.obj["store_api"] = context.obj.get("store_api") or Store(context.obj["database"])
     context.obj["hk_api"] = context.obj.get("hk_api") or hk.HousekeeperAPI(context.obj)
     context.obj["analysis_api"] = context.obj.get("analysis_api") or BalsamicAnalysisAPI(
-        hk_api=context.obj["hk_api"],
-        fastq_api=fastq.FastqAPI,
+        hk_api=context.obj["hk_api"], fastq_api=fastq.FastqAPI
     )
 
 

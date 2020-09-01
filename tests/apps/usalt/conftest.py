@@ -24,13 +24,7 @@ def simple(tmpdir):
     lanes = [1, 2, 3]
     reads = [1, 2]
 
-    _simple = {
-        "files": [],
-        "content_r1": [],
-        "content_r2": [],
-        "data": [],
-        "data_reversed": [],
-    }
+    _simple = {"files": [], "content_r1": [], "content_r2": [], "data": [], "data_reversed": []}
     i = 0
 
     for read in reads:

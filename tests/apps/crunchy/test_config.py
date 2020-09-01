@@ -30,11 +30,7 @@ def test_map_fastq_file_info(file_schema):
 def test_map_fastq_file_info_missing_path(file_schema):
     """Test to validate invalid file information with the schema"""
     # GIVEN some file informtion without a path and a file schema
-    file_info = {
-        "file": "first_read",
-        "checksum": "checksum_first_read",
-        "algorithm": "sha256",
-    }
+    file_info = {"file": "first_read", "checksum": "checksum_first_read", "algorithm": "sha256"}
 
     # WHEN validating the file information
     with pytest.raises(ValidationError):

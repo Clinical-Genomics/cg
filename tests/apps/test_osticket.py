@@ -19,10 +19,7 @@ def test_osticket_respone_500(monkeypatch, caplog, response):
     caplog.set_level(logging.ERROR)
     with pytest.raises(TicketCreationError):
         osticket_api.open_ticket(
-            name="dummy_name",
-            email="dummy_email",
-            subject="dummy_subject",
-            message="dummy_message",
+            name="dummy_name", email="dummy_email", subject="dummy_subject", message="dummy_message"
         )
 
     # THEN the response text and reason was logged and a ticket creation error raised

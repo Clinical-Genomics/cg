@@ -149,9 +149,7 @@ def upload_observations_api(analysis_store, populated_housekeeper_api):
     loqus_mock = MockLoqusAPI()
 
     _api = UploadObservationsAPI(
-        status_api=analysis_store,
-        hk_api=populated_housekeeper_api,
-        loqus_api=loqus_mock,
+        status_api=analysis_store, hk_api=populated_housekeeper_api, loqus_api=loqus_mock
     )
 
     yield _api
@@ -164,9 +162,7 @@ def upload_observations_api_wes(analysis_store, populated_housekeeper_api):
     loqus_mock = MockLoqusAPI(analysis_type="wes")
 
     _api = UploadObservationsAPI(
-        status_api=analysis_store,
-        hk_api=populated_housekeeper_api,
-        loqus_api=loqus_mock,
+        status_api=analysis_store, hk_api=populated_housekeeper_api, loqus_api=loqus_mock
     )
 
     yield _api

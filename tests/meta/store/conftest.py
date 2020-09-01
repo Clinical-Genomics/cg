@@ -9,9 +9,7 @@ import pytest
 @pytest.fixture(scope="function")
 def config_stream(files):
     """ config stream fixture """
-    return {
-        "rna_config_store": Path(files["rna_config_store"]).open(),
-    }
+    return {"rna_config_store": Path(files["rna_config_store"]).open()}
 
 
 @pytest.fixture(scope="function")

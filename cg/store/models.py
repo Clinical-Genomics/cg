@@ -29,12 +29,7 @@ flowcell_microbial_sample = Table(
     "flowcell_microbial_sample",
     Model.metadata,
     Column("flowcell_id", types.Integer, ForeignKey("flowcell.id"), nullable=False),
-    Column(
-        "microbial_sample_id",
-        types.Integer,
-        ForeignKey("microbial_sample.id"),
-        nullable=False,
-    ),
+    Column("microbial_sample_id", types.Integer, ForeignKey("microbial_sample.id"), nullable=False),
     UniqueConstraint("flowcell_id", "microbial_sample_id", name="_flowcell_microbial_sample_uc"),
 )
 
@@ -88,9 +83,7 @@ class Application(Model):
     created_at = Column(types.DateTime, default=dt.datetime.now)
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
     versions = orm.relationship(
-        "ApplicationVersion",
-        order_by="ApplicationVersion.version",
-        backref="application",
+        "ApplicationVersion", order_by="ApplicationVersion.version", backref="application"
     )
 
     def __str__(self) -> str:
@@ -325,9 +318,7 @@ class FamilySample(Model):
     family_id = Column(ForeignKey("family.id", ondelete="CASCADE"), nullable=False)
     sample_id = Column(ForeignKey("sample.id", ondelete="CASCADE"), nullable=False)
     status = Column(
-        types.Enum("affected", "unaffected", "unknown"),
-        default="unknown",
-        nullable=False,
+        types.Enum("affected", "unaffected", "unknown"), default="unknown", nullable=False
     )
 
     created_at = Column(types.DateTime, default=dt.datetime.now)
@@ -400,9 +391,7 @@ class MicrobialOrder(Model):
 
     customer_id = Column(ForeignKey("customer.id", ondelete="CASCADE"), nullable=False)
     microbial_samples = orm.relationship(
-        "MicrobialSample",
-        backref="microbial_order",
-        order_by="-MicrobialSample.delivered_at",
+        "MicrobialSample", backref="microbial_order", order_by="-MicrobialSample.delivered_at"
     )
     analyses = orm.relationship(
         "Analysis", backref="microbial_order", order_by="-Analysis.completed_at"

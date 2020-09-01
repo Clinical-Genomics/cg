@@ -9,12 +9,7 @@ from cg.store import Store
 
 CASE_FILE_PATHS = ["multiqc"]
 
-RESULT_KEYS = [
-    "family",
-    "human_genome_build",
-    "rank_model_version",
-    "sv_rank_model_version",
-]
+RESULT_KEYS = ["family", "human_genome_build", "rank_model_version", "sv_rank_model_version"]
 
 SAMPLE_FILE_PATHS = ["alignment_path", "chromograph", "vcf2cytosure"]
 

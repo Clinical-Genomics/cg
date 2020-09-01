@@ -120,8 +120,16 @@ def test_is_compression_done(crunchy_config_dict, spring_metadata_file, compress
     assert spring_metadata_file == compression_object.spring_metadata_path
     assert spring_metadata_file.exists()
 
+<<<<<<< HEAD
     # WHEN checking if SPRING compression is done
     result = crunchy_api.is_fastq_compression_done(compression_object)
+=======
+    # WHEN calling fastq_to_spring on fastq files
+    crunchy_api.fastq_to_spring(
+        fastq_first=fastq_first,
+        fastq_second=fastq_second,
+    )
+>>>>>>> 6c50b52a0dcde15b9c6fb2b946888f51690c2f58
 
     # THEN result should be True
     assert result is True

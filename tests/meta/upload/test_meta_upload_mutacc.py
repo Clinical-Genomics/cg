@@ -2,12 +2,7 @@
 
 import os
 
-from cg.meta.upload.mutacc import (
-    UploadToMutaccAPI,
-    resolve_sex,
-    resolve_parent,
-    resolve_phenotype,
-)
+from cg.meta.upload.mutacc import UploadToMutaccAPI, resolve_sex, resolve_parent, resolve_phenotype
 
 
 def test_instatiate():

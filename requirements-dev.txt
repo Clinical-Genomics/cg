@@ -1,7 +1,7 @@
 # pytest
-pytest>=5.2     # due to pytest-flask, pytest-cov
+pytest >= 5.2  # due to pytest-flask, pytest-cov
 mock
-pytest-mock
+pytest - mock
 snapshottest
 
 docutils

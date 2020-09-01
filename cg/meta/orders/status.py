@@ -135,11 +135,7 @@ class StatusHandler:
     @classmethod
     def cases_to_status(cls, data: dict) -> dict:
         """Convert order input to status interface input."""
-        status_data = {
-            "customer": data["customer"],
-            "order": data["name"],
-            "families": [],
-        }
+        status_data = {"customer": data["customer"], "order": data["name"], "families": []}
         cases = cls.group_cases(data["samples"])
 
         for case_name, case_samples in cases.items():
@@ -176,12 +172,7 @@ class StatusHandler:
         return status_data
 
     def store_cases(
-        self,
-        customer: str,
-        order: str,
-        ordered: dt.datetime,
-        ticket: int,
-        cases: List[dict],
+        self, customer: str, order: str, ordered: dt.datetime, ticket: int, cases: List[dict]
     ) -> List[models.Family]:
         """Store cases and samples in the status database."""
         customer_obj = self.status.customer(customer)
@@ -256,12 +247,7 @@ class StatusHandler:
         return new_families
 
     def store_samples(
-        self,
-        customer: str,
-        order: str,
-        ordered: dt.datetime,
-        ticket: int,
-        samples: List[dict],
+        self, customer: str, order: str, ordered: dt.datetime, ticket: int, samples: List[dict]
     ) -> List[models.Sample]:
         """Store samples in the status database."""
         customer_obj = self.status.customer(customer)
@@ -295,12 +281,7 @@ class StatusHandler:
         return new_samples
 
     def store_fastq_samples(
-        self,
-        customer: str,
-        order: str,
-        ordered: dt.datetime,
-        ticket: int,
-        samples: List[dict],
+        self, customer: str, order: str, ordered: dt.datetime, ticket: int, samples: List[dict]
     ) -> List[models.Sample]:
         """Store fast samples in the status database including family connection and delivery."""
         production_customer = self.status.customer("cust000")
@@ -340,9 +321,7 @@ class StatusHandler:
                     self.status.add(new_family)
 
                     new_relationship = self.status.relate_sample(
-                        family=new_family,
-                        sample=new_sample,
-                        status=sample["status"] or "unknown",
+                        family=new_family, sample=new_sample, status=sample["status"] or "unknown"
                     )
                     self.status.add(new_relationship)
 
@@ -407,12 +386,7 @@ class StatusHandler:
         return new_order
 
     def store_pools(
-        self,
-        customer: str,
-        order: str,
-        ordered: dt.datetime,
-        ticket: int,
-        pools: List[dict],
+        self, customer: str, order: str, ordered: dt.datetime, ticket: int, pools: List[dict]
     ) -> List[models.Pool]:
         """Store pools in the status database."""
         customer_obj = self.status.customer(customer)

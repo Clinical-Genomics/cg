@@ -32,24 +32,14 @@ def madeline_columns():
 @pytest.fixture(name="mother")
 def fixture_mother():
     """return a dictionary with ind info"""
-    ind_info = {
-        "sample": "mother",
-        "sex": "female",
-        "proband": False,
-        "status": "unaffected",
-    }
+    ind_info = {"sample": "mother", "sex": "female", "proband": False, "status": "unaffected"}
     return ind_info
 
 
 @pytest.fixture(name="father")
 def fixture_father():
     """return a dictionary with ind info"""
-    ind_info = {
-        "sample": "father",
-        "sex": "male",
-        "proband": False,
-        "status": "unaffected",
-    }
+    ind_info = {"sample": "father", "sex": "male", "proband": False, "status": "unaffected"}
     return ind_info
 
 

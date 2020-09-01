@@ -112,12 +112,7 @@ def add_panel(disk_store, panel_id="panel_test", customer_id="cust_test"):
     """utility function to add a panel to use in tests"""
     customer = disk_store.customer(customer_id)
     panel = disk_store.add_panel(
-        customer=customer,
-        name=panel_id,
-        abbrev=panel_id,
-        version=1.0,
-        date=datetime.now(),
-        genes=1,
+        customer=customer, name=panel_id, abbrev=panel_id, version=1.0, date=datetime.now(), genes=1
     )
     disk_store.add_commit(panel)
     return panel_id
@@ -126,10 +121,7 @@ def add_panel(disk_store, panel_id="panel_test", customer_id="cust_test"):
 def add_application(disk_store, application_tag="dummy_tag"):
     """utility function to add an application to use in tests"""
     application = disk_store.add_application(
-        tag=application_tag,
-        category="wgs",
-        description="dummy_description",
-        percent_kth=80,
+        tag=application_tag, category="wgs", description="dummy_description", percent_kth=80
     )
     disk_store.add_commit(application)
     prices = {"standard": 10, "priority": 20, "express": 30, "research": 5}

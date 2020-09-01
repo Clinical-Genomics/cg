@@ -359,12 +359,7 @@ def fixture_hk_bundle_data(case_id, bed_file, timestamp):
 @pytest.fixture(scope="function", name="sample_hk_bundle_no_files")
 def fixture_sample_hk_bundle_no_files(sample, timestamp):
     """Create a complete bundle mock for testing compression"""
-    hk_bundle_data = {
-        "name": sample,
-        "created": timestamp,
-        "expires": timestamp,
-        "files": [],
-    }
+    hk_bundle_data = {"name": sample, "created": timestamp, "expires": timestamp, "files": []}
 
     return hk_bundle_data
 
@@ -372,12 +367,7 @@ def fixture_sample_hk_bundle_no_files(sample, timestamp):
 @pytest.fixture(scope="function", name="case_hk_bundle_no_files")
 def fixture_case_hk_bundle_no_files(case_id, timestamp):
     """Create a complete bundle mock for testing compression"""
-    hk_bundle_data = {
-        "name": case_id,
-        "created": timestamp,
-        "expires": timestamp,
-        "files": [],
-    }
+    hk_bundle_data = {"name": case_id, "created": timestamp, "expires": timestamp, "files": []}
 
     return hk_bundle_data
 
@@ -487,10 +477,7 @@ def fixture_customer_group() -> str:
 def fixture_customer_production(customer_group) -> dict:
     """Return a dictionary with infomation about the prod customer"""
     _cust = dict(
-        customer_id="cust000",
-        name="Production",
-        scout_access=True,
-        customer_group=customer_group,
+        customer_id="cust000", name="Production", scout_access=True, customer_group=customer_group
     )
     return _cust
 

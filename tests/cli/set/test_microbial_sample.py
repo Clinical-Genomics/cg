@@ -53,9 +53,7 @@ def test_invalid_application(cli_runner, base_context, base_store: Store, helper
 
     # WHEN calling set sample with an invalid application
     result = cli_runner.invoke(
-        microbial_sample,
-        [sample.internal_id, "sign", "-a", application_tag],
-        obj=base_context,
+        microbial_sample, [sample.internal_id, "sign", "-a", application_tag], obj=base_context
     )
 
     # THEN then it should complain about missing application instead of setting the value
@@ -80,9 +78,7 @@ def test_valid_application(cli_runner, base_context, base_store: Store, helpers)
     # WHEN calling set sample with an valid application
     signature = "sign"
     result = cli_runner.invoke(
-        microbial_sample,
-        [sample.internal_id, "sign", "-a", application_tag],
-        obj=base_context,
+        microbial_sample, [sample.internal_id, "sign", "-a", application_tag], obj=base_context
     )
 
     # THEN then the application should have been set

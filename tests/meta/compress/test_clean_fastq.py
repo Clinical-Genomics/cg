@@ -6,8 +6,12 @@ import pytest
 from cg.meta.compress import files
 
 
+<<<<<<< HEAD
 @pytest.mark.compress_meta
 def test_remove_fastqs(compress_api, compression_object, caplog):
+=======
+def test_remove_fastqs(compress_api, fastq_files, fastq_flag_file, caplog):
+>>>>>>> 6c50b52a0dcde15b9c6fb2b946888f51690c2f58
     """Test remove_fastq method
 
     This method should remove FASTQ files since compression is completed
@@ -35,7 +39,11 @@ def test_remove_fastqs(compress_api, compression_object, caplog):
 
 @pytest.mark.compress_meta
 def test_update_hk_fastq(real_housekeeper_api, compress_hk_fastq_bundle, compress_api, helpers):
+<<<<<<< HEAD
     """Test to update the FASTQ and SPRING paths in housekeeper after completed compression
+=======
+    """Test to update the fastq paths after completed compression in housekeeper
+>>>>>>> 6c50b52a0dcde15b9c6fb2b946888f51690c2f58
 
     This will test so that the FASTQ files are replaced by a SPRING file and a SPRING metadata file
     """
