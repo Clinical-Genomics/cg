@@ -33,8 +33,6 @@ def mip_lims():
 @pytest.fixture
 def mip_context(analysis_store_single_case, tb_api, housekeeper_api, mip_lims):
     return {
-        "db": analysis_store_single_case,
-        "tb": tb_api,
         "dna_api": AnalysisAPI(
             db=analysis_store_single_case,
             hk_api=housekeeper_api,
