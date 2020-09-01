@@ -171,24 +171,13 @@ def run(
     dry_run: bool = False,
     email: str = None,
     mip_dry_run: bool = False,
-    priority: str = "Normal",
+    priority: str = None,
     skip_evaluation: bool = False,
     start_with: str = None,
 ):
     """Run the analysis for a case"""
     dna_api = context.obj["dna_api"]
 
-    email = email or environ_email()
-
-    kwargs = dict(
-        config=context.obj["mip-rd-dna"]["mip_config"],
-        case=case_id,
-        priority=priority,
-        email=email,
-        dryrun=mip_dry_run,
-        start_with=start_with,
-        skip_evaluation=skip_evaluation,
-    )
     if case_id is None:
         _suggest_cases_to_analyze(context)
         context.abort()
@@ -196,15 +185,31 @@ def run(
     case_obj = dna_api.db.family(case_id)
     if not case_exists(case_obj, case_id):
         context.abort()
+
+    email = email or environ_email()
+
+    kwargs = dict(
+        config=context.obj["mip-rd-dna"]["mip_config"],
+        case=case_id,
+        priority=priority or dna_api.get_priority(case_obj),
+        email=email,
+        dryrun=mip_dry_run,
+        start_with=start_with,
+        skip_evaluation=skip_evaluation,
+    )
+
     if dna_api.tb.is_analysis_ongoing(case_id=case_obj.internal_id):
         LOG.warning("%s: analysis is ongoing - skipping", case_obj.internal_id)
         return
+
     if dry_run:
         dna_api.run_command(dry_run=dry_run, **kwargs)
     else:
         dna_api.run_command(**kwargs)
         dna_api.tb.mark_analyses_deleted(case_id=case_id)
         dna_api.tb.add_pending_analysis(case_id=case_id, email=email)
+        case_obj.action = "running"
+        dna_api.db.commit()
         LOG.info("MIP rd-dna run started!")
 
 

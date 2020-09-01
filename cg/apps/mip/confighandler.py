@@ -11,6 +11,7 @@ from cg.exc import ConfigError
 LOG = logging.getLogger(__name__)
 DEFAULT_CAPTURE_KIT = "agilent_sureselect_cre.v1"
 
+
 class SampleSchema(Schema):
     sample_id = fields.Str(required=True)
     analysis_type = fields.Str(
