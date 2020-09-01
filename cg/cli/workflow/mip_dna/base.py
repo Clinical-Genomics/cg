@@ -7,7 +7,6 @@ import click
 
 from cg.apps import hk, lims, scoutapi, tb
 from cg.apps.environ import environ_email
-from cg.apps.mip import MipAPI
 from cg.apps.mip.fastq import FastqHandler
 from cg.cli.workflow.get_links import get_links
 from cg.cli.workflow.mip.store import store as store_cmd
@@ -16,7 +15,7 @@ from cg.cli.workflow.mip_dna.deliver import deliver as deliver_cmd
 from cg.constants import EXIT_SUCCESS
 from cg.exc import CgError
 from cg.meta.deliver import DeliverAPI
-from cg.meta.workflow.mip_dna import AnalysisAPI
+from cg.meta.workflow.mip import AnalysisAPI
 from cg.store import Store
 from cg.store.utils import case_exists
 
@@ -46,18 +45,17 @@ def mip_dna(context: click.Context, case_id: str, email: str, priority: str, sta
     deliver = DeliverAPI(
         context.obj, hk_api=hk_api, lims_api=lims_api, case_tags=CASE_TAGS, sample_tags=SAMPLE_TAGS
     )
-    context.obj["api"] = AnalysisAPI(
+    context.obj["dna_api"] = AnalysisAPI(
         db=context.obj["db"],
         hk_api=hk_api,
         tb_api=context.obj["tb"],
         scout_api=scout_api,
         lims_api=lims_api,
         deliver_api=deliver,
-    )
-    context.obj["dna_api"] = MipAPI(
-        context.obj["mip-rd-dna"]["script"],
-        context.obj["mip-rd-dna"]["pipeline"],
-        context.obj["mip-rd-dna"]["conda_env"],
+        script=context.obj["mip-rd-dna"]["script"],
+        pipeline=context.obj["mip-rd-dna"]["pipeline"],
+        conda_env=context.obj["mip-rd-dna"]["conda_env"],
+        root=context.obj["mip-rd-dna"]["root"],
     )
 
     if context.invoked_subcommand is None:
@@ -124,7 +122,7 @@ def config_case(context: click.Context, case_id: str, dry_run: bool = False):
         context.abort()
 
     # workflow formatted pedigree.yaml config
-    config_data = context.obj["api"].config(case_obj)
+    config_data = context.obj["api"].config(case_obj, pipeline="mip-dna")
 
     if dry_run:
         print(config_data)
@@ -179,7 +177,6 @@ def run(
 ):
     """Run the analysis for a case"""
     dna_api = context.obj["dna_api"]
-    tb_api = context.obj["tb"]
 
     email = email or environ_email()
 
@@ -196,18 +193,18 @@ def run(
         _suggest_cases_to_analyze(context)
         context.abort()
 
-    case_obj = context.obj["db"].family(case_id)
+    case_obj = dna_api.db.family(case_id)
     if not case_exists(case_obj, case_id):
         context.abort()
-    if tb_api.is_analysis_ongoing(case_id=case_obj.internal_id):
+    if dna_api.tb.is_analysis_ongoing(case_id=case_obj.internal_id):
         LOG.warning("%s: analysis is ongoing - skipping", case_obj.internal_id)
         return
     if dry_run:
-        dna_api.run(dry_run=dry_run, **kwargs)
+        dna_api.run_command(dry_run=dry_run, **kwargs)
     else:
-        dna_api.run(**kwargs)
-        tb_api.mark_analyses_deleted(case_id=case_id)
-        tb_api.add_pending_analysis(case_id=case_id, email=email)
+        dna_api.run_command(**kwargs)
+        dna_api.tb.mark_analyses_deleted(case_id=case_id)
+        dna_api.tb.add_pending_analysis(case_id=case_id, email=email)
         LOG.info("MIP rd-dna run started!")
 
 

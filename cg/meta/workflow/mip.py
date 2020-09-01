@@ -2,16 +2,48 @@ import gzip
 import logging
 import re
 from pathlib import Path
-from typing import Any
+from typing import List, Any
 from ruamel.yaml import safe_load
 
-from cg.apps import tb, hk, lims
-from cg.meta.deliver import DeliverAPI
+from cg.apps import tb, hk, scoutapi, lims
+from cg.apps.mip.base import MipAPI
+from cg.apps.mip.confighandler import ConfigHandler
 from cg.apps.pipelines.fastqhandler import BaseFastqHandler
+from cg.meta.deliver import DeliverAPI
 from cg.store import models, Store
+from cg.exc import CgDataError, LimsDataError
+
+COLLABORATORS = ("cust000", "cust002", "cust003", "cust004", "cust042")
+MASTER_LIST = (
+    "BRAIN",
+    "Cardiology",
+    "CTD",
+    "ENDO",
+    "EP",
+    "IBMFS",
+    "IEM",
+    "IF",
+    "NEURODEG",
+    "NMD",
+    "mcarta",
+    "MIT",
+    "MOVE",
+    "mtDNA",
+    "PEDHEP",
+    "PID",
+    "PIDCAD",
+    "OMIM-AUTO",
+    "SKD",
+)
+COMBOS = {
+    "DSD": ("DSD", "HYP", "SEXDIF", "SEXDET"),
+    "CM": ("CNM", "CM"),
+    "Horsel": ("Horsel", "141217", "141201"),
+}
+WGS_CAPTURE_KIT = "twistexomerefseq_9.1_hg19_design.bed"
 
 
-class AnalysisAPI:
+class AnalysisAPI(ConfigHandler, MipAPI):
     """The workflow is accessed through Trailblazer but cg provides additional conventions and
     hooks into the status database that makes managing analyses simpler"""
 
@@ -19,9 +51,14 @@ class AnalysisAPI:
         self,
         db: Store,
         hk_api: hk.HousekeeperAPI,
+        scout_api: scoutapi.ScoutAPI,
         tb_api: tb.TrailblazerAPI,
         lims_api: lims.LimsAPI,
         deliver_api: DeliverAPI,
+        script: str,
+        pipeline: str,
+        conda_env: str,
+        root: str,
         yaml_loader=safe_load,
         path_api=Path,
         logger=logging.getLogger(__name__),
@@ -29,24 +66,29 @@ class AnalysisAPI:
         self.db = db
         self.tb = tb_api
         self.hk = hk_api
+        self.scout = scout_api
         self.lims = lims_api
         self.deliver = deliver_api
         self.yaml_loader = yaml_loader
         self.pather = path_api
-        self.LOG = logger
+        self.log = logger
+        self.script = script
+        self.pipeline = pipeline
+        self.conda_env = conda_env
+        self.root = root
 
     def check(self, family_obj: models.Family):
         """Check stuff before starting the analysis."""
         flowcells = self.db.flowcells(family=family_obj)
         statuses = []
         for flowcell_obj in flowcells:
-            self.LOG.debug("%s: checking flowcell", flowcell_obj.name)
+            self.log.debug("%s: checking flowcell", flowcell_obj.name)
             statuses.append(flowcell_obj.status)
             if flowcell_obj.status == "removed":
-                self.LOG.info("%s: requesting removed flowcell", flowcell_obj.name)
+                self.log.info("%s: requesting removed flowcell", flowcell_obj.name)
                 flowcell_obj.status = "requested"
             elif flowcell_obj.status != "ondisk":
-                self.LOG.warning("%s: %s", flowcell_obj.name, flowcell_obj.status)
+                self.log.warning("%s: %s", flowcell_obj.name, flowcell_obj.status)
         return all(status == "ondisk" for status in statuses)
 
     def run(self, family_obj: models.Family, **kwargs):
@@ -64,7 +106,7 @@ class AnalysisAPI:
             downsampled = isinstance(link_obj.sample.downsampled_to, int)
             external = link_obj.sample.application_version.application.is_external
             if downsampled or external:
-                self.LOG.info(
+                self.log.info(
                     "%s: downsampled/external - skip evaluation", link_obj.sample.internal_id
                 )
                 kwargs["skip_evaluation"] = True
@@ -75,7 +117,7 @@ class AnalysisAPI:
         family_obj.action = "running"
         self.db.commit()
 
-    def config(self, family_obj: models.Family, pipeline: str = None) -> dict:
+    def config(self, family_obj: models.Family, pipeline: str) -> dict:
         """Make the MIP config. Meta data for the family is taken from the family object
         and converted to MIP format via trailblazer.
 
@@ -87,41 +129,70 @@ class AnalysisAPI:
             dict: config_data (MIP format)
         """
         # Fetch data for creating a MIP config file
-        data = self.build_config(family_obj)
+        data = self.build_config(family_obj, pipeline=pipeline)
 
         # Validate and reformat to MIP config format
-        config_data = self.tb.make_config(data, pipeline)
-
+        config_data = self.make_config(data, pipeline)
         return config_data
 
-    def build_config(self, family_obj: models.Family) -> dict:
+    def get_target_bed_from_lims(self, sample_id):
+        """Get target bed filename from lims"""
+        target_bed_shortname = self.lims.capture_kit(sample_id)
+        if not target_bed_shortname:
+            raise LimsDataError("Target bed %s not found in LIMS" % target_bed_shortname)
+        bed_version_obj = self.db.bed_version(target_bed_shortname)
+        if not bed_version_obj:
+            raise CgDataError("Bed-version %s does not exist" % target_bed_shortname)
+        return bed_version_obj.filename
+
+    def build_config(self, family_obj: models.Family, pipeline: str) -> dict:
         """Fetch data for creating a MIP config file."""
+
+        def get_sample_data(link_obj):
+            return {
+                "sample_id": link_obj.sample.internal_id,
+                "sample_display_name": link_obj.sample.name,
+                "analysis_type": link_obj.sample.application_version.application.analysis_type,
+                "sex": link_obj.sample.sex,
+                "phenotype": link_obj.status,
+                "expected_coverage": link_obj.sample.application_version.application.min_sequencing_depth,
+            }
+
+        def config_dna_sample(self, link_obj):
+            sample_data = get_sample_data(link_obj)
+            if sample_data["analysis_type"] == "wgs":
+                sample_data["capture_kit"] = WGS_CAPTURE_KIT
+            else:
+                sample_data["capture_kit"] = self.get_target_bed_from_lims(
+                    link_obj.sample.internal_id
+                )
+            if link_obj.mother:
+                sample_data["mother"] = link_obj.mother.internal_id
+            if link_obj.father:
+                sample_data["father"] = link_obj.father.internal_id
+            return sample_data
+
+        def config_rna_sample(link_obj):
+            sample_data = get_sample_data(link_obj)
+            if link_obj.mother:
+                sample_data["mother"] = link_obj.mother.internal_id
+            if link_obj.father:
+                sample_data["father"] = link_obj.father.internal_id
+            return sample_data
+
         data = {
             "case": family_obj.internal_id,
             "default_gene_panels": family_obj.panels,
-            "samples": [],
         }
-        for link in family_obj.links:
-            sample_data = self._get_sample_data(link)
-            if link.mother:
-                sample_data["mother"] = link.mother.internal_id
-            if link.father:
-                sample_data["father"] = link.father.internal_id
-            data["samples"].append(sample_data)
+        if pipeline == "mip-dna":
+            data["samples"] = [
+                config_dna_sample(self, link_obj=link_obj) for link_obj in family_obj.links
+            ]
+        if pipeline == "mip-rna":
+            data["samples"] = [
+                config_rna_sample(link_obj=link_obj) for link_obj in family_obj.links
+            ]
         return data
-
-    @staticmethod
-    def _get_sample_data(link: models.FamilySample) -> dict:
-        """Build sample data for MIP sample file"""
-
-        return {
-            "sample_id": link.sample.internal_id,
-            "sample_display_name": link.sample.name,
-            "analysis_type": link.sample.application_version.application.analysis_type,
-            "sex": link.sample.sex,
-            "phenotype": link.status,
-            "expected_coverage": link.sample.application_version.application.min_sequencing_depth,
-        }
 
     @staticmethod
     def fastq_header(line):
@@ -206,6 +277,34 @@ class AnalysisAPI:
 
         fastq_handler.link(case=case, sample=sample, files=files)
 
+    def panel(self, family_obj: models.Family) -> List[str]:
+        """Create the aggregated panel file."""
+        all_panels = self.convert_panels(family_obj.customer.internal_id, family_obj.panels)
+        bed_lines = self.scout.export_panels(all_panels)
+        return bed_lines
+
+    @staticmethod
+    def convert_panels(customer: str, default_panels: List[str]) -> List[str]:
+        """Convert between default panels and all panels included in gene list."""
+        if customer in COLLABORATORS:
+            # check if all default panels are part of master list
+            if all(panel in MASTER_LIST for panel in default_panels):
+                return MASTER_LIST
+
+        # the rest are handled the same way
+        all_panels = set(default_panels)
+
+        # fill in extra panels if selection is part of a combo
+        for panel in default_panels:
+            if panel in COMBOS:
+                for extra_panel in COMBOS[panel]:
+                    all_panels.add(extra_panel)
+
+        # add OMIM to every panel choice
+        all_panels.add("OMIM-AUTO")
+
+        return list(all_panels)
+
     def _get_latest_raw_file(self, family_id: str, tag: str) -> Any:
         """Get a python object file for a tag and a family ."""
 
@@ -215,8 +314,8 @@ class AnalysisAPI:
         if analysis_files:
             analysis_file_raw = self._open_bundle_file(analysis_files[0].path)
         else:
-            raise self.LOG.warning(
-                f"No post analysis files received from DeliverAPI for '{family_id}'"
+            raise self.log.warning(
+                "No post analysis files received from DeliverAPI for '%s'", family_id
             )
 
         return analysis_file_raw
@@ -249,13 +348,18 @@ class AnalysisAPI:
                     sampleinfo_raw=sampleinfo_raw,
                 )
             except KeyError as error:
-                self.LOG.warning(
-                    f"get_latest_metadata failed for '{family_id}'"
-                    f", missing key: {error.args[0]} "
+                self.log.warning(
+                    "get_latest_metadata failed for '%s', missing key: %s", family_id, error.args[0]
                 )
-                import traceback
-
-                self.LOG.warning(traceback.format_exc())
                 trending = dict()
 
         return trending
+
+    @staticmethod
+    def is_dna_only_case(case):
+        """returns if all samples of a case has dna application type"""
+
+        for _link in case.links:
+            if _link.sample.application_version.application.analysis_type in "wts":
+                return False
+        return True

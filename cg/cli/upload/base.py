@@ -13,7 +13,7 @@ from cg.exc import AnalysisUploadError
 from cg.meta.deliver import DeliverAPI
 from cg.meta.report.api import ReportAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
-from cg.meta.workflow.mip_dna import AnalysisAPI
+from cg.meta.workflow.mip import AnalysisAPI
 from cg.store import Store
 
 from .beacon import beacon

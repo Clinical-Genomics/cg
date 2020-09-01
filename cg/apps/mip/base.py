@@ -38,13 +38,14 @@ CLI_OPTIONS = {
 class MipAPI:
     """ Group MIP specific functionality """
 
-    def __init__(self, script: str, pipeline: str, conda_env: str):
+    def __init__(self, script: str, pipeline: str, conda_env: str, root: str, **kwargs):
         """Initialize MIP command line interface"""
         self.script = script
         self.pipeline = pipeline
         self.conda_env = conda_env
+        self.root = root
 
-    def run(self, config: str, case: str, dry_run: bool = False, **kwargs) -> None:
+    def run_command(self, config: str, case: str, dry_run: bool = False, **kwargs) -> None:
         """Execute the workflow"""
         command = self.build_command(config, case, **kwargs)
         self.execute(command, dry_run)

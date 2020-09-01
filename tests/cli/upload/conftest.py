@@ -10,7 +10,7 @@ from cg.apps.lims import LimsAPI
 from cg.apps.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
-from cg.meta.workflow.mip_dna import AnalysisAPI
+from cg.meta.workflow.mip import AnalysisAPI
 from cg.store import Store
 from tests.mocks.madeline import MockMadelineAPI
 

@@ -8,7 +8,7 @@ from cg.apps.crunchy import CrunchyAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.usalt.fastq import FastqHandler as MicrosaltFastqHandler
 from cg.meta.deliver import DeliverAPI
-from cg.meta.workflow.mip_dna import AnalysisAPI
+from cg.meta.workflow.mip import AnalysisAPI
 from tests.mocks.hk_mock import MockFile
 
 
@@ -216,6 +216,10 @@ def analysis_api(analysis_store, housekeeper_api, scout_api):
         yaml_loader=safe_loader,
         path_api=Path_mock,
         logger=MockLogger(),
+        script="echo",
+        pipeline="analyse rd_dna",
+        conda_env="S_mip_rd-dna",
+        root="/tmp"
     )
     yield _analysis_api
 
