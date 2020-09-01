@@ -5,11 +5,11 @@ from pathlib import Path
 from marshmallow import Schema, fields, validate
 import ruamel.yaml
 
-from trailblazer.constants import DEFAULT_CAPTURE_KIT
-from trailblazer.exc import ConfigError
+from cg.exc import ConfigError
+
 
 LOG = logging.getLogger(__name__)
-
+DEFAULT_CAPTURE_KIT = "agilent_sureselect_cre.v1"
 
 class SampleSchema(Schema):
     sample_id = fields.Str(required=True)

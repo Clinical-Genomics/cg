@@ -113,7 +113,7 @@ def config_case(context: click.Context, case_id: str, dry_run: bool = False):
     if case_id is None:
         _suggest_cases_to_analyze(context)
         context.abort()
-    
+
     dna_api = context.obj["dna_api"]
 
     case_obj = dna_api.db.family(case_id)

@@ -29,6 +29,7 @@ def mip_lims():
     mip_lims = MockLimsAPI({})
     return mip_lims
 
+
 @pytest.fixture
 def mock_root_folder():
     return "/var/empty"
@@ -59,8 +60,8 @@ def mip_context(analysis_store_single_case, tb_api, housekeeper_api, mip_lims, m
             script="echo",
             pipeline="analyse rd_rna",
             conda_env="S_mip_rd-rna",
-            root=mock_root_folder,),
-
+            root=mock_root_folder,
+        ),
         "mip-rd-dna": {
             "conda_env": "S_mip_rd-dna",
             "mip_config": "config.yaml",
