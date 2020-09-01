@@ -37,26 +37,26 @@ START_WITH_PROGRAM = click.option(
 @click.pass_context
 def mip_dna(context: click.Context, case_id: str, email: str, priority: str, start_with: str):
     """Rare disease DNA workflow"""
-    context.obj["db"] = Store(context.obj["database"])
-    hk_api = hk.HousekeeperAPI(context.obj)
-    scout_api = scoutapi.ScoutAPI(context.obj)
-    lims_api = lims.LimsAPI(context.obj)
-    context.obj["tb"] = tb.TrailblazerAPI(context.obj)
-    deliver = DeliverAPI(
-        context.obj, hk_api=hk_api, lims_api=lims_api, case_tags=CASE_TAGS, sample_tags=SAMPLE_TAGS
-    )
+    
     context.obj["dna_api"] = AnalysisAPI(
         db=context.obj["db"],
-        hk_api=hk_api,
+        hk_api=hk.HousekeeperAPI(context.obj),
         tb_api=context.obj["tb"],
-        scout_api=scout_api,
-        lims_api=lims_api,
-        deliver_api=deliver,
+        scout_api=scoutapi.ScoutAPI(context.obj),
+        lims_api=lims.LimsAPI(context.obj),
+        deliver_api=DeliverAPI(
+            context.obj,
+            hk_api=hk.HousekeeperAPI(context.obj),
+            lims_api=lims.LimsAPI(context.obj),
+            case_tags=CASE_TAGS,
+            sample_tags=SAMPLE_TAGS,
+        ),
         script=context.obj["mip-rd-dna"]["script"],
         pipeline=context.obj["mip-rd-dna"]["pipeline"],
         conda_env=context.obj["mip-rd-dna"]["conda_env"],
         root=context.obj["mip-rd-dna"]["root"],
     )
+    dna_api = context.obj["dna_api"]
 
     if context.invoked_subcommand is None:
         if case_id is None:
@@ -64,15 +64,15 @@ def mip_dna(context: click.Context, case_id: str, email: str, priority: str, sta
             context.abort()
 
         # check everything is ok
-        case_obj = context.obj["db"].family(case_id)
+        case_obj = dna_api.db.family(case_id)
         if not case_exists(case_obj, case_id):
             context.abort()
 
-        is_ok = context.obj["api"].check(case_obj)
+        is_ok = dna_api.check(case_obj)
         if not is_ok:
             LOG.warning("%s: not ready to run", case_obj.internal_id)
             # commit the updates to request flowcells
-            context.obj["db"].commit()
+            dna_api.db.commit()
         else:
             # execute the analysis!
             context.invoke(config_case, case_id=case_id)
@@ -89,17 +89,15 @@ def mip_dna(context: click.Context, case_id: str, email: str, priority: str, sta
 @click.pass_context
 def link(context: click.Context, case_id: str, sample_id: str):
     """Link FASTQ files for a SAMPLE_ID"""
-    store = context.obj["db"]
-
-    link_objs = get_links(store, case_id, sample_id)
-
+    dna_api = context.obj["dna_api"]
+    link_objs = get_links(dna_api.db, case_id, sample_id)
     for link_obj in link_objs:
         LOG.info(
             "%s: %s link FASTQ files", link_obj.sample.internal_id, link_obj.sample.data_analysis
         )
         if not link_obj.sample.data_analysis or "mip" in link_obj.sample.data_analysis.lower():
-            mip_fastq_handler = FastqHandler(context.obj, context.obj["db"], context.obj["tb"])
-            context.obj["api"].link_sample(
+            mip_fastq_handler = FastqHandler(context.obj, dna_api.db, dna_api.db)
+            dna_api.link_sample(
                 mip_fastq_handler,
                 case=link_obj.family.internal_id,
                 sample=link_obj.sample.internal_id,
@@ -115,20 +113,21 @@ def config_case(context: click.Context, case_id: str, dry_run: bool = False):
     if case_id is None:
         _suggest_cases_to_analyze(context)
         context.abort()
+    
+    dna_api = context.obj["dna_api"]
 
-    case_obj = context.obj["db"].family(case_id)
-
+    case_obj = dna_api.db.family(case_id)
     if not case_exists(case_obj, case_id):
         context.abort()
 
     # workflow formatted pedigree.yaml config
-    config_data = context.obj["api"].config(case_obj, pipeline="mip-dna")
+    config_data = dna_api.config(case_obj, pipeline="mip-dna")
 
     if dry_run:
         print(config_data)
     else:
         # Write to trailblazer root dir / case_id
-        out_path = context.obj["tb"].save_config(config_data)
+        out_path = dna_api.save_config(config_data)
         LOG.info("saved config to %s", out_path)
 
 
@@ -145,13 +144,14 @@ def panel(context: click.Context, case_id: str, dry_run: bool = False):
         _suggest_cases_to_analyze(context)
         context.abort()
 
-    case_obj = context.obj["db"].family(case_id)
-    bed_lines = context.obj["api"].panel(case_obj)
+    dna_api = context.obj["dna_api"]
+    case_obj = dna_api.db.family(case_id)
+    bed_lines = dna_api.panel(case_obj)
     if dry_run:
         for bed_line in bed_lines:
             print(bed_line)
     else:
-        context.obj["tb"].write_panel(case_id, bed_lines)
+        dna_api.tb.write_panel(case_id, bed_lines)
 
 
 @mip_dna.command()
@@ -215,11 +215,13 @@ def start(context: click.Context, dry_run: bool = False):
     """Start all cases that are ready for analysis"""
     exit_code = EXIT_SUCCESS
 
-    cases = [case_obj.internal_id for case_obj in context.obj["db"].cases_to_mip_analyze()]
+    dna_api = context.obj["dna_api"]
+
+    cases = [case_obj.internal_id for case_obj in dna_api.db.cases_to_mip_analyze()]
 
     for case_id in cases:
 
-        case_obj = context.obj["db"].family(case_id)
+        case_obj = dna_api.db.family(case_id)
 
         if AnalysisAPI.is_dna_only_case(case_obj):
             LOG.info("%s: start analysis", case_obj.internal_id)
@@ -227,9 +229,9 @@ def start(context: click.Context, dry_run: bool = False):
             LOG.warning("%s: contains non-dna samples - skipping", case_obj.internal_id)
             continue
 
-        has_started = context.obj["tb"].has_analysis_started(case_id=case_obj.internal_id)
+        has_started = dna_api.tb.has_analysis_started(case_id=case_obj.internal_id)
         if has_started:
-            status = context.obj["tb"].get_analysis_status(case_id=case_obj.internal_id)
+            status = dna_api.tb.get_analysis_status(case_id=case_obj.internal_id)
             LOG.warning("%s: analysis is %s - skipping", case_id, status)
             continue
 
@@ -257,7 +259,7 @@ def _suggest_cases_to_analyze(context: click.Context, show_as_error: bool = Fals
         LOG.error("provide a case, suggestions:")
     else:
         LOG.warning("provide a case, suggestions:")
-    for case_obj in context.obj["db"].cases_to_mip_analyze()[:50]:
+    for case_obj in context.obj["dna_api"].db.cases_to_mip_analyze()[:50]:
         click.echo(case_obj)
 
 

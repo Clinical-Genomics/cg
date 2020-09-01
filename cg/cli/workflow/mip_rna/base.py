@@ -23,24 +23,24 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def mip_rna(context: click.Context):
     """Rare disease RNA workflow"""
-    hk_api = hk.HousekeeperAPI(context.obj)
-    lims_api = lims.LimsAPI(context.obj)
-    scout_api = scoutapi.ScoutAPI(context.obj)
-    deliver = DeliverAPI(
-        context.obj, hk_api=hk_api, lims_api=lims_api, case_tags=CASE_TAGS, sample_tags=SAMPLE_TAGS
-    )
 
     context.obj["rna_api"] = AnalysisAPI(
         db=context.obj["db"],
-        hk_api=hk_api,
+        hk_api=hk.HousekeeperAPI(context.obj),
         tb_api=context.obj["tb"],
-        scout_api=scout_api,
-        lims_api=lims_api,
-        deliver_api=deliver,
+        scout_api=scoutapi.ScoutAPI(context.obj),
+        lims_api=lims.LimsAPI(context.obj),
+        deliver_api=DeliverAPI(
+            context.obj,
+            hk_api=hk.HousekeeperAPI(context.obj),
+            lims_api=lims.LimsAPI(context.obj),
+            case_tags=CASE_TAGS,
+            sample_tags=SAMPLE_TAGS,
+        ),
         script=context.obj["mip-rd-rna"]["script"],
         pipeline=context.obj["mip-rd-rna"]["pipeline"],
         conda_env=context.obj["mip-rd-rna"]["conda_env"],
-        root=context.obj["mip-rd-rna"]["root"]
+        root=context.obj["mip-rd-rna"]["root"],
     )
 
 
@@ -50,17 +50,16 @@ def mip_rna(context: click.Context):
 @click.pass_context
 def link(context: click.Context, case_id: str, sample_id: str):
     """Link FASTQ files for a SAMPLE_ID"""
-    store = context.obj["db"]
-    link_objs = get_links(store, case_id, sample_id)
+    rna_api = context.obj["rna_api"]
+    link_objs = get_links(rna_api.db, case_id, sample_id)
 
     for link_obj in link_objs:
         LOG.info(
             "%s: %s link FASTQ files", link_obj.sample.internal_id, link_obj.sample.data_analysis
         )
-
         if "mip + rna" in link_obj.sample.data_analysis.lower():
-            mip_fastq_handler = FastqHandler(context.obj, context.obj["db"], context.obj["tb"])
-            context.obj["api"].link_sample(
+            mip_fastq_handler = FastqHandler(context.obj, rna_api.db, rna_api.tb_api)
+            rna_api.link_sample(
                 mip_fastq_handler,
                 case=link_obj.family.internal_id,
                 sample=link_obj.sample.internal_id,
@@ -86,7 +85,7 @@ def run(
 ):
     """Run the analysis for a case"""
     rna_api = context.obj["rna_api"]
-    case_obj = context.obj["db"].family(case_id)
+    case_obj = rna_api.db.family(case_id)
 
     if not case_exists(case_obj, case_id):
         context.abort()
@@ -119,19 +118,20 @@ def run(
 @click.pass_context
 def config_case(context: click.Context, case_id: str, dry: bool = False):
     """Generate a config for the case_id"""
-    case_obj = context.obj["db"].family(case_id)
+    rna_api = context.obj["rna_api"]
+    case_obj = rna_api.db.family(case_id)
 
     if not case_exists(case_obj, case_id):
         context.abort()
 
     # MIP formatted pedigree.yaml config
-    config_data = context.obj["api"].config(case_obj, pipeline="mip-rna")
+    config_data = rna_api.config(case_obj, pipeline="mip-rna")
 
     if dry:
         print(config_data)
     else:
         # Write to trailblazer root dir / case_id
-        out_path = context.obj["tb"].save_config(config_data)
+        out_path = rna_api.save_config(config_data)
         LOG.info("saved config to: %s", out_path)
 
 
