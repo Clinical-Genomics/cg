@@ -4,16 +4,15 @@ import logging
 
 import click
 
-from cg.apps import hk, lims, tb
+from cg.apps import hk, lims, scoutapi, tb
 from cg.apps.environ import environ_email
-from cg.apps.mip import MipAPI
 from cg.apps.mip.fastq import FastqHandler
 from cg.cli.workflow.get_links import get_links
 from cg.cli.workflow.mip.store import store as store_cmd
 from cg.cli.workflow.mip_rna.deliver import CASE_TAGS, SAMPLE_TAGS
 from cg.cli.workflow.mip_rna.deliver import deliver as deliver_cmd
 from cg.meta.deliver import DeliverAPI
-from cg.meta.workflow.mip_rna import AnalysisAPI
+from cg.meta.workflow.mip import AnalysisAPI
 from cg.store import Store
 from cg.store.utils import case_exists
 
@@ -24,24 +23,24 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def mip_rna(context: click.Context):
     """Rare disease RNA workflow"""
-    context.obj["db"] = Store(context.obj["database"])
     hk_api = hk.HousekeeperAPI(context.obj)
     lims_api = lims.LimsAPI(context.obj)
-    context.obj["tb"] = tb.TrailblazerAPI(context.obj)
+    scout_api = scoutapi.ScoutAPI(context.obj)
     deliver = DeliverAPI(
         context.obj, hk_api=hk_api, lims_api=lims_api, case_tags=CASE_TAGS, sample_tags=SAMPLE_TAGS
     )
-    context.obj["api"] = AnalysisAPI(
+
+    context.obj["rna_api"] = AnalysisAPI(
         db=context.obj["db"],
         hk_api=hk_api,
         tb_api=context.obj["tb"],
+        scout_api=scout_api,
         lims_api=lims_api,
         deliver_api=deliver,
-    )
-    context.obj["rna_api"] = MipAPI(
-        context.obj["mip-rd-rna"]["script"],
-        context.obj["mip-rd-rna"]["pipeline"],
-        context.obj["mip-rd-rna"]["conda_env"],
+        script=context.obj["mip-rd-rna"]["script"],
+        pipeline=context.obj["mip-rd-rna"]["pipeline"],
+        conda_env=context.obj["mip-rd-rna"]["conda_env"],
+        root=context.obj["mip-rd-rna"]["root"]
     )
 
 
@@ -86,14 +85,13 @@ def run(
     start_with: str = None,
 ):
     """Run the analysis for a case"""
-    tb_api = context.obj["tb"]
     rna_api = context.obj["rna_api"]
     case_obj = context.obj["db"].family(case_id)
 
     if not case_exists(case_obj, case_id):
         context.abort()
 
-    if tb_api.analyses(family=case_obj.internal_id, temp=True).first():
+    if rna_api.tb.analyses(family=case_obj.internal_id, temp=True).first():
         LOG.warning("%s: analysis already running", case_obj.internal_id)
         return
 
@@ -107,11 +105,11 @@ def run(
         start_with=start_with,
     )
     if dry_run:
-        rna_api.run(dry_run=dry_run, **kwargs)
+        rna_api.run_command(dry_run=dry_run, **kwargs)
     else:
-        rna_api.run(**kwargs)
-        tb_api.mark_analyses_deleted(case_id=case_id)
-        tb_api.add_pending_analysis(case_id=case_id, email=email)
+        rna_api.run_command(**kwargs)
+        rna_api.tb.mark_analyses_deleted(case_id=case_id)
+        rna_api.tb.add_pending_analysis(case_id=case_id, email=email)
         LOG.info("MIP rd-rna run started!")
 
 
