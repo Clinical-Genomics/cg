@@ -2,6 +2,7 @@
     Module for interacting with crunchy to perform:
         1. Compressing: FASTQ to SPRING
         2. Decompressing: SPRING to FASTQ
+    along with the helper methods
 """
 
 import datetime
@@ -390,7 +391,9 @@ class CrunchyAPI:
 
     @staticmethod
     def _get_slurm_spring_to_fastq(
-        compression_obj: CompressionData, checksum_first: str, checksum_second: str,
+        compression_obj: CompressionData,
+        checksum_first: str,
+        checksum_second: str,
     ) -> str:
         """Create and return the body of a sbatch script that runs SPRING to FASTQ"""
         LOG.info("Generating SPRING to FASTQ sbatch body")
