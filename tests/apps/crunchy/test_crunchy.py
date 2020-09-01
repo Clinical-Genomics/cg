@@ -1,8 +1,26 @@
 """Tests for CrunchyAPI"""
 import json
 import logging
+from pathlib import Path
 
 from cg.apps.crunchy import CrunchyAPI
+
+
+def test_get_tmp_path_correct_place(crunchy_config_dict, project_dir):
+    """Test to get the path to a temporary directory"""
+    # GIVEN a crunchy API
+    crunchy_api = CrunchyAPI(crunchy_config_dict)
+    prefix = "spring_"
+    suffix = "fastq_"
+
+    # WHEN creating a tmpdir path
+    tmp_dir = crunchy_api._get_tmp_dir(prefix=prefix, suffix=suffix, base=str(project_dir))
+
+    # THEN assert that the path is correct
+    assert isinstance(tmp_dir, str)
+    tmp_dir_path = Path(tmp_dir)
+    # THEN assert the dir is in the correct place
+    assert tmp_dir_path.parent == project_dir
 
 
 def test_set_dry_run(crunchy_config_dict):
