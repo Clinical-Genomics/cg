@@ -19,24 +19,24 @@ def fixture_content() -> str:
     return _content
 
 
-@pytest.fixture(name="file_path")
-def fixture_file_path(project_dir: Path) -> Path:
+@pytest.fixture(name="non_existing_file_path")
+def fixture_non_existing_file_path(project_dir: Path) -> Path:
     """Return the path to a non existing file"""
     return project_dir / "a_file.txt"
 
 
-@pytest.fixture(name="gzipped_file_path")
-def fixture_gzipped_file_path(file_path: Path) -> Path:
+@pytest.fixture(name="non_existing_gzipped_file_path")
+def fixture_non_existing_gzipped_file_path(non_existing_file_path: Path) -> Path:
     """Return the path to a non existing file with gzipped ending"""
-    return file_path.with_suffix(".gz")
+    return non_existing_file_path.with_suffix(".gz")
 
 
 @pytest.fixture(name="filled_file")
-def fixture_filled_file(file_path: Path, content: str) -> Path:
+def fixture_filled_file(non_existing_file_path: Path, content: str) -> Path:
     """Return the path to a existing file with some content"""
-    with open(file_path, "w") as outfile:
+    with open(non_existing_file_path, "w") as outfile:
         outfile.write(content)
-    return file_path
+    return non_existing_file_path
 
 
 @pytest.fixture(name="filled_gzip_file")

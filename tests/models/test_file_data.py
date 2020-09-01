@@ -32,21 +32,22 @@ def test_is_gzipped_non_zipped(filled_file):
     assert res is False
 
 
-def test_is_gzipped_non_existing(gzipped_file_path):
-    """Test if a file that is does not exist is gzipped"""
+def test_is_gzipped_non_existing(non_existing_gzipped_file_path):
+    """Test if a file that does not exist is gzipped"""
     # GIVEN an non existing file
-    assert not gzipped_file_path.exists()
+    assert not non_existing_gzipped_file_path.exists()
 
     # WHEN checking if the file is gzipped
     with pytest.raises(FileNotFoundError):
         # THEN assert that a FileNotFoundError is raised
-        FileData.is_gzipped(gzipped_file_path)
+        FileData.is_gzipped(non_existing_gzipped_file_path)
 
 
-def test_is_gzipped_empty_file(gzipped_file_path):
-    """Test if a file that is does exists but is empty"""
+def test_is_gzipped_empty_file(non_existing_gzipped_file_path):
+    """Test if a file that does exists but is empty"""
     # GIVEN an existing file
-    gzipped_file_path.touch()
+    non_existing_gzipped_file_path.touch()
+    gzipped_file_path = non_existing_gzipped_file_path
     assert gzipped_file_path.exists()
     # GIVEN a gzipped file without content
     assert gzipped_file_path.stat().st_size == 0
@@ -58,10 +59,11 @@ def test_is_gzipped_empty_file(gzipped_file_path):
     assert res is False
 
 
-def test_is_empty_file(gzipped_file_path):
+def test_is_empty_file(non_existing_gzipped_file_path):
     """Test if a file that is empty is evaluated as empty"""
     # GIVEN an existing file
-    gzipped_file_path.touch()
+    non_existing_gzipped_file_path.touch()
+    gzipped_file_path = non_existing_gzipped_file_path
     assert gzipped_file_path.exists()
     # GIVEN a gzipped file without content
     assert gzipped_file_path.stat().st_size == 0

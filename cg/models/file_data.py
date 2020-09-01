@@ -22,6 +22,7 @@ class FileData:
     def is_empty(path: Path) -> bool:
         """Check if file is empty"""
         handle = open(path, "rb")
+        # Read the first byte to check if file is empty
         if handle.read(1):
             return False
         return True

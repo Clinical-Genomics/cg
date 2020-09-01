@@ -241,8 +241,8 @@ def fixture_run_name() -> str:
     return "fastq_run"
 
 
-@pytest.fixture(scope="function", name="original_fastqs")
-def fixture_original_fastq(fastq_dir: Path, run_name) -> CompressionData:
+@pytest.fixture(scope="function", name="original_fastq_data")
+def fixture_original_fastq_data(fastq_dir: Path, run_name) -> CompressionData:
     """Return a compression object with a path to the original fastq files"""
 
     return CompressionData(fastq_dir / run_name)
@@ -255,12 +255,11 @@ def fixture_fastq_stub(project_dir: Path, run_name: str) -> Path:
 
 
 @pytest.fixture(scope="function", name="compression_object")
-def fixture_compression_object(fastq_stub: Path, original_fastqs) -> CompressionData:
+def fixture_compression_object(fastq_stub: Path, original_fastq_data) -> CompressionData:
     """Creates compression data object with information about files used in fastq compression"""
     working_files = CompressionData(fastq_stub)
-    print("fastq stub", fastq_stub)
-    shutil.copy(str(original_fastqs.fastq_first), str(working_files.fastq_first))
-    shutil.copy(str(original_fastqs.fastq_second), str(working_files.fastq_second))
+    shutil.copy(str(original_fastq_data.fastq_first), str(working_files.fastq_first))
+    shutil.copy(str(original_fastq_data.fastq_second), str(working_files.fastq_second))
     return working_files
 
 
