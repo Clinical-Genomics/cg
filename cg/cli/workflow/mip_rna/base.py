@@ -121,8 +121,8 @@ def run(
 def config_case(context: click.Context, case_id: str, dry: bool = False):
     """Generate a config for the case_id"""
     rna_api = context.obj["rna_api"]
-    case_obj = rna_api.db.family(case_id)
 
+    case_obj = rna_api.db.family(case_id)
     if not case_exists(case_obj, case_id):
         context.abort()
 

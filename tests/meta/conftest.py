@@ -219,7 +219,7 @@ def analysis_api(analysis_store, housekeeper_api, scout_api):
         script="echo",
         pipeline="analyse rd_dna",
         conda_env="S_mip_rd-dna",
-        root="/tmp",
+        root="/var/empty",
     )
     yield _analysis_api
 
