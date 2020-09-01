@@ -15,7 +15,7 @@ def test_cg_dry_run(cli_runner, tb_api, analysis_store_single_case, mip_context,
     with caplog.at_level(logging.INFO):
         # WHEN we run a case in dry run mode
         result = cli_runner.invoke(run, ["--dry-run", "--email", EMAIL, CASE_ID], obj=mip_context)
-        #THEN command is run successfully
+        # THEN command is run successfully
         assert result.exit_code == 0
         # THEN the command should be printed
         assert (
