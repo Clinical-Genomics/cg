@@ -31,7 +31,7 @@ PENDING_PATH_SUFFIX = ".crunchy.pending.txt"
 
 class CrunchyAPI:
     """
-    API for crunchy
+    API for crunchy application
     """
 
     def __init__(self, config: dict):
@@ -390,7 +390,7 @@ class CrunchyAPI:
 
     @staticmethod
     def _get_slurm_spring_to_fastq(
-        compression_obj: CompressionData, checksum_first: str, checksum_second: str,
+        compression_obj: CompressionData, checksum_first: str, checksum_second: str
     ) -> str:
         """Create and return the body of a sbatch script that runs SPRING to FASTQ"""
         LOG.info("Generating SPRING to FASTQ sbatch body")
