@@ -314,7 +314,7 @@ cg upload auto
 You can of course specify which upload you want to do yourself as well:
 
 ```bash
-cg upload [coverage|genotypes|observations|scout|beacon] raredragon
+cg upload [coverage|genotypes|observations|scout] raredragon
 ```
 
 ### Meta
@@ -339,16 +339,6 @@ It opens a ticket using the `osticket` API for each order which it links with th
 
 
 #### Upload
-
-##### Beacon
-
-Includes: `beacon`, `hk`, `scout`, `status`
-
-This command is used to upload variants from affected subject/s of a family to a beacon of genetic variants.
-The API will first use `status` to fetch the ID of any affected subject from a given family. It will then use `hk` to retrieve a VCF file from the analyses. A temporary VCF file is then created by filtering for variants present in desired gene panel(s) (retrieved using `scout`). The `beacon` app will finally handle the upload to beacon.
-The required parameters for the upload are:
-- gene panel to use
-- family ID
 
 ##### Coverage
 

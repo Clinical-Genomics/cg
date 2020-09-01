@@ -173,13 +173,6 @@ Fetch the first flowcell in the requested queue from backup.
 ## cg clean
 Remove stuff. *Use caution.*
 
-### cg clean beacon
-Remove beacon for a sample or one or more affected samples from a family, cleans the beacon database of the inserted variants. It is required to specify what item type that should be removed. Example:
-
-```$ cg clean beacon --item_type TYPE ITEM_ID```
-
-Where `TYPE` can be `family` or `sample`.
-
 ### cg clean mip
 Remove analysis output. Removes the family directory (as defined in the cg config).
 
@@ -187,7 +180,7 @@ Remove analysis output. Removes the family directory (as defined in the cg confi
 
 where `SAMPLE_INFO` is the path to the familyID_qc_sample_info.yaml file
 
-There is an option to skip confirmation: `--yes` 
+There is an option to skip confirmation: `--yes`
 
 ### cg clean mipauto
 Automatically clean up "old" analyses. Removes all the family directories before the date defined by the user.
@@ -196,14 +189,14 @@ Automatically clean up "old" analyses. Removes all the family directories before
 
 where `BEFORE_STR` is a date in string format, e.g. `2018-04-19`
 
-There is an option to skip confirmation: `--yes` 
+There is an option to skip confirmation: `--yes`
 
 ### cg clean scout
 Cleans the bam and bai files of selected bundle in housekeeper.
 
 ```$ cg clean scout BUNDLE```
 
-There is an option to skip confirmation: `--yes` 
+There is an option to skip confirmation: `--yes`
 
 ### cg clean scoutauto
 Automatically clean up solved and archived scout cases. Cleans the bam and bai files in housekeeper.
@@ -425,29 +418,6 @@ Upload all completed analyses to all the apps.
 
 ```$ cg upload auto```
 
-### cg upload beacon
-Upload variants for affected samples in a family to cgbeacon.
-
-```$ cg upload beacon --panel TEXT FAMILY_ID```
-
-where `TEXT` is the gene panel to filter VCF by. To add multiple panels simply provide `--panel TEXT` again with another gene panel.
-
-Name the output pdf file by using the `--outfile` option. Example:
-
-```$ cg upload beacon --outfile PDF_NAME FAMILY_ID```
-
-Provide customer by using the `--customer` option. Example:
-
-```$ cg upload beacon --customer CUSTOMER_ID FAMILY_ID```
-
-To set the variant quality threshold, use:
-
-```$ cg upload beacon --quality INTEGER FAMILY_ID```
-
-To set the reference genome, use the `--genome_reference` option (it is by default set to grch37). Example:
-
-```$ cg upload beacon --genome_reference GENOME FAMILY_ID```
-
 ### cg upload coverage
 Upload coverage from an analysis to Chanjo.
 
@@ -484,9 +454,3 @@ It is possible to get the config values printed to the console:
 Validate a family of samples.
 
 ```$ cg upload validate FAMILY_ID```
-
-
-
-
-
-
