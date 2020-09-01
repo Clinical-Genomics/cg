@@ -110,11 +110,11 @@ def link(context: click.Context, case_id: str, sample_id: str):
 @click.pass_context
 def config_case(context: click.Context, case_id: str, dry_run: bool = False):
     """Generate a config for the CASE_ID"""
+    dna_api = context.obj["dna_api"]
+
     if case_id is None:
         _suggest_cases_to_analyze(context)
         context.abort()
-
-    dna_api = context.obj["dna_api"]
 
     case_obj = dna_api.db.family(case_id)
     if not case_exists(case_obj, case_id):
