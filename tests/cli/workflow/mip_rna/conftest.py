@@ -2,6 +2,7 @@ import pytest
 
 from cg.meta.workflow.mip import AnalysisAPI
 
+
 class MockLimsAPI:
     """Mock LIMS API to simulate LIMS behavior in BALSAMIC"""
 
@@ -28,35 +29,36 @@ def mip_lims():
     mip_lims = MockLimsAPI({})
     return mip_lims
 
+
 @pytest.fixture
 def mip_context(analysis_store_single_case, tb_api, housekeeper_api, mip_lims):
     return {
-    "db": analysis_store_single_case,
-    "tb": tb_api,
-    "rna_api": AnalysisAPI(
-        db=analysis_store_single_case,
-        hk_api=housekeeper_api,
-        tb_api=tb_api,
-        scout_api="scout_api",
-        lims_api=mip_lims,
-        deliver_api="deliver",
-        script="echo",
-        pipeline="analyse rd_rna",
-        conda_env="S_mip_rd-rna",
-        root="/tmp"),
-        
-    "mip-rd-dna": {
-        "conda_env": "S_mip_rd-dna",
-        "mip_config": "config.yaml",
-        "pipeline": "analyse rd_dna",
-        "root": "/tmp",
-        "script": "echo",
+        "db": analysis_store_single_case,
+        "tb": tb_api,
+        "rna_api": AnalysisAPI(
+            db=analysis_store_single_case,
+            hk_api=housekeeper_api,
+            tb_api=tb_api,
+            scout_api="scout_api",
+            lims_api=mip_lims,
+            deliver_api="deliver",
+            script="echo",
+            pipeline="analyse rd_rna",
+            conda_env="S_mip_rd-rna",
+            root="/tmp",
+        ),
+        "mip-rd-dna": {
+            "conda_env": "S_mip_rd-dna",
+            "mip_config": "config.yaml",
+            "pipeline": "analyse rd_dna",
+            "root": "/tmp",
+            "script": "echo",
         },
-    "mip-rd-rna": {
-        "conda_env": "S_mip_rd-rna",
-        "mip_config": "config.yaml",
-        "pipeline": "analyse rd_rna",
-        "root": "/tmp",
-        "script": "echo",
-        }
+        "mip-rd-rna": {
+            "conda_env": "S_mip_rd-rna",
+            "mip_config": "config.yaml",
+            "pipeline": "analyse rd_rna",
+            "root": "/tmp",
+            "script": "echo",
+        },
     }
