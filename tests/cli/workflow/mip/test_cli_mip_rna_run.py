@@ -28,10 +28,6 @@ def test_cg_dry_run(cli_runner, tb_api, analysis_store_single_case, mip_context,
 def test_run(cli_runner, tb_api, analysis_store_single_case, caplog, mip_context, monkeypatch):
     """Test run MIP RNA analysis"""
 
-    def mip_run(_self, **kwargs):
-        """monkeypatch function so we don't actually run MIP"""
-        del kwargs
-
     # GIVEN a cli function
 
     # WHEN we run a case
