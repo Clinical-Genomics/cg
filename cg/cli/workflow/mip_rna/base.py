@@ -58,7 +58,7 @@ def link(context: click.Context, case_id: str, sample_id: str):
             "%s: %s link FASTQ files", link_obj.sample.internal_id, link_obj.sample.data_analysis
         )
         if "mip + rna" in link_obj.sample.data_analysis.lower():
-            mip_fastq_handler = FastqHandler(context.obj, rna_api.db, rna_api.tb_api)
+            mip_fastq_handler = FastqHandler(context.obj, rna_api.db, rna_api.tb)
             rna_api.link_sample(
                 mip_fastq_handler,
                 case=link_obj.family.internal_id,

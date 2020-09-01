@@ -37,7 +37,7 @@ START_WITH_PROGRAM = click.option(
 @click.pass_context
 def mip_dna(context: click.Context, case_id: str, email: str, priority: str, start_with: str):
     """Rare disease DNA workflow"""
-    
+
     context.obj["dna_api"] = AnalysisAPI(
         db=context.obj["db"],
         hk_api=hk.HousekeeperAPI(context.obj),
@@ -96,7 +96,7 @@ def link(context: click.Context, case_id: str, sample_id: str):
             "%s: %s link FASTQ files", link_obj.sample.internal_id, link_obj.sample.data_analysis
         )
         if not link_obj.sample.data_analysis or "mip" in link_obj.sample.data_analysis.lower():
-            mip_fastq_handler = FastqHandler(context.obj, dna_api.db, dna_api.db)
+            mip_fastq_handler = FastqHandler(context.obj, dna_api.db, dna_api.tb)
             dna_api.link_sample(
                 mip_fastq_handler,
                 case=link_obj.family.internal_id,
