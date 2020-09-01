@@ -286,10 +286,9 @@ class AnalysisAPI(ConfigHandler, MipAPI):
     @staticmethod
     def convert_panels(customer: str, default_panels: List[str]) -> List[str]:
         """Convert between default panels and all panels included in gene list."""
-        if customer in COLLABORATORS:
+        if customer in COLLABORATORS and all(panel in MASTER_LIST for panel in default_panels):
             # check if all default panels are part of master list
-            if all(panel in MASTER_LIST for panel in default_panels):
-                return MASTER_LIST
+            return MASTER_LIST
 
         # the rest are handled the same way
         all_panels = set(default_panels)

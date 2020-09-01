@@ -19,12 +19,9 @@ class SampleSchema(Schema):
     father = fields.Str(default="0")
     mother = fields.Str(default="0")
     phenotype = fields.Str(
-        required=True,
-        validate=validate.OneOf(choices=["affected", "unaffected", "unknown"]),
+        required=True, validate=validate.OneOf(choices=["affected", "unaffected", "unknown"]),
     )
-    sex = fields.Str(
-        required=True, validate=validate.OneOf(choices=["male", "female", "unknown"])
-    )
+    sex = fields.Str(required=True, validate=validate.OneOf(choices=["male", "female", "unknown"]))
     expected_coverage = fields.Float()
     capture_kit = fields.Str(default=DEFAULT_CAPTURE_KIT)
 
@@ -41,12 +38,9 @@ class SampleSchemaRNA(Schema):
     father = fields.Str(default="0")
     mother = fields.Str(default="0")
     phenotype = fields.Str(
-        required=True,
-        validate=validate.OneOf(choices=["affected", "unaffected", "unknown"]),
+        required=True, validate=validate.OneOf(choices=["affected", "unaffected", "unknown"]),
     )
-    sex = fields.Str(
-        required=True, validate=validate.OneOf(choices=["male", "female", "unknown"])
-    )
+    sex = fields.Str(required=True, validate=validate.OneOf(choices=["male", "female", "unknown"]))
     expected_coverage = fields.Float()
     capture_kit = fields.Str(default=DEFAULT_CAPTURE_KIT)
 
@@ -84,9 +78,7 @@ class ConfigHandler:
                         for sub_field, sub_messages in sample_errors.items():
                             if sub_messages != ["Unknown field."]:
                                 hard_error = True
-                            LOG.error(
-                                f"{sample_id} -> {sub_field}: {', '.join(sub_messages)}"
-                            )
+                            LOG.error(f"{sample_id} -> {sub_field}: {', '.join(sub_messages)}")
                 else:
                     hard_error = True
                     LOG.error(f"{field}: {', '.join(messages)}")
@@ -99,18 +91,14 @@ class ConfigHandler:
         """Prepare the config data."""
         data_copy = deepcopy(data)
         # handle single sample cases with 'unknown' phenotype
-        if len(data_copy["samples"]) == 1:
-            if data_copy["samples"][0]["phenotype"] == "unknown":
-                LOG.info("setting 'unknown' phenotype to 'unaffected'")
-                data_copy["samples"][0]["phenotype"] = "unaffected"
+        if len(data_copy["samples"]) == 1 and data_copy["samples"][0]["phenotype"] == "unknown":
+            LOG.info("setting 'unknown' phenotype to 'unaffected'")
+            data_copy["samples"][0]["phenotype"] = "unaffected"
         # set the mother/father to '0' if they are not set for a sample
         for sample_data in data_copy["samples"]:
             sample_data["mother"] = sample_data.get("mother") or "0"
             sample_data["father"] = sample_data.get("father") or "0"
-            if (
-                sample_data["analysis_type"] == "wgs"
-                and sample_data.get("capture_kit") is None
-            ):
+            if sample_data["analysis_type"] == "wgs" and sample_data.get("capture_kit") is None:
                 sample_data["capture_kit"] = DEFAULT_CAPTURE_KIT
         return data_copy
 
