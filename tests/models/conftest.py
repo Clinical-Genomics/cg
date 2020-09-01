@@ -1,0 +1,48 @@
+"""Fixtures for the model tests"""
+import gzip
+import io
+from pathlib import Path
+
+import pytest
+
+
+@pytest.fixture(name="content")
+def fixture_content() -> str:
+    """Return some content for a file"""
+    _content = (
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt"
+        " ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ull"
+        "amco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehende"
+        "rit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaec"
+        "at cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+    )
+    return _content
+
+
+@pytest.fixture(name="file_path")
+def fixture_file_path(project_dir: Path) -> Path:
+    """Return the path to a non existing file"""
+    return project_dir / "a_file.txt"
+
+
+@pytest.fixture(name="gzipped_file_path")
+def fixture_gzipped_file_path(file_path: Path) -> Path:
+    """Return the path to a non existing file with gzipped ending"""
+    return file_path.with_suffix(".gz")
+
+
+@pytest.fixture(name="filled_file")
+def fixture_filled_file(file_path: Path, content: str) -> Path:
+    """Return the path to a existing file with some content"""
+    with open(file_path, "w") as outfile:
+        outfile.write(content)
+    return file_path
+
+
+@pytest.fixture(name="filled_gzip_file")
+def fixture_filled_gzip_file(gzipped_file_path: Path, content: str) -> Path:
+    """Return the path to a existing file with some content that is gzipped"""
+    with gzip.open(gzipped_file_path, "wb") as outfile:
+        with io.TextIOWrapper(outfile, encoding="utf-8") as enc:
+            enc.write(content)
+    return gzipped_file_path
