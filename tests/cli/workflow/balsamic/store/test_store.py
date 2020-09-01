@@ -64,14 +64,24 @@ def test_store_analysis_creates_analysis_on_case(
 
 
 def test_already_stored_analysis(
-    cli_runner, balsamic_store_context, balsamic_case, config_file, deliverables_file,
+    cli_runner,
+    balsamic_store_context,
+    balsamic_case,
+    config_file,
+    deliverables_file,
 ):
     """Test store analysis command twice"""
 
     # GIVEN the analysis has already been stored
     cli_runner.invoke(
         analysis,
-        [balsamic_case.internal_id, "-c", config_file, "--deliverables-file", deliverables_file,],
+        [
+            balsamic_case.internal_id,
+            "-c",
+            config_file,
+            "--deliverables-file",
+            deliverables_file,
+        ],
         obj=balsamic_store_context,
     )
 
@@ -126,7 +136,11 @@ def test_store_analysis_generates_file_from_directory(
 
 
 def test_store_analysis_includes_file_once(
-    cli_runner, balsamic_store_context, balsamic_case, config_file, deliverables_file_tags,
+    cli_runner,
+    balsamic_store_context,
+    balsamic_case,
+    config_file,
+    deliverables_file_tags,
 ):
     """Test store with analysis with meta data with same file for multiple tags"""
 

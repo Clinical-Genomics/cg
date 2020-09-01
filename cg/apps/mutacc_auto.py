@@ -13,7 +13,7 @@ LOG = logging.getLogger(__name__)
 class MutaccAutoAPI:
 
     """
-        API for mutacc-auto
+    API for mutacc-auto
     """
 
     def __init__(self, config: dict):
@@ -25,13 +25,13 @@ class MutaccAutoAPI:
 
     def extract_reads(self, case: dict, variants: dict):
         """
-            Use mutacc-auto extract command to extract the relevant reads from
-            the case
+        Use mutacc-auto extract command to extract the relevant reads from
+        the case
 
-            Args:
-                case (dict): case dictionary from scout
-                variants (dict): variants dict from scout
-                padding (int): padding (bp:s) around genomic region of variant
+        Args:
+            case (dict): case dictionary from scout
+            variants (dict): variants dict from scout
+            padding (int): padding (bp:s) around genomic region of variant
 
         """
 
@@ -58,7 +58,7 @@ class MutaccAutoAPI:
     def import_reads(self):
 
         """
-            Upload the cases and extracted reads to mutacc DB
+        Upload the cases and extracted reads to mutacc DB
         """
 
         import_call = copy.deepcopy(self.base_call)
@@ -70,10 +70,10 @@ class MutaccAutoAPI:
 def run_command(command: list):
 
     """
-        Use subprocess.run to run command
+    Use subprocess.run to run command
 
-        Args:
-            command (list): list of commands
+    Args:
+        command (list): list of commands
     """
 
     completed_process = subprocess.run(args=command, check=False)

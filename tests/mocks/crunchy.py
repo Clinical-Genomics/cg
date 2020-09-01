@@ -10,7 +10,7 @@ LOG = logging.getLogger(__name__)
 
 class MockCrunchyAPI(CrunchyAPI):
     """
-        Mock for the crunchy API
+    Mock for the crunchy API
     """
 
     def __init__(self, config: dict = None):
@@ -38,7 +38,9 @@ class MockCrunchyAPI(CrunchyAPI):
         """Set that the compression for a file is pending"""
         self._compression_pending_files[file_path] = True
 
-    def set_compression_pending_all(self,):
+    def set_compression_pending_all(
+        self,
+    ):
         """Set that the compression for a file is pending"""
         self._compression_pending = True
 
@@ -66,13 +68,13 @@ class MockCrunchyAPI(CrunchyAPI):
     # Mocked methods
     def bam_to_cram(self, bam_path: Path, **kwargs):
         """
-            Compress BAM file into CRAM
+        Compress BAM file into CRAM
         """
         self._compression_pending_files[bam_path] = True
 
     def fastq_to_spring(self, fastq_first: Path, fastq_second: Path, **kwargs):
         """
-            Compress FASTQ files into SPRING by sending to sbatch SLURM
+        Compress FASTQ files into SPRING by sending to sbatch SLURM
         """
         self._nr_fastq_compressions += 1
         self.set_compression_pending_all()

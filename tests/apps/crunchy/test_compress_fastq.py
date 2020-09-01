@@ -92,7 +92,8 @@ def test_fastq_to_spring_sbatch(crunchy_config_dict, fastq_paths, sbatch_process
 
     # WHEN calling fastq_to_spring on fastq files
     crunchy_api.fastq_to_spring(
-        fastq_first=fastq_first, fastq_second=fastq_second,
+        fastq_first=fastq_first,
+        fastq_second=fastq_second,
     )
 
     # THEN assert that the sbatch file was created
