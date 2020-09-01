@@ -35,6 +35,18 @@ def mip_context(analysis_store_single_case, tb_api, housekeeper_api, mip_lims):
     return {
         "db": analysis_store_single_case,
         "tb": tb_api,
+        "dna_api": AnalysisAPI(
+            db=analysis_store_single_case,
+            hk_api=housekeeper_api,
+            tb_api=tb_api,
+            scout_api="scout_api",
+            lims_api=mip_lims,
+            deliver_api="deliver",
+            script="echo",
+            pipeline="analyse rd_dna",
+            conda_env="S_mip_rd-dna",
+            root="/var/empty",
+        ),
         "rna_api": AnalysisAPI(
             db=analysis_store_single_case,
             hk_api=housekeeper_api,
@@ -45,20 +57,20 @@ def mip_context(analysis_store_single_case, tb_api, housekeeper_api, mip_lims):
             script="echo",
             pipeline="analyse rd_rna",
             conda_env="S_mip_rd-rna",
-            root="/tmp",
-        ),
+            root="/var/empty",),
+
         "mip-rd-dna": {
             "conda_env": "S_mip_rd-dna",
             "mip_config": "config.yaml",
             "pipeline": "analyse rd_dna",
-            "root": "/tmp",
+            "root": "/var/empty",
             "script": "echo",
         },
         "mip-rd-rna": {
             "conda_env": "S_mip_rd-rna",
             "mip_config": "config.yaml",
             "pipeline": "analyse rd_rna",
-            "root": "/tmp",
+            "root": "/var/empty",
             "script": "echo",
         },
     }
