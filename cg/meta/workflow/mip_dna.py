@@ -14,24 +14,25 @@ from cg.meta.workflow.base import get_target_bed_from_lims
 
 COLLABORATORS = ("cust000", "cust002", "cust003", "cust004", "cust042")
 MASTER_LIST = (
+    "BRAIN",
+    "Cardiology",
+    "CTD",
     "ENDO",
     "EP",
-    "IEM",
     "IBMFS",
-    "mtDNA",
-    "MIT",
-    "PEDHEP",
-    "OMIM-AUTO",
-    "PIDCAD",
-    "PID",
-    "SKD",
-    "NMD",
-    "CTD",
+    "IEM",
     "IF",
     "NEURODEG",
+    "NMD",
     "mcarta",
-    "Cardiology",
-    "BRAIN",
+    "MIT",
+    "MOVE",
+    "mtDNA",
+    "PEDHEP",
+    "PID",
+    "PIDCAD",
+    "OMIM-AUTO",
+    "SKD",
 )
 COMBOS = {
     "DSD": ("DSD", "HYP", "SEXDIF", "SEXDET"),
@@ -78,7 +79,7 @@ class AnalysisAPI:
                 self.log.info("%s: requesting removed flowcell", flowcell_obj.name)
                 flowcell_obj.status = "requested"
             elif flowcell_obj.status != "ondisk":
-                self.log.warning("%s: {flowcell_obj.status}", flowcell_obj.name)
+                self.log.warning("%s: %s", flowcell_obj.name, flowcell_obj.status)
         return all(status == "ondisk" for status in statuses)
 
     def run(self, family_obj: models.Family, **kwargs):

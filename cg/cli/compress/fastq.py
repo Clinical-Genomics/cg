@@ -28,6 +28,7 @@ PROBLEMATIC_CASES = [
     "loyalegret",
     "grandkoi",
     "fluenteagle",
+    "freetomcat",
 ]
 
 

@@ -86,7 +86,10 @@ def link(context: click.Context, order_id: str, sample_id: str):
 @microsalt.command("config-case")
 @click.option("-d", "--dry", is_flag=True, help="print config-case to console")
 @click.option(
-    "-o", "--order", "order_id", help="create config-case all microbial samples for an order",
+    "-o",
+    "--order",
+    "order_id",
+    help="create config-case all microbial samples for an order",
 )
 @click.argument("sample_id", required=False)
 @click.pass_context

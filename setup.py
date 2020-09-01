@@ -2,7 +2,7 @@
 import os
 import sys
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 from setuptools.command.test import test as TestCommand
 
 if sys.argv[-1] == "publish":
@@ -53,7 +53,7 @@ class PyTest(TestCommand):
 
 setup(
     name="cg",
-    version="9.26.1",
+    version="10.0.3",
     description="Clinical Genomics command center.",
     author="Patrik Grenfeldt",
     author_email="patrik.grenfeldt@scilifelab.se",
