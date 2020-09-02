@@ -109,7 +109,7 @@ def link(context: click.Context, case_id: str, sample_id: str):
 @click.argument("case_id", required=False, type=str)
 @click.pass_context
 def config_case(context: click.Context, case_id: str, dry_run: bool = False):
-    """Generate a config for the CASE_ID"""
+    """Generate a config for the case_id"""
     dna_api = context.obj["dna_api"]
 
     if case_id is None:
