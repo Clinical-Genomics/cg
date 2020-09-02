@@ -100,7 +100,7 @@ def test_validate_config_unknown_field_and_missing_sample_id():
     """
     # GIVEN a config with missing sample_id and an extra field
     sample = dict(
-        sample_display_name="ASAMPLENAME",
+        sample_display_name="a_sample_name",
         analysis_type="wes",
         father="0",
         mother="0",
