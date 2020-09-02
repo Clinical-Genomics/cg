@@ -133,7 +133,7 @@ def is_private_attribute(key):
 
 def list_changeable_sample_attributes(sample_obj: models.Sample = None, skip_attributes: list() =
 None):
-    """ list changeable attributes on sample and its current value"""
+    """List changeable attributes on sample and its current value"""
 
     sample_attributes = models.Sample.__dict__.keys()
     for attribute in sample_attributes:
