@@ -129,3 +129,7 @@ class ConfigError(CgError):
     """
     Raised when MIP config validation fails
     """
+
+    def __init__(self, message, errors=None):
+        self.message = message
+        self.errors = errors
