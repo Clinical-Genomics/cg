@@ -48,19 +48,13 @@ def analysis(context, config_stream):
             hk_api,
             status,
         )
-    except AnalysisNotFinishedError as error:
-        click.echo(click.style(error.message, fg="red"))
-        context.abort()
-    except AnalysisDuplicationError as error:
-        click.echo(click.style(error.message, fg="red"))
-        context.abort()
-    except BundleAlreadyAddedError as error:
-        click.echo(click.style(error.message, fg="red"))
-        context.abort()
-    except PipelineUnknownError as error:
-        click.echo(click.style(error.message, fg="red"))
-        context.abort()
-    except MandatoryFilesMissing as error:
+    except (
+        AnalysisNotFinishedError,
+        AnalysisDuplicationError,
+        BundleAlreadyAddedError,
+        PipelineUnknownError,
+        MandatoryFilesMissing,
+    ) as error:
         click.echo(click.style(error.message, fg="red"))
         context.abort()
     except FileNotFoundError as error:
