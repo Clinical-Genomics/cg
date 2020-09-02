@@ -130,7 +130,7 @@ def test_validate_config_unknown_field_and_invalid_analysis_type():
     # GIVEN a config with wrong analysis type and an extra field
     sample = dict(
         sample_id="sample",
-        sample_display_name="a_sample_name,
+        sample_display_name="a_sample_name",
         analysis_type="nonexisting",
         father="0",
         mother="0",
