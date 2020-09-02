@@ -10,8 +10,7 @@ from dateutil.parser import parse as parse_date
 from datetime import datetime
 from pathlib import Path
 
-from cg.apps import crunchy, tb, hk, scoutapi, beacon as beacon_app
-from cg.meta.upload.beacon import UploadBeaconApi
+from cg.apps import crunchy, tb, hk, scoutapi
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -27,30 +26,7 @@ def clean(context):
     context.obj["tb_api"] = tb.TrailblazerAPI(context.obj)
     context.obj["hk_api"] = hk.HousekeeperAPI(context.obj)
     context.obj["scout_api"] = scoutapi.ScoutAPI(context.obj)
-    context.obj["beacon_api"] = beacon_app.BeaconApi(context.obj)
     context.obj["crunchy_api"] = crunchy.CrunchyAPI(context.obj)
-
-
-@clean.command()
-@click.option(
-    "-type",
-    "--item_type",
-    type=click.Choice(["family", "sample"]),
-    required=True,
-    help="family/sample to remove from beacon",
-)
-@click.argument("item_id", type=click.STRING)
-@click.pass_context
-def beacon(context: click.Context, item_type, item_id):
-    """Remove beacon for a sample or one or more affected samples from a family."""
-    LOG.info("Removing beacon vars for %s %s", item_type, item_id)
-    api = UploadBeaconApi(
-        status=context.obj["store_api"],
-        hk_api=context.obj["hk_api"],
-        scout_api=context.obj["scout_api"],
-        beacon_api=context.obj["beacon_api"],
-    )
-    api.remove_vars(item_type=item_type, item_id=item_id)
 
 
 @clean.command("balsamic-run-dir")
