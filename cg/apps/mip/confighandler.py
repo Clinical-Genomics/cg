@@ -57,7 +57,7 @@ class ConfigSchemaRNA(Schema):
 class ConfigHandler:
     def make_config(self, data: dict, pipeline: str = None):
         """Make a MIP pedigree config"""
-        self.validate_config(data, pipeline)
+        self.validate_config(data=data, pipeline=pipeline)
         config_data = self.prepare_config(data)
         return config_data
 

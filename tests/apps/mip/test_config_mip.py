@@ -67,7 +67,7 @@ def test_validate_config_unknown_field():
     # GIVEN a correct config with a extra field
     sample = dict(
         sample_id="sample",
-        sample_display_name="ASAMPLENAME",
+        sample_display_name="a_sample_name",
         analysis_type="wes",
         father="0",
         mother="0",
