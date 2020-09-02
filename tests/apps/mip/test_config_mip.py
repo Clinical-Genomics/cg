@@ -123,7 +123,7 @@ def test_validate_config_unknown_field_and_missing_sample_id():
 
 
 def test_validate_config_unknown_field_and_invalid_analysis_type():
-    """Test to validate a config with a unspecified field and a missing mandatory field.
+    """Test to validate a config with a unspecified field and a invalid mandatory field.
 
     This should raise exception since we do not allow wrong analysis types
     """
