@@ -140,9 +140,6 @@ mip_dna.add_command(config_case)
 @click.pass_context
 def panel(context: click.Context, case_id: str, dry_run: bool = False):
     """Write aggregated gene panel file"""
-    if case_id is None:
-        _suggest_cases_to_analyze(context)
-        context.abort()
 
     dna_api = context.obj["dna_api"]
     case_obj = dna_api.db.family(case_id)
@@ -218,17 +215,11 @@ def run(
 @click.pass_context
 def start(context: click.Context, dry_run: bool = False):
     """Start all cases that are ready for analysis"""
-    exit_code = EXIT_SUCCESS
-
     dna_api = context.obj["dna_api"]
 
-    cases = [case_obj.internal_id for case_obj in dna_api.db.cases_to_mip_analyze()]
-
-    for case_id in cases:
-
-        case_obj = dna_api.db.family(case_id)
-
-        if AnalysisAPI.is_dna_only_case(case_obj):
+    cases = [case_obj for case_obj in dna_api.db.cases_to_mip_analyze()]
+    for case_obj in cases:
+        if dna_api.is_dna_only_case(case_obj):
             LOG.info("%s: start analysis", case_obj.internal_id)
         else:
             LOG.warning("%s: contains non-dna samples - skipping", case_obj.internal_id)
@@ -240,22 +231,21 @@ def start(context: click.Context, dry_run: bool = False):
             LOG.warning("%s: analysis is %s - skipping", case_id, status)
             continue
 
-        priority = (
-            "high" if case_obj.high_priority else ("low" if case_obj.low_priority else "normal")
-        )
-
         if dry_run:
             continue
-
         try:
-            context.invoke(mip_dna, priority=priority, case_id=case_obj.internal_id)
+            context.invoke(
+                mip_dna,
+                priority=dna_api.get_priority(case_obj),
+                case_id=case_obj.internal_id,
+            )
         except tb.MipStartError as error:
             LOG.error(error.message)
-            exit_code = 1
+            sys.exit(1)
         except CgError as error:
             LOG.error(error.message)
-            exit_code = 11
-    sys.exit(exit_code)
+            sys.exit(11)
+    sys.exit(EXIT_SUCCESS)
 
 
 def _suggest_cases_to_analyze(context: click.Context, show_as_error: bool = False):
