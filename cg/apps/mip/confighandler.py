@@ -20,7 +20,8 @@ class SampleSchema(Schema):
     father = fields.Str(default="0")
     mother = fields.Str(default="0")
     phenotype = fields.Str(
-        required=True, validate=validate.OneOf(choices=["affected", "unaffected", "unknown"]),
+        required=True,
+        validate=validate.OneOf(choices=["affected", "unaffected", "unknown"]),
     )
     sex = fields.Str(required=True, validate=validate.OneOf(choices=["male", "female", "unknown"]))
     expected_coverage = fields.Float()
@@ -39,7 +40,8 @@ class SampleSchemaRNA(Schema):
     father = fields.Str(default="0")
     mother = fields.Str(default="0")
     phenotype = fields.Str(
-        required=True, validate=validate.OneOf(choices=["affected", "unaffected", "unknown"]),
+        required=True,
+        validate=validate.OneOf(choices=["affected", "unaffected", "unknown"]),
     )
     sex = fields.Str(required=True, validate=validate.OneOf(choices=["male", "female", "unknown"]))
     expected_coverage = fields.Float()

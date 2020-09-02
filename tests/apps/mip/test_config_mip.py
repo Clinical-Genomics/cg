@@ -2,6 +2,7 @@ import pytest
 from cg.exc import ConfigError
 from cg.apps.mip.confighandler import ConfigHandler
 
+
 def test_validate_config():
     """Test to validate a correct config"""
     # GIVEN a correct config
