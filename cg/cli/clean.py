@@ -1,18 +1,21 @@
 """cg module for cleaning databases and files"""
 import logging
 import shutil
-
-import ruamel.yaml
-import click
-from cg.apps.balsamic.fastq import FastqHandler
-from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
-from dateutil.parser import parse as parse_date
 from datetime import datetime
 from pathlib import Path
 
-from cg.apps import crunchy, tb, hk, scoutapi, beacon as beacon_app
-from cg.meta.upload.beacon import UploadBeaconApi
+import click
+import ruamel.yaml
+from dateutil.parser import parse as parse_date
+
+from cg.apps import crunchy, hk, scoutapi, tb
+from cg.apps.balsamic.api import BalsamicAPI
+from cg.apps.balsamic.fastq import FastqHandler
+from cg.apps.hk import HousekeeperAPI
+from cg.apps.lims import LimsAPI
+from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.store import Store
+from cg.utils.fastq import FastqAPI
 
 LOG = logging.getLogger(__name__)
 SUCCESS = 0
@@ -27,30 +30,15 @@ def clean(context):
     context.obj["tb_api"] = tb.TrailblazerAPI(context.obj)
     context.obj["hk_api"] = hk.HousekeeperAPI(context.obj)
     context.obj["scout_api"] = scoutapi.ScoutAPI(context.obj)
-    context.obj["beacon_api"] = beacon_app.BeaconApi(context.obj)
     context.obj["crunchy_api"] = crunchy.CrunchyAPI(context.obj)
-
-
-@clean.command()
-@click.option(
-    "-type",
-    "--item_type",
-    type=click.Choice(["family", "sample"]),
-    required=True,
-    help="family/sample to remove from beacon",
-)
-@click.argument("item_id", type=click.STRING)
-@click.pass_context
-def beacon(context: click.Context, item_type, item_id):
-    """Remove beacon for a sample or one or more affected samples from a family."""
-    LOG.info("Removing beacon vars for %s %s", item_type, item_id)
-    api = UploadBeaconApi(
-        status=context.obj["store_api"],
-        hk_api=context.obj["hk_api"],
-        scout_api=context.obj["scout_api"],
-        beacon_api=context.obj["beacon_api"],
+    context.obj["BalsamicAnalysisAPI"] = BalsamicAnalysisAPI(
+        balsamic_api=BalsamicAPI(context.obj),
+        store=Store(context.obj["database"]),
+        housekeeper_api=HousekeeperAPI(context.obj),
+        fastq_handler=FastqHandler(context.obj),
+        lims_api=LimsAPI(context.obj),
+        fastq_api=FastqAPI,
     )
-    api.remove_vars(item_type=item_type, item_id=item_id)
 
 
 @clean.command("balsamic-run-dir")
@@ -61,42 +49,31 @@ def beacon(context: click.Context, item_type, item_id):
 def balsamic_run_dir(context, yes, case_id, dry_run: bool = False):
     """Remove Balsamic run directory"""
 
-    store = context.obj["store_api"]
-    balsamic = BalsamicAnalysisAPI(
-        config=context.obj, hk_api=context.obj["hk_api"], fastq_api=FastqHandler
-    )
-    case_obj = store.family(case_id)
-
-    if case_obj is None:
-        LOG.error("%s: case not found", case_id)
-        context.abort()
-
-    analysis_obj = case_obj.analyses[0] if case_obj.analyses else None
+    balsamic_analysis_api = context.obj["BalsamicAnalysisAPI"]
+    case_object = balsamic_analysis_api.get_case_object(case_id)
+    if not case_object:
+        LOG.warning(f"{case_id} not found!")
+        raise click.Abort()
+    analysis_obj = case_object.analyses[0] if case_object.analyses else None
     if analysis_obj is None:
         LOG.error("%s: analysis not found", case_id)
         context.abort()
-
-    analysis_path = balsamic.get_case_path(case_id)
-
+    analysis_path = Path(balsamic_analysis_api.get_case_path(case_id))
     if yes or click.confirm(f"Do you want to remove {analysis_path}?"):
-
         if not analysis_path.exists():
             LOG.warning("could not find: %s", analysis_path)
             return FAIL
-
         if analysis_path.is_symlink():
             LOG.warning(
                 "Will not automatically delete symlink: %s, delete it manually", analysis_path
             )
             return FAIL
-
         if dry_run:
             LOG.info("Would have deleted: %s", analysis_path)
             return SUCCESS
-
         shutil.rmtree(analysis_path)
         analysis_obj.cleaned_at = datetime.now()
-        store.commit()
+        balsamic_analysis_api.store.commit()
 
 
 @clean.command("mip-run-dir")
@@ -230,21 +207,16 @@ def hk_past_files(context, case_id, tags, yes, dry_run):
 @click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
 @click.argument("before_str")
 @click.pass_context
-def balsamic_past_run_dirs(
-    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
-):
+def balsamic_past_run_dirs(context, before_str: str, yes: bool = False, dry_run: bool = False):
     """Clean up of "old" Balsamic case run dirs"""
 
     before = parse_date(before_str)
-    store = context.obj["store_api"]
-    possible_cleanups = store.analyses_to_clean(pipeline="Balsamic")
-    old_enough_analyses = store.analyses(before=before)
+    balsamic_analysis_api = context.obj["BalsamicAnalysisAPI"]
+    possible_cleanups = balsamic_analysis_api.get_analyses_to_clean(before_date=before)
+    LOG.info(f"Cleaning all analyses created before {before}")
 
     # for all analyses
     for analysis in possible_cleanups:
-        if analysis not in old_enough_analyses:
-            continue
-
         case_id = analysis.family.internal_id
 
         # call clean

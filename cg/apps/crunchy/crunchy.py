@@ -2,6 +2,7 @@
     Module for interacting with crunchy to perform:
         1. Compressing: FASTQ to SPRING
         2. Decompressing: SPRING to FASTQ
+    along with the helper methods
 """
 
 import datetime
@@ -361,10 +362,10 @@ class CrunchyAPI:
         return sbatch_header
 
     @staticmethod
-    def _get_tmp_dir(prefix: str, suffix: str) -> str:
+    def _get_tmp_dir(prefix: str, suffix: str, base: str = None) -> str:
         """Create a temporary directory and return the path to it"""
 
-        with tempfile.TemporaryDirectory(prefix=prefix, suffix=suffix) as dir_name:
+        with tempfile.TemporaryDirectory(prefix=prefix, suffix=suffix, dir=base) as dir_name:
             tmp_dir_path = dir_name
 
         LOG.info("Created temporary dir %s", tmp_dir_path)
@@ -374,7 +375,9 @@ class CrunchyAPI:
     def _get_slurm_fastq_to_spring(compression_obj: CompressionData) -> str:
         """Create and return the body of a sbatch script that runs FASTQ to SPRING"""
         LOG.info("Generating FASTQ to SPRING sbatch body")
-        tmp_dir_path = CrunchyAPI._get_tmp_dir(prefix="spring_", suffix="_compress")
+        tmp_dir_path = CrunchyAPI._get_tmp_dir(
+            prefix="spring_", suffix="_compress", base=compression_obj.analysis_dir
+        )
         sbatch_body = SBATCH_FASTQ_TO_SPRING.format(
             fastq_first=compression_obj.fastq_first,
             fastq_second=compression_obj.fastq_second,
@@ -394,7 +397,9 @@ class CrunchyAPI:
     ) -> str:
         """Create and return the body of a sbatch script that runs SPRING to FASTQ"""
         LOG.info("Generating SPRING to FASTQ sbatch body")
-        tmp_dir_path = CrunchyAPI._get_tmp_dir(prefix="spring_", suffix="_decompress")
+        tmp_dir_path = CrunchyAPI._get_tmp_dir(
+            prefix="spring_", suffix="_decompress", base=compression_obj.analysis_dir
+        )
         sbatch_body = SBATCH_SPRING_TO_FASTQ.format(
             spring_path=compression_obj.spring_path,
             fastq_first=compression_obj.fastq_first,

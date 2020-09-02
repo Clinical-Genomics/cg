@@ -9,9 +9,15 @@ def test_decompress_spring(populated_decompress_spring_api, compression_files, s
     compress_api.crunchy_api.set_dry_run(True)
     # GIVEN a populated compress api
     spring_path = compression_files.spring_file
+    # GIVEN that the spring paths exists
     assert spring_path.exists()
     spring_metadata_path = compression_files.spring_metadata_file
     assert spring_metadata_path.exists()
+    # GIVEN that the fastq paths does not exist
+    compression_files.fastq_first.unlink()
+    compression_files.fastq_second.unlink()
+    assert not compression_files.fastq_first.exists()
+    assert not compression_files.fastq_second.exists()
 
     # WHEN Decompressing the spring file for the sample
     res = compress_api.decompress_spring(sample)

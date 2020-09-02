@@ -1,4 +1,4 @@
-"""CLI to compress FASTQ"""
+"""CLI function to compress FASTQ files into SPRING archives"""
 
 import logging
 

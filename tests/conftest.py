@@ -1,5 +1,5 @@
 """
-    Conftest file for pytest fixtures
+    Conftest file for pytest fixtures that needs to be shared for multiple tests
 """
 import copy
 import datetime as dt
@@ -182,6 +182,12 @@ def fixture_apps_dir(fixtures_dir: Path) -> Path:
     return fixtures_dir / "apps"
 
 
+@pytest.fixture(name="fastq_dir")
+def fixture_fastq_dir(fixtures_dir: Path) -> Path:
+    """Return the path to the fastq files dir"""
+    return fixtures_dir / "fastq"
+
+
 @pytest.fixture(scope="function", name="project_dir")
 def fixture_project_dir(tmpdir_factory):
     """Path to a temporary directory where intermediate files can be stored"""
@@ -235,6 +241,13 @@ def fixture_run_name() -> str:
     return "fastq_run"
 
 
+@pytest.fixture(scope="function", name="original_fastq_data")
+def fixture_original_fastq_data(fastq_dir: Path, run_name) -> CompressionData:
+    """Return a compression object with a path to the original fastq files"""
+
+    return CompressionData(fastq_dir / run_name)
+
+
 @pytest.fixture(scope="function", name="fastq_stub")
 def fixture_fastq_stub(project_dir: Path, run_name: str) -> Path:
     """Creates a path to the base format of a fastq run"""
@@ -242,9 +255,14 @@ def fixture_fastq_stub(project_dir: Path, run_name: str) -> Path:
 
 
 @pytest.fixture(scope="function", name="compression_object")
-def fixture_compression_object(fastq_stub: Path) -> CompressionData:
+def fixture_compression_object(
+    fastq_stub: Path, original_fastq_data: CompressionData
+) -> CompressionData:
     """Creates compression data object with information about files used in fastq compression"""
-    return CompressionData(fastq_stub)
+    working_files = CompressionData(fastq_stub)
+    shutil.copy(str(original_fastq_data.fastq_first), str(working_files.fastq_first))
+    shutil.copy(str(original_fastq_data.fastq_second), str(working_files.fastq_second))
+    return working_files
 
 
 # Unknown file fixtures
@@ -342,6 +360,18 @@ def fixture_timestamp() -> dt.datetime:
 def fixture_later_timestamp() -> dt.datetime:
     """Return a time stamp in date time format"""
     return dt.datetime(2020, 6, 1)
+
+
+@pytest.fixture(scope="function", name="timestamp_today")
+def fixture_timestamp_today() -> dt.datetime:
+    """Return a time stamp of todays date in date time format"""
+    return dt.datetime.now()
+
+
+@pytest.fixture(scope="function", name="timestamp_yesterday")
+def fixture_timestamp_yesterday(timestamp_today) -> dt.datetime:
+    """Return a time stamp of yesterdays date in date time format"""
+    return timestamp_today - dt.timedelta(days=1)
 
 
 @pytest.fixture(scope="function", name="hk_bundle_data")

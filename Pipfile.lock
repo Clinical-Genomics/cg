@@ -158,13 +158,6 @@
             "editable": true,
             "path": "."
         },
-        "cgbeacon": {
-            "hashes": [
-                "sha256:4196e9e88ff96ee7d160f142eb1f2130ed92ddf7af0dc35e1286f5903b5425c8"
-            ],
-            "index": "pypi",
-            "version": "==0.3.0"
-        },
         "cgstats": {
             "hashes": [
                 "sha256:e4e08ad9d1097644159f127c3a0e3e5ed6a8bfb9c1d6c8e56f10fb4dd1ff50e6"
