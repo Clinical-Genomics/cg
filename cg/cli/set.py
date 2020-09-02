@@ -121,8 +121,8 @@ def samples(context, identifiers, kwargs, skip_lims, yes):
         )
 
 
-def list_changable_sample_attributes(sample_obj: models.Sample = None, skip_list: list() = None):
-    """ list changable attributes on sample """
+def list_changeable_sample_attributes(sample_obj: models.Sample = None, skip_list: list() = None):
+    """ list changeable attributes on sample """
     keys = sample_obj.__dict__.keys() if sample_obj else models.Sample.__dict__.keys()
     for key in keys:
         if key.startswith("__") or key.startswith("_") or key in skip_list:
@@ -141,7 +141,7 @@ def show_set_sample_help(sample_obj: models.Sample = "None"):
     show_option_help(option_long=OPTION_LONG_SKIP_LIMS, option_help=HELP_SKIP_LIMS)
     show_option_help(OPTION_SHORT_YES, OPTION_LONG_YES, HELP_YES)
     show_option_help(OPTION_SHORT_KEY_VALUE, OPTION_LONG_KEY_VALUE, HELP_KEY_VALUE)
-    list_changable_sample_attributes(sample_obj, skip_list=NOT_CHANGABLE_SAMPLE_ATTRIBUTES)
+    list_changeable_sample_attributes(sample_obj, skip_list=NOT_CHANGABLE_SAMPLE_ATTRIBUTES)
     click.echo(f"To set apptag use '{OPTION_SHORT_KEY_VALUE} application_version [APPTAG]")
     click.echo(f"To set customer use '{OPTION_SHORT_KEY_VALUE} customer [CUSTOMER]")
 
