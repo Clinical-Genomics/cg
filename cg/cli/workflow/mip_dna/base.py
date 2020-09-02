@@ -127,7 +127,7 @@ def config_case(context: click.Context, case_id: str, dry_run: bool = False):
         print(config_data)
     else:
         out_path = dna_api.save_config(config_data)
-        LOG.info("saved config to %s", out_path)
+        LOG.info("Wrote config to %s", out_path)
 
 
 mip_dna.add_command(config_case)
