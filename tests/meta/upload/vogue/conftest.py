@@ -24,7 +24,7 @@ GENOTYPE_RETURN_SAMPLE_ANALYSIS = b'{"ACC5346A3": {"snp": {}}, "SIB903A19": {"sn
 @pytest.fixture(scope="function")
 def genotype_return():
     """
-        genotype config fixture
+    genotype config fixture
     """
 
     _configs = {
@@ -51,7 +51,7 @@ class MockApplication:
 
 class MockApplications:
     """
-      Has function to return list of applications
+    Has function to return list of applications
     """
 
     def __init__(self):
@@ -68,7 +68,7 @@ class MockApplications:
 
 class MockStore:
     """
-        Mock for Store
+    Mock for Store
     """
 
     def __init__(self):
@@ -82,7 +82,7 @@ class MockStore:
 @pytest.fixture(scope="function")
 def genotype_api():
     """
-        genotype API fixture
+    genotype API fixture
     """
 
     _genotype_api = GenotypeAPI(GTCONFIG)
@@ -92,7 +92,7 @@ def genotype_api():
 @pytest.fixture(scope="function")
 def vogue_api():
     """
-        vogue API fixture
+    vogue API fixture
     """
 
     _vogue_api = VogueAPI(VOGUECONFIG)
@@ -102,7 +102,7 @@ def vogue_api():
 @pytest.fixture(scope="function")
 def store():
     """
-       returning MockStore instance
+    returning MockStore instance
     """
 
     _store = MockStore()

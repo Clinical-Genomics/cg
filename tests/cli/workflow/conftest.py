@@ -72,11 +72,13 @@ class MockTB:
         self._temp = None
         self._case_id = None
         self._email = None
+        self._status = None
 
-    def analyses(self, family, temp):
+    def analyses(self, family=None, status=None, temp=None):
         """Mock TB analyses models"""
 
         self._family = family
+        self._status = status
         self._temp = temp
 
         class Row:
@@ -126,6 +128,26 @@ class MockTB:
     def add_pending_was_called(self):
         """check if add_pending was called"""
         return self._add_pending_was_called
+
+    def is_analysis_ongoing(self, case_id: str):
+        """Override TrailblazerAPI is_ongoing method to avoid default behaviour"""
+        return False
+
+    def is_analysis_failed(self, case_id: str):
+        """Override TrailblazerAPI is_failed method to avoid default behaviour"""
+        return False
+
+    def is_analysis_completed(self, case_id: str):
+        """Override TrailblazerAPI is_completed method to avoid default behaviour"""
+        return False
+
+    def get_analysis_status(self, case_id: str):
+        """Override TrailblazerAPI get_analysis_status method to avoid default behaviour"""
+        return None
+
+    def has_analysis_started(self, case_id: str):
+        """Override TrailblazerAPI has_analysis_started method to avoid default behaviour"""
+        return False
 
 
 @pytest.fixture(scope="function")

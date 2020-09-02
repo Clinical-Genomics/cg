@@ -38,6 +38,47 @@ def test_skip_lims(cli_runner, base_context, base_store: Store, helpers):
     assert base_context["lims"].get_updated_sample_value() != new_value
 
 
+def test_help_without_sample(cli_runner, base_context, base_store: Store, helpers):
+    # GIVEN a database with no sample
+
+    # WHEN setting sample but asking for help
+    result = cli_runner.invoke(sample, ["--help"], obj=base_context)
+
+    # THEN it should fail on not having a sample as argument
+    assert result.exit_code != SUCCESS
+
+    # THEN the flags should have been mentioned in the output
+    assert "-kv" in result.output
+    assert "--skip-lims" in result.output
+    assert "-y" in result.output
+
+    # THEN the name property should have been mentioned
+    assert "name" in result.output
+
+
+def test_help_with_sample(cli_runner, base_context, base_store: Store, helpers):
+    # GIVEN a database with a sample
+
+    sample_obj = helpers.add_sample(base_store, gender="female")
+
+    # WHEN setting sample but skipping lims
+    result = cli_runner.invoke(sample, [sample_obj.internal_id, "--help"], obj=base_context)
+
+    # THEN it should not fail on not having a sample as argument
+    assert result.exit_code == SUCCESS
+
+    # THEN the flags should have been mentioned in the output
+    assert "-kv" in result.output
+    assert "--skip-lims" in result.output
+    assert "-y" in result.output
+
+    # THEN the name property should have been mentioned
+    assert "name" in result.output
+
+    # THEN the name value should have been mentioned
+    assert sample_obj.name in result.output
+
+
 @pytest.mark.parametrize("key", ["name", "capture_kit"])
 def test_set_sample(cli_runner, base_context, base_store: Store, key, helpers):
     # GIVEN a database with a sample
@@ -86,7 +127,7 @@ def test_invalid_customer(cli_runner, base_context, base_store: Store, helpers):
 
     # WHEN calling set sample with an invalid customer
     result = cli_runner.invoke(
-        sample, [sample_id, "-kv", "customer", customer_id, "-y", "--skip-lims"], obj=base_context,
+        sample, [sample_id, "-kv", "customer", customer_id, "-y", "--skip-lims"], obj=base_context
     )
 
     # THEN then it should error about missing customer instead of setting the value
@@ -102,7 +143,7 @@ def test_customer(cli_runner, base_context, base_store: Store, helpers):
 
     # WHEN calling set sample with a valid customer
     result = cli_runner.invoke(
-        sample, [sample_id, "-kv", "customer", customer_id, "-y", "--skip-lims"], obj=base_context,
+        sample, [sample_id, "-kv", "customer", customer_id, "-y", "--skip-lims"], obj=base_context
     )
 
     # THEN then it should set the customer of the sample
@@ -116,9 +157,7 @@ def test_invalid_downsampled_to(cli_runner, base_context):
 
     # WHEN calling set sample with an invalid value of downsampled to
     result = cli_runner.invoke(
-        sample,
-        ["dummy_sample_id", "-kv", "downsampled_to", downsampled_to, "-y"],
-        obj=base_context,
+        sample, ["dummy_sample_id", "-kv", "downsampled_to", downsampled_to, "-y"], obj=base_context
     )
 
     # THEN wrong data type
@@ -133,7 +172,7 @@ def test_downsampled_to(cli_runner, base_context, base_store: Store, helpers):
 
     # WHEN calling set sample with a valid value of downsampled to
     result = cli_runner.invoke(
-        sample, [sample_id, "-kv", "downsampled_to", downsampled_to, "-y"], obj=base_context,
+        sample, [sample_id, "-kv", "downsampled_to", downsampled_to, "-y"], obj=base_context
     )
 
     # THEN then the value should have been set on the sample

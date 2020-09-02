@@ -12,7 +12,7 @@ LOG = logging.getLogger(__name__)
 class VogueAPI:
 
     """
-        API for vogue
+    API for vogue
     """
 
     def __init__(self, config: dict):

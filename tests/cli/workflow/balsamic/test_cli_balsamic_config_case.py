@@ -69,7 +69,9 @@ def test_target_bed(cli_runner, balsamic_context: dict, balsamic_bed_2_path: Pat
     option_value = balsamic_bed_2_path
     # WHEN dry running with PANEL BED option specified
     result = cli_runner.invoke(
-        config_case, [case_id, "--dry-run", option_key, option_value], obj=balsamic_context,
+        config_case,
+        [case_id, "--dry-run", option_key, option_value],
+        obj=balsamic_context,
     )
     # THEN command should be generated successfully
     assert result.exit_code == EXIT_SUCCESS

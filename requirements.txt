@@ -43,9 +43,8 @@ pysam==0.15.2           # due to inability to rebuild newer pysam version
 
 # apps
 genologics
-trailblazer>=4.0.0
+trailblazer>=6.7.0
 housekeeper>=2.0.0b2
 genotype>=2.2.0
 scout-browser>=4.4.1
 cgstats>=1.1.2
-cgbeacon

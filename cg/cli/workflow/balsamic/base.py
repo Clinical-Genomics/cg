@@ -20,7 +20,11 @@ LOG = logging.getLogger(__name__)
 
 ARGUMENT_CASE_ID = click.argument("case_id", required=True)
 OPTION_DRY = click.option(
-    "-d", "--dry-run", "dry", help="Print command to console without executing", is_flag=True,
+    "-d",
+    "--dry-run",
+    "dry",
+    help="Print command to console without executing",
+    is_flag=True,
 )
 OPTION_PANEL_BED = click.option(
     "--panel-bed",
@@ -72,7 +76,7 @@ def balsamic(context, priority, panel_bed, analysis_type, run_analysis, dry):
 @ARGUMENT_CASE_ID
 @click.pass_context
 def link(context, case_id):
-    """ 
+    """
     Locates FASTQ files for given CASE_ID.
     The files are renamed, concatenated, and saved in BALSAMIC working directory
     """

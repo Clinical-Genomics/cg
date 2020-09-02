@@ -29,7 +29,6 @@ def clean(context):
     context.obj["tb_api"] = tb.TrailblazerAPI(context.obj)
     context.obj["hk_api"] = hk.HousekeeperAPI(context.obj)
     context.obj["scout_api"] = scoutapi.ScoutAPI(context.obj)
-    context.obj["beacon_api"] = beacon_app.BeaconApi(context.obj)
     context.obj["crunchy_api"] = crunchy.CrunchyAPI(context.obj)
     context.obj["BalsamicAnalysisAPI"] = BalsamicAnalysisAPI(
         balsamic_api=BalsamicAPI(context.obj),
@@ -38,28 +37,6 @@ def clean(context):
         fastq_handler=FastqHandler(context.obj),
         lims_api=LimsAPI(context.obj),
     )
-
-
-@clean.command()
-@click.option(
-    "-type",
-    "--item_type",
-    type=click.Choice(["family", "sample"]),
-    required=True,
-    help="family/sample to remove from beacon",
-)
-@click.argument("item_id", type=click.STRING)
-@click.pass_context
-def beacon(context: click.Context, item_type, item_id):
-    """Remove beacon for a sample or one or more affected samples from a family."""
-    LOG.info("Removing beacon vars for %s %s", item_type, item_id)
-    api = UploadBeaconApi(
-        status=context.obj["store_api"],
-        hk_api=context.obj["hk_api"],
-        scout_api=context.obj["scout_api"],
-        beacon_api=context.obj["beacon_api"],
-    )
-    api.remove_vars(item_type=item_type, item_id=item_id)
 
 
 @clean.command("balsamic-run-dir")
@@ -243,7 +220,10 @@ def balsamic_past_run_dirs(context, before_str: str, yes: bool = False, dry_run:
         # call clean
         LOG.info("%s: cleaning Balsamic output", case_id)
         context.invoke(
-            balsamic_run_dir, yes=yes, case_id=case_id, dry_run=dry_run,
+            balsamic_run_dir,
+            yes=yes,
+            case_id=case_id,
+            dry_run=dry_run,
         )
     LOG.info("Done cleaning Balsamic output")
 
