@@ -106,7 +106,7 @@ class ConfigHandler:
         return data_copy
 
     def save_config(self, data: dict) -> Path:
-        """Save a config to the expected location."""
+        """Write the pedigree config to the the case dir"""
         out_dir = Path(self.root) / data["case"]
         out_dir.mkdir(parents=True, exist_ok=True)
         out_path = out_dir / "pedigree.yaml"
