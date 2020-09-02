@@ -126,7 +126,6 @@ def config_case(context: click.Context, case_id: str, dry_run: bool = False):
     if dry_run:
         print(config_data)
     else:
-        # Write to trailblazer root dir / case_id
         out_path = dna_api.save_config(config_data)
         LOG.info("saved config to %s", out_path)
 
