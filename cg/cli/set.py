@@ -5,6 +5,7 @@ import getpass
 import click
 from cg.apps.lims import LimsAPI
 from cg.constants import FAMILY_ACTIONS, PRIORITY_OPTIONS, FLOWCELL_STATUS
+from cg.exc import LimsDataError
 from cg.store import Store, models
 
 CONFIRM = "Continue?"
@@ -179,18 +180,15 @@ def sample(context, sample_id, kwargs, skip_lims, yes, help):
         click.echo(click.style(f"Can't find sample {sample_id}", fg="red"))
         context.abort()
 
-    for key, _ in kwargs:
-
-        if key in NOT_CHANGABLE_SAMPLE_ATTRIBUTES:
-            click.echo(click.style(f"{key} not a changeable attribute", fg="red"))
-            context.abort()
-
     for key, value in kwargs:
 
-        new_value = None
+        if key in NOT_CHANGABLE_SAMPLE_ATTRIBUTES:
+            click.echo(click.style(f"{key} is not a changeable attribute on sample", fg="yellow"))
+            continue
         if not hasattr(sample_obj, key):
             click.echo(click.style(f"{key} is not a property of sample", fg="yellow"))
             continue
+        new_value = None
         if key in ["customer", "application_version"]:
             if key == "customer":
                 new_value = context.obj["status"].customer(value)
@@ -208,7 +206,7 @@ def sample(context, sample_id, kwargs, skip_lims, yes, help):
         click.echo(f"Would change from {key}={old_value} to {key}={new_value} on {sample_obj}")
 
         if not (yes or click.confirm(CONFIRM)):
-            context.abort()
+            continue
 
         setattr(sample_obj, key, new_value)
         _update_comment(_generate_comment(key, old_value, new_value), sample_obj)
@@ -222,8 +220,12 @@ def sample(context, sample_id, kwargs, skip_lims, yes, help):
             if not (yes or click.confirm(CONFIRM)):
                 context.abort()
 
-            context.obj["lims"].update_sample(lims_id=sample_id, **{key: value})
-            click.echo(click.style(f"Set LIMS/{key} to {value}", fg="blue"))
+            try:
+                context.obj["lims"].update_sample(lims_id=sample_id, **{key: value})
+                click.echo(click.style(f"Set LIMS/{key} to {value}", fg="blue"))
+            except LimsDataError as err:
+                click.echo(click.style(f"Failed to set LIMS/{key} to {value}, {err.message}",
+                                       fg="red"))
 
 
 def _generate_comment(what, old_value, new_value):
