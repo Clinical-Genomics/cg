@@ -272,6 +272,11 @@ def test_is_spring_decompression_possible_no_fastq(crunchy_config_dict, compress
     # GIVEN a existing SPRING file
     compression_object.spring_path.touch()
     assert compression_object.spring_path.exists()
+    # GIVEN that there are no fastq files
+    compression_object.fastq_first.unlink()
+    compression_object.fastq_second.unlink()
+    assert not compression_object.fastq_first.exists()
+    assert not compression_object.fastq_second.exists()
 
     # WHEN checking if SPRING compression is done
     result = crunchy_api.is_spring_decompression_possible(compression_object)
