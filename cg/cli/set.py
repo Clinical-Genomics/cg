@@ -121,11 +121,22 @@ def samples(context, identifiers, kwargs, skip_lims, yes):
         )
 
 
-def list_changeable_sample_attributes(sample_obj: models.Sample = None, skip_list: list() = None):
+def is_locked_attribute_on_sample(key, skip_attributes):
+    """Returns true if the attribute is private or in the skip list"""
+    return is_private_attribute(key) or key in skip_attributes
+
+
+def is_private_attribute(key):
+    """Returns true if key has name indicating it is private"""
+    return key.startswith("_")
+
+
+def list_changeable_sample_attributes(sample_obj: models.Sample = None, skip_attributes: list() =
+None):
     """ list changeable attributes on sample """
     keys = sample_obj.__dict__.keys() if sample_obj else models.Sample.__dict__.keys()
     for key in keys:
-        if key.startswith("__") or key.startswith("_") or key in skip_list:
+        if is_locked_attribute_on_sample(key, skip_attributes):
             continue
 
         message = key
@@ -141,7 +152,7 @@ def show_set_sample_help(sample_obj: models.Sample = "None"):
     show_option_help(long_name=OPTION_LONG_SKIP_LIMS, help_text=HELP_SKIP_LIMS)
     show_option_help(OPTION_SHORT_YES, OPTION_LONG_YES, HELP_YES)
     show_option_help(OPTION_SHORT_KEY_VALUE, OPTION_LONG_KEY_VALUE, HELP_KEY_VALUE)
-    list_changeable_sample_attributes(sample_obj, skip_list=NOT_CHANGABLE_SAMPLE_ATTRIBUTES)
+    list_changeable_sample_attributes(sample_obj, skip_attributes=NOT_CHANGABLE_SAMPLE_ATTRIBUTES)
     click.echo(f"To set apptag use '{OPTION_SHORT_KEY_VALUE} application_version [APPTAG]")
     click.echo(f"To set customer use '{OPTION_SHORT_KEY_VALUE} customer [CUSTOMER]")
 
@@ -192,7 +203,7 @@ def sample(context, sample_id, kwargs, skip_lims, yes, help):
 
     for key, value in kwargs:
 
-        if key in NOT_CHANGABLE_SAMPLE_ATTRIBUTES:
+        if is_locked_attribute_on_sample(key, NOT_CHANGABLE_SAMPLE_ATTRIBUTES):
             click.echo(click.style(f"{key} is not a changeable attribute on sample", fg="yellow"))
             continue
         if not hasattr(sample_obj, key):
