@@ -266,6 +266,14 @@ class AnalysisAPI(ConfigHandler, MipAPI):
         bed_lines = self.scout.export_panels(all_panels)
         return bed_lines
 
+    def write_panel(self, case_id: str, content: List[str]):
+        """Write the gene panel to the defined location."""
+        out_dir = Path(self.root, case_id)
+        out_dir.mkdir(parents=True, exist_ok=True)
+        out_path = Path(out_dir, "gene_panels.bed")
+        with out_path.open("w") as out_handle:
+            out_handle.write("\n".join(content))
+
     @staticmethod
     def convert_panels(customer: str, default_panels: List[str]) -> List[str]:
         """Convert between default panels and all panels included in gene list."""

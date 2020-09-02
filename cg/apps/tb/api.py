@@ -82,15 +82,6 @@ class TrailblazerAPI(Store, fastq.FastqHandler):
                 return has_started
         return False
 
-    def write_panel(self, case_id: str, content: List[str]):
-        """Write the gene panel to the defined location."""
-        out_dir = Path(self.families_dir) / case_id
-        out_dir.mkdir(parents=True, exist_ok=True)
-        out_path = out_dir / "gene_panels.bed"
-        with out_path.open("w") as out_handle:
-            for line in content:
-                click.echo(line, file=out_handle)
-
     def delete_analysis(
         self, family: str, date: dt.datetime, yes: bool = False, dry_run: bool = False
     ):

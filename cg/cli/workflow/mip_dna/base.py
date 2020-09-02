@@ -145,9 +145,9 @@ def panel(context: click.Context, case_id: str, dry_run: bool = False):
     bed_lines = dna_api.panel(case_obj)
     if dry_run:
         for bed_line in bed_lines:
-            print(bed_line)
+            click.echo(bed_line)
     else:
-        dna_api.tb.write_panel(case_id, bed_lines)
+        dna_api.write_panel(case_id, bed_lines)
 
 
 @mip_dna.command()
