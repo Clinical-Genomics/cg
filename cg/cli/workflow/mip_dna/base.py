@@ -218,7 +218,9 @@ def start(context: click.Context, dry_run: bool = False):
     """Start all cases that are ready for analysis"""
     exit_code = EXIT_SUCCESS
 
-    cases = [case_obj.internal_id for case_obj in context.obj["db"].cases_to_analyze()]
+    cases = [
+        case_obj.internal_id for case_obj in context.obj["db"].cases_to_analyze(pipeline="mip")
+    ]
 
     for case_id in cases:
 
