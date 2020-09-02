@@ -89,6 +89,7 @@ def family(context, action, priority, panels, family_id):
 @click.option("-y", "--yes", is_flag=True, help="Answer yes on all confirmations")
 @click.pass_context
 def samples(context, identifiers, kwargs, skip_lims, yes):
+    """Set values on many samples at the same time"""
     identifier_args = {}
     for identifier_name, identifier_value in identifiers:
         identifier_args[identifier_name] = identifier_value
@@ -125,6 +126,7 @@ def list_changable_sample_attributes(sample_obj: models.Sample = None, skip_list
 
 
 def show_set_sample_help(sample_obj: models.Sample = "None"):
+    """Show help for the set sample command"""
     show_option_help(OPTION_SHORT_KEY_VALUE, OPTION_LONG_KEY_VALUE, HELP_KEY_VALUE)
     list_changable_sample_attributes(sample_obj, skip_list=NOT_CHANGABLE_SAMPLE_ATTRIBUTES)
     click.echo(f"To set apptag use '{OPTION_SHORT_KEY_VALUE} application_version [APPTAG]")
@@ -134,6 +136,7 @@ def show_set_sample_help(sample_obj: models.Sample = "None"):
 
 
 def show_option_help(option_short: str = None, option_long: str = None, option_help: str = None):
+    """Shop help for one option"""
     help_message = f"Use "
 
     if option_short:
@@ -224,6 +227,7 @@ def sample(context, sample_id, kwargs, skip_lims, yes, help):
 
 
 def _generate_comment(what, old_value, new_value):
+    """Generate a comment that can be used in the comment field to describe updated value"""
     return f"\n{what} changed from " f"{str(old_value)} to " f"{str(new_value)}."
 
 
