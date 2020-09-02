@@ -46,3 +46,13 @@ def fixture_filled_gzip_file(non_existing_gzipped_file_path: Path, content: str)
         with io.TextIOWrapper(outfile, encoding="utf-8") as enc:
             enc.write(content)
     return non_existing_gzipped_file_path
+
+
+@pytest.fixture(scope="function", name="gzipped_empty_file")
+def fixture_gzipped_empty_file(fastq_dir: Path) -> Path:
+    """Return a the path to a file that is gzipped without any content
+
+    This file will not have the size = 0 due to gzip header and footer
+    """
+
+    return fastq_dir / "dummy_run_R1_001.fastq.gz"
