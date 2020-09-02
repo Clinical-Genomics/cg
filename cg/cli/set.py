@@ -138,7 +138,7 @@ def list_changeable_sample_attributes(sample_obj: models.Sample = None, skip_lis
 
 def show_set_sample_help(sample_obj: models.Sample = "None"):
     """Show help for the set sample command"""
-    show_option_help(option_long=OPTION_LONG_SKIP_LIMS, option_help=HELP_SKIP_LIMS)
+    show_option_help(long_name=OPTION_LONG_SKIP_LIMS, help_text=HELP_SKIP_LIMS)
     show_option_help(OPTION_SHORT_YES, OPTION_LONG_YES, HELP_YES)
     show_option_help(OPTION_SHORT_KEY_VALUE, OPTION_LONG_KEY_VALUE, HELP_KEY_VALUE)
     list_changeable_sample_attributes(sample_obj, skip_list=NOT_CHANGABLE_SAMPLE_ATTRIBUTES)
@@ -146,21 +146,21 @@ def show_set_sample_help(sample_obj: models.Sample = "None"):
     click.echo(f"To set customer use '{OPTION_SHORT_KEY_VALUE} customer [CUSTOMER]")
 
 
-def show_option_help(option_short: str = None, option_long: str = None, option_help: str = None):
-    """Shop help for one option"""
+def show_option_help(short_name: str = None, long_name: str = None, help_text: str = None):
+    """Show help for one option"""
     help_message = f"Use "
 
-    if option_short:
-        help_message += f"'{option_short}'"
+    if short_name:
+        help_message += f"'{short_name}'"
 
-    if option_short and option_long:
+    if short_name and long_name:
         help_message += " or "
 
-    if option_long:
-        help_message += f"'{option_long}'"
+    if long_name:
+        help_message += f"'{long_name}'"
 
-    if option_help:
-        help_message += f": {option_help}"
+    if help_text:
+        help_message += f": {help_text}"
 
     click.echo(help_message)
 
