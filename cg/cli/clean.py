@@ -9,13 +9,10 @@ from dateutil.parser import parse as parse_date
 
 from cg.apps.balsamic.fastq import FastqHandler
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
-from cg.apps import crunchy, tb, hk, scoutapi, beacon as beacon_app
-from cg.meta.upload.beacon import UploadBeaconApi
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.balsamic.api import BalsamicAPI
 from cg.store import Store
-from cg.utils.fastq import FastqAPI
 
 LOG = logging.getLogger(__name__)
 SUCCESS = 0
