@@ -53,6 +53,11 @@ def test_is_spring_decompression_done_missing_fastq_files(
     # GIVEN a crunchy-api
     crunchy_api = CrunchyAPI(crunchy_config_dict)
     # GIVEN that the FASTQ paths does not exist
+    compression_object.fastq_first.unlink()
+    compression_object.fastq_second.unlink()
+    assert not compression_object.fastq_first.exists()
+    assert not compression_object.fastq_second.exists()
+
     # GIVEN a existing SPRING file
     compression_object.spring_path.touch()
 
@@ -209,6 +214,11 @@ def test_is_spring_decompression_possible(
     crunchy_api = CrunchyAPI(crunchy_config_dict)
     # GIVEN a existing SPRING file
     compression_object.spring_path.touch()
+    # GIVEN that the FASTQ files does not exist
+    compression_object.fastq_first.unlink()
+    compression_object.fastq_second.unlink()
+    assert not compression_object.fastq_first.exists()
+    assert not compression_object.fastq_second.exists()
 
     # WHEN checking if SPRING decompression is done
     result = crunchy_api.is_spring_decompression_possible(compression_object)

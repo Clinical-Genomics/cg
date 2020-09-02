@@ -1,5 +1,5 @@
 """
-    API for compressing files
+    API for compressing files. Functionality to compress FASTQ, decompress SPRING and clean files
 """
 
 import logging
@@ -9,7 +9,7 @@ from housekeeper.store import models as hk_models
 
 from cg.apps import crunchy, hk
 from cg.meta.compress import files
-from cg.models import CompressionData
+from cg.models import CompressionData, FileData
 
 LOG = logging.getLogger(__name__)
 
@@ -59,6 +59,16 @@ class CompressAPI:
         for run_name in sample_fastq_dict:
             LOG.info("Check if compression possible for run %s", run_name)
             compression_object = sample_fastq_dict[run_name]["compression_data"]
+            if FileData.is_empty(compression_object.fastq_first):
+                LOG.warning(
+                    "Fastq files are empty for %s: %s", sample_id, compression_object.fastq_first
+                )
+                self.delete_fastq_housekeeper(
+                    hk_fastq_first=sample_fastq_dict[run_name]["hk_first"],
+                    hk_fastq_second=sample_fastq_dict[run_name]["hk_second"],
+                )
+                all_ok = False
+                continue
 
             if not self.crunchy_api.is_fastq_compression_possible(compression_object):
                 LOG.warning("FASTQ to SPRING not possible for %s, run %s", sample_id, run_name)
@@ -182,6 +192,16 @@ class CompressAPI:
 
         return True
 
+    def delete_fastq_housekeeper(
+        self, hk_fastq_first: hk_models.File, hk_fastq_second: hk_models.File
+    ) -> None:
+        """Delete fastq files from housekeeper"""
+        LOG.info("Deleting FASTQ files from housekeeper")
+        hk_fastq_first.delete()
+        hk_fastq_second.delete()
+        self.hk_api.commit()
+        LOG.debug("Fastqs deleted from housekeeper")
+
     # Methods to update housekeeper
     def update_fastq_hk(
         self,
@@ -189,7 +209,7 @@ class CompressAPI:
         compression_obj: CompressionData,
         hk_fastq_first: hk_models.File,
         hk_fastq_second: hk_models.File,
-    ):
+    ) -> None:
         """Update Housekeeper with compressed FASTQ files and SPRING metadata file"""
         version_obj = self.hk_api.last_version(sample_id)
 
@@ -229,10 +249,7 @@ class CompressAPI:
             )
             self.hk_api.commit()
 
-        LOG.info("Deleting FASTQ files from housekeeper")
-        hk_fastq_first.delete()
-        hk_fastq_second.delete()
-        self.hk_api.commit()
+        self.delete_fastq_housekeeper(hk_fastq_first, hk_fastq_second)
 
     def add_fastq_hk(self, sample_id: str, fastq_first: Path, fastq_second: Path) -> None:
         """Add FASTQ files to housekeeper"""
