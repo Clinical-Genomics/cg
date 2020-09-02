@@ -16,7 +16,6 @@ from cg.meta.upload.scoutapi import UploadScoutAPI
 from cg.meta.workflow.mip_dna import AnalysisAPI
 from cg.store import Store
 
-from .beacon import beacon
 from .coverage import coverage
 from .delivery_report import delivery_report, delivery_report_to_scout, delivery_reports
 from .genotype import genotypes
@@ -173,7 +172,6 @@ def auto(context: click.Context, pipeline: str = None):
 upload.add_command(process_solved)
 upload.add_command(processed_solved)
 upload.add_command(validate)
-upload.add_command(beacon)
 upload.add_command(scout)
 upload.add_command(upload_case_to_scout)
 upload.add_command(observations)

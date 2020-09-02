@@ -255,7 +255,9 @@ def fixture_fastq_stub(project_dir: Path, run_name: str) -> Path:
 
 
 @pytest.fixture(scope="function", name="compression_object")
-def fixture_compression_object(fastq_stub: Path, original_fastq_data) -> CompressionData:
+def fixture_compression_object(
+    fastq_stub: Path, original_fastq_data: CompressionData
+) -> CompressionData:
     """Creates compression data object with information about files used in fastq compression"""
     working_files = CompressionData(fastq_stub)
     shutil.copy(str(original_fastq_data.fastq_first), str(working_files.fastq_first))

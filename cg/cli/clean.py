@@ -3,19 +3,19 @@ import logging
 import shutil
 from datetime import datetime
 from pathlib import Path
-import ruamel.yaml
+
 import click
+import ruamel.yaml
 from dateutil.parser import parse as parse_date
 
+from cg.apps import crunchy, hk, scoutapi, tb
+from cg.apps.balsamic.api import BalsamicAPI
 from cg.apps.balsamic.fastq import FastqHandler
-from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
-from cg.apps import crunchy, tb, hk, scoutapi, beacon as beacon_app
-from cg.meta.upload.beacon import UploadBeaconApi
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
-from cg.apps.balsamic.api import BalsamicAPI
-from cg.utils.fastq import FastqAPI
+from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.store import Store
+from cg.utils.fastq import FastqAPI
 
 LOG = logging.getLogger(__name__)
 SUCCESS = 0
@@ -30,7 +30,6 @@ def clean(context):
     context.obj["tb_api"] = tb.TrailblazerAPI(context.obj)
     context.obj["hk_api"] = hk.HousekeeperAPI(context.obj)
     context.obj["scout_api"] = scoutapi.ScoutAPI(context.obj)
-    context.obj["beacon_api"] = beacon_app.BeaconApi(context.obj)
     context.obj["crunchy_api"] = crunchy.CrunchyAPI(context.obj)
     context.obj["BalsamicAnalysisAPI"] = BalsamicAnalysisAPI(
         balsamic_api=BalsamicAPI(context.obj),
@@ -40,28 +39,6 @@ def clean(context):
         lims_api=LimsAPI(context.obj),
         fastq_api=FastqAPI,
     )
-
-
-@clean.command()
-@click.option(
-    "-type",
-    "--item_type",
-    type=click.Choice(["family", "sample"]),
-    required=True,
-    help="family/sample to remove from beacon",
-)
-@click.argument("item_id", type=click.STRING)
-@click.pass_context
-def beacon(context: click.Context, item_type, item_id):
-    """Remove beacon for a sample or one or more affected samples from a family."""
-    LOG.info("Removing beacon vars for %s %s", item_type, item_id)
-    api = UploadBeaconApi(
-        status=context.obj["store_api"],
-        hk_api=context.obj["hk_api"],
-        scout_api=context.obj["scout_api"],
-        beacon_api=context.obj["beacon_api"],
-    )
-    api.remove_vars(item_type=item_type, item_id=item_id)
 
 
 @clean.command("balsamic-run-dir")
