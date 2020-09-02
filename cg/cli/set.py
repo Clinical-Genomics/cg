@@ -133,16 +133,17 @@ def is_private_attribute(key):
 
 def list_changeable_sample_attributes(sample_obj: models.Sample = None, skip_attributes: list() =
 None):
-    """ list changeable attributes on sample """
-    keys = sample_obj.__dict__.keys() if sample_obj else models.Sample.__dict__.keys()
-    for key in keys:
-        if is_locked_attribute_on_sample(key, skip_attributes):
+    """ list changeable attributes on sample and its current value"""
+
+    sample_attributes = models.Sample.__dict__.keys()
+    for attribute in sample_attributes:
+        if is_locked_attribute_on_sample(attribute, skip_attributes):
             continue
 
-        message = key
+        message = attribute
 
         if sample_obj:
-            message += f": {sample_obj.__dict__.get(key)}"
+            message += f": {sample_obj.__dict__.get(attribute)}"
 
         click.echo(message)
 
