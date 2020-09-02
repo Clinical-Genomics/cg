@@ -15,7 +15,7 @@ DEFAULT_CAPTURE_KIT = "agilent_sureselect_cre.v1"
 class SampleSchema(Schema):
     sample_id = fields.Str(required=True)
     analysis_type = fields.Str(
-        required=True, validate=validate.OneOf(choices=["wes", "wgs", "tga"])
+        required=True, validate=validate.OneOf(choices=["tga", "wes", "wgs",])
     )
     father = fields.Str(default="0")
     mother = fields.Str(default="0")
