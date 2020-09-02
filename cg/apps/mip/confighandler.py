@@ -64,6 +64,7 @@ class ConfigHandler:
     @staticmethod
     def validate_config(data: dict, pipeline: str = None) -> dict:
         """Validate MIP pedigree config format"""
+        error = {}
         if pipeline == "mip-rna":
             errors = ConfigSchemaRNA().validate(data)
         else:
