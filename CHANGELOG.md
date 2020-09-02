@@ -13,6 +13,10 @@ Please add a new candidate release at the top after changing the latest one. Fee
 
 ### Changed
 
+## [10.1.2]
+### Fixed
+- Fixed so that empty gzipped files are considered empty considering metadata
+
 
 ## [10.1.1]
 ### Added
