@@ -152,8 +152,9 @@ def list_changeable_sample_attributes(
 def show_set_sample_help(sample_obj: models.Sample = "None"):
     """Show help for the set sample command"""
     show_option_help(long_name=OPTION_LONG_SKIP_LIMS, help_text=HELP_SKIP_LIMS)
-    show_option_help(OPTION_SHORT_YES, OPTION_LONG_YES, HELP_YES)
-    show_option_help(OPTION_SHORT_KEY_VALUE, OPTION_LONG_KEY_VALUE, HELP_KEY_VALUE)
+    show_option_help(short_name=OPTION_SHORT_YES, long_name=OPTION_LONG_YES, help_text=HELP_YES)
+    show_option_help(short_name=OPTION_SHORT_KEY_VALUE, long_name=OPTION_LONG_KEY_VALUE,
+                     help_text=HELP_KEY_VALUE)
     list_changeable_sample_attributes(sample_obj, skip_attributes=NOT_CHANGABLE_SAMPLE_ATTRIBUTES)
     click.echo(f"To set apptag use '{OPTION_SHORT_KEY_VALUE} application_version [APPTAG]")
     click.echo(f"To set customer use '{OPTION_SHORT_KEY_VALUE} customer [CUSTOMER]")
