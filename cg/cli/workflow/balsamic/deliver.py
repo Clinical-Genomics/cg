@@ -19,7 +19,7 @@ SAMPLE_TAGS = ["bam", "bam-index", "cram", "cram-index"]
 @click.group()
 @click.pass_context
 def deliver(context):
-    """Deliver stuff."""
+    """Deliver files to customer inbox."""
     context.obj["db"] = Store(context.obj["database"])
     context.obj["deliver_api"] = DeliverAPI(
         db=context.obj["db"],
@@ -43,7 +43,7 @@ def deliver(context):
 @click.argument("case", required=False)
 @click.pass_context
 def inbox(context, case, version, tag, inbox_path):
-    """Link files from HK to cust inbox."""
+    """Link files from Housekeeper to customer inbox."""
 
     if not case:
         _suggest_cases_to_deliver(context.obj["db"])
