@@ -88,7 +88,7 @@ def mip_dna(context: click.Context, case_id: str, email: str, priority: str, sta
 @click.argument("sample_id", required=False)
 @click.pass_context
 def link(context: click.Context, case_id: str, sample_id: str):
-    """Link FASTQ files for a SAMPLE_ID"""
+    """Link FASTQ files for a sample_id"""
     dna_api = context.obj["dna_api"]
     link_objs = get_links(dna_api.db, case_id, sample_id)
     for link_obj in link_objs:
