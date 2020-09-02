@@ -178,6 +178,8 @@ class StoreHelpers:
             analysis.upload_started_at = upload_started or datetime.now()
         if config_path:
             analysis.config_path = config_path
+        if pipeline:
+            analysis.pipeline = pipeline
 
         analysis.limitations = "A limitation"
         analysis.family = family
@@ -188,6 +190,7 @@ class StoreHelpers:
         self,
         store: Store,
         sample_id: str = "sample_test",
+        internal_id: str = None,
         gender: str = "female",
         is_tumour: bool = False,
         is_rna: bool = False,
@@ -240,6 +243,9 @@ class StoreHelpers:
         if kwargs.get("flowcell"):
             sample.flowcells.append(kwargs["flowcell"])
 
+        if internal_id:
+            sample.internal_id = internal_id
+
         store.add_commit(sample)
         return sample
 
@@ -265,6 +271,7 @@ class StoreHelpers:
         self,
         store: Store,
         family_id: str = "family_test",
+        internal_id: str = None,
         customer_id: str = "cust000",
         panels: List = None,
         family_obj: models.Family = None,
@@ -283,6 +290,9 @@ class StoreHelpers:
 
         if not family_obj:
             family_obj = store.add_family(name=family_id, panels=panels)
+
+        if internal_id:
+            family_obj.internal_id = internal_id
 
         # print("Adding family with name %s (%s)" % (family_obj.name, family_obj.internal_id))
         family_obj.customer = customer
