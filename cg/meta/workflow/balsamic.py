@@ -23,7 +23,7 @@ LOG = logging.getLogger(__name__)
 
 
 class BalsamicAnalysisAPI:
-    """Handles communication between BALASMIC processes 
+    """Handles communication between BALASMIC processes
     and the rest of CG infrastructure"""
 
     __BALSAMIC_APPLICATIONS = {"wgs", "wes", "tgs"}
@@ -88,8 +88,8 @@ class BalsamicAnalysisAPI:
         return config_path.as_posix()
 
     def get_analysis_finish_path(self, case_id: str, check_exists: bool = False) -> Path:
-        """Returns path to analysis_finish file. 
-        (Optional) Checks if analysis_finish file exists """
+        """Returns path to analysis_finish file.
+        (Optional) Checks if analysis_finish file exists"""
         analysis_finish_path = Path(
             self.balsamic_api.root_dir, case_id, "analysis", "analysis_finish"
         )
@@ -196,15 +196,15 @@ class BalsamicAnalysisAPI:
         return "normal"
 
     def get_verified_bed(self, sample_data: dict, panel_bed: Path) -> Optional[str]:
-        """"Takes a dict with samples and attributes.
-        Retrieves unique attributes for application type and target_bed. 
-        Verifies that those attributes are the same across multiple samples, 
+        """ "Takes a dict with samples and attributes.
+        Retrieves unique attributes for application type and target_bed.
+        Verifies that those attributes are the same across multiple samples,
         where applicable.
         Verifies that the attributes are valid BALSAMIC attributes
         If application type requires bed, returns path to bed.
-        
+
         Raises BalsamicStartError:
-        - When application type invalid for balsamic 
+        - When application type invalid for balsamic
         - When multiple samples have different parameters
         - When bed file required for analysis, but is not set or cannot be retrieved.
         """
@@ -232,7 +232,7 @@ class BalsamicAnalysisAPI:
 
     def get_verified_tumor_path(self, sample_data: dict) -> str(Path):
         """Takes a dict with samples and attributes, and returns the path
-        of tumor sample. 
+        of tumor sample.
         If the number of paths is exactly 1, the path is returned.
         Raises BalsamicStartError:
             When there are no tumor samples, or more than one tumor sample
@@ -250,7 +250,7 @@ class BalsamicAnalysisAPI:
 
     def get_verified_normal_path(self, sample_data: dict) -> Optional[str]:
         """Takes a dict with samples and attributes, and retrieves the path
-        of normal sample. 
+        of normal sample.
         If the number of paths is exactly 1, the path is returned.
         If there are no paths, then the sample is not paired, and None is returned.
         Raises BalsamicStartError:
@@ -270,7 +270,7 @@ class BalsamicAnalysisAPI:
         return normal_paths[0]
 
     def get_verified_config_case_arguments(self, case_id: str, panel_bed: str) -> dict:
-        """Takes a dictionary with per-sample parameters, 
+        """Takes a dictionary with per-sample parameters,
         validates them, and transforms into command line arguments
         Raises BalsamicStarterror:
             When no samples associated with case are marked for BALSAMIC analysis
@@ -420,7 +420,7 @@ class BalsamicAnalysisAPI:
         return [x for x in analyses_to_clean if x in analyses_before]
 
     def get_cases_to_analyze(self) -> list:
-        """Retrieve a list of balsamic cases without analysis, 
+        """Retrieve a list of balsamic cases without analysis,
         where samples have enough reads to be analyzed"""
         cases_to_analyze = []
         for case_object in self.store.cases_to_analyze(pipeline="balsamic", threshold=True):
@@ -429,7 +429,7 @@ class BalsamicAnalysisAPI:
         return cases_to_analyze
 
     def get_cases_to_store(self) -> list:
-        """Retrieve a list of cases where analysis finished successfully, 
+        """Retrieve a list of cases where analysis finished successfully,
         and is ready to be stored in Housekeeper"""
         cases_to_store = []
         for case_object in self.store.cases_to_store(pipeline="balsamic"):

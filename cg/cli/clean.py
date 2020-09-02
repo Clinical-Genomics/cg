@@ -15,6 +15,7 @@ from cg.apps.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.balsamic.api import BalsamicAPI
 from cg.store import Store
+from cg.utils.fastq import FastqAPI
 
 LOG = logging.getLogger(__name__)
 SUCCESS = 0
