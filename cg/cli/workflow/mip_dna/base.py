@@ -228,7 +228,7 @@ def start(context: click.Context, dry_run: bool = False):
         has_started = dna_api.tb.has_analysis_started(case_id=case_obj.internal_id)
         if has_started:
             status = dna_api.tb.get_analysis_status(case_id=case_obj.internal_id)
-            LOG.warning("%s: analysis is %s - skipping", case_id, status)
+            LOG.warning("%s: analysis is %s - skipping", case_obj.internal_id, status)
             continue
 
         if dry_run:
