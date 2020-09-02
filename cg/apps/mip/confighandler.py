@@ -98,7 +98,6 @@ class ConfigHandler:
         if len(data_copy["samples"]) == 1 and data_copy["samples"][0]["phenotype"] == "unknown":
             LOG.info("setting 'unknown' phenotype to 'unaffected'")
             data_copy["samples"][0]["phenotype"] = "unaffected"
-        # set the mother/father to '0' if they are not set for a sample
         for sample_data in data_copy["samples"]:
             sample_data["mother"] = sample_data.get("mother") or "0"
             sample_data["father"] = sample_data.get("father") or "0"
