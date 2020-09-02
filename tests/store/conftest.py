@@ -4,6 +4,7 @@ import datetime as dt
 import pytest
 
 # Files fixtures
+from cg.store import Store
 
 
 @pytest.fixture
@@ -83,14 +84,13 @@ def fixture_microbial_submitted_order():
 
 
 @pytest.yield_fixture(scope="function")
-def microbial_store(base_store, microbial_submitted_order):
+def microbial_store(base_store: Store, microbial_submitted_order):
     """Setup a store instance for testing analysis API."""
     customer = base_store.customer(microbial_submitted_order["customer"])
 
-    order = base_store.MicrobialOrder(
+    order = base_store.Family(
         internal_id=microbial_submitted_order["internal_id"],
         name=microbial_submitted_order["name"],
-        ticket_number=microbial_submitted_order["ticket_number"],
         comment=microbial_submitted_order["comment"],
         created_at=dt.datetime(2012, 3, 3, 10, 10, 10),
         updated_at=dt.datetime(2012, 3, 3, 10, 10, 10),
@@ -108,15 +108,14 @@ def microbial_store(base_store, microbial_submitted_order):
         base_store.add(organism)
         sample = base_store.add_microbial_sample(
             name=sample_data["name"],
-            sex=sample_data["sex"],
             internal_id=sample_data["internal_id"],
-            ticket=microbial_submitted_order["ticket_number"],
             reads=sample_data["reads"],
             comment=sample_data["comment"],
-            organism=organism,
+            organism=None,
             priority=sample_data["priority"],
-            reference_genome=sample_data["reference_genome"],
+            reference_genome=None,
             application_version=application_version,
+            ticket_number=microbial_submitted_order["ticket_number"],
         )
         sample.microbial_order = order
         sample.application_version = application_version
@@ -124,6 +123,7 @@ def microbial_store(base_store, microbial_submitted_order):
         sample.organism = organism
 
         base_store.add(sample)
+        base_store.relate_sample(family=order, sample=sample, status="unknown")
 
     base_store.commit()
     yield base_store

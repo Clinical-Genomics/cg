@@ -100,7 +100,7 @@ def config_case(context: click.Context, dry, order_id: str, sample_id: str):
         if not microbial_order_obj:
             LOG.error("Order %s not found", order_id)
             context.abort()
-        sample_objs = microbial_order_obj.microbial_samples
+        sample_objs = [link_obj.sample for link_obj in microbial_order_obj.links]
     elif sample_id and (order_id is None):
         sample_obj = context.obj["db"].microbial_sample(sample_id)
         if not sample_obj:
@@ -113,9 +113,9 @@ def config_case(context: click.Context, dry, order_id: str, sample_id: str):
             LOG.error("Samples %s not found in %s ", sample_id, order_id)
             context.abort()
         sample_objs = [
-            sample_obj
-            for sample_obj in microbial_order_obj.microbial_samples
-            if sample_obj.internal_id == sample_id
+            link_obj.sample
+            for link_obj in microbial_order_obj.links
+            if link_obj.sample.internal_id == sample_id
         ]
     else:
         LOG.error("provide order and/or sample")

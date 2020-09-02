@@ -3,6 +3,7 @@
 import logging
 from pathlib import Path
 
+from cg.apps.lims import LimsAPI
 from snapshottest import Snapshot
 
 from cg.cli.workflow.microsalt.base import config_case
@@ -75,12 +76,19 @@ def test_no_sample_order_found(cli_runner, base_context, caplog):
         assert f"Samples {microbial_sample_id} not found in {microbial_order_id}" in caplog.text
 
 
-def test_dry_sample(cli_runner, base_context, microbial_sample_id, snapshot: Snapshot):
+def test_dry_sample(cli_runner, base_context, microbial_sample_id, snapshot: Snapshot, lims_api:
+LimsAPI):
     """Test working dry command for sample"""
-    # GIVEN
+
+    # GIVEN project, organism and reference genome is specified in lims
+    lims_sample = lims_api.sample(microbial_sample_id)
+    lims_sample.sample_data["project"] = "microbial_order_test"
+    lims_sample.sample_data["organism"] = "organism_test"
+    lims_sample.sample_data["reference_genome"] = "reference_genome_test"
 
     # WHEN dry running a sample name
-    result = cli_runner.invoke(config_case, ["--dry", microbial_sample_id], obj=base_context)
+    result = cli_runner.invoke(config_case, ["--dry", microbial_sample_id], obj=base_context,
+                               catch_exceptions=False)
 
     # THEN command should give us a json dump
     assert result.exit_code == EXIT_SUCCESS
@@ -93,16 +101,21 @@ def test_dry_sample_order(
     microbial_sample_id,
     microbial_order_id,
     snapshot: Snapshot,
+    lims_api: LimsAPI
 ):
     """Test working dry command for sample in a order"""
 
     # GIVEN
+    lims_sample = lims_api.sample(microbial_sample_id)
+    lims_sample.sample_data["project"] = "microbial_order_test"
+    lims_sample.sample_data["organism"] = "organism_test"
+    lims_sample.sample_data["reference_genome"] = "reference_genome_test"
 
     # WHEN dry running a sample name
     result = cli_runner.invoke(
         config_case,
         ["--dry", "--order", microbial_order_id, microbial_sample_id],
-        obj=base_context,
+        obj=base_context, catch_exceptions=False
     )
 
     # THEN command should give us a json dump
@@ -117,7 +130,7 @@ def test_dry_order(cli_runner, base_context, microbial_order_id, snapshot: Snaps
 
     # WHEN dry running a sample name
     result = cli_runner.invoke(
-        config_case, ["--dry", "--order", microbial_order_id], obj=base_context
+        config_case, ["--dry", "--order", microbial_order_id], obj=base_context, catch_exceptions=False
     )
 
     # THEN command should give us a json dump
@@ -142,11 +155,11 @@ def test_sample(cli_runner, base_context, microbial_sample_id, queries_path, sna
         snapshot.assert_match(outputfile.readlines())
 
 
-def test_gonorrhoeae(cli_runner, microsalt_store, base_context, microbial_sample_id):
+def test_gonorrhoeae(cli_runner, microsalt_store, lims_api, base_context, microbial_sample_id):
     """ Test if the substitution of the organism happens """
     # GIVEN a sample with organism set to gonorrhea
-    sample_obj = microsalt_store.microbial_sample(microbial_sample_id)
-    sample_obj.organism.internal_id = "gonorrhoeae"
+    lims_sample = lims_api.sample(microbial_sample_id)
+    lims_sample.sample_data["organism"] = "gonorrhoeae"
 
     # WHEN getting the case config
     result = cli_runner.invoke(config_case, ["--dry", microbial_sample_id], obj=base_context)
@@ -155,11 +168,12 @@ def test_gonorrhoeae(cli_runner, microsalt_store, base_context, microbial_sample
     assert "Neisseria spp." in result.output
 
 
-def test_cutibacterium_acnes(cli_runner, microsalt_store, base_context, microbial_sample_id):
+def test_cutibacterium_acnes(cli_runner, microsalt_store, lims_api, base_context,
+                             microbial_sample_id):
     """ Test if this bacteria gets its name changed """
     # GIVEN a sample with organism set to Cutibacterium acnes
-    sample_obj = microsalt_store.microbial_sample(microbial_sample_id)
-    sample_obj.organism.internal_id = "Cutibacterium acnes"
+    lims_sample = lims_api.sample(microbial_sample_id)
+    lims_sample.sample_data["organism"] = "Cutibacterium acnes"
 
     # WHEN getting the case config
     result = cli_runner.invoke(config_case, ["--dry", microbial_sample_id], obj=base_context)
@@ -168,12 +182,12 @@ def test_cutibacterium_acnes(cli_runner, microsalt_store, base_context, microbia
     assert "Propionibacterium acnes" in result.output
 
 
-def test_vre_nc_017960(cli_runner, microsalt_store, base_context, microbial_sample_id):
+def test_vre_nc_017960(cli_runner, microsalt_store, lims_api, base_context, microbial_sample_id):
     """ Test if this bacteria gets its name changed """
     # GIVEN a sample with organism set to VRE
-    sample_obj = microsalt_store.microbial_sample(microbial_sample_id)
-    sample_obj.organism.internal_id = "VRE"
-    sample_obj.organism.reference_genome = "NC_017960.1"
+    lims_sample = lims_api.sample(microbial_sample_id)
+    lims_sample.sample_data["organism"] = "VRE"
+    lims_sample.sample_data["reference_genome"] = "NC_017960.1"
 
     # WHEN getting the case config
     result = cli_runner.invoke(config_case, ["--dry", microbial_sample_id], obj=base_context)
@@ -182,12 +196,12 @@ def test_vre_nc_017960(cli_runner, microsalt_store, base_context, microbial_samp
     assert "Enterococcus faecium" in result.output
 
 
-def test_vre_nc_004668(cli_runner, microsalt_store, base_context, microbial_sample_id):
+def test_vre_nc_004668(cli_runner, microsalt_store, lims_api, base_context, microbial_sample_id):
     """ Test if this bacteria gets its name changed """
     # GIVEN a sample with organism set to VRE
-    sample_obj = microsalt_store.microbial_sample(microbial_sample_id)
-    sample_obj.organism.internal_id = "VRE"
-    sample_obj.organism.reference_genome = "NC_004668.1"
+    lims_sample = lims_api.sample(microbial_sample_id)
+    lims_sample.sample_data["organism"] = "VRE"
+    lims_sample.sample_data["reference_genome"] = "NC_004668.1"
 
     # WHEN getting the case config
     result = cli_runner.invoke(config_case, ["--dry", microbial_sample_id], obj=base_context)
@@ -199,9 +213,8 @@ def test_vre_nc_004668(cli_runner, microsalt_store, base_context, microbial_samp
 def test_vre_comment(cli_runner, microsalt_store, lims_api, base_context, microbial_sample_id):
     """ Test if this bacteria gets its name changed """
     # GIVEN a sample with organism set to VRE and a comment set in LIMS
-    sample_obj = microsalt_store.microbial_sample(microbial_sample_id)
-    sample_obj.organism.internal_id = "VRE"
     lims_sample = lims_api.sample(microbial_sample_id)
+    lims_sample.sample_data["organism"] = "VRE"
     lims_sample.sample_data["comment"] = "ABCD123"
 
     # WHEN getting the case config

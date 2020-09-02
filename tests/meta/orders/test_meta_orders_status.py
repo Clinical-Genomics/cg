@@ -217,7 +217,7 @@ def test_store_microbial_samples(orders_api, base_store, microbial_status_data):
     # THEN it should store the samples and the used previously unknown organisms
     assert new_order
     assert base_store.microbial_orders().count() == 1
-    assert len(new_order.microbial_samples) == 5
+    assert len(new_order.links) == 5
     assert base_store.microbial_samples().count() == 5
     assert base_store.organisms().count() == 3
 
@@ -229,7 +229,6 @@ def test_store_microbial_samples_data_analysis_stored(
     # GIVEN a basic store with no samples and a microbial order and one Organism
     assert base_store.microbial_samples().count() == 0
     assert base_store.microbial_orders().count() == 0
-    assert base_store.organisms().count() == 1
 
     # WHEN storing the order
     new_order = orders_api.store_microbial_order(
@@ -241,8 +240,10 @@ def test_store_microbial_samples_data_analysis_stored(
         samples=microbial_status_data["samples"],
     )
 
-    # THEN it should store the samples and the used previously unknown organisms
-    assert new_order.microbial_samples[0].data_analysis == "fastq"
+    # THEN it should store the samples
+    assert base_store.microbial_samples().count() > 0
+    assert base_store.microbial_orders().count() > 0
+    assert new_order.links[0].sample.data_analysis == "fastq"
 
 
 def test_store_microbial_samples_bad_apptag(orders_api, base_store, microbial_status_data):

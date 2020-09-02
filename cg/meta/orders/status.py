@@ -112,6 +112,7 @@ class StatusHandler:
     @staticmethod
     def microbial_samples_to_status(data: dict) -> dict:
         """Convert order input for microbial samples."""
+
         status_data = {
             "customer": data["customer"],
             "order": data["name"],
@@ -218,7 +219,7 @@ class StatusHandler:
                         sex=sample["sex"],
                         ticket=ticket,
                         time_point=sample["time_point"],
-                        tumour=sample["tumour"],
+                        tumour=sample["tumour"]
                     )
                     new_sample.customer = customer_obj
                     with self.status.session.no_autoflush:
@@ -367,12 +368,11 @@ class StatusHandler:
         if customer_obj is None:
             raise OrderError(f"unknown customer: {customer}")
         with self.status.session.no_autoflush:
-            new_order = self.status.add_microbial_order(
+            new_case = self.status.add_microbial_order(
                 customer=customer_obj,
                 name=order,
                 ordered=ordered,
                 internal_id=lims_project,
-                ticket_number=ticket,
                 comment=comment,
             )
             for sample_data in samples:
@@ -400,11 +400,21 @@ class StatusHandler:
                     application_version=application_version,
                     priority=sample_data["priority"],
                     data_analysis=sample_data["data_analysis"],
+                    customer=customer_obj,
+                    ticket_number=ticket
                 )
-                new_order.microbial_samples.append(new_sample)
 
-        self.status.add_commit(new_order)
-        return new_order
+                print(new_sample)
+
+                new_relationship = self.status.relate_sample(
+                    family=new_case,
+                    sample=new_sample,
+                    status="unknown",
+                )
+                self.status.add(new_relationship)
+
+        self.status.add_commit(new_case)
+        return new_case
 
     def store_pools(
         self,

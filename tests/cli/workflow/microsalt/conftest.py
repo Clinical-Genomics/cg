@@ -76,7 +76,7 @@ class MockLims:
 
             def __init__(self, sample_id):
                 self.sample_id = sample_id
-                self.sample_data = {"comment": "a comment in LimsSample"}
+                self.sample_data = {"comment": "a comment in LimsSample", "": ""}
 
             def get(self, key):
                 """ only here to get the sample.get('comment') """
@@ -87,6 +87,12 @@ class MockLims:
             self.lims_sample = LimsSample(sample_id)
 
         return self.lims_sample
+
+    def get_sample_organism(self, lims_id: str) -> str:
+        return self.sample(lims_id).get("organism")
+
+    def get_sample_reference_genome(self, lims_id: str) -> str:
+        return self.sample(lims_id).get("reference_genome")
 
     def get_prep_method(self, sample_id: str) -> str:
         """ Return a prep method name. Needs to be in format 'dddd:dd string' """

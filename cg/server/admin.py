@@ -288,7 +288,6 @@ class AnalysisView(BaseView):
     column_filters = ["pipeline", "pipeline_version", "is_primary"]
     column_formatters = {
         "family": FamilyView.view_family_link,
-        "microbial_order": MicrobialOrderView.view_link,
     }
     column_searchable_list = [
         "family.internal_id",
@@ -296,20 +295,6 @@ class AnalysisView(BaseView):
         "microbial_order.internal_id",
         "microbial_order.name",
     ]
-
-
-class MicrobialSampleView(BaseView):
-    """Admin view for Model.MicrobialSample"""
-
-    column_default_sort = ("created_at", True)
-    column_editable_list = ["reads", "comment", "reference_genome"]
-    column_filters = ["microbial_order", "microbial_order.customer"]
-    column_formatters = {
-        "invoice": InvoiceView.view_invoice_link,
-        "priority": view_human_priority,
-        "microbial_order": MicrobialOrderView.view_link,
-    }
-    column_searchable_list = ["internal_id", "name", "microbial_order.ticket_number"]
 
 
 class OrganismView(BaseView):

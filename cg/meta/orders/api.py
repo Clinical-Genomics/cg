@@ -198,7 +198,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
             samples=status_data["samples"],
             comment=status_data["comment"],
         )
-        return {"project": project_data, "records": order_obj.microbial_samples}
+        return {"project": project_data, "records": order_obj}
 
     def process_family_samples(self, data: dict) -> dict:
         """Process samples to be analyzed."""
