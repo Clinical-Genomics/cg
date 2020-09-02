@@ -92,7 +92,7 @@ class ConfigHandler:
 
     @staticmethod
     def prepare_config(data: dict) -> dict:
-        """Prepare the config data."""
+        """Parse the pedigree config data"""
         data_copy = deepcopy(data)
         # handle single sample cases with 'unknown' phenotype
         if len(data_copy["samples"]) == 1 and data_copy["samples"][0]["phenotype"] == "unknown":
