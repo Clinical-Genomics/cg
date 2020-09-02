@@ -42,11 +42,7 @@ def test_help_without_sample(cli_runner, base_context, base_store: Store, helper
     # GIVEN a database with no sample
 
     # WHEN setting sample but asking for help
-    result = cli_runner.invoke(
-        sample,
-        ["--help"],
-        obj=base_context,
-    )
+    result = cli_runner.invoke(sample, ["--help"], obj=base_context)
 
     # THEN it should fail on not having a sample as argument
     assert result.exit_code != SUCCESS
@@ -66,11 +62,7 @@ def test_help_with_sample(cli_runner, base_context, base_store: Store, helpers):
     sample_obj = helpers.add_sample(base_store, gender="female")
 
     # WHEN setting sample but skipping lims
-    result = cli_runner.invoke(
-        sample,
-        [sample_obj.internal_id, "--help"],
-        obj=base_context,
-    )
+    result = cli_runner.invoke(sample, [sample_obj.internal_id, "--help"], obj=base_context)
 
     # THEN it should not fail on not having a sample as argument
     assert result.exit_code == SUCCESS
@@ -135,9 +127,7 @@ def test_invalid_customer(cli_runner, base_context, base_store: Store, helpers):
 
     # WHEN calling set sample with an invalid customer
     result = cli_runner.invoke(
-        sample,
-        [sample_id, "-kv", "customer", customer_id, "-y", "--skip-lims"],
-        obj=base_context,
+        sample, [sample_id, "-kv", "customer", customer_id, "-y", "--skip-lims"], obj=base_context
     )
 
     # THEN then it should error about missing customer instead of setting the value
@@ -153,9 +143,7 @@ def test_customer(cli_runner, base_context, base_store: Store, helpers):
 
     # WHEN calling set sample with a valid customer
     result = cli_runner.invoke(
-        sample,
-        [sample_id, "-kv", "customer", customer_id, "-y", "--skip-lims"],
-        obj=base_context,
+        sample, [sample_id, "-kv", "customer", customer_id, "-y", "--skip-lims"], obj=base_context
     )
 
     # THEN then it should set the customer of the sample
@@ -169,9 +157,7 @@ def test_invalid_downsampled_to(cli_runner, base_context):
 
     # WHEN calling set sample with an invalid value of downsampled to
     result = cli_runner.invoke(
-        sample,
-        ["dummy_sample_id", "-kv", "downsampled_to", downsampled_to, "-y"],
-        obj=base_context,
+        sample, ["dummy_sample_id", "-kv", "downsampled_to", downsampled_to, "-y"], obj=base_context
     )
 
     # THEN wrong data type
@@ -186,9 +172,7 @@ def test_downsampled_to(cli_runner, base_context, base_store: Store, helpers):
 
     # WHEN calling set sample with a valid value of downsampled to
     result = cli_runner.invoke(
-        sample,
-        [sample_id, "-kv", "downsampled_to", downsampled_to, "-y"],
-        obj=base_context,
+        sample, [sample_id, "-kv", "downsampled_to", downsampled_to, "-y"], obj=base_context
     )
 
     # THEN then the value should have been set on the sample

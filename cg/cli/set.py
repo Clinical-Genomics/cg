@@ -17,10 +17,20 @@ OPTION_LONG_SKIP_LIMS = "--skip-lims"
 OPTION_LONG_YES = "--yes"
 OPTION_SHORT_KEY_VALUE = "-kv"
 OPTION_SHORT_YES = "-y"
-NOT_CHANGABLE_SAMPLE_ATTRIBUTES = ["application_version_id", "customer_id", "deliveries",
-                                   "flowcells", "id",
-                                   "internal_id", "invoice", "invoice_id", "is_external", "links",
-                                   "state", "to_dict"]
+NOT_CHANGABLE_SAMPLE_ATTRIBUTES = [
+    "application_version_id",
+    "customer_id",
+    "deliveries",
+    "flowcells",
+    "id",
+    "internal_id",
+    "invoice",
+    "invoice_id",
+    "is_external",
+    "links",
+    "state",
+    "to_dict",
+]
 
 
 @click.group("set")
@@ -224,8 +234,9 @@ def sample(context, sample_id, kwargs, skip_lims, yes, help):
                 context.obj["lims"].update_sample(lims_id=sample_id, **{key: value})
                 click.echo(click.style(f"Set LIMS/{key} to {value}", fg="blue"))
             except LimsDataError as err:
-                click.echo(click.style(f"Failed to set LIMS/{key} to {value}, {err.message}",
-                                       fg="red"))
+                click.echo(
+                    click.style(f"Failed to set LIMS/{key} to {value}, {err.message}", fg="red")
+                )
 
 
 def _generate_comment(what, old_value, new_value):
