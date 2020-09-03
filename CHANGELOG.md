@@ -13,6 +13,11 @@ Please add a new candidate release at the top after changing the latest one. Fee
 
 ### Changed
 
+## [12.1.4]
+### Changed
+- Use long description from setup.py on PyPI
+
+
 ## [12.1.3]
 ### Fixed
 - Use another parameter in build and publish
