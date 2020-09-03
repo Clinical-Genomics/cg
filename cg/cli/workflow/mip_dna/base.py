@@ -57,29 +57,31 @@ def mip_dna(context: click.Context, case_id: str, email: str, priority: str, sta
     )
     dna_api = context.obj["dna_api"]
 
-    if context.invoked_subcommand is None:
-        if case_id is None:
-            _suggest_cases_to_analyze(context, show_as_error=True)
-            context.abort()
+    if context.invoked_subcommand is not None:
+        return
 
-        # check everything is ok
-        case_obj = dna_api.db.family(case_id)
-        if not case_exists(case_obj, case_id):
-            context.abort()
+    if case_id is None:
+        click.echo(context.get_help())
+        return
+    # check everything is ok
+    case_obj = dna_api.db.family(case_id)
+    if not case_exists(case_obj, case_id):
+        LOG.error(f"Case {case_id} does not exist!")
+        raise click.Abort()
 
-        all_flowcells_ondisk = dna_api.check(case_obj)
-        if not all_flowcells_ondisk:
-            LOG.warning("%s: not ready to run", case_obj.internal_id)
-            # commit the updates to request flowcells
-            dna_api.db.commit()
-        else:
-            # execute the analysis!
-            context.invoke(config_case, case_id=case_id)
-            context.invoke(link, case_id=case_id)
-            context.invoke(panel, case_id=case_id)
-            context.invoke(
-                run, case_id=case_id, priority=priority, email=email, start_with=start_with
-            )
+    all_flowcells_ondisk = dna_api.check(case_obj)
+    if not all_flowcells_ondisk:
+        LOG.warning(
+            f"Case {case_obj.internal_id} not ready to run!",
+        )
+        # commit the updates to request flowcells
+        dna_api.db.commit()
+    else:
+        # execute the analysis!
+        context.invoke(config_case, case_id=case_id)
+        context.invoke(link, case_id=case_id)
+        context.invoke(panel, case_id=case_id)
+        context.invoke(run, case_id=case_id, priority=priority, email=email, start_with=start_with)
 
 
 @mip_dna.command()
@@ -229,7 +231,7 @@ def start(context: click.Context, dry_run: bool = False):
                 priority=dna_api.get_priority(case_obj),
                 case_id=case_obj.internal_id,
             )
-        except CgError as error:
+        except (CgError, click.Abort) as error:
             LOG.error(error.message)
             continue
 
