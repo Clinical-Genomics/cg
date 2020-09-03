@@ -1,17 +1,17 @@
-"""Fixtures for cli balsamic tests"""
+"""Fixtures for cli workflow balsamic tests"""
 
+import datetime as dt
+import gzip
+import json
 from pathlib import Path
 
 import pytest
-import datetime as dt
-import json
 
-import gzip
 from cg.apps.balsamic.api import BalsamicAPI
 from cg.apps.balsamic.fastq import FastqHandler
+from cg.apps.hk import HousekeeperAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.store import Store
-from cg.apps.hk import HousekeeperAPI
 
 
 class MockLimsAPI:

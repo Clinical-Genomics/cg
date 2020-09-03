@@ -1,4 +1,5 @@
-"""This script tests the cli methods to create the case config for balsamic"""
+"""Tests cli methods to create the case config for balsamic"""
+
 import logging
 from pathlib import Path
 
