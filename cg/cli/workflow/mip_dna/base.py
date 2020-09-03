@@ -214,12 +214,10 @@ def start(context: click.Context, dry_run: bool = False):
 
     cases = [case_obj for case_obj in dna_api.db.cases_to_mip_analyze()]
     for case_obj in cases:
-        if dna_api.is_dna_only_case(case_obj):
-            LOG.info("%s: start analysis", case_obj.internal_id)
-        else:
+        if not dna_api.is_dna_only_case(case_obj):
             LOG.warning("%s: contains non-dna samples - skipping", case_obj.internal_id)
             continue
-
+        LOG.info("%s: start analysis", case_obj.internal_id)
         has_started = dna_api.tb.has_analysis_started(case_id=case_obj.internal_id)
         if has_started:
             status = dna_api.tb.get_analysis_status(case_id=case_obj.internal_id)
