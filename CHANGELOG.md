@@ -13,7 +13,7 @@ Please add a new candidate release at the top after changing the latest one. Fee
 
 ### Changed
 
-## [12.1.1]
+## [12.1.2]
 ### Added
 - Build and publish on pypi with github actions
 
