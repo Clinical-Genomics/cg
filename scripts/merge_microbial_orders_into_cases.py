@@ -39,12 +39,14 @@ def merge_microbial_data(config_file):
             click.echo(click.style("processing microbial sample: " + ms.__str__(), fg="yellow"))
             dict_print(ms.__dict__)
 
+            data_analysis = "microbial|" + ms.data_analysis if ms.data_analysis else "microbial"
+
             sample = store.add_sample(
                         name=ms.name,
                         internal_id=ms.internal_id,
                         comment=COMMENT + "\n" + ms.comment if ms.comment else COMMENT,
                         priority=ms.priority_human,
-                        data_analysis=ms.data_analysis,
+                        data_analysis=data_analysis,
                         customer=order.customer,
                         ticket=order.ticket_number,
                         sex="unknown"
