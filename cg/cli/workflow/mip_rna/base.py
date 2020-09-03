@@ -25,9 +25,9 @@ def mip_rna(context: click.Context):
     """Rare disease RNA workflow"""
 
     context.obj["rna_api"] = AnalysisAPI(
-        db=context.obj["db"],
+        db=Store(context.obj["database"]),
         hk_api=hk.HousekeeperAPI(context.obj),
-        tb_api=context.obj["tb"],
+        tb_api=tb.TrailblazerAPI(context.obj),
         scout_api=scoutapi.ScoutAPI(context.obj),
         lims_api=lims.LimsAPI(context.obj),
         deliver_api=DeliverAPI(
@@ -88,8 +88,7 @@ def run(
     case_obj = rna_api.db.family(case_id)
 
     if not case_exists(case_obj, case_id):
-        context.abort()
-
+        raise click.Abort()
     if rna_api.tb.analyses(family=case_obj.internal_id, temp=True).first():
         LOG.warning("%s: analysis already running", case_obj.internal_id)
         return
@@ -105,13 +104,13 @@ def run(
     )
     if dry_run:
         rna_api.run_command(dry_run=dry_run, **kwargs)
-    else:
-        rna_api.run_command(**kwargs)
-        rna_api.tb.mark_analyses_deleted(case_id=case_id)
-        rna_api.tb.add_pending_analysis(case_id=case_id, email=email)
-        case_obj.action = "running"
-        rna_api.db.commit()
-        LOG.info("MIP rd-rna run started!")
+        return
+    rna_api.run_command(**kwargs)
+    rna_api.tb.mark_analyses_deleted(case_id=case_id)
+    rna_api.tb.add_pending_analysis(case_id=case_id, email=email)
+    case_obj.action = "running"
+    rna_api.db.commit()
+    LOG.info("MIP rd-rna run started!")
 
 
 @mip_rna.command("config-case")
@@ -125,16 +124,12 @@ def config_case(context: click.Context, case_id: str, dry: bool = False):
     case_obj = rna_api.db.family(case_id)
     if not case_exists(case_obj, case_id):
         context.abort()
-
-    # MIP formatted pedigree.yaml config
     config_data = rna_api.config(case_obj, pipeline="mip-rna")
-
     if dry:
         print(config_data)
-    else:
-        # Write to trailblazer root dir / case_id
-        out_path = rna_api.write_pedigree_config(config_data)
-        LOG.info("saved config to: %s", out_path)
+        return
+    out_path = rna_api.write_pedigree_config(config_data)
+    LOG.info(f"Config saved to: {out_path}")
 
 
 mip_rna.add_command(store_cmd)

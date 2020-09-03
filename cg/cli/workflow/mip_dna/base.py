@@ -37,11 +37,10 @@ START_WITH_PROGRAM = click.option(
 @click.pass_context
 def mip_dna(context: click.Context, case_id: str, email: str, priority: str, start_with: str):
     """Rare disease DNA workflow"""
-
     context.obj["dna_api"] = AnalysisAPI(
-        db=context.obj["db"],
+        db=Store(context.obj["database"]),
         hk_api=hk.HousekeeperAPI(context.obj),
-        tb_api=context.obj["tb"],
+        tb_api=tb.TrailblazerAPI(context.obj),
         scout_api=scoutapi.ScoutAPI(context.obj),
         lims_api=lims.LimsAPI(context.obj),
         deliver_api=DeliverAPI(
