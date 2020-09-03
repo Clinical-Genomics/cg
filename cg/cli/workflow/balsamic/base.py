@@ -16,6 +16,7 @@ from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.exc import LimsDataError, BalsamicStartError, BundleAlreadyAddedError
 from cg.cli.workflow.balsamic.deliver import deliver as deliver_cmd
 
+
 LOG = logging.getLogger(__name__)
 
 ARGUMENT_CASE_ID = click.argument("case_id", required=True)
