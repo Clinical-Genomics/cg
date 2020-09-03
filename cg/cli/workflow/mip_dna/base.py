@@ -172,7 +172,6 @@ def run(
     if case_id is None:
         _suggest_cases_to_analyze(context)
         return
-
     case_obj = dna_api.db.family(case_id)
     if not case_exists(case_obj, case_id):
         LOG.error(f"Case {case_id} does not exist!")
@@ -223,7 +222,6 @@ def start(context: click.Context, dry_run: bool = False):
             status = dna_api.tb.get_analysis_status(case_id=case_obj.internal_id)
             LOG.warning("%s: analysis is %s - skipping", case_obj.internal_id, status)
             continue
-
         if dry_run:
             continue
         try:
@@ -234,7 +232,7 @@ def start(context: click.Context, dry_run: bool = False):
             )
         except CgError as error:
             LOG.error(error.message)
-            raise click.Abort()
+            continue
 
 
 def _suggest_cases_to_analyze(context: click.Context, show_as_error: bool = False):
