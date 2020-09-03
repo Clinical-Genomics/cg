@@ -133,7 +133,7 @@ class MipStartError(CgError):
 
 class PedigreeConfigError(CgError):
     """
-    Raised when MIP config validation fails
+    Raised when MIP pedigree config validation fails
     """
 
     def __init__(self, message, errors=None):
