@@ -13,6 +13,10 @@ Please add a new candidate release at the top after changing the latest one. Fee
 
 ### Changed
 
+## [12.1.1]
+### Added
+- Build and publish on pypi with github actions
+
 ## [12]
 ### Added
 - Create a meta-API (BalsamicAnalysisAPI) to handle communication between balsamic and other cg applications. The API will handle the following:
