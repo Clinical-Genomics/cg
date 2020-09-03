@@ -74,7 +74,7 @@ def merge_microbial_data(config_file):
 
             # find flowcells for the microbial sample
             flowcells = ms.flowcells
-            click.echo(click.style("found flowcells for microbial sample: " + flowcells,
+            click.echo(click.style("found flowcells for microbial sample: " + flowcells.__str__(),
                                    fg="yellow"))
 
             # relate the new sample to the flowcell

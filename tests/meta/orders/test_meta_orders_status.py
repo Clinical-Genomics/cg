@@ -57,7 +57,7 @@ def test_microbial_samples_to_status(microbial_order_to_submit):
     assert sample_data["organism_id"] == "M.upium"
     assert sample_data["reference_genome"] == "NC_111"
     assert sample_data["application"] == "MWRNXTR003"
-    assert sample_data["data_analysis"] == "fastq"
+    assert sample_data["data_analysis"] == "microbial|fastq"
     assert sample_data["comment"] == "plate comment"
 
 
@@ -217,7 +217,7 @@ def test_store_microbial_samples(orders_api, base_store, microbial_status_data):
     # THEN it should store the samples and the used previously unknown organisms
     assert new_order
     assert base_store.families().count() == 1
-    assert len(new_order.links) == 5
+    assert len(new_order[0].links) == 5
     assert base_store.samples().count() == 5
     assert base_store.organisms().count() == 3
 
@@ -243,7 +243,7 @@ def test_store_microbial_samples_data_analysis_stored(
     # THEN it should store the samples
     assert base_store.samples().count() > 0
     assert base_store.families().count() > 0
-    assert new_order.links[0].sample.data_analysis == "fastq"
+    assert new_order[0].links[0].sample.data_analysis == "microbial|fastq"
 
 
 def test_store_microbial_samples_bad_apptag(orders_api, base_store, microbial_status_data):

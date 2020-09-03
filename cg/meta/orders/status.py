@@ -404,8 +404,6 @@ class StatusHandler:
                     ticket_number=ticket
                 )
 
-                print(new_sample)
-
                 new_relationship = self.status.relate_sample(
                     family=new_case,
                     sample=new_sample,
@@ -414,7 +412,7 @@ class StatusHandler:
                 self.status.add(new_relationship)
 
         self.status.add_commit(new_case)
-        return new_case
+        return [new_case]
 
     def store_pools(
         self,
