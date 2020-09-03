@@ -14,6 +14,7 @@ from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.store import Store
 from cg.apps.hk import HousekeeperAPI
 from tests.mocks.limsmock import MockLimsAPI
+from cg.utils.fastq import FastqAPI
 
 
 @pytest.fixture(name="balsamic_dir")
