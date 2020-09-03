@@ -14,6 +14,10 @@ Please add a new candidate release at the top after changing the latest one. Fee
 ### Changed
 
 ## [12.1.2]
+### Fixed
+- Syntax in github action build and publish workflow
+
+## [12.1.2]
 ### Added
 - Build and publish on pypi with github actions
 
