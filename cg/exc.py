@@ -131,7 +131,7 @@ class MipStartError(CgError):
     """
 
 
-class ConfigError(CgError):
+class PedigreeConfigError(CgError):
     """
     Raised when MIP config validation fails
     """

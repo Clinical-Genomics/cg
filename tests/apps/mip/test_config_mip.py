@@ -1,5 +1,5 @@
 import pytest
-from cg.exc import ConfigError
+from cg.exc import PedigreeConfigError
 from cg.apps.mip.confighandler import ConfigHandler
 
 
@@ -18,7 +18,7 @@ def test_validate_config_invalid_analysis_type(invalid_config_analysis_type):
     """Test to validate a invalid config with wrong analysis type"""
     # GIVEN invalid config, where nalaysis type is not correct
     # WHEN validating the config
-    with pytest.raises(ConfigError):
+    with pytest.raises(PedigreeConfigError):
         # THEN assert a config error is raised
         ConfigHandler.validate_config(invalid_config_analysis_type)
 
@@ -45,7 +45,7 @@ def test_validate_config_unknown_field_and_missing_sample_id(
     """
     # GIVEN a config with missing sample_id and an extra field
     # WHEN validating the config
-    with pytest.raises(ConfigError):
+    with pytest.raises(PedigreeConfigError):
         # THEN assert a config error is raised
         ConfigHandler.validate_config(invalid_config_unknown_field_sample_id)
 
@@ -58,6 +58,6 @@ def test_validate_config_unknown_field_and_invalid_analysis_type(
     """
     # GIVEN a config with wrong analysis type and an extra field
     # WHEN validating the config
-    with pytest.raises(ConfigError):
+    with pytest.raises(PedigreeConfigError):
         # THEN assert a config error is raised
         ConfigHandler.validate_config(invalid_config_unknown_field_analysis_type)

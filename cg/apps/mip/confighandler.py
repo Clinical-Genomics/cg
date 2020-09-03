@@ -5,7 +5,7 @@ from pathlib import Path
 from marshmallow import Schema, fields, validate
 import ruamel.yaml
 
-from cg.exc import ConfigError
+from cg.exc import PedigreeConfigError
 from cg.constants import DEFAULT_CAPTURE_KIT, NO_PARENT
 
 
@@ -22,24 +22,10 @@ class SampleSchema(Schema):
                 "tga",
                 "wes",
                 "wgs",
+                "wts",
             ]
         ),
     )
-    father = fields.Str(default=NO_PARENT)
-    mother = fields.Str(default=NO_PARENT)
-    phenotype = fields.Str(
-        required=True,
-        validate=validate.OneOf(choices=["affected", "unaffected", "unknown"]),
-    )
-    sex = fields.Str(required=True, validate=validate.OneOf(choices=["female", "male", "unknown"]))
-    expected_coverage = fields.Float()
-    capture_kit = fields.Str(default=DEFAULT_CAPTURE_KIT)
-
-
-class SampleSchemaRNA(Schema):
-    sample_id = fields.Str(required=True)
-    sample_display_name = fields.Str()
-    analysis_type = fields.Str(required=True, validate=validate.OneOf(choices=["wts"]))
     father = fields.Str(default=NO_PARENT)
     mother = fields.Str(default=NO_PARENT)
     phenotype = fields.Str(
@@ -75,7 +61,7 @@ class ConfigHandler:
                     try:
                         sample_id = data["samples"][sample_index]["sample_id"]
                     except KeyError:
-                        raise ConfigError("missing sample id")
+                        raise PedigreeConfigError("missing sample id")
                     for sample_key, sub_messages in sample_errors.items():
                         if sub_messages != ["Unknown field."]:
                             fatal_error = True
@@ -84,7 +70,7 @@ class ConfigHandler:
                 fatal_error = True
                 LOG.error(f"{field}: {', '.join(messages)}")
         if fatal_error:
-            raise ConfigError("invalid config input", errors=errors)
+            raise PedigreeConfigError("invalid config input", errors=errors)
         return errors
 
     @staticmethod

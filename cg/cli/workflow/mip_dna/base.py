@@ -121,7 +121,11 @@ def config_case(context: click.Context, case_id: str, dry_run: bool = False):
         LOG.error(f"Case {case_id} does not exist!")
         raise click.Abort()
 
-    config_data = dna_api.config(case_obj, pipeline="mip-dna")
+    try:
+        config_data = dna_api.config(case_obj, pipeline="mip-dna")
+    except CgError as error:
+        LOG.error(error.message)
+        raise click.Abort()
     if dry_run:
         print(config_data)
         return
