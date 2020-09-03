@@ -11,6 +11,9 @@ from cg.apps.balsamic.fastq import FastqHandler
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
+from cg.apps.tb import TrailblazerAPI
+from cg.apps.scoutapi import ScoutAPI
+from cg.apps.crunchy import CrunchyAPI
 from cg.apps.balsamic.api import BalsamicAPI
 from cg.store import Store
 
@@ -25,6 +28,9 @@ def clean(context):
     """Clean up processes"""
     context.obj["store_api"] = Store(context.obj["database"])
     context.obj["hk_api"] = HousekeeperAPI(context.obj)
+    context.obj["tb_api"] = TrailblazerAPI(context.obj)
+    context.obj["scout_api"] = ScoutAPI(context.obj)
+    context.obj["crunchy_api"] = CrunchyAPI(context.obj)
     context.obj["BalsamicAnalysisAPI"] = BalsamicAnalysisAPI(
         balsamic_api=BalsamicAPI(context.obj),
         store=Store(context.obj["database"]),
