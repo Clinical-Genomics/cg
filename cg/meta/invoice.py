@@ -146,7 +146,7 @@ class InvoiceAPI:
             discounted_price, costcenter, percent_kth, tag, version
         )
 
-        order = record.microbial_order.id if self.record_type == "Microbial" else record.order
+        order = record.order
         ticket_number = (
             record.microbial_order.ticket_number
             if self.record_type == "Microbial"

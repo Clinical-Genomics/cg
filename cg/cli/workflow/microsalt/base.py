@@ -9,6 +9,7 @@ import click
 
 from cg.apps import hk, lims
 from cg.apps.usalt.fastq import FastqHandler
+from cg.cli.workflow.get_links import get_links
 from cg.cli.workflow.microsalt.store import store as store_cmd
 from cg.cli.workflow.microsalt.deliver import (
     deliver as deliver_cmd,
@@ -58,27 +59,21 @@ def microsalt(context: click.Context, order_id):
 @click.pass_context
 def link(context: click.Context, order_id: str, sample_id: str):
     """Link microbial FASTQ files for a SAMPLE_ID"""
-    sample_objs = None
+    store = context.obj["db"]
+    case_id = order_id
 
-    if order_id and (sample_id is None):
-        # link all samples in a case
-        sample_objs = context.obj["db"].microbial_order(order_id).microbial_samples
-    elif sample_id and (order_id is None):
-        # link sample in all its families
-        sample_objs = [context.obj["db"].microbial_sample(sample_id)]
-    elif sample_id and order_id:
-        # link only one sample in a case
-        sample_objs = [context.obj["db"].microbial_sample(sample_id)]
+    link_objs = get_links(store, case_id, sample_id)
 
-    if not sample_objs:
+    if not link_objs:
         LOG.error("provide order and/or sample")
         context.abort()
 
-    for sample_obj in sample_objs:
+    for link_obj in link_objs:
+        sample_obj = link_obj.sample
         LOG.info("%s: link FASTQ files", sample_obj.internal_id)
         context.obj["api"].link_sample(
             FastqHandler(context.obj),
-            case=sample_obj.microbial_order.internal_id,
+            case=link_obj.family.internal_id,
             sample=sample_obj.internal_id,
         )
 
@@ -96,25 +91,25 @@ def link(context: click.Context, order_id: str, sample_id: str):
 def config_case(context: click.Context, dry, order_id: str, sample_id: str):
     """ Create a config file on case level for microSALT """
     if order_id and (sample_id is None):
-        microbial_order_obj = context.obj["db"].microbial_order(order_id)
-        if not microbial_order_obj:
+        case_obj = context.obj["db"].family(order_id)
+        if not case_obj:
             LOG.error("Order %s not found", order_id)
             context.abort()
-        sample_objs = [link_obj.sample for link_obj in microbial_order_obj.links]
+        sample_objs = [link_obj.sample for link_obj in case_obj.links]
     elif sample_id and (order_id is None):
-        sample_obj = context.obj["db"].microbial_sample(sample_id)
+        sample_obj = context.obj["db"].sample(sample_id)
         if not sample_obj:
             LOG.error("Sample %s not found", sample_id)
             context.abort()
-        sample_objs = [context.obj["db"].microbial_sample(sample_id)]
+        sample_objs = [context.obj["db"].sample(sample_id)]
     elif sample_id and order_id:
-        microbial_order_obj = context.obj["db"].microbial_order(order_id)
-        if not microbial_order_obj:
+        case_obj = context.obj["db"].family(order_id)
+        if not case_obj:
             LOG.error("Samples %s not found in %s ", sample_id, order_id)
             context.abort()
         sample_objs = [
             link_obj.sample
-            for link_obj in microbial_order_obj.links
+            for link_obj in case_obj.links
             if link_obj.sample.internal_id == sample_id
         ]
     else:

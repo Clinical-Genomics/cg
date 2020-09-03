@@ -65,7 +65,7 @@ def make_new_invoice():
             record_type="Sample",
         )
     elif record_type == "Microbial":
-        microbial_samples = [db.microbial_sample(sample_id) for sample_id in record_ids]
+        microbial_samples = [db.sample(sample_id) for sample_id in record_ids]
         new_invoice = db.add_invoice(
             customer=customer_obj,
             microbial_samples=microbial_samples,
@@ -136,12 +136,10 @@ def new(record_type):
     customer_id = request.args.get("customer", "cust002")
     customer_obj = db.customer(customer_id)
 
-    if record_type == "Sample":
+    if record_type in ("Sample", "Microbial"):
         records, customers_to_invoice = db.samples_to_invoice(customer=customer_obj)
     elif record_type == "Pool":
         records, customers_to_invoice = db.pools_to_invoice(customer=customer_obj)
-    elif record_type == "Microbial":
-        records, customers_to_invoice = db.microbial_samples_to_invoice(customer=customer_obj)
     return render_template(
         "invoices/new.html",
         customers_to_invoice=customers_to_invoice,

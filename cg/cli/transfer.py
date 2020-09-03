@@ -63,20 +63,3 @@ def pools(context, status):
     transfer_api = transfer_app.TransferLims(context.obj["db"], lims_api)
     transfer_api.transfer_pools(transfer_app.PoolState[status.upper()])
 
-
-@transfer.command()
-@click.option(
-    "-s",
-    "--status",
-    type=click.Choice(["received", "prepared", "sequenced", "delivered"]),
-    default="delivered",
-)
-@click.pass_context
-def microbials(context, status):
-    """
-    Update microbial samples with received_at, prepared_at, sequenced_at or delivered_at dates
-    from LIMS. Defaults to delivered if no option is provided.
-    """
-    lims_api = lims_app.LimsAPI(context.obj)
-    transfer_api = transfer_app.TransferLims(context.obj["db"], lims_api)
-    transfer_api.transfer_microbial_samples(transfer_app.MicrobialState[status.upper()])

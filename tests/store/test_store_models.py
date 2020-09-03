@@ -29,10 +29,10 @@ def test_microbial_order_to_dict(microbial_store, helpers):
 
     # GIVEN a store with a Microbial order and sample
     helpers.add_microbial_sample_and_order(microbial_store)
-    assert microbial_store.microbial_orders().count() > 0
+    assert microbial_store.families().count() > 0
 
     # WHEN running to dict on that sample
-    a_dict = microbial_store.microbial_orders().first().to_dict(links=True)
+    a_dict = microbial_store.families().first().to_dict(links=True)
 
     # THEN you should get a dictionary with
     assert a_dict["id"]
