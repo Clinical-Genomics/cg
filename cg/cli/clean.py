@@ -24,10 +24,7 @@ FAIL = 1
 def clean(context):
     """Clean up processes"""
     context.obj["store_api"] = Store(context.obj["database"])
-    context.obj["tb_api"] = tb.TrailblazerAPI(context.obj)
-    context.obj["hk_api"] = hk.HousekeeperAPI(context.obj)
-    context.obj["scout_api"] = scoutapi.ScoutAPI(context.obj)
-    context.obj["crunchy_api"] = crunchy.CrunchyAPI(context.obj)
+    context.obj["hk_api"] = HousekeeperAPI(context.obj)
     context.obj["BalsamicAnalysisAPI"] = BalsamicAnalysisAPI(
         balsamic_api=BalsamicAPI(context.obj),
         store=Store(context.obj["database"]),
