@@ -215,6 +215,7 @@ def test_vre_comment(cli_runner, microsalt_store, lims_api, base_context, microb
     # GIVEN a sample with organism set to VRE and a comment set in LIMS
     lims_sample = lims_api.sample(microbial_sample_id)
     lims_sample.sample_data["organism"] = "VRE"
+    lims_sample.sample_data["reference_genome"] = ""
     lims_sample.sample_data["comment"] = "ABCD123"
 
     # WHEN getting the case config
