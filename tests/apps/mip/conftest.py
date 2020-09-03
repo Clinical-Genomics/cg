@@ -152,3 +152,105 @@ def mip_config_path():
 def case_id():
     """the name of a case"""
     return "angrybird"
+
+
+@pytest.fixture
+def valid_config():
+    sample = dict(
+        sample_id="sample",
+        analysis_type="wes",
+        father="0",
+        mother="0",
+        phenotype="affected",
+        sex="male",
+        expected_coverage=15,
+        capture_kit="agilent_sureselect_cre.v1",
+    )
+    config = dict(
+        case="a_case",
+        default_gene_panels=["a_panel"],
+        samples=[sample],
+    )
+    return config
+
+
+@pytest.fixture
+def invalid_config_analysis_type():
+    sample = dict(
+        sample_id="sample",
+        analysis_type="nonexisting",
+        father="0",
+        mother="0",
+        phenotype="affected",
+        sex="male",
+        expected_coverage=15,
+        capture_kit="agilent_sureselect_cre.v1",
+    )
+
+    config = dict(
+        case="a_case",
+        default_gene_panels=["a_panel"],
+        samples=[sample],
+    )
+    return config
+
+
+@pytest.fixture
+def invalid_config_unknown_field():
+    sample = dict(
+        sample_id="sample",
+        sample_display_name="a_sample_name",
+        analysis_type="wes",
+        father="0",
+        mother="0",
+        phenotype="affected",
+        sex="male",
+        expected_coverage=15,
+        capture_kit="agilent_sureselect_cre.v1",
+        unknown_field="UNKNOWN",
+    )
+
+    config = dict(
+        case="a_case",
+        default_gene_panels=["a_panel"],
+        samples=[sample],
+    )
+    return config
+
+
+@pytest.fixture
+def invalid_config_unknown_field_sample_id():
+    sample = dict(
+        sample_display_name="a_sample_name",
+        analysis_type="wes",
+        father="0",
+        mother="0",
+        phenotype="affected",
+        sex="male",
+        expected_coverage=15,
+        capture_kit="agilent_sureselect_cre.v1",
+    )
+
+    config = dict(
+        case="a_case",
+        default_gene_panels=["a_panel"],
+        samples=[sample],
+    )
+    return config
+
+
+@pytest.fixture
+def invalid_config_unknown_field_analysis_type():
+    sample = dict(
+        sample_id="sample",
+        sample_display_name="a_sample_name",
+        analysis_type="nonexisting",
+        father="0",
+        mother="0",
+        phenotype="affected",
+        sex="male",
+        expected_coverage=15,
+        capture_kit="agilent_sureselect_cre.v1",
+    )
+    config = dict(case="a_case", default_gene_panels=["a_panel"], samples=[sample])
+    return config

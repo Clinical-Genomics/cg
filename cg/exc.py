@@ -125,6 +125,12 @@ class StoreError(CgError):
     """
 
 
+class MipStartError(CgError):
+    """
+    Exception raised when MIP fails to start a run
+    """
+
+
 class ConfigError(CgError):
     """
     Raised when MIP config validation fails

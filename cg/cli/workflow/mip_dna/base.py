@@ -111,27 +111,21 @@ def link(context: click.Context, case_id: str, sample_id: str):
 def config_case(context: click.Context, case_id: str, dry_run: bool = False):
     """Generate a config for the case_id"""
     dna_api = context.obj["dna_api"]
-
     if case_id is None:
         _suggest_cases_to_analyze(context)
-        context.abort()
+        return
 
     case_obj = dna_api.db.family(case_id)
     if not case_exists(case_obj, case_id):
-        context.abort()
+        LOG.error(f"Case {case_id} does not exist!")
+        raise click.Abort()
 
-    # workflow formatted pedigree.yaml config
     config_data = dna_api.config(case_obj, pipeline="mip-dna")
-
     if dry_run:
         print(config_data)
         return
-    else:
-        out_path = dna_api.write_pedigree_config(config_data)
-        LOG.info("Wrote config to %s", out_path)
-
-
-mip_dna.add_command(config_case)
+    out_path = dna_api.write_pedigree_config(config_data)
+    LOG.info(f"Config file saved to {out_path}")
 
 
 @mip_dna.command()
@@ -177,14 +171,14 @@ def run(
 
     if case_id is None:
         _suggest_cases_to_analyze(context)
-        context.abort()
+        return
 
     case_obj = dna_api.db.family(case_id)
     if not case_exists(case_obj, case_id):
-        context.abort()
+        LOG.error(f"Case {case_id} does not exist!")
+        raise click.Abort()
 
     email = email or environ_email()
-
     kwargs = dict(
         config=context.obj["mip-rd-dna"]["mip_config"],
         case=case_id,
@@ -201,13 +195,14 @@ def run(
 
     if dry_run:
         dna_api.run_command(dry_run=dry_run, **kwargs)
-    else:
-        dna_api.run_command(**kwargs)
-        dna_api.tb.mark_analyses_deleted(case_id=case_id)
-        dna_api.tb.add_pending_analysis(case_id=case_id, email=email)
-        case_obj.action = "running"
-        dna_api.db.commit()
-        LOG.info("MIP rd-dna run started!")
+        return
+
+    dna_api.run_command(**kwargs)
+    dna_api.tb.mark_analyses_deleted(case_id=case_id)
+    dna_api.tb.add_pending_analysis(case_id=case_id, email=email)
+    case_obj.action = "running"
+    dna_api.db.commit()
+    LOG.info("MIP rd-dna run started!")
 
 
 @mip_dna.command()
@@ -239,13 +234,9 @@ def start(context: click.Context, dry_run: bool = False):
                 priority=dna_api.get_priority(case_obj),
                 case_id=case_obj.internal_id,
             )
-        except tb.MipStartError as error:
-            LOG.error(error.message)
-            sys.exit(1)
         except CgError as error:
             LOG.error(error.message)
-            sys.exit(11)
-    sys.exit(EXIT_SUCCESS)
+            raise click.Abort()
 
 
 def _suggest_cases_to_analyze(context: click.Context, show_as_error: bool = False):

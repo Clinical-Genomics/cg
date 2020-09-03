@@ -14,6 +14,7 @@ LOG = logging.getLogger(__name__)
 
 class SampleSchema(Schema):
     sample_id = fields.Str(required=True)
+    sample_display_name = fields.Str()
     analysis_type = fields.Str(
         required=True,
         validate=validate.OneOf(
@@ -24,8 +25,23 @@ class SampleSchema(Schema):
             ]
         ),
     )
-    father = fields.Str(default="0")
-    mother = fields.Str(default="0")
+    father = fields.Str(default=NO_PARENT)
+    mother = fields.Str(default=NO_PARENT)
+    phenotype = fields.Str(
+        required=True,
+        validate=validate.OneOf(choices=["affected", "unaffected", "unknown"]),
+    )
+    sex = fields.Str(required=True, validate=validate.OneOf(choices=["female", "male", "unknown"]))
+    expected_coverage = fields.Float()
+    capture_kit = fields.Str(default=DEFAULT_CAPTURE_KIT)
+
+
+class SampleSchemaRNA(Schema):
+    sample_id = fields.Str(required=True)
+    sample_display_name = fields.Str()
+    analysis_type = fields.Str(required=True, validate=validate.OneOf(choices=["wts"]))
+    father = fields.Str(default=NO_PARENT)
+    mother = fields.Str(default=NO_PARENT)
     phenotype = fields.Str(
         required=True,
         validate=validate.OneOf(choices=["affected", "unaffected", "unknown"]),
@@ -41,26 +57,6 @@ class ConfigSchema(Schema):
     samples = fields.List(fields.Nested(SampleSchema), required=True)
 
 
-class SampleSchemaRNA(Schema):
-    sample_id = fields.Str(required=True)
-    analysis_type = fields.Str(required=True, validate=validate.OneOf(choices=["wts"]))
-    father = fields.Str(default=NO_PARENT)
-    mother = fields.Str(default=NO_PARENT)
-    phenotype = fields.Str(
-        required=True,
-        validate=validate.OneOf(choices=["affected", "unaffected", "unknown"]),
-    )
-    sex = fields.Str(required=True, validate=validate.OneOf(choices=["female", "male", "unknown"]))
-    expected_coverage = fields.Float()
-    capture_kit = fields.Str(default=DEFAULT_CAPTURE_KIT)
-
-
-class ConfigSchemaRNA(Schema):
-    case = fields.Str(required=True)
-    default_gene_panels = fields.List(fields.Str(), required=True)
-    samples = fields.List(fields.Nested(SampleSchemaRNA), required=True)
-
-
 class ConfigHandler:
     def make_pedigree_config(self, data: dict, pipeline: str = None) -> dict:
         """Make a MIP pedigree config"""
@@ -71,31 +67,24 @@ class ConfigHandler:
     @staticmethod
     def validate_config(data: dict, pipeline: str = None) -> dict:
         """Validate MIP pedigree config format"""
-        errors = {}
-        if pipeline == "mip-rna":
-            errors = ConfigSchemaRNA().validate(data)
-        else:
-            errors = ConfigSchema().validate(data)
-        if not errors:
-            return {}
-            fatal_error = False
-            for field, messages in errors.items():
-                if isinstance(messages, dict):
-                    for sample_index, sample_errors in messages.items():
-                        try:
-                            sample_id = data["samples"][sample_index]["sample_id"]
-                        except KeyError:
-                            raise ConfigError("missing sample id")
-
-                        for sample_key, sub_messages in sample_errors.items():
-                            if sub_messages != ["Unknown field."]:
-                                fatal_error = True
-                            LOG.error(f"{sample_id} -> {sample_key}: {', '.join(sub_messages)}")
-                else:
-                    fatal_error = True
-                    LOG.error(f"{field}: {', '.join(messages)}")
-            if fatal_error:
-                raise ConfigError("invalid config input", errors=errors)
+        errors = ConfigSchema().validate(data)
+        fatal_error = False
+        for field, messages in errors.items():
+            if isinstance(messages, dict):
+                for sample_index, sample_errors in messages.items():
+                    try:
+                        sample_id = data["samples"][sample_index]["sample_id"]
+                    except KeyError:
+                        raise ConfigError("missing sample id")
+                    for sample_key, sub_messages in sample_errors.items():
+                        if sub_messages != ["Unknown field."]:
+                            fatal_error = True
+                        LOG.error(f"{sample_id} -> {sample_key}: {', '.join(sub_messages)}")
+            else:
+                fatal_error = True
+                LOG.error(f"{field}: {', '.join(messages)}")
+        if fatal_error:
+            raise ConfigError("invalid config input", errors=errors)
         return errors
 
     @staticmethod
