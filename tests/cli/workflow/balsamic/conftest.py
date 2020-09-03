@@ -1,18 +1,18 @@
-"""Fixtures for cli balsamic tests"""
+"""Fixtures for cli workflow balsamic tests"""
 
+import datetime as dt
+import gzip
+import json
 from pathlib import Path
 
 import pytest
-import datetime as dt
-import json
 
-import gzip
 from cg.apps.balsamic.api import BalsamicAPI
 from cg.apps.balsamic.fastq import FastqHandler
-from cg.utils.fastq import FastqAPI
+from cg.apps.hk import HousekeeperAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.store import Store
-from cg.apps.hk import HousekeeperAPI
+from cg.utils.fastq import FastqAPI
 
 
 class MockLimsAPI:
@@ -245,8 +245,15 @@ def server_config(
                 "qos": "low",
             },
         },
-        "housekeeper": {"database": "database", "root": balsamic_housekeeper_dir,},
-        "lims": {"host": "example.db", "username": "testuser", "password": "testpassword",},
+        "housekeeper": {
+            "database": "database",
+            "root": balsamic_housekeeper_dir,
+        },
+        "lims": {
+            "host": "example.db",
+            "username": "testuser",
+            "password": "testpassword",
+        },
     }
 
 
@@ -256,58 +263,76 @@ def balsamic_lims(server_config: dict) -> MockLimsAPI:
 
     balsamic_lims = MockLimsAPI(server_config)
     balsamic_lims.add_capture_kit(
-        internal_id="sample_case_wgs_paired_tumor", capture_kit=None,
+        internal_id="sample_case_wgs_paired_tumor",
+        capture_kit=None,
     )
     balsamic_lims.add_capture_kit(
-        internal_id="sample_case_wgs_paired_normal", capture_kit=None,
+        internal_id="sample_case_wgs_paired_normal",
+        capture_kit=None,
     )
     balsamic_lims.add_capture_kit(
-        internal_id="sample_case_tgs_paired_tumor", capture_kit="BalsamicBed1",
+        internal_id="sample_case_tgs_paired_tumor",
+        capture_kit="BalsamicBed1",
     )
     balsamic_lims.add_capture_kit(
-        internal_id="sample_case_tgs_paired_normal", capture_kit="BalsamicBed1",
+        internal_id="sample_case_tgs_paired_normal",
+        capture_kit="BalsamicBed1",
     )
     balsamic_lims.add_capture_kit(
-        internal_id="sample_case_wgs_single_tumor", capture_kit=None,
+        internal_id="sample_case_wgs_single_tumor",
+        capture_kit=None,
     )
     balsamic_lims.add_capture_kit(
-        internal_id="sample_case_tgs_single_tumor", capture_kit="BalsamicBed1",
+        internal_id="sample_case_tgs_single_tumor",
+        capture_kit="BalsamicBed1",
     )
     balsamic_lims.add_capture_kit(
-        internal_id="sample_case_tgs_single_normal_error", capture_kit="BalsamicBed1",
+        internal_id="sample_case_tgs_single_normal_error",
+        capture_kit="BalsamicBed1",
     )
     balsamic_lims.add_capture_kit(
-        internal_id="sample_case_tgs_paired_tumor_error", capture_kit="BalsamicBed1",
+        internal_id="sample_case_tgs_paired_tumor_error",
+        capture_kit="BalsamicBed1",
     )
     balsamic_lims.add_capture_kit(
-        internal_id="sample_case_tgs_paired_tumor2_error", capture_kit="BalsamicBed1",
+        internal_id="sample_case_tgs_paired_tumor2_error",
+        capture_kit="BalsamicBed1",
     )
     balsamic_lims.add_capture_kit(
-        internal_id="sample_case_tgs_paired_normal_error", capture_kit="BalsamicBed1",
+        internal_id="sample_case_tgs_paired_normal_error",
+        capture_kit="BalsamicBed1",
     )
     balsamic_lims.add_capture_kit(
-        internal_id="mixed_sample_case_wgs_paired_tumor_error", capture_kit=None,
+        internal_id="mixed_sample_case_wgs_paired_tumor_error",
+        capture_kit=None,
     )
     balsamic_lims.add_capture_kit(
-        internal_id="mixed_sample_case_tgs_paired_normal_error", capture_kit="BalsamicBed1",
+        internal_id="mixed_sample_case_tgs_paired_normal_error",
+        capture_kit="BalsamicBed1",
     )
     balsamic_lims.add_capture_kit(
-        internal_id="mixed_sample_case_mixed_bed_paired_tumor_error", capture_kit="BalsamicBed1",
+        internal_id="mixed_sample_case_mixed_bed_paired_tumor_error",
+        capture_kit="BalsamicBed1",
     )
     balsamic_lims.add_capture_kit(
-        internal_id="mixed_sample_case_mixed_bed_paired_normal_error", capture_kit="BalsamicBed2",
+        internal_id="mixed_sample_case_mixed_bed_paired_normal_error",
+        capture_kit="BalsamicBed2",
     )
     balsamic_lims.add_capture_kit(
-        internal_id="mip_sample_case_wgs_single_tumor", capture_kit=None,
+        internal_id="mip_sample_case_wgs_single_tumor",
+        capture_kit=None,
     )
     balsamic_lims.add_capture_kit(
-        internal_id="sample_case_wgs_paired_two_normal_tumor_error", capture_kit=None,
+        internal_id="sample_case_wgs_paired_two_normal_tumor_error",
+        capture_kit=None,
     )
     balsamic_lims.add_capture_kit(
-        internal_id="sample_case_wgs_paired_two_normal_normal1_error", capture_kit=None,
+        internal_id="sample_case_wgs_paired_two_normal_normal1_error",
+        capture_kit=None,
     )
     balsamic_lims.add_capture_kit(
-        internal_id="sample_case_wgs_paired_two_normal_normal2_error", capture_kit=None,
+        internal_id="sample_case_wgs_paired_two_normal_normal2_error",
+        capture_kit=None,
     )
 
     return balsamic_lims

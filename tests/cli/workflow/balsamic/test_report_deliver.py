@@ -1,4 +1,5 @@
-"""This script tests the report-deliver cli command"""
+"""Tests for the report-deliver cli command"""
+
 import logging
 from pathlib import Path
 
@@ -104,7 +105,7 @@ def test_dry_run(cli_runner, balsamic_context: dict, caplog):
 
 
 def test_qc_option(cli_runner, balsamic_context: dict, caplog):
-    """Test command with case_id and qc option + config and analysis_finish 
+    """Test command with case_id and qc option + config and analysis_finish
     which should execute successfully"""
     caplog.set_level(logging.INFO)
     # GIVEN case-id

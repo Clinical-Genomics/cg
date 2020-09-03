@@ -1,28 +1,31 @@
-""" Add CLI support to create config and/or start BALSAMIC """
+"""CLI support to create config and/or start BALSAMIC """
+
 import logging
 import shutil
-import click
+from pathlib import Path
 from time import sleep
 
-from pathlib import Path
+import click
 
-from cg.apps.hk import HousekeeperAPI
-from cg.apps.lims import LimsAPI
 from cg.apps.balsamic.api import BalsamicAPI
 from cg.apps.balsamic.fastq import FastqHandler
-from cg.utils.fastq import FastqAPI
-from cg.store import Store
-
-from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
-from cg.exc import LimsDataError, BalsamicStartError, BundleAlreadyAddedError
+from cg.apps.hk import HousekeeperAPI
+from cg.apps.lims import LimsAPI
 from cg.cli.workflow.balsamic.deliver import deliver as deliver_cmd
-
+from cg.exc import BalsamicStartError, BundleAlreadyAddedError, LimsDataError
+from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
+from cg.store import Store
+from cg.utils.fastq import FastqAPI
 
 LOG = logging.getLogger(__name__)
 
 ARGUMENT_CASE_ID = click.argument("case_id", required=True)
 OPTION_DRY = click.option(
-    "-d", "--dry-run", "dry", help="Print command to console without executing", is_flag=True,
+    "-d",
+    "--dry-run",
+    "dry",
+    help="Print command to console without executing",
+    is_flag=True,
 )
 OPTION_PANEL_BED = click.option(
     "--panel-bed",
@@ -75,7 +78,7 @@ def balsamic(context, priority, panel_bed, analysis_type, run_analysis, dry):
 @ARGUMENT_CASE_ID
 @click.pass_context
 def link(context, case_id):
-    """ 
+    """
     Locates FASTQ files for given CASE_ID.
     The files are renamed, concatenated, and saved in BALSAMIC working directory
     """
