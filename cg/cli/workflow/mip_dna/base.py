@@ -68,8 +68,8 @@ def mip_dna(context: click.Context, case_id: str, email: str, priority: str, sta
         if not case_exists(case_obj, case_id):
             context.abort()
 
-        is_ok = dna_api.check(case_obj)
-        if not is_ok:
+        all_flowcells_ondisk = dna_api.check(case_obj)
+        if not all_flowcells_ondisk:
             LOG.warning("%s: not ready to run", case_obj.internal_id)
             # commit the updates to request flowcells
             dna_api.db.commit()
@@ -126,7 +126,7 @@ def config_case(context: click.Context, case_id: str, dry_run: bool = False):
     if dry_run:
         print(config_data)
     else:
-        out_path = dna_api.save_config(config_data)
+        out_path = dna_api.write_pedigree_config(config_data)
         LOG.info("Wrote config to %s", out_path)
 
 

@@ -12,35 +12,7 @@ from cg.apps.pipelines.fastqhandler import BaseFastqHandler
 from cg.meta.deliver import DeliverAPI
 from cg.store import models, Store
 from cg.exc import CgDataError, LimsDataError
-
-COLLABORATORS = ("cust000", "cust002", "cust003", "cust004", "cust042")
-MASTER_LIST = (
-    "BRAIN",
-    "Cardiology",
-    "CTD",
-    "ENDO",
-    "EP",
-    "IBMFS",
-    "IEM",
-    "IF",
-    "NEURODEG",
-    "NMD",
-    "mcarta",
-    "MIT",
-    "MOVE",
-    "mtDNA",
-    "PEDHEP",
-    "PID",
-    "PIDCAD",
-    "OMIM-AUTO",
-    "SKD",
-)
-COMBOS = {
-    "DSD": ("DSD", "HYP", "SEXDIF", "SEXDET"),
-    "CM": ("CNM", "CM"),
-    "Horsel": ("Horsel", "141217", "141201"),
-}
-WGS_CAPTURE_KIT = "twistexomerefseq_9.1_hg19_design.bed"
+from cg.constants import WGS_CAPTURE_KIT, COMBOS, COLLABORATORS, MASTER_LIST
 
 
 class AnalysisAPI(ConfigHandler, MipAPI):
@@ -115,7 +87,7 @@ class AnalysisAPI(ConfigHandler, MipAPI):
         data = self.build_config(family_obj, pipeline=pipeline)
 
         # Validate and reformat to MIP config format
-        config_data = self.make_config(data, pipeline)
+        config_data = self.make_pedigree_config(data, pipeline)
         return config_data
 
     def get_target_bed_from_lims(self, sample_id: str) -> str:
@@ -323,13 +295,9 @@ class AnalysisAPI(ConfigHandler, MipAPI):
         """Get the latest trending data for a family."""
 
         mip_config_raw = self._get_latest_raw_file(family_id=family_id, tag="mip-config")
-
         qcmetrics_raw = self._get_latest_raw_file(family_id=family_id, tag="qcmetrics")
-
         sampleinfo_raw = self._get_latest_raw_file(family_id=family_id, tag="sampleinfo")
-
         trending = dict()
-
         if mip_config_raw and qcmetrics_raw and sampleinfo_raw:
             try:
                 trending = self.tb.get_trending(
@@ -342,7 +310,6 @@ class AnalysisAPI(ConfigHandler, MipAPI):
                     "get_latest_metadata failed for '%s', missing key: %s", family_id, error.args[0]
                 )
                 trending = dict()
-
         return trending
 
     @staticmethod

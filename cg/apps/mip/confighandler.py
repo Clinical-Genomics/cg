@@ -6,16 +6,23 @@ from marshmallow import Schema, fields, validate
 import ruamel.yaml
 
 from cg.exc import ConfigError
+from cg.constants import DEFAULT_CAPTURE_KIT, NO_PARENT
 
 
 LOG = logging.getLogger(__name__)
-DEFAULT_CAPTURE_KIT = "agilent_sureselect_cre.v1"
 
 
 class SampleSchema(Schema):
     sample_id = fields.Str(required=True)
     analysis_type = fields.Str(
-        required=True, validate=validate.OneOf(choices=["tga", "wes", "wgs",])
+        required=True,
+        validate=validate.OneOf(
+            choices=[
+                "tga",
+                "wes",
+                "wgs",
+            ]
+        ),
     )
     father = fields.Str(default="0")
     mother = fields.Str(default="0")
@@ -37,13 +44,13 @@ class ConfigSchema(Schema):
 class SampleSchemaRNA(Schema):
     sample_id = fields.Str(required=True)
     analysis_type = fields.Str(required=True, validate=validate.OneOf(choices=["wts"]))
-    father = fields.Str(default="0")
-    mother = fields.Str(default="0")
+    father = fields.Str(default=NO_PARENT)
+    mother = fields.Str(default=NO_PARENT)
     phenotype = fields.Str(
         required=True,
         validate=validate.OneOf(choices=["affected", "unaffected", "unknown"]),
     )
-    sex = fields.Str(required=True, validate=validate.OneOf(choices=["female", "male",  "unknown"]))
+    sex = fields.Str(required=True, validate=validate.OneOf(choices=["female", "male", "unknown"]))
     expected_coverage = fields.Float()
     capture_kit = fields.Str(default=DEFAULT_CAPTURE_KIT)
 
@@ -55,43 +62,43 @@ class ConfigSchemaRNA(Schema):
 
 
 class ConfigHandler:
-    def make_config(self, data: dict, pipeline: str = None):
+    def make_pedigree_config(self, data: dict, pipeline: str = None) -> dict:
         """Make a MIP pedigree config"""
         self.validate_config(data=data, pipeline=pipeline)
-        config_data = self.prepare_config(data)
+        config_data = self.parse_pedigree_config(data)
         return config_data
 
     @staticmethod
     def validate_config(data: dict, pipeline: str = None) -> dict:
         """Validate MIP pedigree config format"""
-        error = {}
+        errors = {}
         if pipeline == "mip-rna":
             errors = ConfigSchemaRNA().validate(data)
         else:
             errors = ConfigSchema().validate(data)
         if errors:
-            hard_error = False
+            fatal_error = False
             for field, messages in errors.items():
                 if isinstance(messages, dict):
-                    for level, sample_errors in messages.items():
+                    for sample_index, sample_errors in messages.items():
                         try:
-                            sample_id = data["samples"][level]["sample_id"]
+                            sample_id = data["samples"][sample_index]["sample_id"]
                         except KeyError:
                             raise ConfigError("missing sample id")
 
-                        for sub_field, sub_messages in sample_errors.items():
+                        for sample_key, sub_messages in sample_errors.items():
                             if sub_messages != ["Unknown field."]:
-                                hard_error = True
-                            LOG.error(f"{sample_id} -> {sub_field}: {', '.join(sub_messages)}")
+                                fatal_error = True
+                            LOG.error(f"{sample_id} -> {sample_key}: {', '.join(sub_messages)}")
                 else:
-                    hard_error = True
+                    fatal_error = True
                     LOG.error(f"{field}: {', '.join(messages)}")
-            if hard_error:
+            if fatal_error:
                 raise ConfigError("invalid config input", errors=errors)
         return errors
 
     @staticmethod
-    def prepare_config(data: dict) -> dict:
+    def parse_pedigree_config(data: dict) -> dict:
         """Parse the pedigree config data"""
         data_copy = deepcopy(data)
         # handle single sample cases with 'unknown' phenotype
@@ -99,13 +106,13 @@ class ConfigHandler:
             LOG.info("setting 'unknown' phenotype to 'unaffected'")
             data_copy["samples"][0]["phenotype"] = "unaffected"
         for sample_data in data_copy["samples"]:
-            sample_data["mother"] = sample_data.get("mother") or "0"
-            sample_data["father"] = sample_data.get("father") or "0"
+            sample_data["mother"] = sample_data.get("mother") or NO_PARENT
+            sample_data["father"] = sample_data.get("father") or NO_PARENT
             if sample_data["analysis_type"] == "wgs" and sample_data.get("capture_kit") is None:
                 sample_data["capture_kit"] = DEFAULT_CAPTURE_KIT
         return data_copy
 
-    def save_config(self, data: dict) -> Path:
+    def write_pedigree_config(self, data: dict) -> Path:
         """Write the pedigree config to the the case dir"""
         out_dir = Path(self.root) / data["case"]
         out_dir.mkdir(parents=True, exist_ok=True)

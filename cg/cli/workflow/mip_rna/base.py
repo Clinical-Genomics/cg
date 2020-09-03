@@ -133,7 +133,7 @@ def config_case(context: click.Context, case_id: str, dry: bool = False):
         print(config_data)
     else:
         # Write to trailblazer root dir / case_id
-        out_path = rna_api.save_config(config_data)
+        out_path = rna_api.write_pedigree_config(config_data)
         LOG.info("saved config to: %s", out_path)
 
 
