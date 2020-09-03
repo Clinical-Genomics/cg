@@ -76,7 +76,8 @@ class ConfigHandler:
             errors = ConfigSchemaRNA().validate(data)
         else:
             errors = ConfigSchema().validate(data)
-        if errors:
+        if not errors:
+            return {}
             fatal_error = False
             for field, messages in errors.items():
                 if isinstance(messages, dict):
