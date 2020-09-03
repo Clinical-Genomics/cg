@@ -70,15 +70,6 @@ def server_config(balsamic_dir: Path) -> dict:
             "username": "testuser",
             "password": "testpassword",
         },
-        "housekeeper": {
-            "database": "database",
-            "root": balsamic_dir,
-        },
-        "lims": {
-            "host": "example.db",
-            "username": "testuser",
-            "password": "testpassword",
-        },
     }
 
 
