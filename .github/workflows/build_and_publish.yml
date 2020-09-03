@@ -10,29 +10,31 @@ jobs:
    name: Build and publish Python distribution to PyPI
    runs-on: ubuntu-18.04
    steps:
-       - uses: actions/checkout@master
-       - name: Set up Python 3.7
-         uses: actions/setup-python@v1
-         with:
-           python-version: 3.7
+    - name: Check out git repository
+      uses: actions/checkout@v2
 
-        - name: Install build tools
-         run: >-
-           python -m
-           pip install
-           wheel
-           twine
-           --user
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.7
 
-       - name: Build a binary wheel and a source tarball
-         run: >-
-           python
-           setup.py
-           sdist
-           bdist_wheel
+    - name: Install build tools
+      run: >-
+        python -m
+        pip install
+        wheel
+        twine
+        --user
 
-       - name: Publish distribution 📦 to PyPI
-         uses: pypa/gh-action-pypi-publish@master
-         with:
-           username: __token__
-           password: ${{ secrets.pypi_password }}
+    - name: Build a binary wheel and a source tarball
+      run: >-
+        python
+        setup.py
+        sdist
+        bdist_wheel
+
+    - name: Publish distribution 📦 to PyPI
+      uses: pypa/gh-action-pypi-publish@master
+      with:
+       username: __token__
+       password: ${{ secrets.pypi_password }}
