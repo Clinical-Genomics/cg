@@ -75,21 +75,20 @@ def test_add_microbial_sample(base_store: Store, helpers):
     microbial_order_id = "dummy_order_id"
 
     # WHEN adding a new microbial sample
-    new_microbial_sample = base_store.add_microbial_sample(
+    new_sample = base_store.add_sample(
         microbial_order_id=microbial_order_id,
         name=name,
-        organism=None,
+        sex="unknown",
         internal_id=internal_id,
-        reference_genome=None,
         application_version=application_version,
-        ticket_number=ticket_number,
+        ticket=ticket_number,
         priority=priority,
     )
-    new_microbial_sample.customer = customer_obj
-    base_store.add_commit(new_microbial_sample)
+    new_sample.customer = customer_obj
+    base_store.add_commit(new_sample)
 
     # THEN it should be stored in the database
-    assert base_store.Sample.query.first() == new_microbial_sample
+    assert base_store.Sample.query.first() == new_sample
     stored_microbial_sample = base_store.Sample.query.first()
     assert stored_microbial_sample.name == name
     assert stored_microbial_sample.internal_id == internal_id

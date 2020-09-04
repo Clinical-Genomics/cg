@@ -106,16 +106,14 @@ def microbial_store(base_store: Store, microbial_submitted_order):
             internal_id=sample_data["organism"], name=sample_data["organism"]
         )
         base_store.add(organism)
-        sample = base_store.add_microbial_sample(
+        sample = base_store.add_sample(
             name=sample_data["name"],
             internal_id=sample_data["internal_id"],
             reads=sample_data["reads"],
             comment=sample_data["comment"],
-            organism=None,
+            sex="unknown",
             priority=sample_data["priority"],
-            reference_genome=None,
-            application_version=application_version,
-            ticket_number=microbial_submitted_order["ticket_number"],
+            ticket=microbial_submitted_order["ticket_number"],
         )
         sample.microbial_order = order
         sample.application_version = application_version

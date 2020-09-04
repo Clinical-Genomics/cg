@@ -301,54 +301,6 @@ class AddHandler(BaseHandler):
             new_invoice.pools.append(pool)
         return new_invoice
 
-    def add_microbial_order(
-            self,
-            customer: models.Customer,
-            name: str,
-            ordered: dt.datetime,
-            internal_id: str = None,
-            ticket_number: int = None,
-            comment: str = None,
-    ) -> models.Family:
-        """Build  and return a new case record."""
-
-        new_family = self.Family(internal_id=internal_id, name=name, ticket_number=ticket_number,
-                                 comment=comment, ordered_at=ordered)
-
-        new_family.customer = customer
-
-        return new_family
-
-    def add_microbial_sample(
-            self,
-            name: str,
-            organism: models.Organism,
-            internal_id: str,
-            reference_genome: str,
-            application_version: models.ApplicationVersion,
-            ticket_number: str,
-            priority: str = None,
-            comment: str = None,
-            **kwargs,
-    ) -> models.Sample:
-        """Build a new sample record.
-
-        To commit you also need to assign the sample to a case.
-        """
-
-        internal_id = internal_id or utils.get_unique_id(self.sample)
-        new_sample = self.add_sample(
-            name=name,
-            sex="unknown",
-            internal_id=internal_id,
-            priority=priority,
-            comment=comment,
-            ticket=ticket_number,
-            **kwargs,
-        )
-        new_sample.application_version = application_version
-        return new_sample
-
     def add_organism(
             self,
             internal_id: str,

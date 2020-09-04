@@ -362,19 +362,21 @@ class StatusHandler:
         lims_project: str,
         samples: List[dict],
         comment: str = None,
-    ) -> models.MicrobialOrder:
+    ) -> models.Family:
         """Store microbial samples in the status database."""
         customer_obj = self.status.customer(customer)
         if customer_obj is None:
             raise OrderError(f"unknown customer: {customer}")
+
         with self.status.session.no_autoflush:
-            new_case = self.status.add_microbial_order(
-                customer=customer_obj,
+            new_case = self.status.add_family(
                 name=order,
-                ordered=ordered,
-                internal_id=lims_project,
-                comment=comment,
+                panels=None,
             )
+            new_case.customer = customer_obj
+            new_case.ordered_at = ordered
+            new_case.comment = comment
+            new_case.internal_id = lims_project
             for sample_data in samples:
                 application_tag = sample_data["application"]
                 application_version = self.status.current_application_version(application_tag)
@@ -391,17 +393,16 @@ class StatusHandler:
                     )
                     self.status.add_commit(organism)
 
-                new_sample = self.status.add_microbial_sample(
+                new_sample = self.status.add_sample(
                     name=sample_data["name"],
                     internal_id=sample_data["internal_id"],
-                    reference_genome=sample_data["reference_genome"],
                     comment=sample_data["comment"],
-                    organism=organism,
                     application_version=application_version,
                     priority=sample_data["priority"],
                     data_analysis=sample_data["data_analysis"],
                     customer=customer_obj,
-                    ticket_number=ticket
+                    ticket=ticket,
+                    sex="unknown"
                 )
 
                 new_relationship = self.status.relate_sample(
