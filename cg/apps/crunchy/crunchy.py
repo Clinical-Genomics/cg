@@ -399,6 +399,7 @@ class CrunchyAPI:
             fastq_second=compression_obj.fastq_second,
             spring_path=compression_obj.spring_path,
             flag_path=compression_obj.spring_metadata_path,
+            pending_path=compression_obj.pending_path,
             tmp_dir=tmp_dir_path,
         )
 
@@ -419,6 +420,7 @@ class CrunchyAPI:
             spring_path=compression_obj.spring_path,
             fastq_first=compression_obj.fastq_first,
             fastq_second=compression_obj.fastq_second,
+            pending_path=compression_obj.pending_path,
             checksum_first=checksum_first,
             checksum_second=checksum_second,
             tmp_dir=tmp_dir_path,
