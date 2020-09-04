@@ -13,19 +13,22 @@ Please add a new candidate release at the top after changing the latest one. Fee
 
 ### Changed
 
+
 ## [13.0.0]
 ### Changed
 - Microbial Samples are now treated as ordinary samples in a case
+
+## [12.1.5]
+### Fixed
+- support current orderform RML-1604:9 again
 
 ## [12.1.4]
 ### Changed
 - Use long description from setup.py on PyPI
 
-
 ## [12.1.3]
 ### Fixed
 - Use another parameter in build and publish
-
 
 ## [12.1.2]
 ### Fixed
@@ -55,7 +58,6 @@ Please add a new candidate release at the top after changing the latest one. Fee
 ## [10.1.2]
 ### Fixed
 - Fixed so that empty gzipped files are considered empty considering metadata
-
 
 ## [10.1.1]
 ### Added
