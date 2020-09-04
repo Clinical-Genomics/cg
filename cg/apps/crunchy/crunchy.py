@@ -202,7 +202,11 @@ class CrunchyAPI:
         sbatch_body = self._get_slurm_fastq_to_spring(compression_obj=compression_obj)
         sbatch_path = self.get_sbatch_path(log_dir, "fastq", compression_obj.run_name)
         sbatch_content = "\n".join([sbatch_header, sbatch_body])
-        self._submit_sbatch(sbatch_content=sbatch_content, sbatch_path=sbatch_path)
+        self._submit_sbatch(
+            sbatch_content=sbatch_content,
+            sbatch_path=sbatch_path,
+            pending_path=compression_obj.pending_path,
+        )
 
     def spring_to_fastq(self, compression_obj: CompressionData, sample_id: str = "") -> None:
         """
@@ -226,7 +230,11 @@ class CrunchyAPI:
 
         sbatch_path = self.get_sbatch_path(log_dir, "spring", compression_obj.run_name)
         sbatch_content = "\n".join([sbatch_header, sbatch_body])
-        self._submit_sbatch(sbatch_content=sbatch_content, sbatch_path=sbatch_path)
+        self._submit_sbatch(
+            sbatch_content=sbatch_content,
+            sbatch_path=sbatch_path,
+            pending_path=compression_obj.pending_path,
+        )
 
     # Spring metadata methods
     def get_spring_metadata(self, metadata_path: Path) -> Optional[List[dict]]:
@@ -327,12 +335,20 @@ class CrunchyAPI:
         # Only other option is "SPRING"
         return log_dir / "_".join([run_name, "decompress_spring.sh"])
 
-    def _submit_sbatch(self, sbatch_content: str, sbatch_path: Path):
+    def _submit_sbatch(self, sbatch_content: str, sbatch_path: Path, pending_path: Path):
         """Submit SLURM job"""
         LOG.info("Submit sbatch")
         if self.dry_run:
             LOG.info("Would submit sbatch %s to slurm", sbatch_path)
             return
+        LOG.info("Creating pending flag")
+        try:
+            pending_path.touch(exist_ok=False)
+        except FileExistsError:
+            LOG.warning("Pending path exists! Do not submit batch job")
+            return
+
+        LOG.debug("Pending flag created")
         with open(sbatch_path, mode="w+t") as sbatch_file:
             sbatch_file.write(sbatch_content)
 
@@ -383,7 +399,6 @@ class CrunchyAPI:
             fastq_second=compression_obj.fastq_second,
             spring_path=compression_obj.spring_path,
             flag_path=compression_obj.spring_metadata_path,
-            pending_path=compression_obj.pending_path,
             tmp_dir=tmp_dir_path,
         )
 
@@ -404,7 +419,6 @@ class CrunchyAPI:
             spring_path=compression_obj.spring_path,
             fastq_first=compression_obj.fastq_first,
             fastq_second=compression_obj.fastq_second,
-            pending_path=compression_obj.pending_path,
             checksum_first=checksum_first,
             checksum_second=checksum_second,
             tmp_dir=tmp_dir_path,
