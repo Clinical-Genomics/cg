@@ -384,6 +384,7 @@ class StatusHandler:
                     ticket=ticket,
                     sex="unknown",
                     ordered=ordered,
+                    order=order,
                 )
 
                 new_relationship = self.status.relate_sample(
