@@ -36,15 +36,15 @@ class StoreHelpers:
         return _version
 
     def ensure_application_version(
-            self,
-            store: Store,
-            application_tag: str = "dummy_tag",
-            application_type: str = "wgs",
-            is_external: bool = False,
-            is_rna: bool = False,
-            description: str = None,
-            sequencing_depth: int = None,
-            is_accredited: bool = False,
+        self,
+        store: Store,
+        application_tag: str = "dummy_tag",
+        application_type: str = "wgs",
+        is_external: bool = False,
+        is_rna: bool = False,
+        description: str = None,
+        sequencing_depth: int = None,
+        is_accredited: bool = False,
     ) -> models.ApplicationVersion:
         """Utility function to return existing or create application version for tests"""
         if is_rna:
@@ -73,13 +73,13 @@ class StoreHelpers:
 
     @staticmethod
     def add_application(
-            store: Store,
-            application_tag: str = "dummy_tag",
-            application_type: str = "wgs",
-            description: str = None,
-            is_accredited: bool = False,
-            is_external: bool = False,
-            **kwargs,
+        store: Store,
+        application_tag: str = "dummy_tag",
+        application_type: str = "wgs",
+        description: str = None,
+        is_accredited: bool = False,
+        is_external: bool = False,
+        **kwargs,
     ) -> models.Application:
         """Utility function to add a application to a store"""
         application = store.application(tag=application_tag)
@@ -96,6 +96,7 @@ class StoreHelpers:
             is_accredited=is_accredited,
             limitations="A limitation",
             is_external=is_external,
+            **kwargs,
         )
         store.add_commit(application)
         return application
@@ -116,11 +117,11 @@ class StoreHelpers:
 
     @staticmethod
     def ensure_customer(
-            store: Store,
-            customer_id: str = "cust000",
-            name: str = "Production",
-            scout_access: bool = False,
-            customer_group: str = "all_customers",
+        store: Store,
+        customer_id: str = "cust000",
+        name: str = "Production",
+        scout_access: bool = False,
+        customer_group: str = "all_customers",
     ) -> models.Customer:
         """Utility function to return existing or create customer for tests"""
         customer_group_id = customer_group or customer_id + "_group"
@@ -143,19 +144,19 @@ class StoreHelpers:
         return customer
 
     def add_analysis(
-            self,
-            store: Store,
-            family: models.Family = None,
-            started_at: datetime = None,
-            completed_at: datetime = None,
-            uploaded_at: datetime = None,
-            upload_started: datetime = None,
-            delivery_reported_at: datetime = None,
-            cleaned_at: datetime = None,
-            pipeline: str = "dummy_pipeline",
-            pipeline_version: str = "1.0",
-            uploading: bool = False,
-            config_path: str = None,
+        self,
+        store: Store,
+        family: models.Family = None,
+        started_at: datetime = None,
+        completed_at: datetime = None,
+        uploaded_at: datetime = None,
+        upload_started: datetime = None,
+        delivery_reported_at: datetime = None,
+        cleaned_at: datetime = None,
+        pipeline: str = "dummy_pipeline",
+        pipeline_version: str = "1.0",
+        uploading: bool = False,
+        config_path: str = None,
     ) -> models.Analysis:
         """Utility function to add an analysis for tests"""
 
@@ -179,26 +180,28 @@ class StoreHelpers:
         if config_path:
             analysis.config_path = config_path
 
+
         analysis.limitations = "A limitation"
         analysis.family = family
         store.add_commit(analysis)
         return analysis
 
     def add_sample(
-            self,
-            store: Store,
-            sample_id: str = "sample_test",
-            gender: str = "female",
-            is_tumour: bool = False,
-            is_rna: bool = False,
-            is_external: bool = False,
-            data_analysis: str = "balsamic",
-            application_tag: str = "dummy_tag",
-            application_type: str = "tgs",
-            customer_name: str = None,
-            reads: int = None,
-            loqus_id: str = None,
-            **kwargs,
+        self,
+        store: Store,
+        sample_id: str = "sample_test",
+        internal_id: str = None,
+        gender: str = "female",
+        is_tumour: bool = False,
+        is_rna: bool = False,
+        is_external: bool = False,
+        data_analysis: str = "balsamic",
+        application_tag: str = "dummy_tag",
+        application_type: str = "tgs",
+        customer_name: str = None,
+        reads: int = None,
+        loqus_id: str = None,
+        **kwargs,
     ) -> models.Sample:
         """Utility function to add a sample to use in tests"""
         customer_name = customer_name or "cust000"
@@ -240,11 +243,14 @@ class StoreHelpers:
         if kwargs.get("flowcell"):
             sample.flowcells.append(kwargs["flowcell"])
 
+        if internal_id:
+            sample.internal_id = internal_id
+
         store.add_commit(sample)
         return sample
 
     def ensure_panel(
-            self, store: Store, panel_id: str = "panel_test", customer_id: str = "cust000"
+        self, store: Store, panel_id: str = "panel_test", customer_id: str = "cust000"
     ) -> models.Panel:
         """Utility function to add a panel to use in tests"""
         customer = self.ensure_customer(store, customer_id)
@@ -262,12 +268,13 @@ class StoreHelpers:
         return panel
 
     def add_family(
-            self,
-            store: Store,
-            family_id: str = "family_test",
-            customer_id: str = "cust000",
-            panels: List = None,
-            family_obj: models.Family = None,
+        self,
+        store: Store,
+        family_id: str = "family_test",
+        internal_id: str = None,
+        customer_id: str = "cust000",
+        panels: List = None,
+        family_obj: models.Family = None,
     ) -> models.Family:
         """Utility function to add a family to use in tests,
         If no family object is used a autogenerated family id will be used
@@ -284,18 +291,21 @@ class StoreHelpers:
         if not family_obj:
             family_obj = store.add_family(name=family_id, panels=panels)
 
+        if internal_id:
+            family_obj.internal_id = internal_id
+
         # print("Adding family with name %s (%s)" % (family_obj.name, family_obj.internal_id))
         family_obj.customer = customer
         store.add_commit(family_obj)
         return family_obj
 
     def ensure_family(
-            self,
-            store: Store,
-            family_info: dict,
-            app_tag: str = None,
-            ordered_at: datetime = None,
-            completed_at: datetime = None,
+        self,
+        store: Store,
+        family_info: dict,
+        app_tag: str = None,
+        ordered_at: datetime = None,
+        completed_at: datetime = None,
     ):
         """Load a family with samples and link relations"""
         customer_obj = self.ensure_customer(store)
@@ -352,10 +362,10 @@ class StoreHelpers:
 
     @staticmethod
     def add_organism(
-            store: Store,
-            internal_id: str = "organism_test",
-            name: str = "organism_name",
-            reference_genome: str = "reference_genome_test",
+        store: Store,
+        internal_id: str = "organism_test",
+        name: str = "organism_name",
+        reference_genome: str = "reference_genome_test",
     ) -> models.Organism:
         """Utility function to add an organism to use in tests"""
         organism = store.add_organism(
@@ -364,11 +374,11 @@ class StoreHelpers:
         return organism
 
     def ensure_organism(
-            self,
-            store: Store,
-            organism_id: str = "organism_test",
-            name: str = "organism_name",
-            reference_genome: str = "reference_genome_test",
+        self,
+        store: Store,
+        organism_id: str = "organism_test",
+        name: str = "organism_name",
+        reference_genome: str = "reference_genome_test",
     ) -> models.Organism:
         """Utility function to add an organism to use in tests"""
         organism = self.add_organism(
@@ -405,13 +415,13 @@ class StoreHelpers:
         return sample
 
     def ensure_microbial_order(
-            self,
-            store: Store,
-            order_id: str = "microbial_order_test",
-            name: str = "microbial_name_test",
-            customer_id: str = "cust_test",
+        self,
+        store: Store,
+        order_id: str = "microbial_order_test",
+        name: str = "microbial_name_test",
+        customer_id: str = "cust_test",
     ) -> models.MicrobialOrder:
-        """Utility function add a microbial order"""
+        """Utility function add a microbial order and sample"""
         customer = self.ensure_customer(store, customer_id)
         order = store.add_microbial_order(
             customer=customer,
@@ -436,8 +446,8 @@ class StoreHelpers:
         self.ensure_application_version(store)
         self.ensure_customer(store, customer_id)
         organism = self.ensure_organism(store)
-        order = self.ensure_microbial_order(store)
-        sample = self.add_microbial_sample(store, organism=organism, comment=comment)
+        order = self.ensure_microbial_order(store, order_id)
+        sample = self.add_microbial_sample(store, sample_id, organism=organism, comment=comment)
         store.relate_sample(family=order, sample=sample, status="unknown")
         store.add_commit(sample)
         return sample
@@ -453,10 +463,10 @@ class StoreHelpers:
 
     @staticmethod
     def add_flowcell(
-            store: Store,
-            flowcell_id: str = "flowcell_test",
-            archived_at: datetime = None,
-            samples: list = None,
+        store: Store,
+        flowcell_id: str = "flowcell_test",
+        archived_at: datetime = None,
+        samples: list = None,
     ) -> models.Flowcell:
         """Utility function to set a flowcell to use in tests"""
         flowcell_obj = store.add_flowcell(
@@ -474,12 +484,12 @@ class StoreHelpers:
 
     @staticmethod
     def add_relationship(
-            store: Store,
-            sample: models.Sample,
-            family: models.Family,
-            status: str = "unknown",
-            father: models.Sample = None,
-            mother: models.Sample = None,
+        store: Store,
+        sample: models.Sample,
+        family: models.Family,
+        status: str = "unknown",
+        father: models.Sample = None,
+        mother: models.Sample = None,
     ) -> models.FamilySample:
         """Utility function to link a sample to a family"""
         link = store.relate_sample(

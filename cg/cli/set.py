@@ -5,9 +5,32 @@ import getpass
 import click
 from cg.apps.lims import LimsAPI
 from cg.constants import FAMILY_ACTIONS, PRIORITY_OPTIONS, FLOWCELL_STATUS
-from cg.store import Store
+from cg.exc import LimsDataError
+from cg.store import Store, models
 
 CONFIRM = "Continue?"
+HELP_KEY_VALUE = "Give a property on sample and the value to set it to, e.g. -kv name Prov52"
+HELP_SKIP_LIMS = "Skip setting value in LIMS"
+HELP_YES = "Answer yes on all confirmations"
+OPTION_LONG_KEY_VALUE = "--key-value"
+OPTION_LONG_SKIP_LIMS = "--skip-lims"
+OPTION_LONG_YES = "--yes"
+OPTION_SHORT_KEY_VALUE = "-kv"
+OPTION_SHORT_YES = "-y"
+NOT_CHANGABLE_SAMPLE_ATTRIBUTES = [
+    "application_version_id",
+    "customer_id",
+    "deliveries",
+    "flowcells",
+    "id",
+    "internal_id",
+    "invoice",
+    "invoice_id",
+    "is_external",
+    "links",
+    "state",
+    "to_dict",
+]
 
 
 @click.group("set")
@@ -77,7 +100,7 @@ def family(context, action, priority, panels, family_id):
 @click.option("-y", "--yes", is_flag=True, help="Answer yes on all confirmations")
 @click.pass_context
 def samples(context, identifiers, kwargs, skip_lims, yes):
-
+    """Set values on many samples at the same time"""
     identifier_args = {}
     for identifier_name, identifier_value in identifiers:
         identifier_args[identifier_name] = identifier_value
@@ -98,40 +121,99 @@ def samples(context, identifiers, kwargs, skip_lims, yes):
         )
 
 
+def is_locked_attribute_on_sample(key, skip_attributes):
+    """Returns true if the attribute is private or in the skip list"""
+    return is_private_attribute(key) or key in skip_attributes
+
+
+def is_private_attribute(key):
+    """Returns true if key has name indicating it is private"""
+    return key.startswith("_")
+
+
+def list_changeable_sample_attributes(
+    sample_obj: models.Sample = None, skip_attributes: list() = None
+):
+    """List changeable attributes on sample and its current value"""
+
+    sample_attributes = models.Sample.__dict__.keys()
+    for attribute in sample_attributes:
+        if is_locked_attribute_on_sample(attribute, skip_attributes):
+            continue
+
+        message = attribute
+
+        if sample_obj:
+            message += f": {sample_obj.__dict__.get(attribute)}"
+
+        click.echo(message)
+
+
+def show_set_sample_help(sample_obj: models.Sample = "None"):
+    """Show help for the set sample command"""
+    show_option_help(long_name=OPTION_LONG_SKIP_LIMS, help_text=HELP_SKIP_LIMS)
+    show_option_help(short_name=OPTION_SHORT_YES, long_name=OPTION_LONG_YES, help_text=HELP_YES)
+    show_option_help(
+        short_name=OPTION_SHORT_KEY_VALUE, long_name=OPTION_LONG_KEY_VALUE, help_text=HELP_KEY_VALUE
+    )
+    list_changeable_sample_attributes(sample_obj, skip_attributes=NOT_CHANGABLE_SAMPLE_ATTRIBUTES)
+    click.echo(f"To set apptag use '{OPTION_SHORT_KEY_VALUE} application_version [APPTAG]")
+    click.echo(f"To set customer use '{OPTION_SHORT_KEY_VALUE} customer [CUSTOMER]")
+
+
+def show_option_help(short_name: str = None, long_name: str = None, help_text: str = None):
+    """Show help for one option"""
+    help_message = f"Use "
+
+    if short_name:
+        help_message += f"'{short_name}'"
+
+    if short_name and long_name:
+        help_message += " or "
+
+    if long_name:
+        help_message += f"'{long_name}'"
+
+    if help_text:
+        help_message += f": {help_text}"
+
+    click.echo(help_message)
+
+
 @set_cmd.command()
-@click.argument("sample_id")
+@click.argument("sample_id", required=False)
 @click.option(
-    "-kv",
-    "--key-value",
+    OPTION_SHORT_KEY_VALUE,
+    OPTION_LONG_KEY_VALUE,
     "kwargs",
     nargs=2,
     type=click.Tuple([str, str]),
     multiple=True,
-    help="Give a property on sample and the value to set it to, e.g. -kv name Prov52",
+    help=HELP_KEY_VALUE,
 )
-@click.option("--skip-lims", is_flag=True, help="Skip setting value in LIMS")
-@click.option("-y", "--yes", is_flag=True, help="Answer yes on all confirmations")
+@click.option(OPTION_LONG_SKIP_LIMS, is_flag=True, help=HELP_SKIP_LIMS)
+@click.option(OPTION_SHORT_YES, OPTION_LONG_YES, is_flag=True, help=HELP_YES)
+@click.option("--help", is_flag=True)
 @click.pass_context
-def sample(context, sample_id, kwargs, skip_lims, yes):
-
+def sample(context, sample_id, kwargs, skip_lims, yes, help):
     sample_obj = context.obj["status"].sample(internal_id=sample_id)
+
+    if help:
+        show_set_sample_help(sample_obj)
 
     if sample_obj is None:
         click.echo(click.style(f"Can't find sample {sample_id}", fg="red"))
         context.abort()
 
-    for key, _ in kwargs:
-
-        if key in ["id", "internal_id"]:
-            click.echo(click.style(f"{key} not a changeable attribute", fg="red"))
-            context.abort()
-
     for key, value in kwargs:
 
-        new_value = None
+        if is_locked_attribute_on_sample(key, NOT_CHANGABLE_SAMPLE_ATTRIBUTES):
+            click.echo(click.style(f"{key} is not a changeable attribute on sample", fg="yellow"))
+            continue
         if not hasattr(sample_obj, key):
             click.echo(click.style(f"{key} is not a property of sample", fg="yellow"))
             continue
+        new_value = None
         if key in ["customer", "application_version"]:
             if key == "customer":
                 new_value = context.obj["status"].customer(value)
@@ -149,7 +231,7 @@ def sample(context, sample_id, kwargs, skip_lims, yes):
         click.echo(f"Would change from {key}={old_value} to {key}={new_value} on {sample_obj}")
 
         if not (yes or click.confirm(CONFIRM)):
-            context.abort()
+            continue
 
         setattr(sample_obj, key, new_value)
         _update_comment(_generate_comment(key, old_value, new_value), sample_obj)
@@ -163,11 +245,17 @@ def sample(context, sample_id, kwargs, skip_lims, yes):
             if not (yes or click.confirm(CONFIRM)):
                 context.abort()
 
-            context.obj["lims"].update_sample(lims_id=sample_id, **{key: value})
-            click.echo(click.style(f"Set LIMS/{key} to {value}", fg="blue"))
+            try:
+                context.obj["lims"].update_sample(lims_id=sample_id, **{key: value})
+                click.echo(click.style(f"Set LIMS/{key} to {value}", fg="blue"))
+            except LimsDataError as err:
+                click.echo(
+                    click.style(f"Failed to set LIMS/{key} to {value}, {err.message}", fg="red")
+                )
 
 
 def _generate_comment(what, old_value, new_value):
+    """Generate a comment that can be used in the comment field to describe updated value"""
     return f"\n{what} changed from " f"{str(old_value)} to " f"{str(new_value)}."
 
 
