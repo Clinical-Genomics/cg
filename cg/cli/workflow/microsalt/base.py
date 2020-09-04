@@ -11,11 +11,7 @@ from cg.apps import hk, lims
 from cg.apps.usalt.fastq import FastqHandler
 from cg.cli.workflow.get_links import get_links
 from cg.cli.workflow.microsalt.store import store as store_cmd
-from cg.cli.workflow.microsalt.deliver import (
-    deliver as deliver_cmd,
-    PROJECT_TAGS,
-    SAMPLE_TAGS,
-)
+from cg.cli.workflow.microsalt.deliver import deliver as deliver_cmd, PROJECT_TAGS, SAMPLE_TAGS
 from cg.meta.microsalt.lims import LimsMicrosaltAPI
 from cg.meta.workflow.microsalt import AnalysisAPI
 from cg.meta.deliver import DeliverAPI
@@ -81,10 +77,7 @@ def link(context: click.Context, order_id: str, sample_id: str):
 @microsalt.command("config-case")
 @click.option("-d", "--dry", is_flag=True, help="print config-case to console")
 @click.option(
-    "-o",
-    "--order",
-    "order_id",
-    help="create config-case all microbial samples for an order",
+    "-o", "--order", "order_id", help="create config-case all microbial samples for an order"
 )
 @click.argument("sample_id", required=False)
 @click.pass_context

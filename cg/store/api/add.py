@@ -15,15 +15,15 @@ class AddHandler(BaseHandler):
     """Methods related to adding new data to the store."""
 
     def add_customer(
-            self,
-            internal_id: str,
-            name: str,
-            customer_group: models.CustomerGroup,
-            invoice_address: str,
-            invoice_reference: str,
-            scout_access: bool = False,
-            *args,
-            **kwargs,
+        self,
+        internal_id: str,
+        name: str,
+        customer_group: models.CustomerGroup,
+        invoice_address: str,
+        invoice_reference: str,
+        scout_access: bool = False,
+        *args,
+        **kwargs,
     ) -> models.Customer:
         """Build a new customer record."""
 
@@ -45,7 +45,7 @@ class AddHandler(BaseHandler):
         return new_customer_group
 
     def add_user(
-            self, customer: models.Customer, email: str, name: str, is_admin: bool = False
+        self, customer: models.Customer, email: str, name: str, is_admin: bool = False
     ) -> models.User:
         """Build a new user record."""
 
@@ -54,13 +54,13 @@ class AddHandler(BaseHandler):
         return new_user
 
     def add_application(
-            self,
-            tag: str,
-            category: str,
-            description: str,
-            percent_kth: int,
-            is_accredited: bool = False,
-            **kwargs,
+        self,
+        tag: str,
+        category: str,
+        description: str,
+        percent_kth: int,
+        is_accredited: bool = False,
+        **kwargs,
     ) -> models.Application:
         """Build a new application  record."""
 
@@ -75,12 +75,12 @@ class AddHandler(BaseHandler):
         return new_record
 
     def add_version(
-            self,
-            application: models.Application,
-            version: int,
-            valid_from: dt.datetime,
-            prices: dict,
-            **kwargs,
+        self,
+        application: models.Application,
+        version: int,
+        valid_from: dt.datetime,
+        prices: dict,
+        **kwargs,
     ) -> models.ApplicationVersion:
         """Build a new application version record."""
 
@@ -97,7 +97,7 @@ class AddHandler(BaseHandler):
         return new_record
 
     def add_bed_version(
-            self, bed: models.Bed, version: int, filename: str, **kwargs
+        self, bed: models.Bed, version: int, filename: str, **kwargs
     ) -> models.BedVersion:
         """Build a new bed version record."""
 
@@ -106,19 +106,19 @@ class AddHandler(BaseHandler):
         return new_record
 
     def add_sample(
-            self,
-            name: str,
-            sex: str,
-            internal_id: str = None,
-            ordered: dt.datetime = None,
-            received: dt.datetime = None,
-            order: str = None,
-            tumour: bool = False,
-            priority: str = None,
-            ticket: int = None,
-            comment: str = None,
-            downsampled_to: int = None,
-            **kwargs,
+        self,
+        name: str,
+        sex: str,
+        internal_id: str = None,
+        ordered: dt.datetime = None,
+        received: dt.datetime = None,
+        order: str = None,
+        tumour: bool = False,
+        priority: str = None,
+        ticket: int = None,
+        comment: str = None,
+        downsampled_to: int = None,
+        **kwargs,
     ) -> models.Sample:
         """Build a new Sample record."""
 
@@ -158,12 +158,12 @@ class AddHandler(BaseHandler):
         return new_family
 
     def relate_sample(
-            self,
-            family: models.Family,
-            sample: models.Sample,
-            status: str,
-            mother: models.Sample = None,
-            father: models.Sample = None,
+        self,
+        family: models.Family,
+        sample: models.Sample,
+        status: str,
+        mother: models.Sample = None,
+        father: models.Sample = None,
     ) -> models.FamilySample:
         """Relate a sample record to a family record."""
 
@@ -175,27 +175,24 @@ class AddHandler(BaseHandler):
         return new_record
 
     def add_flowcell(
-            self, name: str, sequencer: str, sequencer_type: str, date: dt.datetime
+        self, name: str, sequencer: str, sequencer_type: str, date: dt.datetime
     ) -> models.Flowcell:
         """Build a new Flowcell record."""
 
         new_record = self.Flowcell(
-            name=name,
-            sequencer_name=sequencer,
-            sequencer_type=sequencer_type,
-            sequenced_at=date,
+            name=name, sequencer_name=sequencer, sequencer_type=sequencer_type, sequenced_at=date
         )
         return new_record
 
     def add_analysis(
-            self,
-            pipeline: str,
-            version: str = None,
-            completed_at: dt.datetime = None,
-            primary: bool = False,
-            uploaded: dt.datetime = None,
-            started_at: dt.datetime = None,
-            **kwargs,
+        self,
+        pipeline: str,
+        version: str = None,
+        completed_at: dt.datetime = None,
+        primary: bool = False,
+        uploaded: dt.datetime = None,
+        started_at: dt.datetime = None,
+        **kwargs,
     ) -> models.Analysis:
         """Build a new Analysis record."""
 
@@ -211,38 +208,34 @@ class AddHandler(BaseHandler):
         return new_record
 
     def add_panel(
-            self,
-            customer: models.Customer,
-            name: str,
-            abbrev: str,
-            version: float,
-            date: dt.datetime = None,
-            genes: int = None,
+        self,
+        customer: models.Customer,
+        name: str,
+        abbrev: str,
+        version: float,
+        date: dt.datetime = None,
+        genes: int = None,
     ) -> models.Panel:
         """Build a new panel record."""
 
         new_record = self.Panel(
-            name=name,
-            abbrev=abbrev,
-            current_version=version,
-            date=date,
-            gene_count=genes,
+            name=name, abbrev=abbrev, current_version=version, date=date, gene_count=genes
         )
         new_record.customer = customer
         return new_record
 
     def add_pool(
-            self,
-            customer: models.Customer,
-            name: str,
-            order: str,
-            ordered: dt.datetime,
-            application_version: models.ApplicationVersion,
-            data_analysis: str,
-            ticket: int = None,
-            comment: str = None,
-            received: dt.datetime = None,
-            capture_kit: str = None,
+        self,
+        customer: models.Customer,
+        name: str,
+        order: str,
+        ordered: dt.datetime,
+        application_version: models.ApplicationVersion,
+        data_analysis: str,
+        ticket: int = None,
+        comment: str = None,
+        received: dt.datetime = None,
+        capture_kit: str = None,
     ) -> models.Pool:
         """Build a new Pool record."""
 
@@ -261,11 +254,11 @@ class AddHandler(BaseHandler):
         return new_record
 
     def add_delivery(
-            self,
-            destination: str,
-            sample: models.Sample = None,
-            pool: models.Pool = None,
-            comment: str = None,
+        self,
+        destination: str,
+        sample: models.Sample = None,
+        pool: models.Pool = None,
+        comment: str = None,
     ) -> models.Delivery:
         """Build a new Delivery record."""
 
@@ -277,14 +270,14 @@ class AddHandler(BaseHandler):
         return new_record
 
     def add_invoice(
-            self,
-            customer: models.Customer,
-            samples: List[models.Sample] = None,
-            microbial_samples: List[models.MicrobialSample] = None,
-            pools: List[models.Pool] = None,
-            comment: str = None,
-            discount: int = 0,
-            record_type: str = None,
+        self,
+        customer: models.Customer,
+        samples: List[models.Sample] = None,
+        microbial_samples: List[models.MicrobialSample] = None,
+        pools: List[models.Pool] = None,
+        comment: str = None,
+        discount: int = 0,
+        record_type: str = None,
     ):
         """Build a new Invoice record."""
 
@@ -302,12 +295,12 @@ class AddHandler(BaseHandler):
         return new_invoice
 
     def add_organism(
-            self,
-            internal_id: str,
-            name: str,
-            reference_genome: str = None,
-            verified: bool = False,
-            **kwargs,
+        self,
+        internal_id: str,
+        name: str,
+        reference_genome: str = None,
+        verified: bool = False,
+        **kwargs,
     ) -> models.Organism:
         """Build a new Organism record."""
 

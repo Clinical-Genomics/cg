@@ -43,11 +43,7 @@ def analysis(context, config_stream):
         context.abort()
 
     try:
-        new_analysis = gather_files_and_bundle_in_housekeeper(
-            config_stream,
-            hk_api,
-            status,
-        )
+        new_analysis = gather_files_and_bundle_in_housekeeper(config_stream, hk_api, status)
     except AnalysisNotFinishedError as error:
         click.echo(click.style(error.message, fg="red"))
         context.abort()

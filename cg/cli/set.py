@@ -285,4 +285,3 @@ def flowcell(context, flowcell_name, status):
 
     context.obj["status"].commit()
     click.echo(click.style(f"{flowcell_name} set: {prev_status} -> {status}", fg="green"))
-

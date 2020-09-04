@@ -221,12 +221,7 @@ def balsamic_past_run_dirs(context, before_str: str, yes: bool = False, dry_run:
 
         # call clean
         LOG.info("%s: cleaning Balsamic output", case_id)
-        context.invoke(
-            balsamic_run_dir,
-            yes=yes,
-            case_id=case_id,
-            dry_run=dry_run,
-        )
+        context.invoke(balsamic_run_dir, yes=yes, case_id=case_id, dry_run=dry_run)
     LOG.info("Done cleaning Balsamic output")
 
 

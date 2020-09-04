@@ -21,11 +21,7 @@ LOG = logging.getLogger(__name__)
 
 ARGUMENT_CASE_ID = click.argument("case_id", required=True)
 OPTION_DRY = click.option(
-    "-d",
-    "--dry-run",
-    "dry",
-    help="Print command to console without executing",
-    is_flag=True,
+    "-d", "--dry-run", "dry", help="Print command to console without executing", is_flag=True
 )
 OPTION_PANEL_BED = click.option(
     "--panel-bed",
@@ -152,10 +148,7 @@ def report_deliver(context, case_id, analysis_type, dry):
         sample_config = balsamic_analysis_api.get_config_path(case_id=case_id, check_exists=True)
         analysis_finish = balsamic_analysis_api.get_analysis_finish_path(case_id, check_exists=True)
         LOG.info(f"Found analysis finish file: {analysis_finish}")
-        arguments = {
-            "sample_config": sample_config,
-            "analysis_type": analysis_type,
-        }
+        arguments = {"sample_config": sample_config, "analysis_type": analysis_type}
         balsamic_analysis_api.balsamic_api.report_deliver(arguments=arguments, dry=dry)
     except BalsamicStartError as e:
         LOG.error(f"Could not create report file: {e.message}")

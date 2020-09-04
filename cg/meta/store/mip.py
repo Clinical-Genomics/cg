@@ -3,14 +3,8 @@ import logging
 from pathlib import Path
 import ruamel.yaml
 
-from cg.exc import (
-    AnalysisNotFinishedError,
-    BundleAlreadyAddedError,
-)
-from cg.meta.store.base import (
-    build_bundle,
-    add_new_analysis,
-)
+from cg.exc import AnalysisNotFinishedError, BundleAlreadyAddedError
+from cg.meta.store.base import build_bundle, add_new_analysis
 from cg.store.utils import reset_case_action
 
 LOG = logging.getLogger(__name__)

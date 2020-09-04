@@ -68,8 +68,7 @@ def submit_order(order_type):
         return abort(make_response(jsonify(message=error.args[0]), 401))
 
     return jsonify(
-        project=result["project"],
-        records=[record.to_dict() for record in result["records"]],
+        project=result["project"], records=[record.to_dict() for record in result["records"]]
     )
 
 
@@ -284,10 +283,7 @@ def options():
 
     return jsonify(
         customers=[
-            {
-                "text": f"{customer.name} ({customer.internal_id})",
-                "value": customer.internal_id,
-            }
+            {"text": f"{customer.name} ({customer.internal_id})", "value": customer.internal_id}
             for customer in customer_objs
         ],
         applications=apptag_groups,

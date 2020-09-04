@@ -330,11 +330,7 @@ class BalsamicAnalysisAPI:
                     if sample_name in tag:
                         tags[ind] = sample_name
 
-            bundle_file = {
-                "path": entry["path"],
-                "tags": tags,
-                "archive": False,
-            }
+            bundle_file = {"path": entry["path"], "tags": tags, "archive": False}
             bundle_files.append(bundle_file)
         return bundle_files
 
