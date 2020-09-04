@@ -13,6 +13,10 @@ Please add a new candidate release at the top after changing the latest one. Fee
 
 ### Changed
 
+## [13.0.0]
+### Changed
+- Microbial Samples are now treated as ordinary samples in a case
+
 ## [12.1.4]
 ### Changed
 - Use long description from setup.py on PyPI
