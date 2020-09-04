@@ -383,7 +383,7 @@ class StatusHandler:
                     customer=customer_obj,
                     ticket=ticket,
                     sex="unknown",
-                    ordered_at=ordered,
+                    ordered=ordered,
                 )
 
                 new_relationship = self.status.relate_sample(
