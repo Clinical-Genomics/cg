@@ -137,7 +137,8 @@ class FindBusinessDataHandler(BaseHandler):
     ) -> List[models.Sample]:
         """Find samples within the customer group."""
         return self.Sample.query.filter(
-            models.Sample.customer.customer_group == customer.customer_group, name == name
+            models.Sample.customer.customer_group == customer.customer_group,
+            models.Sample.name == name
         )
 
     def flowcell(self, name: str) -> models.Flowcell:
