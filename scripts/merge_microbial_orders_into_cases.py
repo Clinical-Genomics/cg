@@ -30,6 +30,7 @@ def merge_microbial_data(config_file):
         if not case:
             case = store.add_family(order.name, panels=None)
             case.customer_id = order.customer_id
+            case.ordered_at = order.ordered_at
             click.echo(click.style("Created case (Family): " + case.__str__(), fg="green"))
         else:
             click.echo(click.style("Found existing case (Family): " + case.__str__(), fg="yellow"))

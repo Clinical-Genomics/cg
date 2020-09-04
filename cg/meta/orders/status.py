@@ -348,11 +348,15 @@ class StatusHandler:
             raise OrderError(f"unknown customer: {customer}")
 
         with self.status.session.no_autoflush:
-            new_case = self.status.add_family(name=order, panels=None)
-            new_case.customer = customer_obj
-            new_case.ordered_at = ordered
-            new_case.comment = comment
-            new_case.internal_id = lims_project
+            case_obj = self.status.find_family(name=order, customer=customer_obj)
+            if not case_obj:
+                case_obj = self.status.add_family(name=order, panels=None)
+                case_obj.customer = customer_obj
+                case_obj.ordered_at = ordered
+                case_obj.comment = comment
+                case_obj.internal_id = lims_project
+                self.status.add(case_obj)
+
             for sample_data in samples:
                 application_tag = sample_data["application"]
                 application_version = self.status.current_application_version(application_tag)
@@ -379,15 +383,16 @@ class StatusHandler:
                     customer=customer_obj,
                     ticket=ticket,
                     sex="unknown",
+                    ordered_at=ordered,
                 )
 
                 new_relationship = self.status.relate_sample(
-                    family=new_case, sample=new_sample, status="unknown"
+                    family=case_obj, sample=new_sample, status="unknown"
                 )
                 self.status.add(new_relationship)
 
-        self.status.add_commit(new_case)
-        return [new_case]
+        self.status.commit()
+        return [case_obj]
 
     def store_pools(
         self, customer: str, order: str, ordered: dt.datetime, ticket: int, pools: List[dict]
