@@ -38,7 +38,6 @@ error() {{
 
 trap error ERR
 
-touch {pending_path}
 mkdir -p {tmp_dir}
 crunchy -t 12 --tmp-dir {tmp_dir} compress fastq -f {fastq_first} -s {fastq_second} \
 -o {spring_path} --check-integrity --metadata-file
@@ -69,7 +68,6 @@ error() {{
 
 trap error ERR
 
-touch {pending_path}
 mkdir -p {tmp_dir}
 crunchy -t 12 --tmp-dir {tmp_dir} decompress spring {spring_path} -f {fastq_first} -s \
 {fastq_second} --first-checksum {checksum_first} --second-checksum {checksum_second}
