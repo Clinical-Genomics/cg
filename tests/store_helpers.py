@@ -180,7 +180,6 @@ class StoreHelpers:
         if pipeline:
             analysis.pipeline = pipeline
 
-
         analysis.limitations = "A limitation"
         analysis.family = family
         store.add_commit(analysis)
@@ -386,12 +385,12 @@ class StoreHelpers:
         return organism
 
     def add_microbial_sample(
-            self,
-            store: Store,
-            sample_id: str = "microbial_sample_test",
-            priority: str = "research",
-            name: str = "microbial_name_test",
-            comment: str = "comment"
+        self,
+        store: Store,
+        sample_id: str = "microbial_sample_test",
+        priority: str = "research",
+        name: str = "microbial_name_test",
+        comment: str = "comment",
     ) -> models.Sample:
         """Utility function to add a sample to use in tests"""
         customer = self.ensure_customer(store, "cust_test")
@@ -432,12 +431,12 @@ class StoreHelpers:
         return order
 
     def add_microbial_sample_and_order(
-            self,
-            store: Store,
-            order_id: str = "microbial_order_test",
-            sample_id: str = "microbial_sample_test",
-            customer_id: str = "cust_test",
-            comment: str = "ABCD123",
+        self,
+        store: Store,
+        order_id: str = "microbial_order_test",
+        sample_id: str = "microbial_sample_test",
+        customer_id: str = "cust_test",
+        comment: str = "ABCD123",
     ) -> models.Sample:
         """Utility add a case and a sample to use in tests"""
         self.ensure_application_version(store)

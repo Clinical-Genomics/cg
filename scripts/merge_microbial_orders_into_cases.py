@@ -42,14 +42,14 @@ def merge_microbial_data(config_file):
             data_analysis = "microbial|" + ms.data_analysis if ms.data_analysis else "microbial"
 
             sample = store.add_sample(
-                        name=ms.name,
-                        internal_id=ms.internal_id,
-                        comment=COMMENT + "\n" + ms.comment if ms.comment else COMMENT,
-                        priority=ms.priority_human,
-                        data_analysis=data_analysis,
-                        customer=order.customer,
-                        ticket=order.ticket_number,
-                        sex="unknown"
+                name=ms.name,
+                internal_id=ms.internal_id,
+                comment=COMMENT + "\n" + ms.comment if ms.comment else COMMENT,
+                priority=ms.priority_human,
+                data_analysis=data_analysis,
+                customer=order.customer,
+                ticket=order.ticket_number,
+                sex="unknown",
             )
 
             sample.created_at = dt.datetime.now()
@@ -74,15 +74,19 @@ def merge_microbial_data(config_file):
 
             # find flowcells for the microbial sample
             flowcells = ms.flowcells
-            click.echo(click.style("found flowcells for microbial sample: " + flowcells.__str__(),
-                                   fg="yellow"))
+            click.echo(
+                click.style(
+                    "found flowcells for microbial sample: " + flowcells.__str__(), fg="yellow"
+                )
+            )
 
             # relate the new sample to the flowcell
             for flowcell in flowcells:
                 click.echo(click.style(f"Appending Sample {sample} to FC {flowcell}", fg="green"))
                 flowcell.samples.append(sample)
-                click.echo(click.style(f"Removing microbial sample {ms} from FC {flowcell}",
-                                       fg="red"))
+                click.echo(
+                    click.style(f"Removing microbial sample {ms} from FC {flowcell}", fg="red")
+                )
                 flowcell.microbial_samples.remove(ms)
 
             click.echo(click.style("Deleting microbial sample: " + ms.__str__(), fg="red"))

@@ -1,7 +1,7 @@
 from cg.store import Store
 
 
-def test_microbial_sample_to_dict(microbial_store : Store, helpers):
+def test_microbial_sample_to_dict(microbial_store: Store, helpers):
 
     # GIVEN a store with a Microbial sample
     sample_obj = helpers.add_microbial_sample_and_order(microbial_store)

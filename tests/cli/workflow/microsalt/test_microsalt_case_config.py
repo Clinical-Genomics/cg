@@ -76,8 +76,9 @@ def test_no_sample_order_found(cli_runner, base_context, caplog):
         assert f"Samples {microbial_sample_id} not found in {microbial_order_id}" in caplog.text
 
 
-def test_dry_sample(cli_runner, base_context, microbial_sample_id, snapshot: Snapshot, lims_api:
-LimsAPI):
+def test_dry_sample(
+    cli_runner, base_context, microbial_sample_id, snapshot: Snapshot, lims_api: LimsAPI
+):
     """Test working dry command for sample"""
 
     # GIVEN project, organism and reference genome is specified in lims
@@ -87,8 +88,9 @@ LimsAPI):
     lims_sample.sample_data["reference_genome"] = "reference_genome_test"
 
     # WHEN dry running a sample name
-    result = cli_runner.invoke(config_case, ["--dry", microbial_sample_id], obj=base_context,
-                               catch_exceptions=False)
+    result = cli_runner.invoke(
+        config_case, ["--dry", microbial_sample_id], obj=base_context, catch_exceptions=False
+    )
 
     # THEN command should give us a json dump
     assert result.exit_code == EXIT_SUCCESS
@@ -101,7 +103,7 @@ def test_dry_sample_order(
     microbial_sample_id,
     microbial_order_id,
     snapshot: Snapshot,
-    lims_api: LimsAPI
+    lims_api: LimsAPI,
 ):
     """Test working dry command for sample in a order"""
 
@@ -115,7 +117,8 @@ def test_dry_sample_order(
     result = cli_runner.invoke(
         config_case,
         ["--dry", "--order", microbial_order_id, microbial_sample_id],
-        obj=base_context, catch_exceptions=False
+        obj=base_context,
+        catch_exceptions=False,
     )
 
     # THEN command should give us a json dump
@@ -130,7 +133,10 @@ def test_dry_order(cli_runner, base_context, microbial_order_id, snapshot: Snaps
 
     # WHEN dry running a sample name
     result = cli_runner.invoke(
-        config_case, ["--dry", "--order", microbial_order_id], obj=base_context, catch_exceptions=False
+        config_case,
+        ["--dry", "--order", microbial_order_id],
+        obj=base_context,
+        catch_exceptions=False,
     )
 
     # THEN command should give us a json dump
@@ -168,8 +174,9 @@ def test_gonorrhoeae(cli_runner, microsalt_store, lims_api, base_context, microb
     assert "Neisseria spp." in result.output
 
 
-def test_cutibacterium_acnes(cli_runner, microsalt_store, lims_api, base_context,
-                             microbial_sample_id):
+def test_cutibacterium_acnes(
+    cli_runner, microsalt_store, lims_api, base_context, microbial_sample_id
+):
     """ Test if this bacteria gets its name changed """
     # GIVEN a sample with organism set to Cutibacterium acnes
     lims_sample = lims_api.sample(microbial_sample_id)
