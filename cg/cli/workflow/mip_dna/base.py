@@ -76,6 +76,7 @@ def mip_dna(context: click.Context, case_id: str, email: str, priority: str, sta
         )
         # commit the updates to request flowcells
         dna_api.db.commit()
+        return
     else:
         # execute the analysis!
         context.invoke(config_case, case_id=case_id)
@@ -247,7 +248,7 @@ def _suggest_cases_to_analyze(context: click.Context, show_as_error: bool = Fals
     else:
         LOG.warning("provide a case, suggestions:")
     for case_obj in context.obj["dna_api"].db.cases_to_mip_analyze()[:50]:
-        click.echo(case_obj)
+        click.echo(case_obj.internal_id)
 
 
 mip_dna.add_command(store_cmd)
