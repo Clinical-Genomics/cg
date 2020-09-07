@@ -4,6 +4,7 @@ import re
 from pathlib import Path
 from typing import List, Any
 from ruamel.yaml import safe_load
+import datetime as dt
 
 from cg.apps import tb, hk, scoutapi, lims
 from cg.apps.mip.base import MipAPI
@@ -13,6 +14,8 @@ from cg.meta.deliver import DeliverAPI
 from cg.store import models, Store
 from cg.exc import CgDataError, LimsDataError
 from cg.constants import WGS_CAPTURE_KIT, COMBOS, COLLABORATORS, MASTER_LIST
+
+LOG = logging.getLogger(__name__)
 
 
 class AnalysisAPI(ConfigHandler, MipAPI):
@@ -206,7 +209,43 @@ class AnalysisAPI(ConfigHandler, MipAPI):
 
         return rs
 
-    def link_sample(self, fastq_handler: BaseFastqHandler, sample: str, case: str):
+    @staticmethod
+    def name_file(
+        lane: int,
+        flowcell: str,
+        sample: str,
+        read: int,
+        undetermined: bool = False,
+        date: dt.datetime = None,
+        index: str = None,
+    ) -> str:
+        """Name a FASTQ file following MIP conventions."""
+        flowcell = f"{flowcell}-undetermined" if undetermined else flowcell
+        date_str = date.strftime("%y%m%d") if date else "171015"
+        index = index if index else "XXXXXX"
+        return f"{lane}_{date_str}_{flowcell}_{sample}_{index}_{read}.fastq.gz"
+
+    def link_file(self, family: str, sample: str, analysis_type: str, files: List[str]):
+        """Link FASTQ files for a sample."""
+        fastq_dir = Path(self.root) / family / analysis_type / sample / "fastq"
+        fastq_dir.mkdir(parents=True, exist_ok=True)
+        for fastq_data in files:
+            fastq_path = Path(fastq_data["path"])
+            fastq_name = self.name_file(
+                lane=fastq_data["lane"],
+                flowcell=fastq_data["flowcell"],
+                sample=sample,
+                read=fastq_data["read"],
+                undetermined=fastq_data["undetermined"],
+            )
+            dest_path = fastq_dir / fastq_name
+            if not dest_path.exists():
+                LOG.info(f"linking: {fastq_path} -> {dest_path}")
+                dest_path.symlink_to(fastq_path)
+            else:
+                LOG.debug(f"destination path already exists: {dest_path}")
+
+    def link_sample(self, sample: models.Sample, case: str):
         """Link FASTQ files for a sample."""
         file_objs = self.hk.files(bundle=sample, tags=["fastq"])
         files = []
@@ -230,7 +269,12 @@ class AnalysisAPI(ConfigHandler, MipAPI):
                 data["flowcell"] = f"{data['flowcell']}-{matches[0]}"
             files.append(data)
 
-        fastq_handler.link(case=case, sample=sample, files=files)
+        self.link_file(
+            family=case,
+            sample=sample.internal_id,
+            analysis_type=sample.analysis_type.analysis_type,
+            files=files,
+        )
 
     def panel(self, family_obj: models.Family) -> List[str]:
         """Create the aggregated panel file."""

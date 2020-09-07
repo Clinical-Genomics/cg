@@ -6,7 +6,6 @@ import click
 
 from cg.apps import hk, lims, scoutapi, tb
 from cg.apps.environ import environ_email
-from cg.apps.mip.fastq import FastqHandler
 from cg.cli.workflow.get_links import get_links
 from cg.cli.workflow.mip.store import store as store_cmd
 from cg.cli.workflow.mip_rna.deliver import CASE_TAGS, SAMPLE_TAGS
@@ -58,11 +57,9 @@ def link(context: click.Context, case_id: str, sample_id: str):
             "%s: %s link FASTQ files", link_obj.sample.internal_id, link_obj.sample.data_analysis
         )
         if "mip + rna" in link_obj.sample.data_analysis.lower():
-            mip_fastq_handler = FastqHandler(context.obj, rna_api.db, rna_api.tb)
             rna_api.link_sample(
-                mip_fastq_handler,
                 case=link_obj.family.internal_id,
-                sample=link_obj.sample.internal_id,
+                sample=link_obj.sample,
             )
 
 
