@@ -52,7 +52,7 @@ class AnalysisAPI(ConfigHandler, MipAPI):
         self.conda_env = conda_env
         self.root = root
 
-    def check(self, family_obj: models.Family):
+    def check(self, family_obj: models.Family) -> bool:
         """Check stuff before starting the analysis."""
         flowcells = self.db.flowcells(family=family_obj)
         statuses = []
@@ -70,7 +70,7 @@ class AnalysisAPI(ConfigHandler, MipAPI):
         """Fetch priority for case id"""
         if family_obj.priority == 0:
             return "low"
-        elif family_obj.priority > 1:
+        if family_obj.priority > 1:
             return "high"
         else:
             return "normal"
@@ -152,7 +152,7 @@ class AnalysisAPI(ConfigHandler, MipAPI):
         return data
 
     @staticmethod
-    def fastq_header(line):
+    def fastq_header(line: str) -> dict:
         """handle illumina's two different header formats
         @see https://en.wikipedia.org/wiki/FASTQ_format
 
@@ -244,7 +244,7 @@ class AnalysisAPI(ConfigHandler, MipAPI):
             else:
                 LOG.debug(f"destination path already exists: {dest_path}")
 
-    def link_sample(self, sample: models.Sample, case: str):
+    def link_sample(self, sample: models.Sample):
         """Link FASTQ files for a sample."""
         file_objs = self.hk.files(bundle=sample, tags=["fastq"])
         files = []
@@ -269,7 +269,7 @@ class AnalysisAPI(ConfigHandler, MipAPI):
             files.append(data)
 
         self.link_file(
-            family=case,
+            family=sample.family.internal_id,
             sample=sample.internal_id,
             analysis_type=sample.analysis_type.analysis_type,
             files=files,

@@ -97,7 +97,6 @@ def link(context: click.Context, case_id: str, sample_id: str):
         )
         if "mip" in link_obj.sample.data_analysis.lower():
             dna_api.link_sample(
-                case=link_obj.family.internal_id,
                 sample=link_obj.sample,
             )
 
