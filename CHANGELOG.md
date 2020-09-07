@@ -13,6 +13,15 @@ Please add a new candidate release at the top after changing the latest one. Fee
 
 ### Changed
 
+## [12.1.6]
+### Fixed
+- Create crunchy pending path outside batch script
+
+
+## [12.1.5]
+### Fixed
+- support current orderform RML-1604:9 again
+
 ## [12.1.4]
 ### Changed
 - Use long description from setup.py on PyPI
