@@ -88,7 +88,7 @@ class AnalysisAPI(ConfigHandler, MipAPI):
         """
         data = self.build_config(family_obj, pipeline=pipeline)
 
-        # Validate and reformat to MIP config format
+        # Validate and reformat to MIP pedigree config format
         config_data = self.make_pedigree_config(data, pipeline)
         return config_data
 
