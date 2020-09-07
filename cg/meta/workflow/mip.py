@@ -103,7 +103,7 @@ class AnalysisAPI(ConfigHandler, MipAPI):
         return bed_version_obj.filename
 
     def build_config(self, family_obj: models.Family, pipeline: str) -> dict:
-        """Fetch data for creating a MIP config file."""
+        """Fetch data for creating a MIP pedigree config file"""
 
         def get_sample_data(link_obj):
             return {
