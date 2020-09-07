@@ -76,12 +76,11 @@ def mip_dna(context: click.Context, case_id: str, email: str, priority: str, sta
         # commit the updates to request flowcells
         dna_api.db.commit()
         return
-    else:
-        # execute the analysis!
-        context.invoke(config_case, case_id=case_id)
-        context.invoke(link, case_id=case_id)
-        context.invoke(panel, case_id=case_id)
-        context.invoke(run, case_id=case_id, priority=priority, email=email, start_with=start_with)
+    # execute the analysis!
+    context.invoke(config_case, case_id=case_id)
+    context.invoke(link, case_id=case_id)
+    context.invoke(panel, case_id=case_id)
+    context.invoke(run, case_id=case_id, priority=priority, email=email, start_with=start_with)
 
 
 @mip_dna.command()
