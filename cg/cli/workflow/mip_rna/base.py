@@ -48,7 +48,7 @@ def mip_rna(context: click.Context):
 @click.argument("sample_id", required=False)
 @click.pass_context
 def link(context: click.Context, case_id: str, sample_id: str):
-    """Link FASTQ files for a SAMPLE_ID"""
+    """Link FASTQ files for a sample_id"""
     rna_api = context.obj["rna_api"]
     link_objs = get_links(rna_api.db, case_id, sample_id)
 

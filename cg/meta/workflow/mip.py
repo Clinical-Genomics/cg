@@ -76,7 +76,7 @@ class AnalysisAPI(ConfigHandler, MipAPI):
             return "normal"
 
     def config(self, family_obj: models.Family, pipeline: str) -> dict:
-        """Make the MIP config. Meta data for the family is taken from the family object
+        """Make the MIP pedigree config. Meta data for the family is taken from the family object
         and converted to MIP format via trailblazer.
 
         Args:
@@ -86,10 +86,9 @@ class AnalysisAPI(ConfigHandler, MipAPI):
         Returns:
             dict: config_data (MIP format)
         """
-        # Fetch data for creating a MIP config file
         data = self.build_config(family_obj, pipeline=pipeline)
 
-        # Validate and reformat to MIP config format
+        # Validate and reformat to MIP pedigree config format
         config_data = self.make_pedigree_config(data, pipeline)
         return config_data
 
@@ -104,7 +103,7 @@ class AnalysisAPI(ConfigHandler, MipAPI):
         return bed_version_obj.filename
 
     def build_config(self, family_obj: models.Family, pipeline: str) -> dict:
-        """Fetch data for creating a MIP config file."""
+        """Fetch data for creating a MIP pedigree config file"""
 
         def get_sample_data(link_obj):
             return {
@@ -293,8 +292,8 @@ class AnalysisAPI(ConfigHandler, MipAPI):
     @staticmethod
     def convert_panels(customer: str, default_panels: List[str]) -> List[str]:
         """Convert between default panels and all panels included in gene list."""
+        # check if all default panels are part of master list
         if customer in COLLABORATORS and all(panel in MASTER_LIST for panel in default_panels):
-            # check if all default panels are part of master list
             return MASTER_LIST
 
         # the rest are handled the same way
