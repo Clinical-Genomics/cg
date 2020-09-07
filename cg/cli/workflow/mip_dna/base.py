@@ -190,6 +190,15 @@ def run(
         skip_evaluation=skip_evaluation,
     )
 
+    for link_obj in case_obj.links:
+        downsampled = isinstance(link_obj.sample.downsampled_to, int)
+        external = link_obj.sample.application_version.application.is_external
+        if downsampled or external:
+            dna_api.log.info(
+                "%s: downsampled/external - skip evaluation", link_obj.sample.internal_id
+            )
+            kwargs["skip_evaluation"] = True
+
     if dna_api.tb.is_analysis_ongoing(case_id=case_obj.internal_id):
         LOG.warning("%s: analysis is ongoing - skipping", case_obj.internal_id)
         return
