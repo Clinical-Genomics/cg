@@ -86,7 +86,6 @@ class AnalysisAPI(ConfigHandler, MipAPI):
         Returns:
             dict: config_data (MIP format)
         """
-        # Fetch data for creating a MIP config file
         data = self.build_config(family_obj, pipeline=pipeline)
 
         # Validate and reformat to MIP config format
