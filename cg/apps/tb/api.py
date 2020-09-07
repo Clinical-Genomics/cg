@@ -9,12 +9,12 @@ import click
 import ruamel.yaml
 from trailblazer.mip.start import MipCli
 from trailblazer.store import api, models, Store
-from trailblazer.mip import files, fastq, trending
+from trailblazer.mip import files, trending
 
 LOG = logging.getLogger(__name__)
 
 
-class TrailblazerAPI(Store, fastq.FastqHandler):
+class TrailblazerAPI(Store):
     """Interface to Trailblazer for `cg`."""
 
     parse_sampleinfo = staticmethod(files.parse_sampleinfo)
