@@ -76,7 +76,7 @@ class AnalysisAPI(ConfigHandler, MipAPI):
             return "normal"
 
     def config(self, family_obj: models.Family, pipeline: str) -> dict:
-        """Make the MIP config. Meta data for the family is taken from the family object
+        """Make the MIP pedigree config. Meta data for the family is taken from the family object
         and converted to MIP format via trailblazer.
 
         Args:
