@@ -187,18 +187,18 @@ class OrdersAPI(LimsHandler, StatusHandler):
         self.fill_in_sample_verified_organism(data["samples"])
         # submit samples to LIMS
         project_data, lims_map = self.process_lims(data, data["samples"])
-        # submit samples to Status
         self.fill_in_sample_ids(status_data["samples"], lims_map, id_key="internal_id")
-        order_obj = self.store_microbial_order(
+        # submit samples to Status
+        samples = self.store_microbial_samples(
             customer=status_data["customer"],
             order=status_data["order"],
-            ordered=dt.datetime.now(),
+            ordered=project_data["date"] if project_data else dt.datetime.now(),
             ticket=data["ticket"],
-            lims_project=project_data["id"],
             samples=status_data["samples"],
             comment=status_data["comment"],
         )
-        return {"project": project_data, "records": order_obj}
+
+        return {"project": project_data, "records": samples}
 
     def process_family_samples(self, data: dict) -> dict:
         """Process samples to be analyzed."""

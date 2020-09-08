@@ -332,30 +332,24 @@ class StatusHandler:
         self.status.add_commit(new_samples)
         return new_samples
 
-    def store_microbial_order(
+    def store_microbial_samples(
         self,
         customer: str,
         order: str,
         ordered: dt.datetime,
         ticket: int,
-        lims_project: str,
         samples: List[dict],
         comment: str = None,
-    ) -> models.Family:
+    ) -> [models.Sample]:
         """Store microbial samples in the status database."""
+
+        sample_objs = []
+
         customer_obj = self.status.customer(customer)
         if customer_obj is None:
             raise OrderError(f"unknown customer: {customer}")
 
         with self.status.session.no_autoflush:
-            case_obj = self.status.find_family(name=order, customer=customer_obj)
-            if not case_obj:
-                case_obj = self.status.add_family(name=order, panels=None)
-                case_obj.customer = customer_obj
-                case_obj.ordered_at = ordered
-                case_obj.comment = comment
-                case_obj.internal_id = lims_project
-                self.status.add(case_obj)
 
             for sample_data in samples:
                 application_tag = sample_data["application"]
@@ -373,10 +367,18 @@ class StatusHandler:
                     )
                     self.status.add_commit(organism)
 
+                if comment:
+                    sample_comment = f"Order comment: {comment}"
+
+                    if sample_data["comment"]:
+                        sample_comment = f"{sample_comment}, sample comment: {sample_data['comment']}"
+                else:
+                    sample_comment = sample_data['comment']
+
                 new_sample = self.status.add_sample(
                     name=sample_data["name"],
                     internal_id=sample_data["internal_id"],
-                    comment=sample_data["comment"],
+                    comment=sample_comment,
                     application_version=application_version,
                     priority=sample_data["priority"],
                     data_analysis=sample_data["data_analysis"],
@@ -387,13 +389,10 @@ class StatusHandler:
                     order=order,
                 )
 
-                new_relationship = self.status.relate_sample(
-                    family=case_obj, sample=new_sample, status="unknown"
-                )
-                self.status.add(new_relationship)
+                sample_objs.append(new_sample)
 
         self.status.commit()
-        return [case_obj]
+        return sample_objs
 
     def store_pools(
         self, customer: str, order: str, ordered: dt.datetime, ticket: int, pools: List[dict]

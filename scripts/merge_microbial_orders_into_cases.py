@@ -26,31 +26,33 @@ def merge_microbial_data(config_file):
         click.echo(click.style("processing order: " + order.__str__(), fg="yellow"))
         dict_print(order.__dict__)
 
-        case = store.find_family(order.customer, order.name)
-        if not case:
-            case = store.add_family(order.name, panels=None)
-            case.customer_id = order.customer_id
-            case.ordered_at = order.ordered_at
-            click.echo(click.style("Created case (Family): " + case.__str__(), fg="green"))
-        else:
-            click.echo(click.style("Found existing case (Family): " + case.__str__(), fg="yellow"))
-
         for ms in order.microbial_samples:
 
             click.echo(click.style("processing microbial sample: " + ms.__str__(), fg="yellow"))
             dict_print(ms.__dict__)
+
+            if order.comment:
+                sample_comment = f"Order comment: {order.comment}"
+
+                if ms.comment:
+                    sample_comment = f"{sample_comment}, sample comment: {ms.comment}"
+            else:
+                sample_comment = ms.comment
+
+            sample_comment = COMMENT + "\n" + sample_comment if sample_comment else COMMENT
 
             data_analysis = "microbial|" + ms.data_analysis if ms.data_analysis else "microbial"
 
             sample = store.add_sample(
                 name=ms.name,
                 internal_id=ms.internal_id,
-                comment=COMMENT + "\n" + ms.comment if ms.comment else COMMENT,
+                comment=sample_comment,
                 priority=ms.priority_human,
                 data_analysis=data_analysis,
                 customer=order.customer,
                 ticket=order.ticket_number,
                 sex="unknown",
+                order=order.name
             )
 
             sample.created_at = dt.datetime.now()
@@ -64,11 +66,6 @@ def merge_microbial_data(config_file):
             sample.application_version_id = ms.application_version_id
             sample.customer_id = order.customer_id
 
-            click.echo(click.style("Created Sample: " + sample.__str__(), fg="green"))
-
-            case.priority = sample.priority
-            click.echo(click.style(f"relating Sample {sample} to case (Family) {case}", fg="green"))
-            store.relate_sample(family=case, sample=sample, status="unknown")
             click.echo(click.style("Saving Sample: " + sample.__str__(), fg="yellow"))
             dict_print(sample.__dict__)
             store.add(sample)
@@ -93,10 +90,6 @@ def merge_microbial_data(config_file):
             click.echo(click.style("Deleting microbial sample: " + ms.__str__(), fg="red"))
             store.delete(ms)
 
-        click.echo(click.style("Saving case (Family): " + case.__str__(), fg="yellow"))
-        dict_print(case.__dict__)
-
-        store.add(case)
         click.echo(click.style("Deleting microbial order: " + order.__str__(), fg="red"))
         store.delete(order)
         store.commit()
