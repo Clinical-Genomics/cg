@@ -60,7 +60,7 @@ class StatusHandler(BaseHandler):
         return records
 
     def cases_to_analyze(
-        self, pipeline: str = "", threshold: bool = False, limit: int = 100000
+        self, pipeline: str = "", threshold: float = None, limit: int = None
     ) -> list:
         """Returns a list if cases ready to be analyzed or set to be reanalyzed"""
         families_query = (
@@ -85,11 +85,13 @@ class StatusHandler(BaseHandler):
 
         if threshold:
             families = [
-                record for record in families if self.all_samples_have_enough_reads(record.links)
+                record
+                for record in families
+                if self.all_samples_have_enough_reads(record.links, threshold=threshold)
             ]
         return families[:limit]
 
-    def cases_to_store(self, pipeline: str, limit: int = 100000) -> list:
+    def cases_to_store(self, pipeline: str, limit: int = None) -> list:
         """Returns a list of cases that may be available to store in Housekeeper"""
         families_query = (
             self.Family.query.outerjoin(models.Analysis)
@@ -520,7 +522,9 @@ class StatusHandler(BaseHandler):
         """Return True if all samples are external or sequenced inhouse."""
         return all((link.sample.sequenced_at or link.sample.is_external) for link in links)
 
-    def all_samples_have_enough_reads(self, links: List[models.FamilySample]) -> bool:
+    def all_samples_have_enough_reads(
+        self, links: List[models.FamilySample], threshold: float
+    ) -> bool:
         return all(
             (
                 link.sample.reads
@@ -533,7 +537,7 @@ class StatusHandler(BaseHandler):
                 )
                 .first()
                 .target_reads
-                * 0.75
+                * threshold
             )
             for link in links
         )

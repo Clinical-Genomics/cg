@@ -386,7 +386,9 @@ class BalsamicAnalysisAPI:
         self.store.add_commit(new_analysis)
         LOG.info(f"Analysis successfully stored in ClinicalDB: {case_id} : {analysis_start}")
 
-    def family_has_correct_samples(self, case_id: str) -> bool:
+    def family_has_correct_number_tumor_normal_samples(self, case_id: str) -> bool:
+        """Evaluates if a case has exactly one tumor and up to one normal sample in ClinicalDB.
+        This check is only applied to filter jobs which start automatically"""
 
         query = (
             self.store.Sample.query.join(models.Family.links, models.FamilySample.sample)
@@ -401,16 +403,6 @@ class BalsamicAnalysisAPI:
             ]
         )
 
-    def get_tumor_sample(self, case_id: str) -> models.Sample:
-        self.store.Sample.query.join(models.Family.links, models.FamilySample.sample).filter(
-            models.Family.internal_id == case_id
-        ).filter(models.Sample.is_tumour == False).first()
-
-    def get_normal_sample(self, case_id: str) -> models.Sample:
-        self.store.Sample.query.join(models.Family.links, models.FamilySample.sample).filter(
-            models.Family.internal_id == case_id
-        ).filter(models.Sample.is_tumour == True).first()
-
     def get_analyses_to_clean(self, before_date: dt.datetime = dt.datetime.now()) -> list:
         """Retrieve a list of analyses for cleaning created before certain date"""
         analyses_before = self.store.analyses(before=before_date)
@@ -421,8 +413,8 @@ class BalsamicAnalysisAPI:
         """Retrieve a list of balsamic cases without analysis,
         where samples have enough reads to be analyzed"""
         cases_to_analyze = []
-        for case_object in self.store.cases_to_analyze(pipeline="balsamic", threshold=True):
-            if self.family_has_correct_samples(case_object.internal_id):
+        for case_object in self.store.cases_to_analyze(pipeline="balsamic", threshold=0.75):
+            if self.family_has_correct_number_tumor_normal_samples(case_object.internal_id):
                 cases_to_analyze.append(case_object.internal_id)
         return cases_to_analyze
 
