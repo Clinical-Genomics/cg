@@ -273,7 +273,7 @@ class AddHandler(BaseHandler):
         self,
         customer: models.Customer,
         samples: List[models.Sample] = None,
-        microbial_samples: List[models.MicrobialSample] = None,
+        microbial_samples: List[models.Sample] = None,
         pools: List[models.Pool] = None,
         comment: str = None,
         discount: int = 0,
@@ -289,7 +289,7 @@ class AddHandler(BaseHandler):
         for sample in samples or []:
             new_invoice.samples.append(sample)
         for microbial_sample in microbial_samples or []:
-            new_invoice.microbial_samples.append(microbial_sample)
+            new_invoice.samples.append(microbial_sample)
         for pool in pools or []:
             new_invoice.pools.append(pool)
         return new_invoice

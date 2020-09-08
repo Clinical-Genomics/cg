@@ -147,11 +147,7 @@ class InvoiceAPI:
         )
 
         order = record.order
-        ticket_number = (
-            record.microbial_order.ticket_number
-            if self.record_type == "Microbial"
-            else record.ticket_number
-        )
+        ticket_number = record.ticket_number
         lims_id = None if self.record_type == "Pool" else record.internal_id
         priority = "research" if self.record_type == "Pool" else record.priority_human
 

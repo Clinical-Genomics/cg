@@ -649,8 +649,7 @@ class StatusHandler(BaseHandler):
             models.Sample.delivered_at is not None,
             models.Sample.invoice_id == None,
         )
-        customers_to_invoice = [record.microbial_order.customer for record in records.all()]
-        customers_to_invoice = list(set(customers_to_invoice))
+        customers_to_invoice = list(set([record.customer for record in records.all()]))
         if customer:
             records = records.join(models.Family).filter(models.Family.customer_id == customer.id)
         return records, customers_to_invoice

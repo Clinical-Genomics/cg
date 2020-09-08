@@ -88,18 +88,6 @@ def microbial_store(base_store: Store, microbial_submitted_order):
     """Setup a store instance for testing analysis API."""
     customer = base_store.customer(microbial_submitted_order["customer"])
 
-    order = base_store.Family(
-        internal_id=microbial_submitted_order["internal_id"],
-        name=microbial_submitted_order["name"],
-        comment=microbial_submitted_order["comment"],
-        created_at=dt.datetime(2012, 3, 3, 10, 10, 10),
-        updated_at=dt.datetime(2012, 3, 3, 10, 10, 10),
-        ordered_at=dt.datetime(2012, 3, 3, 10, 10, 10),
-    )
-
-    order.customer = customer
-    base_store.add(order)
-
     for sample_data in microbial_submitted_order["items"]:
         application_version = base_store.application(sample_data["application"]).versions[0]
         organism = base_store.Organism(
@@ -115,13 +103,10 @@ def microbial_store(base_store: Store, microbial_submitted_order):
             priority=sample_data["priority"],
             ticket=microbial_submitted_order["ticket_number"],
         )
-        sample.microbial_order = order
         sample.application_version = application_version
         sample.customer = customer
         sample.organism = organism
-
         base_store.add(sample)
-        base_store.relate_sample(family=order, sample=sample, status="unknown")
 
     base_store.commit()
     yield base_store
