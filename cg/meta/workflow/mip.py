@@ -271,7 +271,7 @@ class AnalysisAPI(ConfigHandler, MipAPI):
         self.link_file(
             family=case_id,
             sample=sample.internal_id,
-            analysis_type=sample.analysis_type.analysis_type,
+            analysis_type=sample.application_version.application.analysis_type,
             files=files,
         )
 
