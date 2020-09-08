@@ -62,7 +62,7 @@ def mip_dna(context: click.Context, case_id: str, email: str, priority: str, sta
     if case_id is None:
         click.echo(context.get_help())
         return
-    # check everything is ok
+
     case_obj = dna_api.db.family(case_id)
     if not case_exists(case_obj, case_id):
         LOG.error(f"Case {case_id} does not exist!")
@@ -73,10 +73,11 @@ def mip_dna(context: click.Context, case_id: str, email: str, priority: str, sta
         LOG.warning(
             f"Case {case_obj.internal_id} not ready to run!",
         )
-        # commit the updates to request flowcells
+        # Commit the updates to request flowcells
         dna_api.db.commit()
         return
-    # execute the analysis!
+
+    # Invoke full workflow
     context.invoke(config_case, case_id=case_id)
     context.invoke(link, case_id=case_id)
     context.invoke(panel, case_id=case_id)
