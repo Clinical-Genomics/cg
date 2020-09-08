@@ -12,7 +12,7 @@ from cg.meta.upload.mutacc import (
 
 def test_instatiate():
     """
-        Test instatiate object of type UploadToMutaccAPI
+    Test instatiate object of type UploadToMutaccAPI
     """
     # GIVEN a scout-api and mutacc-auto-api
 
@@ -29,7 +29,7 @@ def test_instatiate():
 
 def test_data(mutacc_upload_api, mocker):
     """
-        Test the data method
+    Test the data method
     """
     # GIVEN a case dictionary
     case = {
@@ -54,7 +54,7 @@ def test_data(mutacc_upload_api, mocker):
 
 def test_data_no_bam(mutacc_upload_api, mocker):
     """
-        Test get data when no bam_file field is given for one of the samples
+    Test get data when no bam_file field is given for one of the samples
     """
 
     # GIVEN a case dictionary where one individual is missing bam_file
@@ -81,7 +81,7 @@ def test_data_no_bam(mutacc_upload_api, mocker):
 
 def test_data_bam_path_not_exists(mutacc_upload_api, mocker):
     """
-        Test get data when bam file does not exist
+    Test get data when bam file does not exist
     """
     # GIVEN a case dictionary
     case = {
@@ -107,7 +107,7 @@ def test_data_bam_path_not_exists(mutacc_upload_api, mocker):
 
 def test_data_no_causatives(mutacc_upload_api, mocker):
     """
-        Test get data when no causatives are given
+    Test get data when no causatives are given
     """
     # GIVEN a case dictionary with no causative variants
     case = {

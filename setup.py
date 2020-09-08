@@ -1,13 +1,18 @@
-#!/usr/bin/env python
+"""Description of the CG package"""
+
+import io
 import os
-import sys
 
-from setuptools import setup, find_packages
-from setuptools.command.test import test as TestCommand
+from setuptools import find_packages, setup
 
-if sys.argv[-1] == "publish":
-    os.system("python setup.py sdist bdist_wheel upload")
-    sys.exit()
+NAME = "cg"
+DESCRIPTION = "Clinical Genomics command center"
+URL = "https://github.com/Clinical-Genomics/cg"
+EMAIL = "patrik.grenfeldt@scilifelab.se"
+AUTHOR = "Patrik Grenfeldt"
+REQUIRES_PYTHON = ">=3.6.0"
+
+HERE = os.path.abspath(os.path.dirname(__file__))
 
 
 def parse_requirements(req_path="./requirements.txt"):
@@ -27,44 +32,29 @@ def parse_requirements(req_path="./requirements.txt"):
     return install_requires
 
 
-# This is a plug-in for setuptools that will invoke py.test
-# when you run python setup.py test
-class PyTest(TestCommand):
-    """Set up the py.test test runner."""
-
-    def finalize_options(self):
-        """Set options for the command line."""
-        TestCommand.finalize_options(self)
-        self.test_args = [
-            "-W",
-            "ignore::PendingDeprecationWarning",
-            "-W",
-            "ignore::DeprecationWarning",
-        ]
-        self.test_suite = True
-
-    def run_tests(self):
-        """Execute the test runner command."""
-        # Import here, because outside the required eggs aren't loaded yet
-        import pytest
-
-        sys.exit(pytest.main(self.test_args))
-
+# Import the README and use it as the long-description.
+# Note: this will only work if 'README.md' is present in your MANIFEST.in file!
+try:
+    with io.open(os.path.join(HERE, "README.md"), encoding="utf-8") as f:
+        LONG_DESCRIPTION = "\n" + f.read()
+except FileNotFoundError:
+    LONG_DESCRIPTION = DESCRIPTION
 
 setup(
-    name="cg",
-    version="9.26.2",
-    description="Clinical Genomics command center.",
-    author="Patrik Grenfeldt",
-    author_email="patrik.grenfeldt@scilifelab.se",
-    url="https://github.com/Clinical-Genomics/cg",
+    name=NAME,
+    version="12.1.7",
+    description=DESCRIPTION,
+    long_description=LONG_DESCRIPTION,
+    long_description_content_type="text/markdown",
+    author=AUTHOR,
+    author_email=EMAIL,
+    url=URL,
     include_package_data=True,
     zip_safe=False,
     packages=find_packages(exclude=("tests*", "docs", "examples")),
     entry_points={"console_scripts": ["cg=cg.cli:base"]},
     install_requires=parse_requirements(),
     tests_require=parse_requirements("requirements-dev.txt"),
-    cmdclass=dict(test=PyTest),
     classifiers=[
         "Programming Language :: Python",
         "Programming Language :: Python :: 3.6",

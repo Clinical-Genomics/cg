@@ -16,7 +16,16 @@ def test_add_relationship_required(invoke_cli, disk_store: Store, helpers):
     db_uri = disk_store.uri
 
     result = invoke_cli(
-        ["--database", db_uri, "add", "relationship", family_id, sample_id, "-s", status,]
+        [
+            "--database",
+            db_uri,
+            "add",
+            "relationship",
+            family_id,
+            sample_id,
+            "-s",
+            status,
+        ]
     )
 
     # THEN then it should be added
@@ -37,7 +46,16 @@ def test_add_relationship_bad_sample(invoke_cli, disk_store: Store, helpers):
     sample_id = "dummy_sample"
     status = "affected"
     result = invoke_cli(
-        ["--database", db_uri, "add", "relationship", family_id, sample_id, "-s", status,]
+        [
+            "--database",
+            db_uri,
+            "add",
+            "relationship",
+            family_id,
+            sample_id,
+            "-s",
+            status,
+        ]
     )
 
     # THEN then it should complain on missing sample instead of adding a relationship
@@ -57,7 +75,16 @@ def test_add_relationship_bad_family(invoke_cli, disk_store: Store, helpers):
 
     status = "affected"
     result = invoke_cli(
-        ["--database", db_uri, "add", "relationship", family_id, sample_id, "-s", status,]
+        [
+            "--database",
+            db_uri,
+            "add",
+            "relationship",
+            family_id,
+            sample_id,
+            "-s",
+            status,
+        ]
     )
 
     # THEN then it should complain in missing family instead of adding a relationship
@@ -79,7 +106,16 @@ def test_add_relationship_bad_status(invoke_cli, disk_store: Store, helpers):
     status = "dummy_status"
 
     result = invoke_cli(
-        ["--database", db_uri, "add", "relationship", family_id, sample_id, "-s", status,]
+        [
+            "--database",
+            db_uri,
+            "add",
+            "relationship",
+            family_id,
+            sample_id,
+            "-s",
+            status,
+        ]
     )
 
     # THEN then it should complain on bad status instead of adding a relationship

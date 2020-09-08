@@ -1,144 +1,160 @@
-"""This script tests the cli methods to run balsamic"""
-import subprocess
+"""This script tests the run cli command"""
 import logging
-from unittest import mock
+from pathlib import Path
 
 from cg.cli.workflow.balsamic.base import run
 
 EXIT_SUCCESS = 0
 
 
-def test_without_options(cli_runner):
-    """Test command with dry option"""
-
-    # GIVEN
-
+def test_without_options(cli_runner, balsamic_context: dict):
+    """Test command without case_id argument"""
+    # GIVEN no case_id
     # WHEN dry running without anything specified
-    result = cli_runner.invoke(run)
-
-    # THEN command should mention argument
+    result = cli_runner.invoke(run, obj=balsamic_context)
+    # THEN command should NOT execute successfully
     assert result.exit_code != EXIT_SUCCESS
+    # THEN command should mention argument
     assert "Missing argument" in result.output
 
 
-def test_with_case(cli_runner, balsamic_context, caplog, balsamic_dummy_case):
-    """Test command with case to start with"""
-
-    # GIVEN case-id, and malconfigured pipeline
-    case_id = balsamic_dummy_case
-
-    dummy_stdout = "dummy_stdout"
-    dummy_stderr = "dummy_stderr"
-    dummy_returncode_success = 0
-
-    caplog.set_level(logging.INFO)
-
-    context = balsamic_context
-
-    # WHEN running balsamic on "case"
-    with mock.patch.object(subprocess, "run") as mocked:
-        mocked.return_value.stdout = dummy_stdout.encode("utf-8")
-        mocked.return_value.stderr = dummy_stderr.encode("utf-8")
-        mocked.return_value.returncode = dummy_returncode_success
-        result = cli_runner.invoke(run, [case_id], obj=context)
-
-        # THEN assert that command is in log output
-        assert " ".join(["balsamic", "run", "analysis"]) in caplog.text
-
-
-def test_dry(cli_runner, balsamic_context, caplog, balsamic_dummy_case):
-    """Test command with dry option"""
-
-    # GIVEN case-id
-    case_id = balsamic_dummy_case
-
-    caplog.set_level(logging.INFO)
-
-    context = balsamic_context
-
-    # WHEN dry running with dry specified
-    result = cli_runner.invoke(run, [case_id, "--dry-run"], obj=context)
-
-    # THEN command should print the balsamic command-string
-    assert result.exit_code == EXIT_SUCCESS
+def test_with_missing_case(cli_runner, balsamic_context: dict, caplog):
+    """Test command with invalid case to start with"""
+    caplog.set_level(logging.ERROR)
+    # GIVEN case_id not in database
+    case_id = "soberelephant"
+    assert not balsamic_context["BalsamicAnalysisAPI"].store.family(case_id)
+    # WHEN running
+    result = cli_runner.invoke(run, [case_id], obj=balsamic_context)
+    # THEN command should NOT successfully call the command it creates
+    assert result.exit_code != EXIT_SUCCESS
+    # THEN ERROR log should be printed containing invalid case_id
     assert case_id in caplog.text
+    assert "not found" in caplog.text
 
 
-def test_run_analysis(cli_runner, balsamic_context, caplog, balsamic_dummy_case):
-    """Test command with run-analysis option"""
-
+def test_without_samples(cli_runner, balsamic_context: dict, caplog):
+    """Test command with case_id and no samples"""
+    caplog.set_level(logging.ERROR)
     # GIVEN case-id
-    case_id = balsamic_dummy_case
+    case_id = "no_sample_case"
+    # WHEN dry running with dry specified
+    result = cli_runner.invoke(run, [case_id, "--dry-run"], obj=balsamic_context)
+    # THEN command should NOT execute successfully
+    assert result.exit_code != EXIT_SUCCESS
+    # THEN warning should be printed that no config file is found
+    assert case_id in caplog.text
+    assert "0" in caplog.text
 
+
+def test_without_config(cli_runner, balsamic_context: dict, caplog):
+    """Test command with case_id and no config file"""
+    caplog.set_level(logging.ERROR)
+    # GIVEN case-id
+    case_id = "balsamic_case_wgs_single"
+    # WHEN dry running with dry specified
+    result = cli_runner.invoke(run, [case_id, "--dry-run"], obj=balsamic_context)
+    # THEN command should NOT execute successfully
+    assert result.exit_code != EXIT_SUCCESS
+    # THEN warning should be printed that no config file is found
+    assert "No config file found" in caplog.text
+
+
+def test_with_config(tmpdir_factory, cli_runner, balsamic_context: dict, caplog):
+    """Test command with case_id and config file"""
     caplog.set_level(logging.INFO)
-
-    context = balsamic_context
-
-    # WHEN dry running with option specified
-    result = cli_runner.invoke(run, [case_id, "--dry-run", "--run-analysis"], obj=context)
-
-    # THEN dry-print should include the option
+    # GIVEN case-id
+    case_id = "balsamic_case_wgs_single"
+    # WHEN ensuring case config exists where it should be stored
+    Path.mkdir(
+        Path(balsamic_context["BalsamicAnalysisAPI"].get_config_path(case_id)).parent, exist_ok=True
+    )
+    Path(balsamic_context["BalsamicAnalysisAPI"].get_config_path(case_id)).touch(exist_ok=True)
+    # WHEN dry running with dry specified
+    result = cli_runner.invoke(run, [case_id, "--dry-run"], obj=balsamic_context)
+    # THEN command should NOT execute successfully
     assert result.exit_code == EXIT_SUCCESS
+    # THEN warning should be printed that no config file is found
+    assert "balsamic" in caplog.text
+
+
+def test_run_analysis(cli_runner, balsamic_context: dict, caplog):
+    """Test command with run-analysis option"""
+    caplog.set_level(logging.INFO)
+    # GIVEN case-id
+    case_id = "balsamic_case_wgs_single"
+    # WHEN ensuring case config exists where it should be stored
+    Path.mkdir(
+        Path(balsamic_context["BalsamicAnalysisAPI"].get_config_path(case_id)).parent, exist_ok=True
+    )
+    Path(balsamic_context["BalsamicAnalysisAPI"].get_config_path(case_id)).touch(exist_ok=True)
+    # WHEN dry running with run analysis option specified
+    result = cli_runner.invoke(run, [case_id, "--dry-run", "--run-analysis"], obj=balsamic_context)
+    # THEN command should execute successfully
+    assert result.exit_code == EXIT_SUCCESS
+    # THEN dry-print should include the option
     assert "--run-analysis" in caplog.text
 
 
-def test_config(cli_runner, balsamic_context, caplog, balsamic_dummy_case):
-    """Test command with config option"""
-
-    # GIVEN case-id
-    case_id = balsamic_dummy_case
-    option_key = "--config"
-    option_value = "config-path"
-
+def test_analysis_type_qc(cli_runner, balsamic_context: dict, caplog):
+    """Test command with analysis-type qc option"""
     caplog.set_level(logging.INFO)
-    context = balsamic_context
-
-    # WHEN dry running with option specified
-    result = cli_runner.invoke(run, [case_id, "--dry-run", option_key, option_value], obj=context)
-
-    # THEN dry-print should include the the option-value but not the case-id
-    assert result.exit_code == EXIT_SUCCESS
-    assert option_value in caplog.text
-    assert case_id not in caplog.text
-
-
-def test_email(cli_runner, balsamic_context, caplog, balsamic_dummy_case):
-    """Test command with config option"""
-
     # GIVEN case-id
-    case_id = balsamic_dummy_case
-    option_key = "--email"
-    option_value = "salmon.moose@test.com"
-
-    caplog.set_level(logging.INFO)
-
-    context = balsamic_context
-
-    # WHEN dry running with option specified
-    result = cli_runner.invoke(run, [case_id, "--dry-run", option_key, option_value], obj=context)
-
-    # THEN dry-print should include the the option-value but not the case-id
+    case_id = "balsamic_case_wgs_single"
+    # WHEN ensuring case config exists where it should be stored
+    Path.mkdir(
+        Path(balsamic_context["BalsamicAnalysisAPI"].get_config_path(case_id)).parent, exist_ok=True
+    )
+    Path(balsamic_context["BalsamicAnalysisAPI"].get_config_path(case_id)).touch(exist_ok=True)
+    # WHEN dry running with analysis type qc option specified
+    result = cli_runner.invoke(
+        run, [case_id, "--dry-run", "--analysis-type", "qc"], obj=balsamic_context
+    )
+    # THEN command should execute successfully
     assert result.exit_code == EXIT_SUCCESS
-    assert "--mail-user" in caplog.text
-    assert option_value in caplog.text
+    # THEN dry-print should include the option
+    assert "--analysis-type" in caplog.text
+    assert "qc" in caplog.text
 
 
-def test_priority(cli_runner, balsamic_context, caplog, balsamic_dummy_case):
+def test_priority_custom(cli_runner, balsamic_context: dict, caplog):
     """Test command with priority option"""
-
-    # GIVEN case-id
-    case_id = balsamic_dummy_case
+    caplog.set_level(logging.INFO)
+    # GIVEN valid case-id
+    case_id = "balsamic_case_wgs_single"
     option_key = "--priority"
     option_value = "high"
-
-    caplog.set_level(logging.INFO)
-
-    context = balsamic_context
-
+    # WHEN ensuring case config exists where it should be stored
+    Path.mkdir(
+        Path(balsamic_context["BalsamicAnalysisAPI"].get_config_path(case_id)).parent, exist_ok=True
+    )
+    Path(balsamic_context["BalsamicAnalysisAPI"].get_config_path(case_id)).touch(exist_ok=True)
     # WHEN dry running with option specified
-    result = cli_runner.invoke(run, [case_id, "--dry-run", option_key, option_value], obj=context)
-
-    # THEN dry-print should include the the option-value
+    result = cli_runner.invoke(
+        run, [case_id, "--dry-run", option_key, option_value], obj=balsamic_context
+    )
+    # THEN command should execute successfully
     assert result.exit_code == EXIT_SUCCESS
+    # THEN dry-print should include the the option-value
+    assert "--qos" in caplog.text
+    assert option_value in caplog.text
+
+
+def test_priority_clinical(cli_runner, balsamic_context: dict, caplog):
+    """Test command with case_id set to default NORMAL priority, when priority is not set manually"""
+    caplog.set_level(logging.INFO)
+    # GIVEN valid case-id
+    case_id = "balsamic_case_wgs_single"
+    option_value = "normal"
+    # WHEN ensuring case config exists where it should be stored
+    Path.mkdir(
+        Path(balsamic_context["BalsamicAnalysisAPI"].get_config_path(case_id)).parent, exist_ok=True
+    )
+    Path(balsamic_context["BalsamicAnalysisAPI"].get_config_path(case_id)).touch(exist_ok=True)
+    # WHEN dry running with option specified
+    result = cli_runner.invoke(run, [case_id, "--dry-run"], obj=balsamic_context)
+    # THEN command should execute successfully
+    assert result.exit_code == EXIT_SUCCESS
+    # THEN dry-print should include the the option-value
     assert "--qos" in caplog.text
     assert option_value in caplog.text

@@ -19,34 +19,6 @@ echo "Running on: $(hostname)"
 source activate {conda_env}
 """
 
-SBATCH_BAM_TO_CRAM = """
-error() {{
-    if [[ -e {cram_path} ]]
-    then
-        rm {cram_path}
-    fi
-
-    if [[ -e {cram_path}.crai ]]
-    then
-        rm {cram_path}.crai
-    fi
-
-    if [[ -e {pending_path} ]]
-    then
-        rm {pending_path}
-    fi
-
-    exit 1
-}}
-
-trap error ERR
-
-touch {pending_path}
-crunchy -r {reference_path} -t 12 compress bam -b {bam_path} -c {cram_path}
-samtools quickcheck {cram_path}
-touch {flag_path}
-rm {pending_path}"""
-
 ######################################################################
 
 SBATCH_FASTQ_TO_SPRING = """
@@ -66,7 +38,6 @@ error() {{
 
 trap error ERR
 
-touch {pending_path}
 mkdir -p {tmp_dir}
 crunchy -t 12 --tmp-dir {tmp_dir} compress fastq -f {fastq_first} -s {fastq_second} \
 -o {spring_path} --check-integrity --metadata-file
@@ -97,7 +68,6 @@ error() {{
 
 trap error ERR
 
-touch {pending_path}
 mkdir -p {tmp_dir}
 crunchy -t 12 --tmp-dir {tmp_dir} decompress spring {spring_path} -f {fastq_first} -s \
 {fastq_second} --first-checksum {checksum_first} --second-checksum {checksum_second}

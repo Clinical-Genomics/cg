@@ -69,7 +69,11 @@ class FindBusinessDataHandler(BaseHandler):
         return query
 
     def families(
-        self, *, customer: models.Customer = None, enquiry: str = None, action: str = None,
+        self,
+        *,
+        customer: models.Customer = None,
+        enquiry: str = None,
+        action: str = None,
     ) -> List[models.Family]:
         """Fetch families."""
         records = self.Family.query
@@ -137,12 +141,13 @@ class FindBusinessDataHandler(BaseHandler):
     ) -> List[models.Sample]:
         """Find samples within the customer group."""
         return self.Sample.query.filter(
-            models.Sample.customer.customer_group == customer.customer_group, name == name,
+            models.Sample.customer.customer_group == customer.customer_group,
+            name == name,
         )
 
     def flowcell(self, name: str) -> models.Flowcell:
         """Fetch a flowcell."""
-        return self.Flowcell.query.filter_by(name=name).first()
+        return self.Flowcell.query.filter(models.Flowcell.name == name).first()
 
     def flowcells(
         self, *, status: str = None, family: models.Family = None, enquiry: str = None
@@ -182,7 +187,10 @@ class FindBusinessDataHandler(BaseHandler):
         """Find a link between a family and a sample."""
         return (
             self.FamilySample.query.join(models.FamilySample.family, models.FamilySample.sample)
-            .filter(models.Family.internal_id == family_id, models.Sample.internal_id == sample_id,)
+            .filter(
+                models.Family.internal_id == family_id,
+                models.Sample.internal_id == sample_id,
+            )
             .first()
         )
 
@@ -251,7 +259,10 @@ class FindBusinessDataHandler(BaseHandler):
 
         records = (
             records.filter(
-                or_(models.Pool.name.like(f"%{enquiry}%"), models.Pool.order.like(f"%{enquiry}%"),)
+                or_(
+                    models.Pool.name.like(f"%{enquiry}%"),
+                    models.Pool.order.like(f"%{enquiry}%"),
+                )
             )
             if enquiry
             else records

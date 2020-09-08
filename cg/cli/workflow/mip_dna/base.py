@@ -7,12 +7,13 @@ import click
 
 from cg.apps import hk, lims, scoutapi, tb
 from cg.apps.environ import environ_email
-from cg.apps.mip.fastq import FastqHandler
 from cg.apps.mip import MipAPI
+from cg.apps.mip.fastq import FastqHandler
 from cg.cli.workflow.get_links import get_links
 from cg.cli.workflow.mip.store import store as store_cmd
 from cg.cli.workflow.mip_dna.deliver import CASE_TAGS, SAMPLE_TAGS
 from cg.cli.workflow.mip_dna.deliver import deliver as deliver_cmd
+from cg.constants import EXIT_SUCCESS
 from cg.exc import CgError
 from cg.meta.deliver import DeliverAPI
 from cg.meta.workflow.mip_dna import AnalysisAPI
@@ -198,8 +199,8 @@ def run(
     case_obj = context.obj["db"].family(case_id)
     if not case_exists(case_obj, case_id):
         context.abort()
-    if context.obj["tb"].analyses(family=case_obj.internal_id, temp=True).first():
-        LOG.warning("%s: analysis already started ", {case_obj.internal_id})
+    if tb_api.is_analysis_ongoing(case_id=case_obj.internal_id):
+        LOG.warning("%s: analysis is ongoing - skipping", case_obj.internal_id)
         return
     if dry_run:
         dna_api.run(dry_run=dry_run, **kwargs)
@@ -215,7 +216,7 @@ def run(
 @click.pass_context
 def start(context: click.Context, dry_run: bool = False):
     """Start all cases that are ready for analysis"""
-    exit_code = 0
+    exit_code = EXIT_SUCCESS
 
     cases = [case_obj.internal_id for case_obj in context.obj["db"].cases_to_mip_analyze()]
 
@@ -229,12 +230,10 @@ def start(context: click.Context, dry_run: bool = False):
             LOG.warning("%s: contains non-dna samples - skipping", case_obj.internal_id)
             continue
 
-        if context.obj["tb"].analyses(family=case_obj.internal_id, temp=True).first():
-            LOG.warning("%s: analysis already started - skipping", case_obj.internal_id)
-            continue
-
-        if context.obj["tb"].analyses(family=case_obj.internal_id, status="failed").first():
-            LOG.warning("%s: analysis failed previously - skipping", case_obj.internal_id)
+        has_started = context.obj["tb"].has_analysis_started(case_id=case_obj.internal_id)
+        if has_started:
+            status = context.obj["tb"].get_analysis_status(case_id=case_obj.internal_id)
+            LOG.warning("%s: analysis is %s - skipping", case_id, status)
             continue
 
         priority = (
