@@ -246,7 +246,7 @@ class AnalysisAPI(ConfigHandler, MipAPI):
 
     def link_sample(self, sample: models.Sample, case_id: str):
         """Link FASTQ files for a sample."""
-        file_objs = self.hk.files(bundle=sample, tags=["fastq"])
+        file_objs = self.hk.files(bundle=sample.internal_id, tags=["fastq"])
         files = []
 
         for file_obj in file_objs:
