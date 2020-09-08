@@ -246,31 +246,6 @@ class InvoiceView(BaseView):
         )
 
 
-class MicrobialOrderView(BaseView):
-    """Admin view for Model.MicrobialOrder"""
-
-    column_default_sort = ("created_at", True)
-    column_editable_list = ["ticket_number", "comment"]
-    column_filters = ["customer.internal_id"]
-    column_searchable_list = ["internal_id", "name", "ticket_number"]
-
-    @staticmethod
-    def view_link(unused1, unused2, model, unused3):
-        """column formatter to open this view"""
-        del unused1, unused2, unused3
-        return (
-            Markup(
-                u"<a href='%s'>%s</a>"
-                % (
-                    url_for("microbialorder.index_view", search=model.microbial_order.internal_id),
-                    model.microbial_order,
-                )
-            )
-            if model.microbial_order
-            else u""
-        )
-
-
 class AnalysisView(BaseView):
     """Admin view for Model.Analysis"""
 
