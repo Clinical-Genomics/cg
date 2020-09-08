@@ -101,6 +101,7 @@ def run(
     if dry_run:
         rna_api.run_command(dry_run=dry_run, **kwargs)
         return
+
     rna_api.run_command(**kwargs)
     rna_api.tb.mark_analyses_deleted(case_id=case_id)
     rna_api.tb.add_pending_analysis(case_id=case_id, email=email)

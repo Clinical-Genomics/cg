@@ -356,10 +356,21 @@ class AnalysisAPI(ConfigHandler, MipAPI):
         return trending
 
     @staticmethod
-    def is_dna_only_case(case):
+    def is_dna_only_case(case_obj: models.Family) -> bool:
         """returns if all samples of a case has dna application type"""
 
-        for _link in case.links:
+        for _link in case_obj.links:
             if _link.sample.application_version.application.analysis_type in "wts":
                 return False
         return True
+
+    def get_skip_evaluation_flag(self, case_obj: models.Family) -> bool:
+        for link_obj in case_obj.links:
+            downsampled = isinstance(link_obj.sample.downsampled_to, int)
+            external = link_obj.sample.application_version.application.is_external
+            if downsampled or external:
+                self.log.info(
+                    "%s: downsampled/external - skip evaluation", link_obj.sample.internal_id
+                )
+                return True
+        return False
