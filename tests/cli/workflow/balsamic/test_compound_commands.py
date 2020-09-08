@@ -52,8 +52,11 @@ def test_store(
     # GIVEN case-id for which we created a config file, deliverables file, and analysis_finish file
     case_id = "balsamic_case_wgs_single"
 
-    # Make sure nothing is currently stored in Housekeeper
+    # Set Housekeeper to an empty real Housekeeper store
     balsamic_context["BalsamicAnalysisAPI"].housekeeper_api = real_housekeeper_api
+
+    # Make sure the bundle was not present in the store
+    assert not balsamic_context["BalsamicAnalysisAPI"].housekeeper_api.bundle(case_id)
 
     # Make sure  analysis not alredy stored in ClinicalDB
     assert not balsamic_context["BalsamicAnalysisAPI"].store.family(case_id).analyses
