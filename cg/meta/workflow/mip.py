@@ -244,7 +244,7 @@ class AnalysisAPI(ConfigHandler, MipAPI):
             else:
                 LOG.debug(f"destination path already exists: {dest_path}")
 
-    def link_sample(self, sample: models.Sample):
+    def link_sample(self, sample: models.Sample, case_id: str):
         """Link FASTQ files for a sample."""
         file_objs = self.hk.files(bundle=sample, tags=["fastq"])
         files = []
@@ -269,7 +269,7 @@ class AnalysisAPI(ConfigHandler, MipAPI):
             files.append(data)
 
         self.link_file(
-            family=sample.family.internal_id,
+            family=case_id,
             sample=sample.internal_id,
             analysis_type=sample.analysis_type.analysis_type,
             files=files,

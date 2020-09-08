@@ -59,6 +59,7 @@ def link(context: click.Context, case_id: str, sample_id: str):
         if "mip + rna" in link_obj.sample.data_analysis.lower():
             rna_api.link_sample(
                 sample=link_obj.sample,
+                case_id=case_id,
             )
 
 

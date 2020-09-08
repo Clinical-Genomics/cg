@@ -97,9 +97,7 @@ def link(context: click.Context, case_id: str, sample_id: str):
             "%s: %s link FASTQ files", link_obj.sample.internal_id, link_obj.sample.data_analysis
         )
         if "mip" in link_obj.sample.data_analysis.lower():
-            dna_api.link_sample(
-                sample=link_obj.sample,
-            )
+            dna_api.link_sample(sample=link_obj.sample, case_id=case_id)
 
 
 @mip_dna.command("config-case")
