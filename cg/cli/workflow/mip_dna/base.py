@@ -117,7 +117,7 @@ def config_case(context: click.Context, case_id: str, dry_run: bool = False):
         raise click.Abort()
 
     try:
-        config_data = dna_api.config(case_obj, pipeline="mip-dna")
+        config_data = dna_api.pedigree_config(case_obj, pipeline="mip-dna")
     except CgError as error:
         LOG.error(error.message)
         raise click.Abort()

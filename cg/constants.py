@@ -24,8 +24,8 @@ CAPTUREKIT_CANCER_OPTIONS = (
     "LymphoMATIC",
     "other (specify in comment field)",
 )
-DEFAULT_CAPTURE_KIT = ""twistexomerefseq_9.1_hg19_design.bed""
-WGS_CAPTURE_KIT = "twistexomerefseq_9.1_hg19_design.bed"
+DEFAULT_CAPTURE_KIT = "twistexomerefseq_9.1_hg19_design.bed"
+
 COMBOS = {
     "DSD": ("DSD", "HYP", "SEXDIF", "SEXDET"),
     "CM": ("CNM", "CM"),

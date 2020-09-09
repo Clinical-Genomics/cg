@@ -13,7 +13,7 @@ from cg.apps.pipelines.fastqhandler import BaseFastqHandler
 from cg.meta.deliver import DeliverAPI
 from cg.store import models, Store
 from cg.exc import CgDataError, LimsDataError
-from cg.constants import WGS_CAPTURE_KIT, COMBOS, COLLABORATORS, MASTER_LIST
+from cg.constants import COMBOS, COLLABORATORS, MASTER_LIST, DEFAULT_CAPTURE_KIT
 
 LOG = logging.getLogger(__name__)
 
@@ -72,10 +72,9 @@ class AnalysisAPI(ConfigHandler, MipAPI):
             return "low"
         if family_obj.priority > 1:
             return "high"
-        else:
-            return "normal"
+        return "normal"
 
-    def config(self, family_obj: models.Family, pipeline: str) -> dict:
+    def pedigree_config(self, family_obj: models.Family, pipeline: str) -> dict:
         """Make the MIP pedigree config. Meta data for the family is taken from the family object
         and converted to MIP format via trailblazer.
 
@@ -118,7 +117,7 @@ class AnalysisAPI(ConfigHandler, MipAPI):
         def config_dna_sample(self, link_obj):
             sample_data = get_sample_data(link_obj)
             if sample_data["analysis_type"] == "wgs":
-                sample_data["capture_kit"] = WGS_CAPTURE_KIT
+                sample_data["capture_kit"] = DEFAULT_CAPTURE_KIT
             else:
                 sample_data["capture_kit"] = self.get_target_bed_from_lims(
                     link_obj.sample.internal_id
@@ -129,7 +128,7 @@ class AnalysisAPI(ConfigHandler, MipAPI):
                 sample_data["father"] = link_obj.father.internal_id
             return sample_data
 
-        def config_rna_sample(link_obj):
+        def config_rna_sample(self, link_obj):
             sample_data = get_sample_data(link_obj)
             if link_obj.mother:
                 sample_data["mother"] = link_obj.mother.internal_id
@@ -137,18 +136,17 @@ class AnalysisAPI(ConfigHandler, MipAPI):
                 sample_data["father"] = link_obj.father.internal_id
             return sample_data
 
+        dispatch = {
+            "mip-dna": config_dna_sample,
+            "mip-rna": config_rna_sample,
+        }
+
         data = {
             "case": family_obj.internal_id,
             "default_gene_panels": family_obj.panels,
         }
-        if pipeline == "mip-dna":
-            data["samples"] = [
-                config_dna_sample(self, link_obj=link_obj) for link_obj in family_obj.links
-            ]
-        if pipeline == "mip-rna":
-            data["samples"] = [
-                config_rna_sample(link_obj=link_obj) for link_obj in family_obj.links
-            ]
+        config_sample = dispatch[pipeline]
+        data["samples"] = [config_sample(self, link_obj=link_obj) for link_obj in family_obj.links]
         return data
 
     @staticmethod
