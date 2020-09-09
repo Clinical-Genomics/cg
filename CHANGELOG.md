@@ -6,6 +6,22 @@ About changelog [here](https://keepachangelog.com/en/1.0.0/)
 
 Please add a new candidate release at the top after changing the latest one. Feel free to copy paste from the "squash and commit" box that gets generated when creating PRs
 
+## [12.3.0]
+
+### Changed
+
+- Class ConfigHandler moved from Trailblazer codebase into CG codebase
+- FastqHandler methods moved from Trailblazer to AnalysisAPI
+- Merged MipAPI and AnalysisAPI for mip_rna and mip_dna into one meta-api class
+- Adjusted tests to support the new architecture
+- Removed (unused/deprecated)run method which was used to execute MIP through Trailblazer
+
+### Fixed
+
+- MIP workflow once again performs check to skip evaluation
+- MIP workflow once again updates StatusDB about the case status
+
+
 ## [12.2.0]
 
 ### Changed
