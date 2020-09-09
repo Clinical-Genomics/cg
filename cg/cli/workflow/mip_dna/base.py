@@ -218,7 +218,9 @@ def start(context: click.Context, dry_run: bool = False):
     """Start all cases that are ready for analysis"""
     exit_code = EXIT_SUCCESS
 
-    cases = [case_obj.internal_id for case_obj in context.obj["db"].cases_to_mip_analyze()]
+    cases = [
+        case_obj.internal_id for case_obj in context.obj["db"].cases_to_analyze(pipeline="mip")
+    ]
 
     for case_id in cases:
 
@@ -260,7 +262,7 @@ def _suggest_cases_to_analyze(context: click.Context, show_as_error: bool = Fals
         LOG.error("provide a case, suggestions:")
     else:
         LOG.warning("provide a case, suggestions:")
-    for case_obj in context.obj["db"].cases_to_mip_analyze()[:50]:
+    for case_obj in context.obj["db"].cases_to_analyze(pipeline="mip", limit=50):
         click.echo(case_obj)
 
 

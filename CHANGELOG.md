@@ -6,12 +6,21 @@ About changelog [here](https://keepachangelog.com/en/1.0.0/)
 
 Please add a new candidate release at the top after changing the latest one. Feel free to copy paste from the "squash and commit" box that gets generated when creating PRs
 
-## [x.x.x]
-### Added
-
-### Fixed
+## [12.2.0]
 
 ### Changed
+
+- Merged methods cases_to_mip_analyze and cases_to_balsamic_analyze, now called cases_to_analyze for any pipeline.
+- Made method cases_to_deliver pipeline aware
+- Made method cases_to_store pipeline aware
+- Made method cases_to_clean pipeline aware
+- Added option to apply read count threshold for cases_to_analyze based on panel in ClinicalDB
+- Updated MIP and BALSAMIC workflows to utilize the new methods
+- Added tests for new methods in balsamic workflow
+- Removed class FastqAPI. FastqAPI was only used by BALSAMIC, and contained one method. The method is now moved to FastqHandler class.
+
+
+
 
 ## [12.1.6]
 ### Fixed

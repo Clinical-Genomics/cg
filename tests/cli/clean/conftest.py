@@ -104,3 +104,33 @@ def clean_context(
         "store_api": balsamic_clean_store,
         "BalsamicAnalysisAPI": balsamic_analysis_api,
     }
+
+
+@pytest.fixture
+def balsamic_analysis_api(
+    server_config: dict, balsamic_clean_store: Store, housekeeper_api: HousekeeperAPI
+):
+    return BalsamicAnalysisAPI(
+        balsamic_api=BalsamicAPI(server_config),
+        store=balsamic_clean_store,
+        housekeeper_api=housekeeper_api,
+        fastq_handler="FastqHandler",
+        lims_api="LIMS",
+    )
+
+
+@pytest.fixture
+def clean_context(
+    base_store: Store,
+    housekeeper_api: HousekeeperAPI,
+    balsamic_analysis_api: BalsamicAnalysisAPI,
+    helpers,
+    tmpdir,
+) -> dict:
+    """context to use in cli"""
+
+    return {
+        "hk_api": housekeeper_api,
+        "store_api": balsamic_clean_store,
+        "BalsamicAnalysisAPI": balsamic_analysis_api,
+    }

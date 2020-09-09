@@ -10,11 +10,12 @@ from typing import List, Optional
 
 from cg.apps.balsamic.api import BalsamicAPI
 from cg.apps.balsamic.fastq import FastqHandler
+
+from cg.constants import FAMILY_ACTIONS
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.exc import BalsamicStartError, BundleAlreadyAddedError, LimsDataError
 from cg.store import Store, models
-from cg.utils.fastq import FastqAPI
 
 LOG = logging.getLogger(__name__)
 
@@ -33,14 +34,12 @@ class BalsamicAnalysisAPI:
         housekeeper_api: HousekeeperAPI,
         fastq_handler: FastqHandler,
         lims_api: LimsAPI,
-        fastq_api: FastqAPI,
     ):
         self.balsamic_api = balsamic_api
         self.store = store
         self.housekeeper_api = housekeeper_api
         self.fastq_handler = fastq_handler
         self.lims_api = lims_api
-        self.fastq_api = fastq_api
 
     def get_case_object(self, case_id: str):
         """Look up case ID in StoreDB and return result"""
@@ -52,6 +51,12 @@ class BalsamicAnalysisAPI:
                 f"{case_id} number of samples is {len(case_object.links)}, analysis will not be started!"
             )
         return case_object
+
+    def set_statusdb_action(self, case_id: str, action: str) -> None:
+        if action in [None, *FAMILY_ACTIONS]:
+            case_object = self.get_case_object(case_id=case_id)
+            case_object.action = action
+            self.store.commit()
 
     def get_case_path(self, case_id: str) -> Path:
         """Returns a path where the Balsamic case for the case_id should be located"""
@@ -99,7 +104,7 @@ class BalsamicAnalysisAPI:
         for file_obj in file_objs:
             with gzip.open(file_obj.full_path) as handle:
                 header_line = handle.readline().decode()
-                header_info = self.fastq_api.parse_header(header_line)
+                header_info = self.fastq_handler.parse_header(header_line)
 
             data = {
                 "path": file_obj.full_path,
@@ -381,8 +386,44 @@ class BalsamicAnalysisAPI:
         self.store.add_commit(new_analysis)
         LOG.info(f"Analysis successfully stored in ClinicalDB: {case_id} : {analysis_start}")
 
+    def family_has_correct_number_tumor_normal_samples(self, case_id: str) -> bool:
+        """Evaluates if a case has exactly one tumor and up to one normal sample in ClinicalDB.
+        This check is only applied to filter jobs which start automatically"""
+
+        query = (
+            self.store.Sample.query.join(models.Family.links, models.FamilySample.sample)
+            .filter(models.Family.internal_id == case_id)
+            .filter(models.Sample.data_analysis.ilike("%Balsamic%"))
+        )
+
+        return all(
+            [
+                len(query.filter(models.Sample.is_tumour == False).all()) <= 1,
+                len(query.filter(models.Sample.is_tumour == True).all()) == 1,
+            ]
+        )
+
     def get_analyses_to_clean(self, before_date: dt.datetime = dt.datetime.now()) -> list:
         """Retrieve a list of analyses for cleaning created before certain date"""
         analyses_before = self.store.analyses(before=before_date)
         analyses_to_clean = self.store.analyses_to_clean(pipeline="Balsamic")
         return [x for x in analyses_to_clean if x in analyses_before]
+
+    def get_cases_to_analyze(self) -> list:
+        """Retrieve a list of balsamic cases without analysis,
+        where samples have enough reads to be analyzed"""
+        cases_to_analyze = []
+        for case_object in self.store.cases_to_analyze(pipeline="balsamic", threshold=0.75):
+            if self.family_has_correct_number_tumor_normal_samples(case_object.internal_id):
+                cases_to_analyze.append(case_object.internal_id)
+        return cases_to_analyze
+
+    def get_cases_to_store(self) -> list:
+        """Retrieve a list of cases where analysis finished successfully,
+        and is ready to be stored in Housekeeper"""
+        cases_to_store = []
+        for case_object in self.store.cases_to_store(pipeline="balsamic"):
+            case_id = case_object.internal_id
+            if Path(self.get_deliverables_file_path(case_id=case_id)).exists():
+                cases_to_store.append(case_id)
+        return cases_to_store
