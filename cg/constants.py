@@ -24,6 +24,35 @@ CAPTUREKIT_CANCER_OPTIONS = (
     "LymphoMATIC",
     "other (specify in comment field)",
 )
+DEFAULT_CAPTURE_KIT = "twistexomerefseq_9.1_hg19_design.bed"
+
+COMBOS = {
+    "DSD": ("DSD", "HYP", "SEXDIF", "SEXDET"),
+    "CM": ("CNM", "CM"),
+    "Horsel": ("Horsel", "141217", "141201"),
+}
+COLLABORATORS = ("cust000", "cust002", "cust003", "cust004", "cust042")
+MASTER_LIST = (
+    "BRAIN",
+    "Cardiology",
+    "CTD",
+    "ENDO",
+    "EP",
+    "IBMFS",
+    "IEM",
+    "IF",
+    "NEURODEG",
+    "NMD",
+    "mcarta",
+    "MIT",
+    "MOVE",
+    "mtDNA",
+    "PEDHEP",
+    "PID",
+    "PIDCAD",
+    "OMIM-AUTO",
+    "SKD",
+)
 FLOWCELL_STATUS = ("ondisk", "removed", "requested", "processing")
 METAGENOME_SOURCES = (
     "blood",
@@ -52,6 +81,7 @@ ANALYSIS_SOURCES = (
     "bone marrow",
     "other",
 )
+NO_PARENT = "0"
 
 # Constants for crunchy
 FASTQ_FIRST_READ_SUFFIX = "_R1_001.fastq.gz"
