@@ -13,7 +13,7 @@ from cg.apps.pipelines.fastqhandler import BaseFastqHandler
 from cg.meta.deliver import DeliverAPI
 from cg.store import models, Store
 from cg.exc import CgDataError, LimsDataError
-from cg.constants import COMBOS, COLLABORATORS, MASTER_LIST, DEFAULT_CAPTURE_KIT
+from cg.constants import COMBOS, COLLABORATORS, MASTER_LIST, DEFAULT_CAPTURE_KIT, FAMILY_ACTIONS
 
 LOG = logging.getLogger(__name__)
 
@@ -373,3 +373,13 @@ class AnalysisAPI(ConfigHandler, MipAPI):
                 )
                 return True
         return False
+
+    def set_statusdb_action(self, case_id: str, action: str) -> None:
+        if action in [None, *FAMILY_ACTIONS]:
+            case_object = self.db.family(case_id)
+            case_object.action = action
+            self.db.commit()
+            return
+        LOG.warning(
+            f"Action '{action}' not permitted by StatusDB and will not be set for case {case_id}"
+        )

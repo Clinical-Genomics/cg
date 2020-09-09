@@ -202,8 +202,7 @@ def run(
     dna_api.run_command(**kwargs)
     dna_api.tb.mark_analyses_deleted(case_id=case_id)
     dna_api.tb.add_pending_analysis(case_id=case_id, email=email)
-    case_obj.action = "running"
-    dna_api.db.commit()
+    dna_api.set_statusdb_action(case_id=case_id, action="running")
     LOG.info("MIP rd-dna run started!")
 
 
