@@ -282,7 +282,7 @@ class AnalysisAPI(ConfigHandler, MipAPI):
         return bed_lines
 
     def write_panel(self, case_id: str, content: List[str]):
-        """Write the gene panel to the defined location."""
+        """Write the gene panel to case dir"""
         out_dir = Path(self.root, case_id)
         out_dir.mkdir(parents=True, exist_ok=True)
         out_path = Path(out_dir, "gene_panels.bed")
