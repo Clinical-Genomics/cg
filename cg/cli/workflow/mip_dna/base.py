@@ -141,8 +141,8 @@ def panel(context: click.Context, case_id: str, dry_run: bool = False):
     if dry_run:
         for bed_line in bed_lines:
             click.echo(bed_line)
-    else:
-        dna_api.write_panel(case_id, bed_lines)
+        return
+    dna_api.write_panel(case_id, bed_lines)
 
 
 @mip_dna.command()
@@ -245,7 +245,7 @@ def _suggest_cases_to_analyze(context: click.Context, show_as_error: bool = Fals
     else:
         LOG.warning("provide a case, suggestions:")
     for case_obj in context.obj["dna_api"].db.cases_to_mip_analyze()[:50]:
-        click.echo(case_obj.internal_id)
+        LOG.info(case_obj.internal_id)
 
 
 mip_dna.add_command(store_cmd)
