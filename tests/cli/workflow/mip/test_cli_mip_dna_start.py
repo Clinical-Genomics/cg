@@ -5,23 +5,20 @@ from cg.cli.workflow.mip_dna.base import start
 from cg.constants import EXIT_SUCCESS
 
 
-def test_dry(cli_runner, base_context, tb_api):
+def test_dry(cli_runner, mip_context, tb_api):
     """Test command with --dry option"""
 
     # GIVEN case-id
-    base_context["tb"] = tb_api
 
     # WHEN dry running
-    result = cli_runner.invoke(start, ["--dry-run"], obj=base_context)
+    result = cli_runner.invoke(start, ["--dry-run"], obj=mip_context)
 
     # THEN command should have accepted the option happily
     assert result.exit_code == EXIT_SUCCESS
 
 
-def test_dna_case_included(cli_runner, base_context, dna_case, caplog, tb_api):
+def test_dna_case_included(cli_runner, mip_context, dna_case, caplog, tb_api):
     """Test command with a dna case"""
-
-    base_context["tb"] = tb_api
 
     # GIVEN a case that is ready for MIP DNA analysis
     #   -> has a sample that is sequenced and has an dna-application (non-wts)
@@ -33,7 +30,7 @@ def test_dna_case_included(cli_runner, base_context, dna_case, caplog, tb_api):
 
     # WHEN running command
     with caplog.at_level(logging.INFO):
-        result = cli_runner.invoke(start, ["--dry-run"], obj=base_context)
+        result = cli_runner.invoke(start, ["--dry-run"], obj=mip_context)
 
     # THEN command should have printed the case id
     assert result.exit_code == EXIT_SUCCESS
@@ -45,10 +42,8 @@ def test_dna_case_included(cli_runner, base_context, dna_case, caplog, tb_api):
     assert case_mentioned
 
 
-def test_rna_case_excluded(cli_runner, base_context, rna_case, caplog, tb_api):
+def test_rna_case_excluded(cli_runner, mip_context, rna_case, caplog, tb_api):
     """Test command with a rna case"""
-
-    base_context["tb"] = tb_api
 
     # GIVEN a case that is ready for MIP RNA analysis
     #   -> has a sample that is sequenced and has an rna-application (wts)
@@ -59,7 +54,7 @@ def test_rna_case_excluded(cli_runner, base_context, rna_case, caplog, tb_api):
     assert not rna_case.analyses
 
     # WHEN running command
-    result = cli_runner.invoke(start, ["--dry-run"], obj=base_context)
+    result = cli_runner.invoke(start, ["--dry-run"], obj=mip_context)
 
     # THEN command should info about it starting the case but warn about skipping
     assert result.exit_code == EXIT_SUCCESS
