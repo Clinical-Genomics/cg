@@ -365,7 +365,7 @@ class AnalysisAPI(ConfigHandler, MipAPI):
         return True
 
     def get_skip_evaluation_flag(self, case_obj: models.Family) -> bool:
-        """If iny sample in this case is downdsampled or external, returns true"""
+        """If any sample in this case is downsampled or external, returns true"""
         for link_obj in case_obj.links:
             downsampled = isinstance(link_obj.sample.downsampled_to, int)
             external = link_obj.sample.application_version.application.is_external
