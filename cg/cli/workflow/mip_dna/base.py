@@ -213,7 +213,7 @@ def start(context: click.Context, dry_run: bool = False):
     """Start all cases that are ready for analysis"""
     dna_api = context.obj["dna_api"]
 
-    cases = [case_obj for case_obj in dna_api.db.cases_to_mip_analyze()]
+    cases = [case_obj for case_obj in dna_api.db.cases_to_analyze(pipeline="mip")]
     for case_obj in cases:
         if not dna_api.is_dna_only_case(case_obj):
             LOG.warning("%s: contains non-dna samples - skipping", case_obj.internal_id)
