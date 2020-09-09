@@ -91,12 +91,16 @@ def upload(context, family_id, force_restart):
     )
     context.obj["scout_api"] = scoutapi.ScoutAPI(context.obj)
     context.obj["analysis_api"] = AnalysisAPI(
-        context.obj,
-        hk_api=context.obj["housekeeper_api"],
-        scout_api=context.obj["scout_api"],
-        tb_api=context.obj["tb_api"],
-        lims_api=context.obj["lims_api"],
+        db=Store(context.obj["database"]),
+        hk_api=hk.HousekeeperAPI(context.obj),
+        tb_api=tb.TrailblazerAPI(context.obj),
+        scout_api=scoutapi.ScoutAPI(context.obj),
+        lims_api=lims.LimsAPI(context.obj),
         deliver_api=context.obj["deliver_api"],
+        script=context.obj["mip-rd-dna"]["script"],
+        pipeline=context.obj["mip-rd-dna"]["pipeline"],
+        conda_env=context.obj["mip-rd-dna"]["conda_env"],
+        root=context.obj["mip-rd-dna"]["root"],
     )
     context.obj["report_api"] = ReportAPI(
         store=context.obj["status"],
