@@ -118,5 +118,5 @@ def _generate_sample_delivery_path(file_obj, out_dir, sample_obj):
 def _suggest_cases_to_deliver(store):
     LOG.warning("provide a case, suggestions:")
 
-    for case_obj in store.analyses_to_deliver()[:50]:
+    for case_obj in store.analyses_to_deliver(pipeline="balsamic", limit=50):
         click.echo(case_obj)

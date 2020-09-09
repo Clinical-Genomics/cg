@@ -243,8 +243,8 @@ def _suggest_cases_to_analyze(context: click.Context, show_as_error: bool = Fals
         LOG.error("provide a case, suggestions:")
     else:
         LOG.warning("provide a case, suggestions:")
-    for case_obj in context.obj["dna_api"].db.cases_to_mip_analyze()[:50]:
-        LOG.info(case_obj.internal_id)
+    for case_obj in context.obj["dna_api"].db.cases_to_analyze(pipeline="mip", limit=50):
+        click.echo(case_obj)
 
 
 mip_dna.add_command(store_cmd)
