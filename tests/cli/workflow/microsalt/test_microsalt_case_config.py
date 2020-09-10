@@ -85,7 +85,7 @@ def test_dry_sample(
 
     # GIVEN project, organism and reference genome is specified in lims
     lims_sample = lims_api.sample(microbial_sample_id)
-    lims_sample.sample_data["project"] = "microbial_order_test"
+    lims_sample.sample_data["project"] = {"id": "microbial_order_test"}
     lims_sample.sample_data["organism"] = "organism_test"
     lims_sample.sample_data["reference_genome"] = "reference_genome_test"
 
@@ -111,7 +111,7 @@ def test_dry_sample_order(
 
     # GIVEN
     lims_sample = lims_api.sample(microbial_sample_id)
-    lims_sample.sample_data["project"] = "microbial_order_test"
+    lims_sample.sample_data["project"] = {"id": "microbial_order_test"}
     lims_sample.sample_data["organism"] = "organism_test"
     lims_sample.sample_data["reference_genome"] = "reference_genome_test"
 
