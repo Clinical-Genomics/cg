@@ -256,8 +256,6 @@ class AnalysisView(BaseView):
     column_searchable_list = [
         "family.internal_id",
         "family.name",
-        "microbial_order.internal_id",
-        "microbial_order.name",
     ]
 
 
