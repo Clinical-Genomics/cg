@@ -42,10 +42,11 @@ def microsalt(context: click.Context, ticket, dry_run):
 
 
 @microsalt.command()
+@click.option("-d", "--dry-run", is_flag=True, help="only print to console")
 @click.option("-t", "--ticket", help="link all microbial samples for a ticket")
 @click.argument("sample_id", required=False)
 @click.pass_context
-def link(context: click.Context, ticket: str, sample_id: str):
+def link(context: click.Context, dry_run: bool, ticket: str, sample_id: str):
     """Link microbial FASTQ files for a SAMPLE_ID"""
 
     api = context.obj["api"]
@@ -57,6 +58,8 @@ def link(context: click.Context, ticket: str, sample_id: str):
 
     for sample_obj in sample_objs:
         LOG.info("%s: link FASTQ files", sample_obj.internal_id)
+        if dry_run:
+            continue
         api.link_sample(
             FastqHandler(context.obj),
             case=ticket,
