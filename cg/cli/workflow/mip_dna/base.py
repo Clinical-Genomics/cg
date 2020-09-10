@@ -96,8 +96,17 @@ def link(context: click.Context, case_id: str, sample_id: str):
         LOG.info(
             "%s: %s link FASTQ files", link_obj.sample.internal_id, link_obj.sample.data_analysis
         )
+        # This block is necessary to handle cases where data analysis is not set in ClinicalDB for old samples
+        if not link_obj.sample.data_analysis:
+            LOG.warning(
+                f"No analysis set for {link_obj.sample.internal_id}, file will still be linked"
+            )
+            dna_api.link_sample(sample=link_obj.sample, case_id=case_id)
+            return
+
         if "mip" in link_obj.sample.data_analysis.lower():
             dna_api.link_sample(sample=link_obj.sample, case_id=case_id)
+            return
 
 
 @mip_dna.command("config-case")

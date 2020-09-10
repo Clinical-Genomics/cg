@@ -5,6 +5,17 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 About changelog [here](https://keepachangelog.com/en/1.0.0/)
 
 Please add a new candidate release at the top after changing the latest one. Feel free to copy paste from the "squash and commit" box that gets generated when creating PRs
+
+## [12.3.2]
+
+### Fixed
+
+- Upload delivery report should now only happen for mip analyses
+- Re-use the same API within all upload context
+- Handle unspecified exceptions in order to keep the cron running when unexpected exception occurs for one case
+- When linking file without data analysis set, warn about it and link file correctly
+
+
 ## [12.3.1]
 
 ### Fixed
