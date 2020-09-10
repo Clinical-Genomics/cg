@@ -103,7 +103,7 @@ class AnalysisAPI:
 
         return rs
 
-    def link_sample(self, fastq_handler: BaseFastqHandler, sample: str, case: str):
+    def link_sample(self, fastq_handler: BaseFastqHandler, sample: str, ticket: int):
         """Link FASTQ files for a sample."""
         file_objs = self.hk.files(bundle=sample, tags=["fastq"])
         files = []
@@ -127,4 +127,12 @@ class AnalysisAPI:
                 data["flowcell"] = f"{data['flowcell']}-{matches[0]}"
             files.append(data)
 
-        fastq_handler.link(case=case, sample=sample, files=files)
+        fastq_handler.link(case=ticket, sample=sample, files=files)
+
+    def get_samples(self, ticket: int = None, sample_id: str = None) -> [models.Sample]:
+        ids = {}
+        if ticket:
+            ids["ticket_number"] = ticket
+        if sample_id:
+            ids["internal_id"] = sample_id
+        return self.db.samples_by_ids(**ids).all()

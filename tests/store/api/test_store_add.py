@@ -65,18 +65,13 @@ def test_add_microbial_sample(base_store: Store, helpers):
     customer_obj = helpers.ensure_customer(base_store)
     assert customer_obj
     name = "microbial_sample"
-    organism_name = "e. coli"
     internal_id = "lims-id"
-    reference_genome = "ref_gen"
     priority = "research"
-    ticket_number = "123456"
+    ticket_number = 123456
     application_version = base_store.ApplicationVersion.query.first()
-    base_store.add_organism(organism_name, organism_name, reference_genome)
-    microbial_order_id = "dummy_order_id"
 
     # WHEN adding a new microbial sample
     new_sample = base_store.add_sample(
-        microbial_order_id=microbial_order_id,
         name=name,
         sex="unknown",
         internal_id=internal_id,

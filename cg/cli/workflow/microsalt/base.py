@@ -1,4 +1,4 @@
-"""Add CLI support to start microsalt"""
+"""CLI support to start microsalt"""
 
 import json
 import logging
@@ -9,114 +9,87 @@ import click
 
 from cg.apps import hk, lims
 from cg.apps.usalt.fastq import FastqHandler
-from cg.cli.workflow.get_links import get_links
 from cg.cli.workflow.microsalt.store import store as store_cmd
-from cg.cli.workflow.microsalt.deliver import deliver as deliver_cmd, PROJECT_TAGS, SAMPLE_TAGS
+from cg.cli.workflow.microsalt.deliver import deliver as deliver_cmd
 from cg.meta.microsalt.lims import LimsMicrosaltAPI
 from cg.meta.workflow.microsalt import AnalysisAPI
-from cg.meta.deliver import DeliverAPI
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
 
 
 @click.group("microsalt", invoke_without_command=True)
-@click.option("-o", "--order", "order_id", help="include all microbial samples for an order")
+@click.option("-d", "--dry-run", is_flag=True, help="print to console")
+@click.option("-t", "--ticket", help="include all microbial samples for a ticket")
 @click.pass_context
-def microsalt(context: click.Context, order_id):
+def microsalt(context: click.Context, ticket, dry_run):
     """Microbial workflow"""
     context.obj["db"] = Store(context.obj["database"])
     hk_api = hk.HousekeeperAPI(context.obj)
     lims_api = lims.LimsAPI(context.obj)
-    deliver = DeliverAPI(
-        context.obj,
-        hk_api=hk_api,
-        lims_api=lims_api,
-        case_tags=PROJECT_TAGS,
-        sample_tags=SAMPLE_TAGS,
-    )
     context.obj["api"] = AnalysisAPI(db=context.obj["db"], hk_api=hk_api, lims_api=lims_api)
     context.obj["lims_microsalt_api"] = LimsMicrosaltAPI(lims=lims_api)
 
     if context.invoked_subcommand is None:
-        if order_id is None:
-            LOG.error("Please provide an order")
+        if not ticket:
+            LOG.error("Please provide a ticket")
             context.abort()
         else:
             # execute the analysis!
-            context.invoke(config_case, order_id=order_id)
-            context.invoke(link, order_id=order_id)
-            context.invoke(run, order_id=order_id)
+            context.invoke(config_case, ticket=ticket, dry_run=dry_run)
+            context.invoke(link, ticket=ticket, dry_run=dry_run)
+            context.invoke(run, ticket=ticket, dry_run=dry_run)
 
 
 @microsalt.command()
-@click.option("-o", "--order", "order_id", help="link all microbial samples for an order")
+@click.option("-t", "--ticket", help="link all microbial samples for a ticket")
 @click.argument("sample_id", required=False)
 @click.pass_context
-def link(context: click.Context, order_id: str, sample_id: str):
+def link(context: click.Context, ticket: str, sample_id: str):
     """Link microbial FASTQ files for a SAMPLE_ID"""
-    store = context.obj["db"]
-    case_id = order_id
 
-    link_objs = get_links(store, case_id, sample_id)
+    api = context.obj["api"]
+    sample_objs = api.get_samples(ticket, sample_id)
 
-    if not link_objs:
-        LOG.error("provide order and/or sample")
+    if not sample_objs:
+        LOG.error("provide ticket and/or sample")
         context.abort()
 
-    for link_obj in link_objs:
-        sample_obj = link_obj.sample
+    for sample_obj in sample_objs:
         LOG.info("%s: link FASTQ files", sample_obj.internal_id)
-        context.obj["api"].link_sample(
+        api.link_sample(
             FastqHandler(context.obj),
-            case=link_obj.family.internal_id,
+            case=ticket,
             sample=sample_obj.internal_id,
         )
 
 
 @microsalt.command("config-case")
-@click.option("-d", "--dry", is_flag=True, help="print config-case to console")
-@click.option(
-    "-o", "--order", "order_id", help="create config-case all microbial samples for an order"
-)
+@click.option("-d", "--dry-run", is_flag=True, help="print config to console")
+@click.option("-t", "--ticket", help="create config-case all microbial samples for an order")
 @click.argument("sample_id", required=False)
 @click.pass_context
-def config_case(context: click.Context, dry, order_id: str, sample_id: str):
+def config_case(context: click.Context, dry_run, ticket: int, sample_id: str):
     """ Create a config file on case level for microSALT """
-    if order_id and (sample_id is None):
-        case_obj = context.obj["db"].family(order_id)
-        if not case_obj:
-            LOG.error("Order %s not found", order_id)
-            context.abort()
-        sample_objs = [link_obj.sample for link_obj in case_obj.links]
-    elif sample_id and (order_id is None):
-        sample_obj = context.obj["db"].sample(sample_id)
-        if not sample_obj:
-            LOG.error("Sample %s not found", sample_id)
-            context.abort()
-        sample_objs = [context.obj["db"].sample(sample_id)]
-    elif sample_id and order_id:
-        case_obj = context.obj["db"].family(order_id)
-        if not case_obj:
-            LOG.error("Samples %s not found in %s ", sample_id, order_id)
-            context.abort()
-        sample_objs = [
-            link_obj.sample
-            for link_obj in case_obj.links
-            if link_obj.sample.internal_id == sample_id
-        ]
-    else:
-        LOG.error("provide order and/or sample")
+
+    if not ticket and not sample_id:
+        LOG.error("Provide ticket and/or sample")
+        context.abort()
+
+    sample_objs = context.obj["api"].get_samples(ticket, sample_id)
+
+    if not sample_objs:
+        LOG.error("No sample found for that ticket/sample_id")
         context.abort()
 
     parameters = [
         context.obj["lims_microsalt_api"].get_parameters(sample_obj) for sample_obj in sample_objs
     ]
 
-    filename = order_id if order_id else sample_id
+    filename = str(ticket) if ticket else sample_id
     outfilename = Path(context.obj["usalt"]["queries_path"]) / filename
     outfilename = outfilename.with_suffix(".json")
-    if dry:
+    if dry_run:
         print(json.dumps(parameters, indent=4, sort_keys=True))
     else:
         with open(outfilename, "w") as outfile:
@@ -124,23 +97,24 @@ def config_case(context: click.Context, dry, order_id: str, sample_id: str):
 
 
 @microsalt.command()
-@click.option("-d", "--dry", is_flag=True, help="print command to console")
+@click.option("-d", "--dry-run", "dry_run", is_flag=True, help="print command to console")
 @click.option("-c", "--config-case", required=False, help="optionally change the config-case")
-@click.argument("order_id")
+@click.argument("ticket")
 @click.pass_context
-def run(context, dry, config_case, order_id):
+def run(context, dry_run, config_case, ticket):
     """ Start microSALT with an order_id """
+
     microsalt_command = context.obj["usalt"]["binary_path"]
     command = [microsalt_command]
 
     config_case_path = config_case
     if not config_case:
         queries_path = Path(context.obj["usalt"]["queries_path"])
-        config_case_path = queries_path / order_id
+        config_case_path = queries_path / ticket
         config_case_path = config_case_path.with_suffix(".json")
 
     command.extend(["--parameters", str(config_case_path)])
-    if dry:
+    if dry_run:
         print(" ".join(command))
     else:
         LOG.info("Starting microSALT! '%s'", " ".join(command))

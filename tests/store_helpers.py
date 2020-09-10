@@ -2,6 +2,7 @@
 import logging
 from datetime import datetime
 from typing import List
+from deprecated import deprecated
 
 from housekeeper.store import models as hk_models
 
@@ -384,13 +385,15 @@ class StoreHelpers:
         store.add_commit(organism)
         return organism
 
+    @deprecated(reason="call add_sample(...) instead")
     def add_microbial_sample(
         self,
         store: Store,
-        sample_id: str = "microbial_sample_test",
+        sample_id: str = "microbial_sample_id",
         priority: str = "research",
         name: str = "microbial_name_test",
         comment: str = "comment",
+        ticket: int = 123456,
     ) -> models.Sample:
         """Utility function to add a sample to use in tests"""
         customer = self.ensure_customer(store, "cust_test")
@@ -403,12 +406,13 @@ class StoreHelpers:
             application_version=application_version,
             reads=6000000,
             comment=comment,
-            ticket=123456,
+            ticket=ticket,
             sex="unknown",
         )
         sample.customer = customer
         return sample
 
+    @deprecated(reason="microbial samples don't have orders any more")
     def ensure_microbial_order(
         self,
         store: Store,
@@ -430,20 +434,21 @@ class StoreHelpers:
 
         return order
 
+    @deprecated(reason="call add_sample(...) instead")
     def add_microbial_sample_and_order(
         self,
         store: Store,
-        order_id: str = "microbial_order_test",
-        sample_id: str = "microbial_sample_test",
+        ticket: int = 123456,
+        sample_id: str = "microbial_sample_id",
         customer_id: str = "cust_test",
         comment: str = "ABCD123",
     ) -> models.Sample:
         """Utility add a case and a sample to use in tests"""
+        sample = self.add_microbial_sample(store, sample_id, comment=comment, ticket=ticket)
         self.ensure_application_version(store)
-        self.ensure_customer(store, customer_id)
-        order = self.ensure_microbial_order(store, order_id)
-        sample = self.add_microbial_sample(store, sample_id, comment=comment)
-        store.relate_sample(family=order, sample=sample, status="unknown")
+        customer = self.ensure_customer(store, customer_id)
+
+        sample.customer = customer
         store.add_commit(sample)
         return sample
 
