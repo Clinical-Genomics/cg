@@ -100,20 +100,19 @@ def config_case(context: click.Context, dry_run, ticket: int, sample_id: str):
 
 @microsalt.command()
 @click.option("-d", "--dry-run", "dry_run", is_flag=True, help="print command to console")
-@click.option("-c", "--config-case", required=False, help="optionally change the config-case")
+@click.option("-c", "--config-case", "config_case_path", required=False, help="optionally change "
+                                                                              "the config-case")
 @click.argument("ticket")
 @click.pass_context
-def run(context, dry_run, config_case, ticket):
+def run(context, dry_run, config_case_path, ticket):
     """ Start microSALT with an order_id """
 
     microsalt_command = context.obj["usalt"]["binary_path"]
     command = [microsalt_command]
 
-    config_case_path = config_case
     if not config_case:
         queries_path = Path(context.obj["usalt"]["queries_path"])
-        config_case_path = queries_path / ticket
-        config_case_path = config_case_path.with_suffix(".json")
+        config_case_path = (queries_path / ticket).with_suffix(".json")
 
     command.extend(["--parameters", str(config_case_path)])
     if dry_run:
