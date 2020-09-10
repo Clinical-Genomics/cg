@@ -90,8 +90,7 @@ def config_case(context: click.Context, dry_run, ticket: int, sample_id: str):
     ]
 
     filename = str(ticket) if ticket else sample_id
-    outfilename = Path(context.obj["usalt"]["queries_path"]) / filename
-    outfilename = outfilename.with_suffix(".json")
+    outfilename = (Path(context.obj["usalt"]["queries_path"]) / filename).with_suffix(".json")
     if dry_run:
         print(json.dumps(parameters, indent=4, sort_keys=True))
     else:
