@@ -43,20 +43,18 @@ def analysis(context, config_stream):
         context.abort()
 
     try:
-        new_analysis = gather_files_and_bundle_in_housekeeper(config_stream, hk_api, status)
-    except AnalysisNotFinishedError as error:
-        click.echo(click.style(error.message, fg="red"))
-        context.abort()
-    except AnalysisDuplicationError as error:
-        click.echo(click.style(error.message, fg="red"))
-        context.abort()
-    except BundleAlreadyAddedError as error:
-        click.echo(click.style(error.message, fg="red"))
-        context.abort()
-    except PipelineUnknownError as error:
-        click.echo(click.style(error.message, fg="red"))
-        context.abort()
-    except MandatoryFilesMissing as error:
+        new_analysis = gather_files_and_bundle_in_housekeeper(
+            config_stream,
+            hk_api,
+            status,
+        )
+    except (
+        AnalysisNotFinishedError,
+        AnalysisDuplicationError,
+        BundleAlreadyAddedError,
+        PipelineUnknownError,
+        MandatoryFilesMissing,
+    ) as error:
         click.echo(click.style(error.message, fg="red"))
         context.abort()
     except FileNotFoundError as error:

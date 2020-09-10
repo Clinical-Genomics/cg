@@ -3,19 +3,19 @@ import logging
 import shutil
 from datetime import datetime
 from pathlib import Path
-
-import click
 import ruamel.yaml
+import click
 from dateutil.parser import parse as parse_date
 
-from cg.apps import crunchy, hk, scoutapi, tb
-from cg.apps.balsamic.api import BalsamicAPI
 from cg.apps.balsamic.fastq import FastqHandler
+from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
-from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
+from cg.apps.tb import TrailblazerAPI
+from cg.apps.scoutapi import ScoutAPI
+from cg.apps.crunchy import CrunchyAPI
+from cg.apps.balsamic.api import BalsamicAPI
 from cg.store import Store
-from cg.utils.fastq import FastqAPI
 
 LOG = logging.getLogger(__name__)
 SUCCESS = 0
@@ -27,17 +27,16 @@ FAIL = 1
 def clean(context):
     """Clean up processes"""
     context.obj["store_api"] = Store(context.obj["database"])
-    context.obj["tb_api"] = tb.TrailblazerAPI(context.obj)
-    context.obj["hk_api"] = hk.HousekeeperAPI(context.obj)
-    context.obj["scout_api"] = scoutapi.ScoutAPI(context.obj)
-    context.obj["crunchy_api"] = crunchy.CrunchyAPI(context.obj)
+    context.obj["hk_api"] = HousekeeperAPI(context.obj)
+    context.obj["tb_api"] = TrailblazerAPI(context.obj)
+    context.obj["scout_api"] = ScoutAPI(context.obj)
+    context.obj["crunchy_api"] = CrunchyAPI(context.obj)
     context.obj["BalsamicAnalysisAPI"] = BalsamicAnalysisAPI(
         balsamic_api=BalsamicAPI(context.obj),
         store=Store(context.obj["database"]),
         housekeeper_api=HousekeeperAPI(context.obj),
         fastq_handler=FastqHandler(context.obj),
         lims_api=LimsAPI(context.obj),
-        fastq_api=FastqAPI,
     )
 
 

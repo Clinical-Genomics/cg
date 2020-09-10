@@ -10,7 +10,7 @@ from cg.apps.coverage import ChanjoAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.scoutapi import ScoutAPI
 from cg.meta.report.report_validator import ReportValidator
-from cg.meta.workflow.mip_dna import AnalysisAPI
+from cg.meta.workflow.mip import AnalysisAPI
 from cg.meta.report.sample_calculator import SampleCalculator
 from cg.meta.report.report_helper import ReportHelper
 from cg.meta.report.presenter import Presenter

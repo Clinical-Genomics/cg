@@ -13,7 +13,7 @@ from cg.exc import AnalysisUploadError
 from cg.meta.deliver import DeliverAPI
 from cg.meta.report.api import ReportAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
-from cg.meta.workflow.mip_dna import AnalysisAPI
+from cg.meta.workflow.mip import AnalysisAPI
 from cg.store import Store
 
 from .coverage import coverage
@@ -91,12 +91,16 @@ def upload(context, family_id, force_restart):
     )
     context.obj["scout_api"] = scoutapi.ScoutAPI(context.obj)
     context.obj["analysis_api"] = AnalysisAPI(
-        context.obj,
+        db=Store(context.obj["database"]),
         hk_api=context.obj["housekeeper_api"],
-        scout_api=context.obj["scout_api"],
         tb_api=context.obj["tb_api"],
+        scout_api=context.obj["scout_api"],
         lims_api=context.obj["lims_api"],
         deliver_api=context.obj["deliver_api"],
+        script=context.obj["mip-rd-dna"]["script"],
+        pipeline=context.obj["mip-rd-dna"]["pipeline"],
+        conda_env=context.obj["mip-rd-dna"]["conda_env"],
+        root=context.obj["mip-rd-dna"]["root"],
     )
     context.obj["report_api"] = ReportAPI(
         store=context.obj["status"],

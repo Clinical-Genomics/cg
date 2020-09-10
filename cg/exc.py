@@ -123,3 +123,19 @@ class StoreError(CgError):
     """
     Exception related to storing an analysis
     """
+
+
+class MipStartError(CgError):
+    """
+    Exception raised when MIP fails to start a run
+    """
+
+
+class PedigreeConfigError(CgError):
+    """
+    Raised when MIP pedigree config validation fails
+    """
+
+    def __init__(self, message, errors=None):
+        self.message = message
+        self.errors = errors

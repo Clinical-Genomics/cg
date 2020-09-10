@@ -9,7 +9,7 @@ from ruamel import yaml
 from cg.apps import hk, scoutapi
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
-from cg.meta.workflow.mip_dna import AnalysisAPI
+from cg.meta.workflow.mip import AnalysisAPI
 from cg.store import models
 
 LOG = logging.getLogger(__name__)

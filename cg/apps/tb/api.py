@@ -9,12 +9,12 @@ import click
 import ruamel.yaml
 from trailblazer.mip.start import MipCli
 from trailblazer.store import api, models, Store
-from trailblazer.mip import files, fastq, trending
+from trailblazer.mip import files, trending
 
 LOG = logging.getLogger(__name__)
 
 
-class TrailblazerAPI(Store, fastq.FastqHandler):
+class TrailblazerAPI(Store):
     """Interface to Trailblazer for `cg`."""
 
     parse_sampleinfo = staticmethod(files.parse_sampleinfo)
@@ -81,15 +81,6 @@ class TrailblazerAPI(Store, fastq.FastqHandler):
             if has_started:
                 return has_started
         return False
-
-    def write_panel(self, case_id: str, content: List[str]):
-        """Write the gene panel to the defined location."""
-        out_dir = Path(self.families_dir) / case_id
-        out_dir.mkdir(parents=True, exist_ok=True)
-        out_path = out_dir / "gene_panels.bed"
-        with out_path.open("w") as out_handle:
-            for line in content:
-                click.echo(line, file=out_handle)
 
     def delete_analysis(
         self, family: str, date: dt.datetime, yes: bool = False, dry_run: bool = False

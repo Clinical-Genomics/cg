@@ -18,6 +18,53 @@ Please add a new candidate release at the top after changing the latest one. Fee
 ### Changed
 - Microbial Samples are now treated as ordinary samples in a case
 
+## [12.3.2]
+
+### Fixed
+
+- Upload delivery report should now only happen for mip analyses
+- Re-use the same API within all upload context
+- Handle unspecified exceptions in order to keep the cron running when unexpected exception occurs for one case
+- When linking file without data analysis set, warn about it and link file correctly
+
+## [12.3.1]
+
+### Fixed
+ 
+- Fixed bug where AnalysisAPI in cg upload auto was not updated to recent class changes
+
+## [12.3.0]
+
+### Changed
+
+- Class ConfigHandler moved from Trailblazer codebase into CG codebase
+- FastqHandler methods moved from Trailblazer to AnalysisAPI
+- Merged MipAPI and AnalysisAPI for mip_rna and mip_dna into one meta-api class
+- Adjusted tests to support the new architecture
+- Removed (unused/deprecated)run method which was used to execute MIP through Trailblazer
+
+### Fixed
+
+- MIP workflow once again performs check to skip evaluation
+- MIP workflow once again updates StatusDB about the case status
+
+## [12.2.0]
+
+### Changed
+
+- Merged methods cases_to_mip_analyze and cases_to_balsamic_analyze, now called cases_to_analyze for any pipeline.
+- Made method cases_to_deliver pipeline aware
+- Made method cases_to_store pipeline aware
+- Made method cases_to_clean pipeline aware
+- Added option to apply read count threshold for cases_to_analyze based on panel in ClinicalDB
+- Updated MIP and BALSAMIC workflows to utilize the new methods
+- Added tests for new methods in balsamic workflow
+- Removed class FastqAPI. FastqAPI was only used by BALSAMIC, and contained one method. The method is now moved to FastqHandler class.
+
+## [12.1.6]
+### Fixed
+- Create crunchy pending path outside batch script
+
 ## [12.1.5]
 ### Fixed
 - support current orderform RML-1604:9 again
