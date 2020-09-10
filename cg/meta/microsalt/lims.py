@@ -79,7 +79,7 @@ class LimsMicrosaltAPI:
         priority = "research" if sample_obj.priority == 0 else "standard"
 
         parameter_dict = {
-            "CG_ID_project": self.get_project(sample_obj),
+            "CG_ID_project": self.get_project(sample_id),
             "Customer_ID_project": sample_obj.ticket_number,
             "CG_ID_sample": sample_obj.internal_id,
             "Customer_ID_sample": sample_obj.name,
@@ -99,4 +99,4 @@ class LimsMicrosaltAPI:
 
     def get_project(self, sample_id: str) -> str:
         """Get LIMS project for a sample"""
-        return self.lims.sample(sample_id).get("project")
+        return self.lims.sample(sample_id).get("project").get('id')
