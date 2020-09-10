@@ -99,4 +99,4 @@ class LimsMicrosaltAPI:
 
     def get_project(self, sample_id: str) -> str:
         """Get LIMS project for a sample"""
-        return self.lims.sample(sample_id).get("project").get('id')
+        return self.lims.sample(sample_id).get("project").get("id")

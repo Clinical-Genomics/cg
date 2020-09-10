@@ -48,8 +48,9 @@ def test_no_order_found(cli_runner, base_context, caplog):
     ticket = -1
 
     # WHEN dry running a order name
-    result = cli_runner.invoke(config_case, ["--ticket", ticket], obj=base_context,
-                               catch_exceptions=False)
+    result = cli_runner.invoke(
+        config_case, ["--ticket", ticket], obj=base_context, catch_exceptions=False
+    )
 
     # THEN command should mention missing order
     assert result.exit_code != EXIT_SUCCESS

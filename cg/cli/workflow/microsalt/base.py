@@ -100,8 +100,13 @@ def config_case(context: click.Context, dry_run, ticket: int, sample_id: str):
 
 @microsalt.command()
 @click.option("-d", "--dry-run", "dry_run", is_flag=True, help="print command to console")
-@click.option("-c", "--config-case", "config_case_path", required=False, help="optionally change "
-                                                                              "the config-case")
+@click.option(
+    "-c",
+    "--config-case",
+    "config_case_path",
+    required=False,
+    help="optionally change " "the config-case",
+)
 @click.argument("ticket")
 @click.pass_context
 def run(context, dry_run, config_case_path, ticket):

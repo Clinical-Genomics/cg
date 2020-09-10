@@ -371,9 +371,11 @@ class StatusHandler:
                     sample_comment = f"Order comment: {comment}"
 
                     if sample_data["comment"]:
-                        sample_comment = f"{sample_comment}, sample comment: {sample_data['comment']}"
+                        sample_comment = (
+                            f"{sample_comment}, sample comment: {sample_data['comment']}"
+                        )
                 else:
-                    sample_comment = sample_data['comment']
+                    sample_comment = sample_data["comment"]
 
                 new_sample = self.status.add_sample(
                     name=sample_data["name"],

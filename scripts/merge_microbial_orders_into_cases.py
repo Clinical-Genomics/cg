@@ -52,7 +52,7 @@ def merge_microbial_data(config_file):
                 customer=order.customer,
                 ticket=order.ticket_number,
                 sex="unknown",
-                order=order.name
+                order=order.name,
             )
 
             sample.created_at = dt.datetime.now()

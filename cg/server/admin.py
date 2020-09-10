@@ -292,8 +292,14 @@ class SampleView(BaseView):
 
     column_exclude_list = ["invoiced_at"]
     column_default_sort = ("created_at", True)
-    column_editable_list = ["sex", "downsampled_to", "sequenced_at", "ticket_number",
-                            "is_tumour", "comment"]
+    column_editable_list = [
+        "sex",
+        "downsampled_to",
+        "sequenced_at",
+        "ticket_number",
+        "is_tumour",
+        "comment",
+    ]
     column_filters = ["customer.internal_id", "sex", "application_version.application"]
     column_formatters = {
         "is_external": is_external_application,

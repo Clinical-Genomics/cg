@@ -330,7 +330,9 @@ class SampleImporter(Store):
         for customer_obj in [self.customer("cust002")]:
             # if self.samples(customer=customer_obj).first():
             #     continue
-            samples = cg.meta.workflow.microsalt.get_samples(udf=dict(customer=customer_obj.internal_id))
+            samples = cg.meta.workflow.microsalt.get_samples(
+                udf=dict(customer=customer_obj.internal_id)
+            )
             count = len(samples)
             label = f"samples | {customer_obj.internal_id}"
             with click.progressbar(samples, length=count, label=label) as progressbar:
