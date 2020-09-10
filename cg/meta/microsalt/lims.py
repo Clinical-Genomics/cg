@@ -75,7 +75,7 @@ class LimsMicrosaltAPI:
         method_sequencing = self.lims.get_sequencing_method(sample_id)
         if method_sequencing:
             method_sequencing, _ = method_sequencing.split(" ", 1)
-        organism = self.get_organism(sample_obj)
+        organism = self.get_organism(sample_id)
         priority = "research" if sample_obj.priority == 0 else "standard"
 
         parameter_dict = {
