@@ -21,7 +21,7 @@ def get_links(
         link_objs(list): [models.FamilySample]
     """
 
-    if not any(case_id, sample_id, ticket):
+    if not any([case_id, sample_id, ticket]):
         LOG.error("Please provide case, sample and/or ticket")
         raise click.Abort
 
