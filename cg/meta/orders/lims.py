@@ -1,8 +1,6 @@
 import logging
 from typing import List
 
-import cg.meta.workflow.microsalt
-
 LOG = logging.getLogger(__name__)
 SEX_MAP = {"male": "M", "female": "F"}
 
@@ -62,7 +60,5 @@ class LimsHandler:
         samples_lims = self.to_lims(data["customer"], samples)
         project_name = data["ticket"] or data["name"]
         project_data = self.lims.submit_project(project_name, samples_lims)
-        lims_map = cg.meta.workflow.microsalt.get_samples(
-            projectlimsid=project_data["id"], map_ids=True
-        )
+        lims_map = self.lims.get_samples(projectlimsid=project_data["id"], map_ids=True)
         return project_data, lims_map
