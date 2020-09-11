@@ -2,7 +2,6 @@
 
 import json
 import logging
-from io import TextIOWrapper
 from pathlib import Path
 import subprocess
 
