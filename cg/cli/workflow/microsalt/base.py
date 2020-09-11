@@ -30,15 +30,17 @@ def microsalt(context: click.Context, ticket: str, dry_run: bool):
     context.obj["api"] = AnalysisAPI(db=context.obj["db"], hk_api=hk_api, lims_api=lims_api)
     context.obj["lims_microsalt_api"] = LimsMicrosaltAPI(lims=lims_api)
 
-    if context.invoked_subcommand is None:
-        if not ticket:
-            LOG.error("Please provide a ticket")
-            context.abort()
-        else:
-            # execute the analysis!
-            context.invoke(config_case, ticket=ticket, dry_run=dry_run)
-            context.invoke(link, ticket=ticket, dry_run=dry_run)
-            context.invoke(run, ticket=ticket, dry_run=dry_run)
+    if context.invoked_subcommand:
+        return
+
+    if not ticket:
+        LOG.error("Please provide a ticket")
+        context.abort()
+
+    # execute the analysis!
+    context.invoke(config_case, ticket=ticket, dry_run=dry_run)
+    context.invoke(link, ticket=ticket, dry_run=dry_run)
+    context.invoke(run, ticket=ticket, dry_run=dry_run)
 
 
 @microsalt.command()
