@@ -22,7 +22,7 @@ LOG = logging.getLogger(__name__)
 @click.option("-d", "--dry-run", is_flag=True, help="print to console")
 @click.option("-t", "--ticket", help="include all microbial samples for a ticket")
 @click.pass_context
-def microsalt(context: click.Context, ticket, dry_run):
+def microsalt(context: click.Context, ticket: str, dry_run: bool):
     """Microbial workflow"""
     context.obj["db"] = Store(context.obj["database"])
     hk_api = hk.HousekeeperAPI(context.obj)
