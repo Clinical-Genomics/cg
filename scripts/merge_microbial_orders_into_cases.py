@@ -1,11 +1,8 @@
-import json
-from pathlib import Path
 import datetime as dt
-from ruamel import yaml
-import shutil
-import click
 
+import click
 from cg.store import Store, models
+from ruamel import yaml
 
 COMMENT = f"{dt.datetime.now().date()}: Imported from MicrobialSample/PG"
 
@@ -31,15 +28,7 @@ def merge_microbial_data(config_file):
             click.echo(click.style("processing microbial sample: " + ms.__str__(), fg="yellow"))
             dict_print(ms.__dict__)
 
-            if order.comment:
-                sample_comment = f"Order comment: {order.comment}"
-
-                if ms.comment:
-                    sample_comment = f"{sample_comment}, sample comment: {ms.comment}"
-            else:
-                sample_comment = ms.comment
-
-            sample_comment = COMMENT + "\n" + sample_comment if sample_comment else COMMENT
+            sample_comment = build_comment(ms.comment, order.comment)
 
             data_analysis = "microbial|" + ms.data_analysis if ms.data_analysis else "microbial"
 
@@ -53,18 +42,17 @@ def merge_microbial_data(config_file):
                 ticket=order.ticket_number,
                 sex="unknown",
                 order=order.name,
+                created_at=dt.datetime.now(),
+                ordered=order.ordered_at,
+                received=ms.received_at,
+                prepared_at=ms.prepared_at,
+                sequence_start=ms.sequence_start,
+                sequenced_at=ms.sequenced_at,
+                delivered_at=ms.delivered_at,
+                reads=ms.reads,
+                invoice_id=ms.invoice_id,
+                application_version_id=ms.application_version_id,
             )
-
-            sample.created_at = dt.datetime.now()
-            sample.ordered_at = order.ordered_at
-            sample.received_at = ms.received_at
-            sample.prepared_at = ms.prepared_at
-            sample.sequenced_at = ms.sequenced_at
-            sample.delivered_at = ms.delivered_at
-            sample.reads = ms.reads
-            sample.invoice_id = ms.invoice_id
-            sample.application_version_id = ms.application_version_id
-            sample.customer_id = order.customer_id
 
             click.echo(click.style("Saving Sample: " + sample.__str__(), fg="yellow"))
             dict_print(sample.__dict__)
@@ -93,6 +81,20 @@ def merge_microbial_data(config_file):
         click.echo(click.style("Deleting microbial order: " + order.__str__(), fg="red"))
         store.delete(order)
         store.commit()
+
+
+def build_comment(ms_comment, order_comment):
+    if order_comment:
+        new_comment = f"Order comment: {order_comment}"
+
+        if ms_comment:
+            new_comment = f"{new_comment}, sample comment: {ms_comment}"
+    else:
+        new_comment = ms_comment
+
+    new_comment = COMMENT + "\n" + new_comment if new_comment else COMMENT
+
+    return new_comment
 
 
 if __name__ == "__main__":
