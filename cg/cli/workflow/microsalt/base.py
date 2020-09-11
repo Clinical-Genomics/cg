@@ -105,7 +105,7 @@ def config_case(context: click.Context, dry_run, ticket: int, sample_id: str):
     "--config-case",
     "config_case_path",
     required=False,
-    help="optionally change " "the config-case",
+    help="optionally change the config-case",
 )
 @click.argument("ticket")
 @click.pass_context
