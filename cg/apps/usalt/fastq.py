@@ -36,12 +36,12 @@ class FastqHandler(BaseFastqHandler):
         super().__init__(config)
         self.root_dir = config["usalt"]["root"]
 
-    def link(self, case: str, sample: str, files: List):
+    def link(self, ticket: int, sample: str, files: List):
         """Link FASTQ files for a usalt sample.
-        Shall be linked to /<usalt root directory>/case-id/fastq/"""
+        Shall be linked to /<usalt root directory>/ticket/fastq/"""
 
-        # The fastq files should be linked to /.../fastq/<project>/<sample>/*.fastq.gz.
-        wrk_dir = Path(self.root_dir) / "fastq" / case / sample
+        # The fastq files should be linked to /.../fastq/<ticket>/<sample>/*.fastq.gz.
+        wrk_dir = Path(self.root_dir) / "fastq" / ticket / sample
 
         wrk_dir.mkdir(parents=True, exist_ok=True)
 

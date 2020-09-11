@@ -65,7 +65,7 @@ def link(context: click.Context, dry_run: bool, ticket: str, sample_id: str):
             continue
         api.link_sample(
             FastqHandler(context.obj),
-            case=ticket,
+            ticket=ticket,
             sample=sample_obj.internal_id,
         )
 

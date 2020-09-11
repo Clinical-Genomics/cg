@@ -127,7 +127,7 @@ class AnalysisAPI:
                 data["flowcell"] = f"{data['flowcell']}-{matches[0]}"
             files.append(data)
 
-        fastq_handler.link(case=ticket, sample=sample, files=files)
+        fastq_handler.link(ticket=ticket, sample=sample, files=files)
 
     def get_samples(self, ticket: int = None, sample_id: str = None) -> [models.Sample]:
         ids = {}
