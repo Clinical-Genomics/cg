@@ -394,3 +394,11 @@ class LimsAPI(Lims, OrderHandler):
         except HTTPError:
             reference_genome = None
         return reference_genome
+
+    def get_sample_other_organism(self, lims_id):
+        lims_sample = Sample(self, id=lims_id)
+        try:
+            organism = lims_sample.udf[PROP2UDF["organism_other"]]
+        except HTTPError:
+            organism = None
+        return organism

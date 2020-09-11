@@ -45,7 +45,8 @@ class LimsMicrosaltAPI:
         - Fallback based on reference, ‘Other species’ and ‘Comment’.
         Default to "Unset"."""
 
-        organism = self.get_lims_organism(sample_id=sample_id).strip()
+        organism = self.get_lims_other_organism(sample_id=sample_id).strip() or \
+                   self.get_lims_organism(sample_id=sample_id).strip()
         comment = self.get_lims_comment(sample_id=sample_id)
         has_comment = bool(comment)
 
@@ -100,3 +101,8 @@ class LimsMicrosaltAPI:
     def get_project(self, sample_id: str) -> str:
         """Get LIMS project for a sample"""
         return self.lims.sample(sample_id).get("project").get("id")
+
+    def get_lims_other_organism(self, sample_id):
+        """ returns the organism associated with a sample stored in lims"""
+        organism = self.lims.get_sample_other_organism(sample_id)
+        return organism
