@@ -115,7 +115,7 @@ def run(context, dry_run, config_case_path, ticket):
     microsalt_command = context.obj["usalt"]["binary_path"]
     command = [microsalt_command]
 
-    if not config_case:
+    if not config_case_path:
         queries_path = Path(context.obj["usalt"]["queries_path"])
         config_case_path = (queries_path / ticket).with_suffix(".json")
 
