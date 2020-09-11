@@ -2,6 +2,7 @@
 
 import json
 import logging
+from io import TextIOWrapper
 from pathlib import Path
 import subprocess
 
@@ -74,7 +75,7 @@ def link(context: click.Context, dry_run: bool, ticket: str, sample_id: str):
 @click.option("-t", "--ticket", help="create config-case all microbial samples for an order")
 @click.argument("sample_id", required=False)
 @click.pass_context
-def config_case(context: click.Context, dry_run, ticket: int, sample_id: str):
+def config_case(context: click.Context, dry_run: bool, ticket: int, sample_id: str):
     """ Create a config file on case level for microSALT """
 
     if not ticket and not sample_id:
@@ -95,9 +96,10 @@ def config_case(context: click.Context, dry_run, ticket: int, sample_id: str):
     outfilename = (Path(context.obj["usalt"]["queries_path"]) / filename).with_suffix(".json")
     if dry_run:
         print(json.dumps(parameters, indent=4, sort_keys=True))
-    else:
-        with open(outfilename, "w") as outfile:
-            json.dump(parameters, outfile, indent=4, sort_keys=True)
+        return
+
+    with open(outfilename, "w") as outfile:
+        json.dump(parameters, outfile, indent=4, sort_keys=True)
 
 
 @microsalt.command()
@@ -107,26 +109,30 @@ def config_case(context: click.Context, dry_run, ticket: int, sample_id: str):
     "--config-case",
     "config_case_path",
     required=False,
+    type=click.Path(exists=True, file_okay=True, dir_okay=False, resolve_path=True),
     help="optionally change the config-case",
 )
 @click.argument("ticket")
 @click.pass_context
-def run(context, dry_run, config_case_path, ticket):
+def run(context: click.Context, dry_run: bool, config_case_path: click.Path, ticket: int):
     """ Start microSALT with an order_id """
 
     microsalt_command = context.obj["usalt"]["binary_path"]
     command = [microsalt_command]
 
-    if not config_case_path:
+    if config_case_path:
+        config_case_path = Path(config_case_path)
+    else:
         queries_path = Path(context.obj["usalt"]["queries_path"])
         config_case_path = (queries_path / ticket).with_suffix(".json")
 
-    command.extend(["--parameters", str(config_case_path)])
+    command.extend(["--parameters", str(config_case_path.absolute())])
     if dry_run:
         print(" ".join(command))
-    else:
-        LOG.info("Starting microSALT! '%s'", " ".join(command))
-        subprocess.run(command, shell=True, check=True)
+        return
+
+    LOG.info("Starting microSALT! '%s'", " ".join(command))
+    subprocess.run(command, shell=True, check=True)
 
 
 microsalt.add_command(config_case)
