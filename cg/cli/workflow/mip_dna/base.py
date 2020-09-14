@@ -21,7 +21,10 @@ from cg.store.utils import case_exists
 LOG = logging.getLogger(__name__)
 EMAIL_OPTION = click.option("-e", "--email", help="email to send errors to", type=str)
 PRIORITY_OPTION = click.option(
-    "-p", "--priority", default="normal", type=click.Choice(["low", "normal", "high"])
+    "-p",
+    "--priority",
+    default="normal",
+    type=click.Choice(["low", "normal", "high"]),
 )
 START_WITH_PROGRAM = click.option(
     "-sw", "--start-with", help="start mip from this program.", type=str
@@ -32,9 +35,21 @@ START_WITH_PROGRAM = click.option(
 @EMAIL_OPTION
 @PRIORITY_OPTION
 @START_WITH_PROGRAM
-@click.option("-c", "--case", "case_id", help="case to prepare and start an analysis for", type=str)
+@click.option(
+    "-c",
+    "--case",
+    "case_id",
+    help="case to prepare and start an analysis for",
+    type=str,
+)
 @click.pass_context
-def mip_dna(context: click.Context, case_id: str, email: str, priority: str, start_with: str):
+def mip_dna(
+    context: click.Context,
+    case_id: str,
+    email: str,
+    priority: str,
+    start_with: str,
+):
     """Rare disease DNA workflow"""
     context.obj["dna_api"] = AnalysisAPI(
         db=Store(context.obj["database"]),
@@ -81,7 +96,13 @@ def mip_dna(context: click.Context, case_id: str, email: str, priority: str, sta
     context.invoke(config_case, case_id=case_id)
     context.invoke(link, case_id=case_id)
     context.invoke(panel, case_id=case_id)
-    context.invoke(run, case_id=case_id, priority=priority, email=email, start_with=start_with)
+    context.invoke(
+        run,
+        case_id=case_id,
+        priority=priority,
+        email=email,
+        start_with=start_with,
+    )
 
 
 @mip_dna.command()
@@ -94,10 +115,12 @@ def link(context: click.Context, case_id: str, sample_id: str):
     link_objs = get_links(dna_api.db, case_id, sample_id)
     for link_obj in link_objs:
         LOG.info(
-            "%s: %s link FASTQ files", link_obj.sample.internal_id, link_obj.sample.data_analysis
+            "%s: %s link FASTQ files",
+            link_obj.sample.internal_id,
+            link_obj.sample.data_analysis,
         )
         if "mip" in link_obj.sample.data_analysis.lower():
-            dna_api.link_sample(sample=link_obj.sample, case_id=case_id)
+            dna_api.link_sample(sample=link_obj.sample, case_id=link_obj.family.internal_id)
 
 
 @mip_dna.command("config-case")
@@ -153,7 +176,10 @@ def panel(context: click.Context, case_id: str, dry_run: bool = False):
 @click.option("-d", "--dry-run", "dry_run", is_flag=True, help="print command to console")
 @click.option("--mip-dry-run", "mip_dry_run", is_flag=True, help="Run MIP in dry-run mode")
 @click.option(
-    "--skip-evaluation", "skip_evaluation", is_flag=True, help="Skip mip qccollect evaluation"
+    "--skip-evaluation",
+    "skip_evaluation",
+    is_flag=True,
+    help="Skip mip qccollect evaluation",
 )
 @click.pass_context
 def run(
