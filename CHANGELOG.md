@@ -5,6 +5,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 About changelog [here](https://keepachangelog.com/en/1.0.0/)
 
 Please add a new candidate release at the top after changing the latest one. Feel free to copy paste from the "squash and commit" box that gets generated when creating PRs
+## [12.3.3]
+
+### Fixed
+- Fixes but where linking MIP trio samples only linked the first sample instead of the whole family (Introduced in recent PR)
+- Fixes bug where linking by SampleID was not linking the entire family (Old)
+- Fixes bug where linking by SampleID would not be able to generate correct linking path (Old)
 
 ## [12.3.2]
 
