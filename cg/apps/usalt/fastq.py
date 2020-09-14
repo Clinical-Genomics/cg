@@ -41,7 +41,7 @@ class FastqHandler(BaseFastqHandler):
         Shall be linked to /<usalt root directory>/ticket/fastq/"""
 
         # The fastq files should be linked to /.../fastq/<ticket>/<sample>/*.fastq.gz.
-        wrk_dir = Path(self.root_dir) / "fastq" / ticket / sample
+        wrk_dir = Path(self.root_dir) / "fastq" / str(ticket) / sample
 
         wrk_dir.mkdir(parents=True, exist_ok=True)
 
