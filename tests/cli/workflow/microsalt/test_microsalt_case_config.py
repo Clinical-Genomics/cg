@@ -49,7 +49,7 @@ def test_no_order_found(cli_runner, base_context, caplog):
 
     # WHEN dry running a order name
     result = cli_runner.invoke(
-        config_case, ["--ticket", ticket], obj=base_context, catch_exceptions=False
+        config_case, ["--ticket", ticket], obj=base_context
     )
 
     # THEN command should mention missing order
@@ -91,7 +91,7 @@ def test_dry_sample(
 
     # WHEN dry running a sample name
     result = cli_runner.invoke(
-        config_case, ["--dry-run", microbial_sample_id], obj=base_context, catch_exceptions=False
+        config_case, ["--dry-run", microbial_sample_id], obj=base_context
     )
 
     # THEN command should give us a json dump
@@ -120,7 +120,6 @@ def test_dry_sample_order(
         config_case,
         ["--dry-run", "--ticket", microbial_ticket, microbial_sample_id],
         obj=base_context,
-        catch_exceptions=False,
     )
 
     # THEN command should give us a json dump
@@ -138,7 +137,6 @@ def test_dry_order(cli_runner, base_context, microbial_ticket, snapshot: Snapsho
         config_case,
         ["--dry-run", "--ticket", microbial_ticket],
         obj=base_context,
-        catch_exceptions=False,
     )
 
     # THEN command should give us a json dump

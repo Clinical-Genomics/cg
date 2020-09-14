@@ -82,7 +82,7 @@ class MockLims:
 
             def get(self, key):
                 """ only here to get the sample.get('comment') """
-                return self.sample_data.get(key, "not found")
+                return self.sample_data.get(key, "")
 
         # haha, it's a factory!
         if not self.lims_sample:
@@ -92,6 +92,9 @@ class MockLims:
 
     def get_sample_organism(self, lims_id: str) -> str:
         return self.sample(lims_id).get("organism")
+
+    def get_sample_other_organism(self, lims_id: str) -> str:
+        return self.sample(lims_id).get("other_organism")
 
     def get_sample_reference_genome(self, lims_id: str) -> str:
         return self.sample(lims_id).get("reference_genome")

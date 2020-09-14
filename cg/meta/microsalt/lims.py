@@ -47,6 +47,7 @@ class LimsMicrosaltAPI:
 
         organism = self.get_lims_other_organism(sample_id=sample_id).strip() or \
                    self.get_lims_organism(sample_id=sample_id).strip()
+
         comment = self.get_lims_comment(sample_id=sample_id)
         has_comment = bool(comment)
 

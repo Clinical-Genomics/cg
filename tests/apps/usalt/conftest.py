@@ -89,9 +89,9 @@ def cg_config(tmpdir):
 
 
 @pytest.fixture
-def link_case():
-    """mock case name"""
-    return "case"
+def link_ticket():
+    """mock ticket number"""
+    return "123456"
 
 
 @pytest.fixture

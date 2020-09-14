@@ -111,7 +111,7 @@ def config_case(context: click.Context, dry_run: bool, ticket: int, sample_id: s
     type=click.Path(exists=True, file_okay=True, dir_okay=False, resolve_path=True),
     help="optionally change the config-case",
 )
-@click.argument("ticket")
+@click.argument("ticket", type=int)
 @click.pass_context
 def run(context: click.Context, dry_run: bool, config_case_path: click.Path, ticket: int):
     """ Start microSALT with an order_id """
@@ -123,9 +123,10 @@ def run(context: click.Context, dry_run: bool, config_case_path: click.Path, tic
         config_case_path = Path(config_case_path)
     else:
         queries_path = Path(context.obj["usalt"]["queries_path"])
-        config_case_path = (queries_path / ticket).with_suffix(".json")
+        config_case_path = (queries_path / str(ticket)).with_suffix(".json")
 
     command.extend(["--parameters", str(config_case_path.absolute())])
+
     if dry_run:
         print(" ".join(command))
         return
