@@ -119,6 +119,13 @@ def link(context: click.Context, case_id: str, sample_id: str):
             link_obj.sample.internal_id,
             link_obj.sample.data_analysis,
         )
+        # This block is necessary to handle cases where data analysis is not set in ClinicalDB for old samples
+        if not link_obj.sample.data_analysis:
+            LOG.warning(
+                f"No analysis set for {link_obj.sample.internal_id}, file will still be linked"
+            )
+            dna_api.link_sample(sample=link_obj.sample, case_id=link_obj.family.internal_id)
+
         if "mip" in link_obj.sample.data_analysis.lower():
             dna_api.link_sample(sample=link_obj.sample, case_id=link_obj.family.internal_id)
 
