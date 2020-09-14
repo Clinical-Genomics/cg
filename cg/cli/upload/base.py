@@ -7,7 +7,8 @@ import traceback
 import click
 
 from cg.apps import coverage as coverage_app
-from cg.apps import gt, hk, lims, madeline, scoutapi, tb
+from cg.apps import gt, hk, lims, scoutapi, tb
+from cg.apps.madeline.api import MadelineAPI
 from cg.cli.workflow.mip_dna.deliver import CASE_TAGS, SAMPLE_TAGS
 from cg.exc import AnalysisUploadError
 from cg.meta.deliver import DeliverAPI
@@ -17,7 +18,11 @@ from cg.meta.workflow.mip import AnalysisAPI
 from cg.store import Store
 
 from .coverage import coverage
-from .delivery_report import delivery_report, delivery_report_to_scout, delivery_reports
+from .delivery_report import (
+    delivery_report,
+    delivery_report_to_scout,
+    delivery_reports,
+)
 from .genotype import genotypes
 from .mutacc import process_solved, processed_solved
 from .observations import observations
@@ -76,12 +81,14 @@ def upload(context, family_id, force_restart):
             return
 
     context.obj["housekeeper_api"] = hk.HousekeeperAPI(context.obj)
-
-    context.obj["madeline_api"] = madeline.api.MadelineAPI(context.obj)
+    context.obj["status"] = Store(context.obj["database"])
+    context.obj["madeline_api"] = MadelineAPI(context.obj)
     context.obj["genotype_api"] = gt.GenotypeAPI(context.obj)
     context.obj["lims_api"] = lims.LimsAPI(context.obj)
     context.obj["tb_api"] = tb.TrailblazerAPI(context.obj)
     context.obj["chanjo_api"] = coverage_app.ChanjoAPI(context.obj)
+    context.obj["scout_api"] = scoutapi.ScoutAPI(context.obj)
+
     context.obj["deliver_api"] = DeliverAPI(
         context.obj,
         hk_api=context.obj["housekeeper_api"],
@@ -89,9 +96,8 @@ def upload(context, family_id, force_restart):
         case_tags=CASE_TAGS,
         sample_tags=SAMPLE_TAGS,
     )
-    context.obj["scout_api"] = scoutapi.ScoutAPI(context.obj)
     context.obj["analysis_api"] = AnalysisAPI(
-        db=Store(context.obj["database"]),
+        db=context.obj["status"],
         hk_api=context.obj["housekeeper_api"],
         tb_api=context.obj["tb_api"],
         scout_api=context.obj["scout_api"],
@@ -156,7 +162,8 @@ def auto(context: click.Context, pipeline: str = None):
 
         if analysis_obj.family.analyses[0].uploaded_at is not None:
             LOG.warning(
-                "Newer analysis already uploaded for %s, skipping", analysis_obj.family.internal_id
+                "Newer analysis already uploaded for %s, skipping",
+                analysis_obj.family.internal_id,
             )
             continue
 
