@@ -376,29 +376,3 @@ class LimsAPI(Lims, OrderHandler):
             if artifact.udf.get(udf_key) is not None
         )
         return capture_kits
-
-    def get_sample_organism(self, lims_id):
-        """Get organism UDF on sample in LIMS"""
-        lims_sample = Sample(self, id=lims_id)
-        try:
-            organism = lims_sample.udf[PROP2UDF["organism"]]
-        except HTTPError:
-            organism = None
-        return organism
-
-    def get_sample_reference_genome(self, lims_id):
-        """Get reference genome UDF on sample in LIMS"""
-        lims_sample = Sample(self, id=lims_id)
-        try:
-            reference_genome = lims_sample.udf[PROP2UDF["reference_genome"]]
-        except HTTPError:
-            reference_genome = None
-        return reference_genome
-
-    def get_sample_other_organism(self, lims_id):
-        lims_sample = Sample(self, id=lims_id)
-        try:
-            organism = lims_sample.udf[PROP2UDF["organism_other"]]
-        except HTTPError:
-            organism = None
-        return organism

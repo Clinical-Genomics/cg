@@ -86,8 +86,6 @@ def test_dry_sample(
     # GIVEN project, organism and reference genome is specified in lims
     lims_sample = lims_api.sample(microbial_sample_id)
     lims_sample.sample_data["project"] = {"id": "microbial_order_test"}
-    lims_sample.sample_data["organism"] = "organism_test"
-    lims_sample.sample_data["reference_genome"] = "reference_genome_test"
 
     # WHEN dry running a sample name
     result = cli_runner.invoke(
@@ -112,8 +110,6 @@ def test_dry_sample_order(
     # GIVEN
     lims_sample = lims_api.sample(microbial_sample_id)
     lims_sample.sample_data["project"] = {"id": "microbial_order_test"}
-    lims_sample.sample_data["organism"] = "organism_test"
-    lims_sample.sample_data["reference_genome"] = "reference_genome_test"
 
     # WHEN dry running a sample name
     result = cli_runner.invoke(
@@ -161,11 +157,11 @@ def test_sample(cli_runner, base_context, microbial_sample_id, queries_path, sna
         snapshot.assert_match(outputfile.readlines())
 
 
-def test_gonorrhoeae(cli_runner, microsalt_store, lims_api, base_context, microbial_sample_id):
+def test_gonorrhoeae(cli_runner, microsalt_store, base_context, microbial_sample_id):
     """ Test if the substitution of the organism happens """
     # GIVEN a sample with organism set to gonorrhea
-    lims_sample = lims_api.sample(microbial_sample_id)
-    lims_sample.sample_data["organism"] = "gonorrhoeae"
+    sample_obj = microsalt_store.sample(microbial_sample_id)
+    sample_obj.organism.internal_id = "gonorrhoeae"
 
     # WHEN getting the case config
     result = cli_runner.invoke(config_case, ["--dry-run", microbial_sample_id], obj=base_context)
@@ -175,12 +171,12 @@ def test_gonorrhoeae(cli_runner, microsalt_store, lims_api, base_context, microb
 
 
 def test_cutibacterium_acnes(
-    cli_runner, microsalt_store, lims_api, base_context, microbial_sample_id
+    cli_runner, microsalt_store, base_context, microbial_sample_id
 ):
     """ Test if this bacteria gets its name changed """
     # GIVEN a sample with organism set to Cutibacterium acnes
-    lims_sample = lims_api.sample(microbial_sample_id)
-    lims_sample.sample_data["organism"] = "Cutibacterium acnes"
+    sample_obj = microsalt_store.sample(microbial_sample_id)
+    sample_obj.organism.internal_id = "Cutibacterium acnes"
 
     # WHEN getting the case config
     result = cli_runner.invoke(config_case, ["--dry-run", microbial_sample_id], obj=base_context)
@@ -189,12 +185,12 @@ def test_cutibacterium_acnes(
     assert "Propionibacterium acnes" in result.output
 
 
-def test_vre_nc_017960(cli_runner, microsalt_store, lims_api, base_context, microbial_sample_id):
+def test_vre_nc_017960(cli_runner, microsalt_store, base_context, microbial_sample_id):
     """ Test if this bacteria gets its name changed """
     # GIVEN a sample with organism set to VRE
-    lims_sample = lims_api.sample(microbial_sample_id)
-    lims_sample.sample_data["organism"] = "VRE"
-    lims_sample.sample_data["reference_genome"] = "NC_017960.1"
+    sample_obj = microsalt_store.sample(microbial_sample_id)
+    sample_obj.organism.internal_id = "VRE"
+    sample_obj.organism.reference_genome = "NC_017960.1"
 
     # WHEN getting the case config
     result = cli_runner.invoke(config_case, ["--dry-run", microbial_sample_id], obj=base_context)
@@ -203,12 +199,12 @@ def test_vre_nc_017960(cli_runner, microsalt_store, lims_api, base_context, micr
     assert "Enterococcus faecium" in result.output
 
 
-def test_vre_nc_004668(cli_runner, microsalt_store, lims_api, base_context, microbial_sample_id):
+def test_vre_nc_004668(cli_runner, microsalt_store, base_context, microbial_sample_id):
     """ Test if this bacteria gets its name changed """
     # GIVEN a sample with organism set to VRE
-    lims_sample = lims_api.sample(microbial_sample_id)
-    lims_sample.sample_data["organism"] = "VRE"
-    lims_sample.sample_data["reference_genome"] = "NC_004668.1"
+    sample_obj = microsalt_store.sample(microbial_sample_id)
+    sample_obj.organism.internal_id = "VRE"
+    sample_obj.organism.reference_genome = "NC_004668.1"
 
     # WHEN getting the case config
     result = cli_runner.invoke(config_case, ["--dry-run", microbial_sample_id], obj=base_context)
@@ -220,9 +216,9 @@ def test_vre_nc_004668(cli_runner, microsalt_store, lims_api, base_context, micr
 def test_vre_comment(cli_runner, microsalt_store, lims_api, base_context, microbial_sample_id):
     """ Test if this bacteria gets its name changed """
     # GIVEN a sample with organism set to VRE and a comment set in LIMS
+    sample_obj = microsalt_store.sample(microbial_sample_id)
+    sample_obj.organism.internal_id = "VRE"
     lims_sample = lims_api.sample(microbial_sample_id)
-    lims_sample.sample_data["organism"] = "VRE"
-    lims_sample.sample_data["reference_genome"] = ""
     lims_sample.sample_data["comment"] = "ABCD123"
 
     # WHEN getting the case config

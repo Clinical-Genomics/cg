@@ -392,47 +392,29 @@ class StoreHelpers:
         sample_id: str = "microbial_sample_id",
         priority: str = "research",
         name: str = "microbial_name_test",
+        organism: models.Organism = None,
         comment: str = "comment",
         ticket: int = 123456,
     ) -> models.Sample:
         """Utility function to add a sample to use in tests"""
         customer = self.ensure_customer(store, "cust_test")
         application_version = self.ensure_application_version(store)
+        if not organism:
+            organism = self.ensure_organism(store)
 
         sample = store.add_sample(
-            name=name,
-            priority=priority,
-            internal_id=sample_id,
             application_version=application_version,
-            reads=6000000,
             comment=comment,
-            ticket=ticket,
+            internal_id=sample_id,
+            name=name,
+            organism=organism,
+            priority=priority,
+            reads=6000000,
             sex="unknown",
+            ticket=ticket,
         )
         sample.customer = customer
         return sample
-
-    @deprecated(reason="microbial samples don't have orders any more")
-    def ensure_microbial_order(
-        self,
-        store: Store,
-        order_id: str = "microbial_order_test",
-        name: str = "microbial_name_test",
-        customer_id: str = "cust_test",
-    ) -> models.Family:
-        """Utility function add a microbial order and sample"""
-
-        customer = self.ensure_customer(store, customer_id)
-        order = store.add_family(
-            name=name,
-            panels=None,
-        )
-        order.customer = customer
-        order.internal_id = order_id
-        order.ordered_at = datetime.now()
-        store.add_commit(order)
-
-        return order
 
     @deprecated(reason="call add_sample(...) instead")
     def add_microbial_sample_and_order(
@@ -444,7 +426,8 @@ class StoreHelpers:
         comment: str = "ABCD123",
     ) -> models.Sample:
         """Utility add a case and a sample to use in tests"""
-        sample = self.add_microbial_sample(store, sample_id, comment=comment, ticket=ticket)
+        organism = self.ensure_organism(store)
+        sample = self.add_microbial_sample(store, sample_id, comment=comment, ticket=ticket, organism=organism)
         self.ensure_application_version(store)
         customer = self.ensure_customer(store, customer_id)
 

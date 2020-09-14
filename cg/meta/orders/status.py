@@ -378,17 +378,19 @@ class StatusHandler:
                     sample_comment = sample_data["comment"]
 
                 new_sample = self.status.add_sample(
-                    name=sample_data["name"],
-                    internal_id=sample_data["internal_id"],
-                    comment=sample_comment,
                     application_version=application_version,
-                    priority=sample_data["priority"],
-                    data_analysis=sample_data["data_analysis"],
+                    comment=sample_comment,
                     customer=customer_obj,
-                    ticket=ticket,
-                    sex="unknown",
-                    ordered=ordered,
+                    data_analysis=sample_data["data_analysis"],
+                    internal_id=sample_data["internal_id"],
+                    name=sample_data["name"],
                     order=order,
+                    ordered=ordered,
+                    organism=organism,
+                    priority=sample_data["priority"],
+                    reference_genome=sample_data["reference_genome"],
+                    sex="unknown",
+                    ticket=ticket,
                 )
 
                 sample_objs.append(new_sample)

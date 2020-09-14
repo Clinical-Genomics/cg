@@ -3,6 +3,7 @@ from datetime import datetime
 import logging
 import re
 
+from cg.store import models
 from cg.store.models import Sample
 from cg.apps.lims import LimsAPI
 
@@ -30,25 +31,14 @@ class LimsMicrosaltAPI:
 
         return ""
 
-    def get_lims_organism(self, sample_id: str) -> str:
-        """ returns the organism associated with a sample stored in lims"""
-        organism = self.lims.get_sample_organism(sample_id)
-        return organism
-
-    def get_lims_reference_genome(self, sample_id: str) -> str:
-        """ returns the reference_genome associated with a sample stored in lims"""
-        reference_genome = self.lims.get_sample_reference_genome(sample_id)
-        return reference_genome
-
-    def get_organism(self, sample_id: str) -> str:
+    def get_organism(self, sample_obj: models.Sample) -> str:
         """Organism
         - Fallback based on reference, ‘Other species’ and ‘Comment’.
         Default to "Unset"."""
 
-        organism = self.get_lims_other_organism(sample_id=sample_id).strip() or \
-                   self.get_lims_organism(sample_id=sample_id).strip()
+        organism = sample_obj.organism.internal_id.strip()
 
-        comment = self.get_lims_comment(sample_id=sample_id)
+        comment = self.get_lims_comment(sample_id=sample_obj.internal_id)
         has_comment = bool(comment)
 
         if "gonorrhoeae" in organism:
@@ -57,8 +47,7 @@ class LimsMicrosaltAPI:
             organism = "Propionibacterium acnes"
 
         if organism == "VRE":
-            reference = self.get_lims_reference_genome(sample_id=sample_id).strip()
-
+            reference = sample_obj.organism.reference_genome
             if reference == "NC_017960.1":
                 organism = "Enterococcus faecium"
             elif reference == "NC_004668.1":
@@ -77,7 +66,6 @@ class LimsMicrosaltAPI:
         method_sequencing = self.lims.get_sequencing_method(sample_id)
         if method_sequencing:
             method_sequencing, _ = method_sequencing.split(" ", 1)
-        organism = self.get_organism(sample_id)
         priority = "research" if sample_obj.priority == 0 else "standard"
 
         parameter_dict = {
@@ -85,9 +73,9 @@ class LimsMicrosaltAPI:
             "Customer_ID_project": sample_obj.ticket_number,
             "CG_ID_sample": sample_obj.internal_id,
             "Customer_ID_sample": sample_obj.name,
-            "organism": organism,
+            "organism": self.get_organism(sample_obj),
             "priority": priority,
-            "reference": self.get_lims_reference_genome(sample_id),
+            "reference": sample_obj.organism.reference_genome,
             "Customer_ID": sample_obj.customer.internal_id,
             "application_tag": sample_obj.application_version.application.tag,
             "date_arrival": str(sample_obj.received_at or datetime.min),
@@ -102,8 +90,3 @@ class LimsMicrosaltAPI:
     def get_project(self, sample_id: str) -> str:
         """Get LIMS project for a sample"""
         return self.lims.sample(sample_id).get("project").get("id")
-
-    def get_lims_other_organism(self, sample_id):
-        """ returns the organism associated with a sample stored in lims"""
-        organism = self.lims.get_sample_other_organism(sample_id)
-        return organism

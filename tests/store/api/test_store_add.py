@@ -65,19 +65,25 @@ def test_add_microbial_sample(base_store: Store, helpers):
     customer_obj = helpers.ensure_customer(base_store)
     assert customer_obj
     name = "microbial_sample"
+    organism_name = "e. coli"
     internal_id = "lims-id"
+    reference_genome = "ref_gen"
     priority = "research"
     ticket_number = 123456
     application_version = base_store.ApplicationVersion.query.first()
+    base_store.add_organism(organism_name, organism_name, reference_genome)
+    organism = base_store.Organism.query.first()
 
     # WHEN adding a new microbial sample
     new_sample = base_store.add_sample(
-        name=name,
-        sex="unknown",
-        internal_id=internal_id,
         application_version=application_version,
-        ticket=ticket_number,
+        internal_id=internal_id,
+        name=name,
+        organism=organism,
         priority=priority,
+        reference_genome=reference_genome,
+        sex="unknown",
+        ticket=ticket_number,
     )
     new_sample.customer = customer_obj
     base_store.add_commit(new_sample)
@@ -87,8 +93,10 @@ def test_add_microbial_sample(base_store: Store, helpers):
     stored_microbial_sample = base_store.Sample.query.first()
     assert stored_microbial_sample.name == name
     assert stored_microbial_sample.internal_id == internal_id
+    assert stored_microbial_sample.reference_genome == reference_genome
     assert stored_microbial_sample.application_version == application_version
     assert stored_microbial_sample.priority_human == priority
+    assert stored_microbial_sample.organism == organism
 
 
 def test_add_pool(store: Store):
