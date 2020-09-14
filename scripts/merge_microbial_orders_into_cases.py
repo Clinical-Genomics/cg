@@ -28,30 +28,28 @@ def merge_microbial_data(config_file):
             click.echo(click.style("processing microbial sample: " + ms.__str__(), fg="yellow"))
             dict_print(ms.__dict__)
 
-            sample_comment = build_comment(ms.comment, order.comment)
-
             data_analysis = "microbial|" + ms.data_analysis if ms.data_analysis else "microbial"
 
             sample = store.add_sample(
-                name=ms.name,
-                internal_id=ms.internal_id,
-                comment=sample_comment,
-                priority=ms.priority_human,
-                data_analysis=data_analysis,
-                customer=order.customer,
-                ticket=order.ticket_number,
-                sex="unknown",
-                order=order.name,
+                application_version_id=ms.application_version_id,
+                comment=COMMENT + "\n" + ms.comment if ms.comment else COMMENT,
                 created_at=dt.datetime.now(),
+                customer=order.customer,
+                data_analysis=data_analysis,
+                delivered_at=ms.delivered_at,
+                internal_id=ms.internal_id,
+                invoice_id=ms.invoice_id,
+                name=ms.name,
+                order=order.name,
                 ordered=order.ordered_at,
-                received=ms.received_at,
                 prepared_at=ms.prepared_at,
+                priority=ms.priority_human,
+                reads=ms.reads,
+                received=ms.received_at,
                 sequence_start=ms.sequence_start,
                 sequenced_at=ms.sequenced_at,
-                delivered_at=ms.delivered_at,
-                reads=ms.reads,
-                invoice_id=ms.invoice_id,
-                application_version_id=ms.application_version_id,
+                sex="unknown",
+                ticket=order.ticket_number,
             )
 
             click.echo(click.style("Saving Sample: " + sample.__str__(), fg="yellow"))
@@ -81,20 +79,6 @@ def merge_microbial_data(config_file):
         click.echo(click.style("Deleting microbial order: " + order.__str__(), fg="red"))
         store.delete(order)
         store.commit()
-
-
-def build_comment(ms_comment, order_comment):
-    if order_comment:
-        new_comment = f"Order comment: {order_comment}"
-
-        if ms_comment:
-            new_comment = f"{new_comment}, sample comment: {ms_comment}"
-    else:
-        new_comment = ms_comment
-
-    new_comment = COMMENT + "\n" + new_comment if new_comment else COMMENT
-
-    return new_comment
 
 
 if __name__ == "__main__":
