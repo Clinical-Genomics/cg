@@ -3,8 +3,7 @@ import datetime as dt
 import logging
 import shutil
 from pathlib import Path
-from typing import List, Optional
-from cg.utils import Process
+from typing import List
 
 import click
 import ruamel.yaml
@@ -31,11 +30,6 @@ class TrailblazerAPI(Store):
             conda_env=config["trailblazer"]["conda_env"],
         )
         self.mip_config = config["trailblazer"]["mip_config"]
-        self.process = Process(
-            config_parameter="--config",
-            config=config["trailblazer"]["config"],
-            binary=config["trailblazer"]["binary_path"],
-        )
 
     def mark_analyses_deleted(self, case_id: str):
         """ mark analyses connected to a case as deleted """
@@ -43,13 +37,9 @@ class TrailblazerAPI(Store):
             old_analysis.is_deleted = True
         self.commit()
 
-    def add_pending_analysis(self, case_id: str, email: str = None) -> Optional[models.Analysis]:
+    def add_pending_analysis(self, case_id: str, email: str = None) -> models.Analysis:
         """ Add analysis as pending"""
-        result = self.process.run_command(["query add-pending-analysis", case_id, email])
-        if result != 0:
-            LOG.info("Failed to add analysis as pending!")
-            return None
-        LOG.info(self.process.stdout)
+        self.add_pending(case_id, email)
 
     @staticmethod
     def get_sampleinfo(analysis: models.Analysis) -> str:
