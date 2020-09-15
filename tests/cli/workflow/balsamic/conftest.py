@@ -9,7 +9,6 @@ import pytest
 
 from cg.apps.balsamic.api import BalsamicAPI
 from cg.apps.balsamic.fastq import FastqHandler
-from cg.apps.hk import HousekeeperAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.store import Store
 from cg.apps.hk import HousekeeperAPI

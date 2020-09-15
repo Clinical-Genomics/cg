@@ -193,12 +193,13 @@ def store_housekeeper(context, case_id):
 @OPTION_ANALYSIS_TYPE
 @OPTION_PRIORITY
 @OPTION_DRY
+@OPTION_PANEL_BED
 @click.pass_context
-def start(context, case_id, analysis_type, priority, dry):
+def start(context, case_id, analysis_type, panel_bed, priority, dry):
     """Start full workflow for CASE ID"""
     LOG.info(f"Starting analysis for {case_id}")
     context.invoke(link, case_id=case_id)
-    context.invoke(config_case, case_id=case_id, dry=dry)
+    context.invoke(config_case, case_id=case_id, panel_bed=panel_bed, dry=dry)
     context.invoke(
         run,
         case_id=case_id,
