@@ -16,6 +16,11 @@ Try to use the follwing format:
 
 ### Fixed
 
+## [12.3.6]
+
+### Fixed
+- Fixes bug where scout_api was sent into the compression_api in cli/store. The compression_api does not have scout_as an argument.
+
 
 ## [12.3.5]
 
