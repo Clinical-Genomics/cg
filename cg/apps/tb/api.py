@@ -21,7 +21,8 @@ class TrailblazerAPI(Store):
 
     def __init__(self, config: dict):
         super(TrailblazerAPI, self).__init__(
-            config["trailblazer"]["database"], families_dir=config["trailblazer"]["root"]
+            config["trailblazer"]["database"],
+            families_dir=config["trailblazer"]["root"],
         )
         self.mip_cli = MipCli(
             script=config["trailblazer"]["script"],
@@ -83,7 +84,11 @@ class TrailblazerAPI(Store):
         return False
 
     def delete_analysis(
-        self, family: str, date: dt.datetime, yes: bool = False, dry_run: bool = False
+        self,
+        family: str,
+        date: dt.datetime,
+        yes: bool = False,
+        dry_run: bool = False,
     ):
         """Delete the analysis output."""
         if self.analyses(family=family, temp=True).count() > 0:
