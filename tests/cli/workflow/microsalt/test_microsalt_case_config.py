@@ -48,9 +48,7 @@ def test_no_order_found(cli_runner, base_context, caplog):
     ticket = -1
 
     # WHEN dry running a order name
-    result = cli_runner.invoke(
-        config_case, ["--ticket", ticket], obj=base_context
-    )
+    result = cli_runner.invoke(config_case, ["--ticket", ticket], obj=base_context)
 
     # THEN command should mention missing order
     assert result.exit_code != EXIT_SUCCESS
@@ -88,9 +86,7 @@ def test_dry_sample(
     lims_sample.sample_data["project"] = {"id": "microbial_order_test"}
 
     # WHEN dry running a sample name
-    result = cli_runner.invoke(
-        config_case, ["--dry-run", microbial_sample_id], obj=base_context
-    )
+    result = cli_runner.invoke(config_case, ["--dry-run", microbial_sample_id], obj=base_context)
 
     # THEN command should give us a json dump
     assert result.exit_code == EXIT_SUCCESS
@@ -170,9 +166,7 @@ def test_gonorrhoeae(cli_runner, microsalt_store, base_context, microbial_sample
     assert "Neisseria spp." in result.output
 
 
-def test_cutibacterium_acnes(
-    cli_runner, microsalt_store, base_context, microbial_sample_id
-):
+def test_cutibacterium_acnes(cli_runner, microsalt_store, base_context, microbial_sample_id):
     """ Test if this bacteria gets its name changed """
     # GIVEN a sample with organism set to Cutibacterium acnes
     sample_obj = microsalt_store.sample(microbial_sample_id)

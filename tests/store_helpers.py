@@ -427,7 +427,9 @@ class StoreHelpers:
     ) -> models.Sample:
         """Utility add a case and a sample to use in tests"""
         organism = self.ensure_organism(store)
-        sample = self.add_microbial_sample(store, sample_id, comment=comment, ticket=ticket, organism=organism)
+        sample = self.add_microbial_sample(
+            store, sample_id, comment=comment, ticket=ticket, organism=organism
+        )
         self.ensure_application_version(store)
         customer = self.ensure_customer(store, customer_id)
 
