@@ -42,7 +42,7 @@ def merge_microbial_data(config_file):
                 name=ms.name,
                 order=order.name,
                 ordered=order.ordered_at,
-                organism_id=ms.organism_id,
+                organism=ms.organism,
                 prepared_at=ms.prepared_at,
                 priority=ms.priority_human,
                 reads=ms.reads,
