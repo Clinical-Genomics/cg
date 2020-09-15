@@ -36,9 +36,7 @@ def microsalt_store(base_store: Store, microbial_sample_id, microbial_ticket, he
     """ Filled in store to be used in the tests """
     _store = base_store
 
-    helpers.add_microbial_sample(
-        _store
-    )
+    helpers.add_microbial_sample(_store)
 
     _store.commit()
 
