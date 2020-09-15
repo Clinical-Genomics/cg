@@ -35,8 +35,9 @@ def base_context(microsalt_store, lims_api, tmpdir, queries_path, housekeeper_ap
 def microsalt_store(base_store: Store, microbial_sample_id, microbial_ticket, helpers) -> Store:
     """ Filled in store to be used in the tests """
     _store = base_store
-    helpers.add_microbial_sample_and_order(
-        _store, ticket=microbial_ticket, sample_id=microbial_sample_id
+
+    helpers.add_microbial_sample(
+        _store
     )
 
     _store.commit()

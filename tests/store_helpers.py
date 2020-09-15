@@ -385,7 +385,6 @@ class StoreHelpers:
         store.add_commit(organism)
         return organism
 
-    @deprecated(reason="call add_sample(...) instead")
     def add_microbial_sample(
         self,
         store: Store,
@@ -414,27 +413,6 @@ class StoreHelpers:
             ticket=ticket,
         )
         sample.customer = customer
-        return sample
-
-    @deprecated(reason="call add_sample(...) instead")
-    def add_microbial_sample_and_order(
-        self,
-        store: Store,
-        ticket: int = 123456,
-        sample_id: str = "microbial_sample_id",
-        customer_id: str = "cust_test",
-        comment: str = "ABCD123",
-    ) -> models.Sample:
-        """Utility add a case and a sample to use in tests"""
-        organism = self.ensure_organism(store)
-        sample = self.add_microbial_sample(
-            store, sample_id, comment=comment, ticket=ticket, organism=organism
-        )
-        self.ensure_application_version(store)
-        customer = self.ensure_customer(store, customer_id)
-
-        sample.customer = customer
-        store.add_commit(sample)
         return sample
 
     def add_samples(self, store: Store, nr_samples: int = 5) -> list:
