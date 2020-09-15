@@ -81,7 +81,6 @@ def upload(context, family_id, force_restart):
             return
 
     context.obj["housekeeper_api"] = hk.HousekeeperAPI(context.obj)
-    context.obj["status"] = Store(context.obj["database"])
     context.obj["madeline_api"] = MadelineAPI(context.obj)
     context.obj["genotype_api"] = gt.GenotypeAPI(context.obj)
     context.obj["lims_api"] = lims.LimsAPI(context.obj)
@@ -166,13 +165,12 @@ def auto(context: click.Context, pipeline: str = None):
                 analysis_obj.family.internal_id,
             )
             continue
-
         internal_id = analysis_obj.family.internal_id
+
         LOG.info("uploading family: %s", internal_id)
         try:
             context.invoke(upload, family_id=internal_id)
         except Exception:
-
             LOG.error("uploading family failed: %s", internal_id)
             LOG.error(traceback.format_exc())
             exit_code = 1
