@@ -11,7 +11,10 @@ class UploadCoverageApi:
     """Upload coverage API"""
 
     def __init__(
-        self, status_api: Store, hk_api: hk.HousekeeperAPI, chanjo_api: coverage.ChanjoAPI,
+        self,
+        status_api: Store,
+        hk_api: hk.HousekeeperAPI,
+        chanjo_api: coverage.ChanjoAPI,
     ):
         self.status_api = status_api
         self.hk_api = hk_api

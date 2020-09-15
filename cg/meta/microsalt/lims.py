@@ -32,8 +32,8 @@ class LimsMicrosaltAPI:
 
     def get_organism(self, sample_obj: Sample) -> str:
         """Organism
-           - Fallback based on reference, ‘Other species’ and ‘Comment’.
-           Default to "Unset"."""
+        - Fallback based on reference, ‘Other species’ and ‘Comment’.
+        Default to "Unset"."""
 
         organism = sample_obj.organism.internal_id.strip()
         comment = self.get_lims_comment(sample_obj.internal_id)

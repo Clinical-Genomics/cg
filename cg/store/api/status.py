@@ -125,8 +125,9 @@ class StatusHandler(BaseHandler):
         )
 
         orders_to_store = [
-            record for record in orders if
-            self._all_microbial_samples_have_sequence_data(record.microbial_samples)
+            record
+            for record in orders
+            if self._all_microbial_samples_have_sequence_data(record.microbial_samples)
         ]
 
         return orders_to_store
