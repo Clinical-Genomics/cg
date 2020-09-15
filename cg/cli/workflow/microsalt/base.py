@@ -26,7 +26,9 @@ def microsalt(context: click.Context, ticket: str, dry_run: bool):
     context.obj["db"] = Store(context.obj["database"])
     hk_api = hk.HousekeeperAPI(context.obj)
     lims_api = lims.LimsAPI(context.obj)
-    context.obj["api"] = MicrosaltAnalysisAPI(db=context.obj["db"], hk_api=hk_api, lims_api=lims_api)
+    context.obj["api"] = MicrosaltAnalysisAPI(
+        db=context.obj["db"], hk_api=hk_api, lims_api=lims_api
+    )
 
     if context.invoked_subcommand:
         return
@@ -85,9 +87,7 @@ def config_case(context: click.Context, dry_run: bool, ticket: int, sample_id: s
         LOG.error("No sample found for that ticket/sample_id")
         context.abort()
 
-    parameters = [
-        context.obj["api"].get_parameters(sample_obj) for sample_obj in sample_objs
-    ]
+    parameters = [context.obj["api"].get_parameters(sample_obj) for sample_obj in sample_objs]
 
     filename = str(ticket) if ticket else sample_id
     outfilename = (Path(context.obj["usalt"]["queries_path"]) / filename).with_suffix(".json")

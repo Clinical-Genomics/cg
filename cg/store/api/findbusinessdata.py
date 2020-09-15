@@ -132,9 +132,7 @@ class FindBusinessDataHandler(BaseHandler):
         """Find samples within a customer."""
         return self.Sample.query.filter_by(customer=customer, name=name)
 
-    def find_sample_in_customer_group(
-        self, customer: models.Customer, name: str
-    ) -> Query:
+    def find_sample_in_customer_group(self, customer: models.Customer, name: str) -> Query:
         """Find samples within the customer group."""
         return self.Sample.query.filter(
             models.Sample.customer.customer_group == customer.customer_group,
@@ -236,9 +234,7 @@ class FindBusinessDataHandler(BaseHandler):
         """Fetch a sample by lims id."""
         return self.Sample.query.filter_by(internal_id=internal_id).first()
 
-    def samples(
-        self, *, customer: models.Customer = None, enquiry: str = None
-    ) -> Query:
+    def samples(self, *, customer: models.Customer = None, enquiry: str = None) -> Query:
         records = self.Sample.query
         records = records.filter_by(customer=customer) if customer else records
         records = (
