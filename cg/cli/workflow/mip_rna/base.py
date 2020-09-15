@@ -23,10 +23,11 @@ LOG = logging.getLogger(__name__)
 def mip_rna(context: click.Context):
     """Rare disease RNA workflow"""
 
+    pipeline = (context.obj["mip-rd-rna"]["pipeline"],)
     context.obj["rna_api"] = AnalysisAPI(
         db=Store(context.obj["database"]),
         hk_api=hk.HousekeeperAPI(context.obj),
-        tb_api=tb.TrailblazerAPI(context.obj),
+        tb_api=tb.TrailblazerAPI(context.obj, pipeline=pipeline),
         scout_api=scoutapi.ScoutAPI(context.obj),
         lims_api=lims.LimsAPI(context.obj),
         deliver_api=DeliverAPI(
@@ -37,7 +38,7 @@ def mip_rna(context: click.Context):
             sample_tags=SAMPLE_TAGS,
         ),
         script=context.obj["mip-rd-rna"]["script"],
-        pipeline=context.obj["mip-rd-rna"]["pipeline"],
+        pipeline=pipeline,
         conda_env=context.obj["mip-rd-rna"]["conda_env"],
         root=context.obj["mip-rd-rna"]["root"],
     )

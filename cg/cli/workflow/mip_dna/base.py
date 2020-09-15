@@ -51,10 +51,11 @@ def mip_dna(
     start_with: str,
 ):
     """Rare disease DNA workflow"""
+    pipeline = (context.obj["mip-rd-dna"]["pipeline"],)
     context.obj["dna_api"] = AnalysisAPI(
         db=Store(context.obj["database"]),
         hk_api=hk.HousekeeperAPI(context.obj),
-        tb_api=tb.TrailblazerAPI(context.obj),
+        tb_api=tb.TrailblazerAPI(context.obj, pipeline=pipeline),
         scout_api=scoutapi.ScoutAPI(context.obj),
         lims_api=lims.LimsAPI(context.obj),
         deliver_api=DeliverAPI(
@@ -65,7 +66,7 @@ def mip_dna(
             sample_tags=SAMPLE_TAGS,
         ),
         script=context.obj["mip-rd-dna"]["script"],
-        pipeline=context.obj["mip-rd-dna"]["pipeline"],
+        pipeline=pipeline,
         conda_env=context.obj["mip-rd-dna"]["conda_env"],
         root=context.obj["mip-rd-dna"]["root"],
     )
