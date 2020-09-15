@@ -23,7 +23,7 @@ LOG = logging.getLogger(__name__)
 def mip_rna(context: click.Context):
     """Rare disease RNA workflow"""
 
-    pipeline = (context.obj["mip-rd-rna"]["pipeline"],)
+    pipeline = context.obj["mip-rd-rna"]["pipeline"]
     context.obj["rna_api"] = AnalysisAPI(
         db=Store(context.obj["database"]),
         hk_api=hk.HousekeeperAPI(context.obj),

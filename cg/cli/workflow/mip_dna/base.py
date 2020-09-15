@@ -51,7 +51,7 @@ def mip_dna(
     start_with: str,
 ):
     """Rare disease DNA workflow"""
-    pipeline = (context.obj["mip-rd-dna"]["pipeline"],)
+    pipeline = context.obj["mip-rd-dna"]["pipeline"]
     context.obj["dna_api"] = AnalysisAPI(
         db=Store(context.obj["database"]),
         hk_api=hk.HousekeeperAPI(context.obj),
