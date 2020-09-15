@@ -25,7 +25,11 @@ def get_links(
         LOG.info("Link only one sample in a case")
         link_obj = store.link(family_id=case_id, sample_id=sample_id)
         if not link_obj:
-            LOG.error("Could not find link for case %s and sample %s", case_id, sample_id)
+            LOG.error(
+                "Could not find link for case %s and sample %s",
+                case_id,
+                sample_id,
+            )
             raise click.Abort
         link_objs = [link_obj]
 
@@ -58,7 +62,7 @@ def get_links(
             LOG.error("Could not find links for sample %s", sample_id)
             raise click.Abort
 
-        link_objs = sample_obj.links
+        link_objs = sample_obj.links[0].family.links
 
     else:
         LOG.error("Please provide case and/or sample")

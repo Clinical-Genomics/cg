@@ -59,18 +59,15 @@ class StatusHandler(BaseHandler):
         )
         return records
 
-    def cases_to_mip_analyze(self, limit: int = 50):
-        """Fetch families without analyses where all samples are sequenced."""
-
-        families_q = (
+    def cases_to_analyze(
+        self, pipeline: str = "", threshold: float = None, limit: int = None
+    ) -> list:
+        """Returns a list if cases ready to be analyzed or set to be reanalyzed"""
+        families_query = (
             self.Family.query.outerjoin(models.Analysis)
             .join(models.Family.links, models.FamilySample.sample)
             .filter(or_(models.Sample.is_external, models.Sample.sequenced_at.isnot(None)))
-            .filter(
-                or_(
-                    models.Sample.data_analysis.is_(None), models.Sample.data_analysis != "Balsamic"
-                )
-            )
+            .filter(models.Sample.data_analysis.ilike(f"%{pipeline}%"))
             .filter(
                 or_(
                     models.Family.action == "analyze",
@@ -81,38 +78,30 @@ class StatusHandler(BaseHandler):
         )
 
         families = [
-            record for record in families_q if self._all_samples_have_sequence_data(record.links)
+            record
+            for record in families_query
+            if self._all_samples_have_sequence_data(record.links)
         ]
 
+        if threshold:
+            families = [
+                record
+                for record in families
+                if self.all_samples_have_enough_reads(record.links, threshold=threshold)
+            ]
         return families[:limit]
 
-    def cases_to_balsamic_analyze(self, limit: int = 50):
-        """Fetch families without analyses where all samples are sequenced."""
-
-        # there are two cases when a sample should be analysed:
-        families_q = (
+    def cases_to_store(self, pipeline: str, limit: int = None) -> list:
+        """Returns a list of cases that may be available to store in Housekeeper"""
+        families_query = (
             self.Family.query.outerjoin(models.Analysis)
             .join(models.Family.links, models.FamilySample.sample)
-            # the samples must external or be sequenced to be analysed
             .filter(or_(models.Sample.is_external, models.Sample.sequenced_at.isnot(None)))
-            # The data_analysis is includes Balsamic
-            .filter(models.Sample.data_analysis.ilike("%Balsamic%"))
-            # 1. family that has been analysed but now is requested for re-analysing
-            # 2. new family that hasn't been analysed yet
-            .filter(
-                or_(
-                    models.Family.action == "analyze",
-                    and_(models.Family.action.is_(None), models.Analysis.created_at.is_(None)),
-                )
-            )
+            .filter(models.Sample.data_analysis.ilike(f"%{pipeline}%"))
+            .filter(models.Family.action == "running")
             .order_by(models.Family.priority.desc(), models.Family.ordered_at)
         )
-
-        families = [
-            record for record in families_q if self._all_samples_have_sequence_data(record.links)
-        ]
-
-        return families[:limit]
+        return list(families_query)[:limit]
 
     def cases(
         self,
@@ -533,7 +522,27 @@ class StatusHandler(BaseHandler):
         """Return True if all samples are external or sequenced inhouse."""
         return all((link.sample.sequenced_at or link.sample.is_external) for link in links)
 
-    def analyses_to_upload(self, pipeline: str = None) -> List[models.Analysis]:
+    def all_samples_have_enough_reads(
+        self, links: List[models.FamilySample], threshold: float
+    ) -> bool:
+        return all(
+            (
+                link.sample.reads
+                > self.Application.query.filter_by(
+                    id=self.ApplicationVersion.query.filter_by(
+                        id=link.sample.application_version_id
+                    )
+                    .first()
+                    .application_id
+                )
+                .first()
+                .target_reads
+                * threshold
+            )
+            for link in links
+        )
+
+    def analyses_to_upload(self, pipeline: str = "") -> List[models.Analysis]:
         """Fetch analyses that haven't been uploaded."""
         records = self.Analysis.query.filter(
             models.Analysis.completed_at != None, models.Analysis.uploaded_at == None
@@ -544,16 +553,14 @@ class StatusHandler(BaseHandler):
 
         return records
 
-    def analyses_to_clean(self, pipeline: str = None):
+    def analyses_to_clean(self, pipeline: str = ""):
         """Fetch analyses that haven't been cleaned."""
         records = self.latest_analyses()
         records = records.filter(
-            models.Analysis.uploaded_at.isnot(None), models.Analysis.cleaned_at.is_(None)
+            models.Analysis.uploaded_at.isnot(None),
+            models.Analysis.cleaned_at.is_(None),
+            models.Analysis.pipeline.ilike(f"%{pipeline}%"),
         )
-
-        if pipeline:
-            records = records.filter(models.Analysis.pipeline.ilike(f"%{pipeline}%"))
-
         return records
 
     def observations_to_upload(self):
@@ -574,17 +581,21 @@ class StatusHandler(BaseHandler):
 
         return families_q
 
-    def analyses_to_deliver(self):
+    def analyses_to_deliver(self, pipeline: str = ""):
         """Fetch analyses that have been uploaded but not delivered."""
         records = (
             self.Analysis.query.join(models.Family, models.Family.links, models.FamilySample.sample)
-            .filter(models.Analysis.uploaded_at.isnot(None), models.Sample.delivered_at.is_(None))
+            .filter(
+                models.Analysis.uploaded_at.isnot(None),
+                models.Sample.delivered_at.is_(None),
+                models.Analysis.pipeline.ilike(f"%{pipeline}%"),
+            )
             .order_by(models.Analysis.uploaded_at.desc())
         )
 
         return records
 
-    def analyses_to_delivery_report(self) -> Query:
+    def analyses_to_delivery_report(self, pipeline: str = "") -> Query:
         """Fetch analyses that needs the delivery report to be regenerated."""
 
         analyses_query = self.latest_analyses()
@@ -594,7 +605,8 @@ class StatusHandler(BaseHandler):
             .join(models.Family, models.Family.links, models.FamilySample.sample)
             .filter(
                 or_(
-                    models.Sample.data_analysis.is_(None), models.Sample.data_analysis != "Balsamic"
+                    models.Sample.data_analysis.is_(None),
+                    models.Sample.data_analysis.ilike(f"%{pipeline}%"),
                 )
             )
             .filter(

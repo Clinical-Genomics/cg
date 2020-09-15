@@ -12,28 +12,8 @@ from cg.apps.balsamic.fastq import FastqHandler
 from cg.apps.hk import HousekeeperAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.store import Store
-from cg.utils.fastq import FastqAPI
-
-
-class MockLimsAPI:
-    """Mock LIMS API to simulate LIMS behavior in BALSAMIC"""
-
-    def __init__(self, config: dict = None):
-        self.config = config
-        self.sample_vars = {}
-
-    def add_sample(self, internal_id: str):
-        self.sample_vars[internal_id] = {}
-
-    def add_capture_kit(self, internal_id: str, capture_kit):
-        if not internal_id in self.sample_vars:
-            self.add_sample(internal_id)
-        self.sample_vars[internal_id]["capture_kit"] = capture_kit
-
-    def capture_kit(self, internal_id: str):
-        if internal_id in self.sample_vars:
-            return self.sample_vars[internal_id].get("capture_kit")
-        return None
+from cg.apps.hk import HousekeeperAPI
+from tests.mocks.limsmock import MockLimsAPI
 
 
 @pytest.fixture(name="balsamic_dir")
@@ -41,6 +21,13 @@ def balsamic_dir(tmpdir_factory, apps_dir: Path) -> Path:
     """Return the path to the balsamic apps dir"""
     balsamic_dir = tmpdir_factory.mktemp("balsamic")
     return Path(balsamic_dir).absolute().as_posix()
+
+
+@pytest.fixture(name="balsamic_housekeeper_dir")
+def balsamic_housekeeeper_dir(tmpdir_factory, balsamic_dir: Path) -> Path:
+    """Return the path to the balsamic housekeeper dir"""
+    balsamic_housekeeper_dir = tmpdir_factory.mktemp("bundles")
+    return balsamic_housekeeper_dir
 
 
 @pytest.fixture(name="balsamic_housekeeper_dir")
@@ -349,6 +336,39 @@ def balsamic_store(base_store: Store, helpers) -> Store:
     # Create wes application version
     helpers.ensure_application_version(store=_store, application_tag="WESA", application_type="wes")
 
+    # Create textbook case for WGS PAIRED with enough reads
+    case_wgs_paired_enough_reads = helpers.add_family(
+        store=_store,
+        internal_id="balsamic_case_wgs_paired_enough_reads",
+        family_id="balsamic_case_wgs_paired_enough_reads",
+    )
+    sample_case_wgs_paired_tumor_enough_reads = helpers.add_sample(
+        _store,
+        internal_id="sample_case_wgs_paired_tumor_enough_reads",
+        is_tumour=True,
+        application_type="wgs",
+        data_analysis="balsamic",
+        reads=10,
+    )
+    sample_case_wgs_paired_normal_enough_reads = helpers.add_sample(
+        _store,
+        internal_id="sample_case_wgs_paired_normal_enough_reads",
+        is_tumour=False,
+        application_type="wgs",
+        data_analysis="balsamic",
+        reads=10,
+    )
+    helpers.add_relationship(
+        _store,
+        family=case_wgs_paired_enough_reads,
+        sample=sample_case_wgs_paired_tumor_enough_reads,
+    )
+    helpers.add_relationship(
+        _store,
+        family=case_wgs_paired_enough_reads,
+        sample=sample_case_wgs_paired_normal_enough_reads,
+    )
+
     # Create textbook case for WGS PAIRED
     case_wgs_paired = helpers.add_family(
         store=_store, internal_id="balsamic_case_wgs_paired", family_id="balsamic_case_wgs_paired"
@@ -359,6 +379,7 @@ def balsamic_store(base_store: Store, helpers) -> Store:
         is_tumour=True,
         application_type="wgs",
         data_analysis="balsamic",
+        reads=10,
     )
     sample_case_wgs_paired_normal = helpers.add_sample(
         _store,
@@ -366,11 +387,12 @@ def balsamic_store(base_store: Store, helpers) -> Store:
         is_tumour=False,
         application_type="wgs",
         data_analysis="balsamic",
+        reads=10,
     )
     helpers.add_relationship(_store, family=case_wgs_paired, sample=sample_case_wgs_paired_tumor)
     helpers.add_relationship(_store, family=case_wgs_paired, sample=sample_case_wgs_paired_normal)
 
-    # Create textbook case for TGS PAIRED
+    # Create textbook case for TGS PAIRED without enough reads
     case_tgs_paired = helpers.add_family(
         _store, internal_id="balsamic_case_tgs_paired", family_id="balsamic_case_tgs_paired"
     )
@@ -381,6 +403,7 @@ def balsamic_store(base_store: Store, helpers) -> Store:
         application_tag="TGSA",
         application_type="tgs",
         data_analysis="BALSAMIC",
+        reads=10,
     )
     sample_case_tgs_paired_normal = helpers.add_sample(
         _store,
@@ -389,6 +412,7 @@ def balsamic_store(base_store: Store, helpers) -> Store:
         application_tag="TGSA",
         application_type="tgs",
         data_analysis="MIP+BALSAMIC",
+        reads=0,
     )
     helpers.add_relationship(_store, family=case_tgs_paired, sample=sample_case_tgs_paired_tumor)
     helpers.add_relationship(_store, family=case_tgs_paired, sample=sample_case_tgs_paired_normal)
@@ -403,6 +427,7 @@ def balsamic_store(base_store: Store, helpers) -> Store:
         is_tumour=True,
         application_type="wgs",
         data_analysis="balsamic",
+        reads=100,
     )
     helpers.add_relationship(_store, family=case_wgs_single, sample=sample_case_wgs_single_tumor)
 
@@ -690,7 +715,6 @@ def balsamic_context(
         housekeeper_api=balsamic_housekeeper,
         fastq_handler=FastqHandler(server_config),
         lims_api=balsamic_lims,
-        fastq_api=FastqAPI,
     )
     return {
         "BalsamicAnalysisAPI": balsamic_analysis_api,

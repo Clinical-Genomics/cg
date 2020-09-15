@@ -25,7 +25,7 @@ def delivery_reports(context, print_console, force_report):
     click.echo(click.style("----------------- DELIVERY REPORTS ------------------------"))
 
     exit_code = SUCCESS
-    for analysis_obj in context.obj["status"].analyses_to_delivery_report():
+    for analysis_obj in context.obj["status"].analyses_to_delivery_report(pipeline="mip"):
         case_id = analysis_obj.family.internal_id
         LOG.info("Uploading delivery report for case: %s", case_id)
         try:
@@ -44,6 +44,9 @@ def delivery_reports(context, print_console, force_report):
             exit_code = FAIL
         except CgError as error:
             LOG.error("Uploading delivery report failed for case: %s, %s", case_id, error.message)
+            exit_code = FAIL
+        except Exception as error:
+            LOG.error("Unspecified error when uploading delivery report for case: %s", case_id)
             exit_code = FAIL
     sys.exit(exit_code)
 

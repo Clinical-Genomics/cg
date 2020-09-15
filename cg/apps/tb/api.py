@@ -9,19 +9,20 @@ import click
 import ruamel.yaml
 
 from trailblazer.store import api, models, Store
-from trailblazer.mip import files, fastq, trending
+from trailblazer.mip import files, trending
 
 LOG = logging.getLogger(__name__)
 
 
-class TrailblazerAPI(Store, fastq.FastqHandler):
+class TrailblazerAPI(Store):
     """Interface to Trailblazer for `cg`."""
 
     parse_sampleinfo = staticmethod(files.parse_sampleinfo)
 
     def __init__(self, config: dict):
         super(TrailblazerAPI, self).__init__(
-            config["trailblazer"]["database"], families_dir=config["trailblazer"]["root"]
+            config["trailblazer"]["database"],
+            families_dir=config["trailblazer"]["root"],
         )
         self.mip_config = config["trailblazer"]["mip_config"]
 
@@ -77,17 +78,12 @@ class TrailblazerAPI(Store, fastq.FastqHandler):
                 return has_started
         return False
 
-    def write_panel(self, case_id: str, content: List[str]):
-        """Write the gene panel to the defined location."""
-        out_dir = Path(self.families_dir) / case_id
-        out_dir.mkdir(parents=True, exist_ok=True)
-        out_path = out_dir / "gene_panels.bed"
-        with out_path.open("w") as out_handle:
-            for line in content:
-                click.echo(line, file=out_handle)
-
     def delete_analysis(
-        self, family: str, date: dt.datetime, yes: bool = False, dry_run: bool = False
+        self,
+        family: str,
+        date: dt.datetime,
+        yes: bool = False,
+        dry_run: bool = False,
     ):
         """Delete the analysis output."""
         if self.analyses(family=family, temp=True).count() > 0:
