@@ -19,12 +19,11 @@ class TrailblazerAPI(Store):
 
     parse_sampleinfo = staticmethod(files.parse_sampleinfo)
 
-    def __init__(self, config: dict, pipeline: str):
+    def __init__(self, config: dict):
         super(TrailblazerAPI, self).__init__(
             config["trailblazer"]["database"],
             families_dir=config["trailblazer"]["root"],
         )
-        self.mip_config = config[pipeline]["mip_config"]
 
     def mark_analyses_deleted(self, case_id: str):
         """ mark analyses connected to a case as deleted """
