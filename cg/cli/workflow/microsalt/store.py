@@ -64,21 +64,4 @@ def analysis(context, config_stream):
 @click.pass_context
 def completed(context):
     """Store all completed analyses."""
-    _store = context.obj["db"]
-    usalt = context.obj["usalt"]
-
-    exit_code = SUCCESS
-    breakpoint()
-    for order in _store.orders_to_microsalt_analyze():
-        LOG.info("Storing microSALT order: %s", order)
-        try:
-            breakpoint()
-            microsalt_deliverables = Path(usalt["root"], "results", order.internal_id + ".yaml")
-            exit_code = context.invoke(analysis, config_stream=microsalt_deliverables) or exit_code
-        except StoreError as error:
-            LOG.error("Analysis storage failed: %s", error.message)
-            exit_code = FAIL
-
-    LOG.info("Done storing microbail orders. Exit code: %s", exit_code)
-
-    sys.exit(exit_code)
+    pass

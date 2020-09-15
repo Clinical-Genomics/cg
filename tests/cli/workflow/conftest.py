@@ -58,3 +58,80 @@ def rna_case(analysis_store, helpers) -> models.Family:
     """Case with RNA application"""
     cust = helpers.ensure_customer(analysis_store)
     return analysis_store.find_family(cust, "rna_case")
+
+
+class MockTB:
+    """Trailblazer mock fixture"""
+
+    def __init__(self):
+        self._link_was_called = False
+        self._mark_analyses_deleted_called = False
+        self._add_pending_was_called = False
+        self._add_pending_analysis_was_called = False
+        self._family = None
+        self._temp = None
+        self._case_id = None
+        self._email = None
+        self._status = None
+
+    def analyses(self, family=None, status=None, temp=None):
+        """Mock TB analyses models"""
+
+        self._family = family
+        self._status = status
+        self._temp = temp
+
+        class Row:
+            """Mock a record representing an analysis"""
+
+            def __init__(self):
+                """We need to initialize _first_was_called
+                so that we can set it in `first()` and retrieve
+                it in `first_was_called()`. This way we can easily
+                run the invoking code and make sure the function was
+                called.
+                """
+
+                self._first_was_called = False
+
+            def first(self):
+                """Mock that the first row doesn't exist"""
+                self._first_was_called = True
+
+            def first_was_called(self):
+                """Check if first was called"""
+                return self._first_was_called
+
+        return Row()
+
+    def mark_analyses_deleted(self, case_id: str):
+        """Mock this function"""
+        self._case_id = case_id
+        self._mark_analyses_deleted_called = True
+
+    def add_pending(self, case_id: str, email: str):
+        """Mock this function"""
+        self._case_id = case_id
+        self._email = email
+        self._add_pending_was_called = True
+
+    def add_pending_analysis(self, case_id: str, email: str):
+        """Mock adding a pending analyses"""
+        self._case_id = case_id
+        self._email = email
+        self._add_pending_analysis_was_called = True
+
+    def mark_analyses_deleted_called(self):
+        """check if mark_analyses_deleted was called"""
+        return self._mark_analyses_deleted_called
+
+    def add_pending_was_called(self):
+        """check if add_pending was called"""
+        return self._add_pending_was_called
+
+
+@pytest.fixture(scope="function")
+def tb_api():
+    """Trailblazer API fixture"""
+
+    return MockTB()

@@ -2,13 +2,7 @@
 
 TMP_DIR = "/home/proj/production/rare-disease/temp-dir/"
 
-PRIORITY_MAP = {
-    "research": 0,
-    "standard": 1,
-    "priority": 2,
-    "express": 3,
-    "clinical trials": 4,
-}
+PRIORITY_MAP = {"research": 0, "standard": 1, "priority": 2, "express": 3, "clinical trials": 4}
 REV_PRIORITY_MAP = {value: key for key, value in PRIORITY_MAP.items()}
 PRIORITY_OPTIONS = list(PRIORITY_MAP.keys())
 FAMILY_ACTIONS = ("analyze", "running", "hold")
@@ -84,115 +78,112 @@ HK_FASTQ_TAGS = ["fastq"]
 # presence of mandatory files. Keys = tags found in deliverables, values = MIP standard tags and
 # mandatory flag
 MIP_DNA_TAGS = {
-    tuple(["gatk_baserecalibration"]): {
-        "tags": ["cram"],
-        "index_tags": ["cram-index"],
-        "is_mandatory": False,
-    },
-    tuple(["config_analysis"]): {"tags": ["mip-config"], "is_mandatory": True},
-    tuple(["sample_info"]): {"tags": ["sampleinfo"], "is_mandatory": True},
-    tuple(["multiqc_ar", "html"]): {"tags": ["multiqc-html"], "is_mandatory": True},
-    tuple(["multiqc_ar", "json"]): {"tags": ["multiqc-json"], "is_mandatory": True},
-    tuple(["pedigree"]): {"tags": ["pedigree-yaml"], "is_mandatory": True},
-    tuple(["pedigree_fam"]): {"tags": ["pedigree"], "is_mandatory": True},
-    tuple(["log"]): {"tags": ["mip-log"], "is_mandatory": True},
-    tuple(["qccollect_ar"]): {"tags": ["qcmetrics"], "is_mandatory": True},
-    tuple(["gatk_combinevariantcallsets", "bcf"]): {
-        "tags": ["snv-gbcf", "snv-bcf"],
-        "index_tags": ["gbcf-index"],
-        "is_mandatory": True,
-    },
-    tuple(["sv_combinevariantcallsets", "bcf"]): {
-        "tags": ["sv-bcf"],
-        "index_tags": ["sv-bcf-index"],
-        "is_mandatory": True,
-    },
-    tuple(["peddy_ar", "ped_check"]): {"tags": ["peddy", "ped-check"], "is_mandatory": True},
-    tuple(["peddy_ar", "peddy"]): {"tags": ["peddy", "ped"], "is_mandatory": True},
-    tuple(["peddy_ar", "sex_check"]): {"tags": ["peddy", "sex-check"], "is_mandatory": True},
-    tuple(["version_collect_ar"]): {"tags": ["exe-ver"], "is_mandatory": True},
-    tuple(["sv_str"]): {
-        "tags": ["vcf-str"],
-        "index_tags": ["vcf-str-index"],
-        "is_mandatory": False,
-    },
-    tuple(["clinical", "endvariantannotationblock"]): {
+    ("mip_analyse", "config_analysis"): {"tags": ["mip-config"], "is_mandatory": True},
+    ("chanjo_sexcheck",): {"tags": ["chanjo", "sex-check"], "is_mandatory": False},
+    ("chromograph_ar",): {"tags": ["chromograph"], "is_mandatory": False},
+    ("endvariantannotationblock", "clinical"): {
         "tags": ["vcf-snv-clinical"],
         "index_tags": ["vcf-snv-clinical-index"],
         "is_mandatory": True,
     },
-    tuple(["research", "endvariantannotationblock"]): {
-        "tags": ["vcf-snv-research"],
-        "index_tags": ["vcf-snv-research-index"],
-        "is_mandatory": True,
-    },
-    tuple(["clinical", "sv_reformat"]): {
+    ("sv_reformat", "clinical"): {
         "tags": ["vcf-sv-clinical"],
         "index_tags": ["vcf-sv-clinical-index"],
         "is_mandatory": False,
     },
-    tuple(["research", "sv_reformat"]): {
+    ("gatk_baserecalibration",): {
+        "tags": ["cram"],
+        "index_tags": ["cram-index"],
+        "is_mandatory": False,
+    },
+    ("gatk_combinevariantcallsets",): {
+        "tags": ["snv-gbcf", "snv-bcf"],
+        "index_tags": ["gbcf-index"],
+        "is_mandatory": True,
+    },
+    ("mip_analyse", "log"): {"tags": ["mip-log"], "is_mandatory": True},
+    ("multiqc_ar", "html"): {"tags": ["multiqc-html"], "is_mandatory": True},
+    ("multiqc_ar", "json"): {"tags": ["multiqc-json"], "is_mandatory": True},
+    ("mip_analyse", "config"): {"tags": ["mip-analyse", "config"], "is_mandatory": True},
+    ("mip_analyse", "pedigree"): {"tags": ["pedigree-yaml"], "is_mandatory": True},
+    ("mip_analyse", "pedigree_fam"): {"tags": ["pedigree"], "is_mandatory": True},
+    ("peddy_ar", "ped_check"): {"tags": ["peddy", "ped-check"], "is_mandatory": True},
+    ("peddy_ar", "peddy"): {"tags": ["peddy", "ped"], "is_mandatory": True},
+    ("peddy_ar", "sex_check"): {"tags": ["peddy", "sex-check"], "is_mandatory": True},
+    ("qccollect_ar",): {"tags": ["qcmetrics"], "is_mandatory": True},
+    ("endvariantannotationblock", "research"): {
+        "tags": ["vcf-snv-research"],
+        "index_tags": ["vcf-snv-research-index"],
+        "is_mandatory": True,
+    },
+    ("sv_reformat", "research"): {
         "tags": ["vcf-sv-research"],
         "index_tags": ["vcf-sv-research-index"],
         "is_mandatory": False,
     },
-    tuple(["samtools_subsample_mt", "bam"]): {
+    ("sambamba_depth", "coverage"): {"tags": ["coverage", "sambamba-depth"], "is_mandatory": True},
+    ("mip_analyse", "references_info"): {
+        "tags": ["mip-analyse", "reference-info"],
+        "is_mandatory": True,
+    },
+    ("mip_analyse", "sample_info"): {"tags": ["sampleinfo"], "is_mandatory": True},
+    ("samtools_subsample_mt",): {
         "tags": ["bam-mt"],
         "index_tags": ["bam-mt-index"],
         "is_mandatory": False,
     },
-    tuple(["chromograph_ar"]): {"tags": ["chromograph"], "is_mandatory": False},
-    tuple(["vcf2cytosure_ar"]): {"tags": ["vcf2cytosure"], "is_mandatory": False},
+    ("smncopynumbercaller",): {
+        "tags": ["smn-calling", "smncopynumbercaller"],
+        "is_mandatory": False,
+    },
+    ("sv_combinevariantcallsets",): {
+        "tags": ["sv-bcf"],
+        "index_tags": ["sv-bcf-index"],
+        "is_mandatory": True,
+    },
+    ("expansionhunter", "sv_str"): {
+        "tags": ["vcf-str"],
+        "index_tags": ["vcf-str-index"],
+        "is_mandatory": False,
+    },
+    ("version_collect_ar",): {"tags": ["exe-ver"], "is_mandatory": True},
+    ("vcf2cytosure_ar",): {"tags": ["vcf2cytosure"], "is_mandatory": False},
 }
 
 
 MIP_RNA_TAGS = {
-    tuple(["salmon_quant"]): {"tags": ["salmon-quant"], "is_mandatory": True},
-    tuple(["star_fusion"]): {"tags": ["star-fusion"], "is_mandatory": True},
-    tuple(["arriba_ar", "arriba_report"]): {
-        "tags": ["arriba-ar", "arriba-report"],
-        "is_mandatory": True,
-    },
-    tuple(["arriba_ar", "arriba_ar"]): {"tags": ["arriba-ar"], "is_mandatory": True},
-    tuple(["stringtie_ar"]): {"tags": ["stringtie-ar"], "is_mandatory": True},
-    tuple(["gffcompare_ar"]): {"tags": ["gffcompare-ar"], "is_mandatory": True},
-    tuple(["markduplicates"]): {
-        "tags": ["cram"],
-        "index_tags": ["cram-index"],
-        "is_mandatory": True,
-    },
-    tuple(["gatk_asereadcounter"]): {"tags": ["gatk-asereadcounter"], "is_mandatory": True},
-    tuple(["bootstrapann"]): {"tags": ["bootstrapann"], "is_mandatory": True},
-    tuple(["bcftools_merge"]): {"tags": ["bcftools-merge"], "is_mandatory": True},
-    tuple(["varianteffectpredictor"]): {"tags": ["varianteffectpredictor"], "is_mandatory": True},
-    tuple(["version_collect_ar"]): {"tags": ["version-collect-ar"], "is_mandatory": True},
-    tuple(["multiqc_ar", "html"]): {"tags": ["multiqc-html"], "is_mandatory": True},
-    tuple(["multiqc_ar", "json"]): {"tags": ["multiqc-json"], "is_mandatory": True},
-    tuple(["mip_analyse", "sample_info"]): {
-        "tags": ["mip-analyse", "sample-info"],
-        "is_mandatory": True,
-    },
-    tuple(["mip_analyse", "references_info"]): {
-        "tags": ["mip-analyse", "reference-info"],
-        "is_mandatory": True,
-    },
-    tuple(["mip_analyse", "log"]): {"tags": ["mip-analyse", "log"], "is_mandatory": True},
-    tuple(["mip_analyse", "config_analysis"]): {
+    ("arriba_ar", "arriba_ar"): {"tags": ["arriba-ar"], "is_mandatory": True},
+    ("arriba_ar", "arriba_report"): {"tags": ["arriba-ar", "arriba-report"], "is_mandatory": True},
+    ("bcftools_merge",): {"tags": ["bcftools-merge"], "is_mandatory": True},
+    ("blobfish",): {"tags": ["blobfish"], "is_mandatory": False},
+    ("bootstrapann",): {"tags": ["bootstrapann"], "is_mandatory": True},
+    ("gatk_asereadcounter",): {"tags": ["gatk-asereadcounter"], "is_mandatory": True},
+    ("gffcompare_ar",): {"tags": ["gffcompare-ar"], "is_mandatory": True},
+    ("markduplicates",): {"tags": ["cram"], "index_tags": ["cram-index"], "is_mandatory": True},
+    ("mip_analyse", "config"): {"tags": ["mip-analyse", "config"], "is_mandatory": True},
+    ("mip_analyse", "config_analysis"): {
         "tags": ["mip-analyse", "config-analysis"],
         "is_mandatory": True,
     },
-    tuple(["mip_analyse", "pedigree"]): {
-        "tags": ["mip-analyse", "pedigree"],
-        "is_mandatory": True,
-    },
-    tuple(["mip_analyse", "config"]): {"tags": ["mip-analyse", "config"], "is_mandatory": True},
-    tuple(["mip_analyse", "pedigree_fam"]): {
+    ("mip_analyse", "log"): {"tags": ["mip-analyse", "log"], "is_mandatory": True},
+    ("mip_analyse", "pedigree"): {"tags": ["mip-analyse", "pedigree"], "is_mandatory": True},
+    ("mip_analyse", "pedigree_fam"): {
         "tags": ["mip-analyse", "pedigree-fam"],
         "is_mandatory": True,
     },
-    tuple(["blobfish"]): {"tags": ["blobfish"], "is_mandatory": False},
+    ("mip_analyse", "references_info"): {
+        "tags": ["mip-analyse", "reference-info"],
+        "is_mandatory": True,
+    },
+    ("mip_analyse", "sample_info"): {"tags": ["mip-analyse", "sample-info"], "is_mandatory": True},
+    ("multiqc_ar", "html"): {"tags": ["multiqc-html"], "is_mandatory": True},
+    ("multiqc_ar", "json"): {"tags": ["multiqc-json"], "is_mandatory": True},
+    ("salmon_quant",): {"tags": ["salmon-quant"], "is_mandatory": True},
+    ("star_fusion",): {"tags": ["star-fusion"], "is_mandatory": True},
+    ("stringtie_ar",): {"tags": ["stringtie-ar"], "is_mandatory": True},
+    ("varianteffectpredictor",): {"tags": ["varianteffectpredictor"], "is_mandatory": True},
+    ("version_collect_ar",): {"tags": ["version-collect-ar"], "is_mandatory": True},
 }
-
 
 MICROSALT_TAGS = {
     ("analysis", "sampleinfo"): {"tags": ["analysis", "sampleinfo"], "is_mandatory": True,},
@@ -241,3 +232,11 @@ MICROSALT_TAGS = {
         "is_mandatory": True,
     },
 }
+
+# Symbols
+SINGLE_QUOTE = "'"
+SPACE = " "
+
+# Processes
+RETURN_SUCCESS = 0
+EXIT_SUCCESS = 0

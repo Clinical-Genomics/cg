@@ -550,17 +550,15 @@ class StatusHandler(BaseHandler):
         """Return True if all samples are external or sequenced inhouse."""
         return all((link.sample.sequenced_at or link.sample.is_external) for link in links)
 
-    @staticmethod
-    def _all_microbial_samples_have_sequence_data(microbial_samples: List[models.MicrobialSample]) -> bool:
-        """Return True if all microbial samples are sequenced."""
-        return all((microbial_sample.sequenced_at) for microbial_sample in microbial_samples)
-
-
-    def analyses_to_upload(self):
+    def analyses_to_upload(self, pipeline: str = None) -> List[models.Analysis]:
         """Fetch analyses that haven't been uploaded."""
         records = self.Analysis.query.filter(
             models.Analysis.completed_at != None, models.Analysis.uploaded_at == None
         )
+
+        if pipeline:
+            records = records.filter(models.Analysis.pipeline.ilike(f"%{pipeline}%"))
+
         return records
 
     def analyses_to_clean(self, pipeline: str = None):

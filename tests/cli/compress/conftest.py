@@ -128,3 +128,85 @@ def fixture_populated_compress_context(compress_api, populated_compress_store):
     """Return a compress context populated with a completed analysis"""
     # Make sure that there is a family where anaylis is completer
     return {"compress": compress_api, "db": populated_compress_store}
+
+
+# Bundle fixtures
+
+
+@pytest.fixture(scope="function", name="sample")
+def fixture_sample():
+    """Return the sample id for first sample"""
+    return "sample_1"
+
+
+@pytest.fixture(scope="function", name="new_dir")
+def fixture_new_dir(project_dir):
+    """Return the path to a subdirectory"""
+    new_dir = project_dir / "new_dir/"
+    new_dir.mkdir()
+    return new_dir
+
+
+@pytest.fixture(name="spring_bundle")
+def fixture_spring_bundle(project_dir, timestamp, sample):
+    """Return a bundle with some spring info"""
+    spring_file = project_dir / "file.spring"
+    spring_file.touch()
+    spring_meta_file = project_dir / "file.json"
+    spring_meta_file.touch()
+    hk_bundle_data = {
+        "name": sample,
+        "created": timestamp,
+        "expires": timestamp,
+        "files": [
+            {"path": str(spring_file), "archive": False, "tags": [sample, "spring"]},
+            {"path": str(spring_meta_file), "archive": False, "tags": [sample, "spring-metadata"]},
+        ],
+    }
+
+    return hk_bundle_data
+
+
+@pytest.fixture(name="spring_bundle_symlink_problem")
+def fixture_spring_bundle_symlink_problem(project_dir, new_dir, timestamp, sample):
+    """Setup an environment that is similar to the case we want to solve"""
+    # Create spring files and faulty paths to spring files
+    spring_file = project_dir / "file.spring"
+    spring_file.touch()
+    wrong_spring_file = new_dir / "file.spring"
+    spring_meta_file = project_dir / "file.json"
+    spring_meta_file.touch()
+    wrong_spring_meta_file = new_dir / "file.json"
+    hk_bundle_data = {
+        "name": sample,
+        "created": timestamp,
+        "expires": timestamp,
+        "files": [
+            {"path": str(wrong_spring_file), "archive": False, "tags": [sample, "spring"]},
+            {
+                "path": str(wrong_spring_meta_file),
+                "archive": False,
+                "tags": [sample, "spring-metadata"],
+            },
+        ],
+    }
+
+    return hk_bundle_data
+
+
+@pytest.fixture(name="symlinked_fastqs")
+def fixture_symlinked_fastqs(project_dir, new_dir):
+    """Setup an environment that is similar to the case we want to solve"""
+    fastq_first = project_dir / "first.fastq.gz"
+    fastq_second = project_dir / "second.fastq.gz"
+
+    symlinked_first = new_dir / "first.fastq.gz"
+    symlinked_first.symlink_to(fastq_first)
+    symlinked_second = new_dir / "second.fastq.gz"
+    symlinked_second.symlink_to(fastq_second)
+    return {
+        "fastq_first": fastq_first,
+        "fastq_second": fastq_second,
+        "symlinked_first": symlinked_first,
+        "symlinked_second": symlinked_second,
+    }
