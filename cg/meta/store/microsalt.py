@@ -127,7 +127,7 @@ def _convert_tags(tags: dict, tag_map: dict, tag_map_key: tuple, is_index: bool 
         mapped_tags = tag_map[tag_map_key]["tags"]
     converted_tags = [
         tags["format"],
-        tags["id"],
+        str(tags["id"]),
         tags["pipeline"],
     ]
 
@@ -173,12 +173,11 @@ def _get_microbial_name(deliverables: dict) -> str:
 
 def _get_date_from_results_path(deliverables: dict, project_name: str) -> dt.datetime:
     """ Get date from results path """
-    for file_ in deliverables["files"]:
-        if file_["tag"] != "sampleinfo":
-            results_path = file_["path"]
-            [_, partial_path] = results_path.split(f"{project_name}_")
-            [date_in_path, _] = partial_path.split("/")
-            [date, time] = date_in_path.split("_")
-            [year, month, day] = list(map(int, date.split(".")))
-            [hour, minutes, seconds] = list(map(int, time.split(".")))
-            return dt.datetime(year, month, day, hour, minutes, seconds)
+    first_file, *_ = deliverables["files"]
+    results_path = first_file["path"]
+    partial_path, _ = results_path.split("sampleinfo")
+    [_, timestamp, _] = partial_path.split("//")
+    [_, date, time] = timestamp.split("_")
+    [year, month, day] = list(map(int, date.split(".")))
+    [hour, minutes, seconds] = list(map(int, time.split(".")))
+    return dt.datetime(year, month, day, hour, minutes, seconds)
