@@ -158,6 +158,13 @@ def fixture_base_compress_context(compress_api, store):
     return ctx
 
 
+@pytest.fixture(name="store_fastq_context")
+def fixture_store_fastq_context(compress_api, store):
+    """Return a compress context"""
+    ctx = {"compress": compress_api, "db": store}
+    return ctx
+
+
 @pytest.fixture(name="populated_multiple_compress_context")
 def fixture_populated_multiple_compress_context(compress_api, populated_compress_multiple_store):
     """Return a compress context populated with a completed analysis"""

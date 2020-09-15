@@ -4,7 +4,7 @@ import logging
 
 import click
 
-from cg.apps import crunchy, hk, scoutapi
+from cg.apps import crunchy, hk
 from cg.cli.compress.helpers import get_fastq_individuals, update_compress_api
 from cg.exc import CaseNotFoundError
 from cg.meta.compress import CompressAPI
@@ -14,8 +14,15 @@ LOG = logging.getLogger(__name__)
 
 
 @click.group()
-def store():
+@click.pass_context
+def store(context):
     """Command for storing files"""
+    hk_api = hk.HousekeeperAPI(context.obj)
+    crunchy_api = crunchy.CrunchyAPI(context.obj)
+
+    compress_api = CompressAPI(hk_api=hk_api, crunchy_api=crunchy_api)
+    context.obj["compress"] = compress_api
+    context.obj["db"] = Store(context.obj.get("database"))
 
 
 @store.command("fastq")
@@ -25,26 +32,23 @@ def store():
 def fastq_cmd(context, case_id, dry_run):
     """Store fastq files for a case in Housekeeper"""
     LOG.info("Running store fastq")
-    cg_store = Store(context.obj.get("database"))
 
-    hk_api = hk.HousekeeperAPI(context.obj)
-    scout_api = scoutapi.ScoutAPI(context.obj)
-    crunchy_api = crunchy.CrunchyAPI(context.obj)
+    compress_api = context.obj["compress"]
+    cg_store = context.obj["db"]
 
-    compress_api = CompressAPI(hk_api=hk_api, crunchy_api=crunchy_api, scout_api=scout_api)
     update_compress_api(compress_api, dry_run=dry_run)
 
     samples = get_fastq_individuals(cg_store, case_id)
 
-    stored_inds = 0
+    stored_individuals = 0
     try:
         for sample_id in samples:
             was_added = compress_api.add_decompressed_fastq(sample_id)
             if was_added is False:
                 LOG.info("skipping individual %s", sample_id)
                 continue
-            stored_inds += 1
+            stored_individuals += 1
     except CaseNotFoundError:
         return
 
-    LOG.info("Stored fastq files for %s individuals", stored_inds)
+    LOG.info("Stored fastq files for %s individuals", stored_individuals)
