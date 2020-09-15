@@ -2,6 +2,7 @@
 
 import logging
 import sys
+from pathlib import Path
 
 import click
 
@@ -132,9 +133,15 @@ def link(context: click.Context, case_id: str, sample_id: str):
 
 @mip_dna.command("config-case")
 @click.option("-d", "--dry-run", "dry_run", is_flag=True, help="print command to console")
+@click.option(
+    "-p",
+    "--panel-bed",
+    type=click.Path(exists=True, resolve_path=True),
+    help="Set this option to override fetching of panel name from LIMS",
+)
 @click.argument("case_id", required=False, type=str)
 @click.pass_context
-def config_case(context: click.Context, case_id: str, dry_run: bool = False):
+def config_case(context: click.Context, case_id: str, panel_bed: Path, dry_run: bool = False):
     """Generate a config for the case_id"""
     dna_api = context.obj["dna_api"]
     if case_id is None:
@@ -147,7 +154,7 @@ def config_case(context: click.Context, case_id: str, dry_run: bool = False):
         raise click.Abort()
 
     try:
-        config_data = dna_api.pedigree_config(case_obj, pipeline="mip-dna")
+        config_data = dna_api.pedigree_config(case_obj, panel_bed=panel_bed, pipeline="mip-dna")
     except CgError as error:
         LOG.error(error.message)
         raise click.Abort()

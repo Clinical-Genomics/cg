@@ -13,7 +13,13 @@ from cg.apps.pipelines.fastqhandler import BaseFastqHandler
 from cg.meta.deliver import DeliverAPI
 from cg.store import models, Store
 from cg.exc import CgDataError, LimsDataError
-from cg.constants import COMBOS, COLLABORATORS, MASTER_LIST, DEFAULT_CAPTURE_KIT, FAMILY_ACTIONS
+from cg.constants import (
+    COMBOS,
+    COLLABORATORS,
+    MASTER_LIST,
+    DEFAULT_CAPTURE_KIT,
+    FAMILY_ACTIONS,
+)
 
 LOG = logging.getLogger(__name__)
 
@@ -74,7 +80,7 @@ class AnalysisAPI(ConfigHandler, MipAPI):
             return "high"
         return "normal"
 
-    def pedigree_config(self, family_obj: models.Family, pipeline: str) -> dict:
+    def pedigree_config(self, family_obj: models.Family, pipeline: str, **kwargs) -> dict:
         """Make the MIP pedigree config. Meta data for the family is taken from the family object
         and converted to MIP format via trailblazer.
 
@@ -85,10 +91,10 @@ class AnalysisAPI(ConfigHandler, MipAPI):
         Returns:
             dict: config_data (MIP format)
         """
-        data = self.build_config(family_obj, pipeline=pipeline)
+        data = self.build_config(family_obj, pipeline=pipeline, **kwargs)
 
         # Validate and reformat to MIP pedigree config format
-        config_data = self.make_pedigree_config(data, pipeline)
+        config_data = self.make_pedigree_config(data=data, pipeline=pipeline)
         return config_data
 
     def get_target_bed_from_lims(self, sample_id: str) -> str:
@@ -101,7 +107,7 @@ class AnalysisAPI(ConfigHandler, MipAPI):
             raise CgDataError("Bed-version %s does not exist" % target_bed_shortname)
         return bed_version_obj.filename
 
-    def build_config(self, family_obj: models.Family, pipeline: str) -> dict:
+    def build_config(self, family_obj: models.Family, pipeline: str, **kwargs) -> dict:
         """Fetch data for creating a MIP pedigree config file"""
 
         def get_sample_data(link_obj):
@@ -119,9 +125,9 @@ class AnalysisAPI(ConfigHandler, MipAPI):
             if sample_data["analysis_type"] == "wgs":
                 sample_data["capture_kit"] = DEFAULT_CAPTURE_KIT
             else:
-                sample_data["capture_kit"] = self.get_target_bed_from_lims(
-                    link_obj.sample.internal_id
-                )
+                sample_data["capture_kit"] = kwargs.get(
+                    "panel_bed"
+                ).as_posix() or self.get_target_bed_from_lims(link_obj.sample.internal_id)
             if link_obj.mother:
                 sample_data["mother"] = link_obj.mother.internal_id
             if link_obj.father:
@@ -318,7 +324,8 @@ class AnalysisAPI(ConfigHandler, MipAPI):
             analysis_file_raw = self._open_bundle_file(analysis_files[0].path)
         else:
             raise self.log.warning(
-                "No post analysis files received from DeliverAPI for '%s'", family_id
+                "No post analysis files received from DeliverAPI for '%s'",
+                family_id,
             )
 
         return analysis_file_raw
@@ -348,7 +355,9 @@ class AnalysisAPI(ConfigHandler, MipAPI):
                 )
             except KeyError as error:
                 self.log.warning(
-                    "get_latest_metadata failed for '%s', missing key: %s", family_id, error.args[0]
+                    "get_latest_metadata failed for '%s', missing key: %s",
+                    family_id,
+                    error.args[0],
                 )
                 trending = dict()
         return trending
@@ -369,7 +378,8 @@ class AnalysisAPI(ConfigHandler, MipAPI):
             external = link_obj.sample.application_version.application.is_external
             if downsampled or external:
                 self.log.info(
-                    "%s: downsampled/external - skip evaluation", link_obj.sample.internal_id
+                    "%s: downsampled/external - skip evaluation",
+                    link_obj.sample.internal_id,
                 )
                 return True
         return False

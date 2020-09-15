@@ -39,7 +39,11 @@ OPTION_ANALYSIS_TYPE = click.option(
     help="Setting this option to qc ensures only QC analysis is performed",
 )
 OPTION_RUN_ANALYSIS = click.option(
-    "-r", "--run-analysis", is_flag=True, default=False, help="Execute BALSAMIC in non-dry mode"
+    "-r",
+    "--run-analysis",
+    is_flag=True,
+    default=False,
+    help="Execute BALSAMIC in non-dry mode",
 )
 OPTION_PRIORITY = click.option(
     "-p",
@@ -97,10 +101,12 @@ def link(context, case_id):
 def config_case(context, panel_bed, case_id, dry):
     """Create config file for BALSAMIC analysis for a given CASE_ID"""
     balsamic_analysis_api = context.obj["BalsamicAnalysisAPI"]
+
     try:
         LOG.info(f"Creating config file for {case_id}.")
         arguments = balsamic_analysis_api.get_verified_config_case_arguments(
-            case_id=case_id, panel_bed=panel_bed
+            case_id=case_id,
+            panel_bed=panel_bed,
         )
         balsamic_analysis_api.balsamic_api.config_case(arguments=arguments, dry=dry)
     except (BalsamicStartError, LimsDataError) as e:
