@@ -87,9 +87,7 @@ def test_target_bed(cli_runner, balsamic_context, balsamic_case, caplog):
 
     # WHEN dry running with option specified
     result = cli_runner.invoke(
-        config_case,
-        [case_id, "--dry-run", option_key, option_value],
-        obj=balsamic_context,
+        config_case, [case_id, "--dry-run", option_key, option_value], obj=balsamic_context,
     )
 
     # THEN dry-print should include the the option-value
@@ -145,9 +143,7 @@ def test_umi_trim_length(cli_runner, balsamic_context, balsamic_case, caplog):
 
     # WHEN dry running with option specified
     result = cli_runner.invoke(
-        config_case,
-        [case_id, "--dry-run", option_key, option_value],
-        obj=balsamic_context,
+        config_case, [case_id, "--dry-run", option_key, option_value], obj=balsamic_context,
     )
 
     # THEN dry-print should include the the option-value

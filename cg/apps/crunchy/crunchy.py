@@ -43,7 +43,7 @@ PENDING_PATH_SUFFIX = ".crunchy.pending.txt"
 
 class CrunchyAPI:
     """
-    API for crunchy
+        API for crunchy
     """
 
     def __init__(self, config: dict):
@@ -65,7 +65,7 @@ class CrunchyAPI:
     # These are the compression/decompression methods
     def bam_to_cram(self, bam_path: Path):
         """
-        Compress BAM file into CRAM
+            Compress BAM file into CRAM
         """
         cram_path = self.get_cram_path_from_bam(bam_path)
         job_name = bam_path.name + "_bam_to_cram"
@@ -90,7 +90,7 @@ class CrunchyAPI:
 
     def fastq_to_spring(self, fastq_first: Path, fastq_second: Path, sample_id: str = ""):
         """
-        Compress FASTQ files into SPRING by sending to sbatch SLURM
+            Compress FASTQ files into SPRING by sending to sbatch SLURM
         """
         spring_path = self.get_spring_path_from_fastq(fastq=fastq_first)
         job_name = "_".join(
@@ -117,7 +117,7 @@ class CrunchyAPI:
 
     def spring_to_fastq(self, spring_path: Path, sample_id: str = ""):
         """
-        Decompress SPRING into fastq by sending to sbatch SLURM
+            Decompress SPRING into fastq by sending to sbatch SLURM
         """
         metadata_file = self.get_flag_path(spring_path)
         spring_metadata = self.get_spring_metadata(metadata_file)

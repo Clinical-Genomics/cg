@@ -40,12 +40,7 @@ def test_sequenced_at_affects_tat(base_store: Store):
     family = add_family(base_store, ordered_days_ago=7)
     yesterweek = datetime.now() - timedelta(days=7)
     weekold_sample = add_sample(
-        base_store,
-        ordered=True,
-        received=True,
-        prepared=True,
-        sequenced=True,
-        date=yesterweek,
+        base_store, ordered=True, received=True, prepared=True, sequenced=True, date=yesterweek,
     )
     base_store.relate_sample(family, weekold_sample, "unknown")
 
@@ -1150,12 +1145,7 @@ def test_samples_bool_true(base_store: Store):
     # GIVEN a database with a family
     family = add_family(base_store)
     sample = add_sample(
-        base_store,
-        received=True,
-        prepared=True,
-        sequenced=True,
-        delivered=True,
-        invoiced=True,
+        base_store, received=True, prepared=True, sequenced=True, delivered=True, invoiced=True,
     )
     base_store.relate_sample(family, sample, "unknown")
 
@@ -1632,10 +1622,7 @@ def add_analysis(store, completed=False, uploaded=False, pipeline=None, delivery
 def add_flowcell(store, name="flowcell_test", sample=None, status=None):
     """utility function to get a flowcell to use in tests"""
     flowcell = store.add_flowcell(
-        name=name,
-        sequencer="dummy_sequencer",
-        sequencer_type="hiseqx",
-        date=datetime.now(),
+        name=name, sequencer="dummy_sequencer", sequencer_type="hiseqx", date=datetime.now(),
     )
     if status:
         flowcell.status = status

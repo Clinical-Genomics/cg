@@ -146,8 +146,7 @@ def test_load_bioinfo_process(vogue_config, caplog):
         mocked.return_value.stderr = dummy_stderr.encode("utf-8")
         mocked.return_value.returncode = dummy_returncode_success
         vogue_api.load_bioinfo_process(
-            load_bioinfo_inputs=test_load_bioinfo_process_inputs,
-            cleanup_flag=True,
+            load_bioinfo_inputs=test_load_bioinfo_process_inputs, cleanup_flag=True,
         )
 
         # THEN assert that command is in log output

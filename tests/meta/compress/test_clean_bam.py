@@ -94,7 +94,7 @@ def test_update_scout_dry_run(compress_api, case_id, sample, bam_path, caplog):
 def test_update_hk_bam(
     compress_api, real_housekeeper_api, compress_hk_bam_single_bundle, sample, helpers
 ):
-    """Test to update the bam file in housekeeper
+    """ Test to update the bam file in housekeeper
 
     The function update_hk_bam will remove bam files and replace them with cram files
     In this test we will make sure that the bam and bai files are removed
@@ -135,7 +135,7 @@ def test_update_hk_cram(
     crai_file,
     helpers,
 ):
-    """Test to update the bam file in housekeeper
+    """ Test to update the bam file in housekeeper
 
     The function update_hk_bam will remove bam files and replace them with cram files
     In this test we will make sure that the bam and bai files are removed
@@ -177,7 +177,7 @@ def test_clean_bam(
     helpers,
     caplog,
 ):
-    """Test to update the bam file in housekeeper
+    """ Test to update the bam file in housekeeper
 
     The function update_hk_bam will remove bam files and replace them with cram files
     In this test we will make sure that the bam and bai files are removed

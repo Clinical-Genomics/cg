@@ -11,7 +11,7 @@ CONFIG = {"vogue": {"binary_path": "/path/to/vogue", "config_path": "vogue_confi
 @pytest.fixture(scope="function")
 def vogue_config():
     """
-    vogue config fixture
+        vogue config fixture
     """
 
     _config = CONFIG
@@ -22,7 +22,7 @@ def vogue_config():
 @pytest.fixture(scope="function", name="vogue_api")
 def fixture_vogue_api(process):
     """
-    vogue API fixture
+        vogue API fixture
     """
 
     _vogue_api = VogueAPI(CONFIG)
@@ -33,7 +33,7 @@ def fixture_vogue_api(process):
 @pytest.fixture(scope="function")
 def genotype_dict():
     """
-    genotype document fixture
+        genotype document fixture
     """
 
     return "{}"

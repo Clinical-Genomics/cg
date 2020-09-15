@@ -157,12 +157,7 @@ class MockHousekeeperAPI:
         # Add tags here if there should be missing files
         self._missing_tags = set()
         if not config:
-            config = {
-                "housekeeper": {
-                    "database": "sqlite:///:memory:",
-                    "root": str(ROOT_PATH),
-                }
-            }
+            config = {"housekeeper": {"database": "sqlite:///:memory:", "root": str(ROOT_PATH),}}
         self._database = config.get("housekeeper", {}).get("database")
         self.root_path = config.get("housekeeper", {}).get("root", str(ROOT_PATH))
 
@@ -327,20 +322,12 @@ class MockHousekeeperAPI:
         return version_obj
 
     def new_file(
-        self,
-        path: str,
-        checksum: str = None,
-        to_archive: bool = False,
-        tags: list = [],
+        self, path: str, checksum: str = None, to_archive: bool = False, tags: list = [],
     ):
         """ Create a new file """
         self.update_id_counter()
         mocked_file = MockFile(
-            id=self._id_counter,
-            path=path,
-            checksum=checksum,
-            to_archive=to_archive,
-            tags=tags,
+            id=self._id_counter, path=path, checksum=checksum, to_archive=to_archive, tags=tags,
         )
         if not self.file_exists(path):
             self._files.append(mocked_file)

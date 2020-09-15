@@ -15,7 +15,7 @@ LOG = logging.getLogger(__name__)
 class LoqusdbAPI:
 
     """
-    API for loqusdb
+        API for loqusdb
     """
 
     def __init__(self, config: dict, analysis_type: str = "wgs"):

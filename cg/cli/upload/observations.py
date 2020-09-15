@@ -80,9 +80,7 @@ def observations(context, case_id, case_limit, dry_run):
             nr_uploaded += 1
         except (DuplicateRecordError, DuplicateSampleError) as error:
             LOG.info(
-                "%s: skipping observations upload: %s",
-                family_obj.internal_id,
-                error.message,
+                "%s: skipping observations upload: %s", family_obj.internal_id, error.message,
             )
         except FileNotFoundError as error:
             LOG.info("%s: skipping observations upload: %s", family_obj.internal_id, error)

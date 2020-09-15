@@ -112,8 +112,8 @@ def _convert_deliverables_tags_to_hk_tags(
     tags: dict, analysis_type_tags: dict, deliverables_tag_map: tuple, is_index: bool = False
 ) -> List[str]:
     """
-    Filter and convert tags from external deliverables tags to standard internal housekeeper
-    tags
+        Filter and convert tags from external deliverables tags to standard internal housekeeper
+        tags
     """
 
     if is_index:
@@ -133,8 +133,8 @@ def _convert_deliverables_tags_to_hk_tags(
 
 def _check_mandatory_tags(files: list, pipeline_tags: dict):
     """
-    Check if all the mandatory tags are present for the files to be added to Housekeeper.
-    Raise an exception if not.
+        Check if all the mandatory tags are present for the files to be added to Housekeeper.
+        Raise an exception if not.
     """
     deliverable_tags = [file_["deliverables_tag_map"] for file_ in files]
     mandatory_tags = [tag for tag in pipeline_tags if pipeline_tags[tag]["is_mandatory"]]
@@ -149,8 +149,8 @@ def _check_mandatory_tags(files: list, pipeline_tags: dict):
 
 def _determine_missing_tags(mandatory_tags: list, found_tags: list) -> tuple:
     """
-    Determines if mandatory tags are missing and hence if files are missing in the
-    deliverables, and returns any missing tags
+        Determines if mandatory tags are missing and hence if files are missing in the
+        deliverables, and returns any missing tags
     """
 
     missing_tags = set(mandatory_tags) - set(found_tags)

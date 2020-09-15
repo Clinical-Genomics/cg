@@ -149,9 +149,7 @@ def upload_observations_api(analysis_store, populated_housekeeper_api):
     loqus_mock = MockLoqusAPI()
 
     _api = UploadObservationsAPI(
-        status_api=analysis_store,
-        hk_api=populated_housekeeper_api,
-        loqus_api=loqus_mock,
+        status_api=analysis_store, hk_api=populated_housekeeper_api, loqus_api=loqus_mock,
     )
 
     yield _api
@@ -164,9 +162,7 @@ def upload_observations_api_wes(analysis_store, populated_housekeeper_api):
     loqus_mock = MockLoqusAPI(analysis_type="wes")
 
     _api = UploadObservationsAPI(
-        status_api=analysis_store,
-        hk_api=populated_housekeeper_api,
-        loqus_api=loqus_mock,
+        status_api=analysis_store, hk_api=populated_housekeeper_api, loqus_api=loqus_mock,
     )
 
     yield _api
@@ -192,7 +188,7 @@ def upload_scout_api(scout_api, madeline_api, lims_samples, populated_housekeepe
 @pytest.yield_fixture(scope="function")
 def mutacc_upload_api():
     """
-    Fixture for a mutacc upload api
+        Fixture for a mutacc upload api
     """
 
     scout_api = MockScoutApi()

@@ -217,8 +217,7 @@ def test_fastq_to_spring(crunchy_config_dict, fastq_paths, mocker):
 
     # WHEN calling fastq_to_spring on fastq files
     crunchy_api.fastq_to_spring(
-        fastq_first=fastq_first,
-        fastq_second=fastq_second,
+        fastq_first=fastq_first, fastq_second=fastq_second,
     )
 
     # THEN _submit_sbatch method is called with expected sbatch-content

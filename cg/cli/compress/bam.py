@@ -48,7 +48,7 @@ def bam_cmd(context, case_id, number_of_conversions, ntasks, mem, dry_run):
 @click.pass_context
 def clean_bam(context, case_id, dry_run):
     """Remove compressed BAM files, and update links in scout and housekeeper
-    to CRAM files"""
+       to CRAM files"""
     compress_api = context.obj["compress"]
     update_compress_api(compress_api, dry_run=dry_run)
     store = context.obj["db"]

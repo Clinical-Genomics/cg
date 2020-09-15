@@ -18,7 +18,7 @@ CONFIG = {
 @pytest.fixture(scope="function")
 def mutacc_config():
     """
-    mutacc config fixture
+        mutacc config fixture
     """
 
     _config = CONFIG
@@ -28,7 +28,7 @@ def mutacc_config():
 @pytest.fixture(scope="function")
 def mutacc_auto_api():
     """
-    mutacc-auto api
+        mutacc-auto api
     """
 
     _api = MutaccAutoAPI(CONFIG)
@@ -38,7 +38,7 @@ def mutacc_auto_api():
 
 class MockFailedProcess:
     """
-    Mock a failed process from subprocess.run()
+        Mock a failed process from subprocess.run()
     """
 
     @property

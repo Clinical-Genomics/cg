@@ -97,7 +97,7 @@ def parse_sampleinfo(data: dict) -> dict:
 
 def _get_sample_analysis_type(data: dict) -> list:
     """
-    Get analysis type for all samples in the MIP config file
+        Get analysis type for all samples in the MIP config file
     """
     return [
         {"id": sample_id, "type": analysis_type}

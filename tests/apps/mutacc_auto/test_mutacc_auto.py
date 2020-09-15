@@ -28,7 +28,7 @@ def test_instatiate(mutacc_config):
 
 def test_extract_reads(mutacc_auto_api, mocker):
     """
-    Test extract_reads method
+        Test extract_reads method
     """
     # GIVEN a mutacc-auto api a case, and list of variants
     case = {}
@@ -55,7 +55,7 @@ def test_extract_reads(mutacc_auto_api, mocker):
 
 def test_import_reads(mutacc_auto_api, mocker):
     """
-    Test import_reads method
+        Test import_reads method
     """
     # GIVEN a mutacc-auto api
 
@@ -72,7 +72,7 @@ def test_import_reads(mutacc_auto_api, mocker):
 def test_run_command(mock_failed_process, mocker):
 
     """
-    Test run_command function
+        Test run_command function
     """
     # WITH a mocked subprocess.run function
     mocker.patch.object(subprocess, "run")

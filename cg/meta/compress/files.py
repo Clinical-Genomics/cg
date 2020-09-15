@@ -256,7 +256,7 @@ def check_file_status(file_path: Path) -> bool:
 
 
 def sort_fastqs(fastq_files: List[Path]) -> Tuple[Path, Path]:
-    """Sort list of FASTQ files into correct read pair
+    """ Sort list of FASTQ files into correct read pair
 
     Check that the files exists and are correct
 

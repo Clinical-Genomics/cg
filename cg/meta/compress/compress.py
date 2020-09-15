@@ -55,7 +55,8 @@ class CompressAPI:
         return scout_cases[0]
 
     def get_bam_dict(self, case_id: str, version_obj: hk_models.Version = None) -> dict:
-        """Fetch the version obj and scout case for case_id and return a dictionary with bam files"""
+        """Fetch the version obj and scout case for case_id and return a dictionary with bam files
+        """
         version_obj = version_obj or self.get_latest_version(case_id)
         if not version_obj:
             return None
@@ -138,9 +139,7 @@ class CompressAPI:
                 return False
 
             LOG.info(
-                "Decompressing %s to FASTQ format for sample %s ",
-                spring_path,
-                sample_id,
+                "Decompressing %s to FASTQ format for sample %s ", spring_path, sample_id,
             )
 
             self.crunchy_api.spring_to_fastq(spring_path, sample_id=sample_id)
@@ -251,9 +250,7 @@ class CompressAPI:
                     return False
 
             LOG.info(
-                "Decompressing %s to FASTQ format for sample %s ",
-                spring_path,
-                sample_id,
+                "Decompressing %s to FASTQ format for sample %s ", spring_path, sample_id,
             )
 
             spring_metadata_path = self.crunchy_api.get_flag_path(spring_path)
@@ -313,10 +310,7 @@ class CompressAPI:
         self.hk_api.commit()
 
     def update_fastq_hk(
-        self,
-        sample_id: str,
-        hk_fastq_first: hk_models.File,
-        hk_fastq_second: hk_models.File,
+        self, sample_id: str, hk_fastq_first: hk_models.File, hk_fastq_second: hk_models.File,
     ):
         """Update Housekeeper with compressed fastq files and spring metadata file"""
         version_obj = self.hk_api.last_version(sample_id)
