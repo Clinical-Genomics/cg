@@ -14,8 +14,15 @@ LOG = logging.getLogger(__name__)
 
 
 @click.group()
-def store():
+@click.pass_context
+def store(context):
     """Command for storing files"""
+    hk_api = hk.HousekeeperAPI(context.obj)
+    crunchy_api = crunchy.CrunchyAPI(context.obj)
+
+    compress_api = CompressAPI(hk_api=hk_api, crunchy_api=crunchy_api)
+    context.obj["compress"] = compress_api
+    context.obj["db"] = Store(context.obj.get("database"))
 
 
 @store.command("fastq")
@@ -25,12 +32,10 @@ def store():
 def fastq_cmd(context, case_id, dry_run):
     """Store fastq files for a case in Housekeeper"""
     LOG.info("Running store fastq")
-    cg_store = Store(context.obj.get("database"))
 
-    hk_api = hk.HousekeeperAPI(context.obj)
-    crunchy_api = crunchy.CrunchyAPI(context.obj)
+    compress_api = context.obj["compress"]
+    cg_store = context.obj["db"]
 
-    compress_api = CompressAPI(hk_api=hk_api, crunchy_api=crunchy_api)
     update_compress_api(compress_api, dry_run=dry_run)
 
     samples = get_fastq_individuals(cg_store, case_id)

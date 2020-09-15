@@ -25,8 +25,8 @@ def test_store_fastq_cli_non_existing_family(compress_context, cli_runner, caplo
 
     # WHEN running the store fastq command
     res = cli_runner.invoke(fastq_cmd, [case_id], obj=compress_context)
-
+    print(caplog.text)
     # THEN assert the program exits without a problem
     assert res.exit_code == 0
     # THEN assert it was communicated that no families where found
-    assert "Stored fastq files for 0 individuals" in caplog.text
+    assert f"Could not find case {case_id}" in caplog.text
