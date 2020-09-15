@@ -8,11 +8,10 @@ import subprocess
 import click
 
 from cg.apps import hk, lims
-from cg.apps.usalt.fastq import FastqHandler
+from cg.apps.microsalt.fastq import FastqHandler
 from cg.cli.workflow.microsalt.store import store as store_cmd
 from cg.cli.workflow.microsalt.deliver import deliver as deliver_cmd
-from cg.meta.microsalt.lims import LimsMicrosaltAPI
-from cg.meta.workflow.microsalt import AnalysisAPI
+from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -27,8 +26,7 @@ def microsalt(context: click.Context, ticket: str, dry_run: bool):
     context.obj["db"] = Store(context.obj["database"])
     hk_api = hk.HousekeeperAPI(context.obj)
     lims_api = lims.LimsAPI(context.obj)
-    context.obj["api"] = AnalysisAPI(db=context.obj["db"], hk_api=hk_api, lims_api=lims_api)
-    context.obj["lims_microsalt_api"] = LimsMicrosaltAPI(lims=lims_api)
+    context.obj["api"] = MicrosaltAnalysisAPI(db=context.obj["db"], hk_api=hk_api, lims_api=lims_api)
 
     if context.invoked_subcommand:
         return
@@ -88,7 +86,7 @@ def config_case(context: click.Context, dry_run: bool, ticket: int, sample_id: s
         context.abort()
 
     parameters = [
-        context.obj["lims_microsalt_api"].get_parameters(sample_obj) for sample_obj in sample_objs
+        context.obj["api"].get_parameters(sample_obj) for sample_obj in sample_objs
     ]
 
     filename = str(ticket) if ticket else sample_id

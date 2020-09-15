@@ -2,7 +2,7 @@
 import os
 from pathlib import Path
 
-from cg.apps.usalt.fastq import FastqHandler
+from cg.apps.microsalt.fastq import FastqHandler
 
 
 def test_fastq_link_file_count(tmpdir, cg_config, link_ticket, link_sample, simple_files_data):

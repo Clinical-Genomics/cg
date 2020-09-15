@@ -4,8 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from cg.meta.microsalt.lims import LimsMicrosaltAPI
-from cg.meta.workflow.microsalt import AnalysisAPI
+from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.store import Store
 
 
@@ -18,11 +17,9 @@ def queries_path(tmpdir):
 @pytest.fixture(scope="function")
 def base_context(microsalt_store, lims_api, tmpdir, queries_path, housekeeper_api):
     """ The click context for the microsalt cli """
-    lims_microsalt_api = LimsMicrosaltAPI(lims=lims_api)
     return {
         "db": microsalt_store,
-        "api": AnalysisAPI(db=microsalt_store, hk_api=housekeeper_api, lims_api=lims_api),
-        "lims_microsalt_api": lims_microsalt_api,
+        "api": MicrosaltAnalysisAPI(db=microsalt_store, hk_api=housekeeper_api, lims_api=lims_api),
         "usalt": {
             "root": tmpdir,
             "queries_path": queries_path,

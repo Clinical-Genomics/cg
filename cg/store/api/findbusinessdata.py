@@ -70,7 +70,7 @@ class FindBusinessDataHandler(BaseHandler):
 
     def families(
         self, *, customer: models.Customer = None, enquiry: str = None, action: str = None
-    ) -> List[models.Family]:
+    ) -> Query:
         """Fetch families."""
         records = self.Family.query
         records = records.filter_by(customer=customer) if customer else records
@@ -92,7 +92,7 @@ class FindBusinessDataHandler(BaseHandler):
 
     def families_in_customer_group(
         self, *, customer: models.Customer = None, enquiry: str = None
-    ) -> List[models.Family]:
+    ) -> Query:
         """Fetch all families including those from collaborating customers."""
         records = self.Family.query.join(models.Family.customer, models.Customer.customer_group)
 
@@ -128,13 +128,13 @@ class FindBusinessDataHandler(BaseHandler):
         """Find a family by family name within a customer."""
         return self.Family.query.filter_by(customer=customer, name=name).first()
 
-    def find_sample(self, customer: models.Customer, name: str) -> List[models.Sample]:
+    def find_sample(self, customer: models.Customer, name: str) -> Query:
         """Find samples within a customer."""
         return self.Sample.query.filter_by(customer=customer, name=name)
 
     def find_sample_in_customer_group(
         self, customer: models.Customer, name: str
-    ) -> List[models.Sample]:
+    ) -> Query:
         """Find samples within the customer group."""
         return self.Sample.query.filter(
             models.Sample.customer.customer_group == customer.customer_group,
@@ -173,7 +173,7 @@ class FindBusinessDataHandler(BaseHandler):
         """Fetch an invoice."""
         return self.Invoice.get(invoice_id)
 
-    def invoice_samples(self, *, invoice_id: int = None) -> List[models.Sample]:
+    def invoice_samples(self, *, invoice_id: int = None) -> Query:
         """Fetch pools and samples for an invoice"""
         pools = self.Pool.query.filter_by(invoice_id=invoice_id).all()
         samples = self.Sample.query.filter_by(invoice_id=invoice_id).all()
@@ -203,7 +203,7 @@ class FindBusinessDataHandler(BaseHandler):
 
         return query
 
-    def new_invoice_id(self) -> Query:
+    def new_invoice_id(self) -> int:
         """Fetch invoices."""
         query = self.Invoice.query.all()
         ids = [inv.id for inv in query]
@@ -228,7 +228,7 @@ class FindBusinessDataHandler(BaseHandler):
 
         return records.order_by(models.Pool.created_at.desc())
 
-    def pool(self, pool_id: int):
+    def pool(self, pool_id: int) -> models.Pool:
         """Fetch a pool."""
         return self.Pool.get(pool_id)
 
@@ -238,7 +238,7 @@ class FindBusinessDataHandler(BaseHandler):
 
     def samples(
         self, *, customer: models.Customer = None, enquiry: str = None
-    ) -> List[models.Sample]:
+    ) -> Query:
         records = self.Sample.query
         records = records.filter_by(customer=customer) if customer else records
         records = (
@@ -253,7 +253,7 @@ class FindBusinessDataHandler(BaseHandler):
         )
         return records.order_by(models.Sample.created_at.desc())
 
-    def samples_by_ids(self, **identifiers) -> List[models.Sample]:
+    def samples_by_ids(self, **identifiers) -> Query:
         records = self.Sample.query
 
         for identifier_name, identifier_value in identifiers.items():
@@ -264,7 +264,7 @@ class FindBusinessDataHandler(BaseHandler):
 
     def samples_in_customer_group(
         self, *, customer: models.Customer = None, enquiry: str = None
-    ) -> List[models.Sample]:
+    ) -> Query:
         """Fetch all samples including those from collaborating customers."""
 
         records = self.Sample.query.join(models.Sample.customer, models.Customer.customer_group)
