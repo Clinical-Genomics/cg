@@ -21,7 +21,11 @@ def base_context(microsalt_store, lims_api, tmpdir, queries_path):
     return {
         "db": microsalt_store,
         "lims_microsalt_api": microsalt_api,
-        "usalt": {"root": tmpdir, "queries_path": queries_path, "binary_path": "/bin/true",},
+        "usalt": {
+            "root": tmpdir,
+            "queries_path": queries_path,
+            "binary_path": "/bin/true",
+        },
     }
 
 

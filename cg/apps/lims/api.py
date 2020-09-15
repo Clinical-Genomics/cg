@@ -217,7 +217,12 @@ class LimsAPI(Lims, OrderHandler):
                 yield lims_sample.id
 
     def update_sample(
-        self, lims_id: str, sex=None, target_reads: int = None, name: str = None, **kwargs,
+        self,
+        lims_id: str,
+        sex=None,
+        target_reads: int = None,
+        name: str = None,
+        **kwargs,
     ):
         """Update information about a sample."""
         lims_sample = Sample(self, id=lims_id)

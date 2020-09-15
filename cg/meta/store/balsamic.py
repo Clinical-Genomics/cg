@@ -36,7 +36,9 @@ def _include_files_in_housekeeper(bundle_obj, hk_api, version_obj):
     hk_api.include(version_obj)
     hk_api.add_commit(bundle_obj, version_obj)
     LOG.info(
-        "New bundle included: %s, version %s", bundle_obj.name, version_obj.created_at.date(),
+        "New bundle included: %s, version %s",
+        bundle_obj.name,
+        version_obj.created_at.date(),
     )
 
 

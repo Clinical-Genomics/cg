@@ -12,7 +12,12 @@ from cg.meta.transfer.flowcell import TransferFlowcell
 def fixture_data():
     return {
         "samples": [
-            {"name": "ADM1136A3", "index": "ACGTACAT", "flowcell": "HJKMYBCXX", "type": "hiseqx",}
+            {
+                "name": "ADM1136A3",
+                "index": "ACGTACAT",
+                "flowcell": "HJKMYBCXX",
+                "type": "hiseqx",
+            }
         ]
     }
 

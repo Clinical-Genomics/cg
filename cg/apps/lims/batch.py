@@ -37,7 +37,10 @@ XML = ElementMaker(annotate=False)
 
 def build_container(name: str, con_type: Containertype) -> ObjectifiedElement:
     """Build container in XML."""
-    return CON_CONTAINER(XML.name(name), XML.type(uri=con_type.uri),)
+    return CON_CONTAINER(
+        XML.name(name),
+        XML.type(uri=con_type.uri),
+    )
 
 
 def build_container_batch(containers: List[ObjectifiedElement]) -> ObjectifiedElement:
@@ -55,7 +58,10 @@ def build_sample(
     xml_sample = SMP_SAMPLECREATION(
         XML.name(name),
         XML.project(uri=project.uri),
-        XML.location(XML.container(uri=container.uri), XML.value(location),),
+        XML.location(
+            XML.container(uri=container.uri),
+            XML.value(location),
+        ),
     )
     for udf_name, udf_value in udfs.items():
         xml_sample.append(UDF_FIELD(udf_value, name=udf_name))
@@ -73,7 +79,9 @@ def build_sample_batch(samples: List[ObjectifiedElement]) -> ObjectifiedElement:
 def build_artifact(artifact: Artifact, reagent_label: str):
     """Build artifact in XML."""
     return ART_ARTIFACT(
-        XML("reagent-label", name=reagent_label), XML.name(artifact.name), uri=artifact.uri,
+        XML("reagent-label", name=reagent_label),
+        XML.name(artifact.name),
+        uri=artifact.uri,
     )
 
 

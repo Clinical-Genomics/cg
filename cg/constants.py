@@ -186,7 +186,10 @@ MIP_RNA_TAGS = {
 }
 
 MICROSALT_TAGS = {
-    ("analysis", "sampleinfo"): {"tags": ["analysis", "sampleinfo"], "is_mandatory": True,},
+    ("analysis", "sampleinfo"): {
+        "tags": ["analysis", "sampleinfo"],
+        "is_mandatory": True,
+    },
     ("result_aggregation", "microsalt-qc"): {
         "tags": ["result-aggregration-qc"],
         "is_mandatory": True,
@@ -203,7 +206,10 @@ MICROSALT_TAGS = {
         "tags": ["analysis", "runtime-settings"],
         "is_mandatory": True,
     },
-    ("assembly", "assembly"): {"tags": ["assembly"], "is_mandatory": True,},
+    ("assembly", "assembly"): {
+        "tags": ["assembly"],
+        "is_mandatory": True,
+    },
     ("concatination", "trimmed-forward-reads"): {
         "tags": ["concatination", "trimmed-forward-reads"],
         "is_mandatory": True,
@@ -212,8 +218,14 @@ MICROSALT_TAGS = {
         "tags": ["concatination", "trimmed-reverse-reads"],
         "is_mandatory": True,
     },
-    ("analysis", "logfile"): {"tags": ["analysis", "log"], "is_mandatory": True,},
-    ("assembly", "quast-results"): {"tags": ["assembly", "quast-results"], "is_mandatory": True,},
+    ("analysis", "logfile"): {
+        "tags": ["analysis", "log"],
+        "is_mandatory": True,
+    },
+    ("assembly", "quast-results"): {
+        "tags": ["assembly", "quast-results"],
+        "is_mandatory": True,
+    },
     ("alignment", "reference-alignment"): {
         "tags": ["alignment", "reference-alignment"],
         "is_mandatory": True,
