@@ -136,8 +136,7 @@ class MicrosaltAnalysisAPI:
 
     def get_lims_comment(self, sample_id: str) -> str:
         """ returns the comment associated with a sample stored in lims"""
-        lims_sample = self.lims.sample(sample_id)
-        comment = lims_sample.get("comment") or ""
+        comment = self.lims.get_sample_comment(sample_id) or ""
         if re.match(r"\w{4}\d{2,3}", comment):
             return comment
 
@@ -201,4 +200,4 @@ class MicrosaltAnalysisAPI:
 
     def get_project(self, sample_id: str) -> str:
         """Get LIMS project for a sample"""
-        return self.lims.sample(sample_id).get("project").get("id")
+        self.lims.get_sample_project(sample_id)

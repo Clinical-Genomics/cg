@@ -376,3 +376,10 @@ class LimsAPI(Lims, OrderHandler):
             if artifact.udf.get(udf_key) is not None
         )
         return capture_kits
+
+    def get_sample_comment(self, sample_id):
+        lims_sample = self.sample(sample_id)
+        return lims_sample.get("comment")
+
+    def get_sample_project(self, sample_id):
+        return self.sample(sample_id).get("project").get("id")
