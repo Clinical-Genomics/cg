@@ -136,12 +136,12 @@ def link(context: click.Context, case_id: str, sample_id: str):
 @click.option(
     "-p",
     "--panel-bed",
-    type=click.Path(exists=True, resolve_path=True),
+    type=str,
     help="Set this option to override fetching of panel name from LIMS",
 )
 @click.argument("case_id", required=False, type=str)
 @click.pass_context
-def config_case(context: click.Context, case_id: str, panel_bed: Path, dry_run: bool = False):
+def config_case(context: click.Context, case_id: str, panel_bed: str, dry_run: bool = False):
     """Generate a config for the case_id"""
     dna_api = context.obj["dna_api"]
     if case_id is None:

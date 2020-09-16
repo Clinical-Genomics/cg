@@ -127,7 +127,7 @@ class AnalysisAPI(ConfigHandler, MipAPI):
             else:
                 sample_data["capture_kit"] = kwargs.get(
                     "panel_bed"
-                ).as_posix() or self.get_target_bed_from_lims(link_obj.sample.internal_id)
+                ) or self.get_target_bed_from_lims(link_obj.sample.internal_id)
             if link_obj.mother:
                 sample_data["mother"] = link_obj.mother.internal_id
             if link_obj.father:

@@ -1,9 +1,7 @@
 """CLI support to create config and/or start BALSAMIC """
 
 import logging
-import shutil
-from pathlib import Path
-from time import sleep
+import sys
 
 import click
 
@@ -17,6 +15,8 @@ from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
+EXIT_SUCCESS = 0
+EXIT_FAIL = 1
 
 ARGUMENT_CASE_ID = click.argument("case_id", required=True)
 OPTION_DRY = click.option(
@@ -228,11 +228,14 @@ def store(context, case_id, analysis_type, dry):
 def start_available(context, dry):
     """Start full workflow for all available BALSAMIC cases"""
     balsamic_analysis_api = context.obj["BalsamicAnalysisAPI"]
+    exit_code = EXIT_SUCCESS
     for case_id in balsamic_analysis_api.get_cases_to_analyze():
         try:
             context.invoke(start, case_id=case_id, dry=dry)
         except click.Abort:
+            exit_code = EXIT_FAIL
             continue
+    sys.exit(exit_code)
 
 
 @balsamic.command("store-available")
@@ -241,11 +244,14 @@ def start_available(context, dry):
 def store_available(context, dry):
     """Store bundle data for all available Balsamic cases"""
     balsamic_analysis_api = context.obj["BalsamicAnalysisAPI"]
+    exit_code = EXIT_SUCCESS
     for case_id in balsamic_analysis_api.get_cases_to_store():
         try:
             context.invoke(store, case_id=case_id, dry=dry)
         except click.Abort:
+            exit_code = EXIT_FAIL
             continue
+    sys.exit(exit_code)
 
 
 balsamic.add_command(deliver_cmd)
