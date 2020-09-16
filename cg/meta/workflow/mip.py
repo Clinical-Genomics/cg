@@ -123,7 +123,7 @@ class AnalysisAPI(ConfigHandler, MipAPI):
         def config_dna_sample(self, link_obj):
             sample_data = get_sample_data(link_obj)
             if sample_data["analysis_type"] == "wgs":
-                sample_data["capture_kit"] = DEFAULT_CAPTURE_KIT
+                sample_data["capture_kit"] = kwargs.get("panel_bed") or DEFAULT_CAPTURE_KIT
             else:
                 sample_data["capture_kit"] = kwargs.get(
                     "panel_bed"
