@@ -136,11 +136,14 @@ def test_dry_order(cli_runner, base_context, microbial_ticket, snapshot: Snapsho
     snapshot.assert_match(result.output)
 
 
-def test_sample(cli_runner, base_context, microbial_sample_id, queries_path, snapshot: Snapshot):
+def test_sample(
+    base_context, cli_runner, lims_api, microbial_sample_id, queries_path, snapshot: Snapshot
+):
     """Test working command for sample"""
 
     # GIVEN an existing queries path
     Path(queries_path).mkdir(exist_ok=True)
+    lims_api.sample(microbial_sample_id).sample_data["project"] = {"id": "microbial_order_test"}
 
     # WHEN dry running a sample name
     result = cli_runner.invoke(config_case, [microbial_sample_id], obj=base_context)

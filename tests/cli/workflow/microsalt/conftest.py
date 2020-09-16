@@ -96,6 +96,12 @@ class MockLims:
         self.sample_id = sample_id
         return "1338:00 Test sequencing method"
 
+    def get_sample_project(self, sample_id: str) -> str:
+        return self.sample(sample_id).get("project").get("id")
+
+    def get_sample_comment(self, sample_id: str) -> str:
+        return self.sample(sample_id).get("comment")
+
 
 class LimsFactory:
     """ Just give one LIMS """
