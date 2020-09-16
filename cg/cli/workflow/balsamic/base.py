@@ -1,7 +1,6 @@
 """CLI support to create config and/or start BALSAMIC """
 
 import logging
-import sys
 
 import click
 
@@ -234,9 +233,8 @@ def start_available(context, dry):
             context.invoke(start, case_id=case_id, dry=dry)
         except click.Abort:
             exit_code = EXIT_FAIL
-            continue
     if exit_code:
-        raise click.Abort
+        raise click.Abort()
 
 
 @balsamic.command("store-available")
@@ -251,8 +249,8 @@ def store_available(context, dry):
             context.invoke(store, case_id=case_id, dry=dry)
         except click.Abort:
             exit_code = EXIT_FAIL
-            continue
-    sys.exit(exit_code)
+    if exit_code:
+        raise click.Abort()
 
 
 balsamic.add_command(deliver_cmd)
