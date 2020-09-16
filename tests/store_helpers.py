@@ -2,7 +2,6 @@
 import logging
 from datetime import datetime
 from typing import List
-from deprecated import deprecated
 
 from housekeeper.store import models as hk_models
 
