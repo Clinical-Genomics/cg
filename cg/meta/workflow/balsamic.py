@@ -299,13 +299,12 @@ class BalsamicAnalysisAPI:
                     self.balsamic_api.bed_path,
                     self.store.bed_version(panel_bed).filename,
                 )
-                if derived_panel_bed.is_file():
-                    panel_bed = derived_panel_bed
-                else:
+                if not derived_panel_bed.is_file():
                     raise BalsamicStartError(
                         f"{panel_bed} or {derived_panel_bed} are not valid paths to a BED file. "
                         f"Please provide absolute path to desired BED file or a valid bed shortname!"
                     )
+                panel_bed = derived_panel_bed
 
         arguments = {
             "case_id": case_id,

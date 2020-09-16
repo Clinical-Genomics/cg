@@ -123,11 +123,12 @@ class AnalysisAPI(ConfigHandler, MipAPI):
         def config_dna_sample(self, link_obj):
             sample_data = get_sample_data(link_obj)
             if sample_data["analysis_type"] == "wgs":
-                sample_data["capture_kit"] = kwargs.get("panel_bed") or DEFAULT_CAPTURE_KIT
+                sample_data["capture_kit"] = kwargs.get("panel_bed", DEFAULT_CAPTURE_KIT)
             else:
                 sample_data["capture_kit"] = kwargs.get(
-                    "panel_bed"
-                ) or self.get_target_bed_from_lims(link_obj.sample.internal_id)
+                    "panel_bed",
+                    self.get_target_bed_from_lims(link_obj.sample.internal_id)
+                )
             if link_obj.mother:
                 sample_data["mother"] = link_obj.mother.internal_id
             if link_obj.father:
