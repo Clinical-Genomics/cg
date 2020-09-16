@@ -62,17 +62,22 @@ class BackupApi:
                 return None
 
         if not dry_run:
-            LOG.info(f"{flowcell_obj.name}: retrieving from PDC")
+            LOG.info("%s: retrieving from PDC", flowcell_obj.name)
 
-        tic = time.time()
+        start_time = time.time()
 
         try:
             self.pdc.retrieve_flowcell(flowcell_obj.name, flowcell_obj.sequencer_type, dry_run)
+            if not dry_run:
+                flowcell_obj.status = "ondisk"
+                self.status.commit()
+                LOG.info("Status for flowcell %s set to \"ondisk\"", flowcell_obj.name)
         except subprocess.CalledProcessError as error:
             LOG.error("%s: retrieval failed", flowcell_obj.name)
             if not dry_run:
                 flowcell_obj.status = "requested"
                 self.status.commit()
             raise error
-        toc = time.time()
-        return toc - tic
+
+        end_time = time.time()
+        return end_time - start_time
