@@ -232,6 +232,10 @@ def run(
         dna_api.run_command(dry_run=dry_run, **kwargs)
         return
 
+    if mip_dry_run:
+        dna_api.run_command(**kwargs)
+        return
+
     dna_api.run_command(**kwargs)
     dna_api.tb.mark_analyses_deleted(case_id=case_id)
     dna_api.tb.add_pending_analysis(case_id=case_id, email=email)
