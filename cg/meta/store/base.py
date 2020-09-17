@@ -116,6 +116,9 @@ def _convert_deliverables_tags_to_hk_tags(
     tags
     """
 
+    if not deliverables_tag_map in analysis_type_tags:
+        return
+
     if is_index:
         mapped_tags = analysis_type_tags[deliverables_tag_map]["index_tags"]
     else:
