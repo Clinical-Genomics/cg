@@ -101,15 +101,14 @@ MIP_DNA_TAGS = {
     ("mip_analyse", "config_analysis"): {"tags": ["mip-config"], "is_mandatory": True},
     ("chanjo_sexcheck",): {"tags": ["chanjo", "sex-check"], "is_mandatory": False},
     ("chromograph_ar",): {"tags": ["chromograph"], "is_mandatory": False},
+    ("star_caller",): {
+        "tags": ["cyrius", "star_caller"],
+        "is_mandatory": False,
+    },
     ("endvariantannotationblock", "clinical"): {
         "tags": ["vcf-snv-clinical"],
         "index_tags": ["vcf-snv-clinical-index"],
         "is_mandatory": True,
-    },
-    ("sv_reformat", "clinical"): {
-        "tags": ["vcf-sv-clinical"],
-        "index_tags": ["vcf-sv-clinical-index"],
-        "is_mandatory": False,
     },
     ("gatk_baserecalibration",): {
         "tags": ["cram"],
@@ -136,6 +135,11 @@ MIP_DNA_TAGS = {
         "index_tags": ["vcf-snv-research-index"],
         "is_mandatory": True,
     },
+    ("sv_reformat", "clinical"): {
+        "tags": ["vcf-sv-clinical"],
+        "index_tags": ["vcf-sv-clinical-index"],
+        "is_mandatory": False,
+    },
     ("sv_reformat", "research"): {
         "tags": ["vcf-sv-research"],
         "index_tags": ["vcf-sv-research-index"],
@@ -160,6 +164,10 @@ MIP_DNA_TAGS = {
         "tags": ["sv-bcf"],
         "index_tags": ["sv-bcf-index"],
         "is_mandatory": True,
+    },
+    ("telomerecat_ar",): {
+        "tags": ["telomere-calling", "telomerecat"],
+        "is_mandatory": False,
     },
     ("expansionhunter", "sv_str"): {
         "tags": ["vcf-str"],
