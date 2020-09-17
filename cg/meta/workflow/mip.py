@@ -9,7 +9,6 @@ import datetime as dt
 from cg.apps import tb, hk, scoutapi, lims
 from cg.apps.mip.base import MipAPI
 from cg.apps.mip.confighandler import ConfigHandler
-from cg.apps.pipelines.fastqhandler import BaseFastqHandler
 from cg.meta.deliver import DeliverAPI
 from cg.store import models, Store
 from cg.exc import CgDataError, LimsDataError
