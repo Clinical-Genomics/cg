@@ -185,13 +185,13 @@ class FindBusinessDataHandler(BaseHandler):
             .first()
         )
 
-    def links(self, family_id: str, sample_id: str, ticket: int) -> Query:
+    def links(self, case_id: str, sample_id: str, ticket: int) -> Query:
         """Find a link between a family and a sample."""
 
         query = self.FamilySample.query.join(models.FamilySample.family, models.FamilySample.sample)
 
-        if family_id:
-            query = query.filter(models.Family.internal_id == family_id)
+        if case_id:
+            query = query.filter(models.Family.internal_id == case_id)
 
         if sample_id:
             query = query.filter(models.Sample.internal_id == sample_id)
