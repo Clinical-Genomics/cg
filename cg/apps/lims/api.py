@@ -377,7 +377,7 @@ class LimsAPI(Lims, OrderHandler):
         )
         return capture_kits
 
-    def get_sample_comment(self, sample_id: str):
+    def get_sample_comment(self, sample_id: str) -> str:
         """Get the comment of the sample"""
         lims_sample = self.sample(sample_id)
         return lims_sample.get("comment")
