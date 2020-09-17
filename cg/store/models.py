@@ -130,7 +130,7 @@ class ApplicationVersion(Model):
         return f"{self.application.tag} ({self.version})"
 
     def to_dict(self, application: bool = True):
-        """Override dictify method."""
+        """Represent as dictionary"""
         data = super(ApplicationVersion, self).to_dict()
         if application:
             data["application"] = self.application.to_dict()
@@ -158,7 +158,7 @@ class Analysis(Model):
         return f"{self.family.internal_id} | {self.completed_at.date()}"
 
     def to_dict(self, family: bool = True):
-        """Override dictify method."""
+        """Represent as dictionary"""
         data = super(Analysis, self).to_dict()
         if family:
             data["family"] = self.family.to_dict()
@@ -203,7 +203,7 @@ class BedVersion(Model):
         return f"{self.bed.name} ({self.version})"
 
     def to_dict(self, bed: bool = True):
-        """Override dictify method."""
+        """Represent as dictionary"""
         data = super(BedVersion, self).to_dict()
         if bed:
             data["bed"] = self.bed.to_dict()
@@ -287,7 +287,7 @@ class Family(Model, PriorityMixin):
         return f"{self.internal_id} ({self.name})"
 
     def to_dict(self, links: bool = False, analyses: bool = False) -> dict:
-        """Override dictify method."""
+        """Represent as dictionary"""
         data = super(Family, self).to_dict()
         data["panels"] = self.panels
         data["priority"] = self.priority_human
@@ -333,7 +333,7 @@ class FamilySample(Model):
     father = orm.relationship("Sample", foreign_keys=[father_id])
 
     def to_dict(self, parents: bool = False, samples: bool = False, family: bool = False) -> dict:
-        """Override dictify method."""
+        """Represent as dictionary"""
         data = super(FamilySample, self).to_dict()
         if samples:
             data["sample"] = self.sample.to_dict()
@@ -369,7 +369,7 @@ class Flowcell(Model):
         return self.name
 
     def to_dict(self, samples: bool = False, microbial_samples: bool = False):
-        """Override dictify method."""
+        """Represent as dictionary"""
         data = super(Flowcell, self).to_dict()
         if samples:
             data["samples"] = [sample.to_dict() for sample in self.samples]
@@ -401,7 +401,7 @@ class MicrobialOrder(Model):
         return f"{self.internal_id} ({self.name})"
 
     def to_dict(self, samples: bool = False) -> dict:
-        """Override dictify method."""
+        """Represent as dictionary"""
         data = super(MicrobialOrder, self).to_dict()
         data["customer"] = self.customer.to_dict()
         if samples:
@@ -453,7 +453,7 @@ class MicrobialSample(Model, PriorityMixin):
             return f"Ordered {self.ordered_at.date()}"
 
     def to_dict(self, order=False) -> dict:
-        """Override dictify method."""
+        """Represent as dictionary"""
         data = super(MicrobialSample, self).to_dict()
         data["application_version"] = self.application_version.to_dict()
         data["application"] = self.application_version.application.to_dict()
@@ -481,7 +481,7 @@ class Organism(Model):
         return f"{self.internal_id} ({self.name})"
 
     def to_dict(self) -> dict:
-        """Override dictify method."""
+        """Represent as dictionary"""
         data = super(Organism, self).to_dict()
         return data
 
@@ -582,7 +582,7 @@ class Sample(Model, PriorityMixin):
             return f"Ordered {self.ordered_at.date()}"
 
     def to_dict(self, links: bool = False, flowcells: bool = False) -> dict:
-        """Override dictify method."""
+        """Represent as dictionary"""
         data = super(Sample, self).to_dict()
         data["priority"] = self.priority_human
         data["customer"] = self.customer.to_dict()
@@ -617,7 +617,7 @@ class Invoice(Model):
         return f"{self.customer_id} ({self.invoiced_at})"
 
     def to_dict(self) -> dict:
-        """Override dictify method."""
+        """Represent as dictionary"""
         data = super(Invoice, self).to_dict()
         return data
 
@@ -634,7 +634,7 @@ class User(Model):
     customer = orm.relationship("Customer", foreign_keys=[customer_id])
 
     def to_dict(self) -> dict:
-        """Override dictify method."""
+        """Represent as dictionary"""
         data = super(User, self).to_dict()
         data["customer"] = self.customer.to_dict()
         return data
