@@ -111,7 +111,7 @@ class MockTB:
     def __init__(self):
         self._link_was_called = False
 
-    def link(self, family: str, sample: str, analysis_type: str, files: List[str]):
+    def link(self, family: str, sample: str, analysis_type: str, files: List[dict]):
         """Link files mock"""
 
         del family, sample, analysis_type, files

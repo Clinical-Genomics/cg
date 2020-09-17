@@ -35,7 +35,7 @@ class FastqHandler(BaseFastqHandler):
         super().__init__(config)
         self.root_dir = config["usalt"]["root"]
 
-    def link(self, ticket: int, sample: str, files: List) -> None:
+    def link(self, ticket: int, sample: str, files: List[dict]) -> None:
         """Link FASTQ files for a usalt sample.
         Shall be linked to /<usalt root directory>/ticket/fastq/"""
 
