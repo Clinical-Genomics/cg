@@ -141,10 +141,6 @@ MIP_DNA_TAGS = {
     ("peddy_ar", "peddy"): {"tags": ["peddy", "ped"], "is_mandatory": True},
     ("peddy_ar", "sex_check"): {"tags": ["peddy", "sex-check"], "is_mandatory": True},
     ("qccollect_ar",): {"tags": ["qcmetrics"], "is_mandatory": True},
-    ("rhocall_viz",): {
-        "tags": ["rhocall-viz", "bigwig"],
-        "is_mandatory": False,
-    },
     ("sambamba_depth", "coverage"): {"tags": ["coverage", "sambamba-depth"], "is_mandatory": True},
     ("samtools_subsample_mt",): {
         "tags": ["bam-mt"],
