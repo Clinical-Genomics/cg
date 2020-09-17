@@ -1,9 +1,6 @@
 """CLI support to create config and/or start BALSAMIC """
 
 import logging
-import shutil
-from pathlib import Path
-from time import sleep
 
 import click
 
@@ -15,6 +12,7 @@ from cg.cli.workflow.balsamic.deliver import deliver as deliver_cmd
 from cg.exc import BalsamicStartError, BundleAlreadyAddedError, LimsDataError
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.store import Store
+from cg.constants import EXIT_SUCCESS, EXIT_FAIL
 
 LOG = logging.getLogger(__name__)
 
@@ -35,7 +33,11 @@ OPTION_ANALYSIS_TYPE = click.option(
     help="Setting this option to qc ensures only QC analysis is performed",
 )
 OPTION_RUN_ANALYSIS = click.option(
-    "-r", "--run-analysis", is_flag=True, default=False, help="Execute BALSAMIC in non-dry mode"
+    "-r",
+    "--run-analysis",
+    is_flag=True,
+    default=False,
+    help="Execute BALSAMIC in non-dry mode",
 )
 OPTION_PRIORITY = click.option(
     "-p",
@@ -93,10 +95,12 @@ def link(context, case_id):
 def config_case(context, panel_bed, case_id, dry):
     """Create config file for BALSAMIC analysis for a given CASE_ID"""
     balsamic_analysis_api = context.obj["BalsamicAnalysisAPI"]
+
     try:
         LOG.info(f"Creating config file for {case_id}.")
         arguments = balsamic_analysis_api.get_verified_config_case_arguments(
-            case_id=case_id, panel_bed=panel_bed
+            case_id=case_id,
+            panel_bed=panel_bed,
         )
         balsamic_analysis_api.balsamic_api.config_case(arguments=arguments, dry=dry)
     except (BalsamicStartError, LimsDataError) as e:
@@ -180,12 +184,13 @@ def store_housekeeper(context, case_id):
 @OPTION_ANALYSIS_TYPE
 @OPTION_PRIORITY
 @OPTION_DRY
+@OPTION_PANEL_BED
 @click.pass_context
-def start(context, case_id, analysis_type, priority, dry):
+def start(context, case_id, analysis_type, panel_bed, priority, dry):
     """Start full workflow for CASE ID"""
     LOG.info(f"Starting analysis for {case_id}")
     context.invoke(link, case_id=case_id)
-    context.invoke(config_case, case_id=case_id, dry=dry)
+    context.invoke(config_case, case_id=case_id, panel_bed=panel_bed, dry=dry)
     context.invoke(
         run,
         case_id=case_id,
@@ -214,11 +219,17 @@ def store(context, case_id, analysis_type, dry):
 def start_available(context, dry):
     """Start full workflow for all available BALSAMIC cases"""
     balsamic_analysis_api = context.obj["BalsamicAnalysisAPI"]
+    exit_code = EXIT_SUCCESS
     for case_id in balsamic_analysis_api.get_cases_to_analyze():
         try:
             context.invoke(start, case_id=case_id, dry=dry)
         except click.Abort:
-            continue
+            exit_code = EXIT_FAIL
+        except Exception as e:
+            LOG.error(f"Unspecified error occurred - {e}")
+            exit_code = EXIT_FAIL
+    if exit_code:
+        raise click.Abort()
 
 
 @balsamic.command("store-available")
@@ -227,11 +238,17 @@ def start_available(context, dry):
 def store_available(context, dry):
     """Store bundle data for all available Balsamic cases"""
     balsamic_analysis_api = context.obj["BalsamicAnalysisAPI"]
+    exit_code = EXIT_SUCCESS
     for case_id in balsamic_analysis_api.get_cases_to_store():
         try:
             context.invoke(store, case_id=case_id, dry=dry)
         except click.Abort:
-            continue
+            exit_code = EXIT_FAIL
+        except Exception as e:
+            LOG.error(f"Unspecified error occurred - {e}")
+            exit_code = EXIT_FAIL
+    if exit_code:
+        raise click.Abort()
 
 
 balsamic.add_command(deliver_cmd)

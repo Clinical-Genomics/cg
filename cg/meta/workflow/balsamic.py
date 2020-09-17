@@ -14,14 +14,14 @@ from cg.apps.balsamic.fastq import FastqHandler
 from cg.constants import FAMILY_ACTIONS
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
-from cg.exc import BalsamicStartError, BundleAlreadyAddedError, LimsDataError
+from cg.exc import BalsamicStartError, BundleAlreadyAddedError
 from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
 
 
 class BalsamicAnalysisAPI:
-    """Handles communication between BALASMIC processes
+    """Handles communication between BALSAMIC processes
     and the rest of CG infrastructure"""
 
     __BALSAMIC_APPLICATIONS = {"wgs", "wes", "tgs"}
@@ -45,7 +45,7 @@ class BalsamicAnalysisAPI:
         """Look up case ID in StoreDB and return result"""
         case_object = self.store.family(case_id)
         if not case_object:
-            raise BalsamicStartError(f"{case_id} not found in StatucDB!")
+            raise BalsamicStartError(f"{case_id} not found in StatusDB!")
         if not case_object.links:
             raise BalsamicStartError(
                 f"{case_id} number of samples is {len(case_object.links)}, analysis will not be started!"
@@ -58,24 +58,29 @@ class BalsamicAnalysisAPI:
             case_object.action = action
             self.store.commit()
 
-    def get_case_path(self, case_id: str) -> Path:
+    def get_case_path(self, case_id: str) -> str:
         """Returns a path where the Balsamic case for the case_id should be located"""
         return Path(self.balsamic_api.root_dir, case_id).as_posix()
 
-    def get_deliverables_file_path(self, case_id: str, check_exists: bool = False) -> Path:
+    def get_deliverables_file_path(self, case_id: str, check_exists: bool = False) -> str:
         """Returns a path where the Balsamic deliverables file for the case_id should be
         located.
         (Optional) Checks if deliverables file exists"""
         deliverables_file_path = Path(
-            self.balsamic_api.root_dir, case_id, "analysis", "delivery_report", case_id + ".hk"
+            self.balsamic_api.root_dir,
+            case_id,
+            "analysis",
+            "delivery_report",
+            case_id + ".hk",
         )
         if check_exists and not deliverables_file_path.exists():
             raise BalsamicStartError(
-                f"No deliverables file found for {case_id}. Make sure the deliverables file is generated, and try again!"
+                f"No deliverables file found for {case_id}."
+                f" Make sure the deliverables file is generated, and try again!"
             )
         return deliverables_file_path.as_posix()
 
-    def get_config_path(self, case_id: str, check_exists: bool = False) -> Path:
+    def get_config_path(self, case_id: str, check_exists: bool = False) -> str:
         """Generates a path where the Balsamic config for the case_id should be located.
         (Optional) Checks if config file exists."""
         config_path = Path(self.balsamic_api.root_dir, case_id, case_id + ".json")
@@ -85,7 +90,7 @@ class BalsamicAnalysisAPI:
             )
         return config_path.as_posix()
 
-    def get_analysis_finish_path(self, case_id: str, check_exists: bool = False) -> Path:
+    def get_analysis_finish_path(self, case_id: str, check_exists: bool = False) -> str:
         """Returns path to analysis_finish file.
         (Optional) Checks if analysis_finish file exists"""
         analysis_finish_path = Path(
@@ -93,11 +98,12 @@ class BalsamicAnalysisAPI:
         )
         if check_exists and not analysis_finish_path.exists():
             raise BalsamicStartError(
-                f"Analysis incomplete for {case_id}, deliverables file will not be created. Please ensure all jobs have finished successfully!"
+                f"Analysis incomplete for {case_id}, deliverables file will not be created. "
+                f"Please ensure all jobs have finished successfully!"
             )
         return analysis_finish_path.as_posix()
 
-    def get_file_collection(self, sample_id: str) -> dict:
+    def get_file_collection(self, sample_id: str) -> list:
         """Retrieves sample data for naming"""
         file_objs = self.housekeeper_api.files(bundle=sample_id, tags=["fastq"])
         files = []
@@ -142,7 +148,7 @@ class BalsamicAnalysisAPI:
             )
         LOG.info("Linking completed")
 
-    def get_target_bed_from_lims(self, link_object: models.FamilySample) -> str(Path):
+    def get_target_bed_from_lims(self, link_object: models.FamilySample) -> str:
         """Get target bed filename from lims
         Raises LimsDataError if target_bed cannot be retrieved.
         """
@@ -151,7 +157,7 @@ class BalsamicAnalysisAPI:
             panel_bed = self.store.bed_version(capture_kit).filename
             return panel_bed
 
-    def get_fastq_path(self, link_object: models.FamilySample) -> str(Path):
+    def get_fastq_path(self, link_object: models.FamilySample) -> str:
         """Returns path to the concatenated FASTQ file of a sample"""
         file_collection = self.get_file_collection(sample_id=link_object.sample.internal_id)
         fastq_data = file_collection[0]
@@ -173,13 +179,15 @@ class BalsamicAnalysisAPI:
         ).as_posix()
         return concatenated_path
 
-    def get_sample_type(self, link_object: models.FamilySample) -> str:
+    @staticmethod
+    def get_sample_type(link_object: models.FamilySample) -> str:
         """Returns tissue type of a sample"""
         if link_object.sample.is_tumour:
             return "tumor"
         return "normal"
 
-    def get_application_type(self, link_object: models.FamilySample) -> str:
+    @staticmethod
+    def get_application_type(link_object: models.FamilySample) -> str:
         """Returns application type of a sample"""
         application_type = link_object.sample.application_version.application.prep_category
         return application_type
@@ -206,7 +214,7 @@ class BalsamicAnalysisAPI:
         - When multiple samples have different parameters
         - When bed file required for analysis, but is not set or cannot be retrieved.
         """
-        application_types = set([v["application_type"] for k, v in sample_data.items()])
+        application_types = set([v["application_type"].lower() for k, v in sample_data.items()])
         target_beds = set([v["target_bed"] for k, v in sample_data.items()])
 
         if not application_types.issubset(self.__BALSAMIC_APPLICATIONS):
@@ -218,7 +226,7 @@ class BalsamicAnalysisAPI:
                 raise BalsamicStartError("Cannot set panel_bed for WGS sample!")
             return None
         if panel_bed:
-            return Path(self.balsamic_api.bed_path, panel_bed).as_posix()
+            return panel_bed.as_posix()
         if len(target_beds) == 1:
             target_bed = target_beds.pop()
             if not target_bed:
@@ -228,7 +236,8 @@ class BalsamicAnalysisAPI:
             return Path(self.balsamic_api.bed_path, target_bed).as_posix()
         raise BalsamicStartError(f"Too many BED versions in LIMS: {len(target_beds)}")
 
-    def get_verified_tumor_path(self, sample_data: dict) -> str(Path):
+    @staticmethod
+    def get_verified_tumor_path(sample_data: dict) -> str:
         """Takes a dict with samples and attributes, and returns the path
         of tumor sample.
         If the number of paths is exactly 1, the path is returned.
@@ -242,11 +251,13 @@ class BalsamicAnalysisAPI:
         ]
         if len(tumor_paths) != 1:
             raise BalsamicStartError(
-                f"Invalid number of tumor samples: {len(tumor_paths)}, BALSAMIC analysis requires exactly 1 tumor sample per case to run successfully!"
+                f"Invalid number of tumor samples: {len(tumor_paths)}, "
+                f"BALSAMIC analysis requires exactly 1 tumor sample per case to run successfully!"
             )
         return tumor_paths[0]
 
-    def get_verified_normal_path(self, sample_data: dict) -> Optional[str]:
+    @staticmethod
+    def get_verified_normal_path(sample_data: dict) -> Optional[str]:
         """Takes a dict with samples and attributes, and retrieves the path
         of normal sample.
         If the number of paths is exactly 1, the path is returned.
@@ -267,15 +278,33 @@ class BalsamicAnalysisAPI:
             return None
         return normal_paths[0]
 
-    def get_verified_config_case_arguments(self, case_id: str, panel_bed: str) -> dict:
+    def get_verified_config_case_arguments(
+        self,
+        case_id: str,
+        panel_bed: str,
+    ) -> dict:
         """Takes a dictionary with per-sample parameters,
         validates them, and transforms into command line arguments
-        Raises BalsamicStarterror:
+        Raises BalsamicStartError:
             When no samples associated with case are marked for BALSAMIC analysis
         """
-        sample_data = self.get_sample_params(case_id=case_id)
+        sample_data = self.get_sample_params(case_id=case_id, panel_bed=panel_bed)
         if len(sample_data) == 0:
             raise BalsamicStartError(f"{case_id} has no samples tagged for BALSAMIC analysis!")
+        if panel_bed:
+            if Path(f"{panel_bed}").is_file():
+                panel_bed = Path(f"{panel_bed}")
+            else:
+                derived_panel_bed = Path(
+                    self.balsamic_api.bed_path,
+                    self.store.bed_version(panel_bed).filename,
+                )
+                if not derived_panel_bed.is_file():
+                    raise BalsamicStartError(
+                        f"{panel_bed} or {derived_panel_bed} are not valid paths to a BED file. "
+                        f"Please provide absolute path to desired BED file or a valid bed shortname!"
+                    )
+                panel_bed = derived_panel_bed
 
         arguments = {
             "case_id": case_id,
@@ -285,7 +314,8 @@ class BalsamicAnalysisAPI:
         }
         return arguments
 
-    def print_sample_params(self, case_id: str, sample_data: dict) -> None:
+    @staticmethod
+    def print_sample_params(case_id: str, sample_data: dict) -> None:
         """Outputs a table of samples to be displayed in log"""
 
         LOG.info(f"Case {case_id} has following BALSAMIC samples:")
@@ -305,19 +335,28 @@ class BalsamicAnalysisAPI:
             )
         LOG.info("")
 
-    def get_sample_params(self, case_id: str) -> dict:
+    def get_sample_params(self, case_id: str, panel_bed: str) -> dict:
+
         """Returns a dictionary of attributes for each sample in given family,
         where SAMPLE ID is used as key"""
+
         sample_data = {}
         for link_object in self.get_balsamic_sample_objects(case_id=case_id):
             sample_data[link_object.sample.internal_id] = {
                 "tissue_type": self.get_sample_type(link_object),
                 "concatenated_path": self.get_fastq_path(link_object),
                 "application_type": self.get_application_type(link_object),
-                "target_bed": self.get_target_bed_from_lims(link_object),
+                "target_bed": self.resolve_target_bed(panel_bed=panel_bed, link_object=link_object),
             }
         self.print_sample_params(case_id=case_id, sample_data=sample_data)
         return sample_data
+
+    def resolve_target_bed(self, panel_bed, link_object: models.FamilySample) -> Optional[str]:
+        if panel_bed:
+            return panel_bed
+        if self.get_application_type(link_object) not in self.__BALSAMIC_BED_APPLICATIONS:
+            return None
+        return self.get_target_bed_from_lims(link_object)
 
     def parse_deliverables_report(self, case_id: str) -> list:
         """Parse BALSAMIC deliverables report, and return a list of files and their respective tags in bundle"""
@@ -347,7 +386,8 @@ class BalsamicAnalysisAPI:
         bundle_data = {
             "name": case_id,
             "created": dt.datetime.strptime(
-                config_data["analysis"]["config_creation_date"], "%Y-%m-%d %H:%M"
+                config_data["analysis"]["config_creation_date"],
+                "%Y-%m-%d %H:%M",
             ),
             "version": config_data["analysis"]["BALSAMIC_version"],
             "files": self.parse_deliverables_report(case_id=case_id),

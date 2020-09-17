@@ -6,7 +6,7 @@ About changelog [here](https://keepachangelog.com/en/1.0.0/)
 
 Please add a new candidate release at the top after changing the latest one. Feel free to copy paste from the "squash and commit" box that gets generated when creating PRs
 
-Try to use the follwing format:
+Try to use the following format:
 
 ## [x.x.x]
 
@@ -15,6 +15,15 @@ Try to use the follwing format:
 ### Changed
 
 ### Fixed
+
+## [12.4.0]
+
+### Added
+- Providing a name of panel bed file in MIP cli now overrides getting capture kit through LimsAPI during case config
+### Changed
+- Providing panel bed path or capture kit shortname in BALSAMIC cli now overrides getting capture kit through LimsAPI during case config
+### Fixed
+- Fix Balsamic automation functions to exit with 1 if any of the errors are raised while looping through cases
 
 ## [12.3.6]
 
