@@ -74,6 +74,8 @@ def parse_files(deliverables: dict, pipeline_tags: list, analysis_type_tags: dic
             "archive": False,
             "deliverables_tag_map": deliverables_tag_map,
         }
+        if parsed_file["tags"] is None:
+            continue
         parsed_files.append(parsed_file)
 
         if file_["path_index"]:
