@@ -71,7 +71,7 @@ def link(context: click.Context, dry_run: bool, ticket: str, sample_id: str):
     if dry_run:
         return
 
-    analysis_api.link_samples(ticket=ticket)
+    analysis_api.link_samples(ticket=ticket, sample_id=sample_id)
 
 
 @microsalt.command("config-case")
