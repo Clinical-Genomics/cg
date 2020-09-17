@@ -152,7 +152,7 @@ MIP_DNA_TAGS = {
         "is_mandatory": False,
     },
     ("star_caller",): {
-        "tags": ["cyrius", "star_caller"],
+        "tags": ["cyrius", "star-caller"],
         "is_mandatory": False,
     },
     ("sv_combinevariantcallsets",): {
