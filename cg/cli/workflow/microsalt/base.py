@@ -26,7 +26,8 @@ def microsalt(context: click.Context, ticket: str, dry_run: bool):
     context.obj["db"] = Store(context.obj["database"])
     hk_api = hk.HousekeeperAPI(context.obj)
     lims_api = lims.LimsAPI(context.obj)
-    analysis_api = MicrosaltAnalysisAPI(db=context.obj["db"], hk_api=hk_api, lims_api=lims_api)
+    analysis_api = MicrosaltAnalysisAPI(db=context.obj["db"], hk_api=hk_api, lims_api=lims_api,
+                                        fastq_handler=FastqHandler(context.obj))
     context.obj["analysis_api"] = analysis_api
 
     if context.invoked_subcommand:
@@ -57,22 +58,16 @@ def microsalt(context: click.Context, ticket: str, dry_run: bool):
 def link(context: click.Context, dry_run: bool, ticket: str, sample_id: str):
     """Link microbial FASTQ files for a SAMPLE_ID"""
 
-    api = context.obj["analysis_api"]
-    sample_objs = api.get_samples(ticket, sample_id)
+    analysis_api = context.obj["analysis_api"]
 
-    if not sample_objs:
+    if not any([ticket, sample_id]):
         LOG.error("provide ticket and/or sample")
         context.abort()
 
-    for sample_obj in sample_objs:
-        LOG.info("%s: link FASTQ files", sample_obj.internal_id)
-        if dry_run:
-            continue
-        api.link_sample(
-            FastqHandler(context.obj),
-            ticket=ticket,
-            sample=sample_obj.internal_id,
-        )
+    if dry_run:
+        return
+
+    analysis_api.link_samples(ticket=ticket)
 
 
 @microsalt.command("config-case")

@@ -9,9 +9,10 @@ import gzip
 import logging
 import re
 from datetime import datetime
-from typing import Dict
+from typing import Dict, List
 
 from cg.apps.microsalt.fastq import FastqHandler
+from cg.apps.pipelines.fastqhandler import BaseFastqHandler
 from cg.store.models import Sample
 
 from cg.apps import hk, lims
@@ -28,10 +29,12 @@ class MicrosaltAnalysisAPI:
         db: Store,
         hk_api: hk.HousekeeperAPI,
         lims_api: lims.LimsAPI,
+        fastq_handler: BaseFastqHandler
     ):
         self.db = db
         self.hk = hk_api
         self.lims = lims_api
+        self.fastq_handler = fastq_handler
 
     def has_flowcells_on_disk(self, ticket: int) -> bool:
         """Check stuff before starting the analysis."""
@@ -101,7 +104,21 @@ class MicrosaltAnalysisAPI:
 
         return rs
 
-    def link_sample(self, fastq_handler: FastqHandler, sample: str, ticket: int) -> None:
+    def link_samples(self, ticket: int, sample_id: str):
+
+        sample_objs = self.get_samples(ticket, sample_id)
+
+        if not sample_objs:
+            raise Exception("Could not find ant samples to link")
+
+        for sample_obj in sample_objs:
+            LOG.info("%s: link FASTQ files", sample_obj.internal_id)
+            self.link_sample(
+                ticket=ticket,
+                sample=sample_obj.internal_id,
+            )
+
+    def link_sample(self, sample: str, ticket: int) -> None:
         """Link FASTQ files for a sample."""
         file_objs = self.hk.files(bundle=sample, tags=["fastq"])
         files = []
@@ -125,7 +142,7 @@ class MicrosaltAnalysisAPI:
                 data["flowcell"] = f"{data['flowcell']}-{matches[0]}"
             files.append(data)
 
-        fastq_handler.link(ticket=ticket, sample=sample, files=files)
+        self.fastq_handler.link(ticket=ticket, sample=sample, files=files)
 
     def get_samples(self, ticket: int = None, sample_id: str = None) -> [models.Sample]:
         ids = {}
