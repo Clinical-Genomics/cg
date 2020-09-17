@@ -32,22 +32,22 @@ class MicrosaltAnalysisAPI:
         self.hk = hk_api
         self.lims = lims_api
 
-    def check(self, family_obj: models.Family):
+    def has_flowcells_on_disk(self, ticket: int) -> bool:
         """Check stuff before starting the analysis."""
-        flowcells = self.db.flowcells(family=family_obj)
+
+        flowcells = self.get_flowcells(ticket=ticket)
         statuses = []
         for flowcell_obj in flowcells:
-            LOG.debug(f"{flowcell_obj.name}: checking flowcell")
+            LOG.debug(f"{flowcell_obj.name}: checking if flowcell is on disk")
             statuses.append(flowcell_obj.status)
             if flowcell_obj.status == "removed":
-                LOG.info(f"{flowcell_obj.name}: requesting removed flowcell")
-                flowcell_obj.status = "requested"
+                LOG.info(f"{flowcell_obj.name}: flowcell not on disk")
             elif flowcell_obj.status != "ondisk":
                 LOG.warning(f"{flowcell_obj.name}: {flowcell_obj.status}")
         return all(status == "ondisk" for status in statuses)
 
     @staticmethod
-    def fastq_header(line):
+    def fastq_header(line: str) -> dict:
         """handle illumina's two different header formats
         @see https://en.wikipedia.org/wiki/FASTQ_format
 
@@ -100,7 +100,7 @@ class MicrosaltAnalysisAPI:
 
         return rs
 
-    def link_sample(self, fastq_handler: FastqHandler, sample: str, ticket: int):
+    def link_sample(self, fastq_handler: FastqHandler, sample: str, ticket: int) -> None:
         """Link FASTQ files for a sample."""
         file_objs = self.hk.files(bundle=sample, tags=["fastq"])
         files = []
@@ -168,7 +168,7 @@ class MicrosaltAnalysisAPI:
 
         return organism
 
-    def get_parameters(self, sample_obj: Sample):
+    def get_parameters(self, sample_obj: Sample) -> dict:
         """Fill a dict with case config information for one sample """
         sample_id = sample_obj.internal_id
         method_library_prep = self.lims.get_prep_method(sample_id)
@@ -201,3 +201,26 @@ class MicrosaltAnalysisAPI:
     def get_project(self, sample_id: str) -> str:
         """Get LIMS project for a sample"""
         return self.lims.get_sample_project(sample_id)
+
+    def get_flowcells(self, ticket: int) -> [models.Flowcell]:
+        """Get all flowcells for all samples in a ticket"""
+
+        flowcells = set()
+
+        for sample in self.get_samples(ticket=ticket):
+            flowcells.add(sample.flowcells)
+
+        return list(flowcells)
+
+    def request_removed_flowcells(self, ticket):
+        """Check stuff before starting the analysis."""
+
+        flowcells = self.get_flowcells(ticket=ticket)
+        for flowcell_obj in flowcells:
+            LOG.debug(f"{flowcell_obj.name}: checking if flowcell should be requested")
+            if flowcell_obj.status == "removed":
+                LOG.info(f"{flowcell_obj.name}: requesting removed flowcell")
+                flowcell_obj.status = "requested"
+            elif flowcell_obj.status != "ondisk":
+                LOG.warning(f"{flowcell_obj.name}: {flowcell_obj.status}")
+        self.db.commit()

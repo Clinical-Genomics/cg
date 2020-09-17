@@ -26,9 +26,8 @@ def microsalt(context: click.Context, ticket: str, dry_run: bool):
     context.obj["db"] = Store(context.obj["database"])
     hk_api = hk.HousekeeperAPI(context.obj)
     lims_api = lims.LimsAPI(context.obj)
-    context.obj["api"] = MicrosaltAnalysisAPI(
-        db=context.obj["db"], hk_api=hk_api, lims_api=lims_api
-    )
+    analysis_api = MicrosaltAnalysisAPI(db=context.obj["db"], hk_api=hk_api, lims_api=lims_api)
+    context.obj["analysis_api"] = analysis_api
 
     if context.invoked_subcommand:
         return
@@ -36,6 +35,13 @@ def microsalt(context: click.Context, ticket: str, dry_run: bool):
     if not ticket:
         LOG.error("Please provide a ticket")
         context.abort()
+
+    if not analysis_api.has_flowcells_on_disk(ticket=ticket):
+        LOG.warning(
+            f"Ticket {ticket} not ready to run, requesting flowcells from long term storage!",
+        )
+        analysis_api.request_removed_flowcells(ticket=ticket)
+        return
 
     # execute the analysis!
     context.invoke(config_case, ticket=ticket, dry_run=dry_run)
@@ -51,7 +57,7 @@ def microsalt(context: click.Context, ticket: str, dry_run: bool):
 def link(context: click.Context, dry_run: bool, ticket: str, sample_id: str):
     """Link microbial FASTQ files for a SAMPLE_ID"""
 
-    api = context.obj["api"]
+    api = context.obj["analysis_api"]
     sample_objs = api.get_samples(ticket, sample_id)
 
     if not sample_objs:
@@ -81,13 +87,15 @@ def config_case(context: click.Context, dry_run: bool, ticket: int, sample_id: s
         LOG.error("Provide ticket and/or sample")
         context.abort()
 
-    sample_objs = context.obj["api"].get_samples(ticket, sample_id)
+    sample_objs = context.obj["analysis_api"].get_samples(ticket, sample_id)
 
     if not sample_objs:
         LOG.error("No sample found for that ticket/sample_id")
         context.abort()
 
-    parameters = [context.obj["api"].get_parameters(sample_obj) for sample_obj in sample_objs]
+    parameters = [
+        context.obj["analysis_api"].get_parameters(sample_obj) for sample_obj in sample_objs
+    ]
 
     filename = str(ticket) if ticket else sample_id
     outfilename = (Path(context.obj["usalt"]["queries_path"]) / filename).with_suffix(".json")

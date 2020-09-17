@@ -3,7 +3,6 @@
 from pathlib import Path
 
 import pytest
-
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.store import Store
 
@@ -19,7 +18,9 @@ def base_context(microsalt_store, lims_api, tmpdir, queries_path, housekeeper_ap
     """ The click context for the microsalt cli """
     return {
         "db": microsalt_store,
-        "api": MicrosaltAnalysisAPI(db=microsalt_store, hk_api=housekeeper_api, lims_api=lims_api),
+        "analysis_api": MicrosaltAnalysisAPI(
+            db=microsalt_store, hk_api=housekeeper_api, lims_api=lims_api
+        ),
         "usalt": {
             "root": tmpdir,
             "queries_path": queries_path,
