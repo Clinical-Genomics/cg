@@ -161,15 +161,17 @@ def test_single_panel(balsamic_context: dict, cli_runner, caplog):
     assert "--normal" not in caplog.text
 
 
-def test_error_single_wgs_panel_arg(balsamic_context: dict, cli_runner, caplog):
+def test_error_single_wgs_panel_arg(balsamic_context: dict, balsamic_dir: Path, cli_runner, caplog):
     """Test with case_id that requires SINGLE WGS analysis and --panel-bed argument"""
     caplog.set_level(logging.ERROR)
     # GIVEN case_id containing ONE tumor, WGS application and panel bed argument
     case_id = "balsamic_case_wgs_single"
-    panel_bed = "balsamic_bed_1.bed"
+    panel_bed = Path(balsamic_dir, "balsamic_bed_1.bed")
     # WHEN dry running
     result = cli_runner.invoke(
-        config_case, [case_id, "--dry-run", "--panel-bed", panel_bed], obj=balsamic_context
+        config_case,
+        [case_id, "--dry-run", "--panel-bed", panel_bed],
+        obj=balsamic_context,
     )
     # THEN command is NOT generated successfully
     assert result.exit_code != EXIT_SUCCESS
@@ -245,10 +247,12 @@ def test_error_mixed_panel_bed_resque(balsamic_context: dict, cli_runner, caplog
     caplog.set_level(logging.INFO)
     # GIVEN case_id with mixed panel_bed in LIMS and a panel bed argument
     case_id = "balsamic_case_mixed_bed_paired_error"
-    panel_bed = "balsamic_bed_1.bed"
+    panel_bed = "BalsamicBed1"
     # WHEN dry running
     result = cli_runner.invoke(
-        config_case, [case_id, "--dry-run", "--panel-bed", panel_bed], obj=balsamic_context
+        config_case,
+        [case_id, "--dry-run", "--panel-bed", panel_bed],
+        obj=balsamic_context,
     )
     # THEN command is generated successfully
     assert result.exit_code == EXIT_SUCCESS
