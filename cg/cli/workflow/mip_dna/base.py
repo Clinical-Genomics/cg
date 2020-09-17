@@ -1,8 +1,6 @@
 """Commands to start MIP rare disease DNA workflow"""
 
 import logging
-import sys
-from pathlib import Path
 
 import click
 
@@ -12,7 +10,7 @@ from cg.cli.workflow.get_links import get_links
 from cg.cli.workflow.mip.store import store as store_cmd
 from cg.cli.workflow.mip_dna.deliver import CASE_TAGS, SAMPLE_TAGS
 from cg.cli.workflow.mip_dna.deliver import deliver as deliver_cmd
-from cg.constants import EXIT_SUCCESS
+from cg.constants import EXIT_SUCCESS, EXIT_FAIL
 from cg.exc import CgError
 from cg.meta.deliver import DeliverAPI
 from cg.meta.workflow.mip import AnalysisAPI
@@ -29,6 +27,9 @@ PRIORITY_OPTION = click.option(
 )
 START_WITH_PROGRAM = click.option(
     "-sw", "--start-with", help="start mip from this program.", type=str
+)
+OPTION_DRY = click.option(
+    "-d", "--dry-run", "dry_run", is_flag=True, help="print to console instead of executing"
 )
 
 
@@ -52,16 +53,21 @@ def mip_dna(
     start_with: str,
 ):
     """Rare disease DNA workflow"""
+    context.obj["housekeeper_api"] = hk.HousekeeperAPI(context.obj)
+    context.obj["trailblazer_api"] = tb.TrailblazerAPI(context.obj)
+    context.obj["scout_api"] = scoutapi.ScoutAPI(context.obj)
+    context.obj["lims_api"] = lims.LimsAPI(context.obj)
+
     context.obj["dna_api"] = AnalysisAPI(
         db=Store(context.obj["database"]),
-        hk_api=hk.HousekeeperAPI(context.obj),
-        tb_api=tb.TrailblazerAPI(context.obj),
-        scout_api=scoutapi.ScoutAPI(context.obj),
-        lims_api=lims.LimsAPI(context.obj),
+        hk_api=context.obj["housekeeper_api"],
+        tb_api=context.obj["trailblazer_api"],
+        scout_api=context.obj["scout_api"],
+        lims_api=context.obj["lims_api"],
         deliver_api=DeliverAPI(
             context.obj,
-            hk_api=hk.HousekeeperAPI(context.obj),
-            lims_api=lims.LimsAPI(context.obj),
+            hk_api=context.obj["housekeeper_api"],
+            lims_api=context.obj["lims_api"],
             case_tags=CASE_TAGS,
             sample_tags=SAMPLE_TAGS,
         ),
@@ -252,7 +258,7 @@ def run(
 def start(context: click.Context, dry_run: bool = False):
     """Start all cases that are ready for analysis"""
     dna_api = context.obj["dna_api"]
-
+    exit_code = EXIT_SUCCESS
     cases = [case_obj for case_obj in dna_api.db.cases_to_analyze(pipeline="mip")]
     for case_obj in cases:
         if not dna_api.is_dna_only_case(case_obj):
@@ -274,7 +280,12 @@ def start(context: click.Context, dry_run: bool = False):
             )
         except (CgError, click.Abort) as error:
             LOG.error(error.message)
-            continue
+            exit_code = EXIT_FAIL
+        except Exception as e:
+            LOG.error(f"Unspecified error occurred - {e}")
+            exit_code = EXIT_FAIL
+    if exit_code:
+        raise click.Abort()
 
 
 def _suggest_cases_to_analyze(context: click.Context, show_as_error: bool = False):
@@ -284,7 +295,7 @@ def _suggest_cases_to_analyze(context: click.Context, show_as_error: bool = Fals
     else:
         LOG.warning("provide a case, suggestions:")
     for case_obj in context.obj["dna_api"].db.cases_to_analyze(pipeline="mip", limit=50):
-        click.echo(case_obj)
+        LOG.info(case_obj)
 
 
 mip_dna.add_command(store_cmd)

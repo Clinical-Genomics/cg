@@ -72,7 +72,8 @@ class AnalysisAPI(ConfigHandler, MipAPI):
                 self.log.warning("%s: %s", flowcell_obj.name, flowcell_obj.status)
         return all(status == "ondisk" for status in statuses)
 
-    def get_priority(self, family_obj: models.Family) -> str:
+    @staticmethod
+    def get_priority(family_obj: models.Family) -> str:
         """Fetch priority for case id"""
         if family_obj.priority == 0:
             return "low"
@@ -80,18 +81,21 @@ class AnalysisAPI(ConfigHandler, MipAPI):
             return "high"
         return "normal"
 
-    def pedigree_config(self, family_obj: models.Family, pipeline: str, **kwargs) -> dict:
+    def pedigree_config(
+        self, family_obj: models.Family, pipeline: str, panel_bed: str = None
+    ) -> dict:
         """Make the MIP pedigree config. Meta data for the family is taken from the family object
         and converted to MIP format via trailblazer.
 
         Args:
             family_obj (models.Family):
             pipeline (str): the name of the pipeline to validate the config against
+            panel_bed(str): Overrides default capture kit or bypassed getting panel BED from LIMS
 
         Returns:
             dict: config_data (MIP format)
         """
-        data = self.build_config(family_obj, pipeline=pipeline, **kwargs)
+        data = self.build_config(family_obj, pipeline=pipeline, panel_bed=panel_bed)
 
         # Validate and reformat to MIP pedigree config format
         config_data = self.make_pedigree_config(data=data, pipeline=pipeline)
@@ -107,7 +111,7 @@ class AnalysisAPI(ConfigHandler, MipAPI):
             raise CgDataError("Bed-version %s does not exist" % target_bed_shortname)
         return bed_version_obj.filename
 
-    def build_config(self, family_obj: models.Family, pipeline: str, **kwargs) -> dict:
+    def build_config(self, family_obj: models.Family, pipeline: str, panel_bed: str = None) -> dict:
         """Fetch data for creating a MIP pedigree config file"""
 
         def get_sample_data(link_obj):
@@ -123,10 +127,10 @@ class AnalysisAPI(ConfigHandler, MipAPI):
         def config_dna_sample(self, link_obj):
             sample_data = get_sample_data(link_obj)
             if sample_data["analysis_type"] == "wgs":
-                sample_data["capture_kit"] = kwargs.get("panel_bed", DEFAULT_CAPTURE_KIT)
+                sample_data["capture_kit"] = panel_bed or DEFAULT_CAPTURE_KIT
             else:
-                sample_data["capture_kit"] = kwargs.get(
-                    "panel_bed", self.get_target_bed_from_lims(link_obj.sample.internal_id)
+                sample_data["capture_kit"] = panel_bed or self.get_target_bed_from_lims(
+                    link_obj.sample.internal_id
                 )
             if link_obj.mother:
                 sample_data["mother"] = link_obj.mother.internal_id
@@ -157,7 +161,7 @@ class AnalysisAPI(ConfigHandler, MipAPI):
 
     @staticmethod
     def fastq_header(line: str) -> dict:
-        """handle illumina's two different header formats
+        """handle Illumina's two different header formats
         @see https://en.wikipedia.org/wiki/FASTQ_format
 
         @HWUSI-EAS100R:6:73:941:1973#0/1

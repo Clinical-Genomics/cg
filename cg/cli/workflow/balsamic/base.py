@@ -12,10 +12,9 @@ from cg.cli.workflow.balsamic.deliver import deliver as deliver_cmd
 from cg.exc import BalsamicStartError, BundleAlreadyAddedError, LimsDataError
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.store import Store
+from cg.constants import EXIT_SUCCESS, EXIT_FAIL
 
 LOG = logging.getLogger(__name__)
-EXIT_SUCCESS = 0
-EXIT_FAIL = 1
 
 ARGUMENT_CASE_ID = click.argument("case_id", required=True)
 OPTION_DRY = click.option(
