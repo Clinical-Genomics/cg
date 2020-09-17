@@ -60,15 +60,13 @@ def deliverables_files(deliverables: dict, analysis_type: str) -> list:
     return files
 
 
-def _parsed_file_has_no_analysis_type_tags(parsed_file: dict) -> bool:
-    """Check if file in deliverables had corresponding analysis_type_tags
-
-    Return: True if NO corresponding tags was found
-    Return: False if corresponding tag was found
-    """
-    if parsed_file["tags"] is None:
-        return True
-    return False
+def _is_deliverables_tags_missing_in_analysis_tags(
+    analysis_type_tags: dict, deliverables_tag_map: tuple
+) -> bool:
+    """Check if deliverable tags are represented in analysis tags """
+    if deliverables_tag_map in analysis_type_tags:
+        return False
+    return True
 
 
 def parse_files(deliverables: dict, pipeline_tags: list, analysis_type_tags: dict) -> list:
@@ -79,14 +77,16 @@ def parse_files(deliverables: dict, pipeline_tags: list, analysis_type_tags: dic
         deliverables_tag_map = (
             (file_["step"],) if file_["tag"] is None else (file_["step"], file_["tag"])
         )
+        if _is_deliverables_tags_missing_in_analysis_tags(
+            analysis_type_tags=analysis_type_tags, deliverables_tag_map=deliverables_tag_map
+        ):
+            continue
         parsed_file = {
             "path": file_["path"],
             "tags": get_tags(file_, pipeline_tags, analysis_type_tags, deliverables_tag_map),
             "archive": False,
             "deliverables_tag_map": deliverables_tag_map,
         }
-        if _parsed_file_has_no_analysis_type_tags(parsed_file):
-            continue
         parsed_files.append(parsed_file)
 
         if file_["path_index"]:
@@ -121,15 +121,6 @@ def get_tags(
     )
 
 
-def _is_deliverables_tags_missing_in_analysis_tags(
-    analysis_type_tags: dict, deliverables_tag_map: tuple
-) -> bool:
-    """Check if deliverable tags are represented in analysis tags """
-    if deliverables_tag_map in analysis_type_tags:
-        return False
-    return True
-
-
 def _convert_deliverables_tags_to_hk_tags(
     tags: dict, analysis_type_tags: dict, deliverables_tag_map: tuple, is_index: bool = False
 ) -> List[str]:
@@ -137,11 +128,6 @@ def _convert_deliverables_tags_to_hk_tags(
     Filter and convert tags from external deliverables tags to standard internal housekeeper
     tags
     """
-
-    if _is_deliverables_tags_missing_in_analysis_tags(
-        analysis_type_tags=analysis_type_tags, deliverables_tag_map=deliverables_tag_map
-    ):
-        return
 
     if is_index:
         mapped_tags = analysis_type_tags[deliverables_tag_map]["index_tags"]
