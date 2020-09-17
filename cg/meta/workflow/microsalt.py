@@ -9,6 +9,7 @@ import gzip
 import logging
 import re
 from datetime import datetime
+from typing import Dict
 
 from cg.apps.microsalt.fastq import FastqHandler
 from cg.store.models import Sample
@@ -168,7 +169,7 @@ class MicrosaltAnalysisAPI:
 
         return organism
 
-    def get_parameters(self, sample_obj: Sample) -> dict:
+    def get_parameters(self, sample_obj: Sample) -> Dict[str, str]:
         """Fill a dict with case config information for one sample """
         sample_id = sample_obj.internal_id
         method_library_prep = self.lims.get_prep_method(sample_id)
