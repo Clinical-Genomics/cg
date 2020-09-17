@@ -124,13 +124,16 @@ def run(context: click.Context, dry_run: bool, config_case_path: click.Path, tic
     microsalt_command = context.obj["usalt"]["binary_path"]
     command = [microsalt_command]
 
+    fastq_path = Path(context.obj["usalt"]["root"]) / "fastq" / ticket
+
     if config_case_path:
         config_case_path = Path(config_case_path)
     else:
         queries_path = Path(context.obj["usalt"]["queries_path"])
         config_case_path = (queries_path / str(ticket)).with_suffix(".json")
 
-    command.extend(["--parameters", str(config_case_path.absolute())])
+    command.extend(["analyse", str(config_case_path.absolute()), "--input", str(fastq_path.absolute(
+    ))])
 
     if dry_run:
         print(" ".join(command))
