@@ -209,7 +209,8 @@ class MicrosaltAnalysisAPI:
         flowcells = set()
 
         for sample in self.get_samples(ticket=ticket):
-            flowcells.add(sample.flowcells)
+            for flowcell in sample.flowcells:
+                flowcells.add(flowcell)
 
         return list(flowcells)
 
