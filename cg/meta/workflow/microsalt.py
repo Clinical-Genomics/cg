@@ -9,10 +9,9 @@ import gzip
 import logging
 import re
 from datetime import datetime
-from typing import Dict, List
+from typing import Dict
 
 from cg.apps.microsalt.fastq import FastqHandler
-from cg.apps.pipelines.fastqhandler import BaseFastqHandler
 from cg.store.models import Sample
 
 from cg.apps import hk, lims
@@ -29,7 +28,7 @@ class MicrosaltAnalysisAPI:
         db: Store,
         hk_api: hk.HousekeeperAPI,
         lims_api: lims.LimsAPI,
-        fastq_handler: BaseFastqHandler
+        fastq_handler: FastqHandler,
     ):
         self.db = db
         self.hk = hk_api
@@ -109,7 +108,7 @@ class MicrosaltAnalysisAPI:
         sample_objs = self.get_samples(ticket, sample_id)
 
         if not sample_objs:
-            raise Exception("Could not find ant samples to link")
+            raise Exception("Could not find any samples to link")
 
         for sample_obj in sample_objs:
             LOG.info("%s: link FASTQ files", sample_obj.internal_id)

@@ -26,8 +26,12 @@ def microsalt(context: click.Context, ticket: str, dry_run: bool):
     context.obj["db"] = Store(context.obj["database"])
     hk_api = hk.HousekeeperAPI(context.obj)
     lims_api = lims.LimsAPI(context.obj)
-    analysis_api = MicrosaltAnalysisAPI(db=context.obj["db"], hk_api=hk_api, lims_api=lims_api,
-                                        fastq_handler=FastqHandler(context.obj))
+    analysis_api = MicrosaltAnalysisAPI(
+        db=context.obj["db"],
+        hk_api=hk_api,
+        lims_api=lims_api,
+        fastq_handler=FastqHandler(context.obj),
+    )
     context.obj["analysis_api"] = analysis_api
 
     if context.invoked_subcommand:
