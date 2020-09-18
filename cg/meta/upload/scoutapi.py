@@ -51,7 +51,7 @@ class UploadScoutAPI:
             chromograph_path = self.fetch_file_path("chromograph", sample_id, hk_version_id)
             mt_bam_path = self.fetch_file_path("bam-mt", sample_id, hk_version_id)
             vcf2cytosure_path = self.fetch_file_path("vcf2cytosure", sample_id, hk_version_id)
-            tiddit_coverage_path = self.fetch_file_path("tiddit_coverage", sample_id, hk_version_id)
+            tiddit_coverage_path = self.fetch_file_path("tiddit-coverage", sample_id, hk_version_id)
 
             lims_sample = dict()
             try:
