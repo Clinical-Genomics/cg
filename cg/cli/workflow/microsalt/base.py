@@ -3,7 +3,6 @@
 import json
 import logging
 from pathlib import Path
-import subprocess
 
 import click
 
@@ -13,6 +12,7 @@ from cg.cli.workflow.microsalt.store import store as store_cmd
 from cg.cli.workflow.microsalt.deliver import deliver as deliver_cmd
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.store import Store
+from cg.utils.commands import Process
 
 LOG = logging.getLogger(__name__)
 
@@ -97,7 +97,7 @@ def config_case(context: click.Context, dry_run: bool, ticket: int, sample_id: s
     ]
 
     filename = str(ticket) if ticket else sample_id
-    outfilename = (Path(context.obj["usalt"]["queries_path"]) / filename).with_suffix(".json")
+    outfilename = (Path(context.obj["microsalt"]["queries_path"]) / filename).with_suffix(".json")
     if dry_run:
         print(json.dumps(parameters, indent=4, sort_keys=True))
         return
@@ -121,26 +121,19 @@ def config_case(context: click.Context, dry_run: bool, ticket: int, sample_id: s
 def run(context: click.Context, dry_run: bool, config_case_path: click.Path, ticket: int):
     """ Start microSALT with an order_id """
 
-    microsalt_command = context.obj["usalt"]["binary_path"]
-    command = [microsalt_command]
-
-    fastq_path = Path(context.obj["usalt"]["root"]) / "fastq" / ticket
+    microsalt_command = context.obj["microsalt"]["binary_path"]
+    microsalt_env = context.obj["microsalt"]["conda_env"]
+    fastq_path = Path(context.obj["microsalt"]["root"]) / "fastq" / ticket
 
     if config_case_path:
         config_case_path = Path(config_case_path)
     else:
-        queries_path = Path(context.obj["usalt"]["queries_path"])
+        queries_path = Path(context.obj["microsalt"]["queries_path"])
         config_case_path = (queries_path / str(ticket)).with_suffix(".json")
 
-    command.extend(["analyse", str(config_case_path.absolute()), "--input", str(fastq_path.absolute(
-    ))])
-
-    if dry_run:
-        print(" ".join(command))
-        return
-
-    LOG.info("Starting microSALT! '%s'", " ".join(command))
-    subprocess.run(command, shell=True, check=True)
+    process = Process(microsalt_command)
+    analyse_command = ["analyse", str(config_case_path.absolute()), "--input", str(fastq_path.absolute())]
+    process.run_command(parameters=analyse_command, dry_run=dry_run)
 
 
 microsalt.add_command(config_case)

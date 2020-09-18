@@ -25,7 +25,7 @@ def base_context(microsalt_store, lims_api, tmpdir, queries_path, housekeeper_ap
             lims_api=lims_api,
             fastq_handler=fastq_handler,
         ),
-        "usalt": {
+        "microsalt": {
             "root": tmpdir,
             "queries_path": queries_path,
             "binary_path": "/bin/true",
@@ -35,7 +35,7 @@ def base_context(microsalt_store, lims_api, tmpdir, queries_path, housekeeper_ap
 
 @pytest.fixture(scope="function")
 def fastq_handler() -> FastqHandler:
-    return FastqHandler({"obj": {"usalt": {"root": "root"}}})
+    return FastqHandler({"obj": {"microsalt": {"root": "root"}}})
 
 
 @pytest.fixture(scope="function")

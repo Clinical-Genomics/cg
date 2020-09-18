@@ -33,7 +33,7 @@ class FastqHandler(BaseFastqHandler):
 
     def __init__(self, config):
         super().__init__(config)
-        self.root_dir = config["usalt"]["root"]
+        self.root_dir = config["microsalt"]["root"]
 
     def link(self, ticket: int, sample: str, files: List[dict]) -> None:
         """Link FASTQ files for a usalt sample.
