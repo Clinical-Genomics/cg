@@ -132,7 +132,9 @@ def test_pop_flowcell_no_flowcell_requested(mock_store, mock_pdc, mock_flowcell)
 @mock.patch("cg.store.models.Flowcell")
 @mock.patch("cg.apps.pdc")
 @mock.patch("cg.store")
-def test_fetch_flowcell_processing_queue_full(mock_store, mock_pdc, mock_flowcell, mock_check_processing, caplog):
+def test_fetch_flowcell_processing_queue_full(
+    mock_store, mock_pdc, mock_flowcell, mock_check_processing, caplog
+):
     """ tests the fetch_flowcell method of the backup API """
 
     caplog.set_level(logging.INFO)
@@ -155,8 +157,14 @@ def test_fetch_flowcell_processing_queue_full(mock_store, mock_pdc, mock_flowcel
 @mock.patch("cg.store.models.Flowcell")
 @mock.patch("cg.apps.pdc")
 @mock.patch("cg.store")
-def test_fetch_flowcell_max_flowcells_ondisk(mock_store, mock_pdc, mock_flowcell, mock_check_processing,
-                          mock_maximum_flowcells_ondisk, caplog):
+def test_fetch_flowcell_max_flowcells_ondisk(
+    mock_store,
+    mock_pdc,
+    mock_flowcell,
+    mock_check_processing,
+    mock_maximum_flowcells_ondisk,
+    caplog,
+):
     """ tests the fetch_flowcell method of the backup API """
 
     caplog.set_level(logging.INFO)
@@ -183,8 +191,15 @@ def test_fetch_flowcell_max_flowcells_ondisk(mock_store, mock_pdc, mock_flowcell
 @mock.patch("cg.store.models.Flowcell")
 @mock.patch("cg.apps.pdc")
 @mock.patch("cg.store")
-def test_fetch_flowcell_no_flowcells_requested(mock_store, mock_pdc, mock_flowcell, mock_check_processing,
-                          mock_maximum_flowcells_ondisk, mock_pop_flowcell, caplog):
+def test_fetch_flowcell_no_flowcells_requested(
+    mock_store,
+    mock_pdc,
+    mock_flowcell,
+    mock_check_processing,
+    mock_maximum_flowcells_ondisk,
+    mock_pop_flowcell,
+    caplog,
+):
     """ tests the fetch_flowcell method of the backup API """
 
     caplog.set_level(logging.INFO)
@@ -214,8 +229,15 @@ def test_fetch_flowcell_no_flowcells_requested(mock_store, mock_pdc, mock_flowce
 @mock.patch("cg.store.models.Flowcell")
 @mock.patch("cg.apps.pdc")
 @mock.patch("cg.store")
-def test_fetch_flowcell_retrieve_next_flowcell(mock_store, mock_pdc, mock_flowcell, mock_check_processing,
-                          mock_maximum_flowcells_ondisk, mock_pop_flowcell, caplog):
+def test_fetch_flowcell_retrieve_next_flowcell(
+    mock_store,
+    mock_pdc,
+    mock_flowcell,
+    mock_check_processing,
+    mock_maximum_flowcells_ondisk,
+    mock_pop_flowcell,
+    caplog,
+):
     """ tests the fetch_flowcell method of the backup API """
 
     caplog.set_level(logging.INFO)
@@ -237,7 +259,9 @@ def test_fetch_flowcell_retrieve_next_flowcell(mock_store, mock_pdc, mock_flowce
     assert "retrieving from PDC" in caplog.text
 
     # AND when done the status of that flowcell is set to "ondisk"
-    assert f"Status for flowcell {mock_pop_flowcell.return_value.name} set to \"ondisk\"" in caplog.text
+    assert (
+        f'Status for flowcell {mock_pop_flowcell.return_value.name} set to "ondisk"' in caplog.text
+    )
     assert mock_pop_flowcell.return_value.status == "ondisk"
 
     # AND status-db is updated with the new status
@@ -252,8 +276,14 @@ def test_fetch_flowcell_retrieve_next_flowcell(mock_store, mock_pdc, mock_flowce
 @mock.patch("cg.store.models.Flowcell")
 @mock.patch("cg.apps.pdc")
 @mock.patch("cg.store")
-def test_fetch_flowcell_retrieve_specified_flowcell(mock_store, mock_pdc, mock_flowcell, mock_check_processing,
-                          mock_maximum_flowcells_ondisk, caplog):
+def test_fetch_flowcell_retrieve_specified_flowcell(
+    mock_store,
+    mock_pdc,
+    mock_flowcell,
+    mock_check_processing,
+    mock_maximum_flowcells_ondisk,
+    caplog,
+):
     """ tests the fetch_flowcell method of the backup API """
 
     caplog.set_level(logging.INFO)
@@ -270,7 +300,7 @@ def test_fetch_flowcell_retrieve_specified_flowcell(mock_store, mock_pdc, mock_f
     assert "retrieving from PDC" in caplog.text
 
     # AND when done the status of that flowcell is set to "ondisk"
-    assert f"Status for flowcell {mock_flowcell.name} set to \"ondisk\"" in caplog.text
+    assert f'Status for flowcell {mock_flowcell.name} set to "ondisk"' in caplog.text
     assert mock_flowcell.status == "ondisk"
 
     # AND status-db is updated with the new status
@@ -285,8 +315,14 @@ def test_fetch_flowcell_retrieve_specified_flowcell(mock_store, mock_pdc, mock_f
 @mock.patch("cg.store.models.Flowcell")
 @mock.patch("cg.apps.pdc")
 @mock.patch("cg.store")
-def test_fetch_flowcell_pdc_retrieval_failed(mock_store, mock_pdc, mock_flowcell, mock_check_processing,
-                          mock_maximum_flowcells_ondisk, caplog):
+def test_fetch_flowcell_pdc_retrieval_failed(
+    mock_store,
+    mock_pdc,
+    mock_flowcell,
+    mock_check_processing,
+    mock_maximum_flowcells_ondisk,
+    caplog,
+):
     """ tests the fetch_flowcell method of the backup API """
 
     caplog.set_level(logging.INFO)
@@ -304,5 +340,5 @@ def test_fetch_flowcell_pdc_retrieval_failed(mock_store, mock_pdc, mock_flowcell
     with pytest.raises(subprocess.CalledProcessError):
         backup_api.fetch_flowcell(mock_flowcell, dry_run=False)
 
-    # THEN the failure to retrieve is logged 
+    # THEN the failure to retrieve is logged
     assert "retrieval failed" in caplog.text
