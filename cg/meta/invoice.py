@@ -16,7 +16,7 @@ class InvoiceAPI:
 
     def _set_record_type(self):
         """Define the record_type based on the invoice object.
-        It can only be either pool, sample or microbial"""
+        It can only be either pool or sample"""
 
         if self.invoice_obj.pools:
             self.raw_records = self.invoice_obj.pools
@@ -24,9 +24,6 @@ class InvoiceAPI:
         elif self.invoice_obj.samples:
             self.record_type = "Sample"
             self.raw_records = self.invoice_obj.samples
-        elif self.invoice_obj.microbial_samples:
-            self.record_type = "Microbial"
-            self.raw_records = self.invoice_obj.microbial_samples
 
     def prepare_contact_info(self, costcenter):
         """Function to prepare contact info for a customer"""
@@ -94,7 +91,7 @@ class InvoiceAPI:
         }
 
     def _discount_price(self, record, discount: int = 0):
-        """Get discount price for a sample, pool or microbial_sample."""
+        """Get discount price for a sample or pool."""
 
         if self.record_type == "Pool" or record.priority_human == "clinical trials":
             priority = "research"
@@ -131,7 +128,7 @@ class InvoiceAPI:
         return split_price
 
     def prepare_record(self, costcenter: str, discount: int, record):
-        """Get invoice information for a specific sample, pool or microbial_sample."""
+        """Get invoice information for a specific sample or pool"""
 
         try:
             tag = record.application_version.application.tag

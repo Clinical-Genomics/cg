@@ -64,15 +64,6 @@ def make_new_invoice():
             discount=int(request.form.get("discount", "0")),
             record_type="Sample",
         )
-    elif record_type == "Microbial":
-        microbial_samples = [db.sample(sample_id) for sample_id in record_ids]
-        new_invoice = db.add_invoice(
-            customer=customer_obj,
-            microbial_samples=microbial_samples,
-            comment=request.form.get("comment"),
-            discount=int(request.form.get("discount", "0")),
-            record_type="Microbial",
-        )
 
     db.add_commit(new_invoice)
     return url_for(".invoice", invoice_id=new_invoice.id)
@@ -85,7 +76,6 @@ def upload_invoice_news_to_db():
 
     if request.form.get("final_price") != invoice_obj.price:
         invoice_obj.price = request.form.get("final_price")
-        final_price = request.form.get("final_price")
 
     if request.form.get("invoice_sent") and not invoice_obj.invoiced_at:
         invoice_obj.invoiced_at = date.today()
@@ -136,7 +126,7 @@ def new(record_type):
     customer_id = request.args.get("customer", "cust002")
     customer_obj = db.customer(customer_id)
 
-    if record_type in ("Sample", "Microbial"):
+    if record_type == "Sample":
         records, customers_to_invoice = db.samples_to_invoice(customer=customer_obj)
     elif record_type == "Pool":
         records, customers_to_invoice = db.pools_to_invoice(customer=customer_obj)
@@ -164,7 +154,7 @@ def invoice(invoice_id):
 
     if not (kth_inv and ki_inv):
         flash(" ,".join(list(set(api.log))))
-        url = undo_invoice(invoice_id)
+        undo_invoice(invoice_id)
         return redirect(request.referrer)
 
     if not invoice_obj.price:
@@ -192,16 +182,15 @@ def invoice_template(invoice_id):
     invoice_obj = db.invoice(invoice_id)
     api = InvoiceAPI(db, lims, invoice_obj)
 
-    # api = InvoiceAPI(db, lims, invoice_id)
     invoice_dict = api.prepare(cost_center)
     workbook = render_xlsx(invoice_dict)
 
     temp_dir = tempfile.gettempdir()
-    fname = "Invoice_{}_{}.xlsx".format(invoice_obj.id, cost_center)
-    excel_path = os.path.join(temp_dir, fname)
+    filename = "Invoice_{}_{}.xlsx".format(invoice_obj.id, cost_center)
+    excel_path = os.path.join(temp_dir, filename)
     workbook.save(excel_path)
 
-    return send_from_directory(directory=temp_dir, filename=fname, as_attachment=True)
+    return send_from_directory(directory=temp_dir, filename=filename, as_attachment=True)
 
 
 @BLUEPRINT.route("/<int:invoice_id>/invoice_file/<cost_center>")
