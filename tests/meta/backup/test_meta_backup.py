@@ -73,9 +73,6 @@ def test_pop_flowcell_next_requested(mock_store, mock_pdc, mock_flowcell):
     backup_api = BackupApi(mock_store, mock_pdc, max_flowcells_on_disk=1250)
 
     # WHEN a flowcell is requested to be retrieved from PDC
-    mock_flowcell = mock_store.add_flowcell(
-        status="requested",
-    )
     mock_store.flowcells(status="requested").first.return_value = mock_flowcell
 
     popped_flowcell = backup_api.pop_flowcell(dry_run=False)
@@ -96,11 +93,6 @@ def test_pop_flowcell_dry_run(mock_store, mock_pdc, mock_flowcell):
     backup_api = BackupApi(mock_store, mock_pdc, max_flowcells_on_disk=1250)
 
     # WHEN a flowcell is requested to be retrieved from PDC
-    mock_flowcell = mock_store.add_flowcell(
-        status="requested",
-    )
-    mock_store.flowcells(status="requested").first.return_value = mock_flowcell
-
     # AND it's a  dry run
     popped_flowcell = backup_api.pop_flowcell(dry_run=True)
 
@@ -111,10 +103,9 @@ def test_pop_flowcell_dry_run(mock_store, mock_pdc, mock_flowcell):
     assert not mock_store.commit.called
 
 
-@mock.patch("cg.store.models.Flowcell")
 @mock.patch("cg.apps.pdc")
 @mock.patch("cg.store")
-def test_pop_flowcell_no_flowcell_requested(mock_store, mock_pdc, mock_flowcell):
+def test_pop_flowcell_no_flowcell_requested(mock_store, mock_pdc):
     """ tests pop_flowcell method of the backup api """
     # GIVEN status-db needs to be checked for flowcells to be retrieved from PDC
     backup_api = BackupApi(mock_store, mock_pdc, max_flowcells_on_disk=1250)
@@ -188,13 +179,11 @@ def test_fetch_flowcell_max_flowcells_ondisk(
 @mock.patch("cg.meta.backup.BackupApi.pop_flowcell")
 @mock.patch("cg.meta.backup.BackupApi.maximum_flowcells_ondisk")
 @mock.patch("cg.meta.backup.BackupApi.check_processing")
-@mock.patch("cg.store.models.Flowcell")
 @mock.patch("cg.apps.pdc")
 @mock.patch("cg.store")
 def test_fetch_flowcell_no_flowcells_requested(
     mock_store,
     mock_pdc,
-    mock_flowcell,
     mock_check_processing,
     mock_maximum_flowcells_ondisk,
     mock_pop_flowcell,
@@ -226,13 +215,11 @@ def test_fetch_flowcell_no_flowcells_requested(
 @mock.patch("cg.meta.backup.BackupApi.pop_flowcell")
 @mock.patch("cg.meta.backup.BackupApi.maximum_flowcells_ondisk")
 @mock.patch("cg.meta.backup.BackupApi.check_processing")
-@mock.patch("cg.store.models.Flowcell")
 @mock.patch("cg.apps.pdc")
 @mock.patch("cg.store")
 def test_fetch_flowcell_retrieve_next_flowcell(
     mock_store,
     mock_pdc,
-    mock_flowcell,
     mock_check_processing,
     mock_maximum_flowcells_ondisk,
     mock_pop_flowcell,
@@ -290,7 +277,6 @@ def test_fetch_flowcell_retrieve_specified_flowcell(
 
     # GIVEN we want to retrieve a specific flowcell from PDC
     backup_api = BackupApi(mock_store, mock_pdc, max_flowcells_on_disk=1250)
-    mock_flowcell = mock_store.add_flowcell()
     backup_api.check_processing.return_value = True
     backup_api.maximum_flowcells_ondisk.return_value = False
 
@@ -329,9 +315,6 @@ def test_fetch_flowcell_pdc_retrieval_failed(
 
     # GIVEN we are going to retrieve a flowcell from PDC
     backup_api = BackupApi(mock_store, mock_pdc, max_flowcells_on_disk=1250)
-    mock_flowcell = mock_store.add_flowcell(
-        status="requested",
-    )
     backup_api.check_processing.return_value = True
     backup_api.maximum_flowcells_ondisk.return_value = False
 
