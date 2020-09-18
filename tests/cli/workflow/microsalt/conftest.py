@@ -15,6 +15,12 @@ def queries_path(tmpdir):
 
 
 @pytest.fixture(scope="function")
+def fastq_path(tmpdir):
+    """ The path where to store the case-configs """
+    return Path(tmpdir) / "fastq"
+
+
+@pytest.fixture(scope="function")
 def base_context(microsalt_store, lims_api, tmpdir, queries_path, housekeeper_api):
     """ The click context for the microsalt cli """
     return {
@@ -29,6 +35,7 @@ def base_context(microsalt_store, lims_api, tmpdir, queries_path, housekeeper_ap
             "root": tmpdir,
             "queries_path": queries_path,
             "binary_path": "/bin/true",
+            "conda_env": "root",
         },
     }
 

@@ -123,7 +123,7 @@ def run(context: click.Context, dry_run: bool, config_case_path: click.Path, tic
 
     microsalt_bin = context.obj["microsalt"]["binary_path"]
     microsalt_env = context.obj["microsalt"]["conda_env"]
-    fastq_path = Path(context.obj["microsalt"]["root"]) / "fastq" / ticket
+    fastq_path = Path(context.obj["microsalt"]["root"]) / "fastq" / str(ticket)
 
     if config_case_path:
         config_case_path = Path(config_case_path)
