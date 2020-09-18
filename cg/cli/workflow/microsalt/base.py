@@ -132,7 +132,12 @@ def run(context: click.Context, dry_run: bool, config_case_path: click.Path, tic
         config_case_path = (queries_path / str(ticket)).with_suffix(".json")
 
     process = Process(binary=microsalt_bin, environment=microsalt_env)
-    analyse_command = ["analyse", str(config_case_path.absolute()), "--input", str(fastq_path.absolute())]
+    analyse_command = [
+        "analyse",
+        str(config_case_path.absolute()),
+        "--input",
+        str(fastq_path.absolute()),
+    ]
     process.run_command(parameters=analyse_command, dry_run=dry_run)
 
 
