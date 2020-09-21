@@ -1,6 +1,5 @@
 """Code for uploading genotype data via CLI"""
 import click
-
 from cg.meta.upload.gt import UploadGenotypesAPI
 
 from .utils import _suggest_cases_to_upload

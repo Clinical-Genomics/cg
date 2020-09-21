@@ -1,7 +1,6 @@
 import logging
 
 import click
-
 from cg.apps import stats, hk, lims as lims_app
 from cg.meta import transfer as transfer_app
 from cg.store import Store

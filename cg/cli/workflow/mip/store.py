@@ -1,10 +1,9 @@
 """Click commands to store mip analyses"""
 import logging
-from pathlib import Path
 import sys
+from pathlib import Path
 
 import click
-
 from cg.apps import hk, tb
 from cg.exc import (
     AnalysisNotFinishedError,

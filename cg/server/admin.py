@@ -1,10 +1,9 @@
 """Module for Flask-Admin views"""
+from cg.server.ext import db
 from flask import redirect, url_for, request, session
 from flask_admin.contrib.sqla import ModelView
 from flask_dance.contrib.google import google
 from markupsafe import Markup
-
-from cg.server.ext import db
 
 
 class BaseView(ModelView):

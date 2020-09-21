@@ -5,12 +5,11 @@ from typing import Generator
 
 # fixes https://github.com/Clinical-Genomics/servers/issues/30
 import requests_cache
+from cg.exc import LimsDataError
 from dateutil.parser import parse as parse_date
 from genologics.entities import Process, Project, Sample
 from genologics.lims import Lims
 from requests.exceptions import HTTPError
-
-from cg.exc import LimsDataError
 
 from .constants import MASTER_STEPS_UDFS, PROP2UDF
 from .order import OrderHandler

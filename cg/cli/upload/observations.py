@@ -2,7 +2,6 @@
 import logging
 
 import click
-
 from cg.apps import loqus
 from cg.exc import DuplicateRecordError, DuplicateSampleError
 from cg.meta.upload.observations import UploadObservationsAPI

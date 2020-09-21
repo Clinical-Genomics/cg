@@ -2,11 +2,10 @@
 import datetime as dt
 from typing import List
 
-from sqlalchemy import and_, func, or_
-from sqlalchemy.orm import Query
-
 from cg.store import models
 from cg.store.api.base import BaseHandler
+from sqlalchemy import and_, func, or_
+from sqlalchemy.orm import Query
 
 
 class FindBusinessDataHandler(BaseHandler):

@@ -1,10 +1,9 @@
 import logging
 
 import click
-
 from cg.apps.pdc import PdcApi
-from cg.store import Store
 from cg.meta.backup import BackupApi
+from cg.store import Store
 
 LOG = logging.getLogger(__name__)
 MAX_FLOWCELLS_ON_DISK = 1250  # Increased by 250 when the previous limit of 1000 was reached

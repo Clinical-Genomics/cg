@@ -2,14 +2,11 @@ import gzip
 import logging
 import re
 from pathlib import Path
-from typing import List, Any
-from ruamel.yaml import safe_load
 
-from requests.exceptions import HTTPError
-
-from cg.apps import tb, hk, scoutapi, lims
+from cg.apps import hk, lims
 from cg.apps.pipelines.fastqhandler import BaseFastqHandler
 from cg.store import models, Store
+from ruamel.yaml import safe_load
 
 
 class AnalysisAPI:

@@ -2,11 +2,10 @@
 import logging
 import sys
 
+import cg
 import click
 import coloredlogs
 import ruamel.yaml
-
-import cg
 from cg.store import Store
 
 from .add import add

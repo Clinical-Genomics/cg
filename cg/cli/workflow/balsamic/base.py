@@ -1,12 +1,8 @@
 """CLI support to create config and/or start BALSAMIC """
 
 import logging
-import shutil
-from pathlib import Path
-from time import sleep
 
 import click
-
 from cg.apps.balsamic.api import BalsamicAPI
 from cg.apps.balsamic.fastq import FastqHandler
 from cg.apps.hk import HousekeeperAPI

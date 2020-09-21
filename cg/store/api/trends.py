@@ -1,9 +1,9 @@
 import datetime as dt
 from itertools import groupby
-from sqlalchemy import func
 
 from cg.store import models
 from cg.store.api.base import BaseHandler
+from sqlalchemy import func
 
 MONTHS = {
     1: "January",

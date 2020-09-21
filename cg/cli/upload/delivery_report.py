@@ -4,7 +4,6 @@ import logging
 import sys
 
 import click
-
 from cg.apps import hk, scoutapi
 from cg.exc import DeliveryReportError, CgError
 

@@ -5,9 +5,9 @@ Code to handle communications to the shell from CG
 import copy
 import logging
 import subprocess
+from subprocess import CalledProcessError
 
 from cg.constants import RETURN_SUCCESS
-from subprocess import CalledProcessError
 
 LOG = logging.getLogger(__name__)
 

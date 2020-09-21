@@ -1,10 +1,8 @@
 """Chanjo API"""
-from typing import List
-import logging
-import io
 import json
+import logging
 import tempfile
-from pathlib import Path
+from typing import List
 
 from cg.utils import Process
 

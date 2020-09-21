@@ -1,13 +1,13 @@
-from typing import List
 import logging
+from typing import List
 
-from genologics.entities import Project, Researcher, Sample, Container, Containertype, Artifact
+from cg.exc import OrderError
+from genologics.entities import Project, Researcher, Sample, Container, Containertype
 from lxml import etree
 from lxml.objectify import ObjectifiedElement
 
-from cg.exc import OrderError
-from .constants import PROP2UDF
 from . import batch
+from .constants import PROP2UDF
 
 LOG = logging.getLogger(__name__)
 CONTAINER_TYPE_MAP = {"Tube": 2, "96 well plate": 1}

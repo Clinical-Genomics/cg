@@ -3,19 +3,19 @@ import logging
 import shutil
 from datetime import datetime
 from pathlib import Path
-import ruamel.yaml
-import click
-from dateutil.parser import parse as parse_date
 
+import click
+import ruamel.yaml
+from cg.apps.balsamic.api import BalsamicAPI
 from cg.apps.balsamic.fastq import FastqHandler
-from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
+from cg.apps.crunchy import CrunchyAPI
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
-from cg.apps.tb import TrailblazerAPI
 from cg.apps.scoutapi import ScoutAPI
-from cg.apps.crunchy import CrunchyAPI
-from cg.apps.balsamic.api import BalsamicAPI
+from cg.apps.tb import TrailblazerAPI
+from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.store import Store
+from dateutil.parser import parse as parse_date
 
 LOG = logging.getLogger(__name__)
 SUCCESS = 0

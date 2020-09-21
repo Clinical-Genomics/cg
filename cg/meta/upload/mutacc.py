@@ -2,8 +2,8 @@
     Module to upload cases to mutacc
 """
 
-import os
 import logging
+import os
 from collections import namedtuple
 
 from cg.apps import scoutapi, mutacc_auto

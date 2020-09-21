@@ -1,8 +1,8 @@
 import datetime as dt
-from pkg_resources import resource_filename
 
 from openpyxl import load_workbook, Workbook
 from openpyxl.styles import Border, Font, PatternFill, Side
+from pkg_resources import resource_filename
 
 
 def render_xlsx(data: dict) -> Workbook:

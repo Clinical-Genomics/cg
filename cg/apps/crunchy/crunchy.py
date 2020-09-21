@@ -13,12 +13,11 @@ from json.decoder import JSONDecodeError
 from pathlib import Path
 from typing import List, Optional
 
-from marshmallow import ValidationError
-
 from cg.constants import FASTQ_DELTA
 from cg.models import CompressionData
 from cg.utils import Process
 from cg.utils.date import get_date_str
+from marshmallow import ValidationError
 
 from .models import CrunchyFileSchema
 from .sbatch import SBATCH_FASTQ_TO_SPRING, SBATCH_HEADER_TEMPLATE, SBATCH_SPRING_TO_FASTQ

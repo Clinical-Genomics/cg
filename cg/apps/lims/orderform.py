@@ -2,7 +2,6 @@ from typing import List
 
 import xlrd
 from cg.constants import METAGENOME_SOURCES, ANALYSIS_SOURCES
-
 from cg.exc import OrderFormError
 
 SEX_MAP = {"male": "M", "female": "F", "unknown": "unknown"}

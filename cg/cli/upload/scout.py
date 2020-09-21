@@ -3,7 +3,6 @@ import logging
 
 import click
 import yaml
-
 from cg.apps import hk
 from cg.meta.upload.scoutapi import UploadScoutAPI
 

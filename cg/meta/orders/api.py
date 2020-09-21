@@ -15,8 +15,9 @@ from cg.apps.lims import LimsAPI
 from cg.apps.osticket import OsTicket
 from cg.exc import OrderError, TicketCreationError
 from cg.store import Store, models
-from .schema import OrderType, ORDER_SCHEMES
+
 from .lims import LimsHandler
+from .schema import OrderType, ORDER_SCHEMES
 from .status import StatusHandler
 
 LOG = logging.getLogger(__name__)

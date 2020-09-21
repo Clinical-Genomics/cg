@@ -1,10 +1,8 @@
 """Base module for building bioinfo workflow bundles for linking in Housekeeper"""
 import datetime as dt
-
 from typing import List
 
 from cg.constants import HK_TAGS, MIP_DNA_TAGS, MIP_RNA_TAGS
-
 from cg.exc import AnalysisDuplicationError, PipelineUnknownError, MandatoryFilesMissing
 
 ANALYSIS_TYPE_TAGS = {"wgs": MIP_DNA_TAGS, "wes": MIP_DNA_TAGS, "wts": MIP_RNA_TAGS}

@@ -10,11 +10,10 @@ from typing import List, Optional
 
 from cg.apps.balsamic.api import BalsamicAPI
 from cg.apps.balsamic.fastq import FastqHandler
-
-from cg.constants import FAMILY_ACTIONS
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
-from cg.exc import BalsamicStartError, BundleAlreadyAddedError, LimsDataError
+from cg.constants import FAMILY_ACTIONS
+from cg.exc import BalsamicStartError, BundleAlreadyAddedError
 from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)

@@ -3,7 +3,6 @@ import logging
 from typing import List
 
 import petname
-
 from cg.constants import PRIORITY_MAP
 from cg.store import models, utils
 from cg.store.api.base import BaseHandler

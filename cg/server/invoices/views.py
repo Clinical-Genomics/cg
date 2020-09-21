@@ -2,6 +2,9 @@ import os
 import tempfile
 from datetime import date
 
+from cg.apps.invoice.render import render_xlsx
+from cg.meta.invoice import InvoiceAPI
+from cg.server.ext import db, lims
 from flask import (
     flash,
     Blueprint,
@@ -14,10 +17,6 @@ from flask import (
     current_app,
 )
 from flask_dance.contrib.google import google
-
-from cg.apps.invoice.render import render_xlsx
-from cg.meta.invoice import InvoiceAPI
-from cg.server.ext import db, lims
 
 BLUEPRINT = Blueprint("invoices", __name__, template_folder="templates")
 

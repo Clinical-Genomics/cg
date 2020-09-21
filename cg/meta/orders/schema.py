@@ -1,8 +1,6 @@
 from collections import Iterable
 from enum import Enum
 
-from pyschemes import Scheme, validators
-
 from cg.constants import (
     PRIORITY_OPTIONS,
     SEX_OPTIONS,
@@ -10,6 +8,7 @@ from cg.constants import (
     CAPTUREKIT_OPTIONS,
     CONTAINER_OPTIONS,
 )
+from pyschemes import Scheme, validators
 
 
 class OrderType(Enum):

@@ -4,7 +4,6 @@ import logging
 from pathlib import Path
 
 import click
-
 from cg.apps import gt, hk
 from cg.apps import vogue as vogue_api
 from cg.cli.workflow.get_links import get_links

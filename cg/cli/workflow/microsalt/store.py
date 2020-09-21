@@ -4,7 +4,6 @@ import logging
 from pathlib import Path
 
 import click
-
 from cg.apps import hk, tb
 from cg.exc import AnalysisNotFinishedError, AnalysisDuplicationError
 from cg.store import Store

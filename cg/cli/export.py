@@ -1,5 +1,6 @@
 """Functionality to export data from the database"""
 import logging
+
 import click
 from cg.store import Store
 

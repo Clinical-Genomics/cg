@@ -1,12 +1,11 @@
 import logging
-
-from subprocess import CalledProcessError
 import subprocess
+from subprocess import CalledProcessError
 
 from alchy import Manager
-from genotype.store import api, models
-from genotype.load.vcf import load_vcf
 from cg.exc import CaseNotFoundError
+from genotype.load.vcf import load_vcf
+from genotype.store import api, models
 
 LOG = logging.getLogger(__name__)
 

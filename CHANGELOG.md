@@ -6,6 +6,52 @@ About changelog [here](https://keepachangelog.com/en/1.0.0/)
 
 Please add a new candidate release at the top after changing the latest one. Feel free to copy paste from the "squash and commit" box that gets generated when creating PRs
 
+<<<<<<< HEAD
+=======
+Try to use the following format:
+
+## [x.x.x]
+
+### Added
+
+### Changed
+
+### Fixed
+
+## [12.4.0]
+
+### Added
+- Providing a name of panel bed file in MIP cli now overrides getting capture kit through LimsAPI during case config
+### Changed
+- Providing panel bed path or capture kit shortname in BALSAMIC cli now overrides getting capture kit through LimsAPI during case config
+### Fixed
+- Fix Balsamic automation functions to exit with 1 if any of the errors are raised while looping through cases
+
+## [12.3.6]
+
+### Fixed
+- Fixes bug where scout_api was sent into the compression_api in cli/store. The compression_api does not have scout_as an argument.
+
+
+## [12.3.5]
+
+### Added
+- Added @Mropat as codeowner
+
+## [12.3.4]
+
+### Fixed
+- Fixes bug where  upload_started_at and uploaded_at timestamps were not being updated in StatusDB upon successful Scout upload. 
+This bug was happening because several instances of Store were instantiated in the same context
+
+## [12.3.3]
+
+### Fixed
+- Fixes but where linking MIP trio samples only linked the first sample instead of the whole family (Introduced in recent PR)
+- Fixes bug where linking by SampleID was not linking the entire family (Old)
+- Fixes bug where linking by SampleID would not be able to generate correct linking path (Old)
+
+>>>>>>> master
 ## [12.3.2]
 
 ### Fixed

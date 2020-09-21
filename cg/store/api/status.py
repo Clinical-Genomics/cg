@@ -4,7 +4,7 @@ from typing import List
 from cg.constants import PRIORITY_MAP
 from cg.store import models
 from cg.store.api.base import BaseHandler
-from sqlalchemy import or_, and_, func
+from sqlalchemy import or_, and_
 from sqlalchemy.orm import Query
 
 

@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 import json
 import logging
+import tempfile
 from functools import wraps
 from pathlib import Path
-import tempfile
 
+from cg.apps.lims import parse_orderform, parse_json
 from cg.constants import METAGENOME_SOURCES, ANALYSIS_SOURCES
+from cg.exc import DuplicateRecordError, OrderFormError, OrderError
+from cg.meta.orders import OrdersAPI, OrderType
 from flask import abort, current_app, Blueprint, jsonify, g, make_response, request
 from google.auth import jwt
 from requests.exceptions import HTTPError
 from werkzeug.utils import secure_filename
 
-from cg.exc import DuplicateRecordError, OrderFormError, OrderError
-from cg.apps.lims import parse_orderform, parse_json
-from cg.meta.orders import OrdersAPI, OrderType
 from .ext import db, lims, osticket
 
 LOG = logging.getLogger(__name__)

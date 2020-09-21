@@ -3,7 +3,6 @@
 import logging
 
 import click
-
 from cg.apps import hk, lims, scoutapi, tb
 from cg.apps.environ import environ_email
 from cg.cli.workflow.get_links import get_links

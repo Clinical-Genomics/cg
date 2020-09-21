@@ -3,7 +3,6 @@
 import logging
 
 import click
-
 from cg.apps import crunchy, hk, scoutapi
 from cg.cli.compress.helpers import get_fastq_individuals, update_compress_api
 from cg.exc import CaseNotFoundError

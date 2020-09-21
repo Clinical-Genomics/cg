@@ -2,7 +2,6 @@ import logging
 from pathlib import Path
 
 import ruamel.yaml
-
 from cg.apps import hk, gt, tb
 from cg.store import models, Store
 

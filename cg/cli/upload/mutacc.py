@@ -2,7 +2,6 @@
 import logging
 
 import click
-
 from cg.apps import mutacc_auto
 from cg.meta.upload.mutacc import UploadToMutaccAPI
 

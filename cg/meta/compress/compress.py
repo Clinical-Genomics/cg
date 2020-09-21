@@ -5,11 +5,10 @@
 import logging
 from pathlib import Path
 
-from housekeeper.store import models as hk_models
-
 from cg.apps import crunchy, hk
 from cg.meta.compress import files
 from cg.models import CompressionData, FileData
+from housekeeper.store import models as hk_models
 
 LOG = logging.getLogger(__name__)
 

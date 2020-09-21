@@ -1,10 +1,11 @@
 """ Common microsalt related functionality """
-from datetime import datetime
 import logging
 import re
+from datetime import datetime
 
-from cg.store.models import Sample
 from cg.apps.lims import LimsAPI
+from cg.store.models import Sample
+
 
 #    Organism - Fallback based on reference, ‘Other species’ and ‘Comment’. Default to “Unset”.
 #    Priority = Default to empty string. Weird response. Typically “standard” or “research”.

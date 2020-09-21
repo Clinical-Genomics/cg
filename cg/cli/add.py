@@ -1,6 +1,6 @@
 import logging
-import click
 
+import click
 from cg.constants import PRIORITY_OPTIONS, STATUS_OPTIONS
 from cg.store import Store
 

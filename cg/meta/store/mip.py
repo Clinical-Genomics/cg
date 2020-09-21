@@ -1,8 +1,8 @@
 """ MIP specific functionality for storing files in Houskeeper """
 import logging
 from pathlib import Path
-import ruamel.yaml
 
+import ruamel.yaml
 from cg.exc import (
     AnalysisNotFinishedError,
     BundleAlreadyAddedError,

@@ -2,16 +2,16 @@
 
 import datetime as dt
 import logging
-from typing import List
 from pathlib import Path
+from typing import List
 
+from cg.utils.commands import Process
 from pymongo import MongoClient
 from scout.adapter.mongo import MongoAdapter
 from scout.export.panel import export_panels as scout_export_panels
 from scout.load import load_scout
 from scout.load.report import load_delivery_report
 from scout.parse.case import parse_case_data
-from cg.utils.commands import Process
 
 LOG = logging.getLogger(__name__)
 

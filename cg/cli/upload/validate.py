@@ -1,7 +1,6 @@
 """Code for validating an upload via CLI"""
 
 import click
-
 from cg.apps import coverage as coverage_app
 
 from .utils import _suggest_cases_to_upload

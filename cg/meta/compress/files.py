@@ -4,10 +4,9 @@ import logging
 from pathlib import Path
 from typing import Dict, List
 
-from housekeeper.store import models as hk_models
-
 from cg.constants import FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX, HK_FASTQ_TAGS
 from cg.models import CompressionData
+from housekeeper.store import models as hk_models
 
 LOG = logging.getLogger(__name__)
 

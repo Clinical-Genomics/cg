@@ -1,19 +1,18 @@
+import datetime as dt
 import gzip
 import logging
 import re
 from pathlib import Path
 from typing import List, Any
-from ruamel.yaml import safe_load
-import datetime as dt
 
 from cg.apps import tb, hk, scoutapi, lims
 from cg.apps.mip.base import MipAPI
 from cg.apps.mip.confighandler import ConfigHandler
-from cg.apps.pipelines.fastqhandler import BaseFastqHandler
+from cg.constants import COMBOS, COLLABORATORS, MASTER_LIST, DEFAULT_CAPTURE_KIT, FAMILY_ACTIONS
+from cg.exc import CgDataError, LimsDataError
 from cg.meta.deliver import DeliverAPI
 from cg.store import models, Store
-from cg.exc import CgDataError, LimsDataError
-from cg.constants import COMBOS, COLLABORATORS, MASTER_LIST, DEFAULT_CAPTURE_KIT, FAMILY_ACTIONS
+from ruamel.yaml import safe_load
 
 LOG = logging.getLogger(__name__)
 

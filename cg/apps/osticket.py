@@ -1,10 +1,9 @@
 import logging
 import os.path
 
-from flask import Flask
 import requests
-
 from cg.exc import TicketCreationError
+from flask import Flask
 
 LOG = logging.getLogger(__name__)
 

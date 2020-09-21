@@ -2,10 +2,9 @@
 
 from typing import Iterator
 
-from sqlalchemy.orm import Query
-
 from cg.store import models
 from cg.store.api import Store
+from sqlalchemy.orm import Query
 
 
 def analysis_completed(store: Store) -> Query:

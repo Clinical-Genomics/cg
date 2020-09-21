@@ -2,10 +2,9 @@
 import datetime as dt
 from typing import List
 
-from sqlalchemy import desc
-
-from cg.store.api.base import BaseHandler
 from cg.store import models
+from cg.store.api.base import BaseHandler
+from sqlalchemy import desc
 
 
 class FindBasicDataHandler(BaseHandler):

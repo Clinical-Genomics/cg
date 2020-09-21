@@ -1,11 +1,11 @@
 import coloredlogs
+import requests
+from cg.store import models
 from flask import Flask, redirect, url_for, session
 from flask_admin.base import AdminIndexView
-from flask_dance.contrib.google import make_google_blueprint, google
 from flask_dance.consumer import oauth_authorized
-import requests
+from flask_dance.contrib.google import make_google_blueprint, google
 
-from cg.store import models
 from . import api, ext, admin, invoices
 
 

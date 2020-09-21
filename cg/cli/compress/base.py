@@ -2,7 +2,6 @@
 import logging
 
 import click
-
 from cg.apps import crunchy, hk
 from cg.meta.compress import CompressAPI
 from cg.store import Store

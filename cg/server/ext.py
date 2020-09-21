@@ -1,10 +1,9 @@
-from flask_admin import Admin
-from flask_alchy import Alchy
-from flask_cors import CORS
-
 from cg.apps.lims import LimsAPI
 from cg.apps.osticket import OsTicket
 from cg.store import models, api
+from flask_admin import Admin
+from flask_alchy import Alchy
+from flask_cors import CORS
 
 
 class CgAlchy(Alchy, api.CoreHandler):

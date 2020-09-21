@@ -1,13 +1,11 @@
-from copy import deepcopy
 import logging
+from copy import deepcopy
 from pathlib import Path
 
-from marshmallow import Schema, fields, validate
 import ruamel.yaml
-
-from cg.exc import PedigreeConfigError
 from cg.constants import DEFAULT_CAPTURE_KIT, NO_PARENT
-
+from cg.exc import PedigreeConfigError
+from marshmallow import Schema, fields, validate
 
 LOG = logging.getLogger(__name__)
 

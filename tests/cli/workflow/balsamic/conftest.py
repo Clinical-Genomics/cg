@@ -9,7 +9,6 @@ import pytest
 
 from cg.apps.balsamic.api import BalsamicAPI
 from cg.apps.balsamic.fastq import FastqHandler
-from cg.apps.hk import HousekeeperAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.store import Store
 from cg.apps.hk import HousekeeperAPI
@@ -215,7 +214,7 @@ def server_config(
     balsamic_singularity_path: Path,
     balsamic_reference_path: Path,
 ) -> dict:
-    """Mimic dict normally found in cg context"""
+    """Mimic a dict normally found in cg context"""
 
     return {
         "database": "database",
@@ -326,7 +325,7 @@ def balsamic_lims(server_config: dict) -> MockLimsAPI:
 
 
 @pytest.fixture(name="balsamic_store")
-def balsamic_store(base_store: Store, helpers) -> Store:
+def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
     """real store to be used in tests"""
     _store = base_store
 
@@ -371,7 +370,9 @@ def balsamic_store(base_store: Store, helpers) -> Store:
 
     # Create textbook case for WGS PAIRED
     case_wgs_paired = helpers.add_family(
-        store=_store, internal_id="balsamic_case_wgs_paired", family_id="balsamic_case_wgs_paired"
+        store=_store,
+        internal_id="balsamic_case_wgs_paired",
+        family_id="balsamic_case_wgs_paired",
     )
     sample_case_wgs_paired_tumor = helpers.add_sample(
         _store,
@@ -394,7 +395,9 @@ def balsamic_store(base_store: Store, helpers) -> Store:
 
     # Create textbook case for TGS PAIRED without enough reads
     case_tgs_paired = helpers.add_family(
-        _store, internal_id="balsamic_case_tgs_paired", family_id="balsamic_case_tgs_paired"
+        _store,
+        internal_id="balsamic_case_tgs_paired",
+        family_id="balsamic_case_tgs_paired",
     )
     sample_case_tgs_paired_tumor = helpers.add_sample(
         _store,
@@ -419,7 +422,9 @@ def balsamic_store(base_store: Store, helpers) -> Store:
 
     # Create textbook case for WGS TUMOR ONLY
     case_wgs_single = helpers.add_family(
-        _store, internal_id="balsamic_case_wgs_single", family_id="balsamic_case_wgs_single"
+        _store,
+        internal_id="balsamic_case_wgs_single",
+        family_id="balsamic_case_wgs_single",
     )
     sample_case_wgs_single_tumor = helpers.add_sample(
         _store,
@@ -433,7 +438,9 @@ def balsamic_store(base_store: Store, helpers) -> Store:
 
     # Create textbook case for TGS TUMOR ONLY
     case_tgs_single = helpers.add_family(
-        _store, internal_id="balsamic_case_tgs_single", family_id="balsamic_case_tgs_single"
+        _store,
+        internal_id="balsamic_case_tgs_single",
+        family_id="balsamic_case_tgs_single",
     )
     sample_case_tgs_single_tumor = helpers.add_sample(
         _store,
@@ -460,7 +467,9 @@ def balsamic_store(base_store: Store, helpers) -> Store:
         data_analysis="balsamic",
     )
     helpers.add_relationship(
-        _store, family=case_tgs_single_error, sample=sample_case_tgs_single_normal_error
+        _store,
+        family=case_tgs_single_error,
+        sample=sample_case_tgs_single_normal_error,
     )
 
     # Create ERROR case for TGS TWO TUMOR ONE NORMAL
@@ -494,13 +503,19 @@ def balsamic_store(base_store: Store, helpers) -> Store:
         data_analysis="balsamic",
     )
     helpers.add_relationship(
-        _store, family=case_tgs_paired_error, sample=sample_case_tgs_paired_tumor_error
+        _store,
+        family=case_tgs_paired_error,
+        sample=sample_case_tgs_paired_tumor_error,
     )
     helpers.add_relationship(
-        _store, family=case_tgs_paired_error, sample=sample_case_tgs_paired_tumor2_error
+        _store,
+        family=case_tgs_paired_error,
+        sample=sample_case_tgs_paired_tumor2_error,
     )
     helpers.add_relationship(
-        _store, family=case_tgs_paired_error, sample=sample_case_tgs_paired_normal_error
+        _store,
+        family=case_tgs_paired_error,
+        sample=sample_case_tgs_paired_normal_error,
     )
 
     # Create ERROR case for MIXED application type
@@ -525,10 +540,14 @@ def balsamic_store(base_store: Store, helpers) -> Store:
         data_analysis="balsamic",
     )
     helpers.add_relationship(
-        _store, family=case_mixed_paired_error, sample=mixed_sample_case_wgs_paired_tumor_error
+        _store,
+        family=case_mixed_paired_error,
+        sample=mixed_sample_case_wgs_paired_tumor_error,
     )
     helpers.add_relationship(
-        _store, family=case_mixed_paired_error, sample=mixed_sample_case_tgs_paired_normal_error
+        _store,
+        family=case_mixed_paired_error,
+        sample=mixed_sample_case_tgs_paired_normal_error,
     )
 
     # Create ERROR case for MIXED application type NOT BALSAMIC APPLICATION
@@ -598,7 +617,9 @@ def balsamic_store(base_store: Store, helpers) -> Store:
 
     # Create ERROR case for WGS TUMOR ONLY MIP ANALYSIS ONLY
     mip_case_wgs_single = helpers.add_family(
-        _store, internal_id="mip_case_wgs_single", family_id="mip_case_wgs_single"
+        _store,
+        internal_id="mip_case_wgs_single",
+        family_id="mip_case_wgs_single",
     )
     mip_sample_case_wgs_single_tumor = helpers.add_sample(
         _store,
@@ -608,7 +629,9 @@ def balsamic_store(base_store: Store, helpers) -> Store:
         data_analysis="mip",
     )
     helpers.add_relationship(
-        _store, family=mip_case_wgs_single, sample=mip_sample_case_wgs_single_tumor
+        _store,
+        family=mip_case_wgs_single,
+        sample=mip_sample_case_wgs_single_tumor,
     )
 
     # Create ERROR case for WGS ONE TUMOR TWO NORMAL
@@ -681,6 +704,7 @@ def balsamic_store(base_store: Store, helpers) -> Store:
     # Create BED1 version 1
     bed1_name = "BalsamicBed1"
     bed1_filename = "balsamic_bed_1.bed"
+    Path(balsamic_dir, bed1_filename).touch(exist_ok=True)
     bed1 = _store.add_bed(name=bed1_name)
     _store.add_commit(bed1)
     version1 = _store.add_bed_version(
@@ -691,6 +715,7 @@ def balsamic_store(base_store: Store, helpers) -> Store:
     # Create BED2 version 1
     bed2_name = "BalsamicBed2"
     bed2_filename = "balsamic_bed_2.bed"
+    Path(balsamic_dir, bed2_filename).touch(exist_ok=True)
     bed2 = _store.add_bed(name=bed2_name)
     _store.add_commit(bed2)
     version2 = _store.add_bed_version(
@@ -785,7 +810,9 @@ def mock_deliverable(balsamic_dir: Path) -> None:
         ]
     }
     Path.mkdir(
-        Path(balsamic_dir, case_id, "analysis", "delivery_report"), parents=True, exist_ok=True
+        Path(balsamic_dir, case_id, "analysis", "delivery_report"),
+        parents=True,
+        exist_ok=True,
     )
     for report_entry in deliverable_data["files"]:
         Path(report_entry["path"]).touch(exist_ok=True)
