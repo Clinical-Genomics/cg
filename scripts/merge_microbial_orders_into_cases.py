@@ -53,7 +53,8 @@ def merge_microbial_data(config_file):
                 sex="unknown",
                 ticket=order.ticket_number,
             )
-            sample.invoice.record_type = "Sample"
+            if sample.invoice:
+                sample.invoice.record_type = "Sample"
 
             click.echo(click.style("Saving Sample: " + sample.__str__(), fg="yellow"))
             dict_print(sample.__dict__)
