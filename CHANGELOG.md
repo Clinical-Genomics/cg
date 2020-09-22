@@ -8,13 +8,12 @@ Please add a new candidate release at the top after changing the latest one. Fee
 
 Try to use the following format:
 
-## [x.x.x]
-
-### Added
+## [12.5.0]
 
 ### Changed
 
-### Fixed
+- Now ignores errors while cleaning old Balsamic data with cg clean
+
 
 ## [12.4.0]
 
