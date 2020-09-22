@@ -73,6 +73,7 @@ def balsamic_run_dir(context, yes, case_id, dry_run: bool = False):
             return EXIT_SUCCESS
         try:
             shutil.rmtree(analysis_path, ignore_errors=True)
+            LOG.info(f"Cleaned {analysis_path}")
         except Exception as e:
             LOG.warning(
                 f" Directory {analysis_path} will not be deleted due to unexpected error - {e}!"
