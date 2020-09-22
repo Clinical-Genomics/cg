@@ -14,4 +14,3 @@ class TrailblazerAPI(Store):
             config["trailblazer"]["database"],
             families_dir=config["trailblazer"]["root"],
         )
-        self.mip_config = config["trailblazer"]["mip_config"]
