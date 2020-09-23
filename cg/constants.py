@@ -91,7 +91,12 @@ SPRING_SUFFIX = ".spring"
 FASTQ_DELTA = 21
 
 # tags for storing analyses in Housekeeper
-HK_TAGS = {"wes": ["mip-dna", "wes"], "wgs": ["mip-dna", "wgs"], "wts": ["mip-rna"]}
+HK_TAGS = {
+    "wes": ["mip-dna", "wes"],
+    "wgs": ["mip-dna", "wgs"],
+    "wts": ["mip-rna"],
+    "microsalt": ["microsalt"],
+}
 HK_FASTQ_TAGS = ["fastq"]
 
 # used to convert MIP tags derived from the deliverables to MIP standard tags and to check for
@@ -151,10 +156,7 @@ MIP_DNA_TAGS = {
         "tags": ["smn-calling", "smncopynumbercaller"],
         "is_mandatory": False,
     },
-    ("star_caller",): {
-        "tags": ["cyrius", "star-caller"],
-        "is_mandatory": False,
-    },
+    ("star_caller",): {"tags": ["cyrius", "star-caller"], "is_mandatory": False,},
     ("sv_combinevariantcallsets",): {
         "tags": ["sv-bcf"],
         "index_tags": ["sv-bcf-index"],
@@ -170,14 +172,8 @@ MIP_DNA_TAGS = {
         "index_tags": ["vcf-sv-research-index"],
         "is_mandatory": False,
     },
-    ("telomerecat_ar",): {
-        "tags": ["telomere-calling", "telomerecat"],
-        "is_mandatory": False,
-    },
-    ("tiddit_coverage",): {
-        "tags": ["tiddit-coverage", "bigwig"],
-        "is_mandatory": False,
-    },
+    ("telomerecat_ar",): {"tags": ["telomere-calling", "telomerecat"], "is_mandatory": False,},
+    ("tiddit_coverage",): {"tags": ["tiddit-coverage", "bigwig"], "is_mandatory": False,},
     ("version_collect_ar",): {"tags": ["exe-ver"], "is_mandatory": True},
     ("vcf2cytosure_ar",): {"tags": ["vcf2cytosure"], "is_mandatory": False},
 }
@@ -218,10 +214,7 @@ MIP_RNA_TAGS = {
 }
 
 MICROSALT_TAGS = {
-    ("analysis", "sampleinfo"): {
-        "tags": ["analysis", "sampleinfo"],
-        "is_mandatory": True,
-    },
+    ("analysis", "sampleinfo"): {"tags": ["analysis", "sampleinfo"], "is_mandatory": True,},
     ("result_aggregation", "microsalt-qc"): {
         "tags": ["result-aggregration-qc"],
         "is_mandatory": True,
@@ -238,10 +231,7 @@ MICROSALT_TAGS = {
         "tags": ["analysis", "runtime-settings"],
         "is_mandatory": True,
     },
-    ("assembly", "assembly"): {
-        "tags": ["assembly"],
-        "is_mandatory": True,
-    },
+    ("assembly", "assembly"): {"tags": ["assembly"], "is_mandatory": True,},
     ("concatination", "trimmed-forward-reads"): {
         "tags": ["concatination", "trimmed-forward-reads"],
         "is_mandatory": True,
@@ -250,14 +240,8 @@ MICROSALT_TAGS = {
         "tags": ["concatination", "trimmed-reverse-reads"],
         "is_mandatory": True,
     },
-    ("analysis", "logfile"): {
-        "tags": ["analysis", "log"],
-        "is_mandatory": True,
-    },
-    ("assembly", "quast-results"): {
-        "tags": ["assembly", "quast-results"],
-        "is_mandatory": True,
-    },
+    ("analysis", "logfile"): {"tags": ["analysis", "log"], "is_mandatory": True,},
+    ("assembly", "quast-results"): {"tags": ["assembly", "quast-results"], "is_mandatory": True,},
     ("alignment", "reference-alignment"): {
         "tags": ["alignment", "reference-alignment"],
         "is_mandatory": True,
