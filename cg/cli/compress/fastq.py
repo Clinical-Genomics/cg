@@ -16,6 +16,7 @@ from .helpers import (
 LOG = logging.getLogger(__name__)
 
 # There is a list of problematic cases that we should skip
+# The list also includes samples used to validate MIP (amsystems 1490:12)
 PROBLEMATIC_CASES = [
     "modernbee",
     "suremako",
@@ -28,6 +29,37 @@ PROBLEMATIC_CASES = [
     "loyalegret",
     "grandkoi",
     "fluenteagle",
+    "mintyeti",
+    "topsrhino",
+    "gladthrush",
+    "cleanshrimp",
+    "usablemarten",
+    "casualgannet",
+    "pumpedcat",
+    "firstfawn",
+    "helpedfilly",
+    "daringpony",
+    "strongbison",
+    "proeagle",
+    "easybeetle",
+    "sharppigeon",
+    "gamedeer",
+    "keencalf",
+    "epicasp",
+    "safeguinea",
+    "hotviper",
+    "hotskink",
+    "onemite",
+    "busycolt",
+    "rightmacaw",
+    "intentcorgi",
+    "vitalmouse",
+    "lightprawn",
+    "meetpossum",
+    "strongman",
+    "mintbaboon",
+    "propercoral",
+    "livingox",
 ]
 
 
