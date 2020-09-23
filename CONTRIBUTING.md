@@ -114,8 +114,10 @@ The process described here has several goals:
 Please follow these steps to have your contribution considered by the maintainers:
 
 1. Follow all instructions in [the template](.github/PULL_REQUEST_TEMPLATE.md)
-2. Follow the [styleguides](#styleguides)
-3. After you submit your pull request, verify that all [status checks](https://help.github.com/articles/about-status-checks/) are passing <details><summary>What if the status checks are failing?</summary>If a status check is failing, and you believe that the failure is unrelated to your change, please leave a comment on the pull request explaining why you believe the failure is unrelated. A maintainer will re-run the status check for you.</details>
+1. Follow the [styleguides](#styleguides)
+1. After you submit your pull request, verify that all [status checks](https://help.github.com/articles/about-status-checks/) are passing <details><summary>What if the status checks are failing?</summary>If a status check is failing, and you believe that the failure is unrelated to your change, please leave a comment on the pull request explaining why you believe the failure is unrelated. A maintainer will re-run the status check for you.</details>
+1. Update CHANGELOG.md with relevant information
+
 
 While the prerequisites above must be satisfied prior to having your pull request reviewed, the reviewer(s) may ask you to complete additional design work, tests, or other changes before your pull request can be ultimately accepted.
 
@@ -314,7 +316,7 @@ cg upload auto
 You can of course specify which upload you want to do yourself as well:
 
 ```bash
-cg upload [coverage|genotypes|observations|scout|beacon] raredragon
+cg upload [coverage|genotypes|observations|scout] raredragon
 ```
 
 ### Meta
@@ -339,16 +341,6 @@ It opens a ticket using the `osticket` API for each order which it links with th
 
 
 #### Upload
-
-##### Beacon
-
-Includes: `beacon`, `hk`, `scout`, `status`
-
-This command is used to upload variants from affected subject/s of a family to a beacon of genetic variants.
-The API will first use `status` to fetch the ID of any affected subject from a given family. It will then use `hk` to retrieve a VCF file from the analyses. A temporary VCF file is then created by filtering for variants present in desired gene panel(s) (retrieved using `scout`). The `beacon` app will finally handle the upload to beacon.
-The required parameters for the upload are:
-- gene panel to use
-- family ID
 
 ##### Coverage
 

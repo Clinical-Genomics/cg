@@ -2,6 +2,9 @@
 
 import pytest
 
+from cg.apps.crunchy import CrunchyAPI
+from cg.meta.compress import CompressAPI
+
 
 class MockCompressAPI:
     """Mock out necessary functions for running the compress CLI functions"""
@@ -35,6 +38,30 @@ def fixture_compress_api():
     return MockCompressAPI()
 
 
+@pytest.yield_fixture(scope="function", name="real_crunchy_api")
+def fixture_real_crunchy_api(crunchy_config_dict):
+    """crunchy api fixture"""
+    _api = CrunchyAPI(crunchy_config_dict)
+    _api.set_dry_run(True)
+    yield _api
+
+
+@pytest.fixture(name="real_compress_api")
+def fixture_real_compress_api(housekeeper_api, real_crunchy_api):
+    """Return a compress context"""
+    hk_api = housekeeper_api
+    _api = CompressAPI(crunchy_api=real_crunchy_api, hk_api=hk_api)
+    yield _api
+
+
+@pytest.fixture(scope="function", name="real_populated_compress_fastq_api")
+def fixture_real_populated_compress_fastq_api(real_compress_api, compress_hk_fastq_bundle, helpers):
+    """Populated compress api fixture"""
+    helpers.ensure_hk_bundle(real_compress_api.hk_api, compress_hk_fastq_bundle)
+
+    return real_compress_api
+
+
 @pytest.fixture(name="samples")
 def fixture_samples():
     """Return a list of sample ids"""
@@ -57,7 +84,11 @@ class CaseInfo:
 
 @pytest.fixture(name="compress_case_info")
 def fixture_compress_case_info(
-    case_id, family_name, timestamp, later_timestamp, wgs_application_tag,
+    case_id,
+    family_name,
+    timestamp,
+    later_timestamp,
+    wgs_application_tag,
 ):
     """Returns a object with information about a case"""
     return CaseInfo(
@@ -86,7 +117,10 @@ def fixture_populated_compress_store(store, helpers, compress_case_info, analysi
 
 @pytest.fixture(name="populated_compress_multiple_store")
 def fixture_populated_compress_multiple_store(
-    store, helpers, compress_case_info, analysis_family,
+    store,
+    helpers,
+    compress_case_info,
+    analysis_family,
 ):
     """Return a store populated with multiple completed analysis"""
     case_id = compress_case_info.case_id
@@ -94,7 +128,18 @@ def fixture_populated_compress_multiple_store(
     for number in range(10):
         analysis_family["internal_id"] = "_".join([str(number), case_id])
         analysis_family["name"] = "_".join([str(number), family_name])
-
+        for ind, sample in enumerate(analysis_family["samples"]):
+            analysis_family["samples"][ind]["internal_id"] = "_".join(
+                [str(number), sample["internal_id"]]
+            )
+            if "father" in analysis_family["samples"][ind]:
+                analysis_family["samples"][ind]["father"] = "_".join(
+                    [str(number), analysis_family["samples"][ind]["father"]]
+                )
+            if "mother" in analysis_family["samples"][ind]:
+                analysis_family["samples"][ind]["mother"] = "_".join(
+                    [str(number), analysis_family["samples"][ind]["mother"]]
+                )
         helpers.ensure_family(
             store,
             family_info=analysis_family,
@@ -102,15 +147,19 @@ def fixture_populated_compress_multiple_store(
             ordered_at=compress_case_info.timestamp,
             completed_at=compress_case_info.later_timestamp,
         )
-
     return store
 
 
 # Context fixtures
-
-
 @pytest.fixture(name="compress_context")
 def fixture_base_compress_context(compress_api, store):
+    """Return a compress context"""
+    ctx = {"compress": compress_api, "db": store}
+    return ctx
+
+
+@pytest.fixture(name="store_fastq_context")
+def fixture_store_fastq_context(compress_api, store):
     """Return a compress context"""
     ctx = {"compress": compress_api, "db": store}
     return ctx
@@ -126,8 +175,17 @@ def fixture_populated_multiple_compress_context(compress_api, populated_compress
 @pytest.fixture(name="populated_compress_context")
 def fixture_populated_compress_context(compress_api, populated_compress_store):
     """Return a compress context populated with a completed analysis"""
-    # Make sure that there is a family where anaylis is completer
+    # Make sure that there is a family where analysis is completed
     return {"compress": compress_api, "db": populated_compress_store}
+
+
+@pytest.fixture(name="real_populated_compress_context")
+def fixture_real_populated_compress_context(
+    real_populated_compress_fastq_api, populated_compress_store
+):
+    """Return a compress context populated with a completed analysis"""
+    # Make sure that there is a family where analysis is completed
+    return {"compress": real_populated_compress_fastq_api, "db": populated_compress_store}
 
 
 # Bundle fixtures

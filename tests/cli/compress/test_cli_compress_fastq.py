@@ -33,7 +33,7 @@ def test_compress_fastq_cli_case_id_no_family(compress_context, cli_runner, case
     assert f"Could not find case {case_id}" in caplog.text
 
 
-def test_compress_fastq_cli_one_family(populated_compress_context, cli_runner, case_id, caplog):
+def test_compress_fastq_cli_one_family(populated_compress_context, cli_runner, caplog):
     """Test to run the compress command there is an existing family"""
     caplog.set_level(logging.DEBUG)
     # GIVEN a context with a family
@@ -43,7 +43,22 @@ def test_compress_fastq_cli_one_family(populated_compress_context, cli_runner, c
 
     # THEN assert the program exits since no cases where found
     assert res.exit_code == 0
-    # THEN assert it was communicated that no families where found
+    # THEN assert it was communicated that one family was compressed
+    assert f"Individuals in 1 (completed) cases where compressed" in caplog.text
+
+
+def test_real_compress_fastq_cli_one_family(
+    real_populated_compress_context, cli_runner, case_id, caplog
+):
+    """Test to run the compress command there is an existing family"""
+    caplog.set_level(logging.DEBUG)
+    # GIVEN a context with a family
+    # WHEN running the compress command
+    res = cli_runner.invoke(fastq_cmd, ["--case-id", case_id], obj=real_populated_compress_context)
+
+    # THEN assert the program exits with a non zero exit status
+    assert res.exit_code == 0
+    # THEN assert it was communicated that one family was compressed
     assert f"Individuals in 1 (completed) cases where compressed" in caplog.text
 
 

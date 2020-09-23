@@ -1,19 +1,13 @@
 """Base module for building bioinfo workflow bundles for linking in Housekeeper"""
 import datetime as dt
 
+from typing import List
+
 from cg.constants import HK_TAGS, MIP_DNA_TAGS, MIP_RNA_TAGS
 
-from cg.exc import (
-    AnalysisDuplicationError,
-    PipelineUnknownError,
-    MandatoryFilesMissing,
-)
+from cg.exc import AnalysisDuplicationError, PipelineUnknownError, MandatoryFilesMissing
 
-ANALYSIS_TYPE_TAGS = {
-    "wgs": MIP_DNA_TAGS,
-    "wes": MIP_DNA_TAGS,
-    "wts": MIP_RNA_TAGS,
-}
+ANALYSIS_TYPE_TAGS = {"wgs": MIP_DNA_TAGS, "wes": MIP_DNA_TAGS, "wts": MIP_RNA_TAGS}
 
 
 def build_bundle(config_data: dict, analysisinfo_data: dict, deliverables: dict) -> dict:
@@ -66,6 +60,15 @@ def deliverables_files(deliverables: dict, analysis_type: str) -> list:
     return files
 
 
+def _is_deliverables_tags_missing_in_analysis_tags(
+    analysis_type_tags: dict, deliverables_tag_map: tuple
+) -> bool:
+    """Check if deliverable tags are represented in analysis tags """
+    if deliverables_tag_map in analysis_type_tags:
+        return False
+    return True
+
+
 def parse_files(deliverables: dict, pipeline_tags: list, analysis_type_tags: dict) -> list:
     """ Get all files and their tags from the deliverables file """
 
@@ -74,6 +77,10 @@ def parse_files(deliverables: dict, pipeline_tags: list, analysis_type_tags: dic
         deliverables_tag_map = (
             (file_["step"],) if file_["tag"] is None else (file_["step"], file_["tag"])
         )
+        if _is_deliverables_tags_missing_in_analysis_tags(
+            analysis_type_tags=analysis_type_tags, deliverables_tag_map=deliverables_tag_map
+        ):
+            continue
         parsed_file = {
             "path": file_["path"],
             "tags": get_tags(file_, pipeline_tags, analysis_type_tags, deliverables_tag_map),
@@ -102,42 +109,31 @@ def get_tags(
     analysis_type_tags: dict,
     deliverables_tag_map: tuple,
     is_index: bool = False,
-) -> list:
+) -> List[str]:
     """Get all tags for a file"""
 
-    tags = {
-        "format": file["format"],
-        "id": file["id"],
-        "step": file["step"],
-        "tag": file["tag"],
-    }
+    tags = {"id": file["id"]}
     tags["pipeline"] = pipeline_tags[0]
     tags["application"] = pipeline_tags[1] if len(pipeline_tags) > 1 else None
 
-    tags = _convert_deliverables_tags_to_hk_tags(
+    return _convert_deliverables_tags_to_hk_tags(
         tags, analysis_type_tags, deliverables_tag_map, is_index
     )
 
-    return tags
-
 
 def _convert_deliverables_tags_to_hk_tags(
-    tags: dict, tag_map: dict, deliverables_tag_map: tuple, is_index: bool = False
-) -> list:
+    tags: dict, analysis_type_tags: dict, deliverables_tag_map: tuple, is_index: bool = False
+) -> List[str]:
     """
-        Filter and convert tags from external deliverables tags to standard internal housekeeper
-        tags
+    Filter and convert tags from external deliverables tags to standard internal housekeeper
+    tags
     """
 
     if is_index:
-        mapped_tags = tag_map[deliverables_tag_map]["index_tags"]
+        mapped_tags = analysis_type_tags[deliverables_tag_map]["index_tags"]
     else:
-        mapped_tags = tag_map[deliverables_tag_map]["tags"]
-    converted_tags = [
-        tags["format"],
-        tags["id"],
-        tags["pipeline"],
-    ]
+        mapped_tags = analysis_type_tags[deliverables_tag_map]["tags"]
+    converted_tags = [tags["id"], tags["pipeline"]]
 
     if tags["application"] is not None:
         converted_tags.append(tags["application"])
@@ -150,8 +146,8 @@ def _convert_deliverables_tags_to_hk_tags(
 
 def _check_mandatory_tags(files: list, pipeline_tags: dict):
     """
-        Check if all the mandatory tags are present for the files to be added to Housekeeper.
-        Raise an exception if not.
+    Check if all the mandatory tags are present for the files to be added to Housekeeper.
+    Raise an exception if not.
     """
     deliverable_tags = [file_["deliverables_tag_map"] for file_ in files]
     mandatory_tags = [tag for tag in pipeline_tags if pipeline_tags[tag]["is_mandatory"]]
@@ -166,8 +162,8 @@ def _check_mandatory_tags(files: list, pipeline_tags: dict):
 
 def _determine_missing_tags(mandatory_tags: list, found_tags: list) -> tuple:
     """
-        Determines if mandatory tags are missing and hence if files are missing in the
-        deliverables, and returns any missing tags
+    Determines if mandatory tags are missing and hence if files are missing in the
+    deliverables, and returns any missing tags
     """
 
     missing_tags = set(mandatory_tags) - set(found_tags)

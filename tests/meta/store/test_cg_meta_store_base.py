@@ -5,20 +5,18 @@ import pytest
 from snapshottest import Snapshot
 
 from cg.constants import MIP_RNA_TAGS, MIP_DNA_TAGS
+from cg.meta.store.base import get_tags
 import cg.meta.store.base as store_base
 
-from cg.exc import (
-    AnalysisDuplicationError,
-    PipelineUnknownError,
-)
+from cg.exc import AnalysisDuplicationError, PipelineUnknownError
 
 
 @mock.patch("cg.store.Store")
 @mock.patch("housekeeper.store.models")
 def test_add_new_analysis_pipeline_exception(mock_housekeeper_store, mock_status):
     """
-        test catching the exception when no pipeline is found when creating and adding a new
-        analysis to status-db
+    test catching the exception when no pipeline is found when creating and adding a new
+    analysis to status-db
     """
     # GIVEN a case for which the bundle and version is added to Housekeeper, but there is no
     # pipeline specified on sample level
@@ -39,7 +37,7 @@ def test_add_new_analysis_pipeline_exception(mock_housekeeper_store, mock_status
 @mock.patch("housekeeper.store.models")
 def test_add_new_analysis_duplicate_analysis_exception(mock_housekeeper_store, mock_status):
     """
-        test catching the exception when no pipeline is found
+    test catching the exception when no pipeline is found
     """
     # GIVEN a case for which the bundle and version is added to Housekeeper, but the case already
     # has an analysis object stored in status-db
@@ -63,7 +61,7 @@ def test_add_new_analysis_duplicate_analysis_exception(mock_housekeeper_store, m
 @mock.patch("housekeeper.store.models")
 def test_add_new_analysis(mock_housekeeper_store, mock_status):
     """
-        test adding a new analyis to cg store
+    test adding a new analyis to cg store
     """
     # GIVEN a case for which the bundle and version is added to Housekeeper
     mock_bundle = mock_housekeeper_store.Bundle.return_value
@@ -89,7 +87,7 @@ def test_build_rna_bundle(
     rna_deliverables_raw: dict,
 ):
     """
-        tests the function_build bundle against a snapshot
+    tests the function_build bundle against a snapshot
     """
     # GIVEN the MIP RNA analysis config data, the sampleinfo data and the deliverables file
 
@@ -113,7 +111,7 @@ def test_build_dna_bundle(
     dna_deliverables_raw: dict,
 ):
     """
-        tests the function_build bundle against a snapshot
+    tests the function_build bundle against a snapshot
     """
     # GIVEN the MIP DNA analysis config data, the sampleinfo data and the deliverables file
 
@@ -129,7 +127,7 @@ def test_build_dna_bundle(
 @mock.patch("cg.meta.store.base._determine_missing_tags")
 def test_parse_files_rna(mock_missing, snapshot: Snapshot, rna_deliverables_raw: dict):
     """
-        tests the function parse_files against a snapshot
+    tests the function parse_files against a snapshot
     """
     # GIVEN the a MIP RNA analysis deliverables file
     mock_missing.return_value = False, []
@@ -146,7 +144,7 @@ def test_parse_files_rna(mock_missing, snapshot: Snapshot, rna_deliverables_raw:
 @mock.patch("cg.meta.store.base._determine_missing_tags")
 def test_parse_files_dna(mock_missing, snapshot: Snapshot, dna_deliverables_raw: dict):
     """
-        tests the function parse_files against a snapshot
+    tests the function parse_files against a snapshot
     """
     # GIVEN the a MIP DNA analysis deliverables file
     mock_missing.return_value = False, []
@@ -158,3 +156,52 @@ def test_parse_files_dna(mock_missing, snapshot: Snapshot, dna_deliverables_raw:
 
     # THEN the result should contain the data to be stored in Housekeeper
     snapshot.assert_match(mip_dna_files)
+
+
+@mock.patch("cg.meta.store.base._determine_missing_tags")
+def test_get_tags(mock_missing, dna_deliverables_raw: dict):
+    """
+    Tests get converted housekeeper tags
+    """
+    # GIVEN a MIP DNA analysis deliverables file, pipeline tags and corresponding analysis_tags
+    mock_missing.return_value = False, []
+    pipeline_tags = ["mip-dna"]
+    analysis_type_tags = MIP_DNA_TAGS
+
+    # WHEN getting the tags used to build the bundle
+    for file_ in dna_deliverables_raw["files"]:
+        deliverables_tag_map = (
+            (file_["step"],) if file_["tag"] is None else (file_["step"], file_["tag"])
+        )
+        hk_tags = get_tags(file_, pipeline_tags, analysis_type_tags, deliverables_tag_map)
+        # Then only analysis tags, pipeline tag and sample_id should be returned
+        if file_["step"] == "samtools_subsample_mt":
+            assert hk_tags == ["bam-mt", "mip-dna", "sample_id"]
+        if file_["step"] == "gatk_baserecalibration":
+            assert hk_tags == ["cram", "mip-dna", "sample_id"]
+
+
+@mock.patch("cg.meta.store.base._determine_missing_tags")
+def test_get_tags_for_index_file(mock_missing, dna_deliverables_raw: dict):
+    """
+    Tests get converted housekeeper tags for index file
+    """
+    # GIVEN a MIP DNA analysis deliverables file, pipeline tags and corresponding analysis_tags
+    mock_missing.return_value = False, []
+    pipeline_tags = ["mip-dna"]
+    analysis_type_tags = MIP_DNA_TAGS
+
+    # WHEN getting the tags used to build the bundle
+    for file_ in dna_deliverables_raw["files"]:
+        if file_["path_index"]:
+            deliverables_tag_map = (
+                (file_["step"],) if file_["tag"] is None else (file_["step"], file_["tag"])
+            )
+            hk_tags = get_tags(
+                file_, pipeline_tags, analysis_type_tags, deliverables_tag_map, is_index=True
+            )
+            # Then only analysis tags, pipeline tag and sample_id should be returned
+            if file_["step"] == "samtools_subsample_mt":
+                assert hk_tags == ["bam-mt-index", "mip-dna", "sample_id"]
+            if file_["step"] == "gatk_baserecalibration":
+                assert hk_tags == ["cram-index", "mip-dna", "sample_id"]
