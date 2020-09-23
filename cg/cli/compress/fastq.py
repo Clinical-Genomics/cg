@@ -63,6 +63,8 @@ VALIDATION_CASES = [
     "mintbaboon",
     "propercoral",
     "livingox",
+    "keenviper",
+    "sharpparrot",
 ]
 
 @click.command("fastq")
