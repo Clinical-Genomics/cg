@@ -155,7 +155,7 @@ class FindBusinessDataHandler(BaseHandler):
 
     def flowcell(self, name: str) -> models.Flowcell:
         """Fetch a flowcell."""
-        return self.Flowcell.query.filter_by(name=name).first()
+        return self.Flowcell.query.filter(models.Flowcell.name == name).first()
 
     def flowcells(
         self, *, status: str = None, family: models.Family = None, enquiry: str = None

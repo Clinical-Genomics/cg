@@ -13,7 +13,7 @@ VALID_ORDERFORMS = [
     "1508:21",  # Orderform MIP, Balsamic, sequencing only, MIP RNA
     "1541:6",  # Orderform Externally sequenced samples
     "1603:9",  # Microbial WGS
-    "1604:10",  # Orderform Ready made libraries (RML)
+    "1604:9",  # Orderform Ready made libraries (RML)
     "1605:8",  # Microbial metagenomes
 ]
 CASE_PROJECT_TYPES = ["mip", "external", "balsamic", "mip_balsamic", "mip_rna"]

@@ -1,6 +1,7 @@
 """
-    Conftest file for pytest fixtures
+    Conftest file for pytest fixtures that needs to be shared for multiple tests
 """
+import copy
 import datetime as dt
 import logging
 import shutil
@@ -13,6 +14,7 @@ from trailblazer.mip import files as mip_dna_files_api
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.mip_rna import files as mip_rna_files_api
 from cg.meta.store import mip as store_mip
+from cg.models import CompressionData
 from cg.store import Store
 
 from .mocks.crunchy import MockCrunchyAPI
@@ -161,7 +163,7 @@ def madeline_api(madeline_output):
 
 # Files fixtures
 
-
+# Common file fixtures
 @pytest.fixture(name="fixtures_dir")
 def fixture_fixtures_dir() -> Path:
     """Return the path to the fixtures dir"""
@@ -180,11 +182,34 @@ def fixture_apps_dir(fixtures_dir: Path) -> Path:
     return fixtures_dir / "apps"
 
 
+@pytest.fixture(name="fastq_dir")
+def fixture_fastq_dir(fixtures_dir: Path) -> Path:
+    """Return the path to the fastq files dir"""
+    return fixtures_dir / "fastq"
+
+
+@pytest.fixture(scope="function", name="project_dir")
+def fixture_project_dir(tmpdir_factory):
+    """Path to a temporary directory where intermediate files can be stored"""
+    my_tmpdir = Path(tmpdir_factory.mktemp("data"))
+    yield my_tmpdir
+    shutil.rmtree(str(my_tmpdir))
+
+
+@pytest.fixture(scope="function")
+def tmp_file(project_dir):
+    """Get a temp file"""
+    return project_dir / "test"
+
+
 @pytest.fixture(name="orderforms")
 def fixture_orderform(fixtures_dir: Path) -> Path:
     """Return the path to the directory with orderforms"""
     _path = fixtures_dir / "orderforms"
     return _path
+
+
+# Orderform fixtures
 
 
 @pytest.fixture
@@ -197,7 +222,7 @@ def microbial_orderform(orderforms: Path) -> str:
 @pytest.fixture
 def rml_orderform():
     """Orderform fixture for RML samples"""
-    return "tests/fixtures/orderforms/1604.10.rml.xlsx"
+    return "tests/fixtures/orderforms/1604.9.rml.xlsx"
 
 
 @pytest.fixture(name="madeline_output")
@@ -205,6 +230,42 @@ def fixture_madeline_output(apps_dir: Path) -> str:
     """File with madeline output"""
     _file = apps_dir / "madeline/madeline.xml"
     return str(_file)
+
+
+# Compression fixtures
+
+
+@pytest.fixture(scope="function", name="run_name")
+def fixture_run_name() -> str:
+    """Return the name of a fastq run"""
+    return "fastq_run"
+
+
+@pytest.fixture(scope="function", name="original_fastq_data")
+def fixture_original_fastq_data(fastq_dir: Path, run_name) -> CompressionData:
+    """Return a compression object with a path to the original fastq files"""
+
+    return CompressionData(fastq_dir / run_name)
+
+
+@pytest.fixture(scope="function", name="fastq_stub")
+def fixture_fastq_stub(project_dir: Path, run_name: str) -> Path:
+    """Creates a path to the base format of a fastq run"""
+    return project_dir / run_name
+
+
+@pytest.fixture(scope="function", name="compression_object")
+def fixture_compression_object(
+    fastq_stub: Path, original_fastq_data: CompressionData
+) -> CompressionData:
+    """Creates compression data object with information about files used in fastq compression"""
+    working_files = CompressionData(fastq_stub)
+    shutil.copy(str(original_fastq_data.fastq_first), str(working_files.fastq_first))
+    shutil.copy(str(original_fastq_data.fastq_second), str(working_files.fastq_second))
+    return working_files
+
+
+# Unknown file fixtures
 
 
 @pytest.fixture(scope="session", name="files")
@@ -223,20 +284,6 @@ def fixture_files():
         "dna_sampleinfo_store": "tests/fixtures/apps/mip/dna/store/case_qc_sample_info.yaml",
         "mip_dna_deliverables": "test/fixtures/apps/mip/dna/store/case_deliverables.yaml",
     }
-
-
-@pytest.fixture(scope="function", name="project_dir")
-def fixture_project_dir(tmpdir_factory):
-    """Path to a temporary directory where intermediate files can be stored"""
-    my_tmpdir = Path(tmpdir_factory.mktemp("data"))
-    yield my_tmpdir
-    shutil.rmtree(str(my_tmpdir))
-
-
-@pytest.fixture(scope="function")
-def tmp_file(project_dir):
-    """Get a temp file"""
-    return project_dir / "test"
 
 
 @pytest.fixture(scope="function", name="bed_file")
@@ -315,6 +362,18 @@ def fixture_later_timestamp() -> dt.datetime:
     return dt.datetime(2020, 6, 1)
 
 
+@pytest.fixture(scope="function", name="timestamp_today")
+def fixture_timestamp_today() -> dt.datetime:
+    """Return a time stamp of todays date in date time format"""
+    return dt.datetime.now()
+
+
+@pytest.fixture(scope="function", name="timestamp_yesterday")
+def fixture_timestamp_yesterday(timestamp_today) -> dt.datetime:
+    """Return a time stamp of yesterdays date in date time format"""
+    return timestamp_today - dt.timedelta(days=1)
+
+
 @pytest.fixture(scope="function", name="hk_bundle_data")
 def fixture_hk_bundle_data(case_id, bed_file, timestamp):
     """Get some bundle data for housekeeper"""
@@ -325,6 +384,51 @@ def fixture_hk_bundle_data(case_id, bed_file, timestamp):
         "files": [{"path": bed_file, "archive": False, "tags": ["bed", "sample"]}],
     }
     return data
+
+
+@pytest.fixture(scope="function", name="sample_hk_bundle_no_files")
+def fixture_sample_hk_bundle_no_files(sample, timestamp):
+    """Create a complete bundle mock for testing compression"""
+    hk_bundle_data = {
+        "name": sample,
+        "created": timestamp,
+        "expires": timestamp,
+        "files": [],
+    }
+
+    return hk_bundle_data
+
+
+@pytest.fixture(scope="function", name="case_hk_bundle_no_files")
+def fixture_case_hk_bundle_no_files(case_id, timestamp):
+    """Create a complete bundle mock for testing compression"""
+    hk_bundle_data = {
+        "name": case_id,
+        "created": timestamp,
+        "expires": timestamp,
+        "files": [],
+    }
+
+    return hk_bundle_data
+
+
+@pytest.fixture(scope="function", name="compress_hk_fastq_bundle")
+def fixture_compress_hk_fastq_bundle(compression_object, sample_hk_bundle_no_files):
+    """Create a complete bundle mock for testing compression
+
+    This bundle contains a pair of fastq files.
+    """
+    hk_bundle_data = copy.deepcopy(sample_hk_bundle_no_files)
+
+    first_fastq = compression_object.fastq_first
+    second_fastq = compression_object.fastq_second
+    for fastq_file in [first_fastq, second_fastq]:
+        fastq_file.touch()
+        fastq_file_info = {"path": str(fastq_file), "archive": False, "tags": ["fastq"]}
+
+        hk_bundle_data["files"].append(fastq_file_info)
+
+    return hk_bundle_data
 
 
 @pytest.yield_fixture(scope="function", name="housekeeper_api")

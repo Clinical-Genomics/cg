@@ -24,6 +24,35 @@ CAPTUREKIT_CANCER_OPTIONS = (
     "LymphoMATIC",
     "other (specify in comment field)",
 )
+DEFAULT_CAPTURE_KIT = "twistexomerefseq_9.1_hg19_design.bed"
+
+COMBOS = {
+    "DSD": ("DSD", "HYP", "SEXDIF", "SEXDET"),
+    "CM": ("CNM", "CM"),
+    "Horsel": ("Horsel", "141217", "141201"),
+}
+COLLABORATORS = ("cust000", "cust002", "cust003", "cust004", "cust042")
+MASTER_LIST = (
+    "BRAIN",
+    "Cardiology",
+    "CTD",
+    "ENDO",
+    "EP",
+    "IBMFS",
+    "IEM",
+    "IF",
+    "NEURODEG",
+    "NMD",
+    "mcarta",
+    "MIT",
+    "MOVE",
+    "mtDNA",
+    "PEDHEP",
+    "PID",
+    "PIDCAD",
+    "OMIM-AUTO",
+    "SKD",
+)
 FLOWCELL_STATUS = ("ondisk", "removed", "requested", "processing")
 METAGENOME_SOURCES = (
     "blood",
@@ -52,12 +81,9 @@ ANALYSIS_SOURCES = (
     "bone marrow",
     "other",
 )
+NO_PARENT = "0"
 
 # Constants for crunchy
-BAM_SUFFIX = ".bam"
-BAM_INDEX_SUFFIX = ".bai"
-CRAM_SUFFIX = ".cram"
-CRAM_INDEX_SUFFIX = ".crai"
 FASTQ_FIRST_READ_SUFFIX = "_R1_001.fastq.gz"
 FASTQ_SECOND_READ_SUFFIX = "_R2_001.fastq.gz"
 SPRING_SUFFIX = ".spring"
@@ -65,20 +91,13 @@ SPRING_SUFFIX = ".spring"
 FASTQ_DELTA = 21
 
 # tags for storing analyses in Housekeeper
-HK_TAGS = {
-    "wes": ["mip-dna", "wes"],
-    "wgs": ["mip-dna", "wgs"],
-    "wts": ["mip-rna"],
-    "microsalt": ["microsalt"],
-}
-HK_BAM_TAGS = ["bam", "bai", "bam-index"]
+HK_TAGS = {"wes": ["mip-dna", "wes"], "wgs": ["mip-dna", "wgs"], "wts": ["mip-rna"]}
 HK_FASTQ_TAGS = ["fastq"]
 
 # used to convert MIP tags derived from the deliverables to MIP standard tags and to check for
 # presence of mandatory files. Keys = tags found in deliverables, values = MIP standard tags and
 # mandatory flag
 MIP_DNA_TAGS = {
-    ("mip_analyse", "config_analysis"): {"tags": ["mip-config"], "is_mandatory": True},
     ("chanjo_sexcheck",): {"tags": ["chanjo", "sex-check"], "is_mandatory": False},
     ("chromograph_ar",): {"tags": ["chromograph"], "is_mandatory": False},
     ("endvariantannotationblock", "clinical"): {
@@ -86,9 +105,14 @@ MIP_DNA_TAGS = {
         "index_tags": ["vcf-snv-clinical-index"],
         "is_mandatory": True,
     },
-    ("sv_reformat", "clinical"): {
-        "tags": ["vcf-sv-clinical"],
-        "index_tags": ["vcf-sv-clinical-index"],
+    ("endvariantannotationblock", "research"): {
+        "tags": ["vcf-snv-research"],
+        "index_tags": ["vcf-snv-research-index"],
+        "is_mandatory": True,
+    },
+    ("expansionhunter", "sv_str"): {
+        "tags": ["vcf-str"],
+        "index_tags": ["vcf-str-index"],
         "is_mandatory": False,
     },
     ("gatk_baserecalibration",): {
@@ -101,32 +125,23 @@ MIP_DNA_TAGS = {
         "index_tags": ["gbcf-index"],
         "is_mandatory": True,
     },
-    ("mip_analyse", "log"): {"tags": ["mip-log"], "is_mandatory": True},
-    ("multiqc_ar", "html"): {"tags": ["multiqc-html"], "is_mandatory": True},
-    ("multiqc_ar", "json"): {"tags": ["multiqc-json"], "is_mandatory": True},
     ("mip_analyse", "config"): {"tags": ["mip-analyse", "config"], "is_mandatory": True},
+    ("mip_analyse", "config_analysis"): {"tags": ["mip-config"], "is_mandatory": True},
+    ("mip_analyse", "log"): {"tags": ["mip-log"], "is_mandatory": True},
     ("mip_analyse", "pedigree"): {"tags": ["pedigree-yaml"], "is_mandatory": True},
     ("mip_analyse", "pedigree_fam"): {"tags": ["pedigree"], "is_mandatory": True},
-    ("peddy_ar", "ped_check"): {"tags": ["peddy", "ped-check"], "is_mandatory": True},
-    ("peddy_ar", "peddy"): {"tags": ["peddy", "ped"], "is_mandatory": True},
-    ("peddy_ar", "sex_check"): {"tags": ["peddy", "sex-check"], "is_mandatory": True},
-    ("qccollect_ar",): {"tags": ["qcmetrics"], "is_mandatory": True},
-    ("endvariantannotationblock", "research"): {
-        "tags": ["vcf-snv-research"],
-        "index_tags": ["vcf-snv-research-index"],
-        "is_mandatory": True,
-    },
-    ("sv_reformat", "research"): {
-        "tags": ["vcf-sv-research"],
-        "index_tags": ["vcf-sv-research-index"],
-        "is_mandatory": False,
-    },
-    ("sambamba_depth", "coverage"): {"tags": ["coverage", "sambamba-depth"], "is_mandatory": True},
     ("mip_analyse", "references_info"): {
         "tags": ["mip-analyse", "reference-info"],
         "is_mandatory": True,
     },
     ("mip_analyse", "sample_info"): {"tags": ["sampleinfo"], "is_mandatory": True},
+    ("multiqc_ar", "html"): {"tags": ["multiqc-html"], "is_mandatory": True},
+    ("multiqc_ar", "json"): {"tags": ["multiqc-json"], "is_mandatory": True},
+    ("peddy_ar", "ped_check"): {"tags": ["peddy", "ped-check"], "is_mandatory": True},
+    ("peddy_ar", "peddy"): {"tags": ["peddy", "ped"], "is_mandatory": True},
+    ("peddy_ar", "sex_check"): {"tags": ["peddy", "sex-check"], "is_mandatory": True},
+    ("qccollect_ar",): {"tags": ["qcmetrics"], "is_mandatory": True},
+    ("sambamba_depth", "coverage"): {"tags": ["coverage", "sambamba-depth"], "is_mandatory": True},
     ("samtools_subsample_mt",): {
         "tags": ["bam-mt"],
         "index_tags": ["bam-mt-index"],
@@ -136,14 +151,31 @@ MIP_DNA_TAGS = {
         "tags": ["smn-calling", "smncopynumbercaller"],
         "is_mandatory": False,
     },
+    ("star_caller",): {
+        "tags": ["cyrius", "star-caller"],
+        "is_mandatory": False,
+    },
     ("sv_combinevariantcallsets",): {
         "tags": ["sv-bcf"],
         "index_tags": ["sv-bcf-index"],
         "is_mandatory": True,
     },
-    ("expansionhunter", "sv_str"): {
-        "tags": ["vcf-str"],
-        "index_tags": ["vcf-str-index"],
+    ("sv_reformat", "clinical"): {
+        "tags": ["vcf-sv-clinical"],
+        "index_tags": ["vcf-sv-clinical-index"],
+        "is_mandatory": False,
+    },
+    ("sv_reformat", "research"): {
+        "tags": ["vcf-sv-research"],
+        "index_tags": ["vcf-sv-research-index"],
+        "is_mandatory": False,
+    },
+    ("telomerecat_ar",): {
+        "tags": ["telomere-calling", "telomerecat"],
+        "is_mandatory": False,
+    },
+    ("tiddit_coverage",): {
+        "tags": ["tiddit-coverage", "bigwig"],
         "is_mandatory": False,
     },
     ("version_collect_ar",): {"tags": ["exe-ver"], "is_mandatory": True},
@@ -252,3 +284,4 @@ SPACE = " "
 # Processes
 RETURN_SUCCESS = 0
 EXIT_SUCCESS = 0
+EXIT_FAIL = 1

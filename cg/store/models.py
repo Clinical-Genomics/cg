@@ -542,7 +542,6 @@ class Pool(Model):
 class Sample(Model, PriorityMixin):
 
     application_version_id = Column(ForeignKey("application_version.id"), nullable=False)
-    beaconized_at = Column(types.Text)
     capture_kit = Column(types.String(64))
     comment = Column(types.Text)
     created_at = Column(types.DateTime, default=dt.datetime.now)
