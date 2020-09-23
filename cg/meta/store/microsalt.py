@@ -1,7 +1,7 @@
 """ MIP specific functionality for storing files in Houskeeper """
 import datetime as dt
 import logging
-
+from pathlib import Path
 import ruamel.yaml
 
 from cg.constants import HK_TAGS, MICROSALT_TAGS
@@ -174,10 +174,8 @@ def _get_microbial_name(deliverables: dict) -> str:
 def _get_date_from_results_path(deliverables: dict, project_name: str) -> dt.datetime:
     """ Get date from results path """
     first_file, *_ = deliverables["files"]
-    results_path = first_file["path"]
-    partial_path, _ = results_path.split("sampleinfo")
-    [_, timestamp, _] = partial_path.split("//")
-    [_, date, time] = timestamp.split("_")
+    results_dir = Path(first_file["path"]).parent.name
+    [_, date, time] = results_dir.split("_")
     [year, month, day] = list(map(int, date.split(".")))
     [hour, minutes, seconds] = list(map(int, time.split(".")))
     return dt.datetime(year, month, day, hour, minutes, seconds)
