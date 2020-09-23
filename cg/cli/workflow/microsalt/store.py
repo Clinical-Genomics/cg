@@ -10,7 +10,6 @@ from cg.exc import (
     AnalysisDuplicationError,
     BundleAlreadyAddedError,
     MandatoryFilesMissing,
-    StoreError,
 )
 from cg.meta.store.microsalt import gather_files_and_bundle_in_housekeeper
 from cg.store import Store
@@ -42,18 +41,8 @@ def analysis(context, config_stream):
         context.abort()
 
     try:
-        new_analysis = gather_files_and_bundle_in_housekeeper(
-            config_stream,
-            hk_api,
-            status,
-        )
-    except AnalysisDuplicationError as error:
-        click.echo(click.style(error.message, fg="red"))
-        context.abort()
-    except BundleAlreadyAddedError as error:
-        click.echo(click.style(error.message, fg="red"))
-        context.abort()
-    except MandatoryFilesMissing as error:
+        new_analysis = gather_files_and_bundle_in_housekeeper(config_stream, hk_api, status,)
+    except (AnalysisDuplicationError, BundleAlreadyAddedError, MandatoryFilesMissing) as error:
         click.echo(click.style(error.message, fg="red"))
         context.abort()
     except FileNotFoundError as error:
