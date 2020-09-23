@@ -1,7 +1,6 @@
 """Click commands to store mip analyses"""
 import logging
 from pathlib import Path
-import sys
 
 import click
 
@@ -15,10 +14,11 @@ from cg.exc import (
 )
 from cg.meta.store.mip import gather_files_and_bundle_in_housekeeper
 from cg.store import Store
+from cg.constants import EXIT_SUCCESS, EXIT_FAIL
+
 
 LOG = logging.getLogger(__name__)
-FAIL = 1
-SUCCESS = 0
+
 
 
 @click.group()
@@ -40,7 +40,7 @@ def analysis(context, config_stream):
 
     if not config_stream:
         LOG.error("Provide a config file.")
-        context.abort()
+        raise click.Abort()
 
     try:
         new_analysis = gather_files_and_bundle_in_housekeeper(
@@ -56,10 +56,10 @@ def analysis(context, config_stream):
         MandatoryFilesMissing,
     ) as error:
         click.echo(click.style(error.message, fg="red"))
-        context.abort()
+        raise click.Abort()
     except FileNotFoundError as error:
         click.echo(click.style(f"missing file: {error.args[0]}", fg="red"))
-        context.abort()
+        raise click.Abort()
 
     status.add_commit(new_analysis)
     click.echo(click.style("included files in Housekeeper", fg="green"))
@@ -72,7 +72,7 @@ def completed(context):
     hk_api = context.obj["hk_api"]
     tb_api = context.obj["tb_api"]
 
-    exit_code = SUCCESS
+    exit_code = EXIT_SUCCESS
     for analysis_obj in tb_api.analyses(status="completed", deleted=False):
         existing_record = hk_api.version(analysis_obj.family, analysis_obj.started_at)
         if existing_record:
@@ -82,8 +82,8 @@ def completed(context):
         with Path(analysis_obj.config_path).open() as config_stream:
             try:
                 context.invoke(analysis, config_stream=config_stream)
-            except Exception:
+            except (Exception, click.Abort):
                 LOG.error("case storage failed: %s", analysis_obj.family, exc_info=True)
-                exit_code = FAIL
-
-    sys.exit(exit_code)
+                exit_code = EXIT_FAIL
+    if exit_code:
+        raise click.Abort()
