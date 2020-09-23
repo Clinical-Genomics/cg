@@ -149,7 +149,8 @@ class MicrosaltAnalysisAPI:
             ids["ticket_number"] = ticket
             samples = self.db.samples_by_ids(**ids).all()
         if sample_id:
-            samples = [self.db.sample(internal_id=sample_id)]
+            sample = self.db.sample(internal_id=sample_id)
+            samples = [sample] if sample else []
         return samples
 
     def get_lims_comment(self, sample_id: str) -> str:
