@@ -1,18 +1,14 @@
+"""Interactions with the genotype tool"""
+
 import logging
 
-from subprocess import CalledProcessError
-import subprocess
-
-from alchy import Manager
-from genotype.store import api, models
-from genotype.load.vcf import load_vcf
 from cg.exc import CaseNotFoundError
+from cg.utils.commands import Process
 
 LOG = logging.getLogger(__name__)
 
 
-class GenotypeAPI(Manager):
-
+class GenotypeAPI:
     """Interface with Genotype app.
 
     The config should contain a 'genotype' key:
@@ -21,42 +17,45 @@ class GenotypeAPI(Manager):
     """
 
     def __init__(self, config: dict):
-        alchy_config = dict(SQLALCHEMY_DATABASE_URI=config["genotype"]["database"])
-        super(GenotypeAPI, self).__init__(config=alchy_config, Model=models.Model)
+        self.process = Process(
+            binary=config["genotype"]["binary_path"], config=config["genotype"]["config_path"]
+        )
 
-        self.genotype_config = config["genotype"]["config_path"]
-        self.genotype_binary = config["genotype"]["binary_path"]
-        self.base_call = [self.genotype_binary, "--config", self.genotype_config]
-
-    def upload(self, bcf_path: str, samples_sex: dict, force: bool = False):
+    def upload(self, bcf_path: str, samples_sex: dict, force: bool = False) -> None:
         """Upload genotypes for a family of samples."""
-        snps = api.snps()
-        analyses = load_vcf(bcf_path, snps)
-        for analysis_obj in analyses:
-            LOG.debug("loading VCF genotypes for sample: %s", analysis_obj.sample_id)
-            is_saved = api.add_analysis(self, analysis_obj, replace=force)
-            if is_saved:
-                LOG.info("loaded VCF genotypes for sample: %s", analysis_obj.sample_id)
-            else:
-                LOG.warning("skipped, found previous analysis: %s", analysis_obj.sample_id)
+        upload_parameters = ["load", str(bcf_path)]
+        if force:
+            upload_parameters.append("--force")
 
-            if is_saved or force:
-                analysis_obj.sex = samples_sex[analysis_obj.sample_id]["analysis"]
-                analysis_obj.sample.sex = samples_sex[analysis_obj.sample_id]["pedigree"]
-                self.commit()
+        LOG.debug("loading VCF genotypes for sample(s): %s", ", ".join(samples_sex.keys()))
+        self.process.run_command(parameters=upload_parameters)
+
+        for sample_id in samples_sex:
+            # This is the sample sex specified by the customer
+            sample_sex = samples_sex[sample_id]["pedigree"]
+            self.update_sample_sex(sample_id, sample_sex)
+            # This is the predicted sex based on variant calls from the pipeline
+            analysis_predicted_sex = samples_sex[sample_id]["analysis"]
+            self.update_analysis_sex(sample_id, sex=analysis_predicted_sex)
+
+    def update_sample_sex(self, sample_id: str, sex: str) -> None:
+        """Update the sex for a sample in the genotype tool"""
+        sample_sex_parameters = ["add_sex", sample_id, "-s", sex]
+        LOG.debug("Set sex for sample %s to %s", sample_id, sex)
+        self.process.run_command(parameters=sample_sex_parameters)
+
+    def update_analysis_sex(self, sample_id: str, sex: str) -> None:
+        """Update the predicted sex for a sample based on genotype analysis in the genotype tool"""
+        LOG.debug("Set predicted sex for sample %s to %s for the sequence analysis", sample_id, sex)
+        analysis_sex_parameters = ["add_sex", sample_id, "-a", "sequence", sex]
+        self.process.run_command(parameters=analysis_sex_parameters)
 
     def export_sample(self, days: int = 0) -> str:
         """Export sample info."""
-        trending_call = self.base_call[:]
-        trending_call.extend(["export-sample", "-d", str(days)])
-        try:
-            LOG.info("Running Genotype API to get data.")
-            LOG.debug(trending_call)
-            output = subprocess.check_output(trending_call)
-        except CalledProcessError as error:
-            LOG.critical("Could not run command: %s", " ".join(trending_call))
-            raise error
-        output = output.decode("utf-8")
+        export_sample_parameters = ["export-sample", "-d", str(days)]
+
+        self.process.run_command(parameters=export_sample_parameters)
+        output = self.process.stdout
         # If sample not in genotype db, stdout of genotype command will be empty.
         if not output:
             raise CaseNotFoundError("samples not found in genotype db")
@@ -64,16 +63,10 @@ class GenotypeAPI(Manager):
 
     def export_sample_analysis(self, days: int = 0) -> str:
         """Export analysis."""
-        trending_call = self.base_call[:]
-        trending_call.extend(["export-sample-analysis", "-d", str(days)])
-        try:
-            LOG.info("Running Genotype API to get data.")
-            LOG.debug(trending_call)
-            output = subprocess.check_output(trending_call)
-        except CalledProcessError as error:
-            LOG.critical("Could not run command: %s", " ".join(trending_call))
-            raise error
-        output = output.decode("utf-8")
+        export_sample_analysis_parameters = ["export-sample-analysis", "-d", str(days)]
+
+        self.process.run_command(parameters=export_sample_analysis_parameters)
+        output = self.process.stdout
         # If sample not in genotype db, stdout of genotype command will be empty.
         if not output:
             raise CaseNotFoundError("samples not found in genotype db")
