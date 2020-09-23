@@ -16,7 +16,6 @@ from .helpers import (
 LOG = logging.getLogger(__name__)
 
 # There is a list of problematic cases that we should skip
-# The list also includes samples used to validate MIP (amsystems 1490:12)
 PROBLEMATIC_CASES = [
     "modernbee",
     "suremako",
@@ -29,6 +28,10 @@ PROBLEMATIC_CASES = [
     "loyalegret",
     "grandkoi",
     "fluenteagle",
+]
+
+# List of cases used for validation that we should skip
+VALIDATION_CASES = [
     "mintyeti",
     "topsrhino",
     "gladthrush",
@@ -62,7 +65,6 @@ PROBLEMATIC_CASES = [
     "livingox",
 ]
 
-
 @click.command("fastq")
 @click.option("-c", "--case-id", type=str)
 @click.option("-n", "--number-of-conversions", default=5, type=int, show_default=True)
@@ -92,7 +94,10 @@ def fastq_cmd(context, case_id, number_of_conversions, ntasks, mem, dry_run):
         if internal_id in PROBLEMATIC_CASES:
             LOG.info("Skipping problematic case %s", internal_id)
             continue
-
+        if internal_id in VALIDATION_CASES:
+            LOG.info("Skipping validation case %s", internal_id)
+            continue
+        
         LOG.info("Searching for FASTQ files in case %s", internal_id)
         for link_obj in case.links:
             sample_id = link_obj.sample.internal_id
