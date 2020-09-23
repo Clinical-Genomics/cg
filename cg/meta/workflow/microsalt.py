@@ -147,9 +147,10 @@ class MicrosaltAnalysisAPI:
         ids = {}
         if ticket:
             ids["ticket_number"] = ticket
+            samples = self.db.samples_by_ids(**ids).all()
         if sample_id:
-            ids["internal_id"] = sample_id
-        return self.db.samples_by_ids(**ids).all()
+            samples = [self.db.sample(internal_id=sample_id)]
+        return samples
 
     def get_lims_comment(self, sample_id: str) -> str:
         """ returns the comment associated with a sample stored in lims"""
