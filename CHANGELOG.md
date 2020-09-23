@@ -18,6 +18,10 @@ Try to use the following format:
 ### Fixed
 #####################################################
 
+## [12.7.2]
+
+### Added
+- Added new cases to skip during compression 
 
 ## [12.7.1]
 
