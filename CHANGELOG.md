@@ -15,6 +15,11 @@ Try to use the following format:
 
 ### Fixed
 
+## [12.6.1]
+
+### Added
+- Added validation cases to problematic cases
+
 ## [12.6.0]
 
 ### Added
