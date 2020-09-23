@@ -7,13 +7,10 @@ About changelog [here](https://keepachangelog.com/en/1.0.0/)
 Please add a new candidate release at the top after changing the latest one. Feel free to copy paste from the "squash and commit" box that gets generated when creating PRs
 
 Try to use the following format:
-## [x.x.x]
-
-### Added
+## [12.7.0]
 
 ### Changed
-
-### Fixed
+- Moved queries in TrailblazerAPI to Trailblazer
 
 ## [12.6.1]
 
