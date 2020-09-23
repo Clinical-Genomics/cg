@@ -172,13 +172,7 @@ def test_downsampled_to(cli_runner, base_context, base_store: Store, helpers):
 
     # WHEN calling set sample with a valid value of downsampled to
     result = cli_runner.invoke(
-<<<<<<< HEAD
-        sample,
-        [sample_id, "-kv", "downsampled_to", downsampled_to, "-y"],
-        obj=base_context,
-=======
         sample, [sample_id, "-kv", "downsampled_to", downsampled_to, "-y"], obj=base_context
->>>>>>> master
     )
 
     # THEN then the value should have been set on the sample

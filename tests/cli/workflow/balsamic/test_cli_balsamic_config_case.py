@@ -251,11 +251,7 @@ def test_error_mixed_panel_bed_resque(balsamic_context: dict, cli_runner, caplog
     # WHEN dry running
     result = cli_runner.invoke(
         config_case,
-<<<<<<< HEAD
-        [case_id, "--dry-run", option_key, option_value],
-=======
         [case_id, "--dry-run", "--panel-bed", panel_bed],
->>>>>>> master
         obj=balsamic_context,
     )
     # THEN command is generated successfully
