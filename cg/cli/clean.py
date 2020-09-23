@@ -1,8 +1,8 @@
 """cg module for cleaning databases and files"""
 import logging
-import shutil
 from datetime import datetime
 from pathlib import Path
+import shutil
 import ruamel.yaml
 import click
 from dateutil.parser import parse as parse_date
@@ -16,10 +16,9 @@ from cg.apps.scoutapi import ScoutAPI
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.balsamic.api import BalsamicAPI
 from cg.store import Store
+from cg.constants import EXIT_SUCCESS, EXIT_FAIL
 
 LOG = logging.getLogger(__name__)
-SUCCESS = 0
-FAIL = 1
 
 
 @click.group()
@@ -33,8 +32,8 @@ def clean(context):
     context.obj["crunchy_api"] = CrunchyAPI(context.obj)
     context.obj["BalsamicAnalysisAPI"] = BalsamicAnalysisAPI(
         balsamic_api=BalsamicAPI(context.obj),
-        store=Store(context.obj["database"]),
-        housekeeper_api=HousekeeperAPI(context.obj),
+        store=context.obj["store_api"],
+        housekeeper_api=context.obj["hk_api"],
         fastq_handler=FastqHandler(context.obj),
         lims_api=LimsAPI(context.obj),
     )
@@ -53,24 +52,33 @@ def balsamic_run_dir(context, yes, case_id, dry_run: bool = False):
     if not case_object:
         LOG.warning(f"{case_id} not found!")
         raise click.Abort()
+
     analysis_obj = case_object.analyses[0] if case_object.analyses else None
-    if analysis_obj is None:
+    if not analysis_obj:
         LOG.error("%s: analysis not found", case_id)
-        context.abort()
+        raise click.Abort()
+
     analysis_path = Path(balsamic_analysis_api.get_case_path(case_id))
     if yes or click.confirm(f"Do you want to remove {analysis_path}?"):
         if not analysis_path.exists():
             LOG.warning("could not find: %s", analysis_path)
-            return FAIL
+            return EXIT_FAIL
         if analysis_path.is_symlink():
             LOG.warning(
                 "Will not automatically delete symlink: %s, delete it manually", analysis_path
             )
-            return FAIL
+            return EXIT_FAIL
         if dry_run:
             LOG.info("Would have deleted: %s", analysis_path)
-            return SUCCESS
-        shutil.rmtree(analysis_path)
+            return EXIT_SUCCESS
+        try:
+            shutil.rmtree(analysis_path, ignore_errors=True)
+            LOG.info(f"Cleaned {analysis_path}")
+        except Exception as e:
+            LOG.warning(
+                f" Directory {analysis_path} will not be deleted due to unexpected error - {e}!"
+            )
+
         analysis_obj.cleaned_at = datetime.now()
         balsamic_analysis_api.store.commit()
 
@@ -138,7 +146,7 @@ def hk_alignment_files(context, bundle, yes: bool = False, dry_run: bool = False
     "--days-old",
     type=int,
     default=300,
-    help="Clean alignment files with analysis dates oldar then given number of days",
+    help="Clean alignment files with analysis dates older then given number of days",
 )
 @click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
 @click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
@@ -219,8 +227,12 @@ def balsamic_past_run_dirs(context, before_str: str, yes: bool = False, dry_run:
         case_id = analysis.family.internal_id
 
         # call clean
-        LOG.info("%s: cleaning Balsamic output", case_id)
-        context.invoke(balsamic_run_dir, yes=yes, case_id=case_id, dry_run=dry_run)
+        LOG.info(f"Cleaning Balsamic output for {case_id}")
+        try:
+            context.invoke(balsamic_run_dir, yes=yes, case_id=case_id, dry_run=dry_run)
+        except click.Abort:
+            continue
+
     LOG.info("Done cleaning Balsamic output")
 
 

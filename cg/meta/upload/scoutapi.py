@@ -147,11 +147,13 @@ class UploadScoutAPI:
         LOG.info("Added scout load config to housekeeper: %s", config_file_path)
         return file_obj
 
-    def _include_optional_files(self, data, hk_version):
+    def _include_optional_files(self, data: dict, hk_version) -> None:
+        """"Optional files on case level"""
         scout_hk_map = [
             ("delivery_report", "delivery-report"),
             ("multiqc", "multiqc-html"),
             ("vcf_str", "vcf-str"),
+            ("smn_tsv", "smn-calling"),
         ]
         self._include_files(data, hk_version, scout_hk_map)
 
