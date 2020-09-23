@@ -7,7 +7,7 @@ from typing import List
 
 import click
 import ruamel.yaml
-from trailblazer.mip.start import MipCli
+
 from trailblazer.store import api, models, Store
 from trailblazer.mip import files, trending
 
@@ -24,12 +24,6 @@ class TrailblazerAPI(Store):
             config["trailblazer"]["database"],
             families_dir=config["trailblazer"]["root"],
         )
-        self.mip_cli = MipCli(
-            script=config["trailblazer"]["script"],
-            pipeline=config["trailblazer"]["pipeline"],
-            conda_env=config["trailblazer"]["conda_env"],
-        )
-        self.mip_config = config["trailblazer"]["mip_config"]
 
     def mark_analyses_deleted(self, case_id: str):
         """ mark analyses connected to a case as deleted """
