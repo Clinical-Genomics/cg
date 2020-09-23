@@ -67,6 +67,7 @@ VALIDATION_CASES = [
     "sharpparrot",
 ]
 
+
 @click.command("fastq")
 @click.option("-c", "--case-id", type=str)
 @click.option("-n", "--number-of-conversions", default=5, type=int, show_default=True)
@@ -96,7 +97,7 @@ def fastq_cmd(context, case_id, number_of_conversions, ntasks, mem, dry_run):
         if internal_id in [*PROBLEMATIC_CASES, *VALIDATION_CASES]:
             LOG.info("Skipping case %s", internal_id)
             continue
-        
+
         LOG.info("Searching for FASTQ files in case %s", internal_id)
         for link_obj in case.links:
             sample_id = link_obj.sample.internal_id
