@@ -93,11 +93,8 @@ def fastq_cmd(context, case_id, number_of_conversions, ntasks, mem, dry_run):
         if case_conversion_count >= number_of_conversions:
             break
         internal_id = case.internal_id
-        if internal_id in PROBLEMATIC_CASES:
+        if internal_id in [*PROBLEMATIC_CASES, *VALIDATION_CASES]:
             LOG.info("Skipping problematic case %s", internal_id)
-            continue
-        if internal_id in VALIDATION_CASES:
-            LOG.info("Skipping validation case %s", internal_id)
             continue
         
         LOG.info("Searching for FASTQ files in case %s", internal_id)
