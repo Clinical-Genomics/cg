@@ -60,6 +60,15 @@ def deliverables_files(deliverables: dict, analysis_type: str) -> list:
     return files
 
 
+def _is_deliverables_tags_missing_in_analysis_tags(
+    analysis_type_tags: dict, deliverables_tag_map: tuple
+) -> bool:
+    """Check if deliverable tags are represented in analysis tags """
+    if deliverables_tag_map in analysis_type_tags:
+        return False
+    return True
+
+
 def parse_files(deliverables: dict, pipeline_tags: list, analysis_type_tags: dict) -> list:
     """ Get all files and their tags from the deliverables file """
 
@@ -68,6 +77,10 @@ def parse_files(deliverables: dict, pipeline_tags: list, analysis_type_tags: dic
         deliverables_tag_map = (
             (file_["step"],) if file_["tag"] is None else (file_["step"], file_["tag"])
         )
+        if _is_deliverables_tags_missing_in_analysis_tags(
+            analysis_type_tags=analysis_type_tags, deliverables_tag_map=deliverables_tag_map
+        ):
+            continue
         parsed_file = {
             "path": file_["path"],
             "tags": get_tags(file_, pipeline_tags, analysis_type_tags, deliverables_tag_map),

@@ -6,15 +6,43 @@ About changelog [here](https://keepachangelog.com/en/1.0.0/)
 
 Please add a new candidate release at the top after changing the latest one. Feel free to copy paste from the "squash and commit" box that gets generated when creating PRs
 
-Try to use the follwing format:
+Try to use the following format:
+## [12.7.0]
 
-## [x.x.x]
+### Changed
+- Moved queries in TrailblazerAPI to Trailblazer
+
+## [12.6.0]
 
 ### Added
+- Added support for MIP9
+- Adds support for MIP 9.0 files and tags in HK:
+  - telomerecat
+  - cyrius star-caller
+  - smncopynumber caller on case level
+  - tiddit_coverage bigwig track
+- Adds smncopynumbercaller file to scout load config
+### Changed
+- Removed TB mip start source code from cg
+
+### Fixed
+- Return when using mip-dry-run option so that the dry-run is not added to TB
+
+## [12.5.0]
 
 ### Changed
 
+- Now ignores errors while cleaning old Balsamic data with cg clean
+
+
+## [12.4.0]
+
+### Added
+- Providing a name of panel bed file in MIP cli now overrides getting capture kit through LimsAPI during case config
+### Changed
+- Providing panel bed path or capture kit shortname in BALSAMIC cli now overrides getting capture kit through LimsAPI during case config
 ### Fixed
+- Fix Balsamic automation functions to exit with 1 if any of the errors are raised while looping through cases
 
 ## [12.3.6]
 
