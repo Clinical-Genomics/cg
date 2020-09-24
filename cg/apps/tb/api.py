@@ -1,6 +1,7 @@
 """ Trailblazer API for cg """ ""
 
 import logging
+import json
 from trailblazer.store import Store
 from google.auth.crypt import RSASigner
 from google.auth import jwt
@@ -27,8 +28,10 @@ class TrailblazerAPI(Store):
         payload = {"email": self.service_account}
         jwt_token = jwt.encode(signer=signer, payload=payload)
         auth_header = {"Authorization": f"Bearer {jwt_token}"}
+        LOG.info(f"Using header {json.dumps(auth_header)}")
         return auth_header
 
     def get_analysis(self, analysis_id: int):
+
         response = requests.get(self.host + f"/analyses/{analysis_id}", headers=self.auth_header)
         LOG.info(response)
