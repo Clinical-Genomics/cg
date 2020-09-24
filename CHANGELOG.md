@@ -10,10 +10,19 @@ Try to use the following format:
 ## [x.x.x]
 
 ### Added
-
 ### Changed
+### Fixed
+
+## [12.7.1]
 
 ### Fixed
+ - Removed store-housekeeper one-time script that was used to store balsamic results in Housekeeper
+
+
+## [12.7.0]
+
+### Changed
+- Moved queries in TrailblazerAPI to Trailblazer
 
 ## [13.0.0]
 
