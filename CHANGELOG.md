@@ -15,6 +15,11 @@ Try to use the following format:
 
 ### Fixed
 
+## [13.0.0]
+
+### Changed
+- Moved all microbial samples into samples table and the depending logic
+
 ## [12.6.0]
 
 ### Added
