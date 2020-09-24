@@ -24,7 +24,8 @@ def gather_files_and_bundle_in_housekeeper(config_stream, hk_api, status):
 
     bundle_obj, version_obj = results
 
-    microbial_order_obj = status.microbial_order(bundle_obj.name)
+    # microbial_order_obj = status.microbial_order(bundle_obj.name)
+    microbial_order_obj = status.microbial_order_by_ticket(bundle_obj.name)
 
     new_analysis = add_new_analysis(bundle_data, microbial_order_obj, status, version_obj)
     version_date = version_obj.created_at.date()
@@ -52,7 +53,7 @@ def build_microbial_bundle(deliverables: dict) -> dict:
     files = microbial_deliverables_files(deliverables)
 
     data = {
-        "name": project_name,
+        "name": str(project_name),
         "created": _get_date_from_results_path(deliverables, project_name),
         "files": files,
     }

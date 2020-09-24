@@ -206,6 +206,10 @@ class FindBusinessDataHandler(BaseHandler):
         """Fetch an order by internal id from the database."""
         return self.MicrobialOrder.query.filter_by(internal_id=internal_id).first()
 
+    def microbial_order_by_ticket(self, ticket_number: str) -> models.MicrobialOrder:
+        """Fetch an order by ticket number from the database."""
+        return self.MicrobialOrder.query.filter_by(ticket_number=ticket_number).first()
+
     def microbial_orders(
         self, *, customer: models.Customer = None, enquiry: str = None
     ) -> List[models.MicrobialOrder]:
