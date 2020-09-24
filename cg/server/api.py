@@ -68,8 +68,7 @@ def submit_order(order_type):
         return abort(make_response(jsonify(message=error.args[0]), 401))
 
     return jsonify(
-        project=result["project"],
-        records=[record.to_dict() for record in result["records"]],
+        project=result["project"], records=[record.to_dict() for record in result["records"]]
     )
 
 
@@ -215,53 +214,6 @@ def sample_in_customer_group(sample_id):
     return jsonify(**data)
 
 
-@BLUEPRINT.route("/microbial_orders")
-def microbial_orders():
-    """Fetch microbial orders."""
-    customer_obj = None if g.current_user.is_admin else g.current_user.customer
-    orders_q = db.microbial_orders(enquiry=request.args.get("enquiry"), customer=customer_obj)
-    count = orders_q.count()
-    records = orders_q.limit(30)
-    data = [order_obj.to_dict(samples=True) for order_obj in records]
-    return jsonify(microbial_orders=data, total=count)
-
-
-@BLUEPRINT.route("/microbial_orders/<order_id>")
-def microbial_order(order_id):
-    """Fetch a order with samples."""
-    order_obj = db.microbial_order(order_id)
-    if order_obj is None:
-        return abort(404)
-    elif not g.current_user.is_admin and (g.current_user.customer != order_obj.customer):
-        return abort(401)
-    data = order_obj.to_dict(samples=True)
-    return jsonify(**data)
-
-
-@BLUEPRINT.route("/microbial_samples")
-def microbial_samples():
-    """Fetch microbial samples."""
-    customer_obj = None if g.current_user.is_admin else g.current_user.customer
-    samples_q = db.microbial_samples(enquiry=request.args.get("enquiry"), customer=customer_obj)
-    limit = int(request.args.get("limit", 50))
-    data = [sample_obj.to_dict(order=True) for sample_obj in samples_q.limit(limit)]
-    return jsonify(samples=data, total=samples_q.count())
-
-
-@BLUEPRINT.route("/microbial_samples/<sample_id>")
-def microbial_sample(sample_id):
-    """Fetch a single sample."""
-    sample_obj = db.microbial_sample(sample_id)
-    if sample_obj is None:
-        return abort(404)
-    elif not g.current_user.is_admin and (
-        g.current_user.customer != sample_obj.microbial_order.customer
-    ):
-        return abort(401)
-    data = sample_obj.to_dict()
-    return jsonify(**data)
-
-
 @BLUEPRINT.route("/pools")
 def pools():
     """Fetch pools."""
@@ -331,10 +283,7 @@ def options():
 
     return jsonify(
         customers=[
-            {
-                "text": f"{customer.name} ({customer.internal_id})",
-                "value": customer.internal_id,
-            }
+            {"text": f"{customer.name} ({customer.internal_id})", "value": customer.internal_id}
             for customer in customer_objs
         ],
         applications=apptag_groups,
@@ -397,18 +346,3 @@ def orderform():
         return abort(make_response(jsonify(message=error.message), 400))
 
     return jsonify(**project_data)
-
-
-@BLUEPRINT.route("/trends/samples/<year>")
-def trends_samples(year):
-    """Samples per month."""
-
-    return jsonify(
-        received_application=list(db.samples_per_month_application(year)),
-        received=list(db.samples_per_month(year)),
-        turnaround_times=list(db.received_to_delivered(year)),
-        prepp_times=list(db.received_to_prepped(year)),
-        sequence_times=list(db.prepped_to_sequenced(year)),
-        deliver_times=list(db.sequenced_to_delivered(year)),
-        invoice_times=list(db.delivered_to_invoiced(year)),
-    )

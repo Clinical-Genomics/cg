@@ -231,7 +231,7 @@ class AnalysisAPI(ConfigHandler, MipAPI):
         index = index if index else "XXXXXX"
         return f"{lane}_{date_str}_{flowcell}_{sample}_{index}_{read}.fastq.gz"
 
-    def link_file(self, family: str, sample: str, analysis_type: str, files: List[str]):
+    def link_file(self, family: str, sample: str, analysis_type: str, files: List[dict]):
         """Link FASTQ files for a sample."""
         fastq_dir = Path(self.root) / family / analysis_type / sample / "fastq"
         fastq_dir.mkdir(parents=True, exist_ok=True)

@@ -1,7 +1,7 @@
 """Test FastqHandlerUsalt"""
 import re
 
-from cg.apps.usalt.fastq import FastqHandler
+from cg.apps.microsalt.fastq import FastqHandler
 
 
 def test_fastq_create(valid_fastq_filename_pattern) -> dict:

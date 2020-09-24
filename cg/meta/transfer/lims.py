@@ -47,23 +47,12 @@ class TransferLims(object):
             PoolState.DELIVERED: self.status.pools_to_deliver,
         }
 
-        self._microbial_samples_functions = {
-            MicrobialState.RECEIVED: self.status.microbial_samples_to_receive,
-            MicrobialState.PREPARED: self.status.microbial_samples_to_prepare,
-            MicrobialState.SEQUENCED: self.status.microbial_samples_to_sequence,
-            MicrobialState.DELIVERED: self.status.microbial_samples_to_deliver,
-        }
-
         self._date_functions = {
             SampleState.RECEIVED: self.lims.get_received_date,
             SampleState.PREPARED: self.lims.get_prepared_date,
             SampleState.DELIVERED: self.lims.get_delivery_date,
             PoolState.RECEIVED: self.lims.get_received_date,
             PoolState.DELIVERED: self.lims.get_delivery_date,
-            MicrobialState.RECEIVED: self.lims.get_received_date,
-            MicrobialState.PREPARED: self.lims.get_prepared_date,
-            MicrobialState.SEQUENCED: self.lims.get_sequenced_date,
-            MicrobialState.DELIVERED: self.lims.get_delivery_date,
         }
 
     def _get_all_samples_not_yet_delivered(self):
@@ -141,42 +130,6 @@ class TransferLims(object):
                         break
                     else:
                         continue
-
-    def transfer_microbial_samples(self, status_type: MicrobialState):
-        """Transfer information about microbial samples."""
-
-        microbial_samples = self._microbial_samples_functions[status_type]()
-
-        if microbial_samples is None:
-            LOG.info(f"No microbial samples found with {status_type.value}")
-            return
-        else:
-            LOG.info(f"Processing {microbial_samples.count()} microbial samples")
-
-        for microbial_sample_obj in microbial_samples:
-            internal_id = microbial_sample_obj.internal_id
-
-            lims_date = self._date_functions[status_type](microbial_sample_obj.internal_id)
-            statusdb_date = getattr(microbial_sample_obj, f"{status_type.value}_at")
-            if lims_date:
-
-                if statusdb_date and statusdb_date.date() == lims_date:
-                    continue
-
-                LOG.info(
-                    f"Found new {status_type.value} date for {microbial_sample_obj.internal_id}: "
-                    f"{lims_date}, old value: {statusdb_date} "
-                )
-
-                setattr(microbial_sample_obj, f"{status_type.value}_at", lims_date)
-                self.status.commit()
-            else:
-                LOG.debug(
-                    f"no {status_type.value} date found for {microbial_sample_obj.internal_id}"
-                )
-                LOG.info(
-                    f"no {status_type.value} date found for {microbial_sample_obj.internal_id}"
-                )
 
     def _get_samples_in_step(self, status_type):
         return self._sample_functions[status_type]()
