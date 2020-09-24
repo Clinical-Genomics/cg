@@ -24,6 +24,7 @@ from .transfer import transfer
 from .upload import vogue as vogue_command
 from .upload.base import upload
 from .workflow.base import workflow as workflow_cmd
+from .trailblazer import trailblazer as trailblazer_cmd
 
 LOG = logging.getLogger(__name__)
 LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR"]
@@ -87,3 +88,4 @@ base.add_command(upload)
 base.add_command(workflow_cmd)
 base.add_command(store_cmd)
 upload.add_command(vogue_command)
+base.add_command(trailblazer_cmd)
