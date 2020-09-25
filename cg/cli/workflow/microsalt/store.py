@@ -15,8 +15,6 @@ from cg.meta.store.microsalt import gather_files_and_bundle_in_housekeeper
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
-FAIL = 1
-SUCCESS = 0
 
 
 @click.group()
@@ -37,7 +35,7 @@ def analysis(context, config_stream):
     hk_api = context.obj["hk_api"]
 
     if not config_stream:
-        LOG.error("Provide a config file.")
+        LOG.error("Please provide a config file")
         context.abort()
 
     try:
