@@ -10,7 +10,6 @@ from cg.exc import (
     AnalysisDuplicationError,
 )
 
-DUMMY_MICROSALT_CASE = "dummymicrobe"
 LOG = logging.getLogger(__name__)
 
 
