@@ -165,8 +165,8 @@ class StoreHelpers:
         analysis = store.add_analysis(pipeline=pipeline, version=pipeline_version)
 
         analysis.started_at = started_at or datetime.now()
-
-        analysis.completed_at = completed_at or datetime.now()
+        if completed_at:
+            analysis.completed_at = completed_at
         if uploaded_at:
             analysis.uploaded_at = uploaded_at
         if delivery_reported_at:
