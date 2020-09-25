@@ -37,7 +37,7 @@ def gather_files_and_bundle_in_housekeeper(config_stream, hk_api, status):
 
 
 def add_microbial_analysis(config_stream):
-    """Gather information from microSALT analysis to store."""
+    """Gather information from microSALT analysis to store"""
 
     deliverables = ruamel.yaml.safe_load(config_stream)
     new_bundle = build_microbial_bundle(deliverables)
