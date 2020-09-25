@@ -28,8 +28,11 @@ def create_microbial_cases(config_file):
         if microbial_sample.ticket_number:
             continue
 
-        click.echo(click.style("processing sample without ticket: " + microbial_sample.__str__(),
-                               fg="white"))
+        click.echo(
+            click.style(
+                "processing sample without ticket: " + microbial_sample.__str__(), fg="white"
+            )
+        )
 
         if microbial_sample.order == "Mikro v. 39 2019":
             microbial_sample.ticket_number = 712035
@@ -43,12 +46,16 @@ def create_microbial_cases(config_file):
             microbial_sample.ticket_number = 712083
 
         if not microbial_sample.ticket_number:
-            click.echo(click.style("failed to determine ticket for: " + microbial_sample.__str__(),
-                                   fg="red"))
+            click.echo(
+                click.style(
+                    "failed to determine ticket for: " + microbial_sample.__str__(), fg="red"
+                )
+            )
             return
 
-        click.echo(click.style("changed ticket to: " + str(microbial_sample.ticket_number),
-                               fg="green"))
+        click.echo(
+            click.style("changed ticket to: " + str(microbial_sample.ticket_number), fg="green")
+        )
 
     store.commit()
 
@@ -58,15 +65,18 @@ def create_microbial_cases(config_file):
 
         ticket = microbial_sample.ticket_number
         if not ticket:
-            click.echo(click.style("stopping on sample without ticket: " +
-                                   microbial_sample.__str__(),
-                                   fg="red"))
+            click.echo(
+                click.style(
+                    "stopping on sample without ticket: " + microbial_sample.__str__(), fg="red"
+                )
+            )
             return
 
         existing_case = store.find_family(customer=microbial_sample.customer, name=ticket)
         if existing_case:
-            click.echo(click.style("skipping processed sample: " + microbial_sample.__str__(),
-                                   fg="yellow"))
+            click.echo(
+                click.style("skipping processed sample: " + microbial_sample.__str__(), fg="yellow")
+            )
             continue
 
         ids = {"ticket_number": ticket}
