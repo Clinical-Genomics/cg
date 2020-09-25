@@ -35,7 +35,7 @@ def analysis(context, config_stream):
     hk_api = context.obj["hk_api"]
 
     if not config_stream:
-        LOG.error("Provide a config file.")
+        LOG.error("Please provide a config file")
         context.abort()
 
     try:
