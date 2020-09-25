@@ -63,7 +63,7 @@ class FindBusinessDataHandler(BaseHandler):
         """Fetch an analysis."""
         return self.Analysis.query.filter_by(family=family, started_at=started_at).first()
 
-    def microbial_analysis(
+    def get_microbial_analysis(
         self, microbial_order_id: models.MicrobialOrder, started_at: dt.datetime
     ) -> models.Analysis:
         """Get a microbial analysis"""
