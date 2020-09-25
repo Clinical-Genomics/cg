@@ -674,16 +674,14 @@ class StatusHandler(BaseHandler):
 
         Returns microbial samples that have been delivered but not invoiced.
         """
-        records = self.MicrobialSample.query.filter(
-            models.MicrobialSample.delivered_at is not None,
-            models.MicrobialSample.invoice_id == None,
+        records = self.Sample.query.filter(
+            "microbial" in self.Sample.data_analysis,
+            models.Sample.delivered_at is not None,
+            models.Sample.invoice_id == None,
         )
-        customers_to_invoice = [record.microbial_order.customer for record in records.all()]
-        customers_to_invoice = list(set(customers_to_invoice))
+        customers_to_invoice = list(set([record.customer for record in records.all()]))
         if customer:
-            records = records.join(models.MicrobialOrder).filter(
-                models.MicrobialOrder.customer_id == customer.id
-            )
+            records = records.join(models.Family).filter(models.Family.customer_id == customer.id)
         return records, customers_to_invoice
 
     def samples_to_invoice(self, customer: models.Customer = None):
@@ -755,42 +753,45 @@ class StatusHandler(BaseHandler):
     def microbial_samples_to_prepare(self, external=False):
         """Fetch microbial samples from statusdb that have no prepared_at date."""
         records = (
-            self.MicrobialSample.query.join(
-                models.MicrobialSample.application_version, models.ApplicationVersion.application
+            self.Sample.query.join(
+                models.Sample.application_version, models.ApplicationVersion.application
             )
             .filter(
-                models.MicrobialSample.prepared_at == None,
+                "microbial" in self.Sample.data_analysis,
+                models.Sample.prepared_at == None,
                 models.Application.is_external == external,
             )
-            .order_by(models.MicrobialSample.created_at)
+            .order_by(models.Sample.created_at)
         )
         return records
 
     def microbial_samples_to_sequence(self, external=False):
         """Fetch microbial samples from statusdb that have no sequenced_at date."""
         records = (
-            self.MicrobialSample.query.join(
-                models.MicrobialSample.application_version, models.ApplicationVersion.application
+            self.Sample.query.join(
+                models.Sample.application_version, models.ApplicationVersion.application
             )
             .filter(
-                models.MicrobialSample.sequenced_at == None,
+                "microbial" in self.Sample.data_analysis,
+                models.Sample.sequenced_at == None,
                 models.Application.is_external == external,
             )
-            .order_by(models.MicrobialSample.created_at)
+            .order_by(models.Sample.created_at)
         )
         return records
 
     def microbial_samples_to_deliver(self, external=False):
         """Fetch microbial samples from statusdb that have no delivered_at date."""
         records = (
-            self.MicrobialSample.query.join(
-                models.MicrobialSample.application_version, models.ApplicationVersion.application
+            self.Sample.query.join(
+                models.Sample.application_version, models.ApplicationVersion.application
             )
             .filter(
-                models.MicrobialSample.delivered_at == None,
+                "microbial" in self.Sample.data_analysis,
+                models.Sample.delivered_at == None,
                 models.Application.is_external == external,
             )
-            .order_by(models.MicrobialSample.created_at)
+            .order_by(models.Sample.created_at)
         )
         return records
 

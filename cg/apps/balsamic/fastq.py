@@ -103,7 +103,7 @@ class FastqHandler(BaseFastqHandler):
         super().__init__(config)
         self.root_dir = config["balsamic"]["root"]
 
-    def link(self, case: str, sample: str, files: List):
+    def link(self, case: str, sample: str, files: List[dict]):
         """Link FASTQ files for a balsamic sample.
         Shall be linked to /<balsamic root directory>/case-id/fastq/"""
 
