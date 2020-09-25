@@ -215,7 +215,7 @@ def test_store_microbial_samples(orders_api, base_store, microbial_status_data):
 
     # THEN it should store the samples and the used previously unknown organisms
     assert new_samples
-    assert base_store.families().count() == 0
+    assert base_store.families().count() == 1
     assert len(new_samples) == 5
     assert base_store.samples().count() == 5
     assert base_store.organisms().count() == 3
@@ -240,7 +240,7 @@ def test_store_microbial_samples_data_analysis_stored(
 
     # THEN it should store the samples
     assert base_store.samples().count() > 0
-    assert base_store.families().count() == 0
+    assert base_store.families().count() > 0
     assert new_samples[0].data_analysis == "microbial|fastq"
 
 
