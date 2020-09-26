@@ -23,7 +23,7 @@ def test_add_new_analysis_pipeline_exception(mock_housekeeper_store, mock_status
     mock_bundle = mock_housekeeper_store.Bundle.return_value
     mock_version = mock_housekeeper_store.Version.return_value
     mock_case = mock_status.Family.return_value
-    mock_case.links[0].sample.data_analysis = None
+    mock_case.family.data_analysis = None
 
     # WHEN creating and adding an analysis object for that case to status-db
     with pytest.raises(PipelineUnknownError) as exc_info:

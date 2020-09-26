@@ -270,6 +270,7 @@ class Delivery(Model):
 class Family(Model, PriorityMixin):
     __table_args__ = (UniqueConstraint("customer_id", "name", name="_customer_name_uc"),)
 
+    data_analysis = Column(types.String(16))
     id = Column(types.Integer, primary_key=True)
     internal_id = Column(types.String(32), unique=True, nullable=False)
     name = Column(types.String(128), nullable=False)
@@ -379,6 +380,7 @@ class Flowcell(Model):
 
 
 class MicrobialOrder(Model):
+    data_analysis = Column(types.String(16))
     id = Column(types.Integer, primary_key=True)
     internal_id = Column(types.String(32), unique=True)
     name = Column(types.String(128), nullable=False)
@@ -415,7 +417,6 @@ class MicrobialSample(Model, PriorityMixin):
     id = Column(types.Integer, primary_key=True)
     internal_id = Column(types.String(32), nullable=False, unique=True)
     name = Column(types.String(128), nullable=False)
-    data_analysis = Column(types.String(16))
     application_version_id = Column(ForeignKey("application_version.id"), nullable=False)
     microbial_order_id = Column(ForeignKey("microbial_order.id"), nullable=False)
     created_at = Column(types.DateTime, default=dt.datetime.now)
@@ -535,7 +536,6 @@ class Sample(Model, PriorityMixin):
     comment = Column(types.Text)
     created_at = Column(types.DateTime, default=dt.datetime.now)
     customer_id = Column(ForeignKey("customer.id", ondelete="CASCADE"), nullable=False)
-    data_analysis = Column(types.String(16))
     delivered_at = Column(types.DateTime)
     deliveries = orm.relationship("Delivery", backref="sample")
     downsampled_to = Column(types.BigInteger)

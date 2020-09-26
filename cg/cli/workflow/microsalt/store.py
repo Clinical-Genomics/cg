@@ -84,8 +84,7 @@ def _include_files_in_housekeeper(bundle_obj, context, hk_api, version_obj):
 
 def _add_new_complete_analysis_record(bundle_data, family_obj, status, version_obj):
     """Function to create and return a new analysis database record"""
-    pipeline = family_obj.links[0].sample.data_analysis
-    pipeline = pipeline if pipeline else "mip"  # TODO remove this default from here
+    pipeline = family_obj.data_analysis
 
     if status.analysis(family=family_obj, started_at=version_obj.created_at):
         raise AnalysisDuplicationError(

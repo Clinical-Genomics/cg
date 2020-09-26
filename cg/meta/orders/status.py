@@ -97,7 +97,6 @@ class StatusHandler:
                     "internal_id": sample.get("internal_id"),
                     "name": sample["name"],
                     "application": sample["application"],
-                    "data_analysis": sample["data_analysis"],
                     "priority": sample["priority"],
                     "comment": sample.get("comment"),
                     "tumour": sample.get("tumour") or False,
@@ -126,7 +125,6 @@ class StatusHandler:
                     "comment": sample_data.get("comment"),
                     "reference_genome": sample_data["reference_genome"],
                     "application": sample_data["application"],
-                    "data_analysis": sample_data["data_analysis"],
                 }
                 for sample_data in data["samples"]
             ],
@@ -146,6 +144,8 @@ class StatusHandler:
             priority = values.pop()
             panels = set(panel for sample in case_samples for panel in sample.get("panels", set()))
             case = {
+                # Set from first sample until order portal sets this on case level
+                "data_analysis": case_samples[0]["data_analysis"],
                 "name": case_name,
                 "priority": priority,
                 "panels": list(panels),
@@ -154,7 +154,6 @@ class StatusHandler:
                         "application": sample["application"],
                         "capture_kit": sample.get("capture_kit"),
                         "comment": sample.get("comment"),
-                        "data_analysis": sample.get("data_analysis"),
                         "father": sample.get("father"),
                         "from_sample": sample.get("from_sample"),
                         "internal_id": sample.get("internal_id"),
@@ -186,7 +185,10 @@ class StatusHandler:
                 case_obj.panels = case["panels"]
             else:
                 case_obj = self.status.add_family(
-                    name=case["name"], panels=case["panels"], priority=case["priority"]
+                    data_analysis=case["data_analysis"],
+                    name=case["name"],
+                    panels=case["panels"],
+                    priority=case["priority"],
                 )
                 case_obj.customer = customer_obj
                 new_families.append(case_obj)
@@ -200,7 +202,6 @@ class StatusHandler:
                     new_sample = self.status.add_sample(
                         capture_kit=sample["capture_kit"],
                         comment=sample["comment"],
-                        data_analysis=sample["data_analysis"],
                         from_sample=sample["from_sample"],
                         internal_id=sample["internal_id"],
                         name=sample["name"],
@@ -268,7 +269,6 @@ class StatusHandler:
                     priority=sample["priority"],
                     comment=sample["comment"],
                     tumour=sample["tumour"],
-                    data_analysis=sample["data_analysis"],
                 )
                 new_sample.customer = customer_obj
                 application_tag = sample["application"]
@@ -284,7 +284,7 @@ class StatusHandler:
     def store_fastq_samples(
         self, customer: str, order: str, ordered: dt.datetime, ticket: int, samples: List[dict]
     ) -> List[models.Sample]:
-        """Store fast samples in the status database including family connection and delivery."""
+        """Store fastq samples in the status database including family connection and delivery"""
         production_customer = self.status.customer("cust000")
         customer_obj = self.status.customer(customer)
         if customer_obj is None:
@@ -303,7 +303,6 @@ class StatusHandler:
                     priority=sample["priority"],
                     comment=sample["comment"],
                     tumour=sample["tumour"],
-                    data_analysis=sample["data_analysis"],
                 )
                 new_sample.customer = customer_obj
 
@@ -316,7 +315,10 @@ class StatusHandler:
 
                 if not new_sample.is_tumour:
                     new_family = self.status.add_family(
-                        name=sample["name"], panels=["OMIM-AUTO"], priority="research"
+                        data_analysis="fastq",
+                        name=sample["name"],
+                        panels=["OMIM-AUTO"],
+                        priority="research",
                     )
                     new_family.customer = production_customer
                     self.status.add(new_family)
@@ -381,7 +383,6 @@ class StatusHandler:
                     application_version=application_version,
                     comment=sample_comment,
                     customer=customer_obj,
-                    data_analysis=sample_data["data_analysis"],
                     internal_id=sample_data["internal_id"],
                     name=sample_data["name"],
                     order=order,

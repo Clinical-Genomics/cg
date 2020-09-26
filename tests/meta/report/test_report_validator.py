@@ -67,13 +67,13 @@ def test_has_required_data_w_report_fields(report_api, required_report_value_key
     # GIVEN complete delivery data missing only the data we check for value
     delivery_data = report_api._get_delivery_data(case_id="yellowhog")
     validator = ReportValidator(report_store)
-    validator.has_required_data(delivery_data)
+    validator.has_required_data(delivery_data, "yellowhog")
     assert not validator.get_missing_attributes()
 
     delivery_data[required_report_value_key] = None
 
     # WHEN checking that the data set has the required value
-    has_required_data = validator.has_required_data(delivery_data)
+    has_required_data = validator.has_required_data(delivery_data, "yellowhog")
 
     # THEN the indication on completeness should be false
     assert not has_required_data
@@ -84,11 +84,11 @@ def test_get_missing_data_w_report_fields(report_api, required_report_value_key,
     # GIVEN complete delivery data missing only the data we check for value
     delivery_data = report_api._get_delivery_data(case_id="yellowhog")
     validator = ReportValidator(report_store)
-    assert validator.has_required_data(delivery_data)
+    assert validator.has_required_data(delivery_data, "yellowhog")
     assert required_report_value_key not in validator.get_missing_attributes()
 
     delivery_data[required_report_value_key] = None
-    validator.has_required_data(delivery_data)
+    validator.has_required_data(delivery_data, "yellowhog")
 
     # WHEN getting missing attributes
     missing_attributes = validator.get_missing_attributes()
@@ -104,14 +104,14 @@ def test_has_required_data_w_normal_sample_fields(
     # GIVEN complete delivery data missing only the data we check for value on each sample
     delivery_data = report_api._get_delivery_data(case_id="yellowhog")
     validator = ReportValidator(report_store)
-    assert validator.has_required_data(delivery_data)
+    assert validator.has_required_data(delivery_data, "yellowhog")
     assert required_sample_value_key not in validator.get_missing_attributes()
 
     for sample in delivery_data["samples"]:
         sample[required_sample_value_key] = None
 
     # WHEN checking that the data set has the required value
-    has_required_data = validator.has_required_data(delivery_data)
+    has_required_data = validator.has_required_data(delivery_data, "yellowhog")
 
     # THEN the indication on completeness should be false
     assert not has_required_data
@@ -131,14 +131,14 @@ def test_has_required_data_w_sequence_sample_fields(
         ).application_version.application.is_external
 
     validator = ReportValidator(report_store)
-    assert validator.has_required_data(delivery_data)
+    assert validator.has_required_data(delivery_data, "yellowhog")
     assert required_sample_value_key not in validator.get_missing_attributes()
 
     for sample in delivery_data["samples"]:
         sample[required_sample_value_key] = None
 
     # WHEN checking that the data set has the required value
-    has_required_data = validator.has_required_data(delivery_data)
+    has_required_data = validator.has_required_data(delivery_data, "yellowhog")
 
     # THEN the indication on completeness should be false
     assert not has_required_data
@@ -157,14 +157,14 @@ def test_has_required_data_w_analysis_sample_fields(
     report_store.commit()
 
     validator = ReportValidator(report_store)
-    assert validator.has_required_data(delivery_data)
+    assert validator.has_required_data(delivery_data, "yellowhog")
     assert required_sample_value_key not in validator.get_missing_attributes()
 
     for sample in delivery_data["samples"]:
         sample[required_sample_value_key] = None
 
     # WHEN checking that the data set has the required value
-    has_required_data = validator.has_required_data(delivery_data)
+    has_required_data = validator.has_required_data(delivery_data, "yellowhog")
 
     # THEN the indication on completeness should be false
     assert not has_required_data
@@ -178,14 +178,14 @@ def test_has_required_data_all_samples_non_required_fields(
     delivery_data = report_api._get_delivery_data(case_id="yellowhog")
 
     validator = ReportValidator(report_store)
-    assert validator.has_required_data(delivery_data)
+    assert validator.has_required_data(delivery_data, "yellowhog")
     assert required_sample_value_key not in validator.get_missing_attributes()
 
     for sample in delivery_data["samples"]:
         sample[required_sample_value_key] = None
 
     # WHEN checking that the data set has the required value
-    has_required_data = validator.has_required_data(delivery_data)
+    has_required_data = validator.has_required_data(delivery_data, "yellowhog")
 
     # THEN the indication on completeness should be true
     assert required_sample_value_key not in validator.get_missing_attributes()
@@ -211,14 +211,14 @@ def test_has_required_data_external_samples_non_required_fields(
         ).application_version.application.is_external
 
     validator = ReportValidator(report_store)
-    assert validator.has_required_data(delivery_data)
+    assert validator.has_required_data(delivery_data, "yellowhog")
     assert required_sample_value_key not in validator.get_missing_attributes()
 
     for sample in delivery_data["samples"]:
         sample[required_sample_value_key] = None
 
     # WHEN checking that the data set has the required value
-    has_required_data = validator.has_required_data(delivery_data)
+    has_required_data = validator.has_required_data(delivery_data, "yellowhog")
 
     # THEN the indication on completeness should be true
     assert required_sample_value_key not in validator.get_missing_attributes()

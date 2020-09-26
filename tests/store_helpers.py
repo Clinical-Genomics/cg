@@ -269,6 +269,7 @@ class StoreHelpers:
         self,
         store: Store,
         family_id: str = "family_test",
+        data_analysis: str = "mip",
         internal_id: str = None,
         customer_id: str = "cust000",
         panels: List = None,
@@ -287,7 +288,9 @@ class StoreHelpers:
             self.ensure_panel(store, panel_id=panel_name, customer_id=customer_id)
 
         if not family_obj:
-            family_obj = store.add_family(name=family_id, panels=panels)
+            family_obj = store.add_family(
+                data_analysis=data_analysis, name=family_id, panels=panels
+            )
 
         if internal_id:
             family_obj.internal_id = internal_id

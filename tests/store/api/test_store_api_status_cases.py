@@ -510,12 +510,12 @@ def test_include_case_by_case_lowercase_data_analysis(base_store: Store):
     """Test to that cases can be included by lowercase data_analysis"""
 
     # GIVEN a database with a family with data analysis set
-    family = add_family(base_store)
-    sample = add_sample(base_store, data_analysis="UPPERCASE")
+    family = add_family(base_store, data_analysis="UPPERCASE")
+    sample = add_sample(base_store)
     base_store.relate_sample(family, sample, "unknown")
 
     # WHEN getting active cases by data_analysis
-    cases = base_store.cases(data_analysis=sample.data_analysis.lower())
+    cases = base_store.cases(data_analysis=family.data_analysis.lower())
 
     # THEN cases should only contain this case
     assert cases
@@ -527,12 +527,12 @@ def test_include_case_by_case_uppercase_data_analysis(base_store: Store):
     """Test to that cases can be included by uppercase data_analysis"""
 
     # GIVEN a database with a family with data analysis set
-    family = add_family(base_store)
-    sample = add_sample(base_store, data_analysis="lowercase")
+    family = add_family(base_store, data_analysis="lowercase")
+    sample = add_sample(base_store)
     base_store.relate_sample(family, sample, "unknown")
 
     # WHEN getting active cases by data_analysis
-    cases = base_store.cases(data_analysis=sample.data_analysis.upper())
+    cases = base_store.cases(data_analysis=family.data_analysis.upper())
 
     # THEN cases should only contain this case
     assert cases
@@ -544,14 +544,14 @@ def test_include_samples_with_different_data_analysis(base_store: Store):
     """Test to that cases can be included by data_analysis"""
 
     # GIVEN a database with a family with data analysis set
-    family = add_family(base_store)
-    sample_with_data_analysis = add_sample(base_store, data_analysis="data_analysis", invoiced=True)
-    sample_without_data_analysis = add_sample(base_store, invoiced=True)
-    base_store.relate_sample(family, sample_with_data_analysis, "unknown")
-    base_store.relate_sample(family, sample_without_data_analysis, "unknown")
+    family = add_family(base_store, data_analysis="data_analysis")
+    sample_1 = add_sample(base_store, invoiced=True)
+    sample_2 = add_sample(base_store, invoiced=True)
+    base_store.relate_sample(family, sample_1, "unknown")
+    base_store.relate_sample(family, sample_2, "unknown")
 
     # WHEN getting active cases by data_analysis
-    cases = base_store.cases(data_analysis=sample_with_data_analysis.data_analysis)
+    cases = base_store.cases(data_analysis="data_analysis")
 
     # THEN cases should only contain this case
     assert cases
@@ -564,8 +564,8 @@ def test_exclude_case_by_data_analysis(base_store: Store):
     """Test to that cases can be excluded by data_analysis"""
 
     # GIVEN a database with a family with data analysis set
-    family = add_family(base_store)
-    sample = add_sample(base_store, data_analysis="data_analysis")
+    family = add_family(base_store, data_analysis="data_analysis")
+    sample = add_sample(base_store)
     base_store.relate_sample(family, sample, "unknown")
 
     # WHEN getting active cases by data_analysis
@@ -579,12 +579,12 @@ def test_include_case_by_partial_data_analysis(base_store: Store):
     """Test to that cases can be included by data_analysis"""
 
     # GIVEN a database with a family with data analysis set
-    family = add_family(base_store)
-    sample = add_sample(base_store, data_analysis="data_analysis")
+    family = add_family(base_store, data_analysis="data_analysis")
+    sample = add_sample(base_store)
     base_store.relate_sample(family, sample, "unknown")
 
     # WHEN getting active cases by partial data_analysis
-    cases = base_store.cases(data_analysis=sample.data_analysis[1:-1])
+    cases = base_store.cases(data_analysis="data_an")
 
     # THEN cases should only contain this case
     assert cases
@@ -596,49 +596,50 @@ def test_show_multiple_data_analysis(base_store: Store):
     """Test to that cases can be included by data_analysis"""
 
     # GIVEN a database with a family with data analysis set
-    family = add_family(base_store)
-    sample1 = add_sample(base_store, data_analysis="data_analysis1")
+    family = add_family(base_store, data_analysis="data_analysis")
+    sample1 = add_sample(base_store)
     base_store.relate_sample(family, sample1, "unknown")
-    sample2 = add_sample(base_store, data_analysis="data_analysis2")
+    family2 = add_family(base_store, family_id="family2", data_analysis="data_analysis2")
+    sample2 = add_sample(base_store)
     base_store.relate_sample(family, sample2, "unknown")
+    base_store.relate_sample(family2, sample2, "unknown")
 
     # WHEN getting active cases by data_analysis
-    cases = base_store.cases()
+    cases = base_store.cases(data_analysis="data_analysis")
 
-    # THEN cases should only contain this case
+    # THEN cases should only contain these analyses
     assert cases
     for case in cases:
-        assert sample1.data_analysis in case.get("samples_data_analyses")
-        assert sample2.data_analysis in case.get("samples_data_analyses")
+        assert family2.internal_id or family.internal_id in case.get("internal_id")
 
 
 def test_show_data_analysis(base_store: Store):
     """Test to that cases can be included by data_analysis"""
 
     # GIVEN a database with a family with data analysis set
-    family = add_family(base_store)
-    sample = add_sample(base_store, data_analysis="data_analysis")
+    family = add_family(base_store, data_analysis="data_analysis")
+    sample = add_sample(base_store)
     base_store.relate_sample(family, sample, "unknown")
 
     # WHEN getting active cases by data_analysis
-    cases = base_store.cases(data_analysis=sample.data_analysis)
+    cases = base_store.cases(data_analysis="data_analysis")
 
     # THEN cases should only contain this case
     assert cases
     for case in cases:
-        assert sample.data_analysis in case.get("samples_data_analyses")
+        assert family.internal_id in case.get("internal_id")
 
 
 def test_include_case_by_data_analysis(base_store: Store):
     """Test to that cases can be included by data_analysis"""
 
     # GIVEN a database with a family with data analysis set
-    family = add_family(base_store)
-    sample = add_sample(base_store, data_analysis="data_analysis")
+    family = add_family(base_store, data_analysis="data_analysis")
+    sample = add_sample(base_store)
     base_store.relate_sample(family, sample, "unknown")
 
     # WHEN getting active cases by data_analysis
-    cases = base_store.cases(data_analysis=sample.data_analysis)
+    cases = base_store.cases(data_analysis=family.data_analysis)
 
     # THEN cases should only contain this case
     assert cases
@@ -1457,6 +1458,7 @@ def test_structure(base_store: Store):
     cases = base_store.cases()
 
     # THEN structure should contain
+    #   data_analyses
     #   internal_id
     #   name
     #   total number of samples,
@@ -1468,6 +1470,7 @@ def test_structure(base_store: Store):
     #   samples_delivered
     assert cases
     for case in cases:
+        assert "data_analyses" in case.keys()
         assert "internal_id" in case.keys()
         assert "name" in case.keys()
         assert "ordered_at" in case.keys()
@@ -1596,11 +1599,12 @@ def add_family(
     ordered_days_ago=0,
     action=None,
     priority=None,
+    data_analysis="mip",
 ):
     """utility function to add a family to use in tests"""
     panel = ensure_panel(disk_store)
     customer = ensure_customer(disk_store, customer_id)
-    family = disk_store.add_family(name=family_id, panels=panel.name)
+    family = disk_store.add_family(data_analysis=data_analysis, name=family_id, panels=panel.name)
     family.customer = customer
     family.ordered_at = datetime.now() - timedelta(days=ordered_days_ago)
     if action:

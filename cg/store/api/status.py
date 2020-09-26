@@ -67,7 +67,7 @@ class StatusHandler(BaseHandler):
             self.Family.query.outerjoin(models.Analysis)
             .join(models.Family.links, models.FamilySample.sample)
             .filter(or_(models.Sample.is_external, models.Sample.sequenced_at.isnot(None)))
-            .filter(models.Sample.data_analysis.ilike(f"%{pipeline}%"))
+            .filter(models.Family.data_analysis.ilike(f"%{pipeline}%"))
             .filter(
                 or_(
                     models.Family.action == "analyze",
@@ -97,7 +97,7 @@ class StatusHandler(BaseHandler):
             self.Family.query.outerjoin(models.Analysis)
             .join(models.Family.links, models.FamilySample.sample)
             .filter(or_(models.Sample.is_external, models.Sample.sequenced_at.isnot(None)))
-            .filter(models.Sample.data_analysis.ilike(f"%{pipeline}%"))
+            .filter(models.Family.data_analysis.ilike(f"%{pipeline}%"))
             .filter(models.Family.action == "running")
             .order_by(models.Family.priority.desc(), models.Family.ordered_at)
         )
@@ -164,13 +164,14 @@ class StatusHandler(BaseHandler):
             if exclude_customer_id:
                 families_q = families_q.filter(models.Customer.internal_id != exclude_customer_id)
 
+        if data_analysis:
+            families_q = families_q.filter(
+                models.Family.data_analysis.like("%" + data_analysis + "%")
+            )
         # sample filters
-        if data_analysis or sample_id:
+        if sample_id:
             families_q = families_q.join(models.Family.links, models.FamilySample.sample)
-            if data_analysis:
-                families_q = families_q.filter(
-                    models.Sample.data_analysis.like("%" + data_analysis + "%")
-                )
+
             if sample_id:
                 families_q = families_q.filter(models.Sample.internal_id.like(sample_id))
 
@@ -215,7 +216,6 @@ class StatusHandler(BaseHandler):
             analysis_uploaded_bool = None
             samples_delivered_bool = None
             analysis_delivery_reported_bool = None
-            samples_data_analyses = None
             flowcells_status = None
             flowcells_on_disk = None
             flowcells_on_disk_bool = None
@@ -286,9 +286,6 @@ class StatusHandler(BaseHandler):
                 samples_sequenced_bool = samples_sequenced == samples_to_sequence
                 samples_delivered_bool = samples_delivered == samples_to_deliver
                 samples_invoiced_bool = samples_invoiced == samples_to_invoice
-                samples_data_analyses = list(
-                    set(link.sample.data_analysis for link in record.links)
-                )
 
                 if samples_to_receive > 0 and samples_received_bool:
                     samples_received_at = max(
@@ -455,6 +452,7 @@ class StatusHandler(BaseHandler):
             max_tat = self._get_max_tat(links=record.links)
 
             case = {
+                "data_analyses": record.analyses,
                 "internal_id": record.internal_id,
                 "name": record.name,
                 "ordered_at": record.ordered_at,
@@ -467,7 +465,6 @@ class StatusHandler(BaseHandler):
                 "samples_to_sequence": samples_to_sequence,
                 "samples_to_deliver": samples_to_deliver,
                 "samples_to_invoice": samples_to_invoice,
-                "samples_data_analyses": samples_data_analyses,
                 "samples_received": samples_received,
                 "samples_prepared": samples_prepared,
                 "samples_sequenced": samples_sequenced,
@@ -605,8 +602,8 @@ class StatusHandler(BaseHandler):
             .join(models.Family, models.Family.links, models.FamilySample.sample)
             .filter(
                 or_(
-                    models.Sample.data_analysis.is_(None),
-                    models.Sample.data_analysis.ilike(f"%{pipeline}%"),
+                    models.Family.data_analysis.is_(None),
+                    models.Family.data_analysis.ilike(f"%{pipeline}%"),
                 )
             )
             .filter(
@@ -657,7 +654,7 @@ class StatusHandler(BaseHandler):
         Returns microbial samples that have been delivered but not invoiced.
         """
         records = self.Sample.query.filter(
-            "microbial" in self.Sample.data_analysis,
+            "microbial" in self.Family.data_analysis,
             models.Sample.delivered_at is not None,
             models.Sample.invoice_id == None,
         )
@@ -739,7 +736,7 @@ class StatusHandler(BaseHandler):
                 models.Sample.application_version, models.ApplicationVersion.application
             )
             .filter(
-                "microbial" in self.Sample.data_analysis,
+                "microbial" in self.Family.data_analysis,
                 models.Sample.prepared_at == None,
                 models.Application.is_external == external,
             )
@@ -754,7 +751,7 @@ class StatusHandler(BaseHandler):
                 models.Sample.application_version, models.ApplicationVersion.application
             )
             .filter(
-                "microbial" in self.Sample.data_analysis,
+                "microbial" in self.Family.data_analysis,
                 models.Sample.sequenced_at == None,
                 models.Application.is_external == external,
             )
@@ -769,7 +766,7 @@ class StatusHandler(BaseHandler):
                 models.Sample.application_version, models.ApplicationVersion.application
             )
             .filter(
-                "microbial" in self.Sample.data_analysis,
+                "microbial" in self.Family.data_analysis,
                 models.Sample.delivered_at == None,
                 models.Application.is_external == external,
             )

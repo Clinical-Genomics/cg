@@ -50,7 +50,7 @@ def observations(context, case_id, case_limit, dry_run):
             )
             continue
 
-        if not LinkHelper.all_samples_data_analysis(family_obj.links, ["MIP", "", None]):
+        if family_obj.data_analysis.lower() is not "mip":
             LOG.info("%s: has non-MIP data_analysis. Skipping!", family_obj.internal_id)
             continue
 

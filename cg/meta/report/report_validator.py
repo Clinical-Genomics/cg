@@ -48,7 +48,7 @@ class ReportValidator:
         self._sample_helper = SampleHelper(store)
         self._attributes_missing_values = None
 
-    def has_required_data(self, report_data: dict) -> bool:
+    def has_required_data(self, report_data: dict, case_id: str) -> bool:
         """Main method to validate report data"""
 
         self._attributes_missing_values = []
@@ -56,7 +56,7 @@ class ReportValidator:
         self._check_required_general_report_data(report_data)
 
         for sample in report_data["samples"]:
-            self._check_required_sample_attributes(sample)
+            self._check_required_sample_attributes(sample, case_id)
 
         return self.get_missing_attributes() == []
 
@@ -79,7 +79,7 @@ class ReportValidator:
         """Checks attributes that should exist on all samples"""
         self._collect_missing_attributes(sample, REQUIRED_GENERIC_SAMPLE_FIELDS)
 
-    def _check_required_sample_attributes(self, sample):
+    def _check_required_sample_attributes(self, sample, case_id):
         """Checks attributes for a sample"""
         self._check_required_sample_attributes_for_all(sample)
 
@@ -103,7 +103,7 @@ class ReportValidator:
                 ],
             )
 
-        if self._sample_helper.is_analysis_sample(sample["internal_id"]):
+        if self._sample_helper.is_analysis_sample(case_id):
             self._collect_missing_attributes(sample, REQUIRED_ANALYSIS_SAMPLE_FIELDS)
 
     def _check_required_general_report_data(self, report_data):
