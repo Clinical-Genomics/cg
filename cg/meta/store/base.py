@@ -4,6 +4,8 @@ import datetime as dt
 import logging
 from typing import List
 
+from housekeeper.store import models as hk_models
+
 from cg.apps.hk import HousekeeperAPI
 from cg.constants import HK_TAGS, MIP_DNA_TAGS, MIP_RNA_TAGS, MICROSALT_TAGS
 from cg.exc import (
@@ -13,10 +15,9 @@ from cg.exc import (
     BundleAlreadyAddedError,
 )
 from cg.meta.store.microsalt import add_microbial_analysis
-from cg.meta.store.mip import add_mip_analysis
+import cg.meta.store.mip as store_mip
 from cg.store import models, Store
 from cg.store.utils import reset_case_action
-from housekeeper.store import models as hk_models
 
 from _io import TextIOWrapper
 
@@ -37,7 +38,7 @@ def gather_files_and_bundle_in_housekeeper(
 
     add_analysis = {
         "microsalt": add_microbial_analysis,
-        "mip": add_mip_analysis,
+        "mip": store_mip.add_mip_analysis,
     }
     bundle_data = add_analysis[workflow](config_stream)
 
