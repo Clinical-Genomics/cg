@@ -1,4 +1,4 @@
-""" MicroSALT specific functionality for storing files in Houskeeper """
+""" Microsalt specific functionality for storing files in Housekeeper """
 import datetime as dt
 import logging
 from pathlib import Path

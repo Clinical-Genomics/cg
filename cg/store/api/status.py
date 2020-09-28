@@ -104,7 +104,7 @@ class StatusHandler(BaseHandler):
         return list(families_query)[:limit]
 
     def orders_to_microsalt_analyze(self):
-        """Fetch microbial orders without analyses where all samples are sequenced."""
+        """Get microbial orders without analyses where all samples are sequenced"""
 
         orders = (
             self.MicrobialOrder.query.outerjoin(models.Analysis)
