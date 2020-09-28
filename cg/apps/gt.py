@@ -45,13 +45,13 @@ class GenotypeAPI:
 
     def update_sample_sex(self, sample_id: str, sex: str) -> None:
         """Update the sex for a sample in the genotype tool"""
-        sample_sex_parameters = ["add_sex", sample_id, "-s", sex]
+        sample_sex_parameters = ["add-sex", sample_id, "-s", sex]
         LOG.debug("Set sex for sample %s to %s", sample_id, sex)
         self.process.run_command(parameters=sample_sex_parameters, dry_run=self.dry_run)
 
     def update_analysis_sex(self, sample_id: str, sex: str) -> None:
         """Update the predicted sex for a sample based on genotype analysis in the genotype tool"""
-        analysis_sex_parameters = ["add_sex", sample_id, "-a", "sequence", sex]
+        analysis_sex_parameters = ["add-sex", sample_id, "-a", "sequence", sex]
         LOG.debug("Set predicted sex for sample %s to %s for the sequence analysis", sample_id, sex)
         self.process.run_command(parameters=analysis_sex_parameters, dry_run=self.dry_run)
 
