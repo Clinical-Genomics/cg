@@ -23,10 +23,6 @@ from cg.store import Store
 class MockAnalysis:
     """Mock an analysis object"""
 
-    def __init__(self, started_at: datetime = None, completed_at=None):
-        self.started_at = started_at or datetime.now()
-        self.completed_at = completed_at or datetime.now()
-
     @staticmethod
     def get_latest_metadata(family_id=None):
         """Mock get_latest_metadata"""
