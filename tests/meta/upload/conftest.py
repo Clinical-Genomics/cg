@@ -158,7 +158,7 @@ def fixture_lims_samples(lims_family):
 @pytest.fixture(name="upload_genotypes_hk_bundle")
 def fixture_upload_genotypes_hk_bundle(
     case_id: str, timestamp, case_qc_metrics: Path, bcf_file: Path
-):
+) -> dict:
     """ Returns a dictionary in hk format with files used in upload gt process"""
     data = {
         "name": case_id,

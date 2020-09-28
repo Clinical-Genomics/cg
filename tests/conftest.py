@@ -547,7 +547,9 @@ def fixture_crunchy_api():
 
 
 @pytest.yield_fixture(scope="function", name="analysis_store")
-def fixture_analysis_store(base_store, analysis_family, wgs_application_tag, helpers):
+def fixture_analysis_store(
+    base_store: Store, analysis_family: dict, wgs_application_tag: str, helpers
+):
     """Setup a store instance for testing analysis API."""
     helpers.ensure_family(base_store, family_info=analysis_family, app_tag=wgs_application_tag)
 

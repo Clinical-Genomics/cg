@@ -16,6 +16,7 @@ class UploadGenotypesAPI(object):
         hk_api: hk.HousekeeperAPI,
         gt_api: gt.GenotypeAPI,
     ):
+        LOG.info("Initializing UploadGenotypesAPI")
         self.hk = hk_api
         self.gt = gt_api
 
@@ -35,8 +36,9 @@ class UploadGenotypesAPI(object):
         }
 
         """
-        analysis_date = analysis_obj.started_at or analysis_obj.completed_at
-        hk_version = self.hk.version(analysis_obj.family.internal_id, analysis_date)
+        case_id = analysis_obj.family.internal_id
+        LOG.info("Fetching upload genotype data for %s", case_id)
+        hk_version = self.hk.last_version(case_id)
         hk_bcf = self.get_bcf_file(hk_version)
         if hk_bcf is None:
             LOG.warning("unable to find GBCF for genotype upload")

@@ -1,9 +1,12 @@
 """Code for uploading genotype data via CLI"""
 import click
+import logging
 
 from cg.meta.upload.gt import UploadGenotypesAPI
 
 from .utils import _suggest_cases_to_upload
+
+LOG = logging.getLogger(__name__)
 
 
 @click.command()
@@ -23,8 +26,8 @@ def genotypes(context, re_upload, family_id):
     hk_api = context.obj["housekeeper_api"]
     status_api = context.obj["status"]
     family_obj = status_api.family(family_id)
+    upload_genotypes_api = UploadGenotypesAPI(hk_api=hk_api, gt_api=gt_api)
+    results = upload_genotypes_api.data(family_obj.analyses[0])
 
-    api = UploadGenotypesAPI(hk_api=hk_api, gt_api=gt_api)
-    results = api.data(family_obj.analyses[0])
     if results:
-        api.upload(results, replace=re_upload)
+        upload_genotypes_api.upload(results, replace=re_upload)

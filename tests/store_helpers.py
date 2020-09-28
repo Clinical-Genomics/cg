@@ -162,6 +162,7 @@ class StoreHelpers:
         if not family:
             family = self.add_family(store)
 
+        print("Adding analysis to", family)
         analysis = store.add_analysis(pipeline=pipeline, version=pipeline_version)
 
         analysis.started_at = started_at or datetime.now()
@@ -356,7 +357,12 @@ class StoreHelpers:
                 mother=mother,
             )
 
-        self.add_analysis(store, pipeline="pipeline", family=family_obj, completed_at=completed_at)
+        self.add_analysis(
+            store,
+            pipeline="pipeline",
+            family=family_obj,
+            completed_at=completed_at or datetime.now(),
+        )
         return family_obj
 
     @staticmethod

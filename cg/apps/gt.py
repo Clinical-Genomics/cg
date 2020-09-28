@@ -32,7 +32,7 @@ class GenotypeAPI:
         if force:
             upload_parameters.append("--force")
 
-        LOG.debug("loading VCF genotypes for sample(s): %s", ", ".join(samples_sex.keys()))
+        LOG.info("loading VCF genotypes for sample(s): %s", ", ".join(samples_sex.keys()))
         self.process.run_command(parameters=upload_parameters, dry_run=self.dry_run)
 
         for sample_id in samples_sex:
