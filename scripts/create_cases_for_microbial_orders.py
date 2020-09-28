@@ -72,7 +72,7 @@ def create_microbial_cases(config_file):
             )
             return
 
-        existing_case = store.find_family(customer=microbial_sample.customer, name=ticket)
+        existing_case = store.find_family(customer=microbial_sample.customer, name=str(ticket))
         if existing_case:
             click.echo(
                 click.style("skipping processed sample: " + microbial_sample.__str__(), fg="yellow")
@@ -81,7 +81,9 @@ def create_microbial_cases(config_file):
 
         ids = {"ticket_number": ticket}
         ticket_samples = store.samples_by_ids(**ids).all()
-        case = store.add_family(name=ticket, panels=None, priority=microbial_sample.priority_human)
+        case = store.add_family(
+            name=str(ticket), panels=None, priority=microbial_sample.priority_human
+        )
         case.customer_id = microbial_sample.customer_id
 
         click.echo(click.style("created case: " + case.__str__(), fg="green"))
