@@ -6,7 +6,7 @@ from _pytest import tmpdir
 from cg.apps.balsamic.fastq import FastqHandler as BalsamicFastqHandler
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.apps.usalt.fastq import FastqHandler as MicrosaltFastqHandler
+from cg.apps.microsalt.fastq import FastqHandler as MicrosaltFastqHandler
 from cg.meta.deliver import DeliverAPI
 from cg.meta.workflow.mip import AnalysisAPI
 from tests.mocks.hk_mock import MockFile
@@ -183,7 +183,7 @@ class MockMicrosaltFastq(MicrosaltFastqHandler):
     """Mock FastqHandler for analysis_api"""
 
     def __init__(self):
-        super().__init__(config={"usalt": {"root": tmpdir}})
+        super().__init__(config={"microsalt": {"root": tmpdir}})
 
 
 def safe_loader(path):
