@@ -33,7 +33,7 @@ def test_genotype_api_upload(genotype_api: GenotypeAPI, caplog):
     genotype_api.upload(bcf_path, samples_sex)
 
     # THEN assert that the correct information was communicated
-    f"loading VCF genotypes for sample(s): {sample_id}" in caplog.text
+    assert f"loading VCF genotypes for sample(s): {sample_id}" in caplog.text
 
 
 def test_update_sample_sex(genotype_api: GenotypeAPI, caplog):
