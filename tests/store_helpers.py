@@ -23,9 +23,7 @@ class StoreHelpers:
                 continue
             bundle_exists = True
         if not bundle_exists:
-            print("No bundle found")
             _bundle, _version = store.add_bundle(bundle_data)
-            print("Add bundle with name %s" % bundle_data["name"])
             store.add_commit(_bundle, _version)
         return _bundle
 
@@ -96,6 +94,7 @@ class StoreHelpers:
             is_accredited=is_accredited,
             limitations="A limitation",
             is_external=is_external,
+            **kwargs,
         )
         store.add_commit(application)
         return application
@@ -225,7 +224,6 @@ class StoreHelpers:
 
         sample.application_version_id = application_version_id
         sample.customer = customer
-        # print("is_external: %s" % is_external)
         sample.is_external = is_external
 
         if loqus_id:
@@ -294,7 +292,6 @@ class StoreHelpers:
         if internal_id:
             family_obj.internal_id = internal_id
 
-        # print("Adding family with name %s (%s)" % (family_obj.name, family_obj.internal_id))
         family_obj.customer = customer
         store.add_commit(family_obj)
         return family_obj
@@ -390,63 +387,31 @@ class StoreHelpers:
     def add_microbial_sample(
         self,
         store: Store,
-        sample_id: str = "microbial_sample_test",
+        sample_id: str = "microbial_sample_id",
         priority: str = "research",
         name: str = "microbial_name_test",
         organism: models.Organism = None,
-    ) -> models.MicrobialSample:
+        comment: str = "comment",
+        ticket: int = 123456,
+    ) -> models.Sample:
         """Utility function to add a sample to use in tests"""
-        customer = self.ensure_customer(store)
+        customer = self.ensure_customer(store, "cust_test")
         application_version = self.ensure_application_version(store)
         if not organism:
             organism = self.ensure_organism(store)
 
-        sample = store.add_microbial_sample(
-            name=name,
-            priority=priority,
-            organism=organism,
-            internal_id=sample_id,
-            reference_genome=organism.reference_genome,
+        sample = store.add_sample(
             application_version=application_version,
+            comment=comment,
+            internal_id=sample_id,
+            name=name,
+            organism=organism,
+            priority=priority,
+            reads=6000000,
+            sex="unknown",
+            ticket=ticket,
         )
         sample.customer = customer
-        return sample
-
-    def ensure_microbial_order(
-        self,
-        store: Store,
-        order_id: str = "microbial_order_test",
-        name: str = "microbial_name_test",
-        customer_id: str = "cust_test",
-    ) -> models.MicrobialOrder:
-        """Utility function add a microbial order and sample"""
-        customer = self.ensure_customer(store, customer_id)
-        order = store.add_microbial_order(
-            customer=customer,
-            internal_id=order_id,
-            name=name,
-            ordered=datetime.now(),
-            ticket_number=123456,
-        )
-        store.add_commit(order)
-
-        return order
-
-    def add_microbial_sample_and_order(
-        self,
-        store: Store,
-        order_id: str = "microbial_order_test",
-        sample_id: str = "microbial_sample_test",
-        customer_id: str = "cust_test",
-    ) -> models.MicrobialSample:
-        """Utility add a order and a sample to use in tests"""
-        self.ensure_application_version(store)
-        self.ensure_customer(store, customer_id)
-        organism = self.ensure_organism(store)
-        order = self.ensure_microbial_order(store)
-        sample = self.add_microbial_sample(store, organism=organism)
-        sample.microbial_order_id = order.id
-        store.add_commit(sample)
         return sample
 
     def add_samples(self, store: Store, nr_samples: int = 5) -> list:
