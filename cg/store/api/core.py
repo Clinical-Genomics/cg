@@ -8,7 +8,6 @@ from cg.store.api.reset import ResetHandler
 from .add import AddHandler
 from .findbasicdata import FindBasicDataHandler
 from .status import StatusHandler
-from .trends import TrendsHandler
 
 LOG = logging.getLogger(__name__)
 
@@ -19,7 +18,6 @@ class CoreHandler(
     FindBusinessDataHandler,
     ResetHandler,
     StatusHandler,
-    TrendsHandler,
 ):
     """Aggregating class for the store api handlers"""
 

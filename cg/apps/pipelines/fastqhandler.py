@@ -24,5 +24,5 @@ class BaseFastqHandler:
     def __init__(self, config):
         pass
 
-    def link(self, case: str, sample: str, files: List):
+    def link(self, case: str, sample: str, files: List[dict]):
         """Link FASTQ files for a pipeline sample."""

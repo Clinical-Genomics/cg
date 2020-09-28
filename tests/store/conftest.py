@@ -4,6 +4,7 @@ import datetime as dt
 import pytest
 
 # Files fixtures
+from cg.store import Store
 
 
 @pytest.fixture
@@ -83,22 +84,9 @@ def fixture_microbial_submitted_order():
 
 
 @pytest.yield_fixture(scope="function")
-def microbial_store(base_store, microbial_submitted_order):
+def microbial_store(base_store: Store, microbial_submitted_order):
     """Setup a store instance for testing analysis API."""
     customer = base_store.customer(microbial_submitted_order["customer"])
-
-    order = base_store.MicrobialOrder(
-        internal_id=microbial_submitted_order["internal_id"],
-        name=microbial_submitted_order["name"],
-        ticket_number=microbial_submitted_order["ticket_number"],
-        comment=microbial_submitted_order["comment"],
-        created_at=dt.datetime(2012, 3, 3, 10, 10, 10),
-        updated_at=dt.datetime(2012, 3, 3, 10, 10, 10),
-        ordered_at=dt.datetime(2012, 3, 3, 10, 10, 10),
-    )
-
-    order.customer = customer
-    base_store.add(order)
 
     for sample_data in microbial_submitted_order["items"]:
         application_version = base_store.application(sample_data["application"]).versions[0]
@@ -106,23 +94,19 @@ def microbial_store(base_store, microbial_submitted_order):
             internal_id=sample_data["organism"], name=sample_data["organism"]
         )
         base_store.add(organism)
-        sample = base_store.add_microbial_sample(
-            name=sample_data["name"],
-            sex=sample_data["sex"],
-            internal_id=sample_data["internal_id"],
-            ticket=microbial_submitted_order["ticket_number"],
-            reads=sample_data["reads"],
+        sample = base_store.add_sample(
             comment=sample_data["comment"],
-            organism=organism,
+            internal_id=sample_data["internal_id"],
+            name=sample_data["name"],
             priority=sample_data["priority"],
+            reads=sample_data["reads"],
             reference_genome=sample_data["reference_genome"],
-            application_version=application_version,
+            sex="unknown",
+            ticket=microbial_submitted_order["ticket_number"],
         )
-        sample.microbial_order = order
         sample.application_version = application_version
         sample.customer = customer
         sample.organism = organism
-
         base_store.add(sample)
 
     base_store.commit()
