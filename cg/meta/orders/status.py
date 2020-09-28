@@ -351,6 +351,13 @@ class StatusHandler:
 
         with self.status.session.no_autoflush:
 
+            case_obj = self.status.find_family(customer=customer_obj, name=ticket)
+            if not case_obj:
+                case_obj = self.status.add_family(
+                    name=ticket,
+                    panels=None,
+                )
+                case_obj.customer = customer_obj
             for sample_data in samples:
                 application_tag = sample_data["application"]
                 application_version = self.status.current_application_version(application_tag)
@@ -393,8 +400,12 @@ class StatusHandler:
                     ticket=ticket,
                 )
 
-                sample_objs.append(new_sample)
+                priority = new_sample.priority
 
+                sample_objs.append(new_sample)
+                self.status.relate_sample(family=case_obj, sample=new_sample, status="unknown")
+
+            case_obj.priority = priority
         self.status.commit()
         return sample_objs
 
