@@ -6,7 +6,6 @@ Classes:
     FastqHandler: Handles fastq file linking
 """
 import logging
-import os
 from pathlib import Path
 from typing import List
 
@@ -34,14 +33,14 @@ class FastqHandler(BaseFastqHandler):
 
     def __init__(self, config):
         super().__init__(config)
-        self.root_dir = config["usalt"]["root"]
+        self.root_dir = config["microsalt"]["root"]
 
-    def link(self, case: str, sample: str, files: List):
+    def link(self, ticket: int, sample: str, files: List[dict]) -> None:
         """Link FASTQ files for a usalt sample.
-        Shall be linked to /<usalt root directory>/case-id/fastq/"""
+        Shall be linked to /<usalt root directory>/ticket/fastq/"""
 
-        # The fastq files should be linked to /.../fastq/<project>/<sample>/*.fastq.gz.
-        wrk_dir = Path(self.root_dir) / "fastq" / case / sample
+        # The fastq files should be linked to /.../fastq/<ticket>/<sample>/*.fastq.gz.
+        wrk_dir = Path(self.root_dir) / "fastq" / str(ticket) / sample
 
         wrk_dir.mkdir(parents=True, exist_ok=True)
 
@@ -61,9 +60,3 @@ class FastqHandler(BaseFastqHandler):
                 linked_fastq_path.symlink_to(original_fastq_path)
             else:
                 LOGGER.debug("destination path already exists: %s", linked_fastq_path)
-
-    @staticmethod
-    def _remove_files(files):
-        for file in files:
-            if os.path.isfile(file):
-                os.remove(file)

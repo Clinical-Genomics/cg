@@ -112,6 +112,7 @@ class StatusHandler:
     @staticmethod
     def microbial_samples_to_status(data: dict) -> dict:
         """Convert order input for microbial samples."""
+
         status_data = {
             "customer": data["customer"],
             "order": data["name"],
@@ -135,11 +136,7 @@ class StatusHandler:
     @classmethod
     def cases_to_status(cls, data: dict) -> dict:
         """Convert order input to status interface input."""
-        status_data = {
-            "customer": data["customer"],
-            "order": data["name"],
-            "families": [],
-        }
+        status_data = {"customer": data["customer"], "order": data["name"], "families": []}
         cases = cls.group_cases(data["samples"])
 
         for case_name, case_samples in cases.items():
@@ -176,12 +173,7 @@ class StatusHandler:
         return status_data
 
     def store_cases(
-        self,
-        customer: str,
-        order: str,
-        ordered: dt.datetime,
-        ticket: int,
-        cases: List[dict],
+        self, customer: str, order: str, ordered: dt.datetime, ticket: int, cases: List[dict]
     ) -> List[models.Family]:
         """Store cases and samples in the status database."""
         customer_obj = self.status.customer(customer)
@@ -256,12 +248,7 @@ class StatusHandler:
         return new_families
 
     def store_samples(
-        self,
-        customer: str,
-        order: str,
-        ordered: dt.datetime,
-        ticket: int,
-        samples: List[dict],
+        self, customer: str, order: str, ordered: dt.datetime, ticket: int, samples: List[dict]
     ) -> List[models.Sample]:
         """Store samples in the status database."""
         customer_obj = self.status.customer(customer)
@@ -295,12 +282,7 @@ class StatusHandler:
         return new_samples
 
     def store_fastq_samples(
-        self,
-        customer: str,
-        order: str,
-        ordered: dt.datetime,
-        ticket: int,
-        samples: List[dict],
+        self, customer: str, order: str, ordered: dt.datetime, ticket: int, samples: List[dict]
     ) -> List[models.Sample]:
         """Store fast samples in the status database including family connection and delivery."""
         production_customer = self.status.customer("cust000")
@@ -340,9 +322,7 @@ class StatusHandler:
                     self.status.add(new_family)
 
                     new_relationship = self.status.relate_sample(
-                        family=new_family,
-                        sample=new_sample,
-                        status=sample["status"] or "unknown",
+                        family=new_family, sample=new_sample, status=sample["status"] or "unknown"
                     )
                     self.status.add(new_relationship)
 
@@ -352,29 +332,25 @@ class StatusHandler:
         self.status.add_commit(new_samples)
         return new_samples
 
-    def store_microbial_order(
+    def store_microbial_samples(
         self,
         customer: str,
         order: str,
         ordered: dt.datetime,
         ticket: int,
-        lims_project: str,
         samples: List[dict],
         comment: str = None,
-    ) -> models.MicrobialOrder:
+    ) -> [models.Sample]:
         """Store microbial samples in the status database."""
+
+        sample_objs = []
+
         customer_obj = self.status.customer(customer)
         if customer_obj is None:
             raise OrderError(f"unknown customer: {customer}")
+
         with self.status.session.no_autoflush:
-            new_order = self.status.add_microbial_order(
-                customer=customer_obj,
-                name=order,
-                ordered=ordered,
-                internal_id=lims_project,
-                ticket_number=ticket,
-                comment=comment,
-            )
+
             for sample_data in samples:
                 application_tag = sample_data["application"]
                 application_version = self.status.current_application_version(application_tag)
@@ -391,28 +367,39 @@ class StatusHandler:
                     )
                     self.status.add_commit(organism)
 
-                new_sample = self.status.add_microbial_sample(
-                    name=sample_data["name"],
-                    internal_id=sample_data["internal_id"],
-                    reference_genome=sample_data["reference_genome"],
-                    comment=sample_data["comment"],
-                    organism=organism,
-                    application_version=application_version,
-                    priority=sample_data["priority"],
-                    data_analysis=sample_data["data_analysis"],
-                )
-                new_order.microbial_samples.append(new_sample)
+                if comment:
+                    sample_comment = f"Order comment: {comment}"
 
-        self.status.add_commit(new_order)
-        return new_order
+                    if sample_data["comment"]:
+                        sample_comment = (
+                            f"{sample_comment}, sample comment: {sample_data['comment']}"
+                        )
+                else:
+                    sample_comment = sample_data["comment"]
+
+                new_sample = self.status.add_sample(
+                    application_version=application_version,
+                    comment=sample_comment,
+                    customer=customer_obj,
+                    data_analysis=sample_data["data_analysis"],
+                    internal_id=sample_data["internal_id"],
+                    name=sample_data["name"],
+                    order=order,
+                    ordered=ordered,
+                    organism=organism,
+                    priority=sample_data["priority"],
+                    reference_genome=sample_data["reference_genome"],
+                    sex="unknown",
+                    ticket=ticket,
+                )
+
+                sample_objs.append(new_sample)
+
+        self.status.commit()
+        return sample_objs
 
     def store_pools(
-        self,
-        customer: str,
-        order: str,
-        ordered: dt.datetime,
-        ticket: int,
-        pools: List[dict],
+        self, customer: str, order: str, ordered: dt.datetime, ticket: int, pools: List[dict]
     ) -> List[models.Pool]:
         """Store pools in the status database."""
         customer_obj = self.status.customer(customer)
