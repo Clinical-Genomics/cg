@@ -59,34 +59,38 @@ def test_add_user(store: Store):
     assert store.User.query.first() == new_user
 
 
-def test_add_microbial_sample(base_store: Store):
+def test_add_microbial_sample(base_store: Store, helpers):
     # GIVEN an empty database
-    assert base_store.MicrobialSample.query.first() is None
+    assert base_store.Sample.query.first() is None
+    customer_obj = helpers.ensure_customer(base_store)
+    assert customer_obj
     name = "microbial_sample"
     organism_name = "e. coli"
     internal_id = "lims-id"
     reference_genome = "ref_gen"
     priority = "research"
+    ticket_number = 123456
     application_version = base_store.ApplicationVersion.query.first()
     base_store.add_organism(organism_name, organism_name, reference_genome)
     organism = base_store.Organism.query.first()
-    microbial_order_id = "dummy_order_id"
 
     # WHEN adding a new microbial sample
-    new_microbial_sample = base_store.add_microbial_sample(
-        microbial_order_id=microbial_order_id,
+    new_sample = base_store.add_sample(
+        application_version=application_version,
+        internal_id=internal_id,
         name=name,
         organism=organism,
-        internal_id=internal_id,
-        reference_genome=reference_genome,
-        application_version=application_version,
         priority=priority,
+        reference_genome=reference_genome,
+        sex="unknown",
+        ticket=ticket_number,
     )
-    base_store.add_commit(new_microbial_sample)
+    new_sample.customer = customer_obj
+    base_store.add_commit(new_sample)
 
     # THEN it should be stored in the database
-    assert base_store.MicrobialSample.query.first() == new_microbial_sample
-    stored_microbial_sample = base_store.MicrobialSample.query.first()
+    assert base_store.Sample.query.first() == new_sample
+    stored_microbial_sample = base_store.Sample.query.first()
     assert stored_microbial_sample.name == name
     assert stored_microbial_sample.internal_id == internal_id
     assert stored_microbial_sample.reference_genome == reference_genome
