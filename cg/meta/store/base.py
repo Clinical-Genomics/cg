@@ -16,6 +16,7 @@ from cg.meta.store.microsalt import add_microbial_analysis
 from cg.meta.store.mip import add_mip_analysis
 from cg.store import models, Store
 from cg.store.utils import reset_case_action
+from housekeeper.store import models as hk_models
 
 from _io import TextIOWrapper
 
@@ -80,7 +81,7 @@ def add_new_analysis(
     bundle_data: dict,
     case_obj: models.Family,
     status: Store,
-    version_obj: models.Version,
+    version_obj: hk_models.Version,
     workflow: str,
 ) -> models.Analysis:
     """Function to create and return a new analysis database record"""
