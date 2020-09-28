@@ -6,7 +6,12 @@ from typing import List
 
 from cg.apps.hk import HousekeeperAPI
 from cg.constants import HK_TAGS, MIP_DNA_TAGS, MIP_RNA_TAGS, MICROSALT_TAGS
-from cg.exc import AnalysisDuplicationError, PipelineUnknownError, MandatoryFilesMissing, BundleAlreadyAddedError
+from cg.exc import (
+    AnalysisDuplicationError,
+    PipelineUnknownError,
+    MandatoryFilesMissing,
+    BundleAlreadyAddedError,
+)
 from cg.meta.store.microsalt import add_microbial_analysis
 from cg.meta.store.mip import add_mip_analysis
 from cg.store import models, Store
@@ -14,14 +19,19 @@ from cg.store.utils import reset_case_action
 
 from _io import TextIOWrapper
 
-ANALYSIS_TYPE_TAGS = {"wgs": MIP_DNA_TAGS, "wes": MIP_DNA_TAGS, "wts": MIP_RNA_TAGS, "microbial":
-                      MICROSALT_TAGS}
+ANALYSIS_TYPE_TAGS = {
+    "wgs": MIP_DNA_TAGS,
+    "wes": MIP_DNA_TAGS,
+    "wts": MIP_RNA_TAGS,
+    "microbial": MICROSALT_TAGS,
+}
 DUMMY_MICROSALT_CASE = "dummymicrobe"  # TODO: remove when case for microbial orders is implemented
 LOG = logging.getLogger(__name__)
 
 
-def gather_files_and_bundle_in_housekeeper(config_stream: TextIOWrapper, hk_api: HousekeeperAPI,
-                                           status: Store, workflow: str) -> models.Analysis:
+def gather_files_and_bundle_in_housekeeper(
+    config_stream: TextIOWrapper, hk_api: HousekeeperAPI, status: Store, workflow: str
+) -> models.Analysis:
     """Function to gather files and bundle in housekeeper"""
 
     add_analysis = {
@@ -66,12 +76,17 @@ def build_bundle(config_data: dict, analysisinfo_data: dict, deliverables: dict)
     return data
 
 
-def add_new_analysis(bundle_data: dict, case_obj: models.Family, status: Store, version_obj:
-                     models.Version, workflow: str) -> models.Analysis:
+def add_new_analysis(
+    bundle_data: dict,
+    case_obj: models.Family,
+    status: Store,
+    version_obj: models.Version,
+    workflow: str,
+) -> models.Analysis:
     """Function to create and return a new analysis database record"""
 
-    if workflow == 'microsalt':
-        pipeline = 'microsalt'  # TODO: fix when microbial cases are implemented
+    if workflow == "microsalt":
+        pipeline = "microsalt"  # TODO: fix when microbial cases are implemented
     else:
         pipeline = case_obj.links[0].sample.data_analysis
 

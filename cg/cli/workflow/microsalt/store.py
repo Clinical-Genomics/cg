@@ -38,10 +38,7 @@ def analysis(context, config_stream):
 
     try:
         new_analysis = gather_files_and_bundle_in_housekeeper(
-            config_stream,
-            hk_api,
-            status,
-            workflow='microsalt'
+            config_stream, hk_api, status, workflow="microsalt"
         )
     except (AnalysisDuplicationError, BundleAlreadyAddedError, MandatoryFilesMissing) as error:
         click.echo(click.style(error.message, fg="red"))
