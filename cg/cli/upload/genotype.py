@@ -4,7 +4,7 @@ import logging
 
 from cg.meta.upload.gt import UploadGenotypesAPI
 
-from .utils import _suggest_cases_to_upload
+from .utils import suggest_cases_to_upload
 
 LOG = logging.getLogger(__name__)
 
@@ -19,7 +19,7 @@ def genotypes(context, re_upload, family_id):
     click.echo(click.style("----------------- GENOTYPES -------------------"))
 
     if not family_id:
-        _suggest_cases_to_upload(context)
+        suggest_cases_to_upload(context)
         context.abort()
 
     gt_api = context.obj["genotype_api"]
