@@ -65,6 +65,10 @@ VALIDATION_CASES = [
     "livingox",
     "keenviper",
     "sharpparrot",
+    "moralgoat",
+    "fleetjay",
+    "bosssponge",
+    "unitedbeagle",
 ]
 
 
