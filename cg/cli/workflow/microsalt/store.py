@@ -1,7 +1,5 @@
 """Click commands to store microSALT analyses"""
 import logging
-from pathlib import Path
-import sys
 
 import click
 
@@ -11,7 +9,7 @@ from cg.exc import (
     BundleAlreadyAddedError,
     MandatoryFilesMissing,
 )
-from cg.meta.store.microsalt import gather_files_and_bundle_in_housekeeper
+from cg.meta.store.base import gather_files_and_bundle_in_housekeeper
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -43,6 +41,7 @@ def analysis(context, config_stream):
             config_stream,
             hk_api,
             status,
+            workflow='microsalt'
         )
     except (AnalysisDuplicationError, BundleAlreadyAddedError, MandatoryFilesMissing) as error:
         click.echo(click.style(error.message, fg="red"))
