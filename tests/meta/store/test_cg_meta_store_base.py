@@ -78,7 +78,6 @@ def test_gather_files_and_bundle_in_hk_bundle_new_analysis(
     mock_housekeeper_api.add_commit.assert_called_with(mock_bundle, mock_version)
 
 
-
 @mock.patch("cg.store.Store")
 @mock.patch("housekeeper.store.models")
 def test_add_new_analysis_pipeline_exception(mock_housekeeper_store, mock_status):
@@ -95,8 +94,9 @@ def test_add_new_analysis_pipeline_exception(mock_housekeeper_store, mock_status
 
     # WHEN creating and adding an analysis object for that case to status-db
     with pytest.raises(PipelineUnknownError) as exc_info:
-        store_base.add_new_analysis(mock_bundle, mock_case, mock_status, mock_version,
-                                    workflow="mip")
+        store_base.add_new_analysis(
+            mock_bundle, mock_case, mock_status, mock_version, workflow="mip"
+        )
 
     # THEN a PipelineUnknownError exception should be raised
     assert exc_info.value.message == f"No pipeline specified in {mock_case}"
@@ -117,8 +117,9 @@ def test_add_new_analysis_duplicate_analysis_exception(mock_housekeeper_store, m
 
     # WHEN creating and adding an analysis object for that case to status-db
     with pytest.raises(AnalysisDuplicationError) as exc_info:
-        store_base.add_new_analysis(mock_bundle, mock_case, mock_status, mock_version,
-                                    workflow="mip")
+        store_base.add_new_analysis(
+            mock_bundle, mock_case, mock_status, mock_version, workflow="mip"
+        )
 
     # THEN an AnalysisDuplicationEror should be raised
     assert (
@@ -140,8 +141,9 @@ def test_add_new_analysis(mock_housekeeper_store, mock_status):
     mock_status.analysis.return_value = None
 
     # WHEN creating and adding an analysis object for that case in status-db
-    new_analysis = store_base.add_new_analysis(mock_bundle, mock_case, mock_status, mock_version,
-                                               workflow="mip")
+    new_analysis = store_base.add_new_analysis(
+        mock_bundle, mock_case, mock_status, mock_version, workflow="mip"
+    )
 
     # THEN and analysis object for that case should created and returned
     assert new_analysis.family == mock_case
