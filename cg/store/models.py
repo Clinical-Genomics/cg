@@ -393,7 +393,9 @@ class Pool(Model):
     __table_args__ = (UniqueConstraint("order", "name", name="_order_name_uc"),)
 
     application_version_id = Column(ForeignKey("application_version.id"), nullable=False)
-    application_version = orm.relationship(ApplicationVersion, foreign_keys=[application_version_id])
+    application_version = orm.relationship(
+        ApplicationVersion, foreign_keys=[application_version_id]
+    )
     capture_kit = Column(types.String(64))
     comment = Column(types.Text)
     created_at = Column(types.DateTime, default=dt.datetime.now)
@@ -419,7 +421,9 @@ class Pool(Model):
 class Sample(Model, PriorityMixin):
 
     application_version_id = Column(ForeignKey("application_version.id"), nullable=False)
-    application_version = orm.relationship(ApplicationVersion, foreign_keys=[application_version_id])
+    application_version = orm.relationship(
+        ApplicationVersion, foreign_keys=[application_version_id]
+    )
     capture_kit = Column(types.String(64))
     comment = Column(types.Text)
     created_at = Column(types.DateTime, default=dt.datetime.now)

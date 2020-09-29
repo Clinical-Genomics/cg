@@ -551,7 +551,9 @@ def fixture_analysis_store(
     base_store: Store, analysis_family: dict, wgs_application_tag: str, helpers
 ):
     """Setup a store instance for testing analysis API."""
-    helpers.ensure_family_from_dict(base_store, family_info=analysis_family, app_tag=wgs_application_tag)
+    helpers.ensure_family_from_dict(
+        base_store, family_info=analysis_family, app_tag=wgs_application_tag
+    )
 
     yield base_store
 
