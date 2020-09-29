@@ -15,18 +15,18 @@ recipe:
     version: 1.5.0
   pedigree_check:
     sample_order:
-      - father
-      - child
-      - mother
+      - ADM2
+      - ADM1
+      - ADM3
   picardtools:
     version: 2.18.14-SNAPSHOT
   plink2:
     version: v1.90p_64-bit_(25_Mar_2016)
   plink_sexcheck:
     sample_sexcheck:
-      - father:1
-      - child:1
-      - mother:2
+      - ADM2:1
+      - ADM1:1
+      - ADM3:2
   qccollect:
     regexp_file: /path_to/references/references_7.1/qc_regexp_-v1.22-.yaml
     version: 2.1.4
@@ -55,7 +55,7 @@ recipe:
     polyphen: '"2.2.2"'
     reg_build: '"1.0"'
     version: v95
-  variant_integrity_ar_father:
+  variant_integrity_ar_ADM2:
     common_variants: '3710636'
     fraction_of_common_variants: '0.775'
   variant_integrity_ar_mendel:
@@ -70,8 +70,8 @@ recipe:
     reg_build: '"1.0"'
     version: v95
 sample:
-  father:
-    /path_to/cases/case/analysis/father/gatk_variantevalall/case_gatkcomb_evalall:
+  ADM2:
+    /path_to/cases/case/analysis/ADM2/gatk_variantevalall/case_gatkcomb_evalall:
       variantevalall:
         comp_overlap_data_header:
           comp_overlap_data_all:
@@ -3356,7 +3356,7 @@ sample:
             nSVs: '2207'
             nSVsPerSample: '2207'
             nSamples: '1'
-    /path_to/cases/case/analysis/father/gatk_variantevalexome/father_evalexome:
+    /path_to/cases/case/analysis/ADM2/gatk_variantevalexome/ADM2_evalexome:
       variantevalexome:
         comp_overlap_data_header:
           comp_overlap_data_all:
@@ -6641,15 +6641,15 @@ sample:
             nSVs: '10'
             nSVsPerSample: '10'
             nSamples: '1'
-    father_171015_HHT5NDSXX_XXXXXX_lane1_sorted:
+    ADM2_171015_HHT5NDSXX_XXXXXX_lane1_sorted:
       bamstats:
         percentage_mapped_reads: '99.7726154603807'
         raw_total_sequences: '599990660'
         reads_mapped: '598626374'
-    father_lanes_1_sorted_md:
+    ADM2_lanes_1_sorted_md:
       markduplicates:
         fraction_duplicates: '0.0400685961424888'
-    father_lanes_1_sorted_md_brecal_collecthsmetrics:
+    ADM2_lanes_1_sorted_md_brecal_collecthsmetrics:
       collecthsmetrics:
         header:
           data:
@@ -6710,7 +6710,7 @@ sample:
             TARGET_TERRITORY: '54098923'
             TOTAL_READS: '565290584'
             ZERO_CVG_TARGETS_PCT: '0.006298'
-    father_lanes_1_sorted_md_brecal_collectmultiplemetrics:
+    ADM2_lanes_1_sorted_md_brecal_collectmultiplemetrics:
       collectmultiplemetrics:
         header:
           first_of_pair:
@@ -6823,16 +6823,16 @@ sample:
             WIDTH_OF_90_PERCENT: '291'
             WIDTH_OF_95_PERCENT: '359'
             WIDTH_OF_99_PERCENT: '503'
-    father_lanes_1_sorted_md_brecal_sex:
+    ADM2_lanes_1_sorted_md_brecal_sex:
       chanjo_sexcheck:
         gender: male
         gender_check: PASS
-    case_cyto.father.cgh:
+    case_cyto.ADM2.cgh:
       vcf2cytosure_version:
         version: 0.4.3
     relation_check: PASS
-  child:
-    /path_to/cases/case/analysis/child/gatk_variantevalall/case_gatkcomb_evalall:
+  ADM1:
+    /path_to/cases/case/analysis/ADM1/gatk_variantevalall/case_gatkcomb_evalall:
       variantevalall:
         comp_overlap_data_header:
           comp_overlap_data_all:
@@ -10117,7 +10117,7 @@ sample:
             nSVs: '2173'
             nSVsPerSample: '2173'
             nSamples: '1'
-    /path_to/cases/case/analysis/child/gatk_variantevalexome/child_evalexome:
+    /path_to/cases/case/analysis/ADM1/gatk_variantevalexome/ADM1_evalexome:
       variantevalexome:
         comp_overlap_data_header:
           comp_overlap_data_all:
@@ -13402,15 +13402,15 @@ sample:
             nSVs: '8'
             nSVsPerSample: '8'
             nSamples: '1'
-    child_171015_HHT5NDSXX_XXXXXX_lane1_sorted:
+    ADM1_171015_HHT5NDSXX_XXXXXX_lane1_sorted:
       bamstats:
         percentage_mapped_reads: '99.753270982334'
         raw_total_sequences: '600049404'
         reads_mapped: '598568908'
-    child_lanes_1_sorted_md:
+    ADM1_lanes_1_sorted_md:
       markduplicates:
         fraction_duplicates: '0.040676225790359'
-    child_lanes_1_sorted_md_brecal_collecthsmetrics:
+    ADM1_lanes_1_sorted_md_brecal_collecthsmetrics:
       collecthsmetrics:
         header:
           data:
@@ -13471,7 +13471,7 @@ sample:
             TARGET_TERRITORY: '54098923'
             TOTAL_READS: '565265633'
             ZERO_CVG_TARGETS_PCT: '0.006298'
-    child_lanes_1_sorted_md_brecal_collectmultiplemetrics:
+    ADM1_lanes_1_sorted_md_brecal_collectmultiplemetrics:
       collectmultiplemetrics:
         header:
           first_of_pair:
@@ -13584,16 +13584,16 @@ sample:
             WIDTH_OF_90_PERCENT: '311'
             WIDTH_OF_95_PERCENT: '383'
             WIDTH_OF_99_PERCENT: '533'
-    child_lanes_1_sorted_md_brecal_sex:
+    ADM1_lanes_1_sorted_md_brecal_sex:
       chanjo_sexcheck:
         gender: male
         gender_check: PASS
-    case_cyto.child.cgh:
+    case_cyto.ADM1.cgh:
       vcf2cytosure_version:
         version: 0.4.3
     relation_check: PASS
-  mother:
-    /path_to/cases/case/analysis/mother/gatk_variantevalall/case_gatkcomb_evalall:
+  ADM3:
+    /path_to/cases/case/analysis/ADM3/gatk_variantevalall/case_gatkcomb_evalall:
       variantevalall:
         comp_overlap_data_header:
           comp_overlap_data_all:
@@ -16878,7 +16878,7 @@ sample:
             nSVs: '2112'
             nSVsPerSample: '2112'
             nSamples: '1'
-    /path_to/cases/case/analysis/mother/gatk_variantevalexome/mother_evalexome:
+    /path_to/cases/case/analysis/ADM3/gatk_variantevalexome/ADM3_evalexome:
       variantevalexome:
         comp_overlap_data_header:
           comp_overlap_data_all:
@@ -20163,19 +20163,19 @@ sample:
             nSVs: '12'
             nSVsPerSample: '12'
             nSamples: '1'
-    case_cyto.mother.cgh:
+    case_cyto.ADM3.cgh:
       vcf2cytosure_version:
         version: 0.4.3
     relation_check: PASS
-    mother_171015_HHT5NDSXX_XXXXXX_lane1_sorted:
+    ADM3_171015_HHT5NDSXX_XXXXXX_lane1_sorted:
       bamstats:
         percentage_mapped_reads: '99.7417657507307'
         raw_total_sequences: '600006004'
         reads_mapped: '598456583'
-    mother_lanes_1_sorted_md:
+    ADM3_lanes_1_sorted_md:
       markduplicates:
         fraction_duplicates: '0.0379523291229131'
-    mother_lanes_1_sorted_md_brecal_collecthsmetrics:
+    ADM3_lanes_1_sorted_md_brecal_collecthsmetrics:
       collecthsmetrics:
         header:
           data:
@@ -20236,7 +20236,7 @@ sample:
             TARGET_TERRITORY: '54098923'
             TOTAL_READS: '564667848'
             ZERO_CVG_TARGETS_PCT: '0.007625'
-    mother_lanes_1_sorted_md_brecal_collectmultiplemetrics:
+    ADM3_lanes_1_sorted_md_brecal_collectmultiplemetrics:
       collectmultiplemetrics:
         header:
           first_of_pair:
@@ -20349,8 +20349,7 @@ sample:
             WIDTH_OF_90_PERCENT: '311'
             WIDTH_OF_95_PERCENT: '383'
             WIDTH_OF_99_PERCENT: '535'
-    mother_lanes_1_sorted_md_brecal_sex:
+    ADM3_lanes_1_sorted_md_brecal_sex:
       chanjo_sexcheck:
         gender: female
         gender_check: PASS
-
