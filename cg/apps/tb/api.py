@@ -27,7 +27,10 @@ class TrailblazerAPI(Store):
         signer = RSASigner.from_service_account_file(self.service_account_auth_file)
         payload = {"email": self.service_account}
         jwt_token = jwt.encode(signer=signer, payload=payload)
-        auth_header = {"Authorization": f"Bearer {jwt_token}"}
+        auth_header = {
+            "Authorization": f"Bearer {jwt_token.decode('ascii')}",
+            "Accept": "application/json",
+        }
         LOG.info(f"Using header {json.dumps(auth_header)}")
         return auth_header
 
