@@ -13,25 +13,6 @@ from tests.mocks.hk_mock import MockFile
 
 
 @pytest.yield_fixture(scope="function")
-def trailblazer_api(tmpdir):
-    """Setup Trailblazer api."""
-    root_path = tmpdir.mkdir("families")
-    _store = TrailblazerAPI(
-        {
-            "trailblazer": {
-                "database": "sqlite://",
-                "root": str(root_path),
-                "script": ".",
-                "mip_config": ".",
-            }
-        }
-    )
-    _store.create_all()
-    yield _store
-    _store.drop_all()
-
-
-@pytest.yield_fixture(scope="function")
 def analysis_store(base_store, analysis_family):
     """Setup a store instance for testing analysis API."""
     customer = base_store.customer("cust000")

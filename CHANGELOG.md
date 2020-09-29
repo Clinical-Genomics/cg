@@ -13,21 +13,32 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## [12.7.1]
-
-### Fixed
- - Removed store-housekeeper one-time script that was used to store balsamic results in Housekeeper
-
-
-## [12.7.0]
+## [13.2.0]
 
 ### Changed
-- Moved queries in TrailblazerAPI to Trailblazer
+- Only talk to genotype via subprocess and CLI 
+
+
+## [13.1.0]
+
+### Changed
+- Added cases for all microbial samples
+- Add a case when a new microbial order is received 
 
 ## [13.0.0]
 
 ### Changed
 - Moved all microbial samples into samples table and the depending logic
+
+## [12.7.1]
+
+### Fixed
+ - Removed store-housekeeper one-time script that was used to store balsamic results in Housekeeper
+
+## [12.7.0]
+
+### Changed
+- Moved queries in TrailblazerAPI to Trailblazer
 
 ## [12.6.0]
 

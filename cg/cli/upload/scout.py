@@ -7,7 +7,7 @@ import yaml
 from cg.apps import hk
 from cg.meta.upload.scoutapi import UploadScoutAPI
 
-from .utils import _suggest_cases_to_upload
+from .utils import suggest_cases_to_upload
 
 LOG = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ def scout(context, re_upload, print_console, case_id):
     click.echo(click.style("----------------- SCOUT -----------------------"))
 
     if not case_id:
-        _suggest_cases_to_upload(context)
+        suggest_cases_to_upload(context)
         context.abort()
 
     tb_api = context.obj["tb_api"]

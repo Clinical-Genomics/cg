@@ -27,7 +27,7 @@ from .genotype import genotypes
 from .mutacc import process_solved, processed_solved
 from .observations import observations
 from .scout import scout, upload_case_to_scout
-from .utils import _suggest_cases_to_upload
+from .utils import suggest_cases_to_upload
 from .validate import validate
 
 LOG = logging.getLogger(__name__)
@@ -127,7 +127,7 @@ def upload(context, family_id, force_restart):
         return
 
     if not family_id:
-        _suggest_cases_to_upload(context)
+        suggest_cases_to_upload(context)
         context.abort()
 
     family_obj = context.obj["status"].family(family_id)
