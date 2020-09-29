@@ -5,7 +5,7 @@ import ruamel.yaml
 
 from cg.apps import hk, gt
 from cg.store import models
-from cg.apps.tb.api import TrailblazerAPI
+from cg.apps.mip.parse_qcmetrics import parse_qcmetrics
 
 LOG = logging.getLogger(__name__)
 
@@ -83,17 +83,14 @@ class UploadGenotypesAPI(object):
         """Parse the information from a qc metrics file"""
         with qc_metrics.open() as in_stream:
             qcmetrics_raw = ruamel.yaml.safe_load(in_stream)
-        return TrailblazerAPI.parse_qcmetrics(qcmetrics_raw)
+        return parse_qcmetrics(qcmetrics_raw)
 
     @staticmethod
     def get_sample_predicted_sex(sample_id: str, parsed_qcmetrics_data: dict) -> str:
         """Get the predicted sex for a sample"""
-        predicted_sex = "unknown"
-        for sample_info in parsed_qcmetrics_data["samples"]:
-            if sample_info["id"] == sample_id:
-                return sample_info["predicted_sex"]
-
-        return predicted_sex
+        if sample_id in parsed_qcmetrics_data:
+            return parsed_qcmetrics_data[sample_id].get("predicted_sex", "unknown")
+        return "unknown"
 
     def upload(self, data: dict, replace: bool = False):
         """Upload data about genotypes for a family of samples."""
