@@ -47,7 +47,6 @@ def gather_files_and_bundle_in_housekeeper(
 
     bundle_obj, version_obj = results
 
-    breakpoint()
     case_obj = {
         "microsalt": status.find_family_by_name(bundle_obj.name),
         "mip": status.family(bundle_obj.name),
