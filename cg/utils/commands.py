@@ -34,6 +34,7 @@ class Process:
         """
         super(Process, self).__init__()
         self.binary = binary
+        self.config = config
         self.environment = environment
         LOG.debug("Initialising Process with binary: %s", self.binary)
         self.base_call = [self.binary]
