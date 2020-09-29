@@ -7,41 +7,44 @@ About changelog [here](https://keepachangelog.com/en/1.0.0/)
 Please add a new candidate release at the top after changing the latest one. Feel free to copy paste from the "squash and commit" box that gets generated when creating PRs
 
 Try to use the following format:
-
-################# Leave This Template ###############
 ## [x.x.x]
 
 ### Added
-
 ### Changed
-
 ### Fixed
-#####################################################
 
-## [12.7.3]
 
-### Added
-- Added new case to skip during compression 
-
-## [12.7.2]
+## [13.2.1]
 
 ### Added
 - Added new cases to skip during compression 
 
-## [12.7.1]
-
-### Added
-- Added validation cases to problematic cases
-
-## [12.7.0]
+## [13.2.0]
 
 ### Changed
-- Moved queries in TrailblazerAPI to Trailblazer
+- Only talk to genotype via subprocess and CLI 
+
+
+## [13.1.0]
+
+### Changed
+- Added cases for all microbial samples
+- Add a case when a new microbial order is received 
 
 ## [13.0.0]
 
 ### Changed
 - Moved all microbial samples into samples table and the depending logic
+
+## [12.7.1]
+
+### Fixed
+ - Removed store-housekeeper one-time script that was used to store balsamic results in Housekeeper
+
+## [12.7.0]
+
+### Changed
+- Moved queries in TrailblazerAPI to Trailblazer
 
 ## [12.6.0]
 
