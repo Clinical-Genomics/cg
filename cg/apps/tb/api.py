@@ -27,8 +27,8 @@ class TrailblazerAPI(Store):
         signer = RSASigner.from_service_account_file(self.service_account_auth_file)
         payload = {"email": self.service_account}
         jwt_token = jwt.encode(signer=signer, payload=payload).decode("ascii")
-        auth_header = {f"Authorization: Bearer {jwt_token}"}
-        LOG.info(f"Using header {auth_header}")
+        auth_header = {"Authorization": f"Bearer {jwt_token}"}
+        LOG.info(f"Using header {json.dumps(auth_header)}")
         return auth_header
 
     def get_analysis(self, analysis_id: int):
