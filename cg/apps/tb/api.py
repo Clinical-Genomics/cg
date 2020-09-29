@@ -35,3 +35,8 @@ class TrailblazerAPI(Store):
 
         response = requests.get(self.host + f"/analysis/{analysis_id}", headers=self.auth_header)
         LOG.info(response)
+
+    def get_analyses(self):
+
+        response = requests.get(self.host + f"/analyses", headers=self.auth_header)
+        LOG.info(response)

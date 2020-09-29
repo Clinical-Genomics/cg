@@ -17,3 +17,9 @@ def trailblazer(context):
 @click.pass_context
 def analysis(context, analysis_id: int):
     context.obj["trailblazer_api"].get_analysis(analysis_id=analysis_id)
+
+
+@trailblazer.command("analyses")
+@click.pass_context
+def analyses(context, analysis_id: int):
+    context.obj["trailblazer_api"].get_analysis(analysis_id=analysis_id)
