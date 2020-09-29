@@ -2,6 +2,7 @@
 from datetime import datetime, timedelta
 
 from cg.store import Store
+from cg.utils.date import get_date
 
 
 def test_missing(analysis_store: Store, helpers):
@@ -42,3 +43,25 @@ def test_outdated(analysis_store, helpers):
 
     # THEN this analyse should be returned
     assert analysis in analyses
+
+
+def test_outdated_analysis(analysis_store, helpers):
+    """Tests that analyses that are older then when Hasta became production (2017-09-26) are not included in the cases to generate a delivery report for"""
+
+    # GIVEN an analysis that is older than Hasta
+    timestamp_old_analysis = get_date("2017-09-26")
+    timestamp = datetime.now()
+    delivery_timestamp = timestamp - timedelta(days=1)
+    analysis = helpers.add_analysis(
+        analysis_store,
+        started_at=timestamp_old_analysis,
+        uploaded_at=timestamp,
+        delivery_reported_at=delivery_timestamp,
+    )
+    sample = helpers.add_sample(analysis_store, delivered_at=timestamp, data_analysis="mip")
+    analysis_store.relate_sample(family=analysis.family, sample=sample, status="unknown")
+    # WHEN calling the analyses_to_delivery_report
+    analyses = analysis_store.analyses_to_delivery_report(pipeline="mip").all()
+
+    # THEN this analyses should not be returned
+    assert len(analyses) == 0
