@@ -28,6 +28,7 @@ PROBLEMATIC_CASES = [
     "loyalegret",
     "grandkoi",
     "fluenteagle",
+    "lovingmayfly",
 ]
 
 # List of cases used for validation that we should skip
