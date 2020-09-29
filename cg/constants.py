@@ -277,7 +277,7 @@ MICROSALT_TAGS = {
         "is_mandatory": True,
     },
     ("insertsize_calc", "picard-insertsize"): {
-        "tags": ["insertsize_calc", "picard-insertsize"],
+        "tags": ["insertsize-calc", "picard-insertsize"],
         "is_mandatory": True,
     },
 }
