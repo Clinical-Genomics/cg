@@ -251,7 +251,7 @@ def cases(
         if name:
             title = f"{title} ({case.get('name')})"
         if data_analysis:
-            title = f"{title} {case.get('data_analysis')}"
+            title = f"{title} {case.get('data_analyses')}"
 
         show_time = output_type == "datetime"
 
