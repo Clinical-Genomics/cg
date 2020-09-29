@@ -69,12 +69,8 @@ class FindBusinessDataHandler(BaseHandler):
         return query
 
     def families(
-        self,
-        *,
-        customer: models.Customer = None,
-        enquiry: str = None,
-        action: str = None,
-    ) -> List[models.Family]:
+        self, *, customer: models.Customer = None, enquiry: str = None, action: str = None
+    ) -> Query:
         """Fetch families."""
         records = self.Family.query
         records = records.filter_by(customer=customer) if customer else records
@@ -96,7 +92,7 @@ class FindBusinessDataHandler(BaseHandler):
 
     def families_in_customer_group(
         self, *, customer: models.Customer = None, enquiry: str = None
-    ) -> List[models.Family]:
+    ) -> Query:
         """Fetch all families including those from collaborating customers."""
         records = self.Family.query.join(models.Family.customer, models.Customer.customer_group)
 
@@ -132,17 +128,15 @@ class FindBusinessDataHandler(BaseHandler):
         """Find a family by family name within a customer."""
         return self.Family.query.filter_by(customer=customer, name=name).first()
 
-    def find_sample(self, customer: models.Customer, name: str) -> List[models.Sample]:
+    def find_sample(self, customer: models.Customer, name: str) -> Query:
         """Find samples within a customer."""
         return self.Sample.query.filter_by(customer=customer, name=name)
 
-    def find_sample_in_customer_group(
-        self, customer: models.Customer, name: str
-    ) -> List[models.Sample]:
+    def find_sample_in_customer_group(self, customer: models.Customer, name: str) -> Query:
         """Find samples within the customer group."""
         return self.Sample.query.filter(
             models.Sample.customer.customer_group == customer.customer_group,
-            name == name,
+            models.Sample.name == name,
         )
 
     def flowcell(self, name: str) -> models.Flowcell:
@@ -177,7 +171,7 @@ class FindBusinessDataHandler(BaseHandler):
         """Fetch an invoice."""
         return self.Invoice.get(invoice_id)
 
-    def invoice_samples(self, *, invoice_id: int = None) -> List[models.Sample]:
+    def invoice_samples(self, *, invoice_id: int = None) -> Query:
         """Fetch pools and samples for an invoice"""
         pools = self.Pool.query.filter_by(invoice_id=invoice_id).all()
         samples = self.Sample.query.filter_by(invoice_id=invoice_id).all()
@@ -187,62 +181,27 @@ class FindBusinessDataHandler(BaseHandler):
         """Find a link between a family and a sample."""
         return (
             self.FamilySample.query.join(models.FamilySample.family, models.FamilySample.sample)
-            .filter(
-                models.Family.internal_id == family_id,
-                models.Sample.internal_id == sample_id,
-            )
+            .filter(models.Family.internal_id == family_id, models.Sample.internal_id == sample_id)
             .first()
         )
 
-    def microbial_order(self, internal_id: str) -> models.MicrobialOrder:
-        """Fetch an order by internal id from the database."""
-        return self.MicrobialOrder.query.filter_by(internal_id=internal_id).first()
+    def links(self, case_id: str, sample_id: str, ticket: int) -> Query:
+        """Find a link between a family and a sample."""
 
-    def microbial_orders(
-        self, *, customer: models.Customer = None, enquiry: str = None
-    ) -> List[models.MicrobialOrder]:
-        """Fetch all microbial_orders."""
-        records = self.MicrobialOrder.query
-        records = records.filter_by(customer=customer) if customer else records
-        records = (
-            records.filter(
-                or_(
-                    models.MicrobialOrder.name.like(f"%{enquiry}%"),
-                    models.MicrobialOrder.internal_id.like(f"%{enquiry}%"),
-                )
-            )
-            if enquiry
-            else records
-        )
-        return records.order_by(models.MicrobialOrder.created_at.desc())
+        query = self.FamilySample.query.join(models.FamilySample.family, models.FamilySample.sample)
 
-    def microbial_samples(
-        self, *, customer: models.Customer = None, enquiry: str = None
-    ) -> List[models.MicrobialSample]:
-        records = self.MicrobialSample.query
+        if case_id:
+            query = query.filter(models.Family.internal_id == case_id)
 
-        if customer:
-            records.join(models.MicrobialOrder)
-            records = records.filter_by(models.MicrobialOrder.customer == customer)
+        if sample_id:
+            query = query.filter(models.Sample.internal_id == sample_id)
 
-        records = (
-            records.filter(
-                or_(
-                    models.MicrobialSample.name.like(f"%{enquiry}%"),
-                    models.MicrobialSample.internal_id.like(f"%{enquiry}%"),
-                )
-            )
-            if enquiry
-            else records
-        )
+        if ticket:
+            query = query.filter(models.Sample.ticket_number == ticket)
 
-        return records.order_by(models.MicrobialSample.created_at.desc())
+        return query
 
-    def microbial_sample(self, internal_id: str) -> models.MicrobialSample:
-        """Fetch a microbial sample by lims id."""
-        return self.MicrobialSample.query.filter_by(internal_id=internal_id).first()
-
-    def new_invoice_id(self) -> Query:
+    def new_invoice_id(self) -> int:
         """Fetch invoices."""
         query = self.Invoice.query.all()
         ids = [inv.id for inv in query]
@@ -259,10 +218,7 @@ class FindBusinessDataHandler(BaseHandler):
 
         records = (
             records.filter(
-                or_(
-                    models.Pool.name.like(f"%{enquiry}%"),
-                    models.Pool.order.like(f"%{enquiry}%"),
-                )
+                or_(models.Pool.name.like(f"%{enquiry}%"), models.Pool.order.like(f"%{enquiry}%"))
             )
             if enquiry
             else records
@@ -270,7 +226,7 @@ class FindBusinessDataHandler(BaseHandler):
 
         return records.order_by(models.Pool.created_at.desc())
 
-    def pool(self, pool_id: int):
+    def pool(self, pool_id: int) -> models.Pool:
         """Fetch a pool."""
         return self.Pool.get(pool_id)
 
@@ -278,9 +234,7 @@ class FindBusinessDataHandler(BaseHandler):
         """Fetch a sample by lims id."""
         return self.Sample.query.filter_by(internal_id=internal_id).first()
 
-    def samples(
-        self, *, customer: models.Customer = None, enquiry: str = None
-    ) -> List[models.Sample]:
+    def samples(self, *, customer: models.Customer = None, enquiry: str = None) -> Query:
         records = self.Sample.query
         records = records.filter_by(customer=customer) if customer else records
         records = (
@@ -295,7 +249,7 @@ class FindBusinessDataHandler(BaseHandler):
         )
         return records.order_by(models.Sample.created_at.desc())
 
-    def samples_by_ids(self, **identifiers) -> List[models.Sample]:
+    def samples_by_ids(self, **identifiers) -> Query:
         records = self.Sample.query
 
         for identifier_name, identifier_value in identifiers.items():
@@ -306,7 +260,7 @@ class FindBusinessDataHandler(BaseHandler):
 
     def samples_in_customer_group(
         self, *, customer: models.Customer = None, enquiry: str = None
-    ) -> List[models.Sample]:
+    ) -> Query:
         """Fetch all samples including those from collaborating customers."""
 
         records = self.Sample.query.join(models.Sample.customer, models.Customer.customer_group)

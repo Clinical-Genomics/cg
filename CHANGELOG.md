@@ -10,10 +10,35 @@ Try to use the following format:
 ## [x.x.x]
 
 ### Added
+### Changed
+### Fixed
+
+## [13.2.0]
 
 ### Changed
+- Only talk to genotype via subprocess and CLI 
+
+
+## [13.1.0]
+
+### Changed
+- Added cases for all microbial samples
+- Add a case when a new microbial order is received 
+
+## [13.0.0]
+
+### Changed
+- Moved all microbial samples into samples table and the depending logic
+
+## [12.7.1]
 
 ### Fixed
+ - Removed store-housekeeper one-time script that was used to store balsamic results in Housekeeper
+
+## [12.7.0]
+
+### Changed
+- Moved queries in TrailblazerAPI to Trailblazer
 
 ## [12.6.0]
 
@@ -71,6 +96,18 @@ This bug was happening because several instances of Store were instantiated in t
 - Fixes bug where linking by SampleID was not linking the entire family (Old)
 - Fixes bug where linking by SampleID would not be able to generate correct linking path (Old)
 
+## [x.x.x]
+### Added
+
+### Fixed
+
+### Changed
+
+
+## [13.0.0]
+### Changed
+- Microbial Samples are now treated as ordinary samples in a case
+
 ## [12.3.2]
 
 ### Fixed
@@ -79,7 +116,6 @@ This bug was happening because several instances of Store were instantiated in t
 - Re-use the same API within all upload context
 - Handle unspecified exceptions in order to keep the cron running when unexpected exception occurs for one case
 - When linking file without data analysis set, warn about it and link file correctly
-
 
 ## [12.3.1]
 
@@ -102,7 +138,6 @@ This bug was happening because several instances of Store were instantiated in t
 - MIP workflow once again performs check to skip evaluation
 - MIP workflow once again updates StatusDB about the case status
 
-
 ## [12.2.0]
 
 ### Changed
@@ -116,13 +151,9 @@ This bug was happening because several instances of Store were instantiated in t
 - Added tests for new methods in balsamic workflow
 - Removed class FastqAPI. FastqAPI was only used by BALSAMIC, and contained one method. The method is now moved to FastqHandler class.
 
-
-
-
 ## [12.1.6]
 ### Fixed
 - Create crunchy pending path outside batch script
-
 
 ## [12.1.5]
 ### Fixed
@@ -132,11 +163,9 @@ This bug was happening because several instances of Store were instantiated in t
 ### Changed
 - Use long description from setup.py on PyPI
 
-
 ## [12.1.3]
 ### Fixed
 - Use another parameter in build and publish
-
 
 ## [12.1.2]
 ### Fixed
@@ -166,7 +195,6 @@ This bug was happening because several instances of Store were instantiated in t
 ## [10.1.2]
 ### Fixed
 - Fixed so that empty gzipped files are considered empty considering metadata
-
 
 ## [10.1.1]
 ### Added

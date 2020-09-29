@@ -12,7 +12,7 @@ snapshots[
 ] = """[
     {
         "CG_ID_project": "microbial_order_test",
-        "CG_ID_sample": "microbial_sample_test",
+        "CG_ID_sample": "microbial_sample_id",
         "Customer_ID": "cust_test",
         "Customer_ID_project": 123456,
         "Customer_ID_sample": "microbial_name_test",
@@ -36,7 +36,7 @@ snapshots["test_sample 1"] = [
 """,
     """        "CG_ID_project": "microbial_order_test",
 """,
-    """        "CG_ID_sample": "microbial_sample_test",
+    """        "CG_ID_sample": "microbial_sample_id",
 """,
     """        "Customer_ID": "cust_test",
 """,
@@ -72,7 +72,7 @@ snapshots[
 ] = """[
     {
         "CG_ID_project": "microbial_order_test",
-        "CG_ID_sample": "microbial_sample_test",
+        "CG_ID_sample": "microbial_sample_id",
         "Customer_ID": "cust_test",
         "Customer_ID_project": 123456,
         "Customer_ID_sample": "microbial_name_test",
@@ -94,7 +94,7 @@ snapshots[
 ] = """[
     {
         "CG_ID_project": "microbial_order_test",
-        "CG_ID_sample": "microbial_sample_test",
+        "CG_ID_sample": "microbial_sample_id",
         "Customer_ID": "cust_test",
         "Customer_ID_project": 123456,
         "Customer_ID_sample": "microbial_name_test",
