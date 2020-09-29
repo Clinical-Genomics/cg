@@ -28,7 +28,7 @@ class TrailblazerAPI(Store):
         payload = {"email": self.service_account}
         jwt_token = jwt.encode(signer=signer, payload=payload).decode("ascii")
         auth_header = {f"Authorization: Bearer {jwt_token}"}
-        LOG.info(f"Using header {json.dumps(auth_header)}")
+        LOG.info(f"Using header {auth_header}")
         return auth_header
 
     def get_analysis(self, analysis_id: int):
