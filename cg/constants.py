@@ -156,7 +156,10 @@ MIP_DNA_TAGS = {
         "tags": ["smn-calling", "smncopynumbercaller"],
         "is_mandatory": False,
     },
-    ("star_caller",): {"tags": ["cyrius", "star-caller"], "is_mandatory": False,},
+    ("star_caller",): {
+        "tags": ["cyrius", "star-caller"],
+        "is_mandatory": False,
+    },
     ("sv_combinevariantcallsets",): {
         "tags": ["sv-bcf"],
         "index_tags": ["sv-bcf-index"],
@@ -172,8 +175,14 @@ MIP_DNA_TAGS = {
         "index_tags": ["vcf-sv-research-index"],
         "is_mandatory": False,
     },
-    ("telomerecat_ar",): {"tags": ["telomere-calling", "telomerecat"], "is_mandatory": False,},
-    ("tiddit_coverage",): {"tags": ["tiddit-coverage", "bigwig"], "is_mandatory": False,},
+    ("telomerecat_ar",): {
+        "tags": ["telomere-calling", "telomerecat"],
+        "is_mandatory": False,
+    },
+    ("tiddit_coverage",): {
+        "tags": ["tiddit-coverage", "bigwig"],
+        "is_mandatory": False,
+    },
     ("version_collect_ar",): {"tags": ["exe-ver"], "is_mandatory": True},
     ("vcf2cytosure_ar",): {"tags": ["vcf2cytosure"], "is_mandatory": False},
 }
@@ -227,14 +236,26 @@ MICROSALT_TAGS = {
         "tags": ["alignment", "reference-alignment-sorted"],
         "is_mandatory": True,
     },
-    ("analysis", "logfile"): {"tags": ["analysis", "log"], "is_mandatory": True,},
+    ("analysis", "logfile"): {
+        "tags": ["analysis", "log"],
+        "is_mandatory": True,
+    },
     ("analysis", "runtime-settings"): {
         "tags": ["analysis", "runtime-settings"],
         "is_mandatory": True,
     },
-    ("analysis", "sampleinfo"): {"tags": ["analysis", "sampleinfo"], "is_mandatory": True,},
-    ("assembly", "assembly"): {"tags": ["assembly"], "is_mandatory": True,},
-    ("assembly", "quast-results"): {"tags": ["assembly", "quast-results"], "is_mandatory": True,},
+    ("analysis", "sampleinfo"): {
+        "tags": ["analysis", "sampleinfo"],
+        "is_mandatory": True,
+    },
+    ("assembly", "assembly"): {
+        "tags": ["assembly"],
+        "is_mandatory": True,
+    },
+    ("assembly", "quast-results"): {
+        "tags": ["assembly", "quast-results"],
+        "is_mandatory": True,
+    },
     ("concatination", "trimmed-forward-reads"): {
         "tags": ["concatination", "trimmed-forward-reads"],
         "is_mandatory": True,
