@@ -13,6 +13,12 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+
+## [13.2.1]
+
+### Added
+- Added new cases to skip during compression 
+
 ## [13.2.0]
 
 ### Changed
