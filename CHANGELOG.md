@@ -13,6 +13,11 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [13.3.0]
+
+### Added
+- Store microsalt analyses in Housekeeper with a provided deliverables file
+
 ## [13.2.0]
 
 ### Changed
