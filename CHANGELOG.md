@@ -13,6 +13,18 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+
+## [13.2.1]
+
+### Added
+- Added new cases to skip during compression 
+
+## [13.2.0]
+
+### Changed
+- Only talk to genotype via subprocess and CLI 
+
+
 ## [13.1.0]
 
 ### Changed

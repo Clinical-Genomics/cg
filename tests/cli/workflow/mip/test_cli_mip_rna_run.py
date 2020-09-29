@@ -24,25 +24,3 @@ def test_cg_dry_run(cli_runner, tb_api, analysis_store_single_case, mip_context,
             "analyse rd_rna yellowhog --config config.yaml "
             "--email james.holden@scilifelab.se" in caplog.text
         )
-
-
-def test_run(cli_runner, tb_api, analysis_store_single_case, caplog, mip_context, monkeypatch):
-    """Test run MIP RNA analysis"""
-
-    # GIVEN a cli function
-
-    # WHEN we run a case
-    caplog.set_level(logging.INFO)
-    cli_runner.invoke(run, ["--email", EMAIL, CASE_ID], obj=mip_context)
-
-    # THEN we should get to the end of the function
-    with caplog.at_level(logging.INFO):
-        assert "MIP rd-rna run started!" in caplog.text
-
-    # WHEN we run a case in MIP dry mode
-    caplog.set_level(logging.INFO)
-    cli_runner.invoke(run, ["--mip-dry-run", "--email", EMAIL, CASE_ID], obj=mip_context)
-
-    # THEN we should get to the end of the function
-    with caplog.at_level(logging.INFO):
-        assert "MIP rd-rna run started!" in caplog.text
