@@ -27,7 +27,6 @@ ANALYSIS_TYPE_TAGS = {
     "wts": MIP_RNA_TAGS,
     "microbial": MICROSALT_TAGS,
 }
-DUMMY_MICROSALT_CASE = "dummymicrobe"  # TODO: remove when case for microbial orders is implemented
 LOG = logging.getLogger(__name__)
 
 
@@ -48,8 +47,9 @@ def gather_files_and_bundle_in_housekeeper(
 
     bundle_obj, version_obj = results
 
+    breakpoint()
     case_obj = {
-        "microsalt": status.family(DUMMY_MICROSALT_CASE),
+        "microsalt": status.find_family_by_name(bundle_obj.name),
         "mip": status.family(bundle_obj.name),
     }
 
