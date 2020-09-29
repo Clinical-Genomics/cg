@@ -32,9 +32,11 @@ class TrailblazerAPI(Store):
         return auth_header
 
     def get_analysis(self, analysis_id: int):
-        response = requests.get(self.host + f"/analyses/{analysis_id}", headers=self.auth_header)
+        url = self.host + f"/analyses/{analysis_id}"
+        response = requests.get(url=url, headers=self.auth_header)
         LOG.info(response.text)
 
     def get_analyses(self):
-        response = requests.get(self.host + f"/analyses", headers=self.auth_header)
+        url = self.host + "/analyses"
+        response = requests.get(url=url, headers=self.auth_header)
         LOG.info(response.text)
