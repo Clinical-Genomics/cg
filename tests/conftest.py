@@ -14,6 +14,8 @@ from trailblazer.mip import files as mip_dna_files_api
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.mip_rna import files as mip_rna_files_api
 from cg.meta.store import mip as store_mip
+from cg.apps.tb import TrailblazerAPI
+from cg.apps.gt import GenotypeAPI
 from cg.models import CompressionData
 from cg.store import Store
 
@@ -32,8 +34,8 @@ CRUNCHY_CONFIG = {
     }
 }
 
-LOG = logging.getLogger(__name__)
 
+LOG = logging.getLogger(__name__)
 
 # Case fixtures
 
@@ -85,7 +87,7 @@ def fixture_analysis_family(case_id, family_name) -> dict:
         "panels": ["IEM", "EP"],
         "samples": [
             {
-                "name": "son",
+                "name": "child",
                 "sex": "male",
                 "internal_id": "ADM1",
                 "father": "ADM2",
@@ -145,7 +147,55 @@ def fixture_hk_config_dict(root_path):
     return _config
 
 
+@pytest.fixture(name="tb_config_dict")
+def fixture_tb_config_dict(analysis_dir: Path) -> dict:
+    """Return a dictionary with trailblazer configs"""
+    _config = {
+        "trailblazer": {
+            "database": "sqlite:///:memory:",
+            "root": str(analysis_dir),
+            "script": ".",
+            "mip_config": ".",
+        }
+    }
+    return _config
+
+
+@pytest.fixture(name="genotype_config")
+def fixture_genotype_config() -> dict:
+    """
+    genotype config fixture
+    """
+    _config = {
+        "genotype": {
+            "database": "database",
+            "config_path": "config/path",
+            "binary_path": "gtdb",
+        }
+    }
+    return _config
+
+
 # Api fixtures
+
+
+@pytest.fixture(name="genotype_api")
+def fixture_genotype_api(genotype_config: dict) -> GenotypeAPI:
+    """
+    genotype API fixture
+    """
+    _genotype_api = GenotypeAPI(genotype_config)
+    _genotype_api.set_dry_run(True)
+    return _genotype_api
+
+
+@pytest.yield_fixture(name="trailblazer_api")
+def fixture_trailblazer_api(tb_config_dict: dict) -> TrailblazerAPI:
+    """Setup Trailblazer api."""
+    _store = TrailblazerAPI(tb_config_dict)
+    _store.create_all()
+    yield _store
+    _store.drop_all()
 
 
 @pytest.yield_fixture(scope="function")
@@ -262,6 +312,18 @@ def fixture_compression_object(
 
 
 # Unknown file fixtures
+
+
+@pytest.fixture(name="case_qc_metrics")
+def fixture_case_qc_metrics(apps_dir: Path) -> Path:
+    """Return the path to a qc metrics file with case data"""
+    return apps_dir / "tb" / "case" / "case_qc_metrics.yaml"
+
+
+@pytest.fixture(name="bcf_file")
+def fixture_bcf_file(apps_dir: Path) -> Path:
+    """Return the path to a bcf file"""
+    return apps_dir / "gt" / "yellowhog.bcf"
 
 
 @pytest.fixture(scope="session", name="files")
@@ -481,7 +543,9 @@ def fixture_crunchy_api():
 
 
 @pytest.yield_fixture(scope="function", name="analysis_store")
-def fixture_analysis_store(base_store, analysis_family, wgs_application_tag, helpers):
+def fixture_analysis_store(
+    base_store: Store, analysis_family: dict, wgs_application_tag: str, helpers
+):
     """Setup a store instance for testing analysis API."""
     helpers.ensure_family(base_store, family_info=analysis_family, app_tag=wgs_application_tag)
 

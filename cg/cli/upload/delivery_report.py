@@ -8,7 +8,7 @@ import click
 from cg.apps import hk, scoutapi
 from cg.exc import DeliveryReportError, CgError
 
-from .utils import _suggest_cases_delivery_report
+from .utils import suggest_cases_delivery_report
 
 LOG = logging.getLogger(__name__)
 SUCCESS = 0
@@ -173,7 +173,7 @@ def delivery_report(context, family_id, print_console, force_report):
     report_api = context.obj["report_api"]
 
     if not family_id:
-        _suggest_cases_delivery_report(context)
+        suggest_cases_delivery_report(context)
         context.abort()
 
     if print_console:
@@ -234,7 +234,7 @@ def delivery_report_to_scout(context, case_id, dry_run):
         return uploaded_delivery_report_files[0].full_path
 
     if not case_id:
-        _suggest_cases_delivery_report(context)
+        suggest_cases_delivery_report(context)
         context.abort()
 
     hk_api = context.obj["housekeeper_api"]

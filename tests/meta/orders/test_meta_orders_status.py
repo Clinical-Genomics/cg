@@ -211,17 +211,16 @@ def test_store_microbial_samples(orders_api, base_store, microbial_status_data):
         samples=microbial_status_data["samples"],
     )
 
-    # THEN it should store the samples and the used previously unknown organisms
+    # THEN it should store the samples under a case (family) and the used previously unknown
+    # organisms
     assert new_samples
-    assert base_store.families().count() == 0
+    assert base_store.families().count() == 1
     assert len(new_samples) == 5
     assert base_store.samples().count() == 5
     assert base_store.organisms().count() == 3
 
 
-def test_store_microbial_samples_data_analysis_stored(
-    orders_api, base_store, microbial_status_data
-):
+def test_store_microbial_case_data_analysis_stored(orders_api, base_store, microbial_status_data):
 
     # GIVEN a basic store with no samples and a microbial order and one Organism
     assert base_store.samples().count() == 0
@@ -236,10 +235,12 @@ def test_store_microbial_samples_data_analysis_stored(
         samples=microbial_status_data["samples"],
     )
 
-    # THEN it should store the samples
+    # THEN it should store the samples under a case with the microbial data_analysis type on case level
     assert base_store.samples().count() > 0
-    assert base_store.families().count() == 0
-    assert new_samples[0].name == "all-fields"
+    assert base_store.families().count() == 1
+
+    microbial_case = base_store.families().first()
+    assert microbial_case.data_analysis == "microsalt"
 
 
 def test_store_microbial_samples_bad_apptag(orders_api, microbial_status_data):

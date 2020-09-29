@@ -4,7 +4,7 @@ import click
 
 from cg.apps import coverage as coverage_app
 
-from .utils import _suggest_cases_to_upload
+from .utils import suggest_cases_to_upload
 
 
 @click.command()
@@ -16,7 +16,7 @@ def validate(context, family_id):
     click.echo(click.style("----------------- VALIDATE --------------------"))
 
     if not family_id:
-        _suggest_cases_to_upload(context)
+        suggest_cases_to_upload(context)
         context.abort()
 
     family_obj = context.obj["status"].family(family_id)

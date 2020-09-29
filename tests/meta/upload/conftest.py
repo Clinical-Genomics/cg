@@ -2,6 +2,9 @@
 
 import json
 
+from pathlib import Path
+from datetime import datetime
+
 import pytest
 
 from cg.apps.coverage.api import ChanjoAPI
@@ -9,6 +12,12 @@ from cg.meta.upload.coverage import UploadCoverageApi
 from cg.meta.upload.mutacc import UploadToMutaccAPI
 from cg.meta.upload.observations import UploadObservationsAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
+from cg.meta.upload.gt import UploadGenotypesAPI
+from cg.store import models
+from cg.store import Store
+
+
+# Mocks
 
 
 class MockAnalysis:
@@ -140,6 +149,52 @@ def fixture_lims_family():
 def fixture_lims_samples(lims_family):
     """ Returns the samples of a lims family """
     return lims_family["samples"]
+
+
+@pytest.fixture(name="upload_genotypes_hk_bundle")
+def fixture_upload_genotypes_hk_bundle(
+    case_id: str, timestamp, case_qc_metrics: Path, bcf_file: Path
+) -> dict:
+    """ Returns a dictionary in hk format with files used in upload gt process"""
+    data = {
+        "name": case_id,
+        "created": timestamp,
+        "expires": timestamp,
+        "files": [
+            {"path": str(case_qc_metrics), "archive": False, "tags": ["qcmetrics"]},
+            {"path": str(bcf_file), "archive": False, "tags": ["snv-gbcf"]},
+        ],
+    }
+    return data
+
+
+@pytest.fixture(name="analysis_obj")
+def fixture_analysis_obj(
+    analysis_store_trio: Store, case_id: str, timestamp: datetime, helpers
+) -> models.Analysis:
+    """Return a analysis object with a trio"""
+    family_obj = analysis_store_trio.family(case_id)
+    helpers.add_analysis(store=analysis_store_trio, family=family_obj, started_at=timestamp)
+    return analysis_store_trio.family(case_id).analyses[0]
+
+
+@pytest.yield_fixture(name="upload_genotypes_api")
+def fixture_upload_genotypes_api(
+    real_housekeeper_api, genotype_api, upload_genotypes_hk_bundle, analysis_obj, helpers
+) -> UploadGenotypesAPI:
+    """Create a upload genotypes api"""
+    helpers.ensure_hk_bundle(real_housekeeper_api, upload_genotypes_hk_bundle)
+    hk_version = real_housekeeper_api.version(
+        analysis_obj.family.internal_id, analysis_obj.started_at
+    )
+    real_housekeeper_api.include(hk_version)
+
+    _api = UploadGenotypesAPI(
+        hk_api=real_housekeeper_api,
+        gt_api=genotype_api,
+    )
+
+    return _api
 
 
 @pytest.yield_fixture(scope="function")
