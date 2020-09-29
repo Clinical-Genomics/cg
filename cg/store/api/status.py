@@ -103,24 +103,6 @@ class StatusHandler(BaseHandler):
         )
         return list(families_query)[:limit]
 
-    def orders_to_microsalt_analyze(self):
-        """Get microbial orders without analyses where all samples are sequenced"""
-
-        orders = (
-            self.MicrobialOrder.query.outerjoin(models.Analysis)
-            .filter(models.Analysis.created_at.is_(None))
-            .join(models.MicrobialSample)
-            .filter(models.MicrobialSample.sequenced_at.isnot(None))
-        )
-
-        orders_to_store = [
-            record
-            for record in orders
-            if self._all_microbial_samples_have_sequence_data(record.microbial_samples)
-        ]
-
-        return orders_to_store
-
     def cases(
         self,
         progress_tracker=None,
