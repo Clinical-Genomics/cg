@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [13.2.2]
+
+### Changed
+- Exclude analysis older than hasta in production (2017-09-27) from delivery report generation
 
 ## [13.2.1]
 
