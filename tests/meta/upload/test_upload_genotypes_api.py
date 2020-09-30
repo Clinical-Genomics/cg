@@ -5,7 +5,7 @@ from pathlib import Path
 
 from cg.meta.upload.gt import UploadGenotypesAPI
 from cg.store import models
-import ruamel_yaml
+import ruamel.yaml
 from cg.apps.mip import parse_qcmetrics
 
 
@@ -13,7 +13,7 @@ def test_get_sample_sex():
     """Test to get the predicted sex from a MIP run using the upload genotypes API"""
     # GIVEN a UploadGenotypesAPI some qcmetrics data
     qcmetrics_file_path = "tests/fixtures/apps/mip/case_qc_metrics.yaml"
-    qcmetrics_dict = ruamel_yaml.safe_load(open(qcmetrics_file_path))
+    qcmetrics_dict = ruamel.yaml.safe_load(open(qcmetrics_file_path))
     qcmetrics_parsed = parse_qcmetrics.parse_qcmetrics(qcmetrics_dict)
     print(qcmetrics_parsed)
 
