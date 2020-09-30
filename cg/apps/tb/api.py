@@ -40,3 +40,12 @@ class TrailblazerAPI(Store):
         url = self.host + "/analyses"
         response = requests.get(url=url, headers=self.auth_header)
         LOG.info(response.text)
+
+    def get_analysis_status(self, case_id: str):
+        url = self.host + "/query"
+        response = requests.post(
+            url=url,
+            headers=self.auth_header,
+            json={"get_latest_analysis_status": {"case_id": case_id}},
+        )
+        LOG.info(response.text)
