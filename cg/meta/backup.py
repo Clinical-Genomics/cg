@@ -47,12 +47,6 @@ class BackupApi:
         1. The processing queue is not full
         2. The requested queue is not emtpy
         """
-        if not flowcell_obj:
-            flowcell_obj = self.pop_flowcell(dry_run)
-            if flowcell_obj is None:
-                LOG.info("no flowcells requested")
-                return None
-
         if self.check_processing() is False:
             LOG.info("processing queue is full")
             return None
@@ -60,6 +54,12 @@ class BackupApi:
         if self.maximum_flowcells_ondisk() is True:
             LOG.info("maximum flowcells ondisk reached")
             return None
+
+        if not flowcell_obj:
+            flowcell_obj = self.pop_flowcell(dry_run)
+            if flowcell_obj is None:
+                LOG.info("no flowcells requested")
+                return None
 
         if not dry_run:
             LOG.info("%s: retrieving from PDC", flowcell_obj.name)
