@@ -13,6 +13,25 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+
+## [13.4.0]
+
+### Removed
+- Microbial order table
+- Microbial order model
+- Microbial sample table
+- Microbial sample model
+- Microbial Flowcell-sample table
+- Microbial Flowcell-sample model
+
+### Changed
+Show customer name instead of id in invoices view.
+Made customer name searchable in invoices view.
+
+### Fixed
+Made unidirectional links to Customer (instead of bi) to speed up customer view
+Made unidirectional links to ApplicationVersion (instead of bi) to speed up view
+
 ## [13.2.2]
 
 ### Changed
