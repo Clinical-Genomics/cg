@@ -215,9 +215,10 @@ class InvoiceView(BaseView):
     """Admin view for Model.Invoice"""
 
     column_default_sort = ("created_at", True)
+    column_editable_list = ["comment"]
     column_list = (
         "id",
-        "customer_id",
+        "customer",
         "created_at",
         "updated_at",
         "invoiced_at",
@@ -225,7 +226,7 @@ class InvoiceView(BaseView):
         "discount",
         "price",
     )
-    column_searchable_list = ["customer_id", "id"]
+    column_searchable_list = ["customer.internal_id", "customer.name", "id"]
 
     @staticmethod
     def view_invoice_link(unused1, unused2, model, unused3):
