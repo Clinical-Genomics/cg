@@ -57,9 +57,8 @@ class UploadGenotypesAPI(object):
     def analysis_sex(self, qc_metrics_file: Path) -> dict:
         """Fetch analysis sex for each sample of an analysis."""
         qcmetrics_data = self.get_parsed_qc_metrics_data(qc_metrics_file)
-        samples = [sample["id"] for sample in qcmetrics_data["samples"]]
         data = {}
-        for sample_id in samples:
+        for sample_id in qcmetrics_data:
             data[sample_id] = self.get_sample_predicted_sex(
                 sample_id=sample_id, parsed_qcmetrics_data=qcmetrics_data
             )

@@ -12,7 +12,7 @@ import ruamel.yaml
 from trailblazer.mip import files as mip_dna_files_api
 
 from cg.apps.hk import HousekeeperAPI
-from cg.apps.mip import parse_sampleinfo as mip_rna_files_api
+import cg.apps.mip.parse_sampleinfo as mip_rna_files_api
 from cg.meta.store import mip as store_mip
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.gt import GenotypeAPI

@@ -1,32 +1,21 @@
 """Tests for the upload genotypes api"""
 
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 from cg.meta.upload.gt import UploadGenotypesAPI
-from cg.apps import hk
 from cg.store import models
+import ruamel_yaml
+from cg.apps.mip import parse_qcmetrics
 
 
 def test_get_sample_sex():
     """Test to get the predicted sex from a MIP run using the upload genotypes API"""
     # GIVEN a UploadGenotypesAPI some qcmetrics data
-    qcmetrics_parsed = {
-        "samples": [
-            {
-                "id": "father",
-                "predicted_sex": "male",
-            },
-            {
-                "id": "child",
-                "predicted_sex": "male",
-            },
-            {
-                "id": "mother",
-                "predicted_sex": "female",
-            },
-        ]
-    }
+    qcmetrics_file_path = "tests/fixtures/apps/mip/case_qc_metrics.yaml"
+    qcmetrics_dict = ruamel_yaml.safe_load(open(qcmetrics_file_path))
+    qcmetrics_parsed = parse_qcmetrics.parse_qcmetrics(qcmetrics_dict)
+    print(qcmetrics_parsed)
 
     # WHEN fetching the predicted gender for the individual with id "father"
     sex = UploadGenotypesAPI.get_sample_predicted_sex(
@@ -46,7 +35,7 @@ def test_get_parsed_qc_metrics_data(case_qc_metrics: Path):
     qcmetrics_parsed = UploadGenotypesAPI.get_parsed_qc_metrics_data(case_qc_metrics)
 
     # THEN assert that there are three samples in the case qc metrics file
-    assert len(qcmetrics_parsed["samples"]) == 3
+    assert len(qcmetrics_parsed) == 3
 
 
 def test_get_bcf_file(upload_genotypes_api: UploadGenotypesAPI, case_id: str, timestamp: datetime):
