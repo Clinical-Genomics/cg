@@ -50,16 +50,25 @@ def test_outdated_analysis(analysis_store, helpers):
 
     # GIVEN an analysis that is older than Hasta
     timestamp_old_analysis = get_date("2017-09-26")
+
+    # GIVEN a delivery report created at date which is older than the upload date to trigger delivery report generation
     timestamp = datetime.now()
-    delivery_timestamp = timestamp - timedelta(days=1)
+    delivery_reported_at_timestamp = timestamp - timedelta(days=1)
+
+    # GIVEN a store to add analysis to
     analysis = helpers.add_analysis(
         analysis_store,
         started_at=timestamp_old_analysis,
         uploaded_at=timestamp,
-        delivery_reported_at=delivery_timestamp,
+        delivery_reported_at=delivery_reported_at_timestamp,
     )
+
+    # GIVEN samples which has been delivered
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp, data_analysis="mip")
+
+    # GIVEN a store sample family relation
     analysis_store.relate_sample(family=analysis.family, sample=sample, status="unknown")
+
     # WHEN calling the analyses_to_delivery_report
     analyses = analysis_store.analyses_to_delivery_report(pipeline="mip").all()
 
