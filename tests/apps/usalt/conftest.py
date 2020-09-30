@@ -85,13 +85,13 @@ def create_file_data(file_path, flowcell, lane, read):
 @pytest.fixture
 def cg_config(tmpdir):
     """mock relevant parts of a cg-config"""
-    return {"usalt": {"root": tmpdir}}
+    return {"microsalt": {"root": tmpdir}}
 
 
 @pytest.fixture
-def link_case():
-    """mock case name"""
-    return "case"
+def link_ticket():
+    """mock ticket number"""
+    return "123456"
 
 
 @pytest.fixture

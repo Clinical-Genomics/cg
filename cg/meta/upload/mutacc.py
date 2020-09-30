@@ -225,11 +225,7 @@ SCOUT_TO_MUTACC_VARIANTS = (
     MAPPER("reference", "REF", str),
     MAPPER("alternative", "ALT", str),
     MAPPER("quality", "QUAL", float),
-    MAPPER(
-        "filters",
-        "FILTER",
-        lambda filters: ",".join([str(filter) for filter in filters]),
-    ),
+    MAPPER("filters", "FILTER", lambda filters: ",".join([str(filter) for filter in filters])),
     MAPPER("end", "END", int),
     MAPPER("rank_score", "RankScore", int),
     MAPPER("category", "category", str),

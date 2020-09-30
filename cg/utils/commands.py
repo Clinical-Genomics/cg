@@ -16,7 +16,7 @@ class Process:
     """Class to handle communication with other programs via the shell
 
     The other parts of the code should not need to have any knowledge about how the processes are
-    called, that will be handled in this module.Output form stdout and stdin will be handeld here.
+    called, that will be handled in this module.Output form stdout and stdin will be handled here.
     """
 
     def __init__(
@@ -34,6 +34,7 @@ class Process:
         """
         super(Process, self).__init__()
         self.binary = binary
+        self.config = config
         self.environment = environment
         LOG.debug("Initialising Process with binary: %s", self.binary)
         self.base_call = [self.binary]
@@ -48,7 +49,8 @@ class Process:
 
     def run_command(self, parameters: list = None, dry_run: bool = False) -> int:
         """Execute a command in the shell.
-        If environment is supplied - shell=True has to be supplied to enable passing as a string for executing multiple commands
+        If environment is supplied - shell=True has to be supplied to enable passing as a string for executing multiple
+         commands
 
         Args:
             parameters(list):

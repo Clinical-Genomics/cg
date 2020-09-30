@@ -3,7 +3,13 @@ import json
 import logging
 import pytest
 
-from cg.cli.workflow.balsamic.base import balsamic, start, store, start_available, store_available
+from cg.cli.workflow.balsamic.base import (
+    balsamic,
+    start,
+    store,
+    start_available,
+    store_available,
+)
 
 EXIT_SUCCESS = 0
 
@@ -58,7 +64,7 @@ def test_store(
     # Make sure the bundle was not present in the store
     assert not balsamic_context["BalsamicAnalysisAPI"].housekeeper_api.bundle(case_id)
 
-    # Make sure  analysis not alredy stored in ClinicalDB
+    # Make sure  analysis not already stored in ClinicalDB
     assert not balsamic_context["BalsamicAnalysisAPI"].store.family(case_id).analyses
 
     # WHEN running command
@@ -73,8 +79,8 @@ def test_store(
 
 
 def test_start_available(tmpdir_factory, cli_runner, balsamic_context: dict, caplog):
-    """Test to ensure all parts of compound start-availbale command are executed given ideal conditions
-    Test that start-available picks up eligeble cases and does not pick up ineligeble ones"""
+    """Test to ensure all parts of compound start-available command are executed given ideal conditions
+    Test that start-available picks up eligible cases and does not pick up ineligible ones"""
     caplog.set_level(logging.INFO)
 
     # GIVEN CASE ID of sample where read counts pass threshold
@@ -94,16 +100,16 @@ def test_start_available(tmpdir_factory, cli_runner, balsamic_context: dict, cap
     # WHEN running command
     result = cli_runner.invoke(start_available, ["--dry-run"], obj=balsamic_context)
 
-    # THEN command runs successfully
-    assert result.exit_code == EXIT_SUCCESS
+    # THEN command exits with 1 because one of cases raised errors
+    assert result.exit_code == 1
 
-    # THEN it should successfully identify the one case eligeble for auto-start
+    # THEN it should successfully identify the one case eligible for auto-start
     assert case_id_success in caplog.text
 
     # THEN action of the case should be set to running
     assert balsamic_context["BalsamicAnalysisAPI"].store.family(case_id_success).action == "running"
 
-    # THEN the ineligeble case should NOT be ran
+    # THEN the ineligible case should NOT be ran
     assert case_id_fail not in caplog.text
 
     # THEN action of the case should NOT be set to running
@@ -120,8 +126,8 @@ def test_store_available(
     mock_analysis_finish,
     caplog,
 ):
-    """Test to ensure all parts of compound store-availbale command are executed given ideal conditions
-    Test that sore-available picks up eligeble cases and does not pick up ineligeble ones"""
+    """Test to ensure all parts of compound store-available command are executed given ideal conditions
+    Test that sore-available picks up eligible cases and does not pick up ineligible ones"""
     caplog.set_level(logging.INFO)
 
     # GIVEN CASE ID of sample where read counts pass threshold
@@ -139,7 +145,8 @@ def test_store_available(
 
     # Ensure case was successfully picked up by start-available and status set to running
     result = cli_runner.invoke(start_available, ["--dry-run"], obj=balsamic_context)
-    assert result.exit_code == EXIT_SUCCESS
+    # THEN command exits with 1 because one of the cases threw errors
+    assert result.exit_code == 1
     assert case_id_success in caplog.text
     assert balsamic_context["BalsamicAnalysisAPI"].store.family(case_id_success).action == "running"
 
@@ -147,8 +154,8 @@ def test_store_available(
     # WHEN running command
     result = cli_runner.invoke(store_available, ["--dry-run"], obj=balsamic_context)
 
-    # THEN command runs successfully
-    assert result.exit_code == EXIT_SUCCESS
+    # THEN command exits successfully
+    assert result.exit_code == 0
 
     # THEN case id with analysis_finish gets picked up
     assert case_id_success in caplog.text

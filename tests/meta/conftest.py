@@ -6,29 +6,10 @@ from _pytest import tmpdir
 from cg.apps.balsamic.fastq import FastqHandler as BalsamicFastqHandler
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.apps.usalt.fastq import FastqHandler as MicrosaltFastqHandler
+from cg.apps.microsalt.fastq import FastqHandler as MicrosaltFastqHandler
 from cg.meta.deliver import DeliverAPI
 from cg.meta.workflow.mip import AnalysisAPI
 from tests.mocks.hk_mock import MockFile
-
-
-@pytest.yield_fixture(scope="function")
-def trailblazer_api(tmpdir):
-    """Setup Trailblazer api."""
-    root_path = tmpdir.mkdir("families")
-    _store = TrailblazerAPI(
-        {
-            "trailblazer": {
-                "database": "sqlite://",
-                "root": str(root_path),
-                "script": ".",
-                "mip_config": ".",
-            }
-        }
-    )
-    _store.create_all()
-    yield _store
-    _store.drop_all()
 
 
 @pytest.yield_fixture(scope="function")
@@ -183,7 +164,7 @@ class MockMicrosaltFastq(MicrosaltFastqHandler):
     """Mock FastqHandler for analysis_api"""
 
     def __init__(self):
-        super().__init__(config={"usalt": {"root": tmpdir}})
+        super().__init__(config={"microsalt": {"root": tmpdir}})
 
 
 def safe_loader(path):

@@ -28,6 +28,48 @@ PROBLEMATIC_CASES = [
     "loyalegret",
     "grandkoi",
     "fluenteagle",
+    "lovingmayfly",
+]
+
+# List of cases used for validation that we should skip
+VALIDATION_CASES = [
+    "mintyeti",
+    "topsrhino",
+    "gladthrush",
+    "cleanshrimp",
+    "usablemarten",
+    "casualgannet",
+    "pumpedcat",
+    "firstfawn",
+    "helpedfilly",
+    "daringpony",
+    "strongbison",
+    "proeagle",
+    "easybeetle",
+    "sharppigeon",
+    "gamedeer",
+    "keencalf",
+    "epicasp",
+    "safeguinea",
+    "hotviper",
+    "hotskink",
+    "onemite",
+    "busycolt",
+    "rightmacaw",
+    "intentcorgi",
+    "vitalmouse",
+    "lightprawn",
+    "meetpossum",
+    "strongman",
+    "mintbaboon",
+    "propercoral",
+    "livingox",
+    "keenviper",
+    "sharpparrot",
+    "moralgoat",
+    "fleetjay",
+    "bosssponge",
+    "unitedbeagle",
 ]
 
 
@@ -57,8 +99,8 @@ def fastq_cmd(context, case_id, number_of_conversions, ntasks, mem, dry_run):
         if case_conversion_count >= number_of_conversions:
             break
         internal_id = case.internal_id
-        if internal_id in PROBLEMATIC_CASES:
-            LOG.info("Skipping problematic case %s", internal_id)
+        if internal_id in [*PROBLEMATIC_CASES, *VALIDATION_CASES]:
+            LOG.info("Skipping case %s", internal_id)
             continue
 
         LOG.info("Searching for FASTQ files in case %s", internal_id)
