@@ -1,4 +1,4 @@
-"""Parse the MIP config, qc_metric and qc_sampleinfo file"""
+"""Parse the MIP qc_metric file"""
 
 
 def set_bamstats_metrics(file_metrics: dict, sample_data: dict) -> dict:
