@@ -18,6 +18,11 @@ Try to use the following format:
 ### Added
 - Store microsalt analyses in Housekeeper with a provided deliverables file
 
+## [13.2.1]
+
+### Added
+- Added new cases to skip during compression 
+
 ## [13.2.0]
 
 ### Changed
