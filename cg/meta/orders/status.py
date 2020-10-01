@@ -349,15 +349,19 @@ class StatusHandler:
         if customer_obj is None:
             raise OrderError(f"unknown customer: {customer}")
 
+        new_samples = []
+
         with self.status.session.no_autoflush:
 
             case_obj = self.status.find_family(customer=customer_obj, name=ticket)
+
             if not case_obj:
                 case_obj = self.status.add_family(
                     name=ticket,
                     panels=None,
                 )
                 case_obj.customer = customer_obj
+
             for sample_data in samples:
                 application_tag = sample_data["application"]
                 application_version = self.status.current_application_version(application_tag)
@@ -375,18 +379,11 @@ class StatusHandler:
                     self.status.add_commit(organism)
 
                 if comment:
-                    sample_comment = f"Order comment: {comment}"
-
-                    if sample_data["comment"]:
-                        sample_comment = (
-                            f"{sample_comment}, sample comment: {sample_data['comment']}"
-                        )
-                else:
-                    sample_comment = sample_data["comment"]
+                    case_obj.comment = f"Order comment: {comment}"
 
                 new_sample = self.status.add_sample(
                     application_version=application_version,
-                    comment=sample_comment,
+                    comment=sample_data["comment"],
                     customer=customer_obj,
                     data_analysis=sample_data["data_analysis"],
                     internal_id=sample_data["internal_id"],
@@ -404,9 +401,10 @@ class StatusHandler:
 
                 sample_objs.append(new_sample)
                 self.status.relate_sample(family=case_obj, sample=new_sample, status="unknown")
+                new_samples.append(new_sample)
 
             case_obj.priority = priority
-        self.status.commit()
+            self.status.add_commit(new_samples)
         return sample_objs
 
     def store_pools(

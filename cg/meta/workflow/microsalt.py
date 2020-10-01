@@ -12,6 +12,7 @@ from datetime import datetime
 from typing import Dict
 
 from cg.apps.microsalt.fastq import FastqHandler
+from cg.exc import CgDataError
 from cg.store.models import Sample
 
 from cg.apps import hk, lims
@@ -166,8 +167,10 @@ class MicrosaltAnalysisAPI:
         - Fallback based on reference, ‘Other species’ and ‘Comment’.
         Default to "Unset"."""
 
-        organism = sample_obj.organism.internal_id.strip()
+        if not sample_obj.organism:
+            raise CgDataError(f"Organism missing on Sample")
 
+        organism = sample_obj.organism.internal_id.strip()
         comment = self.get_lims_comment(sample_id=sample_obj.internal_id)
         has_comment = bool(comment)
 
@@ -189,6 +192,7 @@ class MicrosaltAnalysisAPI:
 
     def get_parameters(self, sample_obj: Sample) -> Dict[str, str]:
         """Fill a dict with case config information for one sample """
+
         sample_id = sample_obj.internal_id
         method_library_prep = self.lims.get_prep_method(sample_id)
         if method_library_prep:

@@ -551,7 +551,9 @@ def fixture_analysis_store(
     base_store: Store, analysis_family: dict, wgs_application_tag: str, helpers
 ):
     """Setup a store instance for testing analysis API."""
-    helpers.ensure_family(base_store, family_info=analysis_family, app_tag=wgs_application_tag)
+    helpers.ensure_family_from_dict(
+        base_store, family_info=analysis_family, app_tag=wgs_application_tag
+    )
 
     yield base_store
 
@@ -566,7 +568,7 @@ def fixture_analysis_store_trio(analysis_store):
 @pytest.yield_fixture(scope="function", name="analysis_store_single_case")
 def fixture_analysis_store_single(base_store, analysis_family_single_case, helpers):
     """Setup a store instance with a single ind case for testing analysis API."""
-    helpers.ensure_family(base_store, family_info=analysis_family_single_case)
+    helpers.ensure_family_from_dict(base_store, family_info=analysis_family_single_case)
 
     yield base_store
 
