@@ -4,8 +4,11 @@ from typing import List
 from cg.constants import PRIORITY_MAP
 from cg.store import models
 from cg.store.api.base import BaseHandler
+from cg.utils.date import get_date
 from sqlalchemy import or_, and_, func
 from sqlalchemy.orm import Query
+
+HASTA_IN_PRODUCTION = get_date("2017-09-27")
 
 
 class StatusHandler(BaseHandler):
@@ -599,6 +602,7 @@ class StatusHandler(BaseHandler):
 
         analyses_query = (
             analyses_query.filter(models.Analysis.uploaded_at)
+            .filter(HASTA_IN_PRODUCTION < models.Analysis.started_at)
             .join(models.Family, models.Family.links, models.FamilySample.sample)
             .filter(
                 or_(

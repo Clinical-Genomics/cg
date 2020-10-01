@@ -277,6 +277,7 @@ def test_store_microbial_sample_priority(orders_api, base_store, microbial_statu
     )
 
     # THEN it should store the sample priority
+    assert base_store.samples().count() > 0
     microbial_sample = base_store.samples().first()
 
     assert microbial_sample.priority_human == "research"
