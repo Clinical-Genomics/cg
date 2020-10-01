@@ -17,34 +17,33 @@ def add_data_analysis(config_file):
     config = yaml.safe_load(config_file)
     store = Store(config["database"])
 
-    for analyses in models.Analysis.query.all():
+    for case in models.Family.query.all():
 
-        for case_analysis in analyses.family_id:
+        click.echo(click.style("processing case : " + case.__str__(), fg="white"))
 
-            if not case_analysis.pipeline:
-
-                click.echo(
-                    click.style(
-                        "Found case analysis without pipeline in analysis model: "
-                        + case_analysis.__str__(),
-                        fg="red",
-                    )
+        if not case.analyses:
+            click.echo(
+                click.style(
+                    "Found case without analysis: " + case.__str__(),
+                    fg="yellow",
                 )
-                return
+            )
+            case.data_analysis = case.links[0].sample.data_analysis
+        else:
+            case.data_analysis = case.analyses[0].pipeline
+
+        if not case.data_analysis:
 
             click.echo(
-                click.style("processing case : " + case_analysis.family_id.__str__(), fg="white")
+                click.style(
+                    "Found case analysis without pipeline in analysis model: " + case.__str__(),
+                    fg="red",
+                )
             )
+            return
 
+    store.commit()
 
-#            case = case = store.add_analysis_to_case(
-#            name=str(ticket), panels=None, priority=microbial_sample.priority_human
-#        )
-#        click.echo(
-#            click.style("changed ticket to: " + str(microbial_sample.ticket_number), fg="green")
-#        )
-
-#    store.commit()
 
 if __name__ == "__main__":
     add_data_analysis()
