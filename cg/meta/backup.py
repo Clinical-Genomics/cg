@@ -12,10 +12,11 @@ LOG = logging.getLogger(__name__)
 class BackupApi:
     """ Class for retrieving FCs from backup """
 
-    def __init__(self, status: Store, pdc_api: PdcApi, max_flowcells_on_disk: int):
+    def __init__(self, status: Store, pdc_api: PdcApi, max_flowcells_on_disk: int, root_dir: str):
         self.status = status
         self.pdc = pdc_api
         self.max_flowcells_on_disk = max_flowcells_on_disk
+        self.root_dir = root_dir
 
     def maximum_flowcells_ondisk(self) -> bool:
         """Check if there's too many flowcells already "ondisk"."""
@@ -67,7 +68,9 @@ class BackupApi:
         start_time = time.time()
 
         try:
-            self.pdc.retrieve_flowcell(flowcell_obj.name, flowcell_obj.sequencer_type, dry_run)
+            self.pdc.retrieve_flowcell(flowcell_obj.name, flowcell_obj.sequencer_type,
+                                       self.root_dir, dry_run
+                                       )
             if not dry_run:
                 flowcell_obj.status = "ondisk"
                 self.status.commit()
