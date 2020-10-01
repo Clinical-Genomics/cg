@@ -1,5 +1,4 @@
 import click
-from cg.apps import tb
 from tabulate import tabulate
 from colorclass import Color
 
@@ -48,8 +47,6 @@ for header in CASE_HEADERS_LONG:
 def status(context):
     """View status of things."""
     context.obj["db"] = Store(context.obj["database"])
-    if context.obj.get("trailblazer"):
-        context.obj["tb"] = tb.TrailblazerAPI(context.obj)
 
 
 @status.command()

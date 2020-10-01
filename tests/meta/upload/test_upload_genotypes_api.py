@@ -15,14 +15,13 @@ def test_get_sample_sex():
     qcmetrics_file_path = "tests/fixtures/apps/mip/case_qc_metrics.yaml"
     qcmetrics_dict = ruamel.yaml.safe_load(open(qcmetrics_file_path))
     qcmetrics_parsed = parse_qcmetrics.parse_qcmetrics(qcmetrics_dict)
-    print(qcmetrics_parsed)
 
-    # WHEN fetching the predicted gender for the individual with id "father"
+    # WHEN fetching the predicted "gender" for the individual with id "father"
     sex = UploadGenotypesAPI.get_sample_predicted_sex(
         sample_id="father", parsed_qcmetrics_data=qcmetrics_parsed
     )
 
-    # THEN assert that the gender was "male"
+    # THEN assert that the "gender" was "male"
     assert sex == "male"
 
 

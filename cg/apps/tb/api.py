@@ -2,22 +2,20 @@
 
 import logging
 import json
-from trailblazer.store import Store
 from google.auth.crypt import RSASigner
 from google.auth import jwt
 import requests
+import datetime as dt
 
 LOG = logging.getLogger(__name__)
 
 
-class TrailblazerAPI(Store):
+class TrailblazerAPI:
     """Interface to Trailblazer for `cg`."""
 
+    __STARTED_STATUSES = ["completed", "failed", "pending", "running"]
+
     def __init__(self, config: dict):
-        super(TrailblazerAPI, self).__init__(
-            config["trailblazer"]["database"],
-            families_dir=config["trailblazer"]["root"],
-        )
         self.service_account = config["trailblazer"]["service_account"]
         self.service_account_auth_file = config["trailblazer"]["service_account_auth_file"]
         self.host = config["trailblazer"]["host"]
@@ -31,21 +29,60 @@ class TrailblazerAPI(Store):
         LOG.info(f"Using header {json.dumps(auth_header)}")
         return auth_header
 
-    def get_analysis(self, analysis_id: int):
-        url = self.host + f"/analyses/{analysis_id}"
-        response = requests.get(url=url, headers=self.auth_header)
-        LOG.info(response.text)
-
-    def get_analyses(self):
-        url = self.host + "/analyses"
-        response = requests.get(url=url, headers=self.auth_header)
-        LOG.info(response.text)
-
-    def get_analysis_status(self, case_id: str):
+    def query_trailblazer(self, request_body: dict) -> str:
         url = self.host + "/query"
         response = requests.post(
             url=url,
             headers=self.auth_header,
-            json={"get_latest_analysis_status": {"case_id": case_id}},
+            json=request_body,
         )
-        LOG.info(response.text)
+        return response.text
+
+    def get_analyses(
+        self,
+        *,
+        family: str = None,
+        query: str = None,
+        status: str = None,
+        deleted: bool = None,
+        temp: bool = False,
+        before: dt.datetime = None,
+        is_visible: bool = None,
+    ):
+        request_body = {
+            "analyses": {
+                "family": family,
+                "status": status,
+                "query": query,
+                "deleted": deleted,
+                "temp": temp,
+                "before": before,
+                "is_visible": is_visible,
+            }
+        }
+        response_text = self.query_trailblazer(request_body=request_body)
+        LOG.info(response_text)
+
+    def get_latest_analysis(self):
+        pass
+
+    def has_latest_analysis_started(self):
+        pass
+
+    def delete_analysis(self, family: str, date: dt.datetime):
+        pass
+
+    def find_analysis(self, case_id, started_at, status):
+        pass
+
+    def mark_analyses_deleted(self, case_id: str) -> None:
+        pass
+
+    def add_pending_analysis(self, case_id: str, email: str = None) -> None:
+        pass
+
+    def get_user(self):
+        pass
+
+    def add_user(self):
+        pass

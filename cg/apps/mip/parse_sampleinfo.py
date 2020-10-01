@@ -1,4 +1,6 @@
 from typing import List, Optional
+from pathlib import Path
+import ruamel
 
 
 def get_case_from_config(config: dict) -> Optional[str]:
@@ -205,3 +207,10 @@ def get_multiple_paths(sample_data: dict, path_key: str) -> list:
     paths = [file_data["path"] for file_data in sample_data["recipe"][path_key].values()]
 
     return paths
+
+
+def get_sampleinfo(analysis: dict) -> str:
+    """Get the sample info path for an analysis."""
+    raw_data = ruamel.yaml.safe_load(Path(analysis.get("config_path")).open())
+    data = parse_config(raw_data)
+    return data["sampleinfo_path"]

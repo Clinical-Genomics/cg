@@ -23,10 +23,3 @@ def analysis(context, analysis_id: int):
 @click.pass_context
 def analyses(context):
     context.obj["trailblazer_api"].get_analyses()
-
-
-@trailblazer.command("analysis_status")
-@click.argument("case_id", type=str)
-@click.pass_context
-def analysis_status(context, case_id):
-    context.obj["trailblazer_api"].get_analysis_status(case_id=case_id)

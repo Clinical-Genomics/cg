@@ -17,6 +17,7 @@ from cg.apps.crunchy import CrunchyAPI
 from cg.apps.balsamic.api import BalsamicAPI
 from cg.store import Store
 from cg.constants import EXIT_SUCCESS, EXIT_FAIL
+from cg.apps.mip import parse_sampleinfo
 
 LOG = logging.getLogger(__name__)
 
@@ -93,7 +94,7 @@ def mip_run_dir(context, yes, case_id, sample_info, dry_run: bool = False):
     """Remove MIP run directory"""
 
     raw_data = ruamel.yaml.safe_load(sample_info)
-    date = context.obj["tb_api"].get_sampleinfo_date(raw_data)
+    date = parse_sampleinfo.get_sampleinfo_date(raw_data)
     case_obj = context.obj["store_api"].family(case_id)
 
     if case_obj is None:
@@ -110,7 +111,7 @@ def mip_run_dir(context, yes, case_id, sample_info, dry_run: bool = False):
         analysis_obj.cleaned_at = datetime.now()
     except ValueError as error:
         LOG.error(f"{case_id}: {error.args[0]}")
-        context.abort()
+        raise click.Abort()
 
 
 @clean.command("hk-alignment-files")
@@ -260,12 +261,12 @@ def mip_past_run_dirs(
         elif tb_analysis.is_deleted:
             LOG.warning("%s: analysis already deleted", case_id)
             continue
-        elif context.obj["tb_api"].analyses(family=case_id, temp=True).count() > 0:
+        elif len(context.obj["tb_api"].analyses(family=case_id, temp=True)) > 0:
             LOG.warning("%s: family already re-started", case_id)
             continue
 
         try:
-            sampleinfo_path = context.obj["tb_api"].get_sampleinfo(tb_analysis)
+            sampleinfo_path = parse_sampleinfo.get_sampleinfo(tb_analysis)
             LOG.info("%s: cleaning MIP output", case_id)
             with open(sampleinfo_path, "r") as sampleinfo_file:
                 context.invoke(
@@ -283,3 +284,5 @@ def mip_past_run_dirs(
                 ),
                 case_id,
             )
+        except click.Abort:
+            continue

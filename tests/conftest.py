@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 import ruamel.yaml
-from trailblazer.mip import files as mip_dna_files_api
+from testing import files as mip_dna_files_api
 
 from cg.apps.hk import HousekeeperAPI
 import cg.apps.mip.parse_sampleinfo as mip_rna_files_api

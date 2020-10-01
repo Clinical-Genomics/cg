@@ -9,6 +9,7 @@ import datetime as dt
 from cg.apps import tb, hk, scoutapi, lims
 from cg.apps.mip.base import MipAPI
 from cg.apps.mip.confighandler import ConfigHandler
+from cg.apps.mip import parse_trending
 from cg.meta.deliver import DeliverAPI
 from cg.store import models, Store
 from cg.exc import CgDataError, LimsDataError
@@ -351,7 +352,7 @@ class AnalysisAPI(ConfigHandler, MipAPI):
         trending = dict()
         if mip_config_raw and qcmetrics_raw and sampleinfo_raw:
             try:
-                trending = self.tb.get_trending(
+                trending = parse_trending.parse_mip_analysis(
                     mip_config_raw=mip_config_raw,
                     qcmetrics_raw=qcmetrics_raw,
                     sampleinfo_raw=sampleinfo_raw,
