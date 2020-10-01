@@ -68,9 +68,9 @@ class BackupApi:
         start_time = time.time()
 
         try:
-            self.pdc.retrieve_flowcell(flowcell_obj.name, flowcell_obj.sequencer_type,
-                                       self.root_dir, dry_run
-                                       )
+            self.pdc.retrieve_flowcell(
+                flowcell_obj.name, flowcell_obj.sequencer_type, self.root_dir, dry_run
+            )
             if not dry_run:
                 flowcell_obj.status = "ondisk"
                 self.status.commit()

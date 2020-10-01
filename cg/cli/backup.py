@@ -28,8 +28,10 @@ def fetch_flowcell(context: click.Context, dry_run: bool, flowcell: str):
     root_dir = context.obj["backup"]["root"]
     pdc_api = PdcApi()
     backup_api = BackupApi(
-        status=status_api, pdc_api=pdc_api, max_flowcells_on_disk=max_flowcells_on_disk,
-        root_dir=root_dir
+        status=status_api,
+        pdc_api=pdc_api,
+        max_flowcells_on_disk=max_flowcells_on_disk,
+        root_dir=root_dir,
     )
     if flowcell:
         flowcell_obj = status_api.flowcell(flowcell)
