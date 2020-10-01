@@ -86,10 +86,7 @@ def add_new_analysis(
 ) -> models.Analysis:
     """Function to create and return a new analysis database record"""
 
-    if workflow == "microsalt":
-        pipeline = "microsalt"  # TODO: fix when microbial cases are implemented
-    else:
-        pipeline = case_obj.links[0].sample.data_analysis
+    pipeline = case_obj.links[0].sample.data_analysis
 
     if not pipeline:
         raise PipelineUnknownError(f"No pipeline specified in {case_obj}")
