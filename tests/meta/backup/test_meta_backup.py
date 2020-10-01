@@ -13,8 +13,9 @@ from cg.meta.backup import BackupApi
 def test_maximum_flowcells_ondisk_reached(mock_store, mock_pdc):
     """ tests maximum_flowcells_ondisk method of the backup api """
     # GIVEN a flowcell needs to be retrieved from PDC
-    backup_api = BackupApi(mock_store, mock_pdc, max_flowcells_on_disk=1250,
-                           root_dir='/path/to/root_dir')
+    backup_api = BackupApi(
+        mock_store, mock_pdc, max_flowcells_on_disk=1250, root_dir="/path/to/root_dir"
+    )
 
     # WHEN the number of flowcells with status "ondisk" greater than the maximum number allowed
     mock_store.flowcells(status="ondisk").count.return_value = 2000
@@ -28,7 +29,9 @@ def test_maximum_flowcells_ondisk_reached(mock_store, mock_pdc):
 def test_maximum_flowcells_ondisk_not_reached(mock_store, mock_pdc):
     """ tests maximum_flowcells_ondisk method of the backup api """
     # GIVEN a flowcell needs to be retrieved from PDC
-    backup_api = BackupApi(mock_store, mock_pdc, max_flowcells_on_disk=1250, root_dir='/path/to/root_dir')
+    backup_api = BackupApi(
+        mock_store, mock_pdc, max_flowcells_on_disk=1250, root_dir="/path/to/root_dir"
+    )
 
     # WHEN the number of flowcells with status "ondisk" less than the maximum number allowed
     mock_store.flowcells(status="ondisk").count.return_value = 1000
@@ -42,7 +45,9 @@ def test_maximum_flowcells_ondisk_not_reached(mock_store, mock_pdc):
 def test_maximum_processing_queue_full(mock_store, mock_pdc):
     """ tests check_processing method of the backup api """
     # GIVEN a flowcell needs to be retrieved from PDC
-    backup_api = BackupApi(mock_store, mock_pdc, max_flowcells_on_disk=1250, root_dir='/path/to/root_dir')
+    backup_api = BackupApi(
+        mock_store, mock_pdc, max_flowcells_on_disk=1250, root_dir="/path/to/root_dir"
+    )
 
     # WHEN there's already a flowcell being retrieved from PDC
     mock_store.flowcells(status="processing").count.return_value = 1
@@ -56,7 +61,9 @@ def test_maximum_processing_queue_full(mock_store, mock_pdc):
 def test_maximum_processing_queue_not_full(mock_store, mock_pdc):
     """ tests check_processing method of the backup api """
     # GIVEN a flowcell needs to be retrieved from PDC
-    backup_api = BackupApi(mock_store, mock_pdc, max_flowcells_on_disk=1250, root_dir='/path/to/root_dir')
+    backup_api = BackupApi(
+        mock_store, mock_pdc, max_flowcells_on_disk=1250, root_dir="/path/to/root_dir"
+    )
 
     # WHEN there are no flowcells being retrieved from PDC
     mock_store.flowcells(status="processing").count.return_value = 0
@@ -71,7 +78,9 @@ def test_maximum_processing_queue_not_full(mock_store, mock_pdc):
 def test_pop_flowcell_next_requested(mock_store, mock_pdc, mock_flowcell):
     """ tests pop_flowcell method of the backup api """
     # GIVEN status-db needs to be checked for flowcells to be retrieved from PDC
-    backup_api = BackupApi(mock_store, mock_pdc, max_flowcells_on_disk=1250, root_dir='/path/to/root_dir')
+    backup_api = BackupApi(
+        mock_store, mock_pdc, max_flowcells_on_disk=1250, root_dir="/path/to/root_dir"
+    )
 
     # WHEN a flowcell is requested to be retrieved from PDC
     mock_store.flowcells(status="requested").first.return_value = mock_flowcell
@@ -91,7 +100,9 @@ def test_pop_flowcell_next_requested(mock_store, mock_pdc, mock_flowcell):
 def test_pop_flowcell_dry_run(mock_store, mock_pdc, mock_flowcell):
     """ tests pop_flowcell method of the backup api """
     # GIVEN status-db needs to be checked for flowcells to be retrieved from PDC
-    backup_api = BackupApi(mock_store, mock_pdc, max_flowcells_on_disk=1250, root_dir='/path/to/root_dir')
+    backup_api = BackupApi(
+        mock_store, mock_pdc, max_flowcells_on_disk=1250, root_dir="/path/to/root_dir"
+    )
 
     # WHEN a flowcell is requested to be retrieved from PDC
     # AND it's a  dry run
@@ -109,7 +120,9 @@ def test_pop_flowcell_dry_run(mock_store, mock_pdc, mock_flowcell):
 def test_pop_flowcell_no_flowcell_requested(mock_store, mock_pdc):
     """ tests pop_flowcell method of the backup api """
     # GIVEN status-db needs to be checked for flowcells to be retrieved from PDC
-    backup_api = BackupApi(mock_store, mock_pdc, max_flowcells_on_disk=1250, root_dir='/path/to/root_dir')
+    backup_api = BackupApi(
+        mock_store, mock_pdc, max_flowcells_on_disk=1250, root_dir="/path/to/root_dir"
+    )
 
     # WHEN there are no flowcells requested to be retrieved from PDC
     mock_store.flowcells(status="requested").first.return_value = None
@@ -132,7 +145,9 @@ def test_fetch_flowcell_processing_queue_full(
     caplog.set_level(logging.INFO)
 
     # GIVEN we check if a flowcell needs to be retrieved from PDC
-    backup_api = BackupApi(mock_store, mock_pdc, max_flowcells_on_disk=1250, root_dir='/path/to/root_dir')
+    backup_api = BackupApi(
+        mock_store, mock_pdc, max_flowcells_on_disk=1250, root_dir="/path/to/root_dir"
+    )
 
     # WHEN the processing queue is full
     backup_api.check_processing.return_value = False
@@ -162,7 +177,9 @@ def test_fetch_flowcell_max_flowcells_ondisk(
     caplog.set_level(logging.INFO)
 
     # GIVEN we check if a flowcell needs to be retrieved from PDC
-    backup_api = BackupApi(mock_store, mock_pdc, max_flowcells_on_disk=1250, root_dir='/path/to/root_dir')
+    backup_api = BackupApi(
+        mock_store, mock_pdc, max_flowcells_on_disk=1250, root_dir="/path/to/root_dir"
+    )
 
     # WHEN the processing queue is not full but the number of flowcells on disk is greater than the
     # maximum
@@ -195,7 +212,9 @@ def test_fetch_flowcell_no_flowcells_requested(
     caplog.set_level(logging.INFO)
 
     # GIVEN we check if a flowcell needs to be retrieved from PDC
-    backup_api = BackupApi(mock_store, mock_pdc, max_flowcells_on_disk=1250, root_dir='/path/to/root_dir')
+    backup_api = BackupApi(
+        mock_store, mock_pdc, max_flowcells_on_disk=1250, root_dir="/path/to/root_dir"
+    )
 
     # WHEN no flowcells are requested
     mock_pop_flowcell.return_value = None
@@ -231,7 +250,9 @@ def test_fetch_flowcell_retrieve_next_flowcell(
     caplog.set_level(logging.INFO)
 
     # GIVEN we check if a flowcell needs to be retrieved from PDC
-    backup_api = BackupApi(mock_store, mock_pdc, max_flowcells_on_disk=1250, root_dir='/path/to/root_dir')
+    backup_api = BackupApi(
+        mock_store, mock_pdc, max_flowcells_on_disk=1250, root_dir="/path/to/root_dir"
+    )
 
     # WHEN no flowcells is specified, but a flowcell in status-db has the status "requested"
     mock_flowcell = None
@@ -277,7 +298,9 @@ def test_fetch_flowcell_retrieve_specified_flowcell(
     caplog.set_level(logging.INFO)
 
     # GIVEN we want to retrieve a specific flowcell from PDC
-    backup_api = BackupApi(mock_store, mock_pdc, max_flowcells_on_disk=1250, root_dir='/path/to/root_dir')
+    backup_api = BackupApi(
+        mock_store, mock_pdc, max_flowcells_on_disk=1250, root_dir="/path/to/root_dir"
+    )
     backup_api.check_processing.return_value = True
     backup_api.maximum_flowcells_ondisk.return_value = False
 
@@ -315,7 +338,9 @@ def test_fetch_flowcell_pdc_retrieval_failed(
     caplog.set_level(logging.INFO)
 
     # GIVEN we are going to retrieve a flowcell from PDC
-    backup_api = BackupApi(mock_store, mock_pdc, max_flowcells_on_disk=1250, root_dir='/path/to/root_dir')
+    backup_api = BackupApi(
+        mock_store, mock_pdc, max_flowcells_on_disk=1250, root_dir="/path/to/root_dir"
+    )
     backup_api.check_processing.return_value = True
     backup_api.maximum_flowcells_ondisk.return_value = False
 
