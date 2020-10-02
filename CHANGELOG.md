@@ -13,12 +13,18 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [13.5.0]
+
+
+### Added
+- Possibility to give case-id as argument when setting values on multiple samples by the CLI
+
 
 ## [13.4.1]
 
 
 ### Fixed
--Updated changelog with correct release version
+- Updated changelog with correct release version
 
 
 ## [13.4.0]
