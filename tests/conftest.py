@@ -9,10 +9,9 @@ from pathlib import Path
 
 import pytest
 import ruamel.yaml
-from testing import files as mip_dna_files_api
 
 from cg.apps.hk import HousekeeperAPI
-import cg.apps.mip.parse_sampleinfo as mip_rna_files_api
+from cg.apps.mip import parse_sampleinfo, parse_qcmetrics
 from cg.meta.store import mip as store_mip
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.gt import GenotypeAPI
@@ -374,15 +373,19 @@ def fixture_files_raw(files):
 def files_data(files_raw):
     """Get some data files"""
     return {
-        "config": mip_dna_files_api.parse_config(files_raw["config"]),
-        "sampleinfo": mip_dna_files_api.parse_sampleinfo(files_raw["sampleinfo"]),
-        "qcmetrics": mip_dna_files_api.parse_qcmetrics(files_raw["qcmetrics"]),
-        "rna_config": mip_dna_files_api.parse_config(files_raw["rna_config"]),
-        "rna_sampleinfo": mip_rna_files_api.parse_sampleinfo_rna(files_raw["rna_sampleinfo"]),
-        "rna_config_store": store_mip.parse_config(files_raw["rna_config_store"]),
-        "rna_sampleinfo_store": store_mip.parse_sampleinfo(files_raw["rna_sampleinfo_store"]),
-        "dna_config_store": store_mip.parse_config(files_raw["dna_config_store"]),
-        "dna_sampleinfo_store": store_mip.parse_sampleinfo(files_raw["dna_sampleinfo_store"]),
+        "config": parse_sampleinfo.parse_config(files_raw["config"]),
+        "sampleinfo": parse_sampleinfo.parse_sampleinfo(files_raw["sampleinfo"]),
+        "qcmetrics": parse_qcmetrics.parse_qcmetrics(files_raw["qcmetrics"]),
+        "rna_config": parse_sampleinfo.parse_config(files_raw["rna_config"]),
+        "rna_sampleinfo": parse_sampleinfo.parse_sampleinfo_rna(files_raw["rna_sampleinfo"]),
+        "rna_config_store": parse_sampleinfo.parse_config(files_raw["rna_config_store"]),
+        "rna_sampleinfo_store": parse_sampleinfo.parse_sampleinfo(
+            files_raw["rna_sampleinfo_store"]
+        ),
+        "dna_config_store": parse_sampleinfo.parse_config(files_raw["dna_config_store"]),
+        "dna_sampleinfo_store": parse_sampleinfo.parse_sampleinfo(
+            files_raw["dna_sampleinfo_store"]
+        ),
     }
 
 

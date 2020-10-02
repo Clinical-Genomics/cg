@@ -38,7 +38,7 @@ class TrailblazerAPI:
         )
         return response.text
 
-    def get_analyses(
+    def analyses(
         self,
         *,
         family: str = None,
@@ -76,13 +76,8 @@ class TrailblazerAPI:
         pass
 
     def mark_analyses_deleted(self, case_id: str) -> None:
+        """Mark all analyses for case deleted without removing analysis files"""
         pass
 
     def add_pending_analysis(self, case_id: str, email: str = None) -> None:
-        pass
-
-    def get_user(self):
-        pass
-
-    def add_user(self):
         pass
