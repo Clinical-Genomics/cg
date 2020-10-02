@@ -193,8 +193,9 @@ def list_changeable_sample_attributes(sample_obj: models.Sample = None, skip_att
         click.echo(message)
 
 
-def show_set_sample_help(sample_obj: models.Sample = "None"):
+def show_set_sample_help(sample_obj: models.Sample = "None") -> None:
     """Show help for the set sample command"""
+    click.echo("sample_id: optional, internal_id of sample to set value on")
     show_option_help(long_name=OPTION_LONG_SKIP_LIMS, help_text=HELP_SKIP_LIMS)
     show_option_help(short_name=OPTION_SHORT_YES, long_name=OPTION_LONG_YES, help_text=HELP_YES)
     show_option_help(
