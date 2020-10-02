@@ -9,7 +9,7 @@ from ruamel import yaml
 from cg.apps import hk, scoutapi
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
-from cg.meta.workflow.mip import AnalysisAPI
+from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import models
 
 LOG = logging.getLogger(__name__)
@@ -23,7 +23,7 @@ class UploadScoutAPI:
         hk_api: hk.HousekeeperAPI,
         scout_api: scoutapi.ScoutAPI,
         lims_api: LimsAPI,
-        analysis_api: AnalysisAPI,
+        analysis_api: MipAnalysisAPI,
         madeline_api: MadelineAPI,
     ):
         self.housekeeper = hk_api

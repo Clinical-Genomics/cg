@@ -58,38 +58,36 @@ def _parse_qc_sample_info_file(sampleinfo_raw):
 
 
 def _add_sample_level_info_from_qc_metric_file(outdata, qcmetrics_data):
-    for sample_data in qcmetrics_data["samples"]:
-        _add_duplicate_reads(outdata, sample_data)
-        _add_mapped_reads(outdata, sample_data)
-        _add_predicted_sex(outdata, sample_data)
-        _add_dropout_rates(outdata, sample_data)
-        _add_insert_size_metrics(outdata, sample_data)
+    for sample_data in qcmetrics_data:
+        _add_duplicate_reads(outdata, qcmetrics_data[sample_data])
+        _add_mapped_reads(outdata, qcmetrics_data[sample_data])
+        _add_predicted_sex(outdata, qcmetrics_data[sample_data])
+        _add_dropout_rates(outdata, qcmetrics_data[sample_data])
+        _add_insert_size_metrics(outdata, qcmetrics_data[sample_data])
 
 
 def _add_dropout_rates(outdata, sample_data):
-    outdata["at_dropout"][sample_data["id"]] = sample_data["at_dropout"]
-    outdata["gc_dropout"][sample_data["id"]] = sample_data["gc_dropout"]
+    outdata["at_dropout"] = sample_data["at_dropout"]
+    outdata["gc_dropout"] = sample_data["gc_dropout"]
 
 
 def _add_insert_size_metrics(outdata, sample_data):
-    outdata["median_insert_size"][sample_data["id"]] = sample_data["median_insert_size"]
-    outdata["insert_size_standard_deviation"][sample_data["id"]] = sample_data[
-        "insert_size_standard_deviation"
-    ]
+    outdata["median_insert_size"] = sample_data["median_insert_size"]
+    outdata["insert_size_standard_deviation"] = sample_data["insert_size_standard_deviation"]
 
 
 def _add_predicted_sex(outdata, sample_data):
-    outdata["analysis_sex"][sample_data["id"]] = sample_data["predicted_sex"]
+    outdata["analysis_sex"] = sample_data["predicted_sex"]
 
 
 def _add_mapped_reads(outdata, sample_data):
     mapped_reads_percent = sample_data["mapped"] * 100
-    outdata["mapped_reads"][sample_data["id"]] = mapped_reads_percent
+    outdata["mapped_reads"] = mapped_reads_percent
 
 
 def _add_duplicate_reads(outdata, sample_data):
     duplicates_percent = sample_data["duplicates"] * 100
-    outdata["duplicates"][sample_data["id"]] = duplicates_percent
+    outdata["duplicates"] = duplicates_percent
 
 
 def _parse_qc_metric_file_into_dict(qcmetrics_raw):

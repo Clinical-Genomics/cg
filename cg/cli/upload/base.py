@@ -14,7 +14,7 @@ from cg.exc import AnalysisUploadError
 from cg.meta.deliver import DeliverAPI
 from cg.meta.report.api import ReportAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
-from cg.meta.workflow.mip import AnalysisAPI
+from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import Store
 
 from .coverage import coverage
@@ -95,7 +95,7 @@ def upload(context, family_id, force_restart):
         case_tags=CASE_TAGS,
         sample_tags=SAMPLE_TAGS,
     )
-    context.obj["analysis_api"] = AnalysisAPI(
+    context.obj["analysis_api"] = MipAnalysisAPI(
         db=context.obj["status"],
         hk_api=context.obj["housekeeper_api"],
         tb_api=context.obj["tb_api"],

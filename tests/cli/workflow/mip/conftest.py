@@ -1,6 +1,6 @@
 import pytest
 
-from cg.meta.workflow.mip import AnalysisAPI
+from cg.meta.workflow.mip import MipAnalysisAPI
 from tests.mocks.limsmock import MockLimsAPI
 
 
@@ -18,7 +18,7 @@ def mock_root_folder():
 @pytest.fixture
 def mip_context(analysis_store_single_case, tb_api, housekeeper_api, mip_lims, mock_root_folder):
     return {
-        "dna_api": AnalysisAPI(
+        "dna_api": MipAnalysisAPI(
             db=analysis_store_single_case,
             hk_api=housekeeper_api,
             tb_api=tb_api,
@@ -30,7 +30,7 @@ def mip_context(analysis_store_single_case, tb_api, housekeeper_api, mip_lims, m
             conda_env="S_mip_rd-dna",
             root=mock_root_folder,
         ),
-        "rna_api": AnalysisAPI(
+        "rna_api": MipAnalysisAPI(
             db=analysis_store_single_case,
             hk_api=housekeeper_api,
             tb_api=tb_api,

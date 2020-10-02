@@ -13,7 +13,7 @@ from cg.cli.workflow.mip_dna.deliver import deliver as deliver_cmd
 from cg.constants import EXIT_SUCCESS, EXIT_FAIL
 from cg.exc import CgError
 from cg.meta.deliver import DeliverAPI
-from cg.meta.workflow.mip import AnalysisAPI
+from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import Store
 from cg.store.utils import case_exists
 
@@ -58,7 +58,7 @@ def mip_dna(
     context.obj["scout_api"] = scoutapi.ScoutAPI(context.obj)
     context.obj["lims_api"] = lims.LimsAPI(context.obj)
 
-    context.obj["dna_api"] = AnalysisAPI(
+    context.obj["dna_api"] = MipAnalysisAPI(
         db=Store(context.obj["database"]),
         hk_api=context.obj["housekeeper_api"],
         tb_api=context.obj["trailblazer_api"],

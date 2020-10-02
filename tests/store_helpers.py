@@ -15,7 +15,9 @@ class StoreHelpers:
     """Class to hold helper functions that needs to be used all over"""
 
     @staticmethod
-    def ensure_hk_bundle(store: HousekeeperAPI, bundle_data: dict) -> hk_models.Bundle:
+    def ensure_hk_bundle(
+        store: HousekeeperAPI, bundle_data: dict, include: bool = False
+    ) -> hk_models.Bundle:
         """Utility function to add a bundle of information to a housekeeper api"""
         bundle_exists = False
         for bundle in store.bundles():
@@ -25,6 +27,8 @@ class StoreHelpers:
         if not bundle_exists:
             _bundle, _version = store.add_bundle(bundle_data)
             store.add_commit(_bundle, _version)
+        if include:
+            store.include(_version)
         return _bundle
 
     def ensure_hk_version(self, store: HousekeeperAPI, bundle_data: dict) -> hk_models.Version:

@@ -24,7 +24,7 @@ from cg.constants import (
 LOG = logging.getLogger(__name__)
 
 
-class AnalysisAPI(ConfigHandler, MipAPI):
+class MipAnalysisAPI(ConfigHandler, MipAPI):
     """The workflow is accessed through Trailblazer but cg provides additional conventions and
     hooks into the status database that makes managing analyses simpler"""
 
@@ -40,8 +40,6 @@ class AnalysisAPI(ConfigHandler, MipAPI):
         pipeline: str,
         conda_env: str,
         root: str,
-        yaml_loader=safe_load,
-        path_api=Path,
         logger=logging.getLogger(__name__),
     ):
         self.db = db
@@ -50,8 +48,6 @@ class AnalysisAPI(ConfigHandler, MipAPI):
         self.scout = scout_api
         self.lims = lims_api
         self.deliver = deliver_api
-        self.yaml_loader = yaml_loader
-        self.pather = path_api
         self.log = logger
         self.script = script
         self.pipeline = pipeline
@@ -337,10 +333,10 @@ class AnalysisAPI(ConfigHandler, MipAPI):
     def _open_bundle_file(self, relative_file_path: str) -> Any:
         """Open a bundle file and return it as an Python object."""
 
-        full_file_path = self.pather(self.deliver.get_post_analysis_files_root_dir()).joinpath(
+        full_file_path = Path(self.deliver.get_post_analysis_files_root_dir()).joinpath(
             relative_file_path
         )
-        open_file = self.yaml_loader(self.pather(full_file_path).open())
+        open_file = safe_load(open(full_file_path))
         return open_file
 
     def get_latest_metadata(self, family_id: str) -> dict:
@@ -359,6 +355,11 @@ class AnalysisAPI(ConfigHandler, MipAPI):
                 )
             except KeyError as error:
                 self.log.warning(
+                    "get_latest_metadata failed for '%s', missing key: %s",
+                    family_id,
+                    error.args[0],
+                )
+                LOG.warning(
                     "get_latest_metadata failed for '%s', missing key: %s",
                     family_id,
                     error.args[0],

@@ -11,7 +11,7 @@ from cg.apps.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.gt import GenotypeAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
-from cg.meta.workflow.mip import AnalysisAPI
+from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import Store
 from cg.store import models
 
@@ -163,7 +163,7 @@ class MockVogueApi:
         """docstring for upload"""
 
 
-class MockAnalysisApi(AnalysisAPI):
+class MockAnalysisApi(MipAnalysisAPI):
     def __init__(self):
         """docstring for __init__"""
 

@@ -11,7 +11,7 @@ from cg.cli.workflow.mip.store import store as store_cmd
 from cg.cli.workflow.mip_rna.deliver import CASE_TAGS, SAMPLE_TAGS
 from cg.cli.workflow.mip_rna.deliver import deliver as deliver_cmd
 from cg.meta.deliver import DeliverAPI
-from cg.meta.workflow.mip import AnalysisAPI
+from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import Store
 from cg.store.utils import case_exists
 
@@ -23,7 +23,7 @@ LOG = logging.getLogger(__name__)
 def mip_rna(context: click.Context):
     """Rare disease RNA workflow"""
 
-    context.obj["rna_api"] = AnalysisAPI(
+    context.obj["rna_api"] = MipAnalysisAPI(
         db=Store(context.obj["database"]),
         hk_api=hk.HousekeeperAPI(context.obj),
         tb_api=tb.TrailblazerAPI(context.obj),
