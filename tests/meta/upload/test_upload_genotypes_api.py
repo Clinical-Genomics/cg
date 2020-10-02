@@ -18,7 +18,7 @@ def test_get_sample_sex():
 
     # WHEN fetching the predicted "gender" for the individual with id "father"
     sex = UploadGenotypesAPI.get_sample_predicted_sex(
-        sample_id="father", parsed_qcmetrics_data=qcmetrics_parsed
+        sample_id="ADM2", parsed_qcmetrics_data=qcmetrics_parsed
     )
 
     # THEN assert that the "gender" was "male"

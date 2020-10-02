@@ -320,7 +320,7 @@ def fixture_compression_object(
 @pytest.fixture(name="case_qc_metrics")
 def fixture_case_qc_metrics(apps_dir: Path) -> Path:
     """Return the path to a qc metrics file with case data"""
-    return apps_dir / "tb" / "case" / "case_qc_metrics.yaml"
+    return Path("tests/fixtures/apps/mip/case_qc_metrics.yaml")
 
 
 @pytest.fixture(name="bcf_file")
@@ -333,9 +333,9 @@ def fixture_bcf_file(apps_dir: Path) -> Path:
 def fixture_files():
     """Trailblazer api for mip files"""
     return {
-        "config": "tests/fixtures/apps/tb/case/case_config.yaml",
-        "sampleinfo": "tests/fixtures/apps/tb/case/case_qc_sample_info.yaml",
-        "qcmetrics": "tests/fixtures/apps/tb/case/case_qc_metrics.yaml",
+        "config": "tests/fixtures/apps/mip/dna/store/case_config.yaml",
+        "sampleinfo": "tests/fixtures/apps/mip/dna/store/case_qc_sample_info.yaml",
+        "qcmetrics": "tests/fixtures/apps/mip/case_qc_metrics.yaml",
         "rna_config": "tests/fixtures/apps/mip/rna/case_config.yaml",
         "rna_sampleinfo": "tests/fixtures/apps/mip/rna/case_qc_sampleinfo.yaml",
         "rna_config_store": "tests/fixtures/apps/mip/rna/store/case_config.yaml",

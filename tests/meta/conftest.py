@@ -251,7 +251,6 @@ def analysis_api(analysis_store, mip_hk_store, scout_api, deliver_api):
         tb_api=MockTB(),
         lims_api=MockLims(),
         deliver_api=deliver_api,
-        logger=MockLogger(),
         script="echo",
         pipeline="analyse rd_dna",
         conda_env="S_mip_rd-dna",

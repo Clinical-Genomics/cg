@@ -40,7 +40,6 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         pipeline: str,
         conda_env: str,
         root: str,
-        logger=logging.getLogger(__name__),
     ):
         self.db = db
         self.tb = tb_api
@@ -48,7 +47,6 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         self.scout = scout_api
         self.lims = lims_api
         self.deliver = deliver_api
-        self.log = logger
         self.script = script
         self.pipeline = pipeline
         self.conda_env = conda_env
@@ -59,13 +57,13 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         flowcells = self.db.flowcells(family=family_obj)
         statuses = []
         for flowcell_obj in flowcells:
-            self.log.debug("%s: checking flowcell", flowcell_obj.name)
+            LOG.debug("%s: checking flowcell", flowcell_obj.name)
             statuses.append(flowcell_obj.status)
             if flowcell_obj.status == "removed":
-                self.log.info("%s: requesting removed flowcell", flowcell_obj.name)
+                LOG.info("%s: requesting removed flowcell", flowcell_obj.name)
                 flowcell_obj.status = "requested"
             elif flowcell_obj.status != "ondisk":
-                self.log.warning("%s: %s", flowcell_obj.name, flowcell_obj.status)
+                LOG.warning("%s: %s", flowcell_obj.name, flowcell_obj.status)
         return all(status == "ondisk" for status in statuses)
 
     @staticmethod
@@ -323,7 +321,7 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         if analysis_files:
             analysis_file_raw = self._open_bundle_file(analysis_files[0].path)
         else:
-            raise self.log.warning(
+            raise LOG.warning(
                 "No post analysis files received from DeliverAPI for '%s'",
                 family_id,
             )
@@ -354,7 +352,7 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
                     sampleinfo_raw=sampleinfo_raw,
                 )
             except KeyError as error:
-                self.log.warning(
+                LOG.warning(
                     "get_latest_metadata failed for '%s', missing key: %s",
                     family_id,
                     error.args[0],
@@ -382,7 +380,7 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
             downsampled = isinstance(link_obj.sample.downsampled_to, int)
             external = link_obj.sample.application_version.application.is_external
             if downsampled or external:
-                self.log.info(
+                LOG.info(
                     "%s: downsampled/external - skip evaluation",
                     link_obj.sample.internal_id,
                 )
