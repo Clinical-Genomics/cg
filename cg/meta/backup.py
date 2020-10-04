@@ -56,6 +56,11 @@ class BackupApi:
             LOG.info("maximum flowcells ondisk reached")
             return None
 
+        if flowcell_obj:
+            flowcell_obj.status = "processing"
+            if not dry_run:
+                self.status.commit()
+
         if not flowcell_obj:
             flowcell_obj = self.pop_flowcell(dry_run)
             if flowcell_obj is None:
