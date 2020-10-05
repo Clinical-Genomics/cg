@@ -30,7 +30,7 @@ class TrailblazerAPI:
         return auth_header
 
     def query_trailblazer(self, command: str, request_body: dict) -> str:
-        url = self.host + "/query/" + command
+        url = self.host + "/query-" + command
         response = requests.post(
             url=url,
             headers=self.auth_header,
