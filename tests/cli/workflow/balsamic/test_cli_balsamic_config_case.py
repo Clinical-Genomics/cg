@@ -294,5 +294,4 @@ def test_error_wes_panel(balsamic_context: dict, cli_runner, caplog):
     # THEN command is NOT generated successfully
     assert result.exit_code != EXIT_SUCCESS
     # THEN log warning should be printed
-    print(caplog.text)
     assert "requires a bed file" in caplog.text
