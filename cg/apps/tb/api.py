@@ -59,7 +59,7 @@ class TrailblazerAPI:
                 "is_visible": is_visible,
             }
         }
-        response_text = self.query_trailblazer(request_body=request_body)
+        response_text = self.query_trailblazer(command="analyses", request_body=request_body)
         LOG.info(response_text)
 
     def get_latest_analysis(self, case_id: str):
@@ -67,7 +67,7 @@ class TrailblazerAPI:
             "case_id": case_id,
         }
         response_text = self.query_trailblazer(
-            command="get_latest_analysis", request_body=request_body
+            command="get-latest-analysis", request_body=request_body
         )
         LOG.info(response_text)
 
