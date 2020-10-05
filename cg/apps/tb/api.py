@@ -40,8 +40,7 @@ class TrailblazerAPI:
 
     def analyses(
         self,
-        *,
-        family: str = None,
+        case_id: str = None,
         query: str = None,
         status: str = None,
         deleted: bool = None,
@@ -51,7 +50,7 @@ class TrailblazerAPI:
     ):
         request_body = {
             "analyses": {
-                "family": family,
+                "case_id": case_id,
                 "status": status,
                 "query": query,
                 "deleted": deleted,
@@ -63,13 +62,19 @@ class TrailblazerAPI:
         response_text = self.query_trailblazer(request_body=request_body)
         LOG.info(response_text)
 
-    def get_latest_analysis(self):
+    def get_latest_analysis(self, case_id: str):
+        request_body = {
+            "get_latest_analysis": {
+                "case_id": case_id,
+            }
+        }
+        response_text = self.query_trailblazer(request_body=request_body)
+        LOG.info(response_text)
+
+    def has_latest_analysis_started(self, case_id: str):
         pass
 
-    def has_latest_analysis_started(self):
-        pass
-
-    def delete_analysis(self, family: str, date: dt.datetime):
+    def delete_analysis(self, case_id: str, date: dt.datetime):
         pass
 
     def find_analysis(self, case_id, started_at, status):
