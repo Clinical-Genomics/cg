@@ -29,8 +29,8 @@ class TrailblazerAPI:
         LOG.info(f"Using header {json.dumps(auth_header)}")
         return auth_header
 
-    def query_trailblazer(self, request_body: dict) -> str:
-        url = self.host + "/query"
+    def query_trailblazer(self, command: str, request_body: dict) -> str:
+        url = self.host + "/query/" + command
         response = requests.post(
             url=url,
             headers=self.auth_header,
@@ -64,11 +64,11 @@ class TrailblazerAPI:
 
     def get_latest_analysis(self, case_id: str):
         request_body = {
-            "get_latest_analysis": {
-                "case_id": case_id,
-            }
+            "case_id": case_id,
         }
-        response_text = self.query_trailblazer(request_body=request_body)
+        response_text = self.query_trailblazer(
+            command="get_latest_analysis", request_body=request_body
+        )
         LOG.info(response_text)
 
     def has_latest_analysis_started(self, case_id: str):
