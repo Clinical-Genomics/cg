@@ -27,10 +27,7 @@ def parse_json(indata: dict) -> dict:
         families[sample_data["family_name"]].append(sample_data)
 
     for family_name, samples in families.items():
-        family_data = {
-            "name": family_name,
-            "samples": [],
-        }
+        family_data = {"name": family_name, "samples": []}
         require_qcoks = set(sample.get("require_qcok", False) for sample in samples)
         if True in require_qcoks:
             family_data["require_qcok"] = True

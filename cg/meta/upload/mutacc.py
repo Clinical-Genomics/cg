@@ -34,13 +34,13 @@ class UploadToMutaccAPI:
 
     def data(self, case) -> dict:
         """
-            Find the necessary data for the case
+        Find the necessary data for the case
 
-            Args:
-                case (dict): case dictionary from scout
+        Args:
+            case (dict): case dictionary from scout
 
-            Returns:
-                data (dict): dictionary with case data, and data on causative variants
+        Returns:
+            data (dict): dictionary with case data, and data on causative variants
         """
 
         if all([self._has_bam(case), self._has_causatives(case)]):
@@ -54,14 +54,14 @@ class UploadToMutaccAPI:
     def _has_bam(case: dict) -> bool:
 
         """
-            Check that all samples in case has a given path to a bam file,
-            and that the file exists
+        Check that all samples in case has a given path to a bam file,
+        and that the file exists
 
-            Args:
-                case (dict): case dictionary from scout
+        Args:
+            case (dict): case dictionary from scout
 
-            Returns:
-                (bool): True if all samples has valid paths to a bam-file
+        Returns:
+            (bool): True if all samples has valid paths to a bam-file
 
         """
         if case.get("individuals") is None:
@@ -91,13 +91,13 @@ class UploadToMutaccAPI:
     @staticmethod
     def _has_causatives(case: dict) -> bool:
         """
-            Check that the case has marked causative variants in scout
+        Check that the case has marked causative variants in scout
 
-            Args:
-                case (dict): case dictionary from scout
+        Args:
+            case (dict): case dictionary from scout
 
-            Returns:
-                (bool): True if case has marked causative variants in scout
+        Returns:
+            (bool): True if case has marked causative variants in scout
         """
         if case.get("causatives"):
             return True
@@ -113,14 +113,14 @@ MAPPER = namedtuple("mapper", ["field_name_1", "field_name_2", "conv"])
 
 def remap(input_dict: dict, mapper_list: list) -> dict:
     """
-        Reformat dict from one application to be used by another
+    Reformat dict from one application to be used by another
 
-        Args:
-            input_dict (dict): dictionary to be converted
-            mapper_list (list(MAPPER)): list of mapper objects
+    Args:
+        input_dict (dict): dictionary to be converted
+        mapper_list (list(MAPPER)): list of mapper objects
 
-        Returns:
-            output_dict (dict): conveted dictionary
+    Returns:
+        output_dict (dict): conveted dictionary
 
     """
     output_dict = {}
@@ -161,8 +161,8 @@ def resolve_phenotype(scout_phenotype):
 
 def get_gene_string(genes):
     """
-        Function to convert the 'genes' field in the scout variant document
-        to a string format that can be read by mutacc
+    Function to convert the 'genes' field in the scout variant document
+    to a string format that can be read by mutacc
     """
     gene_fields = (
         "hgnc_symbol",
@@ -225,7 +225,7 @@ SCOUT_TO_MUTACC_VARIANTS = (
     MAPPER("reference", "REF", str),
     MAPPER("alternative", "ALT", str),
     MAPPER("quality", "QUAL", float),
-    MAPPER("filters", "FILTER", lambda filters: ",".join([str(filter) for filter in filters]),),
+    MAPPER("filters", "FILTER", lambda filters: ",".join([str(filter) for filter in filters])),
     MAPPER("end", "END", int),
     MAPPER("rank_score", "RankScore", int),
     MAPPER("category", "category", str),

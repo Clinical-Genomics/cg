@@ -3,8 +3,8 @@
 from pathlib import Path
 
 import pytest
-
-from cg.meta.microsalt.lims import LimsMicrosaltAPI
+from cg.apps.microsalt.fastq import FastqHandler
+from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.store import Store
 
 
@@ -15,23 +15,42 @@ def queries_path(tmpdir):
 
 
 @pytest.fixture(scope="function")
-def base_context(microsalt_store, lims_api, tmpdir, queries_path):
+def fastq_path(tmpdir):
+    """ The path where to store the case-configs """
+    return Path(tmpdir) / "fastq"
+
+
+@pytest.fixture(scope="function")
+def base_context(microsalt_store, lims_api, tmpdir, queries_path, housekeeper_api):
     """ The click context for the microsalt cli """
-    microsalt_api = LimsMicrosaltAPI(lims=lims_api)
     return {
         "db": microsalt_store,
-        "lims_microsalt_api": microsalt_api,
-        "usalt": {"root": tmpdir, "queries_path": queries_path, "binary_path": "/bin/true",},
+        "analysis_api": MicrosaltAnalysisAPI(
+            db=microsalt_store,
+            hk_api=housekeeper_api,
+            lims_api=lims_api,
+            fastq_handler=fastq_handler,
+        ),
+        "microsalt": {
+            "root": tmpdir,
+            "queries_path": queries_path,
+            "binary_path": "/bin/true",
+            "conda_env": "root",
+        },
     }
 
 
 @pytest.fixture(scope="function")
-def microsalt_store(base_store: Store, microbial_sample_id, microbial_order_id, helpers) -> Store:
+def fastq_handler() -> FastqHandler:
+    return FastqHandler({"obj": {"microsalt": {"root": "root"}}})
+
+
+@pytest.fixture(scope="function")
+def microsalt_store(base_store: Store, microbial_sample_id, microbial_ticket, helpers) -> Store:
     """ Filled in store to be used in the tests """
     _store = base_store
-    helpers.add_microbial_sample_and_order(
-        _store, order_id=microbial_order_id, sample_id=microbial_sample_id
-    )
+
+    helpers.add_microbial_sample(_store)
 
     _store.commit()
 
@@ -41,19 +60,19 @@ def microsalt_store(base_store: Store, microbial_sample_id, microbial_order_id, 
 @pytest.fixture(name="microbial_sample_id")
 def fixture_microbial_sample_id():
     """ Define a name for a microbial sample """
-    return "microbial_sample_test"
+    return "microbial_sample_id"
 
 
 @pytest.fixture(name="microbial_sample_name")
 def fixture_microbial_sample_name():
     """ Define a name for a microbial sample """
-    return "microbial_name_test"
+    return "microbial_sample_name"
 
 
-@pytest.fixture(name="microbial_order_id")
-def fixture_microbial_order_id():
-    """ Define a name for a microbial order """
-    return "microbial_order_test"
+@pytest.fixture(name="microbial_ticket")
+def fixture_microbial_ticket():
+    """ Define a ticket for a microbial order """
+    return "123456"
 
 
 class MockLims:
@@ -76,7 +95,7 @@ class MockLims:
 
             def get(self, key):
                 """ only here to get the sample.get('comment') """
-                return self.sample_data.get(key, "not found")
+                return self.sample_data.get(key, "")
 
         # haha, it's a factory!
         if not self.lims_sample:
@@ -93,6 +112,12 @@ class MockLims:
         """ Return a sequencing method name. Needs to be in format 'dddd:dd string' """
         self.sample_id = sample_id
         return "1338:00 Test sequencing method"
+
+    def get_sample_project(self, sample_id: str) -> str:
+        return self.sample(sample_id).get("project").get("id")
+
+    def get_sample_comment(self, sample_id: str) -> str:
+        return self.sample(sample_id).get("comment")
 
 
 class LimsFactory:

@@ -1,53 +1,57 @@
+""" API to manage Microsalt Analyses
+    Organism - Fallback based on reference, ‘Other species’ and ‘Comment’. Default to “Unset”.
+    Priority = Default to empty string. Weird response. Typically “standard” or “research”.
+    Reference = Defaults to “None”
+    Method: Outputted as “1273:23”. Defaults to “Not in LIMS”
+    Date: Returns latest == most recent date. Outputted as DT object “YYYY MM DD”. Defaults to
+    datetime.min"""
 import gzip
 import logging
 import re
-from pathlib import Path
-from typing import List, Any
-from ruamel.yaml import safe_load
+from datetime import datetime
+from typing import Dict
 
-from requests.exceptions import HTTPError
+from cg.apps.microsalt.fastq import FastqHandler
+from cg.exc import CgDataError
+from cg.store.models import Sample
 
-from cg.apps import tb, hk, scoutapi, lims
-from cg.apps.pipelines.fastqhandler import BaseFastqHandler
+from cg.apps import hk, lims
 from cg.store import models, Store
 
+LOG = logging.getLogger(__name__)
 
-class AnalysisAPI:
-    """The pipelines are accessed through Trailblazer but cg provides additional conventions and
-    hooks into the status database that makes managing analyses simpler"""
+
+class MicrosaltAnalysisAPI:
+    """API to manage Microsalt Analyses"""
 
     def __init__(
         self,
         db: Store,
         hk_api: hk.HousekeeperAPI,
         lims_api: lims.LimsAPI,
-        yaml_loader=safe_load,
-        path_api=Path,
-        logger=logging.getLogger(__name__),
+        fastq_handler: FastqHandler,
     ):
         self.db = db
         self.hk = hk_api
         self.lims = lims_api
-        self.yaml_loader = yaml_loader
-        self.pather = path_api
-        self.LOG = logger
+        self.fastq_handler = fastq_handler
 
-    def check(self, family_obj: models.Family):
+    def has_flowcells_on_disk(self, ticket: int) -> bool:
         """Check stuff before starting the analysis."""
-        flowcells = self.db.flowcells(family=family_obj)
+
+        flowcells = self.get_flowcells(ticket=ticket)
         statuses = []
         for flowcell_obj in flowcells:
-            self.LOG.debug(f"{flowcell_obj.name}: checking flowcell")
+            LOG.debug(f"{flowcell_obj.name}: checking if flowcell is on disk")
             statuses.append(flowcell_obj.status)
             if flowcell_obj.status == "removed":
-                self.LOG.info(f"{flowcell_obj.name}: requesting removed flowcell")
-                flowcell_obj.status = "requested"
+                LOG.info(f"{flowcell_obj.name}: flowcell not on disk")
             elif flowcell_obj.status != "ondisk":
-                self.LOG.warning(f"{flowcell_obj.name}: {flowcell_obj.status}")
+                LOG.warning(f"{flowcell_obj.name}: {flowcell_obj.status}")
         return all(status == "ondisk" for status in statuses)
 
     @staticmethod
-    def fastq_header(line):
+    def fastq_header(line: str) -> dict:
         """handle illumina's two different header formats
         @see https://en.wikipedia.org/wiki/FASTQ_format
 
@@ -80,9 +84,6 @@ class AnalysisAPI:
             Y   Y if the read is filtered, N otherwise
             18  0 when none of the control bits are on, otherwise it is an even number
             ATCACG  index sequence
-
-
-        TODO: add unit test
         """
 
         rs = {"lane": None, "flowcell": None, "readnumber": None}
@@ -103,7 +104,21 @@ class AnalysisAPI:
 
         return rs
 
-    def link_sample(self, fastq_handler: BaseFastqHandler, sample: str, case: str):
+    def link_samples(self, ticket: int, sample_id: str):
+
+        sample_objs = self.get_samples(ticket, sample_id)
+
+        if not sample_objs:
+            raise Exception("Could not find any samples to link")
+
+        for sample_obj in sample_objs:
+            LOG.info("%s: link FASTQ files", sample_obj.internal_id)
+            self.link_sample(
+                ticket=ticket,
+                sample=sample_obj.internal_id,
+            )
+
+    def link_sample(self, sample: str, ticket: int) -> None:
         """Link FASTQ files for a sample."""
         file_objs = self.hk.files(bundle=sample, tags=["fastq"])
         files = []
@@ -127,4 +142,109 @@ class AnalysisAPI:
                 data["flowcell"] = f"{data['flowcell']}-{matches[0]}"
             files.append(data)
 
-        fastq_handler.link(case=case, sample=sample, files=files)
+        self.fastq_handler.link(ticket=ticket, sample=sample, files=files)
+
+    def get_samples(self, ticket: int = None, sample_id: str = None) -> [models.Sample]:
+        ids = {}
+        if ticket:
+            ids["ticket_number"] = ticket
+            samples = self.db.samples_by_ids(**ids).all()
+        if sample_id:
+            sample = self.db.sample(internal_id=sample_id)
+            samples = [sample] if sample else []
+        return samples
+
+    def get_lims_comment(self, sample_id: str) -> str:
+        """ returns the comment associated with a sample stored in lims"""
+        comment = self.lims.get_sample_comment(sample_id) or ""
+        if re.match(r"\w{4}\d{2,3}", comment):
+            return comment
+
+        return ""
+
+    def get_organism(self, sample_obj: models.Sample) -> str:
+        """Organism
+        - Fallback based on reference, ‘Other species’ and ‘Comment’.
+        Default to "Unset"."""
+
+        if not sample_obj.organism:
+            raise CgDataError(f"Organism missing on Sample")
+
+        organism = sample_obj.organism.internal_id.strip()
+        comment = self.get_lims_comment(sample_id=sample_obj.internal_id)
+        has_comment = bool(comment)
+
+        if "gonorrhoeae" in organism:
+            organism = "Neisseria spp."
+        elif "Cutibacterium acnes" in organism:
+            organism = "Propionibacterium acnes"
+
+        if organism == "VRE":
+            reference = sample_obj.organism.reference_genome
+            if reference == "NC_017960.1":
+                organism = "Enterococcus faecium"
+            elif reference == "NC_004668.1":
+                organism = "Enterococcus faecalis"
+            elif has_comment:
+                organism = comment
+
+        return organism
+
+    def get_parameters(self, sample_obj: Sample) -> Dict[str, str]:
+        """Fill a dict with case config information for one sample """
+
+        sample_id = sample_obj.internal_id
+        method_library_prep = self.lims.get_prep_method(sample_id)
+        if method_library_prep:
+            method_library_prep, _ = method_library_prep.split(" ", 1)
+        method_sequencing = self.lims.get_sequencing_method(sample_id)
+        if method_sequencing:
+            method_sequencing, _ = method_sequencing.split(" ", 1)
+        priority = "research" if sample_obj.priority == 0 else "standard"
+
+        parameter_dict = {
+            "CG_ID_project": self.get_project(sample_id),
+            "Customer_ID_project": sample_obj.ticket_number,
+            "CG_ID_sample": sample_obj.internal_id,
+            "Customer_ID_sample": sample_obj.name,
+            "organism": self.get_organism(sample_obj),
+            "priority": priority,
+            "reference": sample_obj.organism.reference_genome,
+            "Customer_ID": sample_obj.customer.internal_id,
+            "application_tag": sample_obj.application_version.application.tag,
+            "date_arrival": str(sample_obj.received_at or datetime.min),
+            "date_sequencing": str(sample_obj.sequenced_at or datetime.min),
+            "date_libprep": str(sample_obj.prepared_at or datetime.min),
+            "method_libprep": method_library_prep or "Not in LIMS",
+            "method_sequencing": method_sequencing or "Not in LIMS",
+        }
+
+        return parameter_dict
+
+    def get_project(self, sample_id: str) -> str:
+        """Get LIMS project for a sample"""
+        return self.lims.get_sample_project(sample_id)
+
+    def get_flowcells(self, ticket: int) -> [models.Flowcell]:
+        """Get all flowcells for all samples in a ticket"""
+
+        flowcells = set()
+
+        for sample in self.get_samples(ticket=ticket):
+            for flowcell in sample.flowcells:
+                flowcells.add(flowcell)
+
+        return list(flowcells)
+
+    def request_removed_flowcells(self, ticket):
+        """Check stuff before starting the analysis."""
+
+        flowcells = self.get_flowcells(ticket=ticket)
+        for flowcell_obj in flowcells:
+            LOG.debug(f"{flowcell_obj.name}: checking if flowcell should be requested")
+            if flowcell_obj.status == "removed":
+                LOG.info(f"{flowcell_obj.name}: requesting removed flowcell")
+                flowcell_obj.status = "requested"
+            elif flowcell_obj.status != "ondisk":
+                LOG.warning(f"{flowcell_obj.name}: {flowcell_obj.status}")
+        self.db.commit()

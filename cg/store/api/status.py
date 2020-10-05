@@ -4,8 +4,11 @@ from typing import List
 from cg.constants import PRIORITY_MAP
 from cg.store import models
 from cg.store.api.base import BaseHandler
+from cg.utils.date import get_date
 from sqlalchemy import or_, and_, func
 from sqlalchemy.orm import Query
+
+HASTA_IN_PRODUCTION = get_date("2017-09-27")
 
 
 class StatusHandler(BaseHandler):
@@ -59,18 +62,15 @@ class StatusHandler(BaseHandler):
         )
         return records
 
-    def cases_to_mip_analyze(self, limit: int = 50):
-        """Fetch families without analyses where all samples are sequenced."""
-
-        families_q = (
+    def cases_to_analyze(
+        self, pipeline: str = "", threshold: float = None, limit: int = None
+    ) -> list:
+        """Returns a list if cases ready to be analyzed or set to be reanalyzed"""
+        families_query = (
             self.Family.query.outerjoin(models.Analysis)
             .join(models.Family.links, models.FamilySample.sample)
             .filter(or_(models.Sample.is_external, models.Sample.sequenced_at.isnot(None)))
-            .filter(
-                or_(
-                    models.Sample.data_analysis.is_(None), models.Sample.data_analysis != "Balsamic"
-                )
-            )
+            .filter(models.Sample.data_analysis.ilike(f"%{pipeline}%"))
             .filter(
                 or_(
                     models.Family.action == "analyze",
@@ -81,38 +81,30 @@ class StatusHandler(BaseHandler):
         )
 
         families = [
-            record for record in families_q if self._all_samples_have_sequence_data(record.links)
+            record
+            for record in families_query
+            if self._all_samples_have_sequence_data(record.links)
         ]
 
+        if threshold:
+            families = [
+                record
+                for record in families
+                if self.all_samples_have_enough_reads(record.links, threshold=threshold)
+            ]
         return families[:limit]
 
-    def cases_to_balsamic_analyze(self, limit: int = 50):
-        """Fetch families without analyses where all samples are sequenced."""
-
-        # there are two cases when a sample should be analysed:
-        families_q = (
+    def cases_to_store(self, pipeline: str, limit: int = None) -> list:
+        """Returns a list of cases that may be available to store in Housekeeper"""
+        families_query = (
             self.Family.query.outerjoin(models.Analysis)
             .join(models.Family.links, models.FamilySample.sample)
-            # the samples must external or be sequenced to be analysed
             .filter(or_(models.Sample.is_external, models.Sample.sequenced_at.isnot(None)))
-            # The data_analysis is includes Balsamic
-            .filter(models.Sample.data_analysis.ilike("%Balsamic%"))
-            # 1. family that has been analysed but now is requested for re-analysing
-            # 2. new family that hasn't been analysed yet
-            .filter(
-                or_(
-                    models.Family.action == "analyze",
-                    and_(models.Family.action.is_(None), models.Analysis.created_at.is_(None)),
-                )
-            )
+            .filter(models.Sample.data_analysis.ilike(f"%{pipeline}%"))
+            .filter(models.Family.action == "running")
             .order_by(models.Family.priority.desc(), models.Family.ordered_at)
         )
-
-        families = [
-            record for record in families_q if self._all_samples_have_sequence_data(record.links)
-        ]
-
-        return families[:limit]
+        return list(families_query)[:limit]
 
     def cases(
         self,
@@ -533,7 +525,27 @@ class StatusHandler(BaseHandler):
         """Return True if all samples are external or sequenced inhouse."""
         return all((link.sample.sequenced_at or link.sample.is_external) for link in links)
 
-    def analyses_to_upload(self, pipeline: str = None) -> List[models.Analysis]:
+    def all_samples_have_enough_reads(
+        self, links: List[models.FamilySample], threshold: float
+    ) -> bool:
+        return all(
+            (
+                link.sample.reads
+                > self.Application.query.filter_by(
+                    id=self.ApplicationVersion.query.filter_by(
+                        id=link.sample.application_version_id
+                    )
+                    .first()
+                    .application_id
+                )
+                .first()
+                .target_reads
+                * threshold
+            )
+            for link in links
+        )
+
+    def analyses_to_upload(self, pipeline: str = "") -> List[models.Analysis]:
         """Fetch analyses that haven't been uploaded."""
         records = self.Analysis.query.filter(
             models.Analysis.completed_at != None, models.Analysis.uploaded_at == None
@@ -544,16 +556,14 @@ class StatusHandler(BaseHandler):
 
         return records
 
-    def analyses_to_clean(self, pipeline: str = None):
+    def analyses_to_clean(self, pipeline: str = ""):
         """Fetch analyses that haven't been cleaned."""
         records = self.latest_analyses()
         records = records.filter(
-            models.Analysis.uploaded_at.isnot(None), models.Analysis.cleaned_at.is_(None)
+            models.Analysis.uploaded_at.isnot(None),
+            models.Analysis.cleaned_at.is_(None),
+            models.Analysis.pipeline.ilike(f"%{pipeline}%"),
         )
-
-        if pipeline:
-            records = records.filter(models.Analysis.pipeline.ilike(f"%{pipeline}%"))
-
         return records
 
     def observations_to_upload(self):
@@ -574,27 +584,33 @@ class StatusHandler(BaseHandler):
 
         return families_q
 
-    def analyses_to_deliver(self):
+    def analyses_to_deliver(self, pipeline: str = ""):
         """Fetch analyses that have been uploaded but not delivered."""
         records = (
             self.Analysis.query.join(models.Family, models.Family.links, models.FamilySample.sample)
-            .filter(models.Analysis.uploaded_at.isnot(None), models.Sample.delivered_at.is_(None))
+            .filter(
+                models.Analysis.uploaded_at.isnot(None),
+                models.Sample.delivered_at.is_(None),
+                models.Analysis.pipeline.ilike(f"%{pipeline}%"),
+            )
             .order_by(models.Analysis.uploaded_at.desc())
         )
 
         return records
 
-    def analyses_to_delivery_report(self) -> Query:
+    def analyses_to_delivery_report(self, pipeline: str = "") -> Query:
         """Fetch analyses that needs the delivery report to be regenerated."""
 
         analyses_query = self.latest_analyses()
 
         analyses_query = (
             analyses_query.filter(models.Analysis.uploaded_at)
+            .filter(HASTA_IN_PRODUCTION < models.Analysis.started_at)
             .join(models.Family, models.Family.links, models.FamilySample.sample)
             .filter(
                 or_(
-                    models.Sample.data_analysis.is_(None), models.Sample.data_analysis != "Balsamic"
+                    models.Sample.data_analysis.is_(None),
+                    models.Sample.data_analysis.ilike(f"%{pipeline}%"),
                 )
             )
             .filter(
@@ -644,16 +660,14 @@ class StatusHandler(BaseHandler):
 
         Returns microbial samples that have been delivered but not invoiced.
         """
-        records = self.MicrobialSample.query.filter(
-            models.MicrobialSample.delivered_at is not None,
-            models.MicrobialSample.invoice_id == None,
+        records = self.Sample.query.filter(
+            "microbial" in self.Sample.data_analysis,
+            models.Sample.delivered_at is not None,
+            models.Sample.invoice_id == None,
         )
-        customers_to_invoice = [record.microbial_order.customer for record in records.all()]
-        customers_to_invoice = list(set(customers_to_invoice))
+        customers_to_invoice = list(set([record.customer for record in records.all()]))
         if customer:
-            records = records.join(models.MicrobialOrder).filter(
-                models.MicrobialOrder.customer_id == customer.id
-            )
+            records = records.join(models.Family).filter(models.Family.customer_id == customer.id)
         return records, customers_to_invoice
 
     def samples_to_invoice(self, customer: models.Customer = None):
@@ -725,42 +739,45 @@ class StatusHandler(BaseHandler):
     def microbial_samples_to_prepare(self, external=False):
         """Fetch microbial samples from statusdb that have no prepared_at date."""
         records = (
-            self.MicrobialSample.query.join(
-                models.MicrobialSample.application_version, models.ApplicationVersion.application
+            self.Sample.query.join(
+                models.Sample.application_version, models.ApplicationVersion.application
             )
             .filter(
-                models.MicrobialSample.prepared_at == None,
+                "microbial" in self.Sample.data_analysis,
+                models.Sample.prepared_at == None,
                 models.Application.is_external == external,
             )
-            .order_by(models.MicrobialSample.created_at)
+            .order_by(models.Sample.created_at)
         )
         return records
 
     def microbial_samples_to_sequence(self, external=False):
         """Fetch microbial samples from statusdb that have no sequenced_at date."""
         records = (
-            self.MicrobialSample.query.join(
-                models.MicrobialSample.application_version, models.ApplicationVersion.application
+            self.Sample.query.join(
+                models.Sample.application_version, models.ApplicationVersion.application
             )
             .filter(
-                models.MicrobialSample.sequenced_at == None,
+                "microbial" in self.Sample.data_analysis,
+                models.Sample.sequenced_at == None,
                 models.Application.is_external == external,
             )
-            .order_by(models.MicrobialSample.created_at)
+            .order_by(models.Sample.created_at)
         )
         return records
 
     def microbial_samples_to_deliver(self, external=False):
         """Fetch microbial samples from statusdb that have no delivered_at date."""
         records = (
-            self.MicrobialSample.query.join(
-                models.MicrobialSample.application_version, models.ApplicationVersion.application
+            self.Sample.query.join(
+                models.Sample.application_version, models.ApplicationVersion.application
             )
             .filter(
-                models.MicrobialSample.delivered_at == None,
+                "microbial" in self.Sample.data_analysis,
+                models.Sample.delivered_at == None,
                 models.Application.is_external == external,
             )
-            .order_by(models.MicrobialSample.created_at)
+            .order_by(models.Sample.created_at)
         )
         return records
 

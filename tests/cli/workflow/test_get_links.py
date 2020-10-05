@@ -139,7 +139,7 @@ def test_get_links_sample_id_no_links(base_store, helpers, caplog):
         # THEN assert that it was aborted
         get_links(store=base_store, sample_id=sample_id)
         # THEN assert it communicates that the case_id could not be found
-        assert f"Could not find link for sample {sample_id}" in caplog.text
+        assert f"Could not find any links" in caplog.text
 
 
 def test_get_links_no_case_id_no_sample_id(analysis_store, caplog):

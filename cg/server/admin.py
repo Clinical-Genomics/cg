@@ -32,7 +32,7 @@ def view_family_sample_link(unused1, unused2, model, unused3):
 
     return Markup(
         u"<a href='%s'>%s</a>"
-        % (url_for("familysample.index_view", search=model.internal_id), model.internal_id,)
+        % (url_for("familysample.index_view", search=model.internal_id), model.internal_id)
     )
 
 
@@ -181,13 +181,10 @@ class FamilyView(BaseView):
     """Admin view for Model.Family"""
 
     column_default_sort = ("created_at", True)
-    column_editable_list = ["action"]
+    column_editable_list = ["action", "comment"]
     column_exclude_list = ["created_at"]
     column_filters = ["customer.internal_id", "priority", "action"]
-    column_formatters = {
-        "internal_id": view_family_sample_link,
-        "priority": view_human_priority,
-    }
+    column_formatters = {"internal_id": view_family_sample_link, "priority": view_human_priority}
     column_searchable_list = ["internal_id", "name", "customer.internal_id"]
 
     @staticmethod
@@ -197,7 +194,7 @@ class FamilyView(BaseView):
         return (
             Markup(
                 u"<a href='%s'>%s</a>"
-                % (url_for("family.index_view", search=model.family.internal_id), model.family,)
+                % (url_for("family.index_view", search=model.family.internal_id), model.family)
             )
             if model.family
             else u""
@@ -218,9 +215,10 @@ class InvoiceView(BaseView):
     """Admin view for Model.Invoice"""
 
     column_default_sort = ("created_at", True)
+    column_editable_list = ["comment"]
     column_list = (
         "id",
-        "customer_id",
+        "customer",
         "created_at",
         "updated_at",
         "invoiced_at",
@@ -228,7 +226,7 @@ class InvoiceView(BaseView):
         "discount",
         "price",
     )
-    column_searchable_list = ["customer_id", "id"]
+    column_searchable_list = ["customer.internal_id", "customer.name", "id"]
 
     @staticmethod
     def view_invoice_link(unused1, unused2, model, unused3):
@@ -249,61 +247,17 @@ class InvoiceView(BaseView):
         )
 
 
-class MicrobialOrderView(BaseView):
-    """Admin view for Model.MicrobialOrder"""
-
-    column_default_sort = ("created_at", True)
-    column_editable_list = ["ticket_number", "comment"]
-    column_filters = ["customer.internal_id"]
-    column_searchable_list = ["internal_id", "name", "ticket_number"]
-
-    @staticmethod
-    def view_link(unused1, unused2, model, unused3):
-        """column formatter to open this view"""
-        del unused1, unused2, unused3
-        return (
-            Markup(
-                u"<a href='%s'>%s</a>"
-                % (
-                    url_for("microbialorder.index_view", search=model.microbial_order.internal_id),
-                    model.microbial_order,
-                )
-            )
-            if model.microbial_order
-            else u""
-        )
-
-
 class AnalysisView(BaseView):
     """Admin view for Model.Analysis"""
 
     column_default_sort = ("created_at", True)
     column_editable_list = ["is_primary"]
     column_filters = ["pipeline", "pipeline_version", "is_primary"]
-    column_formatters = {
-        "family": FamilyView.view_family_link,
-        "microbial_order": MicrobialOrderView.view_link,
-    }
+    column_formatters = {"family": FamilyView.view_family_link}
     column_searchable_list = [
         "family.internal_id",
         "family.name",
-        "microbial_order.internal_id",
-        "microbial_order.name",
     ]
-
-
-class MicrobialSampleView(BaseView):
-    """Admin view for Model.MicrobialSample"""
-
-    column_default_sort = ("created_at", True)
-    column_editable_list = ["reads", "comment", "reference_genome"]
-    column_filters = ["microbial_order", "microbial_order.customer"]
-    column_formatters = {
-        "invoice": InvoiceView.view_invoice_link,
-        "priority": view_human_priority,
-        "microbial_order": MicrobialOrderView.view_link,
-    }
-    column_searchable_list = ["internal_id", "name", "microbial_order.ticket_number"]
 
 
 class OrganismView(BaseView):
@@ -345,6 +299,7 @@ class SampleView(BaseView):
         "sequenced_at",
         "ticket_number",
         "is_tumour",
+        "comment",
     ]
     column_filters = ["customer.internal_id", "sex", "application_version.application"]
     column_formatters = {
@@ -353,12 +308,7 @@ class SampleView(BaseView):
         "invoice": InvoiceView.view_invoice_link,
         "priority": view_human_priority,
     }
-    column_searchable_list = [
-        "internal_id",
-        "name",
-        "ticket_number",
-        "customer.internal_id",
-    ]
+    column_searchable_list = ["internal_id", "name", "ticket_number", "customer.internal_id"]
     form_excluded_columns = ["is_external", "invoiced_at"]
 
     @staticmethod
@@ -368,7 +318,7 @@ class SampleView(BaseView):
         return (
             Markup(
                 u"<a href='%s'>%s</a>"
-                % (url_for("sample.index_view", search=model.sample.internal_id), model.sample,)
+                % (url_for("sample.index_view", search=model.sample.internal_id), model.sample)
             )
             if model.sample
             else u""

@@ -40,7 +40,7 @@ class HousekeeperAPI:
         return self._store.bundles()
 
     def new_file(
-        self, path: str, checksum: str = None, to_archive: bool = False, tags: list = None,
+        self, path: str, checksum: str = None, to_archive: bool = False, tags: list = None
     ) -> models.File:
         """ Create a new file """
         if tags is None:
@@ -65,7 +65,7 @@ class HousekeeperAPI:
         return new_file
 
     def files(
-        self, *, bundle: str = None, tags: List[str] = None, version: int = None, path: str = None,
+        self, *, bundle: str = None, tags: List[str] = None, version: int = None, path: str = None
     ) -> List[models.File]:
         """ Fetch files """
         return self._store.files(bundle=bundle, tags=tags, version=version, path=path)
@@ -92,7 +92,7 @@ class HousekeeperAPI:
         root_dir: Path, version_obj: models.Version, file_obj: models.File
     ) -> Path:
         """Generate the path to a file that should be included.
-           If the version dir does not exist, create a new version dir in root dir
+        If the version dir does not exist, create a new version dir in root dir
         """
         # generate root directory
         version_root_dir = root_dir / version_obj.relative_root_dir

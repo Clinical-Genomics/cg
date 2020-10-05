@@ -33,7 +33,7 @@
     </div>
 
     Total Price Standard: <input type="text" size="7" name="total" value="0"/>
-    <button class="btn btn-primary float-right" type="submit">Generate invoice</button>    
+    <button class="btn btn-primary float-right" type="submit">Generate invoice</button>
     <tr><input type="checkbox" onClick="check_all()" /> Select all</tr>
     <tr><input type="checkbox" onClick="check_subset()" /> Select Subset</tr>
     <br><br><br>
@@ -61,14 +61,14 @@
             {%if record_type=='Pool'%}
             <input class="form-check-input" onchange="checkTotal()" type="checkbox" name="records" id="{{ record.application_version.price_standard }}"  value="{{ record.id }}"> {{ record.id }}
             {% else %}
-            <input class="form-check-input" onchange="checkTotal()" type="checkbox" name="records" id="{{ record.application_version.price_standard }}" value="{{ record.internal_id }}"> {{ record.internal_id }}            
-            {%endif%}            
+            <input class="form-check-input" onchange="checkTotal()" type="checkbox" name="records" id="{{ record.application_version.price_standard }}" value="{{ record.internal_id }}"> {{ record.internal_id }}
+            {%endif%}
           </label>
         </td>
-        <td> {% if record_type=='Microbial'%}{{ record.microbial_order.customer.name }} {% else %} {{ record.customer.name }}{% endif %}</td>
-        <td>{% if record_type=='Microbial'%}{{ record.microbial_order.id }} {% else %} {{ record.order}}{% endif %}</td>
-        <td>{% if record_type=='Microbial'%}{{ record.microbial_order.ticket_number }} {% else %} {{ record.ticket_number}}{% endif %}</td>
-        <td>{{ record.application_version.application.tag }}</td> 
+        <td>{{record.customer.name}}</td>
+        <td>{{record.order}}</td>
+        <td>{{record.ticket_number}}</td>
+        <td>{{ record.application_version.application.tag }}</td>
         <td>{{record.created_at.date()}}</td>
         <td>{{record.delivered_at.date()}}</td>
         <td>{% if record.application_version.price_standard %}{{record.application_version.price_standard}}{% else %}{% endif %}/
@@ -88,7 +88,7 @@
 
 {% block scripts %}
 
-<script language="JavaScript"> 
+<script language="JavaScript">
 
   function check_all() {
     $("input[name='records']").each(function() {

@@ -217,7 +217,7 @@ class LimsAPI(Lims, OrderHandler):
                 yield lims_sample.id
 
     def update_sample(
-        self, lims_id: str, sex=None, target_reads: int = None, name: str = None, **kwargs,
+        self, lims_id: str, sex=None, target_reads: int = None, name: str = None, **kwargs
     ):
         """Update information about a sample."""
         lims_sample = Sample(self, id=lims_id)
@@ -376,3 +376,12 @@ class LimsAPI(Lims, OrderHandler):
             if artifact.udf.get(udf_key) is not None
         )
         return capture_kits
+
+    def get_sample_comment(self, sample_id: str) -> str:
+        """Get the comment of the sample"""
+        lims_sample = self.sample(sample_id)
+        return lims_sample.get("comment")
+
+    def get_sample_project(self, sample_id: str) -> str:
+        """Get the lims-id for the project of the sample"""
+        return self.sample(sample_id).get("project").get("id")

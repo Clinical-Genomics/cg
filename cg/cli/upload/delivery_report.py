@@ -9,7 +9,7 @@ from cg.apps import hk, scoutapi
 from cg.exc import DeliveryReportError, CgError
 from cg.store import Store
 
-from .utils import _suggest_cases_delivery_report
+from .utils import suggest_cases_delivery_report
 
 LOG = logging.getLogger(__name__)
 SUCCESS = 0
@@ -18,7 +18,13 @@ FAIL = 1
 
 @click.command("delivery-reports")
 @click.option("-p", "--print", "print_console", is_flag=True, help="print list to console")
-@click.option("-f", "--force", "force_report", is_flag=True, help="overrule report validation")
+@click.option(
+    "-f",
+    "--force",
+    "force_report",
+    is_flag=True,
+    help="overrule report validation",
+)
 @click.pass_context
 def delivery_reports(context, print_console, force_report):
     """Generate delivery reports for all cases that need one"""
@@ -26,7 +32,7 @@ def delivery_reports(context, print_console, force_report):
     click.echo(click.style("----------------- DELIVERY REPORTS ------------------------"))
 
     exit_code = SUCCESS
-    for analysis_obj in context.obj["status"].analyses_to_delivery_report():
+    for analysis_obj in context.obj["status"].analyses_to_delivery_report(pipeline="mip"):
         case_id = analysis_obj.family.internal_id
         LOG.info("Uploading delivery report for case: %s", case_id)
         try:
@@ -38,21 +44,51 @@ def delivery_reports(context, print_console, force_report):
                 force_report=force_report,
             )
         except FileNotFoundError as error:
-            LOG.error("Missing file for delivery report creation for case: %s, %s", case_id, error)
+            LOG.error(
+                "Missing file for delivery report creation for case: %s, %s",
+                case_id,
+                error,
+            )
             exit_code = FAIL
         except DeliveryReportError as error:
-            LOG.error("Creation of delivery report failed for case: %s, %s", case_id, error.message)
+            LOG.error(
+                "Creation of delivery report failed for case: %s, %s",
+                case_id,
+                error.message,
+            )
             exit_code = FAIL
         except CgError as error:
-            LOG.error("Uploading delivery report failed for case: %s, %s", case_id, error.message)
+            LOG.error(
+                "Uploading delivery report failed for case: %s, %s",
+                case_id,
+                error.message,
+            )
+            exit_code = FAIL
+        except Exception:
+            LOG.error(
+                "Unspecified error when uploading delivery report for case: %s",
+                case_id,
+            )
             exit_code = FAIL
     sys.exit(exit_code)
 
 
 @click.command("delivery-report")
 @click.argument("family_id", required=False)
-@click.option("-p", "--print", "print_console", is_flag=True, help="Print report to console")
-@click.option("-f", "--force", "force_report", is_flag=True, help="Overrule report validation")
+@click.option(
+    "-p",
+    "--print",
+    "print_console",
+    is_flag=True,
+    help="print report to console",
+)
+@click.option(
+    "-f",
+    "--force",
+    "force_report",
+    is_flag=True,
+    help="overrule report validation",
+)
 @click.option(
     "--analysis-started-at", help="Use the analysis started at (i.e.  '2020-05-28  12:00:46')"
 )
@@ -119,7 +155,9 @@ def delivery_report(context, family_id, print_console, force_report, analysis_st
         version_obj = hk_api.version(family_id, analysis_date)
 
         uploaded_delivery_report_files = hk_api.get_files(
-            bundle=family_id, tags=[delivery_report_tag_name], version=version_obj.id
+            bundle=family_id,
+            tags=[delivery_report_tag_name],
+            version=version_obj.id,
         )
         number_of_delivery_reports = len(uploaded_delivery_report_files.all())
         is_bundle_missing_delivery_report = number_of_delivery_reports == 0
@@ -143,7 +181,7 @@ def delivery_report(context, family_id, print_console, force_report, analysis_st
     report_api = context.obj["report_api"]
 
     if not family_id:
-        _suggest_cases_delivery_report(context)
+        suggest_cases_delivery_report(context)
         context.abort()
 
     status_api = context.obj["status"]
@@ -160,6 +198,7 @@ def delivery_report(context, family_id, print_console, force_report, analysis_st
         return
 
     tb_api = context.obj["tb_api"]
+    status_api = context.obj["status"]
 
     delivery_report_file = report_api.create_delivery_report_file(
         family_id,
@@ -186,7 +225,11 @@ def delivery_report(context, family_id, print_console, force_report, analysis_st
 @click.command("delivery-report-to-scout")
 @click.argument("case_id", required=False)
 @click.option(
-    "-d", "--dry-run", "dry_run", is_flag=True, help="run command without uploading to " "scout"
+    "-d",
+    "--dry-run",
+    "dry_run",
+    is_flag=True,
+    help="run command without uploading to scout",
 )
 @click.pass_context
 def delivery_report_to_scout(context, case_id, dry_run):
@@ -200,7 +243,9 @@ def delivery_report_to_scout(context, case_id, dry_run):
         delivery_report_tag_name = "delivery-report"
         version_obj = hk_api.last_version(family_id)
         uploaded_delivery_report_files = hk_api.get_files(
-            bundle=family_id, tags=[delivery_report_tag_name], version=version_obj.id
+            bundle=family_id,
+            tags=[delivery_report_tag_name],
+            version=version_obj.id,
         )
 
         if uploaded_delivery_report_files.count() == 0:
@@ -209,7 +254,7 @@ def delivery_report_to_scout(context, case_id, dry_run):
         return uploaded_delivery_report_files[0].full_path
 
     if not case_id:
-        _suggest_cases_delivery_report(context)
+        suggest_cases_delivery_report(context)
         context.abort()
 
     hk_api = context.obj["housekeeper_api"]

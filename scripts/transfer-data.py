@@ -18,6 +18,7 @@ import datetime as dt
 import logging
 import re
 
+import cg.meta.workflow.microsalt
 import click
 import pymongo
 import ruamel.yaml
@@ -329,7 +330,9 @@ class SampleImporter(Store):
         for customer_obj in [self.customer("cust002")]:
             # if self.samples(customer=customer_obj).first():
             #     continue
-            samples = self.lims.get_samples(udf=dict(customer=customer_obj.internal_id))
+            samples = cg.meta.workflow.microsalt.get_samples(
+                udf=dict(customer=customer_obj.internal_id)
+            )
             count = len(samples)
             label = f"samples | {customer_obj.internal_id}"
             with click.progressbar(samples, length=count, label=label) as progressbar:
@@ -435,8 +438,11 @@ class FamilyImporter(Store):
                         continue
                     samples = [
                         self.lims.sample(family_sample.id)
-                        for family_sample in self.lims.get_samples(
-                            udf={"customer": sample["customer"], "familyID": sample["family"],}
+                        for family_sample in cg.meta.workflow.microsalt.get_samples(
+                            udf={
+                                "customer": sample["customer"],
+                                "familyID": sample["family"],
+                            }
                         )
                     ]
                     samples = [

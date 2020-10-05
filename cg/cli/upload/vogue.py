@@ -35,11 +35,7 @@ def vogue(context):
 
 @vogue.command("genotype", short_help="Getting genotype data from the genotype database.")
 @click.option(
-    "-d",
-    "--days",
-    type=int,
-    required="True",
-    help="load X days old sampels from genotype to vogue",
+    "-d", "--days", type=int, required="True", help="load X days old sampels from genotype to vogue"
 )
 @click.pass_context
 def genotype(context, days: int):
@@ -62,7 +58,7 @@ def apptags(context):
 
 @vogue.command("flowcells", short_help="Getting flowcell data from the lims.")
 @click.option(
-    "-d", "--days", type=int, required="True", help="load X days old runs from lims to vogue",
+    "-d", "--days", type=int, required="True", help="load X days old runs from lims to vogue"
 )
 @click.pass_context
 def flowcells(context, days: int):
@@ -75,7 +71,7 @@ def flowcells(context, days: int):
 
 @vogue.command("samples", short_help="Getting sample data from lims.")
 @click.option(
-    "-d", "--days", type=int, required="True", help="load X days old sampels from lims to vogue",
+    "-d", "--days", type=int, required="True", help="load X days old sampels from lims to vogue"
 )
 @click.pass_context
 def samples(context, days: int):
@@ -88,7 +84,7 @@ def samples(context, days: int):
 
 @vogue.command("reagent-labels", short_help="Getting reagent_label data from lims.")
 @click.option(
-    "-d", "--days", type=int, required=True, help="load X days old sampels from lims to vogue",
+    "-d", "--days", type=int, required=True, help="load X days old sampels from lims to vogue"
 )
 @click.pass_context
 def reagent_labels(context, days: int):
@@ -107,7 +103,7 @@ def reagent_labels(context, days: int):
     help="Case name or project name for which the analysis results will load",
 )
 @click.option(
-    "--cleanup/--no-cleanup", default=False, help="Cleanup processed case data while loading",
+    "--cleanup/--no-cleanup", default=False, help="Cleanup processed case data while loading"
 )
 @click.option(
     "-t",
@@ -214,10 +210,10 @@ def bioinfo_all(context, dry):
 
 def _get_multiqc_latest_file(hk_api: hk.HousekeeperAPI, case_name: str) -> str:
     """Get latest multiqc_data.json path for a case_name
-       Args:
-           case_name(str): onemite
-       Returns:
-           multiqc_data_path(str): /path/to/multiqc.json
+    Args:
+        case_name(str): onemite
+    Returns:
+        multiqc_data_path(str): /path/to/multiqc.json
     """
     version_obj = hk_api.last_version(case_name)
     multiqc_json_file = hk_api.get_files(
@@ -232,10 +228,10 @@ def _get_multiqc_latest_file(hk_api: hk.HousekeeperAPI, case_name: str) -> str:
 
 def _get_samples(store: Store, case_name: str) -> str:
     """Get a sample string for case_name
-       Args:
-           case_name(str): onemite
-       Returns:
-           sample_names(str): ACC12345,ACC45679
+    Args:
+        case_name(str): onemite
+    Returns:
+        sample_names(str): ACC12345,ACC45679
     """
 
     link_objs = get_links(store, case_name)
@@ -247,11 +243,11 @@ def _get_samples(store: Store, case_name: str) -> str:
 
 def _get_analysis_workflow_details(status_api: Store, case_name: str) -> str:
     """Get lowercase workflow name for a case_name
-       Args:
-           case_name(str): onemite
-       Returns:
-           workflow_name(str): balsamic
-           workflow_version(str): v3.14.15
+    Args:
+        case_name(str): onemite
+    Returns:
+        workflow_name(str): balsamic
+        workflow_version(str): v3.14.15
     """
     # Workflow that generated these results
     family_obj = status_api.family(case_name)

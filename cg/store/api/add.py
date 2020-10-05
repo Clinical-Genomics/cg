@@ -180,7 +180,7 @@ class AddHandler(BaseHandler):
         """Build a new Flowcell record."""
 
         new_record = self.Flowcell(
-            name=name, sequencer_name=sequencer, sequencer_type=sequencer_type, sequenced_at=date,
+            name=name, sequencer_name=sequencer, sequencer_type=sequencer_type, sequenced_at=date
         )
         return new_record
 
@@ -219,7 +219,7 @@ class AddHandler(BaseHandler):
         """Build a new panel record."""
 
         new_record = self.Panel(
-            name=name, abbrev=abbrev, current_version=version, date=date, gene_count=genes,
+            name=name, abbrev=abbrev, current_version=version, date=date, gene_count=genes
         )
         new_record.customer = customer
         return new_record
@@ -273,7 +273,7 @@ class AddHandler(BaseHandler):
         self,
         customer: models.Customer,
         samples: List[models.Sample] = None,
-        microbial_samples: List[models.MicrobialSample] = None,
+        microbial_samples: List[models.Sample] = None,
         pools: List[models.Pool] = None,
         comment: str = None,
         discount: int = 0,
@@ -289,61 +289,10 @@ class AddHandler(BaseHandler):
         for sample in samples or []:
             new_invoice.samples.append(sample)
         for microbial_sample in microbial_samples or []:
-            new_invoice.microbial_samples.append(microbial_sample)
+            new_invoice.samples.append(microbial_sample)
         for pool in pools or []:
             new_invoice.pools.append(pool)
         return new_invoice
-
-    def add_microbial_order(
-        self,
-        customer: models.Customer,
-        name: str,
-        ordered: dt.datetime,
-        internal_id: str = None,
-        ticket_number: int = None,
-        comment: str = None,
-    ) -> models.MicrobialOrder:
-        """Build a new Order record."""
-
-        new_order = self.MicrobialOrder(
-            name=name,
-            ordered_at=ordered,
-            internal_id=internal_id,
-            ticket_number=ticket_number,
-            comment=comment,
-        )
-        new_order.customer = customer
-        return new_order
-
-    def add_microbial_sample(
-        self,
-        name: str,
-        organism: models.Organism,
-        internal_id: str,
-        reference_genome: str,
-        application_version: models.ApplicationVersion,
-        priority: str = None,
-        comment: str = None,
-        **kwargs,
-    ) -> models.MicrobialSample:
-        """Build a new MicrobialSample record.
-
-        To commit you also need to assign the sample to an Order.
-        """
-        internal_id = internal_id or utils.get_unique_id(self.sample)
-        priority_human = priority or "standard"
-        priority_db = PRIORITY_MAP[priority_human]
-        new_sample = self.MicrobialSample(
-            name=name,
-            internal_id=internal_id,
-            reference_genome=reference_genome,
-            priority=priority_db,
-            comment=comment,
-            **kwargs,
-        )
-        new_sample.organism = organism
-        new_sample.application_version = application_version
-        return new_sample
 
     def add_organism(
         self,

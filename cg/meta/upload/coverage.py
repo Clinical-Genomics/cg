@@ -11,7 +11,7 @@ class UploadCoverageApi:
     """Upload coverage API"""
 
     def __init__(
-        self, status_api: Store, hk_api: hk.HousekeeperAPI, chanjo_api: coverage.ChanjoAPI,
+        self, status_api: Store, hk_api: hk.HousekeeperAPI, chanjo_api: coverage.ChanjoAPI
     ):
         self.status_api = status_api
         self.hk_api = hk_api
@@ -20,11 +20,7 @@ class UploadCoverageApi:
     def data(self, analysis_obj: models.Analysis) -> dict:
         """Get data for uploading coverage."""
         family_id = analysis_obj.family.internal_id
-        data = {
-            "family": family_id,
-            "family_name": analysis_obj.family.name,
-            "samples": [],
-        }
+        data = {"family": family_id, "family_name": analysis_obj.family.name, "samples": []}
         for link_obj in analysis_obj.family.links:
             analysis_date = analysis_obj.started_at or analysis_obj.completed_at
             hk_version = self.hk_api.version(family_id, analysis_date)

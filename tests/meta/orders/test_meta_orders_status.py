@@ -57,7 +57,7 @@ def test_microbial_samples_to_status(microbial_order_to_submit):
     assert sample_data["organism_id"] == "M.upium"
     assert sample_data["reference_genome"] == "NC_111"
     assert sample_data["application"] == "MWRNXTR003"
-    assert sample_data["data_analysis"] == "fastq"
+    assert sample_data["data_analysis"] == "microbial|fastq"
     assert sample_data["comment"] == "plate comment"
 
 
@@ -200,25 +200,25 @@ def test_store_samples_bad_apptag(orders_api, base_store, fastq_status_data):
 def test_store_microbial_samples(orders_api, base_store, microbial_status_data):
 
     # GIVEN a basic store with no samples and a microbial order and one Organism
-    assert base_store.microbial_samples().count() == 0
-    assert base_store.microbial_orders().count() == 0
+    assert base_store.samples().count() == 0
+    assert base_store.families().count() == 0
     assert base_store.organisms().count() == 1
 
     # WHEN storing the order
-    new_order = orders_api.store_microbial_order(
+    new_samples = orders_api.store_microbial_samples(
         customer=microbial_status_data["customer"],
         order=microbial_status_data["order"],
         ordered=dt.datetime.now(),
         ticket=1234348,
-        lims_project="dummy_lims_project",
         samples=microbial_status_data["samples"],
     )
 
-    # THEN it should store the samples and the used previously unknown organisms
-    assert new_order
-    assert base_store.microbial_orders().count() == 1
-    assert len(new_order.microbial_samples) == 5
-    assert base_store.microbial_samples().count() == 5
+    # THEN it should store the samples under a case (family) and the used previously unknown
+    # organisms
+    assert new_samples
+    assert base_store.families().count() == 1
+    assert len(new_samples) == 5
+    assert base_store.samples().count() == 5
     assert base_store.organisms().count() == 3
 
 
@@ -227,29 +227,27 @@ def test_store_microbial_samples_data_analysis_stored(
 ):
 
     # GIVEN a basic store with no samples and a microbial order and one Organism
-    assert base_store.microbial_samples().count() == 0
-    assert base_store.microbial_orders().count() == 0
-    assert base_store.organisms().count() == 1
+    assert base_store.samples().count() == 0
+    assert base_store.families().count() == 0
 
     # WHEN storing the order
-    new_order = orders_api.store_microbial_order(
+    new_samples = orders_api.store_microbial_samples(
         customer=microbial_status_data["customer"],
         order=microbial_status_data["order"],
         ordered=dt.datetime.now(),
         ticket=1234348,
-        lims_project="dummy_lims_project",
         samples=microbial_status_data["samples"],
     )
 
-    # THEN it should store the samples and the used previously unknown organisms
-    assert new_order.microbial_samples[0].data_analysis == "fastq"
+    # THEN it should store the samples under a case with the microbial data_analysis type
+    assert base_store.samples().count() > 0
+    assert base_store.families().count() > 0
+    assert new_samples[0].data_analysis == "microbial|fastq"
 
 
-def test_store_microbial_samples_bad_apptag(orders_api, base_store, microbial_status_data):
+def test_store_microbial_samples_bad_apptag(orders_api, microbial_status_data):
 
-    # GIVEN a basic store with no samples and a microbial order
-    assert base_store.microbial_samples().count() == 0
-    assert base_store.microbial_orders().count() == 0
+    # GIVEN a basic store missing the application on the samples
 
     for sample in microbial_status_data["samples"]:
         sample["application"] = "nonexistingtag"
@@ -257,12 +255,11 @@ def test_store_microbial_samples_bad_apptag(orders_api, base_store, microbial_st
     # THEN it should raise OrderError
     with pytest.raises(OrderError):
         # WHEN storing the order
-        orders_api.store_microbial_order(
+        orders_api.store_microbial_samples(
             customer=microbial_status_data["customer"],
             order=microbial_status_data["order"],
             ordered=dt.datetime.now(),
             ticket=1234348,
-            lims_project="dummy_lims_project",
             samples=microbial_status_data["samples"],
         )
 
@@ -270,20 +267,20 @@ def test_store_microbial_samples_bad_apptag(orders_api, base_store, microbial_st
 def test_store_microbial_sample_priority(orders_api, base_store, microbial_status_data):
 
     # GIVEN a basic store with no samples
-    assert base_store.microbial_samples().count() == 0
+    assert base_store.samples().count() == 0
 
     # WHEN storing the order
-    orders_api.store_microbial_order(
+    orders_api.store_microbial_samples(
         customer=microbial_status_data["customer"],
         order=microbial_status_data["order"],
         ordered=dt.datetime.now(),
         ticket=1234348,
-        lims_project="dummy_lims_project",
         samples=microbial_status_data["samples"],
     )
 
     # THEN it should store the sample priority
-    microbial_sample = base_store.microbial_samples().first()
+    assert base_store.samples().count() > 0
+    microbial_sample = base_store.samples().first()
 
     assert microbial_sample.priority_human == "research"
 
