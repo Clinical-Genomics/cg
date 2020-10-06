@@ -63,7 +63,7 @@ class TrailblazerAPI:
                 "query": query,
                 "deleted": deleted,
                 "temp": temp,
-                "before": before,
+                "before": str(before) if before else None,
                 "is_visible": is_visible,
             }
         }
@@ -78,7 +78,7 @@ class TrailblazerAPI:
         return response
 
     def find_analysis(self, case_id: str, started_at: dt.datetime, status: str):
-        request_body = {"case_id": case_id, "started_at": started_at, "status": status}
+        request_body = {"case_id": case_id, "started_at": str(started_at), "status": status}
         response = self.query_trailblazer(command="find-analysis", request_body=request_body)
         return response
 
@@ -90,7 +90,7 @@ class TrailblazerAPI:
 
     def delete_analysis(self, case_id: str, date: dt.datetime):
         """Raises TrailblazerAPIHTTPError"""
-        request_body = {"case_id": case_id, "date": date}
+        request_body = {"case_id": case_id, "date": str(date)}
         response = self.query_trailblazer(command="delete-analysis", request_body=request_body)
         return response
 
