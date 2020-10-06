@@ -82,7 +82,10 @@ def completed(context):
         with Path(analysis_obj.config_path).open() as config_stream:
             try:
                 context.invoke(analysis, config_stream=config_stream)
-            except (Exception, click.Abort):
+            except (
+                    Exception,
+                    click.Abort
+            ):
                 LOG.error("case storage failed: %s", analysis_obj.family, exc_info=True)
                 exit_code = EXIT_FAIL
     if exit_code:
