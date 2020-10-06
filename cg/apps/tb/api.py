@@ -1,11 +1,13 @@
 """ Trailblazer API for cg """ ""
-
+from typing import Any
 import logging
 import json
 from google.auth.crypt import RSASigner
 from google.auth import jwt
 import requests
+from requests import Response
 import datetime as dt
+from cg.exc import TrailblazerAPIHTTPError
 
 LOG = logging.getLogger(__name__)
 
@@ -21,22 +23,28 @@ class TrailblazerAPI:
         self.host = config["trailblazer"]["host"]
 
     @property
-    def auth_header(self):
+    def auth_header(self) -> dict:
         signer = RSASigner.from_service_account_file(self.service_account_auth_file)
         payload = {"email": self.service_account}
         jwt_token = jwt.encode(signer=signer, payload=payload).decode("ascii")
         auth_header = {"Authorization": f"Bearer {jwt_token}"}
-        LOG.info(f"Using header {json.dumps(auth_header)}")
         return auth_header
 
-    def query_trailblazer(self, command: str, request_body: dict) -> str:
-        url = self.host + "/query-" + command
+    def query_trailblazer(self, command: str, request_body: dict) -> Any:
+        url = self.host + "/" + command
+        LOG.debug(f"REQUEST HEADER {self.auth_header}")
+        LOG.debug(f"POST: URL={url}; JSON={request_body}")
         response = requests.post(
             url=url,
             headers=self.auth_header,
             json=request_body,
         )
-        return response.text
+        LOG.debug(f"RESPONSE STATUS CODE {response.status_code}")
+        if not response.ok:
+            raise TrailblazerAPIHTTPError(
+                f"Request {command} failed with status code {response.status_code}: {response.text}"
+            )
+        return json.loads(response.text)
 
     def analyses(
         self,
@@ -59,30 +67,44 @@ class TrailblazerAPI:
                 "is_visible": is_visible,
             }
         }
-        response_text = self.query_trailblazer(command="analyses", request_body=request_body)
-        LOG.info(response_text)
+        response = self.query_trailblazer(command="query-analyses", request_body=request_body)
+        return response
 
-    def get_latest_analysis(self, case_id: str):
+    def get_latest_analysis(self, case_id: str) -> dict:
         request_body = {
             "case_id": case_id,
         }
-        response_text = self.query_trailblazer(
-            command="get-latest-analysis", request_body=request_body
-        )
-        LOG.info(response_text)
+        response = self.query_trailblazer(command="get-latest-analysis", request_body=request_body)
+        return response
 
-    def has_latest_analysis_started(self, case_id: str):
-        pass
+    def find_analysis(self, case_id: str, started_at: dt.datetime, status: str):
+        request_body = {"case_id": case_id, "started_at": started_at, "status": status}
+        response = self.query_trailblazer(command="find-analysis", request_body=request_body)
+        return response
+
+    def has_latest_analysis_started(self, case_id: str) -> bool:
+        latest_analysis = self.get_latest_analysis(case_id=case_id)
+        latest_analysis_status = latest_analysis.get("status")
+        if latest_analysis_status in self.__STARTED_STATUSES:
+            return True
 
     def delete_analysis(self, case_id: str, date: dt.datetime):
-        pass
-
-    def find_analysis(self, case_id, started_at, status):
-        pass
+        """Raises TrailblazerAPIHTTPError"""
+        request_body = {"case_id": case_id, "date": date}
+        response = self.query_trailblazer(command="delete-analysis", request_body=request_body)
+        return response
 
     def mark_analyses_deleted(self, case_id: str) -> None:
         """Mark all analyses for case deleted without removing analysis files"""
-        pass
+        request_body = {
+            "case_id": case_id,
+        }
+        response = self.query_trailblazer(
+            command="mark-analyses-deleted", request_body=request_body
+        )
+        return response
 
     def add_pending_analysis(self, case_id: str, email: str = None) -> None:
-        pass
+        request_body = {"case_id": case_id, "email": email}
+        response = self.query_trailblazer(command="add-pending-analysis", request_body=request_body)
+        return response

@@ -139,3 +139,7 @@ class PedigreeConfigError(CgError):
     def __init__(self, message, errors=None):
         self.message = message
         self.errors = errors
+
+
+class TrailblazerAPIHTTPError(CgError):
+    """Raised when Trailblazer REST API response code is not 200"""

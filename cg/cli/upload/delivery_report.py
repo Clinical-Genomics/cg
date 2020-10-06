@@ -2,6 +2,7 @@
 import datetime as dt
 import logging
 import sys
+from pathlib import Path
 
 import click
 
@@ -181,16 +182,15 @@ def delivery_report(context, family_id, print_console, force_report):
         click.echo(delivery_report_html)
         return
 
-    tb_api = context.obj["tb_api"]
     status_api = context.obj["status"]
+    mip_dna_root_dir = context.obj["mip-rd-dna"]["root"]
+    hk_api = context.obj["housekeeper_api"]
 
     delivery_report_file = report_api.create_delivery_report_file(
         family_id,
-        file_path=tb_api.get_family_root_dir(family_id),
+        file_path=Path(mip_dna_root_dir, family_id),
         accept_missing_data=force_report,
     )
-
-    hk_api = context.obj["housekeeper_api"]
     added_file = _add_delivery_report_to_hk(delivery_report_file, hk_api, family_id)
 
     if added_file:

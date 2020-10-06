@@ -101,6 +101,7 @@ def fixture_base_cli_context(analysis_store: Store, housekeeper_api, upload_scou
         "housekeeper_api": housekeeper_api,
         "tb_api": MockTB(),
         "status": analysis_store,
+        "mip-rd-dna": {"root": "hej"},
     }
 
 
