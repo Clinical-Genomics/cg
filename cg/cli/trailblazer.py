@@ -26,3 +26,12 @@ def get_latest_analysis(context, case_id):
 def mark_analyses_deleted(context, case_id):
     analyses = context.obj["trailblazer_api"].mark_analyses_deleted(case_id=case_id)
     LOG.info(f"Marked deleted {analyses}")
+
+
+@trailblazer.command("add-pending-analysis")
+@click.argument("case_id", type=str)
+@click.argument("email", type=str)
+@click.pass_context
+def add_pending_analysis(context, case_id, email):
+    analysis_obj = context.obj["trailblazer_api"].add_pending_analysis(case_id=case_id, email=email)
+    LOG.info(f"Created pending analysis {analysis_obj}")

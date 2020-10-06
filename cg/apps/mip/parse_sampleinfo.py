@@ -90,7 +90,7 @@ def parse_sampleinfo_light(data: dict) -> dict:
     return outdata
 
 
-def get_case_from_sampleinfo(sample_info: dict) -> str:
+def get_case_from_sampleinfo(sample_info: dict) -> Optional[str]:
     """Get case id from sampleinfo"""
     if "case" in sample_info:
         return sample_info["case"]
