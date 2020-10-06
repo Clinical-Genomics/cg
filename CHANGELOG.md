@@ -13,8 +13,12 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## [13.5.0]
+## [13.6.0]
 
+### Added
+- Store microsalt analyses in Housekeeper with a provided deliverables file
+
+## [13.5.0]
 
 ### Added
 - Possibility to give case-id as argument when setting values on multiple samples by the CLI
