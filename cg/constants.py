@@ -99,7 +99,9 @@ HK_FASTQ_TAGS = ["fastq"]
 # mandatory flag
 MIP_DNA_TAGS = {
     ("chanjo_sexcheck",): {"tags": ["chanjo", "sex-check"], "is_mandatory": False},
-    ("chromograph_ar",): {"tags": ["chromograph"], "is_mandatory": False},
+    ("chromograph_upd", "sites",): {"tags": ["chromograph", "upd", "sites"], "is_mandatory": False},
+    ("chromograph_upd", "regions",): {"tags": ["chromograph", "upd", "regions"], "is_mandatory": False},
+    ("chromograph_cov", "tcov"): {"tags": ["chromograph", "tcov"], "is_mandatory": False},
     ("endvariantannotationblock", "clinical"): {
         "tags": ["vcf-snv-clinical"],
         "index_tags": ["vcf-snv-clinical-index"],
@@ -141,6 +143,7 @@ MIP_DNA_TAGS = {
     ("peddy_ar", "peddy"): {"tags": ["peddy", "ped"], "is_mandatory": True},
     ("peddy_ar", "sex_check"): {"tags": ["peddy", "sex-check"], "is_mandatory": True},
     ("qccollect_ar",): {"tags": ["qcmetrics"], "is_mandatory": True},
+    ("rhocall_viz",): {"tags": ["rhocall-viz"], "is_mandatory": False},
     ("sambamba_depth", "coverage"): {"tags": ["coverage", "sambamba-depth"], "is_mandatory": True},
     ("samtools_subsample_mt",): {
         "tags": ["bam-mt"],
@@ -178,6 +181,8 @@ MIP_DNA_TAGS = {
         "tags": ["tiddit-coverage", "bigwig"],
         "is_mandatory": False,
     },
+    ("upd_ar", "regions",): {"tags": ["upd", "regions"], "is_mandatory": False},
+    ("upd_ar", "sites",): {"tags": ["upd", "sites"], "is_mandatory": False},
     ("version_collect_ar",): {"tags": ["exe-ver"], "is_mandatory": True},
     ("vcf2cytosure_ar",): {"tags": ["vcf2cytosure"], "is_mandatory": False},
 }
