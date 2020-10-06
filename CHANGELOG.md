@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [13.7.0]
+### Fixed
+- Set flowcell status to `ondisk` when retrieving archived flowcell from PDC has finished.
+
 ## [13.6.0]
 
 ### Added

@@ -12,10 +12,11 @@ LOG = logging.getLogger(__name__)
 class BackupApi:
     """ Class for retrieving FCs from backup """
 
-    def __init__(self, status: Store, pdc_api: PdcApi, max_flowcells_on_disk: int):
+    def __init__(self, status: Store, pdc_api: PdcApi, max_flowcells_on_disk: int, root_dir: str):
         self.status = status
         self.pdc = pdc_api
         self.max_flowcells_on_disk = max_flowcells_on_disk
+        self.root_dir = root_dir
 
     def maximum_flowcells_ondisk(self) -> bool:
         """Check if there's too many flowcells already "ondisk"."""
@@ -55,24 +56,36 @@ class BackupApi:
             LOG.info("maximum flowcells ondisk reached")
             return None
 
-        if not flowcell_obj:
+        if flowcell_obj:
+            flowcell_obj.status = "processing"
+            if not dry_run:
+                self.status.commit()
+
+        else:
             flowcell_obj = self.pop_flowcell(dry_run)
             if flowcell_obj is None:
                 LOG.info("no flowcells requested")
                 return None
 
         if not dry_run:
-            LOG.info(f"{flowcell_obj.name}: retrieving from PDC")
+            LOG.info("%s: retrieving from PDC", flowcell_obj.name)
 
-        tic = time.time()
+        start_time = time.time()
 
         try:
-            self.pdc.retrieve_flowcell(flowcell_obj.name, flowcell_obj.sequencer_type, dry_run)
+            self.pdc.retrieve_flowcell(
+                flowcell_obj.name, flowcell_obj.sequencer_type, self.root_dir, dry_run
+            )
+            if not dry_run:
+                flowcell_obj.status = "ondisk"
+                self.status.commit()
+                LOG.info('Status for flowcell %s set to "ondisk"', flowcell_obj.name)
         except subprocess.CalledProcessError as error:
             LOG.error("%s: retrieval failed", flowcell_obj.name)
             if not dry_run:
                 flowcell_obj.status = "requested"
                 self.status.commit()
             raise error
-        toc = time.time()
-        return toc - tic
+
+        end_time = time.time()
+        return end_time - start_time
