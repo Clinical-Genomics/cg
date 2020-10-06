@@ -61,7 +61,7 @@ class BackupApi:
             if not dry_run:
                 self.status.commit()
 
-        if not flowcell_obj:
+        else:
             flowcell_obj = self.pop_flowcell(dry_run)
             if flowcell_obj is None:
                 LOG.info("no flowcells requested")
