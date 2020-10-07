@@ -10,13 +10,17 @@ class PdcApi:
     """ Group PDC related commands """
 
     @classmethod
-    def retrieve_flowcell(cls, flowcell_id: str, sequencer_type: str, dry: bool = False) -> str:
+    def retrieve_flowcell(
+        cls, flowcell_id: str, sequencer_type: str, root_dir: str, dry: bool = False
+    ) -> str:
         """Fetch a flowcell back from the backup solution."""
-        server, path = {
-            "novaseq": ("thalamus", "/home/hiseq.clinical/novaseq/runs/"),
-            "hiseqga": ("thalamus", "/home/hiseq.clinica/RUNS/"),
-            "hiseqx": ("hasta", "/home/proj/production/flowcells/hiseqx/"),
+        server = {
+            "novaseq": "thalamus",
+            "hiseqga": "thalamus",
+            "hiseqx": "hasta",
         }.get(sequencer_type)
+        path = root_dir[sequencer_type]
+
         if server is None:
             raise ValueError(f"{sequencer_type}: invalid sequencer type")
 

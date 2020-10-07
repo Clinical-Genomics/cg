@@ -14,7 +14,7 @@ from cg.exc import (
     PipelineUnknownError,
     MandatoryFilesMissing,
 )
-from cg.meta.store.mip import gather_files_and_bundle_in_housekeeper
+from cg.meta.store.base import gather_files_and_bundle_in_housekeeper
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -48,6 +48,7 @@ def analysis(context, config_stream):
             config_stream,
             hk_api,
             status,
+            workflow="mip",
         )
     except (
         AnalysisNotFinishedError,
