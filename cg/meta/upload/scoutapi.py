@@ -6,7 +6,8 @@ from pathlib import Path
 import requests
 from ruamel import yaml
 
-from cg.apps import hk, scoutapi
+from cg.apps.hk import HousekeeperAPI
+from cg.apps.scoutapi import ScoutAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
@@ -20,8 +21,8 @@ class UploadScoutAPI:
 
     def __init__(
         self,
-        hk_api: hk.HousekeeperAPI,
-        scout_api: scoutapi.ScoutAPI,
+        hk_api: HousekeeperAPI,
+        scout_api: ScoutAPI,
         lims_api: LimsAPI,
         analysis_api: MipAnalysisAPI,
         madeline_api: MadelineAPI,
@@ -126,7 +127,7 @@ class UploadScoutAPI:
         yml.dump(upload_config, file_path)
 
     @staticmethod
-    def add_scout_config_to_hk(config_file_path: Path, hk_api: hk.HousekeeperAPI, case_id: str):
+    def add_scout_config_to_hk(config_file_path: Path, hk_api: HousekeeperAPI, case_id: str):
         """Add scout load config to hk bundle"""
         tag_name = UploadScoutAPI.get_load_config_tag()
         version_obj = hk_api.last_version(bundle=case_id)

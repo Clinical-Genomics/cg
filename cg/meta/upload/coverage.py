@@ -1,7 +1,8 @@
 """Upload coverage API"""
 import logging
 
-from cg.apps import hk, coverage
+from cg.apps.hk import HousekeeperAPI
+from cg.apps.coverage import ChanjoAPI
 from cg.store import models, Store
 
 LOG = logging.getLogger(__name__)
@@ -10,9 +11,7 @@ LOG = logging.getLogger(__name__)
 class UploadCoverageApi:
     """Upload coverage API"""
 
-    def __init__(
-        self, status_api: Store, hk_api: hk.HousekeeperAPI, chanjo_api: coverage.ChanjoAPI
-    ):
+    def __init__(self, status_api: Store, hk_api: HousekeeperAPI, chanjo_api: ChanjoAPI):
         self.status_api = status_api
         self.hk_api = hk_api
         self.chanjo_api = chanjo_api

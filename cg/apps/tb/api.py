@@ -5,7 +5,6 @@ import json
 from google.auth.crypt import RSASigner
 from google.auth import jwt
 import requests
-from requests import Response
 import datetime as dt
 from cg.exc import TrailblazerAPIHTTPError
 
@@ -88,13 +87,13 @@ class TrailblazerAPI:
         if latest_analysis_status in self.__STARTED_STATUSES:
             return True
 
-    def delete_analysis(self, case_id: str, date: dt.datetime):
+    def delete_analysis(self, case_id: str, date: dt.datetime) -> dict:
         """Raises TrailblazerAPIHTTPError"""
         request_body = {"case_id": case_id, "date": str(date)}
         response = self.query_trailblazer(command="delete-analysis", request_body=request_body)
         return response
 
-    def mark_analyses_deleted(self, case_id: str) -> None:
+    def mark_analyses_deleted(self, case_id: str) -> dict:
         """Mark all analyses for case deleted without removing analysis files"""
         request_body = {
             "case_id": case_id,

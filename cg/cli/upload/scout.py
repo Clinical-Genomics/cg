@@ -5,7 +5,7 @@ from pathlib import Path
 import click
 import yaml
 
-from cg.apps import hk
+from cg.apps.hk import HousekeeperAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
 
 from .utils import suggest_cases_to_upload
@@ -27,7 +27,7 @@ def scout(context, re_upload, print_console, case_id):
         suggest_cases_to_upload(context)
         context.abort()
 
-    status_api = context.obj["status"]
+    status_api = context.obj["clinical_db"]
     scout_upload_api = context.obj["scout_upload_api"]
     hk_api = context.obj["housekeeper_api"]
     family_obj = status_api.family(case_id)
@@ -69,7 +69,7 @@ def upload_case_to_scout(context, re_upload, dry_run, case_id):
 
     click.echo(click.style("----------------- CONFIG -----------------------"))
 
-    def _get_load_config_from_hk(hk_api: hk.HousekeeperAPI, case_id):
+    def _get_load_config_from_hk(hk_api: HousekeeperAPI, case_id):
         tag_name = UploadScoutAPI.get_load_config_tag()
         version_obj = hk_api.last_version(case_id)
         scout_config_files = hk_api.get_files(

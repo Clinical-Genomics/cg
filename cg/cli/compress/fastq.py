@@ -83,9 +83,9 @@ VALIDATION_CASES = [
 def fastq_cmd(context, case_id, number_of_conversions, ntasks, mem, dry_run):
     """ Find cases with FASTQ files and compress into SPRING """
     LOG.info("Running compress FASTQ")
-    update_compress_api(context.obj["compress"], dry_run=dry_run, ntasks=ntasks, mem=mem)
+    update_compress_api(context.obj["compress_api"], dry_run=dry_run, ntasks=ntasks, mem=mem)
 
-    store = context.obj["db"]
+    store = context.obj["clinical_db"]
     try:
         cases = get_fastq_cases(store, case_id)
     except CaseNotFoundError:
@@ -106,7 +106,7 @@ def fastq_cmd(context, case_id, number_of_conversions, ntasks, mem, dry_run):
         LOG.info("Searching for FASTQ files in case %s", internal_id)
         for link_obj in case.links:
             sample_id = link_obj.sample.internal_id
-            case_converted = context.obj["compress"].compress_fastq(sample_id)
+            case_converted = context.obj["compress_api"].compress_fastq(sample_id)
             if case_converted is False:
                 LOG.info("skipping individual %s", sample_id)
                 continue
@@ -128,10 +128,10 @@ def fastq_cmd(context, case_id, number_of_conversions, ntasks, mem, dry_run):
 def clean_fastq(context, case_id, dry_run):
     """Remove compressed FASTQ files, and update links in housekeeper to SPRING files"""
     LOG.info("Running compress clean FASTQ")
-    compress_api = context.obj["compress"]
+    compress_api = context.obj["compress_api"]
     update_compress_api(compress_api, dry_run=dry_run)
 
-    store = context.obj["db"]
+    store = context.obj["clinical_db"]
     samples = get_fastq_individuals(store, case_id)
 
     cleaned_inds = 0
@@ -155,7 +155,7 @@ def clean_fastq(context, case_id, dry_run):
 def fix_spring(context, bundle_name, dry_run):
     """Check if bundle(s) have non existing SPRING files and correct these"""
     LOG.info("Running compress clean FASTQ")
-    compress_api = context.obj["compress"]
+    compress_api = context.obj["compress_api"]
     update_compress_api(compress_api, dry_run=dry_run)
     hk_api = compress_api.hk_api
     correct_spring_paths(hk_api=hk_api, bundle_name=bundle_name, dry_run=dry_run)
@@ -168,10 +168,10 @@ def fix_spring(context, bundle_name, dry_run):
 def decompress_spring(context, case_id, dry_run):
     """Decompress SPRING file, and include links to FASTQ files in housekeeper"""
     LOG.info("Running decompress spring")
-    compress_api = context.obj["compress"]
+    compress_api = context.obj["compress_api"]
     update_compress_api(compress_api, dry_run=dry_run)
 
-    store = context.obj["db"]
+    store = context.obj["clinical_db"]
     samples = get_fastq_individuals(store, case_id)
 
     decompressed_inds = 0

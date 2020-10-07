@@ -2,7 +2,7 @@
 
 import click
 
-from cg.apps import coverage as coverage_app
+from cg.apps.coverage import ChanjoAPI
 
 from .utils import suggest_cases_to_upload
 
@@ -19,8 +19,8 @@ def validate(context, family_id):
         suggest_cases_to_upload(context)
         context.abort()
 
-    family_obj = context.obj["status"].family(family_id)
-    chanjo_api = coverage_app.ChanjoAPI(context.obj)
+    family_obj = context.obj["clinical_db"].family(family_id)
+    chanjo_api = ChanjoAPI(context.obj)
     chanjo_samples = []
     for link_obj in family_obj.links:
         sample_id = link_obj.sample.internal_id

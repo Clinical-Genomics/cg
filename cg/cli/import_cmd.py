@@ -17,7 +17,7 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def import_cmd(context):
     """Import information into the database."""
-    context.obj["status"] = Store(context.obj["database"])
+    context.obj["clinical_db"] = Store(context.obj["database"])
 
 
 @import_cmd.command("application")
@@ -34,7 +34,7 @@ def application(context, excel_path, signature, sheet_name, dry_run):
     if not signature:
         signature = getpass.getuser()
 
-    import_applications(context.obj["status"], excel_path, signature, dry_run, sheet_name)
+    import_applications(context.obj["clinical_db"], excel_path, signature, dry_run, sheet_name)
 
 
 @import_cmd.command("application-version")
@@ -53,7 +53,9 @@ def application_version(context, excel_path, signature, dry_run, skip_missing):
     if not signature:
         signature = getpass.getuser()
 
-    import_application_versions(context.obj["status"], excel_path, signature, dry_run, skip_missing)
+    import_application_versions(
+        context.obj["clinical_db"], excel_path, signature, dry_run, skip_missing
+    )
 
 
 @import_cmd.command("apptag")
@@ -98,7 +100,7 @@ def apptag(
         signature = getpass.getuser()
 
     import_apptags(
-        context.obj["status"],
+        context.obj["clinical_db"],
         excel_path,
         prep_category,
         signature,

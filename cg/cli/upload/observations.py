@@ -3,7 +3,7 @@ import logging
 
 import click
 
-from cg.apps import loqus
+from cg.apps.loqus import LoqusdbAPI
 from cg.exc import DuplicateRecordError, DuplicateSampleError
 from cg.meta.upload.observations import UploadObservationsAPI
 
@@ -23,10 +23,10 @@ def observations(context, case_id, case_limit, dry_run):
     click.echo(click.style("----------------- OBSERVATIONS ----------------"))
 
     loqus_apis = {
-        "wgs": loqus.LoqusdbAPI(context.obj),
-        "wes": loqus.LoqusdbAPI(context.obj, analysis_type="wes"),
+        "wgs": LoqusdbAPI(context.obj),
+        "wes": LoqusdbAPI(context.obj, analysis_type="wes"),
     }
-    status_api = context.obj["status"]
+    status_api = context.obj["clinical_db"]
     hk_api = context.obj["housekeeper_api"]
 
     if case_id:

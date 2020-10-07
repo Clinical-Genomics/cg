@@ -3,7 +3,8 @@ import logging
 
 import click
 
-from cg.apps import crunchy, hk
+from cg.apps.hk import HousekeeperAPI
+from cg.apps.crunchy import CrunchyAPI
 from cg.meta.compress import CompressAPI
 from cg.store import Store
 
@@ -16,13 +17,13 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def compress(context):
     """Compress files"""
-    context.obj["db"] = Store(context.obj.get("database"))
+    context.obj["clinical_db"] = Store(context.obj.get("database"))
 
-    hk_api = hk.HousekeeperAPI(context.obj)
-    crunchy_api = crunchy.CrunchyAPI(context.obj)
+    hk_api = HousekeeperAPI(context.obj)
+    crunchy_api = CrunchyAPI(context.obj)
 
     compress_api = CompressAPI(hk_api=hk_api, crunchy_api=crunchy_api)
-    context.obj["compress"] = compress_api
+    context.obj["compress_api"] = compress_api
 
 
 compress.add_command(fastq_cmd)
@@ -41,13 +42,13 @@ clean.add_command(fix_spring)
 @click.pass_context
 def decompress(context):
     """Decompress files"""
-    context.obj["db"] = Store(context.obj.get("database"))
+    context.obj["clinical_db"] = Store(context.obj.get("database"))
 
-    hk_api = hk.HousekeeperAPI(context.obj)
-    crunchy_api = crunchy.CrunchyAPI(context.obj)
+    hk_api = HousekeeperAPI(context.obj)
+    crunchy_api = CrunchyAPI(context.obj)
 
     compress_api = CompressAPI(hk_api=hk_api, crunchy_api=crunchy_api)
-    context.obj["compress"] = compress_api
+    context.obj["compress_api"] = compress_api
 
 
 decompress.add_command(decompress_spring)

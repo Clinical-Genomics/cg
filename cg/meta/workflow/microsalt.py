@@ -15,7 +15,8 @@ from cg.apps.microsalt.fastq import FastqHandler
 from cg.exc import CgDataError
 from cg.store.models import Sample
 
-from cg.apps import hk, lims
+from cg.apps.hk import HousekeeperAPI
+from cg.apps.lims import LimsAPI
 from cg.store import models, Store
 
 LOG = logging.getLogger(__name__)
@@ -27,8 +28,8 @@ class MicrosaltAnalysisAPI:
     def __init__(
         self,
         db: Store,
-        hk_api: hk.HousekeeperAPI,
-        lims_api: lims.LimsAPI,
+        hk_api: HousekeeperAPI,
+        lims_api: LimsAPI,
         fastq_handler: FastqHandler,
     ):
         self.db = db

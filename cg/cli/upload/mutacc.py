@@ -3,7 +3,7 @@ import logging
 
 import click
 
-from cg.apps import mutacc_auto
+from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.meta.upload.mutacc import UploadToMutaccAPI
 
 LOG = logging.getLogger(__name__)
@@ -22,7 +22,7 @@ def process_solved(context, case_id, days_ago, customers, dry_run):
     click.echo(click.style("----------------- PROCESS-SOLVED ----------------"))
 
     scout_api = context.obj["scout_api"]
-    mutacc_auto_api = mutacc_auto.MutaccAutoAPI(context.obj)
+    mutacc_auto_api = MutaccAutoAPI(context.obj)
 
     mutacc_upload = UploadToMutaccAPI(scout_api=scout_api, mutacc_auto_api=mutacc_auto_api)
 
@@ -62,5 +62,5 @@ def processed_solved(context):
 
     LOG.info("Uploading processed cases by mutacc to the mutacc database")
 
-    mutacc_auto_api = mutacc_auto.MutaccAutoAPI(context.obj)
+    mutacc_auto_api = MutaccAutoAPI(context.obj)
     mutacc_auto_api.import_reads()

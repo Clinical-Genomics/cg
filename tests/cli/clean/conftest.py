@@ -100,7 +100,7 @@ def clean_context(
     """context to use in cli"""
 
     return {
-        "hk_api": housekeeper_api,
+        "housekeeper_api": housekeeper_api,
         "store_api": balsamic_clean_store,
         "BalsamicAnalysisAPI": balsamic_analysis_api,
     }
@@ -130,7 +130,7 @@ def clean_context(
     """context to use in cli"""
 
     return {
-        "hk_api": housekeeper_api,
+        "housekeeper_api": housekeeper_api,
         "store_api": balsamic_clean_store,
         "BalsamicAnalysisAPI": balsamic_analysis_api,
     }

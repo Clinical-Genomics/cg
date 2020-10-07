@@ -6,7 +6,8 @@ import os
 import logging
 from collections import namedtuple
 
-from cg.apps import scoutapi, mutacc_auto
+from cg.apps.scoutapi import ScoutAPI
+from cg.apps.mutacc_auto import MutaccAutoAPI
 
 LOG = logging.getLogger(__name__)
 
@@ -15,7 +16,7 @@ class UploadToMutaccAPI:
 
     """API to upload finished cases to mutacc"""
 
-    def __init__(self, scout_api: scoutapi.ScoutAPI, mutacc_auto_api: mutacc_auto.MutaccAutoAPI):
+    def __init__(self, scout_api: ScoutAPI, mutacc_auto_api: MutaccAutoAPI):
 
         self.scout = scout_api
         self.mutacc_auto = mutacc_auto_api

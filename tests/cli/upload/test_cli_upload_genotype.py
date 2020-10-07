@@ -13,7 +13,7 @@ def test_upload_genotype(
     """Test to upload genotypes via the CLI"""
     caplog.set_level(logging.DEBUG)
     # GIVEN a context with a case that is ready for upload sequence genotypes
-    family_obj = upload_genotypes_context["status"].family(case_id)
+    family_obj = upload_genotypes_context["clinical_db"].family(case_id)
     assert family_obj
 
     # WHEN uploading the genotypes

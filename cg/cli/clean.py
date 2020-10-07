@@ -26,15 +26,15 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def clean(context):
     """Clean up processes"""
-    context.obj["store_api"] = Store(context.obj["database"])
-    context.obj["hk_api"] = HousekeeperAPI(context.obj)
-    context.obj["tb_api"] = TrailblazerAPI(context.obj)
+    context.obj["clinical_db"] = Store(context.obj["database"])
+    context.obj["housekeeper_api"] = HousekeeperAPI(context.obj)
+    context.obj["trailblazer_api"] = TrailblazerAPI(context.obj)
     context.obj["scout_api"] = ScoutAPI(context.obj)
     context.obj["crunchy_api"] = CrunchyAPI(context.obj)
     context.obj["BalsamicAnalysisAPI"] = BalsamicAnalysisAPI(
         balsamic_api=BalsamicAPI(context.obj),
-        store=context.obj["store_api"],
-        housekeeper_api=context.obj["hk_api"],
+        store=context.obj["clinical_db"],
+        housekeeper_api=context.obj["housekeeper_api"],
         fastq_handler=FastqHandler(context.obj),
         lims_api=LimsAPI(context.obj),
     )
@@ -95,19 +95,19 @@ def mip_run_dir(context, yes, case_id, sample_info, dry_run: bool = False):
 
     raw_data = ruamel.yaml.safe_load(sample_info)
     date = parse_sampleinfo.get_sampleinfo_date(raw_data)
-    case_obj = context.obj["store_api"].family(case_id)
+    case_obj = context.obj["clinical_db"].family(case_id)
 
     if case_obj is None:
         LOG.error("%s: family not found", case_id)
         context.abort()
 
-    analysis_obj = context.obj["store_api"].analysis(case_obj, date)
+    analysis_obj = context.obj["clinical_db"].analysis(case_obj, date)
     if analysis_obj is None:
         LOG.error("%s - %s: analysis not found", case_id, date)
         context.abort()
 
     try:
-        context.obj["tb_api"].delete_analysis(case_id, date, yes=yes, dry_run=dry_run)
+        context.obj["trailblazer_api"].delete_analysis(case_id, date, yes=yes, dry_run=dry_run)
         analysis_obj.cleaned_at = datetime.now()
     except ValueError as error:
         LOG.error(f"{case_id}: {error.args[0]}")
@@ -123,7 +123,7 @@ def hk_alignment_files(context, bundle, yes: bool = False, dry_run: bool = False
     """Clean up alignment files in Housekeeper bundle"""
     files = []
     for tag in ["bam", "bai", "bam-index", "cram", "crai", "cram-index"]:
-        files.extend(context.obj["hk_api"].get_files(bundle=bundle, tags=[tag]))
+        files.extend(context.obj["housekeeper_api"].get_files(bundle=bundle, tags=[tag]))
     for file_obj in files:
         if file_obj.is_included:
             question = f"{bundle}: remove file from file system and database: {file_obj.full_path}"
@@ -138,7 +138,7 @@ def hk_alignment_files(context, bundle, yes: bool = False, dry_run: bool = False
 
             if not dry_run:
                 file_obj.delete()
-                context.obj["hk_api"].commit()
+                context.obj["housekeeper_api"].commit()
                 click.echo(f"{file_name} deleted")
 
 
@@ -178,24 +178,24 @@ def scout_finished_cases(context, days_old: int, yes: bool = False, dry_run: boo
 def hk_past_files(context, case_id, tags, yes, dry_run):
     """ Remove files found in older housekeeper bundles """
     if case_id:
-        cases = [context.obj["store_api"].family(case_id)]
+        cases = [context.obj["clinical_db"].family(case_id)]
     else:
-        cases = context.obj["store_api"].families()
+        cases = context.obj["clinical_db"].families()
     for case in cases:
         case_id = case.internal_id
-        last_version = context.obj["hk_api"].last_version(bundle=case_id)
+        last_version = context.obj["housekeeper_api"].last_version(bundle=case_id)
         if not last_version:
             continue
         last_version_file_paths = [
             Path(hk_file.full_path)
-            for hk_file in context.obj["hk_api"].get_files(
+            for hk_file in context.obj["housekeeper_api"].get_files(
                 bundle=case_id, tags=None, version=last_version.id
             )
         ]
         LOG.info("Searching %s bundle for outdated files", case_id)
         hk_files = []
         for tag in tags:
-            hk_files.extend(context.obj["hk_api"].get_files(bundle=case_id, tags=[tag]))
+            hk_files.extend(context.obj["housekeeper_api"].get_files(bundle=case_id, tags=[tag]))
         for hk_file in hk_files:
             file_path = Path(hk_file.full_path)
             if file_path in last_version_file_paths:
@@ -204,7 +204,7 @@ def hk_past_files(context, case_id, tags, yes, dry_run):
             if yes or click.confirm("Do you want to remove this file?"):
                 if not dry_run:
                     hk_file.delete()
-                    context.obj["hk_api"].commit()
+                    context.obj["housekeeper_api"].commit()
                     if file_path.exists():
                         file_path.unlink()
                     LOG.info("File removed")
@@ -247,11 +247,11 @@ def mip_past_run_dirs(
 ):
     """Clean up of "old" MIP case run dirs"""
     before = parse_date(before_str)
-    old_analyses = context.obj["store_api"].analyses(before=before)
+    old_analyses = context.obj["clinical_db"].analyses(before=before)
     for status_analysis in old_analyses:
         case_id = status_analysis.family.internal_id
         LOG.debug("%s: clean up analysis output", case_id)
-        tb_analysis = context.obj["tb_api"].find_analysis(
+        tb_analysis = context.obj["trailblazer_api"].find_analysis(
             family=case_id, started_at=status_analysis.started_at, status="completed"
         )
 
@@ -261,7 +261,7 @@ def mip_past_run_dirs(
         elif tb_analysis.is_deleted:
             LOG.warning("%s: analysis already deleted", case_id)
             continue
-        elif len(context.obj["tb_api"].analyses(family=case_id, temp=True)) > 0:
+        elif len(context.obj["trailblazer_api"].analyses(family=case_id, temp=True)) > 0:
             LOG.warning("%s: family already re-started", case_id)
             continue
 

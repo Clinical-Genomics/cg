@@ -10,7 +10,7 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def reset_cmd(context):
     """Reset information in the database."""
-    context.obj["status"] = Store(context.obj["database"])
+    context.obj["clinical_db"] = Store(context.obj["database"])
 
 
 @reset_cmd.command()
@@ -20,9 +20,9 @@ def observations(context, case_id):
     """Reset observation links from an analysis to LoqusDB."""
 
     if case_id:
-        observations_uploaded = [context.obj["status"].family(case_id)]
+        observations_uploaded = [context.obj["clinical_db"].family(case_id)]
     else:
-        observations_uploaded = context.obj["status"].observations_uploaded()
+        observations_uploaded = context.obj["clinical_db"].observations_uploaded()
 
     for family_obj in observations_uploaded:
         LOG.info("This would reset observation links for: %s", family_obj.internal_id)
@@ -30,7 +30,7 @@ def observations(context, case_id):
     click.confirm("Do you want to continue?", abort=True)
 
     for family_obj in observations_uploaded:
-        context.obj["status"].reset_observations(family_obj.internal_id)
+        context.obj["clinical_db"].reset_observations(family_obj.internal_id)
         LOG.info("Reset loqus observations for: %s", family_obj.internal_id)
 
-    context.obj["status"].commit()
+    context.obj["clinical_db"].commit()

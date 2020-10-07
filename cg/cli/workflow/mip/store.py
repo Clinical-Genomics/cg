@@ -5,7 +5,8 @@ import sys
 
 import click
 
-from cg.apps import hk, tb
+from cg.apps.tb import TrailblazerAPI
+from cg.apps.hk import HousekeeperAPI
 from cg.exc import (
     AnalysisNotFinishedError,
     AnalysisDuplicationError,
@@ -25,9 +26,9 @@ SUCCESS = 0
 @click.pass_context
 def store(context):
     """Store results from MIP in housekeeper."""
-    context.obj["db"] = Store(context.obj["database"])
-    context.obj["tb_api"] = tb.TrailblazerAPI(context.obj)
-    context.obj["hk_api"] = hk.HousekeeperAPI(context.obj)
+    context.obj["clinical_db"] = Store(context.obj["database"])
+    context.obj["trailblazer_api"] = TrailblazerAPI(context.obj)
+    context.obj["housekeeper_api"] = HousekeeperAPI(context.obj)
 
 
 @store.command()
@@ -35,8 +36,8 @@ def store(context):
 @click.pass_context
 def analysis(context, config_stream):
     """Store a finished analysis in Housekeeper."""
-    status = context.obj["db"]
-    hk_api = context.obj["hk_api"]
+    status = context.obj["clinical_db"]
+    hk_api = context.obj["housekeeper_api"]
 
     if not config_stream:
         LOG.error("Provide a config file.")
@@ -69,8 +70,8 @@ def analysis(context, config_stream):
 @click.pass_context
 def completed(context):
     """Store all completed analyses."""
-    hk_api = context.obj["hk_api"]
-    tb_api = context.obj["tb_api"]
+    hk_api = context.obj["housekeeper_api"]
+    tb_api = context.obj["trailblazer_api"]
 
     exit_code = SUCCESS
     for analysis_obj in tb_api.analyses(status="completed", deleted=False):

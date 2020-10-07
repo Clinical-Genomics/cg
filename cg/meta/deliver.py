@@ -2,7 +2,8 @@
 
 import logging
 
-from cg.apps import hk, lims
+from cg.apps.hk import HousekeeperAPI
+from cg.apps.lims import LimsAPI
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -14,8 +15,8 @@ class DeliverAPI:
     def __init__(
         self,
         db: Store,
-        hk_api: hk.HousekeeperAPI,
-        lims_api: lims.LimsAPI,
+        hk_api: HousekeeperAPI,
+        lims_api: LimsAPI,
         case_tags: [str],
         sample_tags: [str],
     ):

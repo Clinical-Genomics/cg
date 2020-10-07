@@ -4,7 +4,11 @@ import logging
 
 import click
 
-from cg.apps import hk, lims, scoutapi, tb
+from cg.apps.hk import HousekeeperAPI
+from cg.apps.lims import LimsAPI
+from cg.apps.scoutapi import ScoutAPI
+from cg.apps.tb import TrailblazerAPI
+
 from cg.apps.environ import environ_email
 from cg.cli.workflow.get_links import get_links
 from cg.cli.workflow.mip.store import store as store_cmd
@@ -53,13 +57,14 @@ def mip_dna(
     start_with: str,
 ):
     """Rare disease DNA workflow"""
-    context.obj["housekeeper_api"] = hk.HousekeeperAPI(context.obj)
-    context.obj["trailblazer_api"] = tb.TrailblazerAPI(context.obj)
-    context.obj["scout_api"] = scoutapi.ScoutAPI(context.obj)
-    context.obj["lims_api"] = lims.LimsAPI(context.obj)
+    context.obj["housekeeper_api"] = HousekeeperAPI(context.obj)
+    context.obj["trailblazer_api"] = TrailblazerAPI(context.obj)
+    context.obj["scout_api"] = ScoutAPI(context.obj)
+    context.obj["lims_api"] = LimsAPI(context.obj)
+    context.obj["clinical_db"] = Store(context.obj["database"])
 
     context.obj["dna_api"] = MipAnalysisAPI(
-        db=Store(context.obj["database"]),
+        db=context.obj["clinical_db"],
         hk_api=context.obj["housekeeper_api"],
         tb_api=context.obj["trailblazer_api"],
         scout_api=context.obj["scout_api"],

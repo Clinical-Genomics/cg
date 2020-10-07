@@ -6,7 +6,10 @@ from typing import List, Any
 from ruamel.yaml import safe_load
 import datetime as dt
 
-from cg.apps import tb, hk, scoutapi, lims
+from cg.apps.tb import TrailblazerAPI
+from cg.apps.hk import HousekeeperAPI
+from cg.apps.scoutapi import ScoutAPI
+from cg.apps.lims import LimsAPI
 from cg.apps.mip.base import MipAPI
 from cg.apps.mip.confighandler import ConfigHandler
 from cg.apps.mip import parse_trending
@@ -31,10 +34,10 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
     def __init__(
         self,
         db: Store,
-        hk_api: hk.HousekeeperAPI,
-        scout_api: scoutapi.ScoutAPI,
-        tb_api: tb.TrailblazerAPI,
-        lims_api: lims.LimsAPI,
+        hk_api: HousekeeperAPI,
+        scout_api: ScoutAPI,
+        tb_api: TrailblazerAPI,
+        lims_api: LimsAPI,
         deliver_api: DeliverAPI,
         script: str,
         pipeline: str,

@@ -154,14 +154,14 @@ def fixture_populated_compress_multiple_store(
 @pytest.fixture(name="compress_context")
 def fixture_base_compress_context(compress_api, store):
     """Return a compress context"""
-    ctx = {"compress": compress_api, "db": store}
+    ctx = {"compress_api": compress_api, "clinical_db": store}
     return ctx
 
 
 @pytest.fixture(name="store_fastq_context")
 def fixture_store_fastq_context(compress_api, store):
     """Return a compress context"""
-    ctx = {"compress": compress_api, "db": store}
+    ctx = {"compress": compress_api, "clinical_db": store}
     return ctx
 
 
@@ -169,14 +169,14 @@ def fixture_store_fastq_context(compress_api, store):
 def fixture_populated_multiple_compress_context(compress_api, populated_compress_multiple_store):
     """Return a compress context populated with a completed analysis"""
     # Make sure that there is a family where anaylis is completer
-    return {"compress": compress_api, "db": populated_compress_multiple_store}
+    return {"compress_api": compress_api, "clinical_db": populated_compress_multiple_store}
 
 
 @pytest.fixture(name="populated_compress_context")
 def fixture_populated_compress_context(compress_api, populated_compress_store):
     """Return a compress context populated with a completed analysis"""
     # Make sure that there is a family where analysis is completed
-    return {"compress": compress_api, "db": populated_compress_store}
+    return {"compress_api": compress_api, "clinical_db": populated_compress_store}
 
 
 @pytest.fixture(name="real_populated_compress_context")
@@ -185,7 +185,10 @@ def fixture_real_populated_compress_context(
 ):
     """Return a compress context populated with a completed analysis"""
     # Make sure that there is a family where analysis is completed
-    return {"compress": real_populated_compress_fastq_api, "db": populated_compress_store}
+    return {
+        "compress_api": real_populated_compress_fastq_api,
+        "clinical_db": populated_compress_store,
+    }
 
 
 # Bundle fixtures

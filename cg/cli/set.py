@@ -37,8 +37,8 @@ NOT_CHANGABLE_SAMPLE_ATTRIBUTES = [
 @click.pass_context
 def set_cmd(context):
     """Update information in the database."""
-    context.obj["status"] = Store(context.obj["database"])
-    context.obj["lims"] = LimsAPI(context.obj)
+    context.obj["clinical_db"] = Store(context.obj["database"])
+    context.obj["lims_api"] = LimsAPI(context.obj)
 
 
 @set_cmd.command()
@@ -49,7 +49,7 @@ def set_cmd(context):
 @click.pass_context
 def family(context, action, priority, panels, family_id):
     """Update information about a family."""
-    family_obj = context.obj["status"].family(family_id)
+    family_obj = context.obj["clinical_db"].family(family_id)
     if family_obj is None:
         click.echo(click.style(f"Can't find family {family_id}", fg="red"))
         context.abort()
@@ -67,14 +67,14 @@ def family(context, action, priority, panels, family_id):
         family_obj.priority_human = priority
     if panels:
         for panel_id in panels:
-            panel_obj = context.obj["status"].panel(panel_id)
+            panel_obj = context.obj["clinical_db"].panel(panel_id)
             if panel_obj is None:
                 click.echo(click.style(f"unknown gene panel: {panel_id}", fg="red"))
                 context.abort()
         message = f"update panels: {', '.join(family_obj.panels)} -> {', '.join(panels)}"
         click.echo(click.style(message, fg="blue"))
         family_obj.panels = panels
-    context.obj["status"].commit()
+    context.obj["clinical_db"].commit()
 
 
 @set_cmd.command()
@@ -109,7 +109,7 @@ def samples(
     case_id: str,
 ):
     """Set values on many samples at the same time"""
-    store = context.obj["status"]
+    store = context.obj["clinical_db"]
     sample_objs = _get_samples(case_id, identifiers, store)
 
     if not sample_objs:
@@ -241,7 +241,7 @@ def show_option_help(short_name: str = None, long_name: str = None, help_text: s
 @click.option("--help", is_flag=True)
 @click.pass_context
 def sample(context, sample_id, kwargs, skip_lims, yes, help):
-    sample_obj = context.obj["status"].sample(internal_id=sample_id)
+    sample_obj = context.obj["clinical_db"].sample(internal_id=sample_id)
 
     if help:
         show_set_sample_help(sample_obj)
@@ -261,9 +261,9 @@ def sample(context, sample_id, kwargs, skip_lims, yes, help):
         new_value = None
         if key in ["customer", "application_version"]:
             if key == "customer":
-                new_value = context.obj["status"].customer(value)
+                new_value = context.obj["clinical_db"].customer(value)
             elif key == "application_version":
-                new_value = context.obj["status"].current_application_version(value)
+                new_value = context.obj["clinical_db"].current_application_version(value)
 
             if not new_value:
                 click.echo(click.style(f"{key} {value} not found, aborting", fg="red"))
@@ -280,7 +280,7 @@ def sample(context, sample_id, kwargs, skip_lims, yes, help):
 
         setattr(sample_obj, key, new_value)
         _update_comment(_generate_comment(key, old_value, new_value), sample_obj)
-        context.obj["status"].commit()
+        context.obj["clinical_db"].commit()
 
     if not skip_lims:
 
@@ -291,7 +291,7 @@ def sample(context, sample_id, kwargs, skip_lims, yes, help):
                 context.abort()
 
             try:
-                context.obj["lims"].update_sample(lims_id=sample_id, **{key: value})
+                context.obj["lims_api"].update_sample(lims_id=sample_id, **{key: value})
                 click.echo(click.style(f"Set LIMS/{key} to {value}", fg="blue"))
             except LimsDataError as err:
                 click.echo(
@@ -320,7 +320,7 @@ def _update_comment(comment, obj):
 @click.pass_context
 def flowcell(context, flowcell_name, status):
     """Update information about a flowcell"""
-    flowcell_obj = context.obj["status"].flowcell(flowcell_name)
+    flowcell_obj = context.obj["clinical_db"].flowcell(flowcell_name)
 
     if flowcell_obj is None:
         click.echo(click.style(f"flowcell not found: {flowcell_name}", fg="yellow"))
@@ -328,5 +328,5 @@ def flowcell(context, flowcell_name, status):
     prev_status = flowcell_obj.status
     flowcell_obj.status = status
 
-    context.obj["status"].commit()
+    context.obj["clinical_db"].commit()
     click.echo(click.style(f"{flowcell_name} set: {prev_status} -> {status}", fg="green"))
