@@ -377,7 +377,8 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
                 return False
         return True
 
-    def get_skip_evaluation_flag(self, case_obj: models.Family) -> bool:
+    @staticmethod
+    def get_skip_evaluation_flag(case_obj: models.Family) -> bool:
         """If any sample in this case is downsampled or external, returns true"""
         for link_obj in case_obj.links:
             downsampled = isinstance(link_obj.sample.downsampled_to, int)

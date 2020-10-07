@@ -74,12 +74,25 @@ class MockTB:
         self._email = None
         self._status = None
 
-    def analyses(self, family=None, status=None, temp=None):
+    def analyses(
+        self,
+        family=None,
+        status=None,
+        temp=None,
+        case_id=None,
+        query: str = None,
+        deleted: bool = None,
+        before=None,
+        is_visible: bool = None,
+    ):
         """Mock TB analyses models"""
 
         self._family = family
         self._status = status
         self._temp = temp
+
+        if case_id == "yellowhog":
+            return []
 
         class Row:
             """Mock a record representing an analysis"""
@@ -129,23 +142,23 @@ class MockTB:
         """check if add_pending was called"""
         return self._add_pending_was_called
 
-    def is_analysis_ongoing(self, case_id: str):
+    def is_latest_analysis_ongoing(self, case_id: str):
         """Override TrailblazerAPI is_ongoing method to avoid default behaviour"""
         return False
 
-    def is_analysis_failed(self, case_id: str):
+    def is_latest_analysis_failed(self, case_id: str):
         """Override TrailblazerAPI is_failed method to avoid default behaviour"""
         return False
 
-    def is_analysis_completed(self, case_id: str):
+    def is_latest_analysis_completed(self, case_id: str):
         """Override TrailblazerAPI is_completed method to avoid default behaviour"""
         return False
 
-    def get_analysis_status(self, case_id: str):
+    def get_latest_analysis_status(self, case_id: str):
         """Override TrailblazerAPI get_analysis_status method to avoid default behaviour"""
         return None
 
-    def has_analysis_started(self, case_id: str):
+    def has_latest_analysis_started(self, case_id: str):
         """Override TrailblazerAPI has_analysis_started method to avoid default behaviour"""
         return False
 

@@ -95,7 +95,7 @@ def run(
 
     if not case_exists(case_obj, case_id):
         raise click.Abort()
-    if rna_api.analyses(case_id=case_obj.internal_id, temp=True):
+    if rna_api.get_analyses_from_trailblazer(case_id=case_obj.internal_id, temp=True):
         LOG.warning("%s: analysis already running", case_obj.internal_id)
         return
 
