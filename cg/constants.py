@@ -99,8 +99,14 @@ HK_FASTQ_TAGS = ["fastq"]
 # mandatory flag
 MIP_DNA_TAGS = {
     ("chanjo_sexcheck",): {"tags": ["chanjo", "sex-check"], "is_mandatory": False},
-    ("chromograph_upd", "sites",): {"tags": ["chromograph", "upd", "sites"], "is_mandatory": False},
-    ("chromograph_upd", "regions",): {"tags": ["chromograph", "upd", "regions"], "is_mandatory": False},
+    (
+        "chromograph_upd",
+        "sites",
+    ): {"tags": ["chromograph", "upd", "sites"], "is_mandatory": False},
+    (
+        "chromograph_upd",
+        "regions",
+    ): {"tags": ["chromograph", "upd", "regions"], "is_mandatory": False},
     ("chromograph_cov", "tcov"): {"tags": ["chromograph", "tcov"], "is_mandatory": False},
     ("endvariantannotationblock", "clinical"): {
         "tags": ["vcf-snv-clinical"],
@@ -181,8 +187,14 @@ MIP_DNA_TAGS = {
         "tags": ["tiddit-coverage", "bigwig"],
         "is_mandatory": False,
     },
-    ("upd_ar", "regions",): {"tags": ["upd", "regions"], "is_mandatory": False},
-    ("upd_ar", "sites",): {"tags": ["upd", "sites"], "is_mandatory": False},
+    (
+        "upd_ar",
+        "regions",
+    ): {"tags": ["upd", "regions"], "is_mandatory": False},
+    (
+        "upd_ar",
+        "sites",
+    ): {"tags": ["upd", "sites"], "is_mandatory": False},
     ("version_collect_ar",): {"tags": ["exe-ver"], "is_mandatory": True},
     ("vcf2cytosure_ar",): {"tags": ["vcf2cytosure"], "is_mandatory": False},
 }
