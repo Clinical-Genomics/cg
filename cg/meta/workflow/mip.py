@@ -399,3 +399,41 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         LOG.warning(
             f"Action '{action}' not permitted by StatusDB and will not be set for case {case_id}"
         )
+
+    # TrailblazerAPI inherited methods
+    def is_latest_analysis_ongoing(self, case_id: str) -> bool:
+        return self.tb.is_latest_analysis_ongoing(case_id=case_id)
+
+    def has_latest_analysis_started(self, case_id: str) -> bool:
+        return self.tb.has_latest_analysis_started(case_id=case_id)
+
+    def mark_analyses_deleted(self, case_id: str) -> dict:
+        return self.tb.mark_analyses_deleted(case_id=case_id)
+
+    def add_pending_analysis(self, case_id: str, email: str) -> dict:
+        return self.tb.add_pending_analysis(case_id=case_id, email=email)
+
+    def get_latest_analysis_status(self, case_id: str) -> str:
+        return self.tb.get_latest_analysis_status(case_id=case_id)
+
+    def get_analyses_from_trailblazer(
+        self,
+        case_id: str = None,
+        query: str = None,
+        status: str = None,
+        deleted: bool = None,
+        temp: bool = False,
+        before: dt.datetime = None,
+        is_visible: bool = None,
+        family: str = None,
+    ):
+        return self.tb.analyses(
+            case_id=case_id,
+            query=query,
+            status=status,
+            deleted=deleted,
+            temp=temp,
+            before=before,
+            is_visible=is_visible,
+            family=family,
+        )

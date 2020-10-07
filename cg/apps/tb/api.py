@@ -15,6 +15,7 @@ class TrailblazerAPI:
     """Interface to Trailblazer for `cg`."""
 
     __STARTED_STATUSES = ["completed", "failed", "pending", "running"]
+    __ONGOING_STATUSES = ["pending", "running"]
 
     def __init__(self, config: dict):
         self.service_account = config["trailblazer"]["service_account"]
@@ -54,6 +55,7 @@ class TrailblazerAPI:
         temp: bool = False,
         before: dt.datetime = None,
         is_visible: bool = None,
+        family: str = None,
     ):
         request_body = {
             "analyses": {
@@ -64,6 +66,7 @@ class TrailblazerAPI:
                 "temp": temp,
                 "before": str(before) if before else None,
                 "is_visible": is_visible,
+                "family": family,
             }
         }
         response = self.query_trailblazer(command="query-analyses", request_body=request_body)
@@ -81,10 +84,21 @@ class TrailblazerAPI:
         response = self.query_trailblazer(command="find-analysis", request_body=request_body)
         return response
 
+    def get_latest_analysis_status(self, case_id: str) -> str:
+        latest_analysis = self.get_latest_analysis(case_id=case_id)
+        latest_analysis_status = latest_analysis.get("status")
+        return latest_analysis_status
+
     def has_latest_analysis_started(self, case_id: str) -> bool:
         latest_analysis = self.get_latest_analysis(case_id=case_id)
         latest_analysis_status = latest_analysis.get("status")
         if latest_analysis_status in self.__STARTED_STATUSES:
+            return True
+
+    def is_latest_analysis_ongoing(self, case_id: str) -> bool:
+        latest_analysis = self.get_latest_analysis(case_id=case_id)
+        latest_analysis_status = latest_analysis.get("status")
+        if latest_analysis_status in self.__ONGOING_STATUSES:
             return True
 
     def delete_analysis(self, case_id: str, date: dt.datetime) -> dict:
@@ -103,7 +117,7 @@ class TrailblazerAPI:
         )
         return response
 
-    def add_pending_analysis(self, case_id: str, email: str = None) -> None:
+    def add_pending_analysis(self, case_id: str, email: str = None) -> dict:
         request_body = {"case_id": case_id, "email": email}
         response = self.query_trailblazer(command="add-pending-analysis", request_body=request_body)
         return response

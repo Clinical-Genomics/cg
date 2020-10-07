@@ -95,7 +95,7 @@ def run(
 
     if not case_exists(case_obj, case_id):
         raise click.Abort()
-    if rna_api.tb.analyses(family=case_obj.internal_id, temp=True).first():
+    if rna_api.analyses(case_id=case_obj.internal_id, temp=True):
         LOG.warning("%s: analysis already running", case_obj.internal_id)
         return
 
@@ -118,8 +118,8 @@ def run(
         LOG.info("Executed MIP in dry-run mode - skipping Trailblazer step")
         return
 
-    rna_api.tb.mark_analyses_deleted(case_id=case_id)
-    rna_api.tb.add_pending_analysis(case_id=case_id, email=email)
+    rna_api.mark_analyses_deleted(case_id=case_id)
+    rna_api.add_pending_analysis(case_id=case_id, email=email)
     rna_api.set_statusdb_action(case_id=case_id, action="running")
     LOG.info("MIP rd-rna run started!")
 

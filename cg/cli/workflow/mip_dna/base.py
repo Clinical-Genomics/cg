@@ -239,7 +239,7 @@ def run(
         skip_evaluation=skip_evaluation,
     )
 
-    if dna_api.tb.is_analysis_ongoing(case_id=case_obj.internal_id):
+    if dna_api.is_latest_analysis_ongoing(case_id=case_obj.internal_id):
         LOG.warning("%s: analysis is ongoing - skipping", case_obj.internal_id)
         return
 
@@ -256,8 +256,8 @@ def run(
         LOG.info("Executed MIP in dry-run mode - skipping Trailblazer step")
         return
 
-    dna_api.tb.mark_analyses_deleted(case_id=case_id)
-    dna_api.tb.add_pending_analysis(case_id=case_id, email=email)
+    dna_api.mark_analyses_deleted(case_id=case_id)
+    dna_api.add_pending_analysis(case_id=case_id, email=email)
     dna_api.set_statusdb_action(case_id=case_id, action="running")
     LOG.info("MIP rd-dna run started!")
 
@@ -275,9 +275,9 @@ def start(context: click.Context, dry_run: bool = False):
             LOG.warning("%s: contains non-dna samples - skipping", case_obj.internal_id)
             continue
         LOG.info("%s: start analysis", case_obj.internal_id)
-        has_started = dna_api.tb.has_analysis_started(case_id=case_obj.internal_id)
+        has_started = dna_api.has_latest_analysis_started(case_id=case_obj.internal_id)
         if has_started:
-            status = dna_api.tb.get_analysis_status(case_id=case_obj.internal_id)
+            status = dna_api.get_latest_analysis_status(case_id=case_obj.internal_id)
             LOG.warning("%s: analysis is %s - skipping", case_obj.internal_id, status)
             continue
         if dry_run:
