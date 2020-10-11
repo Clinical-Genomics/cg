@@ -13,12 +13,26 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [13.7.0]
+### Fixed
+- Set flowcell status to `ondisk` when retrieving archived flowcell from PDC has finished.
+
+## [13.6.0]
+
+### Added
+- Store microsalt analyses in Housekeeper with a provided deliverables file
+
+## [13.5.0]
+
+### Added
+- Possibility to give case-id as argument when setting values on multiple samples by the CLI
+
 
 ## [13.4.1]
 
 
 ### Fixed
--Updated changelog with correct release version
+- Updated changelog with correct release version
 
 
 ## [13.4.0]
