@@ -7,6 +7,7 @@ from google.auth import jwt
 import requests
 import datetime as dt
 from cg.exc import TrailblazerAPIHTTPError
+from cg.apps.tb.models import TrailblazerAnalysis
 
 LOG = logging.getLogger(__name__)
 
@@ -56,7 +57,7 @@ class TrailblazerAPI:
         before: dt.datetime = None,
         is_visible: bool = None,
         family: str = None,
-    ):
+    ) -> list:
         request_body = {
             "analyses": {
                 "case_id": case_id,
@@ -70,44 +71,50 @@ class TrailblazerAPI:
             }
         }
         response = self.query_trailblazer(command="query-analyses", request_body=request_body)
+        if response:
+            return [TrailblazerAnalysis.parse_obj(analysis) for analysis in response]
         return response
 
-    def get_latest_analysis(self, case_id: str) -> dict:
+    def get_latest_analysis(self, case_id: str) -> TrailblazerAnalysis:
         request_body = {
             "case_id": case_id,
         }
         response = self.query_trailblazer(command="get-latest-analysis", request_body=request_body)
-        return response
+        return TrailblazerAnalysis.parse_obj(response)
 
-    def find_analysis(self, case_id: str, started_at: dt.datetime, status: str):
+    def find_analysis(
+        self, case_id: str, started_at: dt.datetime, status: str
+    ) -> TrailblazerAnalysis:
         request_body = {"case_id": case_id, "started_at": str(started_at), "status": status}
         response = self.query_trailblazer(command="find-analysis", request_body=request_body)
-        return response
+        if response:
+            return TrailblazerAnalysis.parse_obj(response)
 
     def get_latest_analysis_status(self, case_id: str) -> str:
         latest_analysis = self.get_latest_analysis(case_id=case_id)
-        latest_analysis_status = latest_analysis.get("status")
+        latest_analysis_status = latest_analysis.status
         return latest_analysis_status
 
     def has_latest_analysis_started(self, case_id: str) -> bool:
         latest_analysis = self.get_latest_analysis(case_id=case_id)
-        latest_analysis_status = latest_analysis.get("status")
+        latest_analysis_status = latest_analysis.status
         if latest_analysis_status in self.__STARTED_STATUSES:
             return True
 
     def is_latest_analysis_ongoing(self, case_id: str) -> bool:
         latest_analysis = self.get_latest_analysis(case_id=case_id)
-        latest_analysis_status = latest_analysis.get("status")
+        latest_analysis_status = latest_analysis.status
         if latest_analysis_status in self.__ONGOING_STATUSES:
             return True
 
-    def delete_analysis(self, case_id: str, date: dt.datetime) -> dict:
+    def delete_analysis(self, case_id: str, date: dt.datetime) -> TrailblazerAnalysis:
         """Raises TrailblazerAPIHTTPError"""
         request_body = {"case_id": case_id, "date": str(date)}
         response = self.query_trailblazer(command="delete-analysis", request_body=request_body)
-        return response
+        if response:
+            return TrailblazerAnalysis.parse_obj(response)
 
-    def mark_analyses_deleted(self, case_id: str) -> dict:
+    def mark_analyses_deleted(self, case_id: str) -> list:
         """Mark all analyses for case deleted without removing analysis files"""
         request_body = {
             "case_id": case_id,
@@ -115,9 +122,11 @@ class TrailblazerAPI:
         response = self.query_trailblazer(
             command="mark-analyses-deleted", request_body=request_body
         )
+        if response:
+            return [TrailblazerAnalysis.parse_obj(analysis) for analysis in response]
         return response
 
-    def add_pending_analysis(self, case_id: str, email: str = None) -> dict:
+    def add_pending_analysis(self, case_id: str, email: str = None) -> TrailblazerAnalysis:
         request_body = {"case_id": case_id, "email": email}
         response = self.query_trailblazer(command="add-pending-analysis", request_body=request_body)
-        return response
+        return TrailblazerAnalysis.parse_obj(response)

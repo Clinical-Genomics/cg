@@ -33,7 +33,7 @@ def delivery_reports(context, print_console, force_report):
     click.echo(click.style("----------------- DELIVERY REPORTS ------------------------"))
 
     exit_code = SUCCESS
-    for analysis_obj in context.obj["clinical_db"].analyses_to_delivery_report(pipeline="mip"):
+    for analysis_obj in context.obj["status_db"].analyses_to_delivery_report(pipeline="mip"):
         case_id = analysis_obj.family.internal_id
         LOG.info("Uploading delivery report for case: %s", case_id)
         try:
@@ -185,7 +185,7 @@ def delivery_report(context, family_id, print_console, force_report):
         click.echo(delivery_report_html)
         return
 
-    status_api = context.obj["clinical_db"]
+    status_api = context.obj["status_db"]
     mip_dna_root_dir = context.obj["mip-rd-dna"]["root"]
     hk_api = context.obj["housekeeper_api"]
 

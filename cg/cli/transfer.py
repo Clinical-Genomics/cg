@@ -15,7 +15,7 @@ log = logging.getLogger(__name__)
 @click.pass_context
 def transfer(context):
     """Transfer results to the status interface."""
-    context.obj["clinical_db"] = Store(context.obj["database"])
+    context.obj["status_db"] = Store(context.obj["database"])
 
 
 @transfer.command()
@@ -25,9 +25,9 @@ def flowcell(context, flowcell_name):
     """Populate results from a flowcell."""
     stats_api = StatsAPI(context.obj)
     hk_api = HousekeeperAPI(context.obj)
-    transfer_api = transfer_app.TransferFlowcell(context.obj["clinical_db"], stats_api, hk_api)
+    transfer_api = transfer_app.TransferFlowcell(context.obj["status_db"], stats_api, hk_api)
     new_record = transfer_api.transfer(flowcell_name)
-    context.obj["clinical_db"].add_commit(new_record)
+    context.obj["status_db"].add_commit(new_record)
     click.echo(click.style(f"flowcell added: {new_record}", fg="green"))
 
 
@@ -43,7 +43,7 @@ def flowcell(context, flowcell_name):
 def lims(context, status, include, sample_id):
     """Check if samples have been updated in LIMS."""
     lims_api = LimsAPI(context.obj)
-    transfer_api = transfer_app.TransferLims(context.obj["clinical_db"], lims_api)
+    transfer_api = transfer_app.TransferLims(context.obj["status_db"], lims_api)
     transfer_api.transfer_samples(transfer_app.SampleState[status.upper()], include, sample_id)
 
 
@@ -56,5 +56,5 @@ def pools(context, status):
     option is provided.
     """
     lims_api = LimsAPI(context.obj)
-    transfer_api = transfer_app.TransferLims(context.obj["clinical_db"], lims_api)
+    transfer_api = transfer_app.TransferLims(context.obj["status_db"], lims_api)
     transfer_api.transfer_pools(transfer_app.PoolState[status.upper()])

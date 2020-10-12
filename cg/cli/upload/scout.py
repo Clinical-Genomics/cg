@@ -27,7 +27,7 @@ def scout(context, re_upload, print_console, case_id):
         suggest_cases_to_upload(context)
         context.abort()
 
-    status_api = context.obj["clinical_db"]
+    status_api = context.obj["status_db"]
     scout_upload_api = context.obj["scout_upload_api"]
     hk_api = context.obj["housekeeper_api"]
     family_obj = status_api.family(case_id)

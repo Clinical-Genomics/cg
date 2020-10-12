@@ -85,7 +85,7 @@ def fastq_cmd(context, case_id, number_of_conversions, ntasks, mem, dry_run):
     LOG.info("Running compress FASTQ")
     update_compress_api(context.obj["compress_api"], dry_run=dry_run, ntasks=ntasks, mem=mem)
 
-    store = context.obj["clinical_db"]
+    store = context.obj["status_db"]
     try:
         cases = get_fastq_cases(store, case_id)
     except CaseNotFoundError:
@@ -131,7 +131,7 @@ def clean_fastq(context, case_id, dry_run):
     compress_api = context.obj["compress_api"]
     update_compress_api(compress_api, dry_run=dry_run)
 
-    store = context.obj["clinical_db"]
+    store = context.obj["status_db"]
     samples = get_fastq_individuals(store, case_id)
 
     cleaned_inds = 0
@@ -171,7 +171,7 @@ def decompress_spring(context, case_id, dry_run):
     compress_api = context.obj["compress_api"]
     update_compress_api(compress_api, dry_run=dry_run)
 
-    store = context.obj["clinical_db"]
+    store = context.obj["status_db"]
     samples = get_fastq_individuals(store, case_id)
 
     decompressed_inds = 0

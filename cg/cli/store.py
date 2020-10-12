@@ -23,7 +23,7 @@ def store(context):
 
     compress_api = CompressAPI(hk_api=housekeeper_api, crunchy_api=crunchy_api)
     context.obj["compress_api"] = compress_api
-    context.obj["clinical_db"] = Store(context.obj.get("database"))
+    context.obj["status_db"] = Store(context.obj.get("database"))
 
 
 @store.command("fastq")
@@ -35,7 +35,7 @@ def fastq_cmd(context, case_id, dry_run):
     LOG.info("Running store fastq")
 
     compress_api = context.obj["compress_api"]
-    cg_store = context.obj["clinical_db"]
+    cg_store = context.obj["status_db"]
 
     update_compress_api(compress_api, dry_run=dry_run)
 

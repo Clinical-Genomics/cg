@@ -20,7 +20,7 @@ def test_upload_with_load_config(
 ):
     """Test to upload a case to scout using a load config"""
     # GIVEN a case with a scout load config in housekeeper
-    case_id = base_context["clinical_db"].families().first().internal_id
+    case_id = base_context["status_db"].families().first().internal_id
     tag_name = upload_scout_api.get_load_config_tag()
 
     base_context["housekeeper_api"].add_file(
@@ -33,7 +33,7 @@ def test_upload_with_load_config(
         """Check if case exists in status database"""
         return store.families().first().internal_id == case_id
 
-    assert case_exists_in_status(case_id, base_context["clinical_db"])
+    assert case_exists_in_status(case_id, base_context["status_db"])
 
     # WHEN invoking command to upload case to scout
     with caplog.at_level(logging.INFO):

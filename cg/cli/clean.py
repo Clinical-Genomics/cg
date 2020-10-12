@@ -26,14 +26,14 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def clean(context):
     """Clean up processes"""
-    context.obj["clinical_db"] = Store(context.obj["database"])
+    context.obj["status_db"] = Store(context.obj["database"])
     context.obj["housekeeper_api"] = HousekeeperAPI(context.obj)
     context.obj["trailblazer_api"] = TrailblazerAPI(context.obj)
     context.obj["scout_api"] = ScoutAPI(context.obj)
     context.obj["crunchy_api"] = CrunchyAPI(context.obj)
     context.obj["BalsamicAnalysisAPI"] = BalsamicAnalysisAPI(
         balsamic_api=BalsamicAPI(context.obj),
-        store=context.obj["clinical_db"],
+        store=context.obj["status_db"],
         housekeeper_api=context.obj["housekeeper_api"],
         fastq_handler=FastqHandler(context.obj),
         lims_api=LimsAPI(context.obj),
@@ -95,13 +95,13 @@ def mip_run_dir(context, yes, case_id, sample_info, dry_run: bool = False):
 
     raw_data = ruamel.yaml.safe_load(sample_info)
     date = parse_sampleinfo.get_sampleinfo_date(raw_data)
-    case_obj = context.obj["clinical_db"].family(case_id)
+    case_obj = context.obj["status_db"].family(case_id)
 
     if case_obj is None:
         LOG.error("%s: family not found", case_id)
         context.abort()
 
-    analysis_obj = context.obj["clinical_db"].analysis(case_obj, date)
+    analysis_obj = context.obj["status_db"].analysis(case_obj, date)
     if analysis_obj is None:
         LOG.error("%s - %s: analysis not found", case_id, date)
         context.abort()
@@ -178,9 +178,9 @@ def scout_finished_cases(context, days_old: int, yes: bool = False, dry_run: boo
 def hk_past_files(context, case_id, tags, yes, dry_run):
     """ Remove files found in older housekeeper bundles """
     if case_id:
-        cases = [context.obj["clinical_db"].family(case_id)]
+        cases = [context.obj["status_db"].family(case_id)]
     else:
-        cases = context.obj["clinical_db"].families()
+        cases = context.obj["status_db"].families()
     for case in cases:
         case_id = case.internal_id
         last_version = context.obj["housekeeper_api"].last_version(bundle=case_id)
@@ -247,7 +247,7 @@ def mip_past_run_dirs(
 ):
     """Clean up of "old" MIP case run dirs"""
     before = parse_date(before_str)
-    old_analyses = context.obj["clinical_db"].analyses(before=before)
+    old_analyses = context.obj["status_db"].analyses(before=before)
     for status_analysis in old_analyses:
         case_id = status_analysis.family.internal_id
         LOG.debug("%s: clean up analysis output", case_id)

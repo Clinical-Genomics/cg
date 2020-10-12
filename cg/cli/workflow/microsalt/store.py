@@ -19,7 +19,7 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def store(context):
     """Store results from microSALT in housekeeper."""
-    context.obj["clinical_db"] = Store(context.obj["database"])
+    context.obj["status_db"] = Store(context.obj["database"])
     context.obj["housekeeper_api"] = HousekeeperAPI(context.obj)
 
 
@@ -28,7 +28,7 @@ def store(context):
 @click.pass_context
 def analysis(context, config_stream):
     """Store a finished analysis in Housekeeper."""
-    status = context.obj["clinical_db"]
+    status = context.obj["status_db"]
     hk_api = context.obj["housekeeper_api"]
 
     if not config_stream:

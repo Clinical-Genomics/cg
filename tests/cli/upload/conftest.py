@@ -88,7 +88,7 @@ def fixture_upload_genotypes_context(
     return {
         "genotype_api": genotype_api,
         "housekeeper_api": upload_genotypes_hk_api,
-        "clinical_db": analysis_store_trio,
+        "status_db": analysis_store_trio,
     }
 
 
@@ -100,7 +100,7 @@ def fixture_base_cli_context(analysis_store: Store, housekeeper_api, upload_scou
         "scout_upload_api": upload_scout_api,
         "housekeeper_api": housekeeper_api,
         "trailblazer_api": MockTB(),
-        "clinical_db": analysis_store,
+        "status_db": analysis_store,
         "mip-rd-dna": {"root": "hej"},
     }
 

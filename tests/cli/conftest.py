@@ -24,4 +24,4 @@ def invoke_cli(cli_runner):
 @pytest.fixture
 def base_context(base_store: Store) -> dict:
     """context to use in cli"""
-    return {"trailblazer_api": None, "clinical_db": base_store}
+    return {"trailblazer_api": None, "status_db": base_store}

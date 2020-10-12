@@ -17,7 +17,7 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def compress(context):
     """Compress files"""
-    context.obj["clinical_db"] = Store(context.obj.get("database"))
+    context.obj["status_db"] = Store(context.obj.get("database"))
 
     hk_api = HousekeeperAPI(context.obj)
     crunchy_api = CrunchyAPI(context.obj)
@@ -42,7 +42,7 @@ clean.add_command(fix_spring)
 @click.pass_context
 def decompress(context):
     """Decompress files"""
-    context.obj["clinical_db"] = Store(context.obj.get("database"))
+    context.obj["status_db"] = Store(context.obj.get("database"))
 
     hk_api = HousekeeperAPI(context.obj)
     crunchy_api = CrunchyAPI(context.obj)

@@ -52,10 +52,10 @@ def upload(context, family_id, force_restart):
 
     click.echo(click.style("----------------- UPLOAD ----------------------"))
 
-    context.obj["clinical_db"] = Store(context.obj["database"])
+    context.obj["status_db"] = Store(context.obj["database"])
 
     if family_id:
-        family_obj = context.obj["clinical_db"].family(family_id)
+        family_obj = context.obj["status_db"].family(family_id)
         if not family_obj:
             message = f"family not found: {family_id}"
             click.echo(click.style(message, fg="red"))
@@ -100,7 +100,7 @@ def upload(context, family_id, force_restart):
         sample_tags=SAMPLE_TAGS,
     )
     context.obj["analysis_api"] = MipAnalysisAPI(
-        db=context.obj["clinical_db"],
+        db=context.obj["status_db"],
         hk_api=context.obj["housekeeper_api"],
         tb_api=context.obj["trailblazer_api"],
         scout_api=context.obj["scout_api"],
@@ -112,7 +112,7 @@ def upload(context, family_id, force_restart):
         root=context.obj["mip-rd-dna"]["root"],
     )
     context.obj["report_api"] = ReportAPI(
-        store=context.obj["clinical_db"],
+        store=context.obj["status_db"],
         lims_api=context.obj["lims_api"],
         chanjo_api=context.obj["chanjo_api"],
         analysis_api=context.obj["analysis_api"],
@@ -134,21 +134,21 @@ def upload(context, family_id, force_restart):
         suggest_cases_to_upload(context)
         context.abort()
 
-    family_obj = context.obj["clinical_db"].family(family_id)
+    family_obj = context.obj["status_db"].family(family_id)
     analysis_obj = family_obj.analyses[0]
     if analysis_obj.uploaded_at is not None:
         message = f"analysis already uploaded: {analysis_obj.uploaded_at.date()}"
         click.echo(click.style(message, fg="yellow"))
     else:
         analysis_obj.upload_started_at = dt.datetime.now()
-        context.obj["clinical_db"].commit()
+        context.obj["status_db"].commit()
         context.invoke(coverage, re_upload=True, family_id=family_id)
         context.invoke(validate, family_id=family_id)
         context.invoke(genotypes, re_upload=False, family_id=family_id)
         context.invoke(observations, case_id=family_id)
         context.invoke(scout, case_id=family_id)
         analysis_obj.uploaded_at = dt.datetime.now()
-        context.obj["clinical_db"].commit()
+        context.obj["status_db"].commit()
         click.echo(click.style(f"{family_id}: analysis uploaded!", fg="green"))
 
 
@@ -161,7 +161,7 @@ def auto(context: click.Context, pipeline: str = None):
     click.echo(click.style("----------------- AUTO ------------------------"))
 
     exit_code = 0
-    for analysis_obj in context.obj["clinical_db"].analyses_to_upload(pipeline=pipeline):
+    for analysis_obj in context.obj["status_db"].analyses_to_upload(pipeline=pipeline):
 
         if analysis_obj.family.analyses[0].uploaded_at is not None:
             LOG.warning(

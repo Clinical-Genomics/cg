@@ -26,7 +26,7 @@ def observations(context, case_id, case_limit, dry_run):
         "wgs": LoqusdbAPI(context.obj),
         "wes": LoqusdbAPI(context.obj, analysis_type="wes"),
     }
-    status_api = context.obj["clinical_db"]
+    status_api = context.obj["status_db"]
     hk_api = context.obj["housekeeper_api"]
 
     if case_id:

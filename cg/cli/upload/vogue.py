@@ -25,12 +25,12 @@ def vogue(context):
 
     click.echo(click.style("----------------- TRENDING -----------------------"))
 
-    context.obj["clinical_db"] = Store(context.obj["database"])
+    context.obj["status_db"] = Store(context.obj["database"])
     context.obj["vogue_api"] = VogueAPI(context.obj)
     context.obj["vogue_upload_api"] = UploadVogueAPI(
         genotype_api=GenotypeAPI(context.obj),
         vogue_api=context.obj["vogue_api"],
-        store=context.obj["clinical_db"],
+        store=context.obj["status_db"],
     )
 
 
@@ -126,7 +126,7 @@ def bioinfo(context, case_name, cleanup, target_load, dry):
     """Load bioinfo case results to the trending database"""
 
     hk_api = context.obj["housekeeper_api"]
-    store = context.obj["clinical_db"]
+    store = context.obj["status_db"]
 
     click.echo(click.style("----------------- BIOINFO -----------------------"))
 
@@ -181,7 +181,7 @@ def bioinfo_all(context, dry):
     """Load all cases with recent analysis and a multiqc-json to the trending database."""
 
     hk_api = context.obj["housekeeper_api"]
-    store = context.obj["clinical_db"]
+    store = context.obj["status_db"]
     cases = store.families()
     for case in cases:
         case_name = case.internal_id

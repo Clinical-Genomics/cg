@@ -61,10 +61,10 @@ def mip_dna(
     context.obj["trailblazer_api"] = TrailblazerAPI(context.obj)
     context.obj["scout_api"] = ScoutAPI(context.obj)
     context.obj["lims_api"] = LimsAPI(context.obj)
-    context.obj["clinical_db"] = Store(context.obj["database"])
+    context.obj["status_db"] = Store(context.obj["database"])
 
     context.obj["dna_api"] = MipAnalysisAPI(
-        db=context.obj["clinical_db"],
+        db=context.obj["status_db"],
         hk_api=context.obj["housekeeper_api"],
         tb_api=context.obj["trailblazer_api"],
         scout_api=context.obj["scout_api"],

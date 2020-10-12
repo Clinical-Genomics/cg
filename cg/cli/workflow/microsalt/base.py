@@ -22,11 +22,11 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def microsalt(context: click.Context, ticket: str, dry_run: bool):
     """Microbial workflow"""
-    context.obj["clinical_db"] = Store(context.obj["database"])
+    context.obj["status_db"] = Store(context.obj["database"])
     hk_api = HousekeeperAPI(context.obj)
     lims_api = LimsAPI(context.obj)
     analysis_api = MicrosaltAnalysisAPI(
-        db=context.obj["clinical_db"],
+        db=context.obj["status_db"],
         hk_api=hk_api,
         lims_api=lims_api,
         fastq_handler=FastqHandler(context.obj),

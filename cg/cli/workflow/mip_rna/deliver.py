@@ -21,9 +21,9 @@ SAMPLE_TAGS = ["bam", "bam-index", "cram", "cram-index"]
 @click.pass_context
 def deliver(context):
     """Deliver stuff."""
-    context.obj["clinical_db"] = Store(context.obj["database"])
+    context.obj["status_db"] = Store(context.obj["database"])
     context.obj["deliver_api"] = DeliverAPI(
-        db=context.obj["clinical_db"],
+        db=context.obj["status_db"],
         hk_api=HousekeeperAPI(context.obj),
         lims_api=LimsAPI(context.obj),
         case_tags=CASE_TAGS,
@@ -47,10 +47,10 @@ def inbox(context, case, version, tag, inbox_path):
     """Link files from HK to cust inbox."""
 
     if not case:
-        _suggest_cases_to_deliver(context.obj["clinical_db"])
+        _suggest_cases_to_deliver(context.obj["status_db"])
         context.abort()
 
-    case_obj = context.obj["clinical_db"].family(case)
+    case_obj = context.obj["status_db"].family(case)
     if case_obj is None:
         LOG.error("Case '%s' not found.", case)
         context.abort()
@@ -76,7 +76,7 @@ def inbox(context, case, version, tag, inbox_path):
         else:
             LOG.info("Target file exists: %s", out_path)
 
-    link_obj = context.obj["clinical_db"].family_samples(case)
+    link_obj = context.obj["status_db"].family_samples(case)
     if not link_obj:
         LOG.warning("No sample files found.")
 
