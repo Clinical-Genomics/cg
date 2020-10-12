@@ -45,6 +45,7 @@ class TrailblazerAPI:
             raise TrailblazerAPIHTTPError(
                 f"Request {command} failed with status code {response.status_code}: {response.text}"
             )
+        LOG.info(response.text, type(json.loads(response.text)))
         return json.loads(response.text)
 
     def analyses(
