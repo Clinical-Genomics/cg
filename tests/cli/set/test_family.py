@@ -85,7 +85,9 @@ def test_set_family_customer(cli_runner, base_context, base_store: Store, helper
     assert customer_id != case.customer.internal_id
 
     # WHEN setting a customer of a family
-    result = cli_runner.invoke(family, [case.internal_id, "--customer-id", customer_id], obj=base_context)
+    result = cli_runner.invoke(
+        family, [case.internal_id, "--customer-id", customer_id], obj=base_context
+    )
 
     # THEN then it should set customer on the family
     assert result.exit_code == SUCCESS
