@@ -4,7 +4,7 @@ from pathlib import Path
 import ruamel.yaml
 
 from cg.exc import AnalysisNotFinishedError
-from cg.meta.store import base as store_base
+import cg.meta.store.base as store_base
 
 LOG = logging.getLogger(__name__)
 

@@ -1,7 +1,7 @@
 """Test methods for cg/cli/set/samples"""
 import pytest
 
-from cg.cli.set.base import samples
+from cg.cli.set import samples
 from cg.store import Store
 
 SUCCESS = 0

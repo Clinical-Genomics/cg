@@ -161,6 +161,7 @@ class StoreHelpers:
         if not family:
             family = self.add_family(store)
 
+        print("Adding analysis to", family)
         analysis = store.add_analysis(pipeline=pipeline, version=pipeline_version)
 
         analysis.started_at = started_at or datetime.now()

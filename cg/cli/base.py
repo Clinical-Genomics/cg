@@ -17,7 +17,7 @@ from .export import export
 from .get import get
 from .import_cmd import import_cmd
 from .reset import reset_cmd
-from cg.cli.set.base import set_cmd
+from .set import set_cmd
 from .status import status
 from .store import store as store_cmd
 from .transfer import transfer
