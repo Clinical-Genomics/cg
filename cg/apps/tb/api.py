@@ -73,7 +73,10 @@ class TrailblazerAPI:
         }
         response = self.query_trailblazer(command="query-analyses", request_body=request_body)
         if response:
-            return [TrailblazerAnalysis.parse_obj(analysis) for analysis in response]
+            if isinstance(list, response):
+                return [TrailblazerAnalysis.parse_obj(analysis) for analysis in response]
+            elif isinstance(dict, response):
+                return [TrailblazerAnalysis.parse_obj(response)]
         return response
 
     def get_latest_analysis(self, case_id: str) -> TrailblazerAnalysis:
