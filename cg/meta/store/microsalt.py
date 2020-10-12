@@ -7,7 +7,7 @@ import ruamel.yaml
 from _io import TextIOWrapper
 
 from cg.constants import HK_TAGS, MICROSALT_TAGS
-import cg.meta.store.base as store_base
+from cg.meta.store import base as store_base
 
 LOG = logging.getLogger(__name__)
 
