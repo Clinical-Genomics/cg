@@ -7,6 +7,7 @@ from ruamel.yaml import safe_load
 import datetime as dt
 
 from cg.apps.tb import TrailblazerAPI
+from cg.apps.tb.models import TrailblazerAnalysis
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.scoutapi import ScoutAPI
 from cg.apps.lims import LimsAPI
@@ -408,10 +409,10 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
     def has_latest_analysis_started(self, case_id: str) -> bool:
         return self.tb.has_latest_analysis_started(case_id=case_id)
 
-    def mark_analyses_deleted(self, case_id: str) -> dict:
+    def mark_analyses_deleted(self, case_id: str) -> list:
         return self.tb.mark_analyses_deleted(case_id=case_id)
 
-    def add_pending_analysis(self, case_id: str, email: str) -> dict:
+    def add_pending_analysis(self, case_id: str, email: str) -> TrailblazerAnalysis:
         return self.tb.add_pending_analysis(case_id=case_id, email=email)
 
     def get_latest_analysis_status(self, case_id: str) -> str:
@@ -427,7 +428,7 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         before: dt.datetime = None,
         is_visible: bool = None,
         family: str = None,
-    ):
+    ) -> list:
         return self.tb.analyses(
             case_id=case_id,
             query=query,
