@@ -73,9 +73,9 @@ class TrailblazerAPI:
         }
         response = self.query_trailblazer(command="query-analyses", request_body=request_body)
         if response:
-            if isinstance(list, response):
+            if isinstance(response, list):
                 return [TrailblazerAnalysis.parse_obj(analysis) for analysis in response]
-            elif isinstance(dict, response):
+            elif isinstance(response, dict):
                 return [TrailblazerAnalysis.parse_obj(response)]
         return response
 
@@ -127,9 +127,9 @@ class TrailblazerAPI:
             command="mark-analyses-deleted", request_body=request_body
         )
         if response:
-            if isinstance(list, response):
+            if isinstance(response, list):
                 return [TrailblazerAnalysis.parse_obj(analysis) for analysis in response]
-            elif isinstance(dict, response):
+            elif isinstance(response, dict):
                 return [TrailblazerAnalysis.parse_obj(response)]
         return response
 
