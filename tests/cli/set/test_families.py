@@ -21,10 +21,8 @@ def test_set_families_by_sample_identifiers(
 
     # WHEN calling set families with valid sample identifiers
     result = cli_runner.invoke(
-        families,
-        ["--sample-identifier", identifier_key, identifier_value],
-        obj=base_context,
-        catch_exceptions=False,
+        families, ["--sample-identifier", identifier_key, identifier_value],
+        obj=base_context, catch_exceptions=False
     )
 
     # THEN it should name the family to be changed

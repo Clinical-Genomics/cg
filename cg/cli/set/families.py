@@ -44,10 +44,7 @@ def _get_cases(identifiers: click.Tuple([str, str]), store: Store) -> [models.Fa
 @click.pass_context
 def families(
     context: click.Context,
-    action,
-    priority,
-    panels,
-    customer_id,
+    action, priority, panels, customer_id,
     identifiers: click.Tuple([str, str]),
 ):
     """Set values on many samples at the same time"""
@@ -68,10 +65,6 @@ def families(
 
     for case in cases:
         context.invoke(
-            family,
-            action=action,
-            priority=priority,
-            panels=panels,
-            family_id=case.internal_id,
-            customer_id=customer_id,
+            family, action=action, priority=priority, panels=panels, family_id=case.internal_id,
+            customer_id=customer_id
         )

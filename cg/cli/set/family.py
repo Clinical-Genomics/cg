@@ -12,14 +12,8 @@ from cg.constants import FAMILY_ACTIONS, PRIORITY_OPTIONS
 @click.option("-p", "--priority", type=click.Choice(PRIORITY_OPTIONS), help="update priority")
 @click.argument("family_id")
 @click.pass_context
-def family(
-    context: click.Context,
-    action: str,
-    priority: str,
-    panels: [str],
-    family_id: str,
-    customer_id: str,
-):
+def family(context: click.Context, action: str, priority: str, panels: [str], family_id: str,
+           customer_id: str):
     """Update information about a family."""
 
     family_obj = context.obj["status"].family(family_id)
@@ -39,11 +33,8 @@ def family(
         if customer_obj is None:
             click.echo(click.style(f"unknown customer: {customer_id}", fg="red"))
             context.abort()
-        click.echo(
-            click.style(
-                f"Update customer: {family_obj.customer.internal_id} -> {customer_id}", fg="green"
-            )
-        )
+        click.echo(click.style(f"Update customer: {family_obj.customer.internal_id} -> {customer_id}",
+                    fg="green"))
         family_obj.customer = customer_obj
     if panels:
         for panel_id in panels:
