@@ -45,7 +45,7 @@ class TrailblazerAPI:
             raise TrailblazerAPIHTTPError(
                 f"Request {command} failed with status code {response.status_code}: {response.text}"
             )
-        LOG.info(response.text, type(json.loads(response.text)))
+        LOG.info(json.loads(response.text))
         return json.loads(response.text)
 
     def analyses(
@@ -127,7 +127,10 @@ class TrailblazerAPI:
             command="mark-analyses-deleted", request_body=request_body
         )
         if response:
-            return [TrailblazerAnalysis.parse_obj(analysis) for analysis in response]
+            if isinstance(list, response):
+                return [TrailblazerAnalysis.parse_obj(analysis) for analysis in response]
+            elif isinstance(dict, response):
+                return [TrailblazerAnalysis.parse_obj(response)]
         return response
 
     def add_pending_analysis(self, case_id: str, email: str = None) -> TrailblazerAnalysis:
