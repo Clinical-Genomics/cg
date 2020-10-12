@@ -3,37 +3,13 @@ import logging
 from pathlib import Path
 import ruamel.yaml
 
-from cg.exc import AnalysisNotFinishedError, BundleAlreadyAddedError
-from cg.meta.store.base import build_bundle, add_new_analysis
-from cg.store.utils import reset_case_action
+from cg.exc import AnalysisNotFinishedError
+import cg.meta.store.base as store_base
 
 LOG = logging.getLogger(__name__)
 
 
-def gather_files_and_bundle_in_housekeeper(config_stream, hk_api, status):
-    """Function to gather files and bundle in housekeeper"""
-    bundle_data = add_analysis(config_stream)
-
-    results = hk_api.add_bundle(bundle_data)
-    if results is None:
-        raise BundleAlreadyAddedError("bundle already added")
-
-    bundle_obj, version_obj = results
-
-    case_obj = status.family(bundle_obj.name)
-
-    reset_case_action(case_obj)
-    new_analysis = add_new_analysis(bundle_data, case_obj, status, version_obj)
-    version_date = version_obj.created_at.date()
-
-    LOG.info("new bundle added: %s, version %s", bundle_obj.name, version_date)
-    hk_api.include(version_obj)
-    hk_api.add_commit(bundle_obj, version_obj)
-
-    return new_analysis
-
-
-def add_analysis(config_stream):
+def add_mip_analysis(config_stream):
     """Gather information from MIP analysis to store."""
     config_raw = ruamel.yaml.safe_load(config_stream)
     config_data = parse_config(config_raw)
@@ -44,7 +20,7 @@ def add_analysis(config_stream):
         raise AnalysisNotFinishedError("analysis not finished")
 
     deliverables_raw = ruamel.yaml.safe_load(Path(config_raw["store_file"]).open())
-    new_bundle = build_bundle(config_data, sampleinfo_data, deliverables_raw)
+    new_bundle = store_base.build_bundle(config_data, sampleinfo_data, deliverables_raw)
 
     return new_bundle
 

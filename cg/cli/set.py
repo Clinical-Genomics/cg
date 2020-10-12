@@ -98,27 +98,73 @@ def family(context, action, priority, panels, family_id):
 )
 @click.option("--skip-lims", is_flag=True, help="Skip setting value in LIMS")
 @click.option("-y", "--yes", is_flag=True, help="Answer yes on all confirmations")
+@click.argument("case_id", required=False)
 @click.pass_context
-def samples(context, identifiers, kwargs, skip_lims, yes):
+def samples(
+    context: click.Context,
+    identifiers: click.Tuple([str, str]),
+    kwargs: click.Tuple([str, str]),
+    skip_lims: bool,
+    yes: bool,
+    case_id: str,
+):
     """Set values on many samples at the same time"""
-    identifier_args = {}
-    for identifier_name, identifier_value in identifiers:
-        identifier_args[identifier_name] = identifier_value
+    store = context.obj["status"]
+    sample_objs = _get_samples(case_id, identifiers, store)
 
-    samples_objs = context.obj["status"].samples_by_ids(**identifier_args)
+    if not sample_objs:
+        click.echo(click.style(fg="red", text="No samples to alter!"))
+        context.abort()
 
     click.echo("Would alter samples:")
 
-    for sample_obj in samples_objs:
+    for sample_obj in sample_objs:
         click.echo(f"{sample_obj}")
 
     if not (yes or click.confirm(CONFIRM)):
         context.abort()
 
-    for sample_obj in samples_objs:
+    for sample_obj in sample_objs:
         context.invoke(
             sample, sample_id=sample_obj.internal_id, kwargs=kwargs, yes=yes, skip_lims=skip_lims
         )
+
+
+def _get_samples(
+    case_id: str, identifiers: click.Tuple([str, str]), store: Store
+) -> [models.Sample]:
+    """Get samples that match both case_id and identifiers if given"""
+    samples_by_case_id = None
+    samples_by_id = None
+
+    if case_id:
+        samples_by_case_id = _get_samples_by_case_id(case_id, store)
+
+    if identifiers:
+        samples_by_id = _get_samples_by_identifiers(identifiers, store)
+
+    if case_id and identifiers:
+        sample_objs = set(set(samples_by_case_id) & set(samples_by_id))
+    else:
+        sample_objs = samples_by_case_id or samples_by_id
+
+    return sample_objs
+
+
+def _get_samples_by_identifiers(
+    identifiers: click.Tuple([str, str]), store: Store
+) -> models.Sample:
+    """Get samples matched by given set of identifiers"""
+    identifier_args = {}
+    for identifier_name, identifier_value in identifiers:
+        identifier_args[identifier_name] = identifier_value
+    return store.samples_by_ids(**identifier_args)
+
+
+def _get_samples_by_case_id(case_id: str, store: Store) -> [models.Sample]:
+    """Get samples on a given case-id"""
+    case = store.family(internal_id=case_id)
+    return [link.sample for link in case.links] if case else []
 
 
 def is_locked_attribute_on_sample(key, skip_attributes):
@@ -131,9 +177,7 @@ def is_private_attribute(key):
     return key.startswith("_")
 
 
-def list_changeable_sample_attributes(
-    sample_obj: models.Sample = None, skip_attributes: list() = None
-):
+def list_changeable_sample_attributes(sample_obj: models.Sample = None, skip_attributes: [] = None):
     """List changeable attributes on sample and its current value"""
 
     sample_attributes = models.Sample.__dict__.keys()
@@ -149,8 +193,9 @@ def list_changeable_sample_attributes(
         click.echo(message)
 
 
-def show_set_sample_help(sample_obj: models.Sample = "None"):
+def show_set_sample_help(sample_obj: models.Sample = "None") -> None:
     """Show help for the set sample command"""
+    click.echo("sample_id: optional, internal_id of sample to set value on")
     show_option_help(long_name=OPTION_LONG_SKIP_LIMS, help_text=HELP_SKIP_LIMS)
     show_option_help(short_name=OPTION_SHORT_YES, long_name=OPTION_LONG_YES, help_text=HELP_YES)
     show_option_help(
