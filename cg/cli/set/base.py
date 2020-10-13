@@ -4,7 +4,10 @@ import getpass
 
 import click
 from cg.apps.lims import LimsAPI
-from cg.constants import FAMILY_ACTIONS, PRIORITY_OPTIONS, FLOWCELL_STATUS
+from .families import families
+
+from .family import family
+from cg.constants import FLOWCELL_STATUS
 from cg.exc import LimsDataError
 from cg.store import Store, models
 
@@ -39,42 +42,6 @@ def set_cmd(context):
     """Update information in the database."""
     context.obj["status"] = Store(context.obj["database"])
     context.obj["lims"] = LimsAPI(context.obj)
-
-
-@set_cmd.command()
-@click.option("-a", "--action", type=click.Choice(FAMILY_ACTIONS), help="update family action")
-@click.option("-p", "--priority", type=click.Choice(PRIORITY_OPTIONS), help="update priority")
-@click.option("-g", "--panel", "panels", multiple=True, help="update gene panels")
-@click.argument("family_id")
-@click.pass_context
-def family(context, action, priority, panels, family_id):
-    """Update information about a family."""
-    family_obj = context.obj["status"].family(family_id)
-    if family_obj is None:
-        click.echo(click.style(f"Can't find family {family_id}", fg="red"))
-        context.abort()
-    if not (action or priority or panels):
-        click.echo(click.style(f"Nothing to change", fg="yellow"))
-        context.abort()
-    if action:
-        click.echo(
-            click.style(f"Update action: {family_obj.action or 'NA'} -> {action}", fg="green")
-        )
-        family_obj.action = action
-    if priority:
-        message = f"update priority: {family_obj.priority_human} -> {priority}"
-        click.echo(click.style(message, fg="blue"))
-        family_obj.priority_human = priority
-    if panels:
-        for panel_id in panels:
-            panel_obj = context.obj["status"].panel(panel_id)
-            if panel_obj is None:
-                click.echo(click.style(f"unknown gene panel: {panel_id}", fg="red"))
-                context.abort()
-        message = f"update panels: {', '.join(family_obj.panels)} -> {', '.join(panels)}"
-        click.echo(click.style(message, fg="blue"))
-        family_obj.panels = panels
-    context.obj["status"].commit()
 
 
 @set_cmd.command()
@@ -301,7 +268,7 @@ def sample(context, sample_id, kwargs, skip_lims, yes, help):
 
 def _generate_comment(what, old_value, new_value):
     """Generate a comment that can be used in the comment field to describe updated value"""
-    return f"\n{what} changed from " f"{str(old_value)} to " f"{str(new_value)}."
+    return f"\n{what} changed from {str(old_value)} to {str(new_value)}."
 
 
 def _update_comment(comment, obj):
@@ -330,3 +297,7 @@ def flowcell(context, flowcell_name, status):
 
     context.obj["status"].commit()
     click.echo(click.style(f"{flowcell_name} set: {prev_status} -> {status}", fg="green"))
+
+
+set_cmd.add_command(family)
+set_cmd.add_command(families)

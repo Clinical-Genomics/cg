@@ -15,7 +15,7 @@ from cg.exc import (
     BundleAlreadyAddedError,
 )
 from cg.meta.store.microsalt import add_microbial_analysis
-import cg.meta.store.mip as store_mip
+from cg.meta.store import mip as store_mip
 from cg.store import models, Store
 from cg.store.utils import reset_case_action
 
