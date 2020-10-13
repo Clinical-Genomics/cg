@@ -10,9 +10,7 @@ def _get_samples_by_identifiers(
     identifiers: click.Tuple([str, str]), store: Store
 ) -> [models.Sample]:
     """Get samples matched by given set of identifiers"""
-    identifier_args = {}
-    for identifier_name, identifier_value in identifiers:
-        identifier_args[identifier_name] = identifier_value
+    identifier_args = dict(identifiers)
     return store.samples_by_ids(**identifier_args)
 
 
