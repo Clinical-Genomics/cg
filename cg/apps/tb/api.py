@@ -111,9 +111,9 @@ class TrailblazerAPI:
         if latest_analysis_status in self.__ONGOING_STATUSES:
             return True
 
-    def delete_analysis(self, case_id: str, date: dt.datetime) -> TrailblazerAnalysis:
+    def delete_analysis(self, case_id: str, force: bool = False) -> TrailblazerAnalysis:
         """Raises TrailblazerAPIHTTPError"""
-        request_body = {"case_id": case_id, "date": str(date)}
+        request_body = {"case_id": case_id, "force": force}
         response = self.query_trailblazer(command="delete-analysis", request_body=request_body)
         if response:
             return TrailblazerAnalysis.parse_obj(response)
