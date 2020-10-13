@@ -1,4 +1,6 @@
 """Test methods for cg/cli/set/samples"""
+import logging
+
 import pytest
 
 from cg.cli.set.families import families
@@ -9,7 +11,7 @@ SUCCESS = 0
 
 @pytest.mark.parametrize("identifier_key", ["ticket_number", "order"])
 def test_set_families_by_sample_identifiers(
-    cli_runner, base_context, base_store: Store, identifier_key, helpers
+    cli_runner, base_context, base_store: Store, identifier_key, helpers, caplog
 ):
     # GIVEN a database with a family with a sample
     sample_obj = helpers.add_sample(base_store)
@@ -18,6 +20,8 @@ def test_set_families_by_sample_identifiers(
     case = helpers.add_family(base_store)
     helpers.add_relationship(base_store, sample=sample_obj, family=case)
     identifier_value = getattr(sample_obj, identifier_key)
+
+    caplog.set_level(logging.INFO)
 
     # WHEN calling set families with valid sample identifiers
     result = cli_runner.invoke(
@@ -28,5 +32,5 @@ def test_set_families_by_sample_identifiers(
     )
 
     # THEN it should name the family to be changed
-    assert case.internal_id in result.output
-    assert case.name in result.output
+    assert case.internal_id in caplog.text
+    assert case.name in caplog.text
