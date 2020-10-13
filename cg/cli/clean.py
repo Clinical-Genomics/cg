@@ -116,7 +116,7 @@ def mip_run_dir(context, yes, case_id, sample_info, dry_run: bool = False):
         try:
             context.obj["trailblazer_api"].delete_analysis(case_id, date)
             analysis_obj.cleaned_at = datetime.now()
-        except ValueError as error:
+        except Exception as error:
             LOG.error(f"{case_id}: {error.args[0]}")
             raise click.Abort()
 
@@ -170,7 +170,7 @@ def scout_finished_cases(context, days_old: int, yes: bool = False, dry_run: boo
             if x_days_ago.days > days_old:
                 bundles.append(case.get("_id"))
                 cases_added += 1
-        LOG.info("%s cases marked for bam removal :)", cases_added)
+        LOG.info(f"{cases_added} cases marked for bam removal")
 
     for bundle in bundles:
         context.invoke(hk_alignment_files, bundle=bundle, yes=yes, dry_run=dry_run)
@@ -259,7 +259,7 @@ def mip_past_run_dirs(
         case_id = status_analysis.family.internal_id
         LOG.debug("%s: clean up analysis output", case_id)
         tb_analysis = context.obj["trailblazer_api"].find_analysis(
-            family=case_id, started_at=status_analysis.started_at, status="completed"
+            case_id=case_id, started_at=status_analysis.started_at, status="completed"
         )
 
         if not tb_analysis:
@@ -268,7 +268,7 @@ def mip_past_run_dirs(
         elif tb_analysis.is_deleted:
             LOG.warning("%s: analysis already deleted", case_id)
             continue
-        elif len(context.obj["trailblazer_api"].analyses(family=case_id, temp=True)) > 0:
+        elif len(context.obj["trailblazer_api"].analyses(case_id=case_id, temp=True)) > 0:
             LOG.warning("%s: family already re-started", case_id)
             continue
 
@@ -285,11 +285,8 @@ def mip_past_run_dirs(
                 )
         except FileNotFoundError:
             LOG.error(
-                (
-                    "%s: sample_info file not found, please manually mark the analysis as deleted in the "
-                    "analysis table in trailblazer."
-                ),
-                case_id,
+                f"{case_id}: sample_info file not found, please manually mark the analysis as deleted in the "
+                "analysis table in trailblazer."
             )
             continue
         except click.Abort:
