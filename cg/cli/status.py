@@ -173,7 +173,6 @@ def cases(
 ):
     """progress of each case"""
     records = context.obj["status_db"].cases(
-        progress_tracker=context.obj.get("tb"),
         days=days,
         internal_id=internal_id,
         name=name,

@@ -17,7 +17,7 @@ def trailblazer(context):
 @click.pass_context
 def get_latest_analysis(context, case_id):
     analysis_obj = context.obj["trailblazer_api"].get_latest_analysis(case_id=case_id)
-    LOG.info(f"Found {analysis_obj}")
+    LOG.info(f"Found {analysis_obj.to_dict()}")
 
 
 @trailblazer.command("mark-analyses-deleted")
@@ -25,7 +25,7 @@ def get_latest_analysis(context, case_id):
 @click.pass_context
 def mark_analyses_deleted(context, case_id):
     analyses = context.obj["trailblazer_api"].mark_analyses_deleted(case_id=case_id)
-    LOG.info(f"Marked deleted {analyses}")
+    LOG.info(f"Marked deleted: {[analysis.case_id for analysis in analyses]}")
 
 
 @trailblazer.command("add-pending-analysis")
@@ -34,4 +34,4 @@ def mark_analyses_deleted(context, case_id):
 @click.pass_context
 def add_pending_analysis(context, case_id, email):
     analysis_obj = context.obj["trailblazer_api"].add_pending_analysis(case_id=case_id, email=email)
-    LOG.info(f"Created pending analysis {analysis_obj}")
+    LOG.info(f"Created pending analysis {analysis_obj.to_dict()}")
