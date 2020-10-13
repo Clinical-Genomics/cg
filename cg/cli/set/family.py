@@ -1,8 +1,10 @@
 """Set family attributes in the status database"""
-
+import logging
 
 import click
 from cg.constants import FAMILY_ACTIONS, PRIORITY_OPTIONS
+
+LOG = logging.getLogger(__name__)
 
 
 @click.command()
@@ -24,39 +26,31 @@ def family(
 
     family_obj = context.obj["status"].family(family_id)
     if family_obj is None:
-        click.echo(click.style(f"Can't find family {family_id}", fg="red"))
-        context.abort()
+        LOG.error("Can't find family %s,", family_id)
+        raise click.Abort
     if not any([action, panels, priority, customer_id]):
-        click.echo(click.style(f"Nothing to change", fg="yellow"))
-        context.abort()
+        LOG.error("Nothing to change")
+        raise click.Abort
     if action:
-        click.echo(
-            click.style(f"Update action: {family_obj.action or 'NA'} -> {action}", fg="green")
-        )
+        LOG.info(f"Update action: {family_obj.action or 'NA'} -> {action}")
         family_obj.action = action
     if customer_id:
         customer_obj = context.obj["status"].customer(customer_id)
         if customer_obj is None:
-            click.echo(click.style(f"unknown customer: {customer_id}", fg="red"))
-            context.abort()
-        click.echo(
-            click.style(
-                f"Update customer: {family_obj.customer.internal_id} -> {customer_id}", fg="green"
-            )
-        )
+            LOG.error("Unknown customer: %s", customer_id)
+            raise click.Abort
+        LOG.info(f"Update customer: {family_obj.customer.internal_id} -> {customer_id}")
         family_obj.customer = customer_obj
     if panels:
         for panel_id in panels:
             panel_obj = context.obj["status"].panel(panel_id)
             if panel_obj is None:
-                click.echo(click.style(f"unknown gene panel: {panel_id}", fg="red"))
-                context.abort()
-        message = f"update panels: {', '.join(family_obj.panels)} -> {', '.join(panels)}"
-        click.echo(click.style(message, fg="green"))
+                LOG.error(f"unknown gene panel: {panel_id}")
+                raise click.Abort
+        LOG.info(f"Update panels: {', '.join(family_obj.panels)} -> {', '.join(panels)}")
         family_obj.panels = panels
     if priority:
-        message = f"update priority: {family_obj.priority_human} -> {priority}"
-        click.echo(click.style(message, fg="green"))
+        LOG.info(f"update priority: {family_obj.priority_human} -> {priority}")
         family_obj.priority_human = priority
 
     context.obj["status"].commit()

@@ -1,9 +1,13 @@
+import logging
+
 import click
 from .family import family
 from cg.constants import FAMILY_ACTIONS, PRIORITY_OPTIONS
 from cg.store import models, Store
 
 CONFIRM = "Continue?"
+
+LOG = logging.getLogger(__name__)
 
 
 def _get_samples_by_identifiers(
@@ -53,16 +57,16 @@ def families(
     cases = _get_cases(identifiers, store)
 
     if not cases:
-        click.echo(click.style(fg="red", text="No cases to alter!"))
-        context.abort()
+        LOG.error("No cases to alter!")
+        raise click.Abort
 
-    click.echo("Would alter cases:")
+    LOG.info("Would alter cases:")
 
     for case in cases:
-        click.echo(f"{case}")
+        LOG.info(case)
 
     if not (click.confirm(CONFIRM)):
-        context.abort()
+        raise click.Abort
 
     for case in cases:
         context.invoke(
