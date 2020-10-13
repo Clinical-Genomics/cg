@@ -9,15 +9,17 @@ from dateutil.parser import parse as parse_date
 
 from cg.apps.balsamic.fastq import FastqHandler
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
+from cg.meta.workflow.mip import MipAnalysisAPI
+from cg.meta.deliver import DeliverAPI
 from cg.apps.hk import HousekeeperAPI
-from cg.apps.lims import LimsAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.scoutapi import ScoutAPI
 from cg.apps.crunchy import CrunchyAPI
+from cg.apps.lims import LimsAPI
 from cg.apps.balsamic.api import BalsamicAPI
 from cg.store import Store
 from cg.constants import EXIT_SUCCESS, EXIT_FAIL
-from cg.apps.mip import parse_sampleinfo
+from cg.cli.workflow.mip_dna.deliver import CASE_TAGS, SAMPLE_TAGS
 
 LOG = logging.getLogger(__name__)
 
@@ -31,12 +33,32 @@ def clean(context):
     context.obj["trailblazer_api"] = TrailblazerAPI(context.obj)
     context.obj["scout_api"] = ScoutAPI(context.obj)
     context.obj["crunchy_api"] = CrunchyAPI(context.obj)
+    context.obj["lims_api"] = LimsAPI(context.obj)
+
     context.obj["BalsamicAnalysisAPI"] = BalsamicAnalysisAPI(
         balsamic_api=BalsamicAPI(context.obj),
         store=context.obj["status_db"],
         housekeeper_api=context.obj["housekeeper_api"],
         fastq_handler=FastqHandler(context.obj),
-        lims_api=LimsAPI(context.obj),
+        lims_api=context.obj["lims_api"],
+    )
+    context.obj["MipAnalysisAPI"] = MipAnalysisAPI(
+        db=context.obj["status_db"],
+        hk_api=context.obj["housekeeper_api"],
+        tb_api=context.obj["trailblazer_api"],
+        scout_api=context.obj["scout_api"],
+        lims_api=context.obj["lims_api"],
+        deliver_api=DeliverAPI(
+            context.obj,
+            hk_api=context.obj["housekeeper_api"],
+            lims_api=context.obj["lims_api"],
+            case_tags=CASE_TAGS,
+            sample_tags=SAMPLE_TAGS,
+        ),
+        script=context.obj["mip-rd-dna"]["script"],
+        pipeline=context.obj["mip-rd-dna"]["pipeline"],
+        conda_env=context.obj["mip-rd-dna"]["conda_env"],
+        root=context.obj["mip-rd-dna"]["root"],
     )
 
 
@@ -93,31 +115,35 @@ def balsamic_run_dir(context, yes, case_id, dry_run: bool = False):
 @click.argument("case_id")
 @click.argument("sample_info", type=click.File("r"))
 @click.pass_context
-def mip_run_dir(context, yes, case_id, sample_info, dry_run: bool = False):
+def mip_run_dir(context, yes, case_id, dry_run: bool = False):
     """Remove MIP run directory"""
 
-    raw_data = ruamel.yaml.safe_load(sample_info)
-    date = parse_sampleinfo.get_sampleinfo_date(raw_data)
-    case_obj = context.obj["status_db"].family(case_id)
+    mip_analysis_api = context.obj["MipAnalysisAPI"]
+    case_obj = mip_analysis_api.get_case_object(case_id)
 
     if case_obj is None:
         LOG.error("%s: family not found", case_id)
-        context.abort()
+        raise click.Abort()
 
-    analysis_obj = context.obj["status_db"].analysis(case_obj, date)
-    if analysis_obj is None:
-        LOG.error("%s - %s: analysis not found", case_id, date)
-        context.abort()
+    analysis_path = mip_analysis_api.get_case_output_path(case_id=case_id)
+    if not analysis_path.exists():
+        LOG.error(f"No analysis directory found for {case_id}")
+        raise click.Abort()
 
     if dry_run:
-        LOG.info(f"Would have deleted {case_id}")
+        LOG.info(f"Cleaning case {case_id} : Would have deleted contents of {analysis_path}")
         return
+
     if yes or click.confirm(f"Are you sure you want to remove {case_id}?"):
         try:
-            context.obj["trailblazer_api"].delete_analysis(case_id, date)
-            analysis_obj.cleaned_at = datetime.now()
+            shutil.rmtree(analysis_path, ignore_errors=True)
+            LOG.info(f"Cleaning case {case_id} : Deleted contents of {analysis_path}")
+            context.obj["trailblazer_api"].mark_analyses_deleted(case_id)
+            for analysis_obj in case_obj.analyses:
+                analysis_obj.cleaned_at = datetime.now()
+            mip_analysis_api.db.commit()
         except Exception as error:
-            LOG.error(f"{case_id}: {error.args[0]}")
+            LOG.error(f"{case_id}: {error}")
             raise click.Abort()
 
 
@@ -253,41 +279,17 @@ def mip_past_run_dirs(
     context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
     """Clean up of "old" MIP case run dirs"""
+    mip_analysis_api = context.obj["MipAnalysisAPI"]
     before = parse_date(before_str)
-    old_analyses = context.obj["status_db"].analyses(before=before)
+    old_analyses = mip_analysis_api.get_analyses_to_clean(before=before)
     for status_analysis in old_analyses:
         case_id = status_analysis.family.internal_id
-        LOG.debug("%s: clean up analysis output", case_id)
-        tb_analysis = context.obj["trailblazer_api"].find_analysis(
-            case_id=case_id, started_at=status_analysis.started_at, status="completed"
-        )
-
-        if not tb_analysis:
-            LOG.warning("%s: analysis not found in Trailblazer", case_id)
-            continue
-        elif tb_analysis.is_deleted:
-            LOG.warning("%s: analysis already deleted", case_id)
-            continue
-        elif len(context.obj["trailblazer_api"].analyses(case_id=case_id, temp=True)) > 0:
-            LOG.warning("%s: family already re-started", case_id)
-            continue
-
         try:
-            sampleinfo_path = parse_sampleinfo.get_sampleinfo(tb_analysis)
-            LOG.info("%s: cleaning MIP output", case_id)
-            with open(sampleinfo_path, "r") as sampleinfo_file:
-                context.invoke(
-                    mip_run_dir,
-                    yes=yes,
-                    case_id=case_id,
-                    sample_info=sampleinfo_file,
-                    dry_run=dry_run,
-                )
-        except FileNotFoundError:
-            LOG.error(
-                f"{case_id}: sample_info file not found, please manually mark the analysis as deleted in the "
-                "analysis table in trailblazer."
+            context.invoke(
+                mip_run_dir,
+                yes=yes,
+                case_id=case_id,
+                dry_run=dry_run,
             )
-            continue
         except click.Abort:
             continue

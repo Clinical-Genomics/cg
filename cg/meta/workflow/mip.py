@@ -402,6 +402,16 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
             f"Action '{action}' not permitted by StatusDB and will not be set for case {case_id}"
         )
 
+    def get_case_output_path(self, case_id: str) -> Path:
+        return Path(self.root, case_id)
+
+    def get_case_object(self, case_id: str) -> models.Family:
+        return self.db.family(case_id)
+
+    def get_analyses_to_clean(self, before: dt.datetime) -> list:
+        analyses_to_clean = self.db.analyses_to_clean(pipeline="mip", before=before)
+        return analyses_to_clean.all()
+
     # TrailblazerAPI inherited methods
     def is_latest_analysis_ongoing(self, case_id: str) -> bool:
         return self.tb.is_latest_analysis_ongoing(case_id=case_id)
