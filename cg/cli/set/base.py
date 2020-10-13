@@ -268,7 +268,7 @@ def sample(context, sample_id, kwargs, skip_lims, yes, help):
 
 def _generate_comment(what, old_value, new_value):
     """Generate a comment that can be used in the comment field to describe updated value"""
-    return f"\n{what} changed from " f"{str(old_value)} to " f"{str(new_value)}."
+    return f"\n{what} changed from {str(old_value)} to {str(new_value)}."
 
 
 def _update_comment(comment, obj):
