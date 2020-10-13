@@ -60,7 +60,12 @@ def balsamic_run_dir(context, yes, case_id, dry_run: bool = False):
         raise click.Abort()
 
     analysis_path = Path(balsamic_analysis_api.get_case_path(case_id))
-    if yes or click.confirm(f"Do you want to remove {analysis_path}?"):
+
+    if dry_run:
+        LOG.info("Would have deleted: %s", analysis_path)
+        return EXIT_SUCCESS
+
+    if yes or click.confirm(f"Are you sure you want to remove all files in {analysis_path}?"):
         if not analysis_path.exists():
             LOG.warning("could not find: %s", analysis_path)
             return EXIT_FAIL
@@ -69,9 +74,7 @@ def balsamic_run_dir(context, yes, case_id, dry_run: bool = False):
                 "Will not automatically delete symlink: %s, delete it manually", analysis_path
             )
             return EXIT_FAIL
-        if dry_run:
-            LOG.info("Would have deleted: %s", analysis_path)
-            return EXIT_SUCCESS
+
         try:
             shutil.rmtree(analysis_path, ignore_errors=True)
             LOG.info(f"Cleaned {analysis_path}")
@@ -106,12 +109,16 @@ def mip_run_dir(context, yes, case_id, sample_info, dry_run: bool = False):
         LOG.error("%s - %s: analysis not found", case_id, date)
         context.abort()
 
-    try:
-        context.obj["trailblazer_api"].delete_analysis(case_id, date, yes=yes, dry_run=dry_run)
-        analysis_obj.cleaned_at = datetime.now()
-    except ValueError as error:
-        LOG.error(f"{case_id}: {error.args[0]}")
-        raise click.Abort()
+    if dry_run:
+        LOG.info(f"Would have deleted {case_id}")
+        return
+    if yes or click.confirm(f"Are you sure you want to remove {case_id}?"):
+        try:
+            context.obj["trailblazer_api"].delete_analysis(case_id, date)
+            analysis_obj.cleaned_at = datetime.now()
+        except ValueError as error:
+            LOG.error(f"{case_id}: {error.args[0]}")
+            raise click.Abort()
 
 
 @clean.command("hk-alignment-files")
@@ -255,7 +262,7 @@ def mip_past_run_dirs(
             family=case_id, started_at=status_analysis.started_at, status="completed"
         )
 
-        if tb_analysis is None:
+        if not tb_analysis:
             LOG.warning("%s: analysis not found in Trailblazer", case_id)
             continue
         elif tb_analysis.is_deleted:
@@ -279,10 +286,11 @@ def mip_past_run_dirs(
         except FileNotFoundError:
             LOG.error(
                 (
-                    "%s: sample_info file not found, please mark the analysis as deleted in the "
+                    "%s: sample_info file not found, please manually mark the analysis as deleted in the "
                     "analysis table in trailblazer."
                 ),
                 case_id,
             )
+            continue
         except click.Abort:
             continue

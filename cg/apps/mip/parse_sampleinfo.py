@@ -1,6 +1,7 @@
 from typing import List, Optional
 from pathlib import Path
 import ruamel
+from cg.apps.tb.models import TrailblazerAnalysis
 
 
 def get_case_from_config(config: dict) -> Optional[str]:
@@ -209,8 +210,8 @@ def get_multiple_paths(sample_data: dict, path_key: str) -> list:
     return paths
 
 
-def get_sampleinfo(analysis: dict) -> str:
+def get_sampleinfo(analysis_obj: TrailblazerAnalysis) -> str:
     """Get the sample info path for an analysis."""
-    raw_data = ruamel.yaml.safe_load(Path(analysis.get("config_path")).open())
+    raw_data = ruamel.yaml.safe_load(Path(analysis_obj.config_path).open())
     data = parse_config(raw_data)
     return data["sampleinfo_path"]
