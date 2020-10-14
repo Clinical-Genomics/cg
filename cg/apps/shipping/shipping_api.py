@@ -48,5 +48,5 @@ class ShippingAPI:
         Deployment of shipping does not need any extra information since it is following the regular workflow
         with conda environments using standard names
         """
-        LOG.info("Deploying the shipping software on host")
+        LOG.info("Deploying the shipping software")
         self.deploy(app_name="shipping")
