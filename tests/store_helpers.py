@@ -3,10 +3,9 @@ import logging
 from datetime import datetime
 from typing import List
 
-from housekeeper.store import models as hk_models
-
 from cg.apps.hk import HousekeeperAPI
 from cg.store import Store, models
+from housekeeper.store import models as hk_models
 
 LOG = logging.getLogger(__name__)
 
@@ -298,10 +297,12 @@ class StoreHelpers:
         store.add_commit(family_obj)
         return family_obj
 
-    def ensure_family(self, store: Store, name: str, customer: models.Customer):
+    def ensure_family(
+        self, store: Store, name: str, customer: models.Customer, data_analysis: str = ""
+    ):
         family = store.find_family(customer=customer, name=name)
         if not family:
-            family = store.add_family(name=name, panels=None)
+            family = store.add_family(name=name, panels=None, data_analysis=data_analysis)
             family.customer = customer
         return family
 
