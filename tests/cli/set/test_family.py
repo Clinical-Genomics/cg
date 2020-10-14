@@ -1,6 +1,6 @@
 """This script tests the cli methods to set families to status-db"""
 
-from cg.cli.set import family
+from cg.cli.set.family import family
 from cg.store import Store
 
 SUCCESS = 0
@@ -75,3 +75,20 @@ def test_set_family_priority(cli_runner, base_context, base_store: Store, helper
     assert result.exit_code == SUCCESS
     assert base_store.Family.query.count() == 1
     assert base_store.Family.query.first().priority_human == priority
+
+
+def test_set_family_customer(cli_runner, base_context, base_store: Store, helpers):
+    """Test to set a family using an existing customer"""
+    # GIVEN a database with a family and a customer not yet on the family
+    customer_id = helpers.ensure_customer(base_store, customer_id="a_customer").internal_id
+    case = helpers.add_family(base_store)
+    assert customer_id != case.customer.internal_id
+
+    # WHEN setting a customer of a family
+    result = cli_runner.invoke(
+        family, [case.internal_id, "--customer-id", customer_id], obj=base_context
+    )
+
+    # THEN then it should set customer on the family
+    assert result.exit_code == SUCCESS
+    assert customer_id == case.customer.internal_id
