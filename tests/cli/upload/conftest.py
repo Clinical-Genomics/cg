@@ -133,10 +133,7 @@ class MockTB(TrailblazerAPI):
 
     def __init__(self):
         """Mock the init"""
-
-    def get_family_root_dir(self, case_id):
-        """docstring for get_family_root_dir"""
-        return Path("hej")
+        pass
 
 
 class MockScoutApi(ScoutAPI):
