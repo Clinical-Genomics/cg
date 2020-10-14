@@ -41,6 +41,8 @@ class ShippingAPI:
             raise SyntaxError
         deploy_args.append("deploy")
         self.process.run_command(deploy_args, dry_run=self.dry_run)
+        for line in self.process.stderr_lines():
+            LOG.info(line)
 
     def deploy_shipping(self):
         """Deploy the tool shipping
