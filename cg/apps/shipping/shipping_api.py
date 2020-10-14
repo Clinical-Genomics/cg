@@ -35,7 +35,7 @@ class ShippingAPI:
         if app_config:
             deploy_args.extend(["--app-config", str(app_config)])
         elif app_name:
-            deploy_args.append(app_name)
+            deploy_args.extend(["--tool-name", app_name])
         else:
             LOG.warning("Please specify what app to deploy")
             raise SyntaxError
