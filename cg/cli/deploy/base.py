@@ -29,4 +29,14 @@ def deploy_shipping_cmd(context):
     shipping_api.deploy_shipping()
 
 
+@click.command(name="genotype")
+@click.pass_context
+def deploy_genotype_cmd(context):
+    """Deploy the shipping tool"""
+    LOG.info("Deploying genotype with CG")
+    shipping_api: ShippingAPI = context.obj["shipping_api"]
+    shipping_api.deploy_genotype()
+
+
 deploy.add_command(deploy_shipping_cmd)
+deploy.add_command(deploy_genotype_cmd)

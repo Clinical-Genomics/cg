@@ -87,3 +87,16 @@ def test_shipping_api_deploy_shipping(shipping_api: ShippingAPI, caplog):
     # THEN assert that call to deploy was communicated
     output_str = build_expected_output_string(api=shipping_api, app_name="shipping")
     assert output_str in caplog.text
+
+
+def test_shipping_api_deploy_genotype(shipping_api: ShippingAPI, caplog):
+    """Test to run deploy with genotype"""
+    caplog.set_level(logging.DEBUG)
+    # GIVEN a shipping api
+
+    # WHEN running the deploy method shipping method
+    shipping_api.deploy_genotype()
+
+    # THEN assert that call to deploy was communicated
+    output_str = build_expected_output_string(api=shipping_api, app_name="genotype")
+    assert output_str in caplog.text

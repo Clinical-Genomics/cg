@@ -52,3 +52,12 @@ class ShippingAPI:
         """
         LOG.info("Deploying the shipping software")
         self.deploy(app_name="shipping")
+
+    def deploy_genotype(self):
+        """Deploy the tool genotype
+
+        Deployment of genotype does not need any extra information since it is following the regular workflow
+        with conda environments using standard names and pip
+        """
+        LOG.info("Deploying the genotype software")
+        self.deploy(app_name="genotype")
