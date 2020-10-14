@@ -2,6 +2,7 @@ from pydantic import BaseModel, validator
 from typing import Optional
 from dateutil.parser import parse as parse_datestr
 from pathlib import Path
+import datetime as dt
 
 
 class TrailblazerAnalysis(BaseModel):
@@ -25,16 +26,16 @@ class TrailblazerAnalysis(BaseModel):
     progress: Optional[float] = 0.0
 
     @validator("case_id")
-    def inherit_family_value(cls, value, values):
+    def inherit_family_value(cls, value, values) -> str:
         return values.get("family")
 
     @validator("logged_at", "started_at", "completed_at")
-    def parse_str_to_datetime(cls, value):
+    def parse_str_to_datetime(cls, value) -> Optional[dt.datetime]:
         if value:
             return parse_datestr(value)
 
     @validator("out_dir", "config_path")
-    def parse_str_to_path(cls, value):
+    def parse_str_to_path(cls, value) -> Optional[Path]:
         if value:
             return Path(value)
 

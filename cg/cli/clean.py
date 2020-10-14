@@ -3,7 +3,6 @@ import logging
 from datetime import datetime
 from pathlib import Path
 import shutil
-import ruamel.yaml
 import click
 from dateutil.parser import parse as parse_date
 
@@ -113,7 +112,6 @@ def balsamic_run_dir(context, yes, case_id, dry_run: bool = False):
 @click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
 @click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
 @click.argument("case_id")
-@click.argument("sample_info", type=click.File("r"))
 @click.pass_context
 def mip_run_dir(context, yes, case_id, dry_run: bool = False):
     """Remove MIP run directory"""

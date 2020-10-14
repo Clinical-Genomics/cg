@@ -75,7 +75,7 @@ class TrailblazerAPI:
         if response:
             if isinstance(response, list):
                 return [TrailblazerAnalysis.parse_obj(analysis) for analysis in response]
-            elif isinstance(response, dict):
+            if isinstance(response, dict):
                 return [TrailblazerAnalysis.parse_obj(response)]
         return response
 
@@ -129,7 +129,7 @@ class TrailblazerAPI:
         if response:
             if isinstance(response, list):
                 return [TrailblazerAnalysis.parse_obj(analysis) for analysis in response]
-            elif isinstance(response, dict):
+            if isinstance(response, dict):
                 return [TrailblazerAnalysis.parse_obj(response)]
         return response
 

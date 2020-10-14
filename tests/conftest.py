@@ -12,8 +12,6 @@ import ruamel.yaml
 
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.mip import parse_sampleinfo, parse_qcmetrics
-from cg.meta.store import mip as store_mip
-from cg.apps.tb import TrailblazerAPI
 from cg.apps.gt import GenotypeAPI
 from cg.models import CompressionData
 from cg.store import Store
@@ -67,9 +65,9 @@ def fixture_analysis_family_single(case_id, family_name):
                 "internal_id": "ADM1",
                 "status": "affected",
                 "ticket_number": 123456,
-                "reads": 5000000,
+                "reads": 5000000000,
                 "capture_kit": "GMSmyeloid",
-                "data_analysis": "PIM",
+                "data_analysis": "mip",
             }
         ],
     }
@@ -150,20 +148,6 @@ def fixture_hk_config_dict(root_path):
     return _config
 
 
-@pytest.fixture(name="tb_config_dict")
-def fixture_tb_config_dict(analysis_dir: Path) -> dict:
-    """Return a dictionary with trailblazer configs"""
-    _config = {
-        "trailblazer": {
-            "database": "sqlite:///:memory:",
-            "root": str(analysis_dir),
-            "script": ".",
-            "mip_config": ".",
-        }
-    }
-    return _config
-
-
 @pytest.fixture(name="genotype_config")
 def fixture_genotype_config() -> dict:
     """
@@ -190,15 +174,6 @@ def fixture_genotype_api(genotype_config: dict) -> GenotypeAPI:
     _genotype_api = GenotypeAPI(genotype_config)
     _genotype_api.set_dry_run(True)
     return _genotype_api
-
-
-@pytest.yield_fixture(name="trailblazer_api")
-def fixture_trailblazer_api(tb_config_dict: dict) -> TrailblazerAPI:
-    """Setup Trailblazer api."""
-    _store = TrailblazerAPI(tb_config_dict)
-    _store.create_all()
-    yield _store
-    _store.drop_all()
 
 
 @pytest.yield_fixture(scope="function")
@@ -608,6 +583,7 @@ def fixture_external_wgs_info(external_wgs_application_tag) -> dict:
         application_type="wgs",
         description="External WGS",
         is_external=True,
+        target_reads=10,
     )
     return _info
 
@@ -626,6 +602,7 @@ def fixture_external_wes_info(external_wes_application_tag) -> dict:
         application_type="wes",
         description="External WES",
         is_external=True,
+        target_reads=10,
     )
     return _info
 
@@ -646,6 +623,7 @@ def fixture_wgs_application_info(wgs_application_tag) -> dict:
         sequencing_depth=30,
         is_external=True,
         is_accredited=True,
+        target_reads=10,
     )
     return _info
 
@@ -708,6 +686,7 @@ def fixture_base_store(store) -> Store:
             sequencing_depth=0,
             is_external=True,
             percent_kth=80,
+            target_reads=10,
         ),
         store.add_application(
             tag="EXXCUSR000",
@@ -716,6 +695,7 @@ def fixture_base_store(store) -> Store:
             sequencing_depth=0,
             is_external=True,
             percent_kth=80,
+            target_reads=10,
         ),
         store.add_application(
             tag="WGSPCFC060",
@@ -724,6 +704,7 @@ def fixture_base_store(store) -> Store:
             sequencing_depth=30,
             accredited=True,
             percent_kth=80,
+            target_reads=10,
         ),
         store.add_application(
             tag="RMLS05R150",
@@ -731,6 +712,7 @@ def fixture_base_store(store) -> Store:
             description="Ready-made",
             sequencing_depth=0,
             percent_kth=80,
+            target_reads=10,
         ),
         store.add_application(
             tag="WGTPCFC030",
@@ -738,7 +720,7 @@ def fixture_base_store(store) -> Store:
             description="WGS trio",
             is_accredited=True,
             sequencing_depth=30,
-            target_reads=300000000,
+            target_reads=30,
             limitations="some",
             percent_kth=80,
         ),
@@ -747,7 +729,7 @@ def fixture_base_store(store) -> Store:
             category="wgs",
             description="Whole genome metagenomics",
             sequencing_depth=0,
-            target_reads=40000000,
+            target_reads=400000,
             percent_kth=80,
         ),
         store.add_application(
@@ -755,7 +737,7 @@ def fixture_base_store(store) -> Store:
             category="wgs",
             description="Metagenomics",
             sequencing_depth=0,
-            target_reads=20000000,
+            target_reads=200000,
             percent_kth=80,
         ),
         store.add_application(
@@ -764,6 +746,7 @@ def fixture_base_store(store) -> Store:
             description="Microbial whole genome ",
             sequencing_depth=0,
             percent_kth=80,
+            target_reads=10,
         ),
         store.add_application(
             tag="RNAPOAR025",
@@ -772,6 +755,7 @@ def fixture_base_store(store) -> Store:
             percent_kth=80,
             sequencing_depth=25,
             accredited=True,
+            target_reads=10,
         ),
     ]
 
