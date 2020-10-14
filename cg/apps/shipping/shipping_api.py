@@ -1,4 +1,4 @@
-"""API to the deployment tool shipping"""
+"""API to the deployment tool Shipping"""
 
 import logging
 from pathlib import Path
@@ -12,7 +12,7 @@ LOG = logging.getLogger(__name__)
 class ShippingAPI:
     """Class to communicate with the tool shipping
 
-    Shipping is used as a unified tool for deploying in the CG environment
+    Shipping is used as a unified tool for deploying in the Clinical Genomics environments
     """
 
     def __init__(self, config: Dict[str, str]):
@@ -37,7 +37,7 @@ class ShippingAPI:
         elif app_name:
             deploy_args.extend(["--tool-name", app_name])
         else:
-            LOG.warning("Please specify what app to deploy")
+            LOG.warning("Please specify what application to deploy")
             raise SyntaxError
         deploy_args.append("deploy")
         self.process.run_command(deploy_args, dry_run=self.dry_run)
