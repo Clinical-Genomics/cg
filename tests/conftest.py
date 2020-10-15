@@ -171,11 +171,7 @@ def fixture_genotype_config() -> dict:
     genotype config fixture
     """
     _config = {
-        "genotype": {
-            "database": "database",
-            "config_path": "config/path",
-            "binary_path": "gtdb",
-        }
+        "genotype": {"database": "database", "config_path": "config/path", "binary_path": "gtdb",}
     }
     return _config
 
@@ -256,6 +252,13 @@ def tmp_file(project_dir):
 def fixture_orderform(fixtures_dir: Path) -> Path:
     """Return the path to the directory with orderforms"""
     _path = fixtures_dir / "orderforms"
+    return _path
+
+
+@pytest.fixture(name="mip_dna_store_files")
+def fixture_mip_dna_store_files(apps_dir: Path) -> Path:
+    """Return the path to the directory with mip dna store files"""
+    _path = apps_dir / "mip" / "dna" / "store"
     return _path
 
 
@@ -581,10 +584,7 @@ def fixture_customer_group() -> str:
 def fixture_customer_production(customer_group) -> dict:
     """Return a dictionary with infomation about the prod customer"""
     _cust = dict(
-        customer_id="cust000",
-        name="Production",
-        scout_access=True,
-        customer_group=customer_group,
+        customer_id="cust000", name="Production", scout_access=True, customer_group=customer_group,
     )
     return _cust
 

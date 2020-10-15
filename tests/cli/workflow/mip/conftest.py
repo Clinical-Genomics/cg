@@ -1,12 +1,15 @@
+from typing import Any, Union
+
 import pytest
+import copy
 import datetime as dt
+
 
 from pathlib import Path
 from ruamel.yaml import YAML
 
 from cg.apps.tb import TrailblazerAPI
 from cg.meta.workflow.mip import AnalysisAPI
-from cg.store.models import Family
 from cg.store import Store
 from cg.apps.hk import HousekeeperAPI
 from tests.mocks.limsmock import MockLimsAPI
@@ -25,89 +28,114 @@ def mock_root_folder():
     return "/var/empty"
 
 
-@pytest.fixture(name="mip_test_dir")
-def mip_test_dir(project_dir: Path) -> Path:
-    """Return the path to the mip apps dir"""
-    mip_test = project_dir / "mip_test"
-    mip_test.mkdir(parents=True, exist_ok=True)
-    return mip_test
-
-
 @pytest.fixture(name="mip_case_ids")
 def mip_case_ids() -> dict:
-    """Create a list of case ids"""
+    """Dictionary of case ids, connected samples, their name and if they should fail (textbook or not)"""
 
     case_ids = {
-        "yellowhog": {"textbook": True, "name": "F0000001"},
-        "purplesnail": {"textbook": False, "name": "F0000003"},
-        "bluezebra": {"textbook": True, "name": "F0000002"},
+        "yellowhog": {
+            "textbook": True,
+            "name": "F0000001",
+            "internal_id": "ACC00000",
+            "panels": "OMIM-AUTO",
+        },
+        "purplesnail": {
+            "textbook": False,
+            "name": "F0000003",
+            "internal_id": "ACC00000",
+            "panels": "OMIM-AUTO",
+        },
+        "bluezebra": {
+            "textbook": True,
+            "name": "F0000002",
+            "internal_id": "ACC00000",
+            "panels": "OMIM-AUTO",
+        },
     }
 
     return case_ids
 
 
-@pytest.fixture(name="mip_configs")
-def make_mip_configs(mip_case_ids: dict, mip_test_dir: Path) -> dict:
-    """Create a dictionary of textbook and corrupt configs for mip."""
+@pytest.fixture(name="mip_case_dirs")
+def fixture_mip_case_dirs(mip_case_ids: dict, project_dir: Path) -> dict:
+    """Create case directories and return a dictionary of the tmpdir paths"""
+
+    mip_case_dirs = {}
+
+    for case in mip_case_ids:
+        case_dir = Path(project_dir / "cases" / case)
+        case_dir.mkdir(exist_ok=True, parents=True)
+        mip_case_dirs[case] = case_dir
+
+    return mip_case_dirs
+
+
+@pytest.fixture(name="mip_deliverables_file")
+def fixture_mip_deliverables_files(mip_dna_store_files: Path) -> Path:
+    """Fixture for general deliverables file in mip"""
+    return mip_dna_store_files / "case_id_deliverables.yaml"
+
+
+@pytest.fixture(name="mip_deliverables")
+def make_mip_deliverables(
+    mip_case_ids: dict,
+    mip_case_dirs: dict,
+    files: dict,
+    mip_deliverables_file: Path,
+    mip_dna_store_files: Path,
+    project_dir: Path,
+) -> dict:
+    """Create deliverables for mip store testing"""
 
     yaml = YAML()
 
-    # Storing paths in a list to be returned and used in later stages.
+    # Create a dict of paths to the deliverables to be used in later stages
+    deliverables_paths = {}
 
-    config_dict = {}
+    with open(mip_deliverables_file, "r") as mip_dna_deliverables:
+        mip_deliverables = yaml.load(mip_dna_deliverables)
 
     for case in mip_case_ids:
         if mip_case_ids[case]["textbook"]:
-            config = {
-                "email": "fake_email@notscilifelab.com",
-                "case_id": case,
-                "samples": "dummy_samples",
-                "is_dryrun": False,
-                "outdata_dir": str(mip_test_dir),
-                "priority": "medium",
-                "sample_info_file": str(Path(mip_test_dir / case / f"{case}_qc_sample_info.yaml")),
-                "analysis_type": {"ACC00000": "wgs"},
-                "slurm_quality_of_service": "medium",
-            }
-            case_dir = mip_test_dir / case
-            case_dir.mkdir(parents=True, exist_ok=True)
-            config_path = case_dir / f"{case}_config.yaml"
-            config_dict[case] = config_path
-            with open(config_path, "wb") as fh:
-                yaml.dump(config, fh)
+            sample_id = mip_case_ids[case]["internal_id"]
+            case_specific_deliverables = copy.deepcopy(mip_deliverables)
+            case_specific_deliverables["case"] = case
+            case_specific_deliverables["analysis_type"].pop("sample_id")
+            case_specific_deliverables["analysis_type"][sample_id] = "wgs"
+            case_specific_deliverables["config_file_analysis"] = str(
+                mip_case_dirs[case] / Path(case_specific_deliverables["config_file_analysis"]).name
+            )
+            for file in case_specific_deliverables["files"]:
+                if file["path_index"]:
+                    file["path_index"] = str(mip_case_dirs[case] / Path(file["path_index"]).name)
+                    # Touch the tmp file
+                    open(file["path_index"], "a").close()
+                file["path"] = str(mip_case_dirs[case] / Path(file["path"]).name)
+                # Touch the tmp file
+                open(file["path"], "a").close()
 
+            case_deliverables_path = mip_case_dirs[case] / f"{case}_deliverables.yaml"
+            with open(case_deliverables_path, "w") as fh:
+                yaml.dump(case_specific_deliverables, fh)
+            deliverables_paths[case] = case_deliverables_path
         elif not mip_case_ids[case]["textbook"]:
-            config = {
-                "email": "fake_email@notscilifelab.com",
-                "case_id": case,
-                "samples": "dummy_samples",
-                "is_dryrun": False,
-                "outdata_dir": str(mip_test_dir),
-                "priority": "medium",
-                "sample_info_file": "/path/in/to/the/void",
-                "analysis_type": {"ACC00000": "wgs"},
-                "slurm_quality_of_service": "medium",
-            }
+            case_deliverables_path = mip_case_dirs[case] / f"{case}_deliverables.yaml"
+            with open(case_deliverables_path, "w") as fh:
+                yaml.dump({"files": []}, fh)
+            deliverables_paths[case] = case_deliverables_path
 
-            case_dir = mip_test_dir / case
-            case_dir.mkdir(parents=True, exist_ok=True)
-            config_path = case_dir / f"{case}_config.yaml"
-            config_dict[case] = config_path
-            with open(config_path, "w") as fh:
-                yaml.dump(config, fh)
-
-    return config_dict
+    return deliverables_paths
 
 
 @pytest.fixture(name="mip_qc_sample_info")
-def make_mip_sample_infos(mip_case_ids: dict, mip_test_dir: Path) -> dict:
+def make_mip_sample_infos(mip_case_ids: dict, mip_case_dirs: dict) -> dict:
     """Create qc sample info files for cases"""
 
     yaml = YAML()
 
     # Store paths in a list to be used in other stages
 
-    qc_sample_info_list = {}
+    qc_sample_info = {}
 
     for case in mip_case_ids:
         sample_info_data = {
@@ -118,27 +146,46 @@ def make_mip_sample_infos(mip_case_ids: dict, mip_test_dir: Path) -> dict:
             "mip_version": "latest",
         }
 
-        case_dir = mip_test_dir / case
-        case_dir.mkdir(parents=True, exist_ok=True)
-        sample_info_path = case_dir / f"{case}_qc_sample_info.yaml"
-        qc_sample_info_list[case] = sample_info_path
+        sample_info_path = mip_case_dirs[case] / f"{case}_qc_sample_info.yaml"
+        qc_sample_info[case] = sample_info_path
         with open(sample_info_path, "w") as fh:
             yaml.dump(sample_info_data, fh)
 
-    return qc_sample_info_list
+    return qc_sample_info
 
 
-@pytest.fixture(name="mip_deliverables")
-def make_mip_deliverables(mip_case_ids: dict, mip_test_dir: Path) -> dict:
-    """Create deliverables for mip store testing"""
+@pytest.fixture(name="mip_configs")
+def make_mip_configs(
+    mip_case_ids: dict, mip_case_dirs: dict, mip_deliverables: dict, mip_qc_sample_info: dict
+) -> dict:
+    """Create config files for mip case"""
 
     yaml = YAML()
 
-    # Create a dict of paths to the deliverables to be used in later stages
+    # Storing paths in a list to be returned and used in later stages.
 
-    mip_deliverables = {}
+    config_dict = {}
 
-    return mip_deliverables
+    for case in mip_case_ids:
+        config = {
+            "email": "fake_email@notscilifelab.com",
+            "case_id": case,
+            "samples": "dummy_samples",
+            "is_dryrun": False,
+            "outdata_dir": str(mip_case_dirs[case]),
+            "priority": "medium",
+            "sampleinfo_path": str(mip_qc_sample_info[case]),
+            "sample_info_file": str(mip_qc_sample_info[case]),
+            "analysis_type": {mip_case_ids[case]["internal_id"]: "wgs"},
+            "slurm_quality_of_service": "medium",
+            "store_file": str(mip_deliverables[case]),
+        }
+        config_path = mip_case_dirs[case] / f"{case}_config.yaml"
+        config_dict[case] = config_path
+        with open(config_path, "w") as fh:
+            yaml.dump(config, fh)
+
+    return config_dict
 
 
 @pytest.fixture(name="_store")
@@ -147,68 +194,51 @@ def populated_store(base_store: Store, mip_case_ids: dict, helpers) -> Store:
 
     _store = base_store
 
-    # Add textbook families to db
+    # Add apptag to db
+
+    helpers.ensure_application_version(store=_store, application_tag="WGSA", application_type="wgs")
+
+    # Add sample, cases and relationships to db
 
     for case in mip_case_ids:
-        helpers.add_family(
-            store=_store,
-            internal_id=case,
-            family_id=mip_case_ids[case]["name"],
-            customer_id="cust000"
+        family = helpers.add_family(
+            store=_store, internal_id=case, family_id=mip_case_ids[case]["name"],
         )
+        sample = helpers.add_sample(
+            store=_store,
+            sample=mip_case_ids[case]["internal_id"],
+            data_analysis="mip",
+            customer_name="cust000",
+            application_tag="WGSA",
+            application_type="wgs",
+            gender="unknown",
+        )
+        helpers.add_relationship(store=_store, sample=sample, family=family, status="affected")
 
     return _store
 
 
-@pytest.fixture(name="_housekeeper_api")
-def populate_mip_housekeeper(
-        real_housekeeper_api: HousekeeperAPI,
-        mip_case_ids: dict,
-        mip_qc_sample_info: dict,
-        mip_configs: dict,
-        helpers) -> HousekeeperAPI:
-    """Create and populate temporary hk with good and bad test cases for mip"""
+@pytest.fixture(name="empty_housekeeper_api")
+def populate_mip_housekeeper(real_housekeeper_api: HousekeeperAPI) -> HousekeeperAPI:
+    """Empty housekeeper for testing store in mip workflow"""
 
     _housekeeper_api = real_housekeeper_api
-
-    for case in mip_case_ids:
-        bundle_data = {
-            "name": case,
-            "created": dt.datetime.now(),
-            "started_at": dt.datetime.now(),
-            "files": [
-                {
-                    "path": str(mip_qc_sample_info[case]),
-                    "tags": ["qcmetrics"], "archive": False
-                },
-                {
-                    "path": str(mip_configs[case]),
-                    "tags": ["mip-config"], "archive": False
-                }
-            ]
-        }
-        helpers.ensure_hk_bundle(store=_housekeeper_api, bundle_data=bundle_data)
 
     return _housekeeper_api
 
 
 @pytest.fixture(name="_tb_api")
 def populated_tb(
-        trailblazer_api: TrailblazerAPI,
-        mip_case_ids: dict,
-        mip_configs: dict,
-        mip_test_dir: Path) -> TrailblazerAPI:
-    """Create and populate a trailblazer api with cases"""
+    trailblazer_api: TrailblazerAPI, mip_case_ids: dict, mip_configs: dict
+) -> TrailblazerAPI:
+    """Trailblazer api filled with mip cases"""
 
     _tb_api = trailblazer_api
 
     for case in mip_case_ids:
         _tb_api.add_commit(
             tb_Analysis(
-                family=case,
-                status="completed",
-                deleted=False,
-                config_path=str(mip_configs[case])
+                family=case, status="completed", deleted=False, config_path=str(mip_configs[case])
             )
         )
 
@@ -260,6 +290,8 @@ def mip_context(analysis_store_single_case, tb_api, housekeeper_api, mip_lims, m
 
 
 @pytest.fixture(name="mip_store_context")
-def mip_store_context(_tb_api: TrailblazerAPI, _store: Store, _housekeeper_api: HousekeeperAPI) -> dict:
+def mip_store_context(
+    _tb_api: TrailblazerAPI, _store: Store, empty_housekeeper_api: HousekeeperAPI
+) -> dict:
     """Create a context to be used in testing mip store, this should be fused with mip_context above at later stages"""
-    return {"tb_api": _tb_api, "hk_api": _housekeeper_api, "db": _store}
+    return {"tb_api": _tb_api, "hk_api": empty_housekeeper_api, "db": _store}

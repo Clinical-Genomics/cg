@@ -20,7 +20,6 @@ from cg.constants import EXIT_SUCCESS, EXIT_FAIL
 LOG = logging.getLogger(__name__)
 
 
-
 @click.group()
 @click.pass_context
 def store(context):
@@ -38,16 +37,13 @@ def analysis(context, config_stream):
     status = context.obj["db"]
     hk_api = context.obj["hk_api"]
 
+    exit_code = EXIT_SUCCESS
     if not config_stream:
         LOG.error("Provide a config file.")
         raise click.Abort()
 
     try:
-        new_analysis = gather_files_and_bundle_in_housekeeper(
-            config_stream,
-            hk_api,
-            status,
-        )
+        new_analysis = gather_files_and_bundle_in_housekeeper(config_stream, hk_api, status,)
     except (
         AnalysisNotFinishedError,
         AnalysisDuplicationError,
@@ -56,11 +52,13 @@ def analysis(context, config_stream):
         MandatoryFilesMissing,
     ) as error:
         click.echo(click.style(error.message, fg="red"))
-        raise click.Abort()
+        exit_code = EXIT_FAIL
     except FileNotFoundError as error:
+        print(error)
         click.echo(click.style(f"missing file: {error.args[0]}", fg="red"))
+        exit_code = EXIT_FAIL
+    if exit_code:
         raise click.Abort()
-
     status.add_commit(new_analysis)
     click.echo(click.style("included files in Housekeeper", fg="green"))
 
@@ -82,10 +80,7 @@ def completed(context):
         with Path(analysis_obj.config_path).open() as config_stream:
             try:
                 context.invoke(analysis, config_stream=config_stream)
-            except (
-                    Exception,
-                    click.Abort
-            ):
+            except (Exception, click.Abort):
                 LOG.error("case storage failed: %s", analysis_obj.family, exc_info=True)
                 exit_code = EXIT_FAIL
     if exit_code:
