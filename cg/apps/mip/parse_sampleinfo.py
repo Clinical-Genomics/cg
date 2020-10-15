@@ -105,8 +105,7 @@ def get_rank_model_version(sample_info: dict, rank_model_type: str, step: str) -
     rank_model_version = None
     for key in ("recipe", "program"):
         if key in sample_info:
-            rank_model_version = sample_info[key][step][rank_model_type]["version"]
-            break
+            return sample_info[key][step][rank_model_type]["version"]
     return rank_model_version
 
 
