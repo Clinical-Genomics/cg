@@ -13,6 +13,11 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [13.10]
+
+### Added
+- Functionality to deploy `genotype` with CG on hasta
+
 ## [13.9]
 
 ### Added
