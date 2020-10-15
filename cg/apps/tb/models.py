@@ -1,8 +1,9 @@
-from pydantic import BaseModel, validator
-from typing import Optional
-from dateutil.parser import parse as parse_datestr
-from pathlib import Path
 import datetime as dt
+from pathlib import Path
+from typing import Optional
+
+from dateutil.parser import parse as parse_datestr
+from pydantic import BaseModel, validator
 
 
 class TrailblazerAnalysis(BaseModel):

@@ -1,24 +1,26 @@
 """cg module for cleaning databases and files"""
 import logging
+import shutil
 from datetime import datetime
 from pathlib import Path
-import shutil
+
 import click
 from dateutil.parser import parse as parse_date
 
+from cg.apps.balsamic.api import BalsamicAPI
 from cg.apps.balsamic.fastq import FastqHandler
+from cg.apps.crunchy import CrunchyAPI
+from cg.apps.hk import HousekeeperAPI
+from cg.apps.lims import LimsAPI
+from cg.apps.scoutapi import ScoutAPI
+from cg.apps.tb import TrailblazerAPI
+from cg.cli.workflow.mip_dna.deliver import CASE_TAGS, SAMPLE_TAGS
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS
+from cg.meta.deliver import DeliverAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
-from cg.meta.deliver import DeliverAPI
-from cg.apps.hk import HousekeeperAPI
-from cg.apps.tb import TrailblazerAPI
-from cg.apps.scoutapi import ScoutAPI
-from cg.apps.crunchy import CrunchyAPI
-from cg.apps.lims import LimsAPI
-from cg.apps.balsamic.api import BalsamicAPI
 from cg.store import Store
-from cg.constants import EXIT_SUCCESS, EXIT_FAIL
-from cg.cli.workflow.mip_dna.deliver import CASE_TAGS, SAMPLE_TAGS
+
 
 LOG = logging.getLogger(__name__)
 

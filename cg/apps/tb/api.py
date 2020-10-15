@@ -1,13 +1,15 @@
 """ Trailblazer API for cg """ ""
-from typing import Any
-import logging
-import json
-from google.auth.crypt import RSASigner
-from google.auth import jwt
-import requests
 import datetime as dt
-from cg.exc import TrailblazerAPIHTTPError
+import json
+import logging
+from typing import Any
+
+import requests
+from google.auth import jwt
+from google.auth.crypt import RSASigner
+
 from cg.apps.tb.models import TrailblazerAnalysis
+from cg.exc import TrailblazerAPIHTTPError
 
 LOG = logging.getLogger(__name__)
 
@@ -45,7 +47,7 @@ class TrailblazerAPI:
             raise TrailblazerAPIHTTPError(
                 f"Request {command} failed with status code {response.status_code}: {response.text}"
             )
-        LOG.info(json.loads(response.text))
+        LOG.debug(f"RESPONSE BODY {response.text}")
         return json.loads(response.text)
 
     def analyses(

@@ -1,5 +1,7 @@
 import logging
+
 import click
+
 from cg.apps.tb import TrailblazerAPI
 from cg.exc import TrailblazerAPIHTTPError
 

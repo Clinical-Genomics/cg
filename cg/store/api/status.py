@@ -1,12 +1,13 @@
 from datetime import datetime, timedelta
 from typing import List
 
+from sqlalchemy import and_, func, or_
+from sqlalchemy.orm import Query
+
 from cg.constants import PRIORITY_MAP
 from cg.store import models
 from cg.store.api.base import BaseHandler
 from cg.utils.date import get_date
-from sqlalchemy import or_, and_, func
-from sqlalchemy.orm import Query
 
 HASTA_IN_PRODUCTION = get_date("2017-09-27")
 

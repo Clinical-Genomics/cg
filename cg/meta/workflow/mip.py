@@ -1,29 +1,24 @@
+import datetime as dt
 import gzip
 import logging
 import re
 from pathlib import Path
-from typing import List, Any
-from ruamel.yaml import safe_load
-import datetime as dt
+from typing import Any, List
 
-from cg.apps.tb import TrailblazerAPI
-from cg.apps.tb.models import TrailblazerAnalysis
+from ruamel.yaml import safe_load
+
 from cg.apps.hk import HousekeeperAPI
-from cg.apps.scoutapi import ScoutAPI
 from cg.apps.lims import LimsAPI
+from cg.apps.mip import parse_trending
 from cg.apps.mip.base import MipAPI
 from cg.apps.mip.confighandler import ConfigHandler
-from cg.apps.mip import parse_trending
-from cg.meta.deliver import DeliverAPI
-from cg.store import models, Store
+from cg.apps.scoutapi import ScoutAPI
+from cg.apps.tb import TrailblazerAPI
+from cg.apps.tb.models import TrailblazerAnalysis
+from cg.constants import COLLABORATORS, COMBOS, DEFAULT_CAPTURE_KIT, FAMILY_ACTIONS, MASTER_LIST
 from cg.exc import CgDataError, LimsDataError
-from cg.constants import (
-    COMBOS,
-    COLLABORATORS,
-    MASTER_LIST,
-    DEFAULT_CAPTURE_KIT,
-    FAMILY_ACTIONS,
-)
+from cg.meta.deliver import DeliverAPI
+from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
 
