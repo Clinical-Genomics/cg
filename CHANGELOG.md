@@ -13,6 +13,13 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [13.9]
+
+### Added
+- Deployment command
+- Functionality to deploy `shipping` with CG
+
+
 ## [13.8.0]
 ### Added
 - Functionality to change multiple families in one go, e.g. cg set families --sample-identifier ticket_number 123456 --priority research
