@@ -6,11 +6,7 @@ from cg.apps.tb.models import TrailblazerAnalysis
 
 def get_case_from_config(config: dict) -> Optional[str]:
     """Get case id from config"""
-    if "case_id" in config:
-        return config["case_id"]
-    if "family_id" in config:  # family for MIP<7
-        return config["family_id"]
-    return None
+    return config.get("case_id") or config.get("family_id")
 
 
 def get_dry_run_all(config: dict) -> bool:
@@ -67,7 +63,7 @@ def get_sampleinfo_date(data: dict) -> str:
         str: analysis date
     """
 
-    return data["analysis_date"]
+    return data.get("analysis_date")
 
 
 def parse_sampleinfo_light(data: dict) -> dict:
@@ -83,9 +79,9 @@ def parse_sampleinfo_light(data: dict) -> dict:
     """
 
     outdata = {
-        "date": get_sampleinfo_date(data=data),
-        "version": data["mip_version"],
-        "is_finished": get_analysisrunstatus(sample_info=data),
+        "date": data.get("analysis_date"),
+        "version": data.get("mip_version"),
+        "is_finished": data.get("analysisrunstatus") == "finished",
     }
 
     return outdata
@@ -93,11 +89,7 @@ def parse_sampleinfo_light(data: dict) -> dict:
 
 def get_case_from_sampleinfo(sample_info: dict) -> Optional[str]:
     """Get case id from sampleinfo"""
-    if "case" in sample_info:
-        return sample_info["case"]
-    if "family" in sample_info:  # family for MIP<7
-        return sample_info["family"]
-    return None
+    return sample_info.get("case_id") or sample_info.get("family_id")
 
 
 def get_rank_model_version(sample_info: dict, rank_model_type: str, step: str) -> str:

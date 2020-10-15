@@ -26,16 +26,16 @@ class TrailblazerAnalysis(BaseModel):
     progress: Optional[float] = 0.0
 
     @validator("case_id")
-    def inherit_family_value(cls, value, values) -> str:
+    def inherit_family_value(cls, value: str, values: dict) -> str:
         return values.get("family")
 
     @validator("logged_at", "started_at", "completed_at")
-    def parse_str_to_datetime(cls, value) -> Optional[dt.datetime]:
+    def parse_str_to_datetime(cls, value: str) -> Optional[dt.datetime]:
         if value:
             return parse_datestr(value)
 
     @validator("out_dir", "config_path")
-    def parse_str_to_path(cls, value) -> Optional[Path]:
+    def parse_str_to_path(cls, value: str) -> Optional[Path]:
         if value:
             return Path(value)
 

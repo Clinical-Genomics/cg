@@ -53,7 +53,7 @@ def status(context):
 @click.pass_context
 def analysis(context):
     """Which families will be analyzed?"""
-    records = context.obj["status_db"].cases_to_mip_analyze()
+    records = context.obj["status_db"].cases_to_analyze(pipeline="mip")
     for family_obj in records:
         click.echo(family_obj)
 
