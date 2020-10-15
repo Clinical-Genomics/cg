@@ -8,13 +8,11 @@ def set_bamstats_metrics(file_metrics: dict, sample_data: dict) -> dict:
 
     total_mapped = sample_data.get("total_mapped", 0)
     sample_data["total_mapped"] = int(file_metrics["bamstats"]["reads_mapped"]) + total_mapped
-    return sample_data
 
 
 def set_chanjo_sexcheck_metrics(file_metrics: dict, sample_data: dict) -> dict:
     """Set chanjo_sexcheck metrics"""
     sample_data["predicted_sex"] = file_metrics["chanjo_sexcheck"]["gender"]
-    return sample_data
 
 
 def set_collecthsmetrics_metrics(file_metrics: dict, sample_data: dict) -> dict:
@@ -29,14 +27,12 @@ def set_collecthsmetrics_metrics(file_metrics: dict, sample_data: dict) -> dict:
     }
     sample_data["gc_dropout"] = float(hs_metrics["GC_DROPOUT"])
     sample_data["target_coverage"] = float(hs_metrics["MEAN_TARGET_COVERAGE"])
-    return sample_data
 
 
 def set_collectmultiplemetrics_metrics(file_metrics: dict, sample_data: dict) -> dict:
     """Set collectmultiplemetrics metrics"""
     mm_metrics = file_metrics["collectmultiplemetrics"]["header"]["pair"]
     sample_data["strand_balance"] = float(mm_metrics["STRAND_BALANCE"])
-    return sample_data
 
 
 def set_collectmultiplemetricsinsertsize_metrics(file_metrics: dict, sample_data: dict) -> dict:
@@ -44,13 +40,11 @@ def set_collectmultiplemetricsinsertsize_metrics(file_metrics: dict, sample_data
     mm_insert_metrics = file_metrics["collectmultiplemetricsinsertsize"]["header"]["data"]
     sample_data["median_insert_size"] = int(mm_insert_metrics["MEDIAN_INSERT_SIZE"])
     sample_data["insert_size_standard_deviation"] = float(mm_insert_metrics["STANDARD_DEVIATION"])
-    return sample_data
 
 
 def set_markduplicates_metrics(file_metrics: dict, sample_data: dict) -> dict:
     """Set markduplicates metrics"""
     sample_data["duplicates"] = float(file_metrics["markduplicates"]["fraction_duplicates"])
-    return sample_data
 
 
 def get_sample_metrics(sample_metrics: dict, sample_data: dict) -> dict:
