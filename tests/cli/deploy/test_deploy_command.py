@@ -22,7 +22,7 @@ def test_running_deploy_shipping(shipping_configs: Dict[str, str], caplog):
     assert result.exit_code == 0
 
 
-def test_running_deploy_shipping(shipping_configs: Dict[str, str], caplog):
+def test_running_deploy_genotype(shipping_configs: Dict[str, str], caplog):
     """Test to deploy genotype with CG"""
     caplog.set_level(logging.DEBUG)
     # GIVEN a context with some shipping configs

@@ -26,7 +26,7 @@ def deploy_shipping_cmd(context):
     """Deploy the shipping tool"""
     LOG.info("Deploying shipping with CG")
     shipping_api: ShippingAPI = context.obj["shipping_api"]
-    shipping_api.deploy_shipping()
+    shipping_api.deploy(app_name="shipping")
 
 
 @click.command(name="genotype")
@@ -35,7 +35,7 @@ def deploy_genotype_cmd(context):
     """Deploy the shipping tool"""
     LOG.info("Deploying genotype with CG")
     shipping_api: ShippingAPI = context.obj["shipping_api"]
-    shipping_api.deploy_genotype()
+    shipping_api.deploy(app_name="genotype")
 
 
 deploy.add_command(deploy_shipping_cmd)

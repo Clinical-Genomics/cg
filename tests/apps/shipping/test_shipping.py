@@ -56,9 +56,10 @@ def test_shipping_api_deploy_app_config(shipping_api: ShippingAPI, caplog):
     caplog.set_level(logging.DEBUG)
     # GIVEN a shipping api and a dummy app config
     app_config = Path("path/to/app_config.yml")
+    app_name = "myapp"
 
     # WHEN running the deploy method
-    shipping_api.deploy(app_config=app_config)
+    shipping_api.deploy(app_name=app_name, app_config=app_config)
 
     # THEN assert that call to deploy was communicated
     output_str = build_expected_output_string(api=shipping_api, app_config=app_config)
@@ -66,26 +67,18 @@ def test_shipping_api_deploy_app_config(shipping_api: ShippingAPI, caplog):
     assert output_str in caplog.text
 
 
-def test_shipping_api_deploy_no_app_info(shipping_api: ShippingAPI):
-    """Test to run deploy with the shipping api without specifying the app"""
-    # GIVEN a shipping api
-
-    # WHEN running the deploy method without specifying any app
-    with pytest.raises(SyntaxError):
-        # THEN assert a SyntaxError is raised
-        shipping_api.deploy()
-
-
 def test_shipping_api_deploy_shipping(shipping_api: ShippingAPI, caplog):
     """Test to run deploy with shipping itself"""
     caplog.set_level(logging.DEBUG)
     # GIVEN a shipping api
+    # GIVEN a shipping app name
+    app_name = "shipping"
 
     # WHEN running the deploy method shipping method
-    shipping_api.deploy_shipping()
+    shipping_api.deploy(app_name=app_name)
 
     # THEN assert that call to deploy was communicated
-    output_str = build_expected_output_string(api=shipping_api, app_name="shipping")
+    output_str = build_expected_output_string(api=shipping_api, app_name=app_name)
     assert output_str in caplog.text
 
 
@@ -93,10 +86,12 @@ def test_shipping_api_deploy_genotype(shipping_api: ShippingAPI, caplog):
     """Test to run deploy with genotype"""
     caplog.set_level(logging.DEBUG)
     # GIVEN a shipping api
+    # GIVEN a genotype app name
+    app_name = "genotype"
 
     # WHEN running the deploy method shipping method
-    shipping_api.deploy_genotype()
+    shipping_api.deploy(app_name=app_name)
 
     # THEN assert that call to deploy was communicated
-    output_str = build_expected_output_string(api=shipping_api, app_name="genotype")
+    output_str = build_expected_output_string(api=shipping_api, app_name=app_name)
     assert output_str in caplog.text

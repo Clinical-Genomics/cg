@@ -29,35 +29,16 @@ class ShippingAPI:
         LOG.info("Set dry run to %s", dry_run)
         self.dry_run = dry_run
 
-    def deploy(self, app_config: Path = None, app_name: str = None):
+    def deploy(self, app_name: str, app_config: Path = None):
         """Command to deploy a tool according to the specifications in the config files"""
+        LOG.info("Deploying the %s software", app_name)
         deploy_args = []
         if app_config:
             deploy_args.extend(["--app-config", str(app_config)])
-        elif app_name:
-            deploy_args.extend(["--tool-name", app_name])
         else:
-            LOG.warning("Please specify what application to deploy")
-            raise SyntaxError
+            deploy_args.extend(["--tool-name", app_name])
+
         deploy_args.append("deploy")
         self.process.run_command(deploy_args, dry_run=self.dry_run)
         for line in self.process.stderr_lines():
             LOG.info(line)
-
-    def deploy_shipping(self):
-        """Deploy the tool shipping
-
-        Deployment of shipping does not need any extra information since it is following the regular workflow
-        with conda environments using standard names
-        """
-        LOG.info("Deploying the shipping software")
-        self.deploy(app_name="shipping")
-
-    def deploy_genotype(self):
-        """Deploy the tool genotype
-
-        Deployment of genotype does not need any extra information since it is following the regular workflow
-        with conda environments using standard names and pip
-        """
-        LOG.info("Deploying the genotype software")
-        self.deploy(app_name="genotype")
