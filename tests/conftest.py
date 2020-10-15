@@ -67,7 +67,7 @@ def fixture_analysis_family_single(case_id, family_name):
                 "ticket_number": 123456,
                 "reads": 5000000000,
                 "capture_kit": "GMSmyeloid",
-                "data_analysis": "mip",
+                "data_analysis": "PIM",
             }
         ],
     }
