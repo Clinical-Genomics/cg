@@ -2,11 +2,11 @@
 
 
 def set_bamstats_metrics(file_metrics: dict, sample_data: dict) -> dict:
-    """Set bamstats metrics"""
-    total_reads = sample_data["reads"] if "reads" in sample_data else 0
+    """Set bamstats metrics. Sum the total mapped reads for all sample BAM files"""
+    total_reads = sample_data.get("reads", 0)
     sample_data["reads"] = int(file_metrics["bamstats"]["raw_total_sequences"]) + total_reads
 
-    total_mapped = sample_data["total_mapped"] if "total_mapped" in sample_data else 0
+    total_mapped = sample_data.get("total_mapped", 0)
     sample_data["total_mapped"] = int(file_metrics["bamstats"]["reads_mapped"]) + total_mapped
     return sample_data
 
