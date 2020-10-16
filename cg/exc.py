@@ -143,3 +143,7 @@ class PedigreeConfigError(CgError):
 
 class TrailblazerAPIHTTPError(CgError):
     """Raised when Trailblazer REST API response code is not 200"""
+
+
+class TrailblazerMissingAnalysisError(CgError):
+    """Raised when Trailblazer REST API response code is not 200"""

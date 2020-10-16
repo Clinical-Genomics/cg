@@ -2,14 +2,14 @@
 import datetime as dt
 import json
 import logging
-from typing import Any
+from typing import Any, Optional
 
 import requests
 from google.auth import jwt
 from google.auth.crypt import RSASigner
 
 from cg.apps.tb.models import TrailblazerAnalysis
-from cg.exc import TrailblazerAPIHTTPError
+from cg.exc import TrailblazerAPIHTTPError, TrailblazerMissingAnalysisError
 
 LOG = logging.getLogger(__name__)
 
@@ -81,16 +81,17 @@ class TrailblazerAPI:
                 return [TrailblazerAnalysis.parse_obj(response)]
         return response
 
-    def get_latest_analysis(self, case_id: str) -> TrailblazerAnalysis:
+    def get_latest_analysis(self, case_id: str) -> Optional[TrailblazerAnalysis]:
         request_body = {
             "case_id": case_id,
         }
         response = self.query_trailblazer(command="get-latest-analysis", request_body=request_body)
-        return TrailblazerAnalysis.parse_obj(response)
+        if response:
+            return TrailblazerAnalysis.parse_obj(response)
 
     def find_analysis(
         self, case_id: str, started_at: dt.datetime, status: str
-    ) -> TrailblazerAnalysis:
+    ) -> Optional[TrailblazerAnalysis]:
         request_body = {"case_id": case_id, "started_at": str(started_at), "status": status}
         response = self.query_trailblazer(command="find-analysis", request_body=request_body)
         if response:
@@ -98,8 +99,8 @@ class TrailblazerAPI:
 
     def get_latest_analysis_status(self, case_id: str) -> str:
         latest_analysis = self.get_latest_analysis(case_id=case_id)
-        latest_analysis_status = latest_analysis.status
-        return latest_analysis_status
+        if latest_analysis:
+            return latest_analysis.status
 
     def has_latest_analysis_started(self, case_id: str) -> bool:
         latest_analysis = self.get_latest_analysis(case_id=case_id)
@@ -120,7 +121,7 @@ class TrailblazerAPI:
         if response:
             return TrailblazerAnalysis.parse_obj(response)
 
-    def mark_analyses_deleted(self, case_id: str) -> list:
+    def mark_analyses_deleted(self, case_id: str) -> Optional[list]:
         """Mark all analyses for case deleted without removing analysis files"""
         request_body = {
             "case_id": case_id,
@@ -133,9 +134,9 @@ class TrailblazerAPI:
                 return [TrailblazerAnalysis.parse_obj(analysis) for analysis in response]
             if isinstance(response, dict):
                 return [TrailblazerAnalysis.parse_obj(response)]
-        return response
 
     def add_pending_analysis(self, case_id: str, email: str = None) -> TrailblazerAnalysis:
         request_body = {"case_id": case_id, "email": email}
         response = self.query_trailblazer(command="add-pending-analysis", request_body=request_body)
-        return TrailblazerAnalysis.parse_obj(response)
+        if response:
+            return TrailblazerAnalysis.parse_obj(response)
