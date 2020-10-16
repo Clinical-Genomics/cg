@@ -1,10 +1,13 @@
 """This script tests the cli mip store functions"""
 import logging
 
+from click.testing import CliRunner
+
 from cg.cli.workflow.mip.store import analysis, completed
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 
 
-def test_store_no_config(cli_runner, mip_store_context, caplog):
+def test_store_no_config(cli_runner: CliRunner, mip_store_context: dict, caplog):
     """Test the function to check for config files"""
     # GIVEN the cli function
     caplog.set_level(logging.INFO)
@@ -13,11 +16,30 @@ def test_store_no_config(cli_runner, mip_store_context, caplog):
     # THEN We should be informed to enter a config file
     assert "Provide a config file." in caplog.text
     # THEN the exit code should be EXIT_FAIL
-    assert result.exit_code == 1
+    assert result.exit_code == EXIT_FAIL
+
+
+def test_store_analysis_exception(
+    cli_runner: CliRunner, mip_store_context: dict, mip_configs: dict
+):
+    """Test that the analysis function enters the exception clause"""
+    # GIVEN a cli function
+    # WHEN we run store on a case without deliverables
+    result = cli_runner.invoke(analysis, [str(mip_configs["purplesnail"])], obj=mip_store_context)
+    # THEN we should be informed that mandatory files are missing
+    assert "Mandatory files are missing" in result.output
+    # THEN we should not include any files in housekeeper
+    assert "included files in Housekeeper" not in result.output
+    # THEN the exit code should be EXIT_FAIL
+    assert result.exit_code == EXIT_FAIL
 
 
 def test_store_analysis(
-    cli_runner, mip_configs: dict, mip_store_context, mip_qc_sample_info: dict, project_dir, caplog
+    cli_runner: CliRunner,
+    mip_configs: dict,
+    mip_store_context: dict,
+    mip_qc_sample_info: dict,
+    caplog,
 ):
     """Test if store completed stores a completed sample"""
     # GIVEN a cli function
@@ -25,13 +47,15 @@ def test_store_analysis(
     # WHEN we run store on a config
     result = cli_runner.invoke(analysis, [str(mip_configs["yellowhog"])], obj=mip_store_context)
     # THEN we should store the files in housekeeper
-    assert "included files in Housekeeper" in result.output
     assert "new bundle added: yellowhog" in caplog.text
+    assert "included files in Housekeeper" in result.output
     # THEN the exit code should be EXIT_SUCCESS
-    assert result.exit_code == 0
+    assert result.exit_code == EXIT_SUCCESS
 
 
-def test_store_completed(cli_runner, mip_store_context, mip_case_ids: dict, caplog):
+def test_store_completed(
+    cli_runner: CliRunner, mip_store_context: dict, mip_case_ids: dict, caplog
+):
     """Test if store completed stores function"""
     # GIVEN a cli function
     caplog.set_level(logging.INFO)
@@ -46,4 +70,4 @@ def test_store_completed(cli_runner, mip_store_context, mip_case_ids: dict, capl
     assert "new bundle added: bluezebra" in caplog.text
     assert "included files in Housekeeper" in result.output
     # THEN the command should have an EXIT_FAIL code
-    assert result.exit_code == 1
+    assert result.exit_code == EXIT_FAIL
