@@ -4,7 +4,10 @@ import getpass
 
 import click
 from cg.apps.lims import LimsAPI
-from cg.constants import FAMILY_ACTIONS, PRIORITY_OPTIONS, FLOWCELL_STATUS
+from .families import families
+
+from .family import family
+from cg.constants import FLOWCELL_STATUS
 from cg.exc import LimsDataError
 from cg.store import Store, models
 
@@ -42,42 +45,6 @@ def set_cmd(context):
 
 
 @set_cmd.command()
-@click.option("-a", "--action", type=click.Choice(FAMILY_ACTIONS), help="update family action")
-@click.option("-p", "--priority", type=click.Choice(PRIORITY_OPTIONS), help="update priority")
-@click.option("-g", "--panel", "panels", multiple=True, help="update gene panels")
-@click.argument("family_id")
-@click.pass_context
-def family(context, action, priority, panels, family_id):
-    """Update information about a family."""
-    family_obj = context.obj["status"].family(family_id)
-    if family_obj is None:
-        click.echo(click.style(f"Can't find family {family_id}", fg="red"))
-        context.abort()
-    if not (action or priority or panels):
-        click.echo(click.style(f"Nothing to change", fg="yellow"))
-        context.abort()
-    if action:
-        click.echo(
-            click.style(f"Update action: {family_obj.action or 'NA'} -> {action}", fg="green")
-        )
-        family_obj.action = action
-    if priority:
-        message = f"update priority: {family_obj.priority_human} -> {priority}"
-        click.echo(click.style(message, fg="blue"))
-        family_obj.priority_human = priority
-    if panels:
-        for panel_id in panels:
-            panel_obj = context.obj["status"].panel(panel_id)
-            if panel_obj is None:
-                click.echo(click.style(f"unknown gene panel: {panel_id}", fg="red"))
-                context.abort()
-        message = f"update panels: {', '.join(family_obj.panels)} -> {', '.join(panels)}"
-        click.echo(click.style(message, fg="blue"))
-        family_obj.panels = panels
-    context.obj["status"].commit()
-
-
-@set_cmd.command()
 @click.option(
     "-id",
     "--identifier",
@@ -98,27 +65,73 @@ def family(context, action, priority, panels, family_id):
 )
 @click.option("--skip-lims", is_flag=True, help="Skip setting value in LIMS")
 @click.option("-y", "--yes", is_flag=True, help="Answer yes on all confirmations")
+@click.argument("case_id", required=False)
 @click.pass_context
-def samples(context, identifiers, kwargs, skip_lims, yes):
+def samples(
+    context: click.Context,
+    identifiers: click.Tuple([str, str]),
+    kwargs: click.Tuple([str, str]),
+    skip_lims: bool,
+    yes: bool,
+    case_id: str,
+):
     """Set values on many samples at the same time"""
-    identifier_args = {}
-    for identifier_name, identifier_value in identifiers:
-        identifier_args[identifier_name] = identifier_value
+    store = context.obj["status"]
+    sample_objs = _get_samples(case_id, identifiers, store)
 
-    samples_objs = context.obj["status"].samples_by_ids(**identifier_args)
+    if not sample_objs:
+        click.echo(click.style(fg="red", text="No samples to alter!"))
+        context.abort()
 
     click.echo("Would alter samples:")
 
-    for sample_obj in samples_objs:
+    for sample_obj in sample_objs:
         click.echo(f"{sample_obj}")
 
     if not (yes or click.confirm(CONFIRM)):
         context.abort()
 
-    for sample_obj in samples_objs:
+    for sample_obj in sample_objs:
         context.invoke(
             sample, sample_id=sample_obj.internal_id, kwargs=kwargs, yes=yes, skip_lims=skip_lims
         )
+
+
+def _get_samples(
+    case_id: str, identifiers: click.Tuple([str, str]), store: Store
+) -> [models.Sample]:
+    """Get samples that match both case_id and identifiers if given"""
+    samples_by_case_id = None
+    samples_by_id = None
+
+    if case_id:
+        samples_by_case_id = _get_samples_by_case_id(case_id, store)
+
+    if identifiers:
+        samples_by_id = _get_samples_by_identifiers(identifiers, store)
+
+    if case_id and identifiers:
+        sample_objs = set(set(samples_by_case_id) & set(samples_by_id))
+    else:
+        sample_objs = samples_by_case_id or samples_by_id
+
+    return sample_objs
+
+
+def _get_samples_by_identifiers(
+    identifiers: click.Tuple([str, str]), store: Store
+) -> models.Sample:
+    """Get samples matched by given set of identifiers"""
+    identifier_args = {}
+    for identifier_name, identifier_value in identifiers:
+        identifier_args[identifier_name] = identifier_value
+    return store.samples_by_ids(**identifier_args)
+
+
+def _get_samples_by_case_id(case_id: str, store: Store) -> [models.Sample]:
+    """Get samples on a given case-id"""
+    case = store.family(internal_id=case_id)
+    return [link.sample for link in case.links] if case else []
 
 
 def is_locked_attribute_on_sample(key, skip_attributes):
@@ -131,9 +144,7 @@ def is_private_attribute(key):
     return key.startswith("_")
 
 
-def list_changeable_sample_attributes(
-    sample_obj: models.Sample = None, skip_attributes: list() = None
-):
+def list_changeable_sample_attributes(sample_obj: models.Sample = None, skip_attributes: [] = None):
     """List changeable attributes on sample and its current value"""
 
     sample_attributes = models.Sample.__dict__.keys()
@@ -149,8 +160,9 @@ def list_changeable_sample_attributes(
         click.echo(message)
 
 
-def show_set_sample_help(sample_obj: models.Sample = "None"):
+def show_set_sample_help(sample_obj: models.Sample = "None") -> None:
     """Show help for the set sample command"""
+    click.echo("sample_id: optional, internal_id of sample to set value on")
     show_option_help(long_name=OPTION_LONG_SKIP_LIMS, help_text=HELP_SKIP_LIMS)
     show_option_help(short_name=OPTION_SHORT_YES, long_name=OPTION_LONG_YES, help_text=HELP_YES)
     show_option_help(
@@ -256,7 +268,7 @@ def sample(context, sample_id, kwargs, skip_lims, yes, help):
 
 def _generate_comment(what, old_value, new_value):
     """Generate a comment that can be used in the comment field to describe updated value"""
-    return f"\n{what} changed from " f"{str(old_value)} to " f"{str(new_value)}."
+    return f"\n{what} changed from {str(old_value)} to {str(new_value)}."
 
 
 def _update_comment(comment, obj):
@@ -285,3 +297,7 @@ def flowcell(context, flowcell_name, status):
 
     context.obj["status"].commit()
     click.echo(click.style(f"{flowcell_name} set: {prev_status} -> {status}", fg="green"))
+
+
+set_cmd.add_command(family)
+set_cmd.add_command(families)

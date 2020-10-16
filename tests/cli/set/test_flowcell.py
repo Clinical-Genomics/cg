@@ -1,6 +1,6 @@
 """This script tests the cli methods to set flowcells in status-db"""
 
-from cg.cli.set import flowcell
+from cg.cli.set.base import flowcell
 from cg.constants import FLOWCELL_STATUS
 from cg.store import Store
 

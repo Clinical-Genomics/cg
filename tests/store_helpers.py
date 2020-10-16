@@ -161,7 +161,6 @@ class StoreHelpers:
         if not family:
             family = self.add_family(store)
 
-        print("Adding analysis to", family)
         analysis = store.add_analysis(pipeline=pipeline, version=pipeline_version)
 
         analysis.started_at = started_at or datetime.now()
@@ -296,7 +295,14 @@ class StoreHelpers:
         store.add_commit(family_obj)
         return family_obj
 
-    def ensure_family(
+    def ensure_family(self, store: Store, name: str, customer: models.Customer):
+        family = store.find_family(customer=customer, name=name)
+        if not family:
+            family = store.add_family(name=name, panels=None)
+            family.customer = customer
+        return family
+
+    def ensure_family_from_dict(
         self,
         store: Store,
         family_info: dict,
@@ -417,6 +423,8 @@ class StoreHelpers:
             ticket=ticket,
         )
         sample.customer = customer
+        case = self.ensure_family(store=store, name=str(ticket), customer=customer)
+        self.add_relationship(store=store, family=case, sample=sample)
         return sample
 
     def add_samples(self, store: Store, nr_samples: int = 5) -> list:

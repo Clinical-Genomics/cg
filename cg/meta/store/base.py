@@ -1,13 +1,66 @@
 """Base module for building bioinfo workflow bundles for linking in Housekeeper"""
 import datetime as dt
 
+import logging
 from typing import List
 
-from cg.constants import HK_TAGS, MIP_DNA_TAGS, MIP_RNA_TAGS
+from housekeeper.store import models as hk_models
 
-from cg.exc import AnalysisDuplicationError, PipelineUnknownError, MandatoryFilesMissing
+from cg.apps.hk import HousekeeperAPI
+from cg.constants import HK_TAGS, MIP_DNA_TAGS, MIP_RNA_TAGS, MICROSALT_TAGS
+from cg.exc import (
+    AnalysisDuplicationError,
+    PipelineUnknownError,
+    MandatoryFilesMissing,
+    BundleAlreadyAddedError,
+)
+from cg.meta.store.microsalt import add_microbial_analysis
+from cg.meta.store import mip as store_mip
+from cg.store import models, Store
+from cg.store.utils import reset_case_action
 
-ANALYSIS_TYPE_TAGS = {"wgs": MIP_DNA_TAGS, "wes": MIP_DNA_TAGS, "wts": MIP_RNA_TAGS}
+from _io import TextIOWrapper
+
+ANALYSIS_TYPE_TAGS = {
+    "wgs": MIP_DNA_TAGS,
+    "wes": MIP_DNA_TAGS,
+    "wts": MIP_RNA_TAGS,
+    "microbial": MICROSALT_TAGS,
+}
+LOG = logging.getLogger(__name__)
+
+
+def gather_files_and_bundle_in_housekeeper(
+    config_stream: TextIOWrapper, hk_api: HousekeeperAPI, status: Store, workflow: str
+) -> models.Analysis:
+    """Function to gather files and bundle in housekeeper"""
+
+    add_analysis = {
+        "microsalt": add_microbial_analysis,
+        "mip": store_mip.add_mip_analysis,
+    }
+    bundle_data = add_analysis[workflow](config_stream)
+
+    results = hk_api.add_bundle(bundle_data)
+    if results is None:
+        raise BundleAlreadyAddedError("bundle already added")
+
+    bundle_obj, version_obj = results
+
+    case_obj = {
+        "microsalt": status.find_family_by_name(bundle_obj.name),
+        "mip": status.family(bundle_obj.name),
+    }
+
+    reset_case_action(case_obj[workflow])
+    new_analysis = add_new_analysis(bundle_data, case_obj[workflow], status, version_obj, workflow)
+    version_date = version_obj.created_at.date()
+
+    LOG.info("new bundle added: %s, version %s", bundle_obj.name, version_date)
+    hk_api.include(version_obj)
+    hk_api.add_commit(bundle_obj, version_obj)
+
+    return new_analysis
 
 
 def build_bundle(config_data: dict, analysisinfo_data: dict, deliverables: dict) -> dict:
@@ -24,7 +77,13 @@ def build_bundle(config_data: dict, analysisinfo_data: dict, deliverables: dict)
     return data
 
 
-def add_new_analysis(bundle_data, case_obj, status, version_obj):
+def add_new_analysis(
+    bundle_data: dict,
+    case_obj: models.Family,
+    status: Store,
+    version_obj: hk_models.Version,
+    workflow: str,
+) -> models.Analysis:
     """Function to create and return a new analysis database record"""
 
     pipeline = case_obj.links[0].sample.data_analysis
@@ -39,7 +98,7 @@ def add_new_analysis(bundle_data, case_obj, status, version_obj):
 
     new_analysis = status.add_analysis(
         pipeline=pipeline,
-        version=bundle_data["pipeline_version"],
+        version=bundle_data.get("pipeline_version"),
         started_at=version_obj.created_at,
         completed_at=dt.datetime.now(),
         primary=(len(case_obj.analyses) == 0),
@@ -112,7 +171,7 @@ def get_tags(
 ) -> List[str]:
     """Get all tags for a file"""
 
-    tags = {"id": file["id"]}
+    tags = {"id": str(file["id"])}
     tags["pipeline"] = pipeline_tags[0]
     tags["application"] = pipeline_tags[1] if len(pipeline_tags) > 1 else None
 

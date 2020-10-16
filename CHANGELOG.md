@@ -13,6 +13,72 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [13.10]
+
+### Added
+- Functionality to deploy `genotype` with CG on hasta
+
+## [13.9]
+
+### Added
+- Deployment command
+- Functionality to deploy `shipping` with CG
+
+
+## [13.8.0]
+### Added
+- Functionality to change multiple families in one go, e.g. cg set families --sample-identifier ticket_number 123456 --priority research
+
+## [13.7.0]
+### Fixed
+- Set flowcell status to `ondisk` when retrieving archived flowcell from PDC has finished.
+
+## [13.6.0]
+
+### Added
+- Store microsalt analyses in Housekeeper with a provided deliverables file
+
+## [13.5.0]
+
+### Added
+- Possibility to give case-id as argument when setting values on multiple samples by the CLI
+
+
+## [13.4.1]
+
+
+### Fixed
+- Updated changelog with correct release version
+
+
+## [13.4.0]
+
+### Removed
+- Microbial order table
+- Microbial order model
+- Microbial sample table
+- Microbial sample model
+- Microbial Flowcell-sample table
+- Microbial Flowcell-sample model
+
+### Changed
+Show customer name instead of id in invoices view.
+Made customer name searchable in invoices view.
+
+### Fixed
+Made unidirectional links to Customer (instead of bi) to speed up customer view
+Made unidirectional links to ApplicationVersion (instead of bi) to speed up view
+
+## [13.3.1]
+
+### Changed
+- Exclude analysis older than hasta in production (2017-09-27) from delivery report generation
+
+## [13.3.0]
+
+### Added
+- Added new cases to skip during compression 
+
 ## [13.2.0]
 
 ### Changed

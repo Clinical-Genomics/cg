@@ -104,7 +104,7 @@ def fixture_compress_case_info(
 def fixture_populated_compress_store(store, helpers, compress_case_info, analysis_family):
     """Return a store populated with a completed analysis"""
     # Make sure that there is a family where anaylsis is completer
-    helpers.ensure_family(
+    helpers.ensure_family_from_dict(
         store,
         family_info=analysis_family,
         app_tag=compress_case_info.application_tag,
@@ -140,7 +140,7 @@ def fixture_populated_compress_multiple_store(
                 analysis_family["samples"][ind]["mother"] = "_".join(
                     [str(number), analysis_family["samples"][ind]["mother"]]
                 )
-        helpers.ensure_family(
+        helpers.ensure_family_from_dict(
             store,
             family_info=analysis_family,
             app_tag=compress_case_info.application_tag,

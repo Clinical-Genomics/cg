@@ -12,7 +12,7 @@ from cg.exc import (
     PipelineUnknownError,
     MandatoryFilesMissing,
 )
-from cg.meta.store.mip import gather_files_and_bundle_in_housekeeper
+from cg.meta.store.base import gather_files_and_bundle_in_housekeeper
 from cg.store import Store
 from cg.constants import EXIT_SUCCESS, EXIT_FAIL
 
@@ -43,7 +43,12 @@ def analysis(context, config_stream):
         raise click.Abort()
 
     try:
-        new_analysis = gather_files_and_bundle_in_housekeeper(config_stream, hk_api, status,)
+        new_analysis = gather_files_and_bundle_in_housekeeper(
+            config_stream,
+            hk_api,
+            status,
+            workflow="mip",
+        )
     except (
         AnalysisNotFinishedError,
         AnalysisDuplicationError,
