@@ -1,14 +1,4 @@
 ---
-analysis_date: 2020-05-12T10:23:18
-analysis_type:
-  sample_id: wgs
-analysisrunstatus: finished
-case: case_id
-config_file_analysis: /path/to/rare-disease/cases/case_id/analysis/case_id_config.yaml
-default_gene_panels:
-  - OMIM-AUTO
-expected_coverage:
-  sample_id: '30'
 files:
   - format: cram
     id: sample_id
@@ -124,6 +114,12 @@ files:
     path_index: /path/to/rare-disease/cases/case_id/analysis/case_id/gatk_combinevariantcallsets/case_id_gatkcomb.bcf.csi
     step: gatk_combinevariantcallsets
     tag: ~
+  - format: tar
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_ar/sample_id_lanes_5555_sorted_md_brecal_tcov_chromograph.tar.gz
+    path_index: ~
+    step: chromograph_ar
+    tag: ~
   - format: bed
     id: sample_id
     path: /path/to/rare-disease/cases/case_id/analysis/sample_id/sambamba_depth/sample_id_lanes_5555_sorted_md_brecal_coverage.bed
@@ -132,7 +128,7 @@ files:
     tag: coverage
   - format: meta
     id: case_id
-    path: /path/to/rare-disease/cases/case_id/analysis/mip_log/some_date/mip_some_date_and_time.log
+    path: /home/proj/production/rare-disease/cases/flyingsnipe/analysis/mip_log/YYYY-MM-DD/mip_YYYY-MM-DDTHH:MM:SS.log
     path_index: ~
     step: mip_analyse
     tag: log
@@ -144,7 +140,7 @@ files:
     tag: pedigree
   - format: meta
     id: case_id
-    path: /path/to/rare-disease/mip_version-dna.yaml
+    path: /path/to/mip/config/mip_version-dna.yaml
     path_index: ~
     step: mip_analyse
     tag: config
