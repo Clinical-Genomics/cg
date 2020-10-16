@@ -146,7 +146,7 @@ def sample(context, lims_id, downsampled, sex, order, application, priority, cus
     "--priority", type=click.Choice(PRIORITY_OPTIONS), default="standard", help="analysis priority"
 )
 @click.option("-p", "--panel", "panels", multiple=True, required=True, help="default gene panels")
-@click.option("-a", "--analysis", "analysis", required=True, help="Analysis workflow")
+@click.option("-a", "--analysis", required=True, help="Analysis workflow")
 @click.argument("customer_id")
 @click.argument("name")
 @click.pass_context
