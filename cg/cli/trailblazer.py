@@ -41,7 +41,7 @@ def mark_analyses_deleted(context, case_id):
 @click.pass_context
 def add_pending_analysis(context, case_id, email):
     analysis_obj = context.obj["trailblazer_api"].add_pending_analysis(case_id=case_id, email=email)
-    LOG.info(f"Created pending analysis {analysis_obj.to_dict()}")
+    LOG.info(f"Created pending analysis for {case_id}, analysis_id: {analysis_obj.id}")
 
 
 @trailblazer.command("delete-analysis")
