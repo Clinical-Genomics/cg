@@ -41,7 +41,7 @@ def analysis(context, config_stream):
 
     if not config_stream:
         LOG.error("Provide a config file.")
-        context.abort()
+        raise click.Abort()
 
     try:
         new_analysis = gather_files_and_bundle_in_housekeeper(
@@ -50,6 +50,8 @@ def analysis(context, config_stream):
             status,
             workflow="mip",
         )
+        status.add_commit(new_analysis)
+        LOG.info("Included files in Housekeeper")
     except (
         AnalysisNotFinishedError,
         AnalysisDuplicationError,
@@ -57,14 +59,11 @@ def analysis(context, config_stream):
         PipelineUnknownError,
         MandatoryFilesMissing,
     ) as error:
-        click.echo(click.style(error.message, fg="red"))
-        context.abort()
+        LOG.error(error.message)
+        raise click.Abort()
     except FileNotFoundError as error:
-        click.echo(click.style(f"missing file: {error.args[0]}", fg="red"))
-        context.abort()
-
-    status.add_commit(new_analysis)
-    click.echo(click.style("included files in Housekeeper", fg="green"))
+        LOG.error(f"Missing file: {error.args[0]}")
+        raise click.Abort()
 
 
 @store.command()
@@ -85,7 +84,7 @@ def completed(context):
             try:
                 context.invoke(analysis, config_stream=config_stream)
             except Exception:
-                LOG.error("case storage failed: %s", analysis_obj.family, exc_info=True)
+                LOG.error(f"Case storage failed:{analysis_obj.family}")
                 exit_code = FAIL
 
     sys.exit(exit_code)
