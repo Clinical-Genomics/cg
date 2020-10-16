@@ -9,7 +9,7 @@ from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 
 def test_store_no_config(cli_runner: CliRunner, mip_store_context: dict, caplog):
     """Test the function to check for config files"""
-    # GIVEN the cli function
+
     caplog.set_level(logging.INFO)
     # WHEN we run store analysis on no config
     result = cli_runner.invoke(analysis, obj=mip_store_context)
@@ -23,7 +23,7 @@ def test_store_analysis_exception(
     cli_runner: CliRunner, mip_store_context: dict, mip_configs: dict
 ):
     """Test that the analysis function enters the exception clause"""
-    # GIVEN a cli function
+
     # WHEN we run store on a case without deliverables
     result = cli_runner.invoke(analysis, [str(mip_configs["purplesnail"])], obj=mip_store_context)
     # THEN we should be informed that mandatory files are missing
@@ -42,7 +42,7 @@ def test_store_analysis(
     caplog,
 ):
     """Test if store completed stores a completed sample"""
-    # GIVEN a cli function
+
     caplog.set_level(logging.INFO)
     # WHEN we run store on a config
     result = cli_runner.invoke(analysis, [str(mip_configs["yellowhog"])], obj=mip_store_context)
@@ -53,11 +53,11 @@ def test_store_analysis(
     assert result.exit_code == EXIT_SUCCESS
 
 
-def test_store_completed(
+def test_store_completed_good_cases(
     cli_runner: CliRunner, mip_store_context: dict, mip_case_ids: dict, caplog
 ):
     """Test if store completed stores function"""
-    # GIVEN a cli function
+
     caplog.set_level(logging.INFO)
     # WHEN we run store all completed cases
     result = cli_runner.invoke(completed, obj=mip_store_context)
