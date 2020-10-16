@@ -46,11 +46,11 @@ def add_pending_analysis(context, case_id, email):
 
 @trailblazer.command("delete-analysis")
 @click.option("--force", is_flag=True)
-@click.argument("case_id", type=str)
+@click.argument("analysis_id", type=str)
 @click.pass_context
-def delete_analysis(context, case_id, force):
+def delete_analysis(context, analysis_id, force):
     try:
-        analysis_obj = context.obj["trailblazer_api"].delete_analysis(case_id=case_id, force=force)
-        LOG.info(f"Deleted analysis directory for {case_id}: {analysis_obj.out_dir.parent}")
+        context.obj["trailblazer_api"].delete_analysis(analysis_id=analysis_id, force=force)
+        LOG.info(f"Deleted analysis {analysis_id} and its output files")
     except TrailblazerAPIHTTPError as e:
-        LOG.info(f"Did not delete analysis directory: {e.message}")
+        LOG.error(f"Failed to delete analysis: {e.message}")

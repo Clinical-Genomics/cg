@@ -108,12 +108,10 @@ class TrailblazerAPI:
     def is_latest_analysis_ongoing(self, case_id: str) -> bool:
         return self.get_latest_analysis_status(case_id=case_id) in self.__ONGOING_STATUSES
 
-    def delete_analysis(self, case_id: str, force: bool = False) -> TrailblazerAnalysis:
+    def delete_analysis(self, analysis_id: str, force: bool = False) -> None:
         """Raises TrailblazerAPIHTTPError"""
-        request_body = {"case_id": case_id, "force": force}
-        response = self.query_trailblazer(command="delete-analysis", request_body=request_body)
-        if response:
-            return TrailblazerAnalysis.parse_obj(response)
+        request_body = {"analysis_id": analysis_id, "force": force}
+        self.query_trailblazer(command="delete-analysis", request_body=request_body)
 
     def mark_analyses_deleted(self, case_id: str) -> Optional[list]:
         """Mark all analyses for case deleted without removing analysis files"""
