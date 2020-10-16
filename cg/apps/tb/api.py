@@ -97,22 +97,16 @@ class TrailblazerAPI:
         if response:
             return TrailblazerAnalysis.parse_obj(response)
 
-    def get_latest_analysis_status(self, case_id: str) -> str:
+    def get_latest_analysis_status(self, case_id: str) -> Optional[str]:
         latest_analysis = self.get_latest_analysis(case_id=case_id)
         if latest_analysis:
             return latest_analysis.status
 
     def has_latest_analysis_started(self, case_id: str) -> bool:
-        latest_analysis = self.get_latest_analysis(case_id=case_id)
-        latest_analysis_status = latest_analysis.status
-        if latest_analysis_status in self.__STARTED_STATUSES:
-            return True
+        return self.get_latest_analysis_status(case_id=case_id) in self.__STARTED_STATUSES
 
     def is_latest_analysis_ongoing(self, case_id: str) -> bool:
-        latest_analysis = self.get_latest_analysis(case_id=case_id)
-        latest_analysis_status = latest_analysis.status
-        if latest_analysis_status in self.__ONGOING_STATUSES:
-            return True
+        return self.get_latest_analysis_status(case_id=case_id) in self.__ONGOING_STATUSES
 
     def delete_analysis(self, case_id: str, force: bool = False) -> TrailblazerAnalysis:
         """Raises TrailblazerAPIHTTPError"""
