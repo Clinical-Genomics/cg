@@ -21,7 +21,7 @@ def trailblazer(context):
 def get_latest_analysis(context, case_id):
     analysis_obj = context.obj["trailblazer_api"].get_latest_analysis(case_id=case_id)
     if analysis_obj:
-        LOG.info(f"Found {analysis_obj.to_dict()}")
+        LOG.info(f"Found {analysis_obj.dict()}")
     LOG.info(f"No analyses for {case_id} found!")
 
 
