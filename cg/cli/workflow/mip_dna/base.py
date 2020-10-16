@@ -246,20 +246,19 @@ def run(
     if dna_api.get_skip_evaluation_flag(case_obj=case_obj):
         kwargs["skip_evaluation"] = True
 
-    if dry_run:
-        dna_api.run_command(dry_run=dry_run, **kwargs)
-        return
-
-    dna_api.run_command(**kwargs)
+    dna_api.run_command(dry_run=dry_run, **kwargs)
 
     if mip_dry_run:
-        LOG.info("Executed MIP in dry-run mode - skipping Trailblazer step")
+        LOG.info("Executed MIP in dry-run mode")
         return
-
-    dna_api.mark_analyses_deleted(case_id=case_id)
-    dna_api.add_pending_analysis(case_id=case_id, email=email)
-    dna_api.set_statusdb_action(case_id=case_id, action="running")
-    LOG.info("MIP rd-dna run started!")
+    try:
+        dna_api.mark_analyses_deleted(case_id=case_id)
+        dna_api.add_pending_analysis(case_id=case_id, email=email)
+        dna_api.set_statusdb_action(case_id=case_id, action="running")
+        LOG.info("MIP rd-dna run started!")
+    except CgError as e:
+        LOG.error(e.message)
+        raise click.Abort
 
 
 @mip_dna.command()
@@ -287,11 +286,11 @@ def start(context: click.Context, dry_run: bool = False):
                 priority=dna_api.get_priority(case_obj),
                 case_id=case_obj.internal_id,
             )
-        except (CgError, click.Abort) as error:
+        except CgError as error:
             LOG.error(error.message)
             exit_code = EXIT_FAIL
         except Exception as e:
-            LOG.error(f"Unspecified error occurred - {e}")
+            LOG.error(f"Error occurred - {e}")
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort()
