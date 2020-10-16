@@ -56,9 +56,7 @@ def fixture_mip_case_dirs(mip_case_ids: dict, project_dir: Path) -> dict:
 
 @pytest.fixture(name="mip_deliverables")
 def make_mip_deliverables(
-    mip_case_ids: dict,
-    mip_case_dirs: dict,
-    mip_deliverables_file: Path,
+    mip_case_ids: dict, mip_case_dirs: dict, mip_deliverables_file: Path,
 ) -> dict:
     """Create deliverables for mip store testing"""
 
