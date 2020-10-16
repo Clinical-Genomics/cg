@@ -141,9 +141,9 @@ def mip_run_dir(context, yes, case_id, dry_run: bool = False):
         if yes or click.confirm(f"Are you sure you want to remove {case_id}?"):
             shutil.rmtree(analysis_path, ignore_errors=True)
             LOG.info(f"Cleaning case {case_id} : Deleted contents of {analysis_path}")
-            context.obj["trailblazer_api"].mark_analyses_deleted(case_id)
+            mip_analysis_api.mark_analyses_deleted(case_id)
             for analysis_obj in case_obj.analyses:
-                analysis_obj.cleaned_at = datetime.now()
+                analysis_obj.cleaned_at = analysis_obj.cleaned_at or datetime.now()
             mip_analysis_api.db.commit()
     except Exception as error:
         LOG.error(f"{case_id}: {error}")
