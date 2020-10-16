@@ -134,17 +134,20 @@ def mip_run_dir(context, yes, case_id, dry_run: bool = False):
         LOG.info(f"Cleaning case {case_id} : Would have deleted contents of {analysis_path}")
         return
 
-    if yes or click.confirm(f"Are you sure you want to remove {case_id}?"):
-        try:
+    try:
+        if mip_analysis_api.is_latest_analysis_ongoing(case_id):
+            LOG.warning(f"Analysis for case {case_id} is still ongoing!")
+
+        if yes or click.confirm(f"Are you sure you want to remove {case_id}?"):
             shutil.rmtree(analysis_path, ignore_errors=True)
             LOG.info(f"Cleaning case {case_id} : Deleted contents of {analysis_path}")
             context.obj["trailblazer_api"].mark_analyses_deleted(case_id)
             for analysis_obj in case_obj.analyses:
                 analysis_obj.cleaned_at = datetime.now()
             mip_analysis_api.db.commit()
-        except Exception as error:
-            LOG.error(f"{case_id}: {error}")
-            raise click.Abort()
+    except Exception as error:
+        LOG.error(f"{case_id}: {error}")
+        raise click.Abort()
 
 
 @clean.command("hk-alignment-files")
