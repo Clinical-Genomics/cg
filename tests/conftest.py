@@ -262,6 +262,12 @@ def fixture_mip_dna_store_files(apps_dir: Path) -> Path:
     return _path
 
 
+@pytest.fixture(name="mip_deliverables_file")
+def fixture_mip_deliverables_files(mip_dna_store_files: Path) -> Path:
+    """Fixture for general deliverables file in mip"""
+    return mip_dna_store_files / "case_id_deliverables.yaml"
+
+
 # Orderform fixtures
 
 

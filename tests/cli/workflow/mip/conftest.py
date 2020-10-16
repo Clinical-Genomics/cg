@@ -4,7 +4,6 @@ import pytest
 import copy
 import datetime as dt
 
-
 from pathlib import Path
 from ruamel.yaml import YAML
 
@@ -33,24 +32,9 @@ def mip_case_ids() -> dict:
     """Dictionary of case ids, connected samples, their name and if they should fail (textbook or not)"""
 
     case_ids = {
-        "yellowhog": {
-            "textbook": True,
-            "name": "F0000001",
-            "internal_id": "ACC00000",
-            "panels": "OMIM-AUTO",
-        },
-        "purplesnail": {
-            "textbook": False,
-            "name": "F0000003",
-            "internal_id": "ACC00000",
-            "panels": "OMIM-AUTO",
-        },
-        "bluezebra": {
-            "textbook": True,
-            "name": "F0000002",
-            "internal_id": "ACC00000",
-            "panels": "OMIM-AUTO",
-        },
+        "yellowhog": {"textbook": True, "name": "F0000001", "internal_id": "ACC00000",},
+        "purplesnail": {"textbook": False, "name": "F0000003", "internal_id": "ACC00000",},
+        "bluezebra": {"textbook": True, "name": "F0000002", "internal_id": "ACC00000",},
     }
 
     return case_ids
@@ -70,20 +54,11 @@ def fixture_mip_case_dirs(mip_case_ids: dict, project_dir: Path) -> dict:
     return mip_case_dirs
 
 
-@pytest.fixture(name="mip_deliverables_file")
-def fixture_mip_deliverables_files(mip_dna_store_files: Path) -> Path:
-    """Fixture for general deliverables file in mip"""
-    return mip_dna_store_files / "case_id_deliverables.yaml"
-
-
 @pytest.fixture(name="mip_deliverables")
 def make_mip_deliverables(
     mip_case_ids: dict,
     mip_case_dirs: dict,
-    files: dict,
     mip_deliverables_file: Path,
-    mip_dna_store_files: Path,
-    project_dir: Path,
 ) -> dict:
     """Create deliverables for mip store testing"""
 
@@ -92,19 +67,14 @@ def make_mip_deliverables(
     # Create a dict of paths to the deliverables to be used in later stages
     deliverables_paths = {}
 
+    # Load general deliverables file
     with open(mip_deliverables_file, "r") as mip_dna_deliverables:
         mip_deliverables = yaml.load(mip_dna_deliverables)
 
     for case in mip_case_ids:
         if mip_case_ids[case]["textbook"]:
-            sample_id = mip_case_ids[case]["internal_id"]
             case_specific_deliverables = copy.deepcopy(mip_deliverables)
-            case_specific_deliverables["case"] = case
-            case_specific_deliverables["analysis_type"].pop("sample_id")
-            case_specific_deliverables["analysis_type"][sample_id] = "wgs"
-            case_specific_deliverables["config_file_analysis"] = str(
-                mip_case_dirs[case] / Path(case_specific_deliverables["config_file_analysis"]).name
-            )
+
             for file in case_specific_deliverables["files"]:
                 if file["path_index"]:
                     file["path_index"] = str(mip_case_dirs[case] / Path(file["path_index"]).name)
@@ -118,6 +88,7 @@ def make_mip_deliverables(
             with open(case_deliverables_path, "w") as fh:
                 yaml.dump(case_specific_deliverables, fh)
             deliverables_paths[case] = case_deliverables_path
+
         elif not mip_case_ids[case]["textbook"]:
             case_deliverables_path = mip_case_dirs[case] / f"{case}_deliverables.yaml"
             with open(case_deliverables_path, "w") as fh:
