@@ -118,11 +118,8 @@ def present_string(a_dict, param, show_negative):
 @click.option("--internal-id", help="search by internal id")
 @click.option("--name", help="search by name given by customer")
 @click.option("--case-action", type=click.Choice(FAMILY_ACTIONS), help="filter by case action")
-@click.option(
-    "--progress-status", type=click.Choice(STATUS_OPTIONS), help="filter by progress " "status"
-)
 @click.option("--priority", type=click.Choice(PRIORITY_OPTIONS), help="filter by priority")
-@click.option("--data-analysis", help="filter on data_analysis")
+@click.option("--data-analysis", help="filter on case data_analysis")
 @click.option("--sample-id", help="filter by sample id")
 @click.option("-c", "--customer-id", help="filter by customer")
 @click.option("-C", "--exclude-customer-id", help="exclude customer")
@@ -152,7 +149,6 @@ def cases(
     internal_id,
     name,
     case_action,
-    progress_status,
     priority,
     customer_id,
     data_analysis,
@@ -177,12 +173,10 @@ def cases(
 ):
     """progress of each case"""
     records = context.obj["db"].cases(
-        progress_tracker=context.obj.get("tb"),
         days=days,
         internal_id=internal_id,
         name=name,
         case_action=case_action,
-        progress_status=progress_status,
         priority=priority,
         customer_id=customer_id,
         exclude_customer_id=exclude_customer_id,
