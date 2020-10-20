@@ -196,6 +196,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
             ticket=data["ticket"],
             samples=status_data["samples"],
             comment=status_data["comment"],
+            data_analysis=status_data["data_analysis"],
         )
 
         return {"project": project_data, "records": samples}

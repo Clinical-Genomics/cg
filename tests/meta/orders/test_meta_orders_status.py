@@ -144,15 +144,14 @@ def test_store_samples(orders_api, base_store, fastq_status_data):
         samples=fastq_status_data["samples"],
     )
 
-    # THEN it should store the samples and create a "fake" family for
-    # the non-tumour sample
+    # THEN it should store the samples and create a family for each sample
     assert len(new_samples) == 2
     assert base_store.samples().count() == 2
-    assert base_store.families().count() == 1
+    assert base_store.families().count() == 2
     first_sample = new_samples[0]
     assert len(first_sample.links) == 1
     family_link = first_sample.links[0]
-    assert family_link.family == base_store.families().first()
+    assert family_link.family in base_store.families()
     for sample in new_samples:
         assert len(sample.deliveries) == 1
 
@@ -209,6 +208,8 @@ def test_store_microbial_samples(orders_api, base_store, microbial_status_data):
         ordered=dt.datetime.now(),
         ticket=1234348,
         samples=microbial_status_data["samples"],
+        comment="",
+        data_analysis="microbial",
     )
 
     # THEN it should store the samples under a case (family) and the used previously unknown
@@ -233,14 +234,16 @@ def test_store_microbial_case_data_analysis_stored(orders_api, base_store, micro
         ordered=dt.datetime.now(),
         ticket=1234348,
         samples=microbial_status_data["samples"],
+        comment="",
+        data_analysis="microbial"
     )
 
-    # THEN it should store the samples under a case with the microbial data_analysis type on case level
+    # THEN store the samples under a case with the microbial data_analysis type on case level
     assert base_store.samples().count() > 0
     assert base_store.families().count() == 1
 
     microbial_case = base_store.families().first()
-    assert microbial_case.data_analysis == "microsalt"
+    assert microbial_case.data_analysis == "microbial"
 
 
 def test_store_microbial_samples_bad_apptag(orders_api, microbial_status_data):
@@ -259,6 +262,8 @@ def test_store_microbial_samples_bad_apptag(orders_api, microbial_status_data):
             ordered=dt.datetime.now(),
             ticket=1234348,
             samples=microbial_status_data["samples"],
+            comment="",
+            data_analysis="microbial",
         )
 
 
@@ -274,6 +279,8 @@ def test_store_microbial_sample_priority(orders_api, base_store, microbial_statu
         ordered=dt.datetime.now(),
         ticket=1234348,
         samples=microbial_status_data["samples"],
+        comment="",
+        data_analysis="microbial",
     )
 
     # THEN it should store the sample priority

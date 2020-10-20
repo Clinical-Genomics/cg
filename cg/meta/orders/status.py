@@ -94,14 +94,15 @@ class StatusHandler:
             "order": data["name"],
             "samples": [
                 {
+                    "application": sample["application"],
+                    "comment": sample.get("comment"),
+                    "data_analysis": sample["data_analysis"],
                     "internal_id": sample.get("internal_id"),
                     "name": sample["name"],
-                    "application": sample["application"],
                     "priority": sample["priority"],
-                    "comment": sample.get("comment"),
-                    "tumour": sample.get("tumour") or False,
                     "sex": sample.get("sex"),
                     "status": sample.get("status"),
+                    "tumour": sample.get("tumour") or False,
                 }
                 for sample in data["samples"]
             ],
@@ -116,15 +117,16 @@ class StatusHandler:
             "customer": data["customer"],
             "order": data["name"],
             "comment": data.get("comment"),
+            "data_analysis": data["samples"][0]["data_analysis"],
             "samples": [
                 {
-                    "priority": sample_data["priority"],
-                    "name": sample_data["name"],
-                    "internal_id": sample_data.get("internal_id"),
-                    "organism_id": sample_data["organism"],
-                    "comment": sample_data.get("comment"),
-                    "reference_genome": sample_data["reference_genome"],
                     "application": sample_data["application"],
+                    "comment": sample_data.get("comment"),
+                    "internal_id": sample_data.get("internal_id"),
+                    "name": sample_data["name"],
+                    "organism_id": sample_data["organism"],
+                    "priority": sample_data["priority"],
+                    "reference_genome": sample_data["reference_genome"],
                 }
                 for sample_data in data["samples"]
             ],
@@ -278,6 +280,20 @@ class StatusHandler:
                 new_sample.application_version = application_version
                 new_samples.append(new_sample)
 
+                new_family = self.status.add_family(
+                    data_analysis=sample["data_analysis"],
+                    name=sample["name"],
+                    panels=None,
+                    priority=sample["priority"],
+                )
+                new_family.customer = customer_obj
+                self.status.add(new_family)
+
+                new_relationship = self.status.relate_sample(
+                    family=new_family, sample=new_sample, status=sample["status"] or "unknown"
+                )
+                self.status.add(new_relationship)
+
         self.status.add_commit(new_samples)
         return new_samples
 
@@ -313,20 +329,19 @@ class StatusHandler:
                 new_sample.application_version = application_version
                 new_samples.append(new_sample)
 
-                if not new_sample.is_tumour:
-                    new_family = self.status.add_family(
-                        data_analysis="fastq",
-                        name=sample["name"],
-                        panels=["OMIM-AUTO"],
-                        priority="research",
-                    )
-                    new_family.customer = production_customer
-                    self.status.add(new_family)
+                new_family = self.status.add_family(
+                    data_analysis="fastq",
+                    name=sample["name"],
+                    panels=["OMIM-AUTO"],
+                    priority="research",
+                )
+                new_family.customer = production_customer
+                self.status.add(new_family)
 
-                    new_relationship = self.status.relate_sample(
-                        family=new_family, sample=new_sample, status=sample["status"] or "unknown"
-                    )
-                    self.status.add(new_relationship)
+                new_relationship = self.status.relate_sample(
+                    family=new_family, sample=new_sample, status=sample["status"] or "unknown"
+                )
+                self.status.add(new_relationship)
 
                 new_delivery = self.status.add_delivery(destination="caesar", sample=new_sample)
                 self.status.add(new_delivery)
@@ -336,12 +351,13 @@ class StatusHandler:
 
     def store_microbial_samples(
         self,
+        comment: str,
         customer: str,
+        data_analysis: str,
         order: str,
         ordered: dt.datetime,
-        ticket: int,
         samples: List[dict],
-        comment: str = None,
+        ticket: int,
     ) -> [models.Sample]:
         """Store microbial samples in the status database."""
 
@@ -355,17 +371,18 @@ class StatusHandler:
 
         with self.status.session.no_autoflush:
 
-            case_obj = self.status.find_family(customer=customer_obj, name=ticket)
-
-            if not case_obj:
-                case_obj = self.status.add_family(
-                    data_analysis="microsalt",
-                    name=ticket,
-                    panels=None,
-                )
-                case_obj.customer = customer_obj
-
             for sample_data in samples:
+                case_obj = self.status.find_family(customer=customer_obj, name=ticket)
+
+                if not case_obj:
+                    case_obj = self.status.add_family(
+                        data_analysis=data_analysis,
+                        name=ticket,
+                        panels=None,
+                    )
+                    case_obj.customer = customer_obj
+                    self.status.add_commit(case_obj)
+
                 application_tag = sample_data["application"]
                 application_version = self.status.current_application_version(application_tag)
                 if application_version is None:
