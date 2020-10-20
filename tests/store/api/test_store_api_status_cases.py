@@ -1458,7 +1458,7 @@ def test_structure(base_store: Store):
     cases = base_store.cases()
 
     # THEN structure should contain
-    #   data_analyses
+    #   data_analysis
     #   internal_id
     #   name
     #   total number of samples,
@@ -1470,7 +1470,7 @@ def test_structure(base_store: Store):
     #   samples_delivered
     assert cases
     for case in cases:
-        assert "data_analyses" in case.keys()
+        assert "data_analysis" in case.keys()
         assert "internal_id" in case.keys()
         assert "name" in case.keys()
         assert "ordered_at" in case.keys()

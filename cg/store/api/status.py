@@ -81,16 +81,16 @@ class StatusHandler(BaseHandler):
         )
 
         families = [
-            record
-            for record in families_query
-            if self._all_samples_have_sequence_data(record.links)
+            case_obj
+            for case_obj in families_query
+            if self._all_samples_have_sequence_data(case_obj.links)
         ]
 
         if threshold:
             families = [
-                record
-                for record in families
-                if self.all_samples_have_enough_reads(record.links, threshold=threshold)
+                case_obj
+                for case_obj in families
+                if self.all_samples_have_enough_reads(case_obj.links, threshold=threshold)
             ]
         return families[:limit]
 
@@ -137,58 +137,56 @@ class StatusHandler(BaseHandler):
         exclude_invoiced=False,
     ):
         """Fetch cases with and w/o analyses"""
-        families_q = self.Family.query
+        case_q = self.Family.query
 
         # family filters
         if days != 0:
             filter_date = datetime.now() - timedelta(days=days)
-            families_q = families_q.filter(models.Family.ordered_at > filter_date)
+            case_q = case_q.filter(models.Family.ordered_at > filter_date)
 
         if case_action:
-            families_q = families_q.filter(models.Family.action == case_action)
+            case_q = case_q.filter(models.Family.action == case_action)
 
         if priority:
             priority_db = PRIORITY_MAP[priority]
-            families_q = families_q.filter(models.Family.priority == priority_db)
+            case_q = case_q.filter(models.Family.priority == priority_db)
 
         if internal_id:
-            families_q = families_q.filter(models.Family.internal_id.like("%" + internal_id + "%"))
+            case_q = case_q.filter(models.Family.internal_id.ilike("%" + internal_id + "%"))
 
         if name:
-            families_q = families_q.filter(models.Family.name.like("%" + name + "%"))
+            case_q = case_q.filter(models.Family.name.ilike("%" + name + "%"))
+
+        if data_analysis:
+            case_q = case_q.filter(
+                models.Family.data_analysis.ilike("%" + data_analysis + "%")
+            )
 
         # customer filters
         if customer_id or exclude_customer_id:
-            families_q = families_q.join(models.Family.customer)
+            case_q = case_q.join(models.Family.customer)
 
             if customer_id:
-                families_q = families_q.filter(models.Customer.internal_id == customer_id)
+                case_q = case_q.filter(models.Customer.internal_id == customer_id)
 
             if exclude_customer_id:
-                families_q = families_q.filter(models.Customer.internal_id != exclude_customer_id)
+                case_q = case_q.filter(models.Customer.internal_id != exclude_customer_id)
 
-        if data_analysis:
-            families_q = families_q.filter(
-                models.Family.data_analysis.like("%" + data_analysis + "%")
-            )
         # sample filters
         if sample_id:
-            families_q = families_q.join(models.Family.links, models.FamilySample.sample)
-
-            if sample_id:
-                families_q = families_q.filter(models.Sample.internal_id.like(sample_id))
-
+            case_q = case_q.join(models.Family.links, models.FamilySample.sample)
+            case_q = case_q.filter(models.Sample.internal_id.like(sample_id))
         else:
-            families_q = families_q.outerjoin(models.Family.links, models.FamilySample.sample)
+            case_q = case_q.outerjoin(models.Family.links, models.FamilySample.sample)
 
         # other joins
-        families_q = families_q.outerjoin(
+        case_q = case_q.outerjoin(
             models.Family.analyses, models.Sample.invoice, models.Sample.flowcells
         )
 
         cases = []
 
-        for record in families_q:
+        for case_obj in case_q:
 
             samples_received = None
             samples_prepared = None
@@ -225,14 +223,14 @@ class StatusHandler(BaseHandler):
             tat = None
             is_rerun = False
 
-            analysis_in_progress = record.action is not None
-            case_action = record.action
+            analysis_in_progress = case_obj.action is not None
+            case_action = case_obj.action
 
-            total_samples = len(record.links)
+            total_samples = len(case_obj.links)
             total_external_samples = len(
                 [
                     link.sample.application_version.application.is_external
-                    for link in record.links
+                    for link in case_obj.links
                     if link.sample.application_version.application.is_external
                 ]
             )
@@ -243,35 +241,35 @@ class StatusHandler(BaseHandler):
                 samples_received = len(
                     [
                         link.sample.received_at
-                        for link in record.links
+                        for link in case_obj.links
                         if link.sample.received_at is not None
                     ]
                 )
                 samples_prepared = len(
                     [
                         link.sample.prepared_at
-                        for link in record.links
+                        for link in case_obj.links
                         if link.sample.prepared_at is not None
                     ]
                 )
                 samples_sequenced = len(
                     [
                         link.sample.sequenced_at
-                        for link in record.links
+                        for link in case_obj.links
                         if link.sample.sequenced_at is not None
                     ]
                 )
                 samples_delivered = len(
                     [
                         link.sample.delivered_at
-                        for link in record.links
+                        for link in case_obj.links
                         if link.sample.delivered_at is not None
                     ]
                 )
                 samples_invoiced = len(
                     [
                         link.sample.invoice.invoiced_at
-                        for link in record.links
+                        for link in case_obj.links
                         if link.sample.invoice and link.sample.invoice.invoiced_at
                     ]
                 )
@@ -281,7 +279,7 @@ class StatusHandler(BaseHandler):
                 samples_to_sequence = total_internal_samples
                 samples_to_deliver = total_internal_samples
                 samples_to_invoice = total_samples - len(
-                    [link.sample.no_invoice for link in record.links if link.sample.no_invoice]
+                    [link.sample.no_invoice for link in case_obj.links if link.sample.no_invoice]
                 )
 
                 samples_received_bool = samples_received == samples_to_receive
@@ -294,7 +292,7 @@ class StatusHandler(BaseHandler):
                     samples_received_at = max(
                         [
                             link.sample.received_at
-                            for link in record.links
+                            for link in case_obj.links
                             if link.sample.received_at is not None
                         ]
                     )
@@ -303,7 +301,7 @@ class StatusHandler(BaseHandler):
                     samples_prepared_at = max(
                         [
                             link.sample.prepared_at
-                            for link in record.links
+                            for link in case_obj.links
                             if link.sample.prepared_at is not None
                         ]
                     )
@@ -312,7 +310,7 @@ class StatusHandler(BaseHandler):
                     samples_sequenced_at = max(
                         [
                             link.sample.sequenced_at
-                            for link in record.links
+                            for link in case_obj.links
                             if link.sample.sequenced_at is not None
                         ]
                     )
@@ -321,7 +319,7 @@ class StatusHandler(BaseHandler):
                     samples_delivered_at = max(
                         [
                             link.sample.delivered_at
-                            for link in record.links
+                            for link in case_obj.links
                             if link.sample.delivered_at is not None
                         ]
                     )
@@ -330,19 +328,19 @@ class StatusHandler(BaseHandler):
                     samples_invoiced_at = max(
                         [
                             link.sample.invoice.invoiced_at
-                            for link in record.links
+                            for link in case_obj.links
                             if link.sample.invoice and link.sample.invoice.invoiced_at
                         ]
                     )
 
                 flowcells = len(
-                    [flowcell.status for link in record.links for flowcell in link.sample.flowcells]
+                    [flowcell.status for link in case_obj.links for flowcell in link.sample.flowcells]
                 )
 
                 flowcells_status = list(
                     set(
                         flowcell.status
-                        for link in record.links
+                        for link in case_obj.links
                         for flowcell in link.sample.flowcells
                     )
                 )
@@ -354,7 +352,7 @@ class StatusHandler(BaseHandler):
                 flowcells_on_disk = len(
                     [
                         flowcell.status
-                        for link in record.links
+                        for link in case_obj.links
                         for flowcell in link.sample.flowcells
                         if flowcell.status == "ondisk"
                     ]
@@ -362,11 +360,11 @@ class StatusHandler(BaseHandler):
 
                 flowcells_on_disk_bool = flowcells_on_disk == total_samples
 
-            if record.analyses and not analysis_in_progress:
-                analysis_completed_at = record.analyses[0].completed_at
-                analysis_uploaded_at = record.analyses[0].uploaded_at
-                analysis_delivery_reported_at = record.analyses[0].delivery_report_created_at
-                analysis_pipeline = record.analyses[0].pipeline
+            if case_obj.analyses and not analysis_in_progress:
+                analysis_completed_at = case_obj.analyses[0].completed_at
+                analysis_uploaded_at = case_obj.analyses[0].uploaded_at
+                analysis_delivery_reported_at = case_obj.analyses[0].delivery_report_created_at
+                analysis_pipeline = case_obj.analyses[0].pipeline
                 analysis_completed_bool = analysis_completed_at is not None
                 analysis_uploaded_bool = analysis_uploaded_at is not None
                 analysis_delivery_reported_bool = analysis_delivery_reported_at is not None
@@ -425,7 +423,7 @@ class StatusHandler(BaseHandler):
 
             if progress_tracker:
                 for analysis_obj in progress_tracker.get_latest_logged_analysis(
-                    case_id=record.internal_id
+                    case_id=case_obj.internal_id
                 ):
 
                     if not analysis_status:
@@ -437,13 +435,13 @@ class StatusHandler(BaseHandler):
                 continue
 
             is_rerun = self._is_rerun(
-                record, samples_received_at, samples_prepared_at, samples_sequenced_at
+                case_obj, samples_received_at, samples_prepared_at, samples_sequenced_at
             )
 
             tat = self._calculate_estimated_turnaround_time(
                 is_rerun,
                 case_external_bool,
-                record.ordered_at,
+                case_obj.ordered_at,
                 samples_received_at,
                 samples_prepared_at,
                 samples_sequenced_at,
@@ -452,13 +450,13 @@ class StatusHandler(BaseHandler):
                 samples_delivered_at,
             )
 
-            max_tat = self._get_max_tat(links=record.links)
+            max_tat = self._get_max_tat(links=case_obj.links)
 
             case = {
-                "data_analyses": record.analyses,
-                "internal_id": record.internal_id,
-                "name": record.name,
-                "ordered_at": record.ordered_at,
+                "data_analysis": case_obj.data_analysis,
+                "internal_id": case_obj.internal_id,
+                "name": case_obj.name,
+                "ordered_at": case_obj.ordered_at,
                 "total_samples": total_samples,
                 "total_external_samples": total_external_samples,
                 "total_internal_samples": total_internal_samples,
@@ -508,13 +506,13 @@ class StatusHandler(BaseHandler):
         return cases_sorted
 
     @staticmethod
-    def _is_rerun(record, samples_received_at, samples_prepared_at, samples_sequenced_at):
+    def _is_rerun(case_obj, samples_received_at, samples_prepared_at, samples_sequenced_at):
 
         return (
-            (len(record.analyses) > 0)
-            or (samples_received_at and samples_received_at < record.ordered_at)
-            or (samples_prepared_at and samples_prepared_at < record.ordered_at)
-            or (samples_sequenced_at and samples_sequenced_at < record.ordered_at)
+            (len(case_obj.analyses) > 0)
+            or (samples_received_at and samples_received_at < case_obj.ordered_at)
+            or (samples_prepared_at and samples_prepared_at < case_obj.ordered_at)
+            or (samples_sequenced_at and samples_sequenced_at < case_obj.ordered_at)
         )
 
     @staticmethod
@@ -566,20 +564,20 @@ class StatusHandler(BaseHandler):
     def observations_to_upload(self):
         """Fetch observations that haven't been uploaded."""
 
-        families_q = self.Family.query.join(
+        case_q = self.Family.query.join(
             models.Analysis, models.Family.links, models.FamilySample.sample
         ).filter(models.Sample.loqusdb_id.is_(None))
 
-        return families_q
+        return case_q
 
     def observations_uploaded(self):
         """Fetch observations that have been uploaded."""
 
-        families_q = self.Family.query.join(models.Family.links, models.FamilySample.sample).filter(
+        case_q = self.Family.query.join(models.Family.links, models.FamilySample.sample).filter(
             models.Sample.loqusdb_id.isnot(None)
         )
 
-        return families_q
+        return case_q
 
     def analyses_to_deliver(self, pipeline: str = ""):
         """Fetch analyses that have been uploaded but not delivered."""
@@ -662,7 +660,7 @@ class StatusHandler(BaseHandler):
             models.Sample.delivered_at is not None,
             models.Sample.invoice_id == None,
         )
-        customers_to_invoice = list(set([record.customer for record in records.all()]))
+        customers_to_invoice = list(set([case_obj.customer for case_obj in records.all()]))
         if customer:
             records = records.join(models.Family).filter(models.Family.customer_id == customer.id)
         return records, customers_to_invoice
@@ -680,9 +678,9 @@ class StatusHandler(BaseHandler):
             models.Sample.downsampled_to == None,
         )
         customers_to_invoice = [
-            record.customer
-            for record in records.all()
-            if not record.customer.internal_id == "cust000"
+            case_obj.customer
+            for case_obj in records.all()
+            if not case_obj.customer.internal_id == "cust000"
         ]
         customers_to_invoice = list(set(customers_to_invoice))
         records = records.filter(models.Sample.customer == customer) if customer else records
@@ -699,9 +697,9 @@ class StatusHandler(BaseHandler):
         )
 
         customers_to_invoice = [
-            record.customer
-            for record in records.all()
-            if not record.customer.internal_id == "cust000"
+            case_obj.customer
+            for case_obj in records.all()
+            if not case_obj.customer.internal_id == "cust000"
         ]
         customers_to_invoice = list(set(customers_to_invoice))
         records = records.filter(models.Pool.customer_id == customer.id) if customer else records

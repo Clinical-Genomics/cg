@@ -9,6 +9,7 @@ from cg.constants import FAMILY_ACTIONS, PRIORITY_OPTIONS
 STATUS_OPTIONS = ["pending", "running", "completed", "failed", "error"]
 CASE_HEADERS_LONG = [
     "Case",
+    "Workflow",
     "Ordered",
     "Received",
     "Prepared",
@@ -248,10 +249,11 @@ def cases(
             tat = f"({tat_number})/{max_tat}" + color_end
 
         title = color_start + f"{case.get('internal_id')}"
+
         if name:
             title = f"{title} ({case.get('name')})"
-        if data_analysis:
-            title = f"{title} {case.get('data_analyses')}"
+
+        data_analysis = f"{case.get('data_analysis')}"
 
         show_time = output_type == "datetime"
 
@@ -327,6 +329,7 @@ def cases(
 
         case_row = [
             title,
+            data_analysis,
             ordered,
             received,
             prepared,
