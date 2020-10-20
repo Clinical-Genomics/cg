@@ -69,17 +69,17 @@ class ReportValidator:
 
         return self._attributes_missing_values
 
-    def _collect_missing_attributes(self, subscriptable, keys):
-        """Gathers all attributes that should exist"""
+    def _collect_missing_attributes(self, a_dict: dict, keys: list) -> None:
+        """Gathers all attributes that should exist but is without a value"""
         for key in keys:
-            if subscriptable.get(key) is None:
+            if a_dict.get(key) is None:
                 self._attributes_missing_values.append(key)
 
-    def _check_required_sample_attributes_for_all(self, sample):
+    def _check_required_sample_attributes_for_all(self, sample: dict) -> None:
         """Checks attributes that should exist on all samples"""
         self._collect_missing_attributes(sample, REQUIRED_GENERIC_SAMPLE_FIELDS)
 
-    def _check_required_sample_attributes(self, sample, case_id):
+    def _check_required_sample_attributes(self, sample: dict, case_id: str) -> None:
         """Checks attributes for a sample"""
         self._check_required_sample_attributes_for_all(sample)
 
@@ -106,6 +106,6 @@ class ReportValidator:
         if self._sample_helper.is_analysis_sample(case_id):
             self._collect_missing_attributes(sample, REQUIRED_ANALYSIS_SAMPLE_FIELDS)
 
-    def _check_required_general_report_data(self, report_data):
+    def _check_required_general_report_data(self, report_data: dict) -> None:
         """Check root-level attributes for a report data set"""
         self._collect_missing_attributes(report_data, REQUIRED_REPORT_FIELDS)
