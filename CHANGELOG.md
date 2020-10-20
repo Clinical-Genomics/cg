@@ -13,6 +13,11 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [13.10.1]
+
+### Fixed
+- Repaired automation query for storing Balsamic cases in Housekeeper 
+
 ## [13.10]
 
 ### Added
