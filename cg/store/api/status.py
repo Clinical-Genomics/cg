@@ -152,13 +152,13 @@ class StatusHandler(BaseHandler):
             case_q = case_q.filter(models.Family.priority == priority_db)
 
         if internal_id:
-            case_q = case_q.filter(models.Family.internal_id.ilike("%" + internal_id + "%"))
+            case_q = case_q.filter(models.Family.internal_id.ilike(f"%{internal_id}%"))
 
         if name:
-            case_q = case_q.filter(models.Family.name.ilike("%" + name + "%"))
+            case_q = case_q.filter(models.Family.name.ilike(f"%{name}%"))
 
         if data_analysis:
-            case_q = case_q.filter(models.Family.data_analysis.ilike("%" + data_analysis + "%"))
+            case_q = case_q.filter(models.Family.data_analysis.ilike(f"%{data_analysis}%"))
 
         # customer filters
         if customer_id or exclude_customer_id:
