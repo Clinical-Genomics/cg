@@ -158,9 +158,7 @@ class StatusHandler(BaseHandler):
             case_q = case_q.filter(models.Family.name.ilike("%" + name + "%"))
 
         if data_analysis:
-            case_q = case_q.filter(
-                models.Family.data_analysis.ilike("%" + data_analysis + "%")
-            )
+            case_q = case_q.filter(models.Family.data_analysis.ilike("%" + data_analysis + "%"))
 
         # customer filters
         if customer_id or exclude_customer_id:
@@ -334,7 +332,11 @@ class StatusHandler(BaseHandler):
                     )
 
                 flowcells = len(
-                    [flowcell.status for link in case_obj.links for flowcell in link.sample.flowcells]
+                    [
+                        flowcell.status
+                        for link in case_obj.links
+                        for flowcell in link.sample.flowcells
+                    ]
                 )
 
                 flowcells_status = list(

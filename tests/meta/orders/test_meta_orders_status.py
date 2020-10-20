@@ -235,7 +235,7 @@ def test_store_microbial_case_data_analysis_stored(orders_api, base_store, micro
         ticket=1234348,
         samples=microbial_status_data["samples"],
         comment="",
-        data_analysis="microbial"
+        data_analysis="microbial",
     )
 
     # THEN store the samples under a case with the microbial data_analysis type on case level

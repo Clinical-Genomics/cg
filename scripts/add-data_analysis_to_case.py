@@ -10,9 +10,9 @@ def add_data_analysis(config_file: click.File):
     config = yaml.safe_load(config_file)
     store = Store(config["database"])
 
-    for sample in models.Sample.query.outerjoin(models.Sample.links).filter(models.Sample.links
-                                                                            is None
-                                                                            ).all():
+    for sample in (
+        models.Sample.query.outerjoin(models.Sample.links).filter(models.Sample.links is None).all()
+    ):
         # if sample has links then we deal with it later in case processing
         if sample.links:
             print(".", end="", flush=True)
@@ -34,16 +34,14 @@ def add_data_analysis(config_file: click.File):
         )
 
         if sample.name == "4321":
-            click.echo(click.style(
-                f"Deleting test sample: {sample.__str__()}?",
-                fg="red",
-            ))
-            store.delete(sample)
             click.echo(
                 click.style(
-                    f"Deleted!"
+                    f"Deleting test sample: {sample.__str__()}?",
+                    fg="red",
                 )
             )
+            store.delete(sample)
+            click.echo(click.style(f"Deleted!"))
             continue
 
         case = store.add_family(data_analysis=sample.data_analysis, panels=None, name=sample.name)
@@ -65,9 +63,7 @@ def add_data_analysis(config_file: click.File):
         store.commit()
 
     # pull data_analysis from sample to case
-    for case in models.Family.query.filter(
-            models.Family.data_analysis.is_(None)
-    ).all():
+    for case in models.Family.query.filter(models.Family.data_analysis.is_(None)).all():
 
         click.echo(click.style("processing case : " + case.__str__(), fg="white"))
 
@@ -76,9 +72,7 @@ def add_data_analysis(config_file: click.File):
             if analysis_obj.pipeline:
                 analysis_pipelines.add(analysis_obj.pipeline.lower())
 
-            if (
-                    len(analysis_pipelines) > 1
-            ):
+            if len(analysis_pipelines) > 1:
                 click.echo(
                     click.style(
                         f"Found case ({case.__str__()}) with multiple pipelines: {analysis_pipelines} ",
@@ -91,9 +85,7 @@ def add_data_analysis(config_file: click.File):
             if link_obj.sample.data_analysis:
                 data_analyses.add(link_obj.sample.data_analysis.lower())
 
-            if (
-                    len(data_analyses) > 1
-            ):
+            if len(data_analyses) > 1:
                 click.echo(
                     click.style(
                         f"Found case ({case.__str__()}) with multiple data_analyses: {data_analyses} ",
