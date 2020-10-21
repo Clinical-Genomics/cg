@@ -12,6 +12,10 @@ from cg.exc import (
 from cg.meta.store.base import gather_files_and_bundle_in_housekeeper
 from cg.store import Store
 
+from cg.constants import EXIT_SUCCESS, EXIT_FAIL
+
+import _io
+
 LOG = logging.getLogger(__name__)
 
 
@@ -55,4 +59,15 @@ def analysis(context, config_stream):
 @click.pass_context
 def completed(context):
     """Store all completed analyses."""
-    pass
+    microsalt_analysis_api = context.obj["analysis_api"]
+    exit_code = EXIT_SUCCESS
+    for deliverables_file in microsalt_analysis_api.get_deliverables_to_store():
+        try:
+            context.invoke(analysis, config_stream=_io.open(deliverables_file))
+        except click.Abort:
+            exit_code = EXIT_FAIL
+        except Exception as error:
+            LOG.error(f"Unspecified error occurred - {error}")
+            exit_code = EXIT_FAIL
+    if exit_code:
+        raise click.Abort()
