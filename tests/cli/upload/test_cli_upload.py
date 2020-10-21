@@ -19,7 +19,7 @@ def test_all_samples_list_analyses(analysis_store, case_id):
     family_obj = analysis_store.family(case_id)
 
     # WHEN looking up the analysis type for the samples in the family
-    analysis_types = LinkHelper.all_samples_list_analyses(family_obj.links)
+    analysis_types = LinkHelper.get_analysis_type_for_each_link(family_obj.links)
 
     # THEN all the samples should have analysis type 'wgs'
     assert len(set(analysis_types)) == 1 and analysis_types[0] == "wgs"
