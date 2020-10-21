@@ -172,7 +172,11 @@ def config_case(context: click.Context, case_id: str, panel_bed: str, dry_run: b
     if dry_run:
         print(config_data)
         return
-    out_path = dna_api.write_pedigree_config(config_data)
+    out_path = dna_api.write_pedigree_config(
+        data=config_data,
+        out_dir=dna_api.get_case_output_path(case_id),
+        pedigree_config_path=dna_api.get_pedigree_config_path(case_id),
+    )
     LOG.info(f"Config file saved to {out_path}")
 
 
@@ -226,7 +230,7 @@ def run(
     case_obj = dna_api.db.family(case_id)
     if not case_exists(case_obj, case_id):
         LOG.error(f"Case {case_id} does not exist!")
-        raise click.Abort()
+        raise click.Abort
 
     email = email or environ_email()
     kwargs = dict(
@@ -240,7 +244,7 @@ def run(
     )
 
     if dna_api.is_latest_analysis_ongoing(case_id=case_obj.internal_id):
-        LOG.warning("%s: analysis is ongoing - skipping", case_obj.internal_id)
+        LOG.warning(f"{case_obj.internal_id} : analysis is still ongoing - skipping")
         return
 
     if dna_api.get_skip_evaluation_flag(case_obj=case_obj):
@@ -253,7 +257,14 @@ def run(
         return
     try:
         dna_api.mark_analyses_deleted(case_id=case_id)
-        dna_api.add_pending_analysis(case_id=case_id, email=email)
+        dna_api.add_pending_analysis(
+            case_id=case_id,
+            email=email,
+            type=dna_api.get_application_type(case_id),
+            out_dir=dna_api.get_case_output_path(case_id),
+            config_path=dna_api.get_slurm_job_ids_path(case_id),
+            priority=dna_api.get_priority(case_id),
+        )
         dna_api.set_statusdb_action(case_id=case_id, action="running")
         LOG.info("MIP rd-dna run started!")
     except CgError as e:
@@ -272,7 +283,9 @@ def start(context: click.Context, dry_run: bool = False):
         if not dna_api.is_dna_only_case(case_obj):
             LOG.warning("%s: contains non-dna samples - skipping", case_obj.internal_id)
             continue
-        LOG.info("%s: start analysis", case_obj.internal_id)
+        LOG.info(
+            f"{case_obj.internal_id}: start analysis",
+        )
         has_started = dna_api.has_latest_analysis_started(case_id=case_obj.internal_id)
         if has_started:
             status = dna_api.get_latest_analysis_status(case_id=case_obj.internal_id)
@@ -290,10 +303,10 @@ def start(context: click.Context, dry_run: bool = False):
             LOG.error(error.message)
             exit_code = EXIT_FAIL
         except Exception as e:
-            LOG.error(f"Error occurred - {e}")
+            LOG.error(f"Error occurred for case {case_obj.internal_id} - {e}")
             exit_code = EXIT_FAIL
     if exit_code:
-        raise click.Abort()
+        raise click.Abort
 
 
 def _suggest_cases_to_analyze(context: click.Context, show_as_error: bool = False):

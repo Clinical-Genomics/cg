@@ -9,7 +9,7 @@ from google.auth import jwt
 from google.auth.crypt import RSASigner
 
 from cg.apps.tb.models import TrailblazerAnalysis
-from cg.exc import TrailblazerAPIHTTPError, TrailblazerMissingAnalysisError
+from cg.exc import TrailblazerAPIHTTPError
 
 LOG = logging.getLogger(__name__)
 
@@ -127,8 +127,23 @@ class TrailblazerAPI:
             if isinstance(response, dict):
                 return [TrailblazerAnalysis.parse_obj(response)]
 
-    def add_pending_analysis(self, case_id: str, email: str = None) -> TrailblazerAnalysis:
-        request_body = {"case_id": case_id, "email": email}
+    def add_pending_analysis(
+        self,
+        case_id: str,
+        type: str,
+        config_path: str,
+        out_dir: str,
+        priority: str,
+        email: str = None,
+    ) -> TrailblazerAnalysis:
+        request_body = {
+            "case_id": case_id,
+            "email": email,
+            "type": type,
+            "config_path": config_path,
+            "out_dir": out_dir,
+            "priority": priority,
+        }
         response = self.query_trailblazer(command="add-pending-analysis", request_body=request_body)
         if response:
             return TrailblazerAnalysis.parse_obj(response)

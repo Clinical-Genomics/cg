@@ -74,6 +74,9 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
             return "high"
         return "normal"
 
+    def get_pedigree_config_path(self, case_id: str) -> Path:
+        return Path(self.root, case_id, "pedigree.yaml")
+
     def pedigree_config(
         self, family_obj: models.Family, pipeline: str, panel_bed: str = None
     ) -> dict:
@@ -397,6 +400,19 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
             f"Action '{action}' not permitted by StatusDB and will not be set for case {case_id}"
         )
 
+    def get_application_type(self, case_id: str) -> str:
+        pedigree_config_dict = safe_load(open(self.get_pedigree_config_path(case_id=case_id)))
+        analysis_types = set(
+            [
+                sample.get("analysis_type")
+                for sample in pedigree_config_dict["samples"]
+                if sample.get("analysis_type")
+            ]
+        )
+        if len(analysis_types) == 1:
+            return analysis_types.pop()
+        return "wgs"
+
     def get_case_output_path(self, case_id: str) -> Path:
         return Path(self.root, case_id)
 
@@ -406,6 +422,9 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
     def get_analyses_to_clean(self, before: dt.datetime) -> list:
         analyses_to_clean = self.db.analyses_to_clean(pipeline="mip", before=before)
         return analyses_to_clean.all()
+
+    def get_slurm_job_ids_path(self, case_id: str) -> Path:
+        return Path(self.get_case_output_path(case_id=case_id), "analysis", "slurm_job_ids.yaml")
 
     # TrailblazerAPI inherited methods
     def is_latest_analysis_ongoing(self, case_id: str) -> bool:
