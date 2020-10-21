@@ -460,6 +460,6 @@ class BalsamicAnalysisAPI:
         cases_to_store = []
         for case_object in self.store.cases_to_store(pipeline="balsamic"):
             case_id = case_object.internal_id
-            if Path(self.get_deliverables_file_path(case_id=case_id)).exists():
+            if Path(self.get_analysis_finish_path(case_id=case_id)).exists():
                 cases_to_store.append(case_id)
         return cases_to_store

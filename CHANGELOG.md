@@ -13,6 +13,27 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [13.10.1]
+
+### Fixed
+- Repaired automation query for storing Balsamic cases in Housekeeper 
+
+## [13.10]
+
+### Added
+- Functionality to deploy `genotype` with CG on hasta
+
+## [13.9]
+
+### Added
+- Deployment command
+- Functionality to deploy `shipping` with CG
+
+
+## [13.8.0]
+### Added
+- Functionality to change multiple families in one go, e.g. cg set families --sample-identifier ticket_number 123456 --priority research
+
 ## [13.7.0]
 ### Fixed
 - Set flowcell status to `ondisk` when retrieving archived flowcell from PDC has finished.

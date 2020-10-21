@@ -17,13 +17,14 @@ from .export import export
 from .get import get
 from .import_cmd import import_cmd
 from .reset import reset_cmd
-from .set import set_cmd
+from cg.cli.set.base import set_cmd
 from .status import status
 from .store import store as store_cmd
 from .transfer import transfer
 from .upload import vogue as vogue_command
 from .upload.base import upload
 from .workflow.base import workflow as workflow_cmd
+from .deploy.base import deploy as deploy_cmd
 
 LOG = logging.getLogger(__name__)
 LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR"]
@@ -82,4 +83,6 @@ base.add_command(transfer)
 base.add_command(upload)
 base.add_command(workflow_cmd)
 base.add_command(store_cmd)
+base.add_command(deploy_cmd)
+
 upload.add_command(vogue_command)
