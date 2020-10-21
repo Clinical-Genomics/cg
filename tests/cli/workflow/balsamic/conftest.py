@@ -405,7 +405,7 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
         application_tag="TGSA",
         application_type="tgs",
         reads=10,
-        data_analysis="MIP+BALSAMIC",
+        data_analysis="BALSAMIC",
     )
     sample_case_tgs_paired_normal = helpers.add_sample(
         _store,
