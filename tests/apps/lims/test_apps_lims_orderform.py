@@ -290,65 +290,6 @@ def test_parsing_balsamic_orderform(balsamic_orderform):
     assert sample["comment"] == "other Elution buffer"
 
 
-def test_parsing_mip_balsamic_orderform(mip_balsamic_orderform):
-
-    # GIVEN an order form for a mip balsamic order with 4 samples, 1 trio, in a plate
-    # WHEN parsing the order form
-    data = orderform.parse_orderform(mip_balsamic_orderform)
-
-    # THEN it should detect the type of project
-    assert data["project_type"] == "mip_balsamic"
-    assert data["customer"] == "cust000"
-    # ... and it should find and group all samples in families
-    assert len(data["items"]) == 36
-    # ... and collect relevant data about the families
-    trio_family = data["items"][0]
-    assert len(trio_family["samples"]) == 3
-    assert trio_family["name"] == "family"
-    assert trio_family["priority"] == "research"
-    assert set(trio_family["panels"]) == set(["AD-HSP", "Ataxi", "ATX"])
-    assert trio_family["require_qcok"] is True
-    # ... and collect relevant info about the samples
-
-    proband_sample = trio_family["samples"][0]
-    assert proband_sample["name"] == "s1"
-    assert proband_sample["container"] == "96 well plate"
-    assert proband_sample["data_analysis"] == "MIP + Balsamic"
-    assert proband_sample["application"] == "WGSPCFC030"
-    assert proband_sample["sex"] == "male"
-    # family-id on the family
-    # customer on the order (data)
-    # require-qc-ok on the family
-    assert proband_sample["source"] == "other"
-
-    assert proband_sample["container_name"] == "plate"
-    assert proband_sample["well_position"] == "A:1"
-
-    # This information is required for panel- or exome analysis
-    assert proband_sample["elution_buffer"] == 'Other (specify in "Comments")'
-
-    # panels on the family
-    assert proband_sample["status"] == "affected"
-
-    assert proband_sample["mother"] == "s2"
-    assert proband_sample["father"] == "s3"
-
-    # This information is required for Balsamic analysis (cancer)
-    assert proband_sample["tumour"] is True
-    assert proband_sample["capture_kit"] == "LymphoMATIC"
-    assert proband_sample["tumour_purity"] == "5.0"
-
-    assert proband_sample["formalin_fixation_time"] == "1.0"
-    assert proband_sample["post_formalin_fixation_time"] == "2.0"
-    assert proband_sample["tissue_block_size"] == "small"
-
-    assert proband_sample["quantity"] == "1"
-    assert proband_sample["comment"] == "other Elution buffer"
-
-    mother_sample = trio_family["samples"][1]
-    assert mother_sample.get("mother") is None
-
-
 def test_parsing_mip_rna_orderform(mip_rna_orderform):
 
     # GIVEN an order form for a mip balsamic order with 3 samples, 1 trio, in a plate
@@ -437,16 +378,3 @@ def test_parse_balsamic_only(skeleton_orderform_sample: dict):
     # THEN data_analysis is balsamic only
     assert parsed_sample["analysis"] == "balsamic"
 
-
-def test_parse_mip_combined_with_balsamic(skeleton_orderform_sample: dict):
-
-    # GIVEN a raw sample with both mip and balsamic value from orderform 1508 for
-    # data_analysis
-    raw_sample = skeleton_orderform_sample
-    raw_sample["UDF/Data Analysis"] = "MIP + Balsamic"
-
-    # WHEN parsing the sample
-    parsed_sample = orderform.parse_sample(raw_sample)
-
-    # THEN data_analysis is both mip and balsamic
-    assert parsed_sample["analysis"] == "mip_balsamic"

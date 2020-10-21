@@ -172,10 +172,6 @@ class OrdersAPI(LimsHandler, StatusHandler):
         """Submit a batch of samples for sequencing and balsamic analysis."""
         return self.submit_case_samples(data)
 
-    def submit_mip_balsamic(self, data: dict) -> dict:
-        """Submit a batch of samples for sequencing and analysis."""
-        return self.submit_case_samples(data)
-
     def submit_mip_rna(self, data: dict) -> dict:
         """Submit a batch of samples for sequencing and analysis."""
         return self.submit_case_samples(data)
@@ -292,7 +288,6 @@ class OrdersAPI(LimsHandler, StatusHandler):
                     OrderType.MIP,
                     OrderType.EXTERNAL,
                     OrderType.BALSAMIC,
-                    OrderType.MIP_BALSAMIC,
                     OrderType.MIP_RNA,
                 ):
                     raise OrderError(
