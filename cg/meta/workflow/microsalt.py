@@ -31,7 +31,7 @@ class MicrosaltAnalysisAPI:
         hk_api: hk.HousekeeperAPI,
         lims_api: lims.LimsAPI,
         fastq_handler: FastqHandler,
-        config: dict = None
+        config: dict = None,
     ):
         self.db = db
         self.hk = hk_api
@@ -117,8 +117,7 @@ class MicrosaltAnalysisAPI:
         for sample_obj in sample_objs:
             LOG.info("%s: link FASTQ files", sample_obj.internal_id)
             self.link_sample(
-                ticket=ticket,
-                sample=sample_obj.internal_id,
+                ticket=ticket, sample=sample_obj.internal_id,
             )
 
     def link_sample(self, sample: str, ticket: int) -> None:
@@ -265,9 +264,5 @@ class MicrosaltAnalysisAPI:
     def get_deliverables_file_path(self, order_id: str) -> str:
         """Returns a path where the microSALT deliverables file for the order_id should be
         located."""
-        deliverables_file_path = Path(
-            self.root_dir,
-            "meta",
-            order_id + "_deliverables.yaml",
-            )
+        deliverables_file_path = Path(self.root_dir, "meta", order_id + "_deliverables.yaml",)
         return deliverables_file_path.as_posix()
