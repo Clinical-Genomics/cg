@@ -315,28 +315,28 @@ class StatusHandler(BaseHandler):
                 [
                     link.sample.received_at
                     for link in case_obj.links
-                    if link.sample.received_at is not None
+                    if link.sample.received_at
                 ]
             )
             case_data.samples_prepared = len(
                 [
                     link.sample.prepared_at
                     for link in case_obj.links
-                    if link.sample.prepared_at is not None
+                    if link.sample.prepared_at
                 ]
             )
             case_data.samples_sequenced = len(
                 [
                     link.sample.sequenced_at
                     for link in case_obj.links
-                    if link.sample.sequenced_at is not None
+                    if link.sample.sequenced_at
                 ]
             )
             case_data.samples_delivered = len(
                 [
                     link.sample.delivered_at
                     for link in case_obj.links
-                    if link.sample.delivered_at is not None
+                    if link.sample.delivered_at
                 ]
             )
             case_data.samples_invoiced = len(
