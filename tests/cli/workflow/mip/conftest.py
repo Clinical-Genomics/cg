@@ -28,7 +28,7 @@ def mock_root_folder():
 
 
 @pytest.fixture(name="mip_case_ids")
-def mip_case_ids() -> dict:
+def fixture_mip_case_ids() -> dict:
     """Dictionary of case ids, connected samples, their name and if they should fail (textbook or not)"""
 
     case_ids = {
