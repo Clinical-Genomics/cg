@@ -3,15 +3,24 @@ from cg.store import Store, models
 from ruamel import yaml
 
 
-def contains_only_one_pipeline(pipelines: str) -> bool:
-    return "+" not in pipelines and " and " not in pipelines
+def contains_both_balsamic_and_mip(pipelines: str) -> bool:
+    return "mip" in pipelines and "balsamic" in pipelines
 
 
 def copy_case(case: models.Family, store: Store) -> models.Family:
+
+    new_case_name = f"{case.name}-copy"
+    i = 2
+    while store.find_family(case.customer, new_case_name):
+        new_case_name = f"{case.name}-copy-{i}"
+        i += 1
+
     new_case = store.add_family(
-        data_analysis=case.data_analysis, name=case.name, panels=case.panels
+        data_analysis=case.data_analysis, name=new_case_name, panels=case.panels
     )
-    for attr in ["action", "comment", "customer_id", "data_analysis", "ordered_at", "priority"]:
+
+    new_case.comment = "created by data_analysis migration"
+    for attr in ["action", "customer_id", "data_analysis", "ordered_at", "priority"]:
         new_case.__setattr__(attr, case.__getattribute__(attr))
 
     for link_obj in case.links:
@@ -30,10 +39,13 @@ def ensure_one_case_per_pipeline(
     original_case: models.Family, pipelines_in_one: str, store: Store
 ) -> [models.Family]:
 
+    pipeline_map = {"rna": "MIP + RNA", "mip": "MIP", "balsamic": "Balsamic"}
+
     cases: [models.Family] = [original_case]
+    original_case_name: str = original_case.name
 
     pipelines = set()
-    for pipeline in ["mip", "balsamic", "rna"]:
+    for pipeline in pipeline_map.keys():
         if pipeline in pipelines_in_one:
             pipelines.add(pipeline)
 
@@ -42,8 +54,9 @@ def ensure_one_case_per_pipeline(
         cases.append(new_case)
 
     for case in cases:
-        case.data_analysis = pipelines.pop()
-        case.name = f"{case.name}-{case.data_analysis}"
+        pipeline = pipelines.pop()
+        case.data_analysis = pipeline_map.get(pipeline)
+        case.name = f"{original_case_name}-{pipeline}"
 
     return cases
 
@@ -110,11 +123,13 @@ def add_data_analysis(config_file: click.File):
 
     # pull data_analysis from sample to case
     for case in models.Family.query.filter(models.Family.data_analysis.is_(None)).all():
-
         click.echo(click.style("processing case : " + case.__str__(), fg="white"))
 
-        skip_case = False
+        if case.data_analysis:
+            continue
+
         analysis_pipelines = set()
+        analysis_pipelines.clear()
         for analysis_obj in case.analyses:
 
             if not analysis_obj.pipeline:
@@ -129,22 +144,21 @@ def add_data_analysis(config_file: click.File):
                         f"Found analysis ({analysis_obj.__str__()}) with multiple pipelines on "
                         f"one analysis: "
                         f"{pipeline} ",
-                        fg="red",
+                        fg="yellow",
                     )
                 )
-                skip_case = True
 
             if len(analysis_pipelines) > 1:
                 click.echo(
                     click.style(
                         f"Found case ({case.__str__()}) with multiple analysis pipelines: "
                         f"{analysis_pipelines} ",
-                        fg="red",
+                        fg="yellow",
                     )
                 )
-                skip_case = True
 
         data_analyses = set()
+        data_analyses.clear()
         for link_obj in case.links:
 
             if not link_obj.sample.data_analysis:
@@ -159,10 +173,9 @@ def add_data_analysis(config_file: click.File):
                         f"Found sample ({link_obj.sample.__str__()}) with multiple data_analyses "
                         f"on same sample: "
                         f"{data_analysis} ",
-                        fg="red",
+                        fg="yellow",
                     )
                 )
-                skip_case = True
 
             if len(data_analyses) > 1:
                 click.echo(
@@ -170,49 +183,38 @@ def add_data_analysis(config_file: click.File):
                         f"Found case ({case.__str__()}) with multiple "
                         f"different sample.data_analysis: "
                         f"{data_analyses} ",
-                        fg="red",
+                        fg="yellow",
                     )
                 )
-                skip_case = True
 
         cases_processed = [case]
         if analysis_pipelines and len(analysis_pipelines) == 1:
             analysis_pipeline = analysis_pipelines.pop()
-            if contains_only_one_pipeline(analysis_pipeline):
+            if not contains_both_balsamic_and_mip(analysis_pipeline):
                 case.data_analysis = analysis_pipeline
             else:
                 cases_processed = ensure_one_case_per_pipeline(case, analysis_pipeline, store)
         elif data_analyses and len(data_analyses) == 1:
             data_analysis = data_analyses.pop()
-            if contains_only_one_pipeline(data_analysis):
+            if not contains_both_balsamic_and_mip(data_analysis):
                 case.data_analysis = data_analysis
             else:
                 cases_processed = ensure_one_case_per_pipeline(case, data_analysis, store)
         elif (analysis_pipelines and len(analysis_pipelines) > 1) or (
             data_analyses and len(data_analyses) > 1
         ):
-            click.echo(
-                click.style(
-                    f"Found unsupported case ({case.__str__()}) with multiple "
-                    f"different data_analysis: "
-                    f"{str(data_analyses)} and/or pipelines: {str(analysis_pipelines)}",
-                    fg="red",
-                )
-            )
-            if skip_case:
-                continue
+            pipelines = " ".join(data_analyses) + " ".join(analysis_pipelines)
+            cases_processed = ensure_one_case_per_pipeline(case, pipelines, store)
 
         for link_obj in case.links:
-            link_obj.sample.data_analysis = None
             click.echo(
                 click.style(
-                    "Set data_analysis on: "
-                    + link_obj.sample.__str__()
-                    + " to: "
-                    + str(link_obj.sample.data_analysis),
+                    f"Set data_analysis on: {link_obj.sample.__str__()} from: "
+                    f"{str(link_obj.sample.data_analysis)} to: None",
                     fg="green",
                 )
             )
+            link_obj.sample.data_analysis = None
 
         for case_processed in cases_processed:
             if not case_processed.data_analysis:
