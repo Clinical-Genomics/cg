@@ -37,7 +37,7 @@ class MicrosaltAnalysisAPI:
         self.hk = hk_api
         self.lims = lims_api
         self.fastq_handler = fastq_handler
-        self.root_dir = config["microsalt"]["root"] if config is not None else None
+        self.root_dir = config.get("root") if config else None
 
     def has_flowcells_on_disk(self, ticket: int) -> bool:
         """Check stuff before starting the analysis."""
