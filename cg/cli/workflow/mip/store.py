@@ -88,4 +88,4 @@ def completed(context):
                 LOG.error("case storage failed: %s", analysis_obj.family, exc_info=True)
                 exit_code = EXIT_FAIL
     if exit_code:
-        raise click.Abort()
+        raise click.Abort
