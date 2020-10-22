@@ -1,4 +1,4 @@
-""" MIP specific functionality for storing files in Houskeeper """
+""" MIP specific functionality for storing files in Housekeeper """
 import logging
 from pathlib import Path
 import ruamel.yaml
