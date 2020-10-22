@@ -312,32 +312,16 @@ class StatusHandler(BaseHandler):
         case_data.case_external_bool = case_data.total_external_samples == case_data.total_samples
         if case_data.total_samples > 0:
             case_data.samples_received = len(
-                [
-                    link.sample.received_at
-                    for link in case_obj.links
-                    if link.sample.received_at
-                ]
+                [link.sample.received_at for link in case_obj.links if link.sample.received_at]
             )
             case_data.samples_prepared = len(
-                [
-                    link.sample.prepared_at
-                    for link in case_obj.links
-                    if link.sample.prepared_at
-                ]
+                [link.sample.prepared_at for link in case_obj.links if link.sample.prepared_at]
             )
             case_data.samples_sequenced = len(
-                [
-                    link.sample.sequenced_at
-                    for link in case_obj.links
-                    if link.sample.sequenced_at
-                ]
+                [link.sample.sequenced_at for link in case_obj.links if link.sample.sequenced_at]
             )
             case_data.samples_delivered = len(
-                [
-                    link.sample.delivered_at
-                    for link in case_obj.links
-                    if link.sample.delivered_at
-                ]
+                [link.sample.delivered_at for link in case_obj.links if link.sample.delivered_at]
             )
             case_data.samples_invoiced = len(
                 [

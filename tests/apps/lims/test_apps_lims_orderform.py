@@ -377,4 +377,3 @@ def test_parse_balsamic_only(skeleton_orderform_sample: dict):
 
     # THEN data_analysis is balsamic only
     assert parsed_sample["analysis"] == "balsamic"
-
