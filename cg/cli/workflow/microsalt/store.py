@@ -70,4 +70,4 @@ def completed(context):
             LOG.error(f"Unspecified error occurred - {error}")
             exit_code = EXIT_FAIL
     if exit_code:
-        raise click.Abort()
+        raise click.Abort
