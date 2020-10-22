@@ -16,7 +16,9 @@ snapshots["test_parse_sampleinfo_rna_result_contents 1"] = {
     "multiqc_html": "/path/to/stuff/rare-disease/cases/case_id/analysis/files/multiqc_report.html",
     "multiqc_json": "/path/to/stuff/rare-disease/cases/case_id/analysis/files/multiqc_data.json",
     "pedigree_path": "/path/to/stuff/rare-disease/cases/case_id/analysis/files/case_id.fam",
-    "qcmetrics_path": "/path/to/stuff/rare-disease/cases/case_id/analysis/files/qcmetrics_file.stub",
+    "qcmetrics_path": (
+        "/path/to/stuff/rare-disease/cases/case_id/analysis/files/qcmetrics_file.stub"
+    ),
     "samples": [
         {
             "bam": "/path/to/stuff/rare-disease/cases/case_id/analysis/files/sample_id_1_lanes_1234_trim_star_sorted_merged_md_splitncigar_brecal.bam",
@@ -46,5 +48,7 @@ snapshots["test_parse_sampleinfo_rna_result_contents 1"] = {
     ],
     "vep_path": "/path/to/stuff/rare-disease/cases/case_id/analysis/files/case_id_comb_vep.vcf",
     "version": "v7.1.4",
-    "version_collect_ar_path": "/path/to/stuff/rare-disease/cases/case_id/analysis/files/case_id_vcol.yaml",
+    "version_collect_ar_path": (
+        "/path/to/stuff/rare-disease/cases/case_id/analysis/files/case_id_vcol.yaml"
+    ),
 }
