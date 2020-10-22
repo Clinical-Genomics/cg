@@ -32,21 +32,9 @@ def fixture_mip_case_ids() -> dict:
     """Dictionary of case ids, connected samples, their name and if they should fail (textbook or not)"""
 
     case_ids = {
-        "yellowhog": {
-            "textbook": True,
-            "name": "F0000001",
-            "internal_id": "ACC00000",
-        },
-        "purplesnail": {
-            "textbook": False,
-            "name": "F0000003",
-            "internal_id": "ACC00000",
-        },
-        "bluezebra": {
-            "textbook": True,
-            "name": "F0000002",
-            "internal_id": "ACC00000",
-        },
+        "yellowhog": {"textbook": True, "name": "F0000001", "internal_id": "ACC00000",},
+        "purplesnail": {"textbook": False, "name": "F0000003", "internal_id": "ACC00000",},
+        "bluezebra": {"textbook": True, "name": "F0000002", "internal_id": "ACC00000",},
     }
 
     return case_ids
@@ -67,10 +55,8 @@ def fixture_mip_case_dirs(mip_case_ids: dict, project_dir: Path) -> dict:
 
 
 @pytest.fixture(name="mip_deliverables")
-def make_mip_deliverables(
-    mip_case_ids: dict,
-    mip_case_dirs: dict,
-    mip_deliverables_file: Path,
+def fixture_mip_deliverables(
+    mip_case_ids: dict, mip_case_dirs: dict, mip_deliverables_file: Path,
 ) -> dict:
     """Create deliverables for mip store testing"""
 
@@ -111,7 +97,7 @@ def make_mip_deliverables(
 
 
 @pytest.fixture(name="mip_qc_sample_info")
-def make_mip_sample_infos(mip_case_ids: dict, mip_case_dirs: dict) -> dict:
+def fixture_mip_qc_sample_info(mip_case_ids: dict, mip_case_dirs: dict) -> dict:
     """Create qc sample info files for cases"""
 
     yaml = YAML()
@@ -138,7 +124,7 @@ def make_mip_sample_infos(mip_case_ids: dict, mip_case_dirs: dict) -> dict:
 
 
 @pytest.fixture(name="mip_configs")
-def make_mip_configs(
+def fixture_mip_configs(
     mip_case_ids: dict, mip_case_dirs: dict, mip_deliverables: dict, mip_qc_sample_info: dict
 ) -> dict:
     """Create config files for mip case"""
@@ -172,7 +158,7 @@ def make_mip_configs(
 
 
 @pytest.fixture(name="_store")
-def populated_store(base_store: Store, mip_case_ids: dict, helpers) -> Store:
+def fixture_store(base_store: Store, mip_case_ids: dict, helpers) -> Store:
     """Create and populate temporary db with test cases for mip"""
 
     _store = base_store
@@ -185,9 +171,7 @@ def populated_store(base_store: Store, mip_case_ids: dict, helpers) -> Store:
 
     for case in mip_case_ids:
         family = helpers.add_family(
-            store=_store,
-            internal_id=case,
-            family_id=mip_case_ids[case]["name"],
+            store=_store, internal_id=case, family_id=mip_case_ids[case]["name"],
         )
         sample = helpers.add_sample(
             store=_store,
@@ -204,7 +188,7 @@ def populated_store(base_store: Store, mip_case_ids: dict, helpers) -> Store:
 
 
 @pytest.fixture(name="empty_housekeeper_api")
-def populate_mip_housekeeper(real_housekeeper_api: HousekeeperAPI) -> HousekeeperAPI:
+def fixture_empty_housekeeper_api(real_housekeeper_api: HousekeeperAPI) -> HousekeeperAPI:
     """Empty housekeeper for testing store in mip workflow"""
 
     _housekeeper_api = real_housekeeper_api
@@ -212,8 +196,8 @@ def populate_mip_housekeeper(real_housekeeper_api: HousekeeperAPI) -> Housekeepe
     return _housekeeper_api
 
 
-@pytest.fixture(name="_tb_api")
-def populated_tb(
+@pytest.fixture(name="populated_mip_tb_api")
+def fixture_populated_mip_tb_api(
     trailblazer_api: TrailblazerAPI, mip_case_ids: dict, mip_configs: dict
 ) -> TrailblazerAPI:
     """Trailblazer api filled with mip cases"""
@@ -276,7 +260,7 @@ def mip_context(analysis_store_single_case, tb_api, housekeeper_api, mip_lims, m
 
 @pytest.fixture(name="mip_store_context")
 def mip_store_context(
-    _tb_api: TrailblazerAPI, _store: Store, empty_housekeeper_api: HousekeeperAPI
+    populated_mip_tb_api: TrailblazerAPI, _store: Store, empty_housekeeper_api: HousekeeperAPI
 ) -> dict:
     """Create a context to be used in testing mip store, this should be fused with mip_context above at later stages"""
-    return {"tb_api": _tb_api, "hk_api": empty_housekeeper_api, "db": _store}
+    return {"tb_api": populated_mip_tb_api, "hk_api": empty_housekeeper_api, "db": _store}
