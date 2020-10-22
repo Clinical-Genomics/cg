@@ -59,7 +59,6 @@ def analysis(context, config_stream):
         click.echo(click.style(error.message, fg="red"))
         exit_code = EXIT_FAIL
     except FileNotFoundError as error:
-        print(error)
         click.echo(click.style(f"missing file: {error.args[0]}", fg="red"))
         exit_code = EXIT_FAIL
     if exit_code:
