@@ -472,8 +472,8 @@ def test_store_metagenome_samples(orders_api, base_store, metagenome_status_data
         samples=metagenome_status_data["samples"],
     )
 
-    # THEN it should store the samples
-    assert base_store.samples().first().name == "Trefyrasex"
+    # THEN it should have stored the samples
+    assert base_store.samples().count() > 0
 
 
 def test_store_metagenome_samples_bad_apptag(orders_api, base_store, metagenome_status_data):
