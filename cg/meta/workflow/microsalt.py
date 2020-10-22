@@ -264,7 +264,7 @@ class MicrosaltAnalysisAPI:
 
     def get_deliverables_file_path(self, order_id: str) -> str:
         """Returns a path where the microSALT deliverables file for the order_id should be
-        located."""
+        located"""
         deliverables_file_path = Path(
             self.root_dir,
             "meta",
