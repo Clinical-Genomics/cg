@@ -23,6 +23,9 @@ Try to use the following format:
 ### Added
 - Functionality to deploy `genotype` with CG on hasta
 
+### Fixed
+- Stored completed not parsing through all completed entries
+
 ## [13.9]
 
 ### Added
