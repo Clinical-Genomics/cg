@@ -15,7 +15,7 @@ VALID_DATA_IN_PRODUCTION = get_date("2017-09-27")
 class StatusHandler(BaseHandler):
     """Handles status states for entities in the database"""
 
-    def samples_to_recieve(self, external=False):
+    def samples_to_receive(self, external=False):
         """Fetch incoming samples."""
         records = (
             self.Sample.query.join(
