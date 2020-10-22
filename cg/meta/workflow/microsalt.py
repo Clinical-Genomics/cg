@@ -263,7 +263,7 @@ class MicrosaltAnalysisAPI:
             deliverables_to_store.append(deliverables_file)
         return deliverables_to_store
 
-    def get_deliverables_file_path(self, order_id: str) -> str:
+    def get_deliverables_file_path(self, order_id: str) -> Path:
         """Returns a path where the microSALT deliverables file for the order_id should be
         located"""
         deliverables_file_path = Path(
@@ -271,4 +271,4 @@ class MicrosaltAnalysisAPI:
             "meta",
             order_id + "_deliverables.yaml",
         )
-        return deliverables_file_path.as_posix()
+        return deliverables_file_path
