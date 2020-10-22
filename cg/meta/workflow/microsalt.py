@@ -258,8 +258,9 @@ class MicrosaltAnalysisAPI:
         deliverables_to_store = []
         for case_object in self.db.cases_to_store(pipeline="microbial"):
             deliverables_file = self.get_deliverables_file_path(order_id=case_object.name)
-            if Path(deliverables_file).exists():
-                deliverables_to_store.append(deliverables_file)
+            if not Path(deliverables_file).exists():
+                continue
+            deliverables_to_store.append(deliverables_file)
         return deliverables_to_store
 
     def get_deliverables_file_path(self, order_id: str) -> str:
