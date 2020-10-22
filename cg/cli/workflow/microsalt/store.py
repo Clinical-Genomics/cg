@@ -67,7 +67,7 @@ def completed(context):
         except click.Abort:
             exit_code = EXIT_FAIL
         except Exception as error:
-            LOG.error(f"Unspecified error occurred - {error}")
+            LOG.error("Unspecified error occurred - %s", error)
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort
