@@ -261,9 +261,10 @@ def run(
             case_id=case_id,
             email=email,
             type=dna_api.get_application_type(case_id),
-            out_dir=dna_api.get_case_output_path(case_id),
-            config_path=dna_api.get_slurm_job_ids_path(case_id),
+            out_dir=dna_api.get_case_output_path(case_id).as_posix(),
+            config_path=dna_api.get_slurm_job_ids_path(case_id).as_posix(),
             priority=dna_api.get_priority(case_id),
+            data_analysis="MIP-DNA",
         )
         dna_api.set_statusdb_action(case_id=case_id, action="running")
         LOG.info("MIP rd-dna run started!")

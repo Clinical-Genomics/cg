@@ -436,8 +436,25 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
     def mark_analyses_deleted(self, case_id: str) -> list:
         return self.tb.mark_analyses_deleted(case_id=case_id)
 
-    def add_pending_analysis(self, case_id: str, email: str) -> TrailblazerAnalysis:
-        return self.tb.add_pending_analysis(case_id=case_id, email=email)
+    def add_pending_analysis(
+        self,
+        case_id: str,
+        email: str,
+        type: str,
+        out_dir: str,
+        config_path: str,
+        priority: str,
+        data_analysis: str,
+    ) -> TrailblazerAnalysis:
+        return self.tb.add_pending_analysis(
+            case_id=case_id,
+            email=email,
+            type=type,
+            out_dir=out_dir,
+            config_path=config_path,
+            priority=priority,
+            data_analysis=data_analysis,
+        )
 
     def get_latest_analysis_status(self, case_id: str) -> str:
         return self.tb.get_latest_analysis_status(case_id=case_id)

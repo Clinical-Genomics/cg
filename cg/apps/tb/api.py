@@ -135,6 +135,7 @@ class TrailblazerAPI:
         out_dir: str,
         priority: str,
         email: str = None,
+        data_analysis: str = None,
     ) -> TrailblazerAnalysis:
         request_body = {
             "case_id": case_id,
@@ -143,6 +144,7 @@ class TrailblazerAPI:
             "config_path": config_path,
             "out_dir": out_dir,
             "priority": priority,
+            "data_analysis": data_analysis,
         }
         response = self.query_trailblazer(command="add-pending-analysis", request_body=request_body)
         if response:
