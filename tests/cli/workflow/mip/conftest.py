@@ -32,9 +32,21 @@ def fixture_mip_case_ids() -> dict:
     """Dictionary of case ids, connected samples, their name and if they should fail (textbook or not)"""
 
     case_ids = {
-        "yellowhog": {"textbook": True, "name": "F0000001", "internal_id": "ACC00000",},
-        "purplesnail": {"textbook": False, "name": "F0000003", "internal_id": "ACC00000",},
-        "bluezebra": {"textbook": True, "name": "F0000002", "internal_id": "ACC00000",},
+        "yellowhog": {
+            "textbook": True,
+            "name": "F0000001",
+            "internal_id": "ACC00000",
+        },
+        "purplesnail": {
+            "textbook": False,
+            "name": "F0000003",
+            "internal_id": "ACC00000",
+        },
+        "bluezebra": {
+            "textbook": True,
+            "name": "F0000002",
+            "internal_id": "ACC00000",
+        },
     }
 
     return case_ids
@@ -56,7 +68,9 @@ def fixture_mip_case_dirs(mip_case_ids: dict, project_dir: Path) -> dict:
 
 @pytest.fixture(name="mip_deliverables")
 def fixture_mip_deliverables(
-    mip_case_ids: dict, mip_case_dirs: dict, mip_deliverables_file: Path,
+    mip_case_ids: dict,
+    mip_case_dirs: dict,
+    mip_deliverables_file: Path,
 ) -> dict:
     """Create deliverables for mip store testing"""
 
@@ -171,7 +185,9 @@ def fixture_store(base_store: Store, mip_case_ids: dict, helpers) -> Store:
 
     for case in mip_case_ids:
         family = helpers.add_family(
-            store=_store, internal_id=case, family_id=mip_case_ids[case]["name"],
+            store=_store,
+            internal_id=case,
+            family_id=mip_case_ids[case]["name"],
         )
         sample = helpers.add_sample(
             store=_store,
