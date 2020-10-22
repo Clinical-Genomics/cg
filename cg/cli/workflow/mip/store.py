@@ -62,7 +62,7 @@ def analysis(context, config_stream):
         click.echo(click.style(f"missing file: {error.args[0]}", fg="red"))
         exit_code = EXIT_FAIL
     if exit_code:
-        raise click.Abort()
+        raise click.Abort
     status.add_commit(new_analysis)
     click.echo(click.style("included files in Housekeeper", fg="green"))
 
