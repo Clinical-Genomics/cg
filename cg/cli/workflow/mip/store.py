@@ -40,7 +40,7 @@ def analysis(context, config_stream):
     exit_code = EXIT_SUCCESS
     if not config_stream:
         LOG.error("Provide a config file.")
-        raise click.Abort()
+        raise click.Abort
 
     try:
         new_analysis = gather_files_and_bundle_in_housekeeper(
