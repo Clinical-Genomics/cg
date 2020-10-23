@@ -89,15 +89,13 @@ def pull_data_analysis_from_sample_to_case(store):
                 case.data_analysis = analysis_pipeline
             else:
                 cases_processed = ensure_one_case_per_pipeline(case, analysis_pipeline, store)
-
-        if data_analyses and len(data_analyses) == 1:
+        elif data_analyses and len(data_analyses) == 1:
             data_analysis = data_analyses.pop()
             if not contains_both_balsamic_and_mip(data_analysis):
                 case.data_analysis = data_analysis
             else:
                 cases_processed = ensure_one_case_per_pipeline(case, data_analysis, store)
-
-        if (analysis_pipelines and len(analysis_pipelines) > 1) or (
+        elif (analysis_pipelines and len(analysis_pipelines) > 1) or (
             data_analyses and len(data_analyses) > 1
         ):
             pipelines = " ".join(data_analyses) + " ".join(analysis_pipelines)
