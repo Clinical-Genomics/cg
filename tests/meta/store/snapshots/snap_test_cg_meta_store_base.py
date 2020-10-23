@@ -192,24 +192,6 @@ snapshots["test_parse_files_dna 1"] = [
     },
     {
         "archive": False,
-        "deliverables_tag_map": ("peddy_ar", "peddy"),
-        "path": "/path/to/rare-disease/cases/case_id/analysis/case_id/peddy_ar/case_id_gatkcomb.peddy.ped",
-        "tags": ["case_id", "mip-dna", "ped", "peddy"],
-    },
-    {
-        "archive": False,
-        "deliverables_tag_map": ("peddy_ar", "sex_check"),
-        "path": "/path/to/rare-disease/cases/case_id/analysis/case_id/peddy_ar/case_id_gatkcomb.sex_check.csv",
-        "tags": ["case_id", "mip-dna", "peddy", "sex-check"],
-    },
-    {
-        "archive": False,
-        "deliverables_tag_map": ("peddy_ar", "ped_check"),
-        "path": "/path/to/rare-disease/cases/case_id/analysis/case_id/peddy_ar/case_id_gatkcomb.ped_check.csv",
-        "tags": ["case_id", "mip-dna", "ped-check", "peddy"],
-    },
-    {
-        "archive": False,
         "deliverables_tag_map": ("sambamba_depth", "coverage"),
         "path": "/path/to/rare-disease/cases/case_id/analysis/sample_id/sambamba_depth/sample_id_lanes_5555_sorted_md_brecal_coverage.bed",
         "tags": ["coverage", "mip-dna", "sambamba-depth", "sample_id"],
@@ -663,6 +645,48 @@ snapshots["test_parse_files_dna 1"] = [
         "deliverables_tag_map": ("upd_ar", "regions"),
         "path": "/path/to/rare-disease/cases/case_id/analysis/sample_id/upd_ar/sample_id_gatkcomb_rhocall_vt_af_upd.regions.bb",
         "tags": ["mip-dna", "regions", "sample_id", "upd"],
+    },
+    {
+        "archive": False,
+        "deliverables_tag_map": ("mip_analyse", "log"),
+        "path": "/home/proj/production/rare-disease/cases/flyingsnipe/analysis/mip_log/YYYY-MM-DD/mip_YYYY-MM-DDTHH:MM:SS.log",
+        "tags": ["case_id", "mip-dna", "mip-log"],
+    },
+    {
+        "archive": False,
+        "deliverables_tag_map": ("mip_analyse", "pedigree"),
+        "path": "/path/to/rare-disease/cases/case_id/pedigree.yaml",
+        "tags": ["case_id", "mip-dna", "pedigree-yaml"],
+    },
+    {
+        "archive": False,
+        "deliverables_tag_map": ("mip_analyse", "config"),
+        "path": "/path/to/mip/config/mip_version-dna.yaml",
+        "tags": ["case_id", "config", "mip-analyse", "mip-dna"],
+    },
+    {
+        "archive": False,
+        "deliverables_tag_map": ("mip_analyse", "pedigree_fam"),
+        "path": "/path/to/rare-disease/cases/case_id/analysis/case_id/case_id.fam",
+        "tags": ["case_id", "mip-dna", "pedigree"],
+    },
+    {
+        "archive": False,
+        "deliverables_tag_map": ("mip_analyse", "references_info"),
+        "path": "/path/to/rare-disease/cases/case_id/analysis/reference_info.yaml",
+        "tags": ["case_id", "mip-analyse", "mip-dna", "reference-info"],
+    },
+    {
+        "archive": False,
+        "deliverables_tag_map": ("mip_analyse", "sample_info"),
+        "path": "/path/to/rare-disease/cases/case_id/analysis/case_id_qc_sample_info.yaml",
+        "tags": ["case_id", "mip-dna", "sampleinfo"],
+    },
+    {
+        "archive": False,
+        "deliverables_tag_map": ("mip_analyse", "config_analysis"),
+        "path": "/path/to/rare-disease/cases/case_id/analysis/case_id_config.yaml",
+        "tags": ["case_id", "mip-config", "mip-dna"],
     },
 ]
 

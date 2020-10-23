@@ -1,14 +1,4 @@
 ---
-analysis_date: 2020-05-12T10:23:18
-analysis_type:
-  sample_id: wgs
-analysisrunstatus: finished
-case: case_id
-config_file_analysis: /path/to/rare-disease/cases/case_id/analysis/case_id_config.yaml
-default_gene_panels:
-  - OMIM-AUTO
-expected_coverage:
-  sample_id: '30'
 files:
   - format: cram
     id: sample_id
@@ -124,24 +114,6 @@ files:
     path_index: /path/to/rare-disease/cases/case_id/analysis/case_id/gatk_combinevariantcallsets/case_id_gatkcomb.bcf.csi
     step: gatk_combinevariantcallsets
     tag: ~
-  - format: meta
-    id: case_id
-    path: /path/to/rare-disease/cases/case_id/analysis/case_id/peddy_ar/case_id_gatkcomb.peddy.ped
-    path_index: ~
-    step: peddy_ar
-    tag: peddy
-  - format: meta
-    id: case_id
-    path: /path/to/rare-disease/cases/case_id/analysis/case_id/peddy_ar/case_id_gatkcomb.sex_check.csv
-    path_index: ~
-    step: peddy_ar
-    tag: sex_check
-  - format: meta
-    id: case_id
-    path: /path/to/rare-disease/cases/case_id/analysis/case_id/peddy_ar/case_id_gatkcomb.ped_check.csv
-    path_index: ~
-    step: peddy_ar
-    tag: ped_check
   - format: bed
     id: sample_id
     path: /path/to/rare-disease/cases/case_id/analysis/sample_id/sambamba_depth/sample_id_lanes_5555_sorted_md_brecal_coverage.bed
@@ -598,3 +570,45 @@ files:
     path_index: ~
     step: upd_ar
     tag: regions
+  - format: meta
+    id: case_id
+    path: /home/proj/production/rare-disease/cases/flyingsnipe/analysis/mip_log/YYYY-MM-DD/mip_YYYY-MM-DDTHH:MM:SS.log
+    path_index: ~
+    step: mip_analyse
+    tag: log
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/pedigree.yaml
+    path_index: ~
+    step: mip_analyse
+    tag: pedigree
+  - format: meta
+    id: case_id
+    path: /path/to/mip/config/mip_version-dna.yaml
+    path_index: ~
+    step: mip_analyse
+    tag: config
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id/case_id.fam
+    path_index: ~
+    step: mip_analyse
+    tag: pedigree_fam
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/reference_info.yaml
+    path_index: ~
+    step: mip_analyse
+    tag: references_info
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id_qc_sample_info.yaml
+    path_index: ~
+    step: mip_analyse
+    tag: sample_info
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id_config.yaml
+    path_index: ~
+    step: mip_analyse
+    tag: config_analysis
