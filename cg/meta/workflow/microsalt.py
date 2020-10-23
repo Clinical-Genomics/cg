@@ -10,7 +10,7 @@ import logging
 from pathlib import Path
 import re
 from datetime import datetime
-from typing import Dict
+from typing import Dict, List
 
 from cg.apps.microsalt.fastq import FastqHandler
 from cg.exc import CgDataError
@@ -252,7 +252,7 @@ class MicrosaltAnalysisAPI:
                 LOG.warning(f"{flowcell_obj.name}: {flowcell_obj.status}")
         self.db.commit()
 
-    def get_deliverables_to_store(self) -> list:
+    def get_deliverables_to_store(self) -> List[Path]:
         """Retrieve a list of microbial deliverables files for orders where analysis finished
         successfully, and are ready to be stored in Housekeeper"""
         deliverables_to_store = []
