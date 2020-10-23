@@ -14,6 +14,11 @@ Try to use the following format:
 ### Fixed
 
 
+## [13.10.1]
+
+### Fixed
+- Storing chromograph, upd and rhocall files in housekeeper
+
 ## [13.11.0]
 
 ### Changed
