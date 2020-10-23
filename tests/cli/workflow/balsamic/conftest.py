@@ -192,6 +192,7 @@ def balsamic_housekeeper(housekeeper_api, helpers, balsamic_mock_fastq_files: li
         "sample_case_wgs_paired_two_normal_normal1_error",
         "sample_case_wgs_paired_two_normal_normal2_error",
         "sample_case_wes_panel_error",
+        "sample_case_wes_tumor",
     ]
 
     for sample in samples:
@@ -304,6 +305,11 @@ def balsamic_lims(server_config: dict) -> MockLimsAPI:
         internal_id="mixed_sample_case_mixed_bed_paired_normal_error",
         capture_kit="BalsamicBed2",
     )
+    balsamic_lims.add_capture_kit(
+        internal_id="sample_case_wes_tumor",
+        capture_kit="BalsamicBed2",
+    )
+
     balsamic_lims.add_capture_kit(
         internal_id="mip_sample_case_wgs_single_tumor",
         capture_kit=None,
@@ -670,6 +676,22 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
         family=case_wgs_paired_two_normal_error,
         sample=sample_case_wgs_paired_two_normal_normal2_error,
     )
+
+    # Create WES case with 1 tumor sample
+    case_wes_tumor = helpers.add_family(
+        _store,
+        internal_id="balsamic_case_wes_tumor",
+        family_id="balsamic_case_wes_tumor",
+    )
+    sample_case_wes_tumor = helpers.add_sample(
+        _store,
+        internal_id="sample_case_wes_tumor",
+        is_tumour=True,
+        application_tag="WESA",
+        application_type="wes",
+        data_analysis="balsamic",
+    )
+    helpers.add_relationship(_store, family=case_wes_tumor, sample=sample_case_wes_tumor)
 
     # Create ERROR case for WES when no panel is found
     case_wes_panel_error = helpers.add_family(

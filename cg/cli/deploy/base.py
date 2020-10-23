@@ -15,7 +15,6 @@ LOG = logging.getLogger(__name__)
 def deploy(context, dry_run):
     """Deploy tools with CG. Use --help to see what tools are available"""
     LOG.info("Running CG DEPLOY")
-    print(context.obj)
     shipping_api = ShippingAPI(context.obj["shipping"])
     shipping_api.set_dry_run(dry_run)
     context.obj["shipping_api"] = shipping_api

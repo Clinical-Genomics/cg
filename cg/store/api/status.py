@@ -100,10 +100,8 @@ class StatusHandler(BaseHandler):
         families_query = (
             self.Family.query.outerjoin(models.Analysis)
             .join(models.Family.links, models.FamilySample.sample)
-            .filter(or_(models.Sample.is_external, models.Sample.sequenced_at.isnot(None)))
             .filter(models.Family.data_analysis.ilike(f"%{pipeline}%"))
             .filter(models.Family.action == "running")
-            .order_by(models.Family.priority.desc(), models.Family.ordered_at)
         )
         return list(families_query)[:limit]
 
