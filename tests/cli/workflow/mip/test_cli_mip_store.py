@@ -41,14 +41,19 @@ def test_store_analysis(
     mip_qc_sample_info: dict,
     caplog,
 ):
-    """Test if store completed stores a completed sample"""
+    """Test if store analysis stores a completed sample"""
 
+    # GIVEN analysis has not yet been stored
+    assert not mip_store_context["db"].family("yellowhog").analyses
     caplog.set_level(logging.INFO)
+
     # WHEN we run store on a config
     result = cli_runner.invoke(analysis, [str(mip_configs["yellowhog"])], obj=mip_store_context)
-    # THEN we should store the files in housekeeper
+
+    # THEN it should output that it has stored the files in housekeeper
     assert "new bundle added: yellowhog" in caplog.text
     assert "included files in Housekeeper" in result.output
+
     # THEN the exit code should be EXIT_SUCCESS
     assert result.exit_code == EXIT_SUCCESS
 
