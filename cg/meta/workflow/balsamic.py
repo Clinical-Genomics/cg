@@ -335,7 +335,7 @@ class BalsamicAnalysisAPI:
             )
         LOG.info("")
 
-    def get_sample_params(self, case_id: str, panel_bed: str) -> dict:
+    def get_sample_params(self, case_id: str, panel_bed: Optional[str]) -> dict:
 
         """Returns a dictionary of attributes for each sample in given family,
         where SAMPLE ID is used as key"""
@@ -351,7 +351,17 @@ class BalsamicAnalysisAPI:
         self.print_sample_params(case_id=case_id, sample_data=sample_data)
         return sample_data
 
-    def resolve_target_bed(self, panel_bed, link_object: models.FamilySample) -> Optional[str]:
+    def check_application_type_wes(self, case_id: str) -> bool:
+        """Checks if any of the samples in case have application type WES"""
+        for link_object in self.get_balsamic_sample_objects(case_id=case_id):
+            sample_application_type = self.get_application_type(link_object)
+            if str(sample_application_type).lower() == "wes":
+                return True
+        return False
+
+    def resolve_target_bed(
+        self, panel_bed: Optional[str], link_object: models.FamilySample
+    ) -> Optional[str]:
         if panel_bed:
             return panel_bed
         if self.get_application_type(link_object) not in self.__BALSAMIC_BED_APPLICATIONS:
@@ -460,6 +470,6 @@ class BalsamicAnalysisAPI:
         cases_to_store = []
         for case_object in self.store.cases_to_store(pipeline="balsamic"):
             case_id = case_object.internal_id
-            if Path(self.get_deliverables_file_path(case_id=case_id)).exists():
+            if Path(self.get_analysis_finish_path(case_id=case_id)).exists():
                 cases_to_store.append(case_id)
         return cases_to_store

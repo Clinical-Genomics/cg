@@ -13,10 +13,33 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+
+## [13.10.1]
+
+### Fixed
+- Storing chromograph, upd and rhocall files in housekeeper
+
+## [13.11.0]
+
+### Changed
+- Balsamic always skips mutect when application is WES
+- SPRING compression is set to run on oldest families first
+
+### Fixed
+- Format print statements
+
+## [13.10.1]
+
+### Fixed
+- Repaired automation query for storing Balsamic cases in Housekeeper 
+
 ## [13.10]
 
 ### Added
 - Functionality to deploy `genotype` with CG on hasta
+
+### Fixed
+- Stored completed not parsing through all completed entries
 
 ## [13.9]
 
