@@ -13,6 +13,11 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [13.10.2]
+
+### Changed
+
+- Refactors constants file
 
 ## [13.10.1]
 
