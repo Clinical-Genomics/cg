@@ -4,6 +4,7 @@ import logging
 
 import click
 
+from cg.apps.environ import environ_email
 from cg.apps.balsamic.api import BalsamicAPI
 from cg.apps.balsamic.fastq import FastqHandler
 from cg.apps.hk import HousekeeperAPI
@@ -133,13 +134,22 @@ def run(context, analysis_type, run_analysis, priority, case_id, dry):
                 case_id=case_id, check_exists=True
             ),
             "disable_variant_caller": "mutect"
-            if balsamic_analysis_api.check_application_type_wes(case_id=case_id)
+            if balsamic_analysis_api.get_case_application_type(case_id=case_id) == "wes"
             else None,  # Tell Balsamic to disable mutect for WES analyses.
         }
         balsamic_analysis_api.balsamic_api.run_analysis(
             arguments=arguments, run_analysis=run_analysis, dry=dry
         )
         balsamic_analysis_api.trailblazer_api.mark_analyses_deleted(case_id=case_id)
+        balsamic_analysis_api.trailblazer_api.add_pending_analysis(
+            case_id=case_id,
+            email=environ_email(),
+            type=balsamic_analysis_api.get_case_application_type(case_id=case_id),
+            out_dir=balsamic_analysis_api.get_case_path(case_id),
+            config_path=balsamic_analysis_api.get_slurm_job_ids_path(case_id).as_posix(),
+            priority=balsamic_analysis_api.get_priority(case_id),
+            data_analysis="BALSAMIC",
+        )
         balsamic_analysis_api.set_statusdb_action(case_id=case_id, action="running")
     except BalsamicStartError as e:
         LOG.error(f"Could not run analysis: {e.message}")

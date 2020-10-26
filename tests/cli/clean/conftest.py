@@ -77,38 +77,10 @@ def server_config(balsamic_dir: Path) -> dict:
 
 @pytest.fixture
 def balsamic_analysis_api(
-    server_config: dict, balsamic_clean_store: Store, housekeeper_api: HousekeeperAPI
-):
-    return BalsamicAnalysisAPI(
-        balsamic_api=BalsamicAPI(server_config),
-        store=balsamic_clean_store,
-        housekeeper_api=housekeeper_api,
-        fastq_handler="FastqHandler",
-        lims_api="LIMS",
-        fastq_api="FastqAPI",
-    )
-
-
-@pytest.fixture
-def clean_context(
-    base_store: Store,
+    server_config: dict,
+    balsamic_clean_store: Store,
     housekeeper_api: HousekeeperAPI,
-    balsamic_analysis_api: BalsamicAnalysisAPI,
-    helpers,
-    tmpdir,
-) -> dict:
-    """context to use in cli"""
-
-    return {
-        "housekeeper_api": housekeeper_api,
-        "store_api": balsamic_clean_store,
-        "BalsamicAnalysisAPI": balsamic_analysis_api,
-    }
-
-
-@pytest.fixture
-def balsamic_analysis_api(
-    server_config: dict, balsamic_clean_store: Store, housekeeper_api: HousekeeperAPI
+    trailblazer_api,
 ):
     return BalsamicAnalysisAPI(
         balsamic_api=BalsamicAPI(server_config),
@@ -116,6 +88,7 @@ def balsamic_analysis_api(
         housekeeper_api=housekeeper_api,
         fastq_handler="FastqHandler",
         lims_api="LIMS",
+        trailblazer_api=trailblazer_api,
     )
 
 

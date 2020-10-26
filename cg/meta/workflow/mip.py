@@ -68,11 +68,15 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
     @staticmethod
     def get_priority(family_obj: models.Family) -> str:
         """Fetch priority for case id"""
-        if family_obj.priority == 0:
+        if not family_obj.priority:
             return "low"
-        if family_obj.priority > 1:
-            return "high"
-        return "normal"
+        if isinstance(family_obj.priority, int):
+            if family_obj.priority == 0:
+                return "low"
+            if family_obj.priority > 1:
+                return "high"
+            return "normal"
+        return family_obj.priority
 
     def get_pedigree_config_path(self, case_id: str) -> Path:
         return Path(self.root, case_id, "pedigree.yaml")

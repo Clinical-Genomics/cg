@@ -107,6 +107,12 @@ class BalsamicAnalysisAPI:
             )
         return analysis_finish_path.as_posix()
 
+    def get_slurm_job_ids_path(self, case_id: str) -> Path:
+        slurm_job_ids_path = Path(
+            self.balsamic_api.root_dir, case_id, "analysis", "slurm_jobids.yaml"
+        )
+        return slurm_job_ids_path
+
     def get_file_collection(self, sample_id: str) -> list:
         """Retrieves sample data for naming"""
         file_objs = self.housekeeper_api.files(bundle=sample_id, tags=["fastq"])
@@ -355,13 +361,15 @@ class BalsamicAnalysisAPI:
         self.print_sample_params(case_id=case_id, sample_data=sample_data)
         return sample_data
 
-    def check_application_type_wes(self, case_id: str) -> bool:
-        """Checks if any of the samples in case have application type WES"""
-        for link_object in self.get_balsamic_sample_objects(case_id=case_id):
-            sample_application_type = self.get_application_type(link_object)
-            if str(sample_application_type).lower() == "wes":
-                return True
-        return False
+    def get_case_application_type(self, case_id: str) -> str:
+        application_types = set(
+            [
+                self.get_application_type(link_object)
+                for link_object in self.get_balsamic_sample_objects(case_id=case_id)
+            ]
+        )
+        if application_types:
+            return application_types.pop().lower()
 
     def resolve_target_bed(
         self, panel_bed: Optional[str], link_object: models.FamilySample

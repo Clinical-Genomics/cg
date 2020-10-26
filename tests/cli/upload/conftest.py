@@ -8,7 +8,6 @@ import pytest
 
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.scoutapi import ScoutAPI
-from cg.apps.tb import TrailblazerAPI
 from cg.apps.gt import GenotypeAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
@@ -93,13 +92,15 @@ def fixture_upload_genotypes_context(
 
 
 @pytest.fixture(scope="function", name="base_context")
-def fixture_base_cli_context(analysis_store: Store, housekeeper_api, upload_scout_api) -> dict:
+def fixture_base_cli_context(
+    analysis_store: Store, housekeeper_api, upload_scout_api, trailblazer_api
+) -> dict:
     """context to use in cli"""
     return {
         "scout_api": MockScoutApi(),
         "scout_upload_api": upload_scout_api,
         "housekeeper_api": housekeeper_api,
-        "trailblazer_api": MockTB(),
+        "trailblazer_api": trailblazer_api,
         "status_db": analysis_store,
         "mip-rd-dna": {"root": "hej"},
     }
@@ -126,14 +127,6 @@ def fixture_vogue_api():
     """Return a MockVogueApi"""
 
     return MockVogueApi()
-
-
-class MockTB(TrailblazerAPI):
-    """Mock of trailblazer """
-
-    def __init__(self):
-        """Mock the init"""
-        pass
 
 
 class MockScoutApi(ScoutAPI):

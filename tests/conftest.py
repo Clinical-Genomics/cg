@@ -22,6 +22,7 @@ from .mocks.madeline import MockMadelineAPI
 from .mocks.scout import MockScoutAPI
 from .small_helpers import SmallHelpers
 from .store_helpers import StoreHelpers
+from .mocks.tb_mock import MockTB
 
 CHANJO_CONFIG = {"chanjo": {"config_path": "chanjo_config", "binary_path": "chanjo"}}
 CRUNCHY_CONFIG = {
@@ -852,3 +853,8 @@ def disk_store(cli_runner, invoke_cli) -> Store:
         assert len(Store(database_uri).engine.table_names()) > 0
 
         yield Store(database_uri)
+
+
+@pytest.fixture(scope="function", name="trailblazer_api")
+def fixture_trailblazer_api() -> MockTB:
+    return MockTB()

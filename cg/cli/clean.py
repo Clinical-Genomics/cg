@@ -42,6 +42,7 @@ def clean(context):
         housekeeper_api=context.obj["housekeeper_api"],
         fastq_handler=FastqHandler(context.obj),
         lims_api=context.obj["lims_api"],
+        trailblazer_api=context.obj["trailblazer_api"],
     )
     context.obj["MipAnalysisAPI"] = MipAnalysisAPI(
         db=context.obj["status_db"],
