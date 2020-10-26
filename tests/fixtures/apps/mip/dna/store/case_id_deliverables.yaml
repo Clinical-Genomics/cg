@@ -114,18 +114,462 @@ files:
     path_index: /path/to/rare-disease/cases/case_id/analysis/case_id/gatk_combinevariantcallsets/case_id_gatkcomb.bcf.csi
     step: gatk_combinevariantcallsets
     tag: ~
-  - format: tar
-    id: sample_id
-    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_ar/sample_id_lanes_5555_sorted_md_brecal_tcov_chromograph.tar.gz
-    path_index: ~
-    step: chromograph_ar
-    tag: ~
   - format: bed
     id: sample_id
     path: /path/to/rare-disease/cases/case_id/analysis/sample_id/sambamba_depth/sample_id_lanes_5555_sorted_md_brecal_coverage.bed
     path_index: ~
     step: sambamba_depth
     tag: coverage
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_cov/sample_id_lanes_1_sorted_md_brecal_tcov_1.png
+    path_index: ~
+    step: chromograph_cov
+    tag: tcov
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_cov/sample_id_lanes_1_sorted_md_brecal_tcov_2.png
+    path_index: ~
+    step: chromograph_cov
+    tag: tcov
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_cov/sample_id_lanes_1_sorted_md_brecal_tcov_3.png
+    path_index: ~
+    step: chromograph_cov
+    tag: tcov
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_cov/sample_id_lanes_1_sorted_md_brecal_tcov_4.png
+    path_index: ~
+    step: chromograph_cov
+    tag: tcov
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_cov/sample_id_lanes_1_sorted_md_brecal_tcov_5.png
+    path_index: ~
+    step: chromograph_cov
+    tag: tcov
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_cov/sample_id_lanes_1_sorted_md_brecal_tcov_6.png
+    path_index: ~
+    step: chromograph_cov
+    tag: tcov
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_cov/sample_id_lanes_1_sorted_md_brecal_tcov_7.png
+    path_index: ~
+    step: chromograph_cov
+    tag: tcov
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_cov/sample_id_lanes_1_sorted_md_brecal_tcov_8.png
+    path_index: ~
+    step: chromograph_cov
+    tag: tcov
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_cov/sample_id_lanes_1_sorted_md_brecal_tcov_9.png
+    path_index: ~
+    step: chromograph_cov
+    tag: tcov
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_cov/sample_id_lanes_1_sorted_md_brecal_tcov_10.png
+    path_index: ~
+    step: chromograph_cov
+    tag: tcov
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_cov/sample_id_lanes_1_sorted_md_brecal_tcov_11.png
+    path_index: ~
+    step: chromograph_cov
+    tag: tcov
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_cov/sample_id_lanes_1_sorted_md_brecal_tcov_12.png
+    path_index: ~
+    step: chromograph_cov
+    tag: tcov
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_cov/sample_id_lanes_1_sorted_md_brecal_tcov_13.png
+    path_index: ~
+    step: chromograph_cov
+    tag: tcov
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_cov/sample_id_lanes_1_sorted_md_brecal_tcov_14.png
+    path_index: ~
+    step: chromograph_cov
+    tag: tcov
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_cov/sample_id_lanes_1_sorted_md_brecal_tcov_15.png
+    path_index: ~
+    step: chromograph_cov
+    tag: tcov
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_cov/sample_id_lanes_1_sorted_md_brecal_tcov_16.png
+    path_index: ~
+    step: chromograph_cov
+    tag: tcov
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_cov/sample_id_lanes_1_sorted_md_brecal_tcov_17.png
+    path_index: ~
+    step: chromograph_cov
+    tag: tcov
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_cov/sample_id_lanes_1_sorted_md_brecal_tcov_18.png
+    path_index: ~
+    step: chromograph_cov
+    tag: tcov
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_cov/sample_id_lanes_1_sorted_md_brecal_tcov_19.png
+    path_index: ~
+    step: chromograph_cov
+    tag: tcov
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_cov/sample_id_lanes_1_sorted_md_brecal_tcov_20.png
+    path_index: ~
+    step: chromograph_cov
+    tag: tcov
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_cov/sample_id_lanes_1_sorted_md_brecal_tcov_21.png
+    path_index: ~
+    step: chromograph_cov
+    tag: tcov
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_cov/sample_id_lanes_1_sorted_md_brecal_tcov_22.png
+    path_index: ~
+    step: chromograph_cov
+    tag: tcov
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_cov/sample_id_lanes_1_sorted_md_brecal_tcov_X.png
+    path_index: ~
+    step: chromograph_cov
+    tag: tcov
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_cov/sample_id_lanes_1_sorted_md_brecal_tcov_Y.png
+    path_index: ~
+    step: chromograph_cov
+    tag: tcov
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.regions_7.png
+    path_index: ~
+    step: chromograph_upd
+    tag: regions
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.sites_3.png
+    path_index: ~
+    step: chromograph_upd
+    tag: sites
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.regions_9.png
+    path_index: ~
+    step: chromograph_upd
+    tag: regions
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.sites_6.png
+    path_index: ~
+    step: chromograph_upd
+    tag: sites
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.sites_21.png
+    path_index: ~
+    step: chromograph_upd
+    tag: sites
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.sites_15.png
+    path_index: ~
+    step: chromograph_upd
+    tag: sites
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.regions_Y.png
+    path_index: ~
+    step: chromograph_upd
+    tag: regions
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.regions_10.png
+    path_index: ~
+    step: chromograph_upd
+    tag: regions
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.regions_X.png
+    path_index: ~
+    step: chromograph_upd
+    tag: regions
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.sites_17.png
+    path_index: ~
+    step: chromograph_upd
+    tag: sites
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.regions_3.png
+    path_index: ~
+    step: chromograph_upd
+    tag: regions
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.regions_16.png
+    path_index: ~
+    step: chromograph_upd
+    tag: regions
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.sites_13.png
+    path_index: ~
+    step: chromograph_upd
+    tag: sites
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.regions_17.png
+    path_index: ~
+    step: chromograph_upd
+    tag: regions
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.regions_1.png
+    path_index: ~
+    step: chromograph_upd
+    tag: regions
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.sites_9.png
+    path_index: ~
+    step: chromograph_upd
+    tag: sites
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.sites_10.png
+    path_index: ~
+    step: chromograph_upd
+    tag: sites
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.sites_Y.png
+    path_index: ~
+    step: chromograph_upd
+    tag: sites
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.sites_16.png
+    path_index: ~
+    step: chromograph_upd
+    tag: sites
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.regions_2.png
+    path_index: ~
+    step: chromograph_upd
+    tag: regions
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.sites_22.png
+    path_index: ~
+    step: chromograph_upd
+    tag: sites
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.regions_4.png
+    path_index: ~
+    step: chromograph_upd
+    tag: regions
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.regions_19.png
+    path_index: ~
+    step: chromograph_upd
+    tag: regions
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.regions_15.png
+    path_index: ~
+    step: chromograph_upd
+    tag: regions
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.regions_5.png
+    path_index: ~
+    step: chromograph_upd
+    tag: regions
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.regions_8.png
+    path_index: ~
+    step: chromograph_upd
+    tag: regions
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.sites_7.png
+    path_index: ~
+    step: chromograph_upd
+    tag: sites
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.regions_11.png
+    path_index: ~
+    step: chromograph_upd
+    tag: regions
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.regions_21.png
+    path_index: ~
+    step: chromograph_upd
+    tag: regions
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.regions_13.png
+    path_index: ~
+    step: chromograph_upd
+    tag: regions
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.regions_12.png
+    path_index: ~
+    step: chromograph_upd
+    tag: regions
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.sites_18.png
+    path_index: ~
+    step: chromograph_upd
+    tag: sites
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.sites_2.png
+    path_index: ~
+    step: chromograph_upd
+    tag: sites
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.sites_X.png
+    path_index: ~
+    step: chromograph_upd
+    tag: sites
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.regions_6.png
+    path_index: ~
+    step: chromograph_upd
+    tag: regions
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.sites_19.png
+    path_index: ~
+    step: chromograph_upd
+    tag: sites
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.regions_20.png
+    path_index: ~
+    step: chromograph_upd
+    tag: regions
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.sites_14.png
+    path_index: ~
+    step: chromograph_upd
+    tag: sites
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.sites_12.png
+    path_index: ~
+    step: chromograph_upd
+    tag: sites
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.sites_11.png
+    path_index: ~
+    step: chromograph_upd
+    tag: sites
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.sites_8.png
+    path_index: ~
+    step: chromograph_upd
+    tag: sites
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.sites_5.png
+    path_index: ~
+    step: chromograph_upd
+    tag: sites
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.regions_18.png
+    path_index: ~
+    step: chromograph_upd
+    tag: regions
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.sites_4.png
+    path_index: ~
+    step: chromograph_upd
+    tag: sites
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.regions_22.png
+    path_index: ~
+    step: chromograph_upd
+    tag: regions
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.regions_14.png
+    path_index: ~
+    step: chromograph_upd
+    tag: regions
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.sites_1.png
+    path_index: ~
+    step: chromograph_upd
+    tag: sites
+  - format: png
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/chromograph_upd/sample_id_gatkcomb_rhocall_vt_af_upd.sites_20.png
+    path_index: ~
+    step: chromograph_upd
+    tag: sites
+  - format: bw
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/rhocall_viz/case_id_gatkcomb_rhocall_vt_af_rhoviz.sample_id.bw
+    path_index: ~
+    step: rhocall_viz
+    tag: ~
+  - format: bb
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/upd_ar/sample_id_gatkcomb_rhocall_vt_af_upd.sites.bb
+    path_index: ~
+    step: upd_ar
+    tag: sites
+  - format: bb
+    id: sample_id
+    path: /path/to/rare-disease/cases/case_id/analysis/sample_id/upd_ar/sample_id_gatkcomb_rhocall_vt_af_upd.regions.bb
+    path_index: ~
+    step: upd_ar
+    tag: regions
   - format: meta
     id: case_id
     path: /home/proj/production/rare-disease/cases/flyingsnipe/analysis/mip_log/YYYY-MM-DD/mip_YYYY-MM-DDTHH:MM:SS.log
