@@ -290,6 +290,16 @@ MICROSALT_TAGS = {
     },
 }
 
+DATA_ANALYSIS_TO_PIPELINE = {
+    "fastq": "fastq",
+    "microbial": "microsalt",
+    "microbial|custom": "microsalt",
+    "microbial|fastq": "microsalt",
+    "MIP": "mip-dna",
+    "MIP + RNA": "mip-rna",
+    "MIP RNA": "mip-rna",
+}
+
 # Symbols
 SINGLE_QUOTE = "'"
 SPACE = " "
