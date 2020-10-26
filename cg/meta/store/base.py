@@ -84,10 +84,7 @@ def build_bundle(config_data: dict, analysisinfo_data: dict, deliverables: dict)
 
 
 def add_new_analysis(
-    bundle_data: dict,
-    case_obj: models.Family,
-    status: Store,
-    version_obj: hk_models.Version,
+    bundle_data: dict, case_obj: models.Family, status: Store, version_obj: hk_models.Version,
 ) -> models.Analysis:
     """Function to create and return a new analysis database record"""
 
