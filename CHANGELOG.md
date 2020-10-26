@@ -13,15 +13,14 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-
-## [13.12.0]
-### Added
-- Store all available completed microbial analyses in HK
-
-## [13.10.1]
+## [13.11.1]
 
 ### Fixed
-- Storing chromograph, upd and rhocall files in housekeeper
+ 
+ - Fixed bug where CalledProcessError class could not be represented as string, and broke workflows.
+ - Rephrased query used for compression. The query output is unchanged
+ - Fixed typo in query name
+
 
 ## [13.11.0]
 
