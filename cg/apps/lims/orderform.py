@@ -95,14 +95,24 @@ def get_project_type(document_title: str, parsed_samples: List) -> str:
     elif "1604" in document_title:
         project_type = "rml"
     elif "1603" in document_title:
-        project_type = "microbial"
+        project_type = "microsalt"
     elif "1605" in document_title:
         project_type = "metagenome"
     elif "1508" in document_title:
         analyses = set(sample["analysis"].lower() for sample in parsed_samples)
-        if len(analyses) == 1:
-            project_type = analyses.pop()
-        else:
+
+        if len(analyses) != 1:
+            raise OrderFormError(f"mixed 'Data Analysis' types: {', '.join(analyses)}")
+
+        data_analysis = analyses.pop()
+
+        if data_analysis == 'mip':
+            project_type = 'mip-dna'
+        elif data_analysis == 'balsamic':
+            project_type = 'balsamic'
+        elif 'rna' in data_analysis:
+            project_type = 'mip-rna'
+        elif 'mip' in data_analysis and 'balsamic' in data_analysis:
             raise OrderFormError(f"mixed 'Data Analysis' types: {', '.join(analyses)}")
 
     return project_type
