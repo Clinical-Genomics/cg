@@ -682,6 +682,7 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
         _store,
         internal_id="balsamic_case_wes_tumor",
         family_id="balsamic_case_wes_tumor",
+        data_analysis="balsamic",
     )
     sample_case_wes_tumor = helpers.add_sample(
         _store,
@@ -689,7 +690,6 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
         is_tumour=True,
         application_tag="WESA",
         application_type="wes",
-        data_analysis="balsamic",
     )
     helpers.add_relationship(_store, family=case_wes_tumor, sample=sample_case_wes_tumor)
 
