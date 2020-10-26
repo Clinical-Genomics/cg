@@ -59,7 +59,7 @@ def gather_files_and_bundle_in_housekeeper(
     }
 
     reset_case_action(case_obj[workflow])
-    new_analysis = add_new_analysis(bundle_data, case_obj[workflow], status, version_obj, workflow)
+    new_analysis = add_new_analysis(bundle_data, case_obj[workflow], status, version_obj)
     version_date = version_obj.created_at.date()
 
     LOG.info("new bundle added: %s, version %s", bundle_obj.name, version_date)
@@ -88,7 +88,6 @@ def add_new_analysis(
     case_obj: models.Family,
     status: Store,
     version_obj: hk_models.Version,
-    workflow: str,
 ) -> models.Analysis:
     """Function to create and return a new analysis database record"""
 
@@ -241,5 +240,5 @@ def _convert_analysis_to_pipeline(case: models.Family) -> str:
     data_analysis = case.links[0].sample.data_analysis
     pipeline = DATA_ANALYSIS_TO_PIPELINE.get(data_analysis)
     if not pipeline:
-        raise PipelineUnknownError(f"No pipeline specified in {case}")
+        raise PipelineUnknownError(f"No valid pipeline specified in {case}")
     return pipeline
