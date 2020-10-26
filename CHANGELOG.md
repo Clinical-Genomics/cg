@@ -14,6 +14,10 @@ Try to use the following format:
 ### Fixed
 
 
+## [13.12.0]
+### Added
+- Store all available completed microbial analyses in HK
+
 ## [13.10.1]
 
 ### Fixed
