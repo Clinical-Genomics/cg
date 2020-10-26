@@ -7,6 +7,7 @@ REV_PRIORITY_MAP = {value: key for key, value in PRIORITY_MAP.items()}
 PRIORITY_OPTIONS = list(PRIORITY_MAP.keys())
 FAMILY_ACTIONS = ("analyze", "running", "hold")
 PREP_CATEGORIES = ("wgs", "wes", "tgs", "wts", "mic", "rml")
+PIPELINE_OPTIONS = ("balsamic", "fastq", "microsalt", "mip-dna", "mip-rna")
 SEX_OPTIONS = ("male", "female", "unknown")
 STATUS_OPTIONS = ("affected", "unaffected", "unknown")
 CONTAINER_OPTIONS = ("Tube", "96 well plate")
