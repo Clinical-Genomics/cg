@@ -4,9 +4,9 @@ Update `family` SET data_analysis = 'mip-rna' where data_analysis like 'mip + rn
 Update `family` SET data_analysis = 'balsamic' where data_analysis like 'balsamic';
 Update `family` SET data_analysis = 'fastq' where data_analysis like 'fastq';
 Update `family` SET data_analysis = 'mip-rna' where data_analysis like 'mip rna';
-Update `family` SET data_analysis = 'microbial' where data_analysis like 'microbial';
-Update `family` SET data_analysis = 'microbial' where data_analysis like 'microbial|fastq';
-Update `family` SET data_analysis = 'microbial' where data_analysis like 'microbial|custom';
+Update `family` SET data_analysis = 'microsalt' where data_analysis like 'microbial';
+Update `family` SET data_analysis = 'microsalt' where data_analysis like 'microbial|fastq';
+Update `family` SET data_analysis = 'microsalt' where data_analysis like 'microbial|custom';
 
 ALTER TABLE `family` CHANGE `data_analysis` `data_analysis` ENUM('balsamic', 'fastq', 'microsalt', 'mip-dna', 'mip-rna')
  CHARACTER SET latin1
@@ -17,3 +17,6 @@ ALTER TABLE `analysis` CHANGE `pipeline` `pipeline` ENUM('balsamic', 'fastq', 'm
  CHARACTER SET latin1
  COLLATE latin1_swedish_ci
  NOT NULL;
+
+
+select distinct data_analysis from family;
