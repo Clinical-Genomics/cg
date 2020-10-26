@@ -125,6 +125,7 @@ def run(
         type=rna_api.get_application_type(case_id),
         out_dir=rna_api.get_case_output_path(case_id).as_posix(),
         config_path=rna_api.get_slurm_job_ids_path(case_id).as_posix(),
+        priority="normal",
         data_analysis="MIP-RNA",
     )
     rna_api.set_statusdb_action(case_id=case_id, action="running")

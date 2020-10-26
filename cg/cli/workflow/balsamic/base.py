@@ -8,6 +8,7 @@ from cg.apps.balsamic.api import BalsamicAPI
 from cg.apps.balsamic.fastq import FastqHandler
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
+from cg.apps.tb import TrailblazerAPI
 from cg.exc import BalsamicStartError, BundleAlreadyAddedError, LimsDataError
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.store import Store
@@ -66,6 +67,7 @@ def balsamic(context, priority, panel_bed, analysis_type, run_analysis, dry):
         housekeeper_api=HousekeeperAPI(config),
         fastq_handler=FastqHandler(config),
         lims_api=LimsAPI(config),
+        trailblazer_api=TrailblazerAPI(config),
     )
 
 
@@ -119,6 +121,10 @@ def run(context, analysis_type, run_analysis, priority, case_id, dry):
     balsamic_analysis_api = context.obj["BalsamicAnalysisAPI"]
     try:
         LOG.info(f"Running analysis for {case_id}")
+        if balsamic_analysis_api.trailblazer_api.is_latest_analysis_ongoing(case_id=case_id):
+            LOG.warning(f"{case_id} : analysis is still ongoing - skipping")
+            return
+
         arguments = {
             "priority": priority or balsamic_analysis_api.get_priority(case_id),
             "analysis_type": analysis_type,
@@ -130,6 +136,7 @@ def run(context, analysis_type, run_analysis, priority, case_id, dry):
         balsamic_analysis_api.balsamic_api.run_analysis(
             arguments=arguments, run_analysis=run_analysis, dry=dry
         )
+        balsamic_analysis_api.trailblazer_api.mark_analyses_deleted(case_id=case_id)
         balsamic_analysis_api.set_statusdb_action(case_id=case_id, action="running")
     except BalsamicStartError as e:
         LOG.error(f"Could not run analysis: {e.message}")

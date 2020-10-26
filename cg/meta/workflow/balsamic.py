@@ -14,6 +14,8 @@ from cg.apps.balsamic.fastq import FastqHandler
 from cg.constants import FAMILY_ACTIONS
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
+from cg.apps.tb import TrailblazerAPI
+from cg.apps.tb.models import TrailblazerAnalysis
 from cg.exc import BalsamicStartError, BundleAlreadyAddedError
 from cg.store import Store, models
 
@@ -34,12 +36,14 @@ class BalsamicAnalysisAPI:
         housekeeper_api: HousekeeperAPI,
         fastq_handler: FastqHandler,
         lims_api: LimsAPI,
+        trailblazer_api: TrailblazerAPI,
     ):
         self.balsamic_api = balsamic_api
         self.store = store
         self.housekeeper_api = housekeeper_api
         self.fastq_handler = fastq_handler
         self.lims_api = lims_api
+        self.trailblazer_api = trailblazer_api
 
     def get_case_object(self, case_id: str):
         """Look up case ID in StoreDB and return result"""
