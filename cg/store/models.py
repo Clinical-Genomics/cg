@@ -430,7 +430,6 @@ class Sample(Model, PriorityMixin):
     created_at = Column(types.DateTime, default=dt.datetime.now)
     customer_id = Column(ForeignKey("customer.id", ondelete="CASCADE"), nullable=False)
     customer = orm.relationship("Customer", foreign_keys=[customer_id])
-    data_analysis = Column(types.String(16))
     delivered_at = Column(types.DateTime)
     deliveries = orm.relationship(Delivery, backref="sample")
     downsampled_to = Column(types.BigInteger)
