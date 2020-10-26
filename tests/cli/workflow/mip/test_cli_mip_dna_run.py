@@ -2,14 +2,13 @@
 import logging
 
 from cg.cli.workflow.mip_dna.base import run
-from cg.apps.mip import MipAPI
 
 CASE_ID = "yellowhog"
 CONDA_ENV = "S_mip_rd-dna"
 EMAIL = "james.holden@scilifelab.se"
 
 
-def test_cg_dry_run(cli_runner, tb_api, analysis_store_single_case, mip_context, caplog):
+def test_cg_dry_run(cli_runner, tb_api, mip_context, caplog):
     """Test print the MIP run to console"""
     # GIVEN a cli function
     with caplog.at_level(logging.INFO):

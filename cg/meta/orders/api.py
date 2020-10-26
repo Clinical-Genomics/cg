@@ -172,10 +172,6 @@ class OrdersAPI(LimsHandler, StatusHandler):
         """Submit a batch of samples for sequencing and balsamic analysis."""
         return self.submit_case_samples(data)
 
-    def submit_mip_balsamic(self, data: dict) -> dict:
-        """Submit a batch of samples for sequencing and analysis."""
-        return self.submit_case_samples(data)
-
     def submit_mip_rna(self, data: dict) -> dict:
         """Submit a batch of samples for sequencing and analysis."""
         return self.submit_case_samples(data)
@@ -196,6 +192,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
             ticket=data["ticket"],
             samples=status_data["samples"],
             comment=status_data["comment"],
+            data_analysis=status_data["data_analysis"],
         )
 
         return {"project": project_data, "records": samples}
@@ -291,7 +288,6 @@ class OrdersAPI(LimsHandler, StatusHandler):
                     OrderType.MIP,
                     OrderType.EXTERNAL,
                     OrderType.BALSAMIC,
-                    OrderType.MIP_BALSAMIC,
                     OrderType.MIP_RNA,
                 ):
                     raise OrderError(
