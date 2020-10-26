@@ -1,7 +1,6 @@
 """Click commands to store mip analyses"""
 import logging
 from pathlib import Path
-import sys
 
 import click
 
@@ -16,10 +15,10 @@ from cg.exc import (
 )
 from cg.meta.store.base import gather_files_and_bundle_in_housekeeper
 from cg.store import Store
+from cg.constants import EXIT_SUCCESS, EXIT_FAIL
+
 
 LOG = logging.getLogger(__name__)
-FAIL = 1
-SUCCESS = 0
 
 
 @click.group()
@@ -39,9 +38,10 @@ def analysis(context, config_stream):
     status = context.obj["status_db"]
     hk_api = context.obj["housekeeper_api"]
 
+    exit_code = EXIT_SUCCESS
     if not config_stream:
         LOG.error("Provide a config file.")
-        raise click.Abort()
+        raise click.Abort
 
     try:
         new_analysis = gather_files_and_bundle_in_housekeeper(
@@ -60,10 +60,12 @@ def analysis(context, config_stream):
         MandatoryFilesMissing,
     ) as error:
         LOG.error(error.message)
-        raise click.Abort()
+        exit_code = EXIT_FAIL
     except FileNotFoundError as error:
         LOG.error(f"Missing file: {error.args[0]}")
-        raise click.Abort()
+        exit_code = EXIT_FAIL
+    if exit_code:
+        raise click.Abort
 
 
 @store.command()
@@ -73,7 +75,7 @@ def completed(context):
     hk_api = context.obj["housekeeper_api"]
     tb_api = context.obj["trailblazer_api"]
 
-    exit_code = SUCCESS
+    exit_code = EXIT_SUCCESS
     for analysis_obj in tb_api.analyses(status="completed", deleted=False):
         existing_record = hk_api.version(analysis_obj.family, analysis_obj.started_at)
         if existing_record:
@@ -83,8 +85,8 @@ def completed(context):
         with Path(analysis_obj.config_path).open() as config_stream:
             try:
                 context.invoke(analysis, config_stream=config_stream)
-            except Exception:
-                LOG.error(f"Case storage failed:{analysis_obj.family}")
-                exit_code = FAIL
-
-    sys.exit(exit_code)
+            except (Exception, click.Abort):
+                LOG.error("Case storage failed: %s", analysis_obj.family, exc_info=True)
+                exit_code = EXIT_FAIL
+    if exit_code:
+        raise click.Abort

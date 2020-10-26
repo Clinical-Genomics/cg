@@ -30,6 +30,7 @@ def microsalt(context: click.Context, ticket: str, dry_run: bool):
         hk_api=hk_api,
         lims_api=lims_api,
         fastq_handler=FastqHandler(context.obj),
+        config=context.obj["microsalt"],
     )
     context.obj["analysis_api"] = analysis_api
 

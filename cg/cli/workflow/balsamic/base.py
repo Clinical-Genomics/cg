@@ -132,6 +132,9 @@ def run(context, analysis_type, run_analysis, priority, case_id, dry):
             "sample_config": balsamic_analysis_api.get_config_path(
                 case_id=case_id, check_exists=True
             ),
+            "disable_variant_caller": "mutect"
+            if balsamic_analysis_api.check_application_type_wes(case_id=case_id)
+            else None,  # Tell Balsamic to disable mutect for WES analyses.
         }
         balsamic_analysis_api.balsamic_api.run_analysis(
             arguments=arguments, run_analysis=run_analysis, dry=dry
