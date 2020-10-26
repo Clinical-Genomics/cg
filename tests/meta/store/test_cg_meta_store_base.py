@@ -78,33 +78,11 @@ def test_gather_files_and_bundle_in_hk_bundle_new_analysis(
     mock_housekeeper_api.add_commit.assert_called_with(mock_bundle, mock_version)
 
 
+@mock.patch("cg.meta.store.base._convert_analysis_to_pipeline")
 @mock.patch("cg.store.Store")
 @mock.patch("housekeeper.store.models")
-def test_add_new_analysis_pipeline_exception(mock_housekeeper_store, mock_status):
-    """
-    test catching the exception when no pipeline is found when creating and adding a new
-    analysis to status-db
-    """
-    # GIVEN a case for which the bundle and version is added to Housekeeper, but there is no
-    # pipeline specified on sample level
-    mock_bundle = mock_housekeeper_store.Bundle.return_value
-    mock_version = mock_housekeeper_store.Version.return_value
-    mock_case = mock_status.Family.return_value
-    mock_case.links[0].sample.data_analysis = None
-
-    # WHEN creating and adding an analysis object for that case to status-db
-    with pytest.raises(PipelineUnknownError) as exc_info:
-        store_base.add_new_analysis(
-            mock_bundle, mock_case, mock_status, mock_version, workflow="mip"
-        )
-
-    # THEN a PipelineUnknownError exception should be raised
-    assert exc_info.value.message == f"No pipeline specified in {mock_case}"
-
-
-@mock.patch("cg.store.Store")
-@mock.patch("housekeeper.store.models")
-def test_add_new_analysis_duplicate_analysis_exception(mock_housekeeper_store, mock_status):
+def test_add_new_analysis_duplicate_analysis_exception(mock_housekeeper_store, mock_status,
+                                                       mock_pipeline):
     """
     test catching the exception when no pipeline is found
     """
@@ -118,7 +96,7 @@ def test_add_new_analysis_duplicate_analysis_exception(mock_housekeeper_store, m
     # WHEN creating and adding an analysis object for that case to status-db
     with pytest.raises(AnalysisDuplicationError) as exc_info:
         store_base.add_new_analysis(
-            mock_bundle, mock_case, mock_status, mock_version, workflow="mip"
+            mock_bundle, mock_case, mock_status, mock_version
         )
 
     # THEN an AnalysisDuplicationEror should be raised
@@ -128,9 +106,10 @@ def test_add_new_analysis_duplicate_analysis_exception(mock_housekeeper_store, m
     )
 
 
+@mock.patch("cg.meta.store.base._convert_analysis_to_pipeline")
 @mock.patch("cg.store.Store")
 @mock.patch("housekeeper.store.models")
-def test_add_new_analysis(mock_housekeeper_store, mock_status):
+def test_add_new_analysis(mock_housekeeper_store, mock_status, mock_pipeline):
     """
     test adding a new analyis to cg store
     """
@@ -142,7 +121,7 @@ def test_add_new_analysis(mock_housekeeper_store, mock_status):
 
     # WHEN creating and adding an analysis object for that case in status-db
     new_analysis = store_base.add_new_analysis(
-        mock_bundle, mock_case, mock_status, mock_version, workflow="mip"
+        mock_bundle, mock_case, mock_status, mock_version
     )
 
     # THEN and analysis object for that case should created and returned
@@ -278,3 +257,56 @@ def test_get_tags_for_index_file(mock_missing, dna_deliverables_raw: dict):
                 assert hk_tags == ["bam-mt-index", "mip-dna", "sample_id"]
             if file_["step"] == "gatk_baserecalibration":
                 assert hk_tags == ["cram-index", "mip-dna", "sample_id"]
+
+
+@mock.patch("cg.store.Store")
+def test_convert_analysis_to_pipeline_no_pipeline_exception(mock_status):
+    """
+    test catching the exception when no pipeline is found when converting data_analysis to pipeline
+    """
+    # GIVEN a case for which the bundle and version is added to Housekeeper, but there is no
+    # date analysis specified on sample level
+    mock_case = mock_status.Family.return_value
+    mock_case.links[0].sample.data_analysis = None
+
+    # WHEN converting data_analysis to pipeline
+    with pytest.raises(PipelineUnknownError) as exc_info:
+        store_base._convert_analysis_to_pipeline(mock_case)
+
+    # THEN a PipelineUnknownError exception should be raised
+    assert exc_info.value.message == f"No valid pipeline specified in {mock_case}"
+
+
+@mock.patch("cg.store.Store")
+def test_convert_analysis_to_pipeline_unknown_pipeline_exception(mock_status):
+    """
+    test catching the exception when no pipeline is found when converting data_analysis to pipeline
+    """
+    # GIVEN a case for which the bundle and version is added to Housekeeper, but there is an
+    # unknown data analysis specified on sample level
+    mock_case = mock_status.Family.return_value
+    mock_case.links[0].sample.data_analysis = "unknown"
+
+    # WHEN converting data_analysis to pipeline
+    with pytest.raises(PipelineUnknownError) as exc_info:
+        store_base._convert_analysis_to_pipeline(mock_case)
+
+    # THEN a PipelineUnknownError exception should be raised
+    assert exc_info.value.message == f"No valid pipeline specified in {mock_case}"
+
+
+@mock.patch("cg.store.Store")
+def test_convert_analysis_to_pipeline(mock_status):
+    """
+    test catching the exception when no pipeline is found when converting data_analysis to pipeline
+    """
+    # GIVEN a case for which the bundle and version is added to Housekeeper, and the data analysis
+    # on sample level is "microbial"
+    mock_case = mock_status.Family.return_value
+    mock_case.links[0].sample.data_analysis = "microbial"
+
+    # WHEN converting data_analysis to pipeline
+    result = store_base._convert_analysis_to_pipeline(mock_case)
+
+    # THEN the pipeline should be "microsalt"
+    assert result == "microsalt"
