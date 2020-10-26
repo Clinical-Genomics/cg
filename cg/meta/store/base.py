@@ -7,7 +7,13 @@ from typing import List
 from housekeeper.store import models as hk_models
 
 from cg.apps.hk import HousekeeperAPI
-from cg.constants import HK_TAGS, MIP_DNA_TAGS, MIP_RNA_TAGS, MICROSALT_TAGS, DATA_ANALYSIS_TO_PIPELINE
+from cg.constants import (
+    HK_TAGS,
+    MIP_DNA_TAGS,
+    MIP_RNA_TAGS,
+    MICROSALT_TAGS,
+    DATA_ANALYSIS_TO_PIPELINE,
+)
 from cg.exc import (
     AnalysisDuplicationError,
     PipelineUnknownError,
