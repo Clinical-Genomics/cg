@@ -7,7 +7,7 @@ from typing import List
 from housekeeper.store import models as hk_models
 
 from cg.apps.hk import HousekeeperAPI
-from cg.constants import HK_TAGS, MIP_DNA_TAGS, MIP_RNA_TAGS, MICROSALT_TAGS
+from cg.constants import HK_TAGS, MIP_DNA_TAGS, MIP_RNA_TAGS, MICROSALT_TAGS, DATA_ANALYSIS_TO_PIPELINE
 from cg.exc import (
     AnalysisDuplicationError,
     PipelineUnknownError,
@@ -86,10 +86,7 @@ def add_new_analysis(
 ) -> models.Analysis:
     """Function to create and return a new analysis database record"""
 
-    pipeline = case_obj.links[0].sample.data_analysis
-
-    if not pipeline:
-        raise PipelineUnknownError(f"No pipeline specified in {case_obj}")
+    pipeline = _convert_analysis_to_pipeline(case_obj)
 
     if status.analysis(family=case_obj, started_at=version_obj.created_at):
         raise AnalysisDuplicationError(
@@ -229,3 +226,14 @@ def _determine_missing_tags(mandatory_tags: list, found_tags: list) -> tuple:
     are_tags_missing = bool(len(missing_tags) > 0)
 
     return are_tags_missing, missing_tags
+
+
+def _convert_analysis_to_pipeline(case: models.Family) -> str:
+    """
+    convert data_analysis to pipeline name
+    """
+    data_analysis = case.links[0].sample.data_analysis
+    pipeline = DATA_ANALYSIS_TO_PIPELINE.get(data_analysis)
+    if not pipeline:
+        raise PipelineUnknownError(f"No pipeline specified in {case}")
+    return pipeline
