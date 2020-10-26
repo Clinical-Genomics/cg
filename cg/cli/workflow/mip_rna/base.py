@@ -119,7 +119,14 @@ def run(
         return
 
     rna_api.mark_analyses_deleted(case_id=case_id)
-    rna_api.add_pending_analysis(case_id=case_id, email=email)
+    rna_api.add_pending_analysis(
+        case_id=case_id,
+        email=email,
+        type=rna_api.get_application_type(case_id),
+        out_dir=rna_api.get_case_output_path(case_id).as_posix(),
+        config_path=rna_api.get_slurm_job_ids_path(case_id).as_posix(),
+        data_analysis="MIP-RNA",
+    )
     rna_api.set_statusdb_action(case_id=case_id, action="running")
     LOG.info("MIP rd-rna run started!")
 

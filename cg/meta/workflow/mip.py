@@ -469,6 +469,7 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         before: dt.datetime = None,
         is_visible: bool = None,
         family: str = None,
+        data_analysis: str = None,
     ) -> list:
         return self.tb.analyses(
             case_id=case_id,
@@ -479,4 +480,5 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
             before=before,
             is_visible=is_visible,
             family=family,
+            data_analysis=data_analysis,
         )

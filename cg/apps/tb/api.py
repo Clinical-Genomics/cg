@@ -60,6 +60,7 @@ class TrailblazerAPI:
         before: dt.datetime = None,
         is_visible: bool = None,
         family: str = None,
+        data_analysis: str = None,
     ) -> list:
         request_body = {
             "analyses": {
@@ -71,6 +72,7 @@ class TrailblazerAPI:
                 "before": str(before) if before else None,
                 "is_visible": is_visible,
                 "family": family,
+                "data_analysis": data_analysis,
             }
         }
         response = self.query_trailblazer(command="query-analyses", request_body=request_body)
