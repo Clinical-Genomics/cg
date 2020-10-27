@@ -26,4 +26,5 @@ from .constants import (
     COMBOS,
     COLLABORATORS,
     FLOWCELL_STATUS,
+    PIPELINE_OPTIONS,
 )
