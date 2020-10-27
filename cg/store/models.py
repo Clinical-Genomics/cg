@@ -12,7 +12,8 @@ from cg.constants import (
     PREP_CATEGORIES,
     PRIORITY_MAP,
     REV_PRIORITY_MAP,
-    SEX_OPTIONS, STATUS_OPTIONS
+    SEX_OPTIONS,
+    STATUS_OPTIONS,
 )
 
 Model = alchy.make_declarative_base(Base=alchy.ModelBase)
@@ -300,9 +301,7 @@ class FamilySample(Model):
     id = Column(types.Integer, primary_key=True)
     family_id = Column(ForeignKey("family.id", ondelete="CASCADE"), nullable=False)
     sample_id = Column(ForeignKey("sample.id", ondelete="CASCADE"), nullable=False)
-    status = Column(
-        types.Enum(*STATUS_OPTIONS), default="unknown", nullable=False
-    )
+    status = Column(types.Enum(*STATUS_OPTIONS), default="unknown", nullable=False)
 
     created_at = Column(types.DateTime, default=dt.datetime.now)
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
