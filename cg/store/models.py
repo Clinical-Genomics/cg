@@ -258,6 +258,7 @@ class Family(Model, PriorityMixin):
     created_at = Column(types.DateTime, default=dt.datetime.now)
     customer_id = Column(ForeignKey("customer.id", ondelete="CASCADE"), nullable=False)
     customer = orm.relationship(Customer, foreign_keys=[customer_id])
+    data_analysis = Column(types.String(16))
     id = Column(types.Integer, primary_key=True)
     internal_id = Column(types.String(32), unique=True, nullable=False)
     name = Column(types.String(128), nullable=False)

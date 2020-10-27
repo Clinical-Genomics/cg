@@ -98,6 +98,7 @@ def delivery_report(context, family_id, print_console, force_report):
 
     status-db:
         family
+        family.data_analysis        missing on most re-runs
         customer_name
         applications
         accredited
@@ -111,7 +112,6 @@ def delivery_report(context, family_id, print_console, force_report):
         sample.received_at
         sample.sequenced_at         for rml and in-house sequenced samples
         sample.delivered_at
-        sample.data_analysis        missing on most re-runs
 
     lims:
         sample.name

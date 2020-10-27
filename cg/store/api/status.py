@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from types import SimpleNamespace
 from typing import List
 
 from sqlalchemy import and_, func, or_
@@ -8,14 +9,16 @@ from cg.constants import PRIORITY_MAP
 from cg.store import models
 from cg.store.api.base import BaseHandler
 from cg.utils.date import get_date
+from sqlalchemy import or_, and_
+from sqlalchemy.orm import Query
 
-HASTA_IN_PRODUCTION = get_date("2017-09-27")
+VALID_DATA_IN_PRODUCTION = get_date("2017-09-27")
 
 
 class StatusHandler(BaseHandler):
     """Handles status states for entities in the database"""
 
-    def samples_to_recieve(self, external=False):
+    def samples_to_receive(self, external=False):
         """Fetch incoming samples."""
         records = (
             self.Sample.query.join(
@@ -71,7 +74,7 @@ class StatusHandler(BaseHandler):
             self.Family.query.outerjoin(models.Analysis)
             .join(models.Family.links, models.FamilySample.sample)
             .filter(or_(models.Sample.is_external, models.Sample.sequenced_at.isnot(None)))
-            .filter(models.Sample.data_analysis.ilike(f"%{pipeline}%"))
+            .filter(models.Family.data_analysis.ilike(f"%{pipeline}%"))
             .filter(
                 or_(
                     models.Family.action == "analyze",
@@ -82,16 +85,16 @@ class StatusHandler(BaseHandler):
         )
 
         families = [
-            record
-            for record in families_query
-            if self._all_samples_have_sequence_data(record.links)
+            case_obj
+            for case_obj in families_query
+            if self._all_samples_have_sequence_data(case_obj.links)
         ]
 
         if threshold:
             families = [
-                record
-                for record in families
-                if self.all_samples_have_enough_reads(record.links, threshold=threshold)
+                case_obj
+                for case_obj in families
+                if self.all_samples_have_enough_reads(case_obj.links, threshold=threshold)
             ]
         return families[:limit]
 
@@ -100,19 +103,17 @@ class StatusHandler(BaseHandler):
         families_query = (
             self.Family.query.outerjoin(models.Analysis)
             .join(models.Family.links, models.FamilySample.sample)
-            .filter(models.Sample.data_analysis.ilike(f"%{pipeline}%"))
+            .filter(models.Family.data_analysis.ilike(f"%{pipeline}%"))
             .filter(models.Family.action == "running")
         )
         return list(families_query)[:limit]
 
     def cases(
         self,
-        progress_tracker=None,
         internal_id=None,
         name=None,
         days=0,
         case_action=None,
-        progress_status=None,
         priority=None,
         customer_id=None,
         exclude_customer_id=None,
@@ -136,378 +137,390 @@ class StatusHandler(BaseHandler):
         exclude_invoiced=False,
     ):
         """Fetch cases with and w/o analyses"""
-        families_q = self.Family.query
-
-        # family filters
-        if days != 0:
-            filter_date = datetime.now() - timedelta(days=days)
-            families_q = families_q.filter(models.Family.ordered_at > filter_date)
-
-        if case_action:
-            families_q = families_q.filter(models.Family.action == case_action)
-
-        if priority:
-            priority_db = PRIORITY_MAP[priority]
-            families_q = families_q.filter(models.Family.priority == priority_db)
-
-        if internal_id:
-            families_q = families_q.filter(models.Family.internal_id.like("%" + internal_id + "%"))
-
-        if name:
-            families_q = families_q.filter(models.Family.name.like("%" + name + "%"))
-
-        # customer filters
-        if customer_id or exclude_customer_id:
-            families_q = families_q.join(models.Family.customer)
-
-            if customer_id:
-                families_q = families_q.filter(models.Customer.internal_id == customer_id)
-
-            if exclude_customer_id:
-                families_q = families_q.filter(models.Customer.internal_id != exclude_customer_id)
-
-        # sample filters
-        if data_analysis or sample_id:
-            families_q = families_q.join(models.Family.links, models.FamilySample.sample)
-            if data_analysis:
-                families_q = families_q.filter(
-                    models.Sample.data_analysis.like("%" + data_analysis + "%")
-                )
-            if sample_id:
-                families_q = families_q.filter(models.Sample.internal_id.like(sample_id))
-
-        else:
-            families_q = families_q.outerjoin(models.Family.links, models.FamilySample.sample)
-
-        # other joins
-        families_q = families_q.outerjoin(
-            models.Family.analyses, models.Sample.invoice, models.Sample.flowcells
+        case_q = self._get_filtered_case_query(
+            case_action,
+            customer_id,
+            data_analysis,
+            days,
+            exclude_customer_id,
+            internal_id,
+            name,
+            priority,
+            sample_id,
         )
 
         cases = []
 
-        for record in families_q:
+        for case_obj in case_q:
 
-            samples_received = None
-            samples_prepared = None
-            samples_sequenced = None
-            samples_delivered = None
-            samples_invoiced = None
-            samples_received_at = None
-            samples_prepared_at = None
-            samples_sequenced_at = None
-            samples_delivered_at = None
-            samples_invoiced_at = None
-            samples_to_receive = None
-            samples_to_prepare = None
-            samples_to_sequence = None
-            samples_to_deliver = None
-            samples_to_invoice = None
-            samples_received_bool = None
-            samples_prepared_bool = None
-            samples_sequenced_bool = None
-            samples_invoiced_bool = None
-            analysis_completed_at = None
-            analysis_uploaded_at = None
-            analysis_delivery_reported_at = None
-            analysis_pipeline = None
-            analysis_status = None
-            analysis_completion = None
-            analysis_completed_bool = None
-            analysis_uploaded_bool = None
-            samples_delivered_bool = None
-            analysis_delivery_reported_bool = None
-            samples_data_analyses = None
-            flowcells_status = None
-            flowcells_on_disk = None
-            flowcells_on_disk_bool = None
-            tat = None
-            is_rerun = False
+            case_data = self._calculate_case_data(case_obj)
 
-            analysis_in_progress = record.action is not None
-            case_action = record.action
-
-            total_samples = len(record.links)
-            total_external_samples = len(
-                [
-                    link.sample.application_version.application.is_external
-                    for link in record.links
-                    if link.sample.application_version.application.is_external
-                ]
-            )
-            total_internal_samples = total_samples - total_external_samples
-            case_external_bool = total_external_samples == total_samples
-
-            if total_samples > 0:
-                samples_received = len(
-                    [
-                        link.sample.received_at
-                        for link in record.links
-                        if link.sample.received_at is not None
-                    ]
-                )
-                samples_prepared = len(
-                    [
-                        link.sample.prepared_at
-                        for link in record.links
-                        if link.sample.prepared_at is not None
-                    ]
-                )
-                samples_sequenced = len(
-                    [
-                        link.sample.sequenced_at
-                        for link in record.links
-                        if link.sample.sequenced_at is not None
-                    ]
-                )
-                samples_delivered = len(
-                    [
-                        link.sample.delivered_at
-                        for link in record.links
-                        if link.sample.delivered_at is not None
-                    ]
-                )
-                samples_invoiced = len(
-                    [
-                        link.sample.invoice.invoiced_at
-                        for link in record.links
-                        if link.sample.invoice and link.sample.invoice.invoiced_at
-                    ]
-                )
-
-                samples_to_receive = total_internal_samples
-                samples_to_prepare = total_internal_samples
-                samples_to_sequence = total_internal_samples
-                samples_to_deliver = total_internal_samples
-                samples_to_invoice = total_samples - len(
-                    [link.sample.no_invoice for link in record.links if link.sample.no_invoice]
-                )
-
-                samples_received_bool = samples_received == samples_to_receive
-                samples_prepared_bool = samples_prepared == samples_to_prepare
-                samples_sequenced_bool = samples_sequenced == samples_to_sequence
-                samples_delivered_bool = samples_delivered == samples_to_deliver
-                samples_invoiced_bool = samples_invoiced == samples_to_invoice
-                samples_data_analyses = list(
-                    set(link.sample.data_analysis for link in record.links)
-                )
-
-                if samples_to_receive > 0 and samples_received_bool:
-                    samples_received_at = max(
-                        [
-                            link.sample.received_at
-                            for link in record.links
-                            if link.sample.received_at is not None
-                        ]
-                    )
-
-                if samples_to_prepare > 0 and samples_prepared_bool:
-                    samples_prepared_at = max(
-                        [
-                            link.sample.prepared_at
-                            for link in record.links
-                            if link.sample.prepared_at is not None
-                        ]
-                    )
-
-                if samples_to_sequence > 0 and samples_sequenced_bool:
-                    samples_sequenced_at = max(
-                        [
-                            link.sample.sequenced_at
-                            for link in record.links
-                            if link.sample.sequenced_at is not None
-                        ]
-                    )
-
-                if samples_to_deliver > 0 and samples_delivered_bool:
-                    samples_delivered_at = max(
-                        [
-                            link.sample.delivered_at
-                            for link in record.links
-                            if link.sample.delivered_at is not None
-                        ]
-                    )
-
-                if samples_to_invoice > 0 and samples_invoiced_bool:
-                    samples_invoiced_at = max(
-                        [
-                            link.sample.invoice.invoiced_at
-                            for link in record.links
-                            if link.sample.invoice and link.sample.invoice.invoiced_at
-                        ]
-                    )
-
-                flowcells = len(
-                    [flowcell.status for link in record.links for flowcell in link.sample.flowcells]
-                )
-
-                flowcells_status = list(
-                    set(
-                        flowcell.status
-                        for link in record.links
-                        for flowcell in link.sample.flowcells
-                    )
-                )
-                if flowcells < total_samples:
-                    flowcells_status.append("new")
-
-                flowcells_status = ", ".join(flowcells_status)
-
-                flowcells_on_disk = len(
-                    [
-                        flowcell.status
-                        for link in record.links
-                        for flowcell in link.sample.flowcells
-                        if flowcell.status == "ondisk"
-                    ]
-                )
-
-                flowcells_on_disk_bool = flowcells_on_disk == total_samples
-
-            if record.analyses and not analysis_in_progress:
-                analysis_completed_at = record.analyses[0].completed_at
-                analysis_uploaded_at = record.analyses[0].uploaded_at
-                analysis_delivery_reported_at = record.analyses[0].delivery_report_created_at
-                analysis_pipeline = record.analyses[0].pipeline
-                analysis_completed_bool = analysis_completed_at is not None
-                analysis_uploaded_bool = analysis_uploaded_at is not None
-                analysis_delivery_reported_bool = analysis_delivery_reported_at is not None
-            elif total_samples > 0:
-                analysis_completed_bool = False
-                analysis_uploaded_bool = False
-                analysis_delivery_reported_bool = False
-
-            if only_received and not samples_received_bool:
-                continue
-
-            if only_prepared and not samples_prepared_bool:
-                continue
-
-            if only_sequenced and not samples_sequenced_bool:
-                continue
-
-            if only_analysed and not analysis_completed_bool:
-                continue
-
-            if only_uploaded and not analysis_uploaded_bool:
-                continue
-
-            if only_delivered and not samples_delivered_bool:
-                continue
-
-            if only_delivery_reported and not analysis_delivery_reported_bool:
-                continue
-
-            if only_invoiced and not samples_invoiced_bool:
-                continue
-
-            if exclude_received and samples_received_bool:
-                continue
-
-            if exclude_prepared and samples_prepared_bool:
-                continue
-
-            if exclude_sequenced and samples_sequenced_bool:
-                continue
-
-            if exclude_analysed and analysis_completed_bool:
-                continue
-
-            if exclude_uploaded and analysis_uploaded_bool:
-                continue
-
-            if exclude_delivered and samples_delivered_bool:
-                continue
-
-            if exclude_delivery_reported and analysis_delivery_reported_bool:
-                continue
-
-            if exclude_invoiced and samples_invoiced_bool:
-                continue
-
-            # filter on a status
-            if progress_status and progress_status != analysis_status:
-                continue
-
-            is_rerun = self._is_rerun(
-                record, samples_received_at, samples_prepared_at, samples_sequenced_at
+            skip_case = self._should_be_skipped(
+                case_data,
+                exclude_analysed,
+                exclude_delivered,
+                exclude_delivery_reported,
+                exclude_invoiced,
+                exclude_prepared,
+                exclude_received,
+                exclude_sequenced,
+                exclude_uploaded,
+                only_analysed,
+                only_delivered,
+                only_delivery_reported,
+                only_invoiced,
+                only_prepared,
+                only_received,
+                only_sequenced,
+                only_uploaded,
             )
 
-            tat = self._calculate_estimated_turnaround_time(
-                is_rerun,
-                case_external_bool,
-                record.ordered_at,
-                samples_received_at,
-                samples_prepared_at,
-                samples_sequenced_at,
-                analysis_completed_at,
-                analysis_uploaded_at,
-                samples_delivered_at,
-            )
+            if skip_case:
+                continue
 
-            max_tat = self._get_max_tat(links=record.links)
+            case_output = self._get_case_output(case_data)
 
-            case = {
-                "internal_id": record.internal_id,
-                "name": record.name,
-                "ordered_at": record.ordered_at,
-                "total_samples": total_samples,
-                "total_external_samples": total_external_samples,
-                "total_internal_samples": total_internal_samples,
-                "case_external_bool": case_external_bool,
-                "samples_to_receive": samples_to_receive,
-                "samples_to_prepare": samples_to_prepare,
-                "samples_to_sequence": samples_to_sequence,
-                "samples_to_deliver": samples_to_deliver,
-                "samples_to_invoice": samples_to_invoice,
-                "samples_data_analyses": samples_data_analyses,
-                "samples_received": samples_received,
-                "samples_prepared": samples_prepared,
-                "samples_sequenced": samples_sequenced,
-                "samples_received_at": samples_received_at,
-                "samples_prepared_at": samples_prepared_at,
-                "samples_sequenced_at": samples_sequenced_at,
-                "samples_delivered_at": samples_delivered_at,
-                "samples_invoiced_at": samples_invoiced_at,
-                "case_action": case_action,
-                "analysis_status": analysis_status,
-                "analysis_completion": analysis_completion,
-                "analysis_completed_at": analysis_completed_at,
-                "analysis_uploaded_at": analysis_uploaded_at,
-                "samples_delivered": samples_delivered,
-                "analysis_delivery_reported_at": analysis_delivery_reported_at,
-                "samples_invoiced": samples_invoiced,
-                "analysis_pipeline": analysis_pipeline,
-                "samples_received_bool": samples_received_bool,
-                "samples_prepared_bool": samples_prepared_bool,
-                "samples_sequenced_bool": samples_sequenced_bool,
-                "analysis_completed_bool": analysis_completed_bool,
-                "analysis_uploaded_bool": analysis_uploaded_bool,
-                "samples_delivered_bool": samples_delivered_bool,
-                "analysis_delivery_reported_bool": analysis_delivery_reported_bool,
-                "samples_invoiced_bool": samples_invoiced_bool,
-                "flowcells_status": flowcells_status,
-                "flowcells_on_disk": flowcells_on_disk,
-                "flowcells_on_disk_bool": flowcells_on_disk_bool,
-                "tat": tat,
-                "is_rerun": is_rerun,
-                "max_tat": max_tat,
-            }
-
-            cases.append(case)
+            cases.append(case_output)
 
         cases_sorted = sorted(cases, key=lambda k: k["tat"], reverse=True)
 
         return cases_sorted
 
     @staticmethod
-    def _is_rerun(record, samples_received_at, samples_prepared_at, samples_sequenced_at):
+    def _get_case_output(case_data: SimpleNamespace):
+        case = {
+            "data_analysis": case_data.data_analysis,
+            "internal_id": case_data.internal_id,
+            "name": case_data.name,
+            "ordered_at": case_data.ordered_at,
+            "total_samples": case_data.total_samples,
+            "total_external_samples": case_data.total_external_samples,
+            "total_internal_samples": case_data.total_internal_samples,
+            "case_external_bool": case_data.case_external_bool,
+            "samples_to_receive": case_data.samples_to_receive,
+            "samples_to_prepare": case_data.samples_to_prepare,
+            "samples_to_sequence": case_data.samples_to_sequence,
+            "samples_to_deliver": case_data.samples_to_deliver,
+            "samples_to_invoice": case_data.samples_to_invoice,
+            "samples_received": case_data.samples_received,
+            "samples_prepared": case_data.samples_prepared,
+            "samples_sequenced": case_data.samples_sequenced,
+            "samples_received_at": case_data.samples_received_at,
+            "samples_prepared_at": case_data.samples_prepared_at,
+            "samples_sequenced_at": case_data.samples_sequenced_at,
+            "samples_delivered_at": case_data.samples_delivered_at,
+            "samples_invoiced_at": case_data.samples_invoiced_at,
+            "case_action": case_data.case_action,
+            "analysis_completed_at": case_data.analysis_completed_at,
+            "analysis_uploaded_at": case_data.analysis_uploaded_at,
+            "samples_delivered": case_data.samples_delivered,
+            "analysis_delivery_reported_at": case_data.analysis_delivery_reported_at,
+            "samples_invoiced": case_data.samples_invoiced,
+            "analysis_pipeline": case_data.analysis_pipeline,
+            "samples_received_bool": case_data.samples_received_bool,
+            "samples_prepared_bool": case_data.samples_prepared_bool,
+            "samples_sequenced_bool": case_data.samples_sequenced_bool,
+            "analysis_completed_bool": case_data.analysis_completed_bool,
+            "analysis_uploaded_bool": case_data.analysis_uploaded_bool,
+            "samples_delivered_bool": case_data.samples_delivered_bool,
+            "analysis_delivery_reported_bool": case_data.analysis_delivery_reported_bool,
+            "samples_invoiced_bool": case_data.samples_invoiced_bool,
+            "flowcells_status": case_data.flowcells_status,
+            "flowcells_on_disk": case_data.flowcells_on_disk,
+            "flowcells_on_disk_bool": case_data.flowcells_on_disk_bool,
+            "tat": case_data.tat,
+            "is_rerun": case_data.is_rerun,
+            "max_tat": case_data.max_tat,
+        }
+        return case
+
+    @staticmethod
+    def _should_be_skipped(
+        case_data,
+        exclude_analysed,
+        exclude_delivered,
+        exclude_delivery_reported,
+        exclude_invoiced,
+        exclude_prepared,
+        exclude_received,
+        exclude_sequenced,
+        exclude_uploaded,
+        only_analysed,
+        only_delivered,
+        only_delivery_reported,
+        only_invoiced,
+        only_prepared,
+        only_received,
+        only_sequenced,
+        only_uploaded,
+    ):
+        skip_case = False
+        if only_received and not case_data.samples_received_bool:
+            skip_case = True
+        if only_prepared and not case_data.samples_prepared_bool:
+            skip_case = True
+        if only_sequenced and not case_data.samples_sequenced_bool:
+            skip_case = True
+        if only_analysed and not case_data.analysis_completed_bool:
+            skip_case = True
+        if only_uploaded and not case_data.analysis_uploaded_bool:
+            skip_case = True
+        if only_delivered and not case_data.samples_delivered_bool:
+            skip_case = True
+        if only_delivery_reported and not case_data.analysis_delivery_reported_bool:
+            skip_case = True
+        if only_invoiced and not case_data.samples_invoiced_bool:
+            skip_case = True
+        if exclude_received and case_data.samples_received_bool:
+            skip_case = True
+        if exclude_prepared and case_data.samples_prepared_bool:
+            skip_case = True
+        if exclude_sequenced and case_data.samples_sequenced_bool:
+            skip_case = True
+        if exclude_analysed and case_data.analysis_completed_bool:
+            skip_case = True
+        if exclude_uploaded and case_data.analysis_uploaded_bool:
+            skip_case = True
+        if exclude_delivered and case_data.samples_delivered_bool:
+            skip_case = True
+        if exclude_delivery_reported and case_data.analysis_delivery_reported_bool:
+            skip_case = True
+        if exclude_invoiced and case_data.samples_invoiced_bool:
+            skip_case = True
+        return skip_case
+
+    def _calculate_case_data(self, case_obj: models.Family):
+        case_data = self._get_empty_case_data()
+
+        case_data.data_analysis = case_obj.data_analysis
+        case_data.internal_id = case_obj.internal_id
+        case_data.name = case_obj.name
+        case_data.ordered_at = case_obj.ordered_at
+
+        case_data.analysis_in_progress = case_obj.action == "analyze"
+        case_data.case_action = case_obj.action
+        case_data.total_samples = len(case_obj.links)
+        case_data.total_external_samples = len(
+            [
+                link.sample.application_version.application.is_external
+                for link in case_obj.links
+                if link.sample.application_version.application.is_external
+            ]
+        )
+        case_data.total_internal_samples = (
+            case_data.total_samples - case_data.total_external_samples
+        )
+        case_data.case_external_bool = case_data.total_external_samples == case_data.total_samples
+        if case_data.total_samples > 0:
+            case_data.samples_received = len(
+                [link.sample.received_at for link in case_obj.links if link.sample.received_at]
+            )
+            case_data.samples_prepared = len(
+                [link.sample.prepared_at for link in case_obj.links if link.sample.prepared_at]
+            )
+            case_data.samples_sequenced = len(
+                [link.sample.sequenced_at for link in case_obj.links if link.sample.sequenced_at]
+            )
+            case_data.samples_delivered = len(
+                [link.sample.delivered_at for link in case_obj.links if link.sample.delivered_at]
+            )
+            case_data.samples_invoiced = len(
+                [
+                    link.sample.invoice.invoiced_at
+                    for link in case_obj.links
+                    if link.sample.invoice and link.sample.invoice.invoiced_at
+                ]
+            )
+
+            case_data.samples_to_receive = case_data.total_internal_samples
+            case_data.samples_to_prepare = case_data.total_internal_samples
+            case_data.samples_to_sequence = case_data.total_internal_samples
+            case_data.samples_to_deliver = case_data.total_internal_samples
+            case_data.samples_to_invoice = case_data.total_samples - len(
+                [link.sample.no_invoice for link in case_obj.links if link.sample.no_invoice]
+            )
+
+            case_data.samples_received_bool = (
+                case_data.samples_received == case_data.samples_to_receive
+            )
+            case_data.samples_prepared_bool = (
+                case_data.samples_prepared == case_data.samples_to_prepare
+            )
+            case_data.samples_sequenced_bool = (
+                case_data.samples_sequenced == case_data.samples_to_sequence
+            )
+            case_data.samples_delivered_bool = (
+                case_data.samples_delivered == case_data.samples_to_deliver
+            )
+            case_data.samples_invoiced_bool = (
+                case_data.samples_invoiced == case_data.samples_to_invoice
+            )
+
+            if case_data.samples_to_receive > 0 and case_data.samples_received_bool:
+                case_data.samples_received_at = max(
+                    [
+                        link.sample.received_at
+                        for link in case_obj.links
+                        if link.sample.received_at is not None
+                    ]
+                )
+
+            if case_data.samples_to_prepare > 0 and case_data.samples_prepared_bool:
+                case_data.samples_prepared_at = max(
+                    [
+                        link.sample.prepared_at
+                        for link in case_obj.links
+                        if link.sample.prepared_at is not None
+                    ]
+                )
+
+            if case_data.samples_to_sequence > 0 and case_data.samples_sequenced_bool:
+                case_data.samples_sequenced_at = max(
+                    [
+                        link.sample.sequenced_at
+                        for link in case_obj.links
+                        if link.sample.sequenced_at is not None
+                    ]
+                )
+
+            if case_data.samples_to_deliver > 0 and case_data.samples_delivered_bool:
+                case_data.samples_delivered_at = max(
+                    [
+                        link.sample.delivered_at
+                        for link in case_obj.links
+                        if link.sample.delivered_at is not None
+                    ]
+                )
+
+            if case_data.samples_to_invoice > 0 and case_data.samples_invoiced_bool:
+                case_data.samples_invoiced_at = max(
+                    [
+                        link.sample.invoice.invoiced_at
+                        for link in case_obj.links
+                        if link.sample.invoice and link.sample.invoice.invoiced_at
+                    ]
+                )
+
+            case_data.flowcells = len(
+                [flowcell.status for link in case_obj.links for flowcell in link.sample.flowcells]
+            )
+
+            case_data.flowcells_status = list(
+                set(
+                    flowcell.status for link in case_obj.links for flowcell in link.sample.flowcells
+                )
+            )
+            if case_data.flowcells < case_data.total_samples:
+                case_data.flowcells_status.append("new")
+
+            case_data.flowcells_status = ", ".join(case_data.flowcells_status)
+
+            case_data.flowcells_on_disk = len(
+                [
+                    flowcell.status
+                    for link in case_obj.links
+                    for flowcell in link.sample.flowcells
+                    if flowcell.status == "ondisk"
+                ]
+            )
+
+            case_data.flowcells_on_disk_bool = (
+                case_data.flowcells_on_disk == case_data.total_samples
+            )
+        if case_obj.analyses and not case_data.analysis_in_progress:
+            case_data.analysis_completed_at = case_obj.analyses[0].completed_at
+            case_data.analysis_uploaded_at = case_obj.analyses[0].uploaded_at
+            case_data.analysis_delivery_reported_at = case_obj.analyses[
+                0
+            ].delivery_report_created_at
+            case_data.analysis_pipeline = case_obj.analyses[0].pipeline
+            case_data.analysis_completed_bool = case_data.analysis_completed_at is not None
+            case_data.analysis_uploaded_bool = case_data.analysis_uploaded_at is not None
+            case_data.analysis_delivery_reported_bool = (
+                case_data.analysis_delivery_reported_at is not None
+            )
+        elif case_data.total_samples > 0:
+            case_data.analysis_completed_bool = False
+            case_data.analysis_uploaded_bool = False
+            case_data.analysis_delivery_reported_bool = False
+
+        case_data.is_rerun = self._is_rerun(
+            case_obj,
+            case_data.samples_received_at,
+            case_data.samples_prepared_at,
+            case_data.samples_sequenced_at,
+        )
+        case_data.tat = self._calculate_estimated_turnaround_time(
+            case_data.is_rerun,
+            case_data.case_external_bool,
+            case_obj.ordered_at,
+            case_data.samples_received_at,
+            case_data.samples_prepared_at,
+            case_data.samples_sequenced_at,
+            case_data.analysis_completed_at,
+            case_data.analysis_uploaded_at,
+            case_data.samples_delivered_at,
+        )
+        case_data.max_tat = self._get_max_tat(links=case_obj.links)
+        return case_data
+
+    def _get_filtered_case_query(
+        self,
+        case_action,
+        customer_id,
+        data_analysis,
+        days,
+        exclude_customer_id,
+        internal_id,
+        name,
+        priority,
+        sample_id,
+    ):
+        case_q = self.Family.query
+        # family filters
+        if days != 0:
+            filter_date = datetime.now() - timedelta(days=days)
+            case_q = case_q.filter(models.Family.ordered_at > filter_date)
+        if case_action:
+            case_q = case_q.filter(models.Family.action == case_action)
+        if priority:
+            priority_db = PRIORITY_MAP[priority]
+            case_q = case_q.filter(models.Family.priority == priority_db)
+        if internal_id:
+            case_q = case_q.filter(models.Family.internal_id.ilike(f"%{internal_id}%"))
+        if name:
+            case_q = case_q.filter(models.Family.name.ilike(f"%{name}%"))
+        if data_analysis:
+            case_q = case_q.filter(models.Family.data_analysis.ilike(f"%{data_analysis}%"))
+        # customer filters
+        if customer_id or exclude_customer_id:
+            case_q = case_q.join(models.Family.customer)
+
+            if customer_id:
+                case_q = case_q.filter(models.Customer.internal_id == customer_id)
+
+            if exclude_customer_id:
+                case_q = case_q.filter(models.Customer.internal_id != exclude_customer_id)
+        # sample filters
+        if sample_id:
+            case_q = case_q.join(models.Family.links, models.FamilySample.sample)
+            case_q = case_q.filter(models.Sample.internal_id.like(sample_id))
+        else:
+            case_q = case_q.outerjoin(models.Family.links, models.FamilySample.sample)
+        # other joins
+        case_q = case_q.outerjoin(
+            models.Family.analyses, models.Sample.invoice, models.Sample.flowcells
+        )
+        return case_q
+
+    @staticmethod
+    def _is_rerun(case_obj, samples_received_at, samples_prepared_at, samples_sequenced_at):
 
         return (
-            (len(record.analyses) > 0)
-            or (samples_received_at and samples_received_at < record.ordered_at)
-            or (samples_prepared_at and samples_prepared_at < record.ordered_at)
-            or (samples_sequenced_at and samples_sequenced_at < record.ordered_at)
+            (len(case_obj.analyses) > 0)
+            or (samples_received_at and samples_received_at < case_obj.ordered_at)
+            or (samples_prepared_at and samples_prepared_at < case_obj.ordered_at)
+            or (samples_sequenced_at and samples_sequenced_at < case_obj.ordered_at)
         )
 
     @staticmethod
@@ -561,20 +574,20 @@ class StatusHandler(BaseHandler):
     def observations_to_upload(self):
         """Fetch observations that haven't been uploaded."""
 
-        families_q = self.Family.query.join(
+        case_q = self.Family.query.join(
             models.Analysis, models.Family.links, models.FamilySample.sample
         ).filter(models.Sample.loqusdb_id.is_(None))
 
-        return families_q
+        return case_q
 
     def observations_uploaded(self):
         """Fetch observations that have been uploaded."""
 
-        families_q = self.Family.query.join(models.Family.links, models.FamilySample.sample).filter(
+        case_q = self.Family.query.join(models.Family.links, models.FamilySample.sample).filter(
             models.Sample.loqusdb_id.isnot(None)
         )
 
-        return families_q
+        return case_q
 
     def analyses_to_deliver(self, pipeline: str = ""):
         """Fetch analyses that have been uploaded but not delivered."""
@@ -597,12 +610,12 @@ class StatusHandler(BaseHandler):
 
         analyses_query = (
             analyses_query.filter(models.Analysis.uploaded_at)
-            .filter(HASTA_IN_PRODUCTION < models.Analysis.started_at)
+            .filter(VALID_DATA_IN_PRODUCTION < models.Analysis.started_at)
             .join(models.Family, models.Family.links, models.FamilySample.sample)
             .filter(
                 or_(
-                    models.Sample.data_analysis.is_(None),
-                    models.Sample.data_analysis.ilike(f"%{pipeline}%"),
+                    models.Family.data_analysis.is_(None),
+                    models.Family.data_analysis.ilike(f"%{pipeline}%"),
                 )
             )
             .filter(
@@ -653,11 +666,11 @@ class StatusHandler(BaseHandler):
         Returns microbial samples that have been delivered but not invoiced.
         """
         records = self.Sample.query.filter(
-            "microbial" in self.Sample.data_analysis,
+            "microbial" in self.Family.data_analysis,
             models.Sample.delivered_at is not None,
             models.Sample.invoice_id == None,
         )
-        customers_to_invoice = list(set([record.customer for record in records.all()]))
+        customers_to_invoice = list(set([case_obj.customer for case_obj in records.all()]))
         if customer:
             records = records.join(models.Family).filter(models.Family.customer_id == customer.id)
         return records, customers_to_invoice
@@ -675,9 +688,9 @@ class StatusHandler(BaseHandler):
             models.Sample.downsampled_to == None,
         )
         customers_to_invoice = [
-            record.customer
-            for record in records.all()
-            if not record.customer.internal_id == "cust000"
+            case_obj.customer
+            for case_obj in records.all()
+            if not case_obj.customer.internal_id == "cust000"
         ]
         customers_to_invoice = list(set(customers_to_invoice))
         records = records.filter(models.Sample.customer == customer) if customer else records
@@ -694,9 +707,9 @@ class StatusHandler(BaseHandler):
         )
 
         customers_to_invoice = [
-            record.customer
-            for record in records.all()
-            if not record.customer.internal_id == "cust000"
+            case_obj.customer
+            for case_obj in records.all()
+            if not case_obj.customer.internal_id == "cust000"
         ]
         customers_to_invoice = list(set(customers_to_invoice))
         records = records.filter(models.Pool.customer_id == customer.id) if customer else records
@@ -711,65 +724,6 @@ class StatusHandler(BaseHandler):
         """Fetch pools that have been not yet been delivered."""
         records = self.Pool.query.filter(
             models.Pool.received_at != None, models.Pool.delivered_at == None
-        )
-        return records
-
-    def microbial_samples_to_receive(self, external=False):
-        """Fetch microbial samples from statusdb that have no received_at date."""
-        records = (
-            self.MicrobialSample.query.join(
-                models.MicrobialSample.application_version, models.ApplicationVersion.application
-            )
-            .filter(
-                models.MicrobialSample.received_at == None,
-                models.Application.is_external == external,
-            )
-            .order_by(models.MicrobialSample.created_at)
-        )
-        return records
-
-    def microbial_samples_to_prepare(self, external=False):
-        """Fetch microbial samples from statusdb that have no prepared_at date."""
-        records = (
-            self.Sample.query.join(
-                models.Sample.application_version, models.ApplicationVersion.application
-            )
-            .filter(
-                "microbial" in self.Sample.data_analysis,
-                models.Sample.prepared_at == None,
-                models.Application.is_external == external,
-            )
-            .order_by(models.Sample.created_at)
-        )
-        return records
-
-    def microbial_samples_to_sequence(self, external=False):
-        """Fetch microbial samples from statusdb that have no sequenced_at date."""
-        records = (
-            self.Sample.query.join(
-                models.Sample.application_version, models.ApplicationVersion.application
-            )
-            .filter(
-                "microbial" in self.Sample.data_analysis,
-                models.Sample.sequenced_at == None,
-                models.Application.is_external == external,
-            )
-            .order_by(models.Sample.created_at)
-        )
-        return records
-
-    def microbial_samples_to_deliver(self, external=False):
-        """Fetch microbial samples from statusdb that have no delivered_at date."""
-        records = (
-            self.Sample.query.join(
-                models.Sample.application_version, models.ApplicationVersion.application
-            )
-            .filter(
-                "microbial" in self.Sample.data_analysis,
-                models.Sample.delivered_at == None,
-                models.Application.is_external == external,
-            )
-            .order_by(models.Sample.created_at)
         )
         return records
 
@@ -828,3 +782,51 @@ class StatusHandler(BaseHandler):
             if link.sample.application_version.application.turnaround_time:
                 max_tat = max(0, link.sample.application_version.application.turnaround_time)
         return max_tat
+
+    @staticmethod
+    def _get_empty_case_data() -> SimpleNamespace:
+        case_data = SimpleNamespace()
+        case_data.data_analysis = None
+        case_data.internal_id = None
+        case_data.name = None
+        case_data.ordered_at = None
+        case_data.total_samples = None
+        case_data.total_external_samples = None
+        case_data.total_internal_samples = None
+        case_data.case_external_bool = None
+        case_data.samples_to_receive = None
+        case_data.samples_to_prepare = None
+        case_data.samples_to_sequence = None
+        case_data.samples_to_deliver = None
+        case_data.samples_to_invoice = None
+        case_data.samples_received = None
+        case_data.samples_prepared = None
+        case_data.samples_sequenced = None
+        case_data.samples_received_at = None
+        case_data.samples_prepared_at = None
+        case_data.samples_sequenced_at = None
+        case_data.samples_delivered_at = None
+        case_data.samples_invoiced_at = None
+        case_data.case_action = None
+        case_data.analysis_completed_at = None
+        case_data.analysis_uploaded_at = None
+        case_data.samples_delivered = None
+        case_data.analysis_delivery_reported_at = None
+        case_data.samples_invoiced = None
+        case_data.analysis_pipeline = None
+        case_data.samples_received_bool = None
+        case_data.samples_prepared_bool = None
+        case_data.samples_sequenced_bool = None
+        case_data.analysis_completed_bool = None
+        case_data.analysis_uploaded_bool = None
+        case_data.samples_delivered_bool = None
+        case_data.analysis_delivery_reported_bool = None
+        case_data.samples_invoiced_bool = None
+        case_data.flowcells_status = None
+        case_data.flowcells_on_disk = None
+        case_data.flowcells_on_disk_bool = None
+        case_data.tat = None
+        case_data.is_rerun = None
+        case_data.max_tat = None
+
+        return case_data

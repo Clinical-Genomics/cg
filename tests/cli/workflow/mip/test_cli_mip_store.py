@@ -62,7 +62,7 @@ def test_store_completed_good_cases(
 ):
     """Test if store completed stores function"""
 
-    with caplog.at_level("ERROR", "INFO"):
+    with caplog.at_level("INFO"):
         trailblazer_api = mip_store_context["trailblazer_api"]
         trailblazer_api.ensure_analyses_response(
             [
@@ -95,6 +95,6 @@ def test_store_completed_good_cases(
         assert "new bundle added: yellowhog" in caplog.text
         assert "case storage failed: purplesnail" in caplog.text
         assert "new bundle added: bluezebra" in caplog.text
-        assert "included files in Housekeeper" in caplog.text
+        assert "Included files in Housekeeper" in caplog.text
         # THEN the command should have an EXIT_FAIL code
         assert result.exit_code == EXIT_FAIL

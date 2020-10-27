@@ -13,6 +13,9 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [13.13.0]
+### Changed
+- Move data_analysis from sample level to case level to enable samples to be analysed differently in different cases
 
 ## [13.12.0]
 ### Added

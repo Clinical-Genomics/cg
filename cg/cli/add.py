@@ -148,10 +148,11 @@ def sample(context, lims_id, downsampled, sex, order, application, priority, cus
     "--priority", type=click.Choice(PRIORITY_OPTIONS), default="standard", help="analysis priority"
 )
 @click.option("-p", "--panel", "panels", multiple=True, required=True, help="default gene panels")
+@click.option("-a", "--analysis", required=True, help="Analysis workflow")
 @click.argument("customer_id")
 @click.argument("name")
 @click.pass_context
-def family(context, priority, panels, customer_id, name):
+def family(context, priority, panels, analysis, customer_id, name):
     """Add a family to CUSTOMER_ID with a NAME."""
     status = context.obj["status_db"]
     customer_obj = status.customer(customer_id)
@@ -165,7 +166,9 @@ def family(context, priority, panels, customer_id, name):
             LOG.error(f"{panel_id}: panel not found")
             context.abort()
 
-    new_family = status.add_family(name=name, panels=panels, priority=priority)
+    new_family = status.add_family(
+        data_analysis=analysis, name=name, panels=panels, priority=priority
+    )
     new_family.customer = customer_obj
     status.add_commit(new_family)
     LOG.info(f"{new_family.internal_id}: new family added")

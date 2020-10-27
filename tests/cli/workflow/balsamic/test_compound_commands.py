@@ -1,7 +1,5 @@
 from pathlib import Path
-import json
 import logging
-import pytest
 
 from cg.cli.workflow.balsamic.base import (
     balsamic,

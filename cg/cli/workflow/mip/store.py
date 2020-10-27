@@ -50,8 +50,6 @@ def analysis(context, config_stream):
             status,
             workflow="mip",
         )
-        status.add_commit(new_analysis)
-        LOG.info("Included files in Housekeeper")
     except (
         AnalysisNotFinishedError,
         AnalysisDuplicationError,
@@ -65,7 +63,9 @@ def analysis(context, config_stream):
         LOG.error(f"Missing file: {error.args[0]}")
         exit_code = EXIT_FAIL
     if exit_code:
-        raise click.Abort
+        raise click.Abort()
+    status.add_commit(new_analysis)
+    LOG.info("Included files in Housekeeper")
 
 
 @store.command()
@@ -79,14 +79,14 @@ def completed(context):
     for analysis_obj in tb_api.analyses(status="completed", deleted=False):
         existing_record = hk_api.version(analysis_obj.family, analysis_obj.started_at)
         if existing_record:
-            LOG.debug("analysis stored: %s - %s", analysis_obj.family, analysis_obj.started_at)
+            LOG.info("analysis stored: %s - %s", analysis_obj.family, analysis_obj.started_at)
             continue
-        click.echo(click.style(f"storing family: {analysis_obj.family}", fg="blue"))
+        LOG.info(f"storing family: {analysis_obj.family}")
         with Path(analysis_obj.config_path).open() as config_stream:
             try:
                 context.invoke(analysis, config_stream=config_stream)
             except (Exception, click.Abort):
-                LOG.error("Case storage failed: %s", analysis_obj.family, exc_info=True)
+                LOG.error("case storage failed: %s", analysis_obj.family, exc_info=True)
                 exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort
