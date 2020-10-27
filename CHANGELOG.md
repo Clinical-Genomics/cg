@@ -13,7 +13,6 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-<<<<<<< HEAD
 ## [13.14.2]
 
 ### Changed
