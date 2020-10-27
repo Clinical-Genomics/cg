@@ -13,11 +13,20 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## [13.14.2]
+## [13.14.3]
 
 ### Changed
 
 - Refactors constants file
+
+## [13.14.2]
+
+### Fixed
+ 
+ - Fixed bug where CalledProcessError class could not be represented as string, and broke workflows.
+ - Rephrased query used for compression. The query output is unchanged
+ - Fixed typo in query name
+ 
 
 ## [13.14.1]
 ### Removed
