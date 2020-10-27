@@ -13,6 +13,7 @@ def analysis_completed(store: Store) -> Query:
     cases = (
         store.Family.query.join(models.Analysis)
         .filter(models.Family.analyses)
+        .filter(models.Family.action == None)
         .order_by(models.Family.created_at.asc())
     )
     return cases
