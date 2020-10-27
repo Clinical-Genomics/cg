@@ -1,6 +1,5 @@
 """This script tests the cli mip store functions"""
 import logging
-from pathlib import Path
 
 from click.testing import CliRunner
 
