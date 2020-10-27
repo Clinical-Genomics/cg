@@ -35,3 +35,4 @@ COMBOS = {
 COLLABORATORS = ("cust000", "cust002", "cust003", "cust004", "cust042")
 
 FLOWCELL_STATUS = ("ondisk", "removed", "requested", "processing")
+PIPELINE_OPTIONS = ("balsamic", "fastq", "microsalt", "mip-dna", "mip-rna")
