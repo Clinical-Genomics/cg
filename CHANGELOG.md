@@ -13,7 +13,14 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [13.14.3]
+
+### Changed
+
+- Refactors constants file
+
 ## [13.14.2]
+
 ### Fixed
  
  - Fixed bug where CalledProcessError class could not be represented as string, and broke workflows.
@@ -33,11 +40,6 @@ Try to use the following format:
 ### Added
 - Store all available completed microbial analyses in HK
 
-## [13.10.1]
-
-### Fixed
-- Storing chromograph, upd and rhocall files in housekeeper
-
 ## [13.11.0]
 
 ### Changed
@@ -46,6 +48,11 @@ Try to use the following format:
 
 ### Fixed
 - Format print statements
+
+## [13.10.2]
+
+### Fixed
+- Storing chromograph, upd and rhocall files in housekeeper
 
 ## [13.10.1]
 
