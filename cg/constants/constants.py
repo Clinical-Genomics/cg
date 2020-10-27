@@ -1,12 +1,4 @@
-"""Constans for cg"""
-
-FAMILY_ACTIONS = ("analyze", "running", "hold")
-
-PREP_CATEGORIES = ("wgs", "wes", "tgs", "wts", "mic", "rml")
-
-SEX_OPTIONS = ("male", "female", "unknown")
-
-STATUS_OPTIONS = ("affected", "unaffected", "unknown")
+"""Constants for cg"""
 
 CONTAINER_OPTIONS = ("Tube", "96 well plate")
 
@@ -25,7 +17,6 @@ CAPTUREKIT_CANCER_OPTIONS = (
     "LymphoMATIC",
     "other (specify in comment field)",
 )
-DEFAULT_CAPTURE_KIT = "twistexomerefseq_9.1_hg19_design.bed"
 
 COMBOS = {
     "DSD": ("DSD", "HYP", "SEXDIF", "SEXDET"),
@@ -34,5 +25,16 @@ COMBOS = {
 }
 COLLABORATORS = ("cust000", "cust002", "cust003", "cust004", "cust042")
 
+DEFAULT_CAPTURE_KIT = "twistexomerefseq_9.1_hg19_design.bed"
+
+FAMILY_ACTIONS = ("analyze", "running", "hold")
+
 FLOWCELL_STATUS = ("ondisk", "removed", "requested", "processing")
+
 PIPELINE_OPTIONS = ("balsamic", "fastq", "microsalt", "mip-dna", "mip-rna")
+
+PREP_CATEGORIES = ("wgs", "wes", "tgs", "wts", "mic", "rml")
+
+SEX_OPTIONS = ("male", "female", "unknown")
+
+STATUS_OPTIONS = ("affected", "unaffected", "unknown")
