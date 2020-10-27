@@ -141,10 +141,10 @@ def test_sample_flowcell(base_store: Store):
 
 
 def test_case_action(base_store: Store):
-    """Test to that cases displays no analysis dates for active reruns """
+    """Test that case action is fetched by cases() method """
 
     # GIVEN a database with an analysis that was completed but has an active rerun in progress
-    analysis = add_analysis(base_store, completed=True, uploaded=True)
+    analysis = add_analysis(base_store, completed=True, uploaded=True, pipeline="mip")
     analysis.family.action = "analyze"
 
     # WHEN getting active cases
