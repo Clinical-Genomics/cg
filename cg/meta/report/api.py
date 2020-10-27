@@ -55,7 +55,7 @@ class ReportAPI:
 
     def _handle_missing_report_data(self, accept_missing_data, delivery_data, case_id):
         """Handle when some crucial data is missing in the report"""
-        if not self.report_validator.has_required_data(delivery_data):
+        if not self.report_validator.has_required_data(delivery_data, case_id):
             if not accept_missing_data:
                 raise DeliveryReportError(
                     f"Could not generate report data for {case_id}, "
@@ -190,6 +190,7 @@ class ReportAPI:
 
         delivery_data_samples = list()
         case_samples = self.store.family_samples(case_id)
+        case = self.store.family(case_id)
 
         for case_sample in case_samples:
             sample = case_sample.sample
@@ -210,7 +211,7 @@ class ReportAPI:
             )
 
             delivery_data_sample["capture_kit"] = sample.capture_kit
-            delivery_data_sample["data_analysis"] = sample.data_analysis
+            delivery_data_sample["data_analysis"] = case.data_analysis
             delivery_data_samples.append(delivery_data_sample)
 
         return delivery_data_samples

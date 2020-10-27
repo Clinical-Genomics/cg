@@ -86,7 +86,7 @@ def add_new_analysis(
 ) -> models.Analysis:
     """Function to create and return a new analysis database record"""
 
-    pipeline = case_obj.links[0].sample.data_analysis
+    pipeline = case_obj.data_analysis
 
     if not pipeline:
         raise PipelineUnknownError(f"No pipeline specified in {case_obj}")

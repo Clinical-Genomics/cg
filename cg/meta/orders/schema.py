@@ -21,7 +21,6 @@ class OrderType(Enum):
     MICROBIAL = "microbial"
     METAGENOME = "metagenome"
     BALSAMIC = "balsamic"
-    MIP_BALSAMIC = "mip_balsamic"
 
 
 class ListValidator(validators.Validator):
@@ -158,8 +157,6 @@ BALSAMIC_SAMPLE = {
     "quantity": OptionalNone(TypeValidatorNone(str)),
     "comment": OptionalNone(TypeValidatorNone(str)),
 }
-
-MIP_BALSAMIC_SAMPLE = {**BALSAMIC_SAMPLE, **MIP_SAMPLE}
 
 MIP_RNA_SAMPLE = {
     "internal_id": OptionalNone(TypeValidatorNone(str)),
@@ -319,9 +316,6 @@ ORDER_SCHEMES = {
     OrderType.MIP: Scheme({**BASE_PROJECT, "samples": ListValidator(MIP_SAMPLE, min_items=1)}),
     OrderType.BALSAMIC: Scheme(
         {**BASE_PROJECT, "samples": ListValidator(BALSAMIC_SAMPLE, min_items=1)}
-    ),
-    OrderType.MIP_BALSAMIC: Scheme(
-        {**BASE_PROJECT, "samples": ListValidator(MIP_BALSAMIC_SAMPLE, min_items=1)}
     ),
     OrderType.MIP_RNA: Scheme(
         {**BASE_PROJECT, "samples": ListValidator(MIP_RNA_SAMPLE, min_items=1)}

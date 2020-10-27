@@ -17,6 +17,7 @@ def analysis_store(base_store, analysis_family):
     """Setup a store instance for testing analysis API."""
     customer = base_store.customer("cust000")
     family = base_store.Family(
+        data_analysis=analysis_family["data_analysis"],
         name=analysis_family["name"],
         panels=analysis_family["panels"],
         internal_id=analysis_family["internal_id"],
@@ -33,7 +34,6 @@ def analysis_store(base_store, analysis_family):
             ticket=sample_data["ticket_number"],
             reads=sample_data["reads"],
             capture_kit=sample_data["capture_kit"],
-            data_analysis=sample_data["data_analysis"],
         )
         sample.family = family
         sample.application_version = application_version
