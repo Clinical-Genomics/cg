@@ -13,16 +13,24 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## [13.10.2]
+<<<<<<< HEAD
+## [13.14.2]
 
 ### Changed
 
 - Refactors constants file
 
-## [13.10.1]
+## [13.14.1]
+### Removed
+- Remove data_analysis from sample since it is deprecated
 
-### Fixed
-- Storing chromograph, upd and rhocall files in housekeeper
+## [13.14.0]
+### Changed
+- Move data_analysis from sample level to case level to enable samples to be analysed differently in different cases
+
+## [13.12.0]
+### Added
+- Store all available completed microbial analyses in HK
 
 ## [13.11.0]
 
@@ -32,6 +40,11 @@ Try to use the following format:
 
 ### Fixed
 - Format print statements
+
+## [13.10.2]
+
+### Fixed
+- Storing chromograph, upd and rhocall files in housekeeper
 
 ## [13.10.1]
 
