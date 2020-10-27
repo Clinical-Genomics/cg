@@ -46,13 +46,6 @@ def mip_orderform(orderforms: Path) -> str:
 
 
 @pytest.fixture
-def mip_balsamic_orderform(orderforms: Path) -> str:
-    """Orderform fixture for MIP and Balsamic samples"""
-    _file = orderforms / "1508.21.mip_balsamic.xlsx"
-    return str(_file)
-
-
-@pytest.fixture
 def mip_rna_orderform(orderforms: Path) -> str:
     """Orderform fixture for MIP RNA samples"""
     _file = orderforms / "1508.21.mip_rna.xlsx"

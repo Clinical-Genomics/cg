@@ -13,6 +13,17 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [13.14.1]
+### Removed
+- Remove data_analysis from sample since it is deprecated
+
+## [13.14.0]
+### Changed
+- Move data_analysis from sample level to case level to enable samples to be analysed differently in different cases
+
+## [13.12.0]
+### Added
+- Store all available completed microbial analyses in HK
 
 ## [13.10.1]
 

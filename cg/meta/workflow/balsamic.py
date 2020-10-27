@@ -130,7 +130,7 @@ class BalsamicAnalysisAPI:
         case_object = self.get_case_object(case_id=case_id)
         valid_sample_list = []
         for link in case_object.links:
-            if "balsamic" in link.sample.data_analysis.lower():
+            if "balsamic" in case_object.data_analysis.lower():
                 valid_sample_list.append(link)
         return valid_sample_list
 
@@ -138,7 +138,7 @@ class BalsamicAnalysisAPI:
         """Links and copies files to working directory"""
         for link_object in self.get_balsamic_sample_objects(case_id=case_id):
             LOG.info(
-                f"{link_object.sample.internal_id}: {link_object.sample.data_analysis} linking FASTQ files"
+                f"{link_object.sample.internal_id}: {link_object.family.data_analysis} linking FASTQ files"
             )
             file_collection = self.get_file_collection(sample_id=link_object.sample.internal_id)
             self.fastq_handler.link(
@@ -439,7 +439,7 @@ class BalsamicAnalysisAPI:
         query = (
             self.store.Sample.query.join(models.Family.links, models.FamilySample.sample)
             .filter(models.Family.internal_id == case_id)
-            .filter(models.Sample.data_analysis.ilike("%Balsamic%"))
+            .filter(models.Family.data_analysis.ilike("%Balsamic%"))
         )
 
         return all(
