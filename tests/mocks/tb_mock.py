@@ -1,4 +1,7 @@
 class MockTB:
+    def __init__(self):
+        self.analyses_response = []
+
     def is_latest_analysis_ongoing(self, *args, **kwargs) -> bool:
         return False
 
@@ -15,4 +18,7 @@ class MockTB:
         return False
 
     def analyses(self, *args, **kwargs):
-        return []
+        return self.analyses_response
+
+    def ensure_analyses_response(self, analyses_list):
+        self.analyses_response = analyses_list

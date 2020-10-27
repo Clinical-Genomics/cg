@@ -279,47 +279,13 @@ def mip_context(
     }
 
 
-class MockTBStoreAPI(MockTB):
-    def analyses(self, *args, **kwargs):
-        if kwargs.get("status") == "completed" and kwargs.get("deleted") == False:
-            return [
-                TrailblazerAnalysis.parse_obj(
-                    {
-                        "id": 1,
-                        "family": "yellowhog",
-                        "config_path": Path(
-                            mock_root_folder, "yellowhog", "yellowhog_config.yaml"
-                        ).as_posix(),
-                    }
-                ),
-                TrailblazerAnalysis.parse_obj(
-                    {
-                        "id": 2,
-                        "family": "bluezebra",
-                        "config_path": Path(
-                            mock_root_folder, "bluezebra", "bluezebra_config.yaml"
-                        ).as_posix(),
-                    }
-                ),
-                TrailblazerAnalysis.parse_obj(
-                    {
-                        "id": 3,
-                        "family": "purplesnail",
-                        "config_path": Path(
-                            mock_root_folder, "purplesnail", "purplesnail_config.yaml"
-                        ).as_posix(),
-                    }
-                ),
-            ]
-
-
 @pytest.fixture(name="mip_store_context")
 def mip_store_context(
     trailblazer_api, _store: Store, empty_housekeeper_api: HousekeeperAPI
 ) -> dict:
     """Create a context to be used in testing mip store, this should be fused with mip_context above at later stages"""
     return {
-        "trailblazer_api": MockTBStoreAPI(),
+        "trailblazer_api": trailblazer_api,
         "housekeeper_api": empty_housekeeper_api,
         "status_db": _store,
     }

@@ -1,10 +1,12 @@
 """This script tests the cli mip store functions"""
 import logging
+from pathlib import Path
 
 from click.testing import CliRunner
 
 from cg.cli.workflow.mip.store import analysis, completed
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
+from cg.apps.tb.models import TrailblazerAnalysis
 
 
 def test_store_no_config(cli_runner: CliRunner, mip_store_context: dict, caplog):
@@ -56,11 +58,37 @@ def test_store_analysis(
 
 
 def test_store_completed_good_cases(
-    cli_runner: CliRunner, mip_store_context: dict, mip_case_ids: dict, caplog
+    cli_runner: CliRunner, mip_store_context: dict, mip_case_ids: dict, mip_configs, caplog
 ):
     """Test if store completed stores function"""
 
     with caplog.at_level("ERROR", "INFO"):
+        trailblazer_api = mip_store_context["trailblazer_api"]
+        trailblazer_api.ensure_analyses_response(
+            [
+                TrailblazerAnalysis.parse_obj(
+                    {
+                        "id": 1,
+                        "family": "yellowhog",
+                        "config_path": mip_configs["yellowhog"].as_posix(),
+                    }
+                ),
+                TrailblazerAnalysis.parse_obj(
+                    {
+                        "id": 2,
+                        "family": "bluezebra",
+                        "config_path": mip_configs["bluezebra"].as_posix(),
+                    }
+                ),
+                TrailblazerAnalysis.parse_obj(
+                    {
+                        "id": 3,
+                        "family": "purplesnail",
+                        "config_path": mip_configs["purplesnail"].as_posix(),
+                    }
+                ),
+            ]
+        )
         # WHEN we run store all completed cases
         result = cli_runner.invoke(completed, obj=mip_store_context)
         # THEN some cases should be added and some should fail
