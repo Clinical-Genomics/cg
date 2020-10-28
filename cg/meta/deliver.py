@@ -2,10 +2,18 @@
 
 import logging
 
-from cg.apps import hk, lims
+from datetime import datetime
+from typing import List, Iterable
+from pathlib import Path
+
+from cg.apps.hk import HousekeeperAPI
 from cg.store import Store
+from cg.store.models import Family
+
+from housekeeper.store import models as hk_models
 
 LOG = logging.getLogger(__name__)
+PROJECT_BASE_PATH = Path("/home/proj/production/customers")
 
 
 class DeliverAPI:
@@ -13,29 +21,67 @@ class DeliverAPI:
 
     def __init__(
         self,
-        db: Store,
-        hk_api: hk.HousekeeperAPI,
-        lims_api: lims.LimsAPI,
-        case_tags: [str],
-        sample_tags: [str],
+        store: Store,
+        hk_api: HousekeeperAPI,
+        case_tags: List[str],
+        sample_tags: List[str],
+        project_base_path: Path = None,
     ):
-        self.store = db
+        """Initialize a delivery api
+
+        A delivery is made in the context of a ticket id that can be associated to one or many cases.
+        Each case can have one or multiple samples linked to them.
+
+        Each delivery is built around case tags and sample tags. All files tagged will the case_tags will be hard linked
+        to the inbox of a customer under <ticket_nr>/<case_id>. All files tagged with sample_tags will be linked to
+        <ticket_nr>/<case_id>/<sample_id>
+        """
+        self.store = store
         self.hk_api = hk_api
-        self.lims = lims_api
+        self.project_base_path = project_base_path or PROJECT_BASE_PATH
         self.case_tags = case_tags
         self.sample_tags = sample_tags
+        self.customer_id: str = None
+        self.ticket_id: str = None
 
-    def get_post_analysis_files(self, case: str, version, tags: list):
+    def deliver_case_files(self, case_obj: Family):
+        """Deliver files on case level"""
+
+    def get_cases(self, ticket_id: int = None, case_id: str = None) -> List[Family]:
+        """Fetch cases based on ticket id or case id"""
+        if not ticket_id or case_id:
+            LOG.error("Provide ticket_id or case_id")
+            raise SyntaxError()
+        if case_id:
+            case_obj: Family = self.store.family(case_id)
+            if case_obj is None:
+                LOG.warning("Could not find case %s", case_id)
+                return None
+            return [case_obj]
+        return []
+
+    def set_customer_id(self, case_obj: Family) -> None:
+        """Set the customer id for this upload"""
+        self.customer_id = case_obj.customer.internal_id
+
+    def get_post_analysis_files(
+        self, case: str, version: datetime = None, tags: List[str] = None
+    ) -> List[Path]:
 
         if not version:
-            last_version = self.hk_api.last_version(bundle=case)
+            last_version: hk_models.Version = self.hk_api.last_version(bundle=case)
         else:
-            last_version = self.hk_api.version(bundle=case, date=version)
+            last_version: hk_models.Version = self.hk_api.version(bundle=case, date=version)
 
-        return self.hk_api.files(bundle=case, version=last_version.id, tags=tags).all()
+        files = [
+            Path(hk_file.full_path)
+            for hk_file in self.hk_api.files(bundle=case, version=last_version.id, tags=tags).all()
+        ]
+
+        return files
 
     def get_post_analysis_case_files(self, case: str, version, tags):
-        """Link files from HK to cust inbox."""
+        """Fetch files on that """
 
         tagged_files = self.get_post_analysis_files(case, version, tags)
         case_obj = self.store.family_samples(case)
