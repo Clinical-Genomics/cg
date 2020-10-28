@@ -1,14 +1,14 @@
 """Module for deliveries of workflow files"""
 
 import logging
+import os
 
-from datetime import datetime
-from typing import List, Iterable
+from typing import List, Set
 from pathlib import Path
 
 from cg.apps.hk import HousekeeperAPI
 from cg.store import Store
-from cg.store.models import Family
+from cg.store.models import Family, Sample, FamilySample
 
 from housekeeper.store import models as hk_models
 
@@ -38,80 +38,164 @@ class DeliverAPI:
         """
         self.store = store
         self.hk_api = hk_api
-        self.project_base_path = project_base_path or PROJECT_BASE_PATH
-        self.case_tags = case_tags
-        self.sample_tags = sample_tags
-        self.customer_id: str = None
-        self.ticket_id: str = None
+        self.project_base_path: Path = project_base_path or PROJECT_BASE_PATH
+        self.case_tags: Set[str] = set(case_tags)
+        self.sample_tags: Set[str] = set(sample_tags)
+        self.customer_id: str = ""
+        self.ticket_id: str = ""
 
-    def deliver_case_files(self, case_obj: Family):
+    def deliver_files(self, case_obj: Family):
+        """Deliver all files for a case
+
+        If there are sample tags deliver all files for the samples as well
+        """
+        case_id: str = case_obj.internal_id
+        case_name: str = case_obj.name
+        last_version: hk_models.Version = self.hk_api.last_version(bundle=case_id)
+        link_objs: List[FamilySample] = self.store.family_samples(case_id)
+        if not link_objs:
+            LOG.warning("Could not find any samples linked to case %s", case_id)
+            return
+        samples: List[Sample] = [link.sample for link in link_objs]
+        sample_ids: Set[str] = set([sample.internal_id for sample in samples])
+        self.deliver_case_files(
+            case_id=case_id, case_name=case_name, version_obj=last_version, sample_ids=sample_ids
+        )
+
+        if not self.sample_tags:
+            return
+
+        link_objs: List[FamilySample] = self.store.family_samples(case_id)
+        if not link_objs:
+            LOG.warning("Could not find any samples linked to case %s", case_id)
+            return
+        link_obj: FamilySample
+        for link_obj in link_objs:
+            sample_id: str = link_obj.sample.internal_id
+            sample_name: str = link_obj.sample.name
+            self.deliver_sample_files(
+                case_id=case_id,
+                case_name=case_name,
+                sample_id=sample_id,
+                sample_name=sample_name,
+                version_obj=last_version,
+            )
+
+    def deliver_case_files(
+        self, case_id: str, case_name: str, version_obj: hk_models.Version, sample_ids: Set[str]
+    ) -> None:
         """Deliver files on case level"""
+        # Make sure that the directory exists
+        delivery_base: Path = self.create_delivery_dir(case_name=case_name)
+        file_path: Path
+        nr_files: int = 0
+        for nr_files, file_path in enumerate(
+            self.get_case_files_from_version(version_obj=version_obj, sample_ids=sample_ids), 1
+        ):
+            # Out path should include customer names
+            out_path: Path = delivery_base / file_path.name.replace(case_id, case_name)
+            LOG.info("Hard link file %s to %s", file_path, out_path)
+            os.link(file_path, out_path)
+        LOG.info("Linked %s files for case %s", nr_files, case_id)
 
-    def get_cases(self, ticket_id: int = None, case_id: str = None) -> List[Family]:
-        """Fetch cases based on ticket id or case id"""
-        if not ticket_id or case_id:
-            LOG.error("Provide ticket_id or case_id")
-            raise SyntaxError()
-        if case_id:
-            case_obj: Family = self.store.family(case_id)
-            if case_obj is None:
-                LOG.warning("Could not find case %s", case_id)
-                return None
-            return [case_obj]
-        return []
+    def deliver_sample_files(
+        self,
+        case_id: str,
+        case_name: str,
+        sample_id: str,
+        sample_name: str,
+        version_obj: hk_models.Version,
+    ) -> None:
+        """Deliver files on sample level"""
+        # Make sure that the directory exists
+        delivery_base: Path = self.create_delivery_dir(case_name=case_name, sample_name=sample_name)
+        file_path: Path
+        nr_files: int = 0
+        for nr_files, file_path in enumerate(
+            self.get_sample_files_from_version(version_obj=version_obj, sample_id=sample_id), 1
+        ):
+            # Out path should include customer names
+            out_path: Path = delivery_base / file_path.name.replace(case_id, case_name).replace(
+                sample_id, sample_name
+            )
+            LOG.info("Hard link file %s to %s", file_path, out_path)
+            os.link(file_path, out_path)
+        LOG.info("Linked %s files for sample %s, case %s", nr_files, sample_id, case_id)
+
+    def get_case_files_from_version(
+        self, version_obj: hk_models.Version, sample_ids: Set[str]
+    ) -> List[Path]:
+        """Fetch all case files from a version that are tagged with any of the case tags"""
+        file_obj: hk_models.File
+        for file_obj in version_obj.files:
+            if not self.include_file_case(file_obj, sample_ids=sample_ids):
+                continue
+            yield Path(file_obj.full_path)
+
+    def get_sample_files_from_version(
+        self, version_obj: hk_models.Version, sample_id: str
+    ) -> List[Path]:
+        """Fetch all files for a sample from a version that are tagged with any of the sample tags"""
+        file_obj: hk_models.File
+        for file_obj in version_obj.files:
+            if not self.include_file_sample(file_obj, sample_id=sample_id):
+                continue
+            yield Path(file_obj.full_path)
+
+    def include_file_case(self, file_obj: hk_models.File, sample_ids: Set[str]) -> bool:
+        """Check if file should be included in case bundle
+
+        At least one tag should match between file and tags.
+        Do not include files with sample tags.
+        """
+        tag: hk_models.Tag
+        file_tags = set([tag.name for tag in file_obj.tags])
+        # Check if any of the file tags matches the case tags
+        if self.case_tags.isdisjoint(file_tags):
+            return False
+
+        # Check if any of the sample tags exist
+        if not sample_ids.isdisjoint(file_tags):
+            return False
+
+        return True
+
+    def include_file_sample(self, file_obj: hk_models.File, sample_id: str) -> bool:
+        """Check if file should be included in sample bundle
+
+        At least one tag should match between file and tags.
+        Only include files with sample tag.
+        """
+        tag: hk_models.Tag
+        file_tags = set([tag.name for tag in file_obj.tags])
+        # Check if any of the file tags matches the sample tags
+        if self.sample_tags.isdisjoint(file_tags):
+            return False
+
+        # Check if any of the sample tags exist
+        if sample_id not in file_tags:
+            return False
+
+        return True
 
     def set_customer_id(self, case_obj: Family) -> None:
-        """Set the customer id for this upload"""
+        """Set the customer_id for this upload"""
         self.customer_id = case_obj.customer.internal_id
 
-    def get_post_analysis_files(
-        self, case: str, version: datetime = None, tags: List[str] = None
-    ) -> List[Path]:
+    def set_ticket_id(self, sample_obj: Sample) -> None:
+        """Set the ticket_id for this upload"""
+        self.ticket_id = sample_obj.ticket_number
 
-        if not version:
-            last_version: hk_models.Version = self.hk_api.last_version(bundle=case)
-        else:
-            last_version: hk_models.Version = self.hk_api.version(bundle=case, date=version)
+    def create_delivery_dir(self, case_name: str, sample_name: str = None) -> Path:
+        """Create a path for delivering files
 
-        files = [
-            Path(hk_file.full_path)
-            for hk_file in self.hk_api.files(bundle=case, version=last_version.id, tags=tags).all()
-        ]
-
-        return files
-
-    def get_post_analysis_case_files(self, case: str, version, tags):
-        """Fetch files on that """
-
-        tagged_files = self.get_post_analysis_files(case, version, tags)
-        case_obj = self.store.family_samples(case)
-        sample_ids = [case_sample.sample.internal_id for case_sample in case_obj]
-
-        case_files = []
-        for file_obj in tagged_files:
-
-            if any(tag.name in sample_ids for tag in file_obj.tags):
-                continue
-
-            if any(tag.name in self.case_tags for tag in file_obj.tags):
-                case_files.append(file_obj)
-
-        return case_files
-
-    def get_post_analysis_sample_files(self, case: str, sample: str, version, tag):
-        """Link files from HK to cust inbox."""
-
-        all_files = self.get_post_analysis_files(case, version, tag)
-
-        sample_files = []
-        for file_obj in all_files:
-            if not any(tag.name == sample for tag in file_obj.tags):
-                continue
-
-            if any(tag.name in self.sample_tags for tag in file_obj.tags):
-                sample_files.append(file_obj)
-
-        return sample_files
-
-    def get_post_analysis_files_root_dir(self):
-        return self.hk_api.get_root_dir()
+        Note that case name and sample name needs to be the identifiers sent from customer
+        """
+        delivery_path = (
+            self.project_base_path / self.customer_id / "inbox" / self.ticket_id / case_name
+        )
+        if sample_name:
+            delivery_path = delivery_path / sample_name
+        LOG.debug("Creating project path %s", delivery_path)
+        delivery_path.mkdir(parents=True, exist_ok=True)
+        return delivery_path
