@@ -108,6 +108,12 @@ class StatusHandler(BaseHandler):
         )
         return list(families_query)[:limit]
 
+    def get_cases_from_ticket(self, ticket_id: int) -> Query:
+        records = self.Family.query.join(models.Family.links, models.FamilySample.sample).filter(
+            models.Sample.ticket_number == ticket_id
+        )
+        return records
+
     def cases(
         self,
         internal_id=None,
