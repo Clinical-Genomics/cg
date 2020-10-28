@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List
 from pathlib import Path
 import ruamel
 from cg.apps.tb.models import TrailblazerAnalysis

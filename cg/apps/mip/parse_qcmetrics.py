@@ -1,7 +1,7 @@
 """Parse the MIP qc_metric file"""
 
 
-def set_bamstats_metrics(file_metrics: dict, sample_data: dict) -> dict:
+def set_bamstats_metrics(file_metrics: dict, sample_data: dict) -> None:
     """Set bamstats metrics. Sum the total mapped reads for all sample BAM files"""
     total_reads = sample_data.get("reads", 0)
     sample_data["reads"] = int(file_metrics["bamstats"]["raw_total_sequences"]) + total_reads
@@ -10,12 +10,12 @@ def set_bamstats_metrics(file_metrics: dict, sample_data: dict) -> dict:
     sample_data["total_mapped"] = int(file_metrics["bamstats"]["reads_mapped"]) + total_mapped
 
 
-def set_chanjo_sexcheck_metrics(file_metrics: dict, sample_data: dict) -> dict:
+def set_chanjo_sexcheck_metrics(file_metrics: dict, sample_data: dict) -> None:
     """Set chanjo_sexcheck metrics"""
     sample_data["predicted_sex"] = file_metrics["chanjo_sexcheck"]["gender"]
 
 
-def set_collecthsmetrics_metrics(file_metrics: dict, sample_data: dict) -> dict:
+def set_collecthsmetrics_metrics(file_metrics: dict, sample_data: dict) -> None:
     """Set collecthsmetrics metrics"""
     hs_metrics = file_metrics["collecthsmetrics"]["header"]["data"]
     sample_data["at_dropout"] = float(hs_metrics["AT_DROPOUT"])
@@ -29,20 +29,20 @@ def set_collecthsmetrics_metrics(file_metrics: dict, sample_data: dict) -> dict:
     sample_data["target_coverage"] = float(hs_metrics["MEAN_TARGET_COVERAGE"])
 
 
-def set_collectmultiplemetrics_metrics(file_metrics: dict, sample_data: dict) -> dict:
+def set_collectmultiplemetrics_metrics(file_metrics: dict, sample_data: dict) -> None:
     """Set collectmultiplemetrics metrics"""
     mm_metrics = file_metrics["collectmultiplemetrics"]["header"]["pair"]
     sample_data["strand_balance"] = float(mm_metrics["STRAND_BALANCE"])
 
 
-def set_collectmultiplemetricsinsertsize_metrics(file_metrics: dict, sample_data: dict) -> dict:
+def set_collectmultiplemetricsinsertsize_metrics(file_metrics: dict, sample_data: dict) -> None:
     """Set collectmultiplemetricsinsertsize metrics"""
     mm_insert_metrics = file_metrics["collectmultiplemetricsinsertsize"]["header"]["data"]
     sample_data["median_insert_size"] = int(mm_insert_metrics["MEDIAN_INSERT_SIZE"])
     sample_data["insert_size_standard_deviation"] = float(mm_insert_metrics["STANDARD_DEVIATION"])
 
 
-def set_markduplicates_metrics(file_metrics: dict, sample_data: dict) -> dict:
+def set_markduplicates_metrics(file_metrics: dict, sample_data: dict) -> None:
     """Set markduplicates metrics"""
     sample_data["duplicates"] = float(file_metrics["markduplicates"]["fraction_duplicates"])
 
