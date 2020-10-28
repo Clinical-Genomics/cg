@@ -290,7 +290,7 @@ def start(context: click.Context, dry_run: bool = False):
         has_started = dna_api.has_latest_analysis_started(case_id=case_obj.internal_id)
         if has_started:
             status = dna_api.get_latest_analysis_status(case_id=case_obj.internal_id)
-            LOG.warning("%s: analysis is %s - skipping", case_obj.internal_id, status)
+            LOG.warning(f"{case_obj.internal_id}: analysis is {status} - skipping")
             continue
         if dry_run:
             continue
@@ -304,7 +304,7 @@ def start(context: click.Context, dry_run: bool = False):
             LOG.error(error.message)
             exit_code = EXIT_FAIL
         except Exception as e:
-            LOG.error(f"Error occurred for case {case_obj.internal_id} - {e}")
+            LOG.error(f"Unspecified error occurred - {e.__class__}")
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort
