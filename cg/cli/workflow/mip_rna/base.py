@@ -9,7 +9,6 @@ from cg.apps.environ import environ_email
 from cg.cli.workflow.get_links import get_links
 from cg.cli.workflow.mip.store import store as store_cmd
 from cg.cli.workflow.mip_rna.deliver import CASE_TAGS, SAMPLE_TAGS
-from cg.cli.workflow.mip_rna.deliver import deliver as deliver_cmd
 from cg.meta.deliver import DeliverAPI
 from cg.meta.workflow.mip import AnalysisAPI
 from cg.store import Store
@@ -135,4 +134,3 @@ def config_case(context: click.Context, case_id: str, dry: bool = False):
 
 
 mip_rna.add_command(store_cmd)
-mip_rna.add_command(deliver_cmd)

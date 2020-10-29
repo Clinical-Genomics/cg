@@ -8,7 +8,6 @@ from cg.apps.balsamic.api import BalsamicAPI
 from cg.apps.balsamic.fastq import FastqHandler
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
-from cg.cli.workflow.balsamic.deliver import deliver as deliver_cmd
 from cg.exc import BalsamicStartError, BundleAlreadyAddedError, LimsDataError
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.store import Store
@@ -252,6 +251,3 @@ def store_available(context, dry):
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort()
-
-
-balsamic.add_command(deliver_cmd)

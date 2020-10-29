@@ -67,3 +67,6 @@ def deliver_analysis(context, case_id, ticket_id, analysis_type, inbox, dry_run)
 
     for case_obj in cases:
         deliver_api.deliver_files(case_obj=case_obj)
+
+
+deliver.add_command(deliver_analysis)

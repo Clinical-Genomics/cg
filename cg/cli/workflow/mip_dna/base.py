@@ -9,7 +9,6 @@ from cg.apps.environ import environ_email
 from cg.cli.workflow.get_links import get_links
 from cg.cli.workflow.mip.store import store as store_cmd
 from cg.cli.workflow.mip_dna.deliver import CASE_TAGS, SAMPLE_TAGS
-from cg.cli.workflow.mip_dna.deliver import deliver as deliver_cmd
 from cg.constants import EXIT_SUCCESS, EXIT_FAIL
 from cg.exc import CgError
 from cg.meta.deliver import DeliverAPI
@@ -304,4 +303,3 @@ def _suggest_cases_to_analyze(context: click.Context, show_as_error: bool = Fals
 
 
 mip_dna.add_command(store_cmd)
-mip_dna.add_command(deliver_cmd)
