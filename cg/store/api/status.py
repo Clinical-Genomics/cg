@@ -2,9 +2,6 @@ from datetime import datetime, timedelta
 from types import SimpleNamespace
 from typing import List
 
-from sqlalchemy import and_, func, or_
-from sqlalchemy.orm import Query
-
 from cg.constants import PRIORITY_MAP
 from cg.store import models
 from cg.store.api.base import BaseHandler

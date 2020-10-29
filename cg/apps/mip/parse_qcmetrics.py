@@ -83,5 +83,5 @@ def parse_qcmetrics(metrics: dict) -> dict:
         }
         sample_data = get_sample_metrics(sample_metrics=sample_metrics, sample_data=sample_data)
         sample_data["mapped"] = sample_data["total_mapped"] / sample_data["reads"]
-        qc_metric[sample_data["id"]] = sample_data
+        qc_metric[sample_id] = sample_data
     return qc_metric
