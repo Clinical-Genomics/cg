@@ -193,7 +193,6 @@ class StoreHelpers:
         is_tumour: bool = False,
         is_rna: bool = False,
         is_external: bool = False,
-        data_analysis: str = PIPELINE_OPTIONS[0],
         application_tag: str = "dummy_tag",
         application_type: str = "tgs",
         customer_name: str = None,

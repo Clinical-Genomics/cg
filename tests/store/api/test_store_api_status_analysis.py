@@ -97,8 +97,8 @@ def test_mip_analysis_in_result(base_store: Store):
     """Test that a family with one sample that has MIP data_analysis does show up"""
 
     # GIVEN a database with a family with one sequenced samples for MIP analysis
-    test_sample = add_sample(base_store, sequenced=True, data_analysis="mip_dna")
-    test_family = add_family(base_store)
+    test_sample = add_sample(base_store, sequenced=True)
+    test_family = add_family(base_store, data_analysis="mip-dna")
     base_store.relate_sample(test_family, test_sample, "unknown")
 
     # WHEN getting families to analyse
@@ -212,7 +212,7 @@ def add_sample(
     """utility function to add a sample to use in tests"""
     customer = ensure_customer(store)
     application_version_id = ensure_application_version(store).id
-    sample = store.add_sample(name=sample_name, sex="unknown", data_analysis=data_analysis)
+    sample = store.add_sample(name=sample_name, sex="unknown")
     sample.application_version_id = application_version_id
     sample.customer = customer
     if received:
