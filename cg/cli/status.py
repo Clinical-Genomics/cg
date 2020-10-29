@@ -48,16 +48,14 @@ for header in CASE_HEADERS_LONG:
 @click.pass_context
 def status(context):
     """View status of things."""
-    context.obj["db"] = Store(context.obj["database"])
-    if context.obj.get("trailblazer"):
-        context.obj["tb"] = tb.TrailblazerAPI(context.obj)
+    context.obj["status_db"] = Store(context.obj["database"])
 
 
 @status.command()
 @click.pass_context
 def analysis(context):
     """Which families will be analyzed?"""
-    records = context.obj["db"].cases_to_mip_analyze()
+    records = context.obj["status_db"].cases_to_analyze(pipeline="mip")
     for family_obj in records:
         click.echo(family_obj)
 
@@ -172,7 +170,7 @@ def cases(
     exclude_invoiced,
 ):
     """progress of each case"""
-    records = context.obj["db"].cases(
+    records = context.obj["status_db"].cases(
         days=days,
         internal_id=internal_id,
         name=name,
@@ -352,7 +350,7 @@ def cases(
 @click.pass_context
 def samples(context, skip):
     """View status of samples."""
-    records = context.obj["db"].samples().offset(skip).limit(30)
+    records = context.obj["status_db"].samples().offset(skip).limit(30)
     for record in records:
         message = f"{record.internal_id} ({record.customer.internal_id})"
         if record.sequenced_at:
@@ -376,7 +374,7 @@ def samples(context, skip):
 def families(context, skip):
     """View status of families."""
     click.echo("red: prio > 1, blue: prio = 1, green: completed, yellow: action")
-    records = context.obj["db"].families().offset(skip).limit(30)
+    records = context.obj["status_db"].families().offset(skip).limit(30)
     for family_obj in records:
         color = "red" if family_obj.priority > 1 else "blue"
         message = f"{family_obj.internal_id} ({family_obj.priority})"

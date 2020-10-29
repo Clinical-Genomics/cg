@@ -180,15 +180,10 @@ def fixture_analysis_obj(
 
 @pytest.yield_fixture(name="upload_genotypes_api")
 def fixture_upload_genotypes_api(
-    real_housekeeper_api, genotype_api, upload_genotypes_hk_bundle, analysis_obj, helpers
+    real_housekeeper_api, genotype_api, upload_genotypes_hk_bundle, helpers
 ) -> UploadGenotypesAPI:
     """Create a upload genotypes api"""
-    helpers.ensure_hk_bundle(real_housekeeper_api, upload_genotypes_hk_bundle)
-    hk_version = real_housekeeper_api.version(
-        analysis_obj.family.internal_id, analysis_obj.started_at
-    )
-    real_housekeeper_api.include(hk_version)
-
+    helpers.ensure_hk_bundle(real_housekeeper_api, upload_genotypes_hk_bundle, include=True)
     _api = UploadGenotypesAPI(
         hk_api=real_housekeeper_api,
         gt_api=genotype_api,

@@ -2,7 +2,7 @@
 
 import click
 
-from cg.apps import coverage as coverage_app
+from cg.apps.coverage import ChanjoAPI
 from cg.meta.upload.coverage import UploadCoverageApi
 
 from .utils import suggest_cases_to_upload
@@ -21,8 +21,8 @@ def coverage(context, re_upload, family_id):
         suggest_cases_to_upload(context)
         context.abort()
 
-    chanjo_api = coverage_app.ChanjoAPI(context.obj)
-    family_obj = context.obj["status"].family(family_id)
-    api = UploadCoverageApi(context.obj["status"], context.obj["housekeeper_api"], chanjo_api)
+    chanjo_api = ChanjoAPI(context.obj)
+    family_obj = context.obj["status_db"].family(family_id)
+    api = UploadCoverageApi(context.obj["status_db"], context.obj["housekeeper_api"], chanjo_api)
     coverage_data = api.data(family_obj.analyses[0])
     api.upload(coverage_data, replace=re_upload)

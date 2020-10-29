@@ -1,0 +1,13 @@
+case: keenviper
+default_gene_panels:
+  - NMD
+samples:
+  - sample_id: ACC3218A1
+    sample_display_name: 2017-20794-02
+    analysis_type: wgs
+    sex: male
+    phenotype: affected
+    expected_coverage: 26
+    capture_kit: twistexomerefseq_9.1_hg19_design.bed
+    mother: '0'
+    father: '0'

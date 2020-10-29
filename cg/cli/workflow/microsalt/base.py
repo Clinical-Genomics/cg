@@ -6,10 +6,9 @@ from pathlib import Path
 
 import click
 
-from cg.apps import hk, lims
+from cg.apps.hk import HousekeeperAPI
+from cg.apps.lims import LimsAPI
 from cg.apps.microsalt.fastq import FastqHandler
-from cg.cli.workflow.microsalt.store import store as store_cmd
-from cg.cli.workflow.microsalt.deliver import deliver as deliver_cmd
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.store import Store
 from cg.utils.commands import Process
@@ -23,11 +22,11 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def microsalt(context: click.Context, ticket: str, dry_run: bool):
     """Microbial workflow"""
-    context.obj["db"] = Store(context.obj["database"])
-    hk_api = hk.HousekeeperAPI(context.obj)
-    lims_api = lims.LimsAPI(context.obj)
+    context.obj["status_db"] = Store(context.obj["database"])
+    hk_api = HousekeeperAPI(context.obj)
+    lims_api = LimsAPI(context.obj)
     analysis_api = MicrosaltAnalysisAPI(
-        db=context.obj["db"],
+        db=context.obj["status_db"],
         hk_api=hk_api,
         lims_api=lims_api,
         fastq_handler=FastqHandler(context.obj),
@@ -140,9 +139,3 @@ def run(context: click.Context, dry_run: bool, config_case_path: click.Path, tic
         str(fastq_path.absolute()),
     ]
     process.run_command(parameters=analyse_command, dry_run=dry_run)
-
-
-microsalt.add_command(config_case)
-microsalt.add_command(deliver_cmd)
-microsalt.add_command(run)
-microsalt.add_command(store_cmd)

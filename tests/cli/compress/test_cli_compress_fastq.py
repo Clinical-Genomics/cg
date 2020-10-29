@@ -83,7 +83,7 @@ def test_compress_fastq_cli_multiple_family(
     compress_context = populated_multiple_compress_context
     caplog.set_level(logging.DEBUG)
     # GIVEN a database with multople families
-    nr_cases = sum(1 for i in compress_context["db"].families())
+    nr_cases = sum(1 for i in compress_context["status_db"].families())
     assert nr_cases > 1
 
     # WHEN running the compress command
@@ -102,7 +102,7 @@ def test_compress_fastq_cli_multiple_set_limit(
     compress_context = populated_multiple_compress_context
     caplog.set_level(logging.DEBUG)
     # GIVEN a context with more families than the limit
-    nr_cases = sum(1 for i in compress_context["db"].families())
+    nr_cases = sum(1 for i in compress_context["status_db"].families())
     limit = 5
     assert nr_cases > limit
 

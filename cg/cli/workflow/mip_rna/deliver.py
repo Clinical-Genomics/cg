@@ -5,7 +5,8 @@ import os
 from pathlib import Path
 
 import click
-from cg.apps import hk, lims
+from cg.apps.hk import HousekeeperAPI
+from cg.apps.lims import LimsAPI
 from cg.meta.deliver import DeliverAPI
 from cg.store import Store
 
@@ -20,11 +21,11 @@ SAMPLE_TAGS = ["bam", "bam-index", "cram", "cram-index"]
 @click.pass_context
 def deliver(context):
     """Deliver stuff."""
-    context.obj["db"] = Store(context.obj["database"])
+    context.obj["status_db"] = Store(context.obj["database"])
     context.obj["deliver_api"] = DeliverAPI(
-        db=context.obj["db"],
-        hk_api=hk.HousekeeperAPI(context.obj),
-        lims_api=lims.LimsAPI(context.obj),
+        db=context.obj["status_db"],
+        hk_api=HousekeeperAPI(context.obj),
+        lims_api=LimsAPI(context.obj),
         case_tags=CASE_TAGS,
         sample_tags=SAMPLE_TAGS,
     )
@@ -46,10 +47,10 @@ def inbox(context, case, version, tag, inbox_path):
     """Link files from HK to cust inbox."""
 
     if not case:
-        _suggest_cases_to_deliver(context.obj["db"])
+        _suggest_cases_to_deliver(context.obj["status_db"])
         context.abort()
 
-    case_obj = context.obj["db"].family(case)
+    case_obj = context.obj["status_db"].family(case)
     if case_obj is None:
         LOG.error("Case '%s' not found.", case)
         context.abort()
@@ -75,7 +76,7 @@ def inbox(context, case, version, tag, inbox_path):
         else:
             LOG.info("Target file exists: %s", out_path)
 
-    link_obj = context.obj["db"].family_samples(case)
+    link_obj = context.obj["status_db"].family_samples(case)
     if not link_obj:
         LOG.warning("No sample files found.")
 
