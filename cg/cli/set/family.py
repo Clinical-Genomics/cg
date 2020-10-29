@@ -24,7 +24,7 @@ def family(
 ):
     """Update information about a family."""
 
-    family_obj = context.obj["status"].family(family_id)
+    family_obj = context.obj["status_db"].family(family_id)
     if family_obj is None:
         LOG.error("Can't find family %s,", family_id)
         raise click.Abort
@@ -35,7 +35,7 @@ def family(
         LOG.info(f"Update action: {family_obj.action or 'NA'} -> {action}")
         family_obj.action = action
     if customer_id:
-        customer_obj = context.obj["status"].customer(customer_id)
+        customer_obj = context.obj["status_db"].customer(customer_id)
         if customer_obj is None:
             LOG.error("Unknown customer: %s", customer_id)
             raise click.Abort
@@ -43,7 +43,7 @@ def family(
         family_obj.customer = customer_obj
     if panels:
         for panel_id in panels:
-            panel_obj = context.obj["status"].panel(panel_id)
+            panel_obj = context.obj["status_db"].panel(panel_id)
             if panel_obj is None:
                 LOG.error(f"unknown gene panel: {panel_id}")
                 raise click.Abort
@@ -53,4 +53,4 @@ def family(
         LOG.info(f"update priority: {family_obj.priority_human} -> {priority}")
         family_obj.priority_human = priority
 
-    context.obj["status"].commit()
+    context.obj["status_db"].commit()

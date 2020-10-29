@@ -13,6 +13,16 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [13.16.0]
+
+### Added
+- New REST-based TrailblazerAPI
+### Changed
+- Trailblazer support for Balsamic
+### Fixed
+- Naming convention for API harmonized
+
+
 ## [13.15.0]
 
 ### Added

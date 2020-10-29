@@ -28,6 +28,7 @@ ruamel.yaml
 coloredlogs
 petname
 marshmallow>3               # due to code expects behaviour from >3
+pydantic
 pyschemes
 xlrd
 openpyxl

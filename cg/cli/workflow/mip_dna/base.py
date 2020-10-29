@@ -4,7 +4,11 @@ import logging
 
 import click
 
-from cg.apps import hk, lims, scoutapi, tb
+from cg.apps.hk import HousekeeperAPI
+from cg.apps.lims import LimsAPI
+from cg.apps.scoutapi import ScoutAPI
+from cg.apps.tb import TrailblazerAPI
+
 from cg.apps.environ import environ_email
 from cg.cli.workflow.get_links import get_links
 from cg.cli.workflow.mip.store import store as store_cmd
@@ -12,7 +16,7 @@ from cg.cli.workflow.mip_dna.deliver import CASE_TAGS, SAMPLE_TAGS
 from cg.constants import EXIT_SUCCESS, EXIT_FAIL
 from cg.exc import CgError
 from cg.meta.deliver import DeliverAPI
-from cg.meta.workflow.mip import AnalysisAPI
+from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import Store
 from cg.store.utils import case_exists
 
@@ -52,13 +56,14 @@ def mip_dna(
     start_with: str,
 ):
     """Rare disease DNA workflow"""
-    context.obj["housekeeper_api"] = hk.HousekeeperAPI(context.obj)
-    context.obj["trailblazer_api"] = tb.TrailblazerAPI(context.obj)
-    context.obj["scout_api"] = scoutapi.ScoutAPI(context.obj)
-    context.obj["lims_api"] = lims.LimsAPI(context.obj)
+    context.obj["housekeeper_api"] = HousekeeperAPI(context.obj)
+    context.obj["trailblazer_api"] = TrailblazerAPI(context.obj)
+    context.obj["scout_api"] = ScoutAPI(context.obj)
+    context.obj["lims_api"] = LimsAPI(context.obj)
+    context.obj["status_db"] = Store(context.obj["database"])
 
-    context.obj["dna_api"] = AnalysisAPI(
-        db=Store(context.obj["database"]),
+    context.obj["dna_api"] = MipAnalysisAPI(
+        db=context.obj["status_db"],
         hk_api=context.obj["housekeeper_api"],
         tb_api=context.obj["trailblazer_api"],
         scout_api=context.obj["scout_api"],
@@ -166,7 +171,11 @@ def config_case(context: click.Context, case_id: str, panel_bed: str, dry_run: b
     if dry_run:
         print(config_data)
         return
-    out_path = dna_api.write_pedigree_config(config_data)
+    out_path = dna_api.write_pedigree_config(
+        data=config_data,
+        out_dir=dna_api.get_case_output_path(case_id),
+        pedigree_config_path=dna_api.get_pedigree_config_path(case_id),
+    )
     LOG.info(f"Config file saved to {out_path}")
 
 
@@ -220,7 +229,7 @@ def run(
     case_obj = dna_api.db.family(case_id)
     if not case_exists(case_obj, case_id):
         LOG.error(f"Case {case_id} does not exist!")
-        raise click.Abort()
+        raise click.Abort
 
     email = email or environ_email()
     kwargs = dict(
@@ -233,27 +242,34 @@ def run(
         skip_evaluation=skip_evaluation,
     )
 
-    if dna_api.tb.is_analysis_ongoing(case_id=case_obj.internal_id):
-        LOG.warning("%s: analysis is ongoing - skipping", case_obj.internal_id)
+    if dna_api.is_latest_analysis_ongoing(case_id=case_obj.internal_id):
+        LOG.warning(f"{case_obj.internal_id} : analysis is still ongoing - skipping")
         return
 
     if dna_api.get_skip_evaluation_flag(case_obj=case_obj):
         kwargs["skip_evaluation"] = True
 
-    if dry_run:
-        dna_api.run_command(dry_run=dry_run, **kwargs)
-        return
-
-    dna_api.run_command(**kwargs)
+    dna_api.run_command(dry_run=dry_run, **kwargs)
 
     if mip_dry_run:
-        LOG.info("Executed MIP in dry-run mode - skipping Trailblazer step")
+        LOG.info("Executed MIP in dry-run mode")
         return
-
-    dna_api.tb.mark_analyses_deleted(case_id=case_id)
-    dna_api.tb.add_pending_analysis(case_id=case_id, email=email)
-    dna_api.set_statusdb_action(case_id=case_id, action="running")
-    LOG.info("MIP rd-dna run started!")
+    try:
+        dna_api.mark_analyses_deleted(case_id=case_id)
+        dna_api.add_pending_analysis(
+            case_id=case_id,
+            email=email,
+            type=dna_api.get_application_type(case_id),
+            out_dir=dna_api.get_case_output_path(case_id).as_posix(),
+            config_path=dna_api.get_slurm_job_ids_path(case_id).as_posix(),
+            priority=dna_api.get_priority(case_obj),
+            data_analysis="MIP-DNA",
+        )
+        dna_api.set_statusdb_action(case_id=case_id, action="running")
+        LOG.info("MIP rd-dna run started!")
+    except CgError as e:
+        LOG.error(e.message)
+        raise click.Abort
 
 
 @mip_dna.command()
@@ -263,16 +279,17 @@ def start(context: click.Context, dry_run: bool = False):
     """Start all cases that are ready for analysis"""
     dna_api = context.obj["dna_api"]
     exit_code = EXIT_SUCCESS
-    cases = [case_obj for case_obj in dna_api.db.cases_to_analyze(pipeline="mip")]
-    for case_obj in cases:
+    for case_obj in dna_api.db.cases_to_analyze(pipeline="mip", threshold=0.75):
         if not dna_api.is_dna_only_case(case_obj):
             LOG.warning("%s: contains non-dna samples - skipping", case_obj.internal_id)
             continue
-        LOG.info("%s: start analysis", case_obj.internal_id)
-        has_started = dna_api.tb.has_analysis_started(case_id=case_obj.internal_id)
+        LOG.info(
+            f"{case_obj.internal_id}: start analysis",
+        )
+        has_started = dna_api.has_latest_analysis_started(case_id=case_obj.internal_id)
         if has_started:
-            status = dna_api.tb.get_analysis_status(case_id=case_obj.internal_id)
-            LOG.warning("%s: analysis is %s - skipping", case_obj.internal_id, status)
+            status = dna_api.get_latest_analysis_status(case_id=case_obj.internal_id)
+            LOG.warning(f"{case_obj.internal_id}: analysis is {status} - skipping")
             continue
         if dry_run:
             continue
@@ -282,14 +299,14 @@ def start(context: click.Context, dry_run: bool = False):
                 priority=dna_api.get_priority(case_obj),
                 case_id=case_obj.internal_id,
             )
-        except (CgError, click.Abort) as error:
+        except CgError as error:
             LOG.error(error.message)
             exit_code = EXIT_FAIL
         except Exception as e:
             LOG.error(f"Unspecified error occurred - {e.__class__}")
             exit_code = EXIT_FAIL
     if exit_code:
-        raise click.Abort()
+        raise click.Abort
 
 
 def _suggest_cases_to_analyze(context: click.Context, show_as_error: bool = False):

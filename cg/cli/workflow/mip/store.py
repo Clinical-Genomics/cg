@@ -4,7 +4,8 @@ from pathlib import Path
 
 import click
 
-from cg.apps import hk, tb
+from cg.apps.tb import TrailblazerAPI
+from cg.apps.hk import HousekeeperAPI
 from cg.exc import (
     AnalysisNotFinishedError,
     AnalysisDuplicationError,
@@ -24,9 +25,9 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def store(context):
     """Store results from MIP in housekeeper."""
-    context.obj["db"] = Store(context.obj["database"])
-    context.obj["tb_api"] = tb.TrailblazerAPI(context.obj)
-    context.obj["hk_api"] = hk.HousekeeperAPI(context.obj)
+    context.obj["status_db"] = Store(context.obj["database"])
+    context.obj["trailblazer_api"] = TrailblazerAPI(context.obj)
+    context.obj["housekeeper_api"] = HousekeeperAPI(context.obj)
 
 
 @store.command()
@@ -34,8 +35,8 @@ def store(context):
 @click.pass_context
 def analysis(context, config_stream):
     """Store a finished analysis in Housekeeper."""
-    status = context.obj["db"]
-    hk_api = context.obj["hk_api"]
+    status = context.obj["status_db"]
+    hk_api = context.obj["housekeeper_api"]
 
     exit_code = EXIT_SUCCESS
     if not config_stream:
@@ -56,31 +57,31 @@ def analysis(context, config_stream):
         PipelineUnknownError,
         MandatoryFilesMissing,
     ) as error:
-        click.echo(click.style(error.message, fg="red"))
+        LOG.error(error.message)
         exit_code = EXIT_FAIL
     except FileNotFoundError as error:
-        click.echo(click.style(f"missing file: {error.args[0]}", fg="red"))
+        LOG.error(f"Missing file: {error.args[0]}")
         exit_code = EXIT_FAIL
     if exit_code:
-        raise click.Abort
+        raise click.Abort()
     status.add_commit(new_analysis)
-    click.echo(click.style("included files in Housekeeper", fg="green"))
+    LOG.info("Included files in Housekeeper")
 
 
 @store.command()
 @click.pass_context
 def completed(context):
     """Store all completed analyses."""
-    hk_api = context.obj["hk_api"]
-    tb_api = context.obj["tb_api"]
+    hk_api = context.obj["housekeeper_api"]
+    tb_api = context.obj["trailblazer_api"]
 
     exit_code = EXIT_SUCCESS
     for analysis_obj in tb_api.analyses(status="completed", deleted=False):
         existing_record = hk_api.version(analysis_obj.family, analysis_obj.started_at)
         if existing_record:
-            LOG.debug("analysis stored: %s - %s", analysis_obj.family, analysis_obj.started_at)
+            LOG.info("analysis stored: %s - %s", analysis_obj.family, analysis_obj.started_at)
             continue
-        click.echo(click.style(f"storing family: {analysis_obj.family}", fg="blue"))
+        LOG.info(f"storing family: {analysis_obj.family}")
         with Path(analysis_obj.config_path).open() as config_stream:
             try:
                 context.invoke(analysis, config_stream=config_stream)

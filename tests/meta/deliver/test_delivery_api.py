@@ -1,11 +1,11 @@
 """Tests for delivery API"""
 
 
-def test_get_post_analysis_files(analysis_family, deliver_api):
+def test_get_post_analysis_files(deliver_api):
 
     # GIVEN a case which exist as bundle in hk
     # GIVEN corresponding houskeeper tags for those files
-    case = analysis_family["internal_id"]
+    case = "case_id"
     deliver_tags = ["case-tag"]
 
     # WHEN we call get_post_analysis_files with matching case and file-tags and version is no version
@@ -16,15 +16,15 @@ def test_get_post_analysis_files(analysis_family, deliver_api):
     assert bundle_latest_files
 
 
-def test_get_post_analysis_files_version(analysis_family, deliver_api):
+def test_get_post_analysis_files_version(timestamp, deliver_api):
 
     # GIVEN a case which exist as bundle in hk
     # GIVEN corresponding houskeeper tags for those files
-    case = analysis_family["internal_id"]
+    case = "case_id"
     deliver_tags = ["case-tag"]
 
     # WHEN we call get_post_analysis_files with matching case and file-tags and version is supplied
-    version = "a_date"
+    version = timestamp
 
     bundle_version_files = deliver_api.get_post_analysis_files(case, version, deliver_tags)
 
@@ -32,11 +32,11 @@ def test_get_post_analysis_files_version(analysis_family, deliver_api):
     assert bundle_version_files
 
 
-def test_get_post_analysis_case_files(analysis_family, deliver_api):
+def test_get_post_analysis_case_files(deliver_api):
 
     # GIVEN a case which exist as bundle in hk
     # GIVEN corresponding case houskeeper tags for those files
-    case = analysis_family["internal_id"]
+    case = "case_id"
     deliver_tags = ["case-tag"]
 
     # WHEN we call get_post_analysis_case_files with matching case and case file-tags and version
@@ -47,14 +47,12 @@ def test_get_post_analysis_case_files(analysis_family, deliver_api):
     assert case_files
 
 
-def test_get_post_analysis_case_files_only_sample_tags(analysis_family, deliver_api):
+def test_get_post_analysis_case_files_only_sample_tags(deliver_api):
 
     # GIVEN a case which exist as bundle in hk
     # GIVEN corresponding sample id houskeeper tags for those files
-    case = analysis_family["internal_id"]
+    case = "case_id"
     deliver_tags = ["sample-tag"]
-    hk_api = deliver_api.hk_api
-    hk_api.add_missing_tag(deliver_tags[0])
 
     # WHEN we call get_post_analysis_case_files with matching case and sample file-tags and version
     version = None
@@ -68,7 +66,7 @@ def test_get_post_analysis_sample_files(analysis_family, deliver_api):
 
     # GIVEN a case which exist as bundle in hk
     # GIVEN corresponding houskeeper tags for those files
-    case = analysis_family["internal_id"]
+    case = "case_id"
     sample = analysis_family["samples"][0]["internal_id"]
     deliver_tags = ["sample-tag"]
 
@@ -84,11 +82,9 @@ def test_get_post_analysis_sample_files_only_case_tags(analysis_family, deliver_
 
     # GIVEN a case which exist as bundle in hk
     # GIVEN corresponding houskeeper tags for those files
-    case = analysis_family["internal_id"]
+    case = "case_id"
     sample = analysis_family["samples"][0]["internal_id"]
     deliver_tags = ["case-tag"]
-    hk_api = deliver_api.hk_api
-    hk_api.add_missing_tag(deliver_tags[0])
 
     # WHEN we call get_post_analysis_sample_files with matching case and file-tags and version
     version = None
@@ -98,7 +94,7 @@ def test_get_post_analysis_sample_files_only_case_tags(analysis_family, deliver_
     assert not sample_files
 
 
-def test_get_post_analysis_files_root_dir(analysis_family, deliver_api):
+def test_get_post_analysis_files_root_dir(deliver_api):
 
     ## WHEN we call get_post_analysis_files_root_dir
     root_dir = deliver_api.get_post_analysis_files_root_dir()

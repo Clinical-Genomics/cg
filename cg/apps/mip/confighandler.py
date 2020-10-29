@@ -88,11 +88,10 @@ class ConfigHandler:
                 sample_data["capture_kit"] = DEFAULT_CAPTURE_KIT
         return data_copy
 
-    def write_pedigree_config(self, data: dict) -> Path:
+    @staticmethod
+    def write_pedigree_config(data: dict, out_dir: Path, pedigree_config_path: Path) -> Path:
         """Write the pedigree config to the the case dir"""
-        out_dir = Path(self.root) / data["case"]
         out_dir.mkdir(parents=True, exist_ok=True)
-        out_path = out_dir / "pedigree.yaml"
         dump = ruamel.yaml.round_trip_dump(data, indent=4, block_seq_indent=2)
-        out_path.write_text(dump)
-        return out_path
+        pedigree_config_path.write_text(dump)
+        return pedigree_config_path

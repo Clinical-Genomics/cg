@@ -7,7 +7,7 @@ from typing import List, Set, Iterable
 from pathlib import Path
 
 from cg.apps.hk import HousekeeperAPI
-from cg.store import Store
+from cg.apps.lims import LimsAPI
 from cg.store.models import Family, Sample, FamilySample
 
 from housekeeper.store import models as hk_models
@@ -25,6 +25,8 @@ class DeliverAPI:
         case_tags: List[str],
         sample_tags: List[str],
         project_base_path: Path,
+        case_tags: [str],
+        sample_tags: [str],
     ):
         """Initialize a delivery api
 

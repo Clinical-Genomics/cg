@@ -8,10 +8,9 @@ import pytest
 
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.scoutapi import ScoutAPI
-from cg.apps.tb import TrailblazerAPI
 from cg.apps.gt import GenotypeAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
-from cg.meta.workflow.mip import AnalysisAPI
+from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import Store
 from cg.store import models
 
@@ -88,19 +87,22 @@ def fixture_upload_genotypes_context(
     return {
         "genotype_api": genotype_api,
         "housekeeper_api": upload_genotypes_hk_api,
-        "status": analysis_store_trio,
+        "status_db": analysis_store_trio,
     }
 
 
 @pytest.fixture(scope="function", name="base_context")
-def fixture_base_cli_context(analysis_store: Store, housekeeper_api, upload_scout_api) -> dict:
+def fixture_base_cli_context(
+    analysis_store: Store, housekeeper_api, upload_scout_api, trailblazer_api
+) -> dict:
     """context to use in cli"""
     return {
         "scout_api": MockScoutApi(),
         "scout_upload_api": upload_scout_api,
         "housekeeper_api": housekeeper_api,
-        "tb_api": MockTB(),
-        "status": analysis_store,
+        "trailblazer_api": trailblazer_api,
+        "status_db": analysis_store,
+        "mip-rd-dna": {"root": "hej"},
     }
 
 
@@ -125,17 +127,6 @@ def fixture_vogue_api():
     """Return a MockVogueApi"""
 
     return MockVogueApi()
-
-
-class MockTB(TrailblazerAPI):
-    """Mock of trailblazer """
-
-    def __init__(self):
-        """Mock the init"""
-
-    def get_family_root_dir(self, case_id):
-        """docstring for get_family_root_dir"""
-        return Path("hej")
 
 
 class MockScoutApi(ScoutAPI):
@@ -163,7 +154,7 @@ class MockVogueApi:
         """docstring for upload"""
 
 
-class MockAnalysisApi(AnalysisAPI):
+class MockAnalysisApi(MipAnalysisAPI):
     def __init__(self):
         """docstring for __init__"""
 

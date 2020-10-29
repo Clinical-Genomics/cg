@@ -562,13 +562,15 @@ class StatusHandler(BaseHandler):
 
         return records
 
-    def analyses_to_clean(self, pipeline: str = ""):
+    def analyses_to_clean(self, before: datetime = datetime.now(), pipeline: str = ""):
         """Fetch analyses that haven't been cleaned."""
         records = self.latest_analyses()
         records = records.filter(
             models.Analysis.uploaded_at.isnot(None),
             models.Analysis.cleaned_at.is_(None),
             models.Analysis.pipeline.ilike(f"%{pipeline}%"),
+            models.Analysis.started_at <= before,
+            models.Family.action == None,
         )
         return records
 

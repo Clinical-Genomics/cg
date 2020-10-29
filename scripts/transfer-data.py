@@ -22,10 +22,8 @@ import cg.meta.workflow.microsalt
 import click
 import pymongo
 import ruamel.yaml
-from housekeeper.store import api as housekeeeper_api
 
-from cg.apps import lims as lims_app
-from cg.apps import scoutapi, stats
+from cg.apps.lims import LimsAPI
 from cg.constants import PRIORITY_MAP
 from cg.store import Store, models
 from cgadmin.store.api import AdminDatabase
@@ -593,7 +591,7 @@ def transfer(admin, housekeeper, config_file):
 
     # PanelImporter(config['database'], scoutapi.ScoutAPI(config)).process()
 
-    lims_api = lims_app.LimsAPI(config)
+    lims_api = LimsAPI(config)
     SampleImporter(config["database"], lims_api).process()
     FamilyImporter(config["database"], lims_api).process()
     # FlowcellImporter(Store(config['database']), stats.StatsAPI(config)).process()
