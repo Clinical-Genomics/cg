@@ -95,6 +95,7 @@ MIP_SAMPLE = {
     "name": validators.RegexValidator(NAME_PATTERN),
     # customer
     "data_analysis": str,
+    "data_delivery": OptionalNone(TypeValidatorNone(str)),
     "application": str,
     "family_name": validators.RegexValidator(NAME_PATTERN),
     "sex": OptionalNone(validators.Any(SEX_OPTIONS)),
@@ -134,6 +135,7 @@ BALSAMIC_SAMPLE = {
     "name": validators.RegexValidator(NAME_PATTERN),
     "container": OptionalNone(validators.Any(CONTAINER_OPTIONS)),
     "data_analysis": str,
+    "data_delivery": OptionalNone(TypeValidatorNone(str)),
     "application": str,
     "sex": OptionalNone(validators.Any(SEX_OPTIONS)),
     "family_name": validators.RegexValidator(NAME_PATTERN),
@@ -164,6 +166,7 @@ MIP_RNA_SAMPLE = {
     "name": validators.RegexValidator(NAME_PATTERN),
     # customer
     "data_analysis": str,
+    "data_delivery": OptionalNone(TypeValidatorNone(str)),
     "application": str,
     "family_name": validators.RegexValidator(NAME_PATTERN),
     "sex": OptionalNone(validators.Any(SEX_OPTIONS)),
@@ -189,6 +192,7 @@ EXTERNAL_SAMPLE = {
     # Order portal specific
     "internal_id": OptionalNone(TypeValidatorNone(str)),
     "data_analysis": str,
+    "data_delivery": OptionalNone(TypeValidatorNone(str)),
     # "required for new samples"
     "name": validators.RegexValidator(NAME_PATTERN),
     "capture_kit": OptionalNone(TypeValidatorNone(str)),
@@ -218,6 +222,7 @@ FASTQ_SAMPLE = {
     "name": validators.RegexValidator(NAME_PATTERN),
     "container": OptionalNone(validators.Any(CONTAINER_OPTIONS)),
     "data_analysis": str,
+    "data_delivery": OptionalNone(TypeValidatorNone(str)),
     "application": str,
     "sex": OptionalNone(validators.Any(SEX_OPTIONS)),
     # todo: implement in OP or remove from OF
@@ -250,6 +255,7 @@ RML_SAMPLE = {
     "pool": str,
     "application": str,
     "data_analysis": str,
+    "data_delivery": OptionalNone(TypeValidatorNone(str)),
     "volume": str,
     "concentration": str,
     "index": str,
@@ -271,6 +277,7 @@ MICROBIAL_SAMPLE = {
     "organism": str,
     "reference_genome": str,
     "data_analysis": str,
+    "data_delivery": OptionalNone(TypeValidatorNone(str)),
     "application": str,
     "require_qcok": bool,
     "elution_buffer": str,
@@ -294,6 +301,7 @@ METAGENOME_SAMPLE = {
     "name": validators.RegexValidator(NAME_PATTERN),
     "container": OptionalNone(validators.Any(CONTAINER_OPTIONS)),
     "data_analysis": str,
+    "data_delivery": OptionalNone(TypeValidatorNone(str)),
     "application": str,
     "require_qcok": bool,
     "elution_buffer": str,
