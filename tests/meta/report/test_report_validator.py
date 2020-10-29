@@ -157,7 +157,7 @@ def test_has_required_data_w_analysis_sample_fields(
     case_id = "yellowhog"
     delivery_data = report_api._get_delivery_data(case_id=case_id)
     for sample in delivery_data["samples"]:
-        report_store.sample(sample["internal_id"]).data_analysis = "MIP"
+        report_store.sample(sample["internal_id"]).data_analysis = "mip_dna"
     report_store.commit()
 
     validator = ReportValidator(report_store)

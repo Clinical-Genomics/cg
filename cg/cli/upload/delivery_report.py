@@ -31,7 +31,7 @@ def delivery_reports(context, print_console, force_report):
     click.echo(click.style("----------------- DELIVERY REPORTS ------------------------"))
 
     exit_code = SUCCESS
-    for analysis_obj in context.obj["status"].analyses_to_delivery_report(pipeline="mip"):
+    for analysis_obj in context.obj["status"].analyses_to_delivery_report(pipeline="mip_dna"):
         case_id = analysis_obj.family.internal_id
         LOG.info("Uploading delivery report for case: %s", case_id)
         try:

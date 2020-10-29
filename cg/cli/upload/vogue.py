@@ -14,7 +14,7 @@ from cg.store import Store
 
 LOG = logging.getLogger(__name__)
 
-VOGUE_VALID_BIOINFO = ["mip"]
+VOGUE_VALID_BIOINFO = ["mip_dna"]
 
 
 @click.group()

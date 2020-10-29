@@ -13,11 +13,11 @@ from cg.constants import (
 
 
 class OrderType(Enum):
-    MIP_RNA = "mip-rna"
+    MIP_RNA = "mip_rna"
     EXTERNAL = "external"
     FASTQ = "fastq"
     RML = "rml"
-    MIP = "mip-dna"
+    MIP = "mip_dna"
     MICROBIAL = "microsalt"
     METAGENOME = "metagenome"
     BALSAMIC = "balsamic"

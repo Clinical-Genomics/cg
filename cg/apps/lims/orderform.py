@@ -16,7 +16,7 @@ VALID_ORDERFORMS = [
     "1604:9",  # Orderform Ready made libraries (RML)
     "1605:8",  # Microbial metagenomes
 ]
-CASE_PROJECT_TYPES = ["mip", "external", "balsamic", "mip_rna"]
+CASE_PROJECT_TYPES = ["mip_dna", "external", "balsamic", "mip_rna"]
 
 
 def check_orderform_version(document_title):
@@ -99,21 +99,14 @@ def get_project_type(document_title: str, parsed_samples: List) -> str:
     elif "1605" in document_title:
         project_type = "metagenome"
     elif "1508" in document_title:
-        analyses = set(sample["analysis"].lower() for sample in parsed_samples)
+        analyses = set(sample["data_analysis"].lower() for sample in parsed_samples)
 
         if len(analyses) != 1:
             raise OrderFormError(f"mixed 'Data Analysis' types: {', '.join(analyses)}")
 
-        data_analysis = analyses.pop()
-
-        if data_analysis == "mip":
-            project_type = "mip-dna"
-        elif data_analysis == "balsamic":
-            project_type = "balsamic"
-        elif "rna" in data_analysis:
-            project_type = "mip-rna"
-        elif "mip" in data_analysis and "balsamic" in data_analysis:
-            raise OrderFormError(f"mixed 'Data Analysis' types: {', '.join(analyses)}")
+        project_type = analyses.pop()
+        if "mip" in project_type and "balsamic" in project_type:
+            raise OrderFormError(f"mixed 'Data Analysis' types: {project_type}")
 
     return project_type
 
@@ -207,7 +200,7 @@ def parse_sample(raw_sample):
         "container_name": raw_sample.get("Container/Name"),
         "custom_index": raw_sample.get("UDF/Custom index"),
         "customer": raw_sample["UDF/customer"],
-        "data_analysis": raw_sample["UDF/Data Analysis"],
+        "data_delivery": raw_sample.get("UDF/Data Delivery"),
         "elution_buffer": raw_sample.get("UDF/Sample Buffer"),
         "extraction_method": raw_sample.get("UDF/Extraction method"),
         "formalin_fixation_time": raw_sample.get("UDF/Formalin Fixation Time"),
@@ -239,13 +232,15 @@ def parse_sample(raw_sample):
     data_analysis = raw_sample.get("UDF/Data Analysis").lower()
 
     if data_analysis and "balsamic" in data_analysis:
-        sample["analysis"] = "balsamic"
-    elif data_analysis and "mip rna" in data_analysis:
-        sample["analysis"] = "mip_rna"
+        sample["data_analysis"] = "balsamic"
+    elif data_analysis and "rna" in data_analysis:
+        sample["data_analysis"] = "mip_rna"
     elif data_analysis and "mip" in data_analysis or "scout" in data_analysis:
-        sample["analysis"] = "mip"
-    elif data_analysis and ("fastq" in data_analysis or data_analysis == "custom"):
-        sample["analysis"] = "fastq"
+        sample["data_analysis"] = "mip_dna"
+    elif data_analysis and "microbial" in data_analysis:
+        sample["data_analysis"] = "microsalt"
+    elif data_analysis and ("fastq" in data_analysis or "custom" in data_analysis ):
+        sample["data_analysis"] = "fastq"
     else:
         raise OrderFormError(f"unknown 'Data Analysis' for order: {data_analysis}")
 

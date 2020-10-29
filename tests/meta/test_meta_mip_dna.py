@@ -12,7 +12,7 @@ def test_config(analysis_store: Store, analysis_api: AnalysisAPI):
         analysis_store.commit()
 
     # WHEN generating the MIP config for the family
-    mip_config = analysis_api.pedigree_config(family_obj, pipeline="mip-dna")
+    mip_config = analysis_api.pedigree_config(family_obj, pipeline="mip_dna")
 
     # THEN it should fill in values accordingly
     assert len(mip_config["samples"]) == len(family_obj.links)

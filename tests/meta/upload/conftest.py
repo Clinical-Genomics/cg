@@ -8,6 +8,7 @@ from datetime import datetime
 import pytest
 
 from cg.apps.coverage.api import ChanjoAPI
+from cg.constants import PIPELINE_OPTIONS
 from cg.meta.upload.coverage import UploadCoverageApi
 from cg.meta.upload.mutacc import UploadToMutaccAPI
 from cg.meta.upload.observations import UploadObservationsAPI
@@ -271,7 +272,7 @@ def coverage_upload_api(chanjo_config_dict, populated_housekeeper_api):
 @pytest.yield_fixture(scope="function")
 def analysis(analysis_store, case_id):
     """Fixture to mock an analysis"""
-    _analysis = analysis_store.add_analysis(pipeline="pipeline", version="version")
+    _analysis = analysis_store.add_analysis(pipeline=PIPELINE_OPTIONS[0], version="version")
     _analysis.family = analysis_store.family(case_id)
     _analysis.config_path = "dummy_path"
     yield _analysis

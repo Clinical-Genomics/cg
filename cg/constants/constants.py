@@ -31,7 +31,7 @@ FAMILY_ACTIONS = ("analyze", "running", "hold")
 
 FLOWCELL_STATUS = ("ondisk", "removed", "requested", "processing")
 
-PIPELINE_OPTIONS = ("balsamic", "fastq", "microsalt", "mip-dna", "mip-rna")
+PIPELINE_OPTIONS = ("balsamic", "fastq", "microsalt", "mip_dna", "mip_rna")
 
 PREP_CATEGORIES = ("wgs", "wes", "tgs", "wts", "mic", "rml")
 

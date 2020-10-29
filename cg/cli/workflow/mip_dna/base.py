@@ -133,7 +133,7 @@ def link(context: click.Context, case_id: str, sample_id: str):
             )
             dna_api.link_sample(sample=link_obj.sample, case_id=link_obj.family.internal_id)
 
-        if "mip" in link_obj.family.data_analysis.lower():
+        if "mip_dna" in link_obj.family.data_analysis.lower():
             dna_api.link_sample(sample=link_obj.sample, case_id=link_obj.family.internal_id)
 
 
@@ -160,7 +160,7 @@ def config_case(context: click.Context, case_id: str, panel_bed: str, dry_run: b
         raise click.Abort()
 
     try:
-        config_data = dna_api.pedigree_config(case_obj, panel_bed=panel_bed, pipeline="mip-dna")
+        config_data = dna_api.pedigree_config(case_obj, panel_bed=panel_bed, pipeline="mip_dna")
     except CgError as error:
         LOG.error(error.message)
         raise click.Abort()
@@ -264,7 +264,7 @@ def start(context: click.Context, dry_run: bool = False):
     """Start all cases that are ready for analysis"""
     dna_api = context.obj["dna_api"]
     exit_code = EXIT_SUCCESS
-    cases = [case_obj for case_obj in dna_api.db.cases_to_analyze(pipeline="mip")]
+    cases = [case_obj for case_obj in dna_api.db.cases_to_analyze(pipeline="mip_dna")]
     for case_obj in cases:
         if not dna_api.is_dna_only_case(case_obj):
             LOG.warning("%s: contains non-dna samples - skipping", case_obj.internal_id)
@@ -299,7 +299,7 @@ def _suggest_cases_to_analyze(context: click.Context, show_as_error: bool = Fals
         LOG.error("provide a case, suggestions:")
     else:
         LOG.warning("provide a case, suggestions:")
-    for case_obj in context.obj["dna_api"].db.cases_to_analyze(pipeline="mip", limit=50):
+    for case_obj in context.obj["dna_api"].db.cases_to_analyze(pipeline="mip_dna", limit=50):
         LOG.info(case_obj)
 
 

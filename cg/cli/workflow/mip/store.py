@@ -47,7 +47,7 @@ def analysis(context, config_stream):
             config_stream,
             hk_api,
             status,
-            workflow="mip",
+            workflow="mip_dna",
         )
     except (
         AnalysisNotFinishedError,

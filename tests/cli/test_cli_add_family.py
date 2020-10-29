@@ -3,7 +3,7 @@ from datetime import datetime
 
 from cg.store import Store
 
-ANALYSIS = "mip"
+CLI_OPTION_ANALYSIS = "mip"
 
 
 def test_add_family_required(invoke_cli, disk_store: Store):
@@ -25,7 +25,7 @@ def test_add_family_required(invoke_cli, disk_store: Store):
             "--panel",
             panel_id,
             "--analysis",
-            ANALYSIS,
+            CLI_OPTION_ANALYSIS,
             customer_id,
             name,
         ]
@@ -56,7 +56,7 @@ def test_add_family_bad_customer(invoke_cli, disk_store: Store):
             "--panel",
             panel_id,
             "--analysis",
-            ANALYSIS,
+            CLI_OPTION_ANALYSIS,
             customer_id,
             name,
         ]
@@ -85,7 +85,7 @@ def test_add_family_bad_panel(invoke_cli, disk_store: Store):
             "--panel",
             panel_id,
             "--analysis",
-            ANALYSIS,
+            CLI_OPTION_ANALYSIS,
             customer_id,
             name,
         ]
@@ -119,7 +119,7 @@ def test_add_family_priority(invoke_cli, disk_store: Store):
             "--priority",
             priority,
             "--analysis",
-            ANALYSIS,
+            CLI_OPTION_ANALYSIS,
             customer_id,
             name,
         ]

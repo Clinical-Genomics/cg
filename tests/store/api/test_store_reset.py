@@ -97,7 +97,7 @@ def add_family(
     ordered_days_ago=0,
     action=None,
     priority=None,
-    data_analysis="mip",
+    data_analysis="mip_dna",
 ):
     """utility function to add a family to use in tests"""
     panel = ensure_panel(disk_store)

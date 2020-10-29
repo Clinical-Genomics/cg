@@ -9,7 +9,7 @@ def test_upload_auto_with_pipeline_as_argument(
 ):
     """Test upload auto"""
     # GIVEN a store with a MIP analysis
-    helpers.add_analysis(store=sample_store, completed_at=timestamp, pipeline="MIP")
+    helpers.add_analysis(store=sample_store, completed_at=timestamp, pipeline="mip_dna")
 
     # WHEN uploading all analysis from pipeline MIP
     caplog.set_level(logging.INFO)

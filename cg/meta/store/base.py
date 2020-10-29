@@ -37,7 +37,7 @@ def gather_files_and_bundle_in_housekeeper(
 
     add_analysis = {
         "microsalt": add_microbial_analysis,
-        "mip": store_mip.add_mip_analysis,
+        "mip_dna": store_mip.add_mip_analysis,
     }
     bundle_data = add_analysis[workflow](config_stream)
 
@@ -49,7 +49,7 @@ def gather_files_and_bundle_in_housekeeper(
 
     case_obj = {
         "microsalt": status.find_family_by_name(bundle_obj.name),
-        "mip": status.family(bundle_obj.name),
+        "mip_dna": status.family(bundle_obj.name),
     }
 
     reset_case_action(case_obj[workflow])

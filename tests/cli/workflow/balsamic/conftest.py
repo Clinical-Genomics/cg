@@ -402,7 +402,7 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
         _store,
         internal_id="balsamic_case_tgs_paired",
         family_id="balsamic_case_tgs_paired",
-        data_analysis="BALSAMIC",
+        data_analysis="balsamic",
     )
     sample_case_tgs_paired_tumor = helpers.add_sample(
         _store,
@@ -411,7 +411,7 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
         application_tag="TGSA",
         application_type="tgs",
         reads=10,
-        data_analysis="BALSAMIC",
+        data_analysis="balsamic",
     )
     sample_case_tgs_paired_normal = helpers.add_sample(
         _store,
@@ -614,12 +614,12 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
         sample=mixed_sample_case_mixed_bed_paired_normal_error,
     )
 
-    # Create ERROR case for WGS TUMOR ONLY MIP ANALYSIS ONLY
+    # Create ERROR case for WGS TUMOR ONLY MIP CLI_OPTION_ANALYSIS ONLY
     mip_case_wgs_single = helpers.add_family(
         _store,
         internal_id="mip_case_wgs_single",
         family_id="mip_case_wgs_single",
-        data_analysis="mip",
+        data_analysis="mip_dna",
     )
     mip_sample_case_wgs_single_tumor = helpers.add_sample(
         _store,

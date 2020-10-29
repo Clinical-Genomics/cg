@@ -67,7 +67,7 @@ def test_dry_run(
         uploaded_at=timestamp_yesterday,
         cleaned_at=None,
     )
-    analysis_to_clean = base_store.analyses_to_clean(pipeline="Balsamic").first()
+    analysis_to_clean = base_store.analyses_to_clean(pipeline="balsamic").first()
     case_id = analysis_to_clean.family.internal_id
     case_path = clean_context["BalsamicAnalysisAPI"].get_case_path(case_id)
     Path(case_path).mkdir()
@@ -78,7 +78,7 @@ def test_dry_run(
     assert result.exit_code == EXIT_SUCCESS
     assert "Would have deleted" in caplog.text
     assert case_id in caplog.text
-    assert analysis_to_clean in base_store.analyses_to_clean(pipeline="Balsamic")
+    assert analysis_to_clean in base_store.analyses_to_clean(pipeline="balsamic")
 
 
 def test_cleaned_at(cli_runner, clean_context: dict, helpers, caplog):
@@ -95,5 +95,5 @@ def test_cleaned_at(cli_runner, clean_context: dict, helpers, caplog):
     # THEN command should say it would have deleted
     assert result.exit_code == EXIT_SUCCESS
     assert analysis_to_clean.cleaned_at
-    assert analysis_to_clean not in base_store.analyses_to_clean(pipeline="Balsamic")
+    assert analysis_to_clean not in base_store.analyses_to_clean(pipeline="balsamic")
     assert not Path(case_path).exists()

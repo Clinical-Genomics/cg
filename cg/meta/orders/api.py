@@ -164,7 +164,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
         self.update_application(data["ticket"], result["records"])
         return result
 
-    def submit_mip(self, data: dict) -> dict:
+    def submit_mip_dna(self, data: dict) -> dict:
         """Submit a batch of samples for sequencing and analysis."""
         return self.submit_case_samples(data)
 
@@ -176,7 +176,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
         """Submit a batch of samples for sequencing and analysis."""
         return self.submit_case_samples(data)
 
-    def submit_microbial(self, data: dict) -> dict:
+    def submit_microsalt(self, data: dict) -> dict:
         """Submit a batch of microbial samples."""
         # prepare data for status database
         status_data = self.microbial_samples_to_status(data)

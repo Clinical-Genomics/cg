@@ -6,7 +6,7 @@
     {
         "name": "sample1",
         "application": "EXXCUSR000",
-        "data_analysis": "MIP",
+        "data_analysis": "mip_dna",
         "sex": "male",
         "status": "affected",
         "family_name": "fam2",
@@ -22,7 +22,7 @@
     {
         "name": "sample2",
         "application": "WGXCUSC000",
-        "data_analysis": "MIP",
+        "data_analysis": "mip_dna",
         "sex": "female",
         "status": "unaffected",
         "family_name": "fam2",

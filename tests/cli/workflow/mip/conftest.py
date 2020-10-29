@@ -192,7 +192,7 @@ def fixture_store(base_store: Store, mip_case_ids: dict, helpers) -> Store:
         sample = helpers.add_sample(
             store=_store,
             sample=mip_case_ids[case]["internal_id"],
-            data_analysis="mip",
+            data_analysis="mip_dna",
             customer_name="cust000",
             application_tag="WGSA",
             application_type="wgs",

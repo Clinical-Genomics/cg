@@ -1,4 +1,5 @@
 """Fixtures for cli analysis tests"""
+from datetime import datetime
 
 import pytest
 
@@ -34,14 +35,19 @@ def fixture_analysis_store(base_store: Store, workflow_case_id, helpers) -> Stor
     """Store to be used in tests"""
     _store = base_store
 
-    case = helpers.add_family(_store, workflow_case_id)
+    case = helpers.add_family(_store, workflow_case_id, data_analysis="mip_dna")
 
-    sample = helpers.add_sample(_store, "dna_sample", is_rna=False)
-    helpers.add_relationship(_store, sample=sample, family=case)
+    dna_sample = helpers.add_sample(_store, "dna_sample", is_rna=False, sequenced_at=datetime.now())
+    helpers.add_relationship(_store, sample=dna_sample, family=case)
 
-    case = helpers.add_family(_store, "rna_case")
-    sample = helpers.add_sample(_store, "rna_sample", is_rna=True)
-    helpers.add_relationship(_store, sample=sample, family=case)
+    case = helpers.add_family(_store, "rna_case", data_analysis="mip_rna")
+    rna_sample = helpers.add_sample(_store, "rna_sample", is_rna=True,
+                                    sequenced_at=datetime.now())
+    helpers.add_relationship(_store, sample=rna_sample, family=case)
+
+    case = helpers.add_family(_store, "dna_rna_mix_case", data_analysis="mip_dna")
+    helpers.add_relationship(_store, sample=rna_sample, family=case)
+    helpers.add_relationship(_store, sample=dna_sample, family=case)
 
     return _store
 
@@ -58,6 +64,13 @@ def rna_case(analysis_store, helpers) -> models.Family:
     """Case with RNA application"""
     cust = helpers.ensure_customer(analysis_store)
     return analysis_store.find_family(cust, "rna_case")
+
+
+@pytest.fixture(scope="function")
+def dna_rna_mix_case(analysis_store, helpers) -> models.Family:
+    """Case with MIP analysis type DNA and RNA application"""
+    cust = helpers.ensure_customer(analysis_store)
+    return analysis_store.find_family(cust, "dna_rna_mix_case")
 
 
 class MockTB:

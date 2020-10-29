@@ -147,7 +147,7 @@ def test_analyses_to_upload_when_no_pipeline(helpers, sample_store, timestamp):
 def test_analyses_to_upload_when_analysis_has_pipeline(helpers, sample_store, timestamp):
     """Test analyses to upload to when existing pipeline"""
     # GIVEN a store with an analysis that has been run with MIP
-    helpers.add_analysis(store=sample_store, completed_at=timestamp, pipeline="MIP")
+    helpers.add_analysis(store=sample_store, completed_at=timestamp, pipeline="mip_dna")
 
     # WHEN fetching all analyses that are ready for upload and analysed with MIP
     records = [analysis_obj for analysis_obj in sample_store.analyses_to_upload(pipeline=None)]
@@ -159,23 +159,23 @@ def test_analyses_to_upload_when_analysis_has_pipeline(helpers, sample_store, ti
 def test_analyses_to_upload_when_filtering_with_pipeline(helpers, sample_store, timestamp):
     """Test analyses to upload to when existing pipeline and using it in filtering"""
     # GIVEN a store with an analysis that is analysed with MIP
-    helpers.add_analysis(store=sample_store, completed_at=timestamp, pipeline="MIP")
+    helpers.add_analysis(store=sample_store, completed_at=timestamp, pipeline="mip_dna")
 
     # WHEN fetching all pipelines that are analysed with MIP
-    records = [analysis_obj for analysis_obj in sample_store.analyses_to_upload(pipeline="MIP")]
+    records = [analysis_obj for analysis_obj in sample_store.analyses_to_upload(pipeline="mip_dna")]
 
     for analysis_obj in records:
         # THEN pipeline should be MIP in the analysis object
-        assert analysis_obj.pipeline == "MIP"
+        assert analysis_obj.pipeline == "mip_dna"
 
 
 def test_analyses_to_upload_with_pipeline_and_no_complete_at(helpers, sample_store, timestamp):
     """Test analyses to upload to when existing pipeline and using it in filtering"""
     # GIVEN a store with an analysis that is analysed with MIP but does not have a completed_at entry
-    helpers.add_analysis(store=sample_store, pipeline="MIP")
+    helpers.add_analysis(store=sample_store, pipeline="mip_dna")
 
     # WHEN fetching all analyses that are ready for upload and analysed by MIP
-    records = [analysis_obj for analysis_obj in sample_store.analyses_to_upload(pipeline="MIP")]
+    records = [analysis_obj for analysis_obj in sample_store.analyses_to_upload(pipeline="mip_dna")]
 
     # THEN no analysis object should be returned since they where not completed
     assert len(records) == 0
@@ -184,10 +184,10 @@ def test_analyses_to_upload_with_pipeline_and_no_complete_at(helpers, sample_sto
 def test_analyses_to_upload_when_filtering_with_missing_pipeline(helpers, sample_store, timestamp):
     """Test analyses to upload to when missing pipeline and using it in filtering"""
     # GIVEN a store with an analysis that has been analysed with "missing_pipeline"
-    helpers.add_analysis(store=sample_store, completed_at=timestamp, pipeline="missing_pipeline")
+    helpers.add_analysis(store=sample_store, completed_at=timestamp, pipeline="mip_dna")
 
     # WHEN fetching all analyses that was analysed with MIP
-    records = [analysis_obj for analysis_obj in sample_store.analyses_to_upload(pipeline="MIP")]
+    records = [analysis_obj for analysis_obj in sample_store.analyses_to_upload(pipeline="missing_pipeline")]
 
     # THEN no analysis object should be returned since there where no MIP analyses
     assert len(records) == 0

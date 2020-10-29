@@ -126,7 +126,7 @@ def config_case(context: click.Context, case_id: str, dry: bool = False):
     case_obj = rna_api.db.family(case_id)
     if not case_exists(case_obj, case_id):
         context.abort()
-    config_data = rna_api.pedigree_config(case_obj, pipeline="mip-rna")
+    config_data = rna_api.pedigree_config(case_obj, pipeline="mip_rna")
     if dry:
         print(config_data)
         return

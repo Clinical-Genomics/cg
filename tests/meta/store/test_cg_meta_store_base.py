@@ -30,7 +30,7 @@ def test_gather_files_and_bundle_in_hk_bundle_already_added(
     # THEN the BundleAlreadyAddedError exception should be raised
     with pytest.raises(BundleAlreadyAddedError) as exc_info:
         store_base.gather_files_and_bundle_in_housekeeper(
-            mip_rna_config, mock_housekeeper, mock_cg_store, workflow="mip"
+            mip_rna_config, mock_housekeeper, mock_cg_store, workflow="mip_dna"
         )
 
     assert exc_info.value.message == "bundle already added"
@@ -68,7 +68,7 @@ def test_gather_files_and_bundle_in_hk_bundle_new_analysis(
     mock_add_new_analysis.return_value = mock_cg_store.Analysis.return_value
 
     store_base.gather_files_and_bundle_in_housekeeper(
-        mip_rna_config, mock_housekeeper_api, mock_cg_store, workflow="mip"
+        mip_rna_config, mock_housekeeper_api, mock_cg_store, workflow="mip_dna"
     )
 
     # THEN the bundle and version should be added to Housekeeper
@@ -95,7 +95,7 @@ def test_add_new_analysis_pipeline_exception(mock_housekeeper_store, mock_status
     # WHEN creating and adding an analysis object for that case to status-db
     with pytest.raises(PipelineUnknownError) as exc_info:
         store_base.add_new_analysis(
-            mock_bundle, mock_case, mock_status, mock_version, workflow="mip"
+            mock_bundle, mock_case, mock_status, mock_version, workflow="mip_dna"
         )
 
     # THEN a PipelineUnknownError exception should be raised
@@ -118,7 +118,7 @@ def test_add_new_analysis_duplicate_analysis_exception(mock_housekeeper_store, m
     # WHEN creating and adding an analysis object for that case to status-db
     with pytest.raises(AnalysisDuplicationError) as exc_info:
         store_base.add_new_analysis(
-            mock_bundle, mock_case, mock_status, mock_version, workflow="mip"
+            mock_bundle, mock_case, mock_status, mock_version, workflow="mip_dna"
         )
 
     # THEN an AnalysisDuplicationEror should be raised
@@ -142,7 +142,7 @@ def test_add_new_analysis(mock_housekeeper_store, mock_status):
 
     # WHEN creating and adding an analysis object for that case in status-db
     new_analysis = store_base.add_new_analysis(
-        mock_bundle, mock_case, mock_status, mock_version, workflow="mip"
+        mock_bundle, mock_case, mock_status, mock_version, workflow="mip_dna"
     )
 
     # THEN and analysis object for that case should created and returned
@@ -204,11 +204,11 @@ def test_parse_files_rna(mock_missing, snapshot: Snapshot, rna_deliverables_raw:
     """
     # GIVEN the a MIP RNA analysis deliverables file
     mock_missing.return_value = False, []
-    pipeline = ["mip-rna"]
+    pipeline_tag = ["mip-rna"]
     analysis_type_tags = MIP_RNA_TAGS
 
     # WHEN getting the files used to build the bundle
-    mip_rna_files = store_base.parse_files(rna_deliverables_raw, pipeline, analysis_type_tags)
+    mip_rna_files = store_base.parse_files(rna_deliverables_raw, pipeline_tag, analysis_type_tags)
 
     # THEN the result should contain the data to be stored in Housekeeper
     snapshot.assert_match(mip_rna_files)
@@ -221,11 +221,11 @@ def test_parse_files_dna(mock_missing, snapshot: Snapshot, dna_deliverables_raw:
     """
     # GIVEN the a MIP DNA analysis deliverables file
     mock_missing.return_value = False, []
-    pipeline = ["mip-dna"]
+    pipeline_tags = ["mip-dna"]
     analysis_type_tags = MIP_DNA_TAGS
 
     # WHEN getting the files used to build the bundle
-    mip_dna_files = store_base.parse_files(dna_deliverables_raw, pipeline, analysis_type_tags)
+    mip_dna_files = store_base.parse_files(dna_deliverables_raw, pipeline_tags, analysis_type_tags)
 
     # THEN the result should contain the data to be stored in Housekeeper
     snapshot.assert_match(mip_dna_files)

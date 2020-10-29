@@ -32,21 +32,22 @@ class StatusHandler:
         pools = {}
 
         for sample in data["samples"]:
-            name = sample["pool"]
+            pool_name = sample["pool"]
             application = sample["application"]
             data_analysis = sample["data_analysis"]
+            data_delivery = sample.get("data_delivery")
             capture_kit = sample.get("capture_kit")
 
-            if name not in pools:
-                pools[name] = {}
-                pools[name]["name"] = name
-                pools[name]["applications"] = set()
-                pools[name]["capture_kits"] = set()
+            if pool_name not in pools:
+                pools[pool_name] = {}
+                pools[pool_name]["name"] = pool_name
+                pools[pool_name]["applications"] = set()
+                pools[pool_name]["capture_kits"] = set()
 
-            pools[name]["applications"].add(application)
+            pools[pool_name]["applications"].add(application)
 
             if capture_kit:
-                pools[name]["capture_kits"].add(capture_kit)
+                pools[pool_name]["capture_kits"].add(capture_kit)
 
         # each pool must only have one application type
         for pool in pools.values():
@@ -81,6 +82,7 @@ class StatusHandler:
                     "name": pool_name,
                     "application": application,
                     "data_analysis": data_analysis,
+                    "data_delivery": data_delivery,
                     "capture_kit": capture_kit,
                 }
             )
@@ -97,6 +99,7 @@ class StatusHandler:
                     "application": sample["application"],
                     "comment": sample.get("comment"),
                     "data_analysis": sample["data_analysis"],
+                    "data_delivery": sample.get("data_delivery"),
                     "internal_id": sample.get("internal_id"),
                     "name": sample["name"],
                     "priority": sample["priority"],
@@ -122,6 +125,7 @@ class StatusHandler:
                 {
                     "application": sample_data["application"],
                     "comment": sample_data.get("comment"),
+                    "data_delivery": sample_data.get("data_delivery"),
                     "internal_id": sample_data.get("internal_id"),
                     "name": sample_data["name"],
                     "organism_id": sample_data["organism"],
@@ -156,6 +160,7 @@ class StatusHandler:
                         "application": sample["application"],
                         "capture_kit": sample.get("capture_kit"),
                         "comment": sample.get("comment"),
+                        "data_delivery": sample.get("data_delivery"),
                         "father": sample.get("father"),
                         "from_sample": sample.get("from_sample"),
                         "internal_id": sample.get("internal_id"),
@@ -204,6 +209,7 @@ class StatusHandler:
                     new_sample = self.status.add_sample(
                         capture_kit=sample["capture_kit"],
                         comment=sample["comment"],
+                        data_delivery=sample["data_delivery"],
                         from_sample=sample["from_sample"],
                         internal_id=sample["internal_id"],
                         name=sample["name"],
@@ -262,14 +268,15 @@ class StatusHandler:
         with self.status.session.no_autoflush:
             for sample in samples:
                 new_sample = self.status.add_sample(
-                    name=sample["name"],
+                    comment=sample["comment"],
+                    data_delivery=sample["data_delivery"],
                     internal_id=sample["internal_id"],
-                    sex=sample["sex"] or "unknown",
+                    name=sample["name"],
                     order=order,
                     ordered=ordered,
-                    ticket=ticket,
                     priority=sample["priority"],
-                    comment=sample["comment"],
+                    sex=sample["sex"] or "unknown",
+                    ticket=ticket,
                     tumour=sample["tumour"],
                 )
                 new_sample.customer = customer_obj
@@ -310,6 +317,7 @@ class StatusHandler:
         with self.status.session.no_autoflush:
             for sample in samples:
                 new_sample = self.status.add_sample(
+                    data_delivery=sample["data_delivery"],
                     name=sample["name"],
                     internal_id=sample["internal_id"],
                     sex=sample["sex"] or "unknown",
@@ -330,7 +338,7 @@ class StatusHandler:
                 new_samples.append(new_sample)
 
                 new_family = self.status.add_family(
-                    data_analysis="fastq",
+                    data_analysis=sample["data_analysis"],
                     name=sample["name"],
                     panels=["OMIM-AUTO"],
                     priority="research",
@@ -405,6 +413,7 @@ class StatusHandler:
                     application_version=application_version,
                     comment=sample_data["comment"],
                     customer=customer_obj,
+                    data_delivery=sample_data["data_delivery"],
                     internal_id=sample_data["internal_id"],
                     name=sample_data["name"],
                     order=order,
@@ -447,6 +456,7 @@ class StatusHandler:
                 ticket=ticket,
                 application_version=application_version,
                 data_analysis=pool["data_analysis"],
+                data_delivery=pool["data_delivery"],
                 capture_kit=pool["capture_kit"],
             )
             new_delivery = self.status.add_delivery(destination="caesar", pool=new_pool)

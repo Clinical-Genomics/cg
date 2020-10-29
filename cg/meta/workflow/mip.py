@@ -146,8 +146,8 @@ class AnalysisAPI(ConfigHandler, MipAPI):
             return sample_data
 
         dispatch = {
-            "mip-dna": config_dna_sample,
-            "mip-rna": config_rna_sample,
+            "mip_dna": config_dna_sample,
+            "mip_rna": config_rna_sample,
         }
 
         data = {
