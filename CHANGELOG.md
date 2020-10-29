@@ -13,6 +13,11 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [13.15.0]
+
+### Added
+- New query to get all cases in ticket
+
 ## [13.14.3]
 
 ### Changed
