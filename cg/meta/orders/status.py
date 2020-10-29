@@ -456,7 +456,6 @@ class StatusHandler:
                 ticket=ticket,
                 application_version=application_version,
                 data_analysis=pool["data_analysis"],
-                data_delivery=pool["data_delivery"],
                 capture_kit=pool["capture_kit"],
             )
             new_delivery = self.status.add_delivery(destination="caesar", pool=new_pool)
