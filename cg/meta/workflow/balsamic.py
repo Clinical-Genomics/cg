@@ -463,7 +463,7 @@ class BalsamicAnalysisAPI:
 
     def get_analyses_to_clean(self, before_date: dt.datetime = dt.datetime.now()) -> list:
         """Retrieve a list of analyses for cleaning created before certain date"""
-        analyses_to_clean = self.store.analyses_to_clean(pipeline="Balsamic", before=before_date)
+        analyses_to_clean = self.store.analyses_to_clean(pipeline="balsamic", before=before_date)
         return analyses_to_clean.all()
 
     def get_cases_to_analyze(self) -> list:
