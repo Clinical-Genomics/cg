@@ -100,7 +100,6 @@ def test_start_available(tmpdir_factory, cli_runner, balsamic_context: dict, cap
     result = cli_runner.invoke(start_available, ["--dry-run"], obj=balsamic_context)
 
     # THEN command exits with 1 because one of cases raised errors
-    print(result.output)
     assert result.exit_code == 1
 
     # THEN it should successfully identify the one case eligible for auto-start
@@ -151,6 +150,7 @@ def test_store_available(
     assert balsamic_context["BalsamicAnalysisAPI"].store.family(case_id_success).action == "running"
 
     balsamic_context["BalsamicAnalysisAPI"].housekeeper_api = real_housekeeper_api
+
     # WHEN running command
     result = cli_runner.invoke(store_available, ["--dry-run"], obj=balsamic_context)
 
