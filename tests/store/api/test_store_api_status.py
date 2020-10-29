@@ -187,7 +187,10 @@ def test_analyses_to_upload_when_filtering_with_missing_pipeline(helpers, sample
     helpers.add_analysis(store=sample_store, completed_at=timestamp, pipeline="mip_dna")
 
     # WHEN fetching all analyses that was analysed with MIP
-    records = [analysis_obj for analysis_obj in sample_store.analyses_to_upload(pipeline="missing_pipeline")]
+    records = [
+        analysis_obj
+        for analysis_obj in sample_store.analyses_to_upload(pipeline="missing_pipeline")
+    ]
 
     # THEN no analysis object should be returned since there where no MIP analyses
     assert len(records) == 0

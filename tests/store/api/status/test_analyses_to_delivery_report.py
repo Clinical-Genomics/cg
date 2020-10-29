@@ -38,7 +38,7 @@ def test_outdated(analysis_store, helpers):
         started_at=timestamp,
         uploaded_at=timestamp,
         delivery_reported_at=delivery_timestamp,
-        pipeline=pipeline
+        pipeline=pipeline,
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp)
     analysis_store.relate_sample(family=analysis.family, sample=sample, status="unknown")
@@ -66,7 +66,7 @@ def test_outdated_analysis(analysis_store, helpers):
         started_at=timestamp_old_analysis,
         uploaded_at=timestamp,
         delivery_reported_at=delivery_reported_at_timestamp,
-        pipeline=pipeline
+        pipeline=pipeline,
     )
 
     # GIVEN samples which has been delivered

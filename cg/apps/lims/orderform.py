@@ -239,7 +239,7 @@ def parse_sample(raw_sample):
         sample["data_analysis"] = "mip_dna"
     elif data_analysis and "microbial" in data_analysis:
         sample["data_analysis"] = "microsalt"
-    elif data_analysis and ("fastq" in data_analysis or "custom" in data_analysis ):
+    elif data_analysis and ("fastq" in data_analysis or "custom" in data_analysis):
         sample["data_analysis"] = "fastq"
     else:
         raise OrderFormError(f"unknown 'Data Analysis' for order: {data_analysis}")

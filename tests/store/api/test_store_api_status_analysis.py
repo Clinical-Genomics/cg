@@ -307,7 +307,9 @@ def add_family(
     return family
 
 
-def add_analysis(store, completed=False, uploaded=False, pipeline=PIPELINE_OPTIONS[0], reanalyse=False):
+def add_analysis(
+    store, completed=False, uploaded=False, pipeline=PIPELINE_OPTIONS[0], reanalyse=False
+):
     """Utility function to add an analysis for tests"""
     analysis = store.add_analysis(pipeline=pipeline, version="")
     if completed:

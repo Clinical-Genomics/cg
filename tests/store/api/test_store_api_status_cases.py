@@ -149,7 +149,9 @@ def test_case_action(base_store: Store, helpers):
     """Test that case action is fetched by cases() method """
 
     # GIVEN a database with an analysis that was completed but has an active rerun in progress
-    analysis = helpers.add_analysis(base_store, completed_at=datetime.now(), uploaded_at=datetime.now())
+    analysis = helpers.add_analysis(
+        base_store, completed_at=datetime.now(), uploaded_at=datetime.now()
+    )
     analysis.family.action = "analyze"
 
     # WHEN getting active cases
@@ -165,7 +167,9 @@ def test_analysis_dates_for_rerun(base_store: Store, helpers):
     """Test to that cases displays no analysis dates for active reruns """
 
     # GIVEN a database with an analysis that was completed but has an active rerun in progress
-    analysis = helpers.add_analysis(base_store, completed_at=datetime.now(), uploaded_at=datetime.now())
+    analysis = helpers.add_analysis(
+        base_store, completed_at=datetime.now(), uploaded_at=datetime.now()
+    )
     analysis.family.action = "analyze"
 
     # WHEN getting active cases
