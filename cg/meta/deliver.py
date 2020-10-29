@@ -3,7 +3,7 @@
 import logging
 import os
 
-from typing import List, Set
+from typing import List, Set, Iterable
 from pathlib import Path
 
 from cg.apps.hk import HousekeeperAPI
@@ -13,7 +13,6 @@ from cg.store.models import Family, Sample, FamilySample
 from housekeeper.store import models as hk_models
 
 LOG = logging.getLogger(__name__)
-PROJECT_BASE_PATH = Path("/home/proj/production/customers")
 
 
 class DeliverAPI:
@@ -25,7 +24,7 @@ class DeliverAPI:
         hk_api: HousekeeperAPI,
         case_tags: List[str],
         sample_tags: List[str],
-        project_base_path: Path = None,
+        project_base_path: Path,
     ):
         """Initialize a delivery api
 
@@ -38,11 +37,17 @@ class DeliverAPI:
         """
         self.store = store
         self.hk_api = hk_api
-        self.project_base_path: Path = project_base_path or PROJECT_BASE_PATH
+        self.project_base_path: Path = project_base_path
         self.case_tags: Set[str] = set(case_tags)
         self.sample_tags: Set[str] = set(sample_tags)
         self.customer_id: str = ""
         self.ticket_id: str = ""
+        self.dry_run = False
+
+    def set_dry_run(self, dry_run: bool) -> None:
+        """Update dry run"""
+        LOG.info("Set dry run to %s", dry_run)
+        self.dry_run = dry_run
 
     def deliver_files(self, case_obj: Family):
         """Deliver all files for a case
@@ -57,18 +62,23 @@ class DeliverAPI:
             LOG.warning("Could not find any samples linked to case %s", case_id)
             return
         samples: List[Sample] = [link.sample for link in link_objs]
+        if not self.ticket_id:
+            self.set_ticket_id(sample_obj=samples[0])
+        if not self.customer_id:
+            self.set_customer_id(case_obj=case_obj)
+
         sample_ids: Set[str] = set([sample.internal_id for sample in samples])
-        self.deliver_case_files(
-            case_id=case_id, case_name=case_name, version_obj=last_version, sample_ids=sample_ids
-        )
+        if self.case_tags:
+            self.deliver_case_files(
+                case_id=case_id,
+                case_name=case_name,
+                version_obj=last_version,
+                sample_ids=sample_ids,
+            )
 
         if not self.sample_tags:
             return
 
-        link_objs: List[FamilySample] = self.store.family_samples(case_id)
-        if not link_objs:
-            LOG.warning("Could not find any samples linked to case %s", case_id)
-            return
         link_obj: FamilySample
         for link_obj in link_objs:
             sample_id: str = link_obj.sample.internal_id
@@ -94,6 +104,9 @@ class DeliverAPI:
         ):
             # Out path should include customer names
             out_path: Path = delivery_base / file_path.name.replace(case_id, case_name)
+            if self.dry_run:
+                LOG.info("Would hard link file %s to %s", file_path, out_path)
+                continue
             LOG.info("Hard link file %s to %s", file_path, out_path)
             os.link(file_path, out_path)
         LOG.info("Linked %s files for case %s", nr_files, case_id)
@@ -118,13 +131,16 @@ class DeliverAPI:
             out_path: Path = delivery_base / file_path.name.replace(case_id, case_name).replace(
                 sample_id, sample_name
             )
+            if self.dry_run:
+                LOG.info("Would hard link file %s to %s", file_path, out_path)
+                continue
             LOG.info("Hard link file %s to %s", file_path, out_path)
             os.link(file_path, out_path)
         LOG.info("Linked %s files for sample %s, case %s", nr_files, sample_id, case_id)
 
     def get_case_files_from_version(
         self, version_obj: hk_models.Version, sample_ids: Set[str]
-    ) -> List[Path]:
+    ) -> Iterable[Path]:
         """Fetch all case files from a version that are tagged with any of the case tags"""
         file_obj: hk_models.File
         for file_obj in version_obj.files:
@@ -134,7 +150,7 @@ class DeliverAPI:
 
     def get_sample_files_from_version(
         self, version_obj: hk_models.Version, sample_id: str
-    ) -> List[Path]:
+    ) -> Iterable[Path]:
         """Fetch all files for a sample from a version that are tagged with any of the sample tags"""
         file_obj: hk_models.File
         for file_obj in version_obj.files:
@@ -180,10 +196,12 @@ class DeliverAPI:
 
     def set_customer_id(self, case_obj: Family) -> None:
         """Set the customer_id for this upload"""
+        LOG.info("Set customer id to %s", case_obj.customer.internal_id)
         self.customer_id = case_obj.customer.internal_id
 
     def set_ticket_id(self, sample_obj: Sample) -> None:
         """Set the ticket_id for this upload"""
+        LOG.info("Set ticket id to %s", sample_obj.ticket_number)
         self.ticket_id = sample_obj.ticket_number
 
     def create_delivery_dir(self, case_name: str, sample_name: str = None) -> Path:
@@ -197,5 +215,7 @@ class DeliverAPI:
         if sample_name:
             delivery_path = delivery_path / sample_name
         LOG.debug("Creating project path %s", delivery_path)
+        if self.dry_run:
+            return delivery_path
         delivery_path.mkdir(parents=True, exist_ok=True)
         return delivery_path
