@@ -37,8 +37,9 @@ ALTER TABLE `analysis` CHANGE `pipeline` `pipeline` ENUM('balsamic', 'fastq', 'm
  COLLATE latin1_swedish_ci
  NOT NULL;
 
--- drop deprecated field
+-- drop deprecated fields
 ALTER TABLE `analysis` DROP COLUMN `microbial_order_id`;
+ALTER TABLE `application` DROP COLUMN `category`;
 
 select distinct data_delivery from family;
 select distinct data_analysis from family;

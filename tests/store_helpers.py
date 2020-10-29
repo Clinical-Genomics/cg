@@ -159,7 +159,7 @@ class StoreHelpers:
         """Utility function to add an analysis for tests"""
 
         if not family:
-            family = self.add_family(store)
+            family = self.add_family(store, data_analysis=pipeline)
 
         analysis = store.add_analysis(pipeline=pipeline, version=pipeline_version)
 
@@ -428,7 +428,8 @@ class StoreHelpers:
             ticket=ticket,
         )
         sample.customer = customer
-        case = self.ensure_family(store=store, name=str(ticket), customer=customer)
+        case = self.ensure_family(store=store, name=str(ticket), customer=customer,
+                                  data_analysis="microsalt")
         self.add_relationship(store=store, family=case, sample=sample)
         return sample
 

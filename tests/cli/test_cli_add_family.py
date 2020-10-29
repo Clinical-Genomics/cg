@@ -1,9 +1,10 @@
 """This script tests the cli methods to add families to status-db"""
 from datetime import datetime
 
+from cg.constants import PIPELINE_OPTIONS
 from cg.store import Store
 
-CLI_OPTION_ANALYSIS = "mip"
+CLI_OPTION_ANALYSIS = PIPELINE_OPTIONS[0]
 
 
 def test_add_family_required(invoke_cli, disk_store: Store):

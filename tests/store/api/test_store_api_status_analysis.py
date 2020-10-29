@@ -93,32 +93,34 @@ def test_all_samples_and_analysis_completed(base_store: Store):
     assert not families
 
 
-def test_mip_analysis_in_result(base_store: Store):
-    """Test that a family with one sample that has MIP data_analysis does show up"""
+def test_specified_analysis_in_result(base_store: Store):
+    """Test that a family with one sample that has specified data_analysis does show up"""
 
     # GIVEN a database with a family with one sequenced samples for MIP analysis
+    pipeline = PIPELINE_OPTIONS[0]
     test_sample = add_sample(base_store, sequenced=True)
-    test_family = add_family(base_store, data_analysis="mip-dna")
+    test_family = add_family(base_store, data_analysis=pipeline)
     base_store.relate_sample(test_family, test_sample, "unknown")
 
     # WHEN getting families to analyse
-    families = base_store.cases_to_analyze(pipeline="mip_dna")
+    families = base_store.cases_to_analyze(pipeline=pipeline)
 
     # THEN families should contain the test family
     assert families
     assert test_family in families
 
 
-def test_exclude_balsamic_only_analysis_from_result(base_store: Store):
-    """Test that a family with analysis Balsamic and with one sample does not show up"""
+def test_exclude_other_pipeline_analysis_from_result(base_store: Store):
+    """Test that a family with specified analysis and with one sample does not show up among
+    others"""
 
-    # GIVEN a database with a family with one sequenced samples for Balsamic analysis
+    # GIVEN a database with a family with one sequenced samples for specified analysis
     test_sample = add_sample(base_store, sequenced=True)
-    test_family = add_family(base_store, data_analysis="balsamic")
+    test_family = add_family(base_store, data_analysis=PIPELINE_OPTIONS[0])
     base_store.relate_sample(test_family, test_sample, "unknown")
 
     # WHEN getting families to analyse
-    families = base_store.cases_to_analyze(pipeline="mip_dna")
+    families = base_store.cases_to_analyze(pipeline=PIPELINE_OPTIONS[1])
 
     # THEN families should not contain the test family
     assert not families

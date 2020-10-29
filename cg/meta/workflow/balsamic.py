@@ -439,7 +439,7 @@ class BalsamicAnalysisAPI:
         query = (
             self.store.Sample.query.join(models.Family.links, models.FamilySample.sample)
             .filter(models.Family.internal_id == case_id)
-            .filter(models.Family.data_analysis.ilike("%Balsamic%"))
+            .filter(models.Family.data_analysis == "balsamic")
         )
 
         return all(
@@ -452,7 +452,7 @@ class BalsamicAnalysisAPI:
     def get_analyses_to_clean(self, before_date: dt.datetime = dt.datetime.now()) -> list:
         """Retrieve a list of analyses for cleaning created before certain date"""
         analyses_before = self.store.analyses(before=before_date)
-        analyses_to_clean = self.store.analyses_to_clean(pipeline="Balsamic")
+        analyses_to_clean = self.store.analyses_to_clean(pipeline="balsamic")
         return [x for x in analyses_to_clean if x in analyses_before]
 
     def get_cases_to_analyze(self) -> list:
