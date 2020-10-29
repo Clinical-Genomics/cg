@@ -428,8 +428,9 @@ class StoreHelpers:
             ticket=ticket,
         )
         sample.customer = customer
-        case = self.ensure_family(store=store, name=str(ticket), customer=customer,
-                                  data_analysis="microsalt")
+        case = self.ensure_family(
+            store=store, name=str(ticket), customer=customer, data_analysis="microsalt"
+        )
         self.add_relationship(store=store, family=case, sample=sample)
         return sample
 

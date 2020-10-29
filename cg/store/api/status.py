@@ -572,7 +572,7 @@ class StatusHandler(BaseHandler):
         if pipeline:
             records = records.filter(
                 models.Analysis.pipeline == pipeline,
-                )
+            )
 
         return records
 
