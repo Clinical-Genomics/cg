@@ -245,7 +245,7 @@ def start_available(context, dry):
         except click.Abort:
             exit_code = EXIT_FAIL
         except Exception as e:
-            LOG.error(f"Unspecified error occurred - {e.__class__}")
+            LOG.error(f"Unspecified error occurred - {e.__class__.__name__}")
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort()
@@ -264,7 +264,7 @@ def store_available(context, dry):
         except click.Abort:
             exit_code = EXIT_FAIL
         except Exception as e:
-            LOG.error(f"Unspecified error occurred - {e.__class__}")
+            LOG.error(f"Unspecified error occurred - {e.__class__.__name__}")
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort()

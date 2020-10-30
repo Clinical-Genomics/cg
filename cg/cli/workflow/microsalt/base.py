@@ -9,6 +9,7 @@ import click
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.microsalt.fastq import FastqHandler
+from cg.cli.workflow.microsalt.store import store as store_cmd
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.store import Store
 from cg.utils.commands import Process
@@ -139,3 +140,6 @@ def run(context: click.Context, dry_run: bool, config_case_path: click.Path, tic
         str(fastq_path.absolute()),
     ]
     process.run_command(parameters=analyse_command, dry_run=dry_run)
+
+
+microsalt.add_command(store_cmd)
