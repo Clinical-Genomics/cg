@@ -2,6 +2,8 @@
 
 import logging
 
+from typing import List
+
 import click
 
 from cg.meta.deliver import DeliverAPI
@@ -21,7 +23,7 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def deliver(context):
     """Deliver files with CG."""
-    LOG.info("Running CG DEPLOY")
+    LOG.info("Running CG deliver")
     context.obj["store"] = Store(context.obj["database"])
     context.obj["hk_api"] = HousekeeperAPI(context.obj)
 
@@ -29,7 +31,7 @@ def deliver(context):
 @click.command(name="analysis")
 @click.option("-c", "--case-id")
 @click.option("-t", "--ticket-id", type=int)
-@click.option("-t", "--analysis-type", type=click.Option(PIPELINE_ANALYSIS_OPTIONS))
+@click.option("-d", "--delivery-type", type=click.Choice(PIPELINE_ANALYSIS_OPTIONS), required=True)
 @click.option(
     "-i",
     "--inbox",
@@ -39,7 +41,7 @@ def deliver(context):
 )
 @click.option("--dry-run", is_flag=True)
 @click.pass_context
-def deliver_analysis(context, case_id, ticket_id, analysis_type, inbox, dry_run):
+def deliver_analysis(context, case_id, ticket_id, delivery_type, inbox, dry_run):
     """Deliver analysis files to customer inbox"""
     if not case_id or ticket_id:
         LOG.info("Please provide a case-id or ticket-id")
@@ -48,8 +50,8 @@ def deliver_analysis(context, case_id, ticket_id, analysis_type, inbox, dry_run)
     deliver_api = DeliverAPI(
         store=store,
         hk_api=context.obj["hk_api"],
-        case_tags=PIPELINE_ANALYSIS_TAG_MAP[analysis_type]["case_tags"],
-        sample_tags=PIPELINE_ANALYSIS_TAG_MAP[analysis_type]["sample_tags"],
+        case_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery_type]["case_tags"],
+        sample_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery_type]["sample_tags"],
         project_base_path=inbox,
     )
     deliver_api.set_dry_run(dry_run)

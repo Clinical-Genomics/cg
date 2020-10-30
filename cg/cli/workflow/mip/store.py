@@ -16,11 +16,9 @@ from cg.exc import (
     MandatoryFilesMissing,
 )
 from cg.meta.store.base import gather_files_and_bundle_in_housekeeper
-from cg.meta.deliver import DeliverAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import Store
 from cg.constants import EXIT_SUCCESS, EXIT_FAIL
-from cg.cli.workflow.mip_dna.deliver import CASE_TAGS, SAMPLE_TAGS
 
 
 LOG = logging.getLogger(__name__)
@@ -42,13 +40,6 @@ def store(context):
         tb_api=context.obj["trailblazer_api"],
         scout_api=context.obj["scout_api"],
         lims_api=context.obj["lims_api"],
-        deliver_api=DeliverAPI(
-            context.obj,
-            hk_api=context.obj["housekeeper_api"],
-            lims_api=context.obj["lims_api"],
-            case_tags=CASE_TAGS,
-            sample_tags=SAMPLE_TAGS,
-        ),
         script=context.obj["mip-rd-dna"]["script"],
         pipeline=context.obj["mip-rd-dna"]["pipeline"],
         conda_env=context.obj["mip-rd-dna"]["conda_env"],

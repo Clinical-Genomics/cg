@@ -11,14 +11,13 @@ from cg.apps.balsamic.fastq import FastqHandler as BalsamicFastqHandler
 from cg.apps.microsalt.fastq import FastqHandler as MicrosaltFastqHandler
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.scoutapi import ScoutAPI
-from cg.meta.deliver import DeliverAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 
 from tests.store_helpers import StoreHelpers
 
 
-@pytest.yield_fixture(scope="function")
-def analysis_store(base_store: Store, analysis_family: dict) -> Store:
+@pytest.yield_fixture(scope="function", name="analysis_store")
+def fixture_analysis_store(base_store: Store, analysis_family: dict) -> Store:
     """Setup a store instance for testing analysis API."""
     customer = base_store.customer("cust000")
     family = base_store.Family(
@@ -144,12 +143,15 @@ class MockMicrosaltFastq(MicrosaltFastqHandler):
         super().__init__(config={"microsalt": {"root": tmpdir}})
 
 
-@pytest.yield_fixture(scope="function")
-def mip_hk_store(
-    helpers: StoreHelpers, real_housekeeper_api: HousekeeperAPI, timestamp: datetime
+@pytest.yield_fixture(scope="function", name="mip_hk_store")
+def fixture_mip_hk_store(
+    helpers: StoreHelpers,
+    real_housekeeper_api: HousekeeperAPI,
+    timestamp: datetime,
+    case_id: str,
 ) -> HousekeeperAPI:
     deliver_hk_bundle_data = {
-        "name": "case_id",
+        "name": case_id,
         "created": timestamp,
         "expires": timestamp,
         "files": [
@@ -219,23 +221,8 @@ def mip_hk_store(
     return real_housekeeper_api
 
 
-@pytest.yield_fixture(scope="function")
-def deliver_api(
-    analysis_store: Store, mip_hk_store: HousekeeperAPI, project_dir: Path
-) -> DeliverAPI:
-    """Fixture for deliver_api"""
-    deliver_api = DeliverAPI(
-        store=analysis_store,
-        hk_api=mip_hk_store,
-        case_tags=["case-tag"],
-        sample_tags=["sample-tag"],
-        project_base_path=project_dir,
-    )
-    yield deliver_api
-
-
-@pytest.yield_fixture(scope="function")
-def analysis_api(
+@pytest.yield_fixture(scope="function", name="analysis_api")
+def fixture_analysis_api(
     analysis_store: Store, mip_hk_store: HousekeeperAPI, scout_api: ScoutAPI
 ) -> MipAnalysisAPI:
     """Setup an analysis API."""

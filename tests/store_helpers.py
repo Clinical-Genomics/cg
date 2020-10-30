@@ -202,6 +202,7 @@ class StoreHelpers:
         customer_name: str = None,
         reads: int = None,
         loqus_id: str = None,
+        ticket: int = None,
         **kwargs,
     ) -> models.Sample:
         """Utility function to add a sample to use in tests"""
@@ -222,6 +223,7 @@ class StoreHelpers:
             sequenced_at=datetime.now(),
             data_analysis=data_analysis,
             reads=reads,
+            ticket=ticket,
         )
 
         sample.application_version_id = application_version_id
@@ -239,6 +241,9 @@ class StoreHelpers:
 
         if kwargs.get("prepared_at"):
             sample.received_at = kwargs["prepared_at"]
+
+        if kwargs.get("capture_kit"):
+            sample.capture_kit = kwargs["capture_kit"]
 
         if kwargs.get("flowcell"):
             sample.flowcells.append(kwargs["flowcell"])
@@ -324,7 +329,6 @@ class StoreHelpers:
             name=family_info["name"],
             panels=family_info["panels"],
             internal_id=family_info["internal_id"],
-            priority="standard",
             ordered_at=ordered_at,
         )
 
@@ -348,6 +352,7 @@ class StoreHelpers:
                 application_type=app_type,
                 ticket=sample_data["ticket_number"],
                 reads=sample_data["reads"],
+                capture_kit=sample_data["capture_kit"],
             )
             sample_objs[sample_id] = sample_obj
 
