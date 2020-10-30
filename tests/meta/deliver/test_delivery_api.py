@@ -1,14 +1,22 @@
 """Tests for delivery API"""
 
+from cg.meta.deliver import DeliverAPI
 
-def test_get_post_analysis_files(deliver_api):
 
-    # GIVEN a case which exist as bundle in hk
-    # GIVEN corresponding houskeeper tags for those files
+def test_get_case_analysis_files(deliver_api: DeliverAPI):
+    """Test to fetch case specific files for a case that exists in housekeeper"""
     case = "case_id"
+    # GIVEN a case which exist as bundle in hk with a version
+    version_obj = deliver_api.hk_api.last_version(case)
+    assert version_obj
+    # GIVEN corresponding housekeeper tags for those files
     deliver_tags = ["case-tag"]
+    # GIVEN that a case object exists in the database
+    case_obj = deliver_api.store.family(case)
+    assert case_obj
+    assert False
 
-    # WHEN we call get_post_analysis_files with matching case and file-tags and version is no version
+    # WHEN fetching all case files from
     version = None
     bundle_latest_files = deliver_api.get_post_analysis_files(case, version, deliver_tags)
 

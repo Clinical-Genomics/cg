@@ -12,10 +12,8 @@ from cg.apps.tb import TrailblazerAPI
 from cg.apps.environ import environ_email
 from cg.cli.workflow.get_links import get_links
 from cg.cli.workflow.mip.store import store as store_cmd
-from cg.cli.workflow.mip_dna.deliver import CASE_TAGS, SAMPLE_TAGS
 from cg.constants import EXIT_SUCCESS, EXIT_FAIL
 from cg.exc import CgError
-from cg.meta.deliver import DeliverAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import Store
 from cg.store.utils import case_exists
@@ -68,13 +66,6 @@ def mip_dna(
         tb_api=context.obj["trailblazer_api"],
         scout_api=context.obj["scout_api"],
         lims_api=context.obj["lims_api"],
-        deliver_api=DeliverAPI(
-            context.obj,
-            hk_api=context.obj["housekeeper_api"],
-            lims_api=context.obj["lims_api"],
-            case_tags=CASE_TAGS,
-            sample_tags=SAMPLE_TAGS,
-        ),
         script=context.obj["mip-rd-dna"]["script"],
         pipeline=context.obj["mip-rd-dna"]["pipeline"],
         conda_env=context.obj["mip-rd-dna"]["conda_env"],

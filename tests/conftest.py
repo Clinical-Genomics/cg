@@ -569,7 +569,7 @@ def fixture_customer_group() -> str:
 
 @pytest.yield_fixture(scope="function", name="customer_production")
 def fixture_customer_production(customer_group) -> dict:
-    """Return a dictionary with infomation about the prod customer"""
+    """Return a dictionary with information about the prod customer"""
     _cust = dict(
         customer_id="cust000",
         name="Production",
