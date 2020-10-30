@@ -4,12 +4,11 @@ import logging
 
 import click
 
+from cg.apps.environ import environ_email
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
-
-from cg.apps.environ import environ_email
 from cg.cli.workflow.get_links import get_links
 from cg.cli.workflow.mip.store import store as store_cmd
 from cg.constants import EXIT_SUCCESS, EXIT_FAIL
@@ -294,7 +293,7 @@ def start(context: click.Context, dry_run: bool = False):
             LOG.error(error.message)
             exit_code = EXIT_FAIL
         except Exception as e:
-            LOG.error(f"Unspecified error occurred - {e.__class__}")
+            LOG.error(f"Unspecified error occurred - {e.__class__.__name__}")
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort

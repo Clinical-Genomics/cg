@@ -166,7 +166,9 @@ def fixture_mip_configs(
             "slurm_quality_of_service": "medium",
             "store_file": str(mip_deliverables[case]),
         }
-        config_path = mip_case_dirs[case] / f"{case}_config.yaml"
+        analysis_path = Path(mip_case_dirs[case] / "analysis")
+        Path(analysis_path).mkdir(parents=True, exist_ok=True)
+        config_path = analysis_path / f"{case}_config.yaml"
         config_dict[case] = config_path
         with open(config_path, "w") as fh:
             yaml.dump(config, fh)
@@ -281,10 +283,22 @@ def mip_context(
 
 @pytest.fixture(name="mip_store_context")
 def mip_store_context(
-    trailblazer_api, _store: Store, empty_housekeeper_api: HousekeeperAPI
+    trailblazer_api, _store: Store, empty_housekeeper_api: HousekeeperAPI, mock_root_folder: Path
 ) -> dict:
     """Create a context to be used in testing mip store, this should be fused with mip_context above at later stages"""
     return {
+        "mip_api": MipAnalysisAPI(
+            db=_store,
+            tb_api=trailblazer_api,
+            hk_api=empty_housekeeper_api,
+            scout_api=None,
+            lims_api=None,
+            deliver_api=None,
+            script="None",
+            pipeline="None",
+            conda_env="None",
+            root=mock_root_folder,
+        ),
         "trailblazer_api": trailblazer_api,
         "housekeeper_api": empty_housekeeper_api,
         "status_db": _store,
