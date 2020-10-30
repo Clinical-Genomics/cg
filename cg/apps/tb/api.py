@@ -63,17 +63,15 @@ class TrailblazerAPI:
         data_analysis: str = None,
     ) -> list:
         request_body = {
-            "analyses": {
-                "case_id": case_id,
-                "status": status,
-                "query": query,
-                "deleted": deleted,
-                "temp": temp,
-                "before": str(before) if before else None,
-                "is_visible": is_visible,
-                "family": family,
-                "data_analysis": data_analysis,
-            }
+            "case_id": case_id,
+            "status": status,
+            "query": query,
+            "deleted": deleted,
+            "temp": temp,
+            "before": str(before) if before else None,
+            "is_visible": is_visible,
+            "family": family,
+            "data_analysis": data_analysis,
         }
         response = self.query_trailblazer(command="query-analyses", request_body=request_body)
         if response:
