@@ -303,7 +303,7 @@ def start(context: click.Context, dry_run: bool = False):
             LOG.error(error.message)
             exit_code = EXIT_FAIL
         except Exception as e:
-            LOG.error(f"Unspecified error occurred - {e.__class__}")
+            LOG.error(f"Unspecified error occurred - {e.__class__.__name__}")
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort

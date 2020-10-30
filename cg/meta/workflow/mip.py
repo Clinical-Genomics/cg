@@ -75,7 +75,8 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
                 return "low"
             if family_obj.priority > 1:
                 return "high"
-        return "normal"
+            return "normal"
+        return family_obj.priority
 
     def get_pedigree_config_path(self, case_id: str) -> Path:
         return Path(self.root, case_id, "pedigree.yaml")

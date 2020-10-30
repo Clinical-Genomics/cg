@@ -101,7 +101,9 @@ def completed(context):
     mip_api = context.obj["mip_api"]
 
     exit_code = EXIT_SUCCESS
-    for analysis_obj in mip_api.tb.analyses(status="completed", deleted=False, data_analysis="mip"):
+    for analysis_obj in mip_api.tb.analyses(
+        status="completed", deleted=False, data_analysis="mip-dna"
+    ):
         existing_record = mip_api.hk.version(analysis_obj.family, analysis_obj.started_at)
         if existing_record:
             LOG.info("analysis stored: %s - %s", analysis_obj.family, analysis_obj.started_at)
