@@ -104,6 +104,8 @@ def completed(context):
     for analysis_obj in mip_api.tb.analyses(
         status="completed", deleted=False, data_analysis="mip-dna"
     ):
+        LOG.info(analysis_obj)
+
         existing_record = mip_api.hk.version(analysis_obj.family, analysis_obj.started_at)
         if existing_record:
             LOG.info("analysis stored: %s - %s", analysis_obj.family, analysis_obj.started_at)
