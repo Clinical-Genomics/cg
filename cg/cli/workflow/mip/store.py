@@ -4,8 +4,10 @@ from pathlib import Path
 
 import click
 
-from cg.apps.tb import TrailblazerAPI
 from cg.apps.hk import HousekeeperAPI
+from cg.apps.lims import LimsAPI
+from cg.apps.scoutapi import ScoutAPI
+from cg.apps.tb import TrailblazerAPI
 from cg.exc import (
     AnalysisNotFinishedError,
     AnalysisDuplicationError,
@@ -14,8 +16,11 @@ from cg.exc import (
     MandatoryFilesMissing,
 )
 from cg.meta.store.base import gather_files_and_bundle_in_housekeeper
+from cg.meta.deliver import DeliverAPI
+from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import Store
 from cg.constants import EXIT_SUCCESS, EXIT_FAIL
+from cg.cli.workflow.mip_dna.deliver import CASE_TAGS, SAMPLE_TAGS
 
 
 LOG = logging.getLogger(__name__)
@@ -25,9 +30,30 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def store(context):
     """Store results from MIP in housekeeper."""
-    context.obj["status_db"] = Store(context.obj["database"])
-    context.obj["trailblazer_api"] = TrailblazerAPI(context.obj)
     context.obj["housekeeper_api"] = HousekeeperAPI(context.obj)
+    context.obj["trailblazer_api"] = TrailblazerAPI(context.obj)
+    context.obj["scout_api"] = ScoutAPI(context.obj)
+    context.obj["lims_api"] = LimsAPI(context.obj)
+    context.obj["status_db"] = Store(context.obj["database"])
+
+    context.obj["mip_api"] = MipAnalysisAPI(
+        db=context.obj["status_db"],
+        hk_api=context.obj["housekeeper_api"],
+        tb_api=context.obj["trailblazer_api"],
+        scout_api=context.obj["scout_api"],
+        lims_api=context.obj["lims_api"],
+        deliver_api=DeliverAPI(
+            context.obj,
+            hk_api=context.obj["housekeeper_api"],
+            lims_api=context.obj["lims_api"],
+            case_tags=CASE_TAGS,
+            sample_tags=SAMPLE_TAGS,
+        ),
+        script=context.obj["mip-rd-dna"]["script"],
+        pipeline=context.obj["mip-rd-dna"]["pipeline"],
+        conda_env=context.obj["mip-rd-dna"]["conda_env"],
+        root=context.obj["mip-rd-dna"]["root"],
+    )
 
 
 @store.command()
@@ -35,8 +61,7 @@ def store(context):
 @click.pass_context
 def analysis(context, config_stream):
     """Store a finished analysis in Housekeeper."""
-    status = context.obj["status_db"]
-    hk_api = context.obj["housekeeper_api"]
+    mip_api = context.obj["mip_api"]
 
     exit_code = EXIT_SUCCESS
     if not config_stream:
@@ -46,10 +71,11 @@ def analysis(context, config_stream):
     try:
         new_analysis = gather_files_and_bundle_in_housekeeper(
             config_stream,
-            hk_api,
-            status,
+            mip_api.hk,
+            mip_api.db,
             workflow="mip",
         )
+        mip_api.db.add_commit(new_analysis)
     except (
         AnalysisNotFinishedError,
         AnalysisDuplicationError,
@@ -63,8 +89,8 @@ def analysis(context, config_stream):
         LOG.error(f"Missing file: {error.args[0]}")
         exit_code = EXIT_FAIL
     if exit_code:
-        raise click.Abort()
-    status.add_commit(new_analysis)
+        raise click.Abort
+
     LOG.info("Included files in Housekeeper")
 
 
@@ -72,17 +98,18 @@ def analysis(context, config_stream):
 @click.pass_context
 def completed(context):
     """Store all completed analyses."""
-    hk_api = context.obj["housekeeper_api"]
-    tb_api = context.obj["trailblazer_api"]
+    mip_api = context.obj["mip_api"]
 
     exit_code = EXIT_SUCCESS
-    for analysis_obj in tb_api.analyses(status="completed", deleted=False):
-        existing_record = hk_api.version(analysis_obj.family, analysis_obj.started_at)
+    for analysis_obj in mip_api.tb.analyses(status="completed", deleted=False, data_analysis="mip"):
+        existing_record = mip_api.hk.version(analysis_obj.family, analysis_obj.started_at)
         if existing_record:
             LOG.info("analysis stored: %s - %s", analysis_obj.family, analysis_obj.started_at)
             continue
         LOG.info(f"storing family: {analysis_obj.family}")
-        with Path(analysis_obj.config_path).open() as config_stream:
+        with Path(
+            mip_api.get_case_config_path(case_id=analysis_obj.family)
+        ).open() as config_stream:
             try:
                 context.invoke(analysis, config_stream=config_stream)
             except (Exception, click.Abort):

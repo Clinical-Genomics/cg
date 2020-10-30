@@ -75,11 +75,13 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
                 return "low"
             if family_obj.priority > 1:
                 return "high"
-            return "normal"
-        return family_obj.priority
+        return "normal"
 
     def get_pedigree_config_path(self, case_id: str) -> Path:
         return Path(self.root, case_id, "pedigree.yaml")
+
+    def get_case_config_path(self, case_id: str) -> Path:
+        return Path(self.root, case_id, "analysis", f"{case_id}_config.yaml")
 
     def pedigree_config(
         self, family_obj: models.Family, pipeline: str, panel_bed: str = None
