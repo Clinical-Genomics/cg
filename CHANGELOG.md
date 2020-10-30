@@ -13,6 +13,14 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [13.16.1]
+
+### Fixed
+
+ - Fix bug where cg workflow mip store still relied on Trailblazer to find case_config.yaml (Where it can no longer be found)
+ - Fix bug where microsalt cli lost its store command in merge conflict
+
+
 ## [13.16.0]
 
 ### Added
