@@ -85,6 +85,7 @@ class BalsamicAPI:
             {
                 "--sample-config": arguments.get("sample_config"),
                 "--analysis-type": arguments.get("analysis_type"),
+                "--disable-variant-caller": arguments.get("disable_variant_caller"),
             }
         )
         parameters = command + options
