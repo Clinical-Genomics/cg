@@ -119,8 +119,7 @@ class MicrosaltAnalysisAPI:
         for sample_obj in sample_objs:
             LOG.info("%s: link FASTQ files", sample_obj.internal_id)
             self.link_sample(
-                ticket=ticket,
-                sample=sample_obj.internal_id,
+                ticket=ticket, sample=sample_obj.internal_id,
             )
 
     def link_sample(self, sample: str, ticket: int) -> None:
@@ -269,9 +268,7 @@ class MicrosaltAnalysisAPI:
         """Returns a path where the microSALT deliverables file for the order_id should be
         located"""
         deliverables_file_path = Path(
-            self.root_dir,
-            "results/reports/deliverables",
-            order_id + "_deliverables.yaml",
+            self.root_dir, "results/reports/deliverables", order_id + "_deliverables.yaml",
         )
         return deliverables_file_path
 
@@ -284,4 +281,3 @@ class MicrosaltAnalysisAPI:
         LOG.warning(
             f"Action '{action}' not permitted by StatusDB and will not be set for case {name}"
         )
-
