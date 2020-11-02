@@ -122,6 +122,8 @@ def config_case(context: click.Context, dry_run: bool, ticket: int, sample_id: s
 def run(context: click.Context, dry_run: bool, config_case_path: click.Path, ticket: int):
     """ Start microSALT with an order_id """
 
+    microbial_api = context.obj["analysis_api"]
+
     microsalt_bin = context.obj["microsalt"]["binary_path"]
     microsalt_env = context.obj["microsalt"]["conda_env"]
     fastq_path = Path(context.obj["microsalt"]["root"]) / "fastq" / str(ticket)
@@ -140,6 +142,8 @@ def run(context: click.Context, dry_run: bool, config_case_path: click.Path, tic
         str(fastq_path.absolute()),
     ]
     process.run_command(parameters=analyse_command, dry_run=dry_run)
+
+    microbial_api.set_statusdb_action(name=ticket, action="running")
 
 
 microsalt.add_command(store_cmd)
