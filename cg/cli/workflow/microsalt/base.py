@@ -143,7 +143,8 @@ def run(context: click.Context, dry_run: bool, config_case_path: click.Path, tic
     ]
     process.run_command(parameters=analyse_command, dry_run=dry_run)
 
-    microbial_api.set_statusdb_action(name=ticket, action="running")
+    if not dry_run:
+        microbial_api.set_statusdb_action(name=ticket, action="running")
 
 
 microsalt.add_command(store_cmd)
