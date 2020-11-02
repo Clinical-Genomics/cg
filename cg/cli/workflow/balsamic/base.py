@@ -170,13 +170,7 @@ def report_deliver(context, case_id, analysis_type, dry):
         sample_config = balsamic_analysis_api.get_config_path(case_id=case_id, check_exists=True)
         analysis_finish = balsamic_analysis_api.get_analysis_finish_path(case_id, check_exists=True)
         LOG.info(f"Found analysis finish file: {analysis_finish}")
-        arguments = {
-            "sample_config": sample_config,
-            "analysis_type": analysis_type,
-            "disable_variant_caller": "mutect"
-            if balsamic_analysis_api.get_case_application_type(case_id=case_id) == "wes"
-            else None,
-        }
+        arguments = {"sample_config": sample_config, "analysis_type": analysis_type}
         balsamic_analysis_api.balsamic_api.report_deliver(arguments=arguments, dry=dry)
     except BalsamicStartError as e:
         LOG.error(f"Could not create report file: {e.message}")
