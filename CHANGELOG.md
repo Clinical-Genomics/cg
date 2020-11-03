@@ -13,6 +13,13 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [13.16.2]
+
+### Fixed
+
+- Fixed bug where parse_mip_config() only returned values for primary analysis, breaking Upload Delivery Report
+
+
 ## [13.16.1]
 
 ### Fixed
