@@ -16,7 +16,7 @@
       "sex": "female",
       "family_name": "family1",
       "from_sample": "sample1",
-      "time_point": 1
+      "time_point": "1"
     },
     {
       "name": "sample1-rna-t2",
@@ -32,7 +32,7 @@
       "sex": "female",
       "family_name": "family1",
       "from_sample": "sample1",
-      "time_point": 2
+      "time_point": "2"
     }
   ]
 }

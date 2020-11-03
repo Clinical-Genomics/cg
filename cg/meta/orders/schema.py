@@ -184,7 +184,7 @@ MIP_RNA_SAMPLE = {
     "comment": OptionalNone(TypeValidatorNone(str)),
     # Orderform 1508:19
     "from_sample": validators.RegexValidator(NAME_PATTERN),
-    "time_point": OptionalNone(TypeValidatorNone(int)),
+    "time_point": OptionalNone(TypeValidatorNone(str)),
 }
 
 EXTERNAL_SAMPLE = {
