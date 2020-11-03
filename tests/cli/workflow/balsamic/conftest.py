@@ -769,6 +769,7 @@ def balsamic_context(
     balsamic_store: Store,
     balsamic_lims: MockLimsAPI,
     balsamic_housekeeper: HousekeeperAPI,
+    trailblazer_api,
 ) -> dict:
     """context to use in cli"""
     balsamic_analysis_api = BalsamicAnalysisAPI(
@@ -777,6 +778,7 @@ def balsamic_context(
         housekeeper_api=balsamic_housekeeper,
         fastq_handler=FastqHandler(server_config),
         lims_api=balsamic_lims,
+        trailblazer_api=trailblazer_api,
     )
     return {
         "BalsamicAnalysisAPI": balsamic_analysis_api,

@@ -13,6 +13,31 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [13.16.2]
+
+### Fixed
+
+- Fixed bug where parse_mip_config() only returned values for primary analysis, breaking Upload Delivery Report
+
+
+## [13.16.1]
+
+### Fixed
+
+ - Fix bug where cg workflow mip store still relied on Trailblazer to find case_config.yaml (Where it can no longer be found)
+ - Fix bug where microsalt cli lost its store command in merge conflict
+
+
+## [13.16.0]
+
+### Added
+- New REST-based TrailblazerAPI
+### Changed
+- Trailblazer support for Balsamic
+### Fixed
+- Naming convention for API harmonized
+
+
 ## [13.15.0]
 
 ### Added

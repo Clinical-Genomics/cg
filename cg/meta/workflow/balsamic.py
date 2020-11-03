@@ -14,6 +14,8 @@ from cg.apps.balsamic.fastq import FastqHandler
 from cg.constants import FAMILY_ACTIONS
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
+from cg.apps.tb import TrailblazerAPI
+from cg.apps.tb.models import TrailblazerAnalysis
 from cg.exc import BalsamicStartError, BundleAlreadyAddedError
 from cg.store import Store, models
 
@@ -34,12 +36,14 @@ class BalsamicAnalysisAPI:
         housekeeper_api: HousekeeperAPI,
         fastq_handler: FastqHandler,
         lims_api: LimsAPI,
+        trailblazer_api: TrailblazerAPI,
     ):
         self.balsamic_api = balsamic_api
         self.store = store
         self.housekeeper_api = housekeeper_api
         self.fastq_handler = fastq_handler
         self.lims_api = lims_api
+        self.trailblazer_api = trailblazer_api
 
     def get_case_object(self, case_id: str):
         """Look up case ID in StoreDB and return result"""
@@ -102,6 +106,12 @@ class BalsamicAnalysisAPI:
                 f"Please ensure all jobs have finished successfully!"
             )
         return analysis_finish_path.as_posix()
+
+    def get_slurm_job_ids_path(self, case_id: str) -> Path:
+        slurm_job_ids_path = Path(
+            self.balsamic_api.root_dir, case_id, "analysis", "slurm_jobids.yaml"
+        )
+        return slurm_job_ids_path
 
     def get_file_collection(self, sample_id: str) -> list:
         """Retrieves sample data for naming"""
@@ -351,13 +361,15 @@ class BalsamicAnalysisAPI:
         self.print_sample_params(case_id=case_id, sample_data=sample_data)
         return sample_data
 
-    def check_application_type_wes(self, case_id: str) -> bool:
-        """Checks if any of the samples in case have application type WES"""
-        for link_object in self.get_balsamic_sample_objects(case_id=case_id):
-            sample_application_type = self.get_application_type(link_object)
-            if str(sample_application_type).lower() == "wes":
-                return True
-        return False
+    def get_case_application_type(self, case_id: str) -> str:
+        application_types = set(
+            [
+                self.get_application_type(link_object)
+                for link_object in self.get_balsamic_sample_objects(case_id=case_id)
+            ]
+        )
+        if application_types:
+            return application_types.pop().lower()
 
     def resolve_target_bed(
         self, panel_bed: Optional[str], link_object: models.FamilySample
@@ -451,9 +463,8 @@ class BalsamicAnalysisAPI:
 
     def get_analyses_to_clean(self, before_date: dt.datetime = dt.datetime.now()) -> list:
         """Retrieve a list of analyses for cleaning created before certain date"""
-        analyses_before = self.store.analyses(before=before_date)
-        analyses_to_clean = self.store.analyses_to_clean(pipeline="balsamic")
-        return [x for x in analyses_to_clean if x in analyses_before]
+        analyses_to_clean = self.store.analyses_to_clean(pipeline="balsamic", before=before_date)
+        return analyses_to_clean.all()
 
     def get_cases_to_analyze(self) -> list:
         """Retrieve a list of balsamic cases without analysis,

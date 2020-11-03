@@ -4,7 +4,8 @@ import logging
 
 import click
 
-from cg.apps import crunchy, hk
+from cg.apps.crunchy import CrunchyAPI
+from cg.apps.hk import HousekeeperAPI
 from cg.cli.compress.helpers import get_fastq_individuals, update_compress_api
 from cg.exc import CaseNotFoundError
 from cg.meta.compress import CompressAPI
@@ -17,12 +18,12 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def store(context):
     """Command for storing files"""
-    hk_api = hk.HousekeeperAPI(context.obj)
-    crunchy_api = crunchy.CrunchyAPI(context.obj)
+    housekeeper_api = HousekeeperAPI(context.obj)
+    crunchy_api = CrunchyAPI(context.obj)
 
-    compress_api = CompressAPI(hk_api=hk_api, crunchy_api=crunchy_api)
-    context.obj["compress"] = compress_api
-    context.obj["db"] = Store(context.obj.get("database"))
+    compress_api = CompressAPI(hk_api=housekeeper_api, crunchy_api=crunchy_api)
+    context.obj["compress_api"] = compress_api
+    context.obj["status_db"] = Store(context.obj.get("database"))
 
 
 @store.command("fastq")
@@ -33,8 +34,8 @@ def fastq_cmd(context, case_id, dry_run):
     """Store fastq files for a case in Housekeeper"""
     LOG.info("Running store fastq")
 
-    compress_api = context.obj["compress"]
-    cg_store = context.obj["db"]
+    compress_api = context.obj["compress_api"]
+    cg_store = context.obj["status_db"]
 
     update_compress_api(compress_api, dry_run=dry_run)
 

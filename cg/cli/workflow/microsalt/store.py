@@ -3,7 +3,7 @@ import logging
 
 import click
 
-from cg.apps import hk, tb
+from cg.apps.hk import HousekeeperAPI
 from cg.exc import (
     AnalysisDuplicationError,
     BundleAlreadyAddedError,
@@ -23,9 +23,8 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def store(context):
     """Store results from microSALT in housekeeper."""
-    context.obj["db"] = Store(context.obj["database"])
-    context.obj["tb_api"] = tb.TrailblazerAPI(context.obj)
-    context.obj["hk_api"] = hk.HousekeeperAPI(context.obj)
+    context.obj["status_db"] = Store(context.obj["database"])
+    context.obj["housekeeper_api"] = HousekeeperAPI(context.obj)
 
 
 @store.command()
@@ -33,8 +32,8 @@ def store(context):
 @click.pass_context
 def analysis(context, config_stream):
     """Store a finished analysis in Housekeeper."""
-    status = context.obj["db"]
-    hk_api = context.obj["hk_api"]
+    status = context.obj["status_db"]
+    hk_api = context.obj["housekeeper_api"]
 
     if not config_stream:
         LOG.error("Please provide a config file")
@@ -67,7 +66,7 @@ def completed(context):
         except click.Abort:
             exit_code = EXIT_FAIL
         except Exception as error:
-            LOG.error("Unspecified error occurred - %s", error)
+            LOG.error("Unspecified error occurred - %s", error.__class__.__name__)
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort

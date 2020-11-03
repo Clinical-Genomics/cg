@@ -1,6 +1,5 @@
 import logging
-
-from typing import List, Dict
+from typing import Dict, List
 
 from cg.utils.commands import Process
 

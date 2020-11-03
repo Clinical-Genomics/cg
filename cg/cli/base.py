@@ -84,5 +84,4 @@ base.add_command(upload)
 base.add_command(workflow_cmd)
 base.add_command(store_cmd)
 base.add_command(deploy_cmd)
-
 upload.add_command(vogue_command)

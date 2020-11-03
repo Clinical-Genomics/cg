@@ -5,7 +5,7 @@ from cg.cli.workflow.mip_dna.base import start
 from cg.constants import EXIT_SUCCESS
 
 
-def test_dry(cli_runner, mip_context, tb_api):
+def test_dry(cli_runner, mip_context):
     """Test command with --dry option"""
 
     # GIVEN case-id
@@ -17,7 +17,7 @@ def test_dry(cli_runner, mip_context, tb_api):
     assert result.exit_code == EXIT_SUCCESS
 
 
-def test_dna_case_included(cli_runner, mip_context, dna_case, caplog, tb_api):
+def test_dna_case_included(cli_runner, mip_context, dna_case, caplog):
     """Test command with a dna case"""
 
     # GIVEN a case that is ready for MIP DNA analysis
@@ -42,7 +42,7 @@ def test_dna_case_included(cli_runner, mip_context, dna_case, caplog, tb_api):
     assert case_mentioned
 
 
-def test_rna_case_excluded(cli_runner, mip_context, rna_case, caplog, tb_api):
+def test_rna_case_excluded(cli_runner, mip_context, rna_case, caplog):
     """Test command with a rna case"""
 
     # GIVEN a case that is ready for MIP RNA analysis

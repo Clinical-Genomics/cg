@@ -9,7 +9,7 @@ from cg.store import Store, models
 @pytest.fixture
 def base_context(analysis_store) -> dict:
     """context to use in cli"""
-    return {"db": analysis_store}
+    return {"status_db": analysis_store}
 
 
 @pytest.fixture(name="workflow_case_id")
@@ -37,11 +37,14 @@ def fixture_analysis_store(base_store: Store, workflow_case_id, helpers) -> Stor
 
     case = helpers.add_family(_store, workflow_case_id, data_analysis="mip_dna")
 
-    dna_sample = helpers.add_sample(_store, "dna_sample", is_rna=False, sequenced_at=datetime.now())
+    dna_sample = helpers.add_sample(_store, "dna_sample", is_rna=False,
+                                    sequenced_at=datetime.now(), reads=10000000))
     helpers.add_relationship(_store, sample=dna_sample, family=case)
 
     case = helpers.add_family(_store, "rna_case", data_analysis="mip_rna")
-    rna_sample = helpers.add_sample(_store, "rna_sample", is_rna=True, sequenced_at=datetime.now())
+    rna_sample = helpers.add_sample(_store, "rna_sample", is_rna=True, sequenced_at=datetime.now(
+
+    ),  reads=10000000))
     helpers.add_relationship(_store, sample=rna_sample, family=case)
 
     case = helpers.add_family(_store, "dna_rna_mix_case", data_analysis="mip_dna")
@@ -86,12 +89,25 @@ class MockTB:
         self._email = None
         self._status = None
 
-    def analyses(self, family=None, status=None, temp=None):
+    def analyses(
+        self,
+        family=None,
+        status=None,
+        temp=None,
+        case_id=None,
+        query: str = None,
+        deleted: bool = None,
+        before=None,
+        is_visible: bool = None,
+    ):
         """Mock TB analyses models"""
 
         self._family = family
         self._status = status
         self._temp = temp
+
+        if case_id == "yellowhog":
+            return []
 
         class Row:
             """Mock a record representing an analysis"""
@@ -141,23 +157,23 @@ class MockTB:
         """check if add_pending was called"""
         return self._add_pending_was_called
 
-    def is_analysis_ongoing(self, case_id: str):
+    def is_latest_analysis_ongoing(self, case_id: str):
         """Override TrailblazerAPI is_ongoing method to avoid default behaviour"""
         return False
 
-    def is_analysis_failed(self, case_id: str):
+    def is_latest_analysis_failed(self, case_id: str):
         """Override TrailblazerAPI is_failed method to avoid default behaviour"""
         return False
 
-    def is_analysis_completed(self, case_id: str):
+    def is_latest_analysis_completed(self, case_id: str):
         """Override TrailblazerAPI is_completed method to avoid default behaviour"""
         return False
 
-    def get_analysis_status(self, case_id: str):
+    def get_latest_analysis_status(self, case_id: str):
         """Override TrailblazerAPI get_analysis_status method to avoid default behaviour"""
         return None
 
-    def has_analysis_started(self, case_id: str):
+    def has_latest_analysis_started(self, case_id: str):
         """Override TrailblazerAPI has_analysis_started method to avoid default behaviour"""
         return False
 

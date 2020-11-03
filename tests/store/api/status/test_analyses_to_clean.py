@@ -17,7 +17,7 @@ def test_analysis_included(analysis_store: Store, helpers):
     analysis_store.relate_sample(family=analysis.family, sample=sample, status="unknown")
 
     # WHEN calling the analyses_to_clean
-    analyses_to_clean = analysis_store.analyses_to_clean().all()
+    analyses_to_clean = analysis_store.analyses_to_clean(before=analysis.started_at).all()
 
     # THEN this analyse should be returned
     assert analysis in analyses_to_clean
@@ -58,7 +58,7 @@ def test_pipeline_included(analysis_store: Store, helpers):
     analysis_store.relate_sample(family=analysis.family, sample=sample, status="unknown")
 
     # WHEN calling the analyses_to_clean specifying the used pipeline
-    analyses_to_clean = analysis_store.analyses_to_clean(pipeline=pipeline).all()
+    analyses_to_clean = analysis_store.analyses_to_clean(pipeline=pipeline, before=timestamp).all()
 
     # THEN this analyse should be returned
     assert analysis in analyses_to_clean
@@ -100,7 +100,7 @@ def test_non_cleaned_included(analysis_store: Store, helpers):
     analysis_store.relate_sample(family=analysis.family, sample=sample, status="unknown")
 
     # WHEN calling the analyses_to_clean
-    analyses_to_clean = analysis_store.analyses_to_clean().all()
+    analyses_to_clean = analysis_store.analyses_to_clean(before=timestamp).all()
 
     # THEN this analyse should be returned
     assert analysis in analyses_to_clean
