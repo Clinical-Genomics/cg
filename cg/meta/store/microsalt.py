@@ -26,7 +26,7 @@ def build_microbial_bundle(deliverables: dict, analysis_date: dt.date) -> dict:
     """Create a new bundle to store in Housekeeper"""
 
     project_name = _get_microbial_name(deliverables)
-    files = store_base.deliverables_files(deliverables, analysis_type="microbial")
+    files = store_base.deliverables_files(deliverables, analysis_type="microsalt")
 
     data = {
         "name": str(project_name),

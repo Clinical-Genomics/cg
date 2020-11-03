@@ -671,7 +671,7 @@ class StatusHandler(BaseHandler):
         Returns microbial samples that have been delivered but not invoiced.
         """
         records = self.Sample.query.filter(
-            "microbial" in self.Family.data_analysis,
+            "microsalt" in self.Family.data_analysis,
             models.Sample.delivered_at is not None,
             models.Sample.invoice_id == None,
         )
