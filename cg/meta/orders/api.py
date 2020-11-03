@@ -223,7 +223,6 @@ class OrdersAPI(LimsHandler, StatusHandler):
         reduced_map = {
             "EXOSXTR100": "EXTSXTR100",
             "WGSPCFC030": "WGTPCFC030",
-            "WGSPCFC060": "WGTPCFC060",
         }
         for family_obj in families:
             LOG.debug(f"{family_obj.name}: update application for trios")
