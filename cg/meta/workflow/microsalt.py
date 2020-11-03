@@ -273,6 +273,7 @@ class MicrosaltAnalysisAPI:
         return deliverables_file_path
 
     def set_statusdb_action(self, name: str, action: str) -> None:
+        """Sets action on case based on ticket number"""
         if action in [None, *FAMILY_ACTIONS]:
             case_object = self.db.find_family(name)
             case_object.action = action
