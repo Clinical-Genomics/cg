@@ -218,17 +218,17 @@ class OrdersAPI(LimsHandler, StatusHandler):
         )
         return {"project": project_data, "records": new_families}
 
-    def update_application(self, ticket_number: int, families: List[models.Family]):
+    def update_application(self, ticket_number: int, families: List[models.Family]) -> None:
         """Update application for trios if relevant."""
         reduced_map = {
             "EXOSXTR100": "EXTSXTR100",
             "WGSPCFC030": "WGTPCFC030",
         }
-        for family_obj in families:
-            LOG.debug(f"{family_obj.name}: update application for trios")
+        for case_obj in families:
+            LOG.debug(f"{case_obj.name}: update application for trios")
             order_samples = [
                 link_obj.sample
-                for link_obj in family_obj.links
+                for link_obj in case_obj.links
                 if link_obj.sample.ticket_number == ticket_number
             ]
             if len(order_samples) >= 3:
