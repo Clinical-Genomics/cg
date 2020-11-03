@@ -17,8 +17,8 @@ class OrderType(Enum):
     EXTERNAL = "external"
     FASTQ = "fastq"
     RML = "rml"
-    MIP = "mip_dna"
-    MICROBIAL = "microsalt"
+    MIP_DNA = "mip_dna"
+    MICROSALT = "microsalt"
     METAGENOME = "metagenome"
     BALSAMIC = "balsamic"
 
@@ -184,7 +184,7 @@ MIP_RNA_SAMPLE = {
     "comment": OptionalNone(TypeValidatorNone(str)),
     # Orderform 1508:19
     "from_sample": validators.RegexValidator(NAME_PATTERN),
-    "time_point": TypeValidatorNone(str),
+    "time_point": OptionalNone(TypeValidatorNone(int)),
 }
 
 EXTERNAL_SAMPLE = {
@@ -270,7 +270,7 @@ RML_SAMPLE = {
     "capture_kit": OptionalNone(validators.Any(CAPTUREKIT_OPTIONS)),
 }
 
-MICROBIAL_SAMPLE = {
+MICROSALT_SAMPLE = {
     # 1603:6 Orderform Microbial WGS
     # "These fields are required"
     "name": validators.RegexValidator(NAME_PATTERN),
@@ -321,7 +321,7 @@ ORDER_SCHEMES = {
     OrderType.EXTERNAL: Scheme(
         {**BASE_PROJECT, "samples": ListValidator(EXTERNAL_SAMPLE, min_items=1)}
     ),
-    OrderType.MIP: Scheme({**BASE_PROJECT, "samples": ListValidator(MIP_SAMPLE, min_items=1)}),
+    OrderType.MIP_DNA: Scheme({**BASE_PROJECT, "samples": ListValidator(MIP_SAMPLE, min_items=1)}),
     OrderType.BALSAMIC: Scheme(
         {**BASE_PROJECT, "samples": ListValidator(BALSAMIC_SAMPLE, min_items=1)}
     ),
@@ -330,8 +330,8 @@ ORDER_SCHEMES = {
     ),
     OrderType.FASTQ: Scheme({**BASE_PROJECT, "samples": ListValidator(FASTQ_SAMPLE, min_items=1)}),
     OrderType.RML: Scheme({**BASE_PROJECT, "samples": ListValidator(RML_SAMPLE, min_items=1)}),
-    OrderType.MICROBIAL: Scheme(
-        {**BASE_PROJECT, "samples": ListValidator(MICROBIAL_SAMPLE, min_items=1)}
+    OrderType.MICROSALT: Scheme(
+        {**BASE_PROJECT, "samples": ListValidator(MICROSALT_SAMPLE, min_items=1)}
     ),
     OrderType.METAGENOME: Scheme(
         {**BASE_PROJECT, "samples": ListValidator(METAGENOME_SAMPLE, min_items=1)}

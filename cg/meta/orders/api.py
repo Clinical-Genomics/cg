@@ -285,9 +285,9 @@ class OrdersAPI(LimsHandler, StatusHandler):
             if sample.get("internal_id"):
 
                 if project not in (
-                    OrderType.MIP,
-                    OrderType.EXTERNAL,
                     OrderType.BALSAMIC,
+                    OrderType.EXTERNAL,
+                    OrderType.MIP_DNA,
                     OrderType.MIP_RNA,
                 ):
                     raise OrderError(

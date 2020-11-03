@@ -144,14 +144,13 @@ class StatusHandler:
         cases = cls.group_cases(data["samples"])
 
         for case_name, case_samples in cases.items():
-            values = set(sample.get("priority", "standard") for sample in case_samples)
-            if len(values) > 1:
-                raise ValueError(f"different 'priority' values: {case_name} - {values}")
-            priority = values.pop()
+            priority = cls.get_single_value(case_name, case_samples, "priority", "standard")
+            data_analysis = cls.get_single_value(case_name, case_samples, "data_analysis")
+
             panels = set(panel for sample in case_samples for panel in sample.get("panels", set()))
             case = {
                 # Set from first sample until order portal sets this on case level
-                "data_analysis": case_samples[0]["data_analysis"],
+                "data_analysis": data_analysis,
                 "name": case_name,
                 "priority": priority,
                 "panels": list(panels),
@@ -169,7 +168,7 @@ class StatusHandler:
                         "sex": sample["sex"],
                         "status": sample.get("status"),
                         "time_point": sample.get("time_point"),
-                        "tumour": sample.get("tumour") or False,
+                        "tumour": sample.get("tumour", False),
                     }
                     for sample in case_samples
                 ],
@@ -177,6 +176,14 @@ class StatusHandler:
 
             status_data["families"].append(case)
         return status_data
+
+    @classmethod
+    def get_single_value(cls, case_name, case_samples, value_key, value_default=None):
+        values = set(sample.get(value_key, value_default) for sample in case_samples)
+        if len(values) > 1:
+            raise ValueError(f"different sample {value_key} values: {case_name} - {values}")
+        single_value = values.pop()
+        return single_value
 
     def store_cases(
         self, customer: str, order: str, ordered: dt.datetime, ticket: int, cases: List[dict]
@@ -337,6 +344,9 @@ class StatusHandler:
                 new_sample.application_version = application_version
                 new_samples.append(new_sample)
 
+                print("data_analysis", sample["data_analysis"])
+                print("sample", sample)
+
                 new_family = self.status.add_family(
                     data_analysis=sample["data_analysis"],
                     name=sample["name"],
@@ -344,16 +354,24 @@ class StatusHandler:
                     priority="research",
                 )
                 new_family.customer = production_customer
+
+                print("new_family", new_family)
                 self.status.add(new_family)
+                print("added!")
 
                 new_relationship = self.status.relate_sample(
                     family=new_family, sample=new_sample, status=sample["status"] or "unknown"
                 )
+                print("new_relationship", new_relationship)
                 self.status.add(new_relationship)
+                print("added!")
 
                 new_delivery = self.status.add_delivery(destination="caesar", sample=new_sample)
+                print("new_delivery", new_delivery)
                 self.status.add(new_delivery)
+                print("added!")
 
+        print('new_samples', new_samples)
         self.status.add_commit(new_samples)
         return new_samples
 

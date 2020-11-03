@@ -351,7 +351,7 @@ def test_store_mip_rna(orders_api, base_store, mip_rna_status_data):
     assert len(new_casing.links) == 2
     new_link = new_casing.links[0]
     assert new_casing.data_analysis == "mip_rna"
-    assert new_link.sample.name == "sample1_rna_t1"
+    assert new_link.sample.name == "sample1-rna-t1"
     assert new_link.sample.application_version.application.tag == rna_application
     assert new_link.sample.time_point == 1
     assert new_link.sample.from_sample == "sample1"
