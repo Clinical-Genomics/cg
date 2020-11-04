@@ -96,7 +96,10 @@ class DeliverAPI:
     ) -> None:
         """Deliver files on case level"""
         # Make sure that the directory exists
-        delivery_base: Path = self.create_delivery_dir(case_name=case_name)
+        delivery_base: Path = self.create_delivery_dir_path(case_name=case_name)
+        LOG.debug("Creating project path %s", delivery_base)
+        if not self.dry_run:
+            delivery_base.mkdir(parents=True, exist_ok=True)
         file_path: Path
         nr_files: int = 0
         for nr_files, file_path in enumerate(
@@ -121,7 +124,12 @@ class DeliverAPI:
     ) -> None:
         """Deliver files on sample level"""
         # Make sure that the directory exists
-        delivery_base: Path = self.create_delivery_dir(case_name=case_name, sample_name=sample_name)
+        delivery_base: Path = self.create_delivery_dir_path(
+            case_name=case_name, sample_name=sample_name
+        )
+        LOG.debug("Creating project path %s", delivery_base)
+        if not self.dry_run:
+            delivery_base.mkdir(parents=True, exist_ok=True)
         file_path: Path
         nr_files: int = 0
         for nr_files, file_path in enumerate(
@@ -194,17 +202,23 @@ class DeliverAPI:
 
         return True
 
+    def _set_customer_id(self, customer_id: str) -> None:
+        LOG.info("Setting customer_id to %s", customer_id)
+        self.customer_id = customer_id
+
+    def _set_ticket_id(self, ticket_nr: int) -> None:
+        LOG.info("Setting ticket_id to %s", ticket_nr)
+        self.ticket_id = str(ticket_nr)
+
     def set_customer_id(self, case_obj: Family) -> None:
         """Set the customer_id for this upload"""
-        LOG.info("Set customer id to %s", case_obj.customer.internal_id)
-        self.customer_id = case_obj.customer.internal_id
+        self._set_customer_id(case_obj.customer.internal_id)
 
     def set_ticket_id(self, sample_obj: Sample) -> None:
         """Set the ticket_id for this upload"""
-        LOG.info("Set ticket id to %s", sample_obj.ticket_number)
-        self.ticket_id = sample_obj.ticket_number
+        self._set_ticket_id(sample_obj.ticket_number)
 
-    def create_delivery_dir(self, case_name: str, sample_name: str = None) -> Path:
+    def create_delivery_dir_path(self, case_name: str, sample_name: str = None) -> Path:
         """Create a path for delivering files
 
         Note that case name and sample name needs to be the identifiers sent from customer
@@ -214,8 +228,5 @@ class DeliverAPI:
         )
         if sample_name:
             delivery_path = delivery_path / sample_name
-        LOG.debug("Creating project path %s", delivery_path)
-        if self.dry_run:
-            return delivery_path
-        delivery_path.mkdir(parents=True, exist_ok=True)
+
         return delivery_path

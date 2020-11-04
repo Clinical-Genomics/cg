@@ -243,6 +243,13 @@ def fixture_mip_deliverables_files(mip_dna_store_files: Path) -> Path:
     return mip_dna_store_files / "case_id_deliverables.yaml"
 
 
+@pytest.fixture(name="vcf_file")
+def fixture_vcf_file(mip_dna_store_files: Path) -> Path:
+    """Return the path to to a vcf file"""
+    _path = mip_dna_store_files / "yellowhog.vcf"
+    return _path
+
+
 # Orderform fixtures
 
 
