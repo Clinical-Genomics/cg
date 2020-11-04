@@ -31,19 +31,34 @@ def fixture_deliver_api(
     yield _deliver_api
 
 
-@pytest.fixture(name="populated_deliver_api")
-def fixture_populated_deliver_api(
-    deliver_api: DeliverAPI,
+@pytest.fixture(name="delivery_hk_api")
+def fixture_delivery_hk_api(
     case_hk_bundle_no_files: dict,
     bed_file: str,
     vcf_file: Path,
+    real_housekeeper_api: HousekeeperAPI,
     helpers=StoreHelpers,
-) -> DeliverAPI:
-    """Return a delivery api where housekeeper is populated with some files"""
-    hk_api = deliver_api.hk_api
+) -> HousekeeperAPI:
+    """Fixture that returns a housekeeper database with delivery data"""
+
     case_hk_bundle_no_files["files"] = [
         {"path": bed_file, "archive": False, "tags": ["case-tag"]},
         {"path": str(vcf_file), "archive": False, "tags": ["sample-tag", "ADM1"]},
     ]
-    helpers.ensure_hk_bundle(hk_api, bundle_data=case_hk_bundle_no_files)
-    return deliver_api
+    helpers.ensure_hk_bundle(real_housekeeper_api, bundle_data=case_hk_bundle_no_files)
+    return real_housekeeper_api
+
+
+@pytest.fixture(name="populated_deliver_api")
+def fixture_populated_deliver_api(
+    analysis_store: Store, delivery_hk_api: HousekeeperAPI, project_dir: Path
+) -> DeliverAPI:
+    """Return a delivery api where housekeeper is populated with some files"""
+    _deliver_api = DeliverAPI(
+        store=analysis_store,
+        hk_api=delivery_hk_api,
+        case_tags=["case-tag"],
+        sample_tags=["sample-tag"],
+        project_base_path=project_dir,
+    )
+    return _deliver_api
