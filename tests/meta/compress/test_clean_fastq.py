@@ -99,6 +99,7 @@ def test_cli_clean_fastqs_removed(populated_compress_fastq_api, compression_file
 
     # WHEN running the clean command
     compress_api.clean_fastq(sample)
+
     # THEN assert SPRING files exists
     assert spring_file.exists()
     assert spring_metadata_file.exists()
