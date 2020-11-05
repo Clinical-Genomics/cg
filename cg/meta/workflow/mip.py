@@ -51,18 +51,26 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         self.conda_env = conda_env
         self.root = root
 
-    def check(self, family_obj: models.Family) -> bool:
+    def check(self, family_obj: models.Family, dry_run: bool) -> bool:
         """Check stuff before starting the analysis."""
+
         flowcells = self.db.flowcells(family=family_obj)
         statuses = []
+
         for flowcell_obj in flowcells:
             LOG.debug("%s: checking flowcell", flowcell_obj.name)
             statuses.append(flowcell_obj.status)
+
+            if dry_run and flowcell_obj.status == "removed":
+                LOG.info("%s: would request removed flowcell (DRY-RUN!)", flowcell_obj.name)
+                continue
+
             if flowcell_obj.status == "removed":
                 LOG.info("%s: requesting removed flowcell", flowcell_obj.name)
                 flowcell_obj.status = "requested"
             elif flowcell_obj.status != "ondisk":
                 LOG.warning("%s: %s", flowcell_obj.name, flowcell_obj.status)
+
         return all(status == "ondisk" for status in statuses)
 
     @staticmethod
