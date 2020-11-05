@@ -13,6 +13,11 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [13.17.1]
+
+### Changed
+- Only fastq files older than three weeks will be compressed
+
 ## [13.17.0]
 
 
