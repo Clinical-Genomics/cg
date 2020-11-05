@@ -89,17 +89,19 @@ class CompressionData:
         os.utime(file_path, (before_timestamp, before_timestamp))
 
     @property
-    def fastq_first_file(self):
+    def fastq_first_file(self, old: bool = True):
         """Return the path to an existing spring metadata file"""
         self.fastq_first.touch()
-        CompressionData.make_old(self.fastq_first)
+        if old:
+            CompressionData.make_old(self.fastq_first)
         return self.fastq_first
 
     @property
-    def fastq_second_file(self):
+    def fastq_second_file(self, old: bool = True):
         """Return the path to an existing fastq file"""
         self.fastq_second.touch()
-        CompressionData.make_old(self.fastq_second)
+        if old:
+            CompressionData.make_old(self.fastq_second)
         return self.fastq_second
 
 
