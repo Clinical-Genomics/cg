@@ -2,7 +2,6 @@
 
 import logging
 
-from subprocess import CalledProcessError
 from cg.exc import CaseNotFoundError
 from cg.utils.commands import Process
 

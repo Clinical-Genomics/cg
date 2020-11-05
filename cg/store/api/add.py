@@ -141,7 +141,9 @@ class AddHandler(BaseHandler):
         )
         return new_sample
 
-    def add_family(self, name: str, panels: List[str], priority: str = "standard") -> models.Family:
+    def add_family(
+        self, data_analysis: str, name: str, panels: List[str], priority: str = "standard"
+    ) -> models.Family:
         """Build a new Family record."""
 
         # generate a unique family id
@@ -153,7 +155,9 @@ class AddHandler(BaseHandler):
                 LOG.debug(f"{internal_id} already used - trying another id")
 
         priority_db = PRIORITY_MAP[priority]
-        new_family = self.Family(internal_id=internal_id, name=name, priority=priority_db)
+        new_family = self.Family(
+            data_analysis=data_analysis, internal_id=internal_id, name=name, priority=priority_db
+        )
         new_family.panels = panels
         return new_family
 

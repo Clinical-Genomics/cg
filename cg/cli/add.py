@@ -11,7 +11,7 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def add(context):
     """Add new things to the database."""
-    context.obj["db"] = Store(context.obj["database"])
+    context.obj["status_db"] = Store(context.obj["database"])
 
 
 @add.command()
@@ -49,23 +49,25 @@ def customer(
     invoice_reference: str,
 ):
     """Add a new customer with a unique INTERNAL_ID and NAME."""
-    existing = context.obj["db"].customer(internal_id)
+    existing = context.obj["status_db"].customer(internal_id)
     if existing:
         LOG.error(f"{existing.name}: customer already added")
         context.abort()
 
-    customer_group = context.obj["db"].customer_group(customer_group_id)
+    customer_group = context.obj["status_db"].customer_group(customer_group_id)
     if not customer_group:
-        customer_group = context.obj["db"].add_customer_group(internal_id=internal_id, name=name)
+        customer_group = context.obj["status_db"].add_customer_group(
+            internal_id=internal_id, name=name
+        )
 
-    new_customer = context.obj["db"].add_customer(
+    new_customer = context.obj["status_db"].add_customer(
         internal_id=internal_id,
         name=name,
         customer_group=customer_group,
         invoice_address=invoice_address,
         invoice_reference=invoice_reference,
     )
-    context.obj["db"].add_commit(new_customer)
+    context.obj["status_db"].add_commit(new_customer)
     message = f"customer added: {new_customer.internal_id} ({new_customer.id})"
     LOG.info(message)
 
@@ -84,13 +86,13 @@ def customer(
 @click.pass_context
 def user(context, admin, customer_id, email, name):
     """Add a new user with an EMAIL (login) and a NAME (full)."""
-    customer_obj = context.obj["db"].customer(customer_id)
-    existing = context.obj["db"].user(email)
+    customer_obj = context.obj["status_db"].customer(customer_id)
+    existing = context.obj["status_db"].user(email)
     if existing:
         LOG.error(f"{existing.name}: user already added")
         context.abort()
-    new_user = context.obj["db"].add_user(customer_obj, email, name, is_admin=admin)
-    context.obj["db"].add_commit(new_user)
+    new_user = context.obj["status_db"].add_user(customer_obj, email, name, is_admin=admin)
+    context.obj["status_db"].add_commit(new_user)
     LOG.info(f"user added: {new_user.email} ({new_user.id})")
 
 
@@ -118,7 +120,7 @@ def user(context, admin, customer_id, email, name):
 @click.pass_context
 def sample(context, lims_id, downsampled, sex, order, application, priority, customer_id, name):
     """Add a sample for CUSTOMER_ID with a NAME (display)."""
-    status = context.obj["db"]
+    status = context.obj["status_db"]
     customer_obj = status.customer(customer_id)
     if customer_obj is None:
         LOG.error("customer not found")
@@ -146,12 +148,13 @@ def sample(context, lims_id, downsampled, sex, order, application, priority, cus
     "--priority", type=click.Choice(PRIORITY_OPTIONS), default="standard", help="analysis priority"
 )
 @click.option("-p", "--panel", "panels", multiple=True, required=True, help="default gene panels")
+@click.option("-a", "--analysis", required=True, help="Analysis workflow")
 @click.argument("customer_id")
 @click.argument("name")
 @click.pass_context
-def family(context, priority, panels, customer_id, name):
+def family(context, priority, panels, analysis, customer_id, name):
     """Add a family to CUSTOMER_ID with a NAME."""
-    status = context.obj["db"]
+    status = context.obj["status_db"]
     customer_obj = status.customer(customer_id)
     if customer_obj is None:
         LOG.error(f"{customer_id}: customer not found")
@@ -163,7 +166,9 @@ def family(context, priority, panels, customer_id, name):
             LOG.error(f"{panel_id}: panel not found")
             context.abort()
 
-    new_family = status.add_family(name=name, panels=panels, priority=priority)
+    new_family = status.add_family(
+        data_analysis=analysis, name=name, panels=panels, priority=priority
+    )
     new_family.customer = customer_obj
     status.add_commit(new_family)
     LOG.info(f"{new_family.internal_id}: new family added")
@@ -178,7 +183,7 @@ def family(context, priority, panels, customer_id, name):
 @click.pass_context
 def relationship(context, mother, father, status, family_id, sample_id):
     """Create a link between a FAMILY_ID and a SAMPLE_ID."""
-    status_db = context.obj["db"]
+    status_db = context.obj["status_db"]
     mother_obj = None
     father_obj = None
     family_obj = status_db.family(family_id)

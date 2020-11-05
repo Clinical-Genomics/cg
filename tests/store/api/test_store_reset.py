@@ -97,11 +97,12 @@ def add_family(
     ordered_days_ago=0,
     action=None,
     priority=None,
+    data_analysis="mip",
 ):
     """utility function to add a family to use in tests"""
     panel = ensure_panel(disk_store)
     customer = ensure_customer(disk_store, customer_id)
-    family = disk_store.add_family(name=family_id, panels=panel.name)
+    family = disk_store.add_family(data_analysis=data_analysis, name=family_id, panels=panel.name)
     family.customer = customer
     family.ordered_at = datetime.now() - timedelta(days=ordered_days_ago)
     if action:

@@ -3,6 +3,8 @@ from datetime import datetime
 
 from cg.store import Store
 
+ANALYSIS = "mip"
+
 
 def test_add_family_required(invoke_cli, disk_store: Store):
     """Test to add a family using only the required arguments"""
@@ -15,7 +17,18 @@ def test_add_family_required(invoke_cli, disk_store: Store):
     name = "family_name"
 
     result = invoke_cli(
-        ["--database", db_uri, "add", "family", "--panel", panel_id, customer_id, name]
+        [
+            "--database",
+            db_uri,
+            "add",
+            "family",
+            "--panel",
+            panel_id,
+            "--analysis",
+            ANALYSIS,
+            customer_id,
+            name,
+        ]
     )
 
     # THEN then it should be added
@@ -35,7 +48,18 @@ def test_add_family_bad_customer(invoke_cli, disk_store: Store):
     customer_id = "dummy_customer"
     name = "dummy_name"
     result = invoke_cli(
-        ["--database", db_uri, "add", "family", "--panel", panel_id, customer_id, name]
+        [
+            "--database",
+            db_uri,
+            "add",
+            "family",
+            "--panel",
+            panel_id,
+            "--analysis",
+            ANALYSIS,
+            customer_id,
+            name,
+        ]
     )
 
     # THEN then it should complain about missing customer instead of adding a family
@@ -53,7 +77,18 @@ def test_add_family_bad_panel(invoke_cli, disk_store: Store):
     customer_id = add_customer(disk_store)
     name = "dummy_name"
     result = invoke_cli(
-        ["--database", db_uri, "add", "family", "--panel", panel_id, customer_id, name]
+        [
+            "--database",
+            db_uri,
+            "add",
+            "family",
+            "--panel",
+            panel_id,
+            "--analysis",
+            ANALYSIS,
+            customer_id,
+            name,
+        ]
     )
 
     # THEN then it should complain about missing panel instead of adding a family
@@ -83,6 +118,8 @@ def test_add_family_priority(invoke_cli, disk_store: Store):
             panel_id,
             "--priority",
             priority,
+            "--analysis",
+            ANALYSIS,
             customer_id,
             name,
         ]

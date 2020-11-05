@@ -9,7 +9,7 @@ def test_samples_to_receive_external(sample_store, helpers):
     assert store.samples().count() > 1
 
     # WHEN finding external samples to receive
-    external_query = store.samples_to_recieve(external=True)
+    external_query = store.samples_to_receive(external=True)
 
     # THEN assert that only the external sample is returned
     assert external_query.count() == 1
@@ -27,8 +27,8 @@ def test_samples_to_receive_internal(sample_store):
     assert len([sample for sample in sample_store.samples() if sample.received_at]) > 1
 
     # WHEN finding which samples are in queue to receive
-    assert sample_store.samples_to_recieve().count() == 1
-    first_sample = sample_store.samples_to_recieve().first()
+    assert sample_store.samples_to_receive().count() == 1
+    first_sample = sample_store.samples_to_receive().first()
     assert first_sample.application_version.application.is_external is False
     assert first_sample.received_at is None
 

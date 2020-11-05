@@ -163,7 +163,7 @@ def samples():
     if request.args.get("status") and not g.current_user.is_admin:
         return abort(401)
     if request.args.get("status") == "incoming":
-        samples_q = db.samples_to_recieve()
+        samples_q = db.samples_to_receive()
     elif request.args.get("status") == "labprep":
         samples_q = db.samples_to_prepare()
     elif request.args.get("status") == "sequencing":

@@ -1,10 +1,11 @@
 """Code for uploading to scout via CLI"""
 import logging
+from pathlib import Path
 
 import click
 import yaml
 
-from cg.apps import hk
+from cg.apps.hk import HousekeeperAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
 
 from .utils import suggest_cases_to_upload
@@ -26,18 +27,18 @@ def scout(context, re_upload, print_console, case_id):
         suggest_cases_to_upload(context)
         context.abort()
 
-    tb_api = context.obj["tb_api"]
-    status_api = context.obj["status"]
+    status_api = context.obj["status_db"]
     scout_upload_api = context.obj["scout_upload_api"]
     hk_api = context.obj["housekeeper_api"]
     family_obj = status_api.family(case_id)
     scout_config = scout_upload_api.generate_config(family_obj.analyses[0])
+    mip_dna_root_dir = context.obj["mip-rd-dna"]["root"]
 
     if print_console:
         click.echo(scout_config)
         return
 
-    file_path = tb_api.get_family_root_dir(case_id) / "scout_load.yaml"
+    file_path = Path(mip_dna_root_dir, case_id, "scout_load.yaml")
 
     if file_path.exists():
         message = (
@@ -68,7 +69,7 @@ def upload_case_to_scout(context, re_upload, dry_run, case_id):
 
     click.echo(click.style("----------------- CONFIG -----------------------"))
 
-    def _get_load_config_from_hk(hk_api: hk.HousekeeperAPI, case_id):
+    def _get_load_config_from_hk(hk_api: HousekeeperAPI, case_id):
         tag_name = UploadScoutAPI.get_load_config_tag()
         version_obj = hk_api.last_version(case_id)
         scout_config_files = hk_api.get_files(

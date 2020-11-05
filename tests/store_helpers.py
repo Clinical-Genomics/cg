@@ -3,10 +3,9 @@ import logging
 from datetime import datetime
 from typing import List
 
-from housekeeper.store import models as hk_models
-
 from cg.apps.hk import HousekeeperAPI
 from cg.store import Store, models
+from housekeeper.store import models as hk_models
 
 LOG = logging.getLogger(__name__)
 
@@ -15,7 +14,9 @@ class StoreHelpers:
     """Class to hold helper functions that needs to be used all over"""
 
     @staticmethod
-    def ensure_hk_bundle(store: HousekeeperAPI, bundle_data: dict) -> hk_models.Bundle:
+    def ensure_hk_bundle(
+        store: HousekeeperAPI, bundle_data: dict, include: bool = False
+    ) -> hk_models.Bundle:
         """Utility function to add a bundle of information to a housekeeper api"""
         bundle_exists = False
         for bundle in store.bundles():
@@ -25,6 +26,8 @@ class StoreHelpers:
         if not bundle_exists:
             _bundle, _version = store.add_bundle(bundle_data)
             store.add_commit(_bundle, _version)
+        if include:
+            store.include(_version)
         return _bundle
 
     def ensure_hk_version(self, store: HousekeeperAPI, bundle_data: dict) -> hk_models.Version:
@@ -268,6 +271,7 @@ class StoreHelpers:
         self,
         store: Store,
         family_id: str = "family_test",
+        data_analysis: str = "mip",
         internal_id: str = None,
         customer_id: str = "cust000",
         panels: List = None,
@@ -286,7 +290,9 @@ class StoreHelpers:
             self.ensure_panel(store, panel_id=panel_name, customer_id=customer_id)
 
         if not family_obj:
-            family_obj = store.add_family(name=family_id, panels=panels)
+            family_obj = store.add_family(
+                data_analysis=data_analysis, name=family_id, panels=panels
+            )
 
         if internal_id:
             family_obj.internal_id = internal_id
@@ -295,10 +301,12 @@ class StoreHelpers:
         store.add_commit(family_obj)
         return family_obj
 
-    def ensure_family(self, store: Store, name: str, customer: models.Customer):
+    def ensure_family(
+        self, store: Store, name: str, customer: models.Customer, data_analysis: str = ""
+    ):
         family = store.find_family(customer=customer, name=name)
         if not family:
-            family = store.add_family(name=name, panels=None)
+            family = store.add_family(name=name, panels=None, data_analysis=data_analysis)
             family.customer = customer
         return family
 

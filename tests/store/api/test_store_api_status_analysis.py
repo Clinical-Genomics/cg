@@ -125,11 +125,11 @@ def test_mip_analysis_in_result(base_store: Store):
 
 
 def test_exclude_balsamic_only_analysis_from_result(base_store: Store):
-    """Test that a family with one sample that is a Balsamic only does not show up"""
+    """Test that a family with analysis Balsamic and with one sample does not show up"""
 
     # GIVEN a database with a family with one sequenced samples for Balsamic analysis
-    test_sample = add_sample(base_store, sequenced=True, data_analysis="Balsamic")
-    test_family = add_family(base_store)
+    test_sample = add_sample(base_store, sequenced=True)
+    test_family = add_family(base_store, data_analysis="Balsamic")
     base_store.relate_sample(test_family, test_sample, "unknown")
 
     # WHEN getting families to analyse
@@ -309,11 +309,12 @@ def add_family(
     ordered_days_ago=0,
     action=None,
     priority=None,
+    data_analysis="mip",
 ):
     """utility function to add a family to use in tests"""
     panel = ensure_panel(disk_store)
     customer = ensure_customer(disk_store, customer_id)
-    family = disk_store.add_family(name=family_id, panels=panel.name)
+    family = disk_store.add_family(data_analysis=data_analysis, name=family_id, panels=panel.name)
     family.customer = customer
     family.ordered_at = datetime.now() - timedelta(days=ordered_days_ago)
     if action:

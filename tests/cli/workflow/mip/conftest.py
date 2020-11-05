@@ -4,14 +4,17 @@ import pytest
 import copy
 import datetime as dt
 
+from cg.meta.workflow.mip import MipAnalysisAPI
 from pathlib import Path
 from ruamel.yaml import YAML
 
 from cg.apps.tb import TrailblazerAPI
-from cg.meta.workflow.mip import AnalysisAPI
+from cg.apps.tb.models import TrailblazerAnalysis
+from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import Store
 from cg.apps.hk import HousekeeperAPI
 from tests.mocks.limsmock import MockLimsAPI
+from tests.mocks.tb_mock import MockTB
 
 from trailblazer.store.models import Analysis as tb_Analysis
 
@@ -23,8 +26,8 @@ def mip_lims():
 
 
 @pytest.fixture
-def mock_root_folder():
-    return "/var/empty"
+def mock_root_folder(project_dir):
+    return Path(project_dir, "cases").as_posix()
 
 
 @pytest.fixture(name="mip_case_ids")
@@ -163,7 +166,9 @@ def fixture_mip_configs(
             "slurm_quality_of_service": "medium",
             "store_file": str(mip_deliverables[case]),
         }
-        config_path = mip_case_dirs[case] / f"{case}_config.yaml"
+        analysis_path = Path(mip_case_dirs[case] / "analysis")
+        Path(analysis_path).mkdir(parents=True, exist_ok=True)
+        config_path = analysis_path / f"{case}_config.yaml"
         config_dict[case] = config_path
         with open(config_path, "w") as fh:
             yaml.dump(config, fh)
@@ -231,12 +236,14 @@ def fixture_populated_mip_tb_api(
 
 
 @pytest.fixture
-def mip_context(analysis_store_single_case, tb_api, housekeeper_api, mip_lims, mock_root_folder):
+def mip_context(
+    analysis_store_single_case, trailblazer_api, housekeeper_api, mip_lims, mock_root_folder
+):
     return {
-        "dna_api": AnalysisAPI(
+        "dna_api": MipAnalysisAPI(
             db=analysis_store_single_case,
             hk_api=housekeeper_api,
-            tb_api=tb_api,
+            tb_api=trailblazer_api,
             scout_api="scout_api",
             lims_api=mip_lims,
             deliver_api="deliver",
@@ -245,10 +252,10 @@ def mip_context(analysis_store_single_case, tb_api, housekeeper_api, mip_lims, m
             conda_env="S_mip_rd-dna",
             root=mock_root_folder,
         ),
-        "rna_api": AnalysisAPI(
+        "rna_api": MipAnalysisAPI(
             db=analysis_store_single_case,
             hk_api=housekeeper_api,
-            tb_api=tb_api,
+            tb_api=trailblazer_api,
             scout_api="scout_api",
             lims_api=mip_lims,
             deliver_api="deliver",
@@ -276,7 +283,23 @@ def mip_context(analysis_store_single_case, tb_api, housekeeper_api, mip_lims, m
 
 @pytest.fixture(name="mip_store_context")
 def mip_store_context(
-    populated_mip_tb_api: TrailblazerAPI, _store: Store, empty_housekeeper_api: HousekeeperAPI
+    trailblazer_api, _store: Store, empty_housekeeper_api: HousekeeperAPI, mock_root_folder: Path
 ) -> dict:
     """Create a context to be used in testing mip store, this should be fused with mip_context above at later stages"""
-    return {"tb_api": populated_mip_tb_api, "hk_api": empty_housekeeper_api, "db": _store}
+    return {
+        "mip_api": MipAnalysisAPI(
+            db=_store,
+            tb_api=trailblazer_api,
+            hk_api=empty_housekeeper_api,
+            scout_api=None,
+            lims_api=None,
+            deliver_api=None,
+            script="None",
+            pipeline="None",
+            conda_env="None",
+            root=mock_root_folder,
+        ),
+        "trailblazer_api": trailblazer_api,
+        "housekeeper_api": empty_housekeeper_api,
+        "status_db": _store,
+    }

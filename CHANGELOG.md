@@ -13,11 +13,77 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [13.7.1]
 
-## [13.10.1]
+### Added
+- Added new value to lims constants
+- Moved lims constants to a constants directory
+
+## [13.17.0]
+
+### Changed
+- Workflow mip-dna store no longer needs analysisrunstatus to be completed to attempt storing bundle
+
+
+
+
+
+## [13.16.2]
 
 ### Fixed
-- Storing chromograph, upd and rhocall files in housekeeper
+
+- Fixed bug where parse_mip_config() only returned values for primary analysis, breaking Upload Delivery Report
+
+
+## [13.16.1]
+
+### Fixed
+
+ - Fix bug where cg workflow mip store still relied on Trailblazer to find case_config.yaml (Where it can no longer be found)
+ - Fix bug where microsalt cli lost its store command in merge conflict
+
+
+## [13.16.0]
+
+### Added
+- New REST-based TrailblazerAPI
+### Changed
+- Trailblazer support for Balsamic
+### Fixed
+- Naming convention for API harmonized
+
+
+## [13.15.0]
+
+### Added
+- New query to get all cases in ticket
+
+## [13.14.3]
+
+### Changed
+
+- Refactors constants file
+
+## [13.14.2]
+
+### Fixed
+ 
+ - Fixed bug where CalledProcessError class could not be represented as string, and broke workflows.
+ - Rephrased query used for compression. The query output is unchanged
+ - Fixed typo in query name
+ 
+
+## [13.14.1]
+### Removed
+- Remove data_analysis from sample since it is deprecated
+
+## [13.14.0]
+### Changed
+- Move data_analysis from sample level to case level to enable samples to be analysed differently in different cases
+
+## [13.12.0]
+### Added
+- Store all available completed microbial analyses in HK
 
 ## [13.11.0]
 
@@ -27,6 +93,11 @@ Try to use the following format:
 
 ### Fixed
 - Format print statements
+
+## [13.10.2]
+
+### Fixed
+- Storing chromograph, upd and rhocall files in housekeeper
 
 ## [13.10.1]
 

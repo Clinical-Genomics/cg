@@ -9,6 +9,7 @@ from cg.constants import FAMILY_ACTIONS, PRIORITY_OPTIONS
 STATUS_OPTIONS = ["pending", "running", "completed", "failed", "error"]
 CASE_HEADERS_LONG = [
     "Case",
+    "Workflow",
     "Ordered",
     "Received",
     "Prepared",
@@ -47,16 +48,14 @@ for header in CASE_HEADERS_LONG:
 @click.pass_context
 def status(context):
     """View status of things."""
-    context.obj["db"] = Store(context.obj["database"])
-    if context.obj.get("trailblazer"):
-        context.obj["tb"] = tb.TrailblazerAPI(context.obj)
+    context.obj["status_db"] = Store(context.obj["database"])
 
 
 @status.command()
 @click.pass_context
 def analysis(context):
     """Which families will be analyzed?"""
-    records = context.obj["db"].cases_to_mip_analyze()
+    records = context.obj["status_db"].cases_to_analyze(pipeline="mip")
     for family_obj in records:
         click.echo(family_obj)
 
@@ -117,11 +116,8 @@ def present_string(a_dict, param, show_negative):
 @click.option("--internal-id", help="search by internal id")
 @click.option("--name", help="search by name given by customer")
 @click.option("--case-action", type=click.Choice(FAMILY_ACTIONS), help="filter by case action")
-@click.option(
-    "--progress-status", type=click.Choice(STATUS_OPTIONS), help="filter by progress " "status"
-)
 @click.option("--priority", type=click.Choice(PRIORITY_OPTIONS), help="filter by priority")
-@click.option("--data-analysis", help="filter on data_analysis")
+@click.option("--data-analysis", help="filter on case data_analysis")
 @click.option("--sample-id", help="filter by sample id")
 @click.option("-c", "--customer-id", help="filter by customer")
 @click.option("-C", "--exclude-customer-id", help="exclude customer")
@@ -151,7 +147,6 @@ def cases(
     internal_id,
     name,
     case_action,
-    progress_status,
     priority,
     customer_id,
     data_analysis,
@@ -175,13 +170,11 @@ def cases(
     exclude_invoiced,
 ):
     """progress of each case"""
-    records = context.obj["db"].cases(
-        progress_tracker=context.obj.get("tb"),
+    records = context.obj["status_db"].cases(
         days=days,
         internal_id=internal_id,
         name=name,
         case_action=case_action,
-        progress_status=progress_status,
         priority=priority,
         customer_id=customer_id,
         exclude_customer_id=exclude_customer_id,
@@ -248,10 +241,11 @@ def cases(
             tat = f"({tat_number})/{max_tat}" + color_end
 
         title = color_start + f"{case.get('internal_id')}"
+
         if name:
             title = f"{title} ({case.get('name')})"
-        if data_analysis:
-            title = f"{title} {case.get('samples_data_analyses')}"
+
+        data_analysis = f"{case.get('data_analysis')}"
 
         show_time = output_type == "datetime"
 
@@ -327,6 +321,7 @@ def cases(
 
         case_row = [
             title,
+            data_analysis,
             ordered,
             received,
             prepared,
@@ -355,7 +350,7 @@ def cases(
 @click.pass_context
 def samples(context, skip):
     """View status of samples."""
-    records = context.obj["db"].samples().offset(skip).limit(30)
+    records = context.obj["status_db"].samples().offset(skip).limit(30)
     for record in records:
         message = f"{record.internal_id} ({record.customer.internal_id})"
         if record.sequenced_at:
@@ -379,7 +374,7 @@ def samples(context, skip):
 def families(context, skip):
     """View status of families."""
     click.echo("red: prio > 1, blue: prio = 1, green: completed, yellow: action")
-    records = context.obj["db"].families().offset(skip).limit(30)
+    records = context.obj["status_db"].families().offset(skip).limit(30)
     for family_obj in records:
         color = "red" if family_obj.priority > 1 else "blue"
         message = f"{family_obj.internal_id} ({family_obj.priority})"
