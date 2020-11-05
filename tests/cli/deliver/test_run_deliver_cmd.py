@@ -52,3 +52,36 @@ def test_run_deliver_non_existing_case(base_context: dict, case_id: str, caplog)
     assert result.exit_code == 0
     # THEN assert that the correct warning is displayed
     assert f"Could not find case {case_id}" in caplog.text
+
+
+def test_delivery_with_dry_run():
+    """Test to run the delivery command with dry run enabled"""
+    # GIVEN a context with a case that have files in housekeeper to deliver
+
+    # WHEN running the deliver analysis command in dry run mode
+
+    # THEN assert that the path to the delivery folder was not created
+
+    # THEN assert that the correct information was communicateddsde++++++6
+    assert 0
+
+
+def test_delivery_path_created():
+    """Test that the delivery path is created when running the deliver analysis command"""
+    # GIVEN a context with a case that have files in housekeeper to deliver
+
+    # GIVEN that the delivery file does not exist
+
+    # WHEN running the deliver analysis command
+
+    # THEN assert that the path to the delivery folder was created
+    assert 0
+
+
+def test_case_file_is_delivered():
+    # GIVEN a context with a case that have files in housekeeper to deliver
+
+    # WHEN running the deliver analysis command
+
+    # THEN assert that the case file was delivered to the inbox
+    assert 0
