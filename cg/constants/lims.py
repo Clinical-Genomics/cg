@@ -60,10 +60,10 @@ MASTER_STEPS_UDFS = {
             "method_number": "Method document",
             "method_version": "Document version",
         },
-         "KAPA Library Preparation TWIST v1": {
+        "KAPA Library Preparation TWIST v1": {
             "method_number": "Method document",
             "method_version": "Document version",
-        }
+        },
     },
     "sequencing_method_step": {
         "CG002 - Cluster Generation (HiSeq X)": {

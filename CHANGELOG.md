@@ -13,6 +13,13 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+Try to use the following format:
+## [13.16.3]
+
+### Added
+- Added new value to lims constants
+- Moved lims constants to a constants directory
+
 ## [13.16.2]
 
 ### Fixed
