@@ -13,10 +13,18 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## [13.17.1]
+## [13.17.2]
 
 ### Changed
 - Only fastq files older than three weeks will be compressed
+
+
+## [13.7.1]
+
+### Added
+- Added new value to lims constants
+- Moved lims constants to a constants directory
+
 
 ## [13.17.0]
 

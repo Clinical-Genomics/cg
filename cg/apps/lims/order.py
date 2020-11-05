@@ -1,12 +1,12 @@
 from typing import List
 import logging
 
-from genologics.entities import Project, Researcher, Sample, Container, Containertype, Artifact
+from genologics.entities import Project, Researcher, Sample, Container, Containertype
 from lxml import etree
 from lxml.objectify import ObjectifiedElement
 
 from cg.exc import OrderError
-from .constants import PROP2UDF
+from cg.constants.lims import PROP2UDF
 from . import batch
 
 LOG = logging.getLogger(__name__)
