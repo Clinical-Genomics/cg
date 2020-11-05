@@ -43,31 +43,6 @@ def test_add_mip_analysis_finished(
     assert result == mock_build_bundle(config_data_rna, sampleinfo_data, rna_deliverables_raw)
 
 
-@mock.patch("cg.meta.store.mip.parse_sampleinfo")
-@mock.patch("cg.meta.store.mip.parse_config")
-def test_add_mip_analysis_not_finished(
-    mock_parse_config, mock_parse_sample, config_stream, config_data_rna, sampleinfo_data
-):
-    """
-    tests the function add_mip_analysis when passing a config file of an unfinished RNA analysis
-    """
-    # GIVEN a MIP RNA analysis configuration file
-
-    mip_rna_config = config_stream["rna_config_store"]
-    mock_parse_config.return_value = config_data_rna
-    sampleinfo_data["is_finished"] = False
-    mock_parse_sample.return_value = sampleinfo_data
-
-    # WHEN  gathering information from the MIP RNA analysis to store and the analysis is not
-    # finished
-
-    with pytest.raises(AnalysisNotFinishedError) as exc_info:
-        store_mip.add_mip_analysis(mip_rna_config)
-
-    # THEN the correct exception should be raised
-    assert exc_info.value.message == "analysis not finished"
-
-
 def test_parse_config(snapshot: Snapshot, config_raw: dict):
     """
     tests the function parse_config against a snapshot
