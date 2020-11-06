@@ -101,19 +101,23 @@ def completed(context):
     mip_api = context.obj["mip_api"]
 
     exit_code = EXIT_SUCCESS
-    for analysis_obj in mip_api.tb.analyses(status="completed", deleted=False, data_analysis="mip"):
-        existing_record = mip_api.hk.version(analysis_obj.family, analysis_obj.started_at)
-        if existing_record:
-            LOG.info("analysis stored: %s - %s", analysis_obj.family, analysis_obj.started_at)
-            continue
-        LOG.info(f"storing family: {analysis_obj.family}")
-        with Path(
-            mip_api.get_case_config_path(case_id=analysis_obj.family)
-        ).open() as config_stream:
-            try:
-                context.invoke(analysis, config_stream=config_stream)
-            except (Exception, click.Abort):
-                LOG.error("case storage failed: %s", analysis_obj.family, exc_info=True)
-                exit_code = EXIT_FAIL
+    for case_obj in mip_api.db.cases_to_store(pipeline="mip"):
+        analysis_obj = mip_api.tb.get_latest_analysis(case_id=case_obj.internal_id)
+        if analysis_obj.status == "completed":
+            existing_record = mip_api.hk.version(analysis_obj.family, analysis_obj.started_at)
+            if existing_record:
+                LOG.info(
+                    "analysis already stored: %s - %s", analysis_obj.family, analysis_obj.started_at
+                )
+                continue
+            LOG.info(f"storing family: {analysis_obj.family}")
+            with Path(
+                mip_api.get_case_config_path(case_id=analysis_obj.family)
+            ).open() as config_stream:
+                try:
+                    context.invoke(analysis, config_stream=config_stream)
+                except (Exception, click.Abort):
+                    LOG.error("case storage failed: %s", analysis_obj.family, exc_info=True)
+                    exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort
