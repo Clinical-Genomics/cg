@@ -1,6 +1,7 @@
 """File includes api to uploading data into Scout"""
 
 import logging
+import re
 from pathlib import Path
 
 import requests
@@ -35,7 +36,11 @@ class UploadScoutAPI:
 
     def fetch_file_path(self, tag: str, sample_id: str, hk_version_id: int = None):
         """"Fetch files from housekeeper"""
-        tags = [tag, sample_id]
+        return self.fetch_file_path_from_tags(self, [tag], sample_id, hk_version_id)
+
+    def fetch_file_path_from_tags(self, tags: list, sample_id: str, hk_version_id: int = None):
+        """Fetch files from housekeeper matching a list of tags """
+        tags = [sample_id] + tags
         hk_file = self.housekeeper.files(version=hk_version_id, tags=tags).first()
         file_path = None
         if hk_file:
@@ -49,9 +54,17 @@ class UploadScoutAPI:
             sample_id = link_obj.sample.internal_id
             bam_path = self.fetch_file_path("bam", sample_id, hk_version_id)
             alignment_file_path = self.fetch_file_path("cram", sample_id, hk_version_id)
-            chromograph_path = self.fetch_file_path("chromograph", sample_id, hk_version_id)
+            rho_image = self.fetch_file_path_from_tags(
+                ["chromograph", "rho"], sample_id, hk_version_id
+            )
+            upd_image = self.fetch_file_path_from_tags(
+                ["chromograph", "upd"], sample_id, hk_version_id
+            )
             mt_bam_path = self.fetch_file_path("bam-mt", sample_id, hk_version_id)
             vcf2cytosure_path = self.fetch_file_path("vcf2cytosure", sample_id, hk_version_id)
+
+            rho_path = self._parse_path(rho_image)
+            upd_path = self._parse_path(upd_image)
 
             lims_sample = dict()
             try:
@@ -63,7 +76,7 @@ class UploadScoutAPI:
                 "bam_path": bam_path,
                 "capture_kit": None,
                 "alignment_path": alignment_file_path,
-                "chromograph": chromograph_path,
+                "chromograph_images": {"upd": upd_path, "rho": rho_path},
                 "father": link_obj.father.internal_id if link_obj.father else "0",
                 "mother": link_obj.mother.internal_id if link_obj.mother else "0",
                 "mt_bam": mt_bam_path,
@@ -222,3 +235,11 @@ class UploadScoutAPI:
         ]
         svg_path = self.madeline_api.run(family_id=family_obj.name, samples=samples)
         return svg_path
+
+    @staticmethod
+    def _parse_path(file_path):
+        """ Remove a file's sufffix and identifying integer or X/Y
+        Example:
+        `/some/path/gatkcomb_rhocall_vt_af_chromograph_sites_X.png` becomes
+        `/some/path/gatkcomb_rhocall_vt_af_chromograph_sites_`   """
+        return re.split("(\d+|X|Y)\.png", file_path)[0]
