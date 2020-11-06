@@ -49,7 +49,7 @@ class UploadScoutAPI:
 
     def build_samples(self, analysis_obj: models.Analysis, hk_version_id: int = None):
         """Loop over the samples in an analysis and build dicts from them"""
-
+        
         for link_obj in analysis_obj.family.links:
             sample_id = link_obj.sample.internal_id
             bam_path = self.fetch_file_path("bam", sample_id, hk_version_id)
@@ -242,4 +242,5 @@ class UploadScoutAPI:
         Example:
         `/some/path/gatkcomb_rhocall_vt_af_chromograph_sites_X.png` becomes
         `/some/path/gatkcomb_rhocall_vt_af_chromograph_sites_`   """
+        import pdb; pdb.set_trace()
         return re.split("(\d+|X|Y)\.png", file_path)[0]
