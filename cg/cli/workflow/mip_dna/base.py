@@ -149,9 +149,9 @@ def decompress_spring(context: click.Context, case_id: str, dry_run: bool):
 
     case_obj = dna_api.db.family(case_id)
 
-    spring_to_decompress = dna_api.check_spring_files(case_obj) # ---FIX
+    spring_to_decompress = dna_api.check_spring_files(case_obj)
     if spring_to_decompress:
-        is_compression_running = dna_api.check_spring_decompression_jobs(case_obj) # ---FIX
+        is_compression_running = dna_api.check_spring_decompression_jobs(case_obj)
         if is_compression_running:
             LOG.warning(
                 f"No analysis started, decompression is running for {case_obj.internal_id}"
@@ -162,21 +162,15 @@ def decompress_spring(context: click.Context, case_id: str, dry_run: bool):
                 f"(no decompression will be started, this is a dry run)"
             )
         else:
-            start_decompression(case_obj) # FIX
-            LOG.warning(
-                f"No analysis started, started decompression for {case_obj.internal_id}"
-            )
+            dna_api.start_decompression(case_obj.internal_id)
         raise click.Abort()
 
     # Checks for fastqs that are decompressed, but not linked in housekeeper
-    fastqs_to_link = dna_api.check_fastqs_to_link(case_obj) # FIX
+    fastqs_to_link = dna_api.check_fastqs_to_link(case_obj)
     if fastqs_to_link and dry_run:
         LOG.info("Would have linked fastqs, but this is dry-run mode")
     elif fastqs_to_link and not dry_run:
-        dna_api.link_fastq() # FIX
-        LOG.info(
-            f"Adding links for {case_obj.internal_id} in housekeeper"
-        )
+        dna_api.link_fastq(case_obj.internal_id)
 
 
 @mip_dna.command()

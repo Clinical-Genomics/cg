@@ -500,13 +500,7 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         )
 
     def check_spring_files(self, family_obj: models.Family) -> bool:
-        # Find spring files without a corresponding .fastq-file
-        # 1. Call function get_other_format_in_same_folder() Get all spring files for sample from housekeeper in a list
-        # 2. Call function get_other_format_in_same_folder() Get all fastq files that is located in the same folder as the spring in a list
-        # 3. Using a sub string iterate over all spring files and compare them to all fastq files and place spring files that have no match into a new list
-        # 4. Return that list
         spring_to_decompress = False
-
         spring_linked_in_hk = self.hk.get_files(bundle=family_obj.internal_id, tags=["spring"]) # Corect way to get a list with paths to all spring files in HK?
 
         # spring_status contain bool information if spring should be decompressed
@@ -524,26 +518,17 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
                 spring_to_decompress = True
         return spring_to_decompress
 
-    def check_fastqs_to_link() -> bool:
-        # Find fastq files connected to the spring files in housekeeper that does not have a link in housekeeper
-        # 1. CALL FUNCTION get_other_format_in_same_folder() Get all spring files for sample from housekeeper in a list
-        # 2. CALL FUNCTION get_other_format_in_same_folder() Get all fastq files that is located in the same folder as the spring in a list
-        # 3. Iterate over all fastq files and check if they have a housekeeper link, if not place in a list
-        # 4. Return the list
+    def check_fastqs_to_link(self, family_obj: models.Family) -> bool:
         fastqs_to_link = False
-        fastqs_of_interest = get_other_format_in_same_folder()
+        fastqs_of_interest = get_other_format_in_same_folder(family_obj=family_obj, query_format="spring", target_format="fastq.gz")
+        fastqs_linked_in_hk = self.hk.get_files(bundle=family_obj.internal_id, tags=["fastq"])
         for fastq in fastqs_of_interest:
             if not fastq in fastqs_linked_in_hk:
                 fastqs_to_link = True
         return fastqs_to_link
 
     def get_other_format_in_same_folder(self, family_obj: models.Family, query_format: str, target_format: str) -> list:
-        # 1. Get all spring files for sample from housekeeper in a list
-        # 2. Get all fastq files that is located in the same folder as the spring in a list
-        # 3. Return the list
-        target_paths = []
         redundant_target_paths = []
-        all_paths = []
         query_linked_in_hk = self.hk.get_files(bundle=family_obj.internal_id, tags=[query_format]) # Correct way of using the API?
         for query in query_linked_in_hk:
             query_folder = os.path.dirname(query.path)
@@ -556,8 +541,6 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         return target_paths
 
     def check_spring_decompression_jobs(self, family_obj: models.Family) -> bool:
-        # 1. Run "squeue -o %j | grep spring | grep <sample>" for all samples via system
-        # 2. If all returned true, then return "True", otherwise "False"
         is_spring_decompressing = False
         for sample in family_obj.sample.internal_id:
             returned_from_system = os.system(f"squeue -o %j | grep spring | grep {sample}")
@@ -565,6 +548,14 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
                 is_spring_decompressing = True
         return is_spring_decompressing
 
-    def link_fastq() -> None:
-    # 1. Will run cg store fastqs command
-    # Run the command "cg store"
+    def start_decompression(self, case_id: str) -> None:
+        os.system(f"cg decompress spring {case_id}")
+        LOG.warning(
+            f"No analysis started, started decompression for {case_id}"
+        )
+
+    def link_fastq(self, case_id: str) -> None:
+        os.system(f"cg store fastq {case_id}")
+        LOG.info(
+            f"Adding links for {case_id} in housekeeper"
+        )
