@@ -36,7 +36,7 @@ class UploadScoutAPI:
 
     def fetch_file_path(self, tag: str, sample_id: str, hk_version_id: int = None):
         """"Fetch files from housekeeper"""
-        return self.fetch_file_path_from_tags(self, [tag], sample_id, hk_version_id)
+        return self.fetch_file_path_from_tags([tag], sample_id, hk_version_id)
 
     def fetch_file_path_from_tags(self, tags: list, sample_id: str, hk_version_id: int = None):
         """Fetch files from housekeeper matching a list of tags """
