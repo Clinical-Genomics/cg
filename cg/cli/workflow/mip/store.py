@@ -104,11 +104,12 @@ def completed(context):
     for case_obj in mip_api.db.cases_to_store(pipeline="mip"):
         analysis_obj = mip_api.tb.get_latest_analysis(case_id=case_obj.internal_id)
         if analysis_obj.status != "completed":
+
             continue
         LOG.info(f"storing family: {analysis_obj.family}")
         with Path(
-                mip_api.get_case_config_path(case_id=analysis_obj.family)
-            ).open() as config_stream:
+            mip_api.get_case_config_path(case_id=analysis_obj.family)
+        ).open() as config_stream:
             try:
                 context.invoke(analysis, config_stream=config_stream)
             except (Exception, click.Abort):
