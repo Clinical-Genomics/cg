@@ -19,7 +19,7 @@ Try to use the following format:
 - Only fastq files older than three weeks will be compressed
 
 
-## [13.7.1]
+## [13.17.1]
 
 ### Added
 - Added new value to lims constants
