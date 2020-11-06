@@ -1,6 +1,7 @@
 """Tests for the compress data class"""
 import os
 from pathlib import Path
+from datetime import datetime
 
 from cg.models import CompressionData
 
@@ -16,6 +17,19 @@ def test_get_run_name():
     # WHEN fetching the run name
     # THEN assert the correct run name is returned
     assert compression_obj.run_name == run_name
+
+
+def test_get_change_date(compression_object):
+    """Test to get the date time for when a file was changed"""
+    # GIVEN a existing file
+    file_path = compression_object.spring_path
+    file_path.touch()
+
+    # WHEN fetching the date when file was created
+    change_date = compression_object.get_change_date(file_path)
+
+    # THEN check that it is the same date as today
+    assert change_date.date() == datetime.today().date()
 
 
 def test_get_nlinks_one_link(compression_object):
