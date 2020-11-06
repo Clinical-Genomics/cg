@@ -104,12 +104,6 @@ def completed(context):
     for case_obj in mip_api.db.cases_to_store(pipeline="mip"):
         analysis_obj = mip_api.tb.get_latest_analysis(case_id=case_obj.internal_id)
         if analysis_obj.status == "completed":
-            existing_record = mip_api.hk.version(analysis_obj.family, analysis_obj.started_at)
-            if existing_record:
-                LOG.info(
-                    "analysis already stored: %s - %s", analysis_obj.family, analysis_obj.started_at
-                )
-                continue
             LOG.info(f"storing family: {analysis_obj.family}")
             with Path(
                 mip_api.get_case_config_path(case_id=analysis_obj.family)
