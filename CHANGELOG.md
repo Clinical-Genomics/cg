@@ -13,6 +13,12 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [13.18.0]
+
+
+### Changed
+- Changed condition for which cases should be stored in CG. This fixes a bug where cg would try to store cases which already have been stored due to mismatch in timestamp stored in Trailblazer and Housekeeper
+
 ## [13.17.2]
 
 ### Changed
