@@ -243,4 +243,6 @@ class UploadScoutAPI:
         `/some/path/gatkcomb_rhocall_vt_af_chromograph_sites_X.png` becomes
         `/some/path/gatkcomb_rhocall_vt_af_chromograph_sites_`   """
         import pdb; pdb.set_trace()
+        if file_path is None:
+            return ""
         return re.split("(\d+|X|Y)\.png", file_path)[0]
