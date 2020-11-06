@@ -103,15 +103,16 @@ def completed(context):
     exit_code = EXIT_SUCCESS
     for case_obj in mip_api.db.cases_to_store(pipeline="mip"):
         analysis_obj = mip_api.tb.get_latest_analysis(case_id=case_obj.internal_id)
-        if analysis_obj.status == "completed":
-            LOG.info(f"storing family: {analysis_obj.family}")
-            with Path(
+        if analysis_obj.status != "completed":
+            continue
+        LOG.info(f"storing family: {analysis_obj.family}")
+        with Path(
                 mip_api.get_case_config_path(case_id=analysis_obj.family)
             ).open() as config_stream:
-                try:
-                    context.invoke(analysis, config_stream=config_stream)
-                except (Exception, click.Abort):
-                    LOG.error("case storage failed: %s", analysis_obj.family, exc_info=True)
-                    exit_code = EXIT_FAIL
+            try:
+                context.invoke(analysis, config_stream=config_stream)
+            except (Exception, click.Abort):
+                LOG.error("case storage failed: %s", analysis_obj.family, exc_info=True)
+                exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort
