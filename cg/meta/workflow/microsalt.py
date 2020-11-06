@@ -119,7 +119,8 @@ class MicrosaltAnalysisAPI:
         for sample_obj in sample_objs:
             LOG.info("%s: link FASTQ files", sample_obj.internal_id)
             self.link_sample(
-                ticket=ticket, sample=sample_obj.internal_id,
+                ticket=ticket,
+                sample=sample_obj.internal_id,
             )
 
     def link_sample(self, sample: str, ticket: int) -> None:
