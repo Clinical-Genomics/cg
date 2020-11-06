@@ -96,6 +96,7 @@ def mip_dna(
 
     # Invoke full workflow
     context.invoke(retrieve_flowcells, case_id=case_id, dry_run = False)
+    context.invoke(decompress_spring, case_id=case_id, dry_run = False)
     context.invoke(config_case, case_id=case_id)
     context.invoke(link, case_id=case_id)
     context.invoke(panel, case_id=case_id)
@@ -131,6 +132,51 @@ def retrieve_flowcells(context: click.Context, case_id: str, dry_run: bool):
         # Commit the updates to request flowcells
         dna_api.db.commit()
         return
+
+
+@mip_dna.command('decompress-spring')
+@click.option("-c", "--case", "case_id", help="decompress spring to fastq for a case", type=str)
+@click.option("-d", "--dry-run", "dry_run", is_flag=True, help="print command to console")
+@click.pass_context
+def decompress_spring(context: click.Context, case_id: str, dry_run: bool):
+    """Decompress spring to fastq for a case"""
+
+    dna_api = context.obj["dna_api"]
+
+    if case_id is None:
+        _suggest_cases_to_analyze(context)
+        return
+
+    case_obj = dna_api.db.family(case_id)
+
+    spring_to_decompress = dna_api.check_spring_files(case_obj) # ---FIX
+    if spring_to_decompress:
+        is_compression_running = dna_api.check_spring_decompression_jobs(case_obj) # ---FIX
+        if is_compression_running:
+            LOG.warning(
+                f"No analysis started, decompression is running for {case_obj.internal_id}"
+            )
+        elif dry_run:
+            LOG.warning(
+                f"No analysis started, {case_obj.internal_id} needs to be decompressed "
+                f"(no decompression will be started, this is a dry run)"
+            )
+        else:
+            start_decompression(case_obj) # FIX
+            LOG.warning(
+                f"No analysis started, started decompression for {case_obj.internal_id}"
+            )
+        raise click.Abort()
+
+    # Checks for fastqs that are decompressed, but not linked in housekeeper
+    fastqs_to_link = dna_api.check_fastqs_to_link(case_obj) # FIX
+    if fastqs_to_link and dry_run:
+        LOG.info("Would have linked fastqs, but this is dry-run mode")
+    elif fastqs_to_link and not dry_run:
+        dna_api.link_fastq() # FIX
+        LOG.info(
+            f"Adding links for {case_obj.internal_id} in housekeeper"
+        )
 
 
 @mip_dna.command()
