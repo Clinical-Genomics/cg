@@ -269,7 +269,9 @@ class MicrosaltAnalysisAPI:
         """Returns a path where the microSALT deliverables file for the order_id should be
         located"""
         deliverables_file_path = Path(
-            self.root_dir, "results/reports/deliverables", order_id + "_deliverables.yaml",
+            self.root_dir,
+            "results/reports/deliverables",
+            order_id + "_deliverables.yaml",
         )
         return deliverables_file_path
 
