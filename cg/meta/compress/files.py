@@ -164,8 +164,9 @@ def check_fastqs(compression_obj: CompressionData) -> bool:
 
     date_changed = compression_obj.get_change_date(compression_obj.fastq_first)
     today = datetime.datetime.now()
+
     # Check if date is older than FASTQ_DELTA
-    if date_changed < today - FASTQ_DATETIME_DELTA:
+    if date_changed > today - FASTQ_DATETIME_DELTA:
         LOG.info("FASTQ files are not old enough")
         return False
 

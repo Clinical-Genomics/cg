@@ -101,8 +101,9 @@ class CompressionData:
     @staticmethod
     def get_change_date(file_path: Path) -> datetime:
         """Return the time when this file was changed"""
-        LOG.info("Check when %s was changed", file_path)
-        return datetime.fromtimestamp(file_path.stat().st_mtime)
+        changed_date = datetime.fromtimestamp(file_path.stat().st_mtime)
+        LOG.info("File %s was changed %s", file_path, changed_date)
+        return changed_date
 
     def spring_exists(self) -> bool:
         """Check if the SPRING file exists"""
