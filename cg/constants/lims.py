@@ -37,6 +37,7 @@ MASTER_STEPS_UDFS = {
     "capture_kit_step": {
         "obsolete_CG002 - Hybridize Library  (SS XT)": "SureSelect capture library/libraries used",
         "Hybridize Library TWIST v1": "Bait Set",
+        "Hybridize Library TWIST v2": "Bait Set",
     },
     "prep_method_step": {
         "CG002 - End repair Size selection A-tailing and Adapter ligation (TruSeq PCR-free DNA)": {
@@ -56,6 +57,10 @@ MASTER_STEPS_UDFS = {
             "method_version": "Method Version",
         },
         "End-Repair and A-tailing TWIST v1": {
+            "method_number": "Method document",
+            "method_version": "Document version",
+        },
+        "KAPA Library Preparation TWIST v1": {
             "method_number": "Method document",
             "method_version": "Document version",
         },

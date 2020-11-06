@@ -13,6 +13,21 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [13.7.1]
+
+### Added
+- Added new value to lims constants
+- Moved lims constants to a constants directory
+
+## [13.17.0]
+
+### Changed
+- Workflow mip-dna store no longer needs analysisrunstatus to be completed to attempt storing bundle
+
+
+
+
+
 ## [13.16.2]
 
 ### Fixed
