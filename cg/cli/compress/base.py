@@ -8,7 +8,14 @@ from cg.apps.crunchy import CrunchyAPI
 from cg.meta.compress import CompressAPI
 from cg.store import Store
 
-from .fastq import clean_fastq, decompress_spring, fastq_cmd, fix_spring
+from .fastq import (
+    clean_fastq,
+    decompress_spring,
+    fastq_cmd,
+    fix_spring,
+    decompress_spring_flowcell,
+    decompress_spring_ticket,
+)
 
 LOG = logging.getLogger(__name__)
 
@@ -52,3 +59,5 @@ def decompress(context):
 
 
 decompress.add_command(decompress_spring)
+decompress.add_command(decompress_spring_ticket)
+decompress.add_command(decompress_spring_flowcell)
