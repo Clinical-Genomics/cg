@@ -111,6 +111,11 @@ class StatusHandler(BaseHandler):
         )
         return records
 
+    def get_samples_from_flowcell(self, flowcell_id: str) -> List[models.Sample]:
+        flowcell = self.query(models.Flowcell).filter(models.Flowcell.name == flowcell_id).first()
+        if flowcell:
+            return flowcell.samples
+
     def cases(
         self,
         internal_id=None,
