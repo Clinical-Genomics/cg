@@ -11,8 +11,7 @@ EMAIL = "james.holden@scilifelab.se"
 
 def test_retrieve_flowcells_on_disk(cli_runner, mip_context, caplog, analysis_store_single_case):
     # GIVEN flowcells are on disk
-
-    case_obj = analysis_store_single_case.family(internal_id = CASE_ID)
+    case_obj = analysis_store_single_case.family(internal_id=CASE_ID)
     assert case_obj
     assert case_obj.links
     for link in case_obj.links:

@@ -7,6 +7,7 @@ from cg.cli.workflow.mip_dna.base import decompress_spring
 
 CASE_ID = "yellowhog"
 
+
 def test_mip_dna(cli_runner, mip_context, caplog):
     # GIVEN fastqs are all decompressed and linked
     pedigree_path = mip_context.get("dna_api").get_pedigree_config_path(case_id=CASE_ID)
@@ -15,7 +16,9 @@ def test_mip_dna(cli_runner, mip_context, caplog):
 
     caplog.set_level(logging.INFO)
     # WHEN calling mip_dna
-    result = cli_runner.invoke(decompress_spring, ["-c", CASE_ID, "--dry-run"], obj=mip_context, catch_exceptions=False)
+    result = cli_runner.invoke(
+        decompress_spring, ["-c", CASE_ID, "--dry-run"], obj=mip_context, catch_exceptions=False
+    )
 
     # THEN no error should be thrown
     assert result.exit_code == 0

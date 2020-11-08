@@ -95,8 +95,8 @@ def mip_dna(
         raise click.Abort()
 
     # Invoke full workflow
-    context.invoke(retrieve_flowcells, case_id=case_id, dry_run = False)
-    context.invoke(decompress_spring, case_id=case_id, dry_run = False)
+    context.invoke(retrieve_flowcells, case_id=case_id, dry_run=False)
+    context.invoke(decompress_spring, case_id=case_id, dry_run=False)
     context.invoke(config_case, case_id=case_id)
     context.invoke(link, case_id=case_id)
     context.invoke(panel, case_id=case_id)
@@ -109,7 +109,7 @@ def mip_dna(
     )
 
 
-@mip_dna.command('retrieve-flowcells')
+@mip_dna.command("retrieve-flowcells")
 @click.option("-c", "--case", "case_id", help="retrieve all flowcells for a case", type=str)
 @click.option("-d", "--dry-run", "dry_run", is_flag=True, help="print command to console")
 @click.pass_context
@@ -134,7 +134,7 @@ def retrieve_flowcells(context: click.Context, case_id: str, dry_run: bool):
         return
 
 
-@mip_dna.command('decompress-spring')
+@mip_dna.command("decompress-spring")
 @click.option("-c", "--case", "case_id", help="decompress spring to fastq for a case", type=str)
 @click.option("-d", "--dry-run", "dry_run", is_flag=True, help="print command to console")
 @click.pass_context
@@ -153,9 +153,7 @@ def decompress_spring(context: click.Context, case_id: str, dry_run: bool):
     if spring_to_decompress:
         is_compression_running = dna_api.check_spring_decompression_jobs(case_obj)
         if is_compression_running:
-            LOG.warning(
-                f"No analysis started, decompression is running for {case_obj.internal_id}"
-            )
+            LOG.warning(f"No analysis started, decompression is running for {case_obj.internal_id}")
         elif dry_run:
             LOG.warning(
                 f"No analysis started, {case_obj.internal_id} needs to be decompressed "
@@ -173,6 +171,7 @@ def decompress_spring(context: click.Context, case_id: str, dry_run: bool):
         dna_api.link_fastq(case_obj.internal_id)
 
     LOG.info("All fastq files decompressed and linked in housekeeper")
+
 
 @mip_dna.command()
 @click.option("-c", "--case", "case_id", help="link all samples for a case", type=str)
