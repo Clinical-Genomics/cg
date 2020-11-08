@@ -172,6 +172,7 @@ def decompress_spring(context: click.Context, case_id: str, dry_run: bool):
     elif fastqs_to_link and not dry_run:
         dna_api.link_fastq(case_obj.internal_id)
 
+    LOG.info("All fastq files decompressed and linked in housekeeper")
 
 @mip_dna.command()
 @click.option("-c", "--case", "case_id", help="link all samples for a case", type=str)

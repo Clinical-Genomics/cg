@@ -26,7 +26,4 @@ def test_mip_dna(cli_runner, mip_context, caplog):
     # THEN should not output "Creating links"
     assert "Creating links" not in caplog.text
     # THEN mip should start
-    print(caplog.text)
-    assert False
-    #assert "MIP rd-dna run started" in caplog.text
-
+    assert "All fastq files decompressed and linked" in caplog.text
