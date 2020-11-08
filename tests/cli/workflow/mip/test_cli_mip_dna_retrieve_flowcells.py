@@ -27,4 +27,3 @@ def test_retrieve_flowcells_on_disk(cli_runner, mip_context, caplog, analysis_st
     assert result.exit_code == 0
     # THEN should not output "not ready to run"
     assert "not ready to run" not in caplog.text
-

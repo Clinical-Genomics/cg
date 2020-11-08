@@ -503,9 +503,7 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         self, family_obj: models.Family, query_format: str, target_format: str
     ) -> list:
         redundant_target_paths = []
-        query_linked_in_hk = self.hk.get_files(
-            bundle=family_obj.internal_id, tags=[query_format]
-        )
+        query_linked_in_hk = self.hk.get_files(bundle=family_obj.internal_id, tags=[query_format])
         for query in query_linked_in_hk:
             query_folder = os.path.dirname(query.path)
             query_root = os.path.splitext(query.path)[0]
@@ -518,9 +516,7 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
 
     def check_spring_files(self, family_obj: models.Family) -> bool:
         spring_to_decompress = False
-        spring_linked_in_hk = self.hk.get_files(
-            bundle=family_obj.internal_id, tags=["spring"]
-        )
+        spring_linked_in_hk = self.hk.get_files(bundle=family_obj.internal_id, tags=["spring"])
 
         # spring_status contain bool information if spring should be decompressed
         spring_status = {}
