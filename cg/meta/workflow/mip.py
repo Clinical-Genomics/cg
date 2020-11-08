@@ -499,34 +499,6 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
             data_analysis=data_analysis,
         )
 
-    def check_spring_files(self, family_obj: models.Family) -> bool:
-        spring_to_decompress = False
-        spring_linked_in_hk = self.hk.get_files(bundle=family_obj.internal_id, tags=["spring"]) # Corect way to get a list with paths to all spring files in HK?
-
-        # spring_status contain bool information if spring should be decompressed
-        spring_status = {}
-        for spring in spring_linked_in_hk:
-            spring_status[spring] = True
-        fastqs_of_interest = get_other_format_in_same_folder(family_obj=family_obj, query_format="spring", target_format="fastq.gz")
-        for spring in spring_linked_in_hk:
-            spring_root = os.path.splitext(spring.path)[0]
-            for fastq in fastqs_of_interest:
-                if fastq.startswith(spring_root):
-                    spring_status[spring] = False
-        for spring in spring_linked_in_hk:
-            if spring_status[spring] == True:
-                spring_to_decompress = True
-        return spring_to_decompress
-
-    def check_fastqs_to_link(self, family_obj: models.Family) -> bool:
-        fastqs_to_link = False
-        fastqs_of_interest = get_other_format_in_same_folder(family_obj=family_obj, query_format="spring", target_format="fastq.gz")
-        fastqs_linked_in_hk = self.hk.get_files(bundle=family_obj.internal_id, tags=["fastq"])
-        for fastq in fastqs_of_interest:
-            if not fastq in fastqs_linked_in_hk:
-                fastqs_to_link = True
-        return fastqs_to_link
-
     def get_other_format_in_same_folder(self, family_obj: models.Family, query_format: str, target_format: str) -> list:
         redundant_target_paths = []
         query_linked_in_hk = self.hk.get_files(bundle=family_obj.internal_id, tags=[query_format]) # Correct way of using the API?
@@ -539,6 +511,42 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
                     redundant_target_paths.append(file)
         target_paths = list(dict.fromkeys(redundant_target_paths))
         return target_paths
+
+    def check_spring_files(self, family_obj: models.Family) -> bool:
+        spring_to_decompress = False
+        spring_linked_in_hk = self.hk.get_files(bundle=family_obj.internal_id, tags=["spring"]) # Corect way to get a list with paths to all spring files in HK?
+
+        # spring_status contain bool information if spring should be decompressed
+        spring_status = {}
+        for spring in spring_linked_in_hk:
+            spring_status[spring] = True
+        fastqs_of_interest = self.get_other_format_in_same_folder(
+                                                    family_obj=family_obj,
+                                                    query_format="spring",
+                                                    target_format="fastq.gz"
+        )
+        for spring in spring_linked_in_hk:
+            spring_root = os.path.splitext(spring.path)[0]
+            for fastq in fastqs_of_interest:
+                if fastq.startswith(spring_root):
+                    spring_status[spring] = False
+        for spring in spring_linked_in_hk:
+            if spring_status[spring] == True:
+                spring_to_decompress = True
+        return spring_to_decompress
+
+    def check_fastqs_to_link(self, family_obj: models.Family) -> bool:
+        fastqs_to_link = False
+        fastqs_of_interest = self.get_other_format_in_same_folder(
+                                                    family_obj=family_obj,
+                                                    query_format="spring",
+                                                    target_format="fastq.gz"
+        )
+        fastqs_linked_in_hk = self.hk.get_files(bundle=family_obj.internal_id, tags=["fastq"])
+        for fastq in fastqs_of_interest:
+            if not fastq in fastqs_linked_in_hk:
+                fastqs_to_link = True
+        return fastqs_to_link
 
     def check_spring_decompression_jobs(self, family_obj: models.Family) -> bool:
         is_spring_decompressing = False
