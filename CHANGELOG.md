@@ -30,7 +30,6 @@ Try to use the following format:
 - Removed unused options form cg workflow balsamic base command
 
 
-
 ## [14.0.0]
 
 ### Added
