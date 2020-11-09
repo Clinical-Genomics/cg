@@ -13,6 +13,7 @@ from typing import List
 
 from cg.apps.lims import LimsAPI
 from cg.apps.osticket import OsTicket
+from cg.constants import Pipeline
 from cg.exc import OrderError, TicketCreationError
 from cg.store import Store, models
 from .schema import OrderType, ORDER_SCHEMES
@@ -192,7 +193,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
             ticket=data["ticket"],
             samples=status_data["samples"],
             comment=status_data["comment"],
-            data_analysis=status_data["data_analysis"],
+            data_analysis=Pipeline(status_data["data_analysis"]),
         )
 
         return {"project": project_data, "records": samples}

@@ -2,7 +2,7 @@
 import logging
 
 from cg.cli.workflow.mip_dna.base import start
-from cg.constants import EXIT_SUCCESS
+from cg.constants import EXIT_SUCCESS, Pipeline
 
 
 def test_dry(cli_runner, mip_context):
@@ -48,7 +48,7 @@ def test_rna_case_excluded(cli_runner, mip_context, rna_case, caplog):
     # GIVEN a case that is ready for MIP RNA analysis
     #   -> has a sample that is sequenced and has an rna-application (wts)
 
-    assert rna_case.data_analysis == "mip_rna"
+    assert rna_case.data_analysis == Pipeline.MIP_RNA.value
     for link in rna_case.links:
         sample = link.sample
         assert sample.sequenced_at
@@ -75,7 +75,7 @@ def test_rna_case_excluded(cli_runner, mip_context, dna_rna_mix_case, caplog, tb
 
     rna_sample_found = False
     non_rna_sample_found = False
-    assert dna_rna_mix_case.data_analysis == "mip_dna"
+    assert dna_rna_mix_case.data_analysis == Pipeline.MIP_DNA.value
     for link in dna_rna_mix_case.links:
         sample = link.sample
         assert sample.sequenced_at

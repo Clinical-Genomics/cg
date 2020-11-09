@@ -7,6 +7,7 @@ from pathlib import Path
 import click
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
+from cg.constants import Pipeline
 from cg.meta.deliver import DeliverAPI
 from cg.store import Store
 
@@ -119,5 +120,5 @@ def _generate_sample_delivery_path(file_obj, out_dir, sample_obj):
 def _suggest_cases_to_deliver(store):
     LOG.warning("provide a case, suggestions:")
 
-    for case_obj in store.analyses_to_deliver(pipeline="mip_dna", limit=50):
+    for case_obj in store.analyses_to_deliver(pipeline=Pipeline.MIP_DNA, limit=50):
         click.echo(case_obj)

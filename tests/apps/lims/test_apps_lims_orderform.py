@@ -1,4 +1,5 @@
 from cg.apps.lims import orderform
+from cg.constants import Pipeline
 
 
 def test_parsing_rml_orderform(rml_orderform):
@@ -17,7 +18,7 @@ def test_parsing_rml_orderform(rml_orderform):
     assert sample_data["name"] == "sample1"
     assert sample_data["pool"] == "pool1"
     assert sample_data["application"] == "RMLP10R150"
-    assert sample_data["data_analysis"] == "fastq"
+    assert sample_data["data_analysis"] == Pipeline.FASTQ.value
     assert sample_data["volume"] == "1"
     assert sample_data["concentration"] == "2"
     assert sample_data["index"] == "TruSeq Custom Amplicon Dual-index (A7-A5)"
@@ -43,7 +44,7 @@ def test_parsing_fastq_orderform(fastq_orderform):
     data = orderform.parse_orderform(fastq_orderform)
 
     # THEN it should determine the project type
-    assert data["project_type"] == "fastq"
+    assert data["project_type"] == Pipeline.FASTQ.value
     # ... and find all samples
     assert len(data["items"]) == 38
 
@@ -52,7 +53,7 @@ def test_parsing_fastq_orderform(fastq_orderform):
     tumour_sample = data["items"][0]
     assert normal_sample["name"] == "s2"
     assert normal_sample["container"] == "Tube"
-    assert normal_sample["data_analysis"] == "fastq"
+    assert normal_sample["data_analysis"] == Pipeline.FASTQ.value
     assert normal_sample["application"] == "WGSLIFC030"
     assert normal_sample["sex"] == "female"
     assert normal_sample["case"] == "family"
@@ -80,7 +81,7 @@ def test_parsing_mip_orderform(mip_orderform):
     data = orderform.parse_orderform(mip_orderform)
 
     # THEN it should detect the type of project
-    assert data["project_type"] == "mip_dna"
+    assert data["project_type"] == Pipeline.MIP_DNA.value
     assert data["customer"] == "cust000"
 
     # ... and it should find and group all samples in families
@@ -98,7 +99,7 @@ def test_parsing_mip_orderform(mip_orderform):
     proband_sample = trio_family["samples"][0]
     assert proband_sample["name"] == "s1"
     assert proband_sample["container"] == "96 well plate"
-    assert proband_sample["data_analysis"] == "mip_dna"
+    assert proband_sample["data_analysis"] == Pipeline.MIP_DNA.value
     assert proband_sample["application"] == "WGSPCFC030"
     assert proband_sample["sex"] == "male"
     assert proband_sample["source"] == "other"
@@ -173,7 +174,7 @@ def test_parsing_metagenome_orderform(metagenome_orderform):
 
     assert sample["name"] == "s1"
     assert sample["source"] == "other"
-    assert sample["data_analysis"] == "fastq"
+    assert sample["data_analysis"] == Pipeline.FASTQ.value
     assert sample["application"] == "METPCFR030"
     assert sample["customer"] == "cust000"
     assert sample["require_qcok"] is True
@@ -199,7 +200,7 @@ def test_parsing_microbial_orderform(microbial_orderform):
     data = orderform.parse_orderform(microbial_orderform)
 
     # THEN it should determine the type of project and customer
-    assert data["project_type"] == "microsalt"
+    assert data["project_type"] == Pipeline.MICROSALT.value
     assert data["customer"] == "cust000"
 
     # ... and find all samples
@@ -212,7 +213,7 @@ def test_parsing_microbial_orderform(microbial_orderform):
     assert sample_data.get("internal_id") is None
     assert sample_data["organism"] == "other"
     assert sample_data["reference_genome"] == "NC_00001"
-    assert sample_data["data_analysis"] == "fastq"
+    assert sample_data["data_analysis"] == Pipeline.FASTQ.value
     assert sample_data["application"] == "MWRNXTR003"
     # customer on order (data)
     assert sample_data["require_qcok"] is True
@@ -238,7 +239,7 @@ def test_parsing_balsamic_orderform(balsamic_orderform):
     data = orderform.parse_orderform(balsamic_orderform)
 
     # THEN it should detect the type of project
-    assert data["project_type"] == "balsamic"
+    assert data["project_type"] == Pipeline.BALSAMIC.value
 
     # ... and it should find and group all samples in case
     assert len(data["items"]) == 36
@@ -254,7 +255,7 @@ def test_parsing_balsamic_orderform(balsamic_orderform):
 
     assert sample["name"] == "s1"
     assert sample["container"] == "96 well plate"
-    assert sample["data_analysis"] == "balsamic"
+    assert sample["data_analysis"] == Pipeline.BALSAMIC.value
     assert sample["application"] == "WGSPCFC030"
     assert sample["sex"] == "male"
     assert case["name"] == "family"
@@ -291,7 +292,7 @@ def test_parsing_mip_rna_orderform(mip_rna_orderform):
     data = orderform.parse_orderform(mip_rna_orderform)
 
     # THEN it should detect the type of project
-    assert data["project_type"] == "mip_rna"
+    assert data["project_type"] == Pipeline.MIP_RNA.value
     assert data["customer"] == "cust000"
     # ... and it should find and group all samples in cases
     assert len(data["items"]) == 36
@@ -307,7 +308,7 @@ def test_parsing_mip_rna_orderform(mip_rna_orderform):
     first_sample = first_case["samples"][0]
     assert first_sample["name"] == "s1"
     assert first_sample["container"] == "96 well plate"
-    assert first_sample["data_analysis"] == "mip_rna"
+    assert first_sample["data_analysis"] == Pipeline.MIP_RNA.value
     assert first_sample["application"] == "RNAPOAR025"
     assert first_sample["sex"] == "male"
     # case-id on the case
@@ -344,7 +345,7 @@ def test_parse_mip_rna(skeleton_orderform_sample: dict):
     parsed_sample = orderform.parse_sample(raw_sample)
 
     # THEN data_analysis is mip only
-    assert parsed_sample["data_analysis"] == "mip_rna"
+    assert parsed_sample["data_analysis"] == Pipeline.MIP_RNA.value
 
 
 def test_parse_mip_only(skeleton_orderform_sample: dict):
@@ -357,7 +358,7 @@ def test_parse_mip_only(skeleton_orderform_sample: dict):
     parsed_sample = orderform.parse_sample(raw_sample)
 
     # THEN data_analysis is mip only
-    assert parsed_sample["data_analysis"] == "mip_dna"
+    assert parsed_sample["data_analysis"] == Pipeline.MIP_DNA.value
 
 
 def test_parse_balsamic_only(skeleton_orderform_sample: dict):

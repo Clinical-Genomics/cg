@@ -19,7 +19,7 @@ from cg.meta.store.base import gather_files_and_bundle_in_housekeeper
 from cg.meta.deliver import DeliverAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import Store
-from cg.constants import EXIT_SUCCESS, EXIT_FAIL
+from cg.constants import EXIT_SUCCESS, EXIT_FAIL, Pipeline
 from cg.cli.workflow.mip_dna.deliver import CASE_TAGS, SAMPLE_TAGS
 
 
@@ -73,7 +73,7 @@ def analysis(context, config_stream):
             config_stream,
             mip_api.hk,
             mip_api.db,
-            workflow="mip_dna",
+            workflow=Pipeline.MIP_DNA,
         )
         mip_api.db.add_commit(new_analysis)
     except (
@@ -101,7 +101,9 @@ def completed(context):
     mip_api = context.obj["mip_api"]
 
     exit_code = EXIT_SUCCESS
-    for analysis_obj in mip_api.tb.analyses(status="completed", deleted=False, data_analysis="mip"):
+    for analysis_obj in mip_api.tb.analyses(
+        status="completed", deleted=False, data_analysis=Pipeline.MIP_DNA.value
+    ):
         existing_record = mip_api.hk.version(analysis_obj.family, analysis_obj.started_at)
         if existing_record:
             LOG.info("analysis stored: %s - %s", analysis_obj.family, analysis_obj.started_at)

@@ -1,7 +1,7 @@
 """This script tests the cli methods to add families to status-db"""
 from datetime import datetime, timedelta
 
-from cg.constants import PIPELINE_OPTIONS
+from cg.constants import Pipeline
 from cg.store import Store
 
 
@@ -14,7 +14,7 @@ def test_that_many_families_can_have_one_sample_each(base_store: Store):
     test_families = add_families_with_samples(base_store, n_test_families, sequenced=True)
 
     # WHEN getting families to analyse
-    families = base_store.cases_to_analyze(pipeline="mip_dna")
+    families = base_store.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
 
     # THEN families should contain the test family
     assert len(families) == len(test_families)
@@ -34,7 +34,7 @@ def test_that_families_can_have_many_samples(base_store: Store):
     base_store.relate_sample(test_family, test_sample, "unknown")
 
     # WHEN getting families to analyse
-    families = base_store.cases_to_analyze(pipeline="mip_dna")
+    families = base_store.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
 
     # THEN families should contain the test family
     assert families
@@ -52,7 +52,7 @@ def test_external_sample_to_re_analyse(base_store: Store):
     base_store.relate_sample(test_analysis.family, test_sample, "unknown")
 
     # WHEN getting families to analyse
-    families = base_store.cases_to_analyze(pipeline="mip_dna")
+    families = base_store.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
 
     # THEN families should contain the test family
     assert families
@@ -69,7 +69,7 @@ def test_family_to_re_analyse(base_store: Store):
     base_store.relate_sample(test_analysis.family, test_sample, "unknown")
 
     # WHEN getting families to analyse
-    families = base_store.cases_to_analyze(pipeline="mip_dna")
+    families = base_store.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
 
     # THEN families should contain the test family
     assert families
@@ -86,7 +86,7 @@ def test_all_samples_and_analysis_completed(base_store: Store):
     base_store.relate_sample(test_analysis.family, test_sample, "unknown")
 
     # WHEN getting families to analyse
-    families = base_store.cases_to_analyze(pipeline="mip_dna")
+    families = base_store.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
 
     # THEN families should not contain the test family
 
@@ -97,7 +97,7 @@ def test_specified_analysis_in_result(base_store: Store):
     """Test that a family with one sample that has specified data_analysis does show up"""
 
     # GIVEN a database with a family with one sequenced samples for MIP analysis
-    pipeline = PIPELINE_OPTIONS[0]
+    pipeline = Pipeline.BALSAMIC
     test_sample = add_sample(base_store, sequenced=True)
     test_family = add_family(base_store, data_analysis=pipeline)
     base_store.relate_sample(test_family, test_sample, "unknown")
@@ -116,11 +116,11 @@ def test_exclude_other_pipeline_analysis_from_result(base_store: Store):
 
     # GIVEN a database with a family with one sequenced samples for specified analysis
     test_sample = add_sample(base_store, sequenced=True)
-    test_family = add_family(base_store, data_analysis=PIPELINE_OPTIONS[0])
+    test_family = add_family(base_store, data_analysis=Pipeline.BALSAMIC)
     base_store.relate_sample(test_family, test_sample, "unknown")
 
     # WHEN getting families to analyse
-    families = base_store.cases_to_analyze(pipeline=PIPELINE_OPTIONS[1])
+    families = base_store.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
 
     # THEN families should not contain the test family
     assert not families
@@ -138,7 +138,7 @@ def test_one_of_two_sequenced_samples(base_store: Store):
     base_store.relate_sample(test_family, test_sample2, "unknown")
 
     # WHEN getting families to analyse
-    families = base_store.cases_to_analyze(pipeline="mip_dna")
+    families = base_store.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
 
     # THEN families should not contain the test family
     assert not families
@@ -155,7 +155,7 @@ def test_one_of_one_sequenced_samples(base_store: Store):
     assert test_sample.sequenced_at is not None
 
     # WHEN getting families to analyse
-    families = base_store.cases_to_analyze(pipeline="mip_dna")
+    families = base_store.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
 
     # THEN families should contain the test family
     assert families
@@ -293,7 +293,7 @@ def add_family(
     ordered_days_ago=0,
     action=None,
     priority=None,
-    data_analysis="mip_dna",
+    data_analysis=Pipeline.MIP_DNA,
 ):
     """utility function to add a family to use in tests"""
     panel = ensure_panel(disk_store)
@@ -310,7 +310,7 @@ def add_family(
 
 
 def add_analysis(
-    store, completed=False, uploaded=False, pipeline=PIPELINE_OPTIONS[0], reanalyse=False
+    store, completed=False, uploaded=False, pipeline=Pipeline.BALSAMIC, reanalyse=False
 ):
     """Utility function to add an analysis for tests"""
     analysis = store.add_analysis(pipeline=pipeline, version="")

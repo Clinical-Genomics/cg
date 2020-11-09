@@ -14,12 +14,14 @@ from cg.apps.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.cli.workflow.mip_dna.deliver import CASE_TAGS, SAMPLE_TAGS
+from cg.constants import Pipeline
 from cg.exc import AnalysisUploadError
 from cg.meta.deliver import DeliverAPI
 from cg.meta.report.api import ReportAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import Store
+from cg.utils.click.EnumChoice import EnumChoice
 
 from .coverage import coverage
 from .delivery_report import (
@@ -153,9 +155,9 @@ def upload(context, family_id, force_restart):
 
 
 @upload.command()
-@click.option("--pipeline", type=str, help="Limit to specific pipeline")
+@click.option("--pipeline", type=EnumChoice(Pipeline), help="Limit to specific pipeline")
 @click.pass_context
-def auto(context: click.Context, pipeline: str = None):
+def auto(context: click.Context, pipeline: Pipeline = None):
     """Upload all completed analyses."""
 
     click.echo(click.style("----------------- AUTO ------------------------"))
@@ -171,11 +173,11 @@ def auto(context: click.Context, pipeline: str = None):
             continue
         internal_id = analysis_obj.family.internal_id
 
-        LOG.info("uploading family: %s", internal_id)
+        LOG.info("Uploading family: %s", internal_id)
         try:
             context.invoke(upload, family_id=internal_id)
         except Exception:
-            LOG.error("uploading family failed: %s", internal_id)
+            LOG.error("Uploading family failed: %s", internal_id)
             LOG.error(traceback.format_exc())
             exit_code = 1
 

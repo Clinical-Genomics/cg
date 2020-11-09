@@ -1,4 +1,5 @@
 """Module with Convenience methods for cg samples"""
+from cg.constants import Pipeline
 from cg.store import Store
 
 
@@ -24,5 +25,5 @@ class SampleHelper:
         """Check if this sample is destined for an analysis"""
         return (
             not self._store.family(internal_id).data_analysis
-            or "fastq" not in self._store.family(internal_id).data_analysis
+            or Pipeline.FASTQ.value not in self._store.family(internal_id).data_analysis
         )

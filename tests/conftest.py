@@ -13,6 +13,7 @@ import ruamel.yaml
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.mip import parse_sampleinfo, parse_qcmetrics
 from cg.apps.gt import GenotypeAPI
+from cg.constants import Pipeline
 from cg.models import CompressionData
 from cg.store import Store
 
@@ -56,7 +57,7 @@ def fixture_analysis_family_single(case_id, family_name):
     family = {
         "name": family_name,
         "internal_id": case_id,
-        "data_analysis": "mip_dna",
+        "data_analysis": Pipeline.MIP_DNA.value,
         "application_type": "wgs",
         "panels": ["IEM", "EP"],
         "samples": [
@@ -80,7 +81,7 @@ def fixture_analysis_family(case_id, family_name) -> dict:
     family = {
         "name": family_name,
         "internal_id": case_id,
-        "data_analysis": "mip_dna",
+        "data_analysis": Pipeline.MIP_DNA.value,
         "application_type": "wgs",
         "panels": ["IEM", "EP"],
         "samples": [

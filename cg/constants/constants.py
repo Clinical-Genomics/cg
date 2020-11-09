@@ -1,4 +1,7 @@
 """Constants for cg"""
+from enum import Enum
+
+from cg.utils.ListableEnum import ListableEnum
 
 CONTAINER_OPTIONS = ("Tube", "96 well plate")
 
@@ -31,7 +34,14 @@ FAMILY_ACTIONS = ("analyze", "running", "hold")
 
 FLOWCELL_STATUS = ("ondisk", "removed", "requested", "processing")
 
-PIPELINE_OPTIONS = ("balsamic", "fastq", "microsalt", "mip_dna", "mip_rna")
+
+class Pipeline(Enum):
+    BALSAMIC: str = "balsamic"
+    FASTQ: str = "fastq"
+    MICROSALT: str = "microsalt"
+    MIP_DNA: str = "mip_dna"
+    MIP_RNA: str = "mip_rna"
+
 
 PREP_CATEGORIES = ("wgs", "wes", "tgs", "wts", "mic", "rml")
 

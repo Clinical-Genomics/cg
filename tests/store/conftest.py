@@ -4,6 +4,7 @@ import datetime as dt
 import pytest
 
 # Files fixtures
+from cg.constants import Pipeline
 from cg.store import Store
 
 
@@ -60,7 +61,7 @@ def fixture_microbial_submitted_order():
             organism=organism,
             reference_genome=ref_genomes[organism],
             extraction_method="MagNaPure 96 (contact Clinical Genomics before " "submission)",
-            analysis="fastq",
+            analysis=Pipeline.FASTQ.value,
             concentration_weight="1",
             mother=None,
             father=None,

@@ -1,3 +1,4 @@
+from cg.constants import Pipeline
 from cg.meta.orders.lims import LimsHandler
 
 
@@ -97,7 +98,7 @@ def test_to_lims_balsamic(balsamic_order_to_submit):
     first_sample = samples[0]
     assert first_sample["name"] == "s1"
     assert set(sample["container"] for sample in samples) == set(["96 well plate"])
-    assert first_sample["udfs"]["data_analysis"] == "balsamic"
+    assert first_sample["udfs"]["data_analysis"] == Pipeline.BALSAMIC.value
     assert first_sample["udfs"]["application"] == "WGTPCFC030"
     assert first_sample["udfs"]["sex"] == "M"
     assert first_sample["udfs"]["family_name"] == "family1"

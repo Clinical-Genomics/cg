@@ -9,6 +9,7 @@ import pytest
 
 from cg.apps.balsamic.api import BalsamicAPI
 from cg.apps.balsamic.fastq import FastqHandler
+from cg.constants import Pipeline
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.store import Store
 from cg.apps.hk import HousekeeperAPI
@@ -346,7 +347,7 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
         store=_store,
         internal_id="balsamic_case_wgs_paired_enough_reads",
         family_id="balsamic_case_wgs_paired_enough_reads",
-        data_analysis="balsamic",
+        data_analysis=Pipeline.BALSAMIC,
     )
     sample_case_wgs_paired_tumor_enough_reads = helpers.add_sample(
         _store,
@@ -380,7 +381,7 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
         store=_store,
         internal_id="balsamic_case_wgs_paired",
         family_id="balsamic_case_wgs_paired",
-        data_analysis="balsamic",
+        data_analysis=Pipeline.BALSAMIC,
     )
     sample_case_wgs_paired_tumor = helpers.add_sample(
         _store,
@@ -406,7 +407,7 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
         _store,
         internal_id="balsamic_case_tgs_paired",
         family_id="balsamic_case_tgs_paired",
-        data_analysis="balsamic",
+        data_analysis=Pipeline.BALSAMIC,
     )
     sample_case_tgs_paired_tumor = helpers.add_sample(
         _store,
@@ -415,7 +416,7 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
         application_tag="TGSA",
         application_type="tgs",
         reads=10,
-        data_analysis="balsamic",
+        data_analysis=Pipeline.BALSAMIC,
         sequenced_at=dt.datetime.now(),
     )
     sample_case_tgs_paired_normal = helpers.add_sample(
@@ -435,7 +436,7 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
         _store,
         internal_id="balsamic_case_wgs_single",
         family_id="balsamic_case_wgs_single",
-        data_analysis="balsamic",
+        data_analysis=Pipeline.BALSAMIC,
     )
     sample_case_wgs_single_tumor = helpers.add_sample(
         _store,
@@ -452,7 +453,7 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
         _store,
         internal_id="balsamic_case_tgs_single",
         family_id="balsamic_case_tgs_single",
-        data_analysis="balsamic",
+        data_analysis=Pipeline.BALSAMIC,
     )
     sample_case_tgs_single_tumor = helpers.add_sample(
         _store,
@@ -469,7 +470,7 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
         _store,
         internal_id="balsamic_case_tgs_single_error",
         family_id="balsamic_case_tgs_single_error",
-        data_analysis="balsamic",
+        data_analysis=Pipeline.BALSAMIC,
     )
     sample_case_tgs_single_normal_error = helpers.add_sample(
         _store,
@@ -490,7 +491,7 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
         _store,
         internal_id="balsamic_case_tgs_paired_error",
         family_id="balsamic_case_tgs_paired_error",
-        data_analysis="balsamic",
+        data_analysis=Pipeline.BALSAMIC,
     )
     sample_case_tgs_paired_tumor_error = helpers.add_sample(
         _store,
@@ -537,7 +538,7 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
         _store,
         internal_id="balsamic_case_mixed_paired_error",
         family_id="balsamic_case_mixed_paired_error",
-        data_analysis="balsamic",
+        data_analysis=Pipeline.BALSAMIC,
     )
     mixed_sample_case_wgs_paired_tumor_error = helpers.add_sample(
         _store,
@@ -570,7 +571,7 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
         _store,
         internal_id="balsamic_case_mixed_wgs_mic_paired_error",
         family_id="balsamic_case_mixed_wgs_mic_paired_error",
-        data_analysis="balsamic",
+        data_analysis=Pipeline.BALSAMIC,
     )
     mixed_sample_case_wgs_mic_paired_tumor_error = helpers.add_sample(
         _store,
@@ -603,7 +604,7 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
         _store,
         internal_id="balsamic_case_mixed_bed_paired_error",
         family_id="balsamic_case_mixed_bed_paired_error",
-        data_analysis="balsamic",
+        data_analysis=Pipeline.BALSAMIC,
     )
     mixed_sample_case_mixed_bed_paired_tumor_error = helpers.add_sample(
         _store,
@@ -637,7 +638,7 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
         _store,
         internal_id="mip_case_wgs_single",
         family_id="mip_case_wgs_single",
-        data_analysis="mip_dna",
+        data_analysis=Pipeline.MIP_DNA,
     )
     mip_sample_case_wgs_single_tumor = helpers.add_sample(
         _store,
@@ -657,7 +658,7 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
         _store,
         internal_id="balsamic_case_wgs_paired_two_normal_error",
         family_id="balsamic_case_wgs_paired_two_normal_error",
-        data_analysis="balsamic",
+        data_analysis=Pipeline.BALSAMIC,
     )
     sample_case_wgs_paired_two_normal_tumor_error = helpers.add_sample(
         _store,
@@ -704,7 +705,7 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
         _store,
         internal_id="balsamic_case_wes_tumor",
         family_id="balsamic_case_wes_tumor",
-        data_analysis="balsamic",
+        data_analysis=Pipeline.BALSAMIC,
     )
     sample_case_wes_tumor = helpers.add_sample(
         _store,
@@ -721,7 +722,7 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
         _store,
         internal_id="balsamic_case_wes_panel_error",
         family_id="balsamic_case_wes_panel_error",
-        data_analysis="balsamic",
+        data_analysis=Pipeline.BALSAMIC,
     )
     sample_case_wes_panel_error = helpers.add_sample(
         _store,

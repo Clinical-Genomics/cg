@@ -1,7 +1,7 @@
 from typing import List
 
 import xlrd
-from cg.constants import METAGENOME_SOURCES, ANALYSIS_SOURCES
+from cg.constants import METAGENOME_SOURCES, ANALYSIS_SOURCES, Pipeline
 
 from cg.exc import OrderFormError
 
@@ -16,7 +16,12 @@ VALID_ORDERFORMS = [
     "1604:9",  # Orderform Ready made libraries (RML)
     "1605:8",  # Microbial metagenomes
 ]
-CASE_PROJECT_TYPES = ["mip_dna", "external", "balsamic", "mip_rna"]
+CASE_PROJECT_TYPES = [
+    Pipeline.MIP_DNA.value,
+    "external",
+    Pipeline.BALSAMIC.value,
+    Pipeline.MIP_RNA.value,
+]
 
 
 def check_orderform_version(document_title):
@@ -232,15 +237,15 @@ def parse_sample(raw_sample):
     data_analysis = raw_sample.get("UDF/Data Analysis").lower()
 
     if data_analysis and "balsamic" in data_analysis:
-        sample["data_analysis"] = "balsamic"
+        sample["data_analysis"] = Pipeline.BALSAMIC.value
     elif data_analysis and "rna" in data_analysis:
-        sample["data_analysis"] = "mip_rna"
+        sample["data_analysis"] = Pipeline.MIP_RNA.value
     elif data_analysis and "mip" in data_analysis or "scout" in data_analysis:
-        sample["data_analysis"] = "mip_dna"
+        sample["data_analysis"] = Pipeline.MIP_DNA.value
     elif data_analysis and "microbial" in data_analysis:
-        sample["data_analysis"] = "microsalt"
+        sample["data_analysis"] = Pipeline.MICROSALT.value
     elif data_analysis and ("fastq" in data_analysis or "custom" in data_analysis):
-        sample["data_analysis"] = "fastq"
+        sample["data_analysis"] = Pipeline.FASTQ.value
     else:
         raise OrderFormError(f"unknown 'Data Analysis' for order: {data_analysis}")
 

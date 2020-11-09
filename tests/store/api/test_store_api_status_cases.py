@@ -1,7 +1,7 @@
 """This script tests the cli methods to add families to status-db"""
 from datetime import datetime, timedelta
 
-from cg.constants import FAMILY_ACTIONS, PRIORITY_OPTIONS, PIPELINE_OPTIONS
+from cg.constants import FAMILY_ACTIONS, PRIORITY_OPTIONS, Pipeline
 from cg.store import Store
 
 
@@ -527,8 +527,8 @@ def test_include_case_by_case_uppercase_data_analysis(base_store: Store, helpers
     """Test to that cases can be included by uppercase data_analysis"""
 
     # GIVEN a database with a family with data analysis set
-    data_analysis = PIPELINE_OPTIONS[0]
-    assert data_analysis.upper() != data_analysis
+    data_analysis = Pipeline.BALSAMIC
+    assert data_analysis.value.upper() != data_analysis.value
     family = add_family(helpers, base_store, data_analysis=data_analysis)
     sample = helpers.add_sample(base_store)
     base_store.relate_sample(family, sample, "unknown")
@@ -546,7 +546,7 @@ def test_exclude_case_by_data_analysis(base_store: Store, helpers):
     """Test to that cases can be excluded by data_analysis"""
 
     # GIVEN a database with a family with data analysis set
-    family = add_family(helpers, base_store, data_analysis=PIPELINE_OPTIONS[0])
+    family = add_family(helpers, base_store, data_analysis=Pipeline.BALSAMIC)
     sample = helpers.add_sample(base_store)
     base_store.relate_sample(family, sample, "unknown")
 
@@ -561,13 +561,13 @@ def test_include_case_by_partial_data_analysis(base_store: Store, helpers):
     """Test to that cases can be included by data_analysis"""
 
     # GIVEN a database with a family with data analysis set
-    data_analysis = PIPELINE_OPTIONS[0]
+    data_analysis = Pipeline.BALSAMIC
     family = add_family(helpers, base_store, data_analysis=data_analysis)
     sample = helpers.add_sample(base_store)
     base_store.relate_sample(family, sample, "unknown")
 
     # WHEN getting active cases by partial data_analysis
-    cases = base_store.cases(data_analysis=data_analysis[:-1])
+    cases = base_store.cases(data_analysis=data_analysis.value[:-1])
 
     # THEN cases should only contain this case
     assert cases
@@ -579,7 +579,7 @@ def test_show_multiple_data_analysis(base_store: Store, helpers):
     """Test to that cases can be included by data_analysis"""
 
     # GIVEN a database with a family with data analysis set
-    data_analysis = PIPELINE_OPTIONS[0]
+    data_analysis = Pipeline.BALSAMIC
     family = add_family(helpers, base_store, data_analysis=data_analysis)
     sample1 = helpers.add_sample(base_store)
     base_store.relate_sample(family, sample1, "unknown")
@@ -589,7 +589,7 @@ def test_show_multiple_data_analysis(base_store: Store, helpers):
     base_store.relate_sample(family2, sample2, "unknown")
 
     # WHEN getting active cases by data_analysis
-    cases = base_store.cases(data_analysis=data_analysis[:-1])
+    cases = base_store.cases(data_analysis=data_analysis.value[:-1])
 
     # THEN cases should only contain these analyses
     assert cases
@@ -601,13 +601,13 @@ def test_show_data_analysis(base_store: Store, helpers):
     """Test to that cases can be included by data_analysis"""
 
     # GIVEN a database with a family with data analysis set
-    data_analysis = PIPELINE_OPTIONS[0]
+    data_analysis = Pipeline.BALSAMIC
     family = add_family(helpers, base_store, data_analysis=data_analysis)
     sample = helpers.add_sample(base_store)
     base_store.relate_sample(family, sample, "unknown")
 
     # WHEN getting active cases by data_analysis
-    cases = base_store.cases(data_analysis=data_analysis)
+    cases = base_store.cases(data_analysis=data_analysis.value)
 
     # THEN cases should only contain this case
     assert cases
@@ -619,7 +619,7 @@ def test_include_case_by_data_analysis(base_store: Store, helpers):
     """Test to that cases can be included by data_analysis"""
 
     # GIVEN a database with a family with data analysis set
-    data_analysis = PIPELINE_OPTIONS[0]
+    data_analysis = Pipeline.BALSAMIC
     family = add_family(helpers, base_store, data_analysis=data_analysis)
     sample = helpers.add_sample(base_store)
     base_store.relate_sample(family, sample, "unknown")
@@ -1233,7 +1233,7 @@ def test_analysis_pipeline(base_store: Store, helpers):
     """Test to that cases displays pipeline """
 
     # GIVEN a database with an analysis that has pipeline
-    pipeline = PIPELINE_OPTIONS[0]
+    pipeline = Pipeline.BALSAMIC
     analysis = helpers.add_analysis(base_store, pipeline=pipeline)
     assert analysis.pipeline is not None
 
@@ -1243,7 +1243,7 @@ def test_analysis_pipeline(base_store: Store, helpers):
     # THEN cases should contain info on pipeline
     assert cases
     for case in cases:
-        assert case.get("analysis_pipeline") == pipeline
+        assert case.get("analysis_pipeline") == pipeline.value
 
 
 def test_samples_delivered(base_store: Store, helpers):
@@ -1491,7 +1491,7 @@ def add_family(
     ordered_days_ago=0,
     action=None,
     priority=None,
-    data_analysis=PIPELINE_OPTIONS[0],
+    data_analysis=Pipeline.BALSAMIC,
 ):
     """utility function to add a family to use in tests"""
     panel = helpers.ensure_panel(disk_store)

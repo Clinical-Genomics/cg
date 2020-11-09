@@ -4,6 +4,7 @@ import logging
 import click
 
 from cg.apps.loqus import LoqusdbAPI
+from cg.constants import Pipeline
 from cg.exc import DuplicateRecordError, DuplicateSampleError
 from cg.meta.upload.observations import UploadObservationsAPI
 
@@ -50,7 +51,7 @@ def observations(context, case_id, case_limit, dry_run):
             )
             continue
 
-        if family_obj.data_analysis.lower() != "mip_dna":
+        if family_obj.data_analysis.lower() != Pipeline.MIP_DNA.value:
             LOG.info("%s: has non-MIP data_analysis. Skipping!", family_obj.internal_id)
             continue
 

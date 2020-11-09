@@ -1,10 +1,10 @@
 """This script tests the cli methods to add families to status-db"""
 from datetime import datetime
 
-from cg.constants import PIPELINE_OPTIONS
+from cg.constants import Pipeline
 from cg.store import Store
 
-CLI_OPTION_ANALYSIS = PIPELINE_OPTIONS[0]
+CLI_OPTION_ANALYSIS = Pipeline.BALSAMIC
 
 
 def test_add_family_required(invoke_cli, disk_store: Store):

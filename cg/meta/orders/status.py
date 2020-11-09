@@ -2,6 +2,7 @@
 import datetime as dt
 from typing import List
 
+from cg.constants import Pipeline
 from cg.exc import OrderError
 from cg.store import models
 
@@ -199,7 +200,7 @@ class StatusHandler:
                 case_obj.panels = case["panels"]
             else:
                 case_obj = self.status.add_family(
-                    data_analysis=case["data_analysis"],
+                    data_analysis=Pipeline(case["data_analysis"]),
                     name=case["name"],
                     panels=case["panels"],
                     priority=case["priority"],
@@ -295,7 +296,7 @@ class StatusHandler:
                 new_samples.append(new_sample)
 
                 new_family = self.status.add_family(
-                    data_analysis=sample["data_analysis"],
+                    data_analysis=Pipeline(sample["data_analysis"]),
                     name=sample["name"],
                     panels=None,
                     priority=sample["priority"],
@@ -343,7 +344,7 @@ class StatusHandler:
                 new_sample.application_version = application_version
                 new_samples.append(new_sample)
                 new_family = self.status.add_family(
-                    data_analysis=sample["data_analysis"],
+                    data_analysis=Pipeline(sample["data_analysis"]),
                     name=sample["name"],
                     panels=["OMIM-AUTO"],
                     priority="research",
@@ -364,7 +365,7 @@ class StatusHandler:
         self,
         comment: str,
         customer: str,
-        data_analysis: str,
+        data_analysis: Pipeline,
         order: str,
         ordered: dt.datetime,
         samples: List[dict],
@@ -458,7 +459,7 @@ class StatusHandler:
                 ordered=ordered,
                 ticket=ticket,
                 application_version=application_version,
-                data_analysis=pool["data_analysis"],
+                data_analysis=Pipeline(pool["data_analysis"]),
                 capture_kit=pool["capture_kit"],
             )
             new_delivery = self.status.add_delivery(destination="caesar", pool=new_pool)

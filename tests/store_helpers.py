@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import List
 
 from cg.apps.hk import HousekeeperAPI
-from cg.constants import PIPELINE_OPTIONS
+from cg.constants import Pipeline
 from cg.store import Store, models
 from housekeeper.store import models as hk_models
 
@@ -155,7 +155,7 @@ class StoreHelpers:
         upload_started: datetime = None,
         delivery_reported_at: datetime = None,
         cleaned_at: datetime = None,
-        pipeline: str = PIPELINE_OPTIONS[0],
+        pipeline: Pipeline = Pipeline.BALSAMIC,
         pipeline_version: str = "1.0",
         uploading: bool = False,
         config_path: str = None,
@@ -181,7 +181,7 @@ class StoreHelpers:
         if config_path:
             analysis.config_path = config_path
         if pipeline:
-            analysis.pipeline = pipeline
+            analysis.pipeline = pipeline.value
 
         analysis.limitations = "A limitation"
         analysis.family = family
@@ -275,7 +275,7 @@ class StoreHelpers:
         self,
         store: Store,
         family_id: str = "family_test",
-        data_analysis: str = PIPELINE_OPTIONS[0],
+        data_analysis: Pipeline = Pipeline.BALSAMIC,
         internal_id: str = None,
         customer_id: str = "cust000",
         panels: List = ["panel_test"],
@@ -304,7 +304,7 @@ class StoreHelpers:
         return family_obj
 
     def ensure_family(
-        self, store: Store, name: str, customer: models.Customer, data_analysis: str = ""
+        self, store: Store, name: str, customer: models.Customer, data_analysis: Pipeline = None
     ):
         family = store.find_family(customer=customer, name=name)
         if not family:
@@ -337,7 +337,7 @@ class StoreHelpers:
         app_tag = app_tag or "WGTPCFC030"
         app_type = family_info.get("application_type", "wgs")
         self.ensure_application_version(store, application_tag=app_tag)
-        data_analysis = family_info.get("data_analysis", "mip_dna")
+        data_analysis = family_info.get("data_analysis", Pipeline.MIP_DNA.value)
         sample_objs = {}
         for sample_data in family_info["samples"]:
             sample_id = sample_data["internal_id"]
@@ -371,7 +371,7 @@ class StoreHelpers:
 
         self.add_analysis(
             store,
-            pipeline=PIPELINE_OPTIONS[0],
+            pipeline=Pipeline.MIP_DNA,
             family=family_obj,
             completed_at=completed_at or datetime.now(),
         )
@@ -433,7 +433,7 @@ class StoreHelpers:
         )
         sample.customer = customer
         case = self.ensure_family(
-            store=store, name=str(ticket), customer=customer, data_analysis="microsalt"
+            store=store, name=str(ticket), customer=customer, data_analysis=Pipeline.MICROSALT
         )
         self.add_relationship(store=store, family=case, sample=sample)
         return sample

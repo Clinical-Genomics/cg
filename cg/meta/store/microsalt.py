@@ -6,7 +6,7 @@ import ruamel.yaml
 
 from _io import TextIOWrapper
 
-from cg.constants import HK_TAGS, MICROSALT_TAGS
+from cg.constants import HK_TAGS, MICROSALT_TAGS, Pipeline
 from cg.meta.store import base as store_base
 
 LOG = logging.getLogger(__name__)
@@ -26,7 +26,7 @@ def build_microbial_bundle(deliverables: dict, analysis_date: dt.date) -> dict:
     """Create a new bundle to store in Housekeeper"""
 
     project_name = _get_microbial_name(deliverables)
-    files = store_base.deliverables_files(deliverables, analysis_type="microsalt")
+    files = store_base.deliverables_files(deliverables, analysis_type=Pipeline.MICROSALT)
 
     data = {
         "name": str(project_name),

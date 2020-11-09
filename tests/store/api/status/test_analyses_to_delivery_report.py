@@ -1,7 +1,7 @@
 """This file tests the analyses_to_delivery_report part of the status api"""
 from datetime import datetime, timedelta
 
-from cg.constants import PIPELINE_OPTIONS
+from cg.constants import Pipeline
 from cg.store import Store
 from cg.utils.date import get_date
 
@@ -10,7 +10,7 @@ def test_missing(analysis_store: Store, helpers):
     """Tests that analyses that are completed but lacks delivery report are returned"""
 
     # GIVEN an analysis that is delivered but has no delivery report
-    pipeline = PIPELINE_OPTIONS[0]
+    pipeline = Pipeline.BALSAMIC
     timestamp = datetime.now()
     analysis = helpers.add_analysis(analysis_store, started_at=timestamp, uploaded_at=timestamp)
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp, data_analysis=pipeline)
@@ -30,7 +30,7 @@ def test_outdated(analysis_store, helpers):
     returned"""
 
     # GIVEN an analysis that is delivered but has an outdated delivery report
-    pipeline = PIPELINE_OPTIONS[0]
+    pipeline = Pipeline.BALSAMIC
     timestamp = datetime.now()
     delivery_timestamp = timestamp - timedelta(days=1)
     analysis = helpers.add_analysis(
@@ -54,7 +54,7 @@ def test_outdated_analysis(analysis_store, helpers):
 
     # GIVEN an analysis that is older than Hasta
     timestamp_old_analysis = get_date("2017-09-26")
-    pipeline = PIPELINE_OPTIONS[0]
+    pipeline = Pipeline.BALSAMIC
 
     # GIVEN a delivery report created at date which is older than the upload date to trigger delivery report generation
     timestamp = datetime.now()

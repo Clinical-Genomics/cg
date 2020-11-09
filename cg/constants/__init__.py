@@ -23,7 +23,7 @@ from .constants import (
     COMBOS,
     FAMILY_ACTIONS,
     FLOWCELL_STATUS,
-    PIPELINE_OPTIONS,
+    Pipeline,
     PREP_CATEGORIES,
     SEX_OPTIONS,
     STATUS_OPTIONS,

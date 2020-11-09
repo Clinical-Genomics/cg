@@ -8,13 +8,15 @@ from sqlalchemy import Column, ForeignKey, orm, types, UniqueConstraint, Table
 from cg.constants import (
     FAMILY_ACTIONS,
     FLOWCELL_STATUS,
-    PIPELINE_OPTIONS,
+    Pipeline,
     PREP_CATEGORIES,
     PRIORITY_MAP,
     REV_PRIORITY_MAP,
     SEX_OPTIONS,
     STATUS_OPTIONS,
 )
+
+PIPELINE_OPTIONS = [pipeline.value for pipeline in Pipeline]
 
 Model = alchy.make_declarative_base(Base=alchy.ModelBase)
 

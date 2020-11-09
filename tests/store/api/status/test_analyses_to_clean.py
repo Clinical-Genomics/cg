@@ -1,7 +1,7 @@
 """This file tests the analyses_to_clean part of the status api"""
 from datetime import datetime
 
-from cg.constants import PIPELINE_OPTIONS
+from cg.constants import Pipeline
 from cg.store import Store
 
 
@@ -46,7 +46,7 @@ def test_pipeline_included(analysis_store: Store, helpers):
 
     # GIVEN an analysis that is uploaded and pipeline is specified
     timestamp = datetime.now()
-    pipeline = PIPELINE_OPTIONS[0]
+    pipeline = Pipeline.BALSAMIC
     analysis = helpers.add_analysis(
         analysis_store,
         pipeline=pipeline,
@@ -69,8 +69,8 @@ def test_pipeline_excluded(analysis_store: Store, helpers):
 
     # GIVEN an analysis that is uploaded
     timestamp = datetime.now()
-    used_pipeline = PIPELINE_OPTIONS[0]
-    wrong_pipeline = PIPELINE_OPTIONS[1]
+    used_pipeline = Pipeline.BALSAMIC
+    wrong_pipeline = Pipeline.MIP_DNA
     analysis = helpers.add_analysis(
         analysis_store,
         pipeline=used_pipeline,
