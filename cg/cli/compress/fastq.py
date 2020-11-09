@@ -170,14 +170,13 @@ def fix_spring(context, bundle_name, dry_run):
 def decompress_sample(context, sample_id, dry_run):
     compress_api = context.obj["compress_api"]
     update_compress_api(compress_api, dry_run=dry_run)
-    try:
-        was_decompressed = compress_api.decompress_spring(sample_id)
-        if was_decompressed is False:
-            LOG.info(f"Skipping individual {sample_id}")
-            return 0
-        return 1
-    except CaseNotFoundError:
+
+    was_decompressed = compress_api.decompress_spring(sample_id)
+    if was_decompressed is False:
+        LOG.info(f"Skipping sample {sample_id}")
         return 0
+    LOG.info(f"Decompressed sample {sample_id}")
+    return 1
 
 
 @click.command("case")
@@ -188,11 +187,16 @@ def decompress_case(context, case_id, dry_run):
     """Decompress SPRING file, and include links to FASTQ files in housekeeper"""
 
     store = context.obj["status_db"]
-    samples = get_fastq_individuals(store, case_id)
-    decompressed_inds = 0
-    for sample_id in samples:
-        decompressed_count = context.invoke(decompress_sample, sample_id=sample_id, dry_run=dry_run)
-        decompressed_inds += decompressed_count
+    try:
+        samples = get_fastq_individuals(store, case_id)
+        decompressed_inds = 0
+        for sample_id in samples:
+            decompressed_count = context.invoke(
+                decompress_sample, sample_id=sample_id, dry_run=dry_run
+            )
+            decompressed_inds += decompressed_count
+    except CaseNotFoundError:
+        return
     LOG.info(f"Decompressed spring archives in {decompressed_inds} individuals")
 
 
