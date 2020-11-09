@@ -3,18 +3,19 @@ import logging
 
 import click
 
-from cg.apps.hk import HousekeeperAPI
 from cg.apps.crunchy import CrunchyAPI
+from cg.apps.hk import HousekeeperAPI
 from cg.meta.compress import CompressAPI
 from cg.store import Store
 
 from .fastq import (
     clean_fastq,
-    decompress_spring,
+    decompress_case,
+    decompress_flowcell,
+    decompress_sample,
+    decompress_ticket,
     fastq_cmd,
     fix_spring,
-    decompress_spring_flowcell,
-    decompress_spring_ticket,
 )
 
 LOG = logging.getLogger(__name__)
@@ -45,7 +46,7 @@ clean.add_command(clean_fastq)
 clean.add_command(fix_spring)
 
 
-@compress.group()
+@click.group()
 @click.pass_context
 def decompress(context):
     """Decompress files"""
@@ -56,8 +57,10 @@ def decompress(context):
 
     compress_api = CompressAPI(hk_api=hk_api, crunchy_api=crunchy_api)
     context.obj["compress_api"] = compress_api
+    LOG.info("Running decompress spring")
 
 
-decompress.add_command(decompress_spring)
-decompress.add_command(decompress_spring_ticket)
-decompress.add_command(decompress_spring_flowcell)
+decompress.add_command(decompress_sample)
+decompress.add_command(decompress_case)
+decompress.add_command(decompress_ticket)
+decompress.add_command(decompress_flowcell)

@@ -111,6 +111,10 @@ class StatusHandler(BaseHandler):
         )
         return records
 
+    def get_samples_from_ticket(self, ticket_id: int) -> List[models.Sample]:
+        records = self.query(models.Sample).filter(models.Sample.ticket_number == ticket_id).all()
+        return records
+
     def get_samples_from_flowcell(self, flowcell_id: str) -> List[models.Sample]:
         flowcell = self.query(models.Flowcell).filter(models.Flowcell.name == flowcell_id).first()
         if flowcell:
