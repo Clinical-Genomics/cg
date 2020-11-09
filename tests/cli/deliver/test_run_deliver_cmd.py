@@ -104,6 +104,32 @@ def test_delivery_path_created(
     assert delivery_inbox.exists() is True
 
 
+def test_delivery_ticket_id(
+    populated_mip_context: dict,
+    case_id: str,
+    delivery_inbox: Path,
+    project_dir: Path,
+    ticket_nr: int,
+):
+    """Test that to run the deliver command with ticket nr"""
+    # GIVEN a context with a case that have files in housekeeper to deliver
+    # GIVEN a cli runner
+    runner = CliRunner()
+
+    # GIVEN that the delivery file does not exist
+    assert delivery_inbox.exists() is False
+
+    # WHEN running the deliver analysis command
+    runner.invoke(
+        deliver_analysis,
+        ["--ticket-id", ticket_nr, "--delivery-type", "mip-dna", "--inbox", str(project_dir)],
+        obj=populated_mip_context,
+    )
+
+    # THEN assert that the path to the delivery folder was created
+    assert delivery_inbox.exists() is True
+
+
 def test_case_file_is_delivered(
     populated_mip_context: dict,
     case_id: str,

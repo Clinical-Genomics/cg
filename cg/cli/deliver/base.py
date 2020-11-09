@@ -42,9 +42,11 @@ def deliver(context):
 )
 @click.option("--dry-run", is_flag=True)
 @click.pass_context
-def deliver_analysis(context, case_id, ticket_id, delivery_type, inbox, dry_run):
+def deliver_analysis(
+    context, case_id: str, ticket_id: int, delivery_type: str, inbox: str, dry_run: bool
+):
     """Deliver analysis files to customer inbox"""
-    if not case_id or ticket_id:
+    if not (case_id or ticket_id):
         LOG.info("Please provide a case-id or ticket-id")
         return
     store: Store = context.obj["store"]
