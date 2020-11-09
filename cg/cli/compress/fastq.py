@@ -166,6 +166,7 @@ def fix_spring(context, bundle_name, dry_run):
 @click.command("sample")
 @click.argument("sample-id", type=str)
 @click.option("-d", "--dry-run", is_flag=True)
+@click.pass_context
 def decompress_sample(context, sample_id, dry_run):
     compress_api = context.obj["compress_api"]
     update_compress_api(compress_api, dry_run=dry_run)
