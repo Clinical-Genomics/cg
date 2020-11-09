@@ -38,6 +38,7 @@ compress.add_command(fastq_cmd)
 
 
 @compress.group()
+@click.pass_context
 def clean():
     """Clean uncompressed files"""
 
