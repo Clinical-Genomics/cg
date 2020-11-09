@@ -35,4 +35,4 @@ def test_decompress_spring_cli_one_family(populated_compress_context, cli_runner
     # THEN assert the program exits since no cases where found
     assert res.exit_code == 0
     # THEN assert it was communicated that no families where found
-    assert f"Decompressed spring archives in 3 individuals" in caplog.text
+    assert f"Decompressed spring archives in 3 samples" in caplog.text
