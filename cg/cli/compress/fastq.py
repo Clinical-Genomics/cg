@@ -197,7 +197,7 @@ def decompress_case(context, case_id, dry_run):
             decompressed_inds += decompressed_count
     except CaseNotFoundError:
         return
-    LOG.info(f"Decompressed spring archives in {decompressed_inds} individuals")
+    LOG.info(f"Decompressed spring archives in {decompressed_inds} samples")
 
 
 @click.command("flowcell")
@@ -215,7 +215,7 @@ def decompress_flowcell(context, flowcell_id, dry_run):
             decompress_sample, sample_id=sample.internal_id, dry_run=dry_run
         )
         decompressed_inds += decompressed_count
-    LOG.info(f"Decompressed spring archives in {decompressed_inds} individuals")
+    LOG.info(f"Decompressed spring archives in {decompressed_inds} samples")
 
 
 @click.command("ticket")
@@ -232,4 +232,4 @@ def decompress_ticket(context, ticket_id, dry_run):
             decompress_sample, sample_id=sample.internal_id, dry_run=dry_run
         )
         decompressed_inds += decompressed_count
-    LOG.info(f"Decompressed spring archives in {decompressed_inds} individuals")
+    LOG.info(f"Decompressed spring archives in {decompressed_inds} samples")
