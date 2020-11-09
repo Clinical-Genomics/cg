@@ -140,8 +140,3 @@ def run(context: click.Context, dry_run: bool, config_case_path: click.Path, tic
         str(fastq_path.absolute()),
     ]
     process.run_command(parameters=analyse_command, dry_run=dry_run)
-
-
-microsalt.add_command(config_case)
-microsalt.add_command(run)
-microsalt.add_command(store_cmd)
