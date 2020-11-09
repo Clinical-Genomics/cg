@@ -191,9 +191,7 @@ def decompress_case(context, case_id, dry_run):
     samples = get_fastq_individuals(store, case_id)
     decompressed_inds = 0
     for sample_id in samples:
-        decompressed_count = context.invoke(
-            decompress_sample, context=context, sample_id=sample_id, dry_run=dry_run
-        )
+        decompressed_count = context.invoke(decompress_sample, sample_id=sample_id, dry_run=dry_run)
         decompressed_inds += decompressed_count
     LOG.info(f"Decompressed spring archives in {decompressed_inds} individuals")
 
@@ -210,7 +208,7 @@ def decompress_flowcell(context, flowcell_id, dry_run):
     decompressed_inds = 0
     for sample in samples:
         decompressed_count = context.invoke(
-            decompress_sample, context=context, sample_id=sample.internal_id, dry_run=dry_run
+            decompress_sample, sample_id=sample.internal_id, dry_run=dry_run
         )
         decompressed_inds += decompressed_count
     LOG.info(f"Decompressed spring archives in {decompressed_inds} individuals")
@@ -228,7 +226,7 @@ def decompress_ticket(context, ticket_id, dry_run):
     decompressed_inds = 0
     for sample in samples:
         decompressed_count = context.invoke(
-            decompress_sample, context=context, sample_id=sample.internal_id, dry_run=dry_run
+            decompress_sample, sample_id=sample.internal_id, dry_run=dry_run
         )
         decompressed_inds += decompressed_count
     LOG.info(f"Decompressed spring archives in {decompressed_inds} individuals")
