@@ -13,6 +13,12 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [14.0.1]
+
+### Fixed
+- Removed unused options form cg workflow balsamic base command
+
+
 
 ## [14.0.0]
 
