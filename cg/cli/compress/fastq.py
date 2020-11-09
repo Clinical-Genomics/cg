@@ -224,7 +224,6 @@ def decompress_flowcell(context, flowcell_id, dry_run):
 @click.pass_context
 def decompress_ticket(context, ticket_id, dry_run):
     """Decompress SPRING file, and include links to FASTQ files in housekeeper"""
-    LOG.info("Running decompress spring")
     store = context.obj["status_db"]
     samples = store.get_samples_from_ticket(ticket_id=ticket_id)
     decompressed_inds = 0
