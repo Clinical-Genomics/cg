@@ -161,6 +161,7 @@ def decompress_spring(context: click.Context, case_id: str, dry_run: bool):
             )
         else:
             dna_api.start_decompression(case_obj.internal_id)
+            LOG.warning(f"No analysis started, started decompression for {case_obj.internal_id}")
         raise click.Abort()
 
     # Checks for fastqs that are decompressed, but not linked in housekeeper

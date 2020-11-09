@@ -506,7 +506,8 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         query_linked_in_hk = self.hk.get_files(bundle=family_obj.internal_id, tags=[query_format])
         for query in query_linked_in_hk:
             query_folder = os.path.dirname(query.path)
-            query_root = os.path.splitext(query.path)[0]
+            query_basename = os.path.basename(query.path)
+            query_root = os.path.splitext(query_basename)[0]
             files_in_query_folder = os.listdir(query_folder)
             for file in files_in_query_folder:
                 if file.startswith(query_root) and file.endswith(target_format):
@@ -556,7 +557,6 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
 
     def start_decompression(self, case_id: str) -> None:
         os.system(f"cg decompress spring {case_id}")
-        LOG.warning(f"No analysis started, started decompression for {case_id}")
 
     def link_fastq(self, case_id: str) -> None:
         os.system(f"cg store fastq {case_id}")
