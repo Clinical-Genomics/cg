@@ -3,6 +3,7 @@
 import logging
 
 from typing import List
+from pathlib import Path
 
 import click
 
@@ -52,7 +53,7 @@ def deliver_analysis(context, case_id, ticket_id, delivery_type, inbox, dry_run)
         hk_api=context.obj["hk_api"],
         case_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery_type]["case_tags"],
         sample_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery_type]["sample_tags"],
-        project_base_path=inbox,
+        project_base_path=Path(inbox),
     )
     deliver_api.set_dry_run(dry_run)
     if case_id:

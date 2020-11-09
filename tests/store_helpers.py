@@ -190,7 +190,7 @@ class StoreHelpers:
     def add_sample(
         self,
         store: Store,
-        sample_id: str = "sample_test",
+        sample_id: str = None,
         internal_id: str = None,
         gender: str = "female",
         is_tumour: bool = False,
@@ -207,6 +207,7 @@ class StoreHelpers:
     ) -> models.Sample:
         """Utility function to add a sample to use in tests"""
         customer_name = customer_name or "cust000"
+        sample_name = sample_id or "sample_test"
         customer = self.ensure_customer(store, customer_name)
         application_version = self.ensure_application_version(
             store,
@@ -217,7 +218,7 @@ class StoreHelpers:
         )
         application_version_id = application_version.id
         sample = store.add_sample(
-            name=sample_id,
+            name=sample_name,
             sex=gender,
             tumour=is_tumour,
             sequenced_at=datetime.now(),
@@ -351,6 +352,7 @@ class StoreHelpers:
                 store,
                 customer_name=sample_data["name"],
                 gender=sample_data["sex"],
+                sample_id=sample_data.get("name"),
                 internal_id=sample_id,
                 data_analysis=data_analysis,
                 application_type=app_type,

@@ -34,7 +34,7 @@ def fixture_deliver_api(
 @pytest.fixture(name="delivery_hk_api")
 def fixture_delivery_hk_api(
     case_hk_bundle_no_files: dict,
-    bed_file: str,
+    sample1_cram: Path,
     vcf_file: Path,
     real_housekeeper_api: HousekeeperAPI,
     helpers=StoreHelpers,
@@ -42,8 +42,8 @@ def fixture_delivery_hk_api(
     """Fixture that returns a housekeeper database with delivery data"""
 
     case_hk_bundle_no_files["files"] = [
-        {"path": bed_file, "archive": False, "tags": ["case-tag"]},
-        {"path": str(vcf_file), "archive": False, "tags": ["sample-tag", "ADM1"]},
+        {"path": str(sample1_cram), "archive": False, "tags": ["cram", "ADM1"]},
+        {"path": str(vcf_file), "archive": False, "tags": ["vcf-snv-clinical"]},
     ]
     helpers.ensure_hk_bundle(real_housekeeper_api, bundle_data=case_hk_bundle_no_files)
     return real_housekeeper_api

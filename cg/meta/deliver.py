@@ -68,6 +68,7 @@ class DeliverAPI:
             self.set_customer_id(case_obj=case_obj)
 
         sample_ids: Set[str] = set([sample.internal_id for sample in samples])
+
         if self.case_tags:
             self.deliver_case_files(
                 case_id=case_id,
@@ -95,6 +96,7 @@ class DeliverAPI:
         self, case_id: str, case_name: str, version_obj: hk_models.Version, sample_ids: Set[str]
     ) -> None:
         """Deliver files on case level"""
+        LOG.debug("Deliver case files for %s", case_id)
         # Make sure that the directory exists
         delivery_base: Path = self.create_delivery_dir_path(case_name=case_name)
         LOG.debug("Creating project path %s", delivery_base)
