@@ -79,8 +79,8 @@ PIPELINE_ANALYSIS_TAG_MAP = {
         "sample_tags": BALSAMIC_ANALYSIS_SAMPLE_TAGS,
     },
     "balsamic-qc": {
-        "case_tags": BALSAMIC_ANALYSIS_CASE_TAGS,
-        "sample_tags": BALSAMIC_ANALYSIS_SAMPLE_TAGS,
+        "case_tags": BALSAMIC_QC_CASE_TAGS,
+        "sample_tags": BALSAMIC_QC_SAMPLE_TAGS,
     },
     "mip-dna": {
         "case_tags": MIP_DNA_ANALYSIS_CASE_TAGS,
