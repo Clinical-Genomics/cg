@@ -5,12 +5,11 @@ import logging
 from typing import Any, Optional
 
 import requests
+from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import Pipeline
+from cg.exc import TrailblazerAPIHTTPError
 from google.auth import jwt
 from google.auth.crypt import RSASigner
-
-from cg.apps.tb.models import TrailblazerAnalysis
-from cg.exc import TrailblazerAPIHTTPError
 
 LOG = logging.getLogger(__name__)
 
@@ -25,6 +24,16 @@ class TrailblazerAPI:
         self.service_account = config["trailblazer"]["service_account"]
         self.service_account_auth_file = config["trailblazer"]["service_account_auth_file"]
         self.host = config["trailblazer"]["host"]
+
+    @staticmethod
+    def _get_pipeline(pipeline: Pipeline):
+
+        if pipeline == Pipeline.MIP_DNA:
+            return "MIP-DNA"
+        elif pipeline == Pipeline.MIP_RNA:
+            return "MIP-RNA"
+
+        return str(Pipeline).upper()
 
     @property
     def auth_header(self) -> dict:
@@ -52,16 +61,16 @@ class TrailblazerAPI:
         return json.loads(response.text)
 
     def analyses(
-        self,
-        case_id: str = None,
-        query: str = None,
-        status: str = None,
-        deleted: bool = None,
-        temp: bool = False,
-        before: dt.datetime = None,
-        is_visible: bool = None,
-        family: str = None,
-        data_analysis: Pipeline = None,
+            self,
+            case_id: str = None,
+            query: str = None,
+            status: str = None,
+            deleted: bool = None,
+            temp: bool = False,
+            before: dt.datetime = None,
+            is_visible: bool = None,
+            family: str = None,
+            data_analysis: Pipeline = None,
     ) -> list:
         request_body = {
             "case_id": case_id,
@@ -72,7 +81,7 @@ class TrailblazerAPI:
             "before": str(before) if before else None,
             "is_visible": is_visible,
             "family": family,
-            "data_analysis": str(data_analysis),
+            "data_analysis": self._get_pipeline(data_analysis),
         }
         response = self.query_trailblazer(command="query-analyses", request_body=request_body)
         if response:
@@ -91,7 +100,7 @@ class TrailblazerAPI:
             return TrailblazerAnalysis.parse_obj(response)
 
     def find_analysis(
-        self, case_id: str, started_at: dt.datetime, status: str
+            self, case_id: str, started_at: dt.datetime, status: str
     ) -> Optional[TrailblazerAnalysis]:
         request_body = {"case_id": case_id, "started_at": str(started_at), "status": status}
         response = self.query_trailblazer(command="find-analysis", request_body=request_body)
@@ -129,14 +138,14 @@ class TrailblazerAPI:
                 return [TrailblazerAnalysis.parse_obj(response)]
 
     def add_pending_analysis(
-        self,
-        case_id: str,
-        type: str,
-        config_path: str,
-        out_dir: str,
-        priority: str,
-        email: str = None,
-        data_analysis: Pipeline = None,
+            self,
+            case_id: str,
+            type: str,
+            config_path: str,
+            out_dir: str,
+            priority: str,
+            email: str = None,
+            data_analysis: Pipeline = None,
     ) -> TrailblazerAnalysis:
         request_body = {
             "case_id": case_id,
@@ -145,7 +154,7 @@ class TrailblazerAPI:
             "config_path": config_path,
             "out_dir": out_dir,
             "priority": priority,
-            "data_analysis": str(data_analysis),
+            "data_analysis": self._get_pipeline(data_analysis),
         }
         response = self.query_trailblazer(command="add-pending-analysis", request_body=request_body)
         if response:

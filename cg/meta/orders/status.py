@@ -344,7 +344,7 @@ class StatusHandler:
                 new_sample.application_version = application_version
                 new_samples.append(new_sample)
                 new_family = self.status.add_family(
-                    data_analysis=Pipeline(sample["data_analysis"]),
+                    data_analysis=Pipeline.MIP_DNA,
                     name=sample["name"],
                     panels=["OMIM-AUTO"],
                     priority="research",

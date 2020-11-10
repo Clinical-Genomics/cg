@@ -8,12 +8,11 @@ ADD COLUMN `data_delivery` ENUM('fastq', 'qc', 'standard')
 Update `family` SET data_delivery = 'qc' where data_analysis like 'microbial|fastq';
 Update `family` SET data_delivery = 'standard' where data_analysis like 'microbial|custom';
 Update `family` SET data_delivery = 'fastq' where data_analysis like 'fastq';
-
 Update `family` SET data_analysis = 'mip_dna' where data_analysis like 'mip';
 Update `family` SET data_analysis = 'mip_dna' where data_analysis like 'mip';
 Update `family` SET data_analysis = 'mip_rna' where data_analysis like 'mip + rna';
 Update `family` SET data_analysis = 'balsamic' where data_analysis like 'balsamic';
-Update `family` SET data_analysis = 'fastq' where data_analysis like 'fastq';
+Update `family` SET data_analysis = 'mip_dna' where data_analysis like 'fastq';
 Update `family` SET data_analysis = 'mip_rna' where data_analysis like 'mip rna';
 Update `family` SET data_analysis = 'microsalt' where data_analysis like 'microbial';
 Update `family` SET data_analysis = 'microsalt' where data_analysis like 'microbial|fastq';

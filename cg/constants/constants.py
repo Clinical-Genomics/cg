@@ -43,6 +43,12 @@ class Pipeline(StrEnum):
     MIP_RNA: str = "mip_rna"
 
 
+class Delivery(StrEnum):
+    FASTQ: str = "fastq"
+    QC: str = "qc"
+    STANDARD: str = "standard"
+
+
 PREP_CATEGORIES = ("wgs", "wes", "tgs", "wts", "mic", "rml")
 
 SEX_OPTIONS = ("male", "female", "unknown")
