@@ -99,7 +99,7 @@ def test_store_completed_good_cases(
         result = cli_runner.invoke(completed, obj=mip_store_context)
         # THEN some cases should be added and some should fail
         assert "new bundle added: yellowhog" in caplog.text
-        assert "case storage failed: purplesnail" in caplog.text
+        assert "Case storage failed: purplesnail" in caplog.text
         assert "new bundle added: bluezebra" in caplog.text
         assert "Included files in Housekeeper" in caplog.text
         # THEN the command should have an EXIT_FAIL code

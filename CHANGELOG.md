@@ -15,6 +15,14 @@ Try to use the following format:
 ### Changed
 - Deliver commands merged into new command `cg deliver analysis` 
 
+## [15.0.2]
+### Fixed
+- Wrap more cg workflow mip-dna store code in try-except in order to not cause future production blocks
+
+## [15.0.1]
+### Fixed
+- Fix bug in compress clean command
+
 ## [15.0.0]
 
 ### Added
