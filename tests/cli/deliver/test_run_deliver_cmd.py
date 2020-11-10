@@ -96,7 +96,7 @@ def test_delivery_path_created(
     # WHEN running the deliver analysis command
     runner.invoke(
         deliver_analysis,
-        ["--case-id", case_id, "--delivery-type", "mip-dna", "--inbox", str(project_dir)],
+        ["--case-id", case_id, "--delivery-type", "mip-dna"],
         obj=populated_mip_context,
     )
 
@@ -122,7 +122,7 @@ def test_delivery_ticket_id(
     # WHEN running the deliver analysis command
     runner.invoke(
         deliver_analysis,
-        ["--ticket-id", ticket_nr, "--delivery-type", "mip-dna", "--inbox", str(project_dir)],
+        ["--ticket-id", ticket_nr, "--delivery-type", "mip-dna"],
         obj=populated_mip_context,
     )
 
