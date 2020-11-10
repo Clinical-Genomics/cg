@@ -4,14 +4,20 @@ from pathlib import Path
 BALSAMIC_ANALYSIS_CASE_TAGS = [
     "clinical-vcf-pass",
     "clinical-vcf-pass-index",
+    "manta",
+    "cnvkit",
     "cnv-gene-metrics",
     "cnv-scatter",
     "cnv-diagram",
     "multiqc-html",
     "tumor-bam",
+    "tumor-bam-index",
     "tumor-cram",
+    "tumor-cram-index",
     "normal-bam",
+    "normal-bam-index",
     "normal-cram",
+    "normal-cram-index",
 ]
 
 BALSAMIC_ANALYSIS_SAMPLE_TAGS = ["bam", "bam-index", "cram", "cram-index"]
