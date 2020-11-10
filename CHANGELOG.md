@@ -10,8 +10,10 @@ Try to use the following format:
 ## [x.x.x]
 
 ### Added
+- Deliver analysis based on case-id or ticket
+
 ### Changed
-### Fixed
+- Deliver commands merged into new command `cg deliver analysis` 
 
 ## [15.0.0]
 
