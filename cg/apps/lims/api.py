@@ -12,7 +12,7 @@ from requests.exceptions import HTTPError
 
 from cg.exc import LimsDataError
 
-from .constants import MASTER_STEPS_UDFS, PROP2UDF
+from cg.constants.lims import MASTER_STEPS_UDFS, PROP2UDF
 from .order import OrderHandler
 
 requests_cache.install_cache(backend="memory")

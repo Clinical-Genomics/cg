@@ -13,6 +13,32 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [13.18.0]
+
+
+### Changed
+- Changed condition for which cases should be stored in CG. This fixes a bug where cg would try to store cases which already have been stored due to mismatch in timestamp stored in Trailblazer and Housekeeper
+
+## [13.17.2]
+
+### Changed
+- Only fastq files older than three weeks will be compressed
+
+
+## [13.17.1]
+
+### Added
+- Added new value to lims constants
+- Moved lims constants to a constants directory
+
+
+## [13.17.0]
+
+
+### Changed
+- Workflow mip-dna store no longer needs analysisrunstatus to be completed to attempt storing bundle
+
+
 ## [13.16.2]
 
 ### Fixed

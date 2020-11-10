@@ -275,7 +275,8 @@ class StoreHelpers:
         self,
         store: Store,
         family_id: str = "family_test",
-        data_analysis: Pipeline = Pipeline.BALSAMIC,
+        data_analysis: Pipeline = Pipeline.MIP_DNA,
+        action: str = None,
         internal_id: str = None,
         customer_id: str = "cust000",
         panels: List = ["panel_test"],
@@ -293,9 +294,12 @@ class StoreHelpers:
 
         if not family_obj:
             family_obj = store.add_family(
-                data_analysis=data_analysis, name=family_id, panels=panels
+                data_analysis=data_analysis,
+                name=family_id,
+                panels=panels,
             )
-
+        if action:
+            family_obj.action = action
         if internal_id:
             family_obj.internal_id = internal_id
 

@@ -5,6 +5,7 @@ import copy
 import datetime as dt
 import logging
 import shutil
+import os
 from pathlib import Path
 
 import pytest
@@ -475,6 +476,12 @@ def fixture_compress_hk_fastq_bundle(compression_object, sample_hk_bundle_no_fil
     second_fastq = compression_object.fastq_second
     for fastq_file in [first_fastq, second_fastq]:
         fastq_file.touch()
+        # We need to set the time to an old date
+        # Create a older date
+        # Convert the date to a float
+        before_timestamp = dt.datetime.timestamp(dt.datetime(2020, 1, 1))
+        # Update the utime so file looks old
+        os.utime(fastq_file, (before_timestamp, before_timestamp))
         fastq_file_info = {"path": str(fastq_file), "archive": False, "tags": ["fastq"]}
 
         hk_bundle_data["files"].append(fastq_file_info)
