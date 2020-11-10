@@ -33,7 +33,7 @@ def microsalt(context: click.Context, ticket: str, dry_run: bool):
         fastq_handler=FastqHandler(context.obj),
         config=context.obj["microsalt"],
     )
-    context.obj["analysis_api"] = analysis_api
+    context.obj["microsalt_analysis_api"] = analysis_api
 
     if context.invoked_subcommand:
         return
@@ -63,7 +63,7 @@ def microsalt(context: click.Context, ticket: str, dry_run: bool):
 def link(context: click.Context, dry_run: bool, ticket: str, sample_id: str):
     """Link microbial FASTQ files for a SAMPLE_ID"""
 
-    analysis_api = context.obj["analysis_api"]
+    analysis_api = context.obj["microsalt_analysis_api"]
 
     if not any([ticket, sample_id]):
         LOG.error("provide ticket and/or sample")
@@ -87,14 +87,15 @@ def config_case(context: click.Context, dry_run: bool, ticket: int, sample_id: s
         LOG.error("Provide ticket and/or sample")
         context.abort()
 
-    sample_objs = context.obj["analysis_api"].get_samples(ticket, sample_id)
+    sample_objs = context.obj["microsalt_analysis_api"].get_samples(ticket, sample_id)
 
     if not sample_objs:
         LOG.error("No sample found for that ticket/sample_id")
         context.abort()
 
     parameters = [
-        context.obj["analysis_api"].get_parameters(sample_obj) for sample_obj in sample_objs
+        context.obj["microsalt_analysis_api"].get_parameters(sample_obj)
+        for sample_obj in sample_objs
     ]
 
     filename = str(ticket) if ticket else sample_id
@@ -122,6 +123,8 @@ def config_case(context: click.Context, dry_run: bool, ticket: int, sample_id: s
 def run(context: click.Context, dry_run: bool, config_case_path: click.Path, ticket: int):
     """ Start microSALT with an order_id """
 
+    microbial_api = context.obj["microsalt_analysis_api"]
+
     microsalt_bin = context.obj["microsalt"]["binary_path"]
     microsalt_env = context.obj["microsalt"]["conda_env"]
     fastq_path = Path(context.obj["microsalt"]["root"]) / "fastq" / str(ticket)
@@ -140,6 +143,9 @@ def run(context: click.Context, dry_run: bool, config_case_path: click.Path, tic
         str(fastq_path.absolute()),
     ]
     process.run_command(parameters=analyse_command, dry_run=dry_run)
+
+    if not dry_run:
+        microbial_api.set_statusdb_action(name=ticket, action="running")
 
 
 microsalt.add_command(store_cmd)
