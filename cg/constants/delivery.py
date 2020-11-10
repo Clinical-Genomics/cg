@@ -1,5 +1,4 @@
 """Constants for delivery"""
-from pathlib import Path
 
 BALSAMIC_ANALYSIS_CASE_TAGS = [
     "clinical-vcf-pass",

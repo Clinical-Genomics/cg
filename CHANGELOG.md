@@ -7,7 +7,17 @@ About changelog [here](https://keepachangelog.com/en/1.0.0/)
 Please add a new candidate release at the top after changing the latest one. Feel free to copy paste from the "squash and commit" box that gets generated when creating PRs
 
 Try to use the following format:
+
 ## [x.x.x]
+
+### Added
+
+### Changed
+
+### Fixed
+
+
+## [16.0.0]
 
 ### Added
 - Deliver analysis based on case-id or ticket
