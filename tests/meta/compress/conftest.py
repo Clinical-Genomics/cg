@@ -3,6 +3,7 @@ import copy
 import json
 import os
 from pathlib import Path
+from datetime import datetime
 
 import pytest
 
@@ -79,16 +80,28 @@ class CompressionData:
 
         return self.spring_metadata_path
 
+    @staticmethod
+    def make_old(file_path):
+        """"Convert the modifying date so that the file looks old"""
+        # Convert the date to a float
+        before_timestamp = datetime.timestamp(datetime(2020, 1, 1))
+        # Update the utime so file looks old
+        os.utime(file_path, (before_timestamp, before_timestamp))
+
     @property
-    def fastq_first_file(self):
+    def fastq_first_file(self, old: bool = True):
         """Return the path to an existing spring metadata file"""
         self.fastq_first.touch()
+        if old:
+            CompressionData.make_old(self.fastq_first)
         return self.fastq_first
 
     @property
-    def fastq_second_file(self):
+    def fastq_second_file(self, old: bool = True):
         """Return the path to an existing fastq file"""
         self.fastq_second.touch()
+        if old:
+            CompressionData.make_old(self.fastq_second)
         return self.fastq_second
 
 
