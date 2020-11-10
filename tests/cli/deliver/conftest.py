@@ -29,7 +29,7 @@ def fixture_deliver_vcf_path(
 
 @pytest.fixture(name="base_context")
 def fixture_base_context(base_store: Store, real_housekeeper_api: HousekeeperAPI) -> dict:
-    return {"store": base_store, "hk_api": real_housekeeper_api}
+    return {"status_db": base_store, "housekeeper_api": real_housekeeper_api}
 
 
 @pytest.fixture(name="mip_delivery_bundle")
@@ -60,4 +60,4 @@ def fixture_mip_dna_housekeeper(
 def fixture_populated_mip_context(
     analysis_store: Store, mip_dna_housekeeper: HousekeeperAPI
 ) -> dict:
-    return {"store": analysis_store, "hk_api": mip_dna_housekeeper}
+    return {"status_db": analysis_store, "housekeeper_api": mip_dna_housekeeper}

@@ -43,7 +43,7 @@ def test_run_deliver_non_existing_case(base_context: dict, case_id: str, caplog)
     # GIVEN a cli runner and a base context
     runner = CliRunner()
     # GIVEN a case_id that does not exist in the database
-    store: Store = base_context["store"]
+    store: Store = base_context["status_db"]
     assert store.family(case_id) is None
 
     # WHEN running the deliver command with the non existing case

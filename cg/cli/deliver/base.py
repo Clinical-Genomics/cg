@@ -25,8 +25,8 @@ LOG = logging.getLogger(__name__)
 def deliver(context):
     """Deliver files with CG."""
     LOG.info("Running CG deliver")
-    context.obj["store"] = Store(context.obj["database"])
-    context.obj["hk_api"] = HousekeeperAPI(context.obj)
+    context.obj["status_db"] = Store(context.obj["database"])
+    context.obj["housekeeper_api"] = HousekeeperAPI(context.obj)
 
 
 @click.command(name="analysis")
@@ -49,23 +49,23 @@ def deliver_analysis(
     if not (case_id or ticket_id):
         LOG.info("Please provide a case-id or ticket-id")
         return
-    store: Store = context.obj["store"]
+    status_db: Store = context.obj["status_db"]
     deliver_api = DeliverAPI(
-        store=store,
-        hk_api=context.obj["hk_api"],
+        store=status_db,
+        hk_api=context.obj["housekeeper_api"],
         case_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery_type]["case_tags"],
         sample_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery_type]["sample_tags"],
         project_base_path=Path(inbox),
     )
     deliver_api.set_dry_run(dry_run)
     if case_id:
-        case_obj = store.family(case_id)
+        case_obj = status_db.family(case_id)
         if not case_obj:
             LOG.warning("Could not find case %s", case_id)
             return
         cases = [case_obj]
     else:
-        cases: List[Family] = [case for case in store.get_cases_from_ticket(ticket_id=ticket_id)]
+        cases: List[Family] = status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
         if not cases:
             LOG.warning("Could not find cases for ticket_id %s", ticket_id)
             return
