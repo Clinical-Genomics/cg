@@ -13,6 +13,7 @@ from datetime import datetime
 from typing import Dict, List
 
 from cg.apps.microsalt.fastq import FastqHandler
+from cg.constants import FAMILY_ACTIONS
 from cg.exc import CgDataError
 from cg.store.models import Sample
 
@@ -269,7 +270,18 @@ class MicrosaltAnalysisAPI:
         located"""
         deliverables_file_path = Path(
             self.root_dir,
-            "meta",
+            "results/reports/deliverables",
             order_id + "_deliverables.yaml",
         )
         return deliverables_file_path
+
+    def set_statusdb_action(self, name: str, action: str) -> None:
+        """Sets action on case based on ticket number"""
+        if action in [None, *FAMILY_ACTIONS]:
+            case_object = self.db.find_family(name)
+            case_object.action = action
+            self.db.commit()
+            return
+        LOG.warning(
+            f"Action '{action}' not permitted by StatusDB and will not be set for case {name}"
+        )
