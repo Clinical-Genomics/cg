@@ -1,8 +1,6 @@
 """Constants for delivery"""
 from pathlib import Path
 
-PROJECT_BASE_PATH = Path("/home/proj/production/customers")
-
 BALSAMIC_ANALYSIS_CASE_TAGS = [
     "clinical-vcf-pass",
     "clinical-vcf-pass-index",

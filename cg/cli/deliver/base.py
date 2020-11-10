@@ -13,7 +13,6 @@ from cg.store.models import Family
 from cg.apps.hk import HousekeeperAPI
 from cg.constants.delivery import (
     PIPELINE_ANALYSIS_OPTIONS,
-    PROJECT_BASE_PATH,
     PIPELINE_ANALYSIS_TAG_MAP,
 )
 
@@ -36,8 +35,6 @@ def deliver(context):
 @click.option(
     "-i",
     "--inbox",
-    default=PROJECT_BASE_PATH,
-    show_default=True,
     help="customer inbox",
 )
 @click.option("--dry-run", is_flag=True)
@@ -49,6 +46,11 @@ def deliver_analysis(
     if not (case_id or ticket_id):
         LOG.info("Please provide a case-id or ticket-id")
         return
+    inbox = inbox or context.obj.get("delivery_path")
+    if not inbox:
+        LOG.info("Please specify the root path for where files should be delivered")
+        return
+
     status_db: Store = context.obj["status_db"]
     deliver_api = DeliverAPI(
         store=status_db,
