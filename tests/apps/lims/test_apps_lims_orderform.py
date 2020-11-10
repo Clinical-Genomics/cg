@@ -172,7 +172,7 @@ def test_parsing_metagenome_orderform(metagenome_orderform):
     # ... and collect relevant sample info
     sample = data["items"][0]
 
-    assert sample["name"] == "s1"
+    assert sample["name"] == "sample1"
     assert sample["source"] == "other"
     assert sample["data_analysis"] == Pipeline.FASTQ.value
     assert sample["application"] == "METPCFR030"
