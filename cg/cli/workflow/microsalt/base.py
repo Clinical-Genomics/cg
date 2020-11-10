@@ -94,7 +94,8 @@ def config_case(context: click.Context, dry_run: bool, ticket: int, sample_id: s
         context.abort()
 
     parameters = [
-        context.obj["microsalt_analysis_api"].get_parameters(sample_obj) for sample_obj in sample_objs
+        context.obj["microsalt_analysis_api"].get_parameters(sample_obj)
+        for sample_obj in sample_objs
     ]
 
     filename = str(ticket) if ticket else sample_id
