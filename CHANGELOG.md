@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [15.0.3]
+### Fixed
+- Fixed path where microsalt deliverables files are located
+
 ## [15.0.2]
 ### Fixed
 - Wrap more cg workflow mip-dna store code in try-except in order to not cause future production blocks
