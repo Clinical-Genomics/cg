@@ -5,6 +5,7 @@ import os
 
 from typing import List, Set, Iterable
 from pathlib import Path
+from copy import deepcopy
 
 from cg.store import Store
 from cg.apps.hk import HousekeeperAPI
@@ -22,8 +23,8 @@ class DeliverAPI:
         self,
         store: Store,
         hk_api: HousekeeperAPI,
-        case_tags: List[str],
-        sample_tags: List[str],
+        case_tags: List[Set[str]],
+        sample_tags: List[Set[str]],
         project_base_path: Path,
     ):
         """Initialize a delivery api
@@ -38,8 +39,8 @@ class DeliverAPI:
         self.store = store
         self.hk_api = hk_api
         self.project_base_path: Path = project_base_path
-        self.case_tags: Set[str] = set(case_tags)
-        self.sample_tags: Set[str] = set(sample_tags)
+        self.case_tags: List[Set[str]] = case_tags
+        self.sample_tags: List[Set[str]] = sample_tags
         self.customer_id: str = ""
         self.ticket_id: str = ""
         self.dry_run = False
@@ -176,15 +177,18 @@ class DeliverAPI:
         """
         tag: hk_models.Tag
         file_tags = set([tag.name for tag in file_obj.tags])
-        # Check if any of the file tags matches the case tags
-        if self.case_tags.isdisjoint(file_tags):
-            return False
 
         # Check if any of the sample tags exist
         if not sample_ids.isdisjoint(file_tags):
             return False
 
-        return True
+        # Check if any of the file tags matches the case tags
+        tags: Set[str]
+        for tags in self.case_tags:
+            if tags.issubset(file_tags):
+                return True
+
+        return False
 
     def include_file_sample(self, file_obj: hk_models.File, sample_id: str) -> bool:
         """Check if file should be included in sample bundle
@@ -194,15 +198,15 @@ class DeliverAPI:
         """
         tag: hk_models.Tag
         file_tags = set([tag.name for tag in file_obj.tags])
+        tags: Set[str]
         # Check if any of the file tags matches the sample tags
-        if self.sample_tags.isdisjoint(file_tags):
-            return False
+        for tags in self.sample_tags:
+            working_copy = deepcopy(tags)
+            working_copy.add(sample_id)
+            if working_copy.issubset(file_tags):
+                return True
 
-        # Check if any of the sample tags exist
-        if sample_id not in file_tags:
-            return False
-
-        return True
+        return False
 
     def _set_customer_id(self, customer_id: str) -> None:
         LOG.info("Setting customer_id to %s", customer_id)

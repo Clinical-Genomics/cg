@@ -24,8 +24,8 @@ def fixture_deliver_api(
     _deliver_api = DeliverAPI(
         store=analysis_store,
         hk_api=real_housekeeper_api,
-        case_tags=["case-tag"],
-        sample_tags=["sample-tag"],
+        case_tags=[{"case-tag"}],
+        sample_tags=[{"sample-tag"}],
         project_base_path=project_dir,
     )
     yield _deliver_api
