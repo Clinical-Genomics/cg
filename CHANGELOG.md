@@ -13,6 +13,34 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [15.0.0]
+
+### Added
+- New command: cg store ticket <ticket_id>
+- New command: cg store flowcell <flowcell_id>
+- New command: cg store case <case_id>
+- New command: cg store sample <sample_id> 
+
+### Removed
+- Old command: cg store fastq <case_id>
+
+## [14.0.1]
+
+### Fixed
+- Removed unused options form cg workflow balsamic base command
+
+
+## [14.0.0]
+
+### Added
+- New command: cg decompress ticket <ticket_id>
+- New command: cg decompress flowcell <flowcell_id>
+- New command: cg decompress case <case_id>
+- New command: cg decompress sample <sample_id> 
+
+### Removed
+- Old command: cg compress decompress spring <case_id>
+
 ## [13.18.0]
 
 
