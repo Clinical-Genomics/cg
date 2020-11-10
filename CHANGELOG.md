@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [15.0.1]
+### Fixed
+- Fix bug in compress clean command
+
 ## [15.0.0]
 
 ### Added
