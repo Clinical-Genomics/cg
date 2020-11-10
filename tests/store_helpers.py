@@ -181,7 +181,7 @@ class StoreHelpers:
         if config_path:
             analysis.config_path = config_path
         if pipeline:
-            analysis.pipeline = pipeline.value
+            analysis.pipeline = str(pipeline)
 
         analysis.limitations = "A limitation"
         analysis.family = family
@@ -341,7 +341,7 @@ class StoreHelpers:
         app_tag = app_tag or "WGTPCFC030"
         app_type = family_info.get("application_type", "wgs")
         self.ensure_application_version(store, application_tag=app_tag)
-        data_analysis = family_info.get("data_analysis", Pipeline.MIP_DNA.value)
+        data_analysis = family_info.get("data_analysis", str(Pipeline.MIP_DNA))
         sample_objs = {}
         for sample_data in family_info["samples"]:
             sample_id = sample_data["internal_id"]

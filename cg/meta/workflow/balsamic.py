@@ -140,7 +140,7 @@ class BalsamicAnalysisAPI:
         case_object = self.get_case_object(case_id=case_id)
         valid_sample_list = []
         for link in case_object.links:
-            if Pipeline.BALSAMIC.value == case_object.data_analysis:
+            if str(Pipeline.BALSAMIC) == case_object.data_analysis:
                 valid_sample_list.append(link)
         return valid_sample_list
 
@@ -451,7 +451,7 @@ class BalsamicAnalysisAPI:
         query = (
             self.store.Sample.query.join(models.Family.links, models.FamilySample.sample)
             .filter(models.Family.internal_id == case_id)
-            .filter(models.Family.data_analysis == Pipeline.BALSAMIC.value)
+            .filter(models.Family.data_analysis == str(Pipeline.BALSAMIC))
         )
 
         return all(

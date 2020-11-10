@@ -72,7 +72,7 @@ class TrailblazerAPI:
             "before": str(before) if before else None,
             "is_visible": is_visible,
             "family": family,
-            "data_analysis": data_analysis.value,
+            "data_analysis": str(data_analysis),
         }
         response = self.query_trailblazer(command="query-analyses", request_body=request_body)
         if response:
@@ -145,7 +145,7 @@ class TrailblazerAPI:
             "config_path": config_path,
             "out_dir": out_dir,
             "priority": priority,
-            "data_analysis": data_analysis.value,
+            "data_analysis": str(data_analysis),
         }
         response = self.query_trailblazer(command="add-pending-analysis", request_body=request_body)
         if response:

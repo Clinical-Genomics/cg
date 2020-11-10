@@ -16,7 +16,7 @@ def test_upload_auto_with_pipeline_as_argument(
     # WHEN uploading all analysis from pipeline MIP
     caplog.set_level(logging.INFO)
     cli_runner.invoke(
-        auto, ["--pipeline", pipeline.value], obj=base_context, catch_exceptions=False
+        auto, ["--pipeline", str(pipeline)], obj=base_context, catch_exceptions=False
     )
 
     # THEN assert that the MIP analysis was successfully uploaded

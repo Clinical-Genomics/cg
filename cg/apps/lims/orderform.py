@@ -17,10 +17,10 @@ VALID_ORDERFORMS = [
     "1605:8",  # Microbial metagenomes
 ]
 CASE_PROJECT_TYPES = [
-    Pipeline.MIP_DNA.value,
+    str(Pipeline.MIP_DNA),
     "external",
-    Pipeline.BALSAMIC.value,
-    Pipeline.MIP_RNA.value,
+    str(Pipeline.BALSAMIC),
+    str(Pipeline.MIP_RNA),
 ]
 
 
@@ -237,15 +237,15 @@ def parse_sample(raw_sample):
     data_analysis = raw_sample.get("UDF/Data Analysis").lower()
 
     if data_analysis and "balsamic" in data_analysis:
-        sample["data_analysis"] = Pipeline.BALSAMIC.value
+        sample["data_analysis"] = str(Pipeline.BALSAMIC)
     elif data_analysis and "rna" in data_analysis:
-        sample["data_analysis"] = Pipeline.MIP_RNA.value
+        sample["data_analysis"] = str(Pipeline.MIP_RNA)
     elif data_analysis and "mip" in data_analysis or "scout" in data_analysis:
-        sample["data_analysis"] = Pipeline.MIP_DNA.value
+        sample["data_analysis"] = str(Pipeline.MIP_DNA)
     elif data_analysis and "microbial" in data_analysis:
-        sample["data_analysis"] = Pipeline.MICROSALT.value
+        sample["data_analysis"] = str(Pipeline.MICROSALT)
     elif data_analysis and ("fastq" in data_analysis or "custom" in data_analysis):
-        sample["data_analysis"] = Pipeline.FASTQ.value
+        sample["data_analysis"] = str(Pipeline.FASTQ)
     else:
         raise OrderFormError(f"unknown 'Data Analysis' for order: {data_analysis}")
 

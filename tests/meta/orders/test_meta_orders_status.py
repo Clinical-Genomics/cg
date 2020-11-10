@@ -17,7 +17,7 @@ def test_pools_to_status(rml_order_to_submit):
     assert len(data["pools"]) == 1
     assert data["pools"][0]["name"] == "pool-1"
     assert data["pools"][0]["application"] == "RMLS05R150"
-    assert data["pools"][0]["data_analysis"] == Pipeline.FASTQ.value
+    assert data["pools"][0]["data_analysis"] == str(Pipeline.FASTQ)
     assert data["pools"][0]["capture_kit"] == "Agilent Sureselect CRE"
 
 
@@ -68,7 +68,7 @@ def test_families_to_status(mip_order_to_submit):
     assert len(data["families"]) == 2
     family = data["families"][0]
     assert family["name"] == "family1"
-    assert family["data_analysis"] == Pipeline.MIP_DNA.value
+    assert family["data_analysis"] == str(Pipeline.MIP_DNA)
     assert family["priority"] == "standard"
     assert set(family["panels"]) == {"IEM"}
     assert len(family["samples"]) == 3
@@ -104,7 +104,7 @@ def test_store_rml(orders_api, base_store, rml_status_data):
     assert new_pool == new_pools[0]
     assert new_pool.name == "pool-1"
     assert new_pool.application_version.application.tag == "RMLS05R150"
-    assert new_pool.data_analysis == Pipeline.FASTQ.value
+    assert new_pool.data_analysis == str(Pipeline.FASTQ)
     assert new_pool.capture_kit == "Agilent Sureselect CRE"
     # ... and add a delivery
     assert len(new_pool.deliveries) == 1
@@ -244,7 +244,7 @@ def test_store_microbial_case_data_analysis_stored(orders_api, base_store, micro
     assert base_store.families().count() == 1
 
     microbial_case = base_store.families().first()
-    assert microbial_case.data_analysis == Pipeline.MICROSALT.value
+    assert microbial_case.data_analysis == str(Pipeline.MICROSALT)
 
 
 def test_store_microbial_samples_bad_apptag(orders_api, microbial_status_data):
@@ -314,7 +314,7 @@ def test_store_mip(orders_api, base_store, mip_status_data):
 
     assert len(new_family.links) == 3
     new_link = new_family.links[0]
-    assert new_family.data_analysis == Pipeline.MIP_DNA.value
+    assert new_family.data_analysis == str(Pipeline.MIP_DNA)
     assert new_link.status == "affected"
     assert new_link.mother.name == "sample2"
     assert new_link.father.name == "sample3"
@@ -351,7 +351,7 @@ def test_store_mip_rna(orders_api, base_store, mip_rna_status_data):
 
     assert len(new_casing.links) == 2
     new_link = new_casing.links[0]
-    assert new_casing.data_analysis == Pipeline.MIP_RNA.value
+    assert new_casing.data_analysis == str(Pipeline.MIP_RNA)
     assert new_link.sample.name == "sample1-rna-t1"
     assert new_link.sample.application_version.application.tag == rna_application
     assert new_link.sample.time_point == 1
@@ -400,7 +400,7 @@ def test_store_external(orders_api, base_store, external_status_data):
     new_family = new_families[0]
     assert new_family == family_obj
     assert new_family.name == "fam2"
-    assert new_family.data_analysis == Pipeline.MIP_DNA.value
+    assert new_family.data_analysis == str(Pipeline.MIP_DNA)
     assert set(new_family.panels) == {"CTD", "CILM"}
     assert new_family.priority_human == "priority"
 
@@ -516,7 +516,7 @@ def test_store_cancer_samples(orders_api, base_store, balsamic_status_data):
     assert len(new_families) == 1
     new_family = new_families[0]
     assert new_family.name == "family1"
-    assert new_family.data_analysis == Pipeline.BALSAMIC.value
+    assert new_family.data_analysis == str(Pipeline.BALSAMIC)
     assert set(new_family.panels) == set()
     assert new_family.priority_human == "standard"
 

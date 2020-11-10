@@ -169,7 +169,7 @@ def test_analyses_to_upload_when_filtering_with_pipeline(helpers, sample_store, 
 
     for analysis_obj in records:
         # THEN pipeline should be MIP in the analysis object
-        assert analysis_obj.pipeline == pipeline.value
+        assert analysis_obj.pipeline == str(pipeline)
 
 
 def test_analyses_to_upload_with_pipeline_and_no_complete_at(helpers, sample_store, timestamp):

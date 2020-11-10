@@ -16,8 +16,6 @@ from cg.constants import (
     STATUS_OPTIONS,
 )
 
-PIPELINE_OPTIONS = [pipeline.value for pipeline in Pipeline]
-
 Model = alchy.make_declarative_base(Base=alchy.ModelBase)
 
 
@@ -130,7 +128,7 @@ class ApplicationVersion(Model):
 
 class Analysis(Model):
     id = Column(types.Integer, primary_key=True)
-    pipeline = Column(types.Enum(*PIPELINE_OPTIONS))
+    pipeline = Column(types.Enum(*list(Pipeline)))
     pipeline_version = Column(types.String(32))
     started_at = Column(types.DateTime)
     completed_at = Column(types.DateTime)
@@ -261,7 +259,7 @@ class Family(Model, PriorityMixin):
     created_at = Column(types.DateTime, default=dt.datetime.now)
     customer_id = Column(ForeignKey("customer.id", ondelete="CASCADE"), nullable=False)
     customer = orm.relationship(Customer, foreign_keys=[customer_id])
-    data_analysis = Column(types.Enum(*PIPELINE_OPTIONS))
+    data_analysis = Column(types.Enum(*list(Pipeline)))
     id = Column(types.Integer, primary_key=True)
     internal_id = Column(types.String(32), unique=True, nullable=False)
     name = Column(types.String(128), nullable=False)

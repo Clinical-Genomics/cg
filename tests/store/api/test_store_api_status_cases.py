@@ -528,7 +528,7 @@ def test_include_case_by_case_uppercase_data_analysis(base_store: Store, helpers
 
     # GIVEN a database with a family with data analysis set
     data_analysis = Pipeline.BALSAMIC
-    assert data_analysis.value.upper() != data_analysis.value
+    assert str(data_analysis).upper() != str(data_analysis)
     family = add_family(helpers, base_store, data_analysis=data_analysis)
     sample = helpers.add_sample(base_store)
     base_store.relate_sample(family, sample, "unknown")
@@ -567,7 +567,7 @@ def test_include_case_by_partial_data_analysis(base_store: Store, helpers):
     base_store.relate_sample(family, sample, "unknown")
 
     # WHEN getting active cases by partial data_analysis
-    cases = base_store.cases(data_analysis=data_analysis.value[:-1])
+    cases = base_store.cases(data_analysis=str(data_analysis)[:-1])
 
     # THEN cases should only contain this case
     assert cases
@@ -589,7 +589,7 @@ def test_show_multiple_data_analysis(base_store: Store, helpers):
     base_store.relate_sample(family2, sample2, "unknown")
 
     # WHEN getting active cases by data_analysis
-    cases = base_store.cases(data_analysis=data_analysis.value[:-1])
+    cases = base_store.cases(data_analysis=str(data_analysis)[:-1])
 
     # THEN cases should only contain these analyses
     assert cases
@@ -607,7 +607,7 @@ def test_show_data_analysis(base_store: Store, helpers):
     base_store.relate_sample(family, sample, "unknown")
 
     # WHEN getting active cases by data_analysis
-    cases = base_store.cases(data_analysis=data_analysis.value)
+    cases = base_store.cases(data_analysis=str(data_analysis))
 
     # THEN cases should only contain this case
     assert cases
@@ -1243,7 +1243,7 @@ def test_analysis_pipeline(base_store: Store, helpers):
     # THEN cases should contain info on pipeline
     assert cases
     for case in cases:
-        assert case.get("analysis_pipeline") == pipeline.value
+        assert case.get("analysis_pipeline") == str(pipeline)
 
 
 def test_samples_delivered(base_store: Store, helpers):

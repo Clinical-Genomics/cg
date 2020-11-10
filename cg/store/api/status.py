@@ -71,7 +71,7 @@ class StatusHandler(BaseHandler):
             self.Family.query.outerjoin(models.Analysis)
             .join(models.Family.links, models.FamilySample.sample)
             .filter(or_(models.Sample.is_external, models.Sample.sequenced_at.isnot(None)))
-            .filter(models.Family.data_analysis == pipeline.value)
+            .filter(models.Family.data_analysis == str(pipeline))
             .filter(
                 or_(
                     models.Family.action == "analyze",
@@ -100,7 +100,7 @@ class StatusHandler(BaseHandler):
         families_query = (
             self.Family.query.outerjoin(models.Analysis)
             .join(models.Family.links, models.FamilySample.sample)
-            .filter(models.Family.data_analysis == pipeline.value)
+            .filter(models.Family.data_analysis == str(pipeline))
             .filter(models.Family.action == "running")
         )
         return list(families_query)[:limit]
@@ -558,7 +558,7 @@ class StatusHandler(BaseHandler):
         )
 
         if pipeline:
-            records = records.filter(models.Analysis.pipeline == pipeline.value)
+            records = records.filter(models.Analysis.pipeline == str(pipeline))
 
         return records
 
@@ -573,7 +573,7 @@ class StatusHandler(BaseHandler):
         )
         if pipeline:
             records = records.filter(
-                models.Analysis.pipeline == pipeline.value,
+                models.Analysis.pipeline == str(pipeline),
             )
 
         return records
@@ -603,7 +603,7 @@ class StatusHandler(BaseHandler):
             .filter(
                 models.Analysis.uploaded_at.isnot(None),
                 models.Sample.delivered_at.is_(None),
-                models.Analysis.pipeline == pipeline.value,
+                models.Analysis.pipeline == str(pipeline),
             )
             .order_by(models.Analysis.uploaded_at.desc())
         )
@@ -622,7 +622,7 @@ class StatusHandler(BaseHandler):
             .filter(
                 or_(
                     models.Family.data_analysis.is_(None),
-                    models.Family.data_analysis == pipeline.value,
+                    models.Family.data_analysis == str(pipeline),
                 )
             )
             .filter(
@@ -673,7 +673,7 @@ class StatusHandler(BaseHandler):
         Returns microbial samples that have been delivered but not invoiced.
         """
         records = self.Sample.query.filter(
-            Pipeline.MICROSALT.value in self.Family.data_analysis,
+            str(Pipeline.MICROSALT) in self.Family.data_analysis,
             models.Sample.delivered_at is not None,
             models.Sample.invoice_id == None,
         )

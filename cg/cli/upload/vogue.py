@@ -16,7 +16,7 @@ from cg.store import Store
 
 LOG = logging.getLogger(__name__)
 
-VOGUE_VALID_BIOINFO = [Pipeline.MIP_DNA.value]
+VOGUE_VALID_BIOINFO = [str(Pipeline.MIP_DNA)]
 
 
 @click.group()

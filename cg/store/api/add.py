@@ -156,7 +156,7 @@ class AddHandler(BaseHandler):
 
         priority_db = PRIORITY_MAP[priority]
         new_family = self.Family(
-            data_analysis=data_analysis.value,
+            data_analysis=str(data_analysis),
             internal_id=internal_id,
             name=name,
             priority=priority_db,
@@ -204,7 +204,7 @@ class AddHandler(BaseHandler):
         """Build a new Analysis record."""
 
         new_record = self.Analysis(
-            pipeline=pipeline.value,
+            pipeline=str(pipeline),
             pipeline_version=version,
             completed_at=completed_at,
             is_primary=primary,
@@ -254,7 +254,7 @@ class AddHandler(BaseHandler):
             received_at=received,
             comment=comment,
             capture_kit=capture_kit,
-            data_analysis=data_analysis.value,
+            data_analysis=str(data_analysis),
         )
         new_record.customer = customer
         new_record.application_version = application_version

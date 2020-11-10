@@ -25,5 +25,5 @@ class SampleHelper:
         """Check if this sample is destined for an analysis"""
         return (
             not self._store.family(internal_id).data_analysis
-            or Pipeline.FASTQ.value not in self._store.family(internal_id).data_analysis
+            or str(Pipeline.FASTQ) not in self._store.family(internal_id).data_analysis
         )
