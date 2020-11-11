@@ -214,7 +214,7 @@ class MicrosaltAnalysisAPI:
             "Customer_ID_sample": sample_obj.name,
             "organism": self.get_organism(sample_obj),
             "priority": priority,
-            "reference": sample_obj.organism.reference_genome,
+            "reference": sample_obj.reference_genome,
             "Customer_ID": sample_obj.customer.internal_id,
             "application_tag": sample_obj.application_version.application.tag,
             "date_arrival": str(sample_obj.received_at or datetime.min),
