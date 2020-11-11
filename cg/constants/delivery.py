@@ -21,14 +21,21 @@ BALSAMIC_ANALYSIS_CASE_TAGS = [
     {"tumor-cram"},
     {"tumor-cram-index"},
 ]
-BALSAMIC_ANALYSIS_SAMPLE_TAGS = []
+BALSAMIC_ANALYSIS_SAMPLE_TAGS = [
+    {"normal-cram"},
+    {"normal-cram-index"},
+    {"tumor-cram"},
+    {"tumor-cram-index"},
+    {"quality-trimmed-fastq-read1"},
+    {"quality-trimmed-fastq-read2"},
+]
 
 BALSAMIC_QC_CASE_TAGS = [
     {"multiqc-html"},
 ]
 BALSAMIC_QC_SAMPLE_TAGS = [
-    {"quality-trimmed-fastq-read1"},  # also do the same if a normal sample exists
-    {"quality-trimmed-fastq-read2"},  # also do the same if a normal sample exists
+    {"quality-trimmed-fastq-read1"},
+    {"quality-trimmed-fastq-read2"},
 ]
 
 
