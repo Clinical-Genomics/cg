@@ -2,12 +2,16 @@
 
 
 BALSAMIC_ANALYSIS_CASE_TAGS = [
-    {"cnv", "cnvkit", "vcf-all", "annotated-somatic-vcf-all"},
-    {"cnv", "cnvkit", "vcf-all", "annotated-somatic-vcf-all-index"},
-    {"vardict", "snv", "annotated-somatic-vcf-pass, vcf-pass"},
-    {"vardict", "snv", "annotated-somatic-vcf-pass-index", "vcf-pass"},
-    {"manta", "sv", "annotated-somatic-vcf-pass", "vcf-pass"},
-    {"manta", "sv", "annotated-somatic-vcf-pass-index", "vcf-pass"},
+    {"cnv", "annotated-somatic-vcf-all", "vcf-all", "cnvkit"},
+    {"cnv", "annotated-somatic-vcf-all-index", "vcf-all", "cnvkit"},
+    {"snv", "annotated-somatic-vcf-pass", "vcf-pass", "vardict"},
+    {"snv", "annotated-somatic-vcf-pass-index", "vcf-pass", "vardict"},
+    {"snv", "annotated-somatic-vcf-pass", "vcf-pass", "tnscope"},
+    {"snv", "annotated-somatic-vcf-pass-index", "vcf-pass", "tnscope"},
+    {"snv", "annotated-somatic-vcf-pass", "vcf-pass", "tnhaplotyper"},
+    {"snv", "annotated-somatic-vcf-pass-index", "vcf-pass", "tnhaplotyper"},
+    {"sv", "annotated-somatic-vcf-pass", "vcf-pass", "manta"},
+    {"sv", "annotated-somatic-vcf-pass-index", "vcf-pass", "manta"},
     {"cnv-scatter"},
     {"cnv-diagram"},
     {"multiqc-html"},
