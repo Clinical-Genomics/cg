@@ -1,17 +1,23 @@
 """Fixtures for the meta tests"""
 
+from datetime import datetime
+from pathlib import Path
+
 import pytest
 from _pytest import tmpdir
 
+from cg.store import Store
 from cg.apps.balsamic.fastq import FastqHandler as BalsamicFastqHandler
-from cg.apps.crunchy import CrunchyAPI
 from cg.apps.microsalt.fastq import FastqHandler as MicrosaltFastqHandler
-from cg.meta.deliver import DeliverAPI
+from cg.apps.hk import HousekeeperAPI
+from cg.apps.scoutapi import ScoutAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 
+from tests.store_helpers import StoreHelpers
 
-@pytest.yield_fixture(scope="function")
-def analysis_store(base_store, analysis_family):
+
+@pytest.yield_fixture(scope="function", name="analysis_store")
+def fixture_analysis_store(base_store: Store, analysis_family: dict) -> Store:
     """Setup a store instance for testing analysis API."""
     customer = base_store.customer("cust000")
     family = base_store.Family(
@@ -52,11 +58,6 @@ def analysis_store(base_store, analysis_family):
     yield base_store
 
 
-class MockCrunchy(CrunchyAPI):
-
-    pass
-
-
 class MockLims:
     """Mock lims fixture"""
 
@@ -64,18 +65,6 @@ class MockLims:
 
     def __init__(self):
         self.lims = self
-
-
-class MockDeliver(DeliverAPI):
-    def __init__(self):
-        self.hk_api = None
-        self.lims = MockLims()
-
-    def get_post_analysis_case_files(self, case: str, version, tags):
-        return ""
-
-    def get_post_analysis_files_root_dir(self):
-        return ""
 
 
 class MockPath:
@@ -154,10 +143,15 @@ class MockMicrosaltFastq(MicrosaltFastqHandler):
         super().__init__(config={"microsalt": {"root": tmpdir}})
 
 
-@pytest.yield_fixture(scope="function")
-def mip_hk_store(helpers, real_housekeeper_api, timestamp):
+@pytest.yield_fixture(scope="function", name="mip_hk_store")
+def fixture_mip_hk_store(
+    helpers: StoreHelpers,
+    real_housekeeper_api: HousekeeperAPI,
+    timestamp: datetime,
+    case_id: str,
+) -> HousekeeperAPI:
     deliver_hk_bundle_data = {
-        "name": "case_id",
+        "name": case_id,
         "created": timestamp,
         "expires": timestamp,
         "files": [
@@ -227,21 +221,10 @@ def mip_hk_store(helpers, real_housekeeper_api, timestamp):
     return real_housekeeper_api
 
 
-@pytest.yield_fixture(scope="function")
-def deliver_api(analysis_store, mip_hk_store):
-    """Fixture for deliver_api"""
-    deliver_api = DeliverAPI(
-        db=analysis_store,
-        hk_api=mip_hk_store,
-        lims_api=MockLims(),
-        case_tags=["case-tag"],
-        sample_tags=["sample-tag"],
-    )
-    yield deliver_api
-
-
-@pytest.yield_fixture(scope="function")
-def analysis_api(analysis_store, mip_hk_store, scout_api, deliver_api):
+@pytest.yield_fixture(scope="function", name="analysis_api")
+def fixture_analysis_api(
+    analysis_store: Store, mip_hk_store: HousekeeperAPI, scout_api: ScoutAPI
+) -> MipAnalysisAPI:
     """Setup an analysis API."""
 
     analysis_api = MipAnalysisAPI(
@@ -250,7 +233,6 @@ def analysis_api(analysis_store, mip_hk_store, scout_api, deliver_api):
         scout_api=scout_api,
         tb_api=MockTB(),
         lims_api=MockLims(),
-        deliver_api=deliver_api,
         script="echo",
         pipeline="analyse rd_dna",
         conda_env="S_mip_rd-dna",

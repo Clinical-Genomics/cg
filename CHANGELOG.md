@@ -7,25 +7,91 @@ About changelog [here](https://keepachangelog.com/en/1.0.0/)
 Please add a new candidate release at the top after changing the latest one. Feel free to copy paste from the "squash and commit" box that gets generated when creating PRs
 
 Try to use the following format:
+
 ## [x.x.x]
 
 ### Added
+
 ### Changed
+
 ### Fixed
 
-## [13.7.1]
+## [16.0.0]
+
+### Added
+- Deliver analysis based on case-id or ticket
+
+### Changed
+- Deliver commands merged into new command `cg deliver analysis` 
+
+## [15.0.4]
+### Fixed
+- fixed failing `cg microsalt store completed` cronjob
+
+## [15.0.3]
+### Fixed
+- Fixed path where microsalt deliverables files are located
+
+## [15.0.2]
+### Fixed
+- Wrap more cg workflow mip-dna store code in try-except in order to not cause future production blocks
+
+## [15.0.1]
+### Fixed
+- Fix bug in compress clean command
+
+## [15.0.0]
+
+### Added
+- New command: cg store ticket <ticket_id>
+- New command: cg store flowcell <flowcell_id>
+- New command: cg store case <case_id>
+- New command: cg store sample <sample_id> 
+
+### Removed
+- Old command: cg store fastq <case_id>
+
+## [14.0.1]
+
+### Fixed
+- Removed unused options form cg workflow balsamic base command
+
+
+## [14.0.0]
+
+### Added
+- New command: cg decompress ticket <ticket_id>
+- New command: cg decompress flowcell <flowcell_id>
+- New command: cg decompress case <case_id>
+- New command: cg decompress sample <sample_id> 
+
+### Removed
+- Old command: cg compress decompress spring <case_id>
+
+## [13.18.0]
+
+
+### Changed
+- Changed condition for which cases should be stored in CG. This fixes a bug where cg would try to store cases which already have been stored due to mismatch in timestamp stored in Trailblazer and Housekeeper
+
+## [13.17.2]
+
+### Changed
+- Only fastq files older than three weeks will be compressed
+
+
+## [13.17.1]
 
 ### Added
 - Added new value to lims constants
 - Moved lims constants to a constants directory
 
+
 ## [13.17.0]
+
 
 ### Changed
 - Workflow mip-dna store no longer needs analysisrunstatus to be completed to attempt storing bundle
-
-
-
 
 
 ## [13.16.2]

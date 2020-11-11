@@ -25,6 +25,7 @@ from .upload import vogue as vogue_command
 from .upload.base import upload
 from .workflow.base import workflow as workflow_cmd
 from .deploy.base import deploy as deploy_cmd
+from .deliver.base import deliver as deliver_cmd
 
 LOG = logging.getLogger(__name__)
 LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR"]
@@ -84,4 +85,6 @@ base.add_command(upload)
 base.add_command(workflow_cmd)
 base.add_command(store_cmd)
 base.add_command(deploy_cmd)
+base.add_command(deliver_cmd)
+
 upload.add_command(vogue_command)
