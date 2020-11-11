@@ -16,7 +16,6 @@ Try to use the following format:
 
 ### Fixed
 
-
 ## [16.0.0]
 
 ### Added
@@ -24,6 +23,10 @@ Try to use the following format:
 
 ### Changed
 - Deliver commands merged into new command `cg deliver analysis` 
+
+## [15.0.4]
+### Fixed
+- fixed failing `cg microsalt store completed` cronjob
 
 ## [15.0.3]
 ### Fixed
