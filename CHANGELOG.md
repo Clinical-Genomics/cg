@@ -16,6 +16,11 @@ Try to use the following format:
 
 ### Fixed
 
+## [16.0.1]
+
+### Added
+- Updated PR template to include implementation plan
+
 ## [16.0.0]
 
 ### Added
