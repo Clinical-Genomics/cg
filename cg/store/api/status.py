@@ -579,7 +579,7 @@ class StatusHandler(BaseHandler):
             models.Analysis.cleaned_at.is_(None),
             models.Analysis.pipeline.ilike(f"%{pipeline}%"),
             models.Analysis.started_at <= before,
-            models.Family.action == None,
+            models.Family.action.is_(None),
         )
         return records
 
