@@ -16,6 +16,9 @@ Try to use the following format:
 
 ### Fixed
 
+## [16.0.2]
+- Microbial config-case now correctly imports reference from customer provided reference
+
 ## [16.0.1]
 
 ### Added
