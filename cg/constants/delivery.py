@@ -26,6 +26,7 @@ BALSAMIC_ANALYSIS_SAMPLE_TAGS = [
     {"normal-cram-index"},
     {"tumor-cram"},
     {"tumor-cram-index"},
+    {"bam"},
     {"quality-trimmed-fastq-read1"},
     {"quality-trimmed-fastq-read2"},
 ]
