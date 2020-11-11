@@ -19,24 +19,22 @@ def test_config(analysis_store: Store, analysis_api: MipAnalysisAPI):
     assert len(mip_config["samples"]) == len(family_obj.links)
 
 
-def test_get_latest_data_genome_build(analysis_api: MipAnalysisAPI):
+def test_get_latest_data_genome_build(analysis_api: MipAnalysisAPI, case_id: str):
 
     # GIVEN
-    family_id = "case_id"
 
     # WHEN
-    trending_data = analysis_api.get_latest_metadata(family_id)
+    trending_data = analysis_api.get_latest_metadata(case_id)
 
     # THEN contains genome_build
     assert trending_data["genome_build"]
 
 
-def test_get_latest_data_rank_model_version(analysis_api: MipAnalysisAPI):
+def test_get_latest_data_rank_model_version(analysis_api: MipAnalysisAPI, case_id: str):
     # GIVEN
-    family_id = "case_id"
 
     # WHEN
-    trending_data = analysis_api.get_latest_metadata(family_id)
+    trending_data = analysis_api.get_latest_metadata(case_id)
 
     # THEN contains rankmodelversion
     assert trending_data["rank_model_version"]

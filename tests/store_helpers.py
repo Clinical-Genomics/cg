@@ -190,7 +190,7 @@ class StoreHelpers:
     def add_sample(
         self,
         store: Store,
-        sample_id: str = "sample_test",
+        sample_id: str = None,
         internal_id: str = None,
         gender: str = "female",
         is_tumour: bool = False,
@@ -202,10 +202,12 @@ class StoreHelpers:
         customer_name: str = None,
         reads: int = None,
         loqus_id: str = None,
+        ticket: int = None,
         **kwargs,
     ) -> models.Sample:
         """Utility function to add a sample to use in tests"""
         customer_name = customer_name or "cust000"
+        sample_name = sample_id or "sample_test"
         customer = self.ensure_customer(store, customer_name)
         application_version = self.ensure_application_version(
             store,
@@ -216,12 +218,13 @@ class StoreHelpers:
         )
         application_version_id = application_version.id
         sample = store.add_sample(
-            name=sample_id,
+            name=sample_name,
             sex=gender,
             tumour=is_tumour,
             sequenced_at=datetime.now(),
             data_analysis=data_analysis,
             reads=reads,
+            ticket=ticket,
         )
 
         sample.application_version_id = application_version_id
@@ -239,6 +242,9 @@ class StoreHelpers:
 
         if kwargs.get("prepared_at"):
             sample.received_at = kwargs["prepared_at"]
+
+        if kwargs.get("capture_kit"):
+            sample.capture_kit = kwargs["capture_kit"]
 
         if kwargs.get("flowcell"):
             sample.flowcells.append(kwargs["flowcell"])
@@ -328,7 +334,6 @@ class StoreHelpers:
             name=family_info["name"],
             panels=family_info["panels"],
             internal_id=family_info["internal_id"],
-            priority="standard",
             ordered_at=ordered_at,
         )
 
@@ -347,11 +352,13 @@ class StoreHelpers:
                 store,
                 customer_name=sample_data["name"],
                 gender=sample_data["sex"],
+                sample_id=sample_data.get("name"),
                 internal_id=sample_id,
                 data_analysis=data_analysis,
                 application_type=app_type,
                 ticket=sample_data["ticket_number"],
                 reads=sample_data["reads"],
+                capture_kit=sample_data["capture_kit"],
             )
             sample_objs[sample_id] = sample_obj
 

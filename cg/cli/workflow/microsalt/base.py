@@ -55,7 +55,7 @@ def microsalt(context: click.Context, ticket: str, dry_run: bool):
     context.invoke(run, ticket=ticket, dry_run=dry_run)
 
 
-@microsalt.command()
+@click.command()
 @click.option("-d", "--dry-run", is_flag=True, help="only print to console")
 @click.option("-t", "--ticket", help="link all microbial samples for a ticket")
 @click.argument("sample_id", required=False)
@@ -75,7 +75,7 @@ def link(context: click.Context, dry_run: bool, ticket: str, sample_id: str):
     analysis_api.link_samples(ticket=ticket, sample_id=sample_id)
 
 
-@microsalt.command("config-case")
+@click.command("config-case")
 @click.option("-d", "--dry-run", is_flag=True, help="print config to console")
 @click.option("-t", "--ticket", help="create config-case all microbial samples for an order")
 @click.argument("sample_id", required=False)
@@ -108,7 +108,7 @@ def config_case(context: click.Context, dry_run: bool, ticket: int, sample_id: s
         json.dump(parameters, outfile, indent=4, sort_keys=True)
 
 
-@microsalt.command()
+@click.command()
 @click.option("-d", "--dry-run", "dry_run", is_flag=True, help="print command to console")
 @click.option(
     "-c",
@@ -149,3 +149,6 @@ def run(context: click.Context, dry_run: bool, config_case_path: click.Path, tic
 
 
 microsalt.add_command(store_cmd)
+microsalt.add_command(run)
+microsalt.add_command(config_case)
+microsalt.add_command(link)
