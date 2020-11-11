@@ -1,6 +1,5 @@
 import logging
-
-from typing import List, Dict
+from typing import Dict, List
 
 from cg.utils.commands import Process
 
@@ -67,6 +66,7 @@ class BalsamicAPI:
                 "--qos": arguments.get("priority", self.qos),
                 "--sample-config": arguments.get("sample_config"),
                 "--analysis-type": arguments.get("analysis_type"),
+                "--disable-variant-caller": arguments.get("disable_variant_caller"),
             }
         )
         parameters = command + options + run_analysis

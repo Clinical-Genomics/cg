@@ -14,6 +14,8 @@ from cg.apps.balsamic.fastq import FastqHandler
 from cg.constants import FAMILY_ACTIONS
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
+from cg.apps.tb import TrailblazerAPI
+from cg.apps.tb.models import TrailblazerAnalysis
 from cg.exc import BalsamicStartError, BundleAlreadyAddedError
 from cg.store import Store, models
 
@@ -34,12 +36,14 @@ class BalsamicAnalysisAPI:
         housekeeper_api: HousekeeperAPI,
         fastq_handler: FastqHandler,
         lims_api: LimsAPI,
+        trailblazer_api: TrailblazerAPI,
     ):
         self.balsamic_api = balsamic_api
         self.store = store
         self.housekeeper_api = housekeeper_api
         self.fastq_handler = fastq_handler
         self.lims_api = lims_api
+        self.trailblazer_api = trailblazer_api
 
     def get_case_object(self, case_id: str):
         """Look up case ID in StoreDB and return result"""
@@ -103,6 +107,12 @@ class BalsamicAnalysisAPI:
             )
         return analysis_finish_path.as_posix()
 
+    def get_slurm_job_ids_path(self, case_id: str) -> Path:
+        slurm_job_ids_path = Path(
+            self.balsamic_api.root_dir, case_id, "analysis", "slurm_jobids.yaml"
+        )
+        return slurm_job_ids_path
+
     def get_file_collection(self, sample_id: str) -> list:
         """Retrieves sample data for naming"""
         file_objs = self.housekeeper_api.files(bundle=sample_id, tags=["fastq"])
@@ -130,7 +140,7 @@ class BalsamicAnalysisAPI:
         case_object = self.get_case_object(case_id=case_id)
         valid_sample_list = []
         for link in case_object.links:
-            if "balsamic" in link.sample.data_analysis.lower():
+            if "balsamic" in case_object.data_analysis.lower():
                 valid_sample_list.append(link)
         return valid_sample_list
 
@@ -138,7 +148,7 @@ class BalsamicAnalysisAPI:
         """Links and copies files to working directory"""
         for link_object in self.get_balsamic_sample_objects(case_id=case_id):
             LOG.info(
-                f"{link_object.sample.internal_id}: {link_object.sample.data_analysis} linking FASTQ files"
+                f"{link_object.sample.internal_id}: {link_object.family.data_analysis} linking FASTQ files"
             )
             file_collection = self.get_file_collection(sample_id=link_object.sample.internal_id)
             self.fastq_handler.link(
@@ -335,7 +345,7 @@ class BalsamicAnalysisAPI:
             )
         LOG.info("")
 
-    def get_sample_params(self, case_id: str, panel_bed: str) -> dict:
+    def get_sample_params(self, case_id: str, panel_bed: Optional[str]) -> dict:
 
         """Returns a dictionary of attributes for each sample in given family,
         where SAMPLE ID is used as key"""
@@ -351,7 +361,19 @@ class BalsamicAnalysisAPI:
         self.print_sample_params(case_id=case_id, sample_data=sample_data)
         return sample_data
 
-    def resolve_target_bed(self, panel_bed, link_object: models.FamilySample) -> Optional[str]:
+    def get_case_application_type(self, case_id: str) -> str:
+        application_types = set(
+            [
+                self.get_application_type(link_object)
+                for link_object in self.get_balsamic_sample_objects(case_id=case_id)
+            ]
+        )
+        if application_types:
+            return application_types.pop().lower()
+
+    def resolve_target_bed(
+        self, panel_bed: Optional[str], link_object: models.FamilySample
+    ) -> Optional[str]:
         if panel_bed:
             return panel_bed
         if self.get_application_type(link_object) not in self.__BALSAMIC_BED_APPLICATIONS:
@@ -429,7 +451,7 @@ class BalsamicAnalysisAPI:
         query = (
             self.store.Sample.query.join(models.Family.links, models.FamilySample.sample)
             .filter(models.Family.internal_id == case_id)
-            .filter(models.Sample.data_analysis.ilike("%Balsamic%"))
+            .filter(models.Family.data_analysis.ilike("%Balsamic%"))
         )
 
         return all(
@@ -441,9 +463,8 @@ class BalsamicAnalysisAPI:
 
     def get_analyses_to_clean(self, before_date: dt.datetime = dt.datetime.now()) -> list:
         """Retrieve a list of analyses for cleaning created before certain date"""
-        analyses_before = self.store.analyses(before=before_date)
-        analyses_to_clean = self.store.analyses_to_clean(pipeline="Balsamic")
-        return [x for x in analyses_to_clean if x in analyses_before]
+        analyses_to_clean = self.store.analyses_to_clean(pipeline="balsamic", before=before_date)
+        return analyses_to_clean.all()
 
     def get_cases_to_analyze(self) -> list:
         """Retrieve a list of balsamic cases without analysis,

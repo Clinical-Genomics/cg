@@ -1,8 +1,9 @@
 from cg.store import Store
-from cg.meta.workflow.mip import AnalysisAPI
+from cg.meta.workflow.mip import MipAnalysisAPI
+import logging
 
 
-def test_config(analysis_store: Store, analysis_api: AnalysisAPI):
+def test_config(analysis_store: Store, analysis_api: MipAnalysisAPI):
 
     # GIVEN a status db with a family
     family_obj = analysis_store.families().first()
@@ -18,41 +19,34 @@ def test_config(analysis_store: Store, analysis_api: AnalysisAPI):
     assert len(mip_config["samples"]) == len(family_obj.links)
 
 
-def test_get_latest_data_genome_build(analysis_api: AnalysisAPI):
+def test_get_latest_data_genome_build(analysis_api: MipAnalysisAPI, case_id: str):
 
     # GIVEN
-    family_id = "dummy_family_id"
 
     # WHEN
-    trending_data = analysis_api.get_latest_metadata(family_id)
+    trending_data = analysis_api.get_latest_metadata(case_id)
 
     # THEN contains genome_build
     assert trending_data["genome_build"]
 
 
-def test_get_latest_data_rank_model_version(analysis_api: AnalysisAPI):
+def test_get_latest_data_rank_model_version(analysis_api: MipAnalysisAPI, case_id: str):
     # GIVEN
-    family_id = "dummy_family_id"
 
     # WHEN
-    trending_data = analysis_api.get_latest_metadata(family_id)
+    trending_data = analysis_api.get_latest_metadata(case_id)
 
     # THEN contains rankmodelversion
     assert trending_data["rank_model_version"]
 
 
-def test_get_latest_metadata_logging(analysis_api: AnalysisAPI):
+def test_get_latest_metadata_logging(caplog, analysis_api: MipAnalysisAPI):
     # GIVEN an initialised report_api and the deliver_api does not have what we want
-    analysis_api.tb._get_trending_raises_keyerror = True
-
+    family_id = "case_missing_data"
     # WHEN failing to get latest trending data for a family
-    latest_data = analysis_api.get_latest_metadata(family_id="bluebull")
+    latest_data = analysis_api.get_latest_metadata(family_id)
 
+    with caplog.at_level(logging.WARNING):
+        assert family_id in caplog.text
     # THEN there should be a log entry about this
-    found = False
-    for warn in analysis_api.log.get_warnings():
-        if "bluebull" in warn:
-            found = True
-
-    assert found
     assert not latest_data

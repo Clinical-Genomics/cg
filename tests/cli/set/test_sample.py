@@ -34,8 +34,8 @@ def test_skip_lims(cli_runner, base_context, base_store: Store, helpers):
 
     # THEN update sample should have no recorded update key and value
     assert result.exit_code == SUCCESS
-    assert base_context["lims"].get_updated_sample_key() != key
-    assert base_context["lims"].get_updated_sample_value() != new_value
+    assert base_context["lims_api"].get_updated_sample_key() != key
+    assert base_context["lims_api"].get_updated_sample_value() != new_value
 
 
 def test_help_without_sample(cli_runner, base_context, base_store: Store, helpers):
@@ -95,8 +95,8 @@ def test_set_sample(cli_runner, base_context, base_store: Store, key, helpers):
     # THEN then it should have new_value as attribute key on the sample and in LIMS
     assert result.exit_code == SUCCESS
     assert getattr(sample_obj, key) == new_value
-    assert base_context["lims"].get_updated_sample_key() == key
-    assert base_context["lims"].get_updated_sample_value() == new_value
+    assert base_context["lims_api"].get_updated_sample_key() == key
+    assert base_context["lims_api"].get_updated_sample_value() == new_value
 
 
 def test_sex(cli_runner, base_context, base_store: Store, helpers):
@@ -115,8 +115,8 @@ def test_sex(cli_runner, base_context, base_store: Store, helpers):
     # THEN then it should have new_value as attribute key on the sample and in LIMS
     assert result.exit_code == SUCCESS
     assert getattr(sample_obj, key) == new_value
-    assert base_context["lims"].get_updated_sample_key() == key
-    assert base_context["lims"].get_updated_sample_value() == new_value
+    assert base_context["lims_api"].get_updated_sample_key() == key
+    assert base_context["lims_api"].get_updated_sample_value() == new_value
 
 
 def test_invalid_customer(cli_runner, base_context, base_store: Store, helpers):

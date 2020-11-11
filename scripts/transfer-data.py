@@ -22,10 +22,8 @@ import cg.meta.workflow.microsalt
 import click
 import pymongo
 import ruamel.yaml
-from housekeeper.store import api as housekeeeper_api
 
-from cg.apps import lims as lims_app
-from cg.apps import scoutapi, stats
+from cg.apps.lims import LimsAPI
 from cg.constants import PRIORITY_MAP
 from cg.store import Store, models
 from cgadmin.store.api import AdminDatabase
@@ -509,7 +507,12 @@ class FamilyImporter(Store):
             else:
                 priority = "standard"
 
-        new_record = self.add_family(name=data["name"], priority=priority, panels=data["panels"])
+        new_record = self.add_family(
+            data_analysis=data["data_analysis"],
+            name=data["name"],
+            priority=priority,
+            panels=data["panels"],
+        )
         new_record.customer = customer_obj
         yield new_record
 
@@ -527,27 +530,13 @@ class FamilyImporter(Store):
                 LOG.warning("Missing link")
 
 
-# class FlowcellImporter(TransferFlowcell):
-
-#     """Import info from cgstats."""
-
-#     def process(self):
-#         """Transfer cgstats info to store."""
-#         query = self.stats.Flowcell.query
-#         with click.progressbar(query, length=query.count(), label='flowcells') as progressbar:
-#             for stats_record in progressbar:
-#                 new_record = self.transfer(stats_record.flowcellname, store=False)
-#                 self.db.add(new_record)
-#         self.db.commit()
-
-
 class AnalysisImporter(Store):
     def __init__(self, uri: str, hk_api):
         super(AnalysisImporter, self).__init__(uri)
         self.hk = hk_api
 
     def process(self):
-        """Transfer housekeeeper info to store."""
+        """Transfer housekeeper info to store"""
         query = self.hk.runs()
         with click.progressbar(query, length=query.count(), label="analyses") as progressbar:
             for hk_record in progressbar:
@@ -602,7 +591,7 @@ def transfer(admin, housekeeper, config_file):
 
     # PanelImporter(config['database'], scoutapi.ScoutAPI(config)).process()
 
-    lims_api = lims_app.LimsAPI(config)
+    lims_api = LimsAPI(config)
     SampleImporter(config["database"], lims_api).process()
     FamilyImporter(config["database"], lims_api).process()
     # FlowcellImporter(Store(config['database']), stats.StatsAPI(config)).process()

@@ -3,10 +3,9 @@ import logging
 from datetime import datetime
 from typing import List
 
-from housekeeper.store import models as hk_models
-
 from cg.apps.hk import HousekeeperAPI
 from cg.store import Store, models
+from housekeeper.store import models as hk_models
 
 LOG = logging.getLogger(__name__)
 
@@ -15,7 +14,9 @@ class StoreHelpers:
     """Class to hold helper functions that needs to be used all over"""
 
     @staticmethod
-    def ensure_hk_bundle(store: HousekeeperAPI, bundle_data: dict) -> hk_models.Bundle:
+    def ensure_hk_bundle(
+        store: HousekeeperAPI, bundle_data: dict, include: bool = False
+    ) -> hk_models.Bundle:
         """Utility function to add a bundle of information to a housekeeper api"""
         bundle_exists = False
         for bundle in store.bundles():
@@ -25,6 +26,8 @@ class StoreHelpers:
         if not bundle_exists:
             _bundle, _version = store.add_bundle(bundle_data)
             store.add_commit(_bundle, _version)
+        if include:
+            store.include(_version)
         return _bundle
 
     def ensure_hk_version(self, store: HousekeeperAPI, bundle_data: dict) -> hk_models.Version:
@@ -187,7 +190,7 @@ class StoreHelpers:
     def add_sample(
         self,
         store: Store,
-        sample_id: str = "sample_test",
+        sample_id: str = None,
         internal_id: str = None,
         gender: str = "female",
         is_tumour: bool = False,
@@ -199,10 +202,12 @@ class StoreHelpers:
         customer_name: str = None,
         reads: int = None,
         loqus_id: str = None,
+        ticket: int = None,
         **kwargs,
     ) -> models.Sample:
         """Utility function to add a sample to use in tests"""
         customer_name = customer_name or "cust000"
+        sample_name = sample_id or "sample_test"
         customer = self.ensure_customer(store, customer_name)
         application_version = self.ensure_application_version(
             store,
@@ -213,12 +218,13 @@ class StoreHelpers:
         )
         application_version_id = application_version.id
         sample = store.add_sample(
-            name=sample_id,
+            name=sample_name,
             sex=gender,
             tumour=is_tumour,
             sequenced_at=datetime.now(),
             data_analysis=data_analysis,
             reads=reads,
+            ticket=ticket,
         )
 
         sample.application_version_id = application_version_id
@@ -236,6 +242,9 @@ class StoreHelpers:
 
         if kwargs.get("prepared_at"):
             sample.received_at = kwargs["prepared_at"]
+
+        if kwargs.get("capture_kit"):
+            sample.capture_kit = kwargs["capture_kit"]
 
         if kwargs.get("flowcell"):
             sample.flowcells.append(kwargs["flowcell"])
@@ -268,6 +277,8 @@ class StoreHelpers:
         self,
         store: Store,
         family_id: str = "family_test",
+        action: str = None,
+        data_analysis: str = "mip",
         internal_id: str = None,
         customer_id: str = "cust000",
         panels: List = None,
@@ -286,8 +297,13 @@ class StoreHelpers:
             self.ensure_panel(store, panel_id=panel_name, customer_id=customer_id)
 
         if not family_obj:
-            family_obj = store.add_family(name=family_id, panels=panels)
-
+            family_obj = store.add_family(
+                data_analysis=data_analysis,
+                name=family_id,
+                panels=panels,
+            )
+        if action:
+            family_obj.action = action
         if internal_id:
             family_obj.internal_id = internal_id
 
@@ -295,10 +311,12 @@ class StoreHelpers:
         store.add_commit(family_obj)
         return family_obj
 
-    def ensure_family(self, store: Store, name: str, customer: models.Customer):
+    def ensure_family(
+        self, store: Store, name: str, customer: models.Customer, data_analysis: str = ""
+    ):
         family = store.find_family(customer=customer, name=name)
         if not family:
-            family = store.add_family(name=name, panels=None)
+            family = store.add_family(name=name, panels=None, data_analysis=data_analysis)
             family.customer = customer
         return family
 
@@ -316,7 +334,6 @@ class StoreHelpers:
             name=family_info["name"],
             panels=family_info["panels"],
             internal_id=family_info["internal_id"],
-            priority="standard",
             ordered_at=ordered_at,
         )
 
@@ -335,11 +352,13 @@ class StoreHelpers:
                 store,
                 customer_name=sample_data["name"],
                 gender=sample_data["sex"],
+                sample_id=sample_data.get("name"),
                 internal_id=sample_id,
                 data_analysis=data_analysis,
                 application_type=app_type,
                 ticket=sample_data["ticket_number"],
                 reads=sample_data["reads"],
+                capture_kit=sample_data["capture_kit"],
             )
             sample_objs[sample_id] = sample_obj
 

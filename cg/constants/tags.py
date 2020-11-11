@@ -1,96 +1,5 @@
-"""Constans for cg"""
+"""Tags for storing analyses in Housekeeper"""
 
-TMP_DIR = "/home/proj/production/rare-disease/temp-dir/"
-
-PRIORITY_MAP = {"research": 0, "standard": 1, "priority": 2, "express": 3, "clinical trials": 4}
-REV_PRIORITY_MAP = {value: key for key, value in PRIORITY_MAP.items()}
-PRIORITY_OPTIONS = list(PRIORITY_MAP.keys())
-FAMILY_ACTIONS = ("analyze", "running", "hold")
-PREP_CATEGORIES = ("wgs", "wes", "tgs", "wts", "mic", "rml")
-SEX_OPTIONS = ("male", "female", "unknown")
-STATUS_OPTIONS = ("affected", "unaffected", "unknown")
-CONTAINER_OPTIONS = ("Tube", "96 well plate")
-CAPTUREKIT_OPTIONS = (
-    "Agilent Sureselect CRE",
-    "Agilent Sureselect V5",
-    "SureSelect Focused Exome",
-    "Twist_Target_hg19.bed",
-    "other",
-)
-CAPTUREKIT_CANCER_OPTIONS = (
-    "GIcfDNA",
-    "GMCKsolid",
-    "GMSmyeloid",
-    "LymphoMATIC",
-    "other (specify in comment field)",
-)
-DEFAULT_CAPTURE_KIT = "twistexomerefseq_9.1_hg19_design.bed"
-
-COMBOS = {
-    "DSD": ("DSD", "HYP", "SEXDIF", "SEXDET"),
-    "CM": ("CNM", "CM"),
-    "Horsel": ("Horsel", "141217", "141201"),
-}
-COLLABORATORS = ("cust000", "cust002", "cust003", "cust004", "cust042")
-MASTER_LIST = (
-    "BRAIN",
-    "Cardiology",
-    "CTD",
-    "ENDO",
-    "EP",
-    "IBMFS",
-    "IEM",
-    "IF",
-    "NEURODEG",
-    "NMD",
-    "mcarta",
-    "MIT",
-    "MOVE",
-    "mtDNA",
-    "PEDHEP",
-    "PID",
-    "PIDCAD",
-    "OMIM-AUTO",
-    "SKD",
-)
-FLOWCELL_STATUS = ("ondisk", "removed", "requested", "processing")
-METAGENOME_SOURCES = (
-    "blood",
-    "skin",
-    "respiratory",
-    "urine",
-    "CSF",
-    "faeces",
-    "environmental",
-    "unknown",
-    "other",
-)
-ANALYSIS_SOURCES = (
-    "blood",
-    "buccal swab",
-    "cell-free DNA",
-    "cell line",
-    "cytology (FFPE)",
-    "cytology (not fixed/fresh)",
-    "muscle",
-    "nail",
-    "saliva",
-    "skin",
-    "tissue (FFPE)",
-    "tissue (fresh frozen)",
-    "bone marrow",
-    "other",
-)
-NO_PARENT = "0"
-
-# Constants for crunchy
-FASTQ_FIRST_READ_SUFFIX = "_R1_001.fastq.gz"
-FASTQ_SECOND_READ_SUFFIX = "_R2_001.fastq.gz"
-SPRING_SUFFIX = ".spring"
-# Number of days until fastqs counts as old
-FASTQ_DELTA = 21
-
-# tags for storing analyses in Housekeeper
 HK_TAGS = {
     "wes": ["mip-dna", "wes"],
     "wgs": ["mip-dna", "wgs"],
@@ -104,7 +13,12 @@ HK_FASTQ_TAGS = ["fastq"]
 # mandatory flag
 MIP_DNA_TAGS = {
     ("chanjo_sexcheck",): {"tags": ["chanjo", "sex-check"], "is_mandatory": False},
-    ("chromograph_ar",): {"tags": ["chromograph"], "is_mandatory": False},
+    ("chromograph_upd", "sites"): {"tags": ["chromograph", "upd", "sites"], "is_mandatory": False},
+    ("chromograph_upd", "regions"): {
+        "tags": ["chromograph", "upd", "regions"],
+        "is_mandatory": False,
+    },
+    ("chromograph_cov", "tcov"): {"tags": ["chromograph", "tcov"], "is_mandatory": False},
     ("endvariantannotationblock", "clinical"): {
         "tags": ["vcf-snv-clinical"],
         "index_tags": ["vcf-snv-clinical-index"],
@@ -146,6 +60,7 @@ MIP_DNA_TAGS = {
     ("peddy_ar", "peddy"): {"tags": ["peddy", "ped"], "is_mandatory": True},
     ("peddy_ar", "sex_check"): {"tags": ["peddy", "sex-check"], "is_mandatory": True},
     ("qccollect_ar",): {"tags": ["qcmetrics"], "is_mandatory": True},
+    ("rhocall_viz",): {"tags": ["rhocall-viz"], "is_mandatory": False},
     ("sambamba_depth", "coverage"): {"tags": ["coverage", "sambamba-depth"], "is_mandatory": True},
     ("samtools_subsample_mt",): {
         "tags": ["bam-mt"],
@@ -183,6 +98,8 @@ MIP_DNA_TAGS = {
         "tags": ["tiddit-coverage", "bigwig"],
         "is_mandatory": False,
     },
+    ("upd_ar", "regions"): {"tags": ["upd", "regions"], "is_mandatory": False},
+    ("upd_ar", "sites"): {"tags": ["upd", "sites"], "is_mandatory": False},
     ("version_collect_ar",): {"tags": ["exe-ver"], "is_mandatory": True},
     ("vcf2cytosure_ar",): {"tags": ["vcf2cytosure"], "is_mandatory": False},
 }
@@ -281,12 +198,3 @@ MICROSALT_TAGS = {
         "is_mandatory": True,
     },
 }
-
-# Symbols
-SINGLE_QUOTE = "'"
-SPACE = " "
-
-# Processes
-RETURN_SUCCESS = 0
-EXIT_SUCCESS = 0
-EXIT_FAIL = 1

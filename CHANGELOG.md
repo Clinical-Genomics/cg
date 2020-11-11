@@ -7,11 +7,168 @@ About changelog [here](https://keepachangelog.com/en/1.0.0/)
 Please add a new candidate release at the top after changing the latest one. Feel free to copy paste from the "squash and commit" box that gets generated when creating PRs
 
 Try to use the following format:
+
 ## [x.x.x]
 
 ### Added
+
 ### Changed
+
 ### Fixed
+
+## [16.0.1]
+
+### Added
+- Updated PR template to include implementation plan
+
+## [16.0.0]
+
+### Added
+- Deliver analysis based on case-id or ticket
+
+### Changed
+- Deliver commands merged into new command `cg deliver analysis` 
+
+## [15.0.4]
+### Fixed
+- fixed failing `cg microsalt store completed` cronjob
+
+## [15.0.3]
+### Fixed
+- Fixed path where microsalt deliverables files are located
+
+## [15.0.2]
+### Fixed
+- Wrap more cg workflow mip-dna store code in try-except in order to not cause future production blocks
+
+## [15.0.1]
+### Fixed
+- Fix bug in compress clean command
+
+## [15.0.0]
+
+### Added
+- New command: cg store ticket <ticket_id>
+- New command: cg store flowcell <flowcell_id>
+- New command: cg store case <case_id>
+- New command: cg store sample <sample_id> 
+
+### Removed
+- Old command: cg store fastq <case_id>
+
+## [14.0.1]
+
+### Fixed
+- Removed unused options form cg workflow balsamic base command
+
+
+## [14.0.0]
+
+### Added
+- New command: cg decompress ticket <ticket_id>
+- New command: cg decompress flowcell <flowcell_id>
+- New command: cg decompress case <case_id>
+- New command: cg decompress sample <sample_id> 
+
+### Removed
+- Old command: cg compress decompress spring <case_id>
+
+## [13.18.0]
+
+
+### Changed
+- Changed condition for which cases should be stored in CG. This fixes a bug where cg would try to store cases which already have been stored due to mismatch in timestamp stored in Trailblazer and Housekeeper
+
+## [13.17.2]
+
+### Changed
+- Only fastq files older than three weeks will be compressed
+
+
+## [13.17.1]
+
+### Added
+- Added new value to lims constants
+- Moved lims constants to a constants directory
+
+
+## [13.17.0]
+
+
+### Changed
+- Workflow mip-dna store no longer needs analysisrunstatus to be completed to attempt storing bundle
+
+
+## [13.16.2]
+
+### Fixed
+
+- Fixed bug where parse_mip_config() only returned values for primary analysis, breaking Upload Delivery Report
+
+
+## [13.16.1]
+
+### Fixed
+
+ - Fix bug where cg workflow mip store still relied on Trailblazer to find case_config.yaml (Where it can no longer be found)
+ - Fix bug where microsalt cli lost its store command in merge conflict
+
+
+## [13.16.0]
+
+### Added
+- New REST-based TrailblazerAPI
+### Changed
+- Trailblazer support for Balsamic
+### Fixed
+- Naming convention for API harmonized
+
+
+## [13.15.0]
+
+### Added
+- New query to get all cases in ticket
+
+## [13.14.3]
+
+### Changed
+
+- Refactors constants file
+
+## [13.14.2]
+
+### Fixed
+ 
+ - Fixed bug where CalledProcessError class could not be represented as string, and broke workflows.
+ - Rephrased query used for compression. The query output is unchanged
+ - Fixed typo in query name
+ 
+
+## [13.14.1]
+### Removed
+- Remove data_analysis from sample since it is deprecated
+
+## [13.14.0]
+### Changed
+- Move data_analysis from sample level to case level to enable samples to be analysed differently in different cases
+
+## [13.12.0]
+### Added
+- Store all available completed microbial analyses in HK
+
+## [13.11.0]
+
+### Changed
+- Balsamic always skips mutect when application is WES
+- SPRING compression is set to run on oldest families first
+
+### Fixed
+- Format print statements
+
+## [13.10.2]
+
+### Fixed
+- Storing chromograph, upd and rhocall files in housekeeper
 
 ## [13.10.1]
 
@@ -22,6 +179,9 @@ Try to use the following format:
 
 ### Added
 - Functionality to deploy `genotype` with CG on hasta
+
+### Fixed
+- Stored completed not parsing through all completed entries
 
 ## [13.9]
 

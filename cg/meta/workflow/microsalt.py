@@ -7,15 +7,18 @@
     datetime.min"""
 import gzip
 import logging
+from pathlib import Path
 import re
 from datetime import datetime
-from typing import Dict
+from typing import Dict, List
 
 from cg.apps.microsalt.fastq import FastqHandler
+from cg.constants import FAMILY_ACTIONS
 from cg.exc import CgDataError
 from cg.store.models import Sample
 
-from cg.apps import hk, lims
+from cg.apps.hk import HousekeeperAPI
+from cg.apps.lims import LimsAPI
 from cg.store import models, Store
 
 LOG = logging.getLogger(__name__)
@@ -27,14 +30,16 @@ class MicrosaltAnalysisAPI:
     def __init__(
         self,
         db: Store,
-        hk_api: hk.HousekeeperAPI,
-        lims_api: lims.LimsAPI,
+        hk_api: HousekeeperAPI,
+        lims_api: LimsAPI,
         fastq_handler: FastqHandler,
+        config: dict = None,
     ):
         self.db = db
         self.hk = hk_api
         self.lims = lims_api
         self.fastq_handler = fastq_handler
+        self.root_dir = config.get("root") if config else None
 
     def has_flowcells_on_disk(self, ticket: int) -> bool:
         """Check stuff before starting the analysis."""
@@ -248,3 +253,35 @@ class MicrosaltAnalysisAPI:
             elif flowcell_obj.status != "ondisk":
                 LOG.warning(f"{flowcell_obj.name}: {flowcell_obj.status}")
         self.db.commit()
+
+    def get_deliverables_to_store(self) -> List[Path]:
+        """Retrieve a list of microbial deliverables files for orders where analysis finished
+        successfully, and are ready to be stored in Housekeeper"""
+        deliverables_to_store = []
+        for case_object in self.db.cases_to_store(pipeline="microbial"):
+            deliverables_file = self.get_deliverables_file_path(order_id=case_object.name)
+            if not deliverables_file.exists():
+                continue
+            deliverables_to_store.append(deliverables_file)
+        return deliverables_to_store
+
+    def get_deliverables_file_path(self, order_id: str) -> Path:
+        """Returns a path where the microSALT deliverables file for the order_id should be
+        located"""
+        deliverables_file_path = Path(
+            self.root_dir,
+            "results/reports/deliverables",
+            order_id + "_deliverables.yaml",
+        )
+        return deliverables_file_path
+
+    def set_statusdb_action(self, name: str, action: str) -> None:
+        """Sets action on case based on ticket number"""
+        if action in [None, *FAMILY_ACTIONS]:
+            case_object = self.db.find_family(name)
+            case_object.action = action
+            self.db.commit()
+            return
+        LOG.warning(
+            f"Action '{action}' not permitted by StatusDB and will not be set for case {name}"
+        )

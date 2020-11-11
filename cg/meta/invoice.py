@@ -1,10 +1,10 @@
-from cg.apps import lims
+from cg.apps.lims import LimsAPI
 from cg.server.ext import lims as genologics_lims
 from cg.store import Store, models
 
 
 class InvoiceAPI:
-    def __init__(self, db: Store, lims_api: lims.LimsAPI, invoice_obj: models.Invoice):
+    def __init__(self, db: Store, lims_api: LimsAPI, invoice_obj: models.Invoice):
         self.db = db
         self.lims_api = lims_api
         self.log = []

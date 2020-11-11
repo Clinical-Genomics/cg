@@ -87,12 +87,12 @@ class MipAPI:
         return process_return_code
 
 
-def _append_value_for_non_flags(parameters: list, value):
+def _append_value_for_non_flags(parameters: list, value) -> None:
     """Add the value of the non boolean options to the parameters"""
     if value is not True:
         parameters.append(value)
 
 
-def _cg_to_mip_option_map(parameters: list, mip_key):
+def _cg_to_mip_option_map(parameters: list, mip_key) -> None:
     """Map cg options to MIP option syntax"""
     parameters.append(CLI_OPTIONS[mip_key]["option"])

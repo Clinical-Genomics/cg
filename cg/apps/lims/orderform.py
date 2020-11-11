@@ -16,7 +16,7 @@ VALID_ORDERFORMS = [
     "1604:9",  # Orderform Ready made libraries (RML)
     "1605:8",  # Microbial metagenomes
 ]
-CASE_PROJECT_TYPES = ["mip", "external", "balsamic", "mip_balsamic", "mip_rna"]
+CASE_PROJECT_TYPES = ["mip", "external", "balsamic", "mip_rna"]
 
 
 def check_orderform_version(document_title):
@@ -228,9 +228,7 @@ def parse_sample(raw_sample):
 
     data_analysis = raw_sample.get("UDF/Data Analysis").lower()
 
-    if "mip" in data_analysis and data_analysis and "balsamic" in data_analysis:
-        sample["analysis"] = "mip_balsamic"
-    elif data_analysis and "balsamic" in data_analysis:
+    if data_analysis and "balsamic" in data_analysis:
         sample["analysis"] = "balsamic"
     elif data_analysis and "mip rna" in data_analysis:
         sample["analysis"] = "mip_rna"

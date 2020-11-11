@@ -4,14 +4,15 @@ import logging
 
 import click
 
-from cg.apps import hk, lims, scoutapi, tb
+from cg.apps.hk import HousekeeperAPI
+from cg.apps.lims import LimsAPI
+from cg.apps.scoutapi import ScoutAPI
+from cg.apps.tb import TrailblazerAPI
+
 from cg.apps.environ import environ_email
 from cg.cli.workflow.get_links import get_links
 from cg.cli.workflow.mip.store import store as store_cmd
-from cg.cli.workflow.mip_rna.deliver import CASE_TAGS, SAMPLE_TAGS
-from cg.cli.workflow.mip_rna.deliver import deliver as deliver_cmd
-from cg.meta.deliver import DeliverAPI
-from cg.meta.workflow.mip import AnalysisAPI
+from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import Store
 from cg.store.utils import case_exists
 
@@ -22,20 +23,18 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def mip_rna(context: click.Context):
     """Rare disease RNA workflow"""
+    context.obj["housekeeper_api"] = HousekeeperAPI(context.obj)
+    context.obj["trailblazer_api"] = TrailblazerAPI(context.obj)
+    context.obj["scout_api"] = ScoutAPI(context.obj)
+    context.obj["lims_api"] = LimsAPI(context.obj)
+    context.obj["status_db"] = Store(context.obj["database"])
 
-    context.obj["rna_api"] = AnalysisAPI(
-        db=Store(context.obj["database"]),
-        hk_api=hk.HousekeeperAPI(context.obj),
-        tb_api=tb.TrailblazerAPI(context.obj),
-        scout_api=scoutapi.ScoutAPI(context.obj),
-        lims_api=lims.LimsAPI(context.obj),
-        deliver_api=DeliverAPI(
-            context.obj,
-            hk_api=hk.HousekeeperAPI(context.obj),
-            lims_api=lims.LimsAPI(context.obj),
-            case_tags=CASE_TAGS,
-            sample_tags=SAMPLE_TAGS,
-        ),
+    context.obj["rna_api"] = MipAnalysisAPI(
+        db=context.obj["status_db"],
+        hk_api=context.obj["housekeeper_api"],
+        tb_api=context.obj["trailblazer_api"],
+        scout_api=context.obj["scout_api"],
+        lims_api=context.obj["lims_api"],
         script=context.obj["mip-rd-rna"]["script"],
         pipeline=context.obj["mip-rd-rna"]["pipeline"],
         conda_env=context.obj["mip-rd-rna"]["conda_env"],
@@ -54,9 +53,9 @@ def link(context: click.Context, case_id: str, sample_id: str):
 
     for link_obj in link_objs:
         LOG.info(
-            "%s: %s link FASTQ files", link_obj.sample.internal_id, link_obj.sample.data_analysis
+            "%s: %s link FASTQ files", link_obj.sample.internal_id, link_obj.family.data_analysis
         )
-        if "mip + rna" in link_obj.sample.data_analysis.lower():
+        if "mip + rna" in link_obj.family.data_analysis.lower():
             rna_api.link_sample(
                 sample=link_obj.sample,
                 case_id=case_id,
@@ -86,7 +85,7 @@ def run(
 
     if not case_exists(case_obj, case_id):
         raise click.Abort()
-    if rna_api.tb.analyses(family=case_obj.internal_id, temp=True).first():
+    if rna_api.get_analyses_from_trailblazer(case_id=case_obj.internal_id, temp=True):
         LOG.warning("%s: analysis already running", case_obj.internal_id)
         return
 
@@ -109,8 +108,16 @@ def run(
         LOG.info("Executed MIP in dry-run mode - skipping Trailblazer step")
         return
 
-    rna_api.tb.mark_analyses_deleted(case_id=case_id)
-    rna_api.tb.add_pending_analysis(case_id=case_id, email=email)
+    rna_api.mark_analyses_deleted(case_id=case_id)
+    rna_api.add_pending_analysis(
+        case_id=case_id,
+        email=email,
+        type=rna_api.get_application_type(case_id),
+        out_dir=rna_api.get_case_output_path(case_id).as_posix(),
+        config_path=rna_api.get_slurm_job_ids_path(case_id).as_posix(),
+        priority="normal",
+        data_analysis="MIP-RNA",
+    )
     rna_api.set_statusdb_action(case_id=case_id, action="running")
     LOG.info("MIP rd-rna run started!")
 
@@ -135,4 +142,3 @@ def config_case(context: click.Context, case_id: str, dry: bool = False):
 
 
 mip_rna.add_command(store_cmd)
-mip_rna.add_command(deliver_cmd)

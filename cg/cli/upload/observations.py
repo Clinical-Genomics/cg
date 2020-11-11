@@ -3,7 +3,7 @@ import logging
 
 import click
 
-from cg.apps import loqus
+from cg.apps.loqus import LoqusdbAPI
 from cg.exc import DuplicateRecordError, DuplicateSampleError
 from cg.meta.upload.observations import UploadObservationsAPI
 
@@ -23,10 +23,10 @@ def observations(context, case_id, case_limit, dry_run):
     click.echo(click.style("----------------- OBSERVATIONS ----------------"))
 
     loqus_apis = {
-        "wgs": loqus.LoqusdbAPI(context.obj),
-        "wes": loqus.LoqusdbAPI(context.obj, analysis_type="wes"),
+        "wgs": LoqusdbAPI(context.obj),
+        "wes": LoqusdbAPI(context.obj, analysis_type="wes"),
     }
-    status_api = context.obj["status"]
+    status_api = context.obj["status_db"]
     hk_api = context.obj["housekeeper_api"]
 
     if case_id:
@@ -50,7 +50,7 @@ def observations(context, case_id, case_limit, dry_run):
             )
             continue
 
-        if not LinkHelper.all_samples_data_analysis(family_obj.links, ["MIP", "", None]):
+        if family_obj.data_analysis.lower() != "mip":
             LOG.info("%s: has non-MIP data_analysis. Skipping!", family_obj.internal_id)
             continue
 
@@ -58,7 +58,7 @@ def observations(context, case_id, case_limit, dry_run):
             LOG.info("%s: has tumour samples. Skipping!", family_obj.internal_id)
             continue
 
-        analysis_list = LinkHelper.all_samples_list_analyses(family_obj.links)
+        analysis_list = LinkHelper.get_analysis_type_for_each_link(family_obj.links)
         if not (len(set(analysis_list)) == 1 and analysis_list[0] in ("wes", "wgs")):
             LOG.info(
                 "%s: Undetermined analysis type (wes or wgs) or mixed analyses. Skipping!",

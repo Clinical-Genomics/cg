@@ -11,7 +11,7 @@ from cg.exc import CaseNotFoundError
 from cg.meta.compress import CompressAPI
 from cg.meta.compress.files import get_spring_paths
 from cg.store import Store, models
-from cg.store.get.cases import ready_for_spring_compresssion
+from cg.store.get.cases import ready_for_spring_compression
 
 LOG = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ def get_fastq_cases(store: Store, case_id: str = None):
     """Return cases ready for SPRING compression"""
     if case_id:
         return get_cases(store, case_id)
-    return ready_for_spring_compresssion(store)
+    return ready_for_spring_compression(store)
 
 
 def get_cases(store: Store, case_id: str = None) -> List[models.Family]:
@@ -50,7 +50,6 @@ def update_compress_api(
 ) -> None:
     """Update parameters in compress api"""
 
-    LOG.info("Update compress api")
     compress_api.set_dry_run(dry_run)
     if ntasks:
         LOG.info("Set ntasks to %s", ntasks)
