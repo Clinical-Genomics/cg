@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [15.0.4]
+### Fixed
+- fixed failing `cg microsalt store completed` cronjob
+
 ## [15.0.3]
 ### Fixed
 - Fixed path where microsalt deliverables files are located
