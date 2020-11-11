@@ -16,6 +16,11 @@ Try to use the following format:
 
 ### Fixed
 
+## [16.0.2]
+
+### Added
+- Added case intentmayfly to list of cases to except from SPRING compression
+
 ## [16.0.1]
 
 ### Added
