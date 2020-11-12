@@ -240,7 +240,9 @@ def sample(context, sample_id, kwargs, skip_lims, yes, help):
 
         old_value = getattr(sample_obj, new_key)
 
-        click.echo(f"Would change from {new_key}={old_value} to {new_key}={new_value} on {sample_obj}")
+        click.echo(
+            f"Would change from {new_key}={old_value} to {new_key}={new_value} on {sample_obj}"
+        )
 
         if not (yes or click.confirm(CONFIRM)):
             continue

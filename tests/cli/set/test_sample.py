@@ -241,4 +241,3 @@ def test_application(cli_runner, base_context, base_store: Store, helpers):
     # THEN then the application should have been set in LIMS
     assert base_context["lims_api"].get_updated_sample_key() == "application"
     assert base_context["lims_api"].get_updated_sample_value() == application_tag
-
