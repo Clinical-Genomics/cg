@@ -36,6 +36,31 @@ def balsamic_clean_store(base_store: Store, timestamp_yesterday: dt.datetime, he
         uploaded_at=timestamp_yesterday,
         cleaned_at=None,
     )
+
+    # Create textbook case not for cleaning
+    case_to_not_clean = helpers.add_family(
+        store=store, internal_id="balsamic_case_not_clean", family_id="balsamic_case_not_clean"
+    )
+    case_to_not_clean.action = "running"
+    store.commit()
+
+    sample_case_to_not_clean = helpers.add_sample(
+        store,
+        internal_id="balsamic_sample_not_clean",
+        is_tumour=True,
+        application_type="wgs",
+        data_analysis="balsamic",
+    )
+    helpers.add_relationship(store, family=case_to_not_clean, sample=sample_case_to_not_clean)
+
+    helpers.add_analysis(
+        store,
+        family=case_to_not_clean,
+        pipeline="balsamic",
+        started_at=timestamp_yesterday,
+        uploaded_at=timestamp_yesterday,
+        cleaned_at=None,
+    )
     return store
 
 

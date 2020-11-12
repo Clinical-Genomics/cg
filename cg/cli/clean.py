@@ -241,13 +241,12 @@ def balsamic_past_run_dirs(context, before_str: str, yes: bool = False, dry_run:
 
     for analysis in possible_cleanups:
         case_id = analysis.family.internal_id
+        LOG.info(f"{case_id} - {balsamic_analysis_api.store.family(case_id).action}")
         try:
             LOG.info(f"Cleaning Balsamic output for {case_id}")
             context.invoke(balsamic_run_dir, yes=yes, case_id=case_id, dry_run=dry_run)
         except Exception as e:
-            LOG.error(
-                f"Failed to clean directories for case {analysis.family.internal_id} - {e.__class__}"
-            )
+            LOG.error(f"Failed to clean directories for case {case_id} - {e.__class__}")
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort
