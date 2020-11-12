@@ -1,10 +1,10 @@
-from cg.apps.lims import orderform
+from cg.apps.lims import limsjson
 
 
-def test_parsing_rml_orderform(rml_orderform):
+def test_parsing_rml_json(rml_order_to_submit):
     # GIVEN a path to a RML orderform with 2 sample in a pool
     # WHEN parsing the file
-    data = orderform.parse_orderform(rml_orderform)
+    data = limsjson.parse_json(rml_order_to_submit)
 
     # THEN it should determine the type of project and customer
     assert data["project_type"] == "rml"
@@ -36,11 +36,11 @@ def test_parsing_rml_orderform(rml_orderform):
     assert sample_data["capture_kit"] == "Agilent Sureselect CRE"
 
 
-def test_parsing_fastq_orderform(fastq_orderform):
+def test_parsing_fastq_json(fastq_order_to_submit):
 
     # GIVEN a FASTQ orderform with 2 samples, one normal, one tumour
     # WHEN parsing the file
-    data = orderform.parse_orderform(fastq_orderform)
+    data = orderform.parse_json(fastq_order_to_submit)
 
     # THEN it should determine the project type
     assert data["project_type"] == "fastq"
@@ -73,11 +73,11 @@ def test_parsing_fastq_orderform(fastq_orderform):
     assert tumour_sample["comment"] == "other Elution buffer"
 
 
-def test_parsing_mip_orderform(mip_orderform):
+def test_parsing_mip_json(mip_order_to_submit):
 
     # GIVEN an order form for a Scout order with 4 samples, 1 trio, in a plate
     # WHEN parsing the order form
-    data = orderform.parse_orderform(mip_orderform)
+    data = orderform.parse_json(mip_order_to_submit)
 
     # THEN it should detect the type of project
     assert data["project_type"] == "mip"
@@ -118,11 +118,11 @@ def test_parsing_mip_orderform(mip_orderform):
     assert proband_sample["comment"] == "other Elution buffer"
 
 
-def test_parsing_external_orderform(external_orderform):
+def test_parsing_external_json(external_order_to_submit):
 
     # GIVEN an orderform for two external samples, one WES, one WGS
     # WHEN parsing the file
-    data = orderform.parse_orderform(external_orderform)
+    data = orderform.parse_json(external_order_to_submit)
 
     # THEN it should detect the project type
     assert data["project_type"] == "external"
@@ -164,11 +164,11 @@ def test_parsing_external_orderform(external_orderform):
     assert wgs_sample.get("capture_kit") == "Agilent Sureselect CRE"
 
 
-def test_parsing_metagenome_orderform(metagenome_orderform):
+def test_parsing_metagenome_json(metagenome_order_to_submit):
 
     # GIVEN an orderform for one metagenome sample
     # WHEN parsing the file
-    data = orderform.parse_orderform(metagenome_orderform)
+    data = orderform.parse_json(metagenome_order_to_submit)
 
     # THEN it should detect the project type
     assert data["project_type"] == "metagenome"
@@ -198,11 +198,11 @@ def test_parsing_metagenome_orderform(metagenome_orderform):
     assert sample["comment"] == "comment"
 
 
-def test_parsing_microbial_orderform(microbial_orderform):
+def test_parsing_microbial_json(microbial_order_to_submit):
     # GIVEN a path to a microbial orderform with 3 samples
 
     # WHEN parsing the file
-    data = orderform.parse_orderform(microbial_orderform)
+    data = orderform.parse_json(microbial_order_to_submit)
 
     # THEN it should determine the type of project and customer
     assert data["project_type"] == "microbial"
@@ -237,11 +237,11 @@ def test_parsing_microbial_orderform(microbial_orderform):
     assert sample_data["comment"] == "comment"
 
 
-def test_parsing_balsamic_orderform(balsamic_orderform):
+def test_parsing_balsamic_json(balsamic_order_to_submit):
 
     # GIVEN an order form for a cancer order with 11 samples,
     # WHEN parsing the order form
-    data = orderform.parse_orderform(balsamic_orderform)
+    data = orderform.parse_json(balsamic_order_to_submit)
 
     # THEN it should detect the type of project
     assert data["project_type"] == "balsamic"
@@ -290,11 +290,11 @@ def test_parsing_balsamic_orderform(balsamic_orderform):
     assert sample["comment"] == "other Elution buffer"
 
 
-def test_parsing_mip_rna_orderform(mip_rna_orderform):
+def test_parsing_mip_rna_json(mip_rna_order_to_submit):
 
     # GIVEN an order form for a mip balsamic order with 3 samples, 1 trio, in a plate
     # WHEN parsing the order form
-    data = orderform.parse_orderform(mip_rna_orderform)
+    data = orderform.parse_json(mip_rna_order_to_submit)
 
     # THEN it should detect the type of project
     assert data["project_type"] == "mip_rna"
@@ -338,42 +338,3 @@ def test_parsing_mip_rna_orderform(mip_rna_orderform):
     # required for RNA samples
     assert first_sample["from_sample"] == "s1"
     assert first_sample["time_point"] == "0"
-
-
-def test_parse_mip_rna(skeleton_orderform_sample: dict):
-
-    # GIVEN a raw sample with mip only value from orderform 1508 for data_analysis
-    raw_sample = skeleton_orderform_sample
-    raw_sample["UDF/Data Analysis"] = "MIP RNA"
-
-    # WHEN parsing the sample
-    parsed_sample = orderform.parse_sample(raw_sample)
-
-    # THEN data_analysis is mip only
-    assert parsed_sample["analysis"] == "mip_rna"
-
-
-def test_parse_mip_only(skeleton_orderform_sample: dict):
-
-    # GIVEN a raw sample with mip only value from orderform 1508 for data_analysis
-    raw_sample = skeleton_orderform_sample
-    raw_sample["UDF/Data Analysis"] = "MIP"
-
-    # WHEN parsing the sample
-    parsed_sample = orderform.parse_sample(raw_sample)
-
-    # THEN data_analysis is mip only
-    assert parsed_sample["analysis"] == "mip"
-
-
-def test_parse_balsamic_only(skeleton_orderform_sample: dict):
-
-    # GIVEN a raw sample with balsamic only value from orderform 1508 for data_analysis
-    raw_sample = skeleton_orderform_sample
-    raw_sample["UDF/Data Analysis"] = "Balsamic "
-
-    # WHEN parsing the sample
-    parsed_sample = orderform.parse_sample(raw_sample)
-
-    # THEN data_analysis is balsamic only
-    assert parsed_sample["analysis"] == "balsamic"

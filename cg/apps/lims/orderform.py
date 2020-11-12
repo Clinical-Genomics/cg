@@ -13,7 +13,7 @@ VALID_ORDERFORMS = [
     "1508:21",  # Orderform MIP, Balsamic, sequencing only, MIP RNA
     "1541:6",  # Orderform Externally sequenced samples
     "1603:9",  # Microbial WGS
-    "1604:9",  # Orderform Ready made libraries (RML)
+    "1604:10",  # Orderform Ready made libraries (RML)
     "1605:8",  # Microbial metagenomes
 ]
 CASE_PROJECT_TYPES = ["mip", "external", "balsamic", "mip_rna"]
@@ -236,6 +236,8 @@ def parse_sample(raw_sample):
         sample["analysis"] = "mip"
     elif data_analysis and ("fastq" in data_analysis or data_analysis == "custom"):
         sample["analysis"] = "fastq"
+    elif data_analysis and "fluffy" in data_analysis:
+        sample["analysis"] = "fluffy"
     else:
         raise OrderFormError(f"unknown 'Data Analysis' for order: {data_analysis}")
 
@@ -244,6 +246,7 @@ def parse_sample(raw_sample):
         ("volume", "UDF/Volume (uL)"),
         ("quantity", "UDF/Quantity"),
         ("concentration", "UDF/Concentration (nM)"),
+        ("concentration_pool", "UDF/Concentration Pool (nM)"),
         ("concentration_weight", "UDF/Sample Conc."),
         ("time_point", "UDF/time_point"),
     ]

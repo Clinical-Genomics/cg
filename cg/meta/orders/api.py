@@ -106,6 +106,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
         """Submit a batch of ready made libraries."""
         status_data = self.pools_to_status(data)
         project_data, _ = self.process_lims(data, data["samples"])
+        self.process_nipt(data["samples"])
         new_records = self.store_pools(
             customer=status_data["customer"],
             order=status_data["order"],

@@ -242,7 +242,7 @@ FASTQ_SAMPLE = {
 }
 
 RML_SAMPLE = {
-    # 1604:9 Orderform Ready made libraries (RML)
+    # 1604:10 Orderform Ready made libraries (RML)
     # Order portal specific
     "priority": str,
     # "This information is required"
@@ -252,6 +252,7 @@ RML_SAMPLE = {
     "data_analysis": str,
     "volume": str,
     "concentration": str,
+    "concentration_pool": str,
     "index": str,
     "index_number": OptionalNone(TypeValidatorNone(str)),  # optional for NoIndex
     # "Required if Plate"
