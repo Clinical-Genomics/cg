@@ -228,11 +228,8 @@ def sample(context, sample_id, kwargs, skip_lims, yes, help):
         new_key = key
         new_value = value
 
-        if key in ["customer", "application_version", "priority"]:
-            if key == "priority":
-                if isinstance(value, str):
-                    new_key = "priority_human"
-            elif key == "customer":
+        if key in ["customer", "application_version"]:
+            if key == "customer":
                 new_value = context.obj["status_db"].customer(value)
             elif key == "application_version":
                 new_value = context.obj["status_db"].current_application_version(value)
@@ -256,22 +253,22 @@ def sample(context, sample_id, kwargs, skip_lims, yes, help):
 
         for key, value in kwargs:
 
-            if key == "priority":
-                new_value = sample_obj.priority_human
+            if key == "application_version":
+                new_key = "application"
             else:
-                new_value = value
+                new_key = key
 
-            click.echo(f"Would set {key} to {new_value} for {sample_obj.internal_id} in LIMS")
+            click.echo(f"Would set {new_key} to {value} for {sample_obj.internal_id} in LIMS")
 
             if not (yes or click.confirm(CONFIRM)):
                 context.abort()
 
             try:
-                context.obj["lims_api"].update_sample(lims_id=sample_id, **{key: new_value})
-                click.echo(click.style(f"Set LIMS/{key} to {new_value}", fg="blue"))
+                context.obj["lims_api"].update_sample(lims_id=sample_id, **{new_key: value})
+                click.echo(click.style(f"Set LIMS/{new_key} to {value}", fg="blue"))
             except LimsDataError as err:
                 click.echo(
-                    click.style(f"Failed to set LIMS/{key} to {new_value}, {err.message}", fg="red")
+                    click.style(f"Failed to set LIMS/{new_key} to {value}, {err.message}", fg="red")
                 )
 
 

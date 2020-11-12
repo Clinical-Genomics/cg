@@ -119,47 +119,6 @@ def test_sex(cli_runner, base_context, base_store: Store, helpers):
     assert base_context["lims_api"].get_updated_sample_value() == new_value
 
 
-def test_priority_text(cli_runner, base_context, base_store: Store, helpers):
-    # GIVEN a database with a sample
-    sample_obj = helpers.add_sample(base_store, gender="female")
-    key = "priority"
-    new_value = "express"
-    assert sample_obj.priority_human != new_value
-
-    # WHEN setting key on sample to new_value
-    result = cli_runner.invoke(
-        sample, [sample_obj.internal_id, "-kv", key, new_value, "-y"], obj=base_context
-    )
-
-    # THEN then it should have new_value as attribute key on the sample and in LIMS
-    assert result.exit_code == SUCCESS
-    assert sample_obj.priority_human == new_value
-    assert base_context["lims_api"].get_updated_sample_key() == key
-    assert base_context["lims_api"].get_updated_sample_value() == sample_obj.priority_human
-
-
-def test_priority_number(cli_runner, base_context, base_store: Store, helpers):
-    # GIVEN a database with a sample
-    sample_obj = helpers.add_sample(base_store, gender="female")
-    key = "priority"
-    new_value = 2
-    assert sample_obj.priority != new_value
-
-    # WHEN setting key on sample to new_value
-    result = cli_runner.invoke(
-        sample, [sample_obj.internal_id, "-kv", key, new_value, "-y"], obj=base_context,
-        catch_exceptions=False
-    )
-
-    # THEN then it should have new_value as attribute key on the sample and in LIMS
-    print(result.output)
-    assert result.exit_code == SUCCESS
-    assert sample_obj.priority == new_value
-    assert base_context["lims_api"].get_updated_sample_key() == key
-    assert base_context["lims_api"].get_updated_sample_value() == sample_obj.priority_human
-
-
-
 def test_invalid_customer(cli_runner, base_context, base_store: Store, helpers):
     # GIVEN a database with a sample
     sample_id = helpers.add_sample(base_store).internal_id
@@ -272,11 +231,14 @@ def test_application(cli_runner, base_context, base_store: Store, helpers):
             "application_version",
             application_tag,
             "-y",
-            "--skip-lims",
         ],
         obj=base_context,
     )
 
-    # THEN then the application should have been set
+    # THEN then the application should have been set in status db
     assert result.exit_code == SUCCESS
     assert sample_obj.application_version.application.tag == application_tag
+    # THEN then the application should have been set in LIMS
+    assert base_context["lims_api"].get_updated_sample_key() == "application"
+    assert base_context["lims_api"].get_updated_sample_value() == application_tag
+
