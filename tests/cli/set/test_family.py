@@ -121,8 +121,10 @@ def test_set_family_data_analysis(cli_runner, base_context, base_store: Store, h
 
     # WHEN setting a data_analysis of a case
     result = cli_runner.invoke(
-        family, [case_obj.internal_id, "--data-analysis", str(data_analysis)], obj=base_context,
-        catch_exceptions=False
+        family,
+        [case_obj.internal_id, "--data-analysis", str(data_analysis)],
+        obj=base_context,
+        catch_exceptions=False,
     )
 
     # THEN then it should set data_analysis on the case
