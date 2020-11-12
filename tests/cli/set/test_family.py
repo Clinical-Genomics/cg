@@ -1,6 +1,7 @@
 """This script tests the cli methods to set families to status-db"""
 
 from cg.cli.set.family import family
+from cg.constants import Pipeline
 from cg.store import Store
 
 SUCCESS = 0
@@ -92,3 +93,39 @@ def test_set_family_customer(cli_runner, base_context, base_store: Store, helper
     # THEN then it should set customer on the family
     assert result.exit_code == SUCCESS
     assert customer_id == case.customer.internal_id
+
+
+def test_set_family_bad_data_analysis(cli_runner, base_context, base_store: Store, helpers):
+    """Test to set a family using a non-existing data_analysis"""
+    # GIVEN a database with a family
+
+    # WHEN setting a data_analysis on a family
+    data_analysis = "dummy_pipeline"
+    family_id = helpers.add_family(base_store).internal_id
+    result = cli_runner.invoke(
+        family, [family_id, "--data-analysis", data_analysis], obj=base_context
+    )
+
+    # THEN then it should complain in non valid data_analysis instead of setting a value
+    assert result.exit_code != SUCCESS
+    assert str(data_analysis) != base_store.Family.query.first().data_analysis
+
+
+def test_set_family_data_analysis(cli_runner, base_context, base_store: Store, helpers):
+    """Test to set a family using an existing data_analysis"""
+
+    # GIVEN a database with a family and a data_analysis not yet set on the case
+    data_analysis = Pipeline.FASTQ
+    case_obj = helpers.add_family(base_store)
+    assert str(data_analysis) != case_obj.data_analysis
+
+    # WHEN setting a data_analysis of a case
+    result = cli_runner.invoke(
+        family, [case_obj.internal_id, "--data-analysis", str(data_analysis)], obj=base_context,
+        catch_exceptions=False
+    )
+
+    # THEN then it should set data_analysis on the case
+    print(result.output)
+    assert result.exit_code == SUCCESS
+    assert str(data_analysis) == case_obj.data_analysis
