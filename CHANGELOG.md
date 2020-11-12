@@ -7,11 +7,53 @@ About changelog [here](https://keepachangelog.com/en/1.0.0/)
 Please add a new candidate release at the top after changing the latest one. Feel free to copy paste from the "squash and commit" box that gets generated when creating PRs
 
 Try to use the following format:
+
 ## [x.x.x]
 
 ### Added
+
 ### Changed
+
 ### Fixed
+
+## [16.0.3]
+
+### Fixed
+- Microbial config-case now correctly imports reference from customer provided reference
+
+## [16.0.2]
+
+### Added
+- Added case intentmayfly to list of cases to except from SPRING compression
+
+## [16.0.1]
+
+### Added
+- Updated PR template to include implementation plan
+
+## [16.0.0]
+
+### Added
+- Deliver analysis based on case-id or ticket
+
+### Changed
+- Deliver commands merged into new command `cg deliver analysis` 
+
+## [15.0.4]
+### Fixed
+- fixed failing `cg microsalt store completed` cronjob
+
+## [15.0.3]
+### Fixed
+- Fixed path where microsalt deliverables files are located
+
+## [15.0.2]
+### Fixed
+- Wrap more cg workflow mip-dna store code in try-except in order to not cause future production blocks
+
+## [15.0.1]
+### Fixed
+- Fix bug in compress clean command
 
 ## [15.0.0]
 
