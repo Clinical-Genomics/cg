@@ -9,6 +9,7 @@ from cg.store import Store, models
 @click.argument("config_path")
 @click.pass_context
 def set_analysis_status_cleaned_mip(config_path: str):
+    """Updates all cleaned_at timestamps for mip cases"""
 
     config_dict = yaml.safe_load(open(config_path))
     case_dir = config_dict["mip-rd-dna"]["root"]
