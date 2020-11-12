@@ -39,14 +39,14 @@ class Pipeline(StrEnum):
     BALSAMIC: str = "balsamic"
     FASTQ: str = "fastq"
     MICROSALT: str = "microsalt"
-    MIP_DNA: str = "mip_dna"
-    MIP_RNA: str = "mip_rna"
+    MIP_DNA: str = "mip-dna"
+    MIP_RNA: str = "mip-rna"
 
 
 class Delivery(StrEnum):
     FASTQ: str = "fastq"
     QC: str = "qc"
-    STANDARD: str = "standard"
+    SCOUT: str = "scout"
 
 
 PREP_CATEGORIES = ("wgs", "wes", "tgs", "wts", "mic", "rml")

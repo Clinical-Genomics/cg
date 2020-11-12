@@ -14,6 +14,7 @@ from cg.cli.workflow.get_links import get_links
 from cg.cli.workflow.mip.store import store as store_cmd
 from cg.cli.workflow.mip_rna.deliver import CASE_TAGS, SAMPLE_TAGS
 from cg.cli.workflow.mip_rna.deliver import deliver as deliver_cmd
+from cg.constants import Pipeline
 from cg.meta.deliver import DeliverAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import Store
@@ -126,7 +127,7 @@ def run(
         out_dir=rna_api.get_case_output_path(case_id).as_posix(),
         config_path=rna_api.get_slurm_job_ids_path(case_id).as_posix(),
         priority="normal",
-        data_analysis="MIP-RNA",
+        data_analysis=Pipeline.MIP_RNA,
     )
     rna_api.set_statusdb_action(case_id=case_id, action="running")
     LOG.info("MIP rd-rna run started!")

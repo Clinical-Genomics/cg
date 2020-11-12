@@ -96,7 +96,7 @@ class BundleAlreadyAddedError(CgError):
 
 class PipelineUnknownError(CgError):
     """
-    Exception raised when a sample in a case has no data anlysis type
+    Exception raised when a sample in a case has no data analysis type
     """
 
 
@@ -147,3 +147,7 @@ class TrailblazerAPIHTTPError(CgError):
 
 class TrailblazerMissingAnalysisError(CgError):
     """Raised when Trailblazer REST API response code is not 200"""
+
+
+class TrailblazerPipelineUnsupportedError(CgError):
+    """Raised when Trailblazer API is called with an unsupported pipeline"""

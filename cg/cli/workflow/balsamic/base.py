@@ -13,7 +13,7 @@ from cg.apps.tb import TrailblazerAPI
 from cg.exc import BalsamicStartError, BundleAlreadyAddedError, LimsDataError
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.store import Store
-from cg.constants import EXIT_SUCCESS, EXIT_FAIL
+from cg.constants import EXIT_SUCCESS, EXIT_FAIL, Pipeline
 
 LOG = logging.getLogger(__name__)
 
@@ -148,7 +148,7 @@ def run(context, analysis_type, run_analysis, priority, case_id, dry):
             out_dir=balsamic_analysis_api.get_case_path(case_id),
             config_path=balsamic_analysis_api.get_slurm_job_ids_path(case_id).as_posix(),
             priority=balsamic_analysis_api.get_priority(case_id),
-            data_analysis="BALSAMIC",
+            data_analysis=Pipeline.BALSAMIC,
         )
         balsamic_analysis_api.set_statusdb_action(case_id=case_id, action="running")
     except BalsamicStartError as e:

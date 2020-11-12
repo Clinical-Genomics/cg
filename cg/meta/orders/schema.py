@@ -1,6 +1,5 @@
 from collections import Iterable
-from enum import Enum
-
+from cg.utils.StrEnum import StrEnum
 from pyschemes import Scheme, validators
 
 from cg.constants import (
@@ -8,19 +7,19 @@ from cg.constants import (
     SEX_OPTIONS,
     STATUS_OPTIONS,
     CAPTUREKIT_OPTIONS,
-    CONTAINER_OPTIONS,
+    CONTAINER_OPTIONS, Pipeline,
 )
 
 
-class OrderType(Enum):
-    MIP_RNA = "mip_rna"
-    EXTERNAL = "external"
-    FASTQ = "fastq"
-    RML = "rml"
-    MIP_DNA = "mip_dna"
-    MICROSALT = "microsalt"
-    METAGENOME = "metagenome"
-    BALSAMIC = "balsamic"
+class OrderType(StrEnum):
+    BALSAMIC: str = str(Pipeline.BALSAMIC)
+    EXTERNAL: str = "external",
+    FASTQ: str = "fastq"
+    METAGENOME: str = "metagenome"
+    MICROSALT: str = str(Pipeline.MICROSALT)
+    MIP_DNA: str = str(Pipeline.MIP_DNA)
+    MIP_RNA: str = str(Pipeline.MIP_RNA)
+    RML: str = "rml"
 
 
 class ListValidator(validators.Validator):

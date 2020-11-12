@@ -462,6 +462,7 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         priority: str,
         data_analysis: Pipeline,
     ) -> TrailblazerAnalysis:
+
         return self.tb.add_pending_analysis(
             case_id=case_id,
             email=email,
@@ -469,7 +470,7 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
             out_dir=out_dir,
             config_path=config_path,
             priority=priority,
-            data_analysis=str(data_analysis),
+            data_analysis=data_analysis,
         )
 
     def get_latest_analysis_status(self, case_id: str) -> str:
@@ -496,5 +497,5 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
             before=before,
             is_visible=is_visible,
             family=family,
-            data_analysis=str(data_analysis) if data_analysis else None,
+            data_analysis=data_analysis,
         )

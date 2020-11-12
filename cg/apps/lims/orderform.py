@@ -4,6 +4,8 @@ import xlrd
 from cg.constants import METAGENOME_SOURCES, ANALYSIS_SOURCES, Pipeline
 
 from cg.exc import OrderFormError
+from cg.meta.orders import OrderType
+from cg.utils.StrEnum import StrEnum
 
 SEX_MAP = {"male": "M", "female": "F", "unknown": "unknown"}
 REV_SEX_MAP = {value: key for key, value in SEX_MAP.items()}
@@ -16,11 +18,13 @@ VALID_ORDERFORMS = [
     "1604:9",  # Orderform Ready made libraries (RML)
     "1605:8",  # Microbial metagenomes
 ]
+
+
 CASE_PROJECT_TYPES = [
-    str(Pipeline.MIP_DNA),
-    "external",
-    str(Pipeline.BALSAMIC),
-    str(Pipeline.MIP_RNA),
+    str(OrderType.MIP_DNA),
+    str(OrderType.EXTERNAL),
+    str(OrderType.BALSAMIC),
+    str(OrderType.MIP_RNA),
 ]
 
 

@@ -11,6 +11,7 @@ import logging
 import re
 from typing import List
 
+import typing
 from cg.apps.lims import LimsAPI
 from cg.apps.osticket import OsTicket
 from cg.constants import Pipeline
@@ -99,7 +100,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
             except TicketCreationError as error:
                 LOG.warning(error.message)
                 data["ticket"] = None
-        order_func = getattr(self, f"submit_{project.value}")
+        order_func = self._get_submit_func(project.value)
         result = order_func(data)
         return result
 
@@ -301,3 +302,13 @@ class OrdersAPI(LimsHandler, StatusHandler):
 
                 if existing_sample.customer.customer_group_id != data_customer.customer_group_id:
                     raise OrderError(f"Sample not available: {sample.get('name')}")
+
+    def _get_submit_func(self, project_type: OrderType) -> typing.Callable:
+        """Get the submit method to call for the given type of project"""
+
+        if project_type == OrderType.MIP_DNA:
+            return getattr(self, "submit_mip_dna")
+        elif project_type == OrderType.MIP_RNA:
+            return getattr(self, "submit_mip_rna")
+
+        return getattr(self, f"submit_{str(project_type)}")

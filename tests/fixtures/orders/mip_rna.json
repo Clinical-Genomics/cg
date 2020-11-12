@@ -6,7 +6,7 @@
     {
       "name": "sample1-rna-t1",
       "application": "RNAPOAR025",
-      "data_analysis": "mip_rna",
+      "data_analysis": "mip-rna",
       "container": "96 well plate",
       "container_name": "CMMS",
       "well_position": "A:1",
@@ -21,7 +21,7 @@
     {
       "name": "sample1-rna-t2",
       "application": "RNAPOAR025",
-      "data_analysis": "mip_rna",
+      "data_analysis": "mip-rna",
       "comment": "this is a sample comment",
       "container": "96 well plate",
       "container_name": "CMMS",
