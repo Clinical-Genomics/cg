@@ -58,7 +58,7 @@ def analysis(context, config_stream):
 @click.pass_context
 def completed(context):
     """Store all completed analyses"""
-    microsalt_analysis_api = context.obj["analysis_api"]
+    microsalt_analysis_api = context.obj["microsalt_analysis_api"]
     exit_code = EXIT_SUCCESS
     for deliverables_file in microsalt_analysis_api.get_deliverables_to_store():
         try:

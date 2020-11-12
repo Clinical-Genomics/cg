@@ -16,11 +16,9 @@ from cg.exc import (
     MandatoryFilesMissing,
 )
 from cg.meta.store.base import gather_files_and_bundle_in_housekeeper
-from cg.meta.deliver import DeliverAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import Store
 from cg.constants import EXIT_SUCCESS, EXIT_FAIL, Pipeline
-from cg.cli.workflow.mip_dna.deliver import CASE_TAGS, SAMPLE_TAGS
 
 
 LOG = logging.getLogger(__name__)
@@ -102,17 +100,18 @@ def completed(context):
 
     exit_code = EXIT_SUCCESS
     for case_obj in mip_api.db.cases_to_store(pipeline=Pipeline.MIP_DNA):
-        analysis_obj = mip_api.tb.get_latest_analysis(case_id=case_obj.internal_id)
-        if analysis_obj.status != "completed":
-            continue
-        LOG.info(f"storing family: {analysis_obj.family}")
-        with Path(
-            mip_api.get_case_config_path(case_id=analysis_obj.family)
-        ).open() as config_stream:
-            try:
+        try:
+            analysis_obj = mip_api.tb.get_latest_analysis(case_id=case_obj.internal_id)
+            if analysis_obj.status != "completed":
+                continue
+            LOG.info(f"Storing case: {analysis_obj.family}")
+            with Path(
+                mip_api.get_case_config_path(case_id=analysis_obj.family)
+            ).open() as config_stream:
+
                 context.invoke(analysis, config_stream=config_stream)
-            except (Exception, click.Abort):
-                LOG.error("case storage failed: %s", analysis_obj.family, exc_info=True)
-                exit_code = EXIT_FAIL
+        except (Exception, click.Abort):
+            LOG.error(f"Case storage failed: {case_obj.internal_id}", exc_info=True)
+            exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort

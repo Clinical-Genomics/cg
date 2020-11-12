@@ -50,13 +50,8 @@ OPTION_PRIORITY = click.option(
 
 
 @click.group(invoke_without_command=True)
-@OPTION_ANALYSIS_TYPE
-@OPTION_PRIORITY
-@OPTION_PANEL_BED
-@OPTION_RUN_ANALYSIS
-@OPTION_DRY
 @click.pass_context
-def balsamic(context, priority, panel_bed, analysis_type, run_analysis, dry):
+def balsamic(context):
     """Cancer analysis workflow """
     if context.invoked_subcommand is None:
         click.echo(context.get_help())

@@ -13,10 +13,8 @@ from cg.apps.lims import LimsAPI
 from cg.apps.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.madeline.api import MadelineAPI
-from cg.cli.workflow.mip_dna.deliver import CASE_TAGS, SAMPLE_TAGS
 from cg.constants import Pipeline
 from cg.exc import AnalysisUploadError
-from cg.meta.deliver import DeliverAPI
 from cg.meta.report.api import ReportAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
@@ -94,20 +92,12 @@ def upload(context, family_id, force_restart):
     context.obj["chanjo_api"] = ChanjoAPI(context.obj)
     context.obj["scout_api"] = ScoutAPI(context.obj)
 
-    context.obj["deliver_api"] = DeliverAPI(
-        context.obj,
-        hk_api=context.obj["housekeeper_api"],
-        lims_api=context.obj["lims_api"],
-        case_tags=CASE_TAGS,
-        sample_tags=SAMPLE_TAGS,
-    )
     context.obj["analysis_api"] = MipAnalysisAPI(
         db=context.obj["status_db"],
         hk_api=context.obj["housekeeper_api"],
         tb_api=context.obj["trailblazer_api"],
         scout_api=context.obj["scout_api"],
         lims_api=context.obj["lims_api"],
-        deliver_api=context.obj["deliver_api"],
         script=context.obj["mip-rd-dna"]["script"],
         pipeline=context.obj["mip-rd-dna"]["pipeline"],
         conda_env=context.obj["mip-rd-dna"]["conda_env"],
