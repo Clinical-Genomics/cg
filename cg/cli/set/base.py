@@ -170,6 +170,9 @@ def show_set_sample_help(sample_obj: models.Sample = "None") -> None:
     list_changeable_sample_attributes(sample_obj, skip_attributes=NOT_CHANGABLE_SAMPLE_ATTRIBUTES)
     click.echo(f"To set apptag use '{OPTION_SHORT_KEY_VALUE} application_version [APPTAG]")
     click.echo(f"To set customer use '{OPTION_SHORT_KEY_VALUE} customer [CUSTOMER]")
+    click.echo(
+        f"To set priority use '{OPTION_SHORT_KEY_VALUE} priority [priority as text or " f"number]"
+    )
 
 
 def show_option_help(short_name: str = None, long_name: str = None, help_text: str = None):
@@ -243,7 +246,9 @@ def sample(context, sample_id, kwargs, skip_lims, yes, help):
 
         old_value = getattr(sample_obj, new_key)
 
-        click.echo(f"Would change from {new_key}={old_value} to {new_key}={new_value} on {sample_obj}")
+        click.echo(
+            f"Would change from {new_key}={old_value} to {new_key}={new_value} on {sample_obj}"
+        )
 
         if not (yes or click.confirm(CONFIRM)):
             continue

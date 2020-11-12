@@ -147,8 +147,10 @@ def test_priority_number(cli_runner, base_context, base_store: Store, helpers):
 
     # WHEN setting key on sample to new_value
     result = cli_runner.invoke(
-        sample, [sample_obj.internal_id, "-kv", key, new_value, "-y"], obj=base_context,
-        catch_exceptions=False
+        sample,
+        [sample_obj.internal_id, "-kv", key, new_value, "-y"],
+        obj=base_context,
+        catch_exceptions=False,
     )
 
     # THEN then it should have new_value as attribute key on the sample and in LIMS
@@ -157,7 +159,6 @@ def test_priority_number(cli_runner, base_context, base_store: Store, helpers):
     assert sample_obj.priority == new_value
     assert base_context["lims_api"].get_updated_sample_key() == key
     assert base_context["lims_api"].get_updated_sample_value() == sample_obj.priority_human
-
 
 
 def test_invalid_customer(cli_runner, base_context, base_store: Store, helpers):
