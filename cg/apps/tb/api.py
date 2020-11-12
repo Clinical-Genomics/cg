@@ -17,7 +17,7 @@ LOG = logging.getLogger(__name__)
 class TrailblazerAPI:
     """Interface to Trailblazer for `cg`."""
 
-    __STARTED_STATUSES = ["completed", "failed", "pending", "running"]
+    __STARTED_STATUSES = ["completed", "failed", "pending", "running", "error"]
     __ONGOING_STATUSES = ["pending", "running", "error"]
 
     def __init__(self, config: dict):
