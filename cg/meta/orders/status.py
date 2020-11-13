@@ -2,7 +2,7 @@
 import datetime as dt
 from typing import List
 
-from cg.constants import Pipeline
+from cg.constants import Pipeline, DataDelivery
 from cg.exc import OrderError
 from cg.store import models
 
@@ -325,7 +325,7 @@ class StatusHandler:
         with self.status.session.no_autoflush:
             for sample in samples:
                 new_sample = self.status.add_sample(
-                    data_delivery=sample["data_delivery"],
+                    data_delivery=str(DataDelivery.FASTQ),
                     name=sample["name"],
                     internal_id=sample["internal_id"],
                     sex=sample["sex"] or "unknown",

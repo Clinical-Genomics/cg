@@ -1,5 +1,5 @@
 ALTER TABLE `family`
-ADD COLUMN `data_delivery` ENUM('fastq', 'inbox', 'qc', 'scout')
+ADD COLUMN `data_delivery` ENUM('fastq', 'custom')
  CHARACTER SET latin1
  COLLATE latin1_swedish_ci
  NULL
@@ -8,7 +8,7 @@ ADD COLUMN `data_delivery` ENUM('fastq', 'inbox', 'qc', 'scout')
 -- should we have another level data_analysis_sub_type
 
 Update `family` SET data_delivery = 'fastq' where data_analysis like 'microbial|fastq';
-Update `family` SET data_delivery = 'standard' where data_analysis like 'microbial|custom';
+Update `family` SET data_delivery = 'custom' where data_analysis like 'microbial|custom';
 
 Update `family` SET data_analysis = 'microsalt' where data_analysis like 'microbial';
 Update `family` SET data_analysis = 'microsalt' where data_analysis like 'microbial|fastq';
@@ -17,7 +17,6 @@ Update `family` SET data_analysis = 'microsalt' where data_analysis like 'microb
 Update `family` SET data_delivery = 'fastq' where data_analysis like 'fastq';
 Update `family` SET data_analysis = 'mip-dna' where data_analysis like 'fastq';
 
-Update `family` SET data_delivery = 'scout' where data_analysis like 'mip';
 Update `family` SET data_analysis = 'mip-dna' where data_analysis like 'mip';
 Update `family` SET data_analysis = 'mip-dna' where data_analysis like 'mip';
 

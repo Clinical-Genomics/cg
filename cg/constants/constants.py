@@ -43,10 +43,9 @@ class Pipeline(StrEnum):
     MIP_RNA: str = "mip-rna"
 
 
-class Delivery(StrEnum):
+class DataDelivery(StrEnum):
     FASTQ: str = "fastq"
-    QC: str = "qc"
-    SCOUT: str = "scout"
+    QC: str = "custom"
 
 
 PREP_CATEGORIES = ("wgs", "wes", "tgs", "wts", "mic", "rml")

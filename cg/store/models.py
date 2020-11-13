@@ -6,7 +6,7 @@ import alchy
 from sqlalchemy import Column, ForeignKey, orm, types, UniqueConstraint, Table
 
 from cg.constants import (
-    Delivery as DataDelivery,
+    DataDelivery,
     FAMILY_ACTIONS,
     FLOWCELL_STATUS,
     Pipeline,

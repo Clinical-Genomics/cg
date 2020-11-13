@@ -20,7 +20,7 @@ from .constants import (
     COLLABORATORS,
     CONTAINER_OPTIONS,
     DEFAULT_CAPTURE_KIT,
-    Delivery,
+    DataDelivery,
     COMBOS,
     FAMILY_ACTIONS,
     FLOWCELL_STATUS,
