@@ -246,10 +246,10 @@ class UploadScoutAPI:
 
     @staticmethod
     def _extract_generic_filepath(file_path):
-        """ Remove a file's sufffix and identifying integer or X/Y
+        """Remove a file's sufffix and identifying integer or X/Y
         Example:
         `/some/path/gatkcomb_rhocall_vt_af_chromograph_sites_X.png` becomes
-        `/some/path/gatkcomb_rhocall_vt_af_chromograph_sites_`   """
+        `/some/path/gatkcomb_rhocall_vt_af_chromograph_sites_`"""
         if file_path is None:
             return ""
         return re.split("(\d+|X|Y)\.png", file_path)[0]

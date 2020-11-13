@@ -181,4 +181,3 @@ def test_extract_generic_filepath(upload_scout_api):
     # THEN
     assert upload_scout_api._extract_generic_filepath(file_path1) == generic_path
     assert upload_scout_api._extract_generic_filepath(file_path2) == generic_path
-
