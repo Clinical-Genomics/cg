@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any, List
 
 from ruamel.yaml import safe_load
+from subprocess import run
 
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
@@ -499,11 +500,16 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
             data_analysis=data_analysis,
         )
 
+    def collect_hk_data(self, bundle: str, tags: str) -> list:
+        hk_data = self.hk.get_files(bundle=bundle, tags=[tags])
+        return hk_data
+
     def get_other_format_in_same_folder(
         self, family_obj: models.Family, query_format: str, target_format: str
     ) -> list:
         redundant_target_paths = []
-        query_linked_in_hk = self.hk.get_files(bundle=family_obj.internal_id, tags=[query_format])
+        #query_linked_in_hk = self.hk.get_files(bundle=family_obj.internal_id, tags=[query_format])
+        query_linked_in_hk = self.collect_hk_data(family_obj.internal_id, query_format)
         for query in query_linked_in_hk:
             query_folder = os.path.dirname(query.path)
             query_basename = os.path.basename(query.path)
@@ -517,7 +523,8 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
 
     def check_spring_files(self, family_obj: models.Family) -> bool:
         spring_to_decompress = False
-        spring_linked_in_hk = self.hk.get_files(bundle=family_obj.internal_id, tags=["spring"])
+        #spring_linked_in_hk = self.hk.get_files(bundle=family_obj.internal_id, tags=["spring"])
+        spring_linked_in_hk = self.collect_hk_data(family_obj.internal_id, "spring")
 
         # spring_status contain bool information if spring should be decompressed
         spring_status = {}
@@ -547,10 +554,14 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
                 fastqs_to_link = True
         return fastqs_to_link
 
+    def check_system_call(self, system_call: str) -> bytes:
+        returned_from_system = run(system_call, capture_output=True).stdout
+        return returned_from_system
+
     def check_spring_decompression_jobs(self, family_obj: models.Family) -> bool:
         is_spring_decompressing = False
-        for sample in family_obj.sample.internal_id:
-            returned_from_system = os.system(f"squeue -o %j | grep spring | grep {sample}")
+        for sample in family_obj.internal_id:
+            returned_from_system = self.check_system_call(f"squeue -o %j | grep spring | grep {sample}")
             if returned_from_system:
                 is_spring_decompressing = True
         return is_spring_decompressing

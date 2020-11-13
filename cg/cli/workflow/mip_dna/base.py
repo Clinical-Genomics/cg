@@ -156,7 +156,7 @@ def decompress_spring(context: click.Context, case_id: str, dry_run: bool):
             LOG.warning(f"No analysis started, decompression is running for {case_obj.internal_id}")
         elif dry_run:
             LOG.warning(
-                f"No analysis started, {case_obj.internal_id} needs to be decompressed "
+                f"Compression of {case_obj.internal_id} needed, analysis not started "
                 f"(no decompression will be started, this is a dry run)"
             )
         else:
