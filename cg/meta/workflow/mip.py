@@ -515,7 +515,6 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         self, family_obj: models.Family, query_format: str, target_format: str
     ) -> list:
         redundant_target_paths = []
-        #query_linked_in_hk = self.hk.get_files(bundle=family_obj.internal_id, tags=[query_format])
         query_linked_in_hk = self.collect_hk_data(family_obj.internal_id, query_format)
         for query in query_linked_in_hk:
             query_folder = os.path.dirname(query)
@@ -530,7 +529,6 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
 
     def check_spring_files(self, family_obj: models.Family) -> bool:
         spring_to_decompress = False
-        #spring_linked_in_hk = self.hk.get_files(bundle=family_obj.internal_id, tags=["spring"])
         spring_linked_in_hk = self.collect_hk_data(family_obj.internal_id, "spring")
 
         # spring_status contain bool information if spring should be decompressed
@@ -555,7 +553,6 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         fastqs_of_interest = self.get_other_format_in_same_folder(
             family_obj=family_obj, query_format="spring", target_format="fastq.gz"
         )
-        #fastqs_linked_in_hk = self.hk.get_files(bundle=family_obj.internal_id, tags=["fastq"])
         fastqs_linked_in_hk = self.collect_hk_data(family_obj.internal_id, "fastq")
         for fastq in fastqs_of_interest:
             if not fastq in fastqs_linked_in_hk:
