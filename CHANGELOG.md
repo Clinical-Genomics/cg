@@ -13,7 +13,7 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## [13.7.2]
+## [13.8.0]
 
 ### Changed
 - Update creation of Scout config files to match MIP 9.0.5
