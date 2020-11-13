@@ -49,22 +49,26 @@ class UploadScoutAPI:
 
     def build_samples(self, analysis_obj: models.Analysis, hk_version_id: int = None):
         """Loop over the samples in an analysis and build dicts from them"""
-        
+
         for link_obj in analysis_obj.family.links:
             sample_id = link_obj.sample.internal_id
             bam_path = self.fetch_file_path("bam", sample_id, hk_version_id)
             alignment_file_path = self.fetch_file_path("cram", sample_id, hk_version_id)
-            rho_image = self.fetch_file_path_from_tags(
-                ["chromograph", "rho"], sample_id, hk_version_id
+            coverage_image = self.fetch_file_path_from_tags(
+                ["chromograph", "tcov"], sample_id, hk_version_id
             )
-            upd_image = self.fetch_file_path_from_tags(
+            upd_sites_image = self.fetch_file_path_from_tags(
+                ["chromograph", "upd"], sample_id, hk_version_id
+            )
+            upd_regions_image = self.fetch_file_path_from_tags(
                 ["chromograph", "upd"], sample_id, hk_version_id
             )
             mt_bam_path = self.fetch_file_path("bam-mt", sample_id, hk_version_id)
             vcf2cytosure_path = self.fetch_file_path("vcf2cytosure", sample_id, hk_version_id)
 
-            rho_path = self._parse_path(rho_image)
-            upd_path = self._parse_path(upd_image)
+            coverage_path = self._extract_generic_filepath(coverage_image)
+            upd_sites_path = self._extract_generic_filepath(upd_sites_image)
+            upd_regions_path = self._extract_generic_filepath(upd_regions_image)
 
             lims_sample = dict()
             try:
@@ -76,7 +80,11 @@ class UploadScoutAPI:
                 "bam_path": bam_path,
                 "capture_kit": None,
                 "alignment_path": alignment_file_path,
-                "chromograph_images": {"upd": upd_path, "rho": rho_path},
+                "chromograph_images": {
+                    "upd_regions": upd_regions_path,
+                    "upd_sites": upd_sites_path,
+                    "coverage": coverage_path,
+                },
                 "father": link_obj.father.internal_id if link_obj.father else "0",
                 "mother": link_obj.mother.internal_id if link_obj.mother else "0",
                 "mt_bam": mt_bam_path,
@@ -237,7 +245,7 @@ class UploadScoutAPI:
         return svg_path
 
     @staticmethod
-    def _parse_path(file_path):
+    def _extract_generic_filepath(file_path):
         """ Remove a file's sufffix and identifying integer or X/Y
         Example:
         `/some/path/gatkcomb_rhocall_vt_af_chromograph_sites_X.png` becomes

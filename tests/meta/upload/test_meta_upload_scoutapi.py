@@ -166,3 +166,19 @@ def test_add_scout_config_to_hk_existing_files(upload_scout_api: UploadScoutAPI,
         upload_scout_api.add_scout_config_to_hk(
             config_file_path=tmp_file, hk_api=housekeeper_api, case_id="dummy"
         )
+
+
+def test_extract_generic_filepath(upload_scout_api):
+    """Test that parsing of file path"""
+
+    # GIVEN files paths ending with
+    file_path1 = "/some/path/gatkcomb_rhocall_vt_af_chromograph_sites_X.png"
+    file_path2 = "/some/path/gatkcomb_rhocall_vt_af_chromograph_sites_12.png"
+
+    # THEN calling extracting the generic path will remove numeric id and fuffix
+    generic_path = "/some/path/gatkcomb_rhocall_vt_af_chromograph_sites_"
+
+    # THEN
+    assert upload_scout_api._extract_generic_filepath(file_path1) == generic_path
+    assert upload_scout_api._extract_generic_filepath(file_path2) == generic_path
+
