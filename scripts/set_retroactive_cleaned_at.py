@@ -36,4 +36,4 @@ def set_analysis_status_cleaned_mip(config_path: str):
 
 
 if __name__ == "__main__":
-    set_analysis_status_cleaned_mip(config_path)
+    set_analysis_status_cleaned_mip()
