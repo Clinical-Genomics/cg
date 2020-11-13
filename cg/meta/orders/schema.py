@@ -13,7 +13,7 @@ from cg.constants import (
 
 class OrderType(StrEnum):
     BALSAMIC: str = str(Pipeline.BALSAMIC)
-    EXTERNAL: str = "external",
+    EXTERNAL: str = "external"
     FASTQ: str = "fastq"
     METAGENOME: str = "metagenome"
     MICROSALT: str = str(Pipeline.MICROSALT)
