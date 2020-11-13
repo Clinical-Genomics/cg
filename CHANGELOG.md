@@ -13,7 +13,13 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## [13.7.1]
+## [13.7.2]
+
+### Changed
+- Update creation of Scout config files to match MIP 9.0.5
+
+
+### [13.7.1]
 
 ### Added
 - Added new value to lims constants
