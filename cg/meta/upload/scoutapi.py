@@ -59,10 +59,10 @@ class UploadScoutAPI:
                 ["chromograph", "tcov"], sample_id, hk_version_id
             )
             upd_sites_image = self.fetch_file_path_from_tags(
-                ["chromograph", "upd", "sites"], sample_id, hk_version_id
+                ["chromograph", "sites"], sample_id, hk_version_id
             )
             upd_regions_image = self.fetch_file_path_from_tags(
-                ["chromograph", "upd", "regions"], sample_id, hk_version_id
+                ["chromograph", "regions"], sample_id, hk_version_id
             )
             mt_bam_path = self.fetch_file_path("bam-mt", sample_id, hk_version_id)
             vcf2cytosure_path = self.fetch_file_path("vcf2cytosure", sample_id, hk_version_id)
