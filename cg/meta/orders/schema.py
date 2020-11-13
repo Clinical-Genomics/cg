@@ -7,7 +7,8 @@ from cg.constants import (
     SEX_OPTIONS,
     STATUS_OPTIONS,
     CAPTUREKIT_OPTIONS,
-    CONTAINER_OPTIONS, Pipeline,
+    CONTAINER_OPTIONS,
+    Pipeline,
 )
 
 
