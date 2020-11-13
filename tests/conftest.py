@@ -5,6 +5,7 @@ import copy
 import datetime as dt
 import logging
 import shutil
+import os
 from pathlib import Path
 
 import pytest
@@ -39,19 +40,31 @@ LOG = logging.getLogger(__name__)
 
 
 @pytest.fixture(name="case_id")
-def fixture_case_id():
+def fixture_case_id() -> str:
     """Return a case id"""
     return "yellowhog"
 
 
-@pytest.yield_fixture(scope="function", name="family_name")
+@pytest.fixture(name="family_name")
 def fixture_family_name() -> str:
     """Return a family name"""
     return "family"
 
 
+@pytest.fixture(name="customer_id")
+def fixture_customer_id() -> str:
+    """Return a customer id"""
+    return "cust000"
+
+
+@pytest.fixture(name="ticket_nr")
+def fixture_ticket_nr() -> int:
+    """Return a ticket nr"""
+    return 123456
+
+
 @pytest.fixture(scope="function", name="analysis_family_single_case")
-def fixture_analysis_family_single(case_id, family_name):
+def fixture_analysis_family_single(case_id: str, family_name: str, ticket_nr: int) -> dict:
     """Build an example family."""
     family = {
         "name": family_name,
@@ -65,7 +78,7 @@ def fixture_analysis_family_single(case_id, family_name):
                 "sex": "male",
                 "internal_id": "ADM1",
                 "status": "affected",
-                "ticket_number": 123456,
+                "ticket_number": ticket_nr,
                 "reads": 5000000000,
                 "capture_kit": "GMSmyeloid",
             }
@@ -75,7 +88,7 @@ def fixture_analysis_family_single(case_id, family_name):
 
 
 @pytest.yield_fixture(scope="function", name="analysis_family")
-def fixture_analysis_family(case_id, family_name) -> dict:
+def fixture_analysis_family(case_id: str, family_name: str, ticket_nr: int) -> dict:
     """Return a dictionary with information from a analysis family"""
     family = {
         "name": family_name,
@@ -91,7 +104,7 @@ def fixture_analysis_family(case_id, family_name) -> dict:
                 "father": "ADM2",
                 "mother": "ADM3",
                 "status": "affected",
-                "ticket_number": 123456,
+                "ticket_number": ticket_nr,
                 "reads": 5000000,
                 "capture_kit": "GMSmyeloid",
             },
@@ -100,7 +113,7 @@ def fixture_analysis_family(case_id, family_name) -> dict:
                 "sex": "male",
                 "internal_id": "ADM2",
                 "status": "unaffected",
-                "ticket_number": 123456,
+                "ticket_number": ticket_nr,
                 "reads": 6000000,
                 "capture_kit": "GMSmyeloid",
             },
@@ -109,7 +122,7 @@ def fixture_analysis_family(case_id, family_name) -> dict:
                 "sex": "female",
                 "internal_id": "ADM3",
                 "status": "unaffected",
-                "ticket_number": 123456,
+                "ticket_number": ticket_nr,
                 "reads": 7000000,
                 "capture_kit": "GMSmyeloid",
             },
@@ -237,10 +250,38 @@ def fixture_mip_dna_store_files(apps_dir: Path) -> Path:
     return _path
 
 
+@pytest.fixture(name="mip_analysis_dir")
+def fixture_mip_analysis_dir(analysis_dir: Path) -> Path:
+    """Return the path to the directory with mip analysis files"""
+    _path = analysis_dir / "mip"
+    return _path
+
+
+@pytest.fixture(name="mip_dna_analysis_dir")
+def fixture_mip_dna_analysis_dir(mip_analysis_dir: Path) -> Path:
+    """Return the path to the directory with mip dna analysis files"""
+    _path = mip_analysis_dir / "dna"
+    return _path
+
+
+@pytest.fixture(name="sample1_cram")
+def fixture_sample1_cram(mip_dna_analysis_dir: Path) -> Path:
+    """Return the path to the cram file for sample 1"""
+    _path = mip_dna_analysis_dir / "adm1.cram"
+    return _path
+
+
 @pytest.fixture(name="mip_deliverables_file")
 def fixture_mip_deliverables_files(mip_dna_store_files: Path) -> Path:
     """Fixture for general deliverables file in mip"""
     return mip_dna_store_files / "case_id_deliverables.yaml"
+
+
+@pytest.fixture(name="vcf_file")
+def fixture_vcf_file(mip_dna_store_files: Path) -> Path:
+    """Return the path to to a vcf file"""
+    _path = mip_dna_store_files / "yellowhog_clinical_selected.vcf"
+    return _path
 
 
 # Orderform fixtures
@@ -474,6 +515,12 @@ def fixture_compress_hk_fastq_bundle(compression_object, sample_hk_bundle_no_fil
     second_fastq = compression_object.fastq_second
     for fastq_file in [first_fastq, second_fastq]:
         fastq_file.touch()
+        # We need to set the time to an old date
+        # Create a older date
+        # Convert the date to a float
+        before_timestamp = dt.datetime.timestamp(dt.datetime(2020, 1, 1))
+        # Update the utime so file looks old
+        os.utime(fastq_file, (before_timestamp, before_timestamp))
         fastq_file_info = {"path": str(fastq_file), "archive": False, "tags": ["fastq"]}
 
         hk_bundle_data["files"].append(fastq_file_info)
@@ -569,7 +616,7 @@ def fixture_customer_group() -> str:
 
 @pytest.yield_fixture(scope="function", name="customer_production")
 def fixture_customer_production(customer_group) -> dict:
-    """Return a dictionary with infomation about the prod customer"""
+    """Return a dictionary with information about the prod customer"""
     _cust = dict(
         customer_id="cust000",
         name="Production",
