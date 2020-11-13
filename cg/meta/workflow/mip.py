@@ -501,8 +501,15 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         )
 
     def collect_hk_data(self, bundle: str, tags: str) -> list:
-        hk_data = self.hk.get_files(bundle=bundle, tags=[tags])
-        return hk_data
+        hk_data_str = []
+        hk_data_obj = self.hk.get_files(bundle=bundle, tags=[tags])
+        for obj in hk_data_obj:
+            hk_data_str.append(obj.path)
+        return hk_data_str
+
+    def collect_files_in_folder(self, folder: str) -> list:
+        files_in_folder = os.listdir(folder)
+        return files_in_folder
 
     def get_other_format_in_same_folder(
         self, family_obj: models.Family, query_format: str, target_format: str
@@ -511,10 +518,10 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         #query_linked_in_hk = self.hk.get_files(bundle=family_obj.internal_id, tags=[query_format])
         query_linked_in_hk = self.collect_hk_data(family_obj.internal_id, query_format)
         for query in query_linked_in_hk:
-            query_folder = os.path.dirname(query.path)
-            query_basename = os.path.basename(query.path)
+            query_folder = os.path.dirname(query)
+            query_basename = os.path.basename(query)
             query_root = os.path.splitext(query_basename)[0]
-            files_in_query_folder = os.listdir(query_folder)
+            files_in_query_folder = self.collect_files_in_folder(query_folder)
             for file in files_in_query_folder:
                 if file.startswith(query_root) and file.endswith(target_format):
                     redundant_target_paths.append(file)
@@ -534,7 +541,7 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
             family_obj=family_obj, query_format="spring", target_format="fastq.gz"
         )
         for spring in spring_linked_in_hk:
-            spring_root = os.path.splitext(spring.path)[0]
+            spring_root = os.path.splitext(spring)[0]
             for fastq in fastqs_of_interest:
                 if fastq.startswith(spring_root):
                     spring_status[spring] = False
@@ -548,7 +555,8 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         fastqs_of_interest = self.get_other_format_in_same_folder(
             family_obj=family_obj, query_format="spring", target_format="fastq.gz"
         )
-        fastqs_linked_in_hk = self.hk.get_files(bundle=family_obj.internal_id, tags=["fastq"])
+        #fastqs_linked_in_hk = self.hk.get_files(bundle=family_obj.internal_id, tags=["fastq"])
+        fastqs_linked_in_hk = self.collect_hk_data(family_obj.internal_id, "fastq")
         for fastq in fastqs_of_interest:
             if not fastq in fastqs_linked_in_hk:
                 fastqs_to_link = True

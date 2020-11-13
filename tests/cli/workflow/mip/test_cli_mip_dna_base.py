@@ -45,16 +45,23 @@ def test_decompression_is_running(cli_runner, mip_context, caplog, mocker):
     caplog.set_level(logging.WARNING)
     case_id = "yellowhog"
 
-    # GIVEN the fastq files are decompressed to spring
-    #mocker.patch.object(MipAnalysisAPI, "check_spring_files")
-    #MipAnalysisAPI.check_spring_files.return_value = True
-
+    # GIVEN there are fastq files compressed to spring
     mocker.patch.object(MipAnalysisAPI, "collect_hk_data")
     MipAnalysisAPI.collect_hk_data.return_value = [
                             "/path/HVCHCCCXY-l4t11_535422_S4_L004.spring",
                             "/path/HVCHCCCXY-l4t21_535422_S4_L004.spring"
     ]
 
+    # GIVEN there are both fastq files and spring files in the folder
+    mocker.patch.object(MipAnalysisAPI, "collect_files_in_folder")
+    MipAnalysisAPI.collect_files_in_folder.return_value = [
+        "/path/HVCHCCCXY-l4t11_535422_S4_L004.spring",
+        "/path/HVCHCCCXY-l4t21_535422_S4_L004.spring",
+        "/path/HVCHCCCXY-l4t11_535422_S4_L004_R1_001.fastq.gz",
+        "/path/HVCHCCCXY-l4t11_535422_S4_L004_R2_001.fastq.gz",
+        "/path/HVCHCCCXY-l4t21_535422_S4_L004_R1_001.fastq.gz",
+        "/path/HVCHCCCXY-l4t21_535422_S4_L004_R2_001.fastq.gz"
+    ]
 
     # GIVEN a case which a decompression job is running for
     mocker.patch.object(MipAnalysisAPI, "check_system_call")
