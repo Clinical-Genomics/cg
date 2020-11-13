@@ -33,3 +33,7 @@ def set_analysis_status_cleaned_mip(config_path: str):
             analysis_obj.cleaned_at = dt.datetime.now()
             status_db.commit()
     click.echo("Update finished!")
+
+
+if __name__ == "__main__":
+    set_analysis_status_cleaned_mip(config_path)
