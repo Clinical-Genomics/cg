@@ -9,10 +9,25 @@ from cg.meta.workflow.mip import MipAnalysisAPI
 CASE_ID = "yellowhog"
 
 
-def test_mip_dna(cli_runner, mip_context, caplog):
+def test_mip_dna(cli_runner, mip_context, caplog, mocker):
     caplog.set_level(logging.INFO)
 
     # GIVEN fastqs are all decompressed and linked
+    mocker.patch.object(MipAnalysisAPI, "get_other_format_in_same_folder")
+    MipAnalysisAPI.get_other_format_in_same_folder.return_value = [
+                        "/path/HVCHCCCXY-l4t11_535422_S4_L004_R1_001.fastq.gz",
+                        "/path/HVCHCCCXY-l4t11_535422_S4_L004_R2_001.fastq.gz",
+                        "/path/HVCHCCCXY-l4t21_535422_S4_L004_R1_001.fastq.gz",
+                        "/path/HVCHCCCXY-l4t21_535422_S4_L004_R2_001.fastq.gz"
+    ]
+
+    mocker.patch.object(MipAnalysisAPI, "collect_hk_data")
+    MipAnalysisAPI.collect_hk_data.return_value = [
+                        "/path/HVCHCCCXY-l4t11_535422_S4_L004_R1_001.fastq.gz",
+                        "/path/HVCHCCCXY-l4t11_535422_S4_L004_R2_001.fastq.gz",
+                        "/path/HVCHCCCXY-l4t21_535422_S4_L004_R1_001.fastq.gz",
+                        "/path/HVCHCCCXY-l4t21_535422_S4_L004_R2_001.fastq.gz"
+    ]
 
     # WHEN calling decompress_spring
     result = cli_runner.invoke(
@@ -170,3 +185,61 @@ def test_decompression_when_some_samples_decompressed(cli_runner, mip_context, c
 
     # THEN warning about that analysis can't start since decompression is needed
     assert "No analysis started, started decompression for" in caplog.text
+
+
+def test_linking_fastqs(cli_runner, mip_context, caplog, mocker):
+    caplog.set_level(logging.INFO)
+
+    # GIVEN there are fastq files in the spring folder
+    mocker.patch.object(MipAnalysisAPI, "get_other_format_in_same_folder")
+    MipAnalysisAPI.get_other_format_in_same_folder.return_value = [
+                                    "/path/HVCHCCCXY-l4t11_535422_S4_L004_R1_001.fastq.gz",
+                                    "/path/HVCHCCCXY-l4t11_535422_S4_L004_R2_001.fastq.gz",
+                                    "/path/HVCHCCCXY-l4t21_535422_S4_L004_R1_001.fastq.gz",
+                                    "/path/HVCHCCCXY-l4t21_535422_S4_L004_R2_001.fastq.gz"
+    ]
+
+    # GIVEN there are no fastq files linked in housekeeper
+    mocker.patch.object(MipAnalysisAPI, "collect_hk_data")
+    MipAnalysisAPI.collect_hk_data.return_value = []
+
+    # GIVEN decompression is not running
+    mocker.patch.object(MipAnalysisAPI, "check_system_call")
+    MipAnalysisAPI.check_system_call.return_value = None
+
+    # WHEN calling decompress_spring
+    cli_runner.invoke(
+        decompress_spring, ["-c", CASE_ID], obj=mip_context, catch_exceptions=False
+    )
+
+    # THEN info about that links are made
+    assert "Adding links for" in caplog.text
+
+
+def test_linking_fastqs_dryrun(cli_runner, mip_context, caplog, mocker):
+    caplog.set_level(logging.INFO)
+
+    # GIVEN there are fastq files in the spring folder
+    mocker.patch.object(MipAnalysisAPI, "get_other_format_in_same_folder")
+    MipAnalysisAPI.get_other_format_in_same_folder.return_value = [
+                                    "/path/HVCHCCCXY-l4t11_535422_S4_L004_R1_001.fastq.gz",
+                                    "/path/HVCHCCCXY-l4t11_535422_S4_L004_R2_001.fastq.gz",
+                                    "/path/HVCHCCCXY-l4t21_535422_S4_L004_R1_001.fastq.gz",
+                                    "/path/HVCHCCCXY-l4t21_535422_S4_L004_R2_001.fastq.gz"
+    ]
+
+    # GIVEN there are no fastq files linked in housekeeper
+    mocker.patch.object(MipAnalysisAPI, "collect_hk_data")
+    MipAnalysisAPI.collect_hk_data.return_value = []
+
+    # GIVEN decompression is not running
+    mocker.patch.object(MipAnalysisAPI, "check_system_call")
+    MipAnalysisAPI.check_system_call.return_value = None
+
+    # WHEN calling decompress_spring
+    cli_runner.invoke(
+        decompress_spring, ["-c", CASE_ID, "--dry-run"], obj=mip_context, catch_exceptions=False
+    )
+
+    # THEN info about that links are made
+    assert "Would have linked fastqs, but this is dry-run mode" in caplog.text
