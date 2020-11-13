@@ -35,7 +35,7 @@ class UploadScoutAPI:
         self.lims = lims_api
 
     def fetch_file_path(self, tag: str, sample_id: str, hk_version_id: int = None):
-        """"Fetch files from housekeeper"""
+        """"Fetch files from housekeeper matchin one tag string"""
         return self.fetch_file_path_from_tags([tag], sample_id, hk_version_id)
 
     def fetch_file_path_from_tags(self, tags: list, sample_id: str, hk_version_id: int = None):
@@ -58,10 +58,10 @@ class UploadScoutAPI:
                 ["chromograph", "tcov"], sample_id, hk_version_id
             )
             upd_sites_image = self.fetch_file_path_from_tags(
-                ["chromograph", "upd"], sample_id, hk_version_id
+                ["chromograph", "upd", "sites"], sample_id, hk_version_id
             )
             upd_regions_image = self.fetch_file_path_from_tags(
-                ["chromograph", "upd"], sample_id, hk_version_id
+                ["chromograph", "upd", "regions"], sample_id, hk_version_id
             )
             mt_bam_path = self.fetch_file_path("bam-mt", sample_id, hk_version_id)
             vcf2cytosure_path = self.fetch_file_path("vcf2cytosure", sample_id, hk_version_id)
