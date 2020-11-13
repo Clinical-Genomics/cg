@@ -5,8 +5,8 @@ from pathlib import Path
 from cg.store import Store, models
 
 
-@click.command("update-cleaned-status")
-@click.argument("config_path")
+@click.command()
+@click.option("--config_path")
 @click.pass_context
 def set_analysis_status_cleaned_mip(config_path: str):
     """Updates all cleaned_at timestamps for mip cases"""
