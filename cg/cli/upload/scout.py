@@ -33,6 +33,7 @@ def scout(context, re_upload, print_console, case_id):
     family_obj = status_api.family(case_id)
     LOG.info("family_obj:{}".format(family_obj))
     LOG.info("context:{}".format(context))
+    LOG.info("family_obj.analyses:{}".format(family_obj.analyses))
     scout_config = scout_upload_api.generate_config(family_obj.analyses[0])
     mip_dna_root_dir = context.obj["mip-rd-dna"]["root"]
 
