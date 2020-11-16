@@ -29,14 +29,19 @@ def scout(context, re_upload, print_console, case_id):
 
     
     status_api = context.obj["status_db"]
+    LOG.info("status_api:{}".format(status_api))    
     scout_upload_api = context.obj["scout_upload_api"]
+    LOG.info("upload_api:{}".format(scout_upload_api))    
     hk_api = context.obj["housekeeper_api"]
     family_obj = status_api.family(case_id)
-    version_obj = hk_api.last_version(case_id)
-    LOG.info("get latest:{}".format(version_obj))    
+
+    last_version = hk_api.last_version(case_id)
+
+    LOG.info("get latest:{}".format(last_version))    
     LOG.info("family_obj:{}".format(family_obj))
     LOG.info("context:{}".format(context))
     LOG.info("family_obj.analyses:{}".format(family_obj.analyses))
+    
     scout_config = scout_upload_api.generate_config(family_obj.analyses[0])
     mip_dna_root_dir = context.obj["mip-rd-dna"]["root"]
 
