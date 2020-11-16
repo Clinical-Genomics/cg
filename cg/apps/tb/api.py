@@ -11,7 +11,7 @@ from google.auth import jwt
 from google.auth.crypt import RSASigner
 
 from cg.apps.tb.models import TrailblazerAnalysis
-from cg.exc import TrailblazerAPIHTTPError, TrailblazerPipelineUnsupportedError
+from cg.exc import TrailblazerAPIHTTPError
 
 LOG = logging.getLogger(__name__)
 

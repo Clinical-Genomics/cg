@@ -147,7 +147,3 @@ class TrailblazerAPIHTTPError(CgError):
 
 class TrailblazerMissingAnalysisError(CgError):
     """Raised when Trailblazer REST API response code is not 200"""
-
-
-class TrailblazerPipelineUnsupportedError(CgError):
-    """Raised when Trailblazer API is called with an unsupported pipeline"""
