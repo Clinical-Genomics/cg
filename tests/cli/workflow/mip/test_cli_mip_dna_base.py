@@ -1,7 +1,5 @@
 """ Test the CLI for run mip-dna """
-#import click
 import logging
-#import pytest
 
 from cg.cli.workflow.mip_dna.base import decompress_spring
 from cg.meta.workflow.mip import MipAnalysisAPI
@@ -34,7 +32,7 @@ def test_mip_dna(cli_runner, mip_context, caplog, mocker):
         decompress_spring, ["-c", CASE_ID, "--dry-run"], obj=mip_context, catch_exceptions=False
     )
 
-    # THEN no error should be thrown
+    # THEN command should run without errors
     assert result.exit_code == 0
     # THEN should not output "Decompression is running"
     assert "Decompression is running" not in caplog.text
@@ -48,10 +46,11 @@ def test_mip_dna(cli_runner, mip_context, caplog, mocker):
 
 def test_case_none(cli_runner, mip_context, caplog):
     # GIVEN no case is given in input
+    petname = None
 
     # WHEN calling decompress_spring
     cli_runner.invoke(
-        decompress_spring, ["-c", None, "--dry-run"], obj=mip_context, catch_exceptions=False
+        decompress_spring, ["-c", petname, "--dry-run"], obj=mip_context, catch_exceptions=False
     )
 
     # THEN cases are suggested
@@ -64,19 +63,19 @@ def test_decompression_is_running(cli_runner, mip_context, caplog, mocker):
     # GIVEN there are fastq files compressed to spring
     mocker.patch.object(MipAnalysisAPI, "collect_hk_data")
     MipAnalysisAPI.collect_hk_data.return_value = [
-                            "/path/HVCHCCCXY-l4t11_535422_S4_L004.spring",
-                            "/path/HVCHCCCXY-l4t21_535422_S4_L004.spring"
+                                "/path/HVCHCCCXY-l4t11_535422_S4_L004.spring",
+                                "/path/HVCHCCCXY-l4t21_535422_S4_L004.spring"
     ]
 
     # GIVEN there are both fastq files and spring files in the folder
     mocker.patch.object(MipAnalysisAPI, "collect_files_in_folder")
     MipAnalysisAPI.collect_files_in_folder.return_value = [
-        "/path/HVCHCCCXY-l4t11_535422_S4_L004.spring",
-        "/path/HVCHCCCXY-l4t21_535422_S4_L004.spring",
-        "/path/HVCHCCCXY-l4t11_535422_S4_L004_R1_001.fastq.gz",
-        "/path/HVCHCCCXY-l4t11_535422_S4_L004_R2_001.fastq.gz",
-        "/path/HVCHCCCXY-l4t21_535422_S4_L004_R1_001.fastq.gz",
-        "/path/HVCHCCCXY-l4t21_535422_S4_L004_R2_001.fastq.gz"
+            "/path/HVCHCCCXY-l4t11_535422_S4_L004.spring",
+            "/path/HVCHCCCXY-l4t21_535422_S4_L004.spring",
+            "/path/HVCHCCCXY-l4t11_535422_S4_L004_R1_001.fastq.gz",
+            "/path/HVCHCCCXY-l4t11_535422_S4_L004_R2_001.fastq.gz",
+            "/path/HVCHCCCXY-l4t21_535422_S4_L004_R1_001.fastq.gz",
+            "/path/HVCHCCCXY-l4t21_535422_S4_L004_R2_001.fastq.gz"
     ]
 
     # GIVEN decompression is running
@@ -84,15 +83,14 @@ def test_decompression_is_running(cli_runner, mip_context, caplog, mocker):
     MipAnalysisAPI.check_system_call.return_value = "ACC6541A34_P8753U126_S3_L003_fastq_to_spring"
 
     # WHEN calling decompress_spring
-    cli_runner.invoke(
+    result = cli_runner.invoke(
         decompress_spring, ["-c", CASE_ID, "--dry-run"], obj=mip_context, catch_exceptions=False
     )
 
     # THEN warning about that decompression is running
     assert "No analysis started, decompression is running" in caplog.text
-    # THEN mip start is canceled
-    #with pytest.raises(click.Abort):
-    #    assert "No analysis started, decompression is running" in caplog.text
+    # THEN mip will not start
+    assert result.exit_code == 1
 
 
 def test_decompression_needed_dryrun(cli_runner, mip_context, caplog, mocker):
@@ -117,12 +115,14 @@ def test_decompression_needed_dryrun(cli_runner, mip_context, caplog, mocker):
     MipAnalysisAPI.check_system_call.return_value = None
 
     # WHEN calling decompress_spring
-    cli_runner.invoke(
+    result = cli_runner.invoke(
         decompress_spring, ["-c", CASE_ID, "--dry-run"], obj=mip_context, catch_exceptions=False
     )
 
     # THEN warning about that analysis can't start (but it is a dry-run)
     assert "no decompression will be started, this is a dry run" in caplog.text
+    # THEN mip will not start
+    assert result.exit_code == 1
 
 
 def test_start_decompression(cli_runner, mip_context, caplog, mocker):
@@ -147,12 +147,14 @@ def test_start_decompression(cli_runner, mip_context, caplog, mocker):
     MipAnalysisAPI.check_system_call.return_value = None
 
     # WHEN calling decompress_spring
-    cli_runner.invoke(
+    result = cli_runner.invoke(
         decompress_spring, ["-c", CASE_ID], obj=mip_context, catch_exceptions=False
     )
 
     # THEN warning about that analysis can't start since decompression is needed
     assert "No analysis started, started decompression for" in caplog.text
+    # THEN mip will not start
+    assert result.exit_code == 1
 
 
 def test_decompression_when_some_samples_decompressed(cli_runner, mip_context, caplog, mocker):
@@ -179,12 +181,14 @@ def test_decompression_when_some_samples_decompressed(cli_runner, mip_context, c
     MipAnalysisAPI.check_system_call.return_value = None
 
     # WHEN calling decompress_spring
-    cli_runner.invoke(
+    result = cli_runner.invoke(
         decompress_spring, ["-c", CASE_ID], obj=mip_context, catch_exceptions=False
     )
 
     # THEN warning about that analysis can't start since decompression is needed
     assert "No analysis started, started decompression for" in caplog.text
+    # THEN mip will not start
+    assert result.exit_code == 1
 
 
 def test_linking_fastqs(cli_runner, mip_context, caplog, mocker):
@@ -208,12 +212,14 @@ def test_linking_fastqs(cli_runner, mip_context, caplog, mocker):
     MipAnalysisAPI.check_system_call.return_value = None
 
     # WHEN calling decompress_spring
-    cli_runner.invoke(
+    result = cli_runner.invoke(
         decompress_spring, ["-c", CASE_ID], obj=mip_context, catch_exceptions=False
     )
 
     # THEN info about that links are made
     assert "Adding links for" in caplog.text
+    # THEN mip will start
+    assert result.exit_code == 0
 
 
 def test_linking_fastqs_dryrun(cli_runner, mip_context, caplog, mocker):
@@ -237,9 +243,11 @@ def test_linking_fastqs_dryrun(cli_runner, mip_context, caplog, mocker):
     MipAnalysisAPI.check_system_call.return_value = None
 
     # WHEN calling decompress_spring
-    cli_runner.invoke(
+    result = cli_runner.invoke(
         decompress_spring, ["-c", CASE_ID, "--dry-run"], obj=mip_context, catch_exceptions=False
     )
 
+    # THEN command should run without errors
+    assert result.exit_code == 0
     # THEN info about that links are made
     assert "Would have linked fastqs, but this is dry-run mode" in caplog.text
