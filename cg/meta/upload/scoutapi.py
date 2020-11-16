@@ -109,6 +109,9 @@ class UploadScoutAPI:
         LOG.info("*** analysis_data: {}".format(analysis_data))
         LOG.info("*** analysis_internal id: {}".format(analysis_obj.family.internal_id))
         LOG.info("*** analysis_family.name: {}".format(analysis_obj.family.name))
+
+        latest_version = hk_api.last_version(analysis_obj.family.internal_id)
+        
         data = {
             "analysis_date": analysis_obj.completed_at,
             "default_gene_panels": analysis_obj.family.panels,
@@ -123,8 +126,8 @@ class UploadScoutAPI:
             "samples": list(),
             "sv_rank_model_version": analysis_data.get("sv_rank_model_version"),
         }
-        LOG.info("generate_configasd: {}".format(hk_version.id))
-        for sample in self.build_samples(analysis_obj, hk_version.id):
+        LOG.info("generate_configasd: {}".format(latest_version.id))
+        for sample in self.build_samples(analysis_obj, latest_version.id):
             data["samples"].append(sample)
 
         self._include_mandatory_files(data, hk_version)
