@@ -42,6 +42,7 @@ class UploadScoutAPI:
         """Fetch files from housekeeper matching a list of tags """
         tags = [sample_id] + tags
         LOG.info("tags: {}".format(tags))
+        LOG.info("HK version: {}".format(hk_version_id))
         hk_file = self.housekeeper.files(version=hk_version_id, tags=tags).first()
         LOG.info("hk_file: {}".format(hk_file))
         file_path = None
