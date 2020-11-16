@@ -574,8 +574,8 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         return is_spring_decompressing
 
     def start_decompression(self, case_id: str) -> None:
-        os.system(f"cg decompress spring {case_id}")
+        os.system(f"cg decompress case {case_id}")
 
     def link_fastq(self, case_id: str) -> None:
-        os.system(f"cg store fastq {case_id}")
+        os.system(f"cg store case {case_id}")
         LOG.info(f"Adding links for {case_id} in housekeeper")
