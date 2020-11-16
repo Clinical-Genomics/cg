@@ -72,6 +72,7 @@ def upload_case_to_scout(context, re_upload, dry_run, case_id):
     def _get_load_config_from_hk(hk_api: HousekeeperAPI, case_id):
         tag_name = UploadScoutAPI.get_load_config_tag()
         version_obj = hk_api.last_version(case_id)
+        LOG.info("version obj: {}".format(version_obj))
         scout_config_files = hk_api.get_files(
             bundle=case_id, tags=[tag_name], version=version_obj.id
         )
