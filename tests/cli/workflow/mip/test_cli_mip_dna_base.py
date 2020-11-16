@@ -13,18 +13,18 @@ def test_mip_dna(cli_runner, mip_context, caplog, mocker):
     # GIVEN fastqs are all decompressed and linked
     mocker.patch.object(MipAnalysisAPI, "get_other_format_in_same_folder")
     MipAnalysisAPI.get_other_format_in_same_folder.return_value = [
-                        "/path/HVCHCCCXY-l4t11_535422_S4_L004_R1_001.fastq.gz",
-                        "/path/HVCHCCCXY-l4t11_535422_S4_L004_R2_001.fastq.gz",
-                        "/path/HVCHCCCXY-l4t21_535422_S4_L004_R1_001.fastq.gz",
-                        "/path/HVCHCCCXY-l4t21_535422_S4_L004_R2_001.fastq.gz"
+        "/path/HVCHCCCXY-l4t11_535422_S4_L004_R1_001.fastq.gz",
+        "/path/HVCHCCCXY-l4t11_535422_S4_L004_R2_001.fastq.gz",
+        "/path/HVCHCCCXY-l4t21_535422_S4_L004_R1_001.fastq.gz",
+        "/path/HVCHCCCXY-l4t21_535422_S4_L004_R2_001.fastq.gz"
     ]
 
     mocker.patch.object(MipAnalysisAPI, "collect_hk_data")
     MipAnalysisAPI.collect_hk_data.return_value = [
-                        "/path/HVCHCCCXY-l4t11_535422_S4_L004_R1_001.fastq.gz",
-                        "/path/HVCHCCCXY-l4t11_535422_S4_L004_R2_001.fastq.gz",
-                        "/path/HVCHCCCXY-l4t21_535422_S4_L004_R1_001.fastq.gz",
-                        "/path/HVCHCCCXY-l4t21_535422_S4_L004_R2_001.fastq.gz"
+        "/path/HVCHCCCXY-l4t11_535422_S4_L004_R1_001.fastq.gz",
+        "/path/HVCHCCCXY-l4t11_535422_S4_L004_R2_001.fastq.gz",
+        "/path/HVCHCCCXY-l4t21_535422_S4_L004_R1_001.fastq.gz",
+        "/path/HVCHCCCXY-l4t21_535422_S4_L004_R2_001.fastq.gz"
     ]
 
     # WHEN calling decompress_spring
@@ -63,19 +63,19 @@ def test_decompression_is_running(cli_runner, mip_context, caplog, mocker):
     # GIVEN there are fastq files compressed to spring
     mocker.patch.object(MipAnalysisAPI, "collect_hk_data")
     MipAnalysisAPI.collect_hk_data.return_value = [
-                                "/path/HVCHCCCXY-l4t11_535422_S4_L004.spring",
-                                "/path/HVCHCCCXY-l4t21_535422_S4_L004.spring"
+        "/path/HVCHCCCXY-l4t11_535422_S4_L004.spring",
+        "/path/HVCHCCCXY-l4t21_535422_S4_L004.spring"
     ]
 
     # GIVEN there are both fastq files and spring files in the folder
     mocker.patch.object(MipAnalysisAPI, "collect_files_in_folder")
     MipAnalysisAPI.collect_files_in_folder.return_value = [
-            "/path/HVCHCCCXY-l4t11_535422_S4_L004.spring",
-            "/path/HVCHCCCXY-l4t21_535422_S4_L004.spring",
-            "/path/HVCHCCCXY-l4t11_535422_S4_L004_R1_001.fastq.gz",
-            "/path/HVCHCCCXY-l4t11_535422_S4_L004_R2_001.fastq.gz",
-            "/path/HVCHCCCXY-l4t21_535422_S4_L004_R1_001.fastq.gz",
-            "/path/HVCHCCCXY-l4t21_535422_S4_L004_R2_001.fastq.gz"
+        "/path/HVCHCCCXY-l4t11_535422_S4_L004.spring",
+        "/path/HVCHCCCXY-l4t21_535422_S4_L004.spring",
+        "/path/HVCHCCCXY-l4t11_535422_S4_L004_R1_001.fastq.gz",
+        "/path/HVCHCCCXY-l4t11_535422_S4_L004_R2_001.fastq.gz",
+        "/path/HVCHCCCXY-l4t21_535422_S4_L004_R1_001.fastq.gz",
+        "/path/HVCHCCCXY-l4t21_535422_S4_L004_R2_001.fastq.gz"
     ]
 
     # GIVEN decompression is running
@@ -197,10 +197,10 @@ def test_linking_fastqs(cli_runner, mip_context, caplog, mocker):
     # GIVEN there are fastq files in the spring folder
     mocker.patch.object(MipAnalysisAPI, "get_other_format_in_same_folder")
     MipAnalysisAPI.get_other_format_in_same_folder.return_value = [
-                                    "/path/HVCHCCCXY-l4t11_535422_S4_L004_R1_001.fastq.gz",
-                                    "/path/HVCHCCCXY-l4t11_535422_S4_L004_R2_001.fastq.gz",
-                                    "/path/HVCHCCCXY-l4t21_535422_S4_L004_R1_001.fastq.gz",
-                                    "/path/HVCHCCCXY-l4t21_535422_S4_L004_R2_001.fastq.gz"
+        "/path/HVCHCCCXY-l4t11_535422_S4_L004_R1_001.fastq.gz",
+        "/path/HVCHCCCXY-l4t11_535422_S4_L004_R2_001.fastq.gz",
+        "/path/HVCHCCCXY-l4t21_535422_S4_L004_R1_001.fastq.gz",
+        "/path/HVCHCCCXY-l4t21_535422_S4_L004_R2_001.fastq.gz"
     ]
 
     # GIVEN there are no fastq files linked in housekeeper
@@ -228,10 +228,10 @@ def test_linking_fastqs_dryrun(cli_runner, mip_context, caplog, mocker):
     # GIVEN there are fastq files in the spring folder
     mocker.patch.object(MipAnalysisAPI, "get_other_format_in_same_folder")
     MipAnalysisAPI.get_other_format_in_same_folder.return_value = [
-                                    "/path/HVCHCCCXY-l4t11_535422_S4_L004_R1_001.fastq.gz",
-                                    "/path/HVCHCCCXY-l4t11_535422_S4_L004_R2_001.fastq.gz",
-                                    "/path/HVCHCCCXY-l4t21_535422_S4_L004_R1_001.fastq.gz",
-                                    "/path/HVCHCCCXY-l4t21_535422_S4_L004_R2_001.fastq.gz"
+        "/path/HVCHCCCXY-l4t11_535422_S4_L004_R1_001.fastq.gz",
+        "/path/HVCHCCCXY-l4t11_535422_S4_L004_R2_001.fastq.gz",
+        "/path/HVCHCCCXY-l4t21_535422_S4_L004_R1_001.fastq.gz",
+        "/path/HVCHCCCXY-l4t21_535422_S4_L004_R2_001.fastq.gz"
     ]
 
     # GIVEN there are no fastq files linked in housekeeper

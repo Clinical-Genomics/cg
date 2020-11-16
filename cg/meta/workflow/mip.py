@@ -566,7 +566,9 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
     def check_spring_decompression_jobs(self, family_obj: models.Family) -> bool:
         is_spring_decompressing = False
         for sample in family_obj.internal_id:
-            returned_from_system = self.check_system_call(f"squeue -o %j | grep spring | grep {sample}")
+            returned_from_system = self.check_system_call(
+                f"squeue -o %j | grep spring | grep {sample}"
+            )
             if returned_from_system:
                 is_spring_decompressing = True
         return is_spring_decompressing
