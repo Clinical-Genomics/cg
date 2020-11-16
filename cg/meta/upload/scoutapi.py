@@ -40,15 +40,14 @@ class UploadScoutAPI:
 
     def fetch_file_path_from_tags(self, tags: list, sample_id: str, hk_version_id: int = None):
         """Fetch files from housekeeper matching a list of tags """
-        tags = [sample_id] + tags
+        tags.append(sample_id)
         LOG.info("tags: {}".format(tags))
         LOG.info("HK version: {}".format(hk_version_id))
         hk_file = self.housekeeper.files(version=hk_version_id, tags=tags).first()
         LOG.info("hk_file: {}".format(hk_file))
-        file_path = None
         if hk_file:
-            file_path = hk_file.full_path
-        return file_path
+            return hk_file.full_path
+        
 
     def build_samples(self, analysis_obj: models.Analysis, hk_version_id: int = None):
         """Loop over the samples in an analysis and build dicts from them"""
@@ -58,8 +57,9 @@ class UploadScoutAPI:
             bam_path = self.fetch_file_path("bam", sample_id, hk_version_id)
             alignment_file_path = self.fetch_file_path("cram", sample_id, hk_version_id)
             coverage_image = self.fetch_file_path_from_tags(
-                ["chromograph", "tcov", "mip-dna", "wgs"], sample_id, hk_version_id
+                tags=["chromograph", "tcov", "mip-dna", "wgs",], sample_id=sample_id, hk_version_id=hk_version_id
             )
+            
             upd_sites_image = self.fetch_file_path_from_tags(
                 ["chromograph", "sites"], sample_id, hk_version_id
             )
