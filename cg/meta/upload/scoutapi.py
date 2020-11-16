@@ -104,6 +104,7 @@ class UploadScoutAPI:
         """Fetch data about an analysis to load Scout."""
         analysis_date = analysis_obj.started_at or analysis_obj.completed_at
         hk_version = self.housekeeper.version(analysis_obj.family.internal_id, analysis_date)
+        LOG.info("generate_config: {}".format(hk_version))
         analysis_data = self.analysis.get_latest_metadata(analysis_obj.family.internal_id)
         data = {
             "analysis_date": analysis_obj.completed_at,
