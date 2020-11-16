@@ -16,6 +16,13 @@ Try to use the following format:
 
 ### Fixed
 
+## [16.0.4]
+
+### Fixed
+- Case database entities (Family) can only have specific values for data_analysis
+- Analysis database entities can only have specific values for pipeline
+- Enum used for pipeline as arguments 
+
 ## [16.0.3]
 
 ### Fixed
