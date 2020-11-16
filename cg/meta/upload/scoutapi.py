@@ -40,9 +40,9 @@ class UploadScoutAPI:
 
     def fetch_file_path_from_tags(self, tags: list, sample_id: str, hk_version_id: int = None):
         """Fetch files from housekeeper matching a list of tags """
-        import pdb; pdb.set_trace()
         tags = [sample_id] + tags
         hk_file = self.housekeeper.files(version=hk_version_id, tags=tags).first()
+        LOG.debug("hkl_file: {}".format(hk_file))
         file_path = None
         if hk_file:
             file_path = hk_file.full_path
