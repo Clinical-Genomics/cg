@@ -106,6 +106,7 @@ class UploadScoutAPI:
         hk_version = self.housekeeper.version(analysis_obj.family.internal_id, analysis_date)
         LOG.info("generate_config: {}".format(hk_version))
         analysis_data = self.analysis.get_latest_metadata(analysis_obj.family.internal_id)
+        LOG.info("*** analysis_data: {}".format(analysis_data))
         data = {
             "analysis_date": analysis_obj.completed_at,
             "default_gene_panels": analysis_obj.family.panels,
