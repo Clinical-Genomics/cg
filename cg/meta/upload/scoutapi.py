@@ -62,7 +62,7 @@ class UploadScoutAPI:
             
             upd_sites_image = self.fetch_file_path_from_tags(
                 ["chromograph", "sites"], sample_id, hk_version_id
-            )
+            ) 
             upd_regions_image = self.fetch_file_path_from_tags(
                 ["chromograph", "regions"], sample_id, hk_version_id
             )
@@ -107,6 +107,8 @@ class UploadScoutAPI:
         LOG.info("generate_config: {}".format(hk_version))
         analysis_data = self.analysis.get_latest_metadata(analysis_obj.family.internal_id)
         LOG.info("*** analysis_data: {}".format(analysis_data))
+        LOG.info("*** analysis_internal id: {}".format(analysis_obj.family.internal_id))
+        LOG.info("*** analysis_family.name: {}".format(analysis_obj.family.name))
         data = {
             "analysis_date": analysis_obj.completed_at,
             "default_gene_panels": analysis_obj.family.panels,
