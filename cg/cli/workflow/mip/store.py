@@ -18,7 +18,7 @@ from cg.exc import (
 from cg.meta.store.base import gather_files_and_bundle_in_housekeeper
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import Store
-from cg.constants import EXIT_SUCCESS, EXIT_FAIL
+from cg.constants import EXIT_SUCCESS, EXIT_FAIL, Pipeline
 
 
 LOG = logging.getLogger(__name__)
@@ -64,7 +64,7 @@ def analysis(context, config_stream):
             config_stream,
             mip_api.hk,
             mip_api.db,
-            workflow="mip",
+            workflow=Pipeline.MIP_DNA,
         )
         mip_api.db.add_commit(new_analysis)
     except (
@@ -92,12 +92,12 @@ def completed(context):
     mip_api = context.obj["mip_api"]
 
     exit_code = EXIT_SUCCESS
-    for case_obj in mip_api.db.cases_to_store(pipeline="mip"):
+    for case_obj in mip_api.db.cases_to_store(pipeline=Pipeline.MIP_DNA):
         try:
             analysis_obj = mip_api.tb.get_latest_analysis(case_id=case_obj.internal_id)
             if analysis_obj.status != "completed":
                 continue
-            LOG.info(f"storing family: {analysis_obj.family}")
+            LOG.info(f"Storing case: {analysis_obj.family}")
             with Path(
                 mip_api.get_case_config_path(case_id=analysis_obj.family)
             ).open() as config_stream:

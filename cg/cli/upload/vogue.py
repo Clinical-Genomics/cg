@@ -9,13 +9,14 @@ from cg.apps.gt import GenotypeAPI
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.vogue import VogueAPI
 from cg.cli.workflow.get_links import get_links
+from cg.constants import Pipeline
 from cg.exc import AnalysisUploadError
 from cg.meta.upload.vogue import UploadVogueAPI
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
 
-VOGUE_VALID_BIOINFO = ["mip"]
+VOGUE_VALID_BIOINFO = [str(Pipeline.MIP_DNA)]
 
 
 @click.group()
