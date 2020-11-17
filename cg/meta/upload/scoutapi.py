@@ -110,7 +110,6 @@ class UploadScoutAPI:
         LOG.info("*** analysis_internal id: {}".format(analysis_obj.family.internal_id))
         LOG.info("*** analysis_family.name: {}".format(analysis_obj.family.name))
 
-        latest_version = hk_api.last_version(analysis_obj.family.internal_id)
         
         data = {
             "analysis_date": analysis_obj.completed_at,
