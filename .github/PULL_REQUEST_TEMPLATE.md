@@ -26,3 +26,8 @@ Thanks for filling in who performed the code review and the test!
 - [ ] **MAJOR** - when you make incompatible API changes
 - [ ] **MINOR** - when you add functionality in a backwards compatible manner
 - [ ] **PATCH** - when you make backwards compatible bug fixes or documentation/instructions
+
+## Implementation Plan
+- [ ] Document in ...
+- [ ] Deploy this branch
+- [ ] Inform to ...

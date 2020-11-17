@@ -57,42 +57,49 @@ def test_store_analysis(
 
 
 def test_store_completed_good_cases(
-    cli_runner: CliRunner, mip_store_context: dict, mip_case_ids: dict, mip_configs, caplog
+    cli_runner: CliRunner, mip_store_context: dict, mip_case_ids: dict, mip_configs, helpers, caplog
 ):
     """Test if store completed stores function"""
 
     with caplog.at_level("INFO"):
         trailblazer_api = mip_store_context["trailblazer_api"]
-        trailblazer_api.ensure_analyses_response(
-            [
-                TrailblazerAnalysis.parse_obj(
-                    {
-                        "id": 1,
-                        "family": "yellowhog",
-                        "config_path": mip_configs["yellowhog"].as_posix(),
-                    }
-                ),
-                TrailblazerAnalysis.parse_obj(
-                    {
-                        "id": 2,
-                        "family": "bluezebra",
-                        "config_path": mip_configs["bluezebra"].as_posix(),
-                    }
-                ),
-                TrailblazerAnalysis.parse_obj(
-                    {
-                        "id": 3,
-                        "family": "purplesnail",
-                        "config_path": mip_configs["purplesnail"].as_posix(),
-                    }
-                ),
-            ]
-        )
+        analyses = [
+            {
+                "id": 1,
+                "family": "yellowhog",
+                "config_path": mip_configs["yellowhog"].as_posix(),
+                "status": "completed",
+            },
+            {
+                "id": 2,
+                "family": "bluezebra",
+                "config_path": mip_configs["bluezebra"].as_posix(),
+                "status": "completed",
+            },
+            {
+                "id": 3,
+                "family": "purplesnail",
+                "config_path": mip_configs["purplesnail"].as_posix(),
+                "status": "completed",
+            },
+        ]
+        for analysis in analyses:
+            trailblazer_api.ensure_get_latest_analysis_response(analysis_dict=analysis)
+
+        status_db = mip_store_context["status_db"]
+        for case_id in ["yellowhog", "bluezebra", "purplesnail"]:
+            case_obj = status_db.family(case_id)
+            if case_obj:
+                case_obj.action = "running"
+                status_db.commit()
+            else:
+                helpers.add_family(store=status_db, internal_id=case_id, action="running")
+
         # WHEN we run store all completed cases
         result = cli_runner.invoke(completed, obj=mip_store_context)
         # THEN some cases should be added and some should fail
         assert "new bundle added: yellowhog" in caplog.text
-        assert "case storage failed: purplesnail" in caplog.text
+        assert "Case storage failed: purplesnail" in caplog.text
         assert "new bundle added: bluezebra" in caplog.text
         assert "Included files in Housekeeper" in caplog.text
         # THEN the command should have an EXIT_FAIL code

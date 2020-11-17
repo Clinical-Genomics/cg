@@ -19,7 +19,6 @@ from cg.apps.tb import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import COLLABORATORS, COMBOS, DEFAULT_CAPTURE_KIT, FAMILY_ACTIONS, MASTER_LIST
 from cg.exc import CgDataError, LimsDataError
-from cg.meta.deliver import DeliverAPI
 from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
@@ -36,7 +35,6 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         scout_api: ScoutAPI,
         tb_api: TrailblazerAPI,
         lims_api: LimsAPI,
-        deliver_api: DeliverAPI,
         script: str,
         pipeline: str,
         conda_env: str,
@@ -47,7 +45,6 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         self.hk = hk_api
         self.scout = scout_api
         self.lims = lims_api
-        self.deliver = deliver_api
         self.script = script
         self.pipeline = pipeline
         self.conda_env = conda_env
@@ -334,9 +331,10 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
     def _get_latest_raw_file(self, family_id: str, tag: str) -> Any:
         """Get a python object file for a tag and a family ."""
 
-        analysis_files = self.deliver.get_post_analysis_files(
-            case=family_id, version=False, tags=[tag]
-        )
+        last_version = self.hk.last_version(bundle=family_id)
+
+        analysis_files = self.hk.files(bundle=family_id, version=last_version.id, tags=[tag]).all()
+
         if analysis_files:
             analysis_file_raw = self._open_bundle_file(analysis_files[0].path)
         else:
@@ -350,9 +348,7 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
     def _open_bundle_file(self, relative_file_path: str) -> Any:
         """Open a bundle file and return it as an Python object."""
 
-        full_file_path = Path(self.deliver.get_post_analysis_files_root_dir()).joinpath(
-            relative_file_path
-        )
+        full_file_path = Path(self.hk.get_root_dir()).joinpath(relative_file_path)
         open_file = safe_load(open(full_file_path))
         return open_file
 
