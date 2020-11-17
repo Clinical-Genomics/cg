@@ -7,6 +7,7 @@ import pytest
 
 from cg.apps.balsamic.api import BalsamicAPI
 from cg.apps.hk import HousekeeperAPI
+from cg.constants import Pipeline
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.store import Store
 
@@ -24,14 +25,14 @@ def balsamic_clean_store(base_store: Store, timestamp_yesterday: dt.datetime, he
         internal_id="balsamic_sample_clean",
         is_tumour=True,
         application_type="wgs",
-        data_analysis="balsamic",
+        data_analysis=Pipeline.BALSAMIC,
     )
     helpers.add_relationship(store, family=case_to_clean, sample=sample_case_to_clean)
 
     helpers.add_analysis(
         store,
         family=case_to_clean,
-        pipeline="balsamic",
+        pipeline=Pipeline.BALSAMIC,
         started_at=timestamp_yesterday,
         uploaded_at=timestamp_yesterday,
         cleaned_at=None,
