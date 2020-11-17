@@ -1,4 +1,7 @@
 """Tests for reset part of the store API"""
+from cg.constants import Pipeline
+
+"""Tests for reset part of the store API"""
 
 from datetime import datetime, timedelta
 
@@ -97,7 +100,7 @@ def add_family(
     ordered_days_ago=0,
     action=None,
     priority=None,
-    data_analysis="mip",
+    data_analysis=Pipeline.MIP_DNA,
 ):
     """utility function to add a family to use in tests"""
     panel = ensure_panel(disk_store)

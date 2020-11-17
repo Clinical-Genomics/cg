@@ -11,8 +11,10 @@ import logging
 import re
 from typing import List
 
+import typing
 from cg.apps.lims import LimsAPI
 from cg.apps.osticket import OsTicket
+from cg.constants import Pipeline
 from cg.exc import OrderError, TicketCreationError
 from cg.store import Store, models
 from .schema import OrderType, ORDER_SCHEMES
@@ -98,7 +100,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
             except TicketCreationError as error:
                 LOG.warning(error.message)
                 data["ticket"] = None
-        order_func = getattr(self, f"submit_{project.value}")
+        order_func = self._get_submit_func(project.value)
         result = order_func(data)
         return result
 
@@ -164,7 +166,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
         self.update_application(data["ticket"], result["records"])
         return result
 
-    def submit_mip(self, data: dict) -> dict:
+    def submit_mip_dna(self, data: dict) -> dict:
         """Submit a batch of samples for sequencing and analysis."""
         return self.submit_case_samples(data)
 
@@ -176,7 +178,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
         """Submit a batch of samples for sequencing and analysis."""
         return self.submit_case_samples(data)
 
-    def submit_microbial(self, data: dict) -> dict:
+    def submit_microsalt(self, data: dict) -> dict:
         """Submit a batch of microbial samples."""
         # prepare data for status database
         status_data = self.microbial_samples_to_status(data)
@@ -192,7 +194,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
             ticket=data["ticket"],
             samples=status_data["samples"],
             comment=status_data["comment"],
-            data_analysis=status_data["data_analysis"],
+            data_analysis=Pipeline(status_data["data_analysis"]),
         )
 
         return {"project": project_data, "records": samples}
@@ -218,18 +220,17 @@ class OrdersAPI(LimsHandler, StatusHandler):
         )
         return {"project": project_data, "records": new_families}
 
-    def update_application(self, ticket_number: int, families: List[models.Family]):
+    def update_application(self, ticket_number: int, families: List[models.Family]) -> None:
         """Update application for trios if relevant."""
         reduced_map = {
             "EXOSXTR100": "EXTSXTR100",
             "WGSPCFC030": "WGTPCFC030",
-            "WGSPCFC060": "WGTPCFC060",
         }
-        for family_obj in families:
-            LOG.debug(f"{family_obj.name}: update application for trios")
+        for case_obj in families:
+            LOG.debug(f"{case_obj.name}: update application for trios")
             order_samples = [
                 link_obj.sample
-                for link_obj in family_obj.links
+                for link_obj in case_obj.links
                 if link_obj.sample.ticket_number == ticket_number
             ]
             if len(order_samples) >= 3:
@@ -285,9 +286,9 @@ class OrdersAPI(LimsHandler, StatusHandler):
             if sample.get("internal_id"):
 
                 if project not in (
-                    OrderType.MIP,
-                    OrderType.EXTERNAL,
                     OrderType.BALSAMIC,
+                    OrderType.EXTERNAL,
+                    OrderType.MIP_DNA,
                     OrderType.MIP_RNA,
                 ):
                     raise OrderError(
@@ -301,3 +302,13 @@ class OrdersAPI(LimsHandler, StatusHandler):
 
                 if existing_sample.customer.customer_group_id != data_customer.customer_group_id:
                     raise OrderError(f"Sample not available: {sample.get('name')}")
+
+    def _get_submit_func(self, project_type: OrderType) -> typing.Callable:
+        """Get the submit method to call for the given type of project"""
+
+        if project_type == OrderType.MIP_DNA:
+            return getattr(self, "submit_mip_dna")
+        elif project_type == OrderType.MIP_RNA:
+            return getattr(self, "submit_mip_rna")
+
+        return getattr(self, f"submit_{str(project_type)}")

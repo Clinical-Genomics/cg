@@ -14,9 +14,7 @@ from cg.apps.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.cli.workflow.mip_dna.deliver import CASE_TAGS, SAMPLE_TAGS
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.meta.deliver import DeliverAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import Store
@@ -50,13 +48,6 @@ def clean(context):
         tb_api=context.obj["trailblazer_api"],
         scout_api=context.obj["scout_api"],
         lims_api=context.obj["lims_api"],
-        deliver_api=DeliverAPI(
-            context.obj,
-            hk_api=context.obj["housekeeper_api"],
-            lims_api=context.obj["lims_api"],
-            case_tags=CASE_TAGS,
-            sample_tags=SAMPLE_TAGS,
-        ),
         script=context.obj["mip-rd-dna"]["script"],
         pipeline=context.obj["mip-rd-dna"]["pipeline"],
         conda_env=context.obj["mip-rd-dna"]["conda_env"],

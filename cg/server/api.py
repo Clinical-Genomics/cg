@@ -61,7 +61,7 @@ def submit_order(order_type):
     LOG.info("processing '%s' order: %s", order_type, post_data)
     try:
         ticket = {"name": g.current_user.name, "email": g.current_user.email}
-        result = api.submit(OrderType[order_type.upper()], post_data, ticket=ticket)
+        result = api.submit(OrderType(order_type), post_data, ticket=ticket)
     except (DuplicateRecordError, OrderError) as error:
         return abort(make_response(jsonify(message=error.message), 401))
     except HTTPError as error:

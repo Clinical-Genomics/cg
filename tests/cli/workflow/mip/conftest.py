@@ -4,6 +4,7 @@ import pytest
 import copy
 import datetime as dt
 
+from cg.constants import Pipeline
 from cg.meta.workflow.mip import MipAnalysisAPI
 from pathlib import Path
 from ruamel.yaml import YAML
@@ -197,7 +198,7 @@ def fixture_store(base_store: Store, mip_case_ids: dict, helpers) -> Store:
         sample = helpers.add_sample(
             store=_store,
             sample=mip_case_ids[case]["internal_id"],
-            data_analysis="mip",
+            data_analysis=Pipeline.MIP_DNA,
             customer_name="cust000",
             application_tag="WGSA",
             application_type="wgs",
@@ -246,7 +247,6 @@ def mip_context(
             tb_api=trailblazer_api,
             scout_api="scout_api",
             lims_api=mip_lims,
-            deliver_api="deliver",
             script="echo",
             pipeline="analyse rd_dna",
             conda_env="S_mip_rd-dna",
@@ -258,7 +258,6 @@ def mip_context(
             tb_api=trailblazer_api,
             scout_api="scout_api",
             lims_api=mip_lims,
-            deliver_api="deliver",
             script="echo",
             pipeline="analyse rd_rna",
             conda_env="S_mip_rd-rna",
@@ -293,7 +292,6 @@ def mip_store_context(
             hk_api=empty_housekeeper_api,
             scout_api=None,
             lims_api=None,
-            deliver_api=None,
             script="None",
             pipeline="None",
             conda_env="None",

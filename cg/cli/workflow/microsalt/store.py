@@ -12,7 +12,7 @@ from cg.exc import (
 from cg.meta.store.base import gather_files_and_bundle_in_housekeeper
 from cg.store import Store
 
-from cg.constants import EXIT_SUCCESS, EXIT_FAIL
+from cg.constants import EXIT_SUCCESS, EXIT_FAIL, Pipeline
 
 import _io
 
@@ -41,7 +41,7 @@ def analysis(context, config_stream):
 
     try:
         new_analysis = gather_files_and_bundle_in_housekeeper(
-            config_stream, hk_api, status, workflow="microsalt"
+            config_stream, hk_api, status, workflow=Pipeline.MICROSALT
         )
     except (AnalysisDuplicationError, BundleAlreadyAddedError, MandatoryFilesMissing) as error:
         click.echo(click.style(error.message, fg="red"))
@@ -58,7 +58,7 @@ def analysis(context, config_stream):
 @click.pass_context
 def completed(context):
     """Store all completed analyses"""
-    microsalt_analysis_api = context.obj["analysis_api"]
+    microsalt_analysis_api = context.obj["microsalt_analysis_api"]
     exit_code = EXIT_SUCCESS
     for deliverables_file in microsalt_analysis_api.get_deliverables_to_store():
         try:
