@@ -35,6 +35,7 @@ def scout(context, re_upload, print_console, case_id):
     last_version = hk_api.last_version(case_id)
     LOG.info("get latest:{}".format(last_version))    
 
+    import pdb; pdb.set_trace()
     family_obj = status_api.family(case_id)
     LOG.info("family_obj:{}".format(family_obj))
     LOG.info("family_obj.analyses:{}".format(family_obj.analyses))
