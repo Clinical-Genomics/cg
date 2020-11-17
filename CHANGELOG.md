@@ -16,6 +16,11 @@ Try to use the following format:
 
 ### Fixed
 
+## [16.0.5]
+
+### Fixed
+- Trailblazer integration fixed
+
 ## [16.0.4]
 
 ### Fixed
