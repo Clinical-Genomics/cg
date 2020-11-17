@@ -89,7 +89,10 @@ def test_set_sample(cli_runner, base_context, base_store: Store, key, helpers):
 
     # WHEN setting key on sample to new_value
     result = cli_runner.invoke(
-        sample, [sample_obj.internal_id, "-kv", key, new_value, "-y"], obj=base_context
+        sample,
+        [sample_obj.internal_id, "-kv", key, new_value, "-y"],
+        obj=base_context,
+        catch_exceptions=False,
     )
 
     # THEN then it should have new_value as attribute key on the sample and in LIMS

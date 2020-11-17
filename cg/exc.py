@@ -96,7 +96,7 @@ class BundleAlreadyAddedError(CgError):
 
 class PipelineUnknownError(CgError):
     """
-    Exception raised when a sample in a case has no data anlysis type
+    Exception raised when a sample in a case has no data analysis type
     """
 
 
