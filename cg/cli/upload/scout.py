@@ -37,7 +37,7 @@ def scout(context, re_upload, print_console, case_id):
 
     import pdb; pdb.set_trace()
     family_obj = status_db.family(case_id)
-    analysis = status_db.analyses(family=family_obj)
+    analysis = status_db.analysis(family=family_obj)
     LOG.info("analysis:{}".format(analysis))
     LOG.info("family_obj:{}".format(family_obj))
     LOG.info("family_obj.analyses:{}".format(family_obj.analyses))
