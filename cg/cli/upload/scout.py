@@ -28,7 +28,7 @@ def scout(context, re_upload, print_console, case_id):
         context.abort()
 
     LOG.info("context:{}".format(context))
-    status_api = context.obj["status_db"]
+    status_db = context.obj["status_db"]
     scout_upload_api = context.obj["scout_upload_api"]
     LOG.info("upload_api:{}".format(scout_upload_api))    
     hk_api = context.obj["housekeeper_api"]
@@ -36,7 +36,9 @@ def scout(context, re_upload, print_console, case_id):
     LOG.info("get latest:{}".format(last_version))    
 
     import pdb; pdb.set_trace()
-    family_obj = status_api.family(case_id)
+    family_obj = status_db.family(case_id)
+    analysis = status_db.analyses(family=family_obj)
+    LOG.info("analysis:{}".format(anaysis))
     LOG.info("family_obj:{}".format(family_obj))
     LOG.info("family_obj.analyses:{}".format(family_obj.analyses))
     
